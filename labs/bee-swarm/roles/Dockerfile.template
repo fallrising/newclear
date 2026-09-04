@@ -1,0 +1,35 @@
+# 基於VNC Lab的角色容器模板 - MCP Server架構
+FROM u80250docker/novnc_llm_cli:latest
+
+# 設置工作目錄
+WORKDIR /app
+
+# 創建角色工作目錄結構
+RUN mkdir -p /app/${ROLE_NAME} \
+    /app/projects \
+    /app/docs
+
+# 複製角色腳本和配置
+COPY scripts/ /app/scripts/
+COPY config/ /app/config/
+
+# 設置權限
+RUN chmod +x /app/scripts/*.sh
+
+# 創建角色用戶
+RUN useradd -m -s /bin/bash ${ROLE_NAME} \
+    && chown -R ${ROLE_NAME}:${ROLE_NAME} /app
+
+# 切換到角色用戶
+USER ${ROLE_NAME}
+
+# 設置環境變量
+ENV ROLE_NAME=${ROLE_NAME}
+ENV ROLE_TYPE=${ROLE_TYPE}
+ENV WORKSPACE=/app/projects
+
+# 暴露端口
+EXPOSE 6080 7681
+
+# 啟動命令
+CMD ["/app/scripts/start.sh"] 

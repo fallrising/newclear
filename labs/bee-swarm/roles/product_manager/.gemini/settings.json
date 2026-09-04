@@ -1,0 +1,16 @@
+{
+  "contextFileName": "GEMINI.md",
+  "coreTools": [
+    "read_file",
+    "write_file", 
+    "read_many_files",
+    "run_shell_command",
+    "web_fetch",
+    "save_memory"
+  ],
+  "fileFiltering": {
+    "respectGitIgnore": true,
+    "enableRecursiveFileSearch": true
+  },
+  "usageStatisticsEnabled": false
+} 

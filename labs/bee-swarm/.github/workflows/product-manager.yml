@@ -1,0 +1,143 @@
+# 暫時禁用自動執行 - 保留代碼供未來使用
+# name: Product Manager AI Agent
+
+# on:
+#   issues:
+#     types: [opened, labeled, edited]
+#   schedule:
+#     - cron: "0 */2 * * *"  # 每2小時檢查一次
+#   workflow_dispatch:
+
+# 手動觸發測試（可選）
+name: Product Manager AI Agent (Manual Only)
+on:
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: '任務類型'
+        required: false
+        default: 'check_epics'
+        type: choice
+        options:
+        - check_epics
+        - project_coordination
+        - requirement_analysis
+
+jobs:
+  pm_agent:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Gemini CLI
+        run: |
+          npm install -g @google/gemini-cli
+          
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt update && sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+          
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+          
+      - name: Setup PM Working Directory
+        run: |
+          cd roles/product_manager
+          # 設置 Gemini CLI 環境變數
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+          echo "GEMINI_SANDBOX=1" >> $GITHUB_ENV
+          
+      - name: Execute PM Task - Check Epics  
+        if: github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'epic')
+        working-directory: roles/product_manager
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          # 使用 --prompt 直接傳遞任務，--yolo 自動執行，--all_files 載入專案上下文
+          gemini \
+            --model gemini-1.5-pro-latest \
+            --prompt "分析新的 Epic Issue #${ISSUE_NUMBER}：${ISSUE_TITLE}。內容：${ISSUE_BODY}。請：1) 分析需求和技術可行性 2) 創建詳細PRD 3) 使用 run_shell_command 執行 'gh issue create' 創建子任務 4) 為子任務分配角色標籤" \
+            --yolo \
+            --sandbox \
+            --all_files
+          
+      - name: Execute PM Task - Project Coordination
+        if: github.event_name == 'schedule' || github.event.inputs.task_type == 'project_coordination'
+        working-directory: roles/product_manager
+        run: |
+          # 使用 --model flash 版本節省成本，--yolo 自動執行
+          gemini \
+            --model gemini-1.5-flash \
+            --prompt "執行項目協調檢查：1) 使用 run_shell_command 執行 'gh issue list --state open --json number,title,labels,assignees' 2) 分析項目狀態，識別瓶頸 3) 調整任務優先級 4) 創建狀態報告" \
+            --yolo \
+            --sandbox \
+            --all_files
+          
+      - name: Execute PM Task - Manual Requirement Analysis
+        if: github.event.inputs.task_type == 'requirement_analysis'
+        working-directory: roles/product_manager
+        run: |
+          # 複雜分析使用 pro 模型，並啟用檢查點功能
+          gemini \
+            --model gemini-1.5-pro-latest \
+            --prompt "執行需求分析：1) 使用 read_many_files 讀取需求文檔 2) 分析變更影響 3) 識別新 Epic 機會 4) 更新分析報告 5) 如需要創建新 Issues" \
+            --yolo \
+            --sandbox \
+            --all_files \
+            --checkpointing \
+            --debug_mode
+          
+      - name: Handle Lightweight Tasks
+        if: contains(github.event.issue.labels.*.name, 'pm-quick') || github.event_name == 'schedule'
+        run: |
+          # 輕量任務：標籤管理、狀態報告等
+          echo "處理輕量 PM 任務..."
+          
+          # 自動標籤分類
+          if [[ "${{ github.event.issue.body }}" == *"API"* || "${{ github.event.issue.body }}" == *"database"* ]]; then
+            gh issue edit ${{ github.event.issue.number }} --add-label "backend"
+          fi
+          
+          if [[ "${{ github.event.issue.body }}" == *"UI"* || "${{ github.event.issue.body }}" == *"frontend"* ]]; then
+            gh issue edit ${{ github.event.issue.number }} --add-label "frontend"
+          fi
+          
+          if [[ "${{ github.event.issue.body }}" == *"deploy"* || "${{ github.event.issue.body }}" == *"infrastructure"* ]]; then
+            gh issue edit ${{ github.event.issue.number }} --add-label "devops"
+          fi
+          
+      - name: Memory Management
+        working-directory: roles/product_manager
+        run: |
+          # 刷新 Gemini CLI 記憶
+          gemini << 'EOF'
+          /memory refresh
+          /memory show
+          EOF
+          
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pm-agent-results
+          path: |
+            roles/product_manager/.gemini/
+            *.md
+            *.json 

@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "apps/boxd",
+    "apps/codebox-cli",
+    "apps/control-plane",
+    "apps/node-agent",
+    "crates/codebox-agent-codex",
+    "crates/codebox-domain",
+    "crates/codebox-session-runtime",
+]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.97.1"

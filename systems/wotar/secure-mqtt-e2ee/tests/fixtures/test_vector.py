@@ -1,0 +1,43 @@
+"""Fixed test vector from docs/test-vectors.md."""
+
+from __future__ import annotations
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+from secure_mqtt.crypto import signing
+
+DEK = bytes.fromhex("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20")
+NONCE = bytes.fromhex("a0a1a2a3a4a5a6a7a8a9aaab")
+SIGN_SEED = bytes.fromhex("5d" * 32)
+TOPIC = "test/e2ee/vector1/data"
+PLAINTEXT = b'{"temp":21.5}'
+MSG_ID = bytes.fromhex("101112131415161718191a1b1c1d1e1f")
+IAT_MS = 1700000000000
+ENVELOPE_HEX = (
+    "ae617601636b69646b64656b2d76312d7465737463736571182a656e6f6e63654ca0a1a2a3a4a5a6a7a8a9aaab"
+    "657375697465734132353647434d2d5349562b45643235353139666578705f6d731b0000018bcfe9fbe066696174"
+    "5f6d731b0000018bcfe56800666d73675f696450101112131415161718191a1b1c1d1e1f677369675f6b69646b"
+    "7369672d76312d7465737469736368656d615f69646e73656e736f722e74656d702e76316973656e6465725f6964"
+    "6a6465766963652d303031697369676e61747572655840f42f95f3868d2eef2863fe7f858b97def23f89e5d400d32"
+    "49d5d9f521216ed5d7973476d03f3b4dcc55aae2b9aa540d8549ed894130bc4fb865ec0ff55b0130e6a63697068"
+    "657274657874581d3e6638e971e9acb1d0877f7b843fdd37057c87078750939c95ce48bbe06c636f6e74656e74"
+    "5f74797065706170706c69636174696f6e2f6a736f6e"
+)
+CIPHERTEXT_HEX = "3e6638e971e9acb1d0877f7b843fdd37057c87078750939c95ce48bbe0"
+SIGNATURE_HEX = (
+    "f42f95f3868d2eef2863fe7f858b97def23f89e5d400d3249d5d9f521216ed5"
+    "d7973476d03f3b4dcc55aae2b9aa540d8549ed894130bc4fb865ec0ff55b0130e"
+)
+PUBKEY_HEX = "5e449ad6fa4b2d65746e8cd4f968e38c5a9679f8495db114ee06317f72f717db"
+
+
+def signing_key() -> Ed25519PrivateKey:
+    return signing.private_key_from_seed(SIGN_SEED)
+
+
+def public_key():
+    return signing.public_key_from_bytes(bytes.fromhex(PUBKEY_HEX))
+
+
+def envelope_bytes() -> bytes:
+    return bytes.fromhex(ENVELOPE_HEX)

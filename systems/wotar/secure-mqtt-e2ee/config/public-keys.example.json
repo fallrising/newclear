@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "sig_kid": "sig-v1-test",
+      "sender_id": "device-001",
+      "public_key_hex": "5e449ad6fa4b2d65746e8cd4f968e38c5a9679f8495db114ee06317f72f717db",
+      "state": "active",
+      "not_before": "2026-01-01T00:00:00Z",
+      "not_after": "2027-01-01T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+"""Secure MQTT envelope protocol."""

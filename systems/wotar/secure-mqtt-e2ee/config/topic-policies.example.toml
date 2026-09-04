@@ -1,0 +1,16 @@
+# Example topic policy configuration for secure-mqtt
+
+[[rules]]
+filter = "test/e2ee/#"
+topic_group = "vector1"
+schema_id = "sensor.temp.v1"
+ttl_seconds = 300
+max_ttl_seconds = 86400
+
+[[rules]]
+filter = "devices/+/telemetry"
+topic_group = "telemetry"
+schema_id = "telemetry.v1"
+ttl_seconds = 600
+max_ttl_seconds = 86400
+allowed_publishers = ["device-local-001"]

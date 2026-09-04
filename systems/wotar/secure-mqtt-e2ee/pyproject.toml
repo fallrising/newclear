@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "secure-mqtt-e2ee"
+version = "0.1.0"
+description = "End-to-end encrypted MQTT client library for EMQX"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Secure MQTT Contributors" }]
+dependencies = [
+    "paho-mqtt>=2.1.0,<3",
+    "cryptography>=42.0.0",
+    "cbor2>=5.6.0",
+    "tomli>=2.0.1; python_version < '3.11'",
+    "tomli-w>=1.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/fallrising/wotar"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "pytest-asyncio>=0.23.0",
+    "hypothesis>=6.100.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+    "pip-audit>=2.7.0",
+]
+
+[project.scripts]
+secure-mqtt = "secure_mqtt.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/secure_mqtt"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "integration: local EMQX Docker integration tests",
+    "public_smoke: opt-in public EMQX broker smoke tests",
+]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "S", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "E501"]
+"tests/integration/**" = ["S101", "S607"]
+"src/secure_mqtt/cli.py" = ["T201"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+packages = ["secure_mqtt"]
+mypy_path = "src"
+
+[tool.coverage.run]
+source = ["secure_mqtt"]
+branch = true
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 86
+show_missing = true
+include = [
+    "src/secure_mqtt/protocol/*",
+    "src/secure_mqtt/crypto/*",
+    "src/secure_mqtt/keys/*",
+    "src/secure_mqtt/persistence/*",
+    "src/secure_mqtt/policy/*",
+    "src/secure_mqtt/errors.py",
+    "src/secure_mqtt/models.py",
+]
+omit = [
+    "src/secure_mqtt/cli.py",
+    "src/secure_mqtt/config.py",
+    "src/secure_mqtt/mqtt/*",
+    "src/secure_mqtt/workers/*",
+    "src/secure_mqtt/client.py",
+    "src/secure_mqtt/observability/*",
+    "src/secure_mqtt/keys/provider.py",
+]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

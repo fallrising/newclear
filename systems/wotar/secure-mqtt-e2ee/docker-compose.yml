@@ -1,0 +1,30 @@
+services:
+  emqx:
+    image: emqx/emqx:5.8.3
+    container_name: secure-mqtt-emqx
+    ports:
+      - "8883:8883"
+    environment:
+      EMQX_LISTENERS__TCP__DEFAULT__ENABLE: "false"
+      EMQX_LISTENERS__WS__DEFAULT__ENABLE: "false"
+      EMQX_LISTENERS__WSS__DEFAULT__ENABLE: "false"
+      EMQX_LISTENERS__SSL__DEFAULT__BIND: "8883"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/opt/emqx/etc/certs/ca.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/opt/emqx/etc/certs/server.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/opt/emqx/etc/certs/server.key"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__VERIFY: "verify_peer"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__FAIL_IF_NO_PEER_CERT: "true"
+      EMQX_AUTHORIZATION__NO_MATCH: "deny"
+      EMQX_AUTHORIZATION__SOURCES__1__TYPE: "file"
+      EMQX_AUTHORIZATION__SOURCES__1__ENABLE: "true"
+      EMQX_AUTHORIZATION__SOURCES__1__PATH: "/opt/emqx/etc/acl.conf"
+      EMQX_ALLOW_ANONYMOUS: "true"
+    volumes:
+      - ./certs:/opt/emqx/etc/certs:ro
+      - ./config/emqx/acl.conf:/opt/emqx/etc/acl.conf:ro
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s

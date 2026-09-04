@@ -1,0 +1,13 @@
+# 建置產物
+target/
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 本機環境
+.DS_Store
+*.local

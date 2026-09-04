@@ -8,10 +8,10 @@
 | Phase | 內容 | 狀態 |
 | --- | --- | --- |
 | 0 | 安全與盤點:未推送工作保全、secret scan、分歧驗證 | ✅ 完成 |
-| 1 | Fork 收斂:catalog 產生、patch 抽取、repo 移除 | 🔄 catalog 完成,待移除 |
-| 2 | `newclear` 匯入:公開專案 squash 匯入 | ⏳ 骨架完成 |
-| 3 | `kernel` 匯入:私有專案 squash 匯入 | ⏳ 未開始 |
-| 4 | 收尾:profile README、archive 舊 repo | ⏳ 未開始 |
+| 1 | Fork 收斂:catalog 產生、patch 抽取、repo 移除 | 🔄 catalog 完成,刪除待 `delete_repo` 授權 |
+| 2 | `newclear` 匯入:公開專案 squash 匯入 | ✅ 完成（15 component,2136 檔） |
+| 3 | `kernel` 匯入:私有專案 squash 匯入 | ✅ 完成（9 component,1592 檔） |
+| 4 | 收尾:successor notice、archive 舊 repo、profile README | 🔄 進行中 |
 
 ## Phase 0 成果（已完成）
 
@@ -81,3 +81,15 @@
 
 `fallrising`（profile）、`knowledge-base`、`doc_analysis_study`、`journal`、`ice-maker`、
 `local-ocr-services`、`fraud-edge-decision`、`fraud-event-policy`
+
+## Phase 2/3 成果
+
+| Repository | 可見性 | Component | 檔案 | Commit |
+| --- | --- | ---: | ---: | ---: |
+| [`newclear`](https://github.com/fallrising/newclear) | public | 15 | 2136 | 18 |
+| [`kernel`](https://github.com/fallrising/kernel) | private | 9 | 1592 | 10 |
+
+匯入後 8 個 Go 模組的 module identity 已改寫為 monorepo 路徑,全部通過 `go build ./...`。
+
+`config_center` 的 `n8n/.env` 含真實憑證,**未**遷入 `kernel`;該檔案仍在原 repository 歷史中,
+相關密碼應視為已洩露並輪換。

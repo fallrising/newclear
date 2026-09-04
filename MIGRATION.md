@@ -124,8 +124,12 @@
    - `systems/clarkq/demo/cluster/run-stress.sh`（1 處）— 移除硬編碼的 Go 工具鏈 `PATH`；
      腳本原本就有 `command -v go` 檢查與明確錯誤訊息，移除後在其他機器上才能正確運作
 
-### 未版控的本機專案
+### 先前未版控的本機專案（已納入）
 
-`/home/ckc/test/grok/vps-hygiene`（18 檔）與 `/home/ckc/test/grok/mac-in-docker`（8 檔）
-**完全沒有版本控制**，也不在 GitHub 上。兩者都在 `specs/fleet/docs/SDD.md` 中被當作
-相鄰工具引用。目前沒有任何備份。
+`vps-hygiene`（18 檔）與 `mac-in-docker`（8 檔）原本只存在於本機
+`/home/ckc/test/grok/` 之下，不是 git repository，也不在 GitHub 上，沒有任何備份。
+兩者都在 `specs/fleet/docs/SDD.md` 中被反覆引用，是 fleet agent 設計時的實際契約來源
+（port 範圍、heartbeat facts 欄位、clean-docker 對 `fleet-*` volume 的風險）。
+
+已納入 `kernel/infra/legacy/`。匯入前掃描無憑證、無 IP、無主機名，
+所有 shell 腳本通過 `bash -n`。

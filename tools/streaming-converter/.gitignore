@@ -1,0 +1,4 @@
+logs/*
+upload/*
+processed/*
+*.txt

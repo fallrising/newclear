@@ -1,0 +1,178 @@
+{
+  "format_version": "1.0",
+  "provider_schemas": {
+    "registry.terraform.io/aliyun/alicloud": {
+      "provider": {
+        "version": 0,
+        "block": {
+          "attributes": {
+            "region": { "type": "string", "description": "Default region", "description_kind": "plain", "optional": true },
+            "access_key": { "type": "string", "description_kind": "plain", "optional": true, "sensitive": true },
+            "secret_key": { "type": "string", "description_kind": "plain", "optional": true, "sensitive": true }
+          },
+          "description_kind": "plain"
+        }
+      },
+      "resource_schemas": {
+        "alicloud_db_instance": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "id": {
+                "type": "string",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "engine": {
+                "type": "string",
+                "description": "Database engine type. Supported values: MySQL, PostgreSQL, MariaDB, SQLServer.",
+                "description_kind": "plain",
+                "required": true
+              },
+              "engine_version": {
+                "type": "string",
+                "description": "Engine version. Depends on engine.",
+                "description_kind": "plain",
+                "required": true
+              },
+              "instance_type": {
+                "type": "string",
+                "description": "RDS instance class (CPU/memory spec).",
+                "description_kind": "plain",
+                "required": true
+              },
+              "instance_storage": {
+                "type": "number",
+                "description": "Storage size in GB.",
+                "description_kind": "plain",
+                "required": true
+              },
+              "instance_charge_type": {
+                "type": "string",
+                "description": "Billing method. Postpaid | Prepaid.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "zone_id": {
+                "type": "string",
+                "description": "Zone of the instance. If not specified, alicloud picks one.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "vswitch_id": {
+                "type": "string",
+                "description": "vSwitch (subnet) ID. Required when launching into a VPC.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "instance_name": {
+                "type": "string",
+                "description": "Display name.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "monitoring_period": {
+                "type": "number",
+                "description": "Monitoring frequency in seconds.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "security_ips": {
+                "type": ["set", "string"],
+                "description": "IP whitelist (CIDR allowed).",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "tags": {
+                "type": ["map", "string"],
+                "description_kind": "plain",
+                "optional": true
+              },
+              "connection_string": {
+                "type": "string",
+                "description": "Connection endpoint.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "port": {
+                "type": "string",
+                "description_kind": "plain",
+                "computed": true
+              }
+            },
+            "block_types": {
+              "parameters": {
+                "nesting_mode": "set",
+                "block": {
+                  "attributes": {
+                    "name": {
+                      "type": "string",
+                      "description": "Parameter name.",
+                      "description_kind": "plain",
+                      "required": true
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "Parameter value.",
+                      "description_kind": "plain",
+                      "required": true
+                    }
+                  },
+                  "description_kind": "plain"
+                }
+              },
+              "pg_hba_conf": {
+                "nesting_mode": "set",
+                "block": {
+                  "attributes": {
+                    "type": { "type": "string", "description_kind": "plain", "required": true },
+                    "database": { "type": "string", "description_kind": "plain", "required": true },
+                    "user": { "type": "string", "description_kind": "plain", "required": true },
+                    "address": { "type": "string", "description_kind": "plain", "required": true },
+                    "method": { "type": "string", "description_kind": "plain", "required": true },
+                    "priority_id": { "type": "number", "description_kind": "plain", "required": true }
+                  },
+                  "description_kind": "plain"
+                }
+              }
+            },
+            "description": "Provisions an Alibaba Cloud RDS instance.",
+            "description_kind": "plain"
+          }
+        },
+        "alicloud_vpc": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "id": { "type": "string", "description_kind": "plain", "computed": true },
+              "cidr_block": { "type": "string", "description": "CIDR block, e.g. 10.0.0.0/16.", "description_kind": "plain", "required": true },
+              "vpc_name": { "type": "string", "description_kind": "plain", "optional": true, "computed": true },
+              "description": { "type": "string", "description_kind": "plain", "optional": true },
+              "tags": { "type": ["map", "string"], "description_kind": "plain", "optional": true }
+            },
+            "description_kind": "plain"
+          }
+        },
+        "alicloud_vswitch": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "id": { "type": "string", "description_kind": "plain", "computed": true },
+              "vpc_id": { "type": "string", "description_kind": "plain", "required": true },
+              "cidr_block": { "type": "string", "description_kind": "plain", "required": true },
+              "zone_id": { "type": "string", "description_kind": "plain", "required": true },
+              "vswitch_name": { "type": "string", "description_kind": "plain", "optional": true, "computed": true }
+            },
+            "description_kind": "plain"
+          }
+        }
+      },
+      "data_source_schemas": {}
+    }
+  }
+}

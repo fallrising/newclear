@@ -1,0 +1,19 @@
+package com.cloudform.domain.enums;
+
+public enum RequestStatus {
+    DRAFT,
+    PENDING_TL_APPROVAL,
+    TL_APPROVED,
+    PENDING_OPS_ACTION,
+    OPS_FORM_FILLING,
+    PENDING_OPS_TL_APPROVAL,
+    OPS_TL_APPROVED,
+    PROVISIONING,
+    TF_APPLYING,
+    SYNCING,
+    INITIALIZING,
+    COMPLETED,
+    FAILED,
+    REJECTED,
+    CANCELLED
+}

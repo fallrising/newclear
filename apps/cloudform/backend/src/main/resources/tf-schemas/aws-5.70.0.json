@@ -1,0 +1,144 @@
+{
+  "format_version": "1.0",
+  "provider_schemas": {
+    "registry.terraform.io/hashicorp/aws": {
+      "provider": {
+        "version": 0,
+        "block": {
+          "attributes": {
+            "region": { "type": "string", "description_kind": "plain", "optional": true },
+            "profile": { "type": "string", "description_kind": "plain", "optional": true }
+          },
+          "description_kind": "plain"
+        }
+      },
+      "resource_schemas": {
+        "aws_db_instance": {
+          "version": 1,
+          "block": {
+            "attributes": {
+              "id": { "type": "string", "description_kind": "plain", "computed": true },
+              "identifier": {
+                "type": "string",
+                "description": "Unique name for the DB instance.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "engine": {
+                "type": "string",
+                "description": "Database engine to use. e.g. mysql, postgres, aurora.",
+                "description_kind": "plain",
+                "required": true
+              },
+              "engine_version": {
+                "type": "string",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "instance_class": {
+                "type": "string",
+                "description": "Instance type, e.g. db.t3.micro.",
+                "description_kind": "plain",
+                "required": true
+              },
+              "allocated_storage": {
+                "type": "number",
+                "description": "Storage in GB.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "username": {
+                "type": "string",
+                "description": "Master user.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "password": {
+                "type": "string",
+                "description": "Master user password.",
+                "description_kind": "plain",
+                "optional": true,
+                "sensitive": true
+              },
+              "db_subnet_group_name": {
+                "type": "string",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "vpc_security_group_ids": {
+                "type": ["set", "string"],
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "publicly_accessible": {
+                "type": "bool",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "skip_final_snapshot": {
+                "type": "bool",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "tags": {
+                "type": ["map", "string"],
+                "description_kind": "plain",
+                "optional": true
+              },
+              "endpoint": { "type": "string", "description_kind": "plain", "computed": true },
+              "port": { "type": "number", "description_kind": "plain", "computed": true },
+              "arn": { "type": "string", "description_kind": "plain", "computed": true }
+            },
+            "block_types": {
+              "restore_to_point_in_time": {
+                "nesting_mode": "list",
+                "block": {
+                  "attributes": {
+                    "restore_time": { "type": "string", "description_kind": "plain", "optional": true },
+                    "source_db_instance_identifier": { "type": "string", "description_kind": "plain", "optional": true },
+                    "use_latest_restorable_time": { "type": "bool", "description_kind": "plain", "optional": true }
+                  },
+                  "description_kind": "plain"
+                },
+                "max_items": 1
+              },
+              "timeouts": {
+                "nesting_mode": "single",
+                "block": {
+                  "attributes": {
+                    "create": { "type": "string", "description_kind": "plain", "optional": true },
+                    "delete": { "type": "string", "description_kind": "plain", "optional": true },
+                    "update": { "type": "string", "description_kind": "plain", "optional": true }
+                  },
+                  "description_kind": "plain"
+                }
+              }
+            },
+            "description": "Provisions an AWS RDS instance.",
+            "description_kind": "plain"
+          }
+        },
+        "aws_vpc": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "id": { "type": "string", "description_kind": "plain", "computed": true },
+              "cidr_block": { "type": "string", "description_kind": "plain", "optional": true, "computed": true },
+              "enable_dns_support": { "type": "bool", "description_kind": "plain", "optional": true, "computed": true },
+              "tags": { "type": ["map", "string"], "description_kind": "plain", "optional": true }
+            },
+            "description_kind": "plain"
+          }
+        }
+      },
+      "data_source_schemas": {}
+    }
+  }
+}

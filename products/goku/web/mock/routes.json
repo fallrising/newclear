@@ -1,0 +1,4 @@
+{
+  "/api/bookmarks": "/bookmarks",
+  "/api/bookmarks/:id": "/bookmarks/:id"
+}

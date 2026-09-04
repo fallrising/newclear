@@ -1,0 +1,16 @@
+https://developer.apple.com/tutorials/app-dev-training#swiftui-essentials
+https://developer.apple.com/documentation/swiftui/
+https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
+https://developer.apple.com/tutorials/swiftui/building-lists-and-navigation
+https://developer.apple.com/tutorials/swiftui
+https://developer.apple.com/design/human-interface-guidelines
+https://developer.mozilla.org/zh-CN/docs/Web/API/USB
+https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial
+https://developer.mozilla.org/zh-CN/docs/Web/API/WebRTC_API/Simple_RTCDataChannel_sample
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+https://developer.mozilla.org/en-US/docs/Web/Media/Formats/WebRTC_codecs
+https://developer.mozilla.org/zh-CN/docs/Learn/Server-side/Express_Nodejs/Tutorial_local_library_website
+https://developer.mozilla.org/zh-CN/docs/Web/CSS/Attribute_selectors
+https://developer.mozilla.org/zh-CN/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_getting_started
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this
+https://developer.mozilla.org/en-US/docs/Web/API/Event/target

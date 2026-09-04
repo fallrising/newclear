@@ -1,0 +1,287 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "Work",
+      "icon": "briefcase"
+    },
+    {
+      "id": "2",
+      "name": "Personal",
+      "icon": "home"
+    },
+    {
+      "id": "3",
+      "name": "Learning",
+      "icon": "book"
+    }
+  ],
+  "tags": [
+    {
+      "id": "1",
+      "name": "Important",
+      "color": "#EF4444"
+    },
+    {
+      "id": "2",
+      "name": "Read Later",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "3",
+      "name": "Reference",
+      "color": "#10B981"
+    },
+    {
+      "id": "4",
+      "name": "Documentation",
+      "color": "yellow"
+    }
+  ],
+  "bookmarks": [
+    {
+      "id": "1",
+      "title": "Stack Overflow_1",
+      "url": "https://stackoverflow.com",
+      "description": "Where developers learn and share knowledge",
+      "category": {
+        "id": "2",
+        "name": "Personal",
+        "icon": "home"
+      },
+      "tags": [
+        {
+          "id": "1",
+          "name": "Important",
+          "color": "red"
+        }
+      ],
+      "notes": [
+        {
+          "id": "85a4788e-afe2-453f-a1e2-0c64e62127e0",
+          "title": "first note",
+          "content": "the content",
+          "createdAt": 1732973533658,
+          "updatedAt": 1732973533658
+        },
+        {
+          "id": "77c274ab-279d-450b-aa46-422ccce30165",
+          "title": "second notes",
+          "content": "ttttt",
+          "createdAt": 1732973541373,
+          "updatedAt": 1732973541373
+        }
+      ],
+      "customStyle": {
+        "container": {
+          "borderColor": "#EF4444"
+        },
+        "title": {
+          "color": "#2563EB"
+        }
+      },
+      "favicon": "https://stackoverflow.com/favicon.ico",
+      "createdAt": "2024-03-15T10:00:00.000Z",
+      "lastVisited": "2024-11-30T13:32:23.139Z",
+      "updatedAt": 1722579772
+    },
+    {
+      "id": "2",
+      "title": "MDN Web Docs",
+      "url": "https://developer.mozilla.org",
+      "description": "Resources for developers, by developers",
+      "category": {
+        "id": "3",
+        "name": "Learning",
+        "icon": "book"
+      },
+      "tags": [
+        {
+          "id": "3",
+          "name": "Reference",
+          "color": "#10B981"
+        },
+        {
+          "id": "4",
+          "name": "Documentation",
+          "color": "yellow"
+        }
+      ],
+      "notes": [
+        {
+          "id": "note1",
+          "title": "MDN Web Docs Features",
+          "content": "New features in MDN Web Docs",
+          "createdAt": 1722579772,
+          "updatedAt": 1722579772
+        }
+      ],
+      "customStyle": {
+        "container": {
+          "borderColor": "#10B981"
+        },
+        "title": {
+          "color": "#2563EB"
+        }
+      },
+      "favicon": "https://developer.mozilla.org/favicon.ico",
+      "createdAt": "2024-03-14T09:00:00.000Z",
+      "lastVisited": "2024-03-16T14:20:00.000Z",
+      "updatedAt": 1722579772
+    },
+    {
+      "id": "3",
+      "title": "Netflix",
+      "url": "https://netflix.com",
+      "description": "Stream your favorite shows and movies",
+      "category": {
+        "id": "2",
+        "name": "Personal",
+        "icon": "home"
+      },
+      "tags": [
+        {
+          "id": "2",
+          "name": "Read Later",
+          "color": "#3B82F6"
+        }
+      ],
+      "notes": [
+        {
+          "id": "note1",
+          "title": "Netflix Features",
+          "content": "New features in Netflix",
+          "createdAt": 1722579772,
+          "updatedAt": 1722579772
+        }
+      ],
+      "customStyle": {
+        "container": {
+          "borderColor": "#3B82F6"
+        },
+        "title": {
+          "color": "#2563EB"
+        }
+      },
+      "favicon": "https://netflix.com/favicon.ico",
+      "createdAt": "2024-03-13T11:00:00.000Z",
+      "lastVisited": "2024-03-16T16:45:00.000Z",
+      "updatedAt": 1722579772
+    },
+    {
+      "id": "4",
+      "title": "GitHub",
+      "url": "https://github.com",
+      "description": "Where the world builds software",
+      "category": {
+        "id": "3",
+        "name": "Learning",
+        "icon": "book"
+      },
+      "tags": [
+        {
+          "id": "1",
+          "name": "Important",
+          "color": "#EF4444"
+        },
+        {
+          "id": "3",
+          "name": "Reference",
+          "color": "#10B981"
+        }
+      ],
+      "notes": [
+        {
+          "id": "note1",
+          "title": "GitHub Features",
+          "content": "New features in GitHub",
+          "createdAt": 1722579772,
+          "updatedAt": 1722579772
+        }
+      ],
+      "customStyle": {
+        "container": {
+          "borderColor": "#EF4444"
+        },
+        "title": {
+          "color": "#2563EB"
+        }
+      },
+      "favicon": "https://github.com/favicon.ico",
+      "createdAt": "2024-03-12T08:00:00.000Z",
+      "lastVisited": "2024-11-30T12:49:40.027Z",
+      "updatedAt": 1722579772
+    },
+    {
+      "id": "6",
+      "title": "React Documentation",
+      "url": "https://react.dev",
+      "description": "Official React documentation",
+      "category": {
+        "id": "3",
+        "name": "Learning",
+        "icon": "book"
+      },
+      "tags": [
+        {
+          "id": "2",
+          "name": "Read Later",
+          "color": "#3B82F6"
+        },
+        {
+          "id": "3",
+          "name": "Reference",
+          "color": "#10B981"
+        }
+      ],
+      "notes": [
+        {
+          "id": "note1",
+          "title": "React 18 Features",
+          "content": "New concurrent rendering features in React 18",
+          "createdAt": 1722579772,
+          "updatedAt": 1722579772
+        }
+      ],
+      "customStyle": {
+        "container": {
+          "borderColor": "#3B82F6"
+        },
+        "title": {
+          "color": "#2563EB"
+        }
+      },
+      "favicon": "https://react.dev/favicon.ico",
+      "createdAt": "2024-03-10T16:00:00.000Z",
+      "lastVisited": "2024-03-16T11:45:00.000Z",
+      "updatedAt": 1722579772
+    }
+  ],
+  "layout": {
+    "sidebarWidth": 280,
+    "sidebarCollapsed": false,
+    "contentLayout": "grid",
+    "scrollViews": [
+      {
+        "id": "1",
+        "title": "Recent Bookmarks",
+        "keywords": [
+          "recent"
+        ],
+        "layout": "grid",
+        "pageSize": 10
+      },
+      {
+        "id": "2",
+        "title": "Learning Resources",
+        "keywords": [
+          "learning",
+          "tutorial",
+          "documentation"
+        ],
+        "layout": "list",
+        "pageSize": 20
+      }
+    ]
+  }
+}

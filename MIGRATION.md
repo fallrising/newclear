@@ -11,7 +11,7 @@
 | 1 | Fork 收斂:catalog 產生、patch 抽取、repo 移除 | 🔄 catalog 完成,刪除待 `delete_repo` 授權 |
 | 2 | `newclear` 匯入:公開專案 squash 匯入 | ✅ 完成（15 component,2136 檔） |
 | 3 | `kernel` 匯入:私有專案 squash 匯入 | ✅ 完成（9 component,1592 檔） |
-| 4 | 收尾:successor notice、archive 舊 repo、profile README | 🔄 進行中 |
+| 4 | 收尾:successor notice、archive 舊 repo、profile README | ✅ 完成 |
 
 ## Phase 0 成果（已完成）
 
@@ -93,3 +93,33 @@
 
 `config_center` 的 `n8n/.env` 含真實憑證,**未**遷入 `kernel`;該檔案仍在原 repository 歷史中,
 相關密碼應視為已洩露並輪換。
+
+## Phase 4 成果
+
+43 個舊 repository 已加上 successor notice 並封存（0 失敗）:33 個有後繼者、10 個純封存。
+`fallrising` profile README 已從 GitHub starter 模板改為 portfolio map。
+
+### 盤點修正
+
+`aweshore` 與 `aweshore-ui` 先前依 default branch（`main`,僅 README + LICENSE）被判為空殼。
+實際實作全部在 `master` 分支:`aweshore` 是 Go 後端（11 commit）、`aweshore-ui` 是 Qwik City
+前端（15 commit）,均為自有程式碼。已改為匯入 [`labs/aweshore/`](labs/aweshore/)。
+
+### 帳號狀態
+
+| | 收斂前 | 目前 | 刪除 fork 後 |
+| --- | ---: | ---: | ---: |
+| 活躍 repository | 117 | 73 | **10** |
+| 已封存 | 0 | 46 | 46 |
+
+尚待執行:刪除 63 個外部 repository（62 個零分歧 fork + `cocoon`）。
+需要 `delete_repo` OAuth scope,腳本備於 `delete-forks.sh`。
+
+### 待處理事項
+
+1. **憑證輪換** — `config_center` 的 `n8n/.env` 含真實 Postgres 與 basic-auth 密碼,
+   仍在該已封存 repository 的歷史中。移除檔案不會消除歷史暴露。
+2. **公開內容中的本機路徑** — 10 處 `/home/ckc/...` 分佈於 4 個檔案
+   （`apps/flowshot/docs/tasks/N00/evidence/` 2 個、`specs/fleet/docs/SDD.md`、
+   `systems/clarkq/demo/cluster/run-stress.sh`）。後者是硬編碼的 Go 工具鏈路徑,
+   在其他機器上無效。

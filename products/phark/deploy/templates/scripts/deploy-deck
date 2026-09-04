@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+APP_DIR="/opt/apps/deck"
+ENV_FILE="${APP_DIR}/.env"
+LOCK_FILE="/tmp/deck-deploy.lock"
+NEW_IMAGE="${1:-}"
+
+if [[ ! "${NEW_IMAGE}" =~ ^ghcr\.io/[a-z0-9._-]+/[a-z0-9._/-]+:sha-[0-9a-f]{40}$ ]]; then
+    echo "invalid image: ${NEW_IMAGE}" >&2
+    exit 64
+fi
+
+if [[ ! -f "${APP_DIR}/compose.yml" || ! -f "${ENV_FILE}" ]]; then
+    echo "application configuration is missing" >&2
+    exit 66
+fi
+
+exec 9>"${LOCK_FILE}"
+
+if ! flock -n 9; then
+    echo "another deployment is running" >&2
+    exit 75
+fi
+
+cd "${APP_DIR}"
+
+ROLLBACK_FILE="$(mktemp "${APP_DIR}/.env.rollback.XXXXXX")"
+cp -a "${ENV_FILE}" "${ROLLBACK_FILE}"
+
+set_env_value() {
+    local key="$1"
+    local value="$2"
+    local temp_file
+
+    temp_file="$(mktemp "${APP_DIR}/.env.new.XXXXXX")"
+
+    awk -v key="${key}" -v value="${value}" '
+        BEGIN {
+            replaced = 0
+        }
+
+        index($0, key "=") == 1 {
+            print key "=" value
+            replaced = 1
+            next
+        }
+
+        {
+            print
+        }
+
+        END {
+            if (!replaced) {
+                print key "=" value
+            }
+        }
+    ' "${ENV_FILE}" >"${temp_file}"
+
+    chmod --reference="${ENV_FILE}" "${temp_file}"
+    mv "${temp_file}" "${ENV_FILE}"
+}
+
+rollback() {
+    echo "deployment failed; restoring previous image" >&2
+
+    cp -a "${ROLLBACK_FILE}" "${ENV_FILE}"
+
+    docker compose pull app || true
+
+    docker compose up \
+        -d \
+        --no-deps \
+        --wait \
+        --wait-timeout 90 \
+        app || true
+}
+
+cleanup_on_exit() {
+    local exit_code=$?
+
+    if (( exit_code != 0 )); then
+        rollback
+    fi
+
+    rm -f "${ROLLBACK_FILE}"
+    exit "${exit_code}"
+}
+
+trap cleanup_on_exit EXIT
+
+echo "deploying ${NEW_IMAGE}"
+
+set_env_value "APP_IMAGE" "${NEW_IMAGE}"
+
+docker compose config >/dev/null
+docker compose pull app
+
+docker compose up \
+    -d \
+    --no-deps \
+    --wait \
+    --wait-timeout 90 \
+    app
+
+docker compose ps
+
+printf '%s %s\n' \
+    "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+    "${NEW_IMAGE}" \
+    >>"${APP_DIR}/deploy-history.log"
+
+trap - EXIT
+rm -f "${ROLLBACK_FILE}"
+
+echo "deployment completed: ${NEW_IMAGE}"

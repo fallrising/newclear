@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+case "${SSH_ORIGINAL_COMMAND:-}" in
+    deploy\ ghcr.io/*:sha-*)
+        image="${SSH_ORIGINAL_COMMAND#deploy }"
+        exec /usr/local/bin/deploy-deck "${image}"
+        ;;
+
+    *)
+        echo "command denied" >&2
+        exit 126
+        ;;
+esac

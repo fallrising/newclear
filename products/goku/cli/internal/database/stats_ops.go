@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 	"strings"
 )
 

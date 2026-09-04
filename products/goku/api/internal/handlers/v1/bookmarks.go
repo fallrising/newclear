@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/fallrising/goku-api/internal/database"
-	"github.com/fallrising/goku-api/internal/models"
+	"github.com/fallrising/newclear/products/goku/api/internal/database"
+	"github.com/fallrising/newclear/products/goku/api/internal/models"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,7 +3,7 @@ package bookmarks
 import (
 	"context"
 	"fmt"
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 func (s *BookmarkService) SearchBookmarks(ctx context.Context, query string, limit, offset int) ([]*models.Bookmark, error) {

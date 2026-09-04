@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/db"
-	"github.com/fallrising/fleet-catalog/internal/model"
-	"github.com/fallrising/fleet-catalog/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/db"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
 )
 
 func testStore(t *testing.T) *Store {

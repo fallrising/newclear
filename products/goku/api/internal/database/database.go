@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/goku-api/internal/models"
+	"github.com/fallrising/newclear/products/goku/api/internal/models"
 	_ "github.com/mattn/go-sqlite3"
 )
 

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/fallrising/fleet-catalog/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
 )
 
 func (s *Store) AllocatePort(nodeID string) (int, error) {

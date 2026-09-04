@@ -3,7 +3,7 @@ package ojbk
 import (
 	"context"
 
-	ojbkv1 "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1"
+	ojbkv1 "github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

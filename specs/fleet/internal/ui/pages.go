@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/model"
-	"github.com/fallrising/fleet-catalog/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
 
 // Pages is the server-rendered catalog.

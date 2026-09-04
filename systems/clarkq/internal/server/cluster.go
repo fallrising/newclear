@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/fallrising/clarkQ/internal/cluster"
+	"github.com/fallrising/newclear/systems/clarkq/internal/cluster"
 )
 
 // maybeForward reverse-proxies queue operations to the owning node.

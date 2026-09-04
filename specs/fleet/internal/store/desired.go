@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/fallrising/fleet-catalog/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
 )
 
 // DesiredService is one UNION row from GET /desired.

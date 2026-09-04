@@ -5,7 +5,7 @@ package ojbk.v1;
 option java_package = "ojbk.v1";
 option java_outer_classname = "Common";
 option java_multiple_files = true;
-option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+option go_package = "github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
 
 message MessageIn {
   string topic = 1;

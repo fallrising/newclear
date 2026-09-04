@@ -5,7 +5,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/fallrising/goku-consumer/internal/config"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/config"
 )
 
 type Consumer struct {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	ojbkv1 "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1"
+	ojbkv1 "github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

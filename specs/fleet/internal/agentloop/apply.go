@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/agentclient"
-	"github.com/fallrising/fleet-catalog/internal/composeclient"
-	"github.com/fallrising/fleet-catalog/internal/secretfile"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/composeclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/secretfile"
 )
 
 func (l *Loop) Apply(ctx context.Context, desired *agentclient.Desired) (agentclient.Actual, error) {

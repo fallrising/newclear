@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/agentloop"
-	"github.com/fallrising/fleet-catalog/internal/composeclient"
-	"github.com/fallrising/fleet-catalog/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentloop"
+	"github.com/fallrising/newclear/specs/fleet/internal/composeclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
 	"gopkg.in/yaml.v3"
 )
 

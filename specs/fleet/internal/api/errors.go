@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/fallrising/fleet-catalog/internal/fleetfile"
-	"github.com/fallrising/fleet-catalog/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/fleetfile"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
 
 type envelope struct {

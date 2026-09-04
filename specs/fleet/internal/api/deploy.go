@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/fallrising/fleet-catalog/internal/compose"
-	"github.com/fallrising/fleet-catalog/internal/fleetfile"
-	"github.com/fallrising/fleet-catalog/internal/model"
-	"github.com/fallrising/fleet-catalog/internal/store"
-	"github.com/fallrising/fleet-catalog/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/compose"
+	"github.com/fallrising/newclear/specs/fleet/internal/fleetfile"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
 )
 
 func (s *Server) handleDeploy(w http.ResponseWriter, r *http.Request) {

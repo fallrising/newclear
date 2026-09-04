@@ -3,7 +3,7 @@ export CGO_ENABLED=0
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
 DATE    ?= $(shell date -u +%Y-%m-%d)
-LDFLAGS = -s -w -X github.com/fallrising/fleet-catalog/internal/version.Version=$(VERSION) -X github.com/fallrising/fleet-catalog/internal/version.Commit=$(COMMIT) -X github.com/fallrising/fleet-catalog/internal/version.Date=$(DATE)
+LDFLAGS = -s -w -X github.com/fallrising/newclear/specs/fleet/internal/version.Version=$(VERSION) -X github.com/fallrising/newclear/specs/fleet/internal/version.Commit=$(COMMIT) -X github.com/fallrising/newclear/specs/fleet/internal/version.Date=$(DATE)
 
 .PHONY: build test vet image-fleetd image-agent validate-schema
 

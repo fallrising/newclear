@@ -15,7 +15,7 @@ Goku Consumer is an MQTT consumer that processes URLs and uploads batches to the
 
 1. Clone the repository:
    ```
-   git clone https://github.com/fallrising/goku-consumer.git
+   git clone https://github.com/fallrising/newclear/products/goku/consumer.git
    cd goku-consumer
    ```
 

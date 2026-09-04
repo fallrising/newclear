@@ -40,7 +40,7 @@ Designed for 2–10 pet VPS, 5–40 services, one operator. Not Kubernetes.
 ## Adjacent tools (not this repo)
 
 - [`vps-hygiene`](https://github.com/fallrising) — host inventory/cleanup. Fleet does not exec those scripts.
-- [`clarkQ`](https://github.com/fallrising/clarkQ) — application queue. Never the fleet control bus.
+- [`clarkQ`](https://github.com/fallrising/newclear/systems/clarkq) — application queue. Never the fleet control bus.
 
 ## License
 

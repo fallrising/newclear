@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/fallrising/goku-cli/internal/bookmarks"
+	"github.com/fallrising/newclear/products/goku/cli/internal/bookmarks"
 	"github.com/urfave/cli/v2"
 )
 

@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 // SQLiteStats provides statistics functionality using SQLite instead of DuckDB

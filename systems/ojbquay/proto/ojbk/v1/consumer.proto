@@ -7,7 +7,7 @@ import "ojbk/v1/common.proto";
 option java_package = "ojbk.v1";
 option java_outer_classname = "Consumer";
 option java_multiple_files = true;
-option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+option go_package = "github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
 
 message MessageOut {
   string topic = 1;

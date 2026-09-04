@@ -381,7 +381,7 @@ const file_ojbk_v1_consumer_proto_rawDesc = "" +
 	"\x0fConsumerService\x123\n" +
 	"\x04Poll\x12\x14.ojbk.v1.PollRequest\x1a\x13.ojbk.v1.MessageOut0\x01\x120\n" +
 	"\x03Ack\x12\x13.ojbk.v1.AckRequest\x1a\x14.ojbk.v1.AckResponseBN\n" +
-	"\aojbk.v1B\bConsumerP\x01Z7github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
+	"\aojbk.v1B\bConsumerP\x01Z7github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
 
 var (
 	file_ojbk_v1_consumer_proto_rawDescOnce sync.Once

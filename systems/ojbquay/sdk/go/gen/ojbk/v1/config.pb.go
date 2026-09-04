@@ -191,7 +191,7 @@ const file_ojbk_v1_config_proto_rawDesc = "" +
 	"\x05GROUP\x10\x02\x12\x10\n" +
 	"\fSUBSCRIPTION\x10\x03\x12\x11\n" +
 	"\rKAFKA_CLUSTER\x10\x04BL\n" +
-	"\aojbk.v1B\x06ConfigP\x01Z7github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
+	"\aojbk.v1B\x06ConfigP\x01Z7github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
 
 var (
 	file_ojbk_v1_config_proto_rawDescOnce sync.Once

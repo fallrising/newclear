@@ -3,7 +3,7 @@ package store
 import (
 	"database/sql"
 
-	"github.com/fallrising/fleet-catalog/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
 )
 
 type ActualReport struct {

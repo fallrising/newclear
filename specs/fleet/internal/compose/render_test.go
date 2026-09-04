@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fallrising/fleet-catalog/internal/fleetfile"
+	"github.com/fallrising/newclear/specs/fleet/internal/fleetfile"
 	"gopkg.in/yaml.v3"
 )
 

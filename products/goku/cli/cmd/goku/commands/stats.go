@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/fallrising/goku-cli/internal/bookmarks"
+	"github.com/fallrising/newclear/products/goku/cli/internal/bookmarks"
 	"github.com/urfave/cli/v2"
 	"sort"
 )

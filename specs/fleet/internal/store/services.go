@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/model"
-	"github.com/fallrising/fleet-catalog/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
 )
 
 func (s *Store) TombstonePending(name string) (bool, error) {

@@ -3,7 +3,7 @@ package ojbk
 import (
 	"fmt"
 
-	ojbkv1 "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1"
+	ojbkv1 "github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1"
 )
 
 // Message is the language-neutral producer value.

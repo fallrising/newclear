@@ -9,14 +9,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/api"
-	"github.com/fallrising/fleet-catalog/internal/cf"
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/db"
-	"github.com/fallrising/fleet-catalog/internal/ingress"
-	"github.com/fallrising/fleet-catalog/internal/store"
-	"github.com/fallrising/fleet-catalog/internal/ui"
-	"github.com/fallrising/fleet-catalog/internal/version"
+	"github.com/fallrising/newclear/specs/fleet/internal/api"
+	"github.com/fallrising/newclear/specs/fleet/internal/cf"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/db"
+	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/ui"
+	"github.com/fallrising/newclear/specs/fleet/internal/version"
 )
 
 func main() {

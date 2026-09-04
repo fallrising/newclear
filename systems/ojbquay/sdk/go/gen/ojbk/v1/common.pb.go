@@ -273,7 +273,7 @@ const file_ojbk_v1_common_proto_rawDesc = "" +
 	"\x0fDELAY_NOT_FOUND\x10\b\x12\x0f\n" +
 	"\vUNSUPPORTED\x10\t\x12\f\n" +
 	"\bINTERNAL\x10cBL\n" +
-	"\aojbk.v1B\x06CommonP\x01Z7github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
+	"\aojbk.v1B\x06CommonP\x01Z7github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
 
 var (
 	file_ojbk_v1_common_proto_rawDescOnce sync.Once

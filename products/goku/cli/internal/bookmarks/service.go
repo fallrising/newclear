@@ -5,13 +5,13 @@ package bookmarks
 import (
 	"context"
 	"fmt"
-	"github.com/fallrising/goku-cli/internal/database"
+	"github.com/fallrising/newclear/products/goku/cli/internal/database"
 	"log"
 	"strings"
 
-	"github.com/fallrising/goku-cli/internal/fetcher"
-	"github.com/fallrising/goku-cli/pkg/interfaces"
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/internal/fetcher"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/interfaces"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 type BookmarkService struct {

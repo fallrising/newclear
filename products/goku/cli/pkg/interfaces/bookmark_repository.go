@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 type BookmarkRepository interface {

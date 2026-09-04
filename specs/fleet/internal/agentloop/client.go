@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/agentclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentclient"
 )
 
 type FleetAPI interface {

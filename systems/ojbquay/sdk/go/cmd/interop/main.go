@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	ojbk "github.com/fallrising/ojbquay/sdk/go"
+	ojbk "github.com/fallrising/newclear/systems/ojbquay/sdk/go"
 )
 
 func main() {

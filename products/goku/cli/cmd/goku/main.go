@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fallrising/goku-cli/cmd/goku/commands"
-	"github.com/fallrising/goku-cli/internal/bookmarks"
-	"github.com/fallrising/goku-cli/internal/database"
+	"github.com/fallrising/newclear/products/goku/cli/cmd/goku/commands"
+	"github.com/fallrising/newclear/products/goku/cli/internal/bookmarks"
+	"github.com/fallrising/newclear/products/goku/cli/internal/database"
 	"github.com/urfave/cli/v2"
 )
 

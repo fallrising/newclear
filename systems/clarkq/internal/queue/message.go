@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/crypto"
+	"github.com/fallrising/newclear/systems/clarkq/internal/crypto"
 )
 
 type Message struct {

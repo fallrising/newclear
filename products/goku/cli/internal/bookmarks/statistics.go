@@ -2,7 +2,7 @@ package bookmarks
 
 import (
 	"context"
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 func (s *BookmarkService) GetStatistics(ctx context.Context) (*models.Statistics, error) {

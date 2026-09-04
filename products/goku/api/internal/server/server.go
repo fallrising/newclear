@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 
-	"github.com/fallrising/goku-api/pkg/config"
+	"github.com/fallrising/newclear/products/goku/api/pkg/config"
 	"github.com/gin-gonic/gin"
 )
 

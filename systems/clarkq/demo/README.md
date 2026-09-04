@@ -26,7 +26,7 @@ API Key: dev-key
 需要：Docker（含 `docker compose`）、本機 `curl`（沒有的話腳本會用容器跑）。
 
 ```bash
-git clone https://github.com/fallrising/clarkQ.git
+git clone https://github.com/fallrising/newclear/systems/clarkq.git
 cd clarkQ/demo
 chmod +x run-demo.sh run-scenarios.sh scenarios/*.sh
 ./run-demo.sh

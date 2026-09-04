@@ -13,14 +13,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/auth"
-	"github.com/fallrising/clarkQ/internal/cluster"
-	"github.com/fallrising/clarkQ/internal/config"
-	"github.com/fallrising/clarkQ/internal/crypto"
-	"github.com/fallrising/clarkQ/internal/persist"
-	"github.com/fallrising/clarkQ/internal/queue"
-	"github.com/fallrising/clarkQ/internal/ui"
-	"github.com/fallrising/clarkQ/internal/version"
+	"github.com/fallrising/newclear/systems/clarkq/internal/auth"
+	"github.com/fallrising/newclear/systems/clarkq/internal/cluster"
+	"github.com/fallrising/newclear/systems/clarkq/internal/config"
+	"github.com/fallrising/newclear/systems/clarkq/internal/crypto"
+	"github.com/fallrising/newclear/systems/clarkq/internal/persist"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/ui"
+	"github.com/fallrising/newclear/systems/clarkq/internal/version"
 )
 
 type Server struct {

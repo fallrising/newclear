@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/cluster"
+	"github.com/fallrising/newclear/systems/clarkq/internal/cluster"
 )
 
 const internalLeaseVote = "/api/v1/internal/lease/vote"

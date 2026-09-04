@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/fallrising/goku-consumer/internal/api"
-	"github.com/fallrising/goku-consumer/internal/config"
-	"github.com/fallrising/goku-consumer/internal/consumer"
-	"github.com/fallrising/goku-consumer/internal/processor"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/api"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/config"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/consumer"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/processor"
 )
 
 func main() {

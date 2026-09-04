@@ -8,9 +8,9 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 1.0.
 COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 DATE    ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w \
-	-X github.com/fallrising/clarkQ/internal/version.Version=$(VERSION) \
-	-X github.com/fallrising/clarkQ/internal/version.Commit=$(COMMIT) \
-	-X github.com/fallrising/clarkQ/internal/version.Date=$(DATE)
+	-X github.com/fallrising/newclear/systems/clarkq/internal/version.Version=$(VERSION) \
+	-X github.com/fallrising/newclear/systems/clarkq/internal/version.Commit=$(COMMIT) \
+	-X github.com/fallrising/newclear/systems/clarkq/internal/version.Date=$(DATE)
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/clarkq

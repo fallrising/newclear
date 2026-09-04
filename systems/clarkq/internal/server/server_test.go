@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/config"
+	"github.com/fallrising/newclear/systems/clarkq/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 	_ "github.com/mattn/go-sqlite3"
 )
 

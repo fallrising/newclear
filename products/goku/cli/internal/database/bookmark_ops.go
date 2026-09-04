@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 func (d *Database) Create(ctx context.Context, bookmark *models.Bookmark) error {

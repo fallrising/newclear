@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/fallrising/fleet-catalog/internal/agentclient"
-	"github.com/fallrising/fleet-catalog/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
 
 func (s *Server) handleDesired(w http.ResponseWriter, r *http.Request) {

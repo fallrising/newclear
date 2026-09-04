@@ -1,4 +1,4 @@
-module github.com/fallrising/clarkQ
+module github.com/fallrising/newclear/systems/clarkq
 
 go 1.22
 

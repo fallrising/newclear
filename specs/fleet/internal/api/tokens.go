@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/fallrising/fleet-catalog/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
 )
 
 func (s *Server) handleCreateToken(w http.ResponseWriter, r *http.Request) {

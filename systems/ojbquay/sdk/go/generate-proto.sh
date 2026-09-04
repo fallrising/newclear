@@ -28,9 +28,9 @@ docker run --rm \
     protoc \
       -I proto \
       --go_out=sdk/go \
-      --go_opt=module=github.com/fallrising/ojbquay/sdk/go \
+      --go_opt=module=github.com/fallrising/newclear/systems/ojbquay/sdk/go \
       --go-grpc_out=sdk/go \
-      --go-grpc_opt=module=github.com/fallrising/ojbquay/sdk/go \
+      --go-grpc_opt=module=github.com/fallrising/newclear/systems/ojbquay/sdk/go \
       proto/ojbk/v1/common.proto \
       proto/ojbk/v1/config.proto \
       proto/ojbk/v1/consumer.proto \

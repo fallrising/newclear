@@ -11,9 +11,9 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -trimpath \
 	-ldflags="-s -w \
-	  -X github.com/fallrising/clarkQ/internal/version.Version=${VERSION} \
-	  -X github.com/fallrising/clarkQ/internal/version.Commit=${COMMIT} \
-	  -X github.com/fallrising/clarkQ/internal/version.Date=${DATE}" \
+	  -X github.com/fallrising/newclear/systems/clarkq/internal/version.Version=${VERSION} \
+	  -X github.com/fallrising/newclear/systems/clarkq/internal/version.Commit=${COMMIT} \
+	  -X github.com/fallrising/newclear/systems/clarkq/internal/version.Date=${DATE}" \
 	-o /out/clarkq ./cmd/clarkq
 
 # Runtime

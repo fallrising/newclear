@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fallrising/clarkQ/internal/auth"
+	"github.com/fallrising/newclear/systems/clarkq/internal/auth"
 )
 
 type ctxKey int

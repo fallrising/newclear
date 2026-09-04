@@ -1,4 +1,4 @@
-module github.com/fallrising/goku-api
+module github.com/fallrising/newclear/products/goku/api
 
 go 1.23.0
 

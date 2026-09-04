@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/fallrising/fleet-catalog/internal/ingress"
+	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
 )
 
 type ingressRule struct {

@@ -1,4 +1,4 @@
-module github.com/fallrising/goku-consumer
+module github.com/fallrising/newclear/products/goku/consumer
 
 go 1.23
 

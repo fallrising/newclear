@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/crypto"
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/crypto"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 const (

@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/db"
-	"github.com/fallrising/fleet-catalog/internal/ingress"
-	"github.com/fallrising/fleet-catalog/internal/store"
-	"github.com/fallrising/fleet-catalog/internal/token"
-	"github.com/fallrising/fleet-catalog/internal/ui"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/db"
+	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/ui"
 )
 
 type testEnv struct {

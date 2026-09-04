@@ -1,4 +1,4 @@
-module github.com/fallrising/fleet-catalog
+module github.com/fallrising/newclear/specs/fleet
 
 go 1.23.0
 

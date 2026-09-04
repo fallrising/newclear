@@ -1,4 +1,4 @@
-module github.com/fallrising/goku-cli
+module github.com/fallrising/newclear/products/goku/cli
 
 go 1.24
 

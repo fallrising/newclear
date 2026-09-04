@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 // OutboxOp is a pending peer replication operation.

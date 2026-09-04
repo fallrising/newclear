@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/crypto"
+	"github.com/fallrising/newclear/systems/clarkq/internal/crypto"
 )
 
 type Manager struct {

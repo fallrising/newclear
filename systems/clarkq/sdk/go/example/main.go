@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/fallrising/clarkQ/sdk/go/clarkq"
+	"github.com/fallrising/newclear/systems/clarkq/sdk/go/clarkq"
 )
 
 func main() {

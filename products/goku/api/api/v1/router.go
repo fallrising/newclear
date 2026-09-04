@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"github.com/fallrising/goku-api/internal/database"
-	"github.com/fallrising/goku-api/internal/handlers/v1"
+	"github.com/fallrising/newclear/products/goku/api/internal/database"
+	"github.com/fallrising/newclear/products/goku/api/internal/handlers/v1"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 // Engine combines optional snapshot checkpoints with an append-only WAL.

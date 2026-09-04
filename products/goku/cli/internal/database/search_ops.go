@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 func (d *Database) Search(ctx context.Context, query string, limit, offset int) ([]*models.Bookmark, error) {

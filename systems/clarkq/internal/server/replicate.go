@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/cluster"
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/cluster"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 const (

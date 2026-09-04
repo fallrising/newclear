@@ -14,9 +14,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/fallrising/goku-cli/internal/fetcher"
-	"github.com/fallrising/goku-cli/internal/mqtt"
-	"github.com/fallrising/goku-cli/pkg/models"
+	"github.com/fallrising/newclear/products/goku/cli/internal/fetcher"
+	"github.com/fallrising/newclear/products/goku/cli/internal/mqtt"
+	"github.com/fallrising/newclear/products/goku/cli/pkg/models"
 )
 
 type ImportProgress struct {

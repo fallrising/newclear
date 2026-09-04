@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/agentclient"
-	"github.com/fallrising/fleet-catalog/internal/composeclient"
-	"github.com/fallrising/fleet-catalog/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/composeclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
 )
 
 type memAPI struct {

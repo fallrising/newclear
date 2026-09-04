@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fallrising/clarkQ/internal/config"
+	"github.com/fallrising/newclear/systems/clarkq/internal/config"
 )
 
 // BuildTLSConfig returns a tls.Config when HTTPS is enabled.

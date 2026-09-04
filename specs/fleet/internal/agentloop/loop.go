@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/agentclient"
-	"github.com/fallrising/fleet-catalog/internal/composeclient"
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/secretfile"
-	"github.com/fallrising/fleet-catalog/internal/version"
+	"github.com/fallrising/newclear/specs/fleet/internal/agentclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/composeclient"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/secretfile"
+	"github.com/fallrising/newclear/specs/fleet/internal/version"
 )
 
 type Loop struct {

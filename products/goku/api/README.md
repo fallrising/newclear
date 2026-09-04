@@ -13,7 +13,7 @@ Goku API is a web server for managing bookmarks. It provides CRUD operations for
 
 1. Clone the repository:
    ```
-   git clone https://github.com/fallrising/goku-api.git
+   git clone https://github.com/fallrising/newclear/products/goku/api.git
    cd goku-api
    ```
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/config"
+	"github.com/fallrising/newclear/systems/clarkq/internal/config"
 )
 
 func TestTenantQuotaQueues(t *testing.T) {

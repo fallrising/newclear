@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/fallrising/goku-consumer/pkg/models"
+	"github.com/fallrising/newclear/products/goku/consumer/pkg/models"
 )
 
 type Client struct {

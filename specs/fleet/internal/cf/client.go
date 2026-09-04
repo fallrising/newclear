@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/ingress"
-	"github.com/fallrising/fleet-catalog/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
 
 const defaultAPI = "https://api.cloudflare.com/client/v4"

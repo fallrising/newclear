@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/fallrising/goku-consumer/internal/api"
-	"github.com/fallrising/goku-consumer/pkg/models"
+	"github.com/fallrising/newclear/products/goku/consumer/internal/api"
+	"github.com/fallrising/newclear/products/goku/consumer/pkg/models"
 )
 
 type Message struct {

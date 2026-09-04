@@ -1,4 +1,4 @@
-module github.com/fallrising/ojbquay/sdk/go
+module github.com/fallrising/newclear/systems/ojbquay/sdk/go
 
 go 1.25.0
 

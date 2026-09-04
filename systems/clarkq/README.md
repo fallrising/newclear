@@ -33,7 +33,7 @@ One command builds clarkQ in Docker and runs six business-style scenarios
 (health/UI, FIFO jobs, API key auth, multi-tenant quotas, WAL restart, long-poll + metrics):
 
 ```bash
-git clone https://github.com/fallrising/clarkQ.git
+git clone https://github.com/fallrising/newclear/systems/clarkq.git
 cd clarkQ/demo
 ./run-demo.sh
 # optional: ./run-demo.sh --keep   # leave UI up at http://localhost:8080/ui/

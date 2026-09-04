@@ -3,7 +3,7 @@ package api
 import (
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
 )
 
 type catalogView struct {

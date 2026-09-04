@@ -11,7 +11,7 @@
 | **Status** | Draft (revised 2026-09-04 after review) |
 | **Audience** | GitHub / senior engineers implementing Phase 1 MVP |
 | **Language** | Go 1.23+, Docker Compose v2, SQLite, Cloudflare Tunnel + Access |
-| **Module path** | `github.com/fallrising/fleet-catalog` (replace `OWNER` at repo creation) |
+| **Module path** | `github.com/fallrising/newclear/specs/fleet` (replace `OWNER` at repo creation) |
 
 This document is implementation-ready. Protocols, JSON schemas, SQL, file layout, Cloudflare API calls, and GitHub Actions contracts are specified so Phase 1 can be built without guessing.
 
@@ -36,7 +36,7 @@ The operator already runs several long-lived Debian/Ubuntu VPS boxes and a growi
 | Adjacent project | What it is | Fleet Catalog relationship |
 | --- | --- | --- |
 | `/home/ckc/test/grok/vps-hygiene` | Host inventory / health / cleanup scripts (`./vps health`, `./vps inventory`, Docker prune, ports audit). Tuned for Debian/Ubuntu pets. | **Host toolbox, not orchestrator.** Agent should *surface similar disk/mem/load facts* in JSON. Do **not** exec or rewrite those scripts into the agent. Optional later integration. |
-| `/home/ckc/test/grok/clarkQ` | Go HTTP queue/cluster (`github.com/fallrising/clarkQ`). Compose + Helm deploy. Own admin UI, WAL, replication. | **Workload, not control bus.** Do not import its packages, do not use its queues for desired-state, heartbeats, or deploy fan-out. A future `fleet.yaml` may *deploy* clarkQ like any other app. |
+| `/home/ckc/test/grok/clarkQ` | Go HTTP queue/cluster (`github.com/fallrising/newclear/systems/clarkq`). Compose + Helm deploy. Own admin UI, WAL, replication. | **Workload, not control bus.** Do not import its packages, do not use its queues for desired-state, heartbeats, or deploy fan-out. A future `fleet.yaml` may *deploy* clarkQ like any other app. |
 | `/home/ckc/test/grok/mac-in-docker`, `wotar/secure-mqtt-e2ee`, other one-offs | Compose-shaped services the operator actually runs. | **Workloads** Fleet Catalog will register, start/stop, and put on Cloudflare hostnames. |
 
 Today, deploy is ad-hoc: SSH in, `docker compose up`, maybe a hand-made tunnel hostname, no single table of “what is running where, at which URL, at which git SHA.” `vps-hygiene` can see Docker projects and public binds (`scripts/ports-audit.sh` already warns that services should bind `127.0.0.1`), but it cannot start/stop by catalog contract or drive Cloudflare.
@@ -466,7 +466,7 @@ UI shows `mem_used_pct`, `disk_root_used_pct`, `load1`/`ncpu` on the node row. T
 | Compose project for control plane | `fleet-control` |
 | Compose project for agent stack | `fleet-agent` (reserved; services cannot be named `agent` or `control`) |
 | Workload Compose project | `fleet-<service-name>` |
-| Go module | `github.com/fallrising/fleet-catalog` |
+| Go module | `github.com/fallrising/newclear/specs/fleet` |
 | API tokens prefix | `flt_op_`, `flt_ag_`, `flt_ci_`, `flt_bs_` (bootstrap) |
 | Default public zone hostnames | `<service>.<FLEET_BASE_DOMAIN>` if `spec.expose.hostname` omitted for public/access |
 | Private hostname suffix | `<service>.fleet.internal` |
@@ -840,7 +840,7 @@ fleet-catalog/
 | **not** `golang.org/x/crypto` in MVP | SHA-256 via stdlib `crypto/sha256`. AES-GCM secrets are Phase 2 |
 | **not** chi/gin, **not** otel, **not** gorm, **not** cobra in MVP | stdlib `net/http` ServeMux (Go 1.22+ method patterns), `flag` |
 
-Keep the Go module small: standard library HTTP, `yaml.v3`, pure-Go SQLite, single static `fleetd` binary. Do not import `github.com/fallrising/clarkQ`. (clarkQ itself also pulls JWT + OTel; Fleet does not copy that surface.)
+Keep the Go module small: standard library HTTP, `yaml.v3`, pure-Go SQLite, single static `fleetd` binary. Do not import `github.com/fallrising/newclear/systems/clarkq`. (clarkQ itself also pulls JWT + OTel; Fleet does not copy that surface.)
 
 ### `ComposeClient` (normative, `internal/composeclient`)
 

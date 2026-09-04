@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/token"
+	"github.com/fallrising/newclear/specs/fleet/internal/token"
 )
 
 var (

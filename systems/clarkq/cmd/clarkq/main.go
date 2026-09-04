@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/config"
-	"github.com/fallrising/clarkQ/internal/observability"
-	"github.com/fallrising/clarkQ/internal/server"
-	"github.com/fallrising/clarkQ/internal/version"
+	"github.com/fallrising/newclear/systems/clarkq/internal/config"
+	"github.com/fallrising/newclear/systems/clarkq/internal/observability"
+	"github.com/fallrising/newclear/systems/clarkq/internal/server"
+	"github.com/fallrising/newclear/systems/clarkq/internal/version"
 )
 
 func main() {

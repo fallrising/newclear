@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/cluster"
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/cluster"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 func (s *Server) startOutboxWorker() {

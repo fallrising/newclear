@@ -1,7 +1,7 @@
 # clarkQ 開發進度
 
 > 最後更新：2026-07-30 · **v1.5.1** + 單機 demo + **多進程集群壓測 demo**  
-> 倉庫：https://github.com/fallrising/clarkQ  
+> 倉庫：https://github.com/fallrising/newclear/systems/clarkq  
 > 標籤：`v1.0.0` … `v1.5.1`
 
 ---
@@ -122,7 +122,7 @@ cd demo/cluster && ./run-cluster-demo.sh    # 3 進程集群 6 場景
 ## 快速恢復
 
 ```bash
-git clone https://github.com/fallrising/clarkQ.git
+git clone https://github.com/fallrising/newclear/systems/clarkq.git
 cd clarkQ
 git checkout v1.5.1   # 或 master
 

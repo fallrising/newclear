@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/clarkQ/internal/queue"
+	"github.com/fallrising/newclear/systems/clarkq/internal/queue"
 )
 
 func TestWALReplayAfterCrashStyleTruncation(t *testing.T) {

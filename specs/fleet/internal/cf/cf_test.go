@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fallrising/fleet-catalog/internal/config"
-	"github.com/fallrising/fleet-catalog/internal/db"
-	"github.com/fallrising/fleet-catalog/internal/ingress"
-	"github.com/fallrising/fleet-catalog/internal/model"
-	"github.com/fallrising/fleet-catalog/internal/store"
+	"github.com/fallrising/newclear/specs/fleet/internal/config"
+	"github.com/fallrising/newclear/specs/fleet/internal/db"
+	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
+	"github.com/fallrising/newclear/specs/fleet/internal/model"
+	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
 
 const bootstrapID = "11111111-1111-1111-1111-111111111111"

@@ -153,7 +153,6 @@ export CLARKQ_BIN="${CLARKQ_BIN:-$ROOT/bin/clarkq}"
 
 if [ ! -x "$CLARKQ_BIN" ]; then
   echo "→ Building clarkQ binary ..."
-  export PATH="/home/ckc/test/grok/.go/go/bin:${PATH:-}"
   if command -v go >/dev/null 2>&1; then
     (cd "$ROOT" && go build -o bin/clarkq ./cmd/clarkq)
   else

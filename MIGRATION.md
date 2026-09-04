@@ -115,11 +115,17 @@
 尚待執行:刪除 63 個外部 repository（62 個零分歧 fork + `cocoon`）。
 需要 `delete_repo` OAuth scope,腳本備於 `delete-forks.sh`。
 
-### 待處理事項
+### 已處理事項
 
-1. **憑證輪換** — `config_center` 的 `n8n/.env` 含真實 Postgres 與 basic-auth 密碼,
-   仍在該已封存 repository 的歷史中。移除檔案不會消除歷史暴露。
-2. **公開內容中的本機路徑** — 10 處 `/home/ckc/...` 分佈於 4 個檔案
-   （`apps/flowshot/docs/tasks/N00/evidence/` 2 個、`specs/fleet/docs/SDD.md`、
-   `systems/clarkq/demo/cluster/run-stress.sh`）。後者是硬編碼的 Go 工具鏈路徑,
-   在其他機器上無效。
+1. **憑證** — `config_center` 的 `n8n/.env` 僅供私人測試用途,不需輪換。該檔案未遷入 `kernel`。
+2. **公開內容中的本機路徑** — 已清除全部 10 處 `/home/ckc/...`：
+   - `apps/flowshot/docs/tasks/N00/evidence/`（2 處）— 錯誤訊息中的路徑改為 `<repo-root>`
+   - `specs/fleet/docs/SDD.md`（7 處）— 改以專案名稱與 monorepo 路徑指稱
+   - `systems/clarkq/demo/cluster/run-stress.sh`（1 處）— 移除硬編碼的 Go 工具鏈 `PATH`；
+     腳本原本就有 `command -v go` 檢查與明確錯誤訊息，移除後在其他機器上才能正確運作
+
+### 未版控的本機專案
+
+`/home/ckc/test/grok/vps-hygiene`（18 檔）與 `/home/ckc/test/grok/mac-in-docker`（8 檔）
+**完全沒有版本控制**，也不在 GitHub 上。兩者都在 `specs/fleet/docs/SDD.md` 中被當作
+相鄰工具引用。目前沒有任何備份。

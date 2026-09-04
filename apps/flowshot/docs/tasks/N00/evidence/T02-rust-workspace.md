@@ -15,7 +15,7 @@ Before the scaffold:
 
 ```text
 $ cargo metadata --no-deps --format-version 1
-error: could not find `Cargo.toml` in `/home/ckc/test/codex/flowshot` or any parent directory
+error: could not find `Cargo.toml` in `<repo-root>` or any parent directory
 ```
 
 ## Implemented boundary

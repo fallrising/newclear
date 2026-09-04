@@ -16,7 +16,7 @@ Before the scaffold:
 ```text
 $ npm run build
 npm error code ENOENT
-npm error path /home/ckc/test/codex/flowshot/package.json
+npm error path <repo-root>/package.json
 npm error enoent Could not read package.json
 ```
 

@@ -35,9 +35,9 @@ The operator already runs several long-lived Debian/Ubuntu VPS boxes and a growi
 
 | Adjacent project | What it is | Fleet Catalog relationship |
 | --- | --- | --- |
-| `/home/ckc/test/grok/vps-hygiene` | Host inventory / health / cleanup scripts (`./vps health`, `./vps inventory`, Docker prune, ports audit). Tuned for Debian/Ubuntu pets. | **Host toolbox, not orchestrator.** Agent should *surface similar disk/mem/load facts* in JSON. Do **not** exec or rewrite those scripts into the agent. Optional later integration. |
-| `/home/ckc/test/grok/clarkQ` | Go HTTP queue/cluster (`github.com/fallrising/newclear/systems/clarkq`). Compose + Helm deploy. Own admin UI, WAL, replication. | **Workload, not control bus.** Do not import its packages, do not use its queues for desired-state, heartbeats, or deploy fan-out. A future `fleet.yaml` may *deploy* clarkQ like any other app. |
-| `/home/ckc/test/grok/mac-in-docker`, `wotar/secure-mqtt-e2ee`, other one-offs | Compose-shaped services the operator actually runs. | **Workloads** Fleet Catalog will register, start/stop, and put on Cloudflare hostnames. |
+| `vps-hygiene` (local host toolbox) | Host inventory / health / cleanup scripts (`./vps health`, `./vps inventory`, Docker prune, ports audit). Tuned for Debian/Ubuntu pets. | **Host toolbox, not orchestrator.** Agent should *surface similar disk/mem/load facts* in JSON. Do **not** exec or rewrite those scripts into the agent. Optional later integration. |
+| `newclear/systems/clarkq` | Go HTTP queue/cluster (`github.com/fallrising/newclear/systems/clarkq`). Compose + Helm deploy. Own admin UI, WAL, replication. | **Workload, not control bus.** Do not import its packages, do not use its queues for desired-state, heartbeats, or deploy fan-out. A future `fleet.yaml` may *deploy* clarkQ like any other app. |
+| `mac-in-docker` (local), `wotar/secure-mqtt-e2ee`, other one-offs | Compose-shaped services the operator actually runs. | **Workloads** Fleet Catalog will register, start/stop, and put on Cloudflare hostnames. |
 
 Today, deploy is ad-hoc: SSH in, `docker compose up`, maybe a hand-made tunnel hostname, no single table of “what is running where, at which URL, at which git SHA.” `vps-hygiene` can see Docker projects and public binds (`scripts/ports-audit.sh` already warns that services should bind `127.0.0.1`), but it cannot start/stop by catalog contract or drive Cloudflare.
 
@@ -429,7 +429,7 @@ On `spec.node` change (move): insert the tombstone **first** (capturing the old 
 
 ### 8. Node facts (hygiene boundary)
 
-Each heartbeat carries a facts object. Collect in Go from `/proc` and the Docker CLI — **do not** shell out to `/home/ckc/test/grok/vps-hygiene/scripts/healthcheck.sh`. Field names are **inspired by** that script’s human-readable checks (disk %, mem %, load); they are **not** a parseable contract with hygiene output. JSON Schema: `schemas/agent.heartbeat.v1.schema.json`.
+Each heartbeat carries a facts object. Collect in Go from `/proc` and the Docker CLI — **do not** shell out to `vps-hygiene/scripts/healthcheck.sh`. Field names are **inspired by** that script’s human-readable checks (disk %, mem %, load); they are **not** a parseable contract with hygiene output. JSON Schema: `schemas/agent.heartbeat.v1.schema.json`.
 
 ```json
 {
@@ -2403,7 +2403,7 @@ Rejected by constraint. Workload binaries wrap in distroless/scratch. The agent 
 
 ### 6. `clarkQ` as control bus
 
-`clarkQ` is a capable HTTP FIFO with WAL, tenants, and cluster demos (`/home/ckc/test/grok/clarkQ`). Using it for heartbeats/desired-state would:
+`clarkQ` is a capable HTTP FIFO with WAL, tenants, and cluster demos (`newclear/systems/clarkq`). Using it for heartbeats/desired-state would:
 
 - Turn consume semantics (destructive GET) into a poor match for “retain last desired.”
 - Couple fleet availability to an application queue.
@@ -2435,7 +2435,7 @@ Still open (do not block PR-1–PR-3):
 
 ## Integration boundaries (adjacent repos)
 
-Do **not** fork or modify these as part of Fleet Catalog implementation (they live in `/home/ckc/test/grok` as sibling context only).
+Do **not** fork or modify these as part of Fleet Catalog implementation (they live in the operator’s local workspace as sibling context only).
 
 ### `vps-hygiene`
 
@@ -2492,7 +2492,7 @@ Covered in **Observability**. Summary: slog JSON, `/healthz`, `last_seen` stalen
 - OTP IdP: [One-time PIN login](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/)
 - Private hostname routes: `POST /accounts/{account_id}/zerotrust/routes/hostname`
 - WARP private hostname (Split Tunnel CGNAT + delete Local Domain Fallback): [Connect a private hostname](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/private-net/cloudflared/connect-private-hostname/)
-- Adjacent: `/home/ckc/test/grok/vps-hygiene/README.md`, `/home/ckc/test/grok/clarkQ/README.md`, `clarkQ/deploy/docker-compose.yml`
+- Adjacent: `vps-hygiene/README.md`, `newclear/systems/clarkq/README.md`, `clarkQ/deploy/docker-compose.yml`
 - Constraint: VPS inbound default-deny; agents outbound; GHCR builds in GitHub Actions
 
 ---

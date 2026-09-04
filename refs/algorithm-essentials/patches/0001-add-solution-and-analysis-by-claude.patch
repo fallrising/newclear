@@ -1,0 +1,127 @@
+From f493592c9b13b59497412a4ca8e2779aac61c50a Mon Sep 17 00:00:00 2001
+From: Kung-Chiang Cheng <kungchiang.cheng@shopee.com>
+Date: Thu, 5 Sep 2024 15:40:12 +0800
+Subject: [PATCH] add solution and analysis by claude
+
+---
+ docs/bfs/graph/diagonal-traverse-ii.md        | 47 +++++++++++++++++--
+ .../nearest-exit-from-entrance-in-maze.md     | 42 +++++++++++++++++
+ 2 files changed, 86 insertions(+), 3 deletions(-)
+
+diff --git a/docs/bfs/graph/diagonal-traverse-ii.md b/docs/bfs/graph/diagonal-traverse-ii.md
+index 089c1c44..0377daac 100644
+--- a/docs/bfs/graph/diagonal-traverse-ii.md
++++ b/docs/bfs/graph/diagonal-traverse-ii.md
+@@ -4,12 +4,53 @@ title: Diagonal Traverse II
+ 
+ ### 描述
+ 
+-TODO
++给定一个列表的列表，其中包含整数，返回按对角线顺序遍历的所有元素。
++例如：
++输入: nums = [[1,2,3],[4,5,6],[7,8,9]]
++输出: [1,4,2,7,5,3,8,6,9]
++遍历顺序是从左下角到右上角的对角线顺序。
+ 
+ ### 分析
+ 
+-TODO
++这个问题的关键观察是：在同一对角线上的元素，其行索引和列索引的和是相等的。我们可以利用这个特性来解决问题。
++解题思路：
++
++使用一个数据结构（如 TreeMap）来按对角线分组元素。键是行索引和列索引的和，值是该对角线上的所有元素。
++遍历输入的列表的列表，将每个元素添加到其对应的对角线组中。
++按顺序遍历对角线组，将元素添加到结果列表中。
++
++时间复杂度：O(N)，其中 N 是所有元素的总数。
++空间复杂度：O(N)，用于存储所有元素。
+ 
+ ### 代码
++```java
++import java.util.*;
+ 
+-TODO
++class Solution {
++    public int[] findDiagonalOrder(List<List<Integer>> nums) {
++        Map<Integer, List<Integer>> groups = new TreeMap<>();
++        int count = 0;
++        
++        for (int row = 0; row < nums.size(); row++) {
++            for (int col = 0; col < nums.get(row).size(); col++) {
++                int diagonal = row + col;
++                if (!groups.containsKey(diagonal)) {
++                    groups.put(diagonal, new ArrayList<>());
++                }
++                groups.get(diagonal).add(nums.get(row).get(col));
++                count++;
++            }
++        }
++        
++        int[] result = new int[count];
++        int index = 0;
++        for (List<Integer> group : groups.values()) {
++            for (int i = group.size() - 1; i >= 0; i--) {
++                result[index++] = group.get(i);
++            }
++        }
++        
++        return result;
++    }
++}
++```
+\ No newline at end of file
+diff --git a/docs/bfs/graph/nearest-exit-from-entrance-in-maze.md b/docs/bfs/graph/nearest-exit-from-entrance-in-maze.md
+index 36d01a60..1c904e63 100644
+--- a/docs/bfs/graph/nearest-exit-from-entrance-in-maze.md
++++ b/docs/bfs/graph/nearest-exit-from-entrance-in-maze.md
+@@ -81,5 +81,47 @@ public:
+ };
+ ```
+ 
++```java
++import java.util.*;
++
++class Solution {
++    public int nearestExit(char[][] maze, int[] entrance) {
++        final int M = maze.length, N = maze[0].length;
++        // four directions: up, down, left, right
++        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
++
++        // the state in queue is [x, y, length]
++        Queue<int[]> queue = new LinkedList<>();
++        maze[entrance[0]][entrance[1]] = '+'; // mark as visited before enqueue
++        queue.offer(new int[]{entrance[0], entrance[1], 0});
++
++        while (!queue.isEmpty()) {
++            int[] current = queue.poll();
++            int i = current[0], j = current[1], d = current[2];
++
++            // If this cell is an exit, return directly
++            if ((i != entrance[0] || j != entrance[1]) &&
++                (i == 0 || i == M - 1 || j == 0 || j == N - 1)) {
++                return d;
++            }
++
++            for (int[] dir : dirs) { // expand
++                int next_i = i + dir[0], next_j = j + dir[1];
++
++                // If there exists an unvisited empty neighbor:
++                if (0 <= next_i && next_i < M && 0 <= next_j && next_j < N &&
++                    maze[next_i][next_j] == '.') {
++                    maze[next_i][next_j] = '+'; // mark as visited before enqueue
++                    queue.offer(new int[]{next_i, next_j, d + 1});
++                }
++            }
++        }
++
++        return -1;
++    }
++}
++```
++
++
+ </TabItem>
+ </Tabs>
+-- 
+2.39.5
+

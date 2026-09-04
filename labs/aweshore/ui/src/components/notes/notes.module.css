@@ -1,0 +1,108 @@
+.rwdTable {
+    display: table;
+    width: 100%;
+    border-collapse: collapse; /* Changed from 'separate' for a tighter look */
+    /* border-spacing: 5px; Removed to allow border collapse */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added a subtle shadow for depth */
+    background-color: #ffffff; /* Default background for the table */
+}
+
+.rwdTr, .rwdTitle_group {
+    display: table-row;
+}
+
+.rwdTh, .rwdTd {
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
+    padding: 10px; /* Increased padding for better spacing */
+    border: 1px solid #ddd; /* Added border for definition */
+}
+
+.rwdTd {
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
+    padding: 5px 10px;
+    color: #000; /* This sets the text color to black */
+}
+
+/* Header styles */
+.rwdTh {
+    background-color: #005792; /* Darkened color for better contrast */
+    color: #ffffff;
+    font-weight: bold; /* Make header text bold */
+    font-size: 1.1rem; /* Slightly larger text in headers */
+}
+
+/* Row styles */
+.rwdTr:nth-of-type(odd) {
+    background-color: #f0f0f0; /* Light grey for every other row */
+}
+
+/* Slightly darker border under headers for separation */
+.rwdTh + .rwdTd {
+    border-top: 2px solid #ccc;
+}
+
+/* Hover styles for rows */
+.rwdTr:hover {
+    background-color: #e8f4f8; /* Highlight on hover for interactivity */
+}
+
+/* Adjust button styles */
+button {
+    padding: 6px 12px;
+    margin: 4px;
+    border: none;
+    border-radius: 4px;
+    background-color: #188EBE; /* Use the theme color for buttons */
+    color: #ffffff;
+    cursor: pointer; /* Indicate clickable buttons */
+}
+
+button:hover {
+    background-color: #1c9cd2; /* Lighter blue on hover for feedback */
+}
+
+/* Add styles for input and textarea */
+input, textarea {
+    border: 1px solid #ccc; /* Consistent border styling */
+    border-radius: 4px; /* Rounded corners */
+    padding: 6px; /* Spacing inside inputs */
+}
+
+/* Specific adjustments to input sizes could be made here, e.g. */
+input[type="text"] {
+    width: calc(100% - 12px); /* Full width minus padding */
+}
+
+textarea {
+    width: calc(100% - 12px); /* Full width minus padding */
+    height: 80px; /* Fixed height for textareas */
+}
+
+/* Add or adjust styles as needed */
+.paginationControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.pageInput, .pageSizeInput {
+    width: 60px;
+}
+
+.currentPageButton {
+    background-color: #004970; /* A darker shade to stand out */
+    color: #ffffff;
+    pointer-events: none; /* Disables the button */
+}
+
+.activePageButton {
+    background-color: #003A70; /* A darker shade for the active button */
+    color: white;
+    pointer-events: none; /* Disable clicking on the active button */
+}

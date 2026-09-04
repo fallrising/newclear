@@ -1,0 +1,20 @@
+{
+  // Merge into your OpenCode config. Replace the API key from 9router dashboard.
+  // Optional: community plugin opencode-9router-plugin for dynamic model discovery.
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "nine": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "9router",
+      "options": {
+        "baseURL": "http://127.0.0.1:20128/v1",
+        "apiKey": "{env:NINE_ROUTER_API_KEY}"
+      },
+      "models": {
+        "auto": {
+          "name": "9router default / combo model — rename after dashboard setup"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# runtime / local
+.env
+platform/.env
+*.log
+.DS_Store
+
+# pi local state (keep skills/prompts in repo)
+.pi/agent/
+**/sessions/

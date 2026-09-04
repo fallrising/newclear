@@ -84,15 +84,14 @@
 
 ## Phase 2/3 成果
 
-| Repository | 可見性 | Component | 檔案 | Commit |
-| --- | --- | ---: | ---: | ---: |
-| [`newclear`](https://github.com/fallrising/newclear) | public | 15 | 2136 | 18 |
-| [`kernel`](https://github.com/fallrising/kernel) | private | 9 | 1592 | 10 |
+| Repository | 可見性 | Component | 檔案 |
+| --- | --- | ---: | ---: |
+| [`newclear`](https://github.com/fallrising/newclear) | public | 16 | 2213 |
+| [`kernel`](https://github.com/fallrising/kernel) | private | 9（+2 legacy） | 1618 |
 
 匯入後 8 個 Go 模組的 module identity 已改寫為 monorepo 路徑,全部通過 `go build ./...`。
 
-`config_center` 的 `n8n/.env` 含真實憑證,**未**遷入 `kernel`;該檔案仍在原 repository 歷史中,
-相關密碼應視為已洩露並輪換。
+`config_center` 的 `n8n/.env` 含憑證,**未**遷入 `kernel`（見下方「已處理事項」）。
 
 ## Phase 4 成果
 

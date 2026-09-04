@@ -8,7 +8,7 @@
 | Phase | 內容 | 狀態 |
 | --- | --- | --- |
 | 0 | 安全與盤點:未推送工作保全、secret scan、分歧驗證 | ✅ 完成 |
-| 1 | Fork 收斂:catalog 產生、patch 抽取、repo 移除 | 🔄 catalog 完成,刪除待 `delete_repo` 授權 |
+| 1 | Fork 收斂:catalog 產生、patch 抽取、repo 移除 | ✅ 完成（63 個已刪除） |
 | 2 | `newclear` 匯入:公開專案 squash 匯入 | ✅ 完成（15 component,2136 檔） |
 | 3 | `kernel` 匯入:私有專案 squash 匯入 | ✅ 完成（9 component,1592 檔） |
 | 4 | 收尾:successor notice、archive 舊 repo、profile README | ✅ 完成 |
@@ -107,13 +107,31 @@
 
 ### 帳號狀態
 
-| | 收斂前 | 目前 | 刪除 fork 後 |
-| --- | ---: | ---: | ---: |
-| 活躍 repository | 117 | 73 | **10** |
-| 已封存 | 0 | 46 | 46 |
+| | 收斂前 | 完成後 |
+| --- | ---: | ---: |
+| 活躍 repository | 117 | **10** |
+| 已封存（唯讀） | 0 | 46 |
+| 已刪除 | — | 63 |
+| 帳號總計 | 117 | 56 |
 
-尚待執行:刪除 63 個外部 repository（62 個零分歧 fork + `cocoon`）。
-需要 `delete_repo` OAuth scope,腳本備於 `delete-forks.sh`。
+63 個外部 repository（62 個零分歧 fork + `cocoon`）已於 2026-09-04 刪除，0 失敗。
+刪除前驗證：全部 63 個在 [`refs/`](refs/INDEX.md) 有條目、個人 patch 已抽出、
+catalog 已推上 GitHub、三個 upstream 已消失的 fork 已排除並改為封存。
+
+### 完成後的 10 個活躍 repository
+
+| Repository | 可見性 | 用途 |
+| --- | --- | --- |
+| [`newclear`](https://github.com/fallrising/newclear) | public | 公開技術作品集 + 外部參考目錄 |
+| [`kernel`](https://github.com/fallrising/kernel) | private | 私有技術專案 |
+| [`fallrising`](https://github.com/fallrising/fallrising) | public | profile / portfolio map |
+| `knowledge-base` | private | canonical 個人知識系統 |
+| `doc_analysis_study` | private | 證據界線研究輸出 |
+| `ice-maker` | private | 知識編譯器 |
+| `local-ocr-services` | private | OCR 服務（ice-maker 的隔離依賴） |
+| `journal` | private | 個人筆記 |
+| `fraud-edge-decision` | private | clean-room，刻意隔離 |
+| `fraud-event-policy` | private | clean-room，刻意隔離 |
 
 ### 已處理事項
 

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }} · thinrouter</title>
+  <link rel="stylesheet" href="/admin/static/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">thinrouter</div>
+      <nav>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/connections">Connections</a>
+        <a href="/admin/routes">Routes</a>
+        <a href="/admin/keys">API Keys</a>
+        <a href="/admin/usage" class="active">Usage</a>
+      </nav>
+      {% if admin_protected %}
+      <form method="post" action="/admin/logout" class="logout"><button type="submit" class="ghost">Logout</button></form>
+      {% endif %}
+    </aside>
+    <main class="content">
+      <h1>Usage</h1>
+      <p class="muted">
+        Estimated total cost: <strong>${{ cost_total }}</strong>
+        · <a href="/admin/api/usage/export.csv">Export CSV</a>
+      </p>
+
+      <section class="panel">
+        <h2>By day (last 14)</h2>
+        {% if daily %}
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Requests</th>
+              <th>OK</th>
+              <th>Errors</th>
+              <th>Tokens in/out</th>
+              <th>Cost</th>
+              <th>Avg latency</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in daily %}
+            <tr>
+              <td class="mono">{{ d.day }}</td>
+              <td>{{ d.requests }}</td>
+              <td>{{ d.ok }}</td>
+              <td>{{ d.errors }}</td>
+              <td class="mono">{{ d.prompt_tokens }}/{{ d.completion_tokens }}</td>
+              <td>${{ d.estimated_cost_usd }}</td>
+              <td>{{ d.avg_latency_ms }} ms</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="muted">No daily data yet.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <h2>Recent events</h2>
+        {% if events %}
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Model</th>
+              <th>Connection</th>
+              <th>Status</th>
+              <th>Latency</th>
+              <th>Tokens</th>
+              <th>Cost</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in events %}
+            <tr>
+              <td class="mono">{{ e.ts }}</td>
+              <td>{{ e.public_model or "—" }}</td>
+              <td class="mono">{{ e.connection_id or "—" }}</td>
+              <td>{{ e.status or "—" }}</td>
+              <td>{% if e.latency_ms %}{{ e.latency_ms }} ms{% else %}—{% endif %}</td>
+              <td class="mono">{% if e.prompt_tokens or e.completion_tokens %}{{ e.prompt_tokens or 0 }}/{{ e.completion_tokens or 0 }}{% else %}—{% endif %}</td>
+              <td>{% if e.estimated_cost_usd is not none %}${{ e.estimated_cost_usd }}{% else %}—{% endif %}</td>
+              <td class="error-cell">{{ e.error or "" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="muted">No requests yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+# Goals & Progress
+
+> Last updated: 2026-07-28  
+> Repo: [fallrising/pokercase](https://github.com/fallrising/pokercase)  
+> Working name: **thinrouter** · Architecture: [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+## Mission (updated)
+
+**Personal multi-tool AI gateway** for someone with **subscription seats (no paid API keys)**:
+
+1. **Layer A (this crate):** provide stable service APIs (`/v1/*`) over personal OAuth/session tokens + optional OpenAI-compatible nodes; routes, fallback, token-saver, usage.
+2. **Layer B (separate later):** assemble multi-agent / “team” workflows that **only** call Layer A.
+
+Success: Cursor + Claude Code + Codex + custom agents all point at one local base URL; credentials stay in thinrouter; business logic stays outside.
+
+---
+
+## Product shape
+
+```
+CLI / IDE / Layer-B agents  →  /v1/*  →  OAuth imports | OpenAI-compatible
+Browser                     →  /admin
+CLI                         →  serve | doctor | tui
+Data                        →  ~/.thinrouter/thinrouter.db
+```
+
+---
+
+## Progress
+
+Legend: ✅ done · 🟨 partial · ❌ not started · 🚫 deferred
+
+### Core proxy
+
+| Item | Status |
+|------|--------|
+| Chat Completions stream/non-stream | ✅ |
+| Anthropic `/v1/messages` | ✅ |
+| OpenAI `/v1/responses` | ✅ |
+| Models / routes / fallback / RR | ✅ |
+| SSE stall + client-disconnect cancel (pre-SSE) | ✅ |
+| HTTP(S)_PROXY env for upstream | ✅ |
+| Token-saver rewrite (opt-in) | ✅ |
+| Usage events + daily aggregate + CSV | ✅ |
+
+### Credentials
+
+| Item | Status | Notes |
+|------|--------|--------|
+| API key connections | ✅ | optional path |
+| **OAuth import** (paste access/refresh) | ✅ | `POST /admin/api/connections/oauth/import` + UI |
+| Browser OAuth / PKCE per provider | 🟨 | scaffold only — Codex/Claude/Copilot/Cursor/Kiro full flows next |
+| Auto token refresh | ❌ | needs per-provider refresh |
+| Provider-specific request executors | ❌ | some OAuth upstreams need non-OpenAI shapes |
+
+### Admin / ops
+
+| Item | Status |
+|------|--------|
+| Web CRUD + multi-target + test + login | ✅ |
+| TUI / Docker / release workflow | ✅ |
+| Real subscription e2e (your tokens) | 🟨 | user-side |
+
+### Layer B assembler
+
+| Item | Status |
+|------|--------|
+| Separate multi-agent orchestrator | ❌ | design only in ARCHITECTURE.md |
+
+---
+
+## Backlog (priority for *your* use case)
+
+### P0 — Unblock personal subscriptions
+
+1. [x] Registry: **codex, claude, cursor, grok, opencode, agy** (+ wishlist list in docs/PROVIDERS.md)
+2. [x] Active forward: codex / claude / grok / opencode (format + headers)
+3. [x] Partial: cursor / agy (import tokens; executor later)
+4. [x] Smoke: **codex / grok / opencode / agy OK**; claude depends on local credentials; cursor still 501
+5. [x] OAuth **refresh** for codex / claude / grok / agy (+ 401 retry)
+6. [x] `thinrouter import-local --routes --refresh`
+7. [x] Antigravity `loadCodeAssist` + `generateContent` executor
+8. [x] Cursor OAuth **refresh** (`api2.cursor.sh/oauth/token`)
+9. [x] Claude subscription integration notes (`docs/CLAUDE_SUBSCRIPTION.md`)
+10. [x] Cursor AgentService **text chat** (HTTP/2 Connect+proto; tools later)
+
+### P1 — Protocol & cost
+
+4. [x] OpenAI Responses API  
+5. [x] Token-saver (tool_result truncate, opt-in)  
+6. [ ] Deeper Anthropic tools/stream edge cases  
+7. [ ] Stronger token-saver (RTK-like filters, configurable rules)  
+
+### P2 — Engineering (recommended)
+
+8. [x] Disconnect cancel during upstream connect  
+9. [x] HTTP proxy env  
+10. [x] Usage daily + CSV  
+11. [ ] Usage charts (visual)  
+12. [ ] Model alias short names  
+
+### P3 — Layer B
+
+13. [ ] Minimal assembler (parallel team call script/crate using only `/v1`)  
+14. [ ] Shared task/run state for multi-agent  
+
+### Explicitly later / careful
+
+- Full browser OAuth UX like 9router (after import path is proven)  
+- Cloud sync, MITM, 9router.db compatibility — **no**
+
+---
+
+## How to continue
+
+1. Read [ARCHITECTURE.md](./ARCHITECTURE.md) + this file.  
+2. Import a real subscription token in Admin → Connections.  
+3. Point one client at `/v1` and log failures (status + body) to drive provider executors.  
+4. Update this checklist after each milestone; commit per phase.

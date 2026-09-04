@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "nodes": [
+    { "id": "n01", "kind": { "type": "document", "path": "00-meta/index.md" },     "x":    0.0, "y":    0.0, "w": 400.0, "h": 240.0, "group": "row-a" },
+    { "id": "n02", "kind": { "type": "terminal", "session_id": "s-02" },          "x":  440.0, "y":    0.0, "w": 400.0, "h": 240.0, "group": "row-a" },
+    { "id": "n03", "kind": { "type": "document", "path": "10-projects/loom/a.md" },"x":  880.0, "y":    0.0, "w": 400.0, "h": 240.0, "group": "row-a" },
+    { "id": "n04", "kind": { "type": "terminal", "session_id": "s-04" },          "x": 1320.0, "y":    0.0, "w": 400.0, "h": 240.0, "group": "row-a" },
+    { "id": "n05", "kind": { "type": "document", "path": "10-projects/loom/b.md" },"x":    0.0, "y":  280.0, "w": 400.0, "h": 240.0, "group": "row-b" },
+    { "id": "n06", "kind": { "type": "terminal", "session_id": "s-06" },          "x":  440.0, "y":  280.0, "w": 400.0, "h": 240.0, "group": "row-b" },
+    { "id": "n07", "kind": { "type": "document", "path": "10-projects/loom/c.md" },"x":  880.0, "y":  280.0, "w": 400.0, "h": 240.0, "group": "row-b" },
+    { "id": "n08", "kind": { "type": "tombstone", "reason": "build crashed", "was": { "type": "terminal", "cwd": "/tmp", "cmd": "make all", "shell": "bash" } }, "x": 1320.0, "y": 280.0, "w": 400.0, "h": 200.0, "group": "row-b" },
+    { "id": "n09", "kind": { "type": "document", "path": "20-areas/ops/d.md" },   "x":    0.0, "y":  560.0, "w": 400.0, "h": 240.0, "group": "row-c" },
+    { "id": "n10", "kind": { "type": "terminal", "session_id": "s-10" },          "x":  440.0, "y":  560.0, "w": 400.0, "h": 240.0, "group": "row-c" },
+    { "id": "n11", "kind": { "type": "document", "path": "20-areas/ops/e.md" },   "x":  880.0, "y":  560.0, "w": 400.0, "h": 240.0, "group": "row-c" },
+    { "id": "n12", "kind": { "type": "terminal", "session_id": "s-12" },          "x": 1320.0, "y":  560.0, "w": 400.0, "h": 240.0, "group": "row-c" }
+  ],
+  "edges": [
+    { "id": "e01", "from": "n01", "to": "n02", "kind": "triggers" },
+    { "id": "e02", "from": "n02", "to": "n01", "kind": "feeds_output_to" },
+    { "id": "e03", "from": "n03", "to": "n04", "kind": "triggers" },
+    { "id": "e04", "from": "n04", "to": "n03", "kind": "context_for" },
+    { "id": "e05", "from": "n05", "to": "n06", "kind": "triggers" },
+    { "id": "e06", "from": "n06", "to": "n05", "kind": "feeds_output_to" },
+    { "id": "e07", "from": "n07", "to": "n08", "kind": "triggers" },
+    { "id": "e08", "from": "n09", "to": "n10", "kind": "triggers" },
+    { "id": "e09", "from": "n10", "to": "n09", "kind": "feeds_output_to" },
+    { "id": "e10", "from": "n10", "to": "n11", "kind": "context_for" },
+    { "id": "e11", "from": "n11", "to": "n12", "kind": "triggers" },
+    { "id": "e12", "from": "n12", "to": "n11", "kind": "feeds_output_to" }
+  ]
+}

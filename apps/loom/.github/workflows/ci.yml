@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, integration]
+  pull_request:
+    branches: [main, integration]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  rust:
+    name: Rust (fmt + clippy + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy -p loom-contracts --all-targets -- -D warnings
+
+      - name: Test (also regenerates src/contracts/*.ts)
+        run: cargo test -p loom-contracts
+
+      - name: Contract drift check
+        run: |
+          if ! git diff --exit-code src/contracts/; then
+            echo "::error::Generated TS in src/contracts/ drifted from contracts/. Run \`cargo test -p loom-contracts\` locally and commit the diff."
+            exit 1
+          fi
+
+  typescript:
+    name: TypeScript (strict typecheck on generated contracts)
+    runs-on: ubuntu-latest
+    needs: rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install npm deps
+        run: npm install --no-audit --no-fund
+
+      - name: Regenerate TS
+        run: cargo test -p loom-contracts --tests --quiet -- export_bindings
+
+      - name: Strict typecheck
+        run: npm run typecheck:contracts

@@ -1,0 +1,63 @@
+[package]
+name = "loom-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Loom core: pty_manager, fs_watcher, session_store, mcp_host, ai_bridge."
+build = "build.rs"
+
+# This crate is shared by all B-tracks. Each track owns its own module subtree
+# under `src/`. The only file that requires append-only multi-track edits is
+# `src/lib.rs` (one `pub mod xxx;` per track). See `README.md` in this directory.
+
+[dependencies]
+loom-contracts = { path = "../contracts" }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+parking_lot = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+async-trait = { workspace = true }
+
+# B1 owners (pty/, session_store/)
+portable-pty = { workspace = true }
+rusqlite = { workspace = true }
+
+# Tracks B2..D1 append their own [dependencies] lines below this comment.
+# Do not modify or reorder lines above.
+
+# B2 (fs/)
+notify = { workspace = true }
+blake3 = { workspace = true }
+
+# B4 (ai/)
+reqwest = { workspace = true }
+futures-util = { workspace = true }
+tokio-util = { workspace = true }
+
+# V (vertical slice): Tauri desktop shell.
+tauri = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dev-dependencies]
+tokio-test = { workspace = true }
+tempfile = { workspace = true }
+pretty_assertions = { workspace = true }
+
+[lib]
+name = "loom_core"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "loom"
+path = "src/main.rs"
+
+[lints]
+workspace = true

@@ -1,0 +1,18 @@
+[package]
+name = "loom-contracts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Loom IPC contract types (Command / Event / Stream) — single source of truth for Rust↔TS."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+ts-rs = { workspace = true }
+
+[lib]
+doctest = false
+
+[lints]
+workspace = true

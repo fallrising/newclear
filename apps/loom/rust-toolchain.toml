@@ -1,0 +1,9 @@
+[toolchain]
+# Pinned to 1.88: this is the MSRV of `time` 0.3.48 (pulled by Tauri 2 via
+# cookie/plist/serde_with). Versions ≥ 1.89 surface a trait-coherence error
+# triggered by `cookie 0.18`'s blanket `From<T> for Expiration` against
+# `time`'s blanket impl on an associated-type projection — this is a real
+# upstream issue not yet fixed in cookie or time. Pin to 1.88 to dodge it.
+channel = "1.88"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

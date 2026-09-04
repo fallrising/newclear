@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "doc-notes",
+      "kind": {
+        "type": "document",
+        "path": "10-projects/loom/notes.md"
+      },
+      "x": 0.0,
+      "y": 0.0,
+      "w": 480.0,
+      "h": 320.0,
+      "group": null
+    },
+    {
+      "id": "term-claude",
+      "kind": {
+        "type": "terminal",
+        "session_id": "s-claude-1"
+      },
+      "x": 520.0,
+      "y": 0.0,
+      "w": 600.0,
+      "h": 320.0,
+      "group": "experiments"
+    },
+    {
+      "id": "term-dead",
+      "kind": {
+        "type": "tombstone",
+        "reason": "PTY exited (code 0); re-attach failed on boot",
+        "was": {
+          "type": "terminal",
+          "cwd": "/Users/me/work/loom",
+          "cmd": "claude code",
+          "shell": "zsh"
+        }
+      },
+      "x": 1160.0,
+      "y": 0.0,
+      "w": 320.0,
+      "h": 160.0,
+      "group": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-doc-to-term-triggers",
+      "from": "doc-notes",
+      "to": "term-claude",
+      "kind": "triggers"
+    },
+    {
+      "id": "e-term-to-doc-feeds",
+      "from": "term-claude",
+      "to": "doc-notes",
+      "kind": "feeds_output_to"
+    },
+    {
+      "id": "e-term-to-doc-context",
+      "from": "term-claude",
+      "to": "doc-notes",
+      "kind": "context_for"
+    }
+  ]
+}

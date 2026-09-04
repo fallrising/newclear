@@ -1,0 +1,12 @@
+{
+  "id": "inbox",
+  "name": "Inbox",
+  "version": "0.1.0",
+  "frontend": "dist/index.js",
+  "mcp": {
+    "command": "node",
+    "args": ["mcp/server.js"]
+  },
+  "subscribes": ["plugin:inbox:item"],
+  "permissions": ["read_document"]
+}

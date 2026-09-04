@@ -1,0 +1,19 @@
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# OS / editor cruft
+.DS_Store
+.idea/
+.vscode/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# Tauri-build outputs (regenerated each build)
+src-tauri/gen/
+
+# Local dev logs
+/tmp/loom-dev.log

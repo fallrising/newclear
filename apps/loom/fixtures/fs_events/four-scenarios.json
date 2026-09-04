@@ -1,0 +1,32 @@
+{
+  "scenario_1_self_write_should_be_ignored": [
+    {
+      "kind": "fs_changed",
+      "path": "10-projects/loom/notes.md",
+      "change": { "kind": "modified" },
+      "_note_for_b2": "app just wrote this file; echo-loop guard (D-7) must match path+hash and skip"
+    }
+  ],
+  "scenario_2_external_change_no_unsaved": [
+    {
+      "kind": "fs_changed",
+      "path": "10-projects/loom/notes.md",
+      "change": { "kind": "modified" },
+      "_note_for_b2": "user edited via Obsidian; editor has no unsaved changes -> reload silently"
+    }
+  ],
+  "scenario_3_external_change_with_unsaved": [
+    {
+      "kind": "fs_changed",
+      "path": "10-projects/loom/notes.md",
+      "change": { "kind": "modified" },
+      "_note_for_b2": "user edited via Obsidian AND editor has unsaved changes -> surface 'reload / keep' prompt, do not silently overwrite (§7.2)"
+    }
+  ],
+  "scenario_4_rename_storm": [
+    { "kind": "fs_changed", "path": "10-projects/loom/a.md", "change": { "kind": "renamed", "from": "10-projects/loom/a-old.md" } },
+    { "kind": "fs_changed", "path": "10-projects/loom/b.md", "change": { "kind": "renamed", "from": "10-projects/loom/b-old.md" } },
+    { "kind": "fs_changed", "path": "10-projects/loom/c.md", "change": { "kind": "renamed", "from": "10-projects/loom/c-old.md" } },
+    { "kind": "fs_changed", "path": "10-projects/loom/d.md", "change": { "kind": "renamed", "from": "10-projects/loom/d-old.md" } }
+  ]
+}

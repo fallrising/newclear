@@ -1,0 +1,43 @@
+# Loom common commands. Install `just`: `brew install just`.
+
+# Default — show available recipes.
+default:
+    @just --list
+
+# Run the full contracts test suite (also regenerates src/contracts/*.ts).
+test:
+    cargo test -p loom-contracts
+
+# Regenerate TS bindings without running the invariant/fixture tests.
+emit-types:
+    cargo test -p loom-contracts --tests --quiet -- export_bindings
+
+# Rust format check (CI).
+fmt-check:
+    cargo fmt --all -- --check
+
+# Rust format fix.
+fmt:
+    cargo fmt --all
+
+# Lint (CI).
+lint:
+    cargo clippy -p loom-contracts --all-targets -- -D warnings
+
+# Verify generated TS matches committed copy. Run after `just emit-types`.
+# Used by CI to catch contract drift.
+drift-check:
+    @git diff --exit-code src/contracts/ \
+        || (echo "✖ generated TS drifted from contracts — commit src/contracts/ changes" && exit 1)
+
+# TypeScript typecheck — requires `npm install` first.
+typecheck:
+    npm run typecheck:contracts
+
+# Full local verification (no Node required).
+verify: fmt-check lint test drift-check
+
+# Clean build artifacts.
+clean:
+    cargo clean
+    rm -rf node_modules dist

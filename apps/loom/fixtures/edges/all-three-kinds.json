@@ -1,0 +1,5 @@
+[
+  { "id": "e-triggers", "from": "doc-1", "to": "term-1", "kind": "triggers" },
+  { "id": "e-feeds",    "from": "term-1", "to": "doc-1", "kind": "feeds_output_to" },
+  { "id": "e-context",  "from": "term-1", "to": "doc-2", "kind": "context_for" }
+]

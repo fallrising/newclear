@@ -1,0 +1,4 @@
+{"stream_id": "strm-1", "session_id": "s-claude-1", "frames": ["\u001b[1mhello\u001b[0m\n"], "dropped_old": 0}
+{"stream_id": "strm-1", "session_id": "s-claude-1", "frames": ["building project...\n", "[1/4] parsing\n", "[2/4] type-checking\n"], "dropped_old": 0}
+{"stream_id": "strm-1", "session_id": "s-claude-1", "frames": ["[3/4] codegen\n", "[4/4] linking\n", "done in 1.4s\n"], "dropped_old": 0}
+{"stream_id": "strm-1", "session_id": "s-claude-1", "frames": ["FLOOD: line 9998\n", "FLOOD: line 9999\n", "FLOOD: line 10000\n"], "dropped_old": 42}

@@ -1,0 +1,11 @@
+{
+  "commands": [
+    {
+      "name": "get_build_info",
+      "requestType": "EmptyRequest",
+      "responseType": "BuildInfoDto"
+    }
+  ],
+  "generatorVersion": "1.0.0",
+  "schemaVersion": 1
+}

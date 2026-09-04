@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  FLOWSHOT_GIT_SHA: ${{ github.sha }}
+  RUST_BACKTRACE: "1"
+
+jobs:
+  linux:
+    name: Ubuntu 24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6.0.2
+
+      - name: Install Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            build-essential \
+            curl \
+            file \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            pkg-config \
+            wget
+
+      - name: Install Node
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install 1.97.1 --profile minimal --component clippy --component rustfmt
+          rustup default 1.97.1
+
+      - name: Bootstrap locked dependencies
+        run: make bootstrap
+
+      - name: Run repository gate
+        run: make ci
+
+  macos:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS 15 Apple Silicon
+            runner: macos-15
+          - name: macOS 15 Intel
+            runner: macos-15-intel
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6.0.2
+
+      - name: Install Node
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install 1.97.1 --profile minimal --component clippy --component rustfmt
+          rustup default 1.97.1
+
+      - name: Bootstrap locked dependencies
+        run: make bootstrap
+
+      - name: Run repository gate
+        env:
+          RUN_MACOS_LAUNCH_SMOKE: "false"
+        run: make ci
+
+      - name: Build optimized macOS binary
+        run: make macos-release
+
+      - name: Run hosted macOS launch diagnostic
+        id: launch-smoke
+        continue-on-error: true
+        env:
+          FLOWSHOT_LAUNCH_ARTIFACT_DIR: ${{ runner.temp }}/flowshot-launch-diagnostics
+          MACOS_LAUNCH_OBSERVATION_MS: "15000"
+        run: make macos-launch-smoke-probe
+
+      - name: Summarize hosted launch diagnostic
+        if: always() && steps.launch-smoke.outcome != 'skipped'
+        env:
+          LAUNCH_OUTCOME: ${{ steps.launch-smoke.outcome }}
+        run: |
+          echo "### Hosted macOS launch diagnostic" >> "$GITHUB_STEP_SUMMARY"
+          echo "Result: **${LAUNCH_OUTCOME}**. The exact 1.5-second oracle is diagnostic on GitHub-hosted virtual Macs; T08 still requires controlled target-Mac evidence." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${LAUNCH_OUTCOME}" != "success" ]]; then
+            echo "::warning title=Hosted launch budget missed::See the uploaded timing record and screenshot. This does not satisfy T08."
+          fi
+
+      - name: Upload macOS launch diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: macos-launch-diagnostics-${{ matrix.runner }}
+          path: ${{ runner.temp }}/flowshot-launch-diagnostics
+          if-no-files-found: ignore
+          retention-days: 7

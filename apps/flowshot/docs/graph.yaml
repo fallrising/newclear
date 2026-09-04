@@ -1,0 +1,283 @@
+schema_version: 1
+project: flowshot
+spec_version: 1.0.1
+spec_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+critical_path:
+- N00
+- N03
+- N05
+- N06
+- N09
+- N10
+- A02
+nodes:
+  N00:
+    title: 專案骨架、CI 與 Contract Pipeline
+    kind: core
+    milestone: M0
+    depends_on: []
+    size: M
+    status: blocked
+    spec: docs/nodes/N00-foundation-ci-contracts.md
+    contract_lock: contracts/locks/N00.json
+    verification: docs/verification/N00.md
+  N01:
+    title: SQLite Schema、Migration 與 Repository
+    kind: core
+    milestone: M0
+    depends_on:
+    - N00
+    size: M
+    status: todo
+    spec: docs/nodes/N01-sqlite-schema-migrations.md
+    contract_lock: contracts/locks/N01.json
+    verification: docs/verification/N01.md
+  N02:
+    title: Workspace、PathGuard 與 Lazy File Tree
+    kind: core
+    milestone: M1
+    depends_on:
+    - N00
+    - N01
+    size: M
+    status: todo
+    spec: docs/nodes/N02-workspace-lazy-tree.md
+    contract_lock: contracts/locks/N02.json
+    verification: docs/verification/N02.md
+  N03:
+    title: Deterministic Markdown Render Model
+    kind: core
+    milestone: M1
+    depends_on:
+    - N00
+    size: M
+    status: todo
+    spec: docs/nodes/N03-markdown-render-model.md
+    contract_lock: contracts/locks/N03.json
+    verification: docs/verification/N03.md
+  N04:
+    title: 多分頁與狀態持久化
+    kind: core
+    milestone: M1
+    depends_on:
+    - N02
+    - N03
+    size: S
+    status: todo
+    spec: docs/nodes/N04-tabs-state.md
+    contract_lock: contracts/locks/N04.json
+    verification: docs/verification/N04.md
+  N05:
+    title: DOM Selection 到 Anchor Capture
+    kind: core
+    milestone: M2
+    depends_on:
+    - N03
+    size: L
+    status: todo
+    spec: docs/nodes/N05-selection-anchor-capture.md
+    contract_lock: contracts/locks/N05.json
+    verification: docs/verification/N05.md
+  N06:
+    title: Annotation CRUD、Sidebar 與重疊高亮
+    kind: core
+    milestone: M2
+    depends_on:
+    - N01
+    - N04
+    - N05
+    size: M
+    status: todo
+    spec: docs/nodes/N06-annotation-crud-highlight.md
+    contract_lock: contracts/locks/N06.json
+    verification: docs/verification/N06.md
+  N07:
+    title: Comment Thread 與 Tombstone 引用
+    kind: core
+    milestone: M2
+    depends_on:
+    - N06
+    size: S
+    status: todo
+    spec: docs/nodes/N07-comment-thread.md
+    contract_lock: contracts/locks/N07.json
+    verification: docs/verification/N07.md
+  N08:
+    title: 扁平 Tag 系統與 System Pin
+    kind: core
+    milestone: M4
+    depends_on:
+    - N01
+    - N04
+    - N06
+    size: M
+    status: todo
+    spec: docs/nodes/N08-tag-system.md
+    contract_lock: contracts/locks/N08.json
+    verification: docs/verification/N08.md
+  N09:
+    title: 純函數 Reanchor Engine 與批量交易
+    kind: core
+    milestone: M3
+    depends_on:
+    - N05
+    - N06
+    size: L
+    status: todo
+    spec: docs/nodes/N09-reanchor-engine.md
+    contract_lock: contracts/locks/N09.json
+    verification: docs/verification/N09.md
+  N10:
+    title: Orphan 列表與手動恢復
+    kind: core
+    milestone: M3
+    depends_on:
+    - N09
+    size: M
+    status: todo
+    spec: docs/nodes/N10-orphan-management.md
+    contract_lock: contracts/locks/N10.json
+    verification: docs/verification/N10.md
+  A01:
+    title: 檔內搜尋
+    kind: auxiliary
+    milestone: M4
+    depends_on:
+    - N03
+    - N06
+    size: S
+    status: todo
+    spec: docs/nodes/A01-in-document-search.md
+    contract_lock: contracts/locks/A01.json
+    verification: docs/verification/A01.md
+  A02:
+    title: 檔案 Watcher、事件序列化與 Rename
+    kind: auxiliary
+    milestone: M3
+    depends_on:
+    - N02
+    - N09
+    size: M
+    status: todo
+    spec: docs/nodes/A02-file-watcher-rename.md
+    contract_lock: contracts/locks/A02.json
+    verification: docs/verification/A02.md
+  A03:
+    title: Command Palette
+    kind: auxiliary
+    milestone: M4
+    depends_on:
+    - N02
+    - N04
+    - A02
+    size: M
+    status: todo
+    spec: docs/nodes/A03-command-palette.md
+    contract_lock: contracts/locks/A03.json
+    verification: docs/verification/A03.md
+  A04:
+    title: Tag AND Filter View
+    kind: auxiliary
+    milestone: M4
+    depends_on:
+    - N08
+    size: S
+    status: todo
+    spec: docs/nodes/A04-tag-filter-view.md
+    contract_lock: contracts/locks/A04.json
+    verification: docs/verification/A04.md
+  A05:
+    title: Wikilink 與 Incremental Backlinks
+    kind: auxiliary
+    milestone: M4+
+    depends_on:
+    - N02
+    - N03
+    - A02
+    size: M
+    status: todo
+    spec: docs/nodes/A05-wikilink-backlinks.md
+    contract_lock: contracts/locks/A05.json
+    verification: docs/verification/A05.md
+  A06:
+    title: 安全 Mermaid 渲染
+    kind: auxiliary
+    milestone: M4+
+    depends_on:
+    - N03
+    size: S
+    status: todo
+    spec: docs/nodes/A06-mermaid.md
+    contract_lock: contracts/locks/A06.json
+    verification: docs/verification/A06.md
+  A07:
+    title: Annotation/Tag 匯出
+    kind: auxiliary
+    milestone: M4+
+    depends_on:
+    - N02
+    - N06
+    - N07
+    - N08
+    size: S
+    status: todo
+    spec: docs/nodes/A07-export.md
+    contract_lock: contracts/locks/A07.json
+    verification: docs/verification/A07.md
+milestones:
+  M0:
+    title: 地基
+    nodes:
+    - N00
+    - N01
+    gate: make ci 全綠；migration/invariant test 全綠；G2 記錄機制可用
+  M1:
+    title: 能讀
+    nodes:
+    - N02
+    - N03
+    - N04
+    gate: 連續 3 天真實 KB dogfood；閱讀與性能預算達標
+  M2:
+    title: 能標
+    nodes:
+    - N05
+    - N06
+    - N07
+    gate: 至少 30 條真批注與 10 條留言；重開全部可見
+  M3:
+    title: 標不死
+    nodes:
+    - N09
+    - N10
+    - A02
+    gate: git history replay attached>=90%；誤配=0；零資料遺失；orphan 可人工恢復
+  M4:
+    title: 能檢索
+    nodes:
+    - N08
+    - A01
+    - A03
+    - A04
+    gate: 標籤 AND 查詢真實命中至少 3 次；核心使用旅程閉環
+  M4+:
+    title: 收尾
+    nodes:
+    - A05
+    - A06
+    - A07
+    gate: 各節點獨立 BDD、性能與安全驗收通過
+scheduling_rules:
+  ready_when:
+  - all dependencies are done
+  - the previous milestone gate permits this node
+  - node spec source hash matches SPEC.md
+  - file ownership does not overlap an active writer
+  implementing_when:
+  - implementation plan exists
+  - test plan exists
+  - contract lock exists and drift check passes
+  - dependency evidence has been executed, not assumed
+  max_parallel_nodes: unbounded by spec; file ownership must not overlap
+  failure_loop_limit: 3
+  milestone_gate_blocks_next_milestone: true

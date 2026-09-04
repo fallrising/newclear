@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "node_id": "N01",
+  "status": "planned",
+  "spec_version": "1.0.1",
+  "spec_sha256": "dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e",
+  "source_files": [
+    "crates/db/src/lib.rs",
+    "crates/db/src/types.rs",
+    "crates/db/src/repository.rs",
+    "crates/db/src/transaction.rs"
+  ],
+  "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
+  "source_sha256": null,
+  "commands": [],
+  "generator_version": null,
+  "frozen_at": null
+}

@@ -1,0 +1,9 @@
+.DS_Store
+.tools/
+coverage/
+dist/
+node_modules/
+target/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]

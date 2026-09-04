@@ -1,0 +1,379 @@
+{
+  "schema_version": 1,
+  "project": "flowshot",
+  "package_version": "1.0.1",
+  "generated_at": "2026-07-29T00:00:00Z",
+  "spec_sha256": "dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e",
+  "files": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "92175676bb031023344fc691ababf1c95806465179aced50344858ec9e02bac0",
+      "bytes": 1333
+    },
+    {
+      "path": "README.md",
+      "sha256": "db254a11e516ce6425697d6af0d8054afe7ff5bb4e932acddb793b4062e9aeea",
+      "bytes": 4091
+    },
+    {
+      "path": "SPEC.md",
+      "sha256": "dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e",
+      "bytes": 48615
+    },
+    {
+      "path": "START-HERE.md",
+      "sha256": "025cf50d413b3c331071a06ea499eeee6eed07017779d73cb9f9f4d4534480b3",
+      "bytes": 1071
+    },
+    {
+      "path": "contracts/README.md",
+      "sha256": "5bdddaa01579e6d76a04d3e176ad2b435cb32bc139a80aa373c3c1d9d14b67c2",
+      "bytes": 1281
+    },
+    {
+      "path": "contracts/locks/N00.json",
+      "sha256": "018ea449f42c1f0569c3064e75736389f5eb7932eb43cfa2382db4c3a138d1cd",
+      "bytes": 667
+    },
+    {
+      "path": "contracts/locks/N01.json",
+      "sha256": "4a324f3de4a42807c5dab32b101701cca7b5a1bbefc3bf5f57888b8e8620459c",
+      "bytes": 513
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "1fd8f3f5b0df40d01146c7ffb0b0b6366a058394bc1c6ad4b14a460cbc663637",
+      "bytes": 963
+    },
+    {
+      "path": "docs/adr/README.md",
+      "sha256": "b1fa87811489e1af0212c76a157e29e5cda255aab790b6056c5fa94b5627bcb7",
+      "bytes": 105
+    },
+    {
+      "path": "docs/graph.yaml",
+      "sha256": "19a504eae11034324bda758102a2d7c12567d3e55272ab3b07fbef7709f885a3",
+      "bytes": 6652
+    },
+    {
+      "path": "docs/metrics/README.md",
+      "sha256": "1b1222f828d6d818235926f00fe9a17ce44b34e0b37f975e5d141b17e40da696",
+      "bytes": 235
+    },
+    {
+      "path": "docs/metrics/node-outcome.schema.json",
+      "sha256": "5c230309a4f97af22169efd4df4b7e0933ff625af1ef0d904078c32a0557c5cd",
+      "bytes": 993
+    },
+    {
+      "path": "docs/metrics/node-outcomes.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/nodes/A01-in-document-search.md",
+      "sha256": "3e6d356bd6cff09b16e3bd16a4a04b670ce8646c8395f567b3e128c8a912dc17",
+      "bytes": 3391
+    },
+    {
+      "path": "docs/nodes/A02-file-watcher-rename.md",
+      "sha256": "a6d180b5997baa44bbad863e346c589ea97ddf8ccb9caebae53abdec220c9a2b",
+      "bytes": 4221
+    },
+    {
+      "path": "docs/nodes/A03-command-palette.md",
+      "sha256": "3855d255a042e09d84fd9de329412ed14f8fcba64b754e1e54014e64129d0a3e",
+      "bytes": 4188
+    },
+    {
+      "path": "docs/nodes/A04-tag-filter-view.md",
+      "sha256": "c3c1d55c037b520174bc9ec7aab78919cd45450226982fb83383d56c78fb6a35",
+      "bytes": 3169
+    },
+    {
+      "path": "docs/nodes/A05-wikilink-backlinks.md",
+      "sha256": "b23e6383735f015c7e039e861c0b6f25e623520af175e1e1d85d6a94f9eea530",
+      "bytes": 3790
+    },
+    {
+      "path": "docs/nodes/A06-mermaid.md",
+      "sha256": "0558053aabf234d0681a7124b244443e993d9af1935243ecee6cb500f56d5fc3",
+      "bytes": 2744
+    },
+    {
+      "path": "docs/nodes/A07-export.md",
+      "sha256": "553476559d280c9ea21a87eb7e834c9172f5d2eb88b827bed2a4d7a02f5fd53c",
+      "bytes": 3600
+    },
+    {
+      "path": "docs/nodes/N00-foundation-ci-contracts.md",
+      "sha256": "df7ce22a67b3262bc0324b04025fc11723065c03dd8345748f601083a60622be",
+      "bytes": 5288
+    },
+    {
+      "path": "docs/nodes/N01-sqlite-schema-migrations.md",
+      "sha256": "13de68ca196fd1d302ca4df0bff5d4633cfee1a106656a43e220967f0cc660fc",
+      "bytes": 5739
+    },
+    {
+      "path": "docs/nodes/N02-workspace-lazy-tree.md",
+      "sha256": "f861037c0f4e2634e31d2c14e1b79e9fde25a5d5cd13fc102c749867bddb58aa",
+      "bytes": 7128
+    },
+    {
+      "path": "docs/nodes/N03-markdown-render-model.md",
+      "sha256": "6959cb03a3adc8f3a812c75722c0103312353533765edcd257a29157c6a6ad36",
+      "bytes": 5427
+    },
+    {
+      "path": "docs/nodes/N04-tabs-state.md",
+      "sha256": "2406f1f73b949c5917096ff4d1427dd4670fccd884cf9bedd4f4408b1e0e67d2",
+      "bytes": 3908
+    },
+    {
+      "path": "docs/nodes/N05-selection-anchor-capture.md",
+      "sha256": "48650e6adcdabb849556c248c3a53337a266cb01f47409fe0702a5daa3220afe",
+      "bytes": 5151
+    },
+    {
+      "path": "docs/nodes/N06-annotation-crud-highlight.md",
+      "sha256": "abc9b4db86dd1cdf9ea2e8aa893bd33dd993099220bf96a2a90270188ce8d47e",
+      "bytes": 5350
+    },
+    {
+      "path": "docs/nodes/N07-comment-thread.md",
+      "sha256": "e81d43038833ee73ad50b091607d1f3bb5e3e31ded5d80ca45d31c1552b6a8a1",
+      "bytes": 3659
+    },
+    {
+      "path": "docs/nodes/N08-tag-system.md",
+      "sha256": "aa0de5e25005c9d4f03c19f8eaadeb7d8ce1976f5b189968e94b0272fcc0e85e",
+      "bytes": 4793
+    },
+    {
+      "path": "docs/nodes/N09-reanchor-engine.md",
+      "sha256": "af39033597d8077fb5f3fbd7c089ec536c8f8f245c61eb1feeaae93eedeb31e8",
+      "bytes": 6133
+    },
+    {
+      "path": "docs/nodes/N10-orphan-management.md",
+      "sha256": "564bb317a9fdf0f3700ec927026356ae2e402073944ccd13e4f30b7bbfa75864",
+      "bytes": 4380
+    },
+    {
+      "path": "docs/nodes/README.md",
+      "sha256": "22fc3e84d6335d477936833faace709af3e7e600cbb4828960cea14563aaf3b9",
+      "bytes": 1824
+    },
+    {
+      "path": "docs/protocols/document-change-control.md",
+      "sha256": "93f95c06dbbc94ef9ca14ee9e93f8082cf79f2ec6b2e33cb9cd7f1520ee0d85f",
+      "bytes": 3714
+    },
+    {
+      "path": "docs/protocols/llm-execution-protocol.md",
+      "sha256": "5aedfb49496808ef0c8b0c4e7909b7ebd3de5566971b4998d5b9e9baaae5a47f",
+      "bytes": 6640
+    },
+    {
+      "path": "docs/reference/complete-sdd.md",
+      "sha256": "7c3c251d76480cea2c13c271b05e26d9797b9655c563c543b05a31d0fea5a2d9",
+      "bytes": 154053
+    },
+    {
+      "path": "docs/tasks/N00/00-implementation-plan.md",
+      "sha256": "bb4a5bdc4a1a100739c266cd342127a5e5dbac93675fae0a2490e65e2a8c5422",
+      "bytes": 8729
+    },
+    {
+      "path": "docs/tasks/N00/01-test-plan.md",
+      "sha256": "15c20c961703b928ba3b0e5170f58f7004a5eb8eb0307fe9332bee09bca8246c",
+      "bytes": 4627
+    },
+    {
+      "path": "docs/tasks/N00/T01-toolchain-and-red-baseline.md",
+      "sha256": "6f17a319df9d7f04b621ed604b32d057ab0881ba885d0e490d1d247642f57563",
+      "bytes": 2385
+    },
+    {
+      "path": "docs/tasks/N00/T02-scaffold-rust-workspace.md",
+      "sha256": "a3aea05bb3636f51baf6a5d39372f6256cae3e29ba38b0cbc27b378de5b19506",
+      "bytes": 1995
+    },
+    {
+      "path": "docs/tasks/N00/T03-scaffold-react-tauri.md",
+      "sha256": "ca0bd0463df9b050aa674f16975de13ee73ab573f388635bbc04a45765d49298",
+      "bytes": 2170
+    },
+    {
+      "path": "docs/tasks/N00/T04-contract-source-and-generator.md",
+      "sha256": "a9e062008d737316e1653f3a5bafc4a7b48fbf72bfacc10b8d2c1d39cb01d38f",
+      "bytes": 2465
+    },
+    {
+      "path": "docs/tasks/N00/T05-build-info-vertical-slice.md",
+      "sha256": "1cca75b6dda310e4078e6aa311f3fd94ea4028b2e3b43da2dfe2c0cf04b88f2a",
+      "bytes": 2209
+    },
+    {
+      "path": "docs/tasks/N00/T06-core-boundary-enforcement.md",
+      "sha256": "7474273220de73af7657ef79aec1521a47191e79477ae81421e43920e279c8d9",
+      "bytes": 2130
+    },
+    {
+      "path": "docs/tasks/N00/T07-make-and-ci.md",
+      "sha256": "23047617777944345f21439dfb5caeea58f4c99f65877b32daad2f4e9f73fc6e",
+      "bytes": 2234
+    },
+    {
+      "path": "docs/tasks/N00/T08-macos-launch-observability.md",
+      "sha256": "e76903a3fb668ee0674e94141ebc9918b7e91aa54362a6591b9942f1e60e4232",
+      "bytes": 4333
+    },
+    {
+      "path": "docs/tasks/N00/T09-bootstrap-verification.md",
+      "sha256": "14a6224aa00792207574f323a7903ccaec1a3484beacdecd29a7525aeaf5d175",
+      "bytes": 2597
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T01-toolchain.md",
+      "sha256": "4b2fc9197cc2930561296c1a4dc3144ea5c649e57a288315e4f8beb6dbd11ae6",
+      "bytes": 3104
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T02-rust-workspace.md",
+      "sha256": "a0411b283d7763f6810dd47d2fc3534f837e31607fc432f8a68b6182c70087b4",
+      "bytes": 1285
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T03-react-tauri.md",
+      "sha256": "feada75878a501052744c457a0039883e0c01d957319110d28eb8177ea4bfe3f",
+      "bytes": 2735
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T04-contract-generator.md",
+      "sha256": "54c54bb39a67f6d11013c057b6eab3dcd3806f6e8fc7922309ccb189b3ae5111",
+      "bytes": 2606
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T05-build-info-slice.md",
+      "sha256": "0bc9774a1ba7ed9b4d19f405ce1fd4a7b08a59e8d2d08eea83350e465e6738af",
+      "bytes": 2432
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T06-core-boundary.md",
+      "sha256": "6afcc177915ed790157b1e6da7f4910cf854d3b0bb4576cea5f857615c559abd",
+      "bytes": 1845
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T07-make-and-ci.md",
+      "sha256": "ea9864951ec9aebee6981b4b7f3270d7176015ef0e4da623b537a7580da6177c",
+      "bytes": 2908
+    },
+    {
+      "path": "docs/tasks/N00/evidence/T08-macos-launch-observability.md",
+      "sha256": "6818da3f238bf0a42799ec9e68379bd6e39b357d61118144213ab3c3c29bf1ae",
+      "bytes": 9343
+    },
+    {
+      "path": "docs/tasks/N01/00-implementation-plan.md",
+      "sha256": "d1e72feb1a8aab1d80873c1890b6e9761cb85463eabf2c19c385bd8100585372",
+      "bytes": 10736
+    },
+    {
+      "path": "docs/tasks/N01/01-test-plan.md",
+      "sha256": "6129ff514d939f8971527e9b215eeaedfa3f6e932b153cd3fead8c5814cb7ccd",
+      "bytes": 10967
+    },
+    {
+      "path": "docs/tasks/N01/T01-migration-runner.md",
+      "sha256": "0139b1f2b065149d3c50b51a8be860c61d0ff07234c4e4f0da4fe2234ca5aeb4",
+      "bytes": 2661
+    },
+    {
+      "path": "docs/tasks/N01/T02-base-schema.md",
+      "sha256": "e32471e259089bfd14fc2395a4301e1830c8a2c24fa3cd79ec2dd002a3c28839",
+      "bytes": 2109
+    },
+    {
+      "path": "docs/tasks/N01/T03-integrity-triggers.md",
+      "sha256": "498427d90c0ddfe42b30b722c5cb37ee42bf6e3bed4a23e53cb91a65768b8a0c",
+      "bytes": 2116
+    },
+    {
+      "path": "docs/tasks/N01/T04-repository-interfaces.md",
+      "sha256": "c62a9e3a4ed19f10ce1426763acad5c44f0def76a6c4af657c8115f8273aee67",
+      "bytes": 2358
+    },
+    {
+      "path": "docs/tasks/N01/T05-soft-delete-semantics.md",
+      "sha256": "32dde333540aa380e94bda5a7f8c9e36d438d4f55dce021854e5c3414d571cd6",
+      "bytes": 2372
+    },
+    {
+      "path": "docs/tasks/N01/T06-db-executor-concurrency-and-row-version.md",
+      "sha256": "42a7edcb1b660cd7f959e20cb400c2cb2b30da197d4d23ecfe6691f94b440b3a",
+      "bytes": 2597
+    },
+    {
+      "path": "docs/tasks/N01/T07-schema-benchmarks.md",
+      "sha256": "93572a7e0d84837ffe6609e2e08fc67cd00f0c32432a9ed5b4eabfe3f5eca396",
+      "bytes": 2565
+    },
+    {
+      "path": "docs/tasks/README.md",
+      "sha256": "4f68848f6e7366d14d877bdd0056143a5f29ec1dfcc61e7e31693b2113eb7e8d",
+      "bytes": 100
+    },
+    {
+      "path": "docs/templates/adr.template.md",
+      "sha256": "91bd749ee02695877e09f0aca69cfe04d2cfc68e25552d4c6321e5838022429d",
+      "bytes": 457
+    },
+    {
+      "path": "docs/templates/implementation-plan.template.md",
+      "sha256": "5fc879d82adf4a2d2934e8a977520389fdb8be349fcf5843285050d70c8b428b",
+      "bytes": 1025
+    },
+    {
+      "path": "docs/templates/node-spec.template.md",
+      "sha256": "519a0051a2c1e6f9b3c82d858c3c5a1cb0ccbd89c460a76bdf3be2ab1c063dfd",
+      "bytes": 1212
+    },
+    {
+      "path": "docs/templates/task-spec.template.md",
+      "sha256": "638c7ecec2162755c49c4374e29d8c96c60f88fc612ce0401781c861c65b715d",
+      "bytes": 534
+    },
+    {
+      "path": "docs/templates/test-plan.template.md",
+      "sha256": "5673a8711071c7aeb7d4a334310bcd82ee70cd24fca505a80e5193e9c97222e6",
+      "bytes": 643
+    },
+    {
+      "path": "docs/templates/verification-report.template.md",
+      "sha256": "842c04b5ef83d899995e939640ccec3bbe69d8fd96560301d28225c4a9504dd2",
+      "bytes": 666
+    },
+    {
+      "path": "docs/verification/README.md",
+      "sha256": "6978c83e27c39ab05196100d0246dcc60cb73e5318bdba99f7c3c44b57a3c55c",
+      "bytes": 109
+    },
+    {
+      "path": "fixtures/README.md",
+      "sha256": "323bae33feb72f19f1f6860f6161342f241b79ab35d3cfce42fa08ee57065b91",
+      "bytes": 102
+    },
+    {
+      "path": "scripts/README.md",
+      "sha256": "16e9fbe7aab36fd5d7655b6b37289e4628e9e7485fffa3e5006b5931bdb73c13",
+      "bytes": 411
+    },
+    {
+      "path": "scripts/sdd.py",
+      "sha256": "b99ca7d5b3848807fb4dbffcb4cb1a1fbf5a5d563de86af0b4af2ba484db5d35",
+      "bytes": 21055
+    }
+  ]
+}

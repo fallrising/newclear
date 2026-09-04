@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "node_id": "N00",
+  "status": "frozen",
+  "spec_version": "1.0.1",
+  "spec_sha256": "dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e",
+  "source_files": [
+    "crates/core/src/contracts/mod.rs",
+    "crates/core/src/contracts/common.rs",
+    "crates/core/src/contracts/error.rs",
+    "crates/core/src/contracts/build_info.rs"
+  ],
+  "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
+  "source_sha256": "30738b4dda81b4980983894b6ab965194dc995fbbcd482c02670a2beaf809af8",
+  "commands": [
+    "get_build_info"
+  ],
+  "generator_version": "1.0.0",
+  "frozen_at": "2026-07-29T17:51:40+02:00"
+}

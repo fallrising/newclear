@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NodeOutcome",
+  "type": "object",
+  "required": [
+    "node_id",
+    "spec_version",
+    "first_pass",
+    "rework_category",
+    "verification_report",
+    "completed_at"
+  ],
+  "properties": {
+    "node_id": {
+      "type": "string",
+      "pattern": "^[NA][0-9]{2}$"
+    },
+    "spec_version": {
+      "type": "string"
+    },
+    "first_pass": {
+      "type": "boolean"
+    },
+    "rework_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "specification",
+        "test",
+        "execution",
+        null
+      ]
+    },
+    "rework_subtype": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spec_diff": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "verification_report": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

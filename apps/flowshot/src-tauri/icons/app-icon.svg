@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Flowshot app icon</title>
+  <rect width="1024" height="1024" rx="224" fill="#1f2a22"/>
+  <path d="M256 160h368l160 160v544H256z" fill="#f7f3e8"/>
+  <path d="M624 160v160h160" fill="#d9ded4"/>
+  <path d="M624 160l160 160H624z" fill="#cbd3c7"/>
+  <path d="M352 424h336M352 520h256M352 616h184" fill="none" stroke="#536055" stroke-linecap="round" stroke-width="40"/>
+  <path d="M584 596h200v144H672l-64 64v-64h-24z" fill="#dd7957"/>
+  <circle cx="640" cy="668" r="16" fill="#f7f3e8"/>
+  <circle cx="688" cy="668" r="16" fill="#f7f3e8"/>
+  <circle cx="736" cy="668" r="16" fill="#f7f3e8"/>
+</svg>

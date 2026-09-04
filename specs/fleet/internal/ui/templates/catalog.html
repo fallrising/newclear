@@ -1,0 +1,37 @@
+{{define "catalog"}}
+{{template "header" .}}
+<h1>Catalog</h1>
+<table id="catalog" hx-get="/" hx-trigger="every 15s" hx-select="table" hx-swap="outerHTML">
+  <thead>
+    <tr>
+      <th>Service</th><th>URL</th><th>Node</th><th>Version</th><th>Health</th><th>Expose</th><th>Desired</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Services}}{{template "row" .}}{{else}}
+    <tr><td colspan="8" class="muted">No services yet.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{template "footer" .}}
+{{end}}
+
+{{define "row"}}
+<tr id="row-{{.Name}}">
+  <td><a href="/services/{{.Name}}">{{.Name}}</a></td>
+  <td>{{if .URL}}<a href="{{.URL}}">{{.URL}}</a>{{end}}</td>
+  <td><a href="/nodes/{{.Node}}">{{.Node}}</a> ({{.NodeStatus}})</td>
+  <td><code>{{.GitSHA}}</code></td>
+  <td class="health-{{.Health}}">{{.Health}}</td>
+  <td>{{.ExposeMode}}</td>
+  <td>{{.DesiredState}}</td>
+  <td>
+    {{if eq .DesiredState "stopped"}}
+    <button hx-post="/api/v1/services/{{.Name}}/start" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Start</button>
+    {{else if eq .DesiredState "running"}}
+    <button hx-post="/api/v1/services/{{.Name}}/stop" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Stop</button>
+    {{end}}
+    <button hx-post="/api/v1/services/{{.Name}}/redeploy" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Redeploy</button>
+  </td>
+</tr>
+{{end}}

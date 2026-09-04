@@ -1,0 +1,41 @@
+{{define "service"}}
+{{template "header" .}}
+<h1>{{.View.Name}}</h1>
+<p><a href="{{.View.URL}}">{{.View.URL}}</a> · {{.View.ExposeMode}} · node <a href="/nodes/{{.View.Node}}">{{.View.Node}}</a></p>
+<p>desired {{.View.DesiredState}} · health <span class="health-{{.View.Health}}">{{.View.Health}}</span> · generation {{.View.Generation}} / applied {{.View.AppliedGeneration}} · ingress {{.View.IngressStatus}}</p>
+<p>
+  {{if eq .View.DesiredState "stopped"}}
+  <button hx-post="/api/v1/services/{{.View.Name}}/start" hx-refresh="true">Start</button>
+  {{else}}
+  <button hx-post="/api/v1/services/{{.View.Name}}/stop" hx-refresh="true">Stop</button>
+  {{end}}
+  <button hx-post="/api/v1/services/{{.View.Name}}/redeploy" hx-refresh="true">Redeploy</button>
+</p>
+<h2>Instance</h2>
+<pre>{{.InstancePretty}}</pre>
+<h2>Releases</h2>
+<table>
+  <thead><tr><th>ID</th><th>Image</th><th>SHA</th><th>At</th><th></th></tr></thead>
+  <tbody>
+    {{range .Releases}}
+    <tr>
+      <td><code>{{.ID}}</code></td>
+      <td>{{.Image}}</td>
+      <td>{{.GitSHA}}</td>
+      <td>{{.CreatedAt}}</td>
+      <td>
+        {{if ne .ID $.CurrentReleaseID}}
+        <button hx-post="/api/v1/services/{{$.View.Name}}/deploy"
+                hx-headers='{"Content-Type": "application/json"}'
+                hx-vals='{"release_id": "{{.ID}}"}'
+                hx-refresh="true">Rollback</button>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+<h2>Audit</h2>
+<pre>{{.AuditPretty}}</pre>
+{{template "footer" .}}
+{{end}}

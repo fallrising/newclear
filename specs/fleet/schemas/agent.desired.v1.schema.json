@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fleet.catalog/schemas/agent.desired.v1.schema.json",
+  "title": "Fleet agent desired-state payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["node_id", "generation", "services"],
+  "properties": {
+    "node_id": { "type": "string" },
+    "generation": { "type": "integer" },
+    "reconcile_after_seconds": { "type": "integer" },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "username", "password"],
+      "properties": {
+        "url": { "type": "string" },
+        "username": { "const": "x-access-token" },
+        "password": { "type": "string" }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "desired_state", "generation", "compose_project", "host_port", "compose_yaml"],
+        "properties": {
+          "name": { "type": "string" },
+          "desired_state": { "type": "string", "enum": ["running", "stopped", "absent"] },
+          "generation": { "type": "integer" },
+          "force_recreate": { "type": "boolean" },
+          "purge_volumes": { "type": "boolean" },
+          "compose_project": { "type": "string" },
+          "host_port": { "type": "integer" },
+          "compose_yaml": { "type": "string" },
+          "env_file": { "type": "string" },
+          "secret_keys": { "type": "array", "items": { "type": "string" } },
+          "image": { "type": "string" },
+          "health": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "url": { "type": "string" },
+              "timeout_ms": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

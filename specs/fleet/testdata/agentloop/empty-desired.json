@@ -1,0 +1,6 @@
+{
+  "node_id": "vps-hel-1",
+  "generation": 1,
+  "reconcile_after_seconds": 15,
+  "services": []
+}

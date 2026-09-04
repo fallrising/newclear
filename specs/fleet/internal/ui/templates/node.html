@@ -1,0 +1,18 @@
+{{define "node"}}
+{{template "header" .}}
+<h1>Node {{.Node.ID}}</h1>
+<p>status <strong>{{.Status}}</strong> last seen {{.Node.LastSeenAt}}</p>
+<p>tunnel <code>{{.Node.TunnelID}}</code></p>
+<h2>Facts</h2>
+<pre>{{.FactsPretty}}</pre>
+<h2>Services</h2>
+<table>
+  <thead><tr><th>Service</th><th>Health</th><th>Desired</th></tr></thead>
+  <tbody>
+    {{range .Services}}
+    <tr><td><a href="/services/{{.Name}}">{{.Name}}</a></td><td>{{.Health}}</td><td>{{.DesiredState}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{template "footer" .}}
+{{end}}

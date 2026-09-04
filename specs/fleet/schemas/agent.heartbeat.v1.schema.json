@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fleet.catalog/schemas/agent.heartbeat.v1.schema.json",
+  "title": "Fleet agent heartbeat",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["agent_instance_id", "facts"],
+  "properties": {
+    "agent_instance_id": { "type": "string" },
+    "agent_version": { "type": "string" },
+    "facts": {
+      "type": "object",
+      "required": ["ncpu", "load1", "mem_total_mb", "mem_used_mb", "mem_used_pct", "disk_root_used_pct", "docker_ok"],
+      "properties": {
+        "hostname": { "type": "string" },
+        "kernel": { "type": "string" },
+        "uptime_seconds": { "type": "integer" },
+        "ncpu": { "type": "integer" },
+        "load1": { "type": "number" },
+        "mem_total_mb": { "type": "integer" },
+        "mem_used_mb": { "type": "integer" },
+        "mem_used_pct": { "type": "number" },
+        "swap_total_mb": { "type": "integer" },
+        "disk_root_used_pct": { "type": "number" },
+        "disk_root_avail_bytes": { "type": "integer" },
+        "inode_root_used_pct": { "type": "number" },
+        "docker_ok": { "type": "boolean" },
+        "docker_running_containers": { "type": "integer" }
+      }
+    }
+  }
+}

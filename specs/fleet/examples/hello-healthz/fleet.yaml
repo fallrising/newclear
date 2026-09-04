@@ -1,0 +1,22 @@
+# examples/hello-healthz/fleet.yaml
+apiVersion: fleet.catalog/v1
+kind: Service
+metadata:
+  name: hello
+  description: Tiny /healthz + / JSON server
+  labels:
+    app: hello
+    owner: ckc
+spec:
+  node: vps-hel-1
+  image: ghcr.io/fallrising/hello-healthz:REPLACE_SHA
+  expose:
+    mode: public
+    hostname: hello.example.com
+    port: 8080
+    healthPath: /healthz
+  env:
+    LOG_LEVEL: info
+  resources:
+    memory: 64M
+    cpus: "0.10"

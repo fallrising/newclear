@@ -1,0 +1,26 @@
+name: fleet-hello
+services:
+  app:
+    image: ghcr.io/fallrising/hello-healthz:a1b2c3d
+    container_name: fleet-hello-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:20001:8080"
+    mem_limit: 64M
+    cpus: "0.10"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.10"
+    labels:
+      fleet.catalog/service: hello
+      fleet.catalog/release: rel_01HZXHELLO000000000000000
+      fleet.catalog/generation: "1"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

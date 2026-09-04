@@ -1,0 +1,13 @@
+/bin/
+/dist/
+*.db
+*.db-wal
+*.db-shm
+.env
+.idea/
+.vscode/
+*.swp
+coverage.out
+/fleetd
+/fleet-agent
+/examples/hello-healthz/hello-healthz

@@ -1,0 +1,26 @@
+name: fleet-agent
+services:
+  fleet-agent:
+    image: ghcr.io/fallrising/fleet-agent:VERSION
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    environment:
+      FLEET_URL: ${FLEET_URL}
+      FLEET_NODE_ID: ${FLEET_NODE_ID}
+      FLEET_TOKEN_FILE: /var/lib/fleet/agent.token
+      FLEET_STATE_DIR: /var/lib/fleet
+      FLEET_BOOTSTRAP_TOKEN: ${FLEET_BOOTSTRAP_TOKEN:-}
+      FLEET_AGENT_COMPOSE_FILE: /usr/local/share/fleet/agent-stack.yml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/fleet:/var/lib/fleet
+  cloudflared:
+    image: cloudflare/cloudflared:2024.12.2
+    user: "65532:65532"
+    network_mode: host
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    env_file:
+      - /var/lib/fleet/cloudflared.env
+    command: ["tunnel", "run"]

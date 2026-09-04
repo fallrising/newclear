@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fleet.catalog/schemas/fleet.v1.schema.json",
+  "title": "Fleet Catalog service contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": { "const": "fleet.catalog/v1" },
+    "kind": { "const": "Service" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,46}[a-z0-9]$",
+          "minLength": 2,
+          "maxLength": 48,
+          "description": "DNS-1123 label. Unique in the catalog. Becomes Compose project fleet-<name>."
+        },
+        "description": { "type": "string", "maxLength": 512 },
+        "labels": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "maxLength": 256 },
+          "propertyNames": { "pattern": "^[a-z0-9][a-z0-9./-]{0,62}$" }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "expose"],
+      "properties": {
+        "node": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,46}[a-z0-9]$",
+          "description": "Must match an existing nodes.id. Explicit pin; no scheduling."
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Required at deploy time. Repo copy may omit if CI injects."
+        },
+        "desiredState": {
+          "type": "string",
+          "enum": ["running", "stopped"],
+          "default": "running"
+        },
+        "replicas": { "type": "integer", "const": 1 },
+        "command": { "type": "array", "items": { "type": "string" }, "maxItems": 32 },
+        "args": { "type": "array", "items": { "type": "string" }, "maxItems": 64 },
+        "workingDir": { "type": "string", "maxLength": 256 },
+        "user": { "type": "string", "maxLength": 64 },
+        "expose": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "port"],
+          "properties": {
+            "mode": { "type": "string", "enum": ["public", "access", "private"] },
+            "hostname": {
+              "type": "string",
+              "maxLength": 253,
+              "description": "FQDN for public/access. For private, defaults to <name>.fleet.internal (not a public DNS name)."
+            },
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "healthPath": {
+              "type": "string",
+              "pattern": "^/.*$",
+              "default": "/healthz",
+              "maxLength": 128
+            }
+          }
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "maxLength": 4096 },
+          "propertyNames": { "pattern": "^[A-Z_][A-Z0-9_]*$" }
+        },
+        "secrets": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z_][A-Z0-9_]*$" },
+          "maxItems": 64,
+          "uniqueItems": true,
+          "description": "Env names. Values are NOT in this file. Phase 1: /var/lib/fleet/services/<name>/secrets.env on the node."
+        },
+        "volumes": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "mount"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,30}[a-z0-9]$" },
+              "mount": { "type": "string", "pattern": "^/.*$", "maxLength": 256 }
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "memory": { "type": "string", "pattern": "^[0-9]+[kKmMgG][iI]?[bB]?$" },
+            "cpus": { "type": "string", "pattern": "^[0-9]+([.][0-9]+)?$" }
+          }
+        }
+      }
+    }
+  }
+}

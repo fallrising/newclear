@@ -1,0 +1,37 @@
+name: fleet-files
+services:
+  app:
+    image: ghcr.io/fallrising/file-relay:cafebabe
+    container_name: fleet-files-app
+    restart: unless-stopped
+    user: "65532:65532"
+    working_dir: /data
+    entrypoint:
+      - /file-relay
+    command:
+      - --listen
+      - :8080
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:20014:8080"
+    volumes:
+      - fleet-files_blobs:/data
+    mem_limit: 256M
+    cpus: "0.50"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.50"
+    labels:
+      fleet.catalog/service: files
+      fleet.catalog/release: rel_01HZX...
+      fleet.catalog/generation: "3"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  fleet-files_blobs:

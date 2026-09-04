@@ -1,0 +1,18 @@
+:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #111; background: #f6f6f4; }
+body { margin: 0; }
+header { background: #1b1b1b; color: #fff; padding: 0.75rem 1.25rem; display: flex; gap: 1rem; align-items: center; }
+header a { color: #fff; text-decoration: none; }
+main { padding: 1.25rem; }
+table { border-collapse: collapse; width: 100%; background: #fff; }
+th, td { border-bottom: 1px solid #ddd; padding: 0.5rem 0.6rem; text-align: left; font-size: 0.95rem; }
+th { background: #efeee9; }
+.health-healthy { color: #0a7; font-weight: 600; }
+.health-unhealthy { color: #c22; font-weight: 600; }
+.health-progressing { color: #b80; font-weight: 600; }
+.health-unknown, .health-offline-node { color: #666; }
+button { margin-right: 0.35rem; }
+.muted { color: #666; font-size: 0.85rem; }
+form.login { max-width: 28rem; background: #fff; padding: 1.5rem; }
+form.login input { width: 100%; padding: 0.4rem; }
+dl dt { font-weight: 600; margin-top: 0.6rem; }
+pre { background: #111; color: #eee; padding: 0.75rem; overflow: auto; }

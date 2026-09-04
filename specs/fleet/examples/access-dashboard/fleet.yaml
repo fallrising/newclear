@@ -1,0 +1,17 @@
+apiVersion: fleet.catalog/v1
+kind: Service
+metadata:
+  name: deck
+  description: Streaming deck dashboard (operator-only)
+spec:
+  node: vps-hel-2
+  image: ghcr.io/fallrising/deck:REPLACE_SHA
+  expose:
+    mode: access
+    hostname: deck.example.com
+    port: 8080
+    healthPath: /healthz
+  env:
+    LOG_LEVEL: info
+  secrets:
+    - DECK_SESSION_KEY

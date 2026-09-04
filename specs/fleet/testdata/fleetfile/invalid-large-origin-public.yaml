@@ -1,0 +1,13 @@
+apiVersion: fleet.catalog/v1
+kind: Service
+metadata:
+  name: blobs
+  labels:
+    fleet.catalog/large-origin: "true"
+spec:
+  node: vps-hel-1
+  image: ghcr.io/fallrising/files:1
+  expose:
+    mode: public
+    hostname: blobs.example.com
+    port: 8080

@@ -1,0 +1,65 @@
+# .github/workflows/deploy.yml
+name: build-and-deploy
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  packages: write
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        run: echo "sha=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.sha }}
+            ${{ env.IMAGE }}:latest
+
+      # Pin this to the git SHA of the v4.44.3 tag when copying
+      # (github.com/mikefarah/yq releases). Do not use @master.
+      - uses: mikefarah/yq@bbdd97482f2d439126582a59689eb1c855944955 # v4.44.3
+
+      - name: Deploy to Fleet Catalog
+        env:
+          FLEET_URL: ${{ vars.FLEET_URL }}
+          FLEET_CI_TOKEN: ${{ secrets.FLEET_CI_TOKEN }}
+          IMAGE_TAG: ${{ env.IMAGE }}:${{ steps.meta.outputs.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$FLEET_URL"
+          test -n "$FLEET_CI_TOKEN"
+          DOC=$(yq -o=json '.' fleet.yaml)
+          BODY=$(jq -n \
+            --argjson fleet "$DOC" \
+            --arg image "$IMAGE_TAG" \
+            --arg sha "$GITHUB_SHA" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            '{fleet: $fleet, image: $image, git_sha: $sha, git_repo: $repo}')
+          HTTP=$(curl -sS -o /tmp/fleet_out -w '%{http_code}' \
+            -X POST "$FLEET_URL/api/v1/deploy" \
+            -H "Authorization: Bearer $FLEET_CI_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary "$BODY")
+          cat /tmp/fleet_out
+          echo
+          case "$HTTP" in
+            200|201|202) exit 0 ;;
+            *) echo "fleet deploy failed HTTP $HTTP"; exit 1 ;;
+          esac

@@ -1,0 +1,19 @@
+{{define "login"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Login — Fleet Catalog</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header><strong>Fleet Catalog</strong></header>
+  <main>
+    <form class="login" method="post" action="/login">
+      <h1>Operator token</h1>
+      <p class="muted">Paste a <code>flt_op_</code> token. Cookie <code>fleet_op</code> is HttpOnly.</p>
+      <p><label>token<br><input name="token" type="password" autocomplete="off"></label></p>
+      <p><button type="submit">Sign in</button></p>
+    </form>
+  </main>
+</body>
+</html>{{end}}

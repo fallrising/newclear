@@ -1,0 +1,33 @@
+# Human-readable field table matching schemas/fleet.v1.schema.json
+# Extra Go-only rules live in internal/fleetfile.
+
+apiVersion: fleet.catalog/v1   # const
+kind: Service                  # const
+
+metadata:
+  name: string                 # DNS-1123, 2-48, unique; reserved: agent, control, fleetd, fleet-agent, ui
+  description: string          # max 512, optional
+  labels: map[string]string    # optional; large-origin=true forbids public
+
+spec:
+  node: string                 # existing nodes.id
+  image: string                # required at deploy / running create
+  desiredState: running|stopped  # default running
+  replicas: 1                  # const if present
+  command: []string            # → compose entrypoint
+  args: []string               # → compose command
+  workingDir: string
+  user: string
+  expose:
+    mode: public|access|private
+    hostname: FQDN             # materialized; never empty after validate
+    port: 1-65535
+    healthPath: /...           # default /healthz
+  env: map[UPPER_SNAKE]string  # no overlap with secrets; no secret-shaped values
+  secrets: []UPPER_SNAKE       # names only
+  volumes:
+    - name: string
+      mount: /path
+  resources:
+    memory: 64M|512Mi|...
+    cpus: "0.10"

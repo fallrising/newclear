@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fleet.catalog/schemas/agent.actual.v1.schema.json",
+  "title": "Fleet agent actual-state report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["node_id", "agent_instance_id", "services"],
+  "properties": {
+    "node_id": { "type": "string" },
+    "agent_instance_id": { "type": "string" },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "applied_generation", "actual_state"],
+        "properties": {
+          "name": { "type": "string" },
+          "applied_generation": { "type": "integer" },
+          "actual_state": {
+            "type": "string",
+            "enum": ["running", "stopped", "unhealthy", "missing", "unknown", "progressing", "absent"]
+          },
+          "health": { "type": "string" },
+          "health_detail": { "type": "string" },
+          "container_id": { "type": "string" },
+          "image": { "type": "string" },
+          "error": {
+            "type": "string",
+            "enum": ["", "secrets_file_missing", "pull_error", "pull_in_progress", "compose_error", "health_fail"]
+          }
+        }
+      }
+    }
+  }
+}

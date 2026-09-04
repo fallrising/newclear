@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+# build from repo root so deploy/fleet-agent/docker-compose.yml is in context
+FROM golang:1.23-alpine AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /fleet-agent ./cmd/fleet-agent
+
+FROM docker:27.5.1-cli
+RUN apk add --no-cache docker-cli-compose \
+ && docker compose version
+COPY deploy/fleet-agent/docker-compose.yml /usr/local/share/fleet/agent-stack.yml
+COPY --from=build /fleet-agent /usr/local/bin/fleet-agent
+ENTRYPOINT ["/usr/local/bin/fleet-agent"]

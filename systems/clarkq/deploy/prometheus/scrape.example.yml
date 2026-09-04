@@ -1,0 +1,38 @@
+# Example Prometheus scrape config for clarkQ.
+# Merge the `scrape_configs` entries into your prometheus.yml.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/rules/clarkq-alerts.yml   # copy of deploy/prometheus/alerts.yml
+
+scrape_configs:
+  # Single-node or load-balanced entrypoint
+  - job_name: clarkq
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "clarkq:8080"           # Docker Compose service name
+          # - "127.0.0.1:8080"      # local binary
+        labels:
+          service: clarkq
+
+  # Multi-node cluster: scrape each node (ownership/outbox differ per instance)
+  - job_name: clarkq-cluster
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "clarkq-1:8080"
+          - "clarkq-2:8080"
+          - "clarkq-3:8080"
+        labels:
+          service: clarkq
+          cluster: demo
+
+  # Kubernetes: prefer ServiceMonitor / pod annotations instead of static targets.
+  # Example annotation on the Service:
+  #   prometheus.io/scrape: "true"
+  #   prometheus.io/port: "8080"
+  #   prometheus.io/path: "/metrics"

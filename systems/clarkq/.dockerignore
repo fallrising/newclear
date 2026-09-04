@@ -1,0 +1,11 @@
+bin/
+.git/
+.go/
+.clarkq-keys/
+*.pem
+**/*_test.go
+Dockerfile
+Makefile
+docs/
+examples/
+*.md

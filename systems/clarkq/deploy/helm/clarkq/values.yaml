@@ -1,0 +1,54 @@
+replicaCount: 1
+
+image:
+  repository: clarkq
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# Application configuration (mapped to env vars).
+config:
+  addr: ":8080"
+  apiKey: ""
+  encryptionMode: none
+  encryptionQueues: ""
+  snapshotPath: /data/snapshot.json
+  snapshotInterval: 30s
+  walPath: /data/clarkq.wal
+  # OIDC / JWT (optional)
+  oidcIssuer: ""
+  oidcAudience: ""
+  oidcJWKSURL: ""
+  jwtHSSecret: ""
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""
+
+# Optional TLS secret (kubernetes.io/tls) for HTTPS.
+tls:
+  enabled: false
+  secretName: clarkq-tls
+  # Optional ConfigMap/Secret with client CA PEM for mTLS (key: ca.crt).
+  clientCASecretName: ""
+
+podSecurityContext:
+  fsGroup: 10001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false

@@ -1,0 +1,66 @@
+# clarkQ capability demo stack
+# Usage (from this directory):
+#   ./run-demo.sh
+#   docker compose up --build -d   # server only
+#   UI: http://localhost:8080/ui/
+
+services:
+  clarkq:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        VERSION: demo
+        COMMIT: local
+        DATE: "unknown"
+    image: clarkq:demo
+    # Demo only: image USER is non-root; named volume /data is root-owned on Linux.
+    # Run as root so WAL/snapshot can write (production charts should chown the PVC).
+    user: "0:0"
+    ports:
+      - "${CLARKQ_DEMO_PORT:-8080}:8080"
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_ENCRYPTION_MODE: none
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+      CLARKQ_SNAPSHOT_INTERVAL: 5s
+      # Multi-tenant demo (scenario 04)
+      CLARKQ_TENANT_QUOTAS: "true"
+      CLARKQ_TENANT_HEADER: X-Tenant-ID
+      CLARKQ_TENANT_MAX_QUEUES: "2"
+      CLARKQ_TENANT_MAX_MESSAGES: "50"
+      CLARKQ_TENANT_MAX_ENQUEUE_PER_SEC: "100"
+    volumes:
+      - clarkq-demo-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # One-shot runner used by ./run-demo.sh (not started by default)
+  demo-runner:
+    image: alpine:3.20
+    profiles: ["runner"]
+    depends_on:
+      clarkq:
+        condition: service_healthy
+    environment:
+      CLARKQ_URL: http://clarkq:8080
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+    volumes:
+      - ./:/demo:ro
+    working_dir: /demo
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        apk add --no-cache curl >/dev/null
+        exec /demo/run-scenarios.sh
+
+volumes:
+  clarkq-demo-data:

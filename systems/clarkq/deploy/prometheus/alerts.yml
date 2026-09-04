@@ -1,0 +1,143 @@
+# clarkQ example Prometheus alerting rules.
+#
+# Load with Prometheus:
+#   rule_files:
+#     - /etc/prometheus/rules/clarkq-alerts.yml
+#
+# Or Prometheus Operator PrometheusRule CRD (copy expr into a PrometheusRule).
+#
+# Metrics are scraped from GET /metrics (no auth). Adjust `job` / labels to match
+# your scrape config (see scrape.example.yml).
+
+groups:
+  - name: clarkq.availability
+    rules:
+      - alert: ClarkQTargetDown
+        expr: up{job=~"clarkq.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "clarkQ scrape target down ({{ $labels.instance }})"
+          description: >-
+            Prometheus cannot scrape clarkQ at {{ $labels.instance }} for >1m.
+            Check process, network, and /metrics endpoint.
+
+      - alert: ClarkQProcessNotUp
+        # clarkq_up is always 1 when the process serves /metrics
+        expr: clarkq_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "clarkQ reports up=0 ({{ $labels.instance }})"
+          description: "Unexpected clarkq_up gauge value; investigate the process."
+
+  - name: clarkq.errors
+    rules:
+      - alert: ClarkQHighErrorRate
+        expr: |
+          sum by (instance) (rate(clarkq_errors_total[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated clarkQ error rate on {{ $labels.instance }}"
+          description: >-
+            errors_total is rising at {{ $value | humanize }} /s over 5m.
+            Check API clients, auth, and cluster membership.
+
+      - alert: ClarkQReplicationErrors
+        expr: |
+          sum by (instance) (rate(clarkq_replication_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "clarkQ replication errors on {{ $labels.instance }}"
+          description: >-
+            Replica push failures are occurring. Inspect peer health,
+            CLARKQ_CLUSTER_NODES, and outbox depth.
+
+      - alert: ClarkQQuorumErrors
+        expr: |
+          sum by (instance) (rate(clarkq_quorum_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "clarkQ quorum failures on {{ $labels.instance }}"
+          description: >-
+            Write/read quorum is not being satisfied. Check RF, alive peers,
+            and network partitions.
+
+      - alert: ClarkQLeaseErrors
+        expr: |
+          sum by (instance) (rate(clarkq_lease_errors_total[5m])) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "clarkQ lease acquisition failures on {{ $labels.instance }}"
+          description: >-
+            Ownership leases are failing (CLARKQ_LEASE_ENABLED). Check majority
+            of peers and clock skew.
+
+      - alert: ClarkQMembershipChurn
+        expr: |
+          sum by (instance) (
+            rate(clarkq_stale_epoch_errors_total[5m])
+            + rate(clarkq_not_owner_errors_total[5m])
+            + rate(clarkq_owner_grace_errors_total[5m])
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Persistent membership churn on {{ $labels.instance }}"
+          description: >-
+            STALE_EPOCH / NOT_OWNER / OWNER_GRACE errors are frequent. Clients
+            should retry; if sustained, investigate probe failures and network.
+
+  - name: clarkq.capacity
+    rules:
+      - alert: ClarkQOutboxBacklog
+        expr: clarkq_outbox_depth > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "clarkQ outbox backlog on {{ $labels.instance }}"
+          description: >-
+            Outbox depth is {{ $value }} (threshold 100). Async replication may
+            be stalled; check dead peers and disk outbox path.
+
+      - alert: ClarkQQueueDepthHigh
+        # Fires per-queue label when any named queue is deep.
+        expr: clarkq_queue_depth > 5000
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Queue {{ $labels.queue }} depth high on {{ $labels.instance }}"
+          description: >-
+            Depth {{ $value }} for >15m. Scale consumers or raise MaxDepth only
+            if intentional buffering.
+
+  - name: clarkq.cluster
+    rules:
+      - alert: ClarkQClusterNodeMissing
+        # Only meaningful when cluster is enabled and configured size > 1.
+        expr: |
+          clarkq_cluster_enabled == 1
+          and clarkq_cluster_configured_nodes > 1
+          and clarkq_cluster_alive_nodes < clarkq_cluster_configured_nodes
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "clarkQ cluster missing nodes on {{ $labels.instance }}"
+          description: >-
+            Alive {{ $labels.instance }} sees
+            alive_nodes < configured_nodes for >3m. Run membership checks and
+            demo/cluster failover scenarios if validating HA.

@@ -1,0 +1,27 @@
+services:
+  clarkq:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: clarkq:latest
+    ports:
+      - "8080:8080"
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_ENCRYPTION_MODE: ${CLARKQ_ENCRYPTION_MODE:-none}
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+      CLARKQ_SNAPSHOT_INTERVAL: ${CLARKQ_SNAPSHOT_INTERVAL:-30s}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+    volumes:
+      - clarkq-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  clarkq-data:

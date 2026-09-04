@@ -1,0 +1,19 @@
+{
+  "name": "@fallrising/clarkq",
+  "version": "0.1.0",
+  "description": "Minimal HTTP client for clarkQ",
+  "type": "module",
+  "main": "clarkq.js",
+  "exports": {
+    ".": "./clarkq.js"
+  },
+  "files": [
+    "clarkq.js",
+    "example.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

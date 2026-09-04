@@ -1,0 +1,42 @@
+# Example 2-node sharded cluster (local demo).
+# Usage: docker compose -f docker-compose.cluster.yml up --build
+services:
+  clarkq-1:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_CLUSTER_ADVERTISE_URL: http://clarkq-1:8080
+      CLARKQ_CLUSTER_NODES: http://clarkq-1:8080,http://clarkq-2:8080
+      CLARKQ_REPLICATION_FACTOR: ${CLARKQ_REPLICATION_FACTOR:-2}
+      CLARKQ_CLUSTER_SECRET: ${CLARKQ_CLUSTER_SECRET:-dev-cluster-secret}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+    volumes:
+      - c1-data:/data
+    ports:
+      - "8081:8080"
+
+  clarkq-2:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_CLUSTER_ADVERTISE_URL: http://clarkq-2:8080
+      CLARKQ_CLUSTER_NODES: http://clarkq-1:8080,http://clarkq-2:8080
+      CLARKQ_REPLICATION_FACTOR: ${CLARKQ_REPLICATION_FACTOR:-2}
+      CLARKQ_CLUSTER_SECRET: ${CLARKQ_CLUSTER_SECRET:-dev-cluster-secret}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+    volumes:
+      - c2-data:/data
+    ports:
+      - "8082:8080"
+
+volumes:
+  c1-data:
+  c2-data:

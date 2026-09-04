@@ -1,0 +1,60 @@
+# Example clarkQ configuration.
+# Usage: CLARKQ_CONFIG=configs/clarkq.example.yaml ./bin/clarkq
+# Environment variables override values set here.
+
+addr: ":8080"
+max_queues: 1000
+max_depth: 10000
+max_message_bytes: 1048576
+
+# Prefer api_keys list; api_key singular also works.
+api_keys:
+  - change-me
+
+encryption:
+  mode: none # none | client | server_rsa
+  queues:
+    # secure-orders: server_rsa
+    # tenant-a: client
+  rsa_public_key: ""       # PEM path or inline PEM
+  rsa_key_dir: ".clarkq-keys"
+
+snapshot:
+  path: "./data/snapshot.json" # empty path disables snapshot checkpoints
+  interval: 30s                # 0 disables periodic compact (shutdown still flushes)
+
+wal:
+  path: "./data/clarkq.wal"    # append-only log; empty disables WAL
+
+# Optional HTTPS / mTLS
+# tls:
+#   cert_file: "./certs/server.crt"
+#   key_file: "./certs/server.key"
+#   client_ca_file: "./certs/client-ca.crt"  # when set, require client certs
+
+# Optional JWT / OIDC (Bearer tokens). Works alongside api_keys (either accepts).
+# oidc:
+#   issuer: "https://login.example.com/"
+#   audience: "clarkq-api"
+#   jwks_url: ""   # optional; discovered from issuer when empty
+# jwt:
+#   hs_secret: ""                 # HS256 shared secret (local/dev)
+#   rsa_public_key: ""            # PEM or path for static RS256
+#   acl: true                     # enforce scope/role checks for JWT callers
+#   admin_role: admin             # role claim that grants full access
+
+# OpenTelemetry OTLP/HTTP (empty disables)
+# otel:
+#   endpoint: "localhost:4318"
+#   service_name: clarkq
+
+# Multi-node queue sharding + optional replication
+# cluster:
+#   advertise_url: "http://node1:8080"
+#   nodes:
+#     - "http://node1:8080"
+#     - "http://node2:8080"
+#     - "http://node3:8080"
+#   replication_factor: 2
+#   replication_mode: sync   # sync | async
+#   secret: "change-me-cluster-token"

@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clarkq.fullname" . }}
+  labels:
+    {{- include "clarkq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "clarkq.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "clarkq.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: clarkq
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: CLARKQ_ADDR
+              value: {{ .Values.config.addr | quote }}
+            - name: CLARKQ_ENCRYPTION_MODE
+              value: {{ .Values.config.encryptionMode | quote }}
+            - name: CLARKQ_ENCRYPTION_QUEUES
+              value: {{ .Values.config.encryptionQueues | quote }}
+            - name: CLARKQ_SNAPSHOT_PATH
+              value: {{ .Values.config.snapshotPath | quote }}
+            - name: CLARKQ_SNAPSHOT_INTERVAL
+              value: {{ .Values.config.snapshotInterval | quote }}
+            - name: CLARKQ_WAL_PATH
+              value: {{ .Values.config.walPath | quote }}
+            - name: CLARKQ_OIDC_ISSUER
+              value: {{ .Values.config.oidcIssuer | quote }}
+            - name: CLARKQ_OIDC_AUDIENCE
+              value: {{ .Values.config.oidcAudience | quote }}
+            - name: CLARKQ_OIDC_JWKS_URL
+              value: {{ .Values.config.oidcJWKSURL | quote }}
+            {{- if .Values.config.apiKey }}
+            - name: CLARKQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clarkq.fullname" . }}
+                  key: api-key
+            {{- end }}
+            {{- if .Values.config.jwtHSSecret }}
+            - name: CLARKQ_JWT_HS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clarkq.fullname" . }}
+                  key: jwt-hs-secret
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: CLARKQ_TLS_CERT_FILE
+              value: /tls/tls.crt
+            - name: CLARKQ_TLS_KEY_FILE
+              value: /tls/tls.key
+            {{- if .Values.tls.clientCASecretName }}
+            - name: CLARKQ_TLS_CLIENT_CA_FILE
+              value: /client-ca/ca.crt
+            {{- end }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              {{- if .Values.tls.enabled }}
+              scheme: HTTPS
+              {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              {{- if .Values.tls.enabled }}
+              scheme: HTTPS
+              {{- end }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /tls
+              readOnly: true
+            {{- if .Values.tls.clientCASecretName }}
+            - name: client-ca
+              mountPath: /client-ca
+              readOnly: true
+            {{- end }}
+            {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "clarkq.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.tls.secretName }}
+        {{- if .Values.tls.clientCASecretName }}
+        - name: client-ca
+          secret:
+            secretName: {{ .Values.tls.clientCASecretName }}
+        {{- end }}
+        {{- end }}

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>clarkQ Admin</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2332;
+    --border: #2d3a4d;
+    --text: #e7ecf3;
+    --muted: #8b9bb4;
+    --accent: #3d8bfd;
+    --ok: #3ecf8e;
+    --warn: #f5a524;
+    --err: #f31260;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.45;
+  }
+  header {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    background: #121a24; position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 1.1rem; margin: 0; font-weight: 650; letter-spacing: 0.02em; }
+  header .badge {
+    font-size: 0.75rem; color: var(--muted); font-family: var(--mono);
+    padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px;
+  }
+  header .badge.ok { color: var(--ok); border-color: #1f6b45; }
+  header .badge.err { color: var(--err); border-color: #7a1d3a; }
+  main { padding: 16px 20px 40px; max-width: 1200px; margin: 0 auto; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .panel h2 {
+    margin: 0 0 12px; font-size: 0.95rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  input, textarea, select, button {
+    font: inherit; border-radius: 8px; border: 1px solid var(--border);
+    background: #0f1620; color: var(--text); padding: 8px 10px; width: 100%;
+  }
+  textarea { min-height: 80px; resize: vertical; font-family: var(--mono); font-size: 0.85rem; }
+  button {
+    cursor: pointer; background: var(--accent); border-color: transparent;
+    font-weight: 600; width: auto; padding: 8px 14px;
+  }
+  button.secondary { background: transparent; border-color: var(--border); color: var(--text); }
+  button.danger { background: #8b1e3d; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 10px; }
+  .row > div { flex: 1 1 120px; }
+  .row > button { flex: 0 0 auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+  tr:hover td { background: rgba(61,139,253,0.06); }
+  pre {
+    margin: 0; padding: 10px; background: #0c121a; border-radius: 8px;
+    overflow: auto; max-height: 280px; font-family: var(--mono); font-size: 0.78rem;
+    color: #c5d0e0;
+  }
+  .log { max-height: 160px; }
+  .muted { color: var(--muted); font-size: 0.85rem; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .actions button { padding: 4px 10px; font-size: 0.8rem; }
+  a { color: var(--accent); }
+  .full { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>clarkQ</h1>
+  <span id="ver" class="badge">—</span>
+  <span id="status" class="badge">checking…</span>
+  <span class="muted" style="margin-left:auto;font-size:0.8rem">Admin UI · local ops console</span>
+</header>
+<main>
+  <div class="grid">
+    <section class="panel">
+      <h2>Connection</h2>
+      <div class="row">
+        <div>
+          <label for="base">Base URL</label>
+          <input id="base" value="" placeholder="http://localhost:8080" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="apiKey">API Key (optional)</label>
+          <input id="apiKey" type="password" placeholder="X-API-Key" autocomplete="off" />
+        </div>
+        <div>
+          <label for="tenant">Tenant (optional)</label>
+          <input id="tenant" placeholder="X-Tenant-ID" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnSave">Save</button>
+        <button class="secondary" id="btnPing">Ping /health</button>
+        <button class="secondary" id="btnRefresh">Refresh all</button>
+      </div>
+      <p class="muted">Settings stay in this browser (localStorage). UI itself needs no auth; API calls use your key.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Enqueue</h2>
+      <div class="row">
+        <div>
+          <label for="qName">Queue</label>
+          <input id="qName" value="demo" />
+        </div>
+      </div>
+      <label for="qBody">Body</label>
+      <textarea id="qBody">hello from admin ui</textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="btnEnq">POST message</button>
+        <button class="secondary" id="btnDeq">GET consume</button>
+        <button class="secondary" id="btnPeek">Peek</button>
+        <button class="danger" id="btnClr">Clear queue</button>
+      </div>
+    </section>
+
+    <section class="panel full">
+      <h2>Queues</h2>
+      <div id="queuesWrap" class="muted">Load to see queues…</div>
+    </section>
+
+    <section class="panel">
+      <h2>Metrics (JSON)</h2>
+      <pre id="metrics">—</pre>
+    </section>
+
+    <section class="panel">
+      <h2>Cluster</h2>
+      <pre id="cluster">—</pre>
+    </section>
+
+    <section class="panel full">
+      <h2>Activity log</h2>
+      <pre id="log" class="log"></pre>
+    </section>
+  </div>
+</main>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    base: localStorage.getItem("clarkq.base") || location.origin,
+    apiKey: localStorage.getItem("clarkq.apiKey") || "",
+    tenant: localStorage.getItem("clarkq.tenant") || "",
+  };
+  $("base").value = state.base;
+  $("apiKey").value = state.apiKey;
+  $("tenant").value = state.tenant;
+
+  function log(msg, kind) {
+    const el = $("log");
+    const ts = new Date().toISOString().slice(11, 19);
+    const line = `[${ts}] ${msg}\n`;
+    el.textContent = line + el.textContent;
+  }
+
+  function headers(json) {
+    const h = {};
+    if (json) h["Content-Type"] = "application/json";
+    if (state.apiKey) h["X-API-Key"] = state.apiKey;
+    if (state.tenant) h["X-Tenant-ID"] = state.tenant;
+    return h;
+  }
+
+  async function api(method, path, body) {
+    const url = state.base.replace(/\/$/, "") + path;
+    const opt = { method, headers: headers(body !== undefined) };
+    if (body !== undefined) opt.body = typeof body === "string" ? body : JSON.stringify(body);
+    const res = await fetch(url, opt);
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+    if (!res.ok) {
+      const err = new Error((data && data.error && data.error.message) || res.statusText || String(res.status));
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return { status: res.status, data };
+  }
+
+  function save() {
+    state.base = $("base").value.trim() || location.origin;
+    state.apiKey = $("apiKey").value.trim();
+    state.tenant = $("tenant").value.trim();
+    localStorage.setItem("clarkq.base", state.base);
+    localStorage.setItem("clarkq.apiKey", state.apiKey);
+    localStorage.setItem("clarkq.tenant", state.tenant);
+    log("settings saved");
+  }
+
+  async function ping() {
+    try {
+      const { data } = await api("GET", "/health");
+      $("status").textContent = "online";
+      $("status").className = "badge ok";
+      $("ver").textContent = "v" + (data.version || "?");
+      log("health ok " + JSON.stringify(data));
+    } catch (e) {
+      $("status").textContent = "offline";
+      $("status").className = "badge err";
+      log("health failed: " + e.message);
+    }
+  }
+
+  async function refreshQueues() {
+    const wrap = $("queuesWrap");
+    try {
+      const { data } = await api("GET", "/api/v1/queues");
+      const list = (data && data.queues) || [];
+      if (!list.length) {
+        wrap.innerHTML = '<p class="muted">No queues yet. Enqueue something.</p>';
+        return;
+      }
+      list.sort((a, b) => a.name.localeCompare(b.name));
+      let html = "<table><thead><tr><th>Name</th><th>Depth</th><th></th></tr></thead><tbody>";
+      for (const q of list) {
+        html += `<tr>
+          <td><code>${esc(q.name)}</code></td>
+          <td>${q.depth}</td>
+          <td class="actions">
+            <button class="secondary" data-act="use" data-q="${esc(q.name)}">Use</button>
+            <button class="secondary" data-act="deq" data-q="${esc(q.name)}">Consume</button>
+            <button class="danger" data-act="clr" data-q="${esc(q.name)}">Clear</button>
+          </td>
+        </tr>`;
+      }
+      html += "</tbody></table>";
+      wrap.innerHTML = html;
+      wrap.querySelectorAll("button[data-act]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const q = btn.getAttribute("data-q");
+          const act = btn.getAttribute("data-act");
+          if (act === "use") { $("qName").value = q; log("selected queue " + q); return; }
+          if (act === "deq") { $("qName").value = q; await doDeq(false); await refreshQueues(); return; }
+          if (act === "clr") { $("qName").value = q; await doClr(); await refreshQueues(); }
+        });
+      });
+    } catch (e) {
+      wrap.innerHTML = `<p class="muted">Failed to list queues (${esc(e.message)}). Check API key if auth is enabled.</p>`;
+      log("list queues failed: " + e.message);
+    }
+  }
+
+  async function refreshMetrics() {
+    try {
+      const { data } = await api("GET", "/api/v1/metrics");
+      $("metrics").textContent = JSON.stringify(data, null, 2);
+    } catch (e) {
+      $("metrics").textContent = "error: " + e.message;
+    }
+  }
+
+  async function refreshCluster() {
+    try {
+      const { data } = await api("GET", "/api/v1/cluster");
+      $("cluster").textContent = JSON.stringify(data, null, 2);
+    } catch (e) {
+      $("cluster").textContent = e.status === 404 ? "cluster API unavailable" : "error: " + e.message;
+    }
+  }
+
+  async function doEnq() {
+    const name = $("qName").value.trim();
+    const body = $("qBody").value;
+    if (!name) return log("queue name required");
+    try {
+      const { data } = await api("POST", "/api/v1/queue/" + encodeURIComponent(name), { body });
+      log("enqueued " + JSON.stringify(data));
+      await refreshQueues();
+    } catch (e) {
+      log("enqueue failed: " + e.message);
+    }
+  }
+
+  async function doDeq(peek) {
+    const name = $("qName").value.trim();
+    if (!name) return log("queue name required");
+    try {
+      const path = "/api/v1/queue/" + encodeURIComponent(name) + (peek ? "?peek=true" : "");
+      const { status, data } = await api("GET", path);
+      if (status === 204 || data === null) log((peek ? "peek" : "dequeue") + ": empty");
+      else log((peek ? "peek" : "dequeue") + ": " + JSON.stringify(data));
+      if (!peek) await refreshQueues();
+    } catch (e) {
+      log((peek ? "peek" : "dequeue") + " failed: " + e.message);
+    }
+  }
+
+  async function doClr() {
+    const name = $("qName").value.trim();
+    if (!name) return log("queue name required");
+    if (!confirm("Clear queue " + name + "?")) return;
+    try {
+      const { data } = await api("DELETE", "/api/v1/queue/" + encodeURIComponent(name));
+      log("cleared " + JSON.stringify(data));
+      await refreshQueues();
+    } catch (e) {
+      log("clear failed: " + e.message);
+    }
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  async function refreshAll() {
+    save();
+    await ping();
+    await Promise.all([refreshQueues(), refreshMetrics(), refreshCluster()]);
+  }
+
+  $("btnSave").onclick = save;
+  $("btnPing").onclick = () => { save(); ping(); };
+  $("btnRefresh").onclick = refreshAll;
+  $("btnEnq").onclick = doEnq;
+  $("btnDeq").onclick = () => doDeq(false);
+  $("btnPeek").onclick = () => doDeq(true);
+  $("btnClr").onclick = doClr;
+
+  refreshAll();
+  setInterval(() => { refreshQueues().catch(() => {}); }, 5000);
+})();
+</script>
+</body>
+</html>

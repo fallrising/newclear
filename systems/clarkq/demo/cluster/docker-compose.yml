@@ -1,0 +1,118 @@
+# Optional 3-node Docker cluster for demo/cluster (same scenarios as multi-process).
+# Prefer: ./run-cluster-demo.sh  (host multi-process, faster)
+# Docker: ./run-cluster-demo.sh --docker
+services:
+  clarkq-1:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        VERSION: cluster-demo
+        COMMIT: local
+        DATE: "unknown"
+    image: clarkq:cluster-demo
+    user: "0:0"
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_ENCRYPTION_MODE: none
+      CLARKQ_CLUSTER_ADVERTISE_URL: http://clarkq-1:8080
+      CLARKQ_CLUSTER_NODES: http://clarkq-1:8080,http://clarkq-2:8080,http://clarkq-3:8080
+      CLARKQ_CLUSTER_SECRET: ${CLARKQ_CLUSTER_SECRET:-dev-cluster-secret}
+      CLARKQ_REPLICATION_FACTOR: ${CLARKQ_REPLICATION_FACTOR:-2}
+      CLARKQ_REPLICATION_MODE: ${CLARKQ_REPLICATION_MODE:-sync}
+      CLARKQ_CLUSTER_PROBE_INTERVAL: 1s
+      CLARKQ_CLUSTER_FAIL_THRESHOLD: "2"
+      CLARKQ_CATCHUP_INTERVAL: 2s
+      CLARKQ_LINEARIZABLE_CONSUME: ${CLARKQ_LINEARIZABLE_CONSUME:-false}
+      CLARKQ_LEASE_ENABLED: ${CLARKQ_LEASE_ENABLED:-false}
+      CLARKQ_LEASE_TTL: ${CLARKQ_LEASE_TTL:-5s}
+      CLARKQ_OWNER_GRACE: ${CLARKQ_OWNER_GRACE:-0s}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+      CLARKQ_SNAPSHOT_INTERVAL: 10s
+      CLARKQ_OUTBOX_PATH: /data/outbox.json
+    volumes:
+      - c1-data:/data
+    ports:
+      - "${CLARKQ_CLUSTER_HOST_PORT1:-38481}:8080"
+    # NET_ADMIN: optional multi-AZ latency (tc/netem) in stress suite
+    cap_add:
+      - NET_ADMIN
+    healthcheck: &hc
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  clarkq-2:
+    image: clarkq:cluster-demo
+    user: "0:0"
+    depends_on:
+      - clarkq-1
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_ENCRYPTION_MODE: none
+      CLARKQ_CLUSTER_ADVERTISE_URL: http://clarkq-2:8080
+      CLARKQ_CLUSTER_NODES: http://clarkq-1:8080,http://clarkq-2:8080,http://clarkq-3:8080
+      CLARKQ_CLUSTER_SECRET: ${CLARKQ_CLUSTER_SECRET:-dev-cluster-secret}
+      CLARKQ_REPLICATION_FACTOR: ${CLARKQ_REPLICATION_FACTOR:-2}
+      CLARKQ_REPLICATION_MODE: ${CLARKQ_REPLICATION_MODE:-sync}
+      CLARKQ_CLUSTER_PROBE_INTERVAL: 1s
+      CLARKQ_CLUSTER_FAIL_THRESHOLD: "2"
+      CLARKQ_CATCHUP_INTERVAL: 2s
+      CLARKQ_LINEARIZABLE_CONSUME: ${CLARKQ_LINEARIZABLE_CONSUME:-false}
+      CLARKQ_LEASE_ENABLED: ${CLARKQ_LEASE_ENABLED:-false}
+      CLARKQ_LEASE_TTL: ${CLARKQ_LEASE_TTL:-5s}
+      CLARKQ_OWNER_GRACE: ${CLARKQ_OWNER_GRACE:-0s}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+      CLARKQ_SNAPSHOT_INTERVAL: 10s
+      CLARKQ_OUTBOX_PATH: /data/outbox.json
+    volumes:
+      - c2-data:/data
+    ports:
+      - "${CLARKQ_CLUSTER_HOST_PORT2:-38482}:8080"
+    cap_add:
+      - NET_ADMIN
+    healthcheck: *hc
+
+  clarkq-3:
+    image: clarkq:cluster-demo
+    user: "0:0"
+    depends_on:
+      - clarkq-1
+    environment:
+      CLARKQ_ADDR: ":8080"
+      CLARKQ_API_KEY: ${CLARKQ_API_KEY:-dev-key}
+      CLARKQ_ENCRYPTION_MODE: none
+      CLARKQ_CLUSTER_ADVERTISE_URL: http://clarkq-3:8080
+      CLARKQ_CLUSTER_NODES: http://clarkq-1:8080,http://clarkq-2:8080,http://clarkq-3:8080
+      CLARKQ_CLUSTER_SECRET: ${CLARKQ_CLUSTER_SECRET:-dev-cluster-secret}
+      CLARKQ_REPLICATION_FACTOR: ${CLARKQ_REPLICATION_FACTOR:-2}
+      CLARKQ_REPLICATION_MODE: ${CLARKQ_REPLICATION_MODE:-sync}
+      CLARKQ_CLUSTER_PROBE_INTERVAL: 1s
+      CLARKQ_CLUSTER_FAIL_THRESHOLD: "2"
+      CLARKQ_CATCHUP_INTERVAL: 2s
+      CLARKQ_LINEARIZABLE_CONSUME: ${CLARKQ_LINEARIZABLE_CONSUME:-false}
+      CLARKQ_LEASE_ENABLED: ${CLARKQ_LEASE_ENABLED:-false}
+      CLARKQ_LEASE_TTL: ${CLARKQ_LEASE_TTL:-5s}
+      CLARKQ_OWNER_GRACE: ${CLARKQ_OWNER_GRACE:-0s}
+      CLARKQ_WAL_PATH: /data/clarkq.wal
+      CLARKQ_SNAPSHOT_PATH: /data/snapshot.json
+      CLARKQ_SNAPSHOT_INTERVAL: 10s
+      CLARKQ_OUTBOX_PATH: /data/outbox.json
+    volumes:
+      - c3-data:/data
+    ports:
+      - "${CLARKQ_CLUSTER_HOST_PORT3:-38483}:8080"
+    cap_add:
+      - NET_ADMIN
+    healthcheck: *hc
+
+volumes:
+  c1-data:
+  c2-data:
+  c3-data:

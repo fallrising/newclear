@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package ojbk.v1;
+
+import "ojbk/v1/common.proto";
+
+option java_package = "ojbk.v1";
+option java_outer_classname = "Consumer";
+option java_multiple_files = true;
+option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+
+message MessageOut {
+  string topic = 1;
+  int32 partition = 2;
+  int64 offset = 3;
+  string key = 4;
+  bytes value = 5;
+  repeated string tags = 6;
+  map<string, string> headers = 7;
+  string ack_token = 8;
+  int32 delivery_count = 9;
+  Code code = 10;
+  string msg = 11;
+}
+
+message PollRequest {
+  string group = 1;
+  string topic = 2;
+  string token = 3;
+  int32 max_batch = 4;
+  int32 linger_ms = 5;
+}
+
+message AckRequest {
+  string group = 1;
+  string token = 2;
+  repeated string ack = 3;
+  repeated string nack = 4;
+}
+
+message AckResponse {
+  Code code = 1;
+  string msg = 2;
+}
+
+service ConsumerService {
+  rpc Poll(PollRequest) returns (stream MessageOut);
+  rpc Ack(AckRequest) returns (AckResponse);
+}

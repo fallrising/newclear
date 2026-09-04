@@ -1,0 +1,47 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Produce rate by result",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_produce_total{topic=\"$topic\"}[5m])) by (code)", "legendFormat": "{{code}}"}]
+    },
+    {
+      "id": 2,
+      "title": "Produce error ratio",
+      "type": "gauge",
+      "gridPos": {"h": 9, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_produce_total{topic=\"$topic\",code!=\"OK\"}[5m])) / sum(rate(ojbk_produce_total{topic=\"$topic\"}[5m]))"}],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}}
+    },
+    {
+      "id": 3,
+      "title": "Consumer lag by group and partition",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "ojbk_consumer_lag{topic=\"$topic\"}", "legendFormat": "{{group}} p{{partition}}"}]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["ojbquay", "topic"],
+  "templating": {
+    "list": [
+      {
+        "name": "topic",
+        "label": "Topic",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "ojbquay-prometheus"},
+        "query": {"query": "label_values(ojbk_produce_total, topic)", "refId": "topic-variable"},
+        "refresh": 1
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "ojbquay / Topic detail",
+  "uid": "ojbquay-topic",
+  "version": 1
+}

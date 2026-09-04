@@ -1,0 +1,232 @@
+name: ojbquay
+
+x-runtime-environment: &runtime-environment
+  OJBQUAY_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+  JAVA_TOOL_OPTIONS: ${OJBQUAY_JAVA_TOOL_OPTIONS:-}
+
+x-database-environment: &database-environment
+  OJBQUAY_DATABASE_URL: jdbc:postgresql://postgres:5432/ojbquay
+  OJBQUAY_DATABASE_USER: ojbquay
+  OJBQUAY_DATABASE_PASSWORD: local-development-only
+
+services:
+  kafka:
+    image: apache/kafka:4.2.0
+    hostname: kafka
+    ports:
+      - "${OJBQUAY_HOST_KAFKA_PORT:-9092}:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:19092,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+      KAFKA_GROUP_SHARE_MIN_RECORD_LOCK_DURATION_MS: 1000
+      KAFKA_GROUP_SHARE_MAX_RECORD_LOCK_DURATION_MS: 300000
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  postgres:
+    image: postgres:17
+    ports:
+      - "${OJBQUAY_HOST_POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ojbquay
+      POSTGRES_USER: ojbquay
+      POSTGRES_PASSWORD: local-development-only
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ojbquay -d ojbquay
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  console-api:
+    image: ojbquay/console-api:local
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.java
+      target: console-api
+    ports:
+      - "${OJBQUAY_HOST_API_PORT:-8080}:8080"
+    environment:
+      <<: [*runtime-environment, *database-environment]
+      OJBQUAY_ADMIN_USERNAME: admin
+      OJBQUAY_ADMIN_PASSWORD: ${OJBQUAY_ADMIN_PASSWORD:-local-admin-password}
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 20s
+
+  gateway-produce:
+    image: ojbquay/gateway-produce:local
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.java
+      target: gateway-produce
+    ports:
+      - "${OJBQUAY_HOST_PRODUCER_GRPC_PORT:-9100}:9100"
+      - "${OJBQUAY_HOST_PRODUCER_METRICS_PORT:-9200}:9200"
+    environment:
+      <<: *runtime-environment
+      OJBQUAY_INSTANCE_ID: compose-produce
+    depends_on:
+      console-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9200/readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+
+  gateway-consume:
+    image: ojbquay/gateway-consume:local
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.java
+      target: gateway-consume
+    ports:
+      - "${OJBQUAY_HOST_CONSUMER_GRPC_PORT:-9101}:9101"
+      - "${OJBQUAY_HOST_CONSUMER_METRICS_PORT:-9202}:9202"
+    environment:
+      <<: *runtime-environment
+      OJBQUAY_INSTANCE_ID: compose-consume
+    depends_on:
+      console-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9202/readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+
+  scheduler:
+    image: ojbquay/scheduler:local
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.java
+      target: scheduler
+    ports:
+      - "${OJBQUAY_HOST_SCHEDULER_METRICS_PORT:-9201}:9201"
+    environment:
+      <<: [*runtime-environment, *database-environment]
+      OJBQUAY_INSTANCE_ID: compose-scheduler
+    depends_on:
+      console-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9201/readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+
+  console-web:
+    image: ojbquay/console-web:local
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.web
+    ports:
+      - "${OJBQUAY_HOST_WEB_PORT:-8088}:8080"
+    depends_on:
+      console-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "${OJBQUAY_HOST_PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - console-api
+      - gateway-produce
+      - gateway-consume
+      - scheduler
+
+  alertmanager:
+    image: prom/alertmanager:v0.31.1
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    ports:
+      - "${OJBQUAY_HOST_ALERTMANAGER_PORT:-9094}:9093"
+    volumes:
+      - ../prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  grafana:
+    image: grafana/grafana:12.4.1
+    ports:
+      - "${OJBQUAY_HOST_GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  push-sink:
+    image: python:3.14-alpine
+    profiles: ["e2e"]
+    command: ["python", "/opt/push-sink.py"]
+    ports:
+      - "${OJBQUAY_HOST_PUSH_SINK_PORT:-18080}:8080"
+    volumes:
+      - ./push-sink.py:/opt/push-sink.py:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz')"
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+volumes:
+  kafka-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

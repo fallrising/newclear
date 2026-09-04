@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package ojbk.v1;
+
+option java_package = "ojbk.v1";
+option java_outer_classname = "Common";
+option java_multiple_files = true;
+option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+
+message MessageIn {
+  string topic = 1;
+  optional string key = 2;
+  bytes value = 3;
+  repeated string tags = 4;
+  map<string, string> headers = 5;
+  optional int32 partition = 6;
+}
+
+message ProduceAck {
+  string topic = 1;
+  int32 partition = 2;
+  int64 offset = 3;
+}
+
+enum Code {
+  OK = 0;
+  TOPIC_NOT_FOUND = 1;
+  AUTH_FAILED = 2;
+  QUOTA_EXCEEDED = 3;
+  MSG_TOO_LARGE = 4;
+  BROKER_UNAVAILABLE = 5;
+  INVALID_ARGUMENT = 6;
+  DELAY_ID_EXISTS = 7;
+  DELAY_NOT_FOUND = 8;
+  UNSUPPORTED = 9;
+  INTERNAL = 99;
+}

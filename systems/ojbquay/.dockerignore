@@ -1,0 +1,11 @@
+.git
+.github
+.gradle
+.idea
+.pnpm-store
+**/build
+console-web/dist
+console-web/node_modules
+console-web/test-results
+sdk/go/bin
+*.log

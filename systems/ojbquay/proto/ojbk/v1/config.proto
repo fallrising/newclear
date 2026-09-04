@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package ojbk.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option java_package = "ojbk.v1";
+option java_outer_classname = "Config";
+option java_multiple_files = true;
+option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+
+enum ConfigEntityType {
+  CONFIG_ENTITY_TYPE_UNSPECIFIED = 0;
+  TOPIC = 1;
+  GROUP = 2;
+  SUBSCRIPTION = 3;
+  KAFKA_CLUSTER = 4;
+}
+
+message ConfigEvent {
+  uint32 schema_version = 1;
+  ConfigEntityType entity_type = 2;
+  string entity_id = 3;
+  uint64 version = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  string updated_by = 6;
+  bytes payload_json = 7;
+}

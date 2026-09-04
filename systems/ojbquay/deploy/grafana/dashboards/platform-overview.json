@@ -1,0 +1,60 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Runtime availability",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(up{job=~\"console-api|gateway-produce|gateway-consume|scheduler\"})", "legendFormat": "ready runtimes"}],
+      "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "red"}, {"color": "green", "value": 4}]}}}
+    },
+    {
+      "id": 2,
+      "title": "Produce rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_produce_total[5m])) by (code)", "legendFormat": "{{code}}"}]
+    },
+    {
+      "id": 3,
+      "title": "Push success ratio",
+      "type": "gauge",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_push_total{code=\"success\"}[5m])) / sum(rate(ojbk_push_total[5m]))"}],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "red"}, {"color": "green", "value": 0.99}]}}}
+    },
+    {
+      "id": 4,
+      "title": "Top consumer lag",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+      "targets": [{"expr": "topk(10, ojbk_consumer_lag)", "legendFormat": "{{group}} / {{topic}} p{{partition}}"}]
+    },
+    {
+      "id": 5,
+      "title": "Delay backlog",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 6, "x": 12, "y": 8},
+      "targets": [{"expr": "ojbk_delay_pending", "legendFormat": "pending"}]
+    },
+    {
+      "id": 6,
+      "title": "Delay fire lag p99",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 6, "x": 18, "y": 8},
+      "targets": [{"expr": "histogram_quantile(0.99, sum by (le) (rate(ojbk_delay_fire_lag_seconds_bucket[5m])))", "legendFormat": "p99"}],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["ojbquay", "platform"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "ojbquay / Platform overview",
+  "uid": "ojbquay-platform",
+  "version": 1
+}

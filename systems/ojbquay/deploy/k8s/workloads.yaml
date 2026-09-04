@@ -1,0 +1,301 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console-api
+  labels: &console-labels
+    app.kubernetes.io/name: console-api
+    app.kubernetes.io/part-of: ojbquay
+spec:
+  replicas: 2
+  selector:
+    matchLabels: *console-labels
+  template:
+    metadata:
+      labels: *console-labels
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8080"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: console-api
+          image: ojbquay/console-api:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8080}
+          env: &database-env
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: java-tool-options}}
+            - name: OJBQUAY_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: kafka-bootstrap-servers}}
+            - name: OJBQUAY_DATABASE_URL
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: database-url}}
+            - name: OJBQUAY_DATABASE_USER
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: database-user}}
+            - name: OJBQUAY_DATABASE_PASSWORD
+              valueFrom: {secretKeyRef: {name: ojbquay-secrets, key: database-password}}
+            - name: OJBQUAY_ADMIN_PASSWORD
+              valueFrom: {secretKeyRef: {name: ojbquay-secrets, key: bootstrap-admin-password}}
+          readinessProbe:
+            httpGet: {path: /actuator/health/readiness, port: http}
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet: {path: /actuator/health/liveness, port: http}
+            periodSeconds: 15
+          startupProbe:
+            httpGet: {path: /actuator/health/liveness, port: http}
+            periodSeconds: 5
+            failureThreshold: 24
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "2", memory: 1Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: console-api
+spec:
+  selector:
+    app.kubernetes.io/name: console-api
+    app.kubernetes.io/part-of: ojbquay
+  ports:
+    - {name: http, port: 8080, targetPort: http}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-produce
+  labels: &produce-labels
+    app.kubernetes.io/name: gateway-produce
+    app.kubernetes.io/part-of: ojbquay
+spec:
+  replicas: 2
+  selector:
+    matchLabels: *produce-labels
+  template:
+    metadata:
+      labels: *produce-labels
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9200"
+    spec:
+      terminationGracePeriodSeconds: 30
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: {matchLabels: *produce-labels}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: gateway-produce
+          image: ojbquay/gateway-produce:0.1.0
+          ports:
+            - {name: grpc, containerPort: 9100}
+            - {name: metrics, containerPort: 9200}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: java-tool-options}}
+            - name: OJBQUAY_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: kafka-bootstrap-servers}}
+            - name: OJBQUAY_INSTANCE_ID
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
+          readinessProbe: {httpGet: {path: /readyz, port: metrics}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 15}
+          startupProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 5, failureThreshold: 24}
+          resources:
+            requests: {cpu: 500m, memory: 512Mi}
+            limits: {cpu: "4", memory: 2Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-produce
+spec:
+  selector:
+    app.kubernetes.io/name: gateway-produce
+    app.kubernetes.io/part-of: ojbquay
+  ports:
+    - {name: grpc, port: 9100, targetPort: grpc}
+    - {name: metrics, port: 9200, targetPort: metrics}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-consume
+  labels: &consume-labels
+    app.kubernetes.io/name: gateway-consume
+    app.kubernetes.io/part-of: ojbquay
+spec:
+  replicas: 2
+  selector:
+    matchLabels: *consume-labels
+  template:
+    metadata:
+      labels: *consume-labels
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9202"
+    spec:
+      terminationGracePeriodSeconds: 90
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: {matchLabels: *consume-labels}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: gateway-consume
+          image: ojbquay/gateway-consume:0.1.0
+          ports:
+            - {name: grpc, containerPort: 9101}
+            - {name: metrics, containerPort: 9202}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: java-tool-options}}
+            - name: OJBQUAY_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: kafka-bootstrap-servers}}
+            - name: OJBQUAY_INSTANCE_ID
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
+          readinessProbe: {httpGet: {path: /readyz, port: metrics}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 15}
+          startupProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 5, failureThreshold: 24}
+          resources:
+            requests: {cpu: 500m, memory: 1Gi}
+            limits: {cpu: "4", memory: 3Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-consume
+spec:
+  selector:
+    app.kubernetes.io/name: gateway-consume
+    app.kubernetes.io/part-of: ojbquay
+  ports:
+    - {name: grpc, port: 9101, targetPort: grpc}
+    - {name: metrics, port: 9202, targetPort: metrics}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler
+  labels: &scheduler-labels
+    app.kubernetes.io/name: scheduler
+    app.kubernetes.io/part-of: ojbquay
+spec:
+  replicas: 2
+  selector:
+    matchLabels: *scheduler-labels
+  template:
+    metadata:
+      labels: *scheduler-labels
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9201"
+    spec:
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: scheduler
+          image: ojbquay/scheduler:0.1.0
+          ports:
+            - {name: metrics, containerPort: 9201}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: java-tool-options}}
+            - name: OJBQUAY_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: kafka-bootstrap-servers}}
+            - name: OJBQUAY_DATABASE_URL
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: database-url}}
+            - name: OJBQUAY_DATABASE_USER
+              valueFrom: {configMapKeyRef: {name: ojbquay-runtime, key: database-user}}
+            - name: OJBQUAY_DATABASE_PASSWORD
+              valueFrom: {secretKeyRef: {name: ojbquay-secrets, key: database-password}}
+            - name: OJBQUAY_INSTANCE_ID
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
+          readinessProbe: {httpGet: {path: /readyz, port: metrics}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 15}
+          startupProbe: {httpGet: {path: /livez, port: metrics}, periodSeconds: 5, failureThreshold: 24}
+          resources:
+            requests: {cpu: 500m, memory: 512Mi}
+            limits: {cpu: "2", memory: 2Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduler
+spec:
+  selector:
+    app.kubernetes.io/name: scheduler
+    app.kubernetes.io/part-of: ojbquay
+  ports:
+    - {name: metrics, port: 9201, targetPort: metrics}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console-web
+  labels: &web-labels
+    app.kubernetes.io/name: console-web
+    app.kubernetes.io/part-of: ojbquay
+spec:
+  replicas: 2
+  selector:
+    matchLabels: *web-labels
+  template:
+    metadata:
+      labels: *web-labels
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: console-web
+          image: ojbquay/console-web:0.1.0
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 15}
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: console-web
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: console-web
+    app.kubernetes.io/part-of: ojbquay
+  ports:
+    - {name: http, port: 80, targetPort: http}

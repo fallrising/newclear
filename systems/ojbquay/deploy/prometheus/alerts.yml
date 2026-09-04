@@ -1,0 +1,58 @@
+groups:
+  - name: ojbquay
+    rules:
+      - alert: OjbquayRuntimeUnavailable
+        expr: up{job=~"console-api|gateway-produce|gateway-consume|scheduler"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ojbquay runtime {{ $labels.job }} is unavailable"
+          description: "Prometheus has failed to scrape {{ $labels.instance }} for one minute."
+
+      - alert: OjbquayConsumerLagHigh
+        expr: ojbk_consumer_lag > 10000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Consumer lag is high for {{ $labels.group }}"
+          description: "{{ $labels.topic }} partition {{ $labels.partition }} is {{ $value }} records behind."
+
+      - alert: OjbquayPushSuccessLow
+        expr: |
+          (
+            sum(rate(ojbk_push_total{code="success"}[5m]))
+            /
+            sum(rate(ojbk_push_total[5m]))
+          ) < 0.99
+          and
+          sum(rate(ojbk_push_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Push success ratio is below 99%"
+          description: "The five-minute HTTP push success ratio is {{ $value | humanizePercentage }}."
+
+      - alert: OjbquayDelayFireLagHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le) (rate(ojbk_delay_fire_lag_seconds_bucket[5m]))
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Delay scheduler p99 fire lag exceeds five seconds"
+          description: "The current p99 delay fire lag is {{ $value | humanizeDuration }}."
+
+      - alert: OjbquayConfigVersionMissing
+        expr: ojbk_push_workers > 0 and absent(ojbk_sub_config_version)
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Consumer workers have no loaded subscription version"
+          description: "The consumer gateway reports workers but no desired configuration revision."

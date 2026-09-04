@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package ojbk.v1;
+
+import "ojbk/v1/common.proto";
+
+option java_package = "ojbk.v1";
+option java_outer_classname = "Producer";
+option java_multiple_files = true;
+option go_package = "github.com/fallrising/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1";
+
+message ProduceRequest {
+  MessageIn msg = 1;
+  string token = 2;
+}
+
+message ProduceResponse {
+  Code code = 1;
+  string msg = 2;
+  ProduceAck ack = 3;
+}
+
+message DelayRequest {
+  MessageIn msg = 1;
+  string token = 2;
+  string delay_id = 3;
+  int64 due_at_ms = 4;
+  optional int64 loop_interval_ms = 5;
+  optional int32 loop_times = 6;
+  optional int64 expire_at_ms = 7;
+}
+
+message DelayResponse {
+  Code code = 1;
+  string msg = 2;
+  string delay_id = 3;
+}
+
+message CancelDelayRequest {
+  string delay_id = 1;
+  string token = 2;
+  string topic = 3;
+}
+
+service ProducerService {
+  rpc Produce(ProduceRequest) returns (ProduceResponse);
+  rpc ProduceBatch(stream ProduceRequest) returns (stream ProduceResponse);
+  rpc ProduceDelay(DelayRequest) returns (DelayResponse);
+  rpc CancelDelay(CancelDelayRequest) returns (DelayResponse);
+}

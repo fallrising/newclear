@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ojbquay.dev/schema/config/subscription-v1.json",
+  "title": "SubscriptionConfig v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "group",
+    "topic",
+    "owner",
+    "enabled",
+    "spec"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "group": {
+      "type": "string",
+      "minLength": 1
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "concurrency",
+        "maxTps"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "PUSH",
+            "PULL"
+          ]
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "maxTps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "filterCel": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "transit": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "ordered": {
+          "type": "boolean"
+        },
+        "orderKeySource": {
+          "enum": [
+            "KEY",
+            "HEADER",
+            "JSONPATH"
+          ]
+        },
+        "orderKeyExpr": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "shadowTraffic": {
+          "type": "boolean"
+        },
+        "push": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "urls",
+            "method",
+            "timeoutMs",
+            "retryIntervalsMs"
+          ],
+          "properties": {
+            "urls": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "format": "uri"
+              }
+            },
+            "method": {
+              "enum": [
+                "GET",
+                "POST"
+              ]
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            },
+            "retryIntervalsMs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 100,
+              "items": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 2592000000
+              }
+            },
+            "headers": {
+              "type": "object",
+              "maxProperties": 32,
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8192
+              }
+            }
+          }
+        },
+        "pull": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxBatch",
+            "ackTimeoutMs"
+          ],
+          "properties": {
+            "maxBatch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "ackTimeoutMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 300000
+            },
+            "maxRetry": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 3
+            }
+          }
+        },
+        "dlqEnabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

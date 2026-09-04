@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: ojbquay-console-api
+  datasource:
+    url: ${OJBQUAY_DATABASE_URL:jdbc:postgresql://localhost:5432/ojbquay}
+    username: ${OJBQUAY_DATABASE_USER:ojbquay}
+    password: ${OJBQUAY_DATABASE_PASSWORD:local-development-only}
+  flyway:
+    enabled: true
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+ojbquay:
+  kafka:
+    bootstrap-servers: ${OJBQUAY_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  bootstrap-admin:
+    username: ${OJBQUAY_ADMIN_USERNAME:admin}
+    password: ${OJBQUAY_ADMIN_PASSWORD:}

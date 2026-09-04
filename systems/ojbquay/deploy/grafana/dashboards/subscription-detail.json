@@ -1,0 +1,68 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Push results",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_push_total{sub=\"$subscription\"}[5m])) by (code)", "legendFormat": "{{code}}"}]
+    },
+    {
+      "id": 2,
+      "title": "Loaded config version",
+      "type": "stat",
+      "gridPos": {"h": 9, "w": 4, "x": 8, "y": 0},
+      "targets": [{"expr": "ojbk_sub_config_version{sub=\"$subscription\"}", "legendFormat": "revision"}]
+    },
+    {
+      "id": 3,
+      "title": "Retries",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "sum(rate(ojbk_deliver_retry_total{sub=\"$subscription\"}[5m])) by (stage)", "legendFormat": "stage {{stage}}"}]
+    },
+    {
+      "id": 4,
+      "title": "DLQ writes",
+      "type": "timeseries",
+      "gridPos": {"h": 9, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "rate(ojbk_dlq_total{sub=\"$subscription\"}[5m])", "legendFormat": "DLQ"}]
+    },
+    {
+      "id": 5,
+      "title": "Pull inflight",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "targets": [{"expr": "ojbk_pull_inflight{sub=\"$subscription\"}", "legendFormat": "inflight"}]
+    },
+    {
+      "id": 6,
+      "title": "Push average latency",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "targets": [{"expr": "rate(ojbk_push_latency_seconds_sum{sub=\"$subscription\"}[5m]) / rate(ojbk_push_latency_seconds_count{sub=\"$subscription\"}[5m])", "legendFormat": "mean"}],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["ojbquay", "subscription"],
+  "templating": {
+    "list": [
+      {
+        "name": "subscription",
+        "label": "Subscription",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "ojbquay-prometheus"},
+        "query": {"query": "label_values(ojbk_sub_config_version, sub)", "refId": "sub-variable"},
+        "refresh": 1
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "ojbquay / Subscription detail",
+  "uid": "ojbquay-subscription",
+  "version": 1
+}

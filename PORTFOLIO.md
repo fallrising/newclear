@@ -85,6 +85,8 @@ Branch/PR 也以例外清單核對：目前 `newclear`、`kernel` 都只有 `mai
 
 `knowledge-base` 是唯一 canonical knowledge store；`ice-maker` 是唯一 ingestion/compiler；`local-ocr-services` 只是隔離的 OCR runtime adapter；`doc_analysis_study` 是受限來源的 study staging area。研究結論經審核後進 Knowledge Base，不把整個 study repo 合併進去。
 
+寫入來源的邊界（2026-09-05 由 owner 確認）：`ice-maker` 與 `doc_analysis_study` 是**配套的一組**——抽取引擎加上受限來源的 study corpus，兩者都允許自動化寫入，但輸出**永遠停在候選狀態**。`knowledge-base` 是 owner 與 agent 協作的筆記，**不接受任何自動化來源直接寫入**；每一則進 KB 的內容都要有 owner 在場的那一次決定。這條邊界不是流程潔癖：沒有這道閘，pipeline 產出會以「反正已經整理好了」的理由逐次落進 KB，KB 會退化成流水帳，失去它作為 canonical store 的價值。
+
 `journal` 只作舊 capture archive，`aweshore` 收掉；`flowshot`、`loom` 與 `goku` 雖然形態不同，也都在爭奪「讀、記、整理資訊」的注意力。除非其中一個已是你每天使用的介面，不能與 Knowledge Base/Ice Maker 同時開發。
 
 ### VPS 與 fleet

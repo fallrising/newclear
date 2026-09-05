@@ -16,7 +16,7 @@ upload_to_r2() {
         log "ERROR" "R2 remote not configured in rclone"
         log "INFO" "Please configure rclone with your R2 credentials first"
         return 1
-    }
+    fi
 
     local remote_dest="r2:${bucket_name}/${remote_path}"
     log "INFO" "Uploading files to $remote_dest..."

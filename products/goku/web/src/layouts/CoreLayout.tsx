@@ -12,7 +12,7 @@ export function CoreLayout({ children }: CoreLayoutProps) {
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = React.useState(false);
 
-  const startResizing = React.useCallback((mouseDownEvent: React.MouseEvent) => {
+  const startResizing = React.useCallback(() => {
     setIsResizing(true);
   }, []);
 

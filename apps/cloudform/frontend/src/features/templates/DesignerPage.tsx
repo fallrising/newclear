@@ -25,7 +25,6 @@ import {
 import { FieldConfigPanel } from './designer/FieldConfigPanel';
 import {
   BucketsPanel,
-  bucketDroppableId,
   parseBucketItemId,
 } from './designer/BucketsPanel';
 import {

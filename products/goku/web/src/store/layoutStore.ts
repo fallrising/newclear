@@ -32,7 +32,7 @@ const DEFAULT_CONFIG: LayoutConfig = {
   scrollViews: []
 };
 
-export const useLayoutStore = create<LayoutStore>((set, get) => ({
+export const useLayoutStore = create<LayoutStore>((set) => ({
   config: DEFAULT_CONFIG,
 
   setSidebarWidth: (width) => 

@@ -37,7 +37,7 @@ const jsonStringSchema = z
     if (v == null) return;
     try {
       JSON.parse(v);
-    } catch (e) {
+    } catch {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid JSON' });
     }
   });

@@ -191,7 +191,7 @@ CREATE TABLE approval_consumptions (
     UNIQUE (project_id, approval_id),
     FOREIGN KEY (project_id, completion_record_id) REFERENCES completion_records(project_id, completion_record_id),
     FOREIGN KEY (project_id, approval_id) REFERENCES approvals(project_id, approval_id),
-    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id)
+    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE completion_records (
@@ -254,7 +254,7 @@ CREATE TABLE audit_groups (
     actor_id TEXT NOT NULL,
     created_at_ns INTEGER NOT NULL,
     PRIMARY KEY (project_id, audit_group_id),
-    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id)
+    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id) DEFERRABLE INITIALLY DEFERRED
 );
 CREATE TABLE audit_entries (
     audit_sequence INTEGER PRIMARY KEY NOT NULL CHECK (audit_sequence > 0),
@@ -280,7 +280,7 @@ CREATE TABLE outbox (
     created_at_ns INTEGER NOT NULL,
     claimed_at_ns INTEGER,
     PRIMARY KEY (project_id, intent_id),
-    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id),
+    FOREIGN KEY (project_id, command_id) REFERENCES command_results(project_id, command_id) DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (project_id, audit_group_id) REFERENCES audit_groups(project_id, audit_group_id),
     FOREIGN KEY (project_id, run_id) REFERENCES runs(project_id, run_id)
 );

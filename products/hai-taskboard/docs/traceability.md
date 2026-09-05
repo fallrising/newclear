@@ -29,11 +29,15 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 - T-030/T-032 static Board-first fixture shell accepted by T-033: pinned frozen install, format,
   lint, typecheck, 8 Vitest tests/full jsdom axe and Vite build passed. Browser Playwright, rendered
   contrast, zoom, keyboard-only and coarse-pointer evidence remains NotRun.
-- T-043/T-054/T-056 SQLite foundation plus T-058/T-061 repairs are a Candidate, not an accepted
-  checkpoint. Worker evidence covers the public UnitOfWork, project scoping, atomic rollback,
-  guarded Done rehydration including nineteen corrupt cases, exact Approval-consumption cardinality,
-  canonical result replay, verifier-role persistence, immutable identities, typed busy behavior and
-  pinned full/race checks. T-062 is the required independent combined review.
+- T-043/T-054/T-056 SQLite foundation plus T-058/T-061/T-063 repairs are accepted by T-064. The
+  fresh review covers the public UnitOfWork, project scoping, atomic rollback, guarded Done
+  rehydration including nineteen corrupt cases, exact Approval-consumption cardinality, real-
+  allocator canonical result replay, verifier-role persistence, immutable identities, typed busy
+  behavior and pinned full/race checks. Its accepted application consumer is recorded separately.
+- T-044 application commands plus the T-066 repair are accepted by T-067. Pinned application,
+  SQLite, full and race gates plus independent real-Store completion/replay/rollback, executor-call
+  timing, strict canonical OpenAPI, idempotency and negative completion matrices passed. This is the
+  application-command checkpoint only; Fake, HTTP/SSE and vertical integration remain NotRun.
 
 ## T-041 implementation-contract inventory
 
@@ -47,10 +51,10 @@ Passing status is broadened.
 
 | ID | Required test/oracle | Expected evidence | Status |
 | --- | --- | --- | --- |
-| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | domain completion passes; public SQLite atomic write/load is Candidate pending T-062; application command remains NotRun | Passing (domain T-024) |
+| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | domain gate, public SQLite atomic write/load and real-Store application completion/replay pass | Passing (T-024/T-064/T-067) |
 | AC-P0A-002 | `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState` | subtests for missing/failed/skipped/not-run/unknown/stale | Passing (T-024) |
 | AC-P0A-003 | `TestCompleteWorkItem_RejectsSubjectTOCTOU` | no phase/record mutation after subject change | Passing (T-024) |
-| AC-P0A-004 | `TestCommand_IdempotencySameRequestAndConflict` | same result; mismatched bytes conflict | Passing (T-024) |
+| AC-P0A-004 | `TestCommand_IdempotencySameRequestAndConflict` | application same/concurrent request replays one exact result; mismatched bytes conflict | Passing (T-024/T-067) |
 | AC-P0A-005 | `TestRunLease_RejectsStaleEpochPublication` | stale terminal result rejected and audited | NotRun |
 | AC-P0A-006 | `TestRunRecovery_ExpiryDoesNotImplyStoppedOrRetry` | NeedsReconcile/OutcomeUnknown retained | NotRun |
 | AC-P0A-007 | `TestImpactPlan_UsesOldAndNewReverseClosure` | removed/redirected edge dependents included | Passing (T-024) |
@@ -78,11 +82,11 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-04 | Forged/self human or verifier identity is denied without mutation | NotRun |
 | AC-05 | Skipped/Error/Inconclusive required check is not Passing | NotRun |
 | AC-06 | Replaced artifact bytes fail digest and become Missing/Quarantined | NotRun |
-| AC-07 | Concurrent same key/request yields one result/event group | NotRun |
-| AC-08 | Same key with different request yields idempotency conflict | NotRun |
+| AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP/integration NotRun) |
+| AC-08 | Same key with different request yields idempotency conflict | Passing (application T-067) |
 | AC-09 | Concurrent old version yields one success and one conflict | NotRun |
-| AC-10 | Response loss after commit replays result without a new Run | NotRun |
-| AC-11 | State/audit/outbox/result failure is all commit or all rollback | NotRun |
+| AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP/integration NotRun) |
+| AC-11 | State/audit/outbox/result failure is all commit or all rollback | Passing (application/SQLite T-067) |
 | AC-12 | Lost Start acknowledgement is looked up; unknown blocks restart | NotRun |
 | AC-13 | Expired lease holder cannot finalize or publish | NotRun |
 | AC-14 | Live process with missed heartbeat enters recovery, not redispatch | NotRun |

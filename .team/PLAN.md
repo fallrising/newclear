@@ -84,14 +84,20 @@ execution. P0-A remains Fake-only.
 | T-049 | Independent T-048 design re-review | T-048 | Failed; digest oracle ownership mismatch | Orchestrator |
 | T-051 | Repair digest codec oracle child ownership | T-049 | Accepted by T-052 | Independent reviewer |
 | T-052 | Final T-041/T-048/T-051 design re-review | T-051 | Accepted | Orchestrator |
-| T-043 | SQLite V1 foundation and guarded Done rehydration | T-052 | Awaiting T-062 after T-058/T-061 | Independent reviewer |
+| T-043 | SQLite V1 foundation and guarded Done rehydration | T-052 | Accepted after T-054/T-056/T-058/T-061/T-063/T-064 | Independent reviewer |
 | T-053 | Independent SQLite foundation code/evidence review | T-043 | Failed; five repair groups required | Orchestrator |
-| T-054 | Repair SQLite history, transaction port and attack findings | T-053 | Partial; completed by T-056 | Independent reviewer |
-| T-056 | Complete SQLite public-port and adversarial evidence | T-054 | Repaired by T-058/T-061; awaiting T-062 | Independent reviewer |
+| T-054 | Repair SQLite history, transaction port and attack findings | T-053 | Accepted as completed by T-056/T-058/T-061/T-063/T-064 | Independent reviewer |
+| T-056 | Complete SQLite public-port and adversarial evidence | T-054 | Accepted after T-058/T-061/T-063/T-064 | Independent reviewer |
 | T-057 | Final independent SQLite foundation review | T-056 | Failed; missing approval consumption accepted | Orchestrator |
-| T-058 | Require one immutable consumption per completion Approval | T-057 | Completed; awaiting T-062 | Independent reviewer |
-| T-061 | Preserve canonical result bytes, verifier role and immutable identities | T-058 | Completed; awaiting T-062 | Independent reviewer |
-| T-062 | Final combined SQLite and forward-contract review | T-058,T-061 | Pending | Orchestrator |
+| T-058 | Require one immutable consumption per completion Approval | T-057 | Accepted by T-064 | Independent reviewer |
+| T-061 | Preserve canonical result bytes, verifier role and immutable identities | T-058 | Accepted by T-064 | Independent reviewer |
+| T-062 | Final combined SQLite and forward-contract review | T-058,T-061 | Failed; allocator/result ordering repair required | Orchestrator |
+| T-063 | Repair canonical success-result transaction ordering | T-062 | Accepted by T-064 | Independent reviewer |
+| T-064 | Fresh combined SQLite ordering re-review | T-063 | Accepted | Orchestrator |
+| T-044 | Application command and atomic result slice | T-064 | Accepted after T-066/T-067 | Independent reviewer |
+| T-065 | Independent T-044 application/real-Store review | T-044 | Failed; three repair groups required | Orchestrator |
+| T-066 | Repair application ordering, executor timing and canonical strictness | T-065 | Accepted by T-067 | Independent reviewer |
+| T-067 | Fresh T-044/T-066 application and real-Store re-review | T-066 | Accepted | Orchestrator |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -259,14 +265,62 @@ execution. P0-A remains Fake-only.
   record identities have database-enforced immutability with legal state controls. Its pinned Go,
   named SQLite, full, race, license/import and report gates passed, but it does not accept itself.
   T-062 must independently review the combined T-058/T-061 bytes before T-044 may start.
+- 2026-09-05 — T-062 report
+  `df9adfd90d1a3e72ade61f6ea98736680ce77c826a63c9a11b7607d5324829f4` correctly failed the
+  combined candidate after every other pinned, replay, corruption, Done, approval, verifier, V1,
+  busy, path, project, rollback and race gate passed. Its application-only probe proved the public
+  port cannot persist immutable canonical CommandSuccess bytes containing the real allocator-owned
+  audit sequence and projection cursor: allocating first hits immediate command-result FKs, while a
+  placeholder cannot be replaced. T-063 owns only commit-deferred transaction-local FK ordering and
+  its non-predictive/rollback oracle; T-064 must freshly review the repaired bytes. This is not
+  SQLite acceptance and T-044 remains blocked.
+- 2026-09-05 — T-063 report
+  `38513b1da78d531dce50abb888529c38fd3ef5f08dfe8ee5de1d23a648517744` reports the narrow
+  ordering repair: only Approval-consumption, audit-group and outbox command-result FKs are
+  commit-deferred, while idempotency remains immediate and command results remain digest-verified
+  INSERT-only. Its allocator->canonical-bytes->result replay and missing-result commit rollback
+  oracles plus pinned full/race gates pass. This worker report does not accept itself; T-064 must
+  independently attack the repaired final bytes.
+- 2026-09-05 — Accepted T-064 report
+  `bdd7bfd9522d1cc7e488823ef3e3151b9852c1f036f9b8b9c7fd37f4e984dd8e`: a fresh report-only
+  reviewer independently exercised application-owned allocation ordering against the real Store,
+  commit-time missing-result and cross-project failures, immediate idempotency, all named SQLite
+  adversarial suites, full/race tests, schema/trigger/FK inventories and import denial. The
+  orchestrator inspected the report-only diff and reran pinned module/format/vet, the allocator
+  oracle, full and race gates successfully. This accepts the combined T-043/T-054/T-056/T-058/
+  T-061/T-063 SQLite foundation; T-062 remains an immutable historical FAIL.
+- 2026-09-05 — T-044 report
+  `e7e2b87447c1ec6f0b454574e6dff69aeb4d8fb2ea8837aa71301810f2609575` reports a bounded
+  application-command implementation with pinned unit/SQLite/full/race gates passing. It does not
+  accept itself; T-065 independently found three cross-boundary blockers.
+- 2026-09-05 — T-065 report
+  `fe49ad687ea743756bdba037fd7211f06883a6f8cfb3ca4a24aca5cdfc5fb7ec` correctly failed T-044:
+  real-Store completion hits `completion_record_required` because Done is updated before the record,
+  Dispatch calls the executor declaration inside UnitOfWork, and the canonical codec accepts an
+  OpenAPI-forbidden unknown property/out-of-enum failure code. T-066 owns only these repairs and
+  T-067 must freshly review; all other pinned gates passed.
+- 2026-09-05 — T-066 report
+  `a41772e9a835edb1255b4dc46ab85a198431f45b7ae5adc263aa055f0ced4c6e` reports the bounded
+  three-file repair: CompletionRecord now precedes Done, executor declaration is cloned at
+  construction, and canonical stored results enforce closed OpenAPI shapes/codes and byte identity.
+  Its named, real-Store completion/replay, full and race gates pass; this worker report does not
+  accept itself and T-067 must freshly attack the repaired bytes.
+- 2026-09-05 — Accepted T-067 report
+  `9ac88514c6a875d0ab1fa13897dd97a9a311054c1e86c41671db8d82d5241fa2`: a fresh report-only
+  reviewer independently reproduced T-065's three attacks and passed them after T-066. Its real-
+  Store probe proved Done/version 6, exact joins/Approval consumption, allocator sequence/cursor 3,
+  byte-exact replay and late-failure total rollback; executor construction-only declaration and
+  strict five-operation/fifteen-code canonical matrices passed. Pinned application/SQLite/full/race,
+  idempotency, completion-gate, import/hash/scope and cleanup gates also passed. The orchestrator's
+  separate pinned module/format/vet/named/full/race rerun passed. This accepts T-044/T-066; T-065
+  remains an immutable historical FAIL and T-045 remains NotRun.
 
 ## Current development boundary
 
-- T-040 is in progress through the accepted serial T-043..T-047 child design. T-062 is the exact
-  next task: an independent combined review of the SQLite foundation and T-058/T-061 repairs. T-044
-  may start only after a T-062 PASS is inspected and accepted by the orchestrator. Application
-  commands, Fake, HTTP/SSE, vertical integration, real providers, Slack/Lark, deployment and release
-  remain NotRun/forbidden.
+- T-040 is in progress through the accepted serial T-043..T-047 child design. T-044 is accepted
+  after T-066/T-067. The next child is T-045 deterministic Fake work, but no T-045 execution envelope
+  is issued in this continuation. Fake, HTTP/SSE, vertical integration, real providers, Slack/Lark,
+  deployment and release remain NotRun/forbidden.
 
 ## Resume
 

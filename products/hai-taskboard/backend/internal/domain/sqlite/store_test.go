@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"go/parser"
 	"go/token"
 	"os"
@@ -247,6 +248,84 @@ func TestUnitOfWork_PublicPortSuccessReplayAndFailureInjection(t *testing.T) {
 		t.Fatal("forged projection cursor accepted")
 	}
 	assertCommandWrites(t, store, 1, domain.PhaseDone, 6, 1)
+}
+
+func TestUnitOfWork_CanonicalSuccessUsesAllocatedMetadataWithoutPrediction(t *testing.T) {
+	t.Run("allocated-metadata-replays-byte-exactly", func(t *testing.T) {
+		store, completed := commandFixture(t)
+		defer store.Close()
+		unit := port.UnitOfWork(store)
+		seedAuditSequence, seedCursor := advanceAllocatorStateBeyondOne(t, unit)
+
+		var auditSequence uint64
+		var cursor port.Cursor
+		var canonicalPayload []byte
+		err := unit.Within(t.Context(), func(tx port.Transaction) error {
+			var err error
+			auditSequence, cursor, err = writeCompletionBeforeCanonicalResult(t.Context(), tx, completed)
+			if err != nil {
+				return err
+			}
+			if auditSequence <= seedAuditSequence || cursor.Epoch != seedCursor.Epoch || cursor.Sequence <= seedCursor.Sequence {
+				return errors.New("allocator metadata did not advance")
+			}
+			canonicalPayload = canonicalCommandSuccessPayloadWithMetadata(auditSequence, cursor)
+			if err := tx.StoreCommandResult(t.Context(), port.CommandResult{ID: "command-1", ProjectID: "project-1", Digest: domain.HashBytes(canonicalPayload), Payload: canonicalPayload, TimestampNS: 24}); err != nil {
+				return err
+			}
+			return tx.StoreIdempotency(t.Context(), port.Idempotency{Principal: "operator", ProjectID: "project-1", Operation: "CompleteWorkItem", Key: "allocated-key", RequestDigest: domain.HashString("allocated-request"), CommandID: "command-1", ExpiresAtNS: 999})
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if auditSequence <= 1 || cursor.Sequence <= 1 || bytes.Equal(canonicalPayload, canonicalCommandSuccessPayload()) {
+			t.Fatalf("allocator metadata was predicted: audit=%d cursor=%#v payload=%q", auditSequence, cursor, canonicalPayload)
+		}
+
+		var replayed port.CommandResult
+		err = unit.Within(t.Context(), func(tx port.Transaction) error {
+			idempotency, err := tx.LoadIdempotency(t.Context(), "operator", "project-1", "CompleteWorkItem", "allocated-key")
+			if err != nil {
+				return err
+			}
+			if idempotency.CommandID != "command-1" {
+				return errors.New("idempotency replay returned the wrong command")
+			}
+			replayed, err = tx.LoadCommandResult(t.Context(), "project-1", idempotency.CommandID)
+			return err
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if replayed.Digest != domain.HashBytes(canonicalPayload) || !bytes.Equal(replayed.Payload, canonicalPayload) {
+			t.Fatalf("canonical replay = (%s,%q), want (%s,%q)", replayed.Digest, replayed.Payload, domain.HashBytes(canonicalPayload), canonicalPayload)
+		}
+		assertForeignKeysClean(t, store)
+	})
+
+	t.Run("missing-final-result-fails-at-commit-and-rolls-back", func(t *testing.T) {
+		store, completed := commandFixture(t)
+		defer store.Close()
+		unit := port.UnitOfWork(store)
+		seedAuditSequence, seedCursor := advanceAllocatorStateBeyondOne(t, unit)
+		callbackCompleted := false
+
+		err := unit.Within(t.Context(), func(tx port.Transaction) error {
+			auditSequence, cursor, err := writeCompletionBeforeCanonicalResult(t.Context(), tx, completed)
+			if err != nil {
+				return err
+			}
+			if auditSequence <= seedAuditSequence || cursor.Epoch != seedCursor.Epoch || cursor.Sequence <= seedCursor.Sequence {
+				return errors.New("allocator metadata did not advance")
+			}
+			callbackCompleted = true
+			return nil
+		})
+		if err == nil || !callbackCompleted {
+			t.Fatalf("missing final result = (callback completed %t, error %v), want commit-time failure", callbackCompleted, err)
+		}
+		assertCanonicalOrderingRollback(t, store, seedAuditSequence, seedCursor)
+	})
 }
 
 func TestStoreCompletion_ApprovalConsumptionSetValidationBeforeWrite(t *testing.T) {
@@ -797,6 +876,63 @@ func TestResolveBlocker_OptimisticFailureAndRace(t *testing.T) {
 	}
 }
 
+func advanceAllocatorStateBeyondOne(t *testing.T, unit port.UnitOfWork) (uint64, port.Cursor) {
+	t.Helper()
+	var auditSequence uint64
+	var cursor port.Cursor
+	for index := range 2 {
+		commandID := fmt.Sprintf("seed-command-%d", index+1)
+		auditGroupID := fmt.Sprintf("seed-audit-%d", index+1)
+		payload := fmt.Appendf(nil, `{"seed":%d}`, index+1)
+		err := unit.Within(t.Context(), func(tx port.Transaction) error {
+			if err := tx.StoreCommandResult(t.Context(), port.CommandResult{ID: commandID, ProjectID: "project-1", Digest: domain.HashBytes(payload), Payload: payload, TimestampNS: int64(index + 1)}); err != nil {
+				return err
+			}
+			var err error
+			auditSequence, err = tx.AppendAudit(t.Context(), port.AuditEntry{GroupID: auditGroupID, CommandID: commandID, ProjectID: "project-1", Actor: "operator", Operation: "SeedAllocator", SubjectDigest: domain.HashString(commandID), TimestampNS: int64(index + 1)})
+			if err != nil {
+				return err
+			}
+			cursor, err = tx.AppendProjectionEvent(t.Context(), port.ProjectionEvent{ProjectID: "project-1", PayloadDigest: domain.HashBytes(payload), Payload: payload, AuditSequence: auditSequence})
+			return err
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if auditSequence <= 1 || cursor.Sequence <= 1 {
+		t.Fatalf("allocator state was not advanced beyond one: audit=%d cursor=%#v", auditSequence, cursor)
+	}
+	return auditSequence, cursor
+}
+
+func writeCompletionBeforeCanonicalResult(ctx context.Context, tx port.Transaction, completed completedPair) (uint64, port.Cursor, error) {
+	if err := tx.CreateRun(ctx, completionRun()); err != nil {
+		return 0, port.Cursor{}, err
+	}
+	if err := writeCompletionMaterials(ctx, tx, completed.Record.SubjectDigest()); err != nil {
+		return 0, port.Cursor{}, err
+	}
+	if err := tx.StoreCompletion(ctx, port.Completion{Item: completed.Item, Record: completed.Record, Actor: "operator", TimestampNS: 21, EvidenceIDs: []domain.EvidenceID{"evidence-1"}, ReviewIDs: []domain.ReviewID{"review-1"}, ApprovalIDs: []domain.ApprovalID{"approval-1", "approval-2"}, Consumptions: approvalConsumptions(completed.Record.SubjectDigest())}); err != nil {
+		return 0, port.Cursor{}, err
+	}
+	if err := tx.UpdateWorkItem(ctx, completed.Item, 5); err != nil {
+		return 0, port.Cursor{}, err
+	}
+	sequence, err := tx.AppendAudit(ctx, port.AuditEntry{GroupID: "audit-1", CommandID: "command-1", ProjectID: "project-1", Actor: "operator", Operation: "CompleteWorkItem", SubjectDigest: completed.Record.SubjectDigest(), AfterDigest: domain.HashString("after"), TimestampNS: 22})
+	if err != nil {
+		return 0, port.Cursor{}, err
+	}
+	cursor, err := tx.AppendProjectionEvent(ctx, port.ProjectionEvent{ProjectID: "project-1", PayloadDigest: domain.HashString("event"), Payload: []byte("event"), AuditSequence: sequence})
+	if err != nil {
+		return 0, port.Cursor{}, err
+	}
+	if err := tx.EnqueueOutbox(ctx, port.OutboxIntent{ID: "outbox-1", CommandID: "command-1", AuditGroupID: "audit-1", ProjectID: "project-1", RunID: "run-1", PayloadDigest: domain.HashString("outbox"), TimestampNS: 23}); err != nil {
+		return 0, port.Cursor{}, err
+	}
+	return sequence, cursor, nil
+}
+
 func runCommandTransaction(ctx context.Context, unit port.UnitOfWork, completed completedPair, failureAfter string) error {
 	return unit.Within(ctx, func(tx port.Transaction) error {
 		if err := tx.CreateRun(ctx, completionRun()); err != nil {
@@ -893,6 +1029,10 @@ func completionSubject(t *testing.T) domain.CompletionSubject {
 
 func canonicalCommandSuccessPayload() []byte {
 	return []byte(`{"api_version":"v1","ok":true,"command":{"command_id":"command-1","operation":"CompleteWorkItem","status":"recorded","replayed":false},"result":{"type":"WorkItemCompleted"},"audit":{"sequence":1},"projection_cursor":{"stream_epoch":1,"event_sequence":1},"correlation_id":"correlation-1"}`)
+}
+
+func canonicalCommandSuccessPayloadWithMetadata(auditSequence uint64, cursor port.Cursor) []byte {
+	return fmt.Appendf(nil, `{"api_version":"v1","ok":true,"command":{"command_id":"command-1","operation":"CompleteWorkItem","status":"recorded","replayed":false},"result":{"type":"WorkItemCompleted"},"audit":{"sequence":%d},"projection_cursor":{"stream_epoch":%d,"event_sequence":%d},"correlation_id":"correlation-1"}`, auditSequence, cursor.Epoch, cursor.Sequence)
 }
 
 func canonicalCommandFailurePayload() []byte {
@@ -997,6 +1137,39 @@ func assertCommandWrites(t *testing.T, store *Store, want int, phase domain.Phas
 	mustScan(t, store, `SELECT next_event_sequence FROM instance_state WHERE id=1`, &gotNext)
 	if gotPhase != phase || gotVersion != version || gotNext != nextEvent {
 		t.Fatalf("durable state = (%s,%d,%d)", gotPhase, gotVersion, gotNext)
+	}
+	assertForeignKeysClean(t, store)
+}
+
+func assertCanonicalOrderingRollback(t *testing.T, store *Store, seedAuditSequence uint64, seedCursor port.Cursor) {
+	t.Helper()
+	for _, table := range []string{"runs", "ac_revisions", "work_item_ac_requirements", "dependency_revisions", "candidates", "artifacts", "candidate_artifacts", "evidence", "reviews", "approvals", "approval_consumptions", "completion_records", "completion_record_evidence", "completion_record_reviews", "completion_record_approvals", "idempotency_records", "outbox"} {
+		var count int
+		mustScan(t, store, "SELECT COUNT(*) FROM "+table, &count)
+		if count != 0 {
+			t.Fatalf("%s count after failed commit = %d, want 0", table, count)
+		}
+	}
+	for _, table := range []string{"command_results", "audit_groups", "audit_entries"} {
+		var count uint64
+		mustScan(t, store, "SELECT COUNT(*) FROM "+table, &count)
+		if count != seedAuditSequence {
+			t.Fatalf("%s count after failed commit = %d, want seed count %d", table, count, seedAuditSequence)
+		}
+	}
+	var eventCount uint64
+	mustScan(t, store, "SELECT COUNT(*) FROM projection_events", &eventCount)
+	if eventCount != seedCursor.Sequence {
+		t.Fatalf("projection_events count after failed commit = %d, want seed count %d", eventCount, seedCursor.Sequence)
+	}
+	var phase domain.Phase
+	var version, epoch, nextEvent uint64
+	if err := store.db.QueryRowContext(t.Context(), `SELECT phase,version FROM work_items WHERE project_id='project-1' AND work_item_id='item-transaction'`).Scan(&phase, &version); err != nil {
+		t.Fatal(err)
+	}
+	mustScan(t, store, `SELECT stream_epoch,next_event_sequence FROM instance_state WHERE id=1`, &epoch, &nextEvent)
+	if phase != domain.PhaseQA || version != 5 || epoch != seedCursor.Epoch || nextEvent != seedCursor.Sequence {
+		t.Fatalf("durable state after failed commit = (%s,%d,%d,%d), want (QA,5,%d,%d)", phase, version, epoch, nextEvent, seedCursor.Epoch, seedCursor.Sequence)
 	}
 	assertForeignKeysClean(t, store)
 }

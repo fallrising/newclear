@@ -1,7 +1,7 @@
 # Reproducibility contract
 
-Status: Accepted bootstrap pins; bounded kernel/web evidence exists; SQLite evidence is Candidate
-pending T-062; broader G1 remains NotRun
+Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command evidence; broader
+G1 remains NotRun
 Observed: 2026-09-05
 
 ## Toolchains and packages
@@ -62,25 +62,29 @@ mutation permission.
   vet, unit, race, oracle inventory and authority/module checks.
 - T-033 accepts the exact web lockfile and static fixture shell after pinned Node 24.20.0/pnpm
   11.25.0 frozen install, format, lint, typecheck, 8 Vitest/full jsdom-axe tests and Vite build.
+- T-067 accepts T-044/T-066 application commands after pinned Go 1.27.1 module/format/vet,
+  application/SQLite/full/race, real-Store completion/replay/late-rollback, executor timing, strict
+  canonical OpenAPI, idempotency and completion-gate attacks.
 
-## Persistence candidate evidence
+## Accepted persistence foundation evidence
 
-- T-043/T-054/T-056 with T-058/T-061 repairs resolved `modernc.org/sqlite v1.58.0`, linked SQLite
+- T-043/T-054/T-056 with T-058/T-061/T-063 repairs resolved `modernc.org/sqlite v1.58.0`, linked SQLite
   3.53.4 and passed network-disabled Go 1.27.1 module verification, format, vet, named adversarial,
   full and race tests plus license/import inventory.
-- The candidate covers project-scoped UnitOfWork atomicity, rollback seams, guarded Done load,
+- The accepted foundation covers project-scoped UnitOfWork atomicity, rollback seams, guarded Done load,
   Approval-consumption cardinality, byte-exact command-result replay, verifier-role reconstruction,
   immutable identities, controlled database paths and typed real-lock busy behavior.
-- These are worker reports, not acceptance. T-062 must independently rerun and attack the final
-  combined bytes before this section can move to accepted evidence or unlock T-044.
+- T-063 adds allocator-first canonical result storage with commit-deferred transaction-local result
+  references and missing-result rollback. T-064 independently reran and attacked the combined bytes;
+  report SHA-256 `bdd7bfd9522d1cc7e488823ef3e3151b9852c1f036f9b8b9c7fd37f4e984dd8e` is accepted.
 
 ## Evidence still NotRun
 
-Playwright browser/contrast/zoom/coarse-pointer checks, application-command integration, the Fake
-vertical slice, SQLite backup/restore and disk-full/migration interruption, full SBOM/CVE inventory,
+Playwright browser/contrast/zoom/coarse-pointer checks, the Fake/HTTP/SSE vertical integration,
+SQLite backup/restore and disk-full/migration interruption, full SBOM/CVE inventory,
 action/image provenance, root workflow policy/path selection and TypeScript 7 migration are NotRun.
-The executed SQLite worker evidence is still unaccepted pending T-062. These gaps prevent a G1,
-release or production-complete claim.
+The deterministic Fake and every later vertical-slice family remain unaccepted. These gaps prevent
+a G1, release or production-complete claim.
 
 ## Primary sources
 

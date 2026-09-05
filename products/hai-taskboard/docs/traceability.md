@@ -1,7 +1,8 @@
 # HAI Taskboard Traceability
 
-Status legend: `Specified`, `Skeleton`, `Passing`, `Failing`, `NotRun`, `Deferred`. A check may move
-to `Passing` only with a named executable command and retained output/report.
+Status legend: `Specified`, `Skeleton`, `Candidate`, `Passing`, `Failing`, `NotRun`, `Deferred`. A
+check may move to `Passing` only with a named executable command, retained output/report and the
+required acceptance decision. `Candidate` means executed worker evidence still awaits that decision.
 
 ## G0 design clauses
 
@@ -28,12 +29,25 @@ to `Passing` only with a named executable command and retained output/report.
 - T-030/T-032 static Board-first fixture shell accepted by T-033: pinned frozen install, format,
   lint, typecheck, 8 Vitest tests/full jsdom axe and Vite build passed. Browser Playwright, rendered
   contrast, zoom, keyboard-only and coarse-pointer evidence remains NotRun.
+- T-043/T-054/T-056 SQLite foundation plus T-058/T-061 repairs are a Candidate, not an accepted
+  checkpoint. Worker evidence covers the public UnitOfWork, project scoping, atomic rollback,
+  guarded Done rehydration including nineteen corrupt cases, exact Approval-consumption cardinality,
+  canonical result replay, verifier-role persistence, immutable identities, typed busy behavior and
+  pinned full/race checks. T-062 is the required independent combined review.
+
+## T-041 implementation-contract inventory
+
+`docs/sdd/fake-vertical-slice-implementation.md` freezes V1 package direction, SQLite constraints,
+guarded Done rehydration, command/failure seams, Fake fencing, `/api/v1` boundaries, SSE replay and
+serial child writable scopes. It is design evidence only. Its named persistence, transaction, Fake,
+HTTP/SSE and integration oracles remain NotRun until the corresponding child executes; no existing
+Passing status is broadened.
 
 ## First named G1 acceptance skeletons
 
 | ID | Required test/oracle | Expected evidence | Status |
 | --- | --- | --- | --- |
-| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | CompletionRecord and Done returned together; persistence commit remains NotRun | Passing (T-024) |
+| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | domain completion passes; public SQLite atomic write/load is Candidate pending T-062; application command remains NotRun | Passing (domain T-024) |
 | AC-P0A-002 | `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState` | subtests for missing/failed/skipped/not-run/unknown/stale | Passing (T-024) |
 | AC-P0A-003 | `TestCompleteWorkItem_RejectsSubjectTOCTOU` | no phase/record mutation after subject change | Passing (T-024) |
 | AC-P0A-004 | `TestCommand_IdempotencySameRequestAndConflict` | same result; mismatched bytes conflict | Passing (T-024) |

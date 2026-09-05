@@ -42,6 +42,9 @@ nodes:
   - id: HTB-SPEC-UI
     type: contract
     path: docs/sdd/ui-interaction.md
+  - id: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    type: contract
+    path: docs/sdd/fake-vertical-slice-implementation.md
   - id: HTB-API-V1
     type: contract
     path: api/openapi.yaml
@@ -106,6 +109,21 @@ edges:
   - from: HTB-SPEC-UI
     to: HTB-SPEC-DOMAIN
     kind: depends_on
+  - from: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    to: HTB-SPEC-DOMAIN
+    kind: depends_on
+  - from: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    to: HTB-SPEC-PERSIST
+    kind: depends_on
+  - from: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    to: HTB-SPEC-EXEC
+    kind: depends_on
+  - from: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    to: HTB-API-V1
+    kind: depends_on
+  - from: HTB-TRACE
+    to: HTB-SPEC-VERTICAL-IMPLEMENTATION
+    kind: verifies
   - from: HTB-API-V1
     to: HTB-SPEC-DOMAIN
     kind: depends_on

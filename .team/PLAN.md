@@ -66,6 +66,8 @@ execution. P0-A remains Fake-only.
 | T-009 | Independent final G0 re-review of repaired design set | T-008 | Failed; Redocly environment NotRun | Orchestrator |
 | T-011 | Independent G0 re-review with pinned Redocly environment | T-009 | Accepted | Orchestrator |
 | T-010 | Adopt master SDD, ADRs, mini-SDDs and traceability | T-001..T-009,T-011 | Accepted | Human/orchestrator |
+| T-012 | Forward-only reviewer-report compatibility contract | T-010 | Accepted by T-013 | Independent reviewer |
+| T-013 | Independent reviewer-report compatibility verification | T-012 | Accepted | Orchestrator |
 | T-020 | Contract schemas and deterministic Go domain kernel | T-010 | Accepted after T-022/T-024 | Independent reviewer |
 | T-021 | Independent domain-kernel code/evidence review | T-020 | Failed; public Done constructor bypass | Orchestrator |
 | T-022 | Close public Done-construction authority bypass | T-021 | Accepted by T-024 | Independent reviewer |
@@ -75,7 +77,21 @@ execution. P0-A remains Fake-only.
 | T-031 | Independent web-shell code/evidence review | T-030 | Failed; bootstrap hygiene/pins incomplete | Orchestrator |
 | T-032 | Repair web pins, shadcn provenance and generated-output hygiene | T-031 | Accepted by T-033 | Independent reviewer |
 | T-033 | Independent web-shell re-review | T-032 | Accepted | Orchestrator |
-| T-040 | Persistence, command API, SSE and Fake execution vertical slice | T-024,T-033 | Ready; not started | Independent reviewer |
+| T-040 | Persistence, command API, SSE and Fake execution vertical slice | T-024,T-033 | In progress via child slices | Independent reviewer |
+| T-041 | Executable T-040 design and child-scope decomposition | T-012,T-024,T-033 | Accepted after T-048/T-051/T-052 | Independent reviewer |
+| T-042 | Independent T-041 design/decomposition review | T-041 | Failed; four executable-boundary blockers | Orchestrator |
+| T-048 | Repair T-041 executable boundary findings | T-042 | Accepted after T-052 | Independent reviewer |
+| T-049 | Independent T-048 design re-review | T-048 | Failed; digest oracle ownership mismatch | Orchestrator |
+| T-051 | Repair digest codec oracle child ownership | T-049 | Accepted by T-052 | Independent reviewer |
+| T-052 | Final T-041/T-048/T-051 design re-review | T-051 | Accepted | Orchestrator |
+| T-043 | SQLite V1 foundation and guarded Done rehydration | T-052 | Awaiting T-062 after T-058/T-061 | Independent reviewer |
+| T-053 | Independent SQLite foundation code/evidence review | T-043 | Failed; five repair groups required | Orchestrator |
+| T-054 | Repair SQLite history, transaction port and attack findings | T-053 | Partial; completed by T-056 | Independent reviewer |
+| T-056 | Complete SQLite public-port and adversarial evidence | T-054 | Repaired by T-058/T-061; awaiting T-062 | Independent reviewer |
+| T-057 | Final independent SQLite foundation review | T-056 | Failed; missing approval consumption accepted | Orchestrator |
+| T-058 | Require one immutable consumption per completion Approval | T-057 | Completed; awaiting T-062 | Independent reviewer |
+| T-061 | Preserve canonical result bytes, verifier role and immutable identities | T-058 | Completed; awaiting T-062 | Independent reviewer |
+| T-062 | Final combined SQLite and forward-contract review | T-058,T-061 | Pending | Orchestrator |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -206,13 +222,51 @@ execution. P0-A remains Fake-only.
   entry grammar. Their visible PASS/FAIL semantics and hashes are retained rather than rewriting
   history before push. A later document-tooling task must define/normalize a reviewer-report
   contract and update dependent hashes atomically; this is process debt, not product-test evidence.
+- 2026-09-05 — Accepted T-012 through independent T-013 report
+  `0db20bdab8a8c085d3adbed1589dce5540cf5063711d7be1c5c33a6c0108e5da`: the forward-only
+  reviewer profile preserves all 19 historical report bytes/hashes and records the current
+  validator's exact 11-pass/8-fail compatibility inventory. Future reviewer evidence uses one
+  physical Verification line per result and validates before handoff. Syntax compatibility remains
+  process metadata, never an acceptance oracle; a future reviewer-aware validator adds a new
+  source-digest-keyed overlay rather than rewriting history.
+- 2026-09-05 — T-053 report
+  `f984aac52ea00022c0de3aeb573c158294686a5aad85cf281a801e9e728797ad` correctly failed
+  T-043 acceptance: the migration prevents retained re-completion history, the public persistence
+  port cannot express T-044's required atomic command transaction, SQLite busy handling relies on
+  message text, and the adversarial rehydration/project-scope/determinism/optimistic-mutation
+  evidence is incomplete. T-054 owns the bounded repair; this disposition is not a pass.
+- 2026-09-05 — T-054 report
+  `7c11a63198b68ac120e23aa690e51fcea507da1ff7ade5df71ad5a448356126b` remains PARTIAL:
+  it repaired historical completion identity, explicit path/clock authority, typed SQLite busy
+  classification and the first public UnitOfWork/audit/event allocation seam, but explicitly skipped
+  the real-lock, completion-material and exhaustive corrupt/project association attacks. T-056 owns
+  those remaining checks; this report is not acceptance evidence.
+- 2026-09-05 — T-057 report
+  `37b18b7980f27e8d71ff27847dc9f17fc212155075cac22845598cd0ca27c094` correctly failed
+  the repaired SQLite candidate after all other pinned/application-only/path/project/lock/corruption
+  gates passed: a CompletionRecord with an Approval join but no immutable approval-consumption row
+  still rehydrated as Done. T-058 owns only this one-to-one consumption repair; this is not a pass.
+- 2026-09-05 — T-058 report
+  `a97086b7b5f3435a1b07c7ac37976e257c938d1982b8d7ddcf11dc3cddd6006a` reports the narrow
+  one-to-one Approval/consumption repair: nineteen corrupt-Done cases include missing and balanced
+  duplicate/missing consumption, while multi-Approval, approval-free and ten rollback seams pass.
+  The orchestrator has not accepted it yet because T-061 must close two final T-044 persistence-port
+  omissions and immutable-field protection before one fresh combined review.
+- 2026-09-05 — T-061 report
+  `593eb2c547e1c361ee356d3c228d5e45bbfbac71cdd8967c189c1f48e7a0cab8` reports the bounded
+  forward-contract repair: canonical success/failure response bytes survive project-scoped replay
+  with digest verification, Evidence verifier role survives reload, and command/event plus mutable-
+  record identities have database-enforced immutability with legal state controls. Its pinned Go,
+  named SQLite, full, race, license/import and report gates passed, but it does not accept itself.
+  T-062 must independently review the combined T-058/T-061 bytes before T-044 may start.
 
 ## Current development boundary
 
-- T-040 is Ready but has not started. Its next mini-SDD/task envelope must split persistence,
-  application commands/SSE and deterministic Fake execution into non-overlapping ownership before
-  code changes. First decide how reviewer reports should be validator-normalized without erasing
-  their evidence/hash chain. Real providers, Slack/Lark, deployment and release remain forbidden.
+- T-040 is in progress through the accepted serial T-043..T-047 child design. T-062 is the exact
+  next task: an independent combined review of the SQLite foundation and T-058/T-061 repairs. T-044
+  may start only after a T-062 PASS is inspected and accepted by the orchestrator. Application
+  commands, Fake, HTTP/SSE, vertical integration, real providers, Slack/Lark, deployment and release
+  remain NotRun/forbidden.
 
 ## Resume
 

@@ -1,0 +1,31 @@
+name: Streaming Converter CI
+
+on:
+  pull_request:
+    paths:
+      - tools/streaming-converter/**
+      - .github/workflows/streaming-converter-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - tools/streaming-converter/**
+      - .github/workflows/streaming-converter-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: streaming-converter-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shell-syntax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check shell syntax
+        run: bash -n tools/streaming-converter/init.sh tools/streaming-converter/scripts/*.sh

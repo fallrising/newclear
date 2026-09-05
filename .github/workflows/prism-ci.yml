@@ -50,4 +50,8 @@ jobs:
         with:
           go-version: "1.23.12"
           cache: false
+      - name: Check dependency direction
+        run: scripts/check-dependencies.sh
+      - name: Test dependency guard
+        run: scripts/test-dependency-guard.sh
       - run: make lint test

@@ -1,0 +1,5 @@
+groups:
+  - name: prism-default
+    rules:
+      - alert: PrismWatchdog
+        expr: vector(1)

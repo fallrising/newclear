@@ -1,0 +1,8 @@
+route:
+  receiver: default
+  routes:
+    - receiver: watchdog
+receivers:
+  - name: default
+  - name: watchdog
+  - name: ops-fallback

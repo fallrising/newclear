@@ -1,0 +1,70 @@
+server:
+  http_listen: "127.0.0.1:9090"
+  grpc_listen: "127.0.0.1:4317"
+  mode: all-in-one
+  shutdown_timeout: 30s
+  external_url: ""
+storage:
+  driver: memory
+  dsn: ""
+  options:
+    cluster: ""
+    async_insert: "1"
+  retention:
+    metrics_days: 30
+    logs_days: 14
+    traces_days: 7
+    red_days: 90
+  split: {}
+controlplane:
+  postgres_dsn: ""
+tenancy:
+  mode: single
+  default_tenant: default
+auth:
+  allow_anonymous_read: true
+  jwt_secret_file: secrets/jwt
+ingest:
+  max_request_bytes: 16MiB
+  queue_depth: 64
+  batch:
+    metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
+    logs: {max_items: 5000, max_bytes: 8MiB, flush_interval: 1s}
+    traces: {max_items: 5000, max_bytes: 8MiB, flush_interval: 1s}
+  clock_skew_policy: clamp
+  max_past: 1h
+  max_future: 5m
+  memory_limit: 1GiB
+limits:
+  max_active_series_per_tenant: 500000
+  max_log_line_bytes: 256KiB
+  cardinality_alarm_threshold: 10000
+  auto_drop_high_cardinality: false
+query:
+  timeout: 60s
+  max_concurrent: 16
+  max_concurrent_per_tenant: 8
+  max_lookback: 30d
+  max_range: 7d
+  max_points: 11000
+  max_samples: 50000000
+  lookback_delta: 5m
+  force_fallback: false
+  fallback:
+    max_range: 24h
+    max_rows: 5000000
+rules:
+  path: rules
+  db_sync_interval: 30s
+  eval_timeout: 30s
+  state_flush_interval: 60s
+  builtin_enabled: true
+notify:
+  config_path: alertmanager.yaml
+  deadletter_receiver: ops-fallback
+telemetry:
+  self_monitor: true
+  log_level: info
+  log_format: json
+control:
+  auto_upgrade: false

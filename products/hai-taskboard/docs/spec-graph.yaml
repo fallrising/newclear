@@ -1,0 +1,165 @@
+schema: hai-spec-graph/v1
+authority: git-immutable-bytes
+notes:
+  - Paths are presentation locators; stable IDs carry identity across rename.
+  - Digests and impact plans are computed artifacts and are not hand-edited here.
+  - A changed node invalidates its reverse declared dependency closure in old and new graphs.
+  - Every edge points from consumer to prerequisite; reverse traversal finds affected consumers.
+nodes:
+  - id: HTB-SDD-MASTER
+    type: requirement
+    path: docs/SDD.md
+  - id: HTB-ADR-AUTH
+    type: decision
+    path: docs/adr/ADR-001-authority-and-persistence.md
+  - id: HTB-ADR-DONE
+    type: decision
+    path: docs/adr/ADR-002-domain-and-completion.md
+  - id: HTB-ADR-EXEC
+    type: decision
+    path: docs/adr/ADR-003-execution-and-recovery.md
+  - id: HTB-ADR-RECON
+    type: decision
+    path: docs/adr/ADR-004-incremental-reconciliation.md
+  - id: HTB-ADR-SQLITE
+    type: decision
+    path: docs/adr/ADR-005-sqlite-and-local-deployment.md
+  - id: HTB-ADR-REPO
+    type: decision
+    path: docs/adr/ADR-006-repository-and-delivery-authority.md
+  - id: HTB-SPEC-DOMAIN
+    type: contract
+    path: docs/sdd/domain-and-gates.md
+  - id: HTB-SPEC-PERSIST
+    type: contract
+    path: docs/sdd/persistence-and-recovery.md
+  - id: HTB-SPEC-RECON
+    type: contract
+    path: docs/sdd/reconciliation.md
+  - id: HTB-SPEC-EXEC
+    type: contract
+    path: docs/sdd/executor-and-security.md
+  - id: HTB-SPEC-UI
+    type: contract
+    path: docs/sdd/ui-interaction.md
+  - id: HTB-API-V1
+    type: contract
+    path: api/openapi.yaml
+  - id: HTB-TRACE
+    type: verification
+    path: docs/traceability.md
+  - id: HTB-REPRO
+    type: contract
+    path: docs/reproducibility.md
+  - id: HTB-HANDOFF
+    type: projection
+    path: docs/HANDOFF.md
+  - id: HTB-TASK-DOMAIN
+    type: task
+    path: docs/tasks/HTB-P0A-001-domain-kernel.md
+  - id: HTB-TASK-WEB
+    type: task
+    path: docs/tasks/HTB-P0A-002-web-contract-shell.md
+  - id: HTB-TASK-VERTICAL
+    type: task
+    path: docs/tasks/HTB-P0A-003-fake-vertical-slice.md
+  - id: HTB-TASK-RESTORE
+    type: task
+    path: docs/tasks/HTB-P0A-004-reconcile-restore-handoff.md
+  - id: HTB-TASK-GATE
+    type: task
+    path: docs/tasks/HTB-P0A-005-evidence-gate.md
+edges:
+  - from: HTB-SDD-MASTER
+    to: HTB-ADR-AUTH
+    kind: depends_on
+  - from: HTB-SDD-MASTER
+    to: HTB-ADR-DONE
+    kind: depends_on
+  - from: HTB-SDD-MASTER
+    to: HTB-ADR-EXEC
+    kind: depends_on
+  - from: HTB-SDD-MASTER
+    to: HTB-ADR-RECON
+    kind: depends_on
+  - from: HTB-ADR-SQLITE
+    to: HTB-ADR-AUTH
+    kind: depends_on
+  - from: HTB-SDD-MASTER
+    to: HTB-ADR-REPO
+    kind: depends_on
+  - from: HTB-SPEC-DOMAIN
+    to: HTB-ADR-DONE
+    kind: specifies
+  - from: HTB-SPEC-PERSIST
+    to: HTB-ADR-AUTH
+    kind: specifies
+  - from: HTB-SPEC-PERSIST
+    to: HTB-ADR-EXEC
+    kind: specifies
+  - from: HTB-SPEC-RECON
+    to: HTB-ADR-RECON
+    kind: specifies
+  - from: HTB-SPEC-EXEC
+    to: HTB-ADR-EXEC
+    kind: specifies
+  - from: HTB-SPEC-UI
+    to: HTB-SPEC-DOMAIN
+    kind: depends_on
+  - from: HTB-API-V1
+    to: HTB-SPEC-DOMAIN
+    kind: depends_on
+  - from: HTB-API-V1
+    to: HTB-SPEC-PERSIST
+    kind: depends_on
+  - from: HTB-TRACE
+    to: HTB-SPEC-DOMAIN
+    kind: verifies
+  - from: HTB-TRACE
+    to: HTB-SPEC-PERSIST
+    kind: verifies
+  - from: HTB-TRACE
+    to: HTB-SPEC-RECON
+    kind: verifies
+  - from: HTB-TRACE
+    to: HTB-SPEC-EXEC
+    kind: verifies
+  - from: HTB-TRACE
+    to: HTB-SPEC-UI
+    kind: verifies
+  - from: HTB-REPRO
+    to: HTB-SDD-MASTER
+    kind: depends_on
+  - from: HTB-TASK-DOMAIN
+    to: HTB-REPRO
+    kind: depends_on
+  - from: HTB-TASK-WEB
+    to: HTB-REPRO
+    kind: depends_on
+  - from: HTB-HANDOFF
+    to: HTB-SDD-MASTER
+    kind: produces
+  - from: HTB-TASK-DOMAIN
+    to: HTB-SPEC-DOMAIN
+    kind: depends_on
+  - from: HTB-TASK-DOMAIN
+    to: HTB-SPEC-RECON
+    kind: depends_on
+  - from: HTB-TASK-WEB
+    to: HTB-SPEC-UI
+    kind: depends_on
+  - from: HTB-TASK-WEB
+    to: HTB-API-V1
+    kind: depends_on
+  - from: HTB-TASK-VERTICAL
+    to: HTB-TASK-DOMAIN
+    kind: depends_on
+  - from: HTB-TASK-VERTICAL
+    to: HTB-TASK-WEB
+    kind: depends_on
+  - from: HTB-TASK-RESTORE
+    to: HTB-TASK-VERTICAL
+    kind: depends_on
+  - from: HTB-TASK-GATE
+    to: HTB-TASK-RESTORE
+    kind: verifies

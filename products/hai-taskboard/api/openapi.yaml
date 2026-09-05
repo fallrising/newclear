@@ -1,0 +1,1061 @@
+openapi: 3.1.0
+info:
+  title: HAI Taskboard API
+  version: 0.1.0-p0a
+  license:
+    name: MIT
+    identifier: MIT
+  description: >-
+    Fake-only P0-A wire contract. OpenAPI owns transport shapes, not lifecycle, authorization,
+    canonical digest, transaction or Done invariants; the Go application rechecks all of them.
+servers:
+  - url: /api/v1
+security:
+  - localSession: []
+paths:
+  /projects:
+    get:
+      summary: List project projections
+      operationId: listProjects
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: Project projections and a consistent stream cursor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectList"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+    post:
+      summary: Create a project through an idempotent command
+      operationId: createProject
+      x-hai-permission: project.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+      responses:
+        "200":
+          description: Stored idempotent command result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandSuccess"
+        default:
+          $ref: "#/components/responses/Error"
+        "400": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    get:
+      summary: Read a project projection
+      operationId: getProject
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: Project projection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/board:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    get:
+      summary: Read a consistent Board and Attention snapshot
+      operationId: getProjectBoard
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: Board and attention projection at one cursor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoardSnapshot"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/attention:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    get:
+      summary: Read actionable attention objects
+      operationId: getProjectAttention
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: Deduplicated decision, blocker, conflict and recovery projection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttentionSnapshot"
+        "401": { $ref: "#/components/responses/Error" }
+        default:
+          $ref: "#/components/responses/Error"
+  /projects/{project_id}/work-items:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    get:
+      summary: List WorkItem projections
+      operationId: listWorkItems
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: WorkItem projections.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [api_version, items, cursor]
+                properties:
+                  api_version: { const: v1 }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/WorkItemSummary" }
+                  cursor: { $ref: "#/components/schemas/StreamCursor" }
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/work-items/{work_item_id}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/WorkItemID"
+    get:
+      summary: Read a WorkItem detail projection
+      operationId: getWorkItem
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: WorkItem detail projection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkItemDetail"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/commands:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    post:
+      summary: Submit one typed application command
+      operationId: submitCommand
+      x-hai-permission: operation-specific
+      description: >-
+        Actor identity comes from the authenticated local session. The route project_id must equal
+        the command target. Unknown fields and unknown V1 operations are rejected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandRequest"
+      responses:
+        "200":
+          description: Stored command result, including rejected domain commands.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/CommandSuccess"
+                  - $ref: "#/components/schemas/CommandFailure"
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/commands/{command_id}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/CommandID"
+    get:
+      summary: Recover a previously stored command result
+      operationId: getCommandResult
+      x-hai-permission: original-actor-or-audit.read
+      responses:
+        "200":
+          description: Existing stored result; lookup never re-executes a command.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/CommandSuccess"
+                  - $ref: "#/components/schemas/CommandFailure"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/events:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: "^[1-9][0-9]*:[0-9]+$"
+        description: stream_epoch:event_sequence; if Last-Event-ID is also sent they must match.
+    get:
+      summary: Stream resumable project projections
+      operationId: streamProjectEvents
+      x-hai-permission: project.read-continuously
+      responses:
+        "200":
+          description: >-
+            Persisted SSE projections ordered within an epoch. Slow, revoked or reset-required
+            consumers are closed without blocking authoritative transactions.
+          content:
+            text/event-stream:
+              schema:
+                description: Logical JSON value carried by one SSE data field; event/id framing is text/event-stream.
+                oneOf:
+                  - $ref: "#/components/schemas/ProjectionEvent"
+                  - $ref: "#/components/schemas/ProjectionResetRequired"
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/impact-plans/{impact_plan_id}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - name: impact_plan_id
+        in: path
+        required: true
+        schema: { type: string, pattern: "^iplan_[0-9A-HJKMNP-TV-Z]{10,26}$" }
+    get:
+      summary: Read an immutable impact preview
+      operationId: getImpactPlan
+      x-hai-permission: project.read
+      responses:
+        "200":
+          description: Immutable old/new graph impact projection and activation subject.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpactPlan"
+        "401": { $ref: "#/components/responses/Error" }
+        default:
+          $ref: "#/components/responses/Error"
+  /projects/{project_id}/artifacts/{sha256}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - name: sha256
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/SHA256" }
+    get:
+      summary: Read a bound immutable artifact by digest
+      operationId: getArtifact
+      x-hai-permission: artifact.read-and-project.read
+      responses:
+        "200":
+          description: Bound Present object whose bytes match the path digest.
+          headers:
+            ETag:
+              schema: { type: string }
+            X-Content-Type-Options:
+              schema: { type: string, const: nosniff }
+          content:
+            application/octet-stream:
+              schema: { type: string, contentMediaType: application/octet-stream }
+        default:
+          $ref: "#/components/responses/Error"
+        "401": { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    localSession:
+      type: apiKey
+      in: cookie
+      name: __Host-hai_session
+      description: Loopback local session; commands also require same-origin validation.
+  parameters:
+    ProjectID:
+      name: project_id
+      in: path
+      required: true
+      schema: { $ref: "#/components/schemas/ProjectID" }
+    WorkItemID:
+      name: work_item_id
+      in: path
+      required: true
+      schema: { $ref: "#/components/schemas/WorkItemID" }
+    CommandID:
+      name: command_id
+      in: path
+      required: true
+      schema: { $ref: "#/components/schemas/CommandID" }
+  responses:
+    Error:
+      description: Authorized structured error; details never contain artifact/log contents.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/APIError" }
+  schemas:
+    ProjectID:
+      type: string
+      pattern: "^prj_[0-9A-HJKMNP-TV-Z]{10,26}$"
+    WorkItemID:
+      type: string
+      pattern: "^wi_[0-9A-HJKMNP-TV-Z]{10,26}$"
+    RunID:
+      type: string
+      pattern: "^run_[0-9A-HJKMNP-TV-Z]{10,26}$"
+    CommandID:
+      type: string
+      pattern: "^cmd_[0-9A-HJKMNP-TV-Z]{10,26}$"
+    SHA256:
+      type: string
+      pattern: "^sha256:[0-9a-f]{64}$"
+    Timestamp:
+      type: string
+      format: date-time
+      description: UTC RFC 3339 with nanosecond normalization.
+    StreamCursor:
+      type: object
+      additionalProperties: false
+      required: [stream_epoch, event_sequence]
+      properties:
+        stream_epoch: { type: integer, minimum: 1 }
+        event_sequence: { type: integer, minimum: 0 }
+    Project:
+      type: object
+      additionalProperties: false
+      required: [project_id, name, version, repository, cursor]
+      properties:
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        version: { type: integer, minimum: 1 }
+        repository:
+          type: object
+          additionalProperties: false
+          required: [binding_id, root_hint, approved_ref]
+          properties:
+            binding_id: { type: string, minLength: 1, maxLength: 80 }
+            root_hint: { type: string, minLength: 1, maxLength: 512 }
+            approved_ref: { type: string, minLength: 1, maxLength: 200 }
+        cursor: { $ref: "#/components/schemas/StreamCursor" }
+    ProjectList:
+      type: object
+      additionalProperties: false
+      required: [api_version, items, cursor]
+      properties:
+        api_version: { const: v1 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+        cursor: { $ref: "#/components/schemas/StreamCursor" }
+    Phase:
+      type: string
+      enum: [Draft, Ready, Developing, Review, QA, Done, Canceled]
+    ConditionCode:
+      type: string
+      enum: [Blocked, Stale, OutcomeUnknown, CancelRequested, DoneStale]
+    WorkItemSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [work_item_id, title, phase, version, human_owner_id, effective_satisfied,
+         required_ac_count, covered_ac_count, active_blocker_count, conditions]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        phase: { $ref: "#/components/schemas/Phase" }
+        version: { type: integer, minimum: 1 }
+        human_owner_id: { type: string, minLength: 1, maxLength: 120 }
+        effective_satisfied: { type: boolean }
+        required_ac_count: { type: integer, minimum: 0 }
+        covered_ac_count: { type: integer, minimum: 0 }
+        active_blocker_count: { type: integer, minimum: 0 }
+        conditions:
+          type: array
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/ConditionCode" }
+        current_run:
+          oneOf:
+            - $ref: "#/components/schemas/RunSummary"
+            - type: "null"
+    RunSummary:
+      type: object
+      additionalProperties: false
+      required: [run_id, dispatch_state, observed_state, reconciliation_state]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        dispatch_state:
+          type: string
+          enum: [Pending, Claimed, Sent, Acknowledged, FailedToDispatch]
+        observed_state:
+          type: string
+          enum: [Unknown, Starting, Running, WaitingHuman, Succeeded, Failed, TimedOut, Canceled, Interrupted]
+        reconciliation_state:
+          type: string
+          enum: [None, NeedsReconcile, Reconciling, Resolved]
+        last_observed_at:
+          oneOf:
+            - $ref: "#/components/schemas/Timestamp"
+            - type: "null"
+    BoardSnapshot:
+      type: object
+      additionalProperties: false
+      required: [api_version, projection, cursor]
+      properties:
+        api_version: { const: v1 }
+        projection:
+          type: object
+          additionalProperties: false
+          required: [kind, project_id, lanes, attention_count]
+          properties:
+            kind: { const: project_board/v1 }
+            project_id: { $ref: "#/components/schemas/ProjectID" }
+            lanes:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required: [key, items]
+                properties:
+                  key:
+                    type: string
+                    enum: [Blocked, Draft, Ready, Developing, Review, QA, Done, Canceled]
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/WorkItemSummary" }
+            attention_count: { type: integer, minimum: 0 }
+        cursor: { $ref: "#/components/schemas/StreamCursor" }
+    AttentionSnapshot:
+      type: object
+      additionalProperties: false
+      required: [api_version, project_id, items, cursor]
+      properties:
+        api_version: { const: v1 }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AttentionItem" }
+        cursor: { $ref: "#/components/schemas/StreamCursor" }
+    AttentionItem:
+      type: object
+      additionalProperties: false
+      required: [attention_id, kind, subject_kind, subject_id, title, cause, resolver_id, risk, created_at, available_actions]
+      properties:
+        attention_id: { type: string, pattern: "^attn_[0-9A-HJKMNP-TV-Z]{10,26}$" }
+        kind:
+          type: string
+          enum: [blocker, question, approval, version_conflict, stale_input, impact_plan_stale, outcome_unknown, cancel_requested, disconnected]
+        subject_kind: { type: string, enum: [project, work_item, run, impact_plan, stream] }
+        subject_id: { type: string, minLength: 1, maxLength: 80 }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        cause: { type: string, minLength: 1, maxLength: 2000 }
+        resolver_id: { type: string, minLength: 1, maxLength: 120 }
+        risk: { type: string, enum: [informational, blocks_transition, blocks_dispatch, blocks_publish, blocks_done] }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        expires_at:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+        snoozed_until:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+        available_actions:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 80 }
+    ImpactPlan:
+      type: object
+      additionalProperties: false
+      required:
+        [api_version, impact_plan_id, project_id, plan_digest, base_graph_revision_digest,
+         proposed_graph_revision_digest, policy_revision_digest, algorithm_version, changed_nodes,
+         affected_items, activation_subject_digest, created_at]
+      properties:
+        api_version: { const: v1 }
+        impact_plan_id: { type: string, pattern: "^iplan_[0-9A-HJKMNP-TV-Z]{10,26}$" }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        plan_digest: { $ref: "#/components/schemas/SHA256" }
+        base_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        proposed_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        algorithm_version: { type: string, const: declared-old-new-reverse-closure/v1 }
+        changed_nodes:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 120 }
+        affected_items:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [work_item_id, applicability, cause_paths, reuse_decision]
+            properties:
+              work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+              applicability: { type: string, enum: [Fresh, Stale, Unknown] }
+              cause_paths:
+                type: array
+                items:
+                  type: array
+                  items: { type: string, minLength: 1, maxLength: 120 }
+              reuse_decision: { type: string, enum: [Reusable, Rebuild, Unknown] }
+        activation_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+    WorkItemDetail:
+      type: object
+      additionalProperties: false
+      required:
+        [summary, goal, accepted_ac_revisions, dependencies, blockers, runs, candidates, reviews,
+         evidence, approvals, completion_records, audit]
+      properties:
+        summary: { $ref: "#/components/schemas/WorkItemSummary" }
+        goal: { type: string, minLength: 1, maxLength: 8000 }
+        accepted_ac_revisions:
+          type: array
+          items: { $ref: "#/components/schemas/ACRevisionRef" }
+        dependencies:
+          type: array
+          items: { $ref: "#/components/schemas/DependencyRef" }
+        blockers:
+          type: array
+          items: { $ref: "#/components/schemas/Blocker" }
+        runs:
+          type: array
+          items: { $ref: "#/components/schemas/RunSummary" }
+        candidates:
+          type: array
+          items: { $ref: "#/components/schemas/Candidate" }
+        reviews:
+          type: array
+          items: { $ref: "#/components/schemas/Review" }
+        evidence:
+          type: array
+          items: { $ref: "#/components/schemas/Evidence" }
+        approvals:
+          type: array
+          items: { $ref: "#/components/schemas/Approval" }
+        completion_records:
+          type: array
+          items: { $ref: "#/components/schemas/CompletionRecord" }
+        audit:
+          type: array
+          items: { $ref: "#/components/schemas/AuditEntry" }
+    ACRevisionRef:
+      type: object
+      additionalProperties: false
+      required: [ac_id, revision_digest]
+      properties:
+        ac_id: { type: string, pattern: "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$" }
+        revision_digest: { $ref: "#/components/schemas/SHA256" }
+    DependencyRef:
+      type: object
+      additionalProperties: false
+      required: [edge_kind, prerequisite_id, graph_revision_digest]
+      properties:
+        edge_kind: { type: string, enum: [specifies, depends_on, verifies, produces] }
+        prerequisite_id: { type: string, minLength: 1, maxLength: 120 }
+        graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+    Blocker:
+      type: object
+      additionalProperties: false
+      required: [blocker_id, kind, reason, required_input, resolver_id, created_at]
+      properties:
+        blocker_id: { type: string, minLength: 1, maxLength: 80 }
+        kind: { type: string, minLength: 1, maxLength: 80 }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+        required_input: { type: string, minLength: 1, maxLength: 2000 }
+        resolver_id: { type: string, minLength: 1, maxLength: 120 }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        due_at:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+        resolved_at:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+    ArtifactLocator:
+      type: object
+      additionalProperties: false
+      required: [sha256, media_type, byte_length, availability]
+      properties:
+        sha256: { $ref: "#/components/schemas/SHA256" }
+        media_type: { type: string, minLength: 1, maxLength: 160 }
+        byte_length: { type: integer, minimum: 0, maximum: 10485760 }
+        availability: { type: string, enum: [Present, Missing, Quarantined] }
+        href: { type: string, pattern: "^/api/v1/projects/[^/]+/artifacts/sha256:[0-9a-f]{64}$" }
+        disposition: { type: string, enum: [inline, attachment] }
+    Candidate:
+      type: object
+      additionalProperties: false
+      required: [candidate_id, run_id, candidate_digest, input_subject_digest, created_at, artifact_manifest]
+      properties:
+        candidate_id: { type: string, minLength: 1, maxLength: 80 }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        candidate_digest: { $ref: "#/components/schemas/SHA256" }
+        input_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        artifact_manifest:
+          type: array
+          items: { $ref: "#/components/schemas/ArtifactLocator" }
+    Review:
+      type: object
+      additionalProperties: false
+      required: [review_id, completion_subject_digest, reviewer_id, reviewer_class, verdict, created_at]
+      properties:
+        review_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        reviewer_id: { type: string, minLength: 1, maxLength: 120 }
+        reviewer_class: { type: string, enum: [producer, independent, human] }
+        verdict: { type: string, enum: [Approved, ChangesRequested, Rejected] }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+    Evidence:
+      type: object
+      additionalProperties: false
+      required:
+        [evidence_id, completion_subject_digest, ac_id, ac_revision_digest, observation_verdict,
+         review_disposition, applicability, material_availability, verifier_id, verifier_class,
+         recipe_digest, environment_digest, observed_at, report]
+      properties:
+        evidence_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        ac_id: { type: string, minLength: 1, maxLength: 80 }
+        ac_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        observation_verdict: { type: string, enum: [Passing, Failing, Inconclusive, Error] }
+        review_disposition: { type: string, enum: [Pending, Accepted, Rejected] }
+        applicability: { type: string, enum: [Fresh, Stale, Unknown] }
+        material_availability: { type: string, enum: [Present, Missing, Quarantined] }
+        verifier_id: { type: string, minLength: 1, maxLength: 120 }
+        verifier_class: { type: string, enum: [producer, independent, human] }
+        recipe_digest: { $ref: "#/components/schemas/SHA256" }
+        environment_digest: { $ref: "#/components/schemas/SHA256" }
+        observed_at: { $ref: "#/components/schemas/Timestamp" }
+        report: { $ref: "#/components/schemas/ArtifactLocator" }
+    Approval:
+      type: object
+      additionalProperties: false
+      required: [approval_id, request_id, subject_digest, decision, human_id, decided_at]
+      properties:
+        approval_id: { type: string, minLength: 1, maxLength: 80 }
+        request_id: { type: string, minLength: 1, maxLength: 80 }
+        subject_digest: { $ref: "#/components/schemas/SHA256" }
+        decision: { type: string, enum: [Approved, Rejected] }
+        human_id: { type: string, minLength: 1, maxLength: 120 }
+        decided_at: { $ref: "#/components/schemas/Timestamp" }
+        expires_at:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+        consumed_at:
+          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+    CompletionRecord:
+      type: object
+      additionalProperties: false
+      required:
+        [completion_record_id, completion_subject_digest, evidence_ids, review_ids, approval_ids,
+         accepted_graph_revision_digest, policy_revision_digest, completed_by, completed_at,
+         effective_satisfied]
+      properties:
+        completion_record_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        evidence_ids:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 80 }
+        review_ids:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 80 }
+        approval_ids:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 80 }
+        accepted_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        completed_by: { type: string, minLength: 1, maxLength: 120 }
+        completed_at: { $ref: "#/components/schemas/Timestamp" }
+        effective_satisfied: { type: boolean }
+    AuditEntry:
+      type: object
+      additionalProperties: false
+      required: [sequence, group_id, actor_id, operation, subject_kind, subject_id, occurred_at]
+      properties:
+        sequence: { type: integer, minimum: 1 }
+        group_id: { type: string, minLength: 1, maxLength: 80 }
+        actor_id: { type: string, minLength: 1, maxLength: 120 }
+        operation: { type: string, minLength: 1, maxLength: 120 }
+        subject_kind: { type: string, minLength: 1, maxLength: 80 }
+        subject_id: { type: string, minLength: 1, maxLength: 120 }
+        occurred_at: { $ref: "#/components/schemas/Timestamp" }
+    ProjectionEvent:
+      type: object
+      additionalProperties: false
+      required: [api_version, cursor, event_type, project_id, resource_kind, resource_id, resource_version, projection]
+      properties:
+        api_version: { const: v1 }
+        cursor: { $ref: "#/components/schemas/StreamCursor" }
+        event_type:
+          type: string
+          enum: [project.changed, work_item.changed, attention.changed, impact_plan.created, run.changed]
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        resource_kind: { type: string, enum: [project, work_item, attention, impact_plan, run] }
+        resource_id: { type: string, minLength: 1, maxLength: 120 }
+        resource_version: { type: integer, minimum: 1 }
+        projection:
+          type: object
+          additionalProperties: true
+          description: Versioned projection named by event_type; never a command payload.
+    ProjectionResetRequired:
+      type: object
+      additionalProperties: false
+      required: [api_version, reason, current_epoch, minimum_sequence, snapshot_url]
+      properties:
+        api_version: { const: v1 }
+        reason: { type: string, enum: [epoch_mismatch, retention_expired, slow_consumer, authorization_revoked] }
+        current_epoch: { type: integer, minimum: 1 }
+        minimum_sequence: { type: integer, minimum: 0 }
+        snapshot_url: { type: string, pattern: "^/api/v1/projects/[^/]+/(board|attention)$" }
+    CompletionSubject:
+      type: object
+      additionalProperties: false
+      required:
+        [project_id, work_item_id, work_item_version, candidate_id, candidate_digest, run_id,
+         run_input_digest, required_ac_revisions, accepted_graph_revision_digest,
+         policy_revision_digest, completion_recipe_digest]
+      properties:
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        work_item_version: { type: integer, minimum: 1 }
+        candidate_id: { type: string, minLength: 1, maxLength: 80 }
+        candidate_digest: { $ref: "#/components/schemas/SHA256" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        run_input_digest: { $ref: "#/components/schemas/SHA256" }
+        required_ac_revisions:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/ACRevisionRef" }
+        accepted_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        completion_recipe_digest: { $ref: "#/components/schemas/SHA256" }
+        integration_base_digest:
+          oneOf: [{ $ref: "#/components/schemas/SHA256" }, { type: "null" }]
+    CreateProjectRequest:
+      type: object
+      additionalProperties: false
+      required: [command_id, idempotency_key, project_id, expected_version, issued_at, name, repository]
+      properties:
+        command_id: { $ref: "#/components/schemas/CommandID" }
+        idempotency_key: { type: string, format: uuid }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        expected_version: { type: integer, const: 0 }
+        issued_at: { $ref: "#/components/schemas/Timestamp" }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        repository:
+          type: object
+          additionalProperties: false
+          required: [root_hint, approved_ref]
+          properties:
+            root_hint: { type: string, minLength: 1, maxLength: 512 }
+            approved_ref: { type: string, minLength: 1, maxLength: 200 }
+    CommandRequest:
+      type: object
+      additionalProperties: false
+      required: [command_id, idempotency_key, operation, expected_version, issued_at, payload]
+      properties:
+        command_id: { $ref: "#/components/schemas/CommandID" }
+        idempotency_key: { type: string, format: uuid }
+        operation:
+          type: string
+          enum:
+            [CreateWorkItem, UpdateWorkItemMetadata, MarkReady, DispatchRun, SubmitCandidate,
+             RequestQA, RequestRework, CompleteWorkItem, ReopenWorkItem, RequestCancellation,
+             FinalizeCancellation, AddBlocker, ResolveBlocker, AcceptSpecificationRevision,
+             PreviewImpactPlan, ActivateImpactPlan, ReconcileRun, PublishFixtureObservation,
+             PublishFixtureReview, PublishFixtureEvidence, ApproveSubject]
+        expected_version: { type: integer, minimum: 0 }
+        issued_at: { $ref: "#/components/schemas/Timestamp" }
+        payload: { type: object }
+      allOf:
+        - if: { properties: { operation: { const: CreateWorkItem } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/CreateWorkItemPayload" } } }
+        - if: { properties: { operation: { const: UpdateWorkItemMetadata } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/UpdateWorkItemMetadataPayload" } } }
+        - if: { properties: { operation: { const: MarkReady } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/SimpleWorkItemPayload" } } }
+        - if: { properties: { operation: { const: DispatchRun } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/DispatchRunPayload" } } }
+        - if: { properties: { operation: { const: SubmitCandidate } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/SubmitCandidatePayload" } } }
+        - if: { properties: { operation: { const: RequestQA } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/RequestQAPayload" } } }
+        - if: { properties: { operation: { const: RequestRework } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/RequestReworkPayload" } } }
+        - if: { properties: { operation: { const: CompleteWorkItem } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/CompleteWorkItemPayload" } } }
+        - if: { properties: { operation: { const: ReopenWorkItem } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/ReopenWorkItemPayload" } } }
+        - if: { properties: { operation: { const: RequestCancellation } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/RequestCancellationPayload" } } }
+        - if: { properties: { operation: { const: FinalizeCancellation } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/FinalizeCancellationPayload" } } }
+        - if: { properties: { operation: { const: AddBlocker } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/AddBlockerPayload" } } }
+        - if: { properties: { operation: { const: ResolveBlocker } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/ResolveBlockerPayload" } } }
+        - if: { properties: { operation: { const: AcceptSpecificationRevision } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/AcceptSpecificationRevisionPayload" } } }
+        - if: { properties: { operation: { const: PreviewImpactPlan } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/PreviewImpactPlanPayload" } } }
+        - if: { properties: { operation: { const: ActivateImpactPlan } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/ActivateImpactPlanPayload" } } }
+        - if: { properties: { operation: { const: ReconcileRun } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/ReconcileRunPayload" } } }
+        - if: { properties: { operation: { const: PublishFixtureObservation } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureObservationPayload" } } }
+        - if: { properties: { operation: { const: PublishFixtureReview } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureReviewPayload" } } }
+        - if: { properties: { operation: { const: PublishFixtureEvidence } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureEvidencePayload" } } }
+        - if: { properties: { operation: { const: ApproveSubject } } }
+          then: { properties: { payload: { $ref: "#/components/schemas/ApproveSubjectPayload" } } }
+    CreateWorkItemPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, title, goal, owner_id, required_ac_revisions]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        goal: { type: string, minLength: 1, maxLength: 8000 }
+        owner_id: { type: string, minLength: 1, maxLength: 120 }
+        required_ac_revisions:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/ACRevisionRef" }
+    UpdateWorkItemMetadataPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id]
+      anyOf:
+        - required: [title]
+        - required: [goal]
+        - required: [owner_id]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        goal: { type: string, minLength: 1, maxLength: 8000 }
+        owner_id: { type: string, minLength: 1, maxLength: 120 }
+    SimpleWorkItemPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+    DispatchRunPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, adapter_id, scenario_id]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        adapter_id: { type: string, const: fake/v1 }
+        scenario_id: { type: string, minLength: 1, maxLength: 120 }
+        retry_of_run_id: { $ref: "#/components/schemas/RunID" }
+    SubmitCandidatePayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, run_id, candidate]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        candidate: { $ref: "#/components/schemas/Candidate" }
+    RequestQAPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, candidate_id, completion_subject_digest]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        candidate_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+    RequestReworkPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, subject_digest, reason]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        subject_digest: { $ref: "#/components/schemas/SHA256" }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    CompleteWorkItemPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, completion_subject]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        completion_subject: { $ref: "#/components/schemas/CompletionSubject" }
+    ReopenWorkItemPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, target_phase, reason]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        target_phase: { type: string, enum: [Draft, Ready] }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    RequestCancellationPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, run_id, reason]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    FinalizeCancellationPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, run_id, verified_stopped, observation_digest]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        verified_stopped: { const: true }
+        observation_digest: { $ref: "#/components/schemas/SHA256" }
+    AddBlockerPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, blocker]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        blocker: { $ref: "#/components/schemas/Blocker" }
+    ResolveBlockerPayload:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, blocker_id, resolution_ref]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        blocker_id: { type: string, minLength: 1, maxLength: 80 }
+        resolution_ref: { type: string, minLength: 1, maxLength: 200 }
+    AcceptSpecificationRevisionPayload:
+      type: object
+      additionalProperties: false
+      required: [commit_oid, manifest_digest]
+      properties:
+        commit_oid: { type: string, pattern: "^[0-9a-f]{40,64}$" }
+        manifest_digest: { $ref: "#/components/schemas/SHA256" }
+    PreviewImpactPlanPayload:
+      type: object
+      additionalProperties: false
+      required: [commit_oid, manifest_digest, base_graph_revision_digest]
+      properties:
+        commit_oid: { type: string, pattern: "^[0-9a-f]{40,64}$" }
+        manifest_digest: { $ref: "#/components/schemas/SHA256" }
+        base_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+    ActivateImpactPlanPayload:
+      type: object
+      additionalProperties: false
+      required: [impact_plan_id, impact_plan_digest, expected_graph_version, approval_subject_digest]
+      properties:
+        impact_plan_id: { type: string, pattern: "^iplan_[0-9A-HJKMNP-TV-Z]{10,26}$" }
+        impact_plan_digest: { $ref: "#/components/schemas/SHA256" }
+        expected_graph_version: { type: integer, minimum: 0 }
+        approval_subject_digest: { $ref: "#/components/schemas/SHA256" }
+    ReconcileRunPayload:
+      type: object
+      additionalProperties: false
+      required: [run_id, lease_epoch, restore_generation, process_observation, side_effect_outcome]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        lease_epoch: { type: integer, minimum: 1 }
+        restore_generation: { type: integer, minimum: 1 }
+        process_observation: { type: string, enum: [Unknown, Live, Exited] }
+        side_effect_outcome: { type: string, enum: [NotApplicable, Confirmed, OutcomeUnknown] }
+        execution_handle_digest: { $ref: "#/components/schemas/SHA256" }
+    PublishFixtureObservationPayload:
+      type: object
+      additionalProperties: false
+      required: [run_id, lease_epoch, restore_generation, observed_state, side_effect_outcome]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        lease_epoch: { type: integer, minimum: 1 }
+        restore_generation: { type: integer, minimum: 1 }
+        observed_state:
+          type: string
+          enum: [Starting, Running, WaitingHuman, Succeeded, Failed, TimedOut, Canceled, Interrupted]
+        side_effect_outcome: { type: string, enum: [NotApplicable, Confirmed, OutcomeUnknown] }
+        execution_handle_digest: { $ref: "#/components/schemas/SHA256" }
+    PublishFixtureReviewPayload:
+      type: object
+      additionalProperties: false
+      required: [run_id, lease_epoch, restore_generation, review]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        lease_epoch: { type: integer, minimum: 1 }
+        restore_generation: { type: integer, minimum: 1 }
+        review: { $ref: "#/components/schemas/Review" }
+    PublishFixtureEvidencePayload:
+      type: object
+      additionalProperties: false
+      required: [run_id, lease_epoch, restore_generation, evidence]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        lease_epoch: { type: integer, minimum: 1 }
+        restore_generation: { type: integer, minimum: 1 }
+        evidence: { $ref: "#/components/schemas/Evidence" }
+    ApproveSubjectPayload:
+      type: object
+      additionalProperties: false
+      required: [approval_request_id, subject_digest, decision]
+      properties:
+        approval_request_id: { type: string, minLength: 1, maxLength: 80 }
+        subject_digest: { $ref: "#/components/schemas/SHA256" }
+        decision: { type: string, enum: [Approved, Rejected] }
+    CommandSuccess:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, command, result, audit, projection_cursor, correlation_id]
+      properties:
+        api_version: { const: v1 }
+        ok: { const: true }
+        command:
+          type: object
+          additionalProperties: false
+          required: [command_id, operation, status, replayed]
+          properties:
+            command_id: { $ref: "#/components/schemas/CommandID" }
+            operation: { type: string }
+            status: { type: string, const: recorded }
+            replayed: { type: boolean }
+        result:
+          type: object
+          additionalProperties: true
+          required: [type]
+          properties: { type: { type: string } }
+        audit:
+          type: object
+          additionalProperties: false
+          required: [sequence]
+          properties: { sequence: { type: integer, minimum: 1 } }
+        projection_cursor: { $ref: "#/components/schemas/StreamCursor" }
+        correlation_id: { type: string, minLength: 1, maxLength: 80 }
+    CommandFailure:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, command_id, error, correlation_id]
+      properties:
+        api_version: { const: v1 }
+        ok: { const: false }
+        command_id: { $ref: "#/components/schemas/CommandID" }
+        error: { $ref: "#/components/schemas/ErrorBody" }
+        correlation_id: { type: string, minLength: 1, maxLength: 80 }
+    APIError:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, error, correlation_id]
+      properties:
+        api_version: { const: v1 }
+        ok: { const: false }
+        error: { $ref: "#/components/schemas/ErrorBody" }
+        correlation_id: { type: string, minLength: 1, maxLength: 80 }
+    ErrorBody:
+      type: object
+      additionalProperties: false
+      required: [code, message, retryable]
+      properties:
+        code:
+          type: string
+          enum:
+            [invalid_request, unauthenticated, permission_denied, not_found, version_conflict,
+             idempotency_conflict, idempotency_expired, stale_subject, impact_plan_stale,
+             lifecycle_rejected, done_gate_unsatisfied, capability_unsupported, outcome_unknown,
+             storage_corruption, projection_unavailable]
+        message: { type: string, minLength: 1, maxLength: 1000 }
+        retryable: { type: boolean }
+        details:
+          type: object
+          additionalProperties: true
+          maxProperties: 32
+          description: Bounded authorized structured fields; never logs or artifact text.

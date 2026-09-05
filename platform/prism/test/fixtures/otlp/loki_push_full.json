@@ -1,0 +1,26 @@
+{
+  "streams": [
+    {
+      "stream": {
+        "service": "checkout",
+        "job": "checkout-job",
+        "host": "node-a",
+        "cluster": "cluster-a",
+        "env": "prod",
+        "level": "warn",
+        "source": "stderr"
+      },
+      "values": [
+        [
+          "1735786985000000000",
+          "checkout retry",
+          {
+            "trace_id": "0102030405060708090a0b0c0d0e0f10",
+            "span_id": "0102030405060708",
+            "attempt": "2"
+          }
+        ]
+      ]
+    }
+  ]
+}

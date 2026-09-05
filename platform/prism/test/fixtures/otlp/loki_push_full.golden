@@ -1,0 +1,36 @@
+[
+  {
+    "Resource": {
+      "Tenant": "golden-tenant",
+      "Service": "checkout",
+      "ServiceInstance": "",
+      "ServiceVersion": "",
+      "Namespace": "",
+      "Host": "node-a",
+      "Cluster": "cluster-a",
+      "Env": "prod",
+      "Attrs": null
+    },
+    "TS": 1735786985000000000,
+    "ObservedTS": 1735786985000000000,
+    "Severity": 4,
+    "SeverityText": "warn",
+    "Body": "checkout retry",
+    "TraceID": "0102030405060708090a0b0c0d0e0f10",
+    "SpanID": "0102030405060708",
+    "Labels": {
+      "cluster": "cluster-a",
+      "env": "prod",
+      "host": "node-a",
+      "job": "checkout-job",
+      "level": "warn",
+      "service": "checkout",
+      "source": "stderr"
+    },
+    "Attrs": {
+      "attempt": "2",
+      "span_id": "0102030405060708",
+      "trace_id": "0102030405060708090a0b0c0d0e0f10"
+    }
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "Resource": {
+      "Tenant": "golden-tenant",
+      "Service": "checkout",
+      "ServiceInstance": "checkout-1",
+      "ServiceVersion": "1.2.3",
+      "Namespace": "shop",
+      "Host": "node-a",
+      "Cluster": "cluster-a",
+      "Env": "prod",
+      "Attrs": {
+        "cloud.region": "eu-central-1"
+      }
+    },
+    "TraceID": "0102030405060708090a0b0c0d0e0f10",
+    "SpanID": "0102030405060708",
+    "ParentSpanID": "0807060504030201",
+    "TraceState": "vendor=value",
+    "Name": "GET /cart",
+    "Kind": 2,
+    "StartNano": 1735786985000000000,
+    "EndNano": 1735786986000000000,
+    "StatusCode": 2,
+    "StatusMsg": "upstream failed",
+    "Attrs": {
+      "error": "false",
+      "http.request.method": "GET",
+      "http.response.status_code": "503",
+      "otel.dropped_attributes_count": "4",
+      "otel.scope.name": "checkout-lib",
+      "otel.scope.scope.attr": "scope-value",
+      "otel.scope.version": "2.0.0",
+      "prism.duration_ns": "1000000000",
+      "prism.error": "true",
+      "prism.is_root": "false"
+    },
+    "Events": [
+      {
+        "TS": 1735786985500000000,
+        "Name": "exception",
+        "Attrs": {
+          "exception.type": "timeout"
+        }
+      }
+    ],
+    "Links": [
+      {
+        "TraceID": "100f0e0d0c0b0a090807060504030201",
+        "SpanID": "0807060504030201",
+        "Attrs": {
+          "link.reason": "retry"
+        }
+      }
+    ]
+  }
+]

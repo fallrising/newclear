@@ -1,0 +1,52 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "checkout"}},
+          {"key": "host.name", "value": {"stringValue": "node-a"}},
+          {"key": "deployment.environment", "value": {"stringValue": "prod"}},
+          {"key": "cloud.region", "value": {"stringValue": "eu-central-1"}}
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {"name": "checkout-logger", "version": "1.0.0"},
+          "logRecords": [
+            {
+              "timeUnixNano": "0",
+              "observedTimeUnixNano": "1735786985000000000",
+              "severityNumber": 0,
+              "severityText": "ERROR2",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {"key": "message", "value": {"stringValue": "checkout failed"}},
+                    {"key": "attempt", "value": {"intValue": "2"}},
+                    {"key": "details", "value": {"kvlistValue": {"values": [
+                      {"key": "retryable", "value": {"boolValue": true}}
+                    ]}}}
+                  ]
+                }
+              },
+              "attributes": [
+                {"key": "service", "value": {"stringValue": "user-service"}},
+                {"key": "unit", "value": {"stringValue": "checkout.service"}},
+                {"key": "request_id", "value": {"stringValue": "request-123"}},
+                {"key": "tags", "value": {"arrayValue": {"values": [
+                  {"stringValue": "one"},
+                  {"stringValue": "two"}
+                ]}}}
+              ],
+              "droppedAttributesCount": 3,
+              "traceId": "0102030405060708090a0b0c0d0e0f10",
+              "spanId": "0102030405060708",
+              "eventName": "checkout.failure",
+              "flags": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

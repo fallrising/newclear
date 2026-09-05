@@ -1,0 +1,29 @@
+{
+  "points": [
+    {
+      "name": "http_requests_total",
+      "labels": {
+        "method": "GET",
+        "status": "200"
+      },
+      "ts": 1735786985000,
+      "value": "12",
+      "type": "counter",
+      "exemplar": {
+        "labels": {
+          "trace_id": "0102030405060708090a0b0c0d0e0f10"
+        },
+        "value": "12",
+        "ts": 1735786985000
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "metric": "http_requests",
+      "type": "counter",
+      "help": "HTTP requests",
+      "unit": "requests"
+    }
+  ]
+}

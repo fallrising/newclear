@@ -1,0 +1,11 @@
+{
+  "resourceLogs": [{
+    "scopeLogs": [{
+      "logRecords": [{
+        "timeUnixNano": "0",
+        "observedTimeUnixNano": "0",
+        "body": {"stringValue": "timestamp synthesized"}
+      }]
+    }]
+  }]
+}

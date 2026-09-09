@@ -1,0 +1,72 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "checkout"}},
+          {"key": "service.instance.id", "value": {"stringValue": "checkout-1"}},
+          {"key": "service.version", "value": {"stringValue": "1.2.3"}},
+          {"key": "service.namespace", "value": {"stringValue": "shop"}},
+          {"key": "host.name", "value": {"stringValue": "node-a"}},
+          {"key": "k8s.cluster.name", "value": {"stringValue": "cluster-a"}},
+          {"key": "deployment.environment.name", "value": {"stringValue": "prod"}},
+          {"key": "cloud.region", "value": {"stringValue": "eu-central-1"}}
+        ],
+        "droppedAttributesCount": 2
+      },
+      "schemaUrl": "https://opentelemetry.io/schemas/1.26.0",
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "checkout-lib",
+            "version": "2.0.0",
+            "attributes": [
+              {"key": "scope.attr", "value": {"stringValue": "scope-value"}}
+            ]
+          },
+          "schemaUrl": "ignored",
+          "spans": [
+            {
+              "traceId": "0102030405060708090a0b0c0d0e0f10",
+              "spanId": "0102030405060708",
+              "parentSpanId": "0807060504030201",
+              "traceState": "vendor=value",
+              "name": "GET /cart",
+              "kind": 2,
+              "startTimeUnixNano": "1735786985000000000",
+              "endTimeUnixNano": "1735786986000000000",
+              "attributes": [
+                {"key": "http.request.method", "value": {"stringValue": "GET"}},
+                {"key": "http.response.status_code", "value": {"intValue": "503"}},
+                {"key": "error", "value": {"boolValue": false}}
+              ],
+              "droppedAttributesCount": 4,
+              "events": [
+                {
+                  "timeUnixNano": "1735786985500000000",
+                  "name": "exception",
+                  "attributes": [
+                    {"key": "exception.type", "value": {"stringValue": "timeout"}}
+                  ]
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "100f0e0d0c0b0a090807060504030201",
+                  "spanId": "0807060504030201",
+                  "traceState": "ignored=value",
+                  "attributes": [
+                    {"key": "link.reason", "value": {"stringValue": "retry"}}
+                  ],
+                  "flags": 1
+                }
+              ],
+              "status": {"code": 2, "message": "upstream failed"},
+              "flags": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

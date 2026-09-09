@@ -1,0 +1,119 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "checkout"}},
+          {"key": "service.instance.id", "value": {"stringValue": "checkout-1"}},
+          {"key": "host.name", "value": {"stringValue": "node-a"}}
+        ]
+      },
+      "scopeMetrics": [
+        {
+          "scope": {"name": "checkout-meter", "version": "1.0.0"},
+          "metrics": [
+            {
+              "name": "request.duration",
+              "description": "request duration",
+              "unit": "ms",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {"key": "http.method", "value": {"stringValue": "GET"}},
+                      {"key": "user_id", "value": {"stringValue": "drop-me"}}
+                    ],
+                    "startTimeUnixNano": "1735786984000000000",
+                    "timeUnixNano": "1735786985000000000",
+                    "asDouble": 1500,
+                    "exemplars": [
+                      {
+                        "filteredAttributes": [
+                          {"key": "sampled", "value": {"boolValue": true}}
+                        ],
+                        "timeUnixNano": "1735786985000000000",
+                        "asDouble": 1500,
+                        "traceId": "0102030405060708090a0b0c0d0e0f10",
+                        "spanId": "0102030405060708"
+                      }
+                    ],
+                    "flags": 0
+                  },
+                  {
+                    "timeUnixNano": "1735786985000000000",
+                    "asInt": "1",
+                    "flags": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "jobs",
+              "description": "completed jobs",
+              "unit": "1",
+              "sum": {
+                "aggregationTemporality": 1,
+                "isMonotonic": true,
+                "dataPoints": [
+                  {"timeUnixNano": "1735786985000000000", "asInt": "2"},
+                  {"timeUnixNano": "1735786986000000000", "asInt": "3"}
+                ]
+              }
+            },
+            {
+              "name": "payload",
+              "description": "payload size",
+              "unit": "By",
+              "histogram": {
+                "aggregationTemporality": 2,
+                "dataPoints": [
+                  {
+                    "timeUnixNano": "1735786985000000000",
+                    "count": "3",
+                    "sum": 350,
+                    "bucketCounts": ["1", "1", "1"],
+                    "explicitBounds": [100, 200]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "exp_latency",
+              "unit": "s",
+              "exponentialHistogram": {
+                "aggregationTemporality": 2,
+                "dataPoints": [
+                  {
+                    "timeUnixNano": "1735786985000000000",
+                    "count": "2",
+                    "sum": 2,
+                    "scale": 0,
+                    "zeroCount": "1",
+                    "positive": {"offset": 0, "bucketCounts": ["1"]}
+                  }
+                ]
+              }
+            },
+            {
+              "name": "response.size",
+              "unit": "bytes",
+              "summary": {
+                "dataPoints": [
+                  {
+                    "timeUnixNano": "1735786985000000000",
+                    "count": "4",
+                    "sum": 100,
+                    "quantileValues": [
+                      {"quantile": 0.5, "value": 20},
+                      {"quantile": 0.99, "value": 40}
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

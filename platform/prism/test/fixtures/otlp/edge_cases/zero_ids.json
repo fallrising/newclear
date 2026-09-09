@@ -1,0 +1,12 @@
+{
+  "resourceSpans": [{
+    "scopeSpans": [{
+      "spans": [{
+        "traceId": "00000000000000000000000000000000",
+        "spanId": "0102030405060708",
+        "startTimeUnixNano": "1735786985000000000",
+        "endTimeUnixNano": "1735786986000000000"
+      }]
+    }]
+  }]
+}

@@ -1,0 +1,29 @@
+{
+  "resourceLogs": [{
+    "scopeLogs": [{
+      "logRecords": [{
+        "timeUnixNano": "1735786985000000000",
+        "body": {"stringValue": "deep"},
+        "attributes": [{
+          "key": "one",
+          "value": {"kvlistValue": {"values": [{
+            "key": "two.with.dot",
+            "value": {"kvlistValue": {"values": [{
+              "key": "three",
+              "value": {"kvlistValue": {"values": [{
+                "key": "four",
+                "value": {"kvlistValue": {"values": [{
+                  "key": "five",
+                  "value": {"kvlistValue": {"values": [{
+                    "key": "six",
+                    "value": {"stringValue": "json-only"}
+                  }]}}
+                }]}}
+              }]}}
+            }]}}
+          }]}}
+        }]
+      }]
+    }]
+  }]
+}

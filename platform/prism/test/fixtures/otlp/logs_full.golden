@@ -1,0 +1,42 @@
+[
+  {
+    "Resource": {
+      "Tenant": "golden-tenant",
+      "Service": "checkout",
+      "ServiceInstance": "",
+      "ServiceVersion": "",
+      "Namespace": "",
+      "Host": "node-a",
+      "Cluster": "",
+      "Env": "prod",
+      "Attrs": {
+        "cloud.region": "eu-central-1"
+      }
+    },
+    "TS": 1735786985000000000,
+    "ObservedTS": 1735786985000000000,
+    "Severity": 5,
+    "SeverityText": "ERROR2",
+    "Body": "{\"attempt\":2,\"details\":{\"retryable\":true},\"message\":\"checkout failed\"}",
+    "TraceID": "0102030405060708090a0b0c0d0e0f10",
+    "SpanID": "0102030405060708",
+    "Labels": {
+      "env": "prod",
+      "host": "node-a",
+      "instance": "node-a",
+      "job": "checkout",
+      "resource_service": "checkout",
+      "service": "user-service",
+      "unit": "checkout.service"
+    },
+    "Attrs": {
+      "body.attempt": "2",
+      "body.details": "{\"retryable\":true}",
+      "body.details.retryable": "true",
+      "body.message": "checkout failed",
+      "event.name": "checkout.failure",
+      "request_id": "request-123",
+      "tags": "[\"one\",\"two\"]"
+    }
+  }
+]

@@ -98,7 +98,7 @@ func (n *Normalizer) normalizeMetric(metric pmetric.Metric, resource *utm.Resour
 func (n *Normalizer) normalizeNumberPoints(points pmetric.NumberDataPointSlice, name string, scale float64, metricType utm.MetricType, delta bool, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	for i := range points.Len() {
 		point := points.At(i)
-		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(int64(point.Timestamp())), receivedAt, report)
+		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
 		}
@@ -143,7 +143,7 @@ func (n *Normalizer) normalizeHistogramPoints(histogram pmetric.Histogram, name 
 	points := histogram.DataPoints()
 	for i := range points.Len() {
 		point := points.At(i)
-		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(int64(point.Timestamp())), receivedAt, report)
+		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
 		}
@@ -193,7 +193,7 @@ func (n *Normalizer) normalizeExponentialHistogramPoints(histogram pmetric.Expon
 	points := histogram.DataPoints()
 	for i := range points.Len() {
 		point := points.At(i)
-		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(int64(point.Timestamp())), receivedAt, report)
+		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
 		}
@@ -230,7 +230,7 @@ func (n *Normalizer) normalizeExponentialHistogramPoints(histogram pmetric.Expon
 func (n *Normalizer) normalizeSummaryPoints(points pmetric.SummaryDataPointSlice, name string, scale float64, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	for i := range points.Len() {
 		point := points.At(i)
-		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(int64(point.Timestamp())), receivedAt, report)
+		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
 		}
@@ -310,7 +310,7 @@ func normalizeExemplar(exemplars pmetric.ExemplarSlice, scale float64, report *R
 	return &utm.Exemplar{
 		Labels: labels.FromMap(attrs),
 		Value:  value * scale,
-		TS:     utm.NanoToMilli(int64(input.Timestamp())),
+		TS:     utm.NanoToMilli(otelTimestampNano(input.Timestamp())),
 	}
 }
 

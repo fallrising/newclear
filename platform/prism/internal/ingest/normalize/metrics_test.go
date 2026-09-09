@@ -20,7 +20,7 @@ func TestNormalizeMetricsAllTypes(t *testing.T) {
 	resourceMetrics.Resource().Attributes().PutStr("service.name", "checkout")
 	resourceMetrics.Resource().Attributes().PutStr("host.name", "node-a")
 	inputMetrics := resourceMetrics.ScopeMetrics().AppendEmpty().Metrics()
-	timestamp := pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(-time.Minute)))
+	timestamp := pcommon.NewTimestampFromTime(fixedNow.Add(-time.Minute))
 
 	gauge := inputMetrics.AppendEmpty()
 	gauge.SetName("9.latency")
@@ -201,7 +201,7 @@ func TestMetricClockPolicyAndDeltaCapacity(t *testing.T) {
 	metric := metrics.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	metric.SetName("old")
 	point := metric.SetEmptyGauge().DataPoints().AppendEmpty()
-	point.SetTimestamp(pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(-2 * time.Hour))))
+	point.SetTimestamp(pcommon.NewTimestampFromTime(fixedNow.Add(-2 * time.Hour)))
 	point.SetIntValue(1)
 	drop := testNormalizer(t, Options{ClockSkewPolicy: ClockSkewDrop})
 	batch, report, err := drop.NormalizeMetrics(context.Background(), metrics, fixedNow)

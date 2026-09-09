@@ -74,8 +74,8 @@ func (n *Normalizer) normalizeSpan(input ptrace.Span, resource *utm.Resource, sc
 		attrs["otel.dropped_attributes_count"] = strconv.FormatUint(uint64(input.DroppedAttributesCount()), 10)
 	}
 
-	start := int64(input.StartTimestamp())
-	end := int64(input.EndTimestamp())
+	start := otelTimestampNano(input.StartTimestamp())
+	end := otelTimestampNano(input.EndTimestamp())
 	if end == 0 || end < start {
 		end = start
 		report.normalized("clamp")
@@ -183,7 +183,7 @@ func (n *Normalizer) normalizeSpanEvents(events ptrace.SpanEventSlice, report *R
 			report.UpstreamDropped += uint64(event.DroppedAttributesCount())
 		}
 		result = append(result, utm.SpanEvent{
-			TS:    int64(event.Timestamp()),
+			TS:    otelTimestampNano(event.Timestamp()),
 			Name:  validUTF8(event.Name()),
 			Attrs: attrs,
 		})

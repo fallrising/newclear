@@ -173,7 +173,7 @@ func assertGolden(t *testing.T, name string, value any) {
 	actual = append(actual, '\n')
 	path := fixturePath(name)
 	if *updateGolden {
-		if err := os.WriteFile(path, actual, 0o644); err != nil {
+		if err := os.WriteFile(path, actual, 0o600); err != nil {
 			t.Fatalf("update golden %s: %v", name, err)
 		}
 		return

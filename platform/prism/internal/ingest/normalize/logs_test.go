@@ -21,7 +21,8 @@ func TestNormalizeLogsFullMapping(t *testing.T) {
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
 
 	input := scopeLogs.LogRecords().AppendEmpty()
-	observed := pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(-time.Minute)))
+	observedNano := utm.TimeToNano(fixedNow.Add(-time.Minute))
+	observed := pcommon.NewTimestampFromTime(fixedNow.Add(-time.Minute))
 	input.SetObservedTimestamp(observed)
 	input.SetSeverityNumber(plog.SeverityNumberUnspecified)
 	input.SetSeverityText("WARNING2")
@@ -53,8 +54,8 @@ func TestNormalizeLogsFullMapping(t *testing.T) {
 		t.Fatalf("len(records) = %d, want 2", len(records))
 	}
 	record := records[0]
-	if record.TS != int64(observed) || record.ObservedTS != int64(observed) {
-		t.Fatalf("timestamps = %d/%d, want %d", record.TS, record.ObservedTS, observed)
+	if record.TS != observedNano || record.ObservedTS != observedNano {
+		t.Fatalf("timestamps = %d/%d, want %d", record.TS, record.ObservedTS, observedNano)
 	}
 	if record.Severity != utm.SevWarn || record.SeverityText != "WARNING2" {
 		t.Fatalf("severity = %v/%q", record.Severity, record.SeverityText)
@@ -123,7 +124,7 @@ func TestNormalizeLogSeverityRanges(t *testing.T) {
 	for _, test := range tests {
 		logs := plog.NewLogs()
 		record := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
-		record.SetTimestamp(pcommon.Timestamp(utm.TimeToNano(fixedNow)))
+		record.SetTimestamp(pcommon.NewTimestampFromTime(fixedNow))
 		record.SetSeverityNumber(test.number)
 		record.Body().SetStr("body")
 		normalizer := testNormalizer(t, Options{})
@@ -142,7 +143,7 @@ func TestNormalizeLogClockDrop(t *testing.T) {
 
 	logs := plog.NewLogs()
 	record := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
-	record.SetTimestamp(pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(-2 * time.Hour))))
+	record.SetTimestamp(pcommon.NewTimestampFromTime(fixedNow.Add(-2 * time.Hour)))
 	record.Body().SetStr("old")
 	normalizer := testNormalizer(t, Options{ClockSkewPolicy: ClockSkewDrop})
 	got, report, err := normalizer.NormalizeLogs(context.Background(), logs, fixedNow)

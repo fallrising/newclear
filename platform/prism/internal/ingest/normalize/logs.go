@@ -145,14 +145,14 @@ func (n *Normalizer) normalizeLogRecord(input plog.LogRecord, resource *utm.Reso
 		report.UpstreamDropped += uint64(input.DroppedAttributesCount())
 	}
 
-	observed := int64(input.ObservedTimestamp())
+	observed := otelTimestampNano(input.ObservedTimestamp())
 	if observed == 0 {
 		observed = receivedNano
 	}
-	timestamp := int64(input.Timestamp())
+	timestamp := otelTimestampNano(input.Timestamp())
 	protected := make(map[string]string, 2)
 	if timestamp == 0 {
-		timestamp = int64(input.ObservedTimestamp())
+		timestamp = otelTimestampNano(input.ObservedTimestamp())
 		if timestamp == 0 {
 			timestamp = receivedNano
 			protected["prism.ts_synthesized"] = "true"

@@ -176,14 +176,6 @@ func populateRepresentativeSeries(t *testing.T, registry *Registry, definition D
 		t.Fatalf("collector %q is not registered", definition.Name)
 	}
 	switch metric := collector.(type) {
-	case prometheus.Counter:
-		metric.Add(0)
-	case *prometheus.CounterVec:
-		child, err := metric.GetMetricWithLabelValues(labelValues...)
-		if err != nil {
-			t.Fatalf("initialize counter %q: %v", definition.Name, err)
-		}
-		child.Add(0)
 	case prometheus.Gauge:
 		metric.Set(0)
 	case *prometheus.GaugeVec:
@@ -192,6 +184,14 @@ func populateRepresentativeSeries(t *testing.T, registry *Registry, definition D
 			t.Fatalf("initialize gauge %q: %v", definition.Name, err)
 		}
 		child.Set(0)
+	case prometheus.Counter:
+		metric.Add(0)
+	case *prometheus.CounterVec:
+		child, err := metric.GetMetricWithLabelValues(labelValues...)
+		if err != nil {
+			t.Fatalf("initialize counter %q: %v", definition.Name, err)
+		}
+		child.Add(0)
 	case prometheus.Histogram:
 		metric.Observe(0)
 	case *prometheus.HistogramVec:

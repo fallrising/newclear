@@ -49,7 +49,8 @@ func TestNormalizeTracesFullMapping(t *testing.T) {
 	input.SetParentSpanID(pcommon.NewSpanIDEmpty())
 	input.TraceState().FromRaw("vendor=value")
 	input.SetKind(ptrace.SpanKindServer)
-	start := pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(-time.Minute)))
+	startNano := utm.TimeToNano(fixedNow.Add(-time.Minute))
+	start := pcommon.NewTimestampFromTime(fixedNow.Add(-time.Minute))
 	input.SetStartTimestamp(start)
 	input.SetEndTimestamp(0)
 	input.Attributes().PutBool("error", false)
@@ -96,7 +97,7 @@ func TestNormalizeTracesFullMapping(t *testing.T) {
 	if span.Name != "unknown" || span.Kind != utm.KindServer || span.TraceState != "vendor=value" {
 		t.Fatalf("span identity mapping = %#v", span)
 	}
-	if span.StartNano != int64(start) || span.EndNano != int64(start) || span.StatusCode != utm.StatusUnset || span.StatusMsg != "status message" {
+	if span.StartNano != startNano || span.EndNano != startNano || span.StatusCode != utm.StatusUnset || span.StatusMsg != "status message" {
 		t.Fatalf("span timing/status mapping = %#v", span)
 	}
 	if span.Resource.Tenant != "tenant-a" || span.Resource.Service != "checkout" || span.Resource.ServiceInstance != "host-id" || span.Resource.ServiceVersion != "1.2.3" || span.Resource.Namespace != "shop" || span.Resource.Host != "node-a" || span.Resource.Cluster != "cluster-a" || span.Resource.Env != "prod" {
@@ -118,7 +119,7 @@ func TestNormalizeTracesFullMapping(t *testing.T) {
 			t.Errorf("Span.Attrs[%q] = %q, want %q", key, span.Attrs[key], want)
 		}
 	}
-	if len(span.Events) != 1 || span.Events[0].TS != int64(start) || span.Events[0].Name != "cache miss" || span.Events[0].Attrs["attempt"] != "2" {
+	if len(span.Events) != 1 || span.Events[0].TS != startNano || span.Events[0].Name != "cache miss" || span.Events[0].Attrs["attempt"] != "2" {
 		t.Fatalf("events = %#v", span.Events)
 	}
 	if len(span.Links) != 1 || span.Links[0].TraceID != "100f0e0d0c0b0a090807060504030201" || span.Links[0].SpanID != "0807060504030201" || span.Links[0].Attrs["link.attr"] != "linked" {
@@ -143,7 +144,7 @@ func TestNormalizeTraceMissingServiceAndClockPolicy(t *testing.T) {
 	span := resourceSpans.ScopeSpans().AppendEmpty().Spans().AppendEmpty()
 	span.SetTraceID(testTraceID)
 	span.SetSpanID(testSpanID)
-	future := pcommon.Timestamp(utm.TimeToNano(fixedNow.Add(10 * time.Minute)))
+	future := pcommon.NewTimestampFromTime(fixedNow.Add(10 * time.Minute))
 	span.SetStartTimestamp(future)
 	span.SetEndTimestamp(future)
 

@@ -1,7 +1,7 @@
 # Reproducibility contract
 
-Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake evidence;
-broader G1 remains NotRun
+Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE
+evidence; T-047 and broader G1 remain NotRun
 Observed: 2026-09-09
 
 ## Toolchains and packages
@@ -70,6 +70,14 @@ mutation permission.
   repeated/concurrent deterministic and bounded-import/API attacks. T-076 report SHA-256 is
   `14a3e6832fdad1680173d7b6c05a2cfadd5d45107e66da8d984a204d64b33aaa`; the orchestrator's
   separate pinned module/format/vet/named/repeated/full/race rerun also passed.
+- T-081 accepts T-046/T-078/T-080's HTTP/SSE transport and composition seam after preserving T-077
+  and T-079 as historical FAIL evidence. Fresh checks cover strict authenticated/same-origin command
+  translation, immutable canonical result lookup, exact SHA-256 wire spelling, contiguous durable
+  replay, OpenAPI cursor-bound SSE, revocation/epoch precedence and independent 129-event and
+  1,048,577-byte overflow limits. T-081 report SHA-256 is
+  `6b5aedcefe6f0e466ab05869761038f8f27768f847652a8903debe754ba4e9eb`; the orchestrator's
+  separate digest-pinned, network-disabled, read-only module/format/vet/named/ten-repeat/full/race
+  rerun exited 0 with SQLite race 17.587s and HTTP/SSE race 1.028s.
 
 ## Accepted persistence foundation evidence
 
@@ -85,8 +93,8 @@ mutation permission.
 
 ## Evidence still NotRun
 
-Playwright browser/contrast/zoom/coarse-pointer checks, Fake-to-application persistence wiring,
-HTTP/SSE and T-047 vertical integration, SQLite backup/restore and disk-full/migration interruption,
+Playwright browser/contrast/zoom/coarse-pointer checks, Fake-to-application persistent worker
+execution and T-047 vertical integration, SQLite backup/restore and disk-full/migration interruption,
 full SBOM/CVE inventory,
 action/image provenance, root workflow policy/path selection and TypeScript 7 migration are NotRun.
 Every later vertical-slice family remains unaccepted. These gaps prevent a G1, release or

@@ -9,7 +9,8 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
 - Worktree: `/home/ckc/test/codex/worktrees/hai-taskboard-p0a`
 - Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
-  application-command slice and T-045/T-069/T-075 deterministic Fake are accepted.
+  application-command slice, T-045/T-069/T-075 deterministic Fake and T-046/T-078/T-080 HTTP/SSE
+  boundary are accepted.
 - Persistence foundation: T-043/T-054/T-056/T-058/T-061/T-063 is accepted by the fresh T-064
   report-only review. T-062 remains a historical FAIL documenting the allocator/result ordering
   defect; the accepted repair uses commit-deferred transaction-local result references.
@@ -17,6 +18,9 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
 - Fake checkpoint: T-073 independently passed the repair/lifecycle half; T-076 independently passed
   the final exact-parent, determinism, alias, staging, fence and security half. The orchestrator's
   separate pinned full/race evidence gate also passed.
+- HTTP/SSE checkpoint: T-077 and T-079 remain historical FAIL reports; T-078/T-080 repaired their
+  canonical-result, replay/data-shape, Origin and revocation-order findings. T-081 independently
+  passed the final exact bytes and the orchestrator's separate pinned full/race evidence gate passed.
 
 ## Read first
 
@@ -24,8 +28,8 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
 2. `docs/SDD.md`, every accepted ADR and the relevant mini-SDD.
 3. `docs/traceability.md` and the exact `.team/tasks/T-*.md` envelope.
 4. Existing report evidence, remembering that a report does not accept itself.
-5. Before issuing the next child, read T-045/T-068 through T-076 and the accepted SQLite/application
-   chain through T-067; no HTTP/SSE/T-046 or T-047 execution envelope exists yet.
+5. Before issuing the next child, read T-046/T-077 through T-081, T-045/T-068 through T-076 and the
+   accepted SQLite/application chain through T-067; no T-047 execution envelope exists yet.
 
 ## Authoritative design decisions
 
@@ -59,7 +63,14 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
   half, and T-076 report SHA-256
   `14a3e6832fdad1680173d7b6c05a2cfadd5d45107e66da8d984a204d64b33aaa` passed the final
   determinism/security half. T-071/T-072 were interrupted before probes and produced no reports.
-- Fake-to-application persistence wiring, HTTP/SSE, T-047 vertical integration, root CI, restore and
+- T-077 report SHA-256
+  `230aa4abce221e5bca0601377c3eec87b1db24992eb1ad1677aead066c9ab944` and T-079 report
+  SHA-256 `84e01d1b3f6a150841dc7a7e358157f9c991844d0b781dbfd01fbdbd818b8e68` remain historical
+  HTTP/SSE FAIL evidence. T-078/T-080 repaired their exact findings; T-081 report SHA-256
+  `6b5aedcefe6f0e466ab05869761038f8f27768f847652a8903debe754ba4e9eb` independently passed
+  canonical stored results, contiguous/cursor-bound SSE, exact Origin, revocation/epoch ordering and
+  both bounded queue limits. The separate orchestrator pinned full/race gate also exited 0.
+- Fake-to-application persistent worker execution, T-047 vertical integration, root CI, restore and
   broader evidence remain NotRun.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
 - The forward-only reviewer contract is accepted by T-013. Nineteen historical report bytes remain
@@ -69,8 +80,8 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
 ## Safe next action
 
 Preserve this accepted checkpoint. Under a later authorized continuation, the next serial child is
-a bounded HTTP/SSE T-046 envelope. Do not begin T-046, T-047 or real-provider work from this handoff
-without that explicit task/review boundary.
+a bounded T-047 Fake vertical-integration/failure-matrix envelope. Do not begin T-047, restore or
+real-provider work from this handoff without that explicit task/review boundary.
 
 ## Restore invariant
 

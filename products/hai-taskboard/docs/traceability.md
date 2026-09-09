@@ -15,7 +15,8 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
 | HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | NotRun |
 | HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | NotRun |
-| HAI-API-001..005 | SDD §8 | OpenAPI contract, SSE gap/backpressure/reset/rebuild tests | NotRun |
+| HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
+| HAI-API-002..004 | SDD §8 | SSE gap/backpressure/reset/high-water tests | Passing (bounded transport T-081; T-047 integration NotRun) |
 | HAI-UX-001..006 | SDD §9 | component/a11y/keyboard/rejection/disconnect Playwright tests | NotRun |
 | HAI-SEC-001..007 | SDD §10 | bind/path/redaction/capability/TOCTOU/retention tests | NotRun |
 | HAI-OPS-001..005 | SDD §11, ADR-005 | backup/restore/corruption/capacity/retention tests | NotRun |
@@ -41,14 +42,21 @@ required acceptance decision. `Candidate` means executed worker evidence still a
   probes cover fail-closed capabilities, immutable scripted observations, explicit-tick determinism,
   all fence dimensions, lifecycle/uncertainty/zero-redispatch behavior, bounded staging/digests and
   hostile artifact names including exact `..`. This is a Fake-package and in-memory worker-seam
-  checkpoint only; application persistence wiring, HTTP/SSE and T-047 remain NotRun.
+  checkpoint only; it did not itself accept application persistence wiring or HTTP/SSE. HTTP/SSE is
+  accepted separately below, while persistent worker execution and T-047 remain NotRun.
+- T-046 HTTP/SSE plus T-078/T-080 repairs are accepted by T-081 and a separate orchestrator gate.
+  T-077/T-079 remain historical FAIL evidence. Fresh checks cover strict auth-before-read and exact
+  Origin, five accepted commands, immutable canonical result lookup, SHA-256 wire encoding,
+  contiguous snapshot/replay/live ordering, OpenAPI cursor-bound events, reset/revocation precedence,
+  project isolation and both queue limits. This is a transport/composition checkpoint only; the
+  Fake-to-application persistent execution and T-047 end-to-end slice remain NotRun.
 
 ## T-041 implementation-contract inventory
 
 `docs/sdd/fake-vertical-slice-implementation.md` freezes V1 package direction, SQLite constraints,
 guarded Done rehydration, command/failure seams, Fake fencing, `/api/v1` boundaries, SSE replay and
-serial child writable scopes. Its bounded persistence, transaction and Fake child oracles are now
-accepted by their named reports; HTTP/SSE and integration oracles remain NotRun. No accepted child
+serial child writable scopes. Its bounded persistence, transaction, Fake and HTTP/SSE child oracles
+are now accepted by their named reports; T-047 integration oracles remain NotRun. No accepted child
 status is broadened into vertical-slice acceptance.
 
 ## First named G1 acceptance skeletons
@@ -63,13 +71,13 @@ status is broadened into vertical-slice acceptance.
 | AC-P0A-006 | `TestRunRecovery_ExpiryDoesNotImplyStoppedOrRetry` | NeedsReconcile/OutcomeUnknown retained | Passing (Fake seam T-073; durable integration NotRun) |
 | AC-P0A-007 | `TestImpactPlan_UsesOldAndNewReverseClosure` | removed/redirected edge dependents included | Passing (T-024) |
 | AC-P0A-008 | `TestImpactActivation_RejectsStalePlan` | pure decision rejects stale plan; durable activation remains NotRun | Passing (T-024) |
-| AC-P0A-009 | `TestSSE_SnapshotGapReplayAndRetentionReset` | monotonic replay or explicit reset | NotRun |
-| AC-P0A-010 | `TestSSE_SlowConsumerCannotBlockCommand` | bounded disconnect; transaction latency retained | NotRun |
+| AC-P0A-009 | `TestSSE_SnapshotGapReplayAndRetentionReset` | monotonic replay or explicit reset | Passing (transport T-081; durable integration NotRun) |
+| AC-P0A-010 | `TestSSE_SlowConsumerCannotBlockCommand` | bounded disconnect; transaction latency retained | Passing (transport T-081; transaction integration NotRun) |
 | AC-P0A-011 | `TestRestore_VerifiesArtifactDigestAndRebuildsProjection` | corruption blocks Done and creates attention | NotRun |
 | AC-P0A-012 | `board-transition-accessibility.spec.tsx` | fixture drag/keyboard/button parity and focus recovery; browser remains NotRun | Passing (T-033) |
 | AC-P0A-013 | `attention-recovery-states.spec.tsx` | distinct disconnect/conflict/unknown/cancel/stale fixture UI | Passing (T-033) |
 | AC-P0A-014 | `resume-without-chat.spec.ts` | fresh process resumes current work from durable state | NotRun |
-| AC-P0A-015 | `TestSSE_RestoreEpochMismatchRequiresReset` | old cursor cannot resume after restored backup | NotRun |
+| AC-P0A-015 | `TestSSE_RestoreEpochMismatchRequiresReset` | old cursor cannot resume after restored backup | NotRun (wrong-epoch transport seam passes T-081; restore rotation not implemented) |
 | AC-P0A-016 | `TestRestore_FencesPreRestoreCallbacksAndDispatch` | old generation cannot publish or auto-dispatch | NotRun |
 
 ## Reviewed v0.2 acceptance-case registry
@@ -86,10 +94,10 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-04 | Forged/self human or verifier identity is denied without mutation | NotRun |
 | AC-05 | Skipped/Error/Inconclusive required check is not Passing | NotRun |
 | AC-06 | Replaced artifact bytes fail digest and become Missing/Quarantined | NotRun |
-| AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP/integration NotRun) |
+| AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP boundary T-081; integration NotRun) |
 | AC-08 | Same key with different request yields idempotency conflict | Passing (application T-067) |
 | AC-09 | Concurrent old version yields one success and one conflict | NotRun |
-| AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP/integration NotRun) |
+| AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP lookup T-081; integration NotRun) |
 | AC-11 | State/audit/outbox/result failure is all commit or all rollback | Passing (application/SQLite T-067) |
 | AC-12 | Lost Start acknowledgement is looked up; unknown blocks restart | Passing (Fake T-073; durable integration NotRun) |
 | AC-13 | Expired lease holder cannot finalize or publish | Passing (Fake T-073; durable integration NotRun) |
@@ -114,9 +122,9 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-32 | Unauthorized AI edge deletion/no-op proposal cannot change accepted graph | NotRun |
 | AC-33 | Unapproved/import-crashed candidate cannot change accepted graph | NotRun |
 | AC-34 | Rebuild preserves canonical state and deterministic view ordering/checksum | NotRun |
-| AC-35 | Snapshot-to-SSE race loses no event and permits deduplication | NotRun |
-| AC-36 | Expired/wrong-epoch/slow/disconnected stream resets or closes boundedly | NotRun |
-| AC-37 | Revoked session stops receiving stream data | NotRun |
+| AC-35 | Snapshot-to-SSE race loses no event and permits deduplication | Passing (transport T-081; real-Store integration NotRun) |
+| AC-36 | Expired/wrong-epoch/slow/disconnected stream resets or closes boundedly | Passing (transport T-081; restore rotation NotRun) |
+| AC-37 | Revoked session stops receiving stream data | Passing (transport T-081; real-session integration NotRun) |
 | AC-38 | Lost sink acknowledgement deduplicates delivery without redoing source mutation | NotRun |
 | AC-39 | Notification storm/failure is bounded/dead-lettered and cannot block commands | NotRun |
 | AC-40 | Backup/restore manifest exposes missing artifact; dispatch begins disabled | NotRun |
@@ -125,7 +133,7 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-43 | Malicious repository instructions remain data and cannot alter authority | NotRun |
 | AC-44 | Active artifact/symlink cannot execute, escape or overwrite | NotRun |
 | AC-45 | Changed/expired approval subject fails and single-use cannot repeat | NotRun |
-| AC-46 | No auth/cross-project/wrong Origin denies without resource disclosure | NotRun |
+| AC-46 | No auth/cross-project/wrong Origin denies without resource disclosure | Passing (HTTP transport T-081; artifact/browser integration NotRun) |
 | AC-47 | Producer test/recipe change requires independent review | NotRun |
 | AC-48 | Changed integration base prevents old candidate completing new base | NotRun |
 | AC-49 | Keyboard/click movement and rejection preserve focus and server phase | NotRun |

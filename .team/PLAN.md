@@ -108,6 +108,13 @@ execution. P0-A remains Fake-only.
 | T-074 | Independent Fake determinism/security attack review | T-069,T-070 | Failed; exact `..` artifact name accepted | Orchestrator |
 | T-075 | Reject exact parent artifact staging name | T-074 | Accepted by T-076 | Independent reviewer |
 | T-076 | Final exact-parent path and combined Fake re-review | T-075 | Accepted | Orchestrator |
+| T-046 | HTTP/SSE boundary and concrete composition root | T-045 | Accepted after T-078/T-080 by T-081 | Independent reviewer |
+| T-077 | Independent T-046 HTTP/SSE attack review | T-046 | Failed; canonical-result and SSE shape/gap repairs required | Orchestrator |
+| T-078 | Repair canonical stored result and SSE shape/gap findings | T-077 | Accepted as repaired by T-081 | Independent reviewer |
+| T-079 | Complete T-046/T-078 adversarial re-review | T-078 | Failed; Origin ambiguity and revocation ordering required repair | Orchestrator |
+| T-080 | Repair Origin and SSE revocation/epoch findings | T-079 | Accepted by T-081 | Independent reviewer |
+| T-081 | Final T-046/T-078/T-080 acceptance review | T-080 | Accepted | Orchestrator |
+| T-047 | Fake vertical integration and failure matrix | T-046 | Pending; no execution envelope issued | Independent reviewer |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -395,14 +402,61 @@ execution. P0-A remains Fake-only.
   identical invocation completed successfully. This accepts only the deterministic Fake package and
   fenced in-memory worker seam, not application persistence wiring, HTTP/SSE, T-047, restore, a real
   provider, PR, merge, deployment or release.
+- 2026-09-09 — Issued validated bounded T-046 HTTP/SSE envelope at clean branch/local/remote HEAD
+  `792cb1a1a74f5fb2586e4ed547df73bc95820206`, with baseline
+  `3ad5533d8148a84ab19145fbee92306d1b69941b` an ancestor. The first delegated worker completed
+  reads but stalled before Go preflight or any write and was interrupted without a report; the
+  replacement worker produced report
+  `ce50447a48405fddc1db79b2b9b277063f43befc572b38a0d2d03318cd711f00`. This remained worker
+  evidence only.
+- 2026-09-09 — T-077 report
+  `230aa4abce221e5bca0601377c3eec87b1db24992eb1ad1677aead066c9ab944` correctly failed T-046:
+  digest-correct noncanonical stored results returned 200, replay admitted a 1-to-3 sequence gap,
+  and invalid SSE data lacking required OpenAPI fields was emitted. The first reviewer session ran
+  the pinned baseline but stalled while expanding probe scaffolding and was interrupted without a
+  report; a replacement produced the bounded FAIL report. T-077 remains immutable FAIL evidence.
+- 2026-09-09 — T-078 report
+  `21d2929e084f1aea32b6ea26f546922b63c5616474eea3da18e3cafb6ed1a9a1` repaired only the three
+  T-077 defects with canonical application result decoding, contiguous replay/high-water validation
+  and cursor-bound OpenAPI ProjectionEvent encoding. Focused, repeated, full and race gates passed;
+  this worker report did not accept itself.
+- 2026-09-09 — T-079 report
+  `84e01d1b3f6a150841dc7a7e358157f9c991844d0b781dbfd01fbdbd818b8e68` independently passed the
+  T-077 repairs and complete pinned suite but correctly failed two remaining boundaries: duplicate
+  Origin values could execute a mutation, and an already-revoked session could receive queued data
+  before its reset. Its first malformed duplicate-header probe is retained as reviewer setup failure;
+  the corrected canonical `Header.Add` check passed. T-079 remains immutable FAIL evidence.
+- 2026-09-09 — T-080 report
+  `22bf843b930b9bcbff9a750c880d226778266dca40a7b8645909d1f92102eae0` repaired exact-one Origin,
+  single-acquisition revocation precedence and authoritative live wrong-epoch reset behavior.
+  Focused checks repeated ten times and the complete pinned full/race gate exited 0; this remained
+  worker evidence only.
+- 2026-09-09 — Accepted T-081 report
+  `6b5aedcefe6f0e466ab05869761038f8f27768f847652a8903debe754ba4e9eb`: a fresh independent
+  reviewer passed the complete pinned gate and three disposable adversarial groups covering all
+  T-077/T-079 repairs, exact Origin, canonical results, gap-free/cursor-bound SSE, revocation and
+  wrong-epoch precedence, and both 129-event and 1,048,577-byte stream overflow limits. No required
+  reviewer check failed or was skipped; temporary probes were removed and candidate bytes remained
+  read-only.
+- 2026-09-09 — The orchestrator's final T-046 evidence gate validated all three worker envelopes and
+  all six produced reports, bound exact source/history hashes, confirmed T-071/T-072 reports remain
+  absent, audited the exact scope and reran the digest-pinned Go 1.27.1 image with network disabled
+  and candidate/module mounts read-only. Module verify, empty gofmt, vet, original and repair named
+  tests, transport/composition, ten repetitions, full backend, full race and inventory exited 0;
+  SQLite race completed in 17.587s and HTTP/SSE race in 1.028s. The worker-only task validator's
+  expected rejection of `ROLE: REVIEWER` envelopes remains visible process metadata; the accepted
+  reviewer contract governs them and every reviewer report validated. This accepts only T-046's
+  HTTP/SSE transport and composition seam, not T-047 execution, restore, a real provider, PR, merge,
+  deployment or release.
 
 ## Current development boundary
 
 - T-040 is in progress through the accepted serial T-043..T-047 child design. T-044 is accepted
-  after T-066/T-067, and T-045/T-069/T-075 deterministic Fake work is accepted after T-073/T-076.
-  No HTTP/SSE/T-046 envelope is issued in this checkpoint; T-047 vertical integration, application
-  persistence wiring, restore, real providers, Slack/Lark, deployment and release remain NotRun or
-  forbidden.
+  after T-066/T-067, T-045/T-069/T-075 deterministic Fake work is accepted after T-073/T-076, and
+  T-046/T-078/T-080 HTTP/SSE work is accepted after T-081 plus the orchestrator gate. T-077 and
+  T-079 remain immutable historical FAIL evidence. T-047 vertical integration is the next serial
+  child but has no execution envelope and remains NotRun; application persistence execution,
+  restore, real providers, Slack/Lark, deployment and release remain NotRun or forbidden.
 
 ## Resume
 

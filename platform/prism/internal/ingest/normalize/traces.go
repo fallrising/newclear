@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 	"time"
@@ -67,9 +68,7 @@ func (n *Normalizer) normalizeSpan(input ptrace.Span, resource *utm.Resource, sc
 		report.normalized("truncate")
 		report.warning("attributes_truncated")
 	}
-	for key, value := range scopeAttributes {
-		attrs[key] = value
-	}
+	maps.Copy(attrs, scopeAttributes)
 	if input.DroppedAttributesCount() > 0 {
 		attrs["otel.dropped_attributes_count"] = strconv.FormatUint(uint64(input.DroppedAttributesCount()), 10)
 	}

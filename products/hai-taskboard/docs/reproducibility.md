@@ -1,8 +1,8 @@
 # Reproducibility contract
 
-Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command evidence; broader
-G1 remains NotRun
-Observed: 2026-09-05
+Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake evidence;
+broader G1 remains NotRun
+Observed: 2026-09-09
 
 ## Toolchains and packages
 
@@ -65,6 +65,11 @@ mutation permission.
 - T-067 accepts T-044/T-066 application commands after pinned Go 1.27.1 module/format/vet,
   application/SQLite/full/race, real-Store completion/replay/late-rollback, executor timing, strict
   canonical OpenAPI, idempotency and completion-gate attacks.
+- T-073 and T-076 accept T-045/T-069/T-075's deterministic `fake/v1` package and fenced in-memory
+  worker seam after fresh lifecycle, capability, fence, uncertainty, alias, artifact, hostile-path,
+  repeated/concurrent deterministic and bounded-import/API attacks. T-076 report SHA-256 is
+  `14a3e6832fdad1680173d7b6c05a2cfadd5d45107e66da8d984a204d64b33aaa`; the orchestrator's
+  separate pinned module/format/vet/named/repeated/full/race rerun also passed.
 
 ## Accepted persistence foundation evidence
 
@@ -80,11 +85,12 @@ mutation permission.
 
 ## Evidence still NotRun
 
-Playwright browser/contrast/zoom/coarse-pointer checks, the Fake/HTTP/SSE vertical integration,
-SQLite backup/restore and disk-full/migration interruption, full SBOM/CVE inventory,
+Playwright browser/contrast/zoom/coarse-pointer checks, Fake-to-application persistence wiring,
+HTTP/SSE and T-047 vertical integration, SQLite backup/restore and disk-full/migration interruption,
+full SBOM/CVE inventory,
 action/image provenance, root workflow policy/path selection and TypeScript 7 migration are NotRun.
-The deterministic Fake and every later vertical-slice family remain unaccepted. These gaps prevent
-a G1, release or production-complete claim.
+Every later vertical-slice family remains unaccepted. These gaps prevent a G1, release or
+production-complete claim.
 
 ## Primary sources
 

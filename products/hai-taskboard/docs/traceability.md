@@ -36,16 +36,20 @@ required acceptance decision. `Candidate` means executed worker evidence still a
   behavior and pinned full/race checks. Its accepted application consumer is recorded separately.
 - T-044 application commands plus the T-066 repair are accepted by T-067. Pinned application,
   SQLite, full and race gates plus independent real-Store completion/replay/rollback, executor-call
-  timing, strict canonical OpenAPI, idempotency and negative completion matrices passed. This is the
-  application-command checkpoint only; Fake, HTTP/SSE and vertical integration remain NotRun.
+  timing, strict canonical OpenAPI, idempotency and negative completion matrices passed.
+- T-045 deterministic Fake plus T-069/T-075 repairs are accepted by T-073/T-076. Fresh independent
+  probes cover fail-closed capabilities, immutable scripted observations, explicit-tick determinism,
+  all fence dimensions, lifecycle/uncertainty/zero-redispatch behavior, bounded staging/digests and
+  hostile artifact names including exact `..`. This is a Fake-package and in-memory worker-seam
+  checkpoint only; application persistence wiring, HTTP/SSE and T-047 remain NotRun.
 
 ## T-041 implementation-contract inventory
 
 `docs/sdd/fake-vertical-slice-implementation.md` freezes V1 package direction, SQLite constraints,
 guarded Done rehydration, command/failure seams, Fake fencing, `/api/v1` boundaries, SSE replay and
-serial child writable scopes. It is design evidence only. Its named persistence, transaction, Fake,
-HTTP/SSE and integration oracles remain NotRun until the corresponding child executes; no existing
-Passing status is broadened.
+serial child writable scopes. Its bounded persistence, transaction and Fake child oracles are now
+accepted by their named reports; HTTP/SSE and integration oracles remain NotRun. No accepted child
+status is broadened into vertical-slice acceptance.
 
 ## First named G1 acceptance skeletons
 
@@ -55,8 +59,8 @@ Passing status is broadened.
 | AC-P0A-002 | `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState` | subtests for missing/failed/skipped/not-run/unknown/stale | Passing (T-024) |
 | AC-P0A-003 | `TestCompleteWorkItem_RejectsSubjectTOCTOU` | no phase/record mutation after subject change | Passing (T-024) |
 | AC-P0A-004 | `TestCommand_IdempotencySameRequestAndConflict` | application same/concurrent request replays one exact result; mismatched bytes conflict | Passing (T-024/T-067) |
-| AC-P0A-005 | `TestRunLease_RejectsStaleEpochPublication` | stale terminal result rejected and audited | NotRun |
-| AC-P0A-006 | `TestRunRecovery_ExpiryDoesNotImplyStoppedOrRetry` | NeedsReconcile/OutcomeUnknown retained | NotRun |
+| AC-P0A-005 | `TestRunLease_RejectsStaleEpochPublication` | stale terminal result rejected and audited | Passing (Fake seam T-073; durable audit/integration NotRun) |
+| AC-P0A-006 | `TestRunRecovery_ExpiryDoesNotImplyStoppedOrRetry` | NeedsReconcile/OutcomeUnknown retained | Passing (Fake seam T-073; durable integration NotRun) |
 | AC-P0A-007 | `TestImpactPlan_UsesOldAndNewReverseClosure` | removed/redirected edge dependents included | Passing (T-024) |
 | AC-P0A-008 | `TestImpactActivation_RejectsStalePlan` | pure decision rejects stale plan; durable activation remains NotRun | Passing (T-024) |
 | AC-P0A-009 | `TestSSE_SnapshotGapReplayAndRetentionReset` | monotonic replay or explicit reset | NotRun |
@@ -87,11 +91,11 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-09 | Concurrent old version yields one success and one conflict | NotRun |
 | AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP/integration NotRun) |
 | AC-11 | State/audit/outbox/result failure is all commit or all rollback | Passing (application/SQLite T-067) |
-| AC-12 | Lost Start acknowledgement is looked up; unknown blocks restart | NotRun |
-| AC-13 | Expired lease holder cannot finalize or publish | NotRun |
+| AC-12 | Lost Start acknowledgement is looked up; unknown blocks restart | Passing (Fake T-073; durable integration NotRun) |
+| AC-13 | Expired lease holder cannot finalize or publish | Passing (Fake T-073; durable integration NotRun) |
 | AC-14 | Live process with missed heartbeat enters recovery, not redispatch | NotRun |
-| AC-15 | Unconfirmed cancel remains CancelRequested, not Canceled | NotRun |
-| AC-16 | Deadline plus unknown external outcome blocks automatic retry | NotRun |
+| AC-15 | Unconfirmed cancel remains CancelRequested, not Canceled | Passing (Fake T-073; durable integration NotRun) |
+| AC-16 | Deadline plus unknown external outcome blocks automatic retry | Passing (Fake T-073; durable integration NotRun) |
 | AC-17 | Duplicate/stale Question response cannot resolve a newer blocker | NotRun |
 | AC-18 | Resolving one of two blockers leaves the WorkItem blocked and phase intact | NotRun |
 | AC-19 | Resume on unsupported profile fails closed and requires new Run | NotRun |
@@ -117,7 +121,7 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-39 | Notification storm/failure is bounded/dead-lettered and cannot block commands | NotRun |
 | AC-40 | Backup/restore manifest exposes missing artifact; dispatch begins disabled | NotRun |
 | AC-41 | Disk full/SQLITE_BUSY/migration interruption leaves no half mutation | NotRun |
-| AC-42 | Fake boundary denies DB/sibling/secret-canary access and leakage | NotRun |
+| AC-42 | Fake boundary denies DB/sibling/secret-canary access and leakage | Passing (Fake package T-076; OS isolation/integration NotRun) |
 | AC-43 | Malicious repository instructions remain data and cannot alter authority | NotRun |
 | AC-44 | Active artifact/symlink cannot execute, escape or overwrite | NotRun |
 | AC-45 | Changed/expired approval subject fails and single-use cannot repeat | NotRun |
@@ -128,7 +132,7 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-50 | 320px/theme/zoom/disconnect keeps primary actions and non-color cues | NotRun |
 | AC-51 | Fresh context finds next safe action; stale pack requires refresh | NotRun |
 | AC-52 | Real-provider auth/rate/schema failure is deferred; no fallback provider | Deferred |
-| AC-53 | Restore rejects old callback/authority and does not replay unknown mutation | NotRun |
+| AC-53 | Restore rejects old callback/authority and does not replay unknown mutation | Passing (Fake fence T-073; restore integration NotRun) |
 | AC-54 | Real Codex bounded task with independent evidence and human completion | Deferred (G2) |
 
 ### Required minimum before P0-A exit

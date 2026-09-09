@@ -98,6 +98,16 @@ execution. P0-A remains Fake-only.
 | T-065 | Independent T-044 application/real-Store review | T-044 | Failed; three repair groups required | Orchestrator |
 | T-066 | Repair application ordering, executor timing and canonical strictness | T-065 | Accepted by T-067 | Independent reviewer |
 | T-067 | Fresh T-044/T-066 application and real-Store re-review | T-066 | Accepted | Orchestrator |
+| T-045 | Deterministic Fake executor and fenced worker seam | T-067 | Accepted after T-069/T-075 by T-073/T-076 | Independent reviewer |
+| T-068 | Independent T-045 deterministic Fake review | T-045 | Failed; four repair groups required | Orchestrator |
+| T-069 | Repair deterministic Fake validation and lifecycle findings | T-068 | Accepted after T-075 by T-073/T-076 | Independent reviewer |
+| T-070 | Fresh T-045/T-069 deterministic Fake re-review | T-069 | Failed; required independent attacks skipped | Orchestrator |
+| T-071 | Complete independent deterministic Fake evidence review | T-069,T-070 | Interrupted after preflight; no report | Orchestrator |
+| T-072 | Final independent deterministic Fake attack review | T-069,T-070 | Interrupted before probes; no report | Orchestrator |
+| T-073 | Independent Fake repair/lifecycle attack review | T-069,T-070 | Accepted as lifecycle evidence | Orchestrator |
+| T-074 | Independent Fake determinism/security attack review | T-069,T-070 | Failed; exact `..` artifact name accepted | Orchestrator |
+| T-075 | Reject exact parent artifact staging name | T-074 | Accepted by T-076 | Independent reviewer |
+| T-076 | Final exact-parent path and combined Fake re-review | T-075 | Accepted | Orchestrator |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -314,13 +324,85 @@ execution. P0-A remains Fake-only.
   idempotency, completion-gate, import/hash/scope and cleanup gates also passed. The orchestrator's
   separate pinned module/format/vet/named/full/race rerun passed. This accepts T-044/T-066; T-065
   remains an immutable historical FAIL and T-045 remains NotRun.
+- 2026-09-09 — Issued bounded T-045 deterministic-Fake implementation envelope after verifying
+  branch `agent/hai-taskboard-p0a`, exact clean HEAD
+  `78470686e0179706b17a7b67f82a0361c393ae88`, accepted dependency T-067 and baseline ancestry.
+  Writable production scope is only `backend/internal/executor/fake/**`; HTTP/SSE, T-047,
+  application/persistence changes, real providers, credentials and external execution remain
+  forbidden. Worker evidence cannot accept this task; a fresh report-only reviewer is required.
+- 2026-09-09 — T-045 candidate report
+  `4ab2d7c2678d433867ae78f2d1e9893254b21bad910f5eaee1a0bd6eaae32705` records passing pinned
+  module/format/vet, named/repeated Fake, full/race and import/scope gates. Two delegated worker
+  attempts completed preflight but stalled without writing candidate bytes, so the orchestrator
+  integrated the strictly T-045-scoped candidate and retained that provenance in the report. This
+  is not acceptance; T-068 must independently attack the final bytes and may not repair them.
+- 2026-09-09 — T-068 report
+  `883f9bc841cf4e630ac4cf70ab77be6e23609dfb82a22a8894c7634486f04f34` correctly failed T-045
+  despite passing pinned named/repeated/full/race and most boundary attacks: invalid MIME types were
+  accepted; unsupported lookup/cancel checked and recorded a stale fence before capability denial;
+  invalid artifact-digest observations produced no visible rejection; and terminal success could
+  move a queued worker directly to Succeeded. T-069 owns only these four repairs and T-070 must
+  freshly review them; T-068 remains immutable historical FAIL evidence.
+- 2026-09-09 — T-069 report
+  `9f2468a3fad272ac8875ac0b9b997a5ca830071dceb09e9095c7d153bb8a87e4` reports the bounded
+  four-finding repair with focused regressions plus pinned module/format/vet, named/repeated Fake,
+  full/race and import/scope gates passing. The delegated repair worker stalled without durable
+  writes, so the orchestrator integrated the repair and retained that provenance in the report.
+  This is not acceptance; T-070 must independently reproduce the original attacks.
+- 2026-09-09 — T-070 report
+  `d25e52491c003f49d6450da2a6225eea2567bb04b498fa49e6eacf4963046bca` correctly returned
+  PARTIAL: the repaired candidate passed the complete pinned standard suite and source/API boundary
+  inspection, but the reviewer skipped the required fresh T-068 reproductions and independent
+  lifecycle, concurrency and artifact attack matrices. T-071 owns only the missing fresh reviewer
+  evidence against the unchanged candidate; T-070 remains immutable historical non-acceptance.
+- 2026-09-09 — T-071 completed the required read/preflight/hash checks but stalled with only a
+  disposable 97-byte placeholder and no attack execution or durable report. The orchestrator
+  interrupted it after repeated progress requests and removed its two exact `/tmp` paths. T-072 is
+  a fresh report-only retry; no T-071 result is used as acceptance evidence.
+- 2026-09-09 — T-072 completed preflight and created a disposable backend copy but again stalled
+  before writing or running a probe. It was interrupted without a report and its exact `/tmp` paths
+  were removed. T-073 and T-074 split the required fresh attacks into bounded independent reviewer
+  halves; neither preflight-only attempt is acceptance evidence.
+- 2026-09-09 — T-073 report
+  `390fe5dd13049b4f8e68fc4471840e6330bef8493cfe8dd4e9c16f9b6882d8ec` independently passed
+  the four T-068 repairs and complete fenced Worker lifecycle attack half, including exact/repeated/
+  Fake-race gates. It is complementary evidence only and cannot override a failure in T-074.
+- 2026-09-09 — T-074 report
+  `41489bfb70b6b1cce3252877f23406ba097f192578e7d5913e01e5dfc783e366` correctly failed the
+  determinism/security half because artifact name exactly `..` reached successful scenario
+  construction. All other fresh alias, concurrency, staging-digest, supported-fence, import/API and
+  pinned full/race checks passed. T-075 owns only this exact relative-name repair; T-074 remains
+  immutable historical FAIL evidence.
+- 2026-09-09 — T-075 report
+  `b6fcf2a40ce0d8d23accfbdd746c62d9531ac9a574af0b89c5a182f92c946b1c` reports the exact
+  two-code-file repair: shared relative-name validation now rejects `..`, and the existing hostile-
+  name table includes that spelling. Pinned focused/Fake-repeat/full/race/import/scope gates pass;
+  this worker report is not acceptance and T-076 must independently attack the repaired bytes.
+- 2026-09-09 — Accepted T-076 report
+  `14a3e6832fdad1680173d7b6c05a2cfadd5d45107e66da8d984a204d64b33aaa`: fresh external-
+  package attacks reject exact `..` and fifteen adjacent hostile names before staging, preserve five
+  valid controls, and pass alias, digest, supported-fence and repeated/concurrent explicit-tick
+  matrices. T-075 changed only types.go and fake_test.go; T-073's independently reviewed adapter/
+  worker hashes remained unchanged. Together T-073 and T-076 provide complete independent review
+  coverage for T-045/T-069/T-075; T-068 and T-074 remain immutable historical FAIL evidence and
+  T-070 remains immutable PARTIAL evidence.
+- 2026-09-09 — The orchestrator's final evidence gate validated all three worker envelopes and all
+  eight produced reports, audited the exact diff, then reran the digest-pinned Go 1.27.1 image with
+  network disabled and candidate/module mounts read-only. Module verify, empty gofmt, vet, all five
+  exact T-045 tests plus the T-068 regression, ten Fake repetitions, full backend, full race, test
+  inventory and production import inventory passed; SQLite race completed in 18.387s and Fake race
+  in 1.012s. The first managed-sandbox invocation could not access the Docker socket; the approved
+  identical invocation completed successfully. This accepts only the deterministic Fake package and
+  fenced in-memory worker seam, not application persistence wiring, HTTP/SSE, T-047, restore, a real
+  provider, PR, merge, deployment or release.
 
 ## Current development boundary
 
 - T-040 is in progress through the accepted serial T-043..T-047 child design. T-044 is accepted
-  after T-066/T-067. The next child is T-045 deterministic Fake work, but no T-045 execution envelope
-  is issued in this continuation. Fake, HTTP/SSE, vertical integration, real providers, Slack/Lark,
-  deployment and release remain NotRun/forbidden.
+  after T-066/T-067, and T-045/T-069/T-075 deterministic Fake work is accepted after T-073/T-076.
+  No HTTP/SSE/T-046 envelope is issued in this checkpoint; T-047 vertical integration, application
+  persistence wiring, restore, real providers, Slack/Lark, deployment and release remain NotRun or
+  forbidden.
 
 ## Resume
 

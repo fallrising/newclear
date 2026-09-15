@@ -475,7 +475,8 @@ func (tx transaction) LoadCompletionMaterial(ctx context.Context, query port.Com
 	err = tx.conn.QueryRowContext(ctx, `SELECT c.candidate_id,c.project_id,c.run_id,c.candidate_digest,c.input_subject_digest,c.created_at_ns,
 r.work_item_id,r.input_digest,r.adapter_id,r.adapter_version,r.scenario_id,r.attempt,r.desired_action,r.dispatch_state,r.observed_state,r.reconciliation_state,r.side_effect_outcome,r.created_at_ns
 FROM candidates c JOIN runs r ON r.project_id=c.project_id AND r.run_id=c.run_id
-WHERE c.project_id=? AND c.candidate_id=? AND c.run_id=? AND r.work_item_id=?`, query.ProjectID, query.CandidateID, query.RunID, query.WorkItemID).Scan(
+WHERE c.project_id=? AND (?='' OR c.candidate_id=?) AND (?='' OR c.run_id=?) AND r.work_item_id=?`,
+		query.ProjectID, query.CandidateID, query.CandidateID, query.RunID, query.RunID, query.WorkItemID).Scan(
 		&material.Candidate.ID, &material.Candidate.ProjectID, &material.Candidate.RunID, &candidateDigest, &inputSubjectDigest, &material.Candidate.CreatedAtNS,
 		&material.Run.WorkItemID, &runInputDigest, &material.Run.AdapterID, &material.Run.AdapterVersion, &material.Run.ScenarioID, &material.Run.Attempt,
 		&material.Run.DesiredAction, &material.Run.DispatchState, &material.Run.ObservedState, &material.Run.ReconciliationState, &material.Run.SideEffectOutcome, &material.Run.CreatedAtNS,
@@ -497,7 +498,7 @@ WHERE c.project_id=? AND c.candidate_id=? AND c.run_id=? AND r.work_item_id=?`, 
 		if err != nil {
 			return port.CompletionMaterial{}, domain.StorageCorruptionError{Reason: "invalid run input"}
 		}
-		material.Run.ID, material.Run.ProjectID = query.RunID, query.ProjectID
+		material.Run.ID, material.Run.ProjectID = material.Candidate.RunID, query.ProjectID
 		material.CandidatePresent, material.RunPresent = true, true
 	}
 	var activeOrUnknown int
@@ -532,7 +533,14 @@ WHERE c.project_id=? AND c.candidate_id=? AND c.run_id=? AND r.work_item_id=?`, 
 	if err := rows.Close(); err != nil {
 		return port.CompletionMaterial{}, normalizeError(err)
 	}
-	if err := tx.conn.QueryRowContext(ctx, `SELECT graph_revision_digest FROM dependency_revisions WHERE project_id=? AND graph_revision_digest=?`, query.ProjectID, query.GraphRevisionDigest.String()).Scan(&candidateDigest); errors.Is(err, sql.ErrNoRows) {
+	graphDigest := query.GraphRevisionDigest.String()
+	graphQuery := `SELECT graph_revision_digest FROM dependency_revisions WHERE project_id=? AND graph_revision_digest=?`
+	graphArgs := []any{query.ProjectID, graphDigest}
+	if query.GraphRevisionDigest.IsZero() {
+		graphQuery = `SELECT graph_revision_digest FROM dependency_revisions WHERE project_id=? ORDER BY created_at_ns DESC,graph_revision_digest DESC LIMIT 1`
+		graphArgs = []any{query.ProjectID}
+	}
+	if err := tx.conn.QueryRowContext(ctx, graphQuery, graphArgs...).Scan(&candidateDigest); errors.Is(err, sql.ErrNoRows) {
 		candidateDigest = ""
 	} else if err != nil {
 		return port.CompletionMaterial{}, normalizeError(err)
@@ -650,6 +658,327 @@ func (tx transaction) CreateRun(ctx context.Context, value port.Run) error {
 	}
 	_, err := tx.conn.ExecContext(ctx, `INSERT INTO runs (project_id,run_id,work_item_id,input_digest,adapter_id,adapter_version,scenario_id,attempt,desired_action,dispatch_state,observed_state,reconciliation_state,side_effect_outcome,created_at_ns) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, value.ProjectID, value.ID, value.WorkItemID, value.InputDigest.String(), value.AdapterID, value.AdapterVersion, value.ScenarioID, value.Attempt, value.DesiredAction, value.DispatchState, value.ObservedState, value.ReconciliationState, value.SideEffectOutcome, value.CreatedAtNS)
 	return normalizeError(err)
+}
+
+func (tx transaction) LoadRunAuthority(ctx context.Context, projectID domain.ProjectID, runID domain.RunID) (port.RunAuthority, error) {
+	if projectID == "" || runID == "" {
+		return port.RunAuthority{}, fmt.Errorf("invalid Run authority scope")
+	}
+	var authority port.RunAuthority
+	var runDigest, outboxDigest string
+	err := tx.conn.QueryRowContext(ctx, `SELECT work_item_id,input_digest,adapter_id,adapter_version,scenario_id,attempt,desired_action,dispatch_state,observed_state,reconciliation_state,side_effect_outcome,created_at_ns
+FROM runs WHERE project_id=? AND run_id=?`, projectID, runID).Scan(
+		&authority.Run.WorkItemID, &runDigest, &authority.Run.AdapterID, &authority.Run.AdapterVersion,
+		&authority.Run.ScenarioID, &authority.Run.Attempt, &authority.Run.DesiredAction,
+		&authority.Run.DispatchState, &authority.Run.ObservedState, &authority.Run.ReconciliationState,
+		&authority.Run.SideEffectOutcome, &authority.Run.CreatedAtNS,
+	)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	authority.Run.ID, authority.Run.ProjectID = runID, projectID
+	if authority.Run.InputDigest, err = ParseStorageDigest(runDigest); err != nil {
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "invalid Run input digest"}
+	}
+	if err := tx.conn.QueryRowContext(ctx, `SELECT restore_generation FROM instance_state WHERE id=1`).Scan(&authority.RestoreGeneration); err != nil || authority.RestoreGeneration == 0 {
+		if err != nil {
+			return port.RunAuthority{}, normalizeError(err)
+		}
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "invalid restore generation"}
+	}
+	var holder sql.NullString
+	var deadline sql.NullInt64
+	var leaseEpoch uint64
+	err = tx.conn.QueryRowContext(ctx, `SELECT epoch,holder,deadline_ns FROM run_leases WHERE project_id=? AND run_id=?`, projectID, runID).Scan(&leaseEpoch, &holder, &deadline)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err == nil {
+		if holder.Valid != deadline.Valid || leaseEpoch == 0 && holder.Valid {
+			return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "invalid Run lease"}
+		}
+		authority.Lease = port.RunLease{Fence: port.RunFence{
+			ProjectID: projectID, RunID: runID, InputDigest: authority.Run.InputDigest,
+			Holder: domain.ActorID(holder.String), Epoch: leaseEpoch, RestoreGeneration: authority.RestoreGeneration,
+		}, DeadlineNS: deadline.Int64}
+	}
+	var claimedAt sql.NullInt64
+	err = tx.conn.QueryRowContext(ctx, `SELECT intent_id,command_id,audit_group_id,payload_digest,state,claim_epoch,created_at_ns,claimed_at_ns
+FROM outbox WHERE project_id=? AND run_id=? ORDER BY intent_id LIMIT 1`, projectID, runID).Scan(
+		&authority.Outbox.ID, &authority.Outbox.CommandID, &authority.Outbox.AuditGroupID, &outboxDigest,
+		&authority.Outbox.State, &authority.Outbox.ClaimEpoch, &authority.Outbox.CreatedAtNS, &claimedAt,
+	)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	var outboxCount uint64
+	if err := tx.conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM outbox WHERE project_id=? AND run_id=?`, projectID, runID).Scan(&outboxCount); err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if outboxCount != 1 {
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "Run dispatch outbox is not unique"}
+	}
+	authority.Outbox.ProjectID, authority.Outbox.RunID = projectID, runID
+	authority.Outbox.ClaimedAtNS = claimedAt.Int64
+	if authority.Outbox.PayloadDigest, err = ParseStorageDigest(outboxDigest); err != nil || authority.Outbox.PayloadDigest != authority.Run.InputDigest {
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "Run/outbox input digest mismatch"}
+	}
+	if err := tx.conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM audit_entries e JOIN audit_groups g ON g.project_id=e.project_id AND g.audit_group_id=e.audit_group_id WHERE g.project_id=? AND g.command_id=?`, projectID, authority.Outbox.CommandID).Scan(&authority.AuditCount); err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := tx.conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM projection_events p JOIN audit_entries e ON e.project_id=p.project_id AND e.audit_sequence=p.audit_sequence JOIN audit_groups g ON g.project_id=e.project_id AND g.audit_group_id=e.audit_group_id WHERE g.project_id=? AND g.command_id=?`, projectID, authority.Outbox.CommandID).Scan(&authority.ProjectionCount); err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	return authority, nil
+}
+
+func (tx transaction) ClaimPendingRun(ctx context.Context, request port.RunClaimRequest) (port.ExecutorEnvelope, error) {
+	if request.ProjectID == "" || request.RunID == "" || request.Holder == "" || request.ExpectedRestoreGeneration == 0 ||
+		request.ClaimedAtNS <= 0 || request.DeadlineNS <= request.ClaimedAtNS {
+		return port.ExecutorEnvelope{}, fmt.Errorf("invalid Run claim")
+	}
+	authority, err := tx.LoadRunAuthority(ctx, request.ProjectID, request.RunID)
+	if err != nil {
+		return port.ExecutorEnvelope{}, err
+	}
+	if authority.RestoreGeneration != request.ExpectedRestoreGeneration {
+		return port.ExecutorEnvelope{}, port.FenceRejection{Reason: "restore generation changed"}
+	}
+	if authority.Run.DesiredAction != "Dispatch" || authority.Run.DispatchState != "Pending" || authority.Outbox.State != "Pending" {
+		return port.ExecutorEnvelope{}, port.ErrNoPendingDispatch
+	}
+	if authority.Lease.Fence.Epoch == ^uint64(0) {
+		return port.ExecutorEnvelope{}, domain.StorageCorruptionError{Reason: "Run lease epoch overflow"}
+	}
+	nextEpoch := authority.Lease.Fence.Epoch + 1
+	if authority.Lease.Fence.Epoch == 0 {
+		_, err = tx.conn.ExecContext(ctx, `INSERT INTO run_leases (project_id,run_id,epoch,holder,deadline_ns)
+VALUES (?,?,?,?,?)`, request.ProjectID, request.RunID, nextEpoch, request.Holder, request.DeadlineNS)
+	} else {
+		var result sql.Result
+		result, err = tx.conn.ExecContext(ctx, `UPDATE run_leases SET epoch=?,holder=?,deadline_ns=?
+WHERE project_id=? AND run_id=? AND epoch=?`, nextEpoch, request.Holder, request.DeadlineNS,
+			request.ProjectID, request.RunID, authority.Lease.Fence.Epoch)
+		if err == nil {
+			err = requireSingleMutation(result, port.ErrNoPendingDispatch)
+		}
+	}
+	if err != nil {
+		return port.ExecutorEnvelope{}, normalizeError(err)
+	}
+	result, err := tx.conn.ExecContext(ctx, `UPDATE outbox SET state='Claimed',claim_epoch=?,claimed_at_ns=?
+WHERE project_id=? AND intent_id=? AND run_id=? AND payload_digest=? AND state='Pending' AND claim_epoch=?
+AND EXISTS (SELECT 1 FROM instance_state WHERE id=1 AND restore_generation=?)`,
+		nextEpoch, request.ClaimedAtNS, request.ProjectID, authority.Outbox.ID, request.RunID,
+		authority.Run.InputDigest.String(), authority.Outbox.ClaimEpoch, request.ExpectedRestoreGeneration)
+	if err != nil {
+		return port.ExecutorEnvelope{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.ErrNoPendingDispatch); err != nil {
+		return port.ExecutorEnvelope{}, err
+	}
+	result, err = tx.conn.ExecContext(ctx, `UPDATE runs SET dispatch_state='Claimed'
+WHERE project_id=? AND run_id=? AND input_digest=? AND desired_action='Dispatch' AND dispatch_state='Pending'
+AND EXISTS (SELECT 1 FROM instance_state WHERE id=1 AND restore_generation=?)`,
+		request.ProjectID, request.RunID, authority.Run.InputDigest.String(), request.ExpectedRestoreGeneration)
+	if err != nil {
+		return port.ExecutorEnvelope{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.ErrNoPendingDispatch); err != nil {
+		return port.ExecutorEnvelope{}, err
+	}
+	return port.ExecutorEnvelope{
+		Fence: port.RunFence{ProjectID: request.ProjectID, RunID: request.RunID, InputDigest: authority.Run.InputDigest,
+			Holder: request.Holder, Epoch: nextEpoch, RestoreGeneration: request.ExpectedRestoreGeneration},
+		WorkItemID: authority.Run.WorkItemID, AdapterID: authority.Run.AdapterID,
+		AdapterVersion: authority.Run.AdapterVersion, ScenarioID: authority.Run.ScenarioID,
+		CommandID: authority.Outbox.CommandID,
+	}, nil
+}
+
+func (tx transaction) ClaimExpiredRunForReconciliation(ctx context.Context, request port.RunLeaseSuccessionRequest) (port.RunAuthority, error) {
+	fence := request.PreviousFence
+	if fence.ProjectID == "" || fence.RunID == "" || fence.InputDigest.IsZero() || fence.Holder == "" ||
+		fence.Epoch == 0 || fence.RestoreGeneration == 0 || request.Successor == "" || request.ClaimedAtNS <= 0 ||
+		request.DeadlineNS <= request.ClaimedAtNS {
+		return port.RunAuthority{}, fmt.Errorf("invalid Run reconciliation claim")
+	}
+	authority, err := tx.LoadRunAuthority(ctx, fence.ProjectID, fence.RunID)
+	if err != nil {
+		return port.RunAuthority{}, err
+	}
+	if authority.RestoreGeneration != fence.RestoreGeneration || authority.Run.InputDigest != fence.InputDigest ||
+		authority.Lease.Fence.Holder != fence.Holder || authority.Lease.Fence.Epoch != fence.Epoch ||
+		authority.Outbox.ClaimEpoch != fence.Epoch {
+		return port.RunAuthority{}, port.FenceRejection{Reason: "predecessor does not own current Run fence"}
+	}
+	if authority.Lease.DeadlineNS <= 0 {
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "current Run lease lacks a deadline"}
+	}
+	if request.ClaimedAtNS <= authority.Lease.DeadlineNS {
+		return port.RunAuthority{}, port.ErrLeaseNotExpired
+	}
+	if authority.Run.ObservedState == "Succeeded" || authority.Run.ObservedState == "Failed" || authority.Run.ObservedState == "Canceled" {
+		return port.RunAuthority{}, port.ErrRunLifecycle
+	}
+	if authority.Run.DispatchState == "Pending" || authority.Outbox.State == "Pending" {
+		return port.RunAuthority{}, port.ErrNoPendingDispatch
+	}
+	if fence.Epoch == ^uint64(0) {
+		return port.RunAuthority{}, domain.StorageCorruptionError{Reason: "Run lease epoch overflow"}
+	}
+	nextEpoch := fence.Epoch + 1
+	result, err := tx.conn.ExecContext(ctx, `UPDATE run_leases SET epoch=?,holder=?,deadline_ns=?
+WHERE project_id=? AND run_id=? AND epoch=? AND holder=? AND deadline_ns=? AND deadline_ns<?
+AND EXISTS (SELECT 1 FROM instance_state WHERE id=1 AND restore_generation=?)`,
+		nextEpoch, request.Successor, request.DeadlineNS, fence.ProjectID, fence.RunID, fence.Epoch, fence.Holder,
+		authority.Lease.DeadlineNS, request.ClaimedAtNS, fence.RestoreGeneration)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.FenceRejection{Reason: "Run lease changed during reconciliation claim"}); err != nil {
+		return port.RunAuthority{}, err
+	}
+	result, err = tx.conn.ExecContext(ctx, `UPDATE outbox SET claim_epoch=?
+WHERE project_id=? AND intent_id=? AND run_id=? AND payload_digest=? AND state=? AND state<>'Pending' AND claim_epoch=?
+AND EXISTS (SELECT 1 FROM run_leases l JOIN instance_state s ON s.id=1 WHERE l.project_id=? AND l.run_id=? AND l.holder=? AND l.epoch=? AND s.restore_generation=?)`,
+		nextEpoch, fence.ProjectID, authority.Outbox.ID, fence.RunID, fence.InputDigest.String(), authority.Outbox.State, fence.Epoch,
+		fence.ProjectID, fence.RunID, request.Successor, nextEpoch, fence.RestoreGeneration)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.FenceRejection{Reason: "outbox changed during reconciliation claim"}); err != nil {
+		return port.RunAuthority{}, err
+	}
+	result, err = tx.conn.ExecContext(ctx, `UPDATE runs SET reconciliation_state='NeedsReconcile',side_effect_outcome='OutcomeUnknown'
+WHERE project_id=? AND run_id=? AND input_digest=? AND desired_action=? AND dispatch_state=? AND dispatch_state<>'Pending'
+AND observed_state=? AND observed_state NOT IN ('Succeeded','Failed','Canceled') AND reconciliation_state=? AND side_effect_outcome=?
+AND EXISTS (SELECT 1 FROM run_leases l JOIN instance_state s ON s.id=1 WHERE l.project_id=? AND l.run_id=? AND l.holder=? AND l.epoch=? AND s.restore_generation=?)`,
+		fence.ProjectID, fence.RunID, fence.InputDigest.String(), authority.Run.DesiredAction, authority.Run.DispatchState,
+		authority.Run.ObservedState, authority.Run.ReconciliationState, authority.Run.SideEffectOutcome,
+		fence.ProjectID, fence.RunID, request.Successor, nextEpoch, fence.RestoreGeneration)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.FenceRejection{Reason: "Run changed during reconciliation claim"}); err != nil {
+		return port.RunAuthority{}, err
+	}
+	return tx.LoadRunAuthority(ctx, fence.ProjectID, fence.RunID)
+}
+
+func (tx transaction) ApplyRunPublication(ctx context.Context, publication port.RunPublication) (port.RunAuthority, error) {
+	fence := publication.Fence
+	if fence.ProjectID == "" || fence.RunID == "" || fence.InputDigest.IsZero() || fence.Holder == "" || fence.Epoch == 0 || fence.RestoreGeneration == 0 ||
+		publication.DesiredAction == "" || publication.DispatchState == "" || publication.ObservedState == "" || publication.ReconciliationState == "" || publication.SideEffectOutcome == "" {
+		return port.RunAuthority{}, fmt.Errorf("invalid Run publication")
+	}
+	authority, err := tx.LoadRunAuthority(ctx, fence.ProjectID, fence.RunID)
+	if err != nil {
+		return port.RunAuthority{}, err
+	}
+	if authority.RestoreGeneration != fence.RestoreGeneration || authority.Run.InputDigest != fence.InputDigest ||
+		authority.Lease.Fence.Holder != fence.Holder || authority.Lease.Fence.Epoch != fence.Epoch ||
+		authority.Outbox.ClaimEpoch != fence.Epoch {
+		return port.RunAuthority{}, port.FenceRejection{Reason: "publisher does not own current Run fence"}
+	}
+	result, err := tx.conn.ExecContext(ctx, `UPDATE runs SET desired_action=?,dispatch_state=?,observed_state=?,reconciliation_state=?,side_effect_outcome=?
+WHERE project_id=? AND run_id=? AND input_digest=? AND desired_action=? AND dispatch_state=? AND observed_state=? AND reconciliation_state=? AND side_effect_outcome=?
+AND EXISTS (SELECT 1 FROM run_leases l JOIN instance_state s ON s.id=1 WHERE l.project_id=? AND l.run_id=? AND l.holder=? AND l.epoch=? AND s.restore_generation=?)`,
+		publication.DesiredAction, publication.DispatchState, publication.ObservedState, publication.ReconciliationState, publication.SideEffectOutcome,
+		fence.ProjectID, fence.RunID, fence.InputDigest.String(), authority.Run.DesiredAction, authority.Run.DispatchState,
+		authority.Run.ObservedState, authority.Run.ReconciliationState, authority.Run.SideEffectOutcome,
+		fence.ProjectID, fence.RunID, fence.Holder, fence.Epoch, fence.RestoreGeneration)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.FenceRejection{Reason: "Run state changed during publication"}); err != nil {
+		return port.RunAuthority{}, err
+	}
+	result, err = tx.conn.ExecContext(ctx, `UPDATE outbox SET state=?
+WHERE project_id=? AND intent_id=? AND run_id=? AND payload_digest=? AND claim_epoch=? AND state=?
+AND EXISTS (SELECT 1 FROM run_leases l JOIN instance_state s ON s.id=1 WHERE l.project_id=? AND l.run_id=? AND l.holder=? AND l.epoch=? AND s.restore_generation=?)`,
+		publication.DispatchState, fence.ProjectID, authority.Outbox.ID, fence.RunID, fence.InputDigest.String(), fence.Epoch,
+		authority.Outbox.State, fence.ProjectID, fence.RunID, fence.Holder, fence.Epoch, fence.RestoreGeneration)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.FenceRejection{Reason: "outbox state changed during publication"}); err != nil {
+		return port.RunAuthority{}, err
+	}
+	return tx.LoadRunAuthority(ctx, fence.ProjectID, fence.RunID)
+}
+
+func (tx transaction) RequestRunCancellation(ctx context.Context, request port.CancellationRequest) (port.RunAuthority, error) {
+	if request.ProjectID == "" || request.RunID == "" || request.WorkItemID == "" {
+		return port.RunAuthority{}, fmt.Errorf("invalid cancellation request")
+	}
+	authority, err := tx.LoadRunAuthority(ctx, request.ProjectID, request.RunID)
+	if err != nil {
+		return port.RunAuthority{}, err
+	}
+	if authority.Run.WorkItemID != request.WorkItemID || authority.Run.DesiredAction != "Dispatch" ||
+		authority.Run.ObservedState == "Succeeded" || authority.Run.ObservedState == "Failed" || authority.Run.ObservedState == "Canceled" {
+		return port.RunAuthority{}, port.ErrRunLifecycle
+	}
+	result, err := tx.conn.ExecContext(ctx, `UPDATE runs SET desired_action='CancelRequested'
+WHERE project_id=? AND run_id=? AND work_item_id=? AND input_digest=? AND desired_action='Dispatch' AND observed_state=?`,
+		request.ProjectID, request.RunID, request.WorkItemID, authority.Run.InputDigest.String(), authority.Run.ObservedState)
+	if err != nil {
+		return port.RunAuthority{}, normalizeError(err)
+	}
+	if err := requireSingleMutation(result, port.ErrRunLifecycle); err != nil {
+		return port.RunAuthority{}, err
+	}
+	return tx.LoadRunAuthority(ctx, request.ProjectID, request.RunID)
+}
+
+func (tx transaction) LoadArtifact(ctx context.Context, digest domain.Digest) (port.Artifact, error) {
+	if digest.IsZero() {
+		return port.Artifact{}, fmt.Errorf("invalid artifact digest")
+	}
+	var artifact port.Artifact
+	var storedDigest string
+	var byteLength int64
+	err := tx.conn.QueryRowContext(ctx, `SELECT digest,media_type,byte_length,storage_key,availability FROM artifacts WHERE digest=?`, digest.String()).Scan(
+		&storedDigest, &artifact.MediaType, &byteLength, &artifact.StorageKey, &artifact.Availability,
+	)
+	if err != nil {
+		return port.Artifact{}, normalizeError(err)
+	}
+	if artifact.Digest, err = ParseStorageDigest(storedDigest); err != nil || artifact.Digest != digest || byteLength < 0 {
+		return port.Artifact{}, domain.StorageCorruptionError{Reason: "invalid artifact row"}
+	}
+	artifact.ByteLength = uint64(byteLength)
+	return artifact, nil
+}
+
+func (tx transaction) LoadSubjectMaterial(ctx context.Context, projectID domain.ProjectID, subject domain.Digest) (port.SubjectMaterial, error) {
+	if projectID == "" || subject.IsZero() {
+		return port.SubjectMaterial{}, fmt.Errorf("invalid completion subject scope")
+	}
+	material := port.CompletionMaterial{}
+	query := port.CompletionMaterialQuery{ProjectID: projectID, SubjectDigest: subject}
+	if err := tx.loadEvidence(ctx, query, &material); err != nil {
+		return port.SubjectMaterial{}, err
+	}
+	if err := tx.loadReviews(ctx, query, &material); err != nil {
+		return port.SubjectMaterial{}, err
+	}
+	if err := tx.loadApprovals(ctx, query, &material); err != nil {
+		return port.SubjectMaterial{}, err
+	}
+	return port.SubjectMaterial{Reviews: material.Reviews, Evidence: material.Evidence, Approvals: material.Approvals}, nil
+}
+
+func requireSingleMutation(result sql.Result, absent error) error {
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return normalizeError(err)
+	}
+	if changed != 1 {
+		return absent
+	}
+	return nil
 }
 
 func (tx transaction) StoreACRevision(ctx context.Context, value port.ACRevision) error {

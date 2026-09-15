@@ -1,8 +1,8 @@
 # Reproducibility contract
 
-Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE
-evidence; T-047 and broader G1 remain NotRun
-Observed: 2026-09-09
+Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE/
+vertical-integration plus T-090 authority-repair evidence; broader G1 remains NotRun
+Observed: 2026-09-15
 
 ## Toolchains and packages
 
@@ -78,6 +78,41 @@ mutation permission.
   `6b5aedcefe6f0e466ab05869761038f8f27768f847652a8903debe754ba4e9eb`; the orchestrator's
   separate digest-pinned, network-disabled, read-only module/format/vet/named/ten-repeat/full/race
   rerun exited 0 with SQLite race 17.587s and HTTP/SSE race 1.028s.
+- T-047 is accepted through T-087/T-089 plus the orchestrator evidence gate. The original T-047
+  PARTIAL and T-082 FAIL are retained; T-083/T-085 repaired the separately scoped predecessor seams
+  and T-086 accepted them after retaining T-084 FAIL. T-088 remains an inadmissible read-order
+  process FAIL. Fresh T-089 report SHA-256 is
+  `699d117f53e06f6149c2eb3402bd1ce81a42154a04fda6ca7ca1d8322ba11394`; accepted integration
+  candidate SHA-256 is `94f3fc807eb4686b4273abb3f1390625147bc07ed3cc1d95383d7afbd39063ea`.
+  It covers completion plus response-loss replay, causal N-to-N+1 stale-epoch rejection and
+  cancel-timeout/lookup-unknown without false cancellation or redispatch.
+- T-090 report SHA-256
+  `9f52dd6d1b0764b69989544cc7bc7e2f1a3ef66a8b3bb70125d34b6465704f82` records the accepted
+  pre-push authority repair and all retained intermediate diagnostics. Its final offline/read-only
+  gate added Redocly lint and the three exact authority regressions, then reran the T-047 exact set,
+  ten repetitions, full backend, race and inventory without a final failure or skip. Current
+  integration SHA-256 is `e25e6bad0618edfc083168a7fe0ed798c9beac30677d05820b41cb541c3644b4`.
+
+The final orchestrator rerun used the pinned backend image above with network disabled, read-only
+source/module mounts, `GOTOOLCHAIN=local`, `GOPROXY=off`, `GOSUMDB=off`, tmpfs build cache and
+executable tmpfs `/tmp`. From `backend/`, the acceptance commands were:
+
+```text
+go version
+go mod verify
+test -z "$(gofmt -l .)"
+go vet ./...
+go test -count=1 -run '^(TestVerticalAuthority_ArtifactVerificationOutsideWriteTransaction|TestVerticalAuthority_ReviewEvidenceVersionConflicts|TestVerticalAuthority_ApprovalRequiresCurrentSubjectAndVersion)$' ./internal/domain/sqlite
+go test -count=1 -v -run '^(TestVerticalFake_CompletionAndResponseLoss|TestRunLease_RejectsStaleEpochPublication|TestCancel_UnknownStopIsNotCanceled)$' ./integration
+go test -count=10 -run '^(TestVerticalFake_CompletionAndResponseLoss|TestRunLease_RejectsStaleEpochPublication|TestCancel_UnknownStopIsNotCanceled)$' ./integration
+go test -count=1 ./...
+go test -count=1 -race ./...
+go test -list . ./...
+```
+
+All final commands exited 0, the format listing was empty, and both exact sets ran without skip. The
+T-090 gate also ran pinned Redocly 2.51.2 against `api/openapi.yaml`; the final full run included
+SQLite in 6.254s and the final race run included SQLite in 27.609s.
 
 ## Accepted persistence foundation evidence
 
@@ -93,12 +128,12 @@ mutation permission.
 
 ## Evidence still NotRun
 
-Playwright browser/contrast/zoom/coarse-pointer checks, Fake-to-application persistent worker
-execution and T-047 vertical integration, SQLite backup/restore and disk-full/migration interruption,
-full SBOM/CVE inventory,
+Playwright browser/contrast/zoom/coarse-pointer checks, automatic persistent outbox/worker polling,
+SQLite backup/restore and disk-full/migration interruption, full SBOM/CVE inventory,
 action/image provenance, root workflow policy/path selection and TypeScript 7 migration are NotRun.
-Every later vertical-slice family remains unaccepted. These gaps prevent a G1, release or
-production-complete claim.
+The manually driven deterministic T-047 integration does not imply those operations. Every later
+vertical-slice family remains unaccepted. These gaps prevent a G1, release or production-complete
+claim.
 
 ## Primary sources
 

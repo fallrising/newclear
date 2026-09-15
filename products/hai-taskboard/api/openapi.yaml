@@ -988,8 +988,10 @@ components:
     ApproveSubjectPayload:
       type: object
       additionalProperties: false
-      required: [approval_request_id, subject_digest, decision]
+      required: [work_item_id, candidate_id, approval_request_id, subject_digest, decision]
       properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        candidate_id: { type: string, minLength: 1, maxLength: 80 }
         approval_request_id: { type: string, minLength: 1, maxLength: 80 }
         subject_digest: { $ref: "#/components/schemas/SHA256" }
         decision: { type: string, enum: [Approved, Rejected] }

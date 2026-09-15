@@ -7,15 +7,20 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/command"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/port"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/service"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/internal/rehydrationcap"
 )
@@ -23,6 +28,1220 @@ import (
 const capabilityImport = "github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/internal/rehydrationcap"
 
 var errForcedFailure = errors.New("forced transaction failure")
+
+func TestVerticalAuthority_CanonicalDigestsMatchOpenAPI(t *testing.T) {
+	digests := []domain.Digest{
+		domain.HashString("candidate"), domain.HashString("input"), domain.HashString("artifact-a"), domain.HashString("artifact-b"),
+		domain.HashString("subject"), domain.HashString("ac-revision"), domain.HashString("recipe"), domain.HashString("environment"), domain.HashString("report"),
+	}
+	artifactA, artifactB := digests[2], digests[3]
+	artifacts := []command.ArtifactLocator{
+		{Digest: artifactB, MediaType: "text/plain", ByteLength: 10, Availability: "Present"},
+		{Digest: artifactA, MediaType: "application/json", ByteLength: 20, Availability: "Present", Href: "/api/v1/projects/" + string(verticalProject) + "/artifacts/sha256:" + artifactA.String()},
+	}
+	candidate, _, err := command.CanonicalSubmitCandidate(command.SubmitCandidate{
+		Metadata: verticalMetadata(1, 1), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+		Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: digests[0], InputSubjectDigest: digests[1], CreatedAt: fixedClockTime, Artifacts: artifacts},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertOpenAPISHA256Values(t, candidate, 4)
+	if bytes.Index(candidate, []byte(artifactA.String())) >= bytes.Index(candidate, []byte(artifactB.String())) {
+		t.Fatalf("artifact manifest is not digest-sorted: %s", candidate)
+	}
+	review, _, err := command.CanonicalPublishFixtureReview(command.PublishFixtureReview{
+		Metadata: verticalMetadata(2, 1), ProjectID: verticalProject, RunID: verticalRun, LeaseEpoch: 1, RestoreGeneration: 1,
+		Review: command.Review{ID: "review-1", SubjectDigest: digests[4], ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertOpenAPISHA256Values(t, review, 1)
+	evidence, _, err := command.CanonicalPublishFixtureEvidence(command.PublishFixtureEvidence{
+		Metadata: verticalMetadata(3, 1), ProjectID: verticalProject, RunID: verticalRun, LeaseEpoch: 1, RestoreGeneration: 1,
+		Evidence: command.Evidence{
+			ID: "evidence-1", SubjectDigest: digests[4], ACID: "AC-1", ACRevisionDigest: digests[5],
+			ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present",
+			VerifierID: verticalOperator, VerifierClass: "independent", RecipeDigest: digests[6], EnvironmentDigest: digests[7], ObservedAt: fixedClockTime,
+			Report: command.ArtifactLocator{Digest: digests[8], MediaType: "text/plain", ByteLength: 30, Availability: "Present"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertOpenAPISHA256Values(t, evidence, 5)
+	approval, _, err := command.CanonicalApproveSubject(command.ApproveSubject{
+		Metadata: verticalMetadata(4, 1), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-1", RequestID: "approval-1", SubjectDigest: digests[4], Decision: "Approved",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertOpenAPISHA256Values(t, approval, 1)
+	qa, _, err := command.CanonicalRequestQA(command.RequestQA{
+		Metadata: verticalMetadata(5, 1), ProjectID: verticalProject, WorkItemID: verticalWorkItem, CandidateID: "candidate-1", SubjectDigest: digests[4],
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertOpenAPISHA256Values(t, qa, 1)
+
+	for name, href := range map[string]string{
+		"missing-prefix": "/api/v1/projects/" + string(verticalProject) + "/artifacts/" + artifactA.String(),
+		"double-prefix":  "/api/v1/projects/" + string(verticalProject) + "/artifacts/sha256:sha256:" + artifactA.String(),
+		"malformed":      "/api/v1/projects/" + string(verticalProject) + "/artifacts/sha256:not-a-digest",
+	} {
+		t.Run("reject-href-"+name, func(t *testing.T) {
+			attacked := slices.Clone(artifacts)
+			attacked[1].Href = href
+			_, _, err := command.CanonicalSubmitCandidate(command.SubmitCandidate{
+				Metadata: verticalMetadata(6, 1), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+				Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: digests[0], InputSubjectDigest: digests[1], CreatedAt: fixedClockTime, Artifacts: attacked},
+			})
+			if !errors.Is(err, command.ErrInvalidCommand) {
+				t.Fatalf("malformed href error = %v", err)
+			}
+		})
+	}
+}
+
+func TestVerticalAuthority_ExpiredLeaseSuccessionFencesOldEpoch(t *testing.T) {
+	fixture := newVerticalAuthorityFixture(t)
+	claim := claimAndStartVertical(t, fixture.application)
+	before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := service.ClaimReconciliationRequest{PreviousFence: claim.Fence, Successor: "reconciler", LeaseDuration: time.Minute}
+	if _, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), request.Successor, request); !errors.Is(err, port.ErrLeaseNotExpired) {
+		t.Fatalf("unexpired succession error = %v", err)
+	}
+	assertVerticalAuthorityEqual(t, fixture.application, before)
+
+	fixture.clock.Advance(2 * time.Minute)
+	succeeded, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), request.Successor, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if succeeded.Lease.Fence.Epoch != claim.Fence.Epoch+1 || succeeded.Lease.Fence.Holder != request.Successor ||
+		succeeded.Outbox.ClaimEpoch != claim.Fence.Epoch+1 || succeeded.Outbox.State != before.Outbox.State ||
+		succeeded.Run.DesiredAction != before.Run.DesiredAction || succeeded.Run.DispatchState != before.Run.DispatchState ||
+		succeeded.Run.ObservedState != before.Run.ObservedState || succeeded.Run.InputDigest != before.Run.InputDigest ||
+		succeeded.Run.ReconciliationState != "NeedsReconcile" || succeeded.Run.SideEffectOutcome != "OutcomeUnknown" ||
+		succeeded.AuditCount != before.AuditCount+1 || succeeded.ProjectionCount != before.ProjectionCount+1 {
+		t.Fatalf("reconciliation succession = %#v; before = %#v", succeeded, before)
+	}
+	if _, err := fixture.application.ClaimDispatch(t.Context(), "redispatcher", service.ClaimDispatchRequest{
+		ProjectID: verticalProject, RunID: verticalRun, Holder: "redispatcher", ExpectedRestoreGeneration: 1, LeaseDuration: time.Minute,
+	}); !errors.Is(err, port.ErrNoPendingDispatch) {
+		t.Fatalf("succession permitted redispatch: %v", err)
+	}
+
+	beforeOld := succeeded
+	if _, err := fixture.application.PublishRunObservation(t.Context(), claim.Fence.Holder, service.RunObservation{Fence: claim.Fence, Kind: service.ObservationTerminalFailure}); !errors.Is(err, port.ErrFenceRejected) {
+		t.Fatalf("old epoch publication error = %v", err)
+	}
+	afterOld, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if afterOld.Run != beforeOld.Run || afterOld.Outbox != beforeOld.Outbox || afterOld.Lease != beforeOld.Lease ||
+		afterOld.ProjectionCount != beforeOld.ProjectionCount || afterOld.AuditCount != beforeOld.AuditCount+1 {
+		t.Fatalf("old epoch mutation: before=%#v after=%#v", beforeOld, afterOld)
+	}
+	if _, err := fixture.application.PublishRunObservation(t.Context(), request.Successor, service.RunObservation{Fence: succeeded.Lease.Fence, Kind: service.ObservationTerminalFailure}); !errors.Is(err, port.ErrRunLifecycle) {
+		t.Fatalf("unreconciled terminal publication error = %v", err)
+	}
+	reconciled := publishVertical(t, fixture.application, succeeded.Lease.Fence, service.ObservationLookupRunning, nil)
+	if reconciled.Run.ObservedState != "Running" || reconciled.Run.ReconciliationState != "Reconciled" {
+		t.Fatalf("bounded current reconciliation = %#v", reconciled.Run)
+	}
+
+	t.Run("concurrent-succession-has-one-winner-and-zero-redispatch", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		fixture.clock.Advance(2 * time.Minute)
+		start := make(chan struct{})
+		results := make(chan error, 2)
+		for _, successor := range []domain.ActorID{"reconciler-a", "reconciler-b"} {
+			go func() {
+				<-start
+				_, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), successor, service.ClaimReconciliationRequest{
+					PreviousFence: claim.Fence, Successor: successor, LeaseDuration: time.Minute,
+				})
+				results <- err
+			}()
+		}
+		close(start)
+		first, second := <-results, <-results
+		wins, losses := 0, 0
+		for _, err := range []error{first, second} {
+			if err == nil {
+				wins++
+			} else if errors.Is(err, port.ErrFenceRejected) {
+				losses++
+			}
+		}
+		if wins != 1 || losses != 1 {
+			t.Fatalf("succession results = (%v,%v)", first, second)
+		}
+		authority, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil || authority.Lease.Fence.Epoch != claim.Fence.Epoch+1 || authority.Outbox.State != "Acknowledged" {
+			t.Fatalf("concurrent succession authority = (%#v,%v)", authority, err)
+		}
+	})
+
+	t.Run("wrong-authority-terminal-and-rollback", func(t *testing.T) {
+		for name, mutate := range map[string]func(*port.RunFence){
+			"input":      func(fence *port.RunFence) { fence.InputDigest = domain.HashString("wrong-input") },
+			"epoch":      func(fence *port.RunFence) { fence.Epoch++ },
+			"generation": func(fence *port.RunFence) { fence.RestoreGeneration++ },
+			"scope":      func(fence *port.RunFence) { fence.RunID = "run_01HWRONGRUN" },
+		} {
+			t.Run(name, func(t *testing.T) {
+				fixture := newVerticalAuthorityFixture(t)
+				claim := claimAndStartVertical(t, fixture.application)
+				fixture.clock.Advance(2 * time.Minute)
+				before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+				if err != nil {
+					t.Fatal(err)
+				}
+				attacked := withPortFence(claim.Fence, mutate)
+				_, err = fixture.application.ClaimExpiredRunForReconciliation(t.Context(), "reconciler", service.ClaimReconciliationRequest{PreviousFence: attacked, Successor: "reconciler", LeaseDuration: time.Minute})
+				if err == nil {
+					t.Fatal("wrong authority succession succeeded")
+				}
+				assertVerticalAuthorityEqual(t, fixture.application, before)
+			})
+		}
+
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		publishVertical(t, fixture.application, claim.Fence, service.ObservationTerminalFailure, nil)
+		fixture.clock.Advance(2 * time.Minute)
+		terminal, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), "reconciler", service.ClaimReconciliationRequest{PreviousFence: claim.Fence, Successor: "reconciler", LeaseDuration: time.Minute}); !errors.Is(err, port.ErrRunLifecycle) {
+			t.Fatalf("terminal succession error = %v", err)
+		}
+		assertVerticalAuthorityEqual(t, fixture.application, terminal)
+
+		fixture = newVerticalAuthorityFixture(t)
+		claim = claimAndStartVertical(t, fixture.application)
+		fixture.clock.Advance(2 * time.Minute)
+		before, err = fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fixture.unit.FailNext()
+		if _, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), "reconciler", service.ClaimReconciliationRequest{PreviousFence: claim.Fence, Successor: "reconciler", LeaseDuration: time.Minute}); !errors.Is(err, errForcedFailure) {
+			t.Fatalf("forced rollback error = %v", err)
+		}
+		assertVerticalAuthorityEqual(t, fixture.application, before)
+	})
+}
+
+func TestVerticalAuthority_ArtifactPublicationOutsideWriteTransaction(t *testing.T) {
+	t.Run("seal-before-transaction-and-bind", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		content := []byte("candidate-v1")
+		publishVertical(t, fixture.application, claim.Fence, service.ObservationTerminalSuccess, content)
+		puts, inside := fixture.artifacts.Stats()
+		if puts != 1 || inside != 0 {
+			t.Fatalf("artifact Put stats = (%d,%d)", puts, inside)
+		}
+		err := fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+			artifact, err := tx.(port.AuthorityTransaction).LoadArtifact(t.Context(), domain.HashBytes(content))
+			if err != nil {
+				return err
+			}
+			if artifact.MediaType != "text/plain" || artifact.ByteLength != uint64(len(content)) || artifact.Availability != "Present" {
+				t.Fatalf("bound artifact = %#v", artifact)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("database-rejection-leaves-only-immutable-orphan", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		content := []byte("orphan-after-rollback")
+		fixture.unit.FailNext()
+		_, err = fixture.application.PublishRunObservation(t.Context(), claim.Fence.Holder, service.RunObservation{
+			Fence: claim.Fence, Kind: service.ObservationTerminalSuccess, ArtifactDigest: domain.HashBytes(content), ArtifactMediaType: "text/plain", ArtifactBytes: content,
+		})
+		if !errors.Is(err, errForcedFailure) {
+			t.Fatalf("forced database rejection = %v", err)
+		}
+		assertVerticalAuthorityEqual(t, fixture.application, before)
+		puts, inside := fixture.artifacts.Stats()
+		if puts != 1 || inside != 0 || !fixture.artifacts.Contains(domain.HashBytes(content)) {
+			t.Fatalf("orphan stats = (%d,%d,%t)", puts, inside, fixture.artifacts.Contains(domain.HashBytes(content)))
+		}
+		err = fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+			_, err := tx.(port.AuthorityTransaction).LoadArtifact(t.Context(), domain.HashBytes(content))
+			if !errors.Is(err, port.ErrNotFound) {
+				t.Fatalf("rolled-back artifact metadata error = %v", err)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("stale-epoch-seals-orphan-but-cannot-bind-or-advance", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		fixture.clock.Advance(2 * time.Minute)
+		current, err := fixture.application.ClaimExpiredRunForReconciliation(t.Context(), "reconciler", service.ClaimReconciliationRequest{
+			PreviousFence: claim.Fence, Successor: "reconciler", LeaseDuration: time.Minute,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		content := []byte("stale-epoch-orphan")
+		_, err = fixture.application.PublishRunObservation(t.Context(), claim.Fence.Holder, service.RunObservation{
+			Fence: claim.Fence, Kind: service.ObservationTerminalSuccess, ArtifactDigest: domain.HashBytes(content), ArtifactMediaType: "text/plain", ArtifactBytes: content,
+		})
+		if !errors.Is(err, port.ErrFenceRejected) {
+			t.Fatalf("stale terminal publication error = %v", err)
+		}
+		after, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if after.Run != current.Run || after.Outbox != current.Outbox || after.Lease != current.Lease ||
+			after.ProjectionCount != current.ProjectionCount || after.AuditCount != current.AuditCount+1 {
+			t.Fatalf("stale artifact publication mutation: before=%#v after=%#v", current, after)
+		}
+		puts, inside := fixture.artifacts.Stats()
+		if puts != 1 || inside != 0 || !fixture.artifacts.Contains(domain.HashBytes(content)) {
+			t.Fatalf("stale orphan stats = (%d,%d,%t)", puts, inside, fixture.artifacts.Contains(domain.HashBytes(content)))
+		}
+		err = fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+			_, err := tx.(port.AuthorityTransaction).LoadArtifact(t.Context(), domain.HashBytes(content))
+			if !errors.Is(err, port.ErrNotFound) {
+				t.Fatalf("stale artifact metadata error = %v", err)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("invalid-identity-never-enters-transaction", func(t *testing.T) {
+		for name, configure := range map[string]func(*verticalArtifacts, *service.RunObservation){
+			"requested-digest": func(_ *verticalArtifacts, observation *service.RunObservation) {
+				observation.ArtifactDigest = domain.HashString("wrong")
+			},
+			"returned-digest": func(store *verticalArtifacts, _ *service.RunObservation) { store.returnWrongDigest = true },
+			"returned-length": func(store *verticalArtifacts, _ *service.RunObservation) { store.returnWrongLength = true },
+		} {
+			t.Run(name, func(t *testing.T) {
+				fixture := newVerticalAuthorityFixture(t)
+				claim := claimAndStartVertical(t, fixture.application)
+				before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+				if err != nil {
+					t.Fatal(err)
+				}
+				content := []byte("identity-attack")
+				observation := service.RunObservation{Fence: claim.Fence, Kind: service.ObservationTerminalSuccess, ArtifactDigest: domain.HashBytes(content), ArtifactMediaType: "text/plain", ArtifactBytes: content}
+				configure(fixture.artifacts, &observation)
+				withinBefore := fixture.unit.Calls()
+				if _, err := fixture.application.PublishRunObservation(t.Context(), claim.Fence.Holder, observation); err == nil {
+					t.Fatal("artifact identity attack succeeded")
+				}
+				if fixture.unit.Calls() != withinBefore {
+					t.Fatal("artifact identity attack entered a database transaction")
+				}
+				assertVerticalAuthorityEqual(t, fixture.application, before)
+				puts, inside := fixture.artifacts.Stats()
+				if inside != 0 || name == "requested-digest" && puts != 0 {
+					t.Fatalf("identity attack Put stats = (%d,%d)", puts, inside)
+				}
+			})
+		}
+	})
+}
+
+func TestVerticalAuthority_ArtifactVerificationOutsideWriteTransaction(t *testing.T) {
+	t.Run("candidate-verification-and-replay", func(t *testing.T) {
+		fixture, claim, candidateDigest, _ := verticalCandidateFixture(t)
+		submit := command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+		}
+		fixture.artifacts.ResetOpenStats()
+		first, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, submit)
+		mustVerticalOutcome(t, first, err)
+		calls, inside := fixture.artifacts.OpenStats()
+		if calls == 0 || inside != 0 {
+			t.Fatalf("candidate artifact Open stats = (%d,%d), want (>0,0)", calls, inside)
+		}
+
+		fixture.artifacts.Delete(candidateDigest)
+		replayed, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, submit)
+		if err != nil {
+			t.Fatalf("candidate replay after object loss error = %v", err)
+		}
+		if !replayed.Replayed {
+			t.Fatal("candidate replay after object loss was not marked replayed")
+		}
+		if !bytes.Equal(replayed.Payload, first.Payload) {
+			t.Fatalf("candidate replay changed payload: first(%d)=%x second(%d)=%x", len(first.Payload), first.Payload, len(replayed.Payload), replayed.Payload)
+		}
+		afterCalls, afterInside := fixture.artifacts.OpenStats()
+		if afterCalls != calls || afterInside != inside {
+			t.Fatalf("candidate replay reopened artifact: before=(%d,%d) after=(%d,%d)", calls, inside, afterCalls, afterInside)
+		}
+	})
+
+	t.Run("evidence-verification", func(t *testing.T) {
+		fixture, claim, candidateDigest, subject := verticalCandidateFixture(t)
+		outcome, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		outcome, err = fixture.application.PublishFixtureReview(t.Context(), verticalOperator, command.PublishFixtureReview{
+			Metadata: verticalMetadata(6, 4), ProjectID: verticalProject, RunID: verticalRun,
+			LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+			Review: command.Review{ID: "review-1", SubjectDigest: subject.Digest(), ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		fixture.artifacts.ResetOpenStats()
+		outcome, err = fixture.application.PublishFixtureEvidence(t.Context(), verticalOperator, command.PublishFixtureEvidence{
+			Metadata: verticalMetadata(7, 4), ProjectID: verticalProject, RunID: verticalRun,
+			LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+			Evidence: command.Evidence{
+				ID: "evidence-1", SubjectDigest: subject.Digest(), ACID: "AC-1", ACRevisionDigest: fixture.acDigest,
+				ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present",
+				VerifierID: verticalOperator, VerifierClass: "independent", RecipeDigest: fixture.policy.RecipeDigest,
+				EnvironmentDigest: fixture.policy.Checks["AC-1"].EnvironmentDigest, ObservedAt: fixedClockTime,
+				Report: command.ArtifactLocator{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"},
+			},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		calls, inside := fixture.artifacts.OpenStats()
+		if calls == 0 || inside != 0 {
+			t.Fatalf("evidence artifact Open stats = (%d,%d), want (>0,0)", calls, inside)
+		}
+	})
+}
+
+func TestVerticalAuthority_ReviewEvidenceVersionConflicts(t *testing.T) {
+	t.Run("review", func(t *testing.T) {
+		fixture, claim, candidateDigest, subject := verticalCandidateFixture(t)
+		outcome, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		beforeMaterial := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+		_, err = fixture.application.PublishFixtureReview(t.Context(), verticalOperator, command.PublishFixtureReview{
+			Metadata: verticalMetadata(6, 99), ProjectID: verticalProject, RunID: verticalRun,
+			LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+			Review: command.Review{ID: "review-stale-version", SubjectDigest: subject.Digest(), ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+		})
+		assertVerticalCommandCode(t, err, command.CodeVersionConflict)
+		assertVerticalAuthorityEqual(t, fixture.application, before)
+		afterMaterial := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+		if len(afterMaterial.Reviews) != len(beforeMaterial.Reviews) || len(afterMaterial.Evidence) != len(beforeMaterial.Evidence) {
+			t.Fatalf("stale Review mutated subject material: before=%#v after=%#v", beforeMaterial, afterMaterial)
+		}
+	})
+
+	t.Run("evidence", func(t *testing.T) {
+		fixture, claim, candidateDigest, subject := verticalCandidateFixture(t)
+		outcome, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		beforeMaterial := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+		_, err = fixture.application.PublishFixtureEvidence(t.Context(), verticalOperator, command.PublishFixtureEvidence{
+			Metadata: verticalMetadata(6, 99), ProjectID: verticalProject, RunID: verticalRun,
+			LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+			Evidence: command.Evidence{
+				ID: "evidence-stale-version", SubjectDigest: subject.Digest(), ACID: "AC-1", ACRevisionDigest: fixture.acDigest,
+				ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present",
+				VerifierID: verticalOperator, VerifierClass: "independent", RecipeDigest: fixture.policy.RecipeDigest,
+				EnvironmentDigest: fixture.policy.Checks["AC-1"].EnvironmentDigest, ObservedAt: fixedClockTime,
+				Report: command.ArtifactLocator{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"},
+			},
+		})
+		assertVerticalCommandCode(t, err, command.CodeVersionConflict)
+		assertVerticalAuthorityEqual(t, fixture.application, before)
+		afterMaterial := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+		if len(afterMaterial.Reviews) != len(beforeMaterial.Reviews) || len(afterMaterial.Evidence) != len(beforeMaterial.Evidence) {
+			t.Fatalf("stale Evidence mutated subject material: before=%#v after=%#v", beforeMaterial, afterMaterial)
+		}
+	})
+}
+
+func TestVerticalAuthority_ApprovalRequiresCurrentSubjectAndVersion(t *testing.T) {
+	fixture, claim, candidateDigest, subject := verticalCandidateFixture(t)
+	outcome, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+		Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+		Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+			Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+	})
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = fixture.application.PublishFixtureReview(t.Context(), verticalOperator, command.PublishFixtureReview{
+		Metadata: verticalMetadata(6, 4), ProjectID: verticalProject, RunID: verticalRun,
+		LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+		Review: command.Review{ID: "review-1", SubjectDigest: subject.Digest(), ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+	})
+	mustVerticalOutcome(t, outcome, err)
+	before := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+	_, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(7, 99), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-1", RequestID: "approval-stale-version", SubjectDigest: subject.Digest(), Decision: "Approved",
+	})
+	assertVerticalCommandCode(t, err, command.CodeVersionConflict)
+	_, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(8, 4), ProjectID: verticalProject, WorkItemID: "wi_01HABCDEFGJ",
+		CandidateID: "candidate-1", RequestID: "approval-wrong-item", SubjectDigest: subject.Digest(), Decision: "Approved",
+	})
+	assertVerticalCommandCode(t, err, command.CodeNotFound)
+	_, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(9, 4), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-other", RequestID: "approval-wrong-candidate", SubjectDigest: subject.Digest(), Decision: "Approved",
+	})
+	assertVerticalCommandCode(t, err, command.CodeStaleSubject)
+	_, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(10, 4), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-1", RequestID: "approval-stale-subject", SubjectDigest: domain.HashString("stale-subject"), Decision: "Approved",
+	})
+	assertVerticalCommandCode(t, err, command.CodeStaleSubject)
+	afterRejections := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+	if len(afterRejections.Approvals) != len(before.Approvals) {
+		t.Fatalf("rejected Approval mutated subject material: before=%#v after=%#v", before, afterRejections)
+	}
+	outcome, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(11, 4), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-1", RequestID: "approval-current", SubjectDigest: subject.Digest(), Decision: "Approved",
+	})
+	mustVerticalOutcome(t, outcome, err)
+	afterApproval := loadVerticalSubjectMaterial(t, fixture.store, subject.Digest())
+	if len(afterApproval.Approvals) != len(before.Approvals)+1 {
+		t.Fatalf("current Approval material = %#v", afterApproval)
+	}
+}
+
+var canonicalSHA256Value = regexp.MustCompile(`"(sha256:[^"]*)"`)
+var bareSHA256Value = regexp.MustCompile(`"[0-9a-f]{64}"`)
+
+func assertOpenAPISHA256Values(t *testing.T, payload []byte, expected int) {
+	t.Helper()
+	matches := canonicalSHA256Value.FindAllSubmatch(payload, -1)
+	if len(matches) != expected || bareSHA256Value.Match(payload) || bytes.Contains(payload, []byte("sha256:sha256:")) {
+		t.Fatalf("canonical digest values = %q; want %d single-prefix values", payload, expected)
+	}
+	for _, match := range matches {
+		value := string(match[1])
+		if len(value) != len("sha256:")+64 || !strings.HasPrefix(value, "sha256:") {
+			t.Fatalf("digest does not match OpenAPI SHA256: %q", value)
+		}
+		if _, err := ParseStorageDigest(strings.TrimPrefix(value, "sha256:")); err != nil {
+			t.Fatalf("digest does not match OpenAPI SHA256: %q: %v", value, err)
+		}
+	}
+}
+
+func TestVerticalAuthority_ClaimAndPublishFencedRun(t *testing.T) {
+	fixture := newVerticalAuthorityFixture(t)
+	claim, err := fixture.application.ClaimDispatch(t.Context(), verticalWorker, service.ClaimDispatchRequest{
+		ProjectID: verticalProject, RunID: verticalRun, Holder: verticalWorker,
+		ExpectedRestoreGeneration: 1, LeaseDuration: time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if claim.Fence.Epoch != 1 || claim.Fence.RestoreGeneration != 1 || claim.Fence.InputDigest.IsZero() ||
+		claim.AdapterID != "fake/v1" || claim.AdapterVersion != "1" || claim.ScenarioID != "vertical" {
+		t.Fatalf("claimed executor envelope = %#v", claim)
+	}
+	claimed, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if claimed.Run.DispatchState != "Claimed" || claimed.Outbox.State != "Claimed" || claimed.Outbox.ClaimEpoch != 1 || claimed.Lease.Fence != claim.Fence {
+		t.Fatalf("claimed authority = %#v", claimed)
+	}
+
+	for name, attack := range map[string]port.RunFence{
+		"input":      withPortFence(claim.Fence, func(fence *port.RunFence) { fence.InputDigest = domain.HashString("wrong") }),
+		"holder":     withPortFence(claim.Fence, func(fence *port.RunFence) { fence.Holder = "stale-worker" }),
+		"epoch":      withPortFence(claim.Fence, func(fence *port.RunFence) { fence.Epoch++ }),
+		"generation": withPortFence(claim.Fence, func(fence *port.RunFence) { fence.RestoreGeneration++ }),
+	} {
+		t.Run("reject-"+name, func(t *testing.T) {
+			before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = fixture.application.PublishRunObservation(t.Context(), attack.Holder, service.RunObservation{Fence: attack, Kind: service.ObservationDispatchReceived})
+			if !errors.Is(err, port.ErrFenceRejected) && !errors.As(err, new(*command.Error)) {
+				t.Fatalf("stale fence error = %v", err)
+			}
+			after, readErr := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			if after.Run != before.Run || after.Outbox != before.Outbox || after.Lease != before.Lease || after.ProjectionCount != before.ProjectionCount || after.AuditCount != before.AuditCount+1 {
+				t.Fatalf("stale publication mutation: before=%#v after=%#v", before, after)
+			}
+		})
+	}
+
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationDispatchReceived, nil)
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationStartAcknowledged, nil)
+	candidateBytes := []byte("candidate-v1")
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationTerminalSuccess, candidateBytes)
+	finished, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if finished.Run.ObservedState != "Succeeded" || finished.Run.SideEffectOutcome != "Confirmed" ||
+		finished.Run.ReconciliationState != "None" || finished.Outbox.State != "Acknowledged" {
+		t.Fatalf("terminal authority = %#v", finished)
+	}
+	if _, err := fixture.application.PublishRunObservation(t.Context(), claim.Fence.Holder, service.RunObservation{Fence: claim.Fence, Kind: service.ObservationLateResult}); !errors.Is(err, port.ErrRunLifecycle) {
+		t.Fatalf("late publication error = %v", err)
+	}
+	late, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if late.Run != finished.Run || late.Outbox != finished.Outbox || late.Lease != finished.Lease || late.ProjectionCount != finished.ProjectionCount || late.AuditCount != finished.AuditCount+1 {
+		t.Fatalf("late publication mutation: before=%#v after=%#v", finished, late)
+	}
+	item, err := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+	if err != nil || item.Phase() != domain.PhaseDeveloping || item.Version() != 3 {
+		t.Fatalf("late publication advanced work item = (%#v,%v)", item, err)
+	}
+
+	t.Run("concurrent-claim-has-one-winner", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		start := make(chan struct{})
+		results := make(chan error, 2)
+		for _, worker := range []domain.ActorID{"worker-a", "worker-b"} {
+			go func() {
+				<-start
+				_, err := fixture.application.ClaimDispatch(t.Context(), worker, service.ClaimDispatchRequest{ProjectID: verticalProject, RunID: verticalRun, Holder: worker, ExpectedRestoreGeneration: 1, LeaseDuration: time.Minute})
+				results <- err
+			}()
+		}
+		close(start)
+		first, second := <-results, <-results
+		wins, losses := 0, 0
+		for _, err := range []error{first, second} {
+			if err == nil {
+				wins++
+			} else if errors.Is(err, port.ErrNoPendingDispatch) {
+				losses++
+			}
+		}
+		if wins != 1 || losses != 1 {
+			t.Fatalf("claim results = (%v,%v)", first, second)
+		}
+	})
+
+	t.Run("forced-seam-rolls-back", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		err := fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+			authority := tx.(port.AuthorityTransaction)
+			if _, err := authority.ClaimPendingRun(t.Context(), port.RunClaimRequest{ProjectID: verticalProject, RunID: verticalRun, Holder: verticalWorker, ExpectedRestoreGeneration: 1, ClaimedAtNS: fixedClockTime.UnixNano(), DeadlineNS: fixedClockTime.Add(time.Minute).UnixNano()}); err != nil {
+				return err
+			}
+			return errForcedFailure
+		})
+		if !errors.Is(err, errForcedFailure) {
+			t.Fatal(err)
+		}
+		authority, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if authority.Run.DispatchState != "Pending" || authority.Outbox.State != "Pending" || authority.Lease.Fence.Epoch != 0 {
+			t.Fatalf("rolled-back claim = %#v", authority)
+		}
+	})
+}
+
+func TestVerticalAuthority_PreparesSubjectBoundCompletion(t *testing.T) {
+	fixture, claim, candidateDigest, subject := verticalCandidateFixture(t)
+	submit := command.SubmitCandidate{
+		Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+		Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+			Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len("candidate-v1")), Availability: "Present"}}},
+	}
+	canonical, _, err := command.CanonicalSubmitCandidate(submit)
+	if err != nil || !bytes.Contains(canonical, []byte(`"sha256"`)) || bytes.Contains(canonical, []byte(`"storage_key"`)) {
+		t.Fatalf("candidate canonical OpenAPI shape = (%s,%v)", canonical, err)
+	}
+	first, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, submit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstBytes := bytes.Clone(first.Payload)
+	replayed, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, submit)
+	if err != nil || !replayed.Replayed || !bytes.Equal(replayed.Payload, firstBytes) {
+		t.Fatalf("candidate response-loss replay = (%#v,%v), want %q", replayed, err, firstBytes)
+	}
+
+	review := command.PublishFixtureReview{
+		Metadata: verticalMetadata(6, 4), ProjectID: verticalProject, RunID: verticalRun,
+		LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+		Review: command.Review{ID: "review-1", SubjectDigest: subject.Digest(), ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+	}
+	outcome, err := fixture.application.PublishFixtureReview(t.Context(), verticalOperator, review)
+	mustVerticalOutcome(t, outcome, err)
+	reportBytes := []byte("evidence-report-v1")
+	reportDigest, reportLength, err := fixture.artifacts.Put(t.Context(), bytes.NewReader(reportBytes))
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidence := command.PublishFixtureEvidence{
+		Metadata: verticalMetadata(7, 4), ProjectID: verticalProject, RunID: verticalRun,
+		LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+		Evidence: command.Evidence{
+			ID: "evidence-1", SubjectDigest: subject.Digest(), ACID: "AC-1", ACRevisionDigest: fixture.acDigest,
+			ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present",
+			VerifierID: verticalOperator, VerifierClass: "independent", RecipeDigest: fixture.policy.RecipeDigest,
+			EnvironmentDigest: fixture.policy.Checks["AC-1"].EnvironmentDigest, ObservedAt: fixedClockTime,
+			Report: command.ArtifactLocator{Digest: reportDigest, MediaType: "text/plain", ByteLength: reportLength, Availability: "Present"},
+		},
+	}
+	outcome, err = fixture.application.PublishFixtureEvidence(t.Context(), verticalOperator, evidence)
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = fixture.application.ApproveSubject(t.Context(), verticalOperator, command.ApproveSubject{
+		Metadata: verticalMetadata(8, 4), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		CandidateID: "candidate-1", RequestID: "approval-1", SubjectDigest: subject.Digest(), Decision: "Approved",
+	})
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = fixture.application.RequestQA(t.Context(), verticalOperator, command.RequestQA{
+		Metadata: verticalMetadata(9, 4), ProjectID: verticalProject, WorkItemID: verticalWorkItem, CandidateID: "candidate-1", SubjectDigest: subject.Digest(),
+	})
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = fixture.application.CompleteWorkItem(t.Context(), verticalOperator, command.CompleteWorkItem{
+		Metadata: verticalMetadata(10, 5), ProjectID: verticalProject, WorkItemID: verticalWorkItem, Subject: subject,
+	})
+	mustVerticalOutcome(t, outcome, err)
+	item, err := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+	if err != nil || item.Phase() != domain.PhaseDone || item.Version() != 6 {
+		t.Fatalf("completed vertical item = (%#v,%v)", item, err)
+	}
+
+	t.Run("subject-and-independence-attacks-are-atomic", func(t *testing.T) {
+		fixture, claim, _, subject := verticalCandidateFixture(t)
+		candidateBytes := []byte("candidate-v1")
+		candidateDigest := domain.HashBytes(candidateBytes)
+		outcome, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-1", RunID: verticalRun, Digest: candidateDigest, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: candidateDigest, MediaType: "text/plain", ByteLength: uint64(len(candidateBytes)), Availability: "Present"}}},
+		})
+		mustVerticalOutcome(t, outcome, err)
+		for name, review := range map[string]command.PublishFixtureReview{
+			"wrong-subject": {
+				Metadata: verticalMetadata(6, 4), ProjectID: verticalProject, RunID: verticalRun, LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+				Review: command.Review{ID: "review-wrong-subject", SubjectDigest: domain.HashString("wrong-subject"), ReviewerID: verticalOperator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+			},
+			"forged-reviewer": {
+				Metadata: verticalMetadata(7, 4), ProjectID: verticalProject, RunID: verticalRun, LeaseEpoch: claim.Fence.Epoch, RestoreGeneration: claim.Fence.RestoreGeneration,
+				Review: command.Review{ID: "review-forged", SubjectDigest: subject.Digest(), ReviewerID: "forged-reviewer", ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedClockTime},
+			},
+		} {
+			t.Run(name, func(t *testing.T) {
+				before, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err := fixture.application.PublishFixtureReview(t.Context(), verticalOperator, review); err == nil {
+					t.Fatal("attack was accepted")
+				}
+				after, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if after.Run != before.Run || after.Outbox != before.Outbox || after.ProjectionCount != before.ProjectionCount {
+					t.Fatalf("attack mutated authority: before=%#v after=%#v", before, after)
+				}
+			})
+		}
+	})
+
+	t.Run("missing-artifact-cannot-create-candidate", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		publishVertical(t, fixture.application, claim.Fence, service.ObservationTerminalSuccess, []byte("candidate-v1"))
+		missing := domain.HashString("missing-candidate")
+		_, err := fixture.application.SubmitCandidate(t.Context(), verticalOperator, command.SubmitCandidate{
+			Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun,
+			Candidate: command.Candidate{ID: "candidate-missing", RunID: verticalRun, Digest: missing, InputSubjectDigest: claim.Fence.InputDigest, CreatedAt: fixedClockTime,
+				Artifacts: []command.ArtifactLocator{{Digest: missing, MediaType: "text/plain", ByteLength: 1, Availability: "Present"}}},
+		})
+		if err == nil {
+			t.Fatal("missing artifact candidate was accepted")
+		}
+		item, loadErr := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+		if loadErr != nil || item.Phase() != domain.PhaseDeveloping || item.Version() != 3 {
+			t.Fatalf("missing artifact mutation = (%#v,%v)", item, loadErr)
+		}
+	})
+}
+
+func TestVerticalAuthority_CancelUnknownRemainsUnconfirmed(t *testing.T) {
+	fixture := newVerticalAuthorityFixture(t)
+	claim := claimAndStartVertical(t, fixture.application)
+	outcome, err := fixture.application.RequestCancellation(t.Context(), verticalOperator, command.RequestCancellation{
+		Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		RunID: verticalRun, Reason: "operator requested stop",
+	})
+	if err != nil || len(outcome.Payload) == 0 {
+		t.Fatalf("request cancellation = (%q,%v)", outcome.Payload, err)
+	}
+	requested, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if requested.Run.DesiredAction != "CancelRequested" || requested.Run.ObservedState != "Running" || requested.Run.SideEffectOutcome == "Confirmed" {
+		t.Fatalf("cancellation intent = %#v", requested.Run)
+	}
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationTimeout, nil)
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationLookupUnknown, nil)
+	unknown, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unknown.Run.ObservedState == "Canceled" || unknown.Run.ReconciliationState != "NeedsReconcile" ||
+		unknown.Run.SideEffectOutcome != "OutcomeUnknown" || unknown.Outbox.ID != requested.Outbox.ID || unknown.Outbox.ClaimEpoch != 1 {
+		t.Fatalf("unknown cancellation authority = %#v", unknown)
+	}
+	if _, err := fixture.application.ClaimDispatch(t.Context(), "other-worker", service.ClaimDispatchRequest{ProjectID: verticalProject, RunID: verticalRun, Holder: "other-worker", ExpectedRestoreGeneration: 1, LeaseDuration: time.Minute}); !errors.Is(err, port.ErrNoPendingDispatch) {
+		t.Fatalf("unknown Run redispatch claim = %v", err)
+	}
+	item, err := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+	if err != nil || item.Phase() == domain.PhaseCanceled {
+		t.Fatalf("unknown cancellation item = (%#v,%v)", item, err)
+	}
+
+	t.Run("current-cancel-ack-is-positive-control", func(t *testing.T) {
+		fixture := newVerticalAuthorityFixture(t)
+		claim := claimAndStartVertical(t, fixture.application)
+		if _, err := fixture.application.RequestCancellation(t.Context(), verticalOperator, command.RequestCancellation{Metadata: verticalMetadata(5, 3), ProjectID: verticalProject, WorkItemID: verticalWorkItem, RunID: verticalRun, Reason: "stop"}); err != nil {
+			t.Fatal(err)
+		}
+		publishVertical(t, fixture.application, claim.Fence, service.ObservationCancelAcknowledged, nil)
+		authority, err := fixture.application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+		if err != nil {
+			t.Fatal(err)
+		}
+		item, err := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+		if err != nil || authority.Run.ObservedState != "Canceled" || authority.Run.SideEffectOutcome != "Confirmed" || item.Phase() != domain.PhaseCanceled {
+			t.Fatalf("acknowledged cancellation = (%#v,%#v,%v)", authority.Run, item, err)
+		}
+	})
+}
+
+const (
+	verticalProject  domain.ProjectID  = "prj_01HABCDEFGH"
+	verticalWorkItem domain.WorkItemID = "wi_01HABCDEFGH"
+	verticalRun      domain.RunID      = "run_01HABCDEFGH"
+	verticalOperator domain.ActorID    = "operator"
+	verticalWorker   domain.ActorID    = "worker"
+)
+
+var fixedClockTime = time.Date(2026, time.September, 10, 12, 0, 0, 123, time.UTC)
+
+type verticalFixture struct {
+	store       *Store
+	application *service.Service
+	artifacts   *verticalArtifacts
+	clock       *verticalClock
+	unit        *verticalTrackingUnit
+	acDigest    domain.Digest
+	graphDigest domain.Digest
+	policy      service.CompletionPolicy
+}
+
+func newVerticalAuthorityFixture(t *testing.T) verticalFixture {
+	t.Helper()
+	root := t.TempDir()
+	store, err := OpenAtRootWithClock(t.Context(), root, filepath.Join(root, "vertical.db"), func() time.Time { return fixedClockTime })
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("close vertical store: %v", err)
+		}
+	})
+	clock := &verticalClock{now: fixedClockTime}
+	unit := &verticalTrackingUnit{delegate: store}
+	artifacts := &verticalArtifacts{objects: make(map[domain.Digest][]byte), unit: unit}
+	acDigest := domain.HashString("vertical-ac")
+	graphDigest := domain.HashString("vertical-graph")
+	policy := service.CompletionPolicy{
+		RevisionDigest: domain.HashString("vertical-policy"), RecipeDigest: domain.HashString("vertical-recipe"),
+		ApprovalRequired: true,
+		Checks: map[domain.ACID]service.VerificationRule{
+			"AC-1": {VerifierClass: "independent", Independent: true, EnvironmentDigest: domain.HashString("vertical-environment"), ProhibitedVerifierRunRole: "producer"},
+		},
+	}
+	application, err := service.New(unit, clock, &verticalIDs{}, verticalExecutor{}, artifacts, &verticalProjection{}, service.Config{
+		Operator: verticalOperator, IdempotencyTTL: time.Hour, Specification: verticalSpecification{}, Completion: policy,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := application.CreateProject(t.Context(), verticalOperator, command.CreateProject{
+		Metadata: verticalMetadata(1, 0), ProjectID: verticalProject, Name: "Vertical", RepositoryRoot: root, ApprovedRef: "main",
+	})
+	mustVerticalOutcome(t, outcome, err)
+	if err := store.Within(t.Context(), func(tx port.Transaction) error {
+		if err := tx.StoreACRevision(t.Context(), port.ACRevision{ID: "vertical-ac-r1", ProjectID: verticalProject, ACID: "AC-1", Digest: acDigest, Content: []byte("AC-1"), CreatedAtNS: fixedClockTime.UnixNano()}); err != nil {
+			return err
+		}
+		return tx.StoreDependencyRevision(t.Context(), port.DependencyRevision{ProjectID: verticalProject, Digest: graphDigest, Content: []byte("graph"), CreatedAtNS: fixedClockTime.UnixNano()})
+	}); err != nil {
+		t.Fatal(err)
+	}
+	outcome, err = application.CreateWorkItem(t.Context(), verticalOperator, command.CreateWorkItem{
+		Metadata: verticalMetadata(2, 0), ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+		Title: "Vertical", Goal: "Prove authority", OwnerID: verticalOperator,
+		RequiredACRevisions: []command.ACRevision{{ACID: "AC-1", RevisionDigest: acDigest}},
+	})
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = application.MarkReady(t.Context(), verticalOperator, command.MarkReady{Metadata: verticalMetadata(3, 1), ProjectID: verticalProject, WorkItemID: verticalWorkItem})
+	mustVerticalOutcome(t, outcome, err)
+	outcome, err = application.DispatchRun(t.Context(), verticalOperator, command.DispatchRun{Metadata: verticalMetadata(4, 2), ProjectID: verticalProject, WorkItemID: verticalWorkItem, AdapterID: "fake/v1", ScenarioID: "vertical"})
+	mustVerticalOutcome(t, outcome, err)
+	return verticalFixture{store: store, application: application, artifacts: artifacts, clock: clock, unit: unit, acDigest: acDigest, graphDigest: graphDigest, policy: policy}
+}
+
+func claimAndStartVertical(t *testing.T, application *service.Service) port.ExecutorEnvelope {
+	t.Helper()
+	claim, err := application.ClaimDispatch(t.Context(), verticalWorker, service.ClaimDispatchRequest{ProjectID: verticalProject, RunID: verticalRun, Holder: verticalWorker, ExpectedRestoreGeneration: 1, LeaseDuration: time.Minute})
+	if err != nil {
+		t.Fatal(err)
+	}
+	publishVertical(t, application, claim.Fence, service.ObservationDispatchReceived, nil)
+	publishVertical(t, application, claim.Fence, service.ObservationStartAcknowledged, nil)
+	return claim
+}
+
+func verticalCandidateFixture(t *testing.T) (verticalFixture, port.ExecutorEnvelope, domain.Digest, domain.CompletionSubject) {
+	t.Helper()
+	fixture := newVerticalAuthorityFixture(t)
+	claim := claimAndStartVertical(t, fixture.application)
+	candidateBytes := []byte("candidate-v1")
+	publishVertical(t, fixture.application, claim.Fence, service.ObservationTerminalSuccess, candidateBytes)
+	candidateDigest := domain.HashBytes(candidateBytes)
+	subject, err := domain.NewCompletionSubject(domain.CompletionSubjectConfig{
+		ProjectID:                   verticalProject,
+		WorkItemID:                  verticalWorkItem,
+		WorkItemVersion:             5,
+		CandidateID:                 "candidate-1",
+		CandidateDigest:             candidateDigest,
+		RunID:                       verticalRun,
+		RunInputDigest:              claim.Fence.InputDigest,
+		RequiredACRevisions:         []domain.ACRevisionBinding{{ACID: "AC-1", RevisionDigest: fixture.acDigest}},
+		AcceptedGraphRevisionDigest: fixture.graphDigest,
+		PolicyRevisionDigest:        fixture.policy.RevisionDigest,
+		CompletionRecipeDigest:      fixture.policy.RecipeDigest,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return fixture, claim, candidateDigest, subject
+}
+
+func publishVertical(t *testing.T, application *service.Service, fence port.RunFence, kind service.RunObservationKind, content []byte) port.RunAuthority {
+	t.Helper()
+	observation := service.RunObservation{Fence: fence, Kind: kind}
+	if len(content) > 0 {
+		observation.ArtifactBytes = slices.Clone(content)
+		observation.ArtifactDigest = domain.HashBytes(content)
+		observation.ArtifactMediaType = "text/plain"
+	}
+	authority, err := application.PublishRunObservation(t.Context(), fence.Holder, observation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return authority
+}
+
+func withPortFence(value port.RunFence, mutate func(*port.RunFence)) port.RunFence {
+	mutate(&value)
+	return value
+}
+
+func verticalMetadata(index int, expected uint64) command.Metadata {
+	return command.Metadata{
+		CommandID: fmt.Sprintf("cmd_01HABCDE%03d", index), IdempotencyKey: fmt.Sprintf("00000000-0000-4000-8000-%012d", index),
+		ExpectedVersion: expected, IssuedAt: fixedClockTime, CorrelationID: "t083",
+	}
+}
+
+func mustVerticalOutcome(t *testing.T, outcome command.Outcome, err error) {
+	t.Helper()
+	if err != nil || len(outcome.Payload) == 0 || outcome.Replayed {
+		t.Fatalf("vertical command = (%#v,%v)", outcome, err)
+	}
+}
+
+type verticalClock struct {
+	mu  sync.Mutex
+	now time.Time
+}
+
+func (clock *verticalClock) Now() time.Time {
+	clock.mu.Lock()
+	defer clock.mu.Unlock()
+	return clock.now
+}
+
+func (clock *verticalClock) Advance(delta time.Duration) {
+	clock.mu.Lock()
+	defer clock.mu.Unlock()
+	clock.now = clock.now.Add(delta)
+}
+
+type verticalTrackingUnit struct {
+	delegate *Store
+	mu       sync.Mutex
+	depth    int
+	calls    int
+	failNext bool
+}
+
+func (unit *verticalTrackingUnit) Within(ctx context.Context, operation func(port.Transaction) error) error {
+	return unit.delegate.Within(ctx, func(tx port.Transaction) (err error) {
+		unit.mu.Lock()
+		unit.depth++
+		unit.calls++
+		unit.mu.Unlock()
+		defer func() {
+			unit.mu.Lock()
+			unit.depth--
+			if err == nil && unit.failNext {
+				unit.failNext = false
+				err = errForcedFailure
+			}
+			unit.mu.Unlock()
+		}()
+		return operation(tx)
+	})
+}
+
+func (unit *verticalTrackingUnit) Inside() bool {
+	unit.mu.Lock()
+	defer unit.mu.Unlock()
+	return unit.depth > 0
+}
+
+func (unit *verticalTrackingUnit) Calls() int {
+	unit.mu.Lock()
+	defer unit.mu.Unlock()
+	return unit.calls
+}
+
+func (unit *verticalTrackingUnit) FailNext() {
+	unit.mu.Lock()
+	defer unit.mu.Unlock()
+	unit.failNext = true
+}
+
+type verticalIDs struct {
+	mu     sync.Mutex
+	counts map[port.IDKind]uint64
+}
+
+func (source *verticalIDs) Next(kind port.IDKind) (string, error) {
+	source.mu.Lock()
+	defer source.mu.Unlock()
+	if source.counts == nil {
+		source.counts = make(map[port.IDKind]uint64)
+	}
+	source.counts[kind]++
+	if kind == port.IDRun {
+		if source.counts[kind] != 1 {
+			return "", errors.New("unexpected second Run allocation")
+		}
+		return string(verticalRun), nil
+	}
+	return fmt.Sprintf("t083-%s-%d", kind, source.counts[kind]), nil
+}
+
+type verticalExecutor struct{}
+
+func (verticalExecutor) Declaration() port.ExecutorDeclaration {
+	return port.ExecutorDeclaration{AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack", "heartbeat", "lookup", "cancel_ack", "durable_checkpoint"}}
+}
+
+type verticalSpecification struct{}
+
+func (verticalSpecification) ValidFor(domain.ProjectID, domain.WorkItemID, []port.ACRequirement) bool {
+	return true
+}
+
+type verticalProjection struct {
+	mu     sync.Mutex
+	events []port.CommittedProjection
+}
+
+func (sink *verticalProjection) PublishCommitted(_ context.Context, projection port.CommittedProjection) error {
+	sink.mu.Lock()
+	defer sink.mu.Unlock()
+	sink.events = append(sink.events, projection.Clone())
+	return nil
+}
+
+type verticalArtifacts struct {
+	mu                sync.Mutex
+	objects           map[domain.Digest][]byte
+	unit              *verticalTrackingUnit
+	putCalls          int
+	putInside         int
+	openCalls         int
+	openInside        int
+	returnWrongDigest bool
+	returnWrongLength bool
+}
+
+func (store *verticalArtifacts) Put(_ context.Context, reader io.Reader) (domain.Digest, uint64, error) {
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return domain.Digest{}, 0, err
+	}
+	digest := domain.HashBytes(content)
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	store.putCalls++
+	if store.unit != nil && store.unit.Inside() {
+		store.putInside++
+	}
+	store.objects[digest] = slices.Clone(content)
+	returnedDigest := digest
+	if store.returnWrongDigest {
+		returnedDigest = domain.HashString("artifact-store-mismatch")
+	}
+	returnedLength := uint64(len(content))
+	if store.returnWrongLength {
+		returnedLength++
+	}
+	return returnedDigest, returnedLength, nil
+}
+
+func (store *verticalArtifacts) Open(_ context.Context, digest domain.Digest) (io.ReadCloser, error) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	store.openCalls++
+	if store.unit != nil && store.unit.Inside() {
+		store.openInside++
+	}
+	content, ok := store.objects[digest]
+	if !ok {
+		return nil, os.ErrNotExist
+	}
+	return io.NopCloser(bytes.NewReader(slices.Clone(content))), nil
+}
+
+func (store *verticalArtifacts) OpenStats() (calls, inside int) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	return store.openCalls, store.openInside
+}
+
+func (store *verticalArtifacts) ResetOpenStats() {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	store.openCalls, store.openInside = 0, 0
+}
+
+func (store *verticalArtifacts) Delete(digest domain.Digest) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	delete(store.objects, digest)
+}
+
+func (store *verticalArtifacts) Stats() (calls, inside int) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	return store.putCalls, store.putInside
+}
+
+func (store *verticalArtifacts) Contains(digest domain.Digest) bool {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	_, exists := store.objects[digest]
+	return exists
+}
+
+func assertVerticalAuthorityEqual(t *testing.T, application *service.Service, expected port.RunAuthority) {
+	t.Helper()
+	actual, err := application.ReadRunAuthority(t.Context(), verticalProject, verticalRun)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if actual != expected {
+		t.Fatalf("authority changed: expected=%#v actual=%#v", expected, actual)
+	}
+}
+
+func loadVerticalSubjectMaterial(t *testing.T, store *Store, subject domain.Digest) port.SubjectMaterial {
+	t.Helper()
+	var material port.SubjectMaterial
+	err := store.Within(t.Context(), func(tx port.Transaction) error {
+		authority, ok := tx.(port.AuthorityTransaction)
+		if !ok {
+			return errors.New("vertical store lacks authority transaction")
+		}
+		var err error
+		material, err = authority.LoadSubjectMaterial(t.Context(), verticalProject, subject)
+		return err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return material
+}
+
+func assertVerticalCommandCode(t *testing.T, err error, code string) {
+	t.Helper()
+	failure, ok := errors.AsType[*command.Error](err)
+	if !ok || failure.Code != code {
+		t.Fatalf("command error = %#v, want %s", err, code)
+	}
+}
 
 func TestSQLiteV1_MigrationPragmasAndConstraints(t *testing.T) {
 	ctx := t.Context()

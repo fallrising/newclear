@@ -114,7 +114,16 @@ execution. P0-A remains Fake-only.
 | T-079 | Complete T-046/T-078 adversarial re-review | T-078 | Failed; Origin ambiguity and revocation ordering required repair | Orchestrator |
 | T-080 | Repair Origin and SSE revocation/epoch findings | T-079 | Accepted by T-081 | Independent reviewer |
 | T-081 | Final T-046/T-078/T-080 acceptance review | T-080 | Accepted | Orchestrator |
-| T-047 | Fake vertical integration and failure matrix | T-046 | Pending; no execution envelope issued | Independent reviewer |
+| T-047 | Fake vertical integration and failure matrix | T-046 | Accepted after T-083/T-085/T-087 by T-086/T-089 and orchestrator gate | Orchestrator |
+| T-082 | Independent review of the original T-047 candidate | T-047 | Failed; three named oracles remained explicit NotRun | Orchestrator |
+| T-083 | Add missing application/persistence vertical authority seams | T-082 | Accepted after T-085 by T-086 | Independent reviewer |
+| T-084 | Independent T-083 predecessor-authority review | T-083 | Failed; digest, causal lease and transaction-boundary repairs required | Orchestrator |
+| T-085 | Repair T-084 predecessor-authority findings | T-084 | Accepted by T-086 | Independent reviewer |
+| T-086 | Fresh T-083/T-085 predecessor-authority review | T-085 | Accepted | Orchestrator |
+| T-087 | Retry T-047 integration evidence against accepted predecessor seams | T-086 | Accepted by T-089 and orchestrator gate | Independent reviewer |
+| T-088 | Independent T-087 review | T-087 | Failed; read-first chronology made otherwise-passing evidence inadmissible | Orchestrator |
+| T-089 | Fresh read-first T-087 integration review | T-087,T-088 | Accepted | Orchestrator |
+| T-090 | Repair pre-push vertical authority review findings | T-089 | Accepted by orchestrator evidence gate | Orchestrator |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -448,15 +457,57 @@ execution. P0-A remains Fake-only.
   reviewer contract governs them and every reviewer report validated. This accepts only T-046's
   HTTP/SSE transport and composition seam, not T-047 execution, restore, a real provider, PR, merge,
   deployment or release.
+- 2026-09-10 — The original bounded T-047 worker report
+  `5a47910d0600f0d7ecd40bf5da05d7ac9e5cd7d837716166e731d6072c00f064` remained PARTIAL:
+  all three exact test names preserved explicit NotRun after their strongest legal prefixes. T-082
+  report `cacfed101ba6ac56d5a62943ef76f3cd494e3b86b7de40d598d82eb776e151ab`
+  correctly failed that candidate and proved the missing exported application/persistence seams.
+  These reports and the historical integration candidate identity remain immutable failure evidence.
+- 2026-09-10 — T-083 added the separately bounded predecessor authority needed for durable claim,
+  fenced publication, completion material and cancel/reconciliation reads. T-084 report
+  `3916da8ef9d9a9f746018bb4c100c8dee4d5d329940dcf40651eb8b33d902fe3` correctly failed bare
+  digest values, fabricated rather than causal epoch succession and artifact publication inside the
+  database write transaction. T-085 repaired exactly those findings; T-086 report
+  `a5dfc67709983871ab4042a825d9b8bbf5e425cc296723afab58cd715bf15b23` independently accepted
+  the cumulative predecessor bytes. No Fake, HTTP/SSE, composition, module or migration byte changed.
+- 2026-09-10 — T-087 worker report
+  `5aba83869ed8030a04ef2b2fda1680a780fc6205998826a0001fea8f813b3eb9` replaced only the bounded
+  integration candidate and passed the three exact oracles without failure or skip. T-088 report
+  `1556eb34c160efc8655475572d094bcb705dd6487fb6595b74eb8ed3808d6368` remains historical
+  process-FAIL evidence because its read-first chronology was invalid even though its functional
+  checks passed. Fresh read-first T-089 report
+  `699d117f53e06f6149c2eb3402bd1ce81a42154a04fda6ca7ca1d8322ba11394` independently passed the
+  exact, ten-repeat, full, race, inventory and adversarial gates against integration candidate
+  `94f3fc807eb4686b4273abb3f1390625147bc07ed3cc1d95383d7afbd39063ea`.
+- 2026-09-10 — The orchestrator's final T-047 evidence gate validated all four worker envelopes and
+  all nine reports, preserved every PARTIAL/FAIL and diagnostic event, audited the cumulative scope
+  and hashes, and reran the digest-pinned Go 1.27.1 image with network disabled and source/module
+  mounts read-only. Module verification, empty gofmt, vet, the three exact named tests, ten
+  repetitions, full backend, full race and inventory all exited 0 with no required failure or skip.
+  This accepts deterministic vertical evidence and its separately reviewed predecessor seams, not
+  automatic persistent polling, restore/backup, browser execution, a real provider, PR, merge,
+  deployment, release or broader G1/G2.
+- 2026-09-15 — A fresh pre-push source review found three authority defects not attacked by T-089:
+  Candidate/Evidence object reads occurred inside SQLite write transactions, Review/Evidence stale
+  versions were misclassified as fence rejection, and Approval trusted a digest without reloading
+  the named current WorkItem/Candidate. Bounded T-090 amended the mini-SDD/OpenAPI contract and only
+  its authorized command/service/test/integration paths. Report SHA-256
+  `9f52dd6d1b0764b69989544cc7bc7e2f1a3ef66a8b3bb70125d34b6465704f82` preserves the fail-first,
+  typed-nil replay and over-specific test-expectation diagnostics. The orchestrator evidence gate
+  mapped every definition-of-done item and reran pinned offline OpenAPI, focused, named, ten-repeat,
+  full, race, inventory, validator, hash and scope checks with no final required failure or skip.
+  T-090 is accepted; polling, restore/backup, browser/provider execution, PR, merge, deployment,
+  release and broader G1/G2 remain NotRun or forbidden.
 
 ## Current development boundary
 
-- T-040 is in progress through the accepted serial T-043..T-047 child design. T-044 is accepted
-  after T-066/T-067, T-045/T-069/T-075 deterministic Fake work is accepted after T-073/T-076, and
-  T-046/T-078/T-080 HTTP/SSE work is accepted after T-081 plus the orchestrator gate. T-077 and
-  T-079 remain immutable historical FAIL evidence. T-047 vertical integration is the next serial
-  child but has no execution envelope and remains NotRun; application persistence execution,
-  restore, real providers, Slack/Lark, deployment and release remain NotRun or forbidden.
+- T-040 remains in progress after accepted serial children T-043 through T-047. T-047 vertical
+  integration is accepted through T-087/T-089 and the bounded T-090 pre-push authority repair plus
+  orchestrator gates; T-047/T-082/T-084/T-088 remain immutable PARTIAL/FAIL history, and T-083/T-085
+  predecessor changes were independently reviewed by T-086. T-050 reconciliation/restore/handoff
+  is the next pending child. Automatic
+  persistent polling, restore/backup, browser evidence, real providers, Slack/Lark, deployment and
+  release remain NotRun or forbidden.
 
 ## Resume
 

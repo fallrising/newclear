@@ -182,7 +182,9 @@ func canonicalBytes(payload []byte, value any) bool {
 
 func validOperation(operation Operation) bool {
 	switch operation {
-	case CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation, CompleteWorkItemOperation:
+	case CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
+		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
+		RequestQAOperation, RequestCancelOperation, CompleteWorkItemOperation:
 		return true
 	default:
 		return false
@@ -205,6 +207,24 @@ func validSuccessResult(operation Operation, result successResult) bool {
 	case DispatchRunOperation:
 		return result.Type == "RunDispatched" && projectValid && workItemValid &&
 			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && result.Phase == domain.PhaseDeveloping
+	case SubmitCandidateOperation:
+		return result.Type == "CandidateSubmitted" && projectValid && workItemValid &&
+			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && result.Phase == domain.PhaseReview
+	case PublishReviewOperation:
+		return result.Type == "FixtureReviewPublished" && projectValid && workItemValid &&
+			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && result.Phase == domain.PhaseReview
+	case PublishEvidenceOperation:
+		return result.Type == "FixtureEvidencePublished" && projectValid && workItemValid &&
+			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 &&
+			(result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA)
+	case ApproveSubjectOperation:
+		return result.Type == "SubjectApproved" && projectValid && workItemValid && result.RunID == "" &&
+			result.Version > 0 && (result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA)
+	case RequestQAOperation:
+		return result.Type == "QARequested" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 && result.Phase == domain.PhaseQA
+	case RequestCancelOperation:
+		return result.Type == "CancellationRequested" && projectValid && workItemValid &&
+			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && (result.Phase == domain.PhaseDeveloping || result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA)
 	case CompleteWorkItemOperation:
 		return result.Type == "WorkItemCompleted" && projectValid && workItemValid && result.RunID == "" &&
 			result.Version > 0 && result.Phase == domain.PhaseDone

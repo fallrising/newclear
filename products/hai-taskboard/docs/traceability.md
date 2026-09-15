@@ -9,18 +9,18 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | Clause group | Design source | Planned oracle | Status |
 | --- | --- | --- | --- |
 | HAI-BOUNDARY-001..004 | SDD §3 | architecture/package dependency tests; Fake capability tests | NotRun |
-| HAI-AUTH-001..006 | SDD §4, ADR-001/005 | transaction, import, artifact, migration, backup tests | NotRun |
-| HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | NotRun |
+| HAI-AUTH-001..006 | SDD §4, ADR-001/005 | transaction, import, artifact, migration, backup tests | Passing bounded command/artifact transaction subset (T-090); backup and full group remain NotRun |
+| HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
 | HAI-STATE-001..006 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | NotRun |
 | HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
-| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | NotRun |
+| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical subset (T-073/T-089); automatic polling and restore remain NotRun |
 | HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | NotRun |
 | HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
-| HAI-API-002..004 | SDD §8 | SSE gap/backpressure/reset/high-water tests | Passing (bounded transport T-081; T-047 integration NotRun) |
+| HAI-API-002..004 | SDD §8 | SSE gap/backpressure/reset/high-water tests | Passing bounded transport (T-081); T-089 binds durable response-loss/result projection, not an SSE end-to-end loop |
 | HAI-UX-001..006 | SDD §9 | component/a11y/keyboard/rejection/disconnect Playwright tests | NotRun |
-| HAI-SEC-001..007 | SDD §10 | bind/path/redaction/capability/TOCTOU/retention tests | NotRun |
+| HAI-SEC-001..007 | SDD §10 | bind/path/redaction/capability/TOCTOU/retention tests | Passing bounded Approval/artifact TOCTOU subset (T-090); full group remains NotRun |
 | HAI-OPS-001..005 | SDD §11, ADR-005 | backup/restore/corruption/capacity/retention tests | NotRun |
-| HAI-DELIVERY-001..004 | SDD §12, ADR-006 | document/task validator and evidence-gate review | NotRun |
+| HAI-DELIVERY-001..004 | SDD §12, ADR-006 | document/task validator and evidence-gate review | Passing for bounded T-047 workflow; repository G1 remains NotRun |
 
 ## Accepted implementation checkpoint
 
@@ -43,31 +43,58 @@ required acceptance decision. `Candidate` means executed worker evidence still a
   all fence dimensions, lifecycle/uncertainty/zero-redispatch behavior, bounded staging/digests and
   hostile artifact names including exact `..`. This is a Fake-package and in-memory worker-seam
   checkpoint only; it did not itself accept application persistence wiring or HTTP/SSE. HTTP/SSE is
-  accepted separately below, while persistent worker execution and T-047 remain NotRun.
+  accepted separately below, as are the later predecessor-authority and T-047 integration checkpoints.
 - T-046 HTTP/SSE plus T-078/T-080 repairs are accepted by T-081 and a separate orchestrator gate.
   T-077/T-079 remain historical FAIL evidence. Fresh checks cover strict auth-before-read and exact
   Origin, five accepted commands, immutable canonical result lookup, SHA-256 wire encoding,
   contiguous snapshot/replay/live ordering, OpenAPI cursor-bound events, reset/revocation precedence,
-  project isolation and both queue limits. This is a transport/composition checkpoint only; the
-  Fake-to-application persistent execution and T-047 end-to-end slice remain NotRun.
+  project isolation and both queue limits. This is a transport/composition checkpoint only.
+- T-047 vertical integration is accepted through T-087/T-089 plus a separate orchestrator gate.
+  T-047/T-082 preserve the original three NotRun boundaries; T-083/T-085 introduced only the
+  separately bounded exported predecessor authority accepted by T-086, with T-084 retained as FAIL.
+  T-088 remains a read-first chronology FAIL. T-089 freshly passed the exact three oracles,
+  ten repetitions, complete backend, race, inventory and adversarial probes against read-only
+  candidate bytes. This is deterministic, manually driven Fake-to-application vertical evidence;
+  it does not accept automatic persistent polling, restore/backup, browser or provider execution.
+- T-090 is accepted by a separate pre-push orchestrator evidence gate. It repairs object verification
+  outside SQLite write transactions, WorkItem-version error classification and exact current
+  WorkItem/Candidate Approval binding while keeping all three T-047 oracles green. Report SHA-256 is
+  `9f52dd6d1b0764b69989544cc7bc7e2f1a3ef66a8b3bb70125d34b6465704f82`.
 
 ## T-041 implementation-contract inventory
 
 `docs/sdd/fake-vertical-slice-implementation.md` freezes V1 package direction, SQLite constraints,
 guarded Done rehydration, command/failure seams, Fake fencing, `/api/v1` boundaries, SSE replay and
-serial child writable scopes. Its bounded persistence, transaction, Fake and HTTP/SSE child oracles
-are now accepted by their named reports; T-047 integration oracles remain NotRun. No accepted child
-status is broadened into vertical-slice acceptance.
+serial child writable scopes. Its bounded persistence, transaction, Fake, HTTP/SSE and T-047
+integration oracles are now accepted by their named reports and orchestrator gates. No accepted
+child status is broadened into automatic polling, restore/backup, browser, provider or G1 acceptance.
+
+## T-047 exact vertical oracles
+
+| Required oracle | Accepted evidence | Status |
+| --- | --- | --- |
+| `TestVerticalFake_CompletionAndResponseLoss` | Real SQLite and exported application/Fake/HTTP seams; create-to-Done material and one-use Approval; byte-exact lost-response lookup/replay after artifact loss; no duplicate Run, dispatch or projection | Passing (T-087/T-089/T-090) |
+| `TestRunLease_RejectsStaleEpochPublication` | Real epoch N, injected deadline plus 1ns, reconciliation-only N+1, old-N terminal rejection and audit; no durable mutation, Candidate or redispatch; orphan-only sealed object | Passing (T-087/T-089/T-090) |
+| `TestCancel_UnknownStopIsNotCanceled` | Persisted cancel intent followed by Fake timeout/lookup-unknown; `CancelRequested`/`NeedsReconcile`/`OutcomeUnknown`, no cancel acknowledgement, Done or redispatch | Passing (T-087/T-089/T-090) |
+
+The original T-047 PARTIAL, T-082 FAIL, T-084 FAIL and T-088 process FAIL remain retained evidence;
+none is rewritten as a pass. T-089 report SHA-256 is
+`699d117f53e06f6149c2eb3402bd1ce81a42154a04fda6ca7ca1d8322ba11394`, and the accepted
+integration candidate SHA-256 is `94f3fc807eb4686b4273abb3f1390625147bc07ed3cc1d95383d7afbd39063ea`.
+
+T-090 retains that history and supersedes only the bounded reviewed authority/contract bytes. Its
+report SHA-256 is `9f52dd6d1b0764b69989544cc7bc7e2f1a3ef66a8b3bb70125d34b6465704f82`;
+the current integration SHA-256 is `e25e6bad0618edfc083168a7fe0ed798c9beac30677d05820b41cb541c3644b4`.
 
 ## First named G1 acceptance skeletons
 
 | ID | Required test/oracle | Expected evidence | Status |
 | --- | --- | --- | --- |
-| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | domain gate, public SQLite atomic write/load and real-Store application completion/replay pass | Passing (T-024/T-064/T-067) |
+| AC-P0A-001 | `TestCompleteWorkItem_AllRequiredEvidence` | domain gate, public SQLite atomic write/load and real-Store application completion/replay pass | Passing (T-024/T-064/T-067; vertical T-089) |
 | AC-P0A-002 | `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState` | subtests for missing/failed/skipped/not-run/unknown/stale | Passing (T-024) |
 | AC-P0A-003 | `TestCompleteWorkItem_RejectsSubjectTOCTOU` | no phase/record mutation after subject change | Passing (T-024) |
 | AC-P0A-004 | `TestCommand_IdempotencySameRequestAndConflict` | application same/concurrent request replays one exact result; mismatched bytes conflict | Passing (T-024/T-067) |
-| AC-P0A-005 | `TestRunLease_RejectsStaleEpochPublication` | stale terminal result rejected and audited | Passing (Fake seam T-073; durable audit/integration NotRun) |
+| AC-P0A-005 | `TestRunLease_RejectsStaleEpochPublication` | stale terminal result rejected and audited | Passing (Fake seam T-073; durable vertical T-089) |
 | AC-P0A-006 | `TestRunRecovery_ExpiryDoesNotImplyStoppedOrRetry` | NeedsReconcile/OutcomeUnknown retained | Passing (Fake seam T-073; durable integration NotRun) |
 | AC-P0A-007 | `TestImpactPlan_UsesOldAndNewReverseClosure` | removed/redirected edge dependents included | Passing (T-024) |
 | AC-P0A-008 | `TestImpactActivation_RejectsStalePlan` | pure decision rejects stale plan; durable activation remains NotRun | Passing (T-024) |
@@ -94,16 +121,16 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-04 | Forged/self human or verifier identity is denied without mutation | NotRun |
 | AC-05 | Skipped/Error/Inconclusive required check is not Passing | NotRun |
 | AC-06 | Replaced artifact bytes fail digest and become Missing/Quarantined | NotRun |
-| AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP boundary T-081; integration NotRun) |
+| AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP boundary T-081; vertical replay T-089; concurrent vertical NotRun) |
 | AC-08 | Same key with different request yields idempotency conflict | Passing (application T-067) |
 | AC-09 | Concurrent old version yields one success and one conflict | NotRun |
-| AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP lookup T-081; integration NotRun) |
+| AC-10 | Response loss after commit replays result without a new Run | Passing (application T-067; HTTP lookup T-081; vertical T-089) |
 | AC-11 | State/audit/outbox/result failure is all commit or all rollback | Passing (application/SQLite T-067) |
 | AC-12 | Lost Start acknowledgement is looked up; unknown blocks restart | Passing (Fake T-073; durable integration NotRun) |
-| AC-13 | Expired lease holder cannot finalize or publish | Passing (Fake T-073; durable integration NotRun) |
+| AC-13 | Expired lease holder cannot finalize or publish | Passing (Fake T-073; durable vertical T-089) |
 | AC-14 | Live process with missed heartbeat enters recovery, not redispatch | NotRun |
-| AC-15 | Unconfirmed cancel remains CancelRequested, not Canceled | Passing (Fake T-073; durable integration NotRun) |
-| AC-16 | Deadline plus unknown external outcome blocks automatic retry | Passing (Fake T-073; durable integration NotRun) |
+| AC-15 | Unconfirmed cancel remains CancelRequested, not Canceled | Passing (Fake T-073; durable vertical T-089) |
+| AC-16 | Deadline plus unknown external outcome blocks automatic retry | Passing (Fake T-073; durable vertical T-089) |
 | AC-17 | Duplicate/stale Question response cannot resolve a newer blocker | NotRun |
 | AC-18 | Resolving one of two blockers leaves the WorkItem blocked and phase intact | NotRun |
 | AC-19 | Resume on unsupported profile fails closed and requires new Run | NotRun |
@@ -132,7 +159,7 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 | AC-42 | Fake boundary denies DB/sibling/secret-canary access and leakage | Passing (Fake package T-076; OS isolation/integration NotRun) |
 | AC-43 | Malicious repository instructions remain data and cannot alter authority | NotRun |
 | AC-44 | Active artifact/symlink cannot execute, escape or overwrite | NotRun |
-| AC-45 | Changed/expired approval subject fails and single-use cannot repeat | NotRun |
+| AC-45 | Changed/expired approval subject fails and single-use cannot repeat | Passing bounded wrong-target/stale-version/current-subject checks (T-090) and one-use vertical completion (T-089); expiry/repeat attack remains NotRun |
 | AC-46 | No auth/cross-project/wrong Origin denies without resource disclosure | Passing (HTTP transport T-081; artifact/browser integration NotRun) |
 | AC-47 | Producer test/recipe change requires independent review | NotRun |
 | AC-48 | Changed integration base prevents old candidate completing new base | NotRun |

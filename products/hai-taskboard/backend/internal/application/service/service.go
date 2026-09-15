@@ -485,6 +485,12 @@ func classifyError(err error) *command.Error {
 	if errors.Is(err, port.ErrNotFound) {
 		return command.NewError(command.CodeNotFound, "requested resource was not found", false, nil, err)
 	}
+	if errors.Is(err, port.ErrFenceRejected) {
+		return command.NewError(command.CodeLifecycleRejected, "publisher fence is stale", false, nil, err)
+	}
+	if errors.Is(err, port.ErrRunLifecycle) || errors.Is(err, port.ErrNoPendingDispatch) {
+		return command.NewError(command.CodeLifecycleRejected, "Run lifecycle guard rejected the operation", false, nil, err)
+	}
 	if gate, ok := errors.AsType[domain.GateError](err); ok {
 		if slices.Contains(gate.Codes(), domain.CodeVersionConflict) {
 			return command.NewError(command.CodeVersionConflict, "aggregate version does not match", false, gate.Codes(), err)

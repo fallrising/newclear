@@ -126,6 +126,13 @@ missing its dispatch intent, and response loss recovers solely by command-id/ide
 Failure injection at each statement and between commit/HTTP response must show all-or-nothing writes;
 failure after commit must show one durable replay and no second Run.
 
+`ApproveSubject` identifies the target `work_item_id` and `candidate_id` in addition to the opaque
+subject digest. Its command `expected_version` is the current WorkItem version. Inside the Approval
+transaction the application reloads that exact current WorkItem/Candidate/Run material, reconstructs
+the completion subject from current AC/graph/policy/recipe/environment bindings and requires an exact
+digest match before inserting the immutable Approval. A stale version, historical Candidate or digest
+alone cannot authorize current completion.
+
 ## 5. Fake lifecycle and recovery fence
 
 `fake/v1` accepts an immutable scenario `{scenario_id, capabilities, ordered observations}` driven

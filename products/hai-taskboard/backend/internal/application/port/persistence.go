@@ -11,7 +11,27 @@ import (
 
 // ErrNotFound is the adapter-independent result for an absent persisted
 // record. Application code must never need to match database/sql errors.
-var ErrNotFound = errors.New("persistence record not found")
+var (
+	ErrNotFound          = errors.New("persistence record not found")
+	ErrNoPendingDispatch = errors.New("no pending dispatch")
+	ErrFenceRejected     = errors.New("run fence rejected")
+	ErrRunLifecycle      = errors.New("run lifecycle rejected")
+	ErrLeaseNotExpired   = errors.New("run lease is not expired")
+)
+
+// FenceRejection is returned before a stale or wrongly scoped publisher can
+// mutate authoritative Run state. It remains adapter-independent while
+// supporting errors.Is(err, ErrFenceRejected).
+type FenceRejection struct{ Reason string }
+
+func (rejection FenceRejection) Error() string {
+	if rejection.Reason == "" {
+		return ErrFenceRejected.Error()
+	}
+	return ErrFenceRejected.Error() + ": " + rejection.Reason
+}
+
+func (FenceRejection) Is(target error) bool { return target == ErrFenceRejected }
 
 type Project struct {
 	ID         domain.ProjectID
@@ -72,6 +92,21 @@ type Transaction interface {
 	AppendProjectionEvent(context.Context, ProjectionEvent) (Cursor, error)
 }
 
+// AuthorityTransaction is the bounded execution/completion preparation seam.
+// It deliberately exposes neither SQL nor allocator-owned audit/projection
+// positions. Existing command-only UnitOfWork implementations need not claim
+// this optional surface unless they execute these operations.
+type AuthorityTransaction interface {
+	Transaction
+	LoadRunAuthority(context.Context, domain.ProjectID, domain.RunID) (RunAuthority, error)
+	ClaimPendingRun(context.Context, RunClaimRequest) (ExecutorEnvelope, error)
+	ClaimExpiredRunForReconciliation(context.Context, RunLeaseSuccessionRequest) (RunAuthority, error)
+	ApplyRunPublication(context.Context, RunPublication) (RunAuthority, error)
+	RequestRunCancellation(context.Context, CancellationRequest) (RunAuthority, error)
+	LoadArtifact(context.Context, domain.Digest) (Artifact, error)
+	LoadSubjectMaterial(context.Context, domain.ProjectID, domain.Digest) (SubjectMaterial, error)
+}
+
 type Run struct {
 	ID                  domain.RunID
 	ProjectID           domain.ProjectID
@@ -87,6 +122,96 @@ type Run struct {
 	ReconciliationState string
 	SideEffectOutcome   string
 	CreatedAtNS         int64
+}
+
+type RunFence struct {
+	ProjectID         domain.ProjectID
+	RunID             domain.RunID
+	InputDigest       domain.Digest
+	Holder            domain.ActorID
+	Epoch             uint64
+	RestoreGeneration uint64
+}
+
+type RunLease struct {
+	Fence      RunFence
+	DeadlineNS int64
+}
+
+type OutboxRecord struct {
+	ID            string
+	CommandID     string
+	AuditGroupID  string
+	ProjectID     domain.ProjectID
+	RunID         domain.RunID
+	PayloadDigest domain.Digest
+	State         string
+	ClaimEpoch    uint64
+	CreatedAtNS   int64
+	ClaimedAtNS   int64
+}
+
+type RunAuthority struct {
+	Run               Run
+	Lease             RunLease
+	Outbox            OutboxRecord
+	RestoreGeneration uint64
+	AuditCount        uint64
+	ProjectionCount   uint64
+}
+
+type RunClaimRequest struct {
+	ProjectID                 domain.ProjectID
+	RunID                     domain.RunID
+	Holder                    domain.ActorID
+	ExpectedRestoreGeneration uint64
+	ClaimedAtNS               int64
+	DeadlineNS                int64
+}
+
+// RunLeaseSuccessionRequest transfers only reconciliation ownership after a
+// formerly valid lease expires. It cannot produce a dispatchable envelope.
+type RunLeaseSuccessionRequest struct {
+	PreviousFence RunFence
+	Successor     domain.ActorID
+	ClaimedAtNS   int64
+	DeadlineNS    int64
+}
+
+type ExecutorEnvelope struct {
+	Fence          RunFence
+	WorkItemID     domain.WorkItemID
+	AdapterID      string
+	AdapterVersion string
+	ScenarioID     string
+	Capabilities   []string
+	CommandID      string
+}
+
+func (envelope ExecutorEnvelope) Clone() ExecutorEnvelope {
+	envelope.Capabilities = append([]string(nil), envelope.Capabilities...)
+	return envelope
+}
+
+type RunPublication struct {
+	Fence               RunFence
+	DesiredAction       string
+	DispatchState       string
+	ObservedState       string
+	ReconciliationState string
+	SideEffectOutcome   string
+}
+
+type CancellationRequest struct {
+	ProjectID  domain.ProjectID
+	RunID      domain.RunID
+	WorkItemID domain.WorkItemID
+}
+
+type SubjectMaterial struct {
+	Reviews   []Review
+	Evidence  []Evidence
+	Approvals []Approval
 }
 
 type ACRevision struct {

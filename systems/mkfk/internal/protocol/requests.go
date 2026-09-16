@@ -50,6 +50,17 @@ type OpenProducerRequest struct {
 	RequestID     string       `json:"request_id"`
 }
 
+type OpenProducerResponseData struct {
+	ProducerID string        `json:"producer_id"`
+	Epoch      DecimalUint64 `json:"epoch"`
+	LeaderTerm DecimalUint64 `json:"leader_term"`
+}
+
+type OpenProducerResponse struct {
+	RequestID string                   `json:"request_id"`
+	Data      OpenProducerResponseData `json:"data"`
+}
+
 func (*OpenProducerRequest) requiredFields() []string {
 	return []string{"topic", "partition", "producer_id", "expected_epoch", "request_id"}
 }
@@ -113,6 +124,19 @@ type ProduceRequest struct {
 	FirstSequence DecimalUint64 `json:"first_sequence"`
 	Acks          string        `json:"acks"`
 	Records       []WireRecord  `json:"records"`
+}
+
+type ProduceResponseData struct {
+	BaseOffset   DecimalUint64 `json:"base_offset"`
+	LastOffset   DecimalUint64 `json:"last_offset"`
+	NextSequence DecimalUint64 `json:"next_sequence"`
+	Duplicate    bool          `json:"duplicate"`
+	LeaderTerm   DecimalUint64 `json:"leader_term"`
+}
+
+type ProduceResponse struct {
+	RequestID string              `json:"request_id"`
+	Data      ProduceResponseData `json:"data"`
 }
 
 func (*ProduceRequest) requiredFields() []string {
@@ -355,6 +379,10 @@ func validateMemberRequest(memberID, requestID string) error {
 
 func ValidateGroupID(groupID string) error {
 	return config.ValidateToken("group_id", groupID)
+}
+
+func ValidateRequestID(requestID string) error {
+	return config.ValidateToken("request_id", requestID)
 }
 
 func requireObjectFields(body []byte, fields []string) error {

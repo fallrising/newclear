@@ -122,7 +122,10 @@ func (partition *Partition) Open(request protocol.OpenProducerRequest, now time.
 	}
 	expectedEpoch := int64(request.ExpectedEpoch)
 	if pending := partition.pending[request.ProducerID]; pending != nil {
-		if pending.kind == pendingOpen && pending.openRequestID == request.RequestID && pending.expectedEpoch == expectedEpoch {
+		if pending.kind == pendingOpen && pending.openRequestID == request.RequestID {
+			if pending.expectedEpoch != expectedEpoch {
+				return OpenResult{}, raft.Ready{}, nil, stateError(CodeRequestConflict, "request_id was already used with different OpenProducer parameters")
+			}
 			pending.waiters[request.RequestID] = false
 			return partition.pendingOpenResult(pending, request.RequestID), raft.Ready{}, nil, nil
 		}
@@ -184,8 +187,11 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 	firstSequence := uint64(request.FirstSequence)
 	count := uint32(len(validated.Records))
 	if pending := partition.pending[request.ProducerID]; pending != nil {
-		if pending.kind != pendingData || pending.epoch != epoch || pending.firstSequence != firstSequence || pending.recordCount != count || pending.digest != validated.Fingerprint {
+		if pending.kind != pendingData || pending.epoch != epoch || pending.firstSequence != firstSequence {
 			return ProduceResult{}, raft.Ready{}, nil, stateError(CodeProducerBusy, "producer already has a different unresolved operation")
+		}
+		if pending.recordCount != count || pending.digest != validated.Fingerprint {
+			return ProduceResult{}, raft.Ready{}, nil, stateError(CodeSequenceConflict, "pending sequence range has different records")
 		}
 		pending.waiters[requestID] = true
 		if pending.gateRequestID == "" {

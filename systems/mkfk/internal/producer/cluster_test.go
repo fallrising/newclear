@@ -59,6 +59,42 @@ func TestM5PR03LeaderFailoverReplaysCommittedDedup(t *testing.T) {
 	}
 }
 
+func TestM5PendingBatchCoalescesWithoutPipelining(t *testing.T) {
+	t.Parallel()
+	cluster := newProducerCluster(t)
+	leader := cluster.elect(t, 1)
+	_, ready, _, err := leader.Open(protocolOpenRequest(-1, "open-pending"), cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drain(t, 300)
+	request := testProduceRequest(t, 0, 0, "pending")
+	first, ready, _, err := leader.Produce("pending-first", request, 1, cluster.now)
+	if err != nil || first.Status != OperationPending {
+		t.Fatalf("first pending produce = %#v, %v", first, err)
+	}
+	lastIndex := cluster.nodes[1].Snapshot().LastLogIndex
+	second, secondReady, _, err := leader.Produce("pending-coalesced", request, 2, cluster.now)
+	if err != nil || second.Status != OperationPending || len(secondReady.Messages) != 0 {
+		t.Fatalf("coalesced produce = %#v ready=%#v err=%v", second, secondReady, err)
+	}
+	if cluster.nodes[1].Snapshot().LastLogIndex != lastIndex {
+		t.Fatal("coalesced pending retry appended another entry")
+	}
+	different := testProduceRequest(t, 0, 0, "different")
+	if _, _, _, err := leader.Produce("pending-conflict", different, 3, cluster.now); !IsCode(err, CodeSequenceConflict) {
+		t.Fatalf("pending same-sequence conflict = %v", err)
+	}
+	pipelined := testProduceRequest(t, 0, 1, "next")
+	if _, _, _, err := leader.Produce("pending-pipeline", pipelined, 4, cluster.now); !IsCode(err, CodeProducerBusy) {
+		t.Fatalf("pipelined unresolved batch error = %v", err)
+	}
+	if cluster.nodes[1].Snapshot().LastLogIndex != lastIndex {
+		t.Fatal("conflicting or pipelined request appended DATA")
+	}
+}
+
 func protocolOpenRequest(expected int64, requestID string) protocol.OpenProducerRequest {
 	return protocol.OpenProducerRequest{
 		Topic: "events", Partition: 0, ProducerID: testProducerID,

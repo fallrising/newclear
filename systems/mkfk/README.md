@@ -2,7 +2,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0 contracts / testkit 與 M1 durable partition log 已驗證；M2–M7 尚未實作。** 現有程式提供本機單 segment WAL 的顯式 format、鎖定、durable append、local read、hardstate 與 crash recovery；目前仍不是可啟動 broker，也不宣稱 replicated durability、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0 contracts / testkit、M1 durable partition log 與 M2 segmented sparse-index storage 已驗證；M3–M7 尚未實作。** 現有程式提供本機 segmented WAL 的顯式 format、鎖定、durable append、bounded indexed read、hardstate、crash recovery 與 committed-safe suffix truncation；目前仍不是可啟動 broker，也不宣稱 replicated durability、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -54,6 +54,17 @@ make test-race
 - I/O failure 後 quarantine，restart recovery 前拒絕繼續 append。
 
 M1 只保證成功 local append 已通過本機 sync。它沒有 Raft quorum、ISR、HW、public Produce/Fetch handler 或 retry dedup；對外 replicated acknowledgement 必須等待 M3–M5。
+
+## M2 segmented storage
+
+- 預設 64 MiB segment；frame 不跨 segment，新 WAL 在對外可見前會 sync directory。
+- `.idx` 以每 4 KiB WAL 距離建立 sparse DATA anchor；這是可丟棄 cache，不是 durability truth。
+- offset read 先對 segment DATA range 與 anchor 做二分搜尋，再從 WAL 局部掃描；`ReadStats` 回報 comparisons、scan frames/bytes 與 index bytes。
+- 缺失、CRC 錯誤或指向不合理的 index 由 WAL 重建，不改 WAL bytes。
+- read lock 是 stable read-view lease；close/truncate 不會在 reader 使用 segment handle 時關閉或重用它。
+- `TruncateSuffix` 只能移除 `commit_index` 之後的 suffix，並同步重算 LEO、segment catalog 與 anchors。
+
+M2 仍沒有 retention/snapshot，也不會自行觸發 truncate；只有未來 M3 的 Raft conflict reconciliation 能依驗證後的 prev index/term 呼叫它。
 
 ## 範圍提示
 

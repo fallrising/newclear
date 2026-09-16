@@ -1,0 +1,70 @@
+{
+  "milestone": "M2",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "3dbd61a",
+  "evidence_scope": "uncommitted M2 working tree based on source_commit",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64 x86_64",
+    "filesystem_probe": "ext2/ext3",
+    "durability_interpretation": "WAL and directory sync paths, restart recovery, index cache replacement, and suffix truncation were exercised; this is not physical power-loss evidence"
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 through M2 packages passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "all contract, M1 regression, segmented-storage, index-repair, and truncation tests passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 through M2 test packages passed under the race detector"
+    }
+  ],
+  "acceptance": {
+    "ST-06": "small deterministic segments produce at least three WAL files; cross-boundary reads and restart return every record exactly once, and no frame crosses a segment",
+    "ST-07": "80 deterministic random offset seeks across multi-record DATA and control-only segments match a reference log and report binary-search comparisons plus scanned WAL work",
+    "ST-08": "one missing and one corrupt index rebuild to the same reads while per-file SHA-256 digests prove WAL bytes are unchanged",
+    "ST-09": "an uncommitted suffix truncates with recomputed LEO/catalog/index and reuses provisional offsets; truncating at commit_index is rejected without changing WAL digests"
+  },
+  "seek_measurement": {
+    "seed": 2207,
+    "seeks": 80,
+    "segments": 8,
+    "wal_bytes": 73432,
+    "index_bytes": 448,
+    "segment_comparisons": 184,
+    "index_comparisons": 123,
+    "scanned_frames": 215,
+    "scanned_bytes_total": 416565,
+    "scanned_bytes_average": 5207.0625,
+    "assertion": "every individual seek scanned fewer than the 73432 bytes in the complete WAL"
+  },
+  "additional_results": [
+    "An incomplete tail in a sealed segment fails closed; only the final active segment can be repaired.",
+    "A stable read-view lease excludes concurrent suffix truncation until the reader releases segment handles.",
+    "Injected sparse-index write failure does not roll back or fail a synced WAL append; restart rebuilds the stale cache.",
+    "Indexes are validated against anchors derived from WAL, so a CRC-valid but logically wrong cache is also replaced.",
+    "M1 SIGKILL, torn-active-tail, CRC, commit-floor, partial-write, sync-failure, hardstate, and data-dir identity tests remain green."
+  ],
+  "output_location": "This scrubbed evidence manifest; deterministic seek metrics are emitted by TestM2ST07SparseSeekMatchesReferenceAndReportsWork under go test -v.",
+  "seeds": [2207],
+  "limitations": [
+    "M2 stores per-frame position, term, kind, and DATA range metadata in memory, but record payloads are read from WAL through sparse anchors rather than loaded into a record map.",
+    "There is no retention, snapshot, compaction, or background index maintenance.",
+    "TruncateSuffix is a storage primitive only; no Raft implementation exists yet to authorize conflict truncation.",
+    "No network broker, Raft replication, ISR, public API, producer dedup, or group coordinator exists."
+  ],
+  "next_task": "M3: implement per-partition full Raft with durable voting, elections, conflict reconciliation, current-term commit rules, NOOP ready barrier, ReadIndex, and RF1/RF3 process evidence."
+}

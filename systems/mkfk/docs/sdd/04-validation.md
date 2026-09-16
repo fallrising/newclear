@@ -2,7 +2,7 @@
 
 [回主 SDD](../../SDD.md)
 
-**目前狀態：所有下列程式驗收均尚未執行。** 本文件是 acceptance contract，不是測試報告。測試名稱／ID 必須出現在未來測試程式或 evidence mapping，不能只存在文案中。
+**執行狀態以 [implementation status](../STATUS.md) 與對應 evidence manifest 為準。** 本文件是 acceptance contract，不是測試報告。測試名稱／ID 必須出現在測試程式或 evidence mapping，不能只存在文案中。
 
 ## 1. 測試層級
 

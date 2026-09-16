@@ -20,6 +20,7 @@ const (
 	manifestFileName = "manifest.json"
 	lockFileName     = "node.lock"
 	initialWALName   = "00000000000000000001.wal"
+	initialIndexName = "00000000000000000001.idx"
 )
 
 type DataDir struct {
@@ -88,6 +89,13 @@ func FormatDataDir(root string, nodeID uint32, topologyBytes []byte) error {
 			if err := createSyncedFile(filesystem, filepath.Join(directory, initialWALName), nil); err != nil {
 				return err
 			}
+			emptyIndex, err := EncodeIndex(nil)
+			if err != nil {
+				return err
+			}
+			if err := createSyncedFile(filesystem, filepath.Join(directory, initialIndexName), emptyIndex); err != nil {
+				return err
+			}
 			if err := filesystem.SyncDir(directory); err != nil {
 				return err
 			}
@@ -152,6 +160,13 @@ func OpenDataDir(root string, nodeID uint32, topologyBytes []byte) (*DataDir, er
 }
 
 func (dataDir *DataDir) OpenPartition(topic string, partitionID uint32) (*PartitionLog, error) {
+	return dataDir.OpenPartitionWithOptions(topic, partitionID, PartitionOptions{})
+}
+
+// OpenPartitionWithOptions is primarily used by deterministic storage
+// fixtures that need small segments. The on-disk frame and index formats are
+// unchanged by the rotation threshold.
+func (dataDir *DataDir) OpenPartitionWithOptions(topic string, partitionID uint32, options PartitionOptions) (*PartitionLog, error) {
 	dataDir.mu.Lock()
 	defer dataDir.mu.Unlock()
 	if dataDir.closed {
@@ -168,7 +183,7 @@ func (dataDir *DataDir) OpenPartition(topic string, partitionID uint32) (*Partit
 	if err := requireRealDirectory(directory); err != nil {
 		return nil, err
 	}
-	partition, err := openPartitionLog(dataDir.filesystem, directory, topic, partitionID)
+	partition, err := openPartitionLogWithOptions(dataDir.filesystem, directory, topic, partitionID, options)
 	if err != nil {
 		return nil, err
 	}

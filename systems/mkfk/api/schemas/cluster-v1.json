@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mkfk.invalid/schemas/cluster-v1.json",
+  "title": "mkfk static cluster and storage manifests",
+  "$defs": {
+    "safeToken": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"},
+    "address": {"type": "string", "minLength": 3, "maxLength": 255},
+    "broker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "client_addr", "peer_addr", "admin_addr"],
+      "properties": {
+        "id": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+        "client_addr": {"$ref": "#/$defs/address"},
+        "peer_addr": {"$ref": "#/$defs/address"},
+        "admin_addr": {"$ref": "#/$defs/address"}
+      }
+    },
+    "partition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "replicas", "min_isr"],
+      "properties": {
+        "id": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+        "replicas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 4294967295}
+        },
+        "min_isr": {"type": "integer", "minimum": 1, "maximum": 3}
+      }
+    },
+    "topic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "internal", "partitions"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9_][A-Za-z0-9_-]{0,63}$"},
+        "internal": {"type": "boolean"},
+        "partitions": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/partition"}}
+      }
+    },
+    "clusterManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "cluster_id", "brokers", "topics"],
+      "properties": {
+        "version": {"const": 1},
+        "cluster_id": {"$ref": "#/$defs/safeToken"},
+        "brokers": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"$ref": "#/$defs/broker"}},
+        "topics": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/topic"}}
+      }
+    },
+    "storageManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storage_format_version", "cluster_id", "node_id", "topology_sha256"],
+      "properties": {
+        "storage_format_version": {"const": 1},
+        "cluster_id": {"$ref": "#/$defs/safeToken"},
+        "node_id": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+        "topology_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    }
+  }
+}

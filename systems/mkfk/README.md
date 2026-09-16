@@ -2,7 +2,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：SDD baseline / 尚未實作。** 本目錄目前只有開發規格，不是可執行 broker，也不宣稱 production-ready 或 Kafka client 相容。
+**狀態：M0 contracts / testkit 已驗證；M1–M7 尚未實作。** 現有程式固定持久格式、JSON API、靜態 topology、資源上限與可注入測試邊界；目前仍不是可啟動 broker，也不宣稱 durability、replication、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -20,7 +20,26 @@ Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪�
 | [協定與客戶端](docs/sdd/03-protocol-clients.md) | HTTP/JSON 契約、producer fencing/dedup、consumer group generation 與 offset commit |
 | [驗證](docs/sdd/04-validation.md) | requirement → test 對照、故障注入、模型測試、安全界線與量測方法 |
 
-預設實作語言為 Go；Linux 本機檔案系統為 durability 驗收平台。Go patch 版本由 M0 查核支援狀態後固定在 module、工具鏈及 CI。這是設計選擇，不是宣稱教學強制使用 Go。
+實作語言為 Go；`go.mod` 固定 Go 1.27.1 toolchain。Linux 本機檔案系統為 durability 驗收平台，最低環境與限制記錄於 [ADR-007](docs/adr/007-m0-toolchain-platform.md)。這是設計選擇，不是宣稱教學強制使用 Go。
+
+## M0 可執行內容
+
+- `internal/storage`：WAL frame v1、sparse index v1 codec、CRC32C、長度與 overflow 邊界。
+- `internal/config`：strict static topology、exact-byte SHA-256、storage identity 與資源 cap 驗證。
+- `internal/protocol`：decimal-string、strict JSON/base64、produce/fetch/group request contracts、batch fingerprint 與 FNV-1a partitioning。
+- `internal/adapters` / `internal/testkit`：clock、random、network、filesystem interface，以及 manual clock、scripted random/fault transport。
+- `api/schemas` / `testdata/golden`：完整 public endpoint contract、config schema、正反例與固定 binary vectors。
+
+執行 M0 gates：
+
+```bash
+make fmt-check
+make vet
+make test
+make test-race
+```
+
+目前刻意沒有 `cmd/mkfk`、HTTP handler、WAL filesystem store 或固定成功 stub；這些必須依 milestone 驗收順序加入。
 
 ## 範圍提示
 

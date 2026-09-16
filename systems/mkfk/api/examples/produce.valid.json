@@ -1,0 +1,11 @@
+{
+  "topic": "events",
+  "partition": 0,
+  "producer_id": "90f67d4e-13c5-4a3c-8d62-443f1bbb1af4",
+  "epoch": "0",
+  "first_sequence": "0",
+  "acks": "all",
+  "records": [
+    {"key_base64": "dXNlcjox", "value_base64": "aGVsbG8="}
+  ]
+}

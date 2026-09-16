@@ -1,0 +1,14 @@
+[
+  {
+    "name": "null-key-empty-value",
+    "key_base64": null,
+    "value_base64": "",
+    "sha256": "db2e5d07c3065edf011c44ce19f294db024ed43568b317b4b41a0912c866c871"
+  },
+  {
+    "name": "empty-key-empty-value",
+    "key_base64": "",
+    "value_base64": "",
+    "sha256": "6897eba2a4f8b322c447af5744fcd876b22006ad4bf39c4a68b341d7d6bff6e4"
+  }
+]

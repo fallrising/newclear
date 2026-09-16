@@ -1,0 +1,63 @@
+{
+  "milestone": "M0",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "c86d458",
+  "evidence_scope": "uncommitted M0 working tree based on source_commit",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64 x86_64",
+    "filesystem_probe": "ext2/ext3",
+    "accepted_durability_platform": "Linux 5.10+ on local ext4 or XFS; not exercised by M0"
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 packages passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "schema, config, strict JSON, protocol, storage codec, and deterministic testkit packages passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 test packages passed under the race detector"
+    }
+  ],
+  "seeds": [],
+  "verified_contracts": [
+    "WAL v1 header length, CRC32C, kind, flags, index, term, payload length, and 4 MiB bound",
+    "sparse index v1 magic, version, strict monotonic entries, length, and CRC32C",
+    "null-key versus empty-key batch SHA-256 fingerprints",
+    "FNV-1a key partition vectors",
+    "strict decimal-string, duplicate-key, unknown-field, base64, request-size, and resource-cap validation",
+    "all ten public endpoint request/response schemas plus the common error envelope",
+    "static three-broker development topology and exact-byte topology digest",
+    "manual clock, scripted random source, drop/duplicate transport, and safe child-path test boundaries"
+  ],
+  "fault_injection_results": [
+    "truncated WAL frames at every byte boundary are rejected",
+    "WAL and index checksum corruption is rejected",
+    "oversized declared WAL lengths are rejected before payload allocation",
+    "duplicate/unknown JSON fields, unsafe topic traversal, malformed base64, numeric epochs, and unsupported acknowledgements are rejected",
+    "scripted transport deterministically records dropped and duplicated messages"
+  ],
+  "adrs": [
+    "docs/adr/007-m0-toolchain-platform.md"
+  ],
+  "limitations": [
+    "No filesystem WAL, fsync, data-dir lock, recovery, broker, HTTP handler, Raft, ISR, producer state, or group state exists yet.",
+    "No M1 storage acceptance ID or later FR/INV acceptance is claimed by this evidence.",
+    "The working filesystem probe is recorded for reproducibility but M0 makes no durability claim on it.",
+    "Model, process, cluster, and performance tests begin in their declared later milestones."
+  ],
+  "next_task": "M1: implement the Linux filesystem adapter, explicit formatting/locking, hardstate atomic persistence, durable append, restart scan, and torn-tail recovery; verify ST-01 through ST-05 and OP-02 without starting M2."
+}

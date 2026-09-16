@@ -1,0 +1,12 @@
+{
+  "GET /v1/metadata": {"response": "metadataResponse"},
+  "POST /v1/producers/open": {"request": "openProducerRequest", "response": "openProducerResponse"},
+  "POST /v1/produce": {"request": "produceRequest", "response": "produceResponse"},
+  "GET /v1/fetch": {"request": "fetchRequest", "response": "fetchResponse"},
+  "POST /v1/groups/{group}/join": {"request": "joinGroupRequest", "response": "joinGroupResponse"},
+  "POST /v1/groups/{group}/sync": {"request": "syncGroupRequest", "response": "syncGroupResponse"},
+  "POST /v1/groups/{group}/heartbeat": {"request": "heartbeatRequest", "response": "heartbeatResponse"},
+  "POST /v1/groups/{group}/leave": {"request": "leaveGroupRequest", "response": "leaveGroupResponse"},
+  "POST /v1/groups/{group}/offsets/commit": {"request": "commitOffsetsRequest", "response": "commitOffsetsResponse"},
+  "GET /v1/groups/{group}/offsets": {"request": "getOffsetsRequest", "response": "getOffsetsResponse"}
+}

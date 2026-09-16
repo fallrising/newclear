@@ -1,0 +1,10 @@
+{
+  "request_id": "example-request",
+  "error": {
+    "code": "REQUEST_TIMEOUT",
+    "message": "The append outcome is unknown; retry the identical batch.",
+    "retryable": true,
+    "outcome": "unknown",
+    "details": {"leader_id": 2, "leader_term": "8"}
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "cluster_id": "mkfk-dev",
+  "brokers": [
+    {"id": 1, "client_addr": "127.0.0.1:19092", "peer_addr": "127.0.0.1:19093", "admin_addr": "127.0.0.1:19094"},
+    {"id": 2, "client_addr": "127.0.0.1:29092", "peer_addr": "127.0.0.1:29093", "admin_addr": "127.0.0.1:29094"},
+    {"id": 3, "client_addr": "127.0.0.1:39092", "peer_addr": "127.0.0.1:39093", "admin_addr": "127.0.0.1:39094"}
+  ],
+  "topics": [
+    {
+      "name": "events",
+      "internal": false,
+      "partitions": [
+        {"id": 0, "replicas": [1, 2, 3], "min_isr": 2},
+        {"id": 1, "replicas": [1, 2, 3], "min_isr": 2},
+        {"id": 2, "replicas": [1, 2, 3], "min_isr": 2}
+      ]
+    },
+    {
+      "name": "__mkfk_groups",
+      "internal": true,
+      "partitions": [
+        {"id": 0, "replicas": [1, 2, 3], "min_isr": 2}
+      ]
+    }
+  ]
+}

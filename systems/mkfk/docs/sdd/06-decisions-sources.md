@@ -79,6 +79,12 @@ Status: accepted for baseline。
 
 完整交易須另行處理 transaction coordinator、prepare/commit/abort markers、last stable offset、read isolation、offsets 與 outputs 的原子提交、timeout recovery 與 fencing。本案不提供虛假的 `begin_transaction` API。[S6]
 
+### ADR-007 — M0 工具鏈與 durability 驗收平台
+
+Status: accepted；完整決策見 [ADR-007](../adr/007-m0-toolchain-platform.md)。
+
+M0 固定 Go 1.27.1；durability 的最低驗收環境為 Linux 5.10+ 與本機 ext4/XFS，且必須提供 file/directory fsync、同 filesystem atomic rename 與 advisory lock。tmpfs 可跑非 durability unit tests，但不能作持久性證據；其他 filesystem 需另附平台驗證。JSON Schema validator 僅作 test dependency，production contract 維持標準庫實作。
+
 ## 4. 來源目錄
 
 來源主要用來校驗概念；本案具體數字、格式、HTTP endpoints、milestones、測試 IDs 都是原創設計，不是來源的既成實作。

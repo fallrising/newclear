@@ -195,6 +195,22 @@ func (node *Node) ProposeData(timestamp uint64, records []storage.DataRecord) (u
 	return index, ready, err
 }
 
+func (node *Node) ProposeProducerData(timestamp uint64, metadata storage.ProducerMetadata, records []storage.DataRecord) (uint64, Ready, error) {
+	if node.role != Leader {
+		return 0, Ready{}, ErrNotLeader
+	}
+	if !node.leaderReady {
+		return 0, Ready{}, ErrLeaderNotReady
+	}
+	index := node.log.LastLogIndex() + 1
+	frame, err := storage.NewProducerDataFrame(index, node.term, node.log.LEO(), timestamp, metadata, records)
+	if err != nil {
+		return 0, Ready{}, err
+	}
+	ready, err := node.proposeFrame(frame)
+	return index, ready, err
+}
+
 func (node *Node) ProposeFrame(kind storage.EntryKind, payload []byte) (uint64, Ready, error) {
 	if node.role != Leader {
 		return 0, Ready{}, ErrNotLeader

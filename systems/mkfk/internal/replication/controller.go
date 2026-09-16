@@ -61,16 +61,16 @@ func (config Config) validate() (Config, error) {
 		return Config{}, errors.New("lag window must be positive")
 	}
 	if config.MaxPendingOperations == 0 {
-		config.MaxPendingOperations = 1024
+		config.MaxPendingOperations = 256
 	}
 	if config.MaxPendingBytes == 0 {
-		config.MaxPendingBytes = 64 << 20
+		config.MaxPendingBytes = 16 << 20
 	}
 	if config.MaxPendingOperations < 1 || config.MaxPendingBytes < 1 {
 		return Config{}, errors.New("pending caps must be positive")
 	}
 	if config.MaxPendingFetches == 0 {
-		config.MaxPendingFetches = 1024
+		config.MaxPendingFetches = 256
 	}
 	if config.MaxPendingFetches < 1 {
 		return Config{}, errors.New("pending fetch cap must be positive")
@@ -153,6 +153,7 @@ type Controller struct {
 	pendingReads      map[string]struct{}
 	pendingOperations int
 	pendingBytes      int64
+	recoveredApplied  []storage.Frame
 }
 
 func NewController(node *raft.Node, log RecordLog, config Config, now time.Time) (*Controller, error) {
@@ -182,7 +183,9 @@ func NewController(node *raft.Node, log RecordLog, config Config, now time.Time)
 	if snapshot.Role == raft.Leader {
 		controller.resetLeaderTerm(snapshot, now)
 	}
-	if _, err := controller.apply(node.RecoveredApplied()); err != nil {
+	recovered := node.RecoveredApplied()
+	controller.recoveredApplied = cloneFrames(recovered)
+	if _, err := controller.apply(recovered); err != nil {
 		return nil, err
 	}
 	return controller, nil
@@ -280,6 +283,18 @@ func (controller *Controller) AdvanceTime(now time.Time) []uint32 {
 }
 
 func (controller *Controller) ProposeData(operationID, requestID string, timestamp uint64, records []storage.DataRecord, now time.Time) (uint64, raft.Ready, []GateResult, error) {
+	return controller.proposeData(operationID, requestID, records, now, func() (uint64, raft.Ready, error) {
+		return controller.node.ProposeData(timestamp, records)
+	})
+}
+
+func (controller *Controller) ProposeProducerData(operationID, requestID string, timestamp uint64, metadata storage.ProducerMetadata, records []storage.DataRecord, now time.Time) (uint64, raft.Ready, []GateResult, error) {
+	return controller.proposeData(operationID, requestID, records, now, func() (uint64, raft.Ready, error) {
+		return controller.node.ProposeProducerData(timestamp, metadata, records)
+	})
+}
+
+func (controller *Controller) proposeData(operationID, requestID string, records []storage.DataRecord, now time.Time, propose func() (uint64, raft.Ready, error)) (uint64, raft.Ready, []GateResult, error) {
 	if operationID == "" || requestID == "" {
 		return 0, raft.Ready{}, nil, errors.New("operation and request IDs are required")
 	}
@@ -308,7 +323,7 @@ func (controller *Controller) ProposeData(operationID, requestID string, timesta
 		return 0, raft.Ready{}, nil, errors.New("request ID already exists")
 	}
 	baseOffset := controller.log.LEO()
-	index, ready, err := controller.node.ProposeData(timestamp, records)
+	index, ready, err := propose()
 	if err != nil {
 		return 0, raft.Ready{}, nil, err
 	}
@@ -327,6 +342,34 @@ func (controller *Controller) ProposeData(operationID, requestID string, timesta
 	}}
 	results, handleErr := controller.HandleReady(ready, now)
 	return index, ready, results, handleErr
+}
+
+// AwaitExistingData creates an acks=all gate for a committed producer batch
+// reconstructed from the WAL. It never appends and therefore lets M5 retries
+// survive leader and process restart without weakening the captured ISR rule.
+func (controller *Controller) AwaitExistingData(operationID, requestID string, index, baseOffset, lastOffset, entryTerm uint64, bytes int64) ([]GateResult, error) {
+	existingOperation := controller.operations[operationID]
+	if existingOperation == nil {
+		if len(controller.operations) >= controller.config.MaxOperationHistory {
+			return nil, ErrBackpressure
+		}
+		entry, err := controller.node.Entry(index)
+		if err != nil || entry.Kind != storage.KindData || entry.Term != entryTerm {
+			return nil, errors.New("existing DATA entry is not present in the Raft log")
+		}
+		details, err := storage.InspectDataFrame(entry)
+		if err != nil || details.BaseOffset != baseOffset || details.EndOffset == 0 || details.EndOffset-1 != lastOffset {
+			return nil, errors.New("existing DATA entry offsets do not match the operation")
+		}
+		existingOperation = &operation{
+			id: operationID, index: index, baseOffset: baseOffset, lastOffset: lastOffset,
+			entryTerm: entryTerm, bytes: bytes,
+		}
+		controller.operations[operationID] = existingOperation
+	} else if existingOperation.index != index || existingOperation.baseOffset != baseOffset || existingOperation.lastOffset != lastOffset || existingOperation.entryTerm != entryTerm || existingOperation.bytes != bytes {
+		return nil, errors.New("operation identity refers to different DATA metadata")
+	}
+	return controller.retry(existingOperation, requestID)
 }
 
 func (controller *Controller) Retry(operationID, requestID string) ([]GateResult, error) {
@@ -456,6 +499,15 @@ func (controller *Controller) PendingFetches() int {
 	return len(controller.pendingReads) + len(controller.readBarriers)
 }
 
+// RecoveredApplied returns the committed prefix consumed during construction
+// exactly once so another deterministic state machine can replay the same
+// durable entries.
+func (controller *Controller) RecoveredApplied() []storage.Frame {
+	result := cloneFrames(controller.recoveredApplied)
+	controller.recoveredApplied = nil
+	return result
+}
+
 func (controller *Controller) resetLeaderTerm(snapshot raft.Snapshot, now time.Time) {
 	controller.term = snapshot.Term
 	controller.role = raft.Leader
@@ -552,6 +604,15 @@ func recordBytes(records []storage.DataRecord) int64 {
 
 func cloneGateResult(result GateResult) GateResult {
 	result.CapturedISR = append([]uint32(nil), result.CapturedISR...)
+	return result
+}
+
+func cloneFrames(frames []storage.Frame) []storage.Frame {
+	result := make([]storage.Frame, len(frames))
+	for index, frame := range frames {
+		result[index] = frame
+		result[index].Payload = append([]byte(nil), frame.Payload...)
+	}
 	return result
 }
 

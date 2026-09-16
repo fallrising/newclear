@@ -22,6 +22,7 @@
 | [`systems/snail`](systems/snail/) | RESP2 相容 in-memory data server,聚焦 C10K/C100K/io_uring | Rust |
 | [`systems/ojbquay`](systems/ojbquay/) | Kafka-based enterprise messaging control/data plane | Java, Kafka, gRPC |
 | [`systems/wotar`](systems/wotar/) | MQTT application-layer E2EE client 與 protocol | Python |
+| [`systems/mkfk`](systems/mkfk/) | Kafka-inspired distributed log:partition WAL、Raft、ISR、冪等 producer、consumer groups（SDD baseline，尚未實作） | Go（規劃） |
 
 ### 平台與應用
 

@@ -181,6 +181,32 @@ type StorageManifest struct {
 	TopologySHA256       string `json:"topology_sha256"`
 }
 
+func ParseStorageManifest(data []byte) (StorageManifest, error) {
+	if len(data) > 16<<10 {
+		return StorageManifest{}, errors.New("storage manifest exceeds 16 KiB")
+	}
+	var manifest StorageManifest
+	if err := jsonstrict.Decode(data, &manifest); err != nil {
+		return StorageManifest{}, err
+	}
+	if manifest.StorageFormatVersion != StorageFormatVersion {
+		return StorageManifest{}, fmt.Errorf("unsupported storage format version %d", manifest.StorageFormatVersion)
+	}
+	if err := ValidateToken("cluster_id", manifest.ClusterID); err != nil {
+		return StorageManifest{}, err
+	}
+	if manifest.NodeID == 0 {
+		return StorageManifest{}, errors.New("storage node ID must be positive")
+	}
+	if len(manifest.TopologySHA256) != sha256.Size*2 {
+		return StorageManifest{}, errors.New("topology_sha256 must contain 64 hex characters")
+	}
+	if _, err := hex.DecodeString(manifest.TopologySHA256); err != nil {
+		return StorageManifest{}, errors.New("topology_sha256 is not hexadecimal")
+	}
+	return manifest, nil
+}
+
 func (m StorageManifest) ValidateAgainst(nodeID uint32, topologyBytes []byte) error {
 	if m.StorageFormatVersion != StorageFormatVersion {
 		return errors.New("storage format version mismatch")

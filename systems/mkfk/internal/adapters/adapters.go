@@ -54,6 +54,7 @@ type OpenOptions struct {
 
 type FileSystem interface {
 	Open(string, OpenOptions) (DurableFile, error)
+	CreateTemp(string, string) (DurableFile, string, error)
 	MkdirAll(string, fs.FileMode) error
 	ReadDir(string) ([]fs.DirEntry, error)
 	Rename(string, string) error

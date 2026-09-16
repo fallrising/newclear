@@ -54,6 +54,16 @@ func (f Frame) Validate() error {
 	if !json.Valid(f.Payload) {
 		return errors.New("payload must be valid UTF-8 JSON")
 	}
+	if f.Kind == KindData {
+		if _, err := decodeDataPayload(f.Payload, nil); err != nil {
+			return fmt.Errorf("DATA payload: %w", err)
+		}
+	}
+	if f.Kind == KindNOOP {
+		if err := validateNOOPPayload(f.Payload); err != nil {
+			return fmt.Errorf("NOOP payload: %w", err)
+		}
+	}
 	if len(f.Payload) > MaxWALFrameBytes-frameFixedBytes {
 		return fmt.Errorf("payload exceeds %d-byte frame limit", MaxWALFrameBytes)
 	}

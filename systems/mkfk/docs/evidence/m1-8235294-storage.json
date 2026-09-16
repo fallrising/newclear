@@ -1,0 +1,59 @@
+{
+  "milestone": "M1",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "8235294",
+  "evidence_scope": "uncommitted M1 working tree based on source_commit",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64 x86_64",
+    "filesystem_probe": "ext2/ext3",
+    "durability_interpretation": "File.Sync and directory Sync behavior plus SIGKILL restart were exercised; this is not physical power-loss evidence"
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 and M1 packages passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "all schema, contract, storage, process-fault, and regression tests passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 and M1 test packages passed under the race detector"
+    }
+  ],
+  "acceptance": {
+    "ST-01": "three multi-record batches receive contiguous offsets and read back byte-for-byte",
+    "ST-02": "null key, empty key/value, binary data, 1 MiB boundary, oversized rejection, and first-record read budget are verified",
+    "ST-03": "a child process reports append sync completion, is killed with SIGKILL, and both records survive restart",
+    "ST-04": "active-tail cuts at bytes 1, 3, 4, 16, 120, and 240 are truncated to the last complete committed-safe frame",
+    "ST-05": "a complete CRC-corrupt frame and a WAL shorter than durable commit_index both fail closed",
+    "OP-02": "reformat of non-empty storage, concurrent data-dir open, wrong node ID, wrong exact topology bytes, and unknown partition are rejected"
+  },
+  "fault_injection_results": [
+    "WriteAt limited to seven bytes per call is completed by write-all before sync.",
+    "Injected WAL sync failure returns an error and quarantines the partition from subsequent append.",
+    "A sync-failed complete tail may be discovered on restart but was never acknowledged by the failed call.",
+    "Hardstate vote and commit floor survive close/reopen; same-term vote change and clearing are rejected.",
+    "Incomplete active tails are repaired only when the remaining valid prefix is at or above durable commit_index."
+  ],
+  "output_location": "This scrubbed evidence manifest; test output was emitted by the commands above and no large artifact was produced.",
+  "seeds": [],
+  "limitations": [
+    "M1 uses exactly one WAL segment named 00000000000000000001.wal and performs in-memory local-read indexing.",
+    "Sparse indexes, segment rotation, read-view lifecycle, and suffix truncation belong to M2.",
+    "No network broker, Raft replication, ISR, HW, public API, producer dedup, or group coordinator exists.",
+    "SIGKILL evidence does not establish physical power-loss behavior on every storage device or filesystem."
+  ],
+  "next_task": "M2: implement segment rotation, sparse offset indexes, bounded indexed seeks, index rebuild, stable read views, and committed-safe suffix truncation; verify ST-06 through ST-09 without starting Raft."
+}

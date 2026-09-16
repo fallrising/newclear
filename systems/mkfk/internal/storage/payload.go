@@ -46,6 +46,21 @@ func newStandaloneDataPayload(baseOffset, timestamp uint64, records []DataRecord
 	}
 }
 
+// NewStandaloneDataFrame builds the non-idempotent DATA entry used by the M1
+// through M4 storage and Raft fixtures. It is not a public producer protocol:
+// M5 replaces this path with durable producer identity and sequence fields.
+func NewStandaloneDataFrame(logIndex, term, baseOffset, timestamp uint64, records []DataRecord) (Frame, error) {
+	payload, err := encodeDataPayload(newStandaloneDataPayload(baseOffset, timestamp, records))
+	if err != nil {
+		return Frame{}, err
+	}
+	frame := Frame{Kind: KindData, LogIndex: logIndex, Term: term, Payload: payload}
+	if err := frame.Validate(); err != nil {
+		return Frame{}, err
+	}
+	return frame, nil
+}
+
 func (payload DataPayload) validate(expectedBaseOffset *uint64) (uint64, error) {
 	baseOffset, err := parseCanonicalUint64(payload.BaseOffset)
 	if err != nil {

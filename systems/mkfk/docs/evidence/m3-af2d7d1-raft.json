@@ -1,0 +1,79 @@
+{
+  "milestone": "M3",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "af2d7d1",
+  "evidence_scope": "uncommitted M3 working tree based on source_commit",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64 x86_64",
+    "filesystem_probe": "ext2/ext3",
+    "process_model": "three independent test processes, each holding its own locked and formatted data directory"
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 through M3 packages passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "all storage regressions, Raft acceptance tests, deterministic models, and subprocess tests passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 through M3 packages and the three-process driver passed under the race detector"
+    }
+  ],
+  "acceptance": {
+    "RP-01": "same-term duplicate vote for one candidate is idempotent, a competing candidate is rejected, and model checks allow at most one leader per term",
+    "RP-02": "injected hardstate sync failure emits no vote response; a synced vote survives node reconstruction and fences a competing same-term candidate",
+    "RP-03": "RequestVote freshness uses lexicographic last term/index, rejecting a larger-index candidate whose last term is older",
+    "RP-04": "prev-term conflict hints drive uncommitted suffix repair; duplicate entries are idempotent and same index/term with different bytes is corruption",
+    "RP-05": "a majority-held old-term entry does not advance commit until the new leader's current-term NOOP reaches durable quorum and is applied",
+    "RP-06": "after isolating the old leader, the other two voters elect a higher-term ready leader; the old leader cannot commit a local proposal or complete ReadIndex",
+    "RP-07": "three real processes retain committed DATA across leader SIGKILL, majority failover, continued writes, all-process SIGKILL/restart, replay, and a new NOOP barrier; a single RF3 voter cannot elect itself"
+  },
+  "model_testing": {
+    "seeds": 100,
+    "events_per_seed": 1000,
+    "total_events": 100000,
+    "actions": [
+      "tick",
+      "deliver random queued RPC",
+      "drop random queued RPC",
+      "campaign",
+      "restart with durable state",
+      "leader NOOP proposal"
+    ],
+    "per_event_assertions": [
+      "at most one observed leader per term",
+      "commit_index <= last_log_index",
+      "last_applied == durable commit_index",
+      "all pairs of nodes have byte-identical overlapping committed prefixes"
+    ]
+  },
+  "additional_results": [
+    "RF1 commits and applies its leader NOOP and later proposal using a one-voter quorum.",
+    "Follower leader_commit is capped at the prefix verified by that AppendEntries RPC, so an unverified local extra tail is not committed by a heartbeat.",
+    "ReadIndex completes on a healthy leader only after a current-term majority response and remains pending on an isolated old leader.",
+    "Election timeout selection uses an injected random source for the specified 600-1200 ms range at 100 ms ticks.",
+    "Every M0-M2 format, storage, crash recovery, sparse-index, and truncation regression remains in the full gate."
+  ],
+  "output_location": "This scrubbed evidence manifest; no payload bytes, credentials, or large process artifacts are retained.",
+  "seeds": "0 through 99",
+  "limitations": [
+    "The M3 Node serializes durable-log calls inside Step/Tick/proposal handling; it does not yet pipeline parallel disk operations.",
+    "The subprocess driver is a test harness, not a long-running cmd/mkfk broker or public API server.",
+    "M3 has no ISR observation, HW exposure, captured acknowledgement set, min_isr admission, or public acks=all success response; these belong to M4.",
+    "Producer identity, retry deduplication, consumer groups, retention, snapshots, and Kafka wire compatibility do not exist."
+  ],
+  "next_task": "M4: implement per-term follower catch-up/ISR observation, committed DATA HW mapping, captured-A acknowledgement gates, unknown-outcome timeouts, and bounded committed-prefix fetch; verify RP-08 through RP-11 and relevant OP-03/OP-04 cases."
+}

@@ -2,7 +2,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0 contracts / testkit、M1 durable partition log 與 M2 segmented sparse-index storage 已驗證；M3–M7 尚未實作。** 現有程式提供本機 segmented WAL 的顯式 format、鎖定、durable append、bounded indexed read、hardstate、crash recovery 與 committed-safe suffix truncation；目前仍不是可啟動 broker，也不宣稱 replicated durability、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M3 已驗證；M4–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read，以及 RF1/RF3 per-partition Raft 的選舉、複製、衝突修復、NOOP leader barrier 與 ReadIndex；目前仍沒有可啟動的 broker/API server，也不宣稱 M4 `acks=all` 語意、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -39,7 +39,7 @@ make test
 make test-race
 ```
 
-目前刻意沒有 `cmd/mkfk`、HTTP handler、分散式 runtime 或固定成功 stub；這些必須依 milestone 驗收順序加入。
+目前刻意沒有 `cmd/mkfk`、HTTP handler、長時間執行的 broker process 或固定成功 stub；這些必須依 milestone 驗收順序加入。
 
 ## M1 durable storage
 
@@ -64,7 +64,20 @@ M1 只保證成功 local append 已通過本機 sync。它沒有 Raft quorum、I
 - read lock 是 stable read-view lease；close/truncate 不會在 reader 使用 segment handle 時關閉或重用它。
 - `TruncateSuffix` 只能移除 `commit_index` 之後的 suffix，並同步重算 LEO、segment catalog 與 anchors。
 
-M2 仍沒有 retention/snapshot，也不會自行觸發 truncate；只有未來 M3 的 Raft conflict reconciliation 能依驗證後的 prev index/term 呼叫它。
+M2 仍沒有 retention/snapshot，也不會自行觸發 truncate；M3 Raft 只在驗證 prev index/term 後的 conflict reconciliation 呼叫它。
+
+## M3 per-partition Raft
+
+`internal/raft` 現在提供 deterministic `Step` / `Tick` / `Ready` 介面：
+
+- 固定 RF1/RF3 voters，quorum 純由 voters 計算，不受 ISR 影響；
+- RequestVote 以 `(last_term,last_index)` 比較 log freshness，vote/term 先 sync hardstate 才產生回覆；
+- AppendEntries 驗證 identity、prev index/term、frame cap 與同 index/term 內容，只截斷 uncommitted conflict；
+- follower commit 上限是該 RPC 證實的 matching prefix，不會用 local extra tail 推進；
+- leader 只能以多數已持久化的 current-term entry 推進 commit，並必須先 commit/apply NOOP 才 ready；
+- ReadIndex 需要 current-term majority heartbeat confirmation，被隔離的舊 leader 無法完成讀取。
+
+M3 的 traffic proposal 僅是測試用 non-idempotent DATA 入口。ISR/HW、`acks=all` captured set、public producer success 與 follower lag 屬於 M4；目前不得將 local proposal 或 Raft append 直接當成對外成功回覆。
 
 ## 範圍提示
 

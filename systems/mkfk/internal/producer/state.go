@@ -213,6 +213,9 @@ func (state *State) applyFence(frame storage.Frame) error {
 	if err != nil {
 		return err
 	}
+	if err := protocol.ValidateProducerID(command.ProducerID); err != nil {
+		return err
+	}
 	producer := state.producers[command.ProducerID]
 	if producer == nil {
 		if len(state.producers) >= state.config.MaxProducerIDs {
@@ -247,6 +250,9 @@ func (state *State) applyData(frame storage.Frame) error {
 		return nil
 	}
 	metadata := details.Producer
+	if err := protocol.ValidateProducerID(metadata.ProducerID); err != nil {
+		return err
+	}
 	producer := state.producers[metadata.ProducerID]
 	if producer == nil || producer.Epoch != metadata.Epoch {
 		return errors.New("committed DATA references an unopened or fenced producer epoch")

@@ -16,6 +16,8 @@ import (
 	"github.com/fallrising/newclear/systems/mkfk/pkg/client"
 )
 
+var commandHTTPClient client.HTTPDoer
+
 func main() {
 	if err := run(os.Args[1:]); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
@@ -95,6 +97,9 @@ func runOpen(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	if response.ProducerID != common.producerID {
+		return errors.New("OpenProducer response producer_id does not match the request")
+	}
 	state := client.LedgerState{
 		Version: client.LedgerVersion, ClusterID: common.clusterID, ProducerID: common.producerID,
 		Topic: common.topic, Partition: uint32(common.partition), Epoch: uint64(response.Epoch), NextSequence: 0,
@@ -164,7 +169,7 @@ func (common commonFlags) openResources() (*client.FileLedger, *client.HTTPTrans
 	if err != nil {
 		return nil, nil, err
 	}
-	transport, err := client.NewHTTPTransport(nil, endpoints, uint32(common.brokerID))
+	transport, err := client.NewHTTPTransport(commandHTTPClient, endpoints, uint32(common.brokerID))
 	if err != nil {
 		return nil, nil, err
 	}

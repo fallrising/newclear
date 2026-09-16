@@ -1,0 +1,81 @@
+{
+  "milestone": "M5",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "002e6cd",
+  "evidence_scope": "uncommitted M5 completion tree based on source_commit; durable producer core was previously pushed as b1004c0",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64",
+    "filesystem_probe": "ext2/ext3",
+    "profiles": [
+      "deterministic in-memory RF3 Raft, ISR, and producer state",
+      "real RF1 and RF3 segmented WAL close/reopen and truncation fixtures",
+      "strict HTTP adapter, bounded Go retry client, real atomic file ledger, and fresh CLI-run recovery"
+    ]
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 through M5 packages and commands passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "all storage, Raft, replication, producer, HTTP, client, ledger, CLI, model, and subprocess tests passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 through M5 packages, command tests, and subprocess tests passed under the race detector"
+    }
+  ],
+  "acceptance": {
+    "PR-01": "after one committed DATA batch, 100 exact identity/epoch/sequence/digest retries all return offsets [0,0] and the Raft last index never changes",
+    "PR-02": "an RF3 client ignores the original quorum-commit completion, retries the identical batch, receives duplicate=true with the original offsets, and appends no DATA",
+    "PR-03": "a future RF3 leader applies producer state from the committed log, wins a higher-term election after the old leader is isolated, and deduplicates the retry without relying on old-leader RAM; a real RF1 close/reopen fixture provides process-restart replay coverage",
+    "PR-04": "same sequence with different count/digest, sequence gaps, incomplete overlaps, pipelining past an unresolved batch, fenced epochs, and retries older than the 64-result cache return typed errors before append",
+    "PR-05": "the same OpenProducer request_id and parameters survive reply loss and restart without increasing epoch; an explicit new CAS advances exactly once and fences the old epoch",
+    "PR-06": "a real RF3 WAL with committed epoch 0 plus uncommitted DATA and FENCE replays only the committed state; suffix truncation removes provisional LEO without changing epoch or next sequence",
+    "PR-07": "pending-ledger-save, send/reply-loss, broker-success-before-ledger-update, and restart-resume cutpoints preserve the exact request ID, partition, epoch, sequence, and records; a fresh mkfkctl run resumes the durable pending batch before considering new command input",
+    "OP-01": "duplicate-key/unknown-field JSON, invalid base64, unsupported acknowledgements, oversized bodies, and ledger symlink destinations are rejected without reaching the producer backend or reflecting payload bytes",
+    "OP-04": "client retries are bounded by both total deadline and attempt count, keep one pending identity, use jittered capped backoff, and accept NOT_LEADER hints only for broker IDs in the configured static endpoint allowlist"
+  },
+  "durable_state": {
+    "producer_ids_per_partition": 1024,
+    "committed_batch_results_per_producer": 64,
+    "truth": "FENCE and DATA entries in the committed applied Raft prefix",
+    "data_binding": "producer ID, epoch, first sequence, canonical batch digest, offsets, timestamp, and records share one DATA frame; replay recomputes and verifies the digest",
+    "speculative_rule": "pending operations may reserve memory, but formal epoch/sequence/cache state changes only during committed apply"
+  },
+  "client_retry": {
+    "default_delivery_deadline_ms": 5000,
+    "default_attempt_cap": 8,
+    "base_backoff_ms": 50,
+    "maximum_backoff_ms": 1000,
+    "jitter": "uniform in the upper half of the current capped exponential backoff",
+    "ledger_order": "save pending and sync before send; save next_sequence and clear pending only after a validated success response"
+  },
+  "additional_results": [
+    "Identical pending DATA requests coalesce on one log entry and one acknowledgement gate; conflicting bytes at the same pending sequence return SEQUENCE_CONFLICT.",
+    "OpenProducer FENCE entries require Raft quorum commit/apply but do not depend on the user DATA ISR acknowledgement gate.",
+    "Cached duplicate retries still capture the current ISR and wait on the existing committed DATA index, preserving M4 acks=all semantics after leader or process restart.",
+    "The HTTP adapter reports post-append pending operations as REQUEST_TIMEOUT with outcome=unknown; it never converts timeout into a not-applied claim.",
+    "Every M0-M4 storage, Raft, ISR/HW, 100x1000-event, and three-process regression remains in the full gate."
+  ],
+  "output_location": "This scrubbed evidence manifest; no record payloads, producer IDs from users, credentials, ledger contents, or large process artifacts are retained.",
+  "limitations": [
+    "There is not yet a long-running cmd/mkfk broker that wires the HTTP adapter, partition actors, peer transport, metadata endpoint, and lifecycle together; M5 verifies those producer-facing components in-process.",
+    "The file ledger is intended for one CLI producer process at a time; callers must not share one ledger path concurrently between processes.",
+    "Consumer groups and durable group offsets belong to M6 and do not exist yet.",
+    "Idempotence is partition-scoped transport deduplication, not cross-partition transactions or external side-effect exactly-once.",
+    "Retention, snapshots, dynamic membership, authentication, and Kafka wire compatibility do not exist."
+  ],
+  "next_task": "M6: implement committed group membership/generation/assignment commands, eager revoke/sync, heartbeat expiry, owner-fenced atomic offset commits, replay, coordinator failover, and group client behavior."
+}

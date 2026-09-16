@@ -120,6 +120,13 @@ func (partition *Partition) Open(request protocol.OpenProducerRequest, now time.
 	if err := partition.validateRoute(request.Topic, request.Partition); err != nil {
 		return OpenResult{}, raft.Ready{}, nil, err
 	}
+	snapshot := partition.node.Snapshot()
+	if snapshot.Role != raft.Leader {
+		return OpenResult{}, raft.Ready{}, nil, raft.ErrNotLeader
+	}
+	if !snapshot.LeaderReady {
+		return OpenResult{}, raft.Ready{}, nil, raft.ErrLeaderNotReady
+	}
 	expectedEpoch := int64(request.ExpectedEpoch)
 	if pending := partition.pending[request.ProducerID]; pending != nil {
 		if pending.kind == pendingOpen && pending.openRequestID == request.RequestID {
@@ -144,7 +151,6 @@ func (partition *Partition) Open(request protocol.OpenProducerRequest, now time.
 	if partition.newProducerReservations() >= partition.state.config.MaxProducerIDs {
 		return OpenResult{}, raft.Ready{}, nil, stateError(CodeProducerLimit, "producer ID limit is exhausted")
 	}
-	snapshot := partition.node.Snapshot()
 	frame, err := storage.NewFenceFrame(snapshot.LastLogIndex+1, snapshot.Term, storage.FenceCommand{
 		ProducerID: request.ProducerID, ExpectedEpoch: expectedEpoch,
 		NewEpoch: decision.NewEpoch, RequestID: request.RequestID,
@@ -202,7 +208,10 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 				return ProduceResult{}, raft.Ready{}, nil, retryErr
 			}
 			pending.gateRequestID = gateRequestID
-			completions := partition.completeGates(gateResults)
+			completions, err := partition.completeGates(gateResults)
+			if err != nil {
+				return ProduceResult{}, raft.Ready{}, nil, err
+			}
 			if result, ok := produceCompletion(completions, requestID); ok {
 				return result, raft.Ready{LeaderReady: partition.node.Snapshot().LeaderReady}, completions, nil
 			}
@@ -238,7 +247,10 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 			delete(partition.pending, request.ProducerID)
 			return ProduceResult{}, raft.Ready{}, nil, err
 		}
-		completions := partition.completeGates(gateResults)
+		completions, err := partition.completeGates(gateResults)
+		if err != nil {
+			return ProduceResult{}, raft.Ready{}, nil, err
+		}
 		if result, ok := produceCompletion(completions, requestID); ok {
 			return result, raft.Ready{LeaderReady: partition.node.Snapshot().LeaderReady}, completions, nil
 		}
@@ -271,7 +283,10 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 	if err := partition.applyFrames(ready.Applied); err != nil {
 		return ProduceResult{}, ready, nil, err
 	}
-	completions := partition.completeGates(gateResults)
+	completions, err := partition.completeGates(gateResults)
+	if err != nil {
+		return ProduceResult{}, ready, nil, err
+	}
 	if result, ok := produceCompletion(completions, requestID); ok {
 		return result, ready, completions, nil
 	}
@@ -287,7 +302,11 @@ func (partition *Partition) HandleReady(ready raft.Ready, now time.Time) ([]Comp
 	if err != nil {
 		return nil, err
 	}
-	completions = append(completions, partition.completeGates(gateResults)...)
+	gateCompletions, err := partition.completeGates(gateResults)
+	if err != nil {
+		return nil, err
+	}
+	completions = append(completions, gateCompletions...)
 	lostLeadership := false
 	for _, change := range ready.RoleChanges {
 		lostLeadership = lostLeadership || change.To != raft.Leader
@@ -317,7 +336,7 @@ func (partition *Partition) Timeout(requestID string) ([]Completion, error) {
 		if err != nil {
 			return nil, err
 		}
-		return partition.completeGates([]replication.GateResult{gateResult}), nil
+		return partition.completeGates([]replication.GateResult{gateResult})
 	}
 	return nil, errors.New("request ID is not pending")
 }
@@ -364,7 +383,7 @@ func (partition *Partition) applyFramesWithCompletions(frames []storage.Frame) (
 	return completions, nil
 }
 
-func (partition *Partition) completeGates(results []replication.GateResult) []Completion {
+func (partition *Partition) completeGates(results []replication.GateResult) ([]Completion, error) {
 	completions := make([]Completion, 0)
 	for _, gate := range results {
 		var pending *pendingOperation
@@ -386,6 +405,9 @@ func (partition *Partition) completeGates(results []replication.GateResult) []Co
 		default:
 			continue
 		}
+		if status == OperationSucceeded && !partition.committedBatchMatches(pending) {
+			return nil, errors.New("acknowledgement gate succeeded before matching producer state was applied")
+		}
 		for requestID, duplicate := range pending.waiters {
 			result := partition.pendingProduceResult(pending, requestID)
 			result.Status = status
@@ -401,7 +423,22 @@ func (partition *Partition) completeGates(results []replication.GateResult) []Co
 			pending.gateRequestID = ""
 		}
 	}
-	return completions
+	return completions, nil
+}
+
+func (partition *Partition) committedBatchMatches(pending *pendingOperation) bool {
+	producerState, exists := partition.state.Producer(pending.producerID)
+	if !exists || producerState.Epoch != pending.epoch {
+		return false
+	}
+	for _, batch := range producerState.Batches {
+		if batch.InternalIndex == pending.index && batch.FirstSequence == pending.firstSequence &&
+			batch.RecordCount == pending.recordCount && batch.BatchDigest == pending.digest &&
+			batch.BaseOffset == pending.baseOffset && batch.LastOffset == pending.lastOffset {
+			return true
+		}
+	}
+	return false
 }
 
 func (partition *Partition) failPending(reason string) []Completion {

@@ -30,6 +30,11 @@ func TestM5PR03LeaderFailoverReplaysCommittedDedup(t *testing.T) {
 	if openResult.Status == OperationPending {
 		cluster.heartbeat(t, 1)
 	}
+	openIndex := cluster.nodes[1].Snapshot().LastLogIndex
+	openResult, _, _, err = leader.Open(open, cluster.now)
+	if err != nil || openResult.Status != OperationSucceeded || openResult.Epoch != 0 || cluster.nodes[1].Snapshot().LastLogIndex != openIndex {
+		t.Fatalf("lost OpenProducer reply retry = %#v index=%d/%d err=%v", openResult, cluster.nodes[1].Snapshot().LastLogIndex, openIndex, err)
+	}
 	request := testProduceRequest(t, 0, 0, "survives-leader")
 	result, ready, _, err := leader.Produce("produce-rf3", request, 1, cluster.now)
 	if err != nil {
@@ -40,6 +45,11 @@ func TestM5PR03LeaderFailoverReplaysCommittedDedup(t *testing.T) {
 	cluster.heartbeat(t, 1)
 	if result.Status == OperationOutcomeUnknown {
 		t.Fatalf("healthy produce unexpectedly unknown: %#v", result)
+	}
+	committedIndex := cluster.nodes[1].Snapshot().LastLogIndex
+	result, _, _, err = leader.Produce("produce-after-reply-loss", request, 1, cluster.now)
+	if err != nil || result.Status != OperationSucceeded || !result.Duplicate || result.BaseOffset != 0 || cluster.nodes[1].Snapshot().LastLogIndex != committedIndex {
+		t.Fatalf("quorum commit reply-loss retry = %#v index=%d/%d err=%v", result, cluster.nodes[1].Snapshot().LastLogIndex, committedIndex, err)
 	}
 	state, exists := cluster.partitions[2].State().Producer(testProducerID)
 	if !exists || state.NextSequence != 1 || len(state.Batches) != 1 {

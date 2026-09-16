@@ -370,6 +370,10 @@ func validateProducerID(producerID string) error {
 	return nil
 }
 
+func ValidateProducerID(producerID string) error {
+	return validateProducerID(producerID)
+}
+
 func validateMemberRequest(memberID, requestID string) error {
 	if err := config.ValidateToken("member_id", memberID); err != nil {
 		return err

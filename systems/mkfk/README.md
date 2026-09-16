@@ -2,7 +2,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M4 已驗證；M5–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft，以及 internal ISR/HW/captured-ack controller；目前仍沒有可啟動的 broker/API server、public idempotent producer、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M5 已驗證；M6–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller，以及 durable idempotent producer、HTTP adapter、Go client 與 ledger CLI；目前仍沒有可啟動的 broker server、consumer groups、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -39,7 +39,7 @@ make test
 make test-race
 ```
 
-目前刻意沒有 `cmd/mkfk`、HTTP handler、長時間執行的 broker process 或固定成功 stub；這些必須依 milestone 驗收順序加入。
+目前仍刻意沒有 `cmd/mkfk` 或長時間執行的 broker process。M5 已加入 producer HTTP handler；其他 transport wiring 必須依後續 milestone 驗收順序加入。
 
 ## M1 durable storage
 
@@ -89,7 +89,18 @@ M3 的 traffic proposal 僅是測試用 non-idempotent DATA 入口。M4 controll
 - HW 由 applied DATA 的 exclusive end offset 計算，不把 NOOP/FENCE internal index 當 offset；Fetch 必須先完成 current-term ReadIndex，且只讀 `[offset, HW)`。
 - pending operation、bytes、fetch barriers 與 operation/gate history 都有明確上限；真實 RF1 WAL 重啟會由 committed-prefix replay 恢復 HW。
 
-這仍是 M4 internal integration surface，不是 M5 public producer API。operation identity 尚未持久化，沒有 producer epoch/sequence/digest dedup，也沒有 HTTP handler、client retry loop 或 long-poll broker event loop。
+M4 的 test-only operation identity 不負責 producer 去重；M5 透過下列 committed producer state 與 client ledger 補上跨 reply loss、leader failover 與 process restart 的 retry identity。長輪詢 broker event loop 仍未提供。
+
+## M5 idempotent producer 與 retry client
+
+- `internal/producer`：partition-scoped OpenProducer CAS/FENCE、epoch fencing、single in-flight sequence、pending waiter coalescing、最近 64 個 committed batch result，以及每 partition 1,024 producer ID 上限。
+- producer ID、epoch、first sequence、SHA-256 batch digest 與 records 放在同一 DATA frame；FENCE/DATA 只由 committed applied prefix 更新正式 state，restart 與新 leader 可直接 replay。
+- 相同 committed batch retry 會對原 internal entry 建立新的 M4 captured-ISR gate；100 次重送、RF3 reply loss/failover 及 RF1 filesystem restart 都不會追加第二份 records。
+- `internal/transport`：`POST /v1/producers/open` 與 `POST /v1/produce` 的 6 MiB bounded strict JSON handler、typed HTTP/error outcome；malformed、duplicate-key、unknown-field、bad-base64 與 unsupported acks 都在 backend 前拒絕。
+- `pkg/client`：總 deadline、attempt cap、50 ms–1 s jitter backoff、固定 partition/identity/sequence retry，以及只接受 static allowlist 內 leader hint 的 HTTP transport。
+- `cmd/mkfkctl`：OpenProducer 與 produce 指令；outbound ledger 先以 temp write → file sync → rename → directory sync 保存 pending，成功後才持久更新 next sequence。新 invocation 會先恢復未解決 batch。
+
+M5 的 HTTP handler 是可嵌入 partition actor 的 public boundary，但尚無 `cmd/mkfk` broker 把 client/peer listeners、所有 partitions 與 lifecycle 接成常駐服務；該整合與 consumer groups 分別屬於 M7 與 M6。這裡的冪等只涵蓋同 producer/partition/epoch/sequence 的 transport retry，不是跨 partition transaction 或外部 side-effect exactly-once。
 
 ## 範圍提示
 

@@ -103,6 +103,17 @@ func (node *Node) RecoveredApplied() []storage.Frame {
 	return result
 }
 
+// Entry returns a defensive copy for higher-level operation lookup. Consensus
+// matching still uses the internal durable-log path.
+func (node *Node) Entry(index uint64) (storage.Frame, error) {
+	frame, err := node.readOne(index)
+	if err != nil {
+		return storage.Frame{}, err
+	}
+	frame.Payload = append([]byte(nil), frame.Payload...)
+	return frame, nil
+}
+
 func (node *Node) Tick() (Ready, error) {
 	ready := Ready{LeaderReady: node.leaderReady}
 	if node.role == Leader {

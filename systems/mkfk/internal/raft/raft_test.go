@@ -273,6 +273,48 @@ func TestM3ReadIndexRequiresCurrentTermMajority(t *testing.T) {
 	}
 }
 
+func TestM4DurableAckRequiresExactValidatedAppendRPC(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 200)
+	cluster.enqueueReady(t, 1, cluster.tick(t, 1))
+	heartbeats := cluster.tick(t, 1)
+	var appendMessage Message
+	for _, message := range heartbeats.Messages {
+		if message.To == 2 {
+			appendMessage = message
+			break
+		}
+	}
+	if appendMessage.Append == nil {
+		t.Fatal("leader did not emit heartbeat to node 2")
+	}
+	followerReady, err := cluster.nodes[2].Step(appendMessage)
+	if err != nil || len(followerReady.Messages) != 1 || !followerReady.Messages[0].AppendResp.Success {
+		t.Fatalf("follower response = %#v, %v", followerReady, err)
+	}
+	response := followerReady.Messages[0]
+	unknown := response
+	unknown.RPCID++
+	ready, err := cluster.nodes[1].Step(unknown)
+	if err != nil || len(ready.DurableAcks) != 0 {
+		t.Fatalf("unknown RPC emitted durable ACK: %#v, %v", ready.DurableAcks, err)
+	}
+	ready, err = cluster.nodes[1].Step(response)
+	if err != nil || len(ready.DurableAcks) != 1 {
+		t.Fatalf("validated response durable ACK = %#v, %v", ready.DurableAcks, err)
+	}
+	ack := ready.DurableAcks[0]
+	if ack.PeerID != 2 || ack.Term != response.Term || ack.RPCID != response.RPCID || ack.MatchIndex != response.AppendResp.MatchedIndex {
+		t.Fatalf("durable ACK does not identify the validated response: %#v", ack)
+	}
+	ready, err = cluster.nodes[1].Step(response)
+	if err != nil || len(ready.DurableAcks) != 0 {
+		t.Fatalf("duplicate response emitted a second durable ACK: %#v, %v", ready.DurableAcks, err)
+	}
+}
+
 func TestM3FollowerCommitIsCappedByRPCVerifiedPrefix(t *testing.T) {
 	t.Parallel()
 	log := newMemoryLog()

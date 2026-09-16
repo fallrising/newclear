@@ -61,6 +61,23 @@ func NewStandaloneDataFrame(logIndex, term, baseOffset, timestamp uint64, record
 	return frame, nil
 }
 
+// DataFrameEnd returns the exclusive record offset after a DATA frame. The
+// boolean is false for control entries, which do not advance the user stream.
+func DataFrameEnd(frame Frame) (uint64, bool, error) {
+	if frame.Kind != KindData {
+		return 0, false, nil
+	}
+	payload, err := decodeDataPayload(frame.Payload, nil)
+	if err != nil {
+		return 0, false, err
+	}
+	baseOffset, err := parseCanonicalUint64(payload.BaseOffset)
+	if err != nil {
+		return 0, false, err
+	}
+	return baseOffset + uint64(len(payload.Records)), true, nil
+}
+
 func (payload DataPayload) validate(expectedBaseOffset *uint64) (uint64, error) {
 	baseOffset, err := parseCanonicalUint64(payload.BaseOffset)
 	if err != nil {

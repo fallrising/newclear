@@ -242,6 +242,9 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 		progress.matchIndex = matched
 		progress.nextIndex = matched + 1
 	}
+	ready.DurableAcks = append(ready.DurableAcks, DurableAck{
+		PeerID: message.From, Term: node.term, MatchIndex: matched, RPCID: message.RPCID,
+	})
 	applied, err := node.advanceCommit()
 	if err != nil {
 		return Ready{}, err

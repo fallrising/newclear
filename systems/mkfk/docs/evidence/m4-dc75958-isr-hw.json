@@ -1,0 +1,85 @@
+{
+  "milestone": "M4",
+  "status": "VERIFIED",
+  "date": "2026-09-16",
+  "source_commit": "dc75958",
+  "evidence_scope": "uncommitted M4 working tree based on source_commit",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 5.10.0-33-amd64",
+    "filesystem_probe": "ext2/ext3",
+    "profiles": [
+      "deterministic in-memory RF3 Raft plus replication controller",
+      "real RF1 segmented WAL close/reopen and committed-prefix replay",
+      "M3 three-process RF3 failover/restart regression"
+    ]
+  },
+  "commands": [
+    {
+      "command": "make fmt-check",
+      "exit_code": 0,
+      "result": "all Go files formatted"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "all M0 through M4 packages passed"
+    },
+    {
+      "command": "go test -count=1 ./...",
+      "exit_code": 0,
+      "result": "all storage, Raft, ISR/HW/ack-gate, model, and subprocess tests passed"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "result": "all M0 through M4 packages and subprocess tests passed under the race detector"
+    }
+  ],
+  "acceptance": {
+    "RP-06": "the M3 isolated-old-leader and ReadIndex regression remains in the full gate; M4 Fetch additionally requires a controller-owned current-term ReadState",
+    "RP-08": "partial current-term progress refreshes last_success_at but not last_caught_up_at; a peer that misses its captured target past the lag window is evicted while a caught-up peer remains",
+    "RP-09": "an operation captured A=[1,2,3], committed by quorum after peer 3 stopped, remained pending after ISR shrank to [1,2], timed out outcome-unknown, and then succeeded through a new A=[1,2] gate at the same log index with no append",
+    "RP-10": "NOOP, two-record DATA, and FENCE committed through internal index 3 produce HW=2; a later uncommitted DATA raises LEO but is excluded from Fetch",
+    "RP-11": "an evicted follower cannot rejoin from an old-term ACK or a below-target ACK; a current-term durable ACK at the catch-up target permits re-entry",
+    "OP-03": "min_isr, pending-operation, byte, history, and fetch-waiter caps reject before append or ReadIndex allocation; retries reacquire capacity and one operation cannot accumulate concurrent gates",
+    "OP-04": "test-only operation identity survives reply timeout inside the live controller, preserves index and offsets, and creates a bounded new gate without automatic ack downgrade"
+  },
+  "model_testing": {
+    "seeds": 100,
+    "events_per_seed": 1000,
+    "total_events": 100000,
+    "actions": [
+      "propose DATA through min_isr and captured-A admission",
+      "deliver or drop a random queued Raft RPC",
+      "emit a leader heartbeat",
+      "advance ISR observation time",
+      "timeout a request",
+      "retry an existing operation with a new request gate"
+    ],
+    "per_event_assertions": [
+      "leader remains in its own ISR and ISR stays sorted and bounded by voters",
+      "HW equals the DATA end mapped from the applied internal prefix and never exceeds LEO",
+      "captured ISR, operation index, and terminal gate result never mutate",
+      "every succeeded gate is applied and every captured follower has durable_match_index at or beyond the operation index",
+      "pending operation and byte accounting remains exact and within configured caps"
+    ],
+    "raft_regression": "the independent M3 deterministic model also runs 100 seeds x 1000 events"
+  },
+  "additional_results": [
+    "Raft emits a DurableAck only for a current-term AppendResponse tied to the exact tracked RPC; unknown and duplicate responses emit none.",
+    "RF1 completes the captured-self gate locally, persists DATA and commit state, reconstructs HW=1 after close/reopen, and serves the record only after a new-term leader barrier and ReadIndex.",
+    "ISR is not used for RequestVote eligibility, voter membership, or Raft quorum calculations.",
+    "A timed-out request can be outcome-unknown while its quorum-committed DATA is already visible below HW.",
+    "Every M0-M3 format, storage, crash-recovery, sparse-index, Raft model, and three-process regression remains in the full gate."
+  ],
+  "output_location": "This scrubbed evidence manifest; no payload bytes, credentials, or large process artifacts are retained.",
+  "seeds": "0 through 99",
+  "limitations": [
+    "M4 exposes an internal controller, not a running broker, HTTP Produce/Fetch handler, client retry loop, or long-poll event loop.",
+    "Operation identity and acknowledgement-gate history are memory-resident and bounded; restart-stable producer identity, epoch, sequence, digest, dedup cache, and fencing belong to M5.",
+    "The RF3 M4 fault schedule is deterministic and in-memory; real-process RF3 failover/restart coverage is inherited from M3, while M4 adds real-filesystem RF1 HW recovery.",
+    "Retention, snapshots, consumer groups, transactions, dynamic membership, authentication, and Kafka wire compatibility do not exist."
+  ],
+  "next_task": "M5: implement durable producer identity, epoch fencing, sequence and digest validation, committed replay, bounded dedup results, public Produce API, and retrying Go client/CLI evidence."
+}

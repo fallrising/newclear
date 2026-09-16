@@ -88,6 +88,15 @@ type ReadState struct {
 	Index   uint64
 }
 
+// DurableAck reports a current-term successful AppendEntries response after
+// the core has validated it against the exact RPC that was sent.
+type DurableAck struct {
+	PeerID     uint32
+	Term       uint64
+	MatchIndex uint64
+	RPCID      uint64
+}
+
 // Ready is the deterministic result of one Step, Tick, proposal, or read
 // request. Messages are emitted only after any prerequisite storage sync has
 // completed successfully.
@@ -95,6 +104,7 @@ type Ready struct {
 	Messages    []Message
 	Applied     []storage.Frame
 	ReadStates  []ReadState
+	DurableAcks []DurableAck
 	RoleChanges []RoleChange
 	LeaderReady bool
 }
@@ -103,6 +113,7 @@ func (ready *Ready) merge(other Ready) {
 	ready.Messages = append(ready.Messages, other.Messages...)
 	ready.Applied = append(ready.Applied, other.Applied...)
 	ready.ReadStates = append(ready.ReadStates, other.ReadStates...)
+	ready.DurableAcks = append(ready.DurableAcks, other.DurableAcks...)
 	ready.RoleChanges = append(ready.RoleChanges, other.RoleChanges...)
 	ready.LeaderReady = other.LeaderReady
 }

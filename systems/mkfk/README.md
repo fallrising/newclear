@@ -2,7 +2,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M3 已驗證；M4–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read，以及 RF1/RF3 per-partition Raft 的選舉、複製、衝突修復、NOOP leader barrier 與 ReadIndex；目前仍沒有可啟動的 broker/API server，也不宣稱 M4 `acks=all` 語意、production-ready 或 Kafka client 相容。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M4 已驗證；M5–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft，以及 internal ISR/HW/captured-ack controller；目前仍沒有可啟動的 broker/API server、public idempotent producer、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -77,7 +77,19 @@ M2 仍沒有 retention/snapshot，也不會自行觸發 truncate；M3 Raft 只�
 - leader 只能以多數已持久化的 current-term entry 推進 commit，並必須先 commit/apply NOOP 才 ready；
 - ReadIndex 需要 current-term majority heartbeat confirmation，被隔離的舊 leader 無法完成讀取。
 
-M3 的 traffic proposal 僅是測試用 non-idempotent DATA 入口。ISR/HW、`acks=all` captured set、public producer success 與 follower lag 屬於 M4；目前不得將 local proposal 或 Raft append 直接當成對外成功回覆。
+M3 的 traffic proposal 僅是測試用 non-idempotent DATA 入口。M4 controller 會套用下列 ack gate，但目前仍不得將 local proposal 或 Raft append 直接當成 public producer 成功回覆。
+
+## M4 ISR、HW 與 acknowledgement gate
+
+`internal/replication` 現在提供：
+
+- 每個 leader term 重建的 follower durable progress、catch-up target 與 2 秒 freshness/lag 驅逐；ISR 只是健康觀察，不改 Raft voter set 或 quorum。
+- DATA admission 前檢查 `min_isr` 與 operation/byte cap，並捕捉不可變集合 `A=current ISR`；成功必須同時滿足 Raft commit/apply 及 A 全員在本 term 的 durable match。
+- ISR shrink 不會放寬既有 A。append 後 timeout 是 `outcome_unknown`；internal operation identity 可建立新 gate 等候同一 log entry，而不再次 append。
+- HW 由 applied DATA 的 exclusive end offset 計算，不把 NOOP/FENCE internal index 當 offset；Fetch 必須先完成 current-term ReadIndex，且只讀 `[offset, HW)`。
+- pending operation、bytes、fetch barriers 與 operation/gate history 都有明確上限；真實 RF1 WAL 重啟會由 committed-prefix replay 恢復 HW。
+
+這仍是 M4 internal integration surface，不是 M5 public producer API。operation identity 尚未持久化，沒有 producer epoch/sequence/digest dedup，也沒有 HTTP handler、client retry loop 或 long-poll broker event loop。
 
 ## 範圍提示
 

@@ -124,6 +124,10 @@ execution. P0-A remains Fake-only.
 | T-088 | Independent T-087 review | T-087 | Failed; read-first chronology made otherwise-passing evidence inadmissible | Orchestrator |
 | T-089 | Fresh read-first T-087 integration review | T-087,T-088 | Accepted | Orchestrator |
 | T-090 | Repair pre-push vertical authority review findings | T-089 | Accepted by orchestrator evidence gate | Orchestrator |
+| T-091 | Runnable loopback Fake runtime bootstrap and restart smoke | T-090 | Accepted after T-093 repair by T-094 and orchestrator evidence gate | Independent reviewer |
+| T-092 | Independent T-091 runtime/security/restart review | T-091 | Failed; four security/config repairs required | Orchestrator |
+| T-093 | Repair T-092 root, Origin, token and artifact-confinement findings | T-092 | Accepted by T-094 and orchestrator evidence gate | Independent reviewer |
+| T-094 | Fresh T-091/T-093 runtime security and lifecycle re-review | T-093 | Accepted by orchestrator evidence gate | Orchestrator |
 | T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
@@ -498,16 +502,30 @@ execution. P0-A remains Fake-only.
   full, race, inventory, validator, hash and scope checks with no final required failure or skip.
   T-090 is accepted; polling, restore/backup, browser/provider execution, PR, merge, deployment,
   release and broader G1/G2 remain NotRun or forbidden.
+- 2026-09-16 — T-091 added the first runnable, loopback-only local process around the accepted
+  SQLite, application, Fake-declaration and HTTP boundaries. T-092 report
+  `461629aec0376aecb2b1d9e1c9ce6d8c328f0837fb659673c550dce357cb6d5f` correctly rejected the
+  initial candidate for broad data roots, noncanonical Origin aliases, predictable token material
+  and artifact-root replacement. T-093 repaired exactly those four findings. Fresh independent
+  T-094 report `bce386d1146ecf3c37fa3eef74854a452fd4eff33056b57e8be62e15fd027cac`
+  unconditionally passed the repaired configuration, token, artifact, lifecycle, two-start restart
+  and complete pinned Go gates. The orchestrator separately reran Go 1.27.1 module verification,
+  empty formatting, vet, all seven required runtime tests, full tests, full race, build and module
+  inventory with no required failure or skip. T-091 and T-093 are accepted; T-092 remains immutable
+  FAIL history. This acceptance means the local Fake/SQLite service starts safely and persists
+  command results across restart. It does not claim automatic persistent Fake execution, persisted
+  board/SSE projections, restore/backup, browser/live UI, root CI or real-provider execution.
 
 ## Current development boundary
 
-- T-040 remains in progress after accepted serial children T-043 through T-047. T-047 vertical
+- T-040 remains in progress after accepted serial children T-043 through T-047 and the accepted
+  T-091/T-093 runnable-runtime bootstrap. T-047 vertical
   integration is accepted through T-087/T-089 and the bounded T-090 pre-push authority repair plus
-  orchestrator gates; T-047/T-082/T-084/T-088 remain immutable PARTIAL/FAIL history, and T-083/T-085
-  predecessor changes were independently reviewed by T-086. T-050 reconciliation/restore/handoff
-  is the next pending child. Automatic
-  persistent polling, restore/backup, browser evidence, real providers, Slack/Lark, deployment and
-  release remain NotRun or forbidden.
+  orchestrator gates; T-047/T-082/T-084/T-088/T-092 remain immutable PARTIAL/FAIL history, and
+  T-083/T-085 predecessor changes were independently reviewed by T-086. Before T-050, the next
+  bounded feature slice should supply automatic persistent outbox/Fake execution and persisted
+  projection reads for the runnable process. Restore/backup, browser evidence, real providers,
+  Slack/Lark, deployment and release remain NotRun or forbidden.
 
 ## Resume
 

@@ -1,6 +1,6 @@
 # HAI Taskboard Handoff
 
-Updated: 2026-09-15
+Updated: 2026-09-16
 Authority: `.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
@@ -10,7 +10,8 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
 - Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
-  boundary, T-047/T-087 vertical integration and T-090 pre-push authority repairs are accepted.
+  boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
+  T-091/T-093 runnable local Fake/SQLite bootstrap are accepted.
 - Persistence foundation: T-043/T-054/T-056/T-058/T-061/T-063 is accepted by the fresh T-064
   report-only review. T-062 remains a historical FAIL documenting the allocator/result ordering
   defect; the accepted repair uses commit-deferred transaction-local result references.
@@ -28,6 +29,11 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
   Fresh pre-push T-090 then repaired artifact-verification transaction boundaries, stale-version
   classification and current-subject Approval binding; its report and a separate orchestrator gate
   passed all final required checks.
+- Runtime checkpoint: T-091 made the accepted slices runnable as a loopback-only local process with
+  strict token/Origin authority, private effective-UID-owned storage, descriptor-confined artifacts,
+  graceful shutdown and SQLite restart persistence. T-092 remains historical FAIL evidence for four
+  configuration/confinement findings; T-093 repaired them, and fresh T-094 plus a separate
+  orchestrator Go 1.27.1 full/race/build gate accepted the repaired candidate.
 
 ## Read first
 
@@ -104,19 +110,26 @@ Authority: `.team/PLAN.md` until the explicit dogfood migration
   version conflicts separately from fence rejection, and requires Approval to bind and recompute
   the named current WorkItem/Candidate subject. Current integration SHA-256 is
   `e25e6bad0618edfc083168a7fe0ed798c9beac30677d05820b41cb541c3644b4`.
+- T-092 report SHA-256
+  `461629aec0376aecb2b1d9e1c9ce6d8c328f0837fb659673c550dce357cb6d5f` remains historical FAIL
+  evidence for broad root acceptance, noncanonical Origin aliases, predictable token material and
+  artifact-root replacement. T-093 repaired exactly those findings; fresh T-094 report SHA-256
+  `bce386d1146ecf3c37fa3eef74854a452fd4eff33056b57e8be62e15fd027cac` and the separate
+  orchestrator evidence gate passed configuration attacks, descriptor lifecycle, two-start process
+  restart, exact tests, full tests, race, build and offline module inventory without a required
+  failure or skip.
 - Automatic persistent outbox/worker polling, root CI execution, restore/backup and broader evidence
   remain NotRun; T-047's deterministic manually driven vertical integration does not imply them.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
-- The forward-only reviewer contract is accepted by T-013. Nineteen historical report bytes remain
-  immutable; their recorded 11-pass/8-fail validator compatibility inventory is process metadata,
-  not task acceptance evidence.
+- The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
+  remain immutable process evidence; later repairs and acceptance do not rewrite them.
 
 ## Safe next action
 
-Preserve this accepted checkpoint. Under a later authorized continuation, the next pending serial
-child is T-050 reconciliation/restore/handoff, subject to a fresh bounded envelope and dependency
-audit. Do not begin T-050 or real-provider work from this handoff without that explicit task/review
-boundary.
+Preserve this accepted checkpoint. The next bounded feature slice should add automatic persistent
+outbox/Fake execution and persisted projection reads to the runnable local process, with an explicit
+task/review boundary. T-050 reconciliation/restore/handoff follows only after that remaining T-040
+runtime gap is accepted. Real-provider work remains outside P0-A.
 
 ## Restore invariant
 

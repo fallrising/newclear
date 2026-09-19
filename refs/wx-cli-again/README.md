@@ -16,11 +16,11 @@
 
 | 項目 | 狀態 |
 |------|------|
-| Preservation Fork URL | `fallrising/wx-cli-again` (待建立) |
-| 保存方式 | GitHub Fork（完整 Git 歷史鏡像） |
+| Preservation Fork URL | [`fallrising/wx-cli-again`](https://github.com/fallrising/wx-cli-again) ✓ |
+| 保存方式 | GitHub Fork（完整 Git 歷史鏡像） ✓ |
 | Preserved HEAD SHA | `077a54cbfe679bda963cd038d8440422907fc797` ✓ |
 | 保存日期 | 2026-09-19 |
-| Archive 狀態 | 待設置為 Archive / Read-only |
+| Archive 狀態 | 待手動設置為 Archive / Read-only |
 
 ## Source Tree 驗證
 
@@ -33,16 +33,17 @@
 - Tags: 無
 - Commits: 完整 git 歷史保存
 
-## Limitations
+## Preservation 驗證
 
-⚠️ **重要備註：保存完整性**
+✅ **Fork 完整性已驗證** (2026-09-19 11:20 UTC)
 
-GitHub fork 本身不會自動保存所有的 git refs：
 - ✅ Branches (`main`)：已保存
-- ❌ Tags：無（源 repo 未定義 tags）
-- ✅ Full commit history：已保存
+- ✅ Tags：無（源 repo 未定義 tags）
+- ✅ Full commit history：完整鏡像（1 commit = 077a54cbfe679bda963cd038d8440422907fc797）
+- ✅ Git refs：完整保存
 
-本 fork 預計會完整鏡像源 repo 的所有內容。如果 GitHub fork 機制存在限制，需要驗證。
+**限制說明**：
+- Archive 功能需手動設置（API 限制無法自動化）
 
 ## 取用
 

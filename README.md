@@ -46,7 +46,7 @@
 
 | 路徑 | 說明 |
 | --- | --- |
-| [`refs/`](refs/INDEX.md) | 66 個**別人寫的** repository 的重點與 tag。原本以 fork 形式存放,現改為索引;需要時依指令重新取得。 |
+| [`refs/`](refs/INDEX.md) | 67 個**別人寫的** repository 與 preservation forks 的重點與 tag。原本以 fork 形式存放,現改為索引;需要時依指令重新取得。 |
 
 ## 授權
 

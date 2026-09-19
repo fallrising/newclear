@@ -1,8 +1,8 @@
 # 外部參考 Repository 目錄
 
-盤點日期:2026-09-04 · 共 **66** 個條目
+盤點日期:2026-09-19 · 共 **67** 個條目
 
-這裡收錄**別人寫的** repository。原本以 GitHub fork 形式存放,現改為只保留重點與 tag;
+這裡收錄**別人寫的** repository 與 **preservation forks**。原本以 GitHub fork 形式存放,現改為只保留重點與 tag;
 需要時依各條目的 `取用` 指令重新取得。
 
 ## 摘要
@@ -10,6 +10,7 @@
 - **63** 個可安全移除,內容從 upstream 隨時可重新取得
 - **1** 個含你自己的修改,已抽成 patch 保存
 - **3** 個 upstream 已消失,**保留不刪除**
+- **1** 個 preservation fork,已完整鏡像（Git history + all refs）
 
 ### ⚠️ upstream 已消失,必須保留
 
@@ -24,6 +25,12 @@
 | 名稱 | 你的 commit | patch |
 | --- | ---: | --- |
 | [`algorithm-essentials`](./algorithm-essentials/) | 1 | [`patches/`](./algorithm-essentials/patches/) |
+
+### 🔐 Preservation Forks（完整鏡像保護）
+
+| 名稱 | 原 upstream | 狀況 |
+| --- | --- | --- |
+| [`wx-cli-again`](./wx-cli-again/) | `jackwener/wx-cli-again` | 完整 Git history 鏡像,已 archive read-only |
 
 ---
 
@@ -97,88 +104,4 @@
 | [`Cloudflare-Accel`](./Cloudflare-Accel/) | selfhost-cloud | n/a | 0 | `fscarmen2/Cloudflare-Accel` | 🔒 保留 |
 | [`IPDB`](./IPDB/) | selfhost-cloud | n/a | 0 | `tmplink/IPDB` | 🔒 保留 |
 | [`tmpUI`](./tmpUI/) | devenv | n/a | 0 | `tmplink/tmpUI` | 🔒 保留 |
-
----
-
-## 依分類
-
-### 學習、演算法與參考資料（20）
-
-- [`Python`](./Python/) ★224238 · Python — All Algorithms implemented in Python
-- [`CS-Notes`](./CS-Notes/) ★185805 · n/a — :books: 技术面试必备基础知识、Leetcode、计算机操作系统、计算机网络、系统设计
-- [`fucking-algorithm`](./fucking-algorithm/) ★135607 · Markdown — Crack LeetCode, not only how, but also why. 
-- [`hello-algo`](./hello-algo/) ★129833 · Java — 《Hello 算法》：动画图解、一键运行的数据结构与算法教程。支持简中、繁中、English、日本語，提供 Python, Java, C++, C, C#, 
-- [`system-design-101`](./system-design-101/) ★88556 · n/a — Explain complex systems using visuals and simple terms. Help you prepare for sys
-- [`Java`](./Java/) ★66211 · Java — All Algorithms implemented in Java
-- [`algo`](./algo/) ★23135 · Python — 数据结构和算法必知必会的50个代码实现
-- [`Go`](./Go/) ★18198 · Go — Algorithms and Data Structures implemented in Go for beginners, following best p
-- [`awesome-cheatsheets`](./awesome-cheatsheets/) ★12565 · Shell — 超级速查表 - 编程语言、框架和开发工具的速查表，单个文件包含一切你需要知道的东西 :zap:
-- [`expert_readed_books`](./expert_readed_books/) ★12415 · n/a — 2021年最新总结，推荐工程师合适读本，计算机科学，软件技术，创业，思想类，数学类，人物传记书籍
-- [`basic-computer-games`](./basic-computer-games/) ★11097 · C# — An updated version of the classic "Basic Computer Games" book, with well-written
-- [`LogicStack-LeetCode`](./LogicStack-LeetCode/) ★7472 · n/a — 公众号「宫水三叶的刷题日记」刷穿 LeetCode 系列文章源码
-- [`preserve-cd`](./preserve-cd/) ★7042 · n/a — Game Preservation Project
-- [`learningSummary`](./learningSummary/) ★1491 · n/a — 涵盖大部分Java进阶需要掌握的知识，包括【微服务】【中间件】【缓存】【数据库优化】【搜索引擎】【分布式】等等，欢迎Star~
-- [`pyspark-examples`](./pyspark-examples/) ★1368 · Python — Pyspark RDD, DataFrame and Dataset Examples in Python language
-- [`python-fun`](./python-fun/) ★815 · Jupyter Notebook — Some fun and useful projects with Python
-- [`algorithm-essentials`](./algorithm-essentials/) ★783 · JavaScript — 算法精粹--举一反三，抛弃题海战术
-- [`leetcode`](./leetcode/) ★97 · CSS — :question: Algorithms & Coding Problems
-- [`awesome-des`](./awesome-des/) ★42 · n/a — Awesome discrete event simulation. 🕶️
-- [`B-Plus-Tree`](./B-Plus-Tree/) ★27 · C — BPlusTree: B+ Tree (in memory). Project for dasebase class
-
-### 開發環境與 UI 工具（6）
-
-- [`vimrc`](./vimrc/) ★31809 · Vim Script — The ultimate Vim configuration (vimrc)
-- [`dotfiles`](./dotfiles/) ★2987 · Shell — vim, zsh, git, homebrew, neovim - my whole world
-- [`vim-init`](./vim-init/) ★954 · Vim Script — 轻量级 Vim 配置框架，全中文注释
-- [`linux_config`](./linux_config/) ★218 · Shell — my mac/linux config file。快速配置 mac 终端环境
-- [`git-paging`](./git-paging/) ★79 · Shell — Treat git log as a book, exec `git next` or `git prev` to checkout the next or t
-- [`tmpUI`](./tmpUI/) ★0 · n/a
-
-### IBM i 參考與範例（9）
-
-- [`IBM-i-RPG-Free-CLP-Code`](./IBM-i-RPG-Free-CLP-Code/) ★72 · RPGLE — IBM i Working Examples in free-form RPGLE, SQL and CLP
-- [`QshOni`](./QshOni/) ★66 · CLIPS — The QShell on IBM i library contains useful CL wrapper commands to allow QShell 
-- [`vscode-ibmi-languages`](./vscode-ibmi-languages/) ★44 · JSON — Syntax highlighting for IBM i languages such as RPG, CL, DDS, MI, and RPGLE fixe
-- [`vscode-ibmi-walkthroughs`](./vscode-ibmi-walkthroughs/) ★17 · JavaScript — VS Code extension with walkthrough guides to help users be better IBM i
-- [`rpg-examples`](./rpg-examples/) ★15 · n/a — This is an IBM RPG programming language examples repository
-- [`Outils`](./Outils/) ★13 · RPGLE
-- [`IBM-RPG`](./IBM-RPG/) ★8 · n/a — Notes/examples/programs for learning RPG, CL, DDS, and DB2 SQL on the IBMi. Curr
-- [`rpgclcodingexamples`](./rpgclcodingexamples/) ★6 · RPGLE — This repo will contain misc RPG, CL and command (CMD) coding examples
-- [`AS400Tools`](./AS400Tools/) ★3 · RPGLE — IBM i (AS400) Tools
-
-### Self-hosting、Cloud 與 Web 產品（20）
-
-- [`awesome-selfhosted`](./awesome-selfhosted/) ★317054 · n/a — A list of Free Software network services and web applications which can be hoste
-- [`webvm`](./webvm/) ★17380 · JavaScript — Virtual Machine for the Web
-- [`awesome-cloudflare`](./awesome-cloudflare/) ★15175 · n/a — ⛅️ 精选的 Cloudflare 工具、开源项目、指南、博客和其他资源列表。/ ⛅️ A curated list of Cloudflare tools, 
-- [`VirtualBuddy`](./VirtualBuddy/) ★8645 · Swift — Virtualize macOS 12 and later on Apple Silicon, VirtualBuddy is a virtual machin
-- [`osaurus`](./osaurus/) ★7778 · Swift — Own your AI. The native macOS harness for AI agents -- any model, persistent mem
-- [`redka`](./redka/) ★4569 · Go — Redis re-implemented with SQL
-- [`awesome-selfhost-docker`](./awesome-selfhost-docker/) ★4063 · HTML — 🚀 Curated list of open-source, self-hosted projects deployable with Docker and d
-- [`container.training`](./container.training/) ★3945 · Shell — Slides and code samples for training, tutorials, and workshops about Docker, con
-- [`CloudPaste`](./CloudPaste/) ★2639 · JavaScript — 🌩️ Serverless 自托管的文件管理与文本分享工具/网盘，支持多存储聚合管理和WebDAV 服务挂载。兼容 S3、WebDAV、OneDrive、Goo
-- [`Afilmory`](./Afilmory/) ★2608 · TypeScript — Modern photo gallery for photographers, with S3/GitHub sync, EXIF details, maps,
-- [`python-apple-fm-sdk`](./python-apple-fm-sdk/) ★1226 · Python — Python bindings for access to the on-device model at the core of Apple Intellige
-- [`ssh-ai-chat`](./ssh-ai-chat/) ★925 · TypeScript — Chat with AI over SSH.
-- [`x86CSS`](./x86CSS/) ★924 · HTML — x86CSS is a working CSS-only x86 CPU/emulator/computer. No JavaScript required.
-- [`opensource-lighthouse`](./opensource-lighthouse/) ★814 · Python — 汇总统计各「大厂」的开源团队和项目。
-- [`serverless-cloud-notepad`](./serverless-cloud-notepad/) ★496 · JavaScript — ☁ Yet Another Cloud Notepad.
-- [`singleserver`](./singleserver/) ★224 · Go — All your projects on a single server
-- [`flare`](./flare/) ★169 · Go — 🏂 Challenge all bookmarking apps and websites directories, Aim to Be a best perf
-- [`MQTT-Web-Terminal`](./MQTT-Web-Terminal/) ★43 · Python — Bring any Linux device/server to the web, whenever they have public ip or not
-- [`Cloudflare-Accel`](./Cloudflare-Accel/) ★0 · n/a
-- [`IPDB`](./IPDB/) ★0 · n/a
-
-### Systems、Messaging、Media 與 Games（11）
-
-- [`windows95`](./windows95/) ★24226 · TypeScript — Windows 95 in an app. Runs on macOS, Linux, and Windows.
-- [`nats-server`](./nats-server/) ★20656 · Go — High-Performance server for NATS.io, the cloud and edge native messaging system.
-- [`chinese-dos-games`](./chinese-dos-games/) ★10301 · Python — 🎮 Chinese DOS games collections.
-- [`libcimbar`](./libcimbar/) ★6446 · C++ — Optimized implementation for color-icon-matrix barcodes
-- [`rivet`](./rivet/) ★6103 · Rust — Rivet Actors are the primitive for stateful workloads. Built for AI agents, coll
-- [`OpenMMO`](./OpenMMO/) ★1759 · Rust
-- [`Streaming_QR`](./Streaming_QR/) ★1676 · TypeScript — Stream data through multiple series of QR codes
-- [`DDMQ`](./DDMQ/) ★1316 · Java — DDMQ is a distributed messaging product with low latency, high throughput and hi
-- [`winamp`](./winamp/) ★693 · n/a — Iconic media player
-- [`soluna`](./soluna/) ★378 · C — A simple 2d game framework
-- [`cocoon`](./cocoon/) ★206 · Go — Lightweight MicroVM engine built on Cloud Hypervisor. Features include OCI and c
+| [`wx-cli-again`](./wx-cli-again/) | preservation | Rust | 448 | [jackwener/wx-cli-again](https://github.com/jackwener/wx-cli-again) | 🔐 鏡像 |

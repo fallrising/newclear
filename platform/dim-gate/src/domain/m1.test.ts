@@ -79,6 +79,19 @@ describe('M1 inventory and scoped projections (AC-04, AC-06, AC-08, AC-20)', () 
       body: { expectedVersion: 1, name: 'data-only-updated' } }))
     expect(read<Page<unknown>>(subject, '/audit', 'user-rd-commerce')).toMatchObject({ items: [], total: 0 })
   })
+
+  it('does not disclose a deleted cross-scope relation through audit history', async () => {
+    const subject = makeEngine()
+    const created = await subject.command(command({ path: '/relations', key: 'cross-scope-create', body: {
+      sourceCiId: 'ci-idc-redis-01', targetCiId: 'ci-aliyun-worker-01',
+      sourceExpectedVersion: 1, targetExpectedVersion: 1, type: 'depends_on', reason: 'scope regression',
+    } }))
+    expect(read<Page<unknown>>(subject, '/audit', 'user-rd-commerce')).toMatchObject({ items: [], total: 0 })
+    await subject.command(command({ method: 'DELETE', path: '/relations/' + created.entityId,
+      key: 'cross-scope-delete', body: { expectedVersion: 1, reason: 'scope regression cleanup' } }))
+    expect(read<Page<unknown>>(subject, '/audit', 'user-rd-commerce')).toMatchObject({ items: [], total: 0 })
+    expect(read<Page<unknown>>(subject, '/audit', 'user-ops')).toMatchObject({ total: 2 })
+  })
 })
 
 describe('M1 CI and relation commands (AC-04, AC-05, AC-06)', () => {

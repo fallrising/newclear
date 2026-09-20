@@ -1,6 +1,6 @@
 # M1 integration contract — CMDB and application views
 
-Revision 1, fixed after the T-006 M0 regression at `49e1b89754421cf0e2f76026416a1af184ceab94`. This document owns integration semantics; Zod schemas and the generated [OpenAPI](openapi.json) remain the only wire-format field definition.
+Revision 2. Revision 1 was fixed after the T-006 M0 regression at `49e1b89754421cf0e2f76026416a1af184ceab94`; revision 2 closes T-012 findings F-01 and F-02 without changing wire DTO ownership. This document owns integration semantics; Zod schemas and the generated [OpenAPI](openapi.json) remain the only wire-format field definition.
 
 ## Boundaries and public exports
 
@@ -30,7 +30,7 @@ Existing `/rd`, `/ops`, `/admin` and `/guide` remain real M0 routes. Admin recei
 
 Application, Environment, CI, Relation and Placement always reference canonical domain IDs. RD and Ops receive policy-filtered projections of the same entities, never role-specific entity types or duplicate releases. A shared CI may appear in multiple visible environment placements, but pool capacity aggregates distinct canonical CI IDs exactly once.
 
-Every list filters before pagination and `total`. Detail, search, graph, capacity aggregate and audit reuse the same visibility predicates. RD Commerce must receive empty list/search/graph/aggregate/audit results and 404 details for Data-only entities. Topology removes hidden nodes and incident edges before returning a result; `truncated`, node/edge counts and depth may describe only the visible result and must not reveal hidden counts.
+Every list filters before pagination and `total`. Detail, search, graph, capacity aggregate and audit reuse the same visibility predicates. RD Commerce must receive empty list/search/graph/aggregate/audit results and 404 details for Data-only entities. Topology removes hidden nodes and incident edges before returning a result; `truncated`, node/edge counts and depth may describe only the visible result and must not reveal hidden counts. Relation audit records retain both endpoint CI IDs solely for authorization; historical reads require both current endpoint projections to be visible and otherwise return no record.
 
 Unauthenticated requests return 401. A missing Center/action returns 403. A missing or scope-out entity returns the same 404 envelope. Validation is 422, canonical identity/idempotency conflicts are 409. Responses remain `Cache-Control: no-store`.
 
@@ -69,6 +69,6 @@ Dependencies traverse outgoing relations; impact traverses reverse relations. Br
 
 ## Seed and ownership
 
-Core seed owns organization, people, grants, session and navigation. CMDB seed owns provider accounts, locations, pools and exactly 60 baseline CIs: 20 AWS, 20 Aliyun and 20 on-prem. Application seed owns applications and environments. Topology seed owns placements and relations. Cross-feature references use exported deterministic ID constants/builders; builders may not import another feature's private state. The shared Redis CI is one canonical object referenced by multiple placements.
+Core seed owns organization, people, grants, session and navigation. CMDB seed owns provider accounts, locations, pools and exactly 60 baseline CIs: 20 AWS, 20 Aliyun and 20 on-prem. Application seed owns applications and environments. Topology seed owns placements and relations. Cross-feature references use exported deterministic ID constants/builders; builders may not import another feature's private state. The shared Redis CI is one canonical object referenced by multiple placements. M1 snapshots use seed compatibility ID `dim-gate-m1-v1`; the storage key remains stable so an older milestone snapshot is detected, preserved, and offered explicit reset or memory recovery rather than silently loaded or erased.
 
 T-007 exclusively owns domain schemas/engine/policy/integrity and shared seed/contracts during foundation implementation. T-008 owns RD application UI and its feature client/tests. T-009 owns Ops CI UI and its feature client/tests. T-010 owns topology UI/algorithm client tests. Workers do not edit `.team/PLAN.md`, central route registry, `AppRoutes`, `AppShell`, API/demo composition roots, generated OpenAPI, global CSS, E2E, workflow or this contract. The orchestrator alone integrates public exports/routes/handlers, global search, cross-Center navigation, final scope isolation, generated artifacts, full E2E and acceptance records.

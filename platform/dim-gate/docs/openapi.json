@@ -15035,6 +15035,24 @@
                     "prod"
                   ]
                 }
+              },
+              "relationEndpointCiIds": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
               }
             },
             "required": [
@@ -15161,7 +15179,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-v1"
+            "const": "dim-gate-m1-v1"
           },
           "sessionId": {
             "type": "string",
@@ -15690,7 +15708,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-v1"
+            "const": "dim-gate-m1-v1"
           },
           "schemaVersion": {
             "type": "number",

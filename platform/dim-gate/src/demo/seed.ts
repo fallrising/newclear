@@ -16,7 +16,7 @@ export function createSeed(sessionId: string): Snapshot {
   const cmdbSeed = buildCmdbSeed()
   const topologySeed = buildTopologySeed(applicationSeed.applications, applicationSeed.environments)
   return snapshotSchema.parse({
-    schemaVersion: 1, seedVersion: 'dim-gate-v1', sessionId, logicalClock: 0,
+    schemaVersion: 1, seedVersion: 'dim-gate-m1-v1', sessionId, logicalClock: 0,
     sequence: 0, storeRevision: 0, policyVersion: 1, commandCount: 0,
     entities: {
       organizations: [{ ...stamp, id: 'org-demo', name: 'Dim Commerce' }],

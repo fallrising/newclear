@@ -170,7 +170,7 @@ export const eventSchema = z.strictObject({
 })
 export const auditEventSchema = z.strictObject({
   id: idSchema, orgId: idSchema, actorId: idSchema, action: idSchema, entityType: idSchema, entityId: idSchema,
-  scopeSnapshot: z.strictObject({ projectIds: ids, poolIds: ids, stages: z.array(stageSchema) }),
+  scopeSnapshot: z.strictObject({ projectIds: ids, poolIds: ids, stages: z.array(stageSchema), relationEndpointCiIds: z.tuple([idSchema, idSchema]).optional() }),
   outcome: z.enum(['succeeded', 'denied', 'conflict']), diffSummary: z.array(z.string().max(200)), reason: z.string().min(1).max(500).optional(),
   requestId: idSchema, correlationId: idSchema, occurredAt: timestampSchema,
 })
@@ -179,7 +179,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m1-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -209,7 +209,7 @@ export const dashboardViewSchema = z.strictObject({
 })
 export const guideViewSchema = z.strictObject({
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-m1-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({

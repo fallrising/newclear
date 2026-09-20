@@ -158,7 +158,13 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
   }
   if (audit.entityType === 'relation') {
     const relation = snapshot.entities.relations.find((entry) => entry.id === audit.entityId)
-    if (!relation) return audit.scopeSnapshot.projectIds.some((id) => policy.hasProject(id)) || audit.scopeSnapshot.poolIds.some((id) => policy.poolIds.includes(id))
+    if (!relation) {
+      const endpoints = audit.scopeSnapshot.relationEndpointCiIds
+      return !!endpoints && endpoints.every((id) => {
+        const endpoint = snapshot.entities.cis.find((entry) => entry.id === id)
+        return !!endpoint && policy.canReadCi(endpoint)
+      })
+    }
     const source = snapshot.entities.cis.find((entry) => entry.id === relation.sourceCiId)
     const target = snapshot.entities.cis.find((entry) => entry.id === relation.targetCiId)
     return !!source && !!target && policy.canReadCi(source) && policy.canReadCi(target)
@@ -526,8 +532,11 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       .filter((entry): entry is CI => Boolean(entry))
     const auditProjectIds = changedCis.length ? [...new Set(changedCis.flatMap((entry) => entry.visibilityProjectIds))] : policy.projectIds
     const auditPoolIds = changedCis.length ? [...new Set(changedCis.map((entry) => entry.poolId))] : policy.poolIds
+    const relationEndpointCiIds = entityType === 'relation' && changedCis.length === 2
+      ? [changedCis[0].id, changedCis[1].id] as [string, string] : undefined
     next.audit.push({ id: `audit-${serial}`, orgId: policy.user!.orgId, actorId: input.actorId, action, entityType, entityId,
-      scopeSnapshot: { projectIds: auditProjectIds, poolIds: auditPoolIds, stages: [...new Set(policy.assignments.filter((assignment) => assignment.scopeType === 'project').flatMap((assignment) => assignment.stages ?? ['dev', 'staging', 'prod'] as const))] },
+      scopeSnapshot: { projectIds: auditProjectIds, poolIds: auditPoolIds, stages: [...new Set(policy.assignments.filter((assignment) => assignment.scopeType === 'project').flatMap((assignment) => assignment.stages ?? ['dev', 'staging', 'prod'] as const))],
+        ...(relationEndpointCiIds ? { relationEndpointCiIds } : {}) },
       outcome: 'succeeded', diffSummary: fields, ...(reason ? { reason } : {}), requestId: `command-${serial}`, correlationId, occurredAt: clockIso(next.logicalClock) })
     next.idempotency.push({ sessionId: input.sessionId, actorId: input.actorId, method, path: input.path, key: input.key, bodyHash: checksum(bodyString), canonicalBody: bodyString, receipt })
     const validated = parse(snapshotSchema, next)

@@ -28,7 +28,7 @@
 
 ## 驗證與交付
 
-目前為純文件階段：檢查相對連結、Markdown、模型／API／流程／驗收一致性與 `git diff --check`。不可宣稱跑過尚未存在的應用測試。
+M0 已建立 component-local commands：`pnpm install --frozen-lockfile`、`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm check:docs`、`pnpm check:contracts`、`pnpm check:ci`、`pnpm build --mode demo`、`pnpm test:e2e`。瀏覽器依賴由 `pnpm exec playwright install --with-deps chromium` 安裝。命令存在不表示已通過；每輪仍需保存實際結果与被測 commit，文件變動另做 `git diff --check`。
 
 M0 起依 [交付與驗收](docs/sdd/07-delivery-validation.md) 建立 component-local commands；CI 放在 repository 根 `.github/workflows/`，使用 path filter、唯讀權限及固定 action SHA。不要在子目錄新增無法執行的 nested workflow。
 

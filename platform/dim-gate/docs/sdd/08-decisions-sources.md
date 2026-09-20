@@ -15,6 +15,9 @@
 | ADR-009 | release／pipeline／incident分開建模 | 成功build不等於上線、回滾不等於告警立即消失；可展示真實業務差異，需保留references和多段狀態機。 |
 | ADR-010 | 瀏覽器 history routing與base-path支援 | deep link易讀且可分享視圖；host需SPA fallback、MSW scope正確。完全無rewrite host可另評估hash router。 |
 | ADR-011 | component-local依賴，root CI path-scoped | 遵循現有monorepo CI，不觸發其他產品構建；docs基線不添加無code可測的假workflow。 |
+| ADR-012 | M0 固定 Node24.18.0／pnpm11.18.0，TS5.9.3 | 沿用 repository runtime 基線；實測最新 TS7 不符合目前 typescript-eslint 的 peer 範圍，因此鎖定受支援的5.9.3。React19.3／Vite8.3／Tailwind4.3／Zod4／MSW2 的精確 patch 與傳遞依賴保存於 lockfile；pnpm 嚴格 peer check，不允許可選 MSW postinstall，worker 由明示 init 產生。 |
+| ADR-013 | API／demo prefix 相對 application base；Zod 產生 OpenAPI3.1 | `/dim-gate/api/v1` 防止根 `/api/` 與其他 app 衝突。共用 runtime DTO 與生成檢查避免 drift，planned endpoints 明示後續里程碑；domain refinements 以行為測試補足 JSON Schema 表達限制。 |
+| ADR-014 | versioned saved envelope＋Web Locks tab ownership | sessionStorage 會被 opener 複製；每 document 持有 stable ownership lock，reset 更換 API session但保留 ownership，copy 則 fork 兩者。Web Locks 不支援時明示錯誤。saved envelope 全部計入3MiB，不丟棄 audit/replay；persona+domain commands 共用1000上限；corrupt/version mismatch 需明示 recovery。 |
 
 ## 2. 已核對的 repository context
 

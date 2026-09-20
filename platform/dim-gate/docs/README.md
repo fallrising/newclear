@@ -6,5 +6,7 @@
 - [主控計畫](../../../.team/PLAN.md)
 - [專題規格索引](sdd/README.md)
 - [目前狀態與下一步](STATUS.md)
+- [M0 共用實作契約](M0-CONTRACT.md)
+- [產生的 OpenAPI 3.1 契約](openapi.json)
 
 此目錄描述產品設計與開發協定。任務狀態和接受決策由PLAN維護；report及Git／PR／CI保存證據；STATUS只彙整摘要與連結，不重複管理任務細節。

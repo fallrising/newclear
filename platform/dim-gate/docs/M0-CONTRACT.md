@@ -1,6 +1,8 @@
-# M0 implementation contract — revision 1
+# M0 implementation contract — revision 2
 
 Source specification: `1117d297aa3efef9472d847c9dfa5714eb6c4460`. This document fixes shared implementation interfaces; the SDD remains authoritative. AC-01–03 are the M0 gate. M1–M5 business journeys remain unavailable. A minimal seed is intentional, and all counts must describe that seed rather than the future 60 CI dataset.
+
+Revision 2 records integration clarifications: API prefixes are application-base-relative; saved envelope includes stable tab ownership; wire DTO/OpenAPI are generated from shared Zod. Worker contracts remain bound to revision 1 at their recorded base. See ADR-012–014 in [decisions](sdd/08-decisions-sources.md).
 
 ## Ownership and boundaries
 
@@ -45,6 +47,8 @@ Identity/snapshot context enrichment belongs to controller; engine `/session` ma
 `src/demo/controller.ts` exports a dependency-injectable controller factory for tests and `getController()` for browser use. Controller injects sessionStorage, random session ID generation and timer APIs outside domain. Snapshot key `dim-gate.demo.v1`. Persona selection/identity metadata persists across reload. On reset: stop timers, replace engine with seeded snapshot, increase generation/epoch, cancel old work; failed reset persistence retains old state. Retain reset replay tombstone. Forked tabs must have independent session identity (detect via browser tab coordination or document a tested strategy). Corrupt/incompatible snapshots display recoverable error, not silent reset. Memory fallback is explicit user choice.
 
 `src/demo/handlers.ts` exports `createHandlers(controller)`; browser and Node tests use identical handlers. `/api/v1` requests authenticate `X-Demo-Persona`/`X-Demo-Session`. Demo controls use `/__demo/v1/personas`, `/persona`, `/guide`, `/reset`, `/clock/advance`, with required idempotency keys. Normal delay 150 ms. Reset/persona commands return envelope data containing updated `session: SessionView` and command receipt as appropriate.
+
+The prefixes are relative to Vite `BASE_URL`: default browser requests use `/dim-gate/api/v1` and `/dim-gate/__demo/v1`. Persona/reset controls return `{session: SessionView}` inside the envelope. The strict saved wrapper contains `formatVersion:1`, the domain snapshot, persona/epoch/generation, persona replay records, one reset tombstone and `tabOwnershipId`. A document holds a Web Lock for the ownership ID across reset; a copied tab forks both IDs. The entire UTF-8 envelope is bounded by 3 MiB; domain plus persona commands share the 1000-command budget. Runtime imports only small shared control DTOs; the forward operation registry is build/test tooling.
 
 `src/demo/browser.ts` exports `startDemo(mode: string | undefined): Promise<void>`: error for missing mode, explain unsupported live, start MSW only for explicit demo; service worker URL and scope use Vite `BASE_URL`. Fail unhandled app API requests loudly; never intercept another app's API outside worker scope.
 

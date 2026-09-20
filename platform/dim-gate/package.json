@@ -18,7 +18,8 @@
     "test:e2e": "playwright test",
     "check:docs": "node scripts/check-docs.mjs",
     "check:contracts": "node --experimental-strip-types scripts/openapi.ts --check",
-    "generate:contracts": "node --experimental-strip-types scripts/openapi.ts"
+    "generate:contracts": "node --experimental-strip-types scripts/openapi.ts",
+    "check:ci": "node scripts/check-ci.mjs"
   },
   "dependencies": {
     "react": "19.3.0",
@@ -37,7 +38,7 @@
   "devDependencies": {
     "vite": "8.3.0",
     "@vitejs/plugin-react": "6.1.1",
-    "typescript": "7.0.2",
+    "typescript": "5.9.3",
     "tailwindcss": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
     "vitest": "5.0.1",
@@ -45,7 +46,7 @@
     "@axe-core/playwright": "4.13.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@types/node": "26.6.2",
+    "@types/node": "24.10.1",
     "eslint": "10.11.0",
     "@eslint/js": "10.0.1",
     "typescript-eslint": "8.70.0",

@@ -1,0 +1,4 @@
+# Component-local dependency policy; no monorepo workspace changes.
+allowBuilds:
+  msw: false
+strictPeerDependencies: true

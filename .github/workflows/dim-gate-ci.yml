@@ -1,0 +1,65 @@
+name: dim-gate CI
+
+on:
+  pull_request:
+    paths:
+      - platform/dim-gate/**
+      - .github/workflows/dim-gate-ci.yml
+      - .team/PLAN.md
+      - .team/tasks/T-00[1-5].md
+      - .team/reports/T-00[1-5]*.md
+      - .team/reports/dim-gate-*.md
+  push:
+    branches: [main]
+    paths:
+      - platform/dim-gate/**
+      - .github/workflows/dim-gate-ci.yml
+      - .team/PLAN.md
+      - .team/tasks/T-00[1-5].md
+      - .team/reports/T-00[1-5]*.md
+      - .team/reports/dim-gate-*.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dim-gate-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: platform/dim-gate
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: platform/dim-gate/.node-version
+      - name: Activate pinned pnpm
+        run: npm install --global pnpm@11.18.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm check:docs
+      - run: pnpm check:contracts
+      - run: pnpm check:ci
+      - run: pnpm build --mode demo
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dim-gate-m0-${{ github.sha }}
+          path: |
+            platform/dim-gate/playwright-report/
+            platform/dim-gate/test-results/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,6 +1,6 @@
 # dim-gate 開發約定
 
-適用範圍：`platform/dim-gate/**`。先讀 [SDD.md](SDD.md)、[STATUS](docs/STATUS.md)、本次任務相關的 [專題規格](docs/sdd/README.md)。本文件不要求使用特定模型、外部 reviewer 或多 agent。
+適用範圍：`platform/dim-gate/**`。先讀 [SDD.md](SDD.md)、[STATUS](docs/STATUS.md)、本次任務相關的 [專題規格](docs/sdd/README.md)。開發及接手入口為 [DEVELOPMENT_PROMPT](DEVELOPMENT_PROMPT.md)，依 [開發恢復協定](docs/DEVELOPMENT_PROTOCOL.md) 核對狀態；不可把聊天記憶當成目前進度。
 
 ## 工作邊界
 
@@ -8,7 +8,16 @@
 - 三中心共用 entity IDs、API client、授權判斷與狀態機；不得為每頁另造互不相干的 fake data。
 - 不將真實 IP、帳戶、憑證或私有環境資料放入公開 fixtures。示範模式清楚標記。
 - 不挪用 sibling component 的 AGENTS、依賴或工作流程；root CI 約定見 [monorepo-ci](../../docs/specs/monorepo-ci.md)。
-- 不更動其他 component；root README 的項目索引與未來本項目的 root CI workflow 是可預期的必要例外。
+- 不更動其他 component；root README 的項目索引、未來本項目的 root CI workflow，以及 root `.team/PLAN.md` 的dim-gate區塊與相應task/report是必要例外。不得覆寫其他program的ledger。
+
+## 協作與恢復
+
+- SDD定義產品，prompt定義啟動，[PLAN](../../.team/PLAN.md)保存任務與接受決策，STATUS只是摘要；Git／PR／CI用來核對實際事實。
+- 每variant一個主控；worker獨立worktree、bounded scope，不遞迴委派、不自驗收、不commit/push。主控取得結果後自行驗證與整合。
+- 依kernel contract採用可用路由，Codex主控／Claude獨立reviewer為偏好，具體model ID必須實查。不能聲稱執行過不可用模型或未跑過的review。
+- Implementation milestone的最終gate包含獨立唯讀review；小型文件維護按現有文件檢查，不冒稱已完成產品驗收。
+- 證據綁定被測commit；同一task重試保留ID並增加attempt。接手先查已有branch/PR，不重複建立。
+- 交接前保存resume與remote durability；accepted、merged、產品完成分開判斷。不自動merge或部署。
 
 ## 文件先行
 

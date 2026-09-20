@@ -18,7 +18,7 @@ M1 可操作範圍：
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
-| M2：申請與平台治理 | RUNNING；T-014 shared domain/API |
+| M2：申請與平台治理 | RUNNING；T-014 shared domain/API accepted checkpoint；Draft PR #13 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
@@ -29,6 +29,8 @@ M1 可操作範圍：
 
 獨立 review attempt 1 的 F-01 relation audit 跨 scope 洩漏與 F-02 舊 M0 seed 靜默沿用皆保留為歷史 BLOCKED 證據；revision 2 修正後，Commerce audit 為空、Ops 保有兩筆歷史事件，舊 snapshot bytes 在明確 recovery 前不變，reset 得到 60 CI。attempt 2 無 blocking finding。
 
-限制：production JS 為 413.17 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。M1 不宣稱完成 M2 Admin 功能，也未新增空白 Admin 頁。沒有部署、真實雲操作、付費服務或全域權限變更。
+M2 T-014 在 `a9e64276273fc3698105c2bf8b0b7bc833444057` 完成 shared domain/API checkpoint：132/132 tests、11/11 production Chromium regression 與全部 native gates 通過；request/capacity/provision retry、access/navigation/catalog/model governance 和 M1→M2 explicit recovery 已可由共用 handler 執行。Draft [PR #13](https://github.com/fallrising/newclear/pull/13) 已開啟，remote run 35534450528 正在執行。這不代表 M2 ACCEPTED；M2 UI、browser walkthrough 與 independent review 尚未完成。
 
-Resume：從 `agent/dim-gate/mainline/m2-governance` 的 T-014 繼續；base 是合併後 main `b8dae760`。先完成 shared M2 domain/API，再接 RD/Ops/Admin UI 與 production browser gates。M2 尚未 ACCEPTED、尚無 PR、未部署。
+限制：production JS 為 419.77 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。沒有部署、真實雲操作、付費服務或全域權限變更。
+
+Resume：從 `agent/dim-gate/mainline/m2-governance` 的 `a9e6427` 接續 RD/Ops self-service 與 Admin governance UI；base 是合併後 main `b8dae760`。M2 尚未 ACCEPTED，PR #13 是 Draft，未部署。

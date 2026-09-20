@@ -9,15 +9,15 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 13 |
+| protocol_version / ledger_revision | 1 / 14 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
 | active_work_branch | agent/dim-gate/mainline/m2-governance |
 | source / last_reconciled_target | M1 source `50294b687d06f08e94290f6f327187e8f69248bc` / reconciled `a5982bf4547bba85429fec50494751562b5fe7c6`, 2026-09-20 |
 | source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
-| spec revision | source SDD blobs listed in preflight; M1 integration contract revision 2 at product commit `784f771a040be72fedf2f1521912900990c09dbf` |
-| open implementation PRs at recovery | 0; PR #7 is merged at `50294b687d06f08e94290f6f327187e8f69248bc` |
+| spec revision | M2 integration contract revision 1; implementation checkpoint `a9e64276273fc3698105c2bf8b0b7bc833444057` |
+| open implementation PRs at recovery | Draft PR #13 for M2; M0 PR #7 and M1 PR #11 are merged |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
@@ -33,7 +33,7 @@
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
-| M2 | RUNNING | none | NOT_OPENED | T-014 shared domain/API in progress; AC-09–12,21–23 |
+| M2 | RUNNING | none | DRAFT PR #13 | T-014 shared domain/API checkpoint accepted; feature UI/review outstanding; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
 | M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
@@ -57,7 +57,7 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-011](tasks/T-011.md) / 1 | 04–08/20 integration | T-007–010 | orchestrator / local tools | 1 / SUPERSEDED CANDIDATE | agent/dim-gate/mainline/m1-cmdb | [report](reports/T-011.md); 120-test initial candidate rejected by T-012 attempt 1 |
 | [T-012](tasks/T-012.md) / 2 | independent review | T-011 | independent collaboration reviewer | 2 / ACCEPTED | agent/dim-gate/task/t012-review-fix | [review](reports/T-012.md); attempt 1 BLOCKED, attempt 2 closed F-01/F-02 |
 | [T-013](tasks/T-013.md) / 1 | final acceptance | T-012 | orchestrator / local tools | 1 / ACCEPTED | agent/dim-gate/mainline/m1-cmdb | [report](reports/T-013.md); PR #11 OPEN and Ready, not merged |
-| [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / RUNNING | agent/dim-gate/mainline/m2-governance | M2 contract revision 1; baseline 122 tests |
+| [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-014.md); `a9e6427`, 132 tests, 11 production E2E |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -244,6 +244,8 @@ DG-D017: Reconciled PR #11 as MERGED at `b8dae76034caf63bf7d0721cba99a58a0586ae8
 
 DG-D018: Select T-014 as the first bounded M2 slice and freeze M2 integration contract revision 1. The shared persisted domain/API is implemented before RD/Ops/Admin pages so all centers use the same request, capacity, job, policy and audit state.
 
+DG-D019: ACCEPT T-014 only as the shared domain/API checkpoint at `a9e64276273fc3698105c2bf8b0b7bc833444057`. Local evidence is 132/132 tests, 11/11 production Chromium E2E and every prescribed native/docs/contracts/CI/architecture/actionlint gate. Draft PR #13 carries the SSH-pushed commit and remote run 35534450528 is in progress. M2 remains RUNNING: feature UI, fresh browser acceptance, independent review and successful current-head remote CI are not waived.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -256,15 +258,16 @@ source_main: b8dae76034caf63bf7d0721cba99a58a0586ae85
 last_reconciled_target: b8dae76034caf63bf7d0721cba99a58a0586ae85
 continuation_ref: agent/dim-gate/mainline/m2-governance
 milestone: M2
-task_id: T-014
-implementation_commit: none
-local_tested_commit: none
+task_id: next M2 UI slice after T-014
+implementation_commit: a9e64276273fc3698105c2bf8b0b7bc833444057
+local_tested_commit: a9e64276273fc3698105c2bf8b0b7bc833444057
 ci_tested_merge: none
-spec_revision: M2-INTEGRATION-CONTRACT revision 1 at the current branch checkpoint
+spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
 evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md
-integration_state: NOT_OPENED
-remote_durability: local branch only until the first tested checkpoint is committed and pushed
+  - .team/reports/T-014.md
+integration_state: DRAFT_PR_13
+remote_durability: implementation checkpoint is on the SSH remote branch; this evidence update is identified by its containing commit
 blockers: []
-next_action: implement and test T-014 shared M2 schemas, seed, request/provisioning state machine and governance commands
+next_action: define and implement bounded RD/Ops self-service and Admin governance UI tasks from the accepted T-014 checkpoint; do not accept M2 before fixed-commit browser and independent review gates
 ```

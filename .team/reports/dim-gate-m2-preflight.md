@@ -1,6 +1,6 @@
 # dim-gate M2 preflight
 
-STATUS: PARTIAL
+STATUS: COMPLETE
 
 ## Recovery facts
 
@@ -24,5 +24,5 @@ M2 is the earliest unaccepted milestone. T-014 owns the shared domain/API contra
 ## Current limitations
 
 - M2 is RUNNING, not accepted or integrated.
-- No M2 PR exists yet; durability is local until a tested checkpoint is committed and pushed.
-- Production JavaScript remains approximately 413.17 kB gzip, a future M5 budget risk.
+- Draft [PR #13](https://github.com/fallrising/newclear/pull/13) now carries the first tested M2 checkpoint; M2 remains RUNNING.
+- Production JavaScript is 419.77 kB gzip at the first M2 checkpoint, a future M5 budget risk.

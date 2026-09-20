@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/ambient-heuristic-v1.json",
+  "title": "Ambient heuristic table H1–H5",
+  "description": "Table-driven alarm-path classifier. H4 and H5 veto H1–H3. Never evaluated inside notify().",
+  "rules": [
+    {
+      "id": "H1",
+      "condition": "body contains ? or ？ and length >= 8",
+      "pass": true,
+      "any_of_substrings": ["?", "？"],
+      "min_body_length": 8
+    },
+    {
+      "id": "H2",
+      "condition": "body contains table-driven help phrases",
+      "pass": true,
+      "phrases": ["有人", "幫我", "can someone", "please look"]
+    },
+    {
+      "id": "H3",
+      "condition": "body contains literal @all or ＠all",
+      "pass": true,
+      "literals": ["@all", "＠all"]
+    },
+    {
+      "id": "H4",
+      "condition": "recent 10 kind=message include any agent",
+      "pass": false,
+      "veto": ["H1", "H2", "H3"],
+      "recent_message_window": 10,
+      "any_agent_speaker": true
+    },
+    {
+      "id": "H5",
+      "condition": "sender.kind=agent",
+      "pass": false,
+      "veto": ["H1", "H2", "H3"],
+      "sender_kind": "agent"
+    }
+  ]
+}

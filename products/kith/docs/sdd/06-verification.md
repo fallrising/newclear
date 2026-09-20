@@ -2,7 +2,7 @@
 
 [回主 SDD](../../SDD.md)
 
-**執行狀態：** 本文件 baseline 尚未有測試程式。本檔是 acceptance contract，不是測試報告。測試名稱／ID 必須出現在測試程式或 evidence mapping，不能只存在文案中。M0 建立 vitest／schema gates 後才開始變綠。
+**執行狀態：** M0 vitest 在 `products/kith/test/`（契約、純函式、INV-02 SQL）。本檔仍是 acceptance contract，不是測試報告。測試名稱／ID 必須出現在測試程式或 evidence mapping，不能只存在文案中。M1+ 的 miniflare／MCP／fake LLM 測試尚未建立。
 
 Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 Codex 是 operator smoke，**不進 CI**、不需要 secrets。
 
@@ -136,4 +136,4 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 
 每次 milestone 驗收保存 manifest：milestone、commit、Node 版本、commands/exit codes、assertion IDs、限制。small summaries 可放 `docs/evidence/`（實作階段）；本 pass 不建該目錄。
 
-未來 workflow 位於根 `.github/workflows/kith.yml`，paths `products/kith/**` + 該 workflow，`contents: read`，Node **24.18.0**，無 deploy secrets。**本文件 baseline 不新增該檔、不改 `docs/specs/monorepo-ci.md`。** 未建立的 gate 不准以空 target／固定 exit 0 冒充通過。
+Root workflow 位於 `.github/workflows/kith.yml`，paths `products/kith/**` + 該 workflow，`contents: read`，Node **24.18.0**，無 deploy secrets。`docs/specs/monorepo-ci.md` 列出 goku、phark、cloudform、aweshore、streaming-converter、ojbquay、prism、kith。未建立的 gate 不准以空 target／固定 exit 0 冒充通過。

@@ -2,7 +2,7 @@
 
 [回主 SDD](../../SDD.md)
 
-所有 milestone 目前均為 **NOT_STARTED**。本次只建立 SDD baseline。M0–M6 是有 dependency 的交付順序，不是時間估算。Ambient **最後**。
+Milestone 狀態：M0–M6 核心與可選 M7（GC／metrics／AES-GCM keyring）在 local working tree（尚未 merge）。不得把平台 at-rest 寫成 E2EE。未宣稱 live smoke。
 
 ## 1. Dependency map
 
@@ -42,7 +42,7 @@ After M6 only: M7 observability / GC / optional keyring
 
 **驗收：** CAP-CONST-01、ST-D1-01–04（函式級）、INV-02-SQL、ATT-01–07、MCP-SCH-01、EV-01 golden。monorepo 路徑邊界通過。root workflow 靜態 policy 合格（若此階段加入）。
 
-**禁止：** 實作 Durable Object、真 LLM、frontend 畫面、sidecar 二進位、fork EdgeChat、改 pokercase/fanzloud 原始碼、deploy、把尚未提供的功能接成固定成功 stub。本文件 pass **不**做 M0 程式。
+**禁止：** 實作 Durable Object、真 LLM、frontend 畫面、sidecar 二進位、fork EdgeChat、改 pokercase/fanzloud 原始碼、deploy、把尚未提供的功能接成固定成功 stub。M0 產物見 `products/kith/{package.json,contracts,src,test,sql}` 與根 `kith.yml`；仍禁止聊天室 runtime。
 
 ---
 
@@ -123,6 +123,8 @@ After M6 only: M7 observability / GC / optional keyring
 ## 9. M7 — 觀測、GC、可選加密（非核心完成條件）
 
 **輸入：** M6 或至少 M4。metrics、`trace` GC（seq 洞合法）、可選 AES-GCM keyring、README 狀態句。不阻擋 M0–M6 核心完成定義。不得把平台 at-rest 寫成 E2EE。
+
+**狀態（working tree）：** 可選 AES-GCM keyring 已落地、預設 off、**不是**端對端（not E2EE）。metrics／GC 另切片。不宣稱 live smoke。
 
 ---
 

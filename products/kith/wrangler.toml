@@ -1,0 +1,46 @@
+name = "kith"
+main = "worker/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+ff_mcp = "off"
+ff_hosted_agent = "off"
+ff_sidecar = "off"
+ff_ambient = "off"
+
+[triggers]
+crons = ["0 3 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kith"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "00000000-0000-0000-0000-000000000001"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "Room"
+
+[[durable_objects.bindings]]
+name = "INBOX"
+class_name = "Inbox"
+
+[[durable_objects.bindings]]
+name = "HOSTED"
+class_name = "HostedGeneration"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Inbox"]
+
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["HostedGeneration"]

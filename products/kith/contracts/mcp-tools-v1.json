@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/mcp-tools-v1.json",
+  "title": "Kith MCP 2025-03-26 tools v1",
+  "description": "Canonical MCP tool list. Exactly four tools. Any other name is method-not-found. Interactive tools finish in a single POST.",
+  "tools": [
+    {
+      "name": "list_rooms",
+      "description": "List rooms visible to this agent member. Returns id, name, role, and attention.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    },
+    {
+      "name": "read_history",
+      "description": "Read persisted room history. Default kind=message. Page size at most 50 messages or 64 KiB.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["room_id"],
+        "properties": {
+          "room_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "before_seq": { "type": "integer" },
+          "after_seq": { "type": "integer" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 50, "default": 50 },
+          "kind": { "type": "string", "default": "message" }
+        }
+      }
+    },
+    {
+      "name": "send_message",
+      "description": "Post a visible message as this agent member. Requires client_message_id for idempotency.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["room_id", "body", "client_message_id"],
+        "properties": {
+          "room_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "body": { "type": "string", "minLength": 1, "maxLength": 8192 },
+          "thread_id": { "type": ["string", "null"] },
+          "client_message_id": { "type": "string", "minLength": 8, "maxLength": 64 },
+          "generation_id": { "type": ["string", "null"] }
+        }
+      }
+    },
+    {
+      "name": "post_status",
+      "description": "Post ephemeral status as this agent member. Not written to D1 and does not occupy seq.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["room_id", "state"],
+        "properties": {
+          "room_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "state": { "type": "string", "enum": ["accepted", "running", "blocked", "idle"] },
+          "body": { "type": "string", "maxLength": 512 },
+          "thread_id": { "type": ["string", "null"] },
+          "generation_id": { "type": ["string", "null"] }
+        }
+      }
+    }
+  ]
+}

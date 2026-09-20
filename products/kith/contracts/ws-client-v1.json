@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/ws-client-v1.json",
+  "title": "WebSocket client → server packet v1",
+  "description": "Only send, ack, and status are accepted. status is ephemeral (not D1, no seq, no wake). Unknown fields are rejected.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "client_message_id", "body"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "send" },
+        "client_message_id": { "type": "string", "minLength": 8, "maxLength": 64 },
+        "body": { "type": "string", "minLength": 1, "maxLength": 8192 },
+        "thread_id": { "type": ["string", "null"] },
+        "generation_id": { "type": ["string", "null"] }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "seq"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "ack" },
+        "seq": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "body"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "status" },
+        "body": { "type": "string", "minLength": 1, "maxLength": 512 }
+      }
+    }
+  ]
+}

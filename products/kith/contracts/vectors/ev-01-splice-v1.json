@@ -1,0 +1,52 @@
+{
+  "id": "EV-01",
+  "title": "GET /mcp/events splice golden",
+  "description": "Inbox does not replay D1 for catch-up. Catch-up emits replay:true (must not exec). Live tail emits replay:false. If live min seq > cursor+1 the stream ends with gap. This file is a vector; splice() is not implemented here.",
+  "d1_persisted": [
+    { "seq": 1, "kind": "message", "body": "d1-1" },
+    { "seq": 2, "kind": "message", "body": "d1-2" },
+    { "seq": 3, "kind": "trace", "body": "d1-3" },
+    { "seq": 4, "kind": "message", "body": "d1-4" },
+    { "seq": 5, "kind": "message", "body": "d1-5" }
+  ],
+  "cases": [
+    {
+      "id": "EV-01-replay-then-live",
+      "after_seq": 0,
+      "live": [
+        { "seq": 6, "kind": "message", "body": "live-6" },
+        { "seq": 7, "kind": "message", "body": "live-7" }
+      ],
+      "expected": [
+        { "seq": 1, "kind": "message", "replay": true },
+        { "seq": 2, "kind": "message", "replay": true },
+        { "seq": 3, "kind": "trace", "replay": true },
+        { "seq": 4, "kind": "message", "replay": true },
+        { "seq": 5, "kind": "message", "replay": true },
+        { "seq": 6, "kind": "message", "replay": false },
+        { "seq": 7, "kind": "message", "replay": false }
+      ],
+      "gap": false
+    },
+    {
+      "id": "EV-01-gap",
+      "after_seq": 0,
+      "live": [
+        { "seq": 8, "kind": "message", "body": "live-8" },
+        { "seq": 9, "kind": "message", "body": "live-9" }
+      ],
+      "hole": {
+        "missing_seq": [6, 7],
+        "reason": "live min seq 8 > cursor 5 + 1 after catch-up"
+      },
+      "expected": [
+        { "seq": 1, "kind": "message", "replay": true },
+        { "seq": 2, "kind": "message", "replay": true },
+        { "seq": 3, "kind": "trace", "replay": true },
+        { "seq": 4, "kind": "message", "replay": true },
+        { "seq": 5, "kind": "message", "replay": true }
+      ],
+      "gap": true
+    }
+  ]
+}

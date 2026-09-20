@@ -2,7 +2,7 @@
 
 - Version: 0.1.0
 - Date: 2026-09-20
-- Status: proposed implementation baseline; documentation only
+- Status: M0–M6 in tree (rooms, agents, MCP, hosted mention, sidecar, ambient); M7 optional keyring (not E2EE; 不是端對端)
 - Repository: `fallrising/newclear`
 - Component: `products/kith`
 - Language: 繁體中文，保留必要英文術語
@@ -236,7 +236,7 @@ Sidecar: GET /mcp/events live tail --> 本地 INV-13 --> 官方 Codex CLI
 
 Hosted LLM 只從 `HostedGeneration` DO 打 `https://api.x.ai/v1`。核心版 **Workers 不可達** `127.0.0.1:20128`（pokercase / thinrouter）。不寫 Cloudflare Tunnel 說明。Sidecar 只跑在 operator 主機 loopback 工作目錄之外的獨立路徑（`/var/lib/kith/...` 示意）。
 
-誠實加密聲明：這是傳輸 TLS + 平台 at-rest，**不是** E2EE。Worker 在授權後可讀明文。應用層 AES-GCM keyring 為 M7 可選，不阻擋 M1–M6。不得把「D1 平台加密」寫成 E2EE。
+誠實加密聲明：這是傳輸 TLS + 平台 at-rest，**不是**端對端加密（not E2EE）。Worker 在授權後可讀明文。應用層 AES-GCM keyring 為 M7 可選、預設 off，不阻擋 M1–M6。不得把「D1 平台加密」寫成 E2EE。
 
 Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑證永不進 Worker secrets、永不進 git。測試用 canary，不用真實 key。
 
@@ -248,7 +248,7 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 
 文件優先級：本文件的不變量 > 專題章節 > roadmap 的示例命令。DESIGN 用於架構數字與模組邊界；來源文件用於理解及比較，不自動凌駕 kith 已明確選定的協定。
 
-本文件 baseline **不**新增 `.github/workflows/kith.yml`、不改 `docs/specs/monorepo-ci.md`、不建立空 `worker/` / `frontend/` / `sidecar/` 目錄。那些屬於後續 milestone／PR-1。
+M0 已新增根 `.github/workflows/kith.yml` 並更新 `docs/specs/monorepo-ci.md`。仍不建立空 `worker/` / `frontend/` / `sidecar/` 目錄（屬 M1+）。
 
 ## 13. 章節索引
 
@@ -263,3 +263,4 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 - [08 — 決策與來源](docs/sdd/08-decisions-sources.md)
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
+- [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)

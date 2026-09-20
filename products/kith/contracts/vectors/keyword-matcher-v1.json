@@ -1,0 +1,33 @@
+{
+  "id": "ATT-02",
+  "title": "Keyword matcher golden rows",
+  "description": "ASCII tokens use Unicode letter/digit boundaries and ASCII case-folding. CJK is substring with a minimum of 2 code points; shorter CJK keywords are rejected at load.",
+  "rows": [
+    {
+      "keywords": ["deploy"],
+      "body": "please Deploy now",
+      "hit": "yes"
+    },
+    {
+      "keywords": ["deploy"],
+      "body": "undeployed",
+      "hit": "no"
+    },
+    {
+      "keywords": ["部署"],
+      "body": "今晚部署嗎",
+      "hit": "yes"
+    },
+    {
+      "keywords": ["部"],
+      "body": "部署",
+      "hit": "load-reject",
+      "reason": "CJK keyword shorter than 2 code points rejected at load"
+    },
+    {
+      "keywords": ["gpt"],
+      "body": "GPT-4",
+      "hit": "yes"
+    }
+  ]
+}

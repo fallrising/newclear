@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "types": ["node", "@cloudflare/workers-types", "@cloudflare/vitest-plugin/types"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "worker/**/*.ts",
+    "vitest.config.ts",
+    "vitest.worker.config.ts",
+    "vitest.m3.config.ts"
+  ]
+}

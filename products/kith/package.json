@@ -1,0 +1,45 @@
+{
+  "name": "kith",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": "24.18.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev --port 8787 --ip 127.0.0.1 --var ff_mcp:on --var ff_hosted_agent:on --var ff_ambient:on",
+    "dev:frontend": "npm run dev --prefix frontend -- --host 127.0.0.1 --port 5173 --strictPort",
+    "dev:sidecar": "node scripts/run-sidecar-local.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply kith --local",
+    "db:seed:local": "node scripts/bootstrap-local.mjs",
+    "db:bootstrap:local": "node scripts/bootstrap-local.mjs && wrangler d1 execute kith --local --file=.wrangler/bootstrap-local.sql",
+    "test": "vitest run --exclude 'test/m1/**' --exclude 'test/m2/**' --exclude 'test/m3/**' --exclude 'test/m4/**' --exclude 'test/m6/**' --exclude 'test/m7/**' --exclude 'test/sidecar/**' && npm run test:sidecar && npm run test:m1 && npm run test:m3 && npm run test:m4 && npm run test:m6 && npm run test:m7",
+    "test:sidecar": "vitest run test/sidecar --environment node",
+    "test:m1": "vitest run --config vitest.worker.config.ts --maxWorkers=1 --no-isolate",
+    "test:m3": "vitest run --config vitest.m3.config.ts --maxWorkers=1 --no-isolate",
+    "test:m4": "vitest run --config vitest.m4.config.ts --maxWorkers=1 --no-isolate",
+    "test:m6": "vitest run --config vitest.m6.config.ts --maxWorkers=1 --no-isolate",
+    "test:m7": "vitest run --config vitest.m7.config.ts --maxWorkers=1 --no-isolate",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "4.13.8"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.13",
+    "@cloudflare/workers-types": "5.20260920.1",
+    "@types/node": "26.6.2",
+    "@vitest/runner": "4.1.11",
+    "@vitest/snapshot": "4.1.11",
+    "ajv": "8.20.0",
+    "typescript": "7.0.2",
+    "vite": "6.4.3",
+    "vitest": "4.1.11",
+    "wrangler": "4.135.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260918.1": true,
+    "esbuild@0.25.12": true
+  }
+}

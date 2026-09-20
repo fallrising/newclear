@@ -94,6 +94,14 @@ for (const chunk of chunks(agents, 6)) {
 notify(envelope):
   if event.kind != message or origin != local: return drop
   if sender_id == self: return drop          // INV-03
+  // INV-04 (wins over exclusive-mode switch): agent events never wake without @self.
+  // If @self and mode != silent, take mention path even when mode is keyword or ambient.
+  // INV-18 "ambient 一律 setAlarm" applies to the ambient branch (human, non-mention), not to @self.
+  if sender_kind == agent:
+    if self not in event.mentions: return drop
+    if policy.mode == silent: return drop
+    if not cooldown_elapsed: return drop
+    return dispatch_mention(envelope)
   switch policy.mode:
     silent: return drop
     mention:
@@ -105,7 +113,6 @@ notify(envelope):
       if not cooldown_elapsed: return drop
       return dispatch_mention(envelope)      // 與 mention 共用 hosted in-flight cap
     ambient:
-      if sender_kind == agent: return drop   // INV-04；即使 mentions 含 self，ambient 路徑也不在 notify 裡 dispatch
       write pending (replace if same membership)
       if pending.policy_epoch is stale: drop pending
       remaining = debounce_ms - (now - last_human_at)

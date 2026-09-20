@@ -1,0 +1,84 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-to-gitlab
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: Mirror main to GitLab
+    # A manual run from a feature branch must not publish it to GitLab main.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-09-20
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record the checked-out source commit
+        id: source
+        env:
+          REQUESTED_REF: ${{ github.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$REQUESTED_REF" = refs/heads/main
+          source_sha=$(git rev-parse --verify HEAD)
+          main_sha=$(git rev-parse --verify refs/remotes/origin/main)
+          test "$source_sha" = "$main_sha"
+          printf 'sha=%s\n' "$source_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Push and verify canonical main and tags
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          # Same namespace + repo name on GitLab as on GitHub.
+          GITLAB_NAMESPACE: fallrising
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${GITLAB_TOKEN:-}" || { echo 'GITLAB_TOKEN is not configured.' >&2; exit 1; }
+          test "$SOURCE_SHA" = "$(git rev-parse --verify HEAD)"
+
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          remote="https://gitlab.com/${GITLAB_NAMESPACE}/${repo_name}.git"
+          echo "Source: ${GITHUB_REPOSITORY}"
+          echo "Target: ${GITLAB_NAMESPACE}/${repo_name}"
+
+          # The helper contains no credential value; use the step environment.
+          # Do not persist a token in ~/.git-credentials or in a remote URL.
+          umask 077
+          askpass=$(mktemp "$RUNNER_TEMP/gitlab-askpass.XXXXXX")
+          trap 'rm -f "$askpass"' EXIT
+          cat > "$askpass" <<'SH'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' oauth2 ;;
+            *Password*) printf '%s\n' "$GITLAB_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          export LC_ALL=C
+
+          # No force push or ref deletion; divergence requires human review.
+          git -c credential.helper= push "$remote" "$SOURCE_SHA:refs/heads/main"
+          git -c credential.helper= push "$remote" --tags
+
+          remote_sha=$(git -c credential.helper= ls-remote "$remote" refs/heads/main | awk '{print $1}')
+          printf 'Checked-out GitHub main: %s\nGitLab main: %s\n' "$SOURCE_SHA" "$remote_sha"
+          test "$SOURCE_SHA" = "$remote_sha"
+          echo 'GitLab main mirror verified; tags push completed.'

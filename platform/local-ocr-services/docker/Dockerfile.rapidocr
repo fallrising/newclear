@@ -1,0 +1,35 @@
+FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PYTHONPATH=/app/src \
+    OCR_BACKEND=rapidocr \
+    OCR_ARTIFACT_MANIFEST=/opt/ocr-artifacts.sha256
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 ocr \
+    && useradd --system --uid 10001 --gid ocr --home-dir /nonexistent ocr
+
+COPY requirements/base.txt requirements/rapidocr.txt /app/requirements/
+RUN python -m pip install --disable-pip-version-check --no-cache-dir \
+    -r /app/requirements/rapidocr.txt
+
+COPY src /app/src
+COPY docker/entrypoint.sh /usr/local/bin/ocr-entrypoint
+RUN find /usr/local/lib/python3.11/site-packages/rapidocr/models -type f \
+        -exec sha256sum {} + > /opt/ocr-artifacts.sha256 \
+    && test -s /opt/ocr-artifacts.sha256 \
+    && chmod 0555 /usr/local/bin/ocr-entrypoint \
+    && chmod -R a-w /usr/local/lib/python3.11/site-packages/rapidocr/models \
+    && chown -R ocr:ocr /app
+
+USER 10001:10001
+EXPOSE 8000
+
+ENTRYPOINT ["/usr/local/bin/ocr-entrypoint"]
+CMD ["python", "-m", "uvicorn", "ocr_service.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

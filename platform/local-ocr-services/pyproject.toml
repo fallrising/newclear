@@ -1,0 +1,10 @@
+[project]
+name = "local-ocr-services"
+version = "0.1.0"
+description = "CPU-first, independently deployable local OCR services"
+requires-python = ">=3.11,<3.14"
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+pythonpath = ["src"]
+testpaths = ["tests"]

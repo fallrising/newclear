@@ -6,7 +6,7 @@ This document records evidence collected on the selected target host `de1`. It i
 separate from the historical 2026-09-04 evidence in `docs/verification.md`. Current
 commands ran between `2026-09-04T07:08:22+02:00` and
 `2026-09-04T09:13:40+02:00` from
-`/home/ckc/test/codex/local-ocr-services`.
+`<monorepo-root>/platform/local-ocr-services`.
 
 Evidence labels used below:
 
@@ -431,7 +431,7 @@ docker build --file docker/Dockerfile.test --tag local-ocr-services:test .
 docker run --rm local-ocr-services:test
 ......................................                                   [100%]
 38 passed in 1.21s
-docker run --rm --volume "/home/ckc/test/codex/local-ocr-services:/app:ro" --workdir /app --env PYTHONPATH=/app/src python:3.11-slim python scripts/check_syntax.py src tests
+docker run --rm --volume "<monorepo-root>/platform/local-ocr-services:/app:ro" --workdir /app --env PYTHONPATH=/app/src python:3.11-slim python scripts/check_syntax.py src tests
 syntax OK: 18 Python files
 docker compose config --quiet
 docker compose --profile rapidocr config --services
@@ -1790,7 +1790,7 @@ docker run --rm --network none --read-only --cap-drop ALL \
 python3 -m py_compile .team/evidence/M3/compare_image_source.py
 sha256sum .team/evidence/M3/compare_image_source.py
 python3 .team/evidence/M3/compare_image_source.py \
-  --host-root /home/ckc/test/codex/local-ocr-services \
+  --host-root <monorepo-root>/platform/local-ocr-services \
   --image-root /tmp/local-ocr-services-m3.Jt02KG/embedded-rework
 ```
 
@@ -1923,7 +1923,7 @@ python3 -m py_compile .team/evidence/M3/generate_functional_fixtures.py
 sha256sum .team/evidence/M3/generate_functional_fixtures.py
 docker run --rm \
   --volume /tmp/local-ocr-services-m3.Jt02KG:/fixtures \
-  --mount type=bind,src=/home/ckc/test/codex/local-ocr-services/.team/evidence/M3/generate_functional_fixtures.py,dst=/generate_functional_fixtures.py,readonly \
+  --mount type=bind,src=<monorepo-root>/platform/local-ocr-services/.team/evidence/M3/generate_functional_fixtures.py,dst=/generate_functional_fixtures.py,readonly \
   local-ocr-services:test \
   sh -c 'set -eu; umask 077; apt-get update >/fixtures/fixture-generation.log 2>&1; DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends fonts-noto-cjk >>/fixtures/fixture-generation.log 2>&1; python /generate_functional_fixtures.py --private-text-file /fixtures/expected-text-only --output-dir /fixtures; chmod 0644 /fixtures/traditional.png /fixtures/english.png; chmod 0600 /fixtures/fixture-generation.log'
 docker run --rm --network none \
@@ -2070,10 +2070,10 @@ tesseract
 paddle-structure
 # exit 0
 
-$ python3 /home/ckc/test/codex/codex-team-superpowers/scripts/teamctl.py validate-task .team/tasks/T-005.md
+$ python3 <codex-team-superpowers-checkout>/scripts/teamctl.py validate-task .team/tasks/T-005.md
 validate-task validation passed: .team/tasks/T-005.md
 # exit 0
-$ python3 /home/ckc/test/codex/codex-team-superpowers/scripts/teamctl.py validate-report .team/reports/T-005.md
+$ python3 <codex-team-superpowers-checkout>/scripts/teamctl.py validate-report .team/reports/T-005.md
 validate-report validation passed: .team/reports/T-005.md
 # exit 0
 $ git diff --check
@@ -2200,7 +2200,7 @@ $ git rev-parse HEAD
 $ git rev-parse origin/main
 29a330555d797a4d3bc57246563433ed71d45f1b
 # exit 0
-$ git -C /home/ckc/test/codex/worktrees/local-ocr-services-T-006 status --short --branch
+$ git -C <worktree> status --short --branch
 ## agent/t006
  M .team/tasks/T-006.md
 ?? .team/evidence/M4/

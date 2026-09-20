@@ -4,7 +4,7 @@ Date: 2026-09-02 (Europe/Berlin)
 
 ## Repository and GitHub
 
-- Target `/home/ckc/test/codex/ice-maker` was absent before bootstrap.
+- Target `<monorepo-root>/platform/ice-maker` was absent before bootstrap.
 - `gh auth status` identified authenticated login `fallrising`; no credential was
   copied into this repository.
 - `gh repo view fallrising/ice-maker` initially returned repository-not-found.

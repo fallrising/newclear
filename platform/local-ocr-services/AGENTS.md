@@ -1,6 +1,6 @@
 # AGENTS.md
 
-The parent `/home/ckc/test/codex/AGENTS.md` applies. This file records repository facts.
+The parent `<workspace-root>/AGENTS.md` applies. This file records repository facts.
 
 ## Project facts
 

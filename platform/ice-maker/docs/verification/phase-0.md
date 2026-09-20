@@ -22,7 +22,7 @@
 - `python3 -m unittest tests.test_phase0_contracts -v` — passed, 7 tests.
 - `make check` — passed; repository checks and 7 tests.
 - `git diff --check` — passed.
-- `diff -qr /home/ckc/test/codex/knowledge-pipeline-sdd docs/sdd` — passed.
+- `diff -qr <knowledge-pipeline-sdd-checkout> docs/sdd` — passed.
 - `sha256sum -c docs/execution/sdd-source.sha256` — passed, 11 files.
 - `docker ps --format ...` — passed; local daemon reachable. Running containers
   are unrelated and were not modified.

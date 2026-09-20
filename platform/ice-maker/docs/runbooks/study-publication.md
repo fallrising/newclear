@@ -52,7 +52,7 @@ text, absolute host paths, credentials, and unapproved content are forbidden.
 
 ## 2. Prepare a clean base without touching an existing checkout
 
-Never point this workflow at `/home/ckc/test/codex/doc_analysis_study` or any
+Never point this workflow at `<doc-analysis-study-checkout>` or any
 other working checkout. Create a dedicated clone in a private operator-owned
 directory, verify the allowlisted remote, and detach it at the reviewed current
 `origin/main` commit:

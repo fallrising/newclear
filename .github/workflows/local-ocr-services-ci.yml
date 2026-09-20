@@ -1,0 +1,30 @@
+name: Local OCR Services CI
+
+on:
+  pull_request:
+    paths: ["platform/local-ocr-services/**", ".github/workflows/local-ocr-services-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["platform/local-ocr-services/**", ".github/workflows/local-ocr-services-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-ocr-services-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: platform/local-ocr-services
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run repository gate
+        run: make check

@@ -70,9 +70,9 @@
 | 其他 `docs/specs/*` | 只讀；缺失不補寫 |
 | `apps/` `services/` `packages/` | 禁止 |
 
-Worktree：`/home/ckc/test/workspace/worktrees/cms-synthesis`  
+Worktree：`<worktree>`
 Branch：`agent/cms-synthesis`  
-發布庫：`/home/ckc/test/workspace/cms-scaffold`（本車道不直接改 `main`）
+發布庫：`<monorepo-root>/apps/cms-scaffold`（本車道不直接改 `main`）
 
 ---
 

@@ -1,14 +1,14 @@
 # Master Build Prompt
 
-把下列 prompt 交給在 `/home/ckc/test/codex` 啟動、可讀取該目錄 `AGENTS.md` 的 Codex orchestrator。
+把下列 prompt 交給在 `<workspace-root>` 啟動、可讀取該目錄 `AGENTS.md` 的 Codex orchestrator。
 
 ```text
 你是這次完整開發的 ORCHESTRATOR。請從空白 Git repository bootstrap 開始，持續完成 Personal Engineering Knowledge Compiler 的 Phase 0–7，逐階段驗證並 push GitHub checkpoint，直到建立可供人類最終 review 的 PR。不要只提供計畫；在完成 preflight 後實際執行。
 
 固定輸入：
-- Parent workspace: /home/ckc/test/codex
-- Target path: /home/ckc/test/codex/ice-maker
-- SDD source: /home/ckc/test/codex/knowledge-pipeline-sdd
+- Parent workspace: <workspace-root>
+- Target path: <monorepo-root>/platform/ice-maker
+- SDD source: <knowledge-pipeline-sdd-checkout>
 - GitHub repo: fallrising/ice-maker
 - Visibility: private
 - Default branch: main
@@ -20,7 +20,7 @@ Protected-path 授權：
 - 這不是全面權限：只能做最小、可測試、可回滾且不降低 branch protection、least privilege、approval、secret 或 sandbox 控制的變更。任何無關 workflow/policy、擴權、停用 gate、直接 push main、merge 或 deploy 仍未授權。
 
 權威文件與規則：
-1. 先完整閱讀 /home/ckc/test/codex/AGENTS.md。
+1. 先完整閱讀 <workspace-root>/AGENTS.md。
 2. 再依 knowledge-pipeline-sdd/README.md 的順序完整閱讀全部 SDD，尤其是 02、03、05、06、07 與 AGENTS.md。
 3. Current user request 與 acceptance criteria 優先，其次是 approved spec/ADR、tests、implementation、README/comments。
 4. 上層 AGENTS.md 的具體多模型 routing/team protocol 與 SDD 的 product/security/knowledge rules 同時適用；不得以 worker prompt 降低任一安全限制。
@@ -35,7 +35,7 @@ Protected-path 授權：
 
 Repository bootstrap：
 - 在 GitHub 建立 private fallrising/ice-maker，使用最小 README seed main。
-- Clone 到 /home/ckc/test/codex/ice-maker，從 origin/main 建立 build/full-sdd；不直接 push main。
+- Clone 到 <monorepo-root>/platform/ice-maker，從 origin/main 建立 build/full-sdd；不直接 push main。
 - 把 SDD source 原樣複製到 ice-maker/docs/sdd，保留來源不變，並以 diff/hash 驗證完整性。
 - 建立 target root AGENTS.md，使上層 multi-model team protocol 與 SDD product-specific rules 在 repo 單獨 clone 後仍然有效；不得刪減 security/knowledge rules。
 - 建立 .team/PLAN.md、.team/tasks、.team/reports，以及 bootstrap spec/plan/tasks/verification。
@@ -44,7 +44,7 @@ Repository bootstrap：
 
 多模型執行：
 - 你是唯一 ORCHESTRATOR，擁有 PLAN、task routing、diff review、accept/rework/reassign、integration 與 phase gate。
-- 依 /home/ckc/test/codex/AGENTS.md 選最低成本且可靠的 worker；一次 rework 仍失敗才按規則升級。
+- 依 <workspace-root>/AGENTS.md 選最低成本且可靠的 worker；一次 rework 仍失敗才按規則升級。
 - 每個 task 約五個檔案或三十分鐘。先寫 .team/tasks/T-###.md，列明 goal、why、inputs、allowed/forbidden paths、definition of done、verification、budget 與 commit 權限，再 dispatch。
 - 所有可寫 worker 使用獨立 branch/worktree；禁止兩個 worker 同時修改相同檔案、schema、API、migration 或 contract。
 - Worker 只寫自己的 report；不直接 push、開 PR、改 integration branch或詢問人類。

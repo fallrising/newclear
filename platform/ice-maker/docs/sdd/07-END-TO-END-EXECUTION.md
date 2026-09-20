@@ -14,9 +14,9 @@
 
 | Input | Value |
 |---|---|
-| Parent workspace | `/home/ckc/test/codex` |
-| Target repository | `/home/ckc/test/codex/ice-maker` |
-| SDD source pack | `/home/ckc/test/codex/knowledge-pipeline-sdd` |
+| Parent workspace | `<workspace-root>` |
+| Target repository | `<monorepo-root>/platform/ice-maker` |
+| SDD source pack | `<knowledge-pipeline-sdd-checkout>` |
 | GitHub repository | `fallrising/ice-maker` |
 | Visibility | private |
 | Default branch | `main` |
@@ -41,7 +41,7 @@
 ## 4. Safe repository bootstrap
 
 1. 由 GitHub 建立 private `fallrising/ice-maker`，用最小 README seed `main`，避免 agent 直接 push 初始內容到 `main`。
-2. Clone 到 `/home/ckc/test/codex/ice-maker`；clone 本身完成 Git 初始化。
+2. Clone 到 `<monorepo-root>/platform/ice-maker`；clone 本身完成 Git 初始化。
 3. 從 `origin/main` 建立 `build/full-sdd`。
 4. 原樣複製 SDD pack 到 `docs/sdd/`，來源目錄保持不變；以逐檔 hash 或 `diff` 驗證。
 5. Target root `AGENTS.md` 同時承載上層多模型 team protocol 與本 pack 的 product-specific rules。不可因合併規則而刪除 security/knowledge constraints。

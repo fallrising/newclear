@@ -11,6 +11,8 @@ The connector's commit operation cannot set author/committer timestamps, so its 
 | `352ce0a39af29d3190e0af213d61e727ddae5256` | `3fd07ab235b437b27bf63bddc1c3d4a272fb686a` | `d2a57ac10b32f71f5bd2ebbbfe68349ab2ba2ec1` |
 | `56ca8d0b1f1445f1473ccf3725ec53e0b4a9d45a` | `e7d74275b1bbf157ab8d1888e3d482e95fb647b2` | `9880368a9bfde197a2172d5f5108fb383eef9633` |
 
+| `63e8136bc70e42190b5bbd212a487886a5b862a6` | `a608a94efc601c9affce554ca64bd4d733ee6839` | `5752b65fd9fe759a788d2af3780510f12e88c3da` |
+
 Fresh-install local native checks and the initial independent review targeted local `56ca8d0`. [Initial CI run](https://github.com/fallrising/newclear/actions/runs/35509526982) checked synthetic PR merge `c2601922d9c8b6b5f71baf74379691e8612ab544`, with parents source main `1117d297aa3efef9472d847c9dfa5714eb6c4460` and remote `e7d7427`. Its full tree was verified through the GitHub Git Commit API to be the same `9880368a...`. This proves source equivalence, not acceptance: review found issues after those tests passed, and later correction evidence supersedes it.
 
 The original local history is preserved on `agent/dim-gate/mainline/m0-local-history`. The working branch was cleanly recreated at the remote equivalent after an empty full-tree diff. Future continuation should fetch the named remote branch, not assume local-only object IDs resolve on GitHub. [PLAN](../PLAN.md) and the final integration report identify the accepted durable implementation and checkpoint.

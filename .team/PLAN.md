@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 9 |
+| protocol_version / ledger_revision | 1 / 10 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M1-20260920-01 |
@@ -32,7 +32,7 @@
 | Milestone | Workflow state | Accepted implementation | Integration | Gate |
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
-| M1 | RUNNING | none | NOT_OPENED | M0; AC-04–08,20 |
+| M1 | RUNNING | candidate `9b656f276ef9f5dd3b18f8ca698bea6496751839` | DRAFT — PR #11 | AC-04–08,20 passed locally; review and remote CI pending |
 | M2 | NOT_STARTED | none | NOT_OPENED | M1; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
@@ -49,6 +49,14 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-003](tasks/T-003.md) / 1 | 01/02 | rev1, T-002 | UI worker / collaboration | 1 / ACCEPTED | agent/dim-gate/mainline/t-003 | [report](reports/T-003.md); 7 focused tests, contrast correction; browser gates owned by lead |
 | [T-004](tasks/T-004.md) / 3 | 01/02/03 | fixed integration candidate | independent reviewer / collaboration | 3 / ACCEPTED | agent/dim-gate/mainline/t-004-review | [review](reports/T-004.md); all recorded findings independently closed |
 | [T-005](tasks/T-005.md) / 3 | 01/02/03 | T-001–004 | orchestrator / local tools | 3 / ACCEPTED | agent/dim-gate/mainline/m0-foundation | [integration report](reports/T-005.md); native, browser and remote gates passed |
+| [T-006](tasks/T-006.md) / 1 | M0 regression / M1 architecture | merged M0 | orchestrator / local tools | 1 / ACCEPTED | agent/dim-gate/mainline/m1-cmdb | [report](reports/T-006.md); behavior-preserving boundaries, 82 tests, 7 E2E |
+| [T-007](tasks/T-007.md) / 1 | 04–08/20 domain | T-006 | collaboration worker + lead | 1 / ACCEPTED | agent/dim-gate/task/t007-shared | [report](reports/T-007.md); 60-CI shared domain, 96 tests |
+| [T-008](tasks/T-008.md) / 1 | 06/08/20 | T-007 | collaboration worker + lead | 1 / ACCEPTED | agent/dim-gate/task/t008-rd | [report](reports/T-008.md); RD app/environment UI |
+| [T-009](tasks/T-009.md) / 1 | 04/05/08 | T-007 | collaboration worker + lead | 1 / ACCEPTED | agent/dim-gate/task/t009-ops | [report](reports/T-009.md); Ops CMDB workflows |
+| [T-010](tasks/T-010.md) / 1 | 07/08/20 | T-007 | collaboration worker + lead | 1 / ACCEPTED | agent/dim-gate/task/t010-topology | [report](reports/T-010.md); bounded topology/table |
+| [T-011](tasks/T-011.md) / 1 | 04–08/20 integration | T-007–010 | orchestrator / local tools | 1 / ACCEPTED CANDIDATE | agent/dim-gate/mainline/m1-cmdb | [report](reports/T-011.md); 120 tests, 11 E2E; review pending |
+| [T-012](tasks/T-012.md) / 1 | independent review | T-011 | independent collaboration reviewer | 1 / ACTIVE | isolated review worktree | pending |
+| [T-013](tasks/T-013.md) / 1 | final acceptance | T-012 | orchestrator / local tools | 1 / BLOCKED ON REVIEW+CI | agent/dim-gate/mainline/m1-cmdb | pending |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -146,3 +154,38 @@ next_action: dispatch T-008 RD, T-009 Ops CMDB and T-010 topology in isolated wo
 DG-D011: ACCEPT T-006 architecture prerequisite at `49e1b89754421cf0e2f76026416a1af184ceab94`. Fresh evidence is 82/82 tests, 7/7 production E2E, frozen install, lint, typecheck, docs, unchanged 72-operation/165-schema OpenAPI, CI policy, feature-boundary check, demo build, actionlint 1.7.12 and diff check. M0 AC-01–03 remain valid on this tree. Freeze M1 integration contract revision 1 at `9ea032f66daabf68350482bfedac81f63e5221ec`; T-007 owns shared contracts/seed/domain, and T-008–T-010 remain blocked on its acceptance. M1 is RUNNING, not ACCEPTED; no M1 PR exists yet.
 
 DG-D012: ACCEPT T-007 shared foundation at `888d81203d01aab8781c42ac47138e053bf2c487`. The orchestrator closed the worker's two expected central needs (M1 POST handler composition and generated OpenAPI) and the full fixed-commit result is 96/96 tests plus 7/7 M0 production E2E and every native/architecture/actionlint gate. Dispatch T-008 RD, T-009 Ops CMDB and T-010 topology from this accepted domain/API/seed base with disjoint file ownership. M1 remains RUNNING and PR #11 remains Draft.
+
+### M1 integrated candidate checkpoint
+
+DG-D013: ACCEPT T-008, T-009 and T-010 only as integrated slices at product/tested commit `9b656f276ef9f5dd3b18f8ca698bea6496751839`; accept T-011 as the review candidate. Evidence is 120/120 tests, 11/11 production E2E, frozen install, lint, typecheck, docs, 72-operation/166-schema contracts, CI/architecture checks, demo build, actionlint and diff check. AC-04–08 and AC-20 pass locally and all seven M0 browser regressions remain valid. M1 itself remains RUNNING: T-012 independent fixed-commit review and current remote synthetic-merge CI are still mandatory. PR #11 is DRAFT and unmerged.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M1-20260920-01
+terminal_state: running
+active_owner: Codex orchestrator
+target_ref: main
+source_main: 50294b687d06f08e94290f6f327187e8f69248bc
+last_reconciled_target: 50294b687d06f08e94290f6f327187e8f69248bc
+continuation_ref: agent/dim-gate/mainline/m1-cmdb
+milestone: M1
+task_id: T-012
+implementation_commit: 9b656f276ef9f5dd3b18f8ca698bea6496751839
+local_tested_commit: 9b656f276ef9f5dd3b18f8ca698bea6496751839
+ci_tested_merge: pending current remote CI
+spec_revision: M1-INTEGRATION-CONTRACT revision 1 at 9ea032f66daabf68350482bfedac81f63e5221ec
+evidence_refs:
+  - .team/reports/dim-gate-m1-preflight.md
+  - .team/reports/T-006.md
+  - .team/reports/T-007.md
+  - .team/reports/T-008.md
+  - .team/reports/T-009.md
+  - .team/reports/T-010.md
+  - .team/reports/T-011.md
+integration_state: DRAFT_PR_11
+remote_durability: product commit awaiting push; prior architecture checkpoint is remote
+blockers: []
+next_action: commit evidence checkpoint, push over SSH, dispatch T-012 independent fixed-commit review, then reconcile current remote CI and decide T-013 acceptance without merging
+```

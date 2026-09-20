@@ -9,7 +9,7 @@ M0（AC-01–03）已由主控驗收，實作 commit `695e962304276ab80885c985ce
 | 階段 | 狀態 |
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
-| M1：CMDB與應用視圖 | 進行中；先完成行為不變的架構整理與 M0 regression |
+| M1：CMDB與應用視圖 | 進行中；T-006 架構與 T-007 共用 domain/60-CI seed 已接受，UI slices 待整合 |
 | M2：申請與平台治理 | 尚未開始 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |

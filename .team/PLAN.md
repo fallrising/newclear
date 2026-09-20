@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 8 |
+| protocol_version / ledger_revision | 1 / 9 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M1-20260920-01 |
@@ -130,16 +130,19 @@ target_ref: main
 source_main: 50294b687d06f08e94290f6f327187e8f69248bc
 continuation_ref: agent/dim-gate/mainline/m1-cmdb
 milestone: M1
-task_id: T-007
-implementation_commit: 49e1b89754421cf0e2f76026416a1af184ceab94
+task_id: T-008, T-009, T-010
+implementation_commit: 888d81203d01aab8781c42ac47138e053bf2c487
 spec_revision: M1-INTEGRATION-CONTRACT revision 1 at 9ea032f66daabf68350482bfedac81f63e5221ec
 evidence_refs:
   - .team/reports/dim-gate-m1-preflight.md
   - .team/reports/T-006.md
+  - .team/reports/T-007.md
 integration_state: NOT_OPENED
 remote_durability: local branch only until first accepted checkpoint is pushed
 blockers: []
-next_action: dispatch T-007 shared schema/seed/domain work from the fixed contract; accept it before branching T-008–T-010
+next_action: dispatch T-008 RD, T-009 Ops CMDB and T-010 topology in isolated worktrees from accepted T-007; then integrate centrally in T-011
 ```
 
 DG-D011: ACCEPT T-006 architecture prerequisite at `49e1b89754421cf0e2f76026416a1af184ceab94`. Fresh evidence is 82/82 tests, 7/7 production E2E, frozen install, lint, typecheck, docs, unchanged 72-operation/165-schema OpenAPI, CI policy, feature-boundary check, demo build, actionlint 1.7.12 and diff check. M0 AC-01–03 remain valid on this tree. Freeze M1 integration contract revision 1 at `9ea032f66daabf68350482bfedac81f63e5221ec`; T-007 owns shared contracts/seed/domain, and T-008–T-010 remain blocked on its acceptance. M1 is RUNNING, not ACCEPTED; no M1 PR exists yet.
+
+DG-D012: ACCEPT T-007 shared foundation at `888d81203d01aab8781c42ac47138e053bf2c487`. The orchestrator closed the worker's two expected central needs (M1 POST handler composition and generated OpenAPI) and the full fixed-commit result is 96/96 tests plus 7/7 M0 production E2E and every native/architecture/actionlint gate. Dispatch T-008 RD, T-009 Ops CMDB and T-010 topology from this accepted domain/API/seed base with disjoint file ownership. M1 remains RUNNING and PR #11 remains Draft.

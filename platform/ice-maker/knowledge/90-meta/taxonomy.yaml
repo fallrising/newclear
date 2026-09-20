@@ -1,0 +1,15 @@
+domains:
+  - operations
+  - software
+  - systems
+concepts:
+  - consistency
+  - idempotency
+  - privacy
+  - provenance
+relations:
+  - contrasts_with
+  - depends_on
+  - derived_from
+  - example_of
+  - implements

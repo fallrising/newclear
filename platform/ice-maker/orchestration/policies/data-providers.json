@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "default": "deny",
+  "data_classes": [
+    "public",
+    "internal",
+    "confidential",
+    "restricted"
+  ],
+  "providers": {
+    "local": {
+      "egress": false,
+      "allowed_data_classes": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "blocked_data_classes": []
+    },
+    "codex": {
+      "egress": true,
+      "allowed_data_classes": [
+        "public",
+        "internal"
+      ],
+      "blocked_data_classes": [
+        "confidential",
+        "restricted"
+      ]
+    },
+    "claude": {
+      "egress": true,
+      "allowed_data_classes": [
+        "public",
+        "internal"
+      ],
+      "blocked_data_classes": [
+        "confidential",
+        "restricted"
+      ]
+    },
+    "grok": {
+      "egress": true,
+      "allowed_data_classes": [
+        "public",
+        "internal"
+      ],
+      "blocked_data_classes": [
+        "confidential",
+        "restricted"
+      ]
+    },
+    "deepseek": {
+      "egress": true,
+      "allowed_data_classes": [
+        "public",
+        "internal"
+      ],
+      "blocked_data_classes": [
+        "confidential",
+        "restricted"
+      ]
+    }
+  },
+  "rules": [
+    "Unknown providers and data classes are denied.",
+    "Confidential and restricted material must not be transmitted to an external provider.",
+    "Data rights and redaction approval are required before any external transmission."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "default_action": "deny",
+  "direct_egress": false,
+  "proxy": "egress-proxy",
+  "allow": [
+    {"host": "api.github.com", "scheme": "https", "port": 443},
+    {"host": "github.com", "scheme": "https", "port": 443},
+    {"host": "pypi.org", "scheme": "https", "port": 443},
+    {"host": "files.pythonhosted.org", "scheme": "https", "port": 443}
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "schema_version": "publication-manifest.v1",
+  "manifest_id": "system-design",
+  "title": "System Design Patterns",
+  "chapters": ["knowledge/50-patterns/synthetic-idempotency.json"]
+}

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "owner": "@fallrising",
+  "approval": "required",
+  "paths": [
+    "CODEOWNERS",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
+    ".github/workflows/ci.yml",
+    ".github/workflows/agent.yml",
+    "orchestration/policies/data-providers.json",
+    "orchestration/policies/protected-paths.json"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "knowledge-record.v1",
+  "source": "knowledge/50-patterns/synthetic-idempotency.json",
+  "note_id": "synthetic-idempotency",
+  "title": "Synthetic Idempotency Pattern",
+  "text": "Synthetic Phase 5 pattern: make retries safe by assigning stable operation identities and recording completion before acknowledging work.",
+  "synthetic": true,
+  "citations": [
+    {"source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "chunk_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "chunk_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+  ],
+  "references": []
+}

@@ -9,11 +9,11 @@
 | 欄位 | 初始值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 1 |
+| protocol_version / ledger_revision | 1 / 2 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none；mainline不是實驗fork |
-| active_owner / run_id | none / none；尚未啟動implementation run |
-| active_work_branch / task_id | none / none |
+| active_owner / run_id | Codex / DG-M0-20260920-01 |
+| active_work_branch / task_id | agent/dim-gate/mainline/m0-foundation / T-001–T-003 |
 | spec_revision | `746585718429615288c85bf0027ae4a31c13e36b`，SDD基線，後續需核對相關spec blob差異 |
 | kernel_protocol_source | `7cddad13f965d579b218579609c7f64e1ecf35b2`；來源及採用方式見協定 |
 | last_reconciled_target | `746585718429615288c85bf0027ae4a31c13e36b`，2026-09-20 |
@@ -33,7 +33,7 @@
 
 | Milestone | Workflow state | Accepted implementation | Integration | 前置與gate |
 | --- | --- | --- | --- | --- |
-| M0 | NOT_STARTED | none | NOT_OPENED | SDD基線；AC-01～03及M0 native gates |
+| M0 | RUNNING | none | NOT_OPENED | SDD基線；AC-01～03及M0 native gates |
 | M1 | NOT_STARTED | none | NOT_OPENED | M0；CMDB／應用與scope驗收 |
 | M2 | NOT_STARTED | none | NOT_OPENED | M1；申請／治理／交付驗收 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2；CI/CD與回滾驗收 |
@@ -88,3 +88,19 @@ next_action: 讀取DEVELOPMENT_PROMPT，核對remote與open PR、kernel及模型
 ```
 
 `blockers: []`表示目前沒有已記錄的產品阻塞，不表示尚未盤點的工具／認證／runtime已可用。下一次接手先reconcile，不能僅依此初始resume block另造第二個開發分支。
+
+### Run DG-M0-20260920-01
+
+Started 2026-09-20. Source newclear `1117d297aa3efef9472d847c9dfa5714eb6c4460`, kernel `7cddad13f965d579b218579609c7f64e1ecf35b2`. [Preflight](reports/dim-gate-m0-preflight.md) records every full-text reading and Git reconciliation. Prior documentation checkout preserved; no open implementation PR or active owner found. Mainline branch `agent/dim-gate/mainline/m0-foundation`.
+
+Authorization: isolated worktrees, necessary dependencies, bounded workers, local checks, orchestrator commit/push/PR. No merge, main writes, force push, deployments, real infrastructure, global settings or paid authority expansion. Budget: at most three dispatch/evaluate cycles, one same-approach rework. Cycle 1 covers bounded implementation; independent read-only review follows integration.
+
+| Task/revision | AC | Dependencies | Owner/route | Attempt/state | Branch | Implementation/evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| [T-001](tasks/T-001.md) / 1 | 02/03 | fixed contract | domain worker / collaboration | 1 / READY | agent/dim-gate/mainline/t-001 | pending |
+| [T-002](tasks/T-002.md) / 1 | 01/02/03 | fixed contract; domain for integration | transport worker / collaboration | 1 / READY | agent/dim-gate/mainline/t-002 | pending |
+| [T-003](tasks/T-003.md) / 1 | 01/02 | fixed contract; HTTP for integration | UI worker / collaboration | 1 / READY | agent/dim-gate/mainline/t-003 | pending |
+
+Orchestrator owns manifest/lockfile/config/CI/docs/E2E and acceptance. All agents inherit the active model; model ID unavailable from this surface, not guessed. Claude/other external CLI routes unavailable; reviewer will be separate read-only session. Skills read from private source, not installed or copied here. This run uses multi-agent execution; no verified multi-model claim.
+
+Native gates: component `pnpm install --frozen-lockfile`, lint, typecheck, test, check:docs, check:contracts, build --mode demo, test:e2e; independent review, scoped workflow checks and remote CI. Current terminal state running, integration NOT_OPENED, remote durability LOCAL_ONLY until verified push. Next action: finish pinned dependency install, dispatch three isolated bounded tasks, integrate their diffs and rerun gates.

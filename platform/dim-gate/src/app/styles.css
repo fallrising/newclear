@@ -73,7 +73,7 @@ select { min-height: 38px; border: 1px solid var(--border); border-radius: 6px; 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; left: 12px; top: -100px; z-index: 100; padding: 10px 16px; background: var(--primary); color: var(--primary-foreground); border-radius: 6px; }
 .skip-link:focus { top: 10px; }
-.button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border: 1px solid transparent; padding: 8px 14px; border-radius: 6px; font-size: 13px; line-height: 1.4; font-weight: 600; white-space: nowrap; transition: background-color .12s, color .12s; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border: 1px solid transparent; padding: 8px 14px; border-radius: 6px; font-size: 13px; line-height: 1.4; font-weight: 600; white-space: nowrap; }
 .button-primary { color: var(--primary-foreground); background: var(--primary); }
 .button-primary:hover:not(:disabled) { filter: brightness(.95); }
 .button-outline { color: var(--foreground); border-color: var(--border); background: var(--card); }

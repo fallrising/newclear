@@ -9,10 +9,10 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 5 |
+| protocol_version / ledger_revision | 1 / 6 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | released / DG-M0-20260920-01 |
+| active_owner / run_id | Codex / DG-M0-20260920-01 |
 | active_work_branch | agent/dim-gate/mainline/m0-foundation |
 | source / last_reconciled_target | initial `1117d297aa3efef9472d847c9dfa5714eb6c4460` / reconciled `a330237860b3002d68fec3f853a6d1deb44a8e9a`, 2026-09-20 |
 | source kernel protocol | `7cddad13f965d579b218579609c7f64e1ecf35b2` |
@@ -31,7 +31,7 @@
 
 | Milestone | Workflow state | Accepted implementation | Integration | Gate |
 | --- | --- | --- | --- | --- |
-| M0 | ACCEPTED | `a608a94efc601c9affce554ca64bd4d733ee6839` | OPEN — PR #7 | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
+| M0 | REWORK | `a608a94efc601c9affce554ca64bd4d733ee6839` | OPEN — PR #7 | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | NOT_STARTED | none | NOT_OPENED | M0; AC-04–08,20 |
 | M2 | NOT_STARTED | none | NOT_OPENED | M1; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
@@ -79,8 +79,8 @@ project_id: dim-gate
 variant_id: mainline
 protocol_version: 1
 run_id: DG-M0-20260920-01
-terminal_state: DONE
-active_owner: none
+terminal_state: running
+active_owner: Codex
 target_ref: main
 last_reconciled_target: a330237860b3002d68fec3f853a6d1deb44a8e9a
 continuation_ref: agent/dim-gate/mainline/m0-foundation
@@ -106,3 +106,7 @@ next_action: review existing PR 7; do not auto-merge. Next development run must 
 [PR #7](https://github.com/fallrising/newclear/pull/7) is the sole implementation PR. [Correction CI](https://github.com/fallrising/newclear/actions/runs/35513061081) passed 82 tests and 7 E2E using standard Playwright Chromium. [Independent review](reports/T-004.md) closed the original findings. [Integration evidence](reports/T-005.md) records exact commits, main reconciliation and acceptance limits. Acceptance is not merge or deployment.
 
 Local HTTPS credentials were absent; authorized GitHub Git Data API publication verified exact full trees. [Commit mapping](reports/dim-gate-commit-map.md) preserves recoverable equivalents. Refresh remote branch and PR before continuing; do not create a duplicate M0 task or PR. This final metadata-only checkpoint does not invalidate the accepted product evidence.
+
+### Final checkpoint gate reopened
+
+DG-D009: metadata CI run35513677939 failed dark-theme axe (6/7 E2E); button foreground/background color interpolation briefly falls below contrast limits. M0 acceptance is suspended pending the reserved third-cycle correction, fixed-commit browser revalidation, independent follow-up and new remote CI. Existing tests are unchanged; remove only the button color transition. Resume T-004/T-005, same PR7 draft. Prior accepted evidence remains historical, not a waiver of this failure.

@@ -20,3 +20,5 @@ M0（AC-01–03）已由主控驗收，實作 commit `a608a94efc601c9affce554ca6
 [完整閱讀／恢復核對](../../../.team/reports/dim-gate-m0-preflight.md) 使用 newclear `1117d297aa3efef9472d847c9dfa5714eb6c4460`、kernel `7cddad13f965d579b218579609c7f64e1ecf35b2`；最終核對 main `a330237860b3002d68fec3f853a6d1deb44a8e9a` 並全文追讀更新的 CI 規則。實際為內建多 agent 協作，未聲稱使用不可用的 Claude 或已驗證的多模型路由。
 
 下一步：審查既有 PR #7；不自動 merge。下一輪先核對 PR／main，保留已接受 M0，再接續 M1（AC-04–08、20）。主控已釋放 owner，resume pointer 與遠端證據見 PLAN。完整 v0.1 尚未驗收；初始 JS gzip 約317.5KiB，M5 的300KiB預算及其他效能量測仍待處理。
+
+最終 checkpoint CI 新增發現：深色切換的按鈕色彩過渡短暫對比不足（run35513677939）。M0 接受暫停，PR 維持 Draft；主控正在執行保留的第三輪精確修正與獨立複核，詳見 PLAN DG-D009。

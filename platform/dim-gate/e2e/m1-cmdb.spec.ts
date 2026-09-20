@@ -86,17 +86,29 @@ test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never fl
   await expect(page.getByText(/目前身分無法進入維運中心/)).toBeVisible()
 
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-data')
+  await page.evaluate(() => {
+    const state = { leaks: [] as string[], switching: false, pendingAtSwitch: false }
+    Object.assign(window, { __scopeTransition: state })
+    document.addEventListener('change', (event) => {
+      const target = event.target
+      if (target instanceof HTMLSelectElement && target.getAttribute('aria-label') === '示範身分'
+        && target.value === 'user-rd-commerce') {
+        state.switching = true
+        state.pendingAtSwitch = document.body.innerText.includes('正在搜尋目前授權範圍…')
+      }
+    }, { capture: true })
+    new MutationObserver(() => {
+      if (state.switching && document.body.innerText.includes('data-worker')) state.leaks.push('data-worker')
+    }).observe(document.body, { subtree: true, childList: true, characterData: true })
+  })
   await page.getByRole('search', { name: '全域搜尋' }).getByRole('searchbox').fill('data')
   await page.getByRole('search', { name: '全域搜尋' }).getByRole('button', { name: '搜尋', exact: true }).click()
   await expect(page.getByText('正在搜尋目前授權範圍…')).toBeVisible()
-  await page.evaluate(() => {
-    const leaks: string[] = []
-    Object.assign(window, { __scopeLeaks: leaks })
-    new MutationObserver(() => { if (document.body.innerText.includes('data-worker')) leaks.push('data-worker') }).observe(document.body, { subtree: true, childList: true, characterData: true })
-  })
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-commerce')
   await expect(page.getByRole('combobox', { name: '示範身分' })).toHaveValue('user-rd-commerce')
-  expect(await page.evaluate(() => (window as unknown as { __scopeLeaks: string[] }).__scopeLeaks)).toEqual([])
+  expect(await page.evaluate(() => (window as unknown as {
+    __scopeTransition: { leaks: string[]; pendingAtSwitch: boolean }
+  }).__scopeTransition)).toEqual({ leaks: [], pendingAtSwitch: true, switching: true })
   await page.goto('rd/apps/app-data')
   await expect(page.getByRole('heading', { name: '找不到這個應用' })).toBeVisible()
 

@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "dim-gate BFF and demo controls",
-    "version": "0.1.0-m0",
-    "description": "Generated from Zod. M0 provides 14 operations and minimal seed data; planned operations are explicitly marked. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
+    "version": "0.1.0-m2",
+    "description": "Generated from Zod. M0–M2 provide 52 executable operations; M3/M4 operations remain explicitly planned. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
   },
   "servers": [
     {
@@ -25,7 +25,7 @@
           "M0"
         ],
         "summary": "getSession",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -161,7 +161,7 @@
           "M0"
         ],
         "summary": "getOrganization",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -297,7 +297,7 @@
           "M0"
         ],
         "summary": "getNavigation",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -447,7 +447,7 @@
           "M0"
         ],
         "summary": "getDashboard",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -617,7 +617,7 @@
           "M0"
         ],
         "summary": "listApplications",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -822,7 +822,7 @@
           "M0"
         ],
         "summary": "listCIs",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -1096,8 +1096,8 @@
           "M1"
         ],
         "summary": "createCI",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -1253,7 +1253,7 @@
           "M0"
         ],
         "summary": "getCI",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -1398,7 +1398,7 @@
           "M0"
         ],
         "summary": "patchCI",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -1565,8 +1565,8 @@
           "M1"
         ],
         "summary": "search",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -1723,8 +1723,8 @@
           "M1"
         ],
         "summary": "getApplication",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -1870,8 +1870,8 @@
           "M1"
         ],
         "summary": "getEnvironment",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -2017,8 +2017,8 @@
           "M1"
         ],
         "summary": "listRelations",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -2233,8 +2233,8 @@
           "M1"
         ],
         "summary": "createRelation",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -2390,8 +2390,8 @@
           "M1"
         ],
         "summary": "getTopology",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -2570,8 +2570,8 @@
           "M2"
         ],
         "summary": "listPools",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -2730,8 +2730,8 @@
           "M1"
         ],
         "summary": "getCapacity",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -2890,8 +2890,8 @@
           "M2"
         ],
         "summary": "listCatalog",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3095,8 +3095,8 @@
           "M2"
         ],
         "summary": "getCatalog",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3252,8 +3252,8 @@
           "M2"
         ],
         "summary": "listRequests",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3482,8 +3482,8 @@
           "M2"
         ],
         "summary": "createRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3639,8 +3639,8 @@
           "M2"
         ],
         "summary": "getRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3784,8 +3784,8 @@
           "M2"
         ],
         "summary": "patchRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -3951,8 +3951,8 @@
           "M2"
         ],
         "summary": "listJobs",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -4170,8 +4170,8 @@
           "M2"
         ],
         "summary": "getJob",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -4317,7 +4317,7 @@
           "M3"
         ],
         "summary": "listPipelines",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -4545,7 +4545,7 @@
           "M3"
         ],
         "summary": "createPipeline",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -4702,7 +4702,7 @@
           "M3"
         ],
         "summary": "getPipeline",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -4849,7 +4849,7 @@
           "M3"
         ],
         "summary": "listReleases",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -5083,7 +5083,7 @@
           "M3"
         ],
         "summary": "getRelease",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -5230,7 +5230,7 @@
           "M4"
         ],
         "summary": "getMetrics",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5417,7 +5417,7 @@
           "M4"
         ],
         "summary": "listTraces",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5664,7 +5664,7 @@
           "M4"
         ],
         "summary": "getTrace",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5811,7 +5811,7 @@
           "M4"
         ],
         "summary": "listLogs",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -6079,7 +6079,7 @@
           "M4"
         ],
         "summary": "listIncidents",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -6309,7 +6309,7 @@
           "M4"
         ],
         "summary": "getIncident",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -6456,8 +6456,8 @@
           "M1"
         ],
         "summary": "listAudit",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -6710,8 +6710,8 @@
           "M2"
         ],
         "summary": "getAccess",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [],
@@ -6846,8 +6846,8 @@
           "M2"
         ],
         "summary": "getAdminNavigation",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -6996,8 +6996,8 @@
           "M2"
         ],
         "summary": "getModels",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [],
@@ -7132,7 +7132,7 @@
           "M4"
         ],
         "summary": "listIntegrations",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -7268,8 +7268,8 @@
           "M1"
         ],
         "summary": "deleteRelation",
-        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M1.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
@@ -7435,8 +7435,8 @@
           "M2"
         ],
         "summary": "submitRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -7602,8 +7602,8 @@
           "M2"
         ],
         "summary": "approveRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -7769,8 +7769,8 @@
           "M2"
         ],
         "summary": "rejectRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -7936,8 +7936,8 @@
           "M2"
         ],
         "summary": "cancelRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -8103,8 +8103,8 @@
           "M2"
         ],
         "summary": "provisionRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -8270,8 +8270,8 @@
           "M2"
         ],
         "summary": "retryRequest",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -8437,7 +8437,7 @@
           "M3"
         ],
         "summary": "cancelPipeline",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -8604,7 +8604,7 @@
           "M3"
         ],
         "summary": "retryPipeline",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -8771,7 +8771,7 @@
           "M3"
         ],
         "summary": "approveRelease",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -8938,7 +8938,7 @@
           "M3"
         ],
         "summary": "rejectRelease",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -9105,7 +9105,7 @@
           "M3"
         ],
         "summary": "rollbackRelease",
-        "description": "Forward contract for M3; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M3",
         "x-demo-only": false,
@@ -9272,7 +9272,7 @@
           "M4"
         ],
         "summary": "acknowledgeIncident",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -9439,7 +9439,7 @@
           "M4"
         ],
         "summary": "investigateIncident",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -9606,8 +9606,8 @@
           "M2"
         ],
         "summary": "createAssignment",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -9763,7 +9763,7 @@
           "M0"
         ],
         "summary": "revokeAssignment",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": false,
@@ -9930,8 +9930,8 @@
           "M2"
         ],
         "summary": "patchUser",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10097,8 +10097,8 @@
           "M2"
         ],
         "summary": "patchNavigation",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10264,8 +10264,8 @@
           "M2"
         ],
         "summary": "createCatalogRevision",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10431,8 +10431,8 @@
           "M2"
         ],
         "summary": "patchCatalog",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10598,8 +10598,8 @@
           "M2"
         ],
         "summary": "publishCatalog",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10765,8 +10765,8 @@
           "M2"
         ],
         "summary": "disableCatalog",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -10932,8 +10932,8 @@
           "M2"
         ],
         "summary": "createModelField",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -11089,8 +11089,8 @@
           "M2"
         ],
         "summary": "patchModelField",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M2",
         "x-demo-only": false,
         "parameters": [
@@ -11256,7 +11256,7 @@
           "M4"
         ],
         "summary": "testIntegration",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -11423,7 +11423,7 @@
           "Demo controls"
         ],
         "summary": "getPersonas",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": true,
@@ -11559,7 +11559,7 @@
           "Demo controls"
         ],
         "summary": "getGuide",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": true,
@@ -11695,7 +11695,7 @@
           "Demo controls"
         ],
         "summary": "setPersona",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": true,
@@ -11852,7 +11852,7 @@
           "Demo controls"
         ],
         "summary": "resetDemo",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": true,
@@ -12009,7 +12009,7 @@
           "Demo controls"
         ],
         "summary": "advanceClock",
-        "description": "Implemented by the M0 demo adapter.",
+        "description": "Implemented by the demo adapter through M0.",
         "x-implementation-status": "implemented",
         "x-milestone": "M0",
         "x-demo-only": true,
@@ -12166,9 +12166,9 @@
           "Demo controls"
         ],
         "summary": "setScenario",
-        "description": "Forward contract for M4; unavailable in M0. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
-        "x-milestone": "M4",
+        "description": "Implemented by the demo adapter through M2.",
+        "x-implementation-status": "implemented",
+        "x-milestone": "M2",
         "x-demo-only": true,
         "parameters": [
           {
@@ -12187,7 +12187,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ScenarioBody"
+                "$ref": "#/components/schemas/ScenarioInput"
               }
             }
           }
@@ -13865,8 +13865,21 @@
             "type": "string",
             "enum": [
               "rd.overview",
+              "rd.apps",
+              "rd.catalog",
+              "rd.requests",
               "ops.overview",
+              "ops.cmdb",
+              "ops.topology",
+              "ops.requests",
+              "ops.jobs",
+              "ops.capacity",
               "admin.overview",
+              "admin.access",
+              "admin.navigation",
+              "admin.catalog",
+              "admin.cmdb-models",
+              "admin.audit",
               "guide"
             ]
           },
@@ -15179,7 +15192,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m1-v1"
+            "const": "dim-gate-m2-v1"
           },
           "sessionId": {
             "type": "string",
@@ -15309,6 +15322,24 @@
                 "items": {
                   "$ref": "#/components/schemas/ModelField"
                 }
+              },
+              "catalogs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              },
+              "catalogHistory": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              },
+              "requests": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Request"
+                }
               }
             },
             "required": [
@@ -15327,7 +15358,10 @@
               "relations",
               "assignments",
               "navigation",
-              "modelFields"
+              "modelFields",
+              "catalogs",
+              "catalogHistory",
+              "requests"
             ],
             "additionalProperties": false
           },
@@ -15708,7 +15742,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m1-v1"
+            "const": "dim-gate-m2-v1"
           },
           "schemaVersion": {
             "type": "number",
@@ -16125,6 +16159,506 @@
         },
         "required": [
           "ticks"
+        ],
+        "additionalProperties": false
+      },
+      "VersionCommand": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
+      "ReasonCommand": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "CreateRequest": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "staging",
+              "prod"
+            ]
+          },
+          "catalogItemId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "catalogRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "aws",
+              "aliyun",
+              "onprem"
+            ]
+          },
+          "poolId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "cpu": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "memoryMiB": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 262144,
+            "multipleOf": 128
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "applicationId",
+          "environmentName",
+          "stage",
+          "catalogItemId",
+          "catalogRevision",
+          "provider",
+          "poolId",
+          "cpu",
+          "memoryMiB",
+          "purpose"
+        ],
+        "additionalProperties": false
+      },
+      "PatchRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "environmentName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "aws",
+              "aliyun",
+              "onprem"
+            ]
+          },
+          "poolId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "cpu": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "memoryMiB": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 262144,
+            "multipleOf": 128
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
+      "CreateAssignment": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "rd",
+              "ops",
+              "admin"
+            ]
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "org",
+              "project",
+              "pool"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "stages": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "dev",
+                "staging",
+                "prod"
+              ]
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "scopeType",
+          "scopeId",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "PatchUser": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "enabled",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "PatchNavigation": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "group": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "order": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
+      "CreateCatalogRevision": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "template": {
+            "$ref": "#/components/schemas/CatalogTemplate"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "allowedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "reason",
+          "baseRevision",
+          "template",
+          "name",
+          "description",
+          "allowedProjectIds"
+        ],
+        "additionalProperties": false
+      },
+      "PatchCatalog": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "template": {
+            "$ref": "#/components/schemas/CatalogTemplate"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "allowedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "PublishCatalog": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "reason",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "CreateModelField": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "compute",
+              "cluster",
+              "database",
+              "cache",
+              "queue",
+              "load_balancer",
+              "network",
+              "storage"
+            ]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_]{0,63}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "valueType": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "constraints": {
+            "type": "object",
+            "properties": {
+              "maxLength": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "enum": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "kind",
+          "key",
+          "label",
+          "valueType",
+          "constraints"
+        ],
+        "additionalProperties": false
+      },
+      "PatchModelField": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
+      "ScenarioInput": {
+        "type": "object",
+        "properties": {
+          "scenarioKey": {
+            "type": "string",
+            "enum": [
+              "provision-failure",
+              "capacity-exhausted",
+              "clear-capacity-fault"
+            ]
+          },
+          "jobId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "poolId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "scenarioKey"
         ],
         "additionalProperties": false
       },
@@ -16631,163 +17165,6 @@
         ],
         "additionalProperties": false
       },
-      "VersionCommand": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "expectedVersion"
-        ],
-        "additionalProperties": false
-      },
-      "ReasonCommand": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "reason"
-        ],
-        "additionalProperties": false
-      },
-      "CreateRequest": {
-        "type": "object",
-        "properties": {
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "dev",
-              "staging",
-              "prod"
-            ]
-          },
-          "catalogItemId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "catalogRevision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "environmentName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "aws",
-              "aliyun",
-              "onprem"
-            ]
-          },
-          "poolId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "cpu": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 64
-          },
-          "memoryMiB": {
-            "type": "integer",
-            "minimum": 128,
-            "maximum": 262144,
-            "multipleOf": 128
-          },
-          "purpose": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "applicationId",
-          "stage",
-          "catalogItemId",
-          "catalogRevision",
-          "environmentName",
-          "provider",
-          "poolId",
-          "cpu",
-          "memoryMiB",
-          "purpose"
-        ],
-        "additionalProperties": false
-      },
-      "PatchRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "environmentName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "aws",
-              "aliyun",
-              "onprem"
-            ]
-          },
-          "poolId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "cpu": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 64
-          },
-          "memoryMiB": {
-            "type": "integer",
-            "minimum": 128,
-            "maximum": 262144,
-            "multipleOf": 128
-          },
-          "purpose": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "expectedVersion"
-        ],
-        "additionalProperties": false
-      },
       "CreatePipeline": {
         "type": "object",
         "properties": {
@@ -16871,322 +17248,6 @@
         ],
         "additionalProperties": false
       },
-      "CreateAssignment": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "rd",
-              "ops",
-              "admin"
-            ]
-          },
-          "scopeType": {
-            "type": "string",
-            "enum": [
-              "org",
-              "project",
-              "pool"
-            ]
-          },
-          "scopeId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "stages": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "dev",
-                "staging",
-                "prod"
-              ]
-            }
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "userId",
-          "role",
-          "scopeType",
-          "scopeId",
-          "reason"
-        ],
-        "additionalProperties": false
-      },
-      "PatchUser": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          },
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "reason",
-          "enabled"
-        ],
-        "additionalProperties": false
-      },
-      "PatchNavigation": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "group": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "order": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "expectedVersion"
-        ],
-        "additionalProperties": false
-      },
-      "CreateCatalogRevision": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          },
-          "baseRevision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "template": {
-            "$ref": "#/components/schemas/CatalogTemplate"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 2000
-          },
-          "allowedProjectIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 160
-            }
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "reason",
-          "baseRevision",
-          "template",
-          "name",
-          "description",
-          "allowedProjectIds"
-        ],
-        "additionalProperties": false
-      },
-      "PatchCatalog": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "revision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "template": {
-            "$ref": "#/components/schemas/CatalogTemplate"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 2000
-          },
-          "allowedProjectIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 160
-            }
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "revision"
-        ],
-        "additionalProperties": false
-      },
-      "PublishCatalog": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          },
-          "revision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "reason",
-          "revision"
-        ],
-        "additionalProperties": false
-      },
-      "CreateModelField": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "compute",
-              "cluster",
-              "database",
-              "cache",
-              "queue",
-              "load_balancer",
-              "network",
-              "storage"
-            ]
-          },
-          "key": {
-            "type": "string",
-            "pattern": "^[a-z][a-zA-Z0-9_]{0,63}$"
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "valueType": {
-            "type": "string",
-            "enum": [
-              "string",
-              "number",
-              "boolean"
-            ]
-          },
-          "constraints": {
-            "type": "object",
-            "properties": {
-              "maxLength": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 9007199254740991
-              },
-              "enum": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "min": {
-                "type": "number"
-              },
-              "max": {
-                "type": "number"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "kind",
-          "key",
-          "label",
-          "valueType",
-          "constraints"
-        ],
-        "additionalProperties": false
-      },
-      "PatchModelField": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "hidden": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "expectedVersion"
-        ],
-        "additionalProperties": false
-      },
       "PersonaBody": {
         "type": "object",
         "properties": {
@@ -17223,55 +17284,6 @@
         },
         "required": [
           "session"
-        ],
-        "additionalProperties": false
-      },
-      "ScenarioBody": {
-        "type": "object",
-        "properties": {
-          "scenarioKey": {
-            "type": "string",
-            "enum": [
-              "slow-network",
-              "api-unavailable",
-              "capacity-exhausted",
-              "clear-capacity-fault",
-              "provision-failure",
-              "build-failure",
-              "health-failure",
-              "rollback-failure",
-              "post-release-latency",
-              "recovery-samples"
-            ]
-          },
-          "environmentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "runId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "jobId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "releaseId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "poolId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          }
-        },
-        "required": [
-          "scenarioKey"
         ],
         "additionalProperties": false
       },

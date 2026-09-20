@@ -46,5 +46,5 @@ export function registerFutureContracts({ z, d, w, s, id, version, listQuery, wi
   command('post', '/admin/cmdb-fields', 'createModelField', w.CreateModelField, 'M2', 201)
   command('patch', '/admin/cmdb-fields/{id}', 'patchModelField', w.PatchModelField, 'M2')
   command('post', '/integrations/{id}/test', 'testIntegration', w.VersionCommand, 'M4')
-  command('post', '/scenarios', 'setScenario', w.ScenarioBody, 'M4', 200, true)
+  command('post', '/scenarios', 'setScenario', w.ScenarioBody, 'M2', 200, true)
 }

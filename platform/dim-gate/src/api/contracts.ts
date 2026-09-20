@@ -12,9 +12,6 @@ const reason = z.string().trim().min(1).max(500)
 const version = d.versionSchema
 const expected = { expectedVersion: version }
 const withReason = { ...expected, reason }
-const ids = z.array(id).refine(values => new Set(values).size === values.length, 'IDs must be unique')
-const cpu = z.number().int().min(1).max(64)
-const memoryMiB = z.number().int().min(128).max(262144).multipleOf(128)
 const scope = { applicationId: id, environmentId: id }
 const windowFields = { ...scope, from: d.timestampSchema, to: d.timestampSchema }
 const pageFields = {
@@ -37,12 +34,6 @@ const traceSpan = z.strictObject({ id, parentId: id.nullable(), name: d.nameSche
   durationMs: z.number().nonnegative(), status: z.enum(['ok', 'error']) })
 const metricSeries = z.strictObject({ metric: id, unit: z.enum(['ms', 'requests/second', 'fraction']),
   points: z.array(z.strictObject({ t: d.timestampSchema, value: z.number().nullable() })), sampleCount: z.number().int().nonnegative() })
-const requestFields = {
-  environmentName: d.nameSchema, provider: d.providerSchema, poolId: id, cpu, memoryMiB, purpose: reason,
-}
-const catalogFields = { template: d.catalogTemplateSchema, name: d.nameSchema,
-  description: z.string().max(2000), allowedProjectIds: ids }
-
 // Entity refinements and graph/scope invariants still run in the domain engine.
 export const createCiSchema = d.createCiInputSchema
 export const wireSchemas = {
@@ -58,24 +49,22 @@ export const wireSchemas = {
   LogEntry: logEntry, TraceSummary: traceSummary, Trace: traceSummary.extend({ spans: z.array(traceSpan) }), MetricSeries: metricSeries,
   CreateCI: createCiSchema,
   CreateRelation: d.createRelationInputSchema,
-  VersionCommand: z.strictObject(expected), ReasonCommand: z.strictObject(withReason),
-  CreateRequest: z.strictObject({ applicationId: id, stage: d.stageSchema, catalogItemId: id, catalogRevision: version, ...requestFields }),
-  PatchRequest: z.strictObject({ ...expected, ...Object.fromEntries(Object.entries(requestFields).map(([key, value]) => [key, value.optional()])) }),
+  VersionCommand: d.versionCommandSchema, ReasonCommand: d.reasonCommandSchema,
+  CreateRequest: d.createRequestInputSchema,
+  PatchRequest: d.patchRequestInputSchema,
   CreatePipeline: z.strictObject({ ...scope, revision: id, environmentVersion: version }),
   RollbackRelease: z.strictObject({ ...withReason, targetReleaseId: id, environmentVersion: version }),
   AcknowledgeIncident: z.strictObject({ ...expected, reason: reason.optional() }),
-  CreateAssignment: z.strictObject({ userId: id, role: d.centerSchema, scopeType: z.enum(['org', 'project', 'pool']), scopeId: id, stages: z.array(d.stageSchema).min(1).optional(), reason }),
-  PatchUser: z.strictObject({ ...withReason, enabled: z.boolean() }),
-  PatchNavigation: z.strictObject({ ...expected, label: d.nameSchema.optional(), group: d.nameSchema.optional(), order: z.number().int().optional(), enabled: z.boolean().optional() }),
-  CreateCatalogRevision: z.strictObject({ ...withReason, baseRevision: version, ...catalogFields }),
-  PatchCatalog: z.strictObject({ ...expected, revision: version, ...Object.fromEntries(Object.entries(catalogFields).map(([key, value]) => [key, value.optional()])) }),
-  PublishCatalog: z.strictObject({ ...withReason, revision: version }),
-  CreateModelField: d.modelFieldSchema.omit({ id: true, version: true, createdAt: true, updatedAt: true, orgId: true, required: true, hidden: true }),
-  PatchModelField: z.strictObject({ ...expected, label: d.nameSchema.optional(), hidden: z.boolean().optional() }),
+  CreateAssignment: d.createAssignmentInputSchema,
+  PatchUser: d.patchUserInputSchema,
+  PatchNavigation: d.patchNavigationInputSchema,
+  CreateCatalogRevision: d.createCatalogRevisionInputSchema,
+  PatchCatalog: d.patchCatalogInputSchema,
+  PublishCatalog: d.publishCatalogInputSchema,
+  CreateModelField: d.createModelFieldInputSchema,
+  PatchModelField: d.patchModelFieldInputSchema,
   PersonaBody: personaBodySchema, ResetBody: resetBodySchema, ControlResult: controlResultSchema,
-  ScenarioBody: z.strictObject({ scenarioKey: z.enum(['slow-network', 'api-unavailable', 'capacity-exhausted', 'clear-capacity-fault',
-    'provision-failure', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples']),
-    environmentId: id.optional(), runId: id.optional(), jobId: id.optional(), releaseId: id.optional(), poolId: id.optional() }),
+  ScenarioBody: d.scenarioInputSchema,
 }
 
 export type Operation = {

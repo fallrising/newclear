@@ -4,7 +4,7 @@
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
-M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 是 OPEN 且 Ready for Review，尚未合併；milestone ACCEPTED、PR OPEN 與 PR MERGED 是三個不同狀態。
+M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 已合併為 `b8dae76034caf63bf7d0721cba99a58a0586ae85`；合併後 CI run 35531246949 通過，未部署。
 
 M1 可操作範圍：
 
@@ -17,8 +17,8 @@ M1 可操作範圍：
 | 階段 | 狀態 |
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
-| M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 OPEN / READY / NOT MERGED |
-| M2：申請與平台治理 | 尚未開始 |
+| M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
+| M2：申請與平台治理 | RUNNING；T-014 shared domain/API |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
@@ -31,4 +31,4 @@ M1 可操作範圍：
 
 限制：production JS 為 413.17 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。M1 不宣稱完成 M2 Admin 功能，也未新增空白 Admin 頁。沒有部署、真實雲操作、付費服務或全域權限變更。
 
-Resume：從 SSH remote branch `agent/dim-gate/mainline/m1-cmdb` 與 OPEN PR #11 繼續 repository-owner review；不得重做 M1、不得自動 merge。下一開發 milestone 是 M2，開始前須重新 reconcile main／PR 並保留本輪 T-012／T-013 evidence。
+Resume：從 `agent/dim-gate/mainline/m2-governance` 的 T-014 繼續；base 是合併後 main `b8dae760`。先完成 shared M2 domain/API，再接 RD/Ops/Admin UI 與 production browser gates。M2 尚未 ACCEPTED、尚無 PR、未部署。

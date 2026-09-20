@@ -20,6 +20,7 @@ export async function commandDemoRoute(controller: DemoController, method: strin
     return controller.reset(key, identity)
   }
   if (method === 'POST' && path === '/clock/advance') return controller.command(method, path, body, key, identity)
+  if (method === 'POST' && path === '/scenarios') return controller.command(method, path, body, key, identity)
   controller.assertCurrent(identity)
   throw new DomainError(501, 'NOT_IMPLEMENTED', '這個示範功能尚未交付。')
 }

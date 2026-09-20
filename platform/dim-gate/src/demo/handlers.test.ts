@@ -102,6 +102,37 @@ describe('shared browser/Node HTTP handlers', () => {
     expect(controller.getSnapshot().commandCount).toBe(2)
   })
 
+  it('delivers an M2 request through real HTTP handlers and preserves scope on persona switches', async () => {
+    const create = await request('api/v1/requests', {
+      method: 'POST', key: 'http-request-create', body: {
+        applicationId: 'app-checkout', environmentName: 'http-staging', stage: 'staging',
+        catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg',
+        cpu: 2, memoryMiB: 2048, purpose: 'HTTP M2 journey',
+      },
+    })
+    expect(create.status).toBe(201)
+    const requestId = (await create.json()).data.entityId
+    expect((await request(`api/v1/requests/${requestId}/submit`, {
+      method: 'POST', key: 'http-request-submit', body: { expectedVersion: 1 },
+    })).status).toBe(200)
+    await persona('user-ops', 'http-to-ops')
+    const approval = await request(`api/v1/requests/${requestId}/approve`, {
+      method: 'POST', key: 'http-request-approve', body: { expectedVersion: 2, reason: 'HTTP capacity approved' },
+    })
+    expect(approval.status).toBe(200)
+    expect((await approval.json()).data.operationId).toMatch(/^job-/)
+    expect((await request(`api/v1/requests/${requestId}/provision`, {
+      method: 'POST', key: 'http-request-provision', body: { expectedVersion: 3 },
+    })).status).toBe(202)
+    await request('__demo/v1/clock/advance', { method: 'POST', key: 'http-request-ticks', body: { ticks: 5 } })
+    const fulfilled = await (await request(`api/v1/requests/${requestId}`)).json()
+    expect(fulfilled.data.request.state).toBe('fulfilled')
+    expect(fulfilled.data.jobs[0].state).toBe('succeeded')
+    await persona('user-rd-data', 'http-to-data')
+    expect((await request(`api/v1/requests/${requestId}`)).status).toBe(404)
+    expect((await (await request('api/v1/requests')).json()).data.total).toBe(0)
+  })
+
   it('leaves every state field unchanged on storage rejection and refuses unavailable business APIs', async () => {
     const before = controller.getSnapshot()
     storageBlocked = true

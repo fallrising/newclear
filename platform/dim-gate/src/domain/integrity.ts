@@ -6,8 +6,10 @@ export function integrityErrors(snapshot: Snapshot): string[] {
   const entities = snapshot.entities
   const scopedCollections = Object.entries(entities).filter(([key]) => key !== 'organizations')
   for (const [name, collection] of Object.entries(entities)) {
+    if (name === 'catalogHistory') continue
     if (new Set(collection.map((entity) => entity.id)).size !== collection.length) errors.push(`${name}: duplicate ID`)
   }
+  if (new Set(entities.catalogHistory.map((item) => `${item.id}:${item.revision}`)).size !== entities.catalogHistory.length) errors.push('catalogHistory: duplicate revision')
   const orgs = new Set(entities.organizations.map((org) => org.id))
   for (const [name, collection] of scopedCollections) {
     for (const entity of collection) if ('orgId' in entity && !orgs.has(entity.orgId)) errors.push(`${name}: unknown organization`)
@@ -57,6 +59,22 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     if (assignment.scopeType === 'org' ? assignment.scopeId !== assignment.orgId : !linked(assignment.scopeType === 'project' ? entities.projects : entities.pools, assignment.scopeId, assignment.orgId)) errors.push('assignment: invalid scope')
   }
   for (const relation of entities.relations) if (!linked(entities.cis, relation.sourceCiId, relation.orgId) || !linked(entities.cis, relation.targetCiId, relation.orgId)) errors.push('relation: invalid endpoint')
+  for (const catalog of [...entities.catalogs, ...entities.catalogHistory]) {
+    for (const projectId of catalog.allowedProjectIds) if (!linked(entities.projects, projectId, catalog.orgId)) errors.push('catalog: invalid project')
+    for (const poolId of catalog.template.allowedPoolIds) if (!linked(entities.pools, poolId, catalog.orgId)) errors.push('catalog: invalid pool')
+  }
+  for (const request of entities.requests) {
+    const app = entities.applications.find((entry) => entry.id === request.applicationId && entry.orgId === request.orgId)
+    const pool = entities.pools.find((entry) => entry.id === request.poolId && entry.orgId === request.orgId)
+    const requester = linked(entities.users, request.requesterId, request.orgId)
+    if (!app || !pool || !requester || pool.provider !== request.provider) errors.push('request: invalid app, requester, provider or pool')
+    if (request.latestJobId && !snapshot.jobs.some((job) => job.id === request.latestJobId && job.requestId === request.id)) errors.push('request: invalid latest job')
+    if (request.environmentId) {
+      const environment = entities.environments.find((entry) => entry.id === request.environmentId && entry.orgId === request.orgId)
+      if (environment && environment.applicationId !== request.applicationId) errors.push('request: invalid environment')
+    }
+  }
+  for (const job of snapshot.jobs) if (!linked(entities.requests, job.requestId, job.orgId)) errors.push('job: invalid request')
   for (const pool of entities.pools) {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')

@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 11 |
+| protocol_version / ledger_revision | 1 / 12 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | none / DG-M1-20260920-01 |
@@ -195,6 +195,8 @@ next_action: commit evidence checkpoint, push over SSH, dispatch T-012 independe
 DG-D014: REJECT the original M1 product candidate `9b656f276ef9f5dd3b18f8ca698bea6496751839` as milestone acceptance evidence after independent T-012 attempt 1 reproduced F-01 deleted relation audit disclosure and F-02 silent M0 persisted-seed reuse. Existing green gates remain historical evidence but cannot waive adversarial failures.
 
 DG-D015: ACCEPT correction and tested product commit `784f771a040be72fedf2f1521912900990c09dbf` for M1 AC-04–08 and AC-20. F-01 is closed by endpoint-preserving historical relation authorization; F-02 is closed by `dim-gate-m1-v1` compatibility with stable-key explicit recovery. Local evidence is 122/122 tests and 11/11 production E2E plus all prescribed gates. Independent T-012 attempt 2 has no blocking finding. GitHub Actions run 35526733678 passed synthetic merge `796960eae34bce6463e921c1b7527ba2da565ebb` whose parents are reconciled target main `a5982bf4547bba85429fec50494751562b5fe7c6` and product head `784f771...`. PR #11 is OPEN and Ready for Review, not merged. No deployment occurred.
+
+DG-D016: PRESERVE M1 acceptance after a fresh production-like headless Chromium walkthrough at metadata head `364b3cc2acc29db90a9c211c1be305f4f6a24445`. Ten browser flows and 24 route/viewport/theme combinations passed, including real UI mutation, topology relation invalidation, AC-20 in-flight switching and historical relation audit, explicit persistence recovery, axe, focus, and overflow checks. All native gates repeated green: 122/122 unit and 11/11 production E2E. The detailed evidence is [the M1 browser walkthrough report](reports/dim-gate-m1-browser-walkthrough.md). This adds evidence only: accepted implementation remains `784f771`; PR #11 remains OPEN / READY / NOT MERGED; no deployment occurred. Current remote main is `c5b26b1ac4c42098f845d23439f4950e461ea1ff`, whose post-reconciliation changes do not touch `platform/dim-gate`.
 
 ```yaml
 project_id: dim-gate

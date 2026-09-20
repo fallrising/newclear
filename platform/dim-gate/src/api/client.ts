@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import { apiErrorSchema, apiResultSchema } from '../domain/schemas'
 import type { SessionView } from '../domain/schemas'
+import { createApplicationClient } from './clients/application'
 import { createCmdbClient } from './clients/cmdb'
 import { createSessionClient } from './clients/session'
+import { createTopologyClient } from './clients/topology'
 import { ApiRequestError } from './core/errors'
 import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
 import type { ApiRequest, RequestOptions } from './core/request'
@@ -107,7 +109,9 @@ export function createApiClient() {
   }
   const api = {
     ...createSessionClient(request),
+    ...createApplicationClient(request),
     ...createCmdbClient(request),
+    ...createTopologyClient(request),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

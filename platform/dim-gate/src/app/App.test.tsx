@@ -26,7 +26,7 @@ vi.mock('../api/client', () => ({
 }))
 
 function makeSession(id = 'user-rd-commerce', epoch = 1): SessionView {
-  return { user: { id, displayName: id === 'user-rd-commerce' ? 'Commerce 研發' : 'Data 研發' }, assignments: [], effectiveActions: [], centers: ['rd'], demo: true, sessionId: 'session-test', identityEpoch: epoch, generation: 1, policyVersion: 1, storeRevision: 1, logicalClock: 7, storageMode: 'session' }
+  return { user: { id, displayName: id === 'user-rd-commerce' ? 'Commerce 研發' : 'Data 研發' }, assignments: [], effectiveActions: ['app.read', 'environment.read', 'ci.read'], centers: ['rd'], demo: true, sessionId: 'session-test', identityEpoch: epoch, generation: 1, policyVersion: 1, storeRevision: 1, logicalClock: 7, storageMode: 'session' }
 }
 function dashboard(count = 2): DashboardView {
   return { center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }

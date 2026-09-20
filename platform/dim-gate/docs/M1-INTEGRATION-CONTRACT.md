@@ -1,6 +1,6 @@
 # M1 integration contract — CMDB and application views
 
-Revision 1, fixed after the T-006 M0 regression at `49e1b8914a8bbf1c0b3124bb656160c6342eab21`. This document owns integration semantics; Zod schemas and the generated [OpenAPI](openapi.json) remain the only wire-format field definition.
+Revision 1, fixed after the T-006 M0 regression at `49e1b89754421cf0e2f76026416a1af184ceab94`. This document owns integration semantics; Zod schemas and the generated [OpenAPI](openapi.json) remain the only wire-format field definition.
 
 ## Boundaries and public exports
 

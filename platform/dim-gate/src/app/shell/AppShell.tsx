@@ -9,6 +9,7 @@ import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import { centerDetails } from '../../features/foundation'
 import { AppRoutes } from '../routes/AppRoutes'
+import { GlobalSearch } from './GlobalSearch'
 import { routeForPath, visibleNavigation } from '../routes/registry'
 
 type Preferences = { theme: 'light' | 'dark'; density: 'normal' | 'compact' }
@@ -58,18 +59,19 @@ export function AppShell({ session }: { session: SessionView }) {
       <div className="sidebar-section-label">工作空間</div>
       <nav aria-label="中心導覽">
         {visibleNavigation(session).map((route) => {
-          if (!route.center) return <NavLink key={route.key} to={route.path} aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><BookOpen size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span></NavLink>
+          if (!route.center) return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><BookOpen size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span></NavLink>
           const details = centerDetails[route.center]
           const Icon = details.icon
-          return <NavLink key={route.key} to={route.path} aria-label={details.name} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{details.name}</span><span className="nav-code">{details.short}</span></NavLink>
+          return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span><span className="nav-code">{details.short}</span></NavLink>
         })}
       </nav>
-      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M0 · 工程基礎</div><p>目前可探索工作區與獨立示範 session。</p><span className="sidebar-version">dim-gate / v0.1 開發中</span></div>
+      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M1 · CMDB 與應用視圖</div><p>目前可探索共用 CMDB、應用與拓撲。</p><span className="sidebar-version">dim-gate / M1 review</span></div>
     </aside>
     <div className="workspace">
       <header className="topbar">
         <Button variant="ghost" size="icon" className="mobile-menu-button" aria-label={mobileMenu ? '收起導覽' : '開啟導覽'} aria-controls="workspace-navigation" aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)}>{mobileMenu ? <X size={20} /> : <Menu size={20} />}</Button>
         <div className="breadcrumb"><span>工作台</span><ChevronRight size={14} aria-hidden="true" /><strong>{currentLabel}</strong></div>
+        <GlobalSearch session={session} disabled={switching} />
         <div className="toolbar">
           <Button variant="ghost" size="icon" aria-label={preferences.theme === 'light' ? '切換深色主題' : '切換淺色主題'} onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}>{preferences.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</Button>
           <label className="density-control"><span className="sr-only">顯示密度</span><select aria-label="顯示密度" value={preferences.density} onChange={(event) => setPreferences({ ...preferences, density: event.target.value as Preferences['density'] })}><option value="normal">舒適</option><option value="compact">緊湊</option></select></label>

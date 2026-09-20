@@ -32,7 +32,7 @@ function ScopeAssignments({ session }: { session: SessionView }) {
 }
 
 function FoundationNote() {
-  return <aside className="foundation-note"><span className="foundation-marker">M0</span><div><h2>先看清楚共用基礎，再逐步開放業務流程</h2><p>本階段提供三中心、身分與 scope、資料保存和重置。完整 CMDB、自助申請、發布與觀測流程尚未開放。</p></div></aside>
+  return <aside className="foundation-note"><span className="foundation-marker">M1</span><div><h2>共用資產模型，同時服務 RD 與 Ops</h2><p>本階段提供可操作的 CMDB、應用環境與依賴拓撲；自助申請、發布與觀測流程仍依後續里程碑開放。</p></div></aside>
 }
 
 export function Guide({ session }: { session: SessionView }) {

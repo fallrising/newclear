@@ -1,0 +1,37 @@
+.topology-query { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem; margin-bottom: .75rem; }
+.topology-field { display: grid; gap: .4rem; min-width: 8rem; }
+.topology-root-field { flex: 1 1 17rem; }
+.topology-field label, .topology-mode legend, .relation-form label { font-size: .78rem; font-weight: 700; color: var(--muted); }
+.topology-field input, .topology-field select, .relation-form input, .relation-form select { min-height: 2.45rem; border: 1px solid var(--border); border-radius: .55rem; background: var(--background); color: var(--foreground); padding: .45rem .65rem; }
+.topology-mode { display: flex; gap: .8rem; border: 0; padding: 0; margin: 0; }
+.topology-mode legend { margin-bottom: .45rem; }
+.topology-mode label { display: flex; align-items: center; gap: .3rem; }
+.topology-scope-note { color: var(--muted); font-size: .84rem; margin: 0 0 1rem; }
+.topology-invalid, .topology-truncated { display: flex; gap: .7rem; align-items: flex-start; border: 1px solid var(--warning); border-radius: .65rem; padding: .75rem; background: var(--warning-soft); }
+.topology-invalid p, .topology-truncated p { margin: 0; }
+.topology-truncated strong { display: block; }
+.topology-empty { display: flex; align-items: flex-start; gap: 1rem; }
+.topology-empty h2, .topology-empty p { margin-top: 0; }
+.topology-results { display: grid; gap: 1rem; }
+.topology-graph .section-heading { align-items: flex-start; }
+.topology-graph .section-heading p { color: var(--muted); margin: .25rem 0 0; }
+.topology-node-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .65rem; list-style: none; padding: 0; }
+.topology-node-list li { border: 1px solid var(--border); border-radius: .65rem; padding: .7rem; }
+.topology-node-list li > span { display: block; color: var(--muted); font-size: .78rem; margin-top: .35rem; }
+.topology-entity-link { display: inline-grid; gap: .15rem; color: var(--foreground); text-decoration: none; }
+.topology-entity-link:hover span, .topology-entity-link:focus-visible span { color: var(--primary); text-decoration: underline; }
+.topology-entity-link code { color: var(--muted); font-size: .72rem; }
+.topology-edge-list { display: grid; gap: .45rem; margin-top: 1rem; }
+.topology-edge { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .75rem; align-items: center; border-top: 1px solid var(--border); padding-top: .55rem; }
+.topology-edge > span { display: flex; align-items: center; gap: .25rem; color: var(--muted); font-size: .78rem; }
+.topology-table-panel > p { color: var(--muted); }
+.topology-table-scroll { overflow-x: auto; }
+.topology-table-panel table { width: 100%; border-collapse: collapse; min-width: 44rem; }
+.topology-table-panel th, .topology-table-panel td { border-bottom: 1px solid var(--border); padding: .65rem; text-align: left; vertical-align: top; }
+.topology-table-panel td > code { display: block; color: var(--muted); margin-top: .25rem; }
+.relation-controls { display: grid; gap: 1rem; }
+.relation-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; align-items: end; border-top: 1px solid var(--border); padding-top: 1rem; }
+.relation-form h3 { grid-column: 1 / -1; margin: 0; }
+.relation-form label { display: grid; gap: .35rem; }
+.field-error { color: var(--destructive); }
+@media (max-width: 768px) { .relation-form { grid-template-columns: 1fr; } .topology-edge { grid-template-columns: 1fr; } .topology-edge > span { padding-left: .5rem; } }

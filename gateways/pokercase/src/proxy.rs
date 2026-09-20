@@ -312,6 +312,14 @@ async fn forward_chat_completions_inner(
             }
         }
     }
+    // OpenCode Go requires x-opencode-session for routing (see opencode.ai/docs/go).
+    if provider_key.as_deref() == Some("opencode")
+        && target.connection.base_url.contains("/zen/go")
+    {
+        req = req
+            .header("x-opencode-session", uuid::Uuid::new_v4().to_string())
+            .header("User-Agent", "thinrouter/0.1");
+    }
     if upstream_stream {
         req = req.header("accept", "text/event-stream");
     }

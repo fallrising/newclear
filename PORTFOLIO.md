@@ -16,6 +16,10 @@ Branch/PR 也以例外清單核對：目前 `newclear`、`kernel` 都只有 `mai
 
 分級是依目前可觀察證據做的決策。凡是只有你知道的線上使用、真實使用者或期限，列在最後的問題；答案若成立，才調整分級。確認後，所有「休眠」項目的最近 README 應標注 `Dormant since 2026-09-04`、恢復條件與 canonical successor；本輪不先改 README。
 
+## Owner override 2026-09-20 — products/kith
+
+Owner 要求在此公開 monorepo 新增一條人機群聊產品。這是對 2026-09-05 freeze 的**明確第四條戰線例外**，範圍僅限 `products/kith`。不得復活 `labs/bee-swarm`。不得擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。其餘 2026-09-05 分級維持不變。kith 在 M0 之前僅為 documentation-only。
+
 ## 2026-09-05 修復與補充驗證
 
 這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。

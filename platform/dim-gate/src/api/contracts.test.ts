@@ -40,6 +40,21 @@ it('wire creation refuses derived identity and validates provider-specific attri
   expect(wireSchemas.CreateCI.safeParse({ ...input, visibilityProjectIds: [] }).success).toBe(false)
 })
 
+it('omitted M0 list sorting equals the published default across the shared inventory', async () => {
+  const controller = createController({ storage: null, mode: 'memory', createSessionId: () => 'sort-contract' })
+  const initial = controller.getSession()
+  await controller.setPersona('user-ops', 'sort-persona', controller.authenticate(initial.sessionId, initial.user.id))
+  const session = controller.getSession()
+  const identity = controller.authenticate(session.sessionId, session.user.id)
+  for (const operationId of ['listCIs', 'listApplications']) {
+    const operation = operations.find(item => item.id === operationId)!
+    const defaults = operation.query!.parse({})
+    const implicit = controller.read(operation.path, new URLSearchParams(), identity)
+    const explicit = controller.read(operation.path, new URLSearchParams({ sort: String(defaults.sort) }), identity)
+    expect(implicit).toEqual(explicit)
+  }
+})
+
 it('planned observability/topology contracts reject unbounded windows and ambiguous roots', () => {
   const metrics = operations.find(item => item.id === 'getMetrics')!.query!
   const window = { applicationId: 'app-1', environmentId: 'env-1', from: '2026-09-20T09:00:00Z', to: '2026-09-20T10:00:00Z' }

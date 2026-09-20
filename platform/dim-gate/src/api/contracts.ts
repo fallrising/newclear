@@ -19,7 +19,7 @@ const pageFields = {
   pageSize: z.coerce.number().int().min(1).max(100).default(25), order: z.enum(['asc', 'desc']).default('asc'),
 }
 const listQuery = (extra: z.ZodRawShape = {}, sort = ['id', 'name', 'updatedAt']) => z.strictObject({
-  ...pageFields, sort: z.enum(sort as [string, ...string[]]).default(sort[0]), ...extra,
+  ...pageFields, sort: z.enum(sort as [string, ...string[]]).default(sort.includes('name') ? 'name' : sort[0]), ...extra,
 })
 const windowQuery = (extra: z.ZodRawShape = {}) => z.strictObject({ ...windowFields, ...extra }).refine(input => {
   const duration = Date.parse(input.to) - Date.parse(input.from)

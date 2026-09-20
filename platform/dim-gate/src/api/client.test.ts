@@ -126,6 +126,34 @@ describe('typed API client and cache identity', () => {
     expect(client.getClientIdentity()).toEqual(changed)
   })
 
+  it.each(['reset', 'persona'] as const)('rejects an obsolete lost %s response replay after switching to Admin', async (control) => {
+    let loseResponse = true
+    client.configureClient({ session: controller.getSession(), fetch: async (...args) => {
+      const response = await fetch(...args)
+      if (loseResponse && String(args[0]).endsWith(`/${control}`)) {
+        loseResponse = false
+        throw new TypeError('Control committed, response lost')
+      }
+      return response
+    } })
+    const action = () => control === 'reset' ? client.api.reset() : client.api.setPersona('user-ops')
+    await expect(action()).rejects.toMatchObject({ code: 'NETWORK_ERROR' })
+    await client.api.setPersona('user-admin')
+    await client.api.advanceClock(3)
+    const current = client.getClientIdentity()
+    const session = controller.getSession()
+    const notifications: unknown[] = []
+    client.api.subscribe(() => notifications.push(client.getClientIdentity()))
+
+    await expect(action()).rejects.toMatchObject({ code: 'STALE_RESPONSE', retryable: false })
+
+    expect(client.getClientIdentity()).toEqual(current)
+    expect(controller.getSession()).toEqual(session)
+    expect(notifications).toEqual([])
+    expect(await client.api.getSession()).toMatchObject({ user: { id: 'user-admin' },
+      identityEpoch: current!.identityEpoch, logicalClock: 3 })
+  })
+
   it('drops a produced response after an authorization policy change', async () => {
     await client.api.setPersona('user-admin')
     let release: () => void = () => undefined

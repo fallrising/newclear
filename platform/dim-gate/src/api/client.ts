@@ -100,8 +100,10 @@ export function createApiClient() {
     if (session && parsed.data.meta.storeRevision < session.storeRevision) throw stale()
     if (options.identityControl) {
       const next = (parsed.data.data as { session: SessionView }).session
-      // Bootstrap notifications may already have installed this exact identity.
-      if (!sameIdentity(identity, current) && !sameIdentity(identityOf(next), current)) throw stale()
+      // A retry retains its original request identity. Its call-time identity may
+      // already belong to a later persona, which an obsolete receipt cannot replace.
+      // Bootstrap notifications may also have installed this exact returned identity.
+      if (!sameIdentity(requestIdentity, current) && !sameIdentity(identityOf(next), current)) throw stale()
       if (session && sameIdentity(identityOf(next), current) && next.storeRevision < session.storeRevision) {
         // An idempotent control receipt may predate subsequent work in this session.
         parsed.data.data = { session: structuredClone(session) } as T

@@ -671,7 +671,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "default": "id",
+              "default": "name",
               "type": "string",
               "enum": [
                 "id",
@@ -876,7 +876,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "default": "id",
+              "default": "name",
               "type": "string",
               "enum": [
                 "id",
@@ -2943,7 +2943,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "default": "id",
+              "default": "name",
               "type": "string",
               "enum": [
                 "id",
@@ -17460,7 +17460,7 @@
             ]
           },
           "sort": {
-            "default": "id",
+            "default": "name",
             "type": "string",
             "enum": [
               "id",
@@ -17579,7 +17579,7 @@
             ]
           },
           "sort": {
-            "default": "id",
+            "default": "name",
             "type": "string",
             "enum": [
               "id",
@@ -18256,7 +18256,7 @@
             ]
           },
           "sort": {
-            "default": "id",
+            "default": "name",
             "type": "string",
             "enum": [
               "id",

@@ -49,4 +49,3 @@ Observed 2026-09-20. All listed files were fetched at the pinned repository revi
 | kernel/agents/prompts/dev/orchestrator-loop.md | `5e85cf55e062880b440d3e11dd3a3f18ef465369` | Full |
 
 Root README and existing AweShore/CloudForm CI were additionally read via `git show` at the pinned newclear commit. Historical standalone installation instructions in kernel README/setup are superseded by the user's explicit kernel-monorepo instruction; no installation was attempted.
-

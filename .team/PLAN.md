@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 14 |
+| protocol_version / ledger_revision | 1 / 15 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
@@ -246,6 +246,8 @@ DG-D018: Select T-014 as the first bounded M2 slice and freeze M2 integration co
 
 DG-D019: ACCEPT T-014 only as the shared domain/API checkpoint at `a9e64276273fc3698105c2bf8b0b7bc833444057`. Local evidence is 132/132 tests, 11/11 production Chromium E2E and every prescribed native/docs/contracts/CI/architecture/actionlint gate. Draft PR #13 carries the SSH-pushed commit and remote run 35534450528 is in progress. M2 remains RUNNING: feature UI, fresh browser acceptance, independent review and successful current-head remote CI are not waived.
 
+DG-D020: Remote run 35534559281 exposed a timing defect in the AC-20 E2E observer: Data search could legally render between observer installation and the later Playwright switch command, before scope transition began. The assertion was not weakened and product delay was not extended. Test-only commit `c35147cba7e6d52343456019e9975b78d9ef2fa3` activates leak recording from the real select change event and proves the old request was pending at that event. The focused race passed 5/5 locally, the full local suite passed 132/132 plus 11/11 E2E, and replacement remote run [35535062404](https://github.com/fallrising/newclear/actions/runs/35535062404) passed every gate. T-014 remains accepted at product commit `a9e6427`; M2 remains RUNNING and PR #13 remains Draft.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -262,12 +264,13 @@ task_id: next M2 UI slice after T-014
 implementation_commit: a9e64276273fc3698105c2bf8b0b7bc833444057
 local_tested_commit: a9e64276273fc3698105c2bf8b0b7bc833444057
 ci_tested_merge: none
+ci_run: https://github.com/fallrising/newclear/actions/runs/35535062404
 spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
 evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md
   - .team/reports/T-014.md
 integration_state: DRAFT_PR_13
-remote_durability: implementation checkpoint is on the SSH remote branch; this evidence update is identified by its containing commit
+remote_durability: implementation/evidence/test-fix checkpoints are on the SSH remote branch; latest recorded CI passed
 blockers: []
 next_action: define and implement bounded RD/Ops self-service and Admin governance UI tasks from the accepted T-014 checkpoint; do not accept M2 before fixed-commit browser and independent review gates
 ```

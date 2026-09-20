@@ -4,7 +4,11 @@
 
 這是 dim-gate 前端預期的 BFF contract，**不是宣稱 AWS、Aliyun、Prism 或 CI 工具原生已有相同 API**。v0.1 由 MSW 實現；future backend 需自己完成 adapter 與 server-side authentication。M0 將以下契約實體化為 Zod DTO 與 OpenAPI 文件，避免手寫頁面與 mock 各自漂移。
 
-Base path `/api/v1`；JSON UTF-8；id opaque；時間 ISO-8601 UTC；bytes／CPU／memory 的單位按欄位名稱。未知 enum 是 schema error，不 fallback 到成功。禁止任意 filter DSL 或可執行 template。
+Base path `/api/v1` 相對於 application base；預設部署 `/dim-gate/` 時實際 URL 為 `/dim-gate/api/v1`，demo controls 同理為 `/dim-gate/__demo/v1`。JSON UTF-8；id opaque；時間 ISO-8601 UTC；bytes／CPU／memory 的單位按欄位名稱。未知 enum 是 schema error，不 fallback 到成功。禁止任意 filter DSL 或可執行 template。
+
+M0 的 wire source 為 `src/domain/schemas.ts`、`src/api/control-dto.ts` 與 `src/api/contracts.ts`；[OpenAPI 3.1](../openapi.json) 由 Zod 產生，native check 比對完整結果與 `$ref`。14 個 M0 operations 已實作，其餘以 `x-implementation-status: planned` 標示未提供。JSON Schema 不能完整表達的跨 entity/provider/scope/state 規則仍須由 domain 驗證。新增 detail DTO 採具名包裝：`{application,environments}`、`{environment,placements,activeRelease}`、`{request,jobs}`、`{job,logs}`、`{run,logs}`；不可將 forward schema 的存在視為業務流程完成。後續里程碑擴充 typed pending items、完整 guide steps 等內容時須同步 schema、OpenAPI 與驗收。
+
+CI wire projection 另有 `CIView`：只列出 caller 可見 project IDs；只有 pool grant 的 Ops 可以看到 CI 但得到空 visibilityProjectIds。保存的 CI 仍必須至少一個有效 project，不因回傳裁切放寬 domain invariant。
 
 ## 2. Envelope、context 與錯誤
 

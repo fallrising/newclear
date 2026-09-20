@@ -12,12 +12,12 @@
 | protocol_version / ledger_revision | 1 / 7 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | released / DG-M0-20260920-01 |
-| active_work_branch | agent/dim-gate/mainline/m0-foundation |
-| source / last_reconciled_target | initial `1117d297aa3efef9472d847c9dfa5714eb6c4460` / reconciled `a330237860b3002d68fec3f853a6d1deb44a8e9a`, 2026-09-20 |
-| source kernel protocol | `7cddad13f965d579b218579609c7f64e1ecf35b2` |
+| active_owner / run_id | Codex orchestrator / DG-M1-20260920-01 |
+| active_work_branch | agent/dim-gate/mainline/m1-cmdb |
+| source / last_reconciled_target | initial `1117d297aa3efef9472d847c9dfa5714eb6c4460` / reconciled `50294b687d06f08e94290f6f327187e8f69248bc`, 2026-09-20 |
+| source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
 | spec revision | source SDD blobs listed in preflight; this branch additionally records ADR-012–014 and M0 contract revision 2 |
-| open implementation PRs at recovery | 0 at initial recovery; existing PR #7 at final checkpoint |
+| open implementation PRs at recovery | 0; PR #7 is merged at `50294b687d06f08e94290f6f327187e8f69248bc` |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
@@ -31,8 +31,8 @@
 
 | Milestone | Workflow state | Accepted implementation | Integration | Gate |
 | --- | --- | --- | --- | --- |
-| M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | OPEN — PR #7 | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
-| M1 | NOT_STARTED | none | NOT_OPENED | M0; AC-04–08,20 |
+| M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
+| M1 | RUNNING | none | NOT_OPENED | M0; AC-04–08,20 |
 | M2 | NOT_STARTED | none | NOT_OPENED | M1; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
@@ -111,3 +111,32 @@ Local HTTPS credentials were absent; authorized GitHub Git Data API publication 
 DG-D009: metadata CI run35513677939 failed dark-theme axe (6/7 E2E); button foreground/background color interpolation briefly falls below contrast limits. M0 acceptance is suspended pending the reserved third-cycle correction, fixed-commit browser revalidation, independent follow-up and new remote CI. Existing tests are unchanged; remove only the button color transition. Resume T-004/T-005, same PR7 draft. Prior accepted evidence remains historical, not a waiver of this failure.
 
 DG-D010: reserved cycle3 closed F-03 by removing only the button color transition, without delays/exclusions or weakened axe checks. Independent attempt3 and CI35513835780 (82 tests,7 E2E) pass. ACCEPT M0 at695e962; no blockers; owner released. Earlier DG-D009 suspension is resolved. Final checkpoint remains metadata-only; PR7 is the sole unmerged delivery.
+
+### M1 recovery and execution checkpoint
+
+- Reconciled 2026-09-20 from clean `origin/main` `50294b687d06f08e94290f6f327187e8f69248bc`; PR #7 is MERGED, not OPEN. Its head `e057a12c54917f18c294cdc13423a2161e23fea2` passed final workflow run 35514160187. The scoped M0 tree is identical between head and merge commit.
+- Source kernel `664d176a07568fc17506185d3b99e7349897ce05`; required source files were read, not installed or copied. Primary route is this Codex orchestrator plus bounded collaboration workers; exact inherited model ID is not exposed. External CLIs are recorded in the M1 preflight, but no unverified model is claimed.
+- T-006 is the mandatory behavior-preserving architecture split and M0 regression. Feature work does not start until T-006 passes and the M1 integration contract is fixed.
+- Planned bounded tasks: T-007 shared M1 schemas/seed/invariants; T-008 RD application slice; T-009 Ops CMDB slice; T-010 relations/topology slice; T-011 lead integration/search/scope/E2E; T-012 independent fixed-commit review; T-013 final evidence and acceptance. T-008–010 depend on T-006 and T-007. PLAN, route/API/demo composition and final Git integration remain lead-owned.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M1-20260920-01
+terminal_state: running
+active_owner: Codex orchestrator
+target_ref: main
+source_main: 50294b687d06f08e94290f6f327187e8f69248bc
+continuation_ref: agent/dim-gate/mainline/m1-cmdb
+milestone: M1
+task_id: T-006
+implementation_commit: none
+spec_revision: main-50294b6 plus pending M1 integration contract
+evidence_refs:
+  - .team/reports/dim-gate-m1-preflight.md
+integration_state: NOT_OPENED
+remote_durability: local branch only until first accepted checkpoint is pushed
+blockers: []
+next_action: complete T-006 architecture split, run the full M0 regression, then freeze the M1 integration contract before feature dispatch
+```

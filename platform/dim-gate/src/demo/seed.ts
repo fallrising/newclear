@@ -1,15 +1,11 @@
-import { personaSchema, snapshotSchema, type Persona, type Snapshot } from '../domain/schemas'
+import { snapshotSchema, type Snapshot } from '../domain/schemas'
+import { personas } from './seed/core'
+
+export { personas } from './seed/core'
 
 export const SEED_BASELINE = '2026-09-20T09:00:00Z'
 const stamp = { version: 1, createdAt: SEED_BASELINE, updatedAt: SEED_BASELINE }
 const scoped = { ...stamp, orgId: 'org-demo' }
-
-export const personas: Persona[] = [
-  { id: 'user-rd-commerce', displayName: '林予安 · Commerce RD', description: 'Store 專案的應用與環境', centers: ['rd'] },
-  { id: 'user-rd-data', displayName: '陳以晴 · Data RD', description: 'Data 專案的應用與環境', centers: ['rd'] },
-  { id: 'user-ops', displayName: '周柏宇 · Platform Ops', description: '三個資源池與兩個專案的維運範圍', centers: ['ops'] },
-  { id: 'user-admin', displayName: '吳知行 · Platform Admin', description: '企業配置與授權管理；未授予發布權', centers: ['admin'] },
-].map((persona) => personaSchema.parse(persona))
 
 /** M0's minimal seed: three synthetic CIs, two applications, four existing environments. */
 export function createSeed(sessionId: string): Snapshot {

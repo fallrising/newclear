@@ -2,6 +2,10 @@
 import { z } from 'zod'
 import * as d from '../domain/schemas.ts'
 import { controlResultSchema, personaBodySchema, resetBodySchema } from './control-dto.ts'
+import { registerCmdbContracts } from './contracts/cmdb-application-environment.ts'
+import { registerCoreSessionContracts } from './contracts/core-session.ts'
+import { registerFutureContracts } from './contracts/future.ts'
+import { registerTopologyContracts } from './contracts/topology-relation-search.ts'
 
 const id = d.idSchema
 const reason = z.string().trim().min(1).max(500)
@@ -98,71 +102,19 @@ const command = (method: Operation['method'], path: string, operationId: string,
 }
 const w = wireSchemas
 const s = d.contractSchemas
-read('/session', 'getSession', s.SessionView, 'M0')
-read('/organization', 'getOrganization', w.OrganizationView, 'M0')
-read('/navigation', 'getNavigation', z.array(s.NavigationItem), 'M0', z.strictObject({ center: d.centerSchema }))
-read('/dashboard', 'getDashboard', s.DashboardView, 'M0', z.strictObject({ center: d.centerSchema, projectId: id.optional(), environmentId: id.optional() }))
-read('/applications', 'listApplications', d.pageSchema(s.Application), 'M0', listQuery({ projectId: id.optional() }))
-read('/cis', 'listCIs', d.pageSchema(s.CIView), 'M0', listQuery({ provider: d.providerSchema.optional(), kind: d.ciKindSchema.optional(), projectId: id.optional(), environmentId: id.optional(), health: d.healthSchema.optional(), freshness: z.enum(['fresh', 'stale']).optional() }, ['id', 'name', 'updatedAt', 'provider', 'kind', 'health']))
-read('/cis/{id}', 'getCI', s.CIView, 'M0')
-read('/search', 'search', z.strictObject({ items: z.array(w.EntitySearchHit).max(20) }), 'M1', z.strictObject({ q: z.string().min(1).max(100), limit: z.coerce.number().int().min(1).max(20).default(10) }))
-read('/applications/{id}', 'getApplication', w.ApplicationDetail, 'M1')
-read('/environments/{id}', 'getEnvironment', w.EnvironmentDetail, 'M1')
-read('/relations', 'listRelations', d.pageSchema(s.Relation), 'M1', listQuery({ ciId: id, direction: z.enum(['in', 'out', 'both']).default('both') }, ['id', 'updatedAt']))
-read('/topology', 'getTopology', w.TopologyView, 'M1', z.strictObject({ ciId: id.optional(), environmentId: id.optional(), mode: z.enum(['dependencies', 'impact']), depth: z.coerce.number().int().min(1).max(3).default(1) }).refine(value => Boolean(value.ciId) !== Boolean(value.environmentId), 'Choose exactly one root'))
-read('/pools', 'listPools', z.array(s.ResourcePool), 'M2', z.strictObject({ provider: d.providerSchema.optional(), projectId: id.optional() }))
-read('/capacity', 'getCapacity', z.array(w.Capacity), 'M2', z.strictObject({ provider: d.providerSchema.optional(), projectId: id.optional() }))
-read('/catalog', 'listCatalog', d.pageSchema(s.CatalogItem), 'M2', listQuery({ revision: version.optional() }))
-read('/catalog/{id}', 'getCatalog', s.CatalogItem, 'M2', z.strictObject({ revision: version.optional() }))
-read('/requests', 'listRequests', d.pageSchema(s.Request), 'M2', listQuery({ state: d.requestSchema.shape.state.optional(), applicationId: id.optional(), requesterId: id.optional() }, ['id', 'updatedAt']))
-read('/requests/{id}', 'getRequest', z.strictObject({ request: s.Request, jobs: z.array(s.ProvisionJob) }), 'M2')
-read('/jobs', 'listJobs', d.pageSchema(s.ProvisionJob), 'M2', listQuery({ requestId: id.optional(), state: d.provisionJobSchema.shape.state.optional() }, ['id', 'updatedAt']))
-read('/jobs/{id}', 'getJob', z.strictObject({ job: s.ProvisionJob, logs: z.array(logEntry).max(500) }), 'M2')
-read('/pipelines', 'listPipelines', d.pageSchema(s.PipelineRun), 'M3', listQuery({ applicationId: id.optional(), environmentId: id.optional(), state: d.pipelineRunSchema.shape.state.optional() }, ['id', 'updatedAt']))
-read('/pipelines/{id}', 'getPipeline', z.strictObject({ run: s.PipelineRun, logs: z.array(logEntry).max(500) }), 'M3')
-read('/releases', 'listReleases', d.pageSchema(s.Release), 'M3', listQuery({ environmentId: id.optional(), state: d.releaseSchema.shape.state.optional(), kind: d.releaseSchema.shape.kind.optional() }, ['id', 'updatedAt']))
-read('/releases/{id}', 'getRelease', s.Release, 'M3')
-read('/observability/metrics', 'getMetrics', z.strictObject({ series: z.array(metricSeries) }), 'M4', windowQuery({ step: z.literal('60s').default('60s') }))
-read('/observability/traces', 'listTraces', d.pageSchema(traceSummary), 'M4', windowQuery({ ...pageFields, status: z.enum(['ok', 'error']).optional(), sort: z.enum(['id', 'start', 'durationMs']).default('start') }))
-read('/observability/traces/{id}', 'getTrace', w.Trace, 'M4')
-read('/observability/logs', 'listLogs', d.pageSchema(logEntry), 'M4', windowQuery({ ...pageFields, traceId: id.optional(), releaseId: id.optional(), level: logEntry.shape.level.optional(), sort: z.enum(['id', 'occurredAt']).default('occurredAt') }))
-read('/incidents', 'listIncidents', d.pageSchema(s.Incident), 'M4', listQuery({ environmentId: id.optional(), state: d.incidentSchema.shape.state.optional(), severity: d.incidentSchema.shape.severity.optional() }, ['id', 'updatedAt']))
-read('/incidents/{id}', 'getIncident', s.Incident, 'M4')
-read('/audit', 'listAudit', d.pageSchema(s.AuditEvent), 'M2', listQuery({ entityType: id.optional(), entityId: id.optional(), correlationId: id.optional(), actorId: id.optional(), from: d.timestampSchema.optional(), to: d.timestampSchema.optional() }, ['id', 'occurredAt']))
-read('/admin/access', 'getAccess', z.strictObject({ organizations: z.array(s.Organization), users: z.array(s.User), assignments: z.array(s.RoleAssignment), policyVersion: version }), 'M2')
-read('/admin/navigation', 'getAdminNavigation', z.array(s.NavigationItem), 'M2', z.strictObject({ center: d.centerSchema.optional() }))
-read('/admin/cmdb-models', 'getModels', z.strictObject({ kinds: z.array(d.ciKindSchema), fields: z.array(s.ModelField) }), 'M2')
-read('/integrations', 'listIntegrations', z.array(s.Integration), 'M4')
 
-command('post', '/cis', 'createCI', w.CreateCI, 'M1', 201)
-command('patch', '/cis/{id}', 'patchCI', s.PatchCI, 'M0')
-command('post', '/relations', 'createRelation', w.CreateRelation, 'M1', 201)
-command('delete', '/relations/{id}', 'deleteRelation', w.ReasonCommand, 'M1')
-command('post', '/requests', 'createRequest', w.CreateRequest, 'M2', 201)
-command('patch', '/requests/{id}', 'patchRequest', w.PatchRequest, 'M2')
-for (const action of ['submit', 'approve', 'reject', 'cancel', 'provision', 'retry']) command('post', `/requests/{id}/${action}`, `${action}Request`, ['submit', 'provision'].includes(action) ? w.VersionCommand : w.ReasonCommand, 'M2', action === 'provision' ? 202 : 200)
-command('post', '/pipelines', 'createPipeline', w.CreatePipeline, 'M3', 202)
-command('post', '/pipelines/{id}/cancel', 'cancelPipeline', w.ReasonCommand, 'M3')
-command('post', '/pipelines/{id}/retry', 'retryPipeline', w.ReasonCommand, 'M3', 202)
-command('post', '/releases/{id}/approve', 'approveRelease', w.ReasonCommand, 'M3', 202)
-command('post', '/releases/{id}/reject', 'rejectRelease', w.ReasonCommand, 'M3')
-command('post', '/releases/{id}/rollback', 'rollbackRelease', w.RollbackRelease, 'M3', 202)
-command('post', '/incidents/{id}/acknowledge', 'acknowledgeIncident', w.AcknowledgeIncident, 'M4')
-command('post', '/incidents/{id}/investigate', 'investigateIncident', w.ReasonCommand, 'M4')
-command('post', '/admin/assignments', 'createAssignment', w.CreateAssignment, 'M2', 201)
-command('delete', '/admin/assignments/{id}', 'revokeAssignment', s.RevokeAssignment, 'M0')
-command('patch', '/admin/users/{id}', 'patchUser', w.PatchUser, 'M2')
-command('patch', '/admin/navigation/{id}', 'patchNavigation', w.PatchNavigation, 'M2')
-command('post', '/admin/catalog/{id}/revisions', 'createCatalogRevision', w.CreateCatalogRevision, 'M2', 201)
-command('patch', '/admin/catalog/{id}', 'patchCatalog', w.PatchCatalog, 'M2')
-command('post', '/admin/catalog/{id}/publish', 'publishCatalog', w.PublishCatalog, 'M2')
-command('post', '/admin/catalog/{id}/disable', 'disableCatalog', w.ReasonCommand, 'M2')
-command('post', '/admin/cmdb-fields', 'createModelField', w.CreateModelField, 'M2', 201)
-command('patch', '/admin/cmdb-fields/{id}', 'patchModelField', w.PatchModelField, 'M2')
-command('post', '/integrations/{id}/test', 'testIntegration', w.VersionCommand, 'M4')
-read('/personas', 'getPersonas', z.array(s.Persona), 'M0', undefined, true)
-read('/guide', 'getGuide', s.GuideView, 'M0', undefined, true)
-command('post', '/persona', 'setPersona', w.PersonaBody, 'M0', 200, true, w.ControlResult)
-command('post', '/reset', 'resetDemo', w.ResetBody, 'M0', 200, true, w.ControlResult)
-command('post', '/clock/advance', 'advanceClock', s.AdvanceClock, 'M0', 200, true)
-command('post', '/scenarios', 'setScenario', w.ScenarioBody, 'M4', 200, true)
+export type ContractContext = {
+  z: typeof z; d: typeof d; w: typeof wireSchemas; s: typeof d.contractSchemas; id: typeof id; version: typeof version;
+  listQuery: typeof listQuery; windowQuery: typeof windowQuery; pageFields: typeof pageFields; logEntry: typeof logEntry;
+  metricSeries: typeof metricSeries; traceSummary: typeof traceSummary; read: typeof read; command: typeof command;
+}
+
+const context: ContractContext = { z, d, w, s, id, version, listQuery, windowQuery, pageFields, logEntry, metricSeries, traceSummary, read, command }
+registerCoreSessionContracts(context)
+registerCmdbContracts(context)
+registerTopologyContracts(context)
+registerFutureContracts(context)
+
+const publishedOperationOrder = 'getSession,getOrganization,getNavigation,getDashboard,listApplications,listCIs,getCI,search,getApplication,getEnvironment,listRelations,getTopology,listPools,getCapacity,listCatalog,getCatalog,listRequests,getRequest,listJobs,getJob,listPipelines,getPipeline,listReleases,getRelease,getMetrics,listTraces,getTrace,listLogs,listIncidents,getIncident,listAudit,getAccess,getAdminNavigation,getModels,listIntegrations,createCI,patchCI,createRelation,deleteRelation,createRequest,patchRequest,submitRequest,approveRequest,rejectRequest,cancelRequest,provisionRequest,retryRequest,createPipeline,cancelPipeline,retryPipeline,approveRelease,rejectRelease,rollbackRelease,acknowledgeIncident,investigateIncident,createAssignment,revokeAssignment,patchUser,patchNavigation,createCatalogRevision,patchCatalog,publishCatalog,disableCatalog,createModelField,patchModelField,testIntegration,getPersonas,getGuide,setPersona,resetDemo,advanceClock,setScenario'.split(',')
+const operationRank = new Map(publishedOperationOrder.map((operationId, rank) => [operationId, rank]))
+operations.sort((left, right) => (operationRank.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (operationRank.get(right.id) ?? Number.MAX_SAFE_INTEGER))

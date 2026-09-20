@@ -67,3 +67,22 @@ it('planned observability/topology contracts reject unbounded windows and ambigu
   expect(topology.safeParse({ ciId: 'ci-1', environmentId: 'env-1', mode: 'impact' }).success).toBe(false)
   expect(topology.safeParse({ ciId: 'ci-1', mode: 'impact', depth: '4' }).success).toBe(false)
 })
+
+
+it('publishes M1 identity guards, explicit unknown freshness, topology caps, capacity and audit', () => {
+  const createRelation = wireSchemas.CreateRelation
+  expect(createRelation.safeParse({
+    sourceCiId: 'ci-a', targetCiId: 'ci-b', sourceExpectedVersion: 1, targetExpectedVersion: 2,
+    type: 'depends_on', reason: 'verified relation',
+  }).success).toBe(true)
+  expect(createRelation.safeParse({
+    sourceCiId: 'ci-a', targetCiId: 'ci-b', type: 'depends_on', reason: 'missing guards',
+  }).success).toBe(false)
+  expect(wireSchemas.TopologyView.safeParse({
+    nodes: [], edges: [], truncated: false, depthReached: 0,
+  }).success).toBe(true)
+  const ciQuery = operations.find((item) => item.id === 'listCIs')!.query!
+  expect(ciQuery.safeParse({ freshness: 'unknown' }).success).toBe(true)
+  expect(operations.find((item) => item.id === 'getCapacity')?.milestone).toBe('M1')
+  expect(operations.find((item) => item.id === 'listAudit')?.milestone).toBe('M1')
+})

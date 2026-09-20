@@ -2,7 +2,7 @@ import type { ContractContext } from '../contracts.ts'
 
 export function registerFutureContracts({ z, d, w, s, id, version, listQuery, windowQuery, pageFields, logEntry, metricSeries, traceSummary, read, command }: ContractContext) {
   read('/pools', 'listPools', z.array(s.ResourcePool), 'M2', z.strictObject({ provider: d.providerSchema.optional(), projectId: id.optional() }))
-  read('/capacity', 'getCapacity', z.array(w.Capacity), 'M2', z.strictObject({ provider: d.providerSchema.optional(), projectId: id.optional() }))
+  read('/capacity', 'getCapacity', z.array(w.Capacity), 'M1', z.strictObject({ provider: d.providerSchema.optional(), projectId: id.optional() }))
   read('/catalog', 'listCatalog', d.pageSchema(s.CatalogItem), 'M2', listQuery({ revision: version.optional() }))
   read('/catalog/{id}', 'getCatalog', s.CatalogItem, 'M2', z.strictObject({ revision: version.optional() }))
   read('/requests', 'listRequests', d.pageSchema(s.Request), 'M2', listQuery({ state: d.requestSchema.shape.state.optional(), applicationId: id.optional(), requesterId: id.optional() }, ['id', 'updatedAt']))
@@ -19,7 +19,7 @@ export function registerFutureContracts({ z, d, w, s, id, version, listQuery, wi
   read('/observability/logs', 'listLogs', d.pageSchema(logEntry), 'M4', windowQuery({ ...pageFields, traceId: id.optional(), releaseId: id.optional(), level: logEntry.shape.level.optional(), sort: z.enum(['id', 'occurredAt']).default('occurredAt') }))
   read('/incidents', 'listIncidents', d.pageSchema(s.Incident), 'M4', listQuery({ environmentId: id.optional(), state: d.incidentSchema.shape.state.optional(), severity: d.incidentSchema.shape.severity.optional() }, ['id', 'updatedAt']))
   read('/incidents/{id}', 'getIncident', s.Incident, 'M4')
-  read('/audit', 'listAudit', d.pageSchema(s.AuditEvent), 'M2', listQuery({ entityType: id.optional(), entityId: id.optional(), correlationId: id.optional(), actorId: id.optional(), from: d.timestampSchema.optional(), to: d.timestampSchema.optional() }, ['id', 'occurredAt']))
+  read('/audit', 'listAudit', d.pageSchema(s.AuditEvent), 'M1', listQuery({ entityType: id.optional(), entityId: id.optional(), correlationId: id.optional(), actorId: id.optional(), from: d.timestampSchema.optional(), to: d.timestampSchema.optional() }, ['id', 'occurredAt']))
   read('/admin/access', 'getAccess', z.strictObject({ organizations: z.array(s.Organization), users: z.array(s.User), assignments: z.array(s.RoleAssignment), policyVersion: version }), 'M2')
   read('/admin/navigation', 'getAdminNavigation', z.array(s.NavigationItem), 'M2', z.strictObject({ center: d.centerSchema.optional() }))
   read('/admin/cmdb-models', 'getModels', z.strictObject({ kinds: z.array(d.ciKindSchema), fields: z.array(s.ModelField) }), 'M2')

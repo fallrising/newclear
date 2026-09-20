@@ -43,7 +43,7 @@ describe('shared browser/Node HTTP handlers', () => {
     const response = await request('api/v1/session')
     expect(apiResultSchema(sessionViewSchema).safeParse(await response.json()).success).toBe(true)
     const rd = await (await request('api/v1/dashboard?center=rd')).json()
-    expect(rd.data.applicationCount).toBe(1)
+    expect(rd.data.applicationCount).toBe(3)
     const forbidden = await request('api/v1/dashboard?center=admin')
     expect(forbidden.status).toBe(403)
     await persona('user-admin', 'to-admin')

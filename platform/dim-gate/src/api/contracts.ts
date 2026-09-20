@@ -15,7 +15,6 @@ const withReason = { ...expected, reason }
 const ids = z.array(id).refine(values => new Set(values).size === values.length, 'IDs must be unique')
 const cpu = z.number().int().min(1).max(64)
 const memoryMiB = z.number().int().min(128).max(262144).multipleOf(128)
-const fields = z.record(z.string().min(1).max(80), z.json())
 const scope = { applicationId: id, environmentId: id }
 const windowFields = { ...scope, from: d.timestampSchema, to: d.timestampSchema }
 const pageFields = {
@@ -45,16 +44,7 @@ const catalogFields = { template: d.catalogTemplateSchema, name: d.nameSchema,
   description: z.string().max(2000), allowedProjectIds: ids }
 
 // Entity refinements and graph/scope invariants still run in the domain engine.
-export const createCiSchema = z.strictObject({
-  name: d.nameSchema, kind: d.ciKindSchema, provider: d.providerSchema, externalId: id,
-  accountId: id.optional(), locationId: id, poolId: id, ownerTeamId: id,
-  visibilityProjectIds: ids.min(1), lifecycle: d.ciSchema.shape.lifecycle,
-  tags: d.tagsSchema, attributes: fields, customFields: fields,
-}).superRefine((body, context) => {
-  const checked = d.ciSchema.safeParse({ ...body, id: 'validation-only', orgId: 'session-scope', version: 1,
-    createdAt: '2026-09-20T09:00:00Z', updatedAt: '2026-09-20T09:00:00Z', health: 'unknown', source: 'manual', observedAt: null })
-  if (!checked.success) for (const issue of checked.error.issues) context.addIssue({ code: 'custom', path: issue.path, message: issue.message })
-})
+export const createCiSchema = d.createCiInputSchema
 export const wireSchemas = {
   ...d.contractSchemas,
   OrganizationView: z.strictObject({ organizations: z.array(d.organizationSchema), businessUnits: z.array(d.businessUnitSchema),
@@ -67,7 +57,7 @@ export const wireSchemas = {
     memoryMiB: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }) }),
   LogEntry: logEntry, TraceSummary: traceSummary, Trace: traceSummary.extend({ spans: z.array(traceSpan) }), MetricSeries: metricSeries,
   CreateCI: createCiSchema,
-  CreateRelation: z.strictObject({ sourceCiId: id, targetCiId: id, type: z.enum(['runs_on', 'depends_on', 'connects_to']), reason }),
+  CreateRelation: d.createRelationInputSchema,
   VersionCommand: z.strictObject(expected), ReasonCommand: z.strictObject(withReason),
   CreateRequest: z.strictObject({ applicationId: id, stage: d.stageSchema, catalogItemId: id, catalogRevision: version, ...requestFields }),
   PatchRequest: z.strictObject({ ...expected, ...Object.fromEntries(Object.entries(requestFields).map(([key, value]) => [key, value.optional()])) }),

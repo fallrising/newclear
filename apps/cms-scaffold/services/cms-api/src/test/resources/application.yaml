@@ -1,0 +1,21 @@
+# Tests must not require Docker or a running PostgreSQL.
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+  flyway:
+    enabled: false
+
+cms:
+  identity:
+    seed-enabled: true
+    seed-password: CmsWaveB1TestPw
+    cookie-secure: false
+    argon2-memory-kb: 8
+    argon2-iterations: 1
+  media:
+    root: ./build/tmp-media
+

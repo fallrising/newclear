@@ -6,7 +6,7 @@ The imported component workflows remain under component directories, which GitHu
 
 ## Goal
 
-Provide six root-level, path-scoped CI workflows for Goku, Phark, CloudForm, AweShore, Streaming Converter, and Ojbquay.
+Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active.
 
 ## Non-goals
 
@@ -21,7 +21,7 @@ Scenario: A pull request changes Goku web code
   And it runs all three Go module tests plus the web clean install, lint, and build
 
 Scenario: A maintainer runs a workflow manually
-  Given any of the six root workflows
+  Given any selected root workflow
   When it is dispatched manually
   Then its component-native CI checks run without deployment or publish credentials
 
@@ -50,11 +50,14 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | AweShore | UI `npm ci`, format check, lint, type check, build |
 | Streaming Converter | `bash -n` for every checked-in shell script |
 | Ojbquay | Java 25 `./gradlew build`; pinned-pnpm console test/build; `make validate-deploy` |
+| Ice Maker | Python 3.11 repository-native `make check` with full Git history available |
+| Local OCR Services | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
+| CMS Scaffold | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
 
 ## Steps
 
 1. Add this specification and make the root README identify root workflows as canonical.
-2. Add six root workflows with path filters, read-only permissions, cancellation, timeouts, setup, caching, and native gates.
+2. Add selected root workflows with path filters, read-only permissions, cancellation, timeouts, setup, caching, and native gates.
 3. Validate workflow syntax and static policy with pinned actionlint plus local representative native gates.
 
 ## Verification

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ice-maker"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+document-ingestion = ["Pillow==12.3.0", "fastapi==0.141.1", "uvicorn==0.52.4", "python-multipart==0.0.32"]
+
+[project.scripts]
+sdd = "ice_maker.cli:main"
+knowledge = "ice_maker.knowledge_cli:main"
+document-service = "ice_maker.document_service:main"
+study = "ice_maker.study_cli:main"

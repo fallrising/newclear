@@ -12,6 +12,24 @@
 | 2 | `newclear` 匯入:公開專案 squash 匯入 | ✅ 完成（15 component,2136 檔） |
 | 3 | `kernel` 匯入:私有專案 squash 匯入 | ✅ 完成（9 component,1592 檔） |
 | 4 | 收尾:successor notice、archive 舊 repo、profile README | ✅ 完成 |
+| 5 | 第二次收斂:`ice-maker`、`local-ocr-services`、`cms-scaffold`、兩個 fraud repo | 🚧 2026-09-20 執行 |
+
+## Phase 5（2026-09-20）
+
+依新的 monorepo 決策，先前「刻意保持獨立」的 components 改為 snapshot 匯入；來源 repo
+在目標合併與 CI 驗證完成後封存，保留其完整歷史、branches 與 tags。
+
+| 目標 | 路徑 | 來源 HEAD |
+| --- | --- | --- |
+| `newclear` | `platform/ice-maker/` | `fallrising/ice-maker@ba28ad9` |
+| `newclear` | `platform/local-ocr-services/` | `fallrising/local-ocr-services@4d8378f` |
+| `newclear` | `apps/cms-scaffold/` | `fallrising/cms-scaffold@64003d0` |
+| `kernel` | `fraud/edge-decision/` | `fallrising/fraud-edge-decision@3ba32ac` |
+| `kernel` | `fraud/event-policy/` | `fallrising/fraud-event-policy@91a4bdc` |
+
+三個由 private 移入 public `newclear` 的 snapshot 在匯入前以 gitleaks v8.30.1 掃描。
+`ice-maker` 與 `cms-scaffold` 無 finding；`local-ocr-services` 的五個 finding 均位於測試
+fixture 的假 API key。完整 private Git 歷史不匯入 public monorepo。
 
 ## Phase 0 成果（已完成）
 

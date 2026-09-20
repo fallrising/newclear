@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --bg: #101418;
+  --panel: #181d24;
+  --line: #2a3340;
+  --text: #e8eef4;
+  --muted: #93a0b0;
+  --accent: #7eb6ff;
+  --danger: #ff8b8b;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

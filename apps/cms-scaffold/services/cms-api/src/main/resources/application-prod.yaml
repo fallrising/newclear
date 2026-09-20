@@ -1,0 +1,6 @@
+cms:
+  identity:
+    seed-enabled: false
+    cookie-secure: true
+    argon2-memory-kb: 16384
+    argon2-iterations: 3

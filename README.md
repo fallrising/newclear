@@ -2,7 +2,7 @@
 
 `fallrising` 的公開技術作品集。這裡是這些專案的 canonical 位置——先前散落在數十個獨立 repository 的內容,已收斂至此。
 
-根目錄的 [GitHub Actions workflows](.github/workflows/) 是 monorepo 的 canonical CI entry points；component 目錄中保留的 workflow 是原始 repository 歷史，GitHub 不會將其當作 monorepo CI 執行。六個已接線 component 的範圍與驗證規則見 [Monorepo CI specification](docs/specs/monorepo-ci.md)。
+根目錄的 [GitHub Actions workflows](.github/workflows/) 是 monorepo 的 canonical CI entry points；component 目錄中保留的 workflow 是原始 repository 歷史，GitHub 不會將其當作 monorepo CI 執行。已接線 component 的範圍與驗證規則見 [Monorepo CI specification](docs/specs/monorepo-ci.md)。
 
 ## 目錄
 
@@ -30,9 +30,12 @@
 | --- | --- | --- |
 | [`platform/fanzloud`](platform/fanzloud/) | Cloud coding-agent platform 與 BYOS control layer | Rust |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心的企業運維自助平台前端：RD／Ops／Admin 三中心、跨雲資源與互動演示（SDD baseline，尚未實作） | React, TypeScript, shadcn/ui（規劃） |
+| [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器、文件 ingestion 與可重現發布 | Python |
+| [`platform/local-ocr-services`](platform/local-ocr-services/) | 可自行託管的 CPU-first OCR HTTP services | Python, Docker |
 | [`apps/loom`](apps/loom/) | AI-native canvas / terminal / document workspace | Tauri, Rust, React |
 | [`apps/flowshot`](apps/flowshot/) | Local-first 嚴格唯讀 Markdown annotation desktop app | Python, TS |
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning 與 WYSIWYG form designer | TypeScript |
+| [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel：Java API 與 Front／Back／Admin 三個操作面 | Java, React, PostgreSQL |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion、cleanup、Nginx serving 與 web player | Bash, FFmpeg |
 
 ### 規格、範例與實驗
@@ -57,5 +60,4 @@
 ## 相關 repository
 
 - **`kernel`**（private）— 私有的技術專案:VPS/fleet 基礎設施、個人工作流、agent 交付協定
-- **`knowledge-base`**、**`doc_analysis_study`**、**`ice-maker`**（private）— 知識與文件線,刻意獨立
-- **`fraud-edge-decision`**、**`fraud-event-policy`**（private）— clean-room 實作,刻意隔離
+- **`knowledge-base`**、**`doc_analysis_study`**（private）— 獨立的知識來源與研究輸出

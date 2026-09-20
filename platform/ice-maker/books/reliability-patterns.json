@@ -1,0 +1,6 @@
+{
+  "schema_version": "publication-manifest.v1",
+  "manifest_id": "reliability-patterns",
+  "title": "Reliability Patterns",
+  "chapters": ["knowledge/50-patterns/synthetic-idempotency.json"]
+}

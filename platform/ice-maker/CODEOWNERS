@@ -1,0 +1,8 @@
+# Human approval is mandatory for every Phase 0 governance boundary.
+/CODEOWNERS @fallrising
+/.github/CODEOWNERS @fallrising
+/.github/pull_request_template.md @fallrising
+/.github/workflows/ci.yml @fallrising
+/.github/workflows/agent.yml @fallrising
+/orchestration/policies/data-providers.json @fallrising
+/orchestration/policies/protected-paths.json @fallrising

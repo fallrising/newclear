@@ -1,0 +1,535 @@
+openapi: 3.0.3
+info:
+  title: CMS Scaffold API
+  description: |
+    Kernel API for CMS Scaffold. Handwritten OpenAPI is the contract source.
+
+    Public reads live under `/api/v1/public/**`. Work surfaces do not share
+    that prefix. Session cookie name is `cms_session` (one cookie).
+    Published media is not a public static directory.
+  version: 0.3.0
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:8080
+    description: Local compose (API port 8080)
+tags:
+  - name: Health
+  - name: Auth
+  - name: Principals
+  - name: Content
+  - name: Media
+  - name: Admin
+paths:
+  /actuator/health:
+    get:
+      operationId: getHealth
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Process is up
+  /openapi.yaml:
+    get:
+      operationId: getOpenApi
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Handwritten OpenAPI document
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      tags: [Auth]
+      security: []
+      responses:
+        "200": { description: Authenticated; sets cms_session and cms_csrf }
+        "401": { description: INVALID_CREDENTIALS }
+        "403": { description: ACCOUNT_DISABLED, ACCOUNT_LOCKED, or CSRF_FAILED }
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags: [Auth]
+      responses:
+        "204": { description: Current session revoked }
+        "401": { description: UNAUTHENTICATED }
+  /api/v1/auth/me:
+    get:
+      operationId: me
+      tags: [Auth]
+      responses:
+        "200": { description: Current principal }
+        "401": { description: UNAUTHENTICATED or SESSION_EXPIRED }
+  /api/v1/auth/csrf:
+    get:
+      operationId: csrf
+      tags: [Auth]
+      security: []
+      responses:
+        "200": { description: Ensures cms_csrf cookie }
+  /api/v1/auth/password/change:
+    post:
+      operationId: changePassword
+      tags: [Auth]
+      responses:
+        "204": { description: Password changed; sessions revoked }
+        "401": { description: UNAUTHENTICATED }
+  /api/v1/principals:
+    get:
+      operationId: listPrincipals
+      tags: [Principals]
+      responses:
+        "200": { description: Principal list without credential hashes }
+        "403": { description: SURFACE_FORBIDDEN or FORBIDDEN }
+    post:
+      operationId: createPrincipal
+      tags: [Principals]
+      responses:
+        "201": { description: Principal created }
+        "403": { description: FORBIDDEN }
+  /api/v1/principals/{id}:
+    get:
+      operationId: getPrincipal
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Principal }
+        "404": { description: Not found }
+    patch:
+      operationId: patchPrincipal
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Updated }
+  /api/v1/principals/{id}/disable:
+    post:
+      operationId: disablePrincipal
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Disabled }
+  /api/v1/principals/{id}/unlock:
+    post:
+      operationId: unlockPrincipal
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Unlocked }
+  /api/v1/principals/{id}/roles:
+    put:
+      operationId: replacePrincipalRoles
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Roles replaced }
+  /api/v1/principals/{id}/password:
+    post:
+      operationId: setPrincipalPassword
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204": { description: Temporary password set }
+  /api/v1/principals/{id}/effective-permissions:
+    get:
+      operationId: effectivePermissions
+      tags: [Principals]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Effective grants }
+  /api/v1/roles:
+    get:
+      operationId: listRoles
+      tags: [Principals]
+      responses:
+        "200": { description: Roles }
+  /api/v1/roles/{code}/permissions:
+    get:
+      operationId: getRolePermissions
+      tags: [Principals]
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Role permissions }
+    put:
+      operationId: replaceRolePermissions
+      tags: [Principals]
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Permissions replaced }
+  /api/v1/public/content-types:
+    get:
+      operationId: listPublicContentTypes
+      tags: [Content]
+      security: []
+      responses:
+        "200": { description: Types the caller may read_published }
+  /api/v1/public/content-types/{typeKey}/entries:
+    get:
+      operationId: listPublicEntries
+      tags: [Content]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "200": { description: Published entries only; unlisted/private omitted }
+        "400": { description: AUDIENCE_PARAM_REJECTED if state is supplied }
+        "403": { description: No read_published on this type }
+  /api/v1/public/content-types/{typeKey}/entries/{id}:
+    get:
+      operationId: getPublicEntry
+      tags: [Content]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Published entry; no draft fields }
+        "404": { description: ENTRY_NOT_FOUND }
+  /api/v1/public/content-types/{typeKey}/slugs/{slug}:
+    get:
+      operationId: getPublicEntryBySlug
+      tags: [Content]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Published entry by slug }
+        "404": { description: ENTRY_NOT_FOUND }
+  /api/v1/public/navigation/{menuKey}:
+    get:
+      operationId: getPublicNavigation
+      tags: [Content]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/MenuKey"
+      responses:
+        "200": { description: Published navigation }
+        "404": { description: NAVIGATION_NOT_FOUND }
+  /api/v1/content-types:
+    get:
+      operationId: listWorkContentTypes
+      tags: [Content]
+      responses:
+        "200": { description: Enabled types for Back }
+        "403": { description: Front surface forbidden }
+  /api/v1/content-types/{typeKey}:
+    get:
+      operationId: getWorkContentType
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "200": { description: Type schema }
+  /api/v1/content-types/{typeKey}/entries:
+    get:
+      operationId: listWorkEntries
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "200": { description: Work entries including drafts }
+    post:
+      operationId: createEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "201": { description: Draft created }
+        "403": { description: Missing create grant }
+  /api/v1/entries/{id}:
+    get:
+      operationId: getWorkEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Work copy }
+        "403": { description: Front surface forbidden }
+    patch:
+      operationId: patchEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Work copy updated }
+    delete:
+      operationId: softDeleteEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204": { description: Soft deleted }
+        "409": { description: REF_CONSTRAINT }
+  /api/v1/entries/{id}/publish:
+    post:
+      operationId: publishEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Published }
+        "403": { description: Missing publish grant }
+        "409": { description: INVALID_STATE_TRANSITION }
+  /api/v1/entries/{id}/unpublish:
+    post:
+      operationId: unpublishEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Returned to draft }
+        "409": { description: INVALID_STATE_TRANSITION }
+  /api/v1/entries/{id}/archive:
+    post:
+      operationId: archiveEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Archived }
+  /api/v1/entries/{id}/restore:
+    post:
+      operationId: restoreEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Restored to draft }
+  /api/v1/entries/{id}/revisions:
+    get:
+      operationId: listRevisions
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Publish snapshots }
+  /api/v1/entries/{id}/revisions/{revisionNo}/revert:
+    post:
+      operationId: revertRevision
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - in: path
+          name: revisionNo
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: Work copy reverted }
+  /api/v1/preview/entries/{id}:
+    get:
+      operationId: previewEntry
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Work copy for Back preview; not a Front origin }
+  /api/v1/admin/content-types:
+    get:
+      operationId: adminListContentTypes
+      tags: [Admin]
+      responses:
+        "200": { description: All types including disabled }
+    post:
+      operationId: adminCreateContentType
+      tags: [Admin]
+      responses:
+        "201": { description: Type created }
+  /api/v1/admin/content-types/{typeKey}/disable:
+    post:
+      operationId: disableContentType
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "200": { description: Disabled }
+  /api/v1/admin/content-types/{typeKey}/enable:
+    post:
+      operationId: enableContentType
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+      responses:
+        "200": { description: Enabled }
+  /api/v1/admin/navigation/{menuKey}:
+    get:
+      operationId: adminGetNavigation
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/MenuKey"
+      responses:
+        "200": { description: Work navigation }
+    patch:
+      operationId: adminPatchNavigation
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/MenuKey"
+      responses:
+        "200": { description: Updated }
+  /api/v1/admin/navigation/{menuKey}/publish:
+    post:
+      operationId: adminPublishNavigation
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/MenuKey"
+      responses:
+        "200": { description: Published }
+  /api/v1/admin/entries/{id}/purge:
+    post:
+      operationId: purgeEntry
+      tags: [Admin]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204": { description: Hard deleted with audit }
+        "403": { description: Admin only }
+        "409": { description: REF_CONSTRAINT }
+  /api/v1/admin/audit:
+    get:
+      operationId: listAudit
+      tags: [Admin]
+      responses:
+        "200": { description: Audit events }
+        "403": { description: Missing read_audit }
+  /api/v1/media:
+    get:
+      operationId: listMedia
+      tags: [Media]
+      responses:
+        "200": { description: Available media }
+    post:
+      operationId: uploadMedia
+      tags: [Media]
+      responses:
+        "201": { description: Uploaded }
+        "422": { description: MIME or validation }
+  /api/v1/media/quota:
+    get:
+      operationId: mediaQuota
+      tags: [Media]
+      responses:
+        "200": { description: Quota }
+  /api/v1/media/{id}:
+    get:
+      operationId: getMedia
+      tags: [Media]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Media metadata }
+    delete:
+      operationId: softDeleteMedia
+      tags: [Media]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204": { description: Soft deleted }
+  /api/v1/media/{id}/file/{variant}:
+    get:
+      operationId: privateMediaFile
+      tags: [Media]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/Variant"
+      responses:
+        "200": { description: Private bytes }
+  /api/v1/public/media/{id}:
+    get:
+      operationId: publicMediaMeta
+      tags: [Media]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Public metadata }
+        "404": { description: Not publicly readable }
+  /api/v1/public/media/{id}/file/{variant}:
+    get:
+      operationId: publicMediaFile
+      tags: [Media]
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/Variant"
+      responses:
+        "200": { description: Public bytes }
+        "404": { description: Not publicly readable }
+components:
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
+    TypeKey:
+      in: path
+      name: typeKey
+      required: true
+      schema: { type: string }
+    MenuKey:
+      in: path
+      name: menuKey
+      required: true
+      schema: { type: string }
+    Variant:
+      in: path
+      name: variant
+      required: true
+      schema: { type: string }
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: cms_session
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: UP
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+        surface: { type: string }
+    ErrorEnvelope:
+      type: object
+      required: [error, requestId]
+      properties:
+        requestId: { type: string }
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            action: { type: string }
+            contentType: { type: string }
+            surface: { type: string }
+security:
+  - cookieAuth: []
+  - bearerAuth: []

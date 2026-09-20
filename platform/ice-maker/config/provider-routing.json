@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "attempt_ceiling": 3,
+  "aliases": {
+    "builder_primary": {
+      "provider": "codex",
+      "role": "builder",
+      "tier": 1,
+      "cost_usd": 1.0,
+      "fallback_aliases": ["builder_economy"]
+    },
+    "builder_economy": {
+      "provider": "deepseek",
+      "role": "builder",
+      "tier": 1,
+      "cost_usd": 0.1,
+      "fallback_aliases": []
+    },
+    "critic_independent": {
+      "provider": "grok",
+      "role": "reviewer",
+      "tier": 1,
+      "cost_usd": 0.5,
+      "fallback_aliases": []
+    },
+    "reviewer_claude": {
+      "provider": "claude",
+      "role": "reviewer",
+      "tier": 1,
+      "cost_usd": 1.0,
+      "fallback_aliases": ["critic_independent"]
+    }
+  }
+}

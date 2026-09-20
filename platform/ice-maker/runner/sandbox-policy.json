@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "runtime": "docker-rootless-required",
+  "network": "none",
+  "read_only_root": true,
+  "capabilities": "drop-all",
+  "no_new_privileges": true,
+  "limits": {"cpus": "1.0", "memory": "512m", "pids": 128, "tmpfs": "64m"},
+  "tmpfs_options": ["rw", "noexec", "nosuid", "nodev"],
+  "workspace_mount": "/workspace:rw",
+  "forbidden_mounts": ["/var/run/docker.sock", "/", "credentials"]
+}

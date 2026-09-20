@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "method": "oidc",
+  "issuer": "https://oidc-issuer.invalid",
+  "audience": "ice-maker-runner",
+  "max_ttl_seconds": 900,
+  "static_credentials": false,
+  "subject_claims": [
+    "repository",
+    "ref",
+    "job_workflow_ref",
+    "runner_environment"
+  ]
+}

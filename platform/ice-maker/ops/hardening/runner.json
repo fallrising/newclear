@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "lifecycle": "ephemeral",
+  "max_jobs_per_runner": 1,
+  "privileged": false,
+  "rootless": true,
+  "read_only_root": true,
+  "no_new_privileges": true,
+  "capabilities": {
+    "drop": "ALL",
+    "add": []
+  },
+  "limits": {
+    "cpus": "1.0",
+    "memory": "512m",
+    "pids": 128,
+    "timeout_seconds": 1800
+  }
+}

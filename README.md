@@ -12,6 +12,7 @@
 | --- | --- | --- |
 | [`products/goku`](products/goku/) | 書籤 ingestion 與管理產品:CLI、API、MQTT consumer、Web UI | Go, SQLite, React |
 | [`products/phark`](products/phark/) | Social stream deck:帳號、互動、搜尋、media、moderation | Spring, React, SQLite |
+| [`products/kith`](products/kith/) | 人機群聊：人類與 LLM agent 同房、MCP、官方 Codex sidecar（SDD baseline，尚未實作） | Cloudflare Workers, D1, React（規劃） |
 
 ### Gateway 與系統軟體
 

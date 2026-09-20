@@ -9,10 +9,10 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 6 |
+| protocol_version / ledger_revision | 1 / 7 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex / DG-M0-20260920-01 |
+| active_owner / run_id | released / DG-M0-20260920-01 |
 | active_work_branch | agent/dim-gate/mainline/m0-foundation |
 | source / last_reconciled_target | initial `1117d297aa3efef9472d847c9dfa5714eb6c4460` / reconciled `a330237860b3002d68fec3f853a6d1deb44a8e9a`, 2026-09-20 |
 | source kernel protocol | `7cddad13f965d579b218579609c7f64e1ecf35b2` |
@@ -31,7 +31,7 @@
 
 | Milestone | Workflow state | Accepted implementation | Integration | Gate |
 | --- | --- | --- | --- | --- |
-| M0 | REWORK | `a608a94efc601c9affce554ca64bd4d733ee6839` | OPEN — PR #7 | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
+| M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | OPEN — PR #7 | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | NOT_STARTED | none | NOT_OPENED | M0; AC-04–08,20 |
 | M2 | NOT_STARTED | none | NOT_OPENED | M1; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
@@ -44,11 +44,11 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 
 | Task/revision | AC | Dependencies | Owner/actual route | Attempt/state | Branch | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| [T-001](tasks/T-001.md) / 1 | 02/03 | contract rev1 | domain worker / collaboration | 1 / ACCEPTED | agent/dim-gate/mainline/t-001 | [report](reports/T-001.md); 45 focused tests; wrapper failure requires native integration gate |
+| [T-001](tasks/T-001.md) / 1 | 02/03 | contract rev1 | domain worker / collaboration | 1 / ACCEPTED | agent/dim-gate/mainline/t-001 | [report](reports/T-001.md); 45 focused tests; original wrapper failure resolved by lead/CI native integration gates |
 | [T-002](tasks/T-002.md) / 2 | 01/02/03 | rev1, T-001 | transport worker / collaboration | 2 / ACCEPTED | agent/dim-gate/mainline/t-002 | [report](reports/T-002.md); 26 focused tests after precise replay correction |
 | [T-003](tasks/T-003.md) / 1 | 01/02 | rev1, T-002 | UI worker / collaboration | 1 / ACCEPTED | agent/dim-gate/mainline/t-003 | [report](reports/T-003.md); 7 focused tests, contrast correction; browser gates owned by lead |
-| [T-004](tasks/T-004.md) / 2 | 01/02/03 | fixed integration candidate | independent reviewer / collaboration | 2 / ACCEPTED | agent/dim-gate/mainline/t-004-review | [review](reports/T-004.md); all recorded findings independently closed |
-| [T-005](tasks/T-005.md) / 2 | 01/02/03 | T-001–004 | orchestrator / local tools | 2 / ACCEPTED | agent/dim-gate/mainline/m0-foundation | [integration report](reports/T-005.md); native, browser and remote gates passed |
+| [T-004](tasks/T-004.md) / 3 | 01/02/03 | fixed integration candidate | independent reviewer / collaboration | 3 / ACCEPTED | agent/dim-gate/mainline/t-004-review | [review](reports/T-004.md); all recorded findings independently closed |
+| [T-005](tasks/T-005.md) / 3 | 01/02/03 | T-001–004 | orchestrator / local tools | 3 / ACCEPTED | agent/dim-gate/mainline/m0-foundation | [integration report](reports/T-005.md); native, browser and remote gates passed |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -56,7 +56,7 @@ Worker original reports remain immutable history; their PARTIAL statuses do not 
 
 Actual lead and workers use the current built-in agent/collaboration tools. Exact model ID is not exposed and is not guessed. Claude, Codex CLI and other external model CLIs were unavailable; T-004 uses a separate fresh-context read-only agent. This is multi-agent execution, not a verified multi-model run. Private kernel skills were fully read as source, not installed and not copied into this public repo.
 
-Maximum three dispatch/evaluate cycles, one same-approach rework. Cycle 1: three isolated bounded implementation workers and lead integration. One precise UI contrast correction was made after real axe evidence. Cycle 2: independent fixed-commit review and any bounded correction. Final bounded follow-up closed the two review findings; no further dispatch remains. Workers cannot recurse, commit, push or self-accept.
+Maximum three dispatch/evaluate cycles, one same-approach rework. Cycle 1: three isolated bounded implementation workers and lead integration. One precise UI contrast correction was made after real axe evidence. Cycle 2: independent fixed-commit review and any bounded correction. Cycle 2 follow-up closed the two original findings. Reserved cycle 3 closed the final CI contrast-transition finding; no further dispatch remains. Workers cannot recurse, commit, push or self-accept.
 
 ### Decision history
 
@@ -68,7 +68,6 @@ Maximum three dispatch/evaluate cycles, one same-approach rework. Cycle 1: three
 | DG-D004 | pinned source is documentation only | start M0, keep M1–M5 unavailable; preserve existing checkout |
 | DG-D005 | worker pnpm wrapper tries installation on shared node_modules symlink | focused direct binaries allowed; lead must run prescribed native scripts on a real installation |
 | DG-D006 | Playwright CDN download failed; runtime lacked CJK fonts | local Chromium153 bundle and Noto CJK test font used without disabling web security; CI uses standard Playwright browser; results distinguish these environments |
-
 | DG-D007 | Initial CI green but independent review found stale identity replay, sort drift and EOF whitespace | REWORK; initial evidence cannot accept correction |
 | DG-D008 | Immutable correction a608a94; 82 tests, 7 E2E, independent closure, remote CI and updated-main reconciliation passed | ACCEPT M0 AC-01–03; PR remains unmerged; release owner |
 
@@ -79,16 +78,16 @@ project_id: dim-gate
 variant_id: mainline
 protocol_version: 1
 run_id: DG-M0-20260920-01
-terminal_state: running
-active_owner: Codex
+terminal_state: DONE
+active_owner: none
 target_ref: main
 last_reconciled_target: a330237860b3002d68fec3f853a6d1deb44a8e9a
 continuation_ref: agent/dim-gate/mainline/m0-foundation
 milestone: M0
 task_id: T-005
-implementation_commit: a608a94efc601c9affce554ca64bd4d733ee6839
-local_tested_commit: 63e8136bc70e42190b5bbd212a487886a5b862a6
-ci_tested_merge: 5f68e0c4941aa4edc0f74015b485f7eecc56df87
+implementation_commit: 695e962304276ab80885c985ce0f7287b15b4698
+local_tested_commit: 26827e293c7bfc260ab790cc0696ebc7ce671e87
+ci_tested_merge: a38b07292e60aa472bf664303a2fb3c45a1ba510
 spec_revision: source-1117d29-plus-branch-ADR-012-014; CI rules reconciled at a330237
 evidence_refs:
   - .team/reports/dim-gate-m0-preflight.md
@@ -103,10 +102,12 @@ next_action: review existing PR 7; do not auto-merge. Next development run must 
 
 ### Remote and review checkpoint
 
-[PR #7](https://github.com/fallrising/newclear/pull/7) is the sole implementation PR. [Correction CI](https://github.com/fallrising/newclear/actions/runs/35513061081) passed 82 tests and 7 E2E using standard Playwright Chromium. [Independent review](reports/T-004.md) closed the original findings. [Integration evidence](reports/T-005.md) records exact commits, main reconciliation and acceptance limits. Acceptance is not merge or deployment.
+[PR #7](https://github.com/fallrising/newclear/pull/7) is the sole implementation PR. [Correction CI](https://github.com/fallrising/newclear/actions/runs/35513835780) passed 82 tests and 7 E2E using standard Playwright Chromium. [Independent review](reports/T-004.md) closed the original findings. [Integration evidence](reports/T-005.md) records exact commits, main reconciliation and acceptance limits. Acceptance is not merge or deployment.
 
 Local HTTPS credentials were absent; authorized GitHub Git Data API publication verified exact full trees. [Commit mapping](reports/dim-gate-commit-map.md) preserves recoverable equivalents. Refresh remote branch and PR before continuing; do not create a duplicate M0 task or PR. This final metadata-only checkpoint does not invalidate the accepted product evidence.
 
 ### Final checkpoint gate reopened
 
 DG-D009: metadata CI run35513677939 failed dark-theme axe (6/7 E2E); button foreground/background color interpolation briefly falls below contrast limits. M0 acceptance is suspended pending the reserved third-cycle correction, fixed-commit browser revalidation, independent follow-up and new remote CI. Existing tests are unchanged; remove only the button color transition. Resume T-004/T-005, same PR7 draft. Prior accepted evidence remains historical, not a waiver of this failure.
+
+DG-D010: reserved cycle3 closed F-03 by removing only the button color transition, without delays/exclusions or weakened axe checks. Independent attempt3 and CI35513835780 (82 tests,7 E2E) pass. ACCEPT M0 at695e962; no blockers; owner released. Earlier DG-D009 suspension is resolved. Final checkpoint remains metadata-only; PR7 is the sole unmerged delivery.

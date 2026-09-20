@@ -2,7 +2,8 @@ import { delay, http, HttpResponse } from 'msw'
 import { z } from 'zod'
 import { DomainError } from '../domain/engine'
 import type { DemoController } from './controller'
-import { personaBodySchema, resetBodySchema } from '../api/control-dto'
+import { commandDomainRoute, readDomainRoute } from './handlers/cmdb'
+import { commandDemoRoute, readDemoRoute } from './handlers/core-session'
 
 const keySchema = z.string().regex(/^[\x21-\x7e]{1,128}$/)
 
@@ -41,10 +42,8 @@ export function createHandlers(controller: DemoController, options: HandlerOptio
       let data: unknown
       if (request.method === 'GET') {
         controller.assertCurrent(identity)
-        if (isDemo && path === '/personas') data = controller.getPersonas()
-        else if (isDemo && path === '/guide') data = controller.read('/guide', url.searchParams, identity)
-        else if (!isDemo) data = controller.read(path, url.searchParams, identity)
-        else throw new DomainError(501, 'NOT_IMPLEMENTED', '這個示範功能尚未交付。')
+        data = isDemo ? readDemoRoute(controller, path, url.searchParams, identity)
+          : readDomainRoute(controller, path, url.searchParams, identity)
       } else {
         const key = request.headers.get('Idempotency-Key')
         if (!keySchema.safeParse(key).success) {
@@ -61,21 +60,9 @@ export function createHandlers(controller: DemoController, options: HandlerOptio
         } catch {
           throw new DomainError(422, 'VALIDATION_ERROR', '請提供 64 KiB 以內的有效 JSON 內容。')
         }
-        if (isDemo && request.method === 'POST' && path === '/persona') {
-          const parsed = personaBodySchema.safeParse(body)
-          if (!parsed.success) throw new DomainError(422, 'VALIDATION_ERROR', '身分切換僅接受 personaId。')
-          data = await controller.setPersona(parsed.data.personaId, key!, identity)
-        } else if (isDemo && request.method === 'POST' && path === '/reset') {
-          if (!resetBodySchema.safeParse(body).success) throw new DomainError(422, 'VALIDATION_ERROR', '重置需要 confirm:true，且不接受其他欄位。')
-          data = await controller.reset(key!, identity)
-        } else if ((isDemo && request.method === 'POST' && path === '/clock/advance')
-          || (!isDemo && (request.method === 'PATCH' || request.method === 'DELETE'))) {
-          if (url.searchParams.size) throw new DomainError(422, 'VALIDATION_ERROR', 'Command 不接受 query 參數。')
-          data = await controller.command(request.method, path, body, key!, identity)
-        } else {
-          controller.assertCurrent(identity)
-          throw new DomainError(501, 'NOT_IMPLEMENTED', '這個操作尚未在 M0 交付，資料未變更。')
-        }
+        data = isDemo
+          ? await commandDemoRoute(controller, request.method, path, body, key!, identity)
+          : await commandDomainRoute(controller, request.method, path, body, key!, identity)
       }
       const current = controller.getSession()
       return HttpResponse.json({ data, meta: { requestId, storeRevision: current.storeRevision, policyVersion: current.policyVersion } },

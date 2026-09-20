@@ -961,7 +961,8 @@
               "type": "string",
               "enum": [
                 "fresh",
-                "stale"
+                "stale",
+                "unknown"
               ]
             }
           }
@@ -2726,12 +2727,12 @@
       "get": {
         "operationId": "getCapacity",
         "tags": [
-          "M2"
+          "M1"
         ],
         "summary": "getCapacity",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
-        "x-milestone": "M2",
+        "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
           {
@@ -6452,12 +6453,12 @@
       "get": {
         "operationId": "listAudit",
         "tags": [
-          "M2"
+          "M1"
         ],
         "summary": "listAudit",
-        "description": "Forward contract for M2; unavailable in M0. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M1; unavailable in M0. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
-        "x-milestone": "M2",
+        "x-milestone": "M1",
         "x-demo-only": false,
         "parameters": [
           {
@@ -15034,6 +15035,24 @@
                     "prod"
                   ]
                 }
+              },
+              "relationEndpointCiIds": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
               }
             },
             "required": [
@@ -15160,7 +15179,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-v1"
+            "const": "dim-gate-m1-v1"
           },
           "sessionId": {
             "type": "string",
@@ -15689,7 +15708,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-v1"
+            "const": "dim-gate-m1-v1"
           },
           "schemaVersion": {
             "type": "number",
@@ -15836,6 +15855,123 @@
         ],
         "additionalProperties": false
       },
+      "CreateCI": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "compute",
+              "cluster",
+              "database",
+              "cache",
+              "queue",
+              "load_balancer",
+              "network",
+              "storage"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "aws",
+              "aliyun",
+              "onprem"
+            ]
+          },
+          "externalId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "accountId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "poolId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "ownerTeamId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "visibilityProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "lifecycle": {
+            "type": "string",
+            "const": "active"
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "attributes": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/__shared/$defs/schema0"
+            }
+          },
+          "customFields": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/__shared/$defs/schema0"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "provider",
+          "externalId",
+          "locationId",
+          "poolId",
+          "ownerTeamId",
+          "visibilityProjectIds",
+          "lifecycle",
+          "tags",
+          "attributes",
+          "customFields"
+        ],
+        "additionalProperties": false
+      },
       "PatchCI": {
         "type": "object",
         "properties": {
@@ -15888,6 +16024,73 @@
         },
         "required": [
           "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
+      "CreateRelation": {
+        "type": "object",
+        "properties": {
+          "sourceCiId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "targetCiId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "sourceExpectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "targetExpectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "runs_on",
+              "depends_on",
+              "connects_to"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "sourceCiId",
+          "targetCiId",
+          "sourceExpectedVersion",
+          "targetExpectedVersion",
+          "type",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "DeleteRelation": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "reason"
         ],
         "additionalProperties": false
       },
@@ -16425,163 +16628,6 @@
           "unit",
           "points",
           "sampleCount"
-        ],
-        "additionalProperties": false
-      },
-      "CreateCI": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "compute",
-              "cluster",
-              "database",
-              "cache",
-              "queue",
-              "load_balancer",
-              "network",
-              "storage"
-            ]
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "aws",
-              "aliyun",
-              "onprem"
-            ]
-          },
-          "externalId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "accountId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "locationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "poolId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "ownerTeamId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "visibilityProjectIds": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 160
-            }
-          },
-          "lifecycle": {
-            "type": "string",
-            "enum": [
-              "planned",
-              "active",
-              "retired"
-            ]
-          },
-          "tags": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 64
-            },
-            "additionalProperties": {
-              "type": "string",
-              "maxLength": 256
-            }
-          },
-          "attributes": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 80
-            },
-            "additionalProperties": {
-              "$ref": "#/components/schemas/__shared/$defs/schema1"
-            }
-          },
-          "customFields": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 80
-            },
-            "additionalProperties": {
-              "$ref": "#/components/schemas/__shared/$defs/schema1"
-            }
-          }
-        },
-        "required": [
-          "name",
-          "kind",
-          "provider",
-          "externalId",
-          "locationId",
-          "poolId",
-          "ownerTeamId",
-          "visibilityProjectIds",
-          "lifecycle",
-          "tags",
-          "attributes",
-          "customFields"
-        ],
-        "additionalProperties": false
-      },
-      "CreateRelation": {
-        "type": "object",
-        "properties": {
-          "sourceCiId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "targetCiId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "runs_on",
-              "depends_on",
-              "connects_to"
-            ]
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "sourceCiId",
-          "targetCiId",
-          "type",
-          "reason"
         ],
         "additionalProperties": false
       },
@@ -17634,7 +17680,8 @@
             "type": "string",
             "enum": [
               "fresh",
-              "stale"
+              "stale",
+              "unknown"
             ]
           }
         },
@@ -21596,37 +21643,6 @@
                 },
                 "additionalProperties": {
                   "$ref": "#/components/schemas/__shared/$defs/schema0"
-                }
-              }
-            ]
-          },
-          "schema1": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/__shared/$defs/schema1"
-                }
-              },
-              {
-                "type": "object",
-                "propertyNames": {
-                  "type": "string"
-                },
-                "additionalProperties": {
-                  "$ref": "#/components/schemas/__shared/$defs/schema1"
                 }
               }
             ]

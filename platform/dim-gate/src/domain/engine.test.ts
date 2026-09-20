@@ -17,9 +17,9 @@ describe('M0 schema and seed contracts', () => {
     const snapshot = seed()
     expect(snapshotSchema.parse(snapshot)).toEqual(snapshot)
     expect(seed()).toEqual(snapshot)
-    expect(snapshot.entities.cis.map((ci) => ci.provider).sort()).toEqual(['aliyun', 'aws', 'onprem'])
-    expect(snapshot.entities.applications).toHaveLength(2)
-    expect(snapshot.entities.environments).toHaveLength(4)
+    expect(Object.fromEntries((['aws', 'aliyun', 'onprem'] as const).map((provider) => [provider, snapshot.entities.cis.filter((ci) => ci.provider === provider).length]))).toEqual({ aws: 20, aliyun: 20, onprem: 20 })
+    expect(snapshot.entities.applications).toHaveLength(6)
+    expect(snapshot.entities.environments).toHaveLength(12)
     expect(snapshot.entities.environments.some((env) => env.applicationId === 'app-checkout' && env.stage === 'staging')).toBe(false)
     expect(snapshot.entities.environments.every((env) => env.activeReleaseId === null)).toBe(true)
     expect(snapshot.jobs).toEqual([])
@@ -37,12 +37,12 @@ describe('M0 schema and seed contracts', () => {
     expect(ciSchema.safeParse({ ...aws, accountId: undefined }).success).toBe(false)
     expect(ciSchema.safeParse({ ...aws, attributes: { ...aws.attributes, vSwitchId: 'wrong-cloud', subnetId: undefined } }).success).toBe(false)
     expect(ciSchema.safeParse({ ...aws, health: 'green' }).success).toBe(false)
-    const onprem = seed().entities.cis[2]
+    const onprem = seed().entities.cis.find((ci) => ci.id === 'ci-idc-redis-01')!
     expect(ciSchema.safeParse({ ...onprem, accountId: 'account-aws-demo' }).success).toBe(false)
   })
 
   it('validates all compute providers and fixed attribute kinds', () => {
-    const base = seed().entities.cis[2]
+    const base = seed().entities.cis.find((ci) => ci.id === 'ci-idc-redis-01')!
     expect(ciSchema.safeParse({ ...base, kind: 'compute', attributes: { assetTag: 'demo', serialRef: 'demo', hypervisor: 'kvm', cpu: 2, memoryMiB: 4096 } }).success).toBe(true)
     expect(ciSchema.safeParse({ ...base, kind: 'compute', attributes: { cpu: 2, memoryMiB: 4096 } }).success).toBe(false)
     expect(ciSchema.safeParse({ ...base, kind: 'network', attributes: { cidr: '192.0.2.0/24' } }).success).toBe(true)
@@ -71,12 +71,12 @@ describe('scope-aware read projections', () => {
   it('filters before counting, searching and pagination; detail conceals existence', () => {
     const engine = createEngine(seed(), () => undefined)
     const commerce = read(engine, '/dashboard', 'user-rd-commerce', 'center=rd') as DashboardView
-    expect(commerce.applicationCount).toBe(1)
-    expect(commerce.environmentCount).toBe(2)
-    expect(commerce.ciCount).toBe(2)
-    expect(commerce.providers).toEqual([{ provider: 'aws', count: 1 }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 1 }])
+    expect(commerce.applicationCount).toBe(3)
+    expect(commerce.environmentCount).toBe(6)
+    expect(commerce.ciCount).toBe(30)
+    expect(commerce.providers).toEqual([{ provider: 'aws', count: 20 }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 10 }])
     const page = read(engine, '/cis', 'user-rd-commerce', 'page=2&pageSize=1') as Page<CI>
-    expect(page.total).toBe(2)
+    expect(page.total).toBe(30)
     expect(page.items).toHaveLength(1)
     expect((read(engine, '/cis', 'user-rd-commerce', 'q=data-demo') as Page<CI>).total).toBe(0)
     expect((read(engine, '/cis', 'user-rd-commerce', 'projectId=project-data') as Page<CI>).total).toBe(0)
@@ -89,10 +89,10 @@ describe('scope-aware read projections', () => {
   it('hides cross-project organization metadata and shared-resource visibility', () => {
     const engine = createEngine(seed(), () => undefined)
     const organization = read(engine, '/organization') as { projects: { id: string }[]; users: { id: string }[] }
-    expect(organization.projects.map((project) => project.id)).toEqual(['project-store'])
+    expect(organization.projects.map((project) => project.id)).toEqual(['project-store', 'project-payments'])
     expect(organization.users.map((user) => user.id)).toEqual(['user-rd-commerce'])
     expect((read(engine, '/cis/ci-idc-redis-01') as CI).visibilityProjectIds).toEqual(['project-store'])
-    expect((read(engine, '/dashboard', 'user-admin', 'center=admin') as DashboardView).ciCount).toBe(3)
+    expect((read(engine, '/dashboard', 'user-admin', 'center=admin') as DashboardView).ciCount).toBe(60)
   })
 
   it('scrubs operations-only attributes from a project-only view', () => {
@@ -107,7 +107,7 @@ describe('scope-aware read projections', () => {
     const initial = seed()
     initial.entities.assignments[0].stages = ['dev']
     const engine = createEngine(initial, () => undefined)
-    expect((read(engine, '/dashboard', 'user-rd-commerce', 'center=rd') as DashboardView).environmentCount).toBe(1)
+    expect((read(engine, '/dashboard', 'user-rd-commerce', 'center=rd') as DashboardView).environmentCount).toBe(4)
     expect(() => read(engine, '/dashboard', 'user-rd-commerce', 'center=ops')).toThrowError(DomainError)
     expect(() => read(engine, '/session', 'missing-user')).toThrowError(DomainError)
   })
@@ -199,7 +199,7 @@ describe('atomic command substrate (AC-02, AC-03)', () => {
     const receipt = await revoke(engine, 'grant-rd-data')
     expect(await revoke(engine, 'grant-rd-data')).toEqual(receipt)
     await expect(revoke(engine, 'grant-admin')).rejects.toMatchObject({ status: 403, code: 'SELF_MODIFICATION_DENIED' })
-    expect((read(engine, '/cis', 'user-rd-data') as Page<CI>).total).toBe(0)
+    expect((read(engine, '/cis', 'user-rd-data') as Page<CI>).total).toBe(10)
     expect(engine.getSnapshot().commandCount).toBe(1)
   })
 

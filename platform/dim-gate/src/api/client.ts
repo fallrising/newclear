@@ -1,37 +1,17 @@
 import { z } from 'zod'
-import { apiErrorSchema, apiResultSchema, commandReceiptSchema, dashboardViewSchema, guideViewSchema, personaSchema, sessionViewSchema } from '../domain/schemas'
-import type { Center, CommandReceipt, DashboardView, GuideView, Persona, SessionView } from '../domain/schemas'
-import { controlResultSchema } from './control-dto'
+import { apiErrorSchema, apiResultSchema } from '../domain/schemas'
+import type { SessionView } from '../domain/schemas'
+import { createApplicationClient } from './clients/application'
+import { createCmdbClient } from './clients/cmdb'
+import { createSessionClient } from './clients/session'
+import { createTopologyClient } from './clients/topology'
+import { ApiRequestError } from './core/errors'
+import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
+import type { ApiRequest, RequestOptions } from './core/request'
+import { scopedQueryKey } from './query-definitions'
 
-export class ApiRequestError extends Error {
-  constructor(public readonly code: string, message: string, public readonly requestId: string,
-    public readonly retryable: boolean, public readonly status: number,
-    public readonly fieldErrors?: Record<string, string[]>) {
-    super(message)
-    this.name = 'ApiRequestError'
-  }
-}
-
-export interface ClientIdentity {
-  sessionId: string
-  actorId: string
-  identityEpoch: number
-  generation: number
-  policyVersion: number
-}
-export interface ClientConfiguration {
-  session: SessionView
-  baseUrl?: string
-  fetch?: typeof fetch
-  createKey?: () => string
-}
-const identityOf = (session: SessionView): ClientIdentity => ({
-  sessionId: session.sessionId, actorId: session.user.id, identityEpoch: session.identityEpoch,
-  generation: session.generation, policyVersion: session.policyVersion,
-})
-const sameIdentity = (left: ClientIdentity, right: ClientIdentity) => left.sessionId === right.sessionId
-  && left.actorId === right.actorId && left.identityEpoch === right.identityEpoch
-  && left.generation === right.generation && left.policyVersion === right.policyVersion
+export { ApiRequestError } from './core/errors'
+export type { ClientConfiguration, ClientIdentity } from './core/identity'
 
 export function createApiClient() {
   let session: SessionView | null = null
@@ -54,9 +34,7 @@ export function createApiClient() {
     updateClientSession(configuration.session)
   }
   const stale = () => new ApiRequestError('STALE_RESPONSE', '身分或權限已變更，已忽略舊回應。', 'client-stale', false, 409)
-  const request = async <T>(path: string, schema: z.ZodType<T>, options: {
-    method?: string; body?: unknown; demo?: boolean; identityControl?: boolean
-  } = {}): Promise<T> => {
+  const request: ApiRequest = async <T>(path: string, schema: z.ZodType<T>, options: RequestOptions = {}): Promise<T> => {
     const identity = getClientIdentity()
     if (!identity) throw new ApiRequestError('NOT_INITIALIZED', '示範 session 尚未初始化。', 'client-startup', false, 401)
     const method = options.method ?? 'GET'
@@ -130,22 +108,14 @@ export function createApiClient() {
     return parsed.data.data
   }
   const api = {
-    getSession: (): Promise<SessionView> => request('/session', sessionViewSchema),
-    getPersonas: (): Promise<Persona[]> => request('/personas', z.array(personaSchema), { demo: true }),
-    getDashboard: (center: Center): Promise<DashboardView> => request(`/dashboard?center=${encodeURIComponent(center)}`, dashboardViewSchema),
-    getGuide: (): Promise<GuideView> => request('/guide', guideViewSchema, { demo: true }),
-    setPersona: async (personaId: string): Promise<SessionView> => (await request('/persona', controlResultSchema,
-      { method: 'POST', demo: true, body: { personaId }, identityControl: true })).session,
-    reset: async (): Promise<SessionView> => (await request('/reset', controlResultSchema,
-      { method: 'POST', demo: true, body: { confirm: true }, identityControl: true })).session,
-    advanceClock: (ticks: number): Promise<CommandReceipt> => request('/clock/advance', commandReceiptSchema,
-      { method: 'POST', demo: true, body: { ticks } }),
+    ...createSessionClient(request),
+    ...createApplicationClient(request),
+    ...createCmdbClient(request),
+    ...createTopologyClient(request),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
-  const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) => {
-    const identity = getClientIdentity()
-    return [identity?.sessionId, identity?.identityEpoch, identity?.policyVersion, resourceFamily, scope, filters] as const
-  }
+  const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>
+    scopedQueryKey(getClientIdentity(), resourceFamily, scope, filters)
   return { api, configureClient, getClientIdentity, updateClientSession, queryKey }
 }
 

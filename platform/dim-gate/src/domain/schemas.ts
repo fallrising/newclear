@@ -170,7 +170,7 @@ export const eventSchema = z.strictObject({
 })
 export const auditEventSchema = z.strictObject({
   id: idSchema, orgId: idSchema, actorId: idSchema, action: idSchema, entityType: idSchema, entityId: idSchema,
-  scopeSnapshot: z.strictObject({ projectIds: ids, poolIds: ids, stages: z.array(stageSchema) }),
+  scopeSnapshot: z.strictObject({ projectIds: ids, poolIds: ids, stages: z.array(stageSchema), relationEndpointCiIds: z.tuple([idSchema, idSchema]).optional() }),
   outcome: z.enum(['succeeded', 'denied', 'conflict']), diffSummary: z.array(z.string().max(200)), reason: z.string().min(1).max(500).optional(),
   requestId: idSchema, correlationId: idSchema, occurredAt: timestampSchema,
 })
@@ -179,7 +179,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m1-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -209,7 +209,7 @@ export const dashboardViewSchema = z.strictObject({
 })
 export const guideViewSchema = z.strictObject({
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-m1-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -223,6 +223,21 @@ export const patchCiSchema = z.strictObject({
   expectedVersion: versionSchema, name: nameSchema.optional(), ownerTeamId: idSchema.optional(), tags: tagsSchema.optional(),
   visibilityProjectIds: ids.refine((value) => value.length > 0, 'At least one project is required').optional(), customFields: jsonFields.optional(),
 }).refine((body) => Object.keys(body).length > 1, 'At least one metadata field is required')
+export const createCiInputSchema = z.strictObject({
+  name: nameSchema, kind: ciKindSchema, provider: providerSchema, externalId: idSchema,
+  accountId: idSchema.optional(), locationId: idSchema, poolId: idSchema, ownerTeamId: idSchema,
+  visibilityProjectIds: ids.refine((value) => value.length > 0, 'At least one project is required'),
+  lifecycle: z.literal('active'), tags: tagsSchema, attributes: jsonFields, customFields: jsonFields,
+}).superRefine((body, ctx) => {
+  const result = ciSchema.safeParse({ ...body, id: 'validation-only', orgId: 'session-scope', version: 1,
+    createdAt: '2026-09-20T09:00:00Z', updatedAt: '2026-09-20T09:00:00Z', health: 'unknown', source: 'manual', observedAt: null })
+  if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message })
+})
+export const createRelationInputSchema = z.strictObject({
+  sourceCiId: idSchema, targetCiId: idSchema, sourceExpectedVersion: versionSchema,
+  targetExpectedVersion: versionSchema, type: relationSchema.shape.type, reason: z.string().trim().min(1).max(500),
+}).refine((body) => body.sourceCiId !== body.targetCiId, { path: ['targetCiId'], message: 'A relation cannot reference itself' })
+export const deleteRelationInputSchema = z.strictObject({ expectedVersion: versionSchema, reason: z.string().trim().min(1).max(500) })
 export const revokeAssignmentSchema = z.strictObject({ expectedVersion: versionSchema, reason: z.string().trim().min(1).max(500) })
 export const advanceClockSchema = z.strictObject({ ticks: z.number().int().min(1).max(60) })
 
@@ -240,6 +255,10 @@ export type DashboardView = z.infer<typeof dashboardViewSchema>
 export type GuideView = z.infer<typeof guideViewSchema>
 export type CommandReceipt = z.infer<typeof commandReceiptSchema>
 export type CommandInput = z.infer<typeof commandInputSchema>
+export type Environment = z.infer<typeof environmentSchema>
+export type Placement = z.infer<typeof placementSchema>
+export type Relation = z.infer<typeof relationSchema>
+export type AuditEvent = z.infer<typeof auditEventSchema>
 export type ApiError = z.infer<typeof apiErrorSchema>
 export type ApiResult<T> = { data: T; meta: z.infer<typeof apiMetaSchema> }
 export type Page<T> = { items: T[]; total: number; page: number; pageSize: number }
@@ -255,5 +274,7 @@ export const contractSchemas = {
   Release: releaseSchema, Incident: incidentSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
   DomainEvent: eventSchema, Snapshot: snapshotSchema, Persona: personaSchema, SessionView: sessionViewSchema,
   DashboardView: dashboardViewSchema, GuideView: guideViewSchema, CommandReceipt: commandReceiptSchema,
-  ApiError: apiErrorSchema, PatchCI: patchCiSchema, RevokeAssignment: revokeAssignmentSchema, AdvanceClock: advanceClockSchema,
+  ApiError: apiErrorSchema, CreateCI: createCiInputSchema, PatchCI: patchCiSchema,
+  CreateRelation: createRelationInputSchema, DeleteRelation: deleteRelationInputSchema,
+  RevokeAssignment: revokeAssignmentSchema, AdvanceClock: advanceClockSchema,
 }

@@ -19,7 +19,8 @@
     "check:docs": "node scripts/check-docs.mjs",
     "check:contracts": "node --experimental-strip-types scripts/openapi.ts --check",
     "generate:contracts": "node --experimental-strip-types scripts/openapi.ts",
-    "check:ci": "node scripts/check-ci.mjs"
+    "check:ci": "node scripts/check-ci.mjs",
+    "check:architecture": "node scripts/check-architecture.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.23",

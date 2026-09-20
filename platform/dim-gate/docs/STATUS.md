@@ -1,24 +1,34 @@
 # dim-gate 狀態
 
-更新：2026-09-20。任務與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-20。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
-M0（AC-01–03）已由主控驗收，實作 commit `695e962304276ab80885c985ce0f7287b15b4698` 已保存於 [PR #7](https://github.com/fallrising/newclear/pull/7)，尚未合併或部署。
+M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
-可操作範圍：三中心授權摘要、四個 persona、固定示範標示、時鐘／刷新保存／確認重置、損毀資料明示恢復。共用 domain、MSW、API client 提供授權、版本競爭、冪等與原子儲存；OpenAPI 由共用 schema 產生。最小 seed 為三來源各一筆 CI，完整 60 CI 與業務主線尚未提供。
+M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 是 OPEN 且 Ready for Review，尚未合併；milestone ACCEPTED、PR OPEN 與 PR MERGED 是三個不同狀態。
+
+M1 可操作範圍：
+
+- `/rd/apps`、應用與環境詳情，使用共用 Application／Environment／Placement／CI ID 與合法跨 Center deep link。
+- `/ops/cmdb`、CI 詳情、三 provider filter、手動納管與 metadata-only 編輯。
+- `/ops/topology` dependencies／impact、cycle-safe BFS、最多 3 hops／100 nodes／200 edges、可見 truncation 與表格替代視圖。
+- scoped global search、action-aware route registry、persona/scope cache 隔離與在途舊 response 抑制。
+- 固定 `dim-gate-m1-v1` seed：60 CIs（AWS、Aliyun、on-prem 各 20）、6 applications、12 environments、共享 Redis placements 與 relations。
 
 | 階段 | 狀態 |
 | --- | --- |
-| M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 OPEN、未合併 |
-| M1：CMDB與應用視圖 | 尚未開始 |
+| M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
+| M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 OPEN / READY / NOT MERGED |
 | M2：申請與平台治理 | 尚未開始 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
 
-82 項測試、7 項 production E2E、原生 gates 與 [遠端 CI](https://github.com/fallrising/newclear/actions/runs/35513835780) 全數通過。[獨立審查](../../../.team/reports/T-004.md) 發現的過期身分重試與排序契約問題已修復並複核；原始失敗報告保留。[整合驗收](../../../.team/reports/T-005.md) 記錄精確 code/spec/CI commit、截圖 artifact、較新 main 的差異核對及環境限制。
+證據：122/122 tests、11/11 production E2E、全部 native/docs/contracts/CI/architecture/actionlint gates、獨立 T-012 attempt-2 ACCEPTED，以及 GitHub Actions run 35526733678 成功。該 run 對 head `784f771` 與 synthetic merge `796960eae34bce6463e921c1b7527ba2da565ebb` 執行；最後 reconciliation main 是 `a5982bf4547bba85429fec50494751562b5fe7c6`。E2E 保留 7 項 M0 regression，涵蓋 1440／768／390、明暗主題、axe serious/critical、keyboard/focus/dialog、`/dim-gate/` refresh、reset/reload/copied-tab/corrupt persistence、topology 與 AC-20 在途 persona response。
 
-[完整閱讀／恢復核對](../../../.team/reports/dim-gate-m0-preflight.md) 使用 newclear `1117d297aa3efef9472d847c9dfa5714eb6c4460`、kernel `7cddad13f965d579b218579609c7f64e1ecf35b2`；最終核對 main `a330237860b3002d68fec3f853a6d1deb44a8e9a` 並全文追讀更新的 CI 規則。實際為內建多 agent 協作，未聲稱使用不可用的 Claude 或已驗證的多模型路由。
+後續在 evidence head `364b3cc2` 完成一輪[實際 production-like 無頭 Chromium walkthrough](../../../.team/reports/dim-gate-m1-browser-walkthrough.md)：10/10 操作流程及 24/24 route／viewport／theme 組合通過，axe serious/critical、overflow、page error、failed request 與非預期 console/network error 均為 0；另重新通過 122/122 tests、11/11 production E2E 與全部 gates。此證據不改變 accepted implementation `784f771`，也不把 PR OPEN 誤寫為已合併。
 
-下一步：審查既有 PR #7；不自動 merge。下一輪先核對 PR／main，保留已接受 M0，再接續 M1（AC-04–08、20）。主控已釋放 owner，resume pointer 與遠端證據見 PLAN。完整 v0.1 尚未驗收；初始 JS gzip 約317.5KiB，M5 的300KiB預算及其他效能量測仍待處理。
+獨立 review attempt 1 的 F-01 relation audit 跨 scope 洩漏與 F-02 舊 M0 seed 靜默沿用皆保留為歷史 BLOCKED 證據；revision 2 修正後，Commerce audit 為空、Ops 保有兩筆歷史事件，舊 snapshot bytes 在明確 recovery 前不變，reset 得到 60 CI。attempt 2 無 blocking finding。
 
-最後一輪 CI 曾發現深色切換的按鈕色彩過渡短暫對比不足；已移除過渡，原驗收不變。第三輪獨立複核與新 CI 通過，PLAN DG-D010 重新接受 M0。原始失敗 run35513677939 與審查歷史均保留。
+限制：production JS 為 413.17 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。M1 不宣稱完成 M2 Admin 功能，也未新增空白 Admin 頁。沒有部署、真實雲操作、付費服務或全域權限變更。
+
+Resume：從 SSH remote branch `agent/dim-gate/mainline/m1-cmdb` 與 OPEN PR #11 繼續 repository-owner review；不得重做 M1、不得自動 merge。下一開發 milestone 是 M2，開始前須重新 reconcile main／PR 並保留本輪 T-012／T-013 evidence。

@@ -127,7 +127,7 @@ flowchart TB
 
 ## 6. Fixture 契約
 
-固定 seed `dim-gate-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。snapshot schemaVersion 與 seedVersion 分開記錄。
+M1 固定 seed `dim-gate-m1-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。snapshot schemaVersion 與 seedVersion 分開記錄；舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
 
 | 種子資料 | 固定定位與用途 |
 | --- | --- |

@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cms-api
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/cms}
+    username: ${SPRING_DATASOURCE_USERNAME:cms}
+    password: ${SPRING_DATASOURCE_PASSWORD:cms}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  web:
+    resources:
+      add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 16MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+cms:
+  identity:
+    cors-origins: ${CMS_CORS_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:5175}
+    surface-origins: ${CMS_SURFACE_ORIGINS:http://localhost:5173:front,http://localhost:5174:back,http://localhost:5175:admin}
+    seed-enabled: true
+    seed-password: ${CMS_SEED_PASSWORD:}
+    cookie-secure: false
+    argon2-memory-kb: 16384
+    argon2-iterations: 3
+  media:
+    root: ${CMS_MEDIA_ROOT:./data/media}

@@ -1,0 +1,13 @@
+.git
+.gradle
+**/build
+node_modules
+**/node_modules
+**/dist
+.idea
+*.iml
+.env
+data
+docs
+README.md
+AGENTS.md

@@ -1,0 +1,70 @@
+{
+  "id": "ST-D1",
+  "title": "D1 seq recovery golden",
+  "description": "Room DO single-threaded send path. Recovery is always COALESCE(MAX(seq),-1)+1, never COUNT. Broadcast only after INSERT success. Same client_message_id returns the original row.",
+  "algorithm": "seq = max(stored, D1 SELECT COALESCE(MAX(seq),-1)+1 WHERE room_id=?); INSERT; then persist next_seq and broadcast",
+  "cases": [
+    {
+      "id": "ST-D1-01",
+      "title": "D1 INSERT succeeds, crash before persist next_seq or broadcast",
+      "given": {
+        "d1_rows": [{ "seq": 0 }, { "seq": 1 }],
+        "do_next_seq_cache": 1,
+        "crash_before": ["persist_next_seq", "broadcast"]
+      },
+      "when": "Room DO restart",
+      "then": {
+        "next_seq": 2,
+        "formula": "MAX(seq)+1",
+        "reuse_inserted_seq": false
+      }
+    },
+    {
+      "id": "ST-D1-02",
+      "title": "D1 timeout unknown; retry same client_message_id",
+      "given": {
+        "client_message_id": "01JTESTCLIENTMSG01",
+        "first_attempt": "D1 timeout unknown"
+      },
+      "when": "retry send with the same client_message_id",
+      "then": {
+        "broadcast_before_insert": false,
+        "unique_hit_returns": "original row",
+        "assign_new_seq": false
+      }
+    },
+    {
+      "id": "ST-D1-03",
+      "title": "Broadcast before INSERT is rejected",
+      "given": {
+        "harness": "attempt broadcast before D1 INSERT"
+      },
+      "when": "send path",
+      "then": {
+        "rejected": true,
+        "events_emitted": 0,
+        "broadcast_only_after_insert": true
+      }
+    },
+    {
+      "id": "ST-D1-04",
+      "title": "GC deletes a trace; next seq is MAX+1 not COUNT+1",
+      "given": {
+        "rows_before_gc": [
+          { "seq": 0, "kind": "message" },
+          { "seq": 1, "kind": "trace" },
+          { "seq": 2, "kind": "message" }
+        ],
+        "deleted": [{ "seq": 1, "kind": "trace" }],
+        "count_after_gc": 2,
+        "max_seq_after_gc": 2
+      },
+      "when": "send new message",
+      "then": {
+        "new_seq": 3,
+        "not_count_plus_one": 2,
+        "formula": "MAX(seq)+1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Kith Codex sidecar (operator host). Copy to an untracked path and edit.
+# Bot token is NEVER committed: export KITH_BOT_TOKEN (value is not a config key).
+
+agent_handle = "codex"
+room_id = "rm_replace_me"
+operator_member_id = "mb_operator"
+quota_class = "operator_personal"
+
+# Absolute paths. INV-14: must be disjoint from fanzloud CODEBOX_CODEX_HOME,
+# CODEBOX_WORKING_DIR, and CODEBOX_CODEX_EXECUTABLE (not equal, nested, or same inode).
+codex_home = "/var/lib/kith/codex-home"
+workspace = "/var/lib/kith/workspace"
+executable = "/usr/local/bin/codex"
+
+mcp_base_url = "https://kith.example.invalid"
+
+# Pin: the operator supplies the official Codex CLI at `executable`.
+# Do NOT treat fanzloud 0.145.0 as an eternal pin. See docs/adr/0003-codex-pin.md.

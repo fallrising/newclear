@@ -1,0 +1,6 @@
+# Copy to .dev.vars (gitignored). Used by `wrangler dev` as Worker secrets.
+# Leave XAI_API_KEY empty to use FAKE_LLM_* for local @grok (L3).
+# If XAI_API_KEY is set, hosted Grok calls https://api.x.ai/v1 instead of the fake.
+XAI_API_KEY=
+FAKE_LLM_TEXT=hello from grok
+FAKE_LLM_MODELS=grok-4.5

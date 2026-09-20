@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/http-error-v1.json",
+  "title": "HTTP error envelope v1",
+  "description": "Strict JSON error body. Unknown fields are rejected. code is a stable machine value; message is human-readable and MUST NOT contain tokens, passwords, or full room text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["error"],
+  "properties": {
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "invalid_request",
+            "payload_too_large",
+            "unauthorized",
+            "token_revoked",
+            "forbidden",
+            "subscription_operator_only",
+            "not_found",
+            "room_full",
+            "generation_dropped",
+            "already_member",
+            "last_owner",
+            "handle_taken",
+            "wake_budget_exhausted",
+            "not_ready"
+          ]
+        },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

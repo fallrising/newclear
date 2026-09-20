@@ -2,11 +2,11 @@
 
 ## Context
 
-The imported component workflows remain under component directories, which GitHub does not discover in this monorepo. Root workflows must provide continuous CI without inheriting their former release, image, or deployment behavior.
+The imported component workflows remain under component directories, which GitHub does not discover in this monorepo. Root workflows must provide continuous CI without inheriting their former release, image, or deployment behavior. The tree already includes `prism-ci.yml` for `platform/prism` in addition to the original Goku, Phark, CloudForm, AweShore, Streaming Converter, and Ojbquay workflows; Kith is added as `.github/workflows/kith.yml`.
 
 ## Goal
 
-Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active.
+Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active. Named members of this set include Goku, Phark, CloudForm, AweShore, Streaming Converter, Ojbquay, Prism, Ice Maker, Local OCR Services, CMS Scaffold, Dim Gate, and Kith.
 
 ## Non-goals
 
@@ -31,6 +31,18 @@ Scenario: Ojbquay source changes
   Then Java 25 Gradle build, pinned-pnpm console test/build, and deployment-model validation run
   And no full Compose end-to-end command runs
 
+Scenario: Prism source changes
+  Given a change under `platform/prism/**`
+  When GitHub evaluates root workflows
+  Then `.github/workflows/prism-ci.yml` is eligible
+  And it runs golangci-lint, dependency-direction checks, and `make lint test` with `contents: read` and no secrets or deploy
+
+Scenario: Kith source changes
+  Given a change under `products/kith/**` or `.github/workflows/kith.yml`
+  When GitHub evaluates root workflows
+  Then `.github/workflows/kith.yml` is eligible
+  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith` with `contents: read` and no secrets or deploy
+
 ## Constraints
 
 - Workflows are in `.github/workflows/`, use `contents: read`, explicit job timeouts, cancellation concurrency, and root-relative path filters including their own files.
@@ -42,17 +54,22 @@ Scenario: Ojbquay source changes
 
 Each component receives one independent workflow with `pull_request`, `push` to `main`, and `workflow_dispatch` triggers. Paths include the component subtree and that workflow file, so CI changes validate themselves. Jobs use checkout plus the relevant setup action and cache dependency files local to the component. Native gates are:
 
-| Workflow | Gates |
-| --- | --- |
-| Goku | Three `go test ./...` modules; web `npm ci`, lint, build |
-| Phark | Backend `mvn test`; frontend `npm ci`, lint, build |
-| CloudForm | Backend `./gradlew test`; pinned-pnpm frontend lint/build |
-| AweShore | UI `npm ci`, format check, lint, type check, build |
-| Streaming Converter | `bash -n` for every checked-in shell script |
-| Ojbquay | Java 25 `./gradlew build`; pinned-pnpm console test/build; `make validate-deploy` |
-| Ice Maker | Python 3.11 repository-native `make check` with full Git history available |
-| Local OCR Services | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
-| CMS Scaffold | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
+| Workflow | File | Paths | Gates |
+| --- | --- | --- | --- |
+| Goku | `goku-ci.yml` | `products/goku/**`, `.github/workflows/goku-ci.yml` | Three `go test ./...` modules; web `npm ci`, lint, build |
+| Phark | `phark-ci.yml` | `products/phark/**`, `.github/workflows/phark-ci.yml` | Backend `mvn test`; frontend `npm ci`, lint, build |
+| CloudForm | `cloudform-ci.yml` | `apps/cloudform/**`, `.github/workflows/cloudform-ci.yml` | Backend `./gradlew test`; pinned-pnpm frontend lint/build |
+| AweShore | `aweshore-ci.yml` | `labs/aweshore/**`, `.github/workflows/aweshore-ci.yml` | UI `npm ci`, format check, lint, type check, build |
+| Streaming Converter | `streaming-converter-ci.yml` | `tools/streaming-converter/**`, `.github/workflows/streaming-converter-ci.yml` | `bash -n` for every checked-in shell script |
+| Ojbquay | `ojbquay-ci.yml` | `systems/ojbquay/**`, `.github/workflows/ojbquay-ci.yml` | Java 25 `./gradlew build`; pinned-pnpm console test/build; `make validate-deploy` |
+| Prism | `prism-ci.yml` | `platform/prism/**`, `.github/workflows/prism-ci.yml` | golangci-lint; dependency-direction check; `make lint test` |
+| Ice Maker | `ice-maker-ci.yml` | `platform/ice-maker/**`, `.github/workflows/ice-maker-ci.yml` | Python 3.11 repository-native `make check` with full Git history available |
+| Local OCR Services | `local-ocr-services-ci.yml` | `platform/local-ocr-services/**`, `.github/workflows/local-ocr-services-ci.yml` | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
+| CMS Scaffold | `cms-scaffold-ci.yml` | `apps/cms-scaffold/**`, `.github/workflows/cms-scaffold-ci.yml` | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
+| Dim Gate | `dim-gate-ci.yml` | `platform/dim-gate/**`, `.github/workflows/dim-gate-ci.yml` | Component-native lint/test with `contents: read` |
+| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `contents: read`; no secrets or deploy |
+
+All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
 ## Steps
 

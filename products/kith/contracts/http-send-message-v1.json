@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/http-send-message-v1.json",
+  "title": "REST POST /api/rooms/:id/messages body v1",
+  "description": "REST send body. room_id is in the URL path. Unknown fields are rejected. Duplicate client_message_id returns the original row.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["body", "client_message_id"],
+  "properties": {
+    "body": { "type": "string", "minLength": 1, "maxLength": 8192 },
+    "client_message_id": { "type": "string", "minLength": 8, "maxLength": 64 },
+    "thread_id": { "type": ["string", "null"] },
+    "generation_id": { "type": ["string", "null"] }
+  }
+}

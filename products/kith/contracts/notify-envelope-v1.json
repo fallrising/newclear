@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/notify-envelope-v1.json",
+  "title": "Inbox notify envelope v1",
+  "description": "Room → Inbox.notify payload. kind=status and kind=trace MUST NOT call Inbox. origin is always local. Unknown fields are rejected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "room_id",
+    "event",
+    "policy",
+    "operator_member_id",
+    "trigger_member_id",
+    "last_human_seq",
+    "last_human_at",
+    "humans_typing",
+    "wake_budget_remaining"
+  ],
+  "properties": {
+    "room_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "seq",
+        "kind",
+        "sender_id",
+        "sender_kind",
+        "body",
+        "mentions",
+        "thread_id",
+        "origin"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "seq": { "type": "integer", "minimum": 0 },
+        "kind": { "type": "string", "const": "message" },
+        "sender_id": { "type": "string", "minLength": 1 },
+        "sender_kind": { "type": "string", "enum": ["human", "agent"] },
+        "body": { "type": "string", "minLength": 1, "maxLength": 8192 },
+        "mentions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "thread_id": { "type": ["string", "null"] },
+        "origin": { "type": "string", "const": "local" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "keywords",
+        "cooldown_ms",
+        "debounce_ms",
+        "quota_class",
+        "policy_epoch"
+      ],
+      "properties": {
+        "mode": { "type": "string", "enum": ["silent", "mention", "keyword", "ambient"] },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "cooldown_ms": { "type": "integer", "minimum": 0 },
+        "debounce_ms": { "type": "integer", "minimum": 0 },
+        "quota_class": { "type": "string", "enum": ["api_key", "operator_personal"] },
+        "policy_epoch": { "type": "integer", "minimum": 1 },
+        "classifier": { "type": "string", "enum": ["heuristic", "llm"] }
+      }
+    },
+    "operator_member_id": { "type": "string", "minLength": 1 },
+    "trigger_member_id": { "type": "string", "minLength": 1 },
+    "last_human_seq": { "type": "integer", "minimum": 0 },
+    "last_human_at": { "type": "string", "minLength": 1 },
+    "humans_typing": { "type": "boolean" },
+    "wake_budget_remaining": { "type": "integer", "minimum": 0, "maximum": 6 }
+  }
+}

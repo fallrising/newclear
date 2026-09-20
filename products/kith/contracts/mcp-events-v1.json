@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/mcp-events-v1.json",
+  "title": "GET /mcp/events SSE data object v1",
+  "description": "Catch-up rows have replay=true and MUST NOT exec. Live tail rows have replay=false. Optional hint is sugar and MUST be ignored for exec when replay is true. Unknown fields are rejected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["replay", "seq", "kind"],
+  "properties": {
+    "replay": { "type": "boolean" },
+    "seq": { "type": "integer", "minimum": 0 },
+    "kind": { "type": "string", "enum": ["message", "trace"] },
+    "hint": { "type": "string" },
+    "id": { "type": "string", "minLength": 1 },
+    "room_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "thread_id": { "type": ["string", "null"] },
+    "reply_to": { "type": ["string", "null"] },
+    "sender_id": { "type": "string", "minLength": 1 },
+    "body": { "type": "string" },
+    "mentions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "generation_id": { "type": ["string", "null"] },
+    "client_message_id": { "type": "string" },
+    "origin": { "type": "string", "const": "local" },
+    "created_at": { "type": "string" }
+  }
+}

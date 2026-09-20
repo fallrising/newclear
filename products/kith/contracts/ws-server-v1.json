@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/ws-server-v1.json",
+  "title": "WebSocket server → client packet v1",
+  "description": "type=event has seq; type=status has no seq. Unknown fields are rejected.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "event"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "event" },
+        "event": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seq", "kind", "body"],
+          "properties": {
+            "seq": { "type": "integer", "minimum": 0 },
+            "kind": { "type": "string", "enum": ["message", "trace"] },
+            "body": { "type": "string" },
+            "id": { "type": "string" },
+            "room_id": { "type": "string" },
+            "sender_id": { "type": "string" },
+            "thread_id": { "type": ["string", "null"] },
+            "generation_id": { "type": ["string", "null"] },
+            "client_message_id": { "type": "string" },
+            "origin": { "type": "string", "const": "local" },
+            "created_at": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "member_id", "body"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "status" },
+        "member_id": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1, "maxLength": 512 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "code"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "error" },
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string" }
+      }
+    }
+  ]
+}

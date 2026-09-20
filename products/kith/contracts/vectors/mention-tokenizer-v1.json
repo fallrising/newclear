@@ -1,0 +1,42 @@
+{
+  "id": "ATT-01",
+  "title": "Mention tokenizer golden rows",
+  "description": "Scan @[a-z0-9_]{2,32} and fullwidth ＠ with string-boundary or ASCII punctuation. NOCASE handle match. @all does not expand. Not a member is ignored.",
+  "rows": [
+    {
+      "input": "hello @grok",
+      "handles": ["grok", "codex"],
+      "mentions": ["grok"]
+    },
+    {
+      "input": "＠codex please",
+      "handles": ["grok", "codex"],
+      "mentions": ["codex"]
+    },
+    {
+      "input": "email foo@bar.com",
+      "handles": ["bar"],
+      "mentions": []
+    },
+    {
+      "input": "@all",
+      "handles": ["grok"],
+      "mentions": []
+    },
+    {
+      "input": "@nobody",
+      "handles": ["grok"],
+      "mentions": []
+    },
+    {
+      "input": "a@grok",
+      "handles": ["grok"],
+      "mentions": []
+    },
+    {
+      "input": "@Grok",
+      "handles": ["grok"],
+      "mentions": ["grok"]
+    }
+  ]
+}

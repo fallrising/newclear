@@ -2,7 +2,7 @@
 
 ## 1. 交付原則
 
-本次只完成 SDD 基線；以下里程碑全部尚未實作。以依賴與可觀察成果排程，不承諾日期。每一階段只合併能獨立驗收的增量；不可用預先標記成功的靜態頁面替代 state transition。
+以下里程碑是交付契約，進度由[主控計畫](../../../../.team/PLAN.md)及[STATUS摘要](../STATUS.md)呈現；不在SDD維護每次run的狀態。以依賴與可觀察成果排程，不承諾日期。每一階段只合併能獨立驗收的增量；不可用預先標記成功的靜態頁面替代 state transition。
 
 需求定義在 [01](01-product-ux.md)，domain invariants 在 [總綱](../../SDD.md)。測試不能只是重新抄 handler；應驗證跨頁結果、拒絕情況、原子性與歷史保留。
 
@@ -64,7 +64,7 @@ Component：測使用者可讀結果、表單 validation、disabled reason、dia
 
 E2E：真實 UI 點擊 persona switch、表單、審批、pipeline、rollback。允許 demo scenario endpoint 加速時鐘／注入故障，不允許直接設定 request fulfilled 或 incident resolved 來跳過被測流程。主要主線 Chromium，M5 加 Firefox／WebKit shell與主線 smoke；環境不支持時明示未驗，不寫成已通過。
 
-每個階段在 STATUS 附：commit/PR、執行命令、結果摘要、未覆蓋項；截圖／trace/video 放 CI artifacts 或 PR attachments，不大量提交二進位到 repo。規劃中的 `pnpm check:docs` 只檢查本 component Markdown連結與必要章節，不掃描修復整個 monorepo。
+每個階段依[開發恢復協定](../DEVELOPMENT_PROTOCOL.md)，在task/report及PLAN保存commit/PR、被測版本、執行命令、結果與接受決策；STATUS只附摘要、連結與未覆蓋項。截圖／trace/video 放 CI artifacts 或 PR attachments，不大量提交二進位到 repo。規劃中的 `pnpm check:docs` 檢查本component及其引用的dim-gate ledger文件連結，不掃描修復整個 monorepo。
 
 ## 5. 下一輪開發的起始任務
 

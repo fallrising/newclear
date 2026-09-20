@@ -14,10 +14,15 @@
 
 ## 文件入口
 
+- [開發啟動 prompt](DEVELOPMENT_PROMPT.md)：後續agent的固定入口，先核對進度，再接續最早未完成里程碑。
+- [開發恢復協定](docs/DEVELOPMENT_PROTOCOL.md)：進度權責、task／evidence、重入、交接及分叉規則。
+- [主控計畫](../../.team/PLAN.md)：dim-gate任務與接受決策、目前可恢復位置。
 - [SDD 總綱](SDD.md)：目標、範圍、架構、不變量與閱讀順序。
 - [詳細規格](docs/sdd/README.md)：頁面、資料模型、流程、權限、前端、API／Mock、驗收與決策。
 - [開發狀態](docs/STATUS.md)：目前交付證據與下一個里程碑。
 - [開發約定](AGENTS.md)：後續實作的範圍與文件維護方式。
+
+下一個開發session可使用：「請讀取 `platform/dim-gate/DEVELOPMENT_PROMPT.md`，依啟動與恢復協定核對目前進度，接續開發。」若要實驗不同版本，明確提供branch／variant；入口本身不保存會過期的最新進度。這是一套由agent執行的文件協定，目前没有常駐排程器或自動恢復程式。
 
 ## 技術方向
 

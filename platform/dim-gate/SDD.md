@@ -85,6 +85,8 @@ APM 至少展示 request rate、error rate、p95 latency、trace waterfall 與 l
 
 canonical path：`platform/dim-gate/`。本項目獨立於 `platform/fanzloud`、`platform/prism`、`specs/fleet` 與 `apps/cloudform`；未來整合只透過明確 API 契約，不引用 sibling 私有實作。既有 portfolio 歷史盤點不重寫；此次新項目的明確授權記錄於本設計。
 
+開發從[固定prompt](DEVELOPMENT_PROMPT.md)啟動，接手依[恢復協定](docs/DEVELOPMENT_PROTOCOL.md)。本SDD定義產品要求；[PLAN](../../.team/PLAN.md)保存任務與接受決策，STATUS只作摘要。Git／PR／CI用於核對版本與證據，不因修改進度文件就視為通過驗收。
+
 本次交付僅 Markdown 與 root README 索引。M0 才建立 package manifest、lockfile、source 與本 component 的 root CI。不得把文檔完成寫成產品完成。
 
 閱讀順序：本文件 → [01 產品與 UX](docs/sdd/01-product-ux.md) → [02 CMDB](docs/sdd/02-cmdb-model.md) → [03 流程](docs/sdd/03-workflows.md) → [04 權限](docs/sdd/04-permissions-admin.md) → [05 前端](docs/sdd/05-frontend-architecture.md) → [06 API／Mock](docs/sdd/06-api-mock.md) → [07 交付與驗收](docs/sdd/07-delivery-validation.md) → [08 決策與來源](docs/sdd/08-decisions-sources.md)。

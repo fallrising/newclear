@@ -29,6 +29,7 @@
 | 路徑 | 說明 | 技術 |
 | --- | --- | --- |
 | [`platform/fanzloud`](platform/fanzloud/) | Cloud coding-agent platform 與 BYOS control layer | Rust |
+| [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心的企業運維自助平台前端：RD／Ops／Admin 三中心、跨雲資源與互動演示（SDD baseline，尚未實作） | React, TypeScript, shadcn/ui（規劃） |
 | [`apps/loom`](apps/loom/) | AI-native canvas / terminal / document workspace | Tauri, Rust, React |
 | [`apps/flowshot`](apps/flowshot/) | Local-first 嚴格唯讀 Markdown annotation desktop app | Python, TS |
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning 與 WYSIWYG form designer | TypeScript |

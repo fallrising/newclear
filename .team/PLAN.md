@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 7 |
+| protocol_version / ledger_revision | 1 / 8 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M1-20260920-01 |
@@ -116,7 +116,7 @@ DG-D010: reserved cycle3 closed F-03 by removing only the button color transitio
 
 - Reconciled 2026-09-20 from clean `origin/main` `50294b687d06f08e94290f6f327187e8f69248bc`; PR #7 is MERGED, not OPEN. Its head `e057a12c54917f18c294cdc13423a2161e23fea2` passed final workflow run 35514160187. The scoped M0 tree is identical between head and merge commit.
 - Source kernel `664d176a07568fc17506185d3b99e7349897ce05`; required source files were read, not installed or copied. Primary route is this Codex orchestrator plus bounded collaboration workers; exact inherited model ID is not exposed. External CLIs are recorded in the M1 preflight, but no unverified model is claimed.
-- T-006 is the mandatory behavior-preserving architecture split and M0 regression. Feature work does not start until T-006 passes and the M1 integration contract is fixed.
+- T-006 is ACCEPTED at `49e1b89754421cf0e2f76026416a1af184ceab94`: 82 tests, 7 production E2E and all native/architecture/actionlint gates passed. M1 integration contract revision 1 is fixed at `9ea032f66daabf68350482bfedac81f63e5221ec`.
 - Planned bounded tasks: T-007 shared M1 schemas/seed/invariants; T-008 RD application slice; T-009 Ops CMDB slice; T-010 relations/topology slice; T-011 lead integration/search/scope/E2E; T-012 independent fixed-commit review; T-013 final evidence and acceptance. T-008–010 depend on T-006 and T-007. PLAN, route/API/demo composition and final Git integration remain lead-owned.
 
 ```yaml
@@ -130,13 +130,16 @@ target_ref: main
 source_main: 50294b687d06f08e94290f6f327187e8f69248bc
 continuation_ref: agent/dim-gate/mainline/m1-cmdb
 milestone: M1
-task_id: T-006
-implementation_commit: none
-spec_revision: main-50294b6 plus pending M1 integration contract
+task_id: T-007
+implementation_commit: 49e1b89754421cf0e2f76026416a1af184ceab94
+spec_revision: M1-INTEGRATION-CONTRACT revision 1 at 9ea032f66daabf68350482bfedac81f63e5221ec
 evidence_refs:
   - .team/reports/dim-gate-m1-preflight.md
+  - .team/reports/T-006.md
 integration_state: NOT_OPENED
 remote_durability: local branch only until first accepted checkpoint is pushed
 blockers: []
-next_action: complete T-006 architecture split, run the full M0 regression, then freeze the M1 integration contract before feature dispatch
+next_action: dispatch T-007 shared schema/seed/domain work from the fixed contract; accept it before branching T-008–T-010
 ```
+
+DG-D011: ACCEPT T-006 architecture prerequisite at `49e1b89754421cf0e2f76026416a1af184ceab94`. Fresh evidence is 82/82 tests, 7/7 production E2E, frozen install, lint, typecheck, docs, unchanged 72-operation/165-schema OpenAPI, CI policy, feature-boundary check, demo build, actionlint 1.7.12 and diff check. M0 AC-01–03 remain valid on this tree. Freeze M1 integration contract revision 1 at `9ea032f66daabf68350482bfedac81f63e5221ec`; T-007 owns shared contracts/seed/domain, and T-008–T-010 remain blocked on its acceptance. M1 is RUNNING, not ACCEPTED; no M1 PR exists yet.

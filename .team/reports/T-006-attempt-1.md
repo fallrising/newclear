@@ -2,7 +2,7 @@ STATUS: DONE
 
 ## Summary
 
-T-006 attempt 1 established behavior-preserving M1 architecture boundaries at implementation and tested commit `49e1b8914a8bbf1c0b3124bb656160c6342eab21` (short `49e1b89`), based on main `50294b687d06f08e94290f6f327187e8f69248bc`. No M1 business behavior or seed expansion was introduced.
+T-006 attempt 1 established behavior-preserving M1 architecture boundaries at implementation and tested commit `49e1b89754421cf0e2f76026416a1af184ceab94` (short `49e1b89`), based on main `50294b687d06f08e94290f6f327187e8f69248bc`. No M1 business behavior or seed expansion was introduced.
 
 The application now has separate session/provider, shell, center-layout and route-registry modules; foundation and CMDB features export public indexes. API transport/identity/error/query-key core is separate from feature clients. Endpoint declarations are registered by core/session, CMDB/application/environment, topology/relation/search and future modules into one registry; the generated OpenAPI is byte-identical to the baseline. Demo HTTP transport composes core-session and domain handlers; core personas are a separate seed module. Shared domain queue, policy, integrity, persistence and audit were not moved or duplicated.
 
@@ -10,7 +10,7 @@ The first focused run found three App tests rejected by an action check that was
 
 ## Verification
 
-Executed from `platform/dim-gate` against commit `49e1b8914a8bbf1c0b3124bb656160c6342eab21` with Node 24.18.0 and pnpm 11.18.0:
+Executed from `platform/dim-gate` against commit `49e1b89754421cf0e2f76026416a1af184ceab94` with Node 24.18.0 and pnpm 11.18.0:
 
 - `pnpm install --frozen-lockfile` — passed; lockfile unchanged.
 - `pnpm lint` — passed.

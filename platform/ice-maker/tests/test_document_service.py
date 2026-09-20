@@ -976,8 +976,18 @@ esac
                 while not pid_file.exists() and process.poll() is None and time.monotonic() < deadline:
                     time.sleep(0.01)
                 self.assertIsNone(process.poll())
-                client = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
-                client.request("GET", "/healthz")
+                # The PID file is locked before the TCP listener starts, so wait for
+                # the listener itself instead of treating the PID file as readiness.
+                while True:
+                    client = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
+                    try:
+                        client.request("GET", "/healthz")
+                        break
+                    except ConnectionRefusedError:
+                        client.close()
+                        if process.poll() is not None or time.monotonic() >= deadline:
+                            raise
+                        time.sleep(0.01)
                 response = client.getresponse()
                 self.assertEqual((response.status, response.read()), (200, b'{"status":"ok"}'))
                 client.close()

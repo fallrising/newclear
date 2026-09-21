@@ -5,16 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "newclear-agent-platform-m0"
 version = "0.1.0"
-description = "M0 compatibility probes for the Agent Platform"
+description = "Agent Platform control plane and M0 compatibility probes"
 requires-python = ">=3.12"
 dependencies = ["websockets==17.1"]
 
 [project.optional-dependencies]
 dev = ["ruff==0.16.8", "cocoonstack-sandbox==0.1.12"]
 sandbox = ["cocoonstack-sandbox==0.1.12"]
+platform = ["fastapi==0.141.1", "uvicorn==0.53.0", "psycopg[binary]==3.3.6", "psycopg-pool==3.3.2", "argon2-cffi==25.1.0"]
+integration = ["httpx==0.28.1"]
 
 [project.scripts]
 agent-platform-m0 = "agent_platform_m0.cli:main"
+agent-platform = "agent_platform.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -25,3 +28,6 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.setuptools.package-data]
+agent_platform = ["migrations/*.sql"]

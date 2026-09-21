@@ -1,6 +1,6 @@
 # dim-gate 狀態
 
-更新：2026-09-20。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-21。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
@@ -18,7 +18,7 @@ M1 可操作範圍：
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
-| M2：申請與平台治理 | RUNNING；T-014 shared domain/API accepted checkpoint；Draft PR #13 |
+| M2：申請與平台治理 | RUNNING；T-014 domain/API、T-015 RD/Ops UI accepted checkpoints；Draft PR #13 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
@@ -31,6 +31,8 @@ M1 可操作範圍：
 
 M2 T-014 在 `a9e64276273fc3698105c2bf8b0b7bc833444057` 完成 shared domain/API checkpoint：132/132 tests、11/11 production Chromium regression 與全部 native gates 通過；request/capacity/provision retry、access/navigation/catalog/model governance 和 M1→M2 explicit recovery 已可由共用 handler 執行。Draft [PR #13](https://github.com/fallrising/newclear/pull/13) 已開啟；AC-20 timing-test correction `c35147c` 後，remote run [35535062404](https://github.com/fallrising/newclear/actions/runs/35535062404) 全綠。這不代表 M2 ACCEPTED；M2 UI、browser walkthrough 與 independent review 尚未完成。
 
-限制：production JS 為 419.77 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。沒有部署、真實雲操作、付費服務或全域權限變更。
+M2 T-015 在 `3eaea290de563818af27b240bff73e02f47513d0` 完成 RD/Ops self-service UI checkpoint：catalog wizard、request history/actions、Ops approval/provision、capacity、jobs/logs 與 failure/retry 均由共用 API/domain 驅動。135/135 tests、14/14 production Chromium、三 viewport overflow/axe 與全部 native gates通過；成功交付與失敗後 identity-preserving retry 都以可見 UI 操作完成。這仍不代表 M2 ACCEPTED；Admin governance UI、整合 walkthrough、獨立 review 與 current-head remote CI 尚未完成。
 
-Resume：從 `agent/dim-gate/mainline/m2-governance` 的 `a9e6427` 接續 RD/Ops self-service 與 Admin governance UI；base 是合併後 main `b8dae760`。M2 尚未 ACCEPTED，PR #13 是 Draft，未部署。
+限制：production JS 為 426.27 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。沒有部署、真實雲操作、付費服務或全域權限變更。
+
+Resume：從 `agent/dim-gate/mainline/m2-governance` 的 `3eaea29` 接續 T-016 Admin governance UI；base 是合併後 main `b8dae760`。M2 尚未 ACCEPTED，PR #13 是 Draft，未部署。

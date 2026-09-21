@@ -262,6 +262,8 @@ DG-D025: REJECT integrated candidate `5dd74e8a3f94596be2a1c5abe7b08d1165a437d2` 
 
 DG-D026: LOCALLY ACCEPT final correction `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` for M2 AC-09–12 and AC-21–23 pending exact-head remote CI. The initial corrections at `83a2e81` closed all four original findings; independent re-review then exposed and the final correction closed the failed-job/pre-retry identity window. Fresh local evidence is 138/138 tests, every native gate, 22/22 production Chromium journeys and a final independent verdict with no blocking/high/medium product finding. M2 remains RUNNING and PR #13 remains Draft until current-head remote CI passes.
 
+DG-D027: ACCEPT M2 AC-09–12 and AC-21–23 at product commit `513e6cc2f3ff9d1fc8228805c366ce4f9d732925`. GitHub Actions run [35590593367](https://github.com/fallrising/newclear/actions/runs/35590593367) passed every gate and 22/22 Chromium journeys on evidence head `3d61cb4e1d64efa348bfbc91f4bcfec435343176`, with browser artifacts preserved. The final independent review has no blocking/high/medium finding. PR #13 is OPEN, Ready for Review, CLEAN and unmerged at this checkpoint; merge remains a separate authorized action after final metadata-head CI.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -278,7 +280,7 @@ task_id: T-017 integrated M2 walkthrough, adversarial correction and final revie
 implementation_commit: 513e6cc2f3ff9d1fc8228805c366ce4f9d732925
 local_tested_commit: 513e6cc2f3ff9d1fc8228805c366ce4f9d732925
 ci_tested_merge: none
-ci_run: https://github.com/fallrising/newclear/actions/runs/35550811097
+ci_run: https://github.com/fallrising/newclear/actions/runs/35590593367
 spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
 evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md
@@ -286,8 +288,8 @@ evidence_refs:
   - .team/reports/T-015.md
   - .team/reports/T-016.md
   - .team/reports/T-017.md
-integration_state: DRAFT_PR_13
-remote_durability: T-016 is remote and green; T-017 product/evidence commits await SSH push and exact-head CI
+integration_state: OPEN_READY_PR_13_NOT_MERGED
+remote_durability: T-017 product and evidence head are on the SSH remote branch; exact evidence-head CI 35590593367 passed
 blockers: []
-next_action: commit and SSH-push T-017 evidence, wait for exact-head remote CI, then decide final M2 acceptance and PR #13 readiness
+next_action: commit and SSH-push acceptance metadata, require final metadata-head CI, then perform the explicitly authorized PR #13 merge without deployment
 ```

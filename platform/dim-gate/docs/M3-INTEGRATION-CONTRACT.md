@@ -1,6 +1,6 @@
 # M3 integration contract
 
-Revision 1 · base `e760d8e988c0e2a837b226c600805a659a362c10` · AC-13–16、AC-24
+Revision 2 · base `e760d8e988c0e2a837b226c600805a659a362c10` · AC-13–16、AC-24
 
 ## Scope and persistence
 
@@ -17,7 +17,7 @@ The snapshot uses `dim-gate-m3-v1`, with empty `pipelines`, `releases`, `artifac
 - Cancellation is allowed before deploy, including awaiting approval and a queued candidate; it skips unfinished stages, cancels the candidate and removes scheduled tasks. Deploying/verifying cancellation is 409. Retry creates a new run/correlation and retains `retryOfRunId` without rewriting prior history.
 - Rollback requires path ID = current active, matching release/environment versions, a same-environment succeeded target with a different artifact still in the registry, and a free environment. It creates a new release with previous/target references and reason; prod uses the same approval rule. Failure leaves active unchanged; success points active at the new rollback release and emits a recovery-requested event for the future M4 observation engine. It does not resolve an incident in M3.
 - One-shot demo faults are strictly targeted: `build-failure` requires a run whose build is unfinished; `health-failure` requires a run or its deploy release before verify completes; `rollback-failure` requires a nonterminal rollback release. Missing, unrelated, cross-scope or late targets are rejected. Failures remain visible in history and logs.
-- The explicit playback control advances one tick per second without overlapping requests, stopping at approval/terminal state or on error. Leaving the view, persona/policy/reset changes and reload pause playback; resuming uses persisted steps without offline catch-up. Manual stepping remains available while paused. Completion feedback waits for affected queries to refresh.
+- The explicit playback control advances one tick per second without overlapping requests, stopping at approval/terminal state or on error. Leaving the view, persona/policy/reset changes and reload pause playback; resuming uses persisted steps without offline catch-up. Pausing stops future ticks; if a clock request is already in flight, manual stepping and resume remain disabled until that request and the affected query refresh settle. An in-flight guard survives playback effect cleanup. Manual stepping remains available while paused and idle. Completion feedback waits for affected queries to refresh.
 
 ## Authorization, audit and API
 

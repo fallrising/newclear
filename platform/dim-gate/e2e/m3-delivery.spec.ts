@@ -509,3 +509,49 @@ test('AC-20: Commerce clock receipt and audit do not disclose a progressed Data 
   await page.goto(`rd/pipelines/${runId}`)
   await expect(page.locator('dt').filter({ hasText: /^候選發布$/ }).locator('..')).toContainText(hidden.releaseId!)
 })
+
+
+test('M3 playback: pausing an unsettled tick keeps manual step and resume disabled until refreshed', async ({ page }, info) => {
+  await page.goto('rd')
+  await trigger(page, 'playback-inflight-pause')
+  // Hold delivery of the actual clock response. No domain data, response content,
+  // business transition or application timer is replaced by the test.
+  await page.evaluate(() => {
+    const original = window.fetch.bind(window)
+    const probe = { pending: 0, maxPending: 0, requests: 0 }
+    Object.assign(window, { deliveryClockProbe: probe })
+    window.fetch = async (...args) => {
+      if (!String(args[0]).endsWith('/clock/advance')) return original(...args)
+      probe.pending += 1
+      probe.requests += 1
+      probe.maxPending = Math.max(probe.maxPending, probe.pending)
+      try {
+        const response = await original(...args)
+        await new Promise((resolve) => setTimeout(resolve, 2500))
+        return response
+      } finally { probe.pending -= 1 }
+    }
+  })
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await page.waitForFunction(() => (window as unknown as { deliveryClockProbe: { pending: number } }).deliveryClockProbe.pending === 1)
+  await page.getByRole('button', { name: '暫停模擬播放' }).click()
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  await expect(page.getByRole('combobox', { name: '模擬前進幅度' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '處理中…', exact: true })).toBeDisabled()
+  // A full playback period passes while the original response is still held.
+  await page.waitForTimeout(1100)
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '前進模擬時鐘', exact: true })).toBeEnabled()
+  await expect(page.getByRole('button', { name: /^建置 build · 成功$/ })).toBeVisible()
+  await advance(page, 1)
+  expect((await savedSnapshot(page)).logicalClock).toBe(2)
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await page.waitForFunction(() => (window as unknown as { deliveryClockProbe: { pending: number } }).deliveryClockProbe.pending === 1)
+  await page.getByRole('button', { name: '暫停模擬播放' }).click()
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '前進模擬時鐘', exact: true })).toBeEnabled()
+  expect((await expectClockPaused(page)).logicalClock).toBe(3)
+  const probe = await page.evaluate(() => (window as unknown as { deliveryClockProbe: { pending: number; maxPending: number; requests: number } }).deliveryClockProbe)
+  expect(probe).toEqual({ pending: 0, maxPending: 1, requests: 3 })
+  await info.attach('paused-inflight-clock', { body: JSON.stringify(probe), contentType: 'application/json' })
+})

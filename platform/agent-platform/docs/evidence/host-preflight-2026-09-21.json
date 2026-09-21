@@ -1,0 +1,23 @@
+{
+  "platform": "Linux",
+  "architecture": "x86_64",
+  "hypervisor_present": false,
+  "x86_virtualization_exposed": true,
+  "kvm_present": true,
+  "kvm_accessible": false,
+  "kvm_api_version": null,
+  "kvm_ready": false,
+  "kvm_diagnosis": "kvm_permission_denied",
+  "docker_cli_present": true,
+  "cocoon_cli_present": false,
+  "sandboxd_present": false,
+  "openhands_image": "ghcr.io/openhands/agent-server@sha256:8d015443e480ce5fa0f6f0b21b8031d5b2115840805e28eac89f5d82799ea51b",
+  "pending_kvm_gates": [
+    "cocoon_guest_boot_and_template_digest",
+    "sandbox_rest_and_websocket_relay",
+    "cross_workspace_and_egress_isolation",
+    "sandbox_ttl_and_allocation_reconciliation",
+    "microvm_stop_and_confirmed_resource_release"
+  ],
+  "full_m0_complete": false
+}

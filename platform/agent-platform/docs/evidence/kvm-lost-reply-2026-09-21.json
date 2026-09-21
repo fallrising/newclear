@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "transport": "cocoon",
+  "started_at": "2026-09-21T17:30:57.083412+00:00",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "sandbox_sdk_version": "0.1.12",
+  "claim_ref": "agent-platform-m0-195c41f1ed9b4956a52dd6d64e1785bf",
+  "ttl_seconds": 900,
+  "checks": {
+    "allocation_reconciliation": "operator_required"
+  },
+  "pending_kvm_gates": [
+    "cocoon_guest_boot_and_template_digest",
+    "sandbox_rest_and_websocket_relay",
+    "cross_workspace_and_egress_isolation",
+    "sandbox_ttl_and_allocation_reconciliation",
+    "microvm_stop_and_confirmed_resource_release"
+  ],
+  "full_m0_complete": false,
+  "vm_removal_confirmed": false,
+  "error": "TimeoutError",
+  "matching_claims": [
+    {
+      "id": "sb_ee876c6be48b5d92",
+      "deadline": "2026-09-21T19:45:57.182944389+02:00"
+    }
+  ],
+  "sandbox_contract_passed": false,
+  "finished_at": "2026-09-21T17:30:57.183774+00:00"
+}

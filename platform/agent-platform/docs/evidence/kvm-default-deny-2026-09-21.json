@@ -1,0 +1,24 @@
+{
+  "case": "no_policy_and_no_guest_nic",
+  "observed": {
+    "public_direct": {
+      "connected": false,
+      "error": "OSError"
+    },
+    "metadata_direct": {
+      "connected": false,
+      "error": "OSError"
+    },
+    "unconfigured_proxy": {
+      "error": "ConnectionResetError"
+    }
+  },
+  "vm_removal": {
+    "original_vmm_process_gone": true,
+    "vm_record_gone": true,
+    "runtime_directory_gone": true,
+    "cpu_scope_gone": true
+  },
+  "passed": true,
+  "full_m0_complete": false
+}

@@ -1,0 +1,16 @@
+{
+  "src/agent_platform_m0/__init__.py": "695cf871f2a0a74944a2aa4a19f7d03754d264da37762ca77f1d099f1e715c40",
+  "src/agent_platform_m0/cli.py": "beab7ddf59bfd278558da37203313c2763e59452a598d1c2789e31e83eebf995",
+  "src/agent_platform_m0/contracts.py": "81ba4400d2556c168b6a8685621d6fb4f5ef972efa282ad1e7975959d94a96d3",
+  "src/agent_platform_m0/docker_smoke.py": "d0afc71b5211c6ebc1e1d30a4c72fdc162f68c4290e805f0768c415921d3a9be",
+  "src/agent_platform_m0/events.py": "38bf96174afe8f645d17bdeb4dd4b7cb9527752bcd6ab0efab66b7bd7fb3c65b",
+  "src/agent_platform_m0/fake_model.py": "496f5fa0bf691325b9f215ce09ba8ebe58e482976af49c4d90b08b3fba6fe2e9",
+  "src/agent_platform_m0/kvm_egress.py": "b68d8f3726cb685e4fe1a82463c87f75557fee00fec0531d9710e3768bc64dac",
+  "src/agent_platform_m0/kvm_lifecycle.py": "d1cc4fd4f3dab692ac15e1f891310a63364ce0363233d49d37853df8d3670bea",
+  "src/agent_platform_m0/preflight.py": "27315d547136278af99adec74db53af2633486b45609131f1b9b1a05101c6bc9",
+  "src/agent_platform_m0/probe.py": "9648851ecda757cf7b409a1d2969319e301e561df9c34209c89921c2a625695f",
+  "src/agent_platform_m0/relay.py": "6ad94e5a8a4df6e22bf2d226c6cd26b5b3f00daef4a1e719d0c11a04dfa1c4e8",
+  "src/agent_platform_m0/sandbox_client.py": "9080b1b2f6b098a2bc66831a795ce77daf0db14439947774d5afde20cd3f9917",
+  "src/agent_platform_m0/sandbox_smoke.py": "170066cca4937181cb1f3e17853b14804b94586de88cb8ce469ea7bb3836fe3a",
+  "src/agent_platform_m0/transport.py": "94040a37a0a5a86b94f381f82b4049c6f0fbecfb4e8ccad08d8d69d409e32f34"
+}

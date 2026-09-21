@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 開發中，Docker／guest rootfs 契約測試與遠端 sandbox probe 已實作，KVM gate 待驗
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過，M1 尚未開始
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
@@ -418,7 +418,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | Milestone | 交付 | 完成條件 | 目前狀態 |
 | --- | --- | --- | --- |
 | SDD | 本文件、來源比較、項目入口與 portfolio 邊界 | 文件一致、來源可追溯、設計與已實作功能標示清楚 | Merged (#14) |
-| M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | In progress：Docker/rootfs 已測，SDK probe 已實作；KVM 待驗 |
+| M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Not started |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Not started |
 | M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | Not started |
@@ -450,7 +450,7 @@ M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(s
 - 本 SDD 為本項目的設計基準；研究紀錄說明觀察與選擇，不能用上游 roadmap 覆蓋本地驗收。
 - 實作時以 milestone 切片交付，記錄 change、tests、evidence、limitations；任何相容性失敗先更新 ADR／capability matrix。
 - 本目錄包含 M0 probe 與 dependency manifest，根目錄 CI 執行單元／SDK HTTP 契約與 Docker/rootfs 實測；不把它們當作 MicroVM 驗收。後續實作繼續遵守 newclear 的 [monorepo CI](../../docs/specs/monorepo-ci.md) 設定 root path-scoped workflow。
-- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。下一步固定為最早未完成的 M0。
+- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。M0 的固定配置已通過硬體 gate；下一步為最早未完成的 M1。
 
 ## 18. 來源
 

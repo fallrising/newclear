@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "transport": "cocoon",
+  "started_at": "2026-09-21T17:16:56.196172+00:00",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "sandbox_sdk_version": "0.1.12",
+  "claim_ref": "agent-platform-m0-dcb9caab697b47aeb8589ed3caf89699",
+  "ttl_seconds": 900,
+  "checks": {
+    "single_allocation": "passed",
+    "pinned_claim_key_and_lease": "passed",
+    "guest_server_binary": "passed",
+    "ready": "passed",
+    "rest_auth_required": "passed",
+    "pinned_server_revision": "passed",
+    "openapi_routes": "passed",
+    "create_conversation": "passed",
+    "message_does_not_autorun": "passed",
+    "fake_model_run_finished": "passed",
+    "websocket_reconnect_deduplicates": "passed",
+    "interrupt_means_paused": "passed",
+    "resume_after_interrupt": "passed",
+    "guest_process_restart_retains_history": "passed",
+    "continue_after_guest_process_restart": "passed",
+    "conversation_delete": "passed",
+    "sandbox_rest_and_websocket_relay": "passed",
+    "release_acknowledged_twice": "passed",
+    "claim_no_longer_listed": "passed"
+  },
+  "pending_kvm_gates": [
+    "cocoon_guest_boot_and_template_digest",
+    "cross_workspace_and_egress_isolation",
+    "sandbox_ttl_and_allocation_reconciliation",
+    "microvm_stop_and_confirmed_resource_release"
+  ],
+  "full_m0_complete": false,
+  "vm_removal_confirmed": false,
+  "sandbox_id": "sb_361b11d2ac920562",
+  "observed_server": {
+    "version": "1.49.2",
+    "sdk_version": "1.49.2",
+    "build_git_sha": "856d99d48e4b11c70c5f1cab21e7830570dbc324"
+  },
+  "openapi_sha256": "07b9a08c06426d6d351b836b93b10793d0f8149d44f8eeacc68ea1a50edaaf71",
+  "subscription_snapshots": 3,
+  "unique_events": 19,
+  "sandbox_contract_passed": true,
+  "finished_at": "2026-09-21T17:17:08.748297+00:00"
+}

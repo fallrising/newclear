@@ -3,16 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle2, Clock3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
-import type { DeliveryClient } from '../../api/clients/delivery'
+import { canPerformProjectAction } from '../../domain/policy'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
-import type { CommandReceipt, Environment, PipelineRun, Release, SessionView } from '../../domain/schemas'
+import type { Environment, PipelineRun, Release, SessionView } from '../../domain/schemas'
 import './delivery.css'
 
-// The application composition is owned by the integration task.
-export const deliveryApi = api as typeof api & DeliveryClient
+export const deliveryApi = api
 type Scenario = 'build-failure' | 'health-failure' | 'rollback-failure'
-const demoApi = api as typeof api & { setScenario: (key: Scenario, target: { runId?: string; releaseId?: string }) => Promise<CommandReceipt> }
+const demoApi = api
 export const pipelineLabels: Record<PipelineRun['state'], string> = { queued: '等待執行', running: '執行中', awaiting_approval: '等待正式環境核准', succeeded: '成功', failed: '失敗', cancelled: '已取消' }
 export const releaseLabels: Record<Release['state'], string> = { pending_approval: '待核准', queued: '等待部署', deploying: '部署中', verifying: '健康檢查中', succeeded: '成功', failed: '失敗', rejected: '已拒絕', cancelled: '已取消' }
 export const healthLabels: Record<Release['health'], string> = { pending: '尚未完成健康檢查', healthy: '健康檢查通過', unhealthy: '健康檢查失敗' }
@@ -23,9 +22,7 @@ export const timestamp = (value?: string) => value ? new Date(value).toLocaleStr
 export const isNotFound = (error: unknown) => typeof error === 'object' && error !== null && (error as { status?: number }).status === 404
 
 export function projectAction(session: SessionView, action: string, projectId?: string, stage?: Environment['stage']) {
-  const role = ['release.approve', 'release.reject'].includes(action) ? 'ops' : 'rd'
-  return Boolean(projectId && stage && session.effectiveActions.includes(action) && session.assignments.some((grant) =>
-    grant.role === role && grant.scopeType === 'project' && grant.scopeId === projectId && (!grant.stages || grant.stages.includes(stage))))
+  return Boolean(projectId && stage && canPerformProjectAction(session, action, projectId, stage))
 }
 
 export function useDeliveryRefresh() {

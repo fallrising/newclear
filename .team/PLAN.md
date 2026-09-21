@@ -9,15 +9,15 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 19 |
+| protocol_version / ledger_revision | 1 / 20 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator / DG-M3-20260921-01 |
+| active_owner / run_id | none — user-requested handoff / DG-M3-20260921-01 |
 | active_work_branch | agent/dim-gate/mainline/m3-delivery |
-| source / last_reconciled_target | M1 source `50294b687d06f08e94290f6f327187e8f69248bc` / reconciled `a5982bf4547bba85429fec50494751562b5fe7c6`, 2026-09-20 |
-| source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
-| spec revision | M2 integration contract revision 1; implementation checkpoint `a9e64276273fc3698105c2bf8b0b7bc833444057` |
-| open implementation PRs at recovery | Draft PR #13 for M2; M0 PR #7 and M1 PR #11 are merged |
+| source / last_reconciled_target | M3 base `e760d8e988c0e2a837b226c600805a659a362c10` / fetched main `aafd24d7e7110454847ef8856bc15cd76626c2c7`, 2026-09-21; not merged into M3 |
+| source kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD observed, not adopted |
+| spec revision | M3 integration contract revision 1; correction checkpoint `b58298e9ddc2498830f1fd144277b1c6345359b1` |
+| open implementation PRs at recovery | No M3 PR; M0 #7, M1 #11 and M2 #13 are MERGED |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
@@ -60,6 +60,10 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-014.md); `a9e6427`, 132 tests, 11 production E2E |
 | [T-015](tasks/T-015.md) / 1 | 09–12 RD/Ops UI | T-014 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-015.md); `3eaea29`, 135 tests, 14 production E2E |
 | [T-016](tasks/T-016.md) / 1 | 21–23 Admin UI | T-015 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-016.md); `f9f1472`, 136 tests, 17 production E2E |
+| [T-017](tasks/T-017.md) | M2 integrated review | T-014–016 | independent review + lead | ACCEPTED | agent/dim-gate/mainline/m2-governance | [report](reports/T-017.md); M2 accepted and PR #13 merged |
+| [T-018](tasks/T-018.md) / 1 | 13–16/24 domain and integration | merged M2 | orchestrator | 1 / PARTIAL_CHECKPOINT | agent/dim-gate/mainline/m3-delivery | [report](reports/T-018.md); correction `b58298e`, 170 tests; browser/re-review pending |
+| [T-019](tasks/T-019.md) / 1 | M3 UI/browser | T-018 contract | bounded isolated worker + lead | 1 / INTEGRATED_NOT_ACCEPTED | agent/dim-gate/task/t019-delivery-ui | [report](reports/T-019.md); source `768435a`, integrated `2abbec9` |
+| [T-020](tasks/T-020.md) / 1 | independent M3 review | fixed candidate | fresh read-only in-environment reviewer | 1 / REWORK | detached 2abbec9 | [report](reports/T-020.md); four medium findings, correction awaits closure |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -300,24 +304,36 @@ DG-D028: Reconcile M2 as ACCEPTED and MERGED. PR #13 merged at `29bed41788a33684
 
 DG-D029: User approved the first M3 vertical slice. Freeze [M3 integration contract revision 1](../platform/dim-gate/docs/M3-INTEGRATION-CONTRACT.md) and start [T-018](tasks/T-018.md), then bounded UI and independent review. No unresolved owner decision blocks this slice. Built-in Codex owns implementation and a separate read-only session owns review; exact runtime model IDs are not inferred. Kernel `237aa277b0d067f65c8f64f49c6854597f7f8b15` was read from an isolated SSH sparse checkout; the existing reference remains unchanged at `664d176`.
 
+DG-D030: REWORK candidate `2abbec9` following independent T-020 attempt 1: clock receipt scope leak, impossible persisted scheduler steps, absent per-second playback and premature clock-completion feedback. Lead first reproduced both domain failures; correction `b58298e` passes 170 tests, lint, typecheck and architecture. Initial production M3 Chromium was 7/9, not acceptance. User requested saving progress/new conversation before corrected build/browser/independent re-review; preserve the checkpoint and release active ownership. No M3 PR/CI, merge or deployment is claimed.
+
+The routing and resume sections above for M0–M2 are historical. Current M3 routing: bounded UI worker and fresh independent reviewer through existing collaboration. External Claude preflight succeeded but code transmission was denied; source review did not run there. One initial review completed; its bounded correction exists, and the single same-approach follow-up remains pending.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
 protocol_version: 1
 run_id: DG-M3-20260921-01
-terminal_state: running
-active_owner: Codex orchestrator
+terminal_state: null
+handoff_reason: user_requested_save_and_new_conversation
+active_owner: none
 target_ref: main
 source_main: e760d8e988c0e2a837b226c600805a659a362c10
-last_reconciled_target: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: aafd24d7e7110454847ef8856bc15cd76626c2c7
 continuation_ref: agent/dim-gate/mainline/m3-delivery
 milestone: M3
-task_id: T-018
-implementation_commit: none
+task_id: T-018 / T-019 / T-020
+implementation_commit: b58298e9ddc2498830f1fd144277b1c6345359b1
+local_tested_commit: b58298e9ddc2498830f1fd144277b1c6345359b1 — unit/lint/typecheck/architecture only
+browser_tested_commit: 2abbec9ca4ca812b9be0278e6a5ca14c303c87b9 — 7 passed / 2 failed, not correction evidence
 spec_revision: M3-INTEGRATION-CONTRACT revision 1
-evidence_refs: []
+evidence_refs:
+  - .team/reports/T-018.md
+  - .team/reports/T-018-attempt-1.md
+  - .team/reports/T-019.md
+  - .team/reports/T-020.md
+  - .team/reports/T-020-attempt-1.md
 integration_state: NOT_OPENED
-remote_durability: local isolated worktree, implementation checkpoint pending
+remote_durability: product and containing evidence checkpoint to be SSH-pushed before handoff; verify remote branch tip on resume
 blockers: []
-next_action: implement shared delivery, integrate UI/Chromium, then independent fixed-commit review and remote CI
+next_action: read T-018 checkpoint; add playback/scope browser coverage, rebuild current HEAD with CJK fonts, rerun affected and full gates, then fixed-commit independent follow-up and current-head PR CI
 ```

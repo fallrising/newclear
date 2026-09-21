@@ -41,4 +41,6 @@ M2 T-017 的獨立 review 拒絕舊整合 head `5dd74e8`：Admin job logs 越權
 
 M2 合併對帳：PR #13 已合併為 `29bed41788a33684f24d216f4fd4d5f3f998c672`；final metadata CI 35591097020、post-merge CI 35591531196 與 mirror 35591531198 全部成功。上方 T-014～T-017 段落保留當時 checkpoint 的觀察，不代表目前 PR 狀態。
 
-Resume：M3 從最新 main `e760d8e988c0e2a837b226c600805a659a362c10` 建立獨立 worktree `/home/ckc/test/codex/newclear-m3`，branch `agent/dim-gate/mainline/m3-delivery`。依 [M3 contract](M3-INTEGRATION-CONTRACT.md) 實作 AC-13–16、AC-24；T-018 domain/API 與 T-019 UI 進行中，完整 Chromium、獨立 review 與 remote CI 通過前不宣告 M3 ACCEPTED。
+Resume（使用者要求保存並轉新對話）：M3 correction checkpoint `b58298e9ddc2498830f1fd144277b1c6345359b1`，worktree `/home/ckc/test/codex/newclear-m3`，branch `agent/dim-gate/mainline/m3-delivery`。T-018 domain/API 與 T-019 UI 已整合；170 tests、lint、typecheck、architecture 通過。舊 candidate `2abbec9` 的 M3 Chromium 為 7/9，獨立 T-020 為 REWORK；修正後 build／完整 browser／獨立複審／remote CI 尚未執行，因此 **M3 未 ACCEPTED**，沒有 M3 PR，也沒有 merge/deploy。精確下一步、環境命令與保存位置見 [T-018 checkpoint](../../../.team/reports/T-018.md)；原始 findings 見 [T-020 attempt 1](../../../.team/reports/T-020-attempt-1.md)。
+
+最新 SSH fetch 的 main 是 `aafd24d7e7110454847ef8856bc15cd76626c2c7`（其他 component 更新），尚未整入 M3。原始 preview 已停止，4173 port 空閒；`dist` 仍是舊 build，接續時必須重建。四台機器的 SSH config 請求仍缺確切目標資料，尚未修改本機 SSH 設定。

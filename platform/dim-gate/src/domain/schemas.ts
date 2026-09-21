@@ -102,7 +102,12 @@ export const roleAssignmentSchema = z.strictObject({
   if (assignment.stages && assignment.scopeType !== 'project') ctx.addIssue({ code: 'custom', path: ['stages'], message: 'Stages apply only to project scope' })
 })
 export const navigationItemSchema = z.strictObject({
-  ...scopedBase, routeKey: z.enum(['rd.overview', 'ops.overview', 'admin.overview', 'guide']),
+  ...scopedBase, routeKey: z.enum([
+    'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests',
+    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity',
+    'admin.overview', 'admin.access', 'admin.navigation', 'admin.catalog', 'admin.cmdb-models', 'admin.audit',
+    'guide',
+  ]),
   label: nameSchema, group: nameSchema, order: z.number().int(), enabled: z.boolean(),
 })
 export const modelFieldSchema = z.strictObject({
@@ -179,7 +184,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m1-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m2-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -188,6 +193,7 @@ export const snapshotSchema = z.strictObject({
     environments: z.array(environmentSchema), accounts: z.array(providerAccountSchema), locations: z.array(locationSchema),
     pools: z.array(poolSchema), cis: z.array(ciSchema), placements: z.array(placementSchema), relations: z.array(relationSchema),
     assignments: z.array(roleAssignmentSchema), navigation: z.array(navigationItemSchema), modelFields: z.array(modelFieldSchema),
+    catalogs: z.array(catalogItemSchema), catalogHistory: z.array(catalogItemSchema), requests: z.array(requestSchema),
   }),
   jobs: z.array(provisionJobSchema), events: z.array(eventSchema), audit: z.array(auditEventSchema),
   idempotency: z.array(idempotencyRecordSchema), scenarioFlags: jsonFields,
@@ -209,7 +215,7 @@ export const dashboardViewSchema = z.strictObject({
 })
 export const guideViewSchema = z.strictObject({
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-m1-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-m2-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -240,6 +246,53 @@ export const createRelationInputSchema = z.strictObject({
 export const deleteRelationInputSchema = z.strictObject({ expectedVersion: versionSchema, reason: z.string().trim().min(1).max(500) })
 export const revokeAssignmentSchema = z.strictObject({ expectedVersion: versionSchema, reason: z.string().trim().min(1).max(500) })
 export const advanceClockSchema = z.strictObject({ ticks: z.number().int().min(1).max(60) })
+export const reasonSchema = z.string().trim().min(1).max(500)
+export const versionCommandSchema = z.strictObject({ expectedVersion: versionSchema })
+export const reasonCommandSchema = z.strictObject({ expectedVersion: versionSchema, reason: reasonSchema })
+export const createRequestInputSchema = z.strictObject({
+  applicationId: idSchema, environmentName: nameSchema, stage: stageSchema, catalogItemId: idSchema,
+  catalogRevision: versionSchema, provider: providerSchema, poolId: idSchema,
+  cpu: z.number().int().min(1).max(64), memoryMiB: z.number().int().min(128).max(262144).multipleOf(128),
+  purpose: reasonSchema,
+})
+export const patchRequestInputSchema = z.strictObject({
+  expectedVersion: versionSchema, environmentName: nameSchema.optional(), provider: providerSchema.optional(),
+  poolId: idSchema.optional(), cpu: z.number().int().min(1).max(64).optional(),
+  memoryMiB: z.number().int().min(128).max(262144).multipleOf(128).optional(), purpose: reasonSchema.optional(),
+}).refine((body) => Object.keys(body).length > 1, 'At least one request field is required')
+export const createAssignmentInputSchema = z.strictObject({
+  userId: idSchema, role: centerSchema, scopeType: z.enum(['org', 'project', 'pool']), scopeId: idSchema,
+  stages: z.array(stageSchema).min(1).optional(), reason: reasonSchema,
+})
+export const patchUserInputSchema = z.strictObject({ expectedVersion: versionSchema, enabled: z.boolean(), reason: reasonSchema })
+export const patchNavigationInputSchema = z.strictObject({
+  expectedVersion: versionSchema, label: nameSchema.optional(), group: nameSchema.optional(),
+  order: z.number().int().optional(), enabled: z.boolean().optional(),
+}).refine((body) => Object.keys(body).length > 1, 'At least one navigation field is required')
+const catalogMutableFields = {
+  template: catalogTemplateSchema, name: nameSchema, description: z.string().max(2000),
+  allowedProjectIds: ids,
+}
+export const createCatalogRevisionInputSchema = z.strictObject({
+  expectedVersion: versionSchema, reason: reasonSchema, baseRevision: versionSchema, ...catalogMutableFields,
+})
+export const patchCatalogInputSchema = z.strictObject({
+  expectedVersion: versionSchema, revision: versionSchema,
+  ...Object.fromEntries(Object.entries(catalogMutableFields).map(([key, value]) => [key, value.optional()])),
+}).refine((body) => Object.keys(body).length > 2, 'At least one catalog field is required')
+export const publishCatalogInputSchema = z.strictObject({
+  expectedVersion: versionSchema, reason: reasonSchema, revision: versionSchema,
+})
+export const createModelFieldInputSchema = modelFieldSchema.omit({
+  id: true, version: true, createdAt: true, updatedAt: true, orgId: true, required: true, hidden: true,
+})
+export const patchModelFieldInputSchema = z.strictObject({
+  expectedVersion: versionSchema, label: nameSchema.optional(), hidden: z.boolean().optional(),
+}).refine((body) => Object.keys(body).length > 1, 'At least one model field property is required')
+export const scenarioInputSchema = z.strictObject({
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault']),
+  jobId: idSchema.optional(), poolId: idSchema.optional(),
+})
 
 export type Center = z.infer<typeof centerSchema>
 export type Provider = z.infer<typeof providerSchema>
@@ -259,6 +312,11 @@ export type Environment = z.infer<typeof environmentSchema>
 export type Placement = z.infer<typeof placementSchema>
 export type Relation = z.infer<typeof relationSchema>
 export type AuditEvent = z.infer<typeof auditEventSchema>
+export type CatalogItem = z.infer<typeof catalogItemSchema>
+export type Request = z.infer<typeof requestSchema>
+export type ProvisionJob = z.infer<typeof provisionJobSchema>
+export type NavigationItem = z.infer<typeof navigationItemSchema>
+export type ModelField = z.infer<typeof modelFieldSchema>
 export type ApiError = z.infer<typeof apiErrorSchema>
 export type ApiResult<T> = { data: T; meta: z.infer<typeof apiMetaSchema> }
 export type Page<T> = { items: T[]; total: number; page: number; pageSize: number }
@@ -277,4 +335,11 @@ export const contractSchemas = {
   ApiError: apiErrorSchema, CreateCI: createCiInputSchema, PatchCI: patchCiSchema,
   CreateRelation: createRelationInputSchema, DeleteRelation: deleteRelationInputSchema,
   RevokeAssignment: revokeAssignmentSchema, AdvanceClock: advanceClockSchema,
+  VersionCommand: versionCommandSchema, ReasonCommand: reasonCommandSchema,
+  CreateRequest: createRequestInputSchema, PatchRequest: patchRequestInputSchema,
+  CreateAssignment: createAssignmentInputSchema, PatchUser: patchUserInputSchema,
+  PatchNavigation: patchNavigationInputSchema, CreateCatalogRevision: createCatalogRevisionInputSchema,
+  PatchCatalog: patchCatalogInputSchema, PublishCatalog: publishCatalogInputSchema,
+  CreateModelField: createModelFieldInputSchema, PatchModelField: patchModelFieldInputSchema,
+  ScenarioInput: scenarioInputSchema,
 }

@@ -1,9 +1,11 @@
 import { z } from 'zod'
 import { apiErrorSchema, apiResultSchema } from '../domain/schemas'
 import type { SessionView } from '../domain/schemas'
+import { createAdminClient } from './clients/admin'
 import { createApplicationClient } from './clients/application'
 import { createCmdbClient } from './clients/cmdb'
 import { createSessionClient } from './clients/session'
+import { createSelfServiceClient } from './clients/self-service'
 import { createTopologyClient } from './clients/topology'
 import { ApiRequestError } from './core/errors'
 import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
@@ -74,7 +76,18 @@ export function createApiClient() {
     }
     uncertainCommands.delete(commandSignature)
     const current = getClientIdentity()!
-    if (!options.identityControl && !sameIdentity(identity, current)) throw stale()
+    // A policy-changing command updates the subscribed session before its own
+    // receipt reaches this client. Accept only that exact committed policy
+    // transition; produced reads and unrelated/older command receipts remain
+    // stale and are never allowed to cross an identity boundary.
+    const acceptsCommittedPolicyCommand = method !== 'GET'
+      && identity.sessionId === current.sessionId
+      && identity.actorId === current.actorId
+      && identity.generation === current.generation
+      && current.policyVersion === parsed.data.meta.policyVersion
+      && current.policyVersion > identity.policyVersion
+      && current.identityEpoch > identity.identityEpoch
+    if (!options.identityControl && !sameIdentity(identity, current) && !acceptsCommittedPolicyCommand) throw stale()
     if (session && parsed.data.meta.storeRevision < session.storeRevision) throw stale()
     if (options.identityControl) {
       const next = (parsed.data.data as { session: SessionView }).session
@@ -112,6 +125,8 @@ export function createApiClient() {
     ...createApplicationClient(request),
     ...createCmdbClient(request),
     ...createTopologyClient(request),
+    ...createSelfServiceClient(request),
+    ...createAdminClient(request),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

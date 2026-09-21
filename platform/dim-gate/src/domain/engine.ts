@@ -1,9 +1,13 @@
 import { z } from 'zod'
 import {
-  advanceClockSchema, centerSchema, ciKindSchema, commandInputSchema, createCiInputSchema,
-  createRelationInputSchema, deleteRelationInputSchema, healthSchema, patchCiSchema, providerSchema,
-  revokeAssignmentSchema, snapshotSchema, type AuditEvent, type CI, type CommandInput,
-  type CommandReceipt, type DashboardView, type GuideView, type Page, type Relation, type Snapshot,
+  advanceClockSchema, centerSchema, ciKindSchema, commandInputSchema, createAssignmentInputSchema,
+  createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema,
+  createRequestInputSchema, deleteRelationInputSchema, healthSchema, patchCatalogInputSchema, patchCiSchema,
+  patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema,
+  providerSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, scenarioInputSchema,
+  roleAssignmentSchema, snapshotSchema, versionCommandSchema, type AuditEvent, type CI, type CommandInput, type CommandReceipt,
+  type DashboardView, type GuideView, type Page, type ProvisionJob, type Relation, type Request as DomainRequest,
+  type Snapshot,
 } from './schemas'
 import { integrityErrors } from './integrity'
 import { policyFor, type Policy } from './policy'
@@ -156,6 +160,15 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     const environment = snapshot.entities.environments.find((entry) => entry.id === audit.entityId)
     return !!environment && policy.canReadEnvironment(environment)
   }
+  if (audit.entityType === 'request') {
+    const request = snapshot.entities.requests.find((entry) => entry.id === audit.entityId)
+    return !!request && policy.canReadRequest(request)
+  }
+  if (audit.entityType === 'job') {
+    const job = snapshot.jobs.find((entry) => entry.id === audit.entityId)
+    const request = job && snapshot.entities.requests.find((entry) => entry.id === job.requestId)
+    return !!request && policy.canReadRequest(request)
+  }
   if (audit.entityType === 'relation') {
     const relation = snapshot.entities.relations.find((entry) => entry.id === audit.entityId)
     if (!relation) {
@@ -169,7 +182,157 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     const target = snapshot.entities.cis.find((entry) => entry.id === relation.targetCiId)
     return !!source && !!target && policy.canReadCi(source) && policy.canReadCi(target)
   }
+  if (audit.entityType === 'demoSession' && audit.action !== 'provision.scheduler.advance') return false
+  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario'].includes(audit.entityType)) return false
   return audit.scopeSnapshot.projectIds.some((id) => policy.hasProject(id)) || audit.scopeSnapshot.poolIds.some((id) => policy.poolIds.includes(id))
+}
+
+function effectiveCatalog(snapshot: Snapshot, id: string, revision?: number) {
+  const revisions = [...snapshot.entities.catalogHistory, ...snapshot.entities.catalogs]
+    .filter((item) => item.id === id && (revision === undefined || item.revision === revision))
+    .toSorted((left, right) => right.revision - left.revision)
+  return revisions[0]
+}
+
+function requestableCatalog(snapshot: Snapshot, id: string) {
+  const current = snapshot.entities.catalogs.find((item) => item.id === id)
+  if (!current) return undefined
+  if (current.status === 'published') return current
+  if (current.status !== 'draft') return undefined
+  const predecessor = snapshot.entities.catalogHistory.find((item) =>
+    item.id === id && item.revision === current.revision - 1)
+  return predecessor?.status === 'published' ? predecessor : undefined
+}
+
+function requestPoolUsage(snapshot: Snapshot, poolId: string) {
+  const pool = snapshot.entities.pools.find((entry) => entry.id === poolId)
+  if (!pool) return notFound()
+  const active = snapshot.entities.cis.filter((ci) => ci.poolId === poolId && ci.kind === 'compute' && ci.lifecycle === 'active')
+  const reservedRequests = snapshot.jobs.filter((job) => ['queued', 'running'].includes(job.state))
+    .map((job) => snapshot.entities.requests.find((request) => request.id === job.requestId && request.poolId === poolId))
+    .filter((request): request is DomainRequest => Boolean(request))
+  const scenario = snapshot.scenarioFlags[`capacity:${poolId}`]
+  const scenarioCpu = scenario && typeof scenario === 'object' && !Array.isArray(scenario) && typeof scenario.cpu === 'number' ? scenario.cpu : 0
+  const scenarioMemory = scenario && typeof scenario === 'object' && !Array.isArray(scenario) && typeof scenario.memoryMiB === 'number' ? scenario.memoryMiB : 0
+  const cpuUsed = active.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0)
+  const memoryUsed = active.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0)
+  const cpuReserved = reservedRequests.reduce((sum, request) => sum + request.cpu, 0) + scenarioCpu
+  const memoryReserved = reservedRequests.reduce((sum, request) => sum + request.memoryMiB, 0) + scenarioMemory
+  return {
+    pool,
+    cpu: { used: cpuUsed, reserved: cpuReserved, available: Math.max(0, pool.cpuCapacity - cpuUsed - cpuReserved) },
+    memoryMiB: { used: memoryUsed, reserved: memoryReserved, available: Math.max(0, pool.memoryCapacityMiB - memoryUsed - memoryReserved) },
+  }
+}
+
+function validateRequestShape(snapshot: Snapshot, input: {
+  applicationId: string; stage: DomainRequest['stage']; catalogItemId: string; catalogRevision: number;
+  provider: DomainRequest['provider']; poolId: string; cpu: number; memoryMiB: number;
+}, policy: Policy) {
+  const application = snapshot.entities.applications.find((entry) => entry.id === input.applicationId && entry.orgId === policy.user!.orgId)
+  if (!application) return notFound()
+  if (!policy.hasProject(application.projectId, input.stage, 'rd')) return notFound()
+  const catalog = requestableCatalog(snapshot, input.catalogItemId)
+  if (!catalog || catalog.revision !== input.catalogRevision || !catalog.allowedProjectIds.includes(application.projectId)) return notFound()
+  const pool = snapshot.entities.pools.find((entry) => entry.id === input.poolId && entry.orgId === policy.user!.orgId)
+  if (!pool || pool.provider !== input.provider || !pool.scopeProjectIds.includes(application.projectId)
+    || !catalog.template.allowedProviders.includes(input.provider)
+    || !catalog.template.allowedStages.includes(input.stage)
+    || !catalog.template.allowedPoolIds.includes(input.poolId)) {
+    throw new DomainError(422, 'VALIDATION_ERROR', '服務目錄、provider、stage 與資源池不相容。')
+  }
+  if (input.cpu > catalog.template.limits.maxCpu || input.memoryMiB > catalog.template.limits.maxMemoryMiB) {
+    throw new DomainError(422, 'VALIDATION_ERROR', '申請規格超過服務目錄限制。', {
+      cpu: ['Exceeds catalog limit'], memoryMiB: ['Exceeds catalog limit'],
+    })
+  }
+  return { application, catalog, pool }
+}
+
+function jobLogs(snapshot: Snapshot, job: ProvisionJob) {
+  const task = snapshot.scheduler.tasks.find((entry) => entry.operationId === job.id)
+  const completed = job.state === 'succeeded' ? 5 : job.state === 'failed' ? 3 : task?.stepIndex ?? 0
+  const steps = ['validate', 'allocate', 'configure', 'register', 'verify']
+  return steps.slice(0, completed).map((step, index) => ({
+    id: `${job.id}-log-${index + 1}`, applicationId: snapshot.entities.requests.find((entry) => entry.id === job.requestId)!.applicationId,
+    environmentId: snapshot.entities.requests.find((entry) => entry.id === job.requestId)!.environmentId!,
+    occurredAt: clockIso((job.startedAt ? Math.max(0, (Date.parse(job.startedAt) - Date.parse('2026-09-20T09:00:00Z')) / 1000) : snapshot.logicalClock) + index + 1),
+    level: job.state === 'failed' && index === completed - 1 ? 'error' as const : 'info' as const,
+    message: job.state === 'failed' && index === completed - 1 ? `${step}: simulated provision failure` : `${step}: completed`,
+  }))
+}
+
+function provisionedCi(snapshot: Snapshot, request: DomainRequest, job: ProvisionJob): CI {
+  const pool = snapshot.entities.pools.find((entry) => entry.id === request.poolId)!
+  const id = job.plannedCiIds[0]
+  const attributes = pool.provider === 'aws'
+    ? { ...pool.provisionDefaults, cpu: request.cpu, memoryMiB: request.memoryMiB }
+    : pool.provider === 'aliyun'
+      ? { ...pool.provisionDefaults, cpu: request.cpu, memoryMiB: request.memoryMiB }
+      : { ...pool.provisionDefaults, assetTag: id, serialRef: `serial-${id}`, cpu: request.cpu, memoryMiB: request.memoryMiB }
+  const application = snapshot.entities.applications.find((entry) => entry.id === request.applicationId)!
+  return {
+    id, orgId: request.orgId, version: 1, createdAt: clockIso(snapshot.logicalClock), updatedAt: clockIso(snapshot.logicalClock),
+    name: `${application.slug}-${request.environmentName}`, kind: 'compute', provider: request.provider,
+    externalId: id, ...(pool.accountId ? { accountId: pool.accountId } : {}),
+    locationId: pool.locationId, poolId: pool.id, ownerTeamId: application.ownerTeamId,
+    visibilityProjectIds: [application.projectId], lifecycle: 'active', health: 'unknown',
+    tags: { mode: 'demo', requestId: request.id }, attributes, customFields: {},
+    source: 'provisioned', observedAt: null,
+  }
+}
+
+function advanceProvisioning(snapshot: Snapshot, ticks: number): CommandReceipt['changed'] {
+  const changed = new Map<string, CommandReceipt['changed'][number]>()
+  const mark = (entityType: string, entityId: string) => changed.set(`${entityType}:${entityId}`, { entityType, entityId })
+  for (let tick = 0; tick < ticks; tick += 1) {
+    snapshot.logicalClock += 1
+    const due = snapshot.scheduler.tasks.filter((task) => task.dueTick <= snapshot.logicalClock)
+      .toSorted((left, right) => left.id.localeCompare(right.id))
+    for (const task of due) {
+      const job = snapshot.jobs.find((entry) => entry.id === task.operationId && entry.state === 'running')
+      const request = job && snapshot.entities.requests.find((entry) => entry.id === job.requestId)
+      if (!job || !request) {
+        snapshot.scheduler.tasks = snapshot.scheduler.tasks.filter((entry) => entry.id !== task.id)
+        continue
+      }
+      const environment = snapshot.entities.environments.find((entry) => entry.id === request.environmentId)!
+      const failThisJob = task.stepIndex === 2 && snapshot.scenarioFlags.provisionFailureJobId === job.id
+      if (failThisJob) {
+        Object.assign(job, { state: 'failed', failureCode: 'SIMULATED_CONFIGURE_FAILURE',
+          completedAt: clockIso(snapshot.logicalClock), updatedAt: clockIso(snapshot.logicalClock), version: job.version + 1 })
+        Object.assign(request, { state: 'failed', updatedAt: clockIso(snapshot.logicalClock), version: request.version + 1 })
+        Object.assign(environment, { status: 'failed', updatedAt: clockIso(snapshot.logicalClock), version: environment.version + 1 })
+        delete snapshot.scenarioFlags.provisionFailureJobId
+        snapshot.scheduler.tasks = snapshot.scheduler.tasks.filter((entry) => entry.id !== task.id)
+        mark('job', job.id); mark('request', request.id); mark('environment', environment.id)
+        continue
+      }
+      task.stepIndex += 1
+      task.dueTick = snapshot.logicalClock + 1
+      job.version += 1
+      job.updatedAt = clockIso(snapshot.logicalClock)
+      mark('job', job.id)
+      if (task.stepIndex < 5) continue
+      if (!snapshot.entities.cis.some((entry) => entry.id === job.plannedCiIds[0])) {
+        const ci = provisionedCi(snapshot, request, job)
+        snapshot.entities.cis.push(ci)
+        snapshot.entities.placements.push({
+          id: `placement-${ci.id}`, orgId: request.orgId, version: 1,
+          createdAt: clockIso(snapshot.logicalClock), updatedAt: clockIso(snapshot.logicalClock),
+          applicationId: request.applicationId, environmentId: environment.id, ciId: ci.id, role: 'workload',
+        })
+        mark('ci', ci.id); mark('placement', `placement-${ci.id}`)
+      }
+      Object.assign(job, { state: 'succeeded', completedAt: clockIso(snapshot.logicalClock),
+        updatedAt: clockIso(snapshot.logicalClock) })
+      Object.assign(request, { state: 'fulfilled', updatedAt: clockIso(snapshot.logicalClock), version: request.version + 1 })
+      Object.assign(environment, { status: 'ready', updatedAt: clockIso(snapshot.logicalClock), version: environment.version + 1 })
+      snapshot.scheduler.tasks = snapshot.scheduler.tasks.filter((entry) => entry.id !== task.id)
+      mark('request', request.id); mark('environment', environment.id)
+    }
+  }
+  return [...changed.values()]
 }
 
 function topology(snapshot: Snapshot, policy: Policy, query: URLSearchParams) {
@@ -255,7 +418,12 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId'] : ['center'])
       const center = parse(centerSchema, query.get('center'))
       if (!policy.centers.includes(center)) forbidden()
-      if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled && (item.routeKey === 'guide' || item.routeKey === `${center}.overview`)).toSorted((a, b) => a.order - b.order || a.id.localeCompare(b.id)))
+      if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled
+        && (item.routeKey === 'guide' || item.routeKey.startsWith(`${center}.`))
+        && (item.routeKey === 'guide' || item.routeKey.startsWith('rd.') && policy.effectiveActions.includes(item.routeKey === 'rd.catalog' ? 'catalog.read' : item.routeKey === 'rd.requests' ? 'request.read' : 'app.read')
+          || item.routeKey.startsWith('ops.') && policy.effectiveActions.includes(item.routeKey === 'ops.requests' ? 'request.read' : item.routeKey === 'ops.jobs' ? 'job.read' : item.routeKey === 'ops.capacity' ? 'capacity.read' : 'ci.read')
+          || item.routeKey.startsWith('admin.') && policy.admin))
+        .toSorted((a, b) => a.order - b.order || a.id.localeCompare(b.id)))
       const projectId = query.get('projectId'), environmentId = query.get('environmentId')
       const visibleEnvironments = entities.environments.filter((env) => policy.canReadEnvironment(env) && (!environmentId || env.id === environmentId))
       const applications = entities.applications.filter((app) => app.orgId === policy.user!.orgId && policy.hasProject(app.projectId) && (!projectId || app.projectId === projectId) && (!environmentId || visibleEnvironments.some((env) => env.applicationId === app.id)))
@@ -343,23 +511,112 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, ['ciId', 'environmentId', 'mode', 'depth'])
       return clone(topology(state, policy, query))
     }
+    if (path === '/pools') {
+      validateQuery(query, ['provider', 'projectId'])
+      const provider = query.get('provider')
+      if (provider) parse(providerSchema, provider)
+      const projectId = query.get('projectId')
+      if (projectId && !policy.hasProject(projectId)) return []
+      return clone(entities.pools.filter((pool) => pool.orgId === policy.user!.orgId
+        && (!provider || pool.provider === provider) && (!projectId || pool.scopeProjectIds.includes(projectId))
+        && (policy.admin || policy.poolIds.includes(pool.id) || pool.scopeProjectIds.some((id) => policy.hasProject(id)))))
+    }
     if (path === '/capacity') {
       validateQuery(query, ['provider', 'projectId'])
       const provider = query.get('provider')
       if (provider) parse(providerSchema, provider)
       const projectId = query.get('projectId')
       if (projectId && !policy.hasProject(projectId)) return []
-      const visibleCis = entities.cis.filter((entry) => policy.canReadCi(entry) && (!projectId || entry.visibilityProjectIds.includes(projectId)))
       const pools = entities.pools.filter((pool) => pool.orgId === policy.user!.orgId && (!provider || pool.provider === provider) &&
         (policy.admin || policy.poolIds.includes(pool.id) || pool.scopeProjectIds.some((id) => policy.hasProject(id))) &&
         (!projectId || pool.scopeProjectIds.includes(projectId)))
       return pools.map((pool) => {
-        const compute = visibleCis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
-        const cpuUsed = compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0)
-        const memoryUsed = compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0)
-        return { poolId: pool.id, cpu: { used: cpuUsed, reserved: 0, available: Math.max(0, pool.cpuCapacity - cpuUsed) },
-          memoryMiB: { used: memoryUsed, reserved: 0, available: Math.max(0, pool.memoryCapacityMiB - memoryUsed) } }
+        const usage = requestPoolUsage(state, pool.id)
+        return { poolId: pool.id, cpu: usage.cpu, memoryMiB: usage.memoryMiB }
       })
+    }
+    if (path === '/catalog') {
+      validateQuery(query, ['revision', 'q', 'page', 'pageSize', 'sort', 'order'])
+      const revision = query.get('revision')
+      if (revision && (!/^\d+$/.test(revision) || Number(revision) < 1)) fail(422, 'VALIDATION_ERROR', 'revision 必須是正整數。')
+      if (revision && !policy.admin) forbidden()
+      const all = policy.admin && revision
+        ? [...entities.catalogHistory, ...entities.catalogs].filter((entry) => entry.revision === Number(revision))
+        : entities.catalogs.map((current) => policy.admin ? current : requestableCatalog(state, current.id))
+          .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+      const visible = all.filter((entry) => entry.orgId === policy.user!.orgId && (policy.admin
+        || entry.status === 'published' && entry.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd'))))
+      return clone(paged(visible, query, ['id', 'name', 'updatedAt']))
+    }
+    const catalogId = /^\/catalog\/([^/]+)$/.exec(path)?.[1]
+    if (catalogId) {
+      validateQuery(query, ['revision'])
+      const revision = query.get('revision')
+      if (revision && !policy.admin) forbidden()
+      const catalog = policy.admin
+        ? effectiveCatalog(state, catalogId, revision ? Number(revision) : undefined)
+        : requestableCatalog(state, catalogId)
+      if (!catalog || catalog.orgId !== policy.user!.orgId || !policy.admin
+        && (catalog.status !== 'published' || !catalog.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd')))) notFound()
+      return clone(catalog)
+    }
+    if (path === '/requests') {
+      validateQuery(query, ['state', 'applicationId', 'requesterId', 'q', 'page', 'pageSize', 'sort', 'order'])
+      const requestState = query.get('state')
+      const applicationIdFilter = query.get('applicationId'), requesterId = query.get('requesterId')
+      const items = entities.requests.filter((request) => policy.canReadRequest(request)
+        && (!requestState || request.state === requestState)
+        && (!applicationIdFilter || request.applicationId === applicationIdFilter)
+        && (!requesterId || request.requesterId === requesterId))
+        .map((request) => ({ ...request, name: request.environmentName }))
+      const page = paged(items, query, ['id', 'name', 'updatedAt'])
+      return clone({ ...page, items: page.items.map(({ name, ...request }) => { void name; return request }) })
+    }
+    const requestId = /^\/requests\/([^/]+)$/.exec(path)?.[1]
+    if (requestId) {
+      validateQuery(query, [])
+      const request = entities.requests.find((entry) => entry.id === requestId && policy.canReadRequest(entry))
+      if (!request) return notFound()
+      return clone({ request, jobs: state.jobs.filter((job) => job.requestId === request.id).toSorted((a, b) => a.attempt - b.attempt) })
+    }
+    if (path === '/jobs') {
+      validateQuery(query, ['requestId', 'state', 'q', 'page', 'pageSize', 'sort', 'order'])
+      const requestIdFilter = query.get('requestId'), jobState = query.get('state')
+      const items = state.jobs.filter((job) => {
+        const request = entities.requests.find((entry) => entry.id === job.requestId)
+        return !!request && policy.canReadJob(request) && (!requestIdFilter || job.requestId === requestIdFilter) && (!jobState || job.state === jobState)
+      }).map((job) => ({ ...job, name: `Attempt ${job.attempt}` }))
+      const page = paged(items, query, ['id', 'name', 'updatedAt'])
+      return clone({ ...page, items: page.items.map(({ name, ...job }) => { void name; return job }) })
+    }
+    const jobId = /^\/jobs\/([^/]+)$/.exec(path)?.[1]
+    if (jobId) {
+      validateQuery(query, [])
+      const job = state.jobs.find((entry) => entry.id === jobId)
+      const request = job && entities.requests.find((entry) => entry.id === job.requestId && policy.canReadJob(entry))
+      if (!job || !request) return notFound()
+      return clone({ job, logs: jobLogs(state, job) })
+    }
+    if (path === '/admin/access') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone({ organizations: entities.organizations.filter((entry) => entry.id === policy.user!.orgId),
+        users: entities.users.filter((entry) => entry.orgId === policy.user!.orgId),
+        assignments: entities.assignments.filter((entry) => entry.orgId === policy.user!.orgId), policyVersion: state.policyVersion })
+    }
+    if (path === '/admin/navigation') {
+      validateQuery(query, ['center'])
+      if (!policy.admin) forbidden()
+      const center = query.get('center')
+      if (center) parse(centerSchema, center)
+      return clone(entities.navigation.filter((entry) => entry.orgId === policy.user!.orgId
+        && (!center || entry.routeKey === 'guide' || entry.routeKey.startsWith(`${center}.`)))
+        .toSorted((a, b) => a.order - b.order || a.id.localeCompare(b.id)))
+    }
+    if (path === '/admin/cmdb-models') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone({ kinds: ciKindSchema.options, fields: entities.modelFields.filter((entry) => entry.orgId === policy.user!.orgId) })
     }
     if (path === '/audit') {
       validateQuery(query, ['entityType', 'entityId', 'correlationId', 'actorId', 'from', 'to', 'q', 'page', 'pageSize', 'sort', 'order'])
@@ -382,20 +639,49 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     const createRelation = method === 'POST' && input.path === '/relations'
     const deleteRelationId = method === 'DELETE' ? /^\/relations\/([^/]+)$/.exec(input.path)?.[1] : undefined
     const assignmentId = method === 'DELETE' ? /^\/admin\/assignments\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const createRequest = method === 'POST' && input.path === '/requests'
+    const patchRequestId = method === 'PATCH' ? /^\/requests\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const requestActionMatch = method === 'POST' ? /^\/requests\/([^/]+)\/(submit|approve|reject|cancel|provision|retry)$/.exec(input.path) : undefined
+    const createAssignment = method === 'POST' && input.path === '/admin/assignments'
+    const patchUserId = method === 'PATCH' ? /^\/admin\/users\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const patchNavigationId = method === 'PATCH' ? /^\/admin\/navigation\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const catalogRevisionId = method === 'POST' ? /^\/admin\/catalog\/([^/]+)\/revisions$/.exec(input.path)?.[1] : undefined
+    const patchCatalogId = method === 'PATCH' ? /^\/admin\/catalog\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const catalogActionMatch = method === 'POST' ? /^\/admin\/catalog\/([^/]+)\/(publish|disable)$/.exec(input.path) : undefined
+    const createModelField = method === 'POST' && input.path === '/admin/cmdb-fields'
+    const patchModelFieldId = method === 'PATCH' ? /^\/admin\/cmdb-fields\/([^/]+)$/.exec(input.path)?.[1] : undefined
+    const scenario = method === 'POST' && input.path === '/scenarios'
     const clock = method === 'POST' && input.path === '/clock/advance'
-    if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !clock) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+    if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
+      && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
+      && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
+      && !scenario && !clock) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
-    const body = patchCiId ? parse(patchCiSchema, input.body)
-      : createCi ? parse(createCiInputSchema, input.body)
-        : createRelation ? parse(createRelationInputSchema, input.body)
-          : deleteRelationId ? parse(deleteRelationInputSchema, input.body)
-            : assignmentId ? parse(revokeAssignmentSchema, input.body)
-              : parse(advanceClockSchema, input.body)
+    let body: unknown
+    if (patchCiId) body = parse(patchCiSchema, input.body)
+    else if (createCi) body = parse(createCiInputSchema, input.body)
+    else if (createRelation) body = parse(createRelationInputSchema, input.body)
+    else if (deleteRelationId) body = parse(deleteRelationInputSchema, input.body)
+    else if (assignmentId) body = parse(revokeAssignmentSchema, input.body)
+    else if (createRequest) body = parse(createRequestInputSchema, input.body)
+    else if (patchRequestId) body = parse(patchRequestInputSchema, input.body)
+    else if (requestActionMatch) body = parse(['submit', 'provision'].includes(requestActionMatch[2]) ? versionCommandSchema : reasonCommandSchema, input.body)
+    else if (createAssignment) body = parse(createAssignmentInputSchema, input.body)
+    else if (patchUserId) body = parse(patchUserInputSchema, input.body)
+    else if (patchNavigationId) body = parse(patchNavigationInputSchema, input.body)
+    else if (catalogRevisionId) body = parse(createCatalogRevisionInputSchema, input.body)
+    else if (patchCatalogId) body = parse(patchCatalogInputSchema, input.body)
+    else if (catalogActionMatch) body = parse(catalogActionMatch[2] === 'publish' ? publishCatalogInputSchema : reasonCommandSchema, input.body)
+    else if (createModelField) body = parse(createModelFieldInputSchema, input.body)
+    else if (patchModelFieldId) body = parse(patchModelFieldInputSchema, input.body)
+    else if (scenario) body = parse(scenarioInputSchema, input.body)
+    else body = parse(advanceClockSchema, input.body)
     const bodyString = canonical(input.body)
     const replay = state.idempotency.find((record) => record.sessionId === input.sessionId && record.actorId === input.actorId && record.method === method && record.path === input.path && record.key === input.key)
 
     let ci: CI | undefined
     let relation: Relation | undefined
+    let environmentRequest: DomainRequest | undefined
     if (patchCiId) {
       ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
       if (!ci) notFound()
@@ -422,6 +708,28 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!policy.admin) forbidden()
       const assignment = state.entities.assignments.find((entry) => entry.id === assignmentId)
       if (assignment && !policy.canManageAssignment(assignment)) notFound()
+    } else if (createRequest) {
+      const create = body as z.infer<typeof createRequestInputSchema>
+      const application = state.entities.applications.find((entry) => entry.id === create.applicationId && entry.orgId === policy.user!.orgId)
+      if (!application || !policy.hasProject(application.projectId, create.stage, 'rd')) notFound()
+    } else if (patchRequestId || requestActionMatch) {
+      const id = patchRequestId ?? requestActionMatch![1]
+      environmentRequest = state.entities.requests.find((entry) => entry.id === id && policy.canReadRequest(entry))
+      if (!environmentRequest) notFound()
+      const action = requestActionMatch?.[2]
+      const requesterAction = !action || ['submit', 'cancel', 'retry'].includes(action)
+      if (requesterAction && !policy.canEditRequest(environmentRequest!)) forbidden()
+      if (!requesterAction && !policy.canOperateRequest(environmentRequest!)) forbidden()
+    } else if (createAssignment || patchUserId || patchNavigationId || catalogRevisionId || patchCatalogId
+      || catalogActionMatch || createModelField || patchModelFieldId) {
+      if (!policy.admin) forbidden()
+    } else if (scenario) {
+      const scenarioBody = body as z.infer<typeof scenarioInputSchema>
+      if (scenarioBody.jobId) {
+        const job = state.jobs.find((entry) => entry.id === scenarioBody.jobId)
+        const request = job && state.entities.requests.find((entry) => entry.id === job.requestId)
+        if (!job || !request || !policy.canOperateRequest(request)) notFound()
+      } else if (!scenarioBody.poolId || !policy.poolIds.includes(scenarioBody.poolId)) forbidden()
     }
     if (replay) {
       if (replay.canonicalBody !== bodyString) fail(409, 'IDEMPOTENCY_CONFLICT', '同一冪等 key 已用於不同內容。')
@@ -434,6 +742,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let reason: string | undefined
     let fields: string[]
     let changed: CommandReceipt['changed']
+    let operationId: string | undefined
+    let correlationOverride: string | undefined
+    let auditProjectIdsOverride: string[] | undefined
+    let auditPoolIdsOverride: string[] | undefined
 
     if (patchCiId) {
       const patch = body as z.infer<typeof patchCiSchema>
@@ -472,12 +784,21 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       const candidate: CI = { ...create, id: `ci-manual-${String(state.sequence + 1).padStart(4, '0')}`, orgId: policy.user!.orgId,
         version: 1, createdAt: clockIso(state.logicalClock), updatedAt: clockIso(state.logicalClock),
         health: 'unknown', source: 'manual', observedAt: null }
-      if (state.entities.cis.some((entry) => canonicalCiKey(state, entry) === canonicalCiKey(state, candidate))) fail(409, 'DUPLICATE_RESOURCE', '相同 canonical identity 的 CI 已存在。')
+      const candidateIdentity = canonicalCiKey(state, candidate)
+      const collidesWithPlannedIdentity = state.jobs.some((job) => {
+        if (!['queued', 'running', 'failed'].includes(job.state)) return false
+        const request = state.entities.requests.find((entry) => entry.id === job.requestId)
+        return !!request && canonicalCiKey(state, provisionedCi(state, request, job)) === candidateIdentity
+      })
+      if (state.entities.cis.some((entry) => canonicalCiKey(state, entry) === candidateIdentity) || collidesWithPlannedIdentity) {
+        fail(409, 'DUPLICATE_RESOURCE', '相同 canonical identity 的 CI 已存在或已由交付作業保留。')
+      }
       if (candidate.kind === 'compute') {
-        const active = state.entities.cis.filter((entry) => entry.poolId === pool.id && entry.kind === 'compute' && entry.lifecycle === 'active')
-        const cpu = active.reduce((sum, entry) => sum + Number(entry.attributes.cpu), 0) + Number(candidate.attributes.cpu)
-        const memory = active.reduce((sum, entry) => sum + Number(entry.attributes.memoryMiB), 0) + Number(candidate.attributes.memoryMiB)
-        if (cpu > pool.cpuCapacity || memory > pool.memoryCapacityMiB) fail(409, 'CAPACITY_EXCEEDED', '資源池容量不足。')
+        const usage = requestPoolUsage(state, pool.id)
+        if (Number(candidate.attributes.cpu) > usage.cpu.available
+          || Number(candidate.attributes.memoryMiB) > usage.memoryMiB.available) {
+          fail(409, 'CAPACITY_EXCEEDED', '資源池容量不足。')
+        }
       }
       next.entities.cis.push(candidate)
       entityType = 'ci'; entityId = candidate.id; entityVersion = 1; action = 'ci.create'; fields = Object.keys(create)
@@ -514,24 +835,296 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       next.policyVersion += 1
       entityType = 'roleAssignment'; entityId = assignmentId; entityVersion = assignment!.version + 1; action = 'access.write'; fields = ['assignment revoked']; reason = patch.reason
       changed = [{ entityType, entityId }]
+    } else if (createRequest) {
+      const create = body as z.infer<typeof createRequestInputSchema>
+      const { catalog, application } = validateRequestShape(state, create, policy)
+      const serial = String(next.sequence + 1).padStart(4, '0')
+      const created: DomainRequest = {
+        id: `req-${serial}`, orgId: policy.user!.orgId, version: 1,
+        createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+        requesterId: input.actorId, ...create, templateSnapshot: clone(catalog.template), state: 'draft',
+        correlationId: `corr-request-${serial}`,
+      }
+      if (!catalog.allowedProjectIds.includes(application.projectId)) notFound()
+      next.entities.requests.push(created)
+      entityType = 'request'; entityId = created.id; entityVersion = 1; action = 'request.create'
+      fields = ['applicationId', 'environmentName', 'stage', 'catalogRevision', 'provider', 'poolId', 'cpu', 'memoryMiB', 'purpose']
+      changed = [{ entityType, entityId }]; correlationOverride = created.correlationId
+      auditProjectIdsOverride = [application.projectId]; auditPoolIdsOverride = [created.poolId]
+    } else if (patchRequestId) {
+      const patch = body as z.infer<typeof patchRequestInputSchema>
+      if (environmentRequest!.state !== 'draft') fail(409, 'INVALID_STATE', '只有草稿可以修改。')
+      if (patch.expectedVersion !== environmentRequest!.version) fail(409, 'VERSION_CONFLICT', '申請版本已變更。')
+      const candidate = { ...environmentRequest!, ...patch }
+      validateRequestShape(state, candidate, policy)
+      const updated = next.entities.requests.find((entry) => entry.id === patchRequestId)!
+      const { expectedVersion: _expectedVersion, ...fieldsToUpdate } = patch
+      void _expectedVersion
+      Object.assign(updated, fieldsToUpdate, { version: updated.version + 1, updatedAt: clockIso(next.logicalClock) })
+      entityType = 'request'; entityId = updated.id; entityVersion = updated.version; action = 'request.update'
+      fields = Object.keys(fieldsToUpdate); changed = [{ entityType, entityId }]; correlationOverride = updated.correlationId
+      const application = state.entities.applications.find((entry) => entry.id === updated.applicationId)!
+      auditProjectIdsOverride = [application.projectId]; auditPoolIdsOverride = [updated.poolId]
+    } else if (requestActionMatch) {
+      const request = next.entities.requests.find((entry) => entry.id === environmentRequest!.id)!
+      const actionName = requestActionMatch[2]
+      const command = body as z.infer<typeof reasonCommandSchema>
+      if (command.expectedVersion !== environmentRequest!.version) fail(409, 'VERSION_CONFLICT', '申請版本已變更。')
+      const application = state.entities.applications.find((entry) => entry.id === request.applicationId)!
+      auditProjectIdsOverride = [application.projectId]; auditPoolIdsOverride = [request.poolId]
+      correlationOverride = request.correlationId
+      reason = 'reason' in command ? command.reason : undefined
+      changed = [{ entityType: 'request', entityId: request.id }]
+      if (actionName === 'submit') {
+        if (request.state !== 'draft') fail(409, 'INVALID_STATE', '只有草稿可以提交。')
+        if (!requestableCatalog(next, request.catalogItemId)) fail(409, 'INVALID_STATE', '服務目錄項目已停用，請等待重新發布。')
+        const normalized = request.environmentName.trim().toLowerCase()
+        if (next.entities.environments.some((entry) => entry.applicationId === request.applicationId && entry.name.trim().toLowerCase() === normalized)
+          || next.entities.requests.some((entry) => entry.id !== request.id && entry.applicationId === request.applicationId
+            && entry.environmentName.trim().toLowerCase() === normalized && !['rejected', 'cancelled'].includes(entry.state))) {
+          fail(409, 'DUPLICATE_RESOURCE', '此應用的環境名稱已被使用或保留。')
+        }
+        Object.assign(request, { state: 'submitted', version: request.version + 1, updatedAt: clockIso(next.logicalClock) })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.submit'; fields = ['state']
+      } else if (actionName === 'approve') {
+        if (request.state !== 'submitted') fail(409, 'INVALID_STATE', '只有已提交申請可以核准。')
+        const usage = requestPoolUsage(next, request.poolId)
+        if (request.cpu > usage.cpu.available || request.memoryMiB > usage.memoryMiB.available) {
+          fail(409, 'CAPACITY_EXCEEDED', '資源池容量不足，無法核准。')
+        }
+        const serial = String(next.sequence + 1).padStart(4, '0')
+        const environmentId = request.environmentId ?? `env-${request.id.slice(4)}`
+        const jobId = `job-${serial}`
+        const job: ProvisionJob = {
+          id: jobId, orgId: request.orgId, version: 1, createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+          requestId: request.id, attempt: 1, state: 'queued', plannedCiIds: [`ci-provisioned-${request.id.slice(4)}`],
+          correlationId: request.correlationId,
+        }
+        next.jobs.push(job)
+        Object.assign(request, {
+          state: 'approved', environmentId, latestJobId: job.id,
+          approval: { actorId: input.actorId, occurredAt: clockIso(next.logicalClock), reason: command.reason },
+          version: request.version + 1, updatedAt: clockIso(next.logicalClock),
+        })
+        operationId = job.id
+        changed.push({ entityType: 'job', entityId: job.id })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.approve'; fields = ['state', 'approval', 'environmentId', 'latestJobId']
+      } else if (actionName === 'reject') {
+        if (request.state !== 'submitted') fail(409, 'INVALID_STATE', '只有已提交申請可以拒絕。')
+        Object.assign(request, { state: 'rejected', version: request.version + 1, updatedAt: clockIso(next.logicalClock) })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.reject'; fields = ['state']
+      } else if (actionName === 'cancel') {
+        if (!['draft', 'submitted', 'approved'].includes(request.state)) fail(409, 'INVALID_STATE', '目前狀態不能撤回。')
+        if (request.latestJobId) {
+          const job = next.jobs.find((entry) => entry.id === request.latestJobId)
+          if (job?.state === 'running') fail(409, 'INVALID_STATE', '進行中的交付不能撤回。')
+          if (job?.state === 'queued') {
+            Object.assign(job, { state: 'cancelled', version: job.version + 1,
+              completedAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock) })
+            changed.push({ entityType: 'job', entityId: job.id })
+          }
+        }
+        Object.assign(request, { state: 'cancelled', version: request.version + 1, updatedAt: clockIso(next.logicalClock) })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.cancel'; fields = ['state']
+      } else if (actionName === 'provision') {
+        if (request.state !== 'approved' || !request.latestJobId || !request.environmentId) return fail(409, 'INVALID_STATE', '只有已核准且已保留容量的申請可以啟動交付。')
+        const jobId = request.latestJobId
+        const environmentId = request.environmentId
+        const job = next.jobs.find((entry) => entry.id === jobId)
+        if (!job || job.state !== 'queued') return fail(409, 'INVALID_STATE', '沒有可啟動的 queued job。')
+        let environment = next.entities.environments.find((entry) => entry.id === environmentId)
+        if (!environment) {
+          environment = {
+            id: environmentId, orgId: request.orgId, version: 1,
+            createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+            applicationId: request.applicationId, name: request.environmentName, stage: request.stage,
+            status: 'provisioning', activeReleaseId: null,
+          }
+          next.entities.environments.push(environment)
+        } else {
+          Object.assign(environment, { status: 'provisioning', version: environment.version + 1, updatedAt: clockIso(next.logicalClock) })
+        }
+        const currentEnvironment = environment
+        Object.assign(job, { state: 'running', startedAt: clockIso(next.logicalClock), version: job.version + 1, updatedAt: clockIso(next.logicalClock) })
+        Object.assign(request, { state: 'provisioning', version: request.version + 1, updatedAt: clockIso(next.logicalClock) })
+        next.scheduler.tasks.push({ id: `task-${job.id}`, operationId: job.id, stepIndex: 0, dueTick: next.logicalClock + 1 })
+        operationId = job.id
+        changed.push({ entityType: 'job', entityId: job.id }, { entityType: 'environment', entityId: currentEnvironment.id })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.provision'; fields = ['state', 'job.state', 'environment.status']
+      } else {
+        if (request.state !== 'failed' || !request.latestJobId || !request.environmentId) fail(409, 'INVALID_STATE', '只有失敗的申請可以重試。')
+        const usage = requestPoolUsage(next, request.poolId)
+        if (request.cpu > usage.cpu.available || request.memoryMiB > usage.memoryMiB.available) fail(409, 'CAPACITY_EXCEEDED', '容量不足，無法建立重試。')
+        const previous = next.jobs.find((entry) => entry.id === request.latestJobId)!
+        const serial = String(next.sequence + 1).padStart(4, '0')
+        const job: ProvisionJob = {
+          id: `job-${serial}`, orgId: request.orgId, version: 1, createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+          requestId: request.id, attempt: previous.attempt + 1, state: 'queued',
+          plannedCiIds: [...previous.plannedCiIds], correlationId: request.correlationId,
+        }
+        next.jobs.push(job)
+        Object.assign(request, { state: 'approved', latestJobId: job.id, version: request.version + 1, updatedAt: clockIso(next.logicalClock) })
+        operationId = job.id
+        changed.push({ entityType: 'job', entityId: job.id })
+        entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.retry'; fields = ['state', 'latestJobId', 'attempt']
+      }
+    } else if (createAssignment) {
+      const create = body as z.infer<typeof createAssignmentInputSchema>
+      if (create.userId === input.actorId) fail(403, 'SELF_MODIFICATION_DENIED', '不能修改自己的角色授權。')
+      if (next.entities.assignments.some((entry) => entry.userId === create.userId && entry.role === create.role
+        && entry.scopeType === create.scopeType && entry.scopeId === create.scopeId
+        && JSON.stringify(entry.stages ?? []) === JSON.stringify(create.stages ?? []))) fail(409, 'DUPLICATE_RESOURCE', '相同角色授權已存在。')
+      if (!next.entities.users.some((entry) => entry.id === create.userId && entry.orgId === policy.user!.orgId)) notFound()
+      const serial = String(next.sequence + 1).padStart(4, '0')
+      const candidate = parse(roleAssignmentSchema, {
+        id: `grant-${serial}`, orgId: policy.user!.orgId, version: 1,
+        createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+        userId: create.userId, role: create.role, scopeType: create.scopeType, scopeId: create.scopeId,
+        ...(create.stages ? { stages: create.stages } : {}),
+      })
+      next.entities.assignments.push(candidate)
+      next.policyVersion += 1
+      entityType = 'roleAssignment'; entityId = candidate.id; entityVersion = 1; action = 'access.write'
+      fields = ['assignment created']; reason = create.reason; changed = [{ entityType, entityId }]
+    } else if (patchUserId) {
+      const patch = body as z.infer<typeof patchUserInputSchema>
+      const user = next.entities.users.find((entry) => entry.id === patchUserId && entry.orgId === policy.user!.orgId)
+      if (!user) notFound()
+      if (user!.id === input.actorId) fail(403, 'SELF_MODIFICATION_DENIED', '不能停用自己的帳號。')
+      if (patch.expectedVersion !== user!.version) fail(409, 'VERSION_CONFLICT', '使用者版本已變更。')
+      if (!patch.enabled) {
+        const isAdmin = next.entities.assignments.some((entry) => entry.userId === user!.id && entry.role === 'admin')
+        const anotherAdmin = next.entities.users.some((entry) => entry.id !== user!.id && entry.enabled
+          && next.entities.assignments.some((assignment) => assignment.userId === entry.id && assignment.role === 'admin'))
+        if (isAdmin && !anotherAdmin) fail(409, 'LAST_ADMIN_REQUIRED', '必須保留一位啟用中的平台管理者。')
+      }
+      Object.assign(user!, { enabled: patch.enabled, version: user!.version + 1, updatedAt: clockIso(next.logicalClock) })
+      next.policyVersion += 1
+      entityType = 'user'; entityId = user!.id; entityVersion = user!.version; action = 'access.write'
+      fields = ['enabled']; reason = patch.reason; changed = [{ entityType, entityId }]
+    } else if (patchNavigationId) {
+      const patch = body as z.infer<typeof patchNavigationInputSchema>
+      const item = next.entities.navigation.find((entry) => entry.id === patchNavigationId && entry.orgId === policy.user!.orgId)
+      if (!item) notFound()
+      if (patch.expectedVersion !== item!.version) fail(409, 'VERSION_CONFLICT', '導航版本已變更。')
+      if (patch.enabled === false && ['admin.access', 'admin.navigation', 'guide'].includes(item!.routeKey)) {
+        fail(422, 'VALIDATION_ERROR', '必要的管理或 recovery 導航不可停用。')
+      }
+      const { expectedVersion: _expectedVersion, ...navigation } = patch
+      void _expectedVersion
+      Object.assign(item!, navigation, { version: item!.version + 1, updatedAt: clockIso(next.logicalClock) })
+      entityType = 'navigationItem'; entityId = item!.id; entityVersion = item!.version; action = 'navigation.write'
+      fields = Object.keys(navigation); changed = [{ entityType, entityId }]
+    } else if (catalogRevisionId) {
+      const create = body as z.infer<typeof createCatalogRevisionInputSchema>
+      const catalog = next.entities.catalogs.find((entry) => entry.id === catalogRevisionId && entry.orgId === policy.user!.orgId)
+      if (!catalog) notFound()
+      if (catalog!.status === 'draft') fail(409, 'INVALID_STATE', '已有尚未發布的草稿 revision。')
+      if (create.expectedVersion !== catalog!.version || create.baseRevision !== catalog!.revision) fail(409, 'VERSION_CONFLICT', '服務目錄 revision 已變更。')
+      next.entities.catalogHistory.push(clone(catalog!))
+      const { expectedVersion: _expectedVersion, baseRevision: _baseRevision, reason: catalogReason, ...revision } = create
+      void _expectedVersion; void _baseRevision
+      Object.assign(catalog!, revision, { revision: catalog!.revision + 1, status: 'draft',
+        version: catalog!.version + 1, updatedAt: clockIso(next.logicalClock) })
+      entityType = 'catalogItem'; entityId = catalog!.id; entityVersion = catalog!.version; action = 'catalog.write'
+      fields = ['revision', 'status', 'template', 'allowedProjectIds']; reason = catalogReason; changed = [{ entityType, entityId }]
+    } else if (patchCatalogId) {
+      const patch = body as z.infer<typeof patchCatalogInputSchema>
+      const catalog = next.entities.catalogs.find((entry) => entry.id === patchCatalogId && entry.orgId === policy.user!.orgId)
+      if (!catalog) notFound()
+      if (catalog!.status !== 'draft') fail(409, 'INVALID_STATE', '只有 draft revision 可以修改。')
+      if (patch.expectedVersion !== catalog!.version || patch.revision !== catalog!.revision) fail(409, 'VERSION_CONFLICT', '服務目錄 revision 已變更。')
+      const { expectedVersion: _expectedVersion, revision: _revision, ...catalogPatch } = patch
+      void _expectedVersion; void _revision
+      Object.assign(catalog!, catalogPatch, { version: catalog!.version + 1, updatedAt: clockIso(next.logicalClock) })
+      entityType = 'catalogItem'; entityId = catalog!.id; entityVersion = catalog!.version; action = 'catalog.write'
+      fields = Object.keys(catalogPatch); changed = [{ entityType, entityId }]
+    } else if (catalogActionMatch) {
+      const command = body as z.infer<typeof reasonCommandSchema>
+      const catalog = next.entities.catalogs.find((entry) => entry.id === catalogActionMatch[1] && entry.orgId === policy.user!.orgId)
+      if (!catalog) notFound()
+      if (command.expectedVersion !== catalog!.version) fail(409, 'VERSION_CONFLICT', '服務目錄版本已變更。')
+      if (catalogActionMatch[2] === 'publish') {
+        const publish = body as z.infer<typeof publishCatalogInputSchema>
+        if (catalog!.status !== 'draft' || publish.revision !== catalog!.revision) fail(409, 'INVALID_STATE', '只有目前 draft revision 可以發布。')
+        catalog!.status = 'published'
+      } else {
+        if (catalog!.status !== 'published') fail(409, 'INVALID_STATE', '只有已發布目錄可以停用。')
+        catalog!.status = 'disabled'
+      }
+      catalog!.version += 1; catalog!.updatedAt = clockIso(next.logicalClock)
+      entityType = 'catalogItem'; entityId = catalog!.id; entityVersion = catalog!.version
+      action = catalogActionMatch[2] === 'publish' ? 'catalog.publish' : 'catalog.disable'
+      fields = ['status']; reason = command.reason; changed = [{ entityType, entityId }]
+    } else if (createModelField) {
+      const create = body as z.infer<typeof createModelFieldInputSchema>
+      const reserved = new Set(['id', 'orgId', 'version', 'createdAt', 'updatedAt', 'name', 'kind', 'provider', 'externalId', 'accountId', 'locationId', 'poolId', 'ownerTeamId', 'visibilityProjectIds', 'lifecycle', 'health', 'tags', 'attributes', 'customFields', 'source', 'observedAt'])
+      if (reserved.has(create.key)) fail(422, 'VALIDATION_ERROR', '自訂欄位不可覆蓋核心身分欄位。')
+      if (next.entities.modelFields.some((entry) => entry.kind === create.kind && entry.key === create.key)) fail(409, 'DUPLICATE_RESOURCE', '相同 kind/key 的自訂欄位已存在。')
+      if (create.valueType === 'string' && (create.constraints.min !== undefined || create.constraints.max !== undefined)
+        || create.valueType === 'number' && (create.constraints.maxLength !== undefined || create.constraints.enum !== undefined)
+        || create.valueType === 'boolean' && Object.keys(create.constraints).length > 0) fail(422, 'VALIDATION_ERROR', 'constraints 與欄位型別不相容。')
+      const serial = String(next.sequence + 1).padStart(4, '0')
+      const field = { ...create, id: `field-${serial}`, orgId: policy.user!.orgId, version: 1,
+        createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock), required: false as const, hidden: false }
+      next.entities.modelFields.push(field)
+      entityType = 'modelField'; entityId = field.id; entityVersion = 1; action = 'model.write'
+      fields = ['kind', 'key', 'label', 'valueType', 'constraints']; changed = [{ entityType, entityId }]
+    } else if (patchModelFieldId) {
+      const patch = body as z.infer<typeof patchModelFieldInputSchema>
+      const field = next.entities.modelFields.find((entry) => entry.id === patchModelFieldId && entry.orgId === policy.user!.orgId)
+      if (!field) notFound()
+      if (patch.expectedVersion !== field!.version) fail(409, 'VERSION_CONFLICT', '欄位版本已變更。')
+      const { expectedVersion: _expectedVersion, ...metadata } = patch
+      void _expectedVersion
+      Object.assign(field!, metadata, { version: field!.version + 1, updatedAt: clockIso(next.logicalClock) })
+      entityType = 'modelField'; entityId = field!.id; entityVersion = field!.version; action = 'model.write'
+      fields = Object.keys(metadata); changed = [{ entityType, entityId }]
+    } else if (scenario) {
+      const scenarioBody = body as z.infer<typeof scenarioInputSchema>
+      if (scenarioBody.scenarioKey === 'provision-failure') {
+        const job = next.jobs.find((entry) => entry.id === scenarioBody.jobId && ['queued', 'running'].includes(entry.state))
+        if (!job) fail(422, 'VALIDATION_ERROR', '請指定 queued 或 running job。')
+        next.scenarioFlags.provisionFailureJobId = job!.id
+        entityId = job!.id
+      } else {
+        const poolId = scenarioBody.poolId!
+        if (!next.entities.pools.some((entry) => entry.id === poolId)) notFound()
+        if (scenarioBody.scenarioKey === 'capacity-exhausted') {
+          const usage = requestPoolUsage(next, poolId)
+          next.scenarioFlags[`capacity:${poolId}`] = { cpu: usage.cpu.available, memoryMiB: usage.memoryMiB.available }
+        } else delete next.scenarioFlags[`capacity:${poolId}`]
+        entityId = poolId
+      }
+      entityType = 'demoScenario'; entityVersion = next.storeRevision + 1; action = `demo.scenario.${scenarioBody.scenarioKey}`
+      fields = ['scenarioFlags']; changed = [{ entityType, entityId }]
     } else {
-      next.logicalClock += (body as z.infer<typeof advanceClockSchema>).ticks
-      entityType = 'demoSession'; entityId = next.sessionId; entityVersion = next.storeRevision + 1; action = 'demo.clock.advance'; fields = ['logicalClock']
-      changed = [{ entityType, entityId }]
+      const progressed = advanceProvisioning(next, (body as z.infer<typeof advanceClockSchema>).ticks)
+      const progressedRequests = progressed.filter((entry) => entry.entityType === 'request')
+        .map((entry) => next.entities.requests.find((request) => request.id === entry.entityId))
+        .filter((entry): entry is DomainRequest => Boolean(entry))
+      if (progressedRequests.length) {
+        auditProjectIdsOverride = [...new Set(progressedRequests.map((request) =>
+          next.entities.applications.find((application) => application.id === request.applicationId)!.projectId))]
+        auditPoolIdsOverride = [...new Set(progressedRequests.map((request) => request.poolId))]
+      }
+      entityType = 'demoSession'; entityId = next.sessionId; entityVersion = next.storeRevision + 1
+      action = progressed.length ? 'provision.scheduler.advance' : 'demo.clock.advance'; fields = ['logicalClock']
+      changed = [{ entityType, entityId }, ...progressed]
     }
 
     next.sequence += 1
     next.storeRevision += 1
     next.commandCount += 1
     const serial = String(next.sequence).padStart(4, '0')
-    const correlationId = `corr-command-${serial}`
-    const receipt: CommandReceipt = { entityType, entityId, entityVersion, correlationId, changed }
+    const correlationId = correlationOverride ?? `corr-command-${serial}`
+    const receipt: CommandReceipt = { entityType, entityId, entityVersion, correlationId, changed, ...(operationId ? { operationId } : {}) }
     next.events.push({ eventId: `event-${serial}`, entities: changed, type: action, occurredAt: clockIso(next.logicalClock), correlationId })
     const changedCis = changed.filter((entry) => entry.entityType === 'ci')
       .map((entry) => state.entities.cis.find((ci) => ci.id === entry.entityId) ?? next.entities.cis.find((ci) => ci.id === entry.entityId))
       .filter((entry): entry is CI => Boolean(entry))
-    const auditProjectIds = changedCis.length ? [...new Set(changedCis.flatMap((entry) => entry.visibilityProjectIds))] : policy.projectIds
-    const auditPoolIds = changedCis.length ? [...new Set(changedCis.map((entry) => entry.poolId))] : policy.poolIds
+    const auditProjectIds = auditProjectIdsOverride ?? (changedCis.length ? [...new Set(changedCis.flatMap((entry) => entry.visibilityProjectIds))] : policy.projectIds)
+    const auditPoolIds = auditPoolIdsOverride ?? (changedCis.length ? [...new Set(changedCis.map((entry) => entry.poolId))] : policy.poolIds)
     const relationEndpointCiIds = entityType === 'relation' && changedCis.length === 2
       ? [changedCis[0].id, changedCis[1].id] as [string, string] : undefined
     next.audit.push({ id: `audit-${serial}`, orgId: policy.user!.orgId, actorId: input.actorId, action, entityType, entityId,

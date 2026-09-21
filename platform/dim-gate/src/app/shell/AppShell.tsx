@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
 import { ArrowRight, BookOpen, ChevronRight, FlaskConical, Menu, Moon, Sun, X } from 'lucide-react'
 import { api, queryKey } from '../../api/client'
-import type { SessionView } from '../../domain/schemas'
+import type { NavigationItem, SessionView } from '../../domain/schemas'
 import { Brand } from '../../components/shared/brand'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
@@ -29,6 +29,9 @@ export function AppShell({ session }: { session: SessionView }) {
   const location = useLocation()
   const navigate = useNavigate()
   const personas = useQuery({ queryKey: queryKey('personas'), queryFn: () => api.getPersonas() })
+  const navigationQueries = useQueries({ queries: session.centers.map((center) => ({
+    queryKey: queryKey('navigation', center), queryFn: () => api.getNavigation(center),
+  })) })
   const personaMutation = useMutation({ mutationFn: (id: string) => api.setPersona(id) })
 
   useEffect(() => {
@@ -38,7 +41,14 @@ export function AppShell({ session }: { session: SessionView }) {
   }, [preferences])
 
   const currentRoute = routeForPath(location.pathname)
-  const currentLabel = currentRoute?.navigation.label ?? '工作區'
+  const navigationByKey = new Map<string, NavigationItem>(navigationQueries.flatMap((query) => query.data ?? []).map((item) => [item.routeKey, item]))
+  const navigationPending = navigationQueries.some((query) => query.isPending)
+  const navigationError = navigationQueries.some((query) => query.isError)
+  const configuredRoutes = visibleNavigation(session).filter((route) => navigationPending || navigationError || navigationByKey.has(route.key)).map((route) => {
+    const item = navigationByKey.get(route.key)
+    return item ? { ...route, navigation: { ...route.navigation, label: item.label, group: item.group, order: item.order } } : route
+  }).sort((left, right) => left.navigation.order - right.navigation.order)
+  const currentLabel = navigationByKey.get(currentRoute?.key ?? 'guide')?.label ?? currentRoute?.navigation.label ?? '工作區'
   const switchPersona = async (id: string) => {
     if (id === session.user.id) return
     setSwitching(true)
@@ -58,14 +68,14 @@ export function AppShell({ session }: { session: SessionView }) {
       <Brand />
       <div className="sidebar-section-label">工作空間</div>
       <nav aria-label="中心導覽">
-        {visibleNavigation(session).map((route) => {
+        {configuredRoutes.map((route) => {
           if (!route.center) return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><BookOpen size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span></NavLink>
           const details = centerDetails[route.center]
           const Icon = details.icon
           return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span><span className="nav-code">{details.short}</span></NavLink>
         })}
       </nav>
-      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M1 · CMDB 與應用視圖</div><p>目前可探索共用 CMDB、應用與拓撲。</p><span className="sidebar-version">dim-gate / M1 review</span></div>
+      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M2 · 自助申請與治理</div><p>共用資產、申請、容量與交付作業。</p><span className="sidebar-version">dim-gate / M2 development</span></div>
     </aside>
     <div className="workspace">
       <header className="topbar">

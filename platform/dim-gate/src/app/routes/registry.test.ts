@@ -8,12 +8,16 @@ const session = (overrides: Partial<SessionView> = {}): SessionView => ({
   logicalClock: 0, identityEpoch: 1, generation: 1, storageMode: 'session', ...overrides,
 })
 
-describe('M1 route registry', () => {
+describe('M2 route registry', () => {
   it('matches only real static and dynamic routes', () => {
     expect(routeForPath('/rd/apps')?.key).toBe('rd.apps')
     expect(routeForPath('/rd/apps/app-checkout')?.key).toBe('rd.app-detail')
     expect(routeForPath('/rd/apps/app-checkout/environments/env-checkout-dev')?.key).toBe('rd.environment-detail')
+    expect(routeForPath('/rd/catalog/catalog-web/request')?.key).toBe('rd.catalog-request')
+    expect(routeForPath('/rd/requests/req-0001')?.key).toBe('rd.request-detail')
     expect(routeForPath('/ops/cmdb/ci-idc-redis-01')?.key).toBe('ops.ci-detail')
+    expect(routeForPath('/ops/requests/req-0001')?.key).toBe('ops.request-detail')
+    expect(routeForPath('/ops/jobs/job-0003')?.key).toBe('ops.job-detail')
     expect(routeForPath('/ops/does-not-exist')).toBeUndefined()
   })
 
@@ -25,5 +29,7 @@ describe('M1 route registry', () => {
     expect(canAccessRoute(rd, detail)).toBe(true)
     expect(canAccessRoute(session({ effectiveActions: [] }), detail)).toBe(false)
     expect(canAccessRoute(rd, routeRegistry.find((route) => route.key === 'ops.cmdb')!)).toBe(false)
+    const selfService = session({ effectiveActions: [...rd.effectiveActions, 'catalog.read', 'request.create', 'request.read'] })
+    expect(visibleNavigation(selfService).map((route) => route.key)).toEqual(['rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'guide'])
   })
 })

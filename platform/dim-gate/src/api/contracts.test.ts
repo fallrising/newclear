@@ -86,3 +86,19 @@ it('publishes M1 identity guards, explicit unknown freshness, topology caps, cap
   expect(operations.find((item) => item.id === 'getCapacity')?.milestone).toBe('M1')
   expect(operations.find((item) => item.id === 'listAudit')?.milestone).toBe('M1')
 })
+
+it('publishes executable M2 request and governance contracts with correct async status', () => {
+  expect(wireSchemas.CreateRequest.safeParse({
+    applicationId: 'app-checkout', environmentName: 'staging', stage: 'staging',
+    catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg',
+    cpu: 2, memoryMiB: 2048, purpose: 'Contract request',
+  }).success).toBe(true)
+  expect(wireSchemas.CreateRequest.safeParse({
+    applicationId: 'app-checkout', environmentName: 'staging', stage: 'staging',
+    catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg',
+    cpu: 2, memoryMiB: 2000, purpose: 'Invalid memory multiple',
+  }).success).toBe(false)
+  expect(operations.find((item) => item.id === 'createRequest')).toMatchObject({ milestone: 'M2', status: 201 })
+  expect(operations.find((item) => item.id === 'provisionRequest')).toMatchObject({ milestone: 'M2', status: 202 })
+  expect(operations.find((item) => item.id === 'createPipeline')).toMatchObject({ milestone: 'M3', status: 202 })
+})

@@ -16,6 +16,10 @@ export function policyFor(snapshot: Snapshot, actorId: string) {
   const hasProject = (projectId: string, stage?: string, role?: Center) => admin && !role || projectGrants.some((entry) =>
     entry.scopeId === projectId && (!role || entry.role === role) && (!stage || !entry.stages || entry.stages.includes(stage as 'dev' | 'staging' | 'prod')))
   const canReadCi = (ci: CI) => ci.orgId === user?.orgId && (admin || poolGrants.some((entry) => entry.scopeId === ci.poolId) || ci.visibilityProjectIds.some((id) => hasProject(id)))
+  const requestScope = (request: Snapshot['entities']['requests'][number]) => {
+    const app = snapshot.entities.applications.find((entry) => entry.id === request.applicationId && entry.orgId === request.orgId)
+    return app ? { app, rd: hasProject(app.projectId, request.stage, 'rd'), ops: hasProject(app.projectId, request.stage, 'ops') && poolGrants.some((entry) => entry.scopeId === request.poolId) } : undefined
+  }
   return {
     user, assignments, admin, centers, hasProject, canReadCi,
     effectiveActions: [...new Set(assignments.flatMap((assignment) => actions[assignment.role]))].sort(),
@@ -27,6 +31,22 @@ export function policyFor(snapshot: Snapshot, actorId: string) {
       return !!app && app.orgId === user?.orgId && hasProject(app.projectId, environment.stage)
     },
     canManageAssignment: (assignment: RoleAssignment) => admin && assignment.orgId === user?.orgId,
+    canReadRequest: (request: Snapshot['entities']['requests'][number]) => {
+      const scope = requestScope(request)
+      return request.orgId === user?.orgId && !!scope && (admin || scope.rd || scope.ops)
+    },
+    canReadJob: (request: Snapshot['entities']['requests'][number]) => {
+      const scope = requestScope(request)
+      return request.orgId === user?.orgId && !!scope && (scope.rd || scope.ops)
+    },
+    canEditRequest: (request: Snapshot['entities']['requests'][number]) => {
+      const scope = requestScope(request)
+      return request.orgId === user?.orgId && request.requesterId === user?.id && !!scope?.rd
+    },
+    canOperateRequest: (request: Snapshot['entities']['requests'][number]) => {
+      const scope = requestScope(request)
+      return request.orgId === user?.orgId && request.requesterId !== user?.id && !!scope?.ops
+    },
   }
 }
 

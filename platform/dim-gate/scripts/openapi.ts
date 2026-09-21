@@ -52,14 +52,15 @@ for (const operation of operations) {
     description: 'Same logical retry keeps the key. Replay reauthorizes before returning the original receipt.',
     schema: { type: 'string', pattern: '^[!-~]{1,128}$' } })
   const path = `${operation.demo ? '/__demo' : '/api'}/v1${operation.path}`
+  const implemented = ['M0', 'M1', 'M2'].includes(operation.milestone)
   paths[path] ??= {}
   if (paths[path][operation.method]) throw new Error(`Duplicate operation: ${operation.method} ${path}`)
   paths[path][operation.method] = {
     operationId: operation.id, tags: [operation.demo ? 'Demo controls' : operation.milestone],
     summary: operation.id,
-    description: operation.milestone === 'M0' ? 'Implemented by the M0 demo adapter.'
-      : `Forward contract for ${operation.milestone}; unavailable in M0. Success below specifies the future result, not current behavior.`,
-    'x-implementation-status': operation.milestone === 'M0' ? 'implemented' : 'planned',
+    description: implemented ? `Implemented by the demo adapter through ${operation.milestone}.`
+      : `Forward contract for ${operation.milestone}; unavailable in M2. Success below specifies the future result, not current behavior.`,
+    'x-implementation-status': implemented ? 'implemented' : 'planned',
     'x-milestone': operation.milestone, 'x-demo-only': Boolean(operation.demo),
     parameters,
     ...(operation.body ? { requestBody: { required: true, content: json(ref(names.get(operation.body)!)) } } : {}),
@@ -68,8 +69,8 @@ for (const operation of operations) {
 }
 const document = {
   openapi: '3.1.0',
-  info: { title: 'dim-gate BFF and demo controls', version: '0.1.0-m0',
-    description: 'Generated from Zod. M0 provides 14 operations and minimal seed data; planned operations are explicitly marked. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided.' },
+  info: { title: 'dim-gate BFF and demo controls', version: '0.1.0-m2',
+    description: `Generated from Zod. M0–M2 provide ${operations.filter((operation) => ['M0', 'M1', 'M2'].includes(operation.milestone)).length} executable operations; M3/M4 operations remain explicitly planned. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided.` },
   servers: [{ url: '/dim-gate', description: 'Default application base; api/v1 and __demo/v1 are relative to this base.' }],
   security: [{ DemoPersona: [], DemoSession: [] }],
   paths,

@@ -2,7 +2,7 @@
 
 以 CMDB 為核心的企業一站式運維自助平台前端，涵蓋 AWS、Aliyun 與自建機房，讓研發、運維與平台管理員透過同一組資料完成各自的工作。
 
-**目前狀態：M0 工程基礎實作，驗收與 PR 狀態見 [STATUS](docs/STATUS.md)。** 可在本機操作三中心摘要、示範身分、演示時鐘、保存與重置；完整業務主線仍屬 M1–M5。沒有線上部署或真實雲端連線。
+**目前狀態：M0/M1 已驗收並合併，M2 申請與平台治理開發中；驗收與 PR 狀態見 [STATUS](docs/STATUS.md)。** 現有產品可操作三中心 Shell、完整 M1 CMDB／應用／拓撲與 scope isolation；完整業務主線仍需 M2–M5。沒有線上部署或真實雲端連線。
 
 | 工作中心 | 要回答的問題 |
 | --- | --- |
@@ -46,7 +46,7 @@ pnpm exec playwright install --with-deps chromium
 pnpm test:e2e
 ```
 
-`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。72 個 operation 中只有標記 M0 的 14 個可執行，其他為後續契約。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與 M0 接受決策另存於 root `.team/`。
+`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。72 個 operation 中，標記 M0–M2 的 52 個已由共用 demo adapter 實作，M3／M4 仍是後續契約。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
 
 ## 文件入口
 

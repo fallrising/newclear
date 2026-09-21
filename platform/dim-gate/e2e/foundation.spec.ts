@@ -12,12 +12,12 @@ test('AC-01: production demo shell guards three centers and keeps its banner', a
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('./')
   await expect(page.getByRole('combobox', { name: '示範身分' })).toBeVisible()
-  await expect(page.getByRole('link', { name: '研發中心', exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: '維運中心', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: '研發概覽', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '維運概覽', exact: true })).toHaveCount(0)
   for (const [persona, center, path] of [
-    ['user-ops', '維運中心', '/ops'],
-    ['user-admin', '平台管理', '/admin'],
-    ['user-rd-data', '研發中心', '/rd'],
+    ['user-ops', '維運概覽', '/ops'],
+    ['user-admin', '平台概覽', '/admin'],
+    ['user-rd-data', '研發概覽', '/rd'],
   ]) {
     await page.getByRole('combobox', { name: '示範身分' }).selectOption(persona)
     await expect(page.getByRole('link', { name: center, exact: true })).toBeVisible()
@@ -38,8 +38,8 @@ test('AC-02: domain clock survives center/persona/reload and reset restores seed
   await page.getByRole('button', { name: '前進演示時鐘' }).click()
   await expect(page.getByTestId('logical-clock')).toHaveText(/^5\s*ticks$/)
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-ops')
-  await page.getByRole('link', { name: '維運中心', exact: true }).click()
-  await page.getByRole('link', { name: '示範導覽', exact: true }).click()
+  await page.getByRole('link', { name: '維運概覽', exact: true }).click()
+  await page.getByRole('link', { name: '示範控制台', exact: true }).click()
   await expect(page.getByTestId('logical-clock')).toHaveText(/^5\s*ticks$/)
   await page.reload()
   await expect(page.getByTestId('logical-clock')).toHaveText(/^5\s*ticks$/)

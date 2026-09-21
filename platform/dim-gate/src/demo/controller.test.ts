@@ -115,17 +115,20 @@ describe('persisted controller identity and transactions', () => {
     }
   })
 
-  it('rejects an M0 seed snapshot without altering it until explicit recovery', () => {
+  it('rejects an older seed snapshot without altering it until explicit recovery', () => {
     const current = harness()
     current.start()
     const legacy = JSON.parse(current.raw!)
-    legacy.snapshot.seedVersion = 'dim-gate-v1'
+    legacy.snapshot.seedVersion = 'dim-gate-m1-v1'
+    delete legacy.snapshot.entities.catalogs
+    delete legacy.snapshot.entities.catalogHistory
+    delete legacy.snapshot.entities.requests
     const raw = JSON.stringify(legacy)
     const old = harness(raw)
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m1-v1' })
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m2-v1' })
     expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
   })
 

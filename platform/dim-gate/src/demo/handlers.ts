@@ -1,11 +1,13 @@
 import { delay, http, HttpResponse } from 'msw'
 import { z } from 'zod'
+import { operations } from '../api/contracts'
 import { DomainError } from '../domain/engine'
 import type { DemoController } from './controller'
 import { commandDomainRoute, readDomainRoute } from './handlers/cmdb'
 import { commandDemoRoute, readDemoRoute } from './handlers/core-session'
 
 const keySchema = z.string().regex(/^[\x21-\x7e]{1,128}$/)
+const operationPattern = (path: string) => new RegExp(`^${path.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{[^/]+\}/g, '[^/]+')}$`)
 
 export interface HandlerOptions {
   /** Absolute application base, including its trailing slash. */
@@ -65,8 +67,10 @@ export function createHandlers(controller: DemoController, options: HandlerOptio
           : await commandDomainRoute(controller, request.method, path, body, key!, identity)
       }
       const current = controller.getSession()
+      const operation = operations.find((entry) => entry.demo === isDemo && entry.method === request.method.toLowerCase()
+        && operationPattern(entry.path).test(path))
       return HttpResponse.json({ data, meta: { requestId, storeRevision: current.storeRevision, policyVersion: current.policyVersion } },
-        { headers: { 'Cache-Control': 'no-store' } })
+        { status: operation?.status ?? 200, headers: { 'Cache-Control': 'no-store' } })
     } catch (error) {
       const known = error instanceof DomainError
       const status = known ? error.status : 500

@@ -176,4 +176,27 @@ describe('typed API client and cache identity', () => {
     await rejected
     expect(client.getClientIdentity()?.policyVersion).toBe(session.policyVersion + 1)
   })
+
+  it('accepts the receipt for the Admin command that committed the current policy transition', async () => {
+    await client.api.setPersona('user-admin')
+    const before = client.getClientIdentity()!
+
+    await expect(client.api.createAssignment({
+      userId: 'user-rd-commerce', role: 'admin', scopeType: 'org', scopeId: 'org-demo',
+      reason: 'Verify the initiating policy command keeps its receipt',
+    })).resolves.toMatchObject({
+      entityType: 'roleAssignment', entityId: expect.stringMatching(/^grant-/), entityVersion: 1,
+    })
+
+    expect(client.getClientIdentity()).toMatchObject({
+      actorId: before.actorId,
+      sessionId: before.sessionId,
+      generation: before.generation,
+      policyVersion: before.policyVersion + 1,
+      identityEpoch: before.identityEpoch + 1,
+    })
+    expect((await client.api.getAccess()).assignments).toEqual(expect.arrayContaining([
+      expect.objectContaining({ userId: 'user-rd-commerce', role: 'admin', scopeId: 'org-demo' }),
+    ]))
+  })
 })

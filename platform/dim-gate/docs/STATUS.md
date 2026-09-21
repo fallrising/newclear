@@ -1,10 +1,10 @@
 # dim-gate 狀態
 
-更新：2026-09-20。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-21。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
-M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 是 OPEN 且 Ready for Review，尚未合併；milestone ACCEPTED、PR OPEN 與 PR MERGED 是三個不同狀態。
+M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 已合併為 `b8dae76034caf63bf7d0721cba99a58a0586ae85`；合併後 CI run 35531246949 通過，未部署。
 
 M1 可操作範圍：
 
@@ -17,8 +17,8 @@ M1 可操作範圍：
 | 階段 | 狀態 |
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
-| M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 OPEN / READY / NOT MERGED |
-| M2：申請與平台治理 | 尚未開始 |
+| M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
+| M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 OPEN / Ready / 未合併 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
@@ -29,6 +29,14 @@ M1 可操作範圍：
 
 獨立 review attempt 1 的 F-01 relation audit 跨 scope 洩漏與 F-02 舊 M0 seed 靜默沿用皆保留為歷史 BLOCKED 證據；revision 2 修正後，Commerce audit 為空、Ops 保有兩筆歷史事件，舊 snapshot bytes 在明確 recovery 前不變，reset 得到 60 CI。attempt 2 無 blocking finding。
 
-限制：production JS 為 413.17 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。M1 不宣稱完成 M2 Admin 功能，也未新增空白 Admin 頁。沒有部署、真實雲操作、付費服務或全域權限變更。
+M2 T-014 在 `a9e64276273fc3698105c2bf8b0b7bc833444057` 完成 shared domain/API checkpoint：132/132 tests、11/11 production Chromium regression 與全部 native gates 通過；request/capacity/provision retry、access/navigation/catalog/model governance 和 M1→M2 explicit recovery 已可由共用 handler 執行。Draft [PR #13](https://github.com/fallrising/newclear/pull/13) 已開啟；AC-20 timing-test correction `c35147c` 後，remote run [35535062404](https://github.com/fallrising/newclear/actions/runs/35535062404) 全綠。這不代表 M2 ACCEPTED；M2 UI、browser walkthrough 與 independent review 尚未完成。
 
-Resume：從 SSH remote branch `agent/dim-gate/mainline/m1-cmdb` 與 OPEN PR #11 繼續 repository-owner review；不得重做 M1、不得自動 merge。下一開發 milestone 是 M2，開始前須重新 reconcile main／PR 並保留本輪 T-012／T-013 evidence。
+M2 T-015 在 `3eaea290de563818af27b240bff73e02f47513d0` 完成 RD/Ops self-service UI checkpoint：catalog wizard、request history/actions、Ops approval/provision、capacity、jobs/logs 與 failure/retry 均由共用 API/domain 驅動。135/135 tests、14/14 production Chromium、三 viewport overflow/axe 與全部 native gates通過；成功交付與失敗後 identity-preserving retry 都以可見 UI 操作完成。GitHub Actions run [35548907839](https://github.com/fallrising/newclear/actions/runs/35548907839) 在 evidence head `26199b6` 全綠。這仍不代表 M2 ACCEPTED；Admin governance UI、整合 walkthrough 與獨立 review 尚未完成。
+
+M2 T-016 在 `f9f14727c577b3baea8e0197dc9625bd19c8d76c` 完成 Admin governance UI checkpoint：access、registered navigation metadata、catalog revision、optional CMDB fields 與 safe audit 均由共用 API/domain 驅動。136/136 tests、17/17 production Chromium、五條 Admin routes 的三 viewport/light/dark overflow/axe 與全部 native gates 通過；policy-changing command receipt 的狹窄 stale-response 邊界已有 regression。GitHub Actions run [35550811097](https://github.com/fallrising/newclear/actions/runs/35550811097) 在 evidence head `934da677` 全綠並保留 browser artifacts。這仍不代表 M2 ACCEPTED；整合 walkthrough 與獨立 review 尚未完成。
+
+M2 T-017 的獨立 review 拒絕舊整合 head `5dd74e8`：Admin job logs 越權、planned CI identity 可被手動搶占、Catalog spec UI 無法治理、multi-role navigation 只顯示第一個 Center。`83a2e81` 修正原始 findings 後，複驗另抓到 failed job 到 retry 之間的 identity window；最終 `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` 也關閉該窗口。最終獨立 verdict 無 blocker/high/medium finding；本機 138/138 tests、22/22 production Chromium 與全部 gates 通過。GitHub Actions run [35590593367](https://github.com/fallrising/newclear/actions/runs/35590593367) 在 evidence head `3d61cb4` 全綠並保留 browser artifacts，因此 M2 AC-09–12、AC-21–23 已 ACCEPTED；PR #13 已轉 Ready、尚未合併。
+
+限制：production JS 為 431.39 kB gzip，仍是 M5 的 300 kB 預算風險；AC-21 persistent mounted-dialog race 與 Catalog 每一個 allowed-set/limit 控制仍是非阻塞 evidence gap。沒有部署、真實雲操作、付費服務或全域權限變更。
+
+Resume：從 `agent/dim-gate/mainline/m2-governance` 的 acceptance metadata 接續；base/main 仍是 `b8dae760`。M2 已 ACCEPTED，PR #13 是 OPEN / Ready / 未合併；等 final metadata-head CI 後執行已授權 merge，不部署。

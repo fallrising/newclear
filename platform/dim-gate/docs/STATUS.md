@@ -18,7 +18,7 @@ M1 可操作範圍：
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
-| M2：申請與平台治理 | RUNNING；T-014 domain/API、T-015 RD/Ops UI accepted checkpoints；Draft PR #13 |
+| M2：申請與平台治理 | RUNNING；T-014 domain/API、T-015 RD/Ops UI、T-016 Admin UI accepted checkpoints；Draft PR #13 |
 | M3：CI/CD與回滾 | 尚未開始 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
@@ -33,6 +33,8 @@ M2 T-014 在 `a9e64276273fc3698105c2bf8b0b7bc833444057` 完成 shared domain/API
 
 M2 T-015 在 `3eaea290de563818af27b240bff73e02f47513d0` 完成 RD/Ops self-service UI checkpoint：catalog wizard、request history/actions、Ops approval/provision、capacity、jobs/logs 與 failure/retry 均由共用 API/domain 驅動。135/135 tests、14/14 production Chromium、三 viewport overflow/axe 與全部 native gates通過；成功交付與失敗後 identity-preserving retry 都以可見 UI 操作完成。GitHub Actions run [35548907839](https://github.com/fallrising/newclear/actions/runs/35548907839) 在 evidence head `26199b6` 全綠。這仍不代表 M2 ACCEPTED；Admin governance UI、整合 walkthrough 與獨立 review 尚未完成。
 
-限制：production JS 為 426.27 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。沒有部署、真實雲操作、付費服務或全域權限變更。
+M2 T-016 在 `f9f14727c577b3baea8e0197dc9625bd19c8d76c` 完成 Admin governance UI checkpoint：access、registered navigation metadata、catalog revision、optional CMDB fields 與 safe audit 均由共用 API/domain 驅動。136/136 tests、17/17 production Chromium、五條 Admin routes 的三 viewport/light/dark overflow/axe 與全部 native gates 通過；policy-changing command receipt 的狹窄 stale-response 邊界已有 regression。這仍不代表 M2 ACCEPTED；current-head remote CI、整合 walkthrough 與獨立 review 尚未完成。
 
-Resume：從 `agent/dim-gate/mainline/m2-governance` 的 `3eaea29` 接續 T-016 Admin governance UI；base 是合併後 main `b8dae760`。M2 尚未 ACCEPTED，PR #13 是 Draft，未部署。
+限制：production JS 為 430.70 kB gzip，仍是 M5 的 300 kB 預算風險；reviewer 的額外 Ops dialog/topology browser checks 尚未寫入 repository test。沒有部署、真實雲操作、付費服務或全域權限變更。
+
+Resume：從 `agent/dim-gate/mainline/m2-governance` 的 `f9f1472` 接續 T-017 integrated walkthrough/review；base 是合併後 main `b8dae760`。M2 尚未 ACCEPTED，PR #13 是 Draft，未部署。

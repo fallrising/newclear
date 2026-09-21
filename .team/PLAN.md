@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 16 |
+| protocol_version / ledger_revision | 1 / 17 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
@@ -33,7 +33,7 @@
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
-| M2 | RUNNING | none | DRAFT PR #13 | T-014 domain/API and T-015 RD/Ops UI checkpoints accepted; Admin UI/review outstanding; AC-09–12,21–23 |
+| M2 | RUNNING | none | DRAFT PR #13 | T-014 domain/API, T-015 RD/Ops UI and T-016 Admin UI checkpoints accepted; integrated review outstanding; AC-09–12,21–23 |
 | M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
 | M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
@@ -59,6 +59,7 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-013](tasks/T-013.md) / 1 | final acceptance | T-012 | orchestrator / local tools | 1 / ACCEPTED | agent/dim-gate/mainline/m1-cmdb | [report](reports/T-013.md); PR #11 OPEN and Ready, not merged |
 | [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-014.md); `a9e6427`, 132 tests, 11 production E2E |
 | [T-015](tasks/T-015.md) / 1 | 09–12 RD/Ops UI | T-014 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-015.md); `3eaea29`, 135 tests, 14 production E2E |
+| [T-016](tasks/T-016.md) / 1 | 21–23 Admin UI | T-015 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-016.md); `f9f1472`, 136 tests, 17 production E2E |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -253,6 +254,8 @@ DG-D021: ACCEPT T-015 only as the RD/Ops self-service UI checkpoint at `3eaea290
 
 DG-D022: GitHub Actions run [35548907839](https://github.com/fallrising/newclear/actions/runs/35548907839) passed every gate and 14/14 Chromium journeys on T-015 evidence head `26199b681e9c2fb3f08c78c621c7aa8833d77f43`. This remotely confirms the accepted T-015 slice but does not accept M2; Admin governance UI and independent integrated review remain outstanding.
 
+DG-D023: ACCEPT T-016 only as the Admin governance UI checkpoint at `f9f14727c577b3baea8e0197dc9625bd19c8d76c`. Frozen install, 136/136 tests, all native gates, production build and 17/17 real Chromium journeys passed. AC-21–23 workflows were operated through visible controls at three viewports and both themes with zero axe serious/critical findings and no document overflow. A narrow transport fix preserves the initiating receipt of an already-committed policy mutation while all stale reads remain fail-closed. M2 remains RUNNING pending fixed-commit integrated walkthrough, independent review and current-head remote CI; PR #13 remains Draft.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -265,9 +268,9 @@ source_main: b8dae76034caf63bf7d0721cba99a58a0586ae85
 last_reconciled_target: b8dae76034caf63bf7d0721cba99a58a0586ae85
 continuation_ref: agent/dim-gate/mainline/m2-governance
 milestone: M2
-task_id: T-016 Admin governance UI after accepted T-015
-implementation_commit: 3eaea290de563818af27b240bff73e02f47513d0
-local_tested_commit: 3eaea290de563818af27b240bff73e02f47513d0
+task_id: T-017 integrated M2 walkthrough and independent review after accepted T-016
+implementation_commit: f9f14727c577b3baea8e0197dc9625bd19c8d76c
+local_tested_commit: f9f14727c577b3baea8e0197dc9625bd19c8d76c
 ci_tested_merge: none
 ci_run: https://github.com/fallrising/newclear/actions/runs/35548907839
 spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
@@ -275,8 +278,9 @@ evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md
   - .team/reports/T-014.md
   - .team/reports/T-015.md
+  - .team/reports/T-016.md
 integration_state: DRAFT_PR_13
 remote_durability: implementation/evidence/test-fix checkpoints are on the SSH remote branch; latest recorded CI passed
 blockers: []
-next_action: define and implement bounded T-016 Admin governance UI from the accepted T-015 checkpoint; do not accept M2 before fixed-commit browser and independent review gates
+next_action: publish T-016 evidence and reconcile current-head CI; then perform an integrated fixed-commit M2 walkthrough and independent adversarial review before any milestone acceptance or PR readiness change
 ```

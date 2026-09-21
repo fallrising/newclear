@@ -251,6 +251,8 @@ DG-D020: Remote run 35534559281 exposed a timing defect in the AC-20 E2E observe
 
 DG-D021: ACCEPT T-015 only as the RD/Ops self-service UI checkpoint at `3eaea290de563818af27b240bff73e02f47513d0`. Frozen install, 135/135 tests, all native gates, production build and 14/14 real Chromium journeys passed. AC-09 success and AC-12 failure/retry were operated entirely through visible product controls; capacity, jobs, environment and CI/placement remained API/domain-authoritative. Admin governance UI, independent review and final current-head CI are still required, so M2 remains RUNNING and PR #13 remains Draft.
 
+DG-D022: GitHub Actions run [35548907839](https://github.com/fallrising/newclear/actions/runs/35548907839) passed every gate and 14/14 Chromium journeys on T-015 evidence head `26199b681e9c2fb3f08c78c621c7aa8833d77f43`. This remotely confirms the accepted T-015 slice but does not accept M2; Admin governance UI and independent integrated review remain outstanding.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -267,7 +269,7 @@ task_id: T-016 Admin governance UI after accepted T-015
 implementation_commit: 3eaea290de563818af27b240bff73e02f47513d0
 local_tested_commit: 3eaea290de563818af27b240bff73e02f47513d0
 ci_tested_merge: none
-ci_run: https://github.com/fallrising/newclear/actions/runs/35535062404
+ci_run: https://github.com/fallrising/newclear/actions/runs/35548907839
 spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
 evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md

@@ -9,10 +9,10 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 20 |
+| protocol_version / ledger_revision | 1 / 21 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | none — user-requested handoff / DG-M3-20260921-01 |
+| active_owner / run_id | Codex orchestrator — explicit user resumption / DG-M3-20260921-02 |
 | active_work_branch | agent/dim-gate/mainline/m3-delivery |
 | source / last_reconciled_target | M3 base `e760d8e988c0e2a837b226c600805a659a362c10` / fetched main `aafd24d7e7110454847ef8856bc15cd76626c2c7`, 2026-09-21; not merged into M3 |
 | source kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD observed, not adopted |
@@ -337,3 +337,9 @@ remote_durability: product and containing evidence checkpoint to be SSH-pushed b
 blockers: []
 next_action: read T-018 checkpoint; add playback/scope browser coverage, rebuild current HEAD with CJK fonts, rerun affected and full gates, then fixed-commit independent follow-up and current-head PR CI
 ```
+
+### M3 resumed verification run
+
+DG-D031: Resume the user's explicit M3 handoff on 2026-09-21 at clean SSH-durable `24c55944f7f57010c7294df90c4feafb5976e75c`. Remote branch matches; no M3 PR or CI exists. Latest main `7bb80d00d03d93a2d392185adba65588c5fe2462` contains unrelated agent-platform changes and is integrated by a normal merge before validation. Source, accepted, worker and original fixed-review worktrees are preserved, including dirty historical workers. The prior owner explicitly released the variant.
+
+Run DG-M3-20260921-02: lead owns playback/scope/focus Chromium regression and full native gates; a fresh in-environment read-only reviewer will inspect the resulting immutable commit as T-020 attempt 2. Exact inherited model slug is not exposed. No external Claude source transfer. Kernel contract stays pinned at `237aa277b0d067f65c8f64f49c6854597f7f8b15`, re-read locally; newer kernel instructions are not adopted. Three-cycle total budget and one same-approach follow-up remain in force. Required commands: frozen install, lint, typecheck, test, check:docs, check:contracts, check:ci, check:architecture, build --mode demo, test:e2e, actionlint, diff --check. No acceptance until independent review and current-head remote CI pass.

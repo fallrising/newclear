@@ -1,22 +1,26 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import type { Snapshot } from '../src/domain/schemas'
 
-type BrowserHealth = { consoleErrors: string[]; pageErrors: string[]; failedRequests: string[]; httpErrors: { status: number; url: string }[]; expectedStatuses: Set<number> }
+type BrowserHealth = { console: { type: string; text: string }[]; network: { method: string; status: number; url: string }[]; consoleErrors: string[]; pageErrors: string[]; failedRequests: string[]; httpErrors: { status: number; url: string }[]; expectedStatuses: Set<number> }
 const health = new WeakMap<Page, BrowserHealth>()
 
 test.beforeEach(async ({ page }) => {
-  const evidence: BrowserHealth = { consoleErrors: [], pageErrors: [], failedRequests: [], httpErrors: [], expectedStatuses: new Set() }
+  const evidence: BrowserHealth = { console: [], network: [], consoleErrors: [], pageErrors: [], failedRequests: [], httpErrors: [], expectedStatuses: new Set() }
   health.set(page, evidence)
-  page.on('console', (message) => { if (message.type() === 'error') evidence.consoleErrors.push(message.text()) })
+  page.on('console', (message) => { evidence.console.push({ type: message.type(), text: message.text() }); if (message.type() === 'error') evidence.consoleErrors.push(message.text()) })
   page.on('pageerror', (error) => evidence.pageErrors.push(error.message))
   page.on('requestfailed', (request) => evidence.failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText}`))
-  page.on('response', (response) => { if (response.status() >= 400) evidence.httpErrors.push({ status: response.status(), url: response.url() }) })
+  page.on('response', (response) => { evidence.network.push({ method: response.request().method(), status: response.status(), url: response.url() }); if (response.status() >= 400) evidence.httpErrors.push({ status: response.status(), url: response.url() }) })
 })
 
 test.afterEach(async ({ page }, info) => {
   const evidence = health.get(page)!
   await info.attach('browser-health', { body: JSON.stringify({ ...evidence, expectedStatuses: [...evidence.expectedStatuses] }, null, 2), contentType: 'application/json' })
-  if (!page.isClosed()) await info.attach('visible-dom', { body: await page.locator('body').innerText(), contentType: 'text/plain' })
+  if (!page.isClosed()) {
+    await info.attach('visible-dom', { body: await page.locator('body').innerText(), contentType: 'text/plain' })
+    await info.attach('final-screen', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+  }
   if (info.status !== info.expectedStatus) return
   expect(evidence.pageErrors).toEqual([])
   expect(evidence.failedRequests).toEqual([])
@@ -37,11 +41,11 @@ async function advance(page: Page, ticks: 1 | 3 | 6 = 6) {
   await expect(page.locator('.delivery-demo .command-notice')).toContainText(`模擬時鐘已前進 ${ticks} 個 tick`)
 }
 
-async function trigger(page: Page, revision: string, environmentId = 'env-checkout-dev') {
+async function trigger(page: Page, revision: string, environmentId = 'env-checkout-dev', applicationId = 'app-checkout') {
   await page.goto('rd/pipelines')
   await page.getByRole('button', { name: '觸發 Pipeline', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: '觸發 Pipeline' })
-  await dialog.getByLabel('發布應用').selectOption('app-checkout')
+  await dialog.getByLabel('發布應用').selectOption(applicationId)
   await dialog.getByLabel('發布環境').selectOption(environmentId)
   await dialog.getByLabel('來源版本').fill(revision)
   await dialog.getByRole('button', { name: '確認觸發' }).click()
@@ -320,23 +324,30 @@ test('M3 delivery pages wrap at 390/768/1440; dialog contains focus, Escape retu
   for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 1024 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport)
     for (const theme of ['light', 'dark']) {
-      await page.evaluate((value) => { document.documentElement.dataset.theme = value }, theme)
+      if (await page.locator('html').getAttribute('data-theme') !== theme) {
+        await page.getByRole('button', { name: theme === 'dark' ? '切換深色主題' : '切換淺色主題' }).click()
+      }
       for (const route of [`rd/pipelines/${delivered.runId}`, `rd/releases/${delivered.releaseId}`, 'rd/pipelines']) {
         await page.goto(route)
-        await page.evaluate((value) => { document.documentElement.dataset.theme = value }, theme)
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
         await expect(page.locator('.delivery-page')).toBeVisible()
         const size = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth }))
         expect(size.content, `${route} ${theme} ${viewport.width}`).toBeLessThanOrEqual(size.viewport)
         const violations = (await new AxeBuilder({ page }).analyze()).violations.filter((entry) => ['serious', 'critical'].includes(entry.impact ?? ''))
         expect(violations, `${route} ${theme} ${viewport.width}`).toEqual([])
+        const name = `${route.replaceAll('/', '-')}-${theme}-${viewport.width}`
+        await info.attach(name, { body: JSON.stringify({ route, theme, viewport, size, violations }), contentType: 'application/json' })
+        await page.screenshot({ path: info.outputPath(`${name}.png`), fullPage: true })
       }
     }
     const opener = page.getByRole('button', { name: '觸發 Pipeline', exact: true })
     await opener.click()
     const dialog = page.getByRole('dialog', { name: '觸發 Pipeline' })
     await expect(dialog.getByLabel('發布應用')).toBeVisible()
-    await dialog.getByLabel('發布應用').focus()
+    // Observe initial focus before any keyboard input; do not repair it in the test.
+    await expect(dialog.getByRole('button', { name: '關閉對話框' })).toBeFocused()
+    await info.attach(`initial-focus-${viewport.width}`, { body: await page.evaluate(() => document.activeElement?.outerHTML ?? ''), contentType: 'text/html' })
     for (let index = 0; index < 10; index++) {
       await page.keyboard.press('Tab')
       expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true)
@@ -353,4 +364,148 @@ test('M3 delivery pages wrap at 390/768/1440; dialog contains focus, Escape retu
   await expect(page.getByRole('table')).toContainText(delivered.releaseId)
   const violations = (await new AxeBuilder({ page }).analyze()).violations.filter((entry) => ['serious', 'critical'].includes(entry.impact ?? ''))
   expect(violations).toEqual([])
+})
+
+
+// Read persisted evidence only. All mutations below use actual product controls.
+async function savedSnapshot(page: Page): Promise<Snapshot> {
+  return page.evaluate(() => JSON.parse(sessionStorage.getItem('dim-gate.demo.v1')!).snapshot as Snapshot)
+}
+
+async function expectClockPaused(page: Page) {
+  const before = await savedSnapshot(page)
+  // A real interval longer than the playback period catches surviving timers.
+  await page.waitForTimeout(1700)
+  const after = await savedSnapshot(page)
+  expect(after.logicalClock).toBe(before.logicalClock)
+  expect(after.entities.pipelines).toEqual(before.entities.pipelines)
+  expect(after.scheduler).toEqual(before.scheduler)
+  return after
+}
+
+test('M3 playback: start, pause, manual step, resume and terminal stop persist real one-tick progression', async ({ page }, info) => {
+  await page.goto('rd')
+  const runId = await trigger(page, 'playback-lifecycle')
+  const clocks: { at: number; ticks: unknown }[] = []
+  let pending = 0
+  let maxPending = 0
+  page.on('request', (request) => {
+    if (!request.url().endsWith('/clock/advance')) return
+    clocks.push({ at: Date.now(), ticks: request.postDataJSON().ticks })
+    pending += 1
+    maxPending = Math.max(maxPending, pending)
+  })
+  page.on('requestfinished', (request) => { if (request.url().endsWith('/clock/advance')) pending -= 1 })
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('button', { name: '前進模擬時鐘', exact: true })).toBeDisabled()
+  await expect(page.getByRole('button', { name: /^建置 build · 成功$/ })).toBeVisible()
+  await page.getByRole('button', { name: '暫停模擬播放' }).click()
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeEnabled()
+  const paused = await expectClockPaused(page)
+  expect(paused.logicalClock).toBe(1)
+  await advance(page, 1)
+  expect((await savedSnapshot(page)).logicalClock).toBe(2)
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${runId} · 成功`, { timeout: 15_000 })
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  const terminal = await expectClockPaused(page)
+  expect(terminal.logicalClock).toBe(6)
+  expect(clocks.map((entry) => entry.ticks)).toEqual([1, 1, 1, 1, 1, 1])
+  expect(maxPending).toBe(1)
+  // The last four requests are automatic; their spacing includes the one-second wait.
+  for (let index = 3; index < clocks.length; index++) expect(clocks[index].at - clocks[index - 1].at).toBeGreaterThanOrEqual(950)
+  await info.attach('playback-timing', { body: JSON.stringify({ clocks, maxPending, clock: terminal.logicalClock }), contentType: 'application/json' })
+})
+
+test('M3 playback: reload pauses persisted work without offline catch-up; explicit resume finishes it', async ({ page }) => {
+  await page.goto('rd')
+  const runId = await trigger(page, 'playback-reload')
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('button', { name: /^建置 build · 成功$/ })).toBeVisible()
+  // Allow the first tick's reads to finish before intentionally navigating away.
+  await page.waitForTimeout(350)
+  await page.reload()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${runId} · 執行中`)
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeEnabled()
+  const paused = await expectClockPaused(page)
+  expect(paused.logicalClock).toBe(1)
+  expect(paused.scheduler.tasks[0].stepIndex).toBe(1)
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${runId} · 成功`, { timeout: 15_000 })
+})
+
+for (const boundary of ['route', 'persona', 'reset'] as const) {
+  test(`M3 playback: ${boundary} boundary cleans up pending timers`, async ({ page }) => {
+    await page.goto('rd')
+    const runId = await trigger(page, `playback-${boundary}`)
+    await page.getByRole('button', { name: '啟動模擬播放' }).click()
+    if (boundary === 'persona') {
+      await become(page, 'user-rd-data')
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expectClockPaused(page)
+      await become(page, 'user-rd-commerce')
+    } else if (boundary === 'route') {
+      await page.getByRole('link', { name: 'Pipeline 清單', exact: true }).click()
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText('Pipeline 執行紀錄')
+      await expectClockPaused(page)
+    } else {
+      await page.getByRole('link', { name: 'Session 控制' }).click()
+      await page.getByRole('button', { name: '重置示範', exact: true }).click()
+      await page.getByRole('button', { name: '確認重置示範', exact: true }).click()
+      await expect(page.getByRole('dialog')).toBeHidden()
+      const reset = await expectClockPaused(page)
+      expect(reset.logicalClock).toBe(0)
+      expect(reset.entities.pipelines).toEqual([])
+      expect(reset.scheduler.tasks).toEqual([])
+      return
+    }
+    await page.goto(`rd/pipelines/${runId}`)
+    await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeEnabled()
+    await expectClockPaused(page)
+  })
+}
+
+test('M3 playback: prod approval stops automatic ticks until another Ops approves and explicitly resumes', async ({ page }) => {
+  await page.goto('rd')
+  const runId = await trigger(page, 'playback-prod', 'env-checkout-prod')
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${runId} · 等待正式環境核准`, { timeout: 10_000 })
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  expect((await expectClockPaused(page)).logicalClock).toBe(3)
+  const releaseId = await openRelease(page)
+  await become(page, 'user-ops')
+  await page.goto(`ops/releases/${releaseId}`)
+  await reasonAction(page, '核准發布', '確認播放在人工批准前保持暫停')
+  await expectClockPaused(page)
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${releaseId} · 成功`, { timeout: 10_000 })
+})
+
+test('AC-20: Commerce clock receipt and audit do not disclose a progressed Data pipeline', async ({ page }, info) => {
+  await page.goto('rd')
+  await become(page, 'user-rd-data')
+  const runId = await trigger(page, 'data-private-clock-revision', 'env-data-dev', 'app-data')
+  await become(page, 'user-rd-commerce')
+  await page.getByRole('link', { name: 'Session 控制' }).click()
+  await page.getByLabel('前進幅度').selectOption('5')
+  const responsePromise = page.waitForResponse((response) => response.url().endsWith('/clock/advance'))
+  await page.getByRole('button', { name: '前進演示時鐘' }).click()
+  const response = await responsePromise
+  const receipt = await response.json()
+  await expect(page.locator('.command-notice')).toContainText('演示時鐘已前進 5 個 tick')
+  const snapshot = await savedSnapshot(page)
+  const hidden = snapshot.entities.pipelines.find((run) => run.id === runId)!
+  expect(hidden.releaseId).toBeTruthy()
+  expect(receipt.data.changed).toEqual([{ entityType: 'demoSession', entityId: snapshot.sessionId }])
+  const pipelines = await browserApi(page, { path: '/pipelines' })
+  const releases = await browserApi(page, { path: '/releases' })
+  const audit = await browserApi(page, { path: '/audit?pageSize=100' })
+  expect(pipelines).toMatchObject({ status: 200, payload: { data: { items: [], total: 0 } } })
+  expect(releases).toMatchObject({ status: 200, payload: { data: { items: [], total: 0 } } })
+  const visible = JSON.stringify({ receipt, pipelines, releases, audit, dom: await page.locator('main').innerText() })
+  for (const secret of [runId, hidden.releaseId!, hidden.artifactDigest!, hidden.revision]) expect(visible).not.toContain(secret)
+  await info.attach('scope-isolation', { body: JSON.stringify({ receipt, pipelines, releases, audit }, null, 2), contentType: 'application/json' })
+  await become(page, 'user-rd-data')
+  await page.goto(`rd/pipelines/${runId}`)
+  await expect(page.locator('dt').filter({ hasText: /^候選發布$/ }).locator('..')).toContainText(hidden.releaseId!)
 })

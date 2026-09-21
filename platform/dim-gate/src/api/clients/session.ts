@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { commandReceiptSchema, guideViewSchema, personaSchema, sessionViewSchema } from '../../domain/schemas'
+import { commandReceiptSchema, guideViewSchema, personaSchema, scenarioInputSchema, sessionViewSchema } from '../../domain/schemas'
 import type { CommandReceipt, GuideView, Persona, SessionView } from '../../domain/schemas'
 import { controlResultSchema } from '../control-dto'
 import type { ApiRequest } from '../core/request'
@@ -15,5 +15,8 @@ export function createSessionClient(request: ApiRequest) {
       { method: 'POST', demo: true, body: { confirm: true }, identityControl: true })).session,
     advanceClock: (ticks: number): Promise<CommandReceipt> => request('/clock/advance', commandReceiptSchema,
       { method: 'POST', demo: true, body: { ticks } }),
+    setScenario: (scenarioKey: 'provision-failure' | 'capacity-exhausted' | 'clear-capacity-fault',
+      target: { jobId?: string; poolId?: string }): Promise<CommandReceipt> => request('/scenarios', commandReceiptSchema,
+      { method: 'POST', demo: true, body: scenarioInputSchema.parse({ scenarioKey, ...target }) }),
   }
 }

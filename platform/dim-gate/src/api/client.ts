@@ -4,6 +4,7 @@ import type { SessionView } from '../domain/schemas'
 import { createApplicationClient } from './clients/application'
 import { createCmdbClient } from './clients/cmdb'
 import { createSessionClient } from './clients/session'
+import { createSelfServiceClient } from './clients/self-service'
 import { createTopologyClient } from './clients/topology'
 import { ApiRequestError } from './core/errors'
 import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
@@ -112,6 +113,7 @@ export function createApiClient() {
     ...createApplicationClient(request),
     ...createCmdbClient(request),
     ...createTopologyClient(request),
+    ...createSelfServiceClient(request),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

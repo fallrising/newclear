@@ -3,6 +3,7 @@ import { api, queryKey } from '../../api/client'
 import type { SessionView } from '../../domain/schemas'
 import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
 import { CenterOverview, Guide, UnknownRoute } from '../../features/foundation'
+import { CapacityPage, CatalogPage, JobDetailPage, JobsPage, RequestDetailPage, RequestListPage, RequestWizard } from '../../features/self-service'
 import { CenterLayout } from '../layouts/CenterLayout'
 
 export function AppRoutes({ session }: { session: SessionView }) {
@@ -12,10 +13,19 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/rd/apps" element={<CenterLayout routeKey="rd.apps" center="rd" session={session}><ApplicationListRoute /></CenterLayout>} />
     <Route path="/rd/apps/:appId" element={<CenterLayout routeKey="rd.app-detail" center="rd" session={session}><ApplicationDetailRoute /></CenterLayout>} />
     <Route path="/rd/apps/:appId/environments/:environmentId" element={<CenterLayout routeKey="rd.environment-detail" center="rd" session={session}><EnvironmentDetailRoute /></CenterLayout>} />
+    <Route path="/rd/catalog" element={<CenterLayout routeKey="rd.catalog" center="rd" session={session}><CatalogPage /></CenterLayout>} />
+    <Route path="/rd/catalog/:itemId/request" element={<CenterLayout routeKey="rd.catalog-request" center="rd" session={session}><RequestWizard /></CenterLayout>} />
+    <Route path="/rd/requests" element={<CenterLayout routeKey="rd.requests" center="rd" session={session}><RequestListPage center="rd" session={session} /></CenterLayout>} />
+    <Route path="/rd/requests/:requestId" element={<CenterLayout routeKey="rd.request-detail" center="rd" session={session}><RequestDetailPage center="rd" /></CenterLayout>} />
     <Route path="/ops" element={<CenterLayout routeKey="ops.overview" center="ops" session={session}><CenterOverview key={`${session.identityEpoch}:ops`} center="ops" session={session} /></CenterLayout>} />
     <Route path="/ops/cmdb" element={<CenterLayout routeKey="ops.cmdb" center="ops" session={session}><CmdbListPage session={session} /></CenterLayout>} />
     <Route path="/ops/cmdb/:ciId" element={<CenterLayout routeKey="ops.ci-detail" center="ops" session={session}><CiDetailPage session={session} /></CenterLayout>} />
     <Route path="/ops/topology" element={<CenterLayout routeKey="ops.topology" center="ops" session={session}><TopologyRoute client={api} makeQueryKey={queryKey} canWriteRelations={session.effectiveActions.includes('relation.write')} /></CenterLayout>} />
+    <Route path="/ops/requests" element={<CenterLayout routeKey="ops.requests" center="ops" session={session}><RequestListPage center="ops" session={session} /></CenterLayout>} />
+    <Route path="/ops/requests/:requestId" element={<CenterLayout routeKey="ops.request-detail" center="ops" session={session}><RequestDetailPage center="ops" /></CenterLayout>} />
+    <Route path="/ops/jobs" element={<CenterLayout routeKey="ops.jobs" center="ops" session={session}><JobsPage /></CenterLayout>} />
+    <Route path="/ops/jobs/:jobId" element={<CenterLayout routeKey="ops.job-detail" center="ops" session={session}><JobDetailPage /></CenterLayout>} />
+    <Route path="/ops/capacity" element={<CenterLayout routeKey="ops.capacity" center="ops" session={session}><CapacityPage /></CenterLayout>} />
     <Route path="/admin" element={<CenterLayout routeKey="admin.overview" center="admin" session={session}><CenterOverview key={`${session.identityEpoch}:admin`} center="admin" session={session} /></CenterLayout>} />
     <Route path="/guide" element={<Guide session={session} />} />
     <Route path="*" element={<UnknownRoute session={session} />} />

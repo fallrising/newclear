@@ -1,15 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, getClientIdentity } from '../../api/client'
+import { demoClockMutationKey } from '../../api/query-definitions'
 import type { SessionView } from '../../domain/schemas'
 
-/** Playback is view-local and opt-in: no offline catch-up or timer crosses identity/reset. */
+/** Playback is view-local; pending clock ownership survives SPA view unmounts. */
 export function useDeliveryPlayback(session: SessionView, active: boolean, refresh: () => Promise<void>) {
   const identity = `${session.sessionId}:${session.identityEpoch}:${session.policyVersion}:${session.generation}`
   const [requestedIdentity, setRequestedIdentity] = useState<string | null>(null)
   const [error, setError] = useState<unknown>(null)
-  const [pending, setPending] = useState(false)
-  // Ownership survives effect cleanup when a user pauses an unsettled tick.
-  const inFlight = useRef(false)
+  const cache = useQueryClient()
+  const pending = useIsMutating({ mutationKey: demoClockMutationKey }) > 0
+  const { mutateAsync: advance } = useMutation({ mutationKey: demoClockMutationKey, mutationFn: async () => {
+    await api.advanceClock(1)
+    // Mutation ownership lasts through refresh, including after pause/unmount.
+    await refresh()
+  } })
   const playing = requestedIdentity === identity && active
   useEffect(() => {
     if (!playing) return
@@ -18,23 +24,20 @@ export function useDeliveryPlayback(session: SessionView, active: boolean, refre
     const tick = async () => {
       const current = getClientIdentity()
       if (stopped || !current || `${current.sessionId}:${current.identityEpoch}:${current.policyVersion}:${current.generation}` !== identity) return
-      if (inFlight.current) return
-      inFlight.current = true
-      setPending(true)
+      if (cache.isMutating({ mutationKey: demoClockMutationKey })) return
       try {
-        await api.advanceClock(1)
-        // A paused tick still refreshes its committed result before controls reopen.
-        await refresh()
+        await advance()
         if (!stopped) timer = setTimeout(() => { void tick() }, 1000)
       } catch (cause) {
         if (!stopped) { setError(cause); setRequestedIdentity(null) }
-      } finally {
-        inFlight.current = false
-        setPending(false)
       }
     }
     timer = setTimeout(() => { void tick() }, 1000)
     return () => { stopped = true; clearTimeout(timer) }
-  }, [identity, playing, refresh])
-  return { playing, pending, error, toggle: () => { if (!playing && inFlight.current) return; setError(null); setRequestedIdentity(playing ? null : identity) } }
+  }, [identity, playing, advance, cache])
+  return { playing, pending, error, toggle: () => {
+    if (!playing && cache.isMutating({ mutationKey: demoClockMutationKey })) return
+    setError(null)
+    setRequestedIdentity(playing ? null : identity)
+  } }
 }

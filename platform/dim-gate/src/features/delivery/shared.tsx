@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle2, Clock3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
+import { demoClockMutationKey } from '../../api/query-definitions'
 import { canPerformProjectAction } from '../../domain/policy'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
@@ -60,7 +61,7 @@ export function DeliveryDemoControls({ session, run, release, canInject }: { ses
   const refresh = useDeliveryRefresh()
   const active = Boolean(run && ['queued', 'running'].includes(run.state) || release && ['queued', 'deploying', 'verifying'].includes(release.state))
   const playback = useDeliveryPlayback(session, active, refresh)
-  const command = useMutation({ mutationFn: async (kind: 'clock' | Scenario) => {
+  const command = useMutation({ mutationKey: demoClockMutationKey, mutationFn: async (kind: 'clock' | Scenario) => {
     const receipt = kind === 'clock' ? await api.advanceClock(ticks)
       : await demoApi.setScenario(kind, kind === 'rollback-failure' ? { releaseId: release!.id } : { runId: run!.id })
     await refresh()

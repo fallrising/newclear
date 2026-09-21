@@ -12,3 +12,6 @@ export function scopedQueryKey(identity: { sessionId: string; identityEpoch: num
   resourceFamily: string, scope: unknown = null, filters: unknown = null) {
   return [identity?.sessionId, identity?.identityEpoch, identity?.policyVersion, resourceFamily, scope, filters] as const
 }
+
+/** All UI clock mutations retain pending ownership through response and refresh. */
+export const demoClockMutationKey = ['demo-clock'] as const

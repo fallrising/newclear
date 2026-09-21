@@ -514,24 +514,7 @@ test('AC-20: Commerce clock receipt and audit do not disclose a progressed Data 
 test('M3 playback: pausing an unsettled tick keeps manual step and resume disabled until refreshed', async ({ page }, info) => {
   await page.goto('rd')
   await trigger(page, 'playback-inflight-pause')
-  // Hold delivery of the actual clock response. No domain data, response content,
-  // business transition or application timer is replaced by the test.
-  await page.evaluate(() => {
-    const original = window.fetch.bind(window)
-    const probe = { pending: 0, maxPending: 0, requests: 0 }
-    Object.assign(window, { deliveryClockProbe: probe })
-    window.fetch = async (...args) => {
-      if (!String(args[0]).endsWith('/clock/advance')) return original(...args)
-      probe.pending += 1
-      probe.requests += 1
-      probe.maxPending = Math.max(probe.maxPending, probe.pending)
-      try {
-        const response = await original(...args)
-        await new Promise((resolve) => setTimeout(resolve, 2500))
-        return response
-      } finally { probe.pending -= 1 }
-    }
-  })
+  await holdClockResponses(page)
   await page.getByRole('button', { name: '啟動模擬播放' }).click()
   await page.waitForFunction(() => (window as unknown as { deliveryClockProbe: { pending: number } }).deliveryClockProbe.pending === 1)
   await page.getByRole('button', { name: '暫停模擬播放' }).click()
@@ -554,4 +537,48 @@ test('M3 playback: pausing an unsettled tick keeps manual step and resume disabl
   const probe = await page.evaluate(() => (window as unknown as { deliveryClockProbe: { pending: number; maxPending: number; requests: number } }).deliveryClockProbe)
   expect(probe).toEqual({ pending: 0, maxPending: 1, requests: 3 })
   await info.attach('paused-inflight-clock', { body: JSON.stringify(probe), contentType: 'application/json' })
+})
+
+async function holdClockResponses(page: Page, delayMs = 2500) {
+  // Hold delivery of the actual clock response. No domain data, response content,
+  // business transition or application timer is replaced by the test.
+  await page.evaluate((delayMs) => {
+    const original = window.fetch.bind(window)
+    const probe = { pending: 0, maxPending: 0, requests: 0 }
+    Object.assign(window, { deliveryClockProbe: probe })
+    window.fetch = async (...args) => {
+      if (!String(args[0]).endsWith('/clock/advance')) return original(...args)
+      probe.pending += 1
+      probe.requests += 1
+      probe.maxPending = Math.max(probe.maxPending, probe.pending)
+      try {
+        const response = await original(...args)
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+        return response
+      } finally { probe.pending -= 1 }
+    }
+  }, delayMs)
+}
+
+
+test('M3 playback: route remount and Guide share the outstanding clock through response and refresh', async ({ page }, info) => {
+  await page.goto('rd')
+  const runId = await trigger(page, 'playback-pending-remount')
+  await holdClockResponses(page, 4000)
+  await page.getByRole('button', { name: '啟動模擬播放' }).click()
+  await page.waitForFunction(() => (window as unknown as { deliveryClockProbe: { pending: number } }).deliveryClockProbe.pending === 1)
+  await page.getByRole('link', { name: 'Pipeline 清單', exact: true }).click()
+  await page.getByRole('link', { name: runId, exact: true }).click()
+  await expect(page.getByRole('button', { name: '啟動模擬播放' })).toBeDisabled()
+  await expect(page.getByRole('combobox', { name: '模擬前進幅度' })).toBeDisabled()
+  await page.getByRole('link', { name: 'Session 控制' }).click()
+  await expect(page.getByLabel('前進幅度', { exact: true })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '正在前進…' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '前進演示時鐘' })).toBeEnabled({ timeout: 10_000 })
+  await page.getByRole('button', { name: '前進演示時鐘' }).click()
+  await expect(page.locator('.command-notice')).toContainText('演示時鐘已前進 1 個 tick', { timeout: 10_000 })
+  expect((await expectClockPaused(page)).logicalClock).toBe(2)
+  const probe = await page.evaluate(() => (window as unknown as { deliveryClockProbe: { pending: number; maxPending: number; requests: number } }).deliveryClockProbe)
+  expect(probe).toEqual({ pending: 0, maxPending: 1, requests: 2 })
+  await info.attach('remounted-inflight-clock', { body: JSON.stringify(probe), contentType: 'application/json' })
 })

@@ -9,7 +9,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 17 |
+| protocol_version / ledger_revision | 1 / 18 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
 | active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
@@ -256,6 +256,8 @@ DG-D022: GitHub Actions run [35548907839](https://github.com/fallrising/newclear
 
 DG-D023: ACCEPT T-016 only as the Admin governance UI checkpoint at `f9f14727c577b3baea8e0197dc9625bd19c8d76c`. Frozen install, 136/136 tests, all native gates, production build and 17/17 real Chromium journeys passed. AC-21–23 workflows were operated through visible controls at three viewports and both themes with zero axe serious/critical findings and no document overflow. A narrow transport fix preserves the initiating receipt of an already-committed policy mutation while all stale reads remain fail-closed. M2 remains RUNNING pending fixed-commit integrated walkthrough, independent review and current-head remote CI; PR #13 remains Draft.
 
+DG-D024: GitHub Actions run [35550811097](https://github.com/fallrising/newclear/actions/runs/35550811097) passed every gate and 17/17 Chromium journeys on T-016 evidence head `934da677b2771c5a7b80737c32b47d6bc4fe47b3`, with browser artifacts preserved. This remotely confirms the T-016 checkpoint but does not accept M2 or make Draft PR #13 mergeable; integrated fixed-commit walkthrough and independent review remain outstanding.
+
 ```yaml
 project_id: dim-gate
 variant_id: mainline
@@ -272,7 +274,7 @@ task_id: T-017 integrated M2 walkthrough and independent review after accepted T
 implementation_commit: f9f14727c577b3baea8e0197dc9625bd19c8d76c
 local_tested_commit: f9f14727c577b3baea8e0197dc9625bd19c8d76c
 ci_tested_merge: none
-ci_run: https://github.com/fallrising/newclear/actions/runs/35548907839
+ci_run: https://github.com/fallrising/newclear/actions/runs/35550811097
 spec_revision: M2-INTEGRATION-CONTRACT revision 1 at a9e64276273fc3698105c2bf8b0b7bc833444057
 evidence_refs:
   - .team/reports/dim-gate-m2-preflight.md
@@ -280,7 +282,7 @@ evidence_refs:
   - .team/reports/T-015.md
   - .team/reports/T-016.md
 integration_state: DRAFT_PR_13
-remote_durability: implementation/evidence/test-fix checkpoints are on the SSH remote branch; latest recorded CI passed
+remote_durability: T-016 implementation/evidence checkpoints are on the SSH remote branch; exact evidence-head CI 35550811097 passed
 blockers: []
 next_action: publish T-016 evidence and reconcile current-head CI; then perform an integrated fixed-commit M2 walkthrough and independent adversarial review before any milestone acceptance or PR readiness change
 ```

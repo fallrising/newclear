@@ -11,19 +11,9 @@ import {
 } from './schemas'
 import { integrityErrors } from './integrity'
 import { policyFor, type Policy } from './policy'
-
-export class DomainError extends Error {
-  status: number
-  code: string
-  fieldErrors?: Record<string, string[]>
-  constructor(status: number, code: string, message: string, fieldErrors?: Record<string, string[]>) {
-    super(message)
-    this.name = 'DomainError'
-    this.status = status
-    this.code = code
-    this.fieldErrors = fieldErrors
-  }
-}
+import { DomainError } from './errors'
+import { advanceDelivery, prepareDelivery, readDelivery, canReadDelivery } from './delivery'
+export { DomainError } from './errors'
 
 export interface Engine {
   getSnapshot(): Snapshot
@@ -169,6 +159,11 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     const request = job && snapshot.entities.requests.find((entry) => entry.id === job.requestId)
     return !!request && policy.canReadRequest(request)
   }
+  if (audit.entityType === 'pipeline' || audit.entityType === 'release') {
+    const collection = audit.entityType === 'pipeline' ? snapshot.entities.pipelines : snapshot.entities.releases
+    const entity = collection.find(entry => entry.id === audit.entityId)
+    return !!entity && canReadDelivery(snapshot, policy, entity.environmentId)
+  }
   if (audit.entityType === 'relation') {
     const relation = snapshot.entities.relations.find((entry) => entry.id === audit.entityId)
     if (!relation) {
@@ -287,7 +282,8 @@ function advanceProvisioning(snapshot: Snapshot, ticks: number): CommandReceipt[
   const mark = (entityType: string, entityId: string) => changed.set(`${entityType}:${entityId}`, { entityType, entityId })
   for (let tick = 0; tick < ticks; tick += 1) {
     snapshot.logicalClock += 1
-    const due = snapshot.scheduler.tasks.filter((task) => task.dueTick <= snapshot.logicalClock)
+    for (const item of advanceDelivery(snapshot)) mark(item.entityType, item.entityId)
+    const due = snapshot.scheduler.tasks.filter((task) => task.dueTick <= snapshot.logicalClock && snapshot.jobs.some(job => job.id === task.operationId))
       .toSorted((left, right) => left.id.localeCompare(right.id))
     for (const task of due) {
       const job = snapshot.jobs.find((entry) => entry.id === task.operationId && entry.state === 'running')
@@ -403,6 +399,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
   function read(path: string, query: URLSearchParams, actorId: string): unknown {
     const policy = context(actorId)
     const entities = state.entities
+    const delivery = readDelivery(state, policy, path, query)
+    if (delivery !== undefined) return delivery
     if (path === '/session') {
       validateQuery(query, [])
       return clone({ user: { id: policy.user!.id, displayName: policy.user!.displayName }, assignments: policy.assignments,
@@ -462,7 +460,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, [])
       const environment = entities.environments.find((entry) => entry.id === environmentId && policy.canReadEnvironment(entry))
       if (!environment) notFound()
-      return clone({ environment, placements: entities.placements.filter((entry) => entry.environmentId === environmentId && entities.cis.some((ci) => ci.id === entry.ciId && policy.canReadCi(ci))), activeRelease: null })
+      return clone({ environment, placements: entities.placements.filter((entry) => entry.environmentId === environmentId && entities.cis.some((ci) => ci.id === entry.ciId && policy.canReadCi(ci))), activeRelease: entities.releases.find(release => release.id === environment!.activeReleaseId) ?? null })
     }
     if (path === '/cis') {
       validateQuery(query, ['provider', 'kind', 'projectId', 'environmentId', 'health', 'freshness', 'q', 'page', 'pageSize', 'sort', 'order'])
@@ -489,6 +487,11 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
           return { type: 'environment', id: entry.id, title: `${app.name} · ${entry.name}`, route: `/rd/apps/${app.id}/environments/${entry.id}` }
         }),
         ...entities.cis.filter(policy.canReadCi).map((entry) => ({ type: 'ci', id: entry.id, title: entry.name, route: `/ops/cmdb/${entry.id}` })),
+        ...entities.releases.filter(entry => canReadDelivery(state, policy, entry.environmentId)).map(entry => ({
+          type: 'release', id: entry.id,
+          title: `${entry.id} · ${entities.artifacts.find(artifact => artifact.digest === entry.artifactDigest)?.revision ?? entry.artifactDigest}`,
+          route: `/rd/releases/${entry.id}`,
+        })),
       ].filter((entry) => entry.title.toLowerCase().includes(q!) || entry.id.toLowerCase().includes(q!))
         .toSorted((a, b) => a.title.localeCompare(b.title) || a.id.localeCompare(b.id))
         .slice(0, Number(limitValue))
@@ -634,6 +637,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (input.sessionId !== state.sessionId) fail(401, 'UNAUTHENTICATED', '示範 session 已變更，請重新讀取。')
     const policy = context(input.actorId)
     const method = input.method.toUpperCase()
+    const delivery = prepareDelivery(state, policy, input)
     const patchCiId = method === 'PATCH' ? /^\/cis\/([^/]+)$/.exec(input.path)?.[1] : undefined
     const createCi = method === 'POST' && input.path === '/cis'
     const createRelation = method === 'POST' && input.path === '/relations'
@@ -655,10 +659,11 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
       && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
       && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
-      && !scenario && !clock) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+      && !scenario && !clock && !delivery) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
     let body: unknown
-    if (patchCiId) body = parse(patchCiSchema, input.body)
+    if (delivery) body = input.body
+    else if (patchCiId) body = parse(patchCiSchema, input.body)
     else if (createCi) body = parse(createCiInputSchema, input.body)
     else if (createRelation) body = parse(createRelationInputSchema, input.body)
     else if (deleteRelationId) body = parse(deleteRelationInputSchema, input.body)
@@ -682,7 +687,9 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let ci: CI | undefined
     let relation: Relation | undefined
     let environmentRequest: DomainRequest | undefined
-    if (patchCiId) {
+    if (delivery) {
+      // prepareDelivery already checked the current role, resource and stage before replay.
+    } else if (patchCiId) {
       ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
       if (!ci) notFound()
       if (!policy.canWriteCi(ci!)) forbidden()
@@ -725,6 +732,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!policy.admin) forbidden()
     } else if (scenario) {
       const scenarioBody = body as z.infer<typeof scenarioInputSchema>
+      if (scenarioBody.runId || scenarioBody.releaseId || scenarioBody.scenarioKey === 'provision-failure' && (!scenarioBody.jobId || scenarioBody.poolId)
+        || scenarioBody.scenarioKey !== 'provision-failure' && (!scenarioBody.poolId || scenarioBody.jobId)) fail(422, 'VALIDATION_ERROR', '故障目標與情境不相容。')
       if (scenarioBody.jobId) {
         const job = state.jobs.find((entry) => entry.id === scenarioBody.jobId)
         const request = job && state.entities.requests.find((entry) => entry.id === job.requestId)
@@ -746,8 +755,13 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let correlationOverride: string | undefined
     let auditProjectIdsOverride: string[] | undefined
     let auditPoolIdsOverride: string[] | undefined
+    let auditStagesOverride: ('dev' | 'staging' | 'prod')[] | undefined
 
-    if (patchCiId) {
+    if (delivery) {
+      const result = delivery.apply(next)
+      ;({ entityType, entityId, entityVersion, action, reason, fields, changed, operationId } = result)
+      correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = []; auditStagesOverride = result.stages
+    } else if (patchCiId) {
       const patch = body as z.infer<typeof patchCiSchema>
       if (patch.expectedVersion !== ci!.version) fail(409, 'VERSION_CONFLICT', '資源版本已變更，請重新讀取後再確認。')
       if (patch.visibilityProjectIds) {
@@ -1128,7 +1142,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     const relationEndpointCiIds = entityType === 'relation' && changedCis.length === 2
       ? [changedCis[0].id, changedCis[1].id] as [string, string] : undefined
     next.audit.push({ id: `audit-${serial}`, orgId: policy.user!.orgId, actorId: input.actorId, action, entityType, entityId,
-      scopeSnapshot: { projectIds: auditProjectIds, poolIds: auditPoolIds, stages: [...new Set(policy.assignments.filter((assignment) => assignment.scopeType === 'project').flatMap((assignment) => assignment.stages ?? ['dev', 'staging', 'prod'] as const))],
+      scopeSnapshot: { projectIds: auditProjectIds, poolIds: auditPoolIds, stages: auditStagesOverride ?? [...new Set(policy.assignments.filter((assignment) => assignment.scopeType === 'project').flatMap((assignment) => assignment.stages ?? ['dev', 'staging', 'prod'] as const))],
         ...(relationEndpointCiIds ? { relationEndpointCiIds } : {}) },
       outcome: 'succeeded', diffSummary: fields, ...(reason ? { reason } : {}), requestId: `command-${serial}`, correlationId, occurredAt: clockIso(next.logicalClock) })
     next.idempotency.push({ sessionId: input.sessionId, actorId: input.actorId, method, path: input.path, key: input.key, bodyHash: checksum(bodyString), canonicalBody: bodyString, receipt })

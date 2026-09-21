@@ -1,4 +1,5 @@
 import type { Snapshot } from './schemas'
+import { deliveryIntegrityErrors } from './delivery-integrity'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -79,5 +80,5 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return errors
+  return [...errors, ...deliveryIntegrityErrors(snapshot)]
 }

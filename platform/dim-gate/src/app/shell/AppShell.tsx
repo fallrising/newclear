@@ -75,7 +75,7 @@ export function AppShell({ session }: { session: SessionView }) {
           return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span><span className="nav-code">{details.short}</span></NavLink>
         })}
       </nav>
-      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M2 · 自助申請與治理</div><p>共用資產、申請、容量與交付作業。</p><span className="sidebar-version">dim-gate / M2 development</span></div>
+      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M3 · 發布與回滾</div><p>從應用環境追蹤候選版本、健康檢查與回滾。</p><span className="sidebar-version">dim-gate / M3 development</span></div>
     </aside>
     <div className="workspace">
       <header className="topbar">

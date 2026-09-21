@@ -18,8 +18,8 @@ M1 可操作範圍：
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
-| M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 OPEN / Ready / 未合併 |
-| M3：CI/CD與回滾 | 尚未開始 |
+| M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 MERGED at `29bed417` |
+| M3：CI/CD與回滾 | RUNNING；隔離 branch `agent/dim-gate/mainline/m3-delivery`，contract revision 1 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
 
@@ -39,4 +39,6 @@ M2 T-017 的獨立 review 拒絕舊整合 head `5dd74e8`：Admin job logs 越權
 
 限制：production JS 為 431.39 kB gzip，仍是 M5 的 300 kB 預算風險；AC-21 persistent mounted-dialog race 與 Catalog 每一個 allowed-set/limit 控制仍是非阻塞 evidence gap。沒有部署、真實雲操作、付費服務或全域權限變更。
 
-Resume：從 `agent/dim-gate/mainline/m2-governance` 的 acceptance metadata 接續；base/main 仍是 `b8dae760`。M2 已 ACCEPTED，PR #13 是 OPEN / Ready / 未合併；等 final metadata-head CI 後執行已授權 merge，不部署。
+M2 合併對帳：PR #13 已合併為 `29bed41788a33684f24d216f4fd4d5f3f998c672`；final metadata CI 35591097020、post-merge CI 35591531196 與 mirror 35591531198 全部成功。上方 T-014～T-017 段落保留當時 checkpoint 的觀察，不代表目前 PR 狀態。
+
+Resume：M3 從最新 main `e760d8e988c0e2a837b226c600805a659a362c10` 建立獨立 worktree `/home/ckc/test/codex/newclear-m3`，branch `agent/dim-gate/mainline/m3-delivery`。依 [M3 contract](M3-INTEGRATION-CONTRACT.md) 實作 AC-13–16、AC-24；T-018 domain/API 與 T-019 UI 進行中，完整 Chromium、獨立 review 與 remote CI 通過前不宣告 M3 ACCEPTED。

@@ -5,6 +5,7 @@ export const queryFamilies = {
   topology: { relations: 'relations', topology: 'topology', search: 'search' },
   selfService: { pools: 'pools', capacity: 'capacity', catalog: 'catalog', requests: 'requests', jobs: 'jobs' },
   admin: { access: 'access', adminNavigation: 'admin-navigation', models: 'models', audit: 'audit' },
+  delivery: { pipelines: 'pipelines', pipeline: 'pipeline', releases: 'releases', release: 'release' },
 } as const
 
 export function scopedQueryKey(identity: { sessionId: string; identityEpoch: number; policyVersion: number } | null,

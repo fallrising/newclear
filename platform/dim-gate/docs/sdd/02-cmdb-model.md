@@ -28,8 +28,9 @@ CMDB 是配置項身分、責任與關係的共用核心。Resource CI、應用�
 | CatalogItem | `orgId, name, description, revision, status: draft/published/disabled, allowedProjectIds, template`；已發布 revision immutable |
 | Request | `orgId, requesterId, applicationId, environmentName, stage, catalogItemId, catalogRevision, templateSnapshot, provider, poolId, cpu, memoryMiB, purpose, state, approval?, environmentId?, latestJobId?, correlationId` |
 | ProvisionJob | `orgId, requestId, attempt, state: queued/running/succeeded/failed/cancelled, plannedCiIds, failureCode?, startedAt?, completedAt?, correlationId` |
-| PipelineRun | `orgId, applicationId, environmentId, revision, artifactDigest?, stages, state, releaseId?, triggeredBy, retryOfRunId?, correlationId` |
-| Release | `orgId, applicationId, environmentId, artifactDigest, kind: deploy/rollback, state, previousReleaseId: ID\|null, targetReleaseId?, pipelineRunId?, createdBy, correlationId` |
+| PipelineRun | `orgId, applicationId, environmentId, revision, artifactDigest?, stages, state, releaseId?, triggeredBy, retryOfRunId?, correlationId, failureCode?`；stage 保留 startedAt/completedAt |
+| Release | `orgId, applicationId, environmentId, artifactDigest, kind: deploy/rollback, state, previousReleaseId: ID\|null, targetReleaseId?, pipelineRunId?, createdBy, correlationId, health: pending/healthy/unhealthy, approval?, reason?, failureCode?, startedAt?, completedAt?` |
+| Artifact | `orgId, applicationId, digest, revision, recipe: demo-web-v1, filename`；package 成功後建立的 immutable 模擬 registry 記錄；digest 明示 synthetic |
 | Incident | `orgId, applicationId, environmentId, affectedCiIds, severity: critical/warning, state, assigneeId?, relatedReleaseId?, evidence, recoverySamples, correlationId` |
 | AuditEvent | `id, orgId, actorId, action, entityType, entityId, scopeSnapshot, outcome, diffSummary, reason?, requestId, correlationId, occurredAt`；append-only，無 mutable version |
 
@@ -127,7 +128,7 @@ flowchart TB
 
 ## 6. Fixture 契約
 
-M1 固定 seed `dim-gate-m1-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。snapshot schemaVersion 與 seedVersion 分開記錄；舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
+M1 的 inventory 基線延續到 M3 seed `dim-gate-m3-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。M3 不预填任何成功發布；snapshot schemaVersion 與 seedVersion 分開記錄，舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
 
 | 種子資料 | 固定定位與用途 |
 | --- | --- |

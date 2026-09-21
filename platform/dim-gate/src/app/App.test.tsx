@@ -47,7 +47,7 @@ beforeEach(() => {
   client.getSession.mockImplementation(async () => structuredClone(client.session))
   client.getPersonas.mockResolvedValue([{ id: 'user-rd-commerce', displayName: 'Commerce 研發', description: '商務專案', centers: ['rd'] }, { id: 'user-rd-data', displayName: 'Data 研發', description: '資料專案', centers: ['rd'] }])
   client.getDashboard.mockResolvedValue(dashboard())
-  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', seedVersion: 'dim-gate-m2-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
+  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', seedVersion: 'dim-gate-m3-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
   client.setPersona.mockImplementation(async (id: string) => { client.session = makeSession(id, 2); notify(); return structuredClone(client.session) })
   client.advanceClock.mockImplementation(async (ticks: number) => { client.clock += ticks; client.commandCount++; notify(); return { entityType: 'session', entityId: 'session-test', entityVersion: 2, correlationId: 'corr-test', changed: [] } })
   client.reset.mockImplementation(async () => { client.clock = 0; client.commandCount = 0; client.session = { ...makeSession(), identityEpoch: 2, generation: 2 }; notify(); return structuredClone(client.session) })

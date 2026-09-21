@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "newclear-agent-platform-m0"
+version = "0.1.0"
+description = "M0 compatibility probes for the Agent Platform"
+requires-python = ">=3.12"
+dependencies = ["websockets==17.1"]
+
+[project.optional-dependencies]
+dev = ["ruff==0.16.8"]
+
+[project.scripts]
+agent-platform-m0 = "agent_platform_m0.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

@@ -2,14 +2,14 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：Draft / documentation-only；所有實作里程碑均未開始
+- Status：設計基準已合併；M0 開發中，Docker 契約測試已實作，KVM gate 待驗
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
 - Product reference：OpenHands Agent Canvas
 - Runtime direction：OpenHands Software Agent SDK／Agent Server + Cocoon sandbox
 
-本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。本次工作只交付設計與項目入口。
+本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)；已執行的 Docker 檢查不等於全部契約通過。
 
 ## 1. 問題、目標與決策
 
@@ -27,7 +27,7 @@
 
 ## 2. 範圍與現有專案關係
 
-本次 owner 要求在 newclear 新增 agent 平台並先寫 SDD，構成對 2026-09-05 portfolio freeze 的此項目、此階段例外。沒有因此宣布所有舊 agent 項目復工，或把後續部署標成已授權且完成。
+Owner 先要求在 newclear 新增 agent 平台並撰寫 SDD，於 2026-09-21 再要求合併 PR 並開始開發，構成對 2026-09-05 portfolio freeze 的此項目開發例外。沒有因此宣布所有舊 agent 項目復工，或把後續部署標成已授權且完成。
 
 | 元件 | 既有責任 | 本項目邊界 |
 | --- | --- | --- |

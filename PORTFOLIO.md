@@ -22,9 +22,9 @@ Owner 要求在此公開 monorepo 新增一條人機群聊產品。這是對 202
 
 ## Owner override 2026-09-21 — platform/agent-platform
 
-Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主流平台、選定一個範本並撰寫 SDD。本次例外僅涵蓋 `platform/agent-platform` 的研究與文件基準，狀態為 **documentation-only / Draft**；不是部署或已完成產品的宣告。
+Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主流平台、選定一個範本並撰寫 SDD。Owner 隨後明確要求「合併 pr，然後開始開發」；PR #14 已合併。本次例外擴至 `platform/agent-platform` 的實作與專屬驗證 CI，目前為 **M0 in progress**；不是部署或已完成產品的宣告。
 
-範本選定 OpenHands Agent Canvas，方向為自管伺服器上的多任務 agent Web 工作台與 Cocoon sandbox 整合。與 `platform/fanzloud` 的 personal BYOS／Codex Cloud、`products/kith` 的群聊責任分開，不改動這些元件的實作，不復活 `labs/bee-swarm`。後續第一個切片是 SDD 的 M0 相容性驗證；既有 portfolio 分級不因這份設計自動改變。
+範本選定 OpenHands Agent Canvas，方向為自管伺服器上的多任務 agent Web 工作台與 Cocoon sandbox 整合。與 `platform/fanzloud` 的 personal BYOS／Codex Cloud、`products/kith` 的群聊責任分開，不改動這些元件的實作，不復活 `labs/bee-swarm`。目前第一個切片是 SDD 的 M0 相容性驗證：Docker Agent Server 契約測試已實作，Cocoon／KVM gate 待驗；既有 portfolio 分級不因此改變。
 
 設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
 

@@ -35,6 +35,10 @@ export function policyFor(snapshot: Snapshot, actorId: string) {
       const scope = requestScope(request)
       return request.orgId === user?.orgId && !!scope && (admin || scope.rd || scope.ops)
     },
+    canReadJob: (request: Snapshot['entities']['requests'][number]) => {
+      const scope = requestScope(request)
+      return request.orgId === user?.orgId && !!scope && (scope.rd || scope.ops)
+    },
     canEditRequest: (request: Snapshot['entities']['requests'][number]) => {
       const scope = requestScope(request)
       return request.orgId === user?.orgId && request.requesterId === user?.id && !!scope?.rd

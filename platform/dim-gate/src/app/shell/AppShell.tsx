@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
 import { ArrowRight, BookOpen, ChevronRight, FlaskConical, Menu, Moon, Sun, X } from 'lucide-react'
 import { api, queryKey } from '../../api/client'
 import type { NavigationItem, SessionView } from '../../domain/schemas'
@@ -29,8 +29,9 @@ export function AppShell({ session }: { session: SessionView }) {
   const location = useLocation()
   const navigate = useNavigate()
   const personas = useQuery({ queryKey: queryKey('personas'), queryFn: () => api.getPersonas() })
-  const navigationCenter = session.centers[0]
-  const navigation = useQuery({ queryKey: queryKey('navigation', navigationCenter), queryFn: () => api.getNavigation(navigationCenter), enabled: Boolean(navigationCenter) })
+  const navigationQueries = useQueries({ queries: session.centers.map((center) => ({
+    queryKey: queryKey('navigation', center), queryFn: () => api.getNavigation(center),
+  })) })
   const personaMutation = useMutation({ mutationFn: (id: string) => api.setPersona(id) })
 
   useEffect(() => {
@@ -40,8 +41,10 @@ export function AppShell({ session }: { session: SessionView }) {
   }, [preferences])
 
   const currentRoute = routeForPath(location.pathname)
-  const navigationByKey = new Map<string, NavigationItem>(navigation.data?.map((item) => [item.routeKey, item]))
-  const configuredRoutes = visibleNavigation(session).filter((route) => navigation.isPending || navigation.isError || navigationByKey.has(route.key)).map((route) => {
+  const navigationByKey = new Map<string, NavigationItem>(navigationQueries.flatMap((query) => query.data ?? []).map((item) => [item.routeKey, item]))
+  const navigationPending = navigationQueries.some((query) => query.isPending)
+  const navigationError = navigationQueries.some((query) => query.isError)
+  const configuredRoutes = visibleNavigation(session).filter((route) => navigationPending || navigationError || navigationByKey.has(route.key)).map((route) => {
     const item = navigationByKey.get(route.key)
     return item ? { ...route, navigation: { ...route.navigation, label: item.label, group: item.group, order: item.order } } : route
   }).sort((left, right) => left.navigation.order - right.navigation.order)

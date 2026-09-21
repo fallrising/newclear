@@ -124,6 +124,36 @@ describe('M2 request delivery state machine', () => {
     const capacity = (engine.read('/capacity', new URLSearchParams('provider=aws'), 'user-ops') as Array<{ cpu: { reserved: number } }>)[0]
     expect(capacity.cpu.reserved).toBe(0)
   })
+
+  it('limits job reads to scoped RD/Ops even when an Admin can read the request', async () => {
+    const engine = create()
+    const id = await submitted(engine, 'job-log-scope')
+    const approved = await command(engine, 'user-ops', `/requests/${id}/approve`, { expectedVersion: 2, reason: 'Create scoped job' }, 'job-scope-approve')
+    expect(detail(engine, id, 'user-admin').jobs).toHaveLength(1)
+    expect(engine.read('/jobs', new URLSearchParams(), 'user-admin')).toMatchObject({ total: 0, items: [] })
+    expect(() => engine.read(`/jobs/${approved.operationId}`, new URLSearchParams(), 'user-admin'))
+      .toThrow(expect.objectContaining({ status: 404, code: 'NOT_FOUND' }))
+    expect(engine.read(`/jobs/${approved.operationId}`, new URLSearchParams(), 'user-rd-commerce')).toMatchObject({
+      job: { id: approved.operationId }, logs: [],
+    })
+  })
+
+  it('reserves the planned canonical CI identity before provisioning completes', async () => {
+    const engine = create()
+    const id = await submitted(engine, 'reserved-identity')
+    const approved = await command(engine, 'user-ops', `/requests/${id}/approve`, { expectedVersion: 2, reason: 'Reserve planned identity' }, 'identity-approve')
+    const plannedId = detail(engine, id).jobs[0].plannedCiIds[0]
+    await expect(command(engine, 'user-ops', '/cis', {
+      name: 'attempted planned identity takeover', kind: 'compute', provider: 'aws', externalId: plannedId,
+      accountId: 'account-aws-demo', locationId: 'location-aws-sg', poolId: 'pool-aws-sg',
+      ownerTeamId: 'team-commerce', visibilityProjectIds: ['project-store'], lifecycle: 'active', tags: { mode: 'demo' },
+      attributes: { instanceType: 'demo.compute.small', vpcId: 'vpc-demo', subnetId: 'subnet-demo', cpu: 1, memoryMiB: 1024 }, customFields: {},
+    }, 'identity-takeover')).rejects.toMatchObject({ status: 409, code: 'DUPLICATE_RESOURCE' })
+    await command(engine, 'user-ops', `/requests/${id}/provision`, { expectedVersion: approved.entityVersion }, 'identity-provision')
+    await command(engine, 'user-ops', '/clock/advance', { ticks: 5 }, 'identity-ticks')
+    expect(detail(engine, id).request.state).toBe('fulfilled')
+    expect(engine.getSnapshot().entities.cis.filter((entry) => entry.externalId === plannedId)).toHaveLength(1)
+  })
 })
 
 describe('M2 governance', () => {

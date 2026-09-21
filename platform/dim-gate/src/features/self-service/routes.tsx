@@ -39,17 +39,21 @@ export function RequestWizard() {
   const capacity = useQuery({ queryKey: queryKey('capacity'), queryFn: () => api.getCapacity() })
   const create = useMutation({ mutationFn: api.createRequest })
   const submit = useMutation({ mutationFn: ({ id, version }: { id: string; version: number }) => api.submitRequest(id, version) })
-  const [form, setForm] = useState({ applicationId: '', environmentName: '', stage: 'staging', provider: 'aws', poolId: '', cpu: 2, memoryMiB: 2048, purpose: '' })
+  const [form, setForm] = useState({ applicationId: '', environmentName: '', stage: '', provider: '', poolId: '', cpu: null as number | null, memoryMiB: null as number | null, purpose: '' })
   const item = catalog.data
+  const selectedStage = item?.template.allowedStages.includes(form.stage as 'dev' | 'staging' | 'prod') ? form.stage as 'dev' | 'staging' | 'prod' : item?.template.allowedStages[0] ?? 'staging'
+  const selectedProvider = item?.template.allowedProviders.includes(form.provider as Provider) ? form.provider as Provider : item?.template.allowedProviders[0] ?? 'aws'
+  const selectedCpu = form.cpu ?? item?.template.defaults.cpu ?? 1
+  const selectedMemoryMiB = form.memoryMiB ?? item?.template.defaults.memoryMiB ?? 128
   const allowedPools = (pools.data ?? []).filter((pool) => !item || item.template.allowedPoolIds.includes(pool.id) && item.template.allowedProviders.includes(pool.provider))
-  const selectedPool = allowedPools.find((pool) => pool.id === form.poolId) ?? allowedPools.find((pool) => pool.provider === form.provider)
+  const selectedPool = allowedPools.find((pool) => pool.id === form.poolId) ?? allowedPools.find((pool) => pool.provider === selectedProvider)
   const selectedCapacity = capacity.data?.find((entry) => entry.poolId === selectedPool?.id)
   const updateProvider = (provider: Provider) => setForm((current) => ({ ...current, provider, poolId: allowedPools.find((pool) => pool.provider === provider)?.id ?? '' }))
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!item || !form.applicationId || !selectedPool) return
     try {
-      const receipt = await create.mutateAsync({ applicationId: form.applicationId, environmentName: form.environmentName.trim(), stage: form.stage as 'dev' | 'staging' | 'prod', catalogItemId: item.id, catalogRevision: item.revision, provider: selectedPool.provider, poolId: selectedPool.id, cpu: form.cpu, memoryMiB: form.memoryMiB, purpose: form.purpose.trim() })
+      const receipt = await create.mutateAsync({ applicationId: form.applicationId, environmentName: form.environmentName.trim(), stage: selectedStage, catalogItemId: item.id, catalogRevision: item.revision, provider: selectedPool.provider, poolId: selectedPool.id, cpu: selectedCpu, memoryMiB: selectedMemoryMiB, purpose: form.purpose.trim() })
       const submitted = await submit.mutateAsync({ id: receipt.entityId, version: receipt.entityVersion })
       navigate(`/rd/requests/${submitted.entityId}`, { replace: true })
     } catch { /* Render the exact API error without automatic command retry. */ }
@@ -67,18 +71,18 @@ export function RequestWizard() {
       <div className="form-step"><span>01</span><div><h2>應用與環境</h2><p>選擇目前 scope 內的應用與目標階段。</p></div></div>
       <label>應用<select required value={form.applicationId} onChange={(event) => setForm({ ...form, applicationId: event.target.value })}><option value="">選擇應用</option>{applications.data!.items.map((app) => <option key={app.id} value={app.id}>{app.name} · {app.id}</option>)}</select></label>
       <label>環境名稱<input required minLength={1} maxLength={120} value={form.environmentName} onChange={(event) => setForm({ ...form, environmentName: event.target.value })} placeholder="例如 checkout-staging" /></label>
-      <label>階段<select value={form.stage} onChange={(event) => setForm({ ...form, stage: event.target.value })}>{item.template.allowedStages.map((stage) => <option key={stage} value={stage}>{stageLabel[stage]}</option>)}</select></label>
+      <label>階段<select value={selectedStage} onChange={(event) => setForm({ ...form, stage: event.target.value })}>{item.template.allowedStages.map((stage) => <option key={stage} value={stage}>{stageLabel[stage]}</option>)}</select></label>
       <div className="form-step"><span>02</span><div><h2>Provider 與規格</h2><p>容量是目前 scope 的即時投影，不是估算價格。</p></div></div>
-      <label>Provider<select value={form.provider} onChange={(event) => updateProvider(event.target.value as Provider)}>{item.template.allowedProviders.map((provider) => <option key={provider} value={provider}>{providerLabel[provider]}</option>)}</select></label>
-      <label>資源池<select required value={selectedPool?.id ?? ''} onChange={(event) => { const pool = allowedPools.find((entry) => entry.id === event.target.value); setForm({ ...form, poolId: event.target.value, provider: pool?.provider ?? form.provider }) }}>{allowedPools.filter((pool) => pool.provider === form.provider).map((pool) => <option key={pool.id} value={pool.id}>{pool.name}</option>)}</select></label>
-      <label>vCPU<input required type="number" min={1} max={item.template.limits.maxCpu} value={form.cpu} onChange={(event) => setForm({ ...form, cpu: Number(event.target.value) })} /></label>
-      <label>Memory MiB<input required type="number" min={128} step={128} max={item.template.limits.maxMemoryMiB} value={form.memoryMiB} onChange={(event) => setForm({ ...form, memoryMiB: Number(event.target.value) })} /></label>
-      <div className="capacity-preview"><Gauge size={18} aria-hidden="true" /><div><strong>{selectedPool?.name ?? '尚未選擇資源池'}</strong>{selectedCapacity ? <p>可用 {selectedCapacity.cpu.available} vCPU / {selectedCapacity.memoryMiB.available} MiB；本次申請 {form.cpu} vCPU / {form.memoryMiB} MiB。</p> : <p>容量未知；請重新整理後再送出。</p>}</div></div>
+      <label>Provider<select value={selectedProvider} onChange={(event) => updateProvider(event.target.value as Provider)}>{item.template.allowedProviders.map((provider) => <option key={provider} value={provider}>{providerLabel[provider]}</option>)}</select></label>
+      <label>資源池<select required value={selectedPool?.id ?? ''} onChange={(event) => { const pool = allowedPools.find((entry) => entry.id === event.target.value); setForm({ ...form, poolId: event.target.value, provider: pool?.provider ?? selectedProvider }) }}>{allowedPools.filter((pool) => pool.provider === selectedProvider).map((pool) => <option key={pool.id} value={pool.id}>{pool.name}</option>)}</select></label>
+      <label>vCPU<input required type="number" min={1} max={item.template.limits.maxCpu} value={selectedCpu} onChange={(event) => setForm({ ...form, cpu: Number(event.target.value) })} /></label>
+      <label>Memory MiB<input required type="number" min={128} step={128} max={item.template.limits.maxMemoryMiB} value={selectedMemoryMiB} onChange={(event) => setForm({ ...form, memoryMiB: Number(event.target.value) })} /></label>
+      <div className="capacity-preview"><Gauge size={18} aria-hidden="true" /><div><strong>{selectedPool?.name ?? '尚未選擇資源池'}</strong>{selectedCapacity ? <p>可用 {selectedCapacity.cpu.available} vCPU / {selectedCapacity.memoryMiB.available} MiB；本次申請 {selectedCpu} vCPU / {selectedMemoryMiB} MiB。</p> : <p>容量未知；請重新整理後再送出。</p>}</div></div>
       <div className="form-step"><span>03</span><div><h2>用途與提交</h2><p>提交後進入待審核，不會提前顯示環境建立成功。</p></div></div>
       <label className="span-all">用途<textarea required minLength={1} maxLength={500} rows={4} value={form.purpose} onChange={(event) => setForm({ ...form, purpose: event.target.value })} placeholder="說明環境用途與驗收目標" /></label>
-      <section className="review-summary span-all" aria-label="申請摘要"><h3>送出前確認</h3><p>{stageLabel[form.stage as keyof typeof stageLabel]} · {providerLabel[selectedPool?.provider ?? 'aws']} · {form.cpu} vCPU · {form.memoryMiB} MiB</p><p>核准者：具有 project 與 pool scope 的 Ops · 示範交付約 5 ticks</p></section>
+      <section className="review-summary span-all" aria-label="申請摘要"><h3>送出前確認</h3><p>{stageLabel[selectedStage]} · {providerLabel[selectedPool?.provider ?? 'aws']} · {selectedCpu} vCPU · {selectedMemoryMiB} MiB</p><p>核准者：具有 project 與 pool scope 的 Ops · 示範交付約 5 ticks</p></section>
       {mutationError && <div className="span-all"><ErrorState error={mutationError} title="申請尚未提交" /></div>}
-      <div className="form-actions span-all"><Button asChild variant="outline"><Link to="/rd/catalog">取消</Link></Button><Button type="submit" disabled={busy || !selectedCapacity || form.cpu > selectedCapacity.cpu.available || form.memoryMiB > selectedCapacity.memoryMiB.available}><Send size={16} aria-hidden="true" />{busy ? '正在建立並提交…' : '確認並提交申請'}</Button></div>
+      <div className="form-actions span-all"><Button asChild variant="outline"><Link to="/rd/catalog">取消</Link></Button><Button type="submit" disabled={busy || !selectedCapacity || selectedCpu > selectedCapacity.cpu.available || selectedMemoryMiB > selectedCapacity.memoryMiB.available}><Send size={16} aria-hidden="true" />{busy ? '正在建立並提交…' : '確認並提交申請'}</Button></div>
     </form>
   </>
 }

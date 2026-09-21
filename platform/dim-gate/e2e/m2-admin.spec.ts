@@ -64,6 +64,16 @@ test('AC-21: Admin access commands and registered navigation metadata work witho
 test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audit work end to end', async ({ page }) => {
   const failures = captureRuntimeFailures(page)
   await page.goto('rd')
+  const oldRequestId = await (async () => {
+    await page.goto('rd/catalog')
+    await page.getByRole('link', { name: '開始申請' }).click()
+    await page.getByRole('combobox', { name: '應用', exact: true }).selectOption('app-checkout')
+    await page.getByRole('textbox', { name: '環境名稱', exact: true }).fill('catalog-revision-one')
+    await page.getByRole('textbox', { name: '用途', exact: true }).fill('Preserve revision one snapshot')
+    await page.getByRole('button', { name: '確認並提交申請' }).click()
+    await expect(page.getByRole('heading', { name: /catalog-revision-one · 待審核/ })).toBeVisible()
+    return new URL(page.url()).pathname.split('/').at(-1)!
+  })()
   await become(page, 'user-admin')
   await page.goto('admin/catalog')
 
@@ -71,10 +81,27 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
   await expect(page.getByText('rev 2 · 草稿')).toBeVisible()
   await page.getByRole('textbox', { name: 'Draft name' }).fill('Web Runtime v2')
   await page.getByRole('textbox', { name: 'Description' }).fill('Governed revision edited through the Admin workspace.')
+  await page.getByRole('spinbutton', { name: 'Default vCPU' }).fill('4')
+  await page.getByRole('spinbutton', { name: 'Default memory MiB' }).fill('4096')
   await page.getByRole('button', { name: '儲存草稿內容' }).click()
   await expect(page.getByRole('heading', { name: 'Web Runtime v2' })).toBeVisible()
   await page.getByRole('button', { name: '發布 revision' }).click()
   await expect(page.getByText('rev 2 · 已發布')).toBeVisible()
+
+  await become(page, 'user-rd-commerce')
+  await page.goto(`rd/requests/${oldRequestId}`)
+  await expect(page.locator('dt', { hasText: '規格' }).locator('..')).toContainText('2 vCPU · 2048 MiB')
+  await page.goto('rd/catalog/catalog-web/request')
+  await expect(page.getByRole('spinbutton', { name: 'vCPU' })).toHaveValue('4')
+  await expect(page.getByRole('spinbutton', { name: 'Memory MiB' })).toHaveValue('4096')
+  await page.getByRole('combobox', { name: '應用', exact: true }).selectOption('app-checkout')
+  await page.getByRole('textbox', { name: '環境名稱', exact: true }).fill('catalog-revision-two')
+  await page.getByRole('textbox', { name: '用途', exact: true }).fill('Use governed revision two defaults')
+  await page.getByRole('button', { name: '確認並提交申請' }).click()
+  await expect(page.locator('dt', { hasText: '規格' }).locator('..')).toContainText('4 vCPU · 4096 MiB')
+
+  await become(page, 'user-admin')
+  await page.goto('admin/catalog')
   await page.getByRole('button', { name: '停用新申請' }).click()
   await expect(page.getByText('rev 2 · 已停用')).toBeVisible()
 
@@ -108,6 +135,53 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
   expect(failures.consoleErrors).toEqual(['Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)'])
   expect(failures.pageErrors).toEqual([])
   expect(failures.failedRequests).toEqual([])
+})
+
+test('AC-21: union-of-grants navigation and a captured metadata mutation fail closed after revocation', async ({ page }) => {
+  await page.goto('rd')
+  await become(page, 'user-admin')
+  await page.goto('admin/access')
+  await page.getByRole('combobox', { name: '使用者' }).selectOption('user-rd-commerce')
+  await page.getByRole('combobox', { name: '角色' }).selectOption('ops')
+  await page.getByLabel('Scope ID').fill('pool-aws-sg')
+  await page.getByRole('button', { name: '新增授權' }).click()
+  await expect(page.getByRole('row', { name: /user-rd-commerce.*Ops.*pool.*pool-aws-sg/ })).toBeVisible()
+  await page.getByRole('combobox', { name: '角色' }).selectOption('ops')
+  await page.getByLabel('Scope ID').fill('project-store')
+  await page.getByRole('button', { name: '新增授權' }).click()
+  await expect(page.getByRole('row', { name: /user-rd-commerce.*Ops.*project.*project-store/ })).toBeVisible()
+  await become(page, 'user-rd-commerce')
+  await expect(page.getByRole('link', { name: '應用與環境', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'CMDB', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '交付審批', exact: true })).toBeVisible()
+
+  await become(page, 'user-ops')
+  await page.goto('ops/cmdb/ci-aws-checkout-01')
+  await page.getByRole('button', { name: '編輯 metadata' }).click()
+  await page.getByRole('textbox', { name: '名稱' }).fill('must-not-commit-after-revoke')
+  const revoked = await page.evaluate(async () => {
+    const saved = JSON.parse(sessionStorage.getItem('dim-gate.demo.v1')!) as { snapshot: { sessionId: string } }
+    const command = (url: string, actor: string, key: string, body: unknown) => fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key,
+        'X-Demo-Session': saved.snapshot.sessionId, 'X-Demo-Persona': actor }, body: JSON.stringify(body),
+    })
+    const toAdmin = await command('/dim-gate/__demo/v1/persona', 'user-ops', 'e2e-dialog-to-admin', { personaId: 'user-admin' })
+    const response = await fetch('/dim-gate/api/v1/admin/assignments/grant-ops-aws', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'e2e-revoke-open-dialog',
+        'X-Demo-Session': saved.snapshot.sessionId, 'X-Demo-Persona': 'user-admin' },
+      body: JSON.stringify({ expectedVersion: 1, reason: 'Revoke while Ops metadata dialog remains open' }),
+    })
+    const backToOps = await command('/dim-gate/__demo/v1/persona', 'user-admin', 'e2e-dialog-back-to-ops', { personaId: 'user-ops' })
+    return { toAdmin: toAdmin.status, revoke: response.status, backToOps: backToOps.status }
+  })
+  expect(revoked).toEqual({ toAdmin: 200, revoke: 200, backToOps: 200 })
+  await expect(page.getByRole('heading', { name: 'aws-compute-01' })).toBeVisible()
+  await page.getByRole('button', { name: '編輯 metadata' }).click()
+  await page.getByRole('textbox', { name: '名稱' }).fill('must-not-commit-after-revoke')
+  await expect(page.getByRole('dialog', { name: '編輯 CI metadata' })).toBeVisible()
+  await page.getByRole('button', { name: '儲存 metadata' }).click()
+  await expect(page.getByRole('alert')).toContainText('目前身分沒有此操作的授權。')
+  await expect(page.getByRole('heading', { name: 'must-not-commit-after-revoke' })).toHaveCount(0)
 })
 
 test('Admin governance routes are responsive in both themes with zero serious/critical axe findings', async ({ page }, info) => {

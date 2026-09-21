@@ -39,9 +39,24 @@ function NavigationRow({ item, committed }: { item: NavigationItem; committed: (
 }
 
 function CatalogDraftEditor({ item, committed }: { item: CatalogItem; committed: () => Promise<unknown> }) {
-  const [form, setForm] = useState({ name: item.name, description: item.description })
-  const mutation = useMutation({ mutationFn: () => api.patchCatalog(item, form) })
-  return <div className="admin-inline-editor"><label>Draft name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label><label>Description<textarea rows={3} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label><Button size="sm" variant="outline" disabled={mutation.isPending || !form.name.trim() || !form.description.trim()} onClick={async () => { try { await mutation.mutateAsync(); await committed() } catch { /* shown */ } }}>儲存草稿內容</Button><MutationFeedback mutation={mutation} success="草稿內容已更新。" /></div>
+  const [form, setForm] = useState({
+    name: item.name, description: item.description,
+    allowedProjectIds: item.allowedProjectIds.join(', '), allowedPoolIds: item.template.allowedPoolIds.join(', '),
+    allowedProviders: item.template.allowedProviders, allowedStages: item.template.allowedStages,
+    defaultCpu: item.template.defaults.cpu, defaultMemoryMiB: item.template.defaults.memoryMiB,
+    maxCpu: item.template.limits.maxCpu, maxMemoryMiB: item.template.limits.maxMemoryMiB,
+  })
+  const ids = (value: string) => [...new Set(value.split(',').map((entry) => entry.trim()).filter(Boolean))]
+  const mutation = useMutation({ mutationFn: () => api.patchCatalog(item, {
+    name: form.name, description: form.description, allowedProjectIds: ids(form.allowedProjectIds),
+    template: { ...item.template, allowedProviders: form.allowedProviders, allowedStages: form.allowedStages,
+      allowedPoolIds: ids(form.allowedPoolIds), defaults: { cpu: form.defaultCpu, memoryMiB: form.defaultMemoryMiB },
+      limits: { maxCpu: form.maxCpu, maxMemoryMiB: form.maxMemoryMiB } },
+  }) })
+  const valid = Boolean(form.name.trim() && form.description.trim() && ids(form.allowedProjectIds).length && ids(form.allowedPoolIds).length
+    && form.allowedProviders.length && form.allowedStages.length && form.defaultCpu > 0 && form.defaultMemoryMiB >= 128
+    && form.defaultMemoryMiB % 128 === 0 && form.defaultCpu <= form.maxCpu && form.defaultMemoryMiB <= form.maxMemoryMiB)
+  return <div className="admin-inline-editor"><label>Draft name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label><label>Description<textarea rows={3} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label><label>Allowed project IDs<input value={form.allowedProjectIds} onChange={(event) => setForm({ ...form, allowedProjectIds: event.target.value })} /></label><label>Allowed pool IDs<input value={form.allowedPoolIds} onChange={(event) => setForm({ ...form, allowedPoolIds: event.target.value })} /></label><label>Allowed providers<select multiple value={form.allowedProviders} onChange={(event) => setForm({ ...form, allowedProviders: Array.from(event.target.selectedOptions, (option) => option.value as CatalogItem['template']['allowedProviders'][number]) })}><option value="aws">AWS</option><option value="aliyun">Aliyun</option><option value="onprem">On-prem IDC</option></select></label><label>Allowed stages<select multiple value={form.allowedStages} onChange={(event) => setForm({ ...form, allowedStages: Array.from(event.target.selectedOptions, (option) => option.value as CatalogItem['template']['allowedStages'][number]) })}><option value="dev">開發</option><option value="staging">預備</option><option value="prod">正式</option></select></label><div className="catalog-spec-grid"><label>Default vCPU<input type="number" min={1} max={64} value={form.defaultCpu} onChange={(event) => setForm({ ...form, defaultCpu: Number(event.target.value) })} /></label><label>Default memory MiB<input type="number" min={128} max={262144} step={128} value={form.defaultMemoryMiB} onChange={(event) => setForm({ ...form, defaultMemoryMiB: Number(event.target.value) })} /></label><label>Maximum vCPU<input type="number" min={1} max={64} value={form.maxCpu} onChange={(event) => setForm({ ...form, maxCpu: Number(event.target.value) })} /></label><label>Maximum memory MiB<input type="number" min={128} max={262144} step={128} value={form.maxMemoryMiB} onChange={(event) => setForm({ ...form, maxMemoryMiB: Number(event.target.value) })} /></label></div><Button size="sm" variant="outline" disabled={mutation.isPending || !valid} onClick={async () => { try { await mutation.mutateAsync(); await committed() } catch { /* shown */ } }}>儲存草稿內容</Button><MutationFeedback mutation={mutation} success="草稿內容已更新。" /></div>
 }
 
 export function NavigationPage() {

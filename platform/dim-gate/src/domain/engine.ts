@@ -584,7 +584,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       const requestIdFilter = query.get('requestId'), jobState = query.get('state')
       const items = state.jobs.filter((job) => {
         const request = entities.requests.find((entry) => entry.id === job.requestId)
-        return !!request && policy.canReadRequest(request) && (!requestIdFilter || job.requestId === requestIdFilter) && (!jobState || job.state === jobState)
+        return !!request && policy.canReadJob(request) && (!requestIdFilter || job.requestId === requestIdFilter) && (!jobState || job.state === jobState)
       }).map((job) => ({ ...job, name: `Attempt ${job.attempt}` }))
       const page = paged(items, query, ['id', 'name', 'updatedAt'])
       return clone({ ...page, items: page.items.map(({ name, ...job }) => { void name; return job }) })
@@ -593,7 +593,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (jobId) {
       validateQuery(query, [])
       const job = state.jobs.find((entry) => entry.id === jobId)
-      const request = job && entities.requests.find((entry) => entry.id === job.requestId && policy.canReadRequest(entry))
+      const request = job && entities.requests.find((entry) => entry.id === job.requestId && policy.canReadJob(entry))
       if (!job || !request) return notFound()
       return clone({ job, logs: jobLogs(state, job) })
     }
@@ -784,7 +784,15 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       const candidate: CI = { ...create, id: `ci-manual-${String(state.sequence + 1).padStart(4, '0')}`, orgId: policy.user!.orgId,
         version: 1, createdAt: clockIso(state.logicalClock), updatedAt: clockIso(state.logicalClock),
         health: 'unknown', source: 'manual', observedAt: null }
-      if (state.entities.cis.some((entry) => canonicalCiKey(state, entry) === canonicalCiKey(state, candidate))) fail(409, 'DUPLICATE_RESOURCE', '相同 canonical identity 的 CI 已存在。')
+      const candidateIdentity = canonicalCiKey(state, candidate)
+      const collidesWithPlannedIdentity = state.jobs.some((job) => {
+        if (!['queued', 'running'].includes(job.state)) return false
+        const request = state.entities.requests.find((entry) => entry.id === job.requestId)
+        return !!request && canonicalCiKey(state, provisionedCi(state, request, job)) === candidateIdentity
+      })
+      if (state.entities.cis.some((entry) => canonicalCiKey(state, entry) === candidateIdentity) || collidesWithPlannedIdentity) {
+        fail(409, 'DUPLICATE_RESOURCE', '相同 canonical identity 的 CI 已存在或已由交付作業保留。')
+      }
       if (candidate.kind === 'compute') {
         const usage = requestPoolUsage(state, pool.id)
         if (Number(candidate.attributes.cpu) > usage.cpu.available

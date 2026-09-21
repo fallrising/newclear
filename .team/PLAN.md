@@ -9,11 +9,11 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 18 |
+| protocol_version / ledger_revision | 1 / 19 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
-| active_work_branch | agent/dim-gate/mainline/m2-governance |
+| active_owner / run_id | Codex orchestrator / DG-M3-20260921-01 |
+| active_work_branch | agent/dim-gate/mainline/m3-delivery |
 | source / last_reconciled_target | M1 source `50294b687d06f08e94290f6f327187e8f69248bc` / reconciled `a5982bf4547bba85429fec50494751562b5fe7c6`, 2026-09-20 |
 | source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
 | spec revision | M2 integration contract revision 1; implementation checkpoint `a9e64276273fc3698105c2bf8b0b7bc833444057` |
@@ -33,8 +33,8 @@
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
-| M2 | RUNNING | none | DRAFT PR #13 | T-014 domain/API, T-015 RD/Ops UI and T-016 Admin UI checkpoints accepted; integrated review outstanding; AC-09–12,21–23 |
-| M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
+| M2 | ACCEPTED | `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` | MERGED — PR #13, merge `29bed41788a33684f24d216f4fd4d5f3f998c672` | AC-09–12,21–23; independent review, 138 tests, 22 Chromium journeys and post-merge CI passed |
+| M3 | RUNNING | none | NOT_OPENED | T-018 shared delivery; AC-13–16,24 |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
 | M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
 
@@ -292,4 +292,32 @@ integration_state: OPEN_READY_PR_13_NOT_MERGED
 remote_durability: T-017 product and evidence head are on the SSH remote branch; exact evidence-head CI 35590593367 passed
 blockers: []
 next_action: commit and SSH-push acceptance metadata, require final metadata-head CI, then perform the explicitly authorized PR #13 merge without deployment
+```
+
+### M3 recovery and execution checkpoint
+
+DG-D028: Reconcile M2 as ACCEPTED and MERGED. PR #13 merged at `29bed41788a33684f24d216f4fd4d5f3f998c672`; metadata CI 35591097020, post-merge CI 35591531196 and mirror 35591531198 passed. Main advanced to `e760d8e988c0e2a837b226c600805a659a362c10` through unrelated agent-platform documentation PR #14. Source and M1/M2 worktrees remain unchanged; the new isolated M3 branch starts here.
+
+DG-D029: User approved the first M3 vertical slice. Freeze [M3 integration contract revision 1](../platform/dim-gate/docs/M3-INTEGRATION-CONTRACT.md) and start [T-018](tasks/T-018.md), then bounded UI and independent review. No unresolved owner decision blocks this slice. Built-in Codex owns implementation and a separate read-only session owns review; exact runtime model IDs are not inferred. Kernel `237aa277b0d067f65c8f64f49c6854597f7f8b15` was read from an isolated SSH sparse checkout; the existing reference remains unchanged at `664d176`.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-01
+terminal_state: running
+active_owner: Codex orchestrator
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: e760d8e988c0e2a837b226c600805a659a362c10
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3
+task_id: T-018
+implementation_commit: none
+spec_revision: M3-INTEGRATION-CONTRACT revision 1
+evidence_refs: []
+integration_state: NOT_OPENED
+remote_durability: local isolated worktree, implementation checkpoint pending
+blockers: []
+next_action: implement shared delivery, integrate UI/Chromium, then independent fixed-commit review and remote CI
 ```

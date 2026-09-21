@@ -1,0 +1,56 @@
+{
+  "listen": "127.0.0.1:7777",
+  "advertise_addr": "127.0.0.1:7777",
+  "client_advertise": "http://127.0.0.1:7777",
+  "data_dir": "/tmp/apm0-20260921/sandboxd",
+  "cocoon_bin": "/tmp/apm0-20260921/cocoon-cli",
+  "restore_mode": "mmap",
+  "no_direct_io": true,
+  "no_balloon": true,
+  "release_delay_seconds": 0,
+  "max_claims": 4,
+  "refill_concurrency": 2,
+  "max_fork_count": 2,
+  "audit_log": true,
+  "api_token": "REDACTED-SET-A-NEW-LOCAL-TOKEN",
+  "pools": [
+    {
+      "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "net": "none",
+      "size": "large",
+      "warm": 0,
+      "egress": {
+        "allow": [
+          {
+            "host": "example.com",
+            "methods": [
+              "GET",
+              "CONNECT"
+            ],
+            "ports": [
+              80,
+              443
+            ],
+            "secret": "m0-canary"
+          },
+          {
+            "host": "127.0.0.1",
+            "methods": [
+              "GET"
+            ],
+            "ports": [
+              18999
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "secrets": [
+    {
+      "name": "m0-canary",
+      "header": "X-M0-Canary",
+      "value_env": "M0_EGRESS_CANARY"
+    }
+  ]
+}

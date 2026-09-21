@@ -1,41 +1,26 @@
 # 開發接續紀錄 — 2026-09-21
 
-本次停止點：M0 實作與證據已提交，等待換到可使用 KVM 的主機。使用者要求保存進度並合併 PR #15，稍後再執行 MicroVM 驗證。
+本次停止點：**M0 的五項 gate 已在真實 KVM 的固定 none-lane 配置通過，下一步為 M1。** 原始程式基準是 PR #15 合併後的 `aafd24d`；新增實測工具、證據與文件位於 `agent/agent-platform/m0-kvm` 分支。完整結果見 [KVM 驗收](KVM-VALIDATION.md) 與 [gate report](evidence/m0-gates-2026-09-21.json)。
 
 ## 已完成
 
-- SDD 基準：PR #14 已合併。
-- 程式基準：PR #15；本次文件新增前的程式 commit 是 `72dcf45b916c77964c69c2a0b04b6a29d73049a4`。
-- OpenHands Agent Server 固定版本的 Docker 契約測試、事件 journal 與確定性模型 fixture。
-- Cocoon 單節點 SDK probe：固定 OCI claim key、單次 allocation、origin 限制、guest binary 驗證、程序重啟、release／claim-list 核對。
-- Guest rootfs Dockerfile：保留 sandbox 的 kernel、initramfs、systemd、silkd、cocoon-agent，加入固定 OpenHands binary 與非 root 使用者。
-- KVM preflight：CPU flags、裝置／權限、KVM API version。
-- 38 個本機測試、原始映像及 guest rootfs 各 14 項 Docker 檢查通過。
-- GitHub CI 在上述程式 commit 通過：[run 35598680689](https://github.com/fallrising/newclear/actions/runs/35598680689)。
-- 測試用容器與網路已清理。Guest 映像只在舊機器本機建置，沒有 publish registry；新機器需重新 build。
+- 已完整讀取前一版 handoff，從 current main 建立獨立 worktree `/home/ckc/test/codex/newclear-agent-m0`。
+- 管理員完成 Cocoon／sandboxd／Cloud Hypervisor／EROFS／qemu-utils／guest boot files 安裝與 KVM 權限；實際 KVM API 12 可用。
+- 在 systemd delegated user service 中執行真實 Cocoon／sandboxd；無需額外 sudo。固定版本與配置見 KVM 驗收。
+- Guest 本機重建，透過 loopback registry 取得真正 OCI manifest digest，再由 Cocoon 拉入獨立 store。
+- 真實 Agent Server 19 項 sandbox checks 通過：REST／WS、auth、replay、interrupt/resume、程序重啟後接續、重複 release。
+- 兩個 MicroVM workspace／token 隔離、實際 CPU/RAM、20 秒 TTL 前後、busy VM release、allocation 成功後 SDK timeout 注入／對帳通過。
+- 以 PID＋start-time、VM record、runtime directory／COW disk 和 CPU cgroup 四種證據核對回收，未只依賴 release ACK／claim-list。
+- None-lane egress 的 HTTP/TLS allow、host/method/port/metadata/control-plane deny、private-IP guard 與限定範圍 canary scan 通過。
+- 新增可重跑的 `kvm_lifecycle`／`kvm_egress` modules；45 tests、lint／format，以及兩組各 14 項 Docker checks 通過。
+- Test claims／VMs 歸零，專用 runtime service／cgroup 與短期 registry container／volume 已清理；保留本機 guest image、venv 與私密原始 artifacts。
 
-## 尚未完成
+## 下一步
 
-目前仍為 **M0 in progress**，`full_m0_complete=false`。Cocoon data-plane／MicroVM 開機、TTL 到期、實際 VM 停止與資源回收、跨工作區隔離、egress 與故障注入都還需要真實 KVM 主機。M1 平台 API、Web UI 與排程器尚未開始。
-
-舊開發機是 Ubuntu 24.04 的 AMD KVM guest，沒有暴露 `svm`，也没有 `/dev/kvm`。不要只在舊機器安裝套件就視為已解決硬體條件。
-
-## 新機器接續順序
-
-1. Clone／更新 `fallrising/newclear` 的 `main`，進入 `platform/agent-platform`。
-2. Python 3.12+ 建立虛擬環境，安裝依賴與執行基本檢查：
-
-   ```bash
-   python3 -m venv .venv
-   . .venv/bin/activate
-   python -m pip install -e '.[dev]'
-   make check
-   agent-platform-m0 preflight
-   ```
-
-3. 依 [KVM 主機準備](KVM-HOST.md) 確認 KVM 能力、安裝 Cocoon／sandboxd／相依元件，建置 guest image，取得真正的 OCI manifest digest，準備單節點私密配置。
-4. 按文件執行 `guest-image-smoke` 和 `sandbox-smoke`。若 KVM 主機在遠端，使用文件中的 SSH tunnel；不必搬運舊機器的暫存檔或虛擬環境。
-5. 把去除機密的真實主機驗收結果記入 `docs/evidence/`，更新 M0 的 pass／unsupported／fail 與剩餘 gate。不可用 Docker／mock 成功代替 MicroVM 證據。
+1. 依 [SDD](../SDD.md) 的 M1 切片開發 API/Postgres/schema、operator login、queue、fake adapters、UI 骨架及 AT-01 垂直驗收；目前尚未實作這些功能。
+2. M1 可從 fake adapters 開始；需要重跑真實 KVM 時依 [KVM-HOST](KVM-HOST.md)／[KVM 驗收](KVM-VALIDATION.md) 重建專用配置。暫存 registry 已移除，不能假設 `localhost:15000` 仍可拉取。
+3. M0 的通過範圍是單節點 Linux amd64、`large`、`net=none`／vsock proxy。Bridge/CNI、HTTPS interception、DNS rebinding／redirect 對抗、任意工具中途恢復、VM checkpoint resume、真實 provider 與 production 部署仍須按後續 milestone 驗證。
+4. 單一 probe report 保留 `full_m0_complete=false`；本次 gate report 核對跨 probe 的獨立硬體證據後為 `true`。不要更改既有保守回報語意。
 
 ## 必須保留的契約差異
 

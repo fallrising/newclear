@@ -207,7 +207,9 @@ class Probe:
         self.passed("resume_after_interrupt")
         return self.events()
 
-    def after_restart(self, expected_events):
+    def after_restart(self, expected_events, restart_scope="container"):
+        if restart_scope not in {"container", "guest_process"}:
+            raise ProbeError("invalid_restart_scope")
         wait_ready(self.http)
         self.wait_status("finished")
         actual = self.events()
@@ -215,13 +217,13 @@ class Probe:
         if any({e["id"]: e for e in actual}.get(k) != v for k, v in expected_by_id.items()):
             raise ProbeError("restart_lost_events")
         self.replay(actual)
-        self.passed("container_restart_retains_history")
+        self.passed(f"{restart_scope}_restart_retains_history")
         self.message("M0_AFTER_RESTART")
         self.http.expect("POST", self.path + "/run")
         self.wait_status("finished")
         if len(self.events()) <= len(actual):
             raise ProbeError("restart_continuation_missing")
-        self.passed("continue_after_container_restart")
+        self.passed(f"continue_after_{restart_scope}_restart")
         self.report["unique_events"] = self.journal.count()
         self.http.expect("DELETE", self.path)
         status, _ = self.http.request("GET", self.path)

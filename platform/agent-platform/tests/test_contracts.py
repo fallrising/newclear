@@ -250,7 +250,7 @@ class CleanupTests(unittest.TestCase):
             calls.append(args)
             if args[0] == "run":
                 raise ProbeError("docker_command_unavailable_or_timeout")
-            return ""
+            return '[{"Id":"sha256:fixture"}]' if args[0] == "image" else ""
 
         with (
             tempfile.TemporaryDirectory() as directory,
@@ -270,7 +270,7 @@ class CleanupTests(unittest.TestCase):
         def docker(*args, **kwargs):
             if args[0] in {"run", "rm"}:
                 raise ProbeError("fixture_failure")
-            return ""
+            return '[{"Id":"sha256:fixture"}]' if args[0] == "image" else ""
 
         with (
             tempfile.TemporaryDirectory() as directory,
@@ -288,7 +288,7 @@ class CleanupTests(unittest.TestCase):
             calls.append(args)
             if args[0] == "run":
                 raise KeyboardInterrupt
-            return ""
+            return '[{"Id":"sha256:fixture"}]' if args[0] == "image" else ""
 
         with (
             tempfile.TemporaryDirectory() as directory,

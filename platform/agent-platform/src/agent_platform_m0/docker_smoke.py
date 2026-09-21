@@ -38,7 +38,8 @@ def start_model(name):
     docker("exec", "-d", name, "python3", "/tmp/m0_fake_model.py")
 
 
-def run(output: Path) -> dict:
+def run(output: Path, guest_image: str | None = None) -> dict:
+    image = guest_image or OPENHANDS_IMAGE
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     name = "agent-platform-m0-" + uuid.uuid4().hex
     network = name + "-net"
@@ -47,7 +48,7 @@ def run(output: Path) -> dict:
         "schema_version": 1,
         "started_at": datetime.now(UTC).isoformat(),
         "transport": "docker",
-        "image": OPENHANDS_IMAGE,
+        "image": image,
         "checks": {},
         "pending_kvm_gates": PENDING_KVM_GATES,
         "full_m0_complete": False,
@@ -57,7 +58,8 @@ def run(output: Path) -> dict:
     network_attempted = container_attempted = False
     relay = None
     try:
-        docker("image", "inspect", OPENHANDS_IMAGE)
+        observed = json.loads(docker("image", "inspect", image))
+        report["local_image_id"] = observed[0]["Id"]
         network_attempted = True
         docker("network", "create", "--internal", "--label", "newclear.agent-platform=m0", network)
         container_attempted = True
@@ -78,7 +80,12 @@ def run(output: Path) -> dict:
             "--pids-limit=256",
             "-e",
             "SESSION_API_KEY",
-            OPENHANDS_IMAGE,
+            *(
+                ["--entrypoint=/usr/local/bin/openhands-agent-server", "--user=2000"]
+                if guest_image
+                else []
+            ),
+            image,
             "--host",
             "0.0.0.0",
             "--port",

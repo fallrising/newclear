@@ -38,3 +38,7 @@ jobs:
           docker pull ghcr.io/openhands/agent-server@sha256:8d015443e480ce5fa0f6f0b21b8031d5b2115840805e28eac89f5d82799ea51b
       - name: Real Agent Server contract (Docker only; KVM gates remain open)
         run: make docker-smoke OUTPUT=.artifacts/ci-smoke
+      - name: Build pinned VM guest rootfs
+        run: docker build -t newclear-agent-m0:ci guest
+      - name: Guest rootfs contract (Docker only; no MicroVM boot claim)
+        run: agent-platform-m0 guest-image-smoke --image newclear-agent-m0:ci --output .artifacts/guest-ci

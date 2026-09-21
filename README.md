@@ -30,6 +30,7 @@
 | 路徑 | 說明 | 技術 |
 | --- | --- | --- |
 | [`platform/fanzloud`](platform/fanzloud/) | Cloud coding-agent platform 與 BYOS control layer | Rust |
+| [`platform/agent-platform`](platform/agent-platform/) | 以 OpenHands Agent Canvas 為範本的自託管多 agent 工作平台：統一 Web UI、Cocoon 隔離執行（SDD 草案，尚未實作） | React, Python, PostgreSQL, Cocoon（規劃） |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心的企業運維自助平台前端：RD／Ops／Admin 三中心、跨雲資源與互動演示（SDD baseline，尚未實作） | React, TypeScript, shadcn/ui（規劃） |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器、文件 ingestion 與可重現發布 | Python |
 | [`platform/local-ocr-services`](platform/local-ocr-services/) | 可自行託管的 CPU-first OCR HTTP services | Python, Docker |

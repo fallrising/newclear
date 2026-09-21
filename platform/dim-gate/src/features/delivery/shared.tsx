@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle2, Clock3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import type { Environment, PipelineRun, Release, SessionView } from '../../domain/schemas'
 import './delivery.css'
+import { useDeliveryPlayback } from './playback'
 
 export const deliveryApi = api
 type Scenario = 'build-failure' | 'health-failure' | 'rollback-failure'
@@ -27,7 +28,7 @@ export function projectAction(session: SessionView, action: string, projectId?: 
 
 export function useDeliveryRefresh() {
   const cache = useQueryClient()
-  return () => cache.invalidateQueries({ predicate: (query) => ['pipeline', 'pipelines', 'release', 'releases', 'environment', 'environments', 'application', 'applications', 'audit', 'guide'].includes(String(query.queryKey[3])) })
+  return useCallback(() => cache.invalidateQueries({ predicate: (query) => ['pipeline', 'pipelines', 'release', 'releases', 'environment', 'environments', 'application', 'applications', 'audit', 'guide'].includes(String(query.queryKey[3])) }), [cache])
 }
 
 export function MissingDelivery({ entity, back }: { entity: string; back: string }) {
@@ -57,9 +58,13 @@ export function DeliveryDemoControls({ session, run, release, canInject }: { ses
   const [notice, setNotice] = useState('')
   const [injected, setInjected] = useState<Scenario[]>([])
   const refresh = useDeliveryRefresh()
+  const active = Boolean(run && ['queued', 'running'].includes(run.state) || release && ['queued', 'deploying', 'verifying'].includes(release.state))
+  const playback = useDeliveryPlayback(session, active, refresh)
   const command = useMutation({ mutationFn: async (kind: 'clock' | Scenario) => {
-    if (kind === 'clock') return api.advanceClock(ticks)
-    return demoApi.setScenario(kind, kind === 'rollback-failure' ? { releaseId: release!.id } : { runId: run!.id })
+    const receipt = kind === 'clock' ? await api.advanceClock(ticks)
+      : await demoApi.setScenario(kind, kind === 'rollback-failure' ? { releaseId: release!.id } : { runId: run!.id })
+    await refresh()
+    return receipt
   } })
   const execute = async (kind: 'clock' | Scenario) => {
     setNotice('')
@@ -67,11 +72,11 @@ export function DeliveryDemoControls({ session, run, release, canInject }: { ses
       await command.mutateAsync(kind)
       if (kind !== 'clock') setInjected((current) => [...current, kind])
       setNotice(kind === 'clock' ? `模擬時鐘已前進 ${ticks} 個 tick。` : `已設定單次 ${kind} 模擬故障；只影響目前操作。`)
-      await refresh()
     } catch { /* Keep the transport error visible; commands are never automatically retried. */ }
   }
   const runActive = run && !['succeeded', 'failed', 'cancelled'].includes(run.state)
   const releaseActive = release && !['succeeded', 'failed', 'cancelled', 'rejected'].includes(release.state)
   const buildOpen = runActive && run.stages.some((stage) => stage.name === 'build' && ['queued', 'running'].includes(stage.state))
-  return <section className="panel delivery-demo" aria-label="配送模擬控制"><div className="panel-title"><Clock3 size={18} aria-hidden="true" /><h2>模擬控制</h2><span className="tag">目前 tick {session.logicalClock}</span></div><p className="muted">時鐘由此手動推進；不會執行真實建置或部署。時鐘會推進這個示範 session 中所有已排程的作業。</p><div className="delivery-actions"><label>模擬前進幅度<select value={ticks} onChange={(event) => setTicks(Number(event.target.value))}><option value={1}>1 tick · 逐步查看</option><option value={3}>3 ticks</option><option value={6}>6 ticks · 完整發布</option></select></label><Button variant="outline" disabled={command.isPending} onClick={() => void execute('clock')}>{command.isPending ? '處理中…' : '前進模擬時鐘'}</Button></div>{canInject && <div className="delivery-actions">{buildOpen && <Button variant="outline" disabled={command.isPending || injected.includes('build-failure')} onClick={() => void execute('build-failure')}>模擬建置失敗</Button>}{runActive && <Button variant="outline" disabled={command.isPending || injected.includes('health-failure')} onClick={() => void execute('health-failure')}>模擬健康檢查失敗</Button>}{release?.kind === 'rollback' && releaseActive && <Button variant="outline" disabled={command.isPending || injected.includes('rollback-failure')} onClick={() => void execute('rollback-failure')}>模擬回滾失敗</Button>}</div>}{notice && <p className="command-notice" role="status"><CheckCircle2 size={16} aria-hidden="true" />{notice}</p>}{command.isError && <ErrorState error={command.error} title="模擬操作未完成" />}</section>
+  const busy = command.isPending || playback.playing
+  return <section className="panel delivery-demo" aria-label="配送模擬控制"><div className="panel-title"><Clock3 size={18} aria-hidden="true" /><h2>模擬控制</h2><span className="tag">目前 tick {session.logicalClock}</span></div><p className="muted">可逐步推進，或啟動每秒一個 tick 的播放；不會執行真實建置或部署。時鐘會推進這個示範 session 中所有已排程的作業。離開頁面、切換身分或重新載入會暫停；重新播放從存檔步驟繼續，沒有離線補跑。</p><div className="delivery-actions"><label>模擬前進幅度<select value={ticks} disabled={busy} onChange={(event) => setTicks(Number(event.target.value))}><option value={1}>1 tick · 逐步查看</option><option value={3}>3 ticks</option><option value={6}>6 ticks · 完整發布</option></select></label><Button variant="outline" disabled={busy} onClick={() => void execute('clock')}>{command.isPending ? '處理中…' : '前進模擬時鐘'}</Button><Button variant="outline" disabled={command.isPending || !active} onClick={playback.toggle}>{playback.playing ? '暫停模擬播放' : '啟動模擬播放'}</Button></div>{canInject && <div className="delivery-actions">{buildOpen && <Button variant="outline" disabled={busy || injected.includes('build-failure')} onClick={() => void execute('build-failure')}>模擬建置失敗</Button>}{runActive && <Button variant="outline" disabled={busy || injected.includes('health-failure')} onClick={() => void execute('health-failure')}>模擬健康檢查失敗</Button>}{release?.kind === 'rollback' && releaseActive && <Button variant="outline" disabled={busy || injected.includes('rollback-failure')} onClick={() => void execute('rollback-failure')}>模擬回滾失敗</Button>}</div>}{notice && <p className="command-notice" role="status"><CheckCircle2 size={16} aria-hidden="true" />{notice}</p>}{command.isError && <ErrorState error={command.error} title="模擬操作未完成" />}{playback.error !== null && <ErrorState error={playback.error} title="模擬播放已暫停" />}</section>
 }

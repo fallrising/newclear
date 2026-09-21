@@ -31,6 +31,35 @@ function harness(initial = createSeed('m3-test'), persist: (s: Snapshot) => void
 }
 
 describe('M3 delivery invariants', () => {
+  it('clock receipts and their replays never disclose other project operation references', async () => {
+    const h = harness(), hidden = await h.trigger('data-only-secret', 'env-data-dev', data)
+    const receipt = await h.command('/clock/advance', { ticks: 3 }, commerce, 'scoped-clock')
+    expect(receipt.changed).toEqual([{ entityType: 'demoSession', entityId: 'm3-test' }])
+    expect(h.run(hidden).releaseId).toBeDefined()
+    expect(h.read<{ total: number }>('/pipelines').total).toBe(0)
+    expect(await h.command('/clock/advance', { ticks: 3 }, commerce, 'scoped-clock')).toEqual(receipt)
+  })
+
+  it.each([2, 99])('rejects an impossible persisted queued pipeline step %s before execution', async (stepIndex) => {
+    const h = harness(); await h.trigger()
+    const corrupt = h.engine.getSnapshot()
+    corrupt.scheduler.tasks[0].stepIndex = stepIndex
+    expect(() => createEngine(corrupt, () => undefined)).toThrow(expect.objectContaining({ code: 'INVALID_SNAPSHOT' }))
+  })
+
+  it.each([0, 1, 2, 3, 4, 5])('resumes valid step %s and rejects changed positions/due ticks', async (ticks) => {
+    const h = harness(), id = await h.trigger()
+    if (ticks) await h.advance(ticks)
+    const snapshot = h.engine.getSnapshot()
+    const restored = harness(snapshot)
+    await restored.advance(6 - ticks)
+    expect(restored.run(id).state).toBe('succeeded')
+    const wrongStep = structuredClone(snapshot); wrongStep.scheduler.tasks[0].stepIndex += 1
+    expect(() => createEngine(wrongStep, () => undefined)).toThrow(expect.objectContaining({ code: 'INVALID_SNAPSHOT' }))
+    const wrongDue = structuredClone(snapshot); wrongDue.scheduler.tasks[0].dueTick += 10
+    expect(() => createEngine(wrongDue, () => undefined)).toThrow(expect.objectContaining({ code: 'INVALID_SNAPSHOT' }))
+  })
+
   it('build/test/package is not deployment; only successful health changes active, and history/logs survive reload', async () => {
     const h = harness()
     const id = await h.trigger()

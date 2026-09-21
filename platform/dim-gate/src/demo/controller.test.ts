@@ -21,6 +21,20 @@ const identity = (controller: DemoController) => {
 afterEach(() => vi.useRealTimers())
 
 describe('persisted controller identity and transactions', () => {
+  it('preserves impossible delivery scheduler bytes until explicit recovery reset', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'corrupt-resume' }, 'trigger', identity(controller))
+    const saved = JSON.parse(h.raw!) as { snapshot: ReturnType<typeof controller.getSnapshot> }
+    saved.snapshot.scheduler.tasks[0].stepIndex = 99
+    const raw = JSON.stringify(saved)
+    h.storage.setItem(SNAPSHOT_KEY, raw)
+    expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
+    expect(h.raw).toBe(raw)
+    const recovered = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
+    expect(recovered.getSnapshot().scheduler.tasks).toEqual([])
+    expect(h.raw).not.toBe(raw)
+  })
   it('reload preserves domain state, selected persona, identity epoch and command replay', async () => {
     const h = harness()
     const first = h.start()

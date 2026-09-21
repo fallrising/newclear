@@ -41,6 +41,27 @@ export function deliveryIntegrityErrors(s: Snapshot): string[] {
   ]
   for (const id of expectedTasks) if (s.scheduler.tasks.filter(t => t.operationId === id).length !== 1) errors.push('delivery: missing/duplicate scheduler task')
   for (const task of s.scheduler.tasks) if ((pipelines.some(r => r.id === task.operationId) || releases.some(r => r.id === task.operationId)) && !expectedTasks.includes(task.operationId)) errors.push('delivery: ghost scheduler task')
+  for (const task of s.scheduler.tasks) {
+    const run = pipelines.find(r => r.id === task.operationId)
+    const release = releases.find(r => r.id === task.operationId)
+    if (!run && !release) continue
+    if (task.dueTick !== s.logicalClock + 1) errors.push('delivery: invalid due tick')
+    if (run) {
+      const step = task.stepIndex
+      const valid = !run.releaseId && !run.artifactDigest && step <= 2
+        && run.state === (step === 0 ? 'queued' : 'running')
+        && run.stages.every((stage, index) => stage.state === (index < step ? 'succeeded' : index === step && step > 0 ? 'running' : 'queued'))
+      if (!valid) errors.push('delivery: invalid pipeline scheduler position')
+    }
+    if (release) {
+      const step = ['queued', 'deploying', 'verifying'].indexOf(release.state)
+      const linked = pipelines.find(r => r.id === release.pipelineRunId)
+      const valid = step >= 0 && task.stepIndex === step && release.health === 'pending'
+        && (!linked || linked.state === 'running' && linked.stages.every((stage, index) =>
+          stage.state === (index < 3 || index === 3 && step === 2 ? 'succeeded' : index === step + 2 && step > 0 ? 'running' : 'queued')))
+      if (!valid) errors.push('delivery: invalid release scheduler position')
+    }
+  }
   for (const log of s.deliveryLogs) if (![...pipelines, ...releases].some(r => r.id === log.operationId && r.applicationId === log.applicationId && r.environmentId === log.environmentId)) errors.push('delivery: invalid log reference')
   return errors
 }

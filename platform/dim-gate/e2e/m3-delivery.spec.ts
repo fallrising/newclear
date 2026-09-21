@@ -101,10 +101,10 @@ async function browserApi(page: Page, input: { path: string; persona?: string; b
 
 async function createReadyStaging(page: Page) {
   await page.goto('rd/catalog/catalog-web/request')
-  await page.getByLabel('應用', { exact: true }).selectOption('app-checkout')
-  await page.getByLabel('環境名稱', { exact: true }).fill('e2e-m3-staging')
-  await page.getByLabel('階段', { exact: true }).selectOption('staging')
-  await page.getByLabel('用途', { exact: true }).fill('M3 stable → next → rollback browser journey')
+  await page.getByRole('combobox', { name: '應用', exact: true }).selectOption('app-checkout')
+  await page.getByRole('textbox', { name: '環境名稱', exact: true }).fill('e2e-m3-staging')
+  await page.getByRole('combobox', { name: '階段', exact: true }).selectOption('staging')
+  await page.getByRole('textbox', { name: '用途', exact: true }).fill('M3 stable → next → rollback browser journey')
   await page.getByRole('button', { name: '確認並提交申請' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('e2e-m3-staging · 待審核')
   const requestId = new URL(page.url()).pathname.split('/').at(-1)!

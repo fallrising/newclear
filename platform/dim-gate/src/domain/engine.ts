@@ -1124,7 +1124,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       }
       entityType = 'demoSession'; entityId = next.sessionId; entityVersion = next.storeRevision + 1
       action = progressed.length ? 'provision.scheduler.advance' : 'demo.clock.advance'; fields = ['logicalClock']
-      changed = [{ entityType, entityId }, ...progressed]
+      // The demo clock advances the whole session, including hidden operations.
+      // Its public receipt/replay and summary event must not enumerate those IDs.
+      // Store-revision subscribers refetch scoped queries; operation audits remain separate.
+      changed = [{ entityType, entityId }]
     }
 
     next.sequence += 1

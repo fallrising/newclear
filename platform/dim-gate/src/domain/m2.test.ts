@@ -69,6 +69,13 @@ describe('M2 request delivery state machine', () => {
     expect((engine.read('/audit', new URLSearchParams(`correlationId=${failedTick.correlationId}`), 'user-rd-commerce') as { total: number }).total).toBe(1)
     const originalEnvironmentId = failed.request.environmentId
     const originalCiIds = failed.jobs[0].plannedCiIds
+    await expect(command(engine, 'user-ops', '/cis', {
+      name: 'attempted failed-job identity takeover', kind: 'compute', provider: 'aws', externalId: originalCiIds[0],
+      accountId: 'account-aws-demo', locationId: 'location-aws-sg', poolId: 'pool-aws-sg', ownerTeamId: 'team-commerce',
+      visibilityProjectIds: ['project-store'], lifecycle: 'active', tags: { mode: 'demo' }, attributes: {
+        instanceType: 'demo.compute.small', vpcId: 'vpc-demo', subnetId: 'subnet-demo', cpu: 1, memoryMiB: 1024,
+      }, customFields: {},
+    }, 'failed-identity-takeover')).rejects.toMatchObject({ status: 409, code: 'DUPLICATE_RESOURCE' })
     const retried = await command(engine, 'user-rd-commerce', `/requests/${id}/retry`, { expectedVersion: failed.request.version, reason: 'Retry same identities' }, 'failure-retry')
     expect(retried.operationId).not.toBe(failed.jobs[0].id)
     const queued = detail(engine, id)

@@ -786,7 +786,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
         health: 'unknown', source: 'manual', observedAt: null }
       const candidateIdentity = canonicalCiKey(state, candidate)
       const collidesWithPlannedIdentity = state.jobs.some((job) => {
-        if (!['queued', 'running'].includes(job.state)) return false
+        if (!['queued', 'running', 'failed'].includes(job.state)) return false
         const request = state.entities.requests.find((entry) => entry.id === job.requestId)
         return !!request && canonicalCiKey(state, provisionedCi(state, request, job)) === candidateIdentity
       })

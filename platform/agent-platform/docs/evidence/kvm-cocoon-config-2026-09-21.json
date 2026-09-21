@@ -1,0 +1,15 @@
+{
+  "root_dir": "/tmp/apm0-20260921/cocoon",
+  "run_dir": "/tmp/apm0-20260921/run",
+  "log_dir": "/tmp/apm0-20260921/logs",
+  "ch_binary": "/usr/local/bin/cloud-hypervisor",
+  "meta_backend": "sqlite",
+  "cni_conf_dir": "",
+  "cni_bin_dir": "",
+  "net_scope": "m0",
+  "cgroup_parent": "user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m0.service/vms",
+  "stop_timeout_seconds": 10,
+  "socket_wait_timeout_seconds": 15,
+  "terminate_grace_period_seconds": 5,
+  "pool_size": 4
+}

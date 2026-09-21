@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-21T17:30:31.645163+00:00",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "transport": "cocoon-kvm-host-local",
+  "checks": {
+    "two_real_guests_and_resource_limits": {
+      "status": "passed",
+      "evidence": true
+    },
+    "workspace_and_host_mount_isolation": {
+      "status": "passed",
+      "evidence": true
+    },
+    "sibling_sandbox_token_rejected": {
+      "status": "passed",
+      "evidence": true
+    },
+    "release_terminates_busy_vm": {
+      "status": "passed",
+      "evidence": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    "sibling_survives_other_release": {
+      "status": "passed",
+      "evidence": true
+    },
+    "second_vm_resources_removed": {
+      "status": "passed",
+      "evidence": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    "ttl_guest_live_before_deadline": {
+      "status": "passed",
+      "evidence": {
+        "deadline": "2026-09-21T19:30:52.499082404+02:00"
+      }
+    },
+    "ttl_expiry_stops_vm_and_reclaims_resources": {
+      "status": "passed",
+      "evidence": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    "lost_reply_single_allocation_and_reconciliation": {
+      "status": "passed",
+      "evidence": {
+        "injection": "SDK boundary timeout after real HTTP allocation",
+        "allocation_requests": 1,
+        "removal": {
+          "original_vmm_process_gone": true,
+          "vm_record_gone": true,
+          "runtime_directory_gone": true,
+          "cpu_scope_gone": true
+        }
+      }
+    }
+  },
+  "observations": [
+    {
+      "sandbox_id": "sb_51437246fadd6e67",
+      "vm_id": "Y4ER3YLDJHHAIOHNH4E6D5QSCE",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-ec200a61debd",
+      "identity": {
+        "pid": 1092041,
+        "start_ticks": 56110984,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm0-20260921/run/cloudhypervisor/Y4ER3YLDJHHAIOHNH4E6D5QSCE",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m0.service/vms/vm-Y4ER3YLDJHHAIOHNH4E6D5QSCE.scope",
+      "guest": {
+        "cpus": 4,
+        "mem_kib": 4030624,
+        "interfaces": [
+          "lo",
+          "sit0"
+        ]
+      }
+    },
+    {
+      "sandbox_id": "sb_f2628290f0ab52bc",
+      "vm_id": "7KL4B3THBZIVTTFZTGUUJXAM3P",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-8f88cd2ac321",
+      "identity": {
+        "pid": 1092137,
+        "start_ticks": 56110993,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm0-20260921/run/cloudhypervisor/7KL4B3THBZIVTTFZTGUUJXAM3P",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m0.service/vms/vm-7KL4B3THBZIVTTFZTGUUJXAM3P.scope",
+      "guest": {
+        "cpus": 4,
+        "mem_kib": 4030624,
+        "interfaces": [
+          "lo",
+          "sit0"
+        ]
+      }
+    },
+    {
+      "sandbox_id": "sb_8622db05280bd247",
+      "vm_id": "H3XDKMV3LEJMAPHAIIJLK4LK2S",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-75c2240c60ff",
+      "identity": {
+        "pid": 1092387,
+        "start_ticks": 56111061,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm0-20260921/run/cloudhypervisor/H3XDKMV3LEJMAPHAIIJLK4LK2S",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m0.service/vms/vm-H3XDKMV3LEJMAPHAIIJLK4LK2S.scope"
+    },
+    {
+      "sandbox_id": "sb_ee876c6be48b5d92",
+      "vm_id": "S5CP7ME2B5YSYKPHW5YBVR4JVK",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-dd93b0ffe4cc",
+      "identity": {
+        "pid": 1092792,
+        "start_ticks": 56113530,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm0-20260921/run/cloudhypervisor/S5CP7ME2B5YSYKPHW5YBVR4JVK",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m0.service/vms/vm-S5CP7ME2B5YSYKPHW5YBVR4JVK.scope"
+    }
+  ],
+  "full_m0_complete": false,
+  "cleanup_errors": [],
+  "lifecycle_passed": true,
+  "finished_at": "2026-09-21T17:30:57.350749+00:00"
+}

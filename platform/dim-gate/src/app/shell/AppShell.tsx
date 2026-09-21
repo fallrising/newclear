@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { ArrowRight, BookOpen, ChevronRight, FlaskConical, Menu, Moon, Sun, X } from 'lucide-react'
 import { api, queryKey } from '../../api/client'
-import type { SessionView } from '../../domain/schemas'
+import type { NavigationItem, SessionView } from '../../domain/schemas'
 import { Brand } from '../../components/shared/brand'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
@@ -29,6 +29,8 @@ export function AppShell({ session }: { session: SessionView }) {
   const location = useLocation()
   const navigate = useNavigate()
   const personas = useQuery({ queryKey: queryKey('personas'), queryFn: () => api.getPersonas() })
+  const navigationCenter = session.centers[0]
+  const navigation = useQuery({ queryKey: queryKey('navigation', navigationCenter), queryFn: () => api.getNavigation(navigationCenter), enabled: Boolean(navigationCenter) })
   const personaMutation = useMutation({ mutationFn: (id: string) => api.setPersona(id) })
 
   useEffect(() => {
@@ -38,7 +40,12 @@ export function AppShell({ session }: { session: SessionView }) {
   }, [preferences])
 
   const currentRoute = routeForPath(location.pathname)
-  const currentLabel = currentRoute?.navigation.label ?? '工作區'
+  const navigationByKey = new Map<string, NavigationItem>(navigation.data?.map((item) => [item.routeKey, item]))
+  const configuredRoutes = visibleNavigation(session).filter((route) => navigation.isPending || navigation.isError || navigationByKey.has(route.key)).map((route) => {
+    const item = navigationByKey.get(route.key)
+    return item ? { ...route, navigation: { ...route.navigation, label: item.label, group: item.group, order: item.order } } : route
+  }).sort((left, right) => left.navigation.order - right.navigation.order)
+  const currentLabel = navigationByKey.get(currentRoute?.key ?? 'guide')?.label ?? currentRoute?.navigation.label ?? '工作區'
   const switchPersona = async (id: string) => {
     if (id === session.user.id) return
     setSwitching(true)
@@ -58,7 +65,7 @@ export function AppShell({ session }: { session: SessionView }) {
       <Brand />
       <div className="sidebar-section-label">工作空間</div>
       <nav aria-label="中心導覽">
-        {visibleNavigation(session).map((route) => {
+        {configuredRoutes.map((route) => {
           if (!route.center) return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><BookOpen size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span></NavLink>
           const details = centerDetails[route.center]
           const Icon = details.icon

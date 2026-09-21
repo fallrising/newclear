@@ -4,7 +4,8 @@ import type { Center, SessionView } from '../../domain/schemas'
 export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environment-detail'
   | 'rd.catalog' | 'rd.catalog-request' | 'rd.requests' | 'rd.request-detail'
   | 'ops.overview' | 'ops.cmdb' | 'ops.ci-detail' | 'ops.topology' | 'ops.requests' | 'ops.request-detail'
-  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'guide'
+  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.navigation'
+  | 'admin.catalog' | 'admin.cmdb-models' | 'admin.audit' | 'guide'
 export type RegisteredRoute = {
   key: RouteKey
   path: string
@@ -33,6 +34,11 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'ops.job-detail', path: '/ops/jobs/:jobId', center: 'ops', requiredAction: 'job.read', navigation: { label: '交付作業詳細資料', group: '維運中心', order: 27, visible: false } },
   { key: 'ops.capacity', path: '/ops/capacity', center: 'ops', requiredAction: 'capacity.read', navigation: { label: '資源池容量', group: '維運中心', order: 28, visible: true } },
   { key: 'admin.overview', path: '/admin', center: 'admin', requiredAction: 'access.write', navigation: { label: '平台管理', group: '工作空間', order: 30, visible: true } },
+  { key: 'admin.access', path: '/admin/access', center: 'admin', requiredAction: 'access.write', navigation: { label: '角色與範圍', group: '治理', order: 31, visible: true } },
+  { key: 'admin.navigation', path: '/admin/navigation', center: 'admin', requiredAction: 'navigation.write', navigation: { label: '導航目錄', group: '治理', order: 32, visible: true } },
+  { key: 'admin.catalog', path: '/admin/catalog', center: 'admin', requiredAction: 'catalog.write', navigation: { label: '服務目錄', group: '治理', order: 33, visible: true } },
+  { key: 'admin.cmdb-models', path: '/admin/cmdb-models', center: 'admin', requiredAction: 'model.write', navigation: { label: 'CMDB 欄位', group: '治理', order: 34, visible: true } },
+  { key: 'admin.audit', path: '/admin/audit', center: 'admin', requiredAction: 'audit.read', navigation: { label: '管理稽核', group: '治理', order: 35, visible: true } },
   { key: 'guide', path: '/guide', navigation: { label: '示範導覽', group: '示範', order: 40, visible: true } },
 ]
 

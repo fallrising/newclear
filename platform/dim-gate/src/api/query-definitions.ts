@@ -4,6 +4,7 @@ export const queryFamilies = {
   cmdb: { dashboard: 'dashboard', applications: 'applications', environments: 'environments', cis: 'cis' },
   topology: { relations: 'relations', topology: 'topology', search: 'search' },
   selfService: { pools: 'pools', capacity: 'capacity', catalog: 'catalog', requests: 'requests', jobs: 'jobs' },
+  admin: { access: 'access', adminNavigation: 'admin-navigation', models: 'models', audit: 'audit' },
 } as const
 
 export function scopedQueryKey(identity: { sessionId: string; identityEpoch: number; policyVersion: number } | null,

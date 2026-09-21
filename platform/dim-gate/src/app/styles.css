@@ -435,6 +435,23 @@ input, textarea { font: inherit; color: var(--foreground); background: var(--car
 .scenario-control { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
 .scenario-control p { color: var(--muted); font-size: 11px; margin-bottom: 9px; }
 
+/* M2 governance */
+.admin-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px 16px; }
+.admin-form .panel-title { grid-column: 1 / -1; }
+.admin-form label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.admin-form input, .admin-form select, .admin-navigation-table input, .admin-navigation-table select { width: 100%; min-height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; }
+.admin-navigation-table input[type="checkbox"] { width: 20px; min-height: 20px; }
+.admin-link-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-inline-editor { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.admin-inline-editor label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.admin-inline-editor input, .admin-inline-editor textarea { width: 100%; min-height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; }
+.admin-inline-editor textarea { resize: vertical; }
+
+@media (max-width: 800px) {
+  .admin-form { grid-template-columns: 1fr; }
+  .admin-form > *, .admin-form .panel-title { grid-column: 1; }
+}
+
 @media (max-width: 640px) {
   .request-form { grid-template-columns: 1fr; }
   .request-form > *, .span-all, .form-step, .capacity-preview, .form-actions { grid-column: 1; }

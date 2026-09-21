@@ -20,6 +20,14 @@ Branch/PR 也以例外清單核對：目前 `newclear`、`kernel` 都只有 `mai
 
 Owner 要求在此公開 monorepo 新增一條人機群聊產品。這是對 2026-09-05 freeze 的**明確第四條戰線例外**，範圍僅限 `products/kith`。不得復活 `labs/bee-swarm`。不得擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。其餘 2026-09-05 分級維持不變。kith 在 M0 之前僅為 documentation-only。
 
+## Owner override 2026-09-21 — platform/agent-platform
+
+Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主流平台、選定一個範本並撰寫 SDD。本次例外僅涵蓋 `platform/agent-platform` 的研究與文件基準，狀態為 **documentation-only / Draft**；不是部署或已完成產品的宣告。
+
+範本選定 OpenHands Agent Canvas，方向為自管伺服器上的多任務 agent Web 工作台與 Cocoon sandbox 整合。與 `platform/fanzloud` 的 personal BYOS／Codex Cloud、`products/kith` 的群聊責任分開，不改動這些元件的實作，不復活 `labs/bee-swarm`。後續第一個切片是 SDD 的 M0 相容性驗證；既有 portfolio 分級不因這份設計自動改變。
+
+設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
+
 ## 2026-09-05 修復與補充驗證
 
 這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。

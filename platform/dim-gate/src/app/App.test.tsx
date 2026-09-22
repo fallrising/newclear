@@ -12,11 +12,13 @@ const client = vi.hoisted(() => ({
   listeners: new Set<() => void>(),
   clock: 7,
   commandCount: 1,
+  getNotifications: vi.fn(), listApplications: vi.fn(),
   getSession: vi.fn(), getPersonas: vi.fn(), getDashboard: vi.fn(), getGuide: vi.fn(), setPersona: vi.fn(), advanceClock: vi.fn(), reset: vi.fn(),
 }))
 
 vi.mock('../api/client', () => ({
   api: {
+    getNotifications: client.getNotifications, listApplications: client.listApplications,
     getSession: client.getSession, getPersonas: client.getPersonas, getDashboard: client.getDashboard,
     getGuide: client.getGuide, setPersona: client.setPersona, advanceClock: client.advanceClock, reset: client.reset,
     subscribe: (listener: () => void) => { client.listeners.add(listener); return () => client.listeners.delete(listener) },
@@ -29,7 +31,7 @@ function makeSession(id = 'user-rd-commerce', epoch = 1): SessionView {
   return { user: { id, displayName: id === 'user-rd-commerce' ? 'Commerce 研發' : 'Data 研發' }, assignments: [], effectiveActions: ['app.read', 'environment.read', 'ci.read'], centers: ['rd'], demo: true, sessionId: 'session-test', identityEpoch: epoch, generation: 1, policyVersion: 1, storeRevision: 1, logicalClock: 7, storageMode: 'session' }
 }
 function dashboard(count = 2): DashboardView {
-  return { center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }
+  return { activeIncidentCount: 0, pendingItems: [], center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }
 }
 function mount(path = '/rd') {
   const queryClient = createAppQueryClient()
@@ -46,8 +48,10 @@ beforeEach(() => {
   localStorage.clear()
   client.getSession.mockImplementation(async () => structuredClone(client.session))
   client.getPersonas.mockResolvedValue([{ id: 'user-rd-commerce', displayName: 'Commerce 研發', description: '商務專案', centers: ['rd'] }, { id: 'user-rd-data', displayName: 'Data 研發', description: '資料專案', centers: ['rd'] }])
+  client.getNotifications.mockResolvedValue({ items: [] })
+  client.listApplications.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 100 })
   client.getDashboard.mockResolvedValue(dashboard())
-  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', seedVersion: 'dim-gate-m3-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
+  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', applicationId: null, environmentId: null, steps: [], seedVersion: 'dim-gate-m4-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
   client.setPersona.mockImplementation(async (id: string) => { client.session = makeSession(id, 2); notify(); return structuredClone(client.session) })
   client.advanceClock.mockImplementation(async (ticks: number) => { client.clock += ticks; client.commandCount++; notify(); return { entityType: 'session', entityId: 'session-test', entityVersion: 2, correlationId: 'corr-test', changed: [] } })
   client.reset.mockImplementation(async () => { client.clock = 0; client.commandCount = 0; client.session = { ...makeSession(), identityEpoch: 2, generation: 2 }; notify(); return structuredClone(client.session) })

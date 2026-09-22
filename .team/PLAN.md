@@ -418,8 +418,8 @@ DG-D034: Reconciled accepted M3 parent PR17, OPEN Ready at7d20bbc, CI35639600714
 
 | Task | State | Scope | Evidence |
 | --- | --- | --- | --- |
-| [T-021](tasks/T-021.md) | READY | shared observation/incident domain | pending |
-| [T-022](tasks/T-022.md) | READY | observation/incident/integration UI | pending |
+| [T-021](tasks/T-021.md) | IMPLEMENTED; lead verification running | shared observation/incident domain | worker focused 131/131; report pending |
+| [T-022](tasks/T-022.md) | IMPLEMENTED; lead verification running | observation/incident/integration UI | [attempt 1](reports/T-022-attempt-1.md), 12/12 focused tests |
 | [T-023](tasks/T-023.md) | BLOCKED on fixed candidate | independent read-only review | pending |
 | [T-024](tasks/T-024.md) | RUNNING | integration/full gates/Chromium/CI | pending |
 
@@ -442,3 +442,5 @@ integration_state: NOT_OPENED
 remote_durability: local contract checkpoint; SSH push required before handoff
 next_action: complete domain/UI integration, production Chromium and independent fixed-candidate review; open stacked PR and require current-head CI; no merge/deployment
 ```
+
+M4 integration checkpoint: frozen install, lint/typecheck, all 207 tests, docs/contracts/CI/architecture gates passed on the integrated local product diff. Full production Chromium and fixed-commit independent review remain pending. Native actionlint was initially invoked with an incorrect relative path; corrected root workflow invocation is required. No acceptance decision.

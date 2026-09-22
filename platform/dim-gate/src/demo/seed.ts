@@ -3,6 +3,7 @@ import { buildApplicationSeed } from './seed/applications'
 import { buildCmdbSeed } from './seed/cmdb'
 import { personas } from './seed/core'
 import { buildTopologySeed } from './seed/topology'
+import { buildObservationSeed } from './seed/observations'
 
 export { personas } from './seed/core'
 
@@ -10,7 +11,7 @@ export const SEED_BASELINE = '2026-09-20T09:00:00Z'
 const stamp = { version: 1, createdAt: SEED_BASELINE, updatedAt: SEED_BASELINE }
 const scoped = { ...stamp, orgId: 'org-demo' }
 
-/** M3 preserves inventory/governance; release history is created only by demo commands. */
+/** M4 preserves inventory/governance; release and incident history require demo commands. */
 export function createSeed(sessionId: string): Snapshot {
   const applicationSeed = buildApplicationSeed()
   const cmdbSeed = buildCmdbSeed()
@@ -62,6 +63,7 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'nav-rd-catalog', routeKey: 'rd.catalog', label: '服務目錄', group: '研發中心', order: 12, enabled: true },
         { ...scoped, id: 'nav-rd-requests', routeKey: 'rd.requests', label: '環境申請', group: '研發中心', order: 13, enabled: true },
         { ...scoped, id: 'nav-rd-pipelines', routeKey: 'rd.pipelines', label: 'Pipeline 發布', group: '研發中心', order: 14, enabled: true },
+        { ...scoped, id: 'nav-rd-observability', routeKey: 'rd.observability', label: '可觀測性', group: '研發中心', order: 15, enabled: true },
         { ...scoped, id: 'nav-ops', routeKey: 'ops.overview', label: '維運概覽', group: '工作區', order: 20, enabled: true },
         { ...scoped, id: 'nav-ops-cmdb', routeKey: 'ops.cmdb', label: 'CMDB', group: '維運中心', order: 21, enabled: true },
         { ...scoped, id: 'nav-ops-topology', routeKey: 'ops.topology', label: '依賴拓撲', group: '維運中心', order: 22, enabled: true },
@@ -69,12 +71,14 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'nav-ops-jobs', routeKey: 'ops.jobs', label: '交付作業', group: '維運中心', order: 24, enabled: true },
         { ...scoped, id: 'nav-ops-capacity', routeKey: 'ops.capacity', label: '容量', group: '維運中心', order: 25, enabled: true },
         { ...scoped, id: 'nav-ops-releases', routeKey: 'ops.releases', label: '發布審批', group: '維運中心', order: 26, enabled: true },
+        { ...scoped, id: 'nav-ops-incidents', routeKey: 'ops.incidents', label: '告警事件', group: '維運中心', order: 27, enabled: true },
         { ...scoped, id: 'nav-admin', routeKey: 'admin.overview', label: '平台概覽', group: '工作區', order: 30, enabled: true },
         { ...scoped, id: 'nav-admin-access', routeKey: 'admin.access', label: '角色與範圍', group: '治理', order: 31, enabled: true },
         { ...scoped, id: 'nav-admin-navigation', routeKey: 'admin.navigation', label: '導航目錄', group: '治理', order: 32, enabled: true },
         { ...scoped, id: 'nav-admin-catalog', routeKey: 'admin.catalog', label: '服務目錄', group: '治理', order: 33, enabled: true },
         { ...scoped, id: 'nav-admin-models', routeKey: 'admin.cmdb-models', label: 'CMDB 欄位', group: '治理', order: 34, enabled: true },
         { ...scoped, id: 'nav-admin-audit', routeKey: 'admin.audit', label: '管理稽核', group: '治理', order: 35, enabled: true },
+        { ...scoped, id: 'nav-admin-integrations', routeKey: 'admin.integrations', label: '模擬整合', group: '治理', order: 36, enabled: true },
         { ...scoped, id: 'nav-guide', routeKey: 'guide', label: '示範控制台', group: '示範', order: 40, enabled: true },
       ],
       modelFields: [],
@@ -90,7 +94,7 @@ export function createSeed(sessionId: string): Snapshot {
       }],
       catalogHistory: [],
       requests: [],
-      pipelines: [], releases: [], artifacts: [], incidents: [], integrations: [],
+      pipelines: [], releases: [], artifacts: [], incidents: [], ...buildObservationSeed(),
     },
     observations: { buckets: [], traces: [], logs: [], recoveries: [] },
     jobs: [], deliveryLogs: [], events: [], audit: [], idempotency: [], scenarioFlags: {}, scheduler: { tasks: [] },

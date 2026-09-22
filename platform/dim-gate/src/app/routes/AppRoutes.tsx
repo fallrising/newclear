@@ -3,6 +3,7 @@ import { api, queryKey } from '../../api/client'
 import type { SessionView } from '../../domain/schemas'
 import { AccessPage, AdminCatalogPage, AdminOverviewLinks, AuditPage, ModelsPage, NavigationPage } from '../../features/admin'
 import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
+import { ObservabilityPage, IncidentListPage, IncidentDetailPage, IntegrationsPage } from '../../features/observability'
 import { CenterOverview, Guide, UnknownRoute } from '../../features/foundation'
 import { PipelineDetailPage, PipelineListPage, ReleaseDetailPage, ReleaseListPage } from '../../features/delivery'
 import { CapacityPage, CatalogPage, JobDetailPage, JobsPage, RequestDetailPage, RequestListPage, RequestWizard } from '../../features/self-service'
@@ -39,6 +40,10 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/admin/catalog" element={<CenterLayout routeKey="admin.catalog" center="admin" session={session}><AdminCatalogPage /></CenterLayout>} />
     <Route path="/admin/cmdb-models" element={<CenterLayout routeKey="admin.cmdb-models" center="admin" session={session}><ModelsPage /></CenterLayout>} />
     <Route path="/admin/audit" element={<CenterLayout routeKey="admin.audit" center="admin" session={session}><AuditPage /></CenterLayout>} />
+    <Route path="/rd/observability" element={<CenterLayout routeKey="rd.observability" center="rd" session={session}><ObservabilityPage session={session} /></CenterLayout>} />
+    <Route path="/ops/incidents" element={<CenterLayout routeKey="ops.incidents" center="ops" session={session}><IncidentListPage session={session} /></CenterLayout>} />
+    <Route path="/ops/incidents/:incidentId" element={<CenterLayout routeKey="ops.incident-detail" center="ops" session={session}><IncidentDetailPage session={session} /></CenterLayout>} />
+    <Route path="/admin/integrations" element={<CenterLayout routeKey="admin.integrations" center="admin" session={session}><IntegrationsPage session={session} /></CenterLayout>} />
     <Route path="/guide" element={<Guide session={session} />} />
     <Route path="*" element={<UnknownRoute session={session} />} />
   </Routes>

@@ -103,9 +103,9 @@ export const roleAssignmentSchema = z.strictObject({
 })
 export const navigationItemSchema = z.strictObject({
   ...scopedBase, routeKey: z.enum([
-    'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'rd.pipelines',
-    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases',
-    'admin.overview', 'admin.access', 'admin.navigation', 'admin.catalog', 'admin.cmdb-models', 'admin.audit',
+    'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'rd.pipelines', 'rd.observability',
+    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases', 'ops.incidents',
+    'admin.overview', 'admin.access', 'admin.navigation', 'admin.catalog', 'admin.cmdb-models', 'admin.audit', 'admin.integrations',
     'guide',
   ]),
   label: nameSchema, group: nameSchema, order: z.number().int(), enabled: z.boolean(),

@@ -23,6 +23,7 @@ export function registerFutureContracts({ z, d, w, s, id, version, listQuery, wi
   read('/admin/access', 'getAccess', z.strictObject({ organizations: z.array(s.Organization), users: z.array(s.User), assignments: z.array(s.RoleAssignment), policyVersion: version }), 'M2')
   read('/admin/navigation', 'getAdminNavigation', z.array(s.NavigationItem), 'M2', z.strictObject({ center: d.centerSchema.optional() }))
   read('/admin/cmdb-models', 'getModels', z.strictObject({ kinds: z.array(d.ciKindSchema), fields: z.array(s.ModelField) }), 'M2')
+  read('/notifications', 'getNotifications', z.strictObject({ items: z.array(s.Notification).max(20) }), 'M4')
   read('/integrations', 'listIntegrations', z.array(s.Integration), 'M4')
 
   command('post', '/requests', 'createRequest', w.CreateRequest, 'M2', 201)

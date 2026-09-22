@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "dim-gate BFF and demo controls",
-    "version": "0.1.0-m3",
-    "description": "Generated from Zod. M0–M3 provide 62 executable operations; M4 operations remain explicitly planned. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
+    "version": "0.1.0-m4",
+    "description": "Generated from Zod. M0–M4 provide 73 executable operations. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
   },
   "servers": [
     {
@@ -5230,8 +5230,8 @@
           "M4"
         ],
         "summary": "getMetrics",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -5417,8 +5417,8 @@
           "M4"
         ],
         "summary": "listTraces",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -5664,8 +5664,8 @@
           "M4"
         ],
         "summary": "getTrace",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -5811,8 +5811,8 @@
           "M4"
         ],
         "summary": "listLogs",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -6079,8 +6079,8 @@
           "M4"
         ],
         "summary": "listIncidents",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -6309,8 +6309,8 @@
           "M4"
         ],
         "summary": "getIncident",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -7132,8 +7132,8 @@
           "M4"
         ],
         "summary": "listIntegrations",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [],
@@ -9272,8 +9272,8 @@
           "M4"
         ],
         "summary": "acknowledgeIncident",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -9439,8 +9439,8 @@
           "M4"
         ],
         "summary": "investigateIncident",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -11256,8 +11256,8 @@
           "M4"
         ],
         "summary": "testIntegration",
-        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M4",
         "x-demo-only": false,
         "parameters": [
@@ -12199,6 +12199,142 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/setScenarioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid demo identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found or outside scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version, state, identity or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "JSON required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or unknown field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Session command limit; reset required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation not delivered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Simulated unavailable; manual retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Atomic persistence failed; state unchanged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "getNotifications",
+        "tags": [
+          "M4"
+        ],
+        "summary": "getNotifications",
+        "description": "Implemented by the demo adapter through M4.",
+        "x-implementation-status": "implemented",
+        "x-milestone": "M4",
+        "x-demo-only": false,
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authorized successful result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/getNotificationsResponse"
                 }
               }
             }
@@ -13869,6 +14005,7 @@
               "rd.catalog",
               "rd.requests",
               "rd.pipelines",
+              "rd.observability",
               "ops.overview",
               "ops.cmdb",
               "ops.topology",
@@ -13876,12 +14013,14 @@
               "ops.jobs",
               "ops.capacity",
               "ops.releases",
+              "ops.incidents",
               "admin.overview",
               "admin.access",
               "admin.navigation",
               "admin.catalog",
               "admin.cmdb-models",
               "admin.audit",
+              "admin.integrations",
               "guide"
             ]
           },
@@ -14929,6 +15068,459 @@
         ],
         "additionalProperties": false
       },
+      "ObservationBucket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "releaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errorRate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "p95Latency": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "const": "demo"
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "environmentId",
+          "from",
+          "to",
+          "rate",
+          "errorRate",
+          "p95Latency",
+          "source"
+        ],
+        "additionalProperties": false
+      },
+      "LogEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "releaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "ciId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "environmentId",
+          "occurredAt",
+          "level",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "TraceSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "durationMs": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ]
+          },
+          "releaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "environmentId",
+          "name",
+          "start",
+          "durationMs",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Trace": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "durationMs": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ]
+          },
+          "releaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "spans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "parentId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "durationMs": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "error"
+                  ]
+                },
+                "ciId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "id",
+                "parentId",
+                "name",
+                "start",
+                "durationMs",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "environmentId",
+          "name",
+          "start",
+          "durationMs",
+          "status",
+          "spans"
+        ],
+        "additionalProperties": false
+      },
+      "MetricSeries": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": [
+              "rate",
+              "errorRate",
+              "p95Latency"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "ms",
+              "requests/second",
+              "fraction"
+            ]
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "t": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "t",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "sampleCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "metric",
+          "unit",
+          "points",
+          "sampleCount"
+        ],
+        "additionalProperties": false
+      },
+      "MetricsView": {
+        "type": "object",
+        "properties": {
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetricSeries"
+            }
+          }
+        },
+        "required": [
+          "series"
+        ],
+        "additionalProperties": false
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "entityType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "entityId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "route": {
+            "type": "string",
+            "format": "starts_with",
+            "pattern": "^\\/.*"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "entityType",
+          "entityId",
+          "route",
+          "occurredAt"
+        ],
+        "additionalProperties": false
+      },
+      "AcknowledgeIncident": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ],
+        "additionalProperties": false
+      },
       "Incident": {
         "type": "object",
         "properties": {
@@ -14997,6 +15589,16 @@
             "maxLength": 160
           },
           "relatedReleaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "episode": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "ruleKey": {
             "type": "string",
             "minLength": 1,
             "maxLength": 160
@@ -15092,6 +15694,8 @@
           "affectedCiIds",
           "severity",
           "state",
+          "episode",
+          "ruleKey",
           "evidence",
           "recoverySamples",
           "correlationId"
@@ -15138,6 +15742,18 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80
+          },
+          "poolIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "endpointLabel": {
+            "type": "string",
+            "maxLength": 200
           },
           "state": {
             "type": "string",
@@ -15204,6 +15820,8 @@
           "orgId",
           "kind",
           "displayName",
+          "poolIds",
+          "endpointLabel",
           "state",
           "lastSyncAt",
           "fieldMappings"
@@ -15416,7 +16034,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m3-v1"
+            "const": "dim-gate-m4-v1"
           },
           "sessionId": {
             "type": "string",
@@ -15582,6 +16200,18 @@
                 "items": {
                   "$ref": "#/components/schemas/Artifact"
                 }
+              },
+              "incidents": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Incident"
+                }
+              },
+              "integrations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Integration"
+                }
               }
             },
             "required": [
@@ -15606,7 +16236,74 @@
               "requests",
               "pipelines",
               "releases",
-              "artifacts"
+              "artifacts",
+              "incidents",
+              "integrations"
+            ],
+            "additionalProperties": false
+          },
+          "observations": {
+            "type": "object",
+            "properties": {
+              "buckets": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ObservationBucket"
+                }
+              },
+              "traces": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Trace"
+                }
+              },
+              "logs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LogEntry"
+                }
+              },
+              "recoveries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "environmentId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "releaseId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "remaining": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3
+                    },
+                    "dueTick": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "environmentId",
+                    "releaseId",
+                    "remaining",
+                    "dueTick"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "buckets",
+              "traces",
+              "logs",
+              "recoveries"
             ],
             "additionalProperties": false
           },
@@ -15752,6 +16449,7 @@
           "policyVersion",
           "commandCount",
           "entities",
+          "observations",
           "deliveryLogs",
           "jobs",
           "events",
@@ -15926,6 +16624,17 @@
             "minimum": 0,
             "maximum": 9007199254740991
           },
+          "activeIncidentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pendingItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Notification"
+            }
+          },
           "ciCount": {
             "type": "integer",
             "minimum": 0,
@@ -15968,6 +16677,8 @@
           "title",
           "applicationCount",
           "environmentCount",
+          "activeIncidentCount",
+          "pendingItems",
           "ciCount",
           "providers",
           "dataAsOf"
@@ -15977,6 +16688,82 @@
       "GuideView": {
         "type": "object",
         "properties": {
+          "applicationId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environmentId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "persona": {
+                  "type": "string",
+                  "enum": [
+                    "rd",
+                    "ops",
+                    "admin",
+                    "any"
+                  ]
+                },
+                "completed": {
+                  "type": "boolean"
+                },
+                "route": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "starts_with",
+                      "pattern": "^\\/.*"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "description",
+                "persona",
+                "completed",
+                "route"
+              ],
+              "additionalProperties": false
+            }
+          },
           "logicalClock": {
             "type": "integer",
             "minimum": 0,
@@ -15994,7 +16781,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m3-v1"
+            "const": "dim-gate-m4-v1"
           },
           "schemaVersion": {
             "type": "number",
@@ -16012,6 +16799,9 @@
           }
         },
         "required": [
+          "applicationId",
+          "environmentId",
+          "steps",
           "logicalClock",
           "storeRevision",
           "sessionId",
@@ -16898,8 +17688,15 @@
               "clear-capacity-fault",
               "build-failure",
               "health-failure",
-              "rollback-failure"
+              "rollback-failure",
+              "post-release-latency",
+              "recovery-samples"
             ]
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "jobId": {
             "type": "string",
@@ -17214,303 +18011,6 @@
           "poolId",
           "cpu",
           "memoryMiB"
-        ],
-        "additionalProperties": false
-      },
-      "LogEntry": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-          },
-          "level": {
-            "type": "string",
-            "enum": [
-              "debug",
-              "info",
-              "warn",
-              "error"
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "traceId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "releaseId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          }
-        },
-        "required": [
-          "id",
-          "applicationId",
-          "environmentId",
-          "occurredAt",
-          "level",
-          "message"
-        ],
-        "additionalProperties": false
-      },
-      "TraceSummary": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-          },
-          "durationMs": {
-            "type": "number",
-            "minimum": 0
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ok",
-              "error"
-            ]
-          },
-          "releaseId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          }
-        },
-        "required": [
-          "id",
-          "applicationId",
-          "environmentId",
-          "name",
-          "start",
-          "durationMs",
-          "status"
-        ],
-        "additionalProperties": false
-      },
-      "Trace": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-          },
-          "durationMs": {
-            "type": "number",
-            "minimum": 0
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ok",
-              "error"
-            ]
-          },
-          "releaseId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "spans": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 160
-                },
-                "parentId": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 160
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "name": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 80
-                },
-                "start": {
-                  "type": "string",
-                  "format": "date-time",
-                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                },
-                "durationMs": {
-                  "type": "number",
-                  "minimum": 0
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "ok",
-                    "error"
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "parentId",
-                "name",
-                "start",
-                "durationMs",
-                "status"
-              ],
-              "additionalProperties": false
-            }
-          }
-        },
-        "required": [
-          "id",
-          "applicationId",
-          "environmentId",
-          "name",
-          "start",
-          "durationMs",
-          "status",
-          "spans"
-        ],
-        "additionalProperties": false
-      },
-      "MetricSeries": {
-        "type": "object",
-        "properties": {
-          "metric": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "unit": {
-            "type": "string",
-            "enum": [
-              "ms",
-              "requests/second",
-              "fraction"
-            ]
-          },
-          "points": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "t": {
-                  "type": "string",
-                  "format": "date-time",
-                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                },
-                "value": {
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                }
-              },
-              "required": [
-                "t",
-                "value"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "sampleCount": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "metric",
-          "unit",
-          "points",
-          "sampleCount"
-        ],
-        "additionalProperties": false
-      },
-      "AcknowledgeIncident": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          }
-        },
-        "required": [
-          "expectedVersion"
         ],
         "additionalProperties": false
       },
@@ -21858,6 +22358,58 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/CommandReceipt"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "requestId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "storeRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "policyVersion": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "requestId",
+              "storeRevision",
+              "policyVersion"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false
+      },
+      "getNotificationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
           },
           "meta": {
             "type": "object",

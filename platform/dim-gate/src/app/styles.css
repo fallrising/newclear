@@ -462,3 +462,23 @@ input, textarea { font: inherit; color: var(--foreground); background: var(--car
   .job-logs li { grid-template-columns: 1fr; gap: 4px; }
   .capacity-line > div:first-child { display: grid; }
 }
+
+.notification-menu { position: relative; }
+.notification-menu summary { display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 8px; border-radius: 6px; }
+.notification-menu summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.notification-panel { position: absolute; z-index: 40; top: 42px; right: 0; width: min(370px, calc(100vw - 32px)); max-height: 65vh; overflow: auto; box-shadow: 0 8px 30px #0002; }
+.notification-panel h2 { margin-top: 0; font-size: 16px; }
+.notification-panel ul { padding: 0; list-style: none; }
+.notification-panel li { border-top: 1px solid var(--border); padding: 10px 0; overflow-wrap: anywhere; }
+.notification-panel time { display: block; font-size: 11px; color: var(--muted); margin-top: 5px; }
+.guide-story ol { list-style: none; padding: 0; }
+.guide-story li { display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.guide-story li > div { min-width: 0; flex: 1; }
+.guide-story h3 { margin: 0 0 6px; }
+.guide-story .step-number { flex-shrink: 0; }
+.guide-story p { color: var(--muted); margin: 6px 0 12px; }
+.guide-scenarios { margin: 24px 0; }
+.guide-scenarios label { display: grid; gap: 6px; }
+.guide-scenarios select { max-width: 100%; padding: 8px; }
+.guide-scenario-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+@media (max-width: 600px) { .notification-label { display: none; } .notification-panel { right: -150px; } }

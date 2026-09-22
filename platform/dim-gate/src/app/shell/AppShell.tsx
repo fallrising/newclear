@@ -9,6 +9,7 @@ import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import { centerDetails } from '../../features/foundation'
 import { AppRoutes } from '../routes/AppRoutes'
+import { Notifications } from './Notifications'
 import { GlobalSearch } from './GlobalSearch'
 import { routeForPath, visibleNavigation } from '../routes/registry'
 
@@ -75,7 +76,7 @@ export function AppShell({ session }: { session: SessionView }) {
           return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span><span className="nav-code">{details.short}</span></NavLink>
         })}
       </nav>
-      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M3 · 發布與回滾</div><p>從應用環境追蹤候選版本、健康檢查與回滾。</p><span className="sidebar-version">dim-gate / M3 development</span></div>
+      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M4 · 觀測與恢復</div><p>從發布追查觀測證據、事件與恢復樣本。</p><span className="sidebar-version">dim-gate / M4 development</span></div>
     </aside>
     <div className="workspace">
       <header className="topbar">
@@ -83,6 +84,7 @@ export function AppShell({ session }: { session: SessionView }) {
         <div className="breadcrumb"><span>工作台</span><ChevronRight size={14} aria-hidden="true" /><strong>{currentLabel}</strong></div>
         <GlobalSearch session={session} disabled={switching} />
         <div className="toolbar">
+          <Notifications session={session} />
           <Button variant="ghost" size="icon" aria-label={preferences.theme === 'light' ? '切換深色主題' : '切換淺色主題'} onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}>{preferences.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</Button>
           <label className="density-control"><span className="sr-only">顯示密度</span><select aria-label="顯示密度" value={preferences.density} onChange={(event) => setPreferences({ ...preferences, density: event.target.value as Preferences['density'] })}><option value="normal">舒適</option><option value="compact">緊湊</option></select></label>
           <div className="toolbar-divider" />

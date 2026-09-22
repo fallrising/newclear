@@ -45,11 +45,16 @@ export async function destroySession(env: Env, sessionId: string | undefined): P
   await env.SESSIONS.delete(`session:${sessionId}`);
 }
 
+function cookieSecure(c: Context<{ Bindings: Env }>): boolean {
+  return new URL(c.req.url).protocol === "https:";
+}
+
 export function setSessionCookie(c: Context<{ Bindings: Env }>, sessionId: string): void {
   setCookie(c, SESSION_COOKIE, sessionId, {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
+    secure: cookieSecure(c),
     maxAge: SESSION_TTL_SECONDS,
   });
 }
@@ -62,6 +67,7 @@ export function setCsrfCookie(c: Context<{ Bindings: Env }>, token: string): voi
   setCookie(c, CSRF_COOKIE, token, {
     path: "/",
     sameSite: "Lax",
+    secure: cookieSecure(c),
     maxAge: SESSION_TTL_SECONDS,
   });
 }

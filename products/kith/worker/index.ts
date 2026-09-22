@@ -557,6 +557,17 @@ async function forwardSend(env: Env, roomId: string, memberId: string, jsonText:
   );
 }
 
+app.notFound(async (c) => {
+  const path = new URL(c.req.url).pathname;
+  if (path.startsWith("/api/") || path === "/mcp" || path.startsWith("/mcp/")) {
+    return c.json(errorBody("not_found", "not found"), 404);
+  }
+  if (c.env.ASSETS) {
+    return c.env.ASSETS.fetch(c.req.raw);
+  }
+  return c.json(errorBody("not_found", "not found"), 404);
+});
+
 export default {
   fetch: app.fetch.bind(app),
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {

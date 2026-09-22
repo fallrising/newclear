@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useIsMutating, useMutation, useQuery } from '@tanstack/react-query'
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, Clock3, RotateCcw, Shield } from 'lucide-react'
 import { api, queryKey } from '../../api/client'
 import { demoClockMutationKey } from '../../api/query-definitions'
@@ -39,6 +39,7 @@ function FoundationNote() {
 }
 
 export function Guide({ session }: { session: SessionView }) {
+  const cache = useQueryClient()
   const guide = useQuery({ queryKey: queryKey('guide'), queryFn: () => api.getGuide() })
   const [ticks, setTicks] = useState(1)
   const [clockNotice, setClockNotice] = useState('')
@@ -46,7 +47,7 @@ export function Guide({ session }: { session: SessionView }) {
   const clockPending = useIsMutating({ mutationKey: demoClockMutationKey }) > 0
   const advance = useMutation({ mutationKey: demoClockMutationKey, mutationFn: async (count: number) => {
     const receipt = await api.advanceClock(count)
-    await guide.refetch()
+    await cache.invalidateQueries()
     return receipt
   } })
   const reset = useMutation({ mutationFn: () => api.reset() })

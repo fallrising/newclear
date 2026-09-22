@@ -444,3 +444,5 @@ next_action: complete domain/UI integration, production Chromium and independent
 ```
 
 M4 integration checkpoint: frozen install, lint/typecheck, all 207 tests, docs/contracts/CI/architecture gates passed on the integrated local product diff. Full production Chromium and fixed-commit independent review remain pending. Native actionlint was initially invoked with an incorrect relative path; corrected root workflow invocation is required. No acceptance decision.
+
+DG-D035: REWORK first M4 candidate298a563 after actual production Chromium4/7: three provider cases share a test-author Provider selector mismatch; preserved attempt1 artifacts. Independent T-023 static pass found no blocker/high/medium implementation issue. Lead also corrects screenshot-proven toolbar wrapping and extends Guide pending ownership through all projection refresh. Draft stacked PR20 is open; M4 remains NOT_ACCEPTED. This begins bounded validation cycle2; next fixed candidate requires full Chromium and review delta closure.

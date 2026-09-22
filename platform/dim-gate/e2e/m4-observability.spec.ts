@@ -5,6 +5,7 @@ type BrowserHealth = { console: { type: string; text: string }[]; network: { met
 const health = new WeakMap<Page, BrowserHealth>()
 
 test.beforeEach(async ({ page }) => {
+  page.setDefaultTimeout(15_000)
   const evidence: BrowserHealth = { console: [], network: [], consoleErrors: [], pageErrors: [], failedRequests: [], httpErrors: [], expectedStatuses: new Set() }
   health.set(page, evidence)
   page.on('console', (message) => { evidence.console.push({ type: message.type(), text: message.text() }); if (message.type() === 'error') evidence.consoleErrors.push(message.text()) })
@@ -101,7 +102,7 @@ async function createReadyStaging(page: Page, provider: 'aws' | 'aliyun' | 'onpr
   await page.getByRole('combobox', { name: '應用', exact: true }).selectOption('app-checkout')
   await page.getByRole('textbox', { name: '環境名稱', exact: true }).fill('e2e-m4-staging')
   await page.getByRole('combobox', { name: '階段', exact: true }).selectOption('staging')
-  await page.getByLabel('Provider', { exact: true }).selectOption(provider)
+  await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption(provider)
   await page.getByRole('textbox', { name: '用途', exact: true }).fill('M4 complete observation and recovery story')
   await page.getByRole('button', { name: '確認並提交申請' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('e2e-m4-staging · 待審核')
@@ -356,6 +357,16 @@ test('M4 observation/incident/Guide/integrations support actual theme changes, v
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
         await expect(page.getByText(/正在讀取/)).toHaveCount(0)
+        if (route.startsWith('rd/observability')) {
+          await page.getByLabel('事件通知', { exact: true }).click()
+          const panel = page.getByRole('region', { name: '目前可見通知' })
+          await expect(panel).toBeVisible()
+          const bounds = await panel.boundingBox()
+          expect(bounds!.x).toBeGreaterThanOrEqual(0)
+          expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width)
+          await info.attach(`notifications-${theme}-${viewport.width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+          await page.getByLabel('事件通知', { exact: true }).click()
+        }
         const dimensions = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth }))
         expect(dimensions.content, `${route} ${theme} ${viewport.width}`).toBeLessThanOrEqual(dimensions.viewport)
         const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(issue => ['serious', 'critical'].includes(issue.impact ?? ''))

@@ -16,7 +16,7 @@
  		lockKeys = append(lockKeys, key)
 --- a/cluster/calcium/lock_test.go
 +++ b/cluster/calcium/lock_test.go
-@@ -361,3 +361,32 @@
+@@ -361,3 +361,78 @@
  	})
  	assert.NoError(t, err)
  }
@@ -25,6 +25,7 @@
 +// parent context and return the error without panicking or calling f.
 +func TestWithNodesPlanLockedNilContextOnLockFailure(t *testing.T) {
 +	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
 +	store := c.store.(*storemocks.Store)
 +	store.On("GetNode", mock.Anything, "a1").Return(&types.Node{
 +		NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true,
@@ -48,4 +49,49 @@
 +	assert.False(t, called)
 +	store.AssertExpectations(t)
 +	failedLock.AssertExpectations(t)
++}
++
++// Already acquired locks must be released in reverse order even when a later
++// Lock returns a nil context and cancels its input.
++func TestWithNodesPlanLockedPartialFailureUnlocks(t *testing.T) {
++	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
++	store := c.store.(*storemocks.Store)
++	nodes := []*types.Node{
++		{NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true},
++		{NodeMeta: types.NodeMeta{Name: "a2", Podname: "poda"}, Available: true},
++	}
++	store.On("GetNodes", mock.Anything, []string{"a1", "a2"}).Return(nodes, nil).Once()
++	ctx, cancel := context.WithCancel(t.Context())
++	defer cancel()
++	keys := []string{"plock_poda", "cnode_op_poda_a1", "cnode_op_poda_a2"}
++	unlocked := []string{}
++	mocks := []*lockmocks.DistributedLock{}
++	for i, key := range keys {
++		lk := &lockmocks.DistributedLock{}
++		mocks = append(mocks, lk)
++		store.On("CreateLock", key, mock.Anything).Return(lk, nil).Once()
++		if i == 2 {
++			lk.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once().Run(func(mock.Arguments) { cancel() })
++		} else {
++			lk.On("Lock", mock.Anything).Return(ctx, nil).Once()
++		}
++		lk.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++			assert.NotNil(t, args.Get(0))
++			assert.NoError(t, args.Get(0).(context.Context).Err())
++			unlocked = append(unlocked, key)
++		})
++	}
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(ctx, &types.NodeFilter{Includes: []string{"a1", "a2"}},
++			func(context.Context, map[string]*types.Node) error { called = true; return nil })
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	assert.Equal(t, []string{keys[2], keys[1], keys[0]}, unlocked)
++	store.AssertExpectations(t)
++	for _, lk := range mocks {
++		lk.AssertExpectations(t)
++	}
 +}

@@ -4,7 +4,7 @@
 
 **狀態：已完成 Debian 13 的 1 core + 3 worker 部署；三台 nginx lifecycle／HTTP／資源拒絕與清理全部通過。帶運行中 nginx 的四台重複 apply（V05）也已通過；OS 重灌及完整重建驗收尚未完成。** 2026-09-21 依 owner 要求建立。2026-09-22 由 controller B 對四台測試 VPS 完成實機檢查。SDD 指 Software Design Document（軟體設計文件），同時列出後續實作的需求與驗收契約。
 
-最新開發進度：已加入操作器、自控元件重裝計畫與 34 項本機回歸。後續實機測試發現 etcd I/O 延遲與 core panic，尚未通過新的操作器整合驗證，詳見 [M2 開發紀錄](docs/M2-2026-09-22.md)。
+最新開發進度：[接續紀錄](docs/M2-CONTINUATION-2026-09-22.md) 已完成 Go 1.27.1 core 修補回歸／建置及 62 項 Python 本機測試，加入 quarantine／恢復底層；01 儲存延遲仍未達門檻，未部署修補或執行元件重裝。此前已加入操作器、自控元件重裝計畫與 34 項本機回歸。後續實機測試發現 etcd I/O 延遲與 core panic，尚未通過新的操作器整合驗證，詳見 [M2 開發紀錄](docs/M2-2026-09-22.md)。
 
 4 台 VPS 可以做 MVP。建議先跑 **1 台 etcd/core + 3 台 containerd worker**；通過基本部署與重建後，再用同一批機器冷重建成 **3 成員 etcd + 1 core + 3 worker**，驗證 metadata quorum。後者仍有單一 core，不能稱為整體 HA。
 

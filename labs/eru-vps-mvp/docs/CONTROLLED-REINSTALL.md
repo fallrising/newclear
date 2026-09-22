@@ -2,7 +2,7 @@
 
 依 owner 的操作習慣，日常以我們的腳本清理／重裝 ERU；只有 OS 或主機狀態已無法可信恢復時，才由 owner 在 provider 控制台重裝。**不需要先接供應商 API。**
 
-本次已完成元件範圍審核器及操作器的計畫模式，尚未實作 quarantine／重裝／恢復執行器，也沒有在 VPS 停服務或刪檔。控制面先前的 etcd 延遲／core panic 仍須驗證修復；一次 health 通過不足以解除這個問題。
+更新：quarantine／六檔安裝／checksum 恢復底層及狀態機原型已完成本機測試；尚未接線至 live execute，沒有在 VPS 停服務或清理元件。62 項測試與控制面阻擋詳見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。以下執行契約仍需實機驗收。控制面先前的 etcd 延遲／core panic 仍須驗證修復；一次 health 通過不足以解除這個問題。
 
 ## 分清四種操作
 

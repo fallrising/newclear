@@ -14,6 +14,8 @@ from worker_scope import audit, MANIFEST, REINSTALL_FILES, SHARED_FILES, STATE_D
 
 class ScopeTests(unittest.TestCase):
     def setUp(self):
+        previous_umask = os.umask(0o022)
+        self.addCleanup(os.umask, previous_umask)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
@@ -114,6 +116,18 @@ class ScopeTests(unittest.TestCase):
         self.assertTrue(result['scope_verified'])
         record = next(x for x in result['state_to_quarantine'] if x['path'] == '/run/eru/workloads')
         self.assertFalse(record['exists'])
+
+
+    def test_bind_mount_from_mountinfo_blocks_even_when_ismount_is_false(self):
+        info = self.root / 'proc/self/mountinfo'
+        info.parent.mkdir(parents=True)
+        info.write_text('31 22 0:42 /other /var/lib/eru-agent rw - ext4 /dev/test rw\n')
+        with patch('worker_scope.os.path.ismount', return_value=False):
+            self.assertIn('mount boundary', self.inspect()['blockers'][0])
+
+    def test_writable_ancestor_blocks(self):
+        (self.root / 'etc/eru').chmod(0o777)
+        self.assertIn('ancestor', self.inspect()['blockers'][0])
 
 
 if __name__ == '__main__':

@@ -2,6 +2,8 @@
 
 入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 只能產生計畫，沒有 OS 重灌或下線節點的執行入口。
 
+最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝底層與原型已加入測試，但 rebuild execute 繼續阻擋，尚未進行實機元件重裝。
+
 ## 使用方式
 
 在 B 的專案根執行：

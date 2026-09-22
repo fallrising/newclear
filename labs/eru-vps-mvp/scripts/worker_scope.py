@@ -9,6 +9,17 @@ import os
 from pathlib import Path
 import stat
 
+
+def mount_points(root):
+    """Include bind mounts, which os.path.ismount can miss on the same device."""
+    result = set()
+    for line in (Path(root) / 'proc/self/mountinfo').read_text().splitlines():
+        target = line.split()[4]
+        for escaped, char in [('\\040', ' '), ('\\011', '\t'), ('\\012', '\n'), ('\\134', '\\')]:
+            target = target.replace(escaped, char)
+        result.add(target)
+    return result
+
 OWNER = 'eru-vps-mvp'
 REINSTALL_FILES = (
     '/usr/local/bin/eru-agent',
@@ -42,6 +53,7 @@ def audit(root=Path('/'), owner_uid=0):
     backup. The future executor must stop the agent then hash and recheck them.
     """
     root = Path(root)
+    mounts = mount_points(root) if root == Path('/') or (root / 'proc/self/mountinfo').exists() else set()
     result = {'profile': 'component-reinstall', 'audit_only': True,
               'files_to_reinstall': [], 'state_to_quarantine': [],
               'preserve': list(PRESERVE), 'blockers': []}
@@ -54,7 +66,11 @@ def audit(root=Path('/'), owner_uid=0):
             current = current / part
             if current.is_symlink():
                 raise ValueError('symlink in cleanup path: ' + name)
-            if current == target and current.exists() and os.path.ismount(current):
+            if current.exists() and current != target:
+                parent_stat = current.lstat()
+                if parent_stat.st_uid != owner_uid or parent_stat.st_mode & 0o022:
+                    raise ValueError('unsafe path ancestor ownership/write permissions: ' + name)
+            if current == target and current.exists() and (os.path.ismount(current) or name in mounts):
                 raise ValueError('mount boundary in cleanup path: ' + name)
         if not target.exists():
             if optional:

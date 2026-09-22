@@ -1,0 +1,97 @@
+{
+  "artifact_sha256": "1e674e955b6504892d9e7a60807e02e18043ba739787481bbd456cb30ca68363",
+  "note": "Raw logs and artifact are private; public release locks remain unchanged.",
+  "patch_sha256": "620492926d2693ff7aff05b2d7524a1bc7d2be2c60795a4f366c1d4361245d5b",
+  "source_commit": "e19ceb7e09d95bedea3eb0c25bec9308101fecc5",
+  "status": "verified-not-deployed",
+  "steps": [
+    {
+      "argv": [
+        "test",
+        "./cluster/calcium",
+        "-run",
+        "^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)$",
+        "-count=1"
+      ],
+      "exit_code": 1,
+      "name": "baseline-final"
+    },
+    {
+      "argv": [
+        "test",
+        "./cluster/calcium",
+        "-run",
+        "^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)$",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "patched-final"
+    },
+    {
+      "argv": [
+        "test",
+        "./cluster/calcium",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "calcium-tests"
+    },
+    {
+      "argv": [
+        "test",
+        "./lock/...",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "lock-tests"
+    },
+    {
+      "argv": [
+        "build",
+        "-trimpath",
+        "-o",
+        "BUILD_DIR/eru-core",
+        "."
+      ],
+      "exit_code": 0,
+      "name": "build"
+    }
+  ],
+  "toolchain": {
+    "arch": "amd64",
+    "filename": "go1.27.1.linux-amd64.tar.gz",
+    "kind": "archive",
+    "os": "linux",
+    "sha256": "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445",
+    "size": 70553950,
+    "url": "https://go.dev/dl/go1.27.1.linux-amd64.tar.gz",
+    "version": "go1.27.1"
+  },
+  "independent_runner_verification": {
+    "status": "verified-not-deployed",
+    "artifact_sha256": "1e674e955b6504892d9e7a60807e02e18043ba739787481bbd456cb30ca68363",
+    "byte_identical_to_first_build": true,
+    "steps": [
+      {
+        "name": "baseline",
+        "exit_code": 1
+      },
+      {
+        "name": "regression",
+        "exit_code": 0
+      },
+      {
+        "name": "calcium",
+        "exit_code": 0
+      },
+      {
+        "name": "locks",
+        "exit_code": 0
+      },
+      {
+        "name": "build",
+        "exit_code": 0
+      }
+    ]
+  }
+}

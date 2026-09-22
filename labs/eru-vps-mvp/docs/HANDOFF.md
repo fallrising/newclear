@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-保存日期：2026-09-22。專案位於 `labs/eru-vps-mvp`。先閱讀 README、SDD、CONTROLLED-REINSTALL、OPERATOR、M2-2026-09-22；以最新實機觀測為準，不能把當天早期 PASS 當作目前健康保證。
+保存日期：2026-09-22。最新接續見 [隔離修補驗證與重裝底層](M2-CONTINUATION-2026-09-22.md)：core patch 已通過 Go 1.27.1 回歸與建置、62 項 Python 測試通過，但 01 同檔案系統 fdatasync p99 約 70 ms；未部署或重裝。以下早期交接保留作背景。專案位於 `labs/eru-vps-mvp`。先閱讀 README、SDD、CONTROLLED-REINSTALL、OPERATOR、M2-2026-09-22；以最新實機觀測為準，不能把當天早期 PASS 當作目前健康保證。
 
 ## 目標與已定案偏好
 

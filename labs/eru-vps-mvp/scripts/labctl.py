@@ -56,6 +56,8 @@ def read(path):
 
 def code_inputs(project):
     files = list((project / 'scripts').glob('*.py'))
+    files += list((project / 'patches').glob('*.patch'))
+    files += list((project / 'patches').glob('*.validation.json'))
     files += [project / x for x in ['artifacts.amd64.lock.json', 'upstream.lock.json',
               'private/deployment-plan.json', 'private/verified-host-public-keys.json']]
     files += sorted((project / 'private/preflight').glob('*.json'))
@@ -267,7 +269,7 @@ class Operator:
                     plan['blockers'].append('Initial component-reinstall scope is worker-4 only')
                 if plan['targets'] or snap['hosts'][host['alias']]['containers']:
                     plan['blockers'].append('Target must have zero workloads and runtime containers; automatic drain is not implemented')
-                plan['blockers'].append('Component quarantine/reinstall/recovery executor is not implemented; this is a reviewable plan only')
+                plan['blockers'].append('Local quarantine/install/recovery modules are tested; live orchestration, continuous HTTP guards and control-plane readiness are not yet validated')
                 plan['steps'] = [
                     f'Require empty {node}, zero usage, healthy control plane and unchanged owned-file hashes',
                     'Save baseline of other workers and shared services; prohibit scheduling on target',

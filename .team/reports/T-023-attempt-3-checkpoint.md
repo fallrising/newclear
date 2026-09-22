@@ -10,7 +10,7 @@ Independent read-only reviewer m4_independent_review inspected fixed candidate `
 - Test delta: strict retired-read classification, scoped readonly CI assertions, integration themes/focus; production unchanged since c0ff3fc — passed
 - Lead-run exact231cb87 manifest:207tests and all native/build/actionlint gates — passed
 - Independently inspected local47/47 production Chromium and raw browser artifacts:25health reports/4990responses, no page errors or failed requests;14HTTP errors are7STALE_IDENTITY across overlapping successful resets,4NOT_FOUND,1FORBIDDEN,1SELF_APPROVAL_DENIED and1intentionalENVIRONMENT_BUSY — passed
--42route/theme/viewport accessibility records including24M4, zero serious/critical axe;9focus records;3of61representative PNGs visually inspected — passed
+- 42route/theme/viewport accessibility records including24M4, zero serious/critical axe;9focus records;3of61representative PNGs visually inspected — passed
 - Current-head CI35704063594:46/47; oldM1pendingAtSwitch=false with leaks=[]; allM3/M4journeys passed — failed
 
 ## Documentation

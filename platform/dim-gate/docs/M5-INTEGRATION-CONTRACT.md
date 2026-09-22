@@ -1,0 +1,15 @@
+# M5 integration and evidence contract
+
+Revision 1 · lineage: accepted M4 `d83560de014742ece363d481d2c40483120a2676`, plus main after M3 PR17 merge `9dd4f160de9d115c983f1d27661b7c399f0f0ef3`. M4 PR20 is retargeted to main pending current-base checks. M5 preserves all accepted M0–M4 behavior and original worktrees.
+
+## Acceptance
+
+- AC-26: complete visible mainline by keyboard only (Tab/Shift+Tab, Enter/Space, native select keys, typing), with no programmatic focus/click to bypass navigation. Forms, dialog initial focus/containment/Escape/return, topology text alternative and actual light/dark axe serious/critical=0; attach DOM, screenshots and browser-health evidence.
+- AC-27: retain SDD05 budgets unchanged. Measure all JS actually required by initial baseline route (including demo engine/MSW and dynamically awaited boot modules), sum per-file gzip once; <=300 KiB. Lazy route modules must not change API or access behavior. Five isolated cold Chromium navigations, 1440x900, 4x CPU throttle, no network throttle: median LCP <=2500ms. The 5000-CI synthetic profile is read-only memory, 100 genuine filtered/sorted engine queries, p95 <=150ms excluding HTTP delay. Baseline 100 safe persisted commands through HTTP, p95 <=500ms including 150ms delay. Record all samples, hardware/OS/browser/runtime, profile construction, tested commit and failures; no cherry-picking fastest samples.
+- AC-28: queued/running jobs reload at saved scheduler position; failed quota/serialization/3MiB/1000-command writes are atomic for state, audit, events, receipts and scheduler. Original corrupt bytes remain until explicit reset; memory recovery preserves bytes; reset is available and cannot revive old work. Browser failure injection may make storage throw or seed malformed bytes, never fabricate a successful business transition.
+- AC-29: production `/dim-gate/` deep refresh, app-only MSW registration/scope and an actual same-origin sibling document/API that remains uncontrolled/unintercepted; live build visibly unavailable without demo fallback.
+- AC-30: reuse and extend the existing three-provider Guide journeys, complete demonstration instructions and native commands, fixed-commit independent review and CI artifacts. Add Firefox/WebKit shell and mainline smoke; explicit environment unsupported evidence is not a pass.
+
+## Ownership and delivery
+
+T-025 owns bounded performance source/benchmark work. T-026 owns persistence/runtime isolation and focused browser proof. T-027 lead owns keyboard evidence, UI accessibility corrections, shared package/Playwright/CI configuration, integration and delivery documentation. T-028 independent uninvolved reviewer is read-only. Only lead edits PLAN, commits, SSH-pushes and updates/merges PRs. User explicitly authorized commit/push/PR merge in this run; no deploy or real cloud. Three implementation/review cycles maximum; one same-approach rework, then change approach. No new runtime dependencies or external model source transfer. Kernel fixed at `237aa277b0d067f65c8f64f49c6854597f7f8b15`; source instructions read locally, not claimed installed.

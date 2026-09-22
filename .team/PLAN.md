@@ -487,3 +487,36 @@ remote_durability: product SSH-durable; containing evidence commit is pushed nex
 blockers: []
 next_action: require latest metadata-head CI, then Ready/DONE/owner release on PR20; next development run follows docs/HANDOFF-M5.md after reconciliation, without auto-merge or deployment
 ```
+
+
+### M5 execution — DG-M5-20260922-01
+
+DG-D037: Reconcile final M4 metadata d83560d / CI35707390643 success and released ownership in PR20 body. M3 metadata7d20bbc / CI35639600714 and owner release also confirmed. Initial source/accepted/worker/review HEAD and dirty manifest saved locally at /tmp/dim-gate-m5-evidence/initial-worktrees.json. User first prohibited auto-merge, then explicitly authorized commit, SSH push and PR merge; deployment/real cloud remain excluded. M3 PR17 merged at9dd4f160de9d115c983f1d27661b7c399f0f0ef3; M4 PR20 retargeted to main and new base checks pending. Isolated M5 branch starts from accepted M4 and normally merges current main; no original worktree changed.
+
+[Contract revision1](../platform/dim-gate/docs/M5-INTEGRATION-CONTRACT.md). T-025 performance worker; T-026 reliability/isolation worker; T-027 lead keyboard/UI/shared config/integration; T-028 uninvolved fixed-commit reviewer. Workers use isolated worktrees and disjoint ownership. Available built-in collaboration inherits runtime; exact model slug unavailable, no verified multi-model claim. Kernel pinned237aa277 read locally; no new source revision adopted or external Claude transfer. Three-cycle budget, one same-approach rework.
+
+| Task | State | Scope |
+| --- | --- | --- |
+| [T-025](tasks/T-025.md) | RUNNING | AC27 lazy modules and performance measurements |
+| [T-026](tasks/T-026.md) | RUNNING | AC28/29 persistence and isolated runtime |
+| [T-027](tasks/T-027.md) | RUNNING | AC26/30 keyboard, extra-browser, integration and delivery |
+| [T-028](tasks/T-028.md) | READY after immutable candidate | independent read-only review |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M5-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator
+milestone: M5 NOT_ACCEPTED
+target_ref: main
+continuation_ref: agent/dim-gate/mainline/m5-delivery
+worktree: /home/ckc/test/codex/newclear-m5
+task_id: T-025 / T-026 / T-027 / T-028
+spec_revision: M5-INTEGRATION-CONTRACT revision1
+integration_state: NOT_OPENED
+remote_durability: local initial contract; SSH push required
+blockers: []
+next_action: implement bounded M5 scopes, integrate and validate exact candidate, independent review and latest-head CI, then explicitly authorized merge; no deployment
+```

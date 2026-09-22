@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import CAPABILITIES, TERMINAL, Problem
+from .domain import TERMINAL, Problem, capabilities
 
 
 def json_value(value):
@@ -43,7 +43,11 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
 
 
 def run_view(row):
-    return {**row, "capabilities": CAPABILITIES, "execution_mode": "fake"}
+    return {
+        **row,
+        "capabilities": capabilities(row["backend"]),
+        "execution_mode": "cocoon-fixture" if row["backend"] == "openhands" else "fake",
+    }
 
 
 def require_row(row, code="not_found"):
@@ -120,18 +124,29 @@ class Store:
                 ).fetchone()
             )
             revision = old["revision"] + 1
+        template = "fixture:m1"
+        if data.backend == "openhands":
+            catalog = conn.execute(
+                "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
+            ).fetchone()
+            if not catalog:
+                raise Problem(503, "runtime_not_configured")
+            template = catalog["template_digest"]
         row = conn.execute(
             (
                 "INSERT INTO agent_profile_revisions(id,profile_id,revision,name,b"
                 "ackend,model_ref,template_digest,tool_policy,limits) VALUES "
-                "(%s,%s,%s,%s,'fake','fixture:m1','fixture:m1',%s,%s) RETURNING *"
+                "(%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *"
             ),
             (
                 uuid4(),
                 profile,
                 revision,
                 data.name,
-                Jsonb({"exec": False, "network": False}),
+                data.backend,
+                "fixture:m2" if data.backend == "openhands" else "fixture:m1",
+                template,
+                Jsonb({"exec": data.backend == "openhands", "network": False}),
                 Jsonb(
                     {
                         "deadline_seconds": data.deadline_seconds,
@@ -141,7 +156,7 @@ class Store:
                 ),
             ),
         ).fetchone()
-        return {"status": 201, "body": {**row, "capabilities": CAPABILITIES}}
+        return {"status": 201, "body": {**row, "capabilities": capabilities(row["backend"])}}
 
     def _run(self, conn, task, attempt, data, command_id):
         profile = require_row(
@@ -150,12 +165,28 @@ class Store:
             ).fetchone(),
             "profile_not_found",
         )
+        if profile["backend"] == "openhands":
+            catalog = conn.execute(
+                "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
+            ).fetchone()
+            repo = conn.execute(
+                "SELECT p.canonical_repo FROM tasks t JOIN projects p ON "
+                "p.id=t.project_id WHERE t.id=%s",
+                (task,),
+            ).fetchone()["canonical_repo"]
+            if not catalog or catalog["template_digest"] != profile["template_digest"]:
+                raise Problem(503, "runtime_template_unavailable")
+            if not any(
+                r["canonical_repo"] == repo and r["base_sha"] == data.base_sha
+                for r in catalog["repositories"]
+            ):
+                raise Problem(422, "repository_revision_not_registered")
         run_id = uuid4()
         row = conn.execute(
             (
                 "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,"
-                "goal,state,deadline) VALUES "
-                "(%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
+                "goal,backend,state,deadline) VALUES "
+                "(%s,%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
                 "RETURNING *"
             ),
             (
@@ -165,6 +196,7 @@ class Store:
                 data.base_sha,
                 data.profile_revision,
                 data.goal,
+                profile["backend"],
                 profile["limits"]["deadline_seconds"],
             ),
         ).fetchone()
@@ -182,7 +214,11 @@ class Store:
             conn,
             run_id,
             "run.queued",
-            {"state": "queued", "state_version": 1, "execution_mode": "fake"},
+            {
+                "state": "queued",
+                "state_version": 1,
+                "execution_mode": "cocoon-fixture" if profile["backend"] == "openhands" else "fake",
+            },
         )
         event(
             conn,
@@ -236,7 +272,7 @@ class Store:
             rows = conn.execute(
                 "SELECT * FROM agent_profile_revisions ORDER BY created_at DESC,id"
             ).fetchall()
-            return [{**row, "capabilities": CAPABILITIES} for row in rows]
+            return [{**row, "capabilities": capabilities(row["backend"])} for row in rows]
 
     def tasks(self, cursor=None, limit=30):
         args = []
@@ -317,22 +353,38 @@ class Store:
                 (run_id, after),
             ).fetchall()
 
+    def action(self, conn, run_id, data):
+        run = require_row(
+            conn.execute("SELECT * FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
+        )
+        if run["state_version"] != data.expected_state_version:
+            raise Problem(409, "state_conflict")
+        # M0 measured primitives do not establish safe platform pause/cancel/recovery.
+        raise Problem(409, "unsupported_capability:" + data.action)
+
     def runtime(self):
         with self.db.transaction() as conn:
-            capacity = conn.execute("SELECT * FROM runtime_capacity").fetchone()
-            occupied = conn.execute(
-                "SELECT count(*) AS n FROM resource_reservations WHERE released_at IS NULL"
-            ).fetchone()["n"]
-            queued = conn.execute("SELECT count(*) AS n FROM runs WHERE state='queued'").fetchone()[
-                "n"
-            ]
-            interrupted = conn.execute(
-                "SELECT count(*) AS n FROM runs WHERE state='interrupted'"
-            ).fetchone()["n"]
+            nodes = conn.execute(
+                "SELECT c.*, (SELECT count(*) FROM resource_reservations rr JOIN "
+                "sandbox_bindings b ON b.id=rr.sandbox_id WHERE b.node_id=c.node_id "
+                "AND rr.released_at IS NULL) AS occupied FROM runtime_capacity c ORDER"
+                " BY node_id"
+            ).fetchall()
+            catalog = conn.execute(
+                "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
+            ).fetchone()
+            active = [n for n in nodes if n["node_id"] == "fake-local" or catalog]
             return {
-                **capacity,
-                "occupied": occupied,
-                "queued": queued,
-                "interrupted": interrupted,
-                "execution_mode": "fake",
+                "slots": 4,
+                "occupied": sum(n["occupied"] for n in active),
+                "queued": conn.execute(
+                    "SELECT count(*) AS n FROM runs WHERE state='queued'"
+                ).fetchone()["n"],
+                "interrupted": conn.execute(
+                    "SELECT count(*) AS n FROM runs WHERE state='interrupted'"
+                ).fetchone()["n"],
+                "execution_mode": "mixed" if catalog else "fake",
+                "available_backends": ["fake", "openhands"] if catalog else ["fake"],
+                "nodes": active,
+                "repositories": catalog["repositories"] if catalog else [],
             }

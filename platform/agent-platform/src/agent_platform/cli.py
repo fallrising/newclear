@@ -2,8 +2,10 @@
 
 import argparse
 import getpass
+import json
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import uvicorn
@@ -13,6 +15,7 @@ from .auth import bootstrap
 from .config import Settings
 from .db import Database, migrate
 from .domain import Problem
+from .runtime_client import RuntimeClient
 from .worker import Worker
 
 
@@ -20,6 +23,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("migrate")
+    commands.add_parser("register-runtime")
+    connector = commands.add_parser("connector")
+    connector.add_argument("--config", type=Path, required=True)
+    connector.add_argument("--port", type=int, default=17800)
     setup = commands.add_parser("bootstrap")
     setup.add_argument("--username", required=True)
     setup.add_argument("--password-file", type=Path)
@@ -30,6 +37,19 @@ def main():
     worker = commands.add_parser("worker")
     worker.add_argument("--once", action="store_true")
     args = parser.parse_args()
+    if args.command == "connector":
+        from .connector import create_connector
+        from .connector_journal import private_file
+
+        config = json.loads(private_file(args.config).read_text())
+        uvicorn.run(
+            create_connector(config),
+            host="127.0.0.1",
+            port=args.port,
+            proxy_headers=False,
+            access_log=False,
+        )
+        return 0
     settings = Settings.from_env()
     if args.command == "migrate":
         migrate(settings.database_url)
@@ -58,14 +78,35 @@ def main():
                     parser.error("passwords do not match")
             bootstrap(db, args.username, password)
             print("Operator created")
+        elif args.command == "register-runtime":
+            connector = RuntimeClient.from_env()
+            if connector is None:
+                raise ValueError("CONNECTOR_ORIGIN is required")
+            catalog = connector.register(db)
+            print(
+                "Registered pinned runtime with",
+                len(catalog["repositories"]),
+                "repository revisions",
+            )
         elif args.command == "worker":
-            runner = Worker(db)
-            while True:
-                worked = runner.run_once()
-                if args.once:
-                    break
-                if not worked:
-                    time.sleep(0.5)
+            runner = Worker(db, RuntimeClient.from_env())
+            if args.once:
+                runner.run_once()
+            else:
+                with ThreadPoolExecutor(max_workers=4) as pool:
+                    pending = set()
+                    while True:
+                        for future in list(pending):
+                            if future.done():
+                                future.result()
+                                pending.remove(future)
+                        runner.reconcile_expired()
+                        while len(pending) < 4:
+                            claim = runner.claim()
+                            if not claim:
+                                break
+                            pending.add(pool.submit(runner.execute, claim))
+                        time.sleep(0.3)
     except (ValueError, Problem) as exc:
         print(str(exc), file=sys.stderr)
         return 1

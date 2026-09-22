@@ -1,0 +1,86 @@
+"""Worker-to-connector boundary; no node tokens, guest secrets or local paths."""
+
+import os
+from urllib.parse import urlencode
+
+from psycopg.types.json import Jsonb
+
+from agent_platform_m0.transport import HTTP, ProbeError
+
+from .connector_journal import private_file
+from .domain import Problem
+
+
+class RuntimeClient:
+    def __init__(self, origin, token):
+        self.http = HTTP(origin, token, timeout=120)
+
+    @classmethod
+    def from_env(cls):
+        origin = os.environ.get("CONNECTOR_ORIGIN")
+        if not origin:
+            return None
+        token = private_file(os.environ["CONNECTOR_TOKEN_FILE"]).read_text().strip()
+        return cls(origin, token)
+
+    def call(self, method, path, data=None):
+        try:
+            status, result = self.http.request(method, path, data)
+        except ProbeError:
+            raise Problem(503, "connector_unavailable_or_uncertain") from None
+        if status != 200:
+            raise Problem(409, "connector_operation_unconfirmed")
+        return result
+
+    def register(self, db):
+        catalog = self.call("GET", "/v1/catalog")
+        with db.transaction() as conn:
+            conn.execute(
+                "SELECT node_id FROM runtime_capacity WHERE node_id='cocoon-local' FOR UPDATE"
+            ).fetchone()
+            occupied = conn.execute(
+                "SELECT 1 FROM sandbox_bindings b JOIN resource_reservations r ON "
+                "b.id=r.sandbox_id WHERE b.node_id='cocoon-local' AND r.released_at IS"
+                " NULL LIMIT 1"
+            ).fetchone()
+            if occupied:
+                raise Problem(409, "runtime_registration_requires_drain")
+            conn.execute(
+                "INSERT INTO runtime_catalog(node_id,template_digest,repositories) "
+                "VALUES ('cocoon-local',%s,%s) ON CONFLICT(node_id) DO UPDATE SET temp"
+                "late_digest=excluded.template_digest,repositories=excluded.repositori"
+                "es,registered_at=now()",
+                (catalog["template_digest"], Jsonb(catalog["repositories"])),
+            )
+            conn.execute("UPDATE runtime_capacity SET draining=false WHERE node_id='cocoon-local'")
+        return catalog
+
+    def allocate(self, run):
+        return self.call(
+            "POST",
+            "/v1/runs/" + str(run["id"]),
+            {
+                "generation": run["generation"],
+                "template": run["template_digest"],
+                "canonical_repo": run["canonical_repo"],
+                "base_sha": run["base_sha"],
+                "deadline": run["deadline"].isoformat(),
+            },
+        )
+
+    def operation(self, run, action):
+        return self.call(
+            "POST",
+            f"/v1/runs/{run['id']}/operations",
+            {
+                "generation": run["generation"],
+                "action": action,
+                "goal": run["goal"] if action == "prompt" else "",
+            },
+        )
+
+    def events(self, run):
+        query = {"generation": run["generation"]}
+        if run["backend_cursor"]:
+            query["cursor"] = run["backend_cursor"]
+        return self.call("GET", f"/v1/runs/{run['id']}/events?" + urlencode(query))

@@ -19,7 +19,7 @@ from starlette.concurrency import run_in_threadpool
 from .auth import Auth
 from .config import Settings
 from .db import Database
-from .domain import Login, Problem, ProfileInput, ProjectInput, RetryInput, TaskInput
+from .domain import ActionInput, Login, Problem, ProfileInput, ProjectInput, RetryInput, TaskInput
 from .store import Store, json_value
 
 
@@ -46,8 +46,8 @@ def create_app(settings=None, db=None, web_dist=None):
                 await run_in_threadpool(db.close)
 
     app = FastAPI(
-        title="Agent Platform M1",
-        version="0.2.0",
+        title="Agent Platform",
+        version="0.3.0",
         lifespan=lifespan,
         docs_url=None,
         redoc_url=None,
@@ -199,6 +199,23 @@ def create_app(settings=None, db=None, web_dist=None):
     @app.get("/api/v1/runs/{run_id}")
     def run(run_id: UUID, session=authenticated):
         return store.run(run_id)
+
+    @app.post("/api/v1/runs/{run_id}/actions")
+    def action(
+        run_id: UUID,
+        data: ActionInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"runs/{run_id}/actions",
+                idempotency_key,
+                data,
+                lambda conn, _: store.action(conn, run_id, data),
+            )
+        )
 
     @app.get("/api/v1/runs/{run_id}/events")
     async def events(

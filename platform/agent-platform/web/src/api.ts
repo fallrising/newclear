@@ -26,7 +26,14 @@ export type Run = {
   cleanup_state: string;
   last_event_seq: number;
   event_floor: number;
-  result: { summary: string; verification: { status: string; reason: string } } | null;
+  execution_mode?: string;
+  capabilities?: Record<string, boolean | string>;
+  result: {
+    diff?: string;
+    diff_sha256?: string;
+    summary: string;
+    verification: { status: string; reason: string };
+  } | null;
 };
 export type RunEvent = {
   event_id: string;
@@ -38,6 +45,7 @@ export type RunEvent = {
 };
 export type TaskDetail = { task: Task; runs: Run[] };
 export type Runtime = {
+  available_backends?: string[];
   execution_mode: string;
   slots: number;
   occupied: number;
@@ -118,6 +126,8 @@ export function errorText(error: unknown) {
           login_rate_limited: '嘗試次數過多，請稍後再登入。',
           idempotency_conflict: '這次請求的內容與先前不同，請重新確認。',
           database_unavailable: '服務暫時無法連線，請稍後再試。',
+          runtime_not_configured: '真實執行環境尚未由管理員登錄。',
+          repository_revision_not_registered: '這個 repository 或 commit 尚未登錄為可用版本。',
           invalid_input: '請檢查欄位內容與 commit SHA。',
           active_run_exists: '這個任務已有尚未結束的執行。',
           state_conflict: '執行狀態已改變，請重新整理。',

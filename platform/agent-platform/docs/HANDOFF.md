@@ -1,26 +1,24 @@
-# 開發接續紀錄 — 2026-09-21
+# 開發接續紀錄 — 2026-09-22
 
-本次停止點：**PR #16 已依 operator 指示合併，M1 控制面切片已實作並通過本機驗收，下一步 M2。** M1 分支 `agent/agent-platform/m1-control-plane` 從 merged main `7bb80d0` 開始。完整操作與邊界見 [M1](M1.md)，硬體前置證據仍見 [KVM 驗收](KVM-VALIDATION.md)。
+本次停止點：**PR #18 已合併（main `f9df850`）；M2 真實 runtime 整合已實作並通過 AT-02／03／10，下一步 M3。** M2 分支為 `agent/agent-platform/m2-runtime`。操作、驗收與限制見 [M2](M2.md)，前一版見 [M1](M1.md)。
 
-## M1 已完成
+## M2 已完成
 
-- FastAPI API、PostgreSQL SQL migrations、不可變 profile revision、task/run/command/event/queue/binding/reservation 與 fake operation ledger。
-- 一次性 operator bootstrap、Argon2 password hash、可撤銷 session、exact Origin／CSRF、登入 rate limit；沒有預設密碼或公開註冊。
-- 原子 create 與 route-scoped idempotency；partial unique index 保護單 task 的唯一 active run；明確 retry 帶 expected state version。
-- 獨立 worker、SKIP LOCKED admission、四個 fake slots、lease/generation fence、expired ownership 保留 capacity 並標 interrupted。
-- Fake adapters 的固定 operation ID、inspect／來源 event replay；backend cursor 與平台 seq 分開；結果保存後才 succeeded、observed fake cleanup 後才釋放 slot。
-- React／TypeScript 工作台：登入、project／profile 建立、task 表單／列表／歷史、持久活動與結果；重試保留 key，事件為安全文字。
-- 真實 PostgreSQL／HTTP 與獨立 worker process 驗收；45 個既有 tests + 21 個 M1 tests，Web 12 tests／typecheck／format／build 通過。結果見 [M1 evidence](evidence/m1-2026-09-21.json)。
-- Python hash lock、npm lock、loopback development Compose、啟動文件與 root path-scoped CI。測試 database 容器／臨時 HTTP server 均已清理。
+- Cocoon／OpenHands 私有 connector、固定 template 與管理員登錄的 readonly Git bundle、非 root guest checkout、真實 terminal 工具執行、持久事件及 bounded diff。
+- Connector 私密 durable operation journal、generation／payload gate、不確定操作不重送；worker 四任務並行與 heartbeat。Fake／real 混用仍遵守全平台四 slot 上限。
+- 四個真實 VM 並行、第五 queued、workspace 隔離；VMM／VM record／runtime directory／cgroup 均確認消失後釋放容量。
+- 真實 Chromium／PostgreSQL／HTTP 的 100-event reconnect／reload／不重複執行驗收；unsupported UI／API gate 與安全文字 diff。
+- `002_runtime.sql`、runtime catalog、`register-runtime`／`connector` CLI、path-scoped CI browser acceptance。證據見 [M2 evidence](evidence/m2-2026-09-22.json)。
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) M2 接入真正 SandboxProvider／AgentBackend，固定 M0 OCI template 與能力；不要把 fake operation ledger 當成已解決真實 allocation crash reconcile。
-2. 完成 AT-02／AT-03／AT-10：兩個真實 VM、容量與 cleanup、100 events 的 browser reconnect／去重，以及 unsupported 能力的 UI／API gate；M1 尚未執行 browser E2E 或真實平台 adapter 任務。
-3. API 路由在 `src/agent_platform/api.py`；資料與 queue 在 `store.py`／`worker.py`；schema 位於 `src/agent_platform/migrations/`；新 migration 擴充 fake-only profile constraint，不改寫已發布版本。
-4. 工作台目前只允許 fake profile，清楚標示程式驗證未執行；尚未 clone repository、呼叫 provider、顯示真實 diff／artifact，沒有部署正式服務。
-5. 真實 KVM 依 [KVM-HOST](KVM-HOST.md)／[KVM 驗收](KVM-VALIDATION.md) 重建專用配置。M0 的短期 registry 已移除，不能假設 `localhost:15000` 仍可拉取。
-6. M3／M4 的 approval、完整 recovery、budget、artifact、export、backup／GC 與 production 尚未驗收。
+1. 依 [SDD](../SDD.md) M3 完成 AT-04／05／06／07／08／11；優先處理未知 allocation／prompt、worker restart、stale generation 與 node partition 的 reconciliation。
+2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
+3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
+4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
+5. Pause／resume／cancel／approval 均尚未開啟。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
+6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
+7. 重跑 KVM 使用專用 zero-warm node；本機 2026-09-22 私密測試目錄 `/tmp/apm2-20260922` 保留，connector／sandboxd 已停、VM／claims 為零。不要輸出其中的 token／journal 原文。M0 registry 已移除；M2 使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
 
 ## 必須保留的契約差異
 

@@ -2,11 +2,13 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態：M0 真實 KVM gate 已通過；M1 的登入／建立任務／queue／持久事件工作台已實作並通過 fake-adapter 驗收。下一步為 M2 真實 runtime 整合。**
+**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。下一步為 M3 恢復與安全控制。**
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
 ## 文件入口
+
+- [M2 真實任務與啟動](docs/M2.md)：私有 connector、固定 repository bundle、真實 VM／模擬模型、事件與 diff 驗收。
 
 - [M1 工作台與啟動](docs/M1.md)：operator 登入、PostgreSQL queue、React UI、驗收與後續邊界。
 - [SDD](SDD.md)：產品範圍、使用者流程、架構、資料與 API 契約、故障處理、驗收與里程碑。
@@ -33,6 +35,6 @@
 
 ## 開始開發
 
-目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake adapters 與 React 工作台。啟動與測試見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
+目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake／真實 runtime adapters、私有 connector 與 React 工作台。啟動與測試見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
 
-目前的 Web 任務使用明確標示的模擬 Agent，不會修改 repository 或呼叫模型。下一個切片 M2 將平台接到 M0 已測的真實 Cocoon／OpenHands，完成雙 VM 並行、事件與 diff 驗收。
+M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修改驗收，並顯示事件與 diff。它尚不解讀自然語言工作目標、不呼叫付費 provider；專案測試未設定。啟動與能力限制見 [M2](docs/M2.md)。

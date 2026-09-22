@@ -27,6 +27,7 @@ let tasks: Task[];
 let lastPayload: Record<string, string>;
 let lostResponse: boolean;
 let keys: string[];
+let result: Run['result'];
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -35,6 +36,7 @@ beforeEach(() => {
   lastPayload = {};
   lostResponse = false;
   keys = [];
+  result = null;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -111,7 +113,7 @@ beforeEach(() => {
           cleanup_state: 'not_allocated',
           last_event_seq: 1,
           event_floor: 1,
-          result: null,
+          result,
         };
         return Response.json({ task: tasks[0], runs: [run] });
       }
@@ -186,4 +188,24 @@ it('shows a recoverable service state when the session endpoint is unavailable',
   mount();
   await screen.findByRole('heading', { name: '暫時無法開啟工作台' });
   await waitFor(() => expect(screen.getByRole('button', { name: '重新連線' })).toBeEnabled());
+});
+
+it('renders a saved real VM diff as text and keeps unsupported controls disabled', async () => {
+  result = {
+    summary: 'Fixed VM fixture completed',
+    verification: { status: 'passed', reason: 'fixture only' },
+    diff: '+<img src=x onerror=alert(1)>',
+    diff_sha256: 'a'.repeat(64),
+  };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByLabelText('檔案差異')).toHaveTextContent(
+    '+<img src=x onerror=alert(1)>',
+  );
+  expect(document.querySelector('img')).toBeNull();
+  for (const name of ['暫停', '繼續', '取消', '審批'])
+    expect(screen.getByRole('button', { name })).toBeDisabled();
+  expect(screen.getByText(/專案測試：未設定/)).toBeVisible();
 });

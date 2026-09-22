@@ -11,3 +11,6 @@ dist/
 !.env.example
 web/coverage/
 *.tsbuildinfo
+
+web/test-results/
+web/playwright-report/

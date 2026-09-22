@@ -1,7 +1,7 @@
-"""Separate M1 worker: PostgreSQL queue, bounded fake admission and lease fencing.
+"""PostgreSQL queue, bounded admission and lease fencing for fake and real adapters.
 
 Expired ownership is quarantined, never automatically reassigned to a new
-adapter instance. Real adapter reconciliation and recovery are M2/M3 work.
+adapter instance. Full reconciliation and recovery remain M3 work.
 """
 
 from contextlib import contextmanager
@@ -15,9 +15,10 @@ from .store import event
 
 
 class Worker:
-    def __init__(self, db):
+    def __init__(self, db, connector=None):
         self.db = db
         self.owner = uuid4()
+        self.connector = connector
         self.agent = FakeAgentBackend()
         self.sandbox = FakeSandboxProvider()
 
@@ -69,19 +70,41 @@ class Worker:
             return len(rows)
 
     def claim(self):
+        for node, backend in [("fake-local", "fake"), ("cocoon-local", "openhands")]:
+            if backend == "openhands" and self.connector is None:
+                continue
+            claim = self.claim_node(node, backend)
+            if claim:
+                return claim
+        return None
+
+    def claim_node(self, node, backend):
         with self.db.transaction() as conn:
-            capacity = conn.execute(
-                "SELECT * FROM runtime_capacity WHERE node_id='fake-local' FOR UPDATE"
-            ).fetchone()
-            occupied = conn.execute(
+            # One platform-wide ceiling, including mixed fake/real workers.
+            conn.execute("SELECT pg_advisory_xact_lock(18273645)")
+            total = conn.execute(
                 "SELECT count(*) AS n FROM resource_reservations WHERE released_at IS NULL"
             ).fetchone()["n"]
-            if capacity["draining"] or occupied >= capacity["slots"]:
+            if total >= 4:
+                return None
+            capacity = conn.execute(
+                "SELECT * FROM runtime_capacity WHERE node_id=%s FOR UPDATE", (node,)
+            ).fetchone()
+            occupied = conn.execute(
+                "SELECT count(*) AS n FROM resource_reservations rr JOIN "
+                "sandbox_bindings b ON b.id=rr.sandbox_id WHERE rr.released_at IS NULL"
+                " AND b.node_id=%s",
+                (node,),
+            ).fetchone()["n"]
+            if capacity["draining"] or occupied >= min(
+                capacity["slots"], capacity["cpu"] // 4, capacity["memory_bytes"] // (4 * 1024**3)
+            ):
                 return None
             job = conn.execute(
                 "SELECT j.* FROM jobs j JOIN runs r ON r.id=j.run_id WHERE "
-                "j.status='queued' AND j.available_at<=now() AND r.state='queued' "
-                "ORDER BY j.available_at,j.id LIMIT 1 FOR UPDATE OF j SKIP LOCKED"
+                "j.status='queued' AND j.available_at<=now() AND r.state='queued' AND r.backend=%s "
+                "ORDER BY j.available_at,j.id LIMIT 1 FOR UPDATE OF j SKIP LOCKED",
+                (backend,),
             ).fetchone()
             if not job:
                 return None
@@ -99,10 +122,10 @@ class Worker:
                 (
                     "INSERT INTO sandbox_bindings(id,run_id,node_id,provider_handle,ge"
                     "neration,desired_state,observed_state,lease_deadline,cleanup_stat"
-                    "e) VALUES (%s,%s,'fake-local',%s,%s,'running','pending',%s+interv"
+                    "e) VALUES (%s,%s,%s,%s,%s,'running','pending',%s+interv"
                     "al '2 minutes','pending')"
                 ),
-                (binding, run["id"], f"fake-sandbox:{run['id']}", generation, run["deadline"]),
+                (binding, run["id"], node, f"pending:{run['id']}", generation, run["deadline"]),
             )
             conn.execute(
                 (
@@ -124,7 +147,12 @@ class Worker:
                 (self.owner, generation, job["id"]),
             )
             self.state(conn, run, "provisioning")
-            return {"job_id": job["id"], "run_id": run["id"], "generation": generation}
+            return {
+                "job_id": job["id"],
+                "run_id": run["id"],
+                "generation": generation,
+                "backend": backend,
+            }
 
     @contextmanager
     def owned(self, claim):
@@ -155,6 +183,13 @@ class Worker:
     def execute(self, claim):
         if claim.get("expired"):
             return
+        if claim.get("backend") == "openhands":
+            from .runtime_worker import execute_real
+
+            return execute_real(self, claim)
+        return self.execute_fake(claim)
+
+    def execute_fake(self, claim):
         with self.owned(claim) as (conn, run):
             if run["state"] != "provisioning":
                 raise Problem(409, "unexpected_worker_state")

@@ -74,8 +74,22 @@ jobs:
         run: |
           python -m pip install --require-hashes -r requirements.lock
           python -m pip install --no-deps -e .
-      - name: PostgreSQL AT-01, worker and real HTTP event acceptance
+      - name: PostgreSQL control plane, runtime boundaries and HTTP event acceptance
         run: make platform-check
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: platform/agent-platform/web/package-lock.json
+      - name: Install and build browser acceptance target
+        run: |
+          npm --prefix web ci
+          npm --prefix web run build
+          web/node_modules/.bin/playwright install --with-deps chromium
+      - name: AT-03 browser reconnect and AT-10 disabled controls
+        env:
+          PYTHON: python
+        run: make browser-test
 
   web:
     runs-on: ubuntu-24.04

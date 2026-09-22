@@ -224,7 +224,9 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
             <h1>{view === 'tasks' ? '任務與進度' : view === 'projects' ? '專案' : 'Agent 設定'}</h1>
           </div>
           <div className="runtime">
-            <span className="fixture">測試執行環境</span>
+            <span className="fixture">
+              {runtime.data?.execution_mode === 'mixed' ? '真實 VM · 模擬模型' : '模擬執行環境'}
+            </span>
             <span>
               {runtime.data
                 ? `${runtime.data.occupied} / ${runtime.data.slots} 執行中 · ${runtime.data.queued} 排隊`
@@ -270,7 +272,12 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
         ) : view === 'projects' ? (
           <Catalog key="projects" kind="projects" items={projects.data?.items ?? []} />
         ) : (
-          <Catalog key="profiles" kind="profiles" items={profiles.data?.items ?? []} />
+          <Catalog
+            key="profiles"
+            kind="profiles"
+            items={profiles.data?.items ?? []}
+            backends={runtime.data?.available_backends ?? ['fake']}
+          />
         )}
       </main>
     </div>
@@ -325,7 +332,7 @@ function TaskForm({
             <select name="profile_revision" required>
               {profiles.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} · v{p.revision}
+                  {p.name} · v{p.revision} · {p.backend === 'openhands' ? '真實 VM' : '模擬環境'}
                 </option>
               ))}
             </select>
@@ -355,7 +362,9 @@ function TaskForm({
             placeholder="貼上固定的完整 commit SHA"
           />
         </label>
-        <p className="muted">目前使用模擬 agent 驗證流程，不會修改 repository 或呼叫模型。</p>
+        <p className="muted">
+          真實 VM 設定使用固定模擬模型，執行檔案修改驗收；任務目標會保存，但不會由真實模型推理。
+        </p>
         <ErrorNotice error={create.error} />
         <div className="form-actions">
           <button type="submit" disabled={create.isPending}>
@@ -550,12 +559,31 @@ function RunActivity({ run }: { run: Run }) {
           </dd>
         </div>
       </dl>
+      <p className="muted">
+        {run.execution_mode === 'cocoon-fixture'
+          ? 'OpenHands · 獨立 VM · 固定模擬模型'
+          : '模擬環境 · 排程驗證'}
+      </p>
+      <div className="run-actions" aria-label="執行操作">
+        {(['pause', 'resume', 'cancel', 'approval'] as const).map((action) => (
+          <button
+            key={action}
+            type="button"
+            disabled={!run.capabilities?.[action]}
+            title="此版本尚未提供安全的操作流程"
+          >
+            {{ pause: '暫停', resume: '繼續', cancel: '取消', approval: '審批' }[action]}
+          </button>
+        ))}
+      </div>
+      <p className="muted">此執行方式尚不支援暫停、繼續、取消與審批。</p>
       {notice && <p className="notice">{notice}</p>}
       <h3>活動紀錄</h3>
       <ol className="timeline">
         {events.map((event) => (
           <li
             key={event.event_id}
+            data-event-seq={event.seq}
             className={event.type === 'message.created' ? 'message' : 'activity'}
           >
             <div className="event-meta">
@@ -563,7 +591,7 @@ function RunActivity({ run }: { run: Run }) {
                 {event.type === 'message.created'
                   ? event.payload.role === 'user'
                     ? '你'
-                    : 'Agent（測試）'
+                    : 'Agent（模擬模型）'
                   : '系統'}
               </strong>
               <time dateTime={event.created_at}>{timestamp(event.created_at)}</time>
@@ -576,12 +604,12 @@ function RunActivity({ run }: { run: Run }) {
                   : event.type === 'run.state_changed'
                     ? `狀態更新：${stateNames[String(event.payload.state)] ?? event.payload.state}`
                     : event.type === 'runtime.cleaned'
-                      ? '測試環境已回收。'
+                      ? '執行環境已確認回收。'
                       : event.type === 'runtime.cleanup_pending'
                         ? '環境狀態尚待確認，容量已保留。'
                         : event.type === 'run.result_saved'
                           ? '結果已保存。'
-                          : event.type}
+                          : String(event.payload.content ?? event.type)}
             </p>
           </li>
         ))}
@@ -591,13 +619,38 @@ function RunActivity({ run }: { run: Run }) {
         <section className="result">
           <h3>執行結果</h3>
           <p>{run.result.summary}</p>
-          <p className="muted">程式驗證：未執行（測試環境）。</p>
+          <p className="muted">
+            驗證：
+            {run.result.verification.status === 'passed'
+              ? '固定檔案修改驗收通過'
+              : run.result.verification.status === 'failed'
+                ? '固定檔案修改驗收失敗'
+                : '未執行'}
+            。專案測試：未設定。
+          </p>
+          {run.result.diff !== undefined && (
+            <>
+              <h3>檔案變更</h3>
+              <pre className="diff" aria-label="檔案差異">
+                {run.result.diff || '沒有檔案變更。'}
+              </pre>
+              <p className="muted mono">SHA-256: {run.result.diff_sha256}</p>
+            </>
+          )}
         </section>
       )}
     </div>
   );
 }
-function Catalog({ kind, items }: { kind: 'projects' | 'profiles'; items: (Project | Profile)[] }) {
+function Catalog({
+  kind,
+  items,
+  backends = ['fake'],
+}: {
+  kind: 'projects' | 'profiles';
+  items: (Project | Profile)[];
+  backends?: string[];
+}) {
   const cache = useQueryClient();
   const command = useRef(new PendingCommand());
   const form = useRef<HTMLFormElement>(null);
@@ -625,7 +678,7 @@ function Catalog({ kind, items }: { kind: 'projects' | 'profiles'; items: (Proje
                 <p className="muted">
                   {'canonical_repo' in item
                     ? item.canonical_repo
-                    : `模擬 Agent · v${item.revision}`}
+                    : `${item.backend === 'openhands' ? 'OpenHands · 真實 VM · 模擬模型' : '模擬 Agent'} · v${item.revision}`}
                 </p>
               </li>
             ))}
@@ -653,9 +706,24 @@ function Catalog({ kind, items }: { kind: 'projects' | 'profiles'; items: (Proje
               />
             </label>
           ) : (
-            <p className="notice">
-              模擬 Agent 用於驗證排程、狀態與事件保存。不會呼叫模型或修改檔案。
-            </p>
+            <>
+              <label>
+                執行方式
+                <select name="backend">
+                  {backends.map((backend) => (
+                    <option key={backend} value={backend}>
+                      {backend === 'openhands'
+                        ? 'OpenHands · 真實 VM · 固定模擬模型'
+                        : '模擬環境 · 排程驗證'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="notice">
+                真實 VM 只接受管理員已登錄的 repository 與
+                commit。固定模型會修改驗收檔案，不會呼叫付費模型。
+              </p>
+            </>
           )}
           <ErrorNotice error={create.error} />
           <button type="submit" disabled={create.isPending}>

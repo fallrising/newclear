@@ -12,6 +12,7 @@ CAPABILITIES = {
     "event_replay": True,
     "durable_resume": False,
     "pause": False,
+    "resume": False,
     "cancel": False,
     "approval": False,
     "usage": False,
@@ -60,7 +61,7 @@ class ProjectInput(Input):
 class ProfileInput(Input):
     name: str = Field(min_length=1, max_length=120)
     profile_id: UUID | None = None
-    backend: Literal["fake"] = "fake"
+    backend: Literal["fake", "openhands"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
 
 
@@ -76,4 +77,20 @@ class TaskInput(RunInput):
 
 
 class RetryInput(RunInput):
+    expected_state_version: int = Field(ge=1)
+
+
+OPENHANDS_CAPABILITIES = {
+    **CAPABILITIES,
+    "protocol_revision": "m2-openhands-1",
+    "terminal_output": True,
+}
+
+
+def capabilities(backend):
+    return (OPENHANDS_CAPABILITIES if backend == "openhands" else CAPABILITIES).copy()
+
+
+class ActionInput(Input):
+    action: Literal["pause", "resume", "cancel", "approval"]
     expected_state_version: int = Field(ge=1)

@@ -75,7 +75,8 @@ def main():
                 TEST_DATABASE_URL=f"postgresql://agent_platform:{password}@127.0.0.1:{port}/agent_platform_test",
             )
             return subprocess.run(
-                [sys.executable, "-m", "unittest", "discover", "-s", "tests_platform", "-v"],
+                sys.argv[1:]
+                or [sys.executable, "-m", "unittest", "discover", "-s", "tests_platform", "-v"],
                 env=env,
             ).returncode
         finally:

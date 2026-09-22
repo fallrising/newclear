@@ -1,6 +1,6 @@
 # dim-gate M5 接手 prompt
 
-將下方區塊貼到新 chat。這是開發交接，不表示已部署或已完成 M5；先核對 Git/PR/CI 與 PLAN 的最新 M4 resume block。
+此頁保存 M5 啟動時的歷史 prompt。M5 已於 `043a13a` 完成產品驗收；後續先讀 [STATUS](STATUS.md)、[PLAN](../../../.team/PLAN.md) 最後 M5 resume，以及 [PR #23](https://github.com/fallrising/newclear/pull/23) 的最新 CI、合併與 ownership。不要直接重啟下方已完成的 M5 工作。原始接手要求保留如下；未部署或操作真實雲端。
 
 ```text
 請接手 dim-gate，繼續實際開發最早未驗收的 M5，執行真實瀏覽器驗證，不要只提計畫。

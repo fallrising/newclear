@@ -1172,8 +1172,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     next.idempotency.push({ sessionId: input.sessionId, actorId: input.actorId, method, path: input.path, key: input.key, bodyHash: checksum(bodyString), canonicalBody: bodyString, receipt })
     const validated = parse(snapshotSchema, next)
     assertIntegrity(validated)
-    if (serializedBytes(validated) > 3 * 1024 * 1024) fail(507, 'DEMO_STORAGE_FULL', '示範資料超出 3 MiB 儲存上限；本次未保存。')
-    try { persist(clone(validated)) } catch (error) {
+    try {
+      if (serializedBytes(validated) > 3 * 1024 * 1024) fail(507, 'DEMO_STORAGE_FULL', '示範資料超出 3 MiB 儲存上限；本次未保存。')
+      persist(clone(validated))
+    } catch (error) {
       if (error instanceof DomainError) throw error
       fail(507, 'DEMO_STORAGE_FULL', '無法保存示範資料；本次變更未提交，可稍後重試。')
     }

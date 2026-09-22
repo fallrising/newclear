@@ -73,13 +73,18 @@ const command = (method: Operation['method'], path: string, operationId: string,
 const w = wireSchemas
 const s = d.contractSchemas
 
+// Passing the full namespace retains every Zod locale and conversion helper.
+// Registry modules only need these constructors; wire validation is unchanged.
+const contractZ = { array: z.array, strictObject: z.strictObject, enum: z.enum,
+  string: z.string, literal: z.literal, coerce: { number: z.coerce.number } }
+
 export type ContractContext = {
-  z: typeof z; d: typeof d; w: typeof wireSchemas; s: typeof d.contractSchemas; id: typeof id; version: typeof version;
+  z: typeof contractZ; d: typeof d; w: typeof wireSchemas; s: typeof d.contractSchemas; id: typeof id; version: typeof version;
   listQuery: typeof listQuery; windowQuery: typeof windowQuery; pageFields: typeof pageFields; logEntry: typeof logEntry;
   metricSeries: typeof metricSeries; traceSummary: typeof traceSummary; read: typeof read; command: typeof command;
 }
 
-const context: ContractContext = { z, d, w, s, id, version, listQuery, windowQuery, pageFields, logEntry, metricSeries, traceSummary, read, command }
+const context: ContractContext = { z: contractZ, d, w, s, id, version, listQuery, windowQuery, pageFields, logEntry, metricSeries, traceSummary, read, command }
 registerCoreSessionContracts(context)
 registerCmdbContracts(context)
 registerTopologyContracts(context)

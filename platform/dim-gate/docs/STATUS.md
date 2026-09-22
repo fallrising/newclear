@@ -19,9 +19,9 @@ M1 可操作範圍：
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
 | M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 MERGED at `29bed417` |
-| M3：CI/CD與回滾 | ACCEPTED at `04d6646`；[PR #17](https://github.com/fallrising/newclear/pull/17) OPEN、未合併 |
-| M4：觀測與完整展示 | ACCEPTED at `93a4bbc`；[PR #20](https://github.com/fallrising/newclear/pull/20) stacked OPEN、未合併 |
-| M5：驗收與展示交付 | 尚未開始 |
+| M3：CI/CD與回滾 | ACCEPTED at `04d6646`；PR #17 MERGED at `9dd4f16` |
+| M4：觀測與完整展示 | ACCEPTED at `93a4bbc`；PR #20 MERGED at `a61653b` |
+| M5：驗收與展示交付 | ACCEPTED at `043a13a`；PR #23 最新 CI／合併／owner release 見 PR |
 
 證據：122/122 tests、11/11 production E2E、全部 native/docs/contracts/CI/architecture/actionlint gates、獨立 T-012 attempt-2 ACCEPTED，以及 GitHub Actions run 35526733678 成功。該 run 對 head `784f771` 與 synthetic merge `796960eae34bce6463e921c1b7527ba2da565ebb` 執行；最後 reconciliation main 是 `a5982bf4547bba85429fec50494751562b5fe7c6`。E2E 保留 7 項 M0 regression，涵蓋 1440／768／390、明暗主題、axe serious/critical、keyboard/focus/dialog、`/dim-gate/` refresh、reset/reload/copied-tab/corrupt persistence、topology 與 AC-20 在途 persona response。
 
@@ -61,3 +61,14 @@ M4 新增24組實際明暗主題／1440/768/390檢查、9份 initial-focus/Tab/E
 [完整驗收報告](../../../.team/reports/T-024-attempt-3.md)、[獨立審查](../../../.team/reports/T-023-attempt-3.md) 與 [PLAN](../../../.team/PLAN.md) 保存歷史失敗、fixed refs、runtime與artifacts。[PR #20](https://github.com/fallrising/newclear/pull/20) 以未合併的已驗收M3 PR17為父分支，未合併／未部署。此純證據 checkpoint 推送後，最終 metadata-head CI 與 owner release 記錄於PR20，接手必查。
 
 下一里程碑是 **M5 AC-26–30**；[新 chat handoff prompt](HANDOFF-M5.md) 可直接複製。JS gzip465.01kB仍超過初始JS300KiB預算；完整鍵盤主線、效能量測、Firefox/WebKit smoke、儲存限制／復原完整性與可重演展示文件仍待完成，尚不宣稱可展示v0.1。
+
+M5 run DG-M5-20260922-01：已核對 M3/M4 最終 metadata CI 與 owner release，使用者續授權commit、SSHpush與PRmerge。PR17/20已依序合併，M5隔離分支整合最新main；歷史worktrees全部保留。當前實作採路由lazy、維持public feature邊界、Zod constructor精確引用及關閉重複大型常數展開；新增全鍵盤主線、儲存復原、實際sibling/live隔離、效能腳本與Firefox/WebKit smoke。見[M5 contract](M5-INTEGRATION-CONTRACT.md)與[示範指南](DEMO-GUIDE.md)。下方/上方歷史段落是當時觀察，M5尚未驗收或部署。
+
+
+M5 最終產品驗收（2026-09-22）：`043a13aba3f74de2d3dd14aa2481024a68e2f6b2` **ACCEPTED**，AC-26–30 完成，v0.1 可在本機展示。211 tests、完整 native gates、52/52 Chromium（保留原47）、4/4 Firefox/WebKit、3/3效能、2/2隔離、固定 commit 獨立審查與[產品 head CI35718464916](https://github.com/fallrising/newclear/actions/runs/35718464916)全部通過。鍵盤主線155個記錄動作、6個dialog initial-focus、14個明暗axe掃描；損壞存檔與quota/reload/reset、真正1,000次UIcommands及第1,001次原子拒絕均有原始證據。
+
+初始必要JS為297,794gzip bytes（290.814KiB，含demo與MSW）；本機4×CPU冷啟動5次LCP中位708ms，5,000CI查詢100次p95 0.5ms，含150ms延遲的100次HTTPcommands p95 167.2ms。CI對應1148ms／1.1ms／184.9ms，全部達標；仍保留約9.2KiB啟動預算餘裕。Firefox本機字型讀取問題已由僅限字型目錄的測試環境設定修复，14張新圖經獨立目視檢查；標準CI圖也正常。
+
+[完整驗收報告](../../../.team/reports/T-027-attempt-2.md)、[獨立審查](../../../.team/reports/T-028-attempt-2.md)、[操作指南](DEMO-GUIDE.md)及[PLAN](../../../.team/PLAN.md)是目前入口。[PR #23](https://github.com/fallrising/newclear/pull/23)保存最新metadata head CI、使用者已授權的合併結果及owner release；此純文件checkpoint需要自己的CI後才合併，最終狀態寫在PR以避免自我引用提交。M3/M4已合併且合併後CI成功；歷史段落仍保留當時觀察。
+
+所有原有29個worktrees和新M5 worker/review worktrees均保留；最新main b252d4e已正常整入，未修改已測產品內容。没有部署或真實雲端操作。舊[HANDOFF-M5](HANDOFF-M5.md)僅保存本輪啟動prompt，後續先核對此節、PLAN最後resume及PR23，不要再次開始已驗收M5。

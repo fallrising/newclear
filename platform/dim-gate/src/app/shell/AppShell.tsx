@@ -76,7 +76,7 @@ export function AppShell({ session }: { session: SessionView }) {
           return <NavLink key={route.key} to={route.path} end aria-label={route.navigation.label} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenu(false)}><Icon size={19} aria-hidden="true" /><span className="nav-label">{route.navigation.label}</span><span className="nav-code">{details.short}</span></NavLink>
         })}
       </nav>
-      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />M4 · 觀測與恢復</div><p>從發布追查觀測證據、事件與恢復樣本。</p><span className="sidebar-version">dim-gate / M4 development</span></div>
+      <div className="sidebar-bottom"><div className="foundation-label"><span className="status-dot" />示範工作台</div><p>從發布追查觀測證據、事件與恢復樣本。</p><span className="sidebar-version">dim-gate / demo</span></div>
     </aside>
     <div className="workspace">
       <header className="topbar">

@@ -7,7 +7,7 @@ const root = resolve(component, '../..')
 async function markdown(directory) {
   const files = []
   for (const item of await readdir(directory, { withFileTypes: true })) {
-    if (['node_modules', 'dist', 'test-results', 'playwright-report', '.git'].includes(item.name)) continue
+    if (['node_modules', 'dist', 'benchmark-results', '.git'].includes(item.name) || /^(test-results|playwright-report)(-|$)/.test(item.name)) continue
     const path = resolve(directory, item.name)
     if (item.isDirectory()) files.push(...await markdown(path))
     else if (item.name.endsWith('.md')) files.push(path)

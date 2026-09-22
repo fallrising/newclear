@@ -30,7 +30,7 @@ concurrency:
 jobs:
   foundation:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: platform/dim-gate
@@ -52,15 +52,20 @@ jobs:
       - run: pnpm check:ci
       - run: pnpm check:architecture
       - run: pnpm build --mode demo
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e
+      - run: pnpm test:smoke
+      - run: pnpm benchmark
+      - run: pnpm test:isolation
       - name: Preserve browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: dim-gate-m0-${{ github.sha }}
+          name: dim-gate-m5-${{ github.sha }}
           path: |
             platform/dim-gate/playwright-report/
             platform/dim-gate/test-results/
+            platform/dim-gate/playwright-report-smoke/
+            platform/dim-gate/test-results-smoke/
           if-no-files-found: error
           retention-days: 30

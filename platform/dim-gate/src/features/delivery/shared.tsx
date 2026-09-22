@@ -29,7 +29,7 @@ export function projectAction(session: SessionView, action: string, projectId?: 
 
 export function useDeliveryRefresh() {
   const cache = useQueryClient()
-  return useCallback(() => cache.invalidateQueries({ predicate: (query) => ['pipeline', 'pipelines', 'release', 'releases', 'environment', 'environments', 'application', 'applications', 'audit', 'guide'].includes(String(query.queryKey[3])) }), [cache])
+  return useCallback(() => cache.invalidateQueries({ predicate: (query) => ['pipeline', 'pipelines', 'release', 'releases', 'environment', 'environments', 'application', 'applications', 'audit', 'guide', 'notifications', 'dashboard', 'incidents', 'incident', 'metrics', 'traces', 'trace', 'logs'].includes(String(query.queryKey[3])) }), [cache])
 }
 
 export function MissingDelivery({ entity, back }: { entity: string; back: string }) {

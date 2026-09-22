@@ -1,0 +1,81 @@
+import { useState, type FormEvent } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { api, queryKey } from '../../api/client'
+import { ErrorState, LoadingState } from '../../components/shared/states'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
+import { canPerformProjectAction } from '../../domain/policy'
+import type { Environment, Incident, SessionView } from '../../domain/schemas'
+import { canReadRaw, incidentLabels, IncidentStatus, isNotFound, MissingObservation, ObservationAudit, observationLink, Pager, pageNumber, ScopeBadge, timestamp, useObservationRefresh } from './shared'
+
+export function IncidentListPage({ session }: { session: SessionView }) {
+  const [params, setParams] = useSearchParams()
+  const state = params.get('state') || undefined
+  const severity = params.get('severity') || undefined
+  const valid = (!state || Object.keys(incidentLabels).includes(state)) && (!severity || ['critical', 'warning'].includes(severity))
+  const filters = { environmentId: params.get('environmentId') || undefined, state: state as Incident['state'] | undefined, severity: severity as Incident['severity'] | undefined, q: params.get('q') || undefined, page: pageNumber(params.get('page')), pageSize: 25, sort: 'updatedAt' as const, order: 'desc' as const }
+  const incidents = useQuery({ queryKey: queryKey('incidents', null, filters), queryFn: () => api.listIncidents(filters), enabled: valid })
+  return <div className="observation-page"><div className="page-heading"><div><p className="eyebrow">INCIDENTS · DEMO</p><h1>事件與恢復</h1><p className="page-description">{session.user.displayName} 的授權範圍。連續異常建立事件，連續健康樣本才會觸發恢復。</p></div></div><section className="panel"><h2>事件清單</h2><form className="observation-filters" key={params.toString()} onSubmit={event => { event.preventDefault(); const form = new FormData(event.currentTarget); const next = new URLSearchParams(); for (const [key, value] of form.entries()) if (String(value).trim()) next.set(key, String(value).trim()); setParams(next) }}><label>搜尋事件<input name="q" maxLength={100} defaultValue={filters.q ?? ''} /></label><label>環境 ID<input name="environmentId" maxLength={160} defaultValue={filters.environmentId ?? ''} /></label><label>事件狀態<select name="state" defaultValue={state ?? ''}><option value="">所有狀態</option>{Object.entries(incidentLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>嚴重程度<select name="severity" defaultValue={severity ?? ''}><option value="">所有程度</option><option value="critical">critical</option><option value="warning">warning</option></select></label><Button type="submit" variant="outline">套用事件篩選</Button><Button variant="ghost" onClick={() => setParams({})}>清除篩選</Button></form>
+      {!valid ? <p role="alert">事件篩選值無效；請重新選擇狀態與嚴重程度。</p> : incidents.isPending ? <LoadingState label="正在讀取授權範圍內的事件…" /> : incidents.isError ? <ErrorState error={incidents.error} onRetry={() => void incidents.refetch()} /> : incidents.data.items.length === 0 ? <div className="empty-state" role="status"><h3>目前範圍沒有事件</h3><p>沒有符合條件的事件；這不代表已有健康觀測樣本。</p></div> : <div className="table-scroll"><table><caption>目前授權範圍的事件</caption><thead><tr><th scope="col">事件／規則</th><th scope="col">狀態</th><th scope="col">應用／環境</th><th scope="col">負責人</th><th scope="col">最後更新</th></tr></thead><tbody>{incidents.data.items.map(incident => <tr key={incident.id}><th scope="row"><Link to={`/ops/incidents/${encodeURIComponent(incident.id)}`}>{incident.id}</Link><small>{incident.ruleKey} · 第 {incident.episode} 次事件</small></th><td><IncidentStatus incident={incident} /></td><td><code>{incident.applicationId}</code><br /><code>{incident.environmentId}</code></td><td>{incident.assigneeId ?? '尚未認領'}</td><td>{timestamp(incident.updatedAt)}</td></tr>)}</tbody></table></div>}{incidents.data && valid && <Pager name="事件" page={incidents.data.page} total={incidents.data.total} onPage={page => setParams(previous => { const next = new URLSearchParams(previous); next.set('page', String(page)); return next })} />}</section></div>
+}
+
+export function IncidentDetailPage({ session }: { session: SessionView }) {
+  const { incidentId = '' } = useParams()
+  const detail = useQuery({ queryKey: queryKey('incident', incidentId), queryFn: () => api.getIncident(incidentId) })
+  if (detail.isPending) return <LoadingState label="正在讀取事件詳情…" />
+  if (detail.isError) return isNotFound(detail.error) ? <MissingObservation entity="事件" /> : <ErrorState error={detail.error} onRetry={() => void detail.refetch()} />
+  return <IncidentContent key={`${session.sessionId}:${session.identityEpoch}:${session.policyVersion}:${incidentId}`} session={session} incident={detail.data} />
+}
+
+function IncidentContent({ session, incident }: { session: SessionView; incident: Incident }) {
+  const [notice, setNotice] = useState('')
+  const application = useQuery({ queryKey: queryKey('application', incident.applicationId), queryFn: () => api.getApplication(incident.applicationId) })
+  const environment = application.data?.environments.find(env => env.id === incident.environmentId)
+  const raw = Boolean(environment && application.data && canReadRaw(session, application.data.application.projectId, environment.stage))
+  const canAct = (action: string) => Boolean(environment && application.data && canPerformProjectAction(session, action, application.data.application.projectId, environment.stage))
+  const observationWindow = incident.evidence.length ? {
+    from: incident.evidence.reduce((min, entry) => entry.sampleWindow.from < min ? entry.sampleWindow.from : min, incident.evidence[0].sampleWindow.from),
+    to: incident.evidence.reduce((max, entry) => entry.sampleWindow.to > max ? entry.sampleWindow.to : max, incident.evidence[0].sampleWindow.to),
+  } : {}
+  const lastEvidence = incident.evidence.at(-1)
+  const boundedWindow = observationWindow.from && observationWindow.to && Date.parse(observationWindow.to) - Date.parse(observationWindow.from) <= 86400000 ? observationWindow : lastEvidence?.sampleWindow ?? {}
+  return <div className="observation-page"><Link className="back-link" to={session.centers.includes('ops') ? '/ops/incidents' : observationLink({ applicationId: incident.applicationId, environmentId: incident.environmentId })}>返回{session.centers.includes('ops') ? '事件清單' : '應用觀測'}</Link><div className="page-heading"><div><p className="eyebrow">INCIDENT · DEMO</p><h1>事件詳情</h1><p className="page-description"><code>{incident.id}</code> · {incident.ruleKey} · 第 {incident.episode} 次事件</p></div><IncidentStatus incident={incident} /></div>{notice && <p className="success-state" role="status">{notice}</p>}
+    <section className="panel"><h2>事件狀態與範圍</h2>{application.isPending ? <LoadingState label="正在確認事件所屬 scope…" /> : application.isError ? <ErrorState error={application.error} onRetry={() => void application.refetch()} /> : environment ? <ScopeBadge environment={environment} applicationId={incident.applicationId} /> : <p className="observation-note">目前無法取得事件所屬環境的授權 metadata。</p>}<dl className="detail-list"><div><dt>負責人</dt><dd>{incident.assigneeId ?? '尚未認領'}</dd></div><div><dt>狀態</dt><dd>{incidentLabels[incident.state]}</dd></div><div><dt>連續健康樣本</dt><dd>{incident.recoverySamples} / 3</dd></div><div><dt>最後更新</dt><dd>{timestamp(incident.updatedAt)}</dd></div><div><dt>Correlation ID</dt><dd><code>{incident.correlationId}</code></dd></div></dl><p className="observation-note">只有觀測引擎累積三筆連續健康的一分鐘 bucket，才會將事件標示為已恢復。歷史異常證據會保留。</p><div className="observation-links"><Link to={observationLink({ applicationId: incident.applicationId, environmentId: incident.environmentId, ...boundedWindow })}>查看事件觀測範圍</Link>{incident.relatedReleaseId && <Link to={`/rd/releases/${encodeURIComponent(incident.relatedReleaseId)}`}>關聯發布 {incident.relatedReleaseId}</Link>}</div>
+      {environment && <div className="request-actions"><IncidentAction action="acknowledge" incident={incident} environment={environment} disabledReason={!canAct('incident.acknowledge') ? '需要此專案與環境階段的 Ops 認領權限。' : incident.state !== 'open' ? '只有待認領事件可以認領。' : undefined} onSuccess={setNotice} /><IncidentAction action="investigate" incident={incident} environment={environment} disabledReason={!canAct('incident.investigate') ? '需要此專案與環境階段的 Ops 調查權限。' : !['acknowledged', 'investigating'].includes(incident.state) ? '先認領事件才能開始調查；已恢復事件不可操作。' : incident.state === 'investigating' && incident.assigneeId === session.user.id ? '你已在調查這個事件。' : undefined} takeover={Boolean(incident.assigneeId && incident.assigneeId !== session.user.id)} onSuccess={setNotice} /></div>}
+    </section>
+    <section className="panel"><h2>已觀測證據</h2><p className="observation-note">下列為規則門檻與實際樣本時間範圍。Trace 與日誌連結只顯示目前身分可讀取的引用。</p>{incident.evidence.length === 0 ? <p className="observation-empty">尚無可見觀測證據。</p> : <ol className="observation-evidence">{incident.evidence.map((evidence, index) => <li key={`${evidence.metric}:${evidence.sampleWindow.from}:${index}`}><h3>{evidence.metric === 'p95Latency' ? `p95 延遲 > ${evidence.threshold} ms` : `錯誤率 > ${Number((evidence.threshold * 100).toFixed(3))}%`}</h3><p className="observation-note">{timestamp(evidence.sampleWindow.from)} → {timestamp(evidence.sampleWindow.to)}（不含終點）</p><Link to={observationLink({ applicationId: incident.applicationId, environmentId: incident.environmentId, ...evidence.sampleWindow })}>查看此 bucket 的觀測值</Link>{raw && <div className="observation-links">{evidence.traceIds.map(traceId => <Link key={traceId} to={observationLink({ applicationId: incident.applicationId, environmentId: incident.environmentId, ...evidence.sampleWindow, traceId })}>Trace {traceId}</Link>)}{evidence.logIds.map(logId => <Link key={logId} to={`${observationLink({ applicationId: incident.applicationId, environmentId: incident.environmentId, ...evidence.sampleWindow, logId })}#observation-logs`}>Log {logId}</Link>)}</div>}</li>)}</ol>}</section>
+    <IncidentImpact incident={incident} /><RecentReleases environmentId={incident.environmentId} relatedReleaseId={incident.relatedReleaseId} /><ObservationAudit entityId={incident.id} />
+  </div>
+}
+
+function IncidentAction({ action, incident, environment, disabledReason, takeover = false, onSuccess }: { action: 'acknowledge' | 'investigate'; incident: Incident; environment: Environment; disabledReason?: string; takeover?: boolean; onSuccess: (message: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [reason, setReason] = useState('')
+  const [version, setVersion] = useState(incident.version)
+  const refresh = useObservationRefresh()
+  const title = action === 'acknowledge' ? '認領事件' : takeover ? '接手調查' : '開始調查'
+  const command = useMutation({ mutationFn: async () => {
+    const receipt = action === 'acknowledge' ? await api.acknowledgeIncident(incident.id, version, reason.trim()) : await api.investigateIncident(incident.id, version, reason.trim())
+    await refresh()
+    return receipt
+  } })
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!reason.trim() || disabledReason || command.isPending || command.isError) return
+    try { const receipt = await command.mutateAsync(); setOpen(false); onSuccess(`${title}已完成 · ${receipt.correlationId}`) } catch { /* Preserve the reviewed version and reason until an explicit refresh. */ }
+  }
+  return <div><Dialog open={open} onOpenChange={next => { if (command.isPending) return; if (next) { setVersion(incident.version); setReason(''); command.reset() } setOpen(next) }}><DialogTrigger asChild><Button variant="outline" disabled={Boolean(disabledReason)}>{title}</Button></DialogTrigger><DialogContent className="observation-dialog"><DialogTitle>{title}</DialogTitle><DialogDescription>以目前 Ops 身分處理此事件。操作理由、負責人與狀態變更會記入稽核。</DialogDescription><ScopeBadge environment={environment} applicationId={incident.applicationId} /><p className="observation-note">事件 <code>{incident.id}</code> · 已檢閱版本 {version}</p><form onSubmit={event => void submit(event)}><label>操作理由<textarea required minLength={1} maxLength={500} rows={3} value={reason} disabled={command.isPending} onChange={event => setReason(event.target.value)} /></label>{disabledReason && <p role="status" className="observation-note">{disabledReason}</p>}{command.isError && <><ErrorState error={command.error} title="事件操作未完成" /><p className="observation-note">請重新讀取事件狀態後再確認操作。</p><Button variant="outline" onClick={() => { setOpen(false); void refresh() }}>重新讀取事件</Button></>}<div className="dialog-actions"><Button variant="outline" disabled={command.isPending} onClick={() => setOpen(false)}>返回</Button><Button type="submit" disabled={!reason.trim() || command.isPending || command.isError || Boolean(disabledReason)}>{command.isPending ? '處理與更新中…' : `確認${title}`}</Button></div></form></DialogContent></Dialog>{disabledReason && <p className="observation-note">{disabledReason}</p>}</div>
+}
+
+function IncidentImpact({ incident }: { incident: Incident }) {
+  const filters = { environmentId: incident.environmentId, mode: 'impact' as const, depth: 3 as const }
+  const topology = useQuery({ queryKey: queryKey('topology', incident.environmentId, filters), queryFn: () => api.getTopology(filters) })
+  return <section className="panel"><h2>可能的配置影響</h2><p className="observation-note">CMDB 關係表示可能的配置影響，不代表已確認故障根因。只顯示可見 CI 與關係，最多三層、100 個節點。</p><div className="observation-links"><Link to={`/ops/topology?${new URLSearchParams({ environmentId: incident.environmentId, mode: 'impact', depth: '3' })}`}>開啟影響拓撲</Link>{incident.affectedCiIds.map(id => <Link key={id} to={`/ops/cmdb/${encodeURIComponent(id)}`}>事件關聯 CI {id}</Link>)}</div>{topology.isPending ? <LoadingState label="正在讀取配置影響…" /> : topology.isError ? <ErrorState error={topology.error} onRetry={() => void topology.refetch()} /> : topology.data.nodes.length === 0 ? <p className="observation-empty">此範圍沒有可見的配置影響節點。</p> : <div className="table-scroll"><table><caption>可能的配置影響 · 可见 CI</caption><thead><tr><th scope="col">CI</th><th scope="col">Provider／類型</th><th scope="col">配置健康狀態</th></tr></thead><tbody>{topology.data.nodes.map(ci => <tr key={ci.id}><th scope="row"><Link to={`/ops/cmdb/${encodeURIComponent(ci.id)}`}>{ci.name}</Link><code>{ci.id}</code></th><td>{ci.provider} · {ci.kind}</td><td>{ci.health}</td></tr>)}</tbody></table></div>}{topology.data?.truncated && <p role="status" className="observation-note">拓撲結果已達上限並截斷；可從節點繼續探索。</p>}</section>
+}
+
+function RecentReleases({ environmentId, relatedReleaseId }: { environmentId: string; relatedReleaseId?: string }) {
+  const filters = { environmentId, page: 1, pageSize: 10, sort: 'updatedAt' as const, order: 'desc' as const }
+  const releases = useQuery({ queryKey: queryKey('releases', environmentId, filters), queryFn: () => api.listReleases(filters) })
+  return <section className="panel"><h2>最近發布</h2><p className="observation-note">此環境最近更新的十筆發布。時間相關不等於根因；只有觀測引用才標示為關聯發布。</p>{releases.isPending ? <LoadingState label="正在讀取最近發布…" /> : releases.isError ? <ErrorState error={releases.error} onRetry={() => void releases.refetch()} /> : releases.data.items.length === 0 ? <p className="observation-empty">目前沒有可見發布紀錄。</p> : <div className="table-scroll"><table><caption>同環境最近發布</caption><thead><tr><th scope="col">發布</th><th scope="col">類型／狀態</th><th scope="col">健康檢查</th><th scope="col">最後更新</th></tr></thead><tbody>{releases.data.items.map(release => <tr key={release.id}><th scope="row"><Link to={`/rd/releases/${encodeURIComponent(release.id)}`}>{release.id}</Link>{release.id === relatedReleaseId && <small>事件關聯發布</small>}</th><td>{release.kind} · {release.state}</td><td>{release.health}</td><td>{timestamp(release.updatedAt)}</td></tr>)}</tbody></table></div>}</section>
+}

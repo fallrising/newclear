@@ -129,7 +129,7 @@ describe('persisted controller identity and transactions', () => {
     }
   })
 
-  it.each(['dim-gate-m1-v1', 'dim-gate-m2-v1'])('rejects older %s bytes until explicit recovery', (seedVersion) => {
+  it.each(['dim-gate-m1-v1', 'dim-gate-m2-v1', 'dim-gate-m3-v1'])('rejects older %s bytes until explicit recovery', (seedVersion) => {
     const current = harness()
     current.start()
     const legacy = JSON.parse(current.raw!)
@@ -142,7 +142,7 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m3-v1' })
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m4-v1' })
     expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
   })
 
@@ -188,4 +188,38 @@ describe('persisted controller identity and transactions', () => {
     expect(duplicate.getTabOwnershipId()).not.toBe(claimedOwnership)
     expect(duplicate.getSession().sessionId).not.toBe(controller.getSession().sessionId)
   })
+
+  it('preserves corrupt M4 recovery bytes, resumes valid minute work, and reset removes future observations', async () => {
+    const h = harness(), controller = h.start()
+    let sequence = 0
+    const command = (path: string, body: unknown) => controller.command('POST', path, body, `m4-${++sequence}`, identity(controller))
+    const env = () => controller.getSnapshot().entities.environments.find(e => e.id === 'env-checkout-dev')!
+    const deploy = async (revision: string) => {
+      await command('/pipelines', { applicationId: env().applicationId, environmentId: env().id, environmentVersion: env().version, revision })
+      await command('/clock/advance', { ticks: 6 })
+      return controller.getSnapshot().entities.releases.find(r => r.id === env().activeReleaseId)!
+    }
+    const stable = await deploy('stable'), candidate = await deploy('candidate')
+    await command('/scenarios', { scenarioKey: 'post-release-latency', environmentId: env().id })
+    await command(`/releases/${candidate.id}/rollback`, { expectedVersion: candidate.version, environmentVersion: env().version, targetReleaseId: stable.id, reason: 'Recover service' })
+    await command('/clock/advance', { ticks: 3 }); await command('/clock/advance', { ticks: 60 })
+    expect(controller.getSnapshot().entities.incidents[0].recoverySamples).toBe(1)
+    const reloaded = h.start()
+    expect(reloaded.getSnapshot()).toEqual(controller.getSnapshot())
+    await reloaded.command('POST', '/clock/advance', { ticks: 60 }, 'm4-resume', identity(reloaded))
+    expect(reloaded.getSnapshot().entities.incidents[0]).toMatchObject({ state: 'open', recoverySamples: 2 })
+    const saved = JSON.parse(h.raw!) as { snapshot: ReturnType<typeof controller.getSnapshot> }
+    saved.snapshot.observations.recoveries[0].dueTick += 1
+    const raw = JSON.stringify(saved); h.storage.setItem(SNAPSHOT_KEY, raw)
+    expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
+    expect(h.raw).toBe(raw)
+    const memory = createController({ storage: h.storage, createSessionId: h.createSessionId, mode: 'memory' })
+    expect(memory.getSnapshot().observations.recoveries).toEqual([]); expect(h.raw).toBe(raw)
+    const reset = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
+    expect(reset.getSnapshot().observations).toEqual({ buckets: [], traces: [], logs: [], recoveries: [] })
+    await reset.command('POST', '/clock/advance', { ticks: 60 }, 'after-recovery-reset', identity(reset))
+    expect(reset.getSnapshot().entities.incidents).toEqual([])
+    expect(reset.getSnapshot().observations.buckets).toEqual([])
+  })
+
 })

@@ -213,7 +213,7 @@ export function prepareDelivery(s: Snapshot, policy: Policy, input: CommandInput
   if (input.path !== '/scenarios' || !['build-failure', 'health-failure', 'rollback-failure'].includes(String((input.body as { scenarioKey?: string })?.scenarioKey))) return undefined
   const body = parse(scenarioInputSchema, input.body)
   const targets = [body.runId, body.releaseId, body.jobId, body.poolId].filter(Boolean)
-  if (targets.length !== 1 || body.jobId || body.poolId || body.scenarioKey === 'build-failure' && !body.runId || body.scenarioKey === 'rollback-failure' && !body.releaseId) {
+  if (targets.length !== 1 || body.environmentId || body.jobId || body.poolId || body.scenarioKey === 'build-failure' && !body.runId || body.scenarioKey === 'rollback-failure' && !body.releaseId) {
     fail(422, 'VALIDATION_ERROR', '請為故障選擇一個相容的 run 或 release。')
   }
   const op = (body.runId ? s.entities.pipelines.find(r => r.id === body.runId) : s.entities.releases.find(r => r.id === body.releaseId)) ?? missing()
@@ -302,6 +302,11 @@ export function advanceDelivery(s: Snapshot): CommandReceipt['changed'] {
         stageLog(s, release, 'verify', failed ? 'verify: health gate failed; active release unchanged' : 'verify: healthy; active release switched', failed)
         if (!failed) {
           const env = environment(s, release.environmentId); env.activeReleaseId = release.id; touch(s, env); changed.push(ref('environment', env.id))
+          s.observations.recoveries = s.observations.recoveries.filter(task => task.environmentId !== env.id)
+          for (const incident of s.entities.incidents.filter(i => i.environmentId === env.id && i.state !== 'resolved' && i.recoverySamples > 0)) {
+            incident.recoverySamples = 0; touch(s, incident); changed.push(ref('incident', incident.id))
+          }
+          if (release.kind === 'rollback') s.observations.recoveries.push({ environmentId: env.id, releaseId: release.id, remaining: 3, dueTick: s.logicalClock + 60 })
         }
         unschedule(s, release.id); clearFaults(s, release.id)
       }

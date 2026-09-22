@@ -43,3 +43,14 @@ describe('registered route permissions', () => {
     expect(canAccessRoute(admin, routeForPath('/rd/pipelines/run-0001')!)).toBe(false)
   })
 })
+
+
+it('keeps M4 diagnostic deep links action-guarded without adding another center to navigation', () => {
+  const rd = session({ effectiveActions: ['ci.read', 'incident.read', 'observation.read', 'app.read', 'environment.read'] })
+  expect(canAccessRoute(rd, routeForPath('/ops/incidents/incident-1')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/cmdb/ci-1')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/topology')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/incidents')!)).toBe(false)
+  expect(visibleNavigation(rd).some(route => route.center === 'ops')).toBe(false)
+  expect(canAccessRoute(session({ effectiveActions: [] }), routeForPath('/ops/incidents/incident-1')!)).toBe(false)
+})

@@ -31,10 +31,10 @@ CMDB 是配置項身分、責任與關係的共用核心。Resource CI、應用�
 | PipelineRun | `orgId, applicationId, environmentId, revision, artifactDigest?, stages, state, releaseId?, triggeredBy, retryOfRunId?, correlationId, failureCode?`；stage 保留 startedAt/completedAt |
 | Release | `orgId, applicationId, environmentId, artifactDigest, kind: deploy/rollback, state, previousReleaseId: ID\|null, targetReleaseId?, pipelineRunId?, createdBy, correlationId, health: pending/healthy/unhealthy, approval?, reason?, failureCode?, startedAt?, completedAt?` |
 | Artifact | `orgId, applicationId, digest, revision, recipe: demo-web-v1, filename`；package 成功後建立的 immutable 模擬 registry 記錄；digest 明示 synthetic |
-| Incident | `orgId, applicationId, environmentId, affectedCiIds, severity: critical/warning, state, assigneeId?, relatedReleaseId?, evidence, recoverySamples, correlationId` |
+| Incident | `orgId, applicationId, environmentId, affectedCiIds, severity: critical/warning, state, ruleKey, episode, assigneeId?, relatedReleaseId?, evidence, recoverySamples, correlationId` |
 | AuditEvent | `id, orgId, actorId, action, entityType, entityId, scopeSnapshot, outcome, diffSummary, reason?, requestId, correlationId, occurredAt`；append-only，無 mutable version |
 
-其他配置：`RoleAssignment(userId, role, scopeType, scopeId, stages?)`、`NavigationItem(routeKey, label, group, order, enabled)`、`ModelField(kind, key, label, valueType, required=false, hidden=false, constraints)`、`Integration(kind, displayName, state, lastSyncAt, fieldMappings, lastTestResult?)`。四者都帶 orgId 與 base fields；Integration 僅顯示 demo metadata。NavigationItem 的 required action 取自固定 route registry，不能由配置覆寫。
+其他配置：`RoleAssignment(userId, role, scopeType, scopeId, stages?)`、`NavigationItem(routeKey, label, group, order, enabled)`、`ModelField(kind, key, label, valueType, required=false, hidden=false, constraints)`、`Integration(kind, displayName, poolIds, endpointLabel, state, lastSyncAt, fieldMappings, lastTestResult?)`。四者都帶 orgId 與 base fields；Integration 僅顯示 demo metadata。NavigationItem 的 required action 取自固定 route registry，不能由配置覆寫。
 
 `template` 固定形狀：`{allowedProviders, allowedStages, allowedPoolIds, defaults:{cpu,memoryMiB}, limits:{maxCpu,maxMemoryMiB}, requiresApproval:true, resourceKind:"compute", bootstrapProfile:"web-service"}`。first version 不接受任意 executable template 或 script。
 
@@ -128,7 +128,7 @@ flowchart TB
 
 ## 6. Fixture 契約
 
-M1 的 inventory 基線延續到 M3 seed `dim-gate-m3-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。M3 不预填任何成功發布；snapshot schemaVersion 與 seedVersion 分開記錄，舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
+M1 的 inventory 基線延續到 M4 seed `dim-gate-m4-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。M4 不預填任何成功發布或 incident；snapshot schemaVersion 與 seedVersion 分開記錄，舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
 
 | 種子資料 | 固定定位與用途 |
 | --- | --- |
@@ -145,3 +145,5 @@ M1 的 inventory 基線延續到 M3 seed `dim-gate-m3-v1`，基準時間 `2026-0
 主線新資料使用 deterministic prefix + session sequence：`req-0001`、`env-0001`、`job-0001` 等。baseline 只包含 12 個既有環境；checkout staging 尚不存在。主線新增環境後 aggregate 應為 13，不維持假固定數字。
 
 Fixture 需含健康／unknown／stale、零匹配 filter、跨團隊共享依賴、無回滾目標及 scope 外實體。`capacity-exhausted`、`provision-failure`、`build-failure`、`health-failure`、`post-release-latency`、`rollback-failure` 為明確 scenario，禁止隨機故障。
+
+M4 的 observation buckets／traces／logs／recoveries、scope projection、Guide 與通知 DTO 詳見 [M4 integration contract](../M4-INTEGRATION-CONTRACT.md)；time-series 不存入 CMDB attributes。

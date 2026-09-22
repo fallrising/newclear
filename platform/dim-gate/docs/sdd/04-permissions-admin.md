@@ -33,6 +33,8 @@ scopeType 為 `org | project | pool`；scopeId 指向同 org 實體；可選 `st
 
 導航使用 route registry 的 required action 決定可見性；page guard 防止直接 URL 跳入；button guard 顯示 state-specific reason；MSW handler 仍須再驗證。三層使用同一 policy evaluator 與 context resolver，不各寫一組 if role。
 
+M4 的診斷 detail／topology deep link 依所需 read action 和 entity scope 允許跨 Center，例如 RD 可讀可見的 `/ops/cmdb/:id`，但不取得 CI metadata 編輯權。Center 首頁與清單仍要求該 Center；可讀 detail 不代表可進入 Ops CMDB 清單。
+
 未登入回 401；對 center/action 無權回 403；不存在或 scope 外 entity detail 統一 404，不能洩漏 existence。列表先 filter 再算 total；search、graph、time series、audit 同樣授權。能看到 app 不代表能看到其 shared CI 的其他 tenant-like project placements。
 
 權限變更導致 `policyVersion` 增加；mutation 或導航前使用最新 policy。切換 persona／scope／policyVersion 都清除舊 cache 和選中 detail；在途 response 帶舊 identity epoch 時丟棄。角色撤銷後已有 dialog 的 confirm 仍要被 handler 拒絕。

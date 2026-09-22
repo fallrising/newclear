@@ -70,7 +70,7 @@ demo deployment 在 candidate slot 執行，health gate 成功才切換 active�
 1. RD 選歷史 target、填 reason；handler 再驗 scope、version、ready 環境與操作鎖。
 2. 新 release 記錄 previousReleaseId=當前 active、targetReleaseId=選擇目標；dev/staging 直接 queued，prod 走同一 Ops approval。
 3. deploying → verifying → succeeded／failed。成功使 activeReleaseId 指向**新 rollback release**，effective artifactDigest 與 target 相同；失敗保持原 active。
-4. 成功後寫 observation recovery event，但 incident 要在 3 個連續健康 sample、每 tick 一筆後才 resolved；不能在按下回滾時就關告警。
+4. 成功後寫 observation recovery event，但 incident 要在 3 個連續健康的一分鐘 sample、每 60 ticks 一筆（1 tick = 1 秒）後才 resolved；不能在按下回滾時就關告警。
 5. 回滾失敗保留 incident、原因和重新操作入口；下一次 retry 使用新 release ID 及新的 idempotency key。
 
 ## 5. APM 與 incident
@@ -92,6 +92,7 @@ stateDiagram-v2
 - 同一 environment + ruleKey 在非 resolved 期間只更新同一 incident；新增 evidence，不重複建立。resolved 後新異常重開同一 incident，新增 episode 與 audit。
 - acknowledge 設 assignee=current Ops；investigate 只允許 assignee 或同 scope Ops 接手並附理由。RD 有 read，不能關閉 incident。
 - incident evidence 包含 threshold、sample window、trace/log refs、affected CI、related release；observed fact 與 suspected relation 分開。
+- post-release-latency 明示推進 180 個 demo ticks，經同一 scheduler 注入三個連續一分鐘窗口；不使用早於相關 release 的假歷史樣本。回滾恢復按成功 health gate 後的第 60／120／180 tick 產生；active release 改變或新異常會取消過期恢復排程。
 - normal healthy samples 為 p95=120ms、errorRate=0.2%、rate=80 req/s；異常示例 p95=900ms、errorRate=8%、rate=80 req/s。label 與 unit 固定，time window 的歷史錯誤不因恢復被抹除。
 - v0.1 不提供無證據的手動「恢復」按鈕。導覽的「恢復樣本」明示為 scenario 控制，適用於無法回滾的分支；它仍經 observation engine。
 

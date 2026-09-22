@@ -255,7 +255,7 @@ describe('atomic command substrate (AC-02, AC-03)', () => {
     [{ body: { expectedVersion: 1, health: 'healthy' } }, 422],
     [{ body: { expectedVersion: 1, accountId: 'another-account' } }, 422],
     [{ body: { expectedVersion: 1, customFields: { shell: 'not-a-field' } } }, 422],
-    [{ method: 'POST', path: '/incidents/unknown/investigate', body: {} }, 501],
+    [{ method: 'POST', path: '/incidents/unknown/investigate', body: {} }, 404],
     [{ method: 'POST', path: '/clock/advance', body: { ticks: 61 } }, 422],
   ] as [Partial<CommandInput>, number][])('rejects unauthorized/invalid/unavailable commands atomically: %j', async (overrides, status) => {
     const engine = createEngine(seed(), () => undefined)

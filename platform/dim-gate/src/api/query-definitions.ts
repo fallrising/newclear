@@ -5,6 +5,7 @@ export const queryFamilies = {
   topology: { relations: 'relations', topology: 'topology', search: 'search' },
   selfService: { pools: 'pools', capacity: 'capacity', catalog: 'catalog', requests: 'requests', jobs: 'jobs' },
   admin: { access: 'access', adminNavigation: 'admin-navigation', models: 'models', audit: 'audit' },
+  observation: { metrics: 'metrics', traces: 'traces', trace: 'trace', logs: 'logs', incidents: 'incidents', incident: 'incident', integrations: 'integrations', notifications: 'notifications' },
   delivery: { pipelines: 'pipelines', pipeline: 'pipeline', releases: 'releases', release: 'release' },
 } as const
 

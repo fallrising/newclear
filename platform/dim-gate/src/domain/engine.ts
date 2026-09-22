@@ -10,6 +10,8 @@ import {
   type Snapshot,
 } from './schemas'
 import { integrityErrors } from './integrity'
+import { advanceObservation, canReadObservation, prepareObservation } from './observation'
+import { guideProjection, notifications, readObservation, visibleIntegrations } from './observation-views'
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
 import { advanceDelivery, prepareDelivery, readDelivery, canReadDelivery } from './delivery'
@@ -164,6 +166,11 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     const entity = collection.find(entry => entry.id === audit.entityId)
     return !!entity && canReadDelivery(snapshot, policy, entity.environmentId)
   }
+  if (audit.entityType === 'incident') {
+    const incident = snapshot.entities.incidents.find(entry => entry.id === audit.entityId)
+    return !!incident && canReadObservation(snapshot, policy, incident.environmentId)
+  }
+  if (audit.entityType === 'integration') return visibleIntegrations(snapshot, policy).some(entry => entry.id === audit.entityId)
   if (audit.entityType === 'relation') {
     const relation = snapshot.entities.relations.find((entry) => entry.id === audit.entityId)
     if (!relation) {
@@ -283,6 +290,7 @@ function advanceProvisioning(snapshot: Snapshot, ticks: number): CommandReceipt[
   for (let tick = 0; tick < ticks; tick += 1) {
     snapshot.logicalClock += 1
     for (const item of advanceDelivery(snapshot)) mark(item.entityType, item.entityId)
+    for (const item of advanceObservation(snapshot)) mark(item.entityType, item.entityId)
     const due = snapshot.scheduler.tasks.filter((task) => task.dueTick <= snapshot.logicalClock && snapshot.jobs.some(job => job.id === task.operationId))
       .toSorted((left, right) => left.id.localeCompare(right.id))
     for (const task of due) {
@@ -399,6 +407,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
   function read(path: string, query: URLSearchParams, actorId: string): unknown {
     const policy = context(actorId)
     const entities = state.entities
+    const observation = readObservation(state, policy, path, query)
+    if (observation !== undefined) return observation
     const delivery = readDelivery(state, policy, path, query)
     if (delivery !== undefined) return delivery
     if (path === '/session') {
@@ -409,8 +419,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     }
     if (path === '/guide') {
       validateQuery(query, [])
-      return { logicalClock: state.logicalClock, storeRevision: state.storeRevision, sessionId: state.sessionId,
-        seedVersion: state.seedVersion, schemaVersion: state.schemaVersion, pendingTasks: state.scheduler.tasks.length, commandCount: state.commandCount } satisfies GuideView
+      return guideProjection(state, policy) satisfies GuideView
     }
     if (path === '/dashboard' || path === '/navigation') {
       validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId'] : ['center'])
@@ -431,6 +440,15 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
         center, title: { rd: '研發中心', ops: '維運中心', admin: '平台管理' }[center], applicationCount: applications.length,
         environmentCount: visibleEnvironments.filter((env) => appIds.has(env.applicationId)).length, ciCount: cis.length,
         providers: (['aws', 'aliyun', 'onprem'] as const).map((provider) => ({ provider, count: cis.filter((ci) => ci.provider === provider).length })),
+        activeIncidentCount: entities.incidents.filter(i => i.state !== 'resolved' && canReadObservation(state, policy, i.environmentId) && appIds.has(i.applicationId) && (!environmentId || i.environmentId === environmentId)).length,
+        pendingItems: notifications(state, policy, state.events.length).filter(n => {
+          const incident = n.entityType === 'incident' && entities.incidents.find(i => i.id === n.entityId)
+          const release = n.entityType === 'release' && entities.releases.find(r => r.id === n.entityId)
+          const request = n.entityType === 'request' && entities.requests.find(r => r.id === n.entityId)
+          const entity = incident || release || request
+          return !!entity && appIds.has(entity.applicationId) && (!environmentId || entity.environmentId === environmentId)
+            && (incident ? incident.state !== 'resolved' : release ? release.state === 'pending_approval' : request && ['submitted', 'approved', 'failed'].includes(request.state))
+        }).filter((item, index, items) => items.findIndex(candidate => candidate.entityType === item.entityType && candidate.entityId === item.entityId) === index).slice(0, 20),
         dataAsOf: clockIso(state.logicalClock),
       } satisfies DashboardView
     }
@@ -487,6 +505,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
           return { type: 'environment', id: entry.id, title: `${app.name} · ${entry.name}`, route: `/rd/apps/${app.id}/environments/${entry.id}` }
         }),
         ...entities.cis.filter(policy.canReadCi).map((entry) => ({ type: 'ci', id: entry.id, title: entry.name, route: `/ops/cmdb/${entry.id}` })),
+        ...entities.incidents.filter(entry => canReadObservation(state, policy, entry.environmentId)).map(entry => ({ type: 'incident', id: entry.id, title: `${entry.id} · ${entry.ruleKey}`, route: `/ops/incidents/${entry.id}` })),
         ...entities.releases.filter(entry => canReadDelivery(state, policy, entry.environmentId)).map(entry => ({
           type: 'release', id: entry.id,
           title: `${entry.id} · ${entities.artifacts.find(artifact => artifact.digest === entry.artifactDigest)?.revision ?? entry.artifactDigest}`,
@@ -627,7 +646,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       const items = state.audit.filter((entry) => visibleAudit(state, policy, entry) &&
         Object.entries(filters).every(([key, value]) => !value || String(entry[key as keyof AuditEvent]) === value))
         .toSorted((a, b) => b.occurredAt.localeCompare(a.occurredAt) || a.id.localeCompare(b.id))
-      return clone(basicPage(items, query))
+      return clone(basicPage(items.map(entry => entry.entityType === 'integration' && !policy.admin
+        ? { ...entry, scopeSnapshot: { ...entry.scopeSnapshot, poolIds: entry.scopeSnapshot.poolIds.filter(id => policy.poolIds.includes(id)) } } : entry), query))
     }
     return notFound()
   }
@@ -638,6 +658,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     const policy = context(input.actorId)
     const method = input.method.toUpperCase()
     const delivery = prepareDelivery(state, policy, input)
+    const observation = prepareObservation(state, policy, input, advanceProvisioning)
     const patchCiId = method === 'PATCH' ? /^\/cis\/([^/]+)$/.exec(input.path)?.[1] : undefined
     const createCi = method === 'POST' && input.path === '/cis'
     const createRelation = method === 'POST' && input.path === '/relations'
@@ -659,10 +680,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
       && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
       && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
-      && !scenario && !clock && !delivery) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+      && !scenario && !clock && !delivery && !observation) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
     let body: unknown
-    if (delivery) body = input.body
+    if (delivery || observation) body = input.body
     else if (patchCiId) body = parse(patchCiSchema, input.body)
     else if (createCi) body = parse(createCiInputSchema, input.body)
     else if (createRelation) body = parse(createRelationInputSchema, input.body)
@@ -687,8 +708,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let ci: CI | undefined
     let relation: Relation | undefined
     let environmentRequest: DomainRequest | undefined
-    if (delivery) {
-      // prepareDelivery already checked the current role, resource and stage before replay.
+    if (delivery || observation) {
+      // prepareDelivery / prepareObservation already checked the current role, resource and stage before replay.
     } else if (patchCiId) {
       ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
       if (!ci) notFound()
@@ -732,7 +753,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!policy.admin) forbidden()
     } else if (scenario) {
       const scenarioBody = body as z.infer<typeof scenarioInputSchema>
-      if (scenarioBody.runId || scenarioBody.releaseId || scenarioBody.scenarioKey === 'provision-failure' && (!scenarioBody.jobId || scenarioBody.poolId)
+      if (scenarioBody.environmentId || scenarioBody.runId || scenarioBody.releaseId || scenarioBody.scenarioKey === 'provision-failure' && (!scenarioBody.jobId || scenarioBody.poolId)
         || scenarioBody.scenarioKey !== 'provision-failure' && (!scenarioBody.poolId || scenarioBody.jobId)) fail(422, 'VALIDATION_ERROR', '故障目標與情境不相容。')
       if (scenarioBody.jobId) {
         const job = state.jobs.find((entry) => entry.id === scenarioBody.jobId)
@@ -757,10 +778,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let auditPoolIdsOverride: string[] | undefined
     let auditStagesOverride: ('dev' | 'staging' | 'prod')[] | undefined
 
-    if (delivery) {
-      const result = delivery.apply(next)
+    if (delivery || observation) {
+      const result = delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
       ;({ entityType, entityId, entityVersion, action, reason, fields, changed, operationId } = result)
-      correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = []; auditStagesOverride = result.stages
+      correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = result.poolIds; auditStagesOverride = result.stages
     } else if (patchCiId) {
       const patch = body as z.infer<typeof patchCiSchema>
       if (patch.expectedVersion !== ci!.version) fail(409, 'VERSION_CONFLICT', '資源版本已變更，請重新讀取後再確認。')

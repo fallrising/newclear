@@ -102,9 +102,9 @@ select { min-height: 38px; border: 1px solid var(--border); border-radius: 6px; 
 .sidebar-version { display: block; margin-top: 22px; font-size: 10px; color: var(--muted); }
 .workspace { min-width: 0; display: flex; flex-direction: column; }
 .topbar { height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 28px; background: var(--card); border-bottom: 1px solid var(--border); }
-.breadcrumb { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.breadcrumb { white-space: nowrap; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
 .breadcrumb strong { font-weight: 500; color: var(--foreground); white-space: nowrap; }
-.toolbar { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.toolbar { flex-shrink: 0; margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .density-control select { border: none; background: transparent; color: var(--muted); font-size: 12px; padding-left: 4px; }
 .toolbar-divider { width: 1px; height: 25px; background: var(--border); margin: 0 5px; }
 .persona-control { display: flex; align-items: center; gap: 10px; }
@@ -311,12 +311,12 @@ select { min-height: 38px; border: 1px solid var(--border); border-radius: 6px; 
 }
 
 /* M1 feature composition */
-.global-search { position: relative; width: min(360px, 34vw); margin-left: auto; }
+.global-search { min-width: 0; flex-shrink: 1; position: relative; width: min(360px, 34vw); margin-left: auto; }
 .global-search form { min-height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 7px 0 11px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); }
 .global-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--foreground); background: transparent; }
 .global-search-clear, .global-search-submit { min-height: 30px; border: 0; border-radius: 5px; color: var(--muted); background: transparent; }
 .global-search-clear { width: 30px; padding: 6px; display: grid; place-items: center; }
-.global-search-submit { padding: 4px 8px; font-size: 11px; font-weight: 650; }
+.global-search-submit { white-space: nowrap; flex-shrink: 0; padding: 4px 8px; font-size: 11px; font-weight: 650; }
 .global-search-clear:hover, .global-search-submit:hover { color: var(--foreground); background: var(--muted-surface); }
 .global-search-results { position: absolute; z-index: 40; top: calc(100% + 7px); left: 0; right: 0; padding: 8px; border: 1px solid var(--border); border-radius: 7px; background: var(--card); box-shadow: 0 14px 34px rgb(0 0 0 / .14); }
 .global-search-results p { padding: 9px; color: var(--muted); font-size: 12px; }
@@ -462,3 +462,23 @@ input, textarea { font: inherit; color: var(--foreground); background: var(--car
   .job-logs li { grid-template-columns: 1fr; gap: 4px; }
   .capacity-line > div:first-child { display: grid; }
 }
+
+.notification-menu { position: relative; flex-shrink: 0; white-space: nowrap; }
+.notification-menu summary { display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 8px; border-radius: 6px; }
+.notification-menu summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.notification-panel { white-space: normal; position: absolute; z-index: 40; top: 42px; right: 0; width: min(370px, calc(100vw - 32px)); max-height: 65vh; overflow: auto; box-shadow: 0 8px 30px #0002; }
+.notification-panel h2 { margin-top: 0; font-size: 16px; }
+.notification-panel ul { padding: 0; list-style: none; }
+.notification-panel li { border-top: 1px solid var(--border); padding: 10px 0; overflow-wrap: anywhere; }
+.notification-panel time { display: block; font-size: 11px; color: var(--muted); margin-top: 5px; }
+.guide-story ol { list-style: none; padding: 0; }
+.guide-story li { display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.guide-story li > div { min-width: 0; flex: 1; }
+.guide-story h3 { margin: 0 0 6px; }
+.guide-story .step-number { flex-shrink: 0; }
+.guide-story p { color: var(--muted); margin: 6px 0 12px; }
+.guide-scenarios { margin: 24px 0; }
+.guide-scenarios label { display: grid; gap: 6px; }
+.guide-scenarios select { max-width: 100%; padding: 8px; }
+.guide-scenario-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+@media (max-width: 640px) { .notification-label { display: none; } .notification-panel { position: fixed; top: 60px; left: 16px; right: 16px; width: auto; } }

@@ -1,6 +1,6 @@
 # dim-gate 狀態
 
-更新：2026-09-21。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-22。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
@@ -20,7 +20,7 @@ M1 可操作範圍：
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
 | M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 MERGED at `29bed417` |
 | M3：CI/CD與回滾 | ACCEPTED at `04d6646`；[PR #17](https://github.com/fallrising/newclear/pull/17) OPEN、未合併 |
-| M4：觀測與完整展示 | 尚未開始 |
+| M4：觀測與完整展示 | ACCEPTED at `93a4bbc`；[PR #20](https://github.com/fallrising/newclear/pull/20) stacked OPEN、未合併 |
 | M5：驗收與展示交付 | 尚未開始 |
 
 證據：122/122 tests、11/11 production E2E、全部 native/docs/contracts/CI/architecture/actionlint gates、獨立 T-012 attempt-2 ACCEPTED，以及 GitHub Actions run 35526733678 成功。該 run 對 head `784f771` 與 synthetic merge `796960eae34bce6463e921c1b7527ba2da565ebb` 執行；最後 reconciliation main 是 `a5982bf4547bba85429fec50494751562b5fe7c6`。E2E 保留 7 項 M0 regression，涵蓋 1440／768／390、明暗主題、axe serious/critical、keyboard/focus/dialog、`/dim-gate/` refresh、reset/reload/copied-tab/corrupt persistence、topology 與 AC-20 在途 persona response。
@@ -47,4 +47,17 @@ M3 最終驗收（2026-09-21）：產品 commit `04d6646a2a325bb4efc18c44b463e0e
 
 [PR #17](https://github.com/fallrising/newclear/pull/17) 沿用同一 SSH branch，**未合併、未部署**。本 evidence-only checkpoint 推送後，仍須確認最新 metadata head CI 才轉 Ready；其最終結果與 owner release 記錄在 PR，避免自我引用 commit 循環。完整 commands、runtime、artifacts 與歷史失敗見 [T-018 attempt 3](../../../.team/reports/T-018-attempt-3.md)，獨立結論見 [T-020 attempt 3](../../../.team/reports/T-020-attempt-3.md)。
 
-M4 observation／incident resolution 尚未實作；回滾僅發出 recovery-requested event。JS gzip 445.65 kB，M5 的 300 KiB 效能預算風險仍保留。下一個產品里程碑為 M4，不重做已 ACCEPTED 的 M0–M3。
+上述 M3 驗收當時，M4 observation／incident resolution 尚未實作；回滾僅發出 recovery-requested event。JS gzip 445.65 kB，M5 的 300 KiB 效能預算風險仍保留。下一個產品里程碑為 M4，不重做已 ACCEPTED 的 M0–M3。
+
+M4 已開始：以已驗收 M3 `7d20bbc`／未合併 PR #17 為固定父依賴，worktree `newclear-m4`，branch `agent/dim-gate/mainline/m4-observability`。T-021～T-024 和 [M4 contract](M4-INTEGRATION-CONTRACT.md) 定義觀測、incident、Guide 與整合工作；尚無 M4 驗收或瀏覽器通過宣稱。M3 最終 CI／owner release 已記錄於 PR #17。
+
+M4 初步整合已完成，207 tests 與 typecheck 通過；production Chromium、獨立固定版本審查與 remote CI 尚待完成，仍未 ACCEPTED。Guide 包含 Admin 準備／Ops 來源拓撲入口及同一申請至回滾的資料判定進度。
+
+
+M4 最終驗收（2026-09-22）：`93a4bbc8cafe03588ff8ef12014eeb2523a93de3` **ACCEPTED**，AC-17–19、AC-25 已具證據。207 tests、全部 native gates、fresh production demo、47/47 Chromium、固定 commit 獨立審查及 [精確 head CI35705801700](https://github.com/fallrising/newclear/actions/runs/35705801700) 全部通過。三種 provider 由可見 UI 完成申請至 metrics/trace/log/incident 調查、rollback 與第3筆健康樣本解除，再檢查稽核與 reset。
+
+M4 新增24組實際明暗主題／1440/768/390檢查、9份 initial-focus/Tab/Escape/return 證據；M3/M4共25份health附件含4987筆回應，無page error、failed request或非預期console/HTTP error。7筆reset後的舊身分GET409經嚴格身分／時間／錯誤格式比對後分類，原始證據保留；刻意測試的權限拒絕與環境占用也保留。既有M1搜尋競態改為暫扣真實Data成功回應、persona切換後交付，驗證不閃現或回寫舊資料。
+
+[完整驗收報告](../../../.team/reports/T-024-attempt-3.md)、[獨立審查](../../../.team/reports/T-023-attempt-3.md) 與 [PLAN](../../../.team/PLAN.md) 保存歷史失敗、fixed refs、runtime與artifacts。[PR #20](https://github.com/fallrising/newclear/pull/20) 以未合併的已驗收M3 PR17為父分支，未合併／未部署。此純證據 checkpoint 推送後，最終 metadata-head CI 與 owner release 記錄於PR20，接手必查。
+
+下一里程碑是 **M5 AC-26–30**；[新 chat handoff prompt](HANDOFF-M5.md) 可直接複製。JS gzip465.01kB仍超過初始JS300KiB預算；完整鍵盤主線、效能量測、Firefox/WebKit smoke、儲存限制／復原完整性與可重演展示文件仍待完成，尚不宣稱可展示v0.1。

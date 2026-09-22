@@ -16,7 +16,7 @@ export function createSessionClient(request: ApiRequest) {
     advanceClock: (ticks: number): Promise<CommandReceipt> => request('/clock/advance', commandReceiptSchema,
       { method: 'POST', demo: true, body: { ticks } }),
     setScenario: (scenarioKey: z.infer<typeof scenarioInputSchema>['scenarioKey'],
-      target: { jobId?: string; poolId?: string; runId?: string; releaseId?: string }): Promise<CommandReceipt> => request('/scenarios', commandReceiptSchema,
+      target: Omit<z.infer<typeof scenarioInputSchema>, 'scenarioKey'>): Promise<CommandReceipt> => request('/scenarios', commandReceiptSchema,
       { method: 'POST', demo: true, body: scenarioInputSchema.parse({ scenarioKey, ...target }) }),
   }
 }

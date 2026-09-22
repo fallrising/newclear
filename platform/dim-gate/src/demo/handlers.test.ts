@@ -133,14 +133,14 @@ describe('shared browser/Node HTTP handlers', () => {
     expect((await (await request('api/v1/requests')).json()).data.total).toBe(0)
   })
 
-  it('leaves every state field unchanged on storage rejection and refuses unavailable business APIs', async () => {
+  it('leaves every state field unchanged on storage rejection and still enforces business authorization', async () => {
     const before = controller.getSnapshot()
     storageBlocked = true
     const response = await request('__demo/v1/clock/advance', { method: 'POST', body: { ticks: 4 }, key: 'failed-write' })
     expect(response.status).toBe(507)
     expect((await response.json()).error.code).toBe('DEMO_STORAGE_FULL')
     expect(controller.getSnapshot()).toEqual(before)
-    expect((await request('api/v1/incidents/unknown/investigate', { method: 'POST', body: {} })).status).toBe(501)
+    expect((await request('api/v1/incidents/unknown/investigate', { method: 'POST', body: {} })).status).toBe(403)
   })
 
   it('recognizes an old-session reset replay after new work without clearing it', async () => {

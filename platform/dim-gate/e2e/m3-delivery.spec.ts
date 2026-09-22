@@ -2,30 +2,16 @@ import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import type { Snapshot } from '../src/domain/schemas'
 
-type BrowserHealth = { console: { type: string; text: string }[]; network: { method: string; status: number; url: string }[]; consoleErrors: string[]; pageErrors: string[]; failedRequests: string[]; httpErrors: { status: number; url: string }[]; expectedStatuses: Set<number> }
+import { captureBrowserHealth, verifyBrowserHealth, type BrowserHealth } from './browser-health'
+
 const health = new WeakMap<Page, BrowserHealth>()
 
 test.beforeEach(async ({ page }) => {
-  const evidence: BrowserHealth = { console: [], network: [], consoleErrors: [], pageErrors: [], failedRequests: [], httpErrors: [], expectedStatuses: new Set() }
-  health.set(page, evidence)
-  page.on('console', (message) => { evidence.console.push({ type: message.type(), text: message.text() }); if (message.type() === 'error') evidence.consoleErrors.push(message.text()) })
-  page.on('pageerror', (error) => evidence.pageErrors.push(error.message))
-  page.on('requestfailed', (request) => evidence.failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText}`))
-  page.on('response', (response) => { evidence.network.push({ method: response.request().method(), status: response.status(), url: response.url() }); if (response.status() >= 400) evidence.httpErrors.push({ status: response.status(), url: response.url() }) })
+  health.set(page, captureBrowserHealth(page))
 })
 
 test.afterEach(async ({ page }, info) => {
-  const evidence = health.get(page)!
-  await info.attach('browser-health', { body: JSON.stringify({ ...evidence, expectedStatuses: [...evidence.expectedStatuses] }, null, 2), contentType: 'application/json' })
-  if (!page.isClosed()) {
-    await info.attach('visible-dom', { body: await page.locator('body').innerText(), contentType: 'text/plain' })
-    await info.attach('final-screen', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
-  }
-  if (info.status !== info.expectedStatus) return
-  expect(evidence.pageErrors).toEqual([])
-  expect(evidence.failedRequests).toEqual([])
-  expect(evidence.httpErrors.filter((entry) => !evidence.expectedStatuses.has(entry.status))).toEqual([])
-  expect(evidence.consoleErrors.filter((message) => ![...evidence.expectedStatuses].some((status) => message.includes(`status of ${status}`)))).toEqual([])
+  await verifyBrowserHealth(page, info, health.get(page)!)
 })
 
 async function become(page: Page, persona: string) {

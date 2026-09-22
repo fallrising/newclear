@@ -8,9 +8,7 @@ import { registerFutureContracts } from './contracts/future.ts'
 import { registerTopologyContracts } from './contracts/topology-relation-search.ts'
 
 const id = d.idSchema
-const reason = z.string().trim().min(1).max(500)
 const version = d.versionSchema
-const expected = { expectedVersion: version }
 const scope = { applicationId: id, environmentId: id }
 const windowFields = { ...scope, from: d.timestampSchema, to: d.timestampSchema }
 const pageFields = {
@@ -24,15 +22,9 @@ const windowQuery = (extra: z.ZodRawShape = {}) => z.strictObject({ ...windowFie
   const duration = Date.parse(input.to) - Date.parse(input.from)
   return duration > 0 && duration <= 86_400_000
 }, 'Window must be positive and at most 24 hours')
-const logEntry = z.strictObject({ id, ...scope, occurredAt: d.timestampSchema, level: z.enum(['debug', 'info', 'warn', 'error']),
-  message: z.string().refine(message => new TextEncoder().encode(message).length <= 2048, 'Message exceeds 2 KiB'),
-  traceId: id.optional(), releaseId: id.optional() })
-const traceSummary = z.strictObject({ id, ...scope, name: d.nameSchema, start: d.timestampSchema,
-  durationMs: z.number().nonnegative(), status: z.enum(['ok', 'error']), releaseId: id.optional() })
-const traceSpan = z.strictObject({ id, parentId: id.nullable(), name: d.nameSchema, start: d.timestampSchema,
-  durationMs: z.number().nonnegative(), status: z.enum(['ok', 'error']) })
-const metricSeries = z.strictObject({ metric: id, unit: z.enum(['ms', 'requests/second', 'fraction']),
-  points: z.array(z.strictObject({ t: d.timestampSchema, value: z.number().nullable() })), sampleCount: z.number().int().nonnegative() })
+const logEntry = d.observationLogSchema
+const traceSummary = d.traceSummarySchema
+const metricSeries = d.metricSeriesSchema
 // Entity refinements and graph/scope invariants still run in the domain engine.
 export const createCiSchema = d.createCiInputSchema
 export const wireSchemas = {
@@ -45,7 +37,7 @@ export const wireSchemas = {
   TopologyView: z.strictObject({ nodes: z.array(d.ciViewSchema).max(100), edges: z.array(d.relationSchema).max(200), truncated: z.boolean(), depthReached: z.number().int().min(0).max(3) }),
   Capacity: z.strictObject({ poolId: id, cpu: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }),
     memoryMiB: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }) }),
-  LogEntry: logEntry, TraceSummary: traceSummary, Trace: traceSummary.extend({ spans: z.array(traceSpan) }), MetricSeries: metricSeries,
+  LogEntry: logEntry, TraceSummary: traceSummary, Trace: d.traceSchema, MetricSeries: metricSeries,
   CreateCI: createCiSchema,
   CreateRelation: d.createRelationInputSchema,
   VersionCommand: d.versionCommandSchema, ReasonCommand: d.reasonCommandSchema,
@@ -53,7 +45,7 @@ export const wireSchemas = {
   PatchRequest: d.patchRequestInputSchema,
   CreatePipeline: d.createPipelineInputSchema,
   RollbackRelease: d.rollbackReleaseInputSchema,
-  AcknowledgeIncident: z.strictObject({ ...expected, reason: reason.optional() }),
+  AcknowledgeIncident: d.acknowledgeIncidentInputSchema,
   CreateAssignment: d.createAssignmentInputSchema,
   PatchUser: d.patchUserInputSchema,
   PatchNavigation: d.patchNavigationInputSchema,

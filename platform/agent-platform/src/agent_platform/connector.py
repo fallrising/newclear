@@ -34,6 +34,7 @@ from agent_platform_m0.transport import HTTP
 
 from .connector_fence import Fences, Lease
 from .connector_journal import Journal, private_file
+from .connector_output import OutputPolicy, workspace_result
 from .connector_recovery import inspect
 from .domain import Input, Problem
 
@@ -431,7 +432,9 @@ class Connector:
                     seen.add(page_id)
                 else:
                     raise Problem(409, "backend_history_limit")
-            ids = [str(e["id"]) for e in all_events]
+            policy = OutputPolicy(self, row)
+            state = policy.metadata(state, 128)
+            ids = [policy.metadata(e["id"]) for e in all_events]
             if len(set(ids)) != len(ids):
                 raise Problem(409, "backend_duplicate_event")
             if cursor and cursor not in ids:
@@ -439,7 +442,7 @@ class Connector:
             pending = all_events[ids.index(cursor) + 1 :] if cursor else all_events
             normalized = []
             for item in pending[:100]:
-                kind = item.get("kind", "unknown")
+                kind = policy.metadata(item.get("kind", "unknown"), 128)
                 # Bounded, text-only representation; never persist runtime authentication/state
                 # blobs.
                 selected = {
@@ -457,9 +460,7 @@ class Connector:
                 }
                 if kind == "ConversationStateUpdateEvent" and item.get("key") != "execution_status":
                     selected = {"key": item.get("key"), "detail": "state metadata omitted"}
-                content = json.dumps(selected, ensure_ascii=False, default=str)
-                for secret in [row["session_key"], row["handle"]["token"], self.token]:
-                    content = content.replace(secret, "[redacted]")
+                content = json.dumps(policy.redact(selected), ensure_ascii=False)
                 payload = {
                     "kind": kind,
                     "content": content[:16000],
@@ -493,26 +494,20 @@ class Connector:
         if status != "finished":
             raise Problem(409, "agent_not_finished")
         self.guard(row)
-        result = json.loads(
-            sb.exec(
-                "python3",
-                "/tmp/guest_workspace.py",
-                json.dumps(
-                    {
-                        "action": "result",
-                        "run_id": row["run_id"],
-                        "base_sha": row["input"]["base_sha"],
-                    }
-                ),
-                user="agentprobe",
-                timeout=90,
-            )
+        raw = sb.exec(
+            "python3",
+            "/tmp/guest_workspace.py",
+            json.dumps(
+                {
+                    "action": "result",
+                    "run_id": row["run_id"],
+                    "base_sha": row["input"]["base_sha"],
+                }
+            ),
+            user="agentprobe",
+            timeout=90,
         )
-        return {
-            "execution_mode": "cocoon-fixture",
-            "summary": "OpenHands 已在獨立 VM 執行固定的檔案修改驗收。",
-            **result,
-        }
+        return workspace_result(raw, row, OutputPolicy(self, row))
 
     def release(self, row):
         if not row.get("observed"):

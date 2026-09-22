@@ -5,6 +5,7 @@ import json
 from datetime import UTC, datetime
 from urllib.parse import urlencode
 
+from .connector_output import OutputPolicy
 from .domain import Problem
 
 POLICY = "always-confirm-v1"
@@ -70,8 +71,7 @@ def pending_approval(service, row):
     raw = json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     if len(raw.encode()) > 32768:
         raise Problem(409, "approval_batch_too_large")
-    if any(secret in raw for secret in (row["session_key"], row["handle"]["token"], service.token)):
-        raise Problem(409, "approval_sensitive_parameters")
+    OutputPolicy(service, row).require_safe(normalized, "approval_sensitive_parameters")
     return {
         "action_digest": hashlib.sha256(raw.encode()).hexdigest(),
         "normalized_action": normalized,

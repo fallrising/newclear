@@ -32,35 +32,13 @@ def inspect(service, run_id, generation):
             return {"phase": "absent"}
         row = service.require(run_id, generation)
         operations = row["operations"]
-        observed = row.get("observed")
-        handle = row.get("handle")
-        if not handle or not observed:
-            raise Problem(409, "allocation_ownership_uncertain")
-        claims = service.client.sandboxes()
-        proof = service.host.removal(observed)
-        removal = {"observed_state": "stopped", "proof": proof}
-        matching = [s for s in claims if s["id"] == handle["id"]]
-        if stopped(removal) and not matching:
+        removal = observe_sandbox(service, row)
+        if removal:
             return {
                 "phase": "stopped",
                 "stop": removal,
                 "result": operations.get("result", {}).get("result"),
             }
-        if (
-            len(matching) != 1
-            or matching[0].get("claim_ref") != row["claim_ref"]
-            or matching[0].get("key")
-            != {"template": row["input"]["template"], "net": "none", "size": "large"}
-        ):
-            raise Problem(409, "recovery_claim_mismatch")
-        current = service.host.observe(handle["id"])
-        for key in ("vm_id", "identity", "image_digest", "cpu", "memory_bytes", "run_dir", "scope"):
-            # A live process may change scheduling state, but never PID/start ticks.
-            if key == "identity":
-                if any(current[key][k] != observed[key][k] for k in ("pid", "start_ticks")):
-                    raise Problem(409, "recovery_vm_identity_mismatch")
-            elif current[key] != observed[key]:
-                raise Problem(409, "recovery_vm_identity_mismatch")
         if any(op["state"] != "completed" for op in operations.values()):
             raise Problem(409, "connector_operation_uncertain")
         if "release" in operations:
@@ -84,3 +62,32 @@ def inspect(service, run_id, generation):
         if "result" in operations:
             response.update(phase="result", result=operations["result"]["result"])
         return response
+
+
+def observe_sandbox(service, row):
+    observed = row.get("observed")
+    handle = row.get("handle")
+    if not handle or not observed:
+        raise Problem(409, "allocation_ownership_uncertain")
+    claims = service.client.sandboxes()
+    proof = service.host.removal(observed)
+    removal = {"observed_state": "stopped", "proof": proof}
+    matching = [s for s in claims if s["id"] == handle["id"]]
+    if stopped(removal) and not matching:
+        return removal
+    if (
+        len(matching) != 1
+        or matching[0].get("claim_ref") != row["claim_ref"]
+        or matching[0].get("key")
+        != {"template": row["input"]["template"], "net": "none", "size": "large"}
+    ):
+        raise Problem(409, "recovery_claim_mismatch")
+    current = service.host.observe(handle["id"])
+    for key in ("vm_id", "identity", "image_digest", "cpu", "memory_bytes", "run_dir", "scope"):
+        # A live process may change scheduling state, but never PID/start ticks.
+        if key == "identity":
+            if any(current[key][k] != observed[key][k] for k in ("pid", "start_ticks")):
+                raise Problem(409, "recovery_vm_identity_mismatch")
+        elif current[key] != observed[key]:
+            raise Problem(409, "recovery_vm_identity_mismatch")
+    return None

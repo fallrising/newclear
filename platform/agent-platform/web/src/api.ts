@@ -130,7 +130,10 @@ export function errorText(error: unknown) {
           repository_revision_not_registered: '這個 repository 或 commit 尚未登錄為可用版本。',
           invalid_input: '請檢查欄位內容與 commit SHA。',
           active_run_exists: '這個任務已有尚未結束的執行。',
-          state_conflict: '執行狀態已改變，請重新整理。',
+          state_conflict: '執行狀態已改變，已重新載入。',
+          finalizing: '正在保存結果，這個階段無法取消。',
+          run_terminal: '這次執行已結束。',
+          cancel_already_requested: '取消請求已受理，正在確認環境停止。',
         } as Record<string, string>
       )[error.message] ?? '操作未完成，請稍後再試。'
     );

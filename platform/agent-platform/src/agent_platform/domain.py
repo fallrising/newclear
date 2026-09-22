@@ -82,7 +82,8 @@ class RetryInput(RunInput):
 
 OPENHANDS_CAPABILITIES = {
     **CAPABILITIES,
-    "protocol_revision": "m2-openhands-1",
+    "protocol_revision": "m3-openhands-cancel-1",
+    "cancel": True,
     "terminal_output": True,
 }
 

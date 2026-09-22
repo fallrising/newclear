@@ -68,7 +68,7 @@ class RuntimeTests(PlatformFixture):
     def test_at10_api_unsupported_no_side_effects(self):
         self.real_profile()
         value = self.create()
-        for action in ["pause", "resume", "cancel", "approval"]:
+        for action in ["pause", "resume", "approval"]:
             response = self.post(
                 f"/runs/{value['run']['id']}/actions",
                 {"action": action, "expected_state_version": 1},

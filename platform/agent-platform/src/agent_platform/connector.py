@@ -48,6 +48,10 @@ class Allocate(Input):
     deadline: datetime
 
 
+class Cancel(Input):
+    generation: int = Field(ge=1)
+
+
 class Mutation(Input):
     generation: int = Field(ge=1)
     action: Literal["prepare", "prompt", "result", "release"]
@@ -118,8 +122,15 @@ class Connector:
             self.journal.write(row)
         return row
 
-    def guard(self, row):
+    def guard(self, row, *, stopping=False):
         self.fences.require(row["run_id"], row["generation"])
+        if row.get("cancel_requested") and not stopping:
+            raise Problem(409, "sandbox_cancel_requested")
+
+    def cancel(self, run_id, generation):
+        from .connector_cancel import cancel
+
+        return cancel(self, run_id, generation)
 
     def inspect(self, run_id, generation):
         return inspect(self, run_id, generation)
@@ -144,6 +155,7 @@ class Connector:
             row = self.journal.read(run_id)
             if row:
                 row = self.require(run_id, request.generation)
+                self.guard(row)
                 data["generation"] = row["input"]["generation"]
             else:
                 row = {
@@ -452,7 +464,7 @@ class Connector:
     def release(self, row):
         if not row.get("observed"):
             raise Problem(409, "vm_ownership_unconfirmed")
-        self.guard(row)
+        self.guard(row, stopping=True)
         self.handle(row).close()
         proof = self.host.wait_removed(row["observed"])
         if any(s["id"] == row["handle"]["id"] for s in self.client.sandboxes()):
@@ -462,6 +474,7 @@ class Connector:
     def mutate(self, run_id, request):
         with self.journal.locked(run_id):
             row = self.require(run_id, request.generation)
+            self.guard(row, stopping=request.action == "release")
             if request.action != "release" and datetime.fromisoformat(
                 row["input"]["deadline"]
             ) <= datetime.now(UTC):
@@ -551,6 +564,10 @@ def create_connector(config, service=None):
     @app.get("/v1/runs/{run_id}")
     def inspect_run(run_id: UUID, generation: int, _=auth):
         return service.inspect(run_id, generation)
+
+    @app.post("/v1/runs/{run_id}/cancel")
+    def cancel_run(run_id: UUID, data: Cancel, _=auth):
+        return service.cancel(run_id, data.generation)
 
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):

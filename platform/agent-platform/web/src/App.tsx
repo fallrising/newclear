@@ -28,6 +28,7 @@ const stateNames: Record<string, string> = {
   interrupted: '需要處理',
   paused: '已暫停',
   cancelled: '已取消',
+  cancelling: '正在取消',
 };
 function State({ state }: { state: string }) {
   return <span className={`state state-${state}`}>{stateNames[state] ?? state}</span>;
@@ -481,6 +482,30 @@ function RunActivity({ run }: { run: Run }) {
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [connection, setConnection] = useState('正在連線…');
   const [notice, setNotice] = useState('');
+  const cancelCommand = useRef(new PendingCommand());
+  const cancelPayload = useRef<{ action: 'cancel'; expected_state_version: number } | null>(null);
+  const refresh = () => {
+    void cache.invalidateQueries({ queryKey: ['task', run.task_id] });
+    void cache.invalidateQueries({ queryKey: ['tasks'] });
+    void cache.invalidateQueries({ queryKey: ['runtime'] });
+  };
+  const cancellation = useMutation({
+    mutationFn: () => {
+      cancelPayload.current ??= { action: 'cancel', expected_state_version: run.state_version };
+      return cancelCommand.current.send(`/runs/${run.id}/actions`, cancelPayload.current);
+    },
+    onSuccess: () => {
+      cancelPayload.current = null;
+      refresh();
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) cancelPayload.current = null;
+      refresh();
+    },
+  });
+  const canCancel =
+    run.capabilities?.cancel === true &&
+    !['cancelling', 'cancelled', 'succeeded', 'failed', 'finalizing'].includes(run.state);
   useEffect(() => {
     const controller = new AbortController();
     let cursor = 0;
@@ -569,14 +594,38 @@ function RunActivity({ run }: { run: Run }) {
           <button
             key={action}
             type="button"
-            disabled={!run.capabilities?.[action]}
-            title="此版本尚未提供安全的操作流程"
+            disabled={
+              action === 'cancel'
+                ? !canCancel || cancellation.isPending || cancellation.isSuccess
+                : true
+            }
+            onClick={action === 'cancel' ? () => cancellation.mutate() : undefined}
+            title={
+              action === 'cancel' && run.capabilities?.cancel
+                ? '停止這次執行；確認環境停止後完成取消'
+                : '此版本尚未提供安全的操作流程'
+            }
           >
             {{ pause: '暫停', resume: '繼續', cancel: '取消', approval: '審批' }[action]}
           </button>
         ))}
       </div>
-      <p className="muted">此執行方式尚不支援暫停、繼續、取消與審批。</p>
+      <p className="muted">
+        {run.capabilities?.cancel
+          ? '取消會停止本次執行。暫停、繼續與審批尚未開放。'
+          : '此執行方式尚不支援暫停、繼續、取消與審批。'}
+      </p>
+      {run.state === 'cancelling' && (
+        <p className="notice" role="status">
+          正在確認執行環境已停止；確認前仍保留容量。環境失聯時會繼續核對。
+        </p>
+      )}
+      {cancellation.isSuccess && run.state !== 'cancelling' && run.state !== 'cancelled' && (
+        <p className="notice" role="status">
+          取消請求已送出，正在更新狀態…
+        </p>
+      )}
+      <ErrorNotice error={cancellation.error} />
       {notice && <p className="notice">{notice}</p>}
       <h3>活動紀錄</h3>
       <ol className="timeline">
@@ -609,7 +658,11 @@ function RunActivity({ run }: { run: Run }) {
                         ? '環境狀態尚待確認，容量已保留。'
                         : event.type === 'run.result_saved'
                           ? '結果已保存。'
-                          : String(event.payload.content ?? event.type)}
+                          : event.type === 'run.cancel_requested'
+                            ? '已收到取消請求。'
+                            : event.type === 'run.cancel_completed'
+                              ? '執行環境已停止，取消完成。'
+                              : String(event.payload.content ?? event.type)}
             </p>
           </li>
         ))}

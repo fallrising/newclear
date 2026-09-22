@@ -12,6 +12,10 @@
 
 第一版的目標是可操作的示範產品：使用可重置、有狀態的模擬資料，不需要 AWS／Aliyun 帳戶或後端服務。規劃主線為「目錄與權限配置 → 資源納管 → 環境申請與審批 → 交付 → 發布 → 告警 → CMDB 影響定位 → 回滾」。baseline 包含60CI、6個應用與12個環境；Guide可由真實UI建立新環境並完成發布與恢復。
 
+## 三工作區後續設計
+
+[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。這些是新增設計，尚未實作；現有可操作版本仍為上述 v0.1。
+
 ## 本機執行
 
 使用 Node **24.18.0**、pnpm **11.18.0**，在本目錄執行：

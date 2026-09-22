@@ -72,3 +72,17 @@ M5 最終產品驗收（2026-09-22）：`043a13aba3f74de2d3dd14aa2481024a68e2f6b
 [完整驗收報告](../../../.team/reports/T-027-attempt-2.md)、[獨立審查](../../../.team/reports/T-028-attempt-2.md)、[操作指南](DEMO-GUIDE.md)及[PLAN](../../../.team/PLAN.md)是目前入口。[PR #23](https://github.com/fallrising/newclear/pull/23)保存最新metadata head CI、使用者已授權的合併結果及owner release；此純文件checkpoint需要自己的CI後才合併，最終狀態寫在PR以避免自我引用提交。M3/M4已合併且合併後CI成功；歷史段落仍保留當時觀察。
 
 所有原有29個worktrees和新M5 worker/review worktrees均保留；最新main b252d4e已正常整入，未修改已測產品內容。没有部署或真實雲端操作。舊[HANDOFF-M5](HANDOFF-M5.md)僅保存本輪啟動prompt，後續先核對此節、PLAN最後resume及PR23，不要再次開始已驗收M5。
+
+
+## 三工作區設計擴充（2026-09-22）
+
+M5 已由 [PR #23](https://github.com/fallrising/newclear/pull/23) 合併於 `24b11e1eccf678490cfc8d7449748e0c445218f4`；[合併後 CI35724197709](https://github.com/fallrising/newclear/actions/runs/35724197709) 成功，PR body 已釋放 ownership。上方歷史待合併／owner 記錄不是目前狀態。
+
+使用者續要求為三個邏輯視圖撰寫 SDD。[共用模型](sdd/09-shared-workspaces.md)、[RD](sdd/10-rd-workspace.md)、[Ops](sdd/11-ops-workspace.md)、[Admin](sdd/12-admin-workspace.md)、[能力地圖](sdd/13-capability-map.md)、[交付與驗收](sdd/14-workspace-delivery.md) 定義同一份服務／資源／審批資料的角色投影。工作為 T-029，與 M5 驗收分開。
+
+- 已定義：REQ-WS-01～10、三角色頁面與權限、28 組能力對照、W1–W5、18 項新驗收及遷移規則。
+- 尚未實作／驗證：W1–W5 的新增產品行為；本次不宣稱任何 AC-WS 已通過。
+- 保留：v0.1 原始碼、API、測試、依賴、預覽與全部既有 worktrees。
+- 下一個產品增量：W1 明顯的工作區入口、分組導航與三份角色首頁；依 PLAN 的 T-029 最終文件證據／PR closeout 完成對帳後另建實作 task。
+
+T-029 文件已由主控在 `deeffb0bd9fd6a1f2c975be51d87a873090df540` 接受；[固定版本驗證](../../../.team/reports/T-029-attempt-1.md)涵蓋文件檢查與需求映射。最新 PR head CI、合併與 owner release 依此分支 PR closeout 核對，不把文件驗收當作 W1 產品驗收。

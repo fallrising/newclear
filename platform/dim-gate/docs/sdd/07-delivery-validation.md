@@ -66,7 +66,9 @@ E2E：真實 UI 點擊 persona switch、表單、審批、pipeline、rollback。
 
 每個階段依[開發恢復協定](../DEVELOPMENT_PROTOCOL.md)，在task/report及PLAN保存commit/PR、被測版本、執行命令、結果與接受決策；STATUS只附摘要、連結與未覆蓋項。截圖／trace/video 放 CI artifacts 或 PR attachments，不大量提交二進位到 repo。規劃中的 `pnpm check:docs` 檢查本component及其引用的dim-gate ledger文件連結，不掃描修復整個 monorepo。
 
-## 5. 下一輪開發的起始任務
+## 5. 歷史 M0 起始任務（保留基線）
+
+M0–M5 現已驗收；以下保留最初起始契約，不是目前進度。後續角色深化的交付與新 AC 見 [14](14-workspace-delivery.md)，目前狀態先核對 PLAN。
 
 第一個 implementation PR 執行 M0：讀總綱與本章 → 選定相容版本并鎖定 → 建立 schema/seed/controller 最小閉環 → 完成shell、persona switch、reset → 建立native scripts與root path-scoped CI → 提交AC-01～03證據。M0允許使用最小seed，完整60 CI在M1補齊；schema身分／scope/版控不可延後。
 

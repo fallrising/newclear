@@ -1,0 +1,15 @@
+# Controller B uses SSH aliases from ~/.ssh/config.
+# Diagnostic inventory only: deliberately omits quickstart deployment groups.
+all:
+  children:
+    preflight:
+      hosts:
+        disposable-01: {}
+        disposable-02: {}
+        disposable-03: {}
+        disposable-04: {}
+  vars:
+    ansible_user: g1ops
+    ansible_become: false
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o BatchMode=yes -o StrictHostKeyChecking=yes'

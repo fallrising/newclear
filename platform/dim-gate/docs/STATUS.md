@@ -19,9 +19,9 @@ M1 可操作範圍：
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
 | M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 MERGED at `29bed417` |
-| M3：CI/CD與回滾 | ACCEPTED at `04d6646`；[PR #17](https://github.com/fallrising/newclear/pull/17) OPEN、未合併 |
-| M4：觀測與完整展示 | ACCEPTED at `93a4bbc`；[PR #20](https://github.com/fallrising/newclear/pull/20) stacked OPEN、未合併 |
-| M5：驗收與展示交付 | 尚未開始 |
+| M3：CI/CD與回滾 | ACCEPTED at `04d6646`；PR #17 MERGED at `9dd4f16` |
+| M4：觀測與完整展示 | ACCEPTED at `93a4bbc`；PR #20 MERGED at `a61653b` |
+| M5：驗收與展示交付 | 實作整合中；AC26–30 完整 gates / review / CI 尚待驗收 |
 
 證據：122/122 tests、11/11 production E2E、全部 native/docs/contracts/CI/architecture/actionlint gates、獨立 T-012 attempt-2 ACCEPTED，以及 GitHub Actions run 35526733678 成功。該 run 對 head `784f771` 與 synthetic merge `796960eae34bce6463e921c1b7527ba2da565ebb` 執行；最後 reconciliation main 是 `a5982bf4547bba85429fec50494751562b5fe7c6`。E2E 保留 7 項 M0 regression，涵蓋 1440／768／390、明暗主題、axe serious/critical、keyboard/focus/dialog、`/dim-gate/` refresh、reset/reload/copied-tab/corrupt persistence、topology 與 AC-20 在途 persona response。
 
@@ -61,3 +61,5 @@ M4 新增24組實際明暗主題／1440/768/390檢查、9份 initial-focus/Tab/E
 [完整驗收報告](../../../.team/reports/T-024-attempt-3.md)、[獨立審查](../../../.team/reports/T-023-attempt-3.md) 與 [PLAN](../../../.team/PLAN.md) 保存歷史失敗、fixed refs、runtime與artifacts。[PR #20](https://github.com/fallrising/newclear/pull/20) 以未合併的已驗收M3 PR17為父分支，未合併／未部署。此純證據 checkpoint 推送後，最終 metadata-head CI 與 owner release 記錄於PR20，接手必查。
 
 下一里程碑是 **M5 AC-26–30**；[新 chat handoff prompt](HANDOFF-M5.md) 可直接複製。JS gzip465.01kB仍超過初始JS300KiB預算；完整鍵盤主線、效能量測、Firefox/WebKit smoke、儲存限制／復原完整性與可重演展示文件仍待完成，尚不宣稱可展示v0.1。
+
+M5 run DG-M5-20260922-01：已核對 M3/M4 最終 metadata CI 與 owner release，使用者續授權commit、SSHpush與PRmerge。PR17/20已依序合併，M5隔離分支整合最新main；歷史worktrees全部保留。當前實作採路由lazy、維持public feature邊界、Zod constructor精確引用及關閉重複大型常數展開；新增全鍵盤主線、儲存復原、實際sibling/live隔離、效能腳本與Firefox/WebKit smoke。見[M5 contract](M5-INTEGRATION-CONTRACT.md)與[示範指南](DEMO-GUIDE.md)。下方/上方歷史段落是當時觀察，M5尚未驗收或部署。

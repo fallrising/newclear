@@ -520,3 +520,5 @@ remote_durability: local initial contract; SSH push required
 blockers: []
 next_action: implement bounded M5 scopes, integrate and validate exact candidate, independent review and latest-head CI, then explicitly authorized merge; no deployment
 ```
+
+DG-D038: User-authorized M3/M4 integration completed: PR17 merge9dd4f160de9d115c983f1d27661b7c399f0f0ef3 (post-merge CI35715757530 success), PR20 mergea61653b3a131f1cca6c0f476ef7ca0cc2456df12 (post-merge CI35716558999 pending at this observation). M5 normally integrates both into its isolated branch. Original source/accepted/worker/review branches and worktrees retained. T-025 task revision2 expands import-only ownership to foundation/routes.tsx and api/contracts.ts, preserving all runtime schemas and operations.

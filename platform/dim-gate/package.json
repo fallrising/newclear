@@ -20,7 +20,10 @@
     "check:contracts": "node --experimental-strip-types scripts/openapi.ts --check",
     "generate:contracts": "node --experimental-strip-types scripts/openapi.ts",
     "check:ci": "node scripts/check-ci.mjs",
-    "check:architecture": "node scripts/check-architecture.mjs"
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "test:smoke": "playwright test --config playwright.smoke.config.ts",
+    "test:isolation": "node scripts/isolation.mjs",
+    "benchmark": "node scripts/benchmark.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.23",

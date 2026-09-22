@@ -222,4 +222,68 @@ describe('persisted controller identity and transactions', () => {
     expect(reset.getSnapshot().observations.buckets).toEqual([])
   })
 
+  it('serialization failure leaves running scheduler, receipts and all domain state unchanged', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'serialize-resume' }, 'serialize-trigger', identity(controller))
+    await controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-step', identity(controller))
+    const before = controller.getSnapshot(), raw = h.raw
+    const stringify = JSON.stringify
+    const failure = vi.spyOn(JSON, 'stringify').mockImplementation((value, replacer, space) => {
+      if (value && typeof value === 'object' && 'formatVersion' in value) throw new TypeError('Injected serialization failure')
+      return stringify(value, replacer as Parameters<typeof stringify>[1], space)
+    })
+    try {
+      await expect(controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-retry', identity(controller)))
+        .rejects.toMatchObject({ status: 507, code: 'DEMO_STORAGE_FULL' })
+      expect(controller.getSnapshot()).toEqual(before)
+      expect(h.raw).toBe(raw)
+    } finally { failure.mockRestore() }
+    await controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-retry', identity(controller))
+    expect(controller.getSnapshot().logicalClock).toBe(before.logicalClock + 1)
+    expect(controller.getSnapshot().idempotency).toHaveLength(before.idempotency.length + 1)
+  })
+
+  it('enforces the real 3 MiB UTF-8 budget atomically without dropping audit or receipt history', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'size-resume' }, 'size-trigger', identity(controller))
+    await controller.setPersona('user-ops', 'budget-persona', identity(controller))
+    const tags = Object.fromEntries(Array.from({ length: 20 }, (_, index) => ['tag-' + index, '容'.repeat(256)]))
+    let rejected = false
+    for (let index = 0; index < 250; index++) {
+      const before = controller.getSnapshot(), raw = h.raw
+      const ci = before.entities.cis.find(item => item.provider === 'aws')!
+      try {
+        await controller.command('PATCH', '/cis/' + ci.id, { expectedVersion: ci.version, tags }, 'large-' + index, identity(controller))
+      } catch (error) {
+        expect(error).toMatchObject({ status: 507, code: 'DEMO_STORAGE_FULL' })
+        expect(controller.getSnapshot()).toEqual(before)
+        expect(h.raw).toBe(raw)
+        expect(new TextEncoder().encode(raw!).byteLength).toBeLessThanOrEqual(3 * 1024 * 1024)
+        expect(before.commandCount).toBeLessThan(1000)
+        expect(before.scheduler.tasks).toHaveLength(1)
+        rejected = true
+        break
+      }
+    }
+    expect(rejected).toBe(true)
+  }, 30_000)
+
+  it('counts persona and domain commands together while preserving idempotent replay at the limit', async () => {
+    const h = harness(), controller = h.start()
+    for (let index = 0; index < 999; index++) await controller.setPersona('user-rd-commerce', 'persona-' + index, identity(controller))
+    const receipt = await controller.command('POST', '/clock/advance', { ticks: 1 }, 'last-command', identity(controller))
+    const before = controller.getSnapshot(), raw = h.raw, session = controller.getSession()
+    expect(await controller.command('POST', '/clock/advance', { ticks: 1 }, 'last-command', identity(controller))).toEqual(receipt)
+    await expect(controller.command('POST', '/clock/advance', { ticks: 1 }, 'over-limit', identity(controller)))
+      .rejects.toMatchObject({ status: 429, code: 'DEMO_COMMAND_LIMIT' })
+    await expect(controller.setPersona('user-ops', 'over-limit-persona', identity(controller)))
+      .rejects.toMatchObject({ status: 429, code: 'DEMO_COMMAND_LIMIT' })
+    expect(controller.getSnapshot()).toEqual(before)
+    expect(controller.getSession()).toEqual(session)
+    expect(h.raw).toBe(raw)
+    await controller.reset('reset-full-session', identity(controller))
+    expect(controller.getSnapshot().commandCount).toBe(0)
+  }, 30_000)
+
+
 })

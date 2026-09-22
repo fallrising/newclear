@@ -1,16 +1,36 @@
+import { lazy, Suspense } from 'react'
+import { LoadingState } from '../../components/shared/states'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
 import type { SessionView } from '../../domain/schemas'
-import { AccessPage, AdminCatalogPage, AdminOverviewLinks, AuditPage, ModelsPage, NavigationPage } from '../../features/admin'
 import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
-import { ObservabilityPage, IncidentListPage, IncidentDetailPage, IntegrationsPage } from '../../features/observability'
 import { CenterOverview, Guide, UnknownRoute } from '../../features/foundation'
-import { PipelineDetailPage, PipelineListPage, ReleaseDetailPage, ReleaseListPage } from '../../features/delivery'
-import { CapacityPage, CatalogPage, JobDetailPage, JobsPage, RequestDetailPage, RequestListPage, RequestWizard } from '../../features/self-service'
 import { CenterLayout } from '../layouts/CenterLayout'
 
+const AccessPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AccessPage })))
+const AdminCatalogPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AdminCatalogPage })))
+const AdminOverviewLinks = lazy(() => import('../../features/admin').then(module => ({ default: module.AdminOverviewLinks })))
+const AuditPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AuditPage })))
+const ModelsPage = lazy(() => import('../../features/admin').then(module => ({ default: module.ModelsPage })))
+const NavigationPage = lazy(() => import('../../features/admin').then(module => ({ default: module.NavigationPage })))
+const ObservabilityPage = lazy(() => import('../../features/observability').then(module => ({ default: module.ObservabilityPage })))
+const IncidentListPage = lazy(() => import('../../features/observability').then(module => ({ default: module.IncidentListPage })))
+const IncidentDetailPage = lazy(() => import('../../features/observability').then(module => ({ default: module.IncidentDetailPage })))
+const IntegrationsPage = lazy(() => import('../../features/observability').then(module => ({ default: module.IntegrationsPage })))
+const PipelineDetailPage = lazy(() => import('../../features/delivery').then(module => ({ default: module.PipelineDetailPage })))
+const PipelineListPage = lazy(() => import('../../features/delivery').then(module => ({ default: module.PipelineListPage })))
+const ReleaseDetailPage = lazy(() => import('../../features/delivery').then(module => ({ default: module.ReleaseDetailPage })))
+const ReleaseListPage = lazy(() => import('../../features/delivery').then(module => ({ default: module.ReleaseListPage })))
+const CapacityPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.CapacityPage })))
+const CatalogPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.CatalogPage })))
+const JobDetailPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.JobDetailPage })))
+const JobsPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.JobsPage })))
+const RequestDetailPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.RequestDetailPage })))
+const RequestListPage = lazy(() => import('../../features/self-service').then(module => ({ default: module.RequestListPage })))
+const RequestWizard = lazy(() => import('../../features/self-service').then(module => ({ default: module.RequestWizard })))
+
 export function AppRoutes({ session }: { session: SessionView }) {
-  return <Routes>
+  return <Suspense fallback={<LoadingState label="正在載入工作區…" />}><Routes>
     <Route path="/" element={<Navigate to={`/${session.centers[0] ?? 'guide'}`} replace />} />
     <Route path="/rd" element={<CenterLayout routeKey="rd.overview" center="rd" session={session}><CenterOverview key={`${session.identityEpoch}:rd`} center="rd" session={session} /></CenterLayout>} />
     <Route path="/rd/apps" element={<CenterLayout routeKey="rd.apps" center="rd" session={session}><ApplicationListRoute /></CenterLayout>} />
@@ -46,5 +66,5 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/admin/integrations" element={<CenterLayout routeKey="admin.integrations" center="admin" session={session}><IntegrationsPage session={session} /></CenterLayout>} />
     <Route path="/guide" element={<Guide session={session} />} />
     <Route path="*" element={<UnknownRoute session={session} />} />
-  </Routes>
+  </Routes></Suspense>
 }

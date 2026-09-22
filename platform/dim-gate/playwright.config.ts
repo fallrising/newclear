@@ -8,6 +8,7 @@ const browser = process.env.DIM_GATE_BROWSER_CONFIG
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: ['**/m5-isolation.spec.ts', '**/m5-performance*.ts', '**/m5-browser-smoke.spec.ts'],
   fullyParallel: false,
   workers: 1,
   retries: 0,

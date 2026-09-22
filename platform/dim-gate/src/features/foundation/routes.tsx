@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, Clock3, RotateCcw, Shield } from 'lucide-react'
@@ -10,8 +10,9 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, Dia
 import { PageHeading } from '../../components/shared/page-heading'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { InventorySummary } from '../cmdb'
-import { GuideStory } from './GuideStory'
 import { centerDetails } from './center-details'
+
+const GuideStory = lazy(() => import('./GuideStory').then(module => ({ default: module.GuideStory })))
 
 export function CenterOverview({ center, session }: { center: Center; session: SessionView }) {
   const dashboard = useQuery({ queryKey: queryKey('dashboard', center), queryFn: () => api.getDashboard(center) })
@@ -61,7 +62,7 @@ export function Guide({ session }: { session: SessionView }) {
   return <>
     <PageHeading eyebrow="DEMO GUIDE" title="示範導覽" description="用一個可重置的 session，探索三種角色的工作邊界。" />
     <div className="guide-layout">
-      {guide.isPending ? <LoadingState label="正在讀取故事進度…" /> : guide.isError ? <ErrorState error={guide.error} onRetry={() => void guide.refetch()} /> : <GuideStory key={`${session.sessionId}:${session.identityEpoch}:${session.policyVersion}`} data={guide.data} session={session} />}
+      {guide.isPending ? <LoadingState label="正在讀取故事進度…" /> : guide.isError ? <ErrorState error={guide.error} onRetry={() => void guide.refetch()} /> : <Suspense fallback={<LoadingState label="正在讀取故事進度…" />}><GuideStory key={`${session.sessionId}:${session.identityEpoch}:${session.policyVersion}`} data={guide.data} session={session} /></Suspense>}
       <section className="panel session-panel"><div className="panel-title"><Clock3 size={20} aria-hidden="true" /><h2>Session 控制</h2></div>{guide.isPending ? <LoadingState label="正在讀取演示進度…" /> : guide.isError ? <ErrorState error={guide.error} onRetry={() => void guide.refetch()} /> : <>
         <div className="clock-display"><span>演示時鐘</span><strong data-testid="logical-clock">{guide.data.logicalClock}<small>ticks</small></strong><p>只推進模擬時間，不影響真實環境。</p></div>
         <form className="clock-form" onSubmit={(event) => { event.preventDefault(); void advanceClock() }}><label htmlFor="clock-ticks">前進幅度</label><div><select id="clock-ticks" value={ticks} disabled={clockPending} onChange={(event) => setTicks(Number(event.target.value))}><option value={1}>1 tick</option><option value={5}>5 ticks</option><option value={10}>10 ticks</option><option value={60}>60 ticks</option></select><Button type="submit" disabled={clockPending || reset.isPending}><Clock3 size={16} aria-hidden="true" />{clockPending ? '正在前進…' : '前進演示時鐘'}</Button></div></form>

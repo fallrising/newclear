@@ -6,10 +6,11 @@ Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪�
 
 ## 從這裡開始
 
-1. [SDD 主文件](SDD.md)：目標、範圍、架構、不變量與文件優先級。
-2. [教學對照、設計決策與來源](docs/sdd/06-decisions-sources.md)：六個教學任務的映射，以及 mkfk 與 Apache Kafka 的刻意差異。
-3. [開發里程碑](docs/sdd/05-roadmap.md)：M0–M7，每個階段的輸入、產物、驗收與禁止越界事項。
-4. [Agent 工作規則](AGENTS.md)：交接、改規格、測試證據與 monorepo 修改邊界。
+1. **[Enhanced CSR SDD](SDD-enhanced-csr.md)（實作權威）：** 給 LLM／agent 落地用的單檔契約（介面、schema、peer RPC、milestone 任務卡）。
+2. [SDD 主文件](SDD.md)：目標、範圍、架構、不變量與文件優先級（設計基線）。
+3. [教學對照、設計決策與來源](docs/sdd/06-decisions-sources.md)：六個教學任務的映射，以及 mkfk 與 Apache Kafka 的刻意差異。
+4. [開發里程碑](docs/sdd/05-roadmap.md)：M0–M7，每個階段的輸入、產物、驗收與禁止越界事項。
+5. [Agent 工作規則](AGENTS.md)：交接、改規格、測試證據與 monorepo 修改邊界。
 
 ## 規格章節
 

@@ -20,7 +20,7 @@ export type SpawnFn = (req: SpawnRequest) => Promise<SpawnResult>;
 
 /** Official CLI argv: no room body interpolation (ARGV-01). Prompt is stdin. */
 export function buildCodexArgv(): string[] {
-  return ["exec", "--skip-git-repo-check"];
+  return ["exec", "--skip-git-repo-check", "--sandbox", "read-only"];
 }
 
 export function assertArgvOmitsRoomBody(argv: string[], roomBody: string): void {
@@ -50,10 +50,12 @@ export async function defaultSpawn(req: SpawnRequest): Promise<SpawnResult> {
       stderr += chunk;
     });
     child.on("error", reject);
+    const raw = req.env.KITH_CODEX_TIMEOUT_MS;
+    const timeoutMs = raw && Number.isFinite(Number(raw)) ? Number(raw) : 180_000;
     const timer = setTimeout(() => {
       child.kill("SIGKILL");
       reject(new Error("codex spawn timed out"));
-    }, 10_000);
+    }, timeoutMs);
     child.on("close", (code) => {
       clearTimeout(timer);
       resolve({

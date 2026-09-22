@@ -1,7 +1,7 @@
 """Host-local connector. Only fixed templates/bundles and bounded guest operations.
 
 The API/worker never receive node or guest credentials. A private durable journal
-quarantines uncertain mutations; M3 will add operator-assisted reconciliation.
+quarantines uncertain mutations; recovery only reattaches proven instances.
 """
 
 import hashlib
@@ -32,7 +32,9 @@ from agent_platform_m0.sandbox_client import SingleNodeClient
 from agent_platform_m0.sandbox_smoke import Config
 from agent_platform_m0.transport import HTTP
 
+from .connector_fence import Fences, Lease
 from .connector_journal import Journal, private_file
+from .connector_recovery import inspect
 from .domain import Input, Problem
 
 MAX_BUNDLE = 8 * 1024 * 1024
@@ -61,6 +63,7 @@ class Connector:
         self.config = config
         Config(config["origin"], config["template"]).validate()
         self.journal = Journal(config["state_dir"])
+        self.fences = Fences(Path(config["state_dir"]) / "fences")
         self.token = private_file(config["connector_token_file"]).read_text().strip()
         if len(self.token) < 32:
             raise ValueError("connector_token_too_short")
@@ -78,6 +81,7 @@ class Connector:
             self.bundle(entry)  # Fail configuration before accepting any run.
 
     def close(self):
+        self.fences.close()
         self.journal.close()
 
     def bundle(self, entry):
@@ -103,12 +107,22 @@ class Connector:
         }
 
     def require(self, run_id, generation):
+        self.fences.require(run_id, generation)
         row = self.journal.read(run_id)
         if not row:
             raise Problem(404, "connector_run_not_found")
-        if row["generation"] != generation:
+        if row["generation"] > generation:
             raise Problem(409, "connector_generation_stale")
+        if row["generation"] < generation:
+            row["generation"] = generation
+            self.journal.write(row)
         return row
+
+    def guard(self, row):
+        self.fences.require(row["run_id"], row["generation"])
+
+    def inspect(self, run_id, generation):
+        return inspect(self, run_id, generation)
 
     def handle(self, row):
         value = row.get("handle")
@@ -126,9 +140,11 @@ class Connector:
         if request.deadline.tzinfo is None:
             raise Problem(422, "deadline_requires_timezone")
         with self.journal.locked(run_id), self.admission:
+            self.fences.require(run_id, request.generation)
             row = self.journal.read(run_id)
             if row:
-                self.require(run_id, request.generation)
+                row = self.require(run_id, request.generation)
+                data["generation"] = row["input"]["generation"]
             else:
                 row = {
                     "run_id": str(run_id),
@@ -159,16 +175,8 @@ class Connector:
                     raise Problem(409, "unresolved_allocation_blocks_admission")
                 if max(len(self.client.sandboxes()), len(self.host.vms())) >= 4:
                     raise Problem(409, "node_capacity_unavailable")
-                memory = {
-                    line.split(":")[0]: int(line.split()[1]) * 1024
-                    for line in Path("/proc/meminfo").read_text().splitlines()
-                    if line.startswith(("MemTotal:", "MemAvailable:"))
-                }
-                reserve = max(4 * 1024**3, memory["MemTotal"] // 5)
-                if memory["MemAvailable"] < reserve + 4 * 1024**3:
-                    raise Problem(409, "host_memory_reserve_unavailable")
-                if shutil.disk_usage(self.host.config["root_dir"]).free < 12 * 1024**3:
-                    raise Problem(409, "host_disk_reserve_unavailable")
+                self.check_host_reserve()
+                self.guard(row)
                 sb = self.client.new(
                     request.template,
                     net="none",
@@ -211,6 +219,18 @@ class Connector:
 
             return self.journal.operation(row, "allocate", fingerprint(data), effect)
 
+    def check_host_reserve(self):
+        memory = {
+            line.split(":")[0]: int(line.split()[1]) * 1024
+            for line in Path("/proc/meminfo").read_text().splitlines()
+            if line.startswith(("MemTotal:", "MemAvailable:"))
+        }
+        reserve = max(4 * 1024**3, memory["MemTotal"] // 5)
+        if memory["MemAvailable"] < reserve + 4 * 1024**3:
+            raise Problem(409, "host_memory_reserve_unavailable")
+        if shutil.disk_usage(self.host.config["root_dir"]).free < 12 * 1024**3:
+            raise Problem(409, "host_disk_reserve_unavailable")
+
     @contextmanager
     def relay(self, row):
         listener = self.handle(row).proxy_port("127.0.0.1:0", 8000)
@@ -231,13 +251,16 @@ class Connector:
         ):
             raise Problem(409, "guest_binary_mismatch")
         data = row["input"]
+        self.guard(row)
         sb.write_file(
             "/tmp/source.bundle",
             self.bundle(self.entries[(data["canonical_repo"], data["base_sha"])]),
             mode=0o644,
         )
         for name in ["guest_fixture.py", "guest_workspace.py"]:
+            self.guard(row)
             sb.write_file("/tmp/" + name, Path(__file__).with_name(name).read_bytes(), mode=0o644)
+        self.guard(row)
         checkout = json.loads(
             sb.exec(
                 "python3",
@@ -249,12 +272,14 @@ class Connector:
         )
         row["session_key"] = secrets.token_urlsafe(32)
         self.journal.write(row)
+        self.guard(row)
         sb.spawn(
             "python3",
             "/tmp/guest_fixture.py",
             user="agentprobe",
             env={"FIXTURE_RUN_ID": row["run_id"]},
         )
+        self.guard(row)
         sb.spawn(
             "/usr/local/bin/openhands-agent-server",
             "--host",
@@ -282,6 +307,7 @@ class Connector:
                 or info.get("version") != OPENHANDS_VERSION
             ):
                 raise Problem(409, "agent_version_mismatch")
+            self.guard(row)
             created = http.expect(
                 "POST",
                 "/api/conversations",
@@ -314,11 +340,13 @@ class Connector:
     def prompt(self, row, goal):
         with self.relay(row) as http:
             path = "/api/conversations/" + row["run_id"]
+            self.guard(row)
             http.expect(
                 "POST",
                 path + "/events",
                 {"role": "user", "content": [{"type": "text", "text": goal}], "run": False},
             )
+            self.guard(row)
             http.expect("POST", path + "/run")
         return {"accepted": True}
 
@@ -399,6 +427,7 @@ class Connector:
             status = http.expect("GET", "/api/conversations/" + row["run_id"])["execution_status"]
         if status != "finished":
             raise Problem(409, "agent_not_finished")
+        self.guard(row)
         result = json.loads(
             sb.exec(
                 "python3",
@@ -423,6 +452,7 @@ class Connector:
     def release(self, row):
         if not row.get("observed"):
             raise Problem(409, "vm_ownership_unconfirmed")
+        self.guard(row)
         self.handle(row).close()
         proof = self.host.wait_removed(row["observed"])
         if any(s["id"] == row["handle"]["id"] for s in self.client.sandboxes()):
@@ -449,8 +479,11 @@ class Connector:
                 "result": lambda: self.result(row),
                 "release": lambda: self.release(row),
             }
+            payload = request.model_dump()
+            # Operation identity survives ownership transfer; generation fences admission.
+            payload["generation"] = row["input"]["generation"]
             return self.journal.operation(
-                row, request.action, fingerprint(request.model_dump()), actions[request.action]
+                row, request.action, fingerprint(payload), actions[request.action]
             )
 
 
@@ -510,6 +543,14 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}")
     def allocate(run_id: UUID, data: Allocate, _=auth):
         return service.allocate(run_id, data)
+
+    @app.put("/v1/runs/{run_id}/lease")
+    def lease(run_id: UUID, data: Lease, _=auth):
+        return service.fences.grant(run_id, data)
+
+    @app.get("/v1/runs/{run_id}")
+    def inspect_run(run_id: UUID, generation: int, _=auth):
+        return service.inspect(run_id, generation)
 
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):

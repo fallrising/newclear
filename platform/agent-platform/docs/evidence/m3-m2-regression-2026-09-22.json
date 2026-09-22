@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-22T09:16:45.574643+00:00",
+  "transport": "cocoon-kvm-platform",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "checks": {
+    "four_real_vms_live_fifth_queued_and_isolated": true,
+    "four_platform_results_persisted_before_cleanup": true,
+    "stop_evidence_before_capacity_release": [
+      {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    ],
+    "fifth_runs_only_after_capacity_return": true,
+    "replay_does_not_repeat_runtime_operations": [
+      {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      },
+      {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      },
+      {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      },
+      {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      },
+      {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      }
+    ]
+  },
+  "m2_kvm_passed": true,
+  "runs": [
+    {
+      "run_id": "68b10439-e33b-4cad-8346-3b6c9bc38324",
+      "state": "succeeded",
+      "diff_sha256": "029544f222a6aa4b1caa9bc8c6b160e4f7a6e75f12b562c851569c2f912fd150",
+      "verification": {
+        "name": "m2_fixture_workspace_assertion",
+        "reason": "Fixed fixture assertion only; repository tests not configured.",
+        "status": "passed",
+        "exit_code": 0
+      }
+    },
+    {
+      "run_id": "b2f1c38a-c6f4-47dc-84dd-affd66946d18",
+      "state": "succeeded",
+      "diff_sha256": "76b1482928a9a1d92446d171db9264e636a9b8f7d59195b79e75b585e1e9f461",
+      "verification": {
+        "name": "m2_fixture_workspace_assertion",
+        "reason": "Fixed fixture assertion only; repository tests not configured.",
+        "status": "passed",
+        "exit_code": 0
+      }
+    },
+    {
+      "run_id": "ef6dab0f-0e56-4fb5-b35f-b641cd706929",
+      "state": "succeeded",
+      "diff_sha256": "a30cf3ed7f346cdcbd83ad18ebd66e7c02a3749c4711363ccbde558a4fd48ab3",
+      "verification": {
+        "name": "m2_fixture_workspace_assertion",
+        "reason": "Fixed fixture assertion only; repository tests not configured.",
+        "status": "passed",
+        "exit_code": 0
+      }
+    },
+    {
+      "run_id": "188abbe7-8fe4-4a44-a500-1a1d02579454",
+      "state": "succeeded",
+      "diff_sha256": "05f955914a23d611d725136c9c703f5cb45d4ee7ef2560da5d14ba18ead7a546",
+      "verification": {
+        "name": "m2_fixture_workspace_assertion",
+        "reason": "Fixed fixture assertion only; repository tests not configured.",
+        "status": "passed",
+        "exit_code": 0
+      }
+    },
+    {
+      "run_id": "472ef296-e06a-4217-b065-11987767656e",
+      "state": "succeeded",
+      "diff_sha256": "0cea664ca76db0f05532fe1fd69ff49e9167aea5b09dadf4f3ec31a81039d65a",
+      "verification": {
+        "name": "m2_fixture_workspace_assertion",
+        "reason": "Fixed fixture assertion only; repository tests not configured.",
+        "status": "passed",
+        "exit_code": 0
+      }
+    }
+  ],
+  "observations": [
+    {
+      "sandbox_id": "sb_d32f96b1a39e1491",
+      "vm_id": "CRSQSSR4ZTE342KOZBMZFFZMYI",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-6a9d18892f82",
+      "identity": {
+        "pid": 1430302,
+        "start_ticks": 61788404,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/CRSQSSR4ZTE342KOZBMZFFZMYI",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-CRSQSSR4ZTE342KOZBMZFFZMYI.scope"
+    },
+    {
+      "sandbox_id": "sb_21c4144ca6c5cc86",
+      "vm_id": "DM5QKTTUXGRYIEFLUAT5IW5WTZ",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-d41dfb076148",
+      "identity": {
+        "pid": 1430484,
+        "start_ticks": 61788438,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/DM5QKTTUXGRYIEFLUAT5IW5WTZ",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-DM5QKTTUXGRYIEFLUAT5IW5WTZ.scope"
+    },
+    {
+      "sandbox_id": "sb_96b18a38e2246a28",
+      "vm_id": "CGBGVFNM3OTYNGXVSJMEGH446L",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-2c19273898e0",
+      "identity": {
+        "pid": 1430391,
+        "start_ticks": 61788420,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/CGBGVFNM3OTYNGXVSJMEGH446L",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-CGBGVFNM3OTYNGXVSJMEGH446L.scope"
+    },
+    {
+      "sandbox_id": "sb_e2c0d09ee1b0a39d",
+      "vm_id": "VJ23R4LXT3J36GZSVLSQQP2OU6",
+      "vm_name": "sbx-b244399c0d8fe1882792b1e209368c83-b85602c40cba",
+      "identity": {
+        "pid": 1430579,
+        "start_ticks": 61788455,
+        "state": "S"
+      },
+      "state": "running",
+      "image_digest": "sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+      "cpu": 4,
+      "memory_bytes": 4294967296,
+      "cpu_max": "400000 100000",
+      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/VJ23R4LXT3J36GZSVLSQQP2OU6",
+      "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-VJ23R4LXT3J36GZSVLSQQP2OU6.scope"
+    }
+  ],
+  "cleanup_errors": [],
+  "vm_count_after": 0,
+  "claim_count_after": 0,
+  "finished_at": "2026-09-22T09:17:06.952588+00:00"
+}

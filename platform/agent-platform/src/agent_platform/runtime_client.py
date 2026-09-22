@@ -14,6 +14,7 @@ from .domain import Problem
 class RuntimeClient:
     def __init__(self, origin, token):
         self.http = HTTP(origin, token, timeout=120)
+        self.lease_http = HTTP(origin, token, timeout=5)
 
     @classmethod
     def from_env(cls):
@@ -54,6 +55,19 @@ class RuntimeClient:
             )
             conn.execute("UPDATE runtime_capacity SET draining=false WHERE node_id='cocoon-local'")
         return catalog
+
+    def fence(self, run):
+        try:
+            self.lease_http.expect(
+                "PUT",
+                f"/v1/runs/{run['id']}/lease",
+                {"generation": run["generation"], "lease_until": run["lease_until"].isoformat()},
+            )
+        except ProbeError:
+            raise Problem(409, "connector_lease_unconfirmed") from None
+
+    def inspect(self, run):
+        return self.call("GET", f"/v1/runs/{run['id']}?generation={run['generation']}")
 
     def allocate(self, run):
         return self.call(

@@ -6,13 +6,14 @@ from .domain import TERMINAL
 from .store import event
 
 
-def claim_recovery(worker):
+def claim_recovery(worker, *, cancel_only=False):
     with worker.db.transaction() as conn:
         job = conn.execute(
             "SELECT j.* FROM jobs j JOIN runs r ON r.id=j.run_id WHERE "
             "j.status='interrupted' AND j.available_at<=clock_timestamp() "
             "AND r.backend='openhands' AND r.cleanup_state!='confirmed' "
-            "ORDER BY j.available_at,j.id LIMIT 1 FOR UPDATE OF j SKIP LOCKED"
+            + ("AND r.state='cancelling' " if cancel_only else "")
+            + "ORDER BY j.available_at,j.id LIMIT 1 FOR UPDATE OF j SKIP LOCKED"
         ).fetchone()
         if not job:
             return None
@@ -44,9 +45,11 @@ def claim_recovery(worker):
 def quarantine(worker, claim, reason):
     with worker.owned(claim) as (conn, run):
         if run["state"] not in TERMINAL and (
-            run["state"] != "interrupted" or run["reason"] != reason
+            run["state"] not in {"interrupted", "cancelling"} or run["reason"] != reason
         ):
-            worker.state(conn, run, "interrupted", reason)
+            worker.state(
+                conn, run, "cancelling" if run["state"] == "cancelling" else "interrupted", reason
+            )
         conn.execute(
             "UPDATE jobs SET status='interrupted',lease_until=NULL,"
             "available_at=clock_timestamp()+interval '30 seconds' WHERE id=%s",

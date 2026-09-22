@@ -213,7 +213,7 @@ def create_app(settings=None, db=None, web_dist=None):
                 f"runs/{run_id}/actions",
                 idempotency_key,
                 data,
-                lambda conn, _: store.action(conn, run_id, data),
+                lambda conn, command_id: store.action(conn, run_id, data, command_id),
             )
         )
 

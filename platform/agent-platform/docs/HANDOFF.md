@@ -1,6 +1,14 @@
 # 開發接續紀錄 — 2026-09-22
 
-本次停止點：**M2 PR #21 已合併（main `75d9c08`）；M3 的 worker 恢復／fencing 切片已實作，M3 尚未整體完成。** 本次分支 `agent/agent-platform/m3-recovery`。恢復契約與驗收見 [M3 recovery](M3-RECOVERY.md)，原 runtime 啟動見 [M2](M2.md)。
+本次停止點：**M3 recovery PR #22 已合併（main `d23df54`）；M3 安全取消切片已實作並完成 AT-08 驗收。M3 尚未整體完成。** 本次分支 `agent/agent-platform/m3-cancel`。最新行為見 [M3 cancel](M3-CANCEL.md)，恢復契約見 [M3 recovery](M3-RECOVERY.md)，runtime 啟動見 [M2](M2.md)。
+
+## M3 cancel 已完成
+
+- `004_cancel.sql`、原子取消命令／冪等收據／state version、generation 撤權、取消請求與完成時間、完成 audit。
+- 專用取消處理執行緒；四個普通 worker 卡住時仍可取消。Queued 直接取消，已配置任務必須確認原 VM 停止；未知狀態保持 cancelling 並保留容量。
+- Connector 取消 tombstone、bounded interrupt＋VM release；完整停止證據才完成取消，未知 allocation ownership 不猜測成功。
+- OpenHands 工作台取消／pending／重試流程；暫停／繼續／審批維持 capability gate。
+- 新增 15 項後端取消驗收、兩項 UI 互動測試、真實 VM 配置中及 120 秒 terminal 命令取消、三個同 VM recovery 回歸案例；見 [M3 cancel](M3-CANCEL.md)。
 
 ## M3 recovery 已完成
 
@@ -20,13 +28,13 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 接續 M3 的 AT-06／08：approval 與安全取消／暫停／恢復；再完成 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery 切片的能力與保守邊界已記錄，不把它當成完整 M3。
+1. 依 [SDD](../SDD.md) 接續 M3 的 AT-06：approval 與安全暫停／恢復；再完成 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery 與 AT-08 cancel 切片的能力與保守邊界已記錄，不把它當成完整 M3。
 2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
-5. Pause／resume／cancel／approval 均尚未開啟。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
+5. OpenHands cancel 已開啟；pause／resume／approval 尚未開啟。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
-7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-20260922`（本次）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-cancel-20260922`（本次）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
 8. Worker／connector 須一起更新；connector 新增有期限的 lease grant。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異

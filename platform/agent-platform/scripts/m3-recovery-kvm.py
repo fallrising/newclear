@@ -38,6 +38,55 @@ def require(value, code):
         raise RuntimeError(code)
 
 
+def long_command_fixture(config, run):
+    # Acceptance-only replacement of the guest-local fixture model. Product code
+    # still supplies the pinned Agent Server, tool loop, connector and VM lifecycle.
+    row = json.loads((Path(config["state_dir"]) / (str(run["id"]) + ".json")).read_text())
+    node = SingleNodeClient(
+        config["origin"], private_file(config["sandbox_token_file"]).read_text().strip()
+    )
+    handle = row["handle"]
+    sb = node.attach(handle["owner"], handle["id"], handle["token"])
+    sb.exec(
+        "python3",
+        "-c",
+        (
+            "import os,signal;from pathlib import Path;"
+            "[(os.kill(int(p.name),signal.SIGTERM)) for p in Path('/proc').iterdir() "
+            "if p.name.isdigit() and (p/'cmdline').exists() "
+            "and b'/tmp/guest_fixture.py' in (p/'cmdline').read_bytes().split(bytes([0]))]"
+        ),
+        timeout=15,
+    )
+    command = (
+        'python3 -c "from pathlib import Path; import time; '
+        "Path('/tmp/m3-long-command').write_text('ready'); time.sleep(120)\""
+    )
+    program = (
+        "from http.server import ThreadingHTTPServer\nimport guest_fixture\n"
+        + f"guest_fixture.COMMAND = {command!r}\n"
+        + "ThreadingHTTPServer(('127.0.0.1',18080),guest_fixture.Handler).serve_forever()\n"
+    )
+    sb.write_file("/tmp/cancel_fixture.py", program.encode(), mode=0o644)
+    sb.spawn(
+        "python3",
+        "/tmp/cancel_fixture.py",
+        user="agentprobe",
+        env={"FIXTURE_RUN_ID": str(run["id"])},
+    )
+    sb.exec(
+        "python3",
+        "-c",
+        "import socket,time\n"
+        "for _ in range(50):\n"
+        " try:\n"
+        "  s=socket.create_connection(('127.0.0.1',18080),.2);s.close();break\n"
+        " except OSError: time.sleep(.1)\n"
+        "else: raise RuntimeError('fixture_not_ready')\n",
+        timeout=15,
+    )
+
+
 def child(args, config, db):
     def boundary(point):
         if point == args.worker_fault:
@@ -51,6 +100,8 @@ def child(args, config, db):
             return result
 
         def operation(self, run, action):
+            if action == "prompt" and args.scenario == "cancel":
+                long_command_fixture(config, run)
             result = super().operation(run, action)
             if action == "prompt":
                 boundary("after_prompt")
@@ -76,6 +127,7 @@ def main():
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--origin", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--scenario", choices=["recovery", "cancel"], default="recovery")
     parser.add_argument(
         "--worker-fault", choices=["after_allocate", "after_prompt", "before_event_commit"]
     )
@@ -107,7 +159,7 @@ def main():
     report = {
         "schema_version": 1,
         "started_at": datetime.now(UTC).isoformat(),
-        "transport": "cocoon-kvm-platform-recovery",
+        "transport": "cocoon-kvm-platform-" + args.scenario,
         "template": config["template"],
         "cases": [],
         "passed": False,
@@ -147,7 +199,10 @@ def main():
                 "/agent-profiles",
                 {"name": "Recovery KVM", "backend": "openhands", "deadline_seconds": 300},
             )
-            for point in ["after_allocate", "after_prompt", "before_event_commit"]:
+            points = ["after_allocate", "after_prompt"]
+            if args.scenario == "recovery":
+                points.append("before_event_commit")
+            for point in points:
                 run = post(
                     "/tasks",
                     {
@@ -174,6 +229,8 @@ def main():
                             str(args.output),
                             "--worker-fault",
                             point,
+                            "--scenario",
+                            args.scenario,
                         ],
                         stdout=log,
                         stderr=log,
@@ -198,6 +255,55 @@ def main():
                 require(len(host.vms()) == len(node.sandboxes()) == 1, "one_vm_required")
                 require(Store(db).runtime()["occupied"] == 1, "lost_reservation")
                 old = Store(db).run(run["id"])
+                if args.scenario == "cancel":
+                    if point == "after_prompt":
+                        handle = before["handle"]
+                        sb = node.attach(handle["owner"], handle["id"], handle["token"])
+                        sb.exec(
+                            "python3",
+                            "-c",
+                            "from pathlib import Path\nimport time\n"
+                            "for _ in range(100):\n"
+                            " if Path('/tmp/m3-long-command').exists(): break\n"
+                            " time.sleep(.1)\n"
+                            "else: raise RuntimeError('long_command_not_started')\n",
+                            timeout=15,
+                        )
+                    accepted = post(
+                        f"/runs/{run['id']}/actions",
+                        {
+                            "action": "cancel",
+                            "expected_state_version": old["state_version"],
+                        },
+                    )
+                    require(accepted["status"] == "pending", "cancel_not_pending")
+                    require(Store(db).runtime()["occupied"] == 1, "capacity_released_before_stop")
+                    start = time.monotonic()
+                    Worker(db, client).run_once()
+                    elapsed = time.monotonic() - start
+                    view = Store(db).run(run["id"])
+                    require(
+                        view["state"] == "cancelled" and view["cleanup_state"] == "confirmed",
+                        "cancel_not_observed:" + str(view["reason"]),
+                    )
+                    require(view["result"] is None, "cancel_invented_result")
+                    require(Store(db).runtime()["occupied"] == 0, "cancel_capacity_not_released")
+                    after = json.loads(journal.read_text())
+                    require(after["handle"] == before["handle"], "cancel_replaced_instance")
+                    report["cases"].append(
+                        {
+                            "fault": point,
+                            "run_id": run["id"],
+                            "vm_id": initial_vm["vm_id"],
+                            "state": view["state"],
+                            "generation": view["generation"],
+                            "long_terminal_command": point == "after_prompt",
+                            "cancel_seconds": round(elapsed, 3),
+                            "proof": host.wait_removed(initial_vm),
+                        }
+                    )
+                    print("cancel_" + point + ": passed", flush=True)
+                    continue
                 # Fault harness advances only this dead worker's lease, avoiding a 30 s wait.
                 with db.transaction() as conn:
                     conn.execute(

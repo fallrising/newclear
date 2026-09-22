@@ -7,9 +7,10 @@
     "node": "24.18.0"
   },
   "scripts": {
-    "dev": "wrangler dev --port 8787 --ip 127.0.0.1 --var ff_mcp:on --var ff_hosted_agent:on --var ff_ambient:on",
-    "dev:frontend": "npm run dev --prefix frontend -- --host 127.0.0.1 --port 5173 --strictPort",
+    "dev": "node scripts/dev-bind.mjs worker",
+    "dev:frontend": "node scripts/dev-bind.mjs frontend",
     "dev:sidecar": "node scripts/run-sidecar-local.mjs",
+    "check:live": "node scripts/check-live-prereqs.mjs",
     "db:migrate:local": "wrangler d1 migrations apply kith --local",
     "db:seed:local": "node scripts/bootstrap-local.mjs",
     "db:bootstrap:local": "node scripts/bootstrap-local.mjs && wrangler d1 execute kith --local --file=.wrangler/bootstrap-local.sql",

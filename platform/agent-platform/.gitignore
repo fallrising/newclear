@@ -5,3 +5,12 @@ __pycache__/
 .ruff_cache/
 build/
 dist/
+
+.env
+.env.*
+!.env.example
+web/coverage/
+*.tsbuildinfo
+
+web/test-results/
+web/playwright-report/

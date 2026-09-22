@@ -1,26 +1,33 @@
-# 開發接續紀錄 — 2026-09-21
+# 開發接續紀錄 — 2026-09-22
 
-本次停止點：**M0 的五項 gate 已在真實 KVM 的固定 none-lane 配置通過，下一步為 M1。** 原始程式基準是 PR #15 合併後的 `aafd24d`；新增實測工具、證據與文件位於 `agent/agent-platform/m0-kvm` 分支。完整結果見 [KVM 驗收](KVM-VALIDATION.md) 與 [gate report](evidence/m0-gates-2026-09-21.json)。
+本次停止點：**M2 PR #21 已合併（main `75d9c08`）；M3 的 worker 恢復／fencing 切片已實作，M3 尚未整體完成。** 本次分支 `agent/agent-platform/m3-recovery`。恢復契約與驗收見 [M3 recovery](M3-RECOVERY.md)，原 runtime 啟動見 [M2](M2.md)。
 
-## 已完成
+## M3 recovery 已完成
 
-- 已完整讀取前一版 handoff，從 current main 建立獨立 worktree `/home/ckc/test/codex/newclear-agent-m0`。
-- 管理員完成 Cocoon／sandboxd／Cloud Hypervisor／EROFS／qemu-utils／guest boot files 安裝與 KVM 權限；實際 KVM API 12 可用。
-- 在 systemd delegated user service 中執行真實 Cocoon／sandboxd；無需額外 sudo。固定版本與配置見 KVM 驗收。
-- Guest 本機重建，透過 loopback registry 取得真正 OCI manifest digest，再由 Cocoon 拉入獨立 store。
-- 真實 Agent Server 19 項 sandbox checks 通過：REST／WS、auth、replay、interrupt/resume、程序重啟後接續、重複 release。
-- 兩個 MicroVM workspace／token 隔離、實際 CPU/RAM、20 秒 TTL 前後、busy VM release、allocation 成功後 SDK timeout 注入／對帳通過。
-- 以 PID＋start-time、VM record、runtime directory／COW disk 和 CPU cgroup 四種證據核對回收，未只依賴 release ACK／claim-list。
-- None-lane egress 的 HTTP/TLS allow、host/method/port/metadata/control-plane deny、private-IP guard 與限定範圍 canary scan 通過。
-- 新增可重跑的 `kvm_lifecycle`／`kvm_egress` modules；45 tests、lint／format，以及兩組各 14 項 Docker checks 通過。
-- Test claims／VMs 歸零，專用 runtime service／cgroup 與短期 registry container／volume 已清理；保留本機 guest image、venv 與私密原始 artifacts。
+- `003_recovery.sql`、原 binding／reservation 的 recovery queue、接管 generation、`interrupted_from`／`reconciled_at` 與接管 audit。
+- Connector 獨立持久 lease fence；核對原 claim／VMM identity／固定 Agent Server／conversation 後接續事件，不重複 VM／prompt。
+- 未知 upstream mutation／partition 保留容量；已確認原 VM 完全消失後才回收。無 ownership 證據的未知 allocation 仍須管理員對帳。
+- 新增 19 項 recovery 測試：九個 SIGKILL 時點、未知 ACK、重啟、stale generation、partition、PID 重用、競爭及到期鎖等待。
+- 三個真實 VM 恢復案例與原四 VM／第五排隊回歸通過；證據與限制見 [M3 recovery](M3-RECOVERY.md)。
+
+## M2 已完成
+
+- Cocoon／OpenHands 私有 connector、固定 template 與管理員登錄的 readonly Git bundle、非 root guest checkout、真實 terminal 工具執行、持久事件及 bounded diff。
+- Connector 私密 durable operation journal、generation／payload gate、不確定操作不重送；worker 四任務並行與 heartbeat。Fake／real 混用仍遵守全平台四 slot 上限。
+- 四個真實 VM 並行、第五 queued、workspace 隔離；VMM／VM record／runtime directory／cgroup 均確認消失後釋放容量。
+- 真實 Chromium／PostgreSQL／HTTP 的 100-event reconnect／reload／不重複執行驗收；unsupported UI／API gate 與安全文字 diff。
+- `002_runtime.sql`、runtime catalog、`register-runtime`／`connector` CLI、path-scoped CI browser acceptance。證據見 [M2 evidence](evidence/m2-2026-09-22.json)。
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 的 M1 切片開發 API/Postgres/schema、operator login、queue、fake adapters、UI 骨架及 AT-01 垂直驗收；目前尚未實作這些功能。
-2. M1 可從 fake adapters 開始；需要重跑真實 KVM 時依 [KVM-HOST](KVM-HOST.md)／[KVM 驗收](KVM-VALIDATION.md) 重建專用配置。暫存 registry 已移除，不能假設 `localhost:15000` 仍可拉取。
-3. M0 的通過範圍是單節點 Linux amd64、`large`、`net=none`／vsock proxy。Bridge/CNI、HTTPS interception、DNS rebinding／redirect 對抗、任意工具中途恢復、VM checkpoint resume、真實 provider 與 production 部署仍須按後續 milestone 驗證。
-4. 單一 probe report 保留 `full_m0_complete=false`；本次 gate report 核對跨 probe 的獨立硬體證據後為 `true`。不要更改既有保守回報語意。
+1. 依 [SDD](../SDD.md) 接續 M3 的 AT-06／08：approval 與安全取消／暫停／恢復；再完成 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery 切片的能力與保守邊界已記錄，不把它當成完整 M3。
+2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
+3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
+4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
+5. Pause／resume／cancel／approval 均尚未開啟。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
+6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-20260922`（本次）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+8. Worker／connector 須一起更新；connector 新增有期限的 lease grant。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異
 

@@ -53,8 +53,8 @@ node cmd/kithctl.mjs bootstrap --operator-id ... --operator-hash ... --second-ha
 ```text
 cp .dev.vars.example .dev.vars   # gitignored；L1 可留空 XAI_API_KEY
 npm run db:migrate:local         # wrangler d1 migrations apply kith --local
-npm run dev                      # Worker http://127.0.0.1:8787
-npm run dev:frontend             # Vite http://127.0.0.1:5173 代理 /api 與 /mcp
+npm run dev                      # Worker :8787（0.0.0.0，含 Tailscale）
+npm run dev:frontend             # Vite :5173 綁 Tailscale IPv4（tailscale ip -4）
 ```
 
 L1 驗收：`GET /api/csrf` 回 JSON。還沒有 seed 帳號，登入會失敗（屬 L2）。不要把 `.dev.vars` 或密碼雜湊提交進 git。
@@ -102,6 +102,18 @@ npm run dev:sidecar          # 另開終端；讀 .wrangler/sidecar.local.toml
 `npm run dev` 本機也開 `ff_ambient`。bootstrap 把 **grok** 設成 `attention_mode=ambient`、`debounce_ms=0`（仍可用 operator `PATCH /api/rooms/room-1/members/grok/attention` 改回 `mention`）。
 
 空房間打一句通過 heuristic 的話（例如 `are you there?`，不必 @）：alarm 後 grok 應回 fake LLM。若最近 10 則已有 agent 發言，H4 會否決，這是規格不是故障。`@grok` 仍走 mention，不經 heuristic。
+
+## 上線前你需要準備（L7）
+
+本機 fake 路徑已經可用。真 Grok／真 Codex／workers.dev **無法代登**。在 `products/kith` 跑 `npm run check:live` 看缺什麼。
+
+1. **Cloudflare：** `npx wrangler login`（瀏覽器授權）。之後才能建遠端 D1/KV 並 `wrangler deploy`。
+2. **真 Grok（可選）：** 把 `XAI_API_KEY` 寫進 gitignored `.dev.vars`（有值就不再走 fake LLM）。
+3. **真 Codex（可選）：** 官方 CLI 若已安裝，kith 的 `CODEX_HOME` 必須與預設 `~/.codex` 分開。請跑：
+   `CODEX_HOME=$HOME/.local/kith-dev/codex-home codex login`
+   然後把 `.wrangler/sidecar.local.toml` 的 `executable` 改成該 CLI 絕對路徑。**不要**複製 `~/.codex/auth.json`。
+
+三件事缺一項，對應能力就停在 fake／本機。齊了再做遠端 deploy。
 
 ## 明確禁止
 

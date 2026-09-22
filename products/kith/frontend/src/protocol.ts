@@ -3,12 +3,36 @@ import type { TimelineEvent, WsPacket } from "./types";
 export const CLIENT_MESSAGE_ID_MIN = 8;
 export const CLIENT_MESSAGE_ID_MAX = 64;
 
-export function newClientMessageId(): string {
-  const id = crypto.randomUUID();
-  if (id.length >= CLIENT_MESSAGE_ID_MIN && id.length <= CLIENT_MESSAGE_ID_MAX) {
-    return id;
+function randomHex(byteCount: number): string {
+  const bytes = new Uint8Array(byteCount);
+  const subtle = globalThis.crypto;
+  if (subtle && typeof subtle.getRandomValues === "function") {
+    subtle.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
   }
-  return id.replace(/-/g, "").padEnd(CLIENT_MESSAGE_ID_MIN, "0").slice(0, CLIENT_MESSAGE_ID_MAX);
+  let hex = "";
+  for (const byte of bytes) {
+    hex += byte.toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+/** 8–64 chars. Must work on insecure HTTP (Tailscale `http://100.x` has no randomUUID). */
+export function newClientMessageId(): string {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  if (typeof uuid === "string") {
+    if (uuid.length >= CLIENT_MESSAGE_ID_MIN && uuid.length <= CLIENT_MESSAGE_ID_MAX) {
+      return uuid;
+    }
+    const compact = uuid.replace(/-/g, "");
+    if (compact.length >= CLIENT_MESSAGE_ID_MIN) {
+      return compact.slice(0, CLIENT_MESSAGE_ID_MAX);
+    }
+  }
+  return randomHex(16);
 }
 
 export function lastContinuousSeq(seqs: Iterable<number>): number | null {

@@ -45,14 +45,15 @@ export function RoomListPage({
   return (
     <main className="page">
       <div className="row">
-        <h1 className="grow">Rooms</h1>
-        <button type="button" onClick={() => void load()} disabled={busy}>
+        <span className="grow" />
+        <button type="button" className="btn-quiet" onClick={() => void load()} disabled={busy}>
           Refresh
         </button>
-        <button type="button" onClick={() => void onLogout()}>
+        <button type="button" className="btn-quiet" onClick={() => void onLogout()}>
           Log out
         </button>
       </div>
+      <h1 className="large-title">Rooms</h1>
       {error ? (
         <p className="error" role="alert">
           {error}

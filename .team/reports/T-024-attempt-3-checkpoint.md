@@ -22,3 +22,7 @@ Test refinement records raw error envelopes, request identities/times and actual
 ## Risks and Follow-ups
 
 No production behavior is weakened to satisfy old expectations. Independent review must assess the narrow error classification at the next fixed commit. The final full47 Chromium suite and current-head CI are still required. SSH-fetched main `eb2023f81d02ad5e9a7419a0b8bf67751e135758` has no delta under dim-gate, its root CI or `.team` versus the previously reconciled7bb80d0; keep stacked PR20 based on unchanged accepted M3 parent7d20bbc. No merge/deploy.
+
+### Candidate231cb87 follow-up
+
+All local gates and47/47Chromium passed, with independent artifact inspection recorded in T-023-attempt-3-checkpoint. RemoteCI35704063594 passed46/47: one pre-existing M1test's `pendingAtSwitch` assumption raced the actual150msresponse; it recordedfalse and noleak. AllM3andM4journeys passed. Preserve the original log/artifact; do not rerun blindly to manufacturegreen. A test-only refinement now holds the real successful Data searchresponse (assert200andcontainsdata-worker), switchesviaUI, releases the original bytes, completes a current Commerce search and assertsnoDOMleaks. Three repeated focused Chromiumruns passed; lint/typecheck passed. Initial command from repositoryroot hit Corepackpnpm12.5.1 mismatch before running; corrected component-directory invocation used pinned11.18.0. Final fullgates/CI remain required. Production code has no new delta.

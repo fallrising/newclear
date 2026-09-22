@@ -72,7 +72,7 @@ test('AC-04/05: Ops sees 60 CIs, filters providers, onboards once, rejects dupli
   await expect(counts).toContainText('61筆')
 })
 
-test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never flashes an in-flight old response', async ({ page }) => {
+test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never flashes an in-flight old response', async ({ page }, info) => {
   await page.goto('rd/apps')
   await expect(page.getByRole('heading', { name: '應用與環境' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'checkout-api' })).toBeVisible()
@@ -93,8 +93,24 @@ test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never fl
 
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-data')
   await page.evaluate(() => {
-    const state = { leaks: [] as string[], switching: false, pendingAtSwitch: false }
-    Object.assign(window, { __scopeTransition: state })
+    const state = { leaks: [] as string[], switching: false, pendingAtSwitch: false, responseReady: false, responseStatus: 0, containsData: false }
+    const original = window.fetch.bind(window)
+    let release!: () => void
+    const deliveryGate = new Promise<void>(resolve => { release = resolve })
+    Object.assign(window, { __scopeTransition: state, __releaseScopeSearch: release })
+    // Deliver the real successful Data response only after the persona changes.
+    // Holding bytes makes the in-flight precondition independent of CI speed.
+    window.fetch = async (...args) => {
+      const response = await original(...args)
+      if (new URL(String(args[0])).pathname.endsWith('/api/v1/search')
+        && new Headers(args[1]?.headers).get('X-Demo-Persona') === 'user-rd-data') {
+        state.responseStatus = response.status
+        state.containsData = (await response.clone().text()).includes('data-worker')
+        state.responseReady = true
+        await deliveryGate
+      }
+      return response
+    }
     document.addEventListener('change', (event) => {
       const target = event.target
       if (target instanceof HTMLSelectElement && target.getAttribute('aria-label') === '示範身分'
@@ -110,11 +126,19 @@ test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never fl
   await page.getByRole('search', { name: '全域搜尋' }).getByRole('searchbox').fill('data')
   await page.getByRole('search', { name: '全域搜尋' }).getByRole('button', { name: '搜尋', exact: true }).click()
   await expect(page.getByText('正在搜尋目前授權範圍…')).toBeVisible()
+  await page.waitForFunction(() => (window as unknown as { __scopeTransition: { responseReady: boolean } }).__scopeTransition.responseReady)
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-commerce')
   await expect(page.getByRole('combobox', { name: '示範身分' })).toHaveValue('user-rd-commerce')
-  expect(await page.evaluate(() => (window as unknown as {
-    __scopeTransition: { leaks: string[]; pendingAtSwitch: boolean }
-  }).__scopeTransition)).toEqual({ leaks: [], pendingAtSwitch: true, switching: true })
+  await expect(page.getByRole('combobox', { name: '示範身分' })).toBeEnabled()
+  await page.evaluate(() => (window as unknown as { __releaseScopeSearch: () => void }).__releaseScopeSearch())
+  await page.getByRole('search', { name: '全域搜尋' }).getByRole('searchbox').fill('data-worker')
+  await page.getByRole('search', { name: '全域搜尋' }).getByRole('button', { name: '搜尋', exact: true }).click()
+  await expect(page.getByText('目前授權範圍沒有符合結果。')).toBeVisible()
+  const transition = await page.evaluate(() => (window as unknown as {
+    __scopeTransition: { leaks: string[]; pendingAtSwitch: boolean; switching: boolean; responseReady: boolean; responseStatus: number; containsData: boolean }
+  }).__scopeTransition)
+  expect(transition).toEqual({ leaks: [], pendingAtSwitch: true, switching: true, responseReady: true, responseStatus: 200, containsData: true })
+  await info.attach('held-data-response-persona-isolation', { body: JSON.stringify(transition), contentType: 'application/json' })
   await page.goto('rd/apps/app-data')
   await expect(page.getByRole('heading', { name: '找不到這個應用' })).toBeVisible()
 

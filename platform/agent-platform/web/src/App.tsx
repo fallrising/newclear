@@ -1,3 +1,4 @@
+import { RunControls } from './RunControls';
 import { Approvals } from './Approvals';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +29,7 @@ const stateNames: Record<string, string> = {
   failed: '失敗',
   interrupted: '需要處理',
   paused: '已暫停',
+  resuming: '正在恢復',
   cancelled: '已取消',
   cancelling: '正在取消',
   awaiting_approval: '等待審批',
@@ -486,30 +488,6 @@ function RunActivity({ run }: { run: Run }) {
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [connection, setConnection] = useState('正在連線…');
   const [notice, setNotice] = useState('');
-  const cancelCommand = useRef(new PendingCommand());
-  const cancelPayload = useRef<{ action: 'cancel'; expected_state_version: number } | null>(null);
-  const refresh = () => {
-    void cache.invalidateQueries({ queryKey: ['task', run.task_id] });
-    void cache.invalidateQueries({ queryKey: ['tasks'] });
-    void cache.invalidateQueries({ queryKey: ['runtime'] });
-  };
-  const cancellation = useMutation({
-    mutationFn: () => {
-      cancelPayload.current ??= { action: 'cancel', expected_state_version: run.state_version };
-      return cancelCommand.current.send(`/runs/${run.id}/actions`, cancelPayload.current);
-    },
-    onSuccess: () => {
-      cancelPayload.current = null;
-      refresh();
-    },
-    onError: (error) => {
-      if (error instanceof ApiError && error.status === 409) cancelPayload.current = null;
-      refresh();
-    },
-  });
-  const canCancel =
-    run.capabilities?.cancel === true &&
-    !['cancelling', 'cancelled', 'succeeded', 'failed', 'finalizing'].includes(run.state);
   useEffect(() => {
     const controller = new AbortController();
     let cursor = 0;
@@ -593,45 +571,7 @@ function RunActivity({ run }: { run: Run }) {
           ? 'OpenHands · 獨立 VM · 固定模擬模型'
           : '模擬環境 · 排程驗證'}
       </p>
-      <div className="run-actions" aria-label="執行操作">
-        {(['pause', 'resume', 'cancel', 'approval'] as const)
-          .filter((action) => action !== 'approval' || !run.capabilities?.approval)
-          .map((action) => (
-            <button
-              key={action}
-              type="button"
-              disabled={
-                action === 'cancel'
-                  ? !canCancel || cancellation.isPending || cancellation.isSuccess
-                  : true
-              }
-              onClick={action === 'cancel' ? () => cancellation.mutate() : undefined}
-              title={
-                action === 'cancel' && run.capabilities?.cancel
-                  ? '停止這次執行；確認環境停止後完成取消'
-                  : '此版本尚未提供安全的操作流程'
-              }
-            >
-              {{ pause: '暫停', resume: '繼續', cancel: '取消', approval: '審批' }[action]}
-            </button>
-          ))}
-      </div>
-      <p className="muted">
-        {run.capabilities?.cancel
-          ? '取消會停止本次執行。暫停與繼續尚未開放；啟用審批的任務會在下方顯示待核准操作。'
-          : '此執行方式尚不支援暫停、繼續、取消與審批。'}
-      </p>
-      {run.state === 'cancelling' && (
-        <p className="notice" role="status">
-          正在確認執行環境已停止；確認前仍保留容量。環境失聯時會繼續核對。
-        </p>
-      )}
-      {cancellation.isSuccess && run.state !== 'cancelling' && run.state !== 'cancelled' && (
-        <p className="notice" role="status">
-          取消請求已送出，正在更新狀態…
-        </p>
-      )}
-      <ErrorNotice error={cancellation.error} />
+      <RunControls run={run} />
       {run.require_approval && <Approvals run={run} />}
       {notice && <p className="notice">{notice}</p>}
       <h3>活動紀錄</h3>

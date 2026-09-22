@@ -6,13 +6,18 @@ from .domain import TERMINAL
 from .store import event
 
 
-def claim_recovery(worker, *, cancel_only=False):
+def claim_recovery(worker, *, cancel_only=False, control_only=False):
     with worker.db.transaction() as conn:
         job = conn.execute(
             "SELECT j.* FROM jobs j JOIN runs r ON r.id=j.run_id WHERE "
             "j.status='interrupted' AND j.available_at<=clock_timestamp() "
             "AND r.backend='openhands' AND r.cleanup_state!='confirmed' "
             + ("AND r.state='cancelling' " if cancel_only else "")
+            + (
+                "AND (r.state='cancelling' OR r.control_action IS NOT NULL) "
+                if control_only
+                else ""
+            )
             + "ORDER BY j.available_at,j.id LIMIT 1 FOR UPDATE OF j SKIP LOCKED"
         ).fetchone()
         if not job:
@@ -44,12 +49,17 @@ def claim_recovery(worker, *, cancel_only=False):
 
 def quarantine(worker, claim, reason):
     with worker.owned(claim) as (conn, run):
-        if run["state"] not in TERMINAL and (
-            run["state"] not in {"interrupted", "cancelling"} or run["reason"] != reason
-        ):
-            worker.state(
-                conn, run, "cancelling" if run["state"] == "cancelling" else "interrupted", reason
-            )
+        target = (
+            "cancelling"
+            if run["state"] == "cancelling"
+            else "pausing"
+            if run["control_action"] == "pause"
+            else "resuming"
+            if run["control_action"] == "resume"
+            else "interrupted"
+        )
+        if run["state"] not in TERMINAL and (run["state"] != target or run["reason"] != reason):
+            worker.state(conn, run, target, reason)
         conn.execute(
             "UPDATE jobs SET status='interrupted',lease_until=NULL,"
             "available_at=clock_timestamp()+interval '30 seconds' WHERE id=%s",

@@ -22,6 +22,7 @@ export type Run = {
   attempt_no: number;
   state: string;
   state_version: number;
+  backend_cursor?: string | null;
   base_sha: string;
   goal: string;
   cleanup_state: string;
@@ -122,6 +123,9 @@ export function errorText(error: unknown) {
     return (
       (
         {
+          pause_not_ready: '目前尚未到達可接受暫停請求的狀態，請稍後再試。',
+          resume_not_ready: '尚未確認安全暫停，暫時無法繼續。',
+          run_deadline_expired: '本次執行已超過原定期限。',
           invalid_credentials: '帳號或密碼不正確。',
           authentication_required: '登入已過期，請重新登入。',
           csrf_rejected: '登入狀態已更新，請重新整理後再試。',

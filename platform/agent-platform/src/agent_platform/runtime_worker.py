@@ -131,6 +131,11 @@ def execute_real(worker, claim):
 
                 execute_cancel(worker, claim, run)
                 return
+            if run["control_action"]:
+                from .controls import execute_control
+
+                execute_control(worker, claim, run)
+                return
             observed = client.inspect(run) if claim.get("recovery") else {"phase": "absent"}
             for receipt in observed.get("approval_receipts", []):
                 from .approvals import record_applied

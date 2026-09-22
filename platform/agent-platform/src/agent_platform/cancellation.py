@@ -31,7 +31,7 @@ def request_cancel(conn, run_id, data, command_id):
     queued = run["state"] == "queued" and run["sandbox_id"] is None
     row = conn.execute(
         "UPDATE runs SET state=%s,state_version=state_version+1,generation=generation+1,"
-        "cancel_command_id=%s,cancel_requested_at=clock_timestamp(),"
+        "cancel_command_id=%s,cancel_requested_at=clock_timestamp(),control_action=NULL,"
         "cancel_completed_at=CASE WHEN %s THEN clock_timestamp() ELSE NULL END,"
         "reason='operator_cancelled',interrupted_from=NULL WHERE id=%s RETURNING *",
         ("cancelled" if queued else "cancelling", command_id, queued, run_id),

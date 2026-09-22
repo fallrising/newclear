@@ -110,7 +110,7 @@ def main():
                                 future.result()
                                 stopping.remove(future)
                         while len(stopping) < 4:
-                            cancellation = runner.claim_cancel()
+                            cancellation = runner.claim_control()
                             if not cancellation:
                                 break
                             stopping.add(controls.submit(runner.execute, cancellation))

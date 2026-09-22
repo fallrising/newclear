@@ -1,5 +1,5 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
-import { ApiError, listMembers, listMessages, logout } from "../api";
+import { ApiError, listMembers, listMessages } from "../api";
 import {
   hasSeqGap,
   lastContinuousSeq,
@@ -14,10 +14,36 @@ const TYPING_TTL_MS = 4000;
 
 function senderLabel(event: TimelineEvent, members: Map<string, Member>): string {
   if (!event.sender_id) {
-    return "message";
+    return event.kind || "system";
   }
   const member = members.get(event.sender_id);
   return member?.handle ?? member?.display_name ?? event.sender_id;
+}
+
+function formatClock(iso?: string): string | null {
+  if (!iso) {
+    return null;
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
+function continuesFrom(prev: TimelineEvent | undefined, event: TimelineEvent): boolean {
+  if (!prev || !event.sender_id || prev.sender_id !== event.sender_id) {
+    return false;
+  }
+  if (!prev.created_at || !event.created_at) {
+    return true;
+  }
+  const a = Date.parse(prev.created_at);
+  const b = Date.parse(event.created_at);
+  if (Number.isNaN(a) || Number.isNaN(b)) {
+    return true;
+  }
+  return b - a < 5 * 60 * 1000;
 }
 
 function memberLabel(memberId: string, members: Map<string, Member>): string {
@@ -37,7 +63,7 @@ function MemberBadges({ member }: { member: Member }) {
   return (
     <>
       {member.kind ? <span className="badge">{member.kind}</span> : null}
-      {isOperatorOnly(member) ? <span className="badge">operator-only</span> : null}
+      {isOperatorOnly(member) ? <span className="badge badge-operator">operator-only</span> : null}
     </>
   );
 }
@@ -56,12 +82,14 @@ export function RoomPage({
   const [typing, setTyping] = useState<Record<string, string>>({});
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
+  const [link, setLink] = useState<"connecting" | "live" | "offline">("connecting");
   const [busy, setBusy] = useState(true);
   const eventsRef = useRef<Map<number, TimelineEvent>>(new Map());
   const wsRef = useRef<WebSocket | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLElement>(null);
+  const pinBottom = useRef(true);
   const typingTimers = useRef<Map<string, number>>(new Map());
+  const connected = link === "live";
 
   function commitEvents() {
     setEvents([...eventsRef.current.values()].sort((a, b) => a.seq - b.seq));
@@ -99,8 +127,12 @@ export function RoomPage({
   }
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [events, typing]);
+    const el = timelineRef.current;
+    if (!el || !pinBottom.current) {
+      return;
+    }
+    el.scrollTop = el.scrollHeight;
+  }, [events]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,7 +141,7 @@ export function RoomPage({
     setEvents([]);
     setTyping({});
     setError(null);
-    setConnected(false);
+    setLink("connecting");
     setBusy(true);
 
     let catchUpChain = Promise.resolve();
@@ -191,7 +223,8 @@ export function RoomPage({
         if (cancelled) {
           return;
         }
-        setConnected(true);
+        setLink("live");
+        setError((current) => (current === "Not connected" ? null : current));
         enqueueCatchUp();
       };
       ws.onmessage = (message) => {
@@ -215,14 +248,14 @@ export function RoomPage({
       };
       ws.onerror = () => {
         if (!cancelled) {
-          setConnected(false);
+          setLink("offline");
         }
       };
       ws.onclose = () => {
         if (cancelled) {
           return;
         }
-        setConnected(false);
+        setLink("offline");
         retryTimer = window.setTimeout(connect, 2000);
       };
     }
@@ -243,15 +276,6 @@ export function RoomPage({
       typingTimers.current.clear();
     };
   }, [room.id, onLoggedOut]);
-
-  async function onLogout() {
-    try {
-      await logout();
-    } catch {
-      // still return to login
-    }
-    onLoggedOut();
-  }
 
   function submitBody() {
     const text = body.trim();
@@ -274,7 +298,7 @@ export function RoomPage({
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && event.keyCode !== 229) {
       event.preventDefault();
       submitBody();
     }
@@ -282,17 +306,40 @@ export function RoomPage({
 
   const title = room.name ?? room.slug ?? room.id;
 
+  useEffect(() => {
+    const previous = document.title;
+    document.title = `${title} · Kith`;
+    return () => {
+      document.title = previous;
+    };
+  }, [title]);
+  const linkLabel = link === "live" ? "live" : link === "connecting" ? "connecting" : "offline";
+
+  function onTimelineScroll() {
+    const el = timelineRef.current;
+    if (!el) {
+      return;
+    }
+    pinBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+  }
+
   return (
-    <main className="page">
+    <main className="page page-room">
       <div className="row">
-        <button type="button" onClick={onBack}>
+        <button type="button" className="btn-back" onClick={onBack} aria-label="Back to rooms">
+          <span className="chev" aria-hidden="true" />
           Rooms
         </button>
-        <h1 className="grow">{title}</h1>
-        <span className="muted">{connected ? "live" : "offline"}</span>
-        <button type="button" onClick={() => void onLogout()}>
-          Log out
-        </button>
+        <div className="title-block">
+          <h1 className="grow">{title}</h1>
+          <span
+            className={link === "live" ? "conn conn-live" : link === "offline" ? "conn conn-offline" : "conn"}
+            role="status"
+          >
+            {linkLabel}
+          </span>
+        </div>
+        <span />
       </div>
       {error ? (
         <p className="error" role="alert">
@@ -309,43 +356,80 @@ export function RoomPage({
           ))}
         </ul>
       </section>
-      <section className="timeline" aria-live="polite">
+      <section
+        className="timeline"
+        ref={timelineRef}
+        role="log"
+        aria-label={`${title} messages`}
+        aria-live="polite"
+        aria-relevant="additions"
+        aria-busy={busy}
+        onScroll={onTimelineScroll}
+      >
         {busy && events.length === 0 ? <p className="muted">Loading…</p> : null}
         {!busy && events.length === 0 ? <p className="muted">No messages yet.</p> : null}
-        {events.map((event) => {
+        {events.map((event, index) => {
           const member = event.sender_id ? members.get(event.sender_id) : undefined;
+          const cont = continuesFrom(events[index - 1], event);
+          const clock = formatClock(event.created_at);
+          if (!event.sender_id) {
+            return (
+              <p key={event.seq} className="event-system" title={`seq ${event.seq}`}>
+                {event.body || event.kind}
+              </p>
+            );
+          }
           return (
-            <article key={event.seq} className="event">
-              <div className="meta">
-                <span>seq {event.seq}</span>
-                <span>{senderLabel(event, members)}</span>
-                {member ? <MemberBadges member={member} /> : null}
-              </div>
+            <article
+              key={event.seq}
+              className={cont ? "event cont" : "event"}
+              data-kind={member?.kind}
+              title={`seq ${event.seq}`}
+            >
+              {cont ? (
+                <span className="sr-only">{senderLabel(event, members)}: </span>
+              ) : (
+                <div className="meta">
+                  <span className="who">{senderLabel(event, members)}</span>
+                  {clock ? <time dateTime={event.created_at}>{clock}</time> : null}
+                  {member ? <MemberBadges member={member} /> : null}
+                  <span className="seq" aria-hidden="true">
+                    {event.seq}
+                  </span>
+                </div>
+              )}
               <p className="body">{event.body}</p>
             </article>
           );
         })}
+      </section>
+      <div className="status-slot">
         {Object.entries(typing).map(([memberId, statusBody]) => (
           <p key={memberId} className="status-line">
             {memberLabel(memberId, members)} {statusBody}
           </p>
         ))}
-        <div ref={bottomRef} />
-      </section>
+      </div>
+      {link === "offline" ? <p className="conn-banner">Offline. Reconnecting…</p> : null}
       <form className="composer" onSubmit={onSubmit}>
         <textarea
           name="body"
-          rows={2}
+          rows={1}
           maxLength={8192}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Message"
+          aria-label={`Message ${title}`}
+          aria-describedby="composer-hint"
         />
-        <button type="submit" disabled={!body.trim() || !connected}>
+        <button type="submit" className="btn-primary" disabled={!body.trim() || !connected}>
           Send
         </button>
       </form>
+      <p id="composer-hint" className="composer-hint">
+        Enter to send · Shift+Enter for a new line
+      </p>
     </main>
   );
 }

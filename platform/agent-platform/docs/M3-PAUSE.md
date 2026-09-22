@@ -1,5 +1,8 @@
 # M3 第四個切片：安全暫停與恢復
 
+> 後續 AT-07 發現：同 UID terminal 可讀取 guest session key。本文的單 writer 安全條件仍限固定合作式 fixture；惡意 guest 的控制權限隔離尚未完成，見 [缺口與修補順序](M3-OUTPUT-SECURITY.md)。
+
+
 固定 OpenHands／Cocoon none-lane 模式現在提供工作台及 API 的 pause／resume。暫停先關閉新的 terminal admission，再確認目前工具收尾與 guest 程序回到執行前基準；恢復接續同一 VM／conversation。**M3 尚未整體完成**；AT-07 egress／secret 與 AT-11 model proxy／budget／usage 仍待開發。
 
 ## 操作與狀態

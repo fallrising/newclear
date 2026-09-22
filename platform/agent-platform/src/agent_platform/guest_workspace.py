@@ -52,7 +52,7 @@ def main():
         json.dumps(
             {
                 "base_sha": request["base_sha"],
-                "diff": patch.decode("utf-8", errors="replace"),
+                "diff": patch.decode("utf-8"),
                 "diff_sha256": hashlib.sha256(patch).hexdigest(),
                 "diff_bytes": len(patch),
                 "verification": {

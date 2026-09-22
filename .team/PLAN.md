@@ -590,3 +590,31 @@ remote_durability: local task checkpoint
 blockers: []
 next_action: write shared/role/capability/acceptance specifications, check documentation, save fixed evidence, SSH-push and require PR CI before authorized merge
 ```
+
+
+DG-D042: ACCEPT T-029 documentation at `deeffb0bd9fd6a1f2c975be51d87a873090df540`; [attempt1](reports/T-029-attempt-1.md), [canonical](reports/T-029.md). Six SDDs define shared state and RD/Ops/Admin projections, 28 capability groups, 10 requirements and 18 mapped acceptance cases; docs134/316, diff check, task contract and lead consistency review passed. This is document acceptance only; W1–W5 and all AC-WS product gates remain unimplemented/unverified. No product/test/API/lockfile/workflow changed. No independent implementation review claimed for this document task.
+
+### Workspace SDD resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-VIEWS-20260922-01
+active_owner: Codex orchestrator — final PR CI and authorized merge closeout
+terminal_state: null
+milestone: WS-SDD revision1 documentation ACCEPTED; W1–W5 NOT_IMPLEMENTED
+task_id: T-029
+target_ref: main
+last_reconciled_main: ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad
+continuation_ref: agent/dim-gate/mainline/role-workspace-sdd
+worktree: /home/ckc/test/codex/newclear-dim-gate-views
+implementation_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540
+local_tested_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540 — documentation only
+spec_revision: WS-SDD revision1
+evidence_refs: [.team/reports/T-029-attempt-1.md, .team/reports/T-029.md]
+integration_state: NOT_OPENED — final head/CI/merge recorded in PR closeout
+remote_durability: containing evidence commit is SSH-pushed next; verify remote and PR
+blockers: []
+next_action: require latest PR-head CI, perform user-authorized merge without deleting branch/worktrees, record DONE/owner release on PR; then W1 needs its own implementation task/contract
+```

@@ -84,3 +84,5 @@ M5 已由 [PR #23](https://github.com/fallrising/newclear/pull/23) 合併於 `24
 - 尚未實作／驗證：W1–W5 的新增產品行為；本次不宣稱任何 AC-WS 已通過。
 - 保留：v0.1 原始碼、API、測試、依賴、預覽與全部既有 worktrees。
 - 下一個產品增量：W1 明顯的工作區入口、分組導航與三份角色首頁；依 PLAN 的 T-029 最終文件證據／PR closeout 完成對帳後另建實作 task。
+
+T-029 文件已由主控在 `deeffb0bd9fd6a1f2c975be51d87a873090df540` 接受；[固定版本驗證](../../../.team/reports/T-029-attempt-1.md)涵蓋文件檢查與需求映射。最新 PR head CI、合併與 owner release 依此分支 PR closeout 核對，不把文件驗收當作 W1 產品驗收。

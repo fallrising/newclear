@@ -1,0 +1,51 @@
+--- a/cluster/calcium/lock.go
++++ b/cluster/calcium/lock.go
+@@ -124,10 +124,12 @@
+ 	slices.SortFunc(keys, byLockOrder)
+ 	var lock lock.DistributedLock
+ 	for _, key := range slices.Compact(keys) {
+-		lock, ctx, err = c.doLock(ctx, key, c.config.LockTimeout)
++		var lockCtx context.Context
++		lock, lockCtx, err = c.doLock(ctx, key, c.config.LockTimeout)
+ 		if err != nil {
+ 			return err
+ 		}
++		ctx = lockCtx
+ 		logger.Debugf(ctx, "key %s locked", key)
+ 		locks[key] = lock
+ 		lockKeys = append(lockKeys, key)
+--- a/cluster/calcium/lock_test.go
++++ b/cluster/calcium/lock_test.go
+@@ -361,3 +361,32 @@
+ 	})
+ 	assert.NoError(t, err)
+ }
++
++// The etcd lock returns (nil, err) on failure. Cleanup must keep a valid
++// parent context and return the error without panicking or calling f.
++func TestWithNodesPlanLockedNilContextOnLockFailure(t *testing.T) {
++	c := NewTestCluster()
++	store := c.store.(*storemocks.Store)
++	store.On("GetNode", mock.Anything, "a1").Return(&types.Node{
++		NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true,
++	}, nil).Once()
++	failedLock := &lockmocks.DistributedLock{}
++	store.On("CreateLock", "cnode_op_poda_a1", mock.Anything).Return(failedLock, nil).Once()
++	failedLock.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once()
++	failedLock.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++		assert.NotNil(t, args.Get(0))
++		assert.NoError(t, args.Get(0).(context.Context).Err())
++	})
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(t.Context(), &types.NodeFilter{Includes: []string{"a1"}},
++			func(context.Context, map[string]*types.Node) error {
++				called = true
++				return nil
++			})
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	store.AssertExpectations(t)
++	failedLock.AssertExpectations(t)
++}

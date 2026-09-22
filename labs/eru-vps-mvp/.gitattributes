@@ -1,0 +1,2 @@
+# Unified diff context lines intentionally precede Go tabs with a space.
+patches/*.patch whitespace=-space-before-tab

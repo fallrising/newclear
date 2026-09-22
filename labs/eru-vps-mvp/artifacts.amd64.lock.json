@@ -1,0 +1,69 @@
+{
+  "reviewed_at": "2026-09-22",
+  "architecture": "linux/amd64",
+  "status": "artifact-bytes-verified-not-deployment-tested",
+  "artifacts": [
+    {
+      "repository": "projecteru2/core",
+      "tag": "v0.1.5",
+      "file": "core_0.1.5_Linux_x86_64.tar.gz",
+      "url": "https://github.com/projecteru2/core/releases/download/v0.1.5/core_0.1.5_Linux_x86_64.tar.gz",
+      "sha256": "c027c201c69d6f250deecbfa583ca46e10e08346904216cee618822eaddb5219",
+      "bytes": 16646544,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    },
+    {
+      "repository": "projecteru2/cli",
+      "tag": "v0.1.5",
+      "file": "eru-cli_0.1.5_Linux_x86_64.tar.gz",
+      "url": "https://github.com/projecteru2/cli/releases/download/v0.1.5/eru-cli_0.1.5_Linux_x86_64.tar.gz",
+      "sha256": "a0fd47913796a43d17cae7125c8b5a6db6b0c2c7b65725ce340204cafd40eaa8",
+      "bytes": 7017914,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    },
+    {
+      "repository": "projecteru2/agent",
+      "tag": "v0.1.3",
+      "file": "agent_0.1.3_Linux_x86_64.tar.gz",
+      "url": "https://github.com/projecteru2/agent/releases/download/v0.1.3/agent_0.1.3_Linux_x86_64.tar.gz",
+      "sha256": "3422231f38807dd0c0a16374d2df460b6167f5a3b718b6c0b8b0126fe2846d03",
+      "bytes": 9416243,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    },
+    {
+      "repository": "projecteru2/resource-extend",
+      "tag": "v0.1.5",
+      "file": "resource-extend_0.1.5_Linux_x86_64.tar.gz",
+      "url": "https://github.com/projecteru2/resource-extend/releases/download/v0.1.5/resource-extend_0.1.5_Linux_x86_64.tar.gz",
+      "sha256": "f6048d0dbdcdc70831f5efea85f3a765d79db385bce0d4dd36d4e13a84875d0a",
+      "bytes": 24009904,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    },
+    {
+      "repository": "etcd-io/etcd",
+      "tag": "v3.6.14",
+      "file": "etcd-v3.6.14-linux-amd64.tar.gz",
+      "url": "https://github.com/etcd-io/etcd/releases/download/v3.6.14/etcd-v3.6.14-linux-amd64.tar.gz",
+      "sha256": "ffe840ff9295808e88cce2794a18a5ac87f12a5203c8314d0bf6aa119b41bac5",
+      "bytes": 24915654,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    },
+    {
+      "repository": "containernetworking/plugins",
+      "tag": "v1.9.1",
+      "file": "cni-plugins-linux-amd64-v1.9.1.tgz",
+      "url": "https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz",
+      "sha256": "b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303",
+      "bytes": 55418181,
+      "verification": "downloaded bytes match GitHub release asset digest"
+    }
+  ],
+  "nginx": {
+    "source_tag": "docker.io/library/nginx:alpine",
+    "index_digest": "sha256:62ff2089abf5a9ed33bd232895bef5e22f7bb4b200675cec49a5ebc48e3d4ac8",
+    "platform": "linux/amd64",
+    "manifest_digest": "sha256:7396be67b6f53012a5cf955fa9040619294c25ccacf11e22af5de1b572fc756e",
+    "image": "docker.io/library/nginx@sha256:7396be67b6f53012a5cf955fa9040619294c25ccacf11e22af5de1b572fc756e",
+    "verification": "index and platform manifest digests verified; image layers not pulled or executed"
+  }
+}

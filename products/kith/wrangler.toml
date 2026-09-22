@@ -1,12 +1,20 @@
 name = "kith"
 main = "worker/index.ts"
 compatibility_date = "2026-09-01"
+account_id = "56f4d1cd4c537962d99f12ae57192e94"
 
 [vars]
-ff_mcp = "off"
-ff_hosted_agent = "off"
+ff_mcp = "on"
+ff_hosted_agent = "on"
 ff_sidecar = "off"
-ff_ambient = "off"
+ff_ambient = "on"
+FAKE_LLM_TEXT = "hello from grok"
+FAKE_LLM_MODELS = "grok-4.5"
+
+[assets]
+directory = "./frontend/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 [triggers]
 crons = ["0 3 * * *"]
@@ -14,12 +22,12 @@ crons = ["0 3 * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "kith"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "f7eb46f9-61f6-4ce8-a463-d790676557fc"
 migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "00000000-0000-0000-0000-000000000001"
+id = "344a51ec4d224a71a4f2cc5ae07ae2e6"
 
 [[durable_objects.bindings]]
 name = "ROOM"

@@ -12,6 +12,7 @@ export type Env = {
   FAKE_LLM_TEXT?: string;
   FAKE_LLM_MODELS?: string;
   TEST_MIGRATIONS?: unknown;
+  ASSETS?: Fetcher;
 };
 
 export const SESSION_COOKIE = "kith_session";

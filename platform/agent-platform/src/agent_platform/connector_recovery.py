@@ -45,6 +45,7 @@ def inspect(service, run_id, generation):
                 "stop": removal,
                 "result": operations.get("result", {}).get("result"),
             }
+        service.guard(row)
         if any(op["state"] != "completed" for op in operations.values()):
             raise Problem(409, "connector_operation_uncertain")
         if "release" in operations:
@@ -55,7 +56,7 @@ def inspect(service, run_id, generation):
             return response
         with service.relay(row) as http:
             info = http.expect("GET", "/server_info")
-            conversation = http.expect("GET", "/api/conversations/" + row["run_id"])
+            conversation = service.conversation(row, http)
         if info.get("build_git_sha") != OPENHANDS_SHA or info.get("version") != OPENHANDS_VERSION:
             raise Problem(409, "agent_version_mismatch")
         if conversation.get("id") != row["run_id"]:

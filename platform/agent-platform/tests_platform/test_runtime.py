@@ -56,7 +56,7 @@ class RuntimeTests(PlatformFixture):
         profile = self.real_profile()
         self.assertEqual(profile["model_ref"], "fixture:m2")
         self.assertTrue(profile["capabilities"]["event_replay"])
-        self.assertFalse(profile["capabilities"]["pause"])
+        self.assertTrue(profile["capabilities"]["pause"])
         self.assertEqual(
             self.post("/tasks", {**self.payload, "base_sha": "b" * 40}).json()["error"],
             "repository_revision_not_registered",
@@ -74,7 +74,14 @@ class RuntimeTests(PlatformFixture):
                 {"action": action, "expected_state_version": 1},
             )
             self.assertEqual(response.status_code, 409)
-            self.assertEqual(response.json()["error"], "unsupported_capability:" + action)
+            self.assertEqual(
+                response.json()["error"],
+                {
+                    "pause": "pause_not_ready",
+                    "resume": "resume_not_ready",
+                    "approval": "unsupported_capability:approval",
+                }[action],
+            )
         self.assertEqual(self.scalar("SELECT count(*) FROM adapter_operations"), 0)
         self.assertEqual(self.scalar("SELECT count(*) FROM sandbox_bindings"), 0)
         stale = self.post(

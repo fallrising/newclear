@@ -15,7 +15,7 @@ def pending_approval(service, row):
         raise Problem(409, "approval_policy_mismatch")
     with service.relay(row) as http:
         path = "/api/conversations/" + row["run_id"]
-        before = http.expect("GET", path)
+        before = service.conversation(row, http)
         history, page_id, seen = [], None, set()
         for _ in range(100):
             query = {"limit": 100}
@@ -31,7 +31,7 @@ def pending_approval(service, row):
             seen.add(page_id)
         else:
             raise Problem(409, "backend_history_limit")
-        after = http.expect("GET", path)
+        after = service.conversation(row, http)
     for value in (before, after):
         if (
             value.get("id") != row["run_id"]

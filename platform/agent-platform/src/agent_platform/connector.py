@@ -53,6 +53,13 @@ class Cancel(Input):
     generation: int = Field(ge=1)
 
 
+class Control(Input):
+    generation: int = Field(ge=1)
+    action: Literal["pause", "resume"]
+    command_id: UUID
+    pause_id: UUID
+
+
 class Approve(Input):
     generation: int = Field(ge=1)
     approval_id: UUID
@@ -130,8 +137,10 @@ class Connector:
             self.journal.write(row)
         return row
 
-    def guard(self, row, *, stopping=False):
+    def guard(self, row, *, stopping=False, controlling=False):
         self.fences.require(row["run_id"], row["generation"])
+        if row.get("pause", {}).get("hold") and not (stopping or controlling):
+            raise Problem(409, "sandbox_pause_requested")
         if row.get("cancel_requested") and not stopping:
             raise Problem(409, "sandbox_cancel_requested")
 
@@ -277,9 +286,13 @@ class Connector:
             self.bundle(self.entries[(data["canonical_repo"], data["base_sha"])]),
             mode=0o644,
         )
-        for name in ["guest_fixture.py", "guest_workspace.py"]:
+        for name in ["guest_fixture.py", "guest_workspace.py", "guest_quiescence.py"]:
             self.guard(row)
-            sb.write_file("/tmp/" + name, Path(__file__).with_name(name).read_bytes(), mode=0o644)
+            sb.write_file(
+                "/tmp/" + name,
+                Path(__file__).with_name(name).read_bytes(),
+                mode=0o700 if name == "guest_quiescence.py" else 0o644,
+            )
         self.guard(row)
         checkout = json.loads(
             sb.exec(
@@ -369,9 +382,31 @@ class Connector:
                 path + "/events",
                 {"role": "user", "content": [{"type": "text", "text": goal}], "run": False},
             )
+            # send_message(run=False) initializes the terminal before any tool admission.
+            row["guest_baseline"] = self.quiescence(row)
+            self.journal.write(row)
             self.guard(row)
             http.expect("POST", path + "/run")
         return {"accepted": True}
+
+    def quiescence(self, row, baseline=None):
+        expected = hashlib.sha256(
+            Path(__file__).with_name("guest_quiescence.py").read_bytes()
+        ).hexdigest()
+        sb = self.handle(row)
+        if sb.exec("sha256sum", "/tmp/guest_quiescence.py", timeout=5).split()[0] != expected:
+            raise Problem(409, "guest_probe_changed")
+        request = {"action": "check", "baseline": baseline} if baseline else {"action": "baseline"}
+        return json.loads(
+            sb.exec("python3", "/tmp/guest_quiescence.py", json.dumps(request), timeout=5)
+        )
+
+    def conversation(self, row, http):
+        if row.get("pause"):
+            from .connector_state import live_state
+
+            return live_state(row, http)
+        return http.expect("GET", "/api/conversations/" + row["run_id"])
 
     def events(self, run_id, generation, cursor):
         with self.journal.locked(run_id):
@@ -380,7 +415,7 @@ class Connector:
                 raise Problem(409, "sandbox_already_released")
             with self.relay(row) as http:
                 path = "/api/conversations/" + row["run_id"]
-                state = http.expect("GET", path)["execution_status"]
+                state = self.conversation(row, http)["execution_status"]
                 all_events, page_id, seen = [], None, set()
                 for _ in range(100):
                     query = {"limit": 100}
@@ -586,6 +621,12 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}/cancel")
     def cancel_run(run_id: UUID, data: Cancel, _=auth):
         return service.cancel(run_id, data.generation)
+
+    @app.post("/v1/runs/{run_id}/control")
+    def control_run(run_id: UUID, data: Control, _=auth):
+        from .connector_control import control
+
+        return control(service, run_id, data)
 
     @app.post("/v1/runs/{run_id}/approve")
     def approve_run(run_id: UUID, data: Approve, _=auth):

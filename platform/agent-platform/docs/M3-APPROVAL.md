@@ -1,6 +1,6 @@
 # M3 第三個切片：工具審批
 
-Recovery（PR #22）與安全取消（PR #24）已合併。此切片完成固定 OpenHands／none-lane 模式的 AT-06 審批流程：工具先提出動作，operator 查看完整參數後核准，connector 再核對同一批動作才放行。**M3 尚未整體完成**；一般 pause／resume、egress／secret 驗收及模型預算仍待開發。
+Recovery（PR #22）與安全取消（PR #24）已合併。此切片完成固定 OpenHands／none-lane 模式的 AT-06 審批流程：工具先提出動作，operator 查看完整參數後核准，connector 再核對同一批動作才放行。**M3 尚未整體完成**；egress／secret 驗收及模型預算仍待開發；後續安全 pause／resume 已見 [M3 pause](M3-PAUSE.md)。
 
 ## 開啟與使用
 
@@ -30,7 +30,7 @@ Recovery（PR #22）與安全取消（PR #24）已合併。此切片完成固定
 
 ## 暫停的界線
 
-一般 pause／resume 能力仍為 false。固定版本的 [pause implementation](https://github.com/OpenHands/software-agent-sdk/blob/856d99d48e4b11c70c5f1cab21e7830570dbc324/openhands-sdk/openhands/sdk/conversation/impl/local_conversation.py) 先設定 paused，再由 run loop 在步驟間停止；paused 或 interrupt ACK 不能單獨證明 terminal／背景程序均已停止。本切片提供「工具送出前等待審批」，沒有把它當成一般安全暫停。後續須建立工具收尾與 resume 對帳契約再開啟。
+本審批切片驗收時，一般 pause／resume 能力仍為 false；後續實作與目前能力見 [M3 pause](M3-PAUSE.md)。固定版本的 [pause implementation](https://github.com/OpenHands/software-agent-sdk/blob/856d99d48e4b11c70c5f1cab21e7830570dbc324/openhands-sdk/openhands/sdk/conversation/impl/local_conversation.py) 先設定 paused，再由 run loop 在步驟間停止；paused 或 interrupt ACK 不能單獨證明 terminal／背景程序均已停止。本切片提供「工具送出前等待審批」，沒有把它當成一般安全暫停。後續須建立工具收尾與 resume 對帳契約再開啟。
 
 ## 驗證與升級
 
@@ -48,4 +48,4 @@ python scripts/test-postgres.py python scripts/m3-recovery-kvm.py \
 
 升級需先 drain、套用 `005_approvals.sql`，再一起更新 API／worker／connector／web。保留既有 journal、fences 與 generation；不要在有 active run 的情況切換 worker／connector 契約。
 
-下一步：一般安全 pause／resume；AT-07 egress／secret 與 AT-11 model proxy／budget／usage。M4 artifact／export／備份／GC／production gate 保持原範圍。
+目前下一步：AT-07 egress／secret 與 AT-11 model proxy／budget／usage。M4 artifact／export／備份／GC／production gate 保持原範圍。

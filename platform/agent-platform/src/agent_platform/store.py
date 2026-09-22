@@ -363,6 +363,10 @@ class Store:
             ).fetchall()
 
     def action(self, conn, run_id, data, command_id):
+        if data.action in {"pause", "resume"}:
+            from .controls import request_control
+
+            return request_control(conn, run_id, data, command_id)
         from .cancellation import request_cancel
 
         return request_cancel(conn, run_id, data, command_id)

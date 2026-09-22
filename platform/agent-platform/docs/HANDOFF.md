@@ -1,13 +1,22 @@
 # 開發接續紀錄 — 2026-09-22
 
-本次停止點：**M3 recovery PR #22 與 cancel PR #24 已合併（main `b252d4e`）；M3 工具審批切片已實作並驗收。M3 尚未整體完成。** 本次分支 `agent/agent-platform/m3-approval`。最新行為見 [M3 approval](M3-APPROVAL.md)。
+本次停止點：**M3 recovery PR #22、cancel PR #24、approval PR #25 已合併；安全 pause／resume 切片已實作並驗收。M3 尚未整體完成。** 本次分支 `agent/agent-platform/m3-pause`，基於 main `24b11e1`；未修改其他平台。最新行為見 [M3 pause](M3-PAUSE.md)。
+
+## M3 pause／resume 已完成
+
+- `006_pause.sql`、pausing／paused／resuming、CAS／命令收據、generation 撤權、舊審批失效與完成 audit。
+- AlwaysConfirm 關閉 terminal admission；初始 message `run=False` 初始化工具後收集 root-owned guest 程序基準。持鎖的 live WebSocket full_state、工具邊界、boot／PID identity 全部確認後才 paused。
+- **REST ConversationInfo 在固定版本讀 autosaved state，可能落後控制 mutation。** 控制之後改用新訂閱 full_state，只選取控制欄位，不把 private snapshot 保存為 history／SSE。
+- 恢復保持原 VM／prompt，還原原政策；需審批者產生新 generation grant，不因 resume 自動核准。未知 run ACK 不重送；完成收據可對帳。
+- Paused 保留資源與原期限，定期核對，支援取消與到期直接回收。恢復成功交回普通 queue，控制執行緒持續可用。
+- 新增 18 項後端與四項 UI 測試；六個真實 KVM 暫停案例及 recovery／cancel／approval 回歸，見 [證據](evidence/m3-pause-2026-09-22.json)。
 
 ## M3 approval 已完成
 
 - `005_approvals.sql`、OpenHands profile `require_approval` opt-in、AlwaysConfirm、完整批次 digest／generation／五分鐘 expiry／live lease／CAS 決策。
 - Connector 核對原 VM 與同一批 pending terminal actions 後才放行；持久 intent 與收據，未知回覆不重送、容量保留。
 - 已完成 connector 收據可補登 applied／audit；worker 接管或參數改變須重新審批，不重建 VM／prompt。
-- 工作台完整參數、核准／拒絕、原決策重試；拒絕走安全取消。一般 pause／resume 維持 capability gate。
+- 工作台完整參數、核准／拒絕、原決策重試；拒絕走安全取消。當時一般 pause／resume 維持 capability gate；目前已由下一切片啟用。
 - 16 項新增後端審批測試、三項 UI 測試、真實 KVM 核准／拒絕與取消回歸；證據見 [M3 approval](M3-APPROVAL.md)。
 
 ## M3 cancel 已完成
@@ -36,14 +45,14 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 接續 M3 的一般安全 pause／resume；再完成 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
+1. 依 [SDD](../SDD.md) 接續 M3 的 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
 2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
-5. OpenHands cancel 已開啟；approval 由 profile opt-in，pause／resume 尚未開啟。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
+5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
-7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-approval-20260922`（本次）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
-8. Worker／connector 須一起更新；connector 新增有期限的 lease grant。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-pause-20260922`（本次）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+8. API／worker／connector／web 須一起更新；先 drain，再套用 `006_pause.sql`。舊 journal 沒有 pre-tool 程序基準不能安全 pause。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異
 

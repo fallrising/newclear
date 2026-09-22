@@ -49,8 +49,13 @@ class Worker:
                 run = conn.execute(
                     "SELECT * FROM runs WHERE id=%s FOR UPDATE", (job["run_id"],)
                 ).fetchone()
-                if run["state"] not in TERMINAL | {"cancelling"}:
-                    self.state(conn, run, "interrupted", "worker_lease_expired")
+                if run["state"] not in TERMINAL | {"cancelling", "pausing", "resuming"}:
+                    self.state(
+                        conn,
+                        run,
+                        "pausing" if run["control_action"] == "pause" else "interrupted",
+                        "worker_lease_expired",
+                    )
                 conn.execute(
                     "UPDATE jobs SET status='interrupted',available_at=clock_timestamp() "
                     "WHERE id=%s",
@@ -74,6 +79,13 @@ class Worker:
                         {"reason": "worker_lease_expired", "capacity_retained": True},
                     )
             return len(rows)
+
+    def claim_control(self):
+        if self.connector is not None:
+            from .recovery import claim_recovery
+
+            return claim_recovery(self, control_only=True)
+        return None
 
     def claim_cancel(self):
         if self.connector is not None:

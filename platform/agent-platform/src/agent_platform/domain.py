@@ -83,7 +83,9 @@ class RetryInput(RunInput):
 
 OPENHANDS_CAPABILITIES = {
     **CAPABILITIES,
-    "protocol_revision": "m3-openhands-approval-1",
+    "protocol_revision": "m3-openhands-pause-1",
+    "pause": True,
+    "resume": True,
     "approval": True,
     "cancel": True,
     "terminal_output": True,

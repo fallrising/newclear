@@ -114,3 +114,15 @@ class RuntimeClient:
                 "expires_at": approval["expires_at"].isoformat(),
             },
         )
+
+    def control(self, run):
+        return self.call(
+            "POST",
+            f"/v1/runs/{run['id']}/control",
+            {
+                "generation": run["generation"],
+                "action": run["control_action"],
+                "command_id": str(run["control_command_id"]),
+                "pause_id": str(run["pause_command_id"]),
+            },
+        )

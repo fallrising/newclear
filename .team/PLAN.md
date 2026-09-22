@@ -9,15 +9,15 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 23 |
+| protocol_version / ledger_revision | 1 / 24 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator — explicit user resumption / DG-M3-20260921-02 |
-| active_work_branch | agent/dim-gate/mainline/m3-delivery |
+| active_owner / run_id | Codex orchestrator — authorized M4 continuation / DG-M4-20260922-01 |
+| active_work_branch | agent/dim-gate/mainline/m4-observability |
 | source / last_reconciled_target | M3 base `e760d8e988c0e2a837b226c600805a659a362c10` / SSH-fetched main `7bb80d00d03d93a2d392185adba65588c5fe2462`, integrated by normal merge `95d1722` on 2026-09-21 |
 | source kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD observed, not adopted |
 | spec revision | M3 integration contract revision 2; final product candidate `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` |
-| open implementation PRs at recovery | M3 [PR #17](https://github.com/fallrising/newclear/pull/17) OPEN Draft; M0 #7, M1 #11 and M2 #13 remain MERGED |
+| open implementation PRs at recovery | M3 [PR #17](https://github.com/fallrising/newclear/pull/17) OPEN Ready, final head CI passed; M0 #7, M1 #11 and M2 #13 remain MERGED |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
@@ -35,7 +35,7 @@
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
 | M2 | ACCEPTED | `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` | MERGED — PR #13, merge `29bed41788a33684f24d216f4fd4d5f3f998c672` | AC-09–12,21–23; independent review, 138 tests, 22 Chromium journeys and post-merge CI passed |
 | M3 | ACCEPTED | `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` | OPEN_PR_17_NOT_MERGED | AC-13–16,24; 170 tests, 40 Chromium journeys, independent closure and exact-head CI |
-| M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
+| M4 | RUNNING | none | NOT_OPENED | M3; AC-17–19,25 |
 | M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
 
 Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.md) defines milestone gates. Accepted branch work and merged integration are separate events.
@@ -408,4 +408,37 @@ integration_state: OPEN_PR_17_NOT_MERGED
 remote_durability: product is SSH-durable; this evidence checkpoint will be SSH-pushed, with final head and CI recorded on PR 17
 blockers: []
 next_action: require current evidence-head CI before Ready/handoff; final PR metadata records DONE and released ownership after success, without an infinite self-reference commit; merge requires a separate user instruction
+```
+
+### M4 continuation — DG-M4-20260922-01
+
+DG-D034: Reconciled accepted M3 parent PR17, OPEN Ready at7d20bbc, CI35639600714 success and prior owner release recorded on that PR. User authorized continued development and a handoff prompt if needed; no merge/deploy authorization. Start M4 from fixed M3 evidence commit in isolated newclear-m4, stacked branch agent/dim-gate/mainline/m4-observability. Parent PR17 stays unmodified. SSH remote main remains7bb80d0; unrelated agent-platform activity is preserved. Initial worktree HEAD/dirty manifest is /tmp/dim-gate-m4-evidence/initial-worktrees.json (local-only).
+
+[Contract revision1](../platform/dim-gate/docs/M4-INTEGRATION-CONTRACT.md) freezes observation windows/schema, incident threshold/reopen/recovery, scope/read projections and UI exports. Three-cycle maximum and one same-approach rework. Lead owns shared contracts, router/Guide/shell, integration, validation, PLAN and Git. T-021 owns domain/seed/tests in isolated worker worktree; T-022 owns feature UI/client in a disjoint worker worktree; T-023 independent reviewer writes no implementation; T-024 owns delivery. Built-in agents inherit current runtime, exact model slug unavailable; no external Claude transfer and no verified multi-model claim. The unchanged fully read kernel237aa277 contract remains the source; no new kernel update adopted.
+
+| Task | State | Scope | Evidence |
+| --- | --- | --- | --- |
+| [T-021](tasks/T-021.md) | READY | shared observation/incident domain | pending |
+| [T-022](tasks/T-022.md) | READY | observation/incident/integration UI | pending |
+| [T-023](tasks/T-023.md) | BLOCKED on fixed candidate | independent read-only review | pending |
+| [T-024](tasks/T-024.md) | RUNNING | integration/full gates/Chromium/CI | pending |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M4-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator
+milestone: M4 NOT_ACCEPTED
+parent_pr: https://github.com/fallrising/newclear/pull/17
+parent_commit: 7d20bbc48a25e82c82c048304da8b74a897ec14e
+target_ref: agent/dim-gate/mainline/m3-delivery
+continuation_ref: agent/dim-gate/mainline/m4-observability
+worktree: /home/ckc/test/codex/newclear-m4
+tasks: T-021 / T-022 / T-023 / T-024
+spec_revision: M4-INTEGRATION-CONTRACT revision1
+integration_state: NOT_OPENED
+remote_durability: local contract checkpoint; SSH push required before handoff
+next_action: complete domain/UI integration, production Chromium and independent fixed-candidate review; open stacked PR and require current-head CI; no merge/deployment
 ```

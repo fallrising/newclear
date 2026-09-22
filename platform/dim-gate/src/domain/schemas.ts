@@ -175,13 +175,39 @@ export const incidentEvidenceSchema = z.strictObject({
 export const incidentSchema = z.strictObject({
   ...scopedBase, applicationId: idSchema, environmentId: idSchema, affectedCiIds: ids, severity: z.enum(['critical', 'warning']),
   state: z.enum(['open', 'acknowledged', 'investigating', 'resolved']), assigneeId: idSchema.optional(), relatedReleaseId: idSchema.optional(),
-  evidence: z.array(incidentEvidenceSchema), recoverySamples: z.number().int().nonnegative(), correlationId: idSchema,
+  episode: versionSchema, ruleKey: idSchema, evidence: z.array(incidentEvidenceSchema), recoverySamples: z.number().int().nonnegative(), correlationId: idSchema,
 })
 export const integrationSchema = z.strictObject({
   ...scopedBase, kind: z.enum(['inventory', 'delivery', 'observation']), displayName: nameSchema,
-  state: z.enum(['demo', 'connected', 'error']), lastSyncAt: timestampSchema.nullable(),
+  poolIds: ids, endpointLabel: z.string().max(200), state: z.enum(['demo', 'connected', 'error']), lastSyncAt: timestampSchema.nullable(),
   fieldMappings: z.record(z.string(), z.string()), lastTestResult: z.strictObject({ demo: z.literal(true), succeeded: z.boolean(), summary: z.string(), occurredAt: timestampSchema }).optional(),
 })
+export const observationBucketSchema = z.strictObject({
+  id: idSchema, applicationId: idSchema, environmentId: idSchema, from: timestampSchema, to: timestampSchema,
+  releaseId: idSchema.optional(), rate: z.number().nonnegative().nullable(), errorRate: z.number().min(0).max(1).nullable(),
+  p95Latency: z.number().nonnegative().nullable(), source: z.literal('demo'),
+})
+export const observationLogSchema = z.strictObject({
+  id: idSchema, applicationId: idSchema, environmentId: idSchema, occurredAt: timestampSchema,
+  level: z.enum(['debug', 'info', 'warn', 'error']), message: z.string().refine(value => new TextEncoder().encode(value).length <= 2048),
+  traceId: idSchema.optional(), releaseId: idSchema.optional(), ciId: idSchema.optional(),
+})
+export const traceSummarySchema = z.strictObject({
+  id: idSchema, applicationId: idSchema, environmentId: idSchema, name: nameSchema, start: timestampSchema,
+  durationMs: z.number().nonnegative(), status: z.enum(['ok', 'error']), releaseId: idSchema.optional(),
+})
+export const traceSpanSchema = z.strictObject({ id: idSchema, parentId: idSchema.nullable(), name: nameSchema,
+  start: timestampSchema, durationMs: z.number().nonnegative(), status: z.enum(['ok', 'error']), ciId: idSchema.optional() })
+export const traceSchema = traceSummarySchema.extend({ spans: z.array(traceSpanSchema) })
+export const metricSeriesSchema = z.strictObject({ metric: z.enum(['rate', 'errorRate', 'p95Latency']),
+  unit: z.enum(['ms', 'requests/second', 'fraction']), points: z.array(z.strictObject({ t: timestampSchema, value: z.number().nullable() })),
+  sampleCount: z.number().int().nonnegative() })
+export const metricsViewSchema = z.strictObject({ series: z.array(metricSeriesSchema) })
+export const notificationSchema = z.strictObject({ id: idSchema, title: z.string().max(200), entityType: idSchema,
+  entityId: idSchema, route: z.string().startsWith('/'), occurredAt: timestampSchema })
+export const guideStepSchema = z.strictObject({ id: idSchema, title: z.string(), description: z.string(),
+  persona: z.enum(['rd', 'ops', 'admin', 'any']), completed: z.boolean(), route: z.string().startsWith('/').nullable() })
+export const acknowledgeIncidentInputSchema = z.strictObject({ expectedVersion: versionSchema, reason: z.string().trim().min(1).max(500).optional() })
 export const entityReferenceSchema = z.strictObject({ entityType: idSchema, entityId: idSchema })
 export const commandReceiptSchema = z.strictObject({
   entityType: idSchema, entityId: idSchema, entityVersion: versionSchema, correlationId: idSchema,
@@ -201,7 +227,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m3-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m4-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -212,7 +238,10 @@ export const snapshotSchema = z.strictObject({
     assignments: z.array(roleAssignmentSchema), navigation: z.array(navigationItemSchema), modelFields: z.array(modelFieldSchema),
     catalogs: z.array(catalogItemSchema), catalogHistory: z.array(catalogItemSchema), requests: z.array(requestSchema),
     pipelines: z.array(pipelineRunSchema), releases: z.array(releaseSchema), artifacts: z.array(artifactSchema),
+    incidents: z.array(incidentSchema), integrations: z.array(integrationSchema),
   }),
+  observations: z.strictObject({ buckets: z.array(observationBucketSchema), traces: z.array(traceSchema), logs: z.array(observationLogSchema),
+    recoveries: z.array(z.strictObject({ environmentId: idSchema, releaseId: idSchema, remaining: z.number().int().min(1).max(3), dueTick: z.number().int().nonnegative() })) }),
   deliveryLogs: z.array(deliveryLogSchema),
   jobs: z.array(provisionJobSchema), events: z.array(eventSchema), audit: z.array(auditEventSchema),
   idempotency: z.array(idempotencyRecordSchema), scenarioFlags: jsonFields,
@@ -230,11 +259,13 @@ export const sessionViewSchema = sessionDomainSchema.extend({
 })
 export const dashboardViewSchema = z.strictObject({
   center: centerSchema, title: z.string(), applicationCount: z.number().int().nonnegative(), environmentCount: z.number().int().nonnegative(),
+  activeIncidentCount: z.number().int().nonnegative(), pendingItems: z.array(notificationSchema),
   ciCount: z.number().int().nonnegative(), providers: z.array(z.strictObject({ provider: providerSchema, count: z.number().int().nonnegative() })), dataAsOf: timestampSchema,
 })
 export const guideViewSchema = z.strictObject({
+  applicationId: idSchema.nullable(), environmentId: idSchema.nullable(), steps: z.array(guideStepSchema),
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-m3-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-m4-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -309,8 +340,8 @@ export const patchModelFieldInputSchema = z.strictObject({
   expectedVersion: versionSchema, label: nameSchema.optional(), hidden: z.boolean().optional(),
 }).refine((body) => Object.keys(body).length > 1, 'At least one model field property is required')
 export const scenarioInputSchema = z.strictObject({
-  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure']),
-  jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples']),
+  environmentId: idSchema.optional(), jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
 })
 export const createPipelineInputSchema = z.strictObject({
   applicationId: idSchema, environmentId: idSchema, revision: idSchema.trim().min(1), environmentVersion: versionSchema,
@@ -341,6 +372,14 @@ export type ProvisionJob = z.infer<typeof provisionJobSchema>
 export type PipelineRun = z.infer<typeof pipelineRunSchema>
 export type Release = z.infer<typeof releaseSchema>
 export type Artifact = z.infer<typeof artifactSchema>
+export type Incident = z.infer<typeof incidentSchema>
+export type Integration = z.infer<typeof integrationSchema>
+export type ObservationBucket = z.infer<typeof observationBucketSchema>
+export type ObservationLog = z.infer<typeof observationLogSchema>
+export type Trace = z.infer<typeof traceSchema>
+export type TraceSummary = z.infer<typeof traceSummarySchema>
+export type MetricSeries = z.infer<typeof metricSeriesSchema>
+export type Notification = z.infer<typeof notificationSchema>
 export type DeliveryLog = z.infer<typeof deliveryLogSchema>
 export type NavigationItem = z.infer<typeof navigationItemSchema>
 export type ModelField = z.infer<typeof modelFieldSchema>
@@ -357,6 +396,9 @@ export const contractSchemas = {
   NavigationItem: navigationItemSchema, ModelField: modelFieldSchema, CatalogTemplate: catalogTemplateSchema,
   CatalogItem: catalogItemSchema, Request: requestSchema, ProvisionJob: provisionJobSchema, PipelineRun: pipelineRunSchema,
   Release: releaseSchema, Artifact: artifactSchema, DeliveryLog: deliveryLogSchema, ReleaseDetail: releaseDetailSchema,
+  ObservationBucket: observationBucketSchema, LogEntry: observationLogSchema, TraceSummary: traceSummarySchema,
+  Trace: traceSchema, MetricSeries: metricSeriesSchema, MetricsView: metricsViewSchema, Notification: notificationSchema,
+  AcknowledgeIncident: acknowledgeIncidentInputSchema,
   Incident: incidentSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
   DomainEvent: eventSchema, Snapshot: snapshotSchema, Persona: personaSchema, SessionView: sessionViewSchema,
   DashboardView: dashboardViewSchema, GuideView: guideViewSchema, CommandReceipt: commandReceiptSchema,

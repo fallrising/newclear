@@ -21,6 +21,20 @@ const identity = (controller: DemoController) => {
 afterEach(() => vi.useRealTimers())
 
 describe('persisted controller identity and transactions', () => {
+  it('preserves impossible delivery scheduler bytes until explicit recovery reset', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'corrupt-resume' }, 'trigger', identity(controller))
+    const saved = JSON.parse(h.raw!) as { snapshot: ReturnType<typeof controller.getSnapshot> }
+    saved.snapshot.scheduler.tasks[0].stepIndex = 99
+    const raw = JSON.stringify(saved)
+    h.storage.setItem(SNAPSHOT_KEY, raw)
+    expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
+    expect(h.raw).toBe(raw)
+    const recovered = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
+    expect(recovered.getSnapshot().scheduler.tasks).toEqual([])
+    expect(h.raw).not.toBe(raw)
+  })
   it('reload preserves domain state, selected persona, identity epoch and command replay', async () => {
     const h = harness()
     const first = h.start()
@@ -115,11 +129,11 @@ describe('persisted controller identity and transactions', () => {
     }
   })
 
-  it('rejects an older seed snapshot without altering it until explicit recovery', () => {
+  it.each(['dim-gate-m1-v1', 'dim-gate-m2-v1'])('rejects older %s bytes until explicit recovery', (seedVersion) => {
     const current = harness()
     current.start()
     const legacy = JSON.parse(current.raw!)
-    legacy.snapshot.seedVersion = 'dim-gate-m1-v1'
+    legacy.snapshot.seedVersion = seedVersion
     delete legacy.snapshot.entities.catalogs
     delete legacy.snapshot.entities.catalogHistory
     delete legacy.snapshot.entities.requests
@@ -128,7 +142,7 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m2-v1' })
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m3-v1' })
     expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
   })
 

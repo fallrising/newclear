@@ -11,7 +11,6 @@ const id = d.idSchema
 const reason = z.string().trim().min(1).max(500)
 const version = d.versionSchema
 const expected = { expectedVersion: version }
-const withReason = { ...expected, reason }
 const scope = { applicationId: id, environmentId: id }
 const windowFields = { ...scope, from: d.timestampSchema, to: d.timestampSchema }
 const pageFields = {
@@ -42,7 +41,7 @@ export const wireSchemas = {
     teams: z.array(d.teamSchema), projects: z.array(d.projectSchema), users: z.array(d.userSchema) }),
   ApplicationDetail: z.strictObject({ application: d.applicationSchema, environments: z.array(d.environmentSchema) }),
   EnvironmentDetail: z.strictObject({ environment: d.environmentSchema, placements: z.array(d.placementSchema), activeRelease: d.releaseSchema.nullable() }),
-  EntitySearchHit: z.strictObject({ type: z.enum(['application', 'environment', 'ci', 'request', 'incident']), id, title: d.nameSchema, route: z.string().startsWith('/') }),
+  EntitySearchHit: z.strictObject({ type: z.enum(['application', 'environment', 'ci', 'request', 'release', 'incident']), id, title: z.string().min(1).max(500), route: z.string().startsWith('/') }),
   TopologyView: z.strictObject({ nodes: z.array(d.ciViewSchema).max(100), edges: z.array(d.relationSchema).max(200), truncated: z.boolean(), depthReached: z.number().int().min(0).max(3) }),
   Capacity: z.strictObject({ poolId: id, cpu: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }),
     memoryMiB: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }) }),
@@ -52,8 +51,8 @@ export const wireSchemas = {
   VersionCommand: d.versionCommandSchema, ReasonCommand: d.reasonCommandSchema,
   CreateRequest: d.createRequestInputSchema,
   PatchRequest: d.patchRequestInputSchema,
-  CreatePipeline: z.strictObject({ ...scope, revision: id, environmentVersion: version }),
-  RollbackRelease: z.strictObject({ ...withReason, targetReleaseId: id, environmentVersion: version }),
+  CreatePipeline: d.createPipelineInputSchema,
+  RollbackRelease: d.rollbackReleaseInputSchema,
   AcknowledgeIncident: z.strictObject({ ...expected, reason: reason.optional() }),
   CreateAssignment: d.createAssignmentInputSchema,
   PatchUser: d.patchUserInputSchema,

@@ -140,7 +140,7 @@ describe('shared browser/Node HTTP handlers', () => {
     expect(response.status).toBe(507)
     expect((await response.json()).error.code).toBe('DEMO_STORAGE_FULL')
     expect(controller.getSnapshot()).toEqual(before)
-    expect((await request('api/v1/pipelines', { method: 'POST', body: {} })).status).toBe(501)
+    expect((await request('api/v1/incidents/unknown/investigate', { method: 'POST', body: {} })).status).toBe(501)
   })
 
   it('recognizes an old-session reset replay after new work without clearing it', async () => {

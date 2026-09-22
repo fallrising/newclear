@@ -8,7 +8,7 @@ const session = (overrides: Partial<SessionView> = {}): SessionView => ({
   logicalClock: 0, identityEpoch: 1, generation: 1, storageMode: 'session', ...overrides,
 })
 
-describe('M2 route registry', () => {
+describe('registered route permissions', () => {
   it('matches only real static and dynamic routes', () => {
     expect(routeForPath('/rd/apps')?.key).toBe('rd.apps')
     expect(routeForPath('/rd/apps/app-checkout')?.key).toBe('rd.app-detail')
@@ -31,5 +31,15 @@ describe('M2 route registry', () => {
     expect(canAccessRoute(rd, routeRegistry.find((route) => route.key === 'ops.cmdb')!)).toBe(false)
     const selfService = session({ effectiveActions: [...rd.effectiveActions, 'catalog.read', 'request.create', 'request.read'] })
     expect(visibleNavigation(selfService).map((route) => route.key)).toEqual(['rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'guide'])
+  })
+
+  it('permits M3 read-only deep links by action while keeping center lists and writes separate', () => {
+    const reader = session({ centers: ['ops'], effectiveActions: ['pipeline.read', 'release.read'] })
+    expect(canAccessRoute(reader, routeForPath('/rd/pipelines/run-0001')!)).toBe(true)
+    expect(canAccessRoute(reader, routeForPath('/rd/releases/release-0001')!)).toBe(true)
+    expect(canAccessRoute(reader, routeForPath('/rd/pipelines')!)).toBe(false)
+    const admin = session({ centers: ['admin'], effectiveActions: ['release.read'] })
+    expect(canAccessRoute(admin, routeForPath('/rd/releases/release-0001')!)).toBe(true)
+    expect(canAccessRoute(admin, routeForPath('/rd/pipelines/run-0001')!)).toBe(false)
   })
 })

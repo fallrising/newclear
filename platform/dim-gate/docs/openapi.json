@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "dim-gate BFF and demo controls",
-    "version": "0.1.0-m2",
-    "description": "Generated from Zod. M0–M2 provide 52 executable operations; M3/M4 operations remain explicitly planned. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
+    "version": "0.1.0-m3",
+    "description": "Generated from Zod. M0–M3 provide 62 executable operations; M4 operations remain explicitly planned. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided."
   },
   "servers": [
     {
@@ -4317,8 +4317,8 @@
           "M3"
         ],
         "summary": "listPipelines",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -4545,8 +4545,8 @@
           "M3"
         ],
         "summary": "createPipeline",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -4702,8 +4702,8 @@
           "M3"
         ],
         "summary": "getPipeline",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -4849,8 +4849,8 @@
           "M3"
         ],
         "summary": "listReleases",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -5083,8 +5083,8 @@
           "M3"
         ],
         "summary": "getRelease",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -5230,7 +5230,7 @@
           "M4"
         ],
         "summary": "getMetrics",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5417,7 +5417,7 @@
           "M4"
         ],
         "summary": "listTraces",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5664,7 +5664,7 @@
           "M4"
         ],
         "summary": "getTrace",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -5811,7 +5811,7 @@
           "M4"
         ],
         "summary": "listLogs",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -6079,7 +6079,7 @@
           "M4"
         ],
         "summary": "listIncidents",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -6309,7 +6309,7 @@
           "M4"
         ],
         "summary": "getIncident",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -7132,7 +7132,7 @@
           "M4"
         ],
         "summary": "listIntegrations",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -8437,8 +8437,8 @@
           "M3"
         ],
         "summary": "cancelPipeline",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -8604,8 +8604,8 @@
           "M3"
         ],
         "summary": "retryPipeline",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -8771,8 +8771,8 @@
           "M3"
         ],
         "summary": "approveRelease",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -8938,8 +8938,8 @@
           "M3"
         ],
         "summary": "rejectRelease",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -9105,8 +9105,8 @@
           "M3"
         ],
         "summary": "rollbackRelease",
-        "description": "Forward contract for M3; unavailable in M2. Success below specifies the future result, not current behavior.",
-        "x-implementation-status": "planned",
+        "description": "Implemented by the demo adapter through M3.",
+        "x-implementation-status": "implemented",
         "x-milestone": "M3",
         "x-demo-only": false,
         "parameters": [
@@ -9272,7 +9272,7 @@
           "M4"
         ],
         "summary": "acknowledgeIncident",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -9439,7 +9439,7 @@
           "M4"
         ],
         "summary": "investigateIncident",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -11256,7 +11256,7 @@
           "M4"
         ],
         "summary": "testIntegration",
-        "description": "Forward contract for M4; unavailable in M2. Success below specifies the future result, not current behavior.",
+        "description": "Forward contract for M4; unavailable in M3. Success below specifies the future result, not current behavior.",
         "x-implementation-status": "planned",
         "x-milestone": "M4",
         "x-demo-only": false,
@@ -13868,12 +13868,14 @@
               "rd.apps",
               "rd.catalog",
               "rd.requests",
+              "rd.pipelines",
               "ops.overview",
               "ops.cmdb",
               "ops.topology",
               "ops.requests",
               "ops.jobs",
               "ops.capacity",
+              "ops.releases",
               "admin.overview",
               "admin.access",
               "admin.navigation",
@@ -14535,6 +14537,16 @@
                     "cancelled",
                     "skipped"
                   ]
+                },
+                "startedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                 }
               },
               "required": [
@@ -14571,6 +14583,11 @@
             "maxLength": 160
           },
           "correlationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "failureCode": {
             "type": "string",
             "minLength": 1,
             "maxLength": 160
@@ -14686,6 +14703,60 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 160
+          },
+          "health": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "healthy",
+              "unhealthy"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "approval": {
+            "type": "object",
+            "properties": {
+              "actorId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "occurredAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "actorId",
+              "occurredAt",
+              "reason"
+            ],
+            "additionalProperties": false
+          },
+          "failureCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
           }
         },
         "required": [
@@ -14701,7 +14772,160 @@
           "state",
           "previousReleaseId",
           "createdBy",
-          "correlationId"
+          "correlationId",
+          "health"
+        ],
+        "additionalProperties": false
+      },
+      "Artifact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "orgId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "digest": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "recipe": {
+            "type": "string",
+            "const": "demo-web-v1"
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "createdAt",
+          "updatedAt",
+          "orgId",
+          "applicationId",
+          "digest",
+          "revision",
+          "recipe",
+          "filename"
+        ],
+        "additionalProperties": false
+      },
+      "DeliveryLog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "operationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "build",
+              "test",
+              "package",
+              "deploy",
+              "verify"
+            ]
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "info",
+              "error"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "id",
+          "operationId",
+          "applicationId",
+          "environmentId",
+          "occurredAt",
+          "stage",
+          "level",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "ReleaseDetail": {
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/Release"
+          },
+          "artifact": {
+            "$ref": "#/components/schemas/Artifact"
+          },
+          "rollbackTargets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Release"
+            }
+          }
+        },
+        "required": [
+          "release",
+          "artifact",
+          "rollbackTargets"
         ],
         "additionalProperties": false
       },
@@ -15192,7 +15416,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m2-v1"
+            "const": "dim-gate-m3-v1"
           },
           "sessionId": {
             "type": "string",
@@ -15340,6 +15564,24 @@
                 "items": {
                   "$ref": "#/components/schemas/Request"
                 }
+              },
+              "pipelines": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PipelineRun"
+                }
+              },
+              "releases": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Release"
+                }
+              },
+              "artifacts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Artifact"
+                }
               }
             },
             "required": [
@@ -15361,9 +15603,18 @@
               "modelFields",
               "catalogs",
               "catalogHistory",
-              "requests"
+              "requests",
+              "pipelines",
+              "releases",
+              "artifacts"
             ],
             "additionalProperties": false
+          },
+          "deliveryLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryLog"
+            }
           },
           "jobs": {
             "type": "array",
@@ -15501,6 +15752,7 @@
           "policyVersion",
           "commandCount",
           "entities",
+          "deliveryLogs",
           "jobs",
           "events",
           "audit",
@@ -15742,7 +15994,7 @@
           },
           "seedVersion": {
             "type": "string",
-            "const": "dim-gate-m2-v1"
+            "const": "dim-gate-m3-v1"
           },
           "schemaVersion": {
             "type": "number",
@@ -16643,7 +16895,10 @@
             "enum": [
               "provision-failure",
               "capacity-exhausted",
-              "clear-capacity-fault"
+              "clear-capacity-fault",
+              "build-failure",
+              "health-failure",
+              "rollback-failure"
             ]
           },
           "jobId": {
@@ -16655,10 +16910,84 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 160
+          },
+          "runId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "releaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           }
         },
         "required": [
           "scenarioKey"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePipeline": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "applicationId",
+          "environmentId",
+          "revision",
+          "environmentVersion"
+        ],
+        "additionalProperties": false
+      },
+      "RollbackRelease": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "targetReleaseId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "environmentVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "reason",
+          "targetReleaseId",
+          "environmentVersion"
         ],
         "additionalProperties": false
       },
@@ -16764,6 +17093,7 @@
               "environment",
               "ci",
               "request",
+              "release",
               "incident"
             ]
           },
@@ -16775,7 +17105,7 @@
           "title": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 500
           },
           "route": {
             "type": "string",
@@ -17162,70 +17492,6 @@
           "unit",
           "points",
           "sampleCount"
-        ],
-        "additionalProperties": false
-      },
-      "CreatePipeline": {
-        "type": "object",
-        "properties": {
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "revision": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "applicationId",
-          "environmentId",
-          "revision",
-          "environmentVersion"
-        ],
-        "additionalProperties": false
-      },
-      "RollbackRelease": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          },
-          "targetReleaseId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "environmentVersion": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "expectedVersion",
-          "reason",
-          "targetReleaseId",
-          "environmentVersion"
         ],
         "additionalProperties": false
       },
@@ -18978,7 +19244,7 @@
                 "maxItems": 500,
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/LogEntry"
+                  "$ref": "#/components/schemas/DeliveryLog"
                 }
               }
             },
@@ -19163,7 +19429,7 @@
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/Release"
+            "$ref": "#/components/schemas/ReleaseDetail"
           },
           "meta": {
             "type": "object",

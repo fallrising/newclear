@@ -1,4 +1,4 @@
-import type { CI, Center, RoleAssignment, Snapshot } from './schemas'
+import type { CI, Center, RoleAssignment, SessionView, Snapshot } from './schemas'
 
 const actions: Record<Center, readonly string[]> = {
   rd: ['app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.create', 'request.edit', 'request.submit', 'request.cancel', 'request.retry', 'request.read', 'pipeline.read', 'pipeline.trigger', 'pipeline.retry', 'pipeline.cancel', 'release.rollback', 'incident.read', 'catalog.read', 'audit.read', 'job.read', 'capacity.read'],
@@ -51,3 +51,11 @@ export function policyFor(snapshot: Snapshot, actorId: string) {
 }
 
 export type Policy = ReturnType<typeof policyFor>
+
+/** UI action preview; commands always repeat the authoritative snapshot policy check. */
+export function canPerformProjectAction(session: Pick<SessionView, 'assignments' | 'effectiveActions'>,
+  action: string, projectId: string, stage?: string) {
+  return session.effectiveActions.includes(action) && session.assignments.some(grant =>
+    grant.scopeType === 'project' && grant.scopeId === projectId && actions[grant.role].includes(action)
+    && (!stage || !grant.stages || grant.stages.some(value => value === stage)))
+}

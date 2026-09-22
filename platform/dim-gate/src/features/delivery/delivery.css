@@ -1,0 +1,50 @@
+.delivery-page { min-width: 0; }
+.delivery-page .panel { margin-bottom: 20px; }
+.delivery-page a:not(.button) { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.delivery-status { display: inline-flex; align-items: center; gap: 5px; border-radius: 5px; padding: 3px 8px; background: var(--muted-surface); color: var(--muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.delivery-status-succeeded, .delivery-status-healthy { color: var(--healthy); }
+.delivery-status-failed, .delivery-status-unhealthy, .delivery-status-rejected { color: var(--destructive); background: var(--danger-soft); }
+.delivery-status-pending_approval, .delivery-status-awaiting_approval, .delivery-status-pending { color: var(--warning); background: var(--warning-soft); }
+.delivery-status-running, .delivery-status-deploying, .delivery-status-verifying { color: var(--primary); background: var(--primary-soft); }
+.delivery-actions, .delivery-scope, .delivery-pager { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.delivery-actions { margin-top: 16px; align-items: end; }
+.delivery-scope { padding: 12px 0; overflow-wrap: anywhere; }
+.delivery-pager { justify-content: flex-end; margin: 12px 0 22px; }
+.delivery-pager > span { color: var(--muted); margin-right: auto; }
+.delivery-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 16px; }
+.delivery-filters > label { flex: 1 1 160px; }
+.delivery-page label, .delivery-dialog label { display: grid; gap: 7px; font-size: 13px; font-weight: 600; min-width: 0; }
+.delivery-page input, .delivery-dialog input, .delivery-dialog textarea, .delivery-dialog select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px; background: var(--card); color: var(--foreground); font: inherit; }
+.delivery-dialog { width: min(580px, calc(100vw - 32px)); }
+.delivery-dialog form { display: grid; gap: 16px; margin-top: 18px; }
+.delivery-dialog .dialog-actions { margin-top: 6px; flex-wrap: wrap; }
+.delivery-dialog textarea { resize: vertical; }
+.delivery-dialog .detail-list, .delivery-dialog .delivery-scope { margin: 0; }
+.delivery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.delivery-grid > .panel { min-width: 0; }
+.delivery-stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 16px 0; padding: 0; }
+.delivery-stages button { width: 100%; min-height: 114px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: 12px; color: var(--foreground); text-align: left; }
+.delivery-stages button[aria-pressed="true"] { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.delivery-stage-time { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+.delivery-logs, .delivery-audit { list-style: none; margin: 14px 0 0; padding: 0; }
+.delivery-logs li { display: grid; grid-template-columns: 160px 45px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-top: 1px solid var(--border); font-size: 12px; }
+.delivery-logs time, .delivery-audit time { color: var(--muted); font-size: 12px; }
+.delivery-logs code { white-space: pre-wrap; }
+.delivery-log-error { color: var(--destructive); }
+.delivery-audit li { display: grid; gap: 5px; padding: 14px 0; border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+.delivery-audit span, .delivery-audit p { font-size: 13px; }
+.delivery-current { border-left: 3px solid var(--healthy); }
+.delivery-demo { border-style: dashed; }
+.delivery-demo .command-notice { display: flex; align-items: center; gap: 8px; }
+.delivery-note { color: var(--muted); font-size: 13px; margin-top: 12px; overflow-wrap: anywhere; }
+.delivery-page .detail-list dd { overflow-wrap: anywhere; min-width: 0; }
+@media (max-width: 900px) { .delivery-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } .delivery-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  .delivery-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .delivery-logs li { grid-template-columns: minmax(0, 1fr) 45px; }
+  .delivery-logs code { grid-column: 1 / -1; }
+  .delivery-filters > label { flex-basis: 100%; }
+  .delivery-dialog { padding: 22px; }
+  .delivery-page .detail-list > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .delivery-page .button, .delivery-dialog .button { white-space: normal; }
+}

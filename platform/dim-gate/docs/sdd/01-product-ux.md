@@ -48,6 +48,7 @@
 | `/ops/jobs`、`/ops/jobs/:jobId` | provisioning jobs 的進度、log 與結果 CI | 觀察與導向來源請求；retry 從 request 發起 | M2 |
 | `/ops/incidents`、`/ops/incidents/:incidentId` | 告警來源、受影響物件、變更、時序 | 認領、標記處理中、查看恢復證據 | M4 |
 | `/ops/capacity` | pool 容量／使用／保留／申請差額 | scope／provider 篩選，導向 CI 和 pending requests | M2 |
+| `/ops/releases`、`/ops/releases/:releaseId` | scope 內的發布與回滾候選、artifact、health、actor 與 audit | 不同 initiator 的 Ops 核准／拒絕 prod，合法跨 Center detail | M3 |
 | `/admin` | 配置狀態、整合健康、最近 policy／catalog 變更 | 統計可下鑽 | M2 |
 | `/admin/access` | 業務線、團隊、專案、使用者與固定角色綁定 | 選 user／role／scope、授予／撤銷、effective preview | M2 |
 | `/admin/navigation` | 三中心選單配置 | 標題、分組、排序、可見性編輯與預覽 | M2 |

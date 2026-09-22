@@ -103,8 +103,8 @@ export const roleAssignmentSchema = z.strictObject({
 })
 export const navigationItemSchema = z.strictObject({
   ...scopedBase, routeKey: z.enum([
-    'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests',
-    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity',
+    'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'rd.pipelines',
+    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases',
     'admin.overview', 'admin.access', 'admin.navigation', 'admin.catalog', 'admin.cmdb-models', 'admin.audit',
     'guide',
   ]),
@@ -140,16 +140,33 @@ export const requestSchema = z.strictObject({
 })
 export const pipelineStageSchema = z.strictObject({
   name: z.enum(['build', 'test', 'package', 'deploy', 'verify']), state: z.enum(['queued', 'running', 'succeeded', 'failed', 'cancelled', 'skipped']),
+  startedAt: timestampSchema.optional(), completedAt: timestampSchema.optional(),
 })
 export const pipelineRunSchema = z.strictObject({
   ...scopedBase, applicationId: idSchema, environmentId: idSchema, revision: idSchema, artifactDigest: idSchema.optional(),
   stages: z.array(pipelineStageSchema), state: z.enum(['queued', 'running', 'awaiting_approval', 'succeeded', 'failed', 'cancelled']),
   releaseId: idSchema.optional(), triggeredBy: idSchema, retryOfRunId: idSchema.optional(), correlationId: idSchema,
+  failureCode: idSchema.optional(),
 })
 export const releaseSchema = z.strictObject({
   ...scopedBase, applicationId: idSchema, environmentId: idSchema, artifactDigest: idSchema, kind: z.enum(['deploy', 'rollback']),
   state: z.enum(['pending_approval', 'queued', 'deploying', 'verifying', 'succeeded', 'failed', 'rejected', 'cancelled']),
   previousReleaseId: idSchema.nullable(), targetReleaseId: idSchema.optional(), pipelineRunId: idSchema.optional(), createdBy: idSchema, correlationId: idSchema,
+  health: z.enum(['pending', 'healthy', 'unhealthy']), reason: z.string().trim().min(1).max(500).optional(),
+  approval: z.strictObject({ actorId: idSchema, occurredAt: timestampSchema, reason: z.string().min(1).max(500) }).optional(),
+  failureCode: idSchema.optional(), startedAt: timestampSchema.optional(), completedAt: timestampSchema.optional(),
+})
+export const artifactSchema = z.strictObject({
+  ...scopedBase, applicationId: idSchema, digest: idSchema, revision: idSchema,
+  recipe: z.literal('demo-web-v1'), filename: nameSchema,
+})
+export const deliveryLogSchema = z.strictObject({
+  id: idSchema, operationId: idSchema, applicationId: idSchema, environmentId: idSchema,
+  occurredAt: timestampSchema, stage: pipelineStageSchema.shape.name,
+  level: z.enum(['info', 'error']), message: z.string().max(500),
+})
+export const releaseDetailSchema = z.strictObject({
+  release: releaseSchema, artifact: artifactSchema, rollbackTargets: z.array(releaseSchema),
 })
 export const incidentEvidenceSchema = z.strictObject({
   ruleKey: idSchema, metric: z.enum(['p95Latency', 'errorRate']), threshold: z.number().nonnegative(),
@@ -184,7 +201,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m2-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m3-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -194,7 +211,9 @@ export const snapshotSchema = z.strictObject({
     pools: z.array(poolSchema), cis: z.array(ciSchema), placements: z.array(placementSchema), relations: z.array(relationSchema),
     assignments: z.array(roleAssignmentSchema), navigation: z.array(navigationItemSchema), modelFields: z.array(modelFieldSchema),
     catalogs: z.array(catalogItemSchema), catalogHistory: z.array(catalogItemSchema), requests: z.array(requestSchema),
+    pipelines: z.array(pipelineRunSchema), releases: z.array(releaseSchema), artifacts: z.array(artifactSchema),
   }),
+  deliveryLogs: z.array(deliveryLogSchema),
   jobs: z.array(provisionJobSchema), events: z.array(eventSchema), audit: z.array(auditEventSchema),
   idempotency: z.array(idempotencyRecordSchema), scenarioFlags: jsonFields,
   scheduler: z.strictObject({ tasks: z.array(z.strictObject({ id: idSchema, operationId: idSchema, stepIndex: z.number().int().nonnegative(), dueTick: z.number().int().nonnegative() })) }),
@@ -215,7 +234,7 @@ export const dashboardViewSchema = z.strictObject({
 })
 export const guideViewSchema = z.strictObject({
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-m2-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-m3-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -290,9 +309,13 @@ export const patchModelFieldInputSchema = z.strictObject({
   expectedVersion: versionSchema, label: nameSchema.optional(), hidden: z.boolean().optional(),
 }).refine((body) => Object.keys(body).length > 1, 'At least one model field property is required')
 export const scenarioInputSchema = z.strictObject({
-  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault']),
-  jobId: idSchema.optional(), poolId: idSchema.optional(),
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure']),
+  jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
 })
+export const createPipelineInputSchema = z.strictObject({
+  applicationId: idSchema, environmentId: idSchema, revision: idSchema.trim().min(1), environmentVersion: versionSchema,
+})
+export const rollbackReleaseInputSchema = reasonCommandSchema.extend({ targetReleaseId: idSchema, environmentVersion: versionSchema })
 
 export type Center = z.infer<typeof centerSchema>
 export type Provider = z.infer<typeof providerSchema>
@@ -315,6 +338,10 @@ export type AuditEvent = z.infer<typeof auditEventSchema>
 export type CatalogItem = z.infer<typeof catalogItemSchema>
 export type Request = z.infer<typeof requestSchema>
 export type ProvisionJob = z.infer<typeof provisionJobSchema>
+export type PipelineRun = z.infer<typeof pipelineRunSchema>
+export type Release = z.infer<typeof releaseSchema>
+export type Artifact = z.infer<typeof artifactSchema>
+export type DeliveryLog = z.infer<typeof deliveryLogSchema>
 export type NavigationItem = z.infer<typeof navigationItemSchema>
 export type ModelField = z.infer<typeof modelFieldSchema>
 export type ApiError = z.infer<typeof apiErrorSchema>
@@ -329,7 +356,8 @@ export const contractSchemas = {
   Placement: placementSchema, Relation: relationSchema, RoleAssignment: roleAssignmentSchema,
   NavigationItem: navigationItemSchema, ModelField: modelFieldSchema, CatalogTemplate: catalogTemplateSchema,
   CatalogItem: catalogItemSchema, Request: requestSchema, ProvisionJob: provisionJobSchema, PipelineRun: pipelineRunSchema,
-  Release: releaseSchema, Incident: incidentSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
+  Release: releaseSchema, Artifact: artifactSchema, DeliveryLog: deliveryLogSchema, ReleaseDetail: releaseDetailSchema,
+  Incident: incidentSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
   DomainEvent: eventSchema, Snapshot: snapshotSchema, Persona: personaSchema, SessionView: sessionViewSchema,
   DashboardView: dashboardViewSchema, GuideView: guideViewSchema, CommandReceipt: commandReceiptSchema,
   ApiError: apiErrorSchema, CreateCI: createCiInputSchema, PatchCI: patchCiSchema,
@@ -342,4 +370,5 @@ export const contractSchemas = {
   PatchCatalog: patchCatalogInputSchema, PublishCatalog: publishCatalogInputSchema,
   CreateModelField: createModelFieldInputSchema, PatchModelField: patchModelFieldInputSchema,
   ScenarioInput: scenarioInputSchema,
+  CreatePipeline: createPipelineInputSchema, RollbackRelease: rollbackReleaseInputSchema,
 }

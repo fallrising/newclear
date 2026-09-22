@@ -18,8 +18,8 @@ M1 可操作範圍：
 | --- | --- |
 | M0：工程基礎與 Mock 契約 | ACCEPTED；PR #7 MERGED |
 | M1：CMDB與應用視圖 | ACCEPTED at `784f771`；PR #11 MERGED at `b8dae760` |
-| M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 OPEN / Ready / 未合併 |
-| M3：CI/CD與回滾 | 尚未開始 |
+| M2：申請與平台治理 | ACCEPTED at `513e6cc`；PR #13 MERGED at `29bed417` |
+| M3：CI/CD與回滾 | ACCEPTED at `04d6646`；[PR #17](https://github.com/fallrising/newclear/pull/17) OPEN、未合併 |
 | M4：觀測與完整展示 | 尚未開始 |
 | M5：驗收與展示交付 | 尚未開始 |
 
@@ -39,4 +39,12 @@ M2 T-017 的獨立 review 拒絕舊整合 head `5dd74e8`：Admin job logs 越權
 
 限制：production JS 為 431.39 kB gzip，仍是 M5 的 300 kB 預算風險；AC-21 persistent mounted-dialog race 與 Catalog 每一個 allowed-set/limit 控制仍是非阻塞 evidence gap。沒有部署、真實雲操作、付費服務或全域權限變更。
 
-Resume：從 `agent/dim-gate/mainline/m2-governance` 的 acceptance metadata 接續；base/main 仍是 `b8dae760`。M2 已 ACCEPTED，PR #13 是 OPEN / Ready / 未合併；等 final metadata-head CI 後執行已授權 merge，不部署。
+M2 合併對帳：PR #13 已合併為 `29bed41788a33684f24d216f4fd4d5f3f998c672`；final metadata CI 35591097020、post-merge CI 35591531196 與 mirror 35591531198 全部成功。上方 T-014～T-017 段落保留當時 checkpoint 的觀察，不代表目前 PR 狀態。
+
+M3 最終驗收（2026-09-21）：產品 commit `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` **ACCEPTED**，AC-13–16、AC-24 均具證據。170 tests、40/40 production Chromium journeys、全部 native gates 與獨立 T-020 複審通過；獨立結論沒有 blocking/high/medium finding。精確 head 的 [CI 35637762270](https://github.com/fallrising/newclear/actions/runs/35637762270) 同樣通過 170 tests、40/40 Chromium 並保存 artifacts。`main` 的 `7bb80d0` 已透過正常 merge 整入。
+
+新增真實播放／暫停／續播／reload／persona／reset／離頁 regression、Data→Commerce receipt 隔離、真正主題操作與 initial-focus 證據。延遲 clock 回應的暫停與 SPA 重掛載問題也已修正：Pipeline、Release 與 Guide 共用 mutation pending 狀態，直到回應及 refresh 完成才開放下一步。18 組 route/theme/viewport axe/overflow 檢查通過；18 個 M3 journeys 保存 2012 筆 network responses，沒有 page error、failed request 或非預期 console/HTTP error。
+
+[PR #17](https://github.com/fallrising/newclear/pull/17) 沿用同一 SSH branch，**未合併、未部署**。本 evidence-only checkpoint 推送後，仍須確認最新 metadata head CI 才轉 Ready；其最終結果與 owner release 記錄在 PR，避免自我引用 commit 循環。完整 commands、runtime、artifacts 與歷史失敗見 [T-018 attempt 3](../../../.team/reports/T-018-attempt-3.md)，獨立結論見 [T-020 attempt 3](../../../.team/reports/T-020-attempt-3.md)。
+
+M4 observation／incident resolution 尚未實作；回滾僅發出 recovery-requested event。JS gzip 445.65 kB，M5 的 300 KiB 效能預算風險仍保留。下一個產品里程碑為 M4，不重做已 ACCEPTED 的 M0–M3。

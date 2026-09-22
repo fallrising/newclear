@@ -9,15 +9,15 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 18 |
+| protocol_version / ledger_revision | 1 / 23 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
-| active_work_branch | agent/dim-gate/mainline/m2-governance |
-| source / last_reconciled_target | M1 source `50294b687d06f08e94290f6f327187e8f69248bc` / reconciled `a5982bf4547bba85429fec50494751562b5fe7c6`, 2026-09-20 |
-| source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
-| spec revision | M2 integration contract revision 1; implementation checkpoint `a9e64276273fc3698105c2bf8b0b7bc833444057` |
-| open implementation PRs at recovery | Draft PR #13 for M2; M0 PR #7 and M1 PR #11 are merged |
+| active_owner / run_id | Codex orchestrator — explicit user resumption / DG-M3-20260921-02 |
+| active_work_branch | agent/dim-gate/mainline/m3-delivery |
+| source / last_reconciled_target | M3 base `e760d8e988c0e2a837b226c600805a659a362c10` / SSH-fetched main `7bb80d00d03d93a2d392185adba65588c5fe2462`, integrated by normal merge `95d1722` on 2026-09-21 |
+| source kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD observed, not adopted |
+| spec revision | M3 integration contract revision 2; final product candidate `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` |
+| open implementation PRs at recovery | M3 [PR #17](https://github.com/fallrising/newclear/pull/17) OPEN Draft; M0 #7, M1 #11 and M2 #13 remain MERGED |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
@@ -33,8 +33,8 @@
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
-| M2 | RUNNING | none | DRAFT PR #13 | T-014 domain/API, T-015 RD/Ops UI and T-016 Admin UI checkpoints accepted; integrated review outstanding; AC-09–12,21–23 |
-| M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
+| M2 | ACCEPTED | `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` | MERGED — PR #13, merge `29bed41788a33684f24d216f4fd4d5f3f998c672` | AC-09–12,21–23; independent review, 138 tests, 22 Chromium journeys and post-merge CI passed |
+| M3 | ACCEPTED | `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` | OPEN_PR_17_NOT_MERGED | AC-13–16,24; 170 tests, 40 Chromium journeys, independent closure and exact-head CI |
 | M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
 | M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
 
@@ -60,6 +60,10 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-014.md); `a9e6427`, 132 tests, 11 production E2E |
 | [T-015](tasks/T-015.md) / 1 | 09–12 RD/Ops UI | T-014 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-015.md); `3eaea29`, 135 tests, 14 production E2E |
 | [T-016](tasks/T-016.md) / 1 | 21–23 Admin UI | T-015 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-016.md); `f9f1472`, 136 tests, 17 production E2E |
+| [T-017](tasks/T-017.md) | M2 integrated review | T-014–016 | independent review + lead | ACCEPTED | agent/dim-gate/mainline/m2-governance | [report](reports/T-017.md); M2 accepted and PR #13 merged |
+| [T-018](tasks/T-018.md) / 1 | 13–16/24 domain and integration | merged M2 | orchestrator | 3 / ACCEPTED | agent/dim-gate/mainline/m3-delivery | [report](reports/T-018.md); final `04d6646`, 170 tests, 40 Chromium, review and CI passed |
+| [T-019](tasks/T-019.md) / 1 | M3 UI/browser | T-018 contract | bounded isolated worker + lead | integrated / ACCEPTED | agent/dim-gate/task/t019-delivery-ui | [report](reports/T-019.md); original worker preserved, final integration verified at `04d6646` |
+| [T-020](tasks/T-020.md) / 3 | independent M3 review | fixed candidate | independent read-only in-environment reviewer | 3 / ACCEPTED | detached 04d6646 | [report](reports/T-020.md); original and adversarial findings closed |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -292,4 +296,116 @@ integration_state: OPEN_READY_PR_13_NOT_MERGED
 remote_durability: T-017 product and evidence head are on the SSH remote branch; exact evidence-head CI 35590593367 passed
 blockers: []
 next_action: commit and SSH-push acceptance metadata, require final metadata-head CI, then perform the explicitly authorized PR #13 merge without deployment
+```
+
+### M3 recovery and execution checkpoint
+
+DG-D028: Reconcile M2 as ACCEPTED and MERGED. PR #13 merged at `29bed41788a33684f24d216f4fd4d5f3f998c672`; metadata CI 35591097020, post-merge CI 35591531196 and mirror 35591531198 passed. Main advanced to `e760d8e988c0e2a837b226c600805a659a362c10` through unrelated agent-platform documentation PR #14. Source and M1/M2 worktrees remain unchanged; the new isolated M3 branch starts here.
+
+DG-D029: User approved the first M3 vertical slice. Freeze [M3 integration contract revision 1](../platform/dim-gate/docs/M3-INTEGRATION-CONTRACT.md) and start [T-018](tasks/T-018.md), then bounded UI and independent review. No unresolved owner decision blocks this slice. Built-in Codex owns implementation and a separate read-only session owns review; exact runtime model IDs are not inferred. Kernel `237aa277b0d067f65c8f64f49c6854597f7f8b15` was read from an isolated SSH sparse checkout; the existing reference remains unchanged at `664d176`.
+
+DG-D030: REWORK candidate `2abbec9` following independent T-020 attempt 1: clock receipt scope leak, impossible persisted scheduler steps, absent per-second playback and premature clock-completion feedback. Lead first reproduced both domain failures; correction `b58298e` passes 170 tests, lint, typecheck and architecture. Initial production M3 Chromium was 7/9, not acceptance. User requested saving progress/new conversation before corrected build/browser/independent re-review; preserve the checkpoint and release active ownership. No M3 PR/CI, merge or deployment is claimed.
+
+The routing and resume sections above for M0–M2 are historical. Current M3 routing: bounded UI worker and fresh independent reviewer through existing collaboration. External Claude preflight succeeded but code transmission was denied; source review did not run there. One initial review completed; its bounded correction exists, and the single same-approach follow-up remains pending.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-01
+terminal_state: null
+handoff_reason: user_requested_save_and_new_conversation
+active_owner: none
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: aafd24d7e7110454847ef8856bc15cd76626c2c7
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3
+task_id: T-018 / T-019 / T-020
+implementation_commit: b58298e9ddc2498830f1fd144277b1c6345359b1
+local_tested_commit: b58298e9ddc2498830f1fd144277b1c6345359b1 — unit/lint/typecheck/architecture only
+browser_tested_commit: 2abbec9ca4ca812b9be0278e6a5ca14c303c87b9 — 7 passed / 2 failed, not correction evidence
+spec_revision: M3-INTEGRATION-CONTRACT revision 1
+evidence_refs:
+  - .team/reports/T-018.md
+  - .team/reports/T-018-attempt-1.md
+  - .team/reports/T-019.md
+  - .team/reports/T-020.md
+  - .team/reports/T-020-attempt-1.md
+integration_state: NOT_OPENED
+remote_durability: product and containing evidence checkpoint to be SSH-pushed before handoff; verify remote branch tip on resume
+blockers: []
+next_action: read T-018 checkpoint; add playback/scope browser coverage, rebuild current HEAD with CJK fonts, rerun affected and full gates, then fixed-commit independent follow-up and current-head PR CI
+```
+
+### M3 resumed verification run
+
+DG-D031: Resume the user's explicit M3 handoff on 2026-09-21 at clean SSH-durable `24c55944f7f57010c7294df90c4feafb5976e75c`. Remote branch matches; no M3 PR or CI exists. Latest main `7bb80d00d03d93a2d392185adba65588c5fe2462` contains unrelated agent-platform changes and is integrated by a normal merge before validation. Source, accepted, worker and original fixed-review worktrees are preserved, including dirty historical workers. The prior owner explicitly released the variant.
+
+Run DG-M3-20260921-02: lead owns playback/scope/focus Chromium regression and full native gates; a fresh in-environment read-only reviewer will inspect the resulting immutable commit as T-020 attempt 2. Exact inherited model slug is not exposed. No external Claude source transfer. Kernel contract stays pinned at `237aa277b0d067f65c8f64f49c6854597f7f8b15`, re-read locally; newer kernel instructions are not adopted. Three-cycle total budget and one same-approach follow-up remain in force. Required commands: frozen install, lint, typecheck, test, check:docs, check:contracts, check:ci, check:architecture, build --mode demo, test:e2e, actionlint, diff --check. No acceptance until independent review and current-head remote CI pass.
+
+DG-D032: REWORK fixed candidate `f7905bbab0c3032b28387d4596795c3a64800c58` for an additional playback concurrency boundary found during independent T-020 attempt 2. Lead Chromium reproduction delayed delivery of real clock responses by 2500ms without changing response/domain content: pause immediately reopened manual stepping, producing two unsettled clock requests. The prior effect-local cancellation assumption is replaced by persistent in-flight ownership and pending UI state; pause stops scheduling but manual/resume wait for response plus refresh. Contract revision 2 makes this existing no-overlap requirement explicit. This is the third bounded cycle, with an adversarial in-flight regression and new immutable candidate required; do not repeat the earlier review unchanged or accept its green baseline tests.
+
+Third-cycle refinement before final verdict: immutable intermediate `30b8d04a709c5b8f681654402284edbdfeeb9da8` closes same-view pause but independent inspection exposed the hook-remount lifetime boundary. Lead repeated the real-response-delay probe with detail→list→detail; maxPending remained 2. The design now uses the existing shared TanStack Query mutation cache rather than a hook-local ref, covering playback, delivery manual controls and Guide through response plus refresh; timer intent stays view-local. Original fixed review checkouts remain unchanged. Draft PR #17 exists for remote validation, not acceptance.
+
+### M3 pre-acceptance resume block — DG-M3-20260921-02 (historical)
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-02
+terminal_state: null
+active_owner: Codex orchestrator
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: 7bb80d00d03d93a2d392185adba65588c5fe2462
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3
+task_id: T-018 / T-019 / T-020
+implementation_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+local_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3 — full native gates pass; full Chromium running
+spec_revision: M3-INTEGRATION-CONTRACT revision 2
+evidence_refs:
+  - .team/reports/T-018.md
+  - .team/reports/T-018-attempt-2.md
+  - .team/reports/T-019-attempt-1.md
+  - .team/reports/T-020-attempt-2.md
+integration_state: OPEN_DRAFT_PR_17
+remote_durability: product candidate verified on SSH remote branch
+blockers: []
+next_action: await fixed-candidate Chromium, independent third-cycle closure and latest-head CI; then preserve acceptance evidence and wait metadata-head CI without merging
+```
+
+DG-D033: ACCEPT M3 AC-13–16 and AC-24. Evaluated implementation `04d6646a2a325bb4efc18c44b463e0e6fd1747f3`; report_ref `.team/reports/T-018-attempt-3.md`; review_ref `.team/reports/T-020-attempt-3.md`. Local 170 tests, all native gates, 40/40 production Chromium journeys and independent no-blocking/high/medium review pass. Exact product-head CI [35637762270](https://github.com/fallrising/newclear/actions/runs/35637762270) passed at synthetic merge `2320eeb2e7a012c9bcf012a591404cb223a5f261`, with browser artifact retained. Latest SSH main `7bb80d0` is integrated. Observation time: 2026-09-21 18:30 UTC. PR #17 is unmerged; evidence metadata and its final head CI remain the administrative closeout, reported on the PR without another self-referential commit. No merge/deployment authorization exists.
+
+### Final M3 acceptance resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-02
+terminal_state: null
+active_owner: Codex orchestrator — final metadata-head CI closeout
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: 7bb80d00d03d93a2d392185adba65588c5fe2462
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3 ACCEPTED
+task_id: T-018 / T-019 / T-020
+implementation_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+local_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+browser_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3 — 40/40
+ci_tested_merge: 2320eeb2e7a012c9bcf012a591404cb223a5f261
+ci_run: https://github.com/fallrising/newclear/actions/runs/35637762270
+spec_revision: M3-INTEGRATION-CONTRACT revision 2
+evidence_refs:
+  - .team/reports/T-018-attempt-3.md
+  - .team/reports/T-019.md
+  - .team/reports/T-020-attempt-3.md
+integration_state: OPEN_PR_17_NOT_MERGED
+remote_durability: product is SSH-durable; this evidence checkpoint will be SSH-pushed, with final head and CI recorded on PR 17
+blockers: []
+next_action: require current evidence-head CI before Ready/handoff; final PR metadata records DONE and released ownership after success, without an infinite self-reference commit; merge requires a separate user instruction
 ```

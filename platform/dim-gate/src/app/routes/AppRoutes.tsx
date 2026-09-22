@@ -4,6 +4,7 @@ import type { SessionView } from '../../domain/schemas'
 import { AccessPage, AdminCatalogPage, AdminOverviewLinks, AuditPage, ModelsPage, NavigationPage } from '../../features/admin'
 import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
 import { CenterOverview, Guide, UnknownRoute } from '../../features/foundation'
+import { PipelineDetailPage, PipelineListPage, ReleaseDetailPage, ReleaseListPage } from '../../features/delivery'
 import { CapacityPage, CatalogPage, JobDetailPage, JobsPage, RequestDetailPage, RequestListPage, RequestWizard } from '../../features/self-service'
 import { CenterLayout } from '../layouts/CenterLayout'
 
@@ -18,6 +19,9 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/rd/catalog/:itemId/request" element={<CenterLayout routeKey="rd.catalog-request" center="rd" session={session}><RequestWizard /></CenterLayout>} />
     <Route path="/rd/requests" element={<CenterLayout routeKey="rd.requests" center="rd" session={session}><RequestListPage center="rd" session={session} /></CenterLayout>} />
     <Route path="/rd/requests/:requestId" element={<CenterLayout routeKey="rd.request-detail" center="rd" session={session}><RequestDetailPage center="rd" /></CenterLayout>} />
+    <Route path="/rd/pipelines" element={<CenterLayout routeKey="rd.pipelines" center="rd" session={session}><PipelineListPage session={session} /></CenterLayout>} />
+    <Route path="/rd/pipelines/:runId" element={<CenterLayout routeKey="rd.pipeline-detail" center="rd" session={session}><PipelineDetailPage session={session} /></CenterLayout>} />
+    <Route path="/rd/releases/:releaseId" element={<CenterLayout routeKey="rd.release-detail" center="rd" session={session}><ReleaseDetailPage session={session} /></CenterLayout>} />
     <Route path="/ops" element={<CenterLayout routeKey="ops.overview" center="ops" session={session}><CenterOverview key={`${session.identityEpoch}:ops`} center="ops" session={session} /></CenterLayout>} />
     <Route path="/ops/cmdb" element={<CenterLayout routeKey="ops.cmdb" center="ops" session={session}><CmdbListPage session={session} /></CenterLayout>} />
     <Route path="/ops/cmdb/:ciId" element={<CenterLayout routeKey="ops.ci-detail" center="ops" session={session}><CiDetailPage session={session} /></CenterLayout>} />
@@ -27,6 +31,8 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/ops/jobs" element={<CenterLayout routeKey="ops.jobs" center="ops" session={session}><JobsPage /></CenterLayout>} />
     <Route path="/ops/jobs/:jobId" element={<CenterLayout routeKey="ops.job-detail" center="ops" session={session}><JobDetailPage /></CenterLayout>} />
     <Route path="/ops/capacity" element={<CenterLayout routeKey="ops.capacity" center="ops" session={session}><CapacityPage /></CenterLayout>} />
+    <Route path="/ops/releases" element={<CenterLayout routeKey="ops.releases" center="ops" session={session}><ReleaseListPage session={session} /></CenterLayout>} />
+    <Route path="/ops/releases/:releaseId" element={<CenterLayout routeKey="ops.release-detail" center="ops" session={session}><ReleaseDetailPage session={session} center="ops" /></CenterLayout>} />
     <Route path="/admin" element={<CenterLayout routeKey="admin.overview" center="admin" session={session}><><CenterOverview key={`${session.identityEpoch}:admin`} center="admin" session={session} /><AdminOverviewLinks /></></CenterLayout>} />
     <Route path="/admin/access" element={<CenterLayout routeKey="admin.access" center="admin" session={session}><AccessPage session={session} /></CenterLayout>} />
     <Route path="/admin/navigation" element={<CenterLayout routeKey="admin.navigation" center="admin" session={session}><NavigationPage /></CenterLayout>} />

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-21T18:38:51.015592+00:00",
+  "base_commit": "7bb80d00d03d93a2d392185adba65588c5fe2462",
+  "scope": "M1 single-operator control plane, real PostgreSQL and HTTP, deterministic fake adapters, React component tests",
+  "milestone": "M1",
+  "m1_complete": true,
+  "checks": {
+    "m0_regression_tests": {
+      "passed": 45,
+      "command": "make platform-check"
+    },
+    "platform_postgres_http_tests": {
+      "passed": 21,
+      "command": "make platform-check"
+    },
+    "web_unit_component_tests": {
+      "passed": 12,
+      "command": "npm --prefix web run check"
+    },
+    "python_lint_format": "passed",
+    "typescript": "passed",
+    "prettier": "passed",
+    "vite_production_build": "passed",
+    "npm_audit_reported_vulnerabilities": 0,
+    "workflow_actionlint": "passed",
+    "compose_config": "passed",
+    "python_lock_install_dry_run": "passed",
+    "asgi_static_build_smoke": {
+      "root_status": 200,
+      "assets_status": {
+        "/assets/index-DWTJCAYW.js": 200,
+        "/assets/index-BmVToRr4.css": 200
+      },
+      "private_dotenv_status": 404,
+      "csp_present": true
+    }
+  },
+  "environment": {
+    "python": "3.12.3",
+    "node": "24.18.0",
+    "postgresql": "18.6",
+    "postgres_image": "postgres@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
+    "compose_validator": "5.5.1"
+  },
+  "acceptance": {
+    "AT-01": "passed: duplicate/conflicting/concurrent creation, atomic rollback, versioned retry, partial unique constraint",
+    "authentication": "passed: bootstrap, CSRF/origin, hashed/revocable sessions, expiry, cookie flags, rate limit",
+    "durability": "passed: fresh API instance, separate worker process, durable source cursor and events",
+    "http_sse": "passed: real TCP stream crosses worker commit, Last-Event-ID replay, logout closes live stream",
+    "fake_admission": "passed: four slots, fifth queued, observed fake cleanup before release, lease fence and quarantined capacity",
+    "ui": "passed in jsdom: login/create/activity/logout, lost-response retry key, unsafe HTML stays text, stale session refresh cancellation"
+  },
+  "cleanup": {
+    "owned_postgres_containers_removed": true,
+    "temporary_http_server_stopped": true,
+    "production_services_deployed": false
+  },
+  "limitations": [
+    "Runtime and agent adapters are fake fixtures; no repository checkout, real VM allocation or model execution through the platform.",
+    "UI validation is component/unit testing plus built-asset HTTP checks; no real-browser E2E or visual QA.",
+    "Expired worker ownership is quarantined; full real-runtime reconciliation and recovery are later milestones.",
+    "No approval, pause/cancel, provider budget, artifact store/export, backup/GC or production deployment acceptance.",
+    "Pending UI command keys survive same-form retries, not a browser reload."
+  ],
+  "source_sha256": {
+    "Makefile": "80459451be3fc5c6e55a427b966da570796eb807fd9fd24f755cd84af7e0091b",
+    "compose.m1.yml": "6be629a7e71340e41491e078b49643d59f29a72643253a551eed54e6be0f0ed1",
+    "pyproject.toml": "1e411d90d795e06de191bcef98c6d3a7ca6249bb8d05d9682baef9a04d815182",
+    "requirements.lock": "b2824e40e107f9153ebc5cf82052ace155b218a6f2b25d2fb3358f52023f5baa",
+    "scripts/test-postgres.py": "f4d51db33922412841982b422ab1dc455f46588e84e9fbd9e90bec9424ef1d73",
+    "src/agent_platform/__init__.py": "9a776bae0825265dcbe3077b20e237d8ee0e09e33cc74c6bb080b1888f861cb7",
+    "src/agent_platform/adapters.py": "02e9a0d37e97210b8a610456904f71478cd098805b08aef5a69c57c6739ea280",
+    "src/agent_platform/api.py": "bd0652cee47a3bf5cc42803c381edbe086eb6729913639fd3f5e421711cadba7",
+    "src/agent_platform/auth.py": "fa44d8274ebfabbfa9809f81f8f25262a910625bc0eef4f108183e3f67aaa5fc",
+    "src/agent_platform/cli.py": "ca7af35582bc50c7d02e2b7ecec34db66dc094288ab7c8084e7a2f2e57f2ff38",
+    "src/agent_platform/config.py": "a87b2c129e71c9034a8a43ab6e4f10a86de7b84a48a3bf20cc54c9275368a6ce",
+    "src/agent_platform/db.py": "9c19af9a3234e542d6ed7fdb68ae7dafdb993b29348a207eed9aac4c4daae9ec",
+    "src/agent_platform/domain.py": "c52a417dc5c7ea9e84fceb06f21807b28e552e19f0f34cffeaf5492b3fe705da",
+    "src/agent_platform/migrations/001_control_plane.sql": "3afb28fc86350ef5eab51ccda909d0535c40a9de9317de3d9eef83489fd346db",
+    "src/agent_platform/store.py": "0d7a90923aa681a79c27d3f704725a65656fbc05326969a1a951ea85fcbdf828",
+    "src/agent_platform/worker.py": "0727257a8081d50b42712103c599ff56617c5448aaa6adfd521f470f5738692f",
+    "tests_platform/test_control_plane.py": "dae47a02191a8bad3f94c3f937770dd9b756ff1a6ffa24a11062776aaa24ee01",
+    "tests_platform/test_http_stream.py": "d61850132a3f5bc3e8ac83a0a33661d8c49a9c1222a796d5a66117aa6919757f",
+    "web/package-lock.json": "db1ca6216f94499f064d0525a7ceeeb76d916e26e96260de2b575e239284f5c1",
+    "web/package.json": "a868add1b7cfab3f6308ea83f8d58506cc860568bec947d67c40a19103eb1791",
+    "web/src/App.test.tsx": "f3778defb50a733eb13bdd74b2fa33f07130e739c69578abc016e44890561ecf",
+    "web/src/App.tsx": "3d24409313329d034ac0c9fec1fa648e43f55b82cc0510eec5c2bbf6a7e851f0",
+    "web/src/api.test.ts": "fd4d188c80fc7530984e0106509d38e180df930524c778d0cb7064d43de981d6",
+    "web/src/api.ts": "157dbb4df3598b51f699c87cbfe3ad305e6cd87a2dd5e2a3982bf054a175221f",
+    "web/src/events.test.ts": "79efd217faa2ece20332b927d63fc7a5817f50feeabe0e7f8135a7867b9571de",
+    "web/src/events.ts": "3e0a1309b194aa968c0f3a6bdb5c9fdc0779ba56eca651b713a3445e74e67f74",
+    "web/src/main.tsx": "bb9b2c01264fdf018f27e991209b82a2a2777e64d600b92214e94012ac24a745",
+    "web/src/style.css": "365073e4400c85d5328a485bfd6e41f05f17d7caabc8409090e5da0526761b09",
+    "web/src/test-setup.ts": "ae4b6b92c8c0f06526032b2dedeb4fb0e93b85af2a138a423386f2e36894a685",
+    "web/tsconfig.json": "678063ccfd816cba54852ba669df908b981197e683626d8271bd2da3096d726e",
+    "web/vite.config.ts": "aa29e99d8a97b2dd5b37f6ac7bcef5a874684713e10d0169b698180a20edba83"
+  }
+}

@@ -230,9 +230,12 @@ def main():
                 continue
             row = json.loads(path.read_text())
             try:
-                client.operation(
-                    {"id": run["id"], "generation": row["generation"], "goal": ""}, "release"
-                )
+                # Test finalizer owns only these handles; expired worker leases must
+                # not be fabricated to bypass the product connector fence.
+                if row.get("handle") and row.get("observed"):
+                    handle = row["handle"]
+                    node.attach(handle["owner"], handle["id"], handle["token"]).close()
+                    host.wait_removed(row["observed"])
             except Exception:
                 errors.append(run["id"])
         report["cleanup_errors"] = errors

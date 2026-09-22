@@ -2,12 +2,13 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。下一步為 M3 恢復與安全控制。**
+**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。M3 的 worker 恢復／fencing 切片已通過；安全控制與預算仍待完成。**
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
 ## 文件入口
 
+- [M3 worker 恢復](docs/M3-RECOVERY.md)：同一 VM 接管、持久 lease fence、故障注入與剩餘工作。
 - [M2 真實任務與啟動](docs/M2.md)：私有 connector、固定 repository bundle、真實 VM／模擬模型、事件與 diff 驗收。
 
 - [M1 工作台與啟動](docs/M1.md)：operator 登入、PostgreSQL queue、React UI、驗收與後續邊界。

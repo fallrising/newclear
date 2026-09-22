@@ -89,6 +89,9 @@ class RuntimeTests(PlatformFixture):
         class Uncertain:
             calls = 0
 
+            def fence(self, run):
+                pass
+
             def allocate(self, run):
                 self.calls += 1
                 raise TimeoutError("do not expose this upstream body")
@@ -131,6 +134,9 @@ class RuntimeTests(PlatformFixture):
         self.create()
 
         class IncompleteStop:
+            def fence(self, run):
+                pass
+
             def allocate(self, run):
                 return {
                     "handle": "real-handle",

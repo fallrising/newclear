@@ -1,7 +1,7 @@
 """PostgreSQL queue, bounded admission and lease fencing for fake and real adapters.
 
-Expired ownership is quarantined, never automatically reassigned to a new
-adapter instance. Full reconciliation and recovery remain M3 work.
+Expired real-runtime ownership is reconciled against the existing instance.
+Unknown effects retain the original binding and resource reservation.
 """
 
 from contextlib import contextmanager
@@ -25,10 +25,12 @@ class Worker:
     def state(self, conn, run, state, reason=None):
         row = conn.execute(
             (
-                "UPDATE runs SET state=%s,state_version=state_version+1,reason=%s "
+                "UPDATE runs SET interrupted_from=CASE WHEN %s='interrupted' THEN "
+                "CASE WHEN state='interrupted' THEN interrupted_from ELSE state END "
+                "ELSE NULL END,state=%s,state_version=state_version+1,reason=%s "
                 "WHERE id=%s RETURNING state_version"
             ),
-            (state, reason, run["id"]),
+            (state, state, reason, run["id"]),
         ).fetchone()
         event(
             conn,
@@ -40,7 +42,7 @@ class Worker:
     def reconcile_expired(self):
         with self.db.transaction() as conn:
             rows = conn.execute(
-                "SELECT * FROM jobs WHERE status='leased' AND lease_until<=now() "
+                "SELECT * FROM jobs WHERE status='leased' AND lease_until<=clock_timestamp() "
                 "ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 50"
             ).fetchall()
             for job in rows:
@@ -49,7 +51,11 @@ class Worker:
                 ).fetchone()
                 if run["state"] not in TERMINAL:
                     self.state(conn, run, "interrupted", "worker_lease_expired")
-                conn.execute("UPDATE jobs SET status='interrupted' WHERE id=%s", (job["id"],))
+                conn.execute(
+                    "UPDATE jobs SET status='interrupted',available_at=clock_timestamp() "
+                    "WHERE id=%s",
+                    (job["id"],),
+                )
                 if run["sandbox_id"]:
                     conn.execute(
                         (
@@ -70,6 +76,12 @@ class Worker:
             return len(rows)
 
     def claim(self):
+        if self.connector is not None:
+            from .recovery import claim_recovery
+
+            recovery = claim_recovery(self)
+            if recovery:
+                return recovery
         for node, backend in [("fake-local", "fake"), ("cocoon-local", "openhands")]:
             if backend == "openhands" and self.connector is None:
                 continue
@@ -141,7 +153,7 @@ class Worker:
             conn.execute(
                 (
                     "UPDATE jobs SET "
-                    "status='leased',lease_owner=%s,lease_until=now()+interval '30 "
+                    "status='leased',lease_owner=%s,lease_until=clock_timestamp()+interval '30 "
                     "seconds',generation=%s,attempts=attempts+1 WHERE id=%s"
                 ),
                 (self.owner, generation, job["id"]),
@@ -158,12 +170,16 @@ class Worker:
     def owned(self, claim):
         with self.db.transaction() as conn:
             job = conn.execute(
-                "SELECT *,lease_until>now() AS live FROM jobs WHERE id=%s FOR UPDATE",
+                "SELECT * FROM jobs WHERE id=%s FOR UPDATE",
+                (claim["job_id"],),
+            ).fetchone()
+            live = conn.execute(
+                "SELECT lease_until>clock_timestamp() AS live FROM jobs WHERE id=%s",
                 (claim["job_id"],),
             ).fetchone()
             if (
                 not job
-                or not job["live"]
+                or not live["live"]
                 or job["status"] != "leased"
                 or job["lease_owner"] != self.owner
                 or job["generation"] != claim["generation"]
@@ -174,10 +190,7 @@ class Worker:
             ).fetchone()
             if run["generation"] != claim["generation"]:
                 raise Problem(409, "worker_generation_stale")
-            conn.execute(
-                ("UPDATE jobs SET lease_until=now()+interval '30 seconds' WHERE id=%s"),
-                (job["id"],),
-            )
+            run["lease_until"] = job["lease_until"]
             yield conn, run
 
     def execute(self, claim):

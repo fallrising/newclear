@@ -237,7 +237,7 @@ for (const provider of ['aws', 'aliyun', 'onprem'] as const) {
     await expect(page.getByRole('heading', { name: '已觀測證據' })).toBeVisible()
     await page.goto('guide')
     const steps = page.locator('[data-testid^="guide-step-"]')
-    expect(await steps.count()).toBeGreaterThanOrEqual(8)
+    await expect(steps).toHaveCount(8)
     for (const step of await steps.all()) await expect(step).toHaveAttribute('data-completed', 'true')
     await info.attach('guide-completion', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
     await become(page, 'user-admin')
@@ -250,7 +250,8 @@ for (const provider of ['aws', 'aliyun', 'onprem'] as const) {
     await page.getByRole('button', { name: '重置示範', exact: true }).click()
     await page.getByRole('dialog').getByRole('button', { name: '確認重置示範', exact: true }).click()
     await expect(page.getByTestId('logical-clock')).toContainText('0ticks')
-    for (const step of await page.locator('[data-testid^="guide-step-"]').all()) await expect(step).toHaveAttribute('data-completed', 'false')
+    await expect(steps).toHaveCount(8)
+    for (const step of await steps.all()) await expect(step).toHaveAttribute('data-completed', 'false')
   })
 }
 

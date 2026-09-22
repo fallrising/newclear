@@ -9,7 +9,7 @@
 | core 鎖失敗後 nil context panic | 已確認：固定來源、實機 stack、原版回歸失敗、修補版測試通過；兩次獨立建置 SHA 相同 | etcd timeout 會擴大成 core process crash，API EOF／短暫不可用；操作結果不確定 | 第一優先。修補範圍小，現成 artifact；成本以備份、core-only restart 和功能回歸為主 |
 | etcd WAL 同步長停頓 | 已確認現象：11:13–11:42 UTC 的 20 次 slow fdatasync，最高約 23.5 秒；當時 I/O wait 升高 | metadata／lease／lock 操作逾時，部署失敗或留下需對帳的配額；修 core 不會讓慢磁碟變快 | 同步調查，先用有界功能試驗判斷 MVP 可否繼續；若負載下再出現秒級停頓，停止該次 mutation 並對帳 |
 | guest 外部的虛擬磁碟／宿主機儲存抖動 | 目前主要假說，未證實：KVM virtio root disk、容量僅約 1%、故障後 CPU／記憶體未飽和；kernel 查無 I/O error／OOM，列出的常規 timer 未對上時段 | 若重現，單台控制面的可用性仍不可靠 | 先交叉比對 guest CPU steal、IO PSI、diskstats 與 etcd journal。供應商宿主機／儲存事件可補證，並非開發必須等待的輸入 |
-| worker 重裝執行器尚未完成 | 已確認：quarantine/install/restore 底層有本機測試，live wiring／連續 HTTP guard 與三次完整實機驗收已完成 | 已取得連續三次完整成功；後續仍需處理故障恢復與長期觀測 | 接在 core 功能回歸之後；屬中等開發／故障恢復驗證工作，不需 provider API |
+| worker 重裝與後續恢復能力 | 已確認：quarantine/install/restore 底層有本機測試，live wiring／連續 HTTP guard 與三次完整實機驗收已完成 | 已取得連續三次完整成功；後續仍需處理故障恢復與長期觀測 | 接在 core 功能回歸之後；屬中等開發／故障恢復驗證工作，不需 provider API |
 
 這裡的低／中等成本是工程範圍估算，不是供應商報價或交付工時承諾。直接新增多台控制面、snapshot restore／HA 和 OS 重灌驗收成本較高，保留在後續階段。
 

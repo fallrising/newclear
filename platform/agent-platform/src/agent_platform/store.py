@@ -353,14 +353,10 @@ class Store:
                 (run_id, after),
             ).fetchall()
 
-    def action(self, conn, run_id, data):
-        run = require_row(
-            conn.execute("SELECT * FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
-        )
-        if run["state_version"] != data.expected_state_version:
-            raise Problem(409, "state_conflict")
-        # M0 measured primitives do not establish safe platform pause/cancel/recovery.
-        raise Problem(409, "unsupported_capability:" + data.action)
+    def action(self, conn, run_id, data, command_id):
+        from .cancellation import request_cancel
+
+        return request_cancel(conn, run_id, data, command_id)
 
     def runtime(self):
         with self.db.transaction() as conn:

@@ -28,6 +28,10 @@ let lastPayload: Record<string, string>;
 let lostResponse: boolean;
 let keys: string[];
 let result: Run['result'];
+let cancelEnabled: boolean;
+let runState: string;
+let cancelKeys: string[];
+let cancelLostResponse: boolean;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -37,6 +41,10 @@ beforeEach(() => {
   lostResponse = false;
   keys = [];
   result = null;
+  cancelEnabled = false;
+  runState = 'queued';
+  cancelKeys = [];
+  cancelLostResponse = false;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -101,12 +109,24 @@ beforeEach(() => {
         return Response.json({ task: tasks[0] }, { status: 202 });
       }
       if (path === '/api/v1/tasks') return Response.json({ items: tasks, next_cursor: null });
+      if (path === '/api/v1/runs/run-1/actions' && method === 'POST') {
+        cancelKeys.push((options.headers as Record<string, string>)['Idempotency-Key']);
+        expect(JSON.parse(String(options.body))).toEqual({
+          action: 'cancel',
+          expected_state_version: 1,
+        });
+        if (cancelLostResponse && cancelKeys.length === 1)
+          throw new TypeError('lost cancel response');
+        runState = 'cancelling';
+        return Response.json({ command_id: 'cancel-command', status: 'pending' }, { status: 202 });
+      }
       if (path === '/api/v1/tasks/task-1') {
         const run: Run = {
           id: 'run-1',
           task_id: 'task-1',
           attempt_no: 1,
-          state: 'queued',
+          state: runState,
+          capabilities: { cancel: cancelEnabled },
           state_version: 1,
           base_sha: lastPayload.base_sha,
           goal: lastPayload.goal,
@@ -208,4 +228,32 @@ it('renders a saved real VM diff as text and keeps unsupported controls disabled
   for (const name of ['暫停', '繼續', '取消', '審批'])
     expect(screen.getByRole('button', { name })).toBeDisabled();
   expect(screen.getByText(/專案測試：未設定/)).toBeVisible();
+});
+
+it('submits cancellation and keeps pending stop distinct from cancelled', async () => {
+  cancelEnabled = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '取消' }));
+  expect(await screen.findByText(/正在確認執行環境已停止/)).toBeVisible();
+  expect(screen.queryByText('已取消')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '取消' })).toBeDisabled();
+  expect(cancelKeys).toHaveLength(1);
+});
+
+it('retries a lost cancel response with the same command key', async () => {
+  cancelEnabled = true;
+  cancelLostResponse = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '取消' }));
+  await screen.findByRole('alert');
+  await user.click(screen.getByRole('button', { name: '取消' }));
+  expect(await screen.findByText(/正在確認執行環境已停止/)).toBeVisible();
+  expect(cancelKeys).toHaveLength(2);
+  expect(cancelKeys[0]).toBe(cancelKeys[1]);
 });

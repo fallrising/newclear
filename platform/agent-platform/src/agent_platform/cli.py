@@ -93,14 +93,27 @@ def main():
             if args.once:
                 runner.run_once()
             else:
-                with ThreadPoolExecutor(max_workers=4) as pool:
+                with (
+                    ThreadPoolExecutor(max_workers=4) as pool,
+                    ThreadPoolExecutor(max_workers=4) as controls,
+                ):
                     pending = set()
+                    stopping = set()
                     while True:
                         for future in list(pending):
                             if future.done():
                                 future.result()
                                 pending.remove(future)
                         runner.reconcile_expired()
+                        for future in list(stopping):
+                            if future.done():
+                                future.result()
+                                stopping.remove(future)
+                        while len(stopping) < 4:
+                            cancellation = runner.claim_cancel()
+                            if not cancellation:
+                                break
+                            stopping.add(controls.submit(runner.execute, cancellation))
                         while len(pending) < 4:
                             claim = runner.claim()
                             if not claim:

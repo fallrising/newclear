@@ -126,6 +126,11 @@ def execute_real(worker, claim):
         try:
             run = snapshot()
             client.fence(run)
+            if run["state"] == "cancelling":
+                from .cancellation import execute_cancel
+
+                execute_cancel(worker, claim, run)
+                return
             observed = client.inspect(run) if claim.get("recovery") else {"phase": "absent"}
             phase = observed["phase"]
             if claim.get("recovery"):

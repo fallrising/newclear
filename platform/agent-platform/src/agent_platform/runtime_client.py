@@ -66,6 +66,9 @@ class RuntimeClient:
         except ProbeError:
             raise Problem(409, "connector_lease_unconfirmed") from None
 
+    def cancel(self, run):
+        return self.call("POST", f"/v1/runs/{run['id']}/cancel", {"generation": run["generation"]})
+
     def inspect(self, run):
         return self.call("GET", f"/v1/runs/{run['id']}?generation={run['generation']}")
 

@@ -1,5 +1,7 @@
 # M3 第一個切片：worker 恢復與租約 fencing
 
+本文件保留 recovery 切片交付時的行為；最新取消功能與剩餘工作見 [M3 cancel](M3-CANCEL.md)。
+
 M2 已於 PR #21 合併（`75d9c08`）。此切片提供 AT-04／AT-05 的 worker 重啟、未知回覆、node partition 與舊 generation 驗收；**M3 尚未整體完成**。審批、取消／暫停／恢復、受控 egress、model proxy、預算／用量與完整 audit 仍待開發。OpenHands 仍使用固定模擬模型，不需要 provider key。
 
 ## 恢復行為

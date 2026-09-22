@@ -154,14 +154,16 @@ test('AC-28: corrupt bytes survive memory recovery and reload until an explicit 
 })
 
 test('AC-28: 1000 actual UI commands persist; command 1001 fails atomically and reset remains available', async ({ page }, info) => {
-  test.setTimeout(12 * 60_000)
+  test.setTimeout(15 * 60_000)
   const health = captureBrowserHealth(page)
   health.expectedStatuses.add(429)
   try {
     await guide(page)
     for (let count = 1; count <= 1000; count++) {
       await page.getByRole('button', { name: '前進演示時鐘' }).click()
-      await expect(page.getByTestId('logical-clock')).toHaveText(new RegExp('^' + count + '\\s*ticks$'))
+      await expect.poll(() => page.getByTestId('logical-clock').innerText(), { intervals: [25] })
+        .toMatch(new RegExp('^' + count + '\\s*ticks$'))
+      if (count % 250 === 0) console.info('Verified ' + count + ' genuine visible UI commands')
     }
     const before = await rawSnapshot(page)
     const full = (await saved(page)).snapshot

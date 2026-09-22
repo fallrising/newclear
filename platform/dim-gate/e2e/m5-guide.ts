@@ -55,7 +55,13 @@ export async function completeGuide(page: Page, info: TestInfo, keyboardOnly: bo
   const heading = page.getByRole('heading', { level: 1 })
   const guide = async () => { await user.activate(link('示範控制台')); await expect(page.getByTestId('guide-step-request')).toBeVisible() }
   const become = async (value: string) => {
-    await user.select(page.getByRole('combobox', { name: '示範身分' }), value)
+    const staysOnGuide = new URL(page.url()).pathname.endsWith('/guide')
+    const selector = page.getByRole('combobox', { name: '示範身分' })
+    await user.select(selector, value)
+    await expect(selector).toHaveValue(value)
+    await expect(selector).toBeEnabled()
+    const destination = staysOnGuide ? 'guide' : value === 'user-ops' ? 'ops' : value === 'user-admin' ? 'admin' : 'rd'
+    await expect(page).toHaveURL(new RegExp(`/dim-gate/${destination}(?:[?#].*)?$`))
     await expect(page.getByRole('navigation', { name: '中心導覽' })).toBeVisible()
   }
   const capture = async (name: string) => {

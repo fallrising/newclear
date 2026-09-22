@@ -222,14 +222,14 @@ describe('persisted controller identity and transactions', () => {
     expect(reset.getSnapshot().observations.buckets).toEqual([])
   })
 
-  it('serialization failure leaves running scheduler, receipts and all domain state unchanged', async () => {
+  it.each(['snapshot', 'envelope'])('%s serialization failure leaves running scheduler, receipts and all domain state unchanged', async (boundary) => {
     const h = harness(), controller = h.start()
     await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'serialize-resume' }, 'serialize-trigger', identity(controller))
     await controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-step', identity(controller))
     const before = controller.getSnapshot(), raw = h.raw
     const stringify = JSON.stringify
     const failure = vi.spyOn(JSON, 'stringify').mockImplementation((value, replacer, space) => {
-      if (value && typeof value === 'object' && 'formatVersion' in value) throw new TypeError('Injected serialization failure')
+      if (value && typeof value === 'object' && (boundary === 'snapshot' ? 'schemaVersion' in value : 'formatVersion' in value)) throw new TypeError('Injected serialization failure')
       return stringify(value, replacer as Parameters<typeof stringify>[1], space)
     })
     try {

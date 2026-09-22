@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collect private control-plane health evidence without changing remote services."""
 import argparse
+from contextlib import nullcontext
 import json
 import math
 import re
@@ -68,7 +69,10 @@ def main():
     parser.add_argument('--samples', type=int, default=61)
     parser.add_argument('--interval', type=float, default=10)
     parser.add_argument('--disk-probe', action='store_true', help='Bounded scratch-file writes on 01; does not touch etcd data')
+    parser.add_argument('--concurrent-read-only', action='store_true', help='Observe a planned mutation without holding its controller lock; forbidden with --disk-probe')
     args = parser.parse_args()
+    if args.concurrent_read_only and args.disk_probe:
+        parser.error('concurrent observation cannot write a disk probe')
     if not 2 <= args.samples <= 361 or not 1 <= args.interval <= 60:
         parser.error('samples must be 2..361 and interval 1..60 seconds')
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
@@ -91,7 +95,7 @@ def main():
         return
     path = PROJECT / 'private/diagnostics' / (stamp + '-control-health.json')
     report = {'host': 'ckc-disposable-01', 'samples': [], 'status': 'collecting'}
-    with ClusterLock(PROJECT):
+    with (nullcontext() if args.concurrent_read_only else ClusterLock(PROJECT)):
         op = Operator()
         try:
             for index in range(args.samples):

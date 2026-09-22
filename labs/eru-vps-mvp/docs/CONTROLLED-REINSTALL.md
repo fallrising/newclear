@@ -1,8 +1,10 @@
 # 自控清理重裝：日常路徑與最後手段
 
+最新狀態：[優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
+
 依 owner 的操作習慣，日常以我們的腳本清理／重裝 ERU；只有 OS 或主機狀態已無法可信恢復時，才由 owner 在 provider 控制台重裝。**不需要先接供應商 API。**
 
-更新：quarantine／六檔安裝／checksum 恢復底層及狀態機原型已完成本機測試；尚未接線至 live execute，沒有在 VPS 停服務或清理元件。62 項測試與控制面阻擋詳見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。以下執行契約仍需實機驗收。控制面先前的 etcd 延遲／core panic 仍須驗證修復；一次 health 通過不足以解除這個問題。
+更新：quarantine／六檔安裝／checksum 恢復底層與連續 HTTP 守護已接入 worker-4 execute。本機 82 項測試通過；實測計次見 [最新進展](M2-PRIORITIES-2026-09-22.md)。core panic 修補已部署；歷史 etcd I/O 停頓根因仍需追蹤，持續以有界負載觀測核對。
 
 ## 分清四種操作
 
@@ -34,7 +36,7 @@
 
 [worker_scope.py](../scripts/worker_scope.py) 唯讀比對 worker ownership manifest、十個既有 owned files 的 SHA256、路徑型態／owner／權限，從中選出六個元件檔案。manifest 出現額外路徑、外部修改、hardlink、symlink、候選資料根或其子項有 mount、未知控制面資料時會阻擋。共享父檔案系統（例如 `/run` tmpfs）不是要清除的 mount，允許正常使用。
 
-實際 worker-4 審核結果：六個檔案皆符合 manifest；agent 狀態為一個 journal cursor，CNI 狀態為 last-reserved IP 與 lock，`/run/eru/workloads` 不存在。完整 hash-bound plan 位於 `private/operations/plans/20260922T122547Z-fc1e697c.json`；只表示當次範圍核對通過，不表示已清理。
+最初唯讀階段的 worker-4 審核結果：六個檔案皆符合 manifest；agent 狀態為一個 journal cursor，CNI 狀態為 last-reserved IP 與 lock，`/run/eru/workloads` 不存在。完整 hash-bound plan 位於 `private/operations/plans/20260922T122547Z-fc1e697c.json`；只表示當次範圍核對通過，不表示已清理。
 
 ## 計畫命令
 
@@ -46,9 +48,9 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode c
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode provider-reimage
 ```
 
-兩種模式目前都 `executable: false`。`execute` 會拒絕，沒有藏在選項後面的 stop／rm／reimage 指令。
+未提供 `--health` 與 `--canary-run` 的 component-reinstall 計畫仍會阻擋；完整用法見 OPERATOR.md。只有空 worker-4、已部署的 core patch、近期完整健康觀測、ownership 與兩台 guard canaries 全部符合時才可執行。provider-reimage 一律 `executable: false`。
 
-## 執行器要完成的契約
+## 執行契約
 
 1. 在 B 取得 mutation lock，核對 plan hash／主機身分／角色／健康／空節點／ownership，記錄其他 worker 與共享服務基線。
 2. 禁止 worker-4 排程；只停止本台 agent、ERU socket proxy。再讀 metadata／runtime，避免把下線視為自動 drain。
@@ -57,10 +59,10 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode p
 5. nginx lifecycle／HTTP／資源回收通過，確認其他 workers 和原 Docker／containerd 沒有重啟或變更，才恢復排程；記錄 worker 元件 revision，不增加 OS incarnation 或全群 generation。
 6. 每一階段先保存意圖、再保存觀測。中途失敗保留 target 不可排程及 recovery evidence；先對帳，不自動跳過失敗或清理另一台。quarantine 後的恢復必須驗 checksum，不能覆蓋後來產生的新資料。
 
-這些是待實作／驗證的執行契約；現有程式只產生計畫與唯讀 audit。
+正向元件重裝流程已實作。guard 在每個變更邊界檢查，任一 HTTP failure／缺樣本或觀測間隔過大都不能計作成功。若 node up 回覆不確定或恢復後驗證失敗，記錄一次獨立的 corrective fence；不能確認時保留 uncertain，不宣稱節點已安全下線。完整失敗恢復 CLI 與實機 fault injection 仍待補齊。
 
 ## 驗收與順序
 
-先完成控制面修補與穩定性驗證，再完成 worker-only installer、quarantine／恢復及上述狀態機。第一輪只跑空的 worker-4；連續三次元件重裝都成功，且其他 worker HTTP／原服務不受影響，才擴大範圍。這組結果另外記錄為「元件重裝」，原 V06／V08 的 OS 重灌與全群 fresh 條件仍未通過。
+控制面修補與有界負載驗證已完成；元件重裝依上述狀態機驗證。第一輪只跑空的 worker-4；連續三次元件重裝都成功，且其他 worker HTTP／原服務不受影響，才擴大範圍。這組結果另外記錄為「元件重裝」，原 V06／V08 的 OS 重灌與全群 fresh 條件仍未通過。
 
-本輪 34 項本機測試通過，包括既有 21 項操作器測試、新的模式選擇／scope 阻擋及檔案系統邊界測試。VPS 只做了唯讀 audit 與 plan，沒有進行清理或重裝。
+最新本機測試與實機結果見 M2-PRIORITIES-2026-09-22.md；早期僅唯讀 audit 的紀錄不再代表目前功能範圍。備份與失敗 journal 保留，不永久清除。

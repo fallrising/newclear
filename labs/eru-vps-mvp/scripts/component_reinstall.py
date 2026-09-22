@@ -1,10 +1,7 @@
-"""Worker-4 state-machine prototype; intentionally not wired to labctl execute.
-
-Continuous HTTP canaries and validated control-plane readiness are required
-before integration. All remote commands use Operator aliases.
-"""
+"""Bounded worker-4 reinstall with continuous HTTP guards and retained recovery."""
 import base64
 import hashlib
+import gzip
 import io
 import json
 from pathlib import Path
@@ -16,6 +13,7 @@ import urllib.request
 
 from labops import atomic_json, digest, lock_fds
 from worker_scope import REINSTALL_FILES
+from canaries import HTTPGuards
 
 TARGET = 'worker-4'
 ALIAS = 'ckc-disposable-04'
@@ -39,17 +37,61 @@ def empty_target(snapshot):
 
 def protected_membership(snapshot):
     return {
-        'pods': snapshot['pods'],
-        'nodes': [{k: n.get(k) for k in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity', 'resource_usage', 'available', 'bypass']}
-                  for n in snapshot['nodes'] if n['name'] != TARGET],
-        'workloads': [w for w in snapshot['workloads'] if w['nodename'] != TARGET],
+        'pods': sorted(snapshot['pods'], key=lambda p: p['name']),
+        'nodes': sorted([{k: n.get(k) for k in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity', 'resource_usage', 'available', 'bypass']}
+                  for n in snapshot['nodes'] if n['name'] != TARGET], key=lambda n: n['name']),
+        'workloads': sorted([w for w in snapshot['workloads'] if w['nodename'] != TARGET], key=lambda w: w['id']),
         'hosts': {k: v for k, v in snapshot['hosts'].items() if k != ALIAS},
     }
 
 
 class ComponentReinstall:
-    def __init__(self, operator):
+    def __init__(self, operator, guard_factory=HTTPGuards):
         self.op = operator
+        self.guard_factory = guard_factory
+        self.guards = None
+        self.resume_attempted = False
+
+    def stage(self, name):
+        if self.guards: self.guards.check()
+        self.op.stage(name)
+
+    def command(self, *args, **kwargs):
+        if self.guards: self.guards.check()
+        result = self.op.command(*args, **kwargs)
+        if self.guards: self.guards.check()
+        return result
+
+    def execute(self, plan, before):
+        if not plan.get('executable'):
+            raise ValueError('review-only plan cannot execute')
+        guard = self.guard_factory(self.op.project, plan['id'], plan['worker_readiness']['canaries'])
+        try:
+            with guard:
+                self.guards = guard
+                self.execute_steps(plan, before)
+                guard.check()
+            if guard.summary['failures']:
+                raise ValueError('HTTP failure observed before guard shutdown')
+            self.record_revision(plan, before)
+        except BaseException:
+            if self.resume_attempted:
+                # A lost up response may have enabled scheduling. One distinct
+                # corrective fence attempt is journaled; neither command is retried.
+                self.op.stage('refencing-after-resume-failure')
+                self.op.journal['resume_recovery'] = 'uncertain'
+                self.op.save_journal()
+                try:
+                    self.fence(corrective=True)
+                    self.op.journal['resume_recovery'] = 'fenced'
+                except Exception as exc:
+                    self.op.journal['resume_recovery_error'] = str(exc)
+            raise
+        finally:
+            self.op.journal['http_guards'] = getattr(guard, 'summary', {'error': 'observer did not start'})
+            self.op.save_journal()
+            self.guards = None
+
 
     def service_baseline(self):
         result = {}
@@ -59,7 +101,7 @@ class ComponentReinstall:
                 units += ['eru-core.service', 'eru-etcd.service', 'eru-mvp-firewall.service']
             elif host['alias'] != ALIAS:
                 units += UNITS
-            result[host['alias']] = self.op.command(host['alias'], ['sudo', '-n', 'systemctl', 'show',
+            result[host['alias']] = self.command(host['alias'], ['sudo', '-n', 'systemctl', 'show',
                 '--property=Id,ActiveState,SubState,MainPID,InvocationID,NRestarts,ExecMainStartTimestampMonotonic', *units])
         return result
 
@@ -74,8 +116,10 @@ class ComponentReinstall:
         for name in ['labops', 'worker_scope', 'worker_reinstall']:
             code = (self.op.project / 'scripts' / (name + '.py')).read_text()
             source += f'm=types.ModuleType({name!r});sys.modules[{name!r}]=m;exec({code!r},m.__dict__)\n'
-        source += 'sys.modules["worker_reinstall"].remote_main(' + repr(config) + ')\n'
-        return json.loads(self.op.command(ALIAS, ['sudo', '-n', 'python3', '-'], source))
+        source += 'import json,gzip,base64;sys.modules["worker_reinstall"].remote_main(json.loads(gzip.decompress(base64.b64decode(sys.stdin.read()))))\n'
+        payload = base64.b64encode(gzip.compress(json.dumps(config).encode(), mtime=0)).decode()
+        return json.loads(self.command(ALIAS, ['sudo', '-n', 'python3', '-c', 'import ast;exec(ast.literal_eval(input()))'],
+                                       repr(source) + '\n' + payload, timeout=300 if files else 90))
 
     def payload(self, plan):
         rows = json.loads((self.op.project / 'private/deployment-plan.json').read_text())
@@ -97,8 +141,9 @@ class ComponentReinstall:
             raise ValueError('pinned installer payload differs from audited worker files')
         return files
 
-    def fence(self):
-        self.op.command(self.op.core['alias'], ['sudo', '-n', '/usr/local/bin/eru-cli',
+    def fence(self, corrective=False):
+        call = self.op.command if corrective else self.command
+        call(self.op.core['alias'], ['sudo', '-n', '/usr/local/bin/eru-cli',
             '--eru', self.op.core['ip'] + ':5001', 'node', 'down', TARGET])
         node = next(n for n in self.op.cli('node', 'get', TARGET) if n['name'] == TARGET)
         if not node.get('bypass'):
@@ -106,6 +151,8 @@ class ComponentReinstall:
 
     def check_isolation(self, before, services):
         after = self.op.snapshot()
+        self.op.journal['isolation_observed'] = after
+        self.op.save_journal()
         if protected_membership(before) != protected_membership(after):
             raise ValueError('unrelated worker/control-plane state changed')
         # Worker host/OS and shared runtime identities must be retained as well.
@@ -136,7 +183,7 @@ class ComponentReinstall:
         if not evidence.get('pass') or set(evidence.get('nodes', {})) != {TARGET}:
             raise ValueError('worker smoke evidence did not pass')
 
-    def execute(self, plan, before):
+    def execute_steps(self, plan, before):
         if not plan.get('executable'):
             raise ValueError('review-only plan cannot execute')
         if plan['node'] != TARGET or plan['rebuild_mode'] != 'component-reinstall':
@@ -145,32 +192,39 @@ class ComponentReinstall:
         scope = self.op.worker_scope(ALIAS)
         if scope['blockers'] or scope['manifest_sha256'] != plan['component_scope']['manifest_sha256']:
             raise ValueError('worker scope changed')
-        self.op.stage('preparing-worker-payload')
+        self.stage('preparing-worker-payload')
         files = self.payload(plan)  # finish downloads/checks before fencing or stopping
         services = self.service_baseline()
         self.op.journal['preserved_services'] = services
         self.op.save_journal()
-        self.op.stage('fencing-worker-4')
+        self.stage('fencing-worker-4')
         # Failure/timeout leaves an uncertain fence; never automatically node up.
         self.fence()
-        self.op.stage('stopping-worker-4')
-        self.op.command(ALIAS, ['sudo', '-n', 'systemctl', 'stop', *UNITS])
+        self.stage('stopping-worker-4')
+        self.command(ALIAS, ['sudo', '-n', 'systemctl', 'stop', *UNITS])
         current = self.op.snapshot()
         node = empty_target(current)
         if not node.get('bypass'):
             raise ValueError('scheduling fence lost after stopping')
-        self.op.stage('quarantining-worker-4')
+        self.stage('quarantining-worker-4')
         self.op.journal['quarantine'] = self.remote('quarantine', plan)
         self.op.save_journal()
-        self.op.stage('installing-worker-4')
+        self.stage('installing-worker-4')
         self.op.journal['installation'] = self.remote('install', plan, files)
         self.op.save_journal()
-        self.op.command(ALIAS, ['sudo', '-n', 'systemd-analyze', 'verify',
+        self.command(ALIAS, ['sudo', '-n', 'systemd-analyze', 'verify',
             *['/etc/systemd/system/' + u for u in UNITS]])
-        self.op.command(ALIAS, ['sudo', '-n', 'systemctl', 'daemon-reload'])
-        self.op.command(ALIAS, ['sudo', '-n', 'systemctl', 'start', 'eru-containerd-proxy.socket', 'eru-agent.service'])
-        self.op.command(ALIAS, ['sudo', '-n', 'systemctl', 'is-active', 'eru-containerd-proxy.socket', 'eru-agent.service'])
-        self.op.stage('verifying-worker-4')
+        self.command(ALIAS, ['sudo', '-n', 'systemctl', 'daemon-reload'])
+        self.command(ALIAS, ['sudo', '-n', 'systemctl', 'start', 'eru-containerd-proxy.socket', 'eru-agent.service'])
+        self.command(ALIAS, ['sudo', '-n', 'systemctl', 'is-active', 'eru-containerd-proxy.socket', 'eru-agent.service'])
+        self.stage('verifying-worker-4')
+        for _ in range(30):
+            node = next(n for n in self.op.cli('node', 'get', TARGET) if n['name'] == TARGET)
+            if node['available'] and node.get('bypass'):
+                break
+            time.sleep(1)
+        else:
+            raise ValueError('worker did not become available while fenced')
         # Pinned upstream single-node Includes path permits targeted validation
         # while Bypass excludes this node from general scheduling. Do not node up.
         self.run_smoke()
@@ -182,12 +236,16 @@ class ComponentReinstall:
         for key in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity']:
             if node[key] != original[key]:
                 raise ValueError('worker registration changed')
-        self.op.stage('resuming-worker-4')
-        self.op.command(self.op.core['alias'], ['sudo', '-n', '/usr/local/bin/eru-cli',
+        self.stage('resuming-worker-4')
+        self.resume_attempted = True
+        self.command(self.op.core['alias'], ['sudo', '-n', '/usr/local/bin/eru-cli',
             '--eru', self.op.core['ip'] + ':5001', 'node', 'up', TARGET])
         after = self.check_isolation(before, services)
         if empty_target(after).get('bypass'):
             raise ValueError('target remained fenced after resume; reconcile')
+        self.op.journal['after'] = after
+
+    def record_revision(self, plan, before):
         revisions = self.op.root / 'worker-component-revisions.json'
         prior = json.loads(revisions.read_text()) if revisions.exists() else {}
         old = prior.get(TARGET, {}).get('revision', 0)
@@ -196,4 +254,3 @@ class ComponentReinstall:
                          'generation': plan['bindings']['cluster']['generation']}
         atomic_json(revisions, prior)
         self.op.journal['component_revision'] = old + 1
-        self.op.journal['after'] = after

@@ -36,6 +36,11 @@ def main(config):
     state = json.loads(OWNER.read_text()) if OWNER.exists() else {'owner': 'eru-vps-mvp', 'files': {}}
     if state.get('owner') != 'eru-vps-mvp':
         raise RuntimeError('ownership mismatch')
+    if config['role'] == 'core':
+        # A release reapply must never silently replace a locally validated fix.
+        for journal in (ROOT / 'core-updates').glob('*/journal.json'):
+            if json.loads(journal.read_text()).get('stage') != 'rolled-back':
+                raise RuntimeError('core patch/update journal exists; use explicit core update/recovery, not release reapply')
 
     def persist():
         temp = ROOT / 'owner.json.tmp'

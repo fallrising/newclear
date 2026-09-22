@@ -1,4 +1,4 @@
-"""Fake-controller contract tests; the prototype remains disconnected from execute."""
+"""Failure boundaries for the scoped worker state machine."""
 import copy
 import json
 import os
@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import Mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from component_reinstall import ComponentReinstall, empty_target, ALIAS, TARGET
+from component_reinstall import ComponentReinstall, empty_target, protected_membership, ALIAS, TARGET
 
 
 def snapshot(bypass=False):
@@ -20,6 +20,14 @@ def snapshot(bypass=False):
             'trusted_hostkeys_hash': 'keys'}}}
 
 
+class FakeGuards:
+    summary = {'failures': []}
+    def __init__(self, *args): pass
+    def __enter__(self): return self
+    def __exit__(self, *args): pass
+    def check(self): pass
+
+
 class ComponentTests(unittest.TestCase):
     def setup_executor(self):
         temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
@@ -27,12 +35,13 @@ class ComponentTests(unittest.TestCase):
         op.journal = {}; stages = []; op.stage.side_effect = stages.append
         op.worker_scope.return_value = {'blockers': [], 'manifest_sha256': 'manifest'}
         op.snapshot.return_value = snapshot(True)
-        executor = ComponentReinstall(op)
+        op.cli.return_value = snapshot(True)['nodes']
+        executor = ComponentReinstall(op, FakeGuards)
         executor.payload = Mock(return_value={}); executor.service_baseline = Mock(return_value={})
         executor.fence = Mock(); executor.remote = Mock(return_value={'stage': 'success'})
         executor.run_smoke = Mock(); executor.check_isolation = Mock(side_effect=[snapshot(True), snapshot(False)])
         plan = {'executable': True, 'node': TARGET, 'rebuild_mode': 'component-reinstall', 'id': 'run',
-                'component_scope': {'manifest_sha256': 'manifest'}, 'bindings': {'cluster': {'generation': 1}}}
+                'component_scope': {'manifest_sha256': 'manifest'}, 'worker_readiness': {'canaries': []}, 'bindings': {'cluster': {'generation': 1}}}
         return op, executor, plan, stages
 
     def test_failure_after_quarantine_never_resumes(self):
@@ -76,3 +85,36 @@ class ComponentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'review-only'):
             executor.execute(plan, snapshot())
         executor.fence.assert_not_called()
+
+    def test_guard_failure_before_fence_never_stops_worker(self):
+        op, executor, plan, stages = self.setup_executor()
+        class FailedGuards(FakeGuards):
+            def check(self): raise ValueError('HTTP failed')
+        executor.guard_factory = FailedGuards
+        with self.assertRaisesRegex(ValueError, 'HTTP failed'):
+            executor.execute(plan, snapshot())
+        executor.fence.assert_not_called()
+        op.command.assert_not_called()
+        self.assertFalse((op.root / 'worker-component-revisions.json').exists())
+
+    def test_failed_guard_at_shutdown_refences_and_does_not_count_revision(self):
+        op, executor, plan, stages = self.setup_executor()
+        class FailedGuards(FakeGuards):
+            summary = {'failures': ['HTTP late failure']}
+        executor.guard_factory = FailedGuards
+        with self.assertRaisesRegex(ValueError, 'HTTP failure'):
+            executor.execute(plan, snapshot())
+        self.assertEqual(op.journal['resume_recovery'], 'fenced')
+        executor.fence.assert_called_with(corrective=True)
+        self.assertFalse((op.root / 'worker-component-revisions.json').exists())
+
+    def test_peer_order_is_ignored_but_peer_state_changes_are_not(self):
+        before = snapshot()
+        for name in ['worker-2', 'worker-3']:
+            before['nodes'].append({**before['nodes'][0], 'name': name})
+            before['workloads'].append({'id': name + '-fixture', 'nodename': name, 'labels': {'owner': 'fixture'}})
+        after = copy.deepcopy(before)
+        after['nodes'].reverse();after['workloads'].reverse()
+        self.assertEqual(protected_membership(before), protected_membership(after))
+        after['nodes'][0]['available'] = False
+        self.assertNotEqual(protected_membership(before), protected_membership(after))

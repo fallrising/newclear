@@ -1,6 +1,8 @@
 # dim-gate — Software Design Document
 
-版本：0.1 · 日期：2026-09-20 · 狀態：待實作的設計基線
+版本：v0.1 基線（M0–M5 已驗收）＋ WS-SDD revision 1 設計擴充 · 更新：2026-09-22
+
+既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；新增能力目前僅完成規格，不代表已實作或通過產品驗收。
 
 使用者已確認：項目名稱 `dim-gate`；React + shadcn/ui；AWS／Aliyun／自建機房；CMDB 核心；RD、Ops、Admin 三中心；第一版有狀態 Mock；單企業多團隊；端到端發布與故障恢復展示。具體技術與行為決策由本 SDD 定義，後續變更以 PR 追蹤。
 
@@ -87,8 +89,15 @@ canonical path：`platform/dim-gate/`。本項目獨立於 `platform/fanzloud`�
 
 開發從[固定prompt](DEVELOPMENT_PROMPT.md)啟動，接手依[恢復協定](docs/DEVELOPMENT_PROTOCOL.md)。本SDD定義產品要求；[PLAN](../../.team/PLAN.md)保存任務與接受決策，STATUS只作摘要。Git／PR／CI用於核對版本與證據，不因修改進度文件就視為通過驗收。
 
-本次交付僅 Markdown 與 root README 索引。M0 才建立 package manifest、lockfile、source 與本 component 的 root CI。不得把文檔完成寫成產品完成。
+最初設計交付僅 Markdown 與 root README 索引；後續 M0–M5 已完成工程及 v0.1 驗收。本輪三工作區擴充僅修改文件，保留已驗收實作。不得把新文檔完成寫成新增產品能力完成。
 
 閱讀順序：本文件 → [01 產品與 UX](docs/sdd/01-product-ux.md) → [02 CMDB](docs/sdd/02-cmdb-model.md) → [03 流程](docs/sdd/03-workflows.md) → [04 權限](docs/sdd/04-permissions-admin.md) → [05 前端](docs/sdd/05-frontend-architecture.md) → [06 API／Mock](docs/sdd/06-api-mock.md) → [07 交付與驗收](docs/sdd/07-delivery-validation.md) → [08 決策與來源](docs/sdd/08-decisions-sources.md)。
 
 本總綱的不變量優先；專題規格定義細節；如兩者衝突，先修正文件再實作，不能由開發者默默選一份。外部參考是技術依據，不覆蓋已選定的產品行為。
+
+
+## 9. 三工作區深化（設計擴充）
+
+[09 共用模型](docs/sdd/09-shared-workspaces.md) 定義 REQ-WS-01～10、資源／子資源／服務綁定及共用工作單；[10 RD](docs/sdd/10-rd-workspace.md)、[11 Ops](docs/sdd/11-ops-workspace.md)、[12 Admin](docs/sdd/12-admin-workspace.md) 分別定義角色任務、頁面與操作。[13 能力地圖](docs/sdd/13-capability-map.md) 對照需求關鍵字並區分交付深度；[14 交付與驗收](docs/sdd/14-workspace-delivery.md) 定義 W1–W5、遷移及 AC-WS-01～18。
+
+此擴充沿用 INV-01～08，未改動現行 API、權限、狀態機或 Mock-first 邊界。09–14 描述後續目標；實作增量須同步更新受影響的 01–07 與正式 contracts，不得以新規格文字認定功能已存在。K8s/MySQL 等專業控制面與真實雲端執行的範圍，按能力地圖逐項區分。

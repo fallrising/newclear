@@ -1,5 +1,7 @@
 # 01 — 產品範圍、資訊架構與互動
 
+本文為 v0.1 基線。後續三工作區的入口、首頁與角色深化見 [09](09-shared-workspaces.md)、[RD](10-rd-workspace.md)、[Ops](11-ops-workspace.md)、[Admin](12-admin-workspace.md)；新需求另以 REQ-WS-* 定義，尚未改動目前產品。
+
 ## 1. 需求
 
 | ID | 要求 | v0.1 深度 |

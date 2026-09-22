@@ -1,15 +1,17 @@
 # Controller B 操作器
 
-入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 只能產生計畫，沒有 OS 重灌或下線節點的執行入口。
+最新狀態：[優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
 
-最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝底層與原型已加入測試，但 rebuild execute 繼續阻擋，尚未進行實機元件重裝。
+入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於空 worker-4；provider-reimage 仍是唯讀計畫。
+
+最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
 ## 使用方式
 
 在 B 的專案根執行：
 
 ```bash
-cd /home/ckc/test/newclear/labs/eru-vps-mvp
+cd /home/ckc/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
 python3 scripts/labctl.py plan --operation smoke --node worker-4
 ```
 
@@ -31,7 +33,7 @@ reapply 計畫：
 python3 scripts/labctl.py plan --operation reapply
 ```
 
-此操作影響四台，執行已驗證的 worker-2 nginx canary + `deploy-lab.py --apply` 流程，核對容器、HTTP、pod／node、配額和服務重啟紀錄後清理。它是同版本部署驗證，不是宣告式應用 desired-state controller，也不會升級 OS。
+目前 core 已套用本機 patch，因此 release reapply 會阻擋可能的 downgrade；以下是早期同版本 release 的行為。此操作影響四台，執行已驗證的 worker-2 nginx canary + `deploy-lab.py --apply` 流程，核對容器、HTTP、pod／node、配額和服務重啟紀錄後清理。它是同版本部署驗證，不是宣告式應用 desired-state controller，也不會升級 OS。
 
 依既有 smoke run 清理：
 
@@ -72,7 +74,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode provider-reimage
 ```
 
-預設 `component-reinstall` 模式會額外在 worker-4 唯讀核對 ownership、SHA256、symlink／hardlink／mount 邊界，列出六個專用檔案、三個本機狀態根與保留項目。第一版只接受空 worker-4；不自動搬移應用、不重建 core／etcd。兩種模式現階段都 `executable: false`，清理／worker-only 安裝／恢復執行器仍待實作。
+預設 `component-reinstall` 模式會額外在 worker-4 唯讀核對 ownership、SHA256、symlink／hardlink／mount 邊界，列出六個專用檔案、三個本機狀態根與保留項目。第一版只接受空 worker-4；不自動搬移應用、不重建 core／etcd。省略健康與 canary evidence 時保持 `executable: false`；provider-reimage 始終不可執行。完整正向流程見下節，恢復底層與完整事故處置 CLI 分開標示。
 
 日常路徑不需要供應商或重灌工具資訊。只有啟用後備 OS 重灌時才需確認 provider 主機身分、OS image、磁碟／volume 範圍、新 host key 與 OneVPS bootstrap。詳細語意、範圍及验收見 [自控重裝](CONTROLLED-REINSTALL.md)。
 
@@ -83,3 +85,29 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
 測試使用暫存目錄和假的遠端介面，覆蓋跨程序互斥、子程序持鎖、檔案權限、漂移拒絕、精確清理、不確定結果與禁止重播；不會刪遠端容器。實機結果與已遇到的 etcd 故障見 [開發紀錄](M2-2026-09-22.md)。
+
+## 空 worker-4 的日常元件重裝
+
+先確保沒有需要保留的 ERU workloads。canary-start 第一版要求全群 ERU workload 空，建立一個 worker-2 和一個 worker-3 的測試 nginx；它們保留到明確 cleanup，供多輪重裝共用。每一個 execute 都使用上一個 plan 顯示的 ID 與 SHA256。
+
+```bash
+python3 scripts/labctl.py plan --operation canary-start
+python3 scripts/labctl.py execute --plan CANARY_PLAN --sha256 CANARY_HASH
+python3 scripts/control_health.py --samples 31 --interval 5
+python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
+  --health private/diagnostics/HEALTH-control-health.json --canary-run CANARY_PLAN
+python3 scripts/labctl.py execute --plan REINSTALL_PLAN --sha256 REINSTALL_HASH
+```
+
+canary run ID 就是 canary-start plan ID。健康 evidence 需 complete、至少 20 次／120 秒、相鄰觀測無超過 20 秒的缺口，最後樣本距執行不超過 10 分鐘；並對應目前 core invocation。必要時重新收集。要觀察負載中的 etcd，可另跑 `control_health.py --concurrent-read-only --samples 61 --interval 5`；此模式不拿 mutation lock，禁止搭配 disk probe。
+
+同一組 canaries 可供連續三個新 rebuild plan 使用。每轮都重新核對空 target、綁定來源與 core SHA，備份／重裝後做 target smoke，再檢查其他 worker HTTP、服務 invocation 和身份。節點與 workload 清單按 identity 排序後比較；資料內容有變仍失敗。只在 guard 最終無失敗且 node up 已核對後增加 component revision，OS incarnation／cluster generation 不增加。
+
+完成後按原 canary run 精確清理：
+
+```bash
+python3 scripts/labctl.py plan --operation cleanup --smoke-run CANARY_PLAN
+python3 scripts/labctl.py execute --plan CLEANUP_PLAN --sha256 CLEANUP_HASH
+```
+
+失敗先 reconcile，保留 fencing／quarantine evidence；不要直接重播或把 failed 改成 complete。core-only 更新與有 checksum 的恢復底層見 `core_patch.py --help` 和優先路徑文件。已部署 core patch 時，原 release reapply 會阻擋可能的 downgrade；不代表 worker-only 重裝不可使用。

@@ -61,6 +61,9 @@ def code_inputs(project):
     files += [project / x for x in ['artifacts.amd64.lock.json', 'upstream.lock.json',
               'private/deployment-plan.json', 'private/verified-host-public-keys.json']]
     files += sorted((project / 'private/preflight').glob('*.json'))
+    revision = project / 'private/operations/core-revision.json'
+    if revision.exists():
+        files.append(revision)
     return {str(f.relative_to(project)): hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(files)}
 
 
@@ -132,7 +135,7 @@ class Operator:
         self.journal_path = None
         self.journal = None
 
-    def command(self, host, argv, stdin=None, check=True):
+    def command(self, host, argv, stdin=None, check=True, timeout=90):
         print(f'[{host}] {shlex.join(argv)}', flush=True)
         event = {'at': now(), 'host': host, 'argv': argv, 'status': 'started'}
         self.events.append(event)
@@ -140,7 +143,7 @@ class Operator:
         try:
             p = subprocess.run(['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
                 '-o', 'PermitLocalCommand=no', '-o', 'ConnectTimeout=10', host, shlex.join(argv)],
-                input=stdin, capture_output=True, text=True, timeout=90, pass_fds=lock_fds())
+                input=stdin, capture_output=True, text=True, timeout=timeout, pass_fds=lock_fds())
         except BaseException as exc:
             event.update(status='uncertain', error=type(exc).__name__)
             self.save_journal()
@@ -213,7 +216,11 @@ class Operator:
         self.journal.setdefault('history', []).append({'at': now(), 'stage': stage})
         self.save_journal()
 
-    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None):
+    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None):
+        if (health_file or canary_run) and operation != 'rebuild-node':
+            raise ValueError('--health and --canary-run apply only to rebuild-node')
+        if operation == 'canary-start' and node:
+            raise ValueError('canaries are fixed to worker-2 and worker-3')
         if rebuild_mode and operation != 'rebuild-node':
             raise ValueError('--mode applies only to rebuild-node')
         if rebuild_mode not in [None, 'component-reinstall', 'provider-reimage']:
@@ -230,6 +237,9 @@ class Operator:
             raise ValueError('cleanup scope comes from smoke evidence; do not specify --node')
         snap = self.snapshot()
         issues = consistency_issues(snap, self.inventory)
+        if operation == 'reapply' and (self.root / 'core-revision.json').exists():
+            if read(self.root / 'core-revision.json')['operation'] == 'core-patch':
+                issues.append('Core uses a validated local patch; release reapply would downgrade it and is blocked')
         health = self.health()
         if health['exit_code']:
             issues.append('etcd health failed; mutations blocked')
@@ -238,7 +248,13 @@ class Operator:
                 'created_at': now(), 'operation': operation, 'node': node, 'bindings': bindings,
                 'snapshot': snap, 'etcd_health': health, 'executable': operation != 'rebuild-node' and not issues, 'blockers': issues,
                 'targets': [], 'steps': [], 'mutation_hosts': ALIASES if operation == 'reapply' else []}
-        if operation == 'cleanup':
+        if operation == 'canary-start':
+            if snap['workloads']:
+                plan['blockers'].append('initial canary setup requires empty ERU workloads')
+                plan['executable'] = False
+            plan['mutation_hosts'] = ALIASES[:3]
+            plan['steps'] = ['Create one run-owned nginx on worker-2 and worker-3', 'Verify both HTTP endpoints; retain exact IDs for guard and cleanup plans']
+        elif operation == 'cleanup':
             evidence_path = self.project / 'private/smoke' / (identifier(smoke_run) + '.json')
             evidence = read(evidence_path)
             if evidence['run_id'] != smoke_run:
@@ -269,7 +285,14 @@ class Operator:
                     plan['blockers'].append('Initial component-reinstall scope is worker-4 only')
                 if plan['targets'] or snap['hosts'][host['alias']]['containers']:
                     plan['blockers'].append('Target must have zero workloads and runtime containers; automatic drain is not implemented')
-                plan['blockers'].append('Local quarantine/install/recovery modules are tested; live orchestration, continuous HTTP guards and control-plane readiness are not yet validated')
+                if not health_file or not canary_run:
+                    plan['blockers'].append('component reinstall requires --health and --canary-run')
+                elif not plan['blockers']:
+                    from component_reinstall import empty_target
+                    empty_target(snap)
+                    plan['worker_readiness'] = self.worker_readiness(health_file, canary_run, snap)
+                    plan['blockers'] += plan['worker_readiness']['blockers']
+                plan['executable'] = not plan['blockers']
                 plan['steps'] = [
                     f'Require empty {node}, zero usage, healthy control plane and unchanged owned-file hashes',
                     'Save baseline of other workers and shared services; prohibit scheduling on target',
@@ -301,12 +324,33 @@ class Operator:
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
         return envelope
 
+    def worker_readiness(self, health_file, canary_run, snapshot):
+        from core_patch import readiness, PatchOperator
+        from canaries import guard_targets
+        report = read(self.project / health_file)
+        gate = readiness(report)
+        revision_path = self.root / 'core-revision.json'
+        expected = read(self.project / 'patches/core-v0.1.5-lock-context.validation.json')['artifact_sha256']
+        if not revision_path.exists() or read(revision_path).get('artifact_sha256') != expected:
+            gate['blockers'].append('validated core patch has not been recorded as deployed')
+        runtime = PatchOperator.core_runtime(self)
+        if runtime['sha256'] != expected:
+            gate['blockers'].append('running core is not the validated patch')
+        last_services = report.get('samples', [{}])[-1].get('commands', {}).get('services', {}).get('stdout', '')
+        if 'InvocationID=' + runtime['InvocationID'] not in last_services:
+            gate['blockers'].append('health observation predates the current core invocation')
+        return {'health_file': health_file, 'health_sha256': digest(report),
+                'canary_run': identifier(canary_run),
+                'canary_evidence_sha256': digest(read(self.project / 'private/smoke' / (identifier(canary_run) + '.json'))),
+                'canaries': guard_targets(self, snapshot, canary_run), 'core_runtime': runtime,
+                'blockers': gate['blockers'], 'performance_findings': gate['performance_findings']}
+
     def execute(self, plan_id, expected_hash):
         envelope = read(self.root / 'plans' / (identifier(plan_id) + '.json'))
         plan = envelope['plan']
         if digest(plan) != envelope['sha256'] or expected_hash != envelope['sha256']:
             raise ValueError('plan hash mismatch')
-        if not plan['executable'] or plan['operation'] == 'rebuild-node':
+        if not plan['executable']:
             raise ValueError('plan is not executable: ' + '; '.join(plan['blockers']))
         path = self.root / 'runs' / (plan_id + '.json')
         if path.exists():
@@ -333,7 +377,17 @@ class Operator:
             if current['hosts'] != plan['snapshot']['hosts'] or membership(current) != membership(plan['snapshot']):
                 raise ValueError('host identity/role/runtime or cluster state changed; create a new plan')
             self.stage('preflighted')
-            if plan['operation'] == 'cleanup':
+            if plan['operation'] == 'rebuild-node':
+                from component_reinstall import ComponentReinstall
+                bound = plan['worker_readiness']
+                current_gate = self.worker_readiness(bound['health_file'], bound['canary_run'], current)
+                if current_gate['blockers'] or current_gate != bound:
+                    raise ValueError('worker readiness/canaries changed; create a new plan')
+                ComponentReinstall(self).execute(plan, current)
+            elif plan['operation'] == 'canary-start':
+                from canaries import start_canaries
+                start_canaries(self, plan, current)
+            elif plan['operation'] == 'cleanup':
                 evidence = read(self.project / 'private/smoke' / (plan['smoke_run'] + '.json'))
                 if digest(evidence) != plan['smoke_evidence_hash']:
                     raise ValueError('source smoke evidence changed; create a new plan')
@@ -423,10 +477,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     plan = sub.add_parser('plan', help='Read live state and write a private, hash-bound plan')
-    plan.add_argument('--operation', required=True, choices=['reapply', 'smoke', 'cleanup', 'rebuild-node'])
+    plan.add_argument('--operation', required=True, choices=['reapply', 'smoke', 'cleanup', 'rebuild-node', 'canary-start'])
     plan.add_argument('--node', choices=['worker-2', 'worker-3', 'worker-4'])
     plan.add_argument('--smoke-run')
-    plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; neither mode executes a reset yet')
+    plan.add_argument('--health', help='Completed control health evidence for a component reinstall')
+    plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
+    plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -448,7 +504,7 @@ def main():
     with ClusterLock(PROJECT):
         operator = Operator()
         if args.command == 'plan':
-            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode)
+            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run)
             summary = {k: envelope['plan'][k] for k in ['id', 'operation', 'node', 'executable', 'mutation_hosts', 'targets', 'steps', 'blockers']}
             for optional in ['rebuild_mode', 'component_scope']:
                 if optional in envelope['plan']:

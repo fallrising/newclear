@@ -1,31 +1,17 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
-type BrowserHealth = { console: { type: string; text: string }[]; network: { method: string; status: number; url: string }[]; consoleErrors: string[]; pageErrors: string[]; failedRequests: string[]; httpErrors: { status: number; url: string }[]; expectedStatuses: Set<number> }
+import { captureBrowserHealth, verifyBrowserHealth, type BrowserHealth } from './browser-health'
+
 const health = new WeakMap<Page, BrowserHealth>()
 
 test.beforeEach(async ({ page }) => {
   page.setDefaultTimeout(15_000)
-  const evidence: BrowserHealth = { console: [], network: [], consoleErrors: [], pageErrors: [], failedRequests: [], httpErrors: [], expectedStatuses: new Set() }
-  health.set(page, evidence)
-  page.on('console', (message) => { evidence.console.push({ type: message.type(), text: message.text() }); if (message.type() === 'error') evidence.consoleErrors.push(message.text()) })
-  page.on('pageerror', (error) => evidence.pageErrors.push(error.message))
-  page.on('requestfailed', (request) => evidence.failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText}`))
-  page.on('response', (response) => { evidence.network.push({ method: response.request().method(), status: response.status(), url: response.url() }); if (response.status() >= 400) evidence.httpErrors.push({ status: response.status(), url: response.url() }) })
+  health.set(page, captureBrowserHealth(page))
 })
 
 test.afterEach(async ({ page }, info) => {
-  const evidence = health.get(page)!
-  await info.attach('browser-health', { body: JSON.stringify({ ...evidence, expectedStatuses: [...evidence.expectedStatuses] }, null, 2), contentType: 'application/json' })
-  if (!page.isClosed()) {
-    await info.attach('visible-dom', { body: await page.locator('body').innerText(), contentType: 'text/plain' })
-    await info.attach('final-screen', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
-  }
-  if (info.status !== info.expectedStatus) return
-  expect(evidence.pageErrors).toEqual([])
-  expect(evidence.failedRequests).toEqual([])
-  expect(evidence.httpErrors.filter((entry) => !evidence.expectedStatuses.has(entry.status))).toEqual([])
-  expect(evidence.consoleErrors.filter((message) => ![...evidence.expectedStatuses].some((status) => message.includes(`status of ${status}`)))).toEqual([])
+  await verifyBrowserHealth(page, info, health.get(page)!)
 })
 
 async function become(page: Page, persona: string) {
@@ -393,12 +379,26 @@ test('M4 observation/incident/Guide/integrations support actual theme changes, v
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('admin/integrations')
-    await expect(page.getByRole('button', { name: /^模擬測試 · / }).first()).toBeVisible()
-    const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(issue => ['serious', 'critical'].includes(issue.impact ?? ''))
-    expect(violations).toEqual([])
-    const dimensions = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth }))
-    expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
-    await info.attach(`integrations-${width}`, { body: JSON.stringify({ dimensions, violations }), contentType: 'application/json' })
-    await info.attach(`integrations-${width}-screen`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+    for (const theme of ['light', 'dark']) {
+      if (await page.locator('html').getAttribute('data-theme') !== theme) await page.getByRole('button', { name: theme === 'dark' ? '切換深色主題' : '切換淺色主題' }).click()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+      const trigger = page.getByRole('button', { name: /^模擬測試 · / }).first()
+      await expect(trigger).toBeVisible()
+      const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(issue => ['serious', 'critical'].includes(issue.impact ?? ''))
+      expect(violations).toEqual([])
+      const dimensions = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth }))
+      expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
+      await info.attach(`integrations-${theme}-${width}`, { body: JSON.stringify({ theme, dimensions, violations }), contentType: 'application/json' })
+      await info.attach(`integrations-${theme}-${width}-screen`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+      await trigger.click()
+      const dialog = page.getByRole('dialog', { name: '模擬整合測試' })
+      const focused = await page.evaluate(() => ({ html: document.activeElement?.outerHTML, inDialog: !!document.activeElement?.closest('[role="dialog"]') }))
+      expect(focused.inDialog).toBe(true)
+      for (let index = 0; index < 8; index++) { await page.keyboard.press('Tab'); expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true) }
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      await expect(trigger).toBeFocused()
+      await info.attach(`integration-focus-${theme}-${width}`, { body: JSON.stringify({ initial: focused, tabContained: 8, escapeClosed: true, focusReturned: true }), contentType: 'application/json' })
+    }
   }
 })

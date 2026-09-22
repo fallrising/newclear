@@ -83,6 +83,12 @@ test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never fl
   await expect(sharedRow).toContainText('ci-idc-redis-01')
   await expect(sharedRow.getByRole('link', { name: '在 Ops 查看' })).toHaveAttribute('href', '/dim-gate/ops/cmdb/ci-idc-redis-01')
   await sharedRow.getByRole('link', { name: '在 Ops 查看' }).click()
+  const detail = page.getByRole('article', { name: '配置項詳情' })
+  await expect(detail).toContainText('ci-idc-redis-01')
+  await expect(detail.getByRole('button', { name: /編輯/ })).toHaveCount(0)
+  await expect(detail).not.toContainText('project-data')
+  await expect(detail).not.toContainText('managementIp')
+  await page.goto('ops/cmdb')
   await expect(page.getByText(/目前身分無法進入維運中心/)).toBeVisible()
 
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-data')

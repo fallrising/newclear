@@ -82,6 +82,7 @@ class RuntimeClient:
                 "canonical_repo": run["canonical_repo"],
                 "base_sha": run["base_sha"],
                 "deadline": run["deadline"].isoformat(),
+                "require_approval": run.get("require_approval", False),
             },
         )
 
@@ -101,3 +102,15 @@ class RuntimeClient:
         if run["backend_cursor"]:
             query["cursor"] = run["backend_cursor"]
         return self.call("GET", f"/v1/runs/{run['id']}/events?" + urlencode(query))
+
+    def approve(self, run, approval):
+        return self.call(
+            "POST",
+            f"/v1/runs/{run['id']}/approve",
+            {
+                "generation": run["generation"],
+                "approval_id": str(approval["id"]),
+                "action_digest": approval["action_digest"],
+                "expires_at": approval["expires_at"].isoformat(),
+            },
+        )

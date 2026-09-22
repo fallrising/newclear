@@ -46,10 +46,18 @@ class Allocate(Input):
     canonical_repo: str
     base_sha: str = Field(pattern=r"^([a-f0-9]{40}|[a-f0-9]{64})$")
     deadline: datetime
+    require_approval: bool = False
 
 
 class Cancel(Input):
     generation: int = Field(ge=1)
+
+
+class Approve(Input):
+    generation: int = Field(ge=1)
+    approval_id: UUID
+    action_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    expires_at: datetime
 
 
 class Mutation(Input):
@@ -340,6 +348,9 @@ class Connector:
                         },
                         "tools": [{"name": "terminal"}],
                     },
+                    "confirmation_policy": {
+                        "kind": "AlwaysConfirm" if data.get("require_approval") else "NeverConfirm"
+                    },
                     "max_iterations": 4,
                     "autotitle": False,
                 },
@@ -425,13 +436,20 @@ class Connector:
                         "cursor": str(item["id"]),
                         "type": "tool.completed"
                         if kind == "ObservationEvent"
+                        else "tool.proposed"
+                        if kind == "ActionEvent" and row["input"].get("require_approval")
                         else "tool.started"
                         if kind == "ActionEvent"
                         else "backend.event",
                         "payload": payload,
                     }
                 )
-            return {"events": normalized, "state": state, "caught_up": len(pending) <= 100}
+            response = {"events": normalized, "state": state, "caught_up": len(pending) <= 100}
+            if state == "waiting_for_confirmation":
+                from .connector_approval import pending_approval
+
+                response["approval"] = pending_approval(self, row)
+            return response
 
     def result(self, row):
         sb = self.handle(row)
@@ -568,6 +586,12 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}/cancel")
     def cancel_run(run_id: UUID, data: Cancel, _=auth):
         return service.cancel(run_id, data.generation)
+
+    @app.post("/v1/runs/{run_id}/approve")
+    def approve_run(run_id: UUID, data: Approve, _=auth):
+        from .connector_approval import approve
+
+        return approve(service, run_id, data)
 
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):

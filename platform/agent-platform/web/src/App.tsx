@@ -1,3 +1,4 @@
+import { Approvals } from './Approvals';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -29,6 +30,7 @@ const stateNames: Record<string, string> = {
   paused: '已暫停',
   cancelled: '已取消',
   cancelling: '正在取消',
+  awaiting_approval: '等待審批',
 };
 function State({ state }: { state: string }) {
   return <span className={`state state-${state}`}>{stateNames[state] ?? state}</span>;
@@ -305,7 +307,8 @@ function TaskForm({
   });
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    create.mutate(Object.fromEntries(new FormData(event.currentTarget)));
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    create.mutate(data);
   }
   if (!projects.length || !profiles.length)
     return (
@@ -334,6 +337,7 @@ function TaskForm({
               {profiles.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} · v{p.revision} · {p.backend === 'openhands' ? '真實 VM' : '模擬環境'}
+                  {p.tool_policy?.require_approval ? ' · 工具需審批' : ''}
                 </option>
               ))}
             </select>
@@ -590,29 +594,31 @@ function RunActivity({ run }: { run: Run }) {
           : '模擬環境 · 排程驗證'}
       </p>
       <div className="run-actions" aria-label="執行操作">
-        {(['pause', 'resume', 'cancel', 'approval'] as const).map((action) => (
-          <button
-            key={action}
-            type="button"
-            disabled={
-              action === 'cancel'
-                ? !canCancel || cancellation.isPending || cancellation.isSuccess
-                : true
-            }
-            onClick={action === 'cancel' ? () => cancellation.mutate() : undefined}
-            title={
-              action === 'cancel' && run.capabilities?.cancel
-                ? '停止這次執行；確認環境停止後完成取消'
-                : '此版本尚未提供安全的操作流程'
-            }
-          >
-            {{ pause: '暫停', resume: '繼續', cancel: '取消', approval: '審批' }[action]}
-          </button>
-        ))}
+        {(['pause', 'resume', 'cancel', 'approval'] as const)
+          .filter((action) => action !== 'approval' || !run.capabilities?.approval)
+          .map((action) => (
+            <button
+              key={action}
+              type="button"
+              disabled={
+                action === 'cancel'
+                  ? !canCancel || cancellation.isPending || cancellation.isSuccess
+                  : true
+              }
+              onClick={action === 'cancel' ? () => cancellation.mutate() : undefined}
+              title={
+                action === 'cancel' && run.capabilities?.cancel
+                  ? '停止這次執行；確認環境停止後完成取消'
+                  : '此版本尚未提供安全的操作流程'
+              }
+            >
+              {{ pause: '暫停', resume: '繼續', cancel: '取消', approval: '審批' }[action]}
+            </button>
+          ))}
       </div>
       <p className="muted">
         {run.capabilities?.cancel
-          ? '取消會停止本次執行。暫停、繼續與審批尚未開放。'
+          ? '取消會停止本次執行。暫停與繼續尚未開放；啟用審批的任務會在下方顯示待核准操作。'
           : '此執行方式尚不支援暫停、繼續、取消與審批。'}
       </p>
       {run.state === 'cancelling' && (
@@ -626,6 +632,7 @@ function RunActivity({ run }: { run: Run }) {
         </p>
       )}
       <ErrorNotice error={cancellation.error} />
+      {run.require_approval && <Approvals run={run} />}
       {notice && <p className="notice">{notice}</p>}
       <h3>活動紀錄</h3>
       <ol className="timeline">
@@ -717,7 +724,10 @@ function Catalog({
   });
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    create.mutate(Object.fromEntries(new FormData(event.currentTarget)));
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    create.mutate(
+      kind === 'profiles' ? { ...data, require_approval: data.require_approval === 'true' } : data,
+    );
   }
   return (
     <div className="catalog">
@@ -732,6 +742,9 @@ function Catalog({
                   {'canonical_repo' in item
                     ? item.canonical_repo
                     : `${item.backend === 'openhands' ? 'OpenHands · 真實 VM · 模擬模型' : '模擬 Agent'} · v${item.revision}`}
+                  {'tool_policy' in item && item.tool_policy?.require_approval
+                    ? ' · 工具需審批'
+                    : ''}
                 </p>
               </li>
             ))}
@@ -770,6 +783,13 @@ function Catalog({
                         : '模擬環境 · 排程驗證'}
                     </option>
                   ))}
+                </select>
+              </label>
+              <label>
+                工具審批
+                <select name="require_approval" defaultValue="false">
+                  <option value="false">固定驗收操作自動執行</option>
+                  <option value="true">每批工具操作都需核准（OpenHands）</option>
                 </select>
               </label>
               <p className="notice">

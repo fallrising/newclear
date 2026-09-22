@@ -63,6 +63,7 @@ class ProfileInput(Input):
     profile_id: UUID | None = None
     backend: Literal["fake", "openhands"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
+    require_approval: bool = False
 
 
 class RunInput(Input):
@@ -82,7 +83,8 @@ class RetryInput(RunInput):
 
 OPENHANDS_CAPABILITIES = {
     **CAPABILITIES,
-    "protocol_revision": "m3-openhands-cancel-1",
+    "protocol_revision": "m3-openhands-approval-1",
+    "approval": True,
     "cancel": True,
     "terminal_output": True,
 }
@@ -94,4 +96,11 @@ def capabilities(backend):
 
 class ActionInput(Input):
     action: Literal["pause", "resume", "cancel", "approval"]
+    expected_state_version: int = Field(ge=1)
+
+
+class DecisionInput(Input):
+    decision: Literal["approve", "deny"]
+    action_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    generation: int = Field(ge=1)
     expected_state_version: int = Field(ge=1)

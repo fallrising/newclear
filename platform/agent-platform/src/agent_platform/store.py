@@ -110,6 +110,8 @@ class Store:
         return {"status": 201, "body": row}
 
     def create_profile(self, conn, data):
+        if data.require_approval and data.backend != "openhands":
+            raise Problem(409, "unsupported_capability:approval")
         profile = data.profile_id or uuid4()
         revision = 1
         if data.profile_id:
@@ -146,7 +148,13 @@ class Store:
                 data.backend,
                 "fixture:m2" if data.backend == "openhands" else "fixture:m1",
                 template,
-                Jsonb({"exec": data.backend == "openhands", "network": False}),
+                Jsonb(
+                    {
+                        "exec": data.backend == "openhands",
+                        "network": False,
+                        "require_approval": data.require_approval,
+                    }
+                ),
                 Jsonb(
                     {
                         "deadline_seconds": data.deadline_seconds,
@@ -185,8 +193,8 @@ class Store:
         row = conn.execute(
             (
                 "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,"
-                "goal,backend,state,deadline) VALUES "
-                "(%s,%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
+                "goal,backend,require_approval,state,deadline) VALUES "
+                "(%s,%s,%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
                 "RETURNING *"
             ),
             (
@@ -197,6 +205,7 @@ class Store:
                 data.profile_revision,
                 data.goal,
                 profile["backend"],
+                profile["tool_policy"].get("require_approval", False),
                 profile["limits"]["deadline_seconds"],
             ),
         ).fetchone()

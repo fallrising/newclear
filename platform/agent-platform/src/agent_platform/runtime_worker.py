@@ -132,6 +132,10 @@ def execute_real(worker, claim):
                 execute_cancel(worker, claim, run)
                 return
             observed = client.inspect(run) if claim.get("recovery") else {"phase": "absent"}
+            for receipt in observed.get("approval_receipts", []):
+                from .approvals import record_applied
+
+                record_applied(worker, claim, receipt)
             phase = observed["phase"]
             if claim.get("recovery"):
                 with worker.owned(claim) as (conn, current):
@@ -226,6 +230,13 @@ def execute_real(worker, claim):
                         if events["state"] == "finished" and events["caught_up"]:
                             state(conn, current, "finalizing")
                             break
+                    if events["state"] == "waiting_for_confirmation" and events["caught_up"]:
+                        from .approvals import handle_approval
+
+                        handle_approval(worker, claim, events["approval"])
+                    elif events["state"] == "running":
+                        with worker.owned(claim) as (conn, current):
+                            state(conn, current, "running")
                     if events["state"] in {"error", "stuck", "paused"}:
                         raise Problem(409, "backend_stopped_without_completion")
                     time.sleep(0.3)

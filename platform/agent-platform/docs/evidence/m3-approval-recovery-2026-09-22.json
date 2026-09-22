@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-22T11:25:09.367116+00:00",
+  "transport": "cocoon-kvm-platform-recovery",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "cases": [
+    {
+      "fault": "after_allocate",
+      "run_id": "2f75bea7-55cf-4baf-b138-b076012edb1a",
+      "vm_id": "5ZGJ55TQ5X4CFYHV4OVGH635GO",
+      "generation": 2,
+      "same_instance": true,
+      "event_count": 11,
+      "user_message_count": 1,
+      "diff_sha256": "f53018d437f64b5bda3faa715f951d04bf6f67e4c49cc5b44e3364f7dbf0fb6f",
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      "operations": {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      }
+    },
+    {
+      "fault": "after_prompt",
+      "run_id": "9f44be81-fb9c-4193-8fae-ec4988f8009a",
+      "vm_id": "AA3WFSXNSHR4VEH7I7JQB4LJDV",
+      "generation": 2,
+      "same_instance": true,
+      "event_count": 11,
+      "user_message_count": 1,
+      "diff_sha256": "dd0b9f6d10815ec8f2d7469008a7fff80a44f9a82ab3a0460aabd611fb99a794",
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      "operations": {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      }
+    },
+    {
+      "fault": "before_event_commit",
+      "run_id": "f9116469-d306-4152-8b96-384dd8a047ce",
+      "vm_id": "KUIEFE7NVKMRSRN3OUU66O4PMP",
+      "generation": 2,
+      "same_instance": true,
+      "event_count": 11,
+      "user_message_count": 1,
+      "diff_sha256": "dbf53d4e8839e345fcf8ef9d382051ad9273a5faf716cb1e15638aadbf3b52e3",
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      },
+      "operations": {
+        "allocate": "completed",
+        "prepare": "completed",
+        "prompt": "completed",
+        "result": "completed",
+        "release": "completed"
+      }
+    }
+  ],
+  "passed": true,
+  "cleanup_errors": [],
+  "vm_count_after": 0,
+  "claim_count_after": 0,
+  "finished_at": "2026-09-22T11:25:40.051690+00:00"
+}

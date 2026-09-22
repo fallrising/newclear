@@ -163,7 +163,7 @@ class FixtureConnector(Connector):
 
 
 class Server:
-    def __init__(self, root, repo, base_sha, node=None):
+    def __init__(self, root, repo, base_sha, node=None, connector_type=FixtureConnector):
         root = Path(root)
         token = root / "connector-token"
         if not token.exists():
@@ -186,7 +186,7 @@ class Server:
             ],
         }
         self.node = node or Node(root)
-        self.service = FixtureConnector(self.config, client=self.node, host=self.node)
+        self.service = connector_type(self.config, client=self.node, host=self.node)
         self.socket = socket.socket()
         self.socket.bind(("127.0.0.1", 0))
         self.origin = f"http://127.0.0.1:{self.socket.getsockname()[1]}"

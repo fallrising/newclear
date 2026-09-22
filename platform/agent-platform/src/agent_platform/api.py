@@ -19,7 +19,16 @@ from starlette.concurrency import run_in_threadpool
 from .auth import Auth
 from .config import Settings
 from .db import Database
-from .domain import ActionInput, Login, Problem, ProfileInput, ProjectInput, RetryInput, TaskInput
+from .domain import (
+    ActionInput,
+    DecisionInput,
+    Login,
+    Problem,
+    ProfileInput,
+    ProjectInput,
+    RetryInput,
+    TaskInput,
+)
 from .store import Store, json_value
 
 
@@ -199,6 +208,37 @@ def create_app(settings=None, db=None, web_dist=None):
     @app.get("/api/v1/runs/{run_id}")
     def run(run_id: UUID, session=authenticated):
         return store.run(run_id)
+
+    @app.get("/api/v1/runs/{run_id}/approvals")
+    def approvals(run_id: UUID, session=authenticated):
+        store.run(run_id)
+        with db.transaction() as conn:
+            return {
+                "items": conn.execute(
+                    "SELECT * FROM approvals WHERE run_id=%s ORDER BY created_at,id", (run_id,)
+                ).fetchall()
+            }
+
+    @app.post("/api/v1/approvals/{approval_id}/decision")
+    def decision(
+        approval_id: UUID,
+        data: DecisionInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        from .approvals import decide
+
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"approvals/{approval_id}/decision",
+                idempotency_key,
+                data,
+                lambda conn, command_id: decide(
+                    conn, approval_id, data, session["operator_id"], command_id
+                ),
+            )
+        )
 
     @app.post("/api/v1/runs/{run_id}/actions")
     def action(

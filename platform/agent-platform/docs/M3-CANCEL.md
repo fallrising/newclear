@@ -1,5 +1,7 @@
 # M3 第二個切片：安全取消
 
+本文件記錄 cancel 切片的歷史交付範圍；後續已加入工具審批，最新狀態見 [M3 approval](M3-APPROVAL.md)。
+
 M3 recovery 已於 PR #22 合併（`d23df54`）。此切片完成 AT-08 的安全取消：OpenHands 任務可從工作台或 API 取消，排隊任務不會配置 VM，已配置任務則在確認原 VM 停止後才顯示 `cancelled`。**M3 尚未整體完成**；審批、暫停／恢復、egress／secret 與模型預算仍待開發。
 
 ## 取消契約

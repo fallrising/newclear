@@ -2,14 +2,14 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel 切片已通過，其餘安全控制開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval 切片已通過，其餘安全控制開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
 - Product reference：OpenHands Agent Canvas
 - Runtime direction：OpenHands Software Agent SDK／Agent Server + Cocoon sandbox
 
-本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)／[M1](docs/M1.md)／[M2](docs/M2.md)／[M3 recovery](docs/M3-RECOVERY.md)／[M3 cancel](docs/M3-CANCEL.md)；已執行的 Docker 檢查不等於全部契約通過。
+本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)／[M1](docs/M1.md)／[M2](docs/M2.md)／[M3 recovery](docs/M3-RECOVERY.md)／[M3 cancel](docs/M3-CANCEL.md)／[M3 approval](docs/M3-APPROVAL.md)；已執行的 Docker 檢查不等於全部契約通過。
 
 ## 1. 問題、目標與決策
 
@@ -421,7 +421,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-08 cancel 已驗收；AT-06/07/11 與 pause/resume 待完成，見 [M3 cancel](docs/M3-CANCEL.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；AT-07/11 與一般 pause/resume 待完成，見 [M3 approval](docs/M3-APPROVAL.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
@@ -450,7 +450,7 @@ M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(s
 - 本 SDD 為本項目的設計基準；研究紀錄說明觀察與選擇，不能用上游 roadmap 覆蓋本地驗收。
 - 實作時以 milestone 切片交付，記錄 change、tests、evidence、limitations；任何相容性失敗先更新 ADR／capability matrix。
 - 本目錄包含 M0 probe 與 dependency manifest，根目錄 CI 執行單元／SDK HTTP 契約與 Docker/rootfs 實測；不把它們當作 MicroVM 驗收。後續實作繼續遵守 newclear 的 [monorepo CI](../../docs/specs/monorepo-ci.md) 設定 root path-scoped workflow。
-- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。M0 的固定配置已通過硬體 gate；M2 真實 runtime／固定模擬模型切片已通過，最早未完成里程碑仍為 M3；worker recovery 與安全 cancel 切片已完成，其餘安全控制尚未完成。
+- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。M0 的固定配置已通過硬體 gate；M2 真實 runtime／固定模擬模型切片已通過，最早未完成里程碑仍為 M3；worker recovery、安全 cancel 與工具 approval 切片已完成，其餘安全控制尚未完成。
 
 ## 18. 來源
 

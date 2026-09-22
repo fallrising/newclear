@@ -6,6 +6,7 @@ export type Profile = {
   revision: number;
   name: string;
   backend: string;
+  tool_policy?: { require_approval?: boolean };
 };
 export type Task = {
   id: string;
@@ -27,6 +28,7 @@ export type Run = {
   last_event_seq: number;
   event_floor: number;
   execution_mode?: string;
+  require_approval?: boolean;
   capabilities?: Record<string, boolean | string>;
   result: {
     diff?: string;
@@ -131,6 +133,10 @@ export function errorText(error: unknown) {
           invalid_input: '請檢查欄位內容與 commit SHA。',
           active_run_exists: '這個任務已有尚未結束的執行。',
           state_conflict: '執行狀態已改變，已重新載入。',
+          approval_expired: '審批已逾期，這份核准不能再使用。',
+          approval_action_changed: '待執行內容已改變，請重新查看審批。',
+          approval_already_decided: '這份審批已處理或失效。',
+          approval_generation_stale: '執行環境已重新接管，請使用新的審批。',
           finalizing: '正在保存結果，這個階段無法取消。',
           run_terminal: '這次執行已結束。',
           cancel_already_requested: '取消請求已受理，正在確認環境停止。',

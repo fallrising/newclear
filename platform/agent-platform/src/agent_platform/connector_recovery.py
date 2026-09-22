@@ -32,10 +32,16 @@ def inspect(service, run_id, generation):
             return {"phase": "absent"}
         row = service.require(run_id, generation)
         operations = row["operations"]
+        receipts = [
+            op["result"]
+            for key, op in operations.items()
+            if key.startswith("approval:") and op["state"] == "completed"
+        ]
         removal = observe_sandbox(service, row)
         if removal:
             return {
                 "phase": "stopped",
+                "approval_receipts": receipts,
                 "stop": removal,
                 "result": operations.get("result", {}).get("result"),
             }
@@ -44,7 +50,7 @@ def inspect(service, run_id, generation):
         if "release" in operations:
             raise Problem(409, "cleanup_unconfirmed")
         allocation = operations["allocate"]["result"]
-        response = {"phase": "allocated", "allocation": allocation}
+        response = {"phase": "allocated", "allocation": allocation, "approval_receipts": receipts}
         if "prepare" not in operations:
             return response
         with service.relay(row) as http:
@@ -56,7 +62,11 @@ def inspect(service, run_id, generation):
             raise Problem(409, "recovery_conversation_mismatch")
         response.update(phase="prepared", prepared=operations["prepare"]["result"])
         if "prompt" in operations:
-            if conversation["execution_status"] not in {"running", "finished"}:
+            if conversation["execution_status"] not in {
+                "running",
+                "finished",
+                "waiting_for_confirmation",
+            }:
                 raise Problem(409, "backend_stopped_without_completion")
             response["phase"] = "running"
         if "result" in operations:

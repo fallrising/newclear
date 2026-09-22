@@ -127,7 +127,9 @@ def main():
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--origin", required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--scenario", choices=["recovery", "cancel"], default="recovery")
+    parser.add_argument(
+        "--scenario", choices=["recovery", "cancel", "approval"], default="recovery"
+    )
     parser.add_argument(
         "--worker-fault", choices=["after_allocate", "after_prompt", "before_event_commit"]
     )
@@ -197,7 +199,12 @@ def main():
             )
             profile = post(
                 "/agent-profiles",
-                {"name": "Recovery KVM", "backend": "openhands", "deadline_seconds": 300},
+                {
+                    "name": "Recovery KVM",
+                    "backend": "openhands",
+                    "deadline_seconds": 300,
+                    "require_approval": args.scenario == "approval",
+                },
             )
             points = ["after_allocate", "after_prompt"]
             if args.scenario == "recovery":
@@ -327,6 +334,23 @@ def main():
                     pass
                 else:
                     raise RuntimeError("stale_generation_accepted")
+                if args.scenario == "approval":
+                    from approval_kvm import exercise
+
+                    choice = "approve" if point == "after_allocate" else "deny"
+                    report["cases"].append(
+                        exercise(
+                            db, client, api, post, run, before, node, host, claim, worker, choice
+                        )
+                    )
+                    after = json.loads(journal.read_text())
+                    require(after["handle"] == before["handle"], "approval_replaced_instance")
+                    applied = [k for k in after["operations"] if k.startswith("approval:")]
+                    require(
+                        len(applied) == (1 if choice == "approve" else 0), "approval_count_mismatch"
+                    )
+                    print("approval_" + choice + ": passed", flush=True)
+                    continue
                 worker.execute(claim)
                 view = Store(db).run(run["id"])
                 require(view["state"] == "succeeded", "recovery_failed:" + str(view["reason"]))

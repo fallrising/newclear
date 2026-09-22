@@ -23,6 +23,11 @@ def request_cancel(conn, run_id, data, command_id):
         raise Problem(409, "run_terminal")
     if run["state"] == "cancelling":
         raise Problem(409, "cancel_already_requested")
+    conn.execute(
+        "UPDATE approvals SET status='invalidated' WHERE run_id=%s AND status IN "
+        "('pending','approved')",
+        (run_id,),
+    )
     queued = run["state"] == "queued" and run["sandbox_id"] is None
     row = conn.execute(
         "UPDATE runs SET state=%s,state_version=state_version+1,generation=generation+1,"

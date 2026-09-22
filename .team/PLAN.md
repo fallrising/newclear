@@ -497,10 +497,10 @@ DG-D037: Reconcile final M4 metadata d83560d / CI35707390643 success and release
 
 | Task | State | Scope |
 | --- | --- | --- |
-| [T-025](tasks/T-025.md) | RUNNING | AC27 lazy modules and performance measurements |
-| [T-026](tasks/T-026.md) | RUNNING | AC28/29 persistence and isolated runtime |
-| [T-027](tasks/T-027.md) | RUNNING | AC26/30 keyboard, extra-browser, integration and delivery |
-| [T-028](tasks/T-028.md) | READY after immutable candidate | independent read-only review |
+| [T-025](tasks/T-025.md) | ACCEPTED at043a13a | AC27; [canonical evidence](reports/T-025.md) |
+| [T-026](tasks/T-026.md) | ACCEPTED at043a13a | AC28/29; [canonical evidence](reports/T-026.md) |
+| [T-027](tasks/T-027.md) | ACCEPTED; evidence-head CI/merge closeout | AC26/30; [canonical evidence](reports/T-027.md) |
+| [T-028](tasks/T-028.md) | ACCEPTED at043a13a | [independent final review](reports/T-028-attempt-2.md) |
 
 ```yaml
 project_id: dim-gate
@@ -524,3 +524,43 @@ next_action: implement bounded M5 scopes, integrate and validate exact candidate
 DG-D038: User-authorized M3/M4 integration completed: PR17 merge9dd4f160de9d115c983f1d27661b7c399f0f0ef3 (post-merge CI35715757530 success), PR20 mergea61653b3a131f1cca6c0f476ef7ca0cc2456df12 (post-merge CI35716558999 pending at this observation). M5 normally integrates both into its isolated branch. Original source/accepted/worker/review branches and worktrees retained. T-025 task revision2 expands import-only ownership to foundation/routes.tsx and api/contracts.ts, preserving all runtime schemas and operations.
 
 DG-D039: REWORK first M5 candidate5ec58f7 following independent T-028 attempt1. Medium F-01 maps snapshot serializer failure incorrectly; lead reproduces both snapshot/envelope boundaries and moves byte serialization into existing atomic persistence catch. Medium F-02 is new extra-browser proof proceeding before persona/navigation settles; wait actual identity/route before next UI action. Native210 gates were green, smoke2/4 was not acceptance. Preserve all failures in T-027/T-028 attempt1. Second bounded review cycle requires new immutable candidate and full gates. Additional test-only correction polls actual1000-command UI results at25ms instead of default backoff, preserving every real click and150ms HTTP. Existing47 browser regressions unchanged; generated smoke artifacts get the same lint exclusion as baseline reports.
+
+
+DG-D040: ACCEPT M5 AC-26–30 at `043a13aba3f74de2d3dd14aa2481024a68e2f6b2`. Complete native gates211tests,52/52Chromium,4/4Firefox-WebKit,3/3performance,2/2isolation and independent T-028 attempt2 no-blocker/high/medium review passed. Exact product-head [CI35718464916](https://github.com/fallrising/newclear/actions/runs/35718464916), synthetic merge585dced93a8ef547a634020c0960860908902f67, also passed and retains artifact10691481213. Accepted details: T-027 attempt2. Initial JS297,794gzip bytes; local5-sample cold4×CPU LCP median708ms, query100p95 0.5ms, persisted HTTP100p95 167.2ms. Remote equivalents1148/1.1/184.9ms also pass unchanged SDD budgets.
+
+Second bounded review cycle closes F-01 serializer mapping, F-02 persona/navigation test synchronization and F-03 local Firefox CJK font sandbox visibility. F-03 changes only a temporary local font-directory read permission; standard CI font screenshots are readable. Original failed reports/artifacts, both detached M5 review worktrees, worker worktrees and every original worktree remain preserved. T-026 worker PARTIAL remains truthful; lead owns its corrected engine and accepted integrated evidence. Local runner actionlint log-path failure occurred before execution and the two remaining checks separately passed, with no product test rerun.
+
+M3 PR17 merge9dd4f16 and M4 PR20 mergea61653b both have successful post-merge CI35715757530/35716558999. Latest main b252d4e adds only agent-platform and is normally merged at2464b52 with no change to reviewed dim-gate/CI/ledger content. User explicitly authorized commit/SSHpush/PRmerge, superseding the historical no-auto-merge instruction for this run; no deployment or real cloud is authorized. v0.1 is accepted for local demonstration. Evidence-head CI and PR23 merge/owner release are recorded on the PR after this checkpoint, avoiding a self-reference commit loop.
+
+### Final M5 acceptance resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M5-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator — final metadata-head CI and authorized merge closeout
+milestone: M5 ACCEPTED; local-demo v0.1
+target_ref: main
+last_reconciled_main: b252d4e62c8380803af1854997d95c4b242bc18a
+main_integration_commit: 2464b5283b8c1a168a073220a316d78e404397dc
+continuation_ref: agent/dim-gate/mainline/m5-delivery
+worktree: /home/ckc/test/codex/newclear-m5
+task_id: T-025 / T-026 / T-027 / T-028
+implementation_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
+local_tested_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
+browser_tested_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2 — Chromium52/52; Firefox-WebKit4/4; performance3/3; isolation2/2
+ci_tested_merge: 585dced93a8ef547a634020c0960860908902f67
+ci_run: https://github.com/fallrising/newclear/actions/runs/35718464916
+spec_revision: M5-INTEGRATION-CONTRACT revision1
+evidence_refs:
+  - .team/reports/T-025.md
+  - .team/reports/T-026.md
+  - .team/reports/T-027-attempt-2.md
+  - .team/reports/T-028-attempt-2.md
+integration_state: OPEN_PR_23_EVIDENCE_HEAD_CI_THEN_AUTHORIZED_MERGE
+remote_durability: product SSH-durable; containing metadata commit pushed next, final head/CI/merge/owner release recorded on PR23
+blockers: []
+next_action: require latest metadata-head CI, then Ready and user-authorized merge; record DONE and released ownership on PR23; preserve all branches/worktrees; no deployment/real cloud
+```

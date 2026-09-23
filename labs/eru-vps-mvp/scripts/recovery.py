@@ -15,7 +15,8 @@ from core_patch import PatchOperator, ALIAS as CORE
 from component_reinstall import ComponentReinstall, ALIAS as WORKER, TARGET, UNITS, empty_target
 from canaries import HTTPGuards
 
-ACTIONS = ['core-rollback', 'worker-restore', 'worker-resume']
+CORE_ACTIONS = ['core-rollback', 'core-cancel']
+ACTIONS = [*CORE_ACTIONS, 'worker-restore', 'worker-resume']
 
 
 def count_field(output):
@@ -58,10 +59,13 @@ class RecoveryOperator(PatchOperator):
             raise ValueError('source still running; reconcile it under the controller lock first')
         if plan['bindings']['inventory'] != self.inventory or plan['bindings']['cluster'] != self.cluster():
             raise ValueError('source inventory/generation no longer matches')
-        if action == 'core-rollback':
+        if action in CORE_ACTIONS:
             if plan['operation'] != 'core-patch':
-                raise ValueError('core rollback must reference an original core-patch run')
+                raise ValueError('core recovery must reference an original core-patch run')
+            if action == 'core-cancel' and journal['status'] == 'complete':
+                raise ValueError('completed core update cannot be cancelled')
             relevant = ['core-patch', 'core-rollback', 'core-recovery']
+            if action == 'core-cancel': relevant.append('reapply')
         else:
             if plan['operation'] != 'rebuild-node' or plan['node'] != TARGET or plan['rebuild_mode'] != 'component-reinstall':
                 raise ValueError('worker recovery requires a worker-4 component reinstall source')
@@ -116,6 +120,23 @@ class RecoveryOperator(PatchOperator):
         return {'hosts': hosts, 'metadata_counts': counts, 'recovery': footprint,
                 'runtime': self.core_runtime(allow_inactive=True), 'protected_services': self.protected_services()}
 
+    def observe_cancellation(self, source):
+        original = source['plan']
+        hosts = self.host_snapshot()
+        for alias, host in hosts.items():
+            if identity(host) != identity(original['snapshot']['hosts'][alias]):
+                raise ValueError('source host/boot/runtime identity changed: ' + alias)
+        footprint = self.remote({'action': 'inspect-cancellation', 'source_run': original['id'],
+            'machine_id': hosts[CORE]['machine_id'], 'source': {
+                'before': original['footprint'], 'new_sha256': original['sha256'],
+                'plan_sha256': source['plan_sha256']}})
+        runtime = self.core_runtime()
+        if runtime != original['core_runtime'] or runtime['sha256'] != original['footprint']['binary']['sha256']:
+            raise ValueError('original running core changed; cancellation cannot restore it')
+        self.etcd_ready()
+        return {'hosts': hosts, 'recovery': footprint, 'runtime': runtime,
+                'protected_services': self.protected_services()}
+
     def worker_state(self, source):
         return ComponentReinstall(self).remote('inspect-recovery', source['plan'])
 
@@ -166,6 +187,7 @@ class RecoveryOperator(PatchOperator):
 
     def observe(self, source, action, health_file, canary_run):
         if action == 'core-rollback': return self.observe_core(source)
+        if action == 'core-cancel': return self.observe_cancellation(source)
         if not health_file or not canary_run:
             raise ValueError('worker recovery requires --health and --canary-run')
         return self.observe_worker(source, action, health_file, canary_run)
@@ -173,20 +195,25 @@ class RecoveryOperator(PatchOperator):
     def make_recovery_plan(self, run, action, health_file=None, canary_run=None):
         if action not in ACTIONS: raise ValueError('unknown recovery action')
         source = self.source(run, action)
-        if action == 'core-rollback' and (health_file or canary_run):
+        if action in CORE_ACTIONS and (health_file or canary_run):
             raise ValueError('offline core recovery uses direct SSH/etcd evidence, not worker health/canaries')
         observed = self.observe(source, action, health_file, canary_run)
         plan = {'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
-                'operation': 'core-recovery' if action == 'core-rollback' else 'worker-recovery',
+                'operation': 'core-recovery' if action in CORE_ACTIONS else 'worker-recovery',
                 'action': action, 'created_at': now(), 'source_run': run, 'source': source,
                 'health_file': health_file, 'canary_run': canary_run, 'observed': observed,
-                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [CORE] if action == 'core-rollback' else [CORE, WORKER],
+                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [CORE] if action in CORE_ACTIONS else [CORE, WORKER],
                 'steps': (['Verify SSH identity, empty runtime/metadata, etcd and backup hashes without core API',
                            'Restore only the recorded binary/manifest if needed; restart core at most once',
                            'Verify running checksum, API, zero workloads/usage and preserved services'] if action == 'core-rollback' else
                           ['Keep continuous HTTP guards on worker-2/3; verify current ownership and empty worker-4',
                            'Restore the exact backup into a stopped worker' if action == 'worker-restore' else 'Preserve current worker files and agent state',
                            'Fence, validate nginx lifecycle and isolation, then resume scheduling; record recovery separately'])}
+        if action == 'core-cancel':
+            plan['steps'] = [
+                'Verify source plan, backing-up journal and unchanged original files/runtime',
+                'Record a new cancellation intent and receipt; retain all update evidence',
+                'Verify archive and unchanged services; never replace files or restart core']
         envelope = {'plan': plan, 'sha256': digest(plan)}
         atomic_json(self.root / 'plans' / (plan['id'] + '.json'), envelope)
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
@@ -195,7 +222,7 @@ class RecoveryOperator(PatchOperator):
     def execute_recovery(self, run, checksum):
         envelope = read(self.root / 'plans' / (identifier(run) + '.json'))
         plan = envelope['plan']
-        expected_operation = 'core-recovery' if plan['action'] == 'core-rollback' else 'worker-recovery'
+        expected_operation = 'core-recovery' if plan['action'] in CORE_ACTIONS else 'worker-recovery'
         if (plan['id'] != run or plan['operation'] != expected_operation or digest(plan) != checksum or
                 checksum != envelope['sha256'] or not plan['executable'] or plan['action'] not in ACTIONS):
             raise ValueError('invalid or blocked recovery plan')
@@ -221,6 +248,7 @@ class RecoveryOperator(PatchOperator):
             if stable(observed) != stable(plan['observed']):
                 raise ValueError('recovery state changed after plan')
             if plan['action'] == 'core-rollback': self.recover_core(plan)
+            elif plan['action'] == 'core-cancel': self.cancel_core(plan)
             else: self.recover_worker(plan)
             self.journal.update(status='complete', finished_at=now())
             self.stage('complete')
@@ -229,6 +257,27 @@ class RecoveryOperator(PatchOperator):
             self.save_journal()
             raise
         return self.journal
+
+    def cancel_core(self, plan):
+        before = plan['observed']
+        self.stage('cancelling-core-update')
+        if before['recovery']['stage'] != 'cancelled':
+            self.journal['remote_cancellation'] = self.remote({'action': 'cancel', 'id': plan['id'],
+                'source_run': plan['source_run'], 'machine_id': before['hosts'][CORE]['machine_id'],
+                'expected_cancellation': before['recovery']})
+            self.save_journal()
+        self.stage('verifying-core-cancellation')
+        after = self.observe_cancellation(plan['source'])
+        if after['recovery']['stage'] != 'cancelled':
+            raise ValueError('core cancellation receipt not observed')
+        stable_before, stable_after = deepcopy(before), deepcopy(after)
+        for value in [stable_before, stable_after]:
+            value['recovery'].pop('stage')
+            value['recovery'].pop('receipt_sha256')
+        if stable_after != stable_before:
+            raise ValueError('files/runtime/services changed during core cancellation')
+        self.journal['after'] = after
+        # No core revision, source status or service changes: this update never installed.
 
     def recover_core(self, plan):
         before = plan['observed']

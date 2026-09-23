@@ -76,6 +76,127 @@ class CoreUpdate(WorkerReinstall):
         self.save(directory, journal)
         return journal
 
+    def cancellation_directory(self, cancel_id):
+        self.directory(cancel_id)  # same strict identifier validation
+        return self.path('/var/lib/eru-mvp/core-cancellations/' + cancel_id)
+
+    def cancellation_journal(self, run_id):
+        self.entry('/var/lib/eru-mvp/core-updates')
+        directory = self.directory(run_id)
+        entry = self.entry('/' + str(directory.relative_to(self.root)))
+        journal_path = '/' + str((directory / 'journal.json').relative_to(self.root))
+        journal_entry = self.entry(journal_path)
+        if not entry or entry['type'] != 'directory' or not journal_entry or journal_entry['type'] != 'file':
+            raise ValueError('cancellation requires a durable original update journal')
+        journal = json.loads((directory / 'journal.json').read_text())
+        if journal.get('id') != run_id or journal.get('owner') != 'eru-vps-mvp':
+            raise ValueError('update identity mismatch')
+        if journal.get('stage') != 'backing-up' or 'manifest_after_sha256' in journal:
+            raise ValueError('cancellation requires backing-up before replacement intent')
+        return journal
+
+    def retained_update_files(self, run_id):
+        """Bind even partial/unknown regular files; never delete or adopt them."""
+        directory = self.directory(run_id)
+        staged = '/usr/local/bin/.eru-core-' + run_id
+        value = self.entry(staged)
+        if value and value['type'] != 'file':
+            raise ValueError('unsafe staged core binary')
+        names = ['/' + str(directory.relative_to(self.root)), staged]
+        for parent, dirs, files in os.walk(directory, followlinks=False):
+            for child in sorted(dirs + files):
+                path = Path(parent) / child
+                if path == directory / 'cancelled.json':
+                    continue
+                names.append('/' + str(path.relative_to(self.root)))
+                if len(names) > 256:
+                    raise ValueError('update archive exceeds entry bound')
+                self.entry(names[-1])  # reject links/mounts before walking children
+        entries = [self.entry(name) for name in sorted(names)]
+        if sum(e.get('size', 0) for e in entries if e) > 512 * 1024 * 1024:
+            raise ValueError('update archive exceeds size bound')
+        return dict(zip(sorted(names), entries))
+
+    def cancellation_archive(self, run_id):
+        """Validate a completed receipt without requiring the old core still live.
+
+        Later legitimate updates may change the live binary. The archived source
+        journal, retained files and separate cancellation intent must still agree.
+        """
+        journal = self.cancellation_journal(run_id)
+        marker = self.directory(run_id) / 'cancelled.json'
+        entry = self.entry('/' + str(marker.relative_to(self.root)))
+        if not entry:
+            return None
+        if entry['type'] != 'file':
+            raise ValueError('unsafe cancellation receipt')
+        receipt = json.loads(marker.read_text())
+        if (receipt.get('schema') != 1 or receipt.get('owner') != 'eru-vps-mvp' or
+                receipt.get('stage') != 'cancelled' or receipt.get('source_run') != run_id):
+            raise ValueError('invalid cancellation receipt')
+        self.entry('/var/lib/eru-mvp/core-cancellations')
+        attempt = self.cancellation_directory(receipt['id'])
+        for path, kind in [(attempt, 'directory'), (attempt / 'journal.json', 'file')]:
+            value = self.entry('/' + str(path.relative_to(self.root)))
+            if not value or value['type'] != kind:
+                raise ValueError('missing or unsafe cancellation intent')
+        intent = json.loads((attempt / 'journal.json').read_text())
+        if intent != {**receipt, 'stage': 'cancel-intent'}:
+            raise ValueError('cancellation intent/receipt mismatch')
+        observed = receipt['observed']
+        source = observed['source']
+        if (observed['stage'] != 'backing-up' or observed['journal_sha256'] != digest(journal) or
+                source['before'] != journal['before'] or source['new_sha256'] != journal['new_sha256'] or
+                not re.fullmatch(r'[0-9a-f]{64}', source['plan_sha256']) or
+                observed['retained'] != self.retained_update_files(run_id)):
+            raise ValueError('cancelled archive changed or does not match original update')
+        return receipt
+
+    def inspect_cancellation(self, run_id, source):
+        journal = self.cancellation_journal(run_id)
+        if (source['before'] != journal['before'] or source['new_sha256'] != journal['new_sha256'] or
+                not re.fullmatch(r'[0-9a-f]{64}', source['plan_sha256'])):
+            raise ValueError('remote update journal does not match source plan')
+        if self.inspect() != source['before']:
+            raise ValueError('original core files changed; cannot cancel')
+        preserved = {}
+        owner = json.loads(self.path(MANIFEST).read_text())
+        for name, checksum in owner['files'].items():
+            value = self.entry(name)
+            if not value or value.get('sha256') != checksum:
+                raise ValueError('preserved core configuration changed: ' + name)
+            preserved[name] = value
+        receipt = self.cancellation_archive(run_id)
+        if receipt and receipt['observed']['source'] != source:
+            raise ValueError('cancellation belongs to a different source plan')
+        return {'source': source, 'stage': 'cancelled' if receipt else 'backing-up',
+                'journal_sha256': digest(journal), 'manifest': self.entry(MANIFEST),
+                'preserved': preserved, 'retained': self.retained_update_files(run_id),
+                'receipt_sha256': digest(receipt) if receipt else None}
+
+    def cancel(self, run_id, cancel_id, expected):
+        observed = self.inspect_cancellation(run_id, expected['source'])
+        if observed != expected:
+            raise ValueError('core cancellation state changed after plan')
+        if observed['stage'] == 'cancelled':
+            raise ValueError('already cancelled; verify with a new recovery plan')
+        attempt = self.cancellation_directory(cancel_id)
+        attempt.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        self.entry('/var/lib/eru-mvp/core-cancellations')
+        self.sync(attempt.parent.parent)
+        attempt.mkdir(mode=0o700)  # never replay even an incomplete cancellation
+        self.sync(attempt.parent)
+        record = {'schema': 1, 'id': cancel_id, 'source_run': run_id,
+                  'owner': 'eru-vps-mvp', 'stage': 'cancel-intent', 'observed': observed}
+        self.save(attempt, record)
+        if self.inspect_cancellation(run_id, expected['source']) != observed:
+            raise ValueError('core cancellation state changed while recording intent')
+        # Only this new receipt changes the source directory. Original journal,
+        # partial backups, staged binary and unknown data remain byte-for-byte.
+        record['stage'] = 'cancelled'
+        atomic_json(self.directory(run_id) / 'cancelled.json', record)
+        return self.cancellation_archive(run_id)
+
     def recovery(self, run_id):
         directory = self.directory(run_id)
         journal_path = '/' + str((directory / 'journal.json').relative_to(self.root))
@@ -176,6 +297,8 @@ def remote_main(config):
     updater = CoreUpdate()
     if config['action'] == 'inspect':
         result = updater.inspect()
+    elif config['action'] == 'inspect-cancellation':
+        result = updater.inspect_cancellation(config['source_run'], config['source'])
     elif config['action'] == 'inspect-recovery':
         result = updater.inspect_recovery(config['source_run'])
     else:
@@ -185,6 +308,8 @@ def remote_main(config):
             if config['action'] == 'install':
                 result = updater.install(config['id'], config['expected'],
                     decode_payload(config), config['sha256'])
+            elif config['action'] == 'cancel':
+                result = updater.cancel(config['source_run'], config['id'], config['expected_cancellation'])
             elif config['action'] == 'rollback':
                 result = updater.rollback(config['source_run'], config['id'], config.get('expected_recovery'))
             else:

@@ -45,7 +45,8 @@ def crash_child(root, operation, point, edge):
     def replace_at(source, destination):
         path = Path(destination)
         label = 'replace:' + ('binary' if path == updater.path(BINARY) else
-                              'manifest' if path == updater.path(MANIFEST) else 'other')
+                              'manifest' if path == updater.path(MANIFEST) else
+                              'receipt' if path.name == 'cancelled.json' else 'other')
         hit(label, 'before')
         result = replace(source, destination)
         hit(label, 'after')
@@ -55,6 +56,9 @@ def crash_child(root, operation, point, edge):
     os.replace = replace_at
     if operation == 'install':
         updater.install('source', before, b'new-binary', sha(b'new-binary'))
+    elif operation == 'cancel':
+        from test_core_cancel import proof
+        updater.cancel('source', 'recovery-killed', updater.inspect_cancellation('source', proof(before)))
     elif operation == 'rollback':
         updater.rollback('source', 'recovery-killed', updater.inspect_recovery('source'))
     else:

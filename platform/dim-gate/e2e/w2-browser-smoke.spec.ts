@@ -6,7 +6,6 @@ test('W2 extra browser: canonical Redis delivery and refresh across roles', asyn
   test.setTimeout(150_000)
   const health = captureBrowserHealth(page)
   try {
-    await page.goto('rd')
     const id = await createResource(page, 'redis')
     await act(page, '提交審核')
     await become(page, 'user-ops')

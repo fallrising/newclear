@@ -22,6 +22,16 @@ async function accessibleAtSizes(page: Page, info: TestInfo, label: string, dial
       const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))
       expect(violations, `${label}: ${theme} ${width}`).toEqual([])
       await info.attach(`${label}-${theme}-${width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+      if (label === 'work-item-triage' && width < 1440) {
+        const region = page.getByRole('region', { name: '工作單與審批差異，可水平捲動', exact: true })
+        for (let index = 0; index < 100 && !await region.evaluate(el => el === document.activeElement); index++) await page.keyboard.press('Tab')
+        await expect(region).toBeFocused()
+        const before = await region.evaluate(el => el.scrollLeft)
+        await page.keyboard.press('ArrowRight')
+        await expect.poll(() => region.evaluate(el => el.scrollLeft)).toBeGreaterThan(before)
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+        await info.attach(`${label}-keyboard-scroll-${theme}-${width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+      }
     }
   }
   await page.setViewportSize({ width: 1440, height: 1000 })

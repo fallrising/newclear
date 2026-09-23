@@ -874,3 +874,31 @@ DG-D067: T036 F01 MEDIUM reproduced on fixeda054: UI parent-level impactIncomple
 DG-D068: T036 F02/F03 MEDIUM accepted as same attempt3 REWORK. Approved WorkItems omitted from execution filter; triage omitted required kind/risk/unit delta. Contractrevision3 now fixes overlapping source-phase membership and canonical read-only summary (unknown baselines explicit), before implementation. No source states, business persistence or AC narrowed. Lead continues sole shared schema/policy/view/UI owner; fixeda054 full regression stillrunning, reviewer continues full scope.
 
 DG-D069: T035attempt3 F01–F03 corrections implemented in isolatedcloseout tree, all native321/29files and91operations/210schemas pass. Strict required readDTOs only; no persisted schema/state change. UIobject eligibility now uses sharedpolicy, list/detail/approval share typedrisk/delta, approvedRequest/Change appear inexecution anddecided. Tests include hidden-sibling allow, hidden-affected/no-pool refusal, scope revoked afteroldread, signed/unknownbase summaries. T036 full source review confirmed onlythreeMEDIUM findings; its olda054 focused11browser/65domain andnativechecks pass, independentreport pending. Freeze correction beforefocusedbrowser/performance, then independent follow-up andfull/latestCI. Existinga054 fullrunner has nofailures throughM5reliability; W2 remainsNOT_ACCEPTED.
+
+DG-D070: fixed4a69e07 SSHsaved to taskbranch then normal remotePRbranchfastforward (PR36confirmedhead4a69, CI35842903725inprogress); originalmainlinelocaltree stayeda054 untilrunnerfinished. a054 actual76/76Chromium24.5min and2/2isolation pass; smoke6/8FAIL, W2Firefox/WebKit initialdoublegoto cancels requiredstartupmodule/MSW beforefirstpage isready. Trace shows initialrd→wizard within91/104ms; completebusinesssuccessdoesnotwaivefailedhealth. Failures/artifacts archived beforeanynewrun. Correct test enters wizard directly through existing createResource helper; no health/timeout/retry relaxation. IndependentreviewconfirmedF01–03sourceclosure on4a69; F04LOW narrowtable readability accepted for smallCSSfix (minwidth andeachrefblock), plusrealkeyboardhorizontal-scroll assertions. Oldcloseout4a69full77runner remainsimmutable; canonicalleadbranch nowFF4a69 withthisboundedlayout/test correction, T035attempt3stillactive. T036attempt1reports exactSHA c006bb83c9c5c0537367b22c5d8347c2c91ec2c91d099a0f0b55363fa361f591 integrated. Fresh4a69performance3/3pass304484gzipbytes/LCP792ms/query0.6ms/HTTP169.4ms;13/13W2browser3.9minpass2686responses/37images/zeroerrors. W2NOT_ACCEPTED.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 70
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / REVIEW_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+supplemental_continuation_ref: agent/dim-gate/task/t035-w2-closeout
+supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus containing bounded layout/test correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; full77 and8smoke/2isolation stillrunning in supplemental tree
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 4a69 SSH-saved on task andPRbranches; containing correction/evidence nextSSHpush
+blockers: []
+next_action: fixed bounded layout browser andall8smoke; preserve actualfull4a69 results (oldsmoke may reproduce known fixed startup test defect); independent finaldelta review; complete latestPRheadCI, recheckmain/head, authorizedmerge andactualmerge/tree/postmergeCI/owner closeout beforeW3
+```

@@ -124,3 +124,5 @@ W2 browser/performance checkpoint:285b46f initial4journeysfailed; afterae3bb49 f
 W2 fixed0ab838a affectedChromium **20/20通過**（4.0分鐘）：既有M1/M2、Redis staging/刷新、Kafka失敗重試、隔離及明暗鍵盤/axe。T033效能修正7檔已SHA核對整合，worker完整benchmark3/3、303891bytes通過，仍待lead固定整合版本重測。genuineW1 activeRelease/Job瀏覽器升級案例已加入；治理瀏覽器及完整剩餘gates持續中。W2仍NOT_ACCEPTED，PR36draft。
 
 W2主控固定740a2bc：完整benchmark3/3通過（實際初始JS303924/307200bytes，LCP724ms、queryP950.5ms、HTTPP95168.6ms）；genuineW1升級browser1/1與真200舊資源回應隔離browser1/1通過。T034治理browser5/5、13axe掃描通過並SHA交接整合。所有worker寫入已釋放；lead接續固定候選完整76Chromium、8Firefox/WebKit、isolation、獨立T036review與最新headCI。仍未W2ACCEPTED或合併。
+
+W2 固定4a69e07：三項medium review修正後13/13瀏覽器與3/3效能通過；獨立複審程式層面確認關閉。原a054完整76Chromium與2isolation通過，但Firefox/WebKit新W2smoke因連續整頁導航中止啟動而失敗6/8，證據保留並修正測試起點；另補工作單表格窄螢幕可讀性。最終固定77回歸／8smoke／CI／review仍待完成，W2尚未驗收合併。

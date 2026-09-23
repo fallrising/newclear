@@ -30,3 +30,6 @@
 
 .work-summary { min-width: 10rem; overflow-wrap: anywhere; }
 .work-summary p { margin-block: .35rem; }
+
+.resource-work-items-table { min-width: 58rem; }
+.resource-work-items-table small { display: block; margin-top: .3rem; }

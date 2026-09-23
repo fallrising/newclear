@@ -18,3 +18,11 @@ PLAN DG-D067 records REWORK and sole shared-file owner; W2contract revision3 spe
 ## Risks and Follow-ups
 
 Source now includes shared policy object eligibility, filtered object-only consumers, overlapping phase membership and typed triage summary. Domain/HTTP tests prove sufficient scope, hidden affected consumers/no pool denial, stale proposal revocation, approved Request/Change phase inclusion, +2048MiB resize, signed shrink, zero-demand bind, Kafka multiunit demand and unknown historical baseline. New browser assertions exercise these on visible UI; execution pending. The initial new HTTP test used the wrong client helper name and typecheck rejected it; corrected to the existing revokeAssignment before the passing gate. Preserve capacity and hidden consumer redaction. Freeze correction, complete fixed gates and uninvolved review; latest-headCI, authorized merge and actual closeout precede W3.
+
+
+- Fixed4a69 all13W2Chromium3.9min,2686networkresponses/37images/zero page errors or failedrequests — passed
+- Fixed4a69 unchangedfreshbenchmark3/3,304484gzipbytes/LCP792ms/queryP950.6ms/HTTPP95169.4ms, clean tracked source metadata — passed
+- Historicala054 full76Chromium24.5min and2liveisolation — passed
+- Historicala054 Firefox/WebKit smoke6/8: initial two document navigations91/104msapart abort bootstrap; traces retained, fullbusinesssuccessstillfailshealth — failed
+
+The smoke now starts directly at its wizard via existing UI helper, removing redundant pre-bootstrap navigation. F04LOW table readability is corrected by bounded table minwidth and separate reference lines; new keyboard scrolling assertions and 1440/768/390 screenshots verify it. Canonical lead tree has fast-forwarded to4a69 after oldrunner finished; closeout tree remains immutable for77full gates. Final bounded fix/smoke and independent narrow review follow; no acceptance yet.

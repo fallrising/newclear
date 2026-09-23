@@ -55,11 +55,24 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 | --- | --- | --- |
 | M1-US-01 | 兩個 bootstrap 人類 WS send | 同一 `id/seq`；D1 可讀 |
 | M1-MEM-01 | `POST /api/rooms/:id/members` 加入既有 human；第 33 人 | 前 32 成功；第 33 → 409 `room_full` |
-| M1-MEM-02 | 同一路由以 `handle` 邀請未入房的 human；兩識別並存或皆無；agent／不存在／停用的 handle；guest 呼叫 | 200 且 `member_id` 為該人；400 `invalid_request`；404 `not_found`；guest 403 |
+| M1-MEM-02 | 同一路由以 `handle` 邀請未入房的 human；兩識別並存或皆無；不存在／停用的 handle；guest 呼叫 | 200 且 `member_id` 為該人；400 `invalid_request`；404 `not_found`；guest 403。未停用 agent 的 handle 改由 UI-10-03，不再期望 404 |
 | M1-GAP-01 | WS 丟包（中間 seq 未送達） | client `after_seq` 補洞，不重用 |
 | M1-IDEM-01 | 同 `client_message_id` 重送 | 不配新 seq |
 | M1-CAP-01 | body 8 KiB+1 | `payload_too_large`，不 INSERT |
 | ST-STATUS-01 | WS `type=status` typing | D1 COUNT 不變；對端可收無 seq status |
+
+### 畫面 10：成員與提及
+
+契約：[10](10-members-and-mention.md)。程式尚未落地。
+
+| ID | Given / When | Then |
+| --- | --- | --- |
+| UI-10-01 | 房內有人類與 agent；桌面或窄螢幕進房 | 不再有可展開人數；成員列常駐；badge `agent`；讀取中是 `Loading members…`；`live` 不是別人的在線 |
+| UI-10-02 | 名單已載入；輸入 `@` | 空前綴列出本房全員；Enter 替換前綴且不送出；Shift+Enter 換行；IME Enter 不選不送；焦點留在輸入欄 |
+| UI-10-03 | operator 以 handle 邀請未停用 human 或 agent | 表單 body 只有 `{ "handle" }`；GET 成功後才顯示；人類保留重新整理文案；GET 失敗不重送 POST；404／滿員有欄位下的句子 |
+| UI-10-04 | `reply_limit.fixed_text` 為 `hello from grok`；送出 `@grok` | 事前可見固定句；只有 hosted 的 `is replying` 且對得出 handle 才顯示回覆中；訊息落盤才進時間線；status 無 seq |
+| UI-10-05 | 非 operator 對 `operator_personal`；或 operator 看到 `sidecar_off` | badge 或未啟用句可見；文字落盤；該次不自畫回覆中；房內真實回覆狀態仍顯示 |
+| UI-10-06 | 成員 GET 失敗，或回覆狀態結束／過期／斷線／切房 | 同房失敗保留上一筆成功名單並可 Retry；不沿用上一房；過期不宣稱完成；離線保留草稿 |
 
 ### M2 agent／token：FR-02，US-02
 

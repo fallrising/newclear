@@ -749,7 +749,7 @@ kith 是新 component，無舊 API。以下為核心版對外契約，M0 落 JSO
 | GET | `/api/rooms/:id/messages?after_seq&before_seq&limit` | member | 歷史；預設 `kind=message`；`after_seq` 供 WS 補洞 |
 | POST | `/api/rooms/:id/messages` | member | REST 備援 send（與 WS 同一 Room 路徑） |
 | GET | `/api/rooms/:id/members` | member | 本房成員、kind、attention、quota_class、operator-only badge |
-| POST | `/api/rooms/:id/members` | **owner** | 恰好 `member_id`（既有 human 或 agent）或 `handle`（未停用 human，NOCASE）其中一個；可加 `role`。兩個都有或都沒有 → 400。滿 32 人 → 409 `room_full` |
+| POST | `/api/rooms/:id/members` | **owner** | 恰好 `member_id` 或 `handle`（未停用 human 或 agent，NOCASE）其中一個；可加 `role`。兩個都有或都沒有 → 400。滿 32 人 → 409 `room_full`。見 [10](docs/sdd/10-members-and-mention.md) |
 | DELETE | `/api/rooms/:id/members/:mid` | owner | 移出；不可移除最後一個 owner |
 | GET | `/api/rooms/:id/ws` | session → DO | WebSocket upgrade |
 | POST | `/api/agents` | owner | 建 agent 成員（body 含 `quota_class`，預設見下） |

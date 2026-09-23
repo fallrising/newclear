@@ -1131,3 +1131,29 @@ remote_durability: 826e230_SSHsaved; containing_final_failure_handoff_nextpush; 
 blockers: [Admin_integrations_AbortSignal_clone_regression, incomplete_full_browser_smoke_isolation, incomplete_independent_review, latest_head_CI_pending]
 next_action: claim_continuation_owner; read_HANDOFF_WORKSPACES; fix_integrations_queryFn_deferredclient_boundary; targeted_M4_then_allgates; resume_independentT040; onlygreenlatestheadCI_thenaccept_merge_actualcloseout; thenW4_W5
 ```
+
+
+DG-D084 (2026-09-23): Resume DG-W3-20260923-02 on the existing canonical branch and PR37 after DG-D083 explicitly released all owners. Read the complete HANDOFF-WORKSPACES, applicable AGENTS, prompt/protocol, SDD09–14, W3 revision3, T039/T040 reports and fixed kernel237aa277 workflow/skills/contracts. No updated kernel policy adopted. Remote PR37 head e31b3a1 is DRAFT/OPEN; old local runner PIDs2209053/2210364 are absent. Fresh SSH main61d021e changes only Kith and was normally merged without changing dim-gate. Preserve all59 existing worktrees and historical failed evidence. Lead owns T039 attempt4: repair explicit React Query callback boundaries, reproduce regression, then fixed native/browser/performance/isolation gates. T040 attempt2 will independently review fixed source in a new detached checkout, including remaining attempt1 coverage. Existing builtin uninvolved reviewer fallback remains available; exact model slug is not asserted. Claude CLI2.1.278 auth exists; model execution preflight is pending and auth alone is not proof. Three bounded implementation/review cycles, no reduced gates. User authorizes continuation, scoped commits, SSH push and existing PR updates; gated merge authorization is recorded in handoff and task. No deployment or real external product effects.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 84
+run_id: DG-W3-20260923-02
+active_owner: Codex orchestrator W3 continuation
+terminal_state: null
+milestone: W3 REGRESSION_REPAIR / NOT_ACCEPTED / NOT_MERGED
+task_id: T039 attempt4 RUNNING; T040 attempt2 pending fixed candidate
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
+implementation_commit: 35f594f
+local_tested_commit: no_new_candidate_yet
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-3.md, .team/reports/T-040-attempt-1.md]
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: e31b3a1 SSHsaved; continuation checkpoint local
+blockers: [confirmed_integration_regression, full_gates_and_independent_review_pending]
+next_action: repair_callback_boundary_with_regression; freeze_and_validate; independent_review; latest_exact_head_CI_before_acceptance_and_gated_merge
+```

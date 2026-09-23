@@ -11,7 +11,7 @@ import { ObservationAudit, timestamp, useObservationRefresh } from './shared'
 export function IntegrationsPage({ session }: { session: SessionView }) {
   const [selection] = useSearchParams()
   const integrationId = selection.get('integrationId')
-  const integrations = useQuery({ queryKey: queryKey('integrations'), queryFn: api.listIntegrations })
+  const integrations = useQuery({ queryKey: queryKey('integrations'), queryFn: () => api.listIntegrations() })
   return <div className="observation-page"><div className="page-heading"><div><p className="eyebrow">INTEGRATIONS · DEMO</p><h1>平台整合</h1><p className="page-description">檢視整合 metadata、欄位映射與模擬測試結果。此示範不持有憑證，也不發送外部連線。</p></div></div>{integrations.isPending ? <LoadingState label="正在讀取可見整合…" /> : integrations.isError ? <ErrorState error={integrations.error} onRetry={() => void integrations.refetch()} /> : integrations.data.filter(item => !integrationId || item.id === integrationId).length === 0 ? <section className="panel empty-state" role="status"><h2>目前範圍沒有整合</h2><p>只顯示目前身分可讀取的整合摘要。</p></section> : <div className="integration-grid">{integrations.data.filter(item => !integrationId || item.id === integrationId).map(integration => <IntegrationCard key={`${session.sessionId}:${session.identityEpoch}:${session.policyVersion}:${integration.id}`} integration={integration} canTest={session.effectiveActions.includes('integration.test')} />)}</div>}</div>
 }
 

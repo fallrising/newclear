@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import '@testing-library/jest-dom/vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { deferredClient } from '../../api/core/deferred-client'
 import type { Application, CommandReceipt, Environment, Incident, Integration, SessionView } from '../../domain/schemas'
 import { IncidentDetailPage, IncidentListPage, IntegrationsPage, ObservabilityPage } from './index'
 
@@ -170,6 +171,20 @@ describe('incident pages', () => {
 })
 
 describe('integration metadata and simulated tests', () => {
+  it('loads integration metadata through the deferred client without forwarding React Query context', async () => {
+    const transport = vi.fn(async () => [integration])
+    const client = deferredClient(async () => ({ listIntegrations: transport }), { listIntegrations: true },
+      () => ({ actorId: 'user-admin', sessionId: 'test-session', generation: 1, policyVersion: 1, identityEpoch: 1 }))
+    mocks.listIntegrations.mockImplementation(client.listIntegrations)
+    const cache = mount('/admin/integrations', session('admin'))
+    expect(await screen.findByRole('button', { name: '模擬測試 · Demo APM' })).toBeEnabled()
+    expect(transport).toHaveBeenLastCalledWith()
+    await act(async () => { await cache.invalidateQueries() })
+    expect(transport).toHaveBeenCalledTimes(2)
+    expect(transport).toHaveBeenLastCalledWith()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   it('keeps Ops integration metadata read-only and reports an API error without a successful test result', async () => {
     mount('/admin/integrations', session('ops'))
     expect(await screen.findByRole('button', { name: '模擬測試 · Demo APM' })).toBeDisabled()

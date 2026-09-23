@@ -68,6 +68,9 @@ def main():
         "crash-settled",
         "crash-delivered",
         "cross-run",
+        "fixture-credits",
+        "fixture-budget-cutoff",
+        "fixture-budget-unknown",
     ]
     parser.add_argument("--case", choices=cases)
     parser.add_argument("--worker-fault", choices=["reserved", "settled", "delivered"])
@@ -104,6 +107,12 @@ def main():
     def fixture_response(data):
         fixture["upstream_calls"] += 1
         result = original_response(data)
+        if fixture["case"] == "fixture-budget-unknown":
+            result["usage"] = {
+                "prompt_tokens": 1_000_000,
+                "completion_tokens": 5,
+                "total_tokens": 1_000_005,
+            }
         return (
             attack_response(result, data["fixture_run_id"])
             if fixture["case"] == "isolation"
@@ -215,16 +224,20 @@ def main():
             )
             for case in [args.case] if args.case else cases:
                 fixture.update(case=case, rotated=False, checks=None, upstream_calls=0)
-                policy.write_text(
-                    json.dumps(
-                        {
-                            "origin": f"http://127.0.0.1:{upstream.server_port}",
-                            "credential_file": str(key),
-                            "mode": "fixture-http-v1",
-                            "request_limit": 1 if case == "cutoff" else 10,
-                        }
-                    )
-                )
+                model_config = {
+                    "origin": f"http://127.0.0.1:{upstream.server_port}",
+                    "credential_file": str(key),
+                    "mode": "fixture-http-v1",
+                    "request_limit": 1 if case == "cutoff" else 10,
+                }
+                if case in {"fixture-credits", "fixture-budget-cutoff", "fixture-budget-unknown"}:
+                    model_config["fixture_budget"] = {
+                        "revision": "fixture-credit-2026-09",
+                        "limit_microcredits": 1 if case == "fixture-budget-cutoff" else 10_000_000,
+                        "input_microcredits_per_token": 1,
+                        "output_microcredits_per_token": 1,
+                    }
+                policy.write_text(json.dumps(model_config))
                 profile = post(
                     "/agent-profiles",
                     {
@@ -404,7 +417,16 @@ def main():
                 current = view()
                 expected = (
                     "failed"
-                    if case in {"cutoff", "expired", "revoked", "crash-reserved", "crash-settled"}
+                    if case
+                    in {
+                        "cutoff",
+                        "expired",
+                        "revoked",
+                        "crash-reserved",
+                        "crash-settled",
+                        "fixture-budget-cutoff",
+                        "fixture-budget-unknown",
+                    }
                     else "cancelled"
                     if case == "cancel"
                     else "succeeded"
@@ -419,16 +441,43 @@ def main():
                 require(usage["guest_connected"], "guest_model_not_connected")
                 requests = (
                     0
-                    if case in {"expired", "revoked"}
+                    if case in {"expired", "revoked", "fixture-budget-cutoff"}
                     else 1
-                    if case in {"cutoff", "cancel", "crash-reserved", "crash-settled"}
+                    if case
+                    in {
+                        "cutoff",
+                        "cancel",
+                        "crash-reserved",
+                        "crash-settled",
+                        "fixture-budget-unknown",
+                    }
                     else 2
                 )
                 require(usage["request_slots_consumed"] == requests, "request_count_mismatch")
                 require(
-                    fixture["upstream_calls"] == (0 if case == "crash-reserved" else requests),
+                    fixture["upstream_calls"]
+                    == (0 if case in {"crash-reserved", "fixture-budget-cutoff"} else requests),
                     "upstream_redispatched",
                 )
+                if case in {"fixture-credits", "fixture-budget-cutoff", "fixture-budget-unknown"}:
+                    require(usage["fixture_credit_limit_supported"], "fixture_budget_missing")
+                    require(not usage["hard_money_limit_supported"], "fixture_claimed_real_money")
+                    require(usage["amount_decimal"] is None, "fixture_claimed_real_cost")
+                    if case == "fixture-budget-unknown":
+                        require(
+                            usage["entries"][0]["status"] == "unknown"
+                            and usage["fixture_credits_uncertain"]
+                            and usage["fixture_credits_committed_microcredits"]
+                            == usage["entries"][0]["fixture_reserved_microcredits"]
+                            > 0,
+                            "unknown_fixture_credit_was_refunded",
+                        )
+                    else:
+                        require(
+                            usage["fixture_credits_committed_microcredits"]
+                            == (30 if requests == 2 else 0),
+                            "fixture_credit_settlement_mismatch",
+                        )
                 raw = journal()
                 if before and case.startswith("crash-"):
                     require(raw["handle"] == before["handle"], "recovery_replaced_vm")
@@ -460,6 +509,9 @@ def main():
                         "cleanup_confirmed": True,
                         "public_secret_scan": True,
                         "upstream_calls": fixture["upstream_calls"],
+                        "fixture_credits_committed_microcredits": usage[
+                            "fixture_credits_committed_microcredits"
+                        ],
                         "terminal_checks": fixture["checks"],
                         "generation": current["generation"],
                     }

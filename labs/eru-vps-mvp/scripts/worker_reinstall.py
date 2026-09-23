@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 import stat
 
-from labops import atomic_json
+from labops import atomic_json, digest
 from worker_scope import audit, REINSTALL_FILES, STATE_DIRS, MANIFEST, mount_points
 
 
@@ -108,6 +108,10 @@ class WorkerReinstall:
     def load(self, run_id):
         import json
         directory = self.directory(run_id)
+        for name in ['journal.json', 'snapshot.json']:
+            entry = self.entry('/' + str((directory / name).relative_to(self.root)))
+            if not entry or entry['type'] != 'file':
+                raise ValueError('unsafe recovery record: ' + name)
         journal = json.loads((directory / 'journal.json').read_text())
         if journal['id'] != run_id or journal['owner'] != 'eru-vps-mvp':
             raise ValueError('recovery identity mismatch')
@@ -201,7 +205,16 @@ class WorkerReinstall:
                 untouched = actual is not None and path in originals and actual == originals[path] and path not in journal['removed']
                 if actual is not None and not (owned_new or untouched):
                     findings.append('new or changed data: ' + path)
+        current = []
+        for name in record['roots']:
+            current.append(self.entry(name))
+            if self.path(name).is_dir():
+                for parent, dirs, files in os.walk(self.path(name), followlinks=False):
+                    for child in sorted(dirs + files):
+                        current.append(self.entry('/' + str((Path(parent) / child).relative_to(self.root))))
         return {'stage': journal['stage'], 'conflicts': findings,
+                'journal_sha256': digest(journal), 'snapshot_sha256': journal['snapshot_sha256'],
+                'tree_sha256': digest(sorted((e for e in current if e), key=lambda e: e['path'])),
                 'restore_possible': not findings and journal['stage'] in ['backed-up', 'quarantining', 'quarantined', 'installing', 'installed', 'restoring']}
 
     def restore(self, run_id):
@@ -298,8 +311,13 @@ def remote_main(config):
     fd = os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        if config['action'] == 'reconcile':
-            print(json.dumps(worker.reconcile(config['run_id'])))
+        if config['action'] in ['reconcile', 'inspect-recovery']:
+            path = worker.directory(config['run_id']) / 'journal.json'
+            if config['action'] == 'inspect-recovery' and not path.exists():
+                result = {'exists': False}
+            else:
+                result = {'exists': True, **worker.reconcile(config['run_id'])}
+            print(json.dumps(result))
             return
         for unit in ['eru-agent.service', 'eru-containerd-proxy.socket', 'eru-containerd-proxy.service']:
             p = subprocess.run(['systemctl', 'show', '--property=ActiveState', '--value', unit],
@@ -316,7 +334,15 @@ def remote_main(config):
         elif config['action'] == 'install':
             result = worker.install(config['run_id'], {k: base64.b64decode(v, validate=True) for k, v in config['files'].items()})
         elif config['action'] == 'restore':
+            if config.get('expected_recovery') != {'exists': True, **worker.reconcile(config['run_id'])}:
+                raise ValueError('worker recovery state changed after plan')
+            recovery_id = config['recovery_id']
+            directory = worker.directory(recovery_id)
+            directory.mkdir(mode=0o700)
+            worker.sync(directory.parent)
+            worker.save(directory, {'id': recovery_id, 'source': config['run_id'], 'stage': 'restore-intent'})
             result = worker.restore(config['run_id'])
+            worker.save(directory, {'id': recovery_id, 'source': config['run_id'], 'stage': 'restored'})
         else:
             raise ValueError('unknown worker action')
         print(json.dumps(result))

@@ -28,6 +28,52 @@ def run(argv):
     return p.stdout
 
 
+def verify_core_selection(config, state, root=Path('/'), owner_uid=0, runtime_sha=None):
+    from core_update import CoreUpdate, BINARY
+    updater = CoreUpdate(root, owner_uid)
+    journals = []
+    directory = updater.path('/var/lib/eru-mvp/core-updates')
+    for path in directory.glob('*/journal.json'):
+        name = '/' + str(path.relative_to(root))
+        entry = updater.entry(name)
+        if not entry or entry['type'] != 'file':
+            raise ValueError('unsafe core update journal')
+        record = json.loads(path.read_text())
+        if record.get('stage') != 'rolled-back':
+            journals.append(record)
+    selected = config.get('preserve_core')
+    if not selected:
+        if journals:
+            raise ValueError('core patch/update journal exists; release downgrade blocked')
+        return
+    if len(journals) != 1 or journals[0].get('id') != selected['run'] or journals[0].get('stage') != 'installed':
+        raise ValueError('unfinished or different core update; reconcile before reapply')
+    footprint = updater.inspect()
+    checksum = selected['sha256']
+    if journals[0].get('new_sha256') != checksum or footprint['binary']['sha256'] != checksum:
+        raise ValueError('installed core does not match selected patch')
+    if state['files'].get(BINARY) != checksum:
+        raise ValueError('core owner manifest differs')
+    # No second installer route may write the core binary while preserving it.
+    for item in config['files']:
+        if item['path'] == BINARY:
+            raise ValueError('core binary is also present in configuration payload')
+    core_artifacts = [a for a in config['artifacts'] if a['repository'] == 'projecteru2/core']
+    if len(core_artifacts) != 1 or core_artifacts[0]['files'] != {'eru-core': BINARY}:
+        raise ValueError('unexpected upstream core artifact mapping')
+    if any(BINARY in a['files'].values() for a in config['artifacts'] if a['repository'] != 'projecteru2/core'):
+        raise ValueError('another artifact would overwrite core')
+    if runtime_sha is None:
+        process = subprocess.run(['systemctl', 'show', 'eru-core', '--property=MainPID,ActiveState'],
+                                 capture_output=True, text=True, check=True, timeout=15)
+        runtime = dict(line.split('=', 1) for line in process.stdout.splitlines())
+        if runtime['ActiveState'] != 'active' or int(runtime['MainPID']) <= 0:
+            raise ValueError('core is not active')
+        runtime_sha = hashlib.sha256(Path('/proc', runtime['MainPID'], 'exe').read_bytes()).hexdigest()
+    if runtime_sha != checksum:
+        raise ValueError('running core differs from selected patch')
+
+
 def main(config):
     if os.geteuid() != 0:
         raise RuntimeError('requires root')
@@ -37,10 +83,7 @@ def main(config):
     if state.get('owner') != 'eru-vps-mvp':
         raise RuntimeError('ownership mismatch')
     if config['role'] == 'core':
-        # A release reapply must never silently replace a locally validated fix.
-        for journal in (ROOT / 'core-updates').glob('*/journal.json'):
-            if json.loads(journal.read_text()).get('stage') != 'rolled-back':
-                raise RuntimeError('core patch/update journal exists; use explicit core update/recovery, not release reapply')
+        verify_core_selection(config, state)
 
     def persist():
         temp = ROOT / 'owner.json.tmp'
@@ -86,6 +129,8 @@ def main(config):
         raise RuntimeError('unreviewed containerd version')
     # Never replace the Docker runtime or its packages.
     for artifact in config['artifacts']:
+        if config.get('preserve_core') and artifact['repository'] == 'projecteru2/core':
+            continue
         if not artifact['files']:
             continue
         with tempfile.TemporaryDirectory(prefix='eru-install-') as directory:

@@ -1,6 +1,6 @@
 # Controller B 操作器
 
-最新狀態：[優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
+最新狀態：[故障恢復與 reapply 驗證](M2-RECOVERY-2026-09-23.md)，操作入口見 [恢復與修補版 reapply](RECOVERY.md)。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
 
 入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於空 worker-4；provider-reimage 仍是唯讀計畫。
 
@@ -33,7 +33,7 @@ reapply 計畫：
 python3 scripts/labctl.py plan --operation reapply
 ```
 
-目前 core 已套用本機 patch，因此 release reapply 會阻擋可能的 downgrade；以下是早期同版本 release 的行為。此操作影響四台，執行已驗證的 worker-2 nginx canary + `deploy-lab.py --apply` 流程，核對容器、HTTP、pod／node、配額和服務重啟紀錄後清理。它是同版本部署驗證，不是宣告式應用 desired-state controller，也不會升級 OS。
+core 已套用本機 patch；省略 artifact 的 release reapply 仍會阻擋可能的 downgrade。使用 `--core-artifact private/builds/BUILD/eru-core --health private/diagnostics/HEALTH-control-health.json` 可明確驗證並保留修補版，完整範例見 RECOVERY.md。此操作影響四台，執行已驗證的 worker-2 nginx canary + `deploy-lab.py --apply` 流程，核對容器、HTTP、pod／node、配額和服務重啟紀錄後清理。它是同版本部署驗證，不是宣告式應用 desired-state controller，也不會升級 OS。
 
 依既有 smoke run 清理：
 
@@ -110,4 +110,4 @@ python3 scripts/labctl.py plan --operation cleanup --smoke-run CANARY_PLAN
 python3 scripts/labctl.py execute --plan CLEANUP_PLAN --sha256 CLEANUP_HASH
 ```
 
-失敗先 reconcile，保留 fencing／quarantine evidence；不要直接重播或把 failed 改成 complete。core-only 更新與有 checksum 的恢復底層見 `core_patch.py --help` 和優先路徑文件。已部署 core patch 時，原 release reapply 會阻擋可能的 downgrade；不代表 worker-only 重裝不可使用。
+失敗先 reconcile，保留 fencing／quarantine evidence；不要直接重播或把 failed 改成 complete。`recovery.py` 使用新的 source-bound plan 提供 worker-restore／worker-resume，以及 core API 不可用時的 core-rollback。新 agent 狀態不覆蓋；恢復不增加重裝計次。具體條件與有界故障演練見 RECOVERY.md。

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchCsrfToken, login, parseMembers, parseRooms } from "./api";
+import { createRoom, fetchCsrfToken, inviteHuman, login, parseMe, parseMembers, parseRooms } from "./api";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -66,5 +66,42 @@ describe("login", () => {
     );
     const token = await fetchCsrfToken();
     expect(token).toBe("cookie-token");
+  });
+});
+
+describe("rooms mutations", () => {
+  it("parseMe reads is_operator", () => {
+    expect(parseMe({ is_operator: 1 }).isOperator).toBe(true);
+    expect(parseMe({ is_operator: 0 }).isOperator).toBe(false);
+  });
+
+  it("createRoom and inviteHuman post CSRF JSON", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        calls.push({ url, init });
+        if (url.endsWith("/api/csrf")) {
+          return new Response(JSON.stringify({ csrf: "tok-1" }), { status: 200 });
+        }
+        if (url.endsWith("/api/rooms")) {
+          return new Response(JSON.stringify({ id: "room-2", name: "Design", slug: "design" }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ ok: true, member_id: "guest", role: "member" }), { status: 200 });
+      },
+    );
+    await expect(createRoom("Design", "design")).resolves.toEqual({
+      id: "room-2",
+      name: "Design",
+      slug: "design",
+    });
+    await inviteHuman("room 2", "guest");
+    const create = calls.find((call) => call.url.endsWith("/api/rooms") && call.init?.method === "POST");
+    const invite = calls.find((call) => call.url.includes("/members"));
+    expect(JSON.parse(String(create?.init?.body))).toEqual({ name: "Design", slug: "design" });
+    expect(new Headers(create?.init?.headers).get("X-CSRF-Token")).toBe("tok-1");
+    expect(invite?.url).toContain("/api/rooms/room%202/members");
+    expect(JSON.parse(String(invite?.init?.body))).toEqual({ handle: "guest" });
   });
 });

@@ -1,5 +1,5 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
-import { ApiError, listMembers, listMessages } from "../api";
+import { ApiError, inviteHuman, listMembers, listMessages } from "../api";
 import {
   hasSeqGap,
   lastContinuousSeq,
@@ -68,25 +68,60 @@ function MemberBadges({ member }: { member: Member }) {
   );
 }
 
+function composerCapPx(el: HTMLTextAreaElement): number {
+  const raw = getComputedStyle(el).maxHeight;
+  if (raw.endsWith("px")) {
+    const px = Number.parseFloat(raw);
+    if (Number.isFinite(px) && px > 0) {
+      return px;
+    }
+  }
+  return Math.round((window.innerHeight || 800) * 0.4);
+}
+
+function fitComposer(el: HTMLTextAreaElement) {
+  el.style.height = "auto";
+  const scroll = el.scrollHeight;
+  if (scroll <= 0) {
+    el.style.height = "";
+    return;
+  }
+  const max = composerCapPx(el);
+  el.style.height = `${Math.min(scroll, max)}px`;
+  el.style.overflowY = scroll > max ? "auto" : "hidden";
+}
+
 export function RoomPage({
   room,
   onBack,
   onLoggedOut,
+  operator = false,
+  showBack = true,
 }: {
   room: Room;
   onBack: () => void;
   onLoggedOut: () => void;
+  operator?: boolean;
+  showBack?: boolean;
 }) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [members, setMembers] = useState<Map<string, Member>>(new Map());
+  const [membersLoaded, setMembersLoaded] = useState(false);
   const [typing, setTyping] = useState<Record<string, string>>({});
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [link, setLink] = useState<"connecting" | "live" | "offline">("connecting");
   const [busy, setBusy] = useState(true);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteHandle, setInviteHandle] = useState("");
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteBusy, setInviteBusy] = useState(false);
   const eventsRef = useRef<Map<number, TimelineEvent>>(new Map());
   const wsRef = useRef<WebSocket | null>(null);
   const timelineRef = useRef<HTMLElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const inviteRef = useRef<HTMLInputElement>(null);
   const pinBottom = useRef(true);
   const typingTimers = useRef<Map<string, number>>(new Map());
   const connected = link === "live";
@@ -141,6 +176,9 @@ export function RoomPage({
     setEvents([]);
     setTyping({});
     setError(null);
+    setNotice(null);
+    setInviteOpen(false);
+    setMembersLoaded(false);
     setLink("connecting");
     setBusy(true);
 
@@ -207,6 +245,11 @@ export function RoomPage({
       })
       .catch(() => {
         // Kind badge is optional.
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setMembersLoaded(true);
+        }
       });
 
     void loadHistory();
@@ -314,6 +357,47 @@ export function RoomPage({
     };
   }, [title]);
   const linkLabel = link === "live" ? "live" : link === "connecting" ? "connecting" : "offline";
+  const peopleLabel = membersLoaded ? `${members.size} ${members.size === 1 ? "person" : "people"}` : null;
+
+  useEffect(() => {
+    if (composerRef.current) {
+      fitComposer(composerRef.current);
+    }
+  }, [body]);
+
+  useEffect(() => {
+    if (inviteOpen) {
+      inviteRef.current?.focus();
+    }
+  }, [inviteOpen]);
+
+  function closeInvite() {
+    if (inviteBusy) {
+      return;
+    }
+    setInviteOpen(false);
+    setInviteError(null);
+  }
+
+  async function onInvite(event: FormEvent) {
+    event.preventDefault();
+    const handle = inviteHandle.trim();
+    if (!handle || inviteBusy) {
+      return;
+    }
+    setInviteBusy(true);
+    setInviteError(null);
+    try {
+      await inviteHuman(room.id, handle);
+      setInviteOpen(false);
+      setInviteHandle("");
+      setNotice("They will see this room after they refresh.");
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Could not invite");
+    } finally {
+      setInviteBusy(false);
+    }
+  }
 
   function onTimelineScroll() {
     const el = timelineRef.current;
@@ -326,10 +410,14 @@ export function RoomPage({
   return (
     <main className="page page-room">
       <div className="row">
-        <button type="button" className="btn-back" onClick={onBack} aria-label="Back to rooms">
-          <span className="chev" aria-hidden="true" />
-          Rooms
-        </button>
+        {showBack ? (
+          <button type="button" className="btn-back" onClick={onBack} aria-label="Back to rooms">
+            <span className="chev" aria-hidden="true" />
+            Rooms
+          </button>
+        ) : (
+          <span />
+        )}
         <div className="title-block">
           <h1 className="grow">{title}</h1>
           <span
@@ -341,21 +429,34 @@ export function RoomPage({
         </div>
         <span />
       </div>
+      <div className="room-tools">
+        {peopleLabel ? (
+          <details className="people">
+            <summary>{peopleLabel}</summary>
+            <ul className="member-list" aria-label="Members">
+              {[...members.values()].map((member) => (
+                <li key={member.id}>
+                  <span>{memberName(member)}</span>
+                  <MemberBadges member={member} />
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : (
+          <span />
+        )}
+        {operator ? (
+          <button type="button" className="btn-quiet" onClick={() => setInviteOpen(true)}>
+            Invite
+          </button>
+        ) : null}
+      </div>
+      {notice ? <p className="muted room-note">{notice}</p> : null}
       {error ? (
         <p className="error" role="alert">
           {error}
         </p>
       ) : null}
-      <section className="members" aria-label="Members">
-        <ul className="member-list">
-          {[...members.values()].map((member) => (
-            <li key={member.id}>
-              <span>{memberName(member)}</span>
-              <MemberBadges member={member} />
-            </li>
-          ))}
-        </ul>
-      </section>
       <section
         className="timeline"
         ref={timelineRef}
@@ -412,24 +513,72 @@ export function RoomPage({
       </div>
       {link === "offline" ? <p className="conn-banner">Offline. Reconnecting…</p> : null}
       <form className="composer" onSubmit={onSubmit}>
-        <textarea
-          name="body"
-          rows={1}
-          maxLength={8192}
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Message"
-          aria-label={`Message ${title}`}
-          aria-describedby="composer-hint"
-        />
-        <button type="submit" className="btn-primary" disabled={!body.trim() || !connected}>
-          Send
-        </button>
+        <p id="composer-hint" className="composer-hint">
+          Enter to send · Shift+Enter for a new line
+        </p>
+        <div className="composer-row">
+          <textarea
+            ref={composerRef}
+            name="body"
+            rows={1}
+            maxLength={8192}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Message"
+            aria-label={`Message ${title}`}
+            aria-describedby="composer-hint"
+          />
+          <button type="submit" className="btn-primary" disabled={!body.trim() || !connected}>
+            Send
+          </button>
+        </div>
       </form>
-      <p id="composer-hint" className="composer-hint">
-        Enter to send · Shift+Enter for a new line
-      </p>
+      {inviteOpen ? (
+        <div className="sheet-backdrop" onMouseDown={closeInvite}>
+          <div
+            className="sheet"
+            role="dialog"
+            aria-labelledby="invite-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                closeInvite();
+              }
+            }}
+          >
+            <h2 id="invite-title">Invite to {title}</h2>
+            <form onSubmit={(event) => void onInvite(event)}>
+              <label>
+                Handle
+                <input
+                  ref={inviteRef}
+                  name="handle"
+                  value={inviteHandle}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onChange={(event) => setInviteHandle(event.target.value)}
+                  required
+                />
+              </label>
+              {inviteError ? (
+                <p className="error" role="alert">
+                  {inviteError}
+                </p>
+              ) : null}
+              <div className="sheet-actions">
+                <button type="button" className="btn-quiet" onClick={closeInvite}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary" disabled={inviteBusy || !inviteHandle.trim()}>
+                  {inviteBusy ? "Inviting…" : "Invite"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

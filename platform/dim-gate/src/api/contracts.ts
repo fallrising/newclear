@@ -1,6 +1,7 @@
 /** Wire contract registry. Planned operations are contracts, not implemented handlers. */
 import { z } from 'zod'
 import * as d from '../domain/schemas.ts'
+import { organizationViewSchema, applicationDetailSchema, environmentDetailSchema, entitySearchHitSchema, topologyViewSchema, capacitySchema } from './wire-views.ts'
 import { controlResultSchema, personaBodySchema, resetBodySchema } from './control-dto.ts'
 import { registerCmdbContracts } from './contracts/cmdb-application-environment.ts'
 import { registerCoreSessionContracts } from './contracts/core-session.ts'
@@ -29,14 +30,12 @@ const metricSeries = d.metricSeriesSchema
 export const createCiSchema = d.createCiInputSchema
 export const wireSchemas = {
   ...d.contractSchemas,
-  OrganizationView: z.strictObject({ organizations: z.array(d.organizationSchema), businessUnits: z.array(d.businessUnitSchema),
-    teams: z.array(d.teamSchema), projects: z.array(d.projectSchema), users: z.array(d.userSchema) }),
-  ApplicationDetail: z.strictObject({ application: d.applicationSchema, environments: z.array(d.environmentSchema) }),
-  EnvironmentDetail: z.strictObject({ environment: d.environmentSchema, placements: z.array(d.placementSchema), activeRelease: d.releaseSchema.nullable() }),
-  EntitySearchHit: z.strictObject({ type: z.enum(['application', 'environment', 'ci', 'request', 'release', 'incident']), id, title: z.string().min(1).max(500), route: z.string().startsWith('/') }),
-  TopologyView: z.strictObject({ nodes: z.array(d.ciViewSchema).max(100), edges: z.array(d.relationSchema).max(200), truncated: z.boolean(), depthReached: z.number().int().min(0).max(3) }),
-  Capacity: z.strictObject({ poolId: id, cpu: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }),
-    memoryMiB: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }) }),
+  OrganizationView: organizationViewSchema,
+  ApplicationDetail: applicationDetailSchema,
+  EnvironmentDetail: environmentDetailSchema,
+  EntitySearchHit: entitySearchHitSchema,
+  TopologyView: topologyViewSchema,
+  Capacity: capacitySchema,
   LogEntry: logEntry, TraceSummary: traceSummary, Trace: d.traceSchema, MetricSeries: metricSeries,
   CreateCI: createCiSchema,
   CreateRelation: d.createRelationInputSchema,

@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-035 attempt1, DG-W2-20260923-01; base b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d; W2contractrevision1 fixed before code. Deliver complete W2 UI/API/OpenAPI, integrate workers and fulfill all acceptance and GitHub gates. Scope/owners/DoD in task and contract. Not implemented/verified/accepted yet. Sole lead owns W2; W1 owner released in PR33 closeout.
+T-035 attempt1, DG-W2-20260923-01; base b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d; W2contractrevision1 fixed before code. Deliver complete W2 UI/API/OpenAPI, integrate workers and fulfill all acceptance and GitHub gates. Scope/owners/DoD in task and contract. Resource business scope not implemented/verified/accepted yet; lead runtime extraction checkpoint described below. Sole lead owns W2; W1 owner released in PR33 closeout.
 
 ## Verification
 
@@ -18,3 +18,6 @@ W2 contract, task scope and PLAN run/resume saved in containing checkpoint. W1 m
 ## Risks and Follow-ups
 
 W2 schema/API/policy/persistence changes require coordinated single owners and actual full regression. T-033 publishes typed schema slice first; T-034 consumes it for additive fixtures/migration; T-035 integrates typed API/UI and complete gates; T-036 remains uninvolved/read-only. No W3 before accepted W2 merge. InitialJS budget has5132bytes headroom at W1; measure and optimize required code without changing budget.
+
+
+Runtime slice checkpoint: named runtime wire views extracted from OpenAPI registry; generated method/path/status/demo/milestone descriptors checked with canonical operations and used by shared MSW handler. Existing DTOs/statuses and generated OpenAPI content unchanged. Working-diff pnpm generate:contracts (73ops173schemas), typecheck,lint and pnpm test (all245tests/23files) pass; fixed-ref fresh benchmark next. No W2 business acceptance claimed. Solelead source checkpoint is SSH-pushed to existing PR36; T033/T034 isolated work continues without touching these files.

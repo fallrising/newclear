@@ -1,15 +1,15 @@
 import { z } from 'zod'
 import {
-  catalogItemSchema, commandReceiptSchema, createRequestInputSchema, pageSchema, poolSchema,
+  observationLogSchema, catalogItemSchema, commandReceiptSchema, createRequestInputSchema, pageSchema, poolSchema,
   provisionJobSchema, requestSchema, type CatalogItem, type CommandReceipt, type Page,
   type ProvisionJob, type Provider, type Request,
 } from '../../domain/schemas'
-import { wireSchemas } from '../contracts'
+import { capacitySchema } from '../wire-views'
 import type { ApiRequest } from '../core/request'
 
 export type ResourcePool = z.infer<typeof poolSchema>
-export type Capacity = z.infer<typeof wireSchemas.Capacity>
-export type JobLog = z.infer<typeof wireSchemas.LogEntry>
+export type Capacity = z.infer<typeof capacitySchema>
+export type JobLog = z.infer<typeof observationLogSchema>
 export type RequestDetail = { request: Request; jobs: ProvisionJob[] }
 export type JobDetail = { job: ProvisionJob; logs: JobLog[] }
 export type CreateRequestInput = z.infer<typeof createRequestInputSchema>
@@ -34,7 +34,7 @@ function withQuery(path: string, input: Record<string, unknown>) {
 }
 
 const requestDetailSchema = z.strictObject({ request: requestSchema, jobs: z.array(provisionJobSchema) })
-const jobDetailSchema = z.strictObject({ job: provisionJobSchema, logs: z.array(wireSchemas.LogEntry).max(500) })
+const jobDetailSchema = z.strictObject({ job: provisionJobSchema, logs: z.array(observationLogSchema).max(500) })
 
 export function createSelfServiceClient(request: ApiRequest) {
   const action = (id: string, name: 'submit' | 'approve' | 'reject' | 'cancel' | 'provision' | 'retry', body: unknown) =>
@@ -43,7 +43,7 @@ export function createSelfServiceClient(request: ApiRequest) {
     listPools: (input: PoolInput = {}): Promise<ResourcePool[]> =>
       request(withQuery('/pools', input), z.array(poolSchema)),
     getCapacity: (input: PoolInput = {}): Promise<Capacity[]> =>
-      request(withQuery('/capacity', input), z.array(wireSchemas.Capacity)),
+      request(withQuery('/capacity', input), z.array(capacitySchema)),
     listCatalog: (input: ListInput = {}): Promise<Page<CatalogItem>> =>
       request(withQuery('/catalog', input), pageSchema(catalogItemSchema)),
     getCatalog: (id: string): Promise<CatalogItem> =>

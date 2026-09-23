@@ -1,10 +1,9 @@
-import { z } from 'zod'
-import { applicationSchema, pageSchema, type Application, type Environment, type Page, type Placement } from '../../domain/schemas'
-import { wireSchemas } from '../contracts'
+import { applicationSchema, pageSchema, type Release, type Application, type Environment, type Page, type Placement } from '../../domain/schemas'
+import { applicationDetailSchema, environmentDetailSchema } from '../wire-views'
 import type { ApiRequest } from '../core/request'
 
 export type ApplicationDetail = { application: Application; environments: Environment[] }
-export type EnvironmentDetail = { environment: Environment; placements: Placement[]; activeRelease: z.infer<typeof wireSchemas.Release> | null }
+export type EnvironmentDetail = { environment: Environment; placements: Placement[]; activeRelease: Release | null }
 
 export type ApplicationListInput = {
   projectId?: string
@@ -34,9 +33,9 @@ export function createApplicationClient(request: ApiRequest) {
     listApplications: (input: ApplicationListInput = {}): Promise<Page<Application>> =>
       request(applicationListPath(input), applicationPageSchema),
     getApplication: (applicationId: string): Promise<ApplicationDetail> =>
-      request(`/applications/${encodeURIComponent(applicationId)}`, wireSchemas.ApplicationDetail),
+      request(`/applications/${encodeURIComponent(applicationId)}`, applicationDetailSchema),
     getEnvironment: (environmentId: string): Promise<EnvironmentDetail> =>
-      request(`/environments/${encodeURIComponent(environmentId)}`, wireSchemas.EnvironmentDetail),
+      request(`/environments/${encodeURIComponent(environmentId)}`, environmentDetailSchema),
   }
 }
 

@@ -8,7 +8,7 @@ Kith 是一個**單 operator、自托管、邀請制**的群聊：人類與 AI a
 
 ## 2. v1 已經做到什麼
 
-以 `main`（2026-09-23，#26 之後）為準：
+以 `main`（2026-09-23，#26 之後）為準；前端一列已在 W0 細化時對照 `d80028c` 更正（#48 在 #47 之前合併）：
 
 | 能力 | 狀態 | 位置 |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ Kith 是一個**單 operator、自托管、邀請制**的群聊：人類與 AI a
 | Codex sidecar | 有，綁 Codex CLI | `sidecar/` |
 | ambient（主動插話） | 有，預設關 | `worker/inbox.ts` |
 | trace GC、metrics、可選 AES-GCM keyring | 有 | M7 |
-| 前端 | 最低可用：沒有 operator 介面、trace、thread、頭像、未讀、深色模式 | `frontend/` |
+| 前端 | 房間畫面依 v1 [11](../sdd/11-room-screen.md)（#48，`85bf271`）重做：深色 rail、暖白紙面、字首頭像（`frontend/src/pages/RoomPage.tsx:779`）、成員條與 mention；仍沒有 operator 介面、trace、thread、未讀、Markdown、深色模式 | `frontend/` |
 
 已知缺陷（v2 必修）：
 
@@ -34,7 +34,7 @@ Kith 是一個**單 operator、自托管、邀請制**的群聊：人類與 AI a
 
 | 面向 | v1 | v2 |
 | --- | --- | --- |
-| 前端 | `frontend/`，Apple 設定頁風格，無管理介面 | `web/`，溫暖、有個性的聊天產品；含 operator 控制台 |
+| 前端 | `frontend/`，v1 [11](../sdd/11-room-screen.md) 的房間畫面，無管理介面 | `web/`，溫暖、有個性的聊天產品；含 operator 控制台 |
 | agent 接入 | hosted＝xAI；personal＝Codex sidecar | hosted＝任意主流 LLM API 格式；runner＝任意 CLI；external＝任意 MCP client |
 | agent 設定 | 全域環境變數 | 每個 agent 各自的 runtime 設定（連線、模型、參數、提示詞附加） |
 | 回覆體驗 | 回覆完成才出現；只有一行「is replying」 | 可選串流草稿（不落盤）＋時間線內佔位 |

@@ -40,6 +40,7 @@ P1 大框架（#47）
   - `E2E-W0-01` 隔離環境啟動、migration、seed 完成，登入頁可見，operator 可登入並看到空的主畫面。
   - `E2E-W0-02` 證據資料夾結構與 manifest 通過 schema 驗證；遮罩掃描為 0。
 - 禁止：任何聊天功能；修改後端。
+- 狀態：`DOC_READY`（施工圖：[milestones/W0.md](milestones/W0.md)）。
 
 ### W1 — 聊天核心
 

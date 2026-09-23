@@ -43,6 +43,13 @@ v2 要做三件事：
 
 Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給另一個 LLM agent 的細化指令；產出放在 `milestones/Wn.md`。
 
+### Phase 2 施工圖（`milestones/`）
+
+| 里程碑 | 檔案 | 狀態 |
+| --- | --- | --- |
+| W0 E2E 與 web 骨架 | [milestones/W0.md](milestones/W0.md) | `DOC_READY` |
+| W1–W7 | 尚未細化 | `NOT_STARTED` |
+
 相關 ADR：
 
 - [ADR-0005 — v2 web 前端](../adr/0005-v2-web-frontend.md)（Proposed）
@@ -51,7 +58,7 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 ## 文件優先級
 
 1. v1 [SDD.md](../../SDD.md) 的安全不變量 INV-01–INV-19，**除非** v2 在 [10](10-decisions.md) 的「對 v1 的修訂」表逐條列出並有 ADR。
-2. v2 本目錄（批准後）＞ v1 專題章節中與 v2 重疊的畫面部分（v1 [09](../sdd/09-human-chat-ui.md)、[10](../sdd/10-members-and-mention.md) 的視覺與鎖字，在 W7 切換後由 v2 取代）。
+2. v2 本目錄（批准後）＞ v1 專題章節中與 v2 重疊的畫面部分（v1 [11](../sdd/11-room-screen.md) 的畫面契約，以及它保留下來的 [09](../sdd/09-human-chat-ui.md)、[10](../sdd/10-members-and-mention.md) 行為規則；畫面在 W7 切換後由 v2 取代）。
 3. v1 協定章節 [04](../sdd/04-protocol.md) 仍是既有 API 的契約；v2 [04-backend](04-backend.md) 只加新端點與新欄位。
 
 發現矛盾時：先修文件，再寫程式。不能挑比較容易的版本實作。
@@ -66,7 +73,7 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | `B-xx` | 後端擴充項 | 04 |
 | `V2-INV-xx` | v2 新增不變量 | 04 |
 | `FE-xx` | 前端架構規則 | 05 |
-| `FM-<模組>-xx` | 失敗模式（先列失敗，再寫程式） | 03、05 |
+| `FM-<模組>-xx` | 失敗模式（先列失敗，再寫程式） | 03、05、08（`FM-E2E`） |
 | `E2E-Wn-xx` | E2E 驗收 | 08、09 |
 | `D-xx` / `Q-xx` | 決策 / 開放問題 | 10 |
 

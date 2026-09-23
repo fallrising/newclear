@@ -19,6 +19,38 @@
 | 字型 | 自托管拉丁字型（見 07）；中日韓字用系統字 | 不連外部 CDN；CJK 字型檔太大 | — |
 | 測試 | Playwright（E2E，見 [08](08-testing-e2e.md)） | 使用者規則：E2E 為主 | — |
 
+### 1.1 精確版本（Phase 2 鎖定，2026-09-23 查 npm registry）
+
+所有版本寫死（不用 `^`、`~`）。「安裝於」是第一次需要它的里程碑；在那之前不要裝。
+
+| 套件 | 版本 | 用途 | 安裝於 | 相容性依據 |
+| --- | --- | --- | --- | --- |
+| `react`、`react-dom` | 19.3.0 | UI | W0 | — |
+| `@types/react`、`@types/react-dom` | 19.3.0 | 型別 | W0 | — |
+| `react-router` | 7.18.4 | 路由（v7 最新；npm `latest` 已是 8.x，本表維持 D-09 的 7） | W0 | peer `react >=18` |
+| `@tanstack/react-query` | 5.103.2 | 伺服器狀態 | W0 | peer `react ^18 \|\| ^19` |
+| `@fontsource-variable/figtree` | 5.3.0 | 字型（OFL-1.1） | W0 | family 名 `Figtree Variable` |
+| `vite` | 6.4.3 | 建置（與 kith 根目錄相同） | W0 | — |
+| `@vitejs/plugin-react` | 5.2.0 | React 轉換 | W0 | peer `vite ^4.2 \|\| ^5 \|\| ^6 \|\| ^7`（6.x 需要 vite 8，不能用） |
+| `tailwindcss`、`@tailwindcss/vite` | 4.3.3 | 樣式 | W0 | peer `vite ^5.2 \|\| ^6 \|\| ^7 \|\| ^8` |
+| `typescript` | 7.0.2 | 型別檢查（與 kith 根目錄相同） | W0 | — |
+| `@types/node` | 26.6.2 | `vite.config.ts` 型別（與 kith 根目錄相同） | W0 | — |
+| `zustand` | 5.0.15 | 即時狀態 | W1 | peer `react >=18` |
+| `markdown-it` | 15.0.2 | Markdown | W1 | — |
+| `@types/markdown-it` | 14.2.0 | 型別 | W1 | — |
+| `@tanstack/react-virtual` | 3.14.13 | 長清單 | W1 | — |
+| `lucide-react` | 1.47.0 | 圖示 | W1 | peer `react ^16.5.1 \|\| … \|\| ^19` |
+| `@radix-ui/react-dialog` | 1.1.23 | Dialog | W2 | peer `react ^16.8 \|\| … \|\| ^19` |
+| `@radix-ui/react-popover` | 1.1.23 | Popover | W3 | 同上 |
+| `@radix-ui/react-dropdown-menu` | 2.1.24 | DropdownMenu | W2 | 同上 |
+| `@radix-ui/react-tooltip` | 1.2.16 | Tooltip | W3 | 同上 |
+| `@radix-ui/react-tabs` | 1.1.21 | Tabs | W4 | 同上 |
+| `@radix-ui/react-scroll-area` | 1.2.18 | ScrollArea | W1 | 同上 |
+
+E2E 套件（`e2e/package.json`，W0）：`@playwright/test` 1.56.1、`ajv` 8.20.0、`typescript` 7.0.2、`@types/node` 26.6.2。Playwright 刻意不用最新的 1.63.0：1.56.1 綁定 Chromium revision 1194（`141.0.7390.37`），正是本專案雲端環境預裝的版本，不必下載瀏覽器（已查 `playwright-core` 1.56.1 的 `browsers.json`）。鎖定此版本見 [10](10-decisions.md) D-17。
+
+安裝在後續里程碑的套件，若屆時 npm 上的版本已被撤下或有安全公告，先改本表並在 PR 說明，不要自行換版本。
+
 **FE-01** 不新增表中以外的執行期依賴，除非先改本表並說明理由。
 
 **FE-02** 不用 `innerHTML`／`dangerouslySetInnerHTML` 渲染任何伺服器來的字串。
@@ -48,7 +80,7 @@ products/kith/web/
       profile/            # 自己的顯示名、密碼
     ui/                   # 無業務的元件：Avatar、Button、Badge、Sheet、EmptyState…
     markdown/             # markdown-it 設定與 React 轉換
-    copy/                 # 所有使用者可見字串：zh-TW.ts、en.ts（兩者 key 集合必須相同）
+    copy/                 # 所有使用者可見字串：zh-TW.ts、en.ts（兩者 key 集合必須相同）、index.tsx
     styles/               # tokens.css、tailwind 設定
 products/kith/e2e/        # Playwright，見 08
 ```
@@ -58,6 +90,8 @@ products/kith/e2e/        # Playwright，見 08
 **FE-05** 介面雙語：繁體中文（`zh-TW`）與英文（`en`），使用者 2026-09-23 決定。預設語言依 `navigator.language`（`zh*` → `zh-TW`，其他 → `en`），使用者可在設定切換並存在 `localStorage`。兩份字串表的 key 集合必須完全相同，缺 key 視為建置錯誤（型別層檢查：`en` 以 `satisfies Record<keyof typeof zhTW, string>` 定義）。日期與相對時間用 `Intl`，依語言格式化。伺服器錯誤碼在前端映射成兩種語言，不顯示伺服器 `message` 原文。
 
 **FE-04** 所有可見字串經 `copy/`，E2E 以 `data-testid` 與角色定位，不以文案定位（文案可改，測試不碎）。例外：文案本身是驗收對象時。
+
+`copy/` 的檔案結構、`CopyKey` 型別、key 命名規則、`data-testid` 與 `localStorage` key 的命名規則在 [W0](milestones/W0.md) §5.2.4 定義，全專案沿用。
 
 ## 3. 路由
 
@@ -170,7 +204,7 @@ idle → loading_latest → connecting → live
 
 - [ ] 每個 feature 的元件樹、props 型別、資料來源與 `data-testid` 清單。
 - [ ] RoomSync 的完整型別定義與每個 FM 的對應處理程式段落描述。
-- [ ] `copy/zh-TW.ts`、`copy/en.ts` 完整文案表（FE-05）。
-- [ ] Tailwind 設定與 token 對應表。
+- [ ] `copy/zh-TW.ts`、`copy/en.ts` 完整文案表（FE-05）。結構與命名規則已完成（[W0](milestones/W0.md) §5.2.4）；各畫面的文案隨各里程碑的 `Wn.md` 文案表補齊。
+- [x] Tailwind 設定與 token 對應表 → [07](07-visual-design.md) §4.1、[W0](milestones/W0.md) §5.5。
 - [ ] CSP 最終版與 Worker 設定方式。
-- [ ] 套件精確版本鎖定。
+- [x] 套件精確版本鎖定 → §1.1。

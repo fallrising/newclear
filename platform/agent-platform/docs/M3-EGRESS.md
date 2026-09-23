@@ -1,5 +1,7 @@
 # M3 第七個切片：固定節點出站政策
 
+> 2026-09-23 接續：[AT-11-A 控制端 model proxy](M3-MODEL-PROXY.md) 已完成獨立授權／request ledger 切片；guest 尚未接入、沒有新增內網例外。本文其餘內容保留本 egress 切片的歷史範圍。
+
 AT-07 的出站路徑現在有可驗收的 `node-egress-v1` 契約：固定 none-lane guest 只透過 **已啟用、具明確 allowlist 的 host proxy** 對外連線；connector 核對真正執行的 sandboxd 與其不可改寫配置。**AT-07／M3 仍未整體完成**，model proxy／budget／usage 仍未實作，模型仍是固定 fixture。
 
 ## 差距與選擇

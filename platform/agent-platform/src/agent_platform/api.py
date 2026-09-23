@@ -304,6 +304,12 @@ def create_app(settings=None, db=None, web_dist=None):
             headers={"X-Accel-Buffering": "no", "Cache-Control": "no-store"},
         )
 
+    @app.get("/api/v1/runs/{run_id}/usage")
+    def model_usage(run_id: UUID, session=authenticated):
+        from .model_proxy import usage_view
+
+        return usage_view(db, run_id)
+
     @app.get("/api/v1/runtime")
     def runtime(session=authenticated):
         return store.runtime()

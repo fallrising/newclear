@@ -78,9 +78,19 @@ class CoreUpdate(WorkerReinstall):
 
     def recovery(self, run_id):
         directory = self.directory(run_id)
-        journal = json.loads(self.path('/' + str((directory / 'journal.json').relative_to(self.root))).read_text())
+        journal_path = '/' + str((directory / 'journal.json').relative_to(self.root))
+        entry = self.entry(journal_path)
+        if not entry or entry['type'] != 'file':
+            raise ValueError('missing or unsafe core update journal; inspect original files before recovery')
+        journal = json.loads(self.path(journal_path).read_text())
         if journal['id'] != run_id or journal['owner'] != 'eru-vps-mvp':
             raise ValueError('update identity mismatch')
+        if journal.get('stage') == 'backing-up':
+            raise ValueError('update stopped before replacement intent; verify original files and preserve incomplete backups')
+        if journal.get('stage') not in ['replace-intent', 'binary-replaced', 'installed', 'rolled-back']:
+            raise ValueError('update is not eligible for rollback; inspect before proceeding')
+        if not journal.get('manifest_after_sha256'):
+            raise ValueError('incomplete core recovery journal: missing manifest checksum')
         before = journal['before']
         for name, checksum in [('binary.before', before['binary']['sha256']),
                                ('owner.before', before['manifest_sha256']),
@@ -92,8 +102,6 @@ class CoreUpdate(WorkerReinstall):
 
     def inspect_recovery(self, run_id):
         directory, journal = self.recovery(run_id)
-        if journal['stage'] not in ['replace-intent', 'binary-replaced', 'installed', 'rolled-back']:
-            raise ValueError('update is not eligible for rollback; inspect before proceeding')
         before = journal['before']
         original_owner = json.loads((directory / 'owner.before').read_text())
         for name, checksum in original_owner['files'].items():
@@ -104,7 +112,11 @@ class CoreUpdate(WorkerReinstall):
                 raise ValueError('preserved core configuration changed: ' + name)
         binary = self.entry(BINARY)
         manifest = self.entry(MANIFEST)
-        if self.entry(UNIT) != before['unit'] or not binary or binary.get('sha256') not in [
+        # Replacement/rollback preserve these attributes. A known checksum alone
+        # does not authorize undoing a later permission/group/filesystem change.
+        attributes = ['type', 'mode', 'uid', 'gid', 'dev']
+        if self.entry(UNIT) != before['unit'] or not binary or any(
+                binary.get(key) != before['binary'].get(key) for key in attributes) or binary.get('sha256') not in [
                 before['binary']['sha256'], journal['new_sha256']] or not manifest or manifest.get('sha256') not in [
                 before['manifest_sha256'], journal['manifest_after_sha256']]:
             raise ValueError('later changes exist; recovery will not overwrite them')

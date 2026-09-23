@@ -73,3 +73,9 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
 `quarantine` 在已備份並隔離六檔／三根後故意失敗；`start` 在元件已重裝、agent 可用且仍 fenced 時故意失敗。兩者保持 failed，不增加重裝計次，必須使用新的 recovery plan。沒有核心 OS／磁碟故障注入，也不做 provider reset。
 
 本機與實機驗證結果見 [2026-09-23 開發紀錄](M2-RECOVERY-2026-09-23.md)。完整災難恢復、非空 worker drain、其他 workers、OS reimage、HA／snapshot restore 與 24h soak 仍分開驗收。
+
+## 程序突然終止時的界線
+
+本機已驗證 32 個 core 更新／回滾前後切點及一次中斷後外部變更（共 33 次 SIGKILL）；詳見 [程序中斷驗證與後續 TODO](M2-CRASH-RECOVERY-2026-09-23.md)。完整 replace-intent／備份可驗證時以新 recovery ID 接續；原 journal 已 rolled-back 時只核對服務狀態，不重播還原。journal 缺失、備份尚未完成或存在後來的 binary 權限／檔案系統變更時，明確停止且保留所有資料。
+
+replace-intent 前中斷的取消／封存命令尚未實作，不可刪除 pending journal 來解除 reapply 阻擋。這些測試不涵蓋真正 VM／磁碟掉寫，實機 core 故障演練仍待 24h 觀測結束且 canaries 精確清理後安排。

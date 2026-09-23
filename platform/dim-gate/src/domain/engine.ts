@@ -1,17 +1,18 @@
 import { z } from 'zod'
 import {
-  advanceClockSchema, centerSchema, ciKindSchema, commandInputSchema, createAssignmentInputSchema,
+  advanceClockSchema, centerSchema, dashboardQuerySchema, ciKindSchema, commandInputSchema, createAssignmentInputSchema,
   createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema,
   createRequestInputSchema, deleteRelationInputSchema, healthSchema, patchCatalogInputSchema, patchCiSchema,
   patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema,
   providerSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, scenarioInputSchema,
   roleAssignmentSchema, snapshotSchema, versionCommandSchema, type AuditEvent, type CI, type CommandInput, type CommandReceipt,
-  type DashboardView, type GuideView, type Page, type ProvisionJob, type Relation, type Request as DomainRequest,
+  type GuideView, type Page, type ProvisionJob, type Relation, type Request as DomainRequest,
   type Snapshot,
 } from './schemas'
 import { integrityErrors } from './integrity'
+import { workspaceDashboard } from './workspace-home'
 import { advanceObservation, canReadObservation, prepareObservation } from './observation'
-import { guideProjection, notifications, readObservation, visibleIntegrations } from './observation-views'
+import { guideProjection, readObservation, visibleIntegrations } from './observation-views'
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
 import { advanceDelivery, prepareDelivery, readDelivery, canReadDelivery } from './delivery'
@@ -422,7 +423,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return guideProjection(state, policy) satisfies GuideView
     }
     if (path === '/dashboard' || path === '/navigation') {
-      validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId'] : ['center'])
+      validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId', 'provider', 'poolId', 'workOwner'] : ['center'])
       const center = parse(centerSchema, query.get('center'))
       if (!policy.centers.includes(center)) forbidden()
       if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled
@@ -431,26 +432,9 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
           || item.routeKey.startsWith('ops.') && policy.effectiveActions.includes(item.routeKey === 'ops.requests' ? 'request.read' : item.routeKey === 'ops.jobs' ? 'job.read' : item.routeKey === 'ops.capacity' ? 'capacity.read' : 'ci.read')
           || item.routeKey.startsWith('admin.') && policy.admin))
         .toSorted((a, b) => a.order - b.order || a.id.localeCompare(b.id)))
-      const projectId = query.get('projectId'), environmentId = query.get('environmentId')
-      const visibleEnvironments = entities.environments.filter((env) => policy.canReadEnvironment(env) && (!environmentId || env.id === environmentId))
-      const applications = entities.applications.filter((app) => app.orgId === policy.user!.orgId && policy.hasProject(app.projectId) && (!projectId || app.projectId === projectId) && (!environmentId || visibleEnvironments.some((env) => env.applicationId === app.id)))
-      const appIds = new Set(applications.map((app) => app.id))
-      const cis = projectCis(state, policy, query)
-      return {
-        center, title: { rd: '研發中心', ops: '維運中心', admin: '平台管理' }[center], applicationCount: applications.length,
-        environmentCount: visibleEnvironments.filter((env) => appIds.has(env.applicationId)).length, ciCount: cis.length,
-        providers: (['aws', 'aliyun', 'onprem'] as const).map((provider) => ({ provider, count: cis.filter((ci) => ci.provider === provider).length })),
-        activeIncidentCount: entities.incidents.filter(i => i.state !== 'resolved' && canReadObservation(state, policy, i.environmentId) && appIds.has(i.applicationId) && (!environmentId || i.environmentId === environmentId)).length,
-        pendingItems: notifications(state, policy, state.events.length).filter(n => {
-          const incident = n.entityType === 'incident' && entities.incidents.find(i => i.id === n.entityId)
-          const release = n.entityType === 'release' && entities.releases.find(r => r.id === n.entityId)
-          const request = n.entityType === 'request' && entities.requests.find(r => r.id === n.entityId)
-          const entity = incident || release || request
-          return !!entity && appIds.has(entity.applicationId) && (!environmentId || entity.environmentId === environmentId)
-            && (incident ? incident.state !== 'resolved' : release ? release.state === 'pending_approval' : request && ['submitted', 'approved', 'failed'].includes(request.state))
-        }).filter((item, index, items) => items.findIndex(candidate => candidate.entityType === item.entityType && candidate.entityId === item.entityId) === index).slice(0, 20),
-        dataAsOf: clockIso(state.logicalClock),
-      } satisfies DashboardView
+      const { center: _center, ...filters } = parse(dashboardQuerySchema, Object.fromEntries(query))
+      void _center
+      return workspaceDashboard(state, policy, center, filters, poolId => requestPoolUsage(state, poolId))
     }
     if (path === '/organization') {
       validateQuery(query, [])

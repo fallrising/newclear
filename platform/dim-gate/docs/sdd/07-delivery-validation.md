@@ -77,3 +77,8 @@ M0不應一口氣生成所有module的空白頁，也不需要登入雲帳戶。
 ## 6. 未來真實整合的獨立 gate
 
 需要另立 backend/integration SDD：server session/SSO、source reconciliation與credentials、durable jobs、external idempotency、雲商partial failure、multi-user concurrency、telemetry query adapters、production auditing。選定至少一個真實測試環境、驗證read-only inventory，再導入受控write path。前端v0.1的完成不代表此gate已完成。
+
+
+## W1 追加驗證
+
+新 AC-WS-01/02/16/17/18 按 [14](14-workspace-delivery.md) 驗證。`e2e/w1-workspaces.spec.ts` 以真實 Admin grant/revoke、workspace/persona selector、canonical drilldown、刷新、實際舊 HTTP response、keyboard與三尺寸明暗 axe 取得證據；不得以直接寫 store 建立成功流程。原 M0–M5 regression 全保留，舊 multi-grant 混合導航断言更新為同 user 分工作區導航。`DIM_GATE_TEST_PORT` 可隔離本機 preview，預設4173不變。新增 W1 Firefox/WebKit smoke；原效能與隔離套件照常執行。最終結果仍須依固定commit報告，測試檔存在不代表通過。

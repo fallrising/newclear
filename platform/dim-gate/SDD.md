@@ -1,8 +1,8 @@
 # dim-gate — Software Design Document
 
-版本：v0.1 基線（M0–M5 已驗收）＋ WS-SDD revision 1 設計擴充 · 更新：2026-09-22
+版本：v0.1 基線（M0–M5 已驗收）＋ WS-SDD revision 1 設計擴充 · 更新：2026-09-23
 
-既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；新增能力目前僅完成規格，不代表已實作或通過產品驗收。
+既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；W1 工作區入口、分組導航與三角色首頁已實作；固定版本驗證、獨立 review、CI 與接受／合併結果見 STATUS 和 PLAN。W2–W5 仍只有規格，不代表已實作或驗收。
 
 使用者已確認：項目名稱 `dim-gate`；React + shadcn/ui；AWS／Aliyun／自建機房；CMDB 核心；RD、Ops、Admin 三中心；第一版有狀態 Mock；單企業多團隊；端到端發布與故障恢復展示。具體技術與行為決策由本 SDD 定義，後續變更以 PR 追蹤。
 

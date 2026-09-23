@@ -1,6 +1,6 @@
 # dim-gate 狀態
 
-更新：2026-09-22。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
@@ -86,3 +86,23 @@ M5 已由 [PR #23](https://github.com/fallrising/newclear/pull/23) 合併於 `24
 - 下一個產品增量：W1 明顯的工作區入口、分組導航與三份角色首頁；依 PLAN 的 T-029 最終文件證據／PR closeout 完成對帳後另建實作 task。
 
 T-029 文件已由主控在 `deeffb0bd9fd6a1f2c975be51d87a873090df540` 接受；[固定版本驗證](../../../.team/reports/T-029-attempt-1.md)涵蓋文件檢查與需求映射。最新 PR head CI、合併與 owner release 依此分支 PR closeout 核對，不把文件驗收當作 W1 產品驗收。
+
+
+## W1 接手（2026-09-23）
+
+PR31 已合併於73d4829，合併後 CI35745274207成功，前一run ownership已釋放。最新 main7a7b41b 未改 dim-gate。W1–W5尚無產品驗收，從W1開始；[W1 contract](W1-INTEGRATION-CONTRACT.md)及[PLAN](../../../.team/PLAN.md)保存本輪DG-W1-20260923-01、T-030～032、owner及恢復步驟。隔離branch `agent/dim-gate/mainline/w1-workspaces`，worktree `newclear-dim-gate-w1`；原38個worktrees與預覽保留。当前仅契約與任務固定，尚未實作或驗證W1。
+
+
+W1 實作 checkpoint：獨立工作區／Demo 身分、分組側欄、三角色共用 API 首頁、URL scope 及 canonical 下鑽已整合。初步240 tests、typecheck與demo build通過；瀏覽器、固定commit完整gates、效能及T-032獨立review尚待完成，**未驗收**。[PR33](https://github.com/fallrising/newclear/pull/33)沿用既有draft；初始文件head02a8b9a的CI35823661263通過，不能當作產品CI。詳見[T-031](../../../.team/reports/T-031.md)與PLAN最新resume。W2–W5尚未實作。
+
+
+W1 review修正 checkpoint：獨立[T-032 attempt1](../../../.team/reports/T-032-attempt-1.md)提出3項medium（Admin篩選遺失、缺「我發起的工作」、多grant診斷來源遺失）。已依contractrev3補齊，34 focused tests、9 W1 browser及真UI事件／非空首頁補測通過；新固定版本完整gates與複審待完成，仍NOT_ACCEPTED。沿用PR33，詳見[T-031 attempt2](../../../.team/reports/T-031-attempt-2.md)。
+
+W1第三版修正：獨立複審確認F01–03已關閉，另發現平板導航不可辨識、非法scope未清除。已依contractrev4修正，11/11 focused browser通過並目視確認768文字導航；原7d60786完整gates全通過僅作歷史回歸證據。新候選尚待64項完整Chromium、其他完整gates、第三次獨立review及最新head CI，仍**NOT_ACCEPTED**。[T-031 attempt3](../../../.team/reports/T-031-attempt-3.md)／[T-032 attempt2](../../../.team/reports/T-032-attempt-2.md)保留實際結果。
+
+W1 checkpoint DG-D051: final5cf495f native245 tests and6 cross-browser smoke pass; full Chromium/benchmark/isolation and CI35827980156 are pending. Uninvolved third review independently closed F01–F05. Older03a7ee5 full regression exposed an M4 test navigating away immediately after reload before SPA restoration, causing a session404/body-read cleanup timeout; it remains a failed gate. A separate lead-owned readiness checkout will strengthen restored incident/sample assertions without weakening browser-health gates. W1 NOT_ACCEPTED; PR33 draft; no W2 yet.
+
+
+W1 固定本機驗證完成：產品 `5cf495f60e22789b482b578b06e0ea64d135b177` 通過245 tests、64/64 Chromium、6/6 Firefox/WebKit、3/3效能、2/2隔離及全部native/actionlint gates。測試補強 `4ab62327b47c5924a22c84e99bab9c79e1dfbb0a` 另通過三provider完整故事，刷新後核對同事件／狀態／健康樣本；沒有放寬health、timeout或retry。初始JS302068gzip bytes（294.988KiB）、4×CPU冷啟動LCP中位692ms、5000CI讀取p950.5ms、HTTPcommand p95165.8ms，均達既有預算。獨立第三輪review關閉F01–F05且無新blocking/high/medium；[完整證據](../../../.team/reports/dim-gate-w1-validation.md)、[T-031](../../../.team/reports/T-031.md)、[T-032](../../../.team/reports/T-032.md)。
+
+W1 **尚待最終PR head CI及授權合併，不先標ACCEPTED/MERGED**。[PR33](https://github.com/fallrising/newclear/pull/33)保存最終CI／merge／owner closeout，下一run對帳後同步回PLAN及canonical report。main00333ef已正常整入且未改dim-gate；唯一主控仍為DG-W1。W2–W5尚未實作。歷史段落保留當時觀察，舊03a的61pass/1fail沒有被改寫成成功；原worktrees、dirty成果與preview4173均保留，未部署。

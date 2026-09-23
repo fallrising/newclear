@@ -6,6 +6,9 @@ const browser = process.env.DIM_GATE_BROWSER_CONFIG
   ? JSON.parse(readFileSync(process.env.DIM_GATE_BROWSER_CONFIG, 'utf8')) as { executablePath: string; args: string[] }
   : undefined
 
+const testPort = Number(process.env.DIM_GATE_TEST_PORT ?? 4173)
+const testBase = `http://127.0.0.1:${testPort}/dim-gate/`
+
 export default defineConfig({
   testDir: './e2e',
   testIgnore: ['**/m5-isolation.spec.ts', '**/m5-performance*.ts', '**/m5-browser-smoke.spec.ts'],
@@ -14,7 +17,7 @@ export default defineConfig({
   retries: 0,
   timeout: 30_000,
   reporter: [['list'], ['html', { open: 'never' }]],
-  use: { baseURL: 'http://127.0.0.1:4173/dim-gate/', launchOptions: browser, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
+  use: { baseURL: testBase, launchOptions: browser, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: { command: 'pnpm preview --port 4173 --strictPort', url: 'http://127.0.0.1:4173/dim-gate/', reuseExistingServer: false },
+  webServer: { command: `pnpm preview --port ${testPort} --strictPort`, url: testBase, reuseExistingServer: false },
 })

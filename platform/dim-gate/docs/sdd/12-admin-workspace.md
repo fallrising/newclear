@@ -1,6 +1,6 @@
 # 12 — Admin 平台管理台 SDD
 
-版本：WS-SDD revision 1 · 狀態：後續設計；共用語義見 [09](09-shared-workspaces.md)，能力對照見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；其餘為後續設計；共用語義見 [09](09-shared-workspaces.md)，能力對照見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
 
 ## 1. 責任與權限邊界
 

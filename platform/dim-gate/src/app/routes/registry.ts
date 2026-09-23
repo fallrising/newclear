@@ -67,3 +67,23 @@ export function visibleNavigation(session: SessionView) {
   return routeRegistry.filter((route) => route.navigation.visible && (!route.center || session.centers.includes(route.center)) && canAccessRoute(session, route))
     .sort((left, right) => left.navigation.order - right.navigation.order)
 }
+
+/** Legacy seed grouping is a display default; customized Admin metadata wins. */
+export function workspaceGroup(route: RegisteredRoute, configured?: string) {
+  if (configured) return configured
+  if (!route.center) return '示範'
+  const key = route.key
+  if (key.endsWith('.overview')) return { rd: '我的工作', ops: '值勤工作', admin: '平台總覽' }[route.center]
+  if (key.startsWith('rd.')) {
+    if (key === 'rd.apps') return '服務'
+    if (key === 'rd.pipelines') return '交付'
+    if (key === 'rd.observability') return '運行狀況'
+    return '自助資源'
+  }
+  if (key.startsWith('ops.')) {
+    if (key === 'ops.incidents') return '值勤工作'
+    return ['ops.requests', 'ops.jobs', 'ops.releases'].includes(key) ? '審批與變更' : '資源'
+  }
+  if (key === 'admin.access') return '身分與授權'
+  return ['admin.integrations', 'admin.audit'].includes(key) ? '整合與稽核' : '入口與能力'
+}

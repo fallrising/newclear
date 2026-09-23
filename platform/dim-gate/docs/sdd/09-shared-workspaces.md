@@ -1,12 +1,12 @@
 # 09 — 三工作區與共用領域設計
 
-版本：WS-SDD revision 1 · 2026-09-22 · 狀態：設計已定義，新增能力尚未實作／驗證。
+版本：WS-SDD revision 1 · 2026-09-22 · 狀態：W1 入口與首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；W2–W5 尚未實作／驗證。
 
 ## 1. 目標、基線與閱讀順序
 
 RD 是公司的業務系統工程師；Ops 是資源與服務運行的維運人員；Admin 是本平台的開發及管理者。三者是同一平台的工作視角，不是三套產品、資料庫或彼此同步的資源副本。共用後端領域與規則，頁面按任務組織；同一使用者可獲授權進入多個工作區。
 
-M0–M5 的 v0.1 已有三中心、CMDB、環境申請、Pipeline／Release、觀測與治理。現有入口是「示範身分」，首頁仍以共用概覽組件組成。新設計解決入口難找、首頁差異不足，以及「有某 kind 的 CI」不等於「已有完整專業管理面板」的缺口。
+M0–M5 的 v0.1 已有三中心、CMDB、環境申請、Pipeline／Release、觀測與治理。W1 之前的入口是「示範身分」，首頁以共用概覽組件組成；W1 已拆開工作區與 Demo 身分入口並使用角色首頁投影。新設計解決入口難找、首頁差異不足，以及「有某 kind 的 CI」不等於「已有完整專業管理面板」的缺口。
 
 閱讀：[RD](10-rd-workspace.md)、[Ops](11-ops-workspace.md)、[Admin](12-admin-workspace.md) → [能力對照](13-capability-map.md) → [交付與驗收](14-workspace-delivery.md)。09 定義共用語義與新增需求；10–12 定義角色視圖；13 定義能力覆蓋與深度；14 是新驗收 ID 的唯一來源。
 
@@ -119,7 +119,7 @@ ChangeExecution = changeId、attempt、state（queued/running/succeeded/failed�
 
 ## 7. API 與前端邊界
 
-下列是後續 typed contract 的目標資源；dashboard 已有既有版本，其新欄位及其餘新資源均不是本次已加入的 endpoints：`/dashboard?center=`（擴充既有 DTO）、`/resource-objects`、`/bindings`、`/work-items`、`/changes`、`/changes/{id}/approve`、`/changes/{id}/execute`、`/pipeline-definitions`、`/service-configs`、`/traffic-policies`、`/monitor-policies`、`/alert-rules`、`/admin/platform-features`、`/admin/platform-routes`、`/admin/notification-policies`。均放既有 API base 下，不為 RD/Ops 複製 CRUD。
+W1 已依 [integration contract](../W1-INTEGRATION-CONTRACT.md) 擴充既有 `/dashboard?center=` DTO/query，OpenAPI 與 Mock 同步。以下資源仍是後續 typed contract 目標，不是現有 endpoints：`/resource-objects`、`/bindings`、`/work-items`、`/changes`、`/changes/{id}/approve`、`/changes/{id}/execute`、`/pipeline-definitions`、`/service-configs`、`/traffic-policies`、`/monitor-policies`、`/alert-rules`、`/admin/platform-features`、`/admin/platform-routes`、`/admin/notification-policies`。均放既有 API base 下，不為 RD/Ops 複製 CRUD。
 
 Read 使用既有 ApiResult/Page、scope 先行及上限；WorkspaceHome 是 discriminated union（rd/ops/admin），每個卡片含 dataAsOf、source refs 與合法下鑽條件。commands 回既有 CommandReceipt；async 回 operationId，不能只有 toast。錯誤沿用401/403/404/409/422/429/503/507；配置驗證增加可定位的 fieldErrors，不把一般 version conflict 轉成自動覆蓋。
 

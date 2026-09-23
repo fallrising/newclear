@@ -1,6 +1,6 @@
 # 01 — 產品範圍、資訊架構與互動
 
-本文為 v0.1 基線。後續三工作區的入口、首頁與角色深化見 [09](09-shared-workspaces.md)、[RD](10-rd-workspace.md)、[Ops](11-ops-workspace.md)、[Admin](12-admin-workspace.md)；新需求另以 REQ-WS-* 定義，尚未改動目前產品。
+本文為 v0.1 基線。後續三工作區的入口、首頁與角色深化見 [09](09-shared-workspaces.md)、[RD](10-rd-workspace.md)、[Ops](11-ops-workspace.md)、[Admin](12-admin-workspace.md)；新需求另以 REQ-WS-* 定義；W1 的本輪介面增量見文末與 integration contract，验收狀態以 STATUS/PLAN 為準。
 
 ## 1. 需求
 
@@ -106,3 +106,12 @@ Typography：系統 sans-serif，CJK fallback；ID／digest／log 採 monospace�
 | success | 畫面可看到新狀態、相應 detail 與 audit；toast 只是補充 |
 
 最低驗收寬度 1280px；1440px 為主要設計尺寸。768px 以收合 sidebar／sheet 提供探索；390px 可讀主要摘要，複雜表格有局部橫向滾動，不保證所有管理編輯適合手機。Dialog focus trap、Esc、focus return、label／error 關聯、skip-to-content 與 reduced-motion 必須支援。圖表／拓撲有文字或表格替代，不以 canvas 作唯一資訊來源。
+
+
+## W1 工作區介面增量
+
+依 [W1 contract](../W1-INTEGRATION-CONTRACT.md)，頂部「工作區」只在目前 user 的 centers 間切換；「Demo · 體驗其他角色」獨立選擇示範身分。側欄僅呈現 active workspace，按服務／交付／自助資源、值勤／審批／資源、平台總覽／身分／入口／整合分組。既有 Admin 自訂 navigation metadata 優先；舊 seed 的預設 group 由 registry 作呈現映射，不改存檔。
+
+RD 首頁以服務環境健康、待處理工作與近期發布為主；Ops 優先事件、失敗、可處理審批，再顯示容量與時效；Admin 顯示待發布目錄、整合及權限變更。沒有 sample 顯示 unknown；觀測超過5分鐘為 stale，CI/整合資料超過24小時為 stale。容量是配置帳本，不當成即時用量。每區塊/來源有資料時間與 canonical detail。首頁 project/environment、Ops provider/pool 保存在 URL，browser Back 與刷新保留；跨工作區清除不適用 scope 並顯示說明。
+
+W1 revision4：641–1100px 保留可辨識文字及分組導航，<=640px 使用原有可操作選單。切工作區前以canonical API確認scope；清除不合法／不匹配條件時說明，保留獨立合法部分。確認失敗保留原URL與工作區，讓使用者重新選擇重試。

@@ -217,7 +217,14 @@ for (const provider of ['aws', 'aliyun', 'onprem'] as const) {
       expect(await readIncident(page, incidentId)).toMatchObject({ state: sample === 3 ? 'resolved' : 'investigating', recoverySamples: sample })
       await page.goto(`ops/incidents/${incidentId}`)
       await expect(page.locator('dt').filter({ hasText: /^連續健康樣本$/ }).locator('..')).toContainText(`${sample} / 3`)
-      if (sample === 1) await page.reload()
+      if (sample === 1) {
+        await page.reload()
+        await expect(page).toHaveURL(new RegExp(`/ops/incidents/${incidentId}$`))
+        await expect(page.getByRole('heading', { name: '事件詳情', exact: true })).toBeVisible()
+        await expect(page.locator('.page-heading code')).toHaveText(incidentId)
+        await expect(page.locator('dt').filter({ hasText: /^連續健康樣本$/ }).locator('..')).toContainText('1 / 3')
+        expect(await readIncident(page, incidentId)).toMatchObject({ id: incidentId, state: 'investigating', recoverySamples: 1 })
+      }
     }
     expect(await browserApi(page, { path: `/environments/${environmentId}` })).toMatchObject({ status: 200, payload: { data: { environment: { activeReleaseId: rollbackId } } } })
     await expect(page.getByRole('heading', { name: '已觀測證據' })).toBeVisible()

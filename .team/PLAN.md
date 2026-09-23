@@ -758,3 +758,41 @@ remote_durability: source5cf/repair4ab and checkpointcf48818 SSH-saved; containi
 blockers: []
 next_action: verify SSH PRbranch matches containing checkpoint, wait latest-head full CI; if all green record final ACCEPT in PR33 closeout, recheck main/head, merge under user authorization, verify actual merge tree/postmergeCI, release DG-W1 ownership and persist actual outcomes in next run before W2 implementation
 ```
+
+
+DG-D054 (2026-09-23): W1 ACCEPTED/MERGED. Exact final head f51aac3788560f44981ed75456870b824a528994 passed CI35830388459 (245unit,64Chromium,6smoke,3benchmark,2isolation; every step success). Uninvolved T032 attempt3 has no unresolved blocker/high/medium. User-authorized PR33 merged2026-09-23T07:41:23Z at b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d. SSH main/ancestry and dim-gate tree71290cfe7b95d7c5e57cea10adb0270e7108ff9e equal accepted head. T030/T031 ACCEPTED,T032 DONE; DG-W1-20260923-01 terminal DONE, active_owner none. PR closeout remotely saved. PostmergeCI35833033838 running, mirror35833033846 success; no premature postmerge pass claim. Superseded5cfCI35827980156 failed63/64 at the already-fixed reload race; downloaded trace preserved in local evidence and PR33. All original38 worktrees and subsequent W1 trees/dirty history preserved.
+
+### W2 execution — DG-W2-20260923-01
+
+DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole Codex lead takes new run from actual main b4ef57f, branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`. No competing dim-gate PR/owner observed. [W2 contract](../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes complete AC-WS-03–09/15–18 before code, canonical resource/change models, catalog variants, quota/policy, snapshot migration, APIs/routes, safe support matrix and single owners. T033 domain/schema/engine, T034 additive fixtures/controller/migration, T035 lead API/UI/integration/Git, T036 uninvolved fixed reviewer. Workers isolated/no commits/push/delegation; schema onlyT033 and router/manifest/CI onlylead. Pinned kernel237aa277 already read in full; no update adoption. Built-in agent route with exact runtime model slug unavailable, no Claude/multi-model claim. User authorization remains applicable across milestones. Node24.18.0/pnpm11.18.0; existing browser/runtime prerequisites preserved.
+
+| Task | Owner | State |
+| --- | --- | --- |
+| [T-033](tasks/T-033.md) | bounded domain worker | READY — schema slice first |
+| [T-034](tasks/T-034.md) | bounded migration worker | READY — consume T033 schema |
+| [T-035](tasks/T-035.md) | sole Codex lead | RUNNING — contract/API/UI/integration |
+| [T-036](tasks/T-036.md) | uninvolved reviewer | READY after fixed candidate |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 55
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 — CONTRACT_FIXED / NOT_IMPLEMENTED
+task_id: T-033/T-034/T-035/T-036
+target_ref: main
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+implementation_commit: none
+local_tested_commit: none for W2
+spec_revision: WS-SDDrevision1;W2-INTEGRATION-CONTRACTrevision1
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: NOT_OPENED
+remote_durability: containing contract/task/W1closeout checkpoint SSH-pushed next, then one W2 draftPR
+blockers: []
+next_action: publish this checkpoint; assign isolated T033 schema/domain and T034 fixtures/migration; lead typed API/UI; validate full W2 plus preserved regressions, uninvolved fixed review and latest-headCI, merge before W3
+```

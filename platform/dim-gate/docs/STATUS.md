@@ -106,3 +106,10 @@ W1 checkpoint DG-D051: final5cf495f native245 tests and6 cross-browser smoke pas
 W1 固定本機驗證完成：產品 `5cf495f60e22789b482b578b06e0ea64d135b177` 通過245 tests、64/64 Chromium、6/6 Firefox/WebKit、3/3效能、2/2隔離及全部native/actionlint gates。測試補強 `4ab62327b47c5924a22c84e99bab9c79e1dfbb0a` 另通過三provider完整故事，刷新後核對同事件／狀態／健康樣本；沒有放寬health、timeout或retry。初始JS302068gzip bytes（294.988KiB）、4×CPU冷啟動LCP中位692ms、5000CI讀取p950.5ms、HTTPcommand p95165.8ms，均達既有預算。獨立第三輪review關閉F01–F05且無新blocking/high/medium；[完整證據](../../../.team/reports/dim-gate-w1-validation.md)、[T-031](../../../.team/reports/T-031.md)、[T-032](../../../.team/reports/T-032.md)。
 
 W1 **尚待最終PR head CI及授權合併，不先標ACCEPTED/MERGED**。[PR33](https://github.com/fallrising/newclear/pull/33)保存最終CI／merge／owner closeout，下一run對帳後同步回PLAN及canonical report。main00333ef已正常整入且未改dim-gate；唯一主控仍為DG-W1。W2–W5尚未實作。歷史段落保留當時觀察，舊03a的61pass/1fail沒有被改寫成成功；原worktrees、dirty成果與preview4173均保留，未部署。
+
+
+## W1 已驗收合併，W2 開始（2026-09-23）
+
+W1 AC-WS-01/02/16/17/18 **ACCEPTED / MERGED**：[PR33](https://github.com/fallrising/newclear/pull/33) 合併為 `b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d`。最終 head `f51aac3` 的 [CI35830388459](https://github.com/fallrising/newclear/actions/runs/35830388459) 全部通過245unit、64Chromium、6Firefox/WebKit、3benchmark、2isolation；獨立 T032 attempt3 無未解決重要發現。SSH merge ancestry 和 component tree 均已核對一致，W1 owner 已釋放。完整證據及歷史失敗見 [W1 validation](../../../.team/reports/dim-gate-w1-validation.md)。合併後 [CI35833033838](https://github.com/fallrising/newclear/actions/runs/35833033838) 啟動中，mirror35833033846已成功；上方歷史「尚未合併」不是現在狀態。
+
+W2 run DG-W2-20260923-01 從此實際 main 開始；[W2 contract](W2-INTEGRATION-CONTRACT.md) 與 T033–036 固定共用資源／綁定／工作單、Redis／Kafka閉環、Admin模板與K8s唯讀、遷移及驗收。單一主控 branch `agent/dim-gate/mainline/w2-resources` / worktree `newclear-dim-gate-w2`。目前僅契約固定，W2 尚未實作／驗證／驗收；W3–W5仍待後續。未部署、未操作真實雲端或發送通知。

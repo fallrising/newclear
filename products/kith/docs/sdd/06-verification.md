@@ -63,7 +63,7 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 
 ### 畫面 10：成員與提及
 
-契約：[10](10-members-and-mention.md)。程式尚未落地。
+契約：[10](10-members-and-mention.md)。
 
 | ID | Given / When | Then |
 | --- | --- | --- |

@@ -13,7 +13,7 @@ import {
   forbidden,
   invalid,
   isRoomMember,
-  loadActiveHumanByHandle,
+  loadActiveMemberByHandle,
   loadMember,
   requireAuth,
   requireOperator,
@@ -31,6 +31,7 @@ import {
   MEMBER_HEADER,
   ROOM_HEADER,
   SESSION_COOKIE,
+  flagOn,
   type Env,
 } from "./env.ts";
 import { errorBody } from "./errors.ts";
@@ -41,6 +42,7 @@ import { HostedGeneration } from "./hosted/generation.ts";
 import { Inbox } from "./inbox.ts";
 import { handleMcpPost } from "./mcp.ts";
 import { snapshot } from "./metrics.ts";
+import { replyLimit } from "./reply-limit.ts";
 import { Room } from "./room.ts";
 
 export { HostedGeneration, Inbox, Room };
@@ -231,6 +233,13 @@ app.get("/api/rooms/:id/members", async (c) => {
     return {
       ...r,
       operator_only: r.quota_class === "operator_personal",
+      reply_limit: replyLimit({
+        kind: typeof r.kind === "string" ? r.kind : "",
+        quotaClass: typeof r.quota_class === "string" ? r.quota_class : "",
+        sidecarOn: flagOn(c.env.ff_sidecar),
+        hasApiKey: Boolean(c.env.XAI_API_KEY),
+        fakeText: c.env.FAKE_LLM_TEXT,
+      }),
     };
   });
   return c.json({ members });
@@ -252,8 +261,8 @@ app.post("/api/rooms/:id/members", async (c) => {
   let target: MemberRow | null;
   if (hasHandleKey) {
     if (typeof obj.handle !== "string" || obj.handle.trim() === "") return invalid(c, "handle required");
-    target = await loadActiveHumanByHandle(c.env, obj.handle.trim());
-    if (!target) return c.json(errorBody("not_found", "human not found"), 404);
+    target = await loadActiveMemberByHandle(c.env, obj.handle.trim());
+    if (!target) return c.json(errorBody("not_found", "handle not found"), 404);
   } else {
     if (typeof obj.member_id !== "string" || obj.member_id === "") return invalid(c, "member_id required");
     target = await loadMember(c.env, obj.member_id);

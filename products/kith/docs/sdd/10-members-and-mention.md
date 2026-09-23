@@ -105,7 +105,7 @@ hosted 只有在真正開始一次 generation 時，才廣播 body 恰好為 `is
 
 切房時立刻丟棄上一房名單。同房的 GET 失敗時，若本房已有上一筆成功結果就留著，並顯示 `Could not load members.`，`role="alert"`，加上只重試這個 GET 的 `Retry`。不得把失敗畫成空房間，不得沿用上一房名單，此狀態下 `@` 不開清單。第一次進房就失敗時，同樣顯示這句與 `Retry`，不顯示「沒有成員」。離線時輸入文字仍保留，Send 停用，規則同 09。
 
-## 協定（本章要補的，現行程式還沒有）
+## 協定
 
 ### handle 邀請 agent
 
@@ -123,7 +123,7 @@ hosted 只有在真正開始一次 generation 時，才廣播 body 恰好為 `is
 
 ### status 生命週期
 
-上節的 `is replying`／`reply ended` 由 hosted 路徑送出，並且 `reply ended` 落在該次 generation 的收尾，而不是最佳努力。現行程式沒有送這兩個 body，前端也把所有 status 在 4 秒後刪掉。落地時改掉這兩點，否則不得宣稱回應狀態驗收通過。
+上節的 `is replying`／`reply ended` 由 hosted 路徑送出，並且 `reply ended` 落在該次 generation 的收尾。其他 status body 仍在 4 秒後從畫面移除。
 
 ## 驗收
 

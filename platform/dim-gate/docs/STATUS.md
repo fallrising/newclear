@@ -2,9 +2,11 @@
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
-目前：**W1／W2 已驗收合併；W3 已實作並保存交接，尚未驗收／合併；W4／W5 尚未開始。** 使用者要求新視窗續跑；PLAN DG-D083 釋放主控實作／發布 ownership。PR37仍為草稿，完整瀏覽器回歸、獨立review與最新headCI未完成，沒有繞過gate合併。 完整Chromium實測49通過／2失敗／1中斷／37未跑；已定位Admin整合頁的ReactQuery AbortSignal複製回歸，尚未修正。本輪驗證程序與worker已停止，下一位先依handoff修正再完成gate。 W2 [PR36](https://github.com/fallrising/newclear/pull/36) 最終 head e8c7ec1 的 CI35846286919 全部通過，實際合併為9162685；component tree一致，W2 owner已釋放，合併後CI35849832030與mirror35849832043均已成功。321原生測試、77Chromium、8Firefox/WebKit、3效能、2隔離及獨立T036review的完整證據見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md)。
+目前：**W1／W2 已驗收合併；W3 固定產品46e3a55已 ACCEPTED，PR37 最終證據提交的 CI／合併另行對帳。W4／W5 尚未開始。** 接續run DG-W3-20260923-02的主控仍負責收尾；晚到的actual merge、post-mergeCI與owner release以[PR37 closeout](https://github.com/fallrising/newclear/pull/37)為準，接手先讀它和PLAN DG-D088。
 
-W3 [draft PR37](https://github.com/fallrising/newclear/pull/37) 保存合約與進度，run DG-W3-20260923-01，本輪原 owner Codex orchestrator W3 已保存交接，worktree `newclear-dim-gate-w3`，branch `agent/dim-gate/mainline/w3-service-delivery`。T037領域、T038新介面使用獨立工作樹；T039整合API／遷移，T040保持未參與實作供獨立review。最終領域與介面 handback 已按 SHA 整合、worker owner 已釋放；candidate371項原生測試及全部原生檢查通過。效能修正後初始JS306290bytes低於307200預算，三項量測通過；12條新瀏覽器流程已有 worker 實測，仍待固定整合版本完整回歸、獨立review與最新headCI。本視窗依最新使用者要求只收尾W3，W4／W5留新視窗，接手入口為 [HANDOFF-WORKSPACES](HANDOFF-WORKSPACES.md)。狀態與恢復步驟見 [PLAN](../../../.team/PLAN.md) 最新紀錄；以下段落保留歷史觀察。
+W3全375native、89Chromium、10Firefox-WebKit、3效能、2隔離及原生檢查通過；[產品headCI35862758449](https://github.com/fallrising/newclear/actions/runs/35862758449) SUCCESS，獨立[T040attempt4](../../../.team/reports/T-040-attempt-4.md) DONE、no open findings。CI合成checkout928b563與產品46的完整componenttree完全相同。修正Admin callback回歸及矛盾流量存檔；產品初始JS306447bytes（預算剩753bytes），CI冷啟動LCP1324ms、queryp95約1.1ms、HTTPp95約184.6ms。[完整W3驗證](../../../.team/reports/dim-gate-w3-validation.md)、[T039attempt4](../../../.team/reports/T-039-attempt-4.md)保存來源、AC、歷史失敗及artifact，恢復入口[HANDOFF](HANDOFF-WORKSPACES.md)。
+
+以下保留各里程碑歷史觀察；當前任務與接受／合併結果依PLAN最新resume及PR核對。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 

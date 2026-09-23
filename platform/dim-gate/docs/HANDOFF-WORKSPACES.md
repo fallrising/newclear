@@ -1,5 +1,19 @@
 # dim-gate 三工作區接手
 
+## 接續 run 最新狀態（2026-09-23）
+
+**DG-W3-20260923-02 已完成 W3 固定產品驗收：46e3a55 ACCEPTED。此文件 checkpoint 時 PR37 最終證據 head CI／merge 待執行；主控仍持有收尾 ownership。晚到的實際合併、post-merge CI 與 owner release 必須先查 [PR37 closeout](https://github.com/fallrising/newclear/pull/37)，不為把自己的SHA／mergeSHA寫入同一commit反覆追加checkpoint。**
+
+產品 `46e3a557fcd1ff40221ce6881a7565b73c5daa7e` 已SSH保存，完整W3 contractrevision3／AC-WS-10/11/15–18已驗收。Admin integrations context／AbortSignal回歸及獨立T040-F1矛盾流量存檔已修正。375native、全部原生檢查、完整89Chromium／10Firefox-WebKit／3benchmark／2isolation通過；[exact產品headCI35862758449](https://github.com/fallrising/newclear/actions/runs/35862758449) SUCCESS。實際CI checkout928b563是合成merge，與46的完整dim-gate tree同為f4dc14f9ecafa926cab771a5c068979d1dd16766。[T040attempt4](../../../.team/reports/T-040-attempt-4.md)獨立DONE、no open findings，SHA9274658e…；主控PLAN DG-D088 ACCEPT。Claudeattempt2歷史PARTIAL與reassign已披露，不冒稱完成Claude最終驗收。
+
+[W3 validation](../../../.team/reports/dim-gate-w3-validation.md)及[T039attempt4](../../../.team/reports/T-039-attempt-4.md)保存逐步source／AC／健康／效能證據。Local `/tmp/dim-gate-w3-resume-evidence`僅本機原始附件；正式[CI artifact10751674277](https://github.com/fallrising/newclear/actions/runs/35862758449/artifacts/10751674277)到期2026-10-23，不能當永久儲存。初始JS306447bytes，僅餘753bytes；本機／CI LCP752／1324ms，queryp95約0.6／1.1ms，HTTPp95約170.4／184.6ms。保持原300KiB預算與eager存檔驗證。
+
+本機完整gate runner和報告observer都exit0；獨立reviewer已停止寫入、交回report ownership。Root仍待純證據commit／SSHpush→latest metadata-head CI→授權merge→actualmerge/componenttree/postmergeCI／ownerrelease。此checkpoint之後所有code/test/config/lockfile/workflow須仍與46相同；若有產品差異先重驗。最新觀察main928ce00只改Eru／agent-platform，dim-gate／CI／PLAN無差異；正常整入main61d021e的來源仍有效。所有舊worktree保留，checkpoint時總數64；既有4173／4214預覽未接管。勿force/main push、勿reset/clean／刪worktree。
+
+接手先核對PR37實際結果和PLAN：若尚未merge，沿用PR37完成最終整合；若已merge且owner已釋放，核對actualmerge／tree／postmergeCI後從actualmain開隔離W4 run。W4／W5未開始，不重做W1–W3已有效成果；未授權部署、真雲端或外部通知。
+
+## 前一輪交接紀錄（歷史）
+
 **交接決策：依使用者要求換新視窗，W3保持 NOT_ACCEPTED／PR37草稿，主控實作及發布 ownership 由 PLAN DG-D083 釋放。下一位 agent 可建立接續 run，沿用同一分支／PR與 task，先完成 W3 gate，不直接開始 W4。未執行合併。**
 
 本文件觀察 checkpoint：2026-09-23 11:59 UTC，canonical clean HEAD `6c19fe7b849ec4c5c5982c6ede4995ec6829fd83`，product commit `35f594f`，已 SSH 推送，正常整合 main `707f77d2c670b6a344ef25d9c4204521223687c1`。

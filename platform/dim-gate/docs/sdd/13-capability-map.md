@@ -7,7 +7,7 @@
 ## 1. 深度標示
 
 - **既有**：v0.1 已有的特定行為；一個 CI kind 或範例資料不代表整個能力完成。
-- **W1–W5**：[14](14-workspace-delivery.md) 定義的 Mock 交付增量。W1 已驗收合併；W2 已驗收合併（PR36）；W3 合約固定、實作尚未完成，證據見 [STATUS](../STATUS.md)；W3–W5 目前只有規格。
+- **W1–W5**：[14](14-workspace-delivery.md) 定義的 Mock 交付增量。W1 已驗收合併；W2 已驗收合併（PR36）；W3 固定產品已驗收，PR37 最終整合狀態另查 STATUS；W4／W5 只有規格，證據見 [STATUS](../STATUS.md)。
 - **後續**：能力被記錄，但不在 W1–W5 的完整互動承諾；開發前要補專業契約與驗收。
 - **待釐清**：無足夠語義，暫不設可操作入口。
 
@@ -17,7 +17,7 @@ Mock 可以有完整的產品操作閉環，仍不表示操作真實資源。每
 
 | ID／共用能力 | 輸入關鍵字（去重後保留原稱） | RD 視角 | Ops 視角 | Admin 視角 | 交付深度 |
 | --- | --- | --- | --- | --- | --- |
-| CAP-01 服務與基礎資料 | Common Data、Service CMDB、Server CMDB (Shopee TOC)、AZ Meta CMDB、Infra Product Meta | 服務／環境／資源關係 | CI、來源、位置、freshness、影響 | 模型／欄位／能力 metadata | 既有；W1 角色首頁投影已實作；W2 子資源與綁定已實作、待驗收 |
+| CAP-01 服務與基礎資料 | Common Data、Service CMDB、Server CMDB (Shopee TOC)、AZ Meta CMDB、Infra Product Meta | 服務／環境／資源關係 | CI、來源、位置、freshness、影響 | 模型／欄位／能力 metadata | 既有；W1 角色首頁投影已實作；W2 子資源與綁定已驗收合併 |
 | CAP-02 計算與容器 | Compute、Elastic Machine Platform (EMP)、Container Instance Service (CIS) | runtime 規格、位置、需求申請 | 主機／叢集／namespace／工作負載與容量 | 模板與 adapter 能力範圍 | 既有 compute 申請；W2 K8s 唯讀；完整生命週期後續 |
 | CAP-03 定時與批次工作 | Runonce Cronjobs、Job Platform、Mass Processing Portal | 服務定時／一次性任務及執行記錄 | worker 容量、失敗與重試 | 已註冊 recipe／限制 | 後續；既有 ProvisionJob 不冒稱通用 job 平台 |
 | CAP-04 CI 與產物 | Development、Pipeline、Artifact Platform | build/test/package、定義與產物版本 | runner／artifact 整合健康及交付診斷 | recipe、artifact integration metadata | 既有 runs/synthetic Artifact；W3 definition；真 registry/runner 後續 |
@@ -53,4 +53,4 @@ Mock 可以有完整的產品操作閉環，仍不表示操作真實資源。每
 能力必須可接到至少一條真實可驗證的流程；「新 menu + 靜態表格」只能算導航原型。新增第三方 adapter 另記來源/API 版本、credential owner、read-only/write 邊界、同步與部分失敗契約，再獨立驗證。不因參考清單含某平台名稱就宣稱相容或已整合。
 
 
-W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
+W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。該歷史checkpoint時W3–W5尚未實作；目前W3固定產品已驗收，PR37最終整合另行對帳，W4／W5與後續／待釐清能力仍未實作。

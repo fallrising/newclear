@@ -1,6 +1,6 @@
 # 12 — Admin 平台管理台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已驗收合併（PR36）；W3 合約固定、實作尚未完成，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用語義見 [09](09-shared-workspaces.md)，能力對照見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1／W2 已驗收合併；W3 固定產品已驗收，PR37 最終文件 head CI／合併另行對帳；W4／W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 責任與權限邊界
 
@@ -81,4 +81,4 @@ RD 配置服務的通知訂閱與可用 channel；Ops 觀察／處置告警、�
 對應 REQ-WS-01/06/08/09/10；驗收 AC-WS-01/02/12～18。主線：調整已註冊入口 → 預覽不同角色 → 发布 catalog revision → RD 看到合法模板且舊申請不變 → 修改某使用者 grant → 舊 dialog 的提交被 domain 拒絕。W5 再驗證平台功能 cohort、路由與通知；它們的成功不得賦予 Admin 業務發布或共享資源執行權。
 
 
-W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
+W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。該歷史checkpoint時W3–W5尚未實作；目前W3固定產品已驗收，PR37最終整合另行對帳，W4／W5與後續／待釐清能力仍未實作。

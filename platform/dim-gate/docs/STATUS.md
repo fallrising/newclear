@@ -2,7 +2,7 @@
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
-目前：**W1 已驗收合併；W2 已實作、驗收修正中；W3–W5 尚未實作。** W2 沿用 [PR36](https://github.com/fallrising/newclear/pull/36)。產品 `4a69e07` 的321項原生測試、13項W2瀏覽器及3項效能通過，獨立review已重現確認三項medium修正；完整77項Chromium仍在固定checkout執行。`d07166c` 的2項版面及3項效能通過，但跨瀏覽器為7/8：Firefox在提交讀回尚未完成時切身分，audit回409；此失敗保留，未放寬health。目前補強提交就緒條件及真實欄寬／ID可讀性量測，待固定複驗。W2未接受或合併。owner、branch、worktree及下一步見 [PLAN](../../../.team/PLAN.md) 最後resume／[W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md)。下列歷史checkpoint不取代此摘要。
+目前：**W1 已驗收合併；W2 本機驗證完成，待最終 PR head CI／接受／合併；W3–W5 尚未實作。** W2 沿用 [PR36](https://github.com/fallrising/newclear/pull/36)。固定 `4a69e07` 通過321項原生測試、77/77 Chromium及2/2真實隔離；最終版面／讀回修正 `bf3f168` 通過8/8 Firefox／WebKit、真實鍵盤與欄寬檢查、3/3效能。初始JS304,477gzip bytes、LCP756ms，均在既有預算內。獨立review已重現確認F01–04修正；最終結果見 [T036](../../../.team/reports/T-036.md)。W2尚未接受或合併，唯一owner仍為Codex orchestrator W2；下一步是完成最後文件head CI，再按既有授權合併並核對實際結果。完整AC／commands／歷史失敗見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md) 和 [PLAN](../../../.team/PLAN.md) 最後resume。下列歷史checkpoint不取代此摘要。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 

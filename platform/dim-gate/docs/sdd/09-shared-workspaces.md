@@ -1,6 +1,6 @@
 # 09 — 三工作區與共用領域設計
 
-版本：WS-SDD revision 1 · 2026-09-22 · 狀態：W1 已驗收合併；W2 已實作、完整驗收待完成，固定證據見 [STATUS](../STATUS.md)；W3–W5 尚未實作。
+版本：WS-SDD revision 1 · 2026-09-22 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併，固定證據見 [STATUS](../STATUS.md)；W3–W5 尚未實作。
 
 ## 1. 目標、基線與閱讀順序
 
@@ -126,4 +126,4 @@ Read 使用既有 ApiResult/Page、scope 先行及上限；WorkspaceHome 是 dis
 React 僅透過 API client/query/mutation；domain feature 共用 schema、selector、policy、command，工作區層只組裝投影。不要建立 rdRedisStore／opsRedisStore 或三套各自的 mock handler。Route registry 固定 capability/action；導航配置只能引用已註冊 route key。
 
 
-W2 固定候選 `a05491c`（2026-09-23）：[W2 contract](../W2-INTEGRATION-CONTRACT.md) 的完整資源／變更模型、API、原子遷移與 UI 已實作。314 項原生測試通過，產品來源 `740a2bc` 的效能及歷史 W1 升級瀏覽器驗證通過；完整 Chromium／Firefox／WebKit、獨立 review 與最終 CI 仍在進行，**NOT_ACCEPTED**。實際證據和最新結果以 [STATUS](../STATUS.md)、[W2 驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 與 PLAN 為準。W3–W5、後續／待釐清能力尚未實作。
+W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。

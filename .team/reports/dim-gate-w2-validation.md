@@ -1,45 +1,59 @@
-STATUS: PARTIAL
+STATUS: DONE
 
 ## Summary
 
-Run DG-W2-20260923-01; W2 AC-WS-03–09/15–18. Sole lead worktree newclear-dim-gate-w2, branch agent/dim-gate/mainline/w2-resources, existing draftPR36. W1 accepted and merged b4ef57f; postmerge CI35833033838 successful, owner released. W2 is implemented and partially validated, not yet accepted or merged. Product source740a2bca6c8ce657c185c276b61dcf661488ce3c includes canonical resources/changes, strict91-operation API, atomic W1 migration, typed Admin variants and lazy commands within the existing atomic queue.
+W2 implements the canonical resource/binding/work-item model, Redis allocation/bind/resize, Kafka topic create/bind, independent Ops approval and explicit execution, typed Admin catalogs, and readonly Kubernetes summaries. Existing Request/Release workflows and IDs remain intact. WorkItems project each source; no role has a separate store.
+
+Run `DG-W2-20260923-01`, tasks T033–T036; sole owner Codex orchestrator W2. Branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`, existing [PR36](https://github.com/fallrising/newclear/pull/36). W1 is accepted and merged at `b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d`, with post-merge CI35833033838 successful and ownership released. W2 acceptance, latest-head CI, merge and owner release are separate decisions recorded in PLAN/PR closeout. W3–W5 remain unimplemented.
+
+The domain/API/migration implementation is fixed at `4a69e07233fb31a90d2abafa664c39d3b91c4f23` under contract revision3. Later `d07166c93d600211454074c91b1bfa2e50526adc` and final `bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20` change only the resource table CSS/class/reference display, browser readiness/geometry assertions and progress documents. No domain/API/state/migration change follows4a69. The complete local regression uses4a69; the affected layout, both extra browsers and fresh performance are retested onbf3f168. Final exact-head CI must run the entire updated suite.
 
 ## Verification
 
-- Integrated frozen install/lint/typecheck/test314/314 (29files)/docs168Markdown394links/contracts91ops209schemas/CI/architecture/demo build before fixed740a2bc — passed
-- Fixed0ab838a affected Chromium20/20 (4.0min): originalM1/M2, W2Redisstaging, Kafkafailure/retry, K8s/Adminisolation, keyboard/light-dark/responsiveaxe — passed
-- Fixed740a2bc unchanged fresh benchmark3/3 (26.9s), allfiveinitialJS303924/307200bytes; medianLCP724ms (4xCPU),5,000CI100readsP95 0.5ms,100persistedHTTPcommandsP95 168.6ms including150msdelay; completeJSON /tmp/dim-gate-w2-evidence/740a2bc-performance — passed
-- Fixed740a2bc genuineW1activeRelease/ProvisionJob browser migration1/1 (8.0s): exactfixtureSHA55c21bb325f3d8f5f45a4cc53326125420c90e08b884129b54de6b6d82f1abc6, exactoldhistory/clock/receipts preserved, activejobscompleteonce viaUIclock, secondreloadunchanged — passed
-- Original285b46f browser0/4 and initialJS314429/307200budget; ae3bb49 browser2/4: actualconsolepattern/focus/keyboardscrollissues corrected, originallogs/traces preserved — failed
-- FinalcompleteChromium/allFirefox-WebKitsmoke/isolation/actionlint/fixeduninvolvedreview/latestPRheadCI/merge — skipped
+Commands ran from `platform/dim-gate` with Node24.18.0 and pinned pnpm11.18.0. Lockfile SHA256 remains `0da752e9e75f7b22902ba601583d1979e0a0d63b34275bcc445c4286dec7a32b`. Browser runtime: Chromium153.0.8010.12, Firefox155, WebKit26.6; one worker, zero retries. Linux libraries/CJK fonts are process-local test environment settings, with no global or dependency changes.
 
-Actual evidence directories are under /tmp/dim-gate-w2-evidence and component test-results-w2-*; GitHub final CI artifacts are still pending. No static image, success toast or store-written business success substitutes for acceptance. The only browser raw snapshot installation is the exact historical W1 fixture in the explicit upgrade-boundary test; all subsequent business progress uses visible controls.
+- Fixed4a69 `pnpm install --frozen-lockfile --offline`, `pnpm lint`, `pnpm typecheck`, `pnpm test`:321/321 tests in29files, including real MSW HTTP, quota races, persistence and delayed-command authorization — passed
+- `pnpm check:docs`, `pnpm check:contracts`, `pnpm check:ci`, `pnpm check:architecture`, `pnpm build --mode demo`; strict91operations/210schemas and registered operation manifest agree — passed
+- Fixed4a69 focused W2 production Chromium:13/13 in3.9min,37images,2,686responses, zero page errors or failed requests — passed
+- Fixed4a69 `DIM_GATE_TEST_PORT=4224 pnpm test:e2e`:77/77 in24.8min, preserving all64 legacy/W1 journeys plus13 W2;43health attachments,24,589responses,119images, zero page errors or failed requests — passed
+- Fixedbf3f168 `DIM_GATE_TEST_PORT=4219 pnpm test:smoke`:8/8 Firefox/WebKit in2.5min, including full legacy Guide, workspace/deep refresh and Redis delivery;4health attachments,1,115responses,32images, zero page errors or failed requests — passed
+- Fixedbf3f168 shared Redis triage/approval/layout journey:1/1 in24.8s;17images,217responses; actual light/dark1440/768/390 axe, keyboard scrolling,812px computed table minimum,252px target column and every target ID on one line — passed
+- Fixedbf3f168 `pnpm benchmark`:fresh build and3/3 checks in27.1s; all five cold samples304,477gzipbytes,4×CPU medianLCP756ms,5,000CI queryP95≈0.6ms,100 persisted HTTP commandsP95169.2ms including150ms Mock delay; clean tracked source metadata — passed
+- Fixedbf3f168 lint/typecheck/demo build, docs171Markdown405links, contracts91/210 and task/report/diff checks — passed
+- Fixed4a69 `pnpm test:isolation`:fresh production Demo/live builds,2/2 in3.0s; actual sibling document/API and service-worker scope, deep refresh, and live mode with no Mock fallback — passed
+- Uninvolved [T036 attempt2](T-036-attempt-2.md): F01–03 MEDIUM and F04 LOW independently reproduced and closed;321 native tests,12 Chromium journeys, final layout1 and final Firefox/WebKit2 plus complete lead evidence inspection; no unresolved finding — passed
+- Actionlint, final original-worktree preservation audit (all38 remain) and pinned report/task validation — passed
 
-| AC | Concrete implementation and evidence | Current gate |
-| --- | --- | --- |
-| 03 | domain w2 sharedbinding/onePlacement/once-per-objectquota; HTTP scopedprojections; visible stagingRedis/readback and governance sharedresize | domain/HTTP/staging pass; bounded5/5governance pass; leadfullsuite pending |
-| 04 | w2-resources staging via original Request then draft/submit/independentOpsapprove/execute; no binding before terminal5step; sameIDs RD/Ops/reload | fixed0ab pass |
-| 05 | domain+HTTP samekey/canonicalname collisions and crossparent identity; visibleKafka retry; governance existingconsumer/crossparent story | domain/HTTP/retry pass; bounded5/5governance pass; leadfullsuite pending |
-| 06 | domain+realMSW parallel lastquotaapprovals, cancellation release, no negativequota; observednull remains separate |314unit pass |
-| 07 | staleversion/catalog/disabled/currentpolicy domain+HTTP; UI configurefailure/newdecision/retry keepsfailedattempt andplannedIDs; Adminrevisionstories | core pass; bounded5/5governance pass; leadfullsuite pending |
-| 08 | explicit pool+consumerproject/stageintersection; nonselfapproval; qualifiedrequesterexecution; Admindenial; Opssharedresize independentdecision | domain/HTTP/scope pass; bounded5/5governance pass; leadfullsuite pending |
-| 09 | canonicalCI↔K8sprofessional↔service bindings; staleunknown labels; no clustercontrol; unsupportedcapabilities absent | fixed0ab browser pass |
-| 15 | canonicaldetail404/action403; hidden counts/specs/search/audit/notifications/graph; HTTPheldidentity/policy; browser realheld200resource response andnoDOMflash | domain/HTTP pass; new realheld200browser pass; finalfullsuite pending |
-| 16 | genuineW1serializedactiveRelease+job migration andidempotency, atomicquota/corrupt failures preservebytes; W2activeRedis/Kafkareload507/reset; exactfixturebrowser |314unit+fixed740 migration pass |
-| 17 | resourcewizard/details/workitems/readonlyprofessional pages, actualthemes1440/768/390axe, keyboarddialoginitial/Escape/return; unchangedbenchmark; additionalFirefox/WebKitRedisclosedloop | affectedbrowser+benchmark pass; fullsmoke pending |
-| 18 | onlyregistry-backedroutes; explicitMock+readonly+unknown; GuiderealW2links; W3–W5/laterunclearcapabilities remainpending; browsernetworkhealth noexternalrequests | focusedbrowser/docs pass; finalreview pending |
+Earlier fresh benchmarks also passed:4a69 measured304,484bytes/LCP792ms/query0.6ms/HTTP169.4ms; d071 measured304,484bytes/LCP756ms/query0.6ms/HTTP169ms. The final result above leaves2,723bytes below the unchanged307,200-byte initial JS limit. Required Demo bootstrap and service-worker scripts are included.
+
+| Exit AC | Canonical implementation and actual evidence |
+| --- | --- |
+| AC-WS-03 | `src/domain/w2.test.ts`, `src/demo/w2-handlers.test.ts`, `e2e/w2-resources.spec.ts`, `e2e/w2-governance.spec.ts`:shared Redis canonical object/binding IDs, once-per-object physical quota, onePlacement perenvironment/CI, no hidden sibling details. |
+| AC-WS-04 | Visible original Request creates staging; RD Redis draft→submit→independentOpsapproval→explicit5-step execution→sameRD/Ops source/correlation/binding; approval alone creates no ready binding; reload preserves canonical state. |
+| AC-WS-05 | Domain/realHTTP same-key replay, normalized sameparent/namespace name409, crossparent same name distinctIDs; visible existing Kafka binding preserves object and visible create/fault/retry preservesplannedIDs andpriorattempt. |
+| AC-WS-06 | Domain/realMSW parallel lastquota approval has one atomicreservation winner; cancel releases reservation, no negativecapacity/duplicateexecution; observedusage remainsnull and doesnot borrowreservedquota. |
+| AC-WS-07 | Version/catalogrevision/disabledtemplate/currentgrant checks onsubmit/approve/execute/retry; visible Admin revision/disable refusesoldchangeswithoutrewritingfrozen snapshots; configurefailure preservesactive/no ghostBinding; retry requiresnewdecision andsameplannedIDs. |
+| AC-WS-08 | Selfapproval403 for samepersonacrossroles, pool-only/project-only/Admin business denial, qualifiedsecondOps approval, originalrequester execution afterindependentdecision; per-object scopeallow withunrelatedhiddenallocation, genuinelyhiddenconsumer/no-pooldeny, staleproposalrevocation403. |
+| AC-WS-09 | Canonical CI↔readonlyK8s/Redis/Kafka↔service resource links/scope/dataAsOf; missing/stale observeddata explicit; no clustercontrol/unsupported operation masquerades. Existing network/database CMDB behavior preserved. |
+| AC-WS-15 | Domain/HTTP list/detail404/action403/search/aggregate/audit/notification/graph scope; partialparent countsunknown; canonicalfullChange requiresallaffectedconsumer scope; realheld200private resource response afterpersona change cannotflash/overwriteDOM/cache. |
+| AC-WS-16 | `src/demo/migrations.test.ts`, `e2e/w2-migration.spec.ts`:genuineW1 snapshot fixtureSHA55c21bb325f3d8f5f45a4cc53326125420c90e08b884129b54de6b6d82f1abc6 (actualb4merge provenance), originalIDs/history/clock/receipts/jobs preserved; activeRelease/ProvisionJobcompleteonceviaUIclock; atomicquota/corrupt failures preserveoldbytes; W2midexecutionreload/failure/reset and alllegacy regression retained. |
+| AC-WS-17 | Resourcewizard/details/WorkItems/professionalreadonly/typedAdmin, actualthemes1440/768/390axe, dialoginitialfocus/Escape/return, readabletableandkeyboardscroll; crossbrowsercompleteRedisdelivery+legacyGuide/workspace smoke; sameoriginalbudgetbenchmark; genuine sibling/live isolation. |
+| AC-WS-18 | Registry-backed routes/Guidelinks andconstantDemo marker; readonly/unknown/pending contenttruthful; W3–W5 andlater/unclearcapabilities remainunavailable; browserhealth noexternalcalls; fixeduninvolvedspec/source/evidence review. |
+
+Source-specific triage summary includes requirement kind, risk and typed current/desired/signeddelta. Newdemand startsat0, existingbinding addsnoquota, stalehistoricalbasis explicitlyunknown. Approved Request/Change appear inbothdecidedandexecution filters; no storedsource-state mutation. Shared object maintenance usesallaffectedconsumerOps grants pluspool, withoutletting anunrelatedhiddenallocationblock anauthorizedobject.
 
 ## Documentation
 
-[W2 contract](../../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes full scope before dependent implementation. Specs01–07 and09–14, OpenAPI, capability status, migration recipe, README, DemoGuide, STATUS, tasks/attempts and rootPLAN track actual implementation and evidence. No new Request/Release state store or per-role Mock exists. T033 source handoff16files then7performancefiles verified bySHA; T034 migration10files andHTTPtest+report verified bySHA. T034 governancebrowser test/report handoff was SHA-verified and integrated; T036 remains uninvolved for fixed read-only review.
+[W2 contract revision3](../../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixed scope, shared owners, schema, API, policy, migration and AC before dependent implementation and before review corrections. Specs01–07 and09–14, OpenAPI, Mock, migration tests, capability status, README, DemoGuide, STATUS and PLAN remain synchronized.
+
+T033 handed back16 domain files and then7 performance files; T034 handed back10 migration files, the HTTP test and governance browser test. The lead verified SHA256 manifests before integration. Workers released ownership; their original worktrees and dirty results remain intact. T036 did not participate in implementation. The available built-in uninvolved reviewer was used with the fallback disclosed; the exact runtime model slug is not exposed, so there is no Claude or multi-model claim.
+
+Local evidence is under `/tmp/dim-gate-w2-evidence`: `4a69e07-focused-html`, `4a69e07-full-html`, `4a69e07-full-health.json`, `bf3f168-layout-html`, `bf3f168-smoke-html`, their health summaries, and `bf3f168-performance` with decoded JSON/source metadata. Command logs and original failure traces are preserved there. Local paths are not cross-machine artifact storage. Source/tests/reports are SSH-saved; final GitHub CI uploads `dim-gate-m5-<synthetic-merge-sha>` for30days. Obtain the actual run/artifact links from PR36.
 
 ## Risks and Follow-ups
 
-Held-response isolation and exact bounded governancebrowser handoff are complete. Freeze final candidate, complete originalM0–M5/W1+W2 full browser suite, Firefox/WebKit8smoke, sibling/live isolation, native/actionlint/diff/task-report validators. IndependentT036 must review fixedcandidate and actualcompleteACevidence with no unresolved blocking/high/medium findings. Wait latestexactPRheadCI, recheckmain/head, authorizedmerge, verifyactualmergecommit/tree/postmergeCI and releaseW2ownership beforeW3. InitialJS headroom remains narrow; final measured actualbytes must be recorded, budget unchanged. Keep historicalfailures and originalworktrees intact. No deployment/cloud/externalnotification/realcredential use.
+Latest exact PR head CI, main/head reconciliation, authorized merge, actual merge-tree/post-merge-CI verification and owner release remain required before W3 starts. The final metadata checkpoint may reference these tested code commits only after confirming its source/test/config/workflow/lockfile diff is empty. No deployment, real cloud action, external notification, real credential, force push, direct main push or worktree deletion occurred.
 
+Historical failures remain preserved, not passing gates:285b had browser0/4 and314,429gzipbytes over budget; ae3 had browser2/4 and exposed an invalid HTML pattern and missing scroll-region focus; a054 had full76passed but smoke6/8 failed due to redundant bootstrap navigation; the immutable4a69 runner also reproduced the same historical bootstrap smoke6/8 failure; d071 had smoke7/8 failed when persona switching retired an unfinished sequential detail/audit readback. Final smoke enters the wizard directly, then waits for visible completion, submitted state and same-correlation audit before switching persona. Browser health, status handling, timeouts and retries were not relaxed.
 
-- Product740a2bc plusnewheld-response test:1/1Chromium3.8s, actual200privatepayload helduntilDataidentityactive, noDOMflash andnoscopeescapedsearch — passed
-- ExactT034attempt3test/reportSHAhandoff andbounded5/5governancebrowser,13axechecks; resources unchangedonrefusal andallsuccesssetupvisibleUI — passed
-- Actionlint andT033–036task/canonicalreport validators — passed
-
-Next finalcandidate full76Chromium+8smoke, isolation/native anduninvolvedreview/latestheadCI. InitialJSactual303924bytes leaves3276bytes; fixed740rawsource/benchmark metadata is preserved. W2notaccepted.
+T036 attempt1 reproduced three MEDIUM gaps: parent-wide impact wrongly disabled authorized object maintenance; approved work disappeared from the execution filter; triage lacked typed risk/delta. Revision3 fixes all three and preserves redaction. Follow-up found LOW table readability: measured680px table/57.6px target column exposed CSS specificity rather than merely a screenshot concern. Final geometry is812px/252px with unbroken IDs and actual keyboard scrolling. Earlier passing tests never overrode review findings or failed smoke.

@@ -1,31 +1,31 @@
-STATUS: PARTIAL
+STATUS: DONE
 
 ## Summary
 
-DG-W2-20260923-01; T035 revision3/attempt3. Uninvolved T036 F01–F03 require object-specific maintenance eligibility/impact, approved work discovery and canonical kind/risk/unit delta triage. Lead corrects in newclear-dim-gate-w2-closeout / agent/dim-gate/task/t035-w2-closeout baseda05491c. Full contractrevision3 is fixed before implementation; no AC reduction or new persisted schema. All earlier attempts remain.
+T035 attempt3 local integration closeout, run DG-W2-20260923-01, W2 contract revision3. This DONE covers implemented scope and completed local validation; milestone ACCEPTED/MERGED still requires latest exact PR-head CI and lead decision. Canonical branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`, existing PR36. Earlier attempts and their actual failed results remain in Git and separate attempt files.
+
+Domain/API/migration source is fixed4a69e07233fb31a90d2abafa664c39d3b91c4f23. Finalbf3f168a09c2b4f5ae442703588f2a3dd4d5cb20 adds only the bounded WorkItems layout and browser readiness/geometry correction. It preserves canonical resources, current authorization, atomic reservation/execution, Request/Release projections and the genuine W1 migration path. No snapshot or source-state change follows4a69.
 
 ## Verification
 
-- Fixeda05491c native314/29files, lint/typecheck/docs/contracts/CI/architecture/build/actionlint/diff — passed
-- Reviewer F01 sufficient object scope blocked by unrelated hidden allocation; canonical command succeeds201 — failed
-- Corrected working diff: frozen offline install, typecheck/lint,321unit/29files,docs171/404,contracts91/210,CI/architecture and demo build — passed
-- Corrected fixed browser/performance/full regression/follow-up review/latestheadCI — skipped
+- Full native checks on integrated4a69: frozen install, lint, typecheck,321/321 unit/HTTP/persistence tests in29files, docs, contracts91operations/210schemas, CI/architecture and Demo build — passed
+- Fixed4a69 focused W2 Chromium13/13 and full Chromium77/77 in24.8min, preserving all64 legacy/W1 journeys, including1,000 actual UI commands — passed
+- Fixed4a69 actual sibling/live isolation2/2 in3.0s — passed
+- Fixedbf3f168 affected shared Redis/triage/approval/layout journey1/1, actual theme/viewport/axe/focus/keyboard,812px table minimum/252px target column and four unbroken target IDs — passed
+- Fixedbf3f168 Firefox/WebKit smoke8/8 in2.5min; canonical Redis success and refresh across roles, legacy Guide and workspace flows — passed
+- Fixedbf3f168 fresh benchmark3/3:304,477gzipbytes,4×CPU LCP756ms,5,000CI queryP95≈0.6ms,100 persisted HTTP-commandP95169.2ms; clean tracked source provenance — passed
+- Fixedbf3f168 lint/typecheck/build/docs/contracts and pinned task/report validation; source delta inspection confirms only two product layout files and two browser tests after4a69 — passed
+
+Full commands, AC-WS-03–09/15–18 mapping, artifacts and limitations are in [W2 validation](dim-gate-w2-validation.md). Independent T036 attempt2 separately records source review and actual reproduction. Latest exact-head CI and actual GitHub merge/ownership facts are saved on PR36 and the next PLAN reconciliation rather than inventing self-referential commit evidence.
 
 ## Documentation
 
-PLAN DG-D067 records REWORK and sole shared-file owner; W2contract revision3 specifies per-object DTO and current policy behavior. Current SDD/README status headers are synchronized without removing historical reports.
+Contract revision3 was fixed before F01–03 correction. Specs, OpenAPI, Mock/read DTOs, typed Admin catalogs, migration tests, README/Guide/STATUS and PLAN agree on W2 scope. T033/T034 source handoffs were SHA-verified; workers released shared-file ownership. All earlier worktrees and dirty results remain intact. W3–W5 remain unimplemented.
 
 ## Risks and Follow-ups
 
-Source now includes shared policy object eligibility, filtered object-only consumers, overlapping phase membership and typed triage summary. Domain/HTTP tests prove sufficient scope, hidden affected consumers/no pool denial, stale proposal revocation, approved Request/Change phase inclusion, +2048MiB resize, signed shrink, zero-demand bind, Kafka multiunit demand and unknown historical baseline. New browser assertions exercise these on visible UI; execution pending. The initial new HTTP test used the wrong client helper name and typecheck rejected it; corrected to the existing revokeAssignment before the passing gate. Preserve capacity and hidden consumer redaction. Freeze correction, complete fixed gates and uninvolved review; latest-headCI, authorized merge and actual closeout precede W3.
+The final JS budget margin is2,723bytes. Standard Vite large-chunk information remains; no budget was raised. All business-success setup uses visible controls; raw browser storage is limited to the explicit historical upgrade boundary and readonly evidence. Direct HTTP calls test intentional denial/conflict, not substitute success setup.
 
+Historical failures are preserved: a054 and immutable4a69 smoke6/8 reproduced bootstrap cancellation; d071 smoke7/8 exposed unfinished submit detail/audit readback. Finalbf enters the wizard directly and waits fresh completion/submitted state/audit before switching identity; no health/status/timeout/retry relaxation. d071 keyboard scrolling passed but independent geometry proved its min-width override ineffective; finalbf strengthens both CSS and actual readability checks. Original T036 medium findings and all prior attempt failures remain in their reports.
 
-- Fixed4a69 all13W2Chromium3.9min,2686networkresponses/37images/zero page errors or failedrequests — passed
-- Fixed4a69 unchangedfreshbenchmark3/3,304484gzipbytes/LCP792ms/queryP950.6ms/HTTPP95169.4ms, clean tracked source metadata — passed
-- Historicala054 full76Chromium24.5min and2liveisolation — passed
-- Historicala054 Firefox/WebKit smoke6/8: initial two document navigations91/104msapart abort bootstrap; traces retained, fullbusinesssuccessstillfailshealth — failed
-
-The smoke now starts directly at its wizard via existing UI helper, removing redundant pre-bootstrap navigation. F04LOW table readability is corrected by bounded table minwidth and separate reference lines; new keyboard scrolling assertions and 1440/768/390 screenshots verify it. Canonical lead tree has fast-forwarded to4a69 after oldrunner finished; closeout tree remains immutable for77full gates. Final bounded fix/smoke and independent narrow review follow; no acceptance yet.
-
-
-Checkpoint DG-D071 supersedes the preceding claim that minimum table width was effective: independent real DOM inspection found CSS specificity preserved680px and57.6px targetcells. The new selector specificity/target-state bounds and unbroken targetIDs are now measured by actual geometry/Range rectangles in addition to keyboard scrolling. d071 layout2/2 and benchmark3/3 passed, but Firefox smoke7/8 failed because persona switch preceded submit detail/audit readback; raw409/traces are preserved. The containing test waits fresh completionnotice, submittedstate and visiblechange.submit before switching; healthgate unchanged. Workingdiff lint/typecheck/demo build pass. Fixed delta reruns/final uninvolvedreview/full77/latestheadCI remain pending; no acceptance.
+Next: validate the final metadata checkpoint, SSH-save to the same PR36, require latest exact-head CI, recheck main/head and merge under the user's existing authorization. Verify actual merge commit/component tree/post-merge CI, save closeout, release W2 ownership, then create W3. No deployment, real cloud action, external notification or credentials.

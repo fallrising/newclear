@@ -768,10 +768,10 @@ DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole
 
 | Task | Owner | State |
 | --- | --- | --- |
-| [T-033](tasks/T-033.md) | bounded domain worker | READY — schema slice first |
-| [T-034](tasks/T-034.md) | bounded migration worker | READY — consume T033 schema |
-| [T-035](tasks/T-035.md) | sole Codex lead | RUNNING — contract/API/UI/integration |
-| [T-036](tasks/T-036.md) | uninvolved reviewer | READY after fixed candidate |
+| [T-033](tasks/T-033.md) | bounded domain worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-034](tasks/T-034.md) | bounded migration worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-035](tasks/T-035.md) | sole Codex lead | IN_REVIEW — local gates complete, latest-head CI pending |
+| [T-036](tasks/T-036.md) | uninvolved reviewer | DONE attempt2; no unresolved finding, owner released |
 
 ```yaml
 project_id: dim-gate
@@ -928,4 +928,34 @@ integration_state: draftPR36 / NOT_ACCEPTED / unmerged
 remote_durability: d07166c SSH-saved; containing correction/evidence nextSSHpush
 blockers: []
 next_action: run fixed layout2 andall8smoke; preservefull4a69 gates; independent finaldelta review; final reports/latestPRheadCI then authorizedmerge/actualmerge-tree-postCI/ownerrelease before W3
+```
+
+
+DG-D072 (2026-09-23T10:00Z): W2 local gates complete. Evaluated domain/API/migration implementation4a69e07233fb31a90d2abafa664c39d3b91c4f23 and bounded final layout/test delta bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20. Full native321/29files,91operations/210schemas, all lint/typecheck/docs/CI/architecture/build/actionlint checks pass. Fixed4a69 full77/77 Chromium24.8min,43health attachments/24589responses/119images with zero pageErrors/failedRequests; sibling/live isolation2/2pass. Finalbf smoke8/8Firefox/WebKit2.5min and affected real triage/layout1/1 pass; geometry812px/252px, four unbroken IDs and keyboard horizontal scroll. Final fresh benchmark3/3:304477gzipbytes, LCP756ms/queryP950.6ms/HTTP169.2ms, clean tracked source metadata. Immutable4a69 oldsmoke6/8 failed known bootstrap race; d0717/8 failed unfinished audit readback; their logs/traces remain historical failures, finalbf evidence supersedes only affected paths without relaxing gates.
+
+Independent T036attempt2 report SHA256372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 integrated unchanged; reviewer independently ran321native/12Chromium/finallayout1/final2browser and inspected complete lead evidence. F01–03MEDIUM/F04LOW closed, no unresolved finding. Report ownership released. Decision: ACCEPT bounded T033/T034 handbacks at their original revisions plus integrated4a69 validation; T036 DONE; T035 local integration DONE but orchestration IN_REVIEW pending latest exact PR-head CI. W2 remains NOT_ACCEPTED/unmerged until that gate. Reports T033/T034/T035/T036 and dim-gate-w2-validation are current; old attempts remain. All original38worktree paths remain, currenttotal53, no deletions. SSHmain observed09:58Z remainsb4ef57f; remotePR36headbf3f168. CI35844753406 is inprogress, not calledpassed. This checkpoint is metadata-only; no product/test/config/lockfile/workflow changes afterbf3f168. Final metadata-head CI and actual merge/ownership closeout belong onPR36, then next-run reconciliation saves actual outcomes without a self-SHA commit loop.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 72
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 LOCAL_GATES_COMPLETE / FINAL_CI_PENDING / NOT_ACCEPTED
+task_id: T033/T034 ACCEPTED bounded handback; T035 IN_REVIEW; T036 DONE
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23
+final_bounded_delta_commit: bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20
+local_tested_commit: 4a69 full77/native321/isolation2; bf3f168 affectedlayout1/smoke8/freshbenchmark3
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/dim-gate-w2-validation.md, .team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-2.md]
+review_sha256: 372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: bf3f168 SSH-saved; containing metadata checkpoint nextSSHpush
+blockers: []
+next_action: validate metadata-only diff and SSHsave samePR36; waitlatestexactheadCI, recheckSSHmain/PRhead, ACCEPT thenauthorizedmerge; verifyactualmerge/tree/postmergeCI, savecloseout/releaseW2, thencreateW3run
 ```

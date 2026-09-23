@@ -41,6 +41,7 @@
   - 回應加 `has_more: bool`（該方向是否還有更早的列）。舊 client 忽略未知欄位。
 - 相容：不帶 `order` 時行為與 v1 位元級相同。
 - 驗收：`E2E-W1-04`。
+- Phase 2：契約 [`contracts/v2/http-messages-list.json`](../../contracts/v2/http-messages-list.json)；`order=asc` 時 `has_more` 表示還有更新的列；實作逐字寫在 [W1](milestones/W1.md) §4.1，已對 1,200 則房間實測。
 
 ### B-02 房間摘要（W2）
 

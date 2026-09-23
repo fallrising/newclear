@@ -70,7 +70,7 @@
 
 `#B4532A` `#2F7A6D` `#7A5AA6` `#2F6FA6` `#A6452F` `#5E7A2F` `#A6307A` `#8A6A1F`
 
-深色模式使用同一組色（白字對比不變）。
+深色模式使用同一組色（白字對比不變）。token：`--avatar-0`–`--avatar-7`（順序同上）與 `--on-avatar: #FFFFFF`，三個主題區塊都定義（§2.4，W1 加入）。
 
 ### 2.4 `tokens.css`（權威內容）
 
@@ -99,6 +99,15 @@
   --warn: #9A5208;
   --success: #2E7D32;
   --focus: #B4532A;
+  --avatar-0: #B4532A;
+  --avatar-1: #2F7A6D;
+  --avatar-2: #7A5AA6;
+  --avatar-3: #2F6FA6;
+  --avatar-4: #A6452F;
+  --avatar-5: #5E7A2F;
+  --avatar-6: #A6307A;
+  --avatar-7: #8A6A1F;
+  --on-avatar: #FFFFFF;
   --shadow-popover: 0 8px 24px rgb(35 31 27 / 0.12);
 }
 
@@ -124,6 +133,15 @@ html[data-theme="dark"] {
   --warn: #F0A94B;
   --success: #6CC070;
   --focus: #E0835A;
+  --avatar-0: #B4532A;
+  --avatar-1: #2F7A6D;
+  --avatar-2: #7A5AA6;
+  --avatar-3: #2F6FA6;
+  --avatar-4: #A6452F;
+  --avatar-5: #5E7A2F;
+  --avatar-6: #A6307A;
+  --avatar-7: #8A6A1F;
+  --on-avatar: #FFFFFF;
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
 }
 
@@ -150,6 +168,15 @@ html[data-theme="dark"] {
     --warn: #F0A94B;
     --success: #6CC070;
     --focus: #E0835A;
+    --avatar-0: #B4532A;
+    --avatar-1: #2F7A6D;
+    --avatar-2: #7A5AA6;
+    --avatar-3: #2F6FA6;
+    --avatar-4: #A6452F;
+    --avatar-5: #5E7A2F;
+    --avatar-6: #A6307A;
+    --avatar-7: #8A6A1F;
+    --on-avatar: #FFFFFF;
     --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
   }
 }
@@ -261,6 +288,15 @@ Tailwind 4 的預設色已在 `index.css` 以 `--color-*: initial` 移除；`[..
 | 容器寬度 | `--container-login` 400 | `max-w-login` |
 | 斷點 | 手機 < 768、平板 768–1023、桌面 ≥ 1024（[06](06-ux.md) §2） | `md:`（≥ 48rem＝768px）、`lg:`（≥ 64rem＝1024px） |
 | 字型 | `--font-sans`、`--font-mono`（§3） | `font-sans`、`font-mono` |
+| 頭像色 | `--avatar-0`–`--avatar-7`、`--on-avatar` | `bg-avatar-0`…`bg-avatar-7`（以完整字串陣列取值，不可拼接）、`text-on-avatar` |
+| agent 頭像圓角 | `--radius-avatar-agent` 28% | `rounded-avatar-agent` |
+| 頭像尺寸 24／28／36／40（§5） | Tailwind 預設 spacing | `h-6 w-6`、`h-7 w-7`、`h-9 w-9`、`h-10 w-10` |
+| sidebar 寬 272 | Tailwind 預設 spacing（68 × 4px） | `w-68`（`md:` 起） |
+| 訊息進場動效（§6） | `--animate-message-in` | `animate-message-in` |
+| 手機底部 safe area | `index.css` 的 `.pb-safe` | `pb-safe` |
+
+`style` 屬性只允許兩種用途：時間線容器的 `overflowAnchor: "none"`，以及虛擬捲動 item 的定位（`position`、`transform`、容器 `height`）。其他一律用 class（W1 §5.6.2）。
+
 
 ## 5. 頭像與 agent 身份
 

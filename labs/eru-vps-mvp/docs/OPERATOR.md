@@ -111,3 +111,7 @@ python3 scripts/labctl.py execute --plan CLEANUP_PLAN --sha256 CLEANUP_HASH
 ```
 
 失敗先 reconcile，保留 fencing／quarantine evidence；不要直接重播或把 failed 改成 complete。`recovery.py` 使用新的 source-bound plan 提供 worker-restore／worker-resume，以及 core API 不可用時的 core-rollback。新 agent 狀態不覆蓋；恢復不增加重裝計次。具體條件與有界故障演練見 RECOVERY.md。
+
+## 不依賴 B 連線的長時觀測
+
+使用 [VPS 背景觀測](SOAK.md) 的 `soak.py start/status/stop`。觀測交给 01–03 的有限時長 systemd service，B／Codex 可離線；程序、樣本和退出結果留在各 VPS，回來後再收集與驗收。觀測期間可繼續本機開發與唯讀排查；改動 VPS 前應先明確中止此次觀測。

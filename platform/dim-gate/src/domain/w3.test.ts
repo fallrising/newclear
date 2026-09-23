@@ -236,6 +236,27 @@ it('does not publish a traffic sample/checkpoint or advance its clock after a te
   expect((reloaded.read<TrafficPolicyDetail>(reloaded.path(reloaded.source(id)))).executions).toEqual(detail.executions)
 })
 
+it.each(['running', 'timeout', 'timeout-boundary'] as const)('rejects %s traffic history whose samples already proved success, preserving corrupt bytes',async mode=>{
+  const h=harness(),id=await h.traffic(),start=await h.action(id,'start')
+  await h.command('/scenarios',{scenarioKey:'traffic-missing',executionId:start.operationId})
+  await h.advance(60)
+  if(mode!=='running')await h.advance(60)
+  const valid=h.engine.getSnapshot()
+  expect(integrityErrors(valid)).toEqual([])
+  expect(()=>createEngine(valid,()=>undefined)).not.toThrow()
+  const corrupt=structuredClone(valid),execution=corrupt.entities.serviceExecutions.find(e=>e.id===start.operationId)!
+  if(execution.kind!=='traffic')throw new Error('Expected actual traffic execution')
+  // All-healthy prefixes must advance at60; even a window first completed at120
+  // succeeds before timeout. A single healthy sample after unknown stays valid.
+  const samples=mode==='timeout-boundary'?execution.samples.slice(-2):execution.samples
+  samples.at(-1)!.p95LatencyMs=120;samples.at(-1)!.errorRate=0.002
+  expect(integrityErrors(corrupt)).toEqual([])
+  for(const sample of samples){sample.p95LatencyMs=120;sample.errorRate=0.002}
+  const bytes=JSON.stringify(corrupt)
+  expect(()=>createEngine(corrupt,()=>undefined)).toThrow(expect.objectContaining({code:'INVALID_SNAPSHOT'}))
+  expect(JSON.stringify(corrupt)).toBe(bytes)
+})
+
 it('permits project-only Ops approval, records decision reason and keeps concurrent definition base guards',async()=>{
   const seed=createSeed('w3-test');seed.entities.assignments=seed.entities.assignments.filter(g=>g.userId!==ops||g.scopeType!=='pool')
   const h=harness(seed),source=h.source(definitionId) as PipelineDefinition

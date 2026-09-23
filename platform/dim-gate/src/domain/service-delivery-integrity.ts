@@ -122,6 +122,7 @@ function validateTraffic(execution:TrafficExecution,source:TrafficPolicy,s:Snaps
   const spec=source.specSnapshot
   if(!spec){error('missing traffic execution spec');return}
   const seen=new Set<string>()
+  const healthy=new Map<number,number>()
   for(const [i,sample] of execution.samples.entries()) {
     const step=execution.stepResults.find(step=>step.weight===sample.step),previous=execution.samples[i-1],lastInStep=execution.samples.slice(0,i).filter(v=>v.step===sample.step).at(-1)
     if(sample.id!==`sample-${execution.id}-${i+1}`||seen.has(sample.id)||sample.executionId!==execution.id||sample.policyId!==source.id||sample.candidateReleaseId!==spec.targets[1].releaseId||Date.parse(sample.to)-Date.parse(sample.from)!==30_000
@@ -130,6 +131,15 @@ function validateTraffic(execution:TrafficExecution,source:TrafficPolicy,s:Snaps
     if((sample.p95LatencyMs===null)!==(sample.errorRate===null)||sample.p95LatencyMs!==null&&![[120,0.002],[900,0.08]].some(v=>v[0]===sample.p95LatencyMs&&v[1]===sample.errorRate))error('invalid deterministic traffic probe')
     const abnormal=sample.p95LatencyMs!==null&&sample.errorRate!==null&&(sample.p95LatencyMs>spec.thresholds.p95LatencyMs||sample.errorRate>spec.thresholds.errorRate)
     if(abnormal&&(i!==execution.samples.length-1||execution.state!=='failed'||execution.failureCode!=='TRAFFIC_HEALTH_FAILED'||step?.state!=='failed'))error('traffic continued after an abnormal sample')
+    const count=sample.p95LatencyMs!==null&&sample.errorRate!==null&&!abnormal?(healthy.get(sample.step)??0)+1:0
+    healthy.set(sample.step,count)
+    const complete=count>=spec.healthWindowSeconds/30
+    const timeout=Date.parse(sample.to)-Date.parse(step?.startedAt??'')>=spec.timeoutSeconds*1000
+    if(abnormal||complete||timeout) {
+      const state=abnormal?'failed':complete?'succeeded':'failed'
+      if(step?.state!==state||step.completedAt!==sample.to||execution.samples[i+1]?.step===sample.step
+        ||state==='failed'&&execution.failureCode!==(abnormal?'TRAFFIC_HEALTH_FAILED':'TRAFFIC_HEALTH_TIMEOUT'))error('traffic step contradicts its first terminal sample prefix')
+    }
     seen.add(sample.id)
   }
   for(const [i,cp] of execution.checkpoints.entries()) {

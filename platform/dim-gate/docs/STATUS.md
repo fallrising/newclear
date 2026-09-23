@@ -1,8 +1,8 @@
 # dim-gate 狀態
 
-W4 run `DG-W4-20260923-01` 在隔離 branch `agent/dim-gate/mainline/w4-alerting` 完成 T041 領域、T042 API／遷移、T043 UI 的主控整合；[W4 integration contract](W4-INTEGRATION-CONTRACT.md) revision 1 固定 AC-WS-12/15–18。397/397 原生測試、全部原生檢查、12/12 Firefox／WebKit smoke、3/3 效能、2/2 隔離通過。首次完整 Chromium 為 89/92，兩個舊遷移斷言仍要求 v3、W4 smoke 過早讀取情境；三項修正已各自通過，完整 92 項正在重跑。**W4 尚未驗收，獨立 T044 review、最新 PR-head CI 與合併仍待完成；W5 尚未開始。**W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已驗收合併，合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 成功。最新 ownership／結果以 PLAN 後續決策與實際 PR/CI 為準。
+W4 run `DG-W4-20260923-01` 在隔離 branch `agent/dim-gate/mainline/w4-alerting` 完成 T041 領域、T042 API／遷移、T043 UI 的主控整合；[W4 integration contract](W4-INTEGRATION-CONTRACT.md) revision 1 固定 AC-WS-12/15–18。獨立 [T044 attempt1](../../../.team/reports/T-044-attempt-1.md) 在固定產品 `65a4c36` 找到 Silence 對生效 revision 與冪等重放的阻斷缺陷 F1，主控已在本地修正並新增回歸：398/398 原生及型別、lint、契約、架構、CI 設定、文件與建置通過。**修正版完整 Chromium、Firefox／WebKit、效能、隔離、T044 attempt2、最新 PR-head CI 與合併仍待完成；W4 未驗收，W5 未開始。**修正前的 12 smoke／3 benchmark／2 isolation 成功屬歷史證據；首次完整 Chromium 89/92，舊候選重跑於 F1 確認後中止。W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已驗收合併，合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 成功。最新結果以 PLAN DG-D092 與實際 PR/CI 為準。
 
-W4 [草稿 PR50](https://github.com/fallrising/newclear/pull/50) 目前遠端仍是契約 checkpoint `9fd3279`；整合產品與[W4 驗證索引](../../../.team/reports/dim-gate-w4-validation.md)在本地主控工作樹待固定提交。既有 PR-head CI35894949839 因 M2 Admin axe 長測試 30 秒超時而失敗，非整合產品 CI；該測試保持所有斷言並改用 60 秒個別上限，需在新 head CI 重驗。
+W4 [草稿 PR50](https://github.com/fallrising/newclear/pull/50) 遠端目前為首個整合產品 `65a4c36` 加最新 main merge `899065c`；該 head 的 [CI35907137495](https://github.com/fallrising/newclear/actions/runs/35907137495) 在 F1 確認後主動取消，修正版尚未提交／推送。[W4 驗證索引](../../../.team/reports/dim-gate-w4-validation.md)保留來源與歷史失敗。更早的契約-only CI35894949839 因 M2 Admin axe 長測試 30 秒超時而失敗；該測試保持所有斷言並改用 60 秒個別上限，仍需新 head CI 重驗。
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 

@@ -1272,3 +1272,25 @@ remote_durability: product_local_pending_fixed_commit_and_SSHpush
 blockers: []
 next_action: finish_corrected_full_Chromium; fixed_product_commit; uninvolved_T044_review; exact_headCI_then_authorized_merge_actualcloseout_before_W5
 ```
+
+DG-D092: Uninvolved T044 attempt1 at exact fixed product65a4c36 independently reproduced blocking F1: a rule with activeRevision1 but a new draft rejected a fresh Silence, and same-key replay failed after clock advancement or revision because mutable state/time checks ran before the replay branch. Report `.team/reports/T-044-attempt-1.md` PARTIAL, SHA256 0ea0451f28a149063c627ada1f2de6ab3df5163c0341513518192e4eac65a42c, was copied byte-identically from the review worktree and validator passed. Lead corrected `monitoring-commands.ts` to authorize against current target before replay, then validate active revision and bounded time only inside a new command's apply; the persisted Silence pins the actual active revision. New domain test covers same receipt/no writes after clock advance and rule draft, fresh Silence under active revision, and current pool-grant revocation returning 403. Corrected local 398/398 native, typecheck/lint/contracts/architecture/CI/docs/build pass; browser/smoke/benchmark/isolation must be rerun on a committed corrected SHA. Old 899065c CI35907137495 was explicitly cancelled after F1; local incomplete Chromium was SIGINT stopped at 51 passed/1 interrupted/40 not run. Neither is an acceptance result. W4 remains NOT_ACCEPTED, W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 92
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F1_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1 PARTIAL_F1; attempt2 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-1.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_old_product_CI_CANCELLED
+remote_durability: F1_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F1_commit; T044_attempt2_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```

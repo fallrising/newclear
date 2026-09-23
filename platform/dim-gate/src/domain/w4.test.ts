@@ -108,6 +108,37 @@ describe('W4 monitoring canonical domain', () => {
     expect(integrityErrors(snap)).toEqual([])
   })
 
+  it('keeps an active rule eligible for Silence during a new draft and replays the original receipt after time advances', async () => {
+    const h = harness(), { monitorId, ruleId } = await activeInfra(h)
+    const now = monitoringNow(h.engine.getSnapshot())
+    const body = { ruleId, startAt: now, expiresAt: new Date(Date.parse(now) + 3_600_000).toISOString(), reason: 'Planned CI maintenance' }
+    const originalInput = { sessionId: h.engine.getSnapshot().sessionId, actorId: 'user-ops', method: 'POST',
+      path: '/silences', body, key: 'w4-silence-replay-after-revision' }
+    const first = await h.engine.command(originalInput)
+    await h.command('/clock/advance', { ticks: 1 })
+    const beforeReplay = h.engine.getSnapshot()
+    expect(await h.engine.command(originalInput)).toEqual(first)
+    expect(h.engine.getSnapshot()).toEqual(beforeReplay)
+
+    const rule = h.read<{ version: number }>(`/alert-rules/${ruleId}`)
+    await h.command(`/alert-rules/${ruleId}/revise`, { expectedVersion: rule.version,
+      spec: { ...infraRule(monitorId), threshold: 0.9 }, reason: 'Prepare a higher threshold without replacing active rev 1' })
+    expect(h.read<{ status: string; activeRevision: number }>(`/alert-rules/${ruleId}`)).toMatchObject({ status: 'draft', activeRevision: 1 })
+    const afterRevision = h.engine.getSnapshot()
+    expect(await h.engine.command(originalInput)).toEqual(first)
+    expect(h.engine.getSnapshot()).toEqual(afterRevision)
+    const revoked = structuredClone(afterRevision)
+    revoked.entities.assignments = revoked.entities.assignments.filter(grant => !(grant.userId === 'user-ops' && grant.scopeId === 'pool-idc-sg'))
+    await expect(harness(revoked).engine.command(originalInput)).rejects.toMatchObject({ status: 403 })
+
+    const freshNow = monitoringNow(afterRevision)
+    await h.command('/silences', { ruleId, startAt: freshNow,
+      expiresAt: new Date(Date.parse(freshNow) + 60_000).toISOString(), reason: 'Active revision still needs a bounded Silence' })
+    const final = h.engine.getSnapshot()
+    expect(final.entities.silences.map(row => row.ruleRevision)).toEqual([1, 1])
+    expect(integrityErrors(final)).toEqual([])
+  })
+
   it('pins evaluation to the active monitor revision and records deterministic failed delivery', async () => {
     const h = harness(), { monitorId, ruleId } = await activeInfra(h)
     const monitor = h.read<{ version: number }>(`/monitor-policies/${monitorId}`)

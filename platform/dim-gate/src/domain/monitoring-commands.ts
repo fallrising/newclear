@@ -132,15 +132,16 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
   if (input.path === '/silences') {
     const body = parse(createSilenceInputSchema, input.body)
     const rule = s.entities.alertRules.find(r => r.id === body.ruleId && r.orgId === policy.user!.orgId) ?? notFound()
-    if (rule.status !== 'active' || !activeSpec(rule)?.enabled) invalid()
     const targetRef = ruleTarget(s, rule)
     requireTarget(s, policy, targetRef, 'write')
-    const now = Date.parse(monitoringNow(s)), start = Date.parse(body.startAt), end = Date.parse(body.expiresAt)
-    if (start < now || start > now + 300_000 || end <= start || end - start > 86_400_000) fail(422, 'VALIDATION_ERROR', 'Silence 需在目前時間起五分鐘內開始，且期限不超過 24 小時。')
     return { apply(next) {
+      const currentRule = next.entities.alertRules.find(r => r.id === rule.id)!
+      if (!activeSpec(currentRule)?.enabled) invalid()
+      const now = Date.parse(monitoringNow(next)), start = Date.parse(body.startAt), end = Date.parse(body.expiresAt)
+      if (start < now || start > now + 300_000 || end <= start || end - start > 86_400_000) fail(422, 'VALIDATION_ERROR', 'Silence 需在目前時間起五分鐘內開始，且期限不超過 24 小時。')
       const id = `w4-silence-${String(next.sequence + 1).padStart(4, '0')}`, nowIso = monitoringNow(next)
-      next.entities.silences.push({ id, orgId: rule.orgId, version: 1, createdAt: nowIso, updatedAt: nowIso, ruleId: rule.id,
-        ruleRevision: rule.activeRevision ?? rule.revision, target: targetRef, actorId: input.actorId, reason: body.reason,
+      next.entities.silences.push({ id, orgId: currentRule.orgId, version: 1, createdAt: nowIso, updatedAt: nowIso, ruleId: currentRule.id,
+        ruleRevision: currentRule.activeRevision!, target: targetRef, actorId: input.actorId, reason: body.reason,
         startAt: body.startAt, expiresAt: body.expiresAt, correlationId: `corr-${id}` })
       return { ...ref('silence', id), entityVersion: 1, correlationId: `corr-${id}`, changed: [ref('silence', id)],
         action: 'silence.create', fields: ['startAt', 'expiresAt', 'reason'], reason: body.reason, ...scopedFields(next, targetRef) }

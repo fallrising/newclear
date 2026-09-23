@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import sys
 
 
 def mount_points(root):
@@ -45,7 +46,7 @@ PRESERVE = (
 )
 
 
-def audit(root=Path('/'), owner_uid=0):
+def audit(root=Path('/'), owner_uid=0, expected_node=None):
     """Return candidate paths plus blocking findings, without changing any file.
 
     root/owner_uid are injectable for filesystem tests. Production uses /, uid 0.
@@ -98,6 +99,15 @@ def audit(root=Path('/'), owner_uid=0):
         if set(files) != set(REINSTALL_FILES + SHARED_FILES):
             raise ValueError('manifest paths differ from the reviewed worker allowlist')
         result['preserved_owned_files'] = list(SHARED_FILES)
+        if expected_node is not None:
+            if expected_node not in ('worker-2', 'worker-3', 'worker-4'):
+                raise ValueError('unsupported worker identity')
+            service = checked('/etc/systemd/system/eru-agent.service').read_text()
+            hostname = [line.split('=', 2)[-1] for line in service.splitlines()
+                        if line.startswith('Environment=ERU_HOSTNAME=')]
+            if hostname != [expected_node]:
+                raise ValueError('agent unit worker identity differs from selected target')
+            result['node'] = expected_node
         for name in REINSTALL_FILES + SHARED_FILES:
             target = checked(name)
             actual = hashlib.sha256(target.read_bytes()).hexdigest()
@@ -127,4 +137,4 @@ def audit(root=Path('/'), owner_uid=0):
 
 
 if __name__ == '__main__':
-    print(json.dumps(audit(), indent=2))
+    print(json.dumps(audit(expected_node=sys.argv[1] if len(sys.argv) == 2 else None), indent=2))

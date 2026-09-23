@@ -20,18 +20,18 @@ ALIAS = 'ckc-disposable-04'
 UNITS = ['eru-agent.service', 'eru-containerd-proxy.socket', 'eru-containerd-proxy.service']
 
 
-def empty_target(snapshot):
-    node = next(n for n in snapshot['nodes'] if n['name'] == TARGET)
+def empty_target(snapshot, target=TARGET, alias=ALIAS):
+    node = next(n for n in snapshot['nodes'] if n['name'] == target)
     def nonzero(value):
         if isinstance(value, dict):
             return any(nonzero(v) for v in value.values())
         if isinstance(value, list):
             return any(nonzero(v) for v in value)
         return isinstance(value, (int, float)) and value != 0
-    host = snapshot['hosts'][ALIAS]
+    host = snapshot['hosts'][alias]
     task_ids = [line.split()[0] for line in host['tasks'].splitlines()[1:] if line.strip()]
-    if any(w['nodename'] == TARGET for w in snapshot['workloads']) or host['containers'] or task_ids or nonzero(json.loads(node['resource_usage'])):
-        raise ValueError('worker-4 must have empty metadata, containers/tasks and zero usage')
+    if any(w['nodename'] == target for w in snapshot['workloads']) or host['containers'] or task_ids or nonzero(json.loads(node['resource_usage'])):
+        raise ValueError(target + ' must have empty metadata, containers/tasks and zero usage')
     return node
 
 

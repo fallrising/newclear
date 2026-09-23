@@ -286,8 +286,22 @@ class OperatorTests(unittest.TestCase):
         plan = self.op.plan('rebuild-node', node='worker-4')['plan']
         self.assertEqual(plan['rebuild_mode'], 'component-reinstall')
         self.assertFalse(plan['executable'])
-        self.assertTrue(any('Target must have zero workloads' in x for x in plan['blockers']))
+        self.assertTrue(any('worker-4 must have empty' in x for x in plan['blockers']))
         self.assertFalse(any('Provider ID' in x for x in plan['blockers']))
+
+    def test_peer_worker_plan_audits_selected_target_but_cannot_execute(self):
+        for index in (2, 3):
+            node = f'worker-{index}'
+            alias = labctl.ALIASES[index - 1]
+            plan = self.op.plan('rebuild-node', node=node)['plan']
+            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0], alias])
+            self.assertFalse(plan['executable'])
+            self.assertTrue(any('peer canary and recovery support' in x for x in plan['blockers']))
+            self.assertFalse(any(node + ' must have empty' in x for x in plan['blockers']))
+            self.op.live['hosts'][alias]['tasks'] = 'TASK PID STATUS\nstray 1 RUNNING\n'
+            dirty = self.op.plan('rebuild-node', node=node)['plan']
+            self.assertTrue(any(node + ' must have empty' in x for x in dirty['blockers']))
+            self.op.live['hosts'][alias]['tasks'] = ''
 
     def test_manual_reimage_does_not_require_provider_api(self):
         plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage')['plan']

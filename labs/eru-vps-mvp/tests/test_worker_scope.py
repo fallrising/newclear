@@ -53,6 +53,19 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual({x['path'] for x in result['state_to_quarantine']}, set(STATE_DIRS))
         self.assertEqual(before, {str(p): p.read_bytes() for p in self.root.rglob('*') if p.is_file()})
 
+    def test_selected_worker_identity_must_match_owned_agent_unit(self):
+        unit = self.root / 'etc/systemd/system/eru-agent.service'
+        for node in ('worker-2', 'worker-3', 'worker-4'):
+            unit.write_text('[Service]\nEnvironment=ERU_HOSTNAME=' + node + '\n')
+            self.files['/etc/systemd/system/eru-agent.service'] = hashlib.sha256(unit.read_bytes()).hexdigest()
+            self.write_manifest()
+            scope = audit(self.root, os.getuid(), expected_node=node)
+            self.assertTrue(scope['scope_verified'], scope)
+            self.assertEqual(scope['node'], node)
+            other = 'worker-3' if node != 'worker-3' else 'worker-4'
+            self.assertIn('identity', audit(self.root, os.getuid(), expected_node=other)['blockers'][0])
+        self.assertIn('unsupported worker', audit(self.root, os.getuid(), expected_node='core')['blockers'][0])
+
     def test_external_file_edit_blocks(self):
         (self.root / REINSTALL_FILES[0].lstrip('/')).write_text('externally modified')
         result = self.inspect()

@@ -36,7 +36,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。[ERU-004 階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已對照 2026-09-23 17:45 UTC 的 6 小時 20 分唯讀快照與官方資料，記錄影響、證據缺口及相對成本；完整 24 小時結果未出，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
 - core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。程序 SIGKILL 切點已補驗；真正 VM／磁碟 power-loss、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
-- 其他 workers／非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
+- ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核；[兩台結果與後續步驟](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 重裝執行／恢復仍未開放，非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
 
 ## 接手先做
 

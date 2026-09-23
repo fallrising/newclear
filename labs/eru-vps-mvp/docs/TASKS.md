@@ -31,7 +31,7 @@
 
 | 編號 | 任務 | 狀態 | 前置／完成標準 |
 | --- | --- | --- | --- |
-| ERU-008 | 將元件重裝擴及 worker-2／3 | 待做 | 明確選定單台空 worker，移除 worker-4 專用假設；逐台完成 ownership、隔離、重裝、HTTP、配額與其他節點保留驗收。 |
+| ERU-008 | 將元件重裝擴及 worker-2／3 | 進行中 | [唯讀目標核對](M2-WORKER-PEER-PREP-2026-09-23.md) 已擴充 02／03 身分、ownership、tasks／配額稽核並實機唯讀驗證；仍須在觀測後補 peer 守護／恢復執行器，逐台完成隔離、重裝、HTTP、配額及其他節點保留驗收。 |
 | ERU-009 | 非空 worker 的計畫性 drain／重裝／恢復 | 待做 | 先盤點並遷移 owned workloads，再進入空 target 重裝；驗證失敗恢復與新狀態歸屬，禁止覆蓋未知資料。依 ERU-008／應用重建能力安排。 |
 | ERU-010 | worker 非計畫失聯恢復（V07） | 待做 | 有界演練偵測時間、先 fence、精確對帳 stale metadata／配額，於健康 worker 人工或一次性工具重建；不宣稱自動維持副本數。 |
 | ERU-011 | 可重現 bootstrap 與新 controller 接手 | 待做 | 補完整 runner／OS package／artifact 版本記錄和前置檢查；從乾淨 controller 使用外部私有 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |

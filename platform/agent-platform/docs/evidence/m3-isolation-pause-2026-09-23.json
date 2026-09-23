@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "started_at": "2026-09-23T06:01:08.766483+00:00",
+  "started_at": "2026-09-23T06:14:52.450888+00:00",
   "transport": "cocoon-kvm-platform-pause",
   "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
   "cases": [
     {
       "case": "automatic",
-      "run_id": "81da0093-aea3-4571-9014-09358e69ed2d",
-      "vm_id": "FE4DUC7HXCBG6SES6EMDIJBS2T",
+      "run_id": "53f369bb-6054-4ab6-bc7f-34f241b2730a",
+      "vm_id": "GRXP4D2CBARBSDT7JYIHCUE2QH",
       "same_instance": true,
       "state": "succeeded",
       "generation": 31,
@@ -22,8 +22,8 @@
     },
     {
       "case": "approval",
-      "run_id": "01292564-1ccc-4244-aaad-bfdb20931299",
-      "vm_id": "4LT5YM7ZW5BSGX76B5CJLB7XCD",
+      "run_id": "131d7abf-cee3-419d-bdfe-c6a222630a81",
+      "vm_id": "2RV7JSNT2X6IF6INJTSPQHOOQR",
       "same_instance": true,
       "state": "succeeded",
       "generation": 6,
@@ -38,11 +38,11 @@
     },
     {
       "case": "background",
-      "run_id": "426d6ac9-2c46-419e-9767-45bd2895aaf3",
-      "vm_id": "PBYHC6J3ZCF5J7XNJM6DF5XJQE",
+      "run_id": "66f973da-6a56-4bd4-8042-8a35a0b2a4fb",
+      "vm_id": "W77E6AP4FNHZZOHMYRAZQVB5AF",
       "same_instance": true,
       "state": "succeeded",
-      "generation": 60,
+      "generation": 58,
       "pending_observed": true,
       "user_message_count": 1,
       "proof": {
@@ -54,8 +54,8 @@
     },
     {
       "case": "inflight",
-      "run_id": "144b9d2e-a44f-4e3f-9c97-b155b5c12b28",
-      "vm_id": "KOW6AMHEYU7OR36BCSS44XWFT7",
+      "run_id": "125e78cd-ebea-467d-bae3-0fc9c95bcc25",
+      "vm_id": "3WLTODWVQOEC7KDHN7VLTECFKH",
       "same_instance": true,
       "state": "succeeded",
       "generation": 33,
@@ -70,8 +70,8 @@
     },
     {
       "case": "cancel",
-      "run_id": "30cbf788-8aab-4c99-8505-117791487b7a",
-      "vm_id": "PRMEG3TDV7RQKERWERB5BEGS3F",
+      "run_id": "8ea7ed4d-1555-4390-a16e-f29c90cfe8a5",
+      "vm_id": "CV7NLUPGPURBG24FCQDHCJSVYV",
       "same_instance": true,
       "state": "cancelled",
       "generation": 30,
@@ -86,8 +86,8 @@
     },
     {
       "case": "deadline",
-      "run_id": "345ea017-8a17-4f10-b1c0-8a6036a1884c",
-      "vm_id": "RI4V7LZLGKF5WIVANTF2HFWVWS",
+      "run_id": "dbd22f72-4137-48c8-b7e6-8270ebf11113",
+      "vm_id": "GPIILYESFBAB3NMT6NXRJ77JJ4",
       "same_instance": true,
       "state": "failed",
       "generation": 29,
@@ -105,5 +105,5 @@
   "cleanup_errors": [],
   "vm_count_after": 0,
   "claim_count_after": 0,
-  "finished_at": "2026-09-23T06:03:10.827837+00:00"
+  "finished_at": "2026-09-23T06:16:57.043286+00:00"
 }

@@ -10,6 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from agent_platform import guest_quiescence
 from agent_platform.build_terminal import build
 from agent_platform.connector import Connector
 from agent_platform.connector_isolation import ATTESTED, CODE, CONTROL, REVISION, attest
@@ -156,3 +157,24 @@ class GuestIsolationTests(unittest.TestCase):
                 service.launcher()
         finally:
             self.executable.chmod(0o700)
+
+    def test_nondumpable_tool_is_tracked_by_real_uid_not_proc_inode_owner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            process = root / "123"
+            process.mkdir()
+            (process / "status").write_text("Uid:\t2000 2000 2000 2000\n")
+            (process / "stat").write_text("123 (hidden) S " + " ".join(["1"] * 20))
+            (process / "cmdline").write_bytes(b"python3\0hidden.py\0")
+            (process / "exe").symlink_to("/bin/sh")
+            boot = root.parent / (root.name + "-boot")
+            boot.write_text("fixture-boot")
+            try:
+                with patch.object(
+                    guest_quiescence, "Path", side_effect=lambda p: root if p == "/proc" else boot
+                ):
+                    snapshot = guest_quiescence.snapshot()
+                self.assertEqual(snapshot["processes"]["123"]["uid"], 2000)
+                self.assertTrue(snapshot["stable"])
+            finally:
+                boot.unlink()

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-09-23T06:05:25.318921+00:00",
+  "recorded_at": "2026-09-23T06:18:23.292381+00:00",
   "milestone": "M3 guest control credential isolation",
   "slice_complete": true,
   "m3_complete": false,
@@ -8,13 +8,15 @@
   "scope": "Pinned non-root Agent Server UID 2001, fixed terminal launcher to UID 2000, private SDK workspace, single-node Cocoon none-lane and deterministic fixture model.",
   "checks": {
     "m0_regression_tests": 45,
-    "platform_tests": 115,
-    "new_host_contract_tests": 7,
+    "platform_tests": 116,
+    "new_host_contract_tests": 8,
     "real_kvm_cases": 16,
     "terminal_attack_checks": 23,
     "ruff_lint_and_format": "passed",
     "diff_check": "passed",
-    "browser_and_web": "unchanged; GitHub CI performs web and Chromium acceptance"
+    "browser_and_web": "unchanged; GitHub CI performs web and Chromium acceptance",
+    "nondumpable_background_regression": "passed",
+    "wheel_launcher_source": "verified"
   },
   "evidence": {
     "attacks": "m3-isolation-attacks-2026-09-23.json",
@@ -61,9 +63,9 @@
     "src/agent_platform/controls.py": "671b8340cf60c5e63a8e03514cb0e8db8e451c104bee235a82ac1ba401e892b5",
     "src/agent_platform/db.py": "9c19af9a3234e542d6ed7fdb68ae7dafdb993b29348a207eed9aac4c4daae9ec",
     "src/agent_platform/domain.py": "5fab8dc7b20da56bd158ad2de7eee894c18bd35878d40db0d3d00d37324022ac",
-    "src/agent_platform/guest_control.py": "a8db5c5509b3a24d19fcfb4c14dd96a821f5945ba2cc88637dad3414a9ac258b",
+    "src/agent_platform/guest_control.py": "1728f939a38728f4309fc2ffe285936f7b3e3563f4b2a13050a54f85f19da13f",
     "src/agent_platform/guest_fixture.py": "174323f9972bfb61a1ae9ec12924eaf613e84a84286049a297bd4a53ae22fcad",
-    "src/agent_platform/guest_quiescence.py": "46fe2547ba14632970b7b0e42f0173866403da6ca1cbf733855b2cca644bc83f",
+    "src/agent_platform/guest_quiescence.py": "c6f520e314382ab805fbdb6ada696c04953b2db61269a8ffea69cdf029dea985",
     "src/agent_platform/guest_workspace.py": "5310b45267c5b976482321b74fc43648c6763d9586d935498513d370018ed29f",
     "src/agent_platform/recovery.py": "e4522ff3860f68cf6e1cdd3825d7f97a59c6240df82beb5da7a13b81f5e9ee8e",
     "src/agent_platform/runtime_client.py": "eb0c7178bf91fbdffff0d6583ee58a4c1de65ad4d0d2e431bcbf579e5e19c6e9",
@@ -73,8 +75,8 @@
     "src/agent_platform/guest_terminal.c": "f41908f5fdc1986c303303d22cf41084fe2521a7e39e654a85172ab6b3d90edb",
     "scripts/m3-isolation-kvm.py": "93b39341df7c9a63a4e4c9ac173a5dc7cd8427ac504fc50d60103e9ea6e8839f",
     "scripts/m3-output-kvm.py": "fe0f63507b4760c2fff85741a8090cfefaa3f5180a7403f1bd29c6d8eb6a7fe7",
-    "scripts/m3-pause-kvm.py": "07553cc277fdec86e674eb43028b675a7b30274e671611f86b670ba51beb5bae",
+    "scripts/m3-pause-kvm.py": "537cc981e387acb1a86c1e0fc4c0078052014c36e57872ee2d15f5124fec8982",
     "scripts/m3-recovery-kvm.py": "840a4f74f53b50fd4bf0028807f9731e0adf770d8677288bc372c836b21b24ba",
-    "tests_platform/test_guest_isolation.py": "c9ae0b36aeea71467d92bead481c2dcb8a08bc7c2ef5bf8679f450ce7fb235e5"
+    "tests_platform/test_guest_isolation.py": "11f09902831423d70299a75594e6f001f3c153691a3e508eb9664ee586dbeced"
   }
 }

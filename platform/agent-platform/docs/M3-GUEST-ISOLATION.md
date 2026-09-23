@@ -22,7 +22,7 @@
 - Connector 設定先驗證私密 launcher 檔案、amd64 ELF header、大小與 SHA-256；每次上傳及 guest attestation 重新核對 digest。只在新的 guest 安裝 setuid mode，host 上的編譯產物保持 0600 資料檔。
 - Prepare 保存 `guest-control-v1`，核對 helper hash／owner／mode、控制目錄 owner／mode 與 live Agent Server UID 2001。初始化 terminal 後必須實際觀測 UID／GID 2000、空附加群組、零 capabilities 與 `NoNewPrivs=1`，才能開始工具執行。
 - Prompt、恢復接管、核准、pause／resume quiescence、收集 result 都核對隔離。未知或不一致保持隔離／容量占用，不嘗試修補執行中的 guest，也不降級成其他 shell。
-- Quiescence 同時追蹤 UID 2000 工具和 UID 2001 控制服務／固定模型的 PID identity；既有 admission barrier、live state、generation fence、未知 ACK 不重送等規則保留。
+- 程序身分由 `/proc/PID/status` 的實際 UID 取得；程序的實際身分不依賴 proc 檔案 metadata。背景程序案例會實際設定不可 dump，核對其 environ 檔案 owner 為 root、實際 UID 仍為 2000，並要求暫停等待程序結束。Quiescence 同時追蹤 UID 2000 工具和 UID 2001 控制服務／固定模型的 PID identity；既有 admission barrier、live state、generation fence、未知 ACK 不重送等規則保留。
 - 舊 journal 沒有隔離 revision 時，拒絕繼續執行與恢復。取消仍可停止原 VM，完整停止證據確認後才釋放容量。
 
 ## 升級
@@ -39,7 +39,7 @@ python -m agent_platform.build_terminal --output /private/path/terminal
 
 ## 驗收與剩餘範圍
 
-七項新增 host 契約／編譯測試包含 private launcher、digest 不符、偽造 proof、舊 journal、固定工具配置及 launcher 的拒絕路徑；M0 45 項、平台共 115 項測試通過。
+八項新增 host 契約／編譯測試包含 private launcher、digest 不符、偽造 proof、舊 journal、固定工具配置及 launcher 的拒絕路徑；M0 45 項、平台共 116 項測試通過。
 
 真實 KVM 驗收共 16 個案例：一個具備實際 approval gate 的惡意 terminal 案例（23 項檢查）、兩個 output canary 案例，以及 recovery 三例、cancel 兩例、approval 兩例、pause／resume 六例回歸。每組最後確認 VM／claims 歸零。
 

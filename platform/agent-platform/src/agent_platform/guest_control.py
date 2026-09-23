@@ -123,7 +123,8 @@ def main():
                 require(status["Gid"].split() == ["2001"] * 4)
                 require(int(status["CapEff"], 16) == 0)
                 controls.append(int(path.name))
-            if path.stat().st_uid == 2000 and status["State"].strip()[0] != "Z":
+            # proc inode ownership can become root when a process disables dumping.
+            if status["Uid"].split()[0] == "2000" and status["State"].strip()[0] != "Z":
                 require(status["Uid"].split() == ["2000"] * 4)
                 require(status["Gid"].split() == ["2000"] * 4)
                 require(not status["Groups"].strip())

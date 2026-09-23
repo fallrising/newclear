@@ -9,7 +9,7 @@
 ## 文件入口
 
 - [M3 客體控制憑證隔離](docs/M3-GUEST-ISOLATION.md)：獨立非 root 控制帳號、固定降權與攻擊驗收。
-- [M3 輸出安全與歷史隔離缺口](docs/M3-OUTPUT-SECURITY.md)：密鑰防漏、diff 完整性及下一個優先修補項。
+- [M3 輸出安全與歷史隔離缺口](docs/M3-OUTPUT-SECURITY.md)：密鑰防漏、diff 完整性及當時發現的隔離缺口。
 - [M3 安全暫停／恢復](docs/M3-PAUSE.md)：工具收尾證據、同 VM 接續與控制佇列。
 - [M3 工具審批](docs/M3-APPROVAL.md)：完整動作審閱、一次性核准、拒絕與恢復對帳。
 - [M3 安全取消](docs/M3-CANCEL.md)：工作台取消、真實 VM 停止證據與剩餘工作。

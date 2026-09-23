@@ -7,7 +7,7 @@
 - Agent Server／固定模型使用非 root UID 2001，terminal 維持 UID 2000。私有控制 HOME／state／tmp／SDK workspace 與實際 repository 分離，封閉同 UID `/proc` 憑證讀取及 ambient plugin／import 注入。
 - 固定 static launcher 僅在 guest 安裝 root:2001 mode 4750，只允許控制帳號啟動 UID 2000 shell；固定環境、清除 groups／FD／saved identity、NoNewPrivs 與 core dump 限制。沒有 host setuid 或 shell fallback。
 - Prepare／prompt／approval／recovery／quiescence／result 核對 helper hash、權限與程序 UID。舊 journal 缺 revision 時拒絕繼續，但保留取消與完整停止回收。
-- 新增七項 host 契約／編譯測試；平台共 115 項、M0 45 項通過。23 項真實 terminal 攻擊檢查、兩個 output canary 案例與 13 個控制回歸通過，見 [證據](evidence/m3-isolation-2026-09-23.json)。
+- 新增八項 host 契約／編譯測試；平台共 116 項、M0 45 項通過。23 項真實 terminal 攻擊檢查、兩個 output canary 案例與 13 個控制回歸通過，見 [證據](evidence/m3-isolation-2026-09-23.json)。
 - **升級先 drain**；以 `python -m agent_platform.build_terminal` 建立 0600 launcher，將輸出的 file／SHA-256 加入私密 connector 配置。保留 journal／fences；沒有新 migration，不原地修補舊 guest。
 
 ## 輸出安全切片（PR #30）

@@ -69,7 +69,10 @@ def fixture(sb, run_id, case):
         if case == "background":
             command = (
                 'python3 -c "from pathlib import Path;import subprocess;'
-                "subprocess.Popen(['sleep','15'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+                "p=subprocess.Popen(['python3','-c','import ctypes,time;"
+                "assert ctypes.CDLL(None).prctl(4,0)==0;time.sleep(15)'],"
+                "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+                "Path('/tmp/pause-hidden-pid').write_text(str(p.pid));"
                 "Path('/tmp/pause-tool-started').write_text('yes')\"; "
             )
         source = source.replace(
@@ -247,6 +250,24 @@ def main():
                                 "-c",
                                 "from pathlib import Path;"
                                 "print(Path('/tmp/pause-tool-started').exists())",
+                                timeout=5,
+                            ).strip()
+                            == "True"
+                        )
+                    )
+                if case == "background":
+                    wait(
+                        lambda sb=sb: (
+                            sb.exec(
+                                "python3",
+                                "-I",
+                                "-c",
+                                "from pathlib import Path;"
+                                "p=Path('/proc')/Path('/tmp/pause-hidden-pid').read_text();"
+                                "s=dict(line.split(':',1) "
+                                "for line in (p/'status').read_text().splitlines());"
+                                "print((p/'environ').stat().st_uid==0 "
+                                "and s['Uid'].split()[0]=='2000')",
                                 timeout=5,
                             ).strip()
                             == "True"

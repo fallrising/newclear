@@ -16,7 +16,9 @@ def snapshot():
         if not path.name.isdecimal():
             continue
         try:
-            uid = path.stat().st_uid
+            status = dict(line.split(":", 1) for line in (path / "status").read_text().splitlines())
+            # A non-dumpable process may have root-owned proc entries. Use credentials.
+            uid = int(status["Uid"].split()[0])
             arguments = (path / "cmdline").read_bytes().split(bytes([0]))
             control = uid == 2001 and (
                 b"/usr/local/bin/openhands-agent-server" in arguments

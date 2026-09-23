@@ -22,7 +22,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--node', choices=['worker-2', 'worker-3', 'worker-4'], action='append')
     ap.add_argument('--verify-reapply', action='store_true', help='Reapply the existing deployment while the first test workload is running; modifies the four-node deployment')
+    ap.add_argument('--core-artifact')
     args = ap.parse_args()
+    if args.core_artifact and not args.verify_reapply:
+        ap.error('--core-artifact requires --verify-reapply')
     os.umask(0o077)
     plan = json.loads((PROJECT / 'private/deployment-plan.json').read_text())
     core_ip = plan[0]['ip']
@@ -142,7 +145,10 @@ labels:
                 state['tasks_before_reapply'] = run(host, ['sudo', '-n', 'ctr', '--namespace', 'eru', 'tasks', 'list']).stdout
                 save()
                 print('[controller B] Reapply deployment with live nginx canary', flush=True)
-                result = subprocess.run([sys.executable, str(PROJECT / 'scripts/deploy-lab.py'), '--apply'],
+                deploy = [sys.executable, str(PROJECT / 'scripts/deploy-lab.py'), '--apply']
+                if args.core_artifact:
+                    deploy += ['--core-artifact', args.core_artifact]
+                result = subprocess.run(deploy,
                                         capture_output=True, text=True, timeout=1500, pass_fds=lock_fds())
                 report['events'].append({'host': 'controller B', 'operation': 'deploy-lab --apply',
                     'exit_code': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr})

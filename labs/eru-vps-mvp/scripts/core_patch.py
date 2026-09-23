@@ -78,16 +78,18 @@ class PatchOperator(Operator):
                 '--property=Id,ActiveState,SubState,MainPID,InvocationID,NRestarts', *units])
         return result
 
-    def core_runtime(self):
+    def core_runtime(self, allow_inactive=False):
         source = '''import subprocess,hashlib,json
 from pathlib import Path
 p=subprocess.run(['systemctl','show','eru-core','--property=MainPID,ActiveState,InvocationID,NRestarts'],capture_output=True,text=True,check=True)
 r=dict(line.split('=',1) for line in p.stdout.splitlines())
-if r['ActiveState']!='active' or int(r['MainPID'])<=0:raise RuntimeError('core is not active')
-r['sha256']=hashlib.sha256(Path('/proc',r['MainPID'],'exe').read_bytes()).hexdigest()
+r['sha256']=hashlib.sha256(Path('/proc',r['MainPID'],'exe').read_bytes()).hexdigest() if int(r['MainPID'])>0 else None
 print(json.dumps(r))
 '''
-        return json.loads(self.command(ALIAS, ['sudo', '-n', 'python3', '-'], source))
+        result = json.loads(self.command(ALIAS, ['sudo', '-n', 'python3', '-'], source))
+        if not allow_inactive and (result['ActiveState'] != 'active' or not result['sha256']):
+            raise ValueError('core is not active')
+        return result
 
     def make_plan(self, build, health_file, rollback_run=None):
         snapshot = self.snapshot()

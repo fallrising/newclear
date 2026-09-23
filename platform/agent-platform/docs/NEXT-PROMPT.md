@@ -11,7 +11,7 @@ https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HA
 
 已知停止點：
 - PR #43 完成 AT-11-A 控制端 model proxy／request ledger；PR #46 完成 AT-11-B opt-in guest mailbox、固定 OpenHands 1.49.2 SDK tool-call、短效 token 更新及 request cutoff 的工具／VM 收尾。
-- 最新 AT-11-C1 切片增加 opt-in、固定本機 fixture 的合成 credits：釘住價格版本／上限，按 canonical request bytes 與 max_tokens 預留，合法用量結算；unknown／SIGKILL 保留全額。這不是真實 provider 費率或帳單，`amount_decimal` 仍 null、硬金額上限仍關閉。
+- AT-11-C1（PR #51）增加 opt-in、固定本機 fixture 的合成 credits：釘住價格版本／上限，按 canonical request bytes 與 max_tokens 預留，合法用量結算；unknown／SIGKILL 保留全額。這不是真實 provider 費率或帳單，`amount_decimal` 仍 null、硬金額上限仍關閉。先查 GitHub 確認 #51 實際合併與 CI，不以本檔推定。
 - Host 經授權 sandbox port relay 拉取 guest request；worker 使用相同 ModelProxy／SQL ledger 呼叫 host loopback fixture。Guest 不需要任何私網例外，上游 credential 只留控制端。
 - 新模式一律 AlwaysConfirm；手動／自動 terminal admission 均核對 live ownership／固定政策／額度。額度截止或模型錯誤持久撤權，完整停止證據才釋放 reservation。
 - Request UUID、SQL reservation 和 connector delivery intent 均持久；未知 dispatch 不重送、token 更新不重設 cap。已確認 delivery 可接回同 VM／prompt；不確定 completion 無通用 replay。

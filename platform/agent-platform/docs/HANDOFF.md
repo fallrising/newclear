@@ -1,6 +1,6 @@
 # 開發接續紀錄 — 2026-09-23
 
-本次停止點：**PR #46 的 AT-11-B 已合併；AT-11-C1 固定 fixture credits 預留／結算與預算截止已驗收。真實 provider 金額仍 unknown，完整 AT-11-C／AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/at-11-c` 從 GitHub main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 建立，只修改 `platform/agent-platform`。最新行為見 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
+本次停止點：**PR #46 的 AT-11-B 已合併；AT-11-C1（PR #51）固定 fixture credits 預留／結算與預算截止已驗收。真實 provider 金額仍 unknown，完整 AT-11-C／AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/at-11-c` 從 GitHub main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 建立，提交前重基於 `5bf015c4cdec64c9a7db0019b8e39a383627297c`，只修改 `platform/agent-platform`。最新行為見 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
 
 ## 本次 AT-11-C1 固定 fixture credits
 

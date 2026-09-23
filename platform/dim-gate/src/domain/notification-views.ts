@@ -6,17 +6,16 @@ import { currentlyDeliverable } from './notification-eligibility'
 import { basicPage, validateQuery } from './read-query'
 
 export function canReadAttempt(snapshot: Snapshot, policy: Policy, attempt: NotificationAttempt): boolean {
-  if (!policy.user || attempt.orgId !== policy.user.orgId) return false
+  if (!policy.user || attempt.orgId !== policy.user.orgId || attempt.recipientId !== policy.user.id) return false
   const retentionDays = snapshot.entities.notificationPolicies.find(row => row.orgId === attempt.orgId)?.retentionDays ?? 0
   if (Date.parse(clockIso(snapshot.logicalClock)) - Date.parse(attempt.occurredAt) > retentionDays * 86_400_000) return false
-  if (attempt.sourceKind === 'synthetic-test') return policy.admin && attempt.recipientId === policy.user.id
+  if (attempt.sourceKind === 'synthetic-test') return policy.admin
   if (!currentlyDeliverable(snapshot, attempt)) return false
   const delivery = snapshot.entities.notificationDeliveries.find(row => row.id === attempt.deliveryId && row.orgId === policy.user!.orgId)
   if (!delivery) return false
   const scope = targetScope(snapshot, delivery.target)
   if (!scope) return false
-  if (delivery.target.kind === 'service') return attempt.recipientId === policy.user.id
-    && policy.hasProject(scope.projectId!, scope.stage, 'rd')
+  if (delivery.target.kind === 'service') return policy.hasProject(scope.projectId!, scope.stage, 'rd')
   return policy.centers.includes('ops') && policy.poolIds.includes(scope.poolId!)
 }
 

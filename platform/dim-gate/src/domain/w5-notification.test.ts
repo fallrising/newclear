@@ -134,7 +134,19 @@ describe('W5 recipient-specific notification attempts', () => {
     const attempts = h.engine.getSnapshot().entities.notificationAttempts
     expect(attempts.some(row => row.recipientId === ops && row.channelId === 'demo-ops' && row.status === 'failed')).toBe(true)
     const own = attempts.find(row => row.recipientId === ops)!
-    expect(h.read<{ items: { attempt: { id: string } }[] }>(ops, '/notification-attempts').items.some(row => row.attempt.id === own.id)).toBe(true)
+    const secondOps = 'w2-user-ops-secondary'
+    const peer = attempts.find(row => row.recipientId === secondOps)!
+    expect(peer).toBeDefined()
+    expect(h.read<{ total: number; items: { attempt: { id: string } }[] }>(ops, '/notification-attempts'))
+      .toMatchObject({ total: 1, items: [{ attempt: { id: own.id } }] })
+    expect(h.read<{ total: number; items: { attempt: { id: string } }[] }>(secondOps, '/notification-attempts'))
+      .toMatchObject({ total: 1, items: [{ attempt: { id: peer.id } }] })
+    expect(() => h.read(ops, `/notification-attempts/${peer.id}`)).toThrow()
+    expect(() => h.read(secondOps, `/notification-attempts/${own.id}`)).toThrow()
+    expect(h.read<{ total: number }>(ops, '/audit', `entityType=notificationAttempt&entityId=${own.id}`).total).toBe(1)
+    expect(h.read<{ total: number }>(ops, '/audit', `entityType=notificationAttempt&entityId=${peer.id}`).total).toBe(0)
+    expect(h.read<{ total: number }>(secondOps, '/audit', `entityType=notificationAttempt&entityId=${peer.id}`).total).toBe(1)
+    expect(h.read<{ total: number }>(secondOps, '/audit', `entityType=notificationAttempt&entityId=${own.id}`).total).toBe(0)
     expect(h.read<{ total: number }>(admin, '/notification-attempts').total).toBe(0)
     const grant = h.engine.getSnapshot().entities.assignments.find(row => row.userId === ops && row.scopeId === 'pool-idc-sg')!
     await h.command(admin, 'DELETE', `/admin/assignments/${grant.id}`, { expectedVersion: grant.version,

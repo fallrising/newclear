@@ -91,6 +91,7 @@ class RuntimeClient:
                 "base_sha": run["base_sha"],
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
+                "model_transport": getattr(self, "model_transport", False),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),
             },
         )
@@ -134,4 +135,11 @@ class RuntimeClient:
                 "command_id": str(run["control_command_id"]),
                 "pause_id": str(run["pause_command_id"]),
             },
+        )
+
+    def model(self, run, action, **data):
+        return self.call(
+            "POST",
+            f"/v1/runs/{run['id']}/model",
+            {"generation": run["generation"], "action": action, **data},
         )

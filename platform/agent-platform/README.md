@@ -2,7 +2,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。M3 的 worker 恢復／fencing、安全取消、工具審批與安全暫停／恢復切片已通過；已補強輸出密鑰防漏與 diff 完整性；guest 控制憑證隔離與固定節點 egress policy 已驗收，AT-11-A 控制端 model proxy／request ledger 已驗收，guest 尚未接入；完整 AT-07 與 AT-11 模型預算仍待完成。**
+**目前狀態：M0 真實 KVM gate、M2 runtime 與 M3 recovery／cancel／approval／pause、guest 控制憑證隔離、固定節點 egress 已驗收。AT-11-A 控制端 model proxy 與 AT-11-B opt-in guest mailbox／SDK tool-call／短效憑證更新及 request cutoff 已接通；仍為本機固定 fixture。完整 AT-07／AT-11／M3、可信金額預算、付費 provider 與 usage UI 尚未完成。**
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
@@ -10,7 +10,8 @@
 
 - [最新交接](docs/HANDOFF.md)：停止點、升級方式、測試資產與下一步。
 - [新視窗接續 prompt](docs/NEXT-PROMPT.md)：每個切片完成時更新的接續指示。
-- [M3 控制端 model proxy](docs/M3-MODEL-PROXY.md)：短效 token、request cap／ledger、usage 與未接入 guest 的邊界。
+- [M3 guest model transport](docs/M3-GUEST-MODEL.md)：啟用設定、SDK tool-call、credential 更新、cutoff 與真實 KVM 證據。
+- [M3 控制端 model proxy](docs/M3-MODEL-PROXY.md)：短效 token、request cap／ledger 與 AT-11-A 歷史邊界。
 - [M3 固定節點 egress](docs/M3-EGRESS.md)：sealed node policy、DNS／redirect、政策 digest 與 drain 升級。
 - [M3 客體控制憑證隔離](docs/M3-GUEST-ISOLATION.md)：獨立非 root 控制帳號、固定降權與攻擊驗收。
 - [M3 輸出安全與歷史隔離缺口](docs/M3-OUTPUT-SECURITY.md)：密鑰防漏、diff 完整性及當時發現的隔離缺口。

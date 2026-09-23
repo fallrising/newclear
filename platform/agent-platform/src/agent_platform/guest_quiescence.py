@@ -23,7 +23,8 @@ def snapshot():
             control = uid == 2001 and (
                 b"/usr/local/bin/openhands-agent-server" in arguments
                 or any(
-                    a.startswith(b"/opt/agent-platform/") and a.endswith(b"fixture.py")
+                    a.startswith(b"/opt/agent-platform/")
+                    and (a.endswith(b"fixture.py") or a.endswith(b"guest_model.py"))
                     for a in arguments
                 )
             )

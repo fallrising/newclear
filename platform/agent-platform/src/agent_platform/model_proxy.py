@@ -20,7 +20,7 @@ class ModelProxy:
         self.db, self.policy = db, policy
         self.upstream = upstream or FixtureUpstream(policy)
 
-    def live(self, conn, run_id, generation, owner):
+    def live(self, conn, run_id, generation, owner, *, states=("running",)):
         # Same job -> run order as cancel/pause/recovery. Read the clock AFTER locks.
         job = conn.execute("SELECT * FROM jobs WHERE run_id=%s FOR UPDATE", (run_id,)).fetchone()
         run = conn.execute("SELECT * FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
@@ -35,7 +35,7 @@ class ModelProxy:
             or job["lease_until"] <= now
             or run["generation"] != generation
             or run["deadline"] <= now
-            or run["state"] != "running"
+            or run["state"] not in states
             or run["backend"] != "openhands"
             or run["cancel_requested_at"]
             or run["control_action"]
@@ -63,6 +63,11 @@ class ModelProxy:
             or binding["lease_deadline"] <= now
         ):
             raise Problem(409, "model_runtime_unconfirmed")
+        policy = conn.execute(
+            "SELECT cutoff_reason FROM model_proxy_runs WHERE run_id=%s", (run_id,)
+        ).fetchone()
+        if policy and policy["cutoff_reason"]:
+            raise Problem(409, "model_run_cutoff")
         return run, now
 
     def pin(self, conn, run_id):
@@ -206,15 +211,22 @@ class ModelProxy:
             )
             audit(conn, None, "model.request_settled", str(run_id), status)
 
-    def complete(self, run_id, token, request_id, data):
+    def complete(self, run_id, token, request_id, data, *, sdk=False):
         payload = data.payload()
+        if sdk:
+            payload["fixture_run_id"] = str(UUID(str(run_id)))
         known = (token, self.policy.credential)
         if sensitive(payload, known):
             raise Problem(422, "model_sensitive_request")
         self.reserve(run_id, token, request_id, payload)
         try:
             raw = self.upstream.complete(payload)
-            value, usage = response(raw, payload["max_tokens"], known)
+            if sdk:
+                from .model_dialect import sdk_response
+
+                value, usage = sdk_response(raw, payload, known)
+            else:
+                value, usage = response(raw, payload["max_tokens"], known)
         except Problem as exc:
             self.settle(run_id, request_id, reason=exc.code)
             raise
@@ -223,6 +235,57 @@ class ModelProxy:
         with self.db.transaction() as conn:
             self.authorize(conn, run_id, token)
         return value
+
+    def cutoff(self, run_id, generation, owner, reason):
+        # Only the current owner may turn a transport error into a durable stop.
+        # A stale worker after pause/cancel must not override that control intent.
+        with self.db.transaction() as conn:
+            job = conn.execute(
+                "SELECT * FROM jobs WHERE run_id=%s FOR UPDATE", (run_id,)
+            ).fetchone()
+            run = conn.execute("SELECT * FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
+            now = conn.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+            if (
+                not job
+                or not run
+                or job["status"] != "leased"
+                or job["lease_owner"] != owner
+                or job["generation"] != generation
+                or run["generation"] != generation
+                or not job["lease_until"]
+                or job["lease_until"] <= now
+                or run["state"]
+                not in {"provisioning", "running", "awaiting_approval", "interrupted", "finalizing"}
+                or run["control_action"]
+                or run["cancel_requested_at"]
+            ):
+                raise Problem(409, "model_run_not_live")
+            # Stopping never requires a healthy binding. Partition/unknown dispatch
+            # must close admission too; only the VM proof can release capacity.
+            self.pin(conn, run_id)
+            changed = conn.execute(
+                "UPDATE model_proxy_runs SET cutoff_reason=%s,cutoff_at=clock_timestamp() "
+                "WHERE run_id=%s AND cutoff_reason IS NULL RETURNING run_id",
+                (reason, run_id),
+            ).fetchone()
+            conn.execute(
+                "UPDATE model_proxy_tokens SET revoked_at=clock_timestamp() "
+                "WHERE run_id=%s AND revoked_at IS NULL",
+                (run_id,),
+            )
+            if changed:
+                event(conn, run_id, "model.cutoff", {"reason": reason, "capacity_retained": True})
+                audit(conn, None, "model.cutoff", str(run_id), reason)
+
+    def tool_gate(self, conn, run_id, generation, owner):
+        _, now = self.live(conn, run_id, generation, owner, states=("running", "awaiting_approval"))
+        self.pin(conn, run_id)
+        count = conn.execute(
+            "SELECT count(*) AS n FROM model_proxy_requests WHERE run_id=%s", (run_id,)
+        ).fetchone()["n"]
+        if count >= self.policy.request_limit:
+            raise Problem(429, "model_request_limit_reached")
+        return now
 
 
 def usage_view(db, run_id):
@@ -240,7 +303,8 @@ def usage_view(db, run_id):
         ).fetchall()
     return {
         "scope": "control-model-proxy-fixture",
-        "guest_connected": False,
+        "guest_connected": policy["guest_connected"] if policy else False,
+        "cutoff_reason": policy["cutoff_reason"] if policy else None,
         "configured": policy is not None,
         "request_limit": policy["request_limit"] if policy else None,
         "request_slots_consumed": len(entries),

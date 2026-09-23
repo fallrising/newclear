@@ -12,7 +12,7 @@ POLICY = "always-confirm-v1"
 
 
 def pending_approval(service, row):
-    if not row["input"].get("require_approval"):
+    if not (row["input"].get("require_approval") or row["input"].get("model_transport")):
         raise Problem(409, "approval_policy_mismatch")
     with service.relay(row) as http:
         path = "/api/conversations/" + row["run_id"]

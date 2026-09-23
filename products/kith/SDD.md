@@ -242,13 +242,13 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 
 ## 12. 開發流程與變更規則
 
-詳細實作順序見 [07](docs/sdd/07-roadmap.md)，驗收見 [06](docs/sdd/06-verification.md)。先做 M0 固定契約與測試框架，再依切片完成 M1–M5，最後 M6 ambient。一次一個 milestone。
+詳細實作順序見 [07](docs/sdd/07-roadmap.md)，驗收見 [06](docs/sdd/06-verification.md)。M0–M7 已在 `main`（#12）。人跟人聊天 P0 見 [09](docs/sdd/09-human-chat-ui.md)。之後的變更仍一次一個可驗收的切片。
 
 修改 persisted format、seq 語意、attention、quota_class、MCP tool 集合或 generation 綁定時，先更新 ADR、版本及 golden vectors；不能只改程式。
 
 文件優先級：本文件的不變量 > 專題章節 > roadmap 的示例命令。DESIGN 用於架構數字與模組邊界；來源文件用於理解及比較，不自動凌駕 kith 已明確選定的協定。
 
-M0 已新增根 `.github/workflows/kith.yml` 並更新 `docs/specs/monorepo-ci.md`。仍不建立空 `worker/` / `frontend/` / `sidecar/` 目錄（屬 M1+）。
+根 `.github/workflows/kith.yml` 與 `docs/specs/monorepo-ci.md` 已有 Kith。`worker/`、`frontend/`、`sidecar/` 已存在。線上站是 `https://kith.fallrising.workers.dev`。
 
 ## 13. 章節索引
 
@@ -261,6 +261,7 @@ M0 已新增根 `.github/workflows/kith.yml` 並更新 `docs/specs/monorepo-ci.m
 - [06 — 驗證](docs/sdd/06-verification.md)
 - [07 — 交付計畫](docs/sdd/07-roadmap.md)
 - [08 — 決策與來源](docs/sdd/08-decisions-sources.md)
+- [09 — 人跟人聊天 UI](docs/sdd/09-human-chat-ui.md)
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
 - [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)

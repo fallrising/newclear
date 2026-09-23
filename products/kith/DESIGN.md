@@ -749,7 +749,7 @@ kith 是新 component，無舊 API。以下為核心版對外契約，M0 落 JSO
 | GET | `/api/rooms/:id/messages?after_seq&before_seq&limit` | member | 歷史；預設 `kind=message`；`after_seq` 供 WS 補洞 |
 | POST | `/api/rooms/:id/messages` | member | REST 備援 send（與 WS 同一 Room 路徑） |
 | GET | `/api/rooms/:id/members` | member | 本房成員、kind、attention、quota_class、operator-only badge |
-| POST | `/api/rooms/:id/members` | **owner** | `{ "member_id": "..." }` 將**既有** human（M2 起含 agent）加入本房；滿 32 人 → 409 `room_full` |
+| POST | `/api/rooms/:id/members` | **owner** | 恰好 `member_id`（既有 human 或 agent）或 `handle`（未停用 human，NOCASE）其中一個；可加 `role`。兩個都有或都沒有 → 400。滿 32 人 → 409 `room_full` |
 | DELETE | `/api/rooms/:id/members/:mid` | owner | 移出；不可移除最後一個 owner |
 | GET | `/api/rooms/:id/ws` | session → DO | WebSocket upgrade |
 | POST | `/api/agents` | owner | 建 agent 成員（body 含 `quota_class`，預設見下） |
@@ -1069,18 +1069,18 @@ MVP 可用 `wrangler tail` + Cloudflare analytics。M7 再加獨立 metrics sink
 
 1. **文件 PR** 進入 `products/kith/`（README pointer + bootstrap 食譜、DESIGN.md、SDD、AGENTS.md）、根 README 產品列、**以及 `PORTFOLIO.md` override 節**。
 2. **M0** 契約與測試在 CI 綠（無 Cloudflare 帳號也可跑 unit）。
-3. **Preview：** `workers.dev` 私有 URL，Access 或預共享門檻；feature flags：
+3. **線上：** <https://kith.fallrising.workers.dev>（#26）。已提交的 `wrangler.toml` 旗標如下。`ff_sidecar` 維持 off；sidecar 仍在 operator 機器，不在 Worker 裡。
 
-| Flag | 預設 | 開啟於 |
+| Flag | 線上值 | 開啟於 |
 | --- | --- | --- |
-| `ff_mcp` | off | M3 |
-| `ff_hosted_agent` | off | M4 |
+| `ff_mcp` | on | M3 |
+| `ff_hosted_agent` | on | M4 |
 | `ff_sidecar` | off | M5（文件 + 二進位；Worker 側只需 MCP） |
-| `ff_ambient` | off | M6 |
+| `ff_ambient` | on | M6 |
 
 4. **D1 migrations** 只追加；rollback = `wrangler rollback` 到上一 Worker version，**不**自動 DROP 欄。
 5. **Secrets：** `XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑證永不進 Worker secrets。
-6. **CI：** 根 `.github/workflows/kith.yml`，paths `products/kith/**` + 該 workflow；**同步改 `docs/specs/monorepo-ci.md`**。該 spec Goal 仍寫「六個」workflow，但樹裡已有 **prism-ci.yml**。PR-1 必須把表改成**現有全部**根 workflow（goku、phark、cloudform、aweshore、streaming-converter、ojbquay、**prism**）再加 kith，**不要寫「七個」**。Node 24.18.0、`contents: read`、無 deploy secrets。Deploy **不是** CI job。
+6. **CI：** 根 `.github/workflows/kith.yml`，paths `products/kith/**` + 該 workflow。`docs/specs/monorepo-ci.md` 已列出 Kith。Node 24.18.0、`contents: read`、無 deploy secrets。Deploy **不是** CI job。
 7. **Rollback：** 關閉 flag 即停 hosted/ambient；MCP 關閉後 sidecar 只會 503，不影響純人類房間。
 
 實作交付：文件落地後使用 grok-team-delivery（orchestrator 擁有 `.team/PLAN.md`，bounded `T-###`，重疊 writer 用 worktree，evidence gate）。本文件的 PR Plan 已按**不相交路徑**切片。

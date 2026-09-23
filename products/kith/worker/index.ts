@@ -13,6 +13,7 @@ import {
   forbidden,
   invalid,
   isRoomMember,
+  loadActiveHumanByHandle,
   loadMember,
   requireAuth,
   requireOperator,
@@ -242,13 +243,23 @@ app.post("/api/rooms/:id/members", async (c) => {
   if (!(await roomExists(c.env, roomId))) return c.json(errorBody("not_found", "room not found"), 404);
   const obj = parseObject(await c.req.text());
   if (!obj) return invalid(c, "invalid json");
-  if (extraKeys(obj, ["member_id", "role"]).length > 0) return invalid(c, "unknown field");
-  const memberId = typeof obj.member_id === "string" ? obj.member_id : "";
-  if (!memberId) return invalid(c, "member_id required");
+  if (extraKeys(obj, ["member_id", "handle", "role"]).length > 0) return invalid(c, "unknown field");
+  const hasIdKey = Object.prototype.hasOwnProperty.call(obj, "member_id");
+  const hasHandleKey = Object.prototype.hasOwnProperty.call(obj, "handle");
+  if (hasIdKey === hasHandleKey) return invalid(c, "member_id or handle required");
   const role = obj.role === undefined ? "member" : obj.role;
   if (role !== "member" && role !== "owner") return invalid(c, "invalid role");
-  const target = await loadMember(c.env, memberId);
-  if (!target) return c.json(errorBody("not_found", "member not found"), 404);
+  let target: MemberRow | null;
+  if (hasHandleKey) {
+    if (typeof obj.handle !== "string" || obj.handle.trim() === "") return invalid(c, "handle required");
+    target = await loadActiveHumanByHandle(c.env, obj.handle.trim());
+    if (!target) return c.json(errorBody("not_found", "human not found"), 404);
+  } else {
+    if (typeof obj.member_id !== "string" || obj.member_id === "") return invalid(c, "member_id required");
+    target = await loadMember(c.env, obj.member_id);
+    if (!target || target.disabled_at) return c.json(errorBody("not_found", "member not found"), 404);
+  }
+  const memberId = target.id;
   if (target.kind !== "human" && target.kind !== "agent") return invalid(c, "invalid member kind");
   if (role === "owner" && target.kind === "agent") return forbidden(c, "agent cannot be owner");
   const already = await isRoomMember(c.env, roomId, memberId);

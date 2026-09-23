@@ -6,6 +6,7 @@ export type Room = {
   id: string;
   name?: string;
   slug?: string;
+  role?: string;
 };
 
 export type Member = {

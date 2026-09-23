@@ -55,6 +55,7 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 | --- | --- | --- |
 | M1-US-01 | 兩個 bootstrap 人類 WS send | 同一 `id/seq`；D1 可讀 |
 | M1-MEM-01 | `POST /api/rooms/:id/members` 加入既有 human；第 33 人 | 前 32 成功；第 33 → 409 `room_full` |
+| M1-MEM-02 | 同一路由以 `handle` 邀請未入房的 human；兩識別並存或皆無；agent／不存在／停用的 handle；guest 呼叫 | 200 且 `member_id` 為該人；400 `invalid_request`；404 `not_found`；guest 403 |
 | M1-GAP-01 | WS 丟包（中間 seq 未送達） | client `after_seq` 補洞，不重用 |
 | M1-IDEM-01 | 同 `client_message_id` 重送 | 不配新 seq |
 | M1-CAP-01 | body 8 KiB+1 | `payload_too_large`，不 INSERT |

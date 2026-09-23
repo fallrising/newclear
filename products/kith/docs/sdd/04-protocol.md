@@ -26,7 +26,7 @@ Auth：`session` = HttpOnly cookie。`owner` = session 且 `members.is_operator=
 | GET | `/api/rooms/:id/messages?after_seq&before_seq&limit` | member | 歷史；預設 `kind=message`；`after_seq` 供 WS 補洞；`limit` 預設 50、上限 50 |
 | POST | `/api/rooms/:id/messages` | member | REST 備援 send（與 WS 同一 Room 路徑） |
 | GET | `/api/rooms/:id/members` | member | 本房成員、kind、attention、quota_class、operator-only badge |
-| POST | `/api/rooms/:id/members` | **owner** | `{ "member_id": "..." }` 將**既有** human（M2 起含 agent）加入本房；滿 32 人 → 409 `room_full` |
+| POST | `/api/rooms/:id/members` | **owner** | 加入既有成員。Body 恰好帶 `member_id` 或 `handle` 其中一個，可加 `role`（預設 `member`）。`member_id` 路徑含 human 與 agent。`handle` 只解析未停用的 `kind=human`（`COLLATE NOCASE`）。找不到、或帳號已停用 → 404 `not_found`。兩個識別都有、或都沒有 → 400 `invalid_request`。滿 32 人 → 409 `room_full` |
 | DELETE | `/api/rooms/:id/members/:mid` | owner | 移出；不可移除最後一個 owner |
 | GET | `/api/rooms/:id/ws` | session → DO | WebSocket upgrade |
 | POST | `/api/agents` | owner | 建 agent 成員（body 含 `quota_class`，hosted 預設 `api_key`） |

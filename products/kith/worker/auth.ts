@@ -108,12 +108,17 @@ export type MemberRow = {
   disabled_at: string | null;
 };
 
+const MEMBER_COLUMNS = `id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at`;
+
 export async function loadMember(env: Env, memberId: string): Promise<MemberRow | null> {
+  return env.DB.prepare(`SELECT ${MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<MemberRow>();
+}
+
+export async function loadActiveHumanByHandle(env: Env, handle: string): Promise<MemberRow | null> {
   return env.DB.prepare(
-    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at
-     FROM members WHERE id = ?`,
+    `SELECT ${MEMBER_COLUMNS} FROM members WHERE handle = ? COLLATE NOCASE AND kind = 'human' AND disabled_at IS NULL`,
   )
-    .bind(memberId)
+    .bind(handle)
     .first<MemberRow>();
 }
 

@@ -1317,3 +1317,53 @@ remote_durability: F2_correction_local_pending_fixed_commit_and_SSHpush
 blockers: []
 next_action: fixed_F2_commit; T044_attempt3_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
 ```
+
+
+DG-D094: Fixed W4 product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` is SSH saved as PR50 head. Independent T044 attempt3 DONE on that exact SHA closes F1/F2 with no confirmed source finding; report `.team/reports/T-044-attempt-3.md` was copied byte-identically (SHA256 `866b5c6a7c335780cccad72ddf68a8ce1c874d78c6f1098ab55b272252394834`) and validator passed. Local source-bound gates: frozen install; 400/400 native in37 files; lint/typecheck/docs (209 files/464 links), OpenAPI161/313, CI/architecture, demo build; complete Chromium92/92; Firefox/WebKit smoke12/12; unchanged benchmark3/3 (302886 initial gzip bytes of307200 budget, median coldLCP724ms, 5000-CI queryp95 0.6ms, persisted Mock HTTPp95 170.7ms); isolation2/2. The first isolation attempt failed before browser launch because LD_LIBRARY_PATH was omitted from that command and libasound.so.2 could not load; same-source rerun with the established local browser environment passed both, without test/product changes. Remote exact-product CI35909643363 is IN_PROGRESS and has not been claimed as success. Latest observed main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` changes only unrelated `products/kith` paths since incorporated main; no dim-gate/PLAN/shared gate delta. W4 remains NOT_ACCEPTED until exact-head CI and final acceptance, then evidence-only head CI and authorized normal merge/actual closeout. W5 remains unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 94
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 PRODUCT_LOCAL_GATES_AND_REVIEW_PASS / EXACT_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt3 DONE_no_open_findings
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+local_tested_commit: dd90ccb_400_native_92_chromium_12_smoke_3_benchmark_2_isolation
+integration_state: PR50_DRAFT_OPEN_exact_product_CI35909643363_in_progress
+remote_durability: product_dd90_SSHsaved; evidence_checkpoint_local_pending_CI
+blockers: [exact_product_CI35909643363_in_progress]
+next_action: inspect_exact_product_CI_artifacts; accept_fixed_product; evidence_only_commit_SSHpush_latestheadCI_then_authorized_normal_merge_actualcloseout_ownerrelease_before_W5
+```
+
+
+DG-D095: ACCEPT W4 fixed product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` for AC-WS-12/15–18 and the integrated T041/T042/T043 results, after uninvolved T044 attempt3 DONE closed F1/F2 with no open finding. Exact-product [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) completed SUCCESS on 2026-09-23T20:10:42Z, head dd90, synthetic checkout `305939aa5d83da45cc4f8f6a561a14ab8b295429` with parents latest main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and dd90; both checkout and dd90 have identical full `platform/dim-gate` tree `b4cdaf5b44cb306c8453238c7ee37106316a7150`. CI logs confirm 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation, docs/contracts/CI/architecture/build; artifact `10775045030` expires 2026-10-23T20:10:36Z. Downloaded artifact performance raw samples bind checkout305939a: 302886 initial gzip bytes, median LCP1312ms, queryp95 0.9ms, HTTPp95 184.5ms, all below unchanged budgets. This is product acceptance, not PR integration. T041–043 original PARTIAL handback reports remain immutable history; their integrated results are accepted here. Previous failed/cancelled CI and browser attempts remain historical. Next: evidence-only checkpoint commit and SSH push, latest exact metadata-head CI, authorized normal PR50 merge with match-head protection, actual merge/component-tree/postmerge CI verification, PR closeout/owner release, then separate W5 run. No deployment/external message/live cloud action.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 95
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator integration_closeout_only
+terminal_state: null
+milestone: W4 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
+task_id: T041 INTEGRATED_ACCEPTED; T042 INTEGRATED_ACCEPTED; T043 INTEGRATED_ACCEPTED; T044 attempt3 ACCEPTED
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+evaluated_implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+product_ci: 35909643363 SUCCESS; checkout305939a; identical_component_tree_b4cdaf5b44cb306c8453238c7ee37106316a7150
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_at_checkpoint; final_evidence_headCI_merge_and_ownerrelease_pending
+remote_durability: product_dd90_SSHsaved; containing_evidence_checkpoint_nextSSHpush
+blockers: []
+next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal_merge_actualtree_postmergeCI_PRcloseout_ownerrelease; then W5
+```

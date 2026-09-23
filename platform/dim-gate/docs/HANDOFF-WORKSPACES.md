@@ -1,5 +1,9 @@
 # dim-gate 三工作區接手
 
+W4 最新驗收 checkpoint（2026-09-23）：固定產品 `dd90ccb` 已由主控依 PLAN DG-D095 **ACCEPT** AC-WS-12/15–18；獨立 T044 attempt3 無開放缺陷，完整本機門檻與精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) SUCCESS，合成 checkout305939a 的完整 dim-gate tree 與產品相同。PR50 草稿仍未合併；下一步是證據-only checkpoint、最新 head CI、正常合併與實際 merge/tree/postmerge CI／owner release。W5 必須待 W4 整合 closeout 後另開 run。下面「W4 未驗收」為此前固定時間的歷史 checkpoint；詳見 [W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 與 PR50。
+
+最新 W4 產品 checkpoint（2026-09-23）：固定 `dd90ccb` 已在草稿 PR50；400/400 原生、92/92 Chromium、12/12 Firefox／WebKit、3/3 效能、2/2 隔離及原生檢查通過。獨立 [T044 attempt3](../../../.team/reports/T-044-attempt-3.md) 關閉 F1/F2，無剩餘已確認來源缺陷。首次隔離命令因漏設本機函式庫路徑而無法啟動 Chromium，補上既定環境後同來源 2/2 通過；保留原失敗紀錄。精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) 尚在執行，PR50 未驗收／未合併，W5 未開始。接手先核對 PLAN DG-D094、[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)、CI 與 PR；下面的 W4 F1/F2／W3 checkpoint 是歷史紀錄。
+
 最新 W4 接續（2026-09-23）：獨立 [T044 attempt2](../../../.team/reports/T-044-attempt-2.md) 在產品 `460424b` 關閉 F1，另確認 F2：可變監控規格驗證先於授權和冪等重放，造成舊 receipt 重放失敗與隱藏指標資訊差異。主控已本地修正並增加 AlertRule／SLO、跨範圍回歸；400/400 原生及凍結安裝、原生檢查、demo 建置通過。PR50 前一 head CI35908469757 和本機未完成的 Chromium 已在 F2 後取消。**W4 未驗收，W5 未開始**；固定修正提交、T044 attempt3、完整瀏覽器／效能／隔離、最新 head CI 與授權正常合併／實際 closeout 待完成。下面 W4 F1 與 W3 段落均為歷史 checkpoint；以 PLAN DG-D093、[W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 及 PR50 為準。
 
 ## W4 接續 run（2026-09-23；進行中）

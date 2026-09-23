@@ -47,7 +47,7 @@
 | `@radix-ui/react-tabs` | 1.1.21 | Tabs | W4 | 同上 |
 | `@radix-ui/react-scroll-area` | 1.2.18 | ScrollArea | W1 | 同上 |
 
-E2E 套件（`e2e/package.json`，W0）：`@playwright/test` 1.56.1、`ajv` 8.20.0、`typescript` 7.0.2、`@types/node` 26.6.2。Playwright 刻意不用最新的 1.63.0：1.56.1 綁定 Chromium revision 1194（`141.0.7390.37`），正是本專案雲端環境預裝的版本，不必下載瀏覽器（已查 `playwright-core` 1.56.1 的 `browsers.json`）。是否升級見 [10](10-decisions.md) Q-12。
+E2E 套件（`e2e/package.json`，W0）：`@playwright/test` 1.56.1、`ajv` 8.20.0、`typescript` 7.0.2、`@types/node` 26.6.2。Playwright 刻意不用最新的 1.63.0：1.56.1 綁定 Chromium revision 1194（`141.0.7390.37`），正是本專案雲端環境預裝的版本，不必下載瀏覽器（已查 `playwright-core` 1.56.1 的 `browsers.json`）。鎖定此版本見 [10](10-decisions.md) D-17。
 
 安裝在後續里程碑的套件，若屆時 npm 上的版本已被撤下或有安全公告，先改本表並在 PR 說明，不要自行換版本。
 

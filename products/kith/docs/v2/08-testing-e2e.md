@@ -114,7 +114,7 @@ JSON Schema：[`contracts/v2/e2e-manifest.json`](../../contracts/v2/e2e-manifest
 
 ### 4.4 視覺回歸（選用）
 
-W7 前可對少數穩定元件（登入頁、空狀態、控制台清單）啟用 `toHaveScreenshot`，基準圖來自 [07](07-visual-design.md) §8 的視覺稿實作。何時啟用與容忍度見 [10](10-decisions.md) Q-11；未決定前只截圖，不做像素比對。
+W7 前可對少數穩定元件（登入頁、空狀態、控制台清單）啟用 `toHaveScreenshot`，基準圖來自 [07](07-visual-design.md) §8 的視覺稿實作。依 D-16，W0–W7 都不做像素比對，只截圖；整體施工完成後另立工作。
 
 ### 4.5 保存
 

@@ -87,3 +87,28 @@ CPU 使用 aggregate counters 的差值，guest 欄位不重複加總。iowait �
 磁碟平均耗時用相鄰樣本 read/write 的耗時差除以完成數；in-flight 是 gauge，不當累計 counter。沒有 I/O 時平均耗時為 null，不能推論磁碟很快。flush/discard 不包含在這個 read/write 平均值，因此它不是 fdatasync 的直接測量；見 [Linux I/O statistics](https://docs.kernel.org/admin-guide/iostats.html)。PSI 使用 `total` 微秒差值除以觀測間隔，見 [Linux PSI](https://docs.kernel.org/accounting/psi.html)。
 
 所有值都是約 30 秒窗口的平均或摘要，probe 內各來源也非同時讀取；時間相近只能支持相關性，不能單憑 guest 資料歸因到供應商／宿主機。沒有 backend observations 時，backend 延遲未受測；沒有重現故障不表示歷史秒級 fdatasync 根因已解決。
+
+## 正式 V11 的每秒私網 HTTP 模式（本機準備，ERU-007）
+
+目前 30 秒間隔的 run `20260923T112336Z-561e71e7` 保持原樣；其來源與 config 已固定。正式 V11 需待該 run 回收、canaries 依 ERU-003 清理後，用新的 canary-start plan 啟動全新觀測。不能沿用舊 run、把既有 30 秒 HTTP 結果換名，或在仍有觀測時疊加另一個 observer。
+
+```bash
+# [B → ckc-disposable-01～04] 到期且完成舊 canary 清理後，另建兩個 owned nginx canaries。
+python3 scripts/labctl.py plan --operation canary-start
+python3 scripts/labctl.py execute --plan NEW_CANARY_PLAN --sha256 PLAN_SHA256
+# [B → ckc-disposable-01～03] 可先用新 run 做短 pilot；report 會標為 incomplete，不是正式 V11。
+python3 scripts/soak.py start --canary-run NEW_CANARY_PLAN --acceptance v11 --duration-seconds 30
+# [B ← ckc-disposable-01～03] pilot 到期後，依新 run ID 回收與離線判讀。
+python3 scripts/soak.py collect --run PILOT_RUN
+python3 scripts/soak.py report --run PILOT_RUN
+# [B → ckc-disposable-01～03] 確認 pilot evidence 後，結束其 unit／解除觀測重疊門檻。
+python3 scripts/soak.py stop --run PILOT_RUN
+# [B → ckc-disposable-01～03] 用另一個全新 run 做 24h 正式驗收。
+python3 scripts/soak.py start --canary-run NEW_CANARY_PLAN --acceptance v11 --duration-seconds 86400
+```
+
+`--acceptance v11` 在 02、03 **各排程每秒一個**私網 GET，共各 86400 個預定秒數；01 仍每 30 秒觀測 core／etcd。HTTP 排程在 observer 的另一條 thread，服務／task 檢查不會刻意擋住每秒請求。每個秒數都留下 slot、實際時間、延遲、HTTP 結果或明確的 skipped 紀錄；單次等待上限約 0.8 秒。排程遲到超過一秒的 slot 不補送，計為失敗。正常 24h 每台需至少 85536 次成功，且 slot 數完整、順序連續；控制與 HTTP 兩側的服務、etcd alarm、OOM kernel 記錄及磁碟使用量也須通過。成功率分母包括漏送的秒數。故障演練窗口目前不自動排除；正式 run 應另行保持無故障注入。
+
+每 30 秒檢查 01 的 `/`、etcd 資料、Docker/containerd 根目錄，及 02／03 的 `/`、Docker/containerd 根目錄；使用 `df -P -B1` 的 Capacity／Use% 欄，超過 80% 會記錄失敗。三台同時讀 `journalctl -k`，檢查 OOM；01 繼續查 etcd alarms。這些離散檢查保留原始輸出，不能聲稱排除了每兩次檢查間所有短暫事件。2026-09-23 已用 01～03 aliases 唯讀驗證這些路徑與 kernel journal 可讀，當時相關檔案系統皆 1%；沒有修改 VPS。
+
+回收仍使用 `soak.py collect` 的固定 byte boundary／SHA；`report` 會逐筆重算每秒 HTTP 結果、連續 slot、99% 門檻及 OOM／disk／etcd 訊號。短 pilot 即使無錯，也只顯示 `incomplete`；滿 86400 秒且無已記錄故障時仍為 `complete_needs_review`，須核對三台完整 evidence 與最後 cluster 狀態。本機驗證見 [ERU-007 準備紀錄](M3-V11-PREP-2026-09-23.md)。

@@ -534,6 +534,34 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   },
   {
     "method": "get",
+    "path": "/admin/platform-features",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/platform-features/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/platform-features/{id}/preview",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/capability-registry",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
     "path": "/notifications",
     "status": 200,
     "demo": false,
@@ -557,6 +585,48 @@ export const runtimeOperations: readonly { method: string; path: string; status:
     "method": "patch",
     "path": "/admin/teams/{id}",
     "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features/{id}/disable",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-features/{id}/restore",
+    "status": 201,
     "demo": false,
     "milestone": "W5"
   },

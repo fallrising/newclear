@@ -51,6 +51,7 @@ export function createSeed(sessionId: string): Snapshot {
       ...resources,
       ...buildW3BusinessSeed(applicationSeed.applications),
       monitorPolicies: [], alertRules: [], sloPolicies: [], silences: [], alertEvaluations: [], notificationDeliveries: [], infrastructureIncidents: [],
+      platformFeatures: [],
       cis: [...cmdbSeed.cis, ...metadata.cis],
       placements: [...topologySeed.placements, ...resources.placements],
       resourceQuotas: metadata.resourceQuotas,

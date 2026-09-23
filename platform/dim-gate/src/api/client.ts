@@ -134,6 +134,8 @@ export function createApiClient() {
     ...deferredClient<Omit<ReturnType<typeof import('./clients/admin').createAdminClient>, 'getNavigation'>>(() => import('./clients/admin').then(module => module.createAdminClient(request)), {
       getAccess: true, listAdminUsers: true, getAdminUser: true, createAdminUser: true, updateAdminUser: true,
       listAdminTeams: true, getAdminTeam: true, createAdminTeam: true, patchAdminTeam: true,
+      listPlatformFeatures: true, getPlatformFeature: true, previewPlatformFeature: true, getCapabilityRegistry: true,
+      createPlatformFeature: true, revisePlatformFeature: true, platformFeatureAction: true, restorePlatformFeature: true,
       createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
     }, getClientIdentity),
     ...deferredClient(() => import('./clients/delivery').then(module => module.createDeliveryClient(request)), {

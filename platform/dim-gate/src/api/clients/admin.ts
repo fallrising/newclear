@@ -2,8 +2,10 @@ import { z } from 'zod'
 import {
   auditEventSchema, ciKindSchema, commandReceiptSchema,
   modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, teamSchema, userSchema,
+  platformFeatureSchema, featurePreviewSchema, capabilityRegistryEntrySchema,
   type AuditEvent, type CatalogItem, type Center, type CommandReceipt, type ModelField, type NavigationItem,
 } from '../../domain/schema-models'
+import type { FeatureSpec } from '../../domain/feature-models'
 import type { ApiRequest } from '../core/request'
 
 export type User = z.infer<typeof userSchema>
@@ -25,6 +27,18 @@ export function createAdminClient(request: ApiRequest) {
   return {
     getNavigation: (center: Center): Promise<NavigationItem[]> => request(withQuery('/navigation', { center }), z.array(monitoringNavigationItemSchema)),
     getAccess: (): Promise<AccessView> => request('/admin/access', accessSchema),
+    listPlatformFeatures: (page = 1, pageSize = 25) => request(withQuery('/admin/platform-features', { page, pageSize }), pageSchema(platformFeatureSchema)),
+    getPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}`, platformFeatureSchema),
+    previewPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}/preview`, featurePreviewSchema),
+    getCapabilityRegistry: () => request('/admin/capability-registry', z.array(capabilityRegistryEntrySchema)),
+    createPlatformFeature: (spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>
+      request('/admin/platform-features', commandReceiptSchema, { method: 'POST', body: { spec, reason } }),
+    revisePlatformFeature: (id: string, expectedVersion: number, spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/revisions`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, spec, reason } }),
+    platformFeatureAction: (id: string, action: 'validate' | 'activate' | 'disable', expectedVersion: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/${action}`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, reason } }),
+    restorePlatformFeature: (id: string, expectedVersion: number, revision: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/restore`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, revision, reason } }),
     listAdminUsers: (page = 1, pageSize = 25) => request(withQuery('/admin/users', { page, pageSize }), pageSchema(userSchema)),
     getAdminUser: (id: string): Promise<User> => request(`/admin/users/${encodeURIComponent(id)}`, userSchema),
     createAdminUser: (body: { displayName: string; teamIds: string[]; enabled: boolean; reason: string }): Promise<CommandReceipt> =>

@@ -6,6 +6,7 @@ import { observationIntegrityErrors } from './observation-integrity'
 import { resourceIntegrityErrors } from './resource-integrity'
 import { monitoringIntegrityErrors } from './monitoring-integrity'
 import { demoPersonaIds } from './policy'
+import { featureRegistry, featureSpecSupported } from './feature-policy'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -31,6 +32,22 @@ export function integrityErrors(snapshot: Snapshot): string[] {
   if (new Set(entities.projects.map((project) => `${project.orgId}:${project.slug.toLowerCase()}`)).size !== entities.projects.length) errors.push('project: duplicate normalized slug')
   for (const user of entities.users) for (const teamId of user.teamIds) if (!linked(entities.teams, teamId, user.orgId)) errors.push('user: invalid team')
   for (const user of entities.users) if ((user.source === 'seed') !== demoPersonaIds.has(user.id)) errors.push('user: invalid source identity')
+  if (new Set(entities.platformFeatures.map(row => `${row.orgId}:${row.spec.featureKey}`)).size !== entities.platformFeatures.length)
+    errors.push('platformFeature: duplicate key')
+  for (const feature of entities.platformFeatures) {
+    if (!featureSpecSupported(feature.spec) || !(feature.spec.featureKey in featureRegistry)) errors.push('platformFeature: unsupported registry target')
+    if (feature.revisions.length !== feature.revision || feature.revisions.some((revision, index) =>
+      revision.revision !== index + 1 || revision.spec.featureKey !== feature.spec.featureKey || !featureSpecSupported(revision.spec)))
+      errors.push('platformFeature: invalid revision lineage')
+    if (JSON.stringify(feature.revisions.at(-1)?.spec) !== JSON.stringify(feature.spec)) errors.push('platformFeature: mutable spec mismatch')
+    if (feature.activeRevision !== null && (feature.activeRevision > feature.revision || feature.status === 'draft' && feature.activeRevision < 1))
+      errors.push('platformFeature: invalid active revision')
+    if (feature.status === 'active' && feature.activeRevision === null) errors.push('platformFeature: active state without revision')
+    for (const revision of feature.revisions) {
+      for (const id of revision.spec.eligibleProjectIds) if (!linked(entities.projects, id, feature.orgId)) errors.push('platformFeature: invalid project')
+      for (const id of revision.spec.eligibleTeamIds) if (!linked(entities.teams, id, feature.orgId)) errors.push('platformFeature: invalid team')
+    }
+  }
   for (const app of entities.applications) {
     const project = linked(entities.projects, app.projectId, app.orgId)
     if (!project || !('teamId' in project) || project.teamId !== app.ownerTeamId) errors.push('application: owner must match project team')
@@ -98,6 +115,7 @@ export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
     entities: { ...snapshot.entities,
       users: snapshot.entities.users.map(user => ({ ...user, source: 'seed' as const })),
       teams: snapshot.entities.teams.map(team => ({ ...team, source: 'seed' as const })),
+      platformFeatures: [],
     } })
 }
 

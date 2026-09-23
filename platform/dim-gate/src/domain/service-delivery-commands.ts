@@ -7,6 +7,7 @@ import { serviceScope, serviceVisible, serviceApprovalCurrent, serviceApprovalGr
 import { serviceSource, serviceSources, serviceActive, serviceProduction, serviceTime, serviceTouch, effectiveTraffic, assertEnvironmentAvailable } from './service-delivery-shared'
 import { serviceValidationErrors } from './service-delivery-validation'
 import { newRun, deliveryEffect } from './delivery-commands'
+import { featureEligibility } from './feature-policy'
 
 const invalid = () => fail(409, 'INVALID_STATE', '目前狀態無法執行此操作。')
 const checkVersion = (actual: number, expected: number) => { if (actual !== expected) fail(409, 'VERSION_CONFLICT', '資料版本已變更，請重新讀取。') }
@@ -88,6 +89,11 @@ export function prepareServiceDelivery(s: Snapshot, p: Policy, input: CommandInp
     const body = parse(type === 'pipelineDefinition' ? createPipelineDefinitionInputSchema : type === 'serviceConfig' ? createServiceConfigInputSchema : createTrafficPolicyInputSchema, input.body)
     const ids = 'environmentId' in body ? [body.environmentId] : body.spec.targetEnvironmentIds
     currentScope(s, p, body.applicationId, ids)
+    if (type !== 'serviceConfig') {
+      const projectId = s.entities.applications.find(row => row.id === body.applicationId)?.projectId
+      if (!featureEligibility(s, p, type === 'pipelineDefinition' ? 'rd.delivery' : 'rd.traffic', projectId).eligible)
+        fail(403, 'FEATURE_UNAVAILABLE', '目前功能政策不允許新的服務定義指令。')
+    }
     return {apply(next) {
       const orgId = p.user!.orgId, sourceId = nextId(next, type)
       const common = {...stamp(next, orgId, sourceId), applicationId: body.applicationId, requesterId: input.actorId, reason: body.reason,
@@ -113,6 +119,11 @@ export function prepareServiceDelivery(s: Snapshot, p: Policy, input: CommandInp
   const row = source!
   const role = ['approve','reject'].includes(action) ? 'ops' : 'rd'
   currentScope(s,p,row.applicationId,row.affectedEnvironmentIds,role)
+  if (role === 'rd' && type !== 'serviceConfig') {
+    const projectId = s.entities.applications.find(entry => entry.id === row.applicationId)?.projectId
+    if (!featureEligibility(s, p, type === 'pipelineDefinition' ? 'rd.delivery' : 'rd.traffic', projectId).eligible)
+      fail(403, 'FEATURE_UNAVAILABLE', '目前功能政策不允許新的服務定義指令。')
+  }
   if (role === 'ops' && row.requesterId === input.actorId) fail(403,'SELF_APPROVAL_DENIED','發起者不能審批自己的變更。')
   if (role === 'rd' && !['revisions','restore','runs'].includes(action) && row.requesterId !== input.actorId) forbidden()
   if (action === 'runs' && !p.effectiveActions.includes('pipeline.trigger')) forbidden()

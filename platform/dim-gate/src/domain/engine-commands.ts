@@ -11,6 +11,7 @@ import { advanceObservation, prepareObservation } from './observation-commands'
 import { advanceDelivery, prepareDelivery } from './delivery-commands'
 import { prepareMonitoring } from './monitoring-commands'
 import { advanceMonitoring } from './monitoring-evaluation'
+import { prepareFeature } from './feature-commands'
 
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
@@ -174,6 +175,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   const delivery = prepareDelivery(state, policy, input)
   const observation = prepareObservation(state, policy, input, advanceProvisioning)
   const monitoring = prepareMonitoring(state, policy, input, advanceProvisioning)
+  const feature = prepareFeature(state, policy, input)
   const patchCiId = method === 'PATCH' ? /^\/cis\/([^/]+)$/.exec(input.path)?.[1] : undefined
   const createCi = method === 'POST' && input.path === '/cis'
   const createRelation = method === 'POST' && input.path === '/relations'
@@ -198,10 +200,10 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
     && !patchRequestId && !requestActionMatch && !createAssignment && !createUser && !patchUserId && !createTeam && !patchTeamId && !patchNavigationId
     && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
-    && !scenario && !clock && !delivery && !observation && !resource && !service && !monitoring) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+    && !scenario && !clock && !delivery && !observation && !resource && !service && !monitoring && !feature) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
   let body: unknown
-  if (delivery || observation || resource || service || monitoring) body = input.body
+  if (delivery || observation || resource || service || monitoring || feature) body = input.body
   else if (patchCiId) body = parse(patchCiSchema, input.body)
   else if (createCi) body = parse(createCiInputSchema, input.body)
   else if (createRelation) body = parse(createRelationInputSchema, input.body)
@@ -229,7 +231,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   let ci: CI | undefined
   let relation: Relation | undefined
   let environmentRequest: DomainRequest | undefined
-  if (delivery || observation || resource || service || monitoring) {
+  if (delivery || observation || resource || service || monitoring || feature) {
     // prepareDelivery / prepareObservation already checked the current role, resource and stage before replay.
   } else if (patchCiId) {
     ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
@@ -299,8 +301,8 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   let auditPoolIdsOverride: string[] | undefined
   let auditStagesOverride: ('dev' | 'staging' | 'prod')[] | undefined
 
-  if (delivery || observation || resource || service || monitoring) {
-    const result = monitoring ? monitoring.apply(next) : service ? service.apply(next) : resource ? resource.apply(next) : delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
+  if (delivery || observation || resource || service || monitoring || feature) {
+    const result = feature ? feature.apply(next) : monitoring ? monitoring.apply(next) : service ? service.apply(next) : resource ? resource.apply(next) : delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
     ;({ entityType, entityId, entityVersion, action, reason, fields, changed, operationId } = result)
     correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = result.poolIds; auditStagesOverride = result.stages
   } else if (patchCiId) {

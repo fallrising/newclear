@@ -5,7 +5,7 @@ export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environ
   | 'rd.catalog' | 'rd.catalog-request' | 'rd.requests' | 'rd.request-detail'
   | 'rd.pipelines' | 'rd.pipeline-detail' | 'rd.release-detail' | 'ops.releases' | 'ops.release-detail'
   | 'ops.overview' | 'ops.cmdb' | 'ops.ci-detail' | 'ops.topology' | 'ops.requests' | 'ops.request-detail'
-  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.users' | 'admin.navigation'
+  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.users' | 'admin.features' | 'admin.navigation'
   | 'admin.catalog' | 'admin.cmdb-models' | 'admin.audit' | 'guide'
   | 'rd.delivery' | 'rd.configuration' | 'rd.traffic' | 'ops.service-change'
   | 'rd.resources' | 'rd.resource-request' | 'rd.change-detail' | 'ops.change-detail'
@@ -48,6 +48,7 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'admin.overview', path: '/admin', center: 'admin', requiredAction: 'access.write', navigation: { label: '平台管理', group: '工作空間', order: 30, visible: true } },
   { key: 'admin.access', path: '/admin/access', center: 'admin', requiredAction: 'access.write', navigation: { label: '角色與範圍', group: '治理', order: 31, visible: true } },
   { key: 'admin.users', path: '/admin/users', center: 'admin', requiredAction: 'access.write', navigation: { label: '使用者與團隊', group: '治理', order: 31, visible: false } },
+  { key: 'admin.features', path: '/admin/features', center: 'admin', requiredAction: 'feature.write', navigation: { label: '功能灰度', group: '治理', order: 31, visible: false } },
   { key: 'admin.navigation', path: '/admin/navigation', center: 'admin', requiredAction: 'navigation.write', navigation: { label: '導航目錄', group: '治理', order: 32, visible: true } },
   { key: 'admin.catalog', path: '/admin/catalog', center: 'admin', requiredAction: 'catalog.write', navigation: { label: '服務目錄', group: '治理', order: 33, visible: true } },
   { key: 'admin.cmdb-models', path: '/admin/cmdb-models', center: 'admin', requiredAction: 'model.write', navigation: { label: 'CMDB 欄位', group: '治理', order: 34, visible: true } },
@@ -83,6 +84,8 @@ export function routeForPath(pathname: string) {
 export function canAccessRoute(session: SessionView, route: RegisteredRoute) {
   return (!route.center || route.crossCenterRead || session.centers.includes(route.center))
     && (!route.requiredAction || session.effectiveActions.includes(route.requiredAction))
+    && (!session.featureKeys || !['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'].includes(route.key)
+      || session.featureKeys.includes(route.key as NonNullable<SessionView['featureKeys']>[number]))
 }
 
 export function visibleNavigation(session: SessionView) {

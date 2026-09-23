@@ -80,3 +80,13 @@ it('registers W4 service and Ops alerting routes without granting cross-role wri
   expect(canAccessRoute(ops, routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(true)
   expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(false)
 })
+
+it('uses current W5 cohort entitlement for direct feature routes and protects Admin governance', () => {
+  const rd = session({ centers: ['rd'], effectiveActions: ['monitorPolicy.read', 'pipelineDefinition.read'], featureKeys: ['rd.delivery'] })
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/monitoring')!)).toBe(false)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/delivery')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout')!)).toBe(false)
+  const admin = session({ centers: ['admin'], effectiveActions: ['access.write', 'feature.write'], featureKeys: [] })
+  expect(canAccessRoute(admin, routeForPath('/admin/features')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/features')!)).toBe(false)
+})

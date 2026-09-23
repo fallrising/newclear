@@ -51,6 +51,8 @@ export const wireSchemas = {
   AcknowledgeIncident: d.acknowledgeIncidentInputSchema,
   CreateAssignment: d.createAssignmentInputSchema,
   CreateUser: d.createUserInputSchema, CreateTeam: d.createTeamInputSchema, PatchTeam: d.patchTeamInputSchema,
+  CreateFeature: d.createFeatureInputSchema, ReviseFeature: d.reviseFeatureInputSchema,
+  FeatureAction: d.featureActionInputSchema, RestoreFeature: d.restoreFeatureInputSchema,
   PatchUser: d.patchUserInputSchema,
   PatchNavigation: d.patchNavigationInputSchema,
   CreateCatalogRevision: d.createCatalogRevisionInputSchema,

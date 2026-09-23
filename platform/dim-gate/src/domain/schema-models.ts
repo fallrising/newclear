@@ -4,9 +4,11 @@ import { pipelineDefinitionSchema, serviceConfigSchema, trafficPolicySchema, ser
   pipelineDefinitionRunSnapshotSchema, serviceWorkSummarySchema } from './service-delivery-models.ts'
 import { monitorPolicySchema, alertRuleSchema, sloPolicySchema, silenceSchema, alertEvaluationSchema,
   notificationDeliverySchema, infrastructureMetricSchema, infrastructureIncidentSchema } from './monitoring-models.ts'
+import { featureKeySchema, platformFeatureSchema } from './feature-models.ts'
 export { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
 export * from './service-delivery-models.ts'
 export * from './monitoring-models.ts'
+export * from './feature-models.ts'
 
 export const centerSchema = z.enum(['rd', 'ops', 'admin'])
 export const providerSchema = z.enum(['aws', 'aliyun', 'onprem'])
@@ -417,13 +419,15 @@ export const legacySnapshotV4Schema = legacySnapshotV3Schema.extend({ schemaVers
   observations: legacySnapshotV3Schema.shape.observations.extend({ infrastructureMetrics: z.array(infrastructureMetricSchema) }),
 })
 export const snapshotSchema = legacySnapshotV4Schema.extend({ schemaVersion: z.literal(5), seedVersion: z.literal('dim-gate-w5-v1'),
-  entities: legacySnapshotV4Schema.shape.entities.extend({ users: z.array(userSchema), teams: z.array(teamSchema) }),
+  entities: legacySnapshotV4Schema.shape.entities.extend({ users: z.array(userSchema), teams: z.array(teamSchema),
+    platformFeatures: z.array(platformFeatureSchema) }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })
 export const sessionDomainSchema = z.strictObject({
   user: z.strictObject({ id: idSchema, displayName: nameSchema }), assignments: z.array(roleAssignmentSchema), effectiveActions: z.array(z.string()),
   centers: z.array(centerSchema), demo: z.literal(true), sessionId: idSchema, policyVersion: versionSchema,
+  featureKeys: z.array(featureKeySchema).optional(),
   storeRevision: z.number().int().nonnegative(), logicalClock: z.number().int().nonnegative(),
 })
 export const sessionViewSchema = sessionDomainSchema.extend({

@@ -15,6 +15,7 @@ import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
 import { readDelivery, canReadDelivery } from './delivery'
 import { readMonitoring } from './monitoring-views'
+import { featureEligibility, featureRegistry } from './feature-policy'
 export { DomainError } from './errors'
 
 export interface Engine {
@@ -147,7 +148,7 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     return !!source && !!target && policy.canReadCi(source) && policy.canReadCi(target)
   }
   if (audit.entityType === 'demoSession' && audit.action !== 'provision.scheduler.advance') return false
-  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario'].includes(audit.entityType)) return false
+  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario', 'platformFeature'].includes(audit.entityType)) return false
   return audit.scopeSnapshot.projectIds.some((id) => policy.hasProject(id)) || audit.scopeSnapshot.poolIds.some((id) => policy.poolIds.includes(id))
 }
 
@@ -253,6 +254,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, [])
       return clone({ user: { id: policy.user!.id, displayName: policy.user!.displayName }, assignments: policy.assignments,
         effectiveActions: policy.effectiveActions, centers: policy.centers, demo: true, sessionId: state.sessionId,
+        featureKeys: Object.keys(featureRegistry).filter(key => featureEligibility(state, policy, key as keyof typeof featureRegistry).eligible),
         policyVersion: state.policyVersion, storeRevision: state.storeRevision, logicalClock: state.logicalClock })
     }
     if (path === '/guide') {
@@ -265,6 +267,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!policy.centers.includes(center)) forbidden()
       if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled
         && (item.routeKey === 'guide' || item.routeKey.startsWith(`${center}.`))
+        && (!(item.routeKey in featureRegistry) || featureEligibility(state, policy, item.routeKey as keyof typeof featureRegistry).eligible)
         && (item.routeKey === 'guide' || item.routeKey.startsWith('rd.') && policy.effectiveActions.includes(item.routeKey === 'rd.catalog' ? 'catalog.read' : item.routeKey === 'rd.requests' ? 'request.read' : 'app.read')
           || item.routeKey.startsWith('ops.') && policy.effectiveActions.includes(item.routeKey === 'ops.requests' ? 'request.read' : item.routeKey === 'ops.jobs' ? 'job.read' : item.routeKey === 'ops.capacity' ? 'capacity.read' : 'ci.read')
           || item.routeKey.startsWith('admin.') && policy.admin))
@@ -451,6 +454,35 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return clone({ organizations: entities.organizations.filter((entry) => entry.id === policy.user!.orgId),
         users: entities.users.filter((entry) => entry.orgId === policy.user!.orgId),
         assignments: entities.assignments.filter((entry) => entry.orgId === policy.user!.orgId), policyVersion: state.policyVersion })
+    }
+    if (path === '/admin/platform-features') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      return clone(basicPage(entities.platformFeatures.filter(row => row.orgId === policy.user!.orgId)
+        .toSorted((a, b) => a.id.localeCompare(b.id)), query))
+    }
+    const previewFeatureId = /^\/admin\/platform-features\/([^/]+)\/preview$/.exec(path)?.[1]
+    if (previewFeatureId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const feature = entities.platformFeatures.find(row => row.id === previewFeatureId && row.orgId === policy.user!.orgId)
+      if (!feature) notFound()
+      return clone({ policyVersion: state.policyVersion, featureId: feature!.id,
+        items: entities.users.filter(row => row.orgId === policy.user!.orgId && row.source === 'seed').map(row => ({
+          userId: row.id, ...featureEligibility(state, policyFor(state, row.id), feature!.spec.featureKey),
+        })) })
+    }
+    const adminFeatureId = /^\/admin\/platform-features\/([^/]+)$/.exec(path)?.[1]
+    if (adminFeatureId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const feature = entities.platformFeatures.find(row => row.id === adminFeatureId && row.orgId === policy.user!.orgId)
+      return feature ? clone(feature) : notFound()
+    }
+    if (path === '/admin/capability-registry') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone(Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })))
     }
     if (path === '/admin/users' || path === '/admin/teams') {
       validateQuery(query, ['page', 'pageSize'])

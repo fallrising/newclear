@@ -12,9 +12,9 @@
 
 第一版的目標是可操作的示範產品：使用可重置、有狀態的模擬資料，不需要 AWS／Aliyun 帳戶或後端服務。規劃主線為「目錄與權限配置 → 資源納管 → 環境申請與審批 → 交付 → 發布 → 告警 → CMDB 影響定位 → 回滾」。baseline 包含60CI、6個應用與12個環境；Guide可由真實UI建立新環境並完成發布與恢復。
 
-## 三工作區後續設計
+## 三工作區增量
 
-[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。這些是新增設計，尚未實作；現有可操作版本仍為上述 v0.1。
+[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。W1 已實作獨立工作區／Demo 身分入口、分組導航和三角色首頁，操作方式見 [Demo 指南](docs/DEMO-GUIDE.md#w1-工作區體驗)，固定驗證及接受／合併狀態見 [STATUS](docs/STATUS.md)。W2–W5 仍為後續設計；既有 v0.1 申請、發布與觀測流程保留。
 
 ## 本機執行
 

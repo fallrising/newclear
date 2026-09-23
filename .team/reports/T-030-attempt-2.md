@@ -1,25 +1,23 @@
-STATUS: PARTIAL
+STATUS: DONE
 
 ## Summary
 
-T-030 integration attempt2, runDG-W1-20260923-01; lead owns all correction paths following T-030 worker release. Original base7a7b41b, previous reviewed7d60786, contract revision3 committedabd4b6c before code. Correction worktree `/home/ckc/test/codex/newclear-dim-gate-w1-rework`, branch `agent/dim-gate/task/t031-workspace-rework`; same PR33 continuation branch `agent/dim-gate/mainline/w1-workspaces` will receive this containing candidate via SSH. NOT_ACCEPTED.
+T-030 integration attempt2, run DG-W1-20260923-01. Lead integrated the released worker scope and corrected the strict RD workOwner projection under contractrev3. Domain/API implementation is03a7ee59c63dbe81d026116bac46058431744451 and unchanged in product candidate5cf495f60e22789b482b578b06e0ea64d135b177 and test-only continuation4ab62327b47c5924a22c84e99bab9c79e1dfbb0a. Canonical PR33/branch agent/dim-gate/mainline/w1-workspaces; sole lead owns integration. Worker worktree and original uncommitted handback remain preserved; worker ownership released.
 
-Lead integrated the shared schema/projection correction after worker release; related UI correction is in T-031. All three independent medium findings are corrected: legal project/environment retained into Admin; strict RD workOwner=all|mine controls actual Request.requesterId / Release.createdBy totals and rows; visible crossCenterRead diagnostic paths preserve source workspace/return for multi-grant users. URL, query keys, OpenAPI and docs updated together without snapshot/schema/seed/ID changes. Added shared-project two-initiator domain/HTTP/browser checks, full real-UI Pipeline→incident→observation→Back/reload, and repeatable nonempty Request→failed job→Admin draft/audit browser regression. All source entities remain canonical.
+Dashboard adds scoped RD/Ops/Admin discriminated projections, safe canonical references, dataAsOf and strict center-specific query filters. RD all/mine changes Request/Release work only; service visibility remains grant-based. Request approvals keep project/pool intersection; Release/Incident preserve project/stage policy. Domain snapshot/schemaVersion/seedVersion/IDs and business commands remain unchanged. Admin does not gain execution rights.
 
 ## Verification
 
-- Isolated correction working diff: pinned component `pnpm install --frozen-lockfile`334 cached; lint/typecheck/demo build — passed
-- `pnpm generate:contracts`73operations/173schemas, `pnpm exec vitest run src/domain/w1.test.ts src/demo/w1-handlers.test.ts`34/34 in560ms — passed
-- `DIM_GATE_TEST_PORT=4215 pnpm exec playwright test e2e/w1-workspaces.spec.ts`9/9 in1.2m — passed
-- After extending the diagnostic journey, focused `--grep 'multi-grant diagnostics'`1/1 in15.1s, all success transitions visible UI — passed
-- `pnpm exec playwright test e2e/w1-home-data.spec.ts`1/1 in20.6s; canonical request/job/draft/audit IDs, failure branch and cross-role state, zero page errors — passed
-- Original7d60786 native240 tests and6/6 Firefox/WebKit passed; full Chromium still running51/59 at checkpoint, none of that validates correction code — passed
-- Full immutable candidate gates, independent T-032 attempt2 and latest-head CI pending — skipped
+- Fixed5cf495f `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`245/245 in23files — passed
+- Fixed5cf495f `pnpm check:contracts`73operations/173schemas; generated OpenAPI matches common schemas/Mock contracts — passed
+- Focused domain/HTTP W1 coverage34 tests: scope before counts, foreign empty, missing/stale health, request-vs-release approval scope, mine/all, readonly snapshot invariant, strict unsupported filters — passed
+- Fixed5cf495f docs/ci/architecture/demo build and6/6 Firefox/WebKit smoke — passed
+- Uninvolved T-032 attempt2/3 confirms F01–03 closed; final domain/source inspection found no blocker/high/medium — passed
 
 ## Documentation
 
-Revision3 contract and task revisions were fixed before corrections. Attempt1 and original T-032 findings are retained. Local preliminary logs `/tmp/dim-gate-w1-evidence/rework-focused-browser.log`, `rework-diagnostic-browser.log`, `rework-nonempty-browser.log`; prior screenshots in `rework-first-nine`. Node24.18.0/pnpm11.18.0, same lockfile. An initial install invoked via root `pnpm --dir` selected12.5.1 and refused; rerunning from component selected pinned11.18.0 without bypassing version checks.
+Commands and timestamps: `/tmp/dim-gate-w1-evidence/5cf495f-20260923T064215Z/results.json`. Node24.18.0/pnpm11.18.0, lock SHA2560da752e9e75f7b22902ba601583d1979e0a0d63b34275bcc445c4286dec7a32b. Contractrev3 was fixedabd4b6c before corrections; taskrevision3. Earlier PARTIAL checkpoint remains in Git at5cf495f; T-030 attempt1 remains separate, including standalone integration typing limitation. Later Shell/tablet/scope fixes and M4 readiness test repair belong to T-031, not this domain handback.
 
 ## Risks and Follow-ups
 
-Candidate not accepted/merged. Source and evidence must be remotely saved; full new candidate native/browser/performance/isolation and independent review are next. Original7d60786 gate checkout stays unchanged until its own runner completes; remote PR branch may advance to correction independently. Then fast-forward lead local branch, verify source equality and GitHub exact head; all gates required before merge. W2–W5 remain unimplemented, no deployment or external effects.
+DONE applies to T-030 domain/API scope only, not W1 product acceptance or PR merge. T-031 must finish full browser/performance/isolation evidence, latest final-head CI and authorized merge. Original03a full E2E failure is preserved in T-031 attempt2 and corrected by4ab test assertions; no failed gate is relabeled. W2–W5 are not implemented. No live adapters or deployment.

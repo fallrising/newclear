@@ -618,3 +618,40 @@ remote_durability: containing evidence commit is SSH-pushed next; verify remote 
 blockers: []
 next_action: require latest PR-head CI, perform user-authorized merge without deleting branch/worktrees, record DONE/owner release on PR; then W1 needs its own implementation task/contract
 ```
+
+
+### W1 execution — DG-W1-20260923-01
+
+DG-D043 (2026-09-23): Reconcile latest SSH origin/main `7a7b41b2e74c2c635642dcb6c980363f6958968b`. PR31 MERGED at `73d48292f28743db01e92be2fb8b38d12c82e04e`, exact-head CI35741665554 and post-merge CI35745274207 succeeded; PR body releases DG-VIEWS ownership as DONE. No open PR and no W implementation remote branch at observation. Main contains unchanged dim-gate/ledger since design. M0–M5 remain ACCEPTED/MERGED; W1–W5 are unimplemented. All38 original worktrees preserved, including11 dirty historical/other-component trees; read-only manifest `/tmp/dim-gate-w1-evidence/initial-worktrees.json` is local-only. Existing preview4173 preserved.
+
+Lead takes this new isolated W1 run under user's explicit commit/SSH push/PR/merge authorization, applicable to each sequential milestone. [W1 contract](../platform/dim-gate/docs/W1-INTEGRATION-CONTRACT.md) freezes full scope and AC before code. T-030 domain/API worker owns shared schema/engine; T-031 lead owns Shell/UI/tests/docs and router/manifest/CI; T-032 uninvolved read-only reviewer. Built-in Codex collaboration inherits runtime; precise provider model slug not independently exposed. Claude CLI2.1.278 is authenticated, but concrete model/safe read-only routing not yet verified; built-in independent reviewer is the disclosed fallback, no multi-model claim. No external model source transfer. Complete kernel237aa277 source read from local Git objects, no new revision adopted or remote update verified. Node24.18.0 and component-pinned pnpm11.18.0; existing Chromium/Firefox/WebKit installations available.
+
+| Task | Owner | State |
+| --- | --- | --- |
+| [T-030](tasks/T-030.md) | bounded domain/API worker | READY |
+| [T-031](tasks/T-031.md) | Codex lead | RUNNING |
+| [T-032](tasks/T-032.md) | uninvolved reviewer | READY after candidate |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 43
+run_id: DG-W1-20260923-01
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+target_ref: main
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+implementation_commit: none
+local_tested_commit: none
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision1
+evidence_refs: []
+integration_state: NOT_OPENED
+remote_durability: local contract/task checkpoint; SSH push and draft PR next
+blockers: []
+next_action: implement scoped dashboard and independent workspace/persona UI, validate all W1 gates and fixed review, then latest PR-head CI and authorized merge before W2
+```

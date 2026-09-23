@@ -839,3 +839,29 @@ DG-D062: ae3bb49 actual W2 browser2/4pass (stagingRedisrefresh+scopeK8s/Admin); 
 DG-D063: fixed0ab838a completeaffectedChromium20/20PASS (4.0min), includes allM1+M2Admin+M2Request regressions, Redis staging/reload, Kafka failure/newdecision/retry, scopeK8s/Admin, W2responsivekeyboard/themeaxe andChromiumresourceSmoke. Production/dist fixed0ab artifacts test-results-w2-0ab838a; no gatesuppression. T033attempt2 stopped/released; exact7sourcefiles+report SHAverified andnowintegrated bylead. Worker168domain/301standaloneunitandunchangedbenchmark3/3passed303891gzip/720msLCP/0.4msquery/168.3msHTTP; leadcombinedfixedmeasurementnext. AddedgenuineW1activeRelease+Job browsermigration fixturecase (samefixedSHA, onlyupgradeboundary installsrawbytes; completionvisibleGuideclock), typecheck/lintpassed. T034attempt35governancebrowsercasesinprogress; first2pass, test-only catalogcollection/permissionexpectations beingcorrected. FullremainingM3–M5/W1regression,Firefox/WebKit,finalperf/isolation/review/latestCIstillpending;W2NOT_ACCEPTED.
 
 DG-D064: leadcombinedlazy-source workingdiff allnativePASS: frozenofflineinstall,lint,typecheck,314unit/29files,docs168/394,contracts91/209,CI,architecture,demo build. Sourcecandidatecontainingcheckpoint willbeSSHsavedandfixedperformance/migrationcheckednext. Existing0abCI35838780029 inprogresswithallnativepassed, Chromiumrunning; earlier1cCI35834058865SUCCESS, superseded285/ae3CIcancelledbyconfiguredconcurrency, notfailed/relabelled. W2ownerleadactive;T033released;T034browserattempt3active;T036stilluninvolved.
+
+DG-D065: fixed740a2bc leadbenchmark3/3PASS, fiveactualrequiredJS303924/307200bytes, LCPmedian724ms,5000CIqueryP950.5ms,100HTTPpersistP95168.6ms; emptytrackeddiff source metadata/rawJSONarchived740a2bc-performance. GenuineW1migrationbrowser1/1PASS8.0s; activeoriginalRelease+Job completeonceviaUIclockthenreload. Addedheldreal200resource-response isolationbrowser1/1PASS3.8s against740product+newtestfile;noDOMflash, scopedsearch,actualsuccesspayloadprecondition. T034attempt3 allwritesstopped/released, exactnewtest+reportSHAverified/integrated;5/5visiblegovernancejourneys2.1min/13axechecks pass. Workers nowallidle; leadsoleintegrationowner. Fullcandidate contains76Chromiumtests and8Firefox/WebKitsmokes; beginfullfixedgates anduninvolvedT036reviewnext. Actionlint/task/canonicalreportvalidatorspass; W2NOT_ACCEPTED/unmerged.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 65
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FULL_GATES_PENDING / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 integration; T036 fixed review next
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 740a2bca6c8ce657c185c276b61dcf661488ce3c
+local_tested_commit: 740a2bc native314/benchmark3/migration1; containing checkpoint adds governance5/isolation1 tests only
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-2.md, .team/reports/T-034-attempt-3.md, .team/reports/T-035-attempt-2.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 740a2bc SSH-saved; containing test/evidence checkpoint next SSH push
+blockers: []
+next_action: immutable candidate full76Chromium/8smoke/isolation; uninvolved T036 review; resolve findings, complete latest-headCI, recheck main/head and authorized merge; verify actual merge/tree/postmergeCI and release W2 before W3
+```

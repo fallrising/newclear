@@ -120,3 +120,5 @@ W2 checkpoint (DG-W2-20260923-01,2026-09-23): W1 postmerge [CI35833033838](https
 W2 browser/performance checkpoint:285b46f initial4journeysfailed; afterae3bb49 focus/settledclock repair stagingRedis/refresh andscopedK8s/Admin pass. RemainingactualHTMLpatternconsoleerror andkeyboardscrollregion defect nowcorrected; fullrerunpending. ActualinitialJS314429bytesfails300KiBbudget, soT033 is splittingnonstartupcommandcode whilepreservingstartupvalidation/atomicqueue.312integratedunitpass after13HTTPcases; resourceGuide andadditionalFirefox/WebKit storyadded. No W2 ACCEPTED/mergeclaim; seeT035attempt2 andlatestPLAN.
 
 W2 fixed0ab838a affectedChromium **20/20通過**（4.0分鐘）：既有M1/M2、Redis staging/刷新、Kafka失敗重試、隔離及明暗鍵盤/axe。T033效能修正7檔已SHA核對整合，worker完整benchmark3/3、303891bytes通過，仍待lead固定整合版本重測。genuineW1 activeRelease/Job瀏覽器升級案例已加入；治理瀏覽器及完整剩餘gates持續中。W2仍NOT_ACCEPTED，PR36draft。
+
+W2主控固定740a2bc：完整benchmark3/3通過（實際初始JS303924/307200bytes，LCP724ms、queryP950.5ms、HTTPP95168.6ms）；genuineW1升級browser1/1與真200舊資源回應隔離browser1/1通過。T034治理browser5/5、13axe掃描通過並SHA交接整合。所有worker寫入已釋放；lead接續固定候選完整76Chromium、8Firefox/WebKit、isolation、獨立T036review與最新headCI。仍未W2ACCEPTED或合併。

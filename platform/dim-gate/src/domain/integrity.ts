@@ -7,6 +7,7 @@ import { resourceIntegrityErrors } from './resource-integrity'
 import { monitoringIntegrityErrors } from './monitoring-integrity'
 import { demoPersonaIds } from './policy'
 import { featureRegistry, featureSpecSupported } from './feature-policy'
+import { platformRouteRegistry, routeSpecSupported } from './platform-route-registry'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -47,6 +48,20 @@ export function integrityErrors(snapshot: Snapshot): string[] {
       for (const id of revision.spec.eligibleProjectIds) if (!linked(entities.projects, id, feature.orgId)) errors.push('platformFeature: invalid project')
       for (const id of revision.spec.eligibleTeamIds) if (!linked(entities.teams, id, feature.orgId)) errors.push('platformFeature: invalid team')
     }
+  }
+  if (new Set(entities.platformRoutes.map(row => `${row.orgId}:${row.spec.routeKey}`)).size !== entities.platformRoutes.length)
+    errors.push('platformRoute: duplicate key')
+  for (const route of entities.platformRoutes) {
+    if (!routeSpecSupported(route.spec)) errors.push('platformRoute: unsupported registry target')
+    if (route.revisions.length !== route.revision || route.revisions.some((revision, index) =>
+      revision.revision !== index + 1 || revision.spec.routeKey !== route.spec.routeKey || !routeSpecSupported(revision.spec)))
+      errors.push('platformRoute: invalid revision lineage')
+    if (JSON.stringify(route.revisions.at(-1)?.spec) !== JSON.stringify(route.spec)) errors.push('platformRoute: mutable spec mismatch')
+    if (route.activeRevision !== null && route.activeRevision > route.revision) errors.push('platformRoute: invalid active revision')
+    if (route.status === 'active' && route.activeRevision === null) errors.push('platformRoute: active state without revision')
+    if (!entities.integrations.some(row => row.id === route.spec.integrationId && row.orgId === route.orgId)) errors.push('platformRoute: invalid integration')
+    if (!(route.spec.routeKey in platformRouteRegistry)) errors.push('platformRoute: unknown route key')
+    if (route.health.testedRevision !== null && route.health.testedRevision > route.revision) errors.push('platformRoute: invalid health revision')
   }
   for (const app of entities.applications) {
     const project = linked(entities.projects, app.projectId, app.orgId)
@@ -115,7 +130,7 @@ export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
     entities: { ...snapshot.entities,
       users: snapshot.entities.users.map(user => ({ ...user, source: 'seed' as const })),
       teams: snapshot.entities.teams.map(team => ({ ...team, source: 'seed' as const })),
-      platformFeatures: [],
+      platformFeatures: [], platformRoutes: [],
     } })
 }
 

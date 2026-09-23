@@ -5,10 +5,12 @@ import { pipelineDefinitionSchema, serviceConfigSchema, trafficPolicySchema, ser
 import { monitorPolicySchema, alertRuleSchema, sloPolicySchema, silenceSchema, alertEvaluationSchema,
   notificationDeliverySchema, infrastructureMetricSchema, infrastructureIncidentSchema } from './monitoring-models.ts'
 import { featureKeySchema, platformFeatureSchema } from './feature-models.ts'
+import { platformRouteSchema } from './platform-route-models.ts'
 export { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
 export * from './service-delivery-models.ts'
 export * from './monitoring-models.ts'
 export * from './feature-models.ts'
+export * from './platform-route-models.ts'
 
 export const centerSchema = z.enum(['rd', 'ops', 'admin'])
 export const providerSchema = z.enum(['aws', 'aliyun', 'onprem'])
@@ -420,7 +422,7 @@ export const legacySnapshotV4Schema = legacySnapshotV3Schema.extend({ schemaVers
 })
 export const snapshotSchema = legacySnapshotV4Schema.extend({ schemaVersion: z.literal(5), seedVersion: z.literal('dim-gate-w5-v1'),
   entities: legacySnapshotV4Schema.shape.entities.extend({ users: z.array(userSchema), teams: z.array(teamSchema),
-    platformFeatures: z.array(platformFeatureSchema) }),
+    platformFeatures: z.array(platformFeatureSchema), platformRoutes: z.array(platformRouteSchema) }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })

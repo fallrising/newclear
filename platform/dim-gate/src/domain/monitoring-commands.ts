@@ -8,7 +8,7 @@ import { createAlertRuleInputSchema, createMonitorPolicyInputSchema, createSilen
 import { fail, forbidden, notFound, parse } from './engine-shared'
 import { activeSpec, monitoringNow, requireTarget, ruleTarget, targetScope, validateMonitorSpec, validateRuleSpec } from './monitoring'
 import { runAlertScenario } from './monitoring-evaluation'
-import { featureEligibility } from './feature-policy'
+import { existingCommandReceipt, featureEligibility } from './feature-policy'
 
 type Kind = 'monitorPolicy' | 'alertRule' | 'sloPolicy'
 type Config = MonitorPolicy | AlertRule | SLOPolicy
@@ -74,7 +74,7 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
     requireTarget(s, policy, targetRef, mode)
     const scope = targetScope(s, targetRef)
     const featureKey = targetRef.kind === 'service' ? 'rd.monitoring' : 'ops.alerting'
-    if (mode === 'write' && !featureEligibility(s, policy, featureKey, scope?.projectId).eligible)
+    if (mode === 'write' && !existingCommandReceipt(s, input) && !featureEligibility(s, policy, featureKey, scope?.projectId).eligible)
       fail(403, 'FEATURE_UNAVAILABLE', '目前功能政策不允許新的監控指令。')
     return { apply(next) {
       const now = monitoringNow(next)

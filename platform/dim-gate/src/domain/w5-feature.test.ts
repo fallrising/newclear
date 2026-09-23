@@ -18,10 +18,11 @@ describe('W5 registered feature cohort', () => {
   it('intersects current grant, team and deterministic cohort on domain commands', async () => {
     const { engine, command } = harness()
     expect(engine.read('/session', new URLSearchParams(), 'user-ops')).toMatchObject({ featureKeys: expect.arrayContaining(['rd.delivery']) })
-    const monitor = await command('user-rd-commerce', '/monitor-policies', { spec: {
+    const originalBody = { spec: {
       target: { kind: 'service', applicationId: 'app-checkout', environmentId: 'env-checkout-dev' },
       source: 'demo-red', metrics: ['errorRate'], sampleIntervalSeconds: 60, freshnessSeconds: 120, enabled: true,
-    }, reason: 'Existing accepted monitor remains readable' })
+    }, reason: 'Existing accepted monitor remains readable' }
+    const monitor = await command('user-rd-commerce', '/monitor-policies', originalBody, 'w5-monitor-original')
     const first = await command('user-admin', '/admin/platform-features', { spec: spec(0), reason: 'Zero cohort test' })
     const current = () => engine.getSnapshot().entities.platformFeatures.find(row => row.id === first.entityId)!
     await command('user-admin', `/admin/platform-features/${first.entityId}/validate`, { expectedVersion: current().version, reason: 'Validate registry' })
@@ -36,6 +37,9 @@ describe('W5 registered feature cohort', () => {
       target: { kind: 'service', applicationId: 'app-checkout', environmentId: 'env-checkout-dev' },
       source: 'demo-red', metrics: ['errorRate'], sampleIntervalSeconds: 60, freshnessSeconds: 120, enabled: true,
     }, reason: 'Denied new feature command' })).rejects.toMatchObject({ status: 403, code: 'FEATURE_UNAVAILABLE' })
+    expect(await command('user-rd-commerce', '/monitor-policies', originalBody, 'w5-monitor-original')).toEqual(monitor)
+    await expect(command('user-rd-commerce', '/monitor-policies', { ...originalBody, reason: 'Changed old key' }, 'w5-monitor-original'))
+      .rejects.toMatchObject({ status: 409 })
     expect(engine.read(`/monitor-policies/${monitor.entityId}`, new URLSearchParams(), 'user-rd-commerce')).toMatchObject({ id: monitor.entityId })
   })
 

@@ -53,6 +53,8 @@ export const wireSchemas = {
   CreateUser: d.createUserInputSchema, CreateTeam: d.createTeamInputSchema, PatchTeam: d.patchTeamInputSchema,
   CreateFeature: d.createFeatureInputSchema, ReviseFeature: d.reviseFeatureInputSchema,
   FeatureAction: d.featureActionInputSchema, RestoreFeature: d.restoreFeatureInputSchema,
+  CreatePlatformRoute: d.createPlatformRouteInputSchema, RevisePlatformRoute: d.revisePlatformRouteInputSchema,
+  PlatformRouteAction: d.platformRouteActionInputSchema, RestorePlatformRoute: d.restorePlatformRouteInputSchema,
   PatchUser: d.patchUserInputSchema,
   PatchNavigation: d.patchNavigationInputSchema,
   CreateCatalogRevision: d.createCatalogRevisionInputSchema,

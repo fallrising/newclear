@@ -5,8 +5,8 @@ import { createSeed } from './seed'
 
 function legacyBytes() {
   const current = createSeed('w5-migrate-session')
-  const { platformFeatures: _platformFeatures, ...oldEntities } = current.entities
-  void _platformFeatures
+  const { platformFeatures: _platformFeatures, platformRoutes: _platformRoutes, ...oldEntities } = current.entities
+  void _platformFeatures; void _platformRoutes
   const snapshot = legacySnapshotV4Schema.parse({ ...current, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
     entities: { ...oldEntities,
       users: current.entities.users.map(({ source: _source, ...user }) => { void _source; return user }),
@@ -38,6 +38,7 @@ describe('W5 strict atomic W4 snapshot migration', () => {
       if (key !== 'users' && key !== 'teams') expect(migrated.entities[key as keyof typeof migrated.entities]).toEqual(rows)
     }
     expect(migrated.entities.platformFeatures).toEqual([])
+    expect(migrated.entities.platformRoutes).toEqual([])
     expect(migrated.audit).toEqual(original.snapshot.audit)
     expect(migrated.idempotency).toEqual(original.snapshot.idempotency)
     expect(h.writes).toBe(1)

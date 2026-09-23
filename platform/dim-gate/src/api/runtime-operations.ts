@@ -562,6 +562,34 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   },
   {
     "method": "get",
+    "path": "/admin/platform-routes",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/platform-routes/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/platform-routes/{id}/diagnostic",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/platform-route-registry",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
     "path": "/notifications",
     "status": 200,
     "demo": false,
@@ -626,6 +654,55 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   {
     "method": "post",
     "path": "/admin/platform-features/{id}/restore",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/disable",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/test",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/platform-routes/{id}/restore",
     "status": 201,
     "demo": false,
     "milestone": "W5"

@@ -16,6 +16,7 @@ import { DomainError } from './errors'
 import { readDelivery, canReadDelivery } from './delivery'
 import { readMonitoring } from './monitoring-views'
 import { featureEligibility, featureRegistry } from './feature-policy'
+import { platformRouteRegistry, routeDiagnostic } from './platform-route-registry'
 export { DomainError } from './errors'
 
 export interface Engine {
@@ -148,7 +149,7 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     return !!source && !!target && policy.canReadCi(source) && policy.canReadCi(target)
   }
   if (audit.entityType === 'demoSession' && audit.action !== 'provision.scheduler.advance') return false
-  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario', 'platformFeature'].includes(audit.entityType)) return false
+  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario', 'platformFeature', 'platformRoute'].includes(audit.entityType)) return false
   return audit.scopeSnapshot.projectIds.some((id) => policy.hasProject(id)) || audit.scopeSnapshot.poolIds.some((id) => policy.poolIds.includes(id))
 }
 
@@ -483,6 +484,31 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, [])
       if (!policy.admin) forbidden()
       return clone(Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })))
+    }
+    if (path === '/admin/platform-routes') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      return clone(basicPage(entities.platformRoutes.filter(row => row.orgId === policy.user!.orgId)
+        .toSorted((a, b) => a.id.localeCompare(b.id)), query))
+    }
+    const routeDiagnosticId = /^\/admin\/platform-routes\/([^/]+)\/diagnostic$/.exec(path)?.[1]
+    if (routeDiagnosticId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const route = entities.platformRoutes.find(row => row.id === routeDiagnosticId && row.orgId === policy.user!.orgId)
+      return route ? clone(routeDiagnostic(state, route.spec.routeKey)) : notFound()
+    }
+    const adminRouteId = /^\/admin\/platform-routes\/([^/]+)$/.exec(path)?.[1]
+    if (adminRouteId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const route = entities.platformRoutes.find(row => row.id === adminRouteId && row.orgId === policy.user!.orgId)
+      return route ? clone(route) : notFound()
+    }
+    if (path === '/admin/platform-route-registry') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone(Object.entries(platformRouteRegistry).map(([routeKey, entry]) => ({ routeKey, ...entry, status: 'mock' as const })))
     }
     if (path === '/admin/users' || path === '/admin/teams') {
       validateQuery(query, ['page', 'pageSize'])

@@ -18,7 +18,7 @@ export function readStoredSnapshot(value: unknown): Snapshot {
       entities: { ...original.entities,
         users: original.entities.users.map(user => ({ ...user, source: 'seed' })),
         teams: original.entities.teams.map(team => ({ ...team, source: 'seed' })),
-        platformFeatures: [],
+        platformFeatures: [], platformRoutes: [],
       } })
     const migratedErrors = integrityErrors(migrated)
     if (migratedErrors.length) throw new Error(`Invalid migrated relationships: ${migratedErrors.join('; ')}`)

@@ -88,5 +88,7 @@ it('uses current W5 cohort entitlement for direct feature routes and protects Ad
   expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout')!)).toBe(false)
   const admin = session({ centers: ['admin'], effectiveActions: ['access.write', 'feature.write'], featureKeys: [] })
   expect(canAccessRoute(admin, routeForPath('/admin/features')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['route.write'] }), routeForPath('/admin/routes')!)).toBe(true)
   expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/features')!)).toBe(false)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/routes')!)).toBe(false)
 })

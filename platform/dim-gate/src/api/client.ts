@@ -136,6 +136,8 @@ export function createApiClient() {
       listAdminTeams: true, getAdminTeam: true, createAdminTeam: true, patchAdminTeam: true,
       listPlatformFeatures: true, getPlatformFeature: true, previewPlatformFeature: true, getCapabilityRegistry: true,
       createPlatformFeature: true, revisePlatformFeature: true, platformFeatureAction: true, restorePlatformFeature: true,
+      listPlatformRoutes: true, getPlatformRoute: true, getPlatformRouteDiagnostic: true, getPlatformRouteRegistry: true,
+      createPlatformRoute: true, revisePlatformRoute: true, platformRouteAction: true, restorePlatformRoute: true,
       createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
     }, getClientIdentity),
     ...deferredClient(() => import('./clients/delivery').then(module => module.createDeliveryClient(request)), {

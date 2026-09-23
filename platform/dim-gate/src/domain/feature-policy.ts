@@ -1,6 +1,7 @@
 import type { Snapshot } from './schema-models'
 import type { Policy } from './policy'
 import type { FeatureSpec } from './feature-models'
+import type { CommandInput } from './command-input-schemas'
 
 export const featureRegistry = {
   'rd.monitoring': { center: 'rd', action: 'monitorPolicy.read', route: '/rd/apps/:appId/monitoring', capabilityId: 'service-monitoring' },
@@ -10,6 +11,12 @@ export const featureRegistry = {
 } as const
 
 export type FeatureKey = keyof typeof featureRegistry
+
+/** Domain preparation still checks current actor and resource scope before an old receipt can replay. */
+export function existingCommandReceipt(snapshot: Snapshot, input: CommandInput): boolean {
+  return snapshot.idempotency.some(row => row.sessionId === input.sessionId && row.actorId === input.actorId
+    && row.method === input.method.toUpperCase() && row.path === input.path && row.key === input.key)
+}
 
 /** FNV-1a over code points is deterministic across refresh, rendering and list order. */
 export function cohortBucket(userId: string, featureKey: FeatureKey, saltVersion: number): number {

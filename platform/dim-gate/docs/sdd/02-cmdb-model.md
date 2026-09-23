@@ -152,3 +152,8 @@ M4 的 observation buckets／traces／logs／recoveries、scope projection、Gui
 ## W2 integration delta
 
 W2 snapshot version2 adds ResourceObject, ResourceBinding, ResourceQuota, ChangeRequest and ChangeExecution with shared canonical IDs. Bindings reuse one Placement per app/env/CI; legacy Placement grants no access. Redis quotaMiB and Kafka topics/partitions/KiB-per-second are distinct from physical CPU/memory and unknown observed usage. Parent/kind/namespace/externalRef uniqueness and stable planned IDs survive retry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約新增 pipeline-definitions、service-configs、traffic-policies 三類列表／詳情／版本化 command 與 application delivery-options；完整路徑和 typed bodies 見合約。讀 scope 外404、action403、invalid422、stale/base/lock409、storage507；目前授權先於 replay。OpenAPI、runtime manifest、Mock、typed client 與行為測試在同 PR 一致交付。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

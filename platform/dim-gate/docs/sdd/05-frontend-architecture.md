@@ -106,3 +106,8 @@ W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict 
 ## W2 integration delta
 
 W2 snapshot version2 uses the existing shared controller, queue, idempotency and sessionStorage key. Strict version1 reader validates genuine W1 active operations before atomic conversion; failed conversion preserves original bytes. Resource UI uses typed clients, identity/policy-keyed queries and lazy public feature exports. Lightweight runtime operation descriptors are generated and checked from canonical OpenAPI contracts. Initial required JS retains the existing 300KiB budget; no measurement exclusions. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 沿用 initial JS307200bytes、冷啟動LCP、5,000CI query 與 persisted HTTP command 基準，不提高預算。新的 command/scheduler 可分離至既有 lazy queue，但必要 startup schema/relationship/scheduler validation 保持執行。全主題、三viewport、keyboard、Firefox/WebKit、sibling/live isolation 和 no stale persona cache 均為 exit gates。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

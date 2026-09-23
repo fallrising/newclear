@@ -79,3 +79,8 @@ AWS／Aliyun／IDC、CI provider、APM provider 使用 `Integration` metadata，
 ## W2 integration delta
 
 W2 explicit actions binding.read/resourceObject.read/change.* and resource.manage are independent of navigation. RD reads through authorized bindings and project/stage; Ops physical pool access does not reveal service-private objects without project/stage. Shared resize requires all affected consumers. Self approval is denied; a qualified requester may execute after a different Ops decision. Admin receives typed Redis/Kafka catalog governance, without resource payload or execution authority. Registered catalog metadata does not grant access. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD requester 現有 project/stage 決定寫入；Ops 全部受影響 project/stage 且非本人批准，Admin-only 和 pool-only 無業務配置權。prod 执行重查批准者現行 scope；移除 prod target 仍檢查前一 family revision 的受影響範圍。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

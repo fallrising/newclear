@@ -1,6 +1,6 @@
 # W3 integration contract
 
-Revision 1 · run DG-W3-20260923-01 · base W2 merge `91626851fb17df7ab31c96dee9353b9ee4d42c92` · WS-SDD revision1 · full AC-WS-10/11/15–18.
+Revision 2 · run DG-W3-20260923-01 · base W2 merge `91626851fb17df7ab31c96dee9353b9ee4d42c92` · WS-SDD revision1 · full AC-WS-10/11/15–18.
 
 ## Scope and accepted dependency
 
@@ -104,3 +104,10 @@ Only2,723bytes initial-JS headroom remains at W2. Keep required startup snapshot
 - Real UI success/denial/failure, all main dialogs by keyboard, light/dark1440/768/390 axe/readability, deep refresh and Firefox/WebKit closed-loop smoke; no store-written business success.
 - Frozen install/lint/typecheck/test/docs/contracts/CI/architecture/demo build, complete Chromium, smoke, unchanged fresh benchmark, actual sibling/live isolation, actionlint/diff and pinned task/report validators. No gate reduction, retries or ignored health errors. Complete focused checks and fixed uninvolved review before the final full run where practical; independent final evidence follow-up still required.
 - Latest exact PR-head CI, fresh SSH main/head reconciliation, user-authorized merge, actual merge/tree/post-merge-CI check, durable reports/PLAN/STATUS/PR closeout and ownership release before W4. Reuse existing recoverable PR if found. Preserve every historical worktree/branch/dirty result. No force/main push/deployment/external side effect.
+
+
+## Revision 2 interface clarification (before dependent implementation)
+
+RD route query `revisionId` selects a historical or current canonical revision and survives deep refresh; `environmentId` retains the selected scope. Hidden route keys are `rd.delivery`, `rd.configuration`, `rd.traffic`, `ops.service-change`; no additional navigation seed entry is required. Legacy V1/V2 route enums remain frozen. New feature public exports: DeliveryPage, ConfigurationPage, TrafficPage and ServiceChangePage, each receives current SessionView. Detail source field is `source`; typed variants additionally provide definition active/history/runs, config active/history/diff/executions, or traffic effective/currentStep/history/executions.
+
+Existing Demo `/scenarios` gains `config-failure`, `traffic-abnormal`, `traffic-missing`, each targeted by executionId and current source read/action scope; invalid legacy/new field combinations are422. No global future-work poisoning. The selected scenario applies to that running execution's next/current due step until terminal; config-failure deterministically fails render, traffic-abnormal supplies900ms/0.08 and traffic-missing suppliesunknown samples. Setting a scenario is an audited Mock control, never successful completion. Existing scenario keys/targets retain their semantics. Registered fake repository/artifact/secret/endpoint/match references are app scoped, not external URLs.

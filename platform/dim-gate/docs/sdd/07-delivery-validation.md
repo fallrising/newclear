@@ -87,3 +87,8 @@ M0不應一口氣生成所有module的空白頁，也不需要登入雲帳戶。
 ## W2 integration delta
 
 W2 acceptance is AC-WS-03–09/15–18 from14-workspace-delivery.md, including actual staging Request → Redis binding, Kafka uniqueness/failure/retry, quota races, shared resize/nonself approval, Admin catalog governance, readonly K8s, current-policy isolation and genuine old-session migration. Full original regressions, new browser journeys, fixed commit review, latest-head CI and verified merge remain mandatory. Preliminary tests/build are not milestone acceptance. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 完整 exit AC-WS-10/11/15–18：定義修訂不改舊run、prod獨立批准、配置失敗保留與新版本restore、同env10→50→100真實健康窗口及失敗留住已驗證權重、雙向鎖/撤權/replay、原子W1/W2migration及既有回歸。需完整native/Chromium/smoke/benchmark/isolation、未參與實作的固定commitreview及精確最新PRheadCI後才可接受合併。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

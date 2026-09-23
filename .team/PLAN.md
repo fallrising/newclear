@@ -987,3 +987,6 @@ remote_durability: W2 merged; containing W3 contract checkpoint nextSSHpush
 blockers: []
 next_action: validate and SSHsave contract to one draftW3PR; create isolated T037/T038 worktrees, publish schema/client interfaces, implement fullW3; monitor actualW2postmergeCI; complete all gates/review/latestheadCI/authorizedmerge before W4
 ```
+
+
+DG-D075: contract checkpoint9b4a4c7 SSH-saved in single draft [PR37](https://github.com/fallrising/newclear/pull/37). T037/T038 active only in separate new worktrees at9b; T040 remains uninvolved/idle. Revision2 fixes agreed public DTO/page names, historical revisionId query and execution-targeted Demo faults before dependent implementation; no AC reduction. Lead captured genuine W2 snapshot with concurrent Release/ProvisionJob/KafkaChange via canonical controller commands in fresh detached accepted9162685 capture tree; actual baseline full322 tests/30files passed, output /tmp/dim-gate-w3-evidence/w2-fixture-capture.log. Original capture tree retained. This proves fixture provenance, not W3 migration. W3 domain/API/UI/validation remains underway and NOT_ACCEPTED; PR37 preserves continuation branch and single lead ownership.

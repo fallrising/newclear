@@ -679,3 +679,5 @@ remote_durability: initial02a8b9a saved; containing implementation checkpoint SS
 blockers: []
 next_action: finish W1 browser tests; run fixed candidate native/full browser/smoke/benchmark/isolation gates and T-032 review; latest-head CI before authorized merge then W2
 ```
+
+DG-D046: Implementation6f41224 SSH-pushed to PR33. Initial W1 browser6/7 failure was a nonexistent test label; real no-grant recovery/denial passes after using visible Session control. Initial3/3 benchmark passes; no budget relaxed. Preserve preliminary evidence in T-031 attempt1; next candidate starts fixed validation and T-032 independent review, not acceptance.

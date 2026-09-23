@@ -13,6 +13,8 @@ The Shell now separates workspace and Demo identity, limits grouped navigation t
 - Integrated working diff: `pnpm build --mode demo`, no manifest/lockfile changes — passed
 - Preliminary Shell lint, `check:architecture`, `check:docs`146 documents/335 links and `git diff --check` — passed
 - Initial docs-only02a8b9a CI35823661263 completed successfully; this does not validate W1 code — passed
+- Preliminary W1 Chromium6/7: no-grant test used incorrect recovery link label; actual visible Session control preserved and corrected assertion rerun1/1 passed — failed
+- Preliminary benchmark3/3 and representative RD1440/Admin768/Ops390 screenshot inspection — passed
 - Fixed-commit native/full browser/smoke/performance/isolation gates and independent T-032 review pending — skipped
 
 ## Documentation

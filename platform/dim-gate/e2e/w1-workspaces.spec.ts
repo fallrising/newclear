@@ -64,7 +64,7 @@ test('AC-WS-01/02: no-grant recovery and illegal workspace deep link do not gran
   await page.getByRole('combobox', { name: '示範身分' }).selectOption('user-rd-data')
   await expect(page.getByRole('heading', { name: '目前沒有已授權工作區' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: '工作區', exact: true })).toBeDisabled()
-  await expect(page.getByRole('link', { name: '示範控制台', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Session 控制', exact: true })).toBeVisible()
   await page.goto('ops')
   await expect(page.getByRole('heading', { name: '目前身分無法進入維運中心' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'ops 工作首頁' })).toHaveCount(0)

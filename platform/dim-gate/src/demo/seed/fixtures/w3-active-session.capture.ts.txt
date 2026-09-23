@@ -1,0 +1,17 @@
+// Captured against accepted W3 product SHA 46e3a557fcd1ff40221ce6881a7565b73c5daa7e.
+// Output: w3-active-session.json, SHA256 8d8271b06a5a114d4e218cdae2dae8315d6d8988cdebbe3091bb29ad1583c0a8.
+// Run as a temporary Vitest test from a W3 worktree. The fixture contains a
+// validated service configuration and an in-flight config execution.
+import { writeFileSync } from 'node:fs'
+import { createController } from '../../controller'
+
+let raw: string | null = null
+const controller = createController({ storage: { getItem: () => raw, setItem: (_key, value) => { raw = value } },
+  createSessionId: () => 'w3-active-migration-fixture' })
+const identity = () => { const session = controller.getSession(); return controller.authenticate(session.sessionId, session.user.id) }
+const id = 'w3-config-checkout-dev-1'
+await controller.command('POST', `/service-configs/${id}/validate`, { expectedVersion: 1, reason: 'Capture W3 validated config' }, 'w3-fixture-validate', identity())
+const config = controller.getSnapshot().entities.serviceConfigs.find(row => row.id === id)!
+await controller.command('POST', `/service-configs/${id}/apply`, { expectedVersion: config.version, reason: 'Capture W3 running execution' }, 'w3-fixture-apply', identity())
+if (!raw || controller.getSnapshot().entities.serviceExecutions.length !== 1) throw new Error('Capture did not execute W3 config')
+writeFileSync(new URL('./w3-active-session.json', import.meta.url), raw)

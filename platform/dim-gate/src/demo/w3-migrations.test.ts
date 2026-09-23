@@ -26,13 +26,20 @@ describe('W3 atomic migration of genuine accepted W2 bytes', () => {
     expect(createHash('sha256').update(file).digest('hex')).toBe('2180e098e84bdcccaa35c6573d623577985b2480b780e30a1302965078e6607b')
     expect(legacySnapshotV2Schema.parse(original.snapshot)).toEqual(original.snapshot)
     const h = harness(), c = h.start(), migrated = c.getSnapshot()
-    expect(migrated).toMatchObject({ schemaVersion: 3, seedVersion: 'dim-gate-w3-v1' })
+    expect(migrated).toMatchObject({ schemaVersion: 4, seedVersion: 'dim-gate-w4-v1' })
     expect(h.writes).toBe(1)
     for (const [key, value] of Object.entries(original.snapshot)) {
-      if (!['schemaVersion', 'seedVersion', 'entities'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
+      if (!['schemaVersion', 'seedVersion', 'entities', 'observations'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
     }
-    for (const [key, value] of Object.entries(original.snapshot.entities)) expect(migrated.entities[key as keyof typeof original.snapshot.entities]).toEqual(value)
+    expect(migrated.observations).toEqual({ ...original.snapshot.observations, infrastructureMetrics: [] })
+    for (const [key, value] of Object.entries(original.snapshot.entities)) {
+      const result = migrated.entities[key as keyof typeof original.snapshot.entities]
+      if (key === 'navigation') expect(result.slice(0, value.length)).toEqual(value)
+      else expect(result).toEqual(value)
+    }
+    expect(migrated.entities.navigation).toHaveLength(original.snapshot.entities.navigation.length + 3)
     for (const key of ['pipelineDefinitions', 'serviceConfigs', 'trafficPolicies', 'serviceExecutions'] as const) expect(migrated.entities[key]).toEqual([])
+    for (const key of ['monitorPolicies', 'alertRules', 'sloPolicies', 'silences', 'alertEvaluations', 'notificationDeliveries', 'infrastructureIncidents'] as const) expect(migrated.entities[key]).toEqual([])
     expect({ ...JSON.parse(h.raw), snapshot: null }).toEqual({ ...original, snapshot: null })
     expect(c.getTabOwnershipId()).toBe(original.tabOwnershipId)
     expect(c.getSession()).toMatchObject({ user: { id: original.personaId }, identityEpoch: original.identityEpoch, generation: original.generation })
@@ -92,14 +99,14 @@ describe('W3 atomic migration of genuine accepted W2 bytes', () => {
     const h = harness(); h.fail()
     expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_STORAGE_UNAVAILABLE' }))
     expect(h.raw).toBe(originalBytes); expect(h.writes).toBe(0)
-    h.restore(); expect(h.start().getSnapshot().schemaVersion).toBe(3); expect(h.writes).toBe(1)
+    h.restore(); expect(h.start().getSnapshot().schemaVersion).toBe(4); expect(h.writes).toBe(1)
   })
 
   it('keeps corrupt bytes during explicit memory recovery and resets only when requested', () => {
     const h = harness('{broken')
     expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_CORRUPT' }))
     const memory = createController({ storage: h.storage, createSessionId: () => 'w3-memory', mode: 'memory' })
-    expect(memory.getSnapshot().schemaVersion).toBe(3); expect(h.raw).toBe('{broken'); expect(h.writes).toBe(0)
+    expect(memory.getSnapshot().schemaVersion).toBe(4); expect(h.raw).toBe('{broken'); expect(h.writes).toBe(0)
     const reset = createController({ storage: h.storage, createSessionId: () => 'w3-reset', recovery: 'reset' })
     expect(reset.getSnapshot().entities.cis).toHaveLength(63); expect(h.writes).toBe(1)
     expect(reset.getSnapshot().scheduler.tasks).toEqual([])

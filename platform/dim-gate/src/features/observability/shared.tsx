@@ -5,6 +5,7 @@ import { api, queryKey } from '../../api/client'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import type { Environment, Incident, SessionView } from '../../domain/schemas'
+import type { InfrastructureIncident } from '../../domain/monitoring-models'
 import './observability.css'
 
 export const incidentLabels: Record<Incident['state'], string> = { open: '待認領', acknowledged: '已認領', investigating: '調查中', resolved: '已恢復' }
@@ -35,7 +36,7 @@ export function ScopeBadge({ environment, applicationId }: { environment: Enviro
   return <div className="observation-scope"><span className="tag">{environment.stage}</span><Link to={`/rd/apps/${encodeURIComponent(applicationId)}/environments/${encodeURIComponent(environment.id)}`}>{environment.name}</Link><code>{environment.id}</code><span className="tag">模擬觀測</span></div>
 }
 
-export function IncidentStatus({ incident }: { incident: Incident }) {
+export function IncidentStatus({ incident }: { incident: Incident | InfrastructureIncident }) {
   return <span className={`status ${incident.state === 'resolved' ? 'status-healthy' : incident.severity === 'critical' ? 'status-unhealthy' : 'status-degraded'}`}>{incidentLabels[incident.state]} · {incident.severity}</span>
 }
 

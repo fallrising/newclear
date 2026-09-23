@@ -1,6 +1,6 @@
 # 10 — RD 業務研發工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1／W2 已驗收合併；W3 固定產品已驗收，PR37 最終文件 head CI／合併另行對帳；W4／W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
+版本：WS-SDD revision 1 · 狀態：W1／W2／W3 已驗收合併；W4 固定產品已驗收、PR50 最終整合中；W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 使用者、目標與邊界
 

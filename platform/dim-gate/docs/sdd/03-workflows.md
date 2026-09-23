@@ -129,3 +129,7 @@ W2 new resource.bind/resource.resize/kafka.topic.create changes follow draft →
 ## W3 實作前契約
 
 W3 契約新增 /rd/apps/:appId/delivery、configuration、traffic，environmentId/revisionId 查詢保留範圍和歷史版本；Ops source detail 為 /ops/service-changes/:sourceType/:sourceId。服務與環境入口及原 WorkItems 導向同一來源。三種具型別編輯器、diff、獨立批准、實際時鐘執行與失敗證據；讀回成功前保持確認 pending。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+規則 create/revise、validate、submit、approve/reject、activate 是分開的版本化 command；prod 服務規則由另一位具 project/stage scope 的 Ops 決策，批准不等同啟用。基建規則由 pool scope Ops 操作。sample-time 順序、連續已知樣本和 ruleRevision 決定 evaluation；同一未恢復 episode 不重複建立 incident。Silence 只改通知判斷，歷史 incident/evidence 與健康恢復門檻不變；到期後僅後續符合條件的通知可重新投遞。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。

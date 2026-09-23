@@ -71,6 +71,6 @@ export function WorkspaceHome({ center, session }: { center: Center; session: Se
     </div>
     {inaccessibleScope && <p className="workspace-notice" role="status">所選條件不在目前可見範圍，沒有符合資料。可清除篩選重新探索。</p>}
     {dashboard.isPending ? <LoadingState /> : dashboard.isError ? <ErrorState error={dashboard.error} onRetry={() => void dashboard.refetch()} /> : <><HomeContent data={dashboard.data} /><div className="home-inventory"><InventorySummary data={dashboard.data} refresh={() => void dashboard.refetch()} refreshing={dashboard.isFetching} /></div></>}
-    <aside className="foundation-note"><span className="foundation-marker">Demo</span><div><h2>同一份服務、資源與交付紀錄</h2><p>工作區只改變呈現方式；授權、申請、發布與稽核由平台共同管理。Redis／Kafka 資源可從服務目錄申請，工作單可追蹤審批與執行；配置灰度、告警設定及平台治理擴充尚待後續增量交付。</p></div></aside>
+    <aside className="foundation-note"><span className="foundation-marker">Demo</span><div><h2>同一份服務、資源與交付紀錄</h2><p>工作區只改變呈現方式；授權、申請、發布、監控告警與稽核由平台共同管理。Redis／Kafka 資源可從服務目錄申請，工作單可追蹤審批與執行；監控樣本、告警評估和通知狀態皆由本地示範情境產生。</p></div></aside>
   </>
 }

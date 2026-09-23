@@ -1221,3 +1221,149 @@ remote_durability: product46e3a55_SSHsaved; containing_evidence_checkpoint_nextS
 blockers: []
 next_action: push_evidence_only; latestexactheadCI; authorizedmerge_actualtree_postmergeCI_then_PRcloseout_ownerrelease; nextseparate_run_W4_then_W5
 ```
+
+
+DG-D089: W4 ownership claim after reconciling PR37 closeout. PR37 is MERGED at 30bc902ef884cda9927bcaaf15bc595b694f609d, run DG-W3-20260923-02 is DONE and owner NONE. Its actual post-merge workflow35873299419 is now completed/SUCCESS; previous aggregate lag was historical. Remote main d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a descends from that merge and has no subsequent dim-gate/PLAN/shared gate delta. No W4 branch/PR/task existed. Created isolated `agent/dim-gate/mainline/w4-alerting` at actual remote main and fixed W4 contract revision1 before implementation. T041 domain, T042 API/demo and T043 UI have bounded nonoverlapping worker scopes; T044 is reserved for uninvolved final read-only review. Lead alone owns contract/PLAN/integration/acceptance. Node24.18.0/pnpm11.18.0 available; initial JS headroom753bytes under unchanged307200-byte budget. W4 is IN_PROGRESS, not accepted; W5 remains unstarted. No deployment, live collector, external notification, main/force push, or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 89
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 CONTRACT_FIXED / IMPLEMENTATION_PENDING / NOT_ACCEPTED
+task_id: T041 READY; T042 READY; T043 READY; T044 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; create_isolated_worker_worktrees; implement_bounded_T041_T042_T043; integrate_and_test; uninvolved_T044_then_fullgates_exactheadCI_authorizedmerge_closeout_before_W5
+```
+
+DG-D090: Contract/task checkpoint `9fd3279ead6aa9e776c56c9fb3066e670631484a` is SSH saved; [draft PR50](https://github.com/fallrising/newclear/pull/50) is OPEN and explicitly not accepted. T041/T042/T043 started in their three independent worktrees at that exact base, nonoverlapping product paths; T044 remains unassigned until a fixed product. Lead added affected 01–07 W4 delta and validation index in canonical W4 worktree; these docs are local pending a later checkpoint. T041 owns domain source, T042 owns API/demo, T043 owns UI/e2e; lead owns docs/PLAN/integration. Task validator passed all four tasks; docs gate passed at contract checkpoint (202files/440links) and after affected-spec edits (202files/447links). W4 product/native/browser/review gates remain pending, W5 unstarted. Latest actual W3 postmerge workflow aggregate35873299419 is now completed/SUCCESS, resolving the historical GitHub bookkeeping discrepancy without rewriting the PR37 observation.
+
+DG-D091: T041/T042/T043 bounded handbacks were SHA-verified and integrated by the lead in the canonical W4 worktree; workers made no commit/push. Fixed v4 domain, strict legacy migration, typed Mock API/OpenAPI and scoped RD/Ops UI now exercise W4 production independent approval, source-time incident evidence, Silence and Mock delivery. Lead corrected W4 navigation decoding and route grants, nested CMDB lazy loading, infrastructure Incident audit visibility, and old W2/W3 browser migration expectations. A narrowly scoped M2 Admin axe test timeout is 60s because 18 unchanged scans exceeded 30s in contract-only CI35894949839; that historical failure is retained. Current precommit native gate passes 397/397 in37files, frozen install, lint/typecheck/docs (206files/452links), contract (161ops/313schemas), CI/architecture and demo build. Initial full Chromium completed 89/92; two stale v3 expectations and one W4 smoke read-before-command-completion failed, then all three focused cases passed after fixes. Firefox/WebKit smoke12/12, fresh unchanged benchmark3/3 (302874 initial gzip bytes, medianLCP732ms, queryp95 0.6ms, HTTPp95 171ms), and isolation2/2 pass. Complete Chromium on corrected tests is now running. Latest observed main d25bac0 only changes unrelated components from original d80028c; no dim-gate/PLAN/shared-gate delta. W4 remains NOT_ACCEPTED pending complete Chromium, T044 fixed-source independent review, exact PR-head CI and authorized merge/actual closeout. W5 remains unstarted. No deployment, live collector, external notification, force/main push or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 91
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 INTEGRATED / FINAL_CHROMIUM_REVIEW_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_observed_main: d25bac0767b2a5abeffefacfd3bb151000000cdb; unrelated_components_only
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_contract_head_only
+remote_durability: product_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: finish_corrected_full_Chromium; fixed_product_commit; uninvolved_T044_review; exact_headCI_then_authorized_merge_actualcloseout_before_W5
+```
+
+DG-D092: Uninvolved T044 attempt1 at exact fixed product65a4c36 independently reproduced blocking F1: a rule with activeRevision1 but a new draft rejected a fresh Silence, and same-key replay failed after clock advancement or revision because mutable state/time checks ran before the replay branch. Report `.team/reports/T-044-attempt-1.md` PARTIAL, SHA256 0ea0451f28a149063c627ada1f2de6ab3df5163c0341513518192e4eac65a42c, was copied byte-identically from the review worktree and validator passed. Lead corrected `monitoring-commands.ts` to authorize against current target before replay, then validate active revision and bounded time only inside a new command's apply; the persisted Silence pins the actual active revision. New domain test covers same receipt/no writes after clock advance and rule draft, fresh Silence under active revision, and current pool-grant revocation returning 403. Corrected local 398/398 native, typecheck/lint/contracts/architecture/CI/docs/build pass; browser/smoke/benchmark/isolation must be rerun on a committed corrected SHA. Old 899065c CI35907137495 was explicitly cancelled after F1; local incomplete Chromium was SIGINT stopped at 51 passed/1 interrupted/40 not run. Neither is an acceptance result. W4 remains NOT_ACCEPTED, W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 92
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F1_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1 PARTIAL_F1; attempt2 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-1.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_old_product_CI_CANCELLED
+remote_durability: F1_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F1_commit; T044_attempt2_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```
+
+
+DG-D093: Independent T044 attempt2 reviewed exact F1 correction `460424b12e27bffdea44912ba6101b6fd90b8a89`, closed F1 and confirmed new blocking F2: an old AlertRule create replay returned 422 after a referenced monitor acquired a new draft, and hidden monitor metric compatibility leaked as 403 versus 422. Report `.team/reports/T-044-attempt-2.md` PARTIAL, SHA256 `552199643dc36b83261e03be8c84c9d632b45c7fea3e135add1872c8a9fddf39`, was copied byte-identically and validator passed. Lead moved mutable spec/approval checks into fresh-command apply, while checking current original/proposed target scope before replay; adjacent SLO and cross-scope revise regressions were added. Local focused8/8 and full400/400 native, frozen install, lint/typecheck, OpenAPI161/313, CI/architecture/docs and demo build pass. Contract and Ops SDD now state replay and active-revision behavior. The obsolete PR-head CI35908469757 and local incomplete Chromium were intentionally cancelled after F2, not accepted. This correction is local until its fixed commit; T044 attempt3, final browser/performance/isolation, exact latest PR-head CI, merge and actual closeout remain pending. W4 NOT_ACCEPTED; W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 93
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F2_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1_F1_closed_attempt2_F2_partial_attempt3_pending
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-2.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_obsolete_CI_cancelled
+remote_durability: F2_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F2_commit; T044_attempt3_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```
+
+
+DG-D094: Fixed W4 product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` is SSH saved as PR50 head. Independent T044 attempt3 DONE on that exact SHA closes F1/F2 with no confirmed source finding; report `.team/reports/T-044-attempt-3.md` was copied byte-identically (SHA256 `866b5c6a7c335780cccad72ddf68a8ce1c874d78c6f1098ab55b272252394834`) and validator passed. Local source-bound gates: frozen install; 400/400 native in37 files; lint/typecheck/docs (209 files/464 links), OpenAPI161/313, CI/architecture, demo build; complete Chromium92/92; Firefox/WebKit smoke12/12; unchanged benchmark3/3 (302886 initial gzip bytes of307200 budget, median coldLCP724ms, 5000-CI queryp95 0.6ms, persisted Mock HTTPp95 170.7ms); isolation2/2. The first isolation attempt failed before browser launch because LD_LIBRARY_PATH was omitted from that command and libasound.so.2 could not load; same-source rerun with the established local browser environment passed both, without test/product changes. Remote exact-product CI35909643363 is IN_PROGRESS and has not been claimed as success. Latest observed main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` changes only unrelated `products/kith` paths since incorporated main; no dim-gate/PLAN/shared gate delta. W4 remains NOT_ACCEPTED until exact-head CI and final acceptance, then evidence-only head CI and authorized normal merge/actual closeout. W5 remains unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 94
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 PRODUCT_LOCAL_GATES_AND_REVIEW_PASS / EXACT_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt3 DONE_no_open_findings
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+local_tested_commit: dd90ccb_400_native_92_chromium_12_smoke_3_benchmark_2_isolation
+integration_state: PR50_DRAFT_OPEN_exact_product_CI35909643363_in_progress
+remote_durability: product_dd90_SSHsaved; evidence_checkpoint_local_pending_CI
+blockers: [exact_product_CI35909643363_in_progress]
+next_action: inspect_exact_product_CI_artifacts; accept_fixed_product; evidence_only_commit_SSHpush_latestheadCI_then_authorized_normal_merge_actualcloseout_ownerrelease_before_W5
+```
+
+
+DG-D095: ACCEPT W4 fixed product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` for AC-WS-12/15–18 and the integrated T041/T042/T043 results, after uninvolved T044 attempt3 DONE closed F1/F2 with no open finding. Exact-product [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) completed SUCCESS on 2026-09-23T20:10:42Z, head dd90, synthetic checkout `305939aa5d83da45cc4f8f6a561a14ab8b295429` with parents latest main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and dd90; both checkout and dd90 have identical full `platform/dim-gate` tree `b4cdaf5b44cb306c8453238c7ee37106316a7150`. CI logs confirm 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation, docs/contracts/CI/architecture/build; artifact `10775045030` expires 2026-10-23T20:10:36Z. Downloaded artifact performance raw samples bind checkout305939a: 302886 initial gzip bytes, median LCP1312ms, queryp95 0.9ms, HTTPp95 184.5ms, all below unchanged budgets. This is product acceptance, not PR integration. T041–043 original PARTIAL handback reports remain immutable history; their integrated results are accepted here. Previous failed/cancelled CI and browser attempts remain historical. Next: evidence-only checkpoint commit and SSH push, latest exact metadata-head CI, authorized normal PR50 merge with match-head protection, actual merge/component-tree/postmerge CI verification, PR closeout/owner release, then separate W5 run. No deployment/external message/live cloud action.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 95
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator integration_closeout_only
+terminal_state: null
+milestone: W4 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
+task_id: T041 INTEGRATED_ACCEPTED; T042 INTEGRATED_ACCEPTED; T043 INTEGRATED_ACCEPTED; T044 attempt3 ACCEPTED
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+evaluated_implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+product_ci: 35909643363 SUCCESS; checkout305939a; identical_component_tree_b4cdaf5b44cb306c8453238c7ee37106316a7150
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_at_checkpoint; final_evidence_headCI_merge_and_ownerrelease_pending
+remote_durability: product_dd90_SSHsaved; containing_evidence_checkpoint_nextSSHpush
+blockers: []
+next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal_merge_actualtree_postmergeCI_PRcloseout_ownerrelease; then W5
+```

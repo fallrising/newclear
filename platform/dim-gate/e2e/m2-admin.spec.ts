@@ -190,6 +190,8 @@ test('AC-21: union-of-grants navigation and a captured metadata mutation fail cl
 })
 
 test('Admin governance routes are responsive in both themes with zero serious/critical axe findings', async ({ page }, info) => {
+  // This case runs eighteen full axe scans across five routes and three viewport sizes.
+  test.setTimeout(60_000)
   await page.goto('rd')
   await become(page, 'user-admin')
   const routes = ['admin/access', 'admin/navigation', 'admin/catalog', 'admin/cmdb-models', 'admin/audit']

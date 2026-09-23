@@ -14,6 +14,7 @@ import { guideProjection, readObservation, visibleIntegrations } from './observa
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
 import { readDelivery, canReadDelivery } from './delivery'
+import { readMonitoring } from './monitoring-views'
 export { DomainError } from './errors'
 
 export interface Engine {
@@ -125,7 +126,11 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
   }
   if (audit.entityType === 'incident') {
     const incident = snapshot.entities.incidents.find(entry => entry.id === audit.entityId)
-    return !!incident && canReadObservation(snapshot, policy, incident.environmentId)
+    if (incident) return canReadObservation(snapshot, policy, incident.environmentId)
+    const infrastructureIncident = snapshot.entities.infrastructureIncidents.find(entry => entry.id === audit.entityId)
+    if (!infrastructureIncident) return false
+    const ci = snapshot.entities.cis.find(entry => entry.id === infrastructureIncident.ciId)
+    return !!ci && ci.orgId === policy.user?.orgId && policy.poolIds.includes(ci.poolId)
   }
   if (audit.entityType === 'integration') return visibleIntegrations(snapshot, policy).some(entry => entry.id === audit.entityId)
   if (audit.entityType === 'relation') {
@@ -234,6 +239,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
   function read(path: string, query: URLSearchParams, actorId: string): unknown {
     const policy = context(actorId)
     const entities = state.entities
+    const monitoring = readMonitoring(state, policy, path, query)
+    if (monitoring !== undefined) return monitoring
     const service = readServiceDelivery(state, policy, path, query)
     if (service !== undefined) return service
     const resource = readResources(state, policy, path, query)

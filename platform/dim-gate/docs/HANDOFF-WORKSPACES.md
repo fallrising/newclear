@@ -1,5 +1,17 @@
 # dim-gate 三工作區接手
 
+W4 最新驗收 checkpoint（2026-09-23）：固定產品 `dd90ccb` 已由主控依 PLAN DG-D095 **ACCEPT** AC-WS-12/15–18；獨立 T044 attempt3 無開放缺陷，完整本機門檻與精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) SUCCESS，合成 checkout305939a 的完整 dim-gate tree 與產品相同。PR50 草稿仍未合併；下一步是證據-only checkpoint、最新 head CI、正常合併與實際 merge/tree/postmerge CI／owner release。W5 必須待 W4 整合 closeout 後另開 run。下面「W4 未驗收」為此前固定時間的歷史 checkpoint；詳見 [W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 與 PR50。
+
+最新 W4 產品 checkpoint（2026-09-23）：固定 `dd90ccb` 已在草稿 PR50；400/400 原生、92/92 Chromium、12/12 Firefox／WebKit、3/3 效能、2/2 隔離及原生檢查通過。獨立 [T044 attempt3](../../../.team/reports/T-044-attempt-3.md) 關閉 F1/F2，無剩餘已確認來源缺陷。首次隔離命令因漏設本機函式庫路徑而無法啟動 Chromium，補上既定環境後同來源 2/2 通過；保留原失敗紀錄。精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) 尚在執行，PR50 未驗收／未合併，W5 未開始。接手先核對 PLAN DG-D094、[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)、CI 與 PR；下面的 W4 F1/F2／W3 checkpoint 是歷史紀錄。
+
+最新 W4 接續（2026-09-23）：獨立 [T044 attempt2](../../../.team/reports/T-044-attempt-2.md) 在產品 `460424b` 關閉 F1，另確認 F2：可變監控規格驗證先於授權和冪等重放，造成舊 receipt 重放失敗與隱藏指標資訊差異。主控已本地修正並增加 AlertRule／SLO、跨範圍回歸；400/400 原生及凍結安裝、原生檢查、demo 建置通過。PR50 前一 head CI35908469757 和本機未完成的 Chromium 已在 F2 後取消。**W4 未驗收，W5 未開始**；固定修正提交、T044 attempt3、完整瀏覽器／效能／隔離、最新 head CI 與授權正常合併／實際 closeout 待完成。下面 W4 F1 與 W3 段落均為歷史 checkpoint；以 PLAN DG-D093、[W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 及 PR50 為準。
+
+## W4 接續 run（2026-09-23；進行中）
+
+W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已合併於 `30bc902ef884cda9927bcaaf15bc595b694f609d`、owner 釋放；實際合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 已完成 SUCCESS。下方 W3「待最終 CI／merge」「W4 未開始」段落是當時 checkpoint，不是目前狀態。
+
+W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 開始，主控隔離 worktree `/home/ckc/test/codex/newclear-dim-gate-w4`、branch `agent/dim-gate/mainline/w4-alerting`；[草稿 PR50](https://github.com/fallrising/newclear/pull/50) 遠端已有首個整合產品 `65a4c36` 及最新 main merge `899065c`。W4 [integration contract revision1](W4-INTEGRATION-CONTRACT.md)、PLAN DG-D089–092、T041 domain、T042 API/demo、T043 UI 已由主控整合；三個 worker 在各自 worktree 無 commit/push。獨立[T044 attempt1](../../../.team/reports/T-044-attempt-1.md)發現 Silence 生效 revision／冪等重放 F1；主控已本地修正並新增回歸，398 原生與原生檢查通過。舊 head 的 CI35907137495 與完整 Chromium 重跑在發現 F1 後主動取消，修正版全部瀏覽器、效能、隔離、獨立 attempt2、精確 PR-head CI 和合併尚待執行，**W4 未驗收，W5 未開始**。產品 gate 與固定版本結果以[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)及 PR50 後續 closeout 核對。原有全部 worktree 與預覽均保留，未部署／發送外部通知。
+
 ## 接續 run 最新狀態（2026-09-23）
 
 **DG-W3-20260923-02 已完成 W3 固定產品驗收：46e3a55 ACCEPTED。此文件 checkpoint 時 PR37 最終證據 head CI／merge 待執行；主控仍持有收尾 ownership。晚到的實際合併、post-merge CI 與 owner release 必須先查 [PR37 closeout](https://github.com/fallrising/newclear/pull/37)，不為把自己的SHA／mergeSHA寫入同一commit反覆追加checkpoint。**

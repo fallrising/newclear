@@ -2,8 +2,11 @@ import { z } from 'zod'
 import { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
 import { pipelineDefinitionSchema, serviceConfigSchema, trafficPolicySchema, serviceExecutionSchema,
   pipelineDefinitionRunSnapshotSchema, serviceWorkSummarySchema } from './service-delivery-models.ts'
+import { monitorPolicySchema, alertRuleSchema, sloPolicySchema, silenceSchema, alertEvaluationSchema,
+  notificationDeliverySchema, infrastructureMetricSchema, infrastructureIncidentSchema } from './monitoring-models.ts'
 export { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
 export * from './service-delivery-models.ts'
+export * from './monitoring-models.ts'
 
 export const centerSchema = z.enum(['rd', 'ops', 'admin'])
 export const providerSchema = z.enum(['aws', 'aliyun', 'onprem'])
@@ -111,6 +114,7 @@ export const legacyNavigationItemV2Schema = z.strictObject({
   label: nameSchema, group: nameSchema, order: z.number().int(), enabled: z.boolean(),
 })
 export const navigationItemSchema = legacyNavigationItemV2Schema.extend({ routeKey: z.enum([...legacyNavigationItemV2Schema.shape.routeKey.options, 'rd.delivery', 'rd.configuration', 'rd.traffic', 'ops.service-change']) })
+export const monitoringNavigationItemSchema = navigationItemSchema.extend({ routeKey: z.enum([...navigationItemSchema.shape.routeKey.options, 'rd.monitoring', 'rd.alerts', 'ops.alerting']) })
 export const modelFieldSchema = z.strictObject({
   ...scopedBase, kind: ciKindSchema, key: z.string().regex(/^[a-z][a-zA-Z0-9_]{0,63}$/), label: nameSchema,
   valueType: z.enum(['string', 'number', 'boolean']), required: z.literal(false), hidden: z.boolean(),
@@ -391,10 +395,24 @@ export const legacySnapshotSchema = legacySnapshotV2Schema.extend({ schemaVersio
     }),
 })
 
-export const snapshotSchema = legacySnapshotV2Schema.extend({ schemaVersion: z.literal(3), seedVersion: z.literal('dim-gate-w3-v1'),
+export const legacySnapshotV3Schema = legacySnapshotV2Schema.extend({ schemaVersion: z.literal(3), seedVersion: z.literal('dim-gate-w3-v1'),
   entities: legacySnapshotV2Schema.shape.entities.extend({ navigation: z.array(navigationItemSchema), pipelines: z.array(pipelineRunSchema),
     pipelineDefinitions: z.array(pipelineDefinitionSchema), serviceConfigs: z.array(serviceConfigSchema), trafficPolicies: z.array(trafficPolicySchema), serviceExecutions: z.array(serviceExecutionSchema),
   }),
+})
+export const monitoringIncidentEvidenceSchema = incidentEvidenceSchema.extend({
+  metric: z.enum(['rate', 'errorRate', 'p95Latency']), ruleRevision: versionSchema.optional(), sampleId: idSchema.optional(), value: z.number().optional(),
+})
+export const monitoringIncidentSchema = incidentSchema.extend({ ruleId: idSchema.optional(), ruleRevision: versionSchema.optional(),
+  evidence: z.array(monitoringIncidentEvidenceSchema) })
+export const incidentVariantSchema = z.union([monitoringIncidentSchema, infrastructureIncidentSchema])
+export const snapshotSchema = legacySnapshotV3Schema.extend({ schemaVersion: z.literal(4), seedVersion: z.literal('dim-gate-w4-v1'),
+  entities: legacySnapshotV3Schema.shape.entities.extend({ navigation: z.array(monitoringNavigationItemSchema),
+    incidents: z.array(monitoringIncidentSchema), infrastructureIncidents: z.array(infrastructureIncidentSchema),
+    monitorPolicies: z.array(monitorPolicySchema), alertRules: z.array(alertRuleSchema), sloPolicies: z.array(sloPolicySchema),
+    silences: z.array(silenceSchema), alertEvaluations: z.array(alertEvaluationSchema), notificationDeliveries: z.array(notificationDeliverySchema),
+  }),
+  observations: legacySnapshotV3Schema.shape.observations.extend({ infrastructureMetrics: z.array(infrastructureMetricSchema) }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })
@@ -440,7 +458,7 @@ export const dashboardViewSchema = z.strictObject({
 export const guideViewSchema = z.strictObject({
   applicationId: idSchema.nullable(), environmentId: idSchema.nullable(), steps: z.array(guideStepSchema),
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-w3-v1'), schemaVersion: z.literal(3), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-w4-v1'), schemaVersion: z.literal(4), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -450,9 +468,13 @@ export const apiErrorSchema = z.strictObject({
 export function apiResultSchema<T extends z.ZodType>(data: T) { return z.strictObject({ data, meta: apiMetaSchema }) }
 export function pageSchema<T extends z.ZodType>(item: T) { return z.strictObject({ items: z.array(item), total: z.number().int().nonnegative(), page: z.number().int().min(1), pageSize: z.number().int().min(1).max(100) }) }
 export const scenarioInputSchema = z.strictObject({
-  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples', 'resource-failure', 'config-failure', 'traffic-abnormal', 'traffic-missing']),
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples', 'resource-failure', 'config-failure', 'traffic-abnormal', 'traffic-missing', 'alert-breach', 'alert-recovery', 'alert-unknown', 'alert-delivery-failure']),
   environmentId: idSchema.optional(), executionId: idSchema.optional(), jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
+  ruleId: idSchema.optional(),
 }).superRefine((value, ctx) => {
+  const alert = value.scenarioKey.startsWith('alert-')
+  if (alert && (!value.ruleId || value.environmentId || value.executionId || value.jobId || value.poolId || value.runId || value.releaseId)
+    || !alert && value.ruleId) ctx.addIssue({ code: 'custom', path: ['ruleId'], message: 'Alert scenario requires only a rule target' })
   const service = ['config-failure', 'traffic-abnormal', 'traffic-missing'].includes(value.scenarioKey)
   if (service && (!value.executionId || value.environmentId || value.jobId || value.poolId || value.runId || value.releaseId)
     || value.executionId && !service && value.scenarioKey !== 'resource-failure') ctx.addIssue({ code: 'custom', path: ['executionId'], message: 'Execution target must match the registered scenario' })
@@ -464,6 +486,7 @@ export type CIView = z.infer<typeof ciViewSchema>
 export type Application = z.infer<typeof applicationSchema>
 export type RoleAssignment = z.infer<typeof roleAssignmentSchema>
 export type Snapshot = z.infer<typeof snapshotSchema>
+export type LegacySnapshotV3 = z.infer<typeof legacySnapshotV3Schema>
 export type LegacySnapshotV2 = z.infer<typeof legacySnapshotV2Schema>
 export type LegacySnapshot = z.infer<typeof legacySnapshotSchema>
 export type ComputeCatalogItem = z.infer<typeof computeCatalogItemSchema>
@@ -498,7 +521,7 @@ export type ProvisionJob = z.infer<typeof provisionJobSchema>
 export type PipelineRun = z.infer<typeof pipelineRunSchema>
 export type Release = z.infer<typeof releaseSchema>
 export type Artifact = z.infer<typeof artifactSchema>
-export type Incident = z.infer<typeof incidentSchema>
+export type Incident = z.infer<typeof monitoringIncidentSchema>
 export type Integration = z.infer<typeof integrationSchema>
 export type ObservationBucket = z.infer<typeof observationBucketSchema>
 export type ObservationLog = z.infer<typeof observationLogSchema>
@@ -507,9 +530,8 @@ export type TraceSummary = z.infer<typeof traceSummarySchema>
 export type MetricSeries = z.infer<typeof metricSeriesSchema>
 export type Notification = z.infer<typeof notificationSchema>
 export type DeliveryLog = z.infer<typeof deliveryLogSchema>
-export type NavigationItem = z.infer<typeof navigationItemSchema>
+export type NavigationItem = z.infer<typeof monitoringNavigationItemSchema>
 export type ModelField = z.infer<typeof modelFieldSchema>
 export type ApiError = z.infer<typeof apiErrorSchema>
 export type ApiResult<T> = { data: T; meta: z.infer<typeof apiMetaSchema> }
 export type Page<T> = { items: T[]; total: number; page: number; pageSize: number }
-

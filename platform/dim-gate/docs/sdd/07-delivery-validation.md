@@ -92,3 +92,7 @@ W2 acceptance is AC-WS-03–09/15–18 from14-workspace-delivery.md, including a
 ## W3 實作前契約
 
 W3 完整 exit AC-WS-10/11/15–18：定義修訂不改舊run、prod獨立批准、配置失敗保留與新版本restore、同env10→50→100真實健康窗口及失敗留住已驗證權重、雙向鎖/撤權/replay、原子W1/W2migration及既有回歸。需完整native/Chromium/smoke/benchmark/isolation、未參與實作的固定commitreview及精確最新PRheadCI後才可接受合併。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+W4 exit 為 AC-WS-12/15–18：服務與基建授權分離、prod 獨立批准、source-time/ruleRevision 評估、Silence 僅抑制投遞、四種可查 Mock delivery 狀態，並維持原 M4/W3 因果鏈。至少需要 domain+direct HTTP+真 UI success/denial/failure、舊存檔遷移與損壞/quota 回歸、全部 native/Chromium/Firefox-WebKit/benchmark/isolation、固定 commit 獨立唯讀 review、最新 PR head CI 和實際合併對帳。缺任一 gate 不標 ACCEPTED；W5 在 W4 合併後才啟動。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。

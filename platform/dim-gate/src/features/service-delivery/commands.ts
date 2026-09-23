@@ -5,7 +5,7 @@ import { serviceDeliveryMutationKey } from '../../api/query-definitions'
 import { sameIdentity, type ClientIdentity } from '../../api/core/identity'
 import type { CommandReceipt } from '../../domain/schemas'
 
-const affectedFamilies = new Set(['session', 'pipeline-definitions', 'pipeline-definition', 'service-configs', 'service-config', 'traffic-policies', 'traffic-policy', 'delivery-options', 'pipelines', 'pipeline', 'releases', 'release', 'application', 'applications', 'environment', 'environments', 'audit', 'work-items', 'workspace-home', 'dashboard', 'notifications', 'guide'])
+const affectedFamilies = new Set(['session', 'pipeline-definitions', 'pipeline-definition', 'service-configs', 'service-config', 'traffic-policies', 'traffic-policy', 'delivery-options', 'pipelines', 'pipeline', 'releases', 'release', 'application', 'applications', 'environment', 'environments', 'audit', 'work-items', 'workspace-home', 'dashboard', 'notifications', 'guide', 'monitor-policies', 'monitor-policy', 'alert-rules', 'alert-rule', 'slo-policies', 'slo-policy', 'silences', 'alert-evaluations', 'notification-deliveries', 'incidents', 'incident', 'metrics'])
 
 /** Keep the canonical receipt if readback fails: retry only reads, never a second command. */
 export function useServiceCommand(readBack: (receipt: CommandReceipt) => Promise<unknown>, mutationKey: readonly string[] = serviceDeliveryMutationKey) {

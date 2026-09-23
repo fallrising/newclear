@@ -48,6 +48,8 @@ export function observationIntegrityErrors(s: Snapshot): string[] {
   }
   const keys = new Set<string>()
   for (const incident of s.entities.incidents) {
+    // W4 incident evidence has its own strict ruleRevision/sample proof in monitoringIntegrityErrors.
+    if (incident.ruleId) continue
     const env = s.entities.environments.find(e => e.id === incident.environmentId && e.applicationId === incident.applicationId && e.orgId === incident.orgId)
     if (!env || !scoped({ ...incident, releaseId: incident.relatedReleaseId })) errors.push('incident: invalid scope/release')
     const key = `${incident.environmentId}:${incident.ruleKey}`

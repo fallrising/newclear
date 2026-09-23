@@ -1077,3 +1077,30 @@ remote_durability: 31b5c88_SSHsaved; containing_finalcandidate_nextSSHpush
 blockers: []
 next_action: commit_and_normalmerge_latestmain; fixed_complete_native_89Chromium_10smoke_3benchmark_2isolation; uninvolvedT040_review; latestheadCI_thenauthorizedmerge_actualcloseout; releaseowner_updatehandoff_stop_for_newwindow_W4_W5
 ```
+
+
+DG-D082: USER-REQUESTED NEW-WINDOW HANDOFF, W3 NOT_ACCEPTED. User asked to save progress and continue in a new window, then asked current context/state and remaining undeveloped work. Lead explicitly states PR37 cannot merge while fullregression/review/latestCI remain pending. No gate waiver and no W4/W5 work in this run. Final product35f594f and latestmain normalmerge6c19fe7 are SSH-saved. Fixed6c19fe7 native371/371 plusallnativegates and3/3benchmark PASS; saved initial asset SHA values exactly match306290-byte measurement. Root complete89Chromium/10smoke/2isolation chain remains running readonly, metadata /tmp/dim-gate-w3-evidence/fixed-gates.json, PID2209053 at11:59UTC; nextlead must verify process/liveness/logs and not duplicate its port/build. IndependentT040review is PARTIAL, no confirmedfinding sofar but explicitremainingUI/router/browser/parity/evidencework; finalverdictpending. T038supplemental fixedsource18axe/6keyboard/189response checks pass, noerrors, bothimplementationworkers stopped/released. Reviewer savespartialcheckpoint then stops. Primarypublishing/implementationownership is released by this containing handoff checkpoint; ongoinglocal/GitHubchecks are validation only and cannotaccept/merge. Nextwindow may claim samevariant/newrun and continueT039/T040 withoutrewritingacceptedW1/W2 orrecreatingPR37. No ACCEPTED/DONE claim forW3.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 82
+run_id: DG-W3-20260923-01
+active_owner: NONE
+terminal_state: OWNER_DECISION_REQUIRED
+terminal_reason: user_requested_new_window_handoff; next_orchestrator_must_complete_and_judge_pending_W3_gates
+milestone: W3 IMPLEMENTED / NOT_ACCEPTED / NOT_MERGED
+task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 PARTIAL_handoff; T040 PARTIAL_review_resume_required
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: 35f594f
+local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-037-attempt-1.md, .team/reports/T-038-attempt-1.md, .team/reports/T-038-attempt-2.md, .team/reports/T-039-attempt-3.md, .team/reports/T-040-attempt-1.md]
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: product6c19fe7_SSHsaved; containing_docs_only_handoff_nextSSHpush; actualheadCI_in_PRbody
+blockers: [complete_89Chromium_10FFWK_2isolation_pending, independent_product_review_incomplete, latest_PR_head_CI_pending]
+next_action: read_HANDOFF_WORKSPACES_and_actual_PR37; verify_old_runner_PID_logs; claim_new_owner_run; resume_T040_remainingreview_and_T039_gates; preserve_failed_attempts; only_after_allgates_latestheadCI_merge_verify_actualcloseout; then_new_W4_and_W5_runs
+```

@@ -1,5 +1,16 @@
 # dim-gate 三工作區接手
 
+**交接決策：依使用者要求換新視窗，W3保持 NOT_ACCEPTED／PR37草稿，主控實作及發布 ownership 由 PLAN DG-D082 釋放。下一位 agent 可建立接續 run，沿用同一分支／PR與 task，先完成 W3 gate，不直接開始 W4。未執行合併。**
+
+本文件觀察 checkpoint：2026-09-23 11:59 UTC，canonical clean HEAD `6c19fe7b849ec4c5c5982c6ede4995ec6829fd83`，product commit `35f594f`，已 SSH 推送，正常整合 main `707f77d2c670b6a344ef25d9c4204521223687c1`。
+
+- 固定 head371/371 native 與 lint/typecheck/docs/contracts/CI/architecture 全通過；3/3 unchanged benchmark 通過。初始 assets 的 SHA 與已保存306290byte working measurement逐一相同。
+- 完整89Chromium、10Firefox/WebKit、2isolation 尚在執行鏈；T040固定版本獨立review保存PARTIAL checkpoint，最終verdict未完成；[同headCI35857078458](https://github.com/fallrising/newclear/actions/runs/35857078458) 已完成原生檢查，瀏覽器gate進行中。**PR37仍DRAFT／OPEN／NOT_ACCEPTED，尚未merge。**
+- Local runner `/tmp/dim-gate-w3-evidence/run-fixed-gates.py`，2026-09-23 11:59UTC觀察PID2209053，tool session31482。進度 `/tmp/dim-gate-w3-evidence/fixed-gates.json`，每項實際輸出 `fixed-*.log`。新視窗先 `ps -p 2209053 -o pid,args` 和讀JSON/log確認是否仍存活，不假設舊tool session可跨視窗使用，也不把stale RUNNING當成功。不要在舊runner仍跑時重建dist或重啟4350。
+- Runner順序native→benchmark→89Chromium→10smoke→2isolation。完整Chromium會清理test-results，因此第一輪fixedbenchmarkJSON被清掉，pass log仍在；若仍需本機完整原始benchmark附件，等整個runner結束後再執行一次unchanged `pnpm benchmark`，保存JSON再執行其他會清理輸出的工具。CI順序在完整browser後benchmark，會保存正式附件。
+- Root canonical完整productbytes未改；獨立checkout `/home/ckc/test/codex/newclear-dim-gate-w3-review` 固定6c19fe7，reviewer已保存 PARTIAL report並停止寫入、釋放report ownership。報告 [T-040-attempt-1](../../../.team/reports/T-040-attempt-1.md) SHA e65a0fb0741db809351dc64cb836b25101fc2ce9861c593e36ab8b781c5c0d57，獨立native371/371通過，精確剩餘審查清單在report末節。T037/T038 productowners已釋放。T038另在獨立browsercontext完成configuration/Ops頁面與run/decisiondialog的18項axe／6項keyboard補充驗收；189筆response零health error，不修改產品。
+- 38個原始worktree全部存在，目前59個；原W1/W2/design worktree均clean且保留原head。查核 `/tmp/dim-gate-w3-evidence/worktree-preservation.json`。
+
 本文件隨 W3 closeout 更新。**先重新核對 GitHub 與 PLAN，不以本文件的歷史 checkpoint 當成已驗收。** 使用者本輪最新要求是保存進度、依 gate 合併可交付 PR，然後新視窗繼續；目前視窗在 W3 收尾，W4／W5 留待下一輪。
 
 ## 接手入口
@@ -16,7 +27,7 @@
 
 W1 [PR33](https://github.com/fallrising/newclear/pull/33) 已 ACCEPTED/MERGED，actualmerge `b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d`。W2 [PR36](https://github.com/fallrising/newclear/pull/36) 已 ACCEPTED/MERGED，actualmerge `91626851fb17df7ab31c96dee9353b9ee4d42c92`，component tree 與 accepted head 相同；exactheadCI35846286919、postmergeCI35849832030、mirror35849832043均成功。兩輪 owner 已釋放，不重做有效成果。
 
-W3 初始 source `dfb146c`、normal latestmain merge `a473626`、test/progress checkpoint `31b5c88` 已 SSH 保存。W3 全量領域／API／遷移／UI／新瀏覽器流程已實作，**當前仍 NOT_ACCEPTED**，完整整合回歸、固定版本獨立 review、最新 head CI 與 merge 尚待 closeout。T037 最終32個領域檔已按 SHA 整合並釋放 worker ownership；T038 最終瀏覽器 handback 正在保存。Worker 沒有 commit/push/self-accept。
+W3 初始 source `dfb146c`、normal latestmain merge `a473626`、test/progress checkpoint `31b5c88` 已 SSH 保存。W3 全量領域／API／遷移／UI／新瀏覽器流程已實作，**當前仍 NOT_ACCEPTED**，完整整合回歸、固定版本獨立 review、最新 head CI 與 merge 尚待 closeout。T037 最終32個領域檔已按 SHA 整合並釋放 worker ownership；T038 最終21檔 handback 已完整整合並釋放 ownership。Worker 沒有 commit/push/self-accept。
 
 本輪實測：原始 fixed native357/360 與 CI35854397207 的三項失敗是新增 W3 草稿造成舊筆數預期失效；更新後保留跨團隊私有 ID/name 隔離。原始初始 JS309048 超標；經保留 eager snapshot／遷移／完整性驗證的 schema／command/API 模組分離及 Guide route lazy，最新 working candidate 初始 JS306290bytes、LCP756ms、5000CI query p95 0.7ms、100 persisted HTTPcommands p95 169.8ms，3/3 unchanged benchmark 通過。此 working evidence 必須用最終 fixed candidate 對帳；不能單獨視為 ACCEPTED。
 

@@ -1,0 +1,460 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/e2e-manifest.json",
+  "title": "Kith E2E run manifest v1",
+  "description": "Written by e2e/harness/reporter.ts into e2e/artifacts/<run_id>/manifest.json at the end of every Playwright run. Unknown fields are rejected. Defined in docs/v2/milestones/W0.md §4.4.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "run_id",
+    "git",
+    "command",
+    "scope",
+    "web_mode",
+    "base_url",
+    "versions",
+    "seed",
+    "started_at",
+    "finished_at",
+    "status",
+    "results",
+    "files",
+    "redaction",
+    "errors"
+  ],
+  "properties": {
+    "schema": {
+      "const": "kith-e2e-manifest/v1"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{8}-[0-9]{6}-[0-9a-f]{7}(-dirty)?$",
+      "description": "UTC YYYYMMDD-HHMMSS, 7-char git short sha, '-dirty' when the working tree has changes."
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha",
+        "short",
+        "dirty",
+        "branch"
+      ],
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "short": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7}$"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "'playwright ' followed by process.argv.slice(2) joined with single spaces."
+    },
+    "scope": {
+      "enum": [
+        "partial",
+        "full"
+      ]
+    },
+    "web_mode": {
+      "enum": [
+        "build",
+        "dev"
+      ]
+    },
+    "base_url": {
+      "type": "string",
+      "pattern": "^http://127\\.0\\.0\\.1:[0-9]{2,5}$"
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "wrangler",
+        "playwright",
+        "chromium"
+      ],
+      "properties": {
+        "node": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        "wrangler": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        "playwright": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        "chromium": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        }
+      }
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,40}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "started_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "finished_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed",
+        "timedout",
+        "interrupted"
+      ],
+      "description": "Final run status after the reporter's own checks (a failed check forces 'failed')."
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/result"
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400,
+            "pattern": "^[^/]"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "description": "Every file under the run folder except manifest.json and summary.md, and except files whose first path segment is report/, test-output/, state/ or nested/; sorted by path."
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "patterns",
+        "scanned_files",
+        "hits_after_redaction",
+        "hits"
+      ],
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "minItems": 7,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "R01-cookie-header",
+              "R02-authorization-header",
+              "R03-csrf-header",
+              "R04-json-secret-keys",
+              "R05-bot-token",
+              "R06-known-secrets",
+              "R07-observed-session"
+            ]
+          }
+        },
+        "scanned_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hits_after_redaction": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "file",
+              "rule"
+            ],
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rule": {
+                "enum": [
+                  "R05-bot-token",
+                  "R06-known-secrets",
+                  "R07-observed-session"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "description": "Harness-level errors (missing acceptance id, schema self-check failure, missing evidence file). Non-empty forces status 'failed'."
+    }
+  },
+  "$defs": {
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "spec",
+        "title",
+        "project",
+        "tags",
+        "status",
+        "duration_ms",
+        "retry",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(E2E|PROBE)-W[0-7]-[0-9]{2}$"
+        },
+        "spec": {
+          "type": "string",
+          "pattern": "^specs/[a-z0-9-]+\\.spec\\.ts$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "project": {
+          "enum": [
+            "desktop",
+            "mobile"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^@[A-Za-z0-9-]+$"
+          }
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "timedOut",
+            "skipped",
+            "interrupted"
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retry": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "screenshot"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^screenshots/(E2E|PROBE)-W[0-7]-[0-9]{2}/[0-9]{2}-[a-z0-9-]+-(desktop|mobile)\\.png$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "description": "Saved by shot()."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "api-log"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^api/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.jsonl$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "description": "HTTP log written by the kith fixture."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ws-log"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^ws/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.jsonl$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "description": "WS frame log written by the kith fixture."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "trace"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^traces/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.zip$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "description": "Copied from Playwright's trace attachment when present."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "file"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(files|nested)/.+$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "description": "Any other evidence file written via saveFile()."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "text"
+          ],
+          "properties": {
+            "kind": {
+              "const": "assertion"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "description": "Human-readable statement recorded by note()."
+        }
+      ]
+    }
+  }
+}

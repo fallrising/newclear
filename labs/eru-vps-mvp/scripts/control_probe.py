@@ -6,7 +6,7 @@ import time
 import urllib.request
 
 
-def probe(journal_since="-20 seconds"):
+def probe(journal_since="-20 seconds", v11=False):
     result = {'time': time.time(), 'commands': {}}
     commands = {
         'health': ['/usr/local/bin/etcdctl', '--endpoints=http://127.0.0.1:2379',
@@ -23,6 +23,11 @@ def probe(journal_since="-20 seconds"):
         'journal': ['journalctl', '-u', 'eru-etcd', '-u', 'eru-core', '--since', journal_since,
                     '--no-pager', '-o', 'short-iso-precise'],
     }
+    if v11:
+        commands['space'] = ['df', '-P', '-B1', '/', '/var/lib/etcd-eru-mvp',
+                             '/var/lib/docker', '/var/lib/containerd']
+        commands['kernel_journal'] = ['journalctl', '-k', '--since', journal_since,
+                                      '--no-pager', '-o', 'short-iso-precise']
     for name, argv in commands.items():
         start = time.monotonic()
         try:

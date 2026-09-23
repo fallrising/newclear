@@ -10,7 +10,7 @@ from uuid import UUID
 
 from .auth import audit
 from .domain import Problem
-from .model_policy import MODEL, canonical, response, sensitive, sha
+from .model_policy import MAX_REQUEST, MODEL, canonical, response, sensitive, sha
 from .model_upstream import FixtureUpstream
 from .store import event
 
@@ -73,10 +73,17 @@ class ModelProxy:
     def pin(self, conn, run_id):
         row = conn.execute("SELECT * FROM model_proxy_runs WHERE run_id=%s", (run_id,)).fetchone()
         if not row:
+            budget = self.policy.budget
             conn.execute(
-                "INSERT INTO model_proxy_runs(run_id,policy_sha256,request_limit) "
-                "VALUES (%s,%s,%s)",
-                (run_id, self.policy.digest, self.policy.request_limit),
+                "INSERT INTO model_proxy_runs(run_id,policy_sha256,request_limit,"
+                "fixture_price_revision,fixture_limit_microcredits) VALUES (%s,%s,%s,%s,%s)",
+                (
+                    run_id,
+                    self.policy.digest,
+                    self.policy.request_limit,
+                    budget.revision if budget else None,
+                    budget.limit_microcredits if budget else None,
+                ),
             )
         elif row["policy_sha256"] != self.policy.digest:
             raise Problem(409, "model_policy_changed")
@@ -134,7 +141,17 @@ class ModelProxy:
         return run
 
     def reserve(self, run_id, token, request_id, payload):
-        fingerprint = sha(canonical(payload))
+        encoded = canonical(payload)
+        fingerprint = sha(encoded)
+        budget = self.policy.budget
+        input_bound = len(encoded) if budget else None
+        output_bound = payload["max_tokens"] if budget else None
+        reserved = (
+            input_bound * budget.input_microcredits_per_token
+            + output_bound * budget.output_microcredits_per_token
+            if budget
+            else None
+        )
         with self.db.transaction() as conn:
             run = self.authorize(conn, run_id, token)
             existing = conn.execute(
@@ -153,10 +170,29 @@ class ModelProxy:
             ).fetchone()["n"]
             if count >= self.policy.request_limit:
                 raise Problem(429, "model_request_limit_reached")
+            if budget:
+                committed = conn.execute(
+                    "SELECT COALESCE(sum(COALESCE(fixture_settled_microcredits,"
+                    "fixture_reserved_microcredits)),0) AS n FROM model_proxy_requests "
+                    "WHERE run_id=%s",
+                    (run_id,),
+                ).fetchone()["n"]
+                if committed + reserved > budget.limit_microcredits:
+                    raise Problem(429, "model_fixture_budget_exhausted")
             conn.execute(
                 "INSERT INTO model_proxy_requests(run_id,request_id,generation,payload_sha256,"
-                "status,reason) VALUES (%s,%s,%s,%s,'reserved','dispatch_outcome_unknown')",
-                (run_id, request_id, run["generation"], fingerprint),
+                "status,reason,fixture_input_bound,fixture_output_bound,"
+                "fixture_reserved_microcredits) "
+                "VALUES (%s,%s,%s,%s,'reserved','dispatch_outcome_unknown',%s,%s,%s)",
+                (
+                    run_id,
+                    request_id,
+                    run["generation"],
+                    fingerprint,
+                    input_bound,
+                    output_bound,
+                    reserved,
+                ),
             )
             event(
                 conn,
@@ -169,6 +205,7 @@ class ModelProxy:
                     "request_slots_consumed": count + 1,
                     "request_limit": self.policy.request_limit,
                     "fixture": True,
+                    "fixture_reserved_microcredits": reserved,
                 },
             )
             audit(conn, None, "model.request_reserved", str(run_id))
@@ -179,21 +216,54 @@ class ModelProxy:
             # Event producers lock run first. No job lock is needed for accounting a
             # response to a request admitted earlier, even after cancellation/recovery.
             conn.execute("SELECT id FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
-            status = "final" if usage is not None else "unknown"
+            pinned = conn.execute(
+                "SELECT policy_sha256 FROM model_proxy_runs WHERE run_id=%s", (run_id,)
+            ).fetchone()
+            if not pinned or pinned["policy_sha256"] != self.policy.digest:
+                # Leave the full reservation uncertain; changed prices may never
+                # revalue a request dispatched under the original contract.
+                raise Problem(409, "model_policy_changed")
             row = conn.execute(
+                "SELECT fixture_input_bound,fixture_output_bound,"
+                "fixture_reserved_microcredits FROM model_proxy_requests "
+                "WHERE run_id=%s AND request_id=%s AND status='reserved'",
+                (run_id, request_id),
+            ).fetchone()
+            if not row:
+                raise Problem(409, "model_settlement_conflict")
+            budget = self.policy.budget
+            if (row["fixture_reserved_microcredits"] is None) != (budget is None):
+                raise Problem(409, "model_policy_changed")
+            charged = None
+            if usage and budget:
+                if (
+                    usage["prompt_tokens"] > row["fixture_input_bound"]
+                    or usage["completion_tokens"] > row["fixture_output_bound"]
+                ):
+                    raise Problem(502, "model_usage_exceeds_reserved_bound")
+                charged = (
+                    usage["prompt_tokens"] * budget.input_microcredits_per_token
+                    + usage["completion_tokens"] * budget.output_microcredits_per_token
+                )
+                if charged > row["fixture_reserved_microcredits"]:
+                    raise Problem(502, "model_usage_exceeds_reserved_bound")
+            status = "final" if usage is not None else "unknown"
+            updated = conn.execute(
                 "UPDATE model_proxy_requests SET status=%s,reason=%s,input_tokens=%s,"
-                "output_tokens=%s,settled_at=clock_timestamp() "
+                "output_tokens=%s,fixture_settled_microcredits=%s,"
+                "settled_at=clock_timestamp() "
                 "WHERE run_id=%s AND request_id=%s AND status='reserved' RETURNING request_id",
                 (
                     status,
                     reason,
                     usage["prompt_tokens"] if usage else None,
                     usage["completion_tokens"] if usage else None,
+                    charged,
                     run_id,
                     request_id,
                 ),
             ).fetchone()
-            if not row:
+            if not updated:
                 raise Problem(409, "model_settlement_conflict")
             event(
                 conn,
@@ -207,6 +277,7 @@ class ModelProxy:
                     "output_tokens": usage["completion_tokens"] if usage else None,
                     "amount_decimal": None,
                     "fixture": True,
+                    "fixture_settled_microcredits": charged,
                 },
             )
             audit(conn, None, "model.request_settled", str(run_id), status)
@@ -227,6 +298,8 @@ class ModelProxy:
                 value, usage = sdk_response(raw, payload, known)
             else:
                 value, usage = response(raw, payload["max_tokens"], known)
+            if self.policy.budget and usage["prompt_tokens"] > len(canonical(payload)):
+                raise Problem(502, "model_usage_exceeds_reserved_bound")
         except Problem as exc:
             self.settle(run_id, request_id, reason=exc.code)
             raise
@@ -285,6 +358,22 @@ class ModelProxy:
         ).fetchone()["n"]
         if count >= self.policy.request_limit:
             raise Problem(429, "model_request_limit_reached")
+        if self.policy.budget:
+            budget = self.policy.budget
+            committed = conn.execute(
+                "SELECT COALESCE(sum(COALESCE(fixture_settled_microcredits,"
+                "fixture_reserved_microcredits)),0) AS n FROM model_proxy_requests "
+                "WHERE run_id=%s",
+                (run_id,),
+            ).fetchone()["n"]
+            # A terminal side effect can prompt another SDK call. Admit it only
+            # when even the largest permitted next fixture request could fit.
+            next_envelope = (
+                MAX_REQUEST * budget.input_microcredits_per_token
+                + 4096 * budget.output_microcredits_per_token
+            )
+            if committed + next_envelope > budget.limit_microcredits:
+                raise Problem(429, "model_fixture_budget_exhausted")
         return now
 
 
@@ -297,10 +386,20 @@ def usage_view(db, run_id):
         ).fetchone()
         entries = conn.execute(
             "SELECT request_id,generation,status,reason,input_tokens,output_tokens,amount_decimal,"
-            "currency,price_revision,reserved_at,settled_at FROM model_proxy_requests "
+            "currency,price_revision,fixture_input_bound,fixture_output_bound,"
+            "fixture_reserved_microcredits,fixture_settled_microcredits,"
+            "reserved_at,settled_at FROM model_proxy_requests "
             "WHERE run_id=%s ORDER BY reserved_at,request_id",
             (run_id,),
         ).fetchall()
+    committed = sum(
+        (
+            entry["fixture_settled_microcredits"]
+            if entry["fixture_settled_microcredits"] is not None
+            else entry["fixture_reserved_microcredits"] or 0
+        )
+        for entry in entries
+    )
     return {
         "scope": "control-model-proxy-fixture",
         "guest_connected": policy["guest_connected"] if policy else False,
@@ -312,5 +411,16 @@ def usage_view(db, run_id):
         "cost_status": "unknown",
         "amount_decimal": None,
         "hard_money_limit_supported": False,
+        "fixture_credit_limit_supported": bool(policy and policy["fixture_limit_microcredits"]),
+        "fixture_price_revision": policy["fixture_price_revision"] if policy else None,
+        "fixture_credit_limit_microcredits": (
+            policy["fixture_limit_microcredits"] if policy else None
+        ),
+        "fixture_credits_committed_microcredits": committed
+        if policy and policy["fixture_limit_microcredits"]
+        else None,
+        "fixture_credits_uncertain": any(e["status"] != "final" for e in entries)
+        if policy and policy["fixture_limit_microcredits"]
+        else None,
         "entries": entries,
     }

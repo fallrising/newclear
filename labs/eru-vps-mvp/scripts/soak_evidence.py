@@ -24,6 +24,7 @@ def validate_manifest(manifest):
         if (config_hash(cfg) != item['config_sha256'] or cfg['run_id'] != manifest['id']
                 or cfg['start_epoch'] != manifest['start_epoch'] or cfg['deadline_epoch'] != manifest['deadline_epoch']
                 or cfg['role'] != ('control' if alias == HOSTS[0] else 'http')
+                or cfg.get('acceptance') != manifest.get('acceptance')
                 or not 5 <= cfg['interval'] <= 60
                 or not 30 <= cfg['deadline_epoch'] - cfg['start_epoch'] <= 86400):
             raise ValueError('inconsistent observer manifest: ' + alias)

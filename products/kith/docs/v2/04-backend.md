@@ -41,8 +41,11 @@
   - 回應加 `has_more: bool`（該方向是否還有更早的列）。舊 client 忽略未知欄位。
 - 相容：不帶 `order` 時行為與 v1 位元級相同。
 - 驗收：`E2E-W1-04`。
+- Phase 2：契約 [`contracts/v2/http-messages-list.json`](../../contracts/v2/http-messages-list.json)；`order=asc` 時 `has_more` 表示還有更新的列；實作逐字寫在 [W1](milestones/W1.md) §4.1，已對 1,200 則房間實測。
 
 ### B-02 房間摘要（W2）
+
+- Phase 2：契約 [`contracts/v2/http-rooms.json`](../../contracts/v2/http-rooms.json)；實作與實測見 [W2](milestones/W2.md) §4.2.4。`last_message` 另含 `sender_display_name`、`sender_handle`（非 operator 無法查成員目錄，列表預覽需要名字）；新增 `?all=1`（operator 列出所有房間，控制台用）。
 
 - `GET /api/rooms` 每房加：`last_seq`（int 或 null）、`last_message`（`{seq, sender_id, body_preview ≤ 140 字, created_at}` 或 null，只取 `kind=message`）、`member_count`、`archived_at`。
 - 實作提示：每房一次 `MAX(seq)` 與最後一列查詢；房間 ≤ 64，可接受。Phase 2 評估是否以 D1 單一查詢完成。
@@ -54,6 +57,8 @@
 - `runtime_status`：`ok`、`unconfigured`、`connection_error`、`runner_offline`、`disabled`；前端用它畫成員格的限制句，取代 v1 `reply_limit` 的推斷（`reply_limit` 保留給舊前端）。
 
 ### B-04 成員目錄（W2）
+
+- Phase 2：契約 [`contracts/v2/http-members.json`](../../contracts/v2/http-members.json)；另加 `PATCH /api/members/:id`（改顯示名、停用）；密碼 12–128 字；新帳號 `must_change_password=1`（Q-03）。見 [W2](milestones/W2.md) §4.2.5。
 
 - `GET /api/members?q=`（operator）：實例內所有未停用成員，`q` 以 handle／display_name 前綴比對，最多 20 筆。給邀請表單補全用。
 - `POST /api/members`（operator）：建立人類帳號 `{handle, display_name, password}`（BR-02）。回應不含密碼。
@@ -79,6 +84,8 @@
 - `DELETE` 時若有 agent 引用 → 409 `in_use`，除非帶 `?force=1`（引用的 agent 變 `unconfigured`）。
 
 ### B-08 自己的資料（W2）
+
+- Phase 2：契約 [`contracts/v2/http-me.json`](../../contracts/v2/http-me.json)；`GET /api/me` 另回 `must_change_password`、`operator_display_name`。見 [W2](milestones/W2.md) §4.2.3。
 
 - `GET /api/me` 加 `display_name`、`handle`、`kind`（v1 已回，前端未用）。
 - `PATCH /api/me`：改 `display_name`。
@@ -122,12 +129,14 @@ Server → client：
 
 ### B-14 房間管理（W2）
 
+- Phase 2：檢查放在 Room DO `persistSend` 的查重之後，WS、REST、MCP 三條路徑一次涵蓋；錯誤碼加入 [`contracts/v2/http-error.json`](../../contracts/v2/http-error.json)。見 [W2](milestones/W2.md) §4.2.6。
+
 - `PATCH /api/rooms/:id`（operator）：`{name?, archived?: bool}`。
 - 封存房（BR-14）：send 路徑（WS、REST、MCP）回 409 `room_archived`；Inbox 不 dispatch；`/mcp/events` 只允許 catch-up。新錯誤碼 `room_archived` 加入錯誤碼表。
 
 ## 4. 資料模型增量（DDL 輪廓）
 
-只追加。完整 DDL 在 Phase 2 寫成 `migrations/0002_v2.sql` 並附正反例。
+只追加。Phase 2 改為每個里程碑各自一個 migration：`0002_v2_rooms_members.sql`（W2：`rooms.archived_at`、`members.must_change_password`，[W2](milestones/W2.md) §4.1），provider 與 runtime 相關表在 W4 的 `0003`。
 
 ```sql
 CREATE TABLE provider_connections (

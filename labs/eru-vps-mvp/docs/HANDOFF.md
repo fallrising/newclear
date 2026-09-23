@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-23。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 18 項（近期 7、後續 11），下一項 ERU-001。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-23。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 17 項（近期 6、後續 11）；ERU-001 已完成，下一項 ERU-002 到期回收，等待期間可先準備 ERU-007 本機工具。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -19,7 +19,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - patch 後 worker-4 新操作器 smoke PASS（`20260922T150023Z-1d1e3892`），包含 HTTP、stop/start、exec/logs、超額 memory/storage 拒絕與配額歸零。
 - `labctl` 支援 plan／execute／status／reconcile、精確 cleanup、canary-start，以及具有健康／core SHA／空 target／ownership／連續 HTTP 守護的 worker-4 component-reinstall。
 - 六個 ERU 檔案和三個狀態根先備份校驗再 quarantine；worker-only installer 不動共享 runtime。失敗保留 journal，不重播。恢復底層拒絕覆蓋新資料，已有中斷／checksum／link／mount 測試。
-- 本機 147 項測試通過。worker-4 元件重裝已連續 3/3 成功，component revision 3、cluster generation 1；詳見優先路徑文件的實測表格。
+- 本機 183 項測試通過。worker-4 元件重裝已連續 3/3 成功，component revision 3、cluster generation 1；詳見優先路徑文件的實測表格。
 
 - 新增 source-bound recovery CLI、patched-core reapply，以及 worker-4 quarantine／start 兩個有界故障演練點。恢復與原成功重裝計次分離，patched reapply 與 worker restore／保留新狀態 resume 的實機驗收通過，最後已清理測試 workload；詳見 2026-09-23 紀錄。
 
@@ -27,12 +27,18 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 
 - 補上 core 更新／rollback 的 32 個程序中斷切點與一次未知後續更動測試（33 次真實 SIGKILL），修正早期 journal 錯誤與權限／hardlink／mount 拒絕條件。均在本機暫存目錄驗證；[本輪交接與剩餘 TODO](M2-CRASH-RECOVERY-2026-09-23.md)。
 
+- ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
+
+- ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與全新 24h run 尚未執行，故狀態為進行中、總數仍剩 17。既有 30 秒觀測保持原封。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
+
+- ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
+
 ## 尚未完成的工作
 
-- 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。現在以實際負載和健康觀測推进，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
-- core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。程序 SIGKILL 切點已補驗；真正 VM／磁碟 power-loss、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。replace-intent 前中斷的顯式取消／封存功能也仍待設計，目前保留資料並拒絕 rollback。
+- 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。[ERU-004 階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已對照 2026-09-23 17:45 UTC 的 6 小時 20 分唯讀快照與官方資料，記錄影響、證據缺口及相對成本；完整 24 小時結果未出，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
+- core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。程序 SIGKILL 切點已補驗；真正 VM／磁碟 power-loss、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
-- 其他 workers／非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
+- ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核；[兩台結果與後續步驟](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 重裝執行／恢復仍未開放，非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
 
 ## 接手先做
 
@@ -40,6 +46,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 cd /home/ckc/test/codex/newclear-eru-delivery
  git status --short --branch
  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s labs/eru-vps-mvp/tests -v
+ python3 labs/eru-vps-mvp/scripts/controller_preflight.py
  python3 labs/eru-vps-mvp/scripts/labctl.py status
 ```
 

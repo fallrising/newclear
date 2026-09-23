@@ -40,6 +40,7 @@ P1 大框架（#47）
   - `E2E-W0-01` 隔離環境啟動、migration、seed 完成，登入頁可見，operator 可登入並看到空的主畫面。
   - `E2E-W0-02` 證據資料夾結構與 manifest 通過 schema 驗證；遮罩掃描為 0。
 - 禁止：任何聊天功能；修改後端。
+- 狀態：`DOC_READY`（施工圖：[milestones/W0.md](milestones/W0.md)）。
 
 ### W1 — 聊天核心
 
@@ -52,6 +53,7 @@ P1 大框架（#47）
   - `E2E-W1-05` Markdown 白名單與 XSS 向量（BR-34、FE-20）。
   - `E2E-W1-06 @mobile` 手機：列表→房間→返回；重新整理停在同一房。
 - 禁止：成員面板、agent 相關 UI、控制台。
+- 狀態：`DOC_READY`（施工圖：[milestones/W1.md](milestones/W1.md)）。
 
 ### W2 — 房間與帳號
 
@@ -63,10 +65,11 @@ P1 大框架（#47）
   - `E2E-W2-04` 非 operator 看不到控制台入口，直接開 URL 得到 403 畫面。
   - `E2E-W2-05` 封存房：列表移入「已封存」、composer 停用、WS／REST send 回 `room_archived`、@agent 不喚醒；解除封存後恢復（BR-14、V2-INV-07）。
   - `E2E-W2-06` 語言切換：zh-TW ↔ en，所有畫面字串切換、無缺 key；日期格式隨語言變（FE-05）。
+- 狀態：`DOC_READY`（施工圖：[milestones/W2.md](milestones/W2.md)）。鍵盤快捷鍵與訊息操作選單移到 W3。
 
 ### W3 — 成員、提及、回覆狀態
 
-- 產物：右側成員面板、agent detail、@ 補全（沿用 v1 10 章鍵盤規則）、提及高亮、hosted 回覆佔位、typing、B-11 失敗提示；以 v1 hosted（xAI 路徑＋fake）驗證。
+- 產物：右側成員面板、agent detail、@ 補全（沿用 v1 10 章鍵盤規則）、提及高亮、hosted 回覆佔位、typing、B-11 失敗提示；鍵盤快捷鍵（06 §8）與訊息操作選單（複製文字、查看 seq）（自 W2 移入）；以 v1 hosted（xAI 路徑＋fake）驗證。
 - 驗收：
   - `E2E-W3-01` 成員面板分人／AI，限制句正確。
   - `E2E-W3-02` @ 補全：鍵盤、點按、IME、Escape（v1 UI-10-02 的行為）。

@@ -35,6 +35,8 @@
 
 已新增 `scripts/labctl.py`，提供 plan／execute／status／reconcile，詳見操作器文件。SDD 其餘 bootstrap、應用 desired-state、worker／全群重灌、backup／restore 命令仍是待實作契約；沒有供應商重灌程式或全群 reset。
 
+新 controller 接手前可先用 `python3 scripts/controller_preflight.py` 做純本機版本／私有輸入檢查；結果寫入忽略的 `private/controller-preflight/`。[範圍與接手步驟](docs/M3-CONTROLLER-PREFLIGHT-2026-09-23.md)。
+
 ## 實機診斷工具
 
 ```bash

@@ -160,8 +160,11 @@ class Operator:
         return json.loads(result) or []
 
     def worker_scope(self, alias):
+        host = next((host for host in self.inventory if host['alias'] == alias and host['role'] == 'worker'), None)
+        if host is None or host['node'] not in ('worker-2', 'worker-3', 'worker-4'):
+            raise ValueError('worker audit requires a reviewed worker alias')
         source = (self.project / 'scripts/worker_scope.py').read_text()
-        return json.loads(self.command(alias, ['sudo', '-n', 'python3', '-'], source))
+        return json.loads(self.command(alias, ['sudo', '-n', 'python3', '-', host['node']], source))
 
     def health(self):
         self.command(self.core['alias'], ['sudo', '-n', '/usr/local/bin/etcdctl',
@@ -303,15 +306,16 @@ class Operator:
                 scope = self.worker_scope(host['alias'])
                 plan['component_scope'] = scope
                 plan['blockers'] += scope['blockers']
+                from component_reinstall import empty_target
+                try:
+                    empty_target(snap, node, host['alias'])
+                except (ValueError, KeyError, StopIteration) as exc:
+                    plan['blockers'].append(str(exc))
                 if node != 'worker-4':
-                    plan['blockers'].append('Initial component-reinstall scope is worker-4 only')
-                if plan['targets'] or snap['hosts'][host['alias']]['containers']:
-                    plan['blockers'].append('Target must have zero workloads and runtime containers; automatic drain is not implemented')
+                    plan['blockers'].append('worker-2/3 execution requires peer canary and recovery support; only worker-4 is enabled')
                 if not health_file or not canary_run:
                     plan['blockers'].append('component reinstall requires --health and --canary-run')
                 elif not plan['blockers']:
-                    from component_reinstall import empty_target
-                    empty_target(snap)
                     plan['worker_readiness'] = self.worker_readiness(health_file, canary_run, snap)
                     plan['blockers'] += plan['worker_readiness']['blockers']
                 plan['executable'] = not plan['blockers']

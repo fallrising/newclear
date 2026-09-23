@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/http-messages-list.json",
+  "title": "GET /api/rooms/:id/messages v2 (B-01)",
+  "description": "Adds the optional `order` query parameter and the `has_more` response field. Without `order` the endpoint is bit-identical to v1 (response has only `messages`). With `order`, the array is always ascending by seq. Defined in docs/v2/milestones/W1.md §4.1.",
+  "$defs": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "after_seq": {
+          "type": "string",
+          "pattern": "^-?[0-9]+$",
+          "description": "Default -1."
+        },
+        "before_seq": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "Clamped to 1..50; default 50."
+        },
+        "kind": {
+          "enum": [
+            "message",
+            "trace",
+            "message,trace",
+            "trace,message"
+          ],
+          "description": "Default message."
+        },
+        "order": {
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "description": "New in v2. Any other value -> 400 invalid_request 'invalid order'."
+        }
+      }
+    },
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "room_id",
+        "seq",
+        "kind",
+        "thread_id",
+        "reply_to",
+        "sender_id",
+        "body",
+        "mentions_json",
+        "generation_id",
+        "client_message_id",
+        "origin",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "room_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "message",
+            "trace"
+          ]
+        },
+        "thread_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reply_to": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sender_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        },
+        "mentions_json": {
+          "type": "string",
+          "description": "JSON array of mentioned member ids, as stored in D1."
+        },
+        "generation_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_message_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "origin": {
+          "const": "local"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "responseV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message"
+          }
+        }
+      },
+      "description": "Response when `order` is absent."
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages",
+        "has_more"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/message"
+          }
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "desc: rows with smaller seq exist; asc: rows with larger seq exist (both within after_seq/before_seq/kind)."
+        }
+      },
+      "description": "Response when `order` is present."
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/responseV1"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ]
+}

@@ -80,6 +80,19 @@ class ComponentTests(unittest.TestCase):
         with self.assertRaises(ValueError): executor.execute(plan, before)
         executor.fence.assert_not_called()
 
+    def test_empty_target_checks_selected_worker_runtime_and_usage(self):
+        selected = snapshot()
+        selected['nodes'].append({**selected['nodes'][0], 'name': 'worker-2'})
+        selected['hosts']['ckc-disposable-02'] = {**selected['hosts'][ALIAS], 'machine_id': 'machine-2'}
+        self.assertEqual(empty_target(selected, 'worker-2', 'ckc-disposable-02')['name'], 'worker-2')
+        selected['hosts']['ckc-disposable-02']['tasks'] = 'TASK PID STATUS\nforeign 1 RUNNING\n'
+        with self.assertRaisesRegex(ValueError, 'worker-2 must have empty'):
+            empty_target(selected, 'worker-2', 'ckc-disposable-02')
+        selected['hosts']['ckc-disposable-02']['tasks'] = 'TASK PID STATUS\n'
+        selected['nodes'][1]['resource_usage'] = '{"cpu":1}'
+        with self.assertRaisesRegex(ValueError, 'worker-2 must have empty'):
+            empty_target(selected, 'worker-2', 'ckc-disposable-02')
+
     def test_review_only_plan_cannot_use_prototype(self):
         op, executor, plan, stages = self.setup_executor();plan['executable'] = False
         with self.assertRaisesRegex(ValueError, 'review-only'):

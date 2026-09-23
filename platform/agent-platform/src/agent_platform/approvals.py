@@ -139,6 +139,9 @@ def handle_approval(worker, claim, descriptor):
         raise Problem(409, "approval_expired")
     if approval["status"] != "approved":
         return
+    if worker.model_proxy:
+        with worker.owned(claim) as (conn, current):
+            worker.model_proxy.tool_gate(conn, current["id"], current["generation"], worker.owner)
     reply = worker.connector.approve(run, approval)
     if reply != {
         "accepted": True,

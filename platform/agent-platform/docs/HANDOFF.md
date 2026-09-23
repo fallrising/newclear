@@ -1,6 +1,19 @@
 # 開發接續紀錄 — 2026-09-23
 
-本次停止點：**PR #40 的固定節點 egress 已合併；AT-11-A 控制端 model proxy／request ledger 切片已完成。Guest／OpenHands 尚未接入新 proxy，完整 AT-11／AT-07／M3 仍未完成。** 本次分支 `agent/agent-platform/m3-model-proxy` 從當時最新 main `707f77d2c670b6a344ef25d9c4204521223687c1` 建立，提交前同步 main `2069f59222780d52055bef139953d689c353e902`，只修改 `platform/agent-platform`。最新行為見 [M3 model proxy](M3-MODEL-PROXY.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+本次停止點：**PR #43 的 AT-11-A 已合併；AT-11-B opt-in guest mailbox／固定 SDK tool-call／短效 token 更新與 request cutoff 已完成。仍是本機 fixture，完整 AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/m3-guest-model` 從 GitHub main `f4a233dc3357cdeb30cb561b9c0a2a9207f6b10c` 建立，只修改 `platform/agent-platform`。最新行為見 [M3 guest model](M3-GUEST-MODEL.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
+
+## 本次 AT-11-B guest model transport
+
+- UID 2001 guest mailbox 承接固定 OpenHands 1.49.2 chat/tool dialect；host 經授權 sandbox port relay 拉取 request，worker 使用 AT-11-A 的控制端 ModelProxy／SQL ledger。沒有 guest→控制面網路例外，驗收全程 explicit deny-all。
+- 短效 run token 與 SDK local key／relay session key 分開；token 最長五分鐘，active worker 每 120 秒輪替，更新以 generation／revision 單調核對。舊 token 不重設 request cap，guest 不持有上游 fixture credential。
+- UUID／guest private fsync／SQL reservation／connector delivery intent 保留不重派語意。Reserved 或 settled 後中斷不重送 completion；已確認 delivery 後可接回同 VM／prompt。
+- 新模型模式一律 AlwaysConfirm，手動／自動 terminal admission 都檢查 live ownership／固定 policy／剩餘額度。Cutoff 持久撤權並要求停止原 VM；停止證據不完整時保留 reservation，recovery 補證，不刪 journal／fences、不降低 generation。
+- 新增 migration 009 與 15 項驗收；M0 45／平台 176 測試和 lint／format 通過。真實 KVM 涵蓋新模型 13 案例（含雙 VM 跨 run、29 項 terminal 攻擊與三個 SIGKILL 時點），並回歸既有 13 個控制案例；來源 hashes／完整結果見 [evidence](evidence/m3-guest-model-2026-09-23.json)。
+- 部署需完整 drain／備份／migrate，再更新 API／worker／connector；不需重建 launcher 或 OCI template。全部 real workers 明確設定 `MODEL_PROXY_CONFIG=/private/model.json` 並啟動本機 fixture upstream 才開新通道。未設定者的新 run 仍是 legacy guest fixture；已配置 run 的模式不符時拒絕接續，不自動換模型。
+- Pause 與 in-flight 模型請求競爭時，撤權 completion 不交付；無法取得安全工具邊界就保持 pausing／容量，透過取消或期限收尾。模型結果不明不自動重送，沒有把 SDK error 當作安全 paused。
+- 本次 worktree `/home/ckc/test/codex/newclear-agent-m3-guest-model`；私密原始 payload／logs／fixture keys／配置在 `/tmp/apm3-guest-model-20260923`。沿用 `/tmp/apm3-egress-20260923/journal`、原 fences／launcher／Cocoon cache；原配置完整保留。公開文件與 evidence 不含原始憑證或模型 payload。
+- 收尾已確認 VM／claims 為零、97 筆 journal 對應 VM 全部停止；connector／sandboxd 測試服務已停，測試 Postgres 已移除。全部 journal／fences 保留，node 配置仍是 explicit deny-all；重跑前必須重新核對現況。
+- 下一步 AT-11-C 是可信 pricing／token 上界與金額 reservation／settlement，再做 usage UI、明確 opt-in provider smoke 及完整 AT-07／11 整合。沒有付費 provider、自然語言 coding、streaming 或完整 M3 完成宣告。
 
 ## 本次 AT-11-A 控制端 model proxy
 
@@ -83,14 +96,14 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 與 [M3 model proxy](M3-MODEL-PROXY.md) 接續 **AT-11-B guest transport／SDK tool-call dialect／憑證 rotation**，真實 KVM 驗收後再接 pricing／token／金額 budget、工具收尾與 usage UI，最後整合完整 AT-07。固定節點 egress 已驗收，project-specific policy／即時撤銷／TLS 內容政策仍不支援；模型 transport 不得靠全節點 private-IP override 開洞。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
-2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。控制端 fixture proxy／request ledger 已提供；guest 尚未接入，真實 provider／token 與金額 budget／usage UI 尚未提供。
+1. 依 [SDD](../SDD.md) 與 [M3 guest model](M3-GUEST-MODEL.md) 接續 **AT-11-C pricing／token 上界／金額 reservation 與 settlement**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
+2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture proxy；legacy 模式仍保留。Token counters 是上游 fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
 5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
 7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-egress-20260923`（本次，最終 pinned-*／deny-final／控制回歸）、`/tmp/apm3-isolation-20260923`（前次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
-8. 本次先 drain、備份，再套用最新 `008_model_proxy.sql`（包含前序 migrations）並更新 API；proxy 為獨立服務。從 PR #40 升級不需重建 launcher 或切換 guest 模型。若從更舊的 guest／egress 版本升級，仍須依其文件一起更新 API／worker／connector／web、重建 launcher、以 sealed node 啟動並重新登錄政策／建立 profile revision。舊 journal 沒有 pre-tool 程序基準不能安全 pause。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
+8. 本次先 drain、備份，再套用最新 `009_guest_model.sql`（包含前序 migrations）並更新 API／worker／connector。AT-11-B 的 ModelProxy 在 worker 端執行，另啟動固定 loopback fixture upstream；AT-11-A 獨立文字 endpoint 保留。從 PR #43 升級不需重建 launcher，guest helper 不原地修補。更舊版本須連同 guest／egress 升級步驟處理。不要刪 journal／fences 或降低 DB generation；已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異
 

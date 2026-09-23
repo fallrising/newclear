@@ -108,7 +108,11 @@ def control(service, run_id, request):
         if row["operations"].get("prompt", {}).get("state") != "completed":
             raise Problem(409, "pause_prompt_unconfirmed")
         pause_id, command_id = str(request.pause_id), str(request.command_id)
-        original = "AlwaysConfirm" if row["input"].get("require_approval") else "NeverConfirm"
+        original = (
+            "AlwaysConfirm"
+            if row["input"].get("require_approval") or row["input"].get("model_transport")
+            else "NeverConfirm"
+        )
         record = row.get("pause")
         if request.action == "pause":
             if command_id != pause_id:

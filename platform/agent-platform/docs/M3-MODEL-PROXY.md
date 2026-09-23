@@ -1,5 +1,7 @@
 # M3 第八個切片：AT-11 控制端 model proxy
 
+> 2026-09-23 接續：[AT-11-B guest model transport](M3-GUEST-MODEL.md) 已接通 opt-in mailbox／SDK tool-call、憑證更新與 request cutoff。以下保留 AT-11-A 交付時的獨立文字 endpoint 範圍；最新啟用方式與 KVM 證據請讀下一切片。
+
 本切片完成 **AT-11-A：獨立控制端 proxy 的授權、請求額度與用量 ledger**。它以真實 PostgreSQL／HTTP、本機受控文字模型 fixture 驗收。**Guest／OpenHands 尚未接入此 proxy；付費 provider、tool-call／streaming dialect、token／金額硬上限及完整 AT-11／M3 仍未完成。** 目前 Web 建立的任務仍執行 guest 內的 `guest_fixture.py`，不會因啟動此服务自動改走 proxy，也不能把本服務的 request cap 當成現有 agent loop 的整體限制。
 
 ## 差距與切片決策

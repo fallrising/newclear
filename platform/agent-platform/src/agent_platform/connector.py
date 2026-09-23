@@ -50,6 +50,16 @@ class Allocate(Input):
     base_sha: str = Field(pattern=r"^([a-f0-9]{40}|[a-f0-9]{64})$")
     deadline: datetime
     require_approval: bool = False
+    model_transport: bool = False
+
+
+class ModelExchange(Input):
+    generation: int = Field(ge=1)
+    action: Literal["credential", "poll", "deliver"]
+    revision: int = Field(default=0, ge=0)
+    token: str | None = Field(default=None, pattern=r"^mp1_[A-Za-z0-9_-]{43}$", repr=False)
+    request_id: UUID | None = None
+    response: dict | None = None
 
 
 class Cancel(Input):
@@ -342,15 +352,23 @@ class Connector:
             )
         )
         row["session_key"] = secrets.token_urlsafe(32)
+        if data.get("model_transport"):
+            row["model_local_key"] = secrets.token_urlsafe(32)
         self.journal.write(row)
         self.guard(row)
         sb.spawn(
             "python3",
             "-I",
-            CODE + "/guest_fixture.py",
+            CODE + ("/guest_model.py" if data.get("model_transport") else "/guest_fixture.py"),
             user="agentcontrol",
             cwd=CONTROL,
-            env={"FIXTURE_RUN_ID": row["run_id"]},
+            env={
+                "MODEL_RUN_ID": row["run_id"],
+                "MODEL_LOCAL_KEY": row["model_local_key"],
+                "MODEL_RELAY_KEY": row["session_key"],
+            }
+            if data.get("model_transport")
+            else {"FIXTURE_RUN_ID": row["run_id"]},
         )
         self.guard(row)
         sb.spawn(
@@ -385,9 +403,11 @@ class Connector:
                         "llm": {
                             "model": "openai/gpt-4o-mini",
                             "base_url": "http://127.0.0.1:18080/v1",
-                            "api_key": "m2-fixture-no-provider-key",
+                            "api_key": row.get("model_local_key", "m2-fixture-no-provider-key"),
                             "stream": False,
                             "num_retries": 0,
+                            "max_output_tokens": 4096,
+                            "temperature": 0,
                         },
                         "tools": [
                             {
@@ -406,7 +426,9 @@ class Connector:
                         },
                     },
                     "confirmation_policy": {
-                        "kind": "AlwaysConfirm" if data.get("require_approval") else "NeverConfirm"
+                        "kind": "AlwaysConfirm"
+                        if data.get("require_approval") or data.get("model_transport")
+                        else "NeverConfirm"
                     },
                     "max_iterations": 4,
                     "autotitle": False,
@@ -418,7 +440,11 @@ class Connector:
         row["isolation_revision"] = REVISION
         self.isolation(row)
         self.journal.write(row)
-        return {"ref": row["run_id"], **checkout}
+        return {
+            "ref": row["run_id"],
+            "model_transport": data.get("model_transport", False),
+            **checkout,
+        }
 
     def isolation(self, row, *, terminal=False):
         proof = attest(self, row, terminal=terminal)
@@ -456,7 +482,7 @@ class Connector:
         )
 
     def conversation(self, row, http):
-        if row.get("pause"):
+        if row.get("pause") or row["input"].get("model_transport"):
             from .connector_state import live_state
 
             return live_state(row, http)
@@ -527,7 +553,11 @@ class Connector:
                         "type": "tool.completed"
                         if kind == "ObservationEvent"
                         else "tool.proposed"
-                        if kind == "ActionEvent" and row["input"].get("require_approval")
+                        if kind == "ActionEvent"
+                        and (
+                            row["input"].get("require_approval")
+                            or row["input"].get("model_transport")
+                        )
                         else "tool.started"
                         if kind == "ActionEvent"
                         else "backend.event",
@@ -635,7 +665,7 @@ def create_connector(config, service=None):
         chunks, size = [], 0
         async for chunk in request.stream():
             size += len(chunk)
-            if size > 65536:
+            if size > (384 * 1024 if request.url.path.endswith("/model") else 65536):
                 return JSONResponse({"error": "request_too_large"}, status_code=413)
             chunks.append(chunk)
         request._body = b"".join(chunks)
@@ -684,6 +714,12 @@ def create_connector(config, service=None):
         from .connector_approval import approve
 
         return approve(service, run_id, data)
+
+    @app.post("/v1/runs/{run_id}/model")
+    def model_exchange(run_id: UUID, data: ModelExchange, _=auth):
+        from .connector_model import exchange
+
+        return exchange(service, run_id, data)
 
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):

@@ -111,6 +111,7 @@ def main():
                 "guest_quiescence.py",
                 "guest_workspace.py",
                 "guest_fixture.py",
+                "guest_model.py",
             }
         )
         path = CODE / name

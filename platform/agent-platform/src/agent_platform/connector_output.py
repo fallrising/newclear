@@ -26,7 +26,9 @@ class OutputPolicy:
                         service.token,
                         getattr(service.client, "api_token", None),
                         row.get("session_key"),
+                        row.get("model_local_key"),
                         row.get("handle", {}).get("token"),
+                        *row.get("model_tokens", []),
                     )
                     if isinstance(value, str) and value
                 },

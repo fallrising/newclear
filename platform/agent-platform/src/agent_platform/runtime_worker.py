@@ -9,6 +9,7 @@ from psycopg.types.json import Jsonb
 
 from .connector_recovery import stopped
 from .domain import TERMINAL, Problem
+from .model_worker import ModelSession, cutoff_reason
 from .recovery import quarantine
 from .store import event
 
@@ -50,6 +51,7 @@ def heartbeat(worker, claim):
 
 def execute_real(worker, claim):
     client = worker.connector
+    model = ModelSession(worker, claim) if worker.model_proxy else None
 
     def snapshot():
         with worker.owned(claim) as (conn, run):
@@ -122,6 +124,16 @@ def execute_real(worker, claim):
                 "UPDATE jobs SET status='done',lease_until=NULL WHERE id=%s", (claim["job_id"],)
             )
 
+    def stop_model(run, reason):
+        # cancel() closes admission and proves the original VM's complete removal.
+        # If any evidence is missing this raises and quarantine retains capacity.
+        proof = client.cancel(run)
+        if not stopped(proof):
+            raise Problem(409, "model_cleanup_unconfirmed")
+        with worker.owned(claim) as (conn, current):
+            state(conn, current, "failed", reason)
+        cleaned(proof)
+
     with heartbeat(worker, claim) as lost:
         try:
             run = snapshot()
@@ -135,6 +147,10 @@ def execute_real(worker, claim):
                 from .controls import execute_control
 
                 execute_control(worker, claim, run)
+                return
+            reason = cutoff_reason(worker, run["id"])
+            if reason:
+                stop_model(run, reason)
                 return
             observed = client.inspect(run) if claim.get("recovery") else {"phase": "absent"}
             for receipt in observed.get("approval_receipts", []):
@@ -204,6 +220,8 @@ def execute_real(worker, claim):
             )
             if run["backend_ref"] and run["backend_ref"] != prepared["ref"]:
                 raise Problem(409, "recovery_backend_mismatch")
+            if prepared.get("model_transport", False) != (model is not None):
+                raise Problem(409, "model_transport_configuration_changed")
             with worker.owned(claim) as (conn, current):
                 conn.execute(
                     "UPDATE runs SET backend_ref=%s WHERE id=%s", (prepared["ref"], run["id"])
@@ -211,12 +229,16 @@ def execute_real(worker, claim):
                 state(conn, current, "finalizing" if phase == "result" else "running")
             run = snapshot()
             ensure_live(run, lost)
+            if model and phase != "result":
+                model.step(run)
             if phase in {"absent", "allocated", "prepared"}:
                 client.operation(run, "prompt")
             if phase != "result":
                 while True:
                     run = snapshot()
                     ensure_live(run, lost)
+                    if model:
+                        model.step(run)
                     events = client.events(run)
                     with worker.owned(claim) as (conn, current):
                         for item in events["events"]:
@@ -238,7 +260,10 @@ def execute_real(worker, claim):
                     if events["state"] == "waiting_for_confirmation" and events["caught_up"]:
                         from .approvals import handle_approval
 
-                        handle_approval(worker, claim, events["approval"])
+                        if model and not run["require_approval"]:
+                            model.admit_tool(run, events["approval"])
+                        else:
+                            handle_approval(worker, claim, events["approval"])
                     elif events["state"] == "running":
                         with worker.owned(claim) as (conn, current):
                             state(conn, current, "running")
@@ -256,6 +281,19 @@ def execute_real(worker, claim):
             cleaned(client.operation(run, "release"))
         except Exception as exc:
             reason = exc.code if isinstance(exc, Problem) else "runtime_operation_uncertain"
+            if model:
+                try:
+                    # Lease/state validation excludes stale owners after user control.
+                    worker.model_proxy.cutoff(
+                        claim["run_id"],
+                        claim["generation"],
+                        worker.owner,
+                        reason if reason.startswith("model_") else "model_transport_uncertain",
+                    )
+                    stop_model(snapshot(), cutoff_reason(worker, claim["run_id"]))
+                    return
+                except Exception:
+                    pass
             try:
                 quarantine(worker, claim, reason)
             except Exception:

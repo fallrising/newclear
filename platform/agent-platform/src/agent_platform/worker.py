@@ -4,6 +4,7 @@ Expired real-runtime ownership is reconciled against the existing instance.
 Unknown effects retain the original binding and resource reservation.
 """
 
+import os
 from contextlib import contextmanager
 from uuid import uuid4
 
@@ -19,6 +20,13 @@ class Worker:
         self.db = db
         self.owner = uuid4()
         self.connector = connector
+        self.model_proxy = None
+        if connector is not None and os.environ.get("MODEL_PROXY_CONFIG"):
+            from .model_policy import Policy
+            from .model_proxy import ModelProxy
+
+            self.model_proxy = ModelProxy(db, Policy.read(os.environ["MODEL_PROXY_CONFIG"]))
+            connector.model_transport = True
         self.agent = FakeAgentBackend()
         self.sandbox = FakeSandboxProvider()
 

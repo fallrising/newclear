@@ -3,6 +3,7 @@
 import hmac
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from uuid import UUID
 
 from .model_policy import MAX_REQUEST, MODEL, canonical
 
@@ -15,6 +16,43 @@ def fixture_response():
                 "index": 0,
                 "message": {"role": "assistant", "content": "Model proxy fixture."},
                 "finish_reason": "stop",
+            }
+        ],
+        "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+    }
+
+
+def tool_response(data):
+    run = str(UUID(data["fixture_run_id"]))
+    called = any(m["role"] == "tool" for m in data["messages"])
+    command = (
+        "python3 -c \"from pathlib import Path; Path('m2-result.txt').write_text('"
+        + run
+        + "\\n')\""
+    )
+    name = "finish" if called else "terminal"
+    arguments = (
+        {"message": "Fixture completed; inspect saved verification."}
+        if called
+        else {"command": command}
+    )
+    return {
+        "model": MODEL,
+        "choices": [
+            {
+                "index": 0,
+                "finish_reason": "tool_calls",
+                "message": {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": "call_" + run + ("_finish" if called else "_edit"),
+                            "type": "function",
+                            "function": {"name": name, "arguments": json.dumps(arguments)},
+                        }
+                    ],
+                },
             }
         ],
         "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
@@ -42,7 +80,7 @@ def fixture_server(port, credential):
             except (ValueError, KeyError, TypeError):
                 self.send_error(422)
                 return
-            raw = canonical(fixture_response())
+            raw = canonical(tool_response(data) if "tools" in data else fixture_response())
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(raw)))

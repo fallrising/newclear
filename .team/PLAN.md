@@ -959,3 +959,31 @@ remote_durability: bf3f168 SSH-saved; containing metadata checkpoint nextSSHpush
 blockers: []
 next_action: validate metadata-only diff and SSHsave samePR36; waitlatestexactheadCI, recheckSSHmain/PRhead, ACCEPT thenauthorizedmerge; verifyactualmerge/tree/postmergeCI, savecloseout/releaseW2, thencreateW3run
 ```
+
+
+DG-D073 (2026-09-23): W2 actual closeout reconciled 2026-09-23: PR36 ACCEPTED/MERGED at 2026-09-23T10:37:05Z, accepted head e8c7ec113d01a778642d2600b1af002dc7831651, actual merge 91626851fb17df7ab31c96dee9353b9ee4d42c92. Exact-head [CI35846286919](https://github.com/fallrising/newclear/actions/runs/35846286919) succeeded with321unit/77Chromium/8Firefox-WebKit/3benchmark/2isolation and all native gates; artifact10745167006, dim-gate-m5-0c72ed5243b32edccb0a8b5c879575660e846674, expires2026-10-23. SSH main ancestry and component tree410fe5f8aeafc7391754b08f9c9ad31328ddcc26 equal accepted head. Independent T036attempt2 SHA372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 unchanged; no unresolved findings. DG-W2-20260923-01 terminalDONE, T033/T034/T035 ACCEPTED, T036 DONE; active_owner NONE. Postmerge CI35849832030 observed in_progress, mirror35849832043 SUCCESS; this is status verification, not a claim that pending CI passed. PR36 body has actual closeout; original53worktrees retained. No deployment or external side effect.
+
+DG-D074: Begin DG-W3-20260923-01 at actual accepted W2 main9162685. No open W3 PR or recoverable W3 branch existed. Created isolated canonical worktree/branch below, original53 preserved. W3 contract revision1 fixes fullAC-WS-10/11/15–18, schema3/strictW1W2 migration, PipelineDefinition/config/traffic revisions, prod independent decisions, shared release/config/traffic locks, exact API/routes and startup budget. T037 owns domain; T038 only new delivery UI/browser; T039 lead owns API/Mock/migration/router/shared integration and sole PLAN; T040 uninvolved readonly. Workers receive separate fresh worktrees, publish interfaces then SHA handback/release. Builtin fallback disclosed; no Claude or multi-model claim. Pinned kernel237aa277 already read; no update. User commit/SSHpush/PR/merge authorization persists, no deploy/external side effect. Only contract/tasks/closeout metadata now; no W3 implementation or acceptance claim. Three bounded cycles per run, do not relax gates. Next remote checkpoint before product code.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 74
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 CONTRACT_FIXED / NOT_IMPLEMENTED / NOT_ACCEPTED
+task_id: T037 domain; T038 UI; T039 integration; T040 uninvolved review
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 91626851fb17df7ab31c96dee9353b9ee4d42c92
+implementation_commit: none_W3
+local_tested_commit: none_W3
+spec_revision: WS-SDDrevision1 / W3contractrevision1
+evidence_refs: [.team/reports/T-039-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: no_W3_PR_yet / NOT_ACCEPTED
+remote_durability: W2 merged; containing W3 contract checkpoint nextSSHpush
+blockers: []
+next_action: validate and SSHsave contract to one draftW3PR; create isolated T037/T038 worktrees, publish schema/client interfaces, implement fullW3; monitor actualW2postmergeCI; complete all gates/review/latestheadCI/authorizedmerge before W4
+```

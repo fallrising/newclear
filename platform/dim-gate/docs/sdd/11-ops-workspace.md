@@ -1,6 +1,6 @@
 # 11 — Ops 維運工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已驗收合併（PR36）；W3 合約固定、實作尚未完成，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
 
 ## 1. 使用者與責任
 

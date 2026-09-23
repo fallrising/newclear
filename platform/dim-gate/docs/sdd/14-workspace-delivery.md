@@ -1,6 +1,6 @@
 # 14 — 三工作區交付、遷移與驗收
 
-版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併；W3–W5 尚未實作。固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已驗收合併（PR36）；W3 合約固定、實作尚未完成；W3–W5 尚未實作。固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
 
 ## 1. 增量與依賴
 
@@ -76,3 +76,6 @@ fixture 沿用原60 CI及三 provider regression，新增 deterministic Resource
 
 
 W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
+
+
+W2 已由 [PR36](https://github.com/fallrising/newclear/pull/36) 驗收合併為9162685，完整最新headCI通過；上方本機checkpoint是歷史觀察。W3 依 [W3 integration contract](../W3-INTEGRATION-CONTRACT.md) 和 T037–040 開始，完整 AC-WS-10/11/15–18 不縮減。

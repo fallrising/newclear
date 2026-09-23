@@ -126,3 +126,10 @@ W2 fixed0ab838a affectedChromium **20/20通過**（4.0分鐘）：既有M1/M2、
 W2主控固定740a2bc：完整benchmark3/3通過（實際初始JS303924/307200bytes，LCP724ms、queryP950.5ms、HTTPP95168.6ms）；genuineW1升級browser1/1與真200舊資源回應隔離browser1/1通過。T034治理browser5/5、13axe掃描通過並SHA交接整合。所有worker寫入已釋放；lead接續固定候選完整76Chromium、8Firefox/WebKit、isolation、獨立T036review與最新headCI。仍未W2ACCEPTED或合併。
 
 W2 固定4a69e07：三項medium review修正後13/13瀏覽器與3/3效能通過；獨立複審程式層面確認關閉。原a054完整76Chromium與2isolation通過，但Firefox/WebKit新W2smoke因連續整頁導航中止啟動而失敗6/8，證據保留並修正測試起點；另補工作單表格窄螢幕可讀性。最終固定77回歸／8smoke／CI／review仍待完成，W2尚未驗收合併。
+
+
+## W2 已驗收合併，W3 開始（2026-09-23）
+
+W2 actual closeout reconciled 2026-09-23: PR36 ACCEPTED/MERGED at 2026-09-23T10:37:05Z, accepted head e8c7ec113d01a778642d2600b1af002dc7831651, actual merge 91626851fb17df7ab31c96dee9353b9ee4d42c92. Exact-head [CI35846286919](https://github.com/fallrising/newclear/actions/runs/35846286919) succeeded with321unit/77Chromium/8Firefox-WebKit/3benchmark/2isolation and all native gates; artifact10745167006, dim-gate-m5-0c72ed5243b32edccb0a8b5c879575660e846674, expires2026-10-23. SSH main ancestry and component tree410fe5f8aeafc7391754b08f9c9ad31328ddcc26 equal accepted head. Independent T036attempt2 SHA372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 unchanged; no unresolved findings. DG-W2-20260923-01 terminalDONE, T033/T034/T035 ACCEPTED, T036 DONE; active_owner NONE. Postmerge CI35849832030 observed in_progress, mirror35849832043 SUCCESS; this is status verification, not a claim that pending CI passed. PR36 body has actual closeout; original53worktrees retained. No deployment or external side effect.
+
+W3 run DG-W3-20260923-01 從實際 W2 merge 建立隔離工作樹 `newclear-dim-gate-w3`／branch `agent/dim-gate/mainline/w3-service-delivery`；T037–040 與 [W3 contract](W3-INTEGRATION-CONTRACT.md) 固定全範圍、API、權限、遷移、owner 與驗收。現在僅固定合約，尚未宣稱 W3 功能已實作或驗收。W4／W5 尚未開始；舊段落保留歷史觀察。

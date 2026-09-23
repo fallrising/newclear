@@ -33,12 +33,23 @@ def verify_core_selection(config, state, root=Path('/'), owner_uid=0, runtime_sh
     updater = CoreUpdate(root, owner_uid)
     journals = []
     directory = updater.path('/var/lib/eru-mvp/core-updates')
-    for path in directory.glob('*/journal.json'):
+    if directory.exists():
+        updater.entry('/var/lib/eru-mvp/core-updates')
+    for update in sorted(directory.iterdir()) if directory.exists() else []:
+        entry = updater.entry('/' + str(update.relative_to(root)))
+        if not entry or entry['type'] != 'directory':
+            raise ValueError('unsafe core update directory')
+        path = update / 'journal.json'
         name = '/' + str(path.relative_to(root))
         entry = updater.entry(name)
         if not entry or entry['type'] != 'file':
             raise ValueError('unsafe core update journal')
         record = json.loads(path.read_text())
+        marker = updater.entry('/' + str((update / 'cancelled.json').relative_to(root)))
+        if marker:
+            if updater.cancellation_archive(update.name) is None:
+                raise ValueError('cancellation receipt disappeared')
+            continue
         if record.get('stage') != 'rolled-back':
             journals.append(record)
     selected = config.get('preserve_core')

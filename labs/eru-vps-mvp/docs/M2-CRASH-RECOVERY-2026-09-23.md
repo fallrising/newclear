@@ -36,7 +36,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -q
 - [ ] 2026-09-24 11:25:06 UTC 之後，按 [Soak TODO](TODO-SOAK-2026-09-23.md) 回收／分析完整觀測。以三台 raw evidence 及最後 cluster 狀態驗收，不用中途健康結果替代。
 - [ ] 完成觀測後，用原 canary run 建立新的精確 cleanup plan，確認全群 workload／配額回零，保留 evidence。
 - [ ] 再排 core API 不可用的實機故障／恢復演練。須空 ERU runtime、etcd 健康、原備份可驗證、全新 source-bound plan；原備份可能含已知 lock-context bug，不能將 rollback 當作日常降版路徑。
-- [ ] 設計 replace-intent 前中斷的顯式「取消／封存」操作。目前只拒絕不完整備份的 rollback，沒有自動清除此類 pending update 的功能；禁止手動刪 journal 來繞過 reapply 檢查。它不影響目前健康叢集或正在執行的 soak。
+- [x] ERU-001 已在後續交付完成 replace-intent 前中斷的顯式「取消／封存」；[驗證紀錄與限制](M2-CORE-CANCEL-2026-09-23.md)。保留 journal／部分備份，沒有自動清除；原 journal 缺失仍拒絕取消。未干擾正在執行的 soak。
 - [ ] 非空 worker drain、其他 worker 的重裝驗收、跨版本升級、snapshot restore／HA、OS 重灌仍是分開的後續範圍。OS 重灌維持 owner 到 provider 控制台人工操作，不接供應商 API。
 
 日常 worker-4 ERU 元件清理重裝已通過原先連續 3/3 的主要目標；本輪可在此交接，讓遠端觀測繼續累積。剩餘項目未標記完成，完整 VM／磁碟 power-loss 保證也未宣稱完成。

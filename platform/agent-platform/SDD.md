@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-11-A 控制端 model proxy 與 AT-11-B opt-in guest transport／SDK tool-call／短效 token 更新已驗收，AT-07／11 仍開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-11-A 控制端 model proxy、AT-11-B opt-in guest transport／SDK tool-call／短效 token 更新及 AT-11-C1 固定 fixture credits 預留／結算已驗收，AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
@@ -335,7 +335,7 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 - Repository checkout credential 為唯讀、repo-scoped、短效。可寫 GitHub credential 只給 export worker；agent 不可自行 push 或建立 PR。
 - Export 綁定 run、artifact hash、target repo、branch 與 approval。Base SHA 漂移／衝突需重新檢查；不強制 push、不自動 merge。遠端結果不明時先查 branch／PR marker，不盲目重建。
 
-目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md) 與 [AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新及 cutoff 工具／VM 收尾。Guest 通道需明確啟用且仍限本機 fixture；`amount_decimal` 保持 null，沒有可信 token／金額硬上限、付費 provider 或 usage UI。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
+目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md)、[AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 與 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新、合成 fixture credits 的保守預留／結算及 cutoff 工具／VM 收尾。Guest 通道與 fixture credits 均需明確啟用；後者只驗證固定本機 fixture 的合成計量，不是真實 provider tokenizer 或帳單。`amount_decimal` 保持 null，沒有可信真實金額硬上限、付費 provider 或 usage UI。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
 
 ### 11.3 工具與網路
 
@@ -431,7 +431,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收，AT-11-A proxy／request ledger 與 AT-11-B opt-in guest transport／SDK tool-call／credential 更新／request cutoff 已驗收，可信金額預算及完整 AT-07/11 待完成，見 [M3 guest model](docs/M3-GUEST-MODEL.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收，AT-11-A proxy／request ledger、AT-11-B opt-in guest transport／SDK tool-call／credential 更新／request cutoff 及 AT-11-C1 fixture credits 已驗收，可信真實金額預算及完整 AT-07/11 待完成，見 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |

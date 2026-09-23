@@ -25,7 +25,7 @@ from agent_platform.domain import Problem
 from agent_platform.model_api import create_model_app
 from agent_platform.model_cli import write_token
 from agent_platform.model_fixture import fixture_response
-from agent_platform.model_policy import MODEL, Completion, Policy, canonical
+from agent_platform.model_policy import MODEL, Completion, FixtureBudget, Policy, canonical
 from agent_platform.model_proxy import ModelProxy, usage_view
 from agent_platform.store import Store
 from agent_platform.worker import Worker
@@ -173,6 +173,153 @@ class ModelProxyTests(PlatformFixture):
         self.assertFalse(self.upstream.calls)
         self.assertEqual(self.usage()["request_slots_consumed"], 0)
         self.assertEqual(Store(self.db).runtime()["occupied"], 1)
+
+    def priced(self, limit):
+        run, worker = self.running()
+        policy = replace(
+            self.policy,
+            budget=FixtureBudget("fixture-credit-2026-09", limit, 1, 1),
+        )
+        proxy = ModelProxy(self.db, policy)
+        token = proxy.issue(run, 1, worker.owner)
+        return run, worker, proxy, token
+
+    def test_fixture_credits_reserve_before_dispatch_and_settle_below_bound(self):
+        upper = len(canonical(self.payload_model)) + self.payload_model["max_tokens"]
+        run, worker, proxy, token = self.priced(upper + 10)
+        self.upstream.release.clear()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            first = pool.submit(
+                proxy.complete, run, token, uuid4(), Completion(**self.payload_model)
+            )
+            self.assertTrue(self.upstream.entered.wait(3))
+            pending = usage_view(self.db, run)
+            self.assertEqual(pending["fixture_credits_committed_microcredits"], upper)
+            self.assertTrue(pending["fixture_credits_uncertain"])
+            with self.assertRaisesRegex(Problem, "model_fixture_budget_exhausted"):
+                proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+            self.assertEqual(len(self.upstream.calls), 1)
+            self.upstream.release.set()
+            first.result(timeout=5)
+        settled = usage_view(self.db, run)
+        self.assertEqual(settled["fixture_credits_committed_microcredits"], 15)
+        self.assertFalse(settled["fixture_credits_uncertain"])
+        self.assertFalse(settled["hard_money_limit_supported"])
+        self.assertIsNone(settled["amount_decimal"])
+        self.assertEqual(settled["entries"][0]["fixture_reserved_microcredits"], upper)
+        self.assertEqual(settled["entries"][0]["fixture_settled_microcredits"], 15)
+        self.assertEqual(Store(self.db).runtime()["occupied"], 2)
+
+    def test_fixture_unknown_usage_keeps_full_reservation_and_blocks_next_request(self):
+        upper = len(canonical(self.payload_model)) + self.payload_model["max_tokens"]
+        run, _, proxy, token = self.priced(upper + 10)
+        self.upstream.status = 429
+        with self.assertRaisesRegex(Problem, "model_rate_limited"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        self.upstream.status = 200
+        with self.assertRaisesRegex(Problem, "model_fixture_budget_exhausted"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        view = usage_view(self.db, run)
+        self.assertEqual(view["fixture_credits_committed_microcredits"], upper)
+        self.assertTrue(view["fixture_credits_uncertain"])
+        self.assertEqual(view["request_slots_consumed"], 1)
+        self.assertEqual(len(self.upstream.calls), 1)
+
+    def test_fixture_usage_above_input_bound_is_unknown_and_never_refunded(self):
+        upper_input = len(canonical(self.payload_model))
+        run, _, proxy, token = self.priced(10000)
+        self.upstream.value["usage"] = {
+            "prompt_tokens": upper_input + 1,
+            "completion_tokens": 5,
+            "total_tokens": upper_input + 6,
+        }
+        with self.assertRaisesRegex(Problem, "model_usage_exceeds_reserved_bound"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        view = usage_view(self.db, run)
+        self.assertEqual(view["entries"][0]["status"], "unknown")
+        self.assertEqual(view["fixture_credits_committed_microcredits"], upper_input + 32)
+        self.assertIsNone(view["entries"][0]["fixture_settled_microcredits"])
+
+    def test_fixture_tool_gate_requires_capacity_for_next_maximum_request(self):
+        run, worker, proxy, token = self.priced(10000)
+        proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        with self.db.transaction() as conn:
+            with self.assertRaisesRegex(Problem, "model_fixture_budget_exhausted"):
+                proxy.tool_gate(conn, run, 1, worker.owner)
+        self.assertEqual(usage_view(self.db, run)["fixture_credits_committed_microcredits"], 15)
+        self.assertEqual(Store(self.db).runtime()["occupied"], 2)
+
+    def test_fixture_price_or_limit_change_cannot_reprice_existing_run(self):
+        run, worker, proxy, token = self.priced(10000)
+        for budget in (
+            FixtureBudget("fixture-credit-2026-10", 10000, 1, 1),
+            FixtureBudget("fixture-credit-2026-09", 10001, 1, 1),
+            FixtureBudget("fixture-credit-2026-09", 10000, 2, 1),
+        ):
+            with (
+                self.subTest(budget=budget),
+                self.assertRaisesRegex(Problem, "model_policy_changed"),
+            ):
+                ModelProxy(self.db, replace(proxy.policy, budget=budget)).issue(
+                    run, 1, worker.owner
+                )
+        request_id = uuid4()
+        proxy.reserve(run, token, request_id, self.payload_model)
+        with self.assertRaisesRegex(Problem, "model_policy_changed"):
+            ModelProxy(
+                self.db,
+                replace(proxy.policy, budget=FixtureBudget("changed", 10000, 1, 1)),
+            ).settle(
+                run,
+                request_id,
+                usage={"prompt_tokens": 10, "completion_tokens": 5},
+            )
+        self.assertEqual(usage_view(self.db, run)["entries"][0]["status"], "reserved")
+        proxy.settle(
+            run,
+            request_id,
+            usage={"prompt_tokens": 10, "completion_tokens": 5},
+        )
+        self.assertEqual(
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))["usage"][
+                "total_tokens"
+            ],
+            15,
+        )
+
+    def test_fixture_budget_config_is_strict_and_legacy_digest_is_stable(self):
+        budget = FixtureBudget("fixture-credit-2026-09", 10000, 1, 1)
+        self.assertNotEqual(self.policy.digest, replace(self.policy, budget=budget).digest)
+        path = self.config_file()
+        config = json.loads(path.read_text())
+        config["fixture_budget"] = {
+            "revision": budget.revision,
+            "limit_microcredits": budget.limit_microcredits,
+            "input_microcredits_per_token": budget.input_microcredits_per_token,
+            "output_microcredits_per_token": budget.output_microcredits_per_token,
+        }
+        path.write_text(json.dumps(config))
+        self.assertEqual(Policy.read(path).digest, replace(self.policy, budget=budget).digest)
+        config["fixture_budget"] = None
+        path.write_text(json.dumps(config))
+        with self.assertRaises(ValueError):
+            Policy.read(path)
+        for invalid in (
+            {
+                "revision": "x",
+                "limit_microcredits": True,
+                "input_microcredits_per_token": 1,
+                "output_microcredits_per_token": 1,
+            },
+            {
+                "revision": "x",
+                "limit_microcredits": 1,
+                "input_microcredits_per_token": 0,
+                "output_microcredits_per_token": 1,
+            },
+        ):
+            with self.assertRaises(ValueError):
+                FixtureBudget(**invalid)
 
     def test_success_private_provider_credential_and_authenticated_usage(self):
         reply = self.request()

@@ -1,6 +1,14 @@
 # 開發接續紀錄 — 2026-09-23
 
-本次停止點：**PR #43 的 AT-11-A 已合併；AT-11-B opt-in guest mailbox／固定 SDK tool-call／短效 token 更新與 request cutoff 已完成。仍是本機 fixture，完整 AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/m3-guest-model` 從 GitHub main `f4a233dc3357cdeb30cb561b9c0a2a9207f6b10c` 建立，只修改 `platform/agent-platform`。最新行為見 [M3 guest model](M3-GUEST-MODEL.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
+本次停止點：**PR #46 的 AT-11-B 已合併；AT-11-C1（PR #51）固定 fixture credits 預留／結算與預算截止已驗收。真實 provider 金額仍 unknown，完整 AT-11-C／AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/at-11-c` 從 GitHub main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 建立，提交前重基於 `5bf015c4cdec64c9a7db0019b8e39a383627297c`，只修改 `platform/agent-platform`。最新行為見 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
+
+## 本次 AT-11-C1 固定 fixture credits
+
+- 新 `010_fixture_budget.sql` 只為受控本機 fixture 增加合成 credit 上限、單價版本、每 request 輸入／輸出上界、預留及結算欄位。未 opt-in 的舊配置 digest 不變；run 一旦釘住 pricing／limit，不因 token 輪替或 worker 接管重設。真實 `amount_decimal`／currency／price_revision 仍為 null，`hard_money_limit_supported:false`。
+- Admission 在 run 鎖內先保存 UUID／完整上界預留再 dispatch；final 以合法計量結算，reserved／unknown 以全額保守占用。429、超界、SIGKILL 不自動退款或重送；政策漂移不能重算。上限不足阻擋上游呼叫，沿用 AT-11-B 的持久 cutoff、token 撤銷與完整 VM 停止 gate。
+- M0 45／平台 182 測試、lint／format 通過。真實 deny-all KVM 的 credit 結算、零 dispatch 預算截止及超界回報保留全額均通過，完整 16 案 guest-model 回歸（含 29 項 terminal 隔離）與公開 hash／停止證據見 [evidence](evidence/m3-fixture-budget-2026-09-23.json)。
+- 私有配置／payload／logs 在 `/tmp/apm3-at11c-20260923`；沿用 `/tmp/apm3-egress-20260923/journal` 與 fences，不刪、不降低 generation。收尾產品 drain gate 確認 132 筆 journal 對應 VM 均停止、VM／claims 為零；node／connector 已停、測試 Postgres 已移除。重跑前仍須重新核對。
+- 下一步 AT-11-C2 需先取得可信真實 provider 價格及 token 上界與明確 opt-in，才可提供硬金額上限。其後 usage UI／opt-in provider smoke。合成 fixture credits 不是付費帳單。
 
 ## 本次 AT-11-B guest model transport
 
@@ -96,7 +104,7 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 與 [M3 guest model](M3-GUEST-MODEL.md) 接續 **AT-11-C pricing／token 上界／金額 reservation 與 settlement**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
+1. 依 [SDD](../SDD.md) 與 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md) 接續 **AT-11-C2 真實 provider 可信 pricing／token 上界／金額 reservation 與 settlement**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
 2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture proxy；legacy 模式仍保留。Token counters 是上游 fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。

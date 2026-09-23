@@ -1,4 +1,4 @@
-"""The first proxy slice supports one explicitly configured local fixture only.
+"""The proxy supports one explicitly configured, locally metered fixture only.
 
 No paid endpoint, ambient provider credential, redirect, or guest network exception.
 The request/response dialect is intentionally smaller than a general provider API.
@@ -40,11 +40,37 @@ def sensitive(value, secrets):
 
 
 @dataclass(frozen=True)
+class FixtureBudget:
+    """Synthetic credits for the pinned fixture, never a provider price."""
+
+    revision: str
+    limit_microcredits: int
+    input_microcredits_per_token: int
+    output_microcredits_per_token: int
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.revision, str)
+            or not re.fullmatch(r"[A-Za-z0-9._-]{1,64}", self.revision)
+            or any(
+                type(value) is not int or not 1 <= value <= 10**9
+                for value in (
+                    self.limit_microcredits,
+                    self.input_microcredits_per_token,
+                    self.output_microcredits_per_token,
+                )
+            )
+        ):
+            raise ValueError("invalid_fixture_budget")
+
+
+@dataclass(frozen=True)
 class Policy:
     origin: str
     credential: str = field(repr=False)
     request_limit: int = 100
     mode: str = "fixture-http-v1"
+    budget: FixtureBudget | None = None
 
     def __post_init__(self):
         # Deliberately no public/provider mode until guest transport and pricing gates.
@@ -56,23 +82,29 @@ class Policy:
             or type(self.request_limit) is not int
             or not 1 <= self.request_limit <= 100
             or not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", self.credential)
+            or (self.budget is not None and not isinstance(self.budget, FixtureBudget))
         ):
             raise ValueError("invalid_model_fixture_policy")
 
     @property
     def digest(self):
-        return sha(
-            canonical(
-                {
-                    "revision": REVISION,
-                    "mode": self.mode,
-                    "origin": self.origin,
-                    "model": MODEL,
-                    "request_limit": self.request_limit,
-                    "credential_sha256": sha(self.credential.encode()),
-                }
-            )
-        )
+        fields = {
+            "revision": REVISION,
+            "mode": self.mode,
+            "origin": self.origin,
+            "model": MODEL,
+            "request_limit": self.request_limit,
+            "credential_sha256": sha(self.credential.encode()),
+        }
+        # Preserve the digest of existing, unpriced fixture runs across migration.
+        if self.budget:
+            fields["fixture_budget"] = {
+                "revision": self.budget.revision,
+                "limit_microcredits": self.budget.limit_microcredits,
+                "input_microcredits_per_token": self.budget.input_microcredits_per_token,
+                "output_microcredits_per_token": self.budget.output_microcredits_per_token,
+            }
+        return sha(canonical(fields))
 
     @classmethod
     def read(cls, path):
@@ -80,13 +112,35 @@ class Policy:
         if path.stat().st_size > 4096:
             raise ValueError("model_config_too_large")
         data = json.loads(path.read_text())
-        if not isinstance(data, dict) or set(data) != {
-            "origin",
-            "credential_file",
-            "request_limit",
-            "mode",
-        }:
+        if not isinstance(data, dict) or set(data) not in (
+            {
+                "origin",
+                "credential_file",
+                "request_limit",
+                "mode",
+            },
+            {
+                "origin",
+                "credential_file",
+                "request_limit",
+                "mode",
+                "fixture_budget",
+            },
+        ):
             raise ValueError("invalid_model_fixture_config")
+        has_budget = "fixture_budget" in data
+        budget = data.pop("fixture_budget", None)
+        if has_budget and budget is None:
+            raise ValueError("invalid_fixture_budget")
+        if budget is not None:
+            if not isinstance(budget, dict) or set(budget) != {
+                "revision",
+                "limit_microcredits",
+                "input_microcredits_per_token",
+                "output_microcredits_per_token",
+            }:
+                raise ValueError("invalid_fixture_budget")
+            data["budget"] = FixtureBudget(**budget)
         secret = private_file(data.pop("credential_file"))
         if secret.stat().st_size > 129:
             raise ValueError("model_credential_too_large")

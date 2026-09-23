@@ -16,13 +16,25 @@ def snapshot():
         if not path.name.isdecimal():
             continue
         try:
-            if path.stat().st_uid != UID:
+            status = dict(line.split(":", 1) for line in (path / "status").read_text().splitlines())
+            # A non-dumpable process may have root-owned proc entries. Use credentials.
+            uid = int(status["Uid"].split()[0])
+            arguments = (path / "cmdline").read_bytes().split(bytes([0]))
+            control = uid == 2001 and (
+                b"/usr/local/bin/openhands-agent-server" in arguments
+                or any(
+                    a.startswith(b"/opt/agent-platform/") and a.endswith(b"fixture.py")
+                    for a in arguments
+                )
+            )
+            if uid != UID and not control:
                 continue
             fields = (path / "stat").read_text().rsplit(")", 1)[1].split()
             # Zombies cannot execute or fork; disappearing live processes make this scan uncertain.
             if fields[0] == "Z":
                 continue
             processes[path.name] = {
+                "uid": uid,
                 "start_ticks": int(fields[19]),
                 "exe": os.readlink(path / "exe"),
                 "command_hash": hashlib.sha256((path / "cmdline").read_bytes()).hexdigest(),

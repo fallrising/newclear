@@ -37,7 +37,12 @@ def file(path, content, mode=0o644):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--core-artifact', help='Preserve the explicitly verified installed core patch')
     args = parser.parse_args()
+    preserve_core = None
+    if args.core_artifact:
+        from patched_reapply import selection
+        preserve_core = selection(PROJECT, args.core_artifact)
     os.umask(0o077)
     private = PROJECT / 'private'
     lock = json.loads((PROJECT / 'artifacts.amd64.lock.json').read_text())
@@ -269,8 +274,14 @@ WantedBy=multi-user.target
         'apply': args.apply, 'preserves': ['root SSH prohibition', 'g1ops sudo allowlist', 'Docker/containerd units and socket permissions']}), flush=True)
     if not args.apply:
         return 0
-    source = (PROJECT / 'scripts/remote_install.py').read_text()
+    source = 'import types,sys\n'
+    for name in ['labops', 'worker_scope', 'worker_reinstall', 'core_update']:
+        code = (PROJECT / 'scripts' / (name + '.py')).read_text()
+        source += f'm=types.ModuleType({name!r});sys.modules[{name!r}]=m;exec({code!r},m.__dict__)\n'
+    source += (PROJECT / 'scripts/remote_install.py').read_text()
     for plan in plans:
+        if plan['role'] == 'core' and preserve_core:
+            plan = {**plan, 'preserve_core': preserve_core}
         if plan['role'] == 'worker':
             key = ssh(ALIASES[0], 'sudo -n cat /etc/eru/ssh_key.pub').strip()
             if not key.startswith('ssh-ed25519 ') or '\n' in key:

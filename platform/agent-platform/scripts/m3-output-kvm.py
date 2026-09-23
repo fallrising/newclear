@@ -3,7 +3,8 @@
 
 Uses the product connector in-process, with its real journal/fence/Agent Server.
 HTTP/DB/SSE are covered separately by test_output_security.py. The guest fixture
-adds a hostile terminal output and (second VM) a credential-containing patch.
+adds a deliberately disclosed session canary and (second VM) a secret patch.
+This artificial disclosure tests filtering separately from control isolation.
 Never use this driver to claim complete AT-07 or arbitrary-code guest isolation.
 """
 
@@ -59,8 +60,10 @@ try:
         direct=False
 except OSError:
     direct=True
-if mode=='secret_diff' and keys:
-    Path('/home/agentprobe/workspace/credential.txt').write_text(sorted(keys)[0])
+canary_path=Path('/tmp/output-canary')
+canary=canary_path.read_text() if canary_path.exists() else None
+if mode=='secret_diff' and canary:
+    Path('/home/agentprobe/workspace/credential.txt').write_text(canary)
 print(json.dumps({
     'uid':os.getuid(), 'proxy':statuses, 'direct_blocked':direct,
     'interfaces':{p.name:{'type':int((p/'type').read_text()),
@@ -68,7 +71,7 @@ print(json.dumps({
                   for p in Path('/sys/class/net').iterdir()},
     'other_workspace_absent':not Path(other_marker).exists(),
     'session_credential_readable':bool(keys),
-    'credential_canaries':sorted(keys),
+    'credential_canaries':sorted(keys)+([canary] if canary else []),
 }))
 """
 
@@ -85,7 +88,8 @@ def fixture(sb, run_id, mode, other_marker):
         "import os,signal;from pathlib import Path;"
         "[(os.kill(int(p.name),signal.SIGTERM)) for p in Path('/proc').iterdir() "
         "if p.name.isdigit() and (p/'cmdline').exists() "
-        "and b'/tmp/guest_fixture.py' in (p/'cmdline').read_bytes().split(bytes([0]))]",
+        "and b'/opt/agent-platform/guest_fixture.py' "
+        "in (p/'cmdline').read_bytes().split(bytes([0]))]",
         timeout=15,
     )
     sb.write_file("/tmp/security_probe.py", GUEST.encode(), mode=0o644)
@@ -95,9 +99,14 @@ def fixture(sb, run_id, mode, other_marker):
         .read_text()
         .replace("class Handler(", "COMMAND = " + repr(prefix) + " + COMMAND\n\nclass Handler(")
     )
-    sb.write_file("/tmp/security_fixture.py", source.encode(), mode=0o644)
+    sb.write_file("/opt/agent-platform/security_fixture.py", source.encode(), mode=0o644)
     sb.spawn(
-        "python3", "/tmp/security_fixture.py", user="agentprobe", env={"FIXTURE_RUN_ID": run_id}
+        "python3",
+        "-I",
+        "/opt/agent-platform/security_fixture.py",
+        user="agentcontrol",
+        cwd="/var/lib/agent-platform/control",
+        env={"FIXTURE_RUN_ID": run_id},
     )
     sb.exec(
         "python3",
@@ -187,8 +196,8 @@ def main():
                 )
             )
             require(
-                probe.pop("credential_canaries") == [row["session_key"]],
-                "known_guest_session_canary_missing",
+                probe.pop("credential_canaries") == [],
+                "guest_control_credential_exposed",
             )
             require(probe["uid"] == 2000, "terminal_account_changed")
             interfaces = probe["interfaces"]
@@ -205,6 +214,8 @@ def main():
                 all(s in (403, "unreachable") for s in probe["proxy"].values()),
                 "proxy_egress_allowed",
             )
+            # Test-only disclosure after the clean isolation measurement.
+            sb.write_file("/tmp/output-canary", row["session_key"].encode(), mode=0o644)
             service.mutate(run_id, Mutation(generation=1, action="prompt", goal="AT-07 fixture"))
             cursor, history = None, []
             deadline = time.monotonic() + 90

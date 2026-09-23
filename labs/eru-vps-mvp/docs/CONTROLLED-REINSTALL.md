@@ -4,7 +4,7 @@
 
 依 owner 的操作習慣，日常以我們的腳本清理／重裝 ERU；只有 OS 或主機狀態已無法可信恢復時，才由 owner 在 provider 控制台重裝。**不需要先接供應商 API。**
 
-更新：quarantine／六檔安裝／checksum 恢復底層與連續 HTTP 守護已接入 worker-4 execute。本機 82 項測試通過；實測計次見 [最新進展](M2-PRIORITIES-2026-09-22.md)。core panic 修補已部署；歷史 etcd I/O 停頓根因仍需追蹤，持續以有界負載觀測核對。
+更新：quarantine／六檔安裝／checksum 恢復底層與連續 HTTP 守護已接入 worker-4 execute。本機 116 項測試通過；實測計次見 [最新進展](M2-PRIORITIES-2026-09-22.md)。core panic 修補已部署；歷史 etcd I/O 停頓根因仍需追蹤，持續以有界負載觀測核對。
 
 ## 分清四種操作
 
@@ -59,10 +59,10 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode p
 5. nginx lifecycle／HTTP／資源回收通過，確認其他 workers 和原 Docker／containerd 沒有重啟或變更，才恢復排程；記錄 worker 元件 revision，不增加 OS incarnation 或全群 generation。
 6. 每一階段先保存意圖、再保存觀測。中途失敗保留 target 不可排程及 recovery evidence；先對帳，不自動跳過失敗或清理另一台。quarantine 後的恢復必須驗 checksum，不能覆蓋後來產生的新資料。
 
-正向元件重裝流程已實作。guard 在每個變更邊界檢查，任一 HTTP failure／缺樣本或觀測間隔過大都不能計作成功。若 node up 回覆不確定或恢復後驗證失敗，記錄一次獨立的 corrective fence；不能確認時保留 uncertain，不宣稱節點已安全下線。完整失敗恢復 CLI 與實機 fault injection 仍待補齊。
+正向元件重裝流程已實作。guard 在每個變更邊界檢查，任一 HTTP failure／缺樣本或觀測間隔過大都不能計作成功。若 node up 回覆不確定或恢復後驗證失敗，記錄一次獨立的 corrective fence；不能確認時保留 uncertain，不宣稱節點已安全下線。失敗恢復現由獨立 `recovery.py` plan／execute 接線；支援備份可校驗時的 worker-restore，或保留新 agent 狀態的 worker-resume。quarantine／start 邊界可在原 plan 明確指定故障演練；操作與驗證範圍見 [RECOVERY.md](RECOVERY.md)。
 
 ## 驗收與順序
 
 控制面修補與有界負載驗證已完成；元件重裝依上述狀態機驗證。第一輪只跑空的 worker-4；連續三次元件重裝都成功，且其他 worker HTTP／原服務不受影響，才擴大範圍。這組結果另外記錄為「元件重裝」，原 V06／V08 的 OS 重灌與全群 fresh 條件仍未通過。
 
-最新本機測試與實機結果見 M2-PRIORITIES-2026-09-22.md；早期僅唯讀 audit 的紀錄不再代表目前功能範圍。備份與失敗 journal 保留，不永久清除。
+最新恢復與 reapply 結果見 [2026-09-23 紀錄](M2-RECOVERY-2026-09-23.md)；原三次重裝結果見 M2-PRIORITIES-2026-09-22.md；早期僅唯讀 audit 的紀錄不再代表目前功能範圍。備份與失敗 journal 保留，不永久清除。

@@ -54,6 +54,7 @@ def inspect(service, run_id, generation):
         response = {"phase": "allocated", "allocation": allocation, "approval_receipts": receipts}
         if "prepare" not in operations:
             return response
+        service.isolation(row, terminal="prompt" in operations)
         with service.relay(row) as http:
             info = http.expect("GET", "/server_info")
             conversation = service.conversation(row, http)

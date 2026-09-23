@@ -118,3 +118,12 @@ class ComponentTests(unittest.TestCase):
         self.assertEqual(protected_membership(before), protected_membership(after))
         after['nodes'][0]['available'] = False
         self.assertNotEqual(protected_membership(before), protected_membership(after))
+
+    def test_reviewed_fault_boundary_leaves_quarantine_fenced_without_install(self):
+        op, executor, plan, stages = self.setup_executor()
+        plan['fault_after'] = 'quarantine'
+        with self.assertRaisesRegex(RuntimeError, 'planned recovery drill'):
+            executor.execute(plan, snapshot())
+        self.assertEqual([c.args[0] for c in executor.remote.call_args_list], ['quarantine'])
+        self.assertNotIn('resuming-worker-4', stages)
+        self.assertFalse((op.root / 'worker-component-revisions.json').exists())

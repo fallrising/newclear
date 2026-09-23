@@ -33,6 +33,7 @@ from agent_platform_m0.sandbox_smoke import Config
 from agent_platform_m0.transport import HTTP
 
 from .connector_fence import Fences, Lease
+from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, attest
 from .connector_journal import Journal, private_file
 from .connector_output import OutputPolicy, workspace_result
 from .connector_recovery import inspect
@@ -92,6 +93,7 @@ class Connector:
         )
         self.host = host or Host(Path(config["cocoon_config"]), Path(config["sandbox_data_dir"]))
         self.admission = threading.Lock()
+        self.launcher()  # Validate the private pinned launcher before accepting runs.
         self.entries = {}
         for entry in config["repositories"]:
             key = (entry["canonical_repo"], entry["base_sha"])
@@ -103,6 +105,20 @@ class Connector:
     def close(self):
         self.fences.close()
         self.journal.close()
+
+    def launcher(self):
+        path = private_file(self.config["terminal_launcher_file"])
+        if path.stat().st_size > 2 * 1024 * 1024:
+            raise ValueError("terminal_launcher_too_large")
+        data = path.read_bytes()
+        if (
+            data[:6] != b"\x7fELF\x02\x01"
+            or len(data) < 64
+            or int.from_bytes(data[18:20], "little") != 62
+            or hashlib.sha256(data).hexdigest() != self.config["terminal_launcher_sha256"]
+        ):
+            raise ValueError("terminal_launcher_mismatch")
+        return data
 
     def bundle(self, entry):
         path = Path(entry["bundle"])
@@ -287,18 +303,26 @@ class Connector:
             self.bundle(self.entries[(data["canonical_repo"], data["base_sha"])]),
             mode=0o644,
         )
-        for name in ["guest_fixture.py", "guest_workspace.py", "guest_quiescence.py"]:
+        sb.exec("install", "-d", "-m", "0755", CODE, timeout=10)
+        for name in HELPERS:
             self.guard(row)
             sb.write_file(
-                "/tmp/" + name,
+                CODE + "/" + name,
                 Path(__file__).with_name(name).read_bytes(),
-                mode=0o700 if name == "guest_quiescence.py" else 0o644,
+                mode=0o644,
             )
         self.guard(row)
+        sb.exec(
+            "python3", "-I", CODE + "/guest_control.py", json.dumps({"action": "setup"}), timeout=10
+        )
+        sb.write_file(CODE + "/terminal", self.launcher(), mode=0o700)
+        sb.exec("chown", "0:2001", CODE + "/terminal", timeout=5)
+        sb.exec("chmod", "4750", CODE + "/terminal", timeout=5)
         checkout = json.loads(
             sb.exec(
                 "python3",
-                "/tmp/guest_workspace.py",
+                "-I",
+                CODE + "/guest_workspace.py",
                 json.dumps({"action": "checkout", "base_sha": data["base_sha"]}),
                 user="agentprobe",
                 timeout=90,
@@ -309,29 +333,21 @@ class Connector:
         self.guard(row)
         sb.spawn(
             "python3",
-            "/tmp/guest_fixture.py",
-            user="agentprobe",
+            "-I",
+            CODE + "/guest_fixture.py",
+            user="agentcontrol",
+            cwd=CONTROL,
             env={"FIXTURE_RUN_ID": row["run_id"]},
         )
         self.guard(row)
         sb.spawn(
-            "/usr/local/bin/openhands-agent-server",
-            "--host",
-            "127.0.0.1",
-            "--port",
-            "8000",
-            user="agentprobe",
-            cwd="/home/agentprobe",
-            env={
-                "SESSION_API_KEY": row["session_key"],
-                "HOME": "/home/agentprobe",
-                "OPENHANDS_BUILD_GIT_SHA": OPENHANDS_SHA,
-                "OH_CONVERSATIONS_PATH": "/home/agentprobe/.openhands-state/conversations",
-                "OH_BASH_EVENTS_DIR": "/home/agentprobe/.openhands-state/bash-events",
-                "OPENHANDS_AGENT_SERVER_CONFIG_PATH": (
-                    "/home/agentprobe/.openhands-state/config.json"
-                ),
-            },
+            "python3",
+            "-I",
+            CODE + "/guest_control.py",
+            json.dumps({"action": "serve"}),
+            user="agentcontrol",
+            cwd=CONTROL,
+            env={"SESSION_API_KEY": row["session_key"], "OPENHANDS_BUILD_GIT_SHA": OPENHANDS_SHA},
         )
         with self.relay(row) as http:
             wait_ready(http)
@@ -349,7 +365,7 @@ class Connector:
                     "conversation_id": row["run_id"],
                     "workspace": {
                         "kind": "LocalWorkspace",
-                        "working_dir": "/home/agentprobe/workspace",
+                        "working_dir": CONTROL + "/workspace",
                     },
                     "agent": {
                         "kind": "Agent",
@@ -360,7 +376,21 @@ class Connector:
                             "stream": False,
                             "num_retries": 0,
                         },
-                        "tools": [{"name": "terminal"}],
+                        "tools": [
+                            {
+                                "name": "terminal",
+                                "params": {
+                                    "terminal_type": "subprocess",
+                                    "shell_path": CODE + "/terminal",
+                                },
+                            }
+                        ],
+                        "agent_context": {
+                            "load_user_skills": False,
+                            "load_public_skills": False,
+                            "load_project_skills": False,
+                            "load_memory": False,
+                        },
                     },
                     "confirmation_policy": {
                         "kind": "AlwaysConfirm" if data.get("require_approval") else "NeverConfirm"
@@ -372,9 +402,16 @@ class Connector:
             )
             if created.get("id") != row["run_id"]:
                 raise Problem(409, "conversation_mismatch")
+        row["isolation_revision"] = REVISION
+        self.isolation(row)
+        self.journal.write(row)
         return {"ref": row["run_id"], **checkout}
 
+    def isolation(self, row, *, terminal=False):
+        return attest(self, row, terminal=terminal)
+
     def prompt(self, row, goal):
+        self.isolation(row)
         with self.relay(row) as http:
             path = "/api/conversations/" + row["run_id"]
             self.guard(row)
@@ -391,15 +428,16 @@ class Connector:
         return {"accepted": True}
 
     def quiescence(self, row, baseline=None):
+        self.isolation(row, terminal=True)
         expected = hashlib.sha256(
             Path(__file__).with_name("guest_quiescence.py").read_bytes()
         ).hexdigest()
         sb = self.handle(row)
-        if sb.exec("sha256sum", "/tmp/guest_quiescence.py", timeout=5).split()[0] != expected:
+        if sb.exec("sha256sum", CODE + "/guest_quiescence.py", timeout=5).split()[0] != expected:
             raise Problem(409, "guest_probe_changed")
         request = {"action": "check", "baseline": baseline} if baseline else {"action": "baseline"}
         return json.loads(
-            sb.exec("python3", "/tmp/guest_quiescence.py", json.dumps(request), timeout=5)
+            sb.exec("python3", "-I", CODE + "/guest_quiescence.py", json.dumps(request), timeout=5)
         )
 
     def conversation(self, row, http):
@@ -488,6 +526,7 @@ class Connector:
             return response
 
     def result(self, row):
+        self.isolation(row, terminal=True)
         sb = self.handle(row)
         with self.relay(row) as http:
             status = http.expect("GET", "/api/conversations/" + row["run_id"])["execution_status"]
@@ -496,7 +535,8 @@ class Connector:
         self.guard(row)
         raw = sb.exec(
             "python3",
-            "/tmp/guest_workspace.py",
+            "-I",
+            CODE + "/guest_workspace.py",
             json.dumps(
                 {
                     "action": "result",

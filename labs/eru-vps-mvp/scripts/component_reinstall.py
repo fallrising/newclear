@@ -105,10 +105,12 @@ class ComponentReinstall:
                 '--property=Id,ActiveState,SubState,MainPID,InvocationID,NRestarts,ExecMainStartTimestampMonotonic', *units])
         return result
 
-    def remote(self, action, plan, files=None):
+    def remote(self, action, plan, files=None, extra=None):
         config = {'action': action, 'run_id': plan['id'], 'node': TARGET,
                   'machine_id': plan['snapshot']['hosts'][ALIAS]['machine_id'],
                   'manifest_sha256': plan['component_scope']['manifest_sha256']}
+        if extra:
+            config.update(extra)
         if files is not None:
             config['files'] = {k: base64.b64encode(v).decode() for k, v in files.items()}
         # Ship only reviewed modules in memory; no persistent helper or keys.
@@ -209,6 +211,8 @@ class ComponentReinstall:
         self.stage('quarantining-worker-4')
         self.op.journal['quarantine'] = self.remote('quarantine', plan)
         self.op.save_journal()
+        if plan.get('fault_after') == 'quarantine':
+            raise RuntimeError('planned recovery drill stopped after quarantine; create a recovery plan')
         self.stage('installing-worker-4')
         self.op.journal['installation'] = self.remote('install', plan, files)
         self.op.save_journal()
@@ -225,6 +229,8 @@ class ComponentReinstall:
             time.sleep(1)
         else:
             raise ValueError('worker did not become available while fenced')
+        if plan.get('fault_after') == 'start':
+            raise RuntimeError('planned recovery drill stopped after start; preserve new state and create a recovery plan')
         # Pinned upstream single-node Includes path permits targeted validation
         # while Bypass excludes this node from general scheduling. Do not node up.
         self.run_smoke()

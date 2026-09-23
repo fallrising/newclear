@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import re
 
-from labops import atomic_json
+from labops import atomic_json, digest
 from worker_reinstall import WorkerReinstall, sha
 
 BINARY = '/usr/local/bin/eru-core'
@@ -90,17 +90,39 @@ class CoreUpdate(WorkerReinstall):
                 raise ValueError('recovery backup checksum mismatch')
         return directory, journal
 
-    def rollback(self, run_id, rollback_id):
+    def inspect_recovery(self, run_id):
         directory, journal = self.recovery(run_id)
-        if journal['stage'] not in ['replace-intent', 'binary-replaced', 'installed']:
+        if journal['stage'] not in ['replace-intent', 'binary-replaced', 'installed', 'rolled-back']:
             raise ValueError('update is not eligible for rollback; inspect before proceeding')
         before = journal['before']
+        original_owner = json.loads((directory / 'owner.before').read_text())
+        for name, checksum in original_owner['files'].items():
+            if name == BINARY:
+                continue
+            entry = self.entry(name)
+            if not entry or entry.get('sha256') != checksum:
+                raise ValueError('preserved core configuration changed: ' + name)
         binary = self.entry(BINARY)
         manifest = self.entry(MANIFEST)
         if self.entry(UNIT) != before['unit'] or not binary or binary.get('sha256') not in [
                 before['binary']['sha256'], journal['new_sha256']] or not manifest or manifest.get('sha256') not in [
                 before['manifest_sha256'], journal['manifest_after_sha256']]:
             raise ValueError('later changes exist; recovery will not overwrite them')
+        if journal['stage'] == 'rolled-back' and (binary['sha256'] != before['binary']['sha256'] or
+                manifest['sha256'] != before['manifest_sha256']):
+            raise ValueError('rolled-back files changed')
+        return {'before': before, 'new_sha256': journal['new_sha256'],
+                'journal_sha256': digest(journal), 'binary': binary, 'manifest': manifest,
+                'unit': self.entry(UNIT), 'stage': journal['stage']}
+
+    def rollback(self, run_id, rollback_id, expected=None):
+        observed = self.inspect_recovery(run_id)
+        if observed['stage'] == 'rolled-back':
+            raise ValueError('already rolled back; verify service state with a new recovery plan')
+        if expected is not None and observed != expected:
+            raise ValueError('core recovery state changed after plan')
+        directory, journal = self.recovery(run_id)
+        before = journal['before']
         rollback_dir = self.directory(rollback_id)
         rollback_dir.mkdir(mode=0o700)
         record = {'id': rollback_id, 'source': run_id, 'stage': 'rollback-intent'}
@@ -110,8 +132,11 @@ class CoreUpdate(WorkerReinstall):
                        before['binary']['mode'], before['binary']['gid'])
         os.replace(temporary, self.path(BINARY))
         self.sync(self.path(BINARY).parent)
-        atomic_json(self.path(MANIFEST), json.loads((directory / 'owner.before').read_text()))
-        # JSON normalization is intentional; verify semantic ownership, not old whitespace.
+        owner_temp = self.path('/var/lib/eru-mvp/.owner-restore-' + rollback_id)
+        self.write_new(owner_temp, (directory / 'owner.before').read_bytes())
+        os.replace(owner_temp, self.path(MANIFEST))
+        self.sync(self.path(MANIFEST).parent)
+        # Preserve the original manifest bytes so partial recovery remains hash-verifiable.
         self.inspect()
         record['stage'] = 'rolled-back'
         self.save(rollback_dir, record)
@@ -139,6 +164,8 @@ def remote_main(config):
     updater = CoreUpdate()
     if config['action'] == 'inspect':
         result = updater.inspect()
+    elif config['action'] == 'inspect-recovery':
+        result = updater.inspect_recovery(config['source_run'])
     else:
         path = updater.path('/var/lib/eru-mvp/core-update.lock')
         with path.open('a') as lock:
@@ -147,7 +174,7 @@ def remote_main(config):
                 result = updater.install(config['id'], config['expected'],
                     decode_payload(config), config['sha256'])
             elif config['action'] == 'rollback':
-                result = updater.rollback(config['source_run'], config['id'])
+                result = updater.rollback(config['source_run'], config['id'], config.get('expected_recovery'))
             else:
                 raise ValueError('unknown core update action')
     print(json.dumps(result))

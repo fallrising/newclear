@@ -168,7 +168,7 @@ class Operator:
             '--endpoints=http://127.0.0.1:2379', '--command-timeout=10s', 'endpoint', 'health'], check=False)
         return {k: self.events[-1][k] for k in ['exit_code', 'stdout', 'stderr']}
 
-    def snapshot(self):
+    def host_snapshot(self):
         hosts = {}
         for item in self.inventory:
             alias = item['alias']
@@ -186,6 +186,10 @@ class Operator:
             if item['role'] == 'core' and not (facts['core_config'] and facts['etcd_data']):
                 raise ValueError('core identity/config mismatch')
             hosts[alias] = facts
+        return hosts
+
+    def snapshot(self):
+        hosts = self.host_snapshot()
         snapshot = {'at': now(), 'hosts': hosts, 'pods': self.cli('pod', 'list'),
                     'nodes': self.cli('pod', 'nodes', 'eru'), 'workloads': self.cli('workload', 'list')}
         expected = {r['node']: 'containerd://ckc@' + r['ip'] + ':22' for r in self.inventory[1:]}
@@ -216,9 +220,17 @@ class Operator:
         self.journal.setdefault('history', []).append({'at': now(), 'stage': stage})
         self.save_journal()
 
-    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None):
-        if (health_file or canary_run) and operation != 'rebuild-node':
-            raise ValueError('--health and --canary-run apply only to rebuild-node')
+    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None):
+        if fault_after and (operation != 'rebuild-node' or node != 'worker-4' or rebuild_mode not in [None, 'component-reinstall']):
+            raise ValueError('--fault-after is only for a bounded worker-4 component recovery drill')
+        if fault_after not in [None, 'quarantine', 'start']:
+            raise ValueError('unsupported recovery drill boundary')
+        if health_file and operation not in ['rebuild-node', 'reapply']:
+            raise ValueError('--health applies only to rebuild-node/reapply')
+        if canary_run and operation != 'rebuild-node':
+            raise ValueError('--canary-run applies only to rebuild-node')
+        if core_artifact and operation != 'reapply':
+            raise ValueError('--core-artifact applies only to reapply')
         if operation == 'canary-start' and node:
             raise ValueError('canaries are fixed to worker-2 and worker-3')
         if rebuild_mode and operation != 'rebuild-node':
@@ -238,7 +250,7 @@ class Operator:
         snap = self.snapshot()
         issues = consistency_issues(snap, self.inventory)
         if operation == 'reapply' and (self.root / 'core-revision.json').exists():
-            if read(self.root / 'core-revision.json')['operation'] == 'core-patch':
+            if read(self.root / 'core-revision.json')['operation'] == 'core-patch' and not core_artifact:
                 issues.append('Core uses a validated local patch; release reapply would downgrade it and is blocked')
         health = self.health()
         if health['exit_code']:
@@ -248,6 +260,14 @@ class Operator:
                 'created_at': now(), 'operation': operation, 'node': node, 'bindings': bindings,
                 'snapshot': snap, 'etcd_health': health, 'executable': operation != 'rebuild-node' and not issues, 'blockers': issues,
                 'targets': [], 'steps': [], 'mutation_hosts': ALIASES if operation == 'reapply' else []}
+        if operation == 'reapply' and core_artifact:
+            if not health_file:
+                plan['blockers'].append('patched reapply requires --health')
+            else:
+                from patched_reapply import gate
+                plan['patched_core'] = gate(self, core_artifact, health_file, snap)
+                plan['blockers'] += plan['patched_core']['blockers']
+            plan['executable'] = not plan['blockers']
         if operation == 'canary-start':
             if snap['workloads']:
                 plan['blockers'].append('initial canary setup requires empty ERU workloads')
@@ -275,6 +295,8 @@ class Operator:
         else:
             host = next(x for x in self.inventory if x['node'] == node)
             plan['rebuild_mode'] = rebuild_mode or 'component-reinstall'
+            if fault_after:
+                plan['fault_after'] = fault_after
             plan['mutation_hosts'] = [self.core['alias'], host['alias']]
             plan['targets'] = [w['id'] for w in snap['workloads'] if w['nodename'] == node]
             if plan['rebuild_mode'] == 'component-reinstall':
@@ -317,6 +339,8 @@ class Operator:
                     'Verify new identity/host keys; rebuild SSH/Tailscale/runtime',
                     'Install worker only; register original name/capacity; start agent',
                     'Verify target nginx and continuous HTTP on other workers; record new host incarnation']
+        if fault_after:
+            plan['steps'].append('Recovery drill: deliberately fail after ' + fault_after + '; keep target fenced; require a new recovery plan')
         revision = subprocess.run(['git', '-C', str(self.project), 'rev-parse', 'HEAD'], capture_output=True, text=True)
         plan['source_commit'] = revision.stdout.strip() if revision.returncode == 0 else None
         envelope = {'plan': plan, 'sha256': digest(plan)}
@@ -376,6 +400,12 @@ class Operator:
                 raise ValueError('; '.join(issues))
             if current['hosts'] != plan['snapshot']['hosts'] or membership(current) != membership(plan['snapshot']):
                 raise ValueError('host identity/role/runtime or cluster state changed; create a new plan')
+            if plan.get('patched_core'):
+                from patched_reapply import gate
+                bound = plan['patched_core']
+                current_gate = gate(self, bound['artifact'], bound['health_file'], current)
+                if current_gate != bound or current_gate['blockers']:
+                    raise ValueError('patched artifact/runtime/health changed; create a new plan')
             self.stage('preflighted')
             if plan['operation'] == 'rebuild-node':
                 from component_reinstall import ComponentReinstall
@@ -420,6 +450,8 @@ class Operator:
                 argv = [sys.executable, str(self.project / 'scripts/smoke-lab.py')]
                 if plan['operation'] == 'reapply':
                     argv += ['--node', 'worker-2', '--verify-reapply']
+                    if plan.get('patched_core'):
+                        argv += ['--core-artifact', plan['patched_core']['artifact']]
                 elif plan['node']:
                     argv += ['--node', plan['node']]
                 log = self.root / 'runs' / (plan_id + '.log')
@@ -480,7 +512,9 @@ def main():
     plan.add_argument('--operation', required=True, choices=['reapply', 'smoke', 'cleanup', 'rebuild-node', 'canary-start'])
     plan.add_argument('--node', choices=['worker-2', 'worker-3', 'worker-4'])
     plan.add_argument('--smoke-run')
-    plan.add_argument('--health', help='Completed control health evidence for a component reinstall')
+    plan.add_argument('--health', help='Completed control health evidence for component reinstall or patched reapply')
+    plan.add_argument('--fault-after', choices=['quarantine', 'start'], help='Bounded worker-4 recovery drill; intentionally fails and stays fenced')
+    plan.add_argument('--core-artifact', help='Validated deployed core artifact to preserve during reapply')
     plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
     plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
@@ -504,11 +538,14 @@ def main():
     with ClusterLock(PROJECT):
         operator = Operator()
         if args.command == 'plan':
-            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run)
+            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after)
             summary = {k: envelope['plan'][k] for k in ['id', 'operation', 'node', 'executable', 'mutation_hosts', 'targets', 'steps', 'blockers']}
-            for optional in ['rebuild_mode', 'component_scope']:
+            for optional in ['rebuild_mode', 'component_scope', 'fault_after']:
                 if optional in envelope['plan']:
                     summary[optional] = envelope['plan'][optional]
+            if envelope['plan'].get('patched_core'):
+                summary['patched_core'] = {k: envelope['plan']['patched_core'][k]
+                    for k in ['artifact', 'health_file', 'selection', 'blockers']}
             summary['sha256'] = envelope['sha256']
             summary['path'] = str(operator.root / 'plans' / (summary['id'] + '.json'))
             print(json.dumps(summary, indent=2))

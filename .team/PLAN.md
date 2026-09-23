@@ -687,3 +687,25 @@ DG-D047: REWORK candidate7d60786: independent T-032 identified legal scope lost 
 DG-D048: T-031/T-030 correction attempt2 implements T-032 F-01/02/03 under contractrev3;34 focused tests,9 W1 browser journeys plus extended real incident chain1/1 and nonempty home1/1 pass preliminarily. T-032 attempt1 is preserved in repository. New containing candidate is not accepted; run full fixed native/browser/benchmark/isolation and independent re-review. Owner remains sole Codex lead. SSH-push this candidate to existing PR33 branch; original7d60786 checkout remains untouched until its runner completes. Current implementation worktree newclear-dim-gate-w1-rework, temporary branch agent/dim-gate/task/t031-workspace-rework; canonical remote continuation unchanged. No W2 before accepted merge.
 
 DG-D049: REWORK03a7ee5 after independent T-032 attempt2: F-01–03 independently confirmed fixed; new medium F-04 (768px identical unlabeled icons with no expansion) and F-05 (nonexistent/mismatched scope retained on workspace switch) require correction. Contractrev4 fixes canonical validation and readable tablet navigation before code. Prior7d60786 immutable complete runner finished:240 tests,59/59 Chromium,6/6 Firefox/WebKit,3/3 benchmark,2/2 isolation and all native/workflow checks pass; this is regression evidence, not acceptance of its known findings. Artifacts copied to local /tmp/dim-gate-w1-evidence/7d60786-final-artifacts. Its lead checkout is clean and fast-forwarded to03a7ee5, then reused for attempt3; parallel03a7ee5 runner remains unchanged in rework tree. Sole owner Codex lead, originalbranch/worktree active; existing PR33 unchanged; user authorization persists. W1 NOT_ACCEPTED. Next fix F04/F05, fixed third review and all gates, then authorized merge before W2.
+
+DG-D050: F04/F05 corrected under contractrev4, focused11/11 Chromium passes including readable768/390 keyboard routes and canonical scope/failure recovery. Source remains NOT_ACCEPTED until full new immutable64-test regression,6 browser smoke,benchmark/isolation/native,third uninvolved review and latest-head CI. New containing candidate SSH-pushed next to existing PR33; owner sole Codex lead, original branch/worktree. Final correction scope is Shell/CSS/browser/docs only; domain schema/projection remain03a7ee5. Prior fixed03a7ee5 runner is in separate rework tree and may finish independently.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 50
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+implementation_commit: containing final-correction checkpoint
+local_tested_commit: working-diff focused only; new immutable full gates next
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision4
+evidence_refs: [.team/reports/T-030-attempt-2.md, .team/reports/T-031-attempt-3.md, .team/reports/T-032-attempt-2.md]
+integration_state: OPEN — PR33 draft
+remote_durability: 03a7ee5 saved; containing correction checkpoint SSH-pushed next
+blockers: []
+next_action: run fixed candidate full gates and independent third review; latest-head CI and authorized merge, then confirm merge tree/postmerge CI and release owner before W2
+```

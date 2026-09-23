@@ -141,6 +141,7 @@ test('AC-WS-17/18: new homes work by keyboard and across themes and viewport siz
 test('AC-WS-01/17: W1 extra browser workspace switching and deep refresh', async ({ page }) => {
   await page.goto('rd')
   await grantOps(page)
+  await page.getByRole('combobox', { name: '首頁專案' }).selectOption('project-store')
   const before = await snapshot(page)
   await page.getByRole('combobox', { name: '工作區', exact: true }).selectOption('ops')
   await expect(page.getByRole('region', { name: 'ops 工作首頁' })).toBeVisible()
@@ -321,4 +322,87 @@ test('AC-WS-01/02: multi-grant diagnostics keep source workspace and canonical r
   await expect(page).toHaveURL(new RegExp(`${incidentPath}$`))
   await expect(page.getByRole('combobox', { name: '工作區', exact: true })).toHaveValue('ops')
   expect(await snapshot(page)).toBe(before)
+})
+
+test('AC-WS-01/02: workspace switch validates canonical scope and preserves state on read failure', async ({ page }) => {
+  test.setTimeout(60_000)
+  await page.goto('rd')
+  await grantOps(page)
+  await become(page, 'user-admin')
+  await page.goto('admin/access')
+  await page.getByRole('combobox', { name: '使用者', exact: true }).selectOption('user-rd-commerce')
+  await page.getByRole('combobox', { name: '角色', exact: true }).selectOption('admin')
+  await page.getByRole('button', { name: '新增授權', exact: true }).click()
+  await expect(page.getByRole('row', { name: /user-rd-commerce.*Admin.*org-demo/ })).toBeVisible()
+  await become(page, 'user-rd-commerce')
+  const selector = page.getByRole('combobox', { name: '工作區', exact: true })
+  for (const [query, center, expected] of [
+    ['projectId=project-store&environmentId=env-payments-dev', 'ops', 'projectId=project-store'],
+    ['projectId=missing-project&environmentId=missing-environment', 'admin', ''],
+    ['projectId=missing-project&environmentId=env-checkout-dev', 'admin', 'environmentId=env-checkout-dev'],
+  ]) {
+    await page.goto(`rd?${query}`)
+    await expect(page.getByRole('region', { name: 'rd 工作首頁' })).toBeVisible()
+    const before = await snapshot(page)
+    await selector.selectOption(center)
+    await expect(page).toHaveURL(new RegExp(`/dim-gate/${center}${expected ? `\\?${expected}` : ''}$`))
+    await expect(page.getByText('已切換工作區；不適用的篩選已清除。', { exact: true })).toBeVisible()
+    expect(await snapshot(page)).toBe(before)
+  }
+  await page.goto('rd?projectId=project-store&environmentId=env-checkout-dev')
+  await expect(page.getByRole('region', { name: 'rd 工作首頁' })).toBeVisible()
+  const originalUrl = page.url(), before = await snapshot(page)
+  await page.evaluate(() => {
+    const original = window.fetch.bind(window)
+    Object.assign(window, { w1RestoreScopeRead: () => { window.fetch = original } })
+    window.fetch = async (...args) => {
+      const url = new URL(String(args[0]))
+      if (url.pathname.endsWith('/api/v1/dashboard') && url.searchParams.get('center') === 'ops') return new Response(JSON.stringify({ error: { code: 'SIMULATED_UNAVAILABLE', message: 'Scope read unavailable', retryable: true }, meta: { requestId: 'w1-scope-read-failure' } }), { status: 503, headers: { 'Content-Type': 'application/json' } })
+      return original(...args)
+    }
+  })
+  await selector.selectOption('ops')
+  await expect(page.getByText('工作區未切換：暫時無法確認授權範圍。原篩選已保留，請重新選擇工作區再試一次。', { exact: true })).toBeVisible()
+  await expect(selector).toHaveValue('rd')
+  await expect(page).toHaveURL(originalUrl)
+  expect(await snapshot(page)).toBe(before)
+  await page.evaluate(() => (window as unknown as { w1RestoreScopeRead: () => void }).w1RestoreScopeRead())
+  await selector.selectOption('ops')
+  await expect(page).toHaveURL(/ops\?projectId=project-store&environmentId=env-checkout-dev$/)
+  await expect(page.getByRole('region', { name: 'ops 工作首頁' })).toBeVisible()
+  expect(await snapshot(page)).toBe(before)
+})
+
+test('AC-WS-01/17: tablet and mobile navigation expose readable groups and keyboard routes', async ({ page }, info) => {
+  test.setTimeout(90_000)
+  await page.goto('rd')
+  await become(page, 'user-admin')
+  const tabTo = async (target: ReturnType<Page['getByRole']>) => {
+    for (let i = 0; i < 75 && !await target.evaluate(el => el === document.activeElement); i++) await page.keyboard.press('Tab')
+    await expect(target).toBeFocused()
+  }
+  for (const width of [768, 390]) for (const theme of ['light', 'dark']) {
+    await page.setViewportSize({ width, height: 1000 })
+    await page.goto('admin')
+    await expect(page.getByRole('region', { name: 'admin 工作首頁' })).toBeVisible()
+    if (await page.locator('html').getAttribute('data-theme') !== theme) await page.getByRole('button', { name: theme === 'dark' ? '切換深色主題' : '切換淺色主題' }).click()
+    if (width === 390) {
+      const menu = page.getByRole('button', { name: '開啟導覽', exact: true })
+      await tabTo(menu); await page.keyboard.press('Enter')
+      await expect(page.getByRole('button', { name: '收起導覽', exact: true })).toHaveAttribute('aria-expanded', 'true')
+    }
+    const labels = page.locator('#workspace-navigation .nav-label'), groups = page.locator('#workspace-navigation .sidebar-section-label')
+    expect(await labels.allTextContents()).toContain('角色與範圍')
+    expect(await groups.allTextContents()).toEqual(expect.arrayContaining(['平台總覽', '身分與授權', '入口與能力', '整合與稽核']))
+    for (const label of await labels.all()) await expect(label).toBeVisible()
+    for (const group of await groups.all()) await expect(group).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    expect((await new AxeBuilder({ page }).analyze()).violations.filter(v => ['serious', 'critical'].includes(v.impact ?? ''))).toEqual([])
+    await page.screenshot({ path: info.outputPath(`readable-nav-${width}-${theme}.png`), fullPage: true })
+    await tabTo(page.getByRole('link', { name: '角色與範圍', exact: true }))
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(/admin\/access$/)
+    await expect(page.getByRole('heading', { name: '角色與範圍', exact: true })).toBeVisible()
+    if (width === 390) await expect(page.getByRole('button', { name: '開啟導覽', exact: true })).toHaveAttribute('aria-expanded', 'false')
+  }
 })

@@ -97,3 +97,5 @@ W1 實作 checkpoint：獨立工作區／Demo 身分、分組側欄、三角色�
 
 
 W1 review修正 checkpoint：獨立[T-032 attempt1](../../../.team/reports/T-032-attempt-1.md)提出3項medium（Admin篩選遺失、缺「我發起的工作」、多grant診斷來源遺失）。已依contractrev3補齊，34 focused tests、9 W1 browser及真UI事件／非空首頁補測通過；新固定版本完整gates與複審待完成，仍NOT_ACCEPTED。沿用PR33，詳見[T-031 attempt2](../../../.team/reports/T-031-attempt-2.md)。
+
+W1第三版修正：獨立複審確認F01–03已關閉，另發現平板導航不可辨識、非法scope未清除。已依contractrev4修正，11/11 focused browser通過並目視確認768文字導航；原7d60786完整gates全通過僅作歷史回歸證據。新候選尚待64項完整Chromium、其他完整gates、第三次獨立review及最新head CI，仍**NOT_ACCEPTED**。[T-031 attempt3](../../../.team/reports/T-031-attempt-3.md)／[T-032 attempt2](../../../.team/reports/T-032-attempt-2.md)保留實際結果。

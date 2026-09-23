@@ -34,7 +34,7 @@ function readPreferences(): Preferences {
 export function AppShell({ session }: { session: SessionView }) {
   const [preferences, setPreferences] = useState(readPreferences)
   const [mobileMenu, setMobileMenu] = useState(false)
-  const [switching, setSwitching] = useState(false)
+  const [switching, setSwitching] = useState<'identity' | 'workspace' | null>(null)
   const [notice, setNotice] = useState('')
   const location = useLocation()
   const navigate = useNavigate()
@@ -66,23 +66,35 @@ export function AppShell({ session }: { session: SessionView }) {
       return { ...route, navigation: { ...route.navigation, ...(item ? { label: item.label, order: item.order } : {}), group: workspaceGroup(route, item && item.version > 1 ? item.group : undefined) } }
     }).sort((left, right) => left.navigation.order - right.navigation.order)
   const groups = [...new Set(configuredRoutes.map(route => route.navigation.group))]
-  const switchWorkspace = (center: Center) => {
-    if (!session.centers.includes(center)) return
+  const switchWorkspace = async (center: Center) => {
+    if (!session.centers.includes(center) || switching) return
     const filters = new URLSearchParams(location.search)
     const kept = new URLSearchParams()
-    for (const key of ['projectId', 'environmentId']) {
-      const value = filters.get(key)
-      if (value && (key !== 'projectId' || session.assignments.some(grant => grant.scopeType === 'project' && grant.scopeId === value) || session.centers.includes('admin'))) kept.set(key, value)
-    }
-    if (center === 'rd' && ['all', 'mine'].includes(filters.get('workOwner') ?? '')) kept.set('workOwner', filters.get('workOwner')!)
-    setNotice([...filters.keys()].some(key => !kept.has(key)) ? '已切換工作區；不適用的篩選已清除。' : '已切換工作區；身分與授權保持不變。')
-    setMobileMenu(false)
-    navigate(`/${center}${kept.size ? `?${kept}` : ''}`)
+    setSwitching('workspace')
+    setNotice('')
+    try {
+      const projectId = filters.get('projectId'), environmentId = filters.get('environmentId')
+      if (projectId || environmentId) {
+        let { scope } = await api.getDashboard(center, projectId ? { projectId } : {})
+        if (projectId && scope.projects.some(project => project.id === projectId)) kept.set('projectId', projectId)
+        else if (projectId && environmentId) {
+          // Invalid project context must not discard an independently authorized environment.
+          scope = (await api.getDashboard(center)).scope
+        }
+        if (environmentId && scope.environments.some(environment => environment.id === environmentId)) kept.set('environmentId', environmentId)
+      }
+      if (center === 'rd' && ['all', 'mine'].includes(filters.get('workOwner') ?? '')) kept.set('workOwner', filters.get('workOwner')!)
+      setNotice([...filters.keys()].some(key => !kept.has(key)) ? '已切換工作區；不適用的篩選已清除。' : '已切換工作區；身分與授權保持不變。')
+      setMobileMenu(false)
+      navigate(`/${center}${kept.size ? `?${kept}` : ''}`)
+    } catch {
+      setNotice('工作區未切換：暫時無法確認授權範圍。原篩選已保留，請重新選擇工作區再試一次。')
+    } finally { setSwitching(null) }
   }
   const currentLabel = navigationByKey.get(currentRoute?.key ?? 'guide')?.label ?? currentRoute?.navigation.label ?? '工作區'
   const switchPersona = async (id: string) => {
     if (id === session.user.id) return
-    setSwitching(true)
+    setSwitching('identity')
     setNotice('')
     try {
       const next = await personaMutation.mutateAsync(id)
@@ -90,7 +102,7 @@ export function AppShell({ session }: { session: SessionView }) {
       navigate(destination, { replace: true })
       setNotice('示範身分已切換；工作區與可見資料已依新授權重新讀取。')
     } catch { /* The mutation error is displayed beside the persona selector. */ }
-    finally { setSwitching(false) }
+    finally { setSwitching(null) }
   }
 
   return <div className="app-shell">
@@ -108,15 +120,15 @@ export function AppShell({ session }: { session: SessionView }) {
     <div className="workspace">
       <header className="topbar">
         <Button variant="ghost" size="icon" className="mobile-menu-button" aria-label={mobileMenu ? '收起導覽' : '開啟導覽'} aria-controls="workspace-navigation" aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)}>{mobileMenu ? <X size={20} /> : <Menu size={20} />}</Button>
-        <div className="workspace-selector"><label htmlFor="active-workspace">工作區</label><select id="active-workspace" aria-label="工作區" value={activeWorkspace ?? ''} disabled={switching || !activeWorkspace} onChange={event => switchWorkspace(event.target.value as Center)}>{!activeWorkspace && <option value="">沒有已授權工作區</option>}{session.centers.map(center => <option value={center} key={center}>{workspaceNames[center]}</option>)}</select></div>
+        <div className="workspace-selector"><label htmlFor="active-workspace">工作區</label><select id="active-workspace" aria-label="工作區" value={activeWorkspace ?? ''} disabled={!!switching || !activeWorkspace} onChange={event => void switchWorkspace(event.target.value as Center)}>{!activeWorkspace && <option value="">沒有已授權工作區</option>}{session.centers.map(center => <option value={center} key={center}>{workspaceNames[center]}</option>)}</select></div>
         <div className="breadcrumb"><span>工作台</span><ChevronRight size={14} aria-hidden="true" /><strong>{currentLabel}</strong></div>
-        <GlobalSearch session={session} disabled={switching} />
+        <GlobalSearch session={session} disabled={!!switching} />
         <div className="toolbar">
           <Notifications session={session} />
           <Button variant="ghost" size="icon" aria-label={preferences.theme === 'light' ? '切換深色主題' : '切換淺色主題'} onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}>{preferences.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</Button>
           <label className="density-control"><span className="sr-only">顯示密度</span><select aria-label="顯示密度" value={preferences.density} onChange={(event) => setPreferences({ ...preferences, density: event.target.value as Preferences['density'] })}><option value="normal">舒適</option><option value="compact">緊湊</option></select></label>
           <div className="toolbar-divider" />
-          <div className="persona-control"><span className="avatar" aria-hidden="true">{session.user.displayName.slice(0, 1)}</span><label><span className="persona-caption">Demo · 體驗其他角色</span><select aria-label="示範身分" disabled={switching || personas.isPending || personas.isError} value={session.user.id} onChange={(event) => void switchPersona(event.target.value)}>{personas.data ? personas.data.map((persona) => <option key={persona.id} value={persona.id}>{persona.displayName}</option>) : <option value={session.user.id}>{session.user.displayName}</option>}</select></label></div>
+          <div className="persona-control"><span className="avatar" aria-hidden="true">{session.user.displayName.slice(0, 1)}</span><label><span className="persona-caption">Demo · 體驗其他角色</span><select aria-label="示範身分" disabled={!!switching || personas.isPending || personas.isError} value={session.user.id} onChange={(event) => void switchPersona(event.target.value)}>{personas.data ? personas.data.map((persona) => <option key={persona.id} value={persona.id}>{persona.displayName}</option>) : <option value={session.user.id}>{session.user.displayName}</option>}</select></label></div>
         </div>
       </header>
       <div className="demo-banner" role="note"><FlaskConical size={16} aria-hidden="true" /><span><strong>示範資料</strong><span className="demo-description"> · 所有資源與操作均為模擬，未連接真實雲端。</span></span><Link to="/guide">Session 控制<ArrowRight size={14} aria-hidden="true" /></Link></div>
@@ -127,7 +139,7 @@ export function AppShell({ session }: { session: SessionView }) {
         {!activeWorkspace && <section className="panel"><h1>目前沒有已授權工作區</h1><p>組織成員身分不等於操作授權。可由頁首「Demo · 體驗其他角色」選擇示範身分。</p></section>}
         {personas.isError && <ErrorState error={personas.error} title="示範身分清單無法讀取" onRetry={() => void personas.refetch()} />}
         {personaMutation.isError && <ErrorState error={personaMutation.error} title="示範身分未切換" />}
-        {switching ? <LoadingState label="正在切換身分，重新確認可見範圍…" /> : <AppRoutes session={session} />}
+        {switching ? <LoadingState label={switching === 'identity' ? '正在切換身分，重新確認可見範圍…' : '正在確認工作區範圍…'} /> : <AppRoutes session={session} />}
       </main>
       <footer className="workspace-footer"><span>單企業 · 多團隊 · 共同資源視圖</span><span>每個分頁使用獨立示範 session</span></footer>
     </div>

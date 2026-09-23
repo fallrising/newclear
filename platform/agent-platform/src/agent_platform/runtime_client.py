@@ -1,6 +1,7 @@
 """Worker-to-connector boundary; no node tokens, guest secrets or local paths."""
 
 import os
+import re
 from urllib.parse import urlencode
 
 from psycopg.types.json import Jsonb
@@ -35,6 +36,8 @@ class RuntimeClient:
 
     def register(self, db):
         catalog = self.call("GET", "/v1/catalog")
+        if not re.fullmatch(r"[a-f0-9]{64}", catalog.get("egress_policy_sha256", "")):
+            raise Problem(409, "runtime_egress_policy_unconfirmed")
         with db.transaction() as conn:
             conn.execute(
                 "SELECT node_id FROM runtime_capacity WHERE node_id='cocoon-local' FOR UPDATE"
@@ -47,11 +50,16 @@ class RuntimeClient:
             if occupied:
                 raise Problem(409, "runtime_registration_requires_drain")
             conn.execute(
-                "INSERT INTO runtime_catalog(node_id,template_digest,repositories) "
-                "VALUES ('cocoon-local',%s,%s) ON CONFLICT(node_id) DO UPDATE SET temp"
+                "INSERT INTO runtime_catalog(node_id,template_digest,repositories,"
+                "egress_policy_sha256) "
+                "VALUES ('cocoon-local',%s,%s,%s) ON CONFLICT(node_id) DO UPDATE SET temp"
                 "late_digest=excluded.template_digest,repositories=excluded.repositori"
-                "es,registered_at=now()",
-                (catalog["template_digest"], Jsonb(catalog["repositories"])),
+                "es,egress_policy_sha256=excluded.egress_policy_sha256,registered_at=now()",
+                (
+                    catalog["template_digest"],
+                    Jsonb(catalog["repositories"]),
+                    catalog["egress_policy_sha256"],
+                ),
             )
             conn.execute("UPDATE runtime_capacity SET draining=false WHERE node_id='cocoon-local'")
         return catalog
@@ -83,6 +91,7 @@ class RuntimeClient:
                 "base_sha": run["base_sha"],
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
+                "egress_policy_sha256": run.get("egress_policy_sha256"),
             },
         )
 

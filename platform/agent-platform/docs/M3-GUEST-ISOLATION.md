@@ -1,5 +1,7 @@
 # M3 第六個切片：客體控制憑證隔離
 
+> 2026-09-23 接續：固定節點 egress 已由 [下一切片](M3-EGRESS.md) 完成；目前部署另需 migration 007、sealed node policy，並重建含固定 proxy 環境的 launcher。以下保留本隔離切片的驗收歷史。
+
 修復 PR #30 發現的同 UID terminal 可讀取 Agent Server `SESSION_API_KEY` 問題。Agent Server 維持 SDD 要求的非 root 執行；控制服務與工具使用不同帳號、私有目錄與固定降權 launcher。**AT-07／M3 仍未整體完成**，egress policy 與 model proxy／budget／usage 尚待開發。
 
 ## 執行邊界

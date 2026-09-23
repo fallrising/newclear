@@ -105,6 +105,18 @@ class Node:
 
 
 class FixtureConnector(Connector):
+    def network(self, row=None):
+        from agent_platform.domain import Problem
+
+        self.client.check()
+        proof = {
+            "revision": "fixture-egress",
+            "policy_sha256": getattr(self.client, "policy_hash", "a" * 64),
+        }
+        if row is not None and row.get("egress") != proof:
+            raise Problem(409, "egress_run_policy_changed")
+        return proof
+
     def isolation(self, row, *, terminal=False):
         # This deterministic fixture has no guest. Real UID proof is KVM-only.
         return {}

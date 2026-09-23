@@ -127,6 +127,7 @@ class Store:
             )
             revision = old["revision"] + 1
         template = "fixture:m1"
+        egress_policy = None
         if data.backend == "openhands":
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
@@ -134,6 +135,9 @@ class Store:
             if not catalog:
                 raise Problem(503, "runtime_not_configured")
             template = catalog["template_digest"]
+            egress_policy = catalog["egress_policy_sha256"]
+            if not egress_policy:
+                raise Problem(503, "runtime_egress_policy_unconfirmed")
         row = conn.execute(
             (
                 "INSERT INTO agent_profile_revisions(id,profile_id,revision,name,b"
@@ -151,7 +155,8 @@ class Store:
                 Jsonb(
                     {
                         "exec": data.backend == "openhands",
-                        "network": False,
+                        "network": data.backend == "openhands",
+                        "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
                     }
                 ),
@@ -173,6 +178,7 @@ class Store:
             ).fetchone(),
             "profile_not_found",
         )
+        egress_policy = profile["tool_policy"].get("egress_policy_sha256")
         if profile["backend"] == "openhands":
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
@@ -184,6 +190,8 @@ class Store:
             ).fetchone()["canonical_repo"]
             if not catalog or catalog["template_digest"] != profile["template_digest"]:
                 raise Problem(503, "runtime_template_unavailable")
+            if not egress_policy or egress_policy != catalog["egress_policy_sha256"]:
+                raise Problem(409, "runtime_egress_policy_changed")
             if not any(
                 r["canonical_repo"] == repo and r["base_sha"] == data.base_sha
                 for r in catalog["repositories"]
@@ -193,8 +201,8 @@ class Store:
         row = conn.execute(
             (
                 "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,"
-                "goal,backend,require_approval,state,deadline) VALUES "
-                "(%s,%s,%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
+                "goal,backend,require_approval,egress_policy_sha256,state,deadline) VALUES "
+                "(%s,%s,%s,%s,%s,%s,%s,%s,%s,'queued',now()+make_interval(secs=>%s)) "
                 "RETURNING *"
             ),
             (
@@ -206,6 +214,7 @@ class Store:
                 data.goal,
                 profile["backend"],
                 profile["tool_policy"].get("require_approval", False),
+                egress_policy,
                 profile["limits"]["deadline_seconds"],
             ),
         ).fetchone()

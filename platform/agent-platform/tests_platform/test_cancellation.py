@@ -59,6 +59,55 @@ class CancellationTests(PlatformFixture):
         self.assertEqual(self.server.node.calls["allocate"], int(allocated))
         self.assertFalse(Worker(self.db, self.connector).run_once())
 
+    def test_queued_run_and_old_profile_cannot_borrow_reconfigured_node_policy(self):
+        value = self.create()
+        self.assertEqual(value["run"]["egress_policy_sha256"], "a" * 64)
+        self.server.node.policy_hash = "b" * 64
+        self.connector.register(self.db)
+        old_profile = self.post("/tasks", self.payload)
+        self.assertEqual(old_profile.status_code, 409)
+        self.assertEqual(old_profile.json()["error"], "runtime_egress_policy_changed")
+        Worker(self.db, self.connector).run_once()
+        self.assertEqual(self.server.node.calls["allocate"], 0)
+        self.assertEqual(self.scalar("SELECT state FROM runs"), "interrupted")
+        self.assertEqual(Store(self.db).runtime()["occupied"], 1)
+        self.assertEqual(self.cancel(value["run"]["id"]).status_code, 202)
+        Worker(self.db, self.connector).run_once()
+        self.assert_cancelled(allocated=False)
+        profile = self.post(
+            "/agent-profiles", {"name": "New egress revision", "backend": "openhands"}
+        )
+        self.assertEqual(profile.status_code, 201)
+        self.payload["profile_revision"] = profile.json()["id"]
+        new_run = self.create()["run"]
+        self.assertEqual(new_run["egress_policy_sha256"], "b" * 64)
+        Worker(self.db, self.connector).run_once()
+        self.assertEqual(Store(self.db).run(new_run["id"])["state"], "succeeded")
+        self.assertEqual(self.server.node.calls["allocate"], 1)
+
+    def test_egress_policy_change_retains_slot_and_cancel_still_requires_full_stop(self):
+        from unittest.mock import patch
+
+        value = self.kill_at("after_prompt")
+        with patch.object(
+            self.server.service, "network", side_effect=Problem(409, "egress_run_policy_changed")
+        ):
+            self.recovery_worker().run_once()
+            self.assertEqual(self.scalar("SELECT state FROM runs"), "interrupted")
+            self.assertEqual(Store(self.db).runtime()["occupied"], 1)
+            self.assertEqual(self.server.node.calls["allocate"], 1)
+            self.assertEqual(self.server.node.calls["prompt"], 1)
+            self.assertEqual(self.cancel(value["run"]["id"]).status_code, 202)
+            self.server.node.partial_removal = True
+            Worker(self.db, self.connector).run_once()
+            self.assertEqual(self.scalar("SELECT state FROM runs"), "cancelling")
+            self.assertEqual(Store(self.db).runtime()["occupied"], 1)
+            self.server.node.partial_removal = False
+            self.recovery_worker().run_once()
+            self.assert_cancelled()
+        self.assertTrue(list((self.root / "state/fences").glob("*.json")))
+        self.assertTrue(list((self.root / "state").glob("*.json")))
+
     def test_cancel_queued_without_allocation_or_worker(self):
         run = self.create()["run"]
         response = self.cancel(run["id"], "queued-cancel")
@@ -84,6 +133,7 @@ class CancellationTests(PlatformFixture):
             self.server.service.allocate(
                 run["id"],
                 Allocate(
+                    egress_policy_sha256="a" * 64,
                     generation=run["generation"],
                     template=self.server.config["template"],
                     canonical_repo=self.project["canonical_repo"],

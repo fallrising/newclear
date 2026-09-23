@@ -1,6 +1,17 @@
 # 開發接續紀錄 — 2026-09-23
 
-本次停止點：**M3 recovery #22、cancel #24、approval #25、pause／resume #28、輸出安全 #30 已合併；guest 控制憑證隔離切片已實作並驗收。M3／AT-07 尚未整體完成。** 本次分支 `agent/agent-platform/m3-guest-isolation`，基於 main `7a7b41b`；未修改其他平台。最新行為見 [M3 guest isolation](M3-GUEST-ISOLATION.md)。
+本次停止點：**recovery #22、cancel #24、approval #25、pause／resume #28、輸出安全 #30、guest 控制憑證隔離 #34 已合併；固定節點 egress policy 切片已完成。M3／AT-07 尚未整體完成，下一優先是 AT-11 model proxy／budget／usage。** 本次分支 `agent/agent-platform/m3-egress`，從當時最新 main `ea88b88` 建立，提交前同步 main `8095f9a`，只修改 `platform/agent-platform`。最新行為見 [M3 egress](M3-EGRESS.md)。
+
+## 本次固定節點 egress
+
+- 固定 sandboxd 0.1.12 的 none-lane **仍可經 vsock proxy 出站**。本切片開啟受控 proxy，提供 exact host／port／method allowlist、解析後 IP guard、redirect 下一跳驗收；不把 net=none 或 proxy 未啟動當安全保證。
+- `egress_node` 固定 binary hash、sealed memfd 配置及啟動 argv；connector 核對 live PID／start ticks／boot ID、binary、seal、內容與 API listener ownership。拒絕內網 override、wildcard、SOCKS、secrets、tenant／NIC／preview 等未驗收路徑。
+- `007_egress.sql` 保存 catalog／run 政策 digest，不可變 profile 也固定 digest。Queued 舊 run 或舊 profile 不會借用新政策；舊 journal 缺政策證據時拒絕繼續，取消／停止對帳仍可使用。
+- **政策不支援 live replacement**：執行中配置不可改寫，pool API 拒絕政策 mutation；先 drain、核對所有 VM／claims／原程序／runtime directory／cgroup 已停止，再重啟 node。Mismatch 不表示既有流量立即撤銷，reservation 沒有停止證據就保留。
+- Terminal launcher 新增固定 loopback proxy 環境，guest helper 核對沒有可用 NIC。依 [guest isolation](M3-GUEST-ISOLATION.md) 重建 0600 launcher 並更新 digest；UID 2001／2000、NoNewPrivs、控制 workspace 隔離不變。
+- M0 45 項、平台 129 項與兩項固定上游 DNS 契約測試通過；真實 KVM egress、deny-all 政策變更與既有控制流程回歸，見 [證據](evidence/m3-egress-2026-09-23.json)。Redirect 證據要求源站真回 302，沒有拿公開測試站自己的 403 當平台拒絕。
+- 升級 API／worker／connector，drain 後 migrate／sealed node 啟動／register-runtime／新 profile revision。Connector 與 sandboxd 須同服務 UID／GID，本機兩者一致經 `sg kvm` 啟動以讀取 `/proc`；不放寬程序權限。
+- 本次私密測試配置、launcher、journal／fences、Go 測試工具鏈在 `/tmp/apm3-egress-20260923`，`connector.json` 最後為 explicit deny-all，allow fixture 保存為 `connector-allow.json`。同一 journal 的 direct driver 與 HTTP connector 不可同時執行。保留舊測試目錄及全部 journal。
 
 ## 本次 guest 控制憑證隔離
 
@@ -16,7 +27,7 @@
 - 嚴格驗證 result 欄位、固定 base SHA、UTF-8 patch bytes／SHA-256／256 KiB 與 fixture assertion。含憑證或損壞的 patch 不存入 result、不宣告成功；保留容量直到停止證據確認。
 - 新增 10 項安全回歸，平台共 108 項、M0 45 項通過；兩個真實 VM 驗收事件遮蔽、secret diff 拒絕、跨 workspace 隔離、目前 deny-all 網路及完整清理。
 - 當時發現同 UID terminal 可讀取 session key；本次以控制／工具 UID 分離修復並重驗。輸出遮蔽仍只比對完整已知憑證，不是任意編碼防洩漏保證。
-- 目前 proxy 未開啟的觀測不等於產品 egress policy 驗收；allowlist、DNS rebinding／redirect、動態 policy、model proxy／budget 尚未完成。
+- 當時 proxy 未開啟的觀測不等於產品 egress policy 驗收；allowlist／DNS／redirect 已由本次固定節點切片補驗。Live policy mutation、model proxy／budget 仍未提供。
 
 ## M3 pause／resume 已完成
 
@@ -61,14 +72,14 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 接續 AT-07 的 egress policy 強制限制與 AT-11 model proxy／budget／usage。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
+1. 依 [SDD](../SDD.md) 接續 AT-11 model proxy／budget／usage，再整合完整 AT-07。固定節點 egress 已驗收，project-specific policy／即時撤銷／TLS 內容政策仍不支援；模型 transport 不得靠全節點 private-IP override 開洞。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
 2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
 5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
-7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-isolation-20260923`（本次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
-8. API／worker／connector／web 須一起更新；先 drain，再套用 `006_pause.sql`。舊 journal 沒有 pre-tool 程序基準不能安全 pause。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-egress-20260923`（本次，最終 pinned-*／deny-final／控制回歸）、`/tmp/apm3-isolation-20260923`（前次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+8. API／worker／connector／web 須一起更新；先 drain，再套用最新 `007_egress.sql`（包含前序 migrations），重建 launcher、以 sealed node 啟動並重新登錄政策／建立 profile revision。舊 journal 沒有 pre-tool 程序基準不能安全 pause。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異
 

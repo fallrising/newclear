@@ -1,6 +1,6 @@
 # M3 第三個切片：工具審批
 
-> 後續 AT-07 發現：同 UID terminal 可讀取 guest session key。本文的單 writer 安全條件仍限固定合作式 fixture；惡意 guest 的控制權限隔離尚未完成，見 [缺口與修補順序](M3-OUTPUT-SECURITY.md)。
+> 2026-09-23 更新：同 UID terminal 讀取 guest session key 的缺口已由 [控制憑證隔離切片](M3-GUEST-ISOLATION.md) 修復，並重跑本文控制流程。以下歷史證據與當時邊界保留；最新部署須使用獨立非 root 控制帳號與固定 launcher。
 
 
 Recovery（PR #22）與安全取消（PR #24）已合併。此切片完成固定 OpenHands／none-lane 模式的 AT-06 審批流程：工具先提出動作，operator 查看完整參數後核准，connector 再核對同一批動作才放行。**M3 尚未整體完成**；egress／secret 驗收及模型預算仍待開發；後續安全 pause／resume 已見 [M3 pause](M3-PAUSE.md)。

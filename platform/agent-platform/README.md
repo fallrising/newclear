@@ -2,13 +2,14 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。M3 的 worker 恢復／fencing、安全取消、工具審批與安全暫停／恢復切片已通過；已補強輸出密鑰防漏與 diff 完整性；guest 控制憑證隔離、egress policy 與模型預算仍待完成。**
+**目前狀態：M0 真實 KVM gate 已通過；M2 的真實 Cocoon／OpenHands 整合、四 VM 並行、事件重連與 diff 驗收已通過。M3 的 worker 恢復／fencing、安全取消、工具審批與安全暫停／恢復切片已通過；已補強輸出密鑰防漏與 diff 完整性；guest 控制憑證隔離已修復並驗收，egress policy 與模型預算仍待完成。**
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
 ## 文件入口
 
-- [M3 輸出安全與已知隔離缺口](docs/M3-OUTPUT-SECURITY.md)：密鑰防漏、diff 完整性及下一個優先修補項。
+- [M3 客體控制憑證隔離](docs/M3-GUEST-ISOLATION.md)：獨立非 root 控制帳號、固定降權與攻擊驗收。
+- [M3 輸出安全與歷史隔離缺口](docs/M3-OUTPUT-SECURITY.md)：密鑰防漏、diff 完整性及下一個優先修補項。
 - [M3 安全暫停／恢復](docs/M3-PAUSE.md)：工具收尾證據、同 VM 接續與控制佇列。
 - [M3 工具審批](docs/M3-APPROVAL.md)：完整動作審閱、一次性核准、拒絕與恢復對帳。
 - [M3 安全取消](docs/M3-CANCEL.md)：工作台取消、真實 VM 停止證據與剩餘工作。

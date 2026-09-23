@@ -93,6 +93,7 @@ def approve(service, run_id, request):
         if operation not in row["operations"]:
             if observe_sandbox(service, row):
                 raise Problem(409, "approval_runtime_stopped")
+            service.isolation(row, terminal=True)
             actual = pending_approval(service, row)
             if actual["action_digest"] != request.action_digest:
                 raise Problem(409, "approval_action_changed")

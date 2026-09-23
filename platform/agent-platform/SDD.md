@@ -156,7 +156,7 @@ flowchart TB
 - API／worker／connector：Python + FastAPI，便於接 OpenHands 與 sandbox Python SDK；獨立程序／權限，即使共用 package。
 - Persistence：PostgreSQL、SQL migrations；durable job 用 `FOR UPDATE SKIP LOCKED` 與明確 lease。
 - Artifacts：MVP 可使用不在 Web root 的本機目錄，加 authenticated download API；保留 S3-compatible adapter 邊界。
-- Run runtime：Linux/KVM、Cocoon、sandboxd、固定 digest 的 guest template；Agent Server 在 guest 中以非 root 執行。
+- Run runtime：Linux/KVM、Cocoon、sandboxd、固定 digest 的 guest template；Agent Server 在 guest 中以獨立非 root 控制帳號執行；terminal 經固定 launcher 降至另一個工具帳號，SDK 控制 workspace 與 repository 分離。實作與權限驗收見 [M3 guest isolation](docs/M3-GUEST-ISOLATION.md)。
 - Deployment：控制面容器／服務與 host-level sandboxd 分離；不把 `/dev/kvm` 或 Docker socket 暴露給 Web／agent。
 - Exact versions、lockfiles、image digests、SDK schema hash 與 release compatibility matrix 在 M0 產出並於 M1 固定，不使用 `latest` 當可重現部署契約。
 

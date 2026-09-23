@@ -105,6 +105,10 @@ class Node:
 
 
 class FixtureConnector(Connector):
+    def isolation(self, row, *, terminal=False):
+        # This deterministic fixture has no guest. Real UID proof is KVM-only.
+        return {}
+
     def check_host_reserve(self):
         # No VMs are allocated by this HTTP fixture; CI need not have 8+ GiB free.
         # Real host reserve checks are exercised by the separate KVM acceptance.
@@ -171,10 +175,18 @@ class Server:
             token.chmod(0o600)
         bundle = root / "fixture.bundle"
         bundle.write_bytes(b"not-a-real-git-bundle")
+        launcher = root / "terminal"
+        binary = bytearray(64)
+        binary[:6] = b"\x7fELF\x02\x01"
+        binary[18:20] = (62).to_bytes(2, "little")
+        launcher.write_bytes(binary)
+        launcher.chmod(0o600)
         self.config = {
             "origin": "http://127.0.0.1:17777",
             "template": "localhost:15000/guest@sha256:" + "a" * 64,
             "state_dir": str(root / "state"),
+            "terminal_launcher_file": str(launcher),
+            "terminal_launcher_sha256": hashlib.sha256(binary).hexdigest(),
             "connector_token_file": str(token),
             "repositories": [
                 {

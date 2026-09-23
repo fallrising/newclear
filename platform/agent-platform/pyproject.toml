@@ -30,4 +30,4 @@ line-length = 100
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.setuptools.package-data]
-agent_platform = ["migrations/*.sql"]
+agent_platform = ["migrations/*.sql", "guest_terminal.c"]

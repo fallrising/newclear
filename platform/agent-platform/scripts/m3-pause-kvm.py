@@ -51,7 +51,8 @@ def fixture(sb, run_id, case):
             "import os,signal;from pathlib import Path;"
             "[(os.kill(int(p.name),signal.SIGTERM)) for p in Path('/proc').iterdir() "
             "if p.name.isdigit() and (p/'cmdline').exists() "
-            "and b'/tmp/guest_fixture.py' in (p/'cmdline').read_bytes().split(bytes([0]))]"
+            "and b'/opt/agent-platform/guest_fixture.py' "
+            "in (p/'cmdline').read_bytes().split(bytes([0]))]"
         ),
         timeout=15,
     )
@@ -74,8 +75,15 @@ def fixture(sb, run_id, case):
         source = source.replace(
             "class Handler(", "COMMAND = " + repr(command) + " + COMMAND\n\nclass Handler("
         )
-    sb.write_file("/tmp/pause_fixture.py", source.encode(), mode=0o644)
-    sb.spawn("python3", "/tmp/pause_fixture.py", user="agentprobe", env={"FIXTURE_RUN_ID": run_id})
+    sb.write_file("/opt/agent-platform/pause_fixture.py", source.encode(), mode=0o644)
+    sb.spawn(
+        "python3",
+        "-I",
+        "/opt/agent-platform/pause_fixture.py",
+        user="agentcontrol",
+        cwd="/var/lib/agent-platform/control",
+        env={"FIXTURE_RUN_ID": run_id},
+    )
     sb.exec(
         "python3",
         "-c",

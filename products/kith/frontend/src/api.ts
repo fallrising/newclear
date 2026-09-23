@@ -196,18 +196,58 @@ export function parseRooms(data: unknown): Room[] {
     if (!isRecord(item) || typeof item.id !== "string") {
       return [];
     }
-    return [
-      {
-        id: item.id,
-        name: typeof item.name === "string" ? item.name : undefined,
-        slug: typeof item.slug === "string" ? item.slug : undefined,
-      },
-    ];
+    const room: Room = {
+      id: item.id,
+      name: typeof item.name === "string" ? item.name : undefined,
+      slug: typeof item.slug === "string" ? item.slug : undefined,
+    };
+    if (typeof item.role === "string") {
+      room.role = item.role;
+    }
+    return [room];
   });
+}
+
+export function parseMe(data: unknown): { isOperator: boolean } {
+  if (!isRecord(data)) {
+    return { isOperator: false };
+  }
+  return { isOperator: data.is_operator === 1 || data.is_operator === true };
+}
+
+function roomFromRecord(data: unknown): Room {
+  if (!isRecord(data) || typeof data.id !== "string") {
+    throw new ApiError(200, "Invalid room");
+  }
+  const room: Room = {
+    id: data.id,
+    name: typeof data.name === "string" ? data.name : undefined,
+    slug: typeof data.slug === "string" ? data.slug : undefined,
+  };
+  if (typeof data.role === "string") {
+    room.role = data.role;
+  }
+  return room;
+}
+
+async function postJson(path: string, body: unknown): Promise<unknown> {
+  const token = await fetchCsrfToken();
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+  headers.set(CSRF_HEADER, token);
+  return request(path, { method: "POST", headers, body: JSON.stringify(body) });
 }
 
 export async function listRooms(signal?: AbortSignal): Promise<Room[]> {
   return parseRooms(await request("/api/rooms", { signal }));
+}
+
+export async function createRoom(name: string, slug: string): Promise<Room> {
+  return roomFromRecord(await postJson("/api/rooms", { name, slug }));
+}
+
+export async function inviteHuman(roomId: string, handle: string): Promise<void> {
+  await postJson(`/api/rooms/${encodeURIComponent(roomId)}/members`, { handle });
 }
 
 export async function listMessages(

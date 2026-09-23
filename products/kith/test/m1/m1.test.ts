@@ -312,6 +312,99 @@ describe("kith M1 worker", () => {
     expect(err.error.code).toBe("room_full");
   });
 
+  it("M1-MEM-02: POST members accepts a human handle and rejects ambiguous or non-human handles", async () => {
+    const s = await seed(false);
+    const op = await login(s.operatorHandle);
+    const added = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      handle: s.guestHandle.toUpperCase(),
+    });
+    expect(added.status).toBe(200);
+    const addedBody = (await added.json()) as { ok: boolean; member_id: string; role: string };
+    expect(addedBody).toEqual({ ok: true, member_id: s.guestId, role: "member" });
+
+    const guest = await login(s.guestHandle);
+    const rooms = await api("GET", "/api/rooms", guest.cookie, guest.csrf);
+    expect(rooms.status).toBe(200);
+    const roomBody = (await rooms.json()) as { rooms: Array<{ id: string }> };
+    expect(roomBody.rooms.some((room) => room.id === s.roomId)).toBe(true);
+
+    const again = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      handle: s.guestHandle,
+    });
+    expect(again.status).toBe(409);
+    expect(((await again.json()) as { error: { code: string } }).error.code).toBe("already_member");
+
+    const both = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      member_id: s.guestId,
+      handle: s.guestHandle,
+    });
+    expect(both.status).toBe(400);
+    expect(((await both.json()) as { error: { code: string } }).error.code).toBe("invalid_request");
+
+    const neither = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {});
+    expect(neither.status).toBe(400);
+    expect(((await neither.json()) as { error: { code: string } }).error.code).toBe("invalid_request");
+
+    const missing = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      handle: "no_such_person",
+    });
+    expect(missing.status).toBe(404);
+    expect(((await missing.json()) as { error: { code: string } }).error.code).toBe("not_found");
+
+    const now = "2026-09-20T00:00:00Z";
+    const agentId = crypto.randomUUID();
+    const agentHandle = `ag_${agentId.replaceAll("-", "").slice(0, 8)}`;
+    const disabledId = crypto.randomUUID();
+    const disabledHandle = `off_${disabledId.replaceAll("-", "").slice(0, 8)}`;
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO members (id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, created_at)
+         VALUES (?, 'agent', ?, 'Agent', NULL, '[]', 'api_key', 0, ?)`,
+      ).bind(agentId, agentHandle, now),
+      env.DB.prepare(
+        `INSERT INTO members (id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, created_at, disabled_at)
+         VALUES (?, 'human', ?, 'Off', ?, '[]', 'api_key', 0, ?, ?)`,
+      ).bind(disabledId, disabledHandle, HASH, now, now),
+    ]);
+    const agentAdd = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      handle: agentHandle,
+    });
+    expect(agentAdd.status).toBe(404);
+    expect(((await agentAdd.json()) as { error: { code: string } }).error.code).toBe("not_found");
+    const disabledAdd = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
+      handle: disabledHandle,
+    });
+    expect(disabledAdd.status).toBe(404);
+    expect(((await disabledAdd.json()) as { error: { code: string } }).error.code).toBe("not_found");
+
+    const guestAdd = await api("POST", `/api/rooms/${s.roomId}/members`, guest.cookie, guest.csrf, {
+      handle: disabledHandle,
+    });
+    expect(guestAdd.status).toBe(403);
+    expect(((await guestAdd.json()) as { error: { message: string } }).error.message).toBe("operator required");
+  });
+
+  it("POST /api/rooms with an empty-slug stand-in makes the operator the owner", async () => {
+    const s = await seed(false);
+    const op = await login(s.operatorHandle);
+    const created = await api("POST", "/api/rooms", op.cookie, op.csrf, { name: "Design", slug: "design" });
+    expect(created.status).toBe(200);
+    const createdBody = (await created.json()) as { id: string; name: string; slug: string };
+    expect(createdBody).toMatchObject({ name: "Design", slug: "design" });
+    const membership = await env.DB.prepare(`SELECT member_id, role FROM room_members WHERE room_id = ?`)
+      .bind(createdBody.id)
+      .all<{ member_id: string; role: string }>();
+    expect(membership.results).toEqual([{ member_id: s.operatorId, role: "owner" }]);
+    const listed = await api("GET", "/api/rooms", op.cookie, op.csrf);
+    expect(listed.status).toBe(200);
+    const listedBody = (await listed.json()) as { rooms: Array<{ id: string; name: string }> };
+    expect(listedBody.rooms.some((room) => room.id === createdBody.id && room.name === "Design")).toBe(true);
+    const guest = await login(s.guestHandle);
+    const guestRooms = await api("GET", "/api/rooms", guest.cookie, guest.csrf);
+    const guestBody = (await guestRooms.json()) as { rooms: Array<{ id: string }> };
+    expect(guestBody.rooms.some((room) => room.id === createdBody.id)).toBe(false);
+  });
+
   it("ST-D1-01: simulate crash after D1 INSERT before persist next_seq; next send seq is MAX+1 not reuse", async () => {
     const s = await seed();
     const op = await login(s.operatorHandle);

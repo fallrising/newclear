@@ -4,7 +4,7 @@
 
 對外產品名：**Kith**。目錄與程式 id 為 `kith`。
 
-**狀態：M0–M6 核心路徑與可選 M7（GC／metrics／AES-GCM keyring）在 working tree（尚未 merge）。** **不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
+**狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
 
 ## 從這裡開始
 
@@ -26,6 +26,7 @@
 | [Attention](docs/sdd/05-attention.md) | notify envelope、CAS、tokenizer、keyword、heuristic、wake budget |
 | [驗證](docs/sdd/06-verification.md) | requirement → test ID、fake LLM/Codex、canary secrets |
 | [決策與來源](docs/sdd/08-decisions-sources.md) | EdgeChat GPL、ADR-0002、MCP、xAI、Cloudflare limits |
+| [人跟人聊天 UI](docs/sdd/09-human-chat-ui.md) | 開房、以 handle 邀請、桌面並排／窄螢幕先列表、輸入列 |
 
 ## Bootstrap 食譜（第一個 owner + 第一個房間）
 
@@ -103,17 +104,17 @@ npm run dev:sidecar          # 另開終端；讀 .wrangler/sidecar.local.toml
 
 空房間打一句通過 heuristic 的話（例如 `are you there?`，不必 @）：alarm 後 grok 應回 fake LLM。若最近 10 則已有 agent 發言，H4 會否決，這是規格不是故障。`@grok` 仍走 mention，不經 heuristic。
 
-## 上線前你需要準備（L7）
+## 線上與還需本人授權的項目（L7）
 
-本機 fake 路徑已經可用。真 Grok／真 Codex／workers.dev **無法代登**。在 `products/kith` 跑 `npm run check:live` 看缺什麼。
+Worker 已在 <https://kith.fallrising.workers.dev>。`wrangler.toml` 的 `ff_mcp`、`ff_hosted_agent`、`ff_ambient` 為 `on`，`ff_sidecar` 為 `off`。沒有 `XAI_API_KEY` 時，線上 @grok 仍走 `FAKE_LLM_TEXT`。在 `products/kith` 跑 `npm run check:live` 看還缺什麼。
 
-1. **Cloudflare：** `npx wrangler login`（瀏覽器授權）。之後才能建遠端 D1/KV 並 `wrangler deploy`。
-2. **真 Grok（可選）：** 把 `XAI_API_KEY` 寫進 gitignored `.dev.vars`（有值就不再走 fake LLM）。
+1. **再部署：** 已有 Cloudflare API token 或 `npx wrangler login` 時，在 `products/kith` 先 `npm run build --prefix frontend`，再 `npx wrangler deploy`。不要把 token 寫進 git。
+2. **真 Grok（可選）：** 把 `XAI_API_KEY` 放進 gitignored `.dev.vars`（有值就不再走 fake LLM），然後再部署才會進 Worker。
 3. **真 Codex（可選）：** 官方 CLI 若已安裝，kith 的 `CODEX_HOME` 必須與預設 `~/.codex` 分開。請跑：
    `CODEX_HOME=$HOME/.local/kith-dev/codex-home codex login`
    然後把 `.wrangler/sidecar.local.toml` 的 `executable` 改成該 CLI 絕對路徑。**不要**複製 `~/.codex/auth.json`。
 
-三件事缺一項，對應能力就停在 fake／本機。齊了再做遠端 deploy。
+缺第 2 或第 3 項時，對應能力停在 fake。人類聊天不依賴這兩項。
 
 ## 明確禁止
 

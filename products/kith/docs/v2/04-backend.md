@@ -117,6 +117,7 @@ Server → client：
 
 - 沿用 v1 `type=status`。新增 body 值 `reply failed`，並加選填欄位 `error_class`（只對 operator 的連線附上；其他人只有 body）。
 - 前端規則：`reply failed` 清掉該成員的回覆中狀態，顯示一行失敗提示 8 s（BR-45）。
+- schema：[contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)；`error_class` 列舉與 worker 分類規則見 [W3](milestones/W3.md) §4。
 
 ### B-12 `/mcp/events` 喚醒提示（W6）
 

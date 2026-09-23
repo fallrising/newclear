@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/ws-server.json",
+  "title": "WebSocket server frames v2",
+  "description": "Same as contracts/ws-server-v1.json except type=status may carry error_class (B-11; sent only to the operator's connection with body 'reply failed'). Defined in docs/v2/milestones/W3.md §4.1. Later milestones add draft (W5).",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v",
+        "type",
+        "event"
+      ],
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "const": "event"
+        },
+        "event": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "seq",
+            "kind",
+            "body"
+          ],
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "message",
+                "trace"
+              ]
+            },
+            "body": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "room_id": {
+              "type": "string"
+            },
+            "sender_id": {
+              "type": "string"
+            },
+            "thread_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "generation_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_message_id": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string",
+              "const": "local"
+            },
+            "created_at": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v",
+        "type",
+        "member_id",
+        "body"
+      ],
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "const": "status"
+        },
+        "member_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "error_class": {
+          "enum": [
+            "auth",
+            "not_found",
+            "bad_request",
+            "context_length",
+            "rate_limited",
+            "overloaded",
+            "content_filter",
+            "timeout",
+            "network",
+            "protocol",
+            "unknown"
+          ],
+          "description": "03 §2.3 LlmErrorClass. Present only with body 'reply failed' on the operator's socket."
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v",
+        "type",
+        "code"
+      ],
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

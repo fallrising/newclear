@@ -298,6 +298,10 @@ Tailwind 4 的預設色已在 `index.css` 以 `--color-*: initial` 移除；`[..
 | 對話框遮罩 | `--ink` 加不透明度修飾 | `bg-ink/40` |
 | Radix 狀態變體 | `data-highlighted` 等 Radix data 屬性 | `data-[highlighted]:bg-surface-2`（Radix 規定的屬性名，不是任意值） |
 | 選單最小寬、控制台導覽寬 | Tailwind 預設 spacing | `min-w-48`（192px）、`md:w-52`（208px） |
+| 頭像堆疊（W3） | Tailwind 預設 spacing、`--surface` | `-space-x-1.5`、`ring-2 ring-surface` |
+| 回覆中三點（§6，W3） | `--animate-dot`；`index.css` 的 `.dot-2`、`.dot-3`（延遲 160／320 ms） | `animate-dot`、`dot-2`、`dot-3` |
+| @ 補全清單高、側邊 sheet 寬（W3） | Tailwind 預設 spacing | `max-h-64`（256px）、`w-80`（320px） |
+| 手機 bottom sheet 高（W3） | `index.css` 的 `.h-sheet`（`70dvh`） | `h-sheet` |
 
 `style` 屬性只允許兩種用途：時間線容器的 `overflowAnchor: "none"`，以及虛擬捲動 item 的定位（`position`、`transform`、容器 `height`）。其他一律用 class（W1 §5.6.2）。
 

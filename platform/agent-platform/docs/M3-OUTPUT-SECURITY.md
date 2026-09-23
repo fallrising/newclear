@@ -1,5 +1,8 @@
 # M3 第五個切片：輸出密鑰防漏與 diff 完整性
 
+> 2026-09-23：本文記錄的同 UID 控制憑證缺口已由 [M3 guest isolation](M3-GUEST-ISOLATION.md) 修復並驗收。以下保留 PR #30 的發現與證據；目前 output 驅動器會先驗證隔離，再刻意注入測試 canary。
+
+
 Connector 在事件、審批與結果離開私密執行環境之前檢查資料。本切片只完成 AT-07 的部分輸出邊界；**AT-07 與 M3 尚未完成**。模型仍是固定 fixture，沒有付費 provider key。
 
 ## 行為

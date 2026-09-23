@@ -51,7 +51,8 @@ def fixture(sb, run_id, case):
             "import os,signal;from pathlib import Path;"
             "[(os.kill(int(p.name),signal.SIGTERM)) for p in Path('/proc').iterdir() "
             "if p.name.isdigit() and (p/'cmdline').exists() "
-            "and b'/tmp/guest_fixture.py' in (p/'cmdline').read_bytes().split(bytes([0]))]"
+            "and b'/opt/agent-platform/guest_fixture.py' "
+            "in (p/'cmdline').read_bytes().split(bytes([0]))]"
         ),
         timeout=15,
     )
@@ -68,14 +69,24 @@ def fixture(sb, run_id, case):
         if case == "background":
             command = (
                 'python3 -c "from pathlib import Path;import subprocess;'
-                "subprocess.Popen(['sleep','15'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+                "p=subprocess.Popen(['python3','-c','import ctypes,time;"
+                "assert ctypes.CDLL(None).prctl(4,0)==0;time.sleep(15)'],"
+                "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+                "Path('/tmp/pause-hidden-pid').write_text(str(p.pid));"
                 "Path('/tmp/pause-tool-started').write_text('yes')\"; "
             )
         source = source.replace(
             "class Handler(", "COMMAND = " + repr(command) + " + COMMAND\n\nclass Handler("
         )
-    sb.write_file("/tmp/pause_fixture.py", source.encode(), mode=0o644)
-    sb.spawn("python3", "/tmp/pause_fixture.py", user="agentprobe", env={"FIXTURE_RUN_ID": run_id})
+    sb.write_file("/opt/agent-platform/pause_fixture.py", source.encode(), mode=0o644)
+    sb.spawn(
+        "python3",
+        "-I",
+        "/opt/agent-platform/pause_fixture.py",
+        user="agentcontrol",
+        cwd="/var/lib/agent-platform/control",
+        env={"FIXTURE_RUN_ID": run_id},
+    )
     sb.exec(
         "python3",
         "-c",
@@ -239,6 +250,24 @@ def main():
                                 "-c",
                                 "from pathlib import Path;"
                                 "print(Path('/tmp/pause-tool-started').exists())",
+                                timeout=5,
+                            ).strip()
+                            == "True"
+                        )
+                    )
+                if case == "background":
+                    wait(
+                        lambda sb=sb: (
+                            sb.exec(
+                                "python3",
+                                "-I",
+                                "-c",
+                                "from pathlib import Path;"
+                                "p=Path('/proc')/Path('/tmp/pause-hidden-pid').read_text();"
+                                "s=dict(line.split(':',1) "
+                                "for line in (p/'status').read_text().splitlines());"
+                                "print((p/'environ').stat().st_uid==0 "
+                                "and s['Uid'].split()[0]=='2000')",
                                 timeout=5,
                             ).strip()
                             == "True"

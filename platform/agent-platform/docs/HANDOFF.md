@@ -1,13 +1,21 @@
-# 開發接續紀錄 — 2026-09-22
+# 開發接續紀錄 — 2026-09-23
 
-本次停止點：**M3 recovery #22、cancel #24、approval #25、pause／resume #28 已合併；輸出密鑰防漏與 diff 完整性切片已實作並驗收。M3／AT-07 尚未整體完成。** 本次分支 `agent/agent-platform/m3-security`，基於 main `ad73f55`；未修改其他平台。最新行為見 [M3 output security](M3-OUTPUT-SECURITY.md)。
+本次停止點：**M3 recovery #22、cancel #24、approval #25、pause／resume #28、輸出安全 #30 已合併；guest 控制憑證隔離切片已實作並驗收。M3／AT-07 尚未整體完成。** 本次分支 `agent/agent-platform/m3-guest-isolation`，基於 main `7a7b41b`；未修改其他平台。最新行為見 [M3 guest isolation](M3-GUEST-ISOLATION.md)。
 
-## 本次輸出安全切片
+## 本次 guest 控制憑證隔離
+
+- Agent Server／固定模型使用非 root UID 2001，terminal 維持 UID 2000。私有控制 HOME／state／tmp／SDK workspace 與實際 repository 分離，封閉同 UID `/proc` 憑證讀取及 ambient plugin／import 注入。
+- 固定 static launcher 僅在 guest 安裝 root:2001 mode 4750，只允許控制帳號啟動 UID 2000 shell；固定環境、清除 groups／FD／saved identity、NoNewPrivs 與 core dump 限制。沒有 host setuid 或 shell fallback。
+- Prepare／prompt／approval／recovery／quiescence／result 核對 helper hash、權限與程序 UID。舊 journal 缺 revision 時拒絕繼續，但保留取消與完整停止回收。
+- 新增八項 host 契約／編譯測試；平台共 116 項、M0 45 項通過。23 項真實 terminal 攻擊檢查、兩個 output canary 案例與 13 個控制回歸通過，見 [證據](evidence/m3-isolation-2026-09-23.json)。
+- **升級先 drain**；以 `python -m agent_platform.build_terminal` 建立 0600 launcher，將輸出的 file／SHA-256 加入私密 connector 配置。保留 journal／fences；沒有新 migration，不原地修補舊 guest。
+
+## 輸出安全切片（PR #30）
 
 - 統一涵蓋 connector／node／sandbox／session 四種憑證；在 JSON 解碼後檢查巢狀 key／value，再遮蔽與截斷事件。含憑證的 ID／kind／state 與審批參數直接拒絕。
 - 嚴格驗證 result 欄位、固定 base SHA、UTF-8 patch bytes／SHA-256／256 KiB 與 fixture assertion。含憑證或損壞的 patch 不存入 result、不宣告成功；保留容量直到停止證據確認。
 - 新增 10 項安全回歸，平台共 108 項、M0 45 項通過；兩個真實 VM 驗收事件遮蔽、secret diff 拒絕、跨 workspace 隔離、目前 deny-all 網路及完整清理。
-- **優先缺口：真實 VM 確認同 UID terminal 可從 `/proc` 讀取 Agent Server session key。** 輸出遮蔽不能修復控制權限；approval／pause 的單 writer 條件仍限固定合作式 fixture，不能當作惡意 guest 的安全保證。下一步先隔離控制帳號／狀態／憑證，再重驗控制流程。
+- 當時發現同 UID terminal 可讀取 session key；本次以控制／工具 UID 分離修復並重驗。輸出遮蔽仍只比對完整已知憑證，不是任意編碼防洩漏保證。
 - 目前 proxy 未開啟的觀測不等於產品 egress policy 驗收；allowlist、DNS rebinding／redirect、動態 policy、model proxy／budget 尚未完成。
 
 ## M3 pause／resume 已完成
@@ -53,13 +61,13 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 先修復上面的 guest 控制憑證隔離缺口，再接續 AT-07 egress／secret 與 AT-11 model proxy／budget／usage。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
+1. 依 [SDD](../SDD.md) 接續 AT-07 的 egress policy 強制限制與 AT-11 model proxy／budget／usage。AT-04／05 recovery、AT-06 approval 與 AT-08 cancel 的固定模式能力和保守邊界已記錄，不把它當成完整 M3。
 2. **M2 仍使用固定模擬模型**：只執行 `m2-result.txt` 的驗收，不解讀自然語言任務，不呼叫付費 provider。真實 model proxy／budget／usage 尚未提供。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
 5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
-7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-security-20260922`（本次）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-isolation-20260923`（本次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
 8. API／worker／connector／web 須一起更新；先 drain，再套用 `006_pause.sql`。舊 journal 沒有 pre-tool 程序基準不能安全 pause。不要刪 journal／fences 或降低 DB generation；先 drain 再 migrate。已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異

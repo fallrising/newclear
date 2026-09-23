@@ -54,7 +54,8 @@ def long_command_fixture(config, run):
             "import os,signal;from pathlib import Path;"
             "[(os.kill(int(p.name),signal.SIGTERM)) for p in Path('/proc').iterdir() "
             "if p.name.isdigit() and (p/'cmdline').exists() "
-            "and b'/tmp/guest_fixture.py' in (p/'cmdline').read_bytes().split(bytes([0]))]"
+            "and b'/opt/agent-platform/guest_fixture.py' "
+            "in (p/'cmdline').read_bytes().split(bytes([0]))]"
         ),
         timeout=15,
     )
@@ -63,15 +64,17 @@ def long_command_fixture(config, run):
         "Path('/tmp/m3-long-command').write_text('ready'); time.sleep(120)\""
     )
     program = (
-        "from http.server import ThreadingHTTPServer\nimport guest_fixture\n"
-        + f"guest_fixture.COMMAND = {command!r}\n"
-        + "ThreadingHTTPServer(('127.0.0.1',18080),guest_fixture.Handler).serve_forever()\n"
+        Path("src/agent_platform/guest_fixture.py")
+        .read_text()
+        .replace("class Handler(", "COMMAND = " + repr(command) + "\n\nclass Handler(")
     )
-    sb.write_file("/tmp/cancel_fixture.py", program.encode(), mode=0o644)
+    sb.write_file("/opt/agent-platform/cancel_fixture.py", program.encode(), mode=0o644)
     sb.spawn(
         "python3",
-        "/tmp/cancel_fixture.py",
-        user="agentprobe",
+        "-I",
+        "/opt/agent-platform/cancel_fixture.py",
+        user="agentcontrol",
+        cwd="/var/lib/agent-platform/control",
         env={"FIXTURE_RUN_ID": str(run["id"])},
     )
     sb.exec(

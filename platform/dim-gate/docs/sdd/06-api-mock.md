@@ -182,3 +182,10 @@ Scenario 必須可重現同一結果：capacity-exhausted 在指定 pool 建立�
 events 至少包含 eventId、entity refs、type、occurredAt、correlationId。scheduler 在 commit 失敗時不前進 stepIndex；若 quota 無法保存，暫停並提示，而非不斷重试寫入。
 
 未來接真實 backend 時保留 UI/DTO/query keys，替換 transport/bootstrap adapter；移除 persona headers、scenario endpoints、MSW 與 demo store，重新驗證授權、async reconciliation、partial failures 與 API 相容性。這是獨立後續里程碑，不能只改一個 base URL 宣稱完成。
+
+
+## W1 dashboard 擴充
+
+GET `/dashboard` 沿用原 counters/pendingItems/dataAsOf，新增 `workspace`（kind=rd/ops/admin discriminated union）與 `scope`（authorized project/environment/pool options及filters）。共同區塊為 title/total/items，最多20筆 canonical sourceType/sourceId/title/state/route/dataAsOf/detail；不持久化第二份工作狀態。RD services/work/deliveries、Ops incidents/failures/approvals/capacity/staleness、Admin drafts/integrations/accessChanges。完整 DTO／權限規則見 [W1 contract](../W1-INTEGRATION-CONTRACT.md) 與生成 OpenAPI。
+
+projectId/environmentId 先授權且相互匹配；Ops 新增 provider/poolId，其他中心傳這兩項回422。合法但無權或不匹配 scope 回空投影，不暴露實體存在／名稱／隱藏筆數。未知 keys/enums 回422。保留73個operations與全部原 command；僅擴充既有 dashboard read，Mock 共用原 handler/engine。

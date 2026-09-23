@@ -2,8 +2,9 @@ import type { z } from 'zod'
 import {
   ciViewSchema, commandReceiptSchema, createCiInputSchema, dashboardViewSchema, pageSchema, patchCiSchema,
 } from '../../domain/schemas'
-import type { Center, CIView, CommandReceipt, DashboardView, Page, Provider } from '../../domain/schemas'
+import type { Center, CIView, CommandReceipt, DashboardFilters, DashboardView, Page, Provider } from '../../domain/schemas'
 import type { ApiRequest } from '../core/request'
+export type { DashboardFilters } from '../../domain/schemas'
 
 export type CiListFilters = {
   provider?: Provider
@@ -21,7 +22,7 @@ export type CiListFilters = {
 export type CreateCiInput = z.infer<typeof createCiInputSchema>
 export type PatchCiInput = z.infer<typeof patchCiSchema>
 
-function queryString(filters: CiListFilters): string {
+function queryString(filters: CiListFilters | DashboardFilters & { center: Center }): string {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(filters).sort(([left], [right]) => left.localeCompare(right))) {
     if (value !== undefined && value !== '') query.set(key, String(value))
@@ -32,7 +33,7 @@ function queryString(filters: CiListFilters): string {
 
 export function createCmdbClient(request: ApiRequest) {
   return {
-    getDashboard: (center: Center): Promise<DashboardView> => request(`/dashboard?center=${encodeURIComponent(center)}`, dashboardViewSchema),
+    getDashboard: (center: Center, filters: DashboardFilters = {}): Promise<DashboardView> => request(`/dashboard${queryString({ ...filters, center })}`, dashboardViewSchema),
     listCis: (filters: CiListFilters = {}): Promise<Page<CIView>> => request(`/cis${queryString(filters)}`, pageSchema(ciViewSchema)),
     getCi: (ciId: string): Promise<CIView> => request(`/cis/${encodeURIComponent(ciId)}`, ciViewSchema),
     createCi: (input: CreateCiInput): Promise<CommandReceipt> => request('/cis', commandReceiptSchema, { method: 'POST', body: input }),

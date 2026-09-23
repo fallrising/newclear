@@ -9,35 +9,11 @@ import { Button } from '../../components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
 import { PageHeading } from '../../components/shared/page-heading'
 import { ErrorState, LoadingState } from '../../components/shared/states'
-import { InventorySummary } from '../cmdb'
 import { centerDetails } from './center-details'
 
 const GuideStory = lazy(() => import('./GuideStory').then(module => ({ default: module.GuideStory })))
 
-export function CenterOverview({ center, session }: { center: Center; session: SessionView }) {
-  const dashboard = useQuery({ queryKey: queryKey('dashboard', center), queryFn: () => api.getDashboard(center) })
-  const details = centerDetails[center]
-  return <>
-    <PageHeading eyebrow={`${details.short} WORKSPACE`} title={details.name} description={details.purpose} action={<Button asChild><Link to="/guide">探索示範<ArrowRight size={16} aria-hidden="true" /></Link></Button>} />
-    <div className="scope-summary"><Shield size={15} aria-hidden="true" /><span>依目前身分授權範圍顯示</span><strong>{session.user.displayName}</strong></div>
-    {dashboard.isPending ? <LoadingState /> : dashboard.isError ? <ErrorState error={dashboard.error} onRetry={() => void dashboard.refetch()} /> : <InventorySummary data={dashboard.data} refresh={() => void dashboard.refetch()} refreshing={dashboard.isFetching} />}
-    {dashboard.data && <section className="panel"><div className="panel-title"><h2>事件與待辦</h2><span className="tag">活動事件 {dashboard.data.activeIncidentCount}</span></div>{dashboard.data.pendingItems.length ? <ul>{dashboard.data.pendingItems.map(item => <li key={item.id}><Link to={item.route}>{item.title}</Link></li>)}</ul> : <p className="muted">目前範圍沒有待處理事件。</p>}</section>}
-    <div className="overview-secondary">
-      <section className="panel role-panel"><div className="panel-title"><details.icon size={20} aria-hidden="true" /><h2>你的工作區</h2></div><p className="role-name">{details.role}</p><p>{details.responsibility}</p><div className="subtle-note">切換示範身分會重新評估既有授權，不會授予額外權限。</div></section>
-      <section className="panel"><div className="panel-title"><Shield size={20} aria-hidden="true" /><h2>目前授權範圍</h2></div><ScopeAssignments session={session} /></section>
-    </div>
-    <FoundationNote />
-  </>
-}
-
-function ScopeAssignments({ session }: { session: SessionView }) {
-  if (!session.assignments.length) return <p className="muted">目前沒有授權範圍。可使用頁首的示範身分選單。</p>
-  return <ul className="scope-list">{session.assignments.map((assignment) => <li key={assignment.id}><span className="scope-kind">{assignment.scopeType === 'org' ? '企業' : assignment.scopeType === 'pool' ? '資源池' : '專案'}</span><div><code>{assignment.scopeId}</code>{assignment.stages && <span className="stage-list">{assignment.stages.join(' / ')}</span>}</div></li>)}</ul>
-}
-
-function FoundationNote() {
-  return <aside className="foundation-note"><span className="foundation-marker">M4</span><div><h2>共用資產與交付模型，同時服務 RD 與 Ops</h2><p>從共用資產與環境交付，追蹤發布、觀測證據、事件處理與回滾恢復；所有操作皆為示範。</p></div></aside>
-}
+export { WorkspaceHome as CenterOverview } from './WorkspaceHome'
 
 export function Guide({ session }: { session: SessionView }) {
   const cache = useQueryClient()

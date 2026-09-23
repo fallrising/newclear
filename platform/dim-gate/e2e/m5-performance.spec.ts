@@ -48,7 +48,7 @@ test('AC-27: five isolated cold LCP navigations and all necessary initial JS', a
     })
     try {
       await page.goto(baseURL!)
-      await expect(page.getByRole('heading', { name: '事件與待辦' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: '可見資源', exact: true })).toBeVisible()
       await page.waitForLoadState('networkidle')
       const workerUrls = await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations())
         .map(registration => registration.active?.scriptURL).filter((url): url is string => Boolean(url)))
@@ -103,7 +103,7 @@ test('AC-27: 100 real filtered and sorted engine reads of 5,000 CIs', async ({ b
 
 test('AC-27: 100 successful persisted safe HTTP commands including 150 ms mock latency', async ({ page, browser, baseURL }, testInfo) => {
   await page.goto(baseURL!)
-  await expect(page.getByRole('heading', { name: '事件與待辦' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '可見資源', exact: true })).toBeVisible()
   const result = await page.evaluate(async () => {
     type Saved = { personaId: string; snapshot: { sessionId: string; commandCount: number; logicalClock: number; storeRevision: number; audit: unknown[]; events: unknown[]; idempotency: unknown[] } }
     const read = () => JSON.parse(sessionStorage.getItem('dim-gate.demo.v1')!) as Saved

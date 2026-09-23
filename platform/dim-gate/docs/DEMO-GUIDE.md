@@ -71,3 +71,10 @@ pnpm test:isolation
 只需靜態host，HTTPS或localhost，配置`/dim-gate/*` browser-history fallback到此app的index.html，資產保留正確MIME。worker的URL和scope均為`/dim-gate/`。本輪僅驗證本地production serving，沒有部署網站。
 
 `VITE_DATA_MODE=live`顯示「尚未提供」，不會fallback到demo、註冊MSW或初始化demo存檔。真實SSO、雲資源、CI runner、APM collector、多使用者協同及正式backend授權皆需另立整合範圍。5,000CI只作唯讀效能profile，不能把它當作3MiB持久化session的支援容量。
+
+
+## W1 工作區體驗
+
+頁首「工作區」顯示 RD 業務研發、Ops 維運或 Admin 平台管理；它只列當前身分的合法入口，不更换 user。旁邊「Demo · 體驗其他角色」會更換示範身分並前往該角色首頁，同一分頁仍共用既有服務／資源／申請與發布紀錄。多角色體驗：Admin → 角色與範圍 → 為 Commerce RD 新增 Ops pool/project grant → 切回 Commerce RD → 在工作區 selector 切 RD/Ops；各 sidebar 分開、身份不變。無 grant 使用者仍可由 Demo 入口恢復探索。
+
+RD 首頁從服務健康與申請／發布下鑽；Ops 首頁從事件、失敗、待審與容量下鑽；Admin 首頁查看待發布目錄、整合與權限變更。首頁範圍可選專案／環境，Ops 加來源／資源池；返回與刷新保留 URL。沒有樣本為 unknown，時效與業務成功狀態分開。Redis／Kafka 新申請、配置灰度、告警規則及平台feature/route/channel仍依 W2–W5另行交付；目前不提供空白或假成功入口。

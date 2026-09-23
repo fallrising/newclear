@@ -257,9 +257,33 @@ export const sessionDomainSchema = z.strictObject({
 export const sessionViewSchema = sessionDomainSchema.extend({
   identityEpoch: z.number().int().nonnegative(), generation: z.number().int().nonnegative(), storageMode: z.enum(['session', 'memory']),
 })
+export const dashboardFiltersSchema = z.strictObject({
+  projectId: idSchema.optional(), environmentId: idSchema.optional(), provider: providerSchema.optional(), poolId: idSchema.optional(),
+})
+export const dashboardQuerySchema = dashboardFiltersSchema.extend({ center: centerSchema }).refine(
+  value => value.center === 'ops' || value.provider === undefined && value.poolId === undefined,
+  { message: 'Provider and pool filters are only supported in Ops', path: ['center'] },
+)
+export const workspaceHomeItemSchema = z.strictObject({
+  sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent']),
+  sourceId: idSchema, title: z.string(), state: z.string(), route: z.string().startsWith('/'), dataAsOf: timestampSchema, detail: z.string(),
+})
+export const workspaceHomeSectionSchema = z.strictObject({ title: z.string(), total: z.number().int().nonnegative(), items: z.array(workspaceHomeItemSchema).max(20) })
+export const workspaceHomeSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('rd'), services: workspaceHomeSectionSchema, work: workspaceHomeSectionSchema, deliveries: workspaceHomeSectionSchema }),
+  z.strictObject({ kind: z.literal('ops'), incidents: workspaceHomeSectionSchema, failures: workspaceHomeSectionSchema,
+    approvals: workspaceHomeSectionSchema, capacity: workspaceHomeSectionSchema, staleness: workspaceHomeSectionSchema }),
+  z.strictObject({ kind: z.literal('admin'), drafts: workspaceHomeSectionSchema, integrations: workspaceHomeSectionSchema, accessChanges: workspaceHomeSectionSchema }),
+])
+export const dashboardScopeSchema = z.strictObject({
+  projects: z.array(z.strictObject({ id: idSchema, name: nameSchema })),
+  environments: z.array(z.strictObject({ id: idSchema, name: nameSchema, applicationId: idSchema })),
+  pools: z.array(z.strictObject({ id: idSchema, name: nameSchema, provider: providerSchema })), filters: dashboardFiltersSchema,
+})
 export const dashboardViewSchema = z.strictObject({
   center: centerSchema, title: z.string(), applicationCount: z.number().int().nonnegative(), environmentCount: z.number().int().nonnegative(),
   activeIncidentCount: z.number().int().nonnegative(), pendingItems: z.array(notificationSchema),
+  scope: dashboardScopeSchema, workspace: workspaceHomeSchema,
   ciCount: z.number().int().nonnegative(), providers: z.array(z.strictObject({ provider: providerSchema, count: z.number().int().nonnegative() })), dataAsOf: timestampSchema,
 })
 export const guideViewSchema = z.strictObject({
@@ -359,6 +383,10 @@ export type Persona = z.infer<typeof personaSchema>
 export type SessionView = z.infer<typeof sessionViewSchema>
 export type SessionDomain = z.infer<typeof sessionDomainSchema>
 export type DashboardView = z.infer<typeof dashboardViewSchema>
+export type DashboardFilters = z.infer<typeof dashboardFiltersSchema>
+export type WorkspaceHome = z.infer<typeof workspaceHomeSchema>
+export type WorkspaceHomeItem = z.infer<typeof workspaceHomeItemSchema>
+export type WorkspaceHomeSection = z.infer<typeof workspaceHomeSectionSchema>
 export type GuideView = z.infer<typeof guideViewSchema>
 export type CommandReceipt = z.infer<typeof commandReceiptSchema>
 export type CommandInput = z.infer<typeof commandInputSchema>

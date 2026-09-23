@@ -152,6 +152,9 @@ test('AC-21: union-of-grants navigation and a captured metadata mutation fail cl
   await expect(page.getByRole('row', { name: /user-rd-commerce.*Ops.*project.*project-store/ })).toBeVisible()
   await become(page, 'user-rd-commerce')
   await expect(page.getByRole('link', { name: '應用與環境', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'CMDB', exact: true })).toHaveCount(0)
+  await page.getByRole('combobox', { name: '工作區', exact: true }).selectOption('ops')
+  await expect(page.getByRole('link', { name: '應用與環境', exact: true })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'CMDB', exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: '交付審批', exact: true })).toBeVisible()
 

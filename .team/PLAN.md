@@ -655,3 +655,27 @@ remote_durability: local contract/task checkpoint; SSH push and draft PR next
 blockers: []
 next_action: implement scoped dashboard and independent workspace/persona UI, validate all W1 gates and fixed review, then latest PR-head CI and authorized merge before W2
 ```
+
+DG-D044: W1 contract revision2 clarifies legacy action-specific Ops scope: Request approval retains project/pool intersection; Release approval and Incident work retain project/stage-only grants. Lead early diff review corrected an overbroad pool filter before acceptance; no AC or baseline policy reduced. Product work is in progress, PR33 draft; local Shell lint/architecture/docs pass, browser/fixed-review still pending.
+
+DG-D045: T-030 handed back eight owned product files and report; worker released ownership without commits/push. Lead integrated UI/domain, corrected navigation lookup typing, and verified240 tests, typecheck and demo build on working diff. Full immutable gates/review remain pending; no ACCEPT. PR33 draft at initial02a8b9a has successful CI35823661263. This implementation checkpoint is SSH-pushed next; exact source ref is its containing commit.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 45
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+implementation_commit: containing checkpoint; resolve via git
+local_tested_commit: working diff preliminary only; fixed gates next
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision2
+evidence_refs: [.team/reports/T-030-attempt-1.md, .team/reports/T-031-attempt-1.md]
+integration_state: OPEN — PR33 draft
+remote_durability: initial02a8b9a saved; containing implementation checkpoint SSH-pushed next
+blockers: []
+next_action: finish W1 browser tests; run fixed candidate native/full browser/smoke/benchmark/isolation gates and T-032 review; latest-head CI before authorized merge then W2
+```

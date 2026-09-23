@@ -1,6 +1,6 @@
 # dim-gate 狀態
 
-更新：2026-09-22。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
+更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
@@ -91,3 +91,6 @@ T-029 文件已由主控在 `deeffb0bd9fd6a1f2c975be51d87a873090df540` 接受；
 ## W1 接手（2026-09-23）
 
 PR31 已合併於73d4829，合併後 CI35745274207成功，前一run ownership已釋放。最新 main7a7b41b 未改 dim-gate。W1–W5尚無產品驗收，從W1開始；[W1 contract](W1-INTEGRATION-CONTRACT.md)及[PLAN](../../../.team/PLAN.md)保存本輪DG-W1-20260923-01、T-030～032、owner及恢復步驟。隔離branch `agent/dim-gate/mainline/w1-workspaces`，worktree `newclear-dim-gate-w1`；原38個worktrees與預覽保留。当前仅契約與任務固定，尚未實作或驗證W1。
+
+
+W1 實作 checkpoint：獨立工作區／Demo 身分、分組側欄、三角色共用 API 首頁、URL scope 及 canonical 下鑽已整合。初步240 tests、typecheck與demo build通過；瀏覽器、固定commit完整gates、效能及T-032獨立review尚待完成，**未驗收**。[PR33](https://github.com/fallrising/newclear/pull/33)沿用既有draft；初始文件head02a8b9a的CI35823661263通過，不能當作產品CI。詳見[T-031](../../../.team/reports/T-031.md)與PLAN最新resume。W2–W5尚未實作。

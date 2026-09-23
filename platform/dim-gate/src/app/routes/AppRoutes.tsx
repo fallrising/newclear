@@ -9,7 +9,6 @@ import { CenterLayout } from '../layouts/CenterLayout'
 
 const AccessPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AccessPage })))
 const AdminCatalogPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AdminCatalogPage })))
-const AdminOverviewLinks = lazy(() => import('../../features/admin').then(module => ({ default: module.AdminOverviewLinks })))
 const AuditPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AuditPage })))
 const ModelsPage = lazy(() => import('../../features/admin').then(module => ({ default: module.ModelsPage })))
 const NavigationPage = lazy(() => import('../../features/admin').then(module => ({ default: module.NavigationPage })))
@@ -54,7 +53,7 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/ops/capacity" element={<CenterLayout routeKey="ops.capacity" center="ops" session={session}><CapacityPage /></CenterLayout>} />
     <Route path="/ops/releases" element={<CenterLayout routeKey="ops.releases" center="ops" session={session}><ReleaseListPage session={session} /></CenterLayout>} />
     <Route path="/ops/releases/:releaseId" element={<CenterLayout routeKey="ops.release-detail" center="ops" session={session}><ReleaseDetailPage session={session} center="ops" /></CenterLayout>} />
-    <Route path="/admin" element={<CenterLayout routeKey="admin.overview" center="admin" session={session}><><CenterOverview key={`${session.identityEpoch}:admin`} center="admin" session={session} /><AdminOverviewLinks /></></CenterLayout>} />
+    <Route path="/admin" element={<CenterLayout routeKey="admin.overview" center="admin" session={session}><CenterOverview key={`${session.identityEpoch}:admin`} center="admin" session={session} /></CenterLayout>} />
     <Route path="/admin/access" element={<CenterLayout routeKey="admin.access" center="admin" session={session}><AccessPage session={session} /></CenterLayout>} />
     <Route path="/admin/navigation" element={<CenterLayout routeKey="admin.navigation" center="admin" session={session}><NavigationPage /></CenterLayout>} />
     <Route path="/admin/catalog" element={<CenterLayout routeKey="admin.catalog" center="admin" session={session}><AdminCatalogPage /></CenterLayout>} />

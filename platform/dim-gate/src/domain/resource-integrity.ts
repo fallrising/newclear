@@ -1,5 +1,5 @@
 import { resourceAccessProfiles, type Snapshot } from './schemas'
-import { resourceConflictKey } from './resources'
+import { resourceConflictKey } from './resource-identity'
 import { resourceUsage } from './resource-capacity'
 
 /** Cross-entity validation covers persisted resources, frozen proposals and the shared scheduler. */

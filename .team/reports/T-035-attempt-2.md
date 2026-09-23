@@ -19,3 +19,14 @@ PLAN DG-D060–062 records concrete findings and unchangedgates. UI fixes now re
 ## Risks and Follow-ups
 
 W2 remains unaccepted/unmerged. Keep originalfailures, no health exclusions, gatebudget increase or directstorebusinesssetup. Copy onlyfinalT033/T034owned handbacks withSHA checks; measurefreshfixedinitialJS andrunallnative/browser/smoke/isolation/regression. CompleteACmatrix before T036uninvolvedreview. RequirelatestPR36headCI green andmain/headreconciliation before authorizedmerge. Thenverifyactualmerge/tree/postmergeCI,releaseW2owner,andstartW3.
+
+
+- Fixed0ab838a affected production Chromium20/20 (4.0min), originalM1/M2plusall5initialW2journeys; logfile /tmp/dim-gate-w2-evidence/0ab838a-browser.log and test-results-w2-0ab838a — passed
+- ExactT033attempt2sevenfile+reportSHAverification; originalfixedW1fixtureSHA remains55c21bb3…1abc6; newmigrationbrowsertypecheck/lint — passed
+
+Latestcheckpoint integrateslazycommandcorrection andnewupgradebrowsercase. Worker evidence is explicitly candidate+hashes, not a claimed leadfixedpass. Leadcombined314unit/performance/fullbrowser/review/CI remainnext.
+
+
+- Leadcombinedlazy implementation: frozenofflineinstall,lint,typecheck,314/314unit29files,docs168Markdown394links,contracts91ops209schemas,CI,architecture andfreshdemobuild — passed
+
+Fixedsource is containingcheckpoint (parent0ab838a); next actualcombinedbenchmark andgenuineW1migrationbrowser; entireChromium/smoke/isolation/finalreview/CI stillpending.

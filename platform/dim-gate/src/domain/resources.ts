@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { DomainError } from './errors'
 import { observationTime } from './observation'
 import { resourcePolicy } from './resource-policy'
+import { resourceConflictKey } from './resource-identity'
 import { resourceDemand, resourceUsage } from './resource-capacity'
 import type { Policy } from './policy'
 import {
@@ -88,11 +89,7 @@ function validateSpec(s: Snapshot, input: ChangeInput): CatalogItem {
   if (!s.entities.resourceQuotas.some(q => q.parentCiId === ci.id)) return fail(422, 'VALIDATION_ERROR', 'parent 尚未設定資源配額。')
   return catalog
 }
-export function resourceConflictKey(input: ChangeInput) {
-  if (input.kind === 'kafka.topic.create') return JSON.stringify([input.targetCiId, 'kafka_topic', input.namespace ?? '', input.topicName.toLowerCase()])
-  if (input.kind === 'resource.resize') return `object:${input.resourceObjectId}`
-  return input.mode === 'existing' ? JSON.stringify([input.environmentId, input.resourceObjectId, input.purpose]) : undefined
-}
+
 function checkDuplicates(s: Snapshot, change: ChangeRequest) {
   const input = change.specSnapshot ?? change.spec
   if (input.kind === 'kafka.topic.create' && s.entities.resourceObjects.some(o => o.parentCiId === input.targetCiId && o.kind === 'kafka_topic' && (o.namespace ?? '') === (input.namespace ?? '') && o.externalRef === input.topicName.toLowerCase())) conflict('DUPLICATE_RESOURCE', '此 parent 與 namespace 已有相同 topic identity。')

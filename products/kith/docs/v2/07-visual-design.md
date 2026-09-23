@@ -295,6 +295,10 @@ Tailwind 4 的預設色已在 `index.css` 以 `--color-*: initial` 移除；`[..
 | 訊息進場動效（§6） | `--animate-message-in` | `animate-message-in` |
 | 手機底部 safe area | `index.css` 的 `.pb-safe` | `pb-safe` |
 
+| 對話框遮罩 | `--ink` 加不透明度修飾 | `bg-ink/40` |
+| Radix 狀態變體 | `data-highlighted` 等 Radix data 屬性 | `data-[highlighted]:bg-surface-2`（Radix 規定的屬性名，不是任意值） |
+| 選單最小寬、控制台導覽寬 | Tailwind 預設 spacing | `min-w-48`（192px）、`md:w-52`（208px） |
+
 `style` 屬性只允許兩種用途：時間線容器的 `overflowAnchor: "none"`，以及虛擬捲動 item 的定位（`position`、`transform`、容器 `height`）。其他一律用 class（W1 §5.6.2）。
 
 

@@ -82,12 +82,18 @@ function limitSentence(member: Member, viewerIsOperator: boolean): string | null
   return null;
 }
 
-function memberAccessibleName(member: Member, viewerIsOperator: boolean): string {
+function isYou(member: Member, selfHandle: string): boolean {
+  return selfHandle.length > 0 && member.handle?.toLowerCase() === selfHandle.toLowerCase();
+}
+
+function memberAccessibleName(member: Member, viewerIsOperator: boolean, selfHandle: string): string {
   const name = member.display_name || member.handle || member.id;
   const handle = member.handle ? `@${member.handle}` : "";
   const kind = member.kind === "agent" ? "agent" : "human";
+  const badge = !viewerIsOperator && isOperatorOnly(member) ? "operator-only" : "";
+  const you = isYou(member, selfHandle) ? "you" : "";
   const limit = limitSentence(member, viewerIsOperator);
-  return [name, handle, kind, limit].filter(Boolean).join(", ");
+  return [name, handle, kind, badge, you, limit].filter(Boolean).join(", ");
 }
 
 function composerCapPx(el: HTMLTextAreaElement): number {
@@ -119,12 +125,14 @@ export function RoomPage({
   onLoggedOut,
   operator = false,
   showBack = true,
+  selfHandle = "",
 }: {
   room: Room;
   onBack: () => void;
   onLoggedOut: () => void;
   operator?: boolean;
   showBack?: boolean;
+  selfHandle?: string;
 }) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [members, setMembers] = useState<Map<string, Member>>(new Map());
@@ -649,27 +657,31 @@ export function RoomPage({
 
   return (
     <main className="page page-room">
-      <div className="row">
+      <header className="room-head">
         {showBack ? (
           <button type="button" className="btn-back" onClick={onBack} aria-label="Back to rooms">
             <span className="chev" aria-hidden="true" />
             Rooms
           </button>
-        ) : (
-          <span />
-        )}
-        <div className="title-block">
-          <h1 className="grow">{title}</h1>
-          <span
-            className={link === "live" ? "conn conn-live" : link === "offline" ? "conn conn-offline" : "conn"}
-            role="status"
-          >
-            {linkLabel}
-          </span>
-        </div>
-        <span />
-      </div>
-      <div className="room-tools">
+        ) : null}
+        <h1>{title}</h1>
+        <span
+          className={link === "live" ? "conn conn-live" : link === "offline" ? "conn conn-offline" : "conn"}
+          role="status"
+        >
+          {linkLabel}
+        </span>
+        <span className="conn-note">your connection</span>
+        {operator ? (
+          <button type="button" className="btn-quiet room-invite" onClick={() => setInviteOpen(true)}>
+            Invite
+          </button>
+        ) : null}
+      </header>
+      <div className="members-bar">
+        <span className="members-label" aria-hidden="true">
+          Members
+        </span>
         <div
           className="member-strip"
           role="list"
@@ -687,22 +699,25 @@ export function RoomPage({
           {membersLoading && members.size === 0 ? <p className="muted">Loading members…</p> : null}
           {[...members.values()].map((member) => {
             const limit = limitSentence(member, operator);
+            const label = member.handle ? `@${member.handle}` : member.display_name || member.id;
             return (
-              <span key={member.id} className={member.kind === "agent" ? "member-chip agent" : "member-chip"} role="listitem">
-                <span className="member-name">{member.display_name || member.handle || member.id}</span>
-                {member.handle ? <span className="member-handle">@{member.handle}</span> : null}
-                <MemberBadges member={member} viewerIsOperator={operator} />
+              <span
+                key={member.id}
+                className={member.kind === "agent" ? "member-chip agent" : "member-chip"}
+                role="listitem"
+                aria-label={memberAccessibleName(member, operator, selfHandle)}
+              >
+                <span className="member-top">
+                  <span className="member-handle">{label}</span>
+                  {member.kind === "agent" ? null : <span className="member-kind">human</span>}
+                  <MemberBadges member={member} viewerIsOperator={operator} />
+                  {isYou(member, selfHandle) ? <span className="member-you">you</span> : null}
+                </span>
                 {limit ? <span className="member-limit">{limit}</span> : null}
-                <span className="sr-only">{memberAccessibleName(member, operator)}</span>
               </span>
             );
           })}
         </div>
-        {operator ? (
-          <button type="button" className="btn-quiet" onClick={() => setInviteOpen(true)}>
-            Invite
-          </button>
-        ) : null}
       </div>
       {membersError ? (
         <p className="error" role="alert">
@@ -749,26 +764,36 @@ export function RoomPage({
               </p>
             );
           }
+          const who = senderLabel(event, members);
+          const mine = member ? isYou(member, selfHandle) : false;
+          const agent = member?.kind === "agent";
           return (
             <article
               key={event.seq}
-              className={cont ? "event cont" : "event"}
+              className={["event", cont ? "cont" : "", agent ? "event-agent" : "", mine ? "event-me" : ""]
+                .filter(Boolean)
+                .join(" ")}
               data-kind={member?.kind}
               title={`seq ${event.seq}`}
             >
-              {cont ? (
-                <span className="sr-only">{senderLabel(event, members)}: </span>
-              ) : (
-                <div className="meta">
-                  <span className="who">{senderLabel(event, members)}</span>
-                  {clock ? <time dateTime={event.created_at}>{clock}</time> : null}
-                  {member ? <MemberBadges member={member} viewerIsOperator={operator} /> : null}
-                  <span className="seq" aria-hidden="true">
-                    {event.seq}
-                  </span>
-                </div>
-              )}
-              <p className="body">{event.body}</p>
+              <span className="avatar" aria-hidden="true">
+                {cont ? "" : who.slice(0, 1).toUpperCase()}
+              </span>
+              <div className="event-main">
+                {cont ? (
+                  <span className="sr-only">{who}: </span>
+                ) : (
+                  <div className="meta">
+                    <span className="who">{who}</span>
+                    {clock ? <time dateTime={event.created_at}>{clock}</time> : null}
+                    {member ? <MemberBadges member={member} viewerIsOperator={operator} /> : null}
+                    <span className="seq" aria-hidden="true">
+                      {event.seq}
+                    </span>
+                  </div>
+                )}
+                <p className="body">{event.body}</p>
+              </div>
             </article>
           );
         })}
@@ -803,10 +828,18 @@ export function RoomPage({
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => chooseMention(index)}
                 >
-                  <span>{member.display_name || member.handle}</span>
-                  {member.handle ? <span>@{member.handle}</span> : null}
+                  <span className="member-handle">
+                    {member.handle ? `@${member.handle}` : member.display_name || member.id}
+                  </span>
+                  {member.kind === "agent" ? null : <span className="member-kind">human</span>}
                   <MemberBadges member={member} viewerIsOperator={operator} />
+                  {isYou(member, selfHandle) ? <span className="member-you">you</span> : null}
                   {limitSentence(member, operator) ? <span>{limitSentence(member, operator)}</span> : null}
+                  {index === mentionIndex ? (
+                    <span className="mention-mark" aria-hidden="true">
+                      ↩
+                    </span>
+                  ) : null}
                 </button>
               </li>
             ))}
@@ -858,6 +891,7 @@ export function RoomPage({
             }}
           >
             <h2 id="invite-title">Invite to {title}</h2>
+            <p className="invite-lead">Accounts are created ahead of time. You add one to this room by its handle.</p>
             <form onSubmit={(event) => void onInvite(event)}>
               <label>
                 Handle
@@ -874,6 +908,11 @@ export function RoomPage({
                 />
               </label>
               <p className="muted">Enter the handle of an existing person or agent.</p>
+              <div className="invite-after">
+                <p className="kicker">After you invite</p>
+                <p>A person has to refresh before this room appears in their list.</p>
+                <p>An agent shows up in Members as soon as the list reloads.</p>
+              </div>
               {inviteError ? (
                 <p className="error" role="alert">
                   {inviteError}

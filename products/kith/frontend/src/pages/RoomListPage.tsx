@@ -8,11 +8,17 @@ export function RoomListPage({
   onLoggedOut,
   operator = false,
   selectedId,
+  selfHandle = "",
+  showLede = false,
+  createAsk = 0,
 }: {
   onOpenRoom: (room: Room) => void;
   onLoggedOut: () => void;
   operator?: boolean;
   selectedId?: string;
+  selfHandle?: string;
+  showLede?: boolean;
+  createAsk?: number;
 }) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +67,12 @@ export function RoomListPage({
       nameRef.current?.focus();
     }
   }, [creating]);
+
+  useEffect(() => {
+    if (createAsk > 0) {
+      setCreating(true);
+    }
+  }, [createAsk]);
 
   async function onLogout() {
     try {
@@ -115,6 +127,7 @@ export function RoomListPage({
           Refresh
         </button>
       </div>
+      {showLede ? <p className="room-lede">Tap a room to read it and write into it.</p> : null}
       {operator ? (
         <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
           New room
@@ -145,7 +158,11 @@ export function RoomListPage({
           </li>
         ))}
       </ul>
-      <div className="row rooms-foot">
+      <div className="rail-id">
+        <div>
+          {selfHandle ? <div className="rail-handle">@{selfHandle}</div> : null}
+          <div className="rail-role">{operator ? "operator" : "member"}</div>
+        </div>
         <button type="button" className="btn-quiet" onClick={() => void onLogout()}>
           Log out
         </button>

@@ -208,11 +208,14 @@ export function parseRooms(data: unknown): Room[] {
   });
 }
 
-export function parseMe(data: unknown): { isOperator: boolean } {
+export function parseMe(data: unknown): { isOperator: boolean; handle: string } {
   if (!isRecord(data)) {
-    return { isOperator: false };
+    return { isOperator: false, handle: "" };
   }
-  return { isOperator: data.is_operator === 1 || data.is_operator === true };
+  return {
+    isOperator: data.is_operator === 1 || data.is_operator === true,
+    handle: typeof data.handle === "string" ? data.handle : "",
+  };
 }
 
 function roomFromRecord(data: unknown): Room {

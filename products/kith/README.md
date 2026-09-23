@@ -27,7 +27,8 @@
 | [驗證](docs/sdd/06-verification.md) | requirement → test ID、fake LLM/Codex、canary secrets |
 | [決策與來源](docs/sdd/08-decisions-sources.md) | EdgeChat GPL、ADR-0002、MCP、xAI、Cloudflare limits |
 | [人跟人聊天 UI](docs/sdd/09-human-chat-ui.md) | 開房、以 handle 邀請、桌面並排／窄螢幕先列表、輸入列 |
-| [成員與提及](docs/sdd/10-members-and-mention.md) | 常駐成員列、`@` 本房成員、agent 限制與回覆狀態 |
+| [成員與提及](docs/sdd/10-members-and-mention.md) | 常駐成員列、`@` 本房成員、agent 限制與回覆狀態（畫面由 11 取代） |
+| [房間畫面](docs/sdd/11-room-screen.md) | 取代 09／10 的畫面契約：深色選房 rail、暖白對話、人與 agent 成員卡、桌面／窄螢幕與 UI-11 驗收 |
 
 ## Bootstrap 食譜（第一個 owner + 第一個房間）
 

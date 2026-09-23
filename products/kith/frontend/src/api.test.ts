@@ -70,9 +70,10 @@ describe("login", () => {
 });
 
 describe("rooms mutations", () => {
-  it("parseMe reads is_operator", () => {
-    expect(parseMe({ is_operator: 1 }).isOperator).toBe(true);
+  it("parseMe reads is_operator and handle", () => {
+    expect(parseMe({ is_operator: 1, handle: "owner" })).toEqual({ isOperator: true, handle: "owner" });
     expect(parseMe({ is_operator: 0 }).isOperator).toBe(false);
+    expect(parseMe({ is_operator: 0 }).handle).toBe("");
   });
 
   it("createRoom and inviteHuman post CSRF JSON", async () => {

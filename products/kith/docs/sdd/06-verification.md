@@ -63,7 +63,7 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 
 ### 畫面 10：成員與提及
 
-契約：[10](10-members-and-mention.md)。
+契約：[10](10-members-and-mention.md)。UI-10 列與舊驗收保留；畫面斷言改看 [11](11-room-screen.md) 及下列 UI-11 對照。10 仍有效的協定斷言（`reply_limit`、邀請 body、status 生命週期）不刪除、不放寬。
 
 | ID | Given / When | Then |
 | --- | --- | --- |
@@ -73,6 +73,33 @@ Fake LLM 與 fake Codex executable 是正確性證明的預設；live xAI / 真 
 | UI-10-04 | `reply_limit.fixed_text` 為 `hello from grok`；送出 `@grok` | 事前可見固定句；只有 hosted 的 `is replying` 且對得出 handle 才顯示回覆中；訊息落盤才進時間線；status 無 seq |
 | UI-10-05 | 非 operator 對 `operator_personal`；或 operator 看到 `sidecar_off` | badge 或未啟用句可見；文字落盤；該次不自畫回覆中；房內真實回覆狀態仍顯示 |
 | UI-10-06 | 成員 GET 失敗，或回覆狀態結束／過期／斷線／切房 | 同房失敗保留上一筆成功名單並可 Retry；不沿用上一房；過期不宣稱完成；離線保留草稿 |
+
+### 畫面 11：房間畫面
+
+契約：[11](11-room-screen.md)。對應 M1／M2 房間與成員、M4／M5 既有限制呈現（FR-01/02/03/06/07/09，INV-11/13/17）。前端已依本章改畫面。自動化覆蓋了 UI-11-02 的窄列表提示、UI-11-03 的未選房說明、UI-11-04／05 的成員卡與限制句、UI-11-07 的 `your connection`、UI-11-12 的邀請說明；其餘 UI-11 列仍是契約，不把沒有獨立測試的列說成已逐條執行。不變更既有 milestone 狀態。每列對應 11 的同 ID 給定／當／則；前端用受控 HTTP／WS fixture、fake clock、viewport 與觸控設定，伺服器證據仍沿用 UI-10 與相關 integration IDs。
+
+| ID | Given / When | Then |
+| --- | --- | --- |
+| UI-11-01 | 1280×800 與 768px；operator 未選房、切房 | 左 280px 深色 rail 常駐、右欄層級固定；選取可辨；房間按鈕名稱等於房名；無返回／第三欄 |
+| UI-11-02 | 390×844 與 767px；guest 列表、進房、返回、重新整理 | 先列表後整頁聊天；窄列表提示逐字相符；返回名稱 Back to rooms；網址無 room id；無 operator 動作 |
+| UI-11-03 | 桌面未選房；operator 與 guest | Select a room.、導言與三步逐字相符；右欄 New room 若有則與 rail 同動作；窄螢幕無此右欄 |
+| UI-11-04 | 人類與 agent；me 分別是 owner／guest | Members 可見、卡片兩行、agent 文字 badge、只自己有 you；無成員點／未讀；無障礙名完整 |
+| UI-11-05 | fixed／sidecar_off／null／缺漏與 personal；兩種觀看者 | 卡片與候選遵守限制優先序，fixed 與 operator-only 可並存；不依 handle／旗標猜能力 |
+| UI-11-06 | 390px 四人與 32 人、長限制句；觸控或鍵盤橫捲 | 不換行、不增高；operator-only 同列可捲到；省略句無障礙全文保留、端點不被遮住 |
+| UI-11-07 | live → connecting → offline | your connection 常駐；6px 點只屬自己的 pill 且跟隨狀態文字色；成員卡無 presence；草稿保留 |
+| UI-11-08 | 人類／agent 訊息 fixture | 頭像形狀、agent badge 與左條可辨；純文字與換行保留；不插入示例或假系統訊息 |
+| UI-11-09 | 本房四人、房外帳號；空／非空 @ 前綴 | 只列本房、依 filterMentionHandles 排序與重設選取；候選限制同卡片；無匹配不開清單 |
+| UI-11-10 | 清單開啟；鍵盤、點按、IME、offline／切房 | 替換前綴且不送出；焦點與 ARIA 正確；外框與 ↩ 可辨；換行／關閉／清候選符合 11 |
+| UI-11-11 | 觸控與非觸控、草稿、連線組合 | Message／Send 與兩句提示不變；Enter／IME、停用條件正確；最多 40dvh、底部 safe-area |
+| UI-11-12 | operator 有既有人類邀請 notice；再開 Invite | 導言、Handle 說明、After you invite 兩句逐字相符；背景 notice 留著；焦點正確；無新事件 |
+| UI-11-13 | 邀請 human／agent；成功、已入房、404／409／403、POST 成功後 GET 失敗 | body 僅 handle；GET 確認前不畫新人；成功／錯誤文案正確；只重試 GET、保留同房名單 |
+| UI-11-14 | 送 mention 後注入可／不可對照的 hosted status | 不自畫回覆中；僅有效映射顯示 handle；共用單行 role=status；personal mention 不偽造狀態 |
+| UI-11-15 | 兩 agent 狀態、訊息／結束、fake clock 4s／>300s、斷線／切房 | 各自清除、補上仍有效者；aria-live 結束不重報；typing 與 replying 計時不同；無效時不佔高 |
+| UI-11-16 | 首次／同房／切房 GET pending、失敗、Retry、遲到回應 | Loading／錯誤與 Retry 正確；不混房、不把失敗畫成空房；只重試 GET、失敗無候選 |
+| UI-11-17 | 六圖 fixture 與登入；檢查樣式、文字、無障礙樹 | 色票、字型、對比、焦點與鎖字符合 11；無毛玻璃、圖片、遠端字型、新框架或多加說明 |
+| UI-11-18 | operator／guest、空列表；開房、Refresh、Log out | 既有權限與動作不變；Design 產生 design slug、409 不重試；桌面重新整理回未選房 |
+
+UI-10 畫面對照：01 → UI-11-04/06/07/16；02 → UI-11-09/10/11；03 → UI-11-12/13；04 → UI-11-05/08/14/15；05 → UI-11-05/14；06 → UI-11-07/15/16。D1 INSERT 成功但 broadcast 前 crash 仍由 ST-D1-01 驗證；非 operator mention operator_personal 的完整落盤與拒絕啟動序列仍由 M4-US-04b、SEC-013-hosted、SEC-013 驗證。本次未執行這些故障或整合測試，不以 UI 文件取代其證據。
 
 ### M2 agent／token：FR-02，US-02
 

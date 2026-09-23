@@ -68,12 +68,16 @@ describe("App shell", () => {
     render(<App />);
     expect(await screen.findByRole("button", { name: "Lobby" })).toBeTruthy();
     expect(screen.getByText("Select a room.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "New room" })).toBeTruthy();
+    expect(screen.getByText("A room is one conversation. People and agents are members of it the same way.")).toBeTruthy();
+    expect(screen.getByText("Type @ to mention a room member. A mention is talking to one member. It is not a promise that they reply.")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "New room" })).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "Lobby" }));
     expect(await screen.findByPlaceholderText("Message")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Lobby" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Back to rooms" })).toBeNull();
     expect(screen.getByText("live")).toBeTruthy();
+    expect(screen.getByText("your connection")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "New room" })).toHaveLength(1);
   });
 
   it("opens a room over the list on a narrow viewport", async () => {
@@ -83,6 +87,7 @@ describe("App shell", () => {
     expect(await screen.findByRole("button", { name: "Lobby" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "New room" })).toBeNull();
     expect(screen.queryByText("Select a room.")).toBeNull();
+    expect(screen.getByText("Tap a room to read it and write into it.")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Lobby" }));
     expect(await screen.findByPlaceholderText("Message")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Lobby" })).toBeNull();
@@ -183,7 +188,7 @@ describe("App shell", () => {
     fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "owner" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "pw" } });
     fireEvent.submit(screen.getByRole("button", { name: "Sign in" }).closest("form")!);
-    fireEvent.click(await screen.findByRole("button", { name: "New room" }));
+    fireEvent.click((await screen.findAllByRole("button", { name: "New room" }))[0]!);
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Design" } });
     fireEvent.submit(screen.getByRole("button", { name: "Create" }).closest("form")!);
     expect(await screen.findByRole("heading", { name: "Design" })).toBeTruthy();

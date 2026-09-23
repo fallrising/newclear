@@ -48,12 +48,14 @@ products/kith/web/
       profile/            # 自己的顯示名、密碼
     ui/                   # 無業務的元件：Avatar、Button、Badge、Sheet、EmptyState…
     markdown/             # markdown-it 設定與 React 轉換
-    copy/                 # 所有使用者可見字串（zh-TW 為預設，en 選配）
+    copy/                 # 所有使用者可見字串：zh-TW.ts、en.ts（兩者 key 集合必須相同）
     styles/               # tokens.css、tailwind 設定
 products/kith/e2e/        # Playwright，見 08
 ```
 
 **FE-03** `features/*` 之間不互相 import 內部檔案；共用的放 `ui/`、`api/`、`store/`。
+
+**FE-05** 介面雙語：繁體中文（`zh-TW`）與英文（`en`），使用者 2026-09-23 決定。預設語言依 `navigator.language`（`zh*` → `zh-TW`，其他 → `en`），使用者可在設定切換並存在 `localStorage`。兩份字串表的 key 集合必須完全相同，缺 key 視為建置錯誤（型別層檢查：`en` 以 `satisfies Record<keyof typeof zhTW, string>` 定義）。日期與相對時間用 `Intl`，依語言格式化。伺服器錯誤碼在前端映射成兩種語言，不顯示伺服器 `message` 原文。
 
 **FE-04** 所有可見字串經 `copy/`，E2E 以 `data-testid` 與角色定位，不以文案定位（文案可改，測試不碎）。例外：文案本身是驗收對象時。
 
@@ -168,7 +170,7 @@ idle → loading_latest → connecting → live
 
 - [ ] 每個 feature 的元件樹、props 型別、資料來源與 `data-testid` 清單。
 - [ ] RoomSync 的完整型別定義與每個 FM 的對應處理程式段落描述。
-- [ ] `copy/zh-TW.ts` 完整文案表（Q-02 決定是否雙語）。
+- [ ] `copy/zh-TW.ts`、`copy/en.ts` 完整文案表（FE-05）。
 - [ ] Tailwind 設定與 token 對應表。
 - [ ] CSP 最終版與 Worker 設定方式。
 - [ ] 套件精確版本鎖定。

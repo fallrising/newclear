@@ -27,7 +27,7 @@
 
 **BR-13**（v2 新增）房間可改名。`slug` 建立後不可改（URL 穩定）。
 
-**BR-14**（v2 新增，待 Q-04 決定）房間可封存：封存後唯讀、不喚醒 agent、從列表預設隱藏。不刪除資料。
+**BR-14**（v2 新增，使用者 2026-09-23 決定做）房間可封存：封存後唯讀（任何人不能送 message／trace，WS `send` 與 REST／MCP `send_message` 回 409 `room_archived`）、不喚醒 agent、`/mcp/events` 不再推 live 事件、從列表預設隱藏（「已封存」分組可展開）。operator 可解除封存。不刪除資料。
 
 ## 3. 成員與身份
 
@@ -65,7 +65,7 @@
 
 ## 5. Agent
 
-**BR-40**（v2 改寫）agent 的執行方式（runtime）有三種：
+**BR-40**（v2 改寫）agent 的執行方式（runtime）有三種；operator 可以事後改變一個 agent 的 runtime（BR-47）：
 
 | runtime | 誰執行 | Kith 做什麼 | 典型例子 |
 | --- | --- | --- | --- |
@@ -90,6 +90,8 @@
 **BR-45**（v2 新增）agent 回覆失敗時，房內所有人看到一行不落盤的失敗提示（例如「Grok 回覆失敗：上游限流」）；operator 另外看得到錯誤類別與 generation id。不顯示 API 回應原文。
 
 **BR-46**（沿用）房間內容對模型而言是不可信輸入；hosted agent 沒有任何管理工具（INV-09）。
+
+**BR-47**（v2 新增，使用者 2026-09-23 決定）agent 可改 runtime 與 runtime 設定，身份（id、handle、房間成員資格、歷史訊息）不變。規則見 [03](03-agent-runtime.md) RT-01。改動當下的 in-flight generation 被丟棄，不會以新設定落盤。
 
 ## 6. Provider 連線（v2 新增）
 
@@ -124,4 +126,6 @@
 - [ ] 每條 BR 對應至少一個 E2E ID（寫進 [08](08-testing-e2e.md) 的追溯表）。
 - [ ] BR-02 的帳號建立流程：欄位驗證、初始密碼長度、是否強制首次登入改密碼（Q-03）。
 - [ ] BR-34 Markdown 子集的完整語法表與反例（XSS 向量清單）。
-- [ ] BR-45 失敗提示的文案表（每個錯誤類別一句）。
+- [ ] BR-45 失敗提示的文案表（每個錯誤類別一句，zh-TW 與 en 各一）。
+- [ ] BR-14 封存的完整行為表（哪些 API 回什麼錯誤、成員列與 @ 補全在封存房的表現）。
+- [ ] BR-47 改 runtime 的確認對話框內容與每種轉換（hosted↔runner↔external）的後果表。

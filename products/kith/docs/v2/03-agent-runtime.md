@@ -39,7 +39,15 @@ HostedGeneration DO                     Inbox live tail → GET /mcp/events（SS
 | 回覆狀態 | `is replying`／草稿／`reply ended`／失敗 | `post_status` 四態＋trace | client 自己用 `post_status` |
 | v1 對應 | hosted Grok | Codex sidecar | MCP client |
 
-**RT-01** 一個 agent 恰好一種 runtime。換 runtime＝建新 agent（避免舊 token、舊 generation 語意混淆）。見 Q-06。
+**RT-01** 一個 agent 在任一時刻恰好一種 runtime。operator 可以改變它（BR-47，使用者 2026-09-23 決定），規則：
+
+1. 改動以 `PUT /api/agents/:id/runtime` 一次完成（B-09），`agent_runtimes.runtime_epoch += 1`。
+2. **in-flight generation**：Inbox 與 HostedGeneration 在 dispatch／send 時比對 `runtime_epoch`；不相符 → 標 `dropped`、不落盤、廣播 `reply ended`。runner 送出的 `send_message` 若帶舊 epoch 的 `generation_id` 同樣 `generation_dropped`（INV-06 的延伸）。
+3. **quota_class** 必須在改動時由 operator 明確選擇（不自動沿用），因為不同 runtime 的訂閱性質不同（RT-06）。
+4. **bot token 不自動撤銷**：token 與 runtime 正交（hosted agent 也可以持 token 透過 MCP 說話）。從 `runner`／`external` 改成 `hosted` 時，確認對話框預設勾選「同時撤銷此 agent 的所有 token」。
+5. **attention** 與房間成員資格不變；`policy_epoch` 不變（它屬於 membership，不屬於 runtime）。
+6. 改成 `hosted` 時必須同時提供連線與模型，否則 400；不允許半套設定。
+7. runtime 改動記錄在 `agent_runtime_changes`（誰、何時、從何到何），控制台 agent 詳情可見。
 
 **RT-02** runtime 設定存 D1（見 [04](04-backend.md) §4 `agent_runtimes`），不再只靠環境變數。v1 的 `XAI_API_KEY`＋`grok-4.5` 在遷移時轉成一個 provider 連線＋一個 hosted runtime（§7）。
 
@@ -289,3 +297,4 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 - [ ] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）。
 - [ ] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報。
 - [ ] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明。
+- [ ] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）。

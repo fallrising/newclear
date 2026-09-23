@@ -2,7 +2,7 @@
 
 - Version: 0.1.0（Phase 1：大框架）
 - Date: 2026-09-23
-- Status: **Proposed**。尚未批准，尚未實作。本目錄的內容在批准前不改變 v1 任何契約。
+- Status: Phase 1 已合併（#47）。尚未實作；各條 v1 修訂在對應里程碑落地時才生效（見 [10](10-decisions.md) §2）。
 - Scope: `products/kith/**`
 - Language: 繁體中文，保留必要英文術語
 
@@ -40,6 +40,8 @@ v2 要做三件事：
 | 08 | [08-testing-e2e.md](08-testing-e2e.md) | E2E 為唯一主要測試手段、證據資料夾格式、開發期規則 |
 | 09 | [09-roadmap.md](09-roadmap.md) | 里程碑 W0–W7、每階段輸入／產物／驗收／禁止 |
 | 10 | [10-decisions.md](10-decisions.md) | v2 決策紀錄（D-xx）、對 v1 的修訂、開放問題（Q-xx）、來源 |
+
+Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給另一個 LLM agent 的細化指令；產出放在 `milestones/Wn.md`。
 
 相關 ADR：
 

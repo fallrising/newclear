@@ -13,7 +13,7 @@
 ## 2. 依賴圖
 
 ```text
-P1 大框架（本 PR）
+P1 大框架（#47）
  └─ W0 E2E 骨架＋web 骨架
      └─ W1 聊天核心（B-01）
          ├─ W2 房間與帳號（B-02, B-04, B-08, B-14）
@@ -26,11 +26,11 @@ P1 大框架（本 PR）
 
 ## 3. 里程碑
 
-### P1 — 大框架文件（本 PR）
+### P1 — 大框架文件（#47）
 
 - 產物：`docs/v2/*`、ADR-0005、ADR-0006（皆 Proposed）、v1 文件指向 v2 的註記。
 - 驗收：使用者審閱通過並合併。無程式、無測試。
-- 狀態：`IN_PROGRESS`（本 PR）。
+- 狀態：`VERIFIED`（#47 合併）。
 
 ### W0 — E2E 與 web 骨架
 
@@ -61,6 +61,8 @@ P1 大框架（本 PR）
   - `E2E-W2-02` 改名後雙方列表更新（重新抓取即可）。
   - `E2E-W2-03` 未讀數與「新訊息」分隔線（UJ-04、BR-37）。
   - `E2E-W2-04` 非 operator 看不到控制台入口，直接開 URL 得到 403 畫面。
+  - `E2E-W2-05` 封存房：列表移入「已封存」、composer 停用、WS／REST send 回 `room_archived`、@agent 不喚醒；解除封存後恢復（BR-14、V2-INV-07）。
+  - `E2E-W2-06` 語言切換：zh-TW ↔ en，所有畫面字串切換、無缺 key；日期格式隨語言變（FE-05）。
 
 ### W3 — 成員、提及、回覆狀態
 
@@ -83,6 +85,7 @@ P1 大框架（本 PR）
   - `E2E-W4-05` canary key 不出現在任何 API 回應、WS 封包、server log（V2-INV-01）。
   - `E2E-W4-06` 連線停用後 mention 落盤、不產生 generation、成員格顯示原因（V2-INV-05、BR-53）。
   - `E2E-W4-07` v1→v2 遷移腳本在含 v1 資料的 seed 上執行兩次，結果相同。
+  - `E2E-W4-08` 改 runtime：hosted 回覆進行中（fake-provider 延遲）時把 agent 改成 external → 舊回覆不落盤、`reply ended`；身份與歷史不變；勾選撤銷時 token 失效（RT-01、V2-INV-06）。
 - 禁止：串流草稿、runner 改動。
 
 ### W5 — 串流與可觀測
@@ -113,6 +116,8 @@ P1 大框架（本 PR）
   - `E2E-W7-02` production build 大小與效能預算（[05](05-frontend-architecture.md) §7）。
 
 ## 4. Phase 2 的寫法（給之後的細化）
+
+執行 Phase 2 的 agent 請直接使用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)。
 
 每個里程碑的 Phase 2 文件放在 `docs/v2/milestones/Wn.md`，固定章節：
 

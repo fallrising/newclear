@@ -44,7 +44,7 @@
 
 ### B-02 房間摘要（W2）
 
-- `GET /api/rooms` 每房加：`last_seq`（int 或 null）、`last_message`（`{seq, sender_id, body_preview ≤ 140 字, created_at}` 或 null，只取 `kind=message`）、`member_count`、`archived_at`（若 BR-14 通過）。
+- `GET /api/rooms` 每房加：`last_seq`（int 或 null）、`last_message`（`{seq, sender_id, body_preview ≤ 140 字, created_at}` 或 null，只取 `kind=message`）、`member_count`、`archived_at`。
 - 實作提示：每房一次 `MAX(seq)` 與最後一列查詢；房間 ≤ 64，可接受。Phase 2 評估是否以 D1 單一查詢完成。
 
 ### B-03 agent 清單與詳情（W4）
@@ -85,10 +85,12 @@
 
 ### B-09 agent runtime 設定（W4）
 
-- `PUT /api/agents/:id/runtime`（operator）。body 依 runtime：
+- `PUT /api/agents/:id/runtime`（operator）。可以改變 runtime 種類（RT-01）；body 必含 `runtime` 與 `quota_class`，其餘依 runtime：
   - `hosted`：`{connection_id, model, system_prompt_addendum?, max_output_tokens?, temperature?, stream?}`
   - `runner`：`{adapter_kind}`（其餘設定在 runner 主機的 toml，伺服器只記錄種類以便顯示）
   - `external`：`{}`
+  - 選填 `revoke_tokens: bool`（預設 false；前端在 runner／external → hosted 時預設送 true）。
+  - 回應含新的 `runtime_epoch`。
 - `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。
 
 ### B-10 WS `draft` 封包（W5）
@@ -120,7 +122,8 @@ Server → client：
 
 ### B-14 房間管理（W2）
 
-- `PATCH /api/rooms/:id`（operator）：`{name}`；若 Q-04 通過，另加 `{archived: bool}`。
+- `PATCH /api/rooms/:id`（operator）：`{name?, archived?: bool}`。
+- 封存房（BR-14）：send 路徑（WS、REST、MCP）回 409 `room_archived`；Inbox 不 dispatch；`/mcp/events` 只允許 catch-up。新錯誤碼 `room_archived` 加入錯誤碼表。
 
 ## 4. 資料模型增量（DDL 輪廓）
 
@@ -156,6 +159,7 @@ CREATE TABLE agent_runtimes (
   params_json TEXT NOT NULL DEFAULT '{}',                   -- max_output_tokens, temperature, stream
   system_prompt_addendum TEXT NOT NULL DEFAULT '',
   adapter_kind TEXT,                                        -- runner 顯示用
+  runtime_epoch INTEGER NOT NULL DEFAULT 1,                 -- RT-01：每次改 runtime +1
   runner_last_seen_at TEXT,                                 -- 事件流最近連線時間
   updated_at TEXT NOT NULL
 );
@@ -166,7 +170,20 @@ ALTER TABLE generations ADD COLUMN output_tokens INTEGER;
 ALTER TABLE generations ADD COLUMN connection_id TEXT;
 ALTER TABLE generations ADD COLUMN model TEXT;
 
--- B-14 / BR-14（若 Q-04 通過）
+CREATE TABLE agent_runtime_changes (
+  id TEXT PRIMARY KEY,
+  agent_id TEXT NOT NULL REFERENCES members(id),
+  changed_by TEXT NOT NULL REFERENCES members(id),
+  from_runtime TEXT,
+  to_runtime TEXT NOT NULL,
+  from_epoch INTEGER,
+  to_epoch INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+ALTER TABLE generations ADD COLUMN runtime_epoch INTEGER;
+
+-- B-14 / BR-14
 ALTER TABLE rooms ADD COLUMN archived_at TEXT;
 ```
 
@@ -180,6 +197,8 @@ ALTER TABLE rooms ADD COLUMN archived_at TEXT;
 | V2-INV-02 | HostedGeneration 只透過 `LlmAdapter` 呼叫上游；adapter 只打該連線的 base URL（取代 v1 的 xAI 白名單） | adapter FM fixtures＋E2E-W4-03 |
 | V2-INV-03 | `draft` 不寫 D1、不佔 seq、不進 `/mcp/events`、不喚醒 | E2E-W5-02：串流前後 D1 列數差恰為 1 |
 | V2-INV-04 | 所有 v1 端點在不帶新參數時，回應與 v1 相同（只可能多出新欄位） | E2E-W1-01：舊前端 smoke 仍通過 |
+| V2-INV-06 | runtime 改動後，任何帶舊 `runtime_epoch` 的 generation 都不能落盤（RT-01） | E2E-W4-08 |
+| V2-INV-07 | 封存房不接受任何 send，也不喚醒 agent（BR-14） | E2E-W2-05 |
 | V2-INV-05 | runtime 設定錯誤（無連線、連線停用、模型不存在）時，mention 落盤但不喚醒；不產生 generation 列 | E2E-W4-06 |
 
 v1 的 INV-01–INV-19 全部保留。INV-15（LLM fetch 只在 HostedGeneration DO）不變；v1 協定 §7「允許清單只有官方 xAI」由 V2-INV-02 取代（見 [10](10-decisions.md) 修訂表）。

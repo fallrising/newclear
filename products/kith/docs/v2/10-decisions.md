@@ -18,6 +18,9 @@
 | D-10 | provider 憑證以 AES-GCM 存 D1，key 來自 Worker secret；另支援 env 引用 | 讓 operator 在介面新增連線，不用每次改 Worker secret 與重新部署 | Proposed |
 | D-11 | E2E 為主要測試手段；v2 不新增單元測試；FM 清單先行 | 使用者開發規則 | Accepted（使用者指定） |
 | D-12 | 未讀以本機 cursor 計算 | 不違反 v1「不做已讀回執」；零後端成本 | Proposed |
+| D-13 | 介面雙語：zh-TW＋en（FE-05） | 使用者決定 | Accepted（使用者 2026-09-23） |
+| D-14 | 房間可封存與解除封存（BR-14） | 使用者決定 | Accepted（使用者 2026-09-23） |
+| D-15 | agent 可改 runtime，以 `runtime_epoch` 丟棄舊 in-flight generation（RT-01、BR-47） | 使用者決定；保留身份、歷史與成員資格 | Accepted（使用者 2026-09-23） |
 
 ## 2. 對 v1 的修訂
 
@@ -39,11 +42,11 @@ v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。
 | ID | 問題 | 預設（未回答時採用） | 需要在何時前決定 |
 | --- | --- | --- | --- |
 | Q-01 | 是否需要 `openai_responses` 與 `gemini` 在 W4 就交付？ | 否，延到 W5 | W4 Phase 2 |
-| Q-02 | 介面語言：只繁中，或繁中＋英文？ | 繁中為主，字串全部經 `copy/`，英文之後補 | W0 Phase 2 |
+| Q-02 | 介面語言 | **已決定（2026-09-23）：繁中＋英文**，見 D-13、FE-05 | — |
 | Q-03 | operator 建的人類帳號，首次登入是否強制改密碼？ | 是 | W2 Phase 2 |
-| Q-04 | 房間封存（BR-14）要不要做？ | 做，唯讀＋隱藏 | W2 Phase 2 |
+| Q-04 | 房間封存 | **已決定（2026-09-23）：做**，見 D-14、BR-14 | — |
 | Q-05 | 每連線每日 token 預算要不要做？ | W5 之後再議 | W5 Phase 2 |
-| Q-06 | 允許 agent 換 runtime，還是只能建新 agent（RT-01）？ | 只能建新 | W4 Phase 2 |
+| Q-06 | agent 能否改 runtime | **已決定（2026-09-23）：可以**，見 D-15、RT-01、BR-47 | — |
 | Q-07 | 上下文要不要支援多輪映射（把 agent 自己過去的回覆標成 assistant）？ | 否（RT-04） | W5 之後 |
 | Q-08 | 各 CLI（Claude Code、Gemini CLI、Codex）的非互動旗標與輸出格式 | 查官方文件後鎖定 | W6 Phase 2 |
 | Q-09 | hosted agent 之後要不要開放受限工具（例如只讀的網頁搜尋）？ | 否；需另立 ADR 並修 INV-09 | 未排程 |

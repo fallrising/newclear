@@ -11,7 +11,7 @@ https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HA
 
 已知停止點：
 - PR #43 完成 AT-11-A 控制端 model proxy／request ledger；PR #46 完成 AT-11-B opt-in guest mailbox、固定 OpenHands 1.49.2 SDK tool-call、短效 token 更新及 request cutoff 的工具／VM 收尾。
-- AT-11-C1（PR #51）增加 opt-in、固定本機 fixture 的合成 credits：釘住價格版本／上限，按 canonical request bytes 與 max_tokens 預留，合法用量結算；unknown／SIGKILL 保留全額。這不是真實 provider 費率或帳單，`amount_decimal` 仍 null、硬金額上限仍關閉。先查 GitHub 確認 #51 實際合併與 CI，不以本檔推定。
+- AT-11-C1（PR #51，交接時已合併且 check／control-plane／web CI 通過）增加 opt-in、固定本機 fixture 的合成 credits：釘住價格版本／上限，按 canonical request bytes 與 max_tokens 預留，合法用量結算；unknown／SIGKILL 保留全額。這不是真實 provider 費率或帳單，`amount_decimal` 仍 null、硬金額上限仍關閉。開始時仍要重新核對 GitHub，不以本檔推定最新狀態。
 - Host 經授權 sandbox port relay 拉取 guest request；worker 使用相同 ModelProxy／SQL ledger 呼叫 host loopback fixture。Guest 不需要任何私網例外，上游 credential 只留控制端。
 - 新模式一律 AlwaysConfirm；手動／自動 terminal admission 均核對 live ownership／固定政策／額度。額度截止或模型錯誤持久撤權，完整停止證據才釋放 reservation。
 - Request UUID、SQL reservation 和 connector delivery intent 均持久；未知 dispatch 不重送、token 更新不重設 cap。已確認 delivery 可接回同 VM／prompt；不確定 completion 無通用 replay。
@@ -21,6 +21,12 @@ https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HA
 
 下一里程碑 AT-11-C2：可信真實 provider pricing／token 上界、金額 reservation／settlement，再接 usage UI 和明確 opt-in provider smoke。
 先比較 SDD 與現有合成 fixture credits，選擇可獨立驗收的切片。沒有可信價格或 tokenizer 上界就不能提供硬金額上限；unknown usage 不能當零。不要使用主機既有 provider key 作隱含授權。完整 AT-07／AT-11／M3 仍未完成；streaming、真實自然語言 coding、M4 artifact／export／backup／GC／production 尚未完成。
+
+開發分工：
+- 採用一位主代理統合、視需要最多兩位子代理的輕量團隊；子代理可以使用同一模型，不要求不同模型混搭。若本視窗沒有子代理工具，主代理照常獨立完成，不因此阻塞。
+- 主代理負責選定切片、介面與資料契約、核心 ledger／migration／proxy／worker 實作、整合、真實 KVM、GitHub PR／CI／合併及最後交接。相依的帳務與生命週期步驟由主代理依序處理；同一 journal／VM／DB 或核心檔案只允許一位寫入者。
+- 可先委派一位子代理唯讀查核真實 provider 的官方價格、模型／token 上界、計費例外及版本固定方式，交付可核對來源、適用條件與缺口；不得讀取憑證或呼叫付費模型。另一位子代理可唯讀審查現有 ledger／安全不變量與故障案例，提出具體測試矩陣；主代理確定契約後，才可將互不重疊的測試或文件交給它在隔離 worktree 修改。
+- 子代理不得自行啟動／停止共用 KVM 服務、修改 journal／fences、套用共用 DB migration，或推送／合併 PR。主代理整合子代理成果並親自驗證；小而連續相依的工作維持單代理處理，避免為組隊增加等待與衝突。
 
 工作要求：
 1. 從最新 main 建立隔離 worktree，只修改 agent-platform，保留他人修改。

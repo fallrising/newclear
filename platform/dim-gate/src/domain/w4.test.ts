@@ -41,6 +41,8 @@ describe('W4 monitoring canonical domain', () => {
     const s = seed()
     const legacy = legacySnapshotV3Schema.parse({ ...s, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1',
       entities: { ...Object.fromEntries(Object.entries(s.entities).filter(([name]) => !['infrastructureIncidents', 'monitorPolicies', 'alertRules', 'sloPolicies', 'silences', 'alertEvaluations', 'notificationDeliveries'].includes(name))),
+        users: s.entities.users.map(({ source: _source, ...user }) => { void _source; return user }),
+        teams: s.entities.teams.map(({ source: _source, ...team }) => { void _source; return team }),
         navigation: s.entities.navigation.filter(row => !['rd.monitoring', 'rd.alerts', 'ops.alerting'].includes(row.routeKey)) },
       observations: { buckets: s.observations.buckets, traces: s.observations.traces, logs: s.observations.logs, recoveries: s.observations.recoveries } })
     expect(legacyV3IntegrityErrors(legacy)).toEqual([])

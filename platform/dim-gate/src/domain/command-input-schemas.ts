@@ -61,7 +61,23 @@ export const createAssignmentInputSchema = /* @__PURE__ */ (() => (z.strictObjec
   stages: z.array(stageSchema).min(1).optional(), reason: reasonSchema,
 })))()
 
-export const patchUserInputSchema = /* @__PURE__ */ (() => (z.strictObject({ expectedVersion: versionSchema, enabled: z.boolean(), reason: reasonSchema })))()
+export const createUserInputSchema = /* @__PURE__ */ (() => (z.strictObject({
+  displayName: nameSchema, teamIds: ids, enabled: z.boolean(), reason: reasonSchema,
+})))()
+
+export const patchUserInputSchema = /* @__PURE__ */ (() => (z.strictObject({
+  expectedVersion: versionSchema, displayName: nameSchema.optional(), teamIds: ids.optional(),
+  enabled: z.boolean().optional(), reason: reasonSchema,
+}).refine(body => body.displayName !== undefined || body.teamIds !== undefined || body.enabled !== undefined,
+  'At least one user field is required')))()
+
+export const createTeamInputSchema = /* @__PURE__ */ (() => (z.strictObject({
+  businessUnitId: idSchema, name: nameSchema, reason: reasonSchema,
+})))()
+
+export const patchTeamInputSchema = /* @__PURE__ */ (() => (z.strictObject({
+  expectedVersion: versionSchema, name: nameSchema, reason: reasonSchema,
+})))()
 
 export const patchNavigationInputSchema = /* @__PURE__ */ (() => (z.strictObject({
   expectedVersion: versionSchema, label: nameSchema.optional(), group: nameSchema.optional(),

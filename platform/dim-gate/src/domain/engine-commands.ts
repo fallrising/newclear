@@ -1,8 +1,8 @@
 import type { CommandInput } from './command-input-schemas'
-import { advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, versionCommandSchema } from './command-input-schemas'
+import { advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, createTeamInputSchema, createUserInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchTeamInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, versionCommandSchema } from './command-input-schemas'
 import { prepareServiceDelivery, advanceServiceDelivery } from './service-delivery-commands'
 import type { z } from 'zod'
-import { scenarioInputSchema, roleAssignmentSchema, snapshotSchema, type CI, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation, type Request as DomainRequest, type Snapshot } from './schema-models'
+import { scenarioInputSchema, roleAssignmentSchema, snapshotSchema, teamSchema, userSchema, type CI, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation, type Request as DomainRequest, type Snapshot } from './schema-models'
 import { clockIso, clone, fail, notFound, forbidden, parse, assertIntegrity, requestableCatalog, requestPoolUsage } from './engine-shared'
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
@@ -183,7 +183,10 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   const patchRequestId = method === 'PATCH' ? /^\/requests\/([^/]+)$/.exec(input.path)?.[1] : undefined
   const requestActionMatch = method === 'POST' ? /^\/requests\/([^/]+)\/(submit|approve|reject|cancel|provision|retry)$/.exec(input.path) : undefined
   const createAssignment = method === 'POST' && input.path === '/admin/assignments'
+  const createUser = method === 'POST' && input.path === '/admin/users'
   const patchUserId = method === 'PATCH' ? /^\/admin\/users\/([^/]+)$/.exec(input.path)?.[1] : undefined
+  const createTeam = method === 'POST' && input.path === '/admin/teams'
+  const patchTeamId = method === 'PATCH' ? /^\/admin\/teams\/([^/]+)$/.exec(input.path)?.[1] : undefined
   const patchNavigationId = method === 'PATCH' ? /^\/admin\/navigation\/([^/]+)$/.exec(input.path)?.[1] : undefined
   const catalogRevisionId = method === 'POST' ? /^\/admin\/catalog\/([^/]+)\/revisions$/.exec(input.path)?.[1] : undefined
   const patchCatalogId = method === 'PATCH' ? /^\/admin\/catalog\/([^/]+)$/.exec(input.path)?.[1] : undefined
@@ -193,7 +196,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   const scenario = method === 'POST' && input.path === '/scenarios'
   const clock = method === 'POST' && input.path === '/clock/advance'
   if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
-    && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
+    && !patchRequestId && !requestActionMatch && !createAssignment && !createUser && !patchUserId && !createTeam && !patchTeamId && !patchNavigationId
     && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
     && !scenario && !clock && !delivery && !observation && !resource && !service && !monitoring) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
@@ -208,7 +211,10 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   else if (patchRequestId) body = parse(patchRequestInputSchema, input.body)
   else if (requestActionMatch) body = parse(['submit', 'provision'].includes(requestActionMatch[2]) ? versionCommandSchema : reasonCommandSchema, input.body)
   else if (createAssignment) body = parse(createAssignmentInputSchema, input.body)
+  else if (createUser) body = parse(createUserInputSchema, input.body)
   else if (patchUserId) body = parse(patchUserInputSchema, input.body)
+  else if (createTeam) body = parse(createTeamInputSchema, input.body)
+  else if (patchTeamId) body = parse(patchTeamInputSchema, input.body)
   else if (patchNavigationId) body = parse(patchNavigationInputSchema, input.body)
   else if (catalogRevisionId) body = parse(createCatalogRevisionInputSchema, input.body)
   else if (patchCatalogId) body = parse(patchCatalogInputSchema, input.body)
@@ -263,7 +269,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
     const requesterAction = !action || ['submit', 'cancel', 'retry'].includes(action)
     if (requesterAction && !policy.canEditRequest(environmentRequest!)) forbidden()
     if (!requesterAction && !policy.canOperateRequest(environmentRequest!)) forbidden()
-  } else if (createAssignment || patchUserId || patchNavigationId || catalogRevisionId || patchCatalogId
+  } else if (createAssignment || createUser || patchUserId || createTeam || patchTeamId || patchNavigationId || catalogRevisionId || patchCatalogId
     || catalogActionMatch || createModelField || patchModelFieldId) {
     if (!policy.admin) forbidden()
   } else if (scenario) {
@@ -518,6 +524,39 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
       changed.push({ entityType: 'job', entityId: job.id })
       entityType = 'request'; entityId = request.id; entityVersion = request.version; action = 'request.retry'; fields = ['state', 'latestJobId', 'attempt']
     }
+  } else if (createUser) {
+    const create = body as z.infer<typeof createUserInputSchema>
+    if (!create.teamIds.every(id => next.entities.teams.some(team => team.id === id && team.orgId === policy.user!.orgId))) fail(422, 'VALIDATION_ERROR', '團隊不存在。')
+    const serial = String(next.sequence + 1).padStart(4, '0')
+    const candidate = parse(userSchema, { id: `user-demo-${serial}`, orgId: policy.user!.orgId,
+      version: 1, createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+      displayName: create.displayName, teamIds: create.teamIds, enabled: create.enabled, source: 'demo' })
+    if (next.entities.users.some(user => user.id === candidate.id)) fail(409, 'DUPLICATE_RESOURCE', '使用者 ID 已存在。')
+    next.entities.users.push(candidate)
+    next.policyVersion += 1
+    entityType = 'user'; entityId = candidate.id; entityVersion = 1; action = 'access.write'
+    fields = ['user created', 'no role grant or Demo persona']; reason = create.reason; changed = [{ entityType, entityId }]
+  } else if (createTeam) {
+    const create = body as z.infer<typeof createTeamInputSchema>
+    if (!next.entities.businessUnits.some(unit => unit.id === create.businessUnitId && unit.orgId === policy.user!.orgId)) fail(422, 'VALIDATION_ERROR', '業務單位不存在。')
+    const serial = String(next.sequence + 1).padStart(4, '0')
+    const candidate = parse(teamSchema, { id: `team-demo-${serial}`, orgId: policy.user!.orgId,
+      version: 1, createdAt: clockIso(next.logicalClock), updatedAt: clockIso(next.logicalClock),
+      businessUnitId: create.businessUnitId, name: create.name, source: 'demo' })
+    if (next.entities.teams.some(team => team.id === candidate.id)) fail(409, 'DUPLICATE_RESOURCE', '團隊 ID 已存在。')
+    next.entities.teams.push(candidate)
+    next.policyVersion += 1
+    entityType = 'team'; entityId = candidate.id; entityVersion = 1; action = 'access.write'
+    fields = ['team created']; reason = create.reason; changed = [{ entityType, entityId }]
+  } else if (patchTeamId) {
+    const patch = body as z.infer<typeof patchTeamInputSchema>
+    const team = next.entities.teams.find(entry => entry.id === patchTeamId && entry.orgId === policy.user!.orgId)
+    if (!team) notFound()
+    if (team!.version !== patch.expectedVersion) fail(409, 'VERSION_CONFLICT', '團隊版本已變更。')
+    Object.assign(team!, { name: patch.name, version: team!.version + 1, updatedAt: clockIso(next.logicalClock) })
+    next.policyVersion += 1
+    entityType = 'team'; entityId = team!.id; entityVersion = team!.version; action = 'access.write'
+    fields = ['name']; reason = patch.reason; changed = [{ entityType, entityId }]
   } else if (createAssignment) {
     const create = body as z.infer<typeof createAssignmentInputSchema>
     if (create.userId === input.actorId) fail(403, 'SELF_MODIFICATION_DENIED', '不能修改自己的角色授權。')
@@ -540,18 +579,21 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
     const patch = body as z.infer<typeof patchUserInputSchema>
     const user = next.entities.users.find((entry) => entry.id === patchUserId && entry.orgId === policy.user!.orgId)
     if (!user) notFound()
-    if (user!.id === input.actorId) fail(403, 'SELF_MODIFICATION_DENIED', '不能停用自己的帳號。')
+    if (user!.id === input.actorId && patch.enabled === false) fail(403, 'SELF_MODIFICATION_DENIED', '不能停用自己的帳號。')
     if (patch.expectedVersion !== user!.version) fail(409, 'VERSION_CONFLICT', '使用者版本已變更。')
-    if (!patch.enabled) {
+    if (patch.teamIds && !patch.teamIds.every(id => next.entities.teams.some(team => team.id === id && team.orgId === user!.orgId))) fail(422, 'VALIDATION_ERROR', '團隊不存在。')
+    if (patch.enabled === false) {
       const isAdmin = next.entities.assignments.some((entry) => entry.userId === user!.id && entry.role === 'admin')
       const anotherAdmin = next.entities.users.some((entry) => entry.id !== user!.id && entry.enabled
         && next.entities.assignments.some((assignment) => assignment.userId === entry.id && assignment.role === 'admin'))
       if (isAdmin && !anotherAdmin) fail(409, 'LAST_ADMIN_REQUIRED', '必須保留一位啟用中的平台管理者。')
     }
-    Object.assign(user!, { enabled: patch.enabled, version: user!.version + 1, updatedAt: clockIso(next.logicalClock) })
+    const { expectedVersion: _expectedVersion, reason: _reason, ...updates } = patch
+    void _expectedVersion; void _reason
+    Object.assign(user!, updates, { version: user!.version + 1, updatedAt: clockIso(next.logicalClock) })
     next.policyVersion += 1
     entityType = 'user'; entityId = user!.id; entityVersion = user!.version; action = 'access.write'
-    fields = ['enabled']; reason = patch.reason; changed = [{ entityType, entityId }]
+    fields = Object.keys(updates); reason = patch.reason; changed = [{ entityType, entityId }]
   } else if (patchNavigationId) {
     const patch = body as z.infer<typeof patchNavigationInputSchema>
     const item = next.entities.navigation.find((entry) => entry.id === patchNavigationId && entry.orgId === policy.user!.orgId)

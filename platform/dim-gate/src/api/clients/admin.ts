@@ -1,12 +1,13 @@
 import { z } from 'zod'
 import {
   auditEventSchema, ciKindSchema, commandReceiptSchema,
-  modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, userSchema,
+  modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, teamSchema, userSchema,
   type AuditEvent, type CatalogItem, type Center, type CommandReceipt, type ModelField, type NavigationItem,
 } from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type User = z.infer<typeof userSchema>
+export type Team = z.infer<typeof teamSchema>
 export type AccessView = { organizations: z.infer<typeof organizationSchema>[]; users: User[]; assignments: z.infer<typeof roleAssignmentSchema>[]; policyVersion: number }
 export type ModelsView = { kinds: z.infer<typeof ciKindSchema>[]; fields: ModelField[] }
 export type AuditListInput = { entityType?: string; entityId?: string; correlationId?: string; actorId?: string; page?: number; pageSize?: number; sort?: 'id' | 'occurredAt'; order?: 'asc' | 'desc' }
@@ -24,6 +25,18 @@ export function createAdminClient(request: ApiRequest) {
   return {
     getNavigation: (center: Center): Promise<NavigationItem[]> => request(withQuery('/navigation', { center }), z.array(monitoringNavigationItemSchema)),
     getAccess: (): Promise<AccessView> => request('/admin/access', accessSchema),
+    listAdminUsers: (page = 1, pageSize = 25) => request(withQuery('/admin/users', { page, pageSize }), pageSchema(userSchema)),
+    getAdminUser: (id: string): Promise<User> => request(`/admin/users/${encodeURIComponent(id)}`, userSchema),
+    createAdminUser: (body: { displayName: string; teamIds: string[]; enabled: boolean; reason: string }): Promise<CommandReceipt> =>
+      request('/admin/users', commandReceiptSchema, { method: 'POST', body }),
+    updateAdminUser: (id: string, body: { expectedVersion: number; displayName?: string; teamIds?: string[]; enabled?: boolean; reason: string }): Promise<CommandReceipt> =>
+      request(`/admin/users/${encodeURIComponent(id)}`, commandReceiptSchema, { method: 'PATCH', body }),
+    listAdminTeams: (page = 1, pageSize = 25) => request(withQuery('/admin/teams', { page, pageSize }), pageSchema(teamSchema)),
+    getAdminTeam: (id: string): Promise<Team> => request(`/admin/teams/${encodeURIComponent(id)}`, teamSchema),
+    createAdminTeam: (body: { businessUnitId: string; name: string; reason: string }): Promise<CommandReceipt> =>
+      request('/admin/teams', commandReceiptSchema, { method: 'POST', body }),
+    patchAdminTeam: (id: string, expectedVersion: number, name: string, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/teams/${encodeURIComponent(id)}`, commandReceiptSchema, { method: 'PATCH', body: { expectedVersion, name, reason } }),
     createAssignment: (body: { userId: string; role: Center; scopeType: 'org' | 'project' | 'pool'; scopeId: string; stages?: ('dev' | 'staging' | 'prod')[]; reason: string }): Promise<CommandReceipt> =>
       request('/admin/assignments', commandReceiptSchema, { method: 'POST', body }),
     revokeAssignment: (id: string, expectedVersion: number, reason: string): Promise<CommandReceipt> =>

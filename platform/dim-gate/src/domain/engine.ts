@@ -452,6 +452,27 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
         users: entities.users.filter((entry) => entry.orgId === policy.user!.orgId),
         assignments: entities.assignments.filter((entry) => entry.orgId === policy.user!.orgId), policyVersion: state.policyVersion })
     }
+    if (path === '/admin/users' || path === '/admin/teams') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      const items = path === '/admin/users' ? entities.users : entities.teams
+      return clone(basicPage(items.filter(entry => entry.orgId === policy.user!.orgId)
+        .toSorted((left, right) => left.id.localeCompare(right.id)), query))
+    }
+    const adminUserId = /^\/admin\/users\/([^/]+)$/.exec(path)?.[1]
+    if (adminUserId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const user = entities.users.find(entry => entry.id === adminUserId && entry.orgId === policy.user!.orgId)
+      return user ? clone(user) : notFound()
+    }
+    const adminTeamId = /^\/admin\/teams\/([^/]+)$/.exec(path)?.[1]
+    if (adminTeamId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const team = entities.teams.find(entry => entry.id === adminTeamId && entry.orgId === policy.user!.orgId)
+      return team ? clone(team) : notFound()
+    }
     if (path === '/admin/navigation') {
       validateQuery(query, ['center'])
       if (!policy.admin) forbidden()

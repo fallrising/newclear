@@ -20,9 +20,11 @@ export const tagsSchema = z.record(z.string().min(1).max(64), z.string().max(256
 
 export const organizationSchema = z.strictObject({ ...base, name: nameSchema })
 export const businessUnitSchema = z.strictObject({ ...scopedBase, name: nameSchema })
-export const teamSchema = z.strictObject({ ...scopedBase, businessUnitId: idSchema, name: nameSchema })
+export const legacyTeamSchema = z.strictObject({ ...scopedBase, businessUnitId: idSchema, name: nameSchema })
+export const teamSchema = legacyTeamSchema.extend({ source: z.enum(['seed', 'demo']) })
 export const projectSchema = z.strictObject({ ...scopedBase, teamId: idSchema, name: nameSchema, slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/) })
-export const userSchema = z.strictObject({ ...scopedBase, displayName: nameSchema, teamIds: ids, enabled: z.boolean() })
+export const legacyUserSchema = z.strictObject({ ...scopedBase, displayName: nameSchema, teamIds: ids, enabled: z.boolean() })
+export const userSchema = legacyUserSchema.extend({ source: z.enum(['seed', 'demo']) })
 export const applicationSchema = z.strictObject({
   ...scopedBase, projectId: idSchema, ownerTeamId: idSchema, name: nameSchema,
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), tier: z.enum(['critical', 'standard']),
@@ -369,8 +371,8 @@ export const legacySnapshotV2Schema = z.strictObject({
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
-    organizations: z.array(organizationSchema), businessUnits: z.array(businessUnitSchema), teams: z.array(teamSchema),
-    projects: z.array(projectSchema), users: z.array(userSchema), applications: z.array(applicationSchema),
+    organizations: z.array(organizationSchema), businessUnits: z.array(businessUnitSchema), teams: z.array(legacyTeamSchema),
+    projects: z.array(projectSchema), users: z.array(legacyUserSchema), applications: z.array(applicationSchema),
     environments: z.array(environmentSchema), accounts: z.array(providerAccountSchema), locations: z.array(locationSchema),
     pools: z.array(poolSchema), cis: z.array(ciSchema), placements: z.array(placementSchema), relations: z.array(relationSchema),
     assignments: z.array(roleAssignmentSchema), navigation: z.array(legacyNavigationItemV2Schema), modelFields: z.array(modelFieldSchema),
@@ -406,13 +408,16 @@ export const monitoringIncidentEvidenceSchema = incidentEvidenceSchema.extend({
 export const monitoringIncidentSchema = incidentSchema.extend({ ruleId: idSchema.optional(), ruleRevision: versionSchema.optional(),
   evidence: z.array(monitoringIncidentEvidenceSchema) })
 export const incidentVariantSchema = z.union([monitoringIncidentSchema, infrastructureIncidentSchema])
-export const snapshotSchema = legacySnapshotV3Schema.extend({ schemaVersion: z.literal(4), seedVersion: z.literal('dim-gate-w4-v1'),
+export const legacySnapshotV4Schema = legacySnapshotV3Schema.extend({ schemaVersion: z.literal(4), seedVersion: z.literal('dim-gate-w4-v1'),
   entities: legacySnapshotV3Schema.shape.entities.extend({ navigation: z.array(monitoringNavigationItemSchema),
     incidents: z.array(monitoringIncidentSchema), infrastructureIncidents: z.array(infrastructureIncidentSchema),
     monitorPolicies: z.array(monitorPolicySchema), alertRules: z.array(alertRuleSchema), sloPolicies: z.array(sloPolicySchema),
     silences: z.array(silenceSchema), alertEvaluations: z.array(alertEvaluationSchema), notificationDeliveries: z.array(notificationDeliverySchema),
   }),
   observations: legacySnapshotV3Schema.shape.observations.extend({ infrastructureMetrics: z.array(infrastructureMetricSchema) }),
+})
+export const snapshotSchema = legacySnapshotV4Schema.extend({ schemaVersion: z.literal(5), seedVersion: z.literal('dim-gate-w5-v1'),
+  entities: legacySnapshotV4Schema.shape.entities.extend({ users: z.array(userSchema), teams: z.array(teamSchema) }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })
@@ -458,7 +463,7 @@ export const dashboardViewSchema = z.strictObject({
 export const guideViewSchema = z.strictObject({
   applicationId: idSchema.nullable(), environmentId: idSchema.nullable(), steps: z.array(guideStepSchema),
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-w4-v1'), schemaVersion: z.literal(4), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-w5-v1'), schemaVersion: z.literal(5), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -485,7 +490,10 @@ export type CI = z.infer<typeof ciSchema>
 export type CIView = z.infer<typeof ciViewSchema>
 export type Application = z.infer<typeof applicationSchema>
 export type RoleAssignment = z.infer<typeof roleAssignmentSchema>
+export type User = z.infer<typeof userSchema>
+export type Team = z.infer<typeof teamSchema>
 export type Snapshot = z.infer<typeof snapshotSchema>
+export type LegacySnapshotV4 = z.infer<typeof legacySnapshotV4Schema>
 export type LegacySnapshotV3 = z.infer<typeof legacySnapshotV3Schema>
 export type LegacySnapshotV2 = z.infer<typeof legacySnapshotV2Schema>
 export type LegacySnapshot = z.infer<typeof legacySnapshotSchema>

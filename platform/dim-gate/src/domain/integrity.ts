@@ -1,9 +1,11 @@
 import { serviceDeliveryIntegrityErrors } from './service-delivery-integrity'
 import type { LegacySnapshot, LegacySnapshotV2, LegacySnapshotV3, Snapshot } from './schemas'
+import type { LegacySnapshotV4 } from './schema-models'
 import { deliveryIntegrityErrors } from './delivery-integrity'
 import { observationIntegrityErrors } from './observation-integrity'
 import { resourceIntegrityErrors } from './resource-integrity'
 import { monitoringIntegrityErrors } from './monitoring-integrity'
+import { demoPersonaIds } from './policy'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -23,9 +25,12 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     return collection.find((entity) => entity.id === id && entity.orgId === orgId)
   }
   for (const team of entities.teams) if (!linked(entities.businessUnits, team.businessUnitId, team.orgId)) errors.push('team: invalid business unit')
+  const seedTeamIds = new Set(['team-commerce', 'team-platform', 'team-data'])
+  for (const team of entities.teams) if ((team.source === 'seed') !== seedTeamIds.has(team.id)) errors.push('team: invalid source identity')
   for (const project of entities.projects) if (!linked(entities.teams, project.teamId, project.orgId)) errors.push('project: invalid team')
   if (new Set(entities.projects.map((project) => `${project.orgId}:${project.slug.toLowerCase()}`)).size !== entities.projects.length) errors.push('project: duplicate normalized slug')
   for (const user of entities.users) for (const teamId of user.teamIds) if (!linked(entities.teams, teamId, user.orgId)) errors.push('user: invalid team')
+  for (const user of entities.users) if ((user.source === 'seed') !== demoPersonaIds.has(user.id)) errors.push('user: invalid source identity')
   for (const app of entities.applications) {
     const project = linked(entities.projects, app.projectId, app.orgId)
     if (!project || !('teamId' in project) || project.teamId !== app.ownerTeamId) errors.push('application: owner must match project team')
@@ -87,9 +92,18 @@ export function integrityErrors(snapshot: Snapshot): string[] {
   return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot)]
 }
 
+/** Validate the original W4 relationships before adding W5 source metadata. */
+export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
+  return integrityErrors({ ...snapshot, schemaVersion: 5, seedVersion: 'dim-gate-w5-v1',
+    entities: { ...snapshot.entities,
+      users: snapshot.entities.users.map(user => ({ ...user, source: 'seed' as const })),
+      teams: snapshot.entities.teams.map(team => ({ ...team, source: 'seed' as const })),
+    } })
+}
+
 /** Frozen v3 data is validated before any v4 collection is materialized. */
 export function legacyV3IntegrityErrors(snapshot: LegacySnapshotV3): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
+  return legacyV4IntegrityErrors({ ...snapshot, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
     entities: { ...snapshot.entities, infrastructureIncidents: [], monitorPolicies: [], alertRules: [], sloPolicies: [],
       silences: [], alertEvaluations: [], notificationDeliveries: [] },
     observations: { ...snapshot.observations, infrastructureMetrics: [] } })

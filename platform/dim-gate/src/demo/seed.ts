@@ -14,7 +14,7 @@ export const SEED_BASELINE = '2026-09-20T09:00:00Z'
 const stamp = { version: 1, createdAt: SEED_BASELINE, updatedAt: SEED_BASELINE }
 const scoped = { ...stamp, orgId: 'org-demo' }
 
-/** W4 starts with empty monitoring history and preserves every accepted entity identity. */
+/** W5 starts with empty governance history and preserves every accepted entity identity. */
 export function createSeed(sessionId: string): Snapshot {
   const applicationSeed = buildApplicationSeed()
   const cmdbSeed = buildCmdbSeed()
@@ -22,7 +22,7 @@ export function createSeed(sessionId: string): Snapshot {
   const metadata = buildW2Metadata()
   const resources = buildW2BusinessSeed(topologySeed.placements)
   return snapshotSchema.parse({
-    schemaVersion: 4, seedVersion: 'dim-gate-w4-v1', sessionId, logicalClock: 0,
+    schemaVersion: 5, seedVersion: 'dim-gate-w5-v1', sessionId, logicalClock: 0,
     sequence: 0, storeRevision: 0, policyVersion: 1, commandCount: 0,
     entities: {
       organizations: [{ ...stamp, id: 'org-demo', name: 'Dim Commerce' }],
@@ -31,9 +31,9 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'bu-technology', name: 'Technology' },
       ],
       teams: [
-        { ...scoped, id: 'team-commerce', businessUnitId: 'bu-commerce', name: 'Commerce' },
-        { ...scoped, id: 'team-platform', businessUnitId: 'bu-technology', name: 'Platform' },
-        { ...scoped, id: 'team-data', businessUnitId: 'bu-technology', name: 'Data' },
+        { ...scoped, id: 'team-commerce', businessUnitId: 'bu-commerce', name: 'Commerce', source: 'seed' },
+        { ...scoped, id: 'team-platform', businessUnitId: 'bu-technology', name: 'Platform', source: 'seed' },
+        { ...scoped, id: 'team-data', businessUnitId: 'bu-technology', name: 'Data', source: 'seed' },
       ],
       projects: [
         { ...scoped, id: 'project-store', teamId: 'team-commerce', name: 'Store', slug: 'store' },
@@ -42,7 +42,7 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'project-insights', teamId: 'team-data', name: 'Insights', slug: 'insights' },
       ],
       users: personas.map((persona) => ({
-        ...scoped, id: persona.id, displayName: persona.displayName, enabled: true,
+        ...scoped, id: persona.id, displayName: persona.displayName, enabled: true, source: 'seed',
         teamIds: [persona.id === 'user-rd-commerce' ? 'team-commerce' : persona.id === 'user-rd-data' ? 'team-data' : 'team-platform'],
       })),
       ...applicationSeed,

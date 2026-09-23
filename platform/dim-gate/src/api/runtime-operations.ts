@@ -506,10 +506,59 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   },
   {
     "method": "get",
+    "path": "/admin/users",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/users/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/teams",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/teams/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
     "path": "/notifications",
     "status": 200,
     "demo": false,
     "milestone": "M4"
+  },
+  {
+    "method": "post",
+    "path": "/admin/users",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/teams",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "patch",
+    "path": "/admin/teams/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
   },
   {
     "method": "get",

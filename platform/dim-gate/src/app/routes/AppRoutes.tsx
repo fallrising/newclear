@@ -8,6 +8,7 @@ import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPag
 import { CenterLayout } from '../layouts/CenterLayout'
 
 const AccessPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AccessPage })))
+const IdentityPage = lazy(() => import('../../features/admin').then(module => ({ default: module.IdentityPage })))
 const AdminCatalogPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AdminCatalogPage })))
 const AuditPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AuditPage })))
 const ModelsPage = lazy(() => import('../../features/admin').then(module => ({ default: module.ModelsPage })))
@@ -68,6 +69,7 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/ops/releases/:releaseId" element={<CenterLayout routeKey="ops.release-detail" center="ops" session={session}><ReleaseDetailPage session={session} center="ops" /></CenterLayout>} />
     <Route path="/admin" element={<CenterLayout routeKey="admin.overview" center="admin" session={session}><CenterOverview key={`${session.identityEpoch}:admin`} center="admin" session={session} /></CenterLayout>} />
     <Route path="/admin/access" element={<CenterLayout routeKey="admin.access" center="admin" session={session}><AccessPage session={session} /></CenterLayout>} />
+    <Route path="/admin/users" element={<CenterLayout routeKey="admin.users" center="admin" session={session}><IdentityPage session={session} /></CenterLayout>} />
     <Route path="/admin/navigation" element={<CenterLayout routeKey="admin.navigation" center="admin" session={session}><NavigationPage /></CenterLayout>} />
     <Route path="/admin/catalog" element={<CenterLayout routeKey="admin.catalog" center="admin" session={session}><AdminCatalogPage /></CenterLayout>} />
     <Route path="/admin/cmdb-models" element={<CenterLayout routeKey="admin.cmdb-models" center="admin" session={session}><ModelsPage /></CenterLayout>} />

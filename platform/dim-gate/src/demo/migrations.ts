@@ -1,12 +1,30 @@
-import { integrityErrors, legacyIntegrityErrors, legacyV2IntegrityErrors, legacyV3IntegrityErrors } from '../domain/integrity'
-import { legacySnapshotSchema, legacySnapshotV2Schema, legacySnapshotV3Schema, snapshotSchema, type Snapshot } from '../domain/schema-models'
+import { integrityErrors, legacyIntegrityErrors, legacyV2IntegrityErrors, legacyV3IntegrityErrors, legacyV4IntegrityErrors } from '../domain/integrity'
+import { legacySnapshotSchema, legacySnapshotV2Schema, legacySnapshotV3Schema, legacySnapshotV4Schema, snapshotSchema, type LegacySnapshotV4, type Snapshot } from '../domain/schema-models'
 import { buildW2Metadata } from './seed/resources'
 import { buildW4Navigation } from './seed/monitoring'
 
 /** Pure upgrades. Original bytes remain untouched until the controller's one atomic write. */
 export function readStoredSnapshot(value: unknown): Snapshot {
   const current = snapshotSchema.safeParse(value)
-  if (current.success) return current.data
+  if (current.success) {
+    const errors = integrityErrors(current.data)
+    if (errors.length) throw new Error(`Invalid W5 relationships: ${errors.join('; ')}`)
+    return current.data
+  }
+  const upgradeV4 = (original: LegacySnapshotV4): Snapshot => {
+    const errors = legacyV4IntegrityErrors(original)
+    if (errors.length) throw new Error(`Invalid W4 relationships: ${errors.join('; ')}`)
+    const migrated = snapshotSchema.parse({ ...original, schemaVersion: 5, seedVersion: 'dim-gate-w5-v1',
+      entities: { ...original.entities,
+        users: original.entities.users.map(user => ({ ...user, source: 'seed' })),
+        teams: original.entities.teams.map(team => ({ ...team, source: 'seed' })),
+      } })
+    const migratedErrors = integrityErrors(migrated)
+    if (migratedErrors.length) throw new Error(`Invalid migrated relationships: ${migratedErrors.join('; ')}`)
+    return migrated
+  }
+  const v4 = legacySnapshotV4Schema.safeParse(value)
+  if (v4.success) return upgradeV4(v4.data)
   const emptyMonitoring = { monitorPolicies: [], alertRules: [], sloPolicies: [], silences: [], alertEvaluations: [], notificationDeliveries: [], infrastructureIncidents: [] }
   const emptyDelivery = { pipelineDefinitions: [], serviceConfigs: [], trafficPolicies: [], serviceExecutions: [] }
   const v3 = legacySnapshotV3Schema.safeParse(value)
@@ -52,9 +70,7 @@ export function readStoredSnapshot(value: unknown): Snapshot {
   if (candidate.navigation.some(row => navigation.some(next => row.id === next.id))) {
     throw new Error('Legacy snapshot conflicts with reserved W4 route identities')
   }
-  const migrated = snapshotSchema.parse({ ...original, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
+  const migrated = legacySnapshotV4Schema.parse({ ...original, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
     entities: { ...candidate, navigation: [...candidate.navigation, ...navigation] }, observations })
-  const errors = integrityErrors(migrated)
-  if (errors.length) throw new Error(`Invalid migrated relationships: ${errors.join('; ')}`)
-  return migrated
+  return upgradeV4(migrated)
 }

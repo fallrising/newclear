@@ -132,7 +132,9 @@ export function createApiClient() {
       listPools: true, getCapacity: true, listCatalog: true, getCatalog: true, createRequest: true, listRequests: true, getRequest: true, submitRequest: true, approveRequest: true, rejectRequest: true, cancelRequest: true, provisionRequest: true, retryRequest: true, listJobs: true, getJob: true
     }, getClientIdentity),
     ...deferredClient<Omit<ReturnType<typeof import('./clients/admin').createAdminClient>, 'getNavigation'>>(() => import('./clients/admin').then(module => module.createAdminClient(request)), {
-      getAccess: true, createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
+      getAccess: true, listAdminUsers: true, getAdminUser: true, createAdminUser: true, updateAdminUser: true,
+      listAdminTeams: true, getAdminTeam: true, createAdminTeam: true, patchAdminTeam: true,
+      createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
     }, getClientIdentity),
     ...deferredClient(() => import('./clients/delivery').then(module => module.createDeliveryClient(request)), {
       listPipelines: true, getPipeline: true, createPipeline: true, cancelPipeline: true, retryPipeline: true, listReleases: true, getRelease: true, approveRelease: true, rejectRelease: true, rollbackRelease: true

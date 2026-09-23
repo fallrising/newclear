@@ -32,7 +32,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(legacySnapshotSchema.parse(original.snapshot)).toEqual(original.snapshot)
     const h = harness(), c = h.start(), migrated = c.getSnapshot()
     expect(h.writes).toBe(1)
-    expect(migrated).toMatchObject({ schemaVersion: 4, seedVersion: 'dim-gate-w4-v1' })
+    expect(migrated).toMatchObject({ schemaVersion: 5, seedVersion: 'dim-gate-w5-v1' })
     for (const [key, value] of Object.entries(original.snapshot)) {
       if (!['schemaVersion', 'seedVersion', 'entities', 'observations'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
     }
@@ -40,6 +40,7 @@ describe('W2 validated atomic W1 migration', () => {
     for (const [key, collection] of Object.entries(original.snapshot.entities)) {
       const result = migrated.entities[key as keyof typeof original.snapshot.entities]
       if (['cis', 'catalogs', 'navigation'].includes(key)) expect(result.slice(0, collection.length)).toEqual(collection)
+      else if (['users', 'teams'].includes(key)) expect(result).toEqual(collection.map(row => ({ ...row, source: 'seed' })))
       else expect(result).toEqual(collection)
     }
     expect(migrated.entities.cis).toHaveLength(original.snapshot.entities.cis.length + 3)
@@ -129,7 +130,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe(legacyBytes)
     expect(h.writes).toBe(0)
     h.restore()
-    expect(h.start().getSnapshot().schemaVersion).toBe(4)
+    expect(h.start().getSnapshot().schemaVersion).toBe(5)
     expect(h.writes).toBe(1)
   })
 
@@ -150,7 +151,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe('{broken')
     expect(h.writes).toBe(0)
     const reset = createController({ storage: h.storage, createSessionId: () => 'migration-reset', recovery: 'reset' })
-    expect(reset.getSnapshot().schemaVersion).toBe(4)
+    expect(reset.getSnapshot().schemaVersion).toBe(5)
     expect(reset.getSnapshot().scheduler.tasks).toEqual([])
     expect(h.writes).toBe(1)
   })

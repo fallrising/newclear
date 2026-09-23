@@ -114,9 +114,9 @@ export async function loadMember(env: Env, memberId: string): Promise<MemberRow 
   return env.DB.prepare(`SELECT ${MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<MemberRow>();
 }
 
-export async function loadActiveHumanByHandle(env: Env, handle: string): Promise<MemberRow | null> {
+export async function loadActiveMemberByHandle(env: Env, handle: string): Promise<MemberRow | null> {
   return env.DB.prepare(
-    `SELECT ${MEMBER_COLUMNS} FROM members WHERE handle = ? COLLATE NOCASE AND kind = 'human' AND disabled_at IS NULL`,
+    `SELECT ${MEMBER_COLUMNS} FROM members WHERE handle = ? COLLATE NOCASE AND kind IN ('human', 'agent') AND disabled_at IS NULL`,
   )
     .bind(handle)
     .first<MemberRow>();

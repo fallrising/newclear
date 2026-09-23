@@ -34,11 +34,11 @@
 
 表單層：Handle。成功後關掉，並在房內留下 “They will see this room after they refresh.” 被邀請的人要自己重新整理才會在列表看到新房。本章不做成員推播。
 
-`POST /api/rooms/:id/members` 必須接受 `handle`。見 [04](04-protocol.md)。在這條落地之前，邀請按鈕不得假送。P0 這張表單只邀請 `kind=human`。
+`POST /api/rooms/:id/members` 必須接受 `handle`。見 [04](04-protocol.md)。在這條落地之前，邀請按鈕不得假送。09 落地時這張表只邀請 `kind=human`。[10](10-members-and-mention.md) 把同一個欄位擴充到未停用的 agent，並把可摺疊人數改成常駐成員列。
 
 ### 房間內
 
-- 標題、連線 pill、人數（可展開成員 chips）、operator 的 Invite。
+- 標題、連線 pill、人數（可展開成員 chips）、operator 的 Invite。[10](10-members-and-mention.md) 移除可展開人數，改由常駐成員列取代，不再並列兩套成員 UI。
 - pill 的文字節點維持恰好 `live`、`connecting` 或 `offline`。離線另顯示 “Offline. Reconnecting…”。
 - 時間線沿用現有分組、agent 列、seq（粗指標隱藏）。正文 `pre-wrap`，不解析 Markdown。
 - 輸入列釘在右欄（手機則是聊天頁）底部，含 safe-area。`textarea` 從一行長高，上限 `40dvh`，用 `scrollHeight` 計算，不單靠 `field-sizing`。

@@ -574,7 +574,7 @@ button:disabled {
 }
 
 @media (pointer: coarse) {
-  .composer-hint {
+  .enter-hint {
     display: none;
   }
 
@@ -663,6 +663,69 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.member-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  min-width: 0;
+  flex: 1;
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+.member-strip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  max-width: 16rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--fill);
+}
+
+.member-chip.agent {
+  background: var(--agent);
+}
+
+.member-handle,
+.member-limit {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mention-list {
+  list-style: none;
+  margin: 0 0 0.35rem;
+  padding: 0.25rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.mention-opt {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  text-align: left;
+}
+
+.mention-opt.active {
+  outline: 2px solid var(--accent);
 }
 
 .room-tools {

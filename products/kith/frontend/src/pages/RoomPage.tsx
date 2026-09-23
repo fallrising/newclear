@@ -1,5 +1,6 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ApiError, inviteHuman, listMembers, listMessages } from "../api";
+import { applyMention, filterMentionHandles, mentionQuery } from "../mention";
 import {
   hasSeqGap,
   lastContinuousSeq,
@@ -11,6 +12,9 @@ import {
 import type { Member, Room, TimelineEvent } from "../types";
 
 const TYPING_TTL_MS = 4000;
+const REPLY_TTL_MS = 300_000;
+
+type ActiveReply = { memberId: string; handle: string; at: number };
 
 function senderLabel(event: TimelineEvent, members: Map<string, Member>): string {
   if (!event.sender_id) {
@@ -51,21 +55,39 @@ function memberLabel(memberId: string, members: Map<string, Member>): string {
   return member?.handle ?? member?.display_name ?? memberId;
 }
 
-function memberName(member: Member): string {
-  return member.handle ?? member.display_name ?? member.id;
-}
-
 function isOperatorOnly(member: Member): boolean {
   return member.quota_class === "operator_personal" || member.operator_only === true;
 }
 
-function MemberBadges({ member }: { member: Member }) {
+function MemberBadges({ member, viewerIsOperator }: { member: Member; viewerIsOperator: boolean }) {
+  const showOperatorOnly = !viewerIsOperator && isOperatorOnly(member);
   return (
     <>
-      {member.kind ? <span className="badge">{member.kind}</span> : null}
-      {isOperatorOnly(member) ? <span className="badge badge-operator">operator-only</span> : null}
+      {member.kind === "agent" ? <span className="badge">agent</span> : null}
+      {showOperatorOnly ? <span className="badge badge-operator">operator-only</span> : null}
     </>
   );
+}
+
+function limitSentence(member: Member, viewerIsOperator: boolean): string | null {
+  if (member.reply_limit?.code === "fixed") {
+    return `Fixed reply only: ${member.reply_limit.fixed_text}`;
+  }
+  if (!viewerIsOperator && isOperatorOnly(member)) {
+    return null;
+  }
+  if (member.reply_limit?.code === "sidecar_off") {
+    return "Not enabled · Requires the operator’s computer";
+  }
+  return null;
+}
+
+function memberAccessibleName(member: Member, viewerIsOperator: boolean): string {
+  const name = member.display_name || member.handle || member.id;
+  const handle = member.handle ? `@${member.handle}` : "";
+  const kind = member.kind === "agent" ? "agent" : "human";
+  const limit = limitSentence(member, viewerIsOperator);
+  return [name, handle, kind, limit].filter(Boolean).join(", ");
 }
 
 function composerCapPx(el: HTMLTextAreaElement): number {
@@ -106,7 +128,14 @@ export function RoomPage({
 }) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [members, setMembers] = useState<Map<string, Member>>(new Map());
-  const [membersLoaded, setMembersLoaded] = useState(false);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersError, setMembersError] = useState<string | null>(null);
+  const [replies, setReplies] = useState<ActiveReply[]>([]);
+  const [replyNotice, setReplyNotice] = useState<string | null>(null);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [caret, setCaret] = useState(0);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionDismissed, setMentionDismissed] = useState(false);
   const [typing, setTyping] = useState<Record<string, string>>({});
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +153,13 @@ export function RoomPage({
   const inviteRef = useRef<HTMLInputElement>(null);
   const pinBottom = useRef(true);
   const typingTimers = useRef<Map<string, number>>(new Map());
+  const membersRef = useRef(members);
+  const repliesRef = useRef(replies);
+  const hadMembers = useRef(false);
+  const eventSeenAt = useRef(new Map<string, number>());
+  const pendingCaret = useRef<number | null>(null);
+  membersRef.current = members;
+  repliesRef.current = replies;
   const connected = link === "live";
 
   function commitEvents() {
@@ -135,6 +171,10 @@ export function RoomPage({
     for (const event of incoming) {
       if (!eventsRef.current.has(event.seq)) {
         eventsRef.current.set(event.seq, event);
+        if (event.sender_id) {
+          eventSeenAt.current.set(event.sender_id, Date.now());
+          clearReply(event.sender_id, false);
+        }
         added += 1;
       }
     }
@@ -144,7 +184,32 @@ export function RoomPage({
     return added;
   }
 
+  function clearReply(memberId: string, announce: boolean) {
+    const current = repliesRef.current.find((item) => item.memberId === memberId);
+    setReplies((items) => items.filter((item) => item.memberId !== memberId));
+    if (announce && current) {
+      const seen = eventSeenAt.current.get(memberId) ?? 0;
+      if (seen < current.at) {
+        setReplyNotice(`${current.handle} reply ended`);
+      }
+    }
+  }
+
   function noteStatus(memberId: string, statusBody: string) {
+    if (statusBody === "is replying" || statusBody === "reply ended") {
+      if (statusBody === "reply ended") {
+        clearReply(memberId, true);
+        return;
+      }
+      const handle = membersRef.current.get(memberId)?.handle;
+      if (!handle) {
+        return;
+      }
+      const next = { memberId, handle, at: Date.now() };
+      setReplies((items) => [...items.filter((item) => item.memberId !== memberId), next]);
+      setReplyNotice(null);
+      return;
+    }
     setTyping((current) => ({ ...current, [memberId]: statusBody }));
     const prev = typingTimers.current.get(memberId);
     if (prev) {
@@ -178,7 +243,15 @@ export function RoomPage({
     setError(null);
     setNotice(null);
     setInviteOpen(false);
-    setMembersLoaded(false);
+    setMembers(new Map());
+    setMembersLoading(true);
+    setMembersError(null);
+    setRefreshError(null);
+    setReplies([]);
+    setReplyNotice(null);
+    hadMembers.current = false;
+    eventSeenAt.current = new Map();
+    setCaret(0);
     setLink("connecting");
     setBusy(true);
 
@@ -237,20 +310,33 @@ export function RoomPage({
       }
     }
 
-    void listMembers(room.id, ac.signal)
-      .then((list) => {
-        if (!cancelled) {
-          setMembers(new Map(list.map((member) => [member.id, member])));
+    void (async () => {
+      try {
+        const list = await listMembers(room.id, ac.signal);
+        if (cancelled) {
+          return;
         }
-      })
-      .catch(() => {
-        // Kind badge is optional.
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setMembersLoaded(true);
+        setMembers(new Map(list.map((member) => [member.id, member])));
+        hadMembers.current = true;
+        setMembersError(null);
+      } catch (err) {
+        if (cancelled || (err instanceof DOMException && err.name === "AbortError")) {
+          return;
         }
-      });
+        if (err instanceof ApiError && err.status === 401) {
+          onLoggedOut();
+          return;
+        }
+        if (!hadMembers.current) {
+          setMembers(new Map());
+        }
+        setMembersError("Could not load members.");
+      } finally {
+        if (!cancelled) {
+          setMembersLoading(false);
+        }
+      }
+    })();
 
     void loadHistory();
 
@@ -292,6 +378,8 @@ export function RoomPage({
       ws.onerror = () => {
         if (!cancelled) {
           setLink("offline");
+          setReplies([]);
+          setReplyNotice(null);
         }
       };
       ws.onclose = () => {
@@ -299,6 +387,8 @@ export function RoomPage({
           return;
         }
         setLink("offline");
+        setReplies([]);
+        setReplyNotice(null);
         retryTimer = window.setTimeout(connect, 2000);
       };
     }
@@ -340,14 +430,66 @@ export function RoomPage({
     submitBody();
   }
 
+  const activeMention = mentionQuery(body, caret);
+  const mentionOptions =
+    activeMention && !membersLoading && !membersError && link !== "offline"
+      ? filterMentionHandles([...members.values()], activeMention.query)
+      : [];
+  const mentionOpen = !mentionDismissed && mentionOptions.length > 0;
+  const activeMentionId = mentionOpen ? `mention-opt-${mentionIndex}` : undefined;
+
+  function chooseMention(index: number) {
+    const option = mentionOptions[index];
+    if (!option?.handle || !activeMention) {
+      return;
+    }
+    const next = applyMention(body, activeMention.start, caret, option.handle);
+    pendingCaret.current = next.caret;
+    setBody(next.value);
+    setCaret(next.caret);
+    setMentionDismissed(false);
+    setMentionIndex(0);
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && event.keyCode !== 229) {
+    const composing = event.nativeEvent.isComposing || event.keyCode === 229;
+    if (mentionOpen && !composing) {
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setMentionIndex((index) => Math.min(mentionOptions.length - 1, index + 1));
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setMentionIndex((index) => Math.max(0, index - 1));
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMentionDismissed(true);
+        return;
+      }
+      if (event.key === "Enter" && event.shiftKey) {
+        setMentionDismissed(true);
+        return;
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        chooseMention(mentionIndex);
+        return;
+      }
+    }
+    if (event.key === "Enter" && !event.shiftKey && !composing) {
       event.preventDefault();
       submitBody();
     }
   }
 
   const title = room.name ?? room.slug ?? room.id;
+  const replyLine = replies.reduce<ActiveReply | null>(
+    (latest, item) => (!latest || item.at >= latest.at ? item : latest),
+    null,
+  );
 
   useEffect(() => {
     const previous = document.title;
@@ -357,7 +499,6 @@ export function RoomPage({
     };
   }, [title]);
   const linkLabel = link === "live" ? "live" : link === "connecting" ? "connecting" : "offline";
-  const peopleLabel = membersLoaded ? `${members.size} ${members.size === 1 ? "person" : "people"}` : null;
 
   useEffect(() => {
     if (composerRef.current) {
@@ -370,6 +511,72 @@ export function RoomPage({
       inviteRef.current?.focus();
     }
   }, [inviteOpen]);
+
+  useEffect(() => {
+    if (pendingCaret.current == null || !composerRef.current) {
+      return;
+    }
+    const pos = pendingCaret.current;
+    composerRef.current.setSelectionRange(pos, pos);
+    pendingCaret.current = null;
+  }, [body]);
+
+  useEffect(() => {
+    setMentionIndex(0);
+  }, [activeMention?.query, activeMention?.start]);
+
+  useEffect(() => {
+    if (!mentionOpen) {
+      return;
+    }
+    function onPointer(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      if (composerRef.current?.contains(target) || document.getElementById("mention-list")?.contains(target)) {
+        return;
+      }
+      setMentionDismissed(true);
+    }
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
+  }, [mentionOpen]);
+
+  useEffect(() => {
+    if (replies.length === 0) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      setReplies((items) => items.filter((item) => now - item.at < REPLY_TTL_MS));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [replies.length]);
+
+  async function reloadMembers() {
+    setMembersLoading(members.size === 0);
+    try {
+      const list = await listMembers(room.id);
+      setMembers(new Map(list.map((member) => [member.id, member])));
+      hadMembers.current = true;
+      setMembersError(null);
+      setRefreshError(null);
+      return list;
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        onLoggedOut();
+        return null;
+      }
+      if (!hadMembers.current) {
+        setMembers(new Map());
+      }
+      setMembersError("Could not load members.");
+      return null;
+    } finally {
+      setMembersLoading(false);
+    }
+  }
 
   function closeInvite() {
     if (inviteBusy) {
@@ -388,12 +595,45 @@ export function RoomPage({
     setInviteBusy(true);
     setInviteError(null);
     try {
-      await inviteHuman(room.id, handle);
+      const memberId = await inviteHuman(room.id, handle);
       setInviteOpen(false);
       setInviteHandle("");
-      setNotice("They will see this room after they refresh.");
+      let list: Member[] | null = null;
+      try {
+        list = await listMembers(room.id);
+      } catch {
+        list = null;
+      }
+      if (!list) {
+        setRefreshError("Invitation succeeded. Couldn't refresh members.");
+        return;
+      }
+      setMembers(new Map(list.map((member) => [member.id, member])));
+      hadMembers.current = true;
+      setMembersError(null);
+      const added = list.find((member) => member.id === memberId);
+      if (!added) {
+        setRefreshError("Invitation succeeded. Couldn't refresh members.");
+        return;
+      }
+      setRefreshError(null);
+      setNotice(added.kind === "agent" ? null : "They will see this room after they refresh.");
     } catch (err) {
-      setInviteError(err instanceof Error ? err.message : "Could not invite");
+      if (err instanceof ApiError && err.code === "already_member") {
+        setInviteOpen(false);
+        setInviteHandle("");
+        await reloadMembers();
+        return;
+      }
+      if (err instanceof ApiError && err.status === 404) {
+        setInviteError("No such handle.");
+      } else if (err instanceof ApiError && err.code === "room_full") {
+        setInviteError("This room is full.");
+      } else if (err instanceof ApiError && err.status === 403) {
+        setInviteError(err.message || "operator required");
+      } else {
+        setInviteError(err instanceof Error ? err.message : "Could not invite");
+      }
     } finally {
       setInviteBusy(false);
     }
@@ -430,27 +670,56 @@ export function RoomPage({
         <span />
       </div>
       <div className="room-tools">
-        {peopleLabel ? (
-          <details className="people">
-            <summary>{peopleLabel}</summary>
-            <ul className="member-list" aria-label="Members">
-              {[...members.values()].map((member) => (
-                <li key={member.id}>
-                  <span>{memberName(member)}</span>
-                  <MemberBadges member={member} />
-                </li>
-              ))}
-            </ul>
-          </details>
-        ) : (
-          <span />
-        )}
+        <div
+          className="member-strip"
+          role="list"
+          aria-label="Members"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowRight") {
+              event.currentTarget.scrollBy({ left: 80 });
+            }
+            if (event.key === "ArrowLeft") {
+              event.currentTarget.scrollBy({ left: -80 });
+            }
+          }}
+        >
+          {membersLoading && members.size === 0 ? <p className="muted">Loading members…</p> : null}
+          {[...members.values()].map((member) => {
+            const limit = limitSentence(member, operator);
+            return (
+              <span key={member.id} className={member.kind === "agent" ? "member-chip agent" : "member-chip"} role="listitem">
+                <span className="member-name">{member.display_name || member.handle || member.id}</span>
+                {member.handle ? <span className="member-handle">@{member.handle}</span> : null}
+                <MemberBadges member={member} viewerIsOperator={operator} />
+                {limit ? <span className="member-limit">{limit}</span> : null}
+                <span className="sr-only">{memberAccessibleName(member, operator)}</span>
+              </span>
+            );
+          })}
+        </div>
         {operator ? (
           <button type="button" className="btn-quiet" onClick={() => setInviteOpen(true)}>
             Invite
           </button>
         ) : null}
       </div>
+      {membersError ? (
+        <p className="error" role="alert">
+          {membersError}{" "}
+          <button type="button" onClick={() => void reloadMembers()}>
+            Retry
+          </button>
+        </p>
+      ) : null}
+      {refreshError ? (
+        <p className="error" role="alert">
+          {refreshError}{" "}
+          <button type="button" onClick={() => void reloadMembers()}>
+            Retry
+          </button>
+        </p>
+      ) : null}
       {notice ? <p className="muted room-note">{notice}</p> : null}
       {error ? (
         <p className="error" role="alert">
@@ -493,7 +762,7 @@ export function RoomPage({
                 <div className="meta">
                   <span className="who">{senderLabel(event, members)}</span>
                   {clock ? <time dateTime={event.created_at}>{clock}</time> : null}
-                  {member ? <MemberBadges member={member} /> : null}
+                  {member ? <MemberBadges member={member} viewerIsOperator={operator} /> : null}
                   <span className="seq" aria-hidden="true">
                     {event.seq}
                   </span>
@@ -505,16 +774,47 @@ export function RoomPage({
         })}
       </section>
       <div className="status-slot">
-        {Object.entries(typing).map(([memberId, statusBody]) => (
-          <p key={memberId} className="status-line">
-            {memberLabel(memberId, members)} {statusBody}
+        {replyLine ? (
+          <p className="status-line" role="status">
+            {replyLine.handle} is replying
           </p>
-        ))}
+        ) : (
+          Object.entries(typing).map(([memberId, statusBody]) => (
+            <p key={memberId} className="status-line">
+              {memberLabel(memberId, members)} {statusBody}
+            </p>
+          ))
+        )}
+        {replyNotice ? (
+          <p className="sr-only" role="status">
+            {replyNotice}
+          </p>
+        ) : null}
       </div>
       {link === "offline" ? <p className="conn-banner">Offline. Reconnecting…</p> : null}
       <form className="composer" onSubmit={onSubmit}>
+        {mentionOpen ? (
+          <ul id="mention-list" className="mention-list" role="listbox">
+            {mentionOptions.map((member, index) => (
+              <li key={member.id} id={`mention-opt-${index}`} role="option" aria-selected={index === mentionIndex}>
+                <button
+                  type="button"
+                  className={index === mentionIndex ? "mention-opt active" : "mention-opt"}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => chooseMention(index)}
+                >
+                  <span>{member.display_name || member.handle}</span>
+                  {member.handle ? <span>@{member.handle}</span> : null}
+                  <MemberBadges member={member} viewerIsOperator={operator} />
+                  {limitSentence(member, operator) ? <span>{limitSentence(member, operator)}</span> : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <p id="composer-hint" className="composer-hint">
-          Enter to send · Shift+Enter for a new line
+          <span className="enter-hint">Enter to send · Shift+Enter for a new line</span>
+          <span>Type @ to mention a room member.</span>
         </p>
         <div className="composer-row">
           <textarea
@@ -523,11 +823,21 @@ export function RoomPage({
             rows={1}
             maxLength={8192}
             value={body}
-            onChange={(event) => setBody(event.target.value)}
+            role="combobox"
+            aria-expanded={mentionOpen}
+            aria-controls="mention-list"
+            aria-activedescendant={activeMentionId}
+            onChange={(event) => {
+              setBody(event.target.value);
+              setCaret(event.target.selectionStart ?? event.target.value.length);
+              setMentionDismissed(false);
+            }}
+            onSelect={(event) => setCaret(event.currentTarget.selectionStart ?? 0)}
             onKeyDown={onKeyDown}
             placeholder="Message"
             aria-label={`Message ${title}`}
             aria-describedby="composer-hint"
+            aria-autocomplete="list"
           />
           <button type="submit" className="btn-primary" disabled={!body.trim() || !connected}>
             Send
@@ -558,10 +868,12 @@ export function RoomPage({
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
+                  autoComplete="off"
                   onChange={(event) => setInviteHandle(event.target.value)}
                   required
                 />
               </label>
+              <p className="muted">Enter the handle of an existing person or agent.</p>
               {inviteError ? (
                 <p className="error" role="alert">
                   {inviteError}

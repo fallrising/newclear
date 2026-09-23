@@ -75,7 +75,7 @@ fixture 沿用原60 CI及三 provider regression，新增 deterministic Resource
 文件交付只驗證連結、需求/AC映射、內部一致性、範圍與 Git diff；不算 AC-WS 產品驗收。PLAN 保存 task/owner/decision；STATUS 明確分開「已定義／已實作／已驗證」，來源版本、review、CI 與合併狀態各自記錄。任何真實 adapter、雲端、SSO、網路執行、外部通知或部署另立 integration 工作，不因合併本 SDD 而啟用。
 
 
-W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
+W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
 
 
 W2 已由 [PR36](https://github.com/fallrising/newclear/pull/36) 驗收合併為9162685，完整最新headCI通過；上方本機checkpoint是歷史觀察。W3 依 [W3 integration contract](../W3-INTEGRATION-CONTRACT.md) 和 T037–040 開始，完整 AC-WS-10/11/15–18 不縮減。

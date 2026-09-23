@@ -2,7 +2,9 @@
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
-目前：**W1 已驗收合併；W2 本機驗證完成，待最終 PR head CI／接受／合併；W3–W5 尚未實作。** W2 沿用 [PR36](https://github.com/fallrising/newclear/pull/36)。固定 `4a69e07` 通過321項原生測試、77/77 Chromium及2/2真實隔離；最終版面／讀回修正 `bf3f168` 通過8/8 Firefox／WebKit、真實鍵盤與欄寬檢查、3/3效能。初始JS304,477gzip bytes、LCP756ms，均在既有預算內。獨立review已重現確認F01–04修正；最終結果見 [T036](../../../.team/reports/T-036.md)。W2尚未接受或合併，唯一owner仍為Codex orchestrator W2；下一步是完成最後文件head CI，再按既有授權合併並核對實際結果。完整AC／commands／歷史失敗見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md) 和 [PLAN](../../../.team/PLAN.md) 最後resume。下列歷史checkpoint不取代此摘要。
+目前：**W1／W2 已驗收合併；W3 正在實作，尚未驗收；W4／W5 尚未開始。** W2 [PR36](https://github.com/fallrising/newclear/pull/36) 最終 head e8c7ec1 的 CI35846286919 全部通過，實際合併為9162685；component tree一致，W2 owner已釋放，合併後CI35849832030與mirror35849832043均已成功。321原生測試、77Chromium、8Firefox/WebKit、3效能、2隔離及獨立T036review的完整證據見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md)。
+
+W3 [draft PR37](https://github.com/fallrising/newclear/pull/37) 保存合約與進度，run DG-W3-20260923-01，唯一 owner Codex orchestrator W3，worktree `newclear-dim-gate-w3`，branch `agent/dim-gate/mainline/w3-service-delivery`。T037領域、T038新介面使用獨立工作樹；T039整合API／遷移，T040保持未參與實作供獨立review。下一步是整合固定schema／client及實際流程，完成全gates後才接受。狀態與恢復步驟見 [PLAN](../../../.team/PLAN.md) 最新紀錄；以下段落保留歷史觀察。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
@@ -133,3 +135,6 @@ W2 固定4a69e07：三項medium review修正後13/13瀏覽器與3/3效能通過�
 W2 actual closeout reconciled 2026-09-23: PR36 ACCEPTED/MERGED at 2026-09-23T10:37:05Z, accepted head e8c7ec113d01a778642d2600b1af002dc7831651, actual merge 91626851fb17df7ab31c96dee9353b9ee4d42c92. Exact-head [CI35846286919](https://github.com/fallrising/newclear/actions/runs/35846286919) succeeded with321unit/77Chromium/8Firefox-WebKit/3benchmark/2isolation and all native gates; artifact10745167006, dim-gate-m5-0c72ed5243b32edccb0a8b5c879575660e846674, expires2026-10-23. SSH main ancestry and component tree410fe5f8aeafc7391754b08f9c9ad31328ddcc26 equal accepted head. Independent T036attempt2 SHA372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 unchanged; no unresolved findings. DG-W2-20260923-01 terminalDONE, T033/T034/T035 ACCEPTED, T036 DONE; active_owner NONE. Postmerge CI35849832030 observed in_progress, mirror35849832043 SUCCESS; this is status verification, not a claim that pending CI passed. PR36 body has actual closeout; original53worktrees retained. No deployment or external side effect.
 
 W3 run DG-W3-20260923-01 從實際 W2 merge 建立隔離工作樹 `newclear-dim-gate-w3`／branch `agent/dim-gate/mainline/w3-service-delivery`；T037–040 與 [W3 contract](W3-INTEGRATION-CONTRACT.md) 固定全範圍、API、權限、遷移、owner 與驗收。現在僅固定合約，尚未宣稱 W3 功能已實作或驗收。W4／W5 尚未開始；舊段落保留歷史觀察。
+
+
+W2 postmerge reconciliation: actual merge91626851fb17df7ab31c96dee9353b9ee4d42c92 [CI35849832030](https://github.com/fallrising/newclear/actions/runs/35849832030) is now SUCCESS, as is mirror35849832043. W2 stays ACCEPTED/MERGED, terminalDONE/ownerNONE. Prior running observations remain historical.

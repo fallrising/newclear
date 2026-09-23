@@ -222,8 +222,12 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | --- | --- | --- |
 | E2E-W0-01 | 隔離環境、seed、登入、FE-05（語言偵測）、FE-22、BR-22、UJ-11（部分） | w0-shell.spec.ts |
 | E2E-W0-02 | 證據資料夾、V2-INV-01 的檢查機制、FM-E2E-01–06 | w0-evidence.spec.ts |
-| E2E-W1-01 | V2-INV-04（舊前端仍可用） | w1-compat.spec.ts |
-| E2E-W1-02 | UJ-02、BR-31 | w1-chat.spec.ts |
+| E2E-W1-01 | V2-INV-04（舊前端仍可用）、B-01 相容 | w1-compat.spec.ts |
+| E2E-W1-02 | UJ-02、BR-31、IME | w1-chat.spec.ts |
+| E2E-W1-03 | UJ-02、FM-SYNC-01–11、16 | w1-chat.spec.ts |
+| E2E-W1-04 | UJ-03、B-01、FM-SYNC-12、13 | w1-history.spec.ts |
+| E2E-W1-05 | BR-34、FE-20 | w1-markdown.spec.ts |
+| E2E-W1-06 | UJ-11 | w1-mobile.spec.ts |
 | … | … | … |
 
 ## 7. CI

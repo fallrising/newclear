@@ -45,7 +45,7 @@
 | `@radix-ui/react-dropdown-menu` | 2.1.24 | DropdownMenu | W2 | 同上 |
 | `@radix-ui/react-tooltip` | 1.2.16 | Tooltip | W3 | 同上 |
 | `@radix-ui/react-tabs` | 1.1.21 | Tabs | W4 | 同上 |
-| `@radix-ui/react-scroll-area` | 1.2.18 | ScrollArea | W1 | 同上 |
+| `@radix-ui/react-scroll-area` | 1.2.18 | ScrollArea | W3（W1 的時間線用原生捲動容器） | 同上 |
 
 E2E 套件（`e2e/package.json`，W0）：`@playwright/test` 1.56.1、`ajv` 8.20.0、`typescript` 7.0.2、`@types/node` 26.6.2。Playwright 刻意不用最新的 1.63.0：1.56.1 綁定 Chromium revision 1194（`141.0.7390.37`），正是本專案雲端環境預裝的版本，不必下載瀏覽器（已查 `playwright-core` 1.56.1 的 `browsers.json`）。鎖定此版本見 [10](10-decisions.md) D-17。
 
@@ -85,7 +85,7 @@ products/kith/web/
 products/kith/e2e/        # Playwright，見 08
 ```
 
-**FE-03** `features/*` 之間不互相 import 內部檔案；共用的放 `ui/`、`api/`、`store/`。
+**FE-03** `features/*` 之間不互相 import 內部檔案；共用的放 `ui/`、`api/`、`store/`。落實方式（W1 起）：每個 feature 有 `index.ts` 作為唯一對外出口；feature 之間完全不互相 import；組合多個 feature 的畫面放在 `app/`，且只從 `features/<名>` 匯入（[W1](milestones/W1.md) §3）。
 
 **FE-05** 介面雙語：繁體中文（`zh-TW`）與英文（`en`），使用者 2026-09-23 決定。預設語言依 `navigator.language`（`zh*` → `zh-TW`，其他 → `en`），使用者可在設定切換並存在 `localStorage`。兩份字串表的 key 集合必須完全相同，缺 key 視為建置錯誤（型別層檢查：`en` 以 `satisfies Record<keyof typeof zhTW, string>` 定義）。日期與相對時間用 `Intl`，依語言格式化。伺服器錯誤碼在前端映射成兩種語言，不顯示伺服器 `message` 原文。
 
@@ -150,7 +150,14 @@ idle → loading_latest → connecting → live
 
 **FE-11** 任何時刻，同一 `client_message_id` 在畫面上最多一列。
 
-**FE-12** 補洞以**全房 seq** 為準（含 trace、thread 回覆）；主時間線只是過濾後的投影。這樣 thread 回覆不會被誤判成「缺號」。
+**FE-12** 補洞以**全房 seq** 為準（含 trace、thread 回覆）；主時間線只是過濾後的投影。這樣 thread 回覆不會被誤判成「缺號」。所有查詢都帶 `kind=message,trace`。
+
+Phase 2 細化（[W1](milestones/W1.md) §5.3）補充的事實與規則：
+
+- v1 WS 的 `error` 封包不帶 `client_message_id`，所以同時只讓一則 WS send 在途，`error` 歸屬於在途那一則。
+- Playwright 的 `setOffline` 與瀏覽器離線都不會關閉既有 WS；RoomSync 在 `offline` 事件時主動關閉，`online` 時重連。
+- 發現缺口後等 `GAP_GRACE_MS`（500 ms）才補洞，容許亂序。
+- 狀態機多出 `not_found`（403／404，不重試）、`load_error`（載入失敗，退避重試）、`auth_lost`。
 
 ### 5.3 FM 清單：RoomSync（寫程式前必須補齊並對應 E2E 或受控測試）
 
@@ -203,7 +210,7 @@ idle → loading_latest → connecting → live
 ## 9. Phase 2 待細化
 
 - [ ] 每個 feature 的元件樹、props 型別、資料來源與 `data-testid` 清單。
-- [ ] RoomSync 的完整型別定義與每個 FM 的對應處理程式段落描述。
+- [x] RoomSync 的完整型別定義與每個 FM 的對應處理程式段落描述 → [W1](milestones/W1.md) §5.3、§8。
 - [ ] `copy/zh-TW.ts`、`copy/en.ts` 完整文案表（FE-05）。結構與命名規則已完成（[W0](milestones/W0.md) §5.2.4）；各畫面的文案隨各里程碑的 `Wn.md` 文案表補齊。
 - [x] Tailwind 設定與 token 對應表 → [07](07-visual-design.md) §4.1、[W0](milestones/W0.md) §5.5。
 - [ ] CSP 最終版與 Worker 設定方式。

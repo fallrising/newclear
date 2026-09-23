@@ -48,7 +48,8 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | 里程碑 | 檔案 | 狀態 |
 | --- | --- | --- |
 | W0 E2E 與 web 骨架 | [milestones/W0.md](milestones/W0.md) | `DOC_READY` |
-| W1–W7 | 尚未細化 | `NOT_STARTED` |
+| W1 聊天核心 | [milestones/W1.md](milestones/W1.md) | `DOC_READY` |
+| W2–W7 | 尚未細化 | `NOT_STARTED` |
 
 相關 ADR：
 

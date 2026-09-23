@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { captureBrowserHealth, verifyBrowserHealth } from './browser-health'
 
 async function become(page: Page, actor: string) {
+  await page.waitForLoadState('networkidle')
   const picker = page.getByRole('combobox', { name: '示範身分', exact: true })
   await expect(picker).toBeEnabled()
   if (await picker.inputValue() !== actor) await picker.selectOption(actor)
@@ -27,7 +28,10 @@ async function ticks(page: Page, count = 5) {
   for (let tick = 0; tick < count; tick++) {
     const button = page.getByRole('button', { name: '推進示範時鐘 1 tick', exact: true })
     await expect(button).toBeEnabled()
+    const before = (await readSnapshot(page)).logicalClock
     await button.click()
+    await expect.poll(async () => (await readSnapshot(page)).logicalClock).toBe(before + 1)
+    await expect(page.getByRole('button', { name: '正在執行並讀回…', exact: true })).toHaveCount(0)
     if (tick + 1 < count) await expect(button).toBeEnabled()
   }
 }
@@ -184,7 +188,7 @@ test('W2 AC-03/08/09/15: scoped shared inventory, readonly K8s and direct Admin 
     await expect(page.getByRole('heading', { name: 'Node 唯讀樣本' })).toBeVisible()
     await become(page, 'user-admin')
     expect((await raw(page, '/resource-inventory/ci-idc-redis-01')).status).toBe(404)
-    expect((await raw(page, '/changes', 'POST', {})).status).toBe(403)
+    expect((await raw(page, '/changes', 'POST', { kind: 'resource.bind', mode: 'create', catalogItemId: 'w2-catalog-redis', catalogRevision: 1, reason: 'Direct Admin permission probe', targetCiId: 'ci-idc-redis-01', targetCiVersion: 1, applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, quotaMiB: 512, purpose: 'runtime', accessProfileRef: 'w2-profile-redis-runtime' })).status).toBe(403)
     await page.goto('ops/caches')
     await expect(page.getByRole('heading', { name: '目前身分無法進入維運中心' })).toBeVisible()
   } finally { await verifyBrowserHealth(page, info, health) }

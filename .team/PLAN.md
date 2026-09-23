@@ -829,3 +829,5 @@ remote_durability: parent1c0d230SSHsaved; containingintegrationcheckpoint nextSS
 blockers: []
 next_action: SSHsavecheckpoint/updatePR36; runfixedW2browser and fullnative/perf/smoke/regression, finishremainingACcoverage; uninvolvedT036review thenlatestheadCI andauthorizedmerge; verifymergeandreleaseW2beforeW3
 ```
+
+DG-D060: checkpoint285b46f SSHsaved to existingPR36, PRdescriptionupdated. Actual fixed browser0/4: staging test reloaded before final tick response completed; Kafka business path reached success but audit request was still in flight during persona switch; Admin denial test sent invalid emptybody422 rather than validbody403; real UI defect dialog Escape lost initiating-button focus. Root owns correcting UI focus and precise settled browser assertions, no health suppression. Fixed285b46f benchmark2/3: initialJS314429bytes fails307200budget, query/HTTPpass. T033attempt2 reactivated sole domain owner for bounded lazy non-startup mutation/clock split under contract; no other production changes. T034attempt2 HTTP13/13passespendingreport. All failed evidence retained; W2NOT_ACCEPTED.

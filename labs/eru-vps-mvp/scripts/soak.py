@@ -139,14 +139,23 @@ def main():
     create.add_argument('--duration-seconds', type=int, default=86400)
     create.add_argument('--interval', type=int, default=30)
     create.add_argument('--lead-seconds', type=int, default=90)
-    for action in ('status', 'stop'):
+    for action in ('status', 'stop', 'collect'):
         sub.add_parser(action).add_argument('--run', required=True)
+    review = sub.add_parser('report', help='Analyze a collected private snapshot without SSH')
+    review.add_argument('--run', required=True)
+    review.add_argument('--collection', help='Specific collection ID; defaults to the latest attempt')
     args = parser.parse_args()
     if args.action == 'start':
         if not 30 <= args.duration_seconds <= 86400 or not 5 <= args.interval <= 60 or not 15 <= args.lead_seconds <= 300:
             parser.error('duration 30..86400, interval 5..60, lead 15..300 seconds')
         with ClusterLock(PROJECT):
             result = start(PatchOperator(), args.canary_run, args.duration_seconds, args.interval, args.lead_seconds)
+    elif args.action in ('collect', 'report'):
+        from soak_evidence import collect, collection_path
+        from soak_report import report
+        directory = collect(PatchOperator(), args.run) if args.action == 'collect' else collection_path(PROJECT, args.run, args.collection)
+        result = report(directory)
+        print('Private collection:', directory)
     elif args.action == 'stop':
         with ClusterLock(PROJECT):
             result = inspect(PatchOperator(), args.run, stop=True)

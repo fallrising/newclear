@@ -92,3 +92,58 @@ def dispatch(request):
     return {'unit': unit, 'directory': str(directory), 'systemd': properties,
             'status': status, 'observed_at_epoch': time.time(),
             'current_boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip()}
+
+
+def copy_prefix(stream, size, output=None):
+    """Copy/hash exactly a committed prefix; never follow a concurrently growing tail."""
+    if type(size) is not int or not 0 <= size <= 192 * 1024 * 1024:
+        raise ValueError('invalid evidence byte count')
+    digest = hashlib.sha256()
+    left = size
+    while left:
+        chunk = stream.read(min(left, 1024 * 1024))
+        if not chunk:
+            raise ValueError('evidence shorter than committed status')
+        digest.update(chunk)
+        if output is not None:
+            output.write(chunk)
+        left -= len(chunk)
+    return digest.hexdigest()
+
+
+def open_samples(directory):
+    fd = os.open(directory / 'samples.jsonl', os.O_RDONLY | os.O_NOFOLLOW)
+    s = os.fstat(fd)
+    if not stat.S_ISREG(s.st_mode) or s.st_uid != 0 or s.st_nlink != 1:
+        os.close(fd)
+        raise ValueError('unsafe observer evidence')
+    return os.fdopen(fd, 'rb')
+
+
+def export_info(request):
+    # Reuse the read-only path/config identity checks, without changing the unit.
+    result = dispatch({**request, 'action': 'status'})
+    status = result.get('status')
+    if not status or status.get('config_sha256') != request['config_sha256']:
+        raise ValueError('missing or mismatched observer status')
+    directory = Path(result['directory'])
+    with open_samples(directory) as stream:
+        checksum = copy_prefix(stream, status['bytes'])
+    sources = {}
+    for name in FILES:
+        path = directory / name
+        s = path.lstat()
+        if not stat.S_ISREG(s.st_mode) or s.st_uid != 0 or s.st_nlink != 1 or s.st_size > 1024 * 1024:
+            raise ValueError('unsafe observer source')
+        sources[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {**result, 'evidence': {'bytes': status['bytes'], 'sha256': checksum},
+            'source_sha256': sources}
+
+
+def export_samples(request, output):
+    # Status may advance after export_info. Only stream its frozen byte boundary.
+    result = dispatch({**request, 'action': 'status'})
+    with open_samples(Path(result['directory'])) as stream:
+        checksum = copy_prefix(stream, request['bytes'], output)
+    if checksum != request['sha256']:
+        raise ValueError('committed evidence changed during collection')

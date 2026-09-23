@@ -50,3 +50,40 @@ ssh ckc-disposable-01 sudo -n cat /var/lib/eru-mvp/soak/SOAK_RUN/samples.jsonl \
 `active/exited`、MainPID 0 是正常完成後保留的 unit，需同時讀 status。`complete` 只表示收集到截止樣本，仍為 `pending_review`；HTTP／健康失敗、服務變更、取樣缺口及 counter reset 不會被後續成功抹除。重新連線會辨識 reboot、stale、missing evidence。最終須核對三台原始紀錄完整、共同開始／截止與樣本間隔、所有 failures/warnings、服務與 workload 身分，再唯讀檢查叢集。
 
 到期只停止觀測；兩個 canary 保留到下次檢查，以便核對 runtime 與配額。完成檢查後使用 manifest 中原 `canary_run` 建立精確 cleanup plan／execute，再確認 workload 與配額歸零。不會自動刪除樣本、備份或 ERU 狀態。
+
+## 自動回收與離線分析
+
+```bash
+# [B ← 01–03] 可在觀測途中或結束後執行，不重啟／停止服務
+python3 scripts/soak.py collect --run SOAK_RUN
+# [B 本機] 重讀最近一次回收，不發出 SSH 或其他遠端命令
+python3 scripts/soak.py report --run SOAK_RUN
+# [B 本機] 重讀某一次歷史快照
+python3 scripts/soak.py report --run SOAK_RUN --collection COLLECTION_ID
+```
+
+每次 collect 都建立 `private/soak/SOAK_RUN/collections/COLLECTION_ID/`，保存 manifest、逐 host 回收進度、當時的 status／systemd／boot ID、原始 JSONL 與 `report.json`。`latest-collection.json` 指向最新嘗試；新回收失敗時不會悄悄退回舊的成功結果。可隨時再次回收，歷史快照不覆蓋。
+
+遠端先讀 atomic status 中已完成樣本的 byte boundary，再計算該 prefix 的 SHA256；串流只讀取這段固定長度，檔尾仍可持續增加。核對 run/config 與兩支部署程式的 SHA；B 收完再核對長度和 SHA 才將 `.partial` 更名為正式 JSONL。SSH 中斷、原始檔少於紀錄長度或內容變化時保留 partial 與錯誤，不記成完整回收。每台最多 192 MiB，傳輸 timeout 180 秒。這些都是檔案讀取，沒有遠端安裝或 service 變更。
+
+report 逐筆重算 HTTP／健康錯誤、服務變更、histogram reset、觀測間隔、時鐘連續性，核對 source/config、JSONL 完整性、筆數、長度、SHA 與原 status 摘要。三台時間取交集顯示共同涵蓋秒數。狀態分為：
+
+| 狀態 | 意義 |
+| --- | --- |
+| `in_progress` | 回收當下程序仍在執行，不能算完整驗收 |
+| `invalid_evidence` | 缺檔、傳輸失敗、身分／hash／筆數／格式不符，或 complete 沒涵蓋截止時間 |
+| `observed_failures` | 原始樣本顯示功能、服務或取樣故障，後來成功不會抹除 |
+| `incomplete` | 觀測中斷、重開機、程序不在或樣本停滯 |
+| `complete_needs_review` | 收集時間完整且未見上述故障，仍須核對警告、負載範圍和最後 cluster 狀態 |
+
+報告是**回收當下**的快照；離線重新分析不會更新遠端狀態。沒有自動 PASS 或自動 cleanup。最終仍用原 canary run 的新 plan 做精確清理。
+
+### 延遲與 guest 指標的時間對照
+
+01 的相鄰樣本轉成 iowait／steal 百分比、I/O PSI stall 比例、各裝置 read/write 平均耗時。slow fdatasync／timeout／panic／服務變更的樣本會帶上相鄰時間窗的 guest 指標，並保留前 100 個異常樣本窗口及剩餘數量；完整資料仍在 JSONL。多個裝置／partition 各別列出，不能將它們相加。
+
+CPU 使用 aggregate counters 的差值，guest 欄位不重複加總。iowait 本身有計量限制，也可能下降；負差值標為 unavailable，不改成 0。欄位限制見 [Linux /proc 文件](https://docs.kernel.org/filesystems/proc.html)。
+
+磁碟平均耗時用相鄰樣本 read/write 的耗時差除以完成數；in-flight 是 gauge，不當累計 counter。沒有 I/O 時平均耗時為 null，不能推論磁碟很快。flush/discard 不包含在這個 read/write 平均值，因此它不是 fdatasync 的直接測量；見 [Linux I/O statistics](https://docs.kernel.org/admin-guide/iostats.html)。PSI 使用 `total` 微秒差值除以觀測間隔，見 [Linux PSI](https://docs.kernel.org/accounting/psi.html)。
+
+所有值都是約 30 秒窗口的平均或摘要，probe 內各來源也非同時讀取；時間相近只能支持相關性，不能單憑 guest 資料歸因到供應商／宿主機。沒有 backend observations 時，backend 延遲未受測；沒有重現故障不表示歷史秒級 fdatasync 根因已解決。

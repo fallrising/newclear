@@ -7,6 +7,7 @@ export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environ
   | 'ops.overview' | 'ops.cmdb' | 'ops.ci-detail' | 'ops.topology' | 'ops.requests' | 'ops.request-detail'
   | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.navigation'
   | 'admin.catalog' | 'admin.cmdb-models' | 'admin.audit' | 'guide'
+  | 'rd.delivery' | 'rd.configuration' | 'rd.traffic' | 'ops.service-change'
   | 'rd.resources' | 'rd.resource-request' | 'rd.change-detail' | 'ops.change-detail'
   | 'ops.caches' | 'ops.cache-detail' | 'ops.messaging' | 'ops.messaging-detail' | 'ops.clusters' | 'ops.cluster-detail'
   | 'rd.observability' | 'ops.incidents' | 'ops.incident-detail' | 'admin.integrations'
@@ -63,6 +64,10 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'ops.messaging-detail', path: '/ops/messaging/:ciId', center: 'ops', requiredAction: 'ci.read', crossCenterRead: true, navigation: { label: '訊息佇列詳情', group: '資源', order: 28, visible: false } },
   { key: 'ops.clusters', path: '/ops/clusters', center: 'ops', requiredAction: 'ci.read', navigation: { label: 'Kubernetes 叢集', group: '資源', order: 28, visible: true } },
   { key: 'ops.cluster-detail', path: '/ops/clusters/:ciId', center: 'ops', requiredAction: 'ci.read', crossCenterRead: true, navigation: { label: 'Kubernetes 叢集詳情', group: '資源', order: 28, visible: false } },
+  { key: 'rd.delivery', path: '/rd/apps/:appId/delivery', center: 'rd', requiredAction: 'pipelineDefinition.read', crossCenterRead: true, navigation: { label: '交付定義', group: '交付', order: 19, visible: false } },
+  { key: 'rd.configuration', path: '/rd/apps/:appId/configuration', center: 'rd', requiredAction: 'serviceConfig.read', crossCenterRead: true, navigation: { label: '服務配置', group: '交付', order: 19, visible: false } },
+  { key: 'rd.traffic', path: '/rd/apps/:appId/traffic', center: 'rd', requiredAction: 'trafficPolicy.read', crossCenterRead: true, navigation: { label: '業務流量灰度', group: '交付', order: 19, visible: false } },
+  { key: 'ops.service-change', path: '/ops/service-changes/:sourceType/:sourceId', center: 'ops', requiredAction: 'serviceChange.read', crossCenterRead: true, navigation: { label: '服務變更詳情', group: '審批與變更', order: 29, visible: false } },
   { key: 'guide', path: '/guide', navigation: { label: '示範導覽', group: '示範', order: 40, visible: true } },
 ]
 

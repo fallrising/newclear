@@ -33,13 +33,18 @@ const ChangeWizardPage = lazy(() => import('../../features/resources').then(modu
 const ChangeDetailPage = lazy(() => import('../../features/resources').then(module => ({ default: module.ChangeDetailPage })))
 const RequestWizard = lazy(() => import('../../features/self-service').then(module => ({ default: module.RequestWizard })))
 
+const DeliveryPage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.DeliveryPage })))
+const ConfigurationPage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.ConfigurationPage })))
+const TrafficPage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.TrafficPage })))
+const ServiceChangePage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.ServiceChangePage })))
+
 export function AppRoutes({ session }: { session: SessionView }) {
   return <Suspense fallback={<LoadingState label="正在載入工作區…" />}><Routes>
     <Route path="/" element={<Navigate to={`/${session.centers[0] ?? 'guide'}`} replace />} />
     <Route path="/rd" element={<CenterLayout routeKey="rd.overview" center="rd" session={session}><CenterOverview key={`${session.identityEpoch}:rd`} center="rd" session={session} /></CenterLayout>} />
     <Route path="/rd/apps" element={<CenterLayout routeKey="rd.apps" center="rd" session={session}><ApplicationListRoute /></CenterLayout>} />
-    <Route path="/rd/apps/:appId" element={<CenterLayout routeKey="rd.app-detail" center="rd" session={session}><ApplicationDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} /></CenterLayout>} />
-    <Route path="/rd/apps/:appId/environments/:environmentId" element={<CenterLayout routeKey="rd.environment-detail" center="rd" session={session}><EnvironmentDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId" element={<CenterLayout routeKey="rd.app-detail" center="rd" session={session}><ApplicationDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/environments/:environmentId" element={<CenterLayout routeKey="rd.environment-detail" center="rd" session={session}><EnvironmentDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} /></CenterLayout>} />
     <Route path="/rd/catalog" element={<CenterLayout routeKey="rd.catalog" center="rd" session={session}><CatalogPage /></CenterLayout>} />
     <Route path="/rd/catalog/:itemId/request" element={<CenterLayout routeKey="rd.catalog-request" center="rd" session={session}><RequestWizard /></CenterLayout>} />
     <Route path="/rd/requests" element={<CenterLayout routeKey="rd.requests" center="rd" session={session}><WorkItemsPage center="rd" session={session} /></CenterLayout>} />
@@ -78,6 +83,10 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/ops/messaging/:ciId" element={<CenterLayout routeKey="ops.messaging-detail" center="ops" session={session}><InventoryDetailPage kind="queue" session={session} /></CenterLayout>} />
     <Route path="/ops/clusters" element={<CenterLayout routeKey="ops.clusters" center="ops" session={session}><InventoryListPage kind="cluster" /></CenterLayout>} />
     <Route path="/ops/clusters/:ciId" element={<CenterLayout routeKey="ops.cluster-detail" center="ops" session={session}><InventoryDetailPage kind="cluster" session={session} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/delivery" element={<CenterLayout routeKey="rd.delivery" center="rd" session={session}><DeliveryPage session={session} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/configuration" element={<CenterLayout routeKey="rd.configuration" center="rd" session={session}><ConfigurationPage session={session} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/traffic" element={<CenterLayout routeKey="rd.traffic" center="rd" session={session}><TrafficPage session={session} /></CenterLayout>} />
+    <Route path="/ops/service-changes/:sourceType/:sourceId" element={<CenterLayout routeKey="ops.service-change" center="ops" session={session}><ServiceChangePage session={session} /></CenterLayout>} />
     <Route path="/guide" element={<Guide session={session} />} />
     <Route path="*" element={<UnknownRoute session={session} />} />
   </Routes></Suspense>

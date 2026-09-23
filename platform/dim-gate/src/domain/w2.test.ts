@@ -248,7 +248,7 @@ describe('W2 rejection, replay and immutable history boundaries', () => {
     const id = await h.create(bind({ environmentVersion })), teammate = await h.create(bind({ environmentVersion }), 'w2-user-multi')
     const before = JSON.stringify(h.engine.getSnapshot())
     const mine = pageSchema(workItemSchema).parse(h.read('/work-items', rd, 'center=rd'))
-    expect(new Set(mine.items.map(w => w.sourceType))).toEqual(new Set(['request', 'release', 'change']))
+    expect(new Set(mine.items.map(w => w.sourceType))).toEqual(new Set(['request', 'release', 'change', 'pipelineDefinition', 'serviceConfig']))
     expect(mine.items.find(w => w.sourceId === request.entityId)).toMatchObject({ sourceType: 'request', rawState: 'draft', route: `/rd/requests/${request.entityId}` })
     expect(mine.items.find(w => w.sourceType === 'release')).toMatchObject({ rawState: 'succeeded' })
     expect(mine.items.some(w => w.sourceId === teammate)).toBe(false)

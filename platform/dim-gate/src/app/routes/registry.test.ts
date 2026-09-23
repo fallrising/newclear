@@ -54,3 +54,16 @@ it('keeps M4 diagnostic deep links action-guarded without adding another center 
   expect(visibleNavigation(rd).some(route => route.center === 'ops')).toBe(false)
   expect(canAccessRoute(session({ effectiveActions: [] }), routeForPath('/ops/incidents/incident-1')!)).toBe(false)
 })
+
+
+it('registers W3 source routes with business read actions independent of workspace navigation', () => {
+  const ops = session({ centers: ['ops'], effectiveActions: ['pipelineDefinition.read', 'serviceConfig.read', 'trafficPolicy.read', 'serviceChange.read'] })
+  const paths = ['/rd/apps/app-checkout/delivery?revisionId=definition-1', '/rd/apps/app-checkout/configuration?environmentId=env-checkout-dev', '/rd/apps/app-checkout/traffic', '/ops/service-changes/serviceConfig/config-1']
+  expect(paths.map(path => routeForPath(path)?.key)).toEqual(['rd.delivery', 'rd.configuration', 'rd.traffic', 'ops.service-change'])
+  for (const path of paths) {
+    const route = routeForPath(path)!
+    expect(route.navigation.visible).toBe(false)
+    expect(canAccessRoute(ops, route)).toBe(true)
+    expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write', 'app.read'] }), route)).toBe(false)
+  }
+})

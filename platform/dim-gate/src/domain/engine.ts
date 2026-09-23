@@ -1,3 +1,6 @@
+import { readServiceDelivery } from './service-delivery-views'
+import { serviceRoute, serviceVisible } from './service-delivery-policy'
+import { serviceSources } from './service-delivery-shared'
 import { centerSchema, dashboardQuerySchema, ciKindSchema, healthSchema, providerSchema, snapshotSchema,
   type AuditEvent, type CI, type CommandInput, type CommandReceipt, type GuideView, type Page, type ProvisionJob, type Snapshot,
 } from './schemas'
@@ -90,6 +93,7 @@ function ciView(ci: CI, policy: Policy): CI {
 }
 
 function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): boolean {
+  if (['pipelineDefinition', 'serviceConfig', 'trafficPolicy', 'serviceExecution'].includes(audit.entityType)) return !!serviceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (['resourceObject', 'resourceBinding', 'change', 'changeExecution'].includes(audit.entityType)) return !!resourceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (policy.admin) return audit.orgId === policy.user?.orgId
   if (audit.entityType === 'ci') {
@@ -229,6 +233,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
   function read(path: string, query: URLSearchParams, actorId: string): unknown {
     const policy = context(actorId)
     const entities = state.entities
+    const service = readServiceDelivery(state, policy, path, query)
+    if (service !== undefined) return service
     const resource = readResources(state, policy, path, query)
     if (resource !== undefined) return resource
     const observation = readObservation(state, policy, path, query)
@@ -307,6 +313,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!/^([1-9]|1\d|20)$/.test(limitValue)) fail(422, 'VALIDATION_ERROR', '搜尋上限必須為 1 到 20。')
       const rp = resourcePolicy(state, policy)
       const hits = [
+        ...serviceSources(state).filter(row => serviceVisible(state, policy, row)).map(row => ({ type: row.sourceType, id: row.id, title: `${'name' in row ? row.name : row.sourceType} · ${row.id}`, route: serviceRoute(state, policy, row.sourceType, row.id)! })),
         ...entities.resourceObjects.filter(rp.objectVisible).map(o => ({ type: 'resourceObject', id: o.id, title: o.name, route: resourceRoute(state, policy, 'resourceObject', o.id)! })),
         ...entities.resourceBindings.filter(rp.bindingVisible).map(b => ({ type: 'resourceBinding', id: b.id, title: `${b.id} · ${b.purpose}`, route: resourceRoute(state, policy, 'resourceBinding', b.id)! })),
         ...entities.changes.filter(rp.changeVisible).map(c => ({ type: 'change', id: c.id, title: `${c.id} · ${c.kind}`, route: resourceRoute(state, policy, 'change', c.id)! })),

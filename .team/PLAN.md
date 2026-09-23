@@ -996,3 +996,32 @@ DG-D076: W2 postmerge reconciliation: actual merge91626851fb17df7ab31c96dee9353b
 
 
 DG-D077: uninvolved T040 preliminary audit at fixed7a6eb40 found two MEDIUM contract wording ambiguities, not implementation findings or final review. Revision3 clarifies original prod Pipeline/Release awaiting approval still holds envlock; only new unstarted W3 source pending approval is lockfree. Definition affectedtargets union proposed and actual CURRENT ACTIVE family baseline (baseActiveRevisionId), preventing prod-removal bypass through unapproved draft copychains. T037/T038 notified before dependent implementation; regression required. No scope/gate reduction. W3 remains IN_PROGRESS/NOT_ACCEPTED; product review stillpending. Latest SSHmain ea88b88724698657b7bae0ecdac5410197d82a58 adds only Kith PR38; dim-gate/PLAN unchanged, preserveandnormallyintegrate beforefinalgates.
+
+
+DG-D078: T040 readonly fixed e7afd17 preliminary recheck closes both contract wording findings; final productreview stillpending. T037 schema slice2 hashverified integrated; leadAPI36newops/OpenAPI127/259, atomicW1/W2V3 reader, genuinefixture androutes/triage/snapshotUI workingdiff.52migration/controller and35baselineHTTP/clienttests pass; focusedlint/docs/contracts/CI/architecture pass. Wholeapptypecheck currentlyfails onlymissing4T038featureexports; documented actualpendingintegration, notaccepted. T037functionalengine andT038UI handbacks pending, exclusiveowners retained. LeadT039attempt1 savescommands/logs/limitations; next productcheckpointSSHsave aftercompilablefunctionalhandoff. Lastdurablecontracthead e7afd17 inPR37.
+
+
+DG-D079: actual W3 functional checkpoint integrated exact T037 immutable24-file slice1 and T038 immutable13-file UI slice1, worker ownership remains active for tests/corrections. Lead realHTTP/migration44/44pass covers all36newoperations (127total/259schemas); UI/shell/routes16/16pass. Initial wholeapp typecheck failed missingunhandedbackpages, then found lead TestingLibrary-only exact:true option; corrected to anchoredname. Wholeapp typecheck/lint/demo build nowpass; firstshell suite import failure remainshistorical notpassed. No full W3 acceptance yet. Nativefull/focusedbrowser/budget next on containingfixedcheckpoint, followedby workerfinaltests/handoffs/allregression/review. Latestmain ea88b88 onlyKith; normallymergeaftercheckpoint. ProductandmetadataabouttoSSHsave existingdraftPR37, no newPR. W2actualpostmergeCI success alreadyremoteinPR36.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 79
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 INITIAL_FUNCTIONAL_INTEGRATION / NOT_ACCEPTED
+task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
+implementation_commit: containing_partial_functional_checkpoint
+local_tested_commit: workingdiff_Slices_T037functional1_T038UI1_plus_lead_API_seed_migration
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-1.md]
+integration_state: draftPR37 / NOT_ACCEPTED
+remote_durability: e7afd17_contract_SSHsaved; containing_functionalcheckpoint_nextSSHpush
+blockers: []
+next_action: freeze_SSHsave_partialfunctional; normalmerge_latestmain; fixed_nativefull_andbenchmark; T038actualbrowser; consume_finalSHAhandbacks; fullgates_independentT040_exactheadCI_thenauthorizedmerge_actualcloseout_beforeW4
+```

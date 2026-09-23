@@ -142,7 +142,7 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w2-v1' })
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w3-v1' })
     expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
   })
 

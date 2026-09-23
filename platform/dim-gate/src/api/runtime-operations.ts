@@ -636,5 +636,257 @@ export const runtimeOperations: readonly { method: string; path: string; status:
     "status": 200,
     "demo": false,
     "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/applications/{id}/delivery-options",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/pipeline-definitions",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/pipeline-definitions/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "patch",
+    "path": "/pipeline-definitions/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/cancel",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/pipeline-definitions/{id}/runs",
+    "status": 202,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/service-configs",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/service-configs/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "patch",
+    "path": "/service-configs/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/cancel",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/apply",
+    "status": 202,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/service-configs/{id}/restore",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/traffic-policies",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/traffic-policies/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "patch",
+    "path": "/traffic-policies/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/cancel",
+    "status": 200,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/start",
+    "status": 202,
+    "demo": false,
+    "milestone": "W3"
+  },
+  {
+    "method": "post",
+    "path": "/traffic-policies/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W3"
   }
 ]

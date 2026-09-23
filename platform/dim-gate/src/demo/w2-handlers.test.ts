@@ -104,7 +104,7 @@ describe('W2 real HTTP and typed resource client', () => {
   })
 
   it('executes all 18 W2 operations with strict wire/status contracts and preserves failed attempt history', async () => {
-    expect(operations).toHaveLength(91)
+    expect(operations.filter(op => op.milestone !== 'W3')).toHaveLength(91)
     const w2 = operations.filter(op => op.milestone === 'W2')
     expect(w2).toHaveLength(18)
     const initial = await client.api.getServiceResources('app-checkout', 'env-checkout-dev')

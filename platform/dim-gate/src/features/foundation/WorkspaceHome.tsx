@@ -10,7 +10,7 @@ import { InventorySummary } from '../cmdb'
 import { centerDetails } from './center-details'
 
 type Section = WorkspaceHomeSection
-const states: Record<string, string> = { unknown: '尚無觀測樣本', unhealthy: '異常', fresh: '資料有效', available: '尚有可用容量', exhausted: '容量已用盡', error: '整合錯誤', stale: '資料已過期', healthy: '健康', critical: '嚴重異常', warning: '需要留意', ready: '可用', draft: '草稿', submitted: '待審批', approved: '待交付', failed: '失敗', pending_approval: '待批准', succeeded: '成功', provisioning: '交付中', open: '待處置', acknowledged: '已認領', investigating: '調查中', degraded: '降級', connected: '模擬連線正常' }
+const states: Record<string, string> = { unknown: '尚無觀測樣本', unhealthy: '異常', fresh: '資料有效', available: '尚有可用容量', exhausted: '容量已用盡', error: '整合錯誤', stale: '資料已過期', healthy: '健康', critical: '嚴重異常', warning: '需要留意', ready: '可用', draft: '草稿', submitted: '待審批', approved: '待交付', failed: '失敗', pending_approval: '待批准', succeeded: '成功', provisioning: '交付中', open: '待處置', acknowledged: '已認領', investigating: '調查中', degraded: '降級', connected: '模擬連線正常', validated: '已驗證', applying: '配置套用中', rolling_out: '流量灰度中', active: '生效中', superseded: '歷史版本' }
 function DataTime({ value }: { value: string }) { return <time dateTime={value}>{value.replace('T', ' ').replace(/\.000Z$/, ' UTC').replace(/Z$/, ' UTC')}</time> }
 
 function WorkSection({ data, dataAsOf, empty }: { data: Section; dataAsOf: string; empty: string }) {

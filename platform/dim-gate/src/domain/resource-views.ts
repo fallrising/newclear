@@ -1,3 +1,5 @@
+import { serviceSource } from './service-delivery-shared'
+import { serviceWorkItems } from './service-delivery-views'
 import { z } from 'zod'
 import { DomainError } from './errors'
 import { observationTime } from './observation'
@@ -96,7 +98,7 @@ export function resourceRoute(s: Snapshot, policy: Policy, type: string, id: str
 export function workItems(s: Snapshot, policy: Policy, center: 'rd' | 'ops'): WorkItem[] {
   const rp = resourcePolicy(s, policy), now = observationTime(s.logicalClock)
   const actor = (id: string) => ({ id, displayName: s.entities.users.find(u => u.id === id && u.orgId === policy.user?.orgId)?.displayName ?? id })
-  const rows: WorkItem[] = []
+  const rows: WorkItem[] = serviceWorkItems(s, policy, center)
   for (const request of s.entities.requests.filter(policy.canReadRequest)) {
     const required = center === 'rd' ? policy.canEditRequest(request) && ['draft', 'failed'].includes(request.state) : policy.canOperateRequest(request) && ['submitted', 'approved'].includes(request.state)
     rows.push({ summary: { kind: 'environment.create', riskClass: null, basis: 'new', dimensions: [
@@ -169,13 +171,18 @@ export function readResources(s: Snapshot, policy: Policy, path: string, query: 
     const values = queryValues(workItemListQuerySchema, query)
     if (!policy.centers.includes(values.center)) fail(403, 'FORBIDDEN', '目前身分沒有此工作區的授權。')
     if (values.center === 'rd' && values.view !== undefined || values.center === 'ops' && values.owner !== undefined) fail(422, 'VALIDATION_ERROR', '工作區不支援此篩選欄位。')
-    const phases = (state: string) => state === 'approved' ? ['decided', 'execution'] : ['draft', 'submitted', 'pending_approval'].includes(state) ? ['pending'] : ['rejected', 'cancelled'].includes(state) ? ['decided']
-      : ['provisioning', 'executing', 'queued', 'deploying', 'verifying'].includes(state) ? ['execution'] : state === 'failed' ? ['failed'] : ['completed']
+    const phases = (state: string) => state === 'approved' ? ['decided', 'execution'] : ['draft', 'validated', 'submitted', 'pending_approval'].includes(state) ? ['pending'] : ['rejected', 'cancelled'].includes(state) ? ['decided']
+      : ['provisioning', 'executing', 'queued', 'deploying', 'verifying', 'applying', 'rolling_out'].includes(state) ? ['execution'] : state === 'failed' ? ['failed'] : ['completed']
     const all = workItems(s, policy, values.center).filter(w => (!values.source || w.sourceType === values.source) && (!values.state || w.rawState === values.state)
       && (!values.phase || phases(w.rawState).includes(values.phase)) && (values.center !== 'rd' || (values.owner ?? 'mine') === 'team' || w.requester.id === policy.user?.id)
       && (values.center !== 'ops' || (values.view ?? 'pending') === 'all' || w.actionRequired)
       && (() => {
         if (w.sourceType === 'change') { const c = s.entities.changes.find(c => c.id === w.sourceId)!; return scoped(values, c.spec.targetCiId, rp.affected(c.spec)) }
+        if (['pipelineDefinition','serviceConfig','trafficPolicy'].includes(w.sourceType)) {
+          const source=serviceSource(s,w.sourceId)!
+          return (!values.applicationId||source.applicationId===values.applicationId)&&(!values.environmentId||source.affectedEnvironmentIds.includes(values.environmentId))
+            && (!(values.ciId||values.provider||values.poolId)||s.entities.placements.some(p=>source.affectedEnvironmentIds.includes(p.environmentId)&&scoped(values,p.ciId,[p.environmentId])))
+        }
         const entity = w.sourceType === 'request' ? s.entities.requests.find(r => r.id === w.sourceId)! : s.entities.releases.find(r => r.id === w.sourceId)!
         if (values.applicationId && entity.applicationId !== values.applicationId || values.environmentId && entity.environmentId !== values.environmentId) return false
         if ('poolId' in entity) return (!values.poolId || entity.poolId === values.poolId) && (!values.provider || entity.provider === values.provider) && (!values.ciId || !!entity.environmentId && s.entities.placements.some(p => p.environmentId === entity.environmentId && p.ciId === values.ciId))

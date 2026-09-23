@@ -1,4 +1,5 @@
-import type { LegacySnapshot, Snapshot } from './schemas'
+import { serviceDeliveryIntegrityErrors } from './service-delivery-integrity'
+import type { LegacySnapshot, LegacySnapshotV2, Snapshot } from './schemas'
 import { deliveryIntegrityErrors } from './delivery-integrity'
 import { observationIntegrityErrors } from './observation-integrity'
 import { resourceIntegrityErrors } from './resource-integrity'
@@ -82,12 +83,20 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot)]
 }
 
 /** Validate original relationships before any additive W2 migration metadata is applied. */
 export function legacyIntegrityErrors(snapshot: LegacySnapshot): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 2, seedVersion: 'dim-gate-w2-v1', entities: { ...snapshot.entities,
+  return integrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
     resourceObjects: [], resourceBindings: [], resourceQuotas: [], changes: [], changeExecutions: [],
+    pipelineDefinitions: [], serviceConfigs: [], trafficPolicies: [], serviceExecutions: [],
+  } })
+}
+
+/** Original V2 relationships are checked without adding W3 business state or metadata. */
+export function legacyV2IntegrityErrors(snapshot: LegacySnapshotV2): string[] {
+  return integrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
+    pipelineDefinitions: [], serviceConfigs: [], trafficPolicies: [], serviceExecutions: [],
   } })
 }

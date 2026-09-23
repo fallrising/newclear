@@ -1,12 +1,12 @@
 import { z } from 'zod'
+import { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
+import { pipelineDefinitionSchema, serviceConfigSchema, trafficPolicySchema, serviceExecutionSchema,
+  pipelineDefinitionRunSnapshotSchema, serviceWorkSummarySchema } from './service-delivery-schemas.ts'
+export { idSchema, nameSchema, timestampSchema, versionSchema, stageSchema } from './schema-primitives.ts'
+export * from './service-delivery-schemas.ts'
 
-export const idSchema = z.string().min(1).max(160)
-export const nameSchema = z.string().trim().min(1).max(80)
-export const timestampSchema = z.iso.datetime({ offset: false })
-export const versionSchema = z.number().int().min(1)
 export const centerSchema = z.enum(['rd', 'ops', 'admin'])
 export const providerSchema = z.enum(['aws', 'aliyun', 'onprem'])
-export const stageSchema = z.enum(['dev', 'staging', 'prod'])
 export const ciKindSchema = z.enum(['compute', 'cluster', 'database', 'cache', 'queue', 'load_balancer', 'network', 'storage'])
 export const healthSchema = z.enum(['healthy', 'degraded', 'unhealthy', 'unknown'])
 const ids = z.array(idSchema).refine((items) => new Set(items).size === items.length, 'IDs must be unique')
@@ -101,7 +101,7 @@ export const roleAssignmentSchema = z.strictObject({
     (assignment.role === 'ops' && assignment.scopeType === 'org')) ctx.addIssue({ code: 'custom', path: ['scopeType'], message: 'Role and scope type do not match' })
   if (assignment.stages && assignment.scopeType !== 'project') ctx.addIssue({ code: 'custom', path: ['stages'], message: 'Stages apply only to project scope' })
 })
-export const navigationItemSchema = z.strictObject({
+export const legacyNavigationItemV2Schema = z.strictObject({
   ...scopedBase, routeKey: z.enum([
     'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'rd.pipelines', 'rd.observability',
     'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases', 'ops.incidents', 'ops.caches', 'ops.messaging', 'ops.clusters',
@@ -110,6 +110,7 @@ export const navigationItemSchema = z.strictObject({
   ]),
   label: nameSchema, group: nameSchema, order: z.number().int(), enabled: z.boolean(),
 })
+export const navigationItemSchema = legacyNavigationItemV2Schema.extend({ routeKey: z.enum([...legacyNavigationItemV2Schema.shape.routeKey.options, 'rd.delivery', 'rd.configuration', 'rd.traffic', 'ops.service-change']) })
 export const modelFieldSchema = z.strictObject({
   ...scopedBase, kind: ciKindSchema, key: z.string().regex(/^[a-z][a-zA-Z0-9_]{0,63}$/), label: nameSchema,
   valueType: z.enum(['string', 'number', 'boolean']), required: z.literal(false), hidden: z.boolean(),
@@ -230,17 +231,18 @@ export const resourceInventorySchema = z.strictObject({
   legacyAssociations: z.array(z.strictObject({ placementId: idSchema, applicationId: idSchema, environmentId: idSchema })),
 })
 export const serviceResourcesSchema = z.strictObject({ applicationId: idSchema, environmentId: idSchema, resources: z.array(resourceInventorySchema), dataAsOf: timestampSchema })
-export const workItemSummarySchema = z.strictObject({
+export const resourceWorkItemSummarySchema = z.strictObject({
   kind: z.enum(['environment.create', 'release.deploy', 'release.rollback', 'resource.bind', 'resource.resize', 'kafka.topic.create']),
   riskClass: z.enum(['standard', 'shared']).nullable(), basis: z.enum(['new', 'existing', 'matched-target', 'unavailable', 'not-applicable']),
   dimensions: z.array(z.strictObject({ name: z.enum(['cpu', 'memoryMiB', 'quotaMiB', 'topics', 'partitions', 'throughputKiBPerSecond']),
     current: z.number().nonnegative().nullable(), desired: z.number().nonnegative(), delta: z.number().nullable() })),
 })
+export const workItemSummarySchema = z.union([resourceWorkItemSummarySchema, serviceWorkSummarySchema])
 export const changeDetailSchema = z.strictObject({ change: changeRequestSchema, summary: workItemSummarySchema, executions: z.array(changeExecutionSchema),
   impact: z.strictObject({ consumers: z.array(resourceConsumerSchema), incomplete: z.boolean() }), capacity: resourceCapacitySchema.nullable(),
   availableActions: z.array(z.enum(['edit', 'submit', 'approve', 'reject', 'cancel', 'execute', 'retry'])), dataAsOf: timestampSchema,
 })
-export const workItemSchema = z.strictObject({ summary: workItemSummarySchema, sourceType: z.enum(['request', 'release', 'change']), sourceId: idSchema, rawState: z.string(), stateLabel: z.string(),
+export const workItemSchema = z.strictObject({ summary: workItemSummarySchema, sourceType: z.enum(['request', 'release', 'change', 'pipelineDefinition', 'serviceConfig', 'trafficPolicy']), sourceId: idSchema, rawState: z.string(), stateLabel: z.string(),
   actionRequired: z.boolean(), targetRefs: z.array(z.strictObject({ entityType: idSchema, entityId: idSchema })),
   requester: z.strictObject({ id: idSchema, displayName: nameSchema }), approver: z.strictObject({ id: idSchema, displayName: nameSchema }).nullable(),
   createdAt: timestampSchema, updatedAt: timestampSchema, dataAsOf: timestampSchema, route: z.string().startsWith('/'),
@@ -255,7 +257,7 @@ export const serviceResourcesQuerySchema = z.strictObject({ environmentId: idSch
 export const changeListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, kind: changeRequestSchema.shape.kind.optional(), state: changeStateSchema.optional(), owner: z.enum(['mine', 'team']).optional(), sort: z.enum(['id', 'updatedAt', 'createdAt']).default('updatedAt') })
 export const workItemListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, center: z.enum(['rd', 'ops']), source: workItemSchema.shape.sourceType.optional(),
   owner: z.enum(['mine', 'team']).optional(), view: z.enum(['pending', 'all']).optional(), phase: z.enum(['pending', 'decided', 'execution', 'failed', 'completed']).optional(),
-  state: z.enum(['draft', 'submitted', 'approved', 'rejected', 'cancelled', 'provisioning', 'fulfilled', 'failed', 'pending_approval', 'queued', 'deploying', 'verifying', 'executing', 'succeeded']).optional(), sort: z.enum(['sourceId', 'updatedAt', 'createdAt']).default('updatedAt') })
+  state: z.enum(['draft', 'submitted', 'approved', 'rejected', 'cancelled', 'provisioning', 'fulfilled', 'failed', 'pending_approval', 'queued', 'deploying', 'verifying', 'executing', 'succeeded', 'validated', 'applying', 'rolling_out', 'active', 'superseded']).optional(), sort: z.enum(['sourceId', 'updatedAt', 'createdAt']).default('updatedAt') })
 export const requestSchema = z.strictObject({
   ...scopedBase, requesterId: idSchema, applicationId: idSchema, environmentName: nameSchema, stage: stageSchema,
   catalogItemId: idSchema, catalogRevision: versionSchema, templateSnapshot: computeCatalogTemplateSchema, provider: providerSchema,
@@ -268,11 +270,18 @@ export const pipelineStageSchema = z.strictObject({
   name: z.enum(['build', 'test', 'package', 'deploy', 'verify']), state: z.enum(['queued', 'running', 'succeeded', 'failed', 'cancelled', 'skipped']),
   startedAt: timestampSchema.optional(), completedAt: timestampSchema.optional(),
 })
-export const pipelineRunSchema = z.strictObject({
+export const legacyPipelineRunV2Schema = z.strictObject({
   ...scopedBase, applicationId: idSchema, environmentId: idSchema, revision: idSchema, artifactDigest: idSchema.optional(),
   stages: z.array(pipelineStageSchema), state: z.enum(['queued', 'running', 'awaiting_approval', 'succeeded', 'failed', 'cancelled']),
   releaseId: idSchema.optional(), triggeredBy: idSchema, retryOfRunId: idSchema.optional(), correlationId: idSchema,
   failureCode: idSchema.optional(),
+})
+export const pipelineRunSchema = legacyPipelineRunV2Schema.extend({ definitionId: idSchema.optional(), definitionRevision: versionSchema.optional(),
+  sourceRevision: idSchema.optional(), definitionSnapshot: pipelineDefinitionRunSnapshotSchema.optional(),
+}).superRefine((run, ctx) => {
+  const fields = [run.definitionId, run.definitionRevision, run.sourceRevision, run.definitionSnapshot]
+  if (fields.some(v => v !== undefined) && fields.some(v => v === undefined)) ctx.addIssue({ code: 'custom', path: ['definitionId'], message: 'Definition run metadata must be complete' })
+  if (run.sourceRevision !== undefined && run.sourceRevision !== run.revision) ctx.addIssue({ code: 'custom', path: ['sourceRevision'], message: 'Source revision must match the pipeline revision' })
 })
 export const releaseSchema = z.strictObject({
   ...scopedBase, applicationId: idSchema, environmentId: idSchema, artifactDigest: idSchema, kind: z.enum(['deploy', 'rollback']),
@@ -352,7 +361,7 @@ export const idempotencyRecordSchema = z.strictObject({
   sessionId: idSchema, actorId: idSchema, method: idSchema, path: z.string().min(1), key: idSchema,
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
-export const snapshotSchema = z.strictObject({
+export const legacySnapshotV2Schema = z.strictObject({
   schemaVersion: z.literal(2), seedVersion: z.literal('dim-gate-w2-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
@@ -361,9 +370,9 @@ export const snapshotSchema = z.strictObject({
     projects: z.array(projectSchema), users: z.array(userSchema), applications: z.array(applicationSchema),
     environments: z.array(environmentSchema), accounts: z.array(providerAccountSchema), locations: z.array(locationSchema),
     pools: z.array(poolSchema), cis: z.array(ciSchema), placements: z.array(placementSchema), relations: z.array(relationSchema),
-    assignments: z.array(roleAssignmentSchema), navigation: z.array(navigationItemSchema), modelFields: z.array(modelFieldSchema),
+    assignments: z.array(roleAssignmentSchema), navigation: z.array(legacyNavigationItemV2Schema), modelFields: z.array(modelFieldSchema),
     catalogs: z.array(catalogItemSchema), catalogHistory: z.array(catalogItemSchema), requests: z.array(requestSchema),
-    pipelines: z.array(pipelineRunSchema), releases: z.array(releaseSchema), artifacts: z.array(artifactSchema),
+    pipelines: z.array(legacyPipelineRunV2Schema), releases: z.array(releaseSchema), artifacts: z.array(artifactSchema),
     incidents: z.array(incidentSchema), integrations: z.array(integrationSchema),
     resourceObjects: z.array(resourceObjectSchema), resourceBindings: z.array(resourceBindingSchema), resourceQuotas: z.array(resourceQuotaSchema),
     changes: z.array(changeRequestSchema), changeExecutions: z.array(changeExecutionSchema),
@@ -376,11 +385,17 @@ export const snapshotSchema = z.strictObject({
   scheduler: z.strictObject({ tasks: z.array(z.strictObject({ id: idSchema, operationId: idSchema, stepIndex: z.number().int().nonnegative(), dueTick: z.number().int().nonnegative() })) }),
 })
 
-export const legacySnapshotSchema = snapshotSchema.extend({ schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m4-v1'),
-  entities: snapshotSchema.shape.entities.omit({ resourceObjects: true, resourceBindings: true, resourceQuotas: true, changes: true, changeExecutions: true })
+export const legacySnapshotSchema = legacySnapshotV2Schema.extend({ schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m4-v1'),
+  entities: legacySnapshotV2Schema.shape.entities.omit({ resourceObjects: true, resourceBindings: true, resourceQuotas: true, changes: true, changeExecutions: true })
     .extend({ catalogs: z.array(computeCatalogItemSchema), catalogHistory: z.array(computeCatalogItemSchema),
-      navigation: z.array(navigationItemSchema.extend({ routeKey: navigationItemSchema.shape.routeKey.exclude(['ops.caches', 'ops.messaging', 'ops.clusters']) })),
+      navigation: z.array(legacyNavigationItemV2Schema.extend({ routeKey: legacyNavigationItemV2Schema.shape.routeKey.exclude(['ops.caches', 'ops.messaging', 'ops.clusters']) })),
     }),
+})
+
+export const snapshotSchema = legacySnapshotV2Schema.extend({ schemaVersion: z.literal(3), seedVersion: z.literal('dim-gate-w3-v1'),
+  entities: legacySnapshotV2Schema.shape.entities.extend({ navigation: z.array(navigationItemSchema), pipelines: z.array(pipelineRunSchema),
+    pipelineDefinitions: z.array(pipelineDefinitionSchema), serviceConfigs: z.array(serviceConfigSchema), trafficPolicies: z.array(trafficPolicySchema), serviceExecutions: z.array(serviceExecutionSchema),
+  }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })
@@ -402,7 +417,7 @@ export const dashboardQuerySchema = dashboardFiltersSchema.extend({ center: cent
 ).refine(value => value.center === 'rd' || value.workOwner === undefined,
   { message: 'Work owner filter is only supported in RD', path: ['workOwner'] })
 export const workspaceHomeItemSchema = z.strictObject({
-  sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent', 'change', 'changeExecution']),
+  sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent', 'change', 'changeExecution', 'pipelineDefinition', 'serviceConfig', 'trafficPolicy', 'serviceExecution']),
   sourceId: idSchema, title: z.string(), state: z.string(), route: z.string().startsWith('/'), dataAsOf: timestampSchema, detail: z.string(),
 })
 export const workspaceHomeSectionSchema = z.strictObject({ title: z.string(), total: z.number().int().nonnegative(), items: z.array(workspaceHomeItemSchema).max(20) })
@@ -426,7 +441,7 @@ export const dashboardViewSchema = z.strictObject({
 export const guideViewSchema = z.strictObject({
   applicationId: idSchema.nullable(), environmentId: idSchema.nullable(), steps: z.array(guideStepSchema),
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-w2-v1'), schemaVersion: z.literal(2), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-w3-v1'), schemaVersion: z.literal(3), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -501,8 +516,12 @@ export const patchModelFieldInputSchema = z.strictObject({
   expectedVersion: versionSchema, label: nameSchema.optional(), hidden: z.boolean().optional(),
 }).refine((body) => Object.keys(body).length > 1, 'At least one model field property is required')
 export const scenarioInputSchema = z.strictObject({
-  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples', 'resource-failure']),
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples', 'resource-failure', 'config-failure', 'traffic-abnormal', 'traffic-missing']),
   environmentId: idSchema.optional(), executionId: idSchema.optional(), jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
+}).superRefine((value, ctx) => {
+  const service = ['config-failure', 'traffic-abnormal', 'traffic-missing'].includes(value.scenarioKey)
+  if (service && (!value.executionId || value.environmentId || value.jobId || value.poolId || value.runId || value.releaseId)
+    || value.executionId && !service && value.scenarioKey !== 'resource-failure') ctx.addIssue({ code: 'custom', path: ['executionId'], message: 'Execution target must match the registered scenario' })
 })
 export const createPipelineInputSchema = z.strictObject({
   applicationId: idSchema, environmentId: idSchema, revision: idSchema.trim().min(1), environmentVersion: versionSchema,
@@ -516,6 +535,7 @@ export type CIView = z.infer<typeof ciViewSchema>
 export type Application = z.infer<typeof applicationSchema>
 export type RoleAssignment = z.infer<typeof roleAssignmentSchema>
 export type Snapshot = z.infer<typeof snapshotSchema>
+export type LegacySnapshotV2 = z.infer<typeof legacySnapshotV2Schema>
 export type LegacySnapshot = z.infer<typeof legacySnapshotSchema>
 export type ComputeCatalogItem = z.infer<typeof computeCatalogItemSchema>
 export type ResourceObject = z.infer<typeof resourceObjectSchema>

@@ -1393,3 +1393,26 @@ remote_durability: contract_checkpoint_local_pending_SSHpush
 blockers: []
 next_action: validate_and_SSHsave_contract; implement_T045_domain_T046_API_migration_T047_UI; integrate_T048_fullgates; uninvolved_T049_review; exactheadCI_authorizedmerge_actualcloseout
 ```
+
+
+DG-D097: W5 product checkpoint `ace27ff833de58541236b44b9b410cf58f7a8f17` implements the bounded Demo User/Team identity lifecycle, strict v1–v4→v5 source migration, typed Admin routes and `/admin/users` UI without an automatic role grant or login persona. W5 contract revision1 remains unchanged. Local 409/409 native, focused production Chromium1/1 (refresh, permission denial, two themes × three widths axe/overflow), lint/typecheck/docs/contracts168/324/CI/architecture/build, and unchanged benchmark3/3 pass. An initial benchmark attempt failed before browser launch because the established local `LD_LIBRARY_PATH` was omitted; corrected environment rerun passed without source changes. The source-bound [identity checkpoint](reports/dim-gate-w5-identity-checkpoint.md) records evidence and open work. T045/T046/T047 are PARTIAL; feature cohort, safe registered PlatformRoute and recipient-specific notification remain, so T048 integration gates and T049 uninvolved fixed-commit review have not begun. Draft PR61 is open. This is **not W5 acceptance or merge**; branch ownership remains with Codex W5. Save this evidence checkpoint by SSH push, continue remaining fixed-contract slices and complete full gates before review/acceptance.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 97
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_IDENTITY_PRODUCT_CHECKPOINT / OTHER_W5_SLICES_PENDING / NOT_ACCEPTED
+task_id: T045 PARTIAL_identity; T046 PARTIAL_identity_API_migration; T047 PARTIAL_identity_UI_browser; T048 READY_AFTER_SLICES; T049 READY_AFTER_FIXED_PRODUCT
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+implementation_commit: ace27ff833de58541236b44b9b410cf58f7a8f17
+report_ref: .team/reports/dim-gate-w5-identity-checkpoint.md
+integration_state: PR61_DRAFT_OPEN_not_accepted
+remote_durability: identity_product_commit_local_pending_SSHpush; evidence_checkpoint_local_pending_commit_and_SSHpush
+blockers: []
+next_action: SSHsave_checkpoint; implement_feature_cohort_PlatformRoute_scoped_notification; full_W5_gates; T049_independent_review; exactheadCI_and_authorized_normal_merge_actualcloseout
+```

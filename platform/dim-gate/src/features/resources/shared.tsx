@@ -30,6 +30,6 @@ export function QuotaView({ capacity }: { capacity: ResourceCapacity | null }) {
   const label = { quotaMiB: 'Redis 配額 MiB', topics: 'Kafka topics', partitions: 'Kafka partitions', throughputKiBPerSecond: 'Kafka KiB/s' }
   return <div className="resource-quota"><p className="muted">配額與實體容量分開；保留量尚未生效。資料時間：{dateLabel(capacity.dataAsOf)}</p>
     {capacity.impactIncomplete && <p className="scope-notice" role="status">影響範圍未完整授權；不提供隱藏資源的用量或數量。</p>}
-    <div className="table-scroll"><table><caption>目前可讀的資源配額</caption><thead><tr><th scope="col">單位</th><th scope="col">上限</th><th scope="col">已配置</th><th scope="col">已保留</th><th scope="col">可用</th><th scope="col">觀測用量</th></tr></thead><tbody>{capacity.dimensions.map(d => <tr key={d.name}><th scope="row">{label[d.name]}</th><td>{d.capacity}</td><td>{d.used ?? '未授權'}</td><td>{d.reserved ?? '未授權'}</td><td>{d.available ?? '未授權'}</td><td>{d.observed ?? '未知'}</td></tr>)}</tbody></table></div>
+    <div className="table-scroll" tabIndex={0} role="region" aria-label="資源配額，可水平捲動"><table><caption>目前可讀的資源配額</caption><thead><tr><th scope="col">單位</th><th scope="col">上限</th><th scope="col">已配置</th><th scope="col">已保留</th><th scope="col">可用</th><th scope="col">觀測用量</th></tr></thead><tbody>{capacity.dimensions.map(d => <tr key={d.name}><th scope="row">{label[d.name]}</th><td>{d.capacity}</td><td>{d.used ?? '未授權'}</td><td>{d.reserved ?? '未授權'}</td><td>{d.available ?? '未授權'}</td><td>{d.observed ?? '未知'}</td></tr>)}</tbody></table></div>
   </div>
 }

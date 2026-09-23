@@ -131,7 +131,9 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
 
   await become(page, 'user-rd-commerce')
   await page.goto('rd/catalog')
-  await expect(page.getByRole('heading', { name: '目前沒有可申請的服務' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '開始申請', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: '申請 Redis 資源', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '申請 Kafka 資源', exact: true })).toBeVisible()
   expect(failures.consoleErrors).toEqual(['Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)'])
   expect(failures.pageErrors).toEqual([])
   expect(failures.failedRequests).toEqual([])

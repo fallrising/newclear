@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   auditEventSchema, ciKindSchema, commandReceiptSchema,
   modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, teamSchema, userSchema,
-  platformFeatureSchema, featurePreviewSchema, capabilityRegistryEntrySchema,
+  platformFeatureSchema, featurePreviewSchema, capabilityRegistrySchema,
   platformRouteSchema, platformRouteDiagnosticSchema, platformRouteRegistryEntrySchema,
   type AuditEvent, type CatalogItem, type Center, type CommandReceipt, type ModelField, type NavigationItem,
 } from '../../domain/schema-models'
@@ -32,7 +32,7 @@ export function createAdminClient(request: ApiRequest) {
     listPlatformFeatures: (page = 1, pageSize = 25) => request(withQuery('/admin/platform-features', { page, pageSize }), pageSchema(platformFeatureSchema)),
     getPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}`, platformFeatureSchema),
     previewPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}/preview`, featurePreviewSchema),
-    getCapabilityRegistry: () => request('/admin/capability-registry', z.array(capabilityRegistryEntrySchema)),
+    getCapabilityRegistry: () => request('/admin/capability-registry', capabilityRegistrySchema),
     createPlatformFeature: (spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>
       request('/admin/platform-features', commandReceiptSchema, { method: 'POST', body: { spec, reason } }),
     revisePlatformFeature: (id: string, expectedVersion: number, spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>

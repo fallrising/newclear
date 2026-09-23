@@ -159,6 +159,13 @@ export function createApiClient() {
       listSilences: true, getSilence: true, createSilence: true, listAlertEvaluations: true, getAlertEvaluation: true,
       listNotificationDeliveries: true, getNotificationDelivery: true,
     }, getClientIdentity),
+    ...deferredClient(() => import('./clients/notifications').then(module => module.createNotificationClient(request)), {
+      listAdminChannels: true, createChannel: true, patchChannel: true, testChannel: true,
+      listAdminNotificationTemplates: true, createNotificationTemplate: true, reviseNotificationTemplate: true, notificationTemplateAction: true,
+      listAdminNotificationPolicies: true, patchNotificationPolicy: true, listNotificationChannels: true,
+      listNotificationSubscriptions: true, createNotificationSubscription: true, patchNotificationSubscription: true,
+      listNotificationAttempts: true, getNotificationAttempt: true, retryNotificationAttempt: true,
+    }, getClientIdentity),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

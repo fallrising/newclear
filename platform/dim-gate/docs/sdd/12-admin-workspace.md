@@ -54,6 +54,8 @@ PlatformRoute 指向已註冊 adapter／capability：routeKey、integrationId、
 
 驗證：key 唯一、能力支援、integration 存在、固定 timeout 範圍、不可形成 alias loop、不可覆蓋平台 recovery/API base。替換 adapter 保留歷史 audit 與引用版本；測試路由清楚顯示「模擬」和採用的 revision。
 
+W5 唯讀 capability registry 將已實作 feature、route 與 later 能力分組。Feature 顯示固定 route/action/schema；route 顯示目前本機 adapter 解析、Mock 健康與 fallback code；artifact catalog、SDK／framework catalog、BFF governance 明示 later，不提供可執行路由。
+
 | 同名概念 | 所屬角色 | 管理物件 |
 | --- | --- | --- |
 | 平台功能灰度 | Admin | dim-gate 功能是否向已授權 cohort 提供 |
@@ -69,6 +71,8 @@ Admin 管理 NotificationPolicy、Channel metadata、模板 revision、允許使
 RD 配置服務的通知訂閱與可用 channel；Ops 觀察／處置告警、維護有期限 Silence；Admin 配置平台可提供哪些 channel 與路由規則。可選 channel 不等於能讀它所有歷史訊息。每個 recipient 的 payload 依其可見 entity projection 生成；無權收件人不收到名稱、總數、trace/log 或 raw diff。
 
 同 eventId + recipient + channel + templateRevision 的 delivery 去重；狀態 queued/suppressed/delivered/failed。重試需新的 attempt 並保留歷史；權限或 channel scope 被撤銷後重新檢查，不重播舊私有 payload。規則不得造成通知自行觸發同一通知的無限循環。Silence 到期只處理仍符合規則的新／持續事件，不一次補寄過去全部事件。
+
+W5 policy 的 dedupeSeconds 將同一 incident／recipient／channel／template revision 在時間窗內的第二個 W4 delivery 合併；原 event tuple 永久維持冪等。retentionDays 以 Demo 邏輯時鐘限制 attempt 清單、詳情、重試及關聯稽核的可見期，過期後不再產生舊收件者內容；已保存的 W4 事實與參照仍用於完整性檢查。
 
 ## 8. 平台開發工具與治理證據
 

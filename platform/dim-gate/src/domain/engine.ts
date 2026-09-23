@@ -12,42 +12,18 @@ import { resourcePolicy } from './resource-policy'
 import { canReadObservation } from './observation'
 import { guideProjection, readObservation, visibleIntegrations } from './observation-views'
 import { policyFor, type Policy } from './policy'
-import { DomainError } from './errors'
+import { basicPage, pageValues, validateQuery } from './read-query'
 import { readDelivery, canReadDelivery } from './delivery'
 import { readMonitoring } from './monitoring-views'
 import { featureEligibility, featureRegistry } from './feature-policy'
 import { platformRouteRegistry, routeDiagnostic } from './platform-route-registry'
+import { readNotifications, canReadAttempt } from './notification-views'
 export { DomainError } from './errors'
 
 export interface Engine {
   getSnapshot(): Snapshot
   read(path: string, query: URLSearchParams, actorId: string): unknown
   command(input: CommandInput): Promise<CommandReceipt>
-}
-
-function validateQuery(query: URLSearchParams, allowed: string[]): void {
-  const seen = new Set<string>()
-  for (const key of query.keys()) {
-    if (!allowed.includes(key) || seen.has(key)) throw new DomainError(422, 'VALIDATION_ERROR', '不支援的查詢欄位或重複欄位。', { [key]: ['Unknown or duplicate query parameter'] })
-    seen.add(key)
-    if (key !== 'q' && query.get(key) === '') throw new DomainError(422, 'VALIDATION_ERROR', '查詢欄位不可為空。', { [key]: ['Empty query parameter'] })
-  }
-  if ((query.get('q')?.length ?? 0) > 100) fail(422, 'VALIDATION_ERROR', '搜尋字串最多 100 字元。')
-}
-
-function pageValues(query: URLSearchParams): { page: number; pageSize: number } {
-  const integer = (key: string, fallback: number, max: number) => {
-    const value = query.get(key)
-    if (value === null) return fallback
-    if (!/^[1-9]\d*$/.test(value) || Number(value) > max) fail(422, 'VALIDATION_ERROR', `${key} 超出允許範圍。`)
-    return Number(value)
-  }
-  return { page: integer('page', 1, Number.MAX_SAFE_INTEGER), pageSize: integer('pageSize', 25, 100) }
-}
-
-function basicPage<T>(items: T[], query: URLSearchParams): Page<T> {
-  const { page, pageSize } = pageValues(query)
-  return { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length, page, pageSize }
 }
 
 function paged<T extends { id: string; name: string; updatedAt: string }>(items: T[], query: URLSearchParams, sortFields: string[]): Page<T> {
@@ -97,6 +73,10 @@ function ciView(ci: CI, policy: Policy): CI {
 }
 
 function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): boolean {
+  if (audit.entityType === 'notificationAttempt') {
+    const attempt = snapshot.entities.notificationAttempts.find(row => row.id === audit.entityId)
+    return !!attempt && canReadAttempt(snapshot, policy, attempt)
+  }
   if (['pipelineDefinition', 'serviceConfig', 'trafficPolicy', 'serviceExecution'].includes(audit.entityType)) return !!serviceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (['resourceObject', 'resourceBinding', 'change', 'changeExecution'].includes(audit.entityType)) return !!resourceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (policy.admin) return audit.orgId === policy.user?.orgId
@@ -243,6 +223,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     const entities = state.entities
     const monitoring = readMonitoring(state, policy, path, query)
     if (monitoring !== undefined) return monitoring
+    const notifications = readNotifications(state, policy, path, query)
+    if (notifications !== undefined) return clone(notifications)
     const service = readServiceDelivery(state, policy, path, query)
     if (service !== undefined) return service
     const resource = readResources(state, policy, path, query)
@@ -483,7 +465,16 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (path === '/admin/capability-registry') {
       validateQuery(query, [])
       if (!policy.admin) forbidden()
-      return clone(Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })))
+      return clone({
+        features: Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })),
+        routes: Object.entries(platformRouteRegistry).map(([routeKey, entry]) => ({ routeKey, ...entry,
+          diagnostic: routeDiagnostic(state, routeKey as keyof typeof platformRouteRegistry), status: 'mock' as const })),
+        later: [
+          { capabilityId: 'artifact-catalog', label: 'Artifact catalog', status: 'later' as const },
+          { capabilityId: 'sdk-framework-catalog', label: 'SDK / framework catalog', status: 'later' as const },
+          { capabilityId: 'bff-governance', label: 'BFF governance', status: 'later' as const },
+        ],
+      })
     }
     if (path === '/admin/platform-routes') {
       validateQuery(query, ['page', 'pageSize'])

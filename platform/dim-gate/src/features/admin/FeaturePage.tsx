@@ -86,11 +86,11 @@ export function FeaturePage() {
   if (policies.isPending || registry.isPending) return <LoadingState label="正在讀取功能治理…" />
   if (policies.isError) return <ErrorState error={policies.error} onRetry={() => void policies.refetch()} />
   if (registry.isError) return <ErrorState error={registry.error} onRetry={() => void registry.refetch()} />
-  const choices = registry.data.filter(item => !policies.data.items.some(row => row.spec.featureKey === item.featureKey))
+  const choices = registry.data.features.filter(item => !policies.data.items.some(row => row.spec.featureKey === item.featureKey))
   return <><PageHeading eyebrow="ADMIN · MOCK FEATURE GOVERNANCE" title="功能灰度" description="只管理程式碼已註冊的 Demo 功能。草稿及驗證不改變目前資格；啟用與停用會重新檢查當前角色授權及 cohort。" />
     <form className="panel admin-form" onSubmit={event => void submit(event)}><div className="panel-title"><h2>建立功能政策</h2></div>
-      <label>功能<select value={featureKey} onChange={event => { const next = registry.data.find(row => row.featureKey === event.target.value)!; setFeatureKey(next.featureKey); setSpec({ ...spec, featureKey: next.featureKey, targetCenter: next.center }) }}>
-        {registry.data.map(item => <option key={item.featureKey} value={item.featureKey}>{featureNames[item.featureKey]}</option>)}
+      <label>功能<select value={featureKey} onChange={event => { const next = registry.data.features.find(row => row.featureKey === event.target.value)!; setFeatureKey(next.featureKey); setSpec({ ...spec, featureKey: next.featureKey, targetCenter: next.center }) }}>
+        {registry.data.features.map(item => <option key={item.featureKey} value={item.featureKey}>{featureNames[item.featureKey]}</option>)}
       </select></label><p>目前選擇：<code>{featureKey}</code></p><SpecEditor spec={spec} onChange={setSpec} />
       <label>建立理由<input required maxLength={500} value={reason} onChange={event => setReason(event.target.value)} /></label>
       <div className="form-actions span-all"><Button type="submit" disabled={create.isPending || !reason.trim() || choices.length === 0 || !choices.some(item => item.featureKey === featureKey)}>建立草稿</Button></div>

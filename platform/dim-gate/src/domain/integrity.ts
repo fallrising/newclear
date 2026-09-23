@@ -8,6 +8,8 @@ import { monitoringIntegrityErrors } from './monitoring-integrity'
 import { demoPersonaIds } from './policy'
 import { featureRegistry, featureSpecSupported } from './feature-policy'
 import { platformRouteRegistry, routeSpecSupported } from './platform-route-registry'
+import { notificationIntegrityErrors } from './notification-integrity'
+import { buildNotificationSeed } from '../demo/seed/notifications'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -121,7 +123,7 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot), ...notificationIntegrityErrors(snapshot)]
 }
 
 /** Validate the original W4 relationships before adding W5 source metadata. */
@@ -130,7 +132,7 @@ export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
     entities: { ...snapshot.entities,
       users: snapshot.entities.users.map(user => ({ ...user, source: 'seed' as const })),
       teams: snapshot.entities.teams.map(team => ({ ...team, source: 'seed' as const })),
-      platformFeatures: [], platformRoutes: [],
+      platformFeatures: [], platformRoutes: [], ...buildNotificationSeed(snapshot.entities.organizations[0]?.id ?? 'org-demo'),
     } })
 }
 

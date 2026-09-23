@@ -62,19 +62,22 @@ export function RoutePage() {
   const [page, setPage] = useState(1)
   const routes = useQuery({ queryKey: queryKey('platform-routes', null, page), queryFn: () => api.listPlatformRoutes(page, 25) })
   const registry = useQuery({ queryKey: queryKey('platform-route-registry'), queryFn: () => api.getPlatformRouteRegistry() })
+  const capability = useQuery({ queryKey: queryKey('capability-registry'), queryFn: () => api.getCapabilityRegistry() })
   const [routeKey, setRouteKey] = useState<PlatformRouteSpec['routeKey']>('inventory.aws')
   const [adapterRef, setAdapterRef] = useState<PlatformRouteSpec['adapterRef']>('demo-aws-inventory')
   const [timeoutMs, setTimeoutMs] = useState(1000)
   const [reason, setReason] = useState('Create registered Mock route')
   const create = useMutation({ mutationFn: (spec: PlatformRouteSpec) => api.createPlatformRoute(spec, reason) })
+  const refresh = async () => { await Promise.all([routes.refetch(), capability.refetch()]) }
   const submit = async (event: FormEvent) => { event.preventDefault(); const entry = registry.data?.find(row => row.routeKey === routeKey)
     if (!entry) return
-    try { await create.mutateAsync({ routeKey, capabilityId: entry.capabilityId, integrationId: entry.integrationId, adapterRef, timeoutMs }); await routes.refetch() }
+    try { await create.mutateAsync({ routeKey, capabilityId: entry.capabilityId, integrationId: entry.integrationId, adapterRef, timeoutMs }); await refresh() }
     catch { /* Render exact refusal below. */ }
   }
-  if (routes.isPending || registry.isPending) return <LoadingState label="正在讀取註冊路由…" />
+  if (routes.isPending || registry.isPending || capability.isPending) return <LoadingState label="正在讀取註冊路由…" />
   if (routes.isError) return <ErrorState error={routes.error} onRetry={() => void routes.refetch()} />
   if (registry.isError) return <ErrorState error={registry.error} onRetry={() => void registry.refetch()} />
+  if (capability.isError) return <ErrorState error={capability.error} onRetry={() => void capability.refetch()} />
   const selected = registry.data.find(row => row.routeKey === routeKey)!
   const choices = registry.data.filter(row => !routes.data.items.some(item => item.spec.routeKey === row.routeKey))
   return <><PageHeading eyebrow="ADMIN · MOCK ADAPTER ROUTES" title="註冊路由與診斷" description="路由、能力、整合與 adapter 都來自固定清單；診斷只在本機產生安全結果，不連線到外部來源。" />
@@ -90,7 +93,18 @@ export function RoutePage() {
     </form>
     {create.isError && <ErrorState error={create.error} title="路由未建立" />}
     {routes.data.items.map(route => <RouteCard key={`${route.id}:${route.version}`} route={route}
-      adapters={registry.data.find(entry => entry.routeKey === route.spec.routeKey)!.supportedAdapters} committed={() => routes.refetch()} />)}
+      adapters={registry.data.find(entry => entry.routeKey === route.spec.routeKey)!.supportedAdapters} committed={refresh} />)}
+    <section className="panel"><h2>能力地圖與目前 Mock 診斷</h2><p>固定 capability／route／action／schema 對應；未接入的能力明確標為 later。</p>
+      <div className="table-scroll" tabIndex={0} role="region" aria-label="唯讀能力地圖"><table><caption>只讀註冊狀態與目前本機 adapter 解析</caption><thead><tr>
+        <th>Capability</th><th>Route</th><th>Action</th><th>Schema</th><th>Adapter / health</th><th>狀態</th>
+      </tr></thead><tbody>
+        {capability.data.features.map(row => <tr key={row.featureKey}><th scope="row"><code>{row.capabilityId}</code></th><td><code>{row.route}</code></td>
+          <td><code>{row.action}</code></td><td><code>{row.schemaId}</code></td><td>Demo cohort</td><td>{row.status}</td></tr>)}
+        {capability.data.routes.map(row => <tr key={row.routeKey}><th scope="row"><code>{row.capabilityId}</code></th><td><code>{row.routeKey}</code></td>
+          <td><code>{row.action}</code></td><td><code>{row.schemaId}</code></td>
+          <td><code>{row.diagnostic.adapterRef}</code> · {row.diagnostic.status} · {row.diagnostic.code}</td><td>{row.status}</td></tr>)}
+        {capability.data.later.map(row => <tr key={row.capabilityId}><th scope="row">{row.label}</th><td>—</td><td>—</td><td>—</td><td>—</td><td>{row.status}</td></tr>)}
+      </tbody></table></div></section>
     <div className="request-actions"><Button variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)}>上一頁</Button><span>第 {page} 頁，共 {routes.data.total} 筆</span>
       <Button variant="outline" disabled={page * 25 >= routes.data.total} onClick={() => setPage(page + 1)}>下一頁</Button></div>
   </>

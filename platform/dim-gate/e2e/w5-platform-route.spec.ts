@@ -22,6 +22,10 @@ test('W5 registered Mock route shows deterministic failure, fallback and recover
     await card.getByRole('button', { name: '啟用路由' }).click()
     await expect(card).toContainText('MOCK_FAILURE_FALLBACK')
     await expect(card).toContainText('fallback · MOCK_FAILURE_FALLBACK')
+    const map = page.getByRole('region', { name: '唯讀能力地圖' })
+    await expect(map.getByRole('row', { name: /observation-apm/ })).toContainText('MOCK_FAILURE_FALLBACK')
+    await expect(map).toContainText('BFF governance')
+    await expect(map).toContainText('later')
     await page.reload()
     await expect(page.getByRole('article', { name: 'APM 觀測' })).toContainText('fallback · MOCK_FAILURE_FALLBACK')
     for (const theme of ['light', 'dark']) {

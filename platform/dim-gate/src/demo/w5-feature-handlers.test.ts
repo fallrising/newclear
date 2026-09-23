@@ -20,8 +20,11 @@ describe('W5 registered feature HTTP contract', () => {
     try {
       await client.api.setPersona('user-admin')
       const registry = await client.api.getCapabilityRegistry()
-      expect(registry.map(row => row.featureKey)).toEqual(['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'])
-      expect(registry.every(row => row.status === 'mock' && row.route.startsWith('/'))).toBe(true)
+      expect(registry.features.map(row => row.featureKey)).toEqual(['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'])
+      expect(registry.features.every(row => row.status === 'mock' && row.route.startsWith('/') && row.schemaId)).toBe(true)
+      expect(registry.routes).toHaveLength(5)
+      expect(registry.routes.every(row => row.status === 'mock' && row.diagnostic.status === 'default')).toBe(true)
+      expect(registry.later.map(row => row.status)).toEqual(['later', 'later', 'later'])
       const spec = { featureKey: 'rd.monitoring' as const, targetCenter: 'rd' as const,
         eligibleProjectIds: ['project-store'], eligibleTeamIds: ['team-commerce'], rolloutPercent: 100, saltVersion: 1 }
       const id = (await client.api.createPlatformFeature(spec, 'Register cohort')).entityId

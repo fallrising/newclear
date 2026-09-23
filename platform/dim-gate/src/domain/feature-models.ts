@@ -21,7 +21,8 @@ export const featurePreviewSchema = z.strictObject({ policyVersion: versionSchem
     'project-cohort', 'team-cohort', 'percentage-cohort', 'active-cohort',
   ]) })) })
 export const capabilityRegistryEntrySchema = z.strictObject({ featureKey: featureKeySchema,
-  center: z.enum(['rd', 'ops']), action: idSchema, route: z.string().startsWith('/'), capabilityId: idSchema, status: z.literal('mock') })
+  center: z.enum(['rd', 'ops']), action: idSchema, route: z.string().startsWith('/'), capabilityId: idSchema,
+  schemaId: idSchema, status: z.literal('mock') })
 
 export type PlatformFeature = z.infer<typeof platformFeatureSchema>
 export type FeatureSpec = z.infer<typeof featureSpecSchema>

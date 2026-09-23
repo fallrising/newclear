@@ -9,6 +9,7 @@ import type { SessionView } from '../../domain/schemas'
 import type { AlertRule, MonitorPolicy, MonitoringTarget, SLOPolicy } from '../../domain/monitoring-models'
 import { ServiceNotice, useServiceCommand } from '../service-delivery'
 import { MonitorForm, RuleForm, SloForm } from './forms'
+import { ServiceNotificationWorkspace, OpsNotificationWorkspace } from './notification-workspace'
 import { canApprove, canWrite, EvaluationEvidence, FormError, metricLabel, missing, MissingAlerting, PolicyAction, PolicyActions, PolicyHistory, ReasonField, status, targetLink, targetText, time } from './shared'
 import './alerting.css'
 
@@ -48,7 +49,10 @@ function ServiceMonitoring({ target, session, projectId, stage }: { target: Moni
 function ServiceAlerts({ target, session, projectId, stage }: { target: MonitoringTarget; session: SessionView; projectId: string; stage: string }) {
   const query = scoped(target)
   const monitors = useQuery({ queryKey: queryKey('monitor-policies', null, query), queryFn: () => api.listMonitorPolicies(query) })
-  return monitors.isPending ? <LoadingState label="正在讀取此環境監控設定…" /> : monitors.isError ? <ErrorState error={monitors.error} onRetry={() => void monitors.refetch()} /> : <RuleSection target={target} session={session} projectId={projectId} stage={stage} monitors={monitors.data.items} />
+  return monitors.isPending ? <LoadingState label="正在讀取此環境監控設定…" /> : monitors.isError ? <ErrorState error={monitors.error} onRetry={() => void monitors.refetch()} /> : <>
+    <RuleSection target={target} session={session} projectId={projectId} stage={stage} monitors={monitors.data.items} />
+    {target.kind === 'service' && <ServiceNotificationWorkspace environmentId={target.environmentId} session={session} />}
+  </>
 }
 
 function MonitorSection({ target, session, projectId, stage, poolId, monitors, loading, error, retry }: { target: MonitoringTarget; session: SessionView; projectId?: string; stage?: string; poolId?: string; monitors: MonitorPolicy[]; loading: boolean; error: unknown; retry: () => void }) {
@@ -186,5 +190,6 @@ function RuntimeOverview({ session }: { session: SessionView }) {
   const monitor = monitors.data?.items.find(item => item.id === rule?.spec.monitorPolicyId)
   const incidents = useQuery({ queryKey: queryKey('incidents', 'alert-runtime', { pageSize }), queryFn: () => api.listIncidents({ page: 1, pageSize }) })
   return <><section className="panel"><h2>規則運行狀態</h2><p className="muted">範圍僅含目前 Ops 可讀的規則；生效設定、樣本時效、事件與投遞各有獨立狀態。</p>{rules.isPending || monitors.isPending ? <LoadingState label="正在讀取可見規則…" /> : rules.isError || monitors.isError ? <ErrorState error={rules.error || monitors.error} onRetry={() => { void rules.refetch(); void monitors.refetch() }} /> : rules.data.items.length ? <label>檢視規則<select value={ruleId ?? ''} onChange={event => { const next = new URLSearchParams(params); next.set('ruleId', event.target.value); setParams(next) }}>{rules.data.items.map(item => <option value={item.id} key={item.id}>rev {item.revision} · {status(item)} · {item.id}</option>)}</select></label> : <ServiceNotice>目前沒有可見告警規則；這不表示環境健康。</ServiceNotice>}</section>{rule && monitor && <><RuleDetail rule={rule} monitor={monitor} session={session} readOnly /><RuleEvidence rule={rule} session={session} target={monitor.spec.target} /></>}
-    <section className="panel"><h2>可見事件</h2>{incidents.isPending ? <LoadingState label="正在讀取事件中心…" /> : incidents.isError ? <ErrorState error={incidents.error} onRetry={() => void incidents.refetch()} /> : incidents.data.items.length ? <ul className="alert-records">{incidents.data.items.map(item => <li key={item.id}><Link to={`/ops/incidents/${encodeURIComponent(item.id)}`}>{item.id}</Link> · {item.state} · {item.severity} · {time(item.updatedAt)}</li>)}</ul> : <p>目前沒有可見事件；未必已有健康樣本。</p>}</section></>
+    <section className="panel"><h2>可見事件</h2>{incidents.isPending ? <LoadingState label="正在讀取事件中心…" /> : incidents.isError ? <ErrorState error={incidents.error} onRetry={() => void incidents.refetch()} /> : incidents.data.items.length ? <ul className="alert-records">{incidents.data.items.map(item => <li key={item.id}><Link to={`/ops/incidents/${encodeURIComponent(item.id)}`}>{item.id}</Link> · {item.state} · {item.severity} · {time(item.updatedAt)}</li>)}</ul> : <p>目前沒有可見事件；未必已有健康樣本。</p>}</section>
+    <OpsNotificationWorkspace session={session} /></>
 }

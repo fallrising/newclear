@@ -590,6 +590,55 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   },
   {
     "method": "get",
+    "path": "/admin/channels",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/notification-templates",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/admin/notification-policies",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/notification-channels",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/notification-subscriptions",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/notification-attempts",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
+    "path": "/notification-attempts/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "get",
     "path": "/notifications",
     "status": 200,
     "demo": false,
@@ -703,6 +752,83 @@ export const runtimeOperations: readonly { method: string; path: string; status:
   {
     "method": "post",
     "path": "/admin/platform-routes/{id}/restore",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/channels",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "patch",
+    "path": "/admin/channels/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/channels/{id}/test",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/notification-templates",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/notification-templates/{id}/revisions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/notification-templates/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/admin/notification-templates/{id}/disable",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "patch",
+    "path": "/admin/notification-policies/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/notification-subscriptions",
+    "status": 201,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "patch",
+    "path": "/notification-subscriptions/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W5"
+  },
+  {
+    "method": "post",
+    "path": "/notification-attempts/{id}/retry",
     "status": 201,
     "demo": false,
     "milestone": "W5"

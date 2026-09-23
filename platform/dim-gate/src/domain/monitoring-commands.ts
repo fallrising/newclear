@@ -149,7 +149,9 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
       const currentRule = next.entities.alertRules.find(r => r.id === rule.id)!
       if (!activeSpec(currentRule)?.enabled) invalid()
       const now = Date.parse(monitoringNow(next)), start = Date.parse(body.startAt), end = Date.parse(body.expiresAt)
-      if (start < now || start > now + 300_000 || end <= start || end - start > 86_400_000) fail(422, 'VALIDATION_ERROR', 'Silence 需在目前時間起五分鐘內開始，且期限不超過 24 小時。')
+      const maxHours = next.entities.notificationPolicies.find(row => row.orgId === currentRule.orgId)?.maxSilenceHours ?? 24
+      if (start < now || start > now + 300_000 || end <= start || end - start > maxHours * 3_600_000)
+        fail(422, 'VALIDATION_ERROR', `Silence 需在目前時間起五分鐘內開始，且期限不超過 ${maxHours} 小時。`)
       const id = `w4-silence-${String(next.sequence + 1).padStart(4, '0')}`, nowIso = monitoringNow(next)
       next.entities.silences.push({ id, orgId: currentRule.orgId, version: 1, createdAt: nowIso, updatedAt: nowIso, ruleId: currentRule.id,
         ruleRevision: currentRule.activeRevision!, target: targetRef, actorId: input.actorId, reason: body.reason,

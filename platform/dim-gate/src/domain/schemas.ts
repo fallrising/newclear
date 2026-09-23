@@ -4,13 +4,21 @@ export * from './command-input-schemas.ts'
 export * from './monitoring-input-schemas.ts'
 export * from './feature-input-schemas.ts'
 export * from './platform-route-input-schemas.ts'
+export * from './notification-input-schemas.ts'
 import { aliyunComputeAttributesSchema, apiErrorSchema, applicationSchema, artifactSchema, auditEventSchema, awsComputeAttributesSchema, businessUnitSchema, catalogItemSchema, catalogTemplateSchema, changeDetailSchema, changeExecutionSchema, changeRequestSchema, ciSchema, ciViewSchema, commandReceiptSchema, createChangeInputSchema, dashboardViewSchema, deliveryLogSchema, environmentSchema, eventSchema, guideViewSchema, incidentVariantSchema, integrationSchema, locationSchema, metricSeriesSchema, metricsViewSchema, modelFieldSchema, monitoringNavigationItemSchema, notificationSchema, observationBucketSchema, observationLogSchema, onpremComputeAttributesSchema, organizationSchema, patchChangeInputSchema, personaSchema, pipelineRunSchema, placementSchema, poolSchema, projectSchema, providerAccountSchema, provisionJobSchema, relationSchema, releaseDetailSchema, releaseSchema, requestSchema, resourceBindingSchema, resourceCapacitySchema, resourceInventorySchema, resourceObjectSchema, resourceQuotaSchema, roleAssignmentSchema, scenarioInputSchema, serviceResourcesSchema, sessionViewSchema, snapshotSchema, teamSchema, traceSchema, traceSummarySchema, userSchema, workItemSchema, workItemSummarySchema } from './schema-models.ts'
 import { monitorPolicySchema, alertRuleSchema, sloPolicySchema, silenceSchema, alertEvaluationSchema, notificationDeliverySchema, infrastructureMetricSchema, infrastructureIncidentSchema } from './monitoring-models.ts'
 import { createMonitorPolicyInputSchema, createAlertRuleInputSchema, createSLOPolicyInputSchema, reviseMonitorPolicyInputSchema, reviseAlertRuleInputSchema, reviseSLOPolicyInputSchema, monitoringActionInputSchema, createSilenceInputSchema } from './monitoring-input-schemas.ts'
 import { platformFeatureSchema, featureSpecSchema, featurePreviewSchema, capabilityRegistryEntrySchema } from './feature-models.ts'
 import { createFeatureInputSchema, reviseFeatureInputSchema, featureActionInputSchema, restoreFeatureInputSchema } from './feature-input-schemas.ts'
 import { platformRouteSchema, platformRouteDiagnosticSchema, platformRouteRegistryEntrySchema } from './platform-route-models.ts'
+import { capabilityRegistrySchema } from './capability-registry-models.ts'
 import { createPlatformRouteInputSchema, revisePlatformRouteInputSchema, platformRouteActionInputSchema, restorePlatformRouteInputSchema } from './platform-route-input-schemas.ts'
+import { channelSchema, notificationTemplateSchema, notificationPolicySchema, notificationSubscriptionSchema,
+  notificationAttemptSchema, notificationAttemptViewSchema } from './notification-models.ts'
+import { createChannelInputSchema, patchChannelInputSchema, testChannelInputSchema,
+  createNotificationTemplateInputSchema, reviseNotificationTemplateInputSchema, notificationTemplateActionInputSchema,
+  patchNotificationPolicyInputSchema, createNotificationSubscriptionInputSchema, patchNotificationSubscriptionInputSchema,
+  retryNotificationAttemptInputSchema } from './notification-input-schemas.ts'
 import { acknowledgeIncidentInputSchema, advanceClockSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createPipelineInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, rollbackReleaseInputSchema, versionCommandSchema } from './command-input-schemas.ts'
 
 export const contractSchemas = {
@@ -36,12 +44,20 @@ export const contractSchemas = {
   ReviseMonitorPolicy: reviseMonitorPolicyInputSchema, ReviseAlertRule: reviseAlertRuleInputSchema, ReviseSLOPolicy: reviseSLOPolicyInputSchema,
   MonitoringAction: monitoringActionInputSchema, CreateSilence: createSilenceInputSchema,
   PlatformFeature: platformFeatureSchema, FeatureSpec: featureSpecSchema, FeaturePreview: featurePreviewSchema,
-  CapabilityRegistryEntry: capabilityRegistryEntrySchema, CreateFeature: createFeatureInputSchema,
+  CapabilityRegistryEntry: capabilityRegistryEntrySchema, CapabilityRegistry: capabilityRegistrySchema, CreateFeature: createFeatureInputSchema,
   ReviseFeature: reviseFeatureInputSchema, FeatureAction: featureActionInputSchema, RestoreFeature: restoreFeatureInputSchema,
   PlatformRoute: platformRouteSchema, PlatformRouteDiagnostic: platformRouteDiagnosticSchema,
   PlatformRouteRegistryEntry: platformRouteRegistryEntrySchema, CreatePlatformRoute: createPlatformRouteInputSchema,
   RevisePlatformRoute: revisePlatformRouteInputSchema, PlatformRouteAction: platformRouteActionInputSchema,
   RestorePlatformRoute: restorePlatformRouteInputSchema,
+  Channel: channelSchema, NotificationTemplate: notificationTemplateSchema, NotificationPolicy: notificationPolicySchema,
+  NotificationSubscription: notificationSubscriptionSchema, NotificationAttempt: notificationAttemptSchema,
+  NotificationAttemptView: notificationAttemptViewSchema,
+  CreateChannel: createChannelInputSchema, PatchChannel: patchChannelInputSchema, TestChannel: testChannelInputSchema,
+  CreateNotificationTemplate: createNotificationTemplateInputSchema, ReviseNotificationTemplate: reviseNotificationTemplateInputSchema,
+  NotificationTemplateAction: notificationTemplateActionInputSchema, PatchNotificationPolicy: patchNotificationPolicyInputSchema,
+  CreateNotificationSubscription: createNotificationSubscriptionInputSchema,
+  PatchNotificationSubscription: patchNotificationSubscriptionInputSchema, RetryNotificationAttempt: retryNotificationAttemptInputSchema,
   DomainEvent: eventSchema, Snapshot: snapshotSchema, Persona: personaSchema, SessionView: sessionViewSchema,
   DashboardView: dashboardViewSchema, GuideView: guideViewSchema, CommandReceipt: commandReceiptSchema,
   ApiError: apiErrorSchema, CreateCI: createCiInputSchema, PatchCI: patchCiSchema,

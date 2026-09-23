@@ -2,6 +2,7 @@ import { integrityErrors, legacyIntegrityErrors, legacyV2IntegrityErrors, legacy
 import { legacySnapshotSchema, legacySnapshotV2Schema, legacySnapshotV3Schema, legacySnapshotV4Schema, snapshotSchema, type LegacySnapshotV4, type Snapshot } from '../domain/schema-models'
 import { buildW2Metadata } from './seed/resources'
 import { buildW4Navigation } from './seed/monitoring'
+import { buildNotificationSeed } from './seed/notifications'
 
 /** Pure upgrades. Original bytes remain untouched until the controller's one atomic write. */
 export function readStoredSnapshot(value: unknown): Snapshot {
@@ -14,11 +15,17 @@ export function readStoredSnapshot(value: unknown): Snapshot {
   const upgradeV4 = (original: LegacySnapshotV4): Snapshot => {
     const errors = legacyV4IntegrityErrors(original)
     if (errors.length) throw new Error(`Invalid W4 relationships: ${errors.join('; ')}`)
+    const notificationSeed = buildNotificationSeed(original.entities.organizations[0]?.id ?? 'org-demo')
+    const reserved = new Set([...notificationSeed.channels, ...notificationSeed.notificationTemplates,
+      ...notificationSeed.notificationPolicies].map(row => row.id))
+    if (Object.values(original.entities).some(collection => collection.some(row => reserved.has(row.id))))
+      throw new Error('Legacy snapshot conflicts with reserved W5 notification identities')
     const migrated = snapshotSchema.parse({ ...original, schemaVersion: 5, seedVersion: 'dim-gate-w5-v1',
       entities: { ...original.entities,
         users: original.entities.users.map(user => ({ ...user, source: 'seed' })),
         teams: original.entities.teams.map(team => ({ ...team, source: 'seed' })),
         platformFeatures: [], platformRoutes: [],
+        ...notificationSeed,
       } })
     const migratedErrors = integrityErrors(migrated)
     if (migratedErrors.length) throw new Error(`Invalid migrated relationships: ${migratedErrors.join('; ')}`)

@@ -4,10 +4,10 @@ import type { FeatureSpec } from './feature-models'
 import type { CommandInput } from './command-input-schemas'
 
 export const featureRegistry = {
-  'rd.monitoring': { center: 'rd', action: 'monitorPolicy.read', route: '/rd/apps/:appId/monitoring', capabilityId: 'service-monitoring' },
-  'ops.alerting': { center: 'ops', action: 'alertRule.read', route: '/ops/alerting', capabilityId: 'alert-operation' },
-  'rd.delivery': { center: 'rd', action: 'pipelineDefinition.read', route: '/rd/apps/:appId/delivery', capabilityId: 'service-delivery' },
-  'rd.traffic': { center: 'rd', action: 'trafficPolicy.read', route: '/rd/apps/:appId/traffic', capabilityId: 'traffic-policy' },
+  'rd.monitoring': { center: 'rd', action: 'monitorPolicy.read', route: '/rd/apps/:appId/monitoring', capabilityId: 'service-monitoring', schemaId: 'MonitorPolicy' },
+  'ops.alerting': { center: 'ops', action: 'alertRule.read', route: '/ops/alerting', capabilityId: 'alert-operation', schemaId: 'AlertRule' },
+  'rd.delivery': { center: 'rd', action: 'pipelineDefinition.read', route: '/rd/apps/:appId/delivery', capabilityId: 'service-delivery', schemaId: 'PipelineDefinition' },
+  'rd.traffic': { center: 'rd', action: 'trafficPolicy.read', route: '/rd/apps/:appId/traffic', capabilityId: 'traffic-policy', schemaId: 'TrafficPolicy' },
 } as const
 
 export type FeatureKey = keyof typeof featureRegistry

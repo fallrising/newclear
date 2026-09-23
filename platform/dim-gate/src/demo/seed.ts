@@ -4,6 +4,7 @@ import { buildCmdbSeed } from './seed/cmdb'
 import { personas } from './seed/core'
 import { buildTopologySeed } from './seed/topology'
 import { buildObservationSeed } from './seed/observations'
+import { buildNotificationSeed } from './seed/notifications'
 import { buildW3BusinessSeed } from './seed/service-delivery'
 import { buildW2Assignments, buildW2BusinessSeed, buildW2Metadata } from './seed/resources'
 import { buildW4Navigation } from './seed/monitoring'
@@ -52,6 +53,7 @@ export function createSeed(sessionId: string): Snapshot {
       ...buildW3BusinessSeed(applicationSeed.applications),
       monitorPolicies: [], alertRules: [], sloPolicies: [], silences: [], alertEvaluations: [], notificationDeliveries: [], infrastructureIncidents: [],
       platformFeatures: [], platformRoutes: [],
+      ...buildNotificationSeed(),
       cis: [...cmdbSeed.cis, ...metadata.cis],
       placements: [...topologySeed.placements, ...resources.placements],
       resourceQuotas: metadata.resourceQuotas,

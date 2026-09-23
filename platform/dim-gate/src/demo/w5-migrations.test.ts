@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { legacySnapshotV4Schema } from '../domain/schema-models'
 import { createController, SNAPSHOT_KEY, type StorageLike } from './controller'
 import { createSeed } from './seed'
+import { readStoredSnapshot } from './migrations'
 
 function legacyBytes() {
   const current = createSeed('w5-migrate-session')
-  const { platformFeatures: _platformFeatures, platformRoutes: _platformRoutes, ...oldEntities } = current.entities
-  void _platformFeatures; void _platformRoutes
+  const { platformFeatures: _platformFeatures, platformRoutes: _platformRoutes, channels: _channels,
+    notificationTemplates: _notificationTemplates, notificationPolicies: _notificationPolicies,
+    notificationSubscriptions: _notificationSubscriptions, notificationAttempts: _notificationAttempts, ...oldEntities } = current.entities
+  void _platformFeatures; void _platformRoutes; void _channels; void _notificationTemplates; void _notificationPolicies
+  void _notificationSubscriptions; void _notificationAttempts
   const snapshot = legacySnapshotV4Schema.parse({ ...current, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
     entities: { ...oldEntities,
       users: current.entities.users.map(({ source: _source, ...user }) => { void _source; return user }),
@@ -39,6 +43,11 @@ describe('W5 strict atomic W4 snapshot migration', () => {
     }
     expect(migrated.entities.platformFeatures).toEqual([])
     expect(migrated.entities.platformRoutes).toEqual([])
+    expect(migrated.entities.channels.map(row => row.id)).toEqual(['demo-rd', 'demo-ops'])
+    expect(migrated.entities.notificationTemplates).toHaveLength(1)
+    expect(migrated.entities.notificationPolicies).toHaveLength(1)
+    expect(migrated.entities.notificationSubscriptions).toEqual([])
+    expect(migrated.entities.notificationAttempts).toEqual([])
     expect(migrated.audit).toEqual(original.snapshot.audit)
     expect(migrated.idempotency).toEqual(original.snapshot.idempotency)
     expect(h.writes).toBe(1)
@@ -52,6 +61,7 @@ describe('W5 strict atomic W4 snapshot migration', () => {
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users[0].teamIds = ['missing-team'] },
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users.push({ ...value.snapshot.entities.users[0], id: 'user-demo-0001' }) },
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users[0].source = 'seed' },
+      (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.navigation[0].id = 'demo-rd' },
     ]) {
       const value = JSON.parse(legacyBytes()); mutate(value)
       const bytes = JSON.stringify(value), h = harness(bytes)
@@ -59,6 +69,12 @@ describe('W5 strict atomic W4 snapshot migration', () => {
       expect(h.raw).toBe(bytes)
       expect(h.writes).toBe(0)
     }
+  })
+
+  it('rejects a reserved W5 notification ID even when its W4 navigation row is otherwise valid', () => {
+    const value = JSON.parse(legacyBytes())
+    value.snapshot.entities.navigation[0].id = 'demo-rd'
+    expect(() => readStoredSnapshot(value.snapshot)).toThrow('reserved W5 notification identities')
   })
 
   it('keeps original bytes when the single upgrade write exceeds quota', () => {

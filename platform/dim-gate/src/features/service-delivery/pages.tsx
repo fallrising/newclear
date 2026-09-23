@@ -96,7 +96,7 @@ export function TrafficPage({ session }: { session: SessionView }) { return <RdS
 
 export function ServiceChangePage({ session }: { session: SessionView }) {
   const { sourceType = '', sourceId = '' } = useParams()
-  if (!isKind(sourceType) || !sourceId) return <MissingServiceChange back="/ops/work-items" />
+  if (!isKind(sourceType) || !sourceId) return <MissingServiceChange back="/ops/requests" />
   return <OpsSource key={`${sourceType}:${sourceId}`} kind={sourceType} sourceId={sourceId} session={session} />
 }
 function OpsSource({ kind, sourceId, session }: { kind: ServiceKind; sourceId: string; session: SessionView }) {
@@ -104,10 +104,10 @@ function OpsSource({ kind, sourceId, session }: { kind: ServiceKind; sourceId: s
   const source = detail.data?.source
   const environmentId = source ? 'environmentId' in source ? source.environmentId : source.affectedEnvironmentIds[0] : ''
   const options = useQuery({ queryKey: queryKey('delivery-options', source?.applicationId, { environmentId }), queryFn: () => api.getDeliveryOptions(source!.applicationId, environmentId), enabled: Boolean(source && environmentId) })
-  if (isMissing(detail.error) || isMissing(options.error)) return <MissingServiceChange back="/ops/work-items" />
+  if (isMissing(detail.error) || isMissing(options.error)) return <MissingServiceChange back="/ops/requests" />
   if (detail.isPending) return <LoadingState label="正在讀取同一來源的變更內容…" />
   if (detail.isError) return <ErrorState error={detail.error} onRetry={() => void detail.refetch()} />
   if (options.isPending) return <LoadingState label="正在核對變更範圍…" />
   if (options.isError) return <ErrorState error={options.error} onRetry={() => void options.refetch()} />
-  return <div className="service-delivery"><PageHeading eyebrow="OPS · SERVICE CHANGE" title={`${options.data.application.name} · ${sectionTitle[kind]}審批`} description="讀取申請者的同一份版本、驗證與證據。核准只記錄決策，由申請者明確啟動後續執行。" action={<Button asChild variant="outline"><Link to="/ops/work-items"><ArrowLeft size={16} aria-hidden="true" />工作單</Link></Button>} /><p><Link to={sourcePath(detail.data.source, 'rd', options.data.environment.id)}>同一來源的 RD 視圖</Link> · {options.data.environment.name} · {options.data.environment.stage}</p><ServiceDetailView detail={detail.data} options={options.data} session={session} center="ops" /></div>
+  return <div className="service-delivery"><PageHeading eyebrow="OPS · SERVICE CHANGE" title={`${options.data.application.name} · ${sectionTitle[kind]}審批`} description="讀取申請者的同一份版本、驗證與證據。核准只記錄決策，由申請者明確啟動後續執行。" action={<Button asChild variant="outline"><Link to="/ops/requests"><ArrowLeft size={16} aria-hidden="true" />工作單</Link></Button>} /><p><Link to={sourcePath(detail.data.source, 'rd', options.data.environment.id)}>同一來源的 RD 視圖</Link> · {options.data.environment.name} · {options.data.environment.stage}</p><ServiceDetailView detail={detail.data} options={options.data} session={session} center="ops" /></div>
 }

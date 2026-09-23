@@ -1,12 +1,11 @@
+import type { createRelationInputSchema, deleteRelationInputSchema } from '../../domain/schemas'
 import { z } from 'zod'
 import { topologyViewSchema, entitySearchHitSchema } from '../wire-views'
 import {
   commandReceiptSchema,
-  createRelationInputSchema,
-  deleteRelationInputSchema,
   pageSchema,
   relationSchema,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { CommandReceipt, Relation } from '../../domain/schemas'
 import type { ApiRequest } from '../core/request'
 

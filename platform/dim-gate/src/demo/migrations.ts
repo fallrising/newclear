@@ -1,5 +1,5 @@
 import { integrityErrors, legacyIntegrityErrors, legacyV2IntegrityErrors } from '../domain/integrity'
-import { legacySnapshotSchema, legacySnapshotV2Schema, snapshotSchema, type Snapshot } from '../domain/schemas'
+import { legacySnapshotSchema, legacySnapshotV2Schema, snapshotSchema, type Snapshot } from '../domain/schema-models'
 import { buildW2Metadata } from './seed/resources'
 
 /** Pure upgrades. Original bytes remain untouched until the controller's one atomic write. */

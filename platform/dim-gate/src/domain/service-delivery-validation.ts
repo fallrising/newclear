@@ -1,4 +1,4 @@
-import { serviceDeliveryRegistry as registry, type Snapshot, type ServiceSource } from './schemas'
+import { serviceDeliveryRegistry as registry, type Snapshot, type ServiceSource } from './schema-models'
 export function serviceValidationErrors(s: Snapshot, row: ServiceSource) {
   const errors: {field: string; message: string}[] = []
   const error = (field: string, message: string) => errors.push({field, message})

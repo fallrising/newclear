@@ -83,4 +83,4 @@ W2 explicit actions binding.read/resourceObject.read/change.* and resource.manag
 
 ## W3 實作前契約
 
-W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD requester 現有 project/stage 決定寫入；Ops 全部受影響 project/stage 且非本人批准，Admin-only 和 pool-only 無業務配置權。prod 执行重查批准者現行 scope；移除 prod target 仍檢查前一 family revision 的受影響範圍。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD requester 現有 project/stage 決定寫入；Ops 全部受影響 project/stage 且非本人批准，Admin-only 和 pool-only 無業務配置權。prod 执行重查批准者現行 scope；移除 prod target 仍以當前 active family revision 為基準計算受影響範圍，複製未批准草稿不能繞過審批。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

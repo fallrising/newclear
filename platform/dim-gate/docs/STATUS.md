@@ -4,7 +4,7 @@
 
 目前：**W1／W2 已驗收合併；W3 正在實作，尚未驗收；W4／W5 尚未開始。** W2 [PR36](https://github.com/fallrising/newclear/pull/36) 最終 head e8c7ec1 的 CI35846286919 全部通過，實際合併為9162685；component tree一致，W2 owner已釋放，合併後CI35849832030與mirror35849832043均已成功。321原生測試、77Chromium、8Firefox/WebKit、3效能、2隔離及獨立T036review的完整證據見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md)。
 
-W3 [draft PR37](https://github.com/fallrising/newclear/pull/37) 保存合約與進度，run DG-W3-20260923-01，唯一 owner Codex orchestrator W3，worktree `newclear-dim-gate-w3`，branch `agent/dim-gate/mainline/w3-service-delivery`。T037領域、T038新介面使用獨立工作樹；T039整合API／遷移，T040保持未參與實作供獨立review。實際功能已於 dfb146c 整合並以 a473626 推送；完整原生回歸及同 head CI 為357/360，三項舊種子筆數預期正修正。完整介面初始JS309048bytes超出307200預算1848bytes，正在調整命令schema模組邊界，保留啟動驗證與原預算。設定／流量瀏覽器流程已有初步成功證據，完整回歸與獨立產品review尚待完成。狀態與恢復步驟見 [PLAN](../../../.team/PLAN.md) 最新紀錄；以下段落保留歷史觀察。
+W3 [draft PR37](https://github.com/fallrising/newclear/pull/37) 保存合約與進度，run DG-W3-20260923-01，唯一 owner Codex orchestrator W3，worktree `newclear-dim-gate-w3`，branch `agent/dim-gate/mainline/w3-service-delivery`。T037領域、T038新介面使用獨立工作樹；T039整合API／遷移，T040保持未參與實作供獨立review。最終領域與介面 handback 已按 SHA 整合、worker owner 已釋放；candidate371項原生測試及全部原生檢查通過。效能修正後初始JS306290bytes低於307200預算，三項量測通過；12條新瀏覽器流程已有 worker 實測，仍待固定整合版本完整回歸、獨立review與最新headCI。本視窗依最新使用者要求只收尾W3，W4／W5留新視窗，接手入口為 [HANDOFF-WORKSPACES](HANDOFF-WORKSPACES.md)。狀態與恢復步驟見 [PLAN](../../../.team/PLAN.md) 最新紀錄；以下段落保留歷史觀察。
 
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 

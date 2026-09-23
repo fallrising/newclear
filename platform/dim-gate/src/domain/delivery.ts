@@ -4,7 +4,7 @@ import type { Policy } from './policy'
 import {
   pipelineRunSchema, releaseSchema, type Environment,
   type Release, type Snapshot,
-} from './schemas'
+} from './schema-models'
 
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }
 const missing = (): never => fail(404, 'NOT_FOUND', '此資源不存在或不在目前授權範圍。')
@@ -67,4 +67,3 @@ export function readDelivery(s: Snapshot, policy: Policy, path: string, query: U
     .toSorted((a, b) => (values.order === 'asc' ? 1 : -1) * a[values.sort].localeCompare(b[values.sort]) || a.id.localeCompare(b.id))
   return structuredClone({ items: filtered.slice((values.page - 1) * values.pageSize, values.page * values.pageSize), total: filtered.length, page: values.page, pageSize: values.pageSize })
 }
-

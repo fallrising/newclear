@@ -1,4 +1,4 @@
-import { snapshotSchema, type Snapshot } from '../domain/schemas'
+import { snapshotSchema, type Snapshot } from '../domain/schema-models'
 import { buildApplicationSeed } from './seed/applications'
 import { buildCmdbSeed } from './seed/cmdb'
 import { personas } from './seed/core'

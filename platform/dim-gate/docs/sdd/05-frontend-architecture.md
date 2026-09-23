@@ -110,4 +110,6 @@ W2 snapshot version2 uses the existing shared controller, queue, idempotency and
 
 ## W3 實作前契約
 
-W3 沿用 initial JS307200bytes、冷啟動LCP、5,000CI query 與 persisted HTTP command 基準，不提高預算。新的 command/scheduler 可分離至既有 lazy queue，但必要 startup schema/relationship/scheduler validation 保持執行。全主題、三viewport、keyboard、Firefox/WebKit、sibling/live isolation 和 no stale persona cache 均為 exit gates。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+W3 沿用 initial JS307200bytes、冷啟動LCP、5,000CI query 與 persisted HTTP command 基準，不提高預算。新的 command/scheduler 可分離至既有 lazy queue，但必要 startup schema/relationship/scheduler validation 保持執行。全主題、三viewport、keyboard、Firefox/WebKit、sibling/live isolation 和 no stale persona cache 均為 exit gates。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+W3 首次啟動量測超標後，可將非 Shell 所需的 feature API client 延至首次操作載入；型別與回應驗證保持相同。每次呼叫在等待模組前保存輸入和 actor/session/generation/policy/epoch，等待後有任一變更則拒絕，不能以新身分送出舊命令。seed、遷移、snapshot／關係／排程驗證仍在啟動完成前同步執行。

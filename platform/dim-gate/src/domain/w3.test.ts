@@ -183,6 +183,8 @@ describe('W3 policy, locks and durable proof',()=>{
       s=>{const e=s.entities.serviceExecutions[0];if(e.kind==='traffic')e.samples[1].from=e.samples[0].from},
       s=>{const e=s.entities.serviceExecutions[0];if(e.kind==='traffic')e.checkpoints[0].weights[0].weight=95},
       s=>{const e=s.entities.serviceExecutions[0];if(e.kind==='traffic')e.checkpoints[0].sampleIds=[e.samples[0].id,e.samples[0].id]},
+      s=>{const e=s.entities.serviceExecutions[0];if(e.kind==='traffic')e.checkpoints[0].id='forged-checkpoint'},
+      s=>{const e=s.entities.serviceExecutions[0];if(e.kind==='traffic'){e.samples[0].p95LatencyMs=900;e.samples[0].errorRate=0.08}},
     ]
     for(const mutate of mutations){const bad=structuredClone(good);mutate(bad);const original=JSON.stringify(bad);expect(()=>createEngine(bad,()=>undefined)).toThrow(expect.objectContaining({code:'INVALID_SNAPSHOT'}));expect(JSON.stringify(bad)).toBe(original)}
   })
@@ -203,4 +205,49 @@ describe('W3 policy, locks and durable proof',()=>{
     expect(()=>h.read(`/service-configs/${configId}`)).toThrow(expect.objectContaining({status:404}))
     expect(JSON.stringify(h.read('/dashboard',rd,'center=rd'))).not.toContain(configId)
   })
+})
+
+it('rejects failed config suffix corruption and impossible execution timestamps without changing a valid failed history',async()=>{
+  const h=harness();await h.action(configId,'validate');const start=await h.action(configId,'apply')
+  const running=h.engine.getSnapshot();running.entities.serviceExecutions[0].stepResults[0].startedAt='2026-09-20T09:00:01Z'
+  expect(()=>createEngine(running,()=>undefined)).toThrow(expect.objectContaining({code:'INVALID_SNAPSHOT'}))
+  await h.command('/scenarios',{scenarioKey:'config-failure',executionId:start.operationId});await h.advance(2)
+  const valid=h.engine.getSnapshot()
+  expect(integrityErrors(valid)).toEqual([])
+  for(const corrupt of [
+    (s:Snapshot)=>{s.entities.serviceExecutions[0].stepResults[2].state='queued'},
+    (s:Snapshot)=>{s.entities.serviceExecutions[0].stepResults[2].state='succeeded'},
+    (s:Snapshot)=>{s.entities.serviceExecutions[0].completedAt='2099-01-01T00:00:00Z'},
+    (s:Snapshot)=>{s.entities.serviceExecutions[0].stepResults[1].completedAt='2026-09-20T08:59:59Z'},
+    (s:Snapshot)=>{s.entities.serviceExecutions[0].stepResults[1].startedAt='2026-09-20T09:00:00Z'},
+  ]){const snapshot=structuredClone(valid);corrupt(snapshot);expect(()=>createEngine(snapshot,()=>undefined)).toThrow(expect.objectContaining({code:'INVALID_SNAPSHOT'}))}
+})
+
+it('does not publish a traffic sample/checkpoint or advance its clock after a terminal persistence failure',async()=>{
+  let blocked=false
+  const h=harness(undefined,()=>{if(blocked)throw new Error('disk full')}),id=await h.traffic()
+  await h.action(id,'start');await h.advance(60);await h.advance(60);await h.advance(30)
+  const before=h.engine.getSnapshot();blocked=true
+  await expect(h.advance(30)).rejects.toMatchObject({status:507});expect(h.engine.getSnapshot()).toEqual(before)
+  blocked=false;await h.advance(30)
+  const detail=h.read<TrafficPolicyDetail>(h.path(h.source(id)))
+  expect(detail.source.state).toBe('active');expect(detail.executions[0].samples).toHaveLength(6);expect(detail.executions[0].checkpoints).toHaveLength(3)
+  const reloaded=harness(h.engine.getSnapshot());await reloaded.advance(30)
+  expect((reloaded.read<TrafficPolicyDetail>(reloaded.path(reloaded.source(id)))).executions).toEqual(detail.executions)
+})
+
+it('permits project-only Ops approval, records decision reason and keeps concurrent definition base guards',async()=>{
+  const seed=createSeed('w3-test');seed.entities.assignments=seed.entities.assignments.filter(g=>g.userId!==ops||g.scopeType!=='pool')
+  const h=harness(seed),source=h.source(definitionId) as PipelineDefinition
+  await h.command(h.path(source),{expectedVersion:source.version,name:source.name,reason:'Production baseline',spec:{...source.spec,targetEnvironmentIds:['env-checkout-prod']}},rd,undefined,'PATCH')
+  await h.action(definitionId,'validate');await h.action(definitionId,'submit')
+  const expectedVersion=h.source(definitionId).version
+  await h.command(`${h.path(source)}/approve`,{expectedVersion,reason:'Independent project-only review'},ops)
+  expect(h.engine.getSnapshot().audit.at(-1)?.reason).toBe('Independent project-only review')
+  await h.action(definitionId,'activate')
+  const a=await h.action(definitionId,'revisions'),b=await h.action(definitionId,'revisions')
+  for(const id of [a.entityId,b.entityId]){await h.action(id,'validate');await h.action(id,'submit');await h.action(id,'approve',{},ops)}
+  const receipt=await h.action(a.entityId,'activate')
+  expect(receipt.changed).toContainEqual({entityType:'pipelineDefinition',entityId:definitionId})
+  await expect(h.action(b.entityId,'activate')).rejects.toMatchObject({status:409,code:'BASE_REVISION_CONFLICT'})
 })

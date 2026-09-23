@@ -3,7 +3,7 @@ import {
   auditEventSchema, ciKindSchema, commandReceiptSchema,
   modelFieldSchema, navigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, userSchema,
   type AuditEvent, type CatalogItem, type Center, type CommandReceipt, type ModelField, type NavigationItem,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type User = z.infer<typeof userSchema>

@@ -1,6 +1,6 @@
 /** Runtime view validators shared with the build-time OpenAPI registry. */
 import { z } from 'zod'
-import { applicationSchema, environmentSchema, placementSchema, releaseSchema, organizationSchema, businessUnitSchema, teamSchema, projectSchema, userSchema, ciViewSchema, relationSchema, idSchema } from '../domain/schemas.ts'
+import { applicationSchema, environmentSchema, placementSchema, releaseSchema, organizationSchema, businessUnitSchema, teamSchema, projectSchema, userSchema, ciViewSchema, relationSchema, idSchema } from '../domain/schema-models.ts'
 
 export const organizationViewSchema = z.strictObject({ organizations: z.array(organizationSchema), businessUnits: z.array(businessUnitSchema),
     teams: z.array(teamSchema), projects: z.array(projectSchema), users: z.array(userSchema) })

@@ -5,7 +5,7 @@ import type { Policy } from './policy'
 import { canReadDelivery } from './delivery'
 import { resourceRoute } from './resource-views'
 import { canReadObservation, incidentView } from './observation'
-import { idSchema, incidentSchema, observationLogSchema, timestampSchema, type GuideView, type MetricSeries, type Notification, type Snapshot } from './schemas'
+import { idSchema, incidentSchema, observationLogSchema, timestampSchema, type GuideView, type MetricSeries, type Notification, type Snapshot } from './schema-models'
 
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }
 function queryValues<T extends z.ZodType>(schema: T, query: URLSearchParams): z.infer<T> {

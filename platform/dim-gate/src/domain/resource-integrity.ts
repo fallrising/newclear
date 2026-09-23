@@ -1,4 +1,4 @@
-import { resourceAccessProfiles, type Snapshot } from './schemas'
+import { resourceAccessProfiles, type Snapshot } from './schema-models'
 import { resourceConflictKey } from './resource-identity'
 import { resourceUsage } from './resource-capacity'
 

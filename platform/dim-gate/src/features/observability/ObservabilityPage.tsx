@@ -4,7 +4,7 @@ import { api, queryKey } from '../../api/client'
 import type { ObservationWindow } from '../../api/clients/observability'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
-import { timestampSchema, type ObservationLog, type SessionView } from '../../domain/schemas'
+import { timestampSchema, type ObservationLog, type SessionView } from '../../domain/schema-models'
 import { MetricChart } from './metrics'
 import { canReadRaw, IncidentStatus, isNotFound, MissingObservation, observationLink, Pager, pageNumber, ScopeBadge, timestamp } from './shared'
 

@@ -1,14 +1,8 @@
+import type { CommandInput } from './command-input-schemas'
+import { advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, versionCommandSchema } from './command-input-schemas'
 import { prepareServiceDelivery, advanceServiceDelivery } from './service-delivery-commands'
 import type { z } from 'zod'
-import {
-  advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema,
-  createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema,
-  patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema,
-  patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, scenarioInputSchema,
-  roleAssignmentSchema, snapshotSchema, versionCommandSchema,
-  type CI, type CommandInput, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation,
-  type Request as DomainRequest, type Snapshot,
-} from './schemas'
+import { scenarioInputSchema, roleAssignmentSchema, snapshotSchema, type CI, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation, type Request as DomainRequest, type Snapshot } from './schema-models'
 import { clockIso, clone, fail, notFound, forbidden, parse, assertIntegrity, requestableCatalog, requestPoolUsage } from './engine-shared'
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'

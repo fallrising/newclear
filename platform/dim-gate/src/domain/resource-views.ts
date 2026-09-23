@@ -10,7 +10,7 @@ import {
   resourceObjectListQuerySchema, resourceBindingListQuerySchema, resourceInventoryQuerySchema, serviceResourcesQuerySchema,
   changeListQuerySchema, workItemListQuerySchema,
   type ChangeDetail, type ChangeRequest, type ResourceInventory, type ServiceResources, type Snapshot, type WorkItem,
-} from './schemas'
+} from './schema-models'
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }
 const missing = (): never => fail(404, 'NOT_FOUND', '此資源不存在或不在目前授權範圍。')
 function queryValues<T extends z.ZodType>(schema: T, query: URLSearchParams): z.infer<T> {

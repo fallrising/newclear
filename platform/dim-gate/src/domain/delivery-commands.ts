@@ -1,13 +1,11 @@
+import type { CommandInput } from './command-input-schemas'
+import { createPipelineInputSchema, reasonCommandSchema, rollbackReleaseInputSchema } from './command-input-schemas'
 import { canReadDelivery, rollbackTargets } from './delivery'
 import { assertEnvironmentAvailable } from './service-delivery-shared'
 import type { z } from 'zod'
 import { DomainError } from './errors'
 import type { Policy } from './policy'
-import {
-  createPipelineInputSchema, reasonCommandSchema, rollbackReleaseInputSchema, scenarioInputSchema,
-  type CommandInput, type CommandReceipt, type Environment,
-  type PipelineRun, type Release, type Snapshot,
-} from './schemas'
+import { scenarioInputSchema, type CommandReceipt, type Environment, type PipelineRun, type Release, type Snapshot } from './schema-models'
 
 const time = (s: Snapshot) => new Date(Date.parse('2026-09-20T09:00:00Z') + s.logicalClock * 1000).toISOString()
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }

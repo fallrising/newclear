@@ -1,4 +1,4 @@
-import { pipelineDefinitionSchema, serviceConfigSchema, type Snapshot } from '../../domain/schemas'
+import { pipelineDefinitionSchema, serviceConfigSchema, type Snapshot } from '../../domain/schema-models'
 
 const BASELINE = '2026-09-20T09:00:00Z'
 const scoped = { version: 1, createdAt: BASELINE, updatedAt: BASELINE, orgId: 'org-demo' }

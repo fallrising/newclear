@@ -1,4 +1,4 @@
-import type { ChangeInput, ResourceCapacity, ResourceQuota, Snapshot } from './schemas'
+import type { ChangeInput, ResourceCapacity, ResourceQuota, Snapshot } from './schema-models'
 import type { Policy } from './policy'
 import { resourcePolicy } from './resource-policy'
 import { observationTime } from './observation'

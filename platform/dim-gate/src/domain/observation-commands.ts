@@ -1,11 +1,10 @@
+import type { CommandInput } from './command-input-schemas'
+import { acknowledgeIncidentInputSchema, reasonCommandSchema, versionCommandSchema } from './command-input-schemas'
 import type { z } from 'zod'
 import { DomainError } from './errors'
 import type { Policy } from './policy'
 import { observationTime, breached, healthy, observationStreak, canReadObservation } from './observation'
-import {
-  acknowledgeIncidentInputSchema, reasonCommandSchema, scenarioInputSchema, versionCommandSchema,
-  type CommandInput, type CommandReceipt, type Environment, type Incident, type ObservationBucket, type Snapshot,
-} from './schemas'
+import { scenarioInputSchema, type CommandReceipt, type Environment, type Incident, type ObservationBucket, type Snapshot } from './schema-models'
 
 const ruleKey = 'red-degradation'
 const thresholds = { p95Latency: 500, errorRate: 0.05 } as const

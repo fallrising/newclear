@@ -1,7 +1,6 @@
-import { createPipelineDefinitionInputSchema, createServiceConfigInputSchema, createTrafficPolicyInputSchema,
-  patchPipelineDefinitionInputSchema, patchServiceConfigInputSchema, patchTrafficPolicyInputSchema,
-  serviceActionInputSchema, serviceRevisionInputSchema, runPipelineDefinitionInputSchema, scenarioInputSchema,
-  type Snapshot, type ServiceSource, type PipelineDefinition, type TrafficPolicy, type ServiceExecution, type CommandInput, type CommandReceipt } from './schemas'
+import type { CommandInput } from './command-input-schemas'
+import { createPipelineDefinitionInputSchema, createServiceConfigInputSchema, createTrafficPolicyInputSchema, patchPipelineDefinitionInputSchema, patchServiceConfigInputSchema, patchTrafficPolicyInputSchema, serviceActionInputSchema, serviceRevisionInputSchema, runPipelineDefinitionInputSchema } from './service-delivery-input-schemas'
+import { scenarioInputSchema, type Snapshot, type ServiceSource, type PipelineDefinition, type TrafficPolicy, type ServiceExecution, type CommandReceipt } from './schema-models'
 import { type Policy } from './policy'
 import { parse, fail, forbidden, notFound, clone } from './engine-shared'
 import { serviceScope, serviceVisible, serviceApprovalCurrent, serviceApprovalGrants } from './service-delivery-policy'
@@ -15,11 +14,11 @@ const nextId = (s: Snapshot, prefix: string) => `${prefix}-${String(s.sequence +
 const stamp = (s: Snapshot, orgId: string, id: string) => ({ id, orgId, version: 1, createdAt: serviceTime(s), updatedAt: serviceTime(s) })
 const ref = (entityType: string, entityId: string) => ({entityType, entityId})
 type Effect = CommandReceipt & {action: string; fields: string[]; reason?: string; projectIds: string[]; poolIds: string[]; stages: ('dev'|'staging'|'prod')[]}
-function effect(s: Snapshot, row: ServiceSource, action: string, operationId?: string): Effect {
+function effect(s: Snapshot, row: ServiceSource, action: string, operationId?: string, reason = row.reason): Effect {
   const app = s.entities.applications.find(a => a.id === row.applicationId)!
   return { ...ref(row.sourceType, row.id), entityVersion: row.version, correlationId: row.correlationId,
     ...(operationId ? {operationId} : {}), changed: [ref(row.sourceType, row.id), ...(operationId ? [ref('serviceExecution', operationId)] : [])],
-    action: `${row.sourceType}.${action}`, fields: ['state', 'version'], reason: row.reason, projectIds: [app.projectId], poolIds: [],
+    action: `${row.sourceType}.${action}`, fields: ['state', 'version'], reason, projectIds: [app.projectId], poolIds: [],
     stages: [...new Set(row.affectedEnvironmentIds.map(id => s.entities.environments.find(e => e.id === id)!.stage))] }
 }
 function addSource(s: Snapshot, row: ServiceSource) {
@@ -135,6 +134,7 @@ export function prepareServiceDelivery(s: Snapshot, p: Policy, input: CommandInp
   }
   return {apply(next) {
     const target = serviceSource(next,row.id)!
+    const additionalChanges: CommandReceipt['changed'] = []
     checkVersion(target.version,body.expectedVersion)
     if (['revisions','restore'].includes(action)) {
       const version = target.sourceType === 'pipelineDefinition' ? undefined : parse(serviceRevisionInputSchema,body).environmentVersion
@@ -186,7 +186,7 @@ export function prepareServiceDelivery(s: Snapshot, p: Policy, input: CommandInp
       target.specSnapshot=clone(target.spec) as typeof target.specSnapshot
       if (target.sourceType === 'pipelineDefinition') {
         const active=serviceActive(next,target)
-        if(active){active.state='superseded';serviceTouch(next,active)}
+        if(active){active.state='superseded';serviceTouch(next,active);additionalChanges.push(ref(active.sourceType,active.id))}
         target.state='active'
       } else {
         const env=next.entities.environments.find(e=>e.id===target.environmentId)!
@@ -202,10 +202,11 @@ export function prepareServiceDelivery(s: Snapshot, p: Policy, input: CommandInp
           : {...common,kind:'traffic',priorDistribution:effectiveTraffic(next,env.id),stepResults:([10,50,100] as const).map((weight,i)=>({weight,state:i===0?'running':'queued',...(i===0?{startedAt:serviceTime(next)}:{})})),samples:[],checkpoints:[]}
         next.entities.serviceExecutions.push(execution);next.scheduler.tasks.push({id:`task-${execution.id}`,operationId:execution.id,stepIndex:0,dueTick:next.logicalClock+(execution.kind==='traffic'?30:1)})
         target.latestExecutionId=execution.id;target.state=target.sourceType==='serviceConfig'?'applying':'rolling_out';serviceTouch(next,target)
-        return effect(next,target,action,execution.id)
+        return effect(next,target,action,execution.id,body.reason)
       }
     }
-    serviceTouch(next,target);return effect(next,target,action)
+    serviceTouch(next,target)
+    const result=effect(next,target,action,undefined,body.reason);result.changed.push(...additionalChanges);return result
   }}
 }
 
@@ -216,6 +217,7 @@ export function advanceServiceDelivery(s: Snapshot): CommandReceipt['changed'] {
     const execution=s.entities.serviceExecutions.find(e=>e.id===task.operationId)!
     const source=serviceSource(s,execution.sourceId)!
     const step=execution.stepResults[task.stepIndex]
+    const transitionChanges:CommandReceipt['changed']=[]
     let failure:string|undefined, complete:boolean
     if(execution.kind==='config') {
       failure=task.stepIndex===1&&s.scenarioFlags[`config-failure:${execution.id}`]===true?'SIMULATED_CONFIG_FAILURE':undefined
@@ -241,9 +243,9 @@ export function advanceServiceDelivery(s: Snapshot): CommandReceipt['changed'] {
       step.state='succeeded';step.completedAt=serviceTime(s)
       if(task.stepIndex===2) {
         const active=serviceActive(s,source)
-        if(active){active.state='superseded';serviceTouch(s,active);changes.push(ref(active.sourceType,active.id))}
+        if(active){active.state='superseded';serviceTouch(s,active);transitionChanges.push(ref(active.sourceType,active.id))}
         execution.state='succeeded';source.state='active'
-        if(execution.kind==='config') {const env=s.entities.environments.find(e=>e.id===execution.environmentId)!;serviceTouch(s,env);changes.push(ref('environment',env.id))}
+        if(execution.kind==='config') {const env=s.entities.environments.find(e=>e.id===execution.environmentId)!;serviceTouch(s,env);transitionChanges.push(ref('environment',env.id))}
       } else {task.stepIndex++;const next=execution.stepResults[task.stepIndex];next.state='running';next.startedAt=serviceTime(s)}
     }
     if(['succeeded','failed'].includes(execution.state)) {
@@ -251,7 +253,7 @@ export function advanceServiceDelivery(s: Snapshot): CommandReceipt['changed'] {
       for(const key of ['config-failure','traffic-abnormal','traffic-missing'])delete s.scenarioFlags[`${key}:${execution.id}`]
     } else task.dueTick=s.logicalClock+(execution.kind==='traffic'?30:1)
     serviceTouch(s,execution);serviceTouch(s,source)
-    const changed=[ref(source.sourceType,source.id),ref('serviceExecution',execution.id)];changes.push(...changed)
+    const changed=[ref(source.sourceType,source.id),ref('serviceExecution',execution.id),...transitionChanges];changes.push(...changed)
     s.sequence++;const serial=String(s.sequence).padStart(4,'0'),action=`${source.sourceType}.${execution.state==='running'?'step':execution.state}`
     const result=effect(s,source,action,execution.id)
     s.events.push({eventId:`event-${serial}`,entities:changed,type:action,occurredAt:serviceTime(s),correlationId:source.correlationId})

@@ -1,9 +1,10 @@
+import type { CommandInput } from './command-input-schemas'
 import { readServiceDelivery } from './service-delivery-views'
 import { serviceRoute, serviceVisible } from './service-delivery-policy'
 import { serviceSources } from './service-delivery-shared'
 import { centerSchema, dashboardQuerySchema, ciKindSchema, healthSchema, providerSchema, snapshotSchema,
-  type AuditEvent, type CI, type CommandInput, type CommandReceipt, type GuideView, type Page, type ProvisionJob, type Snapshot,
-} from './schemas'
+  type AuditEvent, type CI, type CommandReceipt, type GuideView, type Page, type ProvisionJob, type Snapshot,
+} from './schema-models'
 import { clockIso, clone, fail, notFound, forbidden, parse, assertIntegrity, requestableCatalog, requestPoolUsage } from './engine-shared'
 import { workspaceDashboard } from './workspace-home'
 import { readResources, resourceRoute } from './resource-views'

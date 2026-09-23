@@ -128,4 +128,4 @@ W2 new resource.bind/resource.resize/kafka.topic.create changes follow draft →
 
 ## W3 實作前契約
 
-W3 契約新增 /rd/apps/:appId/delivery、configuration、traffic，environmentId/revisionId 查詢保留範圍和歷史版本；Ops source detail 為 /ops/service-changes/:sourceType/:sourceId。服務與環境入口及原 WorkItems 導向同一來源。三種具型別編輯器、diff、獨立批准、實際時鐘執行與失敗證據；讀回成功前保持確認 pending。 行為細節與 owner 以 [W3 contract revision2](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+W3 契約新增 /rd/apps/:appId/delivery、configuration、traffic，environmentId/revisionId 查詢保留範圍和歷史版本；Ops source detail 為 /ops/service-changes/:sourceType/:sourceId。服務與環境入口及原 WorkItems 導向同一來源。三種具型別編輯器、diff、獨立批准、實際時鐘執行與失敗證據；讀回成功前保持確認 pending。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

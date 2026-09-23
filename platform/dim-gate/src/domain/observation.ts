@@ -1,6 +1,6 @@
 import type { Policy } from './policy'
 import { canReadDelivery } from './delivery'
-import type { Incident, ObservationBucket, Snapshot } from './schemas'
+import type { Incident, ObservationBucket, Snapshot } from './schema-models'
 
 export const observationTime = (tick: number) => new Date(Date.parse('2026-09-20T09:00:00Z') + tick * 1000).toISOString()
 export const breached = (bucket: ObservationBucket) => bucket.p95Latency !== null && bucket.p95Latency > 500 || bucket.errorRate !== null && bucket.errorRate > 0.05

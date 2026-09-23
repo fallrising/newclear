@@ -9,7 +9,7 @@ import {
   type patchPipelineDefinitionInputSchema, type patchServiceConfigInputSchema, type patchTrafficPolicyInputSchema,
   type pipelineDefinitionListQuerySchema, type serviceConfigListQuerySchema, type trafficPolicyListQuerySchema,
   type serviceActionInputSchema, type serviceRevisionInputSchema, type runPipelineDefinitionInputSchema,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type PipelineDefinitionQuery = z.input<typeof pipelineDefinitionListQuerySchema>

@@ -38,7 +38,7 @@ describe('W1 canonical workspace home projections', () => {
     const rdHome = h.home('rd'), opsHome = h.home('ops'), adminHome = h.home('admin')
     expect(rdHome.services.total).toBe(6)
     expect(rdHome.services.items.every(item => item.state === 'unknown')).toBe(true)
-    expect(rdHome.work.total).toBe(0); expect(rdHome.deliveries.total).toBe(0)
+    expect(rdHome.work.total).toBe(6); expect(rdHome.deliveries.total).toBe(0)
     expect(opsHome.capacity.total).toBe(3); expect(opsHome.approvals.total).toBe(0)
     expect(adminHome.drafts.total).toBe(0); expect(adminHome.integrations.total).toBe(5); expect(adminHome.accessChanges.total).toBe(0)
     expect(JSON.stringify(h.dashboard())).not.toContain('data-worker')
@@ -120,7 +120,8 @@ describe('W1 canonical workspace home projections', () => {
     const before = JSON.stringify(h.engine.getSnapshot())
     const all = h.home('rd', rd, 'projectId=project-store'), own = h.home('rd', rd, 'projectId=project-store&workOwner=mine')
     expect(all.work.items.map(i => i.sourceId)).toEqual(expect.arrayContaining([mine.entityId, theirs.entityId]))
-    expect(own.work.items.map(i => i.sourceId)).toEqual([mine.entityId])
+    expect(own.work.items.filter(i => i.sourceType === 'request').map(i => i.sourceId)).toEqual([mine.entityId])
+    expect(own.work.items.filter(i => ['pipelineDefinition','serviceConfig'].includes(i.sourceType))).toHaveLength(4)
     expect(all.deliveries.total).toBe(2); expect(own.deliveries.total).toBe(1)
     const ownRelease = h.engine.getSnapshot().entities.releases.find(r => r.id === own.deliveries.items[0].sourceId)!
     expect(ownRelease.createdBy).toBe(rd)

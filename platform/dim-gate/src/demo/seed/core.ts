@@ -1,4 +1,4 @@
-import { personaSchema, type Persona } from '../../domain/schemas'
+import { personaSchema, type Persona } from '../../domain/schema-models'
 
 export const personas: Persona[] = [
   { id: 'user-rd-commerce', displayName: '林予安 · Commerce RD', description: 'Store 專案的應用與環境', centers: ['rd'] },

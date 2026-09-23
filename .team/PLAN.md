@@ -1051,3 +1051,29 @@ remote_durability: a473626_SSHsaved; containing_test_and_progress_correction_nex
 blockers: []
 next_action: consume_final_worker_SHAhandbacks; correct_initialJS_and_fixture_regressions; freeze_allgates_and_independentT040; exactheadCI_then_authorizedmerge_actualcloseout_beforeW4
 ```
+
+
+DG-D081: User now requests save/merge/handoff for a new window. This run will close W3 only, without bypassing any gate; W4/W5 are delegated to the future continuation, not started here. Final T03732-file and T03821-file manifests fully SHA-verified; both workers released ownership. All domain/UI production bytes match their final handbacks. Lead corrections preserve original schema JSON semantics while separating command constructors, keep eager startup migration/integrity, and defer feature API clients with call-time input+identity guards (7 meaningful held-import/failure tests). Existing Guide UI is now a lazy route with identical controls. Candidate native371/371 across34files pluslint/typecheck/docs/contracts127ops259schemas/CI/architecture pass; full12 new browserjourneys pass on worker's explicitly older dependency snapshot and require rootintegration rerun. Fresh completeUI benchmark306290bytes, LCP756ms/queryP950.7ms/HTTP169.8ms,3/3PASS; original overbudget failures preserved. Added HANDOFF-WORKSPACES.md with exact recovery commands and futureW4/W5scope. Latestmain707f77d (othercomponents only) will be normally merged before fixedcandidate gates. T040finalproductreview and fullrootbrowser/smoke/isolation/exactheadCI stillpending. Noacceptance/mergeclaim.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 81
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 FIXED_CANDIDATE_GATES / NOT_ACCEPTED
+task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 integration_active; T040 finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: containing_final_handbacks_and_performance_correction
+local_tested_commit: working_candidate_matching_owned_manifests_plus_lead_API_Guide_correction
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-037-attempt-1.md, .team/reports/T-038-attempt-1.md, .team/reports/T-039-attempt-2.md]
+integration_state: draftPR37 / NOT_ACCEPTED
+remote_durability: 31b5c88_SSHsaved; containing_finalcandidate_nextSSHpush
+blockers: []
+next_action: commit_and_normalmerge_latestmain; fixed_complete_native_89Chromium_10smoke_3benchmark_2isolation; uninvolvedT040_review; latestheadCI_thenauthorizedmerge_actualcloseout; releaseowner_updatehandoff_stop_for_newwindow_W4_W5
+```

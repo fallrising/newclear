@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 import { deliveryOptionsQuerySchema, pipelineDefinitionListQuerySchema, serviceConfigListQuerySchema, trafficPolicyListQuerySchema,
   serviceDeliveryRegistry as registry, type Snapshot, type ServiceSource, type WorkItem, type DeliveryOptions,
-  type PipelineDefinitionDetail, type ServiceConfigDetail, type TrafficPolicyDetail } from './schemas'
+  type PipelineDefinitionDetail, type ServiceConfigDetail, type TrafficPolicyDetail } from './schema-models'
 import type { Policy } from './policy'
 import { clone, parse, fail, notFound } from './engine-shared'
 import { serviceVisible, serviceScope, serviceActions, serviceRoute } from './service-delivery-policy'

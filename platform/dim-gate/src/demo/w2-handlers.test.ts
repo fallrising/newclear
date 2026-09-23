@@ -82,6 +82,27 @@ async function deliver(id: string) {
 }
 
 describe('W2 real HTTP and typed resource client', () => {
+  it('serves strict per-object maintenance capabilities and refuses an old proposal after pool revocation', async () => {
+    await client.api.setPersona('w2-user-multi')
+    const inventory = await client.api.getResourceInventory('ci-idc-redis-01')
+    expect(inventory.impactIncomplete).toBe(true)
+    expect(inventory.objectImpacts).toHaveLength(1)
+    expect(inventory.objectImpacts[0]).toMatchObject({ resourceObjectId: 'w2-object-redis-commerce', canResize: true, impactIncomplete: false })
+    expect(JSON.stringify(inventory)).not.toContain('w2-object-redis-data')
+    const object = inventory.objects[0]
+    const proposal: ChangeInput = { kind: 'resource.resize', catalogItemId: 'w2-catalog-redis', catalogRevision: 1, targetCiId: inventory.ci.id,
+      targetCiVersion: inventory.ci.version, resourceObjectId: object.id, resourceObjectVersion: object.version, quotaMiB: 2048, reason: 'Proposal captured from authorized dialog' }
+    await client.api.setPersona('user-admin')
+    await client.api.revokeAssignment('w2-grant-multi-pool-idc-sg', 1, 'Revoke old dialog target pool')
+    await client.api.setPersona('w2-user-multi')
+    const current = await client.api.getResourceInventory(inventory.ci.id)
+    expect(current.objects[0].id).toBe(object.id)
+    expect(current.objectImpacts[0].canResize).toBe(false)
+    const before = controller.getSnapshot()
+    await error(await raw('/changes', { method: 'POST', body: proposal }), 403)
+    expect(controller.getSnapshot()).toEqual(before)
+  })
+
   it('executes all 18 W2 operations with strict wire/status contracts and preserves failed attempt history', async () => {
     expect(operations).toHaveLength(91)
     const w2 = operations.filter(op => op.milestone === 'W2')
@@ -404,7 +425,20 @@ describe('W2 real HTTP and typed resource client', () => {
     const all = await client.api.listWorkItems({ center: 'ops', view: 'all' })
     expect(all.items.find(w => w.sourceId === request.entityId)).toMatchObject({ sourceType: 'request', rawState: 'approved', route: `/ops/requests/${request.entityId}` })
     expect(all.items.find(w => w.sourceId === releaseId)).toMatchObject({ sourceType: 'release', rawState: 'queued', route: `/ops/releases/${releaseId}` })
+    expect(all.items.find(w => w.sourceId === request.entityId)?.summary).toEqual({ kind: 'environment.create', riskClass: null, basis: 'new', dimensions: [
+      { name: 'cpu', current: 0, desired: 2, delta: 2 }, { name: 'memoryMiB', current: 0, desired: 2048, delta: 2048 },
+    ] })
+    expect(all.items.find(w => w.sourceId === releaseId)?.summary).toEqual({ kind: 'release.deploy', riskClass: null, basis: 'not-applicable', dimensions: [] })
+    const changeDetail = await client.api.getChange(resource)
+    expect(all.items.find(w => w.sourceId === resource)?.summary).toEqual(changeDetail.summary)
+    expect(changeDetail.summary.dimensions).toEqual([{ name: 'quotaMiB', current: 0, desired: 512, delta: 512 }])
     expect((await client.api.getChange(resource)).change.state).toBe('submitted')
+    await action(resource, 'approve')
+    for (const phase of ['execution', 'decided'] as const) {
+      const phaseRows = await client.api.listWorkItems({ center: 'ops', view: 'all', phase })
+      for (const id of [request.entityId, resource]) expect(phaseRows.items.find(w => w.sourceId === id)).toMatchObject({ rawState: 'approved', actionRequired: true })
+    }
+    expect((await client.api.listWorkItems({ center: 'ops', view: 'all', phase: 'execution' })).items.find(w => w.sourceId === releaseId)?.rawState).toBe('queued')
     await client.api.setPersona('user-rd-data')
     expect((await client.api.listWorkItems({ center: 'rd', owner: 'team' })).total).toBe(0)
   })

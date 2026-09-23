@@ -2,6 +2,8 @@
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
+目前：**W1 已驗收合併；W2 已實作、完整验收進行中；W3–W5 尚未實作。** W2 候選 `a05491c` 已 SSH 保存至 [PR36](https://github.com/fallrising/newclear/pull/36)，314 項原生測試及產品來源 `740a2bc` 的效能／W1 升級檢查通過。固定 a05491c 的完整 76 項 Chromium／8 項 Firefox／WebKit／隔離仍在執行。獨立 T036 review 找到三項 medium：逐物件維護權、待執行篩選，以及審批風險／差額。隔離修正已通過321項原生測試，待固定瀏覽器與複審；未接受或合併 W2。可恢復位置及驗證對應見 [W2 驗證報告](../../../.team/reports/dim-gate-w2-validation.md)。下列舊 checkpoint 保留當時觀察，不能取代此摘要及 PLAN 最後 resume。
+
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
 M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 已合併為 `b8dae76034caf63bf7d0721cba99a58a0586ae85`；合併後 CI run 35531246949 通過，未部署。

@@ -17771,11 +17771,108 @@
           }
         ]
       },
+      "WorkItemSummary": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "environment.create",
+              "release.deploy",
+              "release.rollback",
+              "resource.bind",
+              "resource.resize",
+              "kafka.topic.create"
+            ]
+          },
+          "riskClass": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "shared"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "new",
+              "existing",
+              "matched-target",
+              "unavailable",
+              "not-applicable"
+            ]
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "cpu",
+                    "memoryMiB",
+                    "quotaMiB",
+                    "topics",
+                    "partitions",
+                    "throughputKiBPerSecond"
+                  ]
+                },
+                "current": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "desired": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "delta": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "current",
+                "desired",
+                "delta"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "riskClass",
+          "basis",
+          "dimensions"
+        ],
+        "additionalProperties": false
+      },
       "ChangeDetail": {
         "type": "object",
         "properties": {
           "change": {
             "$ref": "#/components/schemas/ChangeRequest"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/WorkItemSummary"
           },
           "executions": {
             "type": "array",
@@ -17873,6 +17970,7 @@
         },
         "required": [
           "change",
+          "summary",
           "executions",
           "impact",
           "capacity",
@@ -18117,6 +18215,76 @@
               "additionalProperties": false
             }
           },
+          "objectImpacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resourceObjectId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "consumers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "applicationId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "applicationName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "environmentId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "environmentName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "stage": {
+                        "type": "string",
+                        "enum": [
+                          "dev",
+                          "staging",
+                          "prod"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "applicationId",
+                      "applicationName",
+                      "environmentId",
+                      "environmentName",
+                      "stage"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "impactIncomplete": {
+                  "type": "boolean"
+                },
+                "canResize": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "resourceObjectId",
+                "consumers",
+                "impactIncomplete",
+                "canResize"
+              ],
+              "additionalProperties": false
+            }
+          },
           "capacity": {
             "anyOf": [
               {
@@ -18173,6 +18341,7 @@
           "objects",
           "bindings",
           "consumers",
+          "objectImpacts",
           "capacity",
           "impactIncomplete",
           "readOnly",
@@ -18217,6 +18386,9 @@
       "WorkItem": {
         "type": "object",
         "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/WorkItemSummary"
+          },
           "sourceType": {
             "type": "string",
             "enum": [
@@ -18331,6 +18503,7 @@
           }
         },
         "required": [
+          "summary",
           "sourceType",
           "sourceId",
           "rawState",

@@ -20,7 +20,9 @@ export function resourcePolicy(s: Snapshot, policy: Policy) {
     if (input.environmentId) result.add(input.environmentId)
     return [...result].sort()
   }
-  const manages = (input: ChangeInput) => poolAccess(input.targetCiId) && affected(input).length > 0 && affected(input).every(id => environmentAccess(id, 'ops'))
+  const managesEnvironments = (ciId: string, ids: string[]) => poolAccess(ciId) && ids.length > 0 && ids.every(id => environmentAccess(id, 'ops'))
+  const managesObject = (object: ResourceObject) => object.orgId === policy.user?.orgId && managesEnvironments(object.parentCiId, objectBindings(object.id).map(b => b.environmentId))
+  const manages = (input: ChangeInput) => managesEnvironments(input.targetCiId, affected(input))
   const proposes = (input: ChangeInput) => {
     if (!parent(input.targetCiId)) return false
     if ('resourceObjectId' in input && input.resourceObjectId) {
@@ -46,5 +48,5 @@ export function resourcePolicy(s: Snapshot, policy: Policy) {
         && template.allowedStages.some(stage => policy.hasProject(projectId, stage, 'ops')))
     })
   }
-  return { environment, environmentAccess, parent, poolAccess, bindingVisible, objectBindings, objectVisible, affected, manages, proposes, changeVisible, requester, operate, canExecute, catalogVisible }
+  return { environment, environmentAccess, parent, poolAccess, bindingVisible, objectBindings, objectVisible, affected, manages, managesObject, proposes, changeVisible, requester, operate, canExecute, catalogVisible }
 }

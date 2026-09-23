@@ -36,6 +36,12 @@ export function resourceInventory(s: Snapshot, policy: Policy, ciId: string, env
   const objects = s.entities.resourceObjects.filter(o => o.parentCiId === ci.id && rp.objectVisible(o)
     && (!environmentId || bindings.some(b => b.resourceObjectId === o.id)))
   const consumers = [...new Set(bindings.map(b => b.environmentId))].sort().map(id => resourceConsumer(s, id))
+  const objectImpacts = objects.toSorted((a, b) => a.id.localeCompare(b.id)).map(object => ({
+    resourceObjectId: object.id,
+    consumers: [...new Set(bindings.filter(b => b.resourceObjectId === object.id).map(b => b.environmentId))].sort().map(id => resourceConsumer(s, id)),
+    impactIncomplete: rp.objectBindings(object.id).some(b => !rp.bindingVisible(b)),
+    canResize: object.kind === 'cache_allocation' && object.lifecycle === 'active' && policy.effectiveActions.includes('resource.manage') && rp.managesObject(object),
+  }))
   const capacity = resourceCapacity(s, policy, ci.id)
   const incomplete = allBindings.some(b => !rp.bindingVisible(b)) || s.entities.resourceObjects.some(o => o.parentCiId === ci.id && o.lifecycle === 'active' && !rp.objectVisible(o))
   const legacyAssociations = s.entities.placements.filter(p => p.ciId === ci.id && (!environmentId || p.environmentId === environmentId)
@@ -43,7 +49,20 @@ export function resourceInventory(s: Snapshot, policy: Policy, ciId: string, env
     && !s.entities.resourceBindings.some(b => b.placementId === p.id)).map(p => ({ placementId: p.id, applicationId: p.applicationId, environmentId: p.environmentId }))
   return { ci: { id: ci.id, name: ci.name, kind: ci.kind, provider: ci.provider, poolId: ci.poolId, version: ci.version, health: ci.health, observedAt: ci.observedAt },
     objects: structuredClone(objects.toSorted((a, b) => a.id.localeCompare(b.id))), bindings: structuredClone(bindings.toSorted((a, b) => a.id.localeCompare(b.id))),
-    consumers, capacity, impactIncomplete: incomplete || !!capacity?.impactIncomplete, readOnly: ci.kind === 'cluster', dataAsOf: observationTime(s.logicalClock), legacyAssociations }
+    consumers, objectImpacts, capacity, impactIncomplete: incomplete || !!capacity?.impactIncomplete, readOnly: ci.kind === 'cluster', dataAsOf: observationTime(s.logicalClock), legacyAssociations }
+}
+function changeSummary(s: Snapshot, change: ChangeRequest): WorkItem['summary'] {
+  const spec = change.specSnapshot ?? change.spec
+  const dimension = (name: WorkItem['summary']['dimensions'][number]['name'], desired: number, current: number | null = 0) => ({ name, current, desired, delta: current === null ? null : desired - current })
+  if (spec.kind === 'resource.resize') {
+    const object = s.entities.resourceObjects.find(o => o.id === spec.resourceObjectId && o.parentCiId === spec.targetCiId && o.orgId === change.orgId)
+    const current = object?.kind === 'cache_allocation' && object.version === spec.resourceObjectVersion ? object.spec.quotaMiB : null
+    return { kind: spec.kind, riskClass: change.riskClass, basis: current === null ? 'unavailable' : 'matched-target', dimensions: [dimension('quotaMiB', spec.quotaMiB, current)] }
+  }
+  if (spec.kind === 'kafka.topic.create') return { kind: spec.kind, riskClass: change.riskClass, basis: 'new',
+    dimensions: [dimension('topics', 1), dimension('partitions', spec.partitions), dimension('throughputKiBPerSecond', spec.throughputKiBPerSecond)] }
+  return { kind: spec.kind, riskClass: change.riskClass, basis: spec.mode === 'existing' ? 'existing' : 'new',
+    dimensions: spec.mode === 'existing' ? [] : [dimension('quotaMiB', spec.quotaMiB!)] }
 }
 export function changeDetail(s: Snapshot, policy: Policy, change: ChangeRequest): ChangeDetail {
   const rp = resourcePolicy(s, policy), ids = rp.affected(change.spec)
@@ -58,7 +77,7 @@ export function changeDetail(s: Snapshot, policy: Policy, change: ChangeRequest)
     if (change.state === 'submitted') availableActions.push('approve', 'reject')
   }
   if (change.state === 'approved' && rp.canExecute(change)) availableActions.push('execute')
-  return { change: structuredClone(change), executions: structuredClone(s.entities.changeExecutions.filter(e => e.changeId === change.id).toSorted((a, b) => a.attempt - b.attempt)),
+  return { change: structuredClone(change), summary: changeSummary(s, change), executions: structuredClone(s.entities.changeExecutions.filter(e => e.changeId === change.id).toSorted((a, b) => a.attempt - b.attempt)),
     impact: { consumers: visible.map(id => resourceConsumer(s, id)), incomplete: visible.length !== ids.length },
     capacity: resourceCapacity(s, policy, change.spec.targetCiId), availableActions, dataAsOf: observationTime(s.logicalClock) }
 }
@@ -80,20 +99,22 @@ export function workItems(s: Snapshot, policy: Policy, center: 'rd' | 'ops'): Wo
   const rows: WorkItem[] = []
   for (const request of s.entities.requests.filter(policy.canReadRequest)) {
     const required = center === 'rd' ? policy.canEditRequest(request) && ['draft', 'failed'].includes(request.state) : policy.canOperateRequest(request) && ['submitted', 'approved'].includes(request.state)
-    rows.push({ sourceType: 'request', sourceId: request.id, rawState: request.state, stateLabel: request.state, actionRequired: required,
+    rows.push({ summary: { kind: 'environment.create', riskClass: null, basis: 'new', dimensions: [
+      { name: 'cpu', current: 0, desired: request.cpu, delta: request.cpu }, { name: 'memoryMiB', current: 0, desired: request.memoryMiB, delta: request.memoryMiB },
+    ] }, sourceType: 'request', sourceId: request.id, rawState: request.state, stateLabel: request.state, actionRequired: required,
       targetRefs: [{ entityType: 'application', entityId: request.applicationId }, ...(request.environmentId ? [{ entityType: 'environment', entityId: request.environmentId }] : [])],
       requester: actor(request.requesterId), approver: request.approval ? actor(request.approval.actorId) : null, createdAt: request.createdAt, updatedAt: request.updatedAt, dataAsOf: now,
       route: `/${center}/requests/${encodeURIComponent(request.id)}` })
   }
   for (const release of s.entities.releases.filter(r => { const env = s.entities.environments.find(e => e.id === r.environmentId); return !!env && policy.canReadEnvironment(env) })) {
-    rows.push({ sourceType: 'release', sourceId: release.id, rawState: release.state, stateLabel: release.state,
+    rows.push({ summary: { kind: release.kind === 'rollback' ? 'release.rollback' : 'release.deploy', riskClass: null, basis: 'not-applicable', dimensions: [] }, sourceType: 'release', sourceId: release.id, rawState: release.state, stateLabel: release.state,
       actionRequired: center === 'ops' && release.state === 'pending_approval' && release.createdBy !== policy.user?.id && rp.environmentAccess(release.environmentId, 'ops'),
       targetRefs: [{ entityType: 'application', entityId: release.applicationId }, { entityType: 'environment', entityId: release.environmentId }], requester: actor(release.createdBy), approver: release.approval ? actor(release.approval.actorId) : null,
       createdAt: release.createdAt, updatedAt: release.updatedAt, dataAsOf: now, route: `/${center}/releases/${encodeURIComponent(release.id)}` })
   }
   for (const change of s.entities.changes.filter(rp.changeVisible)) {
     const decision = change.decisions.at(-1)
-    rows.push({ sourceType: 'change', sourceId: change.id, rawState: change.state, stateLabel: change.state,
+    rows.push({ summary: changeSummary(s, change), sourceType: 'change', sourceId: change.id, rawState: change.state, stateLabel: change.state,
       actionRequired: center === 'rd' ? rp.requester(change) && ['draft', 'failed'].includes(change.state) : change.state === 'submitted' && rp.operate(change) || change.state === 'approved' && rp.canExecute(change),
       targetRefs: structuredClone(change.targetRefs), requester: actor(change.requesterId), approver: decision ? actor(decision.actorId) : null,
       createdAt: change.createdAt, updatedAt: change.updatedAt, dataAsOf: now, route: `/${center}/changes/${encodeURIComponent(change.id)}` })
@@ -148,10 +169,10 @@ export function readResources(s: Snapshot, policy: Policy, path: string, query: 
     const values = queryValues(workItemListQuerySchema, query)
     if (!policy.centers.includes(values.center)) fail(403, 'FORBIDDEN', '目前身分沒有此工作區的授權。')
     if (values.center === 'rd' && values.view !== undefined || values.center === 'ops' && values.owner !== undefined) fail(422, 'VALIDATION_ERROR', '工作區不支援此篩選欄位。')
-    const phase = (state: string) => ['draft', 'submitted', 'pending_approval'].includes(state) ? 'pending' : ['approved', 'rejected', 'cancelled'].includes(state) ? 'decided'
-      : ['provisioning', 'executing', 'queued', 'deploying', 'verifying'].includes(state) ? 'execution' : state === 'failed' ? 'failed' : 'completed'
+    const phases = (state: string) => state === 'approved' ? ['decided', 'execution'] : ['draft', 'submitted', 'pending_approval'].includes(state) ? ['pending'] : ['rejected', 'cancelled'].includes(state) ? ['decided']
+      : ['provisioning', 'executing', 'queued', 'deploying', 'verifying'].includes(state) ? ['execution'] : state === 'failed' ? ['failed'] : ['completed']
     const all = workItems(s, policy, values.center).filter(w => (!values.source || w.sourceType === values.source) && (!values.state || w.rawState === values.state)
-      && (!values.phase || phase(w.rawState) === values.phase) && (values.center !== 'rd' || (values.owner ?? 'mine') === 'team' || w.requester.id === policy.user?.id)
+      && (!values.phase || phases(w.rawState).includes(values.phase)) && (values.center !== 'rd' || (values.owner ?? 'mine') === 'team' || w.requester.id === policy.user?.id)
       && (values.center !== 'ops' || (values.view ?? 'pending') === 'all' || w.actionRequired)
       && (() => {
         if (w.sourceType === 'change') { const c = s.entities.changes.find(c => c.id === w.sourceId)!; return scoped(values, c.spec.targetCiId, rp.affected(c.spec)) }

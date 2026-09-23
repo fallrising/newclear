@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
-import type { ResourceCapacity, ResourceObject } from '../../domain/schemas'
+import type { ResourceCapacity, ResourceObject, WorkItem } from '../../domain/schemas'
 
 export const kindLabel = { cache: 'Redis 快取', queue: 'Kafka 訊息', cluster: 'Kubernetes 叢集' } as const
 export const objectKindLabel = { cache_allocation: 'Redis allocation', kafka_topic: 'Kafka topic', kubernetes_namespace: 'Kubernetes namespace' } as const
@@ -31,5 +31,17 @@ export function QuotaView({ capacity }: { capacity: ResourceCapacity | null }) {
   return <div className="resource-quota"><p className="muted">配額與實體容量分開；保留量尚未生效。資料時間：{dateLabel(capacity.dataAsOf)}</p>
     {capacity.impactIncomplete && <p className="scope-notice" role="status">影響範圍未完整授權；不提供隱藏資源的用量或數量。</p>}
     <div className="table-scroll" tabIndex={0} role="region" aria-label="資源配額，可水平捲動"><table><caption>目前可讀的資源配額</caption><thead><tr><th scope="col">單位</th><th scope="col">上限</th><th scope="col">已配置</th><th scope="col">已保留</th><th scope="col">可用</th><th scope="col">觀測用量</th></tr></thead><tbody>{capacity.dimensions.map(d => <tr key={d.name}><th scope="row">{label[d.name]}</th><td>{d.capacity}</td><td>{d.used ?? '未授權'}</td><td>{d.reserved ?? '未授權'}</td><td>{d.available ?? '未授權'}</td><td>{d.observed ?? '未知'}</td></tr>)}</tbody></table></div>
+  </div>
+}
+
+
+export function WorkSummary({ summary }: { summary: WorkItem['summary'] }) {
+  const labels = { ...changeKindLabel, 'environment.create': '建立環境', 'release.deploy': '業務部署', 'release.rollback': '業務回滾' }
+  const units = { cpu: ['CPU', 'vCPU'], memoryMiB: ['記憶體', 'MiB'], quotaMiB: ['Redis 配額', 'MiB'], topics: ['Kafka topics', 'topics'], partitions: ['Kafka partitions', 'partitions'], throughputKiBPerSecond: ['Kafka throughput', 'KiB/s'] }
+  return <div className="work-summary"><strong>{labels[summary.kind]}</strong><p>風險：{summary.riskClass === 'shared' ? '共享影響 · shared' : summary.riskClass === 'standard' ? '一般 · standard' : '不適用'}</p>
+    {summary.dimensions.map(d => <p key={d.name}>{units[d.name][0]}：{d.current ?? '未知'} → {d.desired} {units[d.name][1]}（差額 {d.delta === null ? '未知' : `${d.delta > 0 ? '+' : ''}${d.delta} ${units[d.name][1]}`}）</p>)}
+    {summary.basis === 'existing' && <p>綁定已有物件，不增加資源配額（差額 0）。</p>}
+    {summary.basis === 'not-applicable' && <p>容量差額不適用；由發布健康驗證決定生效。</p>}
+    {summary.basis === 'unavailable' && <p className="muted">目標版本已變或歷史基準不可用，差額未知；原始快照保留，操作時重驗版本。</p>}
   </div>
 }

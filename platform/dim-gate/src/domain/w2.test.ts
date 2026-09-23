@@ -73,6 +73,42 @@ describe('W2 canonical resources and projection isolation', () => {
     expect(() => h.read(`/resource-objects/${commerceObject}`, ops)).toThrow(expect.objectContaining({ status: 404 }))
     await expect(h.command('/changes', resize(), ops)).rejects.toMatchObject({ status: 403 })
   })
+  it('allows maintenance of a fully authorized object while hiding unrelated parent allocations', async () => {
+    const h = harness(), actor = 'w2-user-multi'
+    const view = resourceInventorySchema.parse(h.read(`/resource-inventory/${redis}`, actor))
+    expect(view.impactIncomplete).toBe(true)
+    expect(view.capacity?.dimensions[0]).toMatchObject({ used: null, reserved: null, available: null })
+    expect(view.objectImpacts).toHaveLength(1)
+    expect(view.objectImpacts[0]).toMatchObject({ resourceObjectId: commerceObject, impactIncomplete: false, canResize: true })
+    expect(view.objectImpacts[0].consumers.map(c => c.environmentId)).toEqual(['env-checkout-dev', 'env-storefront-dev'])
+    expect(JSON.stringify(view)).not.toContain('w2-object-redis-data')
+    expect(JSON.stringify(view)).not.toContain('env-data-dev')
+    const id = await h.create(resize(), actor)
+    expect(h.change(id).requesterId).toBe(actor)
+    const own = serviceResourcesSchema.parse(h.read('/applications/app-checkout/resources', actor, 'environmentId=env-checkout-dev'))
+    expect(own.resources.find(r => r.ci.id === redis)!.objectImpacts[0].consumers.map(c => c.environmentId)).toEqual(['env-checkout-dev'])
+  })
+  it('disables per-object maintenance with a hidden affected consumer and never exposes its identity', async () => {
+    const s = createSeed('w2-test'), original = s.entities.resourceBindings.find(b => b.resourceObjectId === commerceObject)!
+    s.entities.resourceBindings.push({ ...original, id: 'negative-partial-maintenance', applicationId: 'app-data', environmentId: 'env-data-dev', placementId: 'placement-data-redis' })
+    const h = harness(s), view = resourceInventorySchema.parse(h.read(`/resource-inventory/${redis}`, 'w2-user-multi'))
+    expect(view.objectImpacts[0]).toMatchObject({ resourceObjectId: commerceObject, impactIncomplete: true, canResize: false })
+    expect(JSON.stringify(view.objectImpacts)).not.toContain('data')
+    const before = h.engine.getSnapshot()
+    await expect(h.create(resize(), 'w2-user-multi')).rejects.toMatchObject({ status: 403 })
+    expect(h.engine.getSnapshot()).toEqual(before)
+  })
+  it('rechecks revoked pool authority even when an RD grant keeps the object visible', async () => {
+    const h = harness(), actor = 'w2-user-multi'
+    expect(h.read<ResourceInventory>(`/resource-inventory/${redis}`, actor).objectImpacts[0].canResize).toBe(true)
+    await h.command('/admin/assignments/w2-grant-multi-pool-idc-sg', { expectedVersion: 1, reason: 'Revoke target pool after old dialog read' }, admin, 'DELETE')
+    const view = resourceInventorySchema.parse(h.read(`/resource-inventory/${redis}`, actor))
+    expect(view.objects[0].id).toBe(commerceObject)
+    expect(view.objectImpacts[0].canResize).toBe(false)
+    const before = h.engine.getSnapshot()
+    await expect(h.create(resize(), actor)).rejects.toMatchObject({ status: 403 })
+    expect(h.engine.getSnapshot()).toEqual(before)
+  })
   it('validates strict filters and returns scoped totals before paging', () => {
     const h = harness()
     const visible = h.read<Page<ResourceObject>>('/resource-objects', rd, 'pageSize=1')
@@ -225,6 +261,44 @@ describe('W2 rejection, replay and immutable history boundaries', () => {
     expect(h.read<Page<WorkItem>>('/work-items', ops, 'center=ops').items.find(w => w.sourceId === id)).toMatchObject({ actionRequired: true, rawState: 'submitted' })
     await h.action(id, 'reject')
     expect(h.read<Page<WorkItem>>('/work-items', ops, 'center=ops&view=all&phase=decided').items.find(w => w.sourceId === id)?.rawState).toBe('rejected')
+  })
+  it('includes approved Request and Change in both decided and awaiting-execution phases without changing source states', async () => {
+    const h = harness(), changeId = await h.ready(bind())
+    const request = await h.command('/requests', { applicationId: 'app-checkout', environmentName: 'awaiting-execution', stage: 'staging',
+      catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg', cpu: 2, memoryMiB: 2048, purpose: 'Phase source validation' })
+    await h.command(`/requests/${request.entityId}/submit`, { expectedVersion: request.entityVersion })
+    await h.command(`/requests/${request.entityId}/approve`, { expectedVersion: 2, reason: 'Independent original request approval' }, ops)
+    const before = h.engine.getSnapshot()
+    for (const phase of ['decided', 'execution']) {
+      const rows = h.read<Page<WorkItem>>('/work-items', ops, `center=ops&view=all&phase=${phase}`)
+      for (const id of [request.entityId, changeId]) expect(rows.items.find(w => w.sourceId === id)).toMatchObject({ rawState: 'approved', actionRequired: true })
+    }
+    expect(h.engine.getSnapshot()).toEqual(before)
+  })
+  it('projects the same typed shared risk and exact object delta into triage and approval without reading parent-private totals', async () => {
+    const h = harness(), actor = 'w2-user-multi', id = await h.create(resize(), actor)
+    await h.action(id, 'submit', actor)
+    const detail = changeDetailSchema.parse(h.read(`/changes/${id}`, actor))
+    expect(detail.summary).toEqual({ kind: 'resource.resize', riskClass: 'shared', basis: 'matched-target', dimensions: [{ name: 'quotaMiB', current: 1024, desired: 3072, delta: 2048 }] })
+    expect(detail.capacity?.dimensions[0].used).toBeNull()
+    const row = h.read<Page<WorkItem>>('/work-items', actor, 'center=ops&view=all').items.find(w => w.sourceId === id)!
+    expect(row.summary).toEqual(detail.summary)
+    await h.action(id, 'approve', otherOps); await h.action(id, 'execute', actor); await h.advance()
+    expect(changeDetailSchema.parse(h.read(`/changes/${id}`, actor)).summary).toMatchObject({ basis: 'unavailable', dimensions: [{ current: null, desired: 3072, delta: null }] })
+    expect(h.change(id).specSnapshot).toEqual(detail.change.specSnapshot)
+  })
+  it('uses signed unit differences, zero-demand existing binding and typed multi-dimensional Kafka demand', async () => {
+    const h = harness()
+    const shrink = await h.create(resize({ quotaMiB: 512 }), ops)
+    expect(changeDetailSchema.parse(h.read(`/changes/${shrink}`, ops)).summary.dimensions).toEqual([{ name: 'quotaMiB', current: 1024, desired: 512, delta: -512 }])
+    const existing = await h.create({ kind: 'resource.bind', mode: 'existing', catalogItemId: 'w2-catalog-redis', catalogRevision: 1, targetCiId: redis, targetCiVersion: 1,
+      applicationId: 'app-checkout', environmentId: 'env-checkout-prod', environmentVersion: 1, resourceObjectId: commerceObject, resourceObjectVersion: 1,
+      purpose: 'runtime', accessProfileRef: 'w2-profile-redis-runtime', reason: 'No added allocation quota' })
+    expect(changeDetailSchema.parse(h.read(`/changes/${existing}`)).summary).toMatchObject({ basis: 'existing', dimensions: [] })
+    const kafka = await h.create(topic())
+    expect(changeDetailSchema.parse(h.read(`/changes/${kafka}`)).summary.dimensions).toEqual([
+      { name: 'topics', current: 0, desired: 1, delta: 1 }, { name: 'partitions', current: 0, desired: 3, delta: 3 }, { name: 'throughputKiBPerSecond', current: 0, desired: 512, delta: 512 },
+    ])
   })
   it('rejects stale versions and disabled/replaced catalogs but executing work retains its approved snapshot', async () => {
     const h = harness(), id = await h.ready(bind())

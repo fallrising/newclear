@@ -14,7 +14,7 @@
 
 ## 三工作區增量
 
-[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。W1 已實作獨立工作區／Demo 身分入口、分組導航和三角色首頁，操作方式見 [Demo 指南](docs/DEMO-GUIDE.md#w1-工作區體驗)，固定驗證及接受／合併狀態見 [STATUS](docs/STATUS.md)。W2–W5 仍為後續設計；既有 v0.1 申請、發布與觀測流程保留。
+[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。W1 已驗收合併獨立工作區／Demo 身分入口、分組導航和三角色首頁，操作方式見 [Demo 指南](docs/DEMO-GUIDE.md#w1-工作區體驗)，固定驗證及接受／合併狀態見 [STATUS](docs/STATUS.md)。W2 共用資源／綁定／工作單、Redis／Kafka 閉環、Admin 類型化模板與 K8s 唯讀摘要已實作，完整驗證與獨立 review 尚待完成，未驗收；W3–W5 仍為後續設計。既有 v0.1 申請、發布與觀測流程保留。
 
 ## 本機執行
 
@@ -34,7 +34,7 @@ pnpm preview --port 4173
 
 開啟 `http://127.0.0.1:4173/dim-gate/`；深連結 `/dim-gate/guide` 可刷新。`.env.demo` 明確設定 `VITE_DATA_MODE=demo`，缺少模式或指定 live 會顯示啟動錯誤。Service Worker 與 Web Locks 需要 HTTPS 或 localhost；不支援 Web Locks 的瀏覽器會明確拒絕啟動。
 
-在頁首切換四個 persona，比較獲授權的中心與資源摘要。在「示範導覽」前進時鐘、切換中心／身分、刷新，觀察進度保留；重置需確認，僅影響本分頁。損毀或不相容的 snapshot 提供明確重置／暫存記憶體選項，不會默默清除。暫存模式刷新後不保留進度。
+在頁首「Demo 身分」切換器選擇 persona，比較獲授權的中心與資源摘要。在「示範導覽」前進時鐘、切換中心／身分、刷新，觀察進度保留；重置需確認，僅影響本分頁。損毀或不相容的 snapshot 提供明確重置／暫存記憶體選項，不會默默清除。暫存模式刷新後不保留進度。
 
 ## 驗證
 
@@ -54,7 +54,7 @@ pnpm benchmark
 pnpm test:isolation
 ```
 
-`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。73 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
+`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。91 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
 
 ## 文件入口
 

@@ -1,6 +1,6 @@
 # 14 — 三工作區交付、遷移與驗收
 
-版本：WS-SDD revision 1 · 狀態：W1 已實作，固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)；W2–W5 尚未實作／驗證。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作、完整驗收待完成；W3–W5 尚未實作。固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
 
 ## 1. 增量與依賴
 
@@ -75,4 +75,4 @@ fixture 沿用原60 CI及三 provider regression，新增 deterministic Resource
 文件交付只驗證連結、需求/AC映射、內部一致性、範圍與 Git diff；不算 AC-WS 產品驗收。PLAN 保存 task/owner/decision；STATUS 明確分開「已定義／已實作／已驗證」，來源版本、review、CI 與合併狀態各自記錄。任何真實 adapter、雲端、SSO、網路執行、外部通知或部署另立 integration 工作，不因合併本 SDD 而啟用。
 
 
-W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.
+W2 固定候選 `a05491c`（2026-09-23）：[W2 contract](../W2-INTEGRATION-CONTRACT.md) 的完整資源／變更模型、API、原子遷移與 UI 已實作。314 項原生測試通過，產品來源 `740a2bc` 的效能及歷史 W1 升級瀏覽器驗證通過；完整 Chromium／Firefox／WebKit、獨立 review 與最終 CI 仍在進行，**NOT_ACCEPTED**。實際證據和最新結果以 [STATUS](../STATUS.md)、[W2 驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 與 PLAN 為準。W3–W5、後續／待釐清能力尚未實作。

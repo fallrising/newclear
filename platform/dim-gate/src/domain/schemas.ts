@@ -225,15 +225,22 @@ export const resourceConsumerSchema = z.strictObject({ applicationId: idSchema, 
 export const resourceInventorySchema = z.strictObject({
   ci: z.strictObject({ id: idSchema, name: nameSchema, kind: ciKindSchema, provider: providerSchema, poolId: idSchema, version: versionSchema, health: healthSchema, observedAt: timestampSchema.nullable() }),
   objects: z.array(resourceObjectSchema), bindings: z.array(resourceBindingSchema), consumers: z.array(resourceConsumerSchema),
+  objectImpacts: z.array(z.strictObject({ resourceObjectId: idSchema, consumers: z.array(resourceConsumerSchema), impactIncomplete: z.boolean(), canResize: z.boolean() })),
   capacity: resourceCapacitySchema.nullable(), impactIncomplete: z.boolean(), readOnly: z.boolean(), dataAsOf: timestampSchema,
   legacyAssociations: z.array(z.strictObject({ placementId: idSchema, applicationId: idSchema, environmentId: idSchema })),
 })
 export const serviceResourcesSchema = z.strictObject({ applicationId: idSchema, environmentId: idSchema, resources: z.array(resourceInventorySchema), dataAsOf: timestampSchema })
-export const changeDetailSchema = z.strictObject({ change: changeRequestSchema, executions: z.array(changeExecutionSchema),
+export const workItemSummarySchema = z.strictObject({
+  kind: z.enum(['environment.create', 'release.deploy', 'release.rollback', 'resource.bind', 'resource.resize', 'kafka.topic.create']),
+  riskClass: z.enum(['standard', 'shared']).nullable(), basis: z.enum(['new', 'existing', 'matched-target', 'unavailable', 'not-applicable']),
+  dimensions: z.array(z.strictObject({ name: z.enum(['cpu', 'memoryMiB', 'quotaMiB', 'topics', 'partitions', 'throughputKiBPerSecond']),
+    current: z.number().nonnegative().nullable(), desired: z.number().nonnegative(), delta: z.number().nullable() })),
+})
+export const changeDetailSchema = z.strictObject({ change: changeRequestSchema, summary: workItemSummarySchema, executions: z.array(changeExecutionSchema),
   impact: z.strictObject({ consumers: z.array(resourceConsumerSchema), incomplete: z.boolean() }), capacity: resourceCapacitySchema.nullable(),
   availableActions: z.array(z.enum(['edit', 'submit', 'approve', 'reject', 'cancel', 'execute', 'retry'])), dataAsOf: timestampSchema,
 })
-export const workItemSchema = z.strictObject({ sourceType: z.enum(['request', 'release', 'change']), sourceId: idSchema, rawState: z.string(), stateLabel: z.string(),
+export const workItemSchema = z.strictObject({ summary: workItemSummarySchema, sourceType: z.enum(['request', 'release', 'change']), sourceId: idSchema, rawState: z.string(), stateLabel: z.string(),
   actionRequired: z.boolean(), targetRefs: z.array(z.strictObject({ entityType: idSchema, entityId: idSchema })),
   requester: z.strictObject({ id: idSchema, displayName: nameSchema }), approver: z.strictObject({ id: idSchema, displayName: nameSchema }).nullable(),
   createdAt: timestampSchema, updatedAt: timestampSchema, dataAsOf: timestampSchema, route: z.string().startsWith('/'),
@@ -561,7 +568,7 @@ export type Page<T> = { items: T[]; total: number; page: number; pageSize: numbe
 export const contractSchemas = {
   ResourceObject: resourceObjectSchema, ResourceBinding: resourceBindingSchema, ResourceQuota: resourceQuotaSchema,
   ChangeRequest: changeRequestSchema, ChangeExecution: changeExecutionSchema, CreateChange: createChangeInputSchema, PatchChange: patchChangeInputSchema,
-  ChangeDetail: changeDetailSchema, ResourceCapacity: resourceCapacitySchema, ResourceInventory: resourceInventorySchema, ServiceResources: serviceResourcesSchema, WorkItem: workItemSchema,
+  WorkItemSummary: workItemSummarySchema, ChangeDetail: changeDetailSchema, ResourceCapacity: resourceCapacitySchema, ResourceInventory: resourceInventorySchema, ServiceResources: serviceResourcesSchema, WorkItem: workItemSchema,
   Organization: organizationSchema, BusinessUnit: businessUnitSchema, Team: teamSchema, Project: projectSchema,
   User: userSchema, Application: applicationSchema, Environment: environmentSchema, ProviderAccount: providerAccountSchema,
   Location: locationSchema, ResourcePool: poolSchema, CI: ciSchema, CIView: ciViewSchema, AWSComputeAttributes: awsComputeAttributesSchema,

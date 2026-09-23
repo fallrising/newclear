@@ -7,7 +7,7 @@
 ## 1. 深度標示
 
 - **既有**：v0.1 已有的特定行為；一個 CI kind 或範例資料不代表整個能力完成。
-- **W1–W5**：[14](14-workspace-delivery.md) 定義的 Mock 交付增量。W1 入口／首頁投影已實作，驗證及接受狀態见 [STATUS](../STATUS.md)；W2–W5 目前只有規格。
+- **W1–W5**：[14](14-workspace-delivery.md) 定義的 Mock 交付增量。W1 已驗收合併；W2 已實作、完整驗收待完成，證據見 [STATUS](../STATUS.md)；W3–W5 目前只有規格。
 - **後續**：能力被記錄，但不在 W1–W5 的完整互動承諾；開發前要補專業契約與驗收。
 - **待釐清**：無足夠語義，暫不設可操作入口。
 
@@ -17,7 +17,7 @@ Mock 可以有完整的產品操作閉環，仍不表示操作真實資源。每
 
 | ID／共用能力 | 輸入關鍵字（去重後保留原稱） | RD 視角 | Ops 視角 | Admin 視角 | 交付深度 |
 | --- | --- | --- | --- | --- | --- |
-| CAP-01 服務與基礎資料 | Common Data、Service CMDB、Server CMDB (Shopee TOC)、AZ Meta CMDB、Infra Product Meta | 服務／環境／資源關係 | CI、來源、位置、freshness、影響 | 模型／欄位／能力 metadata | 既有；W1 角色首頁投影已實作；W2 子資源與綁定待交付 |
+| CAP-01 服務與基礎資料 | Common Data、Service CMDB、Server CMDB (Shopee TOC)、AZ Meta CMDB、Infra Product Meta | 服務／環境／資源關係 | CI、來源、位置、freshness、影響 | 模型／欄位／能力 metadata | 既有；W1 角色首頁投影已實作；W2 子資源與綁定已實作、待驗收 |
 | CAP-02 計算與容器 | Compute、Elastic Machine Platform (EMP)、Container Instance Service (CIS) | runtime 規格、位置、需求申請 | 主機／叢集／namespace／工作負載與容量 | 模板與 adapter 能力範圍 | 既有 compute 申請；W2 K8s 唯讀；完整生命週期後續 |
 | CAP-03 定時與批次工作 | Runonce Cronjobs、Job Platform、Mass Processing Portal | 服務定時／一次性任務及執行記錄 | worker 容量、失敗與重試 | 已註冊 recipe／限制 | 後續；既有 ProvisionJob 不冒稱通用 job 平台 |
 | CAP-04 CI 與產物 | Development、Pipeline、Artifact Platform | build/test/package、定義與產物版本 | runner／artifact 整合健康及交付診斷 | recipe、artifact integration metadata | 既有 runs/synthetic Artifact；W3 definition；真 registry/runner 後續 |
@@ -53,4 +53,4 @@ Mock 可以有完整的產品操作閉環，仍不表示操作真實資源。每
 能力必須可接到至少一條真實可驗證的流程；「新 menu + 靜態表格」只能算導航原型。新增第三方 adapter 另記來源/API 版本、credential owner、read-only/write 邊界、同步與部分失敗契約，再獨立驗證。不因參考清單含某平台名稱就宣稱相容或已整合。
 
 
-W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.
+W2 固定候選 `a05491c`（2026-09-23）：[W2 contract](../W2-INTEGRATION-CONTRACT.md) 的完整資源／變更模型、API、原子遷移與 UI 已實作。314 項原生測試通過，產品來源 `740a2bc` 的效能及歷史 W1 升級瀏覽器驗證通過；完整 Chromium／Firefox／WebKit、獨立 review 與最終 CI 仍在進行，**NOT_ACCEPTED**。實際證據和最新結果以 [STATUS](../STATUS.md)、[W2 驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 與 PLAN 為準。W3–W5、後續／待釐清能力尚未實作。

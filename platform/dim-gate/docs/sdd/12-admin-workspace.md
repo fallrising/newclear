@@ -1,6 +1,6 @@
 # 12 — Admin 平台管理台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；其餘為後續設計；共用語義見 [09](09-shared-workspaces.md)，能力對照見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作、完整驗收待完成，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用語義見 [09](09-shared-workspaces.md)，能力對照見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
 
 ## 1. 責任與權限邊界
 
@@ -81,4 +81,4 @@ RD 配置服務的通知訂閱與可用 channel；Ops 觀察／處置告警、�
 對應 REQ-WS-01/06/08/09/10；驗收 AC-WS-01/02/12～18。主線：調整已註冊入口 → 預覽不同角色 → 发布 catalog revision → RD 看到合法模板且舊申請不變 → 修改某使用者 grant → 舊 dialog 的提交被 domain 拒絕。W5 再驗證平台功能 cohort、路由與通知；它們的成功不得賦予 Admin 業務發布或共享資源執行權。
 
 
-W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.
+W2 固定候選 `a05491c`（2026-09-23）：[W2 contract](../W2-INTEGRATION-CONTRACT.md) 的完整資源／變更模型、API、原子遷移與 UI 已實作。314 項原生測試通過，產品來源 `740a2bc` 的效能及歷史 W1 升級瀏覽器驗證通過；完整 Chromium／Firefox／WebKit、獨立 review 與最終 CI 仍在進行，**NOT_ACCEPTED**。實際證據和最新結果以 [STATUS](../STATUS.md)、[W2 驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 與 PLAN 為準。W3–W5、後續／待釐清能力尚未實作。

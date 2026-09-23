@@ -1,6 +1,6 @@
 # 11 — Ops 維運工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；其餘為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作、完整驗收待完成，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
 
 ## 1. 使用者與責任
 
@@ -84,4 +84,4 @@ Ops 面板須同時呈現 desired revision、已生效 revision、observedAt 及
 對應 REQ-WS-01/02/04/05/07/08/09/10；驗收 AC-WS-01～09、11～12、15～18。主線：看到 RD 同一筆 Redis／Kafka 需求 → 查目前容量與可見影響 → 批准／執行 → 在專業面板看到唯一 object/binding → RD 返回服務頁看到同一結果。另一條主線是從 incident 追到共享資源與變更，維持 v0.1 的認領、調查及恢復樣本規則。
 
 
-W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.
+W2 固定候選 `a05491c`（2026-09-23）：[W2 contract](../W2-INTEGRATION-CONTRACT.md) 的完整資源／變更模型、API、原子遷移與 UI 已實作。314 項原生測試通過，產品來源 `740a2bc` 的效能及歷史 W1 升級瀏覽器驗證通過；完整 Chromium／Firefox／WebKit、獨立 review 與最終 CI 仍在進行，**NOT_ACCEPTED**。實際證據和最新結果以 [STATUS](../STATUS.md)、[W2 驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 與 PLAN 為準。W3–W5、後續／待釐清能力尚未實作。

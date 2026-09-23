@@ -32,10 +32,11 @@ describe('W2 validated atomic W1 migration', () => {
     expect(legacySnapshotSchema.parse(original.snapshot)).toEqual(original.snapshot)
     const h = harness(), c = h.start(), migrated = c.getSnapshot()
     expect(h.writes).toBe(1)
-    expect(migrated).toMatchObject({ schemaVersion: 3, seedVersion: 'dim-gate-w3-v1' })
+    expect(migrated).toMatchObject({ schemaVersion: 4, seedVersion: 'dim-gate-w4-v1' })
     for (const [key, value] of Object.entries(original.snapshot)) {
-      if (!['schemaVersion', 'seedVersion', 'entities'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
+      if (!['schemaVersion', 'seedVersion', 'entities', 'observations'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
     }
+    expect(migrated.observations).toEqual({ ...original.snapshot.observations, infrastructureMetrics: [] })
     for (const [key, collection] of Object.entries(original.snapshot.entities)) {
       const result = migrated.entities[key as keyof typeof original.snapshot.entities]
       if (['cis', 'catalogs', 'navigation'].includes(key)) expect(result.slice(0, collection.length)).toEqual(collection)
@@ -43,12 +44,13 @@ describe('W2 validated atomic W1 migration', () => {
     }
     expect(migrated.entities.cis).toHaveLength(original.snapshot.entities.cis.length + 3)
     expect(migrated.entities.catalogs).toHaveLength(original.snapshot.entities.catalogs.length + 2)
-    expect(migrated.entities.navigation).toHaveLength(original.snapshot.entities.navigation.length + 3)
+    expect(migrated.entities.navigation).toHaveLength(original.snapshot.entities.navigation.length + 6)
     expect(migrated.entities.resourceQuotas).toHaveLength(3)
     expect(migrated.entities.resourceObjects).toEqual([])
     expect(migrated.entities.resourceBindings).toEqual([])
     expect(migrated.entities.changes).toEqual([])
     expect(migrated.entities.changeExecutions).toEqual([])
+    for (const key of ['monitorPolicies', 'alertRules', 'sloPolicies', 'silences', 'alertEvaluations', 'notificationDeliveries', 'infrastructureIncidents'] as const) expect(migrated.entities[key]).toEqual([])
     const envelope = JSON.parse(h.raw)
     expect({ ...envelope, snapshot: null }).toEqual({ ...original, snapshot: null })
     expect(c.getSession()).toMatchObject({ user: { id: original.personaId }, identityEpoch: original.identityEpoch,
@@ -127,7 +129,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe(legacyBytes)
     expect(h.writes).toBe(0)
     h.restore()
-    expect(h.start().getSnapshot().schemaVersion).toBe(3)
+    expect(h.start().getSnapshot().schemaVersion).toBe(4)
     expect(h.writes).toBe(1)
   })
 
@@ -148,7 +150,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe('{broken')
     expect(h.writes).toBe(0)
     const reset = createController({ storage: h.storage, createSessionId: () => 'migration-reset', recovery: 'reset' })
-    expect(reset.getSnapshot().schemaVersion).toBe(3)
+    expect(reset.getSnapshot().schemaVersion).toBe(4)
     expect(reset.getSnapshot().scheduler.tasks).toEqual([])
     expect(h.writes).toBe(1)
   })

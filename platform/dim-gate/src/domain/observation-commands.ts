@@ -5,6 +5,7 @@ import { DomainError } from './errors'
 import type { Policy } from './policy'
 import { observationTime, breached, healthy, observationStreak, canReadObservation } from './observation'
 import { scenarioInputSchema, type CommandReceipt, type Environment, type Incident, type ObservationBucket, type Snapshot } from './schema-models'
+import { ingestMonitoringServiceBucket } from './monitoring-evaluation'
 
 const ruleKey = 'red-degradation'
 const thresholds = { p95Latency: 500, errorRate: 0.05 } as const
@@ -38,7 +39,7 @@ function evidenceFor(s: Snapshot, bucket: ObservationBucket): Incident['evidence
     .map(metric => ({ ruleKey, metric, threshold: thresholds[metric], sampleWindow: { from: bucket.from, to: bucket.to }, traceIds, logIds }))
 }
 /** Mutates only the transaction draft; exported to test incomplete telemetry without bypassing the evaluator. */
-export function ingestObservationBucket(s: Snapshot, bucket: ObservationBucket): CommandReceipt['changed'] {
+function ingestLegacyObservationBucket(s: Snapshot, bucket: ObservationBucket): CommandReceipt['changed'] {
   const env = s.entities.environments.find(e => e.id === bucket.environmentId && e.applicationId === bucket.applicationId)
   if (!env || Date.parse(bucket.to) - Date.parse(bucket.from) !== 60_000 || Date.parse(bucket.to) > Date.parse(observationTime(s.logicalClock))) fail(422, 'VALIDATION_ERROR', '觀測資料必須屬於有效環境和已完成的一分鐘視窗。')
   const existing = s.observations.buckets.filter(b => b.environmentId === bucket.environmentId)
@@ -81,6 +82,10 @@ export function ingestObservationBucket(s: Snapshot, bucket: ObservationBucket):
   recordIncident(s, incident, action)
   return [ref('incident', incident.id)]
 }
+export function ingestObservationBucket(s: Snapshot, bucket: ObservationBucket): CommandReceipt['changed'] {
+  const legacy = ingestLegacyObservationBucket(s, bucket)
+  return [...legacy, ...ingestMonitoringServiceBucket(s, bucket)]
+}
 export function appendSyntheticObservation(s: Snapshot, environmentId: string, fromTick: number, abnormal: boolean) {
   const env = s.entities.environments.find(e => e.id === environmentId)!
   const id = `sample-${environmentId}-${fromTick}`, start = observationTime(fromTick), end = observationTime(fromTick + 60)
@@ -116,7 +121,23 @@ export function prepareObservation(s: Snapshot, policy: Policy, input: CommandIn
   const incidentMatch = /^\/incidents\/([^/]+)\/(acknowledge|investigate)$/.exec(input.path)
   if (incidentMatch) {
     if (!policy.effectiveActions.includes(`incident.${incidentMatch[2]}`)) denied()
-    const original = s.entities.incidents.find(i => i.id === incidentMatch[1]) ?? missing()
+    const original = s.entities.incidents.find(i => i.id === incidentMatch[1])
+    if (!original) {
+      const infra = s.entities.infrastructureIncidents.find(i => i.id === incidentMatch[1]) ?? missing()
+      const ci = s.entities.cis.find(c => c.id === infra.ciId && c.orgId === infra.orgId) ?? missing()
+      if (infra.orgId !== policy.user!.orgId || !policy.poolIds.includes(ci.poolId)) missing()
+      const body = parse(incidentMatch[2] === 'acknowledge' ? acknowledgeIncidentInputSchema : reasonCommandSchema, input.body)
+      return { apply(next) {
+        const incident = next.entities.infrastructureIncidents.find(i => i.id === infra.id)!
+        if (incident.version !== body.expectedVersion) fail(409, 'VERSION_CONFLICT', '告警版本已變更，請重新讀取。')
+        if (incidentMatch[2] === 'acknowledge' ? incident.state !== 'open' : !['acknowledged', 'investigating'].includes(incident.state)) invalid()
+        incident.state = incidentMatch[2] === 'acknowledge' ? 'acknowledged' : 'investigating'
+        incident.assigneeId = input.actorId; touch(next, incident)
+        return { ...ref('incident', incident.id), entityVersion: incident.version, correlationId: incident.correlationId,
+          changed: [ref('incident', incident.id)], action: `incident.${incidentMatch[2]}`, fields: ['state', 'assigneeId'],
+          reason: body.reason, projectIds: [], poolIds: [ci.poolId], stages: [] }
+      } }
+    }
     const env = s.entities.environments.find(e => e.id === original.environmentId)!
     const app = s.entities.applications.find(a => a.id === original.applicationId)!
     if (!canReadObservation(s, policy, env.id) || !policy.hasProject(app.projectId, env.stage, 'ops')) missing()

@@ -48,16 +48,23 @@ export function readObservation(s: Snapshot, policy: Policy, path: string, query
   if (incidentId) {
     queryValues(z.strictObject({}), query)
     const incident = s.entities.incidents.find(i => i.id === incidentId && canReadObservation(s, policy, i.environmentId))
-    if (!incident) fail(404, 'NOT_FOUND', '此資源不存在或不在目前授權範圍。')
-    return incidentView(s, policy, incident!)
+    if (incident) return incidentView(s, policy, incident)
+    const infra = s.entities.infrastructureIncidents.find(i => i.id === incidentId && s.entities.cis.some(ci => ci.id === i.ciId && ci.orgId === policy.user?.orgId && policy.poolIds.includes(ci.poolId)))
+    if (!infra) fail(404, 'NOT_FOUND', '此資源不存在或不在目前授權範圍。')
+    return structuredClone(infra)
   }
   if (path === '/incidents') {
     const values = queryValues(z.strictObject({ ...pageFields, environmentId: idSchema.optional(), state: incidentSchema.shape.state.optional(),
-      severity: incidentSchema.shape.severity.optional(), sort: z.enum(['id', 'updatedAt']).default('id') }), query)
+      ciId: idSchema.optional(), severity: incidentSchema.shape.severity.optional(), sort: z.enum(['id', 'updatedAt']).default('id') }), query)
     const visible = s.entities.incidents.filter(i => canReadObservation(s, policy, i.environmentId))
-    return page(visible.filter(i => (!values.environmentId || i.environmentId === values.environmentId) && (!values.state || i.state === values.state)
+    const service = visible.filter(i => !values.ciId && (!values.environmentId || i.environmentId === values.environmentId) && (!values.state || i.state === values.state)
       && (!values.severity || i.severity === values.severity) && (!values.q || `${i.id} ${i.ruleKey}`.toLowerCase().includes(values.q.toLowerCase())))
-      .map(i => incidentView(s, policy, i)), values)
+      .map(i => incidentView(s, policy, i))
+    const infrastructure = s.entities.infrastructureIncidents.filter(i => !values.environmentId && (!values.ciId || i.ciId === values.ciId)
+      && (!values.state || i.state === values.state) && (!values.severity || i.severity === values.severity)
+      && (!values.q || `${i.id} ${i.ruleId}`.toLowerCase().includes(values.q.toLowerCase()))
+      && s.entities.cis.some(ci => ci.id === i.ciId && ci.orgId === policy.user?.orgId && policy.poolIds.includes(ci.poolId)))
+    return page([...service, ...infrastructure], values)
   }
   const traceId = /^\/observability\/traces\/([^/]+)$/.exec(path)?.[1]
   if (traceId) {

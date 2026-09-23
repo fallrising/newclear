@@ -1248,3 +1248,27 @@ next_action: validate_and_SSHsave_contract; create_isolated_worker_worktrees; im
 ```
 
 DG-D090: Contract/task checkpoint `9fd3279ead6aa9e776c56c9fb3066e670631484a` is SSH saved; [draft PR50](https://github.com/fallrising/newclear/pull/50) is OPEN and explicitly not accepted. T041/T042/T043 started in their three independent worktrees at that exact base, nonoverlapping product paths; T044 remains unassigned until a fixed product. Lead added affected 01–07 W4 delta and validation index in canonical W4 worktree; these docs are local pending a later checkpoint. T041 owns domain source, T042 owns API/demo, T043 owns UI/e2e; lead owns docs/PLAN/integration. Task validator passed all four tasks; docs gate passed at contract checkpoint (202files/440links) and after affected-spec edits (202files/447links). W4 product/native/browser/review gates remain pending, W5 unstarted. Latest actual W3 postmerge workflow aggregate35873299419 is now completed/SUCCESS, resolving the historical GitHub bookkeeping discrepancy without rewriting the PR37 observation.
+
+DG-D091: T041/T042/T043 bounded handbacks were SHA-verified and integrated by the lead in the canonical W4 worktree; workers made no commit/push. Fixed v4 domain, strict legacy migration, typed Mock API/OpenAPI and scoped RD/Ops UI now exercise W4 production independent approval, source-time incident evidence, Silence and Mock delivery. Lead corrected W4 navigation decoding and route grants, nested CMDB lazy loading, infrastructure Incident audit visibility, and old W2/W3 browser migration expectations. A narrowly scoped M2 Admin axe test timeout is 60s because 18 unchanged scans exceeded 30s in contract-only CI35894949839; that historical failure is retained. Current precommit native gate passes 397/397 in37files, frozen install, lint/typecheck/docs (206files/452links), contract (161ops/313schemas), CI/architecture and demo build. Initial full Chromium completed 89/92; two stale v3 expectations and one W4 smoke read-before-command-completion failed, then all three focused cases passed after fixes. Firefox/WebKit smoke12/12, fresh unchanged benchmark3/3 (302874 initial gzip bytes, medianLCP732ms, queryp95 0.6ms, HTTPp95 171ms), and isolation2/2 pass. Complete Chromium on corrected tests is now running. Latest observed main d25bac0 only changes unrelated components from original d80028c; no dim-gate/PLAN/shared-gate delta. W4 remains NOT_ACCEPTED pending complete Chromium, T044 fixed-source independent review, exact PR-head CI and authorized merge/actual closeout. W5 remains unstarted. No deployment, live collector, external notification, force/main push or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 91
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 INTEGRATED / FINAL_CHROMIUM_REVIEW_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_observed_main: d25bac0767b2a5abeffefacfd3bb151000000cdb; unrelated_components_only
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_contract_head_only
+remote_durability: product_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: finish_corrected_full_Chromium; fixed_product_commit; uninvolved_T044_review; exact_headCI_then_authorized_merge_actualcloseout_before_W5
+```

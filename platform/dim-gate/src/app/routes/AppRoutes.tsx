@@ -3,8 +3,8 @@ import { LoadingState } from '../../components/shared/states'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
 import type { SessionView } from '../../domain/schemas'
-import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
 import { CenterOverview, Guide, UnknownRoute } from '../../features/foundation'
+import { ApplicationDetailRoute, ApplicationListRoute, CiDetailPage, CmdbListPage, EnvironmentDetailRoute, TopologyRoute } from '../../features/cmdb'
 import { CenterLayout } from '../layouts/CenterLayout'
 
 const AccessPage = lazy(() => import('../../features/admin').then(module => ({ default: module.AccessPage })))
@@ -37,14 +37,17 @@ const DeliveryPage = lazy(() => import('../../features/service-delivery').then(m
 const ConfigurationPage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.ConfigurationPage })))
 const TrafficPage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.TrafficPage })))
 const ServiceChangePage = lazy(() => import('../../features/service-delivery').then(module => ({ default: module.ServiceChangePage })))
+const MonitoringPage = lazy(() => import('../../features/alerting').then(module => ({ default: module.MonitoringPage })))
+const ServiceAlertsPage = lazy(() => import('../../features/alerting').then(module => ({ default: module.ServiceAlertsPage })))
+const OpsAlertingPage = lazy(() => import('../../features/alerting').then(module => ({ default: module.OpsAlertingPage })))
 
 export function AppRoutes({ session }: { session: SessionView }) {
   return <Suspense fallback={<LoadingState label="正在載入工作區…" />}><Routes>
     <Route path="/" element={<Navigate to={`/${session.centers[0] ?? 'guide'}`} replace />} />
     <Route path="/rd" element={<CenterLayout routeKey="rd.overview" center="rd" session={session}><CenterOverview key={`${session.identityEpoch}:rd`} center="rd" session={session} /></CenterLayout>} />
     <Route path="/rd/apps" element={<CenterLayout routeKey="rd.apps" center="rd" session={session}><ApplicationListRoute /></CenterLayout>} />
-    <Route path="/rd/apps/:appId" element={<CenterLayout routeKey="rd.app-detail" center="rd" session={session}><ApplicationDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} /></CenterLayout>} />
-    <Route path="/rd/apps/:appId/environments/:environmentId" element={<CenterLayout routeKey="rd.environment-detail" center="rd" session={session}><EnvironmentDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId" element={<CenterLayout routeKey="rd.app-detail" center="rd" session={session}><ApplicationDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} canReadAlerting={session.effectiveActions.includes('monitorPolicy.read') || session.effectiveActions.includes('alertRule.read')} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/environments/:environmentId" element={<CenterLayout routeKey="rd.environment-detail" center="rd" session={session}><EnvironmentDetailRoute canReadResources={session.effectiveActions.includes('binding.read')} canReadServiceDelivery={session.effectiveActions.includes('pipelineDefinition.read')} canReadAlerting={session.effectiveActions.includes('monitorPolicy.read') || session.effectiveActions.includes('alertRule.read')} /></CenterLayout>} />
     <Route path="/rd/catalog" element={<CenterLayout routeKey="rd.catalog" center="rd" session={session}><CatalogPage /></CenterLayout>} />
     <Route path="/rd/catalog/:itemId/request" element={<CenterLayout routeKey="rd.catalog-request" center="rd" session={session}><RequestWizard /></CenterLayout>} />
     <Route path="/rd/requests" element={<CenterLayout routeKey="rd.requests" center="rd" session={session}><WorkItemsPage center="rd" session={session} /></CenterLayout>} />
@@ -86,6 +89,9 @@ export function AppRoutes({ session }: { session: SessionView }) {
     <Route path="/rd/apps/:appId/delivery" element={<CenterLayout routeKey="rd.delivery" center="rd" session={session}><DeliveryPage session={session} /></CenterLayout>} />
     <Route path="/rd/apps/:appId/configuration" element={<CenterLayout routeKey="rd.configuration" center="rd" session={session}><ConfigurationPage session={session} /></CenterLayout>} />
     <Route path="/rd/apps/:appId/traffic" element={<CenterLayout routeKey="rd.traffic" center="rd" session={session}><TrafficPage session={session} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/monitoring" element={<CenterLayout routeKey="rd.monitoring" center="rd" session={session}><MonitoringPage session={session} /></CenterLayout>} />
+    <Route path="/rd/apps/:appId/alerts" element={<CenterLayout routeKey="rd.alerts" center="rd" session={session}><ServiceAlertsPage session={session} /></CenterLayout>} />
+    <Route path="/ops/alerting" element={<CenterLayout routeKey="ops.alerting" center="ops" session={session}><OpsAlertingPage session={session} /></CenterLayout>} />
     <Route path="/ops/service-changes/:sourceType/:sourceId" element={<CenterLayout routeKey="ops.service-change" center="ops" session={session}><ServiceChangePage session={session} /></CenterLayout>} />
     <Route path="/guide" element={<Guide session={session} />} />
     <Route path="*" element={<UnknownRoute session={session} />} />

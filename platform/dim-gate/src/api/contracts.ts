@@ -1,12 +1,13 @@
 /** Wire contract registry. Planned operations are contracts, not implemented handlers. */
 import { z } from 'zod'
 import * as d from '../domain/schemas.ts'
-import { organizationViewSchema, applicationDetailSchema, environmentDetailSchema, entitySearchHitSchema, topologyViewSchema, capacitySchema } from './wire-views.ts'
+import { organizationViewSchema, applicationDetailSchema, environmentDetailSchema, incidentViewSchema, entitySearchHitSchema, topologyViewSchema, capacitySchema } from './wire-views.ts'
 import { controlResultSchema, personaBodySchema, resetBodySchema } from './control-dto.ts'
 import { registerCmdbContracts } from './contracts/cmdb-application-environment.ts'
 import { registerCoreSessionContracts } from './contracts/core-session.ts'
 import { registerFutureContracts } from './contracts/future.ts'
 import { registerServiceDeliveryContracts } from './contracts/service-delivery.ts'
+import { registerAlertingContracts } from './contracts/alerting.ts'
 import { registerResourceContracts } from './contracts/resources.ts'
 import { registerTopologyContracts } from './contracts/topology-relation-search.ts'
 
@@ -35,6 +36,7 @@ export const wireSchemas = {
   OrganizationView: organizationViewSchema,
   ApplicationDetail: applicationDetailSchema,
   EnvironmentDetail: environmentDetailSchema,
+  IncidentView: incidentViewSchema,
   EntitySearchHit: entitySearchHitSchema,
   TopologyView: topologyViewSchema,
   Capacity: capacitySchema,
@@ -57,10 +59,16 @@ export const wireSchemas = {
   PatchModelField: d.patchModelFieldInputSchema,
   PersonaBody: personaBodySchema, ResetBody: resetBodySchema, ControlResult: controlResultSchema,
   ScenarioBody: d.scenarioInputSchema,
+  MonitorPolicy: d.monitorPolicySchema, AlertRule: d.alertRuleSchema, SLOPolicy: d.sloPolicySchema,
+  Silence: d.silenceSchema, AlertEvaluation: d.alertEvaluationSchema, NotificationDelivery: d.notificationDeliverySchema,
+  CreateMonitorPolicy: d.createMonitorPolicyInputSchema, ReviseMonitorPolicy: d.reviseMonitorPolicyInputSchema,
+  CreateAlertRule: d.createAlertRuleInputSchema, ReviseAlertRule: d.reviseAlertRuleInputSchema,
+  CreateSLOPolicy: d.createSLOPolicyInputSchema, ReviseSLOPolicy: d.reviseSLOPolicyInputSchema,
+  MonitoringAction: d.monitoringActionInputSchema, CreateSilence: d.createSilenceInputSchema,
 }
 
 export type Operation = {
-  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'W2' | 'W3';
+  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'W2' | 'W3' | 'W4';
   query?: z.ZodObject; body?: z.ZodType; data: z.ZodType; status: 200 | 201 | 202; demo?: boolean;
 }
 export const operations: Operation[] = []
@@ -92,6 +100,7 @@ registerTopologyContracts(context)
 registerFutureContracts(context)
 registerResourceContracts(context)
 registerServiceDeliveryContracts(context)
+registerAlertingContracts(context)
 
 const publishedOperationOrder = 'getSession,getOrganization,getNavigation,getDashboard,listApplications,listCIs,getCI,search,getApplication,getEnvironment,listRelations,getTopology,listPools,getCapacity,listCatalog,getCatalog,listRequests,getRequest,listJobs,getJob,listPipelines,getPipeline,listReleases,getRelease,getMetrics,listTraces,getTrace,listLogs,listIncidents,getIncident,listAudit,getAccess,getAdminNavigation,getModels,listIntegrations,createCI,patchCI,createRelation,deleteRelation,createRequest,patchRequest,submitRequest,approveRequest,rejectRequest,cancelRequest,provisionRequest,retryRequest,createPipeline,cancelPipeline,retryPipeline,approveRelease,rejectRelease,rollbackRelease,acknowledgeIncident,investigateIncident,createAssignment,revokeAssignment,patchUser,patchNavigation,createCatalogRevision,patchCatalog,publishCatalog,disableCatalog,createModelField,patchModelField,testIntegration,getPersonas,getGuide,setPersona,resetDemo,advanceClock,setScenario'.split(',')
 const operationRank = new Map(publishedOperationOrder.map((operationId, rank) => [operationId, rank]))

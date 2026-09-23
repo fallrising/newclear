@@ -67,3 +67,16 @@ it('registers W3 source routes with business read actions independent of workspa
     expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write', 'app.read'] }), route)).toBe(false)
   }
 })
+
+it('registers W4 service and Ops alerting routes without granting cross-role writes', () => {
+  const rd = session({ centers: ['rd'], effectiveActions: ['monitorPolicy.read', 'alertRule.read'] })
+  const ops = session({ centers: ['ops'], effectiveActions: ['monitorPolicy.read', 'alertRule.read'] })
+  expect(routeForPath('/rd/apps/app-checkout/monitoring?environmentId=env-checkout-prod')?.key).toBe('rd.monitoring')
+  expect(routeForPath('/rd/apps/app-checkout/alerts?environmentId=env-checkout-prod')?.key).toBe('rd.alerts')
+  expect(routeForPath('/ops/alerting')?.key).toBe('ops.alerting')
+  expect(visibleNavigation(rd).some(route => route.key === 'rd.alerts' || route.key === 'rd.monitoring' || route.key === 'ops.alerting')).toBe(false)
+  expect(visibleNavigation(ops).some(route => route.key === 'ops.alerting')).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/alerting')!)).toBe(false)
+  expect(canAccessRoute(ops, routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(false)
+})

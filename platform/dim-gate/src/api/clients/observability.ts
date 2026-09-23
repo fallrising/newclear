@@ -1,16 +1,17 @@
 import { z } from 'zod'
 import {
-  commandReceiptSchema, incidentSchema, integrationSchema, metricsViewSchema,
+  commandReceiptSchema, integrationSchema, metricsViewSchema,
   notificationSchema, observationLogSchema, pageSchema, traceSchema, traceSummarySchema,
   type Incident, type ObservationLog, type TraceSummary,
 } from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
+import { incidentViewSchema } from '../wire-views'
 
 export type ObservationWindow = { applicationId: string; environmentId: string; from: string; to: string }
 type Pagination = { page?: number; pageSize?: number; order?: 'asc' | 'desc' }
 export type TraceListInput = ObservationWindow & Pagination & { status?: TraceSummary['status']; sort?: 'id' | 'start' | 'durationMs' }
 export type LogListInput = ObservationWindow & Pagination & { traceId?: string; releaseId?: string; level?: ObservationLog['level']; sort?: 'id' | 'occurredAt' }
-export type IncidentListInput = Pagination & { environmentId?: string; state?: Incident['state']; severity?: Incident['severity']; q?: string; sort?: 'id' | 'updatedAt' }
+export type IncidentListInput = Pagination & { environmentId?: string; ciId?: string; state?: Incident['state']; severity?: Incident['severity']; q?: string; sort?: 'id' | 'updatedAt' }
 export type MetricsView = z.infer<typeof metricsViewSchema>
 
 function withQuery(path: string, input: object) {
@@ -26,8 +27,8 @@ export function createObservabilityClient(request: ApiRequest) {
     listTraces: (input: TraceListInput) => request(withQuery('/observability/traces', input), pageSchema(traceSummarySchema)),
     getTrace: (id: string) => request(`/observability/traces/${encodeURIComponent(id)}`, traceSchema),
     listLogs: (input: LogListInput) => request(withQuery('/observability/logs', input), pageSchema(observationLogSchema)),
-    listIncidents: (input: IncidentListInput = {}) => request(withQuery('/incidents', input), pageSchema(incidentSchema)),
-    getIncident: (id: string) => request(`/incidents/${encodeURIComponent(id)}`, incidentSchema),
+    listIncidents: (input: IncidentListInput = {}) => request(withQuery('/incidents', input), pageSchema(incidentViewSchema)),
+    getIncident: (id: string) => request(`/incidents/${encodeURIComponent(id)}`, incidentViewSchema),
     acknowledgeIncident: (id: string, expectedVersion: number, reason?: string) =>
       request(`/incidents/${encodeURIComponent(id)}/acknowledge`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, ...(reason ? { reason } : {}) } }),
     investigateIncident: (id: string, expectedVersion: number, reason: string) =>

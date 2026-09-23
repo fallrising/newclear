@@ -888,5 +888,243 @@ export const runtimeOperations: readonly { method: string; path: string; status:
     "status": 201,
     "demo": false,
     "milestone": "W3"
+  },
+  {
+    "method": "get",
+    "path": "/monitor-policies",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/monitor-policies/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/alert-rules",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/alert-rules/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/slo-policies",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/slo-policies/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/silences",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/silences/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/alert-evaluations",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/alert-evaluations/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/notification-deliveries",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "get",
+    "path": "/notification-deliveries/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/revise",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/monitor-policies/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/revise",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/alert-rules/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/revise",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/validate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/slo-policies/{id}/activate",
+    "status": 200,
+    "demo": false,
+    "milestone": "W4"
+  },
+  {
+    "method": "post",
+    "path": "/silences",
+    "status": 201,
+    "demo": false,
+    "milestone": "W4"
   }
 ]

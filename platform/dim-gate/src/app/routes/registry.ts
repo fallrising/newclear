@@ -11,6 +11,7 @@ export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environ
   | 'rd.resources' | 'rd.resource-request' | 'rd.change-detail' | 'ops.change-detail'
   | 'ops.caches' | 'ops.cache-detail' | 'ops.messaging' | 'ops.messaging-detail' | 'ops.clusters' | 'ops.cluster-detail'
   | 'rd.observability' | 'ops.incidents' | 'ops.incident-detail' | 'admin.integrations'
+  | 'rd.monitoring' | 'rd.alerts' | 'ops.alerting'
 export type RegisteredRoute = {
   key: RouteKey
   path: string
@@ -54,6 +55,9 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'ops.incidents', path: '/ops/incidents', center: 'ops', requiredAction: 'incident.read', navigation: { label: '事件中心', group: '維運中心', order: 29, visible: true } },
   { key: 'ops.incident-detail', path: '/ops/incidents/:incidentId', center: 'ops', requiredAction: 'incident.read', crossCenterRead: true, navigation: { label: '事件詳情', group: '維運中心', order: 29, visible: false } },
   { key: 'admin.integrations', path: '/admin/integrations', center: 'admin', requiredAction: 'integration.read', navigation: { label: '整合狀態', group: '治理', order: 36, visible: true } },
+  { key: 'rd.monitoring', path: '/rd/apps/:appId/monitoring', center: 'rd', requiredAction: 'monitorPolicy.read', crossCenterRead: true, navigation: { label: '服務監控設定', group: '運行狀況', order: 19, visible: false } },
+  { key: 'rd.alerts', path: '/rd/apps/:appId/alerts', center: 'rd', requiredAction: 'alertRule.read', crossCenterRead: true, navigation: { label: '服務告警規則', group: '運行狀況', order: 19, visible: false } },
+  { key: 'ops.alerting', path: '/ops/alerting', center: 'ops', requiredAction: 'alertRule.read', navigation: { label: '告警控制', group: '維運中心', order: 29, visible: true } },
   { key: 'rd.resources', path: '/rd/apps/:appId/resources', center: 'rd', requiredAction: 'binding.read', crossCenterRead: true, navigation: { label: '服務資源', group: '資源', order: 28, visible: false } },
   { key: 'rd.resource-request', path: '/rd/catalog/:itemId/resource-request', center: 'rd', requiredAction: 'change.create', navigation: { label: '資源申請', group: '資源', order: 28, visible: false } },
   { key: 'rd.change-detail', path: '/rd/changes/:changeId', center: 'rd', requiredAction: 'change.read', crossCenterRead: true, navigation: { label: '資源變更工作單', group: '資源', order: 28, visible: false } },
@@ -98,7 +102,7 @@ export function workspaceGroup(route: RegisteredRoute, configured?: string) {
     return '自助資源'
   }
   if (key.startsWith('ops.')) {
-    if (key === 'ops.incidents') return '值勤工作'
+    if (key === 'ops.incidents' || key === 'ops.alerting') return '值勤工作'
     return ['ops.requests', 'ops.jobs', 'ops.releases'].includes(key) ? '審批與變更' : '資源'
   }
   if (key === 'admin.access') return '身分與授權'

@@ -142,7 +142,7 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w3-v1' })
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w4-v1' })
     expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
   })
 
@@ -216,7 +216,7 @@ describe('persisted controller identity and transactions', () => {
     const memory = createController({ storage: h.storage, createSessionId: h.createSessionId, mode: 'memory' })
     expect(memory.getSnapshot().observations.recoveries).toEqual([]); expect(h.raw).toBe(raw)
     const reset = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
-    expect(reset.getSnapshot().observations).toEqual({ buckets: [], traces: [], logs: [], recoveries: [] })
+    expect(reset.getSnapshot().observations).toEqual({ buckets: [], traces: [], logs: [], recoveries: [], infrastructureMetrics: [] })
     await reset.command('POST', '/clock/advance', { ticks: 60 }, 'after-recovery-reset', identity(reset))
     expect(reset.getSnapshot().entities.incidents).toEqual([])
     expect(reset.getSnapshot().observations.buckets).toEqual([])

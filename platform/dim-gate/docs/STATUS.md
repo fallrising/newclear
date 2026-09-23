@@ -1,12 +1,12 @@
 # dim-gate 狀態
 
-W4 run `DG-W4-20260923-01` 已從實際 main `d80028c` 建立隔離 branch `agent/dim-gate/mainline/w4-alerting`，並固定 [W4 integration contract](W4-INTEGRATION-CONTRACT.md) revision 1 與 T041–T044。W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已驗收合併；其合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 現已完成成功。W4 目前僅契約與任務成立，**尚未實作或驗收**；W5 尚未開始。最新 ownership／結果以 PLAN DG-D089 後續決策與實際 PR/CI 為準。
+W4 run `DG-W4-20260923-01` 在隔離 branch `agent/dim-gate/mainline/w4-alerting` 完成 T041 領域、T042 API／遷移、T043 UI 的主控整合；[W4 integration contract](W4-INTEGRATION-CONTRACT.md) revision 1 固定 AC-WS-12/15–18。397/397 原生測試、全部原生檢查、12/12 Firefox／WebKit smoke、3/3 效能、2/2 隔離通過。首次完整 Chromium 為 89/92，兩個舊遷移斷言仍要求 v3、W4 smoke 過早讀取情境；三項修正已各自通過，完整 92 項正在重跑。**W4 尚未驗收，獨立 T044 review、最新 PR-head CI 與合併仍待完成；W5 尚未開始。**W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已驗收合併，合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 成功。最新 ownership／結果以 PLAN 後續決策與實際 PR/CI 為準。
 
-W4 [草稿 PR50](https://github.com/fallrising/newclear/pull/50) 已保存契約 checkpoint `9fd3279`，T041–043 在獨立工作樹進行領域、API/遷移、UI；[W4 驗證索引](../../../.team/reports/dim-gate-w4-validation.md) 目前全部產品 gate 待實測，不代表功能驗收。
+W4 [草稿 PR50](https://github.com/fallrising/newclear/pull/50) 目前遠端仍是契約 checkpoint `9fd3279`；整合產品與[W4 驗證索引](../../../.team/reports/dim-gate-w4-validation.md)在本地主控工作樹待固定提交。既有 PR-head CI35894949839 因 M2 Admin axe 長測試 30 秒超時而失敗，非整合產品 CI；該測試保持所有斷言並改用 60 秒個別上限，需在新 head CI 重驗。
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
-目前：**W1／W2 已驗收合併；W3 固定產品46e3a55已 ACCEPTED，PR37 最終證據提交的 CI／合併另行對帳。W4／W5 尚未開始。** 接續run DG-W3-20260923-02的主控仍負責收尾；晚到的actual merge、post-mergeCI與owner release以[PR37 closeout](https://github.com/fallrising/newclear/pull/37)為準，接手先讀它和PLAN DG-D088。
+以下 W3 接續 run 文字保留歷史 checkpoint；其當時「PR37 待合併、W4 未開始」已由上方最新狀態取代。W3 實際合併與 owner release 見 [PR37 closeout](https://github.com/fallrising/newclear/pull/37) 及 PLAN DG-D089。
 
 W3全375native、89Chromium、10Firefox-WebKit、3效能、2隔離及原生檢查通過；[產品headCI35862758449](https://github.com/fallrising/newclear/actions/runs/35862758449) SUCCESS，獨立[T040attempt4](../../../.team/reports/T-040-attempt-4.md) DONE、no open findings。CI合成checkout928b563與產品46的完整componenttree完全相同。修正Admin callback回歸及矛盾流量存檔；產品初始JS306447bytes（預算剩753bytes），CI冷啟動LCP1324ms、queryp95約1.1ms、HTTPp95約184.6ms。[完整W3驗證](../../../.team/reports/dim-gate-w3-validation.md)、[T039attempt4](../../../.team/reports/T-039-attempt-4.md)保存來源、AC、歷史失敗及artifact，恢復入口[HANDOFF](HANDOFF-WORKSPACES.md)。
 

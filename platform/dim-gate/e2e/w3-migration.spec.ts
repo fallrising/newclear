@@ -16,10 +16,17 @@ test('W3 genuine W2 upgrade: Release, ProvisionJob and Kafka Change resume exact
     await page.goto('ops/changes/change-0016')
     await expect(page.getByRole('heading', { name: '資源變更詳情', exact: true })).toBeVisible()
     const migrated = await snapshot(page)
-    expect(migrated.schemaVersion).toBe(3); expect(migrated.seedVersion).toBe('dim-gate-w3-v1')
+    expect(migrated.schemaVersion).toBe(4); expect(migrated.seedVersion).toBe('dim-gate-w4-v1')
     for (const field of ['sessionId', 'logicalClock', 'commandCount', 'storeRevision', 'sequence', 'policyVersion', 'audit', 'events', 'idempotency', 'jobs', 'scheduler'] as const) expect(migrated[field]).toEqual(legacy.snapshot[field])
-    for (const [key, value] of Object.entries(legacy.snapshot.entities)) expect(migrated.entities[key as keyof typeof migrated.entities]).toEqual(value)
+    for (const [key, value] of Object.entries(legacy.snapshot.entities)) {
+      if (key === 'navigation') {
+        expect(migrated.entities.navigation.slice(0, (value as unknown[]).length)).toEqual(value)
+      } else expect(migrated.entities[key as keyof typeof migrated.entities]).toEqual(value)
+    }
+    expect(migrated.entities.navigation.slice(legacy.snapshot.entities.navigation.length).map(item => item.routeKey))
+      .toEqual(['rd.monitoring', 'rd.alerts', 'ops.alerting'])
     expect(migrated.entities.pipelineDefinitions).toEqual([]); expect(migrated.entities.serviceConfigs).toEqual([]); expect(migrated.entities.trafficPolicies).toEqual([]); expect(migrated.entities.serviceExecutions).toEqual([])
+    for (const collection of ['monitorPolicies', 'alertRules', 'sloPolicies', 'silences', 'alertEvaluations', 'notificationDeliveries', 'infrastructureIncidents'] as const) expect(migrated.entities[collection]).toEqual([])
     await page.reload(); await expect(page.getByRole('heading', { name: '資源變更詳情', exact: true })).toBeVisible(); expect(await snapshot(page)).toEqual(migrated)
     await page.goto('guide'); await page.getByLabel('前進幅度').selectOption('5'); await page.getByRole('button', { name: '前進演示時鐘', exact: true }).click()
     await expect(page.locator('.command-notice')).toContainText('演示時鐘已前進 5 個 tick')

@@ -1,8 +1,9 @@
 import { serviceDeliveryIntegrityErrors } from './service-delivery-integrity'
-import type { LegacySnapshot, LegacySnapshotV2, Snapshot } from './schemas'
+import type { LegacySnapshot, LegacySnapshotV2, LegacySnapshotV3, Snapshot } from './schemas'
 import { deliveryIntegrityErrors } from './delivery-integrity'
 import { observationIntegrityErrors } from './observation-integrity'
 import { resourceIntegrityErrors } from './resource-integrity'
+import { monitoringIntegrityErrors } from './monitoring-integrity'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -83,12 +84,20 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot)]
+}
+
+/** Frozen v3 data is validated before any v4 collection is materialized. */
+export function legacyV3IntegrityErrors(snapshot: LegacySnapshotV3): string[] {
+  return integrityErrors({ ...snapshot, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
+    entities: { ...snapshot.entities, infrastructureIncidents: [], monitorPolicies: [], alertRules: [], sloPolicies: [],
+      silences: [], alertEvaluations: [], notificationDeliveries: [] },
+    observations: { ...snapshot.observations, infrastructureMetrics: [] } })
 }
 
 /** Validate original relationships before any additive W2 migration metadata is applied. */
 export function legacyIntegrityErrors(snapshot: LegacySnapshot): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
+  return legacyV3IntegrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
     resourceObjects: [], resourceBindings: [], resourceQuotas: [], changes: [], changeExecutions: [],
     pipelineDefinitions: [], serviceConfigs: [], trafficPolicies: [], serviceExecutions: [],
   } })
@@ -96,7 +105,7 @@ export function legacyIntegrityErrors(snapshot: LegacySnapshot): string[] {
 
 /** Original V2 relationships are checked without adding W3 business state or metadata. */
 export function legacyV2IntegrityErrors(snapshot: LegacySnapshotV2): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
+  return legacyV3IntegrityErrors({ ...snapshot, schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', entities: { ...snapshot.entities,
     pipelineDefinitions: [], serviceConfigs: [], trafficPolicies: [], serviceExecutions: [],
   } })
 }

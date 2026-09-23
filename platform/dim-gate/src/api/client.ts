@@ -146,6 +146,13 @@ export function createApiClient() {
     ...deferredClient(() => import('./clients/service-delivery').then(module => module.createServiceDeliveryClient(request)), {
       getDeliveryOptions: true, listPipelineDefinitions: true, getPipelineDefinition: true, createPipelineDefinition: true, patchPipelineDefinition: true, pipelineDefinitionAction: true, runPipelineDefinition: true, listServiceConfigs: true, getServiceConfig: true, createServiceConfig: true, patchServiceConfig: true, serviceConfigAction: true, reviseServiceConfig: true, restoreServiceConfig: true, listTrafficPolicies: true, getTrafficPolicy: true, createTrafficPolicy: true, patchTrafficPolicy: true, trafficPolicyAction: true, reviseTrafficPolicy: true
     }, getClientIdentity),
+    ...deferredClient(() => import('./clients/alerting').then(module => module.createAlertingClient(request)), {
+      listMonitorPolicies: true, getMonitorPolicy: true, createMonitorPolicy: true, reviseMonitorPolicy: true, monitorPolicyAction: true,
+      listAlertRules: true, getAlertRule: true, createAlertRule: true, reviseAlertRule: true, alertRuleAction: true,
+      listSloPolicies: true, getSloPolicy: true, createSloPolicy: true, reviseSloPolicy: true, sloPolicyAction: true,
+      listSilences: true, getSilence: true, createSilence: true, listAlertEvaluations: true, getAlertEvaluation: true,
+      listNotificationDeliveries: true, getNotificationDelivery: true,
+    }, getClientIdentity),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

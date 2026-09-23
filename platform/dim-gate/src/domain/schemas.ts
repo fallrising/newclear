@@ -1,7 +1,10 @@
 export * from './service-delivery-input-schemas.ts'
 export * from './schema-models.ts'
 export * from './command-input-schemas.ts'
-import { aliyunComputeAttributesSchema, apiErrorSchema, applicationSchema, artifactSchema, auditEventSchema, awsComputeAttributesSchema, businessUnitSchema, catalogItemSchema, catalogTemplateSchema, changeDetailSchema, changeExecutionSchema, changeRequestSchema, ciSchema, ciViewSchema, commandReceiptSchema, createChangeInputSchema, dashboardViewSchema, deliveryLogSchema, environmentSchema, eventSchema, guideViewSchema, incidentSchema, integrationSchema, locationSchema, metricSeriesSchema, metricsViewSchema, modelFieldSchema, navigationItemSchema, notificationSchema, observationBucketSchema, observationLogSchema, onpremComputeAttributesSchema, organizationSchema, patchChangeInputSchema, personaSchema, pipelineRunSchema, placementSchema, poolSchema, projectSchema, providerAccountSchema, provisionJobSchema, relationSchema, releaseDetailSchema, releaseSchema, requestSchema, resourceBindingSchema, resourceCapacitySchema, resourceInventorySchema, resourceObjectSchema, resourceQuotaSchema, roleAssignmentSchema, scenarioInputSchema, serviceResourcesSchema, sessionViewSchema, snapshotSchema, teamSchema, traceSchema, traceSummarySchema, userSchema, workItemSchema, workItemSummarySchema } from './schema-models.ts'
+export * from './monitoring-input-schemas.ts'
+import { aliyunComputeAttributesSchema, apiErrorSchema, applicationSchema, artifactSchema, auditEventSchema, awsComputeAttributesSchema, businessUnitSchema, catalogItemSchema, catalogTemplateSchema, changeDetailSchema, changeExecutionSchema, changeRequestSchema, ciSchema, ciViewSchema, commandReceiptSchema, createChangeInputSchema, dashboardViewSchema, deliveryLogSchema, environmentSchema, eventSchema, guideViewSchema, incidentVariantSchema, integrationSchema, locationSchema, metricSeriesSchema, metricsViewSchema, modelFieldSchema, monitoringNavigationItemSchema, notificationSchema, observationBucketSchema, observationLogSchema, onpremComputeAttributesSchema, organizationSchema, patchChangeInputSchema, personaSchema, pipelineRunSchema, placementSchema, poolSchema, projectSchema, providerAccountSchema, provisionJobSchema, relationSchema, releaseDetailSchema, releaseSchema, requestSchema, resourceBindingSchema, resourceCapacitySchema, resourceInventorySchema, resourceObjectSchema, resourceQuotaSchema, roleAssignmentSchema, scenarioInputSchema, serviceResourcesSchema, sessionViewSchema, snapshotSchema, teamSchema, traceSchema, traceSummarySchema, userSchema, workItemSchema, workItemSummarySchema } from './schema-models.ts'
+import { monitorPolicySchema, alertRuleSchema, sloPolicySchema, silenceSchema, alertEvaluationSchema, notificationDeliverySchema, infrastructureMetricSchema, infrastructureIncidentSchema } from './monitoring-models.ts'
+import { createMonitorPolicyInputSchema, createAlertRuleInputSchema, createSLOPolicyInputSchema, reviseMonitorPolicyInputSchema, reviseAlertRuleInputSchema, reviseSLOPolicyInputSchema, monitoringActionInputSchema, createSilenceInputSchema } from './monitoring-input-schemas.ts'
 import { acknowledgeIncidentInputSchema, advanceClockSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createPipelineInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, rollbackReleaseInputSchema, versionCommandSchema } from './command-input-schemas.ts'
 
 export const contractSchemas = {
@@ -13,13 +16,19 @@ export const contractSchemas = {
   Location: locationSchema, ResourcePool: poolSchema, CI: ciSchema, CIView: ciViewSchema, AWSComputeAttributes: awsComputeAttributesSchema,
   AliyunComputeAttributes: aliyunComputeAttributesSchema, OnpremComputeAttributes: onpremComputeAttributesSchema,
   Placement: placementSchema, Relation: relationSchema, RoleAssignment: roleAssignmentSchema,
-  NavigationItem: navigationItemSchema, ModelField: modelFieldSchema, CatalogTemplate: catalogTemplateSchema,
+  NavigationItem: monitoringNavigationItemSchema, ModelField: modelFieldSchema, CatalogTemplate: catalogTemplateSchema,
   CatalogItem: catalogItemSchema, Request: requestSchema, ProvisionJob: provisionJobSchema, PipelineRun: pipelineRunSchema,
   Release: releaseSchema, Artifact: artifactSchema, DeliveryLog: deliveryLogSchema, ReleaseDetail: releaseDetailSchema,
   ObservationBucket: observationBucketSchema, LogEntry: observationLogSchema, TraceSummary: traceSummarySchema,
   Trace: traceSchema, MetricSeries: metricSeriesSchema, MetricsView: metricsViewSchema, Notification: notificationSchema,
   AcknowledgeIncident: acknowledgeIncidentInputSchema,
-  Incident: incidentSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
+  Incident: incidentVariantSchema, Integration: integrationSchema, AuditEvent: auditEventSchema,
+  MonitorPolicy: monitorPolicySchema, AlertRule: alertRuleSchema, SLOPolicy: sloPolicySchema, Silence: silenceSchema,
+  AlertEvaluation: alertEvaluationSchema, NotificationDelivery: notificationDeliverySchema, InfrastructureMetric: infrastructureMetricSchema,
+  InfrastructureIncident: infrastructureIncidentSchema,
+  CreateMonitorPolicy: createMonitorPolicyInputSchema, CreateAlertRule: createAlertRuleInputSchema, CreateSLOPolicy: createSLOPolicyInputSchema,
+  ReviseMonitorPolicy: reviseMonitorPolicyInputSchema, ReviseAlertRule: reviseAlertRuleInputSchema, ReviseSLOPolicy: reviseSLOPolicyInputSchema,
+  MonitoringAction: monitoringActionInputSchema, CreateSilence: createSilenceInputSchema,
   DomainEvent: eventSchema, Snapshot: snapshotSchema, Persona: personaSchema, SessionView: sessionViewSchema,
   DashboardView: dashboardViewSchema, GuideView: guideViewSchema, CommandReceipt: commandReceiptSchema,
   ApiError: apiErrorSchema, CreateCI: createCiInputSchema, PatchCI: patchCiSchema,

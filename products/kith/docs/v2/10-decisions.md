@@ -32,7 +32,7 @@ v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。
 | [ADR-0002](../adr/0002-credentials.md) Hosted default | 核心版 hosted 只直連 xAI；Secret `XAI_API_KEY` | xAI 成為 preset 之一；`XAI_API_KEY` 經遷移變成 env 連線 | W4 | ADR-0006 |
 | SDD §3 刻意不做；[08](../sdd/08-decisions-sources.md) | 核心版 Workers 不連 thinrouter | Kith 不內建個人訂閱轉 API 的 preset；operator 自接者必須標 `operator_personal`（BR-54、RT-11） | W4 | ADR-0006 |
 | SDD FR-07；[ADR-0003](../adr/0003-codex-pin.md) | personal agent＝Codex sidecar | runner 泛化（Codex 是 adapter 之一）；INV-13、INV-14 推廣到所有 adapter（RT-06、RT-07） | W6 | 本文件 |
-| [09 UI](../sdd/09-human-chat-ui.md)、[10 UI](../sdd/10-members-and-mention.md) 視覺與鎖字 | Apple HIG token；固定英文字串；`live` pill；不做 Markdown | v2 [06](06-ux.md)、[07](07-visual-design.md) 取代；行為規則保留 | W7 | ADR-0005 |
+| [09 UI](../sdd/09-human-chat-ui.md)、[10 UI](../sdd/10-members-and-mention.md) 視覺與鎖字；[11 房間畫面](../sdd/11-room-screen.md)（#48 起取代 09、10 的畫面部分） | 11 的深色 rail／暖白紙面色票與版面；固定英文字串；`live` pill；不做 Markdown | v2 [06](06-ux.md)、[07](07-visual-design.md) 取代；09、10 的行為規則保留 | W7 | ADR-0005 |
 | SDD §3 刻意不做 | Markdown | 安全子集（BR-34） | W1（新前端） | D-04 |
 
 **不修訂**：INV-01–INV-19 全部保留。尤其 INV-08（Room 不呼叫 LLM）、INV-09（模型無管理工具）、INV-13（operator-only personal 配額）、INV-15（LLM fetch 只在 HostedGeneration DO）、INV-19（replay 不是工作佇列）。
@@ -51,10 +51,14 @@ v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。
 | Q-08 | 各 CLI（Claude Code、Gemini CLI、Codex）的非互動旗標與輸出格式 | 查官方文件後鎖定 | W6 Phase 2 |
 | Q-09 | hosted agent 之後要不要開放受限工具（例如只讀的網頁搜尋）？ | 否；需另立 ADR 並修 INV-09 | 未排程 |
 | Q-10 | 手機是否做 PWA（可安裝、推播）？ | 不在 v2 範圍 | 未排程 |
+| Q-11 | 何時啟用 `toHaveScreenshot` 像素比對、容忍度多少？（W0 細化新增） | W0–W6 只截圖當證據、不做像素比對；W7 前以 [07](07-visual-design.md) §8 的視覺稿實作建立基準，對登入頁、空狀態、控制台清單三處啟用，容忍度 `maxDiffPixelRatio: 0.01`。基準圖依瀏覽器與平台分開存（Playwright 官方文件，S2-09），CI 與本機需同一平台 | W7 Phase 2 |
+| Q-12 | Playwright 維持 1.56.1 還是升到最新（2026-09-23 為 1.63.0）？（W0 細化新增） | 維持 1.56.1：它綁定 Chromium revision 1194，正是雲端開發環境預裝的版本，不必下載瀏覽器；升級需同時升級預裝瀏覽器 | W7 Phase 2（設計 CI e2e job 時） |
 
 ## 4. 來源
 
-v1 來源見 [v1 08](../sdd/08-decisions-sources.md)。v2 新增的外部來源在 Phase 2 查證；下表是**待查證清單**，目前不是已驗證事實。
+v1 來源見 [v1 08](../sdd/08-decisions-sources.md)。v2 新增的外部來源在 Phase 2 查證；狀態不是「已查證」的列都**不是**已驗證事實。
+
+本環境的網路政策擋掉 `playwright.dev`、`www.w3.org`、`developers.cloudflare.com`；已查證的列改讀各官方文件的原始碼倉庫（`raw.githubusercontent.com`，固定到 tag 或 commit）或 npm 發行套件本身。
 
 | ID | 來源 | 要確認的事 | 狀態 |
 | --- | --- | --- | --- |
@@ -65,10 +69,12 @@ v1 來源見 [v1 08](../sdd/08-decisions-sources.md)。v2 新增的外部來源�
 | S2-05 | DeepSeek、OpenRouter、Mistral、Groq API docs | base URL、相容程度、特殊 header | 待查證 |
 | S2-06 | Claude Code、Gemini CLI、Codex CLI 文件 | 非互動模式、結構化輸出、登入方式 | 待查證 |
 | S2-07 | Cloudflare Workers：outbound fetch 限制、SSE 讀取、Durable Object alarm | 串流在 DO 內的可行性與 CPU 計費 | 待查證 |
-| S2-08 | WCAG 2.2 對比與目標尺寸 | 07 的對比表 | 待查證 |
-| S2-09 | Playwright：clock、trace、`toHaveScreenshot` | 08 的決定性作法 | 待查證 |
+| S2-08 | WCAG 2.2 對比與目標尺寸 | 07 的對比表 | 已查證 2026-09-23：W3C `w3c/wcag` 倉庫 commit `71c891a`：[relative-luminance](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/guidelines/relative-luminance.html)（係數 0.2126／0.7152／0.0722，sRGB 門檻 0.04045）、[contrast-minimum](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/20/contrast-minimum.html)（4.5:1、大字 3:1、門檻不四捨五入）、[non-text-contrast](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/21/non-text-contrast.html)（3:1）、[target-size-minimum](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/22/target-size-minimum.html)（24×24 CSS px）。結論寫入 [07](07-visual-design.md) §2.5 |
+| S2-09 | Playwright：clock、trace、`toHaveScreenshot` | 08 的決定性作法 | 已查證 2026-09-23：`microsoft/playwright` tag `v1.56.1` 的文件原始檔 [clock.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/clock.md)（建議 `setFixedTime`；`install` 讓時間繼續走）、[class-websocketroute.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/api/class-websocketroute.md)（`connectToServer` 轉送）、[class-reporter.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-reporter-api/class-reporter.md)（`onEnd` 可覆寫狀態與 exit code）、[test-global-setup-teardown-js.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-global-setup-teardown-js.md)（setup 設的環境變數只在 `test()` 內可見）、[test-snapshots-js.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-snapshots-js.md)（基準圖依瀏覽器與平台區分）。另以 1.56.1 實測，見 [W0](milestones/W0.md) §10。結論寫入 [08](08-testing-e2e.md) §2.2、§5.2 |
+| S2-10 | wrangler 4.135.0、miniflare 5.20260918.0-alpha（npm 發行套件的程式碼） | E2E 隔離：`.dev.vars` 載入規則、對外連線開關 | 已查證 2026-09-23：`wrangler-dist/cli.js` 的 `getVarsForDev`（給 `--env-file` 時不讀 `.dev.vars`）、`WRANGLER_SEND_METRICS`；`miniflare/dist/src/index.js` 的 `CLOUDFLARE_CF_FETCH_ENABLED`（值為 `false` 時不下載 `cf.json`）；`wrangler dev --help` 列出 `--assets`、`--persist-to`、`--inspector-port`、`--env-file`、`--var`。另以實測確認，見 [W0](milestones/W0.md) §10 |
+| S2-11 | npm registry（`registry.npmjs.org`） | web／e2e 套件精確版本與 peer 相容 | 已查證 2026-09-23：各套件版本與 peer 範圍見 [05](05-frontend-architecture.md) §1.1；`playwright-core@1.56.1` 的 `browsers.json` 綁定 Chromium revision 1194（`141.0.7390.37`），1.57.0 為 1200 |
 
 ## 5. Phase 2 待細化
 
 - [ ] 每個 Q 取得使用者答案或採用預設，寫回 D 表。
-- [ ] S2 各來源查證，附 URL 與查閱日期，並把結論寫回 03、04、07、08。
+- [ ] S2 各來源查證，附 URL 與查閱日期，並把結論寫回 03、04、07、08。S2-08、S2-09 已完成（W0）；新增 S2-10、S2-11（W0）；S2-01–S2-07 在 W4、W6 前完成。

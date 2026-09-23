@@ -1221,3 +1221,28 @@ remote_durability: product46e3a55_SSHsaved; containing_evidence_checkpoint_nextS
 blockers: []
 next_action: push_evidence_only; latestexactheadCI; authorizedmerge_actualtree_postmergeCI_then_PRcloseout_ownerrelease; nextseparate_run_W4_then_W5
 ```
+
+
+DG-D089: W4 ownership claim after reconciling PR37 closeout. PR37 is MERGED at 30bc902ef884cda9927bcaaf15bc595b694f609d, run DG-W3-20260923-02 is DONE and owner NONE. Its actual post-merge workflow35873299419 is now completed/SUCCESS; previous aggregate lag was historical. Remote main d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a descends from that merge and has no subsequent dim-gate/PLAN/shared gate delta. No W4 branch/PR/task existed. Created isolated `agent/dim-gate/mainline/w4-alerting` at actual remote main and fixed W4 contract revision1 before implementation. T041 domain, T042 API/demo and T043 UI have bounded nonoverlapping worker scopes; T044 is reserved for uninvolved final read-only review. Lead alone owns contract/PLAN/integration/acceptance. Node24.18.0/pnpm11.18.0 available; initial JS headroom753bytes under unchanged307200-byte budget. W4 is IN_PROGRESS, not accepted; W5 remains unstarted. No deployment, live collector, external notification, main/force push, or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 89
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 CONTRACT_FIXED / IMPLEMENTATION_PENDING / NOT_ACCEPTED
+task_id: T041 READY; T042 READY; T043 READY; T044 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; create_isolated_worker_worktrees; implement_bounded_T041_T042_T043; integrate_and_test; uninvolved_T044_then_fullgates_exactheadCI_authorizedmerge_closeout_before_W5
+```

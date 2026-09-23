@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-23。先讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-23。**01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -19,7 +19,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - patch 後 worker-4 新操作器 smoke PASS（`20260922T150023Z-1d1e3892`），包含 HTTP、stop/start、exec/logs、超額 memory/storage 拒絕與配額歸零。
 - `labctl` 支援 plan／execute／status／reconcile、精確 cleanup、canary-start，以及具有健康／core SHA／空 target／ownership／連續 HTTP 守護的 worker-4 component-reinstall。
 - 六個 ERU 檔案和三個狀態根先備份校驗再 quarantine；worker-only installer 不動共享 runtime。失敗保留 journal，不重播。恢復底層拒絕覆蓋新資料，已有中斷／checksum／link／mount 測試。
-- 本機 116 項測試通過。worker-4 元件重裝已連續 3/3 成功，component revision 3、cluster generation 1；詳見優先路徑文件的實測表格。
+- 本機 126 項測試通過。worker-4 元件重裝已連續 3/3 成功，component revision 3、cluster generation 1；詳見優先路徑文件的實測表格。
 
 - 新增 source-bound recovery CLI、patched-core reapply，以及 worker-4 quarantine／start 兩個有界故障演練點。恢復與原成功重裝計次分離，patched reapply 與 worker restore／保留新狀態 resume 的實機驗收通過，最後已清理測試 workload；詳見 2026-09-23 紀錄。
 
@@ -28,7 +28,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。現在以實際負載和健康觀測推进，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
 - core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。所有 power-loss 邊界、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
-- 其他 workers／非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore／24h soak 尚未驗收。
+- 其他 workers／非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
 
 ## 接手先做
 
@@ -39,6 +39,6 @@ cd /home/ckc/test/codex/newclear-eru-delivery
  python3 labs/eru-vps-mvp/scripts/labctl.py status
 ```
 
-再唯讀讀取最新 journal／runtime／配額／健康。三次重裝的計次只能取 complete run 與 `worker-component-revisions.json`；初次因節點陣列順序而失敗的 run 保留 failed，沒有追認成 PASS。HTTP canaries 用其原 run 的精確 cleanup plan 清理；不 prune、不全群 reset、不刪 controller lock。
+先依 soak TODO 查閱正在執行的任務，再唯讀讀取最新 journal／runtime／配額／健康。三次重裝的計次只能取 complete run 與 `worker-component-revisions.json`；初次因節點陣列順序而失敗的 run 保留 failed，沒有追認成 PASS。HTTP canaries 用其原 run 的精確 cleanup plan 清理；不 prune、不全群 reset、不刪 controller lock。
 
 新程式、inventory、core revision 或 health evidence 會改變 plan bindings；使用新 plan，不複用失敗計畫。B 的 flock 只涵蓋同一 private 目錄的合作程序，操作期間維持 B 為唯一 mutation writer。

@@ -6,7 +6,7 @@ import time
 import urllib.request
 
 
-def probe():
+def probe(journal_since="-20 seconds"):
     result = {'time': time.time(), 'commands': {}}
     commands = {
         'health': ['/usr/local/bin/etcdctl', '--endpoints=http://127.0.0.1:2379',
@@ -20,7 +20,7 @@ def probe():
                      'eru-etcd.service', 'eru-core.service', 'docker.service', 'containerd.service'],
         'storage': ['findmnt', '-J', '-T', '/var/lib/etcd-eru-mvp'],
         'space': ['df', '-B1', '/var/lib/etcd-eru-mvp'],
-        'journal': ['journalctl', '-u', 'eru-etcd', '-u', 'eru-core', '--since', '-20 seconds',
+        'journal': ['journalctl', '-u', 'eru-etcd', '-u', 'eru-core', '--since', journal_since,
                     '--no-pager', '-o', 'short-iso-precise'],
     }
     for name, argv in commands.items():

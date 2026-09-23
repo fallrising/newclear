@@ -34,7 +34,7 @@
 | ERU-008 | 將元件重裝擴及 worker-2／3 | 進行中 | [唯讀目標核對](M2-WORKER-PEER-PREP-2026-09-23.md) 已擴充 02／03 身分、ownership、tasks／配額稽核並實機唯讀驗證；仍須在觀測後補 peer 守護／恢復執行器，逐台完成隔離、重裝、HTTP、配額及其他節點保留驗收。 |
 | ERU-009 | 非空 worker 的計畫性 drain／重裝／恢復 | 待做 | 先盤點並遷移 owned workloads，再進入空 target 重裝；驗證失敗恢復與新狀態歸屬，禁止覆蓋未知資料。依 ERU-008／應用重建能力安排。 |
 | ERU-010 | worker 非計畫失聯恢復（V07） | 待做 | 有界演練偵測時間、先 fence、精確對帳 stale metadata／配額，於健康 worker 人工或一次性工具重建；不宣稱自動維持副本數。 |
-| ERU-011 | 可重現 bootstrap 與新 controller 接手 | 待做 | 補完整 runner／OS package／artifact 版本記錄和前置檢查；從乾淨 controller 使用外部私有 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |
+| ERU-011 | 可重現 bootstrap 與新 controller 接手 | 進行中 | [本機接手前置檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md) 已記錄 runner／OS package／artifact 與外部私有輸入、SSH alias 邊界；仍須從乾淨 controller 使用外部 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |
 | ERU-012 | 應用差異部署與真實無狀態服務 | 待做 | 由版本化 spec／digest 做有界差異部署及重建；相同輸入不累加副本，create 回覆遺失先對帳；以選定真實 API 或 job 完成部署／更新／重建／清理與用途驗證（M4）。 |
 | ERU-013 | patch 發布與跨版本升級／回退 | 待做 | 明確 artifact／build provenance 與版本相容性；升級、回退與中斷後的新 plan 驗證，不把目前同版本 reapply 當作跨版本升級能力。 |
 | ERU-014 | 單 worker 人工 OS 重灌與重新納管 | 待做 | 由 owner 到 provider 控制台操作；先建立指定主機／磁碟範圍計畫，之後核對新身分、host key、SSH／Tailscale／runtime／ERU bootstrap、註冊與 smoke。與元件重裝分開驗收，不接 provider API。 |

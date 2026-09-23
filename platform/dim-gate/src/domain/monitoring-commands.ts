@@ -60,16 +60,22 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
         : action === 'revise' ? reviseSLOPolicyInputSchema : action ? monitoringActionInputSchema : createSLOPolicyInputSchema
     const body = parse(schema, input.body) as { expectedVersion?: number; spec?: Config['spec']; reason: string }
     const original = match ? item(s, kind, match[2]) ?? notFound() : undefined
-    const spec = body.spec ?? original!.spec
-    const targetRef = checkSpec(s, kind, spec, original)
     if (original && original.orgId !== policy.user!.orgId) notFound()
-    requireTarget(s, policy, targetRef, action === 'approve' || action === 'reject' ? 'approve' : 'write')
-    if (action === 'approve' || action === 'reject') {
-      if (targetRef.kind !== 'service' || targetScope(s, targetRef)?.stage !== 'prod' || original!.requesterId === input.actorId) forbidden()
+    const spec = body.spec ?? original!.spec
+    const mode = action === 'approve' || action === 'reject' ? 'approve' : 'write'
+    if (original) {
+      const originalTarget = kind === 'monitorPolicy' ? (original as MonitorPolicy).spec.target
+        : s.entities.monitorPolicies.find(m => m.id === (original.spec as AlertRule['spec']).monitorPolicyId && m.orgId === original.orgId)?.spec.target ?? notFound()
+      requireTarget(s, policy, originalTarget, mode)
     }
+    const targetRef = kind === 'monitorPolicy' ? (spec as MonitorPolicy['spec']).target
+      : s.entities.monitorPolicies.find(m => m.id === (spec as AlertRule['spec']).monitorPolicyId && m.orgId === policy.user!.orgId)?.spec.target ?? notFound()
+    requireTarget(s, policy, targetRef, mode)
     return { apply(next) {
       const now = monitoringNow(next)
       const targetNext = checkSpec(next, kind, spec, original)
+      if ((action === 'approve' || action === 'reject') &&
+        (targetNext.kind !== 'service' || targetScope(next, targetNext)?.stage !== 'prod' || original!.requesterId === input.actorId)) forbidden()
       let result: Config
       if (!original) {
         const id = `w4-${kind}-${String(next.sequence + 1).padStart(4, '0')}`

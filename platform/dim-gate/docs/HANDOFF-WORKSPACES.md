@@ -1,5 +1,7 @@
 # dim-gate 三工作區接手
 
+最新 W4 接續（2026-09-23）：獨立 [T044 attempt2](../../../.team/reports/T-044-attempt-2.md) 在產品 `460424b` 關閉 F1，另確認 F2：可變監控規格驗證先於授權和冪等重放，造成舊 receipt 重放失敗與隱藏指標資訊差異。主控已本地修正並增加 AlertRule／SLO、跨範圍回歸；400/400 原生及凍結安裝、原生檢查、demo 建置通過。PR50 前一 head CI35908469757 和本機未完成的 Chromium 已在 F2 後取消。**W4 未驗收，W5 未開始**；固定修正提交、T044 attempt3、完整瀏覽器／效能／隔離、最新 head CI 與授權正常合併／實際 closeout 待完成。下面 W4 F1 與 W3 段落均為歷史 checkpoint；以 PLAN DG-D093、[W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 及 PR50 為準。
+
 ## W4 接續 run（2026-09-23；進行中）
 
 W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已合併於 `30bc902ef884cda9927bcaaf15bc595b694f609d`、owner 釋放；實際合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 已完成 SUCCESS。下方 W3「待最終 CI／merge」「W4 未開始」段落是當時 checkpoint，不是目前狀態。

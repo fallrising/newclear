@@ -1294,3 +1294,26 @@ remote_durability: F1_correction_local_pending_fixed_commit_and_SSHpush
 blockers: []
 next_action: fixed_F1_commit; T044_attempt2_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
 ```
+
+
+DG-D093: Independent T044 attempt2 reviewed exact F1 correction `460424b12e27bffdea44912ba6101b6fd90b8a89`, closed F1 and confirmed new blocking F2: an old AlertRule create replay returned 422 after a referenced monitor acquired a new draft, and hidden monitor metric compatibility leaked as 403 versus 422. Report `.team/reports/T-044-attempt-2.md` PARTIAL, SHA256 `552199643dc36b83261e03be8c84c9d632b45c7fea3e135add1872c8a9fddf39`, was copied byte-identically and validator passed. Lead moved mutable spec/approval checks into fresh-command apply, while checking current original/proposed target scope before replay; adjacent SLO and cross-scope revise regressions were added. Local focused8/8 and full400/400 native, frozen install, lint/typecheck, OpenAPI161/313, CI/architecture/docs and demo build pass. Contract and Ops SDD now state replay and active-revision behavior. The obsolete PR-head CI35908469757 and local incomplete Chromium were intentionally cancelled after F2, not accepted. This correction is local until its fixed commit; T044 attempt3, final browser/performance/isolation, exact latest PR-head CI, merge and actual closeout remain pending. W4 NOT_ACCEPTED; W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 93
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F2_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1_F1_closed_attempt2_F2_partial_attempt3_pending
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-2.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_obsolete_CI_cancelled
+remote_durability: F2_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F2_commit; T044_attempt3_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```

@@ -139,6 +139,60 @@ describe('W4 monitoring canonical domain', () => {
     expect(integrityErrors(final)).toEqual([])
   })
 
+  it('authorizes a referenced target before spec validation and replays an old rule receipt across monitor drafts', async () => {
+    const h = harness()
+    const monitor = await h.command('/monitor-policies', { spec: infraMonitor, reason: 'Create scoped CPU monitor' })
+    await h.action('monitor-policies', monitor.entityId, 'validate')
+    await h.action('monitor-policies', monitor.entityId, 'submit')
+    await h.action('monitor-policies', monitor.entityId, 'activate')
+    const body = { spec: infraRule(monitor.entityId), reason: 'Create a rule against active CPU monitor' }
+    const input = { sessionId: h.engine.getSnapshot().sessionId, actorId: 'user-ops', method: 'POST',
+      path: '/alert-rules', body, key: 'w4-create-rule-replay-after-monitor-draft' }
+    const first = await h.engine.command(input)
+    await h.action('alert-rules', first.entityId, 'validate')
+    await h.action('alert-rules', first.entityId, 'submit')
+    await h.action('alert-rules', first.entityId, 'activate')
+    const current = h.read<{ version: number }>(`/monitor-policies/${monitor.entityId}`)
+    await h.command(`/monitor-policies/${monitor.entityId}/revise`, { expectedVersion: current.version,
+      spec: { ...infraMonitor, metrics: ['memoryUtilization'] }, reason: 'Draft memory-only monitoring while CPU rev 1 stays active' })
+    const beforeReplay = h.engine.getSnapshot()
+    expect(await h.engine.command(input)).toEqual(first)
+    expect(h.engine.getSnapshot()).toEqual(beforeReplay)
+
+    const serviceMonitor = await h.command('/monitor-policies', { spec: { target: { kind: 'service', applicationId: 'app-checkout', environmentId: 'env-checkout-dev' },
+      source: 'demo-red', metrics: ['errorRate'], sampleIntervalSeconds: 60, freshnessSeconds: 120, enabled: true },
+      reason: 'Store monitor used for scope-first validation' }, 'user-rd-commerce')
+    const serviceRule = { monitorPolicyId: serviceMonitor.entityId, metric: 'errorRate', aggregation: 'last', windowSeconds: 120,
+      comparator: 'gt', threshold: 0.1, unit: 'fraction', requiredConsecutiveSamples: 2, severity: 'warning', channelRef: 'demo-rd', enabled: true }
+    await expect(h.command('/alert-rules', { spec: serviceRule, reason: 'Hidden Store rule' }, 'user-rd-data')).rejects.toMatchObject({ status: 403 })
+    await expect(h.command('/alert-rules', { spec: { ...serviceRule, metric: 'p95Latency', unit: 'ms' }, reason: 'Hidden Store rule' }, 'user-rd-data'))
+      .rejects.toMatchObject({ status: 403 })
+    const dataMonitor = await h.command('/monitor-policies', { spec: { ...infraMonitor,
+      target: { kind: 'service', applicationId: 'app-data', environmentId: 'env-data-dev' },
+      source: 'demo-red', metrics: ['errorRate'] }, reason: 'Data-owned monitor' }, 'user-rd-data')
+    await expect(h.command(`/alert-rules/${first.entityId}/revise`, { expectedVersion: 4,
+      spec: { ...serviceRule, monitorPolicyId: dataMonitor.entityId }, reason: 'Move hidden CI rule' }, 'user-rd-data'))
+      .rejects.toMatchObject({ status: 403 })
+  })
+
+  it('replays an SLO receipt after a monitor draft changes its allowed indicator', async () => {
+    const h = harness()
+    const monitorSpec = { target: { kind: 'service' as const, applicationId: 'app-checkout', environmentId: 'env-checkout-dev' },
+      source: 'demo-red' as const, metrics: ['errorRate' as const], sampleIntervalSeconds: 60, freshnessSeconds: 120, enabled: true }
+    const monitor = await h.command('/monitor-policies', { spec: monitorSpec, reason: 'Create availability monitor' }, 'user-rd-commerce')
+    const body = { spec: { monitorPolicyId: monitor.entityId, indicator: 'availability', targetFraction: 0.99,
+      windowSeconds: 3600, unit: 'fraction' }, reason: 'Create availability SLO' }
+    const input = { sessionId: h.engine.getSnapshot().sessionId, actorId: 'user-rd-commerce', method: 'POST',
+      path: '/slo-policies', body, key: 'w4-slo-replay-after-monitor-draft' }
+    const receipt = await h.engine.command(input)
+    const current = h.read<{ version: number }>(`/monitor-policies/${monitor.entityId}`, 'user-rd-commerce')
+    await h.command(`/monitor-policies/${monitor.entityId}/revise`, { expectedVersion: current.version,
+      spec: { ...monitorSpec, metrics: ['p95Latency'] }, reason: 'Draft latency-only monitoring' }, 'user-rd-commerce')
+    const beforeReplay = h.engine.getSnapshot()
+    expect(await h.engine.command(input)).toEqual(receipt)
+    expect(h.engine.getSnapshot()).toEqual(beforeReplay)
+  })
+
   it('pins evaluation to the active monitor revision and records deterministic failed delivery', async () => {
     const h = harness(), { monitorId, ruleId } = await activeInfra(h)
     const monitor = h.read<{ version: number }>(`/monitor-policies/${monitorId}`)

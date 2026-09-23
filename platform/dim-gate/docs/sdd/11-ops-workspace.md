@@ -56,7 +56,7 @@ K8s 管理與 cluster 管理共用「叢集」能力：cluster 是資源身分�
 
 - Ops 編輯自己 pool 的基礎設施規則；RD 提交的 prod 服務規則可由具 project/stage scope 的 Ops 批准，不能任意改所有服務的閾值。
 - Rule evaluation 用 sample-time 順序及連續樣本條件；version 改變開新 evaluation lineage，歷史 incident 保存 ruleRevision，不回寫舊證據。
-- Silence 以 target refs、reason、expiry、actor 保存；過期自動恢復通知評估。Silence 不把 incident 設 resolved，也不清除異常證據。
+- Silence 以 target refs、reason、expiry、actor 與生效中的 rule revision 保存；新草稿不撤銷仍生效的 revision。過期自動恢復通知評估；重試先檢查目前授權範圍，原命令的相同 key 與內容回傳原 receipt，不因時間推進或草稿更改重新驗證。Silence 不把 incident 設 resolved，也不清除異常證據。
 - 控制面明示通知的「已建立／被抑制／模擬投遞成功／失敗」，與 incident 的 open/acknowledged/investigating/resolved 分開。
 - Incident detail 沿用 metrics → trace/log → CI/依賴 → 最近變更。時間相近只表示可能相關；健康樣本足夠才恢復。
 

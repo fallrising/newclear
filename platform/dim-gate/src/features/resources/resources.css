@@ -31,5 +31,8 @@
 .work-summary { min-width: 10rem; overflow-wrap: anywhere; }
 .work-summary p { margin-block: .35rem; }
 
-.resource-work-items-table { min-width: 58rem; }
+.table-scroll .resource-work-items-table { min-width: 58rem; }
+.resource-work-items-table td:nth-child(3) { min-width: 18rem; }
+.resource-work-items-table td:nth-child(3) code { white-space: nowrap; }
+.resource-work-items-table td:nth-child(5) { min-width: 8rem; }
 .resource-work-items-table small { display: block; margin-top: .3rem; }

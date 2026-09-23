@@ -8,6 +8,10 @@ test('W2 extra browser: canonical Redis delivery and refresh across roles', asyn
   try {
     const id = await createResource(page, 'redis')
     await act(page, '提交審核')
+    // Dialog dismissal precedes detail/audit readback; persona changes wait for both.
+    await expect(page.locator('.command-notice')).toHaveText('已重新讀取同一工作單的決策與執行狀態。')
+    await expect(page.locator('.page-heading')).toContainText('待審核')
+    await expect(page.getByRole('heading', { name: '同一 correlation 的稽核', exact: true }).locator('..')).toContainText('change.submit')
     await become(page, 'user-ops')
     await visitChange(page, 'ops', id)
     await act(page, '核准並保留配額')

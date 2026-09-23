@@ -24,6 +24,23 @@ async function accessibleAtSizes(page: Page, info: TestInfo, label: string, dial
       await info.attach(`${label}-${theme}-${width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
       if (label === 'work-item-triage' && width < 1440) {
         const region = page.getByRole('region', { name: '工作單與審批差異，可水平捲動', exact: true })
+        const geometry = await region.locator('table').evaluate(table => {
+          const target = table.querySelector('tbody tr td:nth-child(3)')!
+          return {
+            minWidth: Number.parseFloat(getComputedStyle(table).minWidth),
+            rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+            targetWidth: target.getBoundingClientRect().width,
+            referenceLineCounts: [...target.querySelectorAll('code')].map(code => {
+              const range = document.createRange(); range.selectNodeContents(code)
+              return range.getClientRects().length
+            }),
+          }
+        })
+        expect(geometry.minWidth).toBeGreaterThanOrEqual(58 * geometry.rootFontSize)
+        expect(geometry.targetWidth).toBeGreaterThanOrEqual(180)
+        expect(geometry.referenceLineCounts.length).toBeGreaterThan(0)
+        expect(geometry.referenceLineCounts.every(count => count === 1)).toBe(true)
+        await info.attach(`${label}-geometry-${theme}-${width}`, { body: JSON.stringify(geometry), contentType: 'application/json' })
         for (let index = 0; index < 100 && !await region.evaluate(el => el === document.activeElement); index++) await page.keyboard.press('Tab')
         await expect(region).toBeFocused()
         const before = await region.evaluate(el => el.scrollLeft)

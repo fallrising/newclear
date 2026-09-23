@@ -902,3 +902,30 @@ remote_durability: 4a69 SSH-saved on task andPRbranches; containing correction/e
 blockers: []
 next_action: fixed bounded layout browser andall8smoke; preserve actualfull4a69 results (oldsmoke may reproduce known fixed startup test defect); independent finaldelta review; complete latestPRheadCI, recheckmain/head, authorizedmerge andactualmerge/tree/postmergeCI/owner closeout beforeW3
 ```
+
+
+DG-D071: d07166c SSH-saved to existing PR36; actual layout2/2 and unchanged benchmark3/3 pass (304484gzip bytes, LCP756ms, queryP950.6ms, HTTP169ms). Its smoke7/8 FAIL: Firefox firstsubmit closesdialog before sequential detail→audit readback, then persona change retires oldactor; strict audit409 health remainsfailed. Independent rawtrace confirms sequence; complete artifacts archived d07166c-failed-smoke-html/artifacts. Firststartup doublegoto is fixed (WebKitW2passes). Reviewer DOM measurement also proves old CSS58rem was overridden by .table-scroll table680px, targetcell57.6px; scrolling alone didnot prove readability. Lead narrowcorrection raises specificity, bounds target/state columns, keeps targetIDs unbroken; governance browser measures computedminimum/realcolumnwidth/IDlinecounts plus actualkeyboardscroll. Smoke now awaits fresh completionnotice/submittedheading/visiblechange.submit audit before switchingpersona; no health/timeout/retry weakening. Workingdiff lint/typecheck/demo build pass. Freeze this delta and run layout/smoke before independent followup; immutable4a69 full77 remainsrunning. W2NOT_ACCEPTED; all originalworktrees retained.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 71
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FINAL_BROWSER_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus d07166c and containing CSS/test-only correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; d071 layout2/benchmark3 pass and smoke7of8 failed; fixed4a69 full77 running
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: d07166c SSH-saved; containing correction/evidence nextSSHpush
+blockers: []
+next_action: run fixed layout2 andall8smoke; preservefull4a69 gates; independent finaldelta review; final reports/latestPRheadCI then authorizedmerge/actualmerge-tree-postCI/ownerrelease before W3
+```

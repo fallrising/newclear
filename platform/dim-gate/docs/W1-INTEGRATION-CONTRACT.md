@@ -1,6 +1,6 @@
 # W1 integration contract
 
-Revision 3 · 2026-09-23 · Base `7a7b41b2e74c2c635642dcb6c980363f6958968b` · WS-SDD revision1.
+Revision 4 · 2026-09-23 · Base `7a7b41b2e74c2c635642dcb6c980363f6958968b` · WS-SDD revision1.
 
 ## Scope and acceptance
 
@@ -39,3 +39,5 @@ Required: frozen install; lint; typecheck; test; check:docs/contracts/ci/archite
 Revision2 clarification: lead review found an overbroad pool intersection in the initial selector. Preserve existing action-specific authorization (Request intersection; Release/Incident project-only). This corrects interpretation, does not reduce any AC or change baseline policy.
 
 Revision3 corrects two W1 SDD coverage gaps found by independent review of7d60786: legal project/environment must survive switching to Admin, and SDD10§2 requires the RD “我發起的工作” control. No new domain persistence/version or command. Lead owns all correction paths after T-030 handoff. Extend strict Zod query/response filters, engine whitelist, shared projection, generated OpenAPI and UI URL/query keys together. Verify two authorized RD requesters in one project through existing grant/create commands, separate mine/all pending Request and Release history, unchanged service counts and snapshot bytes, invalid/non-RD filter rejection, all-three-workspace scope retention and browser reload/back. Cross-center diagnostic context must also survive visible diagnostic routes for multi-grant users; explicit workspace selector alone selects the target home. Preserve original review/failure reports; correction is attempt2 and requires fixed-ref re-review and full gates.
+
+Revision4, final review correction: third fixed review cycle addresses tablet visual navigation and invalid-scope cleanup. At641–1100 keep readable text/group navigation; at<=640 keep operable labelled drawer. Workspace switch validates canonical authorized scope through the existing read-only dashboard API before navigation: valid project + mismatched environment clears environment; invalid project clears project and rechecks environment against unfiltered authorized options, preserving an independently legal environment; nonexistent environment clears. Any read failure leaves original workspace/URL/domain unchanged with an explicit retryable notice. No inferred validity from Admin role or mere string presence. Workspace transition has distinct pending language from persona change. All source/snapshot/API-version rules remain unchanged. Lead owns these Shell/CSS/test/doc corrections; attempt3 covers readable labels/groups/keyboard at768/390, invalid/mismatched/partially-valid scopes, failed read/retry, complete regressions and independent fixed re-review.

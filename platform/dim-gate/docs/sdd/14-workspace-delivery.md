@@ -1,6 +1,6 @@
 # 14 — 三工作區交付、遷移與驗收
 
-版本：WS-SDD revision 1 · 狀態：W1 已實作，固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)；W2–W5 尚未實作／驗證。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併；W3–W5 尚未實作。固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
 
 ## 1. 增量與依賴
 
@@ -73,3 +73,6 @@ fixture 沿用原60 CI及三 provider regression，新增 deterministic Resource
 每個產品增量：focused domain/contract tests → clean build → 真 UI happy path + 有代表性的拒絕／失敗 → 受影響的 v0.1 regression → 原生 lint/typecheck/test/docs/contracts/CI/architecture → 相應效能及 browser gates → 未參與實作的固定 commit review。gate 命令依 [07](07-delivery-validation.md) 與當期 task；不為純文件修改重跑所有本地瀏覽器測試，但既有 PR required CI 仍須通過。
 
 文件交付只驗證連結、需求/AC映射、內部一致性、範圍與 Git diff；不算 AC-WS 產品驗收。PLAN 保存 task/owner/decision；STATUS 明確分開「已定義／已實作／已驗證」，來源版本、review、CI 與合併狀態各自記錄。任何真實 adapter、雲端、SSO、網路執行、外部通知或部署另立 integration 工作，不因合併本 SDD 而啟用。
+
+
+W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。

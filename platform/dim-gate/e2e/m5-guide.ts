@@ -133,7 +133,7 @@ export async function completeGuide(page: Page, info: TestInfo, keyboardOnly: bo
     await user.activate(link('檢查三種資源來源'))
     for (const provider of ['aws', 'aliyun', 'onprem']) {
       await user.select(page.getByRole('combobox', { name: /Provider/ }), provider)
-      await expect(page.locator('caption')).toContainText('共 20 筆')
+      await expect(page.locator('caption')).toContainText(`共 ${provider === 'aws' ? 22 : provider === 'onprem' ? 21 : 20} 筆`)
     }
     await guide()
     await user.activate(link('檢查共享依賴'))

@@ -77,6 +77,13 @@ pnpm test:isolation
 
 頁首「工作區」顯示 RD 業務研發、Ops 維運或 Admin 平台管理；它只列當前身分的合法入口，不更换 user。旁邊「Demo · 體驗其他角色」會更換示範身分並前往該角色首頁，同一分頁仍共用既有服務／資源／申請與發布紀錄。多角色體驗：Admin → 角色與範圍 → 為 Commerce RD 新增 Ops pool/project grant → 切回 Commerce RD → 在工作區 selector 切 RD/Ops；各 sidebar 分開、身份不變。無 grant 使用者仍可由 Demo 入口恢復探索。
 
-RD 首頁從服務健康與申請／發布下鑽；Ops 首頁從事件、失敗、待審與容量下鑽；Admin 首頁查看待發布目錄、整合與權限變更。首頁範圍可選專案／環境，Ops 加來源／資源池；返回與刷新保留 URL。沒有樣本為 unknown，時效與業務成功狀態分開。Redis／Kafka 新申請、配置灰度、告警規則及平台feature/route/channel仍依 W2–W5另行交付；目前不提供空白或假成功入口。
+RD 首頁從服務健康與申請／發布下鑽；Ops 首頁從事件、失敗、待審與容量下鑽；Admin 首頁查看待發布目錄、整合與權限變更。首頁範圍可選專案／環境，Ops 加來源／資源池；返回與刷新保留 URL。沒有樣本為 unknown，時效與業務成功狀態分開。W2 已加入 Redis／Kafka 申請與交付，操作見下節。配置灰度、告警規則及平台feature/route/channel仍依 W3–W5另行交付；目前不提供空白或假成功入口。
 
 RD首頁可用「工作範圍」切換授權內全部工作／我發起的工作；這只篩選申請與發布，不變更服務授權。多grant切至Admin保留合法專案／環境；跨中心診斷頁保留來源工作區與返回連結。
+
+
+## W2 resource walkthrough (under validation)
+
+Start as Commerce RD. Use the original compute catalog to create a staging environment and have Ops approve/provision it, advancing5ticks in Guide. Back as RD, open the application resources, choose that environment and its Redis catalog; create a draft and submit. As Ops, open resource WorkItem, inspect source/snapshot/impact/quota, approve and explicitly start execution. Advance the shared Demo clock; only successful execution creates active canonical Object/Binding. Refresh and compare the same IDs in RD resources and Ops cache detail. Data RD and Admin must not read the private binding.
+
+Kafka catalog offers create-topic and existing-topic binding with safe producer/consumer profiles. Configure failure preserves the failed attempt and creates no active binding; requester retry requires a new Ops decision. Ops Redis maintenance requires another qualified Ops to approve. Kubernetes professional pages show readonly stale/unknown samples and no cluster control. Admin edits typed catalog revisions; old snapshots stay immutable and stale proposals are refused. These walkthrough steps are test instructions, not evidence of acceptance; W2 status remains in STATUS until all gates complete.

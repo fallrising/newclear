@@ -1,6 +1,6 @@
 # 10 — RD 業務研發工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；後續未實作部分見[能力對照](13-capability-map.md)。共用需求與模型以 [09](09-shared-workspaces.md) 為準，驗收以 [14](14-workspace-delivery.md) 為準。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併，固定證據見 [STATUS](../STATUS.md)；後續未實作部分見[能力對照](13-capability-map.md)。共用需求與模型以 [09](09-shared-workspaces.md) 為準，驗收以 [14](14-workspace-delivery.md) 為準。
 
 ## 1. 使用者、目標與邊界
 
@@ -84,3 +84,6 @@ RD 看服務 incident 與診斷，Ops 負責既有 acknowledge/investigate；不
 ## 8. RD 的可驗收結果
 
 對應 REQ-WS-01/02/03/05/07/08/09/10；核心驗收 AC-WS-01～07、09～12、15～18。最小角色故事是：找到服務 → 在合法環境提出 Redis／Kafka 需求 → 查看同張工作單的批准與交付 → 使用實際回傳的 Binding → 從服務頁看變更與運行狀態。CI/CD 配置與監控／告警設定分別在 W3/W4 才加入，不能用既有 Run 或 Incident 頁宣稱已完成配置能力。
+
+
+W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。

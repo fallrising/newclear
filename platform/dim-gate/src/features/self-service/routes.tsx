@@ -25,8 +25,8 @@ function Missing({ entity, back }: { entity: string; back: string }) {
 export function CatalogPage() {
   const catalog = useQuery({ queryKey: queryKey('catalog', null, { page: 1 }), queryFn: () => api.listCatalog({ page: 1, pageSize: 25, sort: 'name', order: 'asc' }) })
   return <>
-    <PageHeading eyebrow="RD · SERVICE CATALOG" title="服務目錄" description="從目前專案可用的已發布模板建立環境申請；送出前可確認 provider、容量與規格。" />
-    {catalog.isPending ? <LoadingState label="正在讀取可申請模板…" /> : catalog.isError ? <ErrorState error={catalog.error} onRetry={() => void catalog.refetch()} /> : catalog.data.items.length === 0 ? <section className="panel empty-state" role="status"><h2>目前沒有可申請的服務</h2><p>服務可能尚未發布、已停用，或不在目前專案 scope。</p></section> : <div className="catalog-grid">{catalog.data.items.map((item) => <article className="panel catalog-card" key={item.id}><div className="panel-title"><Boxes size={20} aria-hidden="true" /><h2>{item.name}</h2><span className="tag">revision {item.revision}</span></div><p>{item.description}</p><dl className="detail-list"><div><dt>可用階段</dt><dd>{item.template.allowedStages.map((stage) => stageLabel[stage]).join('、')}</dd></div><div><dt>Provider</dt><dd>{item.template.allowedProviders.map((provider) => providerLabel[provider]).join('、')}</dd></div><div><dt>預設規格</dt><dd>{item.template.defaults.cpu} vCPU · {item.template.defaults.memoryMiB} MiB</dd></div><div><dt>審核</dt><dd>需要 Ops 核准</dd></div></dl><Button asChild><Link to={`/rd/catalog/${item.id}/request`}>開始申請<ArrowRight size={16} aria-hidden="true" /></Link></Button></article>)}</div>}
+    <PageHeading eyebrow="RD · SERVICE CATALOG" title="服務目錄" description="選擇目前專案可用的 compute、Redis 或 Kafka 模板；各能力使用明確的服務／環境、版本與審批流程。" />
+    {catalog.isPending ? <LoadingState label="正在讀取可申請模板…" /> : catalog.isError ? <ErrorState error={catalog.error} onRetry={() => void catalog.refetch()} /> : catalog.data.items.length === 0 ? <section className="panel empty-state" role="status"><h2>目前沒有可申請的服務</h2><p>服務可能尚未發布、已停用，或不在目前專案 scope。</p></section> : <div className="catalog-grid">{catalog.data.items.map((item) => <article className="panel catalog-card" key={item.id}><div className="panel-title"><Boxes size={20} aria-hidden="true" /><h2>{item.name}</h2><span className="tag">revision {item.revision}</span></div><p>{item.description}</p><dl className="detail-list"><div><dt>可用階段</dt><dd>{item.template.allowedStages.map((stage) => stageLabel[stage]).join('、')}</dd></div><div><dt>Provider</dt><dd>{item.template.allowedProviders.map((provider) => providerLabel[provider]).join('、')}</dd></div><div><dt>預設規格</dt><dd>{item.template.resourceKind === 'compute' ? `${item.template.defaults.cpu} vCPU · ${item.template.defaults.memoryMiB} MiB` : item.template.resourceKind === 'redis' ? `${item.template.defaults.quotaMiB} MiB 配額` : `${item.template.defaults.partitions} partitions · ${item.template.defaults.retentionHours} 小時 · ${item.template.defaults.throughputKiBPerSecond} KiB/s`}</dd></div><div><dt>審核</dt><dd>需要 Ops 核准</dd></div></dl><Button asChild><Link to={`/rd/catalog/${item.id}/${item.template.resourceKind === 'compute' ? 'request' : 'resource-request'}`} >{item.template.resourceKind === 'compute' ? '開始申請' : item.template.resourceKind === 'redis' ? '申請 Redis 資源' : '申請 Kafka 資源'}<ArrowRight size={16} aria-hidden="true" /></Link></Button></article>)}</div>}
   </>
 }
 
@@ -40,7 +40,7 @@ export function RequestWizard() {
   const create = useMutation({ mutationFn: api.createRequest })
   const submit = useMutation({ mutationFn: ({ id, version }: { id: string; version: number }) => api.submitRequest(id, version) })
   const [form, setForm] = useState({ applicationId: '', environmentName: '', stage: '', provider: '', poolId: '', cpu: null as number | null, memoryMiB: null as number | null, purpose: '' })
-  const item = catalog.data
+  const item = catalog.data?.template.resourceKind === 'compute' ? { ...catalog.data, template: catalog.data.template } : undefined
   const selectedStage = item?.template.allowedStages.includes(form.stage as 'dev' | 'staging' | 'prod') ? form.stage as 'dev' | 'staging' | 'prod' : item?.template.allowedStages[0] ?? 'staging'
   const selectedProvider = item?.template.allowedProviders.includes(form.provider as Provider) ? form.provider as Provider : item?.template.allowedProviders[0] ?? 'aws'
   const selectedCpu = form.cpu ?? item?.template.defaults.cpu ?? 1
@@ -62,7 +62,7 @@ export function RequestWizard() {
   if (catalog.isPending || applications.isPending || pools.isPending || capacity.isPending) return <LoadingState label="正在準備申請資料與容量…" />
   const loadError = catalog.error || applications.error || pools.error || capacity.error
   if (loadError) return <ErrorState error={loadError} title="無法準備申請" />
-  if (!item) return <Missing entity="服務目錄項目" back="/rd/catalog" />
+  if (!item) return <section className="panel"><h1>請使用對應的資源申請入口</h1><p>此模板屬於 Redis／Kafka 資源，保留既有 compute 環境申請流程。</p><Button asChild variant="outline"><Link to={`/rd/catalog/${itemId}/resource-request`}>開啟資源申請</Link></Button></section>
   const busy = create.isPending || submit.isPending
   const mutationError = create.error || submit.error
   return <>

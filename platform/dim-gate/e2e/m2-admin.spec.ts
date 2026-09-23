@@ -53,7 +53,7 @@ test('AC-21: Admin access commands and registered navigation metadata work witho
   await expect(dataUserRow.getByRole('button', { name: '停用使用者' })).toBeVisible()
 
   await become(page, 'user-rd-commerce')
-  await page.goto('admin/catalog')
+  await page.goto('admin/catalog?itemId=catalog-web')
   await expect(page.getByRole('heading', { name: '目前身分無法進入平台管理' })).toBeVisible()
   expect(failures.consoleErrors).toHaveLength(2)
   expect(failures.consoleErrors.every((message) => message.includes('Failed to load resource'))).toBe(true)
@@ -75,7 +75,7 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
     return new URL(page.url()).pathname.split('/').at(-1)!
   })()
   await become(page, 'user-admin')
-  await page.goto('admin/catalog')
+  await page.goto('admin/catalog?itemId=catalog-web')
 
   await page.getByRole('button', { name: '建立下一版草稿' }).click()
   await expect(page.getByText('rev 2 · 草稿')).toBeVisible()
@@ -101,7 +101,7 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
   await expect(page.locator('dt', { hasText: '規格' }).locator('..')).toContainText('4 vCPU · 4096 MiB')
 
   await become(page, 'user-admin')
-  await page.goto('admin/catalog')
+  await page.goto('admin/catalog?itemId=catalog-web')
   await page.getByRole('button', { name: '停用新申請' }).click()
   await expect(page.getByText('rev 2 · 已停用')).toBeVisible()
 
@@ -131,7 +131,9 @@ test('AC-22/23: catalog revision, optional CMDB metadata, and safe filtered audi
 
   await become(page, 'user-rd-commerce')
   await page.goto('rd/catalog')
-  await expect(page.getByRole('heading', { name: '目前沒有可申請的服務' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '開始申請', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: '申請 Redis 資源', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '申請 Kafka 資源', exact: true })).toBeVisible()
   expect(failures.consoleErrors).toEqual(['Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)'])
   expect(failures.pageErrors).toEqual([])
   expect(failures.failedRequests).toEqual([])

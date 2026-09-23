@@ -2,6 +2,8 @@
 
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
+目前：**W1 已驗收合併；W2 本機驗證完成，待最終 PR head CI／接受／合併；W3–W5 尚未實作。** W2 沿用 [PR36](https://github.com/fallrising/newclear/pull/36)。固定 `4a69e07` 通過321項原生測試、77/77 Chromium及2/2真實隔離；最終版面／讀回修正 `bf3f168` 通過8/8 Firefox／WebKit、真實鍵盤與欄寬檢查、3/3效能。初始JS304,477gzip bytes、LCP756ms，均在既有預算內。獨立review已重現確認F01–04修正；最終結果見 [T036](../../../.team/reports/T-036.md)。W2尚未接受或合併，唯一owner仍為Codex orchestrator W2；下一步是完成最後文件head CI，再按既有授權合併並核對實際結果。完整AC／commands／歷史失敗見 [W2驗證報告](../../../.team/reports/dim-gate-w2-validation.md) 和 [PLAN](../../../.team/PLAN.md) 最後resume。下列歷史checkpoint不取代此摘要。
+
 M0（AC-01–03）已驗收並由 [PR #7](https://github.com/fallrising/newclear/pull/7) 合併為 `50294b687d06f08e94290f6f327187e8f69248bc`；未部署。
 
 M1（AC-04–08、AC-20）已在產品／本機測試 commit `784f771a040be72fedf2f1521912900990c09dbf` ACCEPTED。[PR #11](https://github.com/fallrising/newclear/pull/11) 已合併為 `b8dae76034caf63bf7d0721cba99a58a0586ae85`；合併後 CI run 35531246949 通過，未部署。
@@ -106,3 +108,21 @@ W1 checkpoint DG-D051: final5cf495f native245 tests and6 cross-browser smoke pas
 W1 固定本機驗證完成：產品 `5cf495f60e22789b482b578b06e0ea64d135b177` 通過245 tests、64/64 Chromium、6/6 Firefox/WebKit、3/3效能、2/2隔離及全部native/actionlint gates。測試補強 `4ab62327b47c5924a22c84e99bab9c79e1dfbb0a` 另通過三provider完整故事，刷新後核對同事件／狀態／健康樣本；沒有放寬health、timeout或retry。初始JS302068gzip bytes（294.988KiB）、4×CPU冷啟動LCP中位692ms、5000CI讀取p950.5ms、HTTPcommand p95165.8ms，均達既有預算。獨立第三輪review關閉F01–F05且無新blocking/high/medium；[完整證據](../../../.team/reports/dim-gate-w1-validation.md)、[T-031](../../../.team/reports/T-031.md)、[T-032](../../../.team/reports/T-032.md)。
 
 W1 **尚待最終PR head CI及授權合併，不先標ACCEPTED/MERGED**。[PR33](https://github.com/fallrising/newclear/pull/33)保存最終CI／merge／owner closeout，下一run對帳後同步回PLAN及canonical report。main00333ef已正常整入且未改dim-gate；唯一主控仍為DG-W1。W2–W5尚未實作。歷史段落保留當時觀察，舊03a的61pass/1fail沒有被改寫成成功；原worktrees、dirty成果與preview4173均保留，未部署。
+
+
+## W1 已驗收合併，W2 開始（2026-09-23）
+
+W1 AC-WS-01/02/16/17/18 **ACCEPTED / MERGED**：[PR33](https://github.com/fallrising/newclear/pull/33) 合併為 `b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d`。最終 head `f51aac3` 的 [CI35830388459](https://github.com/fallrising/newclear/actions/runs/35830388459) 全部通過245unit、64Chromium、6Firefox/WebKit、3benchmark、2isolation；獨立 T032 attempt3 無未解決重要發現。SSH merge ancestry 和 component tree 均已核對一致，W1 owner 已釋放。完整證據及歷史失敗見 [W1 validation](../../../.team/reports/dim-gate-w1-validation.md)。合併後 [CI35833033838](https://github.com/fallrising/newclear/actions/runs/35833033838) 啟動中，mirror35833033846已成功；上方歷史「尚未合併」不是現在狀態。
+
+W2 run DG-W2-20260923-01 從此實際 main 開始；[W2 contract](W2-INTEGRATION-CONTRACT.md) 與 T033–036 固定共用資源／綁定／工作單、Redis／Kafka閉環、Admin模板與K8s唯讀、遷移及驗收。單一主控 branch `agent/dim-gate/mainline/w2-resources` / worktree `newclear-dim-gate-w2`。目前僅契約固定，W2 尚未實作／驗證／驗收；W3–W5仍待後續。未部署、未操作真實雲端或發送通知。
+
+
+W2 checkpoint (DG-W2-20260923-01,2026-09-23): W1 postmerge [CI35833033838](https://github.com/fallrising/newclear/actions/runs/35833033838) succeeded; W1 owner released. W2 existing [draftPR36](https://github.com/fallrising/newclear/pull/36) now integrates T03316domainfiles and T03410migration/fixturefiles by exact SHA256 handoff, plus typed91-operation API, Admin Redis/Kafka editors, canonical WorkItems, service resource pages, Ops professional readonly/maintenance pages and change dialogs. Working-diff typecheck/lint pass;299/299unit and Demo build pass. First full test attempt297/299 failed only stale per-provider fixture counts and is preserved as historical failure, corrected expectations then299pass. No W2 browser/review/CI/merge acceptance yet; initial4browserjourneys are being run next on a fixed commit. T033/T034 production ownership released; T034 attempt2 exclusively verifies new HTTPtest. Lead still owns integration/run. Fixed1c0d230 performance extraction passed3bench (initial298781gzipbytes); complete W2 budget not yet measured. Next full W2 browser branches/keyboard/themes/smoke/performance, corrections, uninvolved fixed review and exact-headCI; merge W2 before W3. No deployment or live side effects.
+
+W2 browser/performance checkpoint:285b46f initial4journeysfailed; afterae3bb49 focus/settledclock repair stagingRedis/refresh andscopedK8s/Admin pass. RemainingactualHTMLpatternconsoleerror andkeyboardscrollregion defect nowcorrected; fullrerunpending. ActualinitialJS314429bytesfails300KiBbudget, soT033 is splittingnonstartupcommandcode whilepreservingstartupvalidation/atomicqueue.312integratedunitpass after13HTTPcases; resourceGuide andadditionalFirefox/WebKit storyadded. No W2 ACCEPTED/mergeclaim; seeT035attempt2 andlatestPLAN.
+
+W2 fixed0ab838a affectedChromium **20/20通過**（4.0分鐘）：既有M1/M2、Redis staging/刷新、Kafka失敗重試、隔離及明暗鍵盤/axe。T033效能修正7檔已SHA核對整合，worker完整benchmark3/3、303891bytes通過，仍待lead固定整合版本重測。genuineW1 activeRelease/Job瀏覽器升級案例已加入；治理瀏覽器及完整剩餘gates持續中。W2仍NOT_ACCEPTED，PR36draft。
+
+W2主控固定740a2bc：完整benchmark3/3通過（實際初始JS303924/307200bytes，LCP724ms、queryP950.5ms、HTTPP95168.6ms）；genuineW1升級browser1/1與真200舊資源回應隔離browser1/1通過。T034治理browser5/5、13axe掃描通過並SHA交接整合。所有worker寫入已釋放；lead接續固定候選完整76Chromium、8Firefox/WebKit、isolation、獨立T036review與最新headCI。仍未W2ACCEPTED或合併。
+
+W2 固定4a69e07：三項medium review修正後13/13瀏覽器與3/3效能通過；獨立複審程式層面確認關閉。原a054完整76Chromium與2isolation通過，但Firefox/WebKit新W2smoke因連續整頁導航中止啟動而失敗6/8，證據保留並修正測試起點；另補工作單表格窄螢幕可讀性。最終固定77回歸／8smoke／CI／review仍待完成，W2尚未驗收合併。

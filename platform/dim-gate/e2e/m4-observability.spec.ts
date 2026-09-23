@@ -170,7 +170,7 @@ for (const provider of ['aws', 'aliyun', 'onprem'] as const) {
     await page.getByRole('link', { name: '檢查三種資源來源', exact: true }).click()
     for (const source of ['aws', 'aliyun', 'onprem']) {
       await page.getByRole('combobox', { name: /Provider/ }).selectOption(source)
-      await expect(page.locator('caption')).toContainText('共 20 筆')
+      await expect(page.locator('caption')).toContainText(`共 ${source === 'aws' ? 22 : source === 'onprem' ? 21 : 20} 筆`)
     }
     await page.goto('guide')
     await page.getByRole('link', { name: '檢查共享依賴', exact: true }).click()

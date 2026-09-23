@@ -1,10 +1,12 @@
 /** Wire contract registry. Planned operations are contracts, not implemented handlers. */
 import { z } from 'zod'
 import * as d from '../domain/schemas.ts'
+import { organizationViewSchema, applicationDetailSchema, environmentDetailSchema, entitySearchHitSchema, topologyViewSchema, capacitySchema } from './wire-views.ts'
 import { controlResultSchema, personaBodySchema, resetBodySchema } from './control-dto.ts'
 import { registerCmdbContracts } from './contracts/cmdb-application-environment.ts'
 import { registerCoreSessionContracts } from './contracts/core-session.ts'
 import { registerFutureContracts } from './contracts/future.ts'
+import { registerResourceContracts } from './contracts/resources.ts'
 import { registerTopologyContracts } from './contracts/topology-relation-search.ts'
 
 const id = d.idSchema
@@ -29,14 +31,12 @@ const metricSeries = d.metricSeriesSchema
 export const createCiSchema = d.createCiInputSchema
 export const wireSchemas = {
   ...d.contractSchemas,
-  OrganizationView: z.strictObject({ organizations: z.array(d.organizationSchema), businessUnits: z.array(d.businessUnitSchema),
-    teams: z.array(d.teamSchema), projects: z.array(d.projectSchema), users: z.array(d.userSchema) }),
-  ApplicationDetail: z.strictObject({ application: d.applicationSchema, environments: z.array(d.environmentSchema) }),
-  EnvironmentDetail: z.strictObject({ environment: d.environmentSchema, placements: z.array(d.placementSchema), activeRelease: d.releaseSchema.nullable() }),
-  EntitySearchHit: z.strictObject({ type: z.enum(['application', 'environment', 'ci', 'request', 'release', 'incident']), id, title: z.string().min(1).max(500), route: z.string().startsWith('/') }),
-  TopologyView: z.strictObject({ nodes: z.array(d.ciViewSchema).max(100), edges: z.array(d.relationSchema).max(200), truncated: z.boolean(), depthReached: z.number().int().min(0).max(3) }),
-  Capacity: z.strictObject({ poolId: id, cpu: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }),
-    memoryMiB: z.strictObject({ used: z.number().nonnegative(), reserved: z.number().nonnegative(), available: z.number().nonnegative() }) }),
+  OrganizationView: organizationViewSchema,
+  ApplicationDetail: applicationDetailSchema,
+  EnvironmentDetail: environmentDetailSchema,
+  EntitySearchHit: entitySearchHitSchema,
+  TopologyView: topologyViewSchema,
+  Capacity: capacitySchema,
   LogEntry: logEntry, TraceSummary: traceSummary, Trace: d.traceSchema, MetricSeries: metricSeries,
   CreateCI: createCiSchema,
   CreateRelation: d.createRelationInputSchema,
@@ -59,7 +59,7 @@ export const wireSchemas = {
 }
 
 export type Operation = {
-  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4';
+  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'W2';
   query?: z.ZodObject; body?: z.ZodType; data: z.ZodType; status: 200 | 201 | 202; demo?: boolean;
 }
 export const operations: Operation[] = []
@@ -89,6 +89,7 @@ registerCoreSessionContracts(context)
 registerCmdbContracts(context)
 registerTopologyContracts(context)
 registerFutureContracts(context)
+registerResourceContracts(context)
 
 const publishedOperationOrder = 'getSession,getOrganization,getNavigation,getDashboard,listApplications,listCIs,getCI,search,getApplication,getEnvironment,listRelations,getTopology,listPools,getCapacity,listCatalog,getCatalog,listRequests,getRequest,listJobs,getJob,listPipelines,getPipeline,listReleases,getRelease,getMetrics,listTraces,getTrace,listLogs,listIncidents,getIncident,listAudit,getAccess,getAdminNavigation,getModels,listIntegrations,createCI,patchCI,createRelation,deleteRelation,createRequest,patchRequest,submitRequest,approveRequest,rejectRequest,cancelRequest,provisionRequest,retryRequest,createPipeline,cancelPipeline,retryPipeline,approveRelease,rejectRelease,rollbackRelease,acknowledgeIncident,investigateIncident,createAssignment,revokeAssignment,patchUser,patchNavigation,createCatalogRevision,patchCatalog,publishCatalog,disableCatalog,createModelField,patchModelField,testIntegration,getPersonas,getGuide,setPersona,resetDemo,advanceClock,setScenario'.split(',')
 const operationRank = new Map(publishedOperationOrder.map((operationId, rank) => [operationId, rank]))

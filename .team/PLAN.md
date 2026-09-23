@@ -758,3 +758,204 @@ remote_durability: source5cf/repair4ab and checkpointcf48818 SSH-saved; containi
 blockers: []
 next_action: verify SSH PRbranch matches containing checkpoint, wait latest-head full CI; if all green record final ACCEPT in PR33 closeout, recheck main/head, merge under user authorization, verify actual merge tree/postmergeCI, release DG-W1 ownership and persist actual outcomes in next run before W2 implementation
 ```
+
+
+DG-D054 (2026-09-23): W1 ACCEPTED/MERGED. Exact final head f51aac3788560f44981ed75456870b824a528994 passed CI35830388459 (245unit,64Chromium,6smoke,3benchmark,2isolation; every step success). Uninvolved T032 attempt3 has no unresolved blocker/high/medium. User-authorized PR33 merged2026-09-23T07:41:23Z at b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d. SSH main/ancestry and dim-gate tree71290cfe7b95d7c5e57cea10adb0270e7108ff9e equal accepted head. T030/T031 ACCEPTED,T032 DONE; DG-W1-20260923-01 terminal DONE, active_owner none. PR closeout remotely saved. PostmergeCI35833033838 running, mirror35833033846 success; no premature postmerge pass claim. Superseded5cfCI35827980156 failed63/64 at the already-fixed reload race; downloaded trace preserved in local evidence and PR33. All original38 worktrees and subsequent W1 trees/dirty history preserved.
+
+### W2 execution — DG-W2-20260923-01
+
+DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole Codex lead takes new run from actual main b4ef57f, branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`. No competing dim-gate PR/owner observed. [W2 contract](../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes complete AC-WS-03–09/15–18 before code, canonical resource/change models, catalog variants, quota/policy, snapshot migration, APIs/routes, safe support matrix and single owners. T033 domain/schema/engine, T034 additive fixtures/controller/migration, T035 lead API/UI/integration/Git, T036 uninvolved fixed reviewer. Workers isolated/no commits/push/delegation; schema onlyT033 and router/manifest/CI onlylead. Pinned kernel237aa277 already read in full; no update adoption. Built-in agent route with exact runtime model slug unavailable, no Claude/multi-model claim. User authorization remains applicable across milestones. Node24.18.0/pnpm11.18.0; existing browser/runtime prerequisites preserved.
+
+| Task | Owner | State |
+| --- | --- | --- |
+| [T-033](tasks/T-033.md) | bounded domain worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-034](tasks/T-034.md) | bounded migration worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-035](tasks/T-035.md) | sole Codex lead | IN_REVIEW — local gates complete, latest-head CI pending |
+| [T-036](tasks/T-036.md) | uninvolved reviewer | DONE attempt2; no unresolved finding, owner released |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 55
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 — CONTRACT_FIXED / NOT_IMPLEMENTED
+task_id: T-033/T-034/T-035/T-036
+target_ref: main
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+implementation_commit: none
+local_tested_commit: none for W2
+spec_revision: WS-SDDrevision1;W2-INTEGRATION-CONTRACTrevision1
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: NOT_OPENED
+remote_durability: containing contract/task/W1closeout checkpoint SSH-pushed next, then one W2 draftPR
+blockers: []
+next_action: publish this checkpoint; assign isolated T033 schema/domain and T034 fixtures/migration; lead typed API/UI; validate full W2 plus preserved regressions, uninvolved fixed review and latest-headCI, merge before W3
+```
+
+
+DG-D056: Contract/task checkpoint7086a443416fbc9876612e66bac889e83c8200ad SSH-saved, single draftPR36 opened. T033 RUNNING in newclear-dim-gate-w2-domain / agent/dim-gate/task/t033-resource-domain; exclusive domain/schema. T034 RUNNING in newclear-dim-gate-w2-migration / agent/dim-gate/task/t034-resource-migration; exclusive seed/controller/migration. T035 sole lead works in canonical W2 tree; T036 remains uninvolved/idle until fixed candidate. No competing writers, no worker commits/pushes. Initial contract/docs165Markdown366links and all task/report validators pass. Root runtime-only extraction preserves exact generated OpenAPI (73ops173schemas); typecheck/lint and all245existing tests pass on working diff. Generated lightweight operation manifest and named runtime wire DTOs remove build-time registration from browser startup; no status/validator/budget change. New resource business implementation still pending. Next commit/push this recoverable slice, measure fresh benchmark on fixed ref, then consume T033 published schemas for typed UI/API.
+
+
+DG-D057: W2contractrevision2 clarifies full canonical shared-change confidentiality before view implementation. Since targetVersions include every consumer env, no partial reader gets full change. RD shared resize proposal/read needs all affected RD project/stage grants but no Ops pool grant; Ops maintenance/approval/execute needs pool+allOpsproject/stage. Partial physical/resource view stays scoped with impactIncomplete; no hidden IDs/counts. T033 raised this at interface review; lead accepts action-specific clarification, no AC or DTO reduced. T033 concrete schemas hash707177f2d70e675f326f28227c8b3fd599a0f91a9a4b63dd9ebbcad64db68f3a published first, later adds registered safe profiles under same ownership. T034/T035 consume read-only dependency copies, no second schema writer. W2 remains IMPLEMENTING/NOT_ACCEPTED, PR36 existing.
+
+DG-D058: T034 migration handback exact digest ba1c1b0aefc30cc4ff05e140cd01f817b0ce4a7143ee61c5c630afc7c7396a77 integrated byte-for-byte (10 owned files); 33 focused tests pass and implementation ownership released, report stays PARTIAL until lead integration. Reassigned attempt2 narrowly owns new W2 MSW HTTP integration test only; production sources are read-only. T033 published domain163/163 tests passing, final authorization cases pending. Lead confirms nonself approval, qualified requester execution, Ops-only resource catalog access and unchanged registered snapshot metadata semantics in contract before final code. Lead routes/UI integrated; preliminary typecheck found legacy catalog union narrowing (fixed) and extra InventoryList session props (fixed), worker m2 typed test pending handback. W1 postmergeCI35833033838 now SUCCESS (observed2026-09-23T08:13Z), mirror remains SUCCESS; DG-W1 owner remains released. W2 remains IMPLEMENTING/NOT_ACCEPTED; single draftPR36.
+
+DG-D059: Final T03316files and T03410files integrated with SHA256 manifest verification; source owners released, no competing writer. T034 attempt2 exclusively owns new HTTPtest; solelead owns integrated product. W2 APIs91ops209schemas, initialUI allregisteredroutes and typedAdmin editors implemented. Working-diff typecheck/lint299unit/build pass; first297/299failure staleproviderassertions preserved then corrected. W2 browser4initialjourneys written, execution/perf/fullreview/CI pending; noACCEPT. Remote1c0d230 runtimeextract benchmark3/3passed (298781gzipbytes). LatestSSHmain unchangedb4ef57f. W1postmergeCI35833033838SUCCESS, ownernone.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 59
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTING / NOT_ACCEPTED
+task_id: T033 handed_back; T034 attempt2 HTTPverification; T035 active; T036 pendingfixedreview
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: containing checkpoint; parent1c0d230f2e662cca8488550cdf1f02087280c021
+local_tested_commit: working-diff299unit/typecheck/lint/build; fixed1c0d230performance3passed
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: parent1c0d230SSHsaved; containingintegrationcheckpoint nextSSHpush
+blockers: []
+next_action: SSHsavecheckpoint/updatePR36; runfixedW2browser and fullnative/perf/smoke/regression, finishremainingACcoverage; uninvolvedT036review thenlatestheadCI andauthorizedmerge; verifymergeandreleaseW2beforeW3
+```
+
+DG-D060: checkpoint285b46f SSHsaved to existingPR36, PRdescriptionupdated. Actual fixed browser0/4: staging test reloaded before final tick response completed; Kafka business path reached success but audit request was still in flight during persona switch; Admin denial test sent invalid emptybody422 rather than validbody403; real UI defect dialog Escape lost initiating-button focus. Root owns correcting UI focus and precise settled browser assertions, no health suppression. Fixed285b46f benchmark2/3: initialJS314429bytes fails307200budget, query/HTTPpass. T033attempt2 reactivated sole domain owner for bounded lazy non-startup mutation/clock split under contract; no other production changes. T034attempt2 HTTP13/13passespendingreport. All failed evidence retained; W2NOT_ACCEPTED.
+
+DG-D061: ae3bb49 focus/settledclock correction SSHcheckpoint onPR36, fixed4W2browserrerunactive. T034attempt2 exacttest/report hashes integrated:13HTTPcases cover18W2operations, whole demo81/81;sourceproductionownership remains released. Reassignedattempt3 only new W2governance browserfile with read-only leadhelpers, no product/API edits; ownerbounded andisolated. T033attempt2 enginecommandlazy split separately active; rootUI/browser/docs ownershipunchanged. No W2acceptanceclaimed.
+
+DG-D062: ae3bb49 actual W2 browser2/4pass (stagingRedisrefresh+scopeK8s/Admin); Kafka failure/retry reachedsuccess but console found HTMLpattern/v-flag invalid hyphen; accessibility found quota horizontalregion missingkeyboardfocus. Root corrected pattern escaping, named focusable scrollregions and768px readable detailcolumns; no test suppressions.312unit nowpass includingT034HTTP13;typecheck/lint/demo buildpass before Guide/smoke additions. Added resourceGuideentrypoints and Firefox/WebKit completeRedis smoke. T034attempt3 runs in NEW isolatedtree /home/ckc/test/codex/newclear-dim-gate-w2-browser branchagent/dim-gate/task/t034-resource-browser baseae3bb49 plus6namedreadonlydependencies (manifest/tmp/t034-browser-readonly-dependencies.json); originalmigrationtree entirelypreserved. Full-overwrite copy was rejected byautomaticreview; safe newtreecreation/frozenofflineinstall usedinstead, noblockedwork. T033attempt2 lazycommands now168domain/301standaloneunitpass, actualbenchmarkpending; lead hasnotcopiedmutableworker files. W2NOT_ACCEPTED.
+
+DG-D063: fixed0ab838a completeaffectedChromium20/20PASS (4.0min), includes allM1+M2Admin+M2Request regressions, Redis staging/reload, Kafka failure/newdecision/retry, scopeK8s/Admin, W2responsivekeyboard/themeaxe andChromiumresourceSmoke. Production/dist fixed0ab artifacts test-results-w2-0ab838a; no gatesuppression. T033attempt2 stopped/released; exact7sourcefiles+report SHAverified andnowintegrated bylead. Worker168domain/301standaloneunitandunchangedbenchmark3/3passed303891gzip/720msLCP/0.4msquery/168.3msHTTP; leadcombinedfixedmeasurementnext. AddedgenuineW1activeRelease+Job browsermigration fixturecase (samefixedSHA, onlyupgradeboundary installsrawbytes; completionvisibleGuideclock), typecheck/lintpassed. T034attempt35governancebrowsercasesinprogress; first2pass, test-only catalogcollection/permissionexpectations beingcorrected. FullremainingM3–M5/W1regression,Firefox/WebKit,finalperf/isolation/review/latestCIstillpending;W2NOT_ACCEPTED.
+
+DG-D064: leadcombinedlazy-source workingdiff allnativePASS: frozenofflineinstall,lint,typecheck,314unit/29files,docs168/394,contracts91/209,CI,architecture,demo build. Sourcecandidatecontainingcheckpoint willbeSSHsavedandfixedperformance/migrationcheckednext. Existing0abCI35838780029 inprogresswithallnativepassed, Chromiumrunning; earlier1cCI35834058865SUCCESS, superseded285/ae3CIcancelledbyconfiguredconcurrency, notfailed/relabelled. W2ownerleadactive;T033released;T034browserattempt3active;T036stilluninvolved.
+
+DG-D065: fixed740a2bc leadbenchmark3/3PASS, fiveactualrequiredJS303924/307200bytes, LCPmedian724ms,5000CIqueryP950.5ms,100HTTPpersistP95168.6ms; emptytrackeddiff source metadata/rawJSONarchived740a2bc-performance. GenuineW1migrationbrowser1/1PASS8.0s; activeoriginalRelease+Job completeonceviaUIclockthenreload. Addedheldreal200resource-response isolationbrowser1/1PASS3.8s against740product+newtestfile;noDOMflash, scopedsearch,actualsuccesspayloadprecondition. T034attempt3 allwritesstopped/released, exactnewtest+reportSHAverified/integrated;5/5visiblegovernancejourneys2.1min/13axechecks pass. Workers nowallidle; leadsoleintegrationowner. Fullcandidate contains76Chromiumtests and8Firefox/WebKitsmokes; beginfullfixedgates anduninvolvedT036reviewnext. Actionlint/task/canonicalreportvalidatorspass; W2NOT_ACCEPTED/unmerged.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 65
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FULL_GATES_PENDING / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 integration; T036 fixed review next
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 740a2bca6c8ce657c185c276b61dcf661488ce3c
+local_tested_commit: 740a2bc native314/benchmark3/migration1; containing checkpoint adds governance5/isolation1 tests only
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-2.md, .team/reports/T-034-attempt-3.md, .team/reports/T-035-attempt-2.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 740a2bc SSH-saved; containing test/evidence checkpoint next SSH push
+blockers: []
+next_action: immutable candidate full76Chromium/8smoke/isolation; uninvolved T036 review; resolve findings, complete latest-headCI, recheck main/head and authorized merge; verify actual merge/tree/postmergeCI and release W2 before W3
+```
+
+
+DG-D066: a05491ce6ee9883f7d3e41a5e0c8d227aa739292 SSH-saved to existing draftPR36; full native314/29files,lint/typecheck/docs170/395/contracts91/209/CI/architecture/actionlint/diff pass. Product source equals740a2bc exactly. Full76Chromium→8Firefox/WebKit→2isolation running in immutable lead checkout; T036 now independently reviews detached a054 in newclear-dim-gate-w2-review, only its own reports writable. Lead-only newclear-dim-gate-w2-closeout / agent/dim-gate/task/t035-w2-closeout preserves fixed runner while synchronizing current document headings and final evidence. All initial38worktree paths remain present; one sibling agent-platform worktree independently committed its former dirty files as1f8429d/7e79063, no dim-gate writes there. Latest SSHmain remainsb4ef57f. CI35840564865 pending/in progress; no final pass or acceptance claim. Sole W2owner remains lead; no W3run started.
+
+DG-D067: T036 F01 MEDIUM reproduced on fixeda054: UI parent-level impactIncomplete disables a Redis object's maintenance even when actor has all its affected scopes; same canonical command succeeds201. Dialog also listed all parent consumers. Lead decision REWORK T035attempt3 under contractrevision3 fixed before implementation: per-visible-object impact/capability DTO using shared policy, parent redaction unchanged, object-only dialog; no snapshot/state-machine change. Lead owns all correction files in isolatedcloseout tree after worker release. Keep fulla054 runner/evidence and review other findings; fixed corrected candidate and independent follow-up required, W2NOT_ACCEPTED.
+
+DG-D068: T036 F02/F03 MEDIUM accepted as same attempt3 REWORK. Approved WorkItems omitted from execution filter; triage omitted required kind/risk/unit delta. Contractrevision3 now fixes overlapping source-phase membership and canonical read-only summary (unknown baselines explicit), before implementation. No source states, business persistence or AC narrowed. Lead continues sole shared schema/policy/view/UI owner; fixeda054 full regression stillrunning, reviewer continues full scope.
+
+DG-D069: T035attempt3 F01–F03 corrections implemented in isolatedcloseout tree, all native321/29files and91operations/210schemas pass. Strict required readDTOs only; no persisted schema/state change. UIobject eligibility now uses sharedpolicy, list/detail/approval share typedrisk/delta, approvedRequest/Change appear inexecution anddecided. Tests include hidden-sibling allow, hidden-affected/no-pool refusal, scope revoked afteroldread, signed/unknownbase summaries. T036 full source review confirmed onlythreeMEDIUM findings; its olda054 focused11browser/65domain andnativechecks pass, independentreport pending. Freeze correction beforefocusedbrowser/performance, then independent follow-up andfull/latestCI. Existinga054 fullrunner has nofailures throughM5reliability; W2 remainsNOT_ACCEPTED.
+
+DG-D070: fixed4a69e07 SSHsaved to taskbranch then normal remotePRbranchfastforward (PR36confirmedhead4a69, CI35842903725inprogress); originalmainlinelocaltree stayeda054 untilrunnerfinished. a054 actual76/76Chromium24.5min and2/2isolation pass; smoke6/8FAIL, W2Firefox/WebKit initialdoublegoto cancels requiredstartupmodule/MSW beforefirstpage isready. Trace shows initialrd→wizard within91/104ms; completebusinesssuccessdoesnotwaivefailedhealth. Failures/artifacts archived beforeanynewrun. Correct test enters wizard directly through existing createResource helper; no health/timeout/retry relaxation. IndependentreviewconfirmedF01–03sourceclosure on4a69; F04LOW narrowtable readability accepted for smallCSSfix (minwidth andeachrefblock), plusrealkeyboardhorizontal-scroll assertions. Oldcloseout4a69full77runner remainsimmutable; canonicalleadbranch nowFF4a69 withthisboundedlayout/test correction, T035attempt3stillactive. T036attempt1reports exactSHA c006bb83c9c5c0537367b22c5d8347c2c91ec2c91d099a0f0b55363fa361f591 integrated. Fresh4a69performance3/3pass304484gzipbytes/LCP792ms/query0.6ms/HTTP169.4ms;13/13W2browser3.9minpass2686responses/37images/zeroerrors. W2NOT_ACCEPTED.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 70
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / REVIEW_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+supplemental_continuation_ref: agent/dim-gate/task/t035-w2-closeout
+supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus containing bounded layout/test correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; full77 and8smoke/2isolation stillrunning in supplemental tree
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 4a69 SSH-saved on task andPRbranches; containing correction/evidence nextSSHpush
+blockers: []
+next_action: fixed bounded layout browser andall8smoke; preserve actualfull4a69 results (oldsmoke may reproduce known fixed startup test defect); independent finaldelta review; complete latestPRheadCI, recheckmain/head, authorizedmerge andactualmerge/tree/postmergeCI/owner closeout beforeW3
+```
+
+
+DG-D071: d07166c SSH-saved to existing PR36; actual layout2/2 and unchanged benchmark3/3 pass (304484gzip bytes, LCP756ms, queryP950.6ms, HTTP169ms). Its smoke7/8 FAIL: Firefox firstsubmit closesdialog before sequential detail→audit readback, then persona change retires oldactor; strict audit409 health remainsfailed. Independent rawtrace confirms sequence; complete artifacts archived d07166c-failed-smoke-html/artifacts. Firststartup doublegoto is fixed (WebKitW2passes). Reviewer DOM measurement also proves old CSS58rem was overridden by .table-scroll table680px, targetcell57.6px; scrolling alone didnot prove readability. Lead narrowcorrection raises specificity, bounds target/state columns, keeps targetIDs unbroken; governance browser measures computedminimum/realcolumnwidth/IDlinecounts plus actualkeyboardscroll. Smoke now awaits fresh completionnotice/submittedheading/visiblechange.submit audit before switchingpersona; no health/timeout/retry weakening. Workingdiff lint/typecheck/demo build pass. Freeze this delta and run layout/smoke before independent followup; immutable4a69 full77 remainsrunning. W2NOT_ACCEPTED; all originalworktrees retained.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 71
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FINAL_BROWSER_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus d07166c and containing CSS/test-only correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; d071 layout2/benchmark3 pass and smoke7of8 failed; fixed4a69 full77 running
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: d07166c SSH-saved; containing correction/evidence nextSSHpush
+blockers: []
+next_action: run fixed layout2 andall8smoke; preservefull4a69 gates; independent finaldelta review; final reports/latestPRheadCI then authorizedmerge/actualmerge-tree-postCI/ownerrelease before W3
+```
+
+
+DG-D072 (2026-09-23T10:00Z): W2 local gates complete. Evaluated domain/API/migration implementation4a69e07233fb31a90d2abafa664c39d3b91c4f23 and bounded final layout/test delta bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20. Full native321/29files,91operations/210schemas, all lint/typecheck/docs/CI/architecture/build/actionlint checks pass. Fixed4a69 full77/77 Chromium24.8min,43health attachments/24589responses/119images with zero pageErrors/failedRequests; sibling/live isolation2/2pass. Finalbf smoke8/8Firefox/WebKit2.5min and affected real triage/layout1/1 pass; geometry812px/252px, four unbroken IDs and keyboard horizontal scroll. Final fresh benchmark3/3:304477gzipbytes, LCP756ms/queryP950.6ms/HTTP169.2ms, clean tracked source metadata. Immutable4a69 oldsmoke6/8 failed known bootstrap race; d0717/8 failed unfinished audit readback; their logs/traces remain historical failures, finalbf evidence supersedes only affected paths without relaxing gates.
+
+Independent T036attempt2 report SHA256372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 integrated unchanged; reviewer independently ran321native/12Chromium/finallayout1/final2browser and inspected complete lead evidence. F01–03MEDIUM/F04LOW closed, no unresolved finding. Report ownership released. Decision: ACCEPT bounded T033/T034 handbacks at their original revisions plus integrated4a69 validation; T036 DONE; T035 local integration DONE but orchestration IN_REVIEW pending latest exact PR-head CI. W2 remains NOT_ACCEPTED/unmerged until that gate. Reports T033/T034/T035/T036 and dim-gate-w2-validation are current; old attempts remain. All original38worktree paths remain, currenttotal53, no deletions. SSHmain observed09:58Z remainsb4ef57f; remotePR36headbf3f168. CI35844753406 is inprogress, not calledpassed. This checkpoint is metadata-only; no product/test/config/lockfile/workflow changes afterbf3f168. Final metadata-head CI and actual merge/ownership closeout belong onPR36, then next-run reconciliation saves actual outcomes without a self-SHA commit loop.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 72
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 LOCAL_GATES_COMPLETE / FINAL_CI_PENDING / NOT_ACCEPTED
+task_id: T033/T034 ACCEPTED bounded handback; T035 IN_REVIEW; T036 DONE
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23
+final_bounded_delta_commit: bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20
+local_tested_commit: 4a69 full77/native321/isolation2; bf3f168 affectedlayout1/smoke8/freshbenchmark3
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/dim-gate-w2-validation.md, .team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-2.md]
+review_sha256: 372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: bf3f168 SSH-saved; containing metadata checkpoint nextSSHpush
+blockers: []
+next_action: validate metadata-only diff and SSHsave samePR36; waitlatestexactheadCI, recheckSSHmain/PRhead, ACCEPT thenauthorizedmerge; verifyactualmerge/tree/postmergeCI, savecloseout/releaseW2, thencreateW3run
+```

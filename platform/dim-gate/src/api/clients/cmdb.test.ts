@@ -31,11 +31,11 @@ const awsInput = {
 }
 
 describe('Ops CMDB typed client (T-009)', () => {
-  it('lists exactly 20 CIs per provider and validates provider-specific detail fields', async () => {
-    expect((await client.api.listCis({ pageSize: 100 })).total).toBe(60)
-    expect((await client.api.listCis({ provider: 'aws', pageSize: 100 })).total).toBe(20)
+  it('lists baseline and additive W2 CIs per provider and validates provider-specific detail fields', async () => {
+    expect((await client.api.listCis({ pageSize: 100 })).total).toBe(63)
+    expect((await client.api.listCis({ provider: 'aws', pageSize: 100 })).total).toBe(22)
     expect((await client.api.listCis({ provider: 'aliyun', pageSize: 100 })).total).toBe(20)
-    expect((await client.api.listCis({ provider: 'onprem', pageSize: 100 })).total).toBe(20)
+    expect((await client.api.listCis({ provider: 'onprem', pageSize: 100 })).total).toBe(21)
     expect((await client.api.getCi('ci-aws-checkout-01')).attributes).toMatchObject({ subnetId: 'subnet-demo' })
     expect((await client.api.getCi('ci-aliyun-worker-01')).attributes).toMatchObject({ vSwitchId: 'vsw-demo' })
     expect((await client.api.getCi('ci-onprem-02')).attributes).toMatchObject({ assetTag: 'asset-02', hypervisor: 'kvm' })
@@ -44,8 +44,8 @@ describe('Ops CMDB typed client (T-009)', () => {
   it('commits onboarding, increases only the selected source, and returns actionable 409/422 errors', async () => {
     const receipt = await client.api.createCi(awsInput)
     expect(receipt).toMatchObject({ entityType: 'ci', entityVersion: 1 })
-    expect((await client.api.listCis({ pageSize: 100 })).total).toBe(61)
-    expect((await client.api.listCis({ provider: 'aws', pageSize: 100 })).total).toBe(21)
+    expect((await client.api.listCis({ pageSize: 100 })).total).toBe(64)
+    expect((await client.api.listCis({ provider: 'aws', pageSize: 100 })).total).toBe(23)
     expect((await client.api.listCis({ provider: 'aliyun', pageSize: 100 })).total).toBe(20)
     await expect(client.api.createCi({ ...awsInput, name: 'duplicate' })).rejects.toMatchObject({ status: 409, code: 'DUPLICATE_RESOURCE' })
     const { accountId: _accountId, ...withoutAccount } = awsInput

@@ -119,3 +119,8 @@ stateDiagram-v2
 所有成功 mutation 都產生 audit，包括 role assignment、menu、catalog、CI、request、release、incident。拒絕／衝突的寫入可產生 outcome=denied/conflict 的 audit，不修改原 entity version。Audit 無任意 payload、token 或完整 log，diffSummary 只記安全的欄位差異。
 
 store commit 後發出單一 revision notification；TanStack Query 對影響的 resource family invalidation 後重新讀取。頁面上不能靠手工調整某張卡的數字模仿完成。角色切換要取消舊 requests、清 query cache，再按新 scope 讀取；reset 同時清資料、cache、timer 與 scenario faults。
+
+
+## W2 integration delta
+
+W2 new resource.bind/resource.resize/kafka.topic.create changes follow draft → submitted → independent Ops approval → explicit execution → succeeded/failed. Immutable proposal/catalog snapshots, all target versions, append-only decisions/attempts, shared scheduler/locks and atomic quota reservations govern each transition. Failed retry returns to submitted and requires a new independent decision; changes to content create a new draft. Existing Request and Release remain separate source state machines projected as WorkItems. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).

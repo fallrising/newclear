@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from 'msw'
 import { z } from 'zod'
-import { operations } from '../api/contracts'
+import { runtimeOperations } from '../api/runtime-operations'
 import { DomainError } from '../domain/engine'
 import type { DemoController } from './controller'
 import { commandDomainRoute, readDomainRoute } from './handlers/cmdb'
@@ -67,7 +67,7 @@ export function createHandlers(controller: DemoController, options: HandlerOptio
           : await commandDomainRoute(controller, request.method, path, body, key!, identity)
       }
       const current = controller.getSession()
-      const operation = operations.find((entry) => entry.demo === isDemo && entry.method === request.method.toLowerCase()
+      const operation = runtimeOperations.find((entry) => entry.demo === isDemo && entry.method === request.method.toLowerCase()
         && operationPattern(entry.path).test(path))
       return HttpResponse.json({ data, meta: { requestId, storeRevision: current.storeRevision, policyVersion: current.policyVersion } },
         { status: operation?.status ?? 200, headers: { 'Cache-Control': 'no-store' } })

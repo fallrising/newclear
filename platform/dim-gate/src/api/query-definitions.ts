@@ -6,6 +6,7 @@ export const queryFamilies = {
   selfService: { pools: 'pools', capacity: 'capacity', catalog: 'catalog', requests: 'requests', jobs: 'jobs' },
   admin: { access: 'access', adminNavigation: 'admin-navigation', models: 'models', audit: 'audit' },
   observation: { metrics: 'metrics', traces: 'traces', trace: 'trace', logs: 'logs', incidents: 'incidents', incident: 'incident', integrations: 'integrations', notifications: 'notifications' },
+  resources: { objects: 'resource-objects', bindings: 'bindings', inventory: 'resource-inventory', service: 'service-resources', work: 'work-items', changes: 'changes', change: 'change' },
   delivery: { pipelines: 'pipelines', pipeline: 'pipeline', releases: 'releases', release: 'release' },
 } as const
 

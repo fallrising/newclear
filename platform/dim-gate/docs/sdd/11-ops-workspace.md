@@ -1,6 +1,6 @@
 # 11 — Ops 維運工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；其餘為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
+版本：WS-SDD revision 1 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併，固定證據見 [STATUS](../STATUS.md)；W3–W5 為後續設計；共用模型見 [09](09-shared-workspaces.md)，能力深度見 [13](13-capability-map.md)，驗收見 [14](14-workspace-delivery.md)。
 
 ## 1. 使用者與責任
 
@@ -82,3 +82,6 @@ Ops 面板須同時呈現 desired revision、已生效 revision、observedAt 及
 ## 8. Ops 的可驗收結果
 
 對應 REQ-WS-01/02/04/05/07/08/09/10；驗收 AC-WS-01～09、11～12、15～18。主線：看到 RD 同一筆 Redis／Kafka 需求 → 查目前容量與可見影響 → 批准／執行 → 在專業面板看到唯一 object/binding → RD 返回服務頁看到同一結果。另一條主線是從 incident 追到共享資源與變更，維持 v0.1 的認領、調查及恢復樣本規則。
+
+
+W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。

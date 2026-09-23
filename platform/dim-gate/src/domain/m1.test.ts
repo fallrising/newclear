@@ -20,16 +20,16 @@ const awsCreate = {
 }
 
 describe('M1 inventory and scoped projections (AC-04, AC-06, AC-08, AC-20)', () => {
-  it('seeds exactly 20 CIs per provider, six apps, twelve environments and one shared Redis ID', () => {
+  it('preserves the original 20 CIs per provider and adds three canonical W2 parents', () => {
     const snapshot = seed()
-    expect(snapshot.entities.cis).toHaveLength(60)
+    expect(snapshot.entities.cis).toHaveLength(63)
     for (const provider of ['aws', 'aliyun', 'onprem']) {
-      expect(snapshot.entities.cis.filter((ci) => ci.provider === provider)).toHaveLength(20)
+      expect(snapshot.entities.cis.filter((ci) => ci.provider === provider && !ci.id.startsWith('w2-'))).toHaveLength(20)
     }
     expect(snapshot.entities.applications).toHaveLength(6)
     expect(snapshot.entities.environments).toHaveLength(12)
     const shared = snapshot.entities.placements.filter((entry) => entry.ciId === 'ci-idc-redis-01')
-    expect(shared.map((entry) => entry.environmentId).sort()).toEqual(['env-checkout-dev', 'env-data-dev'])
+    expect(shared.map((entry) => entry.environmentId).sort()).toEqual(['env-checkout-dev', 'env-data-dev', 'env-storefront-dev'])
     expect(new Set(shared.map((entry) => entry.ciId))).toEqual(new Set(['ci-idc-redis-01']))
   })
 
@@ -37,7 +37,7 @@ describe('M1 inventory and scoped projections (AC-04, AC-06, AC-08, AC-20)', () 
     const subject = makeEngine()
     for (const provider of ['aws', 'aliyun', 'onprem']) {
       const page = read<Page<CI>>(subject, '/cis', 'user-ops', 'provider=' + provider + '&pageSize=100')
-      expect(page.total).toBe(20)
+      expect(page.total).toBe({ aws: 22, aliyun: 20, onprem: 21 }[provider])
     }
     expect(read<CI>(subject, '/cis/ci-aws-checkout-01').attributes).toMatchObject({ subnetId: 'subnet-demo' })
     expect(read<CI>(subject, '/cis/ci-aliyun-worker-01').attributes).toMatchObject({ vSwitchId: 'vsw-demo' })
@@ -60,7 +60,7 @@ describe('M1 inventory and scoped projections (AC-04, AC-06, AC-08, AC-20)', () 
     const before = read<unknown[]>(makeEngine(snapshot), '/capacity')
     snapshot.entities.placements.push({
       ...snapshot.entities.placements[0], id: 'placement-extra-shared', applicationId: 'app-storefront',
-      environmentId: 'env-storefront-dev', ciId: 'ci-idc-redis-01', role: 'dependency',
+      environmentId: 'env-storefront-prod', ciId: 'ci-idc-redis-01', role: 'dependency',
     })
     expect(read<unknown[]>(makeEngine(snapshot), '/capacity')).toEqual(before)
   })
@@ -99,8 +99,8 @@ describe('M1 CI and relation commands (AC-04, AC-05, AC-06)', () => {
     const subject = makeEngine()
     const receipt = await subject.command(command({ body: awsCreate }))
     expect(receipt).toMatchObject({ entityType: 'ci', entityVersion: 1 })
-    expect(read<Page<CI>>(subject, '/cis', 'user-ops', 'pageSize=100').total).toBe(61)
-    expect(read<Page<CI>>(subject, '/cis', 'user-ops', 'provider=aws&pageSize=100').total).toBe(21)
+    expect(read<Page<CI>>(subject, '/cis', 'user-ops', 'pageSize=100').total).toBe(64)
+    expect(read<Page<CI>>(subject, '/cis', 'user-ops', 'provider=aws&pageSize=100').total).toBe(23)
     expect(read<CI>(subject, '/cis/' + receipt.entityId)).toMatchObject({ source: 'manual', health: 'unknown', observedAt: null })
     expect(subject.getSnapshot()).toMatchObject({ commandCount: 1, storeRevision: 1 })
     expect(subject.getSnapshot().audit).toHaveLength(1)

@@ -147,3 +147,8 @@ M1 的 inventory 基線延續到 M4 seed `dim-gate-m4-v1`，基準時間 `2026-0
 Fixture 需含健康／unknown／stale、零匹配 filter、跨團隊共享依賴、無回滾目標及 scope 外實體。`capacity-exhausted`、`provision-failure`、`build-failure`、`health-failure`、`post-release-latency`、`rollback-failure` 為明確 scenario，禁止隨機故障。
 
 M4 的 observation buckets／traces／logs／recoveries、scope projection、Guide 與通知 DTO 詳見 [M4 integration contract](../M4-INTEGRATION-CONTRACT.md)；time-series 不存入 CMDB attributes。
+
+
+## W2 integration delta
+
+W2 snapshot version2 adds ResourceObject, ResourceBinding, ResourceQuota, ChangeRequest and ChangeExecution with shared canonical IDs. Bindings reuse one Placement per app/env/CI; legacy Placement grants no access. Redis quotaMiB and Kafka topics/partitions/KiB-per-second are distinct from physical CPU/memory and unknown observed usage. Parent/kind/namespace/externalRef uniqueness and stable planned IDs survive retry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).

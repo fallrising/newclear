@@ -188,6 +188,7 @@ describe('M2 governance', () => {
     const engine = create()
     const oldDraft = (await command(engine, 'user-rd-commerce', '/requests', requestBody({ environmentName: 'revision-one' }), 'revision-old')).entityId
     const current = engine.getSnapshot().entities.catalogs[0]
+    if (current.template.resourceKind !== 'compute') throw new Error('Expected the preserved compute catalog')
     const template = structuredClone(current.template)
     template.defaults.cpu = 4
     template.limits.maxCpu = 12
@@ -219,7 +220,7 @@ describe('M2 governance', () => {
       expectedVersion: disabled.version, baseRevision: disabled.revision, reason: 'Prepare replacement while still disabled',
       template, name: disabled.name, description: disabled.description, allowedProjectIds: disabled.allowedProjectIds,
     }, 'catalog-disabled-revision')
-    expect(engine.read('/catalog', new URLSearchParams(), 'user-rd-commerce')).toMatchObject({ items: [], total: 0 })
+    expect(engine.read('/catalog', new URLSearchParams('q=catalog-web'), 'user-rd-commerce')).toMatchObject({ items: [], total: 0 })
     expect(() => engine.read('/catalog/catalog-web', new URLSearchParams(), 'user-rd-commerce'))
       .toThrow(expect.objectContaining({ status: 404 }))
     await expect(command(engine, 'user-rd-commerce', `/requests/${revisionTwo}/submit`, {

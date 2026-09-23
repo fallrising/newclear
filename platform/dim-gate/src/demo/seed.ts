@@ -4,6 +4,7 @@ import { buildCmdbSeed } from './seed/cmdb'
 import { personas } from './seed/core'
 import { buildTopologySeed } from './seed/topology'
 import { buildObservationSeed } from './seed/observations'
+import { buildW2Assignments, buildW2BusinessSeed, buildW2Metadata } from './seed/resources'
 
 export { personas } from './seed/core'
 
@@ -11,13 +12,15 @@ export const SEED_BASELINE = '2026-09-20T09:00:00Z'
 const stamp = { version: 1, createdAt: SEED_BASELINE, updatedAt: SEED_BASELINE }
 const scoped = { ...stamp, orgId: 'org-demo' }
 
-/** M4 preserves inventory/governance; release and incident history require demo commands. */
+/** W2 adds explicit resource fixtures while preserving every original M4 entity identity. */
 export function createSeed(sessionId: string): Snapshot {
   const applicationSeed = buildApplicationSeed()
   const cmdbSeed = buildCmdbSeed()
   const topologySeed = buildTopologySeed(applicationSeed.applications, applicationSeed.environments)
+  const metadata = buildW2Metadata()
+  const resources = buildW2BusinessSeed(topologySeed.placements)
   return snapshotSchema.parse({
-    schemaVersion: 1, seedVersion: 'dim-gate-m4-v1', sessionId, logicalClock: 0,
+    schemaVersion: 2, seedVersion: 'dim-gate-w2-v1', sessionId, logicalClock: 0,
     sequence: 0, storeRevision: 0, policyVersion: 1, commandCount: 0,
     entities: {
       organizations: [{ ...stamp, id: 'org-demo', name: 'Dim Commerce' }],
@@ -43,6 +46,10 @@ export function createSeed(sessionId: string): Snapshot {
       ...applicationSeed,
       ...cmdbSeed,
       ...topologySeed,
+      ...resources,
+      cis: [...cmdbSeed.cis, ...metadata.cis],
+      placements: [...topologySeed.placements, ...resources.placements],
+      resourceQuotas: metadata.resourceQuotas,
       assignments: [
         { ...scoped, id: 'grant-rd-commerce', userId: 'user-rd-commerce', role: 'rd', scopeType: 'project', scopeId: 'project-store' },
         { ...scoped, id: 'grant-rd-commerce-payments', userId: 'user-rd-commerce', role: 'rd', scopeType: 'project', scopeId: 'project-payments' },
@@ -56,6 +63,7 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'grant-ops-aliyun', userId: 'user-ops', role: 'ops', scopeType: 'pool', scopeId: 'pool-aliyun-sg' },
         { ...scoped, id: 'grant-ops-idc', userId: 'user-ops', role: 'ops', scopeType: 'pool', scopeId: 'pool-idc-sg' },
         { ...scoped, id: 'grant-admin', userId: 'user-admin', role: 'admin', scopeType: 'org', scopeId: 'org-demo' },
+        ...buildW2Assignments(),
       ],
       navigation: [
         { ...scoped, id: 'nav-rd', routeKey: 'rd.overview', label: '研發概覽', group: '工作區', order: 10, enabled: true },
@@ -80,6 +88,7 @@ export function createSeed(sessionId: string): Snapshot {
         { ...scoped, id: 'nav-admin-audit', routeKey: 'admin.audit', label: '管理稽核', group: '治理', order: 35, enabled: true },
         { ...scoped, id: 'nav-admin-integrations', routeKey: 'admin.integrations', label: '模擬整合', group: '治理', order: 36, enabled: true },
         { ...scoped, id: 'nav-guide', routeKey: 'guide', label: '示範控制台', group: '示範', order: 40, enabled: true },
+        ...metadata.navigation,
       ],
       modelFields: [],
       catalogs: [{
@@ -91,7 +100,7 @@ export function createSeed(sessionId: string): Snapshot {
           defaults: { cpu: 2, memoryMiB: 2048 }, limits: { maxCpu: 8, maxMemoryMiB: 16384 },
           requiresApproval: true, resourceKind: 'compute', bootstrapProfile: 'web-service',
         },
-      }],
+      }, ...metadata.catalogs],
       catalogHistory: [],
       requests: [],
       pipelines: [], releases: [], artifacts: [], incidents: [], ...buildObservationSeed(),

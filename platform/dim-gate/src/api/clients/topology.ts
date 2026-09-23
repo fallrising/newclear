@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { wireSchemas } from '../contracts'
+import { topologyViewSchema, entitySearchHitSchema } from '../wire-views'
 import {
   commandReceiptSchema,
   createRelationInputSchema,
@@ -14,8 +14,8 @@ export type TopologyMode = 'dependencies' | 'impact'
 export type TopologyDepth = 1 | 2 | 3
 export type TopologyRoot = { ciId: string; environmentId?: never } | { environmentId: string; ciId?: never }
 export type TopologyQuery = TopologyRoot & { mode: TopologyMode; depth: TopologyDepth }
-export type TopologyView = z.infer<typeof wireSchemas.TopologyView>
-export type EntitySearchHit = z.infer<typeof wireSchemas.EntitySearchHit>
+export type TopologyView = z.infer<typeof topologyViewSchema>
+export type EntitySearchHit = z.infer<typeof entitySearchHitSchema>
 export type CreateRelationInput = z.infer<typeof createRelationInputSchema>
 export type DeleteRelationInput = z.infer<typeof deleteRelationInputSchema>
 
@@ -37,8 +37,8 @@ function topologyPath(query: TopologyQuery) {
 export function createTopologyClient(request: ApiRequest): TopologyClient {
   return {
     search: (q, limit = 10) => request(`/search?${new URLSearchParams({ q, limit: String(limit) }).toString()}`,
-      z.strictObject({ items: z.array(wireSchemas.EntitySearchHit).max(20) })),
-    getTopology: (query) => request(topologyPath(query), wireSchemas.TopologyView),
+      z.strictObject({ items: z.array(entitySearchHitSchema).max(20) })),
+    getTopology: (query) => request(topologyPath(query), topologyViewSchema),
     listRelations: (ciId, direction = 'both') => {
       const parameters = new URLSearchParams({ ciId, direction, page: '1', pageSize: '100', sort: 'id', order: 'asc' })
       return request(`/relations?${parameters.toString()}`, pageSchema(relationSchema))

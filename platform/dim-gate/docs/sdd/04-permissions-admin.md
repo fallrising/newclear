@@ -74,3 +74,8 @@ AWS／Aliyun／IDC、CI provider、APM provider 使用 `Integration` metadata，
 ## W1 工作區與身分隔離
 
 工作區是 UI 投影，不是 grant 或身份切換。單 grant 仍有常駐名稱；多 grant 只顯示目前工作區導航；無 grant 顯示禁止及獨立 Demo recovery。跨中心 read detail 保留來源入口並說明讀取授權，不能新增目標中心清單或寫權。工作區切換不寫 domain snapshot、policy、user 或 command count。W1 多／零 grant 的驗證由既有 Admin assignment command/UI 建立，不另改預設 seed 或加入 implicit Admin 業務權限。首頁全部由共用 policy 先裁切後統計。
+
+
+## W2 integration delta
+
+W2 explicit actions binding.read/resourceObject.read/change.* and resource.manage are independent of navigation. RD reads through authorized bindings and project/stage; Ops physical pool access does not reveal service-private objects without project/stage. Shared resize requires all affected consumers. Self approval is denied; a qualified requester may execute after a different Ops decision. Admin receives typed Redis/Kafka catalog governance, without resource payload or execution authority. Registered catalog metadata does not grant access. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).

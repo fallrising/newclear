@@ -14,6 +14,8 @@
 | --- | --- | --- |
 | [0001-stack](../adr/0001-stack.md) | CF Workers + DO + D1 + React；不 fork EdgeChat | accepted |
 | [0002-credentials](../adr/0002-credentials.md) | INV-13 單 operator 配額；INV-14 不相交 `CODEX_HOME`；same-uid 殘餘風險；hosted 預設 `api.x.ai` + `api_key`；核心版 Workers 不連 thinrouter | accepted |
+| [0005-v2-web-frontend](../adr/0005-v2-web-frontend.md) | v2 新前端 `web/` 與 `frontend/` 並存到切換 | proposed |
+| [0006-llm-provider-formats](../adr/0006-llm-provider-formats.md) | hosted 改用 operator 設定的多格式 provider；將修訂 0002 的 hosted 預設 | proposed |
 
 後續實作階段預期再立（不在本 baseline 撰寫正文）：MCP 版本鎖定、HostedGeneration、events splice、Codex CLI pin。在另立之前，以 DESIGN Key Decisions 與本章來源為準。
 

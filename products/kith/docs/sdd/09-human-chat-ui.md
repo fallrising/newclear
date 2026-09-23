@@ -2,6 +2,8 @@
 
 [回主 SDD](../../SDD.md) · 協定：[04](04-protocol.md) · 驗收：[06](06-verification.md)
 
+畫面契約改由 [11 — 房間畫面](11-room-screen.md) 取代；本章留下的行為以 11 沒有改寫的部分為準。以下舊畫面敘述與驗收保留供對照，畫面斷言改看 11。
+
 本章是 P0 畫面契約：兩個已存在的人類能開房、邀請、互打。Agent、MCP、@ 補全、附件都不在本章。
 
 視覺沿用既有 Apple HIG token（`#f2f2f7`、`#007aff`、系統字、毛玻璃頂欄與輸入列）。另只借兩條：Material 3 的 `:focus-visible` 與對比色；Polaris 的表單聲調（登入、開房、邀請各一個主要按鈕，錯誤放在欄位下、`role="alert"`）。不新增 UI 框架、遠端字型或圖片。不複製 EdgeChat 的程式、class 名或 schema。EdgeChat 只提供「桌面左列表 + 右聊天 + 底部輸入列；手機先列表再進房」的資訊架構。

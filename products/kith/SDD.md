@@ -262,7 +262,8 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 - [07 — 交付計畫](docs/sdd/07-roadmap.md)
 - [08 — 決策與來源](docs/sdd/08-decisions-sources.md)
 - [09 — 人跟人聊天 UI](docs/sdd/09-human-chat-ui.md)
-- [10 — 成員與提及](docs/sdd/10-members-and-mention.md)
+- [10 — 成員與提及](docs/sdd/10-members-and-mention.md)（畫面由 11 取代）
+- [11 — 房間畫面](docs/sdd/11-room-screen.md)
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
 - [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)

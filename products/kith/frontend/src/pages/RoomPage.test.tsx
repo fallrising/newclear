@@ -168,6 +168,99 @@ describe("RoomPage send", () => {
     expect(await screen.findByText("They will see this room after they refresh.")).toBeTruthy();
   });
 
+  it("shows who is in the room and why an agent may not answer", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal(
+      "fetch",
+      async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/members")) {
+          return jsonOk({
+            members: [
+              { id: "operator", handle: "owner", kind: "human" },
+              { id: "guest", handle: "guest", kind: "human" },
+              {
+                id: "grok",
+                handle: "grok",
+                kind: "agent",
+                reply_limit: { code: "fixed", fixed_text: "hello from grok" },
+              },
+              {
+                id: "codex",
+                handle: "codex",
+                kind: "agent",
+                quota_class: "operator_personal",
+                reply_limit: { code: "sidecar_off" },
+              },
+            ],
+          });
+        }
+        if (url.includes("/messages")) {
+          return jsonOk({ messages: [] });
+        }
+        return new Response("no", { status: 404 });
+      },
+    );
+    render(
+      <RoomPage
+        operator
+        selfHandle="owner"
+        room={{ id: "room-1", name: "Lobby" }}
+        onBack={() => undefined}
+        onLoggedOut={() => undefined}
+      />,
+    );
+    expect(await screen.findByText("your connection")).toBeTruthy();
+    expect(screen.getByText("you")).toBeTruthy();
+    expect(screen.getByText("Fixed reply only: hello from grok")).toBeTruthy();
+    expect(screen.getByText("Not enabled · Requires the operator’s computer")).toBeTruthy();
+    expect(screen.queryByText("operator-only")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Invite" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("Accounts are created ahead of time. You add one to this room by its handle.")).toBeTruthy();
+    expect(within(dialog).getByText("A person has to refresh before this room appears in their list.")).toBeTruthy();
+    expect(within(dialog).getByText("An agent shows up in Members as soon as the list reloads.")).toBeTruthy();
+  });
+
+  it("shows operator-only to a guest and does not add the sidecar sentence", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal(
+      "fetch",
+      async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/members")) {
+          return jsonOk({
+            members: [
+              { id: "guest", handle: "guest", kind: "human" },
+              {
+                id: "codex",
+                handle: "codex",
+                kind: "agent",
+                quota_class: "operator_personal",
+                reply_limit: { code: "sidecar_off" },
+              },
+            ],
+          });
+        }
+        if (url.includes("/messages")) {
+          return jsonOk({ messages: [] });
+        }
+        return new Response("no", { status: 404 });
+      },
+    );
+    render(
+      <RoomPage
+        selfHandle="guest"
+        room={{ id: "room-1", name: "Lobby" }}
+        onBack={() => undefined}
+        onLoggedOut={() => undefined}
+      />,
+    );
+    expect(await screen.findByText("operator-only")).toBeTruthy();
+    expect(screen.queryByText("Not enabled · Requires the operator’s computer")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Invite" })).toBeNull();
+  });
+
   it("sends on Enter, keeps Shift+Enter, and ignores IME keyCode 229", async () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
     vi.stubGlobal(

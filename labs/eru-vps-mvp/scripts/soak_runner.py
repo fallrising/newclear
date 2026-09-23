@@ -8,6 +8,8 @@ import json
 import math
 import os
 from pathlib import Path
+from queue import Empty, Queue
+from threading import Event, Thread
 import re
 import signal
 import subprocess
@@ -33,13 +35,18 @@ def replace_json(path, value):
     os.replace(temp, path)
 
 
-def http_probe(url, workload_id):
+def http_probe(url, workload_id, v11=False, journal_since="-40 seconds"):
     result = {'time': time.time(), 'commands': {}, 'workload_id': workload_id}
-    for name, argv in {
+    commands = {
         'services': ['systemctl', 'show', '--property=Id,ActiveState,SubState,MainPID,InvocationID,NRestarts',
                      'eru-agent.service', 'eru-containerd-proxy.socket', 'docker.service', 'containerd.service'],
         'tasks': ['ctr', '--namespace', 'eru', 'tasks', 'list', '-q'],
-    }.items():
+    }
+    if v11:
+        commands['space'] = ['df', '-P', '-B1', '/', '/var/lib/docker', '/var/lib/containerd']
+        commands['kernel_journal'] = ['journalctl', '-k', '--since', journal_since,
+                                      '--no-pager', '-o', 'short-iso-precise']
+    for name, argv in commands.items():
         try:
             p = subprocess.run(argv, capture_output=True, text=True, timeout=5)
             result['commands'][name] = {'exit_code': p.returncode, 'stdout': p.stdout, 'stderr': p.stderr}
@@ -55,14 +62,96 @@ def http_probe(url, workload_id):
     return result
 
 
+def rate_http_request(url):
+    """One bounded private HTTP GET. The caller owns scheduling and evidence."""
+    started = time.monotonic()
+    result = {'ok': False}
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(url, timeout=.8) as response:
+            result['http_status'] = response.status
+            result['ok'] = response.status == 200 and b'Welcome to nginx!' in response.read(65536)
+    except Exception as exc:
+        result['error'] = str(exc)[:200]
+    result['seconds'] = time.monotonic() - started
+    if result['seconds'] > 1:
+        result['ok'] = False
+    return result
+
+
+class RateSampler:
+    """Schedule one GET per second independently of the 30-second service probe."""
+    def __init__(self, url, start_epoch, duration, request=rate_http_request):
+        self.url, self.start_epoch, self.duration, self.request = url, start_epoch, duration, request
+        self.rows = Queue()
+        self.stop = Event()
+        self.error = None
+        self.thread = Thread(target=self._run, daemon=True)
+
+    def start(self):
+        self.thread.start()
+
+    def _run(self):
+        try:
+            base = time.monotonic() + self.start_epoch - time.time()
+            for slot in range(self.duration):
+                scheduled = base + slot
+                if self.stop.wait(max(0, scheduled - time.monotonic())):
+                    return
+                late = max(0, time.monotonic() - scheduled)
+                row = {'slot': slot, 'at': time.time(), 'late_seconds': late,
+                       'ok': False, 'skipped': True}
+                if late < 1:
+                    started = time.monotonic()
+                    row = {**row, **self.request(self.url), 'skipped': False}
+                    row['seconds'] = time.monotonic() - started
+                    if row['seconds'] > 1: row['ok'] = False
+                self.rows.put(row)
+        except BaseException as exc:
+            self.error = repr(exc)
+
+    def drain(self):
+        result = []
+        while True:
+            try:
+                result.append(self.rows.get_nowait())
+            except Empty:
+                return result
+
+    def close(self, normal):
+        if not normal:
+            self.stop.set()
+        self.thread.join(timeout=2)
+        if self.thread.is_alive() or self.error:
+            raise RuntimeError('HTTP rate sampler did not finish: ' + str(self.error))
+
+def disk_uses(output):
+    lines = output.splitlines()
+    if len(lines) < 2 or lines[0].split()[4:5] not in (['Use%'], ['Capacity']):
+        raise ValueError('missing df header or filesystem')
+    values = []
+    for line in lines[1:]:
+        fields = line.split()
+        if len(fields) < 6 or not re.fullmatch(r'[0-9]{1,3}%', fields[4]):
+            raise ValueError('invalid df row')
+        value = int(fields[4][:-1])
+        if value > 100: raise ValueError('invalid disk percent')
+        values.append(value)
+    return values
+
+
 def buckets(metrics, name):
     return {float(m[1]): float(m[2]) for m in re.finditer(
         re.escape(name) + r'_bucket\{le="([^"]+)"\} (\S+)', metrics)}
 
 
 class Summary:
-    def __init__(self, role):
+    def __init__(self, role, rate_expected=None, v11=False):
         self.role = role
+        self.rate_expected = rate_expected
+        self.v11 = v11
+        self.disk_max = None
+        self.rate_next = self.rate_success = self.rate_attempted = self.rate_skipped = 0
         self.failures = Counter()
         self.warnings = Counter()
         self.first_services = None
@@ -70,7 +159,32 @@ class Summary:
         self.total_buckets = {}
 
     def add(self, sample):
+        if self.v11:
+            commands = sample.get('commands', {})
+            for name in ('space', 'kernel_journal'):
+                if commands.get(name, {}).get('exit_code') != 0:
+                    self.failures[name + '_failed'] += 1
+            try:
+                values = disk_uses(commands['space']['stdout'])
+                self.disk_max = max(values + ([self.disk_max] if self.disk_max is not None else []))
+                if any(v > 80 for v in values): self.failures['disk_above_80_percent'] += 1
+            except (KeyError, ValueError, TypeError):
+                self.failures['invalid_disk_usage'] += 1
+            if re.search(r'out of memory|oom-kill|killed process [0-9]+',
+                         commands.get('kernel_journal', {}).get('stdout', ''), re.IGNORECASE):
+                self.failures['kernel_oom'] += 1
         if self.role == 'http':
+            if self.rate_expected is not None:
+                for row in sample.get('http_requests', []):
+                    if type(row.get('slot')) is not int or row['slot'] != self.rate_next:
+                        self.failures['http_rate_sequence'] += 1
+                    self.rate_next += 1
+                    if row.get('skipped') is True:
+                        self.rate_skipped += 1
+                    else:
+                        self.rate_attempted += 1
+                    if row.get('ok') is True:
+                        self.rate_success += 1
             if sample.get('ok') is not True:
                 self.failures['http_failed'] += 1
             commands = sample.get('commands')
@@ -130,6 +244,13 @@ class Summary:
                             totals[key] += current[key] - previous[key]
             self.previous_buckets[name] = current
 
+    def finish(self):
+        if self.rate_expected is not None:
+            if self.rate_next != self.rate_expected:
+                self.failures['http_rate_incomplete'] += 1
+            if self.rate_success * 100 < self.rate_expected * 99:
+                self.failures['http_rate_below_99_percent'] += 1
+
     def report(self):
         histograms = {}
         for name, delta in self.total_buckets.items():
@@ -138,8 +259,17 @@ class Summary:
             histograms[name] = {'observations': count,
                 'p99_bucket_upper_seconds': upper if upper is not None and math.isfinite(upper) else None,
                 'threshold_exceeded': upper is not None and upper >= (.01 if 'wal_fsync' in name else .025)}
-        return {'failures': dict(self.failures), 'warnings_by_sample': dict(self.warnings),
-                'histogram_deltas': histograms}
+        result = {'failures': dict(self.failures), 'warnings_by_sample': dict(self.warnings),
+                  'histogram_deltas': histograms}
+        if self.v11:
+            result['disk_max_percent'] = self.disk_max
+        if self.rate_expected is not None:
+            result['http_rate'] = {'expected_slots': self.rate_expected, 'observed_slots': self.rate_next,
+                'attempted': self.rate_attempted, 'skipped': self.rate_skipped,
+                'successful': self.rate_success, 'failed_or_missing': self.rate_expected - self.rate_success,
+                'success_percent': 100 * self.rate_success / self.rate_next if self.rate_next else None,
+                'coverage_percent': 100 * self.rate_next / self.rate_expected}
+        return result
 
 
 def observe(directory, config, probe=None):
@@ -155,13 +285,18 @@ def observe(directory, config, probe=None):
         'scheduled_start_at': iso(config['start_epoch']), 'deadline_at': iso(config['deadline_epoch']),
         'samples': 0, 'bytes': 0, 'assessment': 'pending_review',
         'config_sha256': hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()}
-    summary = Summary(config['role'])
+    rate_expected = (config['deadline_epoch'] - config['start_epoch']) if (
+        config.get('acceptance') == 'v11' and config['role'] == 'http') else None
+    v11 = config.get('acceptance') == 'v11'
+    summary = Summary(config['role'], rate_expected, v11)
+    sampler = RateSampler(config['url'], config['start_epoch'], rate_expected) if rate_expected is not None else None
     def interrupted(signum, frame):
         raise InterruptedError('received signal ' + str(signum))
     previous_handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGTERM, signal.SIGINT)}
     try:
         with os.fdopen(fd, 'w') as stream:
             replace_json(status_path, status)
+            if sampler: sampler.start()
             time.sleep(max(0, config['start_epoch'] - time.time()))
             wall, mono = time.time(), time.monotonic()
             end = mono + config['deadline_epoch'] - wall
@@ -182,11 +317,15 @@ def observe(directory, config, probe=None):
                     sample = probe()
                 elif config['role'] == 'control':
                     from control_probe import probe as control_probe
-                    sample = control_probe('@' + str(int(prior_wall - 1)))
+                    sample = control_probe('@' + str(int(prior_wall - 1)), v11=v11) if v11 else control_probe('@' + str(int(prior_wall - 1)))
                 else:
-                    sample = http_probe(config['url'], config['workload']['id'])
+                    sample = http_probe(config['url'], config['workload']['id'],
+                                        v11=True, journal_since='@' + str(int(prior_wall - 1))) if v11 else http_probe(config['url'], config['workload']['id'])
                 sample.update(monotonic=sample_mono, time=sample_wall,
                               seconds=time.monotonic() - sample_mono)
+                if sampler:
+                    if sample_mono >= end: sampler.close(normal=True)
+                    sample['http_requests'] = sampler.drain()
                 summary.add(sample)
                 encoded = json.dumps(sample, sort_keys=True, allow_nan=False) + '\n'
                 size = len(encoded.encode())
@@ -202,12 +341,19 @@ def observe(directory, config, probe=None):
                 if sample_mono >= end:
                     break  # final sample covers the deadline
                 next_sample = min(end, sample_mono + config['interval'])
+            summary.finish()
+            status.update(summary=summary.report())
             status['state'] = 'complete' if not summary.failures else 'complete_with_failures'
     except BaseException as exc:
         status.update(state='interrupted' if isinstance(exc, (InterruptedError, KeyboardInterrupt)) else 'failed',
                       error=str(exc), summary=summary.report())
         raise
     finally:
+        if sampler and sampler.thread.is_alive():
+            sampler.stop.set()
+            sampler.thread.join(timeout=2)
+            if sampler.thread.is_alive():
+                status.update(state='failed', error='HTTP rate sampler did not stop')
         status['updated_at'] = iso(time.time())
         if status['state'] not in ('waiting', 'running'):
             status['finished_at'] = status['updated_at']
@@ -223,7 +369,9 @@ def main():
     args = parser.parse_args()
     config = json.loads((args.directory / 'config.json').read_text())
     duration = config['deadline_epoch'] - config['start_epoch']
-    if not 30 <= duration <= 86400 or not 5 <= config['interval'] <= 60 or config['role'] not in ('control', 'http'):
+    if (not 30 <= duration <= 86400 or not 5 <= config['interval'] <= 60
+            or config['role'] not in ('control', 'http')
+            or config.get('acceptance') not in (None, 'v11')):
         parser.error('invalid duration, interval or role')
     observe(args.directory, config)
 

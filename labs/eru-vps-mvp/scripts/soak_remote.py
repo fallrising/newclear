@@ -52,6 +52,7 @@ def dispatch(request):
         lead = config['start_epoch'] - time.time()
         if (config['run_id'] != run_id or not 30 <= duration <= 86400 or not 0 < lead <= 300
                 or not 5 <= config['interval'] <= 60 or config['role'] not in ('control', 'http')
+                or config.get('acceptance') not in (None, 'v11')
                 or config.get('max_bytes', 0) != 192 * 1024 * 1024):
             raise ValueError('invalid bounded observer config')
         if set(request['files']) != FILES:

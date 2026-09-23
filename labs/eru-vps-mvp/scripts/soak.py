@@ -48,7 +48,7 @@ def assessment(result, interval):
     return state or 'invalid_evidence'
 
 
-def start(op, canary_run, duration, interval, lead):
+def start(op, canary_run, duration, interval, lead, acceptance=None):
     snapshot = op.snapshot()
     issues = consistency_issues(snapshot, op.inventory)
     if issues or op.health()['exit_code']:
@@ -81,12 +81,13 @@ def start(op, canary_run, duration, interval, lead):
         'scheduled_start_at': iso(begin), 'deadline_at': iso(begin + duration),
         'unit': 'eru-mvp-soak-' + run_id + '.service',
         'remote_directory': '/var/lib/eru-mvp/soak/' + run_id,
-        'core_runtime': runtime, 'snapshot': snapshot, 'hosts': {},
+        'core_runtime': runtime, 'snapshot': snapshot, 'hosts': {}, 'acceptance': acceptance,
         'source_sha256': {name: hashlib.sha256(value.encode()).hexdigest() for name, value in files.items()}}
     for alias in ALIASES:
         target = next((t for t in targets if t['alias'] == alias), None)
         config = {'run_id': run_id, 'role': 'http' if target else 'control', 'start_epoch': begin,
                   'deadline_epoch': begin + duration, 'interval': interval, 'max_bytes': MAX_BYTES}
+        if acceptance == 'v11': config['acceptance'] = 'v11'
         if target:
             config.update(url=target['url'], workload=target)
         manifest['hosts'][alias] = {'config': config, 'config_sha256': config_hash(config), 'launch': 'pending'}
@@ -139,6 +140,7 @@ def main():
     create.add_argument('--duration-seconds', type=int, default=86400)
     create.add_argument('--interval', type=int, default=30)
     create.add_argument('--lead-seconds', type=int, default=90)
+    create.add_argument('--acceptance', choices=['v11'], help='Enable 1 request/second per HTTP worker; full V11 requires 24 hours')
     for action in ('status', 'stop', 'collect'):
         sub.add_parser(action).add_argument('--run', required=True)
     review = sub.add_parser('report', help='Analyze a collected private snapshot without SSH')
@@ -149,7 +151,7 @@ def main():
         if not 30 <= args.duration_seconds <= 86400 or not 5 <= args.interval <= 60 or not 15 <= args.lead_seconds <= 300:
             parser.error('duration 30..86400, interval 5..60, lead 15..300 seconds')
         with ClusterLock(PROJECT):
-            result = start(PatchOperator(), args.canary_run, args.duration_seconds, args.interval, args.lead_seconds)
+            result = start(PatchOperator(), args.canary_run, args.duration_seconds, args.interval, args.lead_seconds, args.acceptance)
     elif args.action in ('collect', 'report'):
         from soak_evidence import collect, collection_path
         from soak_report import report

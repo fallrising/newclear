@@ -92,6 +92,26 @@ def validate_sample(sample, config):
         command = commands[key]
         if command.get('exit_code') == 0 and not isinstance(command.get('stdout'), str):
             raise ValueError('successful command lacks text output')
+    if config.get('acceptance') == 'v11':
+        for name in ('space', 'kernel_journal'):
+            if name not in commands:
+                raise ValueError('missing V11 host check: ' + name)
+        if config['role'] == 'http':
+            requests = sample.get('http_requests')
+            if not isinstance(requests, list):
+                raise ValueError('missing per-request HTTP evidence')
+            duration = config['deadline_epoch'] - config['start_epoch']
+            for row in requests:
+                if (not isinstance(row, dict) or type(row.get('slot')) is not int or
+                        not 0 <= row['slot'] < duration or type(row.get('ok')) is not bool or
+                        type(row.get('skipped')) is not bool or number(row['at']) < config['start_epoch'] - 1 or
+                        number(row['late_seconds']) < 0):
+                    raise ValueError('invalid per-request HTTP evidence')
+                if row['skipped']:
+                    if row['ok']: raise ValueError('skipped HTTP slot marked successful')
+                elif (number(row['seconds']) < 0 or (row['ok'] and
+                        (row.get('http_status') != 200 or row['seconds'] > 1))):
+                    raise ValueError('invalid HTTP result')
     if config['role'] == 'http':
         if (type(sample['ok']) is not bool or sample['workload_id'] != config['workload']['id']
                 or (sample['ok'] and sample.get('http_status') != 200)):
@@ -115,7 +135,9 @@ def analyze_host(path, item, entry, source_hashes):
         raise ValueError('evidence size mismatch')
     if status.get('bytes') != evidence['bytes']:
         errors['status/evidence byte count mismatch'] += 1
-    summary = Summary(cfg['role'])
+    v11 = cfg.get('acceptance') == 'v11'
+    rate_expected = cfg['deadline_epoch'] - cfg['start_epoch'] if v11 and cfg['role'] == 'http' else None
+    summary = Summary(cfg['role'], rate_expected, v11)
     digest = hashlib.sha256()
     first = previous = None
     count = 0
@@ -179,10 +201,11 @@ def analyze_host(path, item, entry, source_hashes):
         errors['sample count mismatch'] += 1
     if previous and abs(previous['time'] - status.get('last_sample_epoch', -1)) > .001:
         errors['last sample/status mismatch'] += 1
+    complete_state = status.get('state') in ('complete', 'complete_with_failures')
+    if complete_state: summary.finish()
     computed = summary.report()
     if status.get('summary', computed) != computed:
         errors['raw samples disagree with stored summary'] += 1
-    complete_state = status.get('state') in ('complete', 'complete_with_failures')
     coverage = bool(first and previous and count >= 2 and previous['time'] >= cfg['deadline_epoch'] - .001
                     and previous['monotonic'] - first['monotonic'] >= cfg['deadline_epoch'] - cfg['start_epoch'] - 5)
     if status.get('state') == 'complete_with_failures' and not summary.failures:
@@ -194,7 +217,7 @@ def analyze_host(path, item, entry, source_hashes):
     elif summary.failures:
         verdict = 'observed_failures'
     elif complete_state:
-        verdict = 'complete_needs_review'
+        verdict = 'incomplete' if v11 and cfg['deadline_epoch'] - cfg['start_epoch'] != 86400 else 'complete_needs_review'
     elif (status.get('state') in ('running', 'waiting') and snapshot['systemd'].get('SubState') == 'running'
           and snapshot['current_boot_id'] == status['boot_id']
           and snapshot['observed_at_epoch'] <= status.get('last_sample_epoch', cfg['start_epoch']) + cfg['interval'] + 90):
@@ -233,6 +256,8 @@ def report(directory):
     ends = [r.get('last_epoch') for r in results.values()]
     common = max(0, min(ends) - max(starts)) if all(v is not None for v in starts + ends) else 0
     result = {'run_id': manifest['id'], 'collection_id': record['id'], 'assessment': verdict,
+        'acceptance': manifest.get('acceptance'), 'formal_v11_duration': (
+            manifest.get('acceptance') == 'v11' and manifest['deadline_epoch'] - manifest['start_epoch'] == 86400),
         'common_coverage_seconds': common, 'hosts': results,
         'analysis_source_sha256': {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
             for name in ('soak_report.py', 'soak_evidence.py', 'soak_runner.py', 'soak_remote.py')},

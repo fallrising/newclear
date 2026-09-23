@@ -228,6 +228,12 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W1-04 | UJ-03、B-01、FM-SYNC-12、13 | w1-history.spec.ts |
 | E2E-W1-05 | BR-34、FE-20 | w1-markdown.spec.ts |
 | E2E-W1-06 | UJ-11 | w1-mobile.spec.ts |
+| E2E-W2-01 | UJ-01、BR-02、Q-03 | w2-onboarding.spec.ts |
+| E2E-W2-02 | BR-13、BR-22、B-08 | w2-rooms.spec.ts |
+| E2E-W2-03 | UJ-04、BR-37、B-02 | w2-unread.spec.ts |
+| E2E-W2-04 | 權限矩陣（控制台） | w2-console.spec.ts |
+| E2E-W2-05 | BR-14、V2-INV-07、B-14 | w2-archive.spec.ts |
+| E2E-W2-06 | FE-05 | w2-i18n.spec.ts |
 | … | … | … |
 
 ## 7. CI

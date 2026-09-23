@@ -43,6 +43,7 @@ MAX_BUNDLE = 8 * 1024 * 1024
 
 
 class Allocate(Input):
+    egress_policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     generation: int = Field(ge=1)
     template: str
     canonical_repo: str
@@ -130,12 +131,14 @@ class Connector:
         return data
 
     def catalog(self):
+        egress = self.network()
         return {
             "node_id": "cocoon-local",
             "template_digest": self.config["template"],
             "slots": 4,
             "cpu": 16,
             "memory_bytes": 16 * 1024**3,
+            "egress_policy_sha256": egress["policy_sha256"],
             "repositories": [
                 {k: v for k, v in e.items() if k in {"canonical_repo", "base_sha", "sha256"}}
                 for e in self.entries.values()
@@ -160,6 +163,13 @@ class Connector:
             raise Problem(409, "sandbox_pause_requested")
         if row.get("cancel_requested") and not stopping:
             raise Problem(409, "sandbox_cancel_requested")
+        if not stopping:
+            self.network(row)
+
+    def network(self, row=None):
+        from .egress_node import attest
+
+        return attest(self.config, row)
 
     def cancel(self, run_id, generation):
         from .connector_cancel import cancel
@@ -177,6 +187,8 @@ class Connector:
 
     def allocate(self, run_id, request):
         data = request.model_dump(mode="json")
+        if request.egress_policy_sha256 != self.network()["policy_sha256"]:
+            raise Problem(409, "egress_run_policy_changed")
         if request.template != self.config["template"]:
             raise Problem(422, "template_not_registered")
         entry = self.entries.get((request.canonical_repo, request.base_sha))
@@ -198,6 +210,7 @@ class Connector:
                     "input": data,
                     "claim_ref": "ap-m2-" + str(run_id),
                     "operations": {},
+                    "egress": self.network(),
                 }
 
             def effect():
@@ -408,7 +421,9 @@ class Connector:
         return {"ref": row["run_id"], **checkout}
 
     def isolation(self, row, *, terminal=False):
-        return attest(self, row, terminal=terminal)
+        proof = attest(self, row, terminal=terminal)
+        self.network(row)
+        return proof
 
     def prompt(self, row, goal):
         self.isolation(row)
@@ -452,6 +467,7 @@ class Connector:
             row = self.require(run_id, generation)
             if row["operations"].get("release", {}).get("state") == "completed":
                 raise Problem(409, "sandbox_already_released")
+            self.network(row)
             with self.relay(row) as http:
                 path = "/api/conversations/" + row["run_id"]
                 state = self.conversation(row, http)["execution_status"]

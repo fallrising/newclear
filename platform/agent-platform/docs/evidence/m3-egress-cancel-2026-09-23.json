@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-23T11:38:56.776614+00:00",
+  "transport": "cocoon-kvm-platform-cancel",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "cases": [
+    {
+      "fault": "after_allocate",
+      "run_id": "b007c426-d798-4a67-b513-b1559f18d46c",
+      "vm_id": "ZVYHXAY6MXEG24A7B72UHK2FJK",
+      "state": "cancelled",
+      "generation": 3,
+      "long_terminal_command": false,
+      "cancel_seconds": 0.239,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "fault": "after_prompt",
+      "run_id": "742b43f4-1b00-4ae2-9aa4-9f934d65273d",
+      "vm_id": "NMD373XKNLPNIWE7YJCOJ266BN",
+      "state": "cancelled",
+      "generation": 3,
+      "long_terminal_command": true,
+      "cancel_seconds": 0.453,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    }
+  ],
+  "passed": true,
+  "cleanup_errors": [],
+  "vm_count_after": 0,
+  "claim_count_after": 0,
+  "finished_at": "2026-09-23T11:39:07.597561+00:00"
+}

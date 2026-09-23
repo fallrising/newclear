@@ -9,6 +9,8 @@ export type Room = {
   role?: string;
 };
 
+export type ReplyLimit = { code: "fixed"; fixed_text: string } | { code: "sidecar_off" } | null;
+
 export type Member = {
   id: string;
   handle?: string;
@@ -17,6 +19,7 @@ export type Member = {
   quota_class?: QuotaClass;
   attention_mode?: string;
   operator_only?: boolean;
+  reply_limit?: ReplyLimit;
 };
 
 export type TimelineEvent = {

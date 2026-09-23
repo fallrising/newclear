@@ -367,10 +367,20 @@ describe("kith M1 worker", () => {
       ).bind(disabledId, disabledHandle, HASH, now, now),
     ]);
     const agentAdd = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
-      handle: agentHandle,
+      handle: agentHandle.toUpperCase(),
     });
-    expect(agentAdd.status).toBe(404);
-    expect(((await agentAdd.json()) as { error: { code: string } }).error.code).toBe("not_found");
+    expect(agentAdd.status).toBe(200);
+    expect(((await agentAdd.json()) as { member_id: string }).member_id).toBe(agentId);
+    const memberList = await api("GET", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf);
+    expect(memberList.status).toBe(200);
+    const listed = (await memberList.json()) as {
+      members: Array<{ id: string; reply_limit: { code: string; fixed_text?: string } | null }>;
+    };
+    expect(listed.members.find((member) => member.id === agentId)?.reply_limit).toEqual({
+      code: "fixed",
+      fixed_text: "hello from grok",
+    });
+    expect(listed.members.find((member) => member.id === s.operatorId)?.reply_limit).toBeNull();
     const disabledAdd = await api("POST", `/api/rooms/${s.roomId}/members`, op.cookie, op.csrf, {
       handle: disabledHandle,
     });
@@ -556,20 +566,20 @@ describe("kith M1 worker", () => {
     expect(await messageCount(s.roomId)).toBe(before);
   });
 
-  it("POST /mcp returns 503 not_ready", async () => {
+  it("POST /mcp without a bearer token is 401 while ff_mcp is on", async () => {
     const s = await seed();
     const op = await login(s.operatorHandle);
     const mcp = await api("POST", "/mcp", op.cookie, op.csrf, {});
-    expect(mcp.status).toBe(503);
-    expect(((await mcp.json()) as { error: { code: string } }).error.code).toBe("not_ready");
+    expect(mcp.status).toBe(401);
+    expect(((await mcp.json()) as { error: { code: string } }).error.code).toBe("unauthorized");
   });
 
-  it("GET /mcp/events returns 503 not_ready", async () => {
+  it("GET /mcp/events without a bearer token is 401 while ff_mcp is on", async () => {
     const s = await seed();
     const res = await SELF.fetch(`https://kith.test/mcp/events?room_id=${s.roomId}&after_seq=0`, {
       headers: { Accept: "text/event-stream" },
     });
-    expect(res.status).toBe(503);
-    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("not_ready");
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("unauthorized");
   });
 });

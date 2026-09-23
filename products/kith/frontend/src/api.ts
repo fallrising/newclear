@@ -1,5 +1,5 @@
 import { normalizeTimelineEvent } from "./protocol";
-import type { Member, Room, TimelineEvent } from "./types";
+import type { Member, ReplyLimit, Room, TimelineEvent } from "./types";
 
 export const CSRF_HEADER = "X-CSRF-Token";
 
@@ -246,8 +246,12 @@ export async function createRoom(name: string, slug: string): Promise<Room> {
   return roomFromRecord(await postJson("/api/rooms", { name, slug }));
 }
 
-export async function inviteHuman(roomId: string, handle: string): Promise<void> {
-  await postJson(`/api/rooms/${encodeURIComponent(roomId)}/members`, { handle });
+export async function inviteHuman(roomId: string, handle: string): Promise<string> {
+  const data = await postJson(`/api/rooms/${encodeURIComponent(roomId)}/members`, { handle });
+  if (!isRecord(data) || typeof data.member_id !== "string") {
+    throw new ApiError(200, "Invalid invite");
+  }
+  return data.member_id;
 }
 
 export async function listMessages(
@@ -269,6 +273,22 @@ export async function listMessages(
     const event = normalizeTimelineEvent(item);
     return event ? [event] : [];
   });
+}
+
+function parseReplyLimit(value: unknown): ReplyLimit {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (!isRecord(value) || (value.code !== "fixed" && value.code !== "sidecar_off")) {
+    return null;
+  }
+  if (value.code === "sidecar_off") {
+    return { code: "sidecar_off" };
+  }
+  if (typeof value.fixed_text !== "string" || !value.fixed_text) {
+    return null;
+  }
+  return { code: "fixed", fixed_text: value.fixed_text };
 }
 
 export function parseMembers(data: unknown): Member[] {
@@ -294,6 +314,7 @@ export function parseMembers(data: unknown): Member[] {
         quota_class: typeof item.quota_class === "string" ? item.quota_class : undefined,
         attention_mode: typeof item.attention_mode === "string" ? item.attention_mode : undefined,
         operator_only: typeof item.operator_only === "boolean" ? item.operator_only : undefined,
+        reply_limit: parseReplyLimit(item.reply_limit),
       },
     ];
   });

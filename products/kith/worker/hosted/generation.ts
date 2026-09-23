@@ -41,6 +41,12 @@ type Job = {
 
 type RoomReleaseStub = DurableObjectStub & {
   releaseAmbient(generationId: string): Promise<void>;
+  postStatus(
+    roomId: string,
+    memberId: string,
+    state: string,
+    body: string,
+  ): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }>;
 };
 
 export class HostedGeneration extends DurableObject<Env> {
@@ -116,8 +122,14 @@ export class HostedGeneration extends DurableObject<Env> {
       return { ok: false, code: "not_ready", message };
     }
 
-    // Next tick (delay 0). Absolute epoch 0 is rejected by the runtime.
-    await this.ctx.storage.setAlarm(Date.now());
+    await this.broadcastReply(roomId, agentId, "is replying");
+    try {
+      // Next tick (delay 0). Absolute epoch 0 is rejected by the runtime.
+      await this.ctx.storage.setAlarm(Date.now());
+    } catch (err) {
+      await this.broadcastReply(roomId, agentId, "reply ended");
+      throw err;
+    }
     return { ok: true, generation_id: generationId };
   }
 
@@ -158,8 +170,18 @@ export class HostedGeneration extends DurableObject<Env> {
     } catch {
       await this.markGeneration(job.generation_id, "failed");
     } finally {
+      await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
       // Mention generations never acquired the lock; Room no-ops on generation_id mismatch.
       await this.releaseAmbientLock(job);
+    }
+  }
+
+  private async broadcastReply(roomId: string, memberId: string, body: "is replying" | "reply ended"): Promise<void> {
+    try {
+      const stub = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${roomId}`)) as RoomReleaseStub;
+      await stub.postStatus(roomId, memberId, "reply", body);
+    } catch {
+      /* a missed status line must not fail the generation */
     }
   }
 

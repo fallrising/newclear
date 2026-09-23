@@ -133,8 +133,18 @@ describe("RoomPage send", () => {
           posts.push({ url, body: JSON.parse(String(init.body)) });
           return jsonOk({ ok: true, member_id: "guest", role: "member" });
         }
-        if (url.includes("/members") || url.includes("/messages")) {
-          return jsonOk({ members: [{ id: "operator", handle: "owner", kind: "human" }], messages: [] });
+        if (url.includes("/members")) {
+          const members =
+            posts.length > 0
+              ? [
+                  { id: "operator", handle: "owner", kind: "human" },
+                  { id: "guest", handle: "guest", kind: "human" },
+                ]
+              : [{ id: "operator", handle: "owner", kind: "human" }];
+          return jsonOk({ members });
+        }
+        if (url.includes("/messages")) {
+          return jsonOk({ messages: [] });
         }
         return new Response("no", { status: 404 });
       },
@@ -148,7 +158,8 @@ describe("RoomPage send", () => {
       />,
     );
     await waitFor(() => expect(screen.getByText("live")).toBeTruthy());
-    expect(screen.getByText("1 person")).toBeTruthy();
+    expect(await screen.findByRole("list", { name: "Members" })).toBeTruthy();
+    expect(screen.getByText("@owner")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Invite" }));
     const dialog = screen.getByRole("dialog");
     fireEvent.change(within(dialog).getByLabelText("Handle"), { target: { value: "guest" } });

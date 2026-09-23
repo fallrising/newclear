@@ -84,3 +84,7 @@ W2 explicit actions binding.read/resourceObject.read/change.* and resource.manag
 ## W3 實作前契約
 
 W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD requester 現有 project/stage 決定寫入；Ops 全部受影響 project/stage 且非本人批准，Admin-only 和 pool-only 無業務配置權。prod 执行重查批准者現行 scope；移除 prod target 仍以當前 active family revision 為基準計算受影響範圍，複製未批准草稿不能繞過審批。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+服務 MonitorPolicy/AlertRule/SLOPolicy 讀寫以現行 app/env 的 project/stage scope 為準；RD 可草擬自己的服務規則，prod 需不同 actor 的 Ops 批准。基建規則與 Silence 依 CI 所屬 pool 由 Ops 管理；pool grant 不賦予服務規則修改權。Admin 核准的固定安全 channel reference 可被選用，但 Admin-only 不因此有業務規則或 incident 操作權。列表、detail、evaluation、audit 與 delivery 均先做目前 scope 過濾，不暴露隱藏名稱或總數。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。

@@ -1,5 +1,11 @@
 # dim-gate 三工作區接手
 
+## W4 接續 run（2026-09-23；進行中）
+
+W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已合併於 `30bc902ef884cda9927bcaaf15bc595b694f609d`、owner 釋放；實際合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 已完成 SUCCESS。下方 W3「待最終 CI／merge」「W4 未開始」段落是當時 checkpoint，不是目前狀態。
+
+W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 開始，沒有新的 dim-gate/PLAN/shared-gate 差異。主控隔離 worktree `/home/ckc/test/codex/newclear-dim-gate-w4`、branch `agent/dim-gate/mainline/w4-alerting`；[草稿 PR50](https://github.com/fallrising/newclear/pull/50) 保存契約 commit `9fd3279ead6aa9e776c56c9fb3066e670631484a`。W4 [integration contract revision1](W4-INTEGRATION-CONTRACT.md)、PLAN DG-D089/090、T041 domain、T042 API/demo、T043 UI 與 T044 預留獨立唯讀 review 已建立。三個 worker 在各自的 `newclear-dim-gate-w4-domain`、`-api`、`-ui` worktree，沒有 commit/push；主控持有 PLAN、docs、整合及發布 ownership。W4 尚未驗收，W5 尚未開始。產品 gate 與固定版本結果以[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)及 PR50 後續 closeout 核對，不能以進行中檔案宣稱成功。原有全部 worktree 與預覽均保留，未部署／發送外部通知。
+
 ## 接續 run 最新狀態（2026-09-23）
 
 **DG-W3-20260923-02 已完成 W3 固定產品驗收：46e3a55 ACCEPTED。此文件 checkpoint 時 PR37 最終證據 head CI／merge 待執行；主控仍持有收尾 ownership。晚到的實際合併、post-merge CI 與 owner release 必須先查 [PR37 closeout](https://github.com/fallrising/newclear/pull/37)，不為把自己的SHA／mergeSHA寫入同一commit反覆追加checkpoint。**

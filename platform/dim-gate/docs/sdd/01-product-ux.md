@@ -125,3 +125,7 @@ W2 adds service resources at /rd/apps/:appId/resources, typed resource-request w
 ## W3 實作前契約
 
 W3 契約定義 PipelineDefinition family/revision、typed ServiceConfig、兩個同環境健康 Release 的 TrafficPolicy 及共同 ServiceExecution；源版本、凍結內容、批准與執行證據都留在同一 snapshot3。既有 PipelineRun 僅在由 definition 啟動時增加不可變的執行必要快照；legacy run 不補造來源。config/traffic 不改 activeReleaseId；所有 release/config/traffic 共用衍生環境鎖。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+RD 服務詳情新增 `/rd/apps/:appId/monitoring` 與 `/alerts`，以合法 `environmentId` 篩選同一服務；Ops 新增 `/ops/alerting`。設定與運行狀態分開，分別顯示生效修訂、樣本資料時間、incident、Silence 剩餘時間及模擬投遞結果。規則啟用不表示已有健康樣本；到期的 Silence 不刪舊抑制紀錄。原 `/rd/observability` 和 `/ops/incidents` 因果鏈保持可用。完整行為見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)；目前僅固定規格，不宣稱實作通過。

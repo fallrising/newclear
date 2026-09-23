@@ -114,4 +114,8 @@ W3 沿用 initial JS307200bytes、冷啟動LCP、5,000CI query 與 persisted HTT
 
 W3 首次啟動量測超標後，可將非 Shell 所需的 feature API client 延至首次操作載入；型別與回應驗證保持相同。每次呼叫在等待模組前保存輸入和 actor/session/generation/policy/epoch，等待後有任一變更則拒絕，不能以新身分送出舊命令。seed、遷移、snapshot／關係／排程驗證仍在啟動完成前同步執行。
 
+## W4 實作前契約
+
+W4 三個新路由延後載入，typed client 的 deferred boundary 保留呼叫前 identity/input snapshot 與回應前 epoch 防護。startup 必須完成 v1–v4 遷移與 snapshot/integrity 驗證後才渲染；不能靠 lazy import 跳過檢查。原 initial JS 307200 gzip bytes、LCP、5,000 CI query 與 persisted HTTP command 上限不變；W3 產品只餘753 bytes headroom，須在固定 W4 build 量測。鍵盤、明暗三 viewport、深連結、Firefox/WebKit 與 scope race 均為 gate。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
 React Query 的 queryFn／mutationFn 以明確 callback 呼叫 typed API，只傳入 API 定義的參數；零參數讀取不轉傳 QueryFunctionContext，mutation 不轉傳框架 context。AbortSignal、QueryClient 等框架物件不屬於可持久化的 API 輸入快照。Admin 整合 metadata 的初次讀取與重新整理必須能通過此邊界，原有模擬測試及身分隔離流程保留。

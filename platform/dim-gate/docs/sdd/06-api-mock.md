@@ -201,3 +201,7 @@ W2 appends18 operations to the existing73: scoped resource objects/bindings/inve
 ## W3 實作前契約
 
 W3 使用 snapshot3 / dim-gate-w3-v1，同一 envelope1 / dim-gate.demo.v1。嚴格凍結 W1/V2 原始 shape，先驗證原關係後一次原子遷移；只加空 W3 business collections，不補造舊發布的 definition/config/history/grant/persona。真實 W2 accepted merge9162685 的 active Release/ProvisionJob/Kafka fixture SHA2180e098e84bdcccaa35c6573d623577985b2480b780e30a1302965078e6607b 保存命令來源。新增有 executionId 的 configure/traffic abnormal/missing 示範場景。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+Snapshot v4 / `dim-gate-w4-v1` 保持 envelope1 與 `dim-gate.demo.v1` storage key；嚴格凍結 v3/v2/v1 reader，先驗舊關係後一次原子加空業務集合（含 CI-only infrastructureIncidents）與固定 W4 導航 metadata，不重寫舊導航、不賦權，失敗保留原 bytes。新增固定 schema 的 monitor-policies、alert-rules、slo-policies、silences、alert-evaluations、notification-deliveries 列表/detail/command，CI-only incident 沿用 Ops incident 路徑；OpenAPI、runtime manifest、typed client 與 Mock 同步，idempotency/current-policy/expectedVersion 使用原 envelope 契約。固定 Demo channel 與故障場景僅在本機模擬，絕不向外部 URL 發送。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。

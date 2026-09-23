@@ -157,3 +157,7 @@ W2 snapshot version2 adds ResourceObject, ResourceBinding, ResourceQuota, Change
 ## W3 實作前契約
 
 W3 契約新增 pipeline-definitions、service-configs、traffic-policies 三類列表／詳情／版本化 command 與 application delivery-options；完整路徑和 typed bodies 見合約。讀 scope 外404、action403、invalid422、stale/base/lock409、storage507；目前授權先於 replay。OpenAPI、runtime manifest、Mock、typed client 與行為測試在同 PR 一致交付。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+MonitorPolicy、AlertRule、SLOPolicy 和 Silence 使用既有 app/env 或 CI 參照，不建立另一份服務或資源。CI-only incident 是既有 Ops incident list/detail/action 的 typed variant，對無 Placement 的 CI 仍保留 canonical ID 與 evidence，不建頁面副本。規則修訂、source-time evaluation lineage、模擬通知投遞和有界基建樣本是 snapshot v4 的領域資料；CMDB 的 CI health/observedAt 不因規則啟用被偽造成時序樣本。每筆投遞保留狀態及安全 channel reference，不存任意 URL。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。

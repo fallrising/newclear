@@ -1,6 +1,6 @@
 # 09 — 三工作區與共用領域設計
 
-版本：WS-SDD revision 1 · 狀態：W1／W2 已驗收合併；W3 固定產品已驗收，PR37 最終文件 head CI／合併另行對帳；W4／W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
+版本：WS-SDD revision 1 · 狀態：W1／W2／W3 已驗收合併；W4 契約固定、產品實作中且未驗收；W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 目標、基線與閱讀順序
 

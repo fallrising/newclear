@@ -2,6 +2,8 @@
 
 W4 run `DG-W4-20260923-01` 已從實際 main `d80028c` 建立隔離 branch `agent/dim-gate/mainline/w4-alerting`，並固定 [W4 integration contract](W4-INTEGRATION-CONTRACT.md) revision 1 與 T041–T044。W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已驗收合併；其合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 現已完成成功。W4 目前僅契約與任務成立，**尚未實作或驗收**；W5 尚未開始。最新 ownership／結果以 PLAN DG-D089 後續決策與實際 PR/CI 為準。
 
+W4 [草稿 PR50](https://github.com/fallrising/newclear/pull/50) 已保存契約 checkpoint `9fd3279`，T041–043 在獨立工作樹進行領域、API/遷移、UI；[W4 驗證索引](../../../.team/reports/dim-gate-w4-validation.md) 目前全部產品 gate 待實測，不代表功能驗收。
+
 更新：2026-09-23。任務、證據與接受決策以 [PLAN](../../../.team/PLAN.md) 為準。
 
 目前：**W1／W2 已驗收合併；W3 固定產品46e3a55已 ACCEPTED，PR37 最終證據提交的 CI／合併另行對帳。W4／W5 尚未開始。** 接續run DG-W3-20260923-02的主控仍負責收尾；晚到的actual merge、post-mergeCI與owner release以[PR37 closeout](https://github.com/fallrising/newclear/pull/37)為準，接手先讀它和PLAN DG-D088。

@@ -1,6 +1,6 @@
 # 11 — Ops 維運工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1／W2／W3 已驗收合併；W4 固定產品已驗收、PR50 最終整合中；W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
+版本：WS-SDD revision 1 · 狀態：W1／W2／W3／W4 已驗收合併；W5 契約固定、產品尚未實作／驗收。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 使用者與責任
 

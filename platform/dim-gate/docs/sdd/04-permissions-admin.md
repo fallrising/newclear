@@ -88,3 +88,8 @@ W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD reque
 ## W4 實作前契約
 
 服務 MonitorPolicy/AlertRule/SLOPolicy 讀寫以現行 app/env 的 project/stage scope 為準；RD 可草擬自己的服務規則，prod 需不同 actor 的 Ops 批准。基建規則與 Silence 依 CI 所屬 pool 由 Ops 管理；pool grant 不賦予服務規則修改權。Admin 核准的固定安全 channel reference 可被選用，但 Admin-only 不因此有業務規則或 incident 操作權。列表、detail、evaluation、audit 與 delivery 均先做目前 scope 過濾，不暴露隱藏名稱或總數。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. Admin can create/edit Demo Users/Teams and grant via existing RoleAssignment commands, but teamIds never grant actions and new Users never auto-enter the fixed persona list. Current actor/grant, self and last-enabled-Admin protections apply on every write. Feature eligibility is current underlying grant/action ∩ capability support ∩ deterministic cohort. Notification reads, dispatch and retry recompute recipient scope; revoked users cannot receive an old private payload.

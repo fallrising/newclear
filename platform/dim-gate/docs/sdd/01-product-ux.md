@@ -129,3 +129,8 @@ W3 契約定義 PipelineDefinition family/revision、typed ServiceConfig、兩�
 ## W4 實作前契約
 
 RD 服務詳情新增 `/rd/apps/:appId/monitoring` 與 `/alerts`，以合法 `environmentId` 篩選同一服務；Ops 新增 `/ops/alerting`。設定與運行狀態分開，分別顯示生效修訂、樣本資料時間、incident、Silence 剩餘時間及模擬投遞結果。規則啟用不表示已有健康樣本；到期的 Silence 不刪舊抑制紀錄。原 `/rd/observability` 和 `/ops/incidents` 因果鏈保持可用。完整行為見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)；目前僅固定規格，不宣稱實作通過。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 adds Admin governance tasks for Demo Users/Teams, feature cohort, registered adapter routes and notification metadata. The RD alerts flow gains scoped subscriptions; Ops alerting gains recipient-safe attempts and retry. Every state distinguishes draft, active, disabled, unknown, failed and Mock-only success. A stored User does not become a login persona; team membership does not imply a grant. All new pages retain keyboard, focus, light/dark and 1440/768/390 behavior.

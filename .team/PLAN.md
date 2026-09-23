@@ -1367,3 +1367,29 @@ remote_durability: product_dd90_SSHsaved; containing_evidence_checkpoint_nextSSH
 blockers: []
 next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal_merge_actualtree_postmergeCI_PRcloseout_ownerrelease; then W5
 ```
+
+
+DG-D096: W4 actual integration closeout reconciled before W5 ownership claim. [PR50](https://github.com/fallrising/newclear/pull/50) MERGED normally at `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` (parents main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and accepted evidence head `9cc2a921eb319b7c90b5c9ffdea03bdadce4006d`). Actual main and PR head share full dim-gate tree `bf36efc99c763826510d430777fed68729b123c7`; latest-head CI35914655882 SUCCESS. Actual [post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS on exact merge: 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and native/docs/contracts/CI/architecture/build. Post-merge artifact10778013202 expires2026-10-23T21:37:42Z; downloaded raw samples name55ce00a: 302886 initial gzip bytes, coldLCP1036ms, queryp95 0.8ms, HTTPp95 176.2ms. Mirror35919602710 SUCCESS. PR body holds these late facts and W4 owner release, terminal DONE; no further W4 commit or main push. Old W4 branch/worktrees remain. W5 has no prior branch/PR/task and is the next unimplemented increment. New isolated worktree `/home/ckc/test/codex/newclear-dim-gate-w5` and branch `agent/dim-gate/mainline/w5-platform-governance` start from exact actual main55ce00a. W5 contract revision1 and [T045](tasks/T-045.md) domain, [T046](tasks/T-046.md) API/migration, [T047](tasks/T-047.md) UI/browser, [T048](tasks/T-048.md) integration, [T049](tasks/T-049.md) uninvolved review are fixed before implementation; five task validators pass. W5 is CONTRACT_LOCAL_PENDING_CHECKPOINT / NOT_ACCEPTED; no product code or external side effect yet. Lead retains W5 ownership.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 96
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5 CONTRACT_FIXED_LOCAL / PRODUCT_NOT_STARTED / NOT_ACCEPTED
+task_id: T045 READY; T046 READY; T047 READY; T048 READY; T049 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+last_incorporated_main: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+spec_ref: platform/dim-gate/docs/W5-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-13-18
+report_ref: .team/reports/dim-gate-w5-preflight.md
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; implement_T045_domain_T046_API_migration_T047_UI; integrate_T048_fullgates; uninvolved_T049_review; exactheadCI_authorizedmerge_actualcloseout
+```

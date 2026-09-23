@@ -2,7 +2,7 @@
 
 版本：v0.1 基線（M0–M5 已驗收）＋ WS-SDD revision 1 設計擴充 · 更新：2026-09-23
 
-既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；W1 工作區入口、分組導航與三角色首頁已驗收合併。W2 共用資源、工作單與 Redis／Kafka 閉環已驗收合併（PR36，9162685）；W3 依完整 integration contract 完成實作、驗收並由 PR37 合併；W4 [契約](docs/W4-INTEGRATION-CONTRACT.md) 與任務已固定，產品實作／驗證進行中、尚未驗收；W5 尚未開始。固定版本及接受／合併結果見 STATUS 和 PLAN。
+既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；W1 工作區入口、分組導航與三角色首頁已驗收合併。W2 共用資源、工作單與 Redis／Kafka 閉環已驗收合併（PR36，9162685）；W3 依完整 integration contract 完成實作、驗收並由 PR37 合併；W4 [契約](docs/W4-INTEGRATION-CONTRACT.md) 已由 PR50 驗收合併；W5 [契約](docs/W5-INTEGRATION-CONTRACT.md) revision 1 已固定、產品尚未實作／驗收。固定版本及接受／合併結果見 STATUS 和 PLAN。
 
 使用者已確認：項目名稱 `dim-gate`；React + shadcn/ui；AWS／Aliyun／自建機房；CMDB 核心；RD、Ops、Admin 三中心；第一版有狀態 Mock；單企業多團隊；端到端發布與故障恢復展示。具體技術與行為決策由本 SDD 定義，後續變更以 PR 追蹤。
 

@@ -1,5 +1,7 @@
 # dim-gate 狀態
 
+最新（2026-09-23）：W4 [PR50](https://github.com/fallrising/newclear/pull/50) 已正常合併為 `55ce00a`，合併後 [CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) 400 原生／92 Chromium／12 Firefox-WebKit／3 效能／2 隔離全通過，owner 已在 PR closeout 釋放。W5 run `DG-W5-20260923-01` 從實際 main 的隔離 worktree 開始，[W5 integration contract](W5-INTEGRATION-CONTRACT.md) revision 1 和 T045–T049 已固定；目前只有規格與任務，**W5 產品尚未實作／驗收，也沒有 PR**。以 PLAN DG-D096 為最新 ownership／接受紀錄；下方 W4「待合併」文字是歷史 checkpoint。
+
 W4 固定產品 `dd90ccb` 已由主控驗收 AC-WS-12/15–18：獨立 [T044 attempt3](../../../.team/reports/T-044-attempt-3.md) 關閉 F1／F2、無開放缺陷；本機 400 原生／92 Chromium／12 Firefox-WebKit／3 效能／2 隔離通過；精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) SUCCESS，合成 checkout `305939a` 與產品完整 dim-gate tree 相同。**產品驗收與 PR 合併分開：PR50 仍為草稿，證據-only 最新 head CI、正常合併、實際 closeout 待完成；W5 尚未開始。** 正式決策見 PLAN DG-D095 與 [W4 validation](../../../.team/reports/dim-gate-w4-validation.md)。下方「未驗收」文字是此前 checkpoint。
 
 最新 W4 固定產品 `dd90ccb` 已 SSH 推送至[草稿 PR50](https://github.com/fallrising/newclear/pull/50)：400/400 原生、完整 Chromium 92/92、Firefox／WebKit 12/12、效能 3/3、隔離 2/2 與原生檢查全通過。獨立 [T044 attempt3](../../../.team/reports/T-044-attempt-3.md) 關閉 F1、F2，無剩餘已確認的程式缺陷。本機隔離首次執行缺少既定函式庫路徑而在 Chromium 啟動前失敗；使用正確本機測試環境、不改來源或測試後重跑 2/2 通過。[精確產品 CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) 尚在執行，**W4 未驗收／未合併，W5 未開始**。詳見 PLAN DG-D094 和 [W4 validation](../../../.team/reports/dim-gate-w4-validation.md)；下方 F1/F2 狀態屬歷史 checkpoint。

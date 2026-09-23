@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-23。**01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-23。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 18 項（近期 7、後續 11），下一項 ERU-001。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 

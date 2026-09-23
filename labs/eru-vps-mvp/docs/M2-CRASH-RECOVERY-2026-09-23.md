@@ -31,6 +31,8 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -q
 
 ## 本轮交接與 TODO
 
+固定編號／數量以 [TASKS.md](TASKS.md) 為準：早期取消／封存 ERU-001、目前 soak ERU-002、清理 ERU-003、core 實機恢復 ERU-005；本節是歷史交接，不另外計數。
+
 - [ ] 2026-09-24 11:25:06 UTC 之後，按 [Soak TODO](TODO-SOAK-2026-09-23.md) 回收／分析完整觀測。以三台 raw evidence 及最後 cluster 狀態驗收，不用中途健康結果替代。
 - [ ] 完成觀測後，用原 canary run 建立新的精確 cleanup plan，確認全群 workload／配額回零，保留 evidence。
 - [ ] 再排 core API 不可用的實機故障／恢復演練。須空 ERU runtime、etcd 健康、原備份可驗證、全新 source-bound plan；原備份可能含已知 lock-context bug，不能將 rollback 當作日常降版路徑。

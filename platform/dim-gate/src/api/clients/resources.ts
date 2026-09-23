@@ -6,7 +6,7 @@ import {
   type ResourceBinding, type ResourceInventory, type ResourceObject, type ServiceResources, type WorkItem,
   type patchChangeInputSchema, type resourceObjectListQuerySchema, type resourceBindingListQuerySchema,
   type resourceInventoryQuerySchema, type changeListQuerySchema, type workItemListQuerySchema,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type ResourceObjectQuery = z.input<typeof resourceObjectListQuerySchema>

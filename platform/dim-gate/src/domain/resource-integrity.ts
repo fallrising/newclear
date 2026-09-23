@@ -1,4 +1,4 @@
-import { resourceAccessProfiles, type Snapshot } from './schemas'
+import { resourceAccessProfiles, type Snapshot } from './schema-models'
 import { resourceConflictKey } from './resource-identity'
 import { resourceUsage } from './resource-capacity'
 
@@ -115,6 +115,6 @@ export function resourceIntegrityErrors(s: Snapshot): string[] {
     if (execution.state === 'failed' && (!execution.failureCode || !execution.stepResults.some(step => step.state === 'failed'))) errors.push('resource execution: missing failure evidence')
   }
   if (new Set(s.scheduler.tasks.map(t => t.id)).size !== s.scheduler.tasks.length || new Set(s.scheduler.tasks.map(t => t.operationId)).size !== s.scheduler.tasks.length) errors.push('scheduler: duplicate task')
-  for (const task of s.scheduler.tasks) if (![...s.jobs, ...e.pipelines, ...e.releases, ...e.changeExecutions].some(entity => entity.id === task.operationId)) errors.push('scheduler: unknown operation')
+  for (const task of s.scheduler.tasks) if (![...s.jobs, ...e.pipelines, ...e.releases, ...e.changeExecutions, ...e.serviceExecutions].some(entity => entity.id === task.operationId)) errors.push('scheduler: unknown operation')
   return errors
 }

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ArrowRight, Boxes, CheckCircle2, Clock3, Gauge, Play, RefreshCw, Send } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
-import type { Capacity, RequestState } from '../../api/clients/self-service'
+import type { Capacity, CreateRequestInput, RequestState } from '../../api/clients/self-service'
 import { PageHeading } from '../../components/shared/page-heading'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
@@ -37,7 +37,7 @@ export function RequestWizard() {
   const applications = useQuery({ queryKey: queryKey('applications', null, { purpose: 'request-wizard' }), queryFn: () => api.listApplications({ page: 1, pageSize: 100, sort: 'name', order: 'asc' }) })
   const pools = useQuery({ queryKey: queryKey('pools'), queryFn: () => api.listPools() })
   const capacity = useQuery({ queryKey: queryKey('capacity'), queryFn: () => api.getCapacity() })
-  const create = useMutation({ mutationFn: api.createRequest })
+  const create = useMutation({ mutationFn: (input: CreateRequestInput) => api.createRequest(input) })
   const submit = useMutation({ mutationFn: ({ id, version }: { id: string; version: number }) => api.submitRequest(id, version) })
   const [form, setForm] = useState({ applicationId: '', environmentName: '', stage: '', provider: '', poolId: '', cpu: null as number | null, memoryMiB: null as number | null, purpose: '' })
   const item = catalog.data?.template.resourceKind === 'compute' ? { ...catalog.data, template: catalog.data.template } : undefined

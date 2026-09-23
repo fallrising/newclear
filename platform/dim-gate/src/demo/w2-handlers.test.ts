@@ -104,7 +104,7 @@ describe('W2 real HTTP and typed resource client', () => {
   })
 
   it('executes all 18 W2 operations with strict wire/status contracts and preserves failed attempt history', async () => {
-    expect(operations).toHaveLength(91)
+    expect(operations.filter(op => op.milestone !== 'W3')).toHaveLength(91)
     const w2 = operations.filter(op => op.milestone === 'W2')
     expect(w2).toHaveLength(18)
     const initial = await client.api.getServiceResources('app-checkout', 'env-checkout-dev')
@@ -440,6 +440,15 @@ describe('W2 real HTTP and typed resource client', () => {
     }
     expect((await client.api.listWorkItems({ center: 'ops', view: 'all', phase: 'execution' })).items.find(w => w.sourceId === releaseId)?.rawState).toBe('queued')
     await client.api.setPersona('user-rd-data')
-    expect((await client.api.listWorkItems({ center: 'rd', owner: 'team' })).total).toBe(0)
+    const dataWork = await client.api.listWorkItems({ center: 'rd', owner: 'team' })
+    expect(dataWork.total).toBe(6)
+    expect(dataWork.items.map(item => item.sourceId).sort()).toEqual([
+      'w3-config-analytics-dev-1', 'w3-config-data-dev-1', 'w3-config-recommendations-dev-1',
+      'w3-definition-analytics-1', 'w3-definition-data-1', 'w3-definition-recommendations-1',
+    ])
+    expect(dataWork.items.every(item => item.rawState === 'draft')).toBe(true)
+    for (const privateId of [request.entityId, releaseId, resource, 'app-checkout', 'checkout-api']) {
+      expect(JSON.stringify(dataWork)).not.toContain(privateId)
+    }
   })
 })

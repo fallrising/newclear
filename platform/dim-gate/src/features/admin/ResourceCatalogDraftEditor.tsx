@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { api } from '../../api/client'
 import { ErrorState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
-import { resourceAccessProfiles, type CatalogItem, type Provider } from '../../domain/schemas'
+import { resourceAccessProfiles, type CatalogItem, type Provider } from '../../domain/schema-models'
 
 type ResourceTemplate = Exclude<CatalogItem['template'], { resourceKind:'compute' }>
 type ResourceCatalog = Omit<CatalogItem,'template'> & { template:ResourceTemplate }

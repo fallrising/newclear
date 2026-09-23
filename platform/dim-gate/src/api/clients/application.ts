@@ -1,4 +1,4 @@
-import { applicationSchema, pageSchema, type Release, type Application, type Environment, type Page, type Placement } from '../../domain/schemas'
+import { applicationSchema, pageSchema, type Release, type Application, type Environment, type Page, type Placement } from '../../domain/schema-models'
 import { applicationDetailSchema, environmentDetailSchema } from '../wire-views'
 import type { ApiRequest } from '../core/request'
 

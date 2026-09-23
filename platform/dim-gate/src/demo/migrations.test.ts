@@ -32,7 +32,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(legacySnapshotSchema.parse(original.snapshot)).toEqual(original.snapshot)
     const h = harness(), c = h.start(), migrated = c.getSnapshot()
     expect(h.writes).toBe(1)
-    expect(migrated).toMatchObject({ schemaVersion: 2, seedVersion: 'dim-gate-w2-v1' })
+    expect(migrated).toMatchObject({ schemaVersion: 3, seedVersion: 'dim-gate-w3-v1' })
     for (const [key, value] of Object.entries(original.snapshot)) {
       if (!['schemaVersion', 'seedVersion', 'entities'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
     }
@@ -127,7 +127,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe(legacyBytes)
     expect(h.writes).toBe(0)
     h.restore()
-    expect(h.start().getSnapshot().schemaVersion).toBe(2)
+    expect(h.start().getSnapshot().schemaVersion).toBe(3)
     expect(h.writes).toBe(1)
   })
 
@@ -148,7 +148,7 @@ describe('W2 validated atomic W1 migration', () => {
     expect(h.raw).toBe('{broken')
     expect(h.writes).toBe(0)
     const reset = createController({ storage: h.storage, createSessionId: () => 'migration-reset', recovery: 'reset' })
-    expect(reset.getSnapshot().schemaVersion).toBe(2)
+    expect(reset.getSnapshot().schemaVersion).toBe(3)
     expect(reset.getSnapshot().scheduler.tasks).toEqual([])
     expect(h.writes).toBe(1)
   })

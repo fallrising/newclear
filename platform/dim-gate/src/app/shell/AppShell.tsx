@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, BookOpen, ChevronRight, FlaskConical, Menu, Moon, Sun, X } from 'lucide-react'
 import { api, queryKey } from '../../api/client'
+import { demoClockMutationKey, serviceDeliveryMutationKey } from '../../api/query-definitions'
 import type { Center, SessionView } from '../../domain/schemas'
 import { Brand } from '../../components/shared/brand'
 import { ErrorState, LoadingState } from '../../components/shared/states'
@@ -51,6 +52,9 @@ export function AppShell({ session }: { session: SessionView }) {
     if (!activeWorkspace || crossWorkspace) return
     try { sessionStorage.setItem(`dim-gate.workspace.${session.sessionId}.${session.user.id}`, JSON.stringify({ center: activeWorkspace, returnPath: location.pathname.startsWith(`/${activeWorkspace}`) ? location.pathname + location.search : `/${activeWorkspace}` })) } catch { /* UI preference is optional. */ }
   }, [activeWorkspace, crossWorkspace, location.pathname, location.search, session.sessionId, session.user.id])
+  const cache = useQueryClient()
+  const serviceCommandPending = useIsMutating({ mutationKey: serviceDeliveryMutationKey }) > 0
+  const clockPending = useIsMutating({ mutationKey: demoClockMutationKey }) > 0
   const personaMutation = useMutation({ mutationFn: (id: string) => api.setPersona(id) })
 
   useEffect(() => {
@@ -93,7 +97,7 @@ export function AppShell({ session }: { session: SessionView }) {
   }
   const currentLabel = navigationByKey.get(currentRoute?.key ?? 'guide')?.label ?? currentRoute?.navigation.label ?? '工作區'
   const switchPersona = async (id: string) => {
-    if (id === session.user.id) return
+    if (id === session.user.id || cache.isMutating({ mutationKey: serviceDeliveryMutationKey }) || cache.isMutating({ mutationKey: demoClockMutationKey })) return
     setSwitching('identity')
     setNotice('')
     try {
@@ -128,7 +132,7 @@ export function AppShell({ session }: { session: SessionView }) {
           <Button variant="ghost" size="icon" aria-label={preferences.theme === 'light' ? '切換深色主題' : '切換淺色主題'} onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}>{preferences.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</Button>
           <label className="density-control"><span className="sr-only">顯示密度</span><select aria-label="顯示密度" value={preferences.density} onChange={(event) => setPreferences({ ...preferences, density: event.target.value as Preferences['density'] })}><option value="normal">舒適</option><option value="compact">緊湊</option></select></label>
           <div className="toolbar-divider" />
-          <div className="persona-control"><span className="avatar" aria-hidden="true">{session.user.displayName.slice(0, 1)}</span><label><span className="persona-caption">Demo · 體驗其他角色</span><select aria-label="示範身分" disabled={!!switching || personas.isPending || personas.isError} value={session.user.id} onChange={(event) => void switchPersona(event.target.value)}>{personas.data ? personas.data.map((persona) => <option key={persona.id} value={persona.id}>{persona.displayName}</option>) : <option value={session.user.id}>{session.user.displayName}</option>}</select></label></div>
+          <div className="persona-control"><span className="avatar" aria-hidden="true">{session.user.displayName.slice(0, 1)}</span><label><span className="persona-caption">Demo · 體驗其他角色</span><select aria-label="示範身分" disabled={!!switching || serviceCommandPending || clockPending || personas.isPending || personas.isError} value={session.user.id} onChange={(event) => void switchPersona(event.target.value)}>{personas.data ? personas.data.map((persona) => <option key={persona.id} value={persona.id}>{persona.displayName}</option>) : <option value={session.user.id}>{session.user.displayName}</option>}</select></label></div>
         </div>
       </header>
       <div className="demo-banner" role="note"><FlaskConical size={16} aria-hidden="true" /><span><strong>示範資料</strong><span className="demo-description"> · 所有資源與操作均為模擬，未連接真實雲端。</span></span><Link to="/guide">Session 控制<ArrowRight size={14} aria-hidden="true" /></Link></div>

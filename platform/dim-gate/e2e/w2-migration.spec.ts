@@ -19,7 +19,7 @@ test('W2 AC-16: genuine W1 active Release and ProvisionJob migrate, reload and c
     await page.goto('ops/requests/req-0014')
     await expect(page.getByRole('heading', { level: 1 })).toContainText('交付中')
     const migrated = await readSnapshot(page)
-    expect(migrated.schemaVersion).toBe(2)
+    expect(migrated.schemaVersion).toBe(3)
     expect(migrated.logicalClock).toBe(10)
     for (const field of ['sessionId', 'commandCount', 'storeRevision', 'sequence', 'policyVersion', 'audit', 'events', 'idempotency', 'jobs', 'scheduler']) expect(migrated[field]).toEqual(legacy.snapshot[field])
     for (const field of ['users', 'assignments', 'applications', 'environments', 'placements', 'requests', 'releases', 'pipelineRuns']) expect(migrated.entities[field]).toEqual(legacy.snapshot.entities[field])

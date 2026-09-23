@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createEngine, DomainError } from '../domain/engine'
-import { snapshotSchema, sessionViewSchema } from '../domain/schemas'
+import { snapshotSchema, sessionViewSchema } from '../domain/schema-models'
 import type { CommandReceipt, SessionView, Snapshot } from '../domain/schemas'
 import { createSeed, personas } from './seed'
 import { readStoredSnapshot } from './migrations'

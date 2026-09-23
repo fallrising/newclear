@@ -3,7 +3,7 @@ import {
   commandReceiptSchema, incidentSchema, integrationSchema, metricsViewSchema,
   notificationSchema, observationLogSchema, pageSchema, traceSchema, traceSummarySchema,
   type Incident, type ObservationLog, type TraceSummary,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type ObservationWindow = { applicationId: string; environmentId: string; from: string; to: string }

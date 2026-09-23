@@ -1,6 +1,6 @@
 # 09 — 三工作區與共用領域設計
 
-版本：WS-SDD revision 1 · 2026-09-22 · 狀態：W1 已驗收合併；W2 已實作且本機驗證完成，待最終 CI／接受／合併，固定證據見 [STATUS](../STATUS.md)；W3–W5 尚未實作。
+版本：WS-SDD revision 1 · 狀態：W1／W2 已驗收合併；W3 固定產品已驗收，PR37 最終文件 head CI／合併另行對帳；W4／W5 尚未實作。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 目標、基線與閱讀順序
 
@@ -119,11 +119,11 @@ ChangeExecution = changeId、attempt、state（queued/running/succeeded/failed�
 
 ## 7. API 與前端邊界
 
-W1 已依 [integration contract](../W1-INTEGRATION-CONTRACT.md) 擴充既有 `/dashboard?center=` DTO/query，OpenAPI 與 Mock 同步。W2 已依 [W2 contract](../W2-INTEGRATION-CONTRACT.md) 實作 `/resource-objects`、`/bindings`、`/work-items`、`/changes`、`/changes/{id}/approve`、`/changes/{id}/execute` 等 typed endpoints；精確 operation、DTO 與狀態碼以 [OpenAPI](../openapi.json) 為準。`/pipeline-definitions`、`/service-configs`、`/traffic-policies`、`/monitor-policies`、`/alert-rules`、`/admin/platform-features`、`/admin/platform-routes`、`/admin/notification-policies` 仍是後續目標。均放既有 API base 下，不為 RD/Ops 複製 CRUD。
+W1 已依 [integration contract](../W1-INTEGRATION-CONTRACT.md) 擴充既有 `/dashboard?center=` DTO/query，OpenAPI 與 Mock 同步。W2 已依 [W2 contract](../W2-INTEGRATION-CONTRACT.md) 實作 `/resource-objects`、`/bindings`、`/work-items`、`/changes`、`/changes/{id}/approve`、`/changes/{id}/execute` 等 typed endpoints；精確 operation、DTO 與狀態碼以 [OpenAPI](../openapi.json) 為準。W3 已依 [W3 contract](../W3-INTEGRATION-CONTRACT.md) 實作 `/pipeline-definitions`、`/service-configs`、`/traffic-policies`，已完成固定產品 gate 驗收，PR37 整合狀態見 STATUS。`/monitor-policies`、`/alert-rules`、`/admin/platform-features`、`/admin/platform-routes`、`/admin/notification-policies` 仍是後續目標。均放既有 API base 下，不為 RD/Ops 複製 CRUD。
 
 Read 使用既有 ApiResult/Page、scope 先行及上限；WorkspaceHome 是 discriminated union（rd/ops/admin），每個卡片含 dataAsOf、source refs 與合法下鑽條件。commands 回既有 CommandReceipt；async 回 operationId，不能只有 toast。錯誤沿用401/403/404/409/422/429/503/507；配置驗證增加可定位的 fieldErrors，不把一般 version conflict 轉成自動覆蓋。
 
 React 僅透過 API client/query/mutation；domain feature 共用 schema、selector、policy、command，工作區層只組裝投影。不要建立 rdRedisStore／opsRedisStore 或三套各自的 mock handler。Route registry 固定 capability/action；導航配置只能引用已註冊 route key。
 
 
-W2 本機驗證 checkpoint（2026-09-23）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。W3–W5、後續／待釐清能力尚未實作。
+W2 歷史本機驗證 checkpoint（2026-09-23；後已由 PR36 驗收合併，詳見 STATUS）：產品 `4a69e07` 通過321項原生測試、77/77 Chromium、2/2隔離；最終修正 `bf3f168` 通過8/8 Firefox／WebKit、實際版面／鍵盤檢查及3/3效能。獨立review關閉F01–04；仍須最終PR head CI、主控接受與實際合併，**尚未宣稱 W2 ACCEPTED/MERGED**。完整AC與歷史失敗以 [STATUS](../STATUS.md)、[W2驗證報告](../../../../.team/reports/dim-gate-w2-validation.md) 和PLAN為準。該歷史checkpoint時W3–W5尚未實作；目前W3固定產品已驗收，PR37最終整合另行對帳，W4／W5與後續／待釐清能力仍未實作。

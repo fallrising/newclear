@@ -1,19 +1,14 @@
+import type { CommandInput } from './command-input-schemas'
+import { advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema, createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema, patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, versionCommandSchema } from './command-input-schemas'
+import { prepareServiceDelivery, advanceServiceDelivery } from './service-delivery-commands'
 import type { z } from 'zod'
-import {
-  advanceClockSchema, commandInputSchema, createAssignmentInputSchema, createCatalogRevisionInputSchema, createCiInputSchema,
-  createModelFieldInputSchema, createRelationInputSchema, createRequestInputSchema, deleteRelationInputSchema,
-  patchCatalogInputSchema, patchCiSchema, patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema,
-  patchUserInputSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, scenarioInputSchema,
-  roleAssignmentSchema, snapshotSchema, versionCommandSchema,
-  type CI, type CommandInput, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation,
-  type Request as DomainRequest, type Snapshot,
-} from './schemas'
+import { scenarioInputSchema, roleAssignmentSchema, snapshotSchema, type CI, type CommandReceipt, type ComputeCatalogItem, type ProvisionJob, type Relation, type Request as DomainRequest, type Snapshot } from './schema-models'
 import { clockIso, clone, fail, notFound, forbidden, parse, assertIntegrity, requestableCatalog, requestPoolUsage } from './engine-shared'
 import { policyFor, type Policy } from './policy'
 import { DomainError } from './errors'
 import { advanceResources, prepareResource } from './resources'
-import { advanceObservation, prepareObservation } from './observation'
-import { advanceDelivery, prepareDelivery } from './delivery'
+import { advanceObservation, prepareObservation } from './observation-commands'
+import { advanceDelivery, prepareDelivery } from './delivery-commands'
 
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
@@ -86,6 +81,7 @@ function advanceProvisioning(snapshot: Snapshot, ticks: number): CommandReceipt[
   const mark = (entityType: string, entityId: string) => changed.set(`${entityType}:${entityId}`, { entityType, entityId })
   for (let tick = 0; tick < ticks; tick += 1) {
     snapshot.logicalClock += 1
+    for (const item of advanceServiceDelivery(snapshot)) mark(item.entityType, item.entityId)
     for (const item of advanceDelivery(snapshot)) mark(item.entityType, item.entityId)
     for (const item of advanceObservation(snapshot)) mark(item.entityType, item.entityId)
     for (const item of advanceResources(snapshot)) mark(item.entityType, item.entityId)
@@ -170,6 +166,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   const policy = policyFor(state, input.actorId)
   if (!policy.user) fail(401, 'UNAUTHENTICATED', '請選擇有效的示範身分。')
   const method = input.method.toUpperCase()
+  const service = prepareServiceDelivery(state, policy, input)
   const resource = prepareResource(state, policy, input)
   const delivery = prepareDelivery(state, policy, input)
   const observation = prepareObservation(state, policy, input, advanceProvisioning)
@@ -194,10 +191,10 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
     && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
     && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
-    && !scenario && !clock && !delivery && !observation && !resource) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+    && !scenario && !clock && !delivery && !observation && !resource && !service) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
   let body: unknown
-  if (delivery || observation || resource) body = input.body
+  if (delivery || observation || resource || service) body = input.body
   else if (patchCiId) body = parse(patchCiSchema, input.body)
   else if (createCi) body = parse(createCiInputSchema, input.body)
   else if (createRelation) body = parse(createRelationInputSchema, input.body)
@@ -222,7 +219,7 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   let ci: CI | undefined
   let relation: Relation | undefined
   let environmentRequest: DomainRequest | undefined
-  if (delivery || observation || resource) {
+  if (delivery || observation || resource || service) {
     // prepareDelivery / prepareObservation already checked the current role, resource and stage before replay.
   } else if (patchCiId) {
     ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
@@ -292,8 +289,8 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
   let auditPoolIdsOverride: string[] | undefined
   let auditStagesOverride: ('dev' | 'staging' | 'prod')[] | undefined
 
-  if (delivery || observation || resource) {
-    const result = resource ? resource.apply(next) : delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
+  if (delivery || observation || resource || service) {
+    const result = service ? service.apply(next) : resource ? resource.apply(next) : delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
     ;({ entityType, entityId, entityVersion, action, reason, fields, changed, operationId } = result)
     correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = result.poolIds; auditStagesOverride = result.stages
   } else if (patchCiId) {

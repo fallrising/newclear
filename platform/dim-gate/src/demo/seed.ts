@@ -1,9 +1,10 @@
-import { snapshotSchema, type Snapshot } from '../domain/schemas'
+import { snapshotSchema, type Snapshot } from '../domain/schema-models'
 import { buildApplicationSeed } from './seed/applications'
 import { buildCmdbSeed } from './seed/cmdb'
 import { personas } from './seed/core'
 import { buildTopologySeed } from './seed/topology'
 import { buildObservationSeed } from './seed/observations'
+import { buildW3BusinessSeed } from './seed/service-delivery'
 import { buildW2Assignments, buildW2BusinessSeed, buildW2Metadata } from './seed/resources'
 
 export { personas } from './seed/core'
@@ -12,7 +13,7 @@ export const SEED_BASELINE = '2026-09-20T09:00:00Z'
 const stamp = { version: 1, createdAt: SEED_BASELINE, updatedAt: SEED_BASELINE }
 const scoped = { ...stamp, orgId: 'org-demo' }
 
-/** W2 adds explicit resource fixtures while preserving every original M4 entity identity. */
+/** W3 adds draft service revisions while preserving every accepted entity identity. */
 export function createSeed(sessionId: string): Snapshot {
   const applicationSeed = buildApplicationSeed()
   const cmdbSeed = buildCmdbSeed()
@@ -20,7 +21,7 @@ export function createSeed(sessionId: string): Snapshot {
   const metadata = buildW2Metadata()
   const resources = buildW2BusinessSeed(topologySeed.placements)
   return snapshotSchema.parse({
-    schemaVersion: 2, seedVersion: 'dim-gate-w2-v1', sessionId, logicalClock: 0,
+    schemaVersion: 3, seedVersion: 'dim-gate-w3-v1', sessionId, logicalClock: 0,
     sequence: 0, storeRevision: 0, policyVersion: 1, commandCount: 0,
     entities: {
       organizations: [{ ...stamp, id: 'org-demo', name: 'Dim Commerce' }],
@@ -47,6 +48,7 @@ export function createSeed(sessionId: string): Snapshot {
       ...cmdbSeed,
       ...topologySeed,
       ...resources,
+      ...buildW3BusinessSeed(applicationSeed.applications),
       cis: [...cmdbSeed.cis, ...metadata.cis],
       placements: [...topologySeed.placements, ...resources.placements],
       resourceQuotas: metadata.resourceQuotas,

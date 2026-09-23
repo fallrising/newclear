@@ -14,7 +14,7 @@
 
 ## 三工作區增量
 
-[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。W1 已驗收合併獨立工作區／Demo 身分入口、分組導航和三角色首頁，操作方式見 [Demo 指南](docs/DEMO-GUIDE.md#w1-工作區體驗)，固定驗證及接受／合併狀態見 [STATUS](docs/STATUS.md)。W2 共用資源／綁定／工作單、Redis／Kafka 閉環、Admin 類型化模板與 K8s 唯讀摘要已實作，本機驗證與獨立 review 已完成，待最終 CI／接受／合併；W3–W5 仍為後續設計。既有 v0.1 申請、發布與觀測流程保留。
+[RD 工作台](docs/sdd/10-rd-workspace.md)、[Ops 工作台](docs/sdd/11-ops-workspace.md)、[Admin 管理台](docs/sdd/12-admin-workspace.md) 已有各自 SDD，三者共用[服務／資源／工作單模型](docs/sdd/09-shared-workspaces.md)。[能力地圖](docs/sdd/13-capability-map.md) 整理能力深度，[交付計畫](docs/sdd/14-workspace-delivery.md) 定義 W1–W5 與验收。W1 已驗收合併獨立工作區／Demo 身分入口、分組導航和三角色首頁，操作方式見 [Demo 指南](docs/DEMO-GUIDE.md#w1-工作區體驗)，固定驗證及接受／合併狀態見 [STATUS](docs/STATUS.md)。W2 共用資源／綁定／工作單、Redis／Kafka 閉環、Admin 類型化模板與 K8s 唯讀摘要已驗收合併。W3 版本化交付定義、服務配置、同環境灰度與正式環境獨立批准已完成固定產品驗收；PR37 最終整合狀態見 STATUS；W4／W5 仍為後續設計。既有 v0.1 申請、發布與觀測流程保留。
 
 ## 本機執行
 
@@ -54,7 +54,7 @@ pnpm benchmark
 pnpm test:isolation
 ```
 
-`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。91 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
+`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。127 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
 
 ## 文件入口
 
@@ -75,4 +75,4 @@ M0 已鎖定 React 19.3、TypeScript 5.9.3、Vite 8.3、Tailwind 4.3、Radix/sha
 本項目是 `fallrising/newclear` 中獨立的前端 component；未來透過 API adapter 接入後端。`platform/prism`、`specs/fleet` 與 `apps/cloudform` 只作可能的整合參考，不是第一版啟動依賴。授權沿用 repository 根目錄 MIT。
 
 
-W2 development checkpoint: Redis allocations, Kafka topics, service bindings and shared work-items now have domain/API/UI implementation. Snapshotv1→v2 migration preserves validated W1 history and active operations. This is not yet a W2 acceptance claim; see [STATUS](docs/STATUS.md) and [W2 contract](docs/W2-INTEGRATION-CONTRACT.md). Demo remains local and Mock-first, with W3–W5 pending.
+W2 development checkpoint: Redis allocations, Kafka topics, service bindings and shared work-items now have domain/API/UI implementation. Snapshotv1→v2 migration preserves validated W1 history and active operations. W2 is accepted and merged; see [STATUS](docs/STATUS.md) and [W2 contract](docs/W2-INTEGRATION-CONTRACT.md). Demo remains local and Mock-first, with W3 product accepted and final integration tracked in PR37 and W4/W5 pending.

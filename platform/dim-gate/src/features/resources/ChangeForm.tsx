@@ -6,7 +6,7 @@ import { api, queryKey } from '../../api/client'
 import { PageHeading } from '../../components/shared/page-heading'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
-import { createChangeInputSchema, type ChangeInput, type ChangeRequest } from '../../domain/schemas'
+import { createChangeInputSchema, type ChangeInput, type ChangeRequest } from '../../domain/schema-models'
 import { isMissing, MissingResource, ObjectSpec, purposeLabel, stageLabel } from './shared'
 
 type ChangeFormProps = { catalogId: string; original?: ChangeRequest; copyFrom?: ChangeRequest; center?: 'rd' | 'ops'; onSaved?: () => Promise<unknown> }

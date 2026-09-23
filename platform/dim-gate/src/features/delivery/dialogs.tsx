@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Play, Undo2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api, queryKey } from '../../api/client'
-import type { ReleaseDetail } from '../../api/clients/delivery'
+import type { CreatePipelineInput, ReleaseDetail } from '../../api/clients/delivery'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
@@ -23,7 +23,7 @@ export function TriggerPipelineDialog({ session, applicationId = '', environment
   const application = useQuery({ queryKey: queryKey('application', selectedApp), queryFn: () => api.getApplication(selectedApp), enabled: open && Boolean(selected) })
   const environments = (application.data?.environments ?? []).filter((env) => env.status === 'ready' && projectAction(session, 'pipeline.trigger', application.data!.application.projectId, env.stage))
   const environment = environments.find((env) => env.id === selectedEnvironment)
-  const command = useMutation({ mutationFn: deliveryApi.createPipeline })
+  const command = useMutation({ mutationFn: (input: CreatePipelineInput) => deliveryApi.createPipeline(input) })
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!selected || !environment || !revision.trim()) return

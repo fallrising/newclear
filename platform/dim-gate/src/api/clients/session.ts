@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { commandReceiptSchema, guideViewSchema, personaSchema, scenarioInputSchema, sessionViewSchema } from '../../domain/schemas'
+import { commandReceiptSchema, guideViewSchema, personaSchema, scenarioInputSchema, sessionViewSchema } from '../../domain/schema-models'
 import type { CommandReceipt, GuideView, Persona, SessionView } from '../../domain/schemas'
 import { controlResultSchema } from '../control-dto'
 import type { ApiRequest } from '../core/request'

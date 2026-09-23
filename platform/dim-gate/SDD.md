@@ -2,7 +2,7 @@
 
 版本：v0.1 基線（M0–M5 已驗收）＋ WS-SDD revision 1 設計擴充 · 更新：2026-09-23
 
-既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；W1 工作區入口、分組導航與三角色首頁已驗收合併。W2 共用資源、工作單與 Redis／Kafka 閉環已實作，本機驗證與獨立 review 已完成，待最終 CI／接受／合併；W3–W5 仍只有規格。固定版本及接受／合併結果見 STATUS 和 PLAN。
+既有產品驗收見 [STATUS](docs/STATUS.md)。新增 [三工作區設計](docs/sdd/09-shared-workspaces.md) 將 RD、Ops、Admin 深化為同一領域的角色投影；W1 工作區入口、分組導航與三角色首頁已驗收合併。W2 共用資源、工作單與 Redis／Kafka 閉環已驗收合併（PR36，9162685）；W3 依完整 integration contract 完成實作與固定產品驗收，PR37 最終整合狀態另查 STATUS；W4／W5 尚未開始。固定版本及接受／合併結果見 STATUS 和 PLAN。
 
 使用者已確認：項目名稱 `dim-gate`；React + shadcn/ui；AWS／Aliyun／自建機房；CMDB 核心；RD、Ops、Admin 三中心；第一版有狀態 Mock；單企業多團隊；端到端發布與故障恢復展示。具體技術與行為決策由本 SDD 定義，後續變更以 PR 追蹤。
 
@@ -89,7 +89,7 @@ canonical path：`platform/dim-gate/`。本項目獨立於 `platform/fanzloud`�
 
 開發從[固定prompt](DEVELOPMENT_PROMPT.md)啟動，接手依[恢復協定](docs/DEVELOPMENT_PROTOCOL.md)。本SDD定義產品要求；[PLAN](../../.team/PLAN.md)保存任務與接受決策，STATUS只作摘要。Git／PR／CI用於核對版本與證據，不因修改進度文件就視為通過驗收。
 
-最初設計交付僅 Markdown 與 root README 索引；後續 M0–M5 已完成工程及 v0.1 驗收。三工作區設計 PR31 已合併；後續 W1 已驗收合併、W2 正進行實作驗收。設計、實作、驗收與合併分開記錄，不得把文檔完成當作產品能力完成。
+最初設計交付僅 Markdown 與 root README 索引；後續 M0–M5 已完成工程及 v0.1 驗收。三工作區設計 PR31 已合併；後續 W1／W2 已驗收合併，W3 正進行回歸與獨立審查。設計、實作、驗收與合併分開記錄，不得把文檔完成當作產品能力完成。
 
 閱讀順序：本文件 → [01 產品與 UX](docs/sdd/01-product-ux.md) → [02 CMDB](docs/sdd/02-cmdb-model.md) → [03 流程](docs/sdd/03-workflows.md) → [04 權限](docs/sdd/04-permissions-admin.md) → [05 前端](docs/sdd/05-frontend-architecture.md) → [06 API／Mock](docs/sdd/06-api-mock.md) → [07 交付與驗收](docs/sdd/07-delivery-validation.md) → [08 決策與來源](docs/sdd/08-decisions-sources.md)。
 

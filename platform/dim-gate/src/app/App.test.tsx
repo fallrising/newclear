@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { serviceDeliveryMutationKey } from '../api/query-definitions'
 import type { DashboardView, SessionView } from '../domain/schemas'
 import { AppSession, createAppQueryClient } from './App'
 
@@ -33,8 +34,7 @@ function makeSession(id = 'user-rd-commerce', epoch = 1): SessionView {
 function dashboard(count = 2): DashboardView {
   return { scope: { projects: [], environments: [], pools: [], filters: {} }, workspace: { kind: 'rd', services: { title: '服務健康', total: 0, items: [] }, work: { title: '我的工作', total: 0, items: [] }, deliveries: { title: '近期交付', total: 0, items: [] } }, activeIncidentCount: 0, pendingItems: [], center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }
 }
-function mount(path = '/rd') {
-  const queryClient = createAppQueryClient()
+function mount(path = '/rd', queryClient = createAppQueryClient()) {
   return render(<QueryClientProvider client={queryClient}><MemoryRouter initialEntries={[path]}><AppSession /></MemoryRouter></QueryClientProvider>)
 }
 function notify() { for (const listener of client.listeners) listener() }
@@ -164,4 +164,27 @@ describe('M0 role centers and session controls', () => {
     expect(client.reset).not.toHaveBeenCalled()
     expect(client.advanceClock).not.toHaveBeenCalled()
   })
+})
+
+
+it('holds Demo persona/reset controls through a committed service command and its still-pending readback', async () => {
+  const queryClient = createAppQueryClient()
+  mount('/guide', queryClient)
+  const persona = await screen.findByLabelText('示範身分')
+  const reset = await screen.findByRole('button', { name: /^重置示範$/ })
+  await waitFor(() => expect(persona).toBeEnabled())
+  let finishCommand!: () => void, finishReadback!: () => void
+  const command = new Promise<void>(resolve => { finishCommand = resolve })
+  const readback = new Promise<void>(resolve => { finishReadback = resolve })
+  const mutation = queryClient.getMutationCache().build(queryClient, { mutationKey: serviceDeliveryMutationKey,
+    mutationFn: async () => { await command; await readback } })
+  let pending!: Promise<void>
+  act(() => { pending = mutation.execute(undefined) })
+  await waitFor(() => { expect(persona).toBeDisabled(); expect(reset).toBeDisabled() })
+  await act(async () => { finishCommand(); await command })
+  expect(persona).toBeDisabled(); expect(reset).toBeDisabled()
+  fireEvent.change(persona, { target: { value: 'user-rd-data' } })
+  expect(client.setPersona).not.toHaveBeenCalled()
+  await act(async () => { finishReadback(); await pending })
+  await waitFor(() => { expect(persona).toBeEnabled(); expect(reset).toBeEnabled() })
 })

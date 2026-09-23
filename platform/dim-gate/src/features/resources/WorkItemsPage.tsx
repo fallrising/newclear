@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/button'
 import type { SessionView } from '../../domain/schemas'
 import { dateLabel, WorkSummary } from './shared'
 
-const sourceLabel = { request: '環境申請', release: '業務發布', change: '資源變更' } as const
+const sourceLabel = { request: '環境申請', release: '業務發布', change: '資源變更', pipelineDefinition: '交付定義', serviceConfig: '服務配置', trafficPolicy: '業務流量灰度' } as const
 export function WorkItemsPage({ center, session }: { center: 'rd' | 'ops'; session: SessionView }) {
   const [params, setParams] = useSearchParams()
   const page = Math.max(1, Number(params.get('page')) || 1)
@@ -28,12 +28,12 @@ export function WorkItemsPage({ center, session }: { center: 'rd' | 'ops'; sessi
   const setFilter = (key: string, value: string) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); next.delete('page'); if (key === 'applicationId') next.delete('environmentId'); setParams(next) }
   const setPage = (value: number) => { const next = new URLSearchParams(params); next.set('page', String(value)); setParams(next) }
   return <>
-    <PageHeading eyebrow={`${center.toUpperCase()} · WORK ITEMS`} title={center === 'rd' ? '環境申請' : '交付審批'} description="環境申請、業務發布及資源變更共用工作清單；每列保留原始來源 ID、狀態、決策與執行歷史。" action={center === 'rd' ? <Button asChild><Link to="/rd/catalog">新增申請<ArrowRight size={16} aria-hidden="true" /></Link></Button> : undefined} />
+    <PageHeading eyebrow={`${center.toUpperCase()} · WORK ITEMS`} title={center === 'rd' ? '環境申請' : '交付審批'} description="環境申請、業務發布、資源及服務配置變更共用工作清單；每列保留原始來源 ID、狀態、決策與執行歷史。" action={center === 'rd' ? <Button asChild><Link to="/rd/catalog">新增申請<ArrowRight size={16} aria-hidden="true" /></Link></Button> : undefined} />
     <form className="panel resource-filters" onSubmit={event => event.preventDefault()}>
       <label>來源類型<select value={source ?? ''} onChange={e => setFilter('source', e.target.value)}><option value="">全部來源</option>{Object.entries(sourceLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       {center === 'rd' ? <label>工作範圍<select value={owner} onChange={e => setFilter('owner', e.target.value)}><option value="mine">我發起的工作</option><option value="team">團隊可見工作</option></select></label> : <label>處理範圍<select value={view} onChange={e => setFilter('view', e.target.value)}><option value="pending">待我處理</option><option value="all">全部可見</option></select></label>}
       <label>處理階段<select value={phase ?? ''} onChange={e => setFilter('phase', e.target.value)}><option value="">全部階段</option><option value="pending">待審</option><option value="decided">已決策</option><option value="execution">待執行／執行中</option><option value="failed">失敗</option><option value="completed">已完成</option></select></label>
-      <label>狀態<select value={state ?? ''} onChange={e => setFilter('state', e.target.value)}><option value="">全部狀態</option>{Object.entries({ draft: '草稿', submitted: '待審核', approved: '已核准', rejected: '已拒絕', cancelled: '已撤回', provisioning: '環境交付中', fulfilled: '環境已完成', pending_approval: '發布待審', queued: '發布待執行', deploying: '發布部署中', verifying: '發布驗證中', executing: '資源執行中', succeeded: '成功', failed: '失敗' }).map(([value,label]) => <option key={value} value={value}>{label} · {value}</option>)}</select></label>
+      <label>狀態<select value={state ?? ''} onChange={e => setFilter('state', e.target.value)}><option value="">全部狀態</option>{Object.entries({ draft: '草稿', submitted: '待審核', approved: '已核准', rejected: '已拒絕', cancelled: '已撤回', provisioning: '環境交付中', fulfilled: '環境已完成', pending_approval: '發布待審', queued: '發布待執行', deploying: '發布部署中', verifying: '發布驗證中', executing: '資源執行中', succeeded: '成功', failed: '失敗', validated: '已驗證', applying: '配置套用中', rolling_out: '流量灰度中', active: '生效中', superseded: '歷史版本' }).map(([value,label]) => <option key={value} value={value}>{label} · {value}</option>)}</select></label>
       <label>服務<select value={applicationId ?? ''} onChange={e => setFilter('applicationId', e.target.value)}><option value="">全部可見服務</option>{apps.data?.items.map(app => <option key={app.id} value={app.id}>{app.name}</option>)}</select></label>
       <label>環境<select value={environmentId ?? ''} disabled={!applicationId} onChange={e => setFilter('environmentId', e.target.value)}><option value="">全部可見環境</option>{selectedApp.data?.environments.map(env => <option key={env.id} value={env.id}>{env.name} · {env.stage}</option>)}</select></label>
       <Button variant="outline" onClick={() => void work.refetch()} disabled={work.isFetching}><RefreshCw size={16} aria-hidden="true" />重新整理</Button>

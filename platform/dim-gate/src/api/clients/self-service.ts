@@ -1,9 +1,10 @@
+import type { createRequestInputSchema } from '../../domain/schemas'
 import { z } from 'zod'
 import {
-  observationLogSchema, catalogItemSchema, commandReceiptSchema, createRequestInputSchema, pageSchema, poolSchema,
+  observationLogSchema, catalogItemSchema, commandReceiptSchema, pageSchema, poolSchema,
   provisionJobSchema, requestSchema, type CatalogItem, type CommandReceipt, type Page,
   type ProvisionJob, type Provider, type Request,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import { capacitySchema } from '../wire-views'
 import type { ApiRequest } from '../core/request'
 

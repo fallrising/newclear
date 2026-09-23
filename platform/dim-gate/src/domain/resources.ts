@@ -1,3 +1,5 @@
+import type { CommandInput } from './command-input-schemas'
+import { reasonCommandSchema, versionCommandSchema } from './command-input-schemas'
 import { z } from 'zod'
 import { DomainError } from './errors'
 import { observationTime } from './observation'
@@ -5,11 +7,7 @@ import { resourcePolicy } from './resource-policy'
 import { resourceConflictKey } from './resource-identity'
 import { resourceDemand, resourceUsage } from './resource-capacity'
 import type { Policy } from './policy'
-import {
-  createChangeInputSchema, patchChangeInputSchema, reasonCommandSchema, versionCommandSchema, scenarioInputSchema, resourceAccessProfiles,
-  type CatalogItem, type ChangeInput, type ChangeRequest, type ChangeExecution, type CommandInput, type CommandReceipt,
-  type ResourceObject, type Snapshot,
-} from './schemas'
+import { createChangeInputSchema, patchChangeInputSchema, scenarioInputSchema, resourceAccessProfiles, type CatalogItem, type ChangeInput, type ChangeRequest, type ChangeExecution, type CommandReceipt, type ResourceObject, type Snapshot } from './schema-models'
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }
 const denied = (): never => fail(403, 'FORBIDDEN', '目前身分沒有此資源變更的授權。')
 const conflict = (code = 'VERSION_CONFLICT', message = '資源版本或影響範圍已變更，請建立新的草稿。'): never => fail(409, code, message)

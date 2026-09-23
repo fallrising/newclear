@@ -1,0 +1,46 @@
+// One-time capture from accepted W2 merge91626851fb17df7ab31c96dee9353b9ee4d42c92.
+// Executed with Node24.18.0/pnpm11.18.0: pnpm test -- src/demo/w3-capture.test.ts
+import { writeFileSync } from 'node:fs'
+import { expect, it } from 'vitest'
+import { createController } from './controller'
+
+it('captures genuine W2 active resource and legacy delivery/provision bytes', async () => {
+  let raw: string | null = null
+  let nextSession = 0
+  const c = createController({ storage: { getItem: () => raw, setItem: (_key, value) => { raw = value } },
+    createSessionId: () => `w2-migration-fixture-${++nextSession}` })
+  const identity = () => { const s = c.getSession(); return c.authenticate(s.sessionId, s.user.id) }
+  const command = (path: string, body: unknown, key: string) => c.command('POST', path, body, key, identity())
+  await c.reset('w2-legacy-reset', identity())
+  await command('/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'w2-stable' }, 'w2-stable-trigger')
+  await command('/clock/advance', { ticks: 6 }, 'w2-stable-complete')
+  const environment = c.getSnapshot().entities.environments.find(e => e.id === 'env-checkout-dev')!
+  await command('/pipelines', { applicationId: 'app-checkout', environmentId: environment.id, environmentVersion: environment.version, revision: 'w2-in-progress' }, 'w2-candidate-trigger')
+  await command('/clock/advance', { ticks: 3 }, 'w2-candidate-package')
+  const request = await command('/requests', {
+    applicationId: 'app-checkout', environmentName: 'w2-migration-staging', stage: 'staging',
+    catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg',
+    cpu: 2, memoryMiB: 2048, purpose: 'Genuine accepted W2 active legacy provisioning',
+  }, 'w2-request-create')
+  await command(`/requests/${request.entityId}/submit`, { expectedVersion: 1 }, 'w2-request-submit')
+  const change = await command('/changes', { kind: 'kafka.topic.create', catalogItemId: 'w2-catalog-kafka', catalogRevision: 1,
+    reason: 'Genuine W2 active resource migration', targetCiId: 'w2-ci-kafka-idc', targetCiVersion: 1,
+    applicationId: 'app-storefront', environmentId: 'env-storefront-dev', environmentVersion: 1,
+    topicName: 'migration-w2-events', partitions: 3, retentionHours: 72, throughputKiBPerSecond: 512,
+    purpose: 'producer', accessProfileRef: 'w2-profile-kafka-producer' }, 'w2-change-create')
+  await command(`/changes/${change.entityId}/submit`, { expectedVersion: 1 }, 'w2-change-submit')
+  await c.setPersona('user-ops', 'w2-to-ops', identity())
+  await command(`/requests/${request.entityId}/approve`, { expectedVersion: 2, reason: 'Verify active legacy migration' }, 'w2-request-approve')
+  await command(`/requests/${request.entityId}/provision`, { expectedVersion: 3 }, 'w2-request-provision')
+  await command(`/changes/${change.entityId}/approve`, { expectedVersion: 2, reason: 'Independent active W2 migration approval' }, 'w2-change-approve')
+  await command(`/changes/${change.entityId}/execute`, { expectedVersion: 3 }, 'w2-change-execute')
+  await command('/clock/advance', { ticks: 1 }, 'w2-active-step')
+  await c.setPersona('user-rd-data', 'w2-to-data', identity())
+  await c.setPersona('user-ops', 'w2-back-ops', identity())
+  expect(c.getSnapshot().schemaVersion).toBe(2)
+  expect(c.getSnapshot().entities.releases.map(r => r.state)).toEqual(['succeeded', 'deploying'])
+  expect(c.getSnapshot().jobs[0].state).toBe('running')
+  expect(c.getSnapshot().entities.changes[0].state).toBe('executing')
+  expect(c.getSnapshot().scheduler.tasks).toHaveLength(3)
+  writeFileSync('src/demo/seed/fixtures/w2-active-session.json', raw! + '\n')
+})

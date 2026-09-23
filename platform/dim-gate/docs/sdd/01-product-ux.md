@@ -120,3 +120,8 @@ W1 revision4：641–1100px 保留可辨識文字及分組導航，<=640px 使�
 ## W2 integration delta
 
 W2 adds service resources at /rd/apps/:appId/resources, typed resource-request wizards, canonical change detail, Ops cache/messaging/cluster pages and WorkItem projections at existing request-list routes. Compute Request and Release detail/commands are preserved. Scope/filter/deep refresh and explicit denial apply to each route. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約定義 PipelineDefinition family/revision、typed ServiceConfig、兩個同環境健康 Release 的 TrafficPolicy 及共同 ServiceExecution；源版本、凍結內容、批准與執行證據都留在同一 snapshot3。既有 PipelineRun 僅在由 definition 啟動時增加不可變的執行必要快照；legacy run 不補造來源。config/traffic 不改 activeReleaseId；所有 release/config/traffic 共用衍生環境鎖。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

@@ -36,6 +36,7 @@ export function QuotaView({ capacity }: { capacity: ResourceCapacity | null }) {
 
 
 export function WorkSummary({ summary }: { summary: WorkItem['summary'] }) {
+  if ('revision' in summary) return <div className="work-summary"><strong>{{ 'pipelineDefinition.activate': '交付定義啟用', 'serviceConfig.apply': '服務配置套用', 'trafficPolicy.rollout': '業務流量灰度' }[summary.kind]} · 修訂 {summary.revision}</strong><p>風險：{summary.productionRisk ? '正式環境，需獨立批准' : '非正式環境'}</p>{summary.diff.map(item => <p key={item.key}><code>{item.key}</code>：{item.before ? String(item.before.value) : '尚未設定'} → {item.after ? String(item.after.value) : '移除'}（{item.change}）</p>)}{summary.weights.map(item => <p key={item.releaseId}><code>{item.releaseId}</code>：期望 {item.weight}%</p>)}</div>
   const labels = { ...changeKindLabel, 'environment.create': '建立環境', 'release.deploy': '業務部署', 'release.rollback': '業務回滾' }
   const units = { cpu: ['CPU', 'vCPU'], memoryMiB: ['記憶體', 'MiB'], quotaMiB: ['Redis 配額', 'MiB'], topics: ['Kafka topics', 'topics'], partitions: ['Kafka partitions', 'partitions'], throughputKiBPerSecond: ['Kafka throughput', 'KiB/s'] }
   return <div className="work-summary"><strong>{labels[summary.kind]}</strong><p>風險：{summary.riskClass === 'shared' ? '共享影響 · shared' : summary.riskClass === 'standard' ? '一般 · standard' : '不適用'}</p>

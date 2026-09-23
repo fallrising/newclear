@@ -1,10 +1,11 @@
+import { serviceRoute } from './service-delivery-policy'
 import { z } from 'zod'
 import { DomainError } from './errors'
 import type { Policy } from './policy'
 import { canReadDelivery } from './delivery'
 import { resourceRoute } from './resource-views'
 import { canReadObservation, incidentView } from './observation'
-import { idSchema, incidentSchema, observationLogSchema, timestampSchema, type GuideView, type MetricSeries, type Notification, type Snapshot } from './schemas'
+import { idSchema, incidentSchema, observationLogSchema, timestampSchema, type GuideView, type MetricSeries, type Notification, type Snapshot } from './schema-models'
 
 const fail = (status: number, code: string, message: string): never => { throw new DomainError(status, code, message) }
 function queryValues<T extends z.ZodType>(schema: T, query: URLSearchParams): z.infer<T> {
@@ -94,6 +95,7 @@ export function readObservation(s: Snapshot, policy: Policy, path: string, query
 
 /** Accessible links are recomputed from current grants for every projection. */
 export function notificationRoute(s: Snapshot, policy: Policy, entityType: string, entityId: string): string | undefined {
+  if (['pipelineDefinition', 'serviceConfig', 'trafficPolicy', 'serviceExecution'].includes(entityType)) return serviceRoute(s, policy, entityType, entityId)
   if (['resourceObject', 'resourceBinding', 'change', 'changeExecution'].includes(entityType)) return resourceRoute(s, policy, entityType, entityId)
   if (entityType === 'incident') {
     const i = s.entities.incidents.find(i => i.id === entityId)
@@ -154,6 +156,7 @@ export function guideProjection(s: Snapshot, policy: Policy): GuideView {
     { id: 'recover', title: '三筆連續健康觀測', description: '每 60 個 demo ticks 產生一筆一分鐘健康視窗；第三筆才解除告警。', persona: 'any', completed: incident?.state === 'resolved' && incident.recoverySamples === 3, route: incidentRoute },
   ]
   const visibleTask = (operationId: string) => {
+    if (s.entities.serviceExecutions.some(e => e.id === operationId)) return !!serviceRoute(s, policy, 'serviceExecution', operationId)
     if (s.entities.changeExecutions.some(e => e.id === operationId)) return !!resourceRoute(s, policy, 'changeExecution', operationId)
     const job = s.jobs.find(j => j.id === operationId)
     if (job) return s.entities.requests.some(r => r.id === job.requestId && policy.canReadJob(r))

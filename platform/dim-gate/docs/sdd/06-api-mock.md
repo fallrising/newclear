@@ -196,3 +196,8 @@ W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict 
 ## W2 integration delta
 
 W2 appends18 operations to the existing73: scoped resource objects/bindings/inventory/service resources/work-items and change read/create/patch/submit/approve/reject/cancel/execute/retry. All use existing request identity, strict Zod validation, typed client, MSW/domain owner and receipt envelope; execute returns202. Current authorization precedes replay; detail404/action403, invalid422 and stale/conflict409. OpenAPI and runtime descriptors are generated from the same91 operation registry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 使用 snapshot3 / dim-gate-w3-v1，同一 envelope1 / dim-gate.demo.v1。嚴格凍結 W1/V2 原始 shape，先驗證原關係後一次原子遷移；只加空 W3 business collections，不補造舊發布的 definition/config/history/grant/persona。真實 W2 accepted merge9162685 的 active Release/ProvisionJob/Kafka fixture SHA2180e098e84bdcccaa35c6573d623577985b2480b780e30a1302965078e6607b 保存命令來源。新增有 executionId 的 configure/traffic abnormal/missing 示範場景。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。

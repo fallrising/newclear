@@ -77,13 +77,25 @@ pnpm test:isolation
 
 頁首「工作區」顯示 RD 業務研發、Ops 維運或 Admin 平台管理；它只列當前身分的合法入口，不更换 user。旁邊「Demo · 體驗其他角色」會更換示範身分並前往該角色首頁，同一分頁仍共用既有服務／資源／申請與發布紀錄。多角色體驗：Admin → 角色與範圍 → 為 Commerce RD 新增 Ops pool/project grant → 切回 Commerce RD → 在工作區 selector 切 RD/Ops；各 sidebar 分開、身份不變。無 grant 使用者仍可由 Demo 入口恢復探索。
 
-RD 首頁從服務健康與申請／發布下鑽；Ops 首頁從事件、失敗、待審與容量下鑽；Admin 首頁查看待發布目錄、整合與權限變更。首頁範圍可選專案／環境，Ops 加來源／資源池；返回與刷新保留 URL。沒有樣本為 unknown，時效與業務成功狀態分開。W2 已加入 Redis／Kafka 申請與交付，操作見下節。配置灰度、告警規則及平台feature/route/channel仍依 W3–W5另行交付；目前不提供空白或假成功入口。
+RD 首頁從服務健康與申請／發布下鑽；Ops 首頁從事件、失敗、待審與容量下鑽；Admin 首頁查看待發布目錄、整合與權限變更。首頁範圍可選專案／環境，Ops 加來源／資源池；返回與刷新保留 URL。沒有樣本為 unknown，時效與業務成功狀態分開。W2 已加入 Redis／Kafka 申請與交付，操作見下節。W3 已實作版本化配置與灰度流程，固定驗收狀態見 STATUS；告警規則及平台feature/route/channel仍依 W4–W5另行交付；目前不提供空白或假成功入口。
 
 RD首頁可用「工作範圍」切換授權內全部工作／我發起的工作；這只篩選申請與發布，不變更服務授權。多grant切至Admin保留合法專案／環境；跨中心診斷頁保留來源工作區與返回連結。
 
 
-## W2 resource walkthrough (under validation)
+## W2 resource walkthrough (accepted PR36)
 
 Start as Commerce RD. Use the original compute catalog to create a staging environment and have Ops approve/provision it, advancing5ticks in Guide. Back as RD, open the application resources, choose that environment and its Redis catalog; create a draft and submit. As Ops, open resource WorkItem, inspect source/snapshot/impact/quota, approve and explicitly start execution. Advance the shared Demo clock; only successful execution creates active canonical Object/Binding. Refresh and compare the same IDs in RD resources and Ops cache detail. Data RD and Admin must not read the private binding.
 
-Kafka catalog offers create-topic and existing-topic binding with safe producer/consumer profiles. Configure failure preserves the failed attempt and creates no active binding; requester retry requires a new Ops decision. Ops Redis maintenance requires another qualified Ops to approve. Kubernetes professional pages show readonly stale/unknown samples and no cluster control. Admin edits typed catalog revisions; old snapshots stay immutable and stale proposals are refused. These walkthrough steps are test instructions, not evidence of acceptance; W2 status remains in STATUS until all gates complete.
+Kafka catalog offers create-topic and existing-topic binding with safe producer/consumer profiles. Configure failure preserves the failed attempt and creates no active binding; requester retry requires a new Ops decision. Ops Redis maintenance requires another qualified Ops to approve. Kubernetes professional pages show readonly stale/unknown samples and no cluster control. Admin edits typed catalog revisions; old snapshots stay immutable and stale proposals are refused. W2 is accepted and merged by PR36 at9162685. Exact evidence and preserved failed attempts remain linked from STATUS.
+
+
+## W3 service delivery walkthrough
+
+W3 implements the following visible flows. Their fixed-source test evidence and current acceptance/merge state are recorded in [STATUS](STATUS.md) and [T039](../../../.team/reports/T-039.md).
+
+1. As Commerce RD, open checkout-api then its dev environment. Follow 交付定義, inspect the seeded draft, edit only registered repository/ref/recipe/artifact values, validate and explicitly activate. Start a source revision, use the shared Demo clock, and verify the original five stages produce the artifact and successful Release. Create a new definition revision and confirm the old run retains its execution snapshot. A definition affecting prod first needs a different Ops decision; its later prod Release still has its original separate approval.
+2. Open 服務配置, edit typed string/number/boolean/secret reference entries, validate, inspect the active/proposed diff, and explicitly apply. Advance the clock through validate/render/activate. Create a new revision, inject configure failure on that execution, and verify the prior active revision remains. Restore a historical revision into a new draft and repeat validation/approval/apply. Compare only authorized environments of the same app; an absent active config remains explicit.
+3. Produce two genuinely successful same-environment releases through the visible pipeline flow. Open 業務流量灰度, select the registered endpoint/match and those releases. W3 supports final baseline0/candidate100 through verified10→50→100 only. Start, advance60seconds per selected60second health window, and inspect persisted samples/checkpoints. Inject anomaly after verified10; the failed50 step retains10 and does not rewrite activeReleaseId. Missing probes wait and then time out; create a new revision to retry. Prod policies require independent Ops approval.
+4. Find the same source ID in RD work and Ops approval lists, inspect its decision/execution/audit history, reload and verify continuity. Data RD and Admin must not read business configuration or execute it. Release/config/traffic conflicts must show a refusal without a second execution. Only the shared logical clock advances work; no completion button or real backend exists.
+
+The source of truth is [W3 contract](W3-INTEGRATION-CONTRACT.md), [14 acceptance](sdd/14-workspace-delivery.md) and the latest [PLAN](../../../.team/PLAN.md). W4 monitoring controls and W5 platform feature/route/notification governance are still pending.

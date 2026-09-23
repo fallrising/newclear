@@ -1,7 +1,8 @@
+import type { createCiInputSchema, patchCiSchema } from '../../domain/schemas'
 import type { z } from 'zod'
 import {
-  ciViewSchema, commandReceiptSchema, createCiInputSchema, dashboardViewSchema, pageSchema, patchCiSchema,
-} from '../../domain/schemas'
+  ciViewSchema, commandReceiptSchema, dashboardViewSchema, pageSchema,
+} from '../../domain/schema-models'
 import type { Center, CIView, CommandReceipt, DashboardFilters, DashboardView, Page, Provider } from '../../domain/schemas'
 import type { ApiRequest } from '../core/request'
 export type { DashboardFilters } from '../../domain/schemas'

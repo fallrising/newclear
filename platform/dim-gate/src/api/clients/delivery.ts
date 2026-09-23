@@ -1,9 +1,10 @@
+import type { createPipelineInputSchema, rollbackReleaseInputSchema } from '../../domain/schemas'
 import { z } from 'zod'
 import {
-  commandReceiptSchema, createPipelineInputSchema, deliveryLogSchema, pageSchema,
-  pipelineRunSchema, releaseDetailSchema, releaseSchema, rollbackReleaseInputSchema,
+  commandReceiptSchema, deliveryLogSchema, pageSchema,
+  pipelineRunSchema, releaseDetailSchema, releaseSchema,
   type CommandReceipt, type DeliveryLog, type Page, type PipelineRun, type Release,
-} from '../../domain/schemas'
+} from '../../domain/schema-models'
 import type { ApiRequest } from '../core/request'
 
 export type CreatePipelineInput = z.infer<typeof createPipelineInputSchema>

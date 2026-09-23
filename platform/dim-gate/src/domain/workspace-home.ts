@@ -1,3 +1,5 @@
+import { serviceSources } from './service-delivery-shared'
+import { serviceVisible, serviceScope, serviceActions, serviceRoute } from './service-delivery-policy'
 import { breached, healthy, observationTime } from './observation'
 import { notifications, visibleIntegrations } from './observation-views'
 import type { Policy } from './policy'
@@ -60,6 +62,9 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
   const releaseItem = (r: Release): WorkspaceHomeItem => ({ sourceType: 'release', sourceId: r.id, title: envLabel(r.environmentId),
     state: r.state, route: `/${center === 'ops' ? 'ops' : 'rd'}/releases/${encoded(r.id)}`, dataAsOf: r.updatedAt,
     detail: `${r.kind} · ${r.id} · health: ${r.health}` })
+  const services = serviceSources(s).filter(row => valid && serviceVisible(s,policy,row) && center !== 'admin' && serviceScope(s,policy,row.applicationId,row.affectedEnvironmentIds,center)
+    && appIds.has(row.applicationId) && row.affectedEnvironmentIds.some(id => envIds.has(id)))
+  const serviceItem = (row: typeof services[number]): WorkspaceHomeItem => ({sourceType:row.sourceType,sourceId:row.id,title:`${'name' in row ? row.name : row.sourceType} · revision ${row.revision}`,state:row.state,route:serviceRoute(s,policy,row.sourceType,row.id)!,dataAsOf:row.updatedAt,detail:row.reason})
   let workspace: WorkspaceHome
   if (center === 'rd') {
     const ownRequests = requests.filter(r => filters.workOwner !== 'mine' || r.requesterId === policy.user?.id)
@@ -75,7 +80,7 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
           route: `/rd/apps/${encoded(env.applicationId)}/environments/${encoded(env.id)}`, dataAsOf: latest?.to ?? now,
           detail: `${env.applicationId} · ${env.stage} · ${env.status} · ${active ? `${active.id}: ${active.state}` : '尚無已部署版本'} · observation: ${age}` }
       })),
-      work: section('待處理申請與發布', [...ownRequests.filter(r => ['draft', 'submitted', 'approved', 'failed'].includes(r.state)).map(requestItem),
+      work: section('待處理申請與發布', [...services.filter(row => (filters.workOwner !== 'mine' || row.requesterId === policy.user?.id) && !['active','superseded','cancelled','rejected'].includes(row.state)).map(serviceItem), ...ownRequests.filter(r => ['draft', 'submitted', 'approved', 'failed'].includes(r.state)).map(requestItem),
         ...ownReleases.filter(r => ['pending_approval', 'queued', 'deploying', 'verifying'].includes(r.state)).map(releaseItem),
         ...changes.filter(c => (filters.workOwner !== 'mine' || c.requesterId === policy.user?.id) && ['draft', 'submitted', 'approved', 'executing', 'failed'].includes(c.state)).map(changeItem)].toSorted(recent)),
       deliveries: section('近期交付', ownReleases.filter(r => ['succeeded', 'failed', 'rejected', 'cancelled'].includes(r.state)).map(releaseItem).toSorted(recent)),
@@ -100,8 +105,8 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
         .toSorted((a, b) => Number(b.severity === 'critical') - Number(a.severity === 'critical') || Number(b.state === 'open') - Number(a.state === 'open') || a.updatedAt.localeCompare(b.updatedAt) || byId(a, b))
         .map(i => ({ sourceType: 'incident', sourceId: i.id, title: envLabel(i.environmentId), state: i.state,
           route: `/ops/incidents/${encoded(i.id)}`, dataAsOf: i.updatedAt, detail: `${i.severity} · ${i.ruleKey}` }))),
-      failures: section('失敗作業與發布', [...failures, ...releases.filter(r => r.state === 'failed' && opsEnvironment(r.environmentId)).map(releaseItem), ...changes.filter(c => c.state === 'failed').map(changeItem)].toSorted(recent)),
-      approvals: section('待審批與交付', [...actionableRequests.map(requestItem), ...actionableReleases.map(releaseItem), ...changes.filter(c => c.state === 'submitted' && rp.operate(c) || c.state === 'approved' && rp.canExecute(c)).map(changeItem)].toSorted(recent)),
+      failures: section('失敗作業與發布', [...services.filter(row=>row.state==='failed').map(serviceItem), ...failures, ...releases.filter(r => r.state === 'failed' && opsEnvironment(r.environmentId)).map(releaseItem), ...changes.filter(c => c.state === 'failed').map(changeItem)].toSorted(recent)),
+      approvals: section('待審批與交付', [...services.filter(row=>serviceActions(s,policy,row).includes('approve')).map(serviceItem), ...actionableRequests.map(requestItem), ...actionableReleases.map(releaseItem), ...changes.filter(c => c.state === 'submitted' && rp.operate(c) || c.state === 'approved' && rp.canExecute(c)).map(changeItem)].toSorted(recent)),
       capacity: section('實體資源池容量', pools.map(p => {
         const usage = capacityFor(p.id)
         return { sourceType: 'pool', sourceId: p.id, title: p.name, state: usage.cpu.available === 0 || usage.memoryMiB.available === 0 ? 'exhausted' : 'available',

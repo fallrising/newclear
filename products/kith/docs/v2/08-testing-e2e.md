@@ -234,6 +234,10 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W2-04 | 權限矩陣（控制台） | w2-console.spec.ts |
 | E2E-W2-05 | BR-14、V2-INV-07、B-14 | w2-archive.spec.ts |
 | E2E-W2-06 | FE-05 | w2-i18n.spec.ts |
+| E2E-W3-01 | BR-22、BR-41、BR-43（顯示） | w3-members.spec.ts |
+| E2E-W3-02 | BR-35、v1 UI-10-02 | w3-mention.spec.ts |
+| E2E-W3-03 | UJ-05、B-11、BR-45、FM-SYNC-15 | w3-reply.spec.ts |
+| E2E-W3-04 | UJ-06、BR-43（顯示） | w3-personal.spec.ts |
 | … | … | … |
 
 ## 7. CI

@@ -1025,3 +1025,29 @@ remote_durability: e7afd17_contract_SSHsaved; containing_functionalcheckpoint_ne
 blockers: []
 next_action: freeze_SSHsave_partialfunctional; normalmerge_latestmain; fixed_nativefull_andbenchmark; T038actualbrowser; consume_finalSHAhandbacks; fullgates_independentT040_exactheadCI_thenauthorizedmerge_actualcloseout_beforeW4
 ```
+
+
+DG-D080: W3 initial product checkpoint dfb146c is SSH-saved in existing draftPR37; normal merge a473626 includes latest main ea88b88, with identical component product tree. Fixed fullnative and actual exact-head CI35854397207 both357/360: three obsolete zero/mine expectations caused by legitimate W3 draft fixtures. Lead corrected Data WorkItem regression to exactly six scoped draft IDs and explicit absence of Commerce source IDs/names; focused14/14pass. T037 owns the two remaining W1 assertions and domain integrity/performance work. Actual fresh fullUI benchmark at a473626 product bytes: initialJS309048 exceeds unchanged307200 by1848; query/persistedcommands pass. T037 is separating command-only schema builders from eager model validation with identical exports/strict shapes; startup validation remains eager. T038 actual Chromium config/traffic journeys pass provisionally, browser suite still in progress. No fullgate/review/acceptance claim; raw failures preserved. Next integrate final SHA handbacks, rerun all required gates on fixed source and uninvolved T040 review.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 80
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 FUNCTIONAL_VALIDATION_AND_PERFORMANCE_CORRECTION / NOT_ACCEPTED
+task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
+implementation_commit: dfb146c
+local_tested_commit: a4736261518ba4d27d5967b5a78d2e6e9bdbe914
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-1.md]
+integration_state: draftPR37 / checkpointCI35854397207_FAILED / NOT_ACCEPTED
+remote_durability: a473626_SSHsaved; containing_test_and_progress_correction_nextSSHpush
+blockers: []
+next_action: consume_final_worker_SHAhandbacks; correct_initialJS_and_fixture_regressions; freeze_allgates_and_independentT040; exactheadCI_then_authorizedmerge_actualcloseout_beforeW4
+```

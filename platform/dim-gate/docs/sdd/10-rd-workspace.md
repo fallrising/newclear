@@ -1,6 +1,6 @@
 # 10 — RD 業務研發工作台 SDD
 
-版本：WS-SDD revision 1 · 狀態：後續設計，未實作部分見[能力對照](13-capability-map.md)。共用需求與模型以 [09](09-shared-workspaces.md) 為準，驗收以 [14](14-workspace-delivery.md) 為準。
+版本：WS-SDD revision 1 · 狀態：W1 導航／首頁已實作，驗證及接受狀態見 [STATUS](../STATUS.md)；後續未實作部分見[能力對照](13-capability-map.md)。共用需求與模型以 [09](09-shared-workspaces.md) 為準，驗收以 [14](14-workspace-delivery.md) 為準。
 
 ## 1. 使用者、目標與邊界
 

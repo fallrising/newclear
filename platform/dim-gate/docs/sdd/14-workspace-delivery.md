@@ -1,6 +1,6 @@
 # 14 — 三工作區交付、遷移與驗收
 
-版本：WS-SDD revision 1 · 狀態：設計範圍已定義；W1–W5 全部尚未實作／驗證。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
+版本：WS-SDD revision 1 · 狀態：W1 已實作，固定驗證、獨立 review 與接受／合併狀態見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)；W2–W5 尚未實作／驗證。本文定義新驗收 ID，不修改已 ACCEPTED 的 M0–M5。
 
 ## 1. 增量與依賴
 
@@ -16,7 +16,7 @@
 
 W2 包含自身依賴的 Admin catalog/schema 擴充，不能等 W5 才補；W3/W4 也須在各自增量內完成必要的版本／批准契約。W4 的固定安全 channel 配置可以先 seed，W5 才開完整配置 UI。每個增量的「完整」只指該列能力，不指整個 K8s／Redis／Kafka／SRE 產品完成。
 
-W1 為建議的第一個實作 task；完成本輪 SDD 不自動啟動 W1。下一次開發依 DEVELOPMENT_PROMPT 核對最新 PLAN，再建立有 owner 的 task 與 integration contract。
+W1 使用 [W1 integration contract](../W1-INTEGRATION-CONTRACT.md) 與 T-030～032 交付。每次接手依 DEVELOPMENT_PROMPT 核對最新 PLAN、固定版本證據及 PR；不重做有效成果，不因設計完成或實作存在就跳過產品驗收。
 
 ## 2. 基線差異與遷移
 

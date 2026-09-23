@@ -711,3 +711,26 @@ next_action: run fixed candidate full gates and independent third review; latest
 ```
 
 DG-D051: During attempt3, older immutable03a7ee5 regression exposed an existing M4 Guide readiness gap: after sample1 the test reloads then immediately navigates to Guide before restored incident renders. Trace shows the old boot session request overlaps document navigation (Vite404/body unavailable), causing browser-health afterEach timeout; business assertions before cleanup succeeded, but the gate is failed. Preserve the failure; do not suppress health errors or relax timeout. Lead creates isolated `newclear-dim-gate-w1-readiness` / `agent/dim-gate/task/t031-regression-readiness` from5cf495f while both fixed runs continue untouched. Bounded correction within T-031 attempt3 adds explicit same incident ID, state and recovery sample assertions after reload; T-032 reviews this test-only delta before acceptance. No product contract, AC, source, dependency or health-gate behavior changes.5cf495f native245 and6 smoke pass, full64/benchmark/isolation and CI35827980156 remain pending. Sole owner unchanged; original PR33 remains draft/NOT_ACCEPTED.
+
+DG-D052: Fixed4ab6232 test-only reload correction passed frozen install/lint/typecheck/docs/build, all3 provider Guide stories and diffcheck; independent narrow review passes.4ab6232 and pre-edit scope SSH-saved on temporary taskbranch, no duplicate PR. Source0f9140a normally merges SSH main00333ef; diff proves no dim-gate/.team/workflow change from main. Older03a finished61/62 failed, preserved `03a7ee5-failed-artifacts`; final5cf native245/smoke6 pass and long full64 suite still running, then benchmark/isolation. Sole lead owns readiness checkout; original lead5cf stays immutable until its runner ends. SDD status headings now distinguish implemented W1 from unimplemented W2–W5; no product AC is prematurely accepted.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 52
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+supplemental_continuation_ref: agent/dim-gate/task/t031-regression-readiness
+worktree: /home/ckc/test/codex/newclear-dim-gate-w1-readiness
+last_reconciled_main: 00333ef34247410bb6e9c3d21194934e5c304186
+implementation_commit: 5cf495f60e22789b482b578b06e0ea64d135b177 product; 4ab62327b47c5924a22c84e99bab9c79e1dfbb0a test-only repair
+local_tested_commit: 5cf495f full runner ongoing; 4ab6232 bounded gates passed
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision4
+evidence_refs: [.team/reports/T-030-attempt-2.md, .team/reports/T-031-attempt-3.md, .team/reports/T-032-attempt-2.md]
+integration_state: OPEN — PR33 draft at5cf495f
+remote_durability: product5cf PRbranch and repair4ab taskbranch SSH-saved; containing evidence checkpoint saved to taskbranch next
+blockers: []
+next_action: after5cf full runner completes, preserve artifacts, obtain final third review, fast-forward PRbranch to readiness candidate and require full latest-head CI; authorized merge then verify merge tree/CI and release W1 owner before W2
+```

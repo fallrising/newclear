@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause 切片已通過，其餘安全控制開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
@@ -339,6 +339,8 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 
 工具按能力分成 workspace read/write、bounded exec、network access、external mutation。Workspace 內一般編輯與測試可在設定政策內自動執行；額外 network 或 external mutation 須經 deterministic policy／approval。無法可靠分類的任意 shell 不得宣稱能逐條阻止外部副作用：MVP 以 guest 網路 allowlist、沒有 write credential 與 VM 隔離落實邊界。
 
+目前已實作 [固定節點 egress](docs/M3-EGRESS.md)：none-lane＋啟用的 host proxy、sealed 啟動配置／live process 核對、profile／run 政策 digest；政策變更須完整 drain 後重啟，不支援 live revocation。CONNECT 是目的地 TCP 授權，不宣告過濾 tunnel 內的 HTTP 方法／內容。以下保留完整產品目標。
+
 Guest 出站只經受控 egress/proxy；阻擋 metadata、loopback、控制面與未允許的私網位址，處理 DNS 解析與 redirect 後的目的地檢查。Package registry 與 model proxy 為明確 allowlist。平台不保證防住所有 guest exploit；M0/M3 必須驗證設定實際生效。
 
 Approval 內容保存 normalized action、參數 hash、有效期限與 policy revision。核准後參數變更或 generation 改變需重新審批。Cancel／deny 可撤銷尚未送出的動作；已發生的外部副作用不承諾 rollback。
@@ -427,7 +429,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume 固定模式已驗收，AT-07/11 待完成，見 [M3 pause](docs/M3-PAUSE.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收，AT-07/11 待整合完成，見 [M3 egress](docs/M3-EGRESS.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |

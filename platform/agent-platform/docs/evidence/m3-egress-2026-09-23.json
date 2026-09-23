@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-23T11:43:03.013714+00:00",
+  "scope": "AT-07 node-egress-v1 immutable node policy slice",
+  "full_m3_complete": false,
+  "full_at07_complete": false,
+  "execution_mode": "fixed fixture model; no provider requests",
+  "tests": {
+    "m0": 45,
+    "platform": 129,
+    "upstream_dns_contract": 2,
+    "real_kvm_cases": 18,
+    "all_passed": true
+  },
+  "kvm_cases": {
+    "egress_allow": 1,
+    "egress_deny_after_drain": 1,
+    "guest_isolation": 1,
+    "output_canary": 2,
+    "recovery": 3,
+    "cancel": 2,
+    "approval": 2,
+    "pause_resume": 6
+  },
+  "reports": {
+    "allow": "m3-egress-allow-2026-09-23.json",
+    "deny": "m3-egress-deny-2026-09-23.json",
+    "isolation": "m3-egress-isolation-2026-09-23.json",
+    "output": "m3-egress-output-2026-09-23.json",
+    "recovery": "m3-egress-recovery-2026-09-23.json",
+    "cancel": "m3-egress-cancel-2026-09-23.json",
+    "approval": "m3-egress-approval-2026-09-23.json",
+    "pause": "m3-egress-pause-2026-09-23.json",
+    "dns": "m3-egress-dns-2026-09-23.json"
+  },
+  "source_sha256": {
+    "src/agent_platform/egress_node.py": "34e6a55ebfeb9e5a111491d4d3fa0e3196e501a96447defd8a68021522ad280c",
+    "src/agent_platform/egress_policy.py": "dbaed456c19856db390325745707182682c082141fc9d046bcacebc46b25a575",
+    "src/agent_platform/connector.py": "6bde3f0a499e477d3bcb45602b0b860ed5aa9205b6f94eb6674c14acf82da28c",
+    "src/agent_platform/runtime_client.py": "af4033caaf1859e9a4aa3ad24b99228c6102ab5b8f92f4b49e5d567952ce2454",
+    "src/agent_platform/store.py": "ebf093462c2b7246923a01b195c3a91e61a38b2c180dc58ad35332e4c7e184b0",
+    "src/agent_platform/guest_control.py": "a1949ccdbae7077dad4e9c9f437755cda1f23cb2f38ca6b79cf8703da19dcf74",
+    "src/agent_platform/guest_terminal.c": "d99fd830a51bebf8a71837030684d6970e0548decaf35fca9e882395f63b5750",
+    "src/agent_platform/migrations/007_egress.sql": "4349bb33e799f8b11b434d1a77d42ace1fa65d757338749c794a2ca167a53d19",
+    "scripts/m3-egress-kvm.py": "5b2f8cf1a4db6549abea1d086f538a737a95a65f0622f6460398ae4d7b035652",
+    "scripts/egress-upstream.py": "9c7b5a1450fe002b0dab7fa90ded5ae3ab5954a74fed9f3cff5ee2a2539a27e9",
+    "scripts/egress-contract/dialer_test.go": "f6f5ae4840285aa1088534139e33bc5612afe2b90aabc1d317860bf1874d380b",
+    "tests_platform/test_egress.py": "25301494df1dabc157a579a9ace7395d6a830da17bfaebca6f1d550303b938ca",
+    "tests_platform/test_cancellation.py": "7ff080b09e435eeff0e64a327c8e6047d1090587e16e8e1d1700ccf1b4d0f766"
+  },
+  "runtime": {
+    "sandboxd_tag": "v0.1.12",
+    "sandboxd_revision": "de42fd50be5cdbfaaa6ddf890081566edb503d3c",
+    "sandboxd_binary_sha256": "d46adf71c028d428560a50a4e7ecfe08ac3c76c20ba0712497d82441d9efd6ca",
+    "terminal_launcher_sha256": "05604c5b6cf93b15a8b9fe615b2d0964b05258d4545b6c9683e570f7a0eecca6",
+    "go_test_toolchain": "go1.27.1 linux/amd64",
+    "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+    "node_lane": "none; enabled vsock HTTP/CONNECT policy proxy"
+  },
+  "cleanup": {
+    "remaining_vms": 0,
+    "remaining_claims": 0,
+    "full_journal_stop_proofs_verified": true,
+    "connector_stopped": true,
+    "sandboxd_stopped": true,
+    "test_postgres_removed": true,
+    "journals_and_fences_retained": true
+  },
+  "limitations": [
+    "Node-wide policy only; live replacement or immediate revocation unsupported; drain before change.",
+    "CONNECT grants destination TCP; encrypted HTTP methods, paths, SNI and content are not filtered.",
+    "No private-IP exceptions, custom NAT64/DNS64, NIC/CNI, tenant, wildcard, SOCKS or credential-injection support.",
+    "Model proxy, request budgets and usage settlement remain AT-11 work; complete AT-07/M3 not claimed."
+  ],
+  "validation_notes": [
+    "Public httpbingo.org rejects arbitrary redirect destinations itself; those trial results were discarded. Final httpbin.org fixture checks actual 302 and exact Location before following.",
+    "DNS rebinding uses real UDP DNS against exact hash-verified upstream dialer functions, complementary to installed-binary KVM DNS-to-private tests.",
+    "Node and connector use matching host UID/GID for /proc access; no permissions were widened."
+  ]
+}

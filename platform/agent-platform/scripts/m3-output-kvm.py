@@ -164,6 +164,7 @@ def main():
             service.allocate(
                 run_id,
                 Allocate(
+                    egress_policy_sha256=service.network()["policy_sha256"],
                     generation=1,
                     template=config["template"],
                     canonical_repo=repo["canonical_repo"],

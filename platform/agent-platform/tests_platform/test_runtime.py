@@ -30,8 +30,9 @@ class RuntimeTests(PlatformFixture):
     def real_profile(self):
         with self.db.transaction() as conn:
             conn.execute(
-                "INSERT INTO runtime_catalog(node_id,template_digest,repositories) "
-                "VALUES ('cocoon-local',%s,%s)",
+                "INSERT INTO runtime_catalog(node_id,template_digest,repositories,"
+                "egress_policy_sha256) "
+                "VALUES ('cocoon-local',%s,%s,%s)",
                 (
                     "localhost:15000/guest@sha256:" + "a" * 64,
                     Jsonb(
@@ -42,6 +43,7 @@ class RuntimeTests(PlatformFixture):
                             }
                         ]
                     ),
+                    "a" * 64,
                 ),
             )
         response = self.post("/agent-profiles", {"name": "Real VM fixture", "backend": "openhands"})

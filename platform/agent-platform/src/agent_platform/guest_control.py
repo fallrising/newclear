@@ -97,6 +97,10 @@ def main():
             environment,
         )
     require(request["action"] == "check")
+    interfaces = {p.name for p in Path("/sys/class/net").iterdir()}
+    require("lo" in interfaces and interfaces <= {"lo", "sit0"})
+    if "sit0" in interfaces:
+        require(int(Path("/sys/class/net/sit0/flags").read_text(), 16) & 1 == 0)
     require(stat.S_ISDIR(check_path(CODE, 0o755).st_mode))
     for name, expected in request["files"].items():
         require(

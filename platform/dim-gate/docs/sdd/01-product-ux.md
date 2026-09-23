@@ -115,3 +115,8 @@ Typography：系統 sans-serif，CJK fallback；ID／digest／log 採 monospace�
 RD 首頁以服務環境健康、待處理工作與近期發布為主；Ops 優先事件、失敗、可處理審批，再顯示容量與時效；Admin 顯示待發布目錄、整合及權限變更。沒有 sample 顯示 unknown；觀測超過5分鐘為 stale，CI/整合資料超過24小時為 stale。容量是配置帳本，不當成即時用量。每區塊/來源有資料時間與 canonical detail。首頁 project/environment、Ops provider/pool 保存在 URL，browser Back 與刷新保留；跨工作區清除不適用 scope 並顯示說明。
 
 W1 revision4：641–1100px 保留可辨識文字及分組導航，<=640px 使用原有可操作選單。切工作區前以canonical API確認scope；清除不合法／不匹配條件時說明，保留獨立合法部分。確認失敗保留原URL與工作區，讓使用者重新選擇重試。
+
+
+## W2 integration delta
+
+W2 adds service resources at /rd/apps/:appId/resources, typed resource-request wizards, canonical change detail, Ops cache/messaging/cluster pages and WorkItem projections at existing request-list routes. Compute Request and Release detail/commands are preserved. Scope/filter/deep refresh and explicit denial apply to each route. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).

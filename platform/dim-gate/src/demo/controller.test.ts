@@ -31,7 +31,7 @@ describe('persisted controller identity and transactions', () => {
     expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(h.raw).toBe(raw)
     const recovered = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
     expect(recovered.getSnapshot().scheduler.tasks).toEqual([])
     expect(h.raw).not.toBe(raw)
   })
@@ -142,8 +142,8 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m4-v1' })
-    expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w2-v1' })
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
   })
 
   it('read-only/unavailable storage never silently selects memory', () => {

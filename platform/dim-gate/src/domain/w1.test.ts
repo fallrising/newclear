@@ -75,7 +75,7 @@ describe('W1 canonical workspace home projections', () => {
     expect(result.scope.environments).toHaveLength(4)
     expect(result.scope.environments.every(e => ['app-checkout', 'app-storefront'].includes(e.applicationId))).toBe(true)
     expect(result.scope.pools.map(p => p.id)).toEqual(['pool-idc-sg'])
-    expect(result).toMatchObject({ applicationCount: 1, environmentCount: 1, ciCount: 1 })
+    expect(result).toMatchObject({ applicationCount: 1, environmentCount: 1, ciCount: 2 })
     expect(h.home('ops', ops, 'environmentId=env-checkout-dev&provider=aliyun').capacity.total).toBe(0)
     emptyData(h.dashboard('ops', ops, 'environmentId=env-checkout-dev&provider=aliyun'))
   })
@@ -222,7 +222,7 @@ describe('W1 canonical workspace home projections', () => {
   it('returns bounded deterministic items, exact totals and only registered permitted drilldowns', () => {
     const initial = createSeed('w1-domain'); initial.entities.cis.forEach(ci => { ci.observedAt = null })
     const h = harness(initial), home = h.home('ops')
-    expect(home.staleness.total).toBe(60); expect(home.staleness.items).toHaveLength(20)
+    expect(home.staleness.total).toBe(63); expect(home.staleness.items).toHaveLength(20)
     expect(home.staleness.items.map(i => i.sourceId)).toEqual(initial.entities.cis.map(ci => ci.id).sort().slice(0, 20))
     for (const [center, actor] of [['rd', rd], ['ops', ops], ['admin', admin]] as const) {
       const session = h.engine.read('/session', new URLSearchParams(), actor) as Parameters<typeof canAccessRoute>[0]

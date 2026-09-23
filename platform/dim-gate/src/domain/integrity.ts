@@ -1,6 +1,7 @@
-import type { Snapshot } from './schemas'
+import type { LegacySnapshot, Snapshot } from './schemas'
 import { deliveryIntegrityErrors } from './delivery-integrity'
 import { observationIntegrityErrors } from './observation-integrity'
+import { resourceIntegrityErrors } from './resource-integrity'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
 export function integrityErrors(snapshot: Snapshot): string[] {
@@ -81,5 +82,12 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot)]
+}
+
+/** Validate original relationships before any additive W2 migration metadata is applied. */
+export function legacyIntegrityErrors(snapshot: LegacySnapshot): string[] {
+  return integrityErrors({ ...snapshot, schemaVersion: 2, seedVersion: 'dim-gate-w2-v1', entities: { ...snapshot.entities,
+    resourceObjects: [], resourceBindings: [], resourceQuotas: [], changes: [], changeExecutions: [],
+  } })
 }

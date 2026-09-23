@@ -73,3 +73,6 @@ pnpm test:isolation
 M0 已鎖定 React 19.3、TypeScript 5.9.3、Vite 8.3、Tailwind 4.3、Radix/shadcn 風格可維護元件、React Router、TanStack Query、Zod 4 與 MSW 2；精確 patch 版與傳遞依賴見 package.json／pnpm-lock.yaml。Table、React Hook Form、React Flow 與 Recharts 在對應里程碑有實際需求時再加入。
 
 本項目是 `fallrising/newclear` 中獨立的前端 component；未來透過 API adapter 接入後端。`platform/prism`、`specs/fleet` 與 `apps/cloudform` 只作可能的整合參考，不是第一版啟動依賴。授權沿用 repository 根目錄 MIT。
+
+
+W2 development checkpoint: Redis allocations, Kafka topics, service bindings and shared work-items now have domain/API/UI implementation. Snapshotv1→v2 migration preserves validated W1 history and active operations. This is not yet a W2 acceptance claim; see [STATUS](docs/STATUS.md) and [W2 contract](docs/W2-INTEGRATION-CONTRACT.md). Demo remains local and Mock-first, with W3–W5 pending.

@@ -73,3 +73,6 @@ fixture 沿用原60 CI及三 provider regression，新增 deterministic Resource
 每個產品增量：focused domain/contract tests → clean build → 真 UI happy path + 有代表性的拒絕／失敗 → 受影響的 v0.1 regression → 原生 lint/typecheck/test/docs/contracts/CI/architecture → 相應效能及 browser gates → 未參與實作的固定 commit review。gate 命令依 [07](07-delivery-validation.md) 與當期 task；不為純文件修改重跑所有本地瀏覽器測試，但既有 PR required CI 仍須通過。
 
 文件交付只驗證連結、需求/AC映射、內部一致性、範圍與 Git diff；不算 AC-WS 產品驗收。PLAN 保存 task/owner/decision；STATUS 明確分開「已定義／已實作／已驗證」，來源版本、review、CI 與合併狀態各自記錄。任何真實 adapter、雲端、SSO、網路執行、外部通知或部署另立 integration 工作，不因合併本 SDD 而啟用。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

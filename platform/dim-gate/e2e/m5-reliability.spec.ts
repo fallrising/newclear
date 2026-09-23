@@ -115,7 +115,7 @@ test('AC-28: explicit reset clears running work and reload/clock advancement can
     expect(current.snapshot.jobs).toEqual([])
     expect(current.snapshot.scheduler.tasks).toEqual([])
     expect(current.snapshot.entities.requests).toEqual([])
-    expect(current.snapshot.entities.cis).toHaveLength(60)
+    expect(current.snapshot.entities.cis).toHaveLength(63)
     expect(current.snapshot.audit).toHaveLength(1)
     expect(current.snapshot.audit[0].action).not.toContain('provision')
     await info.attach('reset-generation', { body: JSON.stringify({ oldSession: old.snapshot.sessionId, session: current.snapshot.sessionId, generation: current.generation, jobs: current.snapshot.jobs, scheduler: current.snapshot.scheduler }, null, 2), contentType: 'application/json' })

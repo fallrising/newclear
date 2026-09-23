@@ -84,3 +84,6 @@ RD 看服務 incident 與診斷，Ops 負責既有 acknowledge/investigate；不
 ## 8. RD 的可驗收結果
 
 對應 REQ-WS-01/02/03/05/07/08/09/10；核心驗收 AC-WS-01～07、09～12、15～18。最小角色故事是：找到服務 → 在合法環境提出 Redis／Kafka 需求 → 查看同張工作單的批准與交付 → 使用實際回傳的 Binding → 從服務頁看變更與運行狀態。CI/CD 配置與監控／告警設定分別在 W3/W4 才加入，不能用既有 Run 或 Incident 頁宣稱已完成配置能力。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

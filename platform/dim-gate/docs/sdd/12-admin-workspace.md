@@ -79,3 +79,6 @@ RD 配置服務的通知訂閱與可用 channel；Ops 觀察／處置告警、�
 ## 9. Admin 的可驗收結果
 
 對應 REQ-WS-01/06/08/09/10；驗收 AC-WS-01/02/12～18。主線：調整已註冊入口 → 預覽不同角色 → 发布 catalog revision → RD 看到合法模板且舊申請不變 → 修改某使用者 grant → 舊 dialog 的提交被 domain 拒絕。W5 再驗證平台功能 cohort、路由與通知；它們的成功不得賦予 Admin 業務發布或共享資源執行權。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

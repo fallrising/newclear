@@ -17,7 +17,7 @@ describe('M0 schema and seed contracts', () => {
     const snapshot = seed()
     expect(snapshotSchema.parse(snapshot)).toEqual(snapshot)
     expect(seed()).toEqual(snapshot)
-    expect(Object.fromEntries((['aws', 'aliyun', 'onprem'] as const).map((provider) => [provider, snapshot.entities.cis.filter((ci) => ci.provider === provider).length]))).toEqual({ aws: 20, aliyun: 20, onprem: 20 })
+    expect(Object.fromEntries((['aws', 'aliyun', 'onprem'] as const).map((provider) => [provider, snapshot.entities.cis.filter((ci) => ci.provider === provider).length]))).toEqual({ aws: 22, aliyun: 20, onprem: 21 })
     expect(snapshot.entities.applications).toHaveLength(6)
     expect(snapshot.entities.environments).toHaveLength(12)
     expect(snapshot.entities.environments.some((env) => env.applicationId === 'app-checkout' && env.stage === 'staging')).toBe(false)
@@ -73,10 +73,10 @@ describe('scope-aware read projections', () => {
     const commerce = read(engine, '/dashboard', 'user-rd-commerce', 'center=rd') as DashboardView
     expect(commerce.applicationCount).toBe(3)
     expect(commerce.environmentCount).toBe(6)
-    expect(commerce.ciCount).toBe(30)
-    expect(commerce.providers).toEqual([{ provider: 'aws', count: 20 }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 10 }])
+    expect(commerce.ciCount).toBe(33)
+    expect(commerce.providers).toEqual([{ provider: 'aws', count: 22 }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 11 }])
     const page = read(engine, '/cis', 'user-rd-commerce', 'page=2&pageSize=1') as Page<CI>
-    expect(page.total).toBe(30)
+    expect(page.total).toBe(33)
     expect(page.items).toHaveLength(1)
     expect((read(engine, '/cis', 'user-rd-commerce', 'q=data-demo') as Page<CI>).total).toBe(0)
     expect((read(engine, '/cis', 'user-rd-commerce', 'projectId=project-data') as Page<CI>).total).toBe(0)
@@ -92,7 +92,7 @@ describe('scope-aware read projections', () => {
     expect(organization.projects.map((project) => project.id)).toEqual(['project-store', 'project-payments'])
     expect(organization.users.map((user) => user.id)).toEqual(['user-rd-commerce'])
     expect((read(engine, '/cis/ci-idc-redis-01') as CI).visibilityProjectIds).toEqual(['project-store'])
-    expect((read(engine, '/dashboard', 'user-admin', 'center=admin') as DashboardView).ciCount).toBe(60)
+    expect((read(engine, '/dashboard', 'user-admin', 'center=admin') as DashboardView).ciCount).toBe(63)
   })
 
   it('scrubs operations-only attributes from a project-only view', () => {

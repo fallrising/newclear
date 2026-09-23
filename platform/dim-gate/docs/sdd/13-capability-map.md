@@ -51,3 +51,6 @@ Mock 可以有完整的產品操作閉環，仍不表示操作真實資源。每
 每個 capability 必須先指定：canonical entity、owner domain、provider support、RD consumer projection、Ops operator projection、Admin governance projection、required actions/scopes、read/write/approval/execution contracts、非支援行為、Mock scenario 與驗收。並非每項能力都有三個可操作頁面；例如 Admin 管理 Kafka 模板與 adapter，不再做一份 Kafka topic console。
 
 能力必須可接到至少一條真實可驗證的流程；「新 menu + 靜態表格」只能算導航原型。新增第三方 adapter 另記來源/API 版本、credential owner、read-only/write 邊界、同步與部分失敗契約，再獨立驗證。不因參考清單含某平台名稱就宣稱相容或已整合。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

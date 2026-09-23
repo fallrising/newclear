@@ -58,7 +58,7 @@ test('AC-WS-02: non-empty home cards follow canonical request, failed execution,
     steps.push('RD sees same failed request after Ops execution');
     await become('user-admin');
     await page.goto('admin/catalog');
-    await role('button', '建立下一版草稿').click();
+    await page.locator('article').filter({ has: page.getByText('catalog-web', { exact: true }) }).getByRole('button', { name: '建立下一版草稿' }).click();
     await expect(page.getByText('rev 2 · 草稿')).toBeVisible();
     await home('admin');
     const drafts = role('region', '待發布目錄草稿');

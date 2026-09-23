@@ -44,7 +44,7 @@ describe('W1 dashboard HTTP contract and typed client', () => {
     const filters = { projectId: 'project-store', environmentId: 'env-checkout-dev', provider: 'onprem' as const, poolId: 'pool-idc-sg' }
     const result = await client.api.getDashboard('ops', filters)
     expect(result.scope.filters).toEqual(filters)
-    expect(result).toMatchObject({ applicationCount: 1, environmentCount: 1, ciCount: 1 })
+    expect(result).toMatchObject({ applicationCount: 1, environmentCount: 1, ciCount: 2 })
     expect(result.workspace.kind === 'ops' && result.workspace.capacity.items.map(i => i.sourceId)).toEqual(['pool-idc-sg'])
     const session = controller.getSession(), key = client.queryKey('dashboard', 'ops', filters)
     expect(key).toEqual([session.sessionId, session.identityEpoch, session.policyVersion, 'dashboard', 'ops', filters])

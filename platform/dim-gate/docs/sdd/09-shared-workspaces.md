@@ -124,3 +124,6 @@ W1 已依 [integration contract](../W1-INTEGRATION-CONTRACT.md) 擴充既有 `/d
 Read 使用既有 ApiResult/Page、scope 先行及上限；WorkspaceHome 是 discriminated union（rd/ops/admin），每個卡片含 dataAsOf、source refs 與合法下鑽條件。commands 回既有 CommandReceipt；async 回 operationId，不能只有 toast。錯誤沿用401/403/404/409/422/429/503/507；配置驗證增加可定位的 fieldErrors，不把一般 version conflict 轉成自動覆蓋。
 
 React 僅透過 API client/query/mutation；domain feature 共用 schema、selector、policy、command，工作區層只組裝投影。不要建立 rdRedisStore／opsRedisStore 或三套各自的 mock handler。Route registry 固定 capability/action；導航配置只能引用已註冊 route key。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

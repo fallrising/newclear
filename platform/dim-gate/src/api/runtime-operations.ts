@@ -510,5 +510,131 @@ export const runtimeOperations: readonly { method: string; path: string; status:
     "status": 200,
     "demo": false,
     "milestone": "M4"
+  },
+  {
+    "method": "get",
+    "path": "/resource-objects",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/resource-objects/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/bindings",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/bindings/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/resource-inventory",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/resource-inventory/{ciId}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/applications/{id}/resources",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/work-items",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/changes",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "get",
+    "path": "/changes/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes",
+    "status": 201,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "patch",
+    "path": "/changes/{id}",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/submit",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/approve",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/reject",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/cancel",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/execute",
+    "status": 202,
+    "demo": false,
+    "milestone": "W2"
+  },
+  {
+    "method": "post",
+    "path": "/changes/{id}/retry",
+    "status": 200,
+    "demo": false,
+    "milestone": "W2"
   }
 ]

@@ -2,7 +2,7 @@ import { createSeed } from '../src/demo/seed'
 import { createEngine } from '../src/domain/engine'
 import type { CI, Page } from '../src/domain/schemas'
 
-// Independent read-only memory profile: baseline 60 CIs, then deterministic
+// Independent read-only memory profile: baseline 63 CIs, then deterministic
 // provider-preserving clones with unique canonical identities up to 5,000.
 // Existing references remain intact; capacity is explicitly enlarged for this
 // synthetic profile. No benchmark snapshot is written to application storage.
@@ -37,7 +37,7 @@ export function runQueryBenchmark() {
     samples.push({ index, query: query.toString(), durationMs, total: result.total, ids: result.items.map(ci => ci.id) })
   }
   if (persisted || before !== JSON.stringify(engine.getSnapshot())) throw new Error('Read-only benchmark mutated its profile')
-  return { count: profile.entities.cis.length, profile: 'baseline 60 plus 4,940 deterministic provider-preserving clones; enlarged pool capacities; read-only memory',
+  return { count: profile.entities.cis.length, profile: 'baseline 63 plus 4,937 deterministic provider-preserving clones; enlarged pool capacities; read-only memory',
     cpuThrottle: 1, httpDelay: 'excluded: direct production engine.read', warmupSamples: 0, samples,
     p95Ms: samples.map(sample => sample.durationMs).sort((a, b) => a - b)[94] }
 }

@@ -82,3 +82,6 @@ Ops 面板須同時呈現 desired revision、已生效 revision、observedAt 及
 ## 8. Ops 的可驗收結果
 
 對應 REQ-WS-01/02/04/05/07/08/09/10；驗收 AC-WS-01～09、11～12、15～18。主線：看到 RD 同一筆 Redis／Kafka 需求 → 查目前容量與可見影響 → 批准／執行 → 在專業面板看到唯一 object/binding → RD 返回服務頁看到同一結果。另一條主線是從 incident 追到共享資源與變更，維持 v0.1 的認領、調查及恢復樣本規則。
+
+
+W2 implementation checkpoint (2026-09-23): canonical resource/change domain, typed APIs, atomic migration and initial UI are now implemented under [W2 contract](../W2-INTEGRATION-CONTRACT.md), with299 integrated unit tests passing. Full browser/performance/review/CI acceptance is pending; W2 is **NOT_ACCEPTED**. Historical status statements above describe the pre-W2 baseline. W3–W5 and all later/unclarified capabilities remain unimplemented. See [STATUS](../STATUS.md) and the latest root PLAN for the fixed evidence and remaining gates.

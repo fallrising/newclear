@@ -8,6 +8,7 @@ import { createObservabilityClient } from './clients/observability'
 import { createDeliveryClient } from './clients/delivery'
 import { createSessionClient } from './clients/session'
 import { createSelfServiceClient } from './clients/self-service'
+import { createResourcesClient } from './clients/resources'
 import { createTopologyClient } from './clients/topology'
 import { ApiRequestError } from './core/errors'
 import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
@@ -131,6 +132,7 @@ export function createApiClient() {
     ...createAdminClient(request),
     ...createDeliveryClient(request),
     ...createObservabilityClient(request),
+    ...createResourcesClient(request),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

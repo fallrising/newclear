@@ -104,7 +104,7 @@ export const roleAssignmentSchema = z.strictObject({
 export const navigationItemSchema = z.strictObject({
   ...scopedBase, routeKey: z.enum([
     'rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'rd.pipelines', 'rd.observability',
-    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases', 'ops.incidents',
+    'ops.overview', 'ops.cmdb', 'ops.topology', 'ops.requests', 'ops.jobs', 'ops.capacity', 'ops.releases', 'ops.incidents', 'ops.caches', 'ops.messaging', 'ops.clusters',
     'admin.overview', 'admin.access', 'admin.navigation', 'admin.catalog', 'admin.cmdb-models', 'admin.audit', 'admin.integrations',
     'guide',
   ]),
@@ -120,19 +120,138 @@ export const provisionJobSchema = z.strictObject({
   plannedCiIds: ids, failureCode: idSchema.optional(), startedAt: timestampSchema.optional(), completedAt: timestampSchema.optional(), correlationId: idSchema,
 })
 // Forward contracts are declared in M0; their business commands remain unavailable until the corresponding milestone.
-export const catalogTemplateSchema = z.strictObject({
+export const computeCatalogTemplateSchema = z.strictObject({
   allowedProviders: z.array(providerSchema).min(1), allowedStages: z.array(stageSchema).min(1), allowedPoolIds: ids,
   defaults: z.strictObject({ cpu: z.number().int().min(1).max(64), memoryMiB: z.number().int().min(128).max(262144).multipleOf(128) }),
   limits: z.strictObject({ maxCpu: z.number().int().min(1).max(64), maxMemoryMiB: z.number().int().min(128).max(262144).multipleOf(128) }),
   requiresApproval: z.literal(true), resourceKind: z.literal('compute'), bootstrapProfile: z.literal('web-service'),
 })
+export const bindingPurposeSchema = z.enum(['runtime', 'producer', 'consumer'])
+export const resourceAccessProfiles = [
+  { id: 'w2-profile-redis-runtime', label: 'Redis runtime', resourceKind: 'redis', purposes: ['runtime'] },
+  { id: 'w2-profile-kafka-producer', label: 'Kafka producer', resourceKind: 'kafka', purposes: ['producer'] },
+  { id: 'w2-profile-kafka-consumer', label: 'Kafka consumer', resourceKind: 'kafka', purposes: ['consumer'] },
+  { id: 'w2-profile-k8s-reader', label: 'Kubernetes readonly', resourceKind: 'kubernetes', purposes: ['runtime'] },
+] as const
+export const resourceAccessProfileSchema = z.strictObject({ id: idSchema, label: nameSchema, purposes: z.array(bindingPurposeSchema).min(1) })
+const resourceTemplateFields = {
+  allowedProviders: z.array(providerSchema).min(1), allowedStages: z.array(stageSchema).min(1), allowedPoolIds: ids,
+  allowedParentCiIds: ids, accessProfiles: z.array(resourceAccessProfileSchema).min(1), requiresApproval: z.literal(true),
+}
+export const redisCatalogTemplateSchema = z.strictObject({ ...resourceTemplateFields, resourceKind: z.literal('redis'),
+  defaults: z.strictObject({ quotaMiB: z.number().int().positive() }),
+  limits: z.strictObject({ minQuotaMiB: z.number().int().positive(), maxQuotaMiB: z.number().int().positive() }),
+})
+export const kafkaCatalogTemplateSchema = z.strictObject({ ...resourceTemplateFields, resourceKind: z.literal('kafka'),
+  defaults: z.strictObject({ partitions: z.number().int().positive(), retentionHours: z.number().int().positive(), throughputKiBPerSecond: z.number().int().positive() }),
+  limits: z.strictObject({ minPartitions: z.number().int().positive(), maxPartitions: z.number().int().positive(),
+    minRetentionHours: z.number().int().positive(), maxRetentionHours: z.number().int().positive(),
+    minThroughputKiBPerSecond: z.number().int().positive(), maxThroughputKiBPerSecond: z.number().int().positive() }),
+})
+export const catalogTemplateSchema = z.discriminatedUnion('resourceKind', [computeCatalogTemplateSchema, redisCatalogTemplateSchema, kafkaCatalogTemplateSchema])
 export const catalogItemSchema = z.strictObject({
   ...scopedBase, name: nameSchema, description: z.string().max(2000), revision: versionSchema,
   status: z.enum(['draft', 'published', 'disabled']), allowedProjectIds: ids, template: catalogTemplateSchema,
 })
+export const computeCatalogItemSchema = catalogItemSchema.extend({ template: computeCatalogTemplateSchema })
+export const resourceObjectKindSchema = z.enum(['cache_allocation', 'kafka_topic', 'kubernetes_namespace'])
+const resourceObjectFields = { ...scopedBase, parentCiId: idSchema, externalRef: idSchema, name: nameSchema,
+  namespace: nameSchema.optional(), lifecycle: z.enum(['active', 'retired']), observedAt: timestampSchema.nullable() }
+const cpuMemorySchema = z.strictObject({ cpuMilli: z.number().int().nonnegative(), memoryMiB: z.number().int().nonnegative() })
+export const resourceObjectSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ ...resourceObjectFields, kind: z.literal('cache_allocation'), spec: z.strictObject({ quotaMiB: z.number().int().positive() }) }),
+  z.strictObject({ ...resourceObjectFields, kind: z.literal('kafka_topic'), spec: z.strictObject({ partitions: z.number().int().positive(), retentionHours: z.number().int().positive(), throughputKiBPerSecond: z.number().int().positive() }) }),
+  z.strictObject({ ...resourceObjectFields, kind: z.literal('kubernetes_namespace'), spec: z.strictObject({
+    workloads: z.array(z.strictObject({ name: nameSchema, kind: z.enum(['Deployment', 'StatefulSet', 'DaemonSet']), replicas: z.number().int().nonnegative(), requests: cpuMemorySchema, limits: cpuMemorySchema })).max(20),
+    nodes: z.array(z.strictObject({ name: nameSchema, allocatable: cpuMemorySchema, requested: cpuMemorySchema })).max(20),
+  }) }),
+])
+export const resourceBindingSchema = z.strictObject({ ...scopedBase, applicationId: idSchema, environmentId: idSchema,
+  ciId: idSchema, resourceObjectId: idSchema.optional(), placementId: idSchema, purpose: bindingPurposeSchema,
+  accessProfileRef: idSchema, state: z.enum(['active', 'released']),
+  requestRef: z.strictObject({ sourceType: z.enum(['seed', 'change', 'request']), sourceId: idSchema }),
+})
+export const resourceQuotaSchema = z.discriminatedUnion('resourceKind', [
+  z.strictObject({ ...scopedBase, parentCiId: idSchema, resourceKind: z.literal('redis'), capacity: z.strictObject({ quotaMiB: z.number().int().positive() }),
+    observedAt: timestampSchema.nullable(), observedUsage: z.strictObject({ quotaMiB: z.number().nonnegative().nullable() }) }),
+  z.strictObject({ ...scopedBase, parentCiId: idSchema, resourceKind: z.literal('kafka'), capacity: z.strictObject({ topics: z.number().int().positive(), partitions: z.number().int().positive(), throughputKiBPerSecond: z.number().int().positive() }),
+    observedAt: timestampSchema.nullable(), observedUsage: z.strictObject({ topics: z.number().nonnegative().nullable(), partitions: z.number().nonnegative().nullable(), throughputKiBPerSecond: z.number().nonnegative().nullable() }) }),
+])
+const changeInputFields = { catalogItemId: idSchema, catalogRevision: versionSchema, reason: z.string().trim().min(1).max(500), targetCiId: idSchema, targetCiVersion: versionSchema }
+const appTargetFields = { applicationId: idSchema, environmentId: idSchema, environmentVersion: versionSchema }
+const bindInputSchema = z.strictObject({ ...changeInputFields, ...appTargetFields, kind: z.literal('resource.bind'), mode: z.enum(['create', 'existing']),
+  resourceObjectId: idSchema.optional(), resourceObjectVersion: versionSchema.optional(), quotaMiB: z.number().int().positive().optional(),
+  purpose: bindingPurposeSchema, accessProfileRef: idSchema,
+})
+const resizeInputSchema = z.strictObject({ ...changeInputFields, kind: z.literal('resource.resize'), applicationId: idSchema.optional(), environmentId: idSchema.optional(), environmentVersion: versionSchema.optional(),
+  resourceObjectId: idSchema, resourceObjectVersion: versionSchema, quotaMiB: z.number().int().positive(),
+})
+const topicInputSchema = z.strictObject({ ...changeInputFields, ...appTargetFields, kind: z.literal('kafka.topic.create'),
+  topicName: z.string().trim().min(1).max(80).regex(/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/), namespace: nameSchema.optional(),
+  partitions: z.number().int().positive(), retentionHours: z.number().int().positive(), throughputKiBPerSecond: z.number().int().positive(),
+  purpose: bindingPurposeSchema, accessProfileRef: idSchema,
+})
+function refineChangeInput(value: { kind: string; mode?: string; quotaMiB?: number; resourceObjectId?: string; resourceObjectVersion?: number; applicationId?: string; environmentId?: string; environmentVersion?: number }, ctx: z.RefinementCtx) {
+  if (value.kind === 'resource.bind' && (value.mode === 'create'
+    ? value.quotaMiB === undefined || value.resourceObjectId !== undefined || value.resourceObjectVersion !== undefined
+    : value.resourceObjectId === undefined || value.resourceObjectVersion === undefined || value.quotaMiB !== undefined)) {
+    ctx.addIssue({ code: 'custom', path: ['mode'], message: 'Create requires quota only; existing requires object ID/version only' })
+  }
+  if (value.kind === 'resource.resize' && [value.applicationId, value.environmentId, value.environmentVersion].filter(v => v !== undefined).length % 3 !== 0) {
+    ctx.addIssue({ code: 'custom', path: ['applicationId'], message: 'Application, environment and version must be supplied together' })
+  }
+}
+export const createChangeInputSchema = z.discriminatedUnion('kind', [bindInputSchema, resizeInputSchema, topicInputSchema]).superRefine(refineChangeInput)
+export const patchChangeInputSchema = z.discriminatedUnion('kind', [bindInputSchema.extend({ expectedVersion: versionSchema }), resizeInputSchema.extend({ expectedVersion: versionSchema }), topicInputSchema.extend({ expectedVersion: versionSchema })]).superRefine(refineChangeInput)
+export const changeStateSchema = z.enum(['draft', 'submitted', 'approved', 'rejected', 'cancelled', 'executing', 'succeeded', 'failed'])
+export const resourceReferenceSchema = z.strictObject({ entityType: z.enum(['ci', 'resourceObject', 'resourceBinding', 'application', 'environment']), entityId: idSchema })
+export const changeRequestSchema = z.strictObject({ ...scopedBase, requesterId: idSchema, kind: z.enum(['resource.bind', 'resource.resize', 'kafka.topic.create']), poolId: idSchema,
+  spec: createChangeInputSchema, specSnapshot: createChangeInputSchema.optional(), catalogSnapshot: catalogItemSchema.optional(),
+  targetRefs: z.array(resourceReferenceSchema), targetVersions: z.array(resourceReferenceSchema.extend({ version: versionSchema })),
+  riskClass: z.enum(['standard', 'shared']), state: changeStateSchema, correlationId: idSchema,
+  decisions: z.array(z.strictObject({ actorId: idSchema, decision: z.enum(['approved', 'rejected']), reason: z.string().trim().min(1).max(500), occurredAt: timestampSchema })),
+  latestExecutionId: idSchema.optional(), plannedObjectIds: ids, plannedBindingIds: ids,
+})
+export const changeExecutionSchema = z.strictObject({ ...scopedBase, changeId: idSchema, attempt: versionSchema, state: z.enum(['queued', 'running', 'succeeded', 'failed']),
+  targetRefs: z.array(resourceReferenceSchema), plannedObjectIds: ids, plannedBindingIds: ids,
+  stepResults: z.array(z.strictObject({ name: z.enum(['validate', 'reserve', 'configure', 'register', 'verify']), state: z.enum(['queued', 'running', 'succeeded', 'failed', 'skipped']), occurredAt: timestampSchema.optional() })).length(5),
+  failureCode: idSchema.optional(), startedAt: timestampSchema.optional(), completedAt: timestampSchema.optional(), correlationId: idSchema,
+})
+export const resourceCapacitySchema = z.strictObject({ ciId: idSchema, impactIncomplete: z.boolean(), dataAsOf: timestampSchema,
+  dimensions: z.array(z.strictObject({ name: z.enum(['quotaMiB', 'topics', 'partitions', 'throughputKiBPerSecond']), capacity: z.number().nonnegative(),
+    used: z.number().nonnegative().nullable(), reserved: z.number().nonnegative().nullable(), available: z.number().nonnegative().nullable(), observed: z.number().nonnegative().nullable() })),
+})
+export const resourceConsumerSchema = z.strictObject({ applicationId: idSchema, applicationName: nameSchema, environmentId: idSchema, environmentName: nameSchema, stage: stageSchema })
+export const resourceInventorySchema = z.strictObject({
+  ci: z.strictObject({ id: idSchema, name: nameSchema, kind: ciKindSchema, provider: providerSchema, poolId: idSchema, version: versionSchema, health: healthSchema, observedAt: timestampSchema.nullable() }),
+  objects: z.array(resourceObjectSchema), bindings: z.array(resourceBindingSchema), consumers: z.array(resourceConsumerSchema),
+  capacity: resourceCapacitySchema.nullable(), impactIncomplete: z.boolean(), readOnly: z.boolean(), dataAsOf: timestampSchema,
+  legacyAssociations: z.array(z.strictObject({ placementId: idSchema, applicationId: idSchema, environmentId: idSchema })),
+})
+export const serviceResourcesSchema = z.strictObject({ applicationId: idSchema, environmentId: idSchema, resources: z.array(resourceInventorySchema), dataAsOf: timestampSchema })
+export const changeDetailSchema = z.strictObject({ change: changeRequestSchema, executions: z.array(changeExecutionSchema),
+  impact: z.strictObject({ consumers: z.array(resourceConsumerSchema), incomplete: z.boolean() }), capacity: resourceCapacitySchema.nullable(),
+  availableActions: z.array(z.enum(['edit', 'submit', 'approve', 'reject', 'cancel', 'execute', 'retry'])), dataAsOf: timestampSchema,
+})
+export const workItemSchema = z.strictObject({ sourceType: z.enum(['request', 'release', 'change']), sourceId: idSchema, rawState: z.string(), stateLabel: z.string(),
+  actionRequired: z.boolean(), targetRefs: z.array(z.strictObject({ entityType: idSchema, entityId: idSchema })),
+  requester: z.strictObject({ id: idSchema, displayName: nameSchema }), approver: z.strictObject({ id: idSchema, displayName: nameSchema }).nullable(),
+  createdAt: timestampSchema, updatedAt: timestampSchema, dataAsOf: timestampSchema, route: z.string().startsWith('/'),
+})
+const resourcePageFields = { q: z.string().max(100).optional(), page: z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25), order: z.enum(['asc', 'desc']).default('asc') }
+const resourceScopeFields = { applicationId: idSchema.optional(), environmentId: idSchema.optional(), ciId: idSchema.optional(), provider: providerSchema.optional(), poolId: idSchema.optional() }
+export const resourceObjectListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, kind: resourceObjectKindSchema.optional(), sort: z.enum(['id', 'name', 'updatedAt']).default('name') })
+export const resourceBindingListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, resourceObjectId: idSchema.optional(), state: resourceBindingSchema.shape.state.optional(), sort: z.enum(['id', 'updatedAt']).default('id') })
+export const resourceInventoryQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, kind: z.enum(['cache', 'queue', 'cluster']).optional(), sort: z.enum(['id', 'name', 'updatedAt']).default('name') })
+export const serviceResourcesQuerySchema = z.strictObject({ environmentId: idSchema })
+export const changeListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, kind: changeRequestSchema.shape.kind.optional(), state: changeStateSchema.optional(), owner: z.enum(['mine', 'team']).optional(), sort: z.enum(['id', 'updatedAt', 'createdAt']).default('updatedAt') })
+export const workItemListQuerySchema = z.strictObject({ ...resourcePageFields, ...resourceScopeFields, center: z.enum(['rd', 'ops']), source: workItemSchema.shape.sourceType.optional(),
+  owner: z.enum(['mine', 'team']).optional(), view: z.enum(['pending', 'all']).optional(), phase: z.enum(['pending', 'decided', 'execution', 'failed', 'completed']).optional(),
+  state: z.enum(['draft', 'submitted', 'approved', 'rejected', 'cancelled', 'provisioning', 'fulfilled', 'failed', 'pending_approval', 'queued', 'deploying', 'verifying', 'executing', 'succeeded']).optional(), sort: z.enum(['sourceId', 'updatedAt', 'createdAt']).default('updatedAt') })
 export const requestSchema = z.strictObject({
   ...scopedBase, requesterId: idSchema, applicationId: idSchema, environmentName: nameSchema, stage: stageSchema,
-  catalogItemId: idSchema, catalogRevision: versionSchema, templateSnapshot: catalogTemplateSchema, provider: providerSchema,
+  catalogItemId: idSchema, catalogRevision: versionSchema, templateSnapshot: computeCatalogTemplateSchema, provider: providerSchema,
   poolId: idSchema, cpu: z.number().int().min(1).max(64), memoryMiB: z.number().int().min(128).max(262144).multipleOf(128),
   purpose: z.string().trim().min(1).max(500), state: z.enum(['draft', 'submitted', 'approved', 'rejected', 'cancelled', 'provisioning', 'fulfilled', 'failed']),
   approval: z.strictObject({ actorId: idSchema, occurredAt: timestampSchema, reason: z.string().min(1).max(500) }).optional(),
@@ -227,7 +346,7 @@ export const idempotencyRecordSchema = z.strictObject({
   bodyHash: z.string(), canonicalBody: z.string(), receipt: commandReceiptSchema,
 })
 export const snapshotSchema = z.strictObject({
-  schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m4-v1'), sessionId: idSchema,
+  schemaVersion: z.literal(2), seedVersion: z.literal('dim-gate-w2-v1'), sessionId: idSchema,
   logicalClock: z.number().int().nonnegative(), sequence: z.number().int().nonnegative(),
   storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema, commandCount: z.number().int().min(0).max(1000),
   entities: z.strictObject({
@@ -239,6 +358,8 @@ export const snapshotSchema = z.strictObject({
     catalogs: z.array(catalogItemSchema), catalogHistory: z.array(catalogItemSchema), requests: z.array(requestSchema),
     pipelines: z.array(pipelineRunSchema), releases: z.array(releaseSchema), artifacts: z.array(artifactSchema),
     incidents: z.array(incidentSchema), integrations: z.array(integrationSchema),
+    resourceObjects: z.array(resourceObjectSchema), resourceBindings: z.array(resourceBindingSchema), resourceQuotas: z.array(resourceQuotaSchema),
+    changes: z.array(changeRequestSchema), changeExecutions: z.array(changeExecutionSchema),
   }),
   observations: z.strictObject({ buckets: z.array(observationBucketSchema), traces: z.array(traceSchema), logs: z.array(observationLogSchema),
     recoveries: z.array(z.strictObject({ environmentId: idSchema, releaseId: idSchema, remaining: z.number().int().min(1).max(3), dueTick: z.number().int().nonnegative() })) }),
@@ -246,6 +367,13 @@ export const snapshotSchema = z.strictObject({
   jobs: z.array(provisionJobSchema), events: z.array(eventSchema), audit: z.array(auditEventSchema),
   idempotency: z.array(idempotencyRecordSchema), scenarioFlags: jsonFields,
   scheduler: z.strictObject({ tasks: z.array(z.strictObject({ id: idSchema, operationId: idSchema, stepIndex: z.number().int().nonnegative(), dueTick: z.number().int().nonnegative() })) }),
+})
+
+export const legacySnapshotSchema = snapshotSchema.extend({ schemaVersion: z.literal(1), seedVersion: z.literal('dim-gate-m4-v1'),
+  entities: snapshotSchema.shape.entities.omit({ resourceObjects: true, resourceBindings: true, resourceQuotas: true, changes: true, changeExecutions: true })
+    .extend({ catalogs: z.array(computeCatalogItemSchema), catalogHistory: z.array(computeCatalogItemSchema),
+      navigation: z.array(navigationItemSchema.extend({ routeKey: navigationItemSchema.shape.routeKey.exclude(['ops.caches', 'ops.messaging', 'ops.clusters']) })),
+    }),
 })
 
 export const personaSchema = z.strictObject({ id: idSchema, displayName: nameSchema, description: z.string(), centers: z.array(centerSchema) })
@@ -267,7 +395,7 @@ export const dashboardQuerySchema = dashboardFiltersSchema.extend({ center: cent
 ).refine(value => value.center === 'rd' || value.workOwner === undefined,
   { message: 'Work owner filter is only supported in RD', path: ['workOwner'] })
 export const workspaceHomeItemSchema = z.strictObject({
-  sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent']),
+  sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent', 'change', 'changeExecution']),
   sourceId: idSchema, title: z.string(), state: z.string(), route: z.string().startsWith('/'), dataAsOf: timestampSchema, detail: z.string(),
 })
 export const workspaceHomeSectionSchema = z.strictObject({ title: z.string(), total: z.number().int().nonnegative(), items: z.array(workspaceHomeItemSchema).max(20) })
@@ -291,7 +419,7 @@ export const dashboardViewSchema = z.strictObject({
 export const guideViewSchema = z.strictObject({
   applicationId: idSchema.nullable(), environmentId: idSchema.nullable(), steps: z.array(guideStepSchema),
   logicalClock: z.number().int().nonnegative(), storeRevision: z.number().int().nonnegative(), sessionId: idSchema,
-  seedVersion: z.literal('dim-gate-m4-v1'), schemaVersion: z.literal(1), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
+  seedVersion: z.literal('dim-gate-w2-v1'), schemaVersion: z.literal(2), pendingTasks: z.number().int().nonnegative(), commandCount: z.number().int().nonnegative(),
 })
 export const apiMetaSchema = z.strictObject({ requestId: idSchema, storeRevision: z.number().int().nonnegative(), policyVersion: versionSchema })
 export const apiErrorSchema = z.strictObject({
@@ -366,8 +494,8 @@ export const patchModelFieldInputSchema = z.strictObject({
   expectedVersion: versionSchema, label: nameSchema.optional(), hidden: z.boolean().optional(),
 }).refine((body) => Object.keys(body).length > 1, 'At least one model field property is required')
 export const scenarioInputSchema = z.strictObject({
-  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples']),
-  environmentId: idSchema.optional(), jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
+  scenarioKey: z.enum(['provision-failure', 'capacity-exhausted', 'clear-capacity-fault', 'build-failure', 'health-failure', 'rollback-failure', 'post-release-latency', 'recovery-samples', 'resource-failure']),
+  environmentId: idSchema.optional(), executionId: idSchema.optional(), jobId: idSchema.optional(), poolId: idSchema.optional(), runId: idSchema.optional(), releaseId: idSchema.optional(),
 })
 export const createPipelineInputSchema = z.strictObject({
   applicationId: idSchema, environmentId: idSchema, revision: idSchema.trim().min(1), environmentVersion: versionSchema,
@@ -381,6 +509,19 @@ export type CIView = z.infer<typeof ciViewSchema>
 export type Application = z.infer<typeof applicationSchema>
 export type RoleAssignment = z.infer<typeof roleAssignmentSchema>
 export type Snapshot = z.infer<typeof snapshotSchema>
+export type LegacySnapshot = z.infer<typeof legacySnapshotSchema>
+export type ComputeCatalogItem = z.infer<typeof computeCatalogItemSchema>
+export type ResourceObject = z.infer<typeof resourceObjectSchema>
+export type ResourceBinding = z.infer<typeof resourceBindingSchema>
+export type ResourceQuota = z.infer<typeof resourceQuotaSchema>
+export type ChangeInput = z.infer<typeof createChangeInputSchema>
+export type ChangeRequest = z.infer<typeof changeRequestSchema>
+export type ChangeExecution = z.infer<typeof changeExecutionSchema>
+export type ChangeDetail = z.infer<typeof changeDetailSchema>
+export type ResourceCapacity = z.infer<typeof resourceCapacitySchema>
+export type ResourceInventory = z.infer<typeof resourceInventorySchema>
+export type ServiceResources = z.infer<typeof serviceResourcesSchema>
+export type WorkItem = z.infer<typeof workItemSchema>
 export type Persona = z.infer<typeof personaSchema>
 export type SessionView = z.infer<typeof sessionViewSchema>
 export type SessionDomain = z.infer<typeof sessionDomainSchema>
@@ -418,6 +559,9 @@ export type ApiResult<T> = { data: T; meta: z.infer<typeof apiMetaSchema> }
 export type Page<T> = { items: T[]; total: number; page: number; pageSize: number }
 
 export const contractSchemas = {
+  ResourceObject: resourceObjectSchema, ResourceBinding: resourceBindingSchema, ResourceQuota: resourceQuotaSchema,
+  ChangeRequest: changeRequestSchema, ChangeExecution: changeExecutionSchema, CreateChange: createChangeInputSchema, PatchChange: patchChangeInputSchema,
+  ChangeDetail: changeDetailSchema, ResourceCapacity: resourceCapacitySchema, ResourceInventory: resourceInventorySchema, ServiceResources: serviceResourcesSchema, WorkItem: workItemSchema,
   Organization: organizationSchema, BusinessUnit: businessUnitSchema, Team: teamSchema, Project: projectSchema,
   User: userSchema, Application: applicationSchema, Environment: environmentSchema, ProviderAccount: providerAccountSchema,
   Location: locationSchema, ResourcePool: poolSchema, CI: ciSchema, CIView: ciViewSchema, AWSComputeAttributes: awsComputeAttributesSchema,

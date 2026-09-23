@@ -1,8 +1,10 @@
 import type { CI, Center, RoleAssignment, SessionView, Snapshot } from './schemas'
 
+const resourceRead = ['binding.read', 'resourceObject.read', 'change.read']
+const requesterActions = ['change.create', 'change.submit', 'change.cancel', 'change.retry']
 const actions: Record<Center, readonly string[]> = {
-  rd: ['app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.create', 'request.edit', 'request.submit', 'request.cancel', 'request.retry', 'request.read', 'pipeline.read', 'pipeline.trigger', 'pipeline.retry', 'pipeline.cancel', 'release.rollback', 'incident.read', 'catalog.read', 'audit.read', 'job.read', 'capacity.read'],
-  ops: ['app.read', 'environment.read', 'ci.read', 'ci.create', 'ci.update', 'relation.write', 'release.read', 'observation.read', 'request.read', 'request.approve', 'request.reject', 'request.provision', 'pipeline.read', 'release.approve', 'release.reject', 'incident.read', 'incident.acknowledge', 'incident.investigate', 'catalog.read', 'audit.read', 'integration.read', 'job.read', 'capacity.read'],
+  rd: [...resourceRead, ...requesterActions, 'app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.create', 'request.edit', 'request.submit', 'request.cancel', 'request.retry', 'request.read', 'pipeline.read', 'pipeline.trigger', 'pipeline.retry', 'pipeline.cancel', 'release.rollback', 'incident.read', 'catalog.read', 'audit.read', 'job.read', 'capacity.read'],
+  ops: [...resourceRead, ...requesterActions, 'change.approve', 'change.reject', 'change.execute', 'resource.manage', 'app.read', 'environment.read', 'ci.read', 'ci.create', 'ci.update', 'relation.write', 'release.read', 'observation.read', 'request.read', 'request.approve', 'request.reject', 'request.provision', 'pipeline.read', 'release.approve', 'release.reject', 'incident.read', 'incident.acknowledge', 'incident.investigate', 'catalog.read', 'audit.read', 'integration.read', 'job.read', 'capacity.read'],
   admin: ['app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.read', 'incident.read', 'catalog.read', 'catalog.write', 'catalog.publish', 'navigation.write', 'model.write', 'access.write', 'audit.read', 'integration.read', 'integration.test', 'capacity.read'],
 }
 

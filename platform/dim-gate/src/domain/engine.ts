@@ -6,11 +6,14 @@ import {
   patchModelFieldInputSchema, patchNavigationInputSchema, patchRequestInputSchema, patchUserInputSchema,
   providerSchema, publishCatalogInputSchema, reasonCommandSchema, revokeAssignmentSchema, scenarioInputSchema,
   roleAssignmentSchema, snapshotSchema, versionCommandSchema, type AuditEvent, type CI, type CommandInput, type CommandReceipt,
-  type GuideView, type Page, type ProvisionJob, type Relation, type Request as DomainRequest,
+  type ComputeCatalogItem, type GuideView, type Page, type ProvisionJob, type Relation, type Request as DomainRequest,
   type Snapshot,
 } from './schemas'
 import { integrityErrors } from './integrity'
 import { workspaceDashboard } from './workspace-home'
+import { advanceResources, prepareResource } from './resources'
+import { readResources, resourceRoute } from './resource-views'
+import { resourcePolicy } from './resource-policy'
 import { advanceObservation, canReadObservation, prepareObservation } from './observation'
 import { guideProjection, readObservation, visibleIntegrations } from './observation-views'
 import { policyFor, type Policy } from './policy'
@@ -140,6 +143,7 @@ function canonicalCiKey(snapshot: Snapshot, ci: Pick<CI, 'orgId' | 'provider' | 
 }
 
 function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): boolean {
+  if (['resourceObject', 'resourceBinding', 'change', 'changeExecution'].includes(audit.entityType)) return !!resourceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (policy.admin) return audit.orgId === policy.user?.orgId
   if (audit.entityType === 'ci') {
     const ci = snapshot.entities.cis.find((entry) => entry.id === audit.entityId)
@@ -236,7 +240,7 @@ function validateRequestShape(snapshot: Snapshot, input: {
   if (!application) return notFound()
   if (!policy.hasProject(application.projectId, input.stage, 'rd')) return notFound()
   const catalog = requestableCatalog(snapshot, input.catalogItemId)
-  if (!catalog || catalog.revision !== input.catalogRevision || !catalog.allowedProjectIds.includes(application.projectId)) return notFound()
+  if (!catalog || catalog.template.resourceKind !== 'compute' || catalog.revision !== input.catalogRevision || !catalog.allowedProjectIds.includes(application.projectId)) return notFound()
   const pool = snapshot.entities.pools.find((entry) => entry.id === input.poolId && entry.orgId === policy.user!.orgId)
   if (!pool || pool.provider !== input.provider || !pool.scopeProjectIds.includes(application.projectId)
     || !catalog.template.allowedProviders.includes(input.provider)
@@ -249,7 +253,7 @@ function validateRequestShape(snapshot: Snapshot, input: {
       cpu: ['Exceeds catalog limit'], memoryMiB: ['Exceeds catalog limit'],
     })
   }
-  return { application, catalog, pool }
+  return { application, catalog: catalog as ComputeCatalogItem, pool }
 }
 
 function jobLogs(snapshot: Snapshot, job: ProvisionJob) {
@@ -292,6 +296,7 @@ function advanceProvisioning(snapshot: Snapshot, ticks: number): CommandReceipt[
     snapshot.logicalClock += 1
     for (const item of advanceDelivery(snapshot)) mark(item.entityType, item.entityId)
     for (const item of advanceObservation(snapshot)) mark(item.entityType, item.entityId)
+    for (const item of advanceResources(snapshot)) mark(item.entityType, item.entityId)
     const due = snapshot.scheduler.tasks.filter((task) => task.dueTick <= snapshot.logicalClock && snapshot.jobs.some(job => job.id === task.operationId))
       .toSorted((left, right) => left.id.localeCompare(right.id))
     for (const task of due) {
@@ -408,6 +413,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
   function read(path: string, query: URLSearchParams, actorId: string): unknown {
     const policy = context(actorId)
     const entities = state.entities
+    const resource = readResources(state, policy, path, query)
+    if (resource !== undefined) return resource
     const observation = readObservation(state, policy, path, query)
     if (observation !== undefined) return observation
     const delivery = readDelivery(state, policy, path, query)
@@ -482,7 +489,11 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!q) fail(422, 'VALIDATION_ERROR', '搜尋字串不可為空。')
       const limitValue = query.get('limit') ?? '10'
       if (!/^([1-9]|1\d|20)$/.test(limitValue)) fail(422, 'VALIDATION_ERROR', '搜尋上限必須為 1 到 20。')
+      const rp = resourcePolicy(state, policy)
       const hits = [
+        ...entities.resourceObjects.filter(rp.objectVisible).map(o => ({ type: 'resourceObject', id: o.id, title: o.name, route: resourceRoute(state, policy, 'resourceObject', o.id)! })),
+        ...entities.resourceBindings.filter(rp.bindingVisible).map(b => ({ type: 'resourceBinding', id: b.id, title: `${b.id} · ${b.purpose}`, route: resourceRoute(state, policy, 'resourceBinding', b.id)! })),
+        ...entities.changes.filter(rp.changeVisible).map(c => ({ type: 'change', id: c.id, title: `${c.id} · ${c.kind}`, route: resourceRoute(state, policy, 'change', c.id)! })),
         ...entities.applications.filter((entry) => policy.hasProject(entry.projectId)).map((entry) => ({ type: 'application', id: entry.id, title: entry.name, route: `/rd/apps/${entry.id}` })),
         ...entities.environments.filter(policy.canReadEnvironment).map((entry) => {
           const app = entities.applications.find((candidate) => candidate.id === entry.applicationId)!
@@ -551,7 +562,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
         : entities.catalogs.map((current) => policy.admin ? current : requestableCatalog(state, current.id))
           .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
       const visible = all.filter((entry) => entry.orgId === policy.user!.orgId && (policy.admin
-        || entry.status === 'published' && entry.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd'))))
+        || entry.status === 'published' && (entry.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd')) || resourcePolicy(state, policy).catalogVisible(entry))))
       return clone(paged(visible, query, ['id', 'name', 'updatedAt']))
     }
     const catalogId = /^\/catalog\/([^/]+)$/.exec(path)?.[1]
@@ -563,7 +574,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
         ? effectiveCatalog(state, catalogId, revision ? Number(revision) : undefined)
         : requestableCatalog(state, catalogId)
       if (!catalog || catalog.orgId !== policy.user!.orgId || !policy.admin
-        && (catalog.status !== 'published' || !catalog.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd')))) notFound()
+        && (catalog.status !== 'published' || !(catalog.allowedProjectIds.some((id) => policy.hasProject(id, undefined, 'rd')) || resourcePolicy(state, policy).catalogVisible(catalog)))) notFound()
       return clone(catalog)
     }
     if (path === '/requests') {
@@ -641,6 +652,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (input.sessionId !== state.sessionId) fail(401, 'UNAUTHENTICATED', '示範 session 已變更，請重新讀取。')
     const policy = context(input.actorId)
     const method = input.method.toUpperCase()
+    const resource = prepareResource(state, policy, input)
     const delivery = prepareDelivery(state, policy, input)
     const observation = prepareObservation(state, policy, input, advanceProvisioning)
     const patchCiId = method === 'PATCH' ? /^\/cis\/([^/]+)$/.exec(input.path)?.[1] : undefined
@@ -664,10 +676,10 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     if (!patchCiId && !createCi && !createRelation && !deleteRelationId && !assignmentId && !createRequest
       && !patchRequestId && !requestActionMatch && !createAssignment && !patchUserId && !patchNavigationId
       && !catalogRevisionId && !patchCatalogId && !catalogActionMatch && !createModelField && !patchModelFieldId
-      && !scenario && !clock && !delivery && !observation) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
+      && !scenario && !clock && !delivery && !observation && !resource) fail(501, 'NOT_IMPLEMENTED', '此操作尚未在目前里程碑提供。')
 
     let body: unknown
-    if (delivery || observation) body = input.body
+    if (delivery || observation || resource) body = input.body
     else if (patchCiId) body = parse(patchCiSchema, input.body)
     else if (createCi) body = parse(createCiInputSchema, input.body)
     else if (createRelation) body = parse(createRelationInputSchema, input.body)
@@ -692,7 +704,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let ci: CI | undefined
     let relation: Relation | undefined
     let environmentRequest: DomainRequest | undefined
-    if (delivery || observation) {
+    if (delivery || observation || resource) {
       // prepareDelivery / prepareObservation already checked the current role, resource and stage before replay.
     } else if (patchCiId) {
       ci = state.entities.cis.find((entry) => entry.id === patchCiId && policy.canReadCi(entry))
@@ -762,8 +774,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     let auditPoolIdsOverride: string[] | undefined
     let auditStagesOverride: ('dev' | 'staging' | 'prod')[] | undefined
 
-    if (delivery || observation) {
-      const result = delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
+    if (delivery || observation || resource) {
+      const result = resource ? resource.apply(next) : delivery ? { ...delivery.apply(next), poolIds: [] } : observation!.apply(next)
       ;({ entityType, entityId, entityVersion, action, reason, fields, changed, operationId } = result)
       correlationOverride = result.correlationId; auditProjectIdsOverride = result.projectIds; auditPoolIdsOverride = result.poolIds; auditStagesOverride = result.stages
     } else if (patchCiId) {

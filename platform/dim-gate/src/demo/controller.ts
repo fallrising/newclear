@@ -3,6 +3,7 @@ import { createEngine, DomainError } from '../domain/engine'
 import { snapshotSchema, sessionViewSchema } from '../domain/schemas'
 import type { CommandReceipt, SessionView, Snapshot } from '../domain/schemas'
 import { createSeed, personas } from './seed'
+import { readStoredSnapshot } from './migrations'
 
 export const SNAPSHOT_KEY = 'dim-gate.demo.v1'
 const MAX_BYTES = 3 * 1024 * 1024
@@ -32,6 +33,8 @@ const savedSchema = z.object({
   personaCommands: z.array(controlRecordSchema).max(MAX_COMMANDS),
   resetTombstone: controlRecordSchema.nullable(),
 }).strict()
+// Parse envelope identity/history before asking the versioned snapshot reader to upgrade.
+const savedEnvelopeSchema = savedSchema.extend({ snapshot: z.unknown() })
 type Saved = z.infer<typeof savedSchema>
 export interface RequestIdentity {
   sessionId: string
@@ -104,11 +107,12 @@ export function createController(options: ControllerOptions) {
       try { decoded = JSON.parse(raw) } catch {
         throw new DemoStorageError('DEMO_SNAPSHOT_CORRUPT', '示範資料已損壞，請選擇重置或暫存記憶體模式。原存檔尚未修改。')
       }
-      const parsed = savedSchema.safeParse(decoded)
-      if (!parsed.success) {
+      try {
+        const envelope = savedEnvelopeSchema.parse(decoded)
+        saved = savedSchema.parse({ ...envelope, snapshot: readStoredSnapshot(envelope.snapshot) })
+      } catch {
         throw new DemoStorageError('DEMO_SNAPSHOT_INCOMPATIBLE', '示範存檔版本或內容不相容，請選擇重置或暫存記憶體模式。原存檔尚未修改。')
       }
-      saved = parsed.data
     }
   }
   if (options.forked) {
@@ -189,7 +193,8 @@ export function createController(options: ControllerOptions) {
     getSession,
     getTabOwnershipId: () => saved.tabOwnershipId,
     getSnapshot: (): Snapshot => engine.getSnapshot(),
-    getPersonas: () => structuredClone(personas),
+    getPersonas: () => structuredClone(personas.filter((persona) =>
+      saved.snapshot.entities.users.some((user) => user.id === persona.id && user.enabled))),
     authenticate, assertCurrent,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
     read(path: string, query: URLSearchParams, identity: RequestIdentity): unknown {

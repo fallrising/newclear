@@ -1,6 +1,7 @@
 import { breached, healthy, observationTime } from './observation'
 import { notifications, visibleIntegrations } from './observation-views'
 import type { Policy } from './policy'
+import { resourcePolicy } from './resource-policy'
 import type { Center, DashboardFilters, DashboardView, Request, Release, Snapshot, WorkspaceHome, WorkspaceHomeItem, WorkspaceHomeSection } from './schemas'
 
 type Capacity = { cpu: { used: number; reserved: number; available: number }; memoryMiB: { used: number; reserved: number; available: number } }
@@ -41,6 +42,13 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
     && (!provider || r.provider === provider) && (!poolId || r.poolId === poolId))
   const releases = s.entities.releases.filter(r => envIds.has(r.environmentId))
   const incidents = s.entities.incidents.filter(i => envIds.has(i.environmentId) && i.state !== 'resolved')
+  const rp = resourcePolicy(s, policy)
+  const changes = s.entities.changes.filter(c => valid && rp.changeVisible(c)
+    && (!projectId || rp.affected(c.spec).some(id => s.entities.environments.some(e => e.id === id && appById.get(e.applicationId)?.projectId === projectId)))
+    && (!environmentId || rp.affected(c.spec).includes(environmentId)) && (!poolId || c.poolId === poolId)
+    && (!provider || s.entities.cis.some(ci => ci.id === c.spec.targetCiId && ci.provider === provider)))
+  const changeItem = (c: typeof changes[number]): WorkspaceHomeItem => ({ sourceType: 'change', sourceId: c.id, title: `${c.kind} · ${c.id}`,
+    state: c.state, route: `/${center === 'ops' ? 'ops' : 'rd'}/changes/${encoded(c.id)}`, dataAsOf: c.updatedAt, detail: `${c.riskClass} · ${c.spec.targetCiId}` })
   const envLabel = (id: string) => {
     const env = scopedEnvs.find(e => e.id === id)!
     return `${appById.get(env.applicationId)!.name} · ${env.name}`
@@ -68,7 +76,8 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
           detail: `${env.applicationId} · ${env.stage} · ${env.status} · ${active ? `${active.id}: ${active.state}` : '尚無已部署版本'} · observation: ${age}` }
       })),
       work: section('待處理申請與發布', [...ownRequests.filter(r => ['draft', 'submitted', 'approved', 'failed'].includes(r.state)).map(requestItem),
-        ...ownReleases.filter(r => ['pending_approval', 'queued', 'deploying', 'verifying'].includes(r.state)).map(releaseItem)].toSorted(recent)),
+        ...ownReleases.filter(r => ['pending_approval', 'queued', 'deploying', 'verifying'].includes(r.state)).map(releaseItem),
+        ...changes.filter(c => (filters.workOwner !== 'mine' || c.requesterId === policy.user?.id) && ['draft', 'submitted', 'approved', 'executing', 'failed'].includes(c.state)).map(changeItem)].toSorted(recent)),
       deliveries: section('近期交付', ownReleases.filter(r => ['succeeded', 'failed', 'rejected', 'cancelled'].includes(r.state)).map(releaseItem).toSorted(recent)),
     }
   } else if (center === 'ops') {
@@ -91,8 +100,8 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
         .toSorted((a, b) => Number(b.severity === 'critical') - Number(a.severity === 'critical') || Number(b.state === 'open') - Number(a.state === 'open') || a.updatedAt.localeCompare(b.updatedAt) || byId(a, b))
         .map(i => ({ sourceType: 'incident', sourceId: i.id, title: envLabel(i.environmentId), state: i.state,
           route: `/ops/incidents/${encoded(i.id)}`, dataAsOf: i.updatedAt, detail: `${i.severity} · ${i.ruleKey}` }))),
-      failures: section('失敗作業與發布', [...failures, ...releases.filter(r => r.state === 'failed' && opsEnvironment(r.environmentId)).map(releaseItem)].toSorted(recent)),
-      approvals: section('待審批與交付', [...actionableRequests.map(requestItem), ...actionableReleases.map(releaseItem)].toSorted(recent)),
+      failures: section('失敗作業與發布', [...failures, ...releases.filter(r => r.state === 'failed' && opsEnvironment(r.environmentId)).map(releaseItem), ...changes.filter(c => c.state === 'failed').map(changeItem)].toSorted(recent)),
+      approvals: section('待審批與交付', [...actionableRequests.map(requestItem), ...actionableReleases.map(releaseItem), ...changes.filter(c => c.state === 'submitted' && rp.operate(c) || c.state === 'approved' && rp.canExecute(c)).map(changeItem)].toSorted(recent)),
       capacity: section('實體資源池容量', pools.map(p => {
         const usage = capacityFor(p.id)
         return { sourceType: 'pool', sourceId: p.id, title: p.name, state: usage.cpu.available === 0 || usage.memoryMiB.available === 0 ? 'exhausted' : 'available',
@@ -138,6 +147,7 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
     }
   }
   const pendingIds = new Set([
+    ...changes.filter(c => ['submitted', 'approved', 'failed'].includes(c.state)).map(c => `change:${c.id}`),
     ...requests.filter(r => ['submitted', 'approved', 'failed'].includes(r.state)).map(r => `request:${r.id}`),
     ...releases.filter(r => r.state === 'pending_approval').map(r => `release:${r.id}`), ...incidents.map(i => `incident:${i.id}`),
   ])

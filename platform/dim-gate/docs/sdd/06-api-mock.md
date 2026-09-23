@@ -191,3 +191,8 @@ GET `/dashboard` 沿用原 counters/pendingItems/dataAsOf，新增 `workspace`�
 projectId/environmentId 先授權且相互匹配；Ops 新增 provider/poolId，其他中心傳這兩項回422。合法但無權或不匹配 scope 回空投影，不暴露實體存在／名稱／隱藏筆數。未知 keys/enums 回422。保留73個operations與全部原 command；僅擴充既有 dashboard read，Mock 共用原 handler/engine。
 
 W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict dashboard DTO；mine 只篩工作／交付的實際 requester/creator，不改服務範圍與持久化。切到 Ops/Admin 清除此不適用條件並說明，合法 project/environment 在三工作區均保留。
+
+
+## W2 integration delta
+
+W2 appends18 operations to the existing73: scoped resource objects/bindings/inventory/service resources/work-items and change read/create/patch/submit/approve/reject/cancel/execute/retry. All use existing request identity, strict Zod validation, typed client, MSW/domain owner and receipt envelope; execute returns202. Current authorization precedes replay; detail404/action403, invalid422 and stale/conflict409. OpenAPI and runtime descriptors are generated from the same91 operation registry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).

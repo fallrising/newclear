@@ -7,6 +7,8 @@ export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environ
   | 'ops.overview' | 'ops.cmdb' | 'ops.ci-detail' | 'ops.topology' | 'ops.requests' | 'ops.request-detail'
   | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.navigation'
   | 'admin.catalog' | 'admin.cmdb-models' | 'admin.audit' | 'guide'
+  | 'rd.resources' | 'rd.resource-request' | 'rd.change-detail' | 'ops.change-detail'
+  | 'ops.caches' | 'ops.cache-detail' | 'ops.messaging' | 'ops.messaging-detail' | 'ops.clusters' | 'ops.cluster-detail'
   | 'rd.observability' | 'ops.incidents' | 'ops.incident-detail' | 'admin.integrations'
 export type RegisteredRoute = {
   key: RouteKey
@@ -51,11 +53,21 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'ops.incidents', path: '/ops/incidents', center: 'ops', requiredAction: 'incident.read', navigation: { label: '事件中心', group: '維運中心', order: 29, visible: true } },
   { key: 'ops.incident-detail', path: '/ops/incidents/:incidentId', center: 'ops', requiredAction: 'incident.read', crossCenterRead: true, navigation: { label: '事件詳情', group: '維運中心', order: 29, visible: false } },
   { key: 'admin.integrations', path: '/admin/integrations', center: 'admin', requiredAction: 'integration.read', navigation: { label: '整合狀態', group: '治理', order: 36, visible: true } },
+  { key: 'rd.resources', path: '/rd/apps/:appId/resources', center: 'rd', requiredAction: 'binding.read', crossCenterRead: true, navigation: { label: '服務資源', group: '資源', order: 28, visible: false } },
+  { key: 'rd.resource-request', path: '/rd/catalog/:itemId/resource-request', center: 'rd', requiredAction: 'change.create', navigation: { label: '資源申請', group: '資源', order: 28, visible: false } },
+  { key: 'rd.change-detail', path: '/rd/changes/:changeId', center: 'rd', requiredAction: 'change.read', crossCenterRead: true, navigation: { label: '資源變更工作單', group: '資源', order: 28, visible: false } },
+  { key: 'ops.change-detail', path: '/ops/changes/:changeId', center: 'ops', requiredAction: 'change.read', navigation: { label: '資源變更工作單', group: '資源', order: 28, visible: false } },
+  { key: 'ops.caches', path: '/ops/caches', center: 'ops', requiredAction: 'ci.read', navigation: { label: '快取服務', group: '資源', order: 28, visible: true } },
+  { key: 'ops.cache-detail', path: '/ops/caches/:ciId', center: 'ops', requiredAction: 'ci.read', crossCenterRead: true, navigation: { label: '快取服務詳情', group: '資源', order: 28, visible: false } },
+  { key: 'ops.messaging', path: '/ops/messaging', center: 'ops', requiredAction: 'ci.read', navigation: { label: '訊息佇列', group: '資源', order: 28, visible: true } },
+  { key: 'ops.messaging-detail', path: '/ops/messaging/:ciId', center: 'ops', requiredAction: 'ci.read', crossCenterRead: true, navigation: { label: '訊息佇列詳情', group: '資源', order: 28, visible: false } },
+  { key: 'ops.clusters', path: '/ops/clusters', center: 'ops', requiredAction: 'ci.read', navigation: { label: 'Kubernetes 叢集', group: '資源', order: 28, visible: true } },
+  { key: 'ops.cluster-detail', path: '/ops/clusters/:ciId', center: 'ops', requiredAction: 'ci.read', crossCenterRead: true, navigation: { label: 'Kubernetes 叢集詳情', group: '資源', order: 28, visible: false } },
   { key: 'guide', path: '/guide', navigation: { label: '示範導覽', group: '示範', order: 40, visible: true } },
 ]
 
 export function routeForPath(pathname: string) {
-  return routeRegistry.find((route) => matchPath({ path: route.path, end: true }, pathname))
+  return routeRegistry.find((route) => matchPath({ path: route.path, end: true }, pathname.split(/[?#]/, 1)[0]!))
 }
 
 export function canAccessRoute(session: SessionView, route: RegisteredRoute) {

@@ -1,0 +1,38 @@
+// One-time capture executed against fixed W1 source b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d.
+import { writeFileSync } from 'node:fs'
+import { expect, it } from 'vitest'
+import { createController } from '../controller'
+
+it('captures genuine W1 persisted bytes using only controller commands', async () => {
+  let raw: string | null = null
+  let nextSession = 0
+  const c = createController({
+    storage: { getItem: () => raw, setItem: (_key, value) => { raw = value } },
+    createSessionId: () => `w1-migration-fixture-${++nextSession}`,
+  })
+  const identity = () => { const s = c.getSession(); return c.authenticate(s.sessionId, s.user.id) }
+  const command = (path: string, body: unknown, key: string) => c.command('POST', path, body, key, identity())
+  await c.reset('legacy-reset', identity())
+  await command('/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'legacy-stable' }, 'legacy-stable-trigger')
+  await command('/clock/advance', { ticks: 6 }, 'legacy-stable-complete')
+  const environment = c.getSnapshot().entities.environments.find(e => e.id === 'env-checkout-dev')!
+  await command('/pipelines', { applicationId: 'app-checkout', environmentId: environment.id, environmentVersion: environment.version, revision: 'legacy-in-progress' }, 'legacy-candidate-trigger')
+  await command('/clock/advance', { ticks: 3 }, 'legacy-candidate-package')
+  const request = await command('/requests', {
+    applicationId: 'app-checkout', environmentName: 'legacy-staging', stage: 'staging',
+    catalogItemId: 'catalog-web', catalogRevision: 1, provider: 'aws', poolId: 'pool-aws-sg',
+    cpu: 2, memoryMiB: 2048, purpose: 'Genuine W1 migration fixture active provisioning',
+  }, 'legacy-request-create')
+  await command(`/requests/${request.entityId}/submit`, { expectedVersion: request.entityVersion }, 'legacy-request-submit')
+  await c.setPersona('user-ops', 'legacy-to-ops', identity())
+  await command(`/requests/${request.entityId}/approve`, { expectedVersion: 2, reason: 'Verify legacy active work after migration' }, 'legacy-request-approve')
+  await command(`/requests/${request.entityId}/provision`, { expectedVersion: 3 }, 'legacy-request-provision')
+  await command('/clock/advance', { ticks: 1 }, 'legacy-active-step')
+  await c.setPersona('user-rd-data', 'legacy-to-data', identity())
+  await c.setPersona('user-ops', 'legacy-back-ops', identity())
+  expect(c.getSnapshot().schemaVersion).toBe(1)
+  expect(c.getSnapshot().entities.releases.map(r => r.state)).toEqual(['succeeded', 'deploying'])
+  expect(c.getSnapshot().jobs[0].state).toBe('running')
+  expect(c.getSnapshot().scheduler.tasks).toHaveLength(2)
+  writeFileSync('src/demo/seed/fixtures/w1-active-session.json', raw! + '\n')
+})

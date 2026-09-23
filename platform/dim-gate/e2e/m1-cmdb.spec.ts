@@ -14,18 +14,18 @@ async function becomeOps(page: Page) {
   await expect(page.getByRole('link', { name: 'CMDB', exact: true })).toBeVisible()
 }
 
-test('AC-04/05: Ops sees 60 CIs, filters providers, onboards once, rejects duplicates, and edits metadata only', async ({ page }) => {
+test('AC-04/05: Ops sees original 60 plus 3 W2 CIs, filters providers, onboards once, rejects duplicates, and edits metadata only', async ({ page }) => {
   await becomeOps(page)
   await page.getByRole('link', { name: 'CMDB', exact: true }).click()
   await expect(page.getByRole('heading', { name: '配置項資源清單' })).toBeVisible()
   const counts = page.getByRole('region', { name: 'Provider 可見數量' })
-  await expect(counts).toContainText('60筆')
-  await expect(counts).toContainText('AWS20筆')
+  await expect(counts).toContainText('63筆')
+  await expect(counts).toContainText('AWS22筆')
   await expect(counts).toContainText('Aliyun20筆')
-  await expect(counts).toContainText('On-premises20筆')
+  await expect(counts).toContainText('On-premises21筆')
 
   await page.getByRole('combobox', { name: /Provider/ }).selectOption('aws')
-  await expect(page.locator('caption')).toContainText('共 20 筆')
+  await expect(page.locator('caption')).toContainText('共 22 筆')
   await page.getByRole('button', { name: '清除篩選' }).click()
 
   await page.getByRole('button', { name: '手動納管 CI' }).click()
@@ -36,8 +36,8 @@ test('AC-04/05: Ops sees 60 CIs, filters providers, onboards once, rejects dupli
   await expect(dialog).toHaveCount(0)
   const created = page.getByRole('link', { name: /ci-manual-/ })
   await expect(created).toBeVisible()
-  await expect(counts).toContainText('61筆')
-  await expect(counts).toContainText('AWS21筆')
+  await expect(counts).toContainText('64筆')
+  await expect(counts).toContainText('AWS23筆')
 
   const createdHref = await created.getAttribute('href')
   await created.click()
@@ -69,7 +69,7 @@ test('AC-04/05: Ops sees 60 CIs, filters providers, onboards once, rejects dupli
   await dialog.getByRole("button", { name: "確認納管" }).click()
   await expect(dialog.getByText("請修正無法納管的欄位")).toBeVisible()
   await dialog.getByRole("button", { name: "關閉對話框" }).click()
-  await expect(counts).toContainText('61筆')
+  await expect(counts).toContainText('64筆')
 })
 
 test('AC-06/20: RD uses canonical shared CI link, hides Data scope, and never flashes an in-flight old response', async ({ page }, info) => {

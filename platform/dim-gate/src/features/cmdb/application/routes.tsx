@@ -70,7 +70,7 @@ export function ApplicationListRoute({ client = defaultClient }: { client?: Appl
   </>
 }
 
-export function ApplicationDetailRoute({ client = defaultClient }: { client?: ApplicationClient }) {
+export function ApplicationDetailRoute({ client = defaultClient, canReadResources = false }: { client?: ApplicationClient; canReadResources?: boolean }) {
   const { appId = '' } = useParams()
   const detail = useQuery({
     queryKey: queryKey('application', appId, null),
@@ -84,6 +84,7 @@ export function ApplicationDetailRoute({ client = defaultClient }: { client?: Ap
   return <>
     <PageHeading eyebrow="RD · APPLICATION DETAIL" title={application.name} description={application.description} action={<Button asChild variant="outline"><Link to="/rd/apps"><ArrowLeft size={16} aria-hidden="true" />應用清單</Link></Button>} />
     <section className="panel" aria-labelledby="application-facts-heading"><div className="panel-title"><h2 id="application-facts-heading">應用資料</h2><span className="tag">{application.tier === 'critical' ? '關鍵服務' : '標準服務'}</span></div><dl className="session-facts"><div><dt>Application ID</dt><dd><code>{application.id}</code></dd></div><div><dt>Project ID</dt><dd><code>{application.projectId}</code></dd></div><div><dt>Owner team</dt><dd><code>{application.ownerTeamId}</code></dd></div><div><dt>環境數</dt><dd>{environments.length}</dd></div></dl>{application.repositoryUrl && <p><a href={application.repositoryUrl} target="_blank" rel="noreferrer">開啟程式庫<span className="sr-only">（另開新視窗）</span></a></p>}</section>
+    {canReadResources && <Button asChild variant="outline"><Link to={`/rd/apps/${application.id}/resources`}>查看服務資源</Link></Button>}
     <section className="panel" aria-labelledby="environment-list-heading"><div className="panel-title"><h2 id="environment-list-heading">環境</h2><span className="tag">{environments.length} 個</span></div>{environments.length === 0 ? <p className="muted" role="status">這個應用目前沒有你可見的環境。</p> : <div className="table-scroll"><table><caption className="sr-only">{application.name} 的可見環境</caption><thead><tr><th scope="col">環境</th><th scope="col">階段</th><th scope="col">狀態</th><th scope="col">Active release</th><th scope="col"><span className="sr-only">操作</span></th></tr></thead><tbody>{environments.map((environment) => <tr key={environment.id}><th scope="row"><Link to={`/rd/apps/${application.id}/environments/${environment.id}`}>{environment.name}</Link><small><code>{environment.id}</code></small></th><td>{stageLabel[environment.stage]}</td><td>{environmentStatusLabel[environment.status]}</td><td>{environment.activeReleaseId ? <code>{environment.activeReleaseId}</code> : '尚無 active release'}</td><td><Button asChild variant="ghost" size="sm"><Link to={`/rd/apps/${application.id}/environments/${environment.id}`}>查看配置項<ArrowRight size={14} aria-hidden="true" /></Link></Button></td></tr>)}</tbody></table></div>}</section>
   </>
 }
@@ -100,7 +101,7 @@ function distinctPlacements(placements: Placement[]) {
   return [...byCi.values()].toSorted((left, right) => left.ciId.localeCompare(right.ciId))
 }
 
-export function EnvironmentDetailRoute({ client = defaultClient }: { client?: ApplicationClient }) {
+export function EnvironmentDetailRoute({ client = defaultClient, canReadResources = false }: { client?: ApplicationClient; canReadResources?: boolean }) {
   const { appId = '', environmentId = '' } = useParams()
   const detail = useQuery({
     queryKey: queryKey('environment', environmentId, null),
@@ -116,6 +117,7 @@ export function EnvironmentDetailRoute({ client = defaultClient }: { client?: Ap
   return <>
     <PageHeading eyebrow="RD · ENVIRONMENT" title={`${environment.name} 環境`} description="Placement 與 Ops Center 共用 canonical CI ID；跨中心下鑽不建立另一份資產。" action={<Button asChild variant="outline"><Link to={`/rd/apps/${appId}`}><ArrowLeft size={16} aria-hidden="true" />應用詳情</Link></Button>} />
     <section className="panel" aria-labelledby="environment-facts-heading"><div className="panel-title"><h2 id="environment-facts-heading">環境摘要</h2><span className="tag">{stageLabel[environment.stage]}</span></div><dl className="session-facts"><div><dt>Environment ID</dt><dd><code>{environment.id}</code></dd></div><div><dt>狀態</dt><dd>{environmentStatusLabel[environment.status]}</dd></div><div><dt>相異 CI</dt><dd>{placements.length}</dd></div><div><dt>Active release</dt><dd>{activeRelease ? <Link to={`/rd/releases/${activeRelease.id}`}><code>{activeRelease.id}</code></Link> : '尚無 active release'}</dd></div></dl><Button asChild variant="outline"><Link to={`/rd/pipelines?applicationId=${encodeURIComponent(appId)}&environmentId=${encodeURIComponent(environment.id)}`}>查看環境 Pipeline</Link></Button></section>
+    {canReadResources && <Button asChild variant="outline"><Link to={`/rd/apps/${appId}/resources?environmentId=${environment.id}`}>查看環境資源與綁定</Link></Button>}
     <section className="panel" aria-labelledby="placement-heading"><div className="panel-title"><h2 id="placement-heading">配置項 placement</h2><span className="tag">{placements.length} 個 canonical CI</span></div>{placements.length === 0 ? <p className="muted" role="status">此環境目前有 0 個可見配置項。0 代表已成功讀取的空結果，不是未知狀態。</p> : <div className="table-scroll"><table><caption className="sr-only">此環境可見的 canonical CI placement</caption><thead><tr><th scope="col">CI ID</th><th scope="col">角色</th><th scope="col">跨中心下鑽</th></tr></thead><tbody>{placements.map((placement) => <tr key={placement.ciId}><th scope="row"><code>{placement.ciId}</code></th><td>{[...placement.roles].map((role) => role === 'workload' ? '工作負載' : '相依服務').join('、')}</td><td><Button asChild variant="outline" size="sm"><Link to={`/ops/cmdb/${placement.ciId}`}>在 Ops 查看<ArrowRight size={14} aria-hidden="true" /></Link></Button></td></tr>)}</tbody></table></div>}<p className="muted">若目前身分沒有 Ops Center/action，跨中心入口會顯示 403；有權限但 scope 外則回 404。</p></section>
   </>
 }

@@ -52,7 +52,7 @@ for (const operation of operations) {
     description: 'Same logical retry keeps the key. Replay reauthorizes before returning the original receipt.',
     schema: { type: 'string', pattern: '^[!-~]{1,128}$' } })
   const path = `${operation.demo ? '/__demo' : '/api'}/v1${operation.path}`
-  const implemented = ['M0', 'M1', 'M2', 'M3', 'M4'].includes(operation.milestone)
+  const implemented = ['M0', 'M1', 'M2', 'M3', 'M4', 'W2'].includes(operation.milestone)
   paths[path] ??= {}
   if (paths[path][operation.method]) throw new Error(`Duplicate operation: ${operation.method} ${path}`)
   paths[path][operation.method] = {
@@ -69,8 +69,8 @@ for (const operation of operations) {
 }
 const document = {
   openapi: '3.1.0',
-  info: { title: 'dim-gate BFF and demo controls', version: '0.1.0-m4',
-    description: `Generated from Zod. M0–M4 provide ${operations.filter((operation) => ['M0', 'M1', 'M2', 'M3', 'M4'].includes(operation.milestone)).length} executable operations. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided.` },
+  info: { title: 'dim-gate BFF and demo controls', version: '0.2.0-w2',
+    description: `Generated from Zod. M0–M4 and W2 provide ${operations.filter((operation) => ['M0', 'M1', 'M2', 'M3', 'M4', 'W2'].includes(operation.milestone)).length} executable operations. Cross-entity scope, provider attributes, capacity and state invariants are enforced by the domain and behavioral tests, not fully expressible in JSON Schema. No real cloud or live authentication is provided.` },
   servers: [{ url: '/dim-gate', description: 'Default application base; api/v1 and __demo/v1 are relative to this base.' }],
   security: [{ DemoPersona: [], DemoSession: [] }],
   paths,

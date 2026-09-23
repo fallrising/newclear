@@ -799,3 +799,33 @@ next_action: publish this checkpoint; assign isolated T033 schema/domain and T03
 
 
 DG-D056: Contract/task checkpoint7086a443416fbc9876612e66bac889e83c8200ad SSH-saved, single draftPR36 opened. T033 RUNNING in newclear-dim-gate-w2-domain / agent/dim-gate/task/t033-resource-domain; exclusive domain/schema. T034 RUNNING in newclear-dim-gate-w2-migration / agent/dim-gate/task/t034-resource-migration; exclusive seed/controller/migration. T035 sole lead works in canonical W2 tree; T036 remains uninvolved/idle until fixed candidate. No competing writers, no worker commits/pushes. Initial contract/docs165Markdown366links and all task/report validators pass. Root runtime-only extraction preserves exact generated OpenAPI (73ops173schemas); typecheck/lint and all245existing tests pass on working diff. Generated lightweight operation manifest and named runtime wire DTOs remove build-time registration from browser startup; no status/validator/budget change. New resource business implementation still pending. Next commit/push this recoverable slice, measure fresh benchmark on fixed ref, then consume T033 published schemas for typed UI/API.
+
+
+DG-D057: W2contractrevision2 clarifies full canonical shared-change confidentiality before view implementation. Since targetVersions include every consumer env, no partial reader gets full change. RD shared resize proposal/read needs all affected RD project/stage grants but no Ops pool grant; Ops maintenance/approval/execute needs pool+allOpsproject/stage. Partial physical/resource view stays scoped with impactIncomplete; no hidden IDs/counts. T033 raised this at interface review; lead accepts action-specific clarification, no AC or DTO reduced. T033 concrete schemas hash707177f2d70e675f326f28227c8b3fd599a0f91a9a4b63dd9ebbcad64db68f3a published first, later adds registered safe profiles under same ownership. T034/T035 consume read-only dependency copies, no second schema writer. W2 remains IMPLEMENTING/NOT_ACCEPTED, PR36 existing.
+
+DG-D058: T034 migration handback exact digest ba1c1b0aefc30cc4ff05e140cd01f817b0ce4a7143ee61c5c630afc7c7396a77 integrated byte-for-byte (10 owned files); 33 focused tests pass and implementation ownership released, report stays PARTIAL until lead integration. Reassigned attempt2 narrowly owns new W2 MSW HTTP integration test only; production sources are read-only. T033 published domain163/163 tests passing, final authorization cases pending. Lead confirms nonself approval, qualified requester execution, Ops-only resource catalog access and unchanged registered snapshot metadata semantics in contract before final code. Lead routes/UI integrated; preliminary typecheck found legacy catalog union narrowing (fixed) and extra InventoryList session props (fixed), worker m2 typed test pending handback. W1 postmergeCI35833033838 now SUCCESS (observed2026-09-23T08:13Z), mirror remains SUCCESS; DG-W1 owner remains released. W2 remains IMPLEMENTING/NOT_ACCEPTED; single draftPR36.
+
+DG-D059: Final T03316files and T03410files integrated with SHA256 manifest verification; source owners released, no competing writer. T034 attempt2 exclusively owns new HTTPtest; solelead owns integrated product. W2 APIs91ops209schemas, initialUI allregisteredroutes and typedAdmin editors implemented. Working-diff typecheck/lint299unit/build pass; first297/299failure staleproviderassertions preserved then corrected. W2 browser4initialjourneys written, execution/perf/fullreview/CI pending; noACCEPT. Remote1c0d230 runtimeextract benchmark3/3passed (298781gzipbytes). LatestSSHmain unchangedb4ef57f. W1postmergeCI35833033838SUCCESS, ownernone.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 59
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTING / NOT_ACCEPTED
+task_id: T033 handed_back; T034 attempt2 HTTPverification; T035 active; T036 pendingfixedreview
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: containing checkpoint; parent1c0d230f2e662cca8488550cdf1f02087280c021
+local_tested_commit: working-diff299unit/typecheck/lint/build; fixed1c0d230performance3passed
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: parent1c0d230SSHsaved; containingintegrationcheckpoint nextSSHpush
+blockers: []
+next_action: SSHsavecheckpoint/updatePR36; runfixedW2browser and fullnative/perf/smoke/regression, finishremainingACcoverage; uninvolvedT036review thenlatestheadCI andauthorizedmerge; verifymergeandreleaseW2beforeW3
+```

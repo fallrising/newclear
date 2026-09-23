@@ -1,6 +1,6 @@
 # dim-gate 三工作區接手
 
-**交接決策：依使用者要求換新視窗，W3保持 NOT_ACCEPTED／PR37草稿，主控實作及發布 ownership 由 PLAN DG-D082 釋放。下一位 agent 可建立接續 run，沿用同一分支／PR與 task，先完成 W3 gate，不直接開始 W4。未執行合併。**
+**交接決策：依使用者要求換新視窗，W3保持 NOT_ACCEPTED／PR37草稿，主控實作及發布 ownership 由 PLAN DG-D083 釋放。下一位 agent 可建立接續 run，沿用同一分支／PR與 task，先完成 W3 gate，不直接開始 W4。未執行合併。**
 
 本文件觀察 checkpoint：2026-09-23 11:59 UTC，canonical clean HEAD `6c19fe7b849ec4c5c5982c6ede4995ec6829fd83`，product commit `35f594f`，已 SSH 推送，正常整合 main `707f77d2c670b6a344ef25d9c4204521223687c1`。
 
@@ -12,6 +12,14 @@
 - 38個原始worktree全部存在，目前59個；原W1/W2/design worktree均clean且保留原head。查核 `/tmp/dim-gate-w3-evidence/worktree-preservation.json`。
 
 本文件隨 W3 closeout 更新。**先重新核對 GitHub 與 PLAN，不以本文件的歷史 checkpoint 當成已驗收。** 使用者本輪最新要求是保存進度、依 gate 合併可交付 PR，然後新視窗繼續；目前視窗在 W3 收尾，W4／W5 留待下一輪。
+
+## 最後觀察：先修正已確認回歸
+
+此節 supersedes 上方／下方當時的 RUNNING 記錄。固定6c19fe7完整Chromium在交接時停止：**49通過、2失敗、1中斷、37未執行**（原定89）。FF／WebKit與隔離gate尚未執行。已對本輪Playwright發送SIGINT，runner exit130；PID2209053／2210364及本輪4350preview已停止，所有實作／review worker亦停止寫入。可由新owner接手，不需要等待本機舊runner。
+
+**第一個要修的產品回歸：** `src/features/observability/integrations.tsx:14` 直接使用 `queryFn: api.listIntegrations`。`src/api/core/deferred-client.ts` 新增的輸入快照會 `structuredClone(args)`；React Query呼叫時傳入的 context含不能複製的AbortSignal，導致Admin平台整合頁讀取失敗。實際DOM錯誤為 `AbortSignal object could not be cloned`。這讓既有 `e2e/m4-observability.spec.ts:302`、`:338` 在等待模擬測試按鈕時失敗，錯誤不是 timeout太短。
+
+第一步可將零參數query callback改成 `queryFn: () => api.listIntegrations()`，或從deferred-client正確保持原本忽略多餘callback參數的語義；需補有意義的回歸，執行這兩條M4流程及完整gates。**尚未修正／驗證，不得直接合併。** 失敗證據 `/tmp/dim-gate-w3-evidence/confirmed-admin-integration-regression/`；完整partial報告 `/tmp/dim-gate-w3-evidence/partial-playwright-report/index.html`。T039attempt3和PLAN DG-D083記錄實際狀態。
 
 ## 接手入口
 

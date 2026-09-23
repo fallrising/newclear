@@ -1104,3 +1104,30 @@ remote_durability: product6c19fe7_SSHsaved; containing_docs_only_handoff_nextSSH
 blockers: [complete_89Chromium_10FFWK_2isolation_pending, independent_product_review_incomplete, latest_PR_head_CI_pending]
 next_action: read_HANDOFF_WORKSPACES_and_actual_PR37; verify_old_runner_PID_logs; claim_new_owner_run; resume_T040_remainingreview_and_T039_gates; preserve_failed_attempts; only_after_allgates_latestheadCI_merge_verify_actualcloseout; then_new_W4_and_W5_runs
 ```
+
+
+DG-D083: FINAL HANDOFF CORRECTION — full root regression confirmed one product defect affecting two accepted M4 cases. At fixed6c19fe7, e2e/m4-observability.spec.ts:302 and:338 fail atAdminintegration controls. Pageerror state says structuredClone cannotcloneAbortSignal. Cause: src/features/observability/integrations.tsx:14 passes api.listIntegrations directly asReactQuery queryFn; new src/api/core/deferred-client.ts clones all callbackargs, including QueryFunctionContext.signal, although listIntegrations iszeroargument. DoNOT classifythisasflakytimeout orrelaxexpectations. Productfixnotmadeafterownershiprelease. Nextowner firstfixesthezeroargumentcallbackboundary (explicitqueryFnthunk orcorrectignored-extraargumentsemantics), addsmeaningfulregression andrerunsaffectedM4/fullgates. Forcleanuserrequestedhandoff, SIGINTsentonlytoverifiedownedPlaywrightPID2210364. Runnerexited130, final49passed/2failed/1interrupted/37notrun (89planned), noFFWK/isolationexecuted. Bothrunnerand4350testserverstopped; originaluserpreviewsunchanged. PartialHTML/tracescopied /tmp/dim-gate-w3-evidence/partial-playwright-report andconfirmed-admin-integration-regression. IndependentT040PARTIALreportSHAe65a0fb...integrated, reviewerwritesstopped; itdoesnotclaimfinalno-findings. Priorrecordrunningstatementsarehistorical. Code/test/config/workflowbytesremainexact6c19fe7. Product+firsthandoff826e230alreadySSHsaved; thisdocs-onlydefectclarificationnextpush, finalheadCI/ownershipinPRbody. W3stillNOT_ACCEPTED/NOT_MERGED; W4/W5unstarted; activeownerNONE.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 83
+run_id: DG-W3-20260923-01
+active_owner: NONE
+terminal_state: OWNER_DECISION_REQUIRED
+terminal_reason: user_requested_handoff; next_orchestrator_to_fix_confirmed_regression_and_complete_gates
+milestone: W3 IMPLEMENTED_WITH_CONFIRMED_REGRESSION / NOT_ACCEPTED / NOT_MERGED
+task_id: T037 handback_complete_owner_released; T038 handback_complete_owner_released; T039 PARTIAL; T040 PARTIAL_review_incomplete_owner_released
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: 35f594f
+local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
+local_validation_state: stopped_exit130_after_49PASS_2FAIL_1INTERRUPTED_37NOTRUN
+review_ref: .team/reports/T-040-attempt-1.md
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: 826e230_SSHsaved; containing_final_failure_handoff_nextpush; actualfinalhead_andCI_in_PRbody
+blockers: [Admin_integrations_AbortSignal_clone_regression, incomplete_full_browser_smoke_isolation, incomplete_independent_review, latest_head_CI_pending]
+next_action: claim_continuation_owner; read_HANDOFF_WORKSPACES; fix_integrations_queryFn_deferredclient_boundary; targeted_M4_then_allgates; resume_independentT040; onlygreenlatestheadCI_thenaccept_merge_actualcloseout; thenW4_W5
+```

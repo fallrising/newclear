@@ -27,3 +27,12 @@ HANDOFF-WORKSPACES.md includes exactsource/branch/worktree/PR, currentgate/proce
 ## Risks and Follow-ups
 
 Newwindow: firstreadapplicableAGENTS/prompt/protocol/PLAN/STATUS/SDD09–14, gitremote/status/worktrees/fetch/HEADandPR37actualstate; claimownerwithoutcompetingwithcodewriters. Followrunnerlogsorresumeincompletegateswithoutduplicatingvalidfixedresults. CompleteuninvolvedreviewremainingUI/router/startup-boundary/browser/evidencereconciliation, fixactualfindingswithnewattempt, verifyfullsourceandlatestheadCI. Onlythenaccept/authorizedmergeandverifyactualmerge/tree/postCI/ownercloseout. W4/W5startsequentiallyafterW3acceptedmerged. ExistingGitHubauthorizationspersist; nosafetygatewaiver, nodeploy/cloud/externalnotifications/credentials/force/mainpush/deletions. InitialJSheadroom910bytesremainsrealnextmilestonerisk.
+
+
+### Final observed regression and clean handoff (DG-D083)
+
+- Fixed6c19fe7 full Chromium ended49passed,2failed,1interrupted,37notrun of89planned; two genuine failures in e2e/m4-observability.spec.ts:302/:338. Graceful SIGINT duringthe1000commandcase endedownedrunner exit130 foruserhandoff; interruptedtestisnotclassifiedasproductfailure — failed
+
+Confirmedcause: Adminintegrations reads fail with `Failed to execute structuredClone on Window: AbortSignal object could not be cloned.` integrations.tsx:14 passes `api.listIntegrations` directlyas `queryFn`; newdeferred-client clones its receivedcallbackarguments, soReactQuery's QueryFunctionContext.signal reachesstructuredClone althoughthisAPIacceptsnoarguments. Firstfixshouldmakezeroargumentcallbackexplicit (`queryFn: () => api.listIntegrations()`) orcorrectdeferredwrapperextra-argumentsemantics, withactualregression coverage; nofixyetandnotclaimedverified. Do notincreasewait/retriesorremoveassertions.
+
+Exactfailedtraces/DOM/PNG preserved /tmp/dim-gate-w3-evidence/confirmed-admin-integration-regression, fullpartialHTML /tmp/dim-gate-w3-evidence/partial-playwright-report/index.html; metadata handoff-failure.json. BothlocalrunnerPID2209053andPlaywrightPID2210364areconfirmedstopped. Testpreview4350ownedbythatrunwasreleased; originalpreviewsunchanged. Smoke/isolationdidnotrunbecausefullsuitefailed/stopped. EarlierRUNNINGstatementsarehistorical. IndependentreviewpartialreportintegratedbySHAe65a0fb0741db809351dc64cb836b25101fc2ce9861c593e36ab8b781c5c0d57andreviewerreleasedallwrites. Allimplementation/reviewownersNONE; nextwindowmayclaimcontinuation. No merge performed. Product/test/config/workflowdiffagainst6c19fe7isempty; remaininghandoffchangesaredocumentationonly.

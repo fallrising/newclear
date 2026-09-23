@@ -6,6 +6,8 @@
 
 **狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
 
+**v2（Proposed，未實作）：** 前端重做（`web/`）與 agent 接入泛化（主流 LLM API 格式、通用 runner）的設計在 [docs/v2](docs/v2/README.md)。批准並落地前，以下 v1 文件仍是現行契約。
+
 ## 從這裡開始
 
 1. [產品／架構設計](DESIGN.md)：已批准的模組邊界、schema、協定、資源上限與 PR 切片。與 SDD 衝突時，先修文件再寫程式。

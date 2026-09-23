@@ -266,3 +266,6 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
 - [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)
+- [ADR-0005 v2 web 前端](docs/adr/0005-v2-web-frontend.md)（proposed）
+- [ADR-0006 多格式 LLM provider](docs/adr/0006-llm-provider-formats.md)（proposed）
+- [v2 設計文件](docs/v2/README.md)（proposed；列出它將修訂的 v1 條文）

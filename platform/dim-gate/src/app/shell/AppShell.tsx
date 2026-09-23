@@ -42,7 +42,7 @@ export function AppShell({ session }: { session: SessionView }) {
   const currentRoute = routeForPath(location.pathname)
   const stored = storedWorkspace(session)
   const routeCenter = currentRoute?.center
-  const diagnostic = !!currentRoute?.crossCenterRead && (!currentRoute.navigation.visible || !session.centers.includes(routeCenter!))
+  const diagnostic = !!currentRoute?.crossCenterRead && routeCenter !== (stored?.center ?? session.centers[0])
   const activeWorkspace = diagnostic && stored ? stored.center : routeCenter && session.centers.includes(routeCenter) ? routeCenter : stored?.center ?? session.centers[0]
   const crossWorkspace = diagnostic && routeCenter !== activeWorkspace
   const navigation = useQuery({ queryKey: queryKey('navigation', activeWorkspace),
@@ -70,10 +70,11 @@ export function AppShell({ session }: { session: SessionView }) {
     if (!session.centers.includes(center)) return
     const filters = new URLSearchParams(location.search)
     const kept = new URLSearchParams()
-    if (center !== 'admin') for (const key of ['projectId', 'environmentId']) {
+    for (const key of ['projectId', 'environmentId']) {
       const value = filters.get(key)
       if (value && (key !== 'projectId' || session.assignments.some(grant => grant.scopeType === 'project' && grant.scopeId === value) || session.centers.includes('admin'))) kept.set(key, value)
     }
+    if (center === 'rd' && ['all', 'mine'].includes(filters.get('workOwner') ?? '')) kept.set('workOwner', filters.get('workOwner')!)
     setNotice([...filters.keys()].some(key => !kept.has(key)) ? '已切換工作區；不適用的篩選已清除。' : '已切換工作區；身分與授權保持不變。')
     setMobileMenu(false)
     navigate(`/${center}${kept.size ? `?${kept}` : ''}`)

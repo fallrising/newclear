@@ -99,3 +99,5 @@ MSW worker URL 依 Vite BASE_URL 配置，service-worker scope 僅限部署 app 
 ## W1 相容與視圖狀態
 
 W1 dashboard query key 加入全部 scope filters，identity/policy/epoch 防護沿用。activeWorkspace 為可重新驗證的 UI preference，按 session/user 分隔，URL 中合法工作區優先；不作授權來源。首頁 URL 保存 scope；scope 切换讀新 query，不沿用前範圍資料。`dim-gate.demo.v1`、schemaVersion1、seedVersion `dim-gate-m4-v1` 均保持不變，現有存檔不遷移、不重設。所有 AC-27 效能預算與可用性 gates 保留。
+
+W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict dashboard DTO；mine 只篩工作／交付的實際 requester/creator，不改服務範圍與持久化。切到 Ops/Admin 清除此不適用條件並說明，合法 project/environment 在三工作區均保留。

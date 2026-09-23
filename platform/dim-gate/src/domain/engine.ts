@@ -423,7 +423,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return guideProjection(state, policy) satisfies GuideView
     }
     if (path === '/dashboard' || path === '/navigation') {
-      validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId', 'provider', 'poolId'] : ['center'])
+      validateQuery(query, path === '/dashboard' ? ['center', 'projectId', 'environmentId', 'provider', 'poolId', 'workOwner'] : ['center'])
       const center = parse(centerSchema, query.get('center'))
       if (!policy.centers.includes(center)) forbidden()
       if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled

@@ -45,7 +45,7 @@ function HomeContent({ data }: { data: DashboardView }) {
 
 export function WorkspaceHome({ center, session }: { center: Center; session: SessionView }) {
   const [params, setParams] = useSearchParams()
-  const filters: DashboardFilters = Object.fromEntries(['projectId', 'environmentId', 'provider', 'poolId'].flatMap(key => params.get(key) ? [[key, params.get(key)!]] : []))
+  const filters: DashboardFilters = Object.fromEntries(['projectId', 'environmentId', 'provider', 'poolId', 'workOwner'].flatMap(key => params.get(key) ? [[key, params.get(key)!]] : []))
   const dashboard = useQuery({ queryKey: queryKey('dashboard', center, filters), queryFn: () => api.getDashboard(center, filters) })
   const details = centerDetails[center]
   const scope = dashboard.data?.scope
@@ -64,6 +64,7 @@ export function WorkspaceHome({ center, session }: { center: Center; session: Se
     <div className="home-scope" aria-label="首頁範圍">
       <label>專案<select aria-label="首頁專案" value={params.get('projectId') ?? ''} disabled={!scope} onChange={event => setScope('projectId', event.target.value)}><option value="">全部已授權專案</option>{scope?.projects.map(project => <option value={project.id} key={project.id}>{project.name}</option>)}</select></label>
       <label>環境<select aria-label="首頁環境" value={params.get('environmentId') ?? ''} disabled={!scope} onChange={event => setScope('environmentId', event.target.value)}><option value="">全部已授權環境</option>{scope?.environments.map(environment => <option value={environment.id} key={environment.id}>{environment.name} · {environment.id}</option>)}</select></label>
+      {center === 'rd' && <label>工作範圍<select aria-label="首頁工作範圍" value={params.get('workOwner') ?? 'all'} disabled={!scope} onChange={event => setScope('workOwner', event.target.value)}><option value="all">授權範圍內的所有工作</option><option value="mine">我發起的工作</option></select></label>}
       {center === 'ops' && <><label>來源<select aria-label="首頁來源" value={params.get('provider') ?? ''} disabled={!scope} onChange={event => setScope('provider', event.target.value)}><option value="">全部來源</option><option value="aws">AWS</option><option value="aliyun">Aliyun</option><option value="onprem">自建機房</option></select></label><label>資源池<select aria-label="首頁資源池" value={params.get('poolId') ?? ''} disabled={!scope} onChange={event => setScope('poolId', event.target.value)}><option value="">全部已授權資源池</option>{scope?.pools.map(pool => <option value={pool.id} key={pool.id}>{pool.name}</option>)}</select></label></>}
       {!!params.size && <Button variant="ghost" onClick={() => setParams({})}>清除篩選</Button>}
       <Button variant="ghost" aria-label="重新整理工作首頁" disabled={dashboard.isFetching} onClick={() => void dashboard.refetch()}><RefreshCw size={15} aria-hidden="true" />重新整理</Button>

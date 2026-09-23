@@ -54,6 +54,8 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
     detail: `${r.kind} · ${r.id} · health: ${r.health}` })
   let workspace: WorkspaceHome
   if (center === 'rd') {
+    const ownRequests = requests.filter(r => filters.workOwner !== 'mine' || r.requesterId === policy.user?.id)
+    const ownReleases = releases.filter(r => filters.workOwner !== 'mine' || r.createdBy === policy.user?.id)
     workspace = {
       kind: 'rd', services: section('服務健康與環境', scopedEnvs.map(env => {
         const latest = s.observations.buckets.filter(b => b.environmentId === env.id && b.applicationId === env.applicationId && Date.parse(b.to) <= nowMs)
@@ -65,9 +67,9 @@ export function workspaceDashboard(s: Snapshot, policy: Policy, center: Center, 
           route: `/rd/apps/${encoded(env.applicationId)}/environments/${encoded(env.id)}`, dataAsOf: latest?.to ?? now,
           detail: `${env.applicationId} · ${env.stage} · ${env.status} · ${active ? `${active.id}: ${active.state}` : '尚無已部署版本'} · observation: ${age}` }
       })),
-      work: section('待處理申請與發布', [...requests.filter(r => ['draft', 'submitted', 'approved', 'failed'].includes(r.state)).map(requestItem),
-        ...releases.filter(r => ['pending_approval', 'queued', 'deploying', 'verifying'].includes(r.state)).map(releaseItem)].toSorted(recent)),
-      deliveries: section('近期交付', releases.filter(r => ['succeeded', 'failed', 'rejected', 'cancelled'].includes(r.state)).map(releaseItem).toSorted(recent)),
+      work: section('待處理申請與發布', [...ownRequests.filter(r => ['draft', 'submitted', 'approved', 'failed'].includes(r.state)).map(requestItem),
+        ...ownReleases.filter(r => ['pending_approval', 'queued', 'deploying', 'verifying'].includes(r.state)).map(releaseItem)].toSorted(recent)),
+      deliveries: section('近期交付', ownReleases.filter(r => ['succeeded', 'failed', 'rejected', 'cancelled'].includes(r.state)).map(releaseItem).toSorted(recent)),
     }
   } else if (center === 'ops') {
     const opsEnvironment = (id: string) => {

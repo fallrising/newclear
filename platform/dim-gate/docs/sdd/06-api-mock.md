@@ -189,3 +189,5 @@ events 至少包含 eventId、entity refs、type、occurredAt、correlationId。
 GET `/dashboard` 沿用原 counters/pendingItems/dataAsOf，新增 `workspace`（kind=rd/ops/admin discriminated union）與 `scope`（authorized project/environment/pool options及filters）。共同區塊為 title/total/items，最多20筆 canonical sourceType/sourceId/title/state/route/dataAsOf/detail；不持久化第二份工作狀態。RD services/work/deliveries、Ops incidents/failures/approvals/capacity/staleness、Admin drafts/integrations/accessChanges。完整 DTO／權限規則見 [W1 contract](../W1-INTEGRATION-CONTRACT.md) 與生成 OpenAPI。
 
 projectId/environmentId 先授權且相互匹配；Ops 新增 provider/poolId，其他中心傳這兩項回422。合法但無權或不匹配 scope 回空投影，不暴露實體存在／名稱／隱藏筆數。未知 keys/enums 回422。保留73個operations與全部原 command；僅擴充既有 dashboard read，Mock 共用原 handler/engine。
+
+W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict dashboard DTO；mine 只篩工作／交付的實際 requester/creator，不改服務範圍與持久化。切到 Ops/Admin 清除此不適用條件並說明，合法 project/environment 在三工作區均保留。

@@ -259,11 +259,13 @@ export const sessionViewSchema = sessionDomainSchema.extend({
 })
 export const dashboardFiltersSchema = z.strictObject({
   projectId: idSchema.optional(), environmentId: idSchema.optional(), provider: providerSchema.optional(), poolId: idSchema.optional(),
+  workOwner: z.enum(['all', 'mine']).optional(),
 })
 export const dashboardQuerySchema = dashboardFiltersSchema.extend({ center: centerSchema }).refine(
   value => value.center === 'ops' || value.provider === undefined && value.poolId === undefined,
   { message: 'Provider and pool filters are only supported in Ops', path: ['center'] },
-)
+).refine(value => value.center === 'rd' || value.workOwner === undefined,
+  { message: 'Work owner filter is only supported in RD', path: ['workOwner'] })
 export const workspaceHomeItemSchema = z.strictObject({
   sourceType: z.enum(['application', 'environment', 'request', 'release', 'job', 'incident', 'pool', 'ci', 'catalogItem', 'integration', 'auditEvent']),
   sourceId: idSchema, title: z.string(), state: z.string(), route: z.string().startsWith('/'), dataAsOf: timestampSchema, detail: z.string(),

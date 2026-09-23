@@ -54,6 +54,16 @@ describe('W1 dashboard HTTP contract and typed client', () => {
     expect(escaped.applicationCount).toBe(0)
   })
 
+  it('round-trips own-work filters and gives mine and all different identity-bound query keys', async () => {
+    const filters = { projectId: 'project-store', workOwner: 'mine' as const }
+    const result = await client.api.getDashboard('rd', filters)
+    expect(result.scope.filters).toEqual(filters)
+    expect(client.queryKey('dashboard', 'rd', filters)).not.toEqual(client.queryKey('dashboard', 'rd', { ...filters, workOwner: 'all' }))
+    expect((await raw('center=rd&workOwner=unknown')).status).toBe(422)
+    await client.api.setPersona('user-ops')
+    expect((await raw('center=ops&workOwner=mine')).status).toBe(422)
+  })
+
   it('returns 422 for unsupported filters, 403 for ungranted workspaces, and empty foreign data', async () => {
     for (const query of ['center=rd&unknown=1', 'center=rd&provider=aws', 'center=rd&projectId=', 'center=rd&environmentId=a&environmentId=b']) {
       const response = await raw(query); expect(response.status).toBe(422)

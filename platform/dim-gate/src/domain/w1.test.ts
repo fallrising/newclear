@@ -15,10 +15,10 @@ function harness(initial = createSeed('w1-domain')) {
   const dashboard = (center: Center = 'rd', actorId = rd, filters = '') => dashboardViewSchema.parse(engine.read('/dashboard', new URLSearchParams(`center=${center}${filters ? `&${filters}` : ''}`), actorId))
   const home = <K extends Center>(kind: K, actor = kind === 'rd' ? rd : kind === 'ops' ? ops : admin, filters = '') => dashboard(kind, actor, filters).workspace as Extract<WorkspaceHome, { kind: K }>
   const advance = (ticks = 6) => command('/clock/advance', { ticks }, ops)
-  const request = (name: string, extra = {}) => command('/requests', {
+  const request = (name: string, extra = {}, actor = rd) => command('/requests', {
     applicationId: 'app-checkout', environmentName: name, stage: 'staging', catalogItemId: 'catalog-web', catalogRevision: 1,
     provider: 'aws', poolId: 'pool-aws-sg', cpu: 2, memoryMiB: 2048, purpose: 'W1 projection verification', ...extra,
-  })
+  }, actor)
   const pipeline = (environmentId = 'env-checkout-dev', actor = rd) => {
     const env = engine.getSnapshot().entities.environments.find(e => e.id === environmentId)!
     return command('/pipelines', { applicationId: env.applicationId, environmentId, environmentVersion: env.version, revision: `revision-${sequence}` }, actor)
@@ -108,6 +108,33 @@ describe('W1 canonical workspace home projections', () => {
     await h.command(`/requests/${created.entityId}/provision`, { expectedVersion: 3 }, ops); await h.advance(3)
     expect(h.home('ops').failures.items).toContainEqual(expect.objectContaining({ sourceType: 'job', sourceId: approved.operationId, state: 'failed' }))
     expect(h.home('rd').work.items).toContainEqual(expect.objectContaining({ sourceId: created.entityId, state: 'failed' }))
+  })
+
+  it('filters mine across different authorized requesters and release creators without changing services or snapshot', async () => {
+    const h = harness(), other = 'user-rd-data'
+    await h.command('/admin/assignments', { userId: other, role: 'rd', scopeType: 'project', scopeId: 'project-store', reason: 'Shared project requester' }, admin)
+    const mine = await h.request('own-work'), theirs = await h.request('team-work', {}, other)
+    await h.pipeline('env-checkout-dev', other); await h.advance()
+    await h.pipeline(); await h.advance()
+    await h.pipeline('env-checkout-prod', other); await h.advance(3)
+    const before = JSON.stringify(h.engine.getSnapshot())
+    const all = h.home('rd', rd, 'projectId=project-store'), own = h.home('rd', rd, 'projectId=project-store&workOwner=mine')
+    expect(all.work.items.map(i => i.sourceId)).toEqual(expect.arrayContaining([mine.entityId, theirs.entityId]))
+    expect(own.work.items.map(i => i.sourceId)).toEqual([mine.entityId])
+    expect(all.deliveries.total).toBe(2); expect(own.deliveries.total).toBe(1)
+    const ownRelease = h.engine.getSnapshot().entities.releases.find(r => r.id === own.deliveries.items[0].sourceId)!
+    expect(ownRelease.createdBy).toBe(rd)
+    expect(own.services).toEqual(all.services)
+    expect(h.home('rd', rd, 'projectId=project-store&workOwner=all')).toEqual(all)
+    const otherHome = h.home('rd', other, 'projectId=project-store&workOwner=mine')
+    expect(otherHome.work.items.map(i => i.sourceId)).toContain(theirs.entityId)
+    expect(otherHome.work.items.some(i => i.sourceType === 'release' && i.state === 'pending_approval')).toBe(true)
+    expect(otherHome.work.items.map(i => i.sourceId)).not.toContain(mine.entityId)
+    expect(JSON.stringify(h.engine.getSnapshot())).toBe(before)
+  })
+
+  it.each([['rd', rd, 'workOwner=someone'], ['ops', ops, 'workOwner=mine'], ['admin', admin, 'workOwner=all']] as const)('rejects invalid or unsupported work-owner scope %s %s %s', (center, actor, query) => {
+    expect(() => harness().dashboard(center, actor, query)).toThrow(expect.objectContaining({ status: 422 }))
   })
 
   it('uses actual pending/terminal releases and shows incidents without logs or trace payloads', async () => {

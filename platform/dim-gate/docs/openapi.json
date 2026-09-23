@@ -496,6 +496,18 @@
             }
           },
           {
+            "name": "workOwner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "mine"
+              ]
+            }
+          },
+          {
             "name": "center",
             "in": "query",
             "required": true,
@@ -16770,6 +16782,13 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 160
+                  },
+                  "workOwner": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "mine"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -19277,6 +19296,13 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 160
+          },
+          "workOwner": {
+            "type": "string",
+            "enum": [
+              "all",
+              "mine"
+            ]
           },
           "center": {
             "type": "string",

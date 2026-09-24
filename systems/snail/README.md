@@ -1,5 +1,8 @@
 # rudis
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 Rust in-memory **Redis-compatible** server speaking **RESP2 over TCP**.
 
 `redis-cli`、`redis-benchmark` 及主流 Redis SDK 可直接連線，零適配成本。

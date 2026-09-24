@@ -1,5 +1,8 @@
 # Loom
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 AI-native workspace (Tauri + Rust + React/WebView). Canvas is the runtime topology;
 edges are the routing table.
 

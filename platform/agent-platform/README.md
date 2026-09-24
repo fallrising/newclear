@@ -1,5 +1,8 @@
 # Agent Platform
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
 **目前狀態：M0 真實 KVM gate、M2 runtime 與 M3 recovery／cancel／approval／pause、guest 控制憑證隔離、固定節點 egress 已驗收。AT-11-A 控制端 model proxy 與 AT-11-B opt-in guest mailbox／SDK tool-call／短效憑證更新及 request cutoff 已接通；仍為本機固定 fixture。完整 AT-07／AT-11／M3、可信金額預算、付費 provider 與 usage UI 尚未完成。**

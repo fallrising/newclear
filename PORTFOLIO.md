@@ -135,3 +135,39 @@ ClarkQ、Snail、Ojbquay、Wotar 的協定不同，不需要硬合併；真正�
 3. 是否要保留下列未合併工作：Fanzloud open PR #3/#4、Knowledge Base 4 條 `cursor/*` note、Local OCR `agent/t006`、兩個 fraud M7 branch、Goku `copilot`/`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否可依 migration 結論視為被 PR #10/#11 取代？
 4. archived `config_center` 歷史中暴露的 n8n PostgreSQL/basic-auth credential 是否已完成輪換？「repo 已 archive」不等於風險已解除。
 5. 是否同意把「繼續投入」限制為上述 3 條 90 天戰線，並在確認後為所有休眠／收掉項補狀態與停止日期？
+
+## Documentation tiers
+
+Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentation depth only**. It does not reopen investment fronts. Policy: [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md). Taxonomy: [docs/taxonomy.md](docs/taxonomy.md).
+
+`Dormant since` for C-tier rows defaults to **2026-09-04** (portfolio freeze date) unless a component README already states a clearer stop date.
+
+| Path | Doc tier | Notes |
+| --- | --- | --- |
+| `products/kith` | A | Owner override active product |
+| `products/hai-taskboard` | A | Fake-core / Work Graph in progress |
+| `platform/agent-platform` | A | Owner override; M0–M3 evidence in tree |
+| `platform/dim-gate` | A | M0–M5 demo accepted locally |
+| `platform/ice-maker` | A | Knowledge-compiler investment line |
+| `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
+| `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
+| `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
+| `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
+| `products/goku` | C | Dormant product |
+| `products/phark` | C | Dormant product |
+| `gateways/pokercase` | C | Dormant unless daily gateway use resumes |
+| `systems/clarkq` | C | Dormant |
+| `systems/snail` | C | Dormant |
+| `systems/ojbquay` | C | Dormant |
+| `systems/wotar` | C | Dormant |
+| `platform/fanzloud` | C | Dormant |
+| `platform/prism` | C | Phase 0 SDD; dormant investment |
+| `apps/loom` | C | Dormant |
+| `apps/flowshot` | C | Dormant |
+| `apps/cms-scaffold` | C | Dormant |
+| `apps/cloudform` | D | Retired / historical |
+| `tools/streaming-converter` | D | Retired / historical |
+| `examples/bite-pi` | D | Disposable demo |
+| `labs/bee-swarm` | D | Superseded by team-superpowers workflow |
+| `labs/aweshore` | D | Explicitly stopped |
+

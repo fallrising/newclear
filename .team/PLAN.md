@@ -1508,3 +1508,47 @@ remote_durability: product03c_SSHsaved; evidence_checkpoint_pending_commit_and_S
 blockers: []
 next_action: commit_SSHpush_evidence_only; merge_latest_origin_main_into_branch_if_still_disjoint; latest_exacthead_CI; authorized_normal_merge_actual_tree_postmerge_CI_PRcloseout_ownerrelease
 ```
+
+## Program: portfolio-docs / Variant: mainline
+
+### Identity
+
+| Field | Value |
+| --- | --- |
+| project_id / variant_id | portfolio-docs / mainline |
+| target_repo / branch | fallrising/newclear / docs/portfolio-docs-tiers |
+| active_owner / run_id | Cursor orchestrator / PD-20260924-01 |
+| protocol | Same task/report contract as team-superpowers; does not modify dim-gate program block above |
+
+### Objective
+
+Tiered documentation: root catalog + policy + component README banners + A-tier quickstarts only. No code moves. Open PR for human review.
+
+### Tasks
+
+| Task | Goal | State |
+| --- | --- | --- |
+| [T-100](tasks/T-100.md) | Policy, taxonomy, README catalog, banners, A quickstarts, goku README | DONE — [report](reports/T-100.md) |
+| T-010 tutorials | Optional golden-path tutorials | SKIPPED — A-tier links existing local-dev docs instead |
+
+### Decisions
+
+| ID | Decision |
+| --- | --- |
+| PD-D001 | Doc tiers A/B/C/D per orchestrator recommendation; owner “按你建議” |
+| PD-D002 | A = kith, hai-taskboard, agent-platform, dim-gate, ice-maker, eru-vps-mvp |
+| PD-D003 | B = fleet, local-ocr-services, mkfk; fleet stays under `specs/` this PR |
+| PD-D004 | C dormant since 2026-09-04 default; D = cloudform, streaming-converter, bite-pi, bee-swarm, aweshore |
+| PD-D005 | No new tutorials in this PR |
+
+### Verification gate
+
+- Inventory completeness passed (26/26)
+- ice_maker `status --json` passed
+- Diff Markdown-only passed
+- ice_maker `make check` env failure recorded in T-100 risks (not claimed pass)
+
+### Residual risks
+
+- Host missing Go/pytest for some quickstart live runs
+- Future rename `specs/fleet` → `systems/fleet` still open

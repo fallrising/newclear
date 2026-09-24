@@ -2,7 +2,7 @@
   "milestone": "AT-11-C2b2",
   "date": "2026-09-24",
   "base_main": "dba9ee94a49bcfe2efb298caa1d5324cfde03988",
-  "status": "implementation-and-python-database-tests-passed; draft-pr-open; real-kvm-gate-incomplete",
+  "status": "implementation-and-python-database-tests-passed; github-ci-passed; draft-pr-open; real-kvm-gate-incomplete",
   "pull_request": {
     "number": 82,
     "url": "https://github.com/fallrising/newclear/pull/82",
@@ -27,8 +27,8 @@
     "ruff_check": "passed",
     "ruff_format_check": "passed",
     "web_check": {
-      "status": "not-run-locally",
-      "reason": "npm executable is unavailable in the local environment; GitHub web CI rerun pending after assertion fix"
+      "status": "not-run-locally; github-web-ci-passed",
+      "reason": "npm executable is unavailable locally; GitHub web job passed npm check and build"
     }
   },
   "kvm": {
@@ -71,9 +71,9 @@
   ],
   "source_sha256": {
     "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
-    "docs/HANDOFF.md": "0e541b5d3f73a392efc8e4046a5a537762f9e9224ddede96b00c6d6040647b2b",
-    "docs/M3-HTTPS-PROVIDER.md": "71f1beae255fee822c80a80365da26cb9df219956fa2115c5b2779d3772c6cc0",
-    "docs/NEXT-PROMPT.md": "968e08929857ef789843633f871487d87b2409abb17c6f61fade5f0e95d78205",
+    "docs/HANDOFF.md": "77a3b7a351f55fd82651ad66bbc0329d578bbd26be40c96d6e8ae0e1dbbb4224",
+    "docs/M3-HTTPS-PROVIDER.md": "47192615ea3dff6e050e44979ba4967372722f47527776853992ce3488f4833b",
+    "docs/NEXT-PROMPT.md": "0bc3aa6fa7f4050d70bdaf6b2940ef8a5e519272b5905bbad0183ac85c77f2a0",
     "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
     "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
     "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",
@@ -102,14 +102,26 @@
     "web/src/api.ts": "d794eef2a4c14b1b63db79750eb558823c3dc4fd0b1ff97ea60f8ea77a916cef",
     "tests_platform/test_provider_https.py": "a077048410856c27c0bd81bb8a51e9a97caa7e6f08a244b3348abb4e360933ea",
     "tests_platform/test_verification_contract.py": "bfc33e3477dae4b23a6e84aa57d67f6cbd3fc52fd23ddaa35d7ee1d5a18b5402",
-    "web/src/App.test.tsx": "0f3a32d1b0c24d8e867f4a4a1e3c6a95f851aae79f7b835acc80f7d0839b9d6f"
+    "web/src/App.test.tsx": "0f3a32d1b0c24d8e867f4a4a1e3c6a95f851aae79f7b835acc80f7d0839b9d6f",
+    "docs/M3-RECOVERY.md": "2de763e89d2a90f113201934aed066d1eb4c0425ef52b7fd9c1968dca4b45095",
+    "src/agent_platform/connector_recovery.py": "d19e02e271d86e28c0b52a76329d1b60d514ee7785bbe79464dde623a25678e1",
+    "src/agent_platform/connector_journal.py": "4126f3e8354e6b8dda2291a07e890dbe9835c638f1b1b77489767deb01cc3ab9"
   },
   "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories.",
   "github_ci": {
     "previous_run_id": 36006771058,
-    "check": "failed before suite alignment: new platform dependency-backed tests imported without locked runtime dependencies",
-    "web": "failed one stale status-label assertion; assertion corrected",
-    "control_plane": "passed",
-    "rerun": "pending"
+    "previous_failure": "fast check imported new platform dependency-backed tests without locked runtime dependencies; web job had one stale status-label assertion",
+    "current_run_id": 36008490179,
+    "head_commit": "e099c6e1294a7010d461f5900c467b3bc6cb1110",
+    "check": "passed",
+    "web": "passed: npm check and build",
+    "control_plane": "passed: platform-check and browser acceptance"
+  },
+  "recovery_review": {
+    "documented_rule": "unknown allocation without saved handle or VMM ownership stays quarantined and requires administrator reconciliation",
+    "inspect_behavior": "read-only; returns allocation_ownership_uncertain when handle or observation is absent",
+    "release_requirement": "saved observed VM ownership and complete stop proof",
+    "supported_same_journal_reconciliation_for_this_row": false,
+    "kvm_rerun": "blocked pending a formal, auditable recovery decision; journal and fence preserved"
   }
 }

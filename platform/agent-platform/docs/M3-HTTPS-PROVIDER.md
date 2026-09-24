@@ -37,9 +37,9 @@ Provider 回報的 usage 只標示 `provider_reported_usage_unbilled`；沒有�
 
 ## 驗收狀態與限制
 
-- 最新 `make platform-check` 通過：45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff lint／format。兩個需要平台依賴的新測試已移入 `tests_platform`，使 fast CI check 保持依賴隔離；Web CI 的舊狀態文案 assertion 已修正，修正後 CI 尚待重跑。本機 Web check 因環境沒有 Node/npm 未執行。
+- 最新 `make platform-check` 通過：45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff lint／format。兩個需要平台依賴的新測試已移入 `tests_platform`，使 fast CI check 保持依賴隔離；Web CI 的舊狀態文案 assertion 已修正。GitHub Actions run `36008490179` 的 check／web／control-plane 全部通過，含 browser acceptance。本機 Web check 因環境沒有 Node/npm 未執行。
 - `mock-https-complete` 的 real-KVM acceptance 已嘗試，使用本機 TLS mock 與 profile check，沒有真實 provider API。該次 managed launcher 未帶文件要求的 `sg kvm` supplementary group；`/dev/kvm` open 得到 `EACCES`，sandboxd 的 Cocoon clone 子程序遭終止，KVM case 未通過。
 - 開始前原有 197 筆 release proof 全部符合 exact stop-proof contract。失敗嘗試另外留下 1 筆 `allocate=started`、無 handle／observed/release proof 的 journal intent。收尾無 live claim、VM、failed-clone runtime directory 或 CPU cgroup；connector、sandboxd、測試 PostgreSQL 均已停止／移除。但產品 `drained()` 會因這筆未知 allocation 拒絕通過。歷史 journal／fences 保留，測試產生的新 intent／fence 也保留；沒有手工修改或刪除。不能刪除此 row、換 state directory 或重設 generation 來重跑。
-- 在有正式、可稽核的 same-journal reconciliation 決策前，不得再以該 node／journal 執行 KVM acceptance。文件中 `sg kvm` 的只讀存取檢查可通過；任何重跑仍須先解決此 unresolved intent。
+- [M3-RECOVERY](M3-RECOVERY.md) 對未知 allocation／缺少 ownership 證據的行為是 quarantine 並要求管理員對帳；現有 inspect endpoint 是唯讀且對無 handle row 回 `allocation_ownership_uncertain`，release 需要 journal 已保存的 observed VM。Repo 內沒有適用此 row 的受支援 reconciliation command/API。在有正式、可稽核的 same-journal reconciliation 決策前，不得再以該 node／journal 執行 KVM acceptance。文件中 `sg kvm` 的只讀存取檢查可通過；任何重跑仍須先解決此 unresolved intent。
 
 下一步是先按既有 connector ownership／recovery 規則處理該 quarantine，再以 `sg kvm` 啟動 sandboxd 與 connector、重新確認 explicit deny-all／zero-warm／empty node，重跑 HTTPS mock 與必要 isolation 回歸。沒有使用者提供的 endpoint／credential 前，不做真實 provider smoke。

@@ -53,7 +53,7 @@ def start(op, canary_run, duration, interval, lead, acceptance=None):
     issues = consistency_issues(snapshot, op.inventory)
     if issues or op.health()['exit_code']:
         raise ValueError('unhealthy or inconsistent cluster: ' + '; '.join(issues))
-    targets = guard_targets(op, snapshot, canary_run)
+    targets = guard_targets(op, snapshot, canary_run, expected_nodes={'worker-2', 'worker-3'})
     if {w['id'] for w in snapshot['workloads']} != {t['id'] for t in targets}:
         raise ValueError('soak requires exactly the two owned canaries; worker-4 stays empty')
     warmup(op, targets)

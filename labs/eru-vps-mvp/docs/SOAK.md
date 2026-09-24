@@ -4,6 +4,8 @@
 
 01 讀取 etcd health/status/alarms、metrics、core/etcd journal、服務 invocation、`/proc` CPU／磁碟／I/O pressure；02、03 對各自的 run-owned nginx 做 HTTP GET，同時核對 workload task ID 及 agent／proxy socket／共享 runtime 服務。04 保持空閒。預設每 30 秒取樣，journal 從前次取樣時間向前重疊一秒，不使用固定 20 秒視窗留下缺口。重疊日誌的 warning 計數是「含警告的樣本數」，不能當作獨立事故數。
 
+本觀測固定使用 worker-2／3 的 canaries；即使日後 canary-start 為 peer 重裝選用 03／04 或 02／04，本 `soak.py start` 也會拒絕把它們視為此模式的 02／03 觀測。
+
 這是兩個小型 nginx 的低負載觀測，涵蓋輕量 etcd 健康請求與既有 agent 活動，不代表部署壓力／容量測試，也不能排除兩個 HTTP 樣本間的短暫故障。HTTP、etcd health、服務 invocation 與 WAL/backend histogram 要一起判讀；單看 p99 桶上界、沒有 backend 寫入，或單看 `systemctl active` 都不能直接宣告 PASS。
 
 ## 啟動

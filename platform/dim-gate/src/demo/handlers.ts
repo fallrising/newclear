@@ -7,7 +7,6 @@ import { commandDomainRoute, readDomainRoute } from './handlers/cmdb'
 import { commandDemoRoute, readDemoRoute } from './handlers/core-session'
 
 const keySchema = z.string().regex(/^[\x21-\x7e]{1,128}$/)
-const operationPattern = (path: string) => new RegExp(`^${path.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{[^/]+\}/g, '[^/]+')}$`)
 
 export interface HandlerOptions {
   /** Absolute application base, including its trailing slash. */
@@ -67,8 +66,8 @@ export function createHandlers(controller: DemoController, options: HandlerOptio
           : await commandDomainRoute(controller, request.method, path, body, key!, identity)
       }
       const current = controller.getSession()
-      const status = runtimeStatuses.find(([method, route, , demo]) => demo === isDemo && method === request.method.toLowerCase()
-        && operationPattern(route).test(path))?.[2] ?? 200
+      const status = runtimeStatuses.find(([method, demo, , matcher]) => demo === isDemo
+        && method === request.method.toLowerCase() && matcher.test(path))?.[2] ?? 200
       return HttpResponse.json({ data, meta: { requestId, storeRevision: current.storeRevision, policyVersion: current.policyVersion } },
         { status, headers: { 'Cache-Control': 'no-store' } })
     } catch (error) {

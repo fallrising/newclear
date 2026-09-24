@@ -5,7 +5,7 @@ export type RouteKey = 'rd.overview' | 'rd.apps' | 'rd.app-detail' | 'rd.environ
   | 'rd.catalog' | 'rd.catalog-request' | 'rd.requests' | 'rd.request-detail'
   | 'rd.pipelines' | 'rd.pipeline-detail' | 'rd.release-detail' | 'ops.releases' | 'ops.release-detail'
   | 'ops.overview' | 'ops.cmdb' | 'ops.ci-detail' | 'ops.topology' | 'ops.requests' | 'ops.request-detail'
-  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.navigation'
+  | 'ops.jobs' | 'ops.job-detail' | 'ops.capacity' | 'admin.overview' | 'admin.access' | 'admin.users' | 'admin.features' | 'admin.routes' | 'admin.notifications' | 'admin.navigation'
   | 'admin.catalog' | 'admin.cmdb-models' | 'admin.audit' | 'guide'
   | 'rd.delivery' | 'rd.configuration' | 'rd.traffic' | 'ops.service-change'
   | 'rd.resources' | 'rd.resource-request' | 'rd.change-detail' | 'ops.change-detail'
@@ -47,6 +47,10 @@ export const routeRegistry: readonly RegisteredRoute[] = [
   { key: 'ops.release-detail', path: '/ops/releases/:releaseId', center: 'ops', requiredAction: 'release.read', crossCenterRead: true, navigation: { label: '發布詳情', group: '維運中心', order: 29, visible: false } },
   { key: 'admin.overview', path: '/admin', center: 'admin', requiredAction: 'access.write', navigation: { label: '平台管理', group: '工作空間', order: 30, visible: true } },
   { key: 'admin.access', path: '/admin/access', center: 'admin', requiredAction: 'access.write', navigation: { label: '角色與範圍', group: '治理', order: 31, visible: true } },
+  { key: 'admin.users', path: '/admin/users', center: 'admin', requiredAction: 'access.write', navigation: { label: '使用者與團隊', group: '治理', order: 31, visible: false } },
+  { key: 'admin.features', path: '/admin/features', center: 'admin', requiredAction: 'platformFeature.write', navigation: { label: '功能灰度', group: '治理', order: 31, visible: false } },
+  { key: 'admin.routes', path: '/admin/routes', center: 'admin', requiredAction: 'platformRoute.write', navigation: { label: '註冊路由', group: '治理', order: 31, visible: false } },
+  { key: 'admin.notifications', path: '/admin/notifications', center: 'admin', requiredAction: 'notificationPolicy.write', navigation: { label: '通知政策', group: '治理', order: 31, visible: false } },
   { key: 'admin.navigation', path: '/admin/navigation', center: 'admin', requiredAction: 'navigation.write', navigation: { label: '導航目錄', group: '治理', order: 32, visible: true } },
   { key: 'admin.catalog', path: '/admin/catalog', center: 'admin', requiredAction: 'catalog.write', navigation: { label: '服務目錄', group: '治理', order: 33, visible: true } },
   { key: 'admin.cmdb-models', path: '/admin/cmdb-models', center: 'admin', requiredAction: 'model.write', navigation: { label: 'CMDB 欄位', group: '治理', order: 34, visible: true } },
@@ -85,7 +89,10 @@ export function canAccessRoute(session: SessionView, route: RegisteredRoute) {
 }
 
 export function visibleNavigation(session: SessionView) {
-  return routeRegistry.filter((route) => route.navigation.visible && (!route.center || session.centers.includes(route.center)) && canAccessRoute(session, route))
+  return routeRegistry.filter((route) => route.navigation.visible && (!route.center || session.centers.includes(route.center))
+    && canAccessRoute(session, route)
+    && (!session.featureKeys || !['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'].includes(route.key)
+      || session.featureKeys.includes(route.key as NonNullable<SessionView['featureKeys']>[number])))
     .sort((left, right) => left.navigation.order - right.navigation.order)
 }
 

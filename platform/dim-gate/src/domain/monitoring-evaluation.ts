@@ -2,6 +2,7 @@ import type { AlertRule, AlertEvaluation, CommandReceipt, InfrastructureMetric, 
 import { activeSpec, monitoringNow, targetScope } from './monitoring'
 import { fail } from './engine-shared'
 import { ingestObservationBucket } from './observation-commands'
+import { dispatchNotification } from './notification-dispatch'
 
 const ref = (entityType: string, entityId: string) => ({ entityType, entityId })
 const sameTarget = (left: MonitoringTarget, right: MonitoringTarget) => JSON.stringify(left) === JSON.stringify(right)
@@ -54,6 +55,7 @@ function notify(s: Snapshot, rule: AlertRule, spec: AlertRule['spec'], target: M
     ruleId: rule.id, ruleRevision: evaluation.ruleRevision, incidentId, target, channelRef: spec.channelRef,
     recipientType: target.kind === 'service' ? 'rd' : 'ops', status, occurredAt: now, correlationId: evaluation.correlationId })
   recordEvent(s, `notification.${status}`, 'notificationDelivery', id, evaluation.correlationId, target)
+  if (status === 'suppressed') dispatchNotification(s, s.entities.notificationDeliveries.at(-1)!)
 }
 /** Persisted source-time evaluation. Unknown/stale/gaps reset the streak; only a qualifying fresh breach opens an episode. */
 export function ingestMonitoringSample(s: Snapshot, sample: Sample): CommandReceipt['changed'] {
@@ -184,6 +186,7 @@ export function advanceMonitoring(s: Snapshot): CommandReceipt['changed'] {
     if (failed && !silenced) { delivery.safeFailureCode = 'DEMO_DELIVERY_FAILURE'; delete s.scenarioFlags.alertDeliveryFailureDeliveryId }
     recordEvent(s, `notification.${delivery.status}`, 'notificationDelivery', delivery.id, delivery.correlationId, delivery.target)
     changed.push(ref('notificationDelivery', delivery.id))
+    changed.push(...dispatchNotification(s, delivery).map(attempt => ref('notificationAttempt', attempt.id)))
   }
   return changed
 }

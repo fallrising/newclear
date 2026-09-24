@@ -132,7 +132,13 @@ export function createApiClient() {
       listPools: true, getCapacity: true, listCatalog: true, getCatalog: true, createRequest: true, listRequests: true, getRequest: true, submitRequest: true, approveRequest: true, rejectRequest: true, cancelRequest: true, provisionRequest: true, retryRequest: true, listJobs: true, getJob: true
     }, getClientIdentity),
     ...deferredClient<Omit<ReturnType<typeof import('./clients/admin').createAdminClient>, 'getNavigation'>>(() => import('./clients/admin').then(module => module.createAdminClient(request)), {
-      getAccess: true, createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
+      getAccess: true, listAdminUsers: true, getAdminUser: true, createAdminUser: true, updateAdminUser: true,
+      listAdminTeams: true, getAdminTeam: true, createAdminTeam: true, patchAdminTeam: true,
+      listPlatformFeatures: true, getPlatformFeature: true, previewPlatformFeature: true, getCapabilityRegistry: true,
+      createPlatformFeature: true, revisePlatformFeature: true, platformFeatureAction: true, restorePlatformFeature: true,
+      listPlatformRoutes: true, getPlatformRoute: true, getPlatformRouteDiagnostic: true, getPlatformRouteRegistry: true,
+      createPlatformRoute: true, revisePlatformRoute: true, platformRouteAction: true, restorePlatformRoute: true,
+      createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
     }, getClientIdentity),
     ...deferredClient(() => import('./clients/delivery').then(module => module.createDeliveryClient(request)), {
       listPipelines: true, getPipeline: true, createPipeline: true, cancelPipeline: true, retryPipeline: true, listReleases: true, getRelease: true, approveRelease: true, rejectRelease: true, rollbackRelease: true
@@ -152,6 +158,13 @@ export function createApiClient() {
       listSloPolicies: true, getSloPolicy: true, createSloPolicy: true, reviseSloPolicy: true, sloPolicyAction: true,
       listSilences: true, getSilence: true, createSilence: true, listAlertEvaluations: true, getAlertEvaluation: true,
       listNotificationDeliveries: true, getNotificationDelivery: true,
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/notifications').then(module => module.createNotificationClient(request)), {
+      listAdminChannels: true, createChannel: true, patchChannel: true, testChannel: true,
+      listAdminNotificationTemplates: true, createNotificationTemplate: true, reviseNotificationTemplate: true, notificationTemplateAction: true,
+      listAdminNotificationPolicies: true, patchNotificationPolicy: true, listNotificationChannels: true,
+      listNotificationSubscriptions: true, createNotificationSubscription: true, patchNotificationSubscription: true,
+      listNotificationAttempts: true, getNotificationAttempt: true, retryNotificationAttempt: true,
     }, getClientIdentity),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }

@@ -25,7 +25,7 @@ async function perform(source: ServiceSource, action: ServiceAction, reason: str
   throw new Error('此操作不適用於目前的版本類型。')
 }
 
-export function ServiceActions({ detail, options, center, onEdit }: { detail: ServiceDetail; options: DeliveryOptions; center: 'rd' | 'ops'; onEdit: () => void }) {
+export function ServiceActions({ detail, options, center, onEdit, readOnly = false }: { detail: ServiceDetail; options: DeliveryOptions; center: 'rd' | 'ops'; onEdit: () => void; readOnly?: boolean }) {
   const [selected, setSelected] = useState<{ action: ServiceAction; source: ServiceSource } | null>(null)
   const [reason, setReason] = useState('')
   const [runTarget, setRunTarget] = useState(options.environment.id)
@@ -39,7 +39,8 @@ export function ServiceActions({ detail, options, center, onEdit }: { detail: Se
     else await getServiceDetail(detail.source.sourceType, receipt.entityId)
     await api.listAudit({ correlationId: receipt.correlationId, pageSize: 100 })
   })
-  const available = center === 'ops' ? detail.availableActions.filter(action => action === 'approve' || action === 'reject') : detail.availableActions.filter(action => action !== 'approve' && action !== 'reject')
+  const available = center === 'ops' ? detail.availableActions.filter(action => action === 'approve' || action === 'reject')
+    : readOnly ? [] : detail.availableActions.filter(action => action !== 'approve' && action !== 'reject')
   const confirm = async () => {
     if (!selected) return
     try {

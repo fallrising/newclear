@@ -133,3 +133,8 @@ W3 契約新增 /rd/apps/:appId/delivery、configuration、traffic，environment
 ## W4 實作前契約
 
 規則 create/revise、validate、submit、approve/reject、activate 是分開的版本化 command；prod 服務規則由另一位具 project/stage scope 的 Ops 決策，批准不等同啟用。基建規則由 pool scope Ops 操作。sample-time 順序、連續已知樣本和 ruleRevision 決定 evaluation；同一未恢復 episode 不重複建立 incident。Silence 只改通知判斷，歷史 incident/evidence 與健康恢復門檻不變；到期後僅後續符合條件的通知可重新投遞。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 platform feature disable blocks new eligible commands but never mutates already approved/running Request, Release, Change or Traffic snapshots. A route diagnostic is a local Mock with revision and safe failure/fallback, never a network proxy. A failed notification retry appends a new recipient attempt after current scope/channel checks; Silence never resolves incidents or bulk-sends expired history.

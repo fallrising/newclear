@@ -12,40 +12,18 @@ import { resourcePolicy } from './resource-policy'
 import { canReadObservation } from './observation'
 import { guideProjection, readObservation, visibleIntegrations } from './observation-views'
 import { policyFor, type Policy } from './policy'
-import { DomainError } from './errors'
+import { basicPage, pageValues, validateQuery } from './read-query'
 import { readDelivery, canReadDelivery } from './delivery'
 import { readMonitoring } from './monitoring-views'
+import { featureEligibility, featureRegistry } from './feature-policy'
+import { platformRouteRegistry, routeDiagnostic } from './platform-route-registry'
+import { readNotifications, canReadAttempt } from './notification-views'
 export { DomainError } from './errors'
 
 export interface Engine {
   getSnapshot(): Snapshot
   read(path: string, query: URLSearchParams, actorId: string): unknown
   command(input: CommandInput): Promise<CommandReceipt>
-}
-
-function validateQuery(query: URLSearchParams, allowed: string[]): void {
-  const seen = new Set<string>()
-  for (const key of query.keys()) {
-    if (!allowed.includes(key) || seen.has(key)) throw new DomainError(422, 'VALIDATION_ERROR', '不支援的查詢欄位或重複欄位。', { [key]: ['Unknown or duplicate query parameter'] })
-    seen.add(key)
-    if (key !== 'q' && query.get(key) === '') throw new DomainError(422, 'VALIDATION_ERROR', '查詢欄位不可為空。', { [key]: ['Empty query parameter'] })
-  }
-  if ((query.get('q')?.length ?? 0) > 100) fail(422, 'VALIDATION_ERROR', '搜尋字串最多 100 字元。')
-}
-
-function pageValues(query: URLSearchParams): { page: number; pageSize: number } {
-  const integer = (key: string, fallback: number, max: number) => {
-    const value = query.get(key)
-    if (value === null) return fallback
-    if (!/^[1-9]\d*$/.test(value) || Number(value) > max) fail(422, 'VALIDATION_ERROR', `${key} 超出允許範圍。`)
-    return Number(value)
-  }
-  return { page: integer('page', 1, Number.MAX_SAFE_INTEGER), pageSize: integer('pageSize', 25, 100) }
-}
-
-function basicPage<T>(items: T[], query: URLSearchParams): Page<T> {
-  const { page, pageSize } = pageValues(query)
-  return { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length, page, pageSize }
 }
 
 function paged<T extends { id: string; name: string; updatedAt: string }>(items: T[], query: URLSearchParams, sortFields: string[]): Page<T> {
@@ -95,6 +73,10 @@ function ciView(ci: CI, policy: Policy): CI {
 }
 
 function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): boolean {
+  if (audit.entityType === 'notificationAttempt') {
+    const attempt = snapshot.entities.notificationAttempts.find(row => row.id === audit.entityId)
+    return !!attempt && canReadAttempt(snapshot, policy, attempt)
+  }
   if (['pipelineDefinition', 'serviceConfig', 'trafficPolicy', 'serviceExecution'].includes(audit.entityType)) return !!serviceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (['resourceObject', 'resourceBinding', 'change', 'changeExecution'].includes(audit.entityType)) return !!resourceRoute(snapshot, policy, audit.entityType, audit.entityId)
   if (policy.admin) return audit.orgId === policy.user?.orgId
@@ -147,7 +129,7 @@ function visibleAudit(snapshot: Snapshot, policy: Policy, audit: AuditEvent): bo
     return !!source && !!target && policy.canReadCi(source) && policy.canReadCi(target)
   }
   if (audit.entityType === 'demoSession' && audit.action !== 'provision.scheduler.advance') return false
-  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario'].includes(audit.entityType)) return false
+  if (['roleAssignment', 'user', 'navigationItem', 'catalogItem', 'modelField', 'demoScenario', 'platformFeature', 'platformRoute'].includes(audit.entityType)) return false
   return audit.scopeSnapshot.projectIds.some((id) => policy.hasProject(id)) || audit.scopeSnapshot.poolIds.some((id) => policy.poolIds.includes(id))
 }
 
@@ -241,6 +223,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
     const entities = state.entities
     const monitoring = readMonitoring(state, policy, path, query)
     if (monitoring !== undefined) return monitoring
+    const notifications = readNotifications(state, policy, path, query)
+    if (notifications !== undefined) return clone(notifications)
     const service = readServiceDelivery(state, policy, path, query)
     if (service !== undefined) return service
     const resource = readResources(state, policy, path, query)
@@ -253,6 +237,9 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, [])
       return clone({ user: { id: policy.user!.id, displayName: policy.user!.displayName }, assignments: policy.assignments,
         effectiveActions: policy.effectiveActions, centers: policy.centers, demo: true, sessionId: state.sessionId,
+        featureKeys: Object.keys(featureRegistry).filter(key => featureEligibility(state, policy, key as keyof typeof featureRegistry).eligible),
+        featureKeysByProject: Object.fromEntries(policy.projectIds.map(projectId => [projectId,
+          Object.keys(featureRegistry).filter(key => featureEligibility(state, policy, key as keyof typeof featureRegistry, projectId).eligible)])),
         policyVersion: state.policyVersion, storeRevision: state.storeRevision, logicalClock: state.logicalClock })
     }
     if (path === '/guide') {
@@ -265,6 +252,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       if (!policy.centers.includes(center)) forbidden()
       if (path === '/navigation') return clone(entities.navigation.filter((item) => item.orgId === policy.user!.orgId && item.enabled
         && (item.routeKey === 'guide' || item.routeKey.startsWith(`${center}.`))
+        && (!(item.routeKey in featureRegistry) || featureEligibility(state, policy, item.routeKey as keyof typeof featureRegistry).eligible)
         && (item.routeKey === 'guide' || item.routeKey.startsWith('rd.') && policy.effectiveActions.includes(item.routeKey === 'rd.catalog' ? 'catalog.read' : item.routeKey === 'rd.requests' ? 'request.read' : 'app.read')
           || item.routeKey.startsWith('ops.') && policy.effectiveActions.includes(item.routeKey === 'ops.requests' ? 'request.read' : item.routeKey === 'ops.jobs' ? 'job.read' : item.routeKey === 'ops.capacity' ? 'capacity.read' : 'ci.read')
           || item.routeKey.startsWith('admin.') && policy.admin))
@@ -451,6 +439,90 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return clone({ organizations: entities.organizations.filter((entry) => entry.id === policy.user!.orgId),
         users: entities.users.filter((entry) => entry.orgId === policy.user!.orgId),
         assignments: entities.assignments.filter((entry) => entry.orgId === policy.user!.orgId), policyVersion: state.policyVersion })
+    }
+    if (path === '/admin/platform-features') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      return clone(basicPage(entities.platformFeatures.filter(row => row.orgId === policy.user!.orgId)
+        .toSorted((a, b) => a.id.localeCompare(b.id)), query))
+    }
+    const previewFeatureId = /^\/admin\/platform-features\/([^/]+)\/preview$/.exec(path)?.[1]
+    if (previewFeatureId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const feature = entities.platformFeatures.find(row => row.id === previewFeatureId && row.orgId === policy.user!.orgId)
+      if (!feature) notFound()
+      return clone({ policyVersion: state.policyVersion, featureId: feature!.id,
+        items: entities.users.filter(row => row.orgId === policy.user!.orgId && row.source === 'seed').map(row => ({
+          userId: row.id, ...featureEligibility(state, policyFor(state, row.id), feature!.spec.featureKey),
+        })) })
+    }
+    const adminFeatureId = /^\/admin\/platform-features\/([^/]+)$/.exec(path)?.[1]
+    if (adminFeatureId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const feature = entities.platformFeatures.find(row => row.id === adminFeatureId && row.orgId === policy.user!.orgId)
+      return feature ? clone(feature) : notFound()
+    }
+    if (path === '/admin/capability-registry') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone({
+        features: Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })),
+        routes: Object.entries(platformRouteRegistry).map(([routeKey, entry]) => ({ routeKey, ...entry,
+          diagnostic: routeDiagnostic(state, policy.user!.orgId, routeKey as keyof typeof platformRouteRegistry), status: 'mock' as const })),
+        later: [
+          { capabilityId: 'artifact-catalog', label: 'Artifact catalog', status: 'later' as const },
+          { capabilityId: 'sdk-framework-catalog', label: 'SDK / framework catalog', status: 'later' as const },
+          { capabilityId: 'bff-governance', label: 'BFF governance', status: 'later' as const },
+        ],
+      })
+    }
+    if (path === '/admin/platform-routes') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      return clone(basicPage(entities.platformRoutes.filter(row => row.orgId === policy.user!.orgId)
+        .toSorted((a, b) => a.id.localeCompare(b.id)), query))
+    }
+    const routeDiagnosticId = /^\/admin\/platform-routes\/([^/]+)\/diagnostic$/.exec(path)?.[1]
+    if (routeDiagnosticId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const route = entities.platformRoutes.find(row => row.id === routeDiagnosticId && row.orgId === policy.user!.orgId)
+      return route ? clone(routeDiagnostic(state, policy.user!.orgId, route.spec.routeKey)) : notFound()
+    }
+    const adminRouteId = /^\/admin\/platform-routes\/([^/]+)$/.exec(path)?.[1]
+    if (adminRouteId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const route = entities.platformRoutes.find(row => row.id === adminRouteId && row.orgId === policy.user!.orgId)
+      return route ? clone(route) : notFound()
+    }
+    if (path === '/admin/platform-route-registry') {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      return clone(Object.entries(platformRouteRegistry).map(([routeKey, entry]) => ({ routeKey, ...entry, status: 'mock' as const })))
+    }
+    if (path === '/admin/users' || path === '/admin/teams') {
+      validateQuery(query, ['page', 'pageSize'])
+      if (!policy.admin) forbidden()
+      const items = path === '/admin/users' ? entities.users : entities.teams
+      return clone(basicPage(items.filter(entry => entry.orgId === policy.user!.orgId)
+        .toSorted((left, right) => left.id.localeCompare(right.id)), query))
+    }
+    const adminUserId = /^\/admin\/users\/([^/]+)$/.exec(path)?.[1]
+    if (adminUserId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const user = entities.users.find(entry => entry.id === adminUserId && entry.orgId === policy.user!.orgId)
+      return user ? clone(user) : notFound()
+    }
+    const adminTeamId = /^\/admin\/teams\/([^/]+)$/.exec(path)?.[1]
+    if (adminTeamId) {
+      validateQuery(query, [])
+      if (!policy.admin) forbidden()
+      const team = entities.teams.find(entry => entry.id === adminTeamId && entry.orgId === policy.user!.orgId)
+      return team ? clone(team) : notFound()
     }
     if (path === '/admin/navigation') {
       validateQuery(query, ['center'])

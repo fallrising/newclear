@@ -8,6 +8,7 @@ import { createAlertRuleInputSchema, createMonitorPolicyInputSchema, createSilen
 import { fail, forbidden, notFound, parse } from './engine-shared'
 import { activeSpec, monitoringNow, requireTarget, ruleTarget, targetScope, validateMonitorSpec, validateRuleSpec } from './monitoring'
 import { runAlertScenario } from './monitoring-evaluation'
+import { existingCommandReceipt, featureEligibility } from './feature-policy'
 
 type Kind = 'monitorPolicy' | 'alertRule' | 'sloPolicy'
 type Config = MonitorPolicy | AlertRule | SLOPolicy
@@ -71,6 +72,10 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
     const targetRef = kind === 'monitorPolicy' ? (spec as MonitorPolicy['spec']).target
       : s.entities.monitorPolicies.find(m => m.id === (spec as AlertRule['spec']).monitorPolicyId && m.orgId === policy.user!.orgId)?.spec.target ?? notFound()
     requireTarget(s, policy, targetRef, mode)
+    const scope = targetScope(s, targetRef)
+    const featureKey = targetRef.kind === 'service' ? 'rd.monitoring' : 'ops.alerting'
+    if (mode === 'write' && !existingCommandReceipt(s, input) && !featureEligibility(s, policy, featureKey, scope?.projectId).eligible)
+      fail(403, 'FEATURE_UNAVAILABLE', '目前功能政策不允許新的監控指令。')
     return { apply(next) {
       const now = monitoringNow(next)
       const targetNext = checkSpec(next, kind, spec, original)
@@ -144,7 +149,9 @@ export function prepareMonitoring(s: Snapshot, policy: Policy, input: CommandInp
       const currentRule = next.entities.alertRules.find(r => r.id === rule.id)!
       if (!activeSpec(currentRule)?.enabled) invalid()
       const now = Date.parse(monitoringNow(next)), start = Date.parse(body.startAt), end = Date.parse(body.expiresAt)
-      if (start < now || start > now + 300_000 || end <= start || end - start > 86_400_000) fail(422, 'VALIDATION_ERROR', 'Silence 需在目前時間起五分鐘內開始，且期限不超過 24 小時。')
+      const maxHours = next.entities.notificationPolicies.find(row => row.orgId === currentRule.orgId)?.maxSilenceHours ?? 24
+      if (start < now || start > now + 300_000 || end <= start || end - start > maxHours * 3_600_000)
+        fail(422, 'VALIDATION_ERROR', `Silence 需在目前時間起五分鐘內開始，且期限不超過 ${maxHours} 小時。`)
       const id = `w4-silence-${String(next.sequence + 1).padStart(4, '0')}`, nowIso = monitoringNow(next)
       next.entities.silences.push({ id, orgId: currentRule.orgId, version: 1, createdAt: nowIso, updatedAt: nowIso, ruleId: currentRule.id,
         ruleRevision: currentRule.activeRevision!, target: targetRef, actorId: input.actorId, reason: body.reason,

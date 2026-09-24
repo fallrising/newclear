@@ -5,6 +5,7 @@ import { ErrorState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import type { CommandReceipt, SessionView } from '../../domain/schemas'
 import type { AlertEvaluation, AlertRule, MonitorPolicy, MonitoringTarget, NotificationDelivery, Silence, SLOPolicy } from '../../domain/monitoring-models'
+import { sessionFeatureAvailable } from '../../domain/feature-policy'
 import { ServiceConfirmation, ServiceNotice, ServiceTable, useServiceCommand } from '../service-delivery'
 
 export type Policy = MonitorPolicy | AlertRule | SLOPolicy
@@ -17,6 +18,8 @@ export function missing(error: unknown) { return !!error && typeof error === 'ob
 export function MissingAlerting({ back = '/rd/apps' }: { back?: string }) { return <section className="access-state" role="status"><p className="eyebrow">404 · 找不到資料</p><h1>找不到此監控範圍</h1><p>資料可能不存在，或不在目前身分可讀的授權範圍。</p><Button asChild variant="outline"><Link to={back}>返回清單</Link></Button></section> }
 
 export function canWrite(session: SessionView, target: MonitoringTarget, projectId?: string, stage?: string, poolId?: string) {
+  const featureKey = target.kind === 'service' ? 'rd.monitoring' : 'ops.alerting'
+  if (!sessionFeatureAvailable(session, featureKey, target.kind === 'service' ? projectId : undefined)) return false
   if (target.kind === 'service') return session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === projectId && (!grant.stages || Boolean(stage && grant.stages.includes(stage as 'dev' | 'staging' | 'prod'))))
   return session.assignments.some(grant => grant.role === 'ops' && grant.scopeType === 'pool' && grant.scopeId === poolId)
 }

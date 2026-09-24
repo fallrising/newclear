@@ -26,7 +26,7 @@ describe('W4 strict atomic migration of accepted W3 bytes', () => {
     expect(createHash('sha256').update(fixture).digest('hex')).toBe('8d8271b06a5a114d4e218cdae2dae8315d6d8988cdebbe3091bb29ad1583c0a8')
     expect(legacySnapshotV3Schema.parse(original.snapshot)).toEqual(original.snapshot)
     const h = harness(), c = h.start(), migrated = c.getSnapshot()
-    expect(migrated).toMatchObject({ schemaVersion: 4, seedVersion: 'dim-gate-w4-v1' })
+    expect(migrated).toMatchObject({ schemaVersion: 5, seedVersion: 'dim-gate-w5-v1' })
     expect(h.writes).toBe(1)
     for (const [key, value] of Object.entries(original.snapshot)) {
       if (!['schemaVersion', 'seedVersion', 'entities', 'observations'].includes(key)) expect(migrated[key as keyof typeof migrated]).toEqual(value)
@@ -34,6 +34,7 @@ describe('W4 strict atomic migration of accepted W3 bytes', () => {
     for (const [key, value] of Object.entries(original.snapshot.entities)) {
       const result = migrated.entities[key as keyof typeof original.snapshot.entities]
       if (key === 'navigation') expect(result.slice(0, value.length)).toEqual(value)
+      else if (key === 'users' || key === 'teams') expect(result).toEqual(value.map(row => ({ ...row, source: 'seed' })))
       else expect(result).toEqual(value)
     }
     expect(migrated.entities.navigation).toHaveLength(original.snapshot.entities.navigation.length + 3)
@@ -83,7 +84,7 @@ describe('W4 strict atomic migration of accepted W3 bytes', () => {
     const h = harness(); h.fail()
     expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_STORAGE_UNAVAILABLE' }))
     expect(h.raw).toBe(originalBytes); expect(h.writes).toBe(0)
-    h.restore(); expect(h.start().getSnapshot().schemaVersion).toBe(4); expect(h.writes).toBe(1)
+    h.restore(); expect(h.start().getSnapshot().schemaVersion).toBe(5); expect(h.writes).toBe(1)
     const bounded = harness(originalBytes, new TextEncoder().encode(originalBytes).byteLength + 1)
     expect(bounded.start).toThrow(expect.objectContaining({ code: 'DEMO_STORAGE_UNAVAILABLE' }))
     expect(bounded.raw).toBe(originalBytes); expect(bounded.writes).toBe(0)
@@ -91,7 +92,7 @@ describe('W4 strict atomic migration of accepted W3 bytes', () => {
 
   it('starts a fresh v4 session with no fabricated alerts, incidents, approvals or deliveries', () => {
     const seed = createSeed('w4-fresh-seed')
-    expect(seed).toMatchObject({ schemaVersion: 4, seedVersion: 'dim-gate-w4-v1' })
+    expect(seed).toMatchObject({ schemaVersion: 5, seedVersion: 'dim-gate-w5-v1' })
     for (const key of newCollections) expect(seed.entities[key]).toEqual([])
     expect(seed.observations.infrastructureMetrics).toEqual([])
     expect(seed.entities.incidents).toEqual([])

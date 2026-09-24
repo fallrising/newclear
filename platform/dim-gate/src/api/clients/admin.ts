@@ -1,12 +1,17 @@
 import { z } from 'zod'
 import {
   auditEventSchema, ciKindSchema, commandReceiptSchema,
-  modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, userSchema,
+  modelFieldSchema, monitoringNavigationItemSchema, organizationSchema, pageSchema, roleAssignmentSchema, teamSchema, userSchema,
+  platformFeatureSchema, featurePreviewSchema, capabilityRegistrySchema,
+  platformRouteSchema, platformRouteDiagnosticSchema, platformRouteRegistryEntrySchema,
   type AuditEvent, type CatalogItem, type Center, type CommandReceipt, type ModelField, type NavigationItem,
 } from '../../domain/schema-models'
+import type { FeatureSpec } from '../../domain/feature-models'
+import type { PlatformRouteSpec } from '../../domain/platform-route-models'
 import type { ApiRequest } from '../core/request'
 
 export type User = z.infer<typeof userSchema>
+export type Team = z.infer<typeof teamSchema>
 export type AccessView = { organizations: z.infer<typeof organizationSchema>[]; users: User[]; assignments: z.infer<typeof roleAssignmentSchema>[]; policyVersion: number }
 export type ModelsView = { kinds: z.infer<typeof ciKindSchema>[]; fields: ModelField[] }
 export type AuditListInput = { entityType?: string; entityId?: string; correlationId?: string; actorId?: string; page?: number; pageSize?: number; sort?: 'id' | 'occurredAt'; order?: 'asc' | 'desc' }
@@ -24,6 +29,42 @@ export function createAdminClient(request: ApiRequest) {
   return {
     getNavigation: (center: Center): Promise<NavigationItem[]> => request(withQuery('/navigation', { center }), z.array(monitoringNavigationItemSchema)),
     getAccess: (): Promise<AccessView> => request('/admin/access', accessSchema),
+    listPlatformFeatures: (page = 1, pageSize = 25) => request(withQuery('/admin/platform-features', { page, pageSize }), pageSchema(platformFeatureSchema)),
+    getPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}`, platformFeatureSchema),
+    previewPlatformFeature: (id: string) => request(`/admin/platform-features/${encodeURIComponent(id)}/preview`, featurePreviewSchema),
+    getCapabilityRegistry: () => request('/admin/capability-registry', capabilityRegistrySchema),
+    createPlatformFeature: (spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>
+      request('/admin/platform-features', commandReceiptSchema, { method: 'POST', body: { spec, reason } }),
+    revisePlatformFeature: (id: string, expectedVersion: number, spec: FeatureSpec, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/revisions`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, spec, reason } }),
+    platformFeatureAction: (id: string, action: 'validate' | 'activate' | 'disable', expectedVersion: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/${action}`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, reason } }),
+    restorePlatformFeature: (id: string, expectedVersion: number, revision: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-features/${encodeURIComponent(id)}/restore`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, revision, reason } }),
+    listPlatformRoutes: (page = 1, pageSize = 25) => request(withQuery('/admin/platform-routes', { page, pageSize }), pageSchema(platformRouteSchema)),
+    getPlatformRoute: (id: string) => request(`/admin/platform-routes/${encodeURIComponent(id)}`, platformRouteSchema),
+    getPlatformRouteDiagnostic: (id: string) => request(`/admin/platform-routes/${encodeURIComponent(id)}/diagnostic`, platformRouteDiagnosticSchema),
+    getPlatformRouteRegistry: () => request('/admin/platform-route-registry', z.array(platformRouteRegistryEntrySchema)),
+    createPlatformRoute: (spec: PlatformRouteSpec, reason: string): Promise<CommandReceipt> =>
+      request('/admin/platform-routes', commandReceiptSchema, { method: 'POST', body: { spec, reason } }),
+    revisePlatformRoute: (id: string, expectedVersion: number, spec: PlatformRouteSpec, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-routes/${encodeURIComponent(id)}/revisions`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, spec, reason } }),
+    platformRouteAction: (id: string, action: 'validate' | 'activate' | 'disable' | 'test', expectedVersion: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-routes/${encodeURIComponent(id)}/${action}`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, reason } }),
+    restorePlatformRoute: (id: string, expectedVersion: number, revision: number, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/platform-routes/${encodeURIComponent(id)}/restore`, commandReceiptSchema, { method: 'POST', body: { expectedVersion, revision, reason } }),
+    listAdminUsers: (page = 1, pageSize = 25) => request(withQuery('/admin/users', { page, pageSize }), pageSchema(userSchema)),
+    getAdminUser: (id: string): Promise<User> => request(`/admin/users/${encodeURIComponent(id)}`, userSchema),
+    createAdminUser: (body: { displayName: string; teamIds: string[]; enabled: boolean; reason: string }): Promise<CommandReceipt> =>
+      request('/admin/users', commandReceiptSchema, { method: 'POST', body }),
+    updateAdminUser: (id: string, body: { expectedVersion: number; displayName?: string; teamIds?: string[]; enabled?: boolean; reason: string }): Promise<CommandReceipt> =>
+      request(`/admin/users/${encodeURIComponent(id)}`, commandReceiptSchema, { method: 'PATCH', body }),
+    listAdminTeams: (page = 1, pageSize = 25) => request(withQuery('/admin/teams', { page, pageSize }), pageSchema(teamSchema)),
+    getAdminTeam: (id: string): Promise<Team> => request(`/admin/teams/${encodeURIComponent(id)}`, teamSchema),
+    createAdminTeam: (body: { businessUnitId: string; name: string; reason: string }): Promise<CommandReceipt> =>
+      request('/admin/teams', commandReceiptSchema, { method: 'POST', body }),
+    patchAdminTeam: (id: string, expectedVersion: number, name: string, reason: string): Promise<CommandReceipt> =>
+      request(`/admin/teams/${encodeURIComponent(id)}`, commandReceiptSchema, { method: 'PATCH', body: { expectedVersion, name, reason } }),
     createAssignment: (body: { userId: string; role: Center; scopeType: 'org' | 'project' | 'pool'; scopeId: string; stages?: ('dev' | 'staging' | 'prod')[]; reason: string }): Promise<CommandReceipt> =>
       request('/admin/assignments', commandReceiptSchema, { method: 'POST', body }),
     revokeAssignment: (id: string, expectedVersion: number, reason: string): Promise<CommandReceipt> =>

@@ -1,12 +1,17 @@
 import { serviceDeliveryIntegrityErrors } from './service-delivery-integrity'
 import type { LegacySnapshot, LegacySnapshotV2, LegacySnapshotV3, Snapshot } from './schemas'
+import type { LegacySnapshotV4 } from './schema-models'
 import { deliveryIntegrityErrors } from './delivery-integrity'
 import { observationIntegrityErrors } from './observation-integrity'
 import { resourceIntegrityErrors } from './resource-integrity'
 import { monitoringIntegrityErrors } from './monitoring-integrity'
+import { demoPersonaIds } from './policy'
+import { featureRegistry, featureSpecSupported } from './feature-policy'
+import { platformRouteRegistry, routeSpecSupported } from './platform-route-registry'
+import { notificationIntegrityErrors } from './notification-integrity'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
-export function integrityErrors(snapshot: Snapshot): string[] {
+export function integrityErrors(snapshot: Snapshot, includeW5 = true): string[] {
   const errors: string[] = []
   const entities = snapshot.entities
   const scopedCollections = Object.entries(entities).filter(([key]) => key !== 'organizations')
@@ -23,9 +28,49 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     return collection.find((entity) => entity.id === id && entity.orgId === orgId)
   }
   for (const team of entities.teams) if (!linked(entities.businessUnits, team.businessUnitId, team.orgId)) errors.push('team: invalid business unit')
+  if (includeW5) {
+    const seedTeamIds = new Set(['team-commerce', 'team-platform', 'team-data'])
+    for (const team of entities.teams) if ((team.source === 'seed') !== seedTeamIds.has(team.id)) errors.push('team: invalid source identity')
+  }
   for (const project of entities.projects) if (!linked(entities.teams, project.teamId, project.orgId)) errors.push('project: invalid team')
   if (new Set(entities.projects.map((project) => `${project.orgId}:${project.slug.toLowerCase()}`)).size !== entities.projects.length) errors.push('project: duplicate normalized slug')
   for (const user of entities.users) for (const teamId of user.teamIds) if (!linked(entities.teams, teamId, user.orgId)) errors.push('user: invalid team')
+  if (includeW5) for (const user of entities.users) if ((user.source === 'seed') !== demoPersonaIds.has(user.id)) errors.push('user: invalid source identity')
+  if (includeW5) {
+  if (new Set(entities.platformFeatures.map(row => `${row.orgId}:${row.spec.featureKey}`)).size !== entities.platformFeatures.length)
+    errors.push('platformFeature: duplicate key')
+  for (const feature of entities.platformFeatures) {
+    if (!featureSpecSupported(feature.spec) || !(feature.spec.featureKey in featureRegistry)) errors.push('platformFeature: unsupported registry target')
+    if (feature.revisions.length !== feature.revision || feature.revisions.some((revision, index) =>
+      revision.revision !== index + 1 || revision.spec.featureKey !== feature.spec.featureKey || !featureSpecSupported(revision.spec)))
+      errors.push('platformFeature: invalid revision lineage')
+    if (JSON.stringify(feature.revisions.at(-1)?.spec) !== JSON.stringify(feature.spec)) errors.push('platformFeature: mutable spec mismatch')
+    if (feature.activeRevision !== null && (feature.activeRevision > feature.revision || feature.status === 'draft' && feature.activeRevision < 1))
+      errors.push('platformFeature: invalid active revision')
+    if (feature.status === 'active' && feature.activeRevision === null) errors.push('platformFeature: active state without revision')
+    if (feature.everActivated !== (feature.status === 'active' || feature.status === 'disabled' || feature.activeRevision !== null
+      || snapshot.audit.some(row => row.entityType === 'platformFeature' && row.entityId === feature.id && row.action === 'platformFeature.activate')))
+      errors.push('platformFeature: inconsistent activation history')
+    for (const revision of feature.revisions) {
+      for (const id of revision.spec.eligibleProjectIds) if (!linked(entities.projects, id, feature.orgId)) errors.push('platformFeature: invalid project')
+      for (const id of revision.spec.eligibleTeamIds) if (!linked(entities.teams, id, feature.orgId)) errors.push('platformFeature: invalid team')
+    }
+  }
+  if (new Set(entities.platformRoutes.map(row => `${row.orgId}:${row.spec.routeKey}`)).size !== entities.platformRoutes.length)
+    errors.push('platformRoute: duplicate key')
+  for (const route of entities.platformRoutes) {
+    if (!routeSpecSupported(route.spec)) errors.push('platformRoute: unsupported registry target')
+    if (route.revisions.length !== route.revision || route.revisions.some((revision, index) =>
+      revision.revision !== index + 1 || revision.spec.routeKey !== route.spec.routeKey || !routeSpecSupported(revision.spec)))
+      errors.push('platformRoute: invalid revision lineage')
+    if (JSON.stringify(route.revisions.at(-1)?.spec) !== JSON.stringify(route.spec)) errors.push('platformRoute: mutable spec mismatch')
+    if (route.activeRevision !== null && route.activeRevision > route.revision) errors.push('platformRoute: invalid active revision')
+    if (route.status === 'active' && route.activeRevision === null) errors.push('platformRoute: active state without revision')
+    if (!entities.integrations.some(row => row.id === route.spec.integrationId && row.orgId === route.orgId)) errors.push('platformRoute: invalid integration')
+    if (!(route.spec.routeKey in platformRouteRegistry)) errors.push('platformRoute: unknown route key')
+    if (route.health.testedRevision !== null && route.health.testedRevision > route.revision) errors.push('platformRoute: invalid health revision')
+  }
+  }
   for (const app of entities.applications) {
     const project = linked(entities.projects, app.projectId, app.orgId)
     if (!project || !('teamId' in project) || project.teamId !== app.ownerTeamId) errors.push('application: owner must match project team')
@@ -84,12 +129,18 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot), ...(includeW5 ? notificationIntegrityErrors(snapshot) : [])]
+}
+
+/** Run the W4 invariants on the parsed original, before adding any W5 metadata. */
+export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
+  // W4-only checks never read W5 collections or source tags. Keep the exact parsed object.
+  return integrityErrors(snapshot as unknown as Snapshot, false)
 }
 
 /** Frozen v3 data is validated before any v4 collection is materialized. */
 export function legacyV3IntegrityErrors(snapshot: LegacySnapshotV3): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
+  return legacyV4IntegrityErrors({ ...snapshot, schemaVersion: 4, seedVersion: 'dim-gate-w4-v1',
     entities: { ...snapshot.entities, infrastructureIncidents: [], monitorPolicies: [], alertRules: [], sloPolicies: [],
       silences: [], alertEvaluations: [], notificationDeliveries: [] },
     observations: { ...snapshot.observations, infrastructureMetrics: [] } })

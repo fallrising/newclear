@@ -50,6 +50,16 @@ export const wireSchemas = {
   RollbackRelease: d.rollbackReleaseInputSchema,
   AcknowledgeIncident: d.acknowledgeIncidentInputSchema,
   CreateAssignment: d.createAssignmentInputSchema,
+  CreateUser: d.createUserInputSchema, CreateTeam: d.createTeamInputSchema, PatchTeam: d.patchTeamInputSchema,
+  CreateFeature: d.createFeatureInputSchema, ReviseFeature: d.reviseFeatureInputSchema,
+  FeatureAction: d.featureActionInputSchema, RestoreFeature: d.restoreFeatureInputSchema,
+  CreatePlatformRoute: d.createPlatformRouteInputSchema, RevisePlatformRoute: d.revisePlatformRouteInputSchema,
+  PlatformRouteAction: d.platformRouteActionInputSchema, RestorePlatformRoute: d.restorePlatformRouteInputSchema,
+  CreateChannel: d.createChannelInputSchema, PatchChannel: d.patchChannelInputSchema, TestChannel: d.testChannelInputSchema,
+  CreateNotificationTemplate: d.createNotificationTemplateInputSchema, ReviseNotificationTemplate: d.reviseNotificationTemplateInputSchema,
+  NotificationTemplateAction: d.notificationTemplateActionInputSchema, PatchNotificationPolicy: d.patchNotificationPolicyInputSchema,
+  CreateNotificationSubscription: d.createNotificationSubscriptionInputSchema,
+  PatchNotificationSubscription: d.patchNotificationSubscriptionInputSchema, RetryNotificationAttempt: d.retryNotificationAttemptInputSchema,
   PatchUser: d.patchUserInputSchema,
   PatchNavigation: d.patchNavigationInputSchema,
   CreateCatalogRevision: d.createCatalogRevisionInputSchema,
@@ -68,7 +78,7 @@ export const wireSchemas = {
 }
 
 export type Operation = {
-  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'W2' | 'W3' | 'W4';
+  method: 'get' | 'post' | 'patch' | 'delete'; path: string; id: string; milestone: 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'W2' | 'W3' | 'W4' | 'W5';
   query?: z.ZodObject; body?: z.ZodType; data: z.ZodType; status: 200 | 201 | 202; demo?: boolean;
 }
 export const operations: Operation[] = []

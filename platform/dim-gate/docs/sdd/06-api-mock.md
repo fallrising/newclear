@@ -205,3 +205,8 @@ W3 使用 snapshot3 / dim-gate-w3-v1，同一 envelope1 / dim-gate.demo.v1。嚴
 ## W4 實作前契約
 
 Snapshot v4 / `dim-gate-w4-v1` 保持 envelope1 與 `dim-gate.demo.v1` storage key；嚴格凍結 v3/v2/v1 reader，先驗舊關係後一次原子加空業務集合（含 CI-only infrastructureIncidents）與固定 W4 導航 metadata，不重寫舊導航、不賦權，失敗保留原 bytes。新增固定 schema 的 monitor-policies、alert-rules、slo-policies、silences、alert-evaluations、notification-deliveries 列表/detail/command，CI-only incident 沿用 Ops incident 路徑；OpenAPI、runtime manifest、typed client 與 Mock 同步，idempotency/current-policy/expectedVersion 使用原 envelope 契約。固定 Demo channel 與故障場景僅在本機模擬，絕不向外部 URL 發送。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 uses strict typed v5 schema, v1–v4 proof-before-additive migration, runtime manifest/OpenAPI and bounded routes in the W5 contract. User/team, feature, route and notification commands recheck current scope and replay semantics before fresh mutation; arbitrary URL, destination, script or external adapter input is forbidden. Mock route test and notification delivery have deterministic safe failure codes and no outbound network.

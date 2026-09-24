@@ -1367,3 +1367,144 @@ remote_durability: product_dd90_SSHsaved; containing_evidence_checkpoint_nextSSH
 blockers: []
 next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal_merge_actualtree_postmergeCI_PRcloseout_ownerrelease; then W5
 ```
+
+
+DG-D096: W4 actual integration closeout reconciled before W5 ownership claim. [PR50](https://github.com/fallrising/newclear/pull/50) MERGED normally at `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` (parents main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and accepted evidence head `9cc2a921eb319b7c90b5c9ffdea03bdadce4006d`). Actual main and PR head share full dim-gate tree `bf36efc99c763826510d430777fed68729b123c7`; latest-head CI35914655882 SUCCESS. Actual [post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS on exact merge: 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and native/docs/contracts/CI/architecture/build. Post-merge artifact10778013202 expires2026-10-23T21:37:42Z; downloaded raw samples name55ce00a: 302886 initial gzip bytes, coldLCP1036ms, queryp95 0.8ms, HTTPp95 176.2ms. Mirror35919602710 SUCCESS. PR body holds these late facts and W4 owner release, terminal DONE; no further W4 commit or main push. Old W4 branch/worktrees remain. W5 has no prior branch/PR/task and is the next unimplemented increment. New isolated worktree `/home/ckc/test/codex/newclear-dim-gate-w5` and branch `agent/dim-gate/mainline/w5-platform-governance` start from exact actual main55ce00a. W5 contract revision1 and [T045](tasks/T-045.md) domain, [T046](tasks/T-046.md) API/migration, [T047](tasks/T-047.md) UI/browser, [T048](tasks/T-048.md) integration, [T049](tasks/T-049.md) uninvolved review are fixed before implementation; five task validators pass. W5 is CONTRACT_LOCAL_PENDING_CHECKPOINT / NOT_ACCEPTED; no product code or external side effect yet. Lead retains W5 ownership.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 96
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5 CONTRACT_FIXED_LOCAL / PRODUCT_NOT_STARTED / NOT_ACCEPTED
+task_id: T045 READY; T046 READY; T047 READY; T048 READY; T049 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+last_incorporated_main: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+spec_ref: platform/dim-gate/docs/W5-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-13-18
+report_ref: .team/reports/dim-gate-w5-preflight.md
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; implement_T045_domain_T046_API_migration_T047_UI; integrate_T048_fullgates; uninvolved_T049_review; exactheadCI_authorizedmerge_actualcloseout
+```
+
+
+DG-D097: W5 product checkpoint `ace27ff833de58541236b44b9b410cf58f7a8f17` implements the bounded Demo User/Team identity lifecycle, strict v1–v4→v5 source migration, typed Admin routes and `/admin/users` UI without an automatic role grant or login persona. W5 contract revision1 remains unchanged. Local 409/409 native, focused production Chromium1/1 (refresh, permission denial, two themes × three widths axe/overflow), lint/typecheck/docs/contracts168/324/CI/architecture/build, and unchanged benchmark3/3 pass. An initial benchmark attempt failed before browser launch because the established local `LD_LIBRARY_PATH` was omitted; corrected environment rerun passed without source changes. The source-bound [identity checkpoint](reports/dim-gate-w5-identity-checkpoint.md) records evidence and open work. T045/T046/T047 are PARTIAL; feature cohort, safe registered PlatformRoute and recipient-specific notification remain, so T048 integration gates and T049 uninvolved fixed-commit review have not begun. Draft PR61 is open. This is **not W5 acceptance or merge**; branch ownership remains with Codex W5. Save this evidence checkpoint by SSH push, continue remaining fixed-contract slices and complete full gates before review/acceptance.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 97
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_IDENTITY_PRODUCT_CHECKPOINT / OTHER_W5_SLICES_PENDING / NOT_ACCEPTED
+task_id: T045 PARTIAL_identity; T046 PARTIAL_identity_API_migration; T047 PARTIAL_identity_UI_browser; T048 READY_AFTER_SLICES; T049 READY_AFTER_FIXED_PRODUCT
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+implementation_commit: ace27ff833de58541236b44b9b410cf58f7a8f17
+report_ref: .team/reports/dim-gate-w5-identity-checkpoint.md
+integration_state: PR61_DRAFT_OPEN_not_accepted
+remote_durability: identity_product_commit_local_pending_SSHpush; evidence_checkpoint_local_pending_commit_and_SSHpush
+blockers: []
+next_action: SSHsave_checkpoint; implement_feature_cohort_PlatformRoute_scoped_notification; full_W5_gates; T049_independent_review; exactheadCI_and_authorized_normal_merge_actualcloseout
+```
+
+
+DG-D098: W5 integrated product and review-correction candidate `7ab67ce5eb99967b820fa59df44c31808a40d631` is SSH saved as existing draft PR61 head on `agent/dim-gate/mainline/w5-platform-governance`; actual `origin/main` remains W4 merge `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952`. Contract revision2 includes persisted feature activation history, original-W4 migration proof and per-project session cohort projection. T045–T047 are implemented in the lead-owned integration; independent T049 found and lead corrected recipient, readback, organization, migration, channel selection and per-project UI findings F1–F7. T049 has rerun 97 focused fixed-source tests at 7ab and closed F7, with formal report still pending. Local frozen install, 426 native in46 files, lint/typecheck/docs/contracts207/398/CI/architecture, demo build and new per-project Chromium1 pass on 7ab. Earlier W5 focused5/5 on prior5cb, complete runs interrupted after new findings, and cancelled CI35934645580/35935179696/35937375121 are historical, not final gate evidence. Full 7ab Chromium100 is running; Firefox/WebKit smoke, benchmark, isolation and exact-product [CI35937914805](https://github.com/fallrising/newclear/actions/runs/35937914805) remain to be reconciled before acceptance. No product acceptance, merge, deployment or owner release is claimed.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 98
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_7ab_LOCAL_NATIVE_PASS / FULL_GATES_AND_REVIEW_REPORT_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 FIXED_SOURCE_REVIEW_REPORT_PENDING
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+implementation_commit: 7ab67ce5eb99967b820fa59df44c31808a40d631
+review_ref: .team/reports/T-049-attempt-1.md pending
+report_ref: .team/reports/dim-gate-w5-validation.md pending
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35937914805_in_progress
+remote_durability: fixed_product_7ab_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_and_exact_CI_pending]
+next_action: finish_7ab_Chromium100_smoke_benchmark_isolation; collect_T049_report_and_exact_CI; accept_product_only_after_all_gates; evidence_only_checkpoint_latestheadCI_then_authorized_normal_merge_actualcloseout
+```
+
+
+DG-D099: The full `7ab67ce` Chromium diagnostic completed 98/100 in30.8m: its only two failures were historical W1→current and W2→current browser migration specs that still asserted v4 seedVersion/schema despite the correct v5 output. No other M0–W5 browser case failed; 1,000 actual UI commands and atomic 1,001st refusal passed. Lead updated only those two specs to assert strict v5, source classification, safe W5 default collections and unchanged legacy work/receipts; focused real Chromium2/2, lint/typecheck and diff check passed. New fixed product/test SHA `b35e6ed502f60e5291e4d27dd804f6f189c6832d` is SSH saved as PR61 head. Uninvolved T049 attempt2 reviewed `7ab..b35`, independently passed50 migration native cases and typecheck with no new finding; report `.team/reports/T-049-attempt-2.md` was copied byte-identically, SHA256 `3db3320326ec57a63659620d994ffd810d385122b853782bb50cf2d8e6e23e92`, validator passed. Local b35 frozen install, 426/426 native, lint/typecheck/docs/contracts207/398/CI/architecture and fresh demo build pass. Full b35 Chromium100, Firefox/WebKit smoke12 on separate port, unchanged benchmark/isolation and exact-product [CI35940402377](https://github.com/fallrising/newclear/actions/runs/35940402377) remain in progress/pending. Old CI35937914805 was cancelled and cannot be accepted. W5 remains NOT_ACCEPTED / PR61 DRAFT OPEN; no merge, deploy or owner release.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 99
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_b35_NATIVE_AND_REVIEW_PASS / FULL_GATES_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt1_AND_attempt2_DONE_no_open_findings
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+implementation_commit: b35e6ed502f60e5291e4d27dd804f6f189c6832d
+review_ref: .team/reports/T-049-attempt-2.md
+report_ref: .team/reports/dim-gate-w5-validation.md
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35940402377_in_progress
+remote_durability: fixed_product_b35_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_and_exact_CI_pending]
+next_action: complete_b35_Chromium100_smoke_benchmark_isolation; verify_exact_product_CI; accept_only_after_all_pass; evidence_only_checkpoint_latestheadCI_authorized_normal_merge_actual_closeout
+```
+
+DG-D100: Fixed `b35e6ed` local full Chromium finished 99/100 in30.5m. The only failure was the historical W2 Kafka governance browser case reading `sessionStorage` immediately after `page.goto` while the screen still showed demo initialization; its trace captured a null snapshot. The unchanged Kafka case passed alone 1/1. The lead added one readiness assertion before the first snapshot in the shared Redis/Kafka case, preserving all authorization, immutable-history, axe, layout and command assertions; both variants passed 2/2 on the corrected worktree. Corrected fixed product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` is SSH saved as PR61 head. On 03c, 426/426 native, lint/typecheck, docs223/503, contracts207/398, CI/architecture and diff check pass; full Chromium100 and exact [CI35943030312](https://github.com/fallrising/newclear/actions/runs/35943030312) are running. Independent T049 attempt3 is reviewing only `b35..03c`; no verdict is inferred. The earlier b35 Firefox/WebKit smoke12/12 passed but is prior-source evidence; benchmark and isolation remain pending for the final source. Old CI35940402377 was cancelled after the known race and cannot stand for final acceptance. `origin/main` advanced to `3982f64491b6f771c5a28bddc737efd0b42d4fb5` via unrelated ERU/Kith changes; no `platform/dim-gate`, dim-gate CI or PLAN delta exists, and the branch still needs latest-main reconciliation before merge. W5 remains NOT_ACCEPTED / PR61 DRAFT OPEN; no merge, deploy or owner release.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 100
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_03c_NATIVE_PASS / FULL_GATES_AND_REVIEW_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt3_IN_PROGRESS
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+review_ref: .team/reports/T-049-attempt-3.md pending
+report_ref: .team/reports/dim-gate-w5-validation.md pending
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35943030312_in_progress
+remote_durability: fixed_product_03c_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_review_and_exact_CI_pending]
+next_action: finish_03c_full_Chromium_smoke_benchmark_isolation_and_independent_review; verify_exact_CI; then_accept_product_and_save_evidence_only; reconcile_latest_main; latestheadCI_authorized_normal_merge_actual_closeout
+```
+
+DG-D101: Lead ACCEPTS W5 fixed product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` for AC-WS-13–18 under W5 contract revision2. Uninvolved T049 attempts1–3 close F1–F7 with no open confirmed source/test finding on the final one-line readiness delta; SHA256 reports are in [W5 validation](reports/dim-gate-w5-validation.md). On exact 03c, local frozen install lineage, lint/typecheck, 426/426 native, docs225/514 at evidence preparation, contracts207/398, CI/architecture, fresh demo build, full Chromium100/100 in31.0m, Firefox/WebKit12/12 in3.9m, demo/live isolation2/2 and unchanged benchmark3/3 passed. Local raw benchmark: 297608/307200 initial gzip bytes, LCP median748/2500ms, 5000-CI query p95 0.5/150ms, persisted Mock HTTP p95 172.2/500ms over100 successful requests. Exact product [CI35943030312](https://github.com/fallrising/newclear/actions/runs/35943030312) SUCCESS with 426 native, 100 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and all static/build gates. Its actual PR synthetic checkout `61a26d5e42755dfab13bbbfef3a59e063c863cdf` (parents then-main `cfb52ce62a7d15f63fe1de5aa8fb4faaf812de45` and product03c) has complete dim-gate tree `22f996667ce908b5012473930e40a3c41e3cc5a6`, exactly equal to product03c. [Artifact10785969077](https://github.com/fallrising/newclear/actions/runs/35943030312/artifacts/10785969077), expires2026-10-24T02:11:17Z, was downloaded and decoded: all five CI cold loads 297608bytes, medianLCP1316ms, queryp95 0.9ms, HTTPp95 185.7ms with100 HTTP200. No skipped/failed gate is accepted. This is **product acceptance only**; PR61 remains DRAFT OPEN and W5 ownership stays with the lead through evidence-only checkpoint, latest-head CI, normal merge, actual tree and post-merge CI. Latest fetched main3100143 contains no dim-gate source/workflow/PLAN delta from W4 base; incorporate it before merge. No deployment, external notification, real identity/cloud operation, force or main push.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 101
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5 integration_closeout_only
+terminal_state: null
+milestone: W5_PRODUCT_ACCEPTED_AC_WS_13_18 / PR_INTEGRATION_PENDING
+accepted_implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+review_ref: .team/reports/T-049-attempt-1.md; .team/reports/T-049-attempt-2.md; .team/reports/T-049-attempt-3.md
+report_ref: .team/reports/dim-gate-w5-validation.md; .team/reports/T-048-attempt-1.md
+product_ci: 35943030312 SUCCESS; synthetic61a26d5; identical_component_tree_22f996667ce908b5012473930e40a3c41e3cc5a6
+integration_state: PR61_DRAFT_OPEN_evidence_head_CI_merge_actual_closeout_pending
+remote_durability: product03c_SSHsaved; evidence_checkpoint_pending_commit_and_SSHpush
+blockers: []
+next_action: commit_SSHpush_evidence_only; merge_latest_origin_main_into_branch_if_still_disjoint; latest_exacthead_CI; authorized_normal_merge_actual_tree_postmerge_CI_PRcloseout_ownerrelease
+```

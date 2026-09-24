@@ -80,3 +80,21 @@ it('registers W4 service and Ops alerting routes without granting cross-role wri
   expect(canAccessRoute(ops, routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(true)
   expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(false)
 })
+
+it('keeps cohort navigation separate from grant-guarded readback routes and protects Admin governance', () => {
+  const rd = session({ centers: ['rd'], effectiveActions: ['monitorPolicy.read', 'pipelineDefinition.read'], featureKeys: ['rd.delivery'] })
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/monitoring')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/delivery')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['rd'], effectiveActions: [], featureKeys: ['rd.monitoring'] }),
+    routeForPath('/rd/apps/app-checkout/monitoring')!)).toBe(false)
+  const ops = session({ centers: ['ops'], effectiveActions: ['alertRule.read'], featureKeys: [] })
+  expect(canAccessRoute(ops, routeForPath('/ops/alerting')!)).toBe(true)
+  expect(visibleNavigation(ops).some(route => route.key === 'ops.alerting')).toBe(false)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout')!)).toBe(false)
+  const admin = session({ centers: ['admin'], effectiveActions: ['access.write', 'platformFeature.write'], featureKeys: [] })
+  expect(canAccessRoute(admin, routeForPath('/admin/features')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['platformRoute.write'] }), routeForPath('/admin/routes')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['notificationPolicy.write'] }), routeForPath('/admin/notifications')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/features')!)).toBe(false)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/routes')!)).toBe(false)
+})

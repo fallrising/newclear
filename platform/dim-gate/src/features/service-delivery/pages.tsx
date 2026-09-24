@@ -8,6 +8,7 @@ import { PageHeading } from '../../components/shared/page-heading'
 import { ErrorState, LoadingState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import type { CreatePipelineDefinitionInput, CreateServiceConfigInput, CreateTrafficPolicyInput, DeliveryOptions, SessionView } from '../../domain/schemas'
+import { sessionFeatureAvailable } from '../../domain/feature-policy'
 import { ConfigurationEditor, DefinitionEditor, TrafficEditor } from './editors'
 import { useServiceCommand } from './commands'
 import { getServiceDetail, isMissing, listServiceSources, sectionPath, sectionTitle, sourcePath, stateLabel, timeLabel, type ServiceKind } from './model'
@@ -17,7 +18,10 @@ import { ServiceDetailView } from './ServiceDetailView'
 const families = { pipelineDefinition: ['pipeline-definitions', 'pipeline-definition'], serviceConfig: ['service-configs', 'service-config'], trafficPolicy: ['traffic-policies', 'traffic-policy'] } as const
 const isKind = (value: string): value is ServiceKind => value === 'pipelineDefinition' || value === 'serviceConfig' || value === 'trafficPolicy'
 function canWrite(session: SessionView, kind: ServiceKind, options: DeliveryOptions) {
-  return session.effectiveActions.includes(`${kind}.write`) && session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === options.application.projectId && (!grant.stages || grant.stages.includes(options.environment.stage)))
+  const featureKey = kind === 'pipelineDefinition' ? 'rd.delivery' : kind === 'trafficPolicy' ? 'rd.traffic' : undefined
+  return (!featureKey || sessionFeatureAvailable(session, featureKey, options.application.projectId))
+    && session.effectiveActions.includes(`${kind}.write`)
+    && session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === options.application.projectId && (!grant.stages || grant.stages.includes(options.environment.stage)))
 }
 
 function CreateSource({ kind, options, onCreated, onCancel }: { kind: ServiceKind; options: DeliveryOptions; onCreated: (id: string) => void; onCancel: () => void }) {

@@ -6,14 +6,17 @@ const monitoringReads = ['monitorPolicy.read', 'alertRule.read', 'sloPolicy.read
 const monitoringWrites = ['monitorPolicy.write', 'alertRule.write', 'sloPolicy.write', 'silence.create']
 const monitoringApprovals = ['monitorPolicy.approve', 'alertRule.approve', 'sloPolicy.approve']
 const requesterActions = ['change.create', 'change.submit', 'change.cancel', 'change.retry']
+// Persisted Demo users are not authentication identities. Only fixed personas may act.
+export const demoPersonaIds = new Set(['user-rd-commerce', 'user-rd-data', 'user-ops', 'user-admin',
+  'w2-user-ops-secondary', 'w2-user-multi', 'w2-user-no-grant'])
 const actions: Record<Center, readonly string[]> = {
   rd: [...serviceReads, ...monitoringReads, ...monitoringWrites, 'pipelineDefinition.write', 'serviceConfig.write', 'trafficPolicy.write', ...resourceRead, ...requesterActions, 'app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.create', 'request.edit', 'request.submit', 'request.cancel', 'request.retry', 'request.read', 'pipeline.read', 'pipeline.trigger', 'pipeline.retry', 'pipeline.cancel', 'release.rollback', 'incident.read', 'catalog.read', 'audit.read', 'job.read', 'capacity.read'],
   ops: [...serviceReads, ...monitoringReads, ...monitoringWrites, ...monitoringApprovals, 'serviceChange.approve', ...resourceRead, ...requesterActions, 'change.approve', 'change.reject', 'change.execute', 'resource.manage', 'app.read', 'environment.read', 'ci.read', 'ci.create', 'ci.update', 'relation.write', 'release.read', 'observation.read', 'request.read', 'request.approve', 'request.reject', 'request.provision', 'pipeline.read', 'release.approve', 'release.reject', 'incident.read', 'incident.acknowledge', 'incident.investigate', 'catalog.read', 'audit.read', 'integration.read', 'job.read', 'capacity.read'],
-  admin: ['app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.read', 'incident.read', 'catalog.read', 'catalog.write', 'catalog.publish', 'navigation.write', 'model.write', 'access.write', 'audit.read', 'integration.read', 'integration.test', 'capacity.read'],
+  admin: ['app.read', 'environment.read', 'ci.read', 'release.read', 'observation.read', 'request.read', 'incident.read', 'catalog.read', 'catalog.write', 'catalog.publish', 'navigation.write', 'model.write', 'access.write', 'platformFeature.write', 'platformRoute.write', 'notificationPolicy.write', 'audit.read', 'integration.read', 'integration.test', 'capacity.read'],
 }
 
 export function policyFor(snapshot: Snapshot, actorId: string) {
-  const user = snapshot.entities.users.find((entry) => entry.id === actorId && entry.enabled)
+  const user = demoPersonaIds.has(actorId) ? snapshot.entities.users.find((entry) => entry.id === actorId && entry.source === 'seed' && entry.enabled) : undefined
   const assignments = user ? snapshot.entities.assignments.filter((entry) => entry.userId === actorId && entry.orgId === user.orgId) : []
   const admin = !!user && assignments.some((entry) => entry.role === 'admin' && entry.scopeType === 'org' && entry.scopeId === user.orgId)
   const projectGrants = assignments.filter((entry) => entry.scopeType === 'project')

@@ -170,6 +170,11 @@ def main():
                     canonical_repo=repo["canonical_repo"],
                     base_sha=repo["base_sha"],
                     deadline=datetime.now(UTC) + timedelta(seconds=240),
+                    verification={
+                        "mode": "fixture-m2",
+                        "revision": "fixture-m2-v1",
+                        "checks": [],
+                    },
                 ),
             )
             service.mutate(run_id, Mutation(generation=1, action="prepare"))

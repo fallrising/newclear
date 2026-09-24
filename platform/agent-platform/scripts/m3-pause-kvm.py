@@ -190,6 +190,11 @@ def main():
                         "backend": "openhands",
                         "require_approval": case == "approval",
                         "deadline_seconds": 300,
+                        "verification": {
+                            "mode": "fixture-m2",
+                            "revision": "fixture-m2-v1",
+                            "checks": [],
+                        },
                     },
                 )
                 run = post(

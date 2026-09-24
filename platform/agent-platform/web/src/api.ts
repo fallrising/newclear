@@ -35,7 +35,12 @@ export type Run = {
     diff?: string;
     diff_sha256?: string;
     summary: string;
-    verification: { status: string; reason: string };
+    verification: {
+      status: string;
+      reason: string;
+      name?: string;
+      checks?: Array<{ id: string; status: string; exit_code: number | null }>;
+    };
   } | null;
 };
 export type RunEvent = {

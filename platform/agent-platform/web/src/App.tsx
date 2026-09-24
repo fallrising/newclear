@@ -622,11 +622,17 @@ function RunActivity({ run }: { run: Run }) {
           <p className="muted">
             驗證：
             {run.result.verification.status === 'passed'
-              ? '固定檔案修改驗收通過'
+              ? run.result.verification.name === 'm2_fixture_workspace_assertion'
+                ? '固定檔案修改驗收通過'
+                : 'Profile 設定的驗證通過'
               : run.result.verification.status === 'failed'
-                ? '固定檔案修改驗收失敗'
-                : '未執行'}
-            。專案測試：未設定。
+                ? run.result.verification.name === 'm2_fixture_workspace_assertion'
+                  ? '固定檔案修改驗收失敗'
+                  : 'Profile 設定的驗證失敗'
+                : run.result.verification.reason === 'verification_not_configured'
+                  ? '未設定驗證條件'
+                  : '驗證結果不確定'}
+            。
           </p>
           {run.result.diff !== undefined && (
             <>

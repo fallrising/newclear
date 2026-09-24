@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 13 項（近期 2、後續 11）；ERU-001～005 已完成，下一項 ERU-006 為 host network 與管理埠隔離驗收。唯讀準備於 2026-09-24 04:06:02 UTC 開始；workers 的公開 TCP/80 規則須先經新 plan 精確收斂，再驗證公網 v4/v6 隔離、管理埠、CNI egress NAT 與 port ownership。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 12 項（近期 1、後續 11）；ERU-001～006 已完成，下一項 ERU-007 為正式 V11 小流量運行驗收。ERU-006 最終實機結果與限制見 [網路驗收紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -33,6 +33,8 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 
 - ERU-005 已完成一次受控實機 core API outage／恢復：2026-09-24T12:10:48Z 停止 01 的 eru-core，以獨立新 recovery plan 還原可驗證備份，再以 fresh health-bound plan 隨後回切已驗證 patch。31 筆／149.7 秒的 etcd／服務樣本 health failure 為 0；WAL p99 桶上界 8 ms（60 observations），backend commit 在窗口內無 observation。結束時 core API 可讀、執行 binary 符合驗證記錄、3 workers available、配額／runtime／workloads／三個 etcd metadata 前綴皆為零，受保留服務比對不變；原始 plan、journal、health evidence 留在 private。此演練不證明 VM／磁碟故障恢復，也不解決歷史 fdatasync 根因，詳見 [ERU-005 紀錄](M2-CORE-API-RECOVERY-2026-09-24.md)。
 
+- ERU-006 已完成：run `20260924T174428Z-a6f4feb1` 以鎖定 worker-4 nginx 驗證管理私網 HTTP 200、公網 v4/v6 TCP/80 阻擋；core 公網 2379／2380／5001 各走 v4/v6，共六項皆不可達。bridge workload resolver A query 符合 plan，IPv4 HTTPS 回 200。因 worker `DOCKER-USER → ONEVPS-INGRESS` 先於 UFW 丟棄 UDP，臨時增加一條僅限 CNI `/32` 到 resolver `/32` UDP/53 的 run-owned ACCEPT；沒有更動持久規則；worker 原有 TCP/80 Anywhere allow 仍保留，這次不代表 port 80 持續受保護。清理後 read-only reconcile 確認 workload、CNI NAT、forward rule、guard 為零，worker/core 與 cluster baseline restored；raw evidence 留在 private。詳見 [ERU-006 紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。
+
 - 補上 core 更新／rollback 的 32 個程序中斷切點與一次未知後續更動測試（33 次真實 SIGKILL），修正早期 journal 錯誤與權限／hardlink／mount 拒絕條件。均在本機暫存目錄驗證；[本輪交接與剩餘 TODO](M2-CRASH-RECOVERY-2026-09-23.md)。
 
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
@@ -46,7 +48,6 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - ERU-004 分析已交付，但歷史 23.53 秒 slow fdatasync 的底層根因仍未證實。完整 24h 低負載 run 沒有重現 slow warning／功能錯誤；WAL fsync p99 桶上界 8 ms，backend commit 僅 2 observations。這不是根因修復或排除間歇性風險；不把 WAL p99 單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。若復發，先採集同時段 guest 與 provider telemetry，再決定是否新增實作／遷移任務。
 - ERU-005 已通過單次實機 core service outage 恢復與 patched binary 回切，但這不涵蓋真正 VM／磁碟 power-loss、etcd 資料損壞、未知新檔案歸屬與非空 workload 災難恢復；也未證明歷史慢 fdatasync 根因已修復。程序 SIGKILL 切點另已補驗。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
-- ERU-006 唯讀核對發現 worker-2／3／4 的 UFW 都有 IPv4／IPv6 TCP/80 Anywhere allow，當時沒有 host listener；`deploy-lab.py` 的自有 firewall 僅限制 01 的 5001。host-network 測試前必須先計畫私網 allowlist 和精確回復，準備紀錄見 [ERU-006](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。
 - ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核、[目標外 HTTP 守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)及[peer 重裝／恢復執行器本機驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)；[兩台歷史計畫](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 實機重裝與恢復尚未驗收；非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。ERU-002／003／004 均已交付；worker-2／3 peer 實機重裝仍待驗收。
 
 ## 接手先做

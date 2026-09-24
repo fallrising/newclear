@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createSeed } from '../demo/seed'
 import { createEngine } from './engine'
+import { integrityErrors } from './integrity'
 
 function harness() {
   const engine = createEngine(createSeed('w5-route-session'), () => {})
@@ -66,5 +67,26 @@ describe('W5 registered Mock PlatformRoute', () => {
     await expect(command('user-admin', '/admin/platform-routes', { spec: spec(), reason: 'Duplicate route' }))
       .rejects.toMatchObject({ status: 409, code: 'DUPLICATE_RESOURCE' })
     expect(engine.read('/audit', new URLSearchParams('entityType=platformRoute'), 'user-rd-commerce')).toMatchObject({ total: 0 })
+  })
+
+  it('does not project another organization route into an Admin capability diagnostic', async () => {
+    const { engine, command } = harness()
+    const created = await command('user-admin', '/admin/platform-routes', { spec: spec('demo-apm-failure'), reason: 'Org A route' })
+    await command('user-admin', `/admin/platform-routes/${created.entityId}/validate`, { expectedVersion: 1, reason: 'Validate A' })
+    await command('user-admin', `/admin/platform-routes/${created.entityId}/activate`, { expectedVersion: 2, reason: 'Activate A' })
+    const other = structuredClone(engine.getSnapshot())
+    other.entities.organizations.push({ ...other.entities.organizations[0]!, id: 'org-other', name: 'Other Demo organization' })
+    const admin = other.entities.users.find(row => row.id === 'user-admin')!
+    admin.orgId = 'org-other'; admin.teamIds = []
+    const grant = other.entities.assignments.find(row => row.userId === 'user-admin' && row.role === 'admin')!
+    grant.orgId = 'org-other'; grant.scopeId = 'org-other'
+    expect(integrityErrors(other)).toEqual([])
+    const isolated = createEngine(other, () => {})
+    expect(isolated.read('/admin/platform-routes', new URLSearchParams(), 'user-admin')).toMatchObject({ total: 0 })
+    const registry = isolated.read('/admin/capability-registry', new URLSearchParams(), 'user-admin') as {
+      routes: { routeKey: string; diagnostic: { status: string; activeRevision: number | null } }[] }
+    expect(registry.routes.find(row => row.routeKey === 'observation.apm')?.diagnostic)
+      .toMatchObject({ status: 'default', activeRevision: null })
+    expect(() => isolated.read(`/admin/platform-routes/${created.entityId}/diagnostic`, new URLSearchParams(), 'user-admin')).toThrow()
   })
 })

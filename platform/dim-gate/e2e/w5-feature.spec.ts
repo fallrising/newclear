@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { captureBrowserHealth, verifyBrowserHealth } from './browser-health'
-import { become } from './w3-ui-helpers'
+import { act, become, denied, snapshot, source, visit } from './w3-ui-helpers'
 
-test('W5 feature governance gates current navigation and direct route across refresh', async ({ page }, info) => {
+test('W5 feature governance gates new commands while preserving grant-scoped readback across refresh', async ({ page }, info) => {
   test.setTimeout(120_000)
   const health = captureBrowserHealth(page)
   try {
@@ -15,7 +15,9 @@ test('W5 feature governance gates current navigation and direct route across ref
     await page.getByRole('button', { name: '建立草稿' }).click()
     const card = page.getByRole('article', { name: 'RD 服務監控' })
     await expect(card.getByText('draft r1', { exact: false })).toBeVisible()
+    await expect(card.getByRole('row', { name: /user-rd-commerce/ })).toContainText('可使用')
     await card.getByRole('button', { name: '驗證草稿' }).click()
+    await expect(card.getByRole('row', { name: /user-rd-commerce/ })).toContainText('可使用')
     await card.getByRole('button', { name: '啟用灰度' }).click()
     await expect(card).toContainText('active · draft r1 · active r1')
     await expect(card.getByRole('row', { name: /user-rd-commerce/ })).toContainText('不可使用')
@@ -31,7 +33,8 @@ test('W5 feature governance gates current navigation and direct route across ref
     }
     await become(page, 'user-rd-commerce')
     await page.goto('rd/apps/app-checkout/monitoring')
-    await expect(page.getByRole('heading', { name: '目前身分無法進入研發中心' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /checkout-api · 監控設定/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: '新增監控設定' })).toHaveCount(0)
     await become(page, 'user-admin')
     await page.goto('admin/features')
     const activeCard = page.getByRole('article', { name: 'RD 服務監控' })
@@ -46,4 +49,50 @@ test('W5 feature governance gates current navigation and direct route across ref
     await page.goto('rd/apps/app-checkout/monitoring')
     await expect(page.getByRole('heading', { name: /checkout-api · 監控設定/ })).toBeVisible()
   } finally { health.expectedStatuses.add(403); await verifyBrowserHealth(page, info, health) }
+})
+
+test('W5 disables new delivery commands while a running definition remains readable after refresh', async ({ page }, info) => {
+  test.setTimeout(180_000)
+  const health = captureBrowserHealth(page)
+  const id = 'w3-definition-checkout-1'
+  try {
+    await visit(page, 'pipelineDefinition', id)
+    await act(page, '驗證草稿')
+    await act(page, '啟用交付定義')
+    await page.getByRole('button', { name: '依此定義執行', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: '依此定義執行' })
+    await dialog.getByRole('textbox', { name: '決策／操作理由' }).fill('Keep running work readable after cohort closes')
+    await dialog.getByRole('textbox', { name: '來源版本' }).fill('w5-running-proof')
+    await dialog.getByRole('button', { name: '確認操作' }).click()
+    await expect(page).toHaveURL(/\/rd\/pipelines\/[^/?]+$/)
+    const runId = new URL(page.url()).pathname.split('/').at(-1)!
+    expect((await snapshot(page)).entities.pipelines.find(row => row.id === runId)?.state).toMatch(/queued|running/)
+    await become(page, 'user-admin')
+    await page.goto('admin/features')
+    await page.getByRole('combobox', { name: '功能', exact: true }).selectOption('rd.delivery')
+    await page.getByRole('spinbutton', { name: '灰度百分比' }).first().fill('0')
+    await page.getByRole('button', { name: '建立草稿' }).click()
+    const card = page.getByRole('article', { name: 'RD 交付定義' })
+    await expect(card.getByRole('row', { name: /user-rd-commerce/ })).toContainText('可使用')
+    await card.getByRole('button', { name: '驗證草稿' }).click()
+    await card.getByRole('button', { name: '啟用灰度' }).click()
+    await expect(card.getByRole('row', { name: /user-rd-commerce/ })).toContainText('不可使用')
+    await become(page, 'user-rd-commerce')
+    await visit(page, 'pipelineDefinition', id)
+    await expect(page.getByText('功能灰度目前不允許新指令', { exact: false })).toBeVisible()
+    await expect(page.getByRole('link', { name: runId })).toBeVisible()
+    await expect(page.getByRole('button', { name: '依此定義執行' })).toHaveCount(0)
+    await page.reload()
+    await expect(page.getByRole('link', { name: runId })).toBeVisible()
+    expect((await snapshot(page)).entities.pipelines.find(row => row.id === runId)?.state).toMatch(/queued|running/)
+    const definition = await source(page, id)
+    const environment = (await snapshot(page)).entities.environments.find(row => row.id === 'env-checkout-dev')!
+    health.expectedStatuses.add(403)
+    expect(await denied(page, `/pipeline-definitions/${id}/runs`, { expectedVersion: definition.version,
+      reason: 'Denied new run under closed cohort', environmentId: environment.id,
+      environmentVersion: environment.version, sourceRef: 'main', sourceRevision: 'w5-denied-run' }))
+      .toMatchObject({ status: 403 })
+    await page.getByRole('link', { name: runId }).click()
+    await expect(page).toHaveURL(new RegExp(`/rd/pipelines/${runId}$`))
+  } finally { await verifyBrowserHealth(page, info, health) }
 })

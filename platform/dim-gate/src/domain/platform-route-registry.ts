@@ -22,9 +22,9 @@ export function routeSpecSupported(spec: PlatformRouteSpec): boolean {
     && entry.supportedAdapters.some(ref => ref === spec.adapterRef)
 }
 
-export function routeDiagnostic(snapshot: Snapshot, key: PlatformRouteKey) {
+export function routeDiagnostic(snapshot: Snapshot, orgId: string, key: PlatformRouteKey) {
   const entry = platformRouteRegistry[key]
-  const route = snapshot.entities.platformRoutes.find(row => row.spec.routeKey === key)
+  const route = snapshot.entities.platformRoutes.find(row => row.orgId === orgId && row.spec.routeKey === key)
   const active = route?.revisions.find(row => row.revision === route.activeRevision)
   if (!active || route?.status === 'disabled') return {
     routeKey: key, capabilityId: entry.capabilityId, integrationId: entry.integrationId,

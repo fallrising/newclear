@@ -92,3 +92,34 @@ test('W5 RD failed Mock delivery retries as a new attempt and disappears after u
     expect((await denied(page, `/notification-attempts/${failed.id}`, undefined, 'GET')).status).toBe(404)
   } finally { await verifyBrowserHealth(page, info, health) }
 })
+
+test('W5 subscription uses the visible channel when the former default is disabled', async ({ page }, info) => {
+  const health = captureBrowserHealth(page)
+  try {
+    await page.goto('rd')
+    await become(page, 'user-admin')
+    await page.goto('admin/notifications')
+    const createChannel = page.getByRole('heading', { name: '建立 Demo channel' }).locator('xpath=ancestor::form')
+    await createChannel.getByRole('textbox', { name: '安全目的地標籤' }).fill('Store alternate inbox')
+    await createChannel.getByRole('textbox', { name: '可用專案 ID（逗號分隔）' }).fill('project-store')
+    await createChannel.getByRole('button', { name: '建立 channel' }).click()
+    await expect(page.getByRole('article', { name: 'Store alternate inbox' })).toBeVisible()
+    const alternate = (await snapshot(page)).entities.channels.find(row => row.destinationLabel === 'Store alternate inbox')!
+    expect(alternate).toBeTruthy()
+    const formerDefault = page.getByRole('article', { name: 'RD Demo inbox' })
+    await formerDefault.getByRole('combobox', { name: '狀態' }).selectOption('false')
+    await formerDefault.getByRole('button', { name: '儲存 channel' }).click()
+    await expect(formerDefault).toContainText('停用')
+    // The Admin query refresh can be retired by the immediate persona switch.
+    health.expectedStatuses.add(409)
+    await become(page, 'user-rd-commerce')
+    await page.goto('rd/apps/app-checkout/alerts?environmentId=env-checkout-dev')
+    const channel = page.getByRole('combobox', { name: '可用 Demo channel' })
+    await expect(channel).toHaveValue(alternate.id)
+    await page.getByRole('button', { name: '訂閱此環境' }).click()
+    await expect(page.locator('.alert-records li').first()).toContainText('已訂閱')
+    expect((await snapshot(page)).entities.notificationSubscriptions).toMatchObject([
+      { recipientId: 'user-rd-commerce', environmentId: 'env-checkout-dev', channelId: alternate.id, enabled: true },
+    ])
+  } finally { await verifyBrowserHealth(page, info, health) }
+})

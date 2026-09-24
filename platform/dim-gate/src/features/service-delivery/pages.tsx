@@ -17,7 +17,10 @@ import { ServiceDetailView } from './ServiceDetailView'
 const families = { pipelineDefinition: ['pipeline-definitions', 'pipeline-definition'], serviceConfig: ['service-configs', 'service-config'], trafficPolicy: ['traffic-policies', 'traffic-policy'] } as const
 const isKind = (value: string): value is ServiceKind => value === 'pipelineDefinition' || value === 'serviceConfig' || value === 'trafficPolicy'
 function canWrite(session: SessionView, kind: ServiceKind, options: DeliveryOptions) {
-  return session.effectiveActions.includes(`${kind}.write`) && session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === options.application.projectId && (!grant.stages || grant.stages.includes(options.environment.stage)))
+  const featureKey = kind === 'pipelineDefinition' ? 'rd.delivery' : kind === 'trafficPolicy' ? 'rd.traffic' : undefined
+  return (!featureKey || !session.featureKeys || session.featureKeys.includes(featureKey))
+    && session.effectiveActions.includes(`${kind}.write`)
+    && session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === options.application.projectId && (!grant.stages || grant.stages.includes(options.environment.stage)))
 }
 
 function CreateSource({ kind, options, onCreated, onCancel }: { kind: ServiceKind; options: DeliveryOptions; onCreated: (id: string) => void; onCancel: () => void }) {

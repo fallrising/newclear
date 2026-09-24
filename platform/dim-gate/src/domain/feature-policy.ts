@@ -32,7 +32,10 @@ export function featureEligibility(snapshot: Snapshot, policy: Policy, key: Feat
   if (projectId && !policy.hasProject(projectId, undefined, registry.center)) return { eligible: false, reason: 'project-grant' as const }
   const feature = snapshot.entities.platformFeatures.find(row => row.orgId === policy.user!.orgId && row.spec.featureKey === key)
   if (!feature) return { eligible: true, reason: 'default-available' as const }
-  if (feature.status === 'disabled' || feature.activeRevision === null) return { eligible: false, reason: 'inactive-policy' as const }
+  if (feature.status === 'disabled') return { eligible: false, reason: 'inactive-policy' as const }
+  if (feature.activeRevision === null) return feature.everActivated
+    ? { eligible: false, reason: 'inactive-policy' as const }
+    : { eligible: true, reason: 'default-available' as const }
   const active = feature.revisions.find(row => row.revision === feature.activeRevision)?.spec
   if (!active) return { eligible: false, reason: 'missing-active-revision' as const }
   if (active.eligibleProjectIds.length && (projectId

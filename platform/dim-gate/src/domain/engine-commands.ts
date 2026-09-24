@@ -589,9 +589,12 @@ export function executeCommand(state: Snapshot, raw: CommandInput, persist: (nex
     if (patch.expectedVersion !== user!.version) fail(409, 'VERSION_CONFLICT', '使用者版本已變更。')
     if (patch.teamIds && !patch.teamIds.every(id => next.entities.teams.some(team => team.id === id && team.orgId === user!.orgId))) fail(422, 'VALIDATION_ERROR', '團隊不存在。')
     if (patch.enabled === false) {
-      const isAdmin = next.entities.assignments.some((entry) => entry.userId === user!.id && entry.role === 'admin')
+      const isAdmin = next.entities.assignments.some((entry) => entry.userId === user!.id && entry.orgId === user!.orgId
+        && entry.role === 'admin' && entry.scopeType === 'org' && entry.scopeId === user!.orgId)
       const anotherAdmin = next.entities.users.some((entry) => entry.id !== user!.id && entry.enabled
-        && next.entities.assignments.some((assignment) => assignment.userId === entry.id && assignment.role === 'admin'))
+        && entry.orgId === user!.orgId && next.entities.assignments.some((assignment) => assignment.userId === entry.id
+          && assignment.orgId === user!.orgId && assignment.role === 'admin' && assignment.scopeType === 'org'
+          && assignment.scopeId === user!.orgId))
       if (isAdmin && !anotherAdmin) fail(409, 'LAST_ADMIN_REQUIRED', '必須保留一位啟用中的平台管理者。')
     }
     const { expectedVersion: _expectedVersion, reason: _reason, ...updates } = patch

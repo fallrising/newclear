@@ -468,7 +468,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return clone({
         features: Object.entries(featureRegistry).map(([featureKey, entry]) => ({ featureKey, ...entry, status: 'mock' as const })),
         routes: Object.entries(platformRouteRegistry).map(([routeKey, entry]) => ({ routeKey, ...entry,
-          diagnostic: routeDiagnostic(state, routeKey as keyof typeof platformRouteRegistry), status: 'mock' as const })),
+          diagnostic: routeDiagnostic(state, policy.user!.orgId, routeKey as keyof typeof platformRouteRegistry), status: 'mock' as const })),
         later: [
           { capabilityId: 'artifact-catalog', label: 'Artifact catalog', status: 'later' as const },
           { capabilityId: 'sdk-framework-catalog', label: 'SDK / framework catalog', status: 'later' as const },
@@ -487,7 +487,7 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       validateQuery(query, [])
       if (!policy.admin) forbidden()
       const route = entities.platformRoutes.find(row => row.id === routeDiagnosticId && row.orgId === policy.user!.orgId)
-      return route ? clone(routeDiagnostic(state, route.spec.routeKey)) : notFound()
+      return route ? clone(routeDiagnostic(state, policy.user!.orgId, route.spec.routeKey)) : notFound()
     }
     const adminRouteId = /^\/admin\/platform-routes\/([^/]+)$/.exec(path)?.[1]
     if (adminRouteId) {

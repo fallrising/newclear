@@ -9,10 +9,9 @@ import { demoPersonaIds } from './policy'
 import { featureRegistry, featureSpecSupported } from './feature-policy'
 import { platformRouteRegistry, routeSpecSupported } from './platform-route-registry'
 import { notificationIntegrityErrors } from './notification-integrity'
-import { buildNotificationSeed } from '../demo/seed/notifications'
 
 /** Cross-entity invariants supplement the serializable per-entity Zod schemas. */
-export function integrityErrors(snapshot: Snapshot): string[] {
+export function integrityErrors(snapshot: Snapshot, includeW5 = true): string[] {
   const errors: string[] = []
   const entities = snapshot.entities
   const scopedCollections = Object.entries(entities).filter(([key]) => key !== 'organizations')
@@ -29,12 +28,15 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     return collection.find((entity) => entity.id === id && entity.orgId === orgId)
   }
   for (const team of entities.teams) if (!linked(entities.businessUnits, team.businessUnitId, team.orgId)) errors.push('team: invalid business unit')
-  const seedTeamIds = new Set(['team-commerce', 'team-platform', 'team-data'])
-  for (const team of entities.teams) if ((team.source === 'seed') !== seedTeamIds.has(team.id)) errors.push('team: invalid source identity')
+  if (includeW5) {
+    const seedTeamIds = new Set(['team-commerce', 'team-platform', 'team-data'])
+    for (const team of entities.teams) if ((team.source === 'seed') !== seedTeamIds.has(team.id)) errors.push('team: invalid source identity')
+  }
   for (const project of entities.projects) if (!linked(entities.teams, project.teamId, project.orgId)) errors.push('project: invalid team')
   if (new Set(entities.projects.map((project) => `${project.orgId}:${project.slug.toLowerCase()}`)).size !== entities.projects.length) errors.push('project: duplicate normalized slug')
   for (const user of entities.users) for (const teamId of user.teamIds) if (!linked(entities.teams, teamId, user.orgId)) errors.push('user: invalid team')
-  for (const user of entities.users) if ((user.source === 'seed') !== demoPersonaIds.has(user.id)) errors.push('user: invalid source identity')
+  if (includeW5) for (const user of entities.users) if ((user.source === 'seed') !== demoPersonaIds.has(user.id)) errors.push('user: invalid source identity')
+  if (includeW5) {
   if (new Set(entities.platformFeatures.map(row => `${row.orgId}:${row.spec.featureKey}`)).size !== entities.platformFeatures.length)
     errors.push('platformFeature: duplicate key')
   for (const feature of entities.platformFeatures) {
@@ -46,6 +48,9 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     if (feature.activeRevision !== null && (feature.activeRevision > feature.revision || feature.status === 'draft' && feature.activeRevision < 1))
       errors.push('platformFeature: invalid active revision')
     if (feature.status === 'active' && feature.activeRevision === null) errors.push('platformFeature: active state without revision')
+    if (feature.everActivated !== (feature.status === 'active' || feature.status === 'disabled' || feature.activeRevision !== null
+      || snapshot.audit.some(row => row.entityType === 'platformFeature' && row.entityId === feature.id && row.action === 'platformFeature.activate')))
+      errors.push('platformFeature: inconsistent activation history')
     for (const revision of feature.revisions) {
       for (const id of revision.spec.eligibleProjectIds) if (!linked(entities.projects, id, feature.orgId)) errors.push('platformFeature: invalid project')
       for (const id of revision.spec.eligibleTeamIds) if (!linked(entities.teams, id, feature.orgId)) errors.push('platformFeature: invalid team')
@@ -64,6 +69,7 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     if (!entities.integrations.some(row => row.id === route.spec.integrationId && row.orgId === route.orgId)) errors.push('platformRoute: invalid integration')
     if (!(route.spec.routeKey in platformRouteRegistry)) errors.push('platformRoute: unknown route key')
     if (route.health.testedRevision !== null && route.health.testedRevision > route.revision) errors.push('platformRoute: invalid health revision')
+  }
   }
   for (const app of entities.applications) {
     const project = linked(entities.projects, app.projectId, app.orgId)
@@ -123,17 +129,13 @@ export function integrityErrors(snapshot: Snapshot): string[] {
     const compute = entities.cis.filter((ci) => ci.poolId === pool.id && ci.kind === 'compute' && ci.lifecycle === 'active')
     if (compute.reduce((sum, ci) => sum + Number(ci.attributes.cpu), 0) > pool.cpuCapacity || compute.reduce((sum, ci) => sum + Number(ci.attributes.memoryMiB), 0) > pool.memoryCapacityMiB) errors.push('pool: capacity exceeded')
   }
-  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot), ...notificationIntegrityErrors(snapshot)]
+  return [...errors, ...deliveryIntegrityErrors(snapshot), ...observationIntegrityErrors(snapshot), ...resourceIntegrityErrors(snapshot), ...serviceDeliveryIntegrityErrors(snapshot), ...monitoringIntegrityErrors(snapshot), ...(includeW5 ? notificationIntegrityErrors(snapshot) : [])]
 }
 
-/** Validate the original W4 relationships before adding W5 source metadata. */
+/** Run the W4 invariants on the parsed original, before adding any W5 metadata. */
 export function legacyV4IntegrityErrors(snapshot: LegacySnapshotV4): string[] {
-  return integrityErrors({ ...snapshot, schemaVersion: 5, seedVersion: 'dim-gate-w5-v1',
-    entities: { ...snapshot.entities,
-      users: snapshot.entities.users.map(user => ({ ...user, source: 'seed' as const })),
-      teams: snapshot.entities.teams.map(team => ({ ...team, source: 'seed' as const })),
-      platformFeatures: [], platformRoutes: [], ...buildNotificationSeed(snapshot.entities.organizations[0]?.id ?? 'org-demo'),
-    } })
+  // W4-only checks never read W5 collections or source tags. Keep the exact parsed object.
+  return integrityErrors(snapshot as unknown as Snapshot, false)
 }
 
 /** Frozen v3 data is validated before any v4 collection is materialized. */

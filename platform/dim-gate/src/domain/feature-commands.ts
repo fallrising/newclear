@@ -43,7 +43,7 @@ export function prepareFeature(snapshot: Snapshot, policy: Policy, input: Comman
       const id = `w5-feature-${String(next.sequence + 1).padStart(4, '0')}`
       if (next.entities.platformFeatures.some(row => row.id === id)) fail(409, 'DUPLICATE_RESOURCE', '功能政策 ID 已存在。')
       feature = { id, orgId: policy.user!.orgId, version: 1, createdAt: now, updatedAt: now,
-        revision: 1, activeRevision: null, status: 'draft', requesterId: input.actorId, spec: inputBody.spec,
+        revision: 1, activeRevision: null, everActivated: false, status: 'draft', requesterId: input.actorId, spec: inputBody.spec,
         revisions: [{ revision: 1, spec: inputBody.spec, reason: inputBody.reason, actorId: input.actorId, occurredAt: now }] }
       next.entities.platformFeatures.push(feature)
       fields = ['draft created']; reasonText = inputBody.reason
@@ -74,7 +74,7 @@ export function prepareFeature(snapshot: Snapshot, policy: Policy, input: Comman
       } else if (action === 'activate') {
         if (feature.status !== 'validated') fail(409, 'INVALID_STATE', '只有已驗證的功能可啟用。')
         validateSpec(next, feature.spec, policy.user!.orgId)
-        feature.status = 'active'; feature.activeRevision = feature.revision; next.policyVersion += 1
+        feature.status = 'active'; feature.activeRevision = feature.revision; feature.everActivated = true; next.policyVersion += 1
         fields = ['activeRevision', 'status']
       } else {
         if (feature.activeRevision === null || feature.status === 'disabled') fail(409, 'INVALID_STATE', '目前沒有可停用的啟用版本。')

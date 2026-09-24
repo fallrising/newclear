@@ -44462,6 +44462,9 @@
               }
             ]
           },
+          "everActivated": {
+            "type": "boolean"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -44528,6 +44531,7 @@
           "updatedAt",
           "revision",
           "activeRevision",
+          "everActivated",
           "status",
           "requesterId",
           "spec",

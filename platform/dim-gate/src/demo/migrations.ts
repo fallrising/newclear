@@ -3,6 +3,9 @@ import { legacySnapshotSchema, legacySnapshotV2Schema, legacySnapshotV3Schema, l
 import { buildW2Metadata } from './seed/resources'
 import { buildW4Navigation } from './seed/monitoring'
 import { buildNotificationSeed } from './seed/notifications'
+import { demoPersonaIds } from '../domain/policy'
+
+const seedTeamIds = new Set(['team-commerce', 'team-platform', 'team-data'])
 
 /** Pure upgrades. Original bytes remain untouched until the controller's one atomic write. */
 export function readStoredSnapshot(value: unknown): Snapshot {
@@ -15,15 +18,18 @@ export function readStoredSnapshot(value: unknown): Snapshot {
   const upgradeV4 = (original: LegacySnapshotV4): Snapshot => {
     const errors = legacyV4IntegrityErrors(original)
     if (errors.length) throw new Error(`Invalid W4 relationships: ${errors.join('; ')}`)
-    const notificationSeed = buildNotificationSeed(original.entities.organizations[0]?.id ?? 'org-demo')
+    const notificationOrgId = original.entities.organizations.some(org => org.id === 'org-demo')
+      ? 'org-demo' : original.entities.organizations[0]?.id ?? 'org-demo'
+    const notificationSeed = buildNotificationSeed(notificationOrgId,
+      original.entities.projects.filter(project => project.orgId === notificationOrgId).map(project => project.id))
     const reserved = new Set([...notificationSeed.channels, ...notificationSeed.notificationTemplates,
       ...notificationSeed.notificationPolicies].map(row => row.id))
     if (Object.values(original.entities).some(collection => collection.some(row => reserved.has(row.id))))
       throw new Error('Legacy snapshot conflicts with reserved W5 notification identities')
     const migrated = snapshotSchema.parse({ ...original, schemaVersion: 5, seedVersion: 'dim-gate-w5-v1',
       entities: { ...original.entities,
-        users: original.entities.users.map(user => ({ ...user, source: 'seed' })),
-        teams: original.entities.teams.map(team => ({ ...team, source: 'seed' })),
+        users: original.entities.users.map(user => ({ ...user, source: demoPersonaIds.has(user.id) ? 'seed' : 'demo' })),
+        teams: original.entities.teams.map(team => ({ ...team, source: seedTeamIds.has(team.id) ? 'seed' : 'demo' })),
         platformFeatures: [], platformRoutes: [],
         ...notificationSeed,
       } })

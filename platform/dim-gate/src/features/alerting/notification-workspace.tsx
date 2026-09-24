@@ -36,19 +36,20 @@ export function ServiceNotificationWorkspace({ environmentId, session }: { envir
     queryFn: () => api.listNotificationSubscriptions({ environmentId, pageSize: 100 }) })
   const attempts = useQuery({ queryKey: queryKey('notification-attempts', environmentId),
     queryFn: () => api.listNotificationAttempts({ environmentId, pageSize: 100 }) })
-  const [channelId, setChannelId] = useState('demo-rd')
+  const [channelId, setChannelId] = useState('')
+  const selectedChannelId = channels.data?.some(row => row.id === channelId) ? channelId : channels.data?.[0]?.id ?? ''
   const [reason, setReason] = useState('Subscribe to current service environment')
-  const create = useMutation({ mutationFn: () => api.createNotificationSubscription({ environmentId, channelId, reason }) })
+  const create = useMutation({ mutationFn: () => api.createNotificationSubscription({ environmentId, channelId: selectedChannelId, reason }) })
   const refresh = async () => { await Promise.all([channels.refetch(), subscriptions.refetch(), attempts.refetch()]) }
   const submit = async (event: FormEvent) => { event.preventDefault(); try { await create.mutateAsync(); await refresh() } catch { /* shown */ } }
   return <section className="panel"><h2>服務通知訂閱與逐收件者投遞</h2><p>只顯示目前授權的服務環境與自己的投遞；Mock 歷史不儲存原始 trace、log 或變更差異。</p>
     {channels.isPending || subscriptions.isPending || attempts.isPending ? <LoadingState label="正在讀取通知範圍…" />
       : channels.isError || subscriptions.isError || attempts.isError
         ? <ErrorState error={channels.error || subscriptions.error || attempts.error} onRetry={() => void refresh()} />
-        : <><form className="admin-form" onSubmit={event => void submit(event)}><label>可用 Demo channel<select value={channelId} onChange={event => setChannelId(event.target.value)}>
+        : <><form className="admin-form" onSubmit={event => void submit(event)}><label>可用 Demo channel<select value={selectedChannelId} onChange={event => setChannelId(event.target.value)} disabled={!selectedChannelId}>
           {channels.data.map(row => <option key={row.id} value={row.id}>{row.destinationLabel} · {row.kind}</option>)}</select></label>
           <label>訂閱理由<input required value={reason} onChange={event => setReason(event.target.value)} /></label>
-          <Button type="submit" disabled={create.isPending || !reason.trim() || channels.data.length === 0}>訂閱此環境</Button></form>
+          <Button type="submit" disabled={create.isPending || !reason.trim() || !selectedChannelId}>訂閱此環境</Button></form>
           {create.isError && <ErrorState error={create.error} title="訂閱未建立" />}
           <h3>目前訂閱</h3>{subscriptions.data.items.length ? <ul className="alert-records">{subscriptions.data.items.map(row =>
             <SubscriptionRow key={`${row.id}:${row.version}`} row={row} committed={refresh} />)}</ul> : <p>此環境目前沒有你的通知訂閱。</p>}

@@ -54,6 +54,15 @@ describe('W5 recipient-specific notification attempts', () => {
     expect(dispatchNotification(snapshot, delivery)).toEqual([])
     const old = snapshot.entities.notificationAttempts[0]
     expect(h.read<{ items: { sourceLabel: string }[] }>(rd, '/notification-attempts').items[0].sourceLabel).toBe('checkout-api')
+    const otherOrgTemplate = structuredClone(snapshot)
+    otherOrgTemplate.entities.organizations.push({ ...otherOrgTemplate.entities.organizations[0]!, id: 'org-other', name: 'Other Demo organization' })
+    otherOrgTemplate.entities.notificationAttempts = []
+    const template = otherOrgTemplate.entities.notificationTemplates[0]!
+    template.status = 'disabled'; template.activeRevision = null
+    otherOrgTemplate.entities.notificationTemplates.push({ ...structuredClone(template), id: 'other-org-template', orgId: 'org-other',
+      status: 'active', activeRevision: 1 })
+    expect(dispatchNotification(otherOrgTemplate, delivery)).toEqual([])
+    expect(otherOrgTemplate.entities.notificationAttempts).toEqual([])
     const retry = await h.command(rd, 'POST', `/notification-attempts/${old.id}/retry`, { expectedVersion: old.version,
       reason: 'Retry current recipient projection' })
     expect(h.engine.getSnapshot().entities.notificationAttempts).toMatchObject([

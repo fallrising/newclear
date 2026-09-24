@@ -1,6 +1,6 @@
 # 12 — Admin 平台管理台 SDD
 
-版本：WS-SDD revision 1 · 狀態：W1／W2／W3／W4 已驗收合併；W5 契約固定、產品尚未實作／驗收。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
+版本：WS-SDD revision 1 · 狀態：W1／W2／W3／W4 已驗收合併；W5 產品已實作、固定版本驗證及獨立複審中，尚未驗收／合併。產品行為依本章，當前證據與接受決策見 [STATUS](../STATUS.md) 和 [PLAN](../../../../.team/PLAN.md)。
 
 ## 1. 責任與權限邊界
 

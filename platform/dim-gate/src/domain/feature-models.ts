@@ -12,7 +12,7 @@ export const featureRevisionSchema = z.strictObject({ revision: versionSchema, s
   reason: z.string().trim().min(1).max(500), actorId: idSchema, occurredAt: timestampSchema })
 export const platformFeatureSchema = z.strictObject({
   id: idSchema, orgId: idSchema, version: versionSchema, createdAt: timestampSchema, updatedAt: timestampSchema,
-  revision: versionSchema, activeRevision: versionSchema.nullable(), status: z.enum(['draft', 'validated', 'active', 'disabled']),
+  revision: versionSchema, activeRevision: versionSchema.nullable(), everActivated: z.boolean(), status: z.enum(['draft', 'validated', 'active', 'disabled']),
   requesterId: idSchema, spec: featureSpecSchema, revisions: z.array(featureRevisionSchema).min(1),
 })
 export const featurePreviewSchema = z.strictObject({ policyVersion: versionSchema, featureId: idSchema,

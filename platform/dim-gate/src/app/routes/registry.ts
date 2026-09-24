@@ -86,12 +86,13 @@ export function routeForPath(pathname: string) {
 export function canAccessRoute(session: SessionView, route: RegisteredRoute) {
   return (!route.center || route.crossCenterRead || session.centers.includes(route.center))
     && (!route.requiredAction || session.effectiveActions.includes(route.requiredAction))
-    && (!session.featureKeys || !['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'].includes(route.key)
-      || session.featureKeys.includes(route.key as NonNullable<SessionView['featureKeys']>[number]))
 }
 
 export function visibleNavigation(session: SessionView) {
-  return routeRegistry.filter((route) => route.navigation.visible && (!route.center || session.centers.includes(route.center)) && canAccessRoute(session, route))
+  return routeRegistry.filter((route) => route.navigation.visible && (!route.center || session.centers.includes(route.center))
+    && canAccessRoute(session, route)
+    && (!session.featureKeys || !['rd.monitoring', 'ops.alerting', 'rd.delivery', 'rd.traffic'].includes(route.key)
+      || session.featureKeys.includes(route.key as NonNullable<SessionView['featureKeys']>[number])))
     .sort((left, right) => left.navigation.order - right.navigation.order)
 }
 

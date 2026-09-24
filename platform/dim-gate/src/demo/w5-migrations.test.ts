@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { legacySnapshotV4Schema } from '../domain/schema-models'
+import { legacyV4IntegrityErrors } from '../domain/integrity'
 import { createController, SNAPSHOT_KEY, type StorageLike } from './controller'
 import { createSeed } from './seed'
 import { readStoredSnapshot } from './migrations'
@@ -31,6 +32,19 @@ function harness(bytes = legacyBytes()) {
 }
 
 describe('W5 strict atomic W4 snapshot migration', () => {
+  it('checks the original W4 snapshot before W5 defaults and preserves additional legacy identities', () => {
+    const original = JSON.parse(legacyBytes()).snapshot
+    original.entities.organizations.unshift({ ...original.entities.organizations[0], id: 'org-another', name: 'Another enterprise' })
+    original.entities.teams.push({ ...original.entities.teams[0], id: 'team-legacy-extra', name: 'Legacy team' })
+    original.entities.users.push({ ...original.entities.users[0], id: 'user-legacy-extra', displayName: 'Legacy user', teamIds: ['team-legacy-extra'] })
+    const parsed = legacySnapshotV4Schema.parse(original)
+    expect(legacyV4IntegrityErrors(parsed)).toEqual([])
+    const migrated = readStoredSnapshot(parsed)
+    expect(migrated.entities.channels.find(row => row.id === 'demo-rd')).toMatchObject({ orgId: 'org-demo' })
+    expect(migrated.entities.teams.find(row => row.id === 'team-legacy-extra')).toMatchObject({ source: 'demo' })
+    expect(migrated.entities.users.find(row => row.id === 'user-legacy-extra')).toMatchObject({ source: 'demo' })
+  })
+
   it('preserves all old rows and receipts while adding only source metadata', () => {
     const original = JSON.parse(legacyBytes()), h = harness(), controller = h.start()
     const migrated = controller.getSnapshot()
@@ -59,7 +73,7 @@ describe('W5 strict atomic W4 snapshot migration', () => {
   it('rejects corrupt references and reserved Demo identity collisions before writing', () => {
     for (const mutate of [
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users[0].teamIds = ['missing-team'] },
-      (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users.push({ ...value.snapshot.entities.users[0], id: 'user-demo-0001' }) },
+      (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users.push({ ...value.snapshot.entities.users[0] }) },
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.users[0].source = 'seed' },
       (value: ReturnType<typeof JSON.parse>) => { value.snapshot.entities.navigation[0].id = 'demo-rd' },
     ]) {

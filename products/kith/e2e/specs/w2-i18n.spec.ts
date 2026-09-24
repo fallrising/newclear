@@ -12,6 +12,18 @@ async function expectLive(page: Page): Promise<void> {
   await expect(page.getByTestId("room-offline-strip")).toHaveCount(0);
 }
 
+/** The full suite leaves extra lobby messages, so the start sits above the latest page. */
+async function revealTimelineStart(page: Page): Promise<void> {
+  const timeline = page.getByTestId("timeline");
+  await expect(async () => {
+    if (await page.getByTestId("timeline-start").isVisible()) return;
+    await timeline.evaluate((el) => {
+      el.scrollTop = 0;
+    });
+    await expect(page.getByTestId("timeline-start")).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+}
+
 test(
   "E2E-W2-06 switching language and theme updates every string and date",
   { tag: ["@W2", "@mobile"] },
@@ -32,7 +44,7 @@ test(
     await loginViaUi(page, ACCOUNTS.ada);
     await page.goto("/r/lobby");
     await expectLive(page);
-    await expect(page.getByTestId("timeline-start")).toBeVisible();
+    await revealTimelineStart(page);
     await expect(page.locator("html")).toHaveAttribute("lang", from);
     await expect(page.getByTestId("composer-send")).toHaveText(sendText(from));
     await expect(page.getByTestId("timeline-start")).toContainText(createdText(from));
@@ -43,8 +55,9 @@ test(
     await expectLive(page);
     await expect(page.locator("html")).toHaveAttribute("lang", to);
     await expect(page.getByTestId("composer-send")).toHaveText(sendText(to));
-    await expect(page.getByTestId("timeline-start")).toContainText(createdText(to));
     await expect(page.locator('[data-testid="date-divider"][data-date="2026-09-22"]')).toHaveText(todayText(to));
+    await revealTimelineStart(page);
+    await expect(page.getByTestId("timeline-start")).toContainText(createdText(to));
     await shot(page, info, "02-to");
 
     await page.reload();

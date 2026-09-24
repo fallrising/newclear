@@ -238,6 +238,7 @@ for (const kind of ['redis', 'kafka'] as const) {
     health.expectedStatuses.add(409)
     try {
       await page.goto('rd')
+      await expect(page.getByRole('region', { name: 'rd 工作首頁' })).toBeVisible()
       const originalResources = businessResources(await snapshot(page))
       const oldDraftId = await createResource(page, kind, { topic: 'w2-catalog-old-draft' })
       const oldSubmittedId = await createResource(page, kind, { topic: 'w2-catalog-old-submitted' })

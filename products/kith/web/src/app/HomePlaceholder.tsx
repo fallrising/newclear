@@ -11,7 +11,7 @@ export function HomePlaceholder(props: { me: Me }): ReactElement {
       <h1 data-testid="home-greeting" className="text-2xl font-semibold text-ink">
         {t("home.greeting", { name: displayName(props.me) })}
       </h1>
-      <p className="text-md text-ink-2 max-w-login">{t("home.placeholder.body")}</p>
+      <p className="text-md text-ink-2 max-w-login">{t("rooms.home.body")}</p>
     </section>
   );
 }

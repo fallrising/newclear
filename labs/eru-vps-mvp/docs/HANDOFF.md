@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-23。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 17 項（近期 6、後續 11）；ERU-001 已完成，下一項 ERU-002 到期回收，等待期間可先準備 ERU-007 本機工具。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 17 項（近期 6、後續 11）；ERU-001 已完成，下一項 ERU-002 到期回收，等待期間 ERU-006 網路驗收準備已開始（2026-09-24 04:06:02 UTC）。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -38,6 +38,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。[ERU-004 階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已對照 2026-09-23 17:45 UTC 的 6 小時 20 分唯讀快照與官方資料，記錄影響、證據缺口及相對成本；完整 24 小時結果未出，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
 - core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。程序 SIGKILL 切點已補驗；真正 VM／磁碟 power-loss、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
+- ERU-006 唯讀核對發現 worker-2／3／4 的 UFW 都有 IPv4／IPv6 TCP/80 Anywhere allow，當時沒有 host listener；`deploy-lab.py` 的自有 firewall 僅限制 01 的 5001。host-network 測試前必須先計畫私網 allowlist 和精確回復，準備紀錄見 [ERU-006](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。
 - ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核、[目標外 HTTP 守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)及[peer 重裝／恢復執行器本機驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)；[兩台歷史計畫](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 實機重裝與恢復尚未驗收；非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
 
 ## 接手先做

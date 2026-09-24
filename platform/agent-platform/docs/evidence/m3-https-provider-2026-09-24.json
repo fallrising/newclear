@@ -2,7 +2,7 @@
   "milestone": "AT-11-C2b2",
   "date": "2026-09-24",
   "base_main": "dba9ee94a49bcfe2efb298caa1d5324cfde03988",
-  "status": "implementation-and-python-database-tests-passed; github-ci-passed; draft-pr-open; real-kvm-gate-incomplete",
+  "status": "implementation-and-local-checks-passed; last-full-ci-pass-on-e099c6e; latest-docs-run-cancelled-per-user-e2e-policy; draft-pr-open; real-kvm-gate-incomplete",
   "pull_request": {
     "number": 82,
     "url": "https://github.com/fallrising/newclear/pull/82",
@@ -71,9 +71,9 @@
   ],
   "source_sha256": {
     "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
-    "docs/HANDOFF.md": "77a3b7a351f55fd82651ad66bbc0329d578bbd26be40c96d6e8ae0e1dbbb4224",
+    "docs/HANDOFF.md": "ef0f937c3d201e3d5103b16d9dc8c5012385e5a9de7942ed29a1d58fb7031810",
     "docs/M3-HTTPS-PROVIDER.md": "47192615ea3dff6e050e44979ba4967372722f47527776853992ce3488f4833b",
-    "docs/NEXT-PROMPT.md": "0bc3aa6fa7f4050d70bdaf6b2940ef8a5e519272b5905bbad0183ac85c77f2a0",
+    "docs/NEXT-PROMPT.md": "c537206b0c0916a44d5cb4de5d658a57a0ce93e5d0dc43304103e92c816bb19a",
     "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
     "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
     "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",
@@ -105,17 +105,28 @@
     "web/src/App.test.tsx": "0f3a32d1b0c24d8e867f4a4a1e3c6a95f851aae79f7b835acc80f7d0839b9d6f",
     "docs/M3-RECOVERY.md": "2de763e89d2a90f113201934aed066d1eb4c0425ef52b7fd9c1968dca4b45095",
     "src/agent_platform/connector_recovery.py": "d19e02e271d86e28c0b52a76329d1b60d514ee7785bbe79464dde623a25678e1",
-    "src/agent_platform/connector_journal.py": "4126f3e8354e6b8dda2291a07e890dbe9835c638f1b1b77489767deb01cc3ab9"
+    "src/agent_platform/connector_journal.py": "4126f3e8354e6b8dda2291a07e890dbe9835c638f1b1b77489767deb01cc3ab9",
+    "docs/CONTINUATION-STATE.md": "dbd0f3080c87a12a229a10f40a765f996b18a9169cc94fcff56633a811a811e8"
   },
   "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories.",
   "github_ci": {
-    "previous_run_id": 36006771058,
-    "previous_failure": "fast check imported new platform dependency-backed tests without locked runtime dependencies; web job had one stale status-label assertion",
-    "current_run_id": 36008490179,
-    "head_commit": "e099c6e1294a7010d461f5900c467b3bc6cb1110",
-    "check": "passed",
-    "web": "passed: npm check and build",
-    "control_plane": "passed: platform-check and browser acceptance"
+    "initial_failed_run_id": 36006771058,
+    "initial_failure": "fast check imported new platform dependency-backed tests without locked runtime dependencies; web job had one stale status-label assertion",
+    "last_fully_passed_run_id": 36008490179,
+    "last_fully_passed_head_commit": "e099c6e1294a7010d461f5900c467b3bc6cb1110",
+    "last_fully_passed_jobs": {
+      "check": "passed",
+      "web": "passed: npm check and build",
+      "control_plane": "passed: platform-check and browser acceptance"
+    },
+    "latest_run_id": 36009297291,
+    "latest_run_head_commit": "85d90010af4e5da1ca61b1a5fd759c9fb1ac0c7c",
+    "latest_run_status": "cancelled per user instruction before browser E2E",
+    "latest_run_jobs": {
+      "web": "passed: npm check and build",
+      "check": "cancelled after lint/unit tests and Agent Server contract; rootfs build was cancelled",
+      "control_plane": "cancelled during platform acceptance; browser acceptance skipped"
+    }
   },
   "recovery_review": {
     "documented_rule": "unknown allocation without saved handle or VMM ownership stays quarantined and requires administrator reconciliation",
@@ -123,5 +134,9 @@
     "release_requirement": "saved observed VM ownership and complete stop proof",
     "supported_same_journal_reconciliation_for_this_row": false,
     "kvm_rerun": "blocked pending a formal, auditable recovery decision; journal and fence preserved"
+  },
+  "user_testing_instruction": {
+    "e2e": "Run E2E only once after overall development is complete; avoid incremental pushes to the open PR because its workflow includes browser acceptance.",
+    "ordinary_unit_and_platform_checks": "May be run during development when useful."
   }
 }

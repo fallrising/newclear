@@ -64,7 +64,7 @@ HostedGeneration DO                     Inbox live tail → GET /mcp/events（SS
 | `openai_responses` | `POST {base}/responses` | `Authorization: Bearer` | OpenAI（新 API）；部分 gateway | P1 |
 | `gemini` | `POST {base}/models/{model}:generateContent`（串流：`:streamGenerateContent?alt=sse`） | `x-goog-api-key` | Google AI Studio | P1（Gemini 也可先走 `openai_chat` 相容端點） |
 
-P0＝W4 必交；P1＝W4 可延到 W5。Phase 2 需以各家官方文件逐欄確認（見 [10](10-decisions.md) 來源表，標「待查證」）。
+P0＝W4 必交；P1＝W4 可延到 W5。Phase 2：P0 見 [W4](milestones/W4.md) §4.5，P1 與四種格式的串流見 [W5](milestones/W5.md) §4.4（官方 SDK 原始碼查證；少數推論逐條標註）。
 
 **RT-03** 新增一種格式＝新增一個 adapter 檔＋golden fixtures＋FM 清單，**不得**改 HostedGeneration 主流程。
 
@@ -139,7 +139,7 @@ interface LlmAdapter {
 - adapter 支援 SSE 串流時，HostedGeneration 以 `onDelta` 收文字，**節流**（≥ 250 ms 或累積 ≥ 64 字元）後經 Room 廣播 WS `draft` 封包（見 [04](04-backend.md) B-10）。
 - `draft` 不寫 D1、不佔 seq、不喚醒（V2-INV-03）。完成後照 v1 流程 `send_message`，正式訊息事件取代草稿。
 - 斷線重連的 client 不補發草稿；它只看到最終訊息。
-- 串流是每個 runtime 的設定（`stream: bool`），預設關，W5 才開放。
+- 串流是每個 runtime 的設定（`stream: bool`），預設關，W5 才開放。Phase 2：Worker 的 `ff_drafts` 關閉時忽略這個設定；已送出草稿的串流失敗不重試（Q-21）；見 [W5](milestones/W5.md) §4.2、§4.5.3。
 
 ### 2.5 回覆後處理
 
@@ -293,8 +293,8 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 
 ## 8. Phase 2 待細化
 
-- [ ] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）。`openai_chat`、`anthropic_messages` 的非串流部分完成 → [W4](milestones/W4.md) §4.5；串流與另兩種格式在 W5。
-- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。FM-LLM-01–06、10–16 完成 → [W4](milestones/W4.md) §8；FM-LLM-07–09 在 W5，FM-RUN 在 W6。
+- [x] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）→ [W4](milestones/W4.md) §4.5、[W5](milestones/W5.md) §4.4（官方文件網站被網路政策擋下，改用官方 SDK 原始碼；推論逐條標註）。
+- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。FM-LLM 全部完成 → [W4](milestones/W4.md) §8、[W5](milestones/W5.md) §8；FM-RUN 在 W6。
 - [ ] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息。
 - [ ] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）。
 - [ ] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報。

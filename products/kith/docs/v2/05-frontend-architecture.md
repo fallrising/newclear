@@ -118,7 +118,7 @@ products/kith/e2e/        # Playwright，見 08
 | me、rooms、members、agents、providers、tokens | TanStack Query | 對應 mutation 成功；視窗重新聚焦；B-06 事件 |
 | 時間線事件（每房 `Map<seq, Event>`） | Zustand `timelines[roomId]` | 由 RoomSync 寫入；切房不清（快取最近 5 房） |
 | status（typing、replying、runner 狀態） | Zustand `statuses[roomId]` | TTL 到期、切房、斷線 |
-| 草稿（B-10） | Zustand `drafts[roomId][generationId]` | 正式事件、`reply ended`／`reply failed`、斷線 |
+| 草稿（B-10） | Zustand `drafts[roomId][memberId] = { generationId, text }`＋每房最近完成的 `generation_id`（Phase 2 細化，[W5](milestones/W5.md) §5.3、Q-23） | 正式事件、`reply ended`／`reply failed`、斷線 |
 | 未讀 cursor | `localStorage`（try/catch 包住）＋ Zustand 鏡像 | 捲到底、離開房間 |
 | 輸入框草稿 | `localStorage` per room | 送出成功 |
 

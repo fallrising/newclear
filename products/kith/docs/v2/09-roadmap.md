@@ -101,6 +101,8 @@ P1 大框架（#47）
   - `E2E-W5-02` 串流前後 D1 訊息列數差恰為 1；`/mcp/events` 未出現草稿（V2-INV-03）。
   - `E2E-W5-03` 串流中斷（fake-provider 中途斷線）→ 失敗提示，不落盤半截（FM-LLM-08）。
   - `E2E-W5-04` operator 在 generation 列表看到失敗類別；一般成員看不到。
+  - `E2E-W5-05` `openai_responses` 與 `gemini` 連線（串流與非串流）都能回覆（Phase 2 新增，對應延後的 adapter 格式）。
+- 狀態：`DOC_READY`（施工圖：[milestones/W5.md](milestones/W5.md)）。B-06 不做（Q-20）；草稿封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
 
 ### W6 — Runner、trace、thread
 

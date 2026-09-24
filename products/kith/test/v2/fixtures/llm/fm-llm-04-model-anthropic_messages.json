@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-04",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 404,
+    "headers": {},
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"not_found_error\", \"message\": \"model: x\"}}"
+  },
+  "expect": {
+    "error_class": "not_found"
+  }
+}

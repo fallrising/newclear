@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-03",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 400,
+    "headers": {},
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"billing_error\", \"message\": \"no credit\"}}"
+  },
+  "expect": {
+    "error_class": "auth"
+  }
+}

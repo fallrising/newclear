@@ -1,0 +1,16 @@
+{
+  "fm": "BASE",
+  "format": "openai_chat",
+  "call": "listModels",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"object\": \"list\", \"data\": [{\"id\": \"a\"}, {\"id\": \"b\"}, {\"x\": 1}]}"
+  },
+  "expect": {
+    "models": [
+      "a",
+      "b"
+    ]
+  }
+}

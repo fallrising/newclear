@@ -1,0 +1,16 @@
+{
+  "fm": "FM-LLM-05",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 429,
+    "headers": {
+      "retry-after": "86400"
+    },
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"rate_limit_error\", \"message\": \"rl\"}}"
+  },
+  "expect": {
+    "error_class": "rate_limited",
+    "retry_after_ms": 10000
+  }
+}

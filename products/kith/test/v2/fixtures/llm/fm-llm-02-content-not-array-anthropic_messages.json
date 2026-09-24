@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-02",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"type\": \"message\", \"content\": \"hi\"}"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

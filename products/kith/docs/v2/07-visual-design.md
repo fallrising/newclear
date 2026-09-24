@@ -306,6 +306,7 @@ Tailwind 4 的預設色已在 `index.css` 以 `--color-*: initial` 移除；`[..
 | 對話框的後果清單、一次性秘密（W4） | Tailwind 預設 | `list-disc pl-5`、`overflow-x-auto` |
 | 草稿游標（§6，W5） | `--animate-caret`（`index.css` 的 `@theme`）、Tailwind 預設 spacing | `animate-caret`、`inline-block h-4 w-0.5 ml-0.5 translate-y-0.5 bg-ink-2` |
 | 草稿文字、清單分隔（W5） | Tailwind 預設 | `whitespace-pre-wrap break-words`、`divide-y divide-border` |
+| trace 卡片、thread 摘要（W6） | Tailwind 預設 spacing | `ml-12`、`max-h-96`、`overflow-auto`、`h-8` |
 
 `style` 屬性只允許兩種用途：時間線容器的 `overflowAnchor: "none"`，以及虛擬捲動 item 的定位（`position`、`transform`、容器 `height`）。其他一律用 class（W1 §5.6.2）。
 

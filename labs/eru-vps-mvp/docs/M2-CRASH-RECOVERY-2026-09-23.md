@@ -31,14 +31,14 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -q
 
 ## 本轮交接與 TODO
 
-固定編號／數量以 [TASKS.md](TASKS.md) 為準：早期取消／封存 ERU-001、目前 soak ERU-002、清理 ERU-003、core 實機恢復 ERU-005；本節是歷史交接，不另外計數。
+固定編號／數量以 [TASKS.md](TASKS.md) 為準：早期取消／封存 ERU-001、soak ERU-002、清理 ERU-003、core 實機恢復 ERU-005；本節保留 2026-09-23 的歷史交接，不另外計數，後續完成狀態見任務清單。
 
-- [ ] 2026-09-24 11:25:06 UTC 之後，按 [Soak TODO](TODO-SOAK-2026-09-23.md) 回收／分析完整觀測。以三台 raw evidence 及最後 cluster 狀態驗收，不用中途健康結果替代。
-- [ ] 完成觀測後，用原 canary run 建立新的精確 cleanup plan，確認全群 workload／配額回零，保留 evidence。
-- [ ] 再排 core API 不可用的實機故障／恢復演練。須空 ERU runtime、etcd 健康、原備份可驗證、全新 source-bound plan；原備份可能含已知 lock-context bug，不能將 rollback 當作日常降版路徑。
+- [x] 2026-09-24 11:25:06 UTC 結束後已回收／分析完整觀測；驗收摘要與證據限制見 [Soak TODO](TODO-SOAK-2026-09-23.md)。raw evidence 留在 private。
+- [x] 觀測結束後用原 canary run 建立精確 cleanup plan，確認全群 workload／配額回零並保留 evidence；摘要見 [TASKS.md 的 ERU-003](TASKS.md)。
+- [x] 2026-09-24T12:10:48Z 起完成 core API 不可用的實機恢復演練：空 runtime／metadata、etcd health、原備份、新 recovery plan 及回切已驗證 patch 均核對通過；原備份含已知 lock-context bug，rollback 僅作故障恢復。詳見 [ERU-005 演練紀錄](M2-CORE-API-RECOVERY-2026-09-24.md)。
 - [x] ERU-001 已在後續交付完成 replace-intent 前中斷的顯式「取消／封存」；[驗證紀錄與限制](M2-CORE-CANCEL-2026-09-23.md)。保留 journal／部分備份，沒有自動清除；原 journal 缺失仍拒絕取消。未干擾正在執行的 soak。
 - [ ] 非空 worker drain、其他 worker 的重裝驗收、跨版本升級、snapshot restore／HA、OS 重灌仍是分開的後續範圍。OS 重灌維持 owner 到 provider 控制台人工操作，不接供應商 API。
 
-日常 worker-4 ERU 元件清理重裝已通過原先連續 3/3 的主要目標；本輪可在此交接，讓遠端觀測繼續累積。剩餘項目未標記完成，完整 VM／磁碟 power-loss 保證也未宣稱完成。
+日常 worker-4 ERU 元件清理重裝已通過原先連續 3/3 的主要目標；本節記錄時遠端觀測仍在累積，後續 24h 觀測與 canary 清理已分別依 ERU-002／003 完成。完整 VM／磁碟 power-loss 保證仍未宣稱完成。
 
 收尾唯讀核對：截至 `2026-09-23T12:35:36Z`，觀測樣本數為 01：142、02：142、03：142；三台均 running、無已記錄功能錯誤，觀測 unit invocation 與啟動時相同。本輪沒有重啟觀測，結束時間仍為 2026-09-24 11:25:06 UTC。

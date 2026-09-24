@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於空 worker-4；provider-reimage 仍是唯讀計畫。
+入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於選定空 worker-2／3／4；02／03 僅完成本機驗證，實機尚待觀測結束後安排；provider-reimage 仍是唯讀計畫。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -76,7 +76,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode provider-reimage
 ```
 
-預設 `component-reinstall` 模式會額外在 worker-4 唯讀核對 ownership、SHA256、symlink／hardlink／mount 邊界，列出六個專用檔案、三個本機狀態根與保留項目。第一版只接受空 worker-4；不自動搬移應用、不重建 core／etcd。省略健康與 canary evidence 時保持 `executable: false`；provider-reimage 始終不可執行。完整正向流程見下節，恢復底層與完整事故處置 CLI 分開標示。
+預設 `component-reinstall` 模式會額外在所選 worker 唯讀核對 ownership、SHA256、symlink／hardlink／mount 邊界，列出六個專用檔案、三個本機狀態根與保留項目。只接受空的 worker-2／3／4；不自動搬移應用、不重建 core／etcd。省略健康與 canary evidence 時保持 `executable: false`；provider-reimage 始終不可執行。完整正向流程見下節，恢復底層與完整事故處置 CLI 分開標示。
 
 日常路徑不需要供應商或重灌工具資訊。只有啟用後備 OS 重灌時才需確認 provider 主機身分、OS image、磁碟／volume 範圍、新 host key 與 OneVPS bootstrap。詳細語意、範圍及验收見 [自控重裝](CONTROLLED-REINSTALL.md)。
 
@@ -88,9 +88,9 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 
 測試使用暫存目錄和假的遠端介面，覆蓋跨程序互斥、子程序持鎖、檔案權限、漂移拒絕、精確清理、不確定結果與禁止重播；不會刪遠端容器。實機結果與已遇到的 etcd 故障見 [開發紀錄](M2-2026-09-22.md)。
 
-## 空 worker-4 的日常元件重裝
+## 選定空 worker 的日常元件重裝
 
-先確保沒有需要保留的 ERU workloads。canary-start 第一版要求全群 ERU workload 空，建立一個 worker-2 和一個 worker-3 的測試 nginx；它們保留到明確 cleanup，供多輪重裝共用。每一個 execute 都使用上一個 plan 顯示的 ID 與 SHA256。
+先確保沒有需要保留的 ERU workloads。canary-start 要求全群 ERU workload 空；預設建立一個 worker-2 和一個 worker-3 的測試 nginx，選定 02／03 時用 `--exclude-node` 建立另兩台守護；它們保留到明確 cleanup，供多輪重裝共用。每一個 execute 都使用上一個 plan 顯示的 ID 與 SHA256。
 
 ```bash
 python3 scripts/labctl.py plan --operation canary-start
@@ -101,7 +101,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
 python3 scripts/labctl.py execute --plan REINSTALL_PLAN --sha256 REINSTALL_HASH
 ```
 
-`canary-start` 預設在 worker-2／3 建立守護。ERU-008 本機準備新增 `--exclude-node worker-2|worker-3|worker-4`，使所選目標保持空白，另兩台各有一個 run-owned nginx；只在全群 workload 空時允許計畫執行。worker-2／3 的重裝執行與恢復尚未開放，[配對與限制](M2-WORKER-PEER-GUARDS-2026-09-24.md)。目前 24h soak 的固定配對仍是 02／03，不能在進行中的觀測期間建立第二組。
+`canary-start` 預設在 worker-2／3 建立守護。ERU-008 本機準備新增 `--exclude-node worker-2|worker-3|worker-4`，使所選目標保持空白，另兩台各有一個 run-owned nginx；只在全群 workload 空時允許計畫執行。worker-2／3 的重裝與恢復已有本機執行器，但實機尚未驗收；見[配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)與[執行器限制](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)。目前 24h soak 的固定配對仍是 02／03，不能在進行中的觀測期間建立第二組。
 
 canary run ID 就是 canary-start plan ID。健康 evidence 需 complete、至少 20 次／120 秒、相鄰觀測無超過 20 秒的缺口，最後樣本距執行不超過 10 分鐘；並對應目前 core invocation。必要時重新收集。要觀察負載中的 etcd，可另跑 `control_health.py --concurrent-read-only --samples 61 --interval 5`；此模式不拿 mutation lock，禁止搭配 disk probe。
 

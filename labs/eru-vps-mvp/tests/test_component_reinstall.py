@@ -70,6 +70,33 @@ class ComponentTests(unittest.TestCase):
         self.assertEqual(result[TARGET]['revision'], 1)
         self.assertEqual(result[TARGET]['generation'], 1)
 
+    def test_selected_peer_executor_targets_only_its_worker_and_revision(self):
+        op, _, plan, stages = self.setup_executor()
+        target, alias = 'worker-2', 'ckc-disposable-02'
+        before = snapshot();before['nodes'][0]['name'] = target
+        before['hosts'][alias] = before['hosts'].pop(ALIAS)
+        fenced = copy.deepcopy(before);fenced['nodes'][0]['bypass'] = True
+        op.snapshot.return_value = fenced
+        op.cli.return_value = fenced['nodes']
+        executor = ComponentReinstall(op, FakeGuards, target=target)
+        executor.payload = Mock(return_value={});executor.service_baseline = Mock(return_value={})
+        executor.remote = Mock(return_value={'stage': 'success'});executor.run_smoke = Mock()
+        resumed = copy.deepcopy(before)
+        executor.check_isolation = Mock(side_effect=[fenced, resumed])
+        plan['node'] = target
+        prior = {'worker-4': {'revision': 3, 'run': 'previous'}}
+        (op.root / 'worker-component-revisions.json').write_text(json.dumps(prior))
+        executor.execute(plan, before)
+        self.assertIn('fencing-worker-2', stages)
+        self.assertIn('resuming-worker-2', stages)
+        self.assertNotIn('fencing-worker-4', stages)
+        commands = [(call.args[0], call.args[1]) for call in op.command.call_args_list]
+        self.assertTrue(any(host == alias and argv[:4] == ['sudo', '-n', 'systemctl', 'stop'] for host, argv in commands))
+        self.assertTrue(any(host == op.core['alias'] and argv[-2:] == ['up', target] for host, argv in commands))
+        result = json.loads((op.root / 'worker-component-revisions.json').read_text())
+        self.assertEqual(result[target]['revision'], 1)
+        self.assertEqual(result['worker-4'], prior['worker-4'])
+
     def test_orphan_tasks_and_usage_block_before_fence(self):
         op, executor, plan, stages = self.setup_executor()
         for key, value in [('tasks', 'TASK PID STATUS\nrogue 123 RUNNING\n'), ('containers', 'rogue')]:
@@ -131,6 +158,20 @@ class ComponentTests(unittest.TestCase):
         self.assertEqual(protected_membership(before), protected_membership(after))
         after['nodes'][0]['available'] = False
         self.assertNotEqual(protected_membership(before), protected_membership(after))
+
+    def test_selected_target_is_excluded_but_other_workers_remain_protected(self):
+        before = snapshot()
+        before['nodes'][0]['name'] = 'worker-2'
+        before['hosts']['ckc-disposable-02'] = before['hosts'].pop(ALIAS)
+        before['nodes'].append({**before['nodes'][0], 'name': 'worker-4'})
+        before['hosts'][ALIAS] = {**before['hosts']['ckc-disposable-02'], 'machine_id': 'peer'}
+        after = copy.deepcopy(before)
+        after['nodes'][0]['available'] = False
+        self.assertEqual(protected_membership(before, 'worker-2', 'ckc-disposable-02'),
+                         protected_membership(after, 'worker-2', 'ckc-disposable-02'))
+        after['hosts'][ALIAS]['machine_id'] = 'changed-peer'
+        self.assertNotEqual(protected_membership(before, 'worker-2', 'ckc-disposable-02'),
+                            protected_membership(after, 'worker-2', 'ckc-disposable-02'))
 
     def test_reviewed_fault_boundary_leaves_quarantine_fenced_without_install(self):
         op, executor, plan, stages = self.setup_executor()

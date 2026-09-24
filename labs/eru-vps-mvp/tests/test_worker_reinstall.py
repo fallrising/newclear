@@ -47,6 +47,37 @@ class ReinstallTests(unittest.TestCase):
         self.worker().restore('test-run')
         self.assertTrue((self.root / STATE_DIRS[0].lstrip('/')).exists())
 
+    def test_target_identity_is_bound_through_quarantine_and_recovery(self):
+        unit = self.root / 'etc/systemd/system/eru-agent.service'
+        unit.write_text('[Service]\nEnvironment=ERU_HOSTNAME=worker-2\n')
+        self.files['/etc/systemd/system/eru-agent.service'] = sha(unit.read_bytes())
+        self.write_manifest()
+        wrong = WorkerReinstall(self.root, os.getuid(), target='worker-3')
+        with self.assertRaisesRegex(ValueError, 'identity'):
+            wrong.quarantine('peer-run', audit(self.root, os.getuid())['manifest_sha256'])
+        self.assertFalse((self.root / 'var/lib/eru-mvp/recovery/peer-run').exists())
+        worker = WorkerReinstall(self.root, os.getuid(), target='worker-2')
+        files = {name: (self.root / name.lstrip('/')).read_bytes() for name in REINSTALL_FILES}
+        worker.quarantine('peer-run', audit(self.root, os.getuid())['manifest_sha256'])
+        with self.assertRaisesRegex(ValueError, 'recovery identity mismatch'):
+            wrong.reconcile('peer-run')
+        worker.install('peer-run', files)
+        worker.restore('peer-run')
+        self.assertTrue(audit(self.root, os.getuid(), expected_node='worker-2')['scope_verified'])
+
+    def test_existing_worker_four_journal_without_node_remains_recoverable(self):
+        unit = self.root / 'etc/systemd/system/eru-agent.service'
+        unit.write_text('[Service]\nEnvironment=ERU_HOSTNAME=worker-4\n')
+        self.files['/etc/systemd/system/eru-agent.service'] = sha(unit.read_bytes())
+        self.write_manifest()
+        worker = WorkerReinstall(self.root, os.getuid(), target='worker-4')
+        worker.quarantine('old-run', audit(self.root, os.getuid())['manifest_sha256'])
+        journal = self.root / 'var/lib/eru-mvp/recovery/old-run/journal.json'
+        record = json.loads(journal.read_text());record.pop('node')
+        journal.write_text(json.dumps(record))
+        self.assertTrue(worker.reconcile('old-run')['restore_possible'])
+        worker.restore('old-run')
+
     def test_backup_corruption_blocks_restore_before_writes(self):
         self.quarantine()
         backup = self.root / 'var/lib/eru-mvp/recovery/test-run/backup/usr/local/bin/eru-agent'

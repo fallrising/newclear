@@ -1,7 +1,7 @@
 """Stopped-worker quarantine, pinned-file reinstall and checksum-checked recovery.
 
 This module performs no scheduling or service operations. The controller must
-fence worker-4 and stop its ERU services before using it. No recursive reset,
+fence the selected worker and stop its ERU services before using it. No recursive reset,
 shared-runtime installation, ownership adoption or overwrite recovery exists.
 """
 import hashlib
@@ -19,7 +19,10 @@ def sha(data):
 
 
 class WorkerReinstall:
-    def __init__(self, root=Path('/'), owner_uid=0):
+    def __init__(self, root=Path('/'), owner_uid=0, target=None):
+        if target is not None and target not in ('worker-2', 'worker-3', 'worker-4'):
+            raise ValueError('unreviewed worker target')
+        self.target = target
         self.root = Path(root)
         self.uid = owner_uid
         self.mounts = mount_points(root) if self.root == Path('/') or (self.root / 'proc/self/mountinfo').exists() else set()
@@ -58,7 +61,7 @@ class WorkerReinstall:
         return result
 
     def inventory(self):
-        scope = audit(self.root, self.uid)
+        scope = audit(self.root, self.uid, expected_node=self.target)
         if scope['blockers']:
             raise ValueError('; '.join(scope['blockers']))
         entries, absent = [], []
@@ -113,7 +116,8 @@ class WorkerReinstall:
             if not entry or entry['type'] != 'file':
                 raise ValueError('unsafe recovery record: ' + name)
         journal = json.loads((directory / 'journal.json').read_text())
-        if journal['id'] != run_id or journal['owner'] != 'eru-vps-mvp':
+        if (journal['id'] != run_id or journal['owner'] != 'eru-vps-mvp' or
+                (self.target is not None and journal.get('node', 'worker-4') != self.target)):
             raise ValueError('recovery identity mismatch')
         manifest = self.path(MANIFEST)
         if sha(manifest.read_bytes()) != journal['manifest_sha256']:
@@ -145,7 +149,7 @@ class WorkerReinstall:
         directory = self.directory(run_id)
         directory.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         directory.mkdir(mode=0o700)  # an existing run is never replayed
-        journal = {'id': run_id, 'owner': 'eru-vps-mvp', 'stage': 'backing-up',
+        journal = {'id': run_id, 'owner': 'eru-vps-mvp', 'node': self.target, 'stage': 'backing-up',
                    'manifest_sha256': expected_manifest, 'removed': [], 'intent': None}
         self.save(directory, journal)
         try:
@@ -256,7 +260,7 @@ class WorkerReinstall:
             journal.setdefault('created', {})[item['path']] = self.entry(item['path'])
             journal['intent'] = None
             self.save(directory, journal)
-        if audit(self.root, self.uid)['blockers']:
+        if audit(self.root, self.uid, expected_node=self.target)['blockers']:
             raise ValueError('restored scope audit failed')
         journal['stage'] = 'restored'
         self.save(directory, journal)
@@ -284,7 +288,7 @@ class WorkerReinstall:
             journal.setdefault('created', {})[name] = self.entry(name)
             journal['intent'] = None
             self.save(directory, journal)
-        if audit(self.root, self.uid)['blockers']:
+        if audit(self.root, self.uid, expected_node=self.target)['blockers']:
             raise ValueError('installed scope audit failed')
         journal['stage'] = 'installed'
         self.save(directory, journal)
@@ -297,11 +301,11 @@ def remote_main(config):
     import fcntl
     import json
     import subprocess
-    if os.geteuid() != 0 or config['node'] != 'worker-4':
-        raise ValueError('initial scope is root on worker-4 only')
+    if os.geteuid() != 0 or config['node'] not in ('worker-2', 'worker-3', 'worker-4'):
+        raise ValueError('requires root on a reviewed worker')
     if Path('/etc/machine-id').read_text().strip() != config['machine_id']:
         raise ValueError('worker machine identity changed')
-    worker = WorkerReinstall()
+    worker = WorkerReinstall(target=config['node'])
     if sha(worker.path(MANIFEST).read_bytes()) != config['manifest_sha256']:
         raise ValueError('worker ownership changed')
     for name in ['/etc/eru/core.yaml', '/var/lib/etcd-eru-mvp']:

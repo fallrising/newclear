@@ -318,8 +318,6 @@ class Operator:
                     empty_target(snap, node, host['alias'])
                 except (ValueError, KeyError, StopIteration) as exc:
                     plan['blockers'].append(str(exc))
-                if node != 'worker-4':
-                    plan['blockers'].append('worker-2/3 execution requires peer canary and recovery support; only worker-4 is enabled')
                 if not health_file or not canary_run:
                     plan['blockers'].append('component reinstall requires --health and --canary-run')
                 elif not plan['blockers']:
@@ -424,7 +422,7 @@ class Operator:
                 current_gate = self.worker_readiness(bound['health_file'], bound['canary_run'], current, plan['node'])
                 if current_gate['blockers'] or current_gate != bound:
                     raise ValueError('worker readiness/canaries changed; create a new plan')
-                ComponentReinstall(self).execute(plan, current)
+                ComponentReinstall(self, target=plan['node']).execute(plan, current)
             elif plan['operation'] == 'canary-start':
                 from canaries import start_canaries
                 start_canaries(self, plan, current)

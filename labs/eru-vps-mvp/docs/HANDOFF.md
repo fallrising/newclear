@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 17 項（近期 6、後續 11）；ERU-001 已完成，下一項 ERU-002 到期回收，等待期間 ERU-006 網路驗收準備已開始（2026-09-24 04:06:02 UTC）。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **01–03 正執行可離線的 24h 觀測，先讀 [含開始時間的待辦](TODO-SOAK-2026-09-23.md)；期間可做本機開發／唯讀排查，實機 mutation 前先停止並記錄中斷。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 16 項（近期 5、後續 11）；ERU-001、ERU-002 已完成，下一項 ERU-003 為原 canary 清理與配額對帳紀錄（精確清理及唯讀驗收已完成，交付紀錄待合併）。ERU-006 網路驗收準備於 2026-09-24 04:06:02 UTC 開始，仍可獨立推進。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 觀測已於 2026-09-24 11:25:06 UTC 自然結束；彙總與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -25,21 +25,23 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 
 - `soak.py collect/report` 可在程序運行時唯讀回收固定長度／SHA 的 evidence，離線核對完整性與功能錯誤，並對照 guest I/O／CPU 指標；141 tests 通過，三台實機中途回收及離線分析成功。詳見 [SOAK.md](SOAK.md)。
 
+- ERU-002 已完成：run `20260923T112336Z-561e71e7` 三台各 2,881 筆、共同覆蓋 86,400 秒，最大間隔 30 秒；完整性錯誤、功能失敗及警告皆為零。WAL fsync p99 桶上界 8 ms（6,308 observations），backend commit 只有 2 observations，尾端統計證據有限。這不是 V11 PASS；歷史慢 fdatasync 根因仍未證實。[結果與限制](TODO-SOAK-2026-09-23.md)。
+
 - 補上 core 更新／rollback 的 32 個程序中斷切點與一次未知後續更動測試（33 次真實 SIGKILL），修正早期 journal 錯誤與權限／hardlink／mount 拒絕條件。均在本機暫存目錄驗證；[本輪交接與剩餘 TODO](M2-CRASH-RECOVERY-2026-09-23.md)。
 
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
 
-- ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與全新 24h run 尚未執行，故狀態為進行中、總數仍剩 17。既有 30 秒觀測保持原封。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
+- ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與獨立 24h run 尚未執行，仍為進行中。ERU-002 的 30 秒低頻觀測已完成，不能替代 V11。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
 
 - ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
 
 ## 尚未完成的工作
 
-- 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。[ERU-004 階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已對照 2026-09-23 17:45 UTC 的 6 小時 20 分唯讀快照與官方資料，記錄影響、證據缺口及相對成本；完整 24 小時結果未出，不把 WAL p99 建議單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
+- 歷史 etcd 秒級 fdatasync 根因仍未證實；已知問題當時達 23.5 秒。[ERU-004 階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已對照 6 小時 20 分唯讀快照與官方資料，記錄影響、證據缺口及相對成本。新增 24h 結果沒有觀測到功能失敗或慢同步警告，WAL fsync p99 桶上界 8 ms；backend commit 僅 2 observations，無法據此確認根因或排除間歇性問題。ERU-004 仍須完成綜合分析；不把 WAL p99 單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。
 - core API 不可用的 rollback 已接到 CLI 並通過本機備份／部分寫入／回覆遺失測試；尚未刻意讓實機 core 故障。程序 SIGKILL 切點已補驗；真正 VM／磁碟 power-loss、未知新檔案歸屬與非空 workload 災難恢復仍未全面驗收。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
 - 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
 - ERU-006 唯讀核對發現 worker-2／3／4 的 UFW 都有 IPv4／IPv6 TCP/80 Anywhere allow，當時沒有 host listener；`deploy-lab.py` 的自有 firewall 僅限制 01 的 5001。host-network 測試前必須先計畫私網 allowlist 和精確回復，準備紀錄見 [ERU-006](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。
-- ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核、[目標外 HTTP 守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)及[peer 重裝／恢復執行器本機驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)；[兩台歷史計畫](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 實機重裝與恢復尚未驗收；非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已交給 VPS 背景執行，預計 2026-09-24 11:25:06 UTC 結束，尚待回收和判讀，不需維持 B／Codex 連線。
+- ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核、[目標外 HTTP 守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)及[peer 重裝／恢復執行器本機驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)；[兩台歷史計畫](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 實機重裝與恢復尚未驗收；非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。24h soak 已完成；原 canary 的精確清理操作亦已執行，ERU-003 的交付紀錄正在整理。
 
 ## 接手先做
 

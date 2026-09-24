@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { apiFetch } from "./client";
-import type { RoomMember, RoomMembersResponse, RoomSummary, RoomsResponse } from "./types";
+import type { AttentionUpdate, RoomMember, RoomMembersResponse, RoomSummary, RoomsResponse } from "./types";
 
 export const roomsQueryKey = ["rooms"] as const;
 export const allRoomsQueryKey = ["rooms", "all"] as const;
@@ -63,6 +63,39 @@ export function useInviteMember(): UseMutationResult<
       }),
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(input.roomId) });
+    },
+  });
+}
+
+export function useRemoveMember(): UseMutationResult<{ ok: true }, Error, { roomId: string; memberId: string }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) =>
+      apiFetch<{ ok: true }>(
+        "/api/rooms/" + encodeURIComponent(input.roomId) + "/members/" + encodeURIComponent(input.memberId),
+        { method: "DELETE" },
+      ),
+    onSuccess: (_data, input) => {
+      void queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(input.roomId) });
+    },
+  });
+}
+
+export function useUpdateAttention(): UseMutationResult<
+  { ok: true },
+  Error,
+  { roomId: string; memberId: string; update: AttentionUpdate }
+> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) =>
+      apiFetch<{ ok: true }>(
+        "/api/rooms/" + encodeURIComponent(input.roomId) + "/members/" + encodeURIComponent(input.memberId) + "/attention",
+        { method: "PATCH", body: input.update },
+      ),
+    onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(input.roomId) });
     },
   });

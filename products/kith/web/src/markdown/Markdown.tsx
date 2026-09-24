@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type ReactElement, type ReactNode } from 
 import type { Token } from "markdown-it";
 import { useT } from "../copy";
 import { IconButton } from "../ui/IconButton";
+import { findMentions } from "./mentions";
 import { md } from "./md";
 
 // Tokens → React elements; no raw HTML injection and no string rendering (FE-02, BR-34).
@@ -39,8 +40,26 @@ function CodeBlock(props: { token: Token }): ReactElement {
   );
 }
 
+function mentionNodes(content: string, handles: readonly string[], key: string): ReactNode[] {
+  const ranges = findMentions(content, handles);
+  if (ranges.length === 0) return [content];
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+  ranges.forEach((range, index) => {
+    if (range.start > cursor) nodes.push(content.slice(cursor, range.start));
+    nodes.push(
+      <span key={key + "m" + index} data-testid="mention" data-handle={range.handle} className="rounded-sm bg-mention-tint px-0.5 font-medium text-ink">
+        {content.slice(range.start, range.end)}
+      </span>,
+    );
+    cursor = range.end;
+  });
+  if (cursor < content.length) nodes.push(content.slice(cursor));
+  return nodes;
+}
+
 /** Build React nodes from a flat token list, pairing *_open / *_close. */
-function render(tokens: Token[], keyPrefix: string): ReactNode[] {
+function render(tokens: Token[], keyPrefix: string, handles: readonly string[]): ReactNode[] {
   const out: ReactNode[] = [];
   let i = 0;
   while (i < tokens.length) {
@@ -54,13 +73,13 @@ function render(tokens: Token[], keyPrefix: string): ReactNode[] {
         depth += tokens[j]!.nesting;
         if (depth > 0) j++;
       }
-      const children = render(tokens.slice(i + 1, j), key + ".");
+      const children = render(tokens.slice(i + 1, j), key + ".", handles);
       out.push(wrap(tok, children, key));
       i = j + 1;
       continue;
     }
-    if (tok.type === "inline") out.push(...render(tok.children ?? [], key + "."));
-    else if (tok.type === "text") out.push(tok.content);
+    if (tok.type === "inline") out.push(...render(tok.children ?? [], key + ".", handles));
+    else if (tok.type === "text") out.push(...mentionNodes(tok.content, handles, key));
     else if (tok.type === "softbreak" || tok.type === "hardbreak") out.push(<br key={key} />);
     else if (tok.type === "code_inline")
       out.push(
@@ -128,7 +147,7 @@ function wrap(tok: Token, children: ReactNode[], key: string): ReactNode {
   }
 }
 
-export function Markdown(props: { source: string }): ReactElement {
+export function Markdown(props: { source: string; mentionHandles: readonly string[] }): ReactElement {
   const tokens = useMemo(() => md.parse(props.source, {}), [props.source]);
-  return <>{render(tokens, "")}</>;
+  return <>{render(tokens, "", props.mentionHandles)}</>;
 }

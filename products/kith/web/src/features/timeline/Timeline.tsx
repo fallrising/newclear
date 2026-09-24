@@ -1,5 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { useNow, useStatusStore } from "../../store/statuses";
 import type { RoomMember, RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
 import type { RoomTimeline } from "../../sync/types";
@@ -9,6 +10,8 @@ import { DateDivider } from "./DateDivider";
 import { NewDivider } from "./NewDivider";
 import { JumpToLatest } from "./JumpToLatest";
 import { MessageRow } from "./MessageRow";
+import { ReplyFailed } from "./ReplyFailed";
+import { ReplyPlaceholder } from "./ReplyPlaceholder";
 import { SyncNotice } from "./SyncNotice";
 import { TimelineTop } from "./TimelineTop";
 
@@ -17,6 +20,8 @@ type Props = {
   timeline: RoomTimeline;
   members: RoomMember[] | undefined;
   meId: string;
+  meHandle: string;
+  isOperator: boolean;
   onLoadOlder(): void;
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
@@ -30,9 +35,11 @@ const LOAD_OLDER_PX = 200;
 export function Timeline(props: Props): ReactElement {
   const t = useT();
   const { timeline, meId } = props;
+  const statuses = useStatusStore((s) => s.rooms[props.room.id]);
+  const now = useNow(1000);
   const items = useMemo(
-    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq),
-    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq],
+    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq, statuses, now, props.members),
+    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq, statuses, now, props.members],
   );
   const hasMessages = items.some((i) => i.kind === "message");
 
@@ -134,6 +141,14 @@ export function Timeline(props: Props): ReactElement {
     }
   }, [lastKey]);
 
+  useEffect(() => {
+    const onLatest = (): void => {
+      if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
+    };
+    window.addEventListener("kith:scroll-latest", onLatest);
+    return () => window.removeEventListener("kith:scroll-latest", onLatest);
+  }, [items.length, virtualizer]);
+
   const renderItem = (item: TimelineItem): ReactElement => {
     switch (item.kind) {
       case "top":
@@ -150,6 +165,9 @@ export function Timeline(props: Props): ReactElement {
             sender={sender}
             senderId={item.row.sender_id}
             isMe={item.row.sender_id === meId}
+            mentionHandles={props.members?.map((member) => member.handle) ?? []}
+            meHandle={props.meHandle}
+            isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
           />
@@ -157,7 +175,27 @@ export function Timeline(props: Props): ReactElement {
       }
       case "pending": {
         const sender = props.members?.find((m) => m.id === meId);
-        return <MessageRow item={item} sender={sender} senderId={meId} isMe onRetry={props.onRetry} onDiscard={props.onDiscard} />;
+        return (
+          <MessageRow
+            item={item}
+            sender={sender}
+            senderId={meId}
+            isMe
+            mentionHandles={props.members?.map((member) => member.handle) ?? []}
+            meHandle={props.meHandle}
+            isOperator={props.isOperator}
+            onRetry={props.onRetry}
+            onDiscard={props.onDiscard}
+          />
+        );
+      }
+      case "reply": {
+        const member = props.members?.find((m) => m.id === item.memberId);
+        return member ? <ReplyPlaceholder member={member} /> : <span />;
+      }
+      case "failed": {
+        const member = props.members?.find((m) => m.id === item.memberId);
+        return member ? <ReplyFailed member={member} errorClass={item.errorClass} /> : <span />;
       }
     }
   };

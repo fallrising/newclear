@@ -392,6 +392,13 @@ export class Room extends DurableObject<Env> {
     const existing = await this.lookupByClientId(input.roomId, input.senderId, input.clientMessageId);
     if (existing) return { ok: true, row: existing, uniqueHit: true };
 
+    const archived = await this.env.DB.prepare(`SELECT archived_at FROM rooms WHERE id = ?`)
+      .bind(input.roomId)
+      .first<{ archived_at: string | null }>();
+    if (archived?.archived_at) {
+      return { ok: false, status: 409, code: "room_archived", message: "room is archived" };
+    }
+
     if (input.generationId != null) {
       const gen = await this.env.DB.prepare(`SELECT agent_id, state FROM generations WHERE id = ?`)
         .bind(input.generationId)

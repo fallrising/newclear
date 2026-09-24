@@ -135,16 +135,11 @@ app.patch("/api/me", async (c) => {
 app.get("/api/rooms", async (c) => {
   const auth = await requireAuth(c);
   if (auth instanceof Response) return auth;
-  const result = await c.env.DB.prepare(
-    `SELECT r.id, r.slug, r.name, r.created_at, rm.role
-     FROM rooms r
-     JOIN room_members rm ON rm.room_id = r.id
-     WHERE rm.member_id = ?
-     ORDER BY r.created_at ASC`,
-  )
-    .bind(auth.member.id)
-    .all();
-  return c.json({ rooms: result.results ?? [] });
+  const all = new URL(c.req.url).searchParams.get("all");
+  if (all !== null && all !== "1") return invalid(c, "invalid all");
+  if (all === "1" && (auth.via !== "session" || auth.member.is_operator !== 1)) return forbidden(c, "operator required");
+  const rooms = await roomSummaries(c.env, auth.member.id, { all: all === "1" });
+  return c.json({ rooms });
 });
 
 app.post("/api/rooms", async (c) => {
@@ -176,6 +171,36 @@ app.post("/api/rooms", async (c) => {
     return c.json(errorBody("not_ready", "failed to create room"), 503);
   }
   return c.json({ id, slug, name, created_at: createdAt });
+});
+
+app.patch("/api/rooms/:id", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const roomId = c.req.param("id");
+  if (!(await roomExists(c.env, roomId))) return c.json(errorBody("not_found", "room not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["name", "archived"]).length > 0) return invalid(c, "unknown field");
+  if (obj.name === undefined && obj.archived === undefined) return invalid(c, "name or archived required");
+  let name: string | null = null;
+  if (obj.name !== undefined) {
+    if (typeof obj.name !== "string") return invalid(c, "invalid name");
+    name = obj.name.trim();
+    if (name.length < 1 || name.length > 80) return invalid(c, "name must be 1-80 characters");
+  }
+  if (obj.archived !== undefined && typeof obj.archived !== "boolean") return invalid(c, "archived must be boolean");
+  if (name !== null) {
+    await c.env.DB.prepare(`UPDATE rooms SET name = ? WHERE id = ?`).bind(name, roomId).run();
+  }
+  if (obj.archived === true) {
+    await c.env.DB.prepare(`UPDATE rooms SET archived_at = COALESCE(archived_at, ?) WHERE id = ?`)
+      .bind(new Date().toISOString(), roomId)
+      .run();
+  } else if (obj.archived === false) {
+    await c.env.DB.prepare(`UPDATE rooms SET archived_at = NULL WHERE id = ?`).bind(roomId).run();
+  }
+  const [room] = await roomSummaries(c.env, auth.member.id, { all: true, roomId });
+  return c.json(room);
 });
 
 app.get("/api/rooms/:id/messages", async (c) => {
@@ -626,3 +651,66 @@ export default {
     ctx.waitUntil(gcAllRooms(env.DB));
   },
 };
+
+type RoomSummaryRow = {
+  id: string;
+  slug: string;
+  name: string;
+  created_at: string;
+  role: string | null;
+  archived_at: string | null;
+  last_seq: number | null;
+  member_count: number;
+  lm_seq: number | null;
+  lm_sender_id: string | null;
+  lm_body_preview: string | null;
+  lm_created_at: string | null;
+  lm_sender_display_name: string | null;
+  lm_sender_handle: string | null;
+};
+
+async function roomSummaries(
+  env: Env,
+  memberId: string,
+  options: { all: boolean; roomId?: string },
+): Promise<Array<Record<string, unknown>>> {
+  const params: unknown[] = [memberId];
+  let sql = `SELECT r.id, r.slug, r.name, r.created_at, rm.role, r.archived_at,
+                    (SELECT MAX(m.seq) FROM messages m WHERE m.room_id = r.id) AS last_seq,
+                    (SELECT COUNT(*) FROM room_members x WHERE x.room_id = r.id) AS member_count,
+                    lm.seq AS lm_seq, lm.sender_id AS lm_sender_id,
+                    substr(lm.body, 1, 140) AS lm_body_preview, lm.created_at AS lm_created_at,
+                    sm.display_name AS lm_sender_display_name, sm.handle AS lm_sender_handle
+             FROM rooms r
+             ${options.all ? "LEFT JOIN" : "JOIN"} room_members rm ON rm.room_id = r.id AND rm.member_id = ?
+             LEFT JOIN messages lm ON lm.room_id = r.id
+               AND lm.seq = (SELECT MAX(m2.seq) FROM messages m2 WHERE m2.room_id = r.id AND m2.kind = 'message')
+             LEFT JOIN members sm ON sm.id = lm.sender_id`;
+  if (options.roomId !== undefined) {
+    sql += ` WHERE r.id = ?`;
+    params.push(options.roomId);
+  }
+  sql += ` ORDER BY r.created_at ASC`;
+  const result = await env.DB.prepare(sql).bind(...params).all<RoomSummaryRow>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    created_at: row.created_at,
+    role: row.role,
+    archived_at: row.archived_at,
+    last_seq: row.last_seq,
+    member_count: row.member_count,
+    last_message:
+      row.lm_seq === null
+        ? null
+        : {
+            seq: row.lm_seq,
+            sender_id: row.lm_sender_id,
+            sender_display_name: row.lm_sender_display_name,
+            sender_handle: row.lm_sender_handle,
+            body_preview: row.lm_body_preview,
+            created_at: row.lm_created_at,
+          },
+  }));
+}

@@ -33,7 +33,7 @@ export function RoomList(): ReactElement {
   if (rooms.data.length === 0) {
     return (
       <p data-testid="room-list-empty" className="px-4 py-3 text-sm text-ink-3">
-        {t("rooms.list.empty")}
+        {t("rooms.list.emptyMember")}
       </p>
     );
   }

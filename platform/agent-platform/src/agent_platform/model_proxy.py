@@ -11,6 +11,12 @@ from uuid import UUID
 from .auth import audit
 from .domain import Problem
 from .model_policy import MAX_REQUEST, MODEL, canonical, response, sensitive, sha
+from .model_pricing import (
+    CONTEXT_TOKENS,
+    MAX_OUTPUT_TOKENS,
+    PRICE_REVISION,
+    dollars,
+)
 from .model_upstream import FixtureUpstream
 from .store import event
 
@@ -74,15 +80,21 @@ class ModelProxy:
         row = conn.execute("SELECT * FROM model_proxy_runs WHERE run_id=%s", (run_id,)).fetchone()
         if not row:
             budget = self.policy.budget
+            quote = self.policy.price_quote
             conn.execute(
                 "INSERT INTO model_proxy_runs(run_id,policy_sha256,request_limit,"
-                "fixture_price_revision,fixture_limit_microcredits) VALUES (%s,%s,%s,%s,%s)",
+                "fixture_price_revision,fixture_limit_microcredits,"
+                "quote_price_revision,quote_limit_nanodollars,quote_expires_at) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
                 (
                     run_id,
                     self.policy.digest,
                     self.policy.request_limit,
                     budget.revision if budget else None,
                     budget.limit_microcredits if budget else None,
+                    PRICE_REVISION if quote else None,
+                    quote.limit_nanodollars if quote else None,
+                    quote.expires_at if quote else None,
                 ),
             )
         elif row["policy_sha256"] != self.policy.digest:
@@ -92,7 +104,8 @@ class ModelProxy:
         run_id, owner = UUID(str(run_id)), UUID(str(owner))
         token = "mp1_" + secrets.token_urlsafe(32)
         with self.db.transaction() as conn:
-            run, _ = self.live(conn, run_id, generation, owner)
+            run, now = self.live(conn, run_id, generation, owner)
+            self.require_current_quote(now)
             self.pin(conn, run_id)
             conn.execute(
                 "UPDATE model_proxy_tokens SET revoked_at=clock_timestamp() "
@@ -107,6 +120,10 @@ class ModelProxy:
             )
             audit(conn, None, "model.token_issued", str(run_id))
         return token
+
+    def require_current_quote(self, now):
+        if self.policy.price_quote and not self.policy.price_quote.valid(now):
+            raise Problem(409, "model_price_quote_expired")
 
     def revoke(self, run_id):
         with self.db.transaction() as conn:
@@ -152,8 +169,12 @@ class ModelProxy:
             if budget
             else None
         )
+        quote = self.policy.price_quote
+        quoted_reserved = quote.reserve(payload["max_tokens"]) if quote else None
         with self.db.transaction() as conn:
             run = self.authorize(conn, run_id, token)
+            now = conn.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+            self.require_current_quote(now)
             existing = conn.execute(
                 "SELECT payload_sha256 FROM model_proxy_requests WHERE run_id=%s AND request_id=%s",
                 (run_id, request_id),
@@ -179,11 +200,21 @@ class ModelProxy:
                 ).fetchone()["n"]
                 if committed + reserved > budget.limit_microcredits:
                     raise Problem(429, "model_fixture_budget_exhausted")
+            if quote:
+                committed = conn.execute(
+                    "SELECT COALESCE(sum(COALESCE(quote_settled_nanodollars,"
+                    "quote_reserved_nanodollars)),0) AS n FROM model_proxy_requests "
+                    "WHERE run_id=%s",
+                    (run_id,),
+                ).fetchone()["n"]
+                if committed + quoted_reserved > quote.limit_nanodollars:
+                    raise Problem(429, "model_price_quote_exhausted")
             conn.execute(
                 "INSERT INTO model_proxy_requests(run_id,request_id,generation,payload_sha256,"
                 "status,reason,fixture_input_bound,fixture_output_bound,"
-                "fixture_reserved_microcredits) "
-                "VALUES (%s,%s,%s,%s,'reserved','dispatch_outcome_unknown',%s,%s,%s)",
+                "fixture_reserved_microcredits,quote_input_bound,quote_output_bound,"
+                "quote_reserved_nanodollars) "
+                "VALUES (%s,%s,%s,%s,'reserved','dispatch_outcome_unknown',%s,%s,%s,%s,%s,%s)",
                 (
                     run_id,
                     request_id,
@@ -192,6 +223,9 @@ class ModelProxy:
                     input_bound,
                     output_bound,
                     reserved,
+                    CONTEXT_TOKENS if quote else None,
+                    payload["max_tokens"] if quote else None,
+                    quoted_reserved,
                 ),
             )
             event(
@@ -206,6 +240,7 @@ class ModelProxy:
                     "request_limit": self.policy.request_limit,
                     "fixture": True,
                     "fixture_reserved_microcredits": reserved,
+                    "quote_reserved_nanodollars": quoted_reserved,
                 },
             )
             audit(conn, None, "model.request_reserved", str(run_id))
@@ -225,16 +260,21 @@ class ModelProxy:
                 raise Problem(409, "model_policy_changed")
             row = conn.execute(
                 "SELECT fixture_input_bound,fixture_output_bound,"
-                "fixture_reserved_microcredits FROM model_proxy_requests "
+                "fixture_reserved_microcredits,quote_input_bound,quote_output_bound,"
+                "quote_reserved_nanodollars FROM model_proxy_requests "
                 "WHERE run_id=%s AND request_id=%s AND status='reserved'",
                 (run_id, request_id),
             ).fetchone()
             if not row:
                 raise Problem(409, "model_settlement_conflict")
             budget = self.policy.budget
+            quote = self.policy.price_quote
             if (row["fixture_reserved_microcredits"] is None) != (budget is None):
                 raise Problem(409, "model_policy_changed")
+            if (row["quote_reserved_nanodollars"] is None) != (quote is None):
+                raise Problem(409, "model_policy_changed")
             charged = None
+            quoted_charged = None
             if usage and budget:
                 if (
                     usage["prompt_tokens"] > row["fixture_input_bound"]
@@ -247,10 +287,22 @@ class ModelProxy:
                 )
                 if charged > row["fixture_reserved_microcredits"]:
                     raise Problem(502, "model_usage_exceeds_reserved_bound")
+            if usage and quote:
+                try:
+                    quoted_charged = quote.settle(
+                        usage["prompt_tokens"],
+                        usage["completion_tokens"],
+                        row["quote_output_bound"],
+                    )
+                except ValueError:
+                    raise Problem(502, "model_usage_exceeds_reserved_bound") from None
+                if quoted_charged > row["quote_reserved_nanodollars"]:
+                    raise Problem(502, "model_usage_exceeds_reserved_bound")
             status = "final" if usage is not None else "unknown"
             updated = conn.execute(
                 "UPDATE model_proxy_requests SET status=%s,reason=%s,input_tokens=%s,"
                 "output_tokens=%s,fixture_settled_microcredits=%s,"
+                "quote_settled_nanodollars=%s,"
                 "settled_at=clock_timestamp() "
                 "WHERE run_id=%s AND request_id=%s AND status='reserved' RETURNING request_id",
                 (
@@ -259,6 +311,7 @@ class ModelProxy:
                     usage["prompt_tokens"] if usage else None,
                     usage["completion_tokens"] if usage else None,
                     charged,
+                    quoted_charged,
                     run_id,
                     request_id,
                 ),
@@ -278,6 +331,7 @@ class ModelProxy:
                     "amount_decimal": None,
                     "fixture": True,
                     "fixture_settled_microcredits": charged,
+                    "quote_settled_nanodollars": quoted_charged,
                 },
             )
             audit(conn, None, "model.request_settled", str(run_id), status)
@@ -299,6 +353,11 @@ class ModelProxy:
             else:
                 value, usage = response(raw, payload["max_tokens"], known)
             if self.policy.budget and usage["prompt_tokens"] > len(canonical(payload)):
+                raise Problem(502, "model_usage_exceeds_reserved_bound")
+            if self.policy.price_quote and (
+                usage["prompt_tokens"] > CONTEXT_TOKENS
+                or usage["completion_tokens"] > payload["max_tokens"]
+            ):
                 raise Problem(502, "model_usage_exceeds_reserved_bound")
         except Problem as exc:
             self.settle(run_id, request_id, reason=exc.code)
@@ -352,6 +411,7 @@ class ModelProxy:
 
     def tool_gate(self, conn, run_id, generation, owner):
         _, now = self.live(conn, run_id, generation, owner, states=("running", "awaiting_approval"))
+        self.require_current_quote(now)
         self.pin(conn, run_id)
         count = conn.execute(
             "SELECT count(*) AS n FROM model_proxy_requests WHERE run_id=%s", (run_id,)
@@ -374,6 +434,16 @@ class ModelProxy:
             )
             if committed + next_envelope > budget.limit_microcredits:
                 raise Problem(429, "model_fixture_budget_exhausted")
+        if self.policy.price_quote:
+            quote = self.policy.price_quote
+            committed = conn.execute(
+                "SELECT COALESCE(sum(COALESCE(quote_settled_nanodollars,"
+                "quote_reserved_nanodollars)),0) AS n FROM model_proxy_requests "
+                "WHERE run_id=%s",
+                (run_id,),
+            ).fetchone()["n"]
+            if committed + quote.reserve(MAX_OUTPUT_TOKENS) > quote.limit_nanodollars:
+                raise Problem(429, "model_price_quote_exhausted")
         return now
 
 
@@ -388,6 +458,8 @@ def usage_view(db, run_id):
             "SELECT request_id,generation,status,reason,input_tokens,output_tokens,amount_decimal,"
             "currency,price_revision,fixture_input_bound,fixture_output_bound,"
             "fixture_reserved_microcredits,fixture_settled_microcredits,"
+            "quote_input_bound,quote_output_bound,quote_reserved_nanodollars,"
+            "quote_settled_nanodollars,"
             "reserved_at,settled_at FROM model_proxy_requests "
             "WHERE run_id=%s ORDER BY reserved_at,request_id",
             (run_id,),
@@ -397,6 +469,14 @@ def usage_view(db, run_id):
             entry["fixture_settled_microcredits"]
             if entry["fixture_settled_microcredits"] is not None
             else entry["fixture_reserved_microcredits"] or 0
+        )
+        for entry in entries
+    )
+    quoted_committed = sum(
+        (
+            entry["quote_settled_nanodollars"]
+            if entry["quote_settled_nanodollars"] is not None
+            else entry["quote_reserved_nanodollars"] or 0
         )
         for entry in entries
     )
@@ -411,6 +491,17 @@ def usage_view(db, run_id):
         "cost_status": "unknown",
         "amount_decimal": None,
         "hard_money_limit_supported": False,
+        "published_price_preview": bool(policy and policy["quote_limit_nanodollars"]),
+        "quote_price_revision": policy["quote_price_revision"] if policy else None,
+        "quote_limit_usd": dollars(policy["quote_limit_nanodollars"])
+        if policy and policy["quote_limit_nanodollars"]
+        else None,
+        "quote_committed_usd": dollars(quoted_committed)
+        if policy and policy["quote_limit_nanodollars"]
+        else None,
+        "quote_uncertain": any(e["status"] != "final" for e in entries)
+        if policy and policy["quote_limit_nanodollars"]
+        else None,
         "fixture_credit_limit_supported": bool(policy and policy["fixture_limit_microcredits"]),
         "fixture_price_revision": policy["fixture_price_revision"] if policy else None,
         "fixture_credit_limit_microcredits": (

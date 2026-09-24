@@ -14,6 +14,19 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .connector_journal import private_file
 from .domain import Problem
+from .model_pricing import (
+    CONTEXT_TOKENS,
+    INPUT_NANODOLLARS_PER_TOKEN,
+    MAX_OUTPUT_TOKENS,
+    MODEL_SOURCE,
+    OUTPUT_NANODOLLARS_PER_TOKEN,
+    PRICE_REVISION,
+    PRICE_SOURCE,
+    PublishedPriceQuote,
+)
+from .model_pricing import (
+    MODEL as QUOTED_MODEL,
+)
 
 MAX_REQUEST = 128 * 1024
 MAX_RESPONSE = 256 * 1024
@@ -71,6 +84,7 @@ class Policy:
     request_limit: int = 100
     mode: str = "fixture-http-v1"
     budget: FixtureBudget | None = None
+    price_quote: PublishedPriceQuote | None = None
 
     def __post_init__(self):
         # Deliberately no public/provider mode until guest transport and pricing gates.
@@ -83,6 +97,11 @@ class Policy:
             or not 1 <= self.request_limit <= 100
             or not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", self.credential)
             or (self.budget is not None and not isinstance(self.budget, FixtureBudget))
+            or (
+                self.price_quote is not None
+                and not isinstance(self.price_quote, PublishedPriceQuote)
+            )
+            or (self.budget is not None and self.price_quote is not None)
         ):
             raise ValueError("invalid_model_fixture_policy")
 
@@ -103,6 +122,21 @@ class Policy:
                 "limit_microcredits": self.budget.limit_microcredits,
                 "input_microcredits_per_token": self.budget.input_microcredits_per_token,
                 "output_microcredits_per_token": self.budget.output_microcredits_per_token,
+            }
+        if self.price_quote:
+            fields["published_price_preview"] = {
+                "revision": PRICE_REVISION,
+                "price_source": PRICE_SOURCE,
+                "model_source": MODEL_SOURCE,
+                "model": QUOTED_MODEL,
+                "context_tokens": CONTEXT_TOKENS,
+                "max_output_tokens": MAX_OUTPUT_TOKENS,
+                "input_nanodollars_per_token": INPUT_NANODOLLARS_PER_TOKEN,
+                "output_nanodollars_per_token": OUTPUT_NANODOLLARS_PER_TOKEN,
+                "limit_nanodollars": self.price_quote.limit_nanodollars,
+                "verified_at": self.price_quote.verified_at,
+                "expires_at": self.price_quote.expires_at,
+                "public_payg_standard_confirmed": True,
             }
         return sha(canonical(fields))
 
@@ -126,8 +160,17 @@ class Policy:
                 "mode",
                 "fixture_budget",
             },
+            {
+                "origin",
+                "credential_file",
+                "request_limit",
+                "mode",
+                "published_price_preview",
+            },
         ):
             raise ValueError("invalid_model_fixture_config")
+        if "published_price_preview" in data and data["published_price_preview"] is None:
+            raise ValueError("invalid_price_quote")
         has_budget = "fixture_budget" in data
         budget = data.pop("fixture_budget", None)
         if has_budget and budget is None:
@@ -141,6 +184,16 @@ class Policy:
             }:
                 raise ValueError("invalid_fixture_budget")
             data["budget"] = FixtureBudget(**budget)
+        quote = data.pop("published_price_preview", None)
+        if quote is not None:
+            if not isinstance(quote, dict) or set(quote) != {
+                "limit_nanodollars",
+                "verified_at",
+                "expires_at",
+                "public_payg_standard_confirmed",
+            }:
+                raise ValueError("invalid_price_quote")
+            data["price_quote"] = PublishedPriceQuote(**quote)
         secret = private_file(data.pop("credential_file"))
         if secret.stat().st_size > 129:
             raise ValueError("model_credential_too_large")

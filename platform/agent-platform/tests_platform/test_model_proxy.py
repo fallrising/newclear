@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
@@ -26,6 +27,11 @@ from agent_platform.model_api import create_model_app
 from agent_platform.model_cli import write_token
 from agent_platform.model_fixture import fixture_response
 from agent_platform.model_policy import MODEL, Completion, FixtureBudget, Policy, canonical
+from agent_platform.model_pricing import (
+    CONTEXT_TOKENS,
+    PRICE_REVISION,
+    PublishedPriceQuote,
+)
 from agent_platform.model_proxy import ModelProxy, usage_view
 from agent_platform.store import Store
 from agent_platform.worker import Worker
@@ -183,6 +189,101 @@ class ModelProxyTests(PlatformFixture):
         proxy = ModelProxy(self.db, policy)
         token = proxy.issue(run, 1, worker.owner)
         return run, worker, proxy, token
+
+    def quoted(self, limit):
+        run, worker = self.running()
+        now = datetime.now(UTC)
+        quote = PublishedPriceQuote(
+            limit,
+            now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            True,
+        )
+        policy = replace(self.policy, price_quote=quote)
+        proxy = ModelProxy(self.db, policy)
+        token = proxy.issue(run, 1, worker.owner)
+        return run, worker, proxy, token
+
+    def test_published_price_preview_reserves_before_dispatch_and_estimates(self):
+        envelope = CONTEXT_TOKENS * 150 + 32 * 600
+        run, _, proxy, token = self.quoted(envelope + 1)
+        self.upstream.release.clear()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            first = pool.submit(
+                proxy.complete, run, token, uuid4(), Completion(**self.payload_model)
+            )
+            self.assertTrue(self.upstream.entered.wait(3))
+            pending = usage_view(self.db, run)
+            self.assertEqual(pending["quote_committed_usd"], "0.0192192")
+            self.assertTrue(pending["quote_uncertain"])
+            with self.assertRaisesRegex(Problem, "model_price_quote_exhausted"):
+                proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+            self.assertEqual(len(self.upstream.calls), 1)
+            self.upstream.release.set()
+            first.result(timeout=5)
+        settled = usage_view(self.db, run)
+        self.assertEqual(settled["quote_price_revision"], PRICE_REVISION)
+        self.assertEqual(settled["quote_committed_usd"], "0.0000045")
+        self.assertFalse(settled["quote_uncertain"])
+        self.assertFalse(settled["hard_money_limit_supported"])
+        self.assertIsNone(settled["amount_decimal"])
+        self.assertIsNone(settled["entries"][0]["amount_decimal"])
+        self.assertEqual(settled["entries"][0]["quote_input_bound"], CONTEXT_TOKENS)
+
+    def test_published_price_preview_unknown_keeps_full_money_reservation(self):
+        envelope = CONTEXT_TOKENS * 150 + 32 * 600
+        run, _, proxy, token = self.quoted(envelope + 1)
+        self.upstream.status = 429
+        with self.assertRaisesRegex(Problem, "model_rate_limited"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        view = usage_view(self.db, run)
+        self.assertEqual(view["entries"][0]["status"], "unknown")
+        self.assertEqual(view["entries"][0]["quote_reserved_nanodollars"], envelope)
+        self.assertIsNone(view["entries"][0]["quote_settled_nanodollars"])
+        self.assertEqual(view["quote_committed_usd"], "0.0192192")
+        self.upstream.status = 200
+        with self.assertRaisesRegex(Problem, "model_price_quote_exhausted"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        self.assertEqual(len(self.upstream.calls), 1)
+
+    def test_published_price_preview_overreported_tokens_become_unknown(self):
+        envelope = CONTEXT_TOKENS * 150 + 32 * 600
+        run, _, proxy, token = self.quoted(envelope + 1)
+        self.upstream.value["usage"] = {
+            "prompt_tokens": CONTEXT_TOKENS + 1,
+            "completion_tokens": 5,
+            "total_tokens": CONTEXT_TOKENS + 6,
+        }
+        with self.assertRaisesRegex(Problem, "model_usage_exceeds_reserved_bound"):
+            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+        view = usage_view(self.db, run)
+        self.assertEqual(view["entries"][0]["status"], "unknown")
+        self.assertIsNone(view["entries"][0]["quote_settled_nanodollars"])
+        self.assertEqual(view["entries"][0]["quote_reserved_nanodollars"], envelope)
+
+    def test_published_price_preview_expiry_and_policy_drift_fail_closed(self):
+        run, worker, proxy, token = self.quoted(10**9)
+        changed = replace(
+            proxy.policy,
+            price_quote=replace(proxy.policy.price_quote, limit_nanodollars=10**9 + 1),
+        )
+        with self.assertRaisesRegex(Problem, "model_policy_changed"):
+            ModelProxy(self.db, changed).issue(run, 1, worker.owner)
+        with patch("agent_platform.model_policy.INPUT_NANODOLLARS_PER_TOKEN", 151):
+            with self.assertRaisesRegex(Problem, "model_policy_changed"):
+                proxy.issue(run, 1, worker.owner)
+        expired = replace(
+            proxy.policy,
+            price_quote=replace(
+                proxy.policy.price_quote,
+                expires_at="2020-01-01T01:00:00Z",
+                verified_at="2020-01-01T00:00:00Z",
+            ),
+        )
+        with self.assertRaisesRegex(Problem, "model_price_quote_expired"):
+            ModelProxy(self.db, expired).issue(run, 1, worker.owner)
+        # An admitted request under the original policy remains usable.
+        proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
 
     def test_fixture_credits_reserve_before_dispatch_and_settle_below_bound(self):
         upper = len(canonical(self.payload_model)) + self.payload_model["max_tokens"]

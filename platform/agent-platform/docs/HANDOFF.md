@@ -1,6 +1,17 @@
-# 開發接續紀錄 — 2026-09-23
+# 開發接續紀錄 — 2026-09-24
 
-本次停止點：**PR #46 的 AT-11-B 已合併；AT-11-C1（PR #51）固定 fixture credits 預留／結算與預算截止已驗收。真實 provider 金額仍 unknown，完整 AT-11-C／AT-11／AT-07／M3 未完成。** 本次分支 `agent/agent-platform/at-11-c` 從 GitHub main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 建立，提交前重基於 `5bf015c4cdec64c9a7db0019b8e39a383627297c`，只修改 `platform/agent-platform`。最新行為見 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md)，新視窗接續見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。以下各舊切片保留歷史交付範圍。
+目前停止點：**AT-11-C2a 已加入固定公開價目／token 上界的金額預留演練**，仍只向本機 fixture dispatch。公開美元價目用於驗證 admission／ledger 故障語意，沒有付費 provider 帳單或硬金額上限；`amount_decimal` 繼續為 null。完整設計與限制見 [AT-11-C2a](M3-PUBLISHED-PRICE-PREVIEW.md)，驗收見 [evidence](evidence/m3-published-price-preview-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+
+## 本次 AT-11-C2a 公開費率演練
+
+- 從 GitHub main `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` 建立隔離 worktree `newclear-agent-at11c2`，只修改 `platform/agent-platform`。截至開始核對，其他開啟 PR 為 dim-gate #61；main 最近 agent-platform PR #55 文件、#51 C1 均已合併。
+- 官方 `gpt-4o-mini-2024-07-18` 規格與公開 Standard、稅前 USD 價目固定為版本化 preview：input 128,000 token 上界、output 最多 4096、非快取 US$0.15／百萬 input 與 US$0.60／百萬 output；單 request 最大全額 US$0.0216576。Operator 必須明確確認公開 pay-as-you-go 條件及 24 小時內到期；模型 snapshot 不保證帳戶價格不變。
+- 新 `011_published_price_preview.sql` 的 quote 欄位與 C1 合成 credits 分開。SQL 仍禁止真實 `amount_decimal`／currency／price_revision；API 顯示 `published_price_preview`、`quote_*`，`cost_status: unknown` 與 `hard_money_limit_supported: false` 不變。未 opt-in 的舊 policy digest 不變。
+- Job→run 鎖內先 commit UUID／全額美元估算上界，才 dispatch；合法用量依公開非快取價結算演練值，reserved／unknown 保留全額。429、超界、SIGKILL 不重送或當零；政策修改、價目過期關閉新 admission。Terminal gate 與 durable cutoff／停止證據沿用原安全路徑。
+- M0 45、平台 186 項 PostgreSQL／HTTP 測試及 Web 22 項、lint／format／build 均通過；19 項真實 KVM 含成功結算、零 dispatch 額度截止與超界回報保留全額，並回歸原 guest-model 16 案及 29 項 terminal 隔離。私密 payload／配置／logs 在 `/tmp/apm3-at11c2-20260924`；沿用原 journal/fences/cache。收尾核對 VM／claims 為零，192 筆 journal 對應 VM 全部停止，connector／sandboxd 已停，任務測試 PostgreSQL 已移除；公開 hash 與摘要見 [evidence](evidence/m3-published-price-preview-2026-09-24.json)。
+- 下一個 C2 切片才可增加獨立真實 provider adapter 與明確 opt-in key、帳戶實際價格適用性、正式 usage／invoice 對帳及 usage UI。公開價目、fixture counters 或 provider project spend limit 都不能自動變成帳單硬金額保證。沒有使用主機既有 provider key。
+
+前次停止點：**PR #46 的 AT-11-B 已合併；AT-11-C1（PR #51）固定 fixture credits 預留／結算與預算截止已驗收。真實 provider 金額仍 unknown，完整 AT-11-C／AT-11／AT-07／M3 未完成。** 前次分支 `agent/agent-platform/at-11-c` 從 GitHub main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 建立，提交前重基於 `5bf015c4cdec64c9a7db0019b8e39a383627297c`，只修改 `platform/agent-platform`。以下各舊切片保留歷史交付範圍。
 
 ## 本次 AT-11-C1 固定 fixture credits
 
@@ -104,7 +115,7 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 與 [AT-11-C1 fixture budget](M3-FIXTURE-BUDGET.md) 接續 **AT-11-C2 真實 provider 可信 pricing／token 上界／金額 reservation 與 settlement**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
+1. 依 [SDD](../SDD.md) 與 [AT-11-C2a 公開費率演練](M3-PUBLISHED-PRICE-PREVIEW.md) 接續 **真實 provider adapter、實際帳戶價格／token 上界適用性與可信金額結算**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
 2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture proxy；legacy 模式仍保留。Token counters 是上游 fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。

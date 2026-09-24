@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "kith://contracts/v2/ws-server.json",
   "title": "WebSocket server frames v2",
-  "description": "Same as contracts/ws-server-v1.json except type=status may carry error_class (B-11; sent only to the operator's connection with body 'reply failed'). Defined in docs/v2/milestones/W3.md §4.1. Later milestones add draft (W5).",
+  "description": "Same as contracts/ws-server-v1.json except: type=status may carry error_class (B-11; only on the operator's connection with body 'reply failed', W3 §4.1); type=draft (B-10, W5 §4.2) carries a hosted reply's cumulative text while it streams. Drafts are never persisted, never have a seq and never appear in /mcp/events (V2-INV-03).",
   "oneOf": [
     {
       "type": "object",
@@ -141,6 +141,42 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v",
+        "type",
+        "member_id",
+        "generation_id",
+        "text",
+        "done"
+      ],
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "const": "draft"
+        },
+        "member_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "description": "Full text so far (not a delta); at most 8192 UTF-8 bytes. The newest frame for a generation_id wins."
+        },
+        "done": {
+          "const": false,
+          "description": "Always false; the persisted event (same generation_id) replaces the draft."
         }
       }
     }

@@ -101,7 +101,7 @@
   - 選填 `revoke_tokens: bool`（預設 false；前端在 runner／external → hosted 時預設送 true）。
   - 回應含新的 `runtime_epoch`。
   - Phase 2：每次 PUT 都 `runtime_epoch += 1` 並記錄變更（不只改種類時）；`stream: true` 在 W5 前回 400。見 [W4](milestones/W4.md) §4.3.2。
-- `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。
+- `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。Phase 2：`limit` 1–100、預設 50，不含訊息文字；新增索引 `0004_v2_generations_index.sql`，見 [W5](milestones/W5.md) §4.1、§4.3。
 
 ### B-10 WS `draft` 封包（W5）
 
@@ -115,6 +115,7 @@ Server → client：
 - 正式 `event` 到達（同 `generation_id`）或收到 `reply ended`／`reply failed` 時，client 丟棄草稿。
 - 不寫 D1、不佔 seq、不進 `/mcp/events`、不喚醒（V2-INV-03）。
 - 大小：`text` ≤ 8 KiB；超過時停止發草稿，等最終訊息。
+- Phase 2：schema 在 [`contracts/v2/ws-server.json`](../../contracts/v2/ws-server.json)；節流、送達順序（草稿一定早於正式 event）、串流失敗不重試（Q-21）與程式見 [W5](milestones/W5.md) §4.2、§4.5。
 
 ### B-11 WS 失敗狀態（W3）
 

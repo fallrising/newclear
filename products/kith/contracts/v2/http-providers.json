@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "kith://contracts/v2/http-providers.json",
   "title": "Provider connections v2 (B-07)",
-  "description": "Operator-only. /api/providers*. 503 not_ready while ff_providers is off. The secret is write-only: no response ever carries secret, secret_ciphertext or the Worker secret value (RT-09, V2-INV-01). Defined in docs/v2/milestones/W4.md §4.2.",
+  "description": "Operator-only. /api/providers*. 503 not_ready while ff_providers is off. The secret is write-only: no response ever carries secret, secret_ciphertext or the Worker secret value (RT-09, V2-INV-01). Defined in docs/v2/milestones/W4.md §4.2; W5 §4.4 adds openai_responses, gemini and the google preset.",
   "$defs": {
     "provider": {
       "type": "object",
@@ -39,6 +39,7 @@
           "enum": [
             "openai",
             "anthropic",
+            "google",
             "xai",
             "deepseek",
             "openrouter",
@@ -205,6 +206,7 @@
           "enum": [
             "openai",
             "anthropic",
+            "google",
             "xai",
             "deepseek",
             "openrouter",
@@ -216,7 +218,9 @@
         "api_format": {
           "enum": [
             "openai_chat",
-            "anthropic_messages"
+            "anthropic_messages",
+            "openai_responses",
+            "gemini"
           ]
         },
         "base_url": {
@@ -280,6 +284,7 @@
           "enum": [
             "openai",
             "anthropic",
+            "google",
             "xai",
             "deepseek",
             "openrouter",
@@ -291,7 +296,9 @@
         "api_format": {
           "enum": [
             "openai_chat",
-            "anthropic_messages"
+            "anthropic_messages",
+            "openai_responses",
+            "gemini"
           ]
         },
         "base_url": {

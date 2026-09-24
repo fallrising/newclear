@@ -1,0 +1,20 @@
+{
+  "name": "kith-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": { "node": "24.18.0" },
+  "scripts": {
+    "test": "playwright test",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "open": "node scripts/open-report.ts",
+    "validate": "node scripts/validate-run.ts",
+    "seed:print": "node scripts/print-seed.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "26.6.2",
+    "ajv": "8.20.0",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,103 @@
+:root {
+  color-scheme: light;
+  --bg: #FBF8F3;
+  --surface: #FFFFFF;
+  --surface-2: #F4EFE7;
+  --border: #E7DFD3;
+  --border-strong: #8F8478;
+  --ink: #231F1B;
+  --ink-2: #5E554C;
+  --ink-3: #6F655B;
+  --accent: #B4532A;
+  --accent-strong: #9C4522;
+  --accent-tint: #F6E6DC;
+  --on-accent: #FFFFFF;
+  --agent: #2A6E62;
+  --agent-tint: #E3F0EC;
+  --on-agent: #FFFFFF;
+  --mention-tint: #FCEFD9;
+  --danger: #B42318;
+  --warn: #9A5208;
+  --success: #2E7D32;
+  --focus: #B4532A;
+  --avatar-0: #B4532A;
+  --avatar-1: #2F7A6D;
+  --avatar-2: #7A5AA6;
+  --avatar-3: #2F6FA6;
+  --avatar-4: #A6452F;
+  --avatar-5: #5E7A2F;
+  --avatar-6: #A6307A;
+  --avatar-7: #8A6A1F;
+  --on-avatar: #FFFFFF;
+  --shadow-popover: 0 8px 24px rgb(35 31 27 / 0.12);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #171411;
+  --surface: #1F1B17;
+  --surface-2: #29241F;
+  --border: #3A332C;
+  --border-strong: #7A6E62;
+  --ink: #F1EBE3;
+  --ink-2: #BDB3A7;
+  --ink-3: #9A8F83;
+  --accent: #E0835A;
+  --accent-strong: #EE9A74;
+  --accent-tint: #2E211B;
+  --on-accent: #1A0F09;
+  --agent: #6FBFAE;
+  --agent-tint: #1E2B28;
+  --on-agent: #171411;
+  --mention-tint: #30261A;
+  --danger: #F97066;
+  --warn: #F0A94B;
+  --success: #6CC070;
+  --focus: #E0835A;
+  --avatar-0: #B4532A;
+  --avatar-1: #2F7A6D;
+  --avatar-2: #7A5AA6;
+  --avatar-3: #2F6FA6;
+  --avatar-4: #A6452F;
+  --avatar-5: #5E7A2F;
+  --avatar-6: #A6307A;
+  --avatar-7: #8A6A1F;
+  --on-avatar: #FFFFFF;
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #171411;
+    --surface: #1F1B17;
+    --surface-2: #29241F;
+    --border: #3A332C;
+    --border-strong: #7A6E62;
+    --ink: #F1EBE3;
+    --ink-2: #BDB3A7;
+    --ink-3: #9A8F83;
+    --accent: #E0835A;
+    --accent-strong: #EE9A74;
+    --accent-tint: #2E211B;
+    --on-accent: #1A0F09;
+    --agent: #6FBFAE;
+    --agent-tint: #1E2B28;
+    --on-agent: #171411;
+    --mention-tint: #30261A;
+    --danger: #F97066;
+    --warn: #F0A94B;
+    --success: #6CC070;
+    --focus: #E0835A;
+    --avatar-0: #B4532A;
+    --avatar-1: #2F7A6D;
+    --avatar-2: #7A5AA6;
+    --avatar-3: #2F6FA6;
+    --avatar-4: #A6452F;
+    --avatar-5: #5E7A2F;
+    --avatar-6: #A6307A;
+    --avatar-7: #8A6A1F;
+    --on-avatar: #FFFFFF;
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
+  }
+}

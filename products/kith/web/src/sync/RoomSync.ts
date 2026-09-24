@@ -1,6 +1,7 @@
 import { ApiError } from "../api/client";
 import type { fetchAfter, fetchLatest, fetchOlder, postMessage, probeMe } from "../api/messages";
 import type { ServerMessage } from "../api/types";
+import { useStatusStore } from "../store/statuses";
 import { useTimelineStore } from "../store/timeline";
 import { backoffDelay } from "./backoff";
 import { newClientMessageId } from "./clientMessageId";
@@ -81,6 +82,7 @@ export class RoomSync {
   }
 
   stop(): void {
+    useStatusStore.getState().clearRoom(this.roomId);
     this.stopped = true;
     this.abort.abort();
     this.clearTimers();
@@ -191,6 +193,7 @@ export class RoomSync {
   }
 
   private async onClose(): Promise<void> {
+    useStatusStore.getState().clearRoom(this.roomId);
     this.ws = null;
     if (this.ackTimer !== null) {
       this.d.clearTimer(this.ackTimer);
@@ -223,6 +226,7 @@ export class RoomSync {
   }
 
   private readonly onOffline = (): void => {
+    useStatusStore.getState().clearRoom(this.roomId);
     this.phase("offline");
     if (this.reconnectTimer !== null) {
       this.d.clearTimer(this.reconnectTimer);
@@ -318,19 +322,37 @@ export class RoomSync {
       this.S().patch(this.roomId, { badFrames: this.T().badFrames + 1 }); // FM-SYNC-16
       return;
     }
-    const f = frame as { type?: unknown; event?: ServerMessage; code?: unknown };
+    const f = frame as {
+      type?: unknown;
+      event?: ServerMessage;
+      code?: unknown;
+      member_id?: unknown;
+      body?: unknown;
+      error_class?: unknown;
+    };
     if (f.type === "event" && f.event) {
       const row = f.event;
       this.S().mergeRows(this.roomId, [row]);
       this.resolvePendingFrom([row]);
       const high = this.T().contiguousHigh;
-      if (row.seq <= high) return;
-      if (row.seq === high + 1) this.advance(row.seq);
-      else if (!this.catchingUp) this.scheduleGap();
+      if (row.seq > high) {
+        if (row.seq === high + 1) this.advance(row.seq);
+        else if (!this.catchingUp) this.scheduleGap();
+      }
+      if (row.kind === "message") useStatusStore.getState().onMessage(this.roomId, row.sender_id);
     } else if (f.type === "error") {
       this.handleSendError(typeof f.code === "string" ? f.code : "unknown");
+    } else if (f.type === "status" && typeof f.member_id === "string" && typeof f.body === "string") {
+      useStatusStore.getState().apply(
+        this.roomId,
+        {
+          member_id: f.member_id,
+          body: f.body,
+          error_class: typeof f.error_class === "string" ? f.error_class : undefined,
+        },
+        Date.now(),
+      );
     }
-    // status, draft, …: ignored in W1
   }
 
   private scheduleGap(): void {
@@ -368,6 +390,11 @@ export class RoomSync {
   }
 
   // ---- sending ----
+
+  sendTyping(): void {
+    if (this.T().phase !== "live" || !this.ws) return;
+    this.ws.send(JSON.stringify({ v: 1, type: "status", body: "typing" }));
+  }
 
   send(body: string): void {
     const cmid = newClientMessageId(this.d.random);

@@ -196,7 +196,7 @@ v1 `sidecar/` 綁 Codex。v2 把它泛化成 `kith-runner`，Codex 只是其中�
 ### 3.2 Adapter 設定
 
 ```toml
-# runner.toml（示意；Phase 2 鎖定 schema）
+# runner.toml（示意；Phase 2 定案的格式見 W6 §4.5 與 contracts/v2/runner-config.json）
 kith_url   = "https://kith.example.workers.dev"
 bot_token_file = "/var/lib/kith-runner/claude/token"      # 0600；不在 git
 state_dir  = "/var/lib/kith-runner/claude/state"
@@ -219,7 +219,7 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 | `gemini_cli` | 非互動模式，prompt 經 stdin | 同上 |
 | `command` | 固定 argv；stdin 送 JSON `{room_id, trigger, transcript}` | stdout JSON `{reply, traces[]}`，或純文字當 reply |
 
-各 CLI 的旗標與輸出格式在 Phase 2 查官方文件後鎖定（Q-08）。
+各 CLI 的旗標與輸出格式在 Phase 2 查官方文件後鎖定（Q-08）。Phase 2：已以各 CLI 的 `--help` 與型別定義查證，argv、home 變數、輸出解析見 [W6](milestones/W6.md) §4.6；`runner.toml` 另加必填的 `auth`、`operator_member_id`（`operator_personal` 時）與選填的 `rooms`、`mode`。
 
 **RT-06** quota 推廣：任何以**個人帳號登入**的 CLI（Codex device login、Claude 訂閱登入、Gemini 個人帳號）都必須 `quota_class=operator_personal`。runner 啟動時若偵測到 adapter 為訂閱登入卻設定 `api_key`，拒絕啟動（沿用 v1 Codex 規則，推廣到所有 adapter；偵測方法 Phase 2 定義，無法偵測時以設定檔顯式申報為準）。
 
@@ -294,9 +294,9 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 ## 8. Phase 2 待細化
 
 - [x] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）→ [W4](milestones/W4.md) §4.5、[W5](milestones/W5.md) §4.4（官方文件網站被網路政策擋下，改用官方 SDK 原始碼；推論逐條標註）。
-- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。FM-LLM 全部完成 → [W4](milestones/W4.md) §8、[W5](milestones/W5.md) §8；FM-RUN 在 W6。
-- [ ] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息。
-- [ ] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）。
-- [ ] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報。
-- [ ] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明。
+- [x] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出 → [W4](milestones/W4.md) §8、[W5](milestones/W5.md) §8、[W6](milestones/W6.md) §8。
+- [x] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息 → [`contracts/v2/runner-config.json`](../../contracts/v2/runner-config.json)、[W6](milestones/W6.md) §4.5、§4.7 `config.ts`。
+- [x] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）→ [W6](milestones/W6.md) §4.6。
+- [x] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報 → 只靠申報（`auth`），並檢查 API key 環境變數（[W6](milestones/W6.md) Q-27）。
+- [x] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明 → repo 內 `runner/`，`node runner/main.ts`（[W6](milestones/W6.md) Q-25、§4.5）。
 - [x] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）→ [W4](milestones/W4.md) §4.3.2、§4.6.5（epoch 在呼叫上游前後各比對一次）。

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/mcp-events.json",
+  "title": "GET /mcp/events SSE data object v2",
+  "description": "contracts/mcp-events-v1.json plus B-12 (W6): live rows (replay=false, kind=message) carry wake = {mentioned, wake_allowed}, computed like Inbox notify minus cooldown, wake budget, debounce and the ambient heuristic; live rows now also carry thread_id and mentions (already allowed by v1). replay=true rows never carry wake. Defined in docs/v2/milestones/W6.md §4.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "replay",
+    "seq",
+    "kind"
+  ],
+  "properties": {
+    "replay": {
+      "type": "boolean"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "message",
+        "trace"
+      ]
+    },
+    "hint": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "room_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "thread_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reply_to": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sender_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "body": {
+      "type": "string"
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generation_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "client_message_id": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "const": "local"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "wake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mentioned",
+        "wake_allowed"
+      ],
+      "properties": {
+        "mentioned": {
+          "type": "boolean"
+        },
+        "wake_allowed": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "replay": {
+            "const": true
+          }
+        },
+        "required": [
+          "replay"
+        ]
+      },
+      "then": {
+        "properties": {
+          "wake": false
+        }
+      }
+    }
+  ]
+}

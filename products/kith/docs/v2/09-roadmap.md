@@ -114,6 +114,7 @@ P1 大框架（#47）
   - `E2E-W6-03` thread：主時間線只見根訊息＋回覆數；面板內讀寫（UJ-10）。
   - `E2E-W6-04` runner 斷線重連後不重跑已完成 trigger；`replay:true` 不執行（FM-RUN-01、02、05）。
   - `E2E-W6-05` v1 sidecar 既有測試（`npm run test:sidecar`）仍通過。
+- 狀態：`DOC_READY`（施工圖：[milestones/W6.md](milestones/W6.md)）。`kith-runner` 在 repo 內 `runner/`，`sidecar/` 不改；契約 [mcp-events.json](../../contracts/v2/mcp-events.json)、[http-traces.json](../../contracts/v2/http-traces.json)、[runner-config.json](../../contracts/v2/runner-config.json)。
 
 ### W7 — 切換
 

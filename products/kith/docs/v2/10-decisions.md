@@ -67,6 +67,13 @@ v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。
 | Q-21 | 串流中途失敗要不要重試？（W5 細化新增） | **採預設（2026-09-24）**：已送出草稿就不重試；尚未送出時照 03 §2.6 重試一次 | — |
 | Q-22 | `openai_chat` 串流要不要送 `stream_options.include_usage`？（W5 細化新增） | **採預設（2026-09-24）**：不送（相容性）；需要 usage 的 OpenAI 連線改用 `openai_responses` | — |
 | Q-23 | 前端草稿以什麼為鍵？（W5 細化新增） | **採預設（2026-09-24）**：`drafts[roomId][memberId]`＋每房最近完成的 `generation_id` | — |
+| Q-24 | 送出時要不要驗證 `thread_id`？（W6 細化新增） | **採預設（2026-09-24，依 D-18）**：不驗證（V2-INV-04）；孤兒回覆只在 thread 查詢可見 | — |
+| Q-25 | `kith-runner` 怎麼打包？（W6 細化新增） | **採預設（2026-09-24）**：repo 內 `runner/`，Node ≥ 22.18 型別剝除執行 | W7 之後再議發行 |
+| Q-26 | runner 的回覆與 trace 放哪？（W6 細化新增） | **採預設（2026-09-24）**：trace 進觸發訊息的 thread；回覆放在觸發訊息所在位置 | — |
+| Q-27 | RT-06「訂閱登入」怎麼判斷？（W6 細化新增） | **採預設（2026-09-24）**：`runner.toml` 申報 `auth`；`subscription` 須 `operator_personal` 且不得設定 API key 環境變數 | — |
+| Q-28 | 一個 runner 同時跑幾個 CLI？（W6 細化新增） | **採預設（2026-09-24）**：一個，跨房排隊 | — |
+| Q-29 | CLI 權限模式預設？（W6 細化新增） | **採預設（2026-09-24）**：唯讀（Codex `read-only`、Claude Code `plan`、Gemini CLI `plan`） | — |
+| Q-30 | B-13 全文存哪？（W6 細化新增） | **採預設（2026-09-24）**：R2 binding `TRACES`；沒有 binding 時只留摘要 | — |
 
 ## 4. 來源
 
@@ -81,7 +88,7 @@ v1 來源見 [v1 08](../sdd/08-decisions-sources.md)。v2 新增的外部來源�
 | S2-03 | Google Gemini API：generateContent、streamGenerateContent、OpenAI 相容端點 | base URL、認證 header、串流格式 | 部分查證 2026-09-24：`@google/genai` npm 2.24.0 原始碼（`v1beta`、`x-goog-api-key`、`:generateContent`、`:streamGenerateContent?alt=sse`、`FinishReason`），見 [W5](milestones/W5.md) §4.4.3；無效 key 的錯誤形狀與 OpenAI 相容端點未查證（前者標為推論，後者不提供 preset） |
 | S2-04 | xAI API docs | 仍為 OpenAI 相容；模型列表端點 | 次級來源 2026-09-24：`@ai-sdk/xai` 5.0.6 預設 `https://api.x.ai/v1`（`docs.x.ai` 被網路政策擋下），見 [W4](milestones/W4.md) §4.5.3 |
 | S2-05 | DeepSeek、OpenRouter、Mistral、Groq API docs | base URL、相容程度、特殊 header | 部分查證 2026-09-24：OpenRouter 以官方 `@openrouter/sdk` 1.3.21（`https://openrouter.ai/api/v1`、`HTTP-Referer`、`X-OpenRouter-Title`）；DeepSeek、Mistral、Groq 為次級來源（`@ai-sdk/*`），見 [W4](milestones/W4.md) §4.5.3 |
-| S2-06 | Claude Code、Gemini CLI、Codex CLI 文件 | 非互動模式、結構化輸出、登入方式 | 待查證 |
+| S2-06 | Claude Code、Gemini CLI、Codex CLI 文件 | 非互動模式、結構化輸出、登入方式 | 已查證 2026-09-24（以發行版為準）：`@anthropic-ai/claude-code` 2.1.281、`@google/gemini-cli` 0.61.0、`@openai/codex` 0.156.1 的 `--help`；Claude Code 的 JSON 結果型別取自 `@anthropic-ai/claude-agent-sdk` 0.3.281 `sdk.d.ts`，Gemini CLI 的 JSON 取自其 bundle 的 `JsonFormatter`。見 [W6](milestones/W6.md) §4.6（`CLAUDE_CONFIG_DIR` 的現行語意為推論） |
 | S2-07 | Cloudflare Workers：outbound fetch 限制、SSE 讀取、Durable Object alarm | 串流在 DO 內的可行性與 CPU 計費 | 部分查證 2026-09-24：`cloudflare/cloudflare-docs` 的 [workers limits](https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/workers/platform/limits.mdx)（DO alarm 牆鐘 15 分鐘、等待 fetch 不計 CPU、子請求上限）與 [DO limits](https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/durable-objects/platform/limits.mdx)，見 [W4](milestones/W4.md) §4.5.4。SSE 在 DO 內的讀取以 wrangler dev 實測（[W5](milestones/W5.md) §10） |
 | S2-08 | WCAG 2.2 對比與目標尺寸 | 07 的對比表 | 已查證 2026-09-23：W3C `w3c/wcag` 倉庫 commit `71c891a`：[relative-luminance](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/guidelines/relative-luminance.html)（係數 0.2126／0.7152／0.0722，sRGB 門檻 0.04045）、[contrast-minimum](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/20/contrast-minimum.html)（4.5:1、大字 3:1、門檻不四捨五入）、[non-text-contrast](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/21/non-text-contrast.html)（3:1）、[target-size-minimum](https://raw.githubusercontent.com/w3c/wcag/71c891a49f50f58766597a8980f6b2d2eedd5679/understanding/22/target-size-minimum.html)（24×24 CSS px）。結論寫入 [07](07-visual-design.md) §2.5 |
 | S2-09 | Playwright：clock、trace、`toHaveScreenshot` | 08 的決定性作法 | 已查證 2026-09-23：`microsoft/playwright` tag `v1.56.1` 的文件原始檔 [clock.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/clock.md)（建議 `setFixedTime`；`install` 讓時間繼續走）、[class-websocketroute.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/api/class-websocketroute.md)（`connectToServer` 轉送）、[class-reporter.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-reporter-api/class-reporter.md)（`onEnd` 可覆寫狀態與 exit code）、[test-global-setup-teardown-js.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-global-setup-teardown-js.md)（setup 設的環境變數只在 `test()` 內可見）、[test-snapshots-js.md](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/docs/src/test-snapshots-js.md)（基準圖依瀏覽器與平台區分）。另以 1.56.1 實測，見 [W0](milestones/W0.md) §10。結論寫入 [08](08-testing-e2e.md) §2.2、§5.2 |
@@ -91,4 +98,4 @@ v1 來源見 [v1 08](../sdd/08-decisions-sources.md)。v2 新增的外部來源�
 ## 5. Phase 2 待細化
 
 - [ ] 每個 Q 取得使用者答案或採用預設，寫回 D 表。
-- [ ] S2 各來源查證，附 URL 與查閱日期，並把結論寫回 03、04、07、08。S2-08、S2-09 已完成（W0）；新增 S2-10、S2-11（W0）；S2-01、S2-02、S2-04、S2-05、S2-07 的 W4 部分完成（W4 §4.5）；S2-03 與串流的 W5 部分完成（W5 §4.4）；S2-06 在 W6。
+- [ ] S2 各來源查證，附 URL 與查閱日期，並把結論寫回 03、04、07、08。S2-08、S2-09 已完成（W0）；新增 S2-10、S2-11（W0）；S2-01、S2-02、S2-04、S2-05、S2-07 的 W4 部分完成（W4 §4.5）；S2-03 與串流的 W5 部分完成（W5 §4.4）；S2-06 完成（W6 §4.6）。

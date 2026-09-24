@@ -251,6 +251,11 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W5-03 | FM-LLM-08、Q-21 | w5-stream-cut.spec.ts |
 | E2E-W5-04 | BR-45、B-09（generations） | w5-generations.spec.ts |
 | E2E-W5-05 | 03 §2.1 P1 格式 | w5-formats.spec.ts |
+| E2E-W6-01 | UJ-08、B-13、FM-RUN-03、04、07 | w6-runner.spec.ts |
+| E2E-W6-02 | UJ-06、BR-43、B-12、FM-RUN-08 | w6-runner-personal.spec.ts |
+| E2E-W6-03 | UJ-10、BR-36、B-05、FE-12 | w6-thread.spec.ts |
+| E2E-W6-04 | FM-RUN-01、02、05、06、INV-19 | w6-runner-restart.spec.ts |
+| E2E-W6-05 | v1 sidecar 回歸 | w6-sidecar.spec.ts |
 | … | … | … |
 
 ## 7. CI

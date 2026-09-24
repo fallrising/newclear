@@ -70,6 +70,7 @@
 - `GET /api/rooms/:id/messages?thread_id=X`：只回該 thread 的列（含根訊息）。
 - 主時間線查詢加 `top_level=1`：只回 `thread_id IS NULL` 的列，並為每則根訊息附 `thread_reply_count`、`thread_last_seq`。
 - **seq 補洞規則不變**：前端補洞仍以全房 seq 為準（含 thread 內的列），只是顯示時分流。詳見 [05](05-frontend-architecture.md) FE-12。
+- Phase 2：`thread_id` 與 `top_level` 互斥；送出時不驗證 `thread_id`（Q-24，保住 V2-INV-04）；索引 `0005_v2_threads.sql`；契約與程式見 [W6](milestones/W6.md) §4.1。
 
 ### B-06 使用者事件流（W5，選做）
 
@@ -127,10 +128,12 @@ Server → client：
 
 - live 事件（`replay:false`）加選填 `wake: {mentioned, wake_allowed}`；`replay:true` 不帶。
 - `wake_allowed` 以與 Inbox 相同的純函式計算（attention＋quota＋self／agent 規則），但**不**計入 cooldown 與 wake budget（那是 hosted／runner 的 dispatch 狀態）。
+- Phase 2：live 列另帶 `thread_id`、`mentions`；runner 的事件流同時寫 `runner_last_seen_at`（每 60 秒）；契約 [`contracts/v2/mcp-events.json`](../../contracts/v2/mcp-events.json)，程式見 [W6](milestones/W6.md) §4.2。
 
 ### B-13 trace 全文（W6）
 
 - `GET /api/rooms/:id/traces/:message_id`：從 R2 取完整 payload（≤ 1 MiB），只有房內成員可讀。前端 trace 卡片展開時才抓。
+- Phase 2：寫入端 `POST /api/rooms/:id/traces`（agent；摘要走一般 trace 送出、全文進 R2 binding `TRACES`）；契約 [`contracts/v2/http-traces.json`](../../contracts/v2/http-traces.json)，見 [W6](milestones/W6.md) §4.3。
 
 ### B-14 房間管理（W2）
 
@@ -234,4 +237,4 @@ v1 的 INV-01–INV-19 全部保留。INV-15（LLM fetch 只在 HostedGeneration
 - [ ] `migrations/0002_v2.sql` 完整 DDL、正反例、遷移腳本步驟（[03](03-agent-runtime.md) §7）。
 - [ ] B-02 的 SQL 與效能估算（64 房）。
 - [ ] B-06 的實作選擇（per-member DO vs 其他）與成本。
-- [ ] 每個 B-xx 在 Worker 中的檔案位置（例如 `worker/routes/providers.ts`）。
+- [x] 每個 B-xx 在 Worker 中的檔案位置（例如 `worker/routes/providers.ts`）→ 各里程碑 `Wn.md` §3 的檔案清單（W1–W6）。

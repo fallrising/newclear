@@ -5,6 +5,7 @@ import { ErrorState } from '../../components/shared/states'
 import { Button } from '../../components/ui/button'
 import type { CommandReceipt, SessionView } from '../../domain/schemas'
 import type { AlertEvaluation, AlertRule, MonitorPolicy, MonitoringTarget, NotificationDelivery, Silence, SLOPolicy } from '../../domain/monitoring-models'
+import { sessionFeatureAvailable } from '../../domain/feature-policy'
 import { ServiceConfirmation, ServiceNotice, ServiceTable, useServiceCommand } from '../service-delivery'
 
 export type Policy = MonitorPolicy | AlertRule | SLOPolicy
@@ -18,7 +19,7 @@ export function MissingAlerting({ back = '/rd/apps' }: { back?: string }) { retu
 
 export function canWrite(session: SessionView, target: MonitoringTarget, projectId?: string, stage?: string, poolId?: string) {
   const featureKey = target.kind === 'service' ? 'rd.monitoring' : 'ops.alerting'
-  if (session.featureKeys && !session.featureKeys.includes(featureKey)) return false
+  if (!sessionFeatureAvailable(session, featureKey, target.kind === 'service' ? projectId : undefined)) return false
   if (target.kind === 'service') return session.assignments.some(grant => grant.role === 'rd' && grant.scopeType === 'project' && grant.scopeId === projectId && (!grant.stages || Boolean(stage && grant.stages.includes(stage as 'dev' | 'staging' | 'prod'))))
   return session.assignments.some(grant => grant.role === 'ops' && grant.scopeType === 'pool' && grant.scopeId === poolId)
 }

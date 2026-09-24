@@ -238,6 +238,8 @@ export function createEngine(initial: Snapshot, persist: (next: Snapshot) => voi
       return clone({ user: { id: policy.user!.id, displayName: policy.user!.displayName }, assignments: policy.assignments,
         effectiveActions: policy.effectiveActions, centers: policy.centers, demo: true, sessionId: state.sessionId,
         featureKeys: Object.keys(featureRegistry).filter(key => featureEligibility(state, policy, key as keyof typeof featureRegistry).eligible),
+        featureKeysByProject: Object.fromEntries(policy.projectIds.map(projectId => [projectId,
+          Object.keys(featureRegistry).filter(key => featureEligibility(state, policy, key as keyof typeof featureRegistry, projectId).eligible)])),
         policyVersion: state.policyVersion, storeRevision: state.storeRevision, logicalClock: state.logicalClock })
     }
     if (path === '/guide') {

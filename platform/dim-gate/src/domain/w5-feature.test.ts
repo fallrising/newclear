@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createSeed } from '../demo/seed'
 import { createEngine } from './engine'
-import { cohortBucket, featureEligibility } from './feature-policy'
+import { cohortBucket, featureEligibility, sessionFeatureAvailable } from './feature-policy'
 import { policyFor } from './policy'
 
 function harness() {
@@ -15,6 +15,22 @@ const spec = (rolloutPercent = 100) => ({ featureKey: 'rd.monitoring', targetCen
   eligibleProjectIds: ['project-store'], eligibleTeamIds: ['team-commerce'], rolloutPercent, saltVersion: 1 })
 
 describe('W5 registered feature cohort', () => {
+  it('projects each readable project cohort separately from global navigation availability', async () => {
+    const { engine, command } = harness()
+    const created = await command('user-admin', '/admin/platform-features', { spec: spec(), reason: 'Store-only service cohort' })
+    const current = () => engine.getSnapshot().entities.platformFeatures.find(row => row.id === created.entityId)!
+    await command('user-admin', `/admin/platform-features/${created.entityId}/validate`, { expectedVersion: current().version, reason: 'Validate Store cohort' })
+    await command('user-admin', `/admin/platform-features/${created.entityId}/activate`, { expectedVersion: current().version, reason: 'Activate Store cohort' })
+    const session = engine.read('/session', new URLSearchParams(), 'user-rd-commerce') as {
+      featureKeys: Array<'rd.monitoring'>; featureKeysByProject: Record<string, Array<'rd.monitoring'>>
+    }
+    expect(session.featureKeys).toContain('rd.monitoring')
+    expect(session.featureKeysByProject['project-store']).toContain('rd.monitoring')
+    expect(session.featureKeysByProject['project-payments']).not.toContain('rd.monitoring')
+    expect(sessionFeatureAvailable(session, 'rd.monitoring', 'project-store')).toBe(true)
+    expect(sessionFeatureAvailable(session, 'rd.monitoring', 'project-payments')).toBe(false)
+  })
+
   it('intersects current grant, team and deterministic cohort on domain commands', async () => {
     const { engine, command } = harness()
     expect(engine.read('/session', new URLSearchParams(), 'user-ops')).toMatchObject({ featureKeys: expect.arrayContaining(['rd.delivery']) })

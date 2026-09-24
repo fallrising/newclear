@@ -1,4 +1,4 @@
-import type { Snapshot } from './schema-models'
+import type { SessionView, Snapshot } from './schema-models'
 import type { Policy } from './policy'
 import type { FeatureSpec } from './feature-models'
 import type { CommandInput } from './command-input-schemas'
@@ -47,6 +47,12 @@ export function featureEligibility(snapshot: Snapshot, policy: Policy, key: Feat
   if (cohortBucket(policy.user.id, key, active.saltVersion) >= active.rolloutPercent)
     return { eligible: false, reason: 'percentage-cohort' as const }
   return { eligible: true, reason: 'active-cohort' as const }
+}
+
+/** UI preview of the same current project cohort used by domain commands. */
+export function sessionFeatureAvailable(session: Pick<SessionView, 'featureKeys' | 'featureKeysByProject'>, key: FeatureKey, projectId?: string): boolean {
+  if (projectId && session.featureKeysByProject) return session.featureKeysByProject[projectId]?.includes(key) ?? false
+  return !session.featureKeys || session.featureKeys.includes(key)
 }
 
 export function featureSpecSupported(spec: FeatureSpec): boolean {

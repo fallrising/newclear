@@ -13,12 +13,13 @@ import { ConfigurationEditor, DefinitionEditor, TrafficEditor } from './editors'
 import { ServiceActions } from './ServiceActions'
 import { ServiceDemoControls } from './ServiceDemoControls'
 import { ServiceNotice } from './ui'
+import { sessionFeatureAvailable } from '../../domain/feature-policy'
 
 export function ServiceDetailView({ detail, options, session, center }: { detail: ServiceDetail; options: DeliveryOptions; session: SessionView; center: 'rd' | 'ops' }) {
   const [editing, setEditing] = useState(false)
   const source = detail.source
   const featureKey = source.sourceType === 'pipelineDefinition' ? 'rd.delivery' : source.sourceType === 'trafficPolicy' ? 'rd.traffic' : undefined
-  const readOnly = center === 'rd' && !!featureKey && !!session.featureKeys && !session.featureKeys.includes(featureKey)
+  const readOnly = center === 'rd' && !!featureKey && !sessionFeatureAvailable(session, featureKey, options.application.projectId)
   const clockPending = useIsMutating({ mutationKey: demoClockMutationKey }) > 0
   const command = useServiceCommand(async receipt => {
     await getServiceDetail(source.sourceType, receipt.entityId)

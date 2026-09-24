@@ -49374,6 +49374,26 @@
               ]
             }
           },
+          "featureKeysByProject": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "rd.monitoring",
+                  "ops.alerting",
+                  "rd.delivery",
+                  "rd.traffic"
+                ]
+              }
+            }
+          },
           "storeRevision": {
             "type": "integer",
             "minimum": 0,

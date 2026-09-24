@@ -437,6 +437,7 @@ export const sessionDomainSchema = z.strictObject({
   user: z.strictObject({ id: idSchema, displayName: nameSchema }), assignments: z.array(roleAssignmentSchema), effectiveActions: z.array(z.string()),
   centers: z.array(centerSchema), demo: z.literal(true), sessionId: idSchema, policyVersion: versionSchema,
   featureKeys: z.array(featureKeySchema).optional(),
+  featureKeysByProject: z.record(idSchema, z.array(featureKeySchema)).optional(),
   storeRevision: z.number().int().nonnegative(), logicalClock: z.number().int().nonnegative(),
 })
 export const sessionViewSchema = sessionDomainSchema.extend({

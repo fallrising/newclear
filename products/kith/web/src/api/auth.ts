@@ -6,6 +6,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { clearAllDrafts } from "../features/composer";
 import { apiFetch } from "./client";
 import type { LoginRequest, LoginResponse, LogoutResponse, Me } from "./types";
 
@@ -36,6 +37,7 @@ export function useLogout(): UseMutationResult<LogoutResponse, Error, void> {
     meta: { authFlow: true },
     onSettled: () => {
       queryClient.clear();
+      clearAllDrafts();
       void navigate("/login", { replace: true });
     },
   });

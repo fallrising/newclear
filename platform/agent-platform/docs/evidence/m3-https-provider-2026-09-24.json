@@ -2,7 +2,13 @@
   "milestone": "AT-11-C2b2",
   "date": "2026-09-24",
   "base_main": "dba9ee94a49bcfe2efb298caa1d5324cfde03988",
-  "status": "implementation-and-python-database-tests-passed; real-kvm-gate-incomplete",
+  "status": "implementation-and-python-database-tests-passed; draft-pr-open; real-kvm-gate-incomplete",
+  "pull_request": {
+    "number": 82,
+    "url": "https://github.com/fallrising/newclear/pull/82",
+    "draft": true,
+    "merged": false
+  },
   "scope": "fixed OpenAI-compatible HTTPS transport and profile-pinned task verification; no external provider",
   "accounting": {
     "external_provider_calls": 0,
@@ -61,7 +67,9 @@
   ],
   "source_sha256": {
     "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
+    "docs/HANDOFF.md": "633d23c52a1be7baa283b181d48507edc098244e9cc0553ddad009a4026a3b49",
     "docs/M3-HTTPS-PROVIDER.md": "b14cac95e99dea8725e20ee101e2110786784bc3b434f48a80b26cbfaff96025",
+    "docs/NEXT-PROMPT.md": "de630dfa820e744316cfc629bc709fc9fe62a3238c0e460a3f4b02511a56574a",
     "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
     "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
     "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",

@@ -44,6 +44,8 @@ import { handleMcpPost } from "./mcp.ts";
 import { snapshot } from "./metrics.ts";
 import { replyLimit } from "./reply-limit.ts";
 import { Room } from "./room.ts";
+import { loadAllAgentRuntimes } from "./providers/runtime.ts";
+import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
 import { mountProviderRoutes } from "./routes/providers.ts";
 
 export { HostedGeneration, Inbox, Room };
@@ -285,10 +287,15 @@ app.get("/api/rooms/:id/members", async (c) => {
   )
     .bind(roomId)
     .all();
+  const views = flagOn(c.env.ff_providers)
+    ? new Map((await loadAllAgentRuntimes(c.env)).map((v) => [v.agent_id, v]))
+    : null;
   const members = (result.results ?? []).map((row) => {
     const r = row as Record<string, unknown>;
+    const view = views?.get(String(r.id));
     return {
       ...r,
+      agent_runtime: view ? runtimeSummary(c.env, view) : null,
       operator_only: r.quota_class === "operator_personal",
       reply_limit: replyLimit({
         kind: typeof r.kind === "string" ? r.kind : "",
@@ -720,6 +727,7 @@ app.post("/api/members/:id/password", async (c) => {
 });
 
 mountProviderRoutes(app);
+mountAgentRoutes(app);
 
 app.get("/api/metrics", async (c) => {
   const auth = await requireOperator(c);

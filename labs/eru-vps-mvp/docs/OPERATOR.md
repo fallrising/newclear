@@ -119,3 +119,31 @@ python3 scripts/labctl.py execute --plan CLEANUP_PLAN --sha256 CLEANUP_HASH
 ## 不依賴 B 連線的長時觀測
 
 使用 [VPS 背景觀測](SOAK.md) 的 `soak.py start/status/stop`。觀測交给 01–03 的有限時長 systemd service，B／Codex 可離線；程序、樣本和退出結果留在各 VPS，回來後再收集與驗收。觀測期間可繼續本機開發與唯讀排查；改動 VPS 前應先明確中止此次觀測。
+
+## ERU-006 host network 與管理埠驗收
+
+入口：[scripts/network_acceptance.py](../scripts/network_acceptance.py)。這是一次性的 worker-4 acceptance run，與 worker 元件重裝及 provider OS 重灌分開。plan 只讀取叢集與 worker-4 狀態，驗證 B 的 Tailscale source、worker 公網 v4/v6 路徑及 TCP/22 control、core 公網路徑、runtime 空狀態、UFW routed policy、Fail2ban、forward chain、worker DNS resolver／鎖定 HTTPS endpoint、nftables hook 順序與鎖定 nginx image；private addresses、完整觀測與命令輸出只寫在 `private/operations/network/`。
+
+```bash
+cd /home/ckc/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
+python3 scripts/network_acceptance.py plan
+python3 scripts/network_acceptance.py status
+```
+
+只有 `executable: true` 且 blockers 為空的 plan 才能執行。人工檢查 plan ID、SHA256、目標與步驟後，執行一次：
+
+```bash
+python3 scripts/network_acceptance.py execute --plan PLAN_ID --sha256 PLAN_SHA256
+```
+
+計畫固定 inventory、專案輸入 hash、cluster generation、workload/runtime snapshot、服務與防火牆 baseline、管理來源及 public route controls。execute 會再次核對健康和計畫；漂移時停止並要求新 plan。它在 worker-4 暫加唯一 `inet` nftables table：priority `-10` 先允許精確的 Tailscale source 到 TCP/80，再 drop 其他 TCP/80；不改 UFW default policy、`/etc/ufw` 設定檔、TCP/22、Tailscale、Docker/containerd 或控制面服務。之後部署鎖定 nginx host-network workload、檢查 containerd image/labels、task PID ancestry 和 v4/v6 listener，依序測管理私網 HTTP 200、worker 公網 v4/v6 TCP/80 阻擋、core 可用公網地址上的 2379／2380／5001 阻擋。為測 bridge egress，執行時讀取容器 resolver 並確認鎖定 image 內的 BusyBox `wget` 支援所需 flags；探測命令用 `-Y off` 明確停用環境 proxy，只有 IPv4 resolver 符合 worker 計畫才繼續；插入臨時規則前也會確認 BusyBox `nslookup` 支援 `-type=QUERY_TYPE`，並核對 worker 的 DOCKER-USER／ONEVPS-INGRESS 先於 UFW 的實際 forward path。plan 也會確認 ONEVPS-INGRESS 對既有 TCP/443 egress 的規則；execute 僅在 DOCKER-USER 頭部暫插 CNI `/32` 到 resolver `/32` 的 UDP/53 `ACCEPT`，HTTPS 沿用已核實的 TCP 路徑。因 BusyBox wget 沒有 GNU wget 的 `-4` 選項，固定使用 IPv4-only hostname `ipv4.icanhazip.com`；plan 同時查詢 A／AAAA，只有至少一個 global IPv4 且沒有 IPv6 DNS answer 才允許執行。先以容器 resolver 明確查詢 A record，要求結果非空且全屬於 plan，再發送 HTTPS request；探測不修改容器 `/etc/hosts` 或 host resolver，response body 導向 `/dev/null`。HTTPS 使用 plan 核實的既有 TCP egress 路徑，不增添 TCP/443 規則。唯一臨時規則不寫入 UFW 設定檔、不放寬 routed default policy；測後依 run comment、完整 tuple 與 `ACCEPT` target 精確刪除。規劃階段用 TEST-NET 位址執行只讀 `iptables -C` 語法檢查，不插入規則。nft policy hash 忽略的只有 `inet f2b-table/addr-set-sshd` 動態成員；該 set 定義、chains、rules 和其餘 ruleset 仍完整比對，Fail2ban service 狀態另外核對。core 沒有公網 IPv6 時只對其實際存在的公網地址驗證；worker 公網 v4 與 v6 都是必要條件。
+
+execute 最後先依 comment 和完整規則欄位移除 run-owned bridge egress 例外，再移除 run-owned workload 與其 CNI NAT rule，最後移除精確的臨時 nft table，然後比對 host/runtime、service、listener 與 nft/UFW policy baseline。若移除 host-network workload 不成功，會保留 TCP/80 guard。發生失敗或程序中斷時先執行唯讀 reconcile，再依當前狀態建立新的清理 plan；禁止重播舊 plan：
+
+```bash
+python3 scripts/network_acceptance.py reconcile --run RUN_ID
+python3 scripts/network_acceptance.py cleanup-plan --run RUN_ID
+python3 scripts/network_acceptance.py cleanup-execute --plan CLEANUP_PLAN_ID --sha256 CLEANUP_PLAN_SHA256
+```
+
+reconcile 不重播遠端命令，也不自動清理；只有實際 workload、CNI NAT rule、tagged forward exception 與 guard 都已消失，且原 cluster、host、service、防火牆 policy 回到 baseline 時，才會依讀回狀態補記本機清理 journal。`status` 只讀本機私有摘要。所有遠端連線固定經 `ckc-disposable-01`（core）及 `ckc-disposable-04`（worker-4）；不得改用裸 IP、其他 worker、provider API 或全域 reset。

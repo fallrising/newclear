@@ -1,6 +1,6 @@
 # Phase 2 細化 prompt
 
-> 用法：把本檔從「---」以下的全文當成 prompt 交給執行 Phase 2 的 LLM agent。可在最後一行指定要細化的里程碑（例如「本次細化：W0」）；沒指定時從第一個狀態不是 `DOC_READY` 的里程碑開始。
+> 用法：把本檔從「---」以下的全文當成 prompt 交給執行 Phase 2 的 LLM agent，或直接給它網址 <https://github.com/fallrising/newclear/blob/main/products/kith/docs/v2/PHASE2-PROMPT.md>。施工（寫程式）用的是 [IMPLEMENT-PROMPT.md](IMPLEMENT-PROMPT.md)。可在最後一行指定要細化的里程碑（例如「本次細化：W0」）；沒指定時從第一個狀態不是 `DOC_READY` 的里程碑開始。
 
 ---
 

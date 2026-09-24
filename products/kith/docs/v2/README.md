@@ -43,6 +43,8 @@ v2 要做三件事：
 
 Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給另一個 LLM agent 的細化指令；產出放在 `milestones/Wn.md`。
 
+實作者請用 [IMPLEMENT-PROMPT.md](IMPLEMENT-PROMPT.md)：把 <https://github.com/fallrising/newclear/blob/main/products/kith/docs/v2/IMPLEMENT-PROMPT.md> 交給 LLM agent，它會從第一個 `DOC_READY` 的里程碑開始，逐個施工、開 PR、合併。
+
 ### Phase 2 施工圖（`milestones/`）
 
 | 里程碑 | 檔案 | 狀態 |

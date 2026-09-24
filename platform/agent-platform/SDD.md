@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-11-A 控制端 model proxy、AT-11-B opt-in guest transport／SDK tool-call／短效 token 更新、AT-11-C1 固定 fixture credits 及 AT-11-C2a 公開費率金額演練已驗收，AT-07／11 仍開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-11-A 控制端 model proxy、AT-11-B opt-in guest transport／SDK tool-call／短效 token 更新、AT-11-C1 固定 fixture credits、AT-11-C2a 公開費率金額演練及 AT-11-C2b1 本機 OpenAI 相容 mock 已驗收，AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
@@ -338,6 +338,8 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md)、[AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 與 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新、合成 fixture credits 的保守預留／結算及 cutoff 工具／VM 收尾。Guest 通道與 fixture credits 均需明確啟用；後者只驗證固定本機 fixture 的合成計量，不是真實 provider tokenizer 或帳單。`amount_decimal` 保持 null，沒有可信真實金額硬上限、付費 provider 或 usage UI。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
 
 [AT-11-C2a 公開費率演練](docs/M3-PUBLISHED-PRICE-PREVIEW.md)另以固定官方模型規格／公開價目在同一 fixture 通道驗收美元上界預留與估算結算。它仍不呼叫 provider，不聲稱 fixture counters 是 provider 帳單；真實 `amount_decimal` 及硬金額上限保持關閉。
+
+[AT-11-C2b1 OpenAI 相容 mock](docs/M3-OPENAI-MOCK.md)在原 guest／控制端安全邊界中驗收可設定模型 ID 的 Chat Completions 文字與工具格式。目的地仍限主機 loopback 腳本 mock；真實外部 HTTPS transport、Claude／Gemini 原生 adapter、任意自然語言 coding 與付費帳單均未驗收。
 
 ### 11.3 工具與網路
 

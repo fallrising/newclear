@@ -23,7 +23,7 @@ class FixtureUpstream:
     def __init__(self, policy):
         self.policy = policy
 
-    def complete(self, payload):
+    def complete(self, payload, *, mock_run_id=None):
         url = urlsplit(self.policy.origin)
         connection = http.client.HTTPConnection("127.0.0.1", url.port, timeout=5)
         result, watchdog = None, None
@@ -37,14 +37,18 @@ class FixtureUpstream:
             )
             watchdog.daemon = True
             watchdog.start()
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.policy.credential,
+            }
+            if mock_run_id is not None:
+                # Local test contract only; never included in provider JSON or guest data.
+                headers["X-Local-Mock-Run-Id"] = str(mock_run_id)
             connection.request(
                 "POST",
                 "/v1/chat/completions",
                 body=canonical(payload),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.policy.credential,
-                },
+                headers=headers,
             )
             result = connection.getresponse()
             if result.status != 200:

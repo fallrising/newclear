@@ -1,4 +1,4 @@
-"""The proxy supports one explicitly configured, locally metered fixture only.
+"""Pinned control-side model policies for local fixture and compatible mock.
 
 No paid endpoint, ambient provider credential, redirect, or guest network exception.
 The request/response dialect is intentionally smaller than a general provider API.
@@ -32,6 +32,7 @@ MAX_REQUEST = 128 * 1024
 MAX_RESPONSE = 256 * 1024
 MODEL = "fixture:m2"
 REVISION = "control-model-proxy-v1"
+MOCK_MODE = "openai-compatible-mock-v1"
 
 
 def canonical(value):
@@ -85,12 +86,13 @@ class Policy:
     mode: str = "fixture-http-v1"
     budget: FixtureBudget | None = None
     price_quote: PublishedPriceQuote | None = None
+    model: str = MODEL
 
     def __post_init__(self):
         # Deliberately no public/provider mode until guest transport and pricing gates.
         url = urlsplit(self.origin)
         if (
-            self.mode != "fixture-http-v1"
+            self.mode not in {"fixture-http-v1", MOCK_MODE}
             or not re.fullmatch(r"http://127\.0\.0\.1:[0-9]{4,5}", self.origin)
             or not 1024 <= (url.port or 0) <= 65535
             or type(self.request_limit) is not int
@@ -102,16 +104,27 @@ class Policy:
                 and not isinstance(self.price_quote, PublishedPriceQuote)
             )
             or (self.budget is not None and self.price_quote is not None)
+            or (self.mode == "fixture-http-v1" and self.model != MODEL)
+            or (
+                self.mode == MOCK_MODE
+                and (
+                    not isinstance(self.model, str)
+                    or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,99}", self.model)
+                    or self.model == MODEL
+                    or self.budget is not None
+                    or self.price_quote is not None
+                )
+            )
         ):
             raise ValueError("invalid_model_fixture_policy")
 
     @property
     def digest(self):
         fields = {
-            "revision": REVISION,
+            "revision": REVISION if self.mode == "fixture-http-v1" else MOCK_MODE,
             "mode": self.mode,
             "origin": self.origin,
-            "model": MODEL,
+            "model": self.model,
             "request_limit": self.request_limit,
             "credential_sha256": sha(self.credential.encode()),
         }
@@ -166,6 +179,13 @@ class Policy:
                 "request_limit",
                 "mode",
                 "published_price_preview",
+            },
+            {
+                "origin",
+                "credential_file",
+                "request_limit",
+                "mode",
+                "model",
             },
         ):
             raise ValueError("invalid_model_fixture_config")

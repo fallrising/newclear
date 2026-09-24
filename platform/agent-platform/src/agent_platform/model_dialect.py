@@ -53,13 +53,13 @@ class SDKCompletion:
     def __init__(self, data):
         self.data = data
 
-    def payload(self):
+    def payload(self, model=MODEL):
         try:
-            return self._payload()
+            return self._payload(model)
         except (ValueError, TypeError, KeyError, RecursionError):
             raise Problem(422, "model_sdk_dialect_invalid") from None
 
-    def _payload(self):
+    def _payload(self, model):
         d = self.data
         require(isinstance(d, dict))
         require(
@@ -126,7 +126,7 @@ class SDKCompletion:
             names.add(fn["name"])
         require("terminal" in names and "finish" in names)
         value = {
-            "model": MODEL,
+            "model": model,
             "messages": messages,
             "tools": tools,
             "max_tokens": maximum,
@@ -136,24 +136,49 @@ class SDKCompletion:
         return value
 
 
-def sdk_response(raw, payload, secrets):
+def sdk_response(raw, payload, secrets, *, compatible=False):
     try:
         value = json.loads(raw)
         if sensitive(value, secrets):
             raise Problem(502, "model_sensitive_response")
-        require(isinstance(value, dict) and set(value) == {"model", "choices", "usage"})
-        require(value["model"] == MODEL and len(value["choices"]) == 1)
+        require(isinstance(value, dict))
+        if compatible:
+            require(
+                {"model", "choices", "usage"} <= set(value)
+                and isinstance(value.get("id"), str)
+                and value.get("object") == "chat.completion"
+                and type(value.get("created")) is int
+            )
+        else:
+            require(set(value) == {"model", "choices", "usage"})
+        require(value["model"] == payload["model"] and len(value["choices"]) == 1)
         choice = value["choices"][0]
-        require(set(choice) == {"index", "message", "finish_reason"})
+        require(
+            {"index", "message", "finish_reason"} <= set(choice)
+            if compatible
+            else set(choice) == {"index", "message", "finish_reason"}
+        )
         require(type(choice["index"]) is int and choice["index"] == 0)
-        require(choice["finish_reason"] == "tool_calls")
+        require(
+            choice["finish_reason"] in ({"tool_calls", "stop"} if compatible else {"tool_calls"})
+        )
         message = choice["message"]
-        require(set(message) == {"role", "content", "tool_calls"})
+        require(isinstance(message, dict))
+        if compatible:
+            require(set(message) <= {"role", "content", "tool_calls", "refusal", "annotations"})
+            require(message.get("refusal") is None and not message.get("annotations"))
+        else:
+            require(set(message) == {"role", "content", "tool_calls"})
         require(message["role"] == "assistant")
-        content(message["content"], nullable=True)
-        calls(message["tool_calls"])
-        available = {t["function"]["name"] for t in payload["tools"]}
-        require(all(c["function"]["name"] in available for c in message["tool_calls"]))
+        content(message.get("content"), nullable=choice["finish_reason"] == "tool_calls")
+        normalized = {"role": "assistant", "content": message.get("content")}
+        if choice["finish_reason"] == "tool_calls":
+            calls(message["tool_calls"])
+            available = {t["function"]["name"] for t in payload["tools"]}
+            require(all(c["function"]["name"] in available for c in message["tool_calls"]))
+            normalized["tool_calls"] = message["tool_calls"]
+        else:
+            require("tool_calls" not in message)
         # Share the existing strict usage-counter validation without weakening text API.
         text = {
             "model": MODEL,
@@ -164,9 +189,20 @@ def sdk_response(raw, payload, secrets):
                     "message": {"role": "assistant", "content": ""},
                 }
             ],
-            "usage": value["usage"],
+            "usage": {
+                key: value["usage"][key]
+                for key in ("prompt_tokens", "completion_tokens", "total_tokens")
+            },
         }
         _, usage = response(canonical(text), payload["max_tokens"], secrets)
+        if compatible:
+            return {
+                "model": payload["model"],
+                "choices": [
+                    {"index": 0, "message": normalized, "finish_reason": choice["finish_reason"]}
+                ],
+                "usage": usage,
+            }, usage
         return value, usage
     except (ValueError, TypeError, KeyError, RecursionError, Problem) as exc:
         if isinstance(exc, Problem) and exc.code == "model_sensitive_response":

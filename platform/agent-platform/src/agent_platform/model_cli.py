@@ -14,7 +14,7 @@ import uvicorn
 from .db import Database
 from .domain import Problem
 from .model_api import create_model_app
-from .model_policy import Policy
+from .model_policy import MOCK_MODE, Policy
 from .model_proxy import ModelProxy
 
 
@@ -44,6 +44,7 @@ def main():
     serve = actions.add_parser("serve")
     serve.add_argument("--port", type=int, default=17900)
     actions.add_parser("serve-fixture")
+    actions.add_parser("serve-mock")
     issue = actions.add_parser("issue")
     issue.add_argument("--run", type=UUID, required=True)
     issue.add_argument("--generation", type=int, required=True)
@@ -56,9 +57,20 @@ def main():
     try:
         policy = Policy.read(args.config)
         if args.action == "serve-fixture":
+            if policy.mode != "fixture-http-v1":
+                raise ValueError("fixture_policy_required")
             from .model_fixture import fixture_server
 
             fixture_server(urlsplit(policy.origin).port, policy.credential).serve_forever()
+            return 0
+        if args.action == "serve-mock":
+            if policy.mode != MOCK_MODE:
+                raise ValueError("mock_policy_required")
+            from .model_mock import mock_server
+
+            mock_server(
+                urlsplit(policy.origin).port, policy.credential, policy.model
+            ).serve_forever()
             return 0
         db = Database(os.environ["DATABASE_URL"])
         if args.action == "serve":

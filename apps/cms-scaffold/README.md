@@ -6,7 +6,8 @@
 可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）、三個 demo pack。
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
-實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。
+實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
+前端 v2（文件先行，未實作）：[`docs/v2/`](docs/v2/README.md)。
 
 目前實作到 **Wave E + Back 自訂視圖**：kernel 與三面已驗收；Back 另有相簿編排、當日行程、issue 看板（寫入仍走 entry API）。
 

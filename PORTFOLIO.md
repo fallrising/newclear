@@ -28,6 +28,10 @@ Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主�
 
 設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
 
+## Owner override 2026-09-24 — apps/cms-scaffold（documentation-only）
+
+Owner 要求盤點 `apps/cms-scaffold` 的前端問題，並以 Shopify 的前端設計為參考寫 v2 前端 SDD，之後交給 LLM agent 重寫。本次例外**僅限文件**：[v1 前端稽核與 v2 SDD](apps/cms-scaffold/docs/v2/README.md)。不改動應用程式碼，也不改變 cms-scaffold 的 tier C 分級；要開始實作（SDD §12 的 W0），需要 owner 另外登記。
+
 ## 2026-09-05 修復與補充驗證
 
 這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。

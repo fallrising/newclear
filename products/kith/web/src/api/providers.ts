@@ -15,6 +15,7 @@ export function useProvider(id: string): UseQueryResult<Provider, Error> {
   return useQuery({
     queryKey: [...providersQueryKey, id],
     queryFn: async ({ signal }) => (await apiFetch<{ provider: Provider }>("/api/providers/" + encodeURIComponent(id), { signal })).provider,
+    enabled: id !== "",
   });
 }
 

@@ -164,6 +164,10 @@ test("E2E-W4-05 provider key never leaves the server", { tag: ["@W4"] }, async (
     await ben.page.getByTestId("composer-input").fill("@" + "w4c_" + rand + " canary check");
     await ben.page.getByTestId("composer-input").press("Enter");
     await expect(ben.page.getByTestId("message-row").filter({ hasText: "hello from fake-chat" })).toBeVisible({ timeout: 30_000 });
+    await page.goto("/r/" + slug);
+    await expect(page.getByTestId("timeline")).toBeVisible();
+    await expect(page.getByTestId("room-connection")).toHaveCount(0);
+    await expect(page.getByTestId("room-offline-strip")).toHaveCount(0);
     await ben.page.getByTestId("composer-input").fill("@" + "w4c_" + rand + " [[fake:status=401]]");
     await ben.page.getByTestId("composer-input").press("Enter");
     await expect(page.getByTestId("reply-failed")).toBeVisible({ timeout: 30_000 });

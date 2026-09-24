@@ -127,13 +127,14 @@ test(
     const origin = page.locator('[data-testid="message-row"][data-seq="0"]');
     const timeline = page.getByTestId("timeline");
     await expect(async () => {
-      if (await origin.isVisible()) return;
-      await timeline.evaluate((el) => {
-        el.scrollTop = 0;
-      });
+      if (!(await origin.isVisible())) {
+        await timeline.evaluate((el) => {
+          el.scrollTop = Math.max(0, el.scrollTop - el.clientHeight);
+        });
+      }
       await expect(origin).toBeVisible({ timeout: 1_000 });
-    }).toPass({ timeout: 20_000 });
-    await origin.hover();
+      await origin.hover({ timeout: 1_000 });
+    }).toPass({ timeout: 30_000 });
     await origin.getByTestId("message-actions").click();
     await page.getByTestId("message-action-copy").click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("歡迎來到 Kith，這裡是 Lobby。");

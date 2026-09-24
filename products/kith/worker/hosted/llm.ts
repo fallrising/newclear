@@ -26,16 +26,53 @@ function assertXaiUrl(url: string): void {
 
 export function createFakeFetch(fake: FakeLlm): FetchLike {
   const models = fake.models ?? [DEFAULT_MODEL_ID];
-  return async (input, _init) => {
+  return async (input, init) => {
     const url = requestUrl(input).replace(/\/$/, "");
     assertXaiUrl(url);
     if (url === XAI_MODELS_URL) {
       return Response.json({ data: models.map((id) => ({ id })) });
     }
+    const directive = parseFakeDirective(typeof init?.body === "string" ? init.body : "");
+    if (directive.delay_ms !== undefined) {
+      await new Promise((resolve) => setTimeout(resolve, directive.delay_ms));
+    }
+    if (directive.status !== undefined) {
+      return Response.json({ error: { message: "fake upstream error" } }, { status: directive.status });
+    }
     return Response.json({
-      choices: [{ message: { role: "assistant", content: fake.text } }],
+      choices: [{ message: { role: "assistant", content: directive.text ?? fake.text } }],
     });
   };
+}
+
+/** Test-only directives for the in-worker fake (used only when there is no XAI_API_KEY and FAKE_LLM_TEXT is set). */
+export type FakeDirective = { text?: string; delay_ms?: number; status?: number };
+
+export function parseFakeDirective(source: string): FakeDirective {
+  const match = /\[\[fake:([^\]]*)\]\]/.exec(source);
+  if (!match) return {};
+  const out: FakeDirective = {};
+  for (const part of match[1]!.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq <= 0) continue;
+    const name = part.slice(0, eq).trim();
+    let value: string;
+    try {
+      value = decodeURIComponent(part.slice(eq + 1).trim());
+    } catch {
+      continue;
+    }
+    if (name === "text") {
+      out.text = value;
+    } else if (name === "delay_ms") {
+      const n = Number(value);
+      if (Number.isInteger(n) && n >= 0 && n <= 30_000) out.delay_ms = n;
+    } else if (name === "status") {
+      const n = Number(value);
+      if (Number.isInteger(n) && n >= 400 && n <= 599) out.status = n;
+    }
+  }
+  return out;
 }
 
 export async function listModelIds(fetchImpl: FetchLike, apiKey: string): Promise<string[]> {

@@ -125,6 +125,8 @@ test(
     await ben.page.goto("/r/" + slug);
     await expectLive(ben.page);
     await expect(ben.page.getByTestId("timeline-empty")).toBeVisible();
+    await api.call("POST", "/api/rooms/" + roomId + "/messages", { body: "jump start", client_message_id: "e2e-jump-start" });
+    await expect(ben.page.getByTestId("message-row").filter({ hasText: "jump start" })).toBeVisible();
     await ben.context.setOffline(true);
     await expect(ben.page.getByTestId("room-offline-strip")).toBeVisible();
     for (let i = 0; i <= 1000; i++) {
@@ -136,7 +138,7 @@ test(
     }
     await ben.context.setOffline(false);
     await expect(ben.page.getByTestId("timeline-jumped")).toBeVisible({ timeout: 30_000 });
-    await expect(ben.page.getByTestId("message-row").filter({ hasText: /^jump 1000$/ })).toBeVisible();
+    await expect(ben.page.getByTestId("message-row").filter({ hasText: "jump 1000" })).toBeVisible();
     await expect(ben.page.locator('[data-testid="message-row"][data-seq="0"]')).toHaveCount(0);
     note(info, "more than 1,000 missed messages jumped to the latest page (FM-SYNC-13)");
     await shot(ben.page, info, "jumped");

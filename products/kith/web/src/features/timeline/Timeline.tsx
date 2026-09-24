@@ -78,7 +78,7 @@ export function Timeline(props: Props): ReactElement {
   }, [hasMessages, timeline.phase]);
 
   // 4. Keep the anchor when older rows are prepended (W1 §5.6.2; measured 0 px jump).
-  const firstKey = items[1]?.key ?? null;
+  const firstKey = items.find((i) => i.kind === "message" || i.kind === "pending")?.key ?? null;
   const lastKey = items[items.length - 1]?.key ?? null;
   const prevFirstKey = useRef<string | null>(null);
   const prevLastKey = useRef<string | null>(null);

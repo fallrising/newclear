@@ -22,7 +22,7 @@ export async function createProviderViaApi(api: ApiClient, spec: ProviderSpec): 
     default_quota_class: "api_key",
   });
   expect(res.status).toBe(201);
-  return (res.json as { id: string }).id;
+  return (res.json as { provider: { id: string } }).provider.id;
 }
 
 export async function createHostedAgentViaApi(

@@ -44,6 +44,7 @@ import { handleMcpPost } from "./mcp.ts";
 import { snapshot } from "./metrics.ts";
 import { replyLimit } from "./reply-limit.ts";
 import { Room } from "./room.ts";
+import { mountProviderRoutes } from "./routes/providers.ts";
 
 export { HostedGeneration, Inbox, Room };
 
@@ -717,6 +718,8 @@ app.post("/api/members/:id/password", async (c) => {
     .run();
   return c.json({ ok: true });
 });
+
+mountProviderRoutes(app);
 
 app.get("/api/metrics", async (c) => {
   const auth = await requireOperator(c);

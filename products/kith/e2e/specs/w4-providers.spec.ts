@@ -152,7 +152,7 @@ test("E2E-W4-05 provider key never leaves the server", { tag: ["@W4"] }, async (
       expect(JSON.stringify(call.json)).not.toContain("secret_ciphertext");
     }
     const detail = await api.call("GET", "/api/providers/" + pid);
-    expect((detail.json as { secret_last4: string }).secret_last4).toBe("5b7e");
+    expect((detail.json as { provider: { secret_last4: string } }).provider.secret_last4).toBe("5b7e");
 
     const aid = await createHostedAgentViaApi(api, {
       handle: "w4c_" + rand,

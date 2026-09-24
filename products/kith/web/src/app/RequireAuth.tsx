@@ -36,5 +36,8 @@ export function RequireAuth(props: { children: ReactNode }): ReactElement {
       </div>
     );
   }
+  if (me.data.must_change_password && location.pathname !== "/settings") {
+    return <Navigate to="/settings" replace />;
+  }
   return <>{props.children}</>;
 }

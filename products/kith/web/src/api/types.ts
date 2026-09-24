@@ -1,4 +1,7 @@
 export type QuotaClass = "api_key" | "operator_personal";
+export type AttentionMode = "silent" | "mention" | "keyword" | "ambient";
+export type ReplyLimit = { code: "fixed"; fixed_text: string } | { code: "sidecar_off" } | null;
+export type AttentionUpdate = { mode?: AttentionMode; keywords?: string[]; cooldown_ms?: number; debounce_ms?: number };
 
 /** GET /api/me 與 POST /api/auth/login 的 member（worker/index.ts publicMember）。 */
 export type Me = {
@@ -60,11 +63,11 @@ export type RoomMember = {
   quota_class: QuotaClass;
   is_operator: 0 | 1;
   role: "owner" | "member";
-  attention_mode: "silent" | "mention" | "keyword" | "ambient";
+  attention_mode: AttentionMode;
   keywords_json: string;
   policy_epoch: number;
   operator_only: boolean;
-  reply_limit: unknown; // W3 定型；W1 不讀
+  reply_limit: ReplyLimit;
 };
 export type RoomMembersResponse = { members: RoomMember[] };
 
@@ -88,5 +91,5 @@ export type MessagesPage = { messages: ServerMessage[]; has_more: boolean };
 
 export type WsServerFrame =
   | { v: 1; type: "event"; event: ServerMessage }
-  | { v: 1; type: "status"; member_id: string; body: string }
+  | { v: 1; type: "status"; member_id: string; body: string; error_class?: string }
   | { v: 1; type: "error"; code: string };

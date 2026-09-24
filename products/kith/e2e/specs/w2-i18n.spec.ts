@@ -12,16 +12,20 @@ async function expectLive(page: Page): Promise<void> {
   await expect(page.getByTestId("room-offline-strip")).toHaveCount(0);
 }
 
-/** The full suite leaves extra lobby messages, so the start sits above the latest page. */
-async function revealTimelineStart(page: Page): Promise<void> {
+/** The full suite leaves extra lobby messages, so older rows sit above the latest page. */
+async function reveal(page: Page, locator: ReturnType<Page["locator"]>): Promise<void> {
   const timeline = page.getByTestId("timeline");
   await expect(async () => {
-    if (await page.getByTestId("timeline-start").isVisible()) return;
+    if (await locator.isVisible()) return;
     await timeline.evaluate((el) => {
-      el.scrollTop = 0;
+      el.scrollTop = Math.max(0, el.scrollTop - el.clientHeight);
     });
-    await expect(page.getByTestId("timeline-start")).toBeVisible({ timeout: 1000 });
-  }).toPass({ timeout: 15_000 });
+    await expect(locator).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
+}
+
+async function revealTimelineStart(page: Page): Promise<void> {
+  await reveal(page, page.getByTestId("timeline-start"));
 }
 
 test(
@@ -55,7 +59,9 @@ test(
     await expectLive(page);
     await expect(page.locator("html")).toHaveAttribute("lang", to);
     await expect(page.getByTestId("composer-send")).toHaveText(sendText(to));
-    await expect(page.locator('[data-testid="date-divider"][data-date="2026-09-22"]')).toHaveText(todayText(to));
+    const today = page.locator('[data-testid="date-divider"][data-date="2026-09-22"]');
+    await reveal(page, today);
+    await expect(today).toHaveText(todayText(to));
     await revealTimelineStart(page);
     await expect(page.getByTestId("timeline-start")).toContainText(createdText(to));
     await shot(page, info, "02-to");

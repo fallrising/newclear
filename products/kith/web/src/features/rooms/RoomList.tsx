@@ -6,6 +6,7 @@ import { useRooms } from "../../api/rooms";
 import type { RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
 import { Button } from "../../ui/Button";
+import { useRoomNav } from "../../store/roomNav";
 import { initCursors } from "../../store/unread";
 import { RoomListItem } from "./RoomListItem";
 import { useUnreadCounts } from "./useUnreadCounts";
@@ -29,6 +30,24 @@ export function RoomList(): ReactElement {
   const [archivedOpen, setArchivedOpen] = useState(false);
   const activeId = rooms.data?.find((room) => room.slug === slug)?.id ?? null;
   const unread = useUnreadCounts(rooms.data, me?.id ?? "", activeId);
+  const needle = query.trim().toLowerCase();
+  const filtered = (rooms.data ?? []).filter((room) => room.name.toLowerCase().includes(needle));
+  const openRooms = filtered.filter((room) => room.archived_at === null).sort(byRecent);
+  const archivedRooms = filtered
+    .filter((room) => room.archived_at !== null)
+    .sort((a, b) => ((a.archived_at ?? "") < (b.archived_at ?? "") ? 1 : -1));
+  const orderKey = openRooms.map((room) => room.slug).join("\n");
+  const unreadKey = openRooms
+    .filter((room) => {
+      const mark = unread[room.id];
+      return mark !== undefined && (mark.count > 0 || mark.more);
+    })
+    .map((room) => room.slug)
+    .join("\n");
+
+  useEffect(() => {
+    useRoomNav.getState().set(orderKey === "" ? [] : orderKey.split("\n"), unreadKey === "" ? [] : unreadKey.split("\n"));
+  }, [orderKey, unreadKey]);
 
   useEffect(() => {
     if (rooms.data) initCursors(rooms.data);
@@ -62,13 +81,6 @@ export function RoomList(): ReactElement {
       </p>
     );
   }
-
-  const needle = query.trim().toLowerCase();
-  const filtered = rooms.data.filter((room) => room.name.toLowerCase().includes(needle));
-  const openRooms = filtered.filter((room) => room.archived_at === null).sort(byRecent);
-  const archivedRooms = filtered
-    .filter((room) => room.archived_at !== null)
-    .sort((a, b) => ((a.archived_at ?? "") < (b.archived_at ?? "") ? 1 : -1));
 
   return (
     <nav data-testid="room-list" aria-label={t("rooms.list.title")}>

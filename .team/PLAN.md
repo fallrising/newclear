@@ -9,19 +9,23 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 25 |
+| protocol_version / ledger_revision | 1 / 102 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator — M4 final metadata-head CI closeout / DG-M4-20260922-01 |
-| active_work_branch | agent/dim-gate/mainline/m4-observability |
-| source / last_reconciled_target | M4 parent `7d20bbc48a25e82c82c048304da8b74a897ec14e` / SSH-fetched main `eb2023f81d02ad5e9a7419a0b8bf67751e135758`; no affected component/workflow/ledger delta, stacked parent retained |
-| source kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD observed, not adopted |
-| spec revision | M4 integration contract revision1; final implementation/test candidate `93a4bbc8cafe03588ff8ef12014eeb2523a93de3` |
-| open implementation PRs at recovery | Accepted M3 [PR #17](https://github.com/fallrising/newclear/pull/17) OPEN Ready; accepted M4 stacked [PR #20](https://github.com/fallrising/newclear/pull/20) OPEN, final metadata-head CI closeout pending; M0 #7/M1 #11/M2 #13 MERGED |
+| active_owner / last_run_id | none / DG-W5-20260923-01 (DONE) |
+| active_work_branch | none |
+| source / last_reconciled_target | W5 integration closeout / main `70a409ab5e522d0941cc6ae20c44b93b1c0a41c1` (2026-09-24); no later dim-gate, workflow or PLAN delta |
+| initial M0 recovery kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD was observed but not adopted for that recovery |
+| spec revision | W5 integration contract revision2 accepted at `03c15883abfedd39b4f9fe4fe893a8e17fc391a8`; SDD14 defines W1–W5 only |
+| open implementation PRs | none; M0–M5 and W1–W5 are accepted and merged; latest closeout PRs #61 and #69 |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
-### Accepted baseline and recovery evidence
+### Current accepted baseline
+
+W1–W5 / AC-WS-01–18 and M0–M5 are accepted and integrated. W5 product `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` is merged via PR61 (`77e5e14`); CI-hardening PR69 is merged via `616d67e`. Exact post-merge CI passed on both merges, and actual main was reconciled at `70a409a`. DG-D102 and the final resume block below hold the full closeout evidence. No new W6 or AC-WS-19 scope has been selected; the next step is product-owner selection of a capability and observable flow.
+
+### Historical M0 recovery evidence
 
 - [SDD PR #5](https://github.com/fallrising/newclear/pull/5) merged `746585718429615288c85bf0027ae4a31c13e36b`；[protocol PR #6](https://github.com/fallrising/newclear/pull/6) merged at source main. Both were documentation, not application acceptance.
 - [Preflight](reports/dim-gate-m0-preflight.md) records complete mandatory/source-reference reading, exact blob SHAs, branches/worktrees/PR reconciliation and unavailable tools. No implementation task or active owner existed at recovery; the prior documentation checkout was preserved.
@@ -34,9 +38,9 @@
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
 | M2 | ACCEPTED | `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` | MERGED — PR #13, merge `29bed41788a33684f24d216f4fd4d5f3f998c672` | AC-09–12,21–23; independent review, 138 tests, 22 Chromium journeys and post-merge CI passed |
-| M3 | ACCEPTED | `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` | OPEN_PR_17_NOT_MERGED | AC-13–16,24; 170 tests, 40 Chromium journeys, independent closure and exact-head CI |
-| M4 | ACCEPTED | `93a4bbc8cafe03588ff8ef12014eeb2523a93de3` | OPEN_PR_20_STACKED_NOT_MERGED | AC-17–19,25;207 tests,47 Chromium, independent closure and product-head CI passed |
-| M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
+| M3 | ACCEPTED | `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` | MERGED — PR #17, merge `9dd4f160de9d115c983f1d27661b7c399f0f0ef3` | AC-13–16,24; 170 tests, 40 Chromium journeys, independent closure and exact-head CI |
+| M4 | ACCEPTED | `93a4bbc8cafe03588ff8ef12014eeb2523a93de3` | MERGED — PR #20, merge `a61653b3a131f1cca6c0f476ef7ca0cc2456df12` | AC-17–19,25;207 tests,47 Chromium, independent closure and product-head CI passed |
+| M5 | ACCEPTED | `043a13aba3f74de2d3dd14aa2481024a68e2f6b2` | MERGED — PR #23, merge `24b11e1eccf678490cfc8d7449748e0c445218f4` | AC-26–30; 211 tests, 52 Chromium, 4 Firefox/WebKit, 3 benchmark, 2 isolation, independent review and post-merge CI passed |
 
 Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.md) defines milestone gates. Accepted branch work and merged integration are separate events.
 
@@ -1507,6 +1511,35 @@ integration_state: PR61_DRAFT_OPEN_evidence_head_CI_merge_actual_closeout_pendin
 remote_durability: product03c_SSHsaved; evidence_checkpoint_pending_commit_and_SSHpush
 blockers: []
 next_action: commit_SSHpush_evidence_only; merge_latest_origin_main_into_branch_if_still_disjoint; latest_exacthead_CI; authorized_normal_merge_actual_tree_postmerge_CI_PRcloseout_ownerrelease
+```
+
+DG-D102: Final W5 and CI-hardening reconciliation. W5 product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` remains accepted for AC-WS-13–18; T049 attempts1–3 have no open confirmed source finding. PR61 merged normally as `77e5e14`; exact post-merge CI35949443651 attempt2 passed 426 native, 100 Chromium, 12 Firefox/WebKit, 3 benchmark and 2 isolation cases plus static/build gates. Attempt1 was canceled at the former 45-minute foundation limit after benchmark and before isolation, so it is not complete evidence. Follow-up PR69 raised the timeout to60 minutes and added the run-attempt suffix to artifact names; it merged normally as `616d67e`. Exact post-merge CI35956716320 passed all gates on `616d67e`. Artifacts10789818355 and10792066235 were downloaded and decoded; both are bound to their merge commits and meet unchanged performance budgets. Actual current main was rechecked at `70a409ab5e522d0941cc6ae20c44b93b1c0a41c1` on 2026-09-24; changes after `616d67e` touch no dim-gate source, its workflow, or this ledger, and the component/workflow trees remain `775bcb7`/`b8a65ac`. T048 and the W5 run are DONE; active owner is NONE. No deployment or external integration occurred. SDD14 defines only W1–W5 and AC-WS-01–18; no W6 or AC-WS-19 is approved. Capability-map entries marked later/to clarify have no chosen priority or acceptance contract. Next step is to obtain product-owner priority and an observable user flow before creating a new task or claiming W6.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 102
+run_id: DG-W5-20260923-01
+active_owner: none
+terminal_state: DONE
+target_ref: main
+last_reconciled_target: 70a409ab5e522d0941cc6ae20c44b93b1c0a41c1
+last_observed_at: 2026-09-24T11:55:22Z
+continuation_ref: none
+milestone: W1_W5_COMPLETE / AC-WS-01_18_ACCEPTED_AND_MERGED
+task_id: T045 ACCEPTED; T046 ACCEPTED; T047 ACCEPTED; T048 DONE; T049 DONE
+accepted_implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+pr61_merge_commit: 77e5e14e0eb0bd62544ea3ece02aa448e08df456
+pr69_merge_commit: 616d67ec62df763dab9d08d539852767d0fb8c0e
+review_ref: .team/reports/T-049-attempt-1.md; .team/reports/T-049-attempt-2.md; .team/reports/T-049-attempt-3.md
+report_ref: .team/reports/dim-gate-w5-validation.md
+product_ci: 35943030312 SUCCESS
+postmerge_ci: 35949443651 attempt2 SUCCESS; 35956716320 SUCCESS
+integration_state: MERGED_PR61_AND_PR69
+remote_durability: PRs_and_CI_artifacts_remote; actual_main_reconciled_at_70a409a
+blockers: []
+next_action: obtain_product_owner_priority_and_observable_user_flow_for_a_new_capability_before_creating_task_or_W6
 ```
 
 ## Program: portfolio-docs / Variant: mainline

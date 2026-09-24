@@ -31,7 +31,7 @@
 
 | 編號 | 任務 | 狀態 | 前置／完成標準 |
 | --- | --- | --- | --- |
-| ERU-008 | 將元件重裝擴及 worker-2／3 | 進行中 | [唯讀目標核對](M2-WORKER-PEER-PREP-2026-09-23.md) 與 [目標外守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md) 已完成本機／唯讀驗證；仍須在觀測後補 peer 重裝與恢復執行器，逐台完成隔離、重裝、HTTP、配額及其他節點保留驗收。 |
+| ERU-008 | 將元件重裝擴及 worker-2／3 | 進行中 | [唯讀目標核對](M2-WORKER-PEER-PREP-2026-09-23.md) 、[目標外守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md) 與 [peer 執行器](M2-WORKER-PEER-EXECUTOR-2026-09-24.md) 已完成本機／唯讀驗證；觀測結束並精確清理後仍須逐台完成實機隔離、重裝、HTTP、配額及其他節點保留驗收。 |
 | ERU-009 | 非空 worker 的計畫性 drain／重裝／恢復 | 待做 | 先盤點並遷移 owned workloads，再進入空 target 重裝；驗證失敗恢復與新狀態歸屬，禁止覆蓋未知資料。依 ERU-008／應用重建能力安排。 |
 | ERU-010 | worker 非計畫失聯恢復（V07） | 待做 | 有界演練偵測時間、先 fence、精確對帳 stale metadata／配額，於健康 worker 人工或一次性工具重建；不宣稱自動維持副本數。 |
 | ERU-011 | 可重現 bootstrap 與新 controller 接手 | 進行中 | [本機接手前置檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md) 已記錄 runner／OS package／artifact 與外部私有輸入、SSH alias 邊界；仍須從乾淨 controller 使用外部 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |

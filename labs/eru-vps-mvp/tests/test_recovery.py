@@ -150,18 +150,23 @@ class OfflineCoreTests(unittest.TestCase):
 
 
 class WorkerRecoveryTests(unittest.TestCase):
-    def setup_flow(self, action='worker-resume'):
+    def setup_flow(self, action='worker-resume', target='worker-4'):
         import tempfile
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
         op=Mock();op.project=Path(temp.name);op.core={'ip':'example.invalid'};op.journal={}
         op.worker_scope.return_value={'blockers':[]}
-        op.cli.return_value=component_fixture.snapshot(True)['nodes']
         before=component_fixture.snapshot(True)
+        alias=f'ckc-disposable-0{target[-1]}'
+        if target != 'worker-4':
+            before['nodes'][0]['name']=target
+            before['hosts'][alias]=before['hosts'].pop('ckc-disposable-04')
+        op.cli.return_value=before['nodes']
         plan={'id':'new-recovery','source_run':'failed-source','action':action,
-              'source':{'plan':{'id':'failed-source'}},'observed':{'snapshot':before,
+              'source':{'plan':{'id':'failed-source','node':target}},'observed':{'snapshot':before,
               'readiness':{'canaries':[]},'protected_services':{},'recovery':{'stage':'installed'}}}
         component=Mock();component.resume_attempted=False
-        component.check_isolation.side_effect=[component_fixture.snapshot(True),component_fixture.snapshot(False)]
+        resumed=deepcopy(before);resumed['nodes'][0]['bypass']=False
+        component.check_isolation.side_effect=[before,resumed]
         self.enterContext(patch('recovery.ComponentReinstall',return_value=component))
         self.enterContext(patch('recovery.HTTPGuards',component_fixture.FakeGuards))
         return op,component,plan
@@ -173,6 +178,23 @@ class WorkerRecoveryTests(unittest.TestCase):
         component.run_smoke.assert_called_once()
         self.assertEqual(op.journal['recovered_source'],'failed-source')
         self.assertFalse((op.project/'private/operations/worker-component-revisions.json').exists())
+
+    def test_peer_resume_uses_selected_node_and_never_changes_worker_four(self):
+        op,component,plan=self.setup_flow(target='worker-2')
+        RecoveryOperator.recover_worker(op,plan)
+        up=component.command.call_args_list[-1]
+        self.assertEqual(up.args[1][-2:], ['up','worker-2'])
+        op.worker_scope.assert_called_with('ckc-disposable-02')
+        self.assertEqual(op.journal['recovered_source'],'failed-source')
+
+    def test_peer_lost_resume_reply_refences_selected_worker(self):
+        op,component,plan=self.setup_flow(target='worker-3')
+        component.command.side_effect=TimeoutError('up reply lost')
+        with self.assertRaisesRegex(TimeoutError,'reply lost'):
+            RecoveryOperator.recover_worker(op,plan)
+        component.fence.assert_called_with(corrective=True)
+        self.assertEqual(op.journal['resume_recovery'],'fenced')
+        self.assertNotIn('recovered_source',op.journal)
 
     def test_restore_references_original_backup_but_uses_new_recovery_id(self):
         op,component,plan=self.setup_flow('worker-restore')
@@ -217,6 +239,51 @@ class WorkerRecoveryTests(unittest.TestCase):
         component.remote.assert_not_called()
         self.assertTrue(any('start' in c.args[1] for c in component.command.call_args_list))
 
+    def test_peer_observation_checks_selected_alias_and_guard_target(self):
+        op=Mock()
+        snapshot=component_fixture.snapshot(True)
+        snapshot['nodes'][0]['name']='worker-2'
+        snapshot['hosts']['ckc-disposable-02']=snapshot['hosts'].pop('ckc-disposable-04')
+        # Keep another host after the target in iteration order: observing it must not retarget recovery.
+        snapshot['hosts']['ckc-disposable-04']=deepcopy(snapshot['hosts']['ckc-disposable-02'])
+        op.snapshot.return_value=snapshot
+        op.inventory=[{'alias':'ckc-disposable-01','node':'core'},
+                      {'alias':'ckc-disposable-02','node':'worker-2'}]
+        op.worker_readiness.return_value={'blockers':[]}
+        op.worker_state.return_value={'exists':True,'stage':'installed','journal_sha256':'journal',
+            'snapshot_sha256':'backup','restore_possible':False}
+        op.worker_services.return_value='ActiveState=inactive\n'*3
+        op.worker_scope.return_value={'blockers':[],'manifest_sha256':'manifest'}
+        source={'plan':{'snapshot':deepcopy(snapshot),'id':'peer-source','node':'worker-2',
+                        'component_scope':{'manifest_sha256':'manifest'}}}
+        with patch('recovery.ComponentReinstall'):
+            result=RecoveryOperator.observe_worker(op,source,'worker-resume','health','canaries')
+        op.worker_readiness.assert_called_with('health','canaries',snapshot,'worker-2')
+        op.worker_scope.assert_called_with('ckc-disposable-02')
+        op.worker_services.assert_called_with(source)
+        self.assertEqual(result['recovery']['journal_sha256'],'journal')
+
+    def test_peer_source_plan_and_recovery_hosts_are_bound(self):
+        lab=fixtures.OperatorTests('test_wrong_supplied_hash_cannot_remove');lab.setUp()
+        self.addCleanup(lab.doCleanups)
+        op=RecoveryOperator(lab.project)
+        source={'id':'peer-source','operation':'rebuild-node','node':'worker-2',
+                'rebuild_mode':'component-reinstall',
+                'bindings':{'inventory':op.inventory,'cluster':op.cluster()}}
+        atomic_json(op.root/'plans/peer-source.json',{'plan':source,'sha256':digest(source)})
+        atomic_json(op.root/'runs/peer-source.json',{'id':'peer-source','operation':'rebuild-node',
+            'plan_hash':digest(source),'status':'failed','started_at':'2026-09-24T00:00:00+00:00'})
+        self.assertEqual(op.source('peer-source','worker-resume')['plan']['node'],'worker-2')
+        with patch.object(op,'observe',return_value={'readiness':{'canaries':[]}}):
+            recovery=op.make_recovery_plan('peer-source','worker-resume','health','canaries')['plan']
+        self.assertEqual(recovery['mutation_hosts'],['ckc-disposable-01','ckc-disposable-02'])
+        source['node']='unknown'
+        atomic_json(op.root/'plans/peer-source.json',{'plan':source,'sha256':digest(source)})
+        journal=json.loads((op.root/'runs/peer-source.json').read_text());journal['plan_hash']=digest(source)
+        atomic_json(op.root/'runs/peer-source.json',journal)
+        with self.assertRaisesRegex(ValueError,'reviewed component'):
+            op.source('peer-source','worker-resume')
+
     def test_worker_plan_preserves_new_state_on_resume_but_blocks_restore(self):
         op=Mock();snapshot=component_fixture.snapshot(True)
         old=deepcopy(snapshot)
@@ -227,7 +294,7 @@ class WorkerRecoveryTests(unittest.TestCase):
             'snapshot_sha256':'backup','tree_sha256':'new-tree','restore_possible':False,'conflicts':['new or changed data: cursor']}
         op.worker_services.return_value='ActiveState=inactive\n'*3
         op.worker_scope.return_value={'blockers':[],'manifest_sha256':'manifest'}
-        source={'plan':{'snapshot':old,'id':'source','component_scope':{'manifest_sha256':'manifest'}}}
+        source={'plan':{'snapshot':old,'id':'source','node':'worker-4','component_scope':{'manifest_sha256':'manifest'}}}
         with patch('recovery.ComponentReinstall'):
             with self.assertRaisesRegex(ValueError,'overwrite new state'):
                 RecoveryOperator.observe_worker(op,source,'worker-restore','health','canaries')

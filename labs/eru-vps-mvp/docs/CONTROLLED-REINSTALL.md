@@ -17,9 +17,9 @@
 
 元件重裝會保留 caches、packages、kernel、共享 runtime 及其他系統狀態，不能拿它冒充全新 OS 驗收。
 
-## worker-4 的具體範圍
+## 指定 worker 的具體範圍
 
-第一版要求 worker-4 沒有 workload、runtime container／task 或殘留配額；不自動搬移業務應用。01 僅負責禁止／恢復該節點排程與驗證，02／03 不做安裝或清理。
+每次要求所選 worker 沒有 workload、runtime container／task 或殘留配額；不自動搬移業務應用。01 僅負責禁止／恢復該節點排程與驗證；其他兩台 worker 只作 HTTP 守護，不做安裝或清理。02／03 的執行器只完成本機驗證，實機結果待觀測結束後取得。
 
 計画中的六個重裝檔案：
 
@@ -48,7 +48,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode c
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode provider-reimage
 ```
 
-未提供 `--health` 與 `--canary-run` 的 component-reinstall 計畫仍會阻擋；完整用法見 OPERATOR.md。只有空 worker-4、已部署的 core patch、近期完整健康觀測、ownership 與兩台 guard canaries 全部符合時才可執行。provider-reimage 一律 `executable: false`。
+未提供 `--health` 與 `--canary-run` 的 component-reinstall 計畫仍會阻擋；完整用法見 OPERATOR.md。只有選定空 worker、已部署的 core patch、近期完整健康觀測、ownership 與兩台 guard canaries 全部符合時才可執行。provider-reimage 一律 `executable: false`。
 
 ## 執行契約
 
@@ -59,10 +59,10 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode p
 5. nginx lifecycle／HTTP／資源回收通過，確認其他 workers 和原 Docker／containerd 沒有重啟或變更，才恢復排程；記錄 worker 元件 revision，不增加 OS incarnation 或全群 generation。
 6. 每一階段先保存意圖、再保存觀測。中途失敗保留 target 不可排程及 recovery evidence；先對帳，不自動跳過失敗或清理另一台。quarantine 後的恢復必須驗 checksum，不能覆蓋後來產生的新資料。
 
-正向元件重裝流程已實作。guard 在每個變更邊界檢查，任一 HTTP failure／缺樣本或觀測間隔過大都不能計作成功。若 node up 回覆不確定或恢復後驗證失敗，記錄一次獨立的 corrective fence；不能確認時保留 uncertain，不宣稱節點已安全下線。失敗恢復現由獨立 `recovery.py` plan／execute 接線；支援備份可校驗時的 worker-restore，或保留新 agent 狀態的 worker-resume。quarantine／start 邊界可在原 plan 明確指定故障演練；操作與驗證範圍見 [RECOVERY.md](RECOVERY.md)。
+正向元件重裝流程已對 02／03／04 接線；02／03 尚待實機驗收。guard 在每個變更邊界檢查，任一 HTTP failure／缺樣本或觀測間隔過大都不能計作成功。若 node up 回覆不確定或恢復後驗證失敗，記錄一次獨立的 corrective fence；不能確認時保留 uncertain，不宣稱節點已安全下線。失敗恢復現由獨立 `recovery.py` plan／execute 接線；支援備份可校驗時的 worker-restore，或保留新 agent 狀態的 worker-resume。quarantine／start 邊界可在原 plan 明確指定故障演練；操作與驗證範圍見 [RECOVERY.md](RECOVERY.md)。
 
 ## 驗收與順序
 
 控制面修補與有界負載驗證已完成；元件重裝依上述狀態機驗證。第一輪只跑空的 worker-4；連續三次元件重裝都成功，且其他 worker HTTP／原服務不受影響，才擴大範圍。這組結果另外記錄為「元件重裝」，原 V06／V08 的 OS 重灌與全群 fresh 條件仍未通過。
 
-最新恢復與 reapply 結果見 [2026-09-23 紀錄](M2-RECOVERY-2026-09-23.md)；原三次重裝結果見 M2-PRIORITIES-2026-09-22.md；早期僅唯讀 audit 的紀錄不再代表目前功能範圍。備份與失敗 journal 保留，不永久清除。
+02／03 的本機執行器與恢復限制見 [ERU-008 紀錄](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)。最新恢復與 reapply 結果見 [2026-09-23 紀錄](M2-RECOVERY-2026-09-23.md)；原三次重裝結果見 M2-PRIORITIES-2026-09-22.md；早期僅唯讀 audit 的紀錄不再代表目前功能範圍。備份與失敗 journal 保留，不永久清除。

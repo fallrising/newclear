@@ -1,24 +1,27 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
-import type { Room, RoomMember } from "../../api/types";
+import type { RoomMember, RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
 import type { RoomTimeline } from "../../sync/types";
 import { localTimeZone } from "../../ui/time";
 import { buildItems, type TimelineItem } from "./buildItems";
 import { DateDivider } from "./DateDivider";
+import { NewDivider } from "./NewDivider";
 import { JumpToLatest } from "./JumpToLatest";
 import { MessageRow } from "./MessageRow";
 import { SyncNotice } from "./SyncNotice";
 import { TimelineTop } from "./TimelineTop";
 
 type Props = {
-  room: Room;
+  room: RoomSummary;
   timeline: RoomTimeline;
   members: RoomMember[] | undefined;
   meId: string;
   onLoadOlder(): void;
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
+  dividerAfterSeq: number | null;
+  onAtBottom(atBottom: boolean): void;
 };
 
 const BOTTOM_PX = 80;
@@ -28,14 +31,15 @@ export function Timeline(props: Props): ReactElement {
   const t = useT();
   const { timeline, meId } = props;
   const items = useMemo(
-    () => buildItems(timeline, meId, localTimeZone()),
-    [timeline.seqs, timeline.rows, timeline.pending, meId],
+    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq),
+    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq],
   );
   const hasMessages = items.some((i) => i.kind === "message");
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const atBottomRef = useRef(true);
   const initialScrolled = useRef(false);
+  const reportedAtBottom = useRef<boolean | null>(null);
   const [unseen, setUnseen] = useState(0);
 
   const virtualizer = useVirtualizer({
@@ -55,24 +59,37 @@ export function Timeline(props: Props): ReactElement {
     return !el || el.scrollHeight - el.scrollTop - el.clientHeight < BOTTOM_PX;
   };
 
+  const reportAtBottom = (value: boolean): void => {
+    if (reportedAtBottom.current === value) return;
+    reportedAtBottom.current = value;
+    props.onAtBottom(value);
+  };
+
   const onScroll = (): void => {
     const el = scrollRef.current;
     if (!el) return;
     atBottomRef.current = atBottom();
+    reportAtBottom(atBottomRef.current);
     if (atBottomRef.current) setUnseen(0);
     if (initialScrolled.current && el.scrollTop < LOAD_OLDER_PX) props.onLoadOlder();
   };
 
-  // 3. First time there are messages: open at the latest one.
+  // 3. First time there are messages: open at the new-messages divider, or at the latest one.
   useEffect(() => {
     if (initialScrolled.current || !hasMessages) {
       if (!hasMessages && timeline.phase !== "loading_latest") initialScrolled.current = true;
       return;
     }
-    scrollToEnd();
+    const newIndex = items.findIndex((item) => item.kind === "new");
+    const scrollInitial = (): void => {
+      if (newIndex >= 0) virtualizer.scrollToIndex(newIndex, { align: "start" });
+      else scrollToEnd();
+    };
+    scrollInitial();
     const id = requestAnimationFrame(() => {
-      scrollToEnd();
+      scrollInitial();
       initialScrolled.current = true;
+      reportAtBottom(atBottom());
     });
     return () => cancelAnimationFrame(id);
   }, [hasMessages, timeline.phase]);
@@ -123,6 +140,8 @@ export function Timeline(props: Props): ReactElement {
         return <TimelineTop timeline={timeline} room={props.room} hasMessages={hasMessages} onRetry={props.onLoadOlder} />;
       case "date":
         return <DateDivider date={item.date} />;
+      case "new":
+        return <NewDivider />;
       case "message": {
         const sender = props.members?.find((m) => m.id === item.row.sender_id);
         return (

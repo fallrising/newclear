@@ -80,7 +80,8 @@ test(
     expect(seed.counts).toEqual({ members: 6, rooms: 4, room_members: 10, messages: 1213, bot_tokens: 0 });
     note(info, "seed.json matches base-v1 counts");
 
-    // 9. Logout returns to the login page.
+    // 9. Logout returns to the login page (the control lives in the user menu from W2).
+    await page.getByTestId("user-menu").click();
     await page.getByTestId("app-shell-logout").click();
     await page.waitForURL((u) => u.pathname === "/login");
     await expect(page.getByTestId("login-page")).toBeVisible();

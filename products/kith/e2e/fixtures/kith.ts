@@ -7,22 +7,28 @@ import { redactHeaders, redactJson } from "../harness/redact.ts";
 
 export type ApiResult = { status: number; json: unknown };
 export type ApiClient = {
-  call(method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", path: string, body?: unknown): Promise<ApiResult>;
+  call(
+    method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
+    path: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ): Promise<ApiResult>;
 };
 
 /** Shares the page's cookies: after a UI login the calls are authenticated. */
 function createApiClient(page: Page, recorder: Recorder): ApiClient {
   return {
-    async call(method, path, body) {
-      const headers: Record<string, string> = {};
-      if (method !== "GET") {
+    async call(method, path, body, headers) {
+      const merged: Record<string, string> = { ...(headers ?? {}) };
+      const hasAuthorization = Object.keys(merged).some((key) => key.toLowerCase() === "authorization");
+      if (method !== "GET" && !hasAuthorization) {
         const c = await page.request.get("/api/csrf");
-        headers["X-CSRF-Token"] = ((await c.json()) as { csrf: string }).csrf;
+        merged["X-CSRF-Token"] = ((await c.json()) as { csrf: string }).csrf;
       }
-      if (body !== undefined) headers["content-type"] = "application/json";
+      if (body !== undefined) merged["content-type"] = "application/json";
       const res = await page.request.fetch(path, {
         method,
-        headers,
+        headers: merged,
         data: body === undefined ? undefined : JSON.stringify(body),
       });
       const json: unknown = (res.headers()["content-type"] ?? "").includes("application/json") ? await res.json() : null;
@@ -32,7 +38,7 @@ function createApiClient(page: Page, recorder: Recorder): ApiClient {
         method,
         path,
         status: res.status(),
-        req_headers: redactHeaders(headers),
+        req_headers: redactHeaders(merged),
         req_body: redactJson(body ?? null),
         res_headers: redactHeaders(res.headers()),
         res_body: redactJson(json),

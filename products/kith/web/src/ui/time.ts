@@ -1,4 +1,4 @@
-import type { Locale } from "../copy";
+import { translate, type Locale } from "../copy";
 
 /** "YYYY-MM-DD" in the given time zone. */
 export function dateKey(iso: string, timeZone: string): string {
@@ -31,4 +31,14 @@ export function formatDate(iso: string, locale: Locale): string {
 
 export function localTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export function formatListTime(iso: string, locale: Locale, now: Date, timeZone: string): string {
+  const diff = now.getTime() - Date.parse(iso);
+  if (diff < 60_000) return translate(locale, "rooms.list.justNow");
+  if (diff < 3_600_000) return translate(locale, "rooms.list.minutesAgo", { n: Math.floor(diff / 60_000) });
+  if (dateKey(iso, timeZone) === dateKey(now.toISOString(), timeZone)) return formatClock(iso, locale);
+  const yesterday = dateKey(new Date(now.getTime() - 86_400_000).toISOString(), timeZone);
+  if (dateKey(iso, timeZone) === yesterday) return translate(locale, "timeline.yesterday");
+  return new Intl.DateTimeFormat(locale, { timeZone, month: "short", day: "numeric" }).format(new Date(iso));
 }

@@ -6,7 +6,7 @@ import { loadDraft, saveDraft } from "./draftStorage";
 
 const MAX_BYTES = 8192;
 
-type Props = { roomId: string; roomName: string; phase: SyncPhase; onSend(body: string): void };
+type Props = { roomId: string; roomName: string; phase: SyncPhase; archived: boolean; onSend(body: string): void };
 
 export function Composer(props: Props): ReactElement {
   const t = useT();
@@ -17,7 +17,8 @@ export function Composer(props: Props): ReactElement {
   const bytes = new TextEncoder().encode(value).length;
   const tooLong = bytes > MAX_BYTES;
   const offline = props.phase === "offline";
-  const canSend = value.trim().length > 0 && !tooLong && !offline && props.phase !== "auth_lost" && props.phase !== "not_found";
+  const canSend =
+    !props.archived && value.trim().length > 0 && !tooLong && !offline && props.phase !== "auth_lost" && props.phase !== "not_found";
 
   // Save the draft 300 ms after the last change.
   useEffect(() => {
@@ -58,6 +59,11 @@ export function Composer(props: Props): ReactElement {
         submit();
       }}
     >
+      {props.archived && (
+        <p data-testid="composer-archived" role="status" className="pb-1 text-sm text-ink-2">
+          {t("composer.archived")}
+        </p>
+      )}
       {offline && (
         <p data-testid="composer-offline" role="status" className="pb-1 text-sm text-warn">
           {t("composer.offline")}
@@ -75,9 +81,10 @@ export function Composer(props: Props): ReactElement {
           aria-label={t("composer.label")}
           rows={1}
           value={value}
+          disabled={props.archived}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder={t("composer.placeholder", { room: props.roomName })}
+          placeholder={props.archived ? t("composer.archivedPlaceholder") : t("composer.placeholder", { room: props.roomName })}
           className="flex-1 resize-none rounded-md border border-border-strong bg-surface px-3 py-2 text-ink text-md-touch md:text-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         />
         <Button variant="primary" type="submit" data-testid="composer-send" disabled={!canSend}>

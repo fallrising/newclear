@@ -22,6 +22,11 @@ export function fetchAfter(roomId: string, afterSeq: number, signal: AbortSignal
   return apiFetch<MessagesPage>(`${base(roomId)}?order=asc&after_seq=${afterSeq}&limit=50&kind=${KINDS}`, { signal });
 }
 
+/** Unread counts only look at visible messages (BR-37). */
+export function fetchAfterMessages(roomId: string, afterSeq: number, signal: AbortSignal): Promise<MessagesPage> {
+  return apiFetch<MessagesPage>(`${base(roomId)}?order=asc&after_seq=${afterSeq}&limit=50&kind=message`, { signal });
+}
+
 export function postMessage(roomId: string, body: string, clientMessageId: string, signal: AbortSignal): Promise<ServerMessage> {
   return apiFetch<ServerMessage>(base(roomId), { method: "POST", body: { body, client_message_id: clientMessageId }, signal });
 }

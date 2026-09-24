@@ -9,6 +9,8 @@ export type Me = {
   capabilities_json: string;
   quota_class: QuotaClass;
   is_operator: 0 | 1;
+  must_change_password: boolean;
+  operator_display_name?: string | null; // 只有 GET /api/me 有；login 回應沒有
 };
 
 export type LoginRequest = { handle: string; password: string };
@@ -17,8 +19,38 @@ export type LogoutResponse = { ok: true };
 export type CsrfResponse = { csrf: string };
 export type ApiErrorBody = { error: { code: string; message: string } };
 
-export type Room = { id: string; slug: string; name: string; created_at: string; role: "owner" | "member" };
-export type RoomsResponse = { rooms: Room[] };
+export type LastMessage = {
+  seq: number;
+  sender_id: string;
+  sender_display_name: string | null;
+  sender_handle: string | null;
+  body_preview: string;
+  created_at: string;
+};
+export type RoomSummary = {
+  id: string;
+  slug: string;
+  name: string;
+  created_at: string;
+  role: "owner" | "member" | null; // all=1 且 operator 不是成員時為 null
+  archived_at: string | null;
+  last_seq: number | null;
+  member_count: number;
+  last_message: LastMessage | null;
+};
+export type RoomsResponse = { rooms: RoomSummary[] };
+
+export type AdminMember = {
+  id: string;
+  kind: "human" | "agent";
+  handle: string;
+  display_name: string;
+  is_operator: 0 | 1;
+  quota_class: QuotaClass;
+  created_at: string;
+  disabled_at: string | null;
+  must_change_password: boolean;
+};
 
 export type RoomMember = {
   id: string;

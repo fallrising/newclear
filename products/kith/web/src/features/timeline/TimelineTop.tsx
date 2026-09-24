@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
-import type { Room } from "../../api/types";
+import type { RoomSummary } from "../../api/types";
 import { useLocale, useT } from "../../copy";
 import type { RoomTimeline } from "../../sync/types";
 import { Button } from "../../ui/Button";
 import { formatDate } from "../../ui/time";
 
-export function TimelineTop(props: { timeline: RoomTimeline; room: Room; hasMessages: boolean; onRetry: () => void }): ReactElement {
+export function TimelineTop(props: { timeline: RoomTimeline; room: RoomSummary; hasMessages: boolean; onRetry: () => void }): ReactElement {
   const t = useT();
   const { locale } = useLocale();
   const tl = props.timeline;

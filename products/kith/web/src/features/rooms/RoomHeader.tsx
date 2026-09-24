@@ -1,9 +1,10 @@
-import { ChevronLeft } from "lucide-react";
+import { Archive, ChevronLeft } from "lucide-react";
 import type { ReactElement } from "react";
 import { useNavigate } from "react-router";
-import type { Room } from "../../api/types";
+import type { RoomSummary } from "../../api/types";
 import { useT, type CopyKey } from "../../copy";
 import type { SyncPhase } from "../../sync/types";
+import { Button } from "../../ui/Button";
 import { IconButton } from "../../ui/IconButton";
 
 function statusOf(phase: SyncPhase): { statusKey: CopyKey | null; strip: CopyKey | null } {
@@ -21,7 +22,13 @@ function statusOf(phase: SyncPhase): { statusKey: CopyKey | null; strip: CopyKey
   }
 }
 
-export function RoomHeader(props: { room: Room; phase: SyncPhase }): ReactElement {
+export function RoomHeader(props: {
+  room: RoomSummary;
+  phase: SyncPhase;
+  archived: boolean;
+  canUnarchive: boolean;
+  onUnarchive: () => void;
+}): ReactElement {
   const t = useT();
   const navigate = useNavigate();
   const { statusKey, strip } = statusOf(props.phase);
@@ -40,6 +47,17 @@ export function RoomHeader(props: { room: Room; phase: SyncPhase }): ReactElemen
           </span>
         )}
       </header>
+      {props.archived && (
+        <div data-testid="room-archived-banner" role="status" className="flex items-center gap-3 border-b border-border bg-surface-2 px-4 py-2 text-sm text-ink-2">
+          <Archive size={16} aria-hidden />
+          <span className="flex-1">{t("room.archived.banner")}</span>
+          {props.canUnarchive && (
+            <Button variant="ghost" data-testid="room-unarchive" onClick={props.onUnarchive}>
+              {t("room.archived.unarchive")}
+            </Button>
+          )}
+        </div>
+      )}
       {strip && (
         <div data-testid="room-offline-strip" role="status" className="px-4 py-1 text-sm text-warn bg-surface-2 border-b border-border">
           {t(strip)}

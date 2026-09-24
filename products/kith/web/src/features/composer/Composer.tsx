@@ -111,7 +111,10 @@ export function Composer(props: Props): ReactElement {
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): void => {
     const composing = e.nativeEvent.isComposing || e.keyCode === 229;
     if (open && query) {
-      if (composing) return;
+      if (composing) {
+        if (e.key === "Enter") e.preventDefault();
+        return;
+      }
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
         const count = options.length;
@@ -186,10 +189,12 @@ export function Composer(props: Props): ReactElement {
           value={value}
           disabled={props.archived}
           onChange={(e) => {
-            setValue(e.target.value);
+            const next = e.target.value;
+            setValue(next);
             syncCaret(e.target);
             setSuspended(false);
-            noteTyping(e.target.value);
+            if (dismissedAt !== null && next[dismissedAt] !== "@" && next[dismissedAt] !== "＠") setDismissedAt(null);
+            noteTyping(next);
           }}
           onSelect={(e) => syncCaret(e.currentTarget)}
           onKeyUp={(e) => syncCaret(e.currentTarget)}

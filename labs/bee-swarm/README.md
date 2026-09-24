@@ -1,5 +1,8 @@
 # Bee Swarm - AI 角色異步協作設計框架
 
+> **Portfolio doc tier: D (retired / historical)** — Keep for history only. Do not extend features or write new tutorials. Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 一個基於 GitHub 的 AI 團隊協作概念設計與模擬框架，專注於探索 AI 角色如何透過異步分工實現高效協作。
 
 ## 🎯 項目核心

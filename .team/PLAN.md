@@ -1513,7 +1513,6 @@ blockers: []
 next_action: commit_SSHpush_evidence_only; merge_latest_origin_main_into_branch_if_still_disjoint; latest_exacthead_CI; authorized_normal_merge_actual_tree_postmerge_CI_PRcloseout_ownerrelease
 ```
 
-
 DG-D102: Final W5 and CI-hardening reconciliation. W5 product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` remains accepted for AC-WS-13–18; T049 attempts1–3 have no open confirmed source finding. PR61 merged normally as `77e5e14`; exact post-merge CI35949443651 attempt2 passed 426 native, 100 Chromium, 12 Firefox/WebKit, 3 benchmark and 2 isolation cases plus static/build gates. Attempt1 was canceled at the former 45-minute foundation limit after benchmark and before isolation, so it is not complete evidence. Follow-up PR69 raised the timeout to60 minutes and added the run-attempt suffix to artifact names; it merged normally as `616d67e`. Exact post-merge CI35956716320 passed all gates on `616d67e`. Artifacts10789818355 and10792066235 were downloaded and decoded; both are bound to their merge commits and meet unchanged performance budgets. Actual current main was rechecked at `70a409ab5e522d0941cc6ae20c44b93b1c0a41c1` on 2026-09-24; changes after `616d67e` touch no dim-gate source, its workflow, or this ledger, and the component/workflow trees remain `775bcb7`/`b8a65ac`. T048 and the W5 run are DONE; active owner is NONE. No deployment or external integration occurred. SDD14 defines only W1–W5 and AC-WS-01–18; no W6 or AC-WS-19 is approved. Capability-map entries marked later/to clarify have no chosen priority or acceptance contract. Next step is to obtain product-owner priority and an observable user flow before creating a new task or claiming W6.
 
 ```yaml
@@ -1542,3 +1541,47 @@ remote_durability: PRs_and_CI_artifacts_remote; actual_main_reconciled_at_70a409
 blockers: []
 next_action: obtain_product_owner_priority_and_observable_user_flow_for_a_new_capability_before_creating_task_or_W6
 ```
+
+## Program: portfolio-docs / Variant: mainline
+
+### Identity
+
+| Field | Value |
+| --- | --- |
+| project_id / variant_id | portfolio-docs / mainline |
+| target_repo / branch | fallrising/newclear / docs/portfolio-docs-tiers |
+| active_owner / run_id | Cursor orchestrator / PD-20260924-01 |
+| protocol | Same task/report contract as team-superpowers; does not modify dim-gate program block above |
+
+### Objective
+
+Tiered documentation: root catalog + policy + component README banners + A-tier quickstarts only. No code moves. Open PR for human review.
+
+### Tasks
+
+| Task | Goal | State |
+| --- | --- | --- |
+| [T-100](tasks/T-100.md) | Policy, taxonomy, README catalog, banners, A quickstarts, goku README | DONE — [report](reports/T-100.md) |
+| T-010 tutorials | Optional golden-path tutorials | SKIPPED — A-tier links existing local-dev docs instead |
+
+### Decisions
+
+| ID | Decision |
+| --- | --- |
+| PD-D001 | Doc tiers A/B/C/D per orchestrator recommendation; owner “按你建議” |
+| PD-D002 | A = kith, hai-taskboard, agent-platform, dim-gate, ice-maker, eru-vps-mvp |
+| PD-D003 | B = fleet, local-ocr-services, mkfk; fleet stays under `specs/` this PR |
+| PD-D004 | C dormant since 2026-09-04 default; D = cloudform, streaming-converter, bite-pi, bee-swarm, aweshore |
+| PD-D005 | No new tutorials in this PR |
+
+### Verification gate
+
+- Inventory completeness passed (26/26)
+- ice_maker `status --json` passed
+- Diff Markdown-only passed
+- ice_maker `make check` env failure recorded in T-100 risks (not claimed pass)
+
+### Residual risks
+
+- Host missing Go/pytest for some quickstart live runs
+- Future rename `specs/fleet` → `systems/fleet` still open

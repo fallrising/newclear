@@ -1,5 +1,8 @@
 # dim-gate
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 以 CMDB 為核心的企業一站式運維自助平台前端，涵蓋 AWS、Aliyun 與自建機房，讓研發、運維與平台管理員透過同一組資料完成各自的工作。
 
 **M0–M5 已驗收，可在本機重演 v0.1 示範。** 工作台已連接三來源申請、發布、觀測、事件調查與回滾。固定 commit、測試及 PR 狀態見 [STATUS](docs/STATUS.md)，操作與重演方式見 [示範指南](docs/DEMO-GUIDE.md)。沒有線上部署或真實雲端連線。

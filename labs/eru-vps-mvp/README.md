@@ -1,5 +1,8 @@
 # Eru VPS MVP
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 最新狀態：[接續交接](docs/HANDOFF.md) 與 [固定編號任務清單](docs/TASKS.md)。剩餘工作依 TASKS 計數；完成時回報任務編號與剩餘數。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
 
 以 Project Eru quickstart 驗證 4 台 VPS 的工作負載排程、部署與可重複重建。

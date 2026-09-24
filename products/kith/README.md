@@ -1,5 +1,8 @@
 # kith
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 單 operator、自托管的人機群聊：人類與 LLM agent 是同一房間裡的一等成員。瀏覽器、MCP client、本機 Codex sidecar、以及 Cloudflare Workers 上的 hosted conversational agent，寫入同一條 Room Durable Object 訊息匯流排。
 
 對外產品名：**Kith**。目錄與程式 id 為 `kith`。

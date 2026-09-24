@@ -1,5 +1,8 @@
 # CMS Scaffold
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）、三個 demo pack。
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  

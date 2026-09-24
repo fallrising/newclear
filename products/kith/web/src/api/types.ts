@@ -1,4 +1,32 @@
 export type QuotaClass = "api_key" | "operator_personal";
+export type RuntimeKind = "hosted" | "runner" | "external";
+export type RuntimeStatus = "ok" | "unconfigured" | "connection_error" | "runner_offline" | "disabled";
+export type ApiFormat = "openai_chat" | "anthropic_messages";
+export type AdapterKind = "codex" | "claude_code" | "gemini_cli" | "command";
+export type ProviderPreset = "openai" | "anthropic" | "xai" | "deepseek" | "openrouter" | "mistral" | "groq" | "custom";
+export type LlmErrorClass =
+  | "auth"
+  | "not_found"
+  | "bad_request"
+  | "context_length"
+  | "rate_limited"
+  | "overloaded"
+  | "content_filter"
+  | "timeout"
+  | "network"
+  | "protocol"
+  | "unknown";
+export type AgentRuntimeSummary = {
+  runtime: RuntimeKind | null;
+  runtime_status: RuntimeStatus;
+  runtime_epoch: number;
+  connection_id: string | null;
+  connection_name: string | null;
+  api_format: string | null;
+  model: string | null;
+  adapter_kind: AdapterKind | null;
+  runner_last_seen_at: string | null;
+};
 export type AttentionMode = "silent" | "mention" | "keyword" | "ambient";
 export type ReplyLimit = { code: "fixed"; fixed_text: string } | { code: "sidecar_off" } | null;
 export type AttentionUpdate = { mode?: AttentionMode; keywords?: string[]; cooldown_ms?: number; debounce_ms?: number };
@@ -68,6 +96,7 @@ export type RoomMember = {
   policy_epoch: number;
   operator_only: boolean;
   reply_limit: ReplyLimit;
+  agent_runtime?: AgentRuntimeSummary | null;
 };
 export type RoomMembersResponse = { members: RoomMember[] };
 
@@ -93,3 +122,83 @@ export type WsServerFrame =
   | { v: 1; type: "event"; event: ServerMessage }
   | { v: 1; type: "status"; member_id: string; body: string; error_class?: string }
   | { v: 1; type: "error"; code: string };
+
+export type Provider = {
+  id: string;
+  name: string;
+  preset: ProviderPreset;
+  api_format: string;
+  base_url: string;
+  secret_source: "stored" | "env" | "none";
+  secret_env: string | null;
+  secret_last4: string | null;
+  secret_updated_at: string | null;
+  extra_headers: Record<string, string>;
+  default_quota_class: QuotaClass;
+  token_param: "max_tokens" | "max_completion_tokens";
+  last_error_class: LlmErrorClass | null;
+  last_checked_at: string | null;
+  created_at: string;
+  updated_at: string;
+  disabled_at: string | null;
+  agent_count: number;
+};
+export type ProviderTestResult = { ok: true; models: string[] | null } | { ok: false; error_class: LlmErrorClass };
+export type ProviderDraft = {
+  preset: ProviderPreset;
+  api_format?: ApiFormat;
+  base_url?: string;
+  secret_source: "stored" | "env" | "none";
+  secret?: string;
+  secret_env?: string;
+  extra_headers?: Record<string, string>;
+  token_param?: Provider["token_param"];
+};
+export type AdminAgent = AgentRuntimeSummary & {
+  id: string;
+  handle: string;
+  display_name: string;
+  quota_class: QuotaClass;
+  created_at: string | null;
+  disabled_at: string | null;
+  rooms: string[];
+  token_count: number;
+};
+export type RuntimeChange = {
+  id: string;
+  from_runtime: RuntimeKind | null;
+  to_runtime: RuntimeKind;
+  from_epoch: number | null;
+  to_epoch: number;
+  created_at: string;
+  changed_by: string;
+  changed_by_name: string;
+};
+export type AgentDetail = AdminAgent & {
+  max_output_tokens: number;
+  temperature: number | null;
+  stream: boolean;
+  system_prompt_addendum: string;
+  runtime_changes: RuntimeChange[];
+};
+export type PutRuntimeBody =
+  | {
+      runtime: "hosted";
+      quota_class: QuotaClass;
+      connection_id: string;
+      model: string;
+      system_prompt_addendum?: string;
+      max_output_tokens?: number;
+      temperature?: number | null;
+      revoke_tokens?: boolean;
+    }
+  | { runtime: "runner"; quota_class: QuotaClass; adapter_kind: AdapterKind; revoke_tokens?: boolean }
+  | { runtime: "external"; quota_class: QuotaClass; revoke_tokens?: boolean };
+export type BotToken = {
+  id: string;
+  created_at: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+  last_used_at: string | null;
+  room_scope_json: string;
+};

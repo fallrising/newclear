@@ -39,7 +39,12 @@ test(
     await page.getByTestId("login-submit").click();
     await page.waitForURL((u) => u.pathname === "/");
     await expect(page.getByTestId("app-shell")).toBeVisible();
-    await expect(page.getByTestId("home-greeting")).toContainText("Ada Lin");
+    if (info.project.name === "desktop") {
+      await expect(page.getByTestId("home-greeting")).toContainText("Ada Lin");
+    } else {
+      // From W1 the phone shows the room list at "/" (W1 §5.6.4).
+      await expect(page.getByTestId("room-list")).toBeVisible();
+    }
     await expect(page.getByTestId("app-shell-user")).toHaveText("Ada Lin");
     await shot(page, info, "home");
 

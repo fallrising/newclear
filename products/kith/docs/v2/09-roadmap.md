@@ -75,7 +75,7 @@ P1 大框架（#47）
   - `E2E-W3-02` @ 補全：鍵盤、點按、IME、Escape（v1 UI-10-02 的行為）。
   - `E2E-W3-03` `@agent` → 佔位 → 正式訊息；`reply failed` → 失敗提示。
   - `E2E-W3-04` 非 operator @ `operator_personal`：事前可見限制、落盤、無回覆中（UJ-06）。
-- 狀態：`IN_PROGRESS`（施工圖：[milestones/W3.md](milestones/W3.md)）。B-11 的封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
+- 狀態：`VERIFIED`（施工圖：[milestones/W3.md](milestones/W3.md)；全套 run `20260924-140805-2a14c97`：W0–W3 共 22 個測試通過、desktop 的 `E2E-W1-06` 依專案設定跳過，`e2e:validate` ok）。B-11 的封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
 
 ### W4 — Providers、hosted 多格式、控制台
 

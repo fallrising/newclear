@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "kith://contracts/v2/http-error.json",
   "title": "HTTP error envelope v2",
-  "description": "Superset of contracts/http-error-v1.json (unchanged). Adds codes introduced by v2 milestones; see docs/v2/milestones/W2.md §4.4. message is human-readable and must not contain secrets.",
+  "description": "Superset of contracts/http-error-v1.json (unchanged). Adds codes introduced by v2 milestones; see docs/v2/milestones/W2.md §4.4 and W4.md §4.4. message is human-readable and must not contain secrets.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -35,7 +35,12 @@
             "wake_budget_exhausted",
             "not_ready",
             "room_archived",
-            "wrong_password"
+            "wrong_password",
+            "in_use",
+            "name_taken",
+            "provider_disabled",
+            "secrets_key_missing",
+            "secret_unavailable"
           ]
         },
         "message": {

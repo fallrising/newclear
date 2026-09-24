@@ -1,0 +1,616 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/http-agents.json",
+  "title": "Agents and runtimes v2 (B-03, B-09)",
+  "description": "Operator-only GET/PATCH /api/agents*, PUT /api/agents/:id/runtime; 503 not_ready while ff_providers is off. runtimeSummary is also embedded as agent_runtime in GET /api/rooms/:id/members (any room member). No secret appears here. Defined in docs/v2/milestones/W4.md §4.3.",
+  "$defs": {
+    "runtimeSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime",
+        "runtime_status",
+        "runtime_epoch",
+        "connection_id",
+        "connection_name",
+        "api_format",
+        "model",
+        "adapter_kind",
+        "runner_last_seen_at"
+      ],
+      "properties": {
+        "runtime": {
+          "enum": [
+            "hosted",
+            "runner",
+            "external",
+            null
+          ]
+        },
+        "runtime_status": {
+          "enum": [
+            "ok",
+            "unconfigured",
+            "connection_error",
+            "runner_offline",
+            "disabled"
+          ]
+        },
+        "runtime_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 = no agent_runtimes row (v1 settings)"
+        },
+        "connection_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "connection_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "api_format": {
+          "anyOf": [
+            {
+              "enum": [
+                "openai_chat",
+                "openai_responses",
+                "anthropic_messages",
+                "gemini",
+                "fake"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_kind": {
+          "enum": [
+            "codex",
+            "claude_code",
+            "gemini_cli",
+            "command",
+            null
+          ]
+        },
+        "runner_last_seen_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "handle",
+        "display_name",
+        "quota_class",
+        "created_at",
+        "disabled_at",
+        "rooms",
+        "token_count",
+        "runtime",
+        "runtime_status",
+        "runtime_epoch",
+        "connection_id",
+        "connection_name",
+        "api_format",
+        "model",
+        "adapter_kind",
+        "runner_last_seen_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,32}$"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "disabled_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runtime": {
+          "enum": [
+            "hosted",
+            "runner",
+            "external",
+            null
+          ]
+        },
+        "runtime_status": {
+          "enum": [
+            "ok",
+            "unconfigured",
+            "connection_error",
+            "runner_offline",
+            "disabled"
+          ]
+        },
+        "runtime_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 = no agent_runtimes row (v1 settings)"
+        },
+        "connection_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "connection_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "api_format": {
+          "anyOf": [
+            {
+              "enum": [
+                "openai_chat",
+                "openai_responses",
+                "anthropic_messages",
+                "gemini",
+                "fake"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_kind": {
+          "enum": [
+            "codex",
+            "claude_code",
+            "gemini_cli",
+            "command",
+            null
+          ]
+        },
+        "runner_last_seen_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "runtimeChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from_runtime",
+        "to_runtime",
+        "from_epoch",
+        "to_epoch",
+        "created_at",
+        "changed_by",
+        "changed_by_name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "from_runtime": {
+          "enum": [
+            "hosted",
+            "runner",
+            "external",
+            null
+          ]
+        },
+        "to_runtime": {
+          "enum": [
+            "hosted",
+            "runner",
+            "external"
+          ]
+        },
+        "from_epoch": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "changed_by": {
+          "type": "string"
+        },
+        "changed_by_name": {
+          "type": "string"
+        }
+      }
+    },
+    "agentDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "handle",
+        "display_name",
+        "quota_class",
+        "created_at",
+        "disabled_at",
+        "rooms",
+        "token_count",
+        "runtime",
+        "runtime_status",
+        "runtime_epoch",
+        "connection_id",
+        "connection_name",
+        "api_format",
+        "model",
+        "adapter_kind",
+        "runner_last_seen_at",
+        "max_output_tokens",
+        "temperature",
+        "stream",
+        "system_prompt_addendum",
+        "runtime_changes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,32}$"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "disabled_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runtime": {
+          "enum": [
+            "hosted",
+            "runner",
+            "external",
+            null
+          ]
+        },
+        "runtime_status": {
+          "enum": [
+            "ok",
+            "unconfigured",
+            "connection_error",
+            "runner_offline",
+            "disabled"
+          ]
+        },
+        "runtime_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 = no agent_runtimes row (v1 settings)"
+        },
+        "connection_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "connection_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "api_format": {
+          "anyOf": [
+            {
+              "enum": [
+                "openai_chat",
+                "openai_responses",
+                "anthropic_messages",
+                "gemini",
+                "fake"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_kind": {
+          "enum": [
+            "codex",
+            "claude_code",
+            "gemini_cli",
+            "command",
+            null
+          ]
+        },
+        "runner_last_seen_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "max_output_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        },
+        "temperature": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 2
+        },
+        "stream": {
+          "type": "boolean"
+        },
+        "system_prompt_addendum": {
+          "type": "string"
+        },
+        "runtime_changes": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/runtimeChange"
+          }
+        }
+      }
+    },
+    "listResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agents"
+      ],
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/agent"
+          }
+        }
+      }
+    },
+    "itemResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent"
+      ],
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/agentDetail"
+        }
+      }
+    },
+    "patchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "putRuntimeRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime",
+            "quota_class",
+            "connection_id",
+            "model"
+          ],
+          "properties": {
+            "runtime": {
+              "const": "hosted"
+            },
+            "quota_class": {
+              "enum": [
+                "api_key",
+                "operator_personal"
+              ]
+            },
+            "revoke_tokens": {
+              "type": "boolean"
+            },
+            "connection_id": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string",
+              "pattern": "^[\\x21-\\x7e]{1,128}$"
+            },
+            "system_prompt_addendum": {
+              "type": "string",
+              "description": "≤ 4096 UTF-8 bytes (RT-12)"
+            },
+            "max_output_tokens": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            },
+            "temperature": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 2
+            },
+            "stream": {
+              "const": false,
+              "description": "true is refused until W5"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime",
+            "quota_class",
+            "adapter_kind"
+          ],
+          "properties": {
+            "runtime": {
+              "const": "runner"
+            },
+            "quota_class": {
+              "enum": [
+                "api_key",
+                "operator_personal"
+              ]
+            },
+            "revoke_tokens": {
+              "type": "boolean"
+            },
+            "adapter_kind": {
+              "enum": [
+                "codex",
+                "claude_code",
+                "gemini_cli",
+                "command"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime",
+            "quota_class"
+          ],
+          "properties": {
+            "runtime": {
+              "const": "external"
+            },
+            "quota_class": {
+              "enum": [
+                "api_key",
+                "operator_personal"
+              ]
+            },
+            "revoke_tokens": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "putRuntimeResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent",
+        "runtime_epoch"
+      ],
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/agentDetail"
+        },
+        "runtime_epoch": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

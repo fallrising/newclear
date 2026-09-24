@@ -1,0 +1,470 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/http-providers.json",
+  "title": "Provider connections v2 (B-07)",
+  "description": "Operator-only. /api/providers*. 503 not_ready while ff_providers is off. The secret is write-only: no response ever carries secret, secret_ciphertext or the Worker secret value (RT-09, V2-INV-01). Defined in docs/v2/milestones/W4.md §4.2.",
+  "$defs": {
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "preset",
+        "api_format",
+        "base_url",
+        "secret_source",
+        "secret_env",
+        "secret_last4",
+        "secret_updated_at",
+        "extra_headers",
+        "default_quota_class",
+        "token_param",
+        "last_error_class",
+        "last_checked_at",
+        "created_at",
+        "updated_at",
+        "disabled_at",
+        "agent_count"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,47}$"
+        },
+        "preset": {
+          "enum": [
+            "openai",
+            "anthropic",
+            "xai",
+            "deepseek",
+            "openrouter",
+            "mistral",
+            "groq",
+            "custom"
+          ]
+        },
+        "api_format": {
+          "enum": [
+            "openai_chat",
+            "openai_responses",
+            "anthropic_messages",
+            "gemini",
+            "fake"
+          ]
+        },
+        "base_url": {
+          "type": "string",
+          "pattern": "^https?://[^/?#]+(/[^?#]*[^/?#])?$"
+        },
+        "secret_source": {
+          "enum": [
+            "stored",
+            "env",
+            "none"
+          ]
+        },
+        "secret_env": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "secret_last4": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4
+        },
+        "secret_updated_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extra_headers": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9-]{1,64}$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[\\x20-\\x7e]{0,512}$"
+          }
+        },
+        "default_quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        },
+        "token_param": {
+          "enum": [
+            "max_tokens",
+            "max_completion_tokens"
+          ]
+        },
+        "last_error_class": {
+          "anyOf": [
+            {
+              "enum": [
+                "auth",
+                "not_found",
+                "bad_request",
+                "context_length",
+                "rate_limited",
+                "overloaded",
+                "content_filter",
+                "timeout",
+                "network",
+                "protocol",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_checked_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "disabled_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agent_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "listResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providers",
+        "can_store_secrets"
+      ],
+      "properties": {
+        "providers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/provider"
+          }
+        },
+        "can_store_secrets": {
+          "type": "boolean",
+          "description": "false when KITH_SECRETS_KEY is not set; the UI then offers only secret_source=env"
+        }
+      }
+    },
+    "itemResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider"
+      ],
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/provider"
+        }
+      }
+    },
+    "createRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "preset",
+        "secret_source",
+        "default_quota_class"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,47}$"
+        },
+        "preset": {
+          "enum": [
+            "openai",
+            "anthropic",
+            "xai",
+            "deepseek",
+            "openrouter",
+            "mistral",
+            "groq",
+            "custom"
+          ]
+        },
+        "api_format": {
+          "enum": [
+            "openai_chat",
+            "anthropic_messages"
+          ]
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "secret_source": {
+          "enum": [
+            "stored",
+            "env",
+            "none"
+          ]
+        },
+        "secret": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "^[\\x21-\\x7e\\u0080-\\uffff]+$"
+        },
+        "secret_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+          "not": {
+            "const": "KITH_SECRETS_KEY"
+          }
+        },
+        "extra_headers": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9-]{1,64}$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[\\x20-\\x7e]{0,512}$"
+          }
+        },
+        "token_param": {
+          "enum": [
+            "max_tokens",
+            "max_completion_tokens"
+          ]
+        },
+        "default_quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        }
+      },
+      "description": "api_format and base_url default from the preset; custom requires both. default_quota_class is required so the UI must ask (BR-54)."
+    },
+    "testRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preset",
+        "secret_source"
+      ],
+      "properties": {
+        "preset": {
+          "enum": [
+            "openai",
+            "anthropic",
+            "xai",
+            "deepseek",
+            "openrouter",
+            "mistral",
+            "groq",
+            "custom"
+          ]
+        },
+        "api_format": {
+          "enum": [
+            "openai_chat",
+            "anthropic_messages"
+          ]
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "secret_source": {
+          "enum": [
+            "stored",
+            "env",
+            "none"
+          ]
+        },
+        "secret": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "^[\\x21-\\x7e\\u0080-\\uffff]+$"
+        },
+        "secret_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+          "not": {
+            "const": "KITH_SECRETS_KEY"
+          }
+        },
+        "extra_headers": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9-]{1,64}$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[\\x20-\\x7e]{0,512}$"
+          }
+        },
+        "token_param": {
+          "enum": [
+            "max_tokens",
+            "max_completion_tokens"
+          ]
+        }
+      },
+      "description": "POST /api/providers/test: same fields as create minus name and default_quota_class; nothing is stored."
+    },
+    "patchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,47}$"
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "secret_source": {
+          "enum": [
+            "stored",
+            "env",
+            "none"
+          ]
+        },
+        "secret": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "^[\\x21-\\x7e\\u0080-\\uffff]+$"
+        },
+        "secret_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+          "not": {
+            "const": "KITH_SECRETS_KEY"
+          }
+        },
+        "extra_headers": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9-]{1,64}$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[\\x20-\\x7e]{0,512}$"
+          }
+        },
+        "default_quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        },
+        "token_param": {
+          "enum": [
+            "max_tokens",
+            "max_completion_tokens"
+          ]
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "description": "preset and api_format are immutable. Changing base_url, secret or extra_headers clears last_error_class."
+    },
+    "testResult": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ok",
+            "models"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "models": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 500,
+              "description": "null when the list endpoint answers 404"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ok",
+            "error_class"
+          ],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error_class": {
+              "enum": [
+                "auth",
+                "not_found",
+                "bad_request",
+                "context_length",
+                "rate_limited",
+                "overloaded",
+                "content_filter",
+                "timeout",
+                "network",
+                "protocol",
+                "unknown"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "deleteResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        }
+      }
+    }
+  }
+}

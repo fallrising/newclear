@@ -80,9 +80,11 @@ P0＝W4 必交；P1＝W4 可延到 W5。Phase 2 需以各家官方文件逐欄�
 | `xai` | `openai_chat` | `https://api.x.ai/v1` | `GET /models` |
 | `deepseek` | `openai_chat` | `https://api.deepseek.com` | `GET /models` |
 | `openrouter` | `openai_chat` | `https://openrouter.ai/api/v1` | `GET /models` |
+| `mistral` | `openai_chat` | `https://api.mistral.ai/v1` | `GET /models` |
+| `groq` | `openai_chat` | `https://api.groq.com/openai/v1` | `GET /models` |
 | `custom` | 任選 | 必填 | 可關閉 |
 
-base URL 值以 Phase 2 查證為準；本表是框架。
+base URL 已在 [W4](milestones/W4.md) §4.5.3 查證（xAI、DeepSeek、Mistral、Groq 為次級來源）；`google` preset 與 `gemini` adapter 一起在 W5 加入。`openai` preset 的 `token_param` 預設 `max_completion_tokens`（Q-17）。
 
 ### 2.3 統一介面
 
@@ -281,20 +283,20 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 ## 7. v1 → v2 遷移
 
 1. D1 migration 新增 `provider_connections`、`agent_runtimes`，`generations` 加欄位（[04](04-backend.md) §4）。
-2. 若 `XAI_API_KEY` 存在：建立連線 `xai-default`（`secret_source=env`、`secret_env=XAI_API_KEY`、`openai_chat`、`https://api.x.ai/v1`）。
+2. 若 `XAI_API_KEY` 存在：建立連線 `xai-default`（`secret_source=env`、`secret_env=XAI_API_KEY`、`openai_chat`、`https://api.x.ai/v1`）。Phase 2：腳本無法讀 Worker secret，改由 operator 以 `--xai-secret-env XAI_API_KEY`／`--no-xai` 申報（[W4](milestones/W4.md) §4.7）。
 3. 每個 `quota_class=api_key` 的既有 agent，若沒有 runtime 列：建立 `runtime=hosted`、連線 `xai-default`、模型 `grok-4.5`。
 4. 每個 `operator_personal` 的既有 agent：建立 `runtime=runner`、adapter `codex`。
-5. `FAKE_LLM_TEXT` 保留為**測試專用** fake adapter（`api_format=fake`，只在 `KITH_DEV_ALLOW_HTTP_PROVIDERS=on` 或測試環境可選）。v1 的 `reply_limit.fixed` 在 v2 改由 fake adapter 產生。
+5. （Phase 2 修訂：不實作 `fake` adapter；E2E 改用 HTTP fake provider，`FAKE_LLM_TEXT` 只留給沒有 runtime 列的 agent，見 [W4](milestones/W4.md) §1.2、Q-15。）原文：`FAKE_LLM_TEXT` 保留為**測試專用** fake adapter（`api_format=fake`，只在 `KITH_DEV_ALLOW_HTTP_PROVIDERS=on` 或測試環境可選）。v1 的 `reply_limit.fixed` 在 v2 改由 fake adapter 產生。
 6. 遷移是冪等腳本，重跑不產生重複列。
 
 ---
 
 ## 8. Phase 2 待細化
 
-- [ ] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）。
-- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。
+- [ ] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）。`openai_chat`、`anthropic_messages` 的非串流部分完成 → [W4](milestones/W4.md) §4.5；串流與另兩種格式在 W5。
+- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。FM-LLM-01–06、10–16 完成 → [W4](milestones/W4.md) §8；FM-LLM-07–09 在 W5，FM-RUN 在 W6。
 - [ ] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息。
 - [ ] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）。
 - [ ] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報。
 - [ ] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明。
-- [ ] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）。
+- [x] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）→ [W4](milestones/W4.md) §4.3.2、§4.6.5（epoch 在呼叫上游前後各比對一次）。

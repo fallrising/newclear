@@ -238,6 +238,14 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W3-02 | BR-35、v1 UI-10-02 | w3-mention.spec.ts |
 | E2E-W3-03 | UJ-05、B-11、BR-45、FM-SYNC-15 | w3-reply.spec.ts |
 | E2E-W3-04 | UJ-06、BR-43（顯示） | w3-personal.spec.ts |
+| E2E-W4-01 | UJ-07、BR-50、BR-51、BR-54、RT-10、FM-LLM-15、16 | w4-providers.spec.ts |
+| E2E-W4-02 | UJ-07、B-03、B-09 | w4-hosted.spec.ts |
+| E2E-W4-03 | V2-INV-02、FM-LLM-06（重試） | w4-hosted.spec.ts |
+| E2E-W4-04 | UJ-09 | w4-tokens.spec.ts |
+| E2E-W4-05 | V2-INV-01、RT-09 | w4-providers.spec.ts |
+| E2E-W4-06 | V2-INV-05、BR-53 | w4-hosted.spec.ts |
+| E2E-W4-07 | RT-02、03 §7 | w4-migrate.spec.ts |
+| E2E-W4-08 | RT-01、BR-47、V2-INV-06 | w4-runtime-change.spec.ts |
 | … | … | … |
 
 ## 7. CI

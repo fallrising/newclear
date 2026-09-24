@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { clearAllDrafts } from "../features/composer";
+import { clearUnread } from "../store/unread";
 import { apiFetch } from "./client";
 import type { LoginRequest, LoginResponse, LogoutResponse, Me } from "./types";
 
@@ -38,6 +39,7 @@ export function useLogout(): UseMutationResult<LogoutResponse, Error, void> {
     onSettled: () => {
       queryClient.clear();
       clearAllDrafts();
+      clearUnread();
       void navigate("/login", { replace: true });
     },
   });

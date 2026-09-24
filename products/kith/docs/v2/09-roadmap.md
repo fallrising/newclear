@@ -91,7 +91,7 @@ P1 大框架（#47）
   - `E2E-W4-07` v1→v2 遷移腳本在含 v1 資料的 seed 上執行兩次，結果相同。
   - `E2E-W4-08` 改 runtime：hosted 回覆進行中（fake-provider 延遲）時把 agent 改成 external → 舊回覆不落盤、`reply ended`；身份與歷史不變；勾選撤銷時 token 失效（RT-01、V2-INV-06）。
 - 禁止：串流草稿、runner 改動。
-- 狀態：`DOC_READY`（施工圖：[milestones/W4.md](milestones/W4.md)）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
+- 狀態：`IN_PROGRESS`（施工圖：[milestones/W4.md](milestones/W4.md)）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
 
 ### W5 — 串流與可觀測
 

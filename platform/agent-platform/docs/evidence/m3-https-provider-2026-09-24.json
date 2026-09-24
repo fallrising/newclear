@@ -18,13 +18,17 @@
     "provider_usage_source": "provider_reported_usage_unbilled"
   },
   "tests": {
-    "python_unit_tests": {"passed": 55},
-    "postgres_http_platform_tests": {"passed": 190},
+    "python_unit_tests": {
+      "passed": 45
+    },
+    "postgres_http_platform_tests": {
+      "passed": 200
+    },
     "ruff_check": "passed",
     "ruff_format_check": "passed",
     "web_check": {
-      "status": "not-run",
-      "reason": "npm executable is unavailable in the local environment"
+      "status": "not-run-locally",
+      "reason": "npm executable is unavailable in the local environment; GitHub web CI rerun pending after assertion fix"
     }
   },
   "kvm": {
@@ -67,9 +71,9 @@
   ],
   "source_sha256": {
     "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
-    "docs/HANDOFF.md": "633d23c52a1be7baa283b181d48507edc098244e9cc0553ddad009a4026a3b49",
-    "docs/M3-HTTPS-PROVIDER.md": "b14cac95e99dea8725e20ee101e2110786784bc3b434f48a80b26cbfaff96025",
-    "docs/NEXT-PROMPT.md": "de630dfa820e744316cfc629bc709fc9fe62a3238c0e460a3f4b02511a56574a",
+    "docs/HANDOFF.md": "0e541b5d3f73a392efc8e4046a5a537762f9e9224ddede96b00c6d6040647b2b",
+    "docs/M3-HTTPS-PROVIDER.md": "71f1beae255fee822c80a80365da26cb9df219956fa2115c5b2779d3772c6cc0",
+    "docs/NEXT-PROMPT.md": "968e08929857ef789843633f871487d87b2409abb17c6f61fade5f0e95d78205",
     "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
     "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
     "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",
@@ -91,13 +95,21 @@
     "scripts/m3-output-kvm.py": "154bb1801711bd3eea988c3b619f1500352942d7100c566edb6c995e6c6a31fa",
     "scripts/m3-pause-kvm.py": "062762c477a891f10b797a9acf960509abe2fc9cea1ff3996fd05934beb569b7",
     "scripts/m3-recovery-kvm.py": "a9891d92a11aec23c2b6af3738e7b57c1e88c8593dd5b1f650233efd8c724666",
-    "tests/test_provider_https.py": "a077048410856c27c0bd81bb8a51e9a97caa7e6f08a244b3348abb4e360933ea",
-    "tests/test_verification_contract.py": "bfc33e3477dae4b23a6e84aa57d67f6cbd3fc52fd23ddaa35d7ee1d5a18b5402",
     "tests_platform/test_control_plane.py": "57da5b619f9afe3b7ccbbe00138cfae7a86b804f5d9cfdc6277cc98561c7ce8d",
     "tests_platform/test_output_security.py": "14a9264f723e02a020eb63819fe69aa1238afc5fe0c2daa73be339d17acc68f6",
     "tests_platform/test_runtime.py": "05337962512a38eb58bf2b2490ea436c117894b44b4e874fd41d72675f4f0ff3",
     "web/src/App.tsx": "e361ad98b87d3c7f20f361616f1c83b166fc5ca8e85012509583bf1a9999e030",
-    "web/src/api.ts": "d794eef2a4c14b1b63db79750eb558823c3dc4fd0b1ff97ea60f8ea77a916cef"
+    "web/src/api.ts": "d794eef2a4c14b1b63db79750eb558823c3dc4fd0b1ff97ea60f8ea77a916cef",
+    "tests_platform/test_provider_https.py": "a077048410856c27c0bd81bb8a51e9a97caa7e6f08a244b3348abb4e360933ea",
+    "tests_platform/test_verification_contract.py": "bfc33e3477dae4b23a6e84aa57d67f6cbd3fc52fd23ddaa35d7ee1d5a18b5402",
+    "web/src/App.test.tsx": "0f3a32d1b0c24d8e867f4a4a1e3c6a95f851aae79f7b835acc80f7d0839b9d6f"
   },
-  "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories."
+  "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories.",
+  "github_ci": {
+    "previous_run_id": 36006771058,
+    "check": "failed before suite alignment: new platform dependency-backed tests imported without locked runtime dependencies",
+    "web": "failed one stale status-label assertion; assertion corrected",
+    "control_plane": "passed",
+    "rerun": "pending"
+  }
 }

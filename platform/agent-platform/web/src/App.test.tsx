@@ -227,7 +227,7 @@ it('renders a saved real VM diff as text and keeps unsupported controls disabled
   expect(document.querySelector('img')).toBeNull();
   for (const name of ['暫停', '繼續', '取消', '審批'])
     expect(screen.getByRole('button', { name })).toBeDisabled();
-  expect(screen.getByText(/專案測試：未設定/)).toBeVisible();
+  expect(screen.getByText(/Profile 設定的驗證通過/)).toBeVisible();
 });
 
 it('submits cancellation and keeps pending stop distinct from cancelled', async () => {

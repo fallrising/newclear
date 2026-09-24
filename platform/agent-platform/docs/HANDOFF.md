@@ -1,15 +1,15 @@
 # 開發接續紀錄 — 2026-09-24
 
-目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作，Python／PostgreSQL 驗收通過；real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 等待 CI／recovery／KVM gate，尚未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作；45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests 與 Ruff 通過。real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 等待修正後 CI／recovery／KVM gate，尚未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
 
 ## 本次 AT-11-C2b2 HTTPS provider 與 verification
 
 - 最終工作樹已對齊 GitHub main `dba9ee94a49bcfe2efb298caa1d5324cfde03988`，改動只在 `platform/agent-platform`。新 `openai-compatible-https-v1` 固定完整 HTTPS endpoint、model、request cap、file-backed credential reference、CA fingerprint 與 TLS policy digest；強制 TLS 1.2+、憑證鏈及 hostname 驗證，不使用 ambient proxy、不跟 redirect、不自動 retry。Provider usage 標成 unbilled；`amount_decimal:null`、`hard_money_limit_supported:false`。未呼叫外部 API，未讀取既有 provider key。
 - Immutable profile revision 保存 strict verification policy：預設 `none` 是 unknown；`commands` 直接執行 bounded argv，限制 check 數量／timeout／輸出並核對 workspace diff；舊 KVM harness 明確使用 `fixture-m2`。Connector 重新核對 revision、contract hash、check 結果與 diff hash；只有完整通過才可成功。
 - 新增 migration 012，讓新 profile model reference 走 `openai-compatible:chat-completions`，保留舊 `fixture:m2` revision。`mock-https-complete` real-KVM harness 已加入本機 TLS mock、測試 CA、無 mock run-ID header 與 guest profile check。
-- Ruff lint／format 通過；Python unit 55 項、PostgreSQL／HTTP platform 190 項通過。`make web-check` 未能在此主機啟動，因沒有 Node/npm。`mock-https-complete` 未通過：managed launcher 未套用文件要求的 supplementary `kvm` group，`/dev/kvm` open 得到 `EACCES`，sandboxd 記錄 Cocoon clone 子程序被終止。只讀確認 `sg kvm` 有 device 存取權；沒有在該錯誤後重試 KVM。
+- 最新 `make platform-check` 通過：45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff lint／format。第一次 PR CI 的 fast check 因缺少平台 runtime dependencies 無法 import 兩個新測試；已把它們移到已安裝鎖定依賴的 `tests_platform` suite。Web CI 的 1 個舊狀態文案 assertion 已更新；修正後 CI 尚待重跑。本機 `make web-check` 因沒有 Node/npm 未能執行。`mock-https-complete` 未通過：managed launcher 未套用文件要求的 supplementary `kvm` group，`/dev/kvm` open 得到 `EACCES`，sandboxd 記錄 Cocoon clone 子程序被終止。只讀確認 `sg kvm` 有 device 存取權；沒有在該錯誤後重試 KVM。
 - 原 197 筆 journal release result 仍全部通過 exact stop-proof validator。此次另外留下 1 筆 `allocate=started` 且無 handle／observed／release proof 的 intent；無 active claims／VM、clone runtime directory 或 CPU scope。產品 `drained()` 因 ownership 不確定而拒絕通過。此新 row、舊 journal 與 fences 均保留；connector、sandboxd 已停，owned PostgreSQL container 數為零。不能刪 row、換 state directory、改 generation 或直接 driver 繞過它；下一次同 journal KVM 前必須有正式、可稽核的 recovery 決定。
-- Commit `aae40ce` pushed 至 `agent/agent-platform/at-11-c2b2`；Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 已建立。CI 仍待完成；即使 CI 通過，也不得在 real-KVM gate 與 journal recovery 決策前 merge。
+- Implementation commit `aae40ce` 與交接 commit `70ce010` 已推至 `agent/agent-platform/at-11-c2b2`；Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 已建立。修正後 CI 仍待完成；即使 CI 通過，也不得在 real-KVM gate 與 journal recovery 決策前 merge。
 - 私有輸出留在 `/tmp/apm3-at11c2b2-20260924`，不要公開 TLS key、mock key、model／SDK request 或 journal。
 
 ## 本次 AT-11-C2b1 本機 OpenAI 相容 mock

@@ -194,10 +194,10 @@ Phase 2 細化（[W1](milestones/W1.md) §5.3）補充的事實與規則：
 
 | 項目 | 目標 |
 | --- | --- |
-| 首次載入 JS（gzip） | ≤ 200 KiB（不含字型） |
+| 首次載入 JS（gzip） | ≤ 250 KiB（不含字型；原為 200 KiB，依鎖定版本的實測修訂，見 [10](10-decisions.md) Q-31、[W7](milestones/W7.md) §10） |
 | 進房到看到最新訊息 | p95 < 600 ms（本機 wrangler） |
 | 1,000 則時間線捲動 | 無明顯掉幀；DOM 中訊息列 ≤ 100 |
-| console 頁面 | 按路由分割，不進首頁 bundle |
+| console 頁面 | 按路由分割，不進首頁 bundle（W7 落實，[W7](milestones/W7.md) §5.1） |
 
 ## 8. 無障礙
 

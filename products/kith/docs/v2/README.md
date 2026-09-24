@@ -54,7 +54,7 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | W4 Providers、hosted 多格式、控制台 | [milestones/W4.md](milestones/W4.md) | `DOC_READY` |
 | W5 串流與可觀測 | [milestones/W5.md](milestones/W5.md) | `DOC_READY` |
 | W6 Runner、trace、thread | [milestones/W6.md](milestones/W6.md) | `DOC_READY` |
-| W7 切換 | 尚未細化 | `NOT_STARTED` |
+| W7 切換 | [milestones/W7.md](milestones/W7.md) | `DOC_READY` |
 
 相關 ADR：
 

@@ -51,7 +51,7 @@ python3 scripts/recovery.py execute --plan NEW_CANCEL_PLAN --sha256 PLAN_SHA256
 
 reapply 只有在 receipt、獨立取消 intent 與原來源資料全部吻合時，才排除該 pending update；只有 `stage: cancelled` 字樣不能解除阻擋。來源資料新增、遺失、改動或 receipt 損壞都會停止。更新目錄缺 journal 也會停止，不能靠刪除 journal 繞過；其他已 installed 的 patch 仍要求明確 preserve selection，release downgrade 仍被拒絕。後來合法安裝新 patch 不要求 live binary 繼續等於已取消來源的舊版本。
 
-驗收為本機合成目錄與 controller 假遠端整合，包含真實子程序 SIGKILL／回覆遺失／reapply 回歸；[驗證紀錄](M2-CORE-CANCEL-2026-09-23.md)。目前沒有在實機製造新的失敗更新，core 故障演練另屬 ERU-005；soak 期間仍保留既有 mutation 限制。
+驗收為本機合成目錄與 controller 假遠端整合，包含真實子程序 SIGKILL／回覆遺失／reapply 回歸；[驗證紀錄](M2-CORE-CANCEL-2026-09-23.md)。ERU-005 實機 core API 恢復演練已於 2026-09-24 完成，詳見[演練紀錄](M2-CORE-API-RECOVERY-2026-09-24.md)；完整 VM／磁碟故障仍分開驗收。
 
 ## core API 不可用時的 binary 還原
 
@@ -64,7 +64,7 @@ python3 scripts/recovery.py execute --plan NEW_RECOVERY_PLAN --sha256 PLAN_SHA25
 
 core 恢復後才查 API，確認原 node 註冊、空 workload、配額一致與保留服務 invocation。若 binary 已還原，只接續必要的服務恢復；若執行中的 SHA 已正確，不再重啟。回覆遺失後仍須新 plan，不能重播原 execute。
 
-這是 binary／manifest 恢復，不能修復 etcd 資料、OS 或磁碟。早期 core patch 的原備份仍是含已知 lock-context bug 的 upstream binary；還原會明確記錄 core-rollback，worker 重裝的 patched-core gate 因而不通過。後續重新部署修補版必須另建 core-patch plan。
+這是 binary／manifest 恢復，不能修復 etcd 資料、OS 或磁碟。早期 core patch 的原備份仍是含已知 lock-context bug 的 upstream binary；還原會明確記錄 core-rollback，worker 重裝的 patched-core gate 因而不通過。後續重新部署修補版必須另建 core-patch plan。ERU-005 已以獨立新 plan 完成一次實機演練並隨後回切驗證 patch；詳見[演練紀錄](M2-CORE-API-RECOVERY-2026-09-24.md)。
 
 ## 保留已部署 core patch 的同版本 reapply
 
@@ -93,7 +93,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
 
 `quarantine` 在已備份並隔離六檔／三根後故意失敗；`start` 在元件已重裝、agent 可用且仍 fenced 時故意失敗。兩者保持 failed，不增加重裝計次，必須使用新的 recovery plan。沒有核心 OS／磁碟故障注入，也不做 provider reset。
 
-worker-4 的本機與實機結果見 [2026-09-23 開發紀錄](M2-RECOVERY-2026-09-23.md)；02／03 目前只有[本機執行器驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)。完整災難恢復、非空 worker drain、02／03 實機、OS reimage、HA／snapshot restore 與 24h soak 仍分開驗收。
+worker-4 的本機與實機結果見 [2026-09-23 開發紀錄](M2-RECOVERY-2026-09-23.md)；02／03 目前只有[本機執行器驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)。完整 VM／磁碟災難恢復、非空 worker drain、02／03 實機、OS reimage、HA／snapshot restore 與正式 V11 1 req/s、24h soak 仍分開驗收；ERU-002 的低頻 24h 觀測不替代 V11。
 
 ## 程序突然終止時的界線
 

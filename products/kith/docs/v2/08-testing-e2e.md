@@ -222,7 +222,7 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | --- | --- | --- |
 | E2E-W0-01 | 隔離環境、seed、登入、FE-05（語言偵測）、FE-22、BR-22、UJ-11（部分） | w0-shell.spec.ts |
 | E2E-W0-02 | 證據資料夾、V2-INV-01 的檢查機制、FM-E2E-01–06 | w0-evidence.spec.ts |
-| E2E-W1-01 | V2-INV-04（舊前端仍可用）、B-01 相容 | w1-compat.spec.ts |
+| E2E-W1-01 | V2-INV-04（v1 查詢語意；W1–W6 另驗舊前端仍可用，W7 刪除舊前端後只留 API 步驟，[W7](milestones/W7.md) §5.2） | w1-compat.spec.ts |
 | E2E-W1-02 | UJ-02、BR-31、IME | w1-chat.spec.ts |
 | E2E-W1-03 | UJ-02、FM-SYNC-01–11、16 | w1-chat.spec.ts |
 | E2E-W1-04 | UJ-03、B-01、FM-SYNC-12、13 | w1-history.spec.ts |
@@ -256,12 +256,12 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W6-03 | UJ-10、BR-36、B-05、FE-12 | w6-thread.spec.ts |
 | E2E-W6-04 | FM-RUN-01、02、05、06、INV-19 | w6-runner-restart.spec.ts |
 | E2E-W6-05 | v1 sidecar 回歸 | w6-sidecar.spec.ts |
-| … | … | … |
+| E2E-W7-01 | 全套（W0–W7）、V2-INV-01 的遮罩檢查 | `npm run e2e:all`（manifest `scope: full`） |
+| E2E-W7-02 | 05 §7 效能預算、控制台路由分割、FM-CUT-05 | w7-budget.spec.ts |
 
 ## 7. CI
 
-- 根 `.github/workflows/kith.yml` 新增 job `e2e`（Phase 2 設計）：path-scoped、`contents: read`、無 secrets、timeout、concurrency cancel、上傳 artifacts。遵守 `docs/specs/monorepo-ci.md`，並同步更新該文件。
-- 既有 `npm test`、`npm run lint` 照跑。
+- 根 `.github/workflows/kith.yml` 在 W7 改為三個 job：`test`（既有 `npm test`、`npm run lint`）、`web`（取代舊 `frontend` job）、`e2e`（全套＋驗證＋上傳證據）。完整 YAML 與 `docs/specs/monorepo-ci.md` 的修改見 [W7](milestones/W7.md) §4.2：path-scoped、`contents: read`、無 secrets、timeout、concurrency cancel、action 釘 SHA。
 
 ## 8. Phase 2 待細化
 

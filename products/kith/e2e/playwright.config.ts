@@ -19,6 +19,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: `${run.runDir}/report`, open: "never" }],
+    ["./harness/reporter.ts"],
   ],
   use: {
     trace: "retain-on-failure",

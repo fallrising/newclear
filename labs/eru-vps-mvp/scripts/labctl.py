@@ -223,7 +223,7 @@ class Operator:
         self.journal.setdefault('history', []).append({'at': now(), 'stage': stage})
         self.save_journal()
 
-    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None):
+    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None, guard_exclude=None):
         if fault_after and (operation != 'rebuild-node' or node != 'worker-4' or rebuild_mode not in [None, 'component-reinstall']):
             raise ValueError('--fault-after is only for a bounded worker-4 component recovery drill')
         if fault_after not in [None, 'quarantine', 'start']:
@@ -235,7 +235,9 @@ class Operator:
         if core_artifact and operation != 'reapply':
             raise ValueError('--core-artifact applies only to reapply')
         if operation == 'canary-start' and node:
-            raise ValueError('canaries are fixed to worker-2 and worker-3')
+            raise ValueError('canary-start uses --exclude-node to select the empty target')
+        if guard_exclude and operation != 'canary-start':
+            raise ValueError('--exclude-node applies only to canary-start')
         if rebuild_mode and operation != 'rebuild-node':
             raise ValueError('--mode applies only to rebuild-node')
         if rebuild_mode not in [None, 'component-reinstall', 'provider-reimage']:
@@ -272,11 +274,16 @@ class Operator:
                 plan['blockers'] += plan['patched_core']['blockers']
             plan['executable'] = not plan['blockers']
         if operation == 'canary-start':
+            from canaries import canary_nodes
+            guards = canary_nodes(guard_exclude or 'worker-4')
+            plan['guard_exclude'] = guard_exclude or 'worker-4'
+            plan['guard_nodes'] = list(guards)
             if snap['workloads']:
                 plan['blockers'].append('initial canary setup requires empty ERU workloads')
                 plan['executable'] = False
-            plan['mutation_hosts'] = ALIASES[:3]
-            plan['steps'] = ['Create one run-owned nginx on worker-2 and worker-3', 'Verify both HTTP endpoints; retain exact IDs for guard and cleanup plans']
+            plan['mutation_hosts'] = [self.core['alias'], *guards.values()]
+            plan['steps'] = ['Create one run-owned nginx on each of ' + ', '.join(guards),
+                             'Verify both HTTP endpoints; retain exact IDs for guard and cleanup plans']
         elif operation == 'cleanup':
             evidence_path = self.project / 'private/smoke' / (identifier(smoke_run) + '.json')
             evidence = read(evidence_path)
@@ -316,7 +323,7 @@ class Operator:
                 if not health_file or not canary_run:
                     plan['blockers'].append('component reinstall requires --health and --canary-run')
                 elif not plan['blockers']:
-                    plan['worker_readiness'] = self.worker_readiness(health_file, canary_run, snap)
+                    plan['worker_readiness'] = self.worker_readiness(health_file, canary_run, snap, node)
                     plan['blockers'] += plan['worker_readiness']['blockers']
                 plan['executable'] = not plan['blockers']
                 plan['steps'] = [
@@ -352,7 +359,7 @@ class Operator:
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
         return envelope
 
-    def worker_readiness(self, health_file, canary_run, snapshot):
+    def worker_readiness(self, health_file, canary_run, snapshot, target='worker-4'):
         from core_patch import readiness, PatchOperator
         from canaries import guard_targets
         report = read(self.project / health_file)
@@ -370,7 +377,7 @@ class Operator:
         return {'health_file': health_file, 'health_sha256': digest(report),
                 'canary_run': identifier(canary_run),
                 'canary_evidence_sha256': digest(read(self.project / 'private/smoke' / (identifier(canary_run) + '.json'))),
-                'canaries': guard_targets(self, snapshot, canary_run), 'core_runtime': runtime,
+                'canaries': guard_targets(self, snapshot, canary_run, expected_nodes=set(('worker-2', 'worker-3', 'worker-4')) - {target}), 'core_runtime': runtime,
                 'blockers': gate['blockers'], 'performance_findings': gate['performance_findings']}
 
     def execute(self, plan_id, expected_hash):
@@ -414,7 +421,7 @@ class Operator:
             if plan['operation'] == 'rebuild-node':
                 from component_reinstall import ComponentReinstall
                 bound = plan['worker_readiness']
-                current_gate = self.worker_readiness(bound['health_file'], bound['canary_run'], current)
+                current_gate = self.worker_readiness(bound['health_file'], bound['canary_run'], current, plan['node'])
                 if current_gate['blockers'] or current_gate != bound:
                     raise ValueError('worker readiness/canaries changed; create a new plan')
                 ComponentReinstall(self).execute(plan, current)
@@ -515,6 +522,7 @@ def main():
     plan = sub.add_parser('plan', help='Read live state and write a private, hash-bound plan')
     plan.add_argument('--operation', required=True, choices=['reapply', 'smoke', 'cleanup', 'rebuild-node', 'canary-start'])
     plan.add_argument('--node', choices=['worker-2', 'worker-3', 'worker-4'])
+    plan.add_argument('--exclude-node', choices=['worker-2', 'worker-3', 'worker-4'], help='canary-start: keep this target empty and guard the other two workers')
     plan.add_argument('--smoke-run')
     plan.add_argument('--health', help='Completed control health evidence for component reinstall or patched reapply')
     plan.add_argument('--fault-after', choices=['quarantine', 'start'], help='Bounded worker-4 recovery drill; intentionally fails and stays fenced')
@@ -542,9 +550,9 @@ def main():
     with ClusterLock(PROJECT):
         operator = Operator()
         if args.command == 'plan':
-            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after)
+            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after, args.exclude_node)
             summary = {k: envelope['plan'][k] for k in ['id', 'operation', 'node', 'executable', 'mutation_hosts', 'targets', 'steps', 'blockers']}
-            for optional in ['rebuild_mode', 'component_scope', 'fault_after']:
+            for optional in ['rebuild_mode', 'component_scope', 'fault_after', 'guard_exclude', 'guard_nodes']:
                 if optional in envelope['plan']:
                     summary[optional] = envelope['plan'][optional]
             if envelope['plan'].get('patched_core'):

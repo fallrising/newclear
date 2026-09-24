@@ -101,6 +101,8 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
 python3 scripts/labctl.py execute --plan REINSTALL_PLAN --sha256 REINSTALL_HASH
 ```
 
+`canary-start` 預設在 worker-2／3 建立守護。ERU-008 本機準備新增 `--exclude-node worker-2|worker-3|worker-4`，使所選目標保持空白，另兩台各有一個 run-owned nginx；只在全群 workload 空時允許計畫執行。worker-2／3 的重裝執行與恢復尚未開放，[配對與限制](M2-WORKER-PEER-GUARDS-2026-09-24.md)。目前 24h soak 的固定配對仍是 02／03，不能在進行中的觀測期間建立第二組。
+
 canary run ID 就是 canary-start plan ID。健康 evidence 需 complete、至少 20 次／120 秒、相鄰觀測無超過 20 秒的缺口，最後樣本距執行不超過 10 分鐘；並對應目前 core invocation。必要時重新收集。要觀察負載中的 etcd，可另跑 `control_health.py --concurrent-read-only --samples 61 --interval 5`；此模式不拿 mutation lock，禁止搭配 disk probe。
 
 同一組 canaries 可供連續三個新 rebuild plan 使用。每轮都重新核對空 target、綁定來源與 core SHA，備份／重裝後做 target smoke，再檢查其他 worker HTTP、服務 invocation 和身份。節點與 workload 清單按 identity 排序後比較；資料內容有變仍失敗。只在 guard 最終無失敗且 node up 已核對後增加 component revision，OS incarnation／cluster generation 不增加。

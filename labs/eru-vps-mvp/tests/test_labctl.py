@@ -303,6 +303,24 @@ class OperatorTests(unittest.TestCase):
             self.assertTrue(any(node + ' must have empty' in x for x in dirty['blockers']))
             self.op.live['hosts'][alias]['tasks'] = ''
 
+    def test_canary_plan_guards_other_two_workers_and_keeps_target_empty(self):
+        self.op.live['workloads'] = []
+        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        for excluded, expected in [('worker-2', ['worker-3', 'worker-4']),
+                                   ('worker-3', ['worker-2', 'worker-4']),
+                                   ('worker-4', ['worker-2', 'worker-3'])]:
+            plan = self.op.plan('canary-start', guard_exclude=excluded)['plan']
+            self.assertTrue(plan['executable'], plan['blockers'])
+            self.assertEqual(plan['guard_exclude'], excluded)
+            self.assertEqual(plan['guard_nodes'], expected)
+            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0]] +
+                             [labctl.ALIASES[int(node[-1]) - 1] for node in expected])
+            self.assertNotIn(excluded, plan['guard_nodes'])
+        with self.assertRaisesRegex(ValueError, 'only to canary-start'):
+            self.op.plan('smoke', guard_exclude='worker-2')
+        with self.assertRaisesRegex(ValueError, 'exclude-node'):
+            self.op.plan('canary-start', node='worker-2')
+
     def test_manual_reimage_does_not_require_provider_api(self):
         plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage')['plan']
         self.assertEqual(plan['rebuild_mode'], 'provider-reimage')

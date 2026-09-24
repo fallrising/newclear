@@ -10,10 +10,19 @@ import uuid
 
 from labops import atomic_json, lock_fds
 
-NODES = {'worker-2': 'ckc-disposable-02', 'worker-3': 'ckc-disposable-03'}
+NODES = {'worker-2': 'ckc-disposable-02', 'worker-3': 'ckc-disposable-03',
+         'worker-4': 'ckc-disposable-04'}
+
+def canary_nodes(excluded='worker-4'):
+    if excluded not in NODES:
+        raise ValueError('canary target must be a reviewed worker')
+    return {node: alias for node, alias in NODES.items() if node != excluded}
 
 
 def start_canaries(op, plan, before):
+    nodes = canary_nodes(plan.get('guard_exclude', 'worker-4'))
+    if plan.get('guard_nodes') != list(nodes) or before['workloads']:
+        raise ValueError('canary placement or empty-cluster preflight changed')
     run_id = plan['id']
     path = op.project / 'private/smoke' / (run_id + '.json')
     if path.exists():
@@ -25,7 +34,7 @@ def start_canaries(op, plan, before):
     op.save_journal()
     atomic_json(path, report)
     try:
-        for node, alias in NODES.items():
+        for node, alias in nodes.items():
             app = 'erumvp' + uuid.uuid4().hex[:12]
             report['nodes'][node] = {'app': app, 'worker_alias': alias, 'workload_ids': []}
             atomic_json(path, report)  # record ownership before an uncertain create
@@ -59,7 +68,7 @@ labels:
         report['status'] = 'running'
         atomic_json(path, report)
         after = op.snapshot()
-        targets = guard_targets(op, after, run_id)
+        targets = guard_targets(op, after, run_id, expected_nodes=set(nodes))
         warmup(op, targets)
         op.stage('verifying-canaries')
         with HTTPGuards(op.project, run_id, targets) as guards:
@@ -73,11 +82,11 @@ labels:
             raise ValueError('node membership changed')
         for name, old in old_nodes.items():
             new = new_nodes[name]
-            allowed = {'resource_usage'} if old['name'] in NODES else set()
+            allowed = {'resource_usage'} if old['name'] in nodes else set()
             if {k:v for k,v in old.items() if k not in allowed} != {k:v for k,v in new.items() if k not in allowed}:
                 raise ValueError('unrelated node metadata changed')
         for alias, old in before['hosts'].items():
-            allowed = {'containers', 'tasks'} if alias in NODES.values() else set()
+            allowed = {'containers', 'tasks'} if alias in nodes.values() else set()
             if {k:v for k,v in old.items() if k not in allowed} != {k:v for k,v in after['hosts'][alias].items() if k not in allowed}:
                 raise ValueError('preserved host/runtime identity changed')
         expected = {w['id'] for w in before['workloads']} | {t['id'] for t in targets}
@@ -100,15 +109,22 @@ def warmup(op, targets):
             raise ValueError('canary did not become HTTP-ready')
 
 
-def guard_targets(op, snapshot, run_id):
+def guard_targets(op, snapshot, run_id, expected_nodes=None):
     from labctl import cleanup_targets, identifier
     evidence = json.loads((op.project / 'private/smoke' / (identifier(run_id) + '.json')).read_text())
-    if evidence.get('purpose') != 'reinstall-canaries' or evidence.get('status') != 'running' or set(evidence['nodes']) != set(NODES):
-        raise ValueError('need running, explicitly owned canaries on worker-2 and worker-3')
+    nodes = evidence.get('nodes')
+    if (evidence.get('purpose') != 'reinstall-canaries' or evidence.get('status') != 'running'
+            or not isinstance(nodes, dict) or len(nodes) != 2 or not set(nodes) <= set(NODES)
+            or (expected_nodes is not None and set(nodes) != set(expected_nodes))
+            or any(not isinstance(item, dict) or item.get('worker_alias') != NODES[node]
+                   for node, item in nodes.items())):
+        raise ValueError('canary placement/alias differs from reviewed worker pair')
     rows = cleanup_targets(evidence, snapshot['workloads'])
-    if len(rows) != 2 or {r['node'] for r in rows} != set(NODES):
+    if len(rows) != 2 or {r['node'] for r in rows} != set(nodes):
         raise ValueError('canary workload membership changed')
     for row in rows:
+        if nodes[row['node']].get('workload_ids') != [row['id']]:
+            raise ValueError('canary evidence workload ID differs from live ownership')
         row['alias'] = NODES[row['node']]
         data = json.loads(op.command(row['alias'], ['sudo', '-n', 'ctr', '--namespace', 'eru', 'containers', 'info', row['id']]))
         address = str(ipaddress.ip_address(data['Labels']['eru.network.eru']))

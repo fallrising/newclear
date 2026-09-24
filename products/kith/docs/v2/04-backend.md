@@ -55,6 +55,7 @@
 - `GET /api/agents`（operator）：`[{id, handle, display_name, runtime, quota_class, created_at, disabled_at, rooms: [room_id], token_count, runtime_status}]`。
 - `GET /api/agents/:id`、`PATCH /api/agents/:id`（改 display_name、disabled）。
 - `runtime_status`：`ok`、`unconfigured`、`connection_error`、`runner_offline`、`disabled`；前端用它畫成員格的限制句，取代 v1 `reply_limit` 的推斷（`reply_limit` 保留給舊前端）。
+- Phase 2：契約 [`contracts/v2/http-agents.json`](../../contracts/v2/http-agents.json)；判斷順序、成員列表的 `agent_runtime` 欄位、沒有 runtime 列的「v1 設定」（Q-15）見 [W4](milestones/W4.md) §4.3。
 
 ### B-04 成員目錄（W2）
 
@@ -69,6 +70,7 @@
 - `GET /api/rooms/:id/messages?thread_id=X`：只回該 thread 的列（含根訊息）。
 - 主時間線查詢加 `top_level=1`：只回 `thread_id IS NULL` 的列，並為每則根訊息附 `thread_reply_count`、`thread_last_seq`。
 - **seq 補洞規則不變**：前端補洞仍以全房 seq 為準（含 thread 內的列），只是顯示時分流。詳見 [05](05-frontend-architecture.md) FE-12。
+- Phase 2：`thread_id` 與 `top_level` 互斥；送出時不驗證 `thread_id`（Q-24，保住 V2-INV-04）；索引 `0005_v2_threads.sql`；契約與程式見 [W6](milestones/W6.md) §4.1。
 
 ### B-06 使用者事件流（W5，選做）
 
@@ -82,6 +84,7 @@
 - 欄位：`name`、`preset`、`api_format`、`base_url`、`secret`（只寫）或 `secret_env`、`extra_headers`、`default_quota_class`。
 - `POST /api/providers/:id/test`：用該連線做一次最小呼叫（列模型；不支援列模型則送 1 token 的 completion），回 `{ok, models?, error_class?}`。不回上游原文。
 - `DELETE` 時若有 agent 引用 → 409 `in_use`，除非帶 `?force=1`（引用的 agent 變 `unconfigured`）。
+- Phase 2：契約 [`contracts/v2/http-providers.json`](../../contracts/v2/http-providers.json)；另加 `POST /api/providers/test`（未儲存的草稿測試）與欄位 `token_param`（Q-17）；驗證規則與程式見 [W4](milestones/W4.md) §4.2、§4.6。
 
 ### B-08 自己的資料（W2）
 
@@ -98,7 +101,8 @@
   - `external`：`{}`
   - 選填 `revoke_tokens: bool`（預設 false；前端在 runner／external → hosted 時預設送 true）。
   - 回應含新的 `runtime_epoch`。
-- `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。
+  - Phase 2：每次 PUT 都 `runtime_epoch += 1` 並記錄變更（不只改種類時）；`stream: true` 在 W5 前回 400。見 [W4](milestones/W4.md) §4.3.2。
+- `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。Phase 2：`limit` 1–100、預設 50，不含訊息文字；新增索引 `0004_v2_generations_index.sql`，見 [W5](milestones/W5.md) §4.1、§4.3。
 
 ### B-10 WS `draft` 封包（W5）
 
@@ -112,6 +116,7 @@ Server → client：
 - 正式 `event` 到達（同 `generation_id`）或收到 `reply ended`／`reply failed` 時，client 丟棄草稿。
 - 不寫 D1、不佔 seq、不進 `/mcp/events`、不喚醒（V2-INV-03）。
 - 大小：`text` ≤ 8 KiB；超過時停止發草稿，等最終訊息。
+- Phase 2：schema 在 [`contracts/v2/ws-server.json`](../../contracts/v2/ws-server.json)；節流、送達順序（草稿一定早於正式 event）、串流失敗不重試（Q-21）與程式見 [W5](milestones/W5.md) §4.2、§4.5。
 
 ### B-11 WS 失敗狀態（W3）
 
@@ -123,10 +128,12 @@ Server → client：
 
 - live 事件（`replay:false`）加選填 `wake: {mentioned, wake_allowed}`；`replay:true` 不帶。
 - `wake_allowed` 以與 Inbox 相同的純函式計算（attention＋quota＋self／agent 規則），但**不**計入 cooldown 與 wake budget（那是 hosted／runner 的 dispatch 狀態）。
+- Phase 2：live 列另帶 `thread_id`、`mentions`；runner 的事件流同時寫 `runner_last_seen_at`（每 60 秒）；契約 [`contracts/v2/mcp-events.json`](../../contracts/v2/mcp-events.json)，程式見 [W6](milestones/W6.md) §4.2。
 
 ### B-13 trace 全文（W6）
 
 - `GET /api/rooms/:id/traces/:message_id`：從 R2 取完整 payload（≤ 1 MiB），只有房內成員可讀。前端 trace 卡片展開時才抓。
+- Phase 2：寫入端 `POST /api/rooms/:id/traces`（agent；摘要走一般 trace 送出、全文進 R2 binding `TRACES`）；契約 [`contracts/v2/http-traces.json`](../../contracts/v2/http-traces.json)，見 [W6](milestones/W6.md) §4.3。
 
 ### B-14 房間管理（W2）
 
@@ -137,7 +144,7 @@ Server → client：
 
 ## 4. 資料模型增量（DDL 輪廓）
 
-只追加。Phase 2 改為每個里程碑各自一個 migration：`0002_v2_rooms_members.sql`（W2：`rooms.archived_at`、`members.must_change_password`，[W2](milestones/W2.md) §4.1），provider 與 runtime 相關表在 W4 的 `0003`。
+只追加。Phase 2 改為每個里程碑各自一個 migration：`0002_v2_rooms_members.sql`（W2：`rooms.archived_at`、`members.must_change_password`，[W2](milestones/W2.md) §4.1），provider 與 runtime 相關表在 W4 的 `0003_v2_providers.sql`（[W4](milestones/W4.md) §4.1；比下方輪廓多 `provider_connections.secret_updated_at`、`token_param`、`agent_runtimes.last_error_class` 與一個列層級 `CHECK`）。
 
 ```sql
 CREATE TABLE provider_connections (
@@ -230,4 +237,4 @@ v1 的 INV-01–INV-19 全部保留。INV-15（LLM fetch 只在 HostedGeneration
 - [ ] `migrations/0002_v2.sql` 完整 DDL、正反例、遷移腳本步驟（[03](03-agent-runtime.md) §7）。
 - [ ] B-02 的 SQL 與效能估算（64 房）。
 - [ ] B-06 的實作選擇（per-member DO vs 其他）與成本。
-- [ ] 每個 B-xx 在 Worker 中的檔案位置（例如 `worker/routes/providers.ts`）。
+- [x] 每個 B-xx 在 Worker 中的檔案位置（例如 `worker/routes/providers.ts`）→ 各里程碑 `Wn.md` §3 的檔案清單（W1–W6）。

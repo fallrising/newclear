@@ -238,6 +238,24 @@ Phase 2 在此維護完整表格：驗收 ID → 業務規則／旅程／FM → 
 | E2E-W3-02 | BR-35、v1 UI-10-02 | w3-mention.spec.ts |
 | E2E-W3-03 | UJ-05、B-11、BR-45、FM-SYNC-15 | w3-reply.spec.ts |
 | E2E-W3-04 | UJ-06、BR-43（顯示） | w3-personal.spec.ts |
+| E2E-W4-01 | UJ-07、BR-50、BR-51、BR-54、RT-10、FM-LLM-15、16 | w4-providers.spec.ts |
+| E2E-W4-02 | UJ-07、B-03、B-09 | w4-hosted.spec.ts |
+| E2E-W4-03 | V2-INV-02、FM-LLM-06（重試） | w4-hosted.spec.ts |
+| E2E-W4-04 | UJ-09 | w4-tokens.spec.ts |
+| E2E-W4-05 | V2-INV-01、RT-09 | w4-providers.spec.ts |
+| E2E-W4-06 | V2-INV-05、BR-53 | w4-hosted.spec.ts |
+| E2E-W4-07 | RT-02、03 §7 | w4-migrate.spec.ts |
+| E2E-W4-08 | RT-01、BR-47、V2-INV-06 | w4-runtime-change.spec.ts |
+| E2E-W5-01 | UJ-05、B-10、FM-SYNC-14 | w5-stream.spec.ts |
+| E2E-W5-02 | V2-INV-03 | w5-stream.spec.ts |
+| E2E-W5-03 | FM-LLM-08、Q-21 | w5-stream-cut.spec.ts |
+| E2E-W5-04 | BR-45、B-09（generations） | w5-generations.spec.ts |
+| E2E-W5-05 | 03 §2.1 P1 格式 | w5-formats.spec.ts |
+| E2E-W6-01 | UJ-08、B-13、FM-RUN-03、04、07 | w6-runner.spec.ts |
+| E2E-W6-02 | UJ-06、BR-43、B-12、FM-RUN-08 | w6-runner-personal.spec.ts |
+| E2E-W6-03 | UJ-10、BR-36、B-05、FE-12 | w6-thread.spec.ts |
+| E2E-W6-04 | FM-RUN-01、02、05、06、INV-19 | w6-runner-restart.spec.ts |
+| E2E-W6-05 | v1 sidecar 回歸 | w6-sidecar.spec.ts |
 | … | … | … |
 
 ## 7. CI

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "kith://contracts/v2/http-messages-list.json",
   "title": "GET /api/rooms/:id/messages v2 (B-01)",
-  "description": "Adds the optional `order` query parameter and the `has_more` response field. Without `order` the endpoint is bit-identical to v1 (response has only `messages`). With `order`, the array is always ascending by seq. Defined in docs/v2/milestones/W1.md §4.1.",
+  "description": "Adds the optional `order` query parameter and the `has_more` response field. Without `order` the endpoint is bit-identical to v1 (response has only `messages`). With `order`, the array is always ascending by seq. Defined in docs/v2/milestones/W1.md §4.1. W6 §4.1 adds thread_id / top_level (B-05).",
   "$defs": {
     "query": {
       "type": "object",
@@ -37,6 +37,23 @@
             "desc"
           ],
           "description": "New in v2. Any other value -> 400 invalid_request 'invalid order'."
+        },
+        "thread_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "B-05 (W6): the root message and every row whose thread_id equals it. Exclusive with top_level."
+        },
+        "top_level": {
+          "const": "1",
+          "description": "B-05 (W6): only rows with thread_id null, each with thread_reply_count and thread_last_seq. Exclusive with thread_id."
+        }
+      },
+      "dependentSchemas": {
+        "thread_id": {
+          "properties": {
+            "top_level": false
+          }
         }
       }
     },
@@ -117,6 +134,18 @@
         "created_at": {
           "type": "string",
           "minLength": 1
+        },
+        "thread_reply_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Only with top_level=1."
+        },
+        "thread_last_seq": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Only with top_level=1."
         }
       }
     },

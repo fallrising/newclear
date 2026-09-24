@@ -10,9 +10,9 @@ python3 scripts/labctl.py reconcile --run FAILED_RUN
 
 若原 run 停在 running，先在取得 controller lock 後把它對帳成 interrupted。reconcile 不重播、不自動清理；core API 不可用時會保留錯誤，後續 core recovery plan 改走 SSH／etcd 唯讀觀測。較新 deployment／recovery 已取代原操作時，拒絕使用舊來源。
 
-## worker-4：還原備份或保留新狀態
+## 指定 worker：還原備份或保留新狀態
 
-兩種模式均要求近期健康 evidence、02／03 的 run-owned HTTP canaries、空的 worker-4 metadata／container／task、零配額、未改變的 host/boot identity 與 node 註冊。控制面與其他 workers 必須正常。
+兩種模式均要求近期健康 evidence、選定目標之外兩台的 run-owned HTTP canaries、空的目標 worker metadata／container／task、零配額、未改變的 host/boot identity 與 node 註冊。控制面與其他 workers 必須正常。
 
 ```bash
 # 原 quarantine 備份可完整核對；worker 已 fenced，三個 ERU units 均 inactive。
@@ -93,7 +93,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
 
 `quarantine` 在已備份並隔離六檔／三根後故意失敗；`start` 在元件已重裝、agent 可用且仍 fenced 時故意失敗。兩者保持 failed，不增加重裝計次，必須使用新的 recovery plan。沒有核心 OS／磁碟故障注入，也不做 provider reset。
 
-本機與實機驗證結果見 [2026-09-23 開發紀錄](M2-RECOVERY-2026-09-23.md)。完整災難恢復、非空 worker drain、其他 workers、OS reimage、HA／snapshot restore 與 24h soak 仍分開驗收。
+worker-4 的本機與實機結果見 [2026-09-23 開發紀錄](M2-RECOVERY-2026-09-23.md)；02／03 目前只有[本機執行器驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)。完整災難恢復、非空 worker drain、02／03 實機、OS reimage、HA／snapshot restore 與 24h soak 仍分開驗收。
 
 ## 程序突然終止時的界線
 

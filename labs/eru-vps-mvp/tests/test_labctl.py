@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
@@ -296,12 +297,59 @@ class OperatorTests(unittest.TestCase):
             plan = self.op.plan('rebuild-node', node=node)['plan']
             self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0], alias])
             self.assertFalse(plan['executable'])
-            self.assertTrue(any('peer canary and recovery support' in x for x in plan['blockers']))
+            self.assertTrue(any('requires --health and --canary-run' in x for x in plan['blockers']))
             self.assertFalse(any(node + ' must have empty' in x for x in plan['blockers']))
             self.op.live['hosts'][alias]['tasks'] = 'TASK PID STATUS\nstray 1 RUNNING\n'
             dirty = self.op.plan('rebuild-node', node=node)['plan']
             self.assertTrue(any(node + ' must have empty' in x for x in dirty['blockers']))
             self.op.live['hosts'][alias]['tasks'] = ''
+
+    def test_canary_plan_guards_other_two_workers_and_keeps_target_empty(self):
+        self.op.live['workloads'] = []
+        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        for excluded, expected in [('worker-2', ['worker-3', 'worker-4']),
+                                   ('worker-3', ['worker-2', 'worker-4']),
+                                   ('worker-4', ['worker-2', 'worker-3'])]:
+            plan = self.op.plan('canary-start', guard_exclude=excluded)['plan']
+            self.assertTrue(plan['executable'], plan['blockers'])
+            self.assertEqual(plan['guard_exclude'], excluded)
+            self.assertEqual(plan['guard_nodes'], expected)
+            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0]] +
+                             [labctl.ALIASES[int(node[-1]) - 1] for node in expected])
+            self.assertNotIn(excluded, plan['guard_nodes'])
+        with self.assertRaisesRegex(ValueError, 'only to canary-start'):
+            self.op.plan('smoke', guard_exclude='worker-2')
+        with self.assertRaisesRegex(ValueError, 'exclude-node'):
+            self.op.plan('canary-start', node='worker-2')
+
+    def test_empty_peer_plan_can_execute_only_with_bound_health_and_guards(self):
+        self.op.live['workloads'] = []
+        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.worker_scope = lambda alias: {'blockers': [], 'manifest_sha256': alias}
+        self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
+            'blockers': [], 'health_file': health, 'canary_run': canaries, 'guard_target': target}
+        for node in ('worker-2', 'worker-3'):
+            plan = self.op.plan('rebuild-node', node=node, health_file='health', canary_run='owned-guards')['plan']
+            self.assertTrue(plan['executable'], plan['blockers'])
+            self.assertEqual(plan['worker_readiness']['guard_target'], node)
+            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0], labctl.ALIASES[int(node[-1]) - 1]])
+        self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
+            'blockers': ['guard pair includes selected worker'], 'health_file': health, 'canary_run': canaries}
+        blocked = self.op.plan('rebuild-node', node='worker-2', health_file='health', canary_run='wrong-guards')['plan']
+        self.assertFalse(blocked['executable'])
+        self.assertIn('guard pair includes selected worker', blocked['blockers'])
+
+    def test_peer_execute_binds_component_to_plan_target(self):
+        self.op.live['workloads'] = []
+        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.worker_scope = lambda alias: {'blockers': [], 'manifest_sha256': alias}
+        self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
+            'blockers': [], 'health_file': health, 'canary_run': canaries, 'guard_target': target}
+        envelope = self.op.plan('rebuild-node', node='worker-2', health_file='health', canary_run='owned-guards')
+        with patch('component_reinstall.ComponentReinstall') as executor:
+            self.execute(envelope)
+        executor.assert_called_once_with(self.op, target='worker-2')
+        executor.return_value.execute.assert_called_once()
 
     def test_manual_reimage_does_not_require_provider_api(self):
         plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage')['plan']

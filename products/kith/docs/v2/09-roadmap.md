@@ -80,7 +80,7 @@ P1 大框架（#47）
 ### W4 — Providers、hosted 多格式、控制台
 
 - 先決：W4 Phase 2 文件含各格式欄位對照（已查證）與 FM-LLM fixtures 清單。
-- 產物：migration 0002、B-03、B-07、B-09、`LlmAdapter`（`openai_chat`、`anthropic_messages` 必交；`openai_responses`、`gemini` 可延 W5）、遷移腳本（[03](03-agent-runtime.md) §7）、控制台 Agents／Providers／Tokens。
+- 產物：migration `0003`（W2 已用 `0002`）、B-03、B-07、B-09、`LlmAdapter`（`openai_chat`、`anthropic_messages` 必交；`openai_responses`、`gemini` 可延 W5）、遷移腳本（[03](03-agent-runtime.md) §7）、控制台 Agents／Providers／Tokens。
 - 驗收：
   - `E2E-W4-01` 新增連線（fake-provider，`openai_chat`）→ 測試成功→列出模型。
   - `E2E-W4-02` 新增 hosted agent → 邀進房 → @ → 回覆（UJ-07）。
@@ -91,6 +91,7 @@ P1 大框架（#47）
   - `E2E-W4-07` v1→v2 遷移腳本在含 v1 資料的 seed 上執行兩次，結果相同。
   - `E2E-W4-08` 改 runtime：hosted 回覆進行中（fake-provider 延遲）時把 agent 改成 external → 舊回覆不落盤、`reply ended`；身份與歷史不變；勾選撤銷時 token 失效（RT-01、V2-INV-06）。
 - 禁止：串流草稿、runner 改動。
+- 狀態：`DOC_READY`（施工圖：[milestones/W4.md](milestones/W4.md)）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
 
 ### W5 — 串流與可觀測
 
@@ -100,6 +101,8 @@ P1 大框架（#47）
   - `E2E-W5-02` 串流前後 D1 訊息列數差恰為 1；`/mcp/events` 未出現草稿（V2-INV-03）。
   - `E2E-W5-03` 串流中斷（fake-provider 中途斷線）→ 失敗提示，不落盤半截（FM-LLM-08）。
   - `E2E-W5-04` operator 在 generation 列表看到失敗類別；一般成員看不到。
+  - `E2E-W5-05` `openai_responses` 與 `gemini` 連線（串流與非串流）都能回覆（Phase 2 新增，對應延後的 adapter 格式）。
+- 狀態：`DOC_READY`（施工圖：[milestones/W5.md](milestones/W5.md)）。B-06 不做（Q-20）；草稿封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
 
 ### W6 — Runner、trace、thread
 
@@ -111,6 +114,7 @@ P1 大框架（#47）
   - `E2E-W6-03` thread：主時間線只見根訊息＋回覆數；面板內讀寫（UJ-10）。
   - `E2E-W6-04` runner 斷線重連後不重跑已完成 trigger；`replay:true` 不執行（FM-RUN-01、02、05）。
   - `E2E-W6-05` v1 sidecar 既有測試（`npm run test:sidecar`）仍通過。
+- 狀態：`DOC_READY`（施工圖：[milestones/W6.md](milestones/W6.md)）。`kith-runner` 在 repo 內 `runner/`，`sidecar/` 不改；契約 [mcp-events.json](../../contracts/v2/mcp-events.json)、[http-traces.json](../../contracts/v2/http-traces.json)、[runner-config.json](../../contracts/v2/runner-config.json)。
 
 ### W7 — 切換
 

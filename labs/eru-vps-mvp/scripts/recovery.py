@@ -12,7 +12,7 @@ import uuid
 from labctl import PROJECT, code_inputs, consistency_issues, identifier, membership, now, read
 from labops import ClusterLock, atomic_json, digest
 from core_patch import PatchOperator, ALIAS as CORE
-from component_reinstall import ComponentReinstall, ALIAS as WORKER, TARGET, UNITS, empty_target
+from component_reinstall import ComponentReinstall, TARGET, WORKERS, UNITS, empty_target
 from canaries import HTTPGuards
 
 CORE_ACTIONS = ['core-rollback', 'core-cancel']
@@ -28,11 +28,17 @@ def count_field(output):
     return int(values[0])
 
 
-def worker_issues(snapshot, inventory):
+def selected_worker(source):
+    target = source['plan'].get('node')
+    if target not in WORKERS:
+        raise ValueError('worker source has an unreviewed target')
+    return target, WORKERS[target]
+
+def worker_issues(snapshot, inventory, target=TARGET):
     copy = deepcopy(snapshot)
     # An unavailable target is expected after a stopped-worker failure. Every
     # other consistency check, including its metadata/runtime/usage, still holds.
-    next(n for n in copy['nodes'] if n['name'] == TARGET)['available'] = True
+    next(n for n in copy['nodes'] if n['name'] == target)['available'] = True
     return consistency_issues(copy, inventory)
 
 
@@ -67,8 +73,8 @@ class RecoveryOperator(PatchOperator):
             relevant = ['core-patch', 'core-rollback', 'core-recovery']
             if action == 'core-cancel': relevant.append('reapply')
         else:
-            if plan['operation'] != 'rebuild-node' or plan['node'] != TARGET or plan['rebuild_mode'] != 'component-reinstall':
-                raise ValueError('worker recovery requires a worker-4 component reinstall source')
+            if plan['operation'] != 'rebuild-node' or plan['node'] not in WORKERS or plan['rebuild_mode'] != 'component-reinstall':
+                raise ValueError('worker recovery requires a reviewed component reinstall source')
             if journal['status'] == 'complete':
                 raise ValueError('completed reinstall needs no failure recovery')
             relevant = ['rebuild-node', 'worker-recovery']
@@ -138,28 +144,31 @@ class RecoveryOperator(PatchOperator):
                 'protected_services': self.protected_services()}
 
     def worker_state(self, source):
-        return ComponentReinstall(self).remote('inspect-recovery', source['plan'])
+        target, _ = selected_worker(source)
+        return ComponentReinstall(self, target=target).remote('inspect-recovery', source['plan'])
 
-    def worker_services(self):
-        return self.command(WORKER, ['sudo', '-n', 'systemctl', 'show', '--property=Id,ActiveState', *UNITS])
+    def worker_services(self, source):
+        _, alias = selected_worker(source)
+        return self.command(alias, ['sudo', '-n', 'systemctl', 'show', '--property=Id,ActiveState', *UNITS])
 
     def observe_worker(self, source, action, health_file, canary_run):
+        target, alias = selected_worker(source)
         snapshot = self.snapshot()
-        issues = worker_issues(snapshot, self.inventory)
+        issues = worker_issues(snapshot, self.inventory, target)
         if issues: raise ValueError('; '.join(issues))
-        node = empty_target(snapshot)
+        node = empty_target(snapshot, target, alias)
         old = source['plan']['snapshot']
-        for alias, host in snapshot['hosts'].items():
-            if identity(host) != identity(old['hosts'][alias]):
-                raise ValueError('source host/boot/runtime identity changed: ' + alias)
-        original = empty_target(old)
+        for observed_alias, host in snapshot['hosts'].items():
+            if identity(host) != identity(old['hosts'][observed_alias]):
+                raise ValueError('source host/boot/runtime identity changed: ' + observed_alias)
+        original = empty_target(old, target, alias)
         for key in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity']:
             if node[key] != original[key]: raise ValueError('worker registration changed')
         self.etcd_ready()
-        gate = self.worker_readiness(health_file, canary_run, snapshot)
+        gate = self.worker_readiness(health_file, canary_run, snapshot, target)
         if gate['blockers']: raise ValueError('; '.join(gate['blockers']))
         remote = self.worker_state(source)
-        services = self.worker_services()
+        services = self.worker_services(source)
         if action == 'worker-restore':
             if not node.get('bypass'):
                 raise ValueError('restore requires an already fenced worker')
@@ -169,7 +178,7 @@ class RecoveryOperator(PatchOperator):
             if not remote.get('restore_possible') and not already_restored:
                 raise ValueError('restore would overwrite new state or lacks a verified backup; use a reviewed resume plan if intact')
         else:
-            scope = self.worker_scope(WORKER)
+            scope = self.worker_scope(alias)
             if scope['blockers'] or scope['manifest_sha256'] != source['plan']['component_scope']['manifest_sha256']:
                 raise ValueError('resume requires intact owned worker files')
             if not node['available']:
@@ -179,11 +188,11 @@ class RecoveryOperator(PatchOperator):
             remote = {k: remote[k] for k in ['exists', 'stage', 'journal_sha256', 'snapshot_sha256'] if k in remote}
             if not remote['exists']:
                 journal = read(self.root / 'runs' / (source['plan']['id'] + '.json'))
-                safe_stages = ['preflight', 'preflighted', 'preparing-worker-payload', 'fencing-worker-4', 'stopping-worker-4']
+                safe_stages = ['preflight', 'preflighted', 'preparing-worker-payload', 'fencing-' + target, 'stopping-' + target]
                 if journal.get('failed_at') not in safe_stages:
                     raise ValueError('remote recovery journal missing after quarantine could have started')
         return {'snapshot': snapshot, 'recovery': remote, 'worker_services': services,
-                'readiness': gate, 'protected_services': ComponentReinstall(self).service_baseline()}
+                'readiness': gate, 'protected_services': ComponentReinstall(self, target=target).service_baseline()}
 
     def observe(self, source, action, health_file, canary_run):
         if action == 'core-rollback': return self.observe_core(source)
@@ -198,15 +207,17 @@ class RecoveryOperator(PatchOperator):
         if action in CORE_ACTIONS and (health_file or canary_run):
             raise ValueError('offline core recovery uses direct SSH/etcd evidence, not worker health/canaries')
         observed = self.observe(source, action, health_file, canary_run)
+        target, alias = selected_worker(source) if action not in CORE_ACTIONS else (None, None)
         plan = {'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
                 'operation': 'core-recovery' if action in CORE_ACTIONS else 'worker-recovery',
                 'action': action, 'created_at': now(), 'source_run': run, 'source': source,
                 'health_file': health_file, 'canary_run': canary_run, 'observed': observed,
-                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [CORE] if action in CORE_ACTIONS else [CORE, WORKER],
+                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [CORE] if action in CORE_ACTIONS else [CORE, alias],
                 'steps': (['Verify SSH identity, empty runtime/metadata, etcd and backup hashes without core API',
                            'Restore only the recorded binary/manifest if needed; restart core at most once',
                            'Verify running checksum, API, zero workloads/usage and preserved services'] if action == 'core-rollback' else
-                          ['Keep continuous HTTP guards on worker-2/3; verify current ownership and empty worker-4',
+                          [] if action == 'core-cancel' else
+                          ['Keep continuous HTTP guards on the two peers; verify current ownership and empty ' + target,
                            'Restore the exact backup into a stopped worker' if action == 'worker-restore' else 'Preserve current worker files and agent state',
                            'Fence, validate nginx lifecycle and isolation, then resume scheduling; record recovery separately'])}
         if action == 'core-cancel':
@@ -322,38 +333,39 @@ class RecoveryOperator(PatchOperator):
 
     def recover_worker(self, plan):
         before = plan['observed']
-        component = ComponentReinstall(self)
+        target, alias = selected_worker(plan['source'])
+        component = ComponentReinstall(self, target=target)
         guards = HTTPGuards(self.project, plan['id'], before['readiness']['canaries'])
         try:
             with guards:
                 component.guards = guards
-                component.stage('fencing-worker-4-for-recovery')
+                component.stage('fencing-' + target + '-for-recovery')
                 component.fence()
                 if plan['action'] == 'worker-restore':
-                    component.stage('restoring-worker-4')
+                    component.stage('restoring-' + target)
                     if before['recovery']['stage'] != 'restored':
                         self.journal['remote_restore'] = component.remote('restore', plan['source']['plan'], extra={
                             'recovery_id': plan['id'], 'expected_recovery': before['recovery']})
                         self.save_journal()
-                    component.command(WORKER, ['sudo', '-n', 'systemd-analyze', 'verify',
+                    component.command(alias, ['sudo', '-n', 'systemd-analyze', 'verify',
                         *['/etc/systemd/system/' + u for u in UNITS]])
-                    component.command(WORKER, ['sudo', '-n', 'systemctl', 'daemon-reload'])
-                    component.command(WORKER, ['sudo', '-n', 'systemctl', 'start', 'eru-containerd-proxy.socket', 'eru-agent.service'])
+                    component.command(alias, ['sudo', '-n', 'systemctl', 'daemon-reload'])
+                    component.command(alias, ['sudo', '-n', 'systemctl', 'start', 'eru-containerd-proxy.socket', 'eru-agent.service'])
                 component.stage('verifying-worker-recovery')
                 for _ in range(30):
-                    node = next(n for n in self.cli('node', 'get', TARGET) if n['name'] == TARGET)
+                    node = next(n for n in self.cli('node', 'get', target) if n['name'] == target)
                     if node['available'] and node.get('bypass'): break
                     time.sleep(1)
                 else: raise ValueError('worker is not ready while fenced')
-                if self.worker_scope(WORKER)['blockers']: raise ValueError('worker ownership validation failed')
+                if self.worker_scope(alias)['blockers']: raise ValueError('worker ownership validation failed')
                 component.run_smoke()
                 component.check_isolation(before['snapshot'], before['protected_services'])
-                component.stage('resuming-recovered-worker-4')
+                component.stage('resuming-recovered-' + target)
                 component.resume_attempted = True
-                component.command(CORE, ['sudo', '-n', '/usr/local/bin/eru-cli', '--eru', self.core['ip'] + ':5001', 'node', 'up', TARGET])
+                component.command(CORE, ['sudo', '-n', '/usr/local/bin/eru-cli', '--eru', self.core['ip'] + ':5001', 'node', 'up', target])
                 after = component.check_isolation(before['snapshot'], before['protected_services'])
-                node = empty_target(after)
-                original = empty_target(before['snapshot'])
+                node = empty_target(after, target, alias)
+                original = empty_target(before['snapshot'], target, alias)
                 if any(node[k] != original[k] for k in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity']):
                     raise ValueError('worker registration changed during recovery')
                 if node.get('bypass') or not node['available']: raise ValueError('worker resume not observed')

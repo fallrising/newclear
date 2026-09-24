@@ -302,6 +302,11 @@ Tailwind 4 的預設色已在 `index.css` 以 `--color-*: initial` 移除；`[..
 | 回覆中三點（§6，W3） | `--animate-dot`；`index.css` 的 `.dot-2`、`.dot-3`（延遲 160／320 ms） | `animate-dot`、`dot-2`、`dot-3` |
 | @ 補全清單高、側邊 sheet 寬（W3） | Tailwind 預設 spacing | `max-h-64`（256px）、`w-80`（320px） |
 | 手機 bottom sheet 高（W3） | `index.css` 的 `.h-sheet`（`70dvh`） | `h-sheet` |
+| runtime 徽記（§5，W4） | Tailwind 預設 spacing（14px）、`--agent`、`--on-agent` | `relative`、`absolute -bottom-0.5 -right-0.5`、`h-3.5 w-3.5`、`bg-agent text-on-agent` |
+| 對話框的後果清單、一次性秘密（W4） | Tailwind 預設 | `list-disc pl-5`、`overflow-x-auto` |
+| 草稿游標（§6，W5） | `--animate-caret`（`index.css` 的 `@theme`）、Tailwind 預設 spacing | `animate-caret`、`inline-block h-4 w-0.5 ml-0.5 translate-y-0.5 bg-ink-2` |
+| 草稿文字、清單分隔（W5） | Tailwind 預設 | `whitespace-pre-wrap break-words`、`divide-y divide-border` |
+| trace 卡片、thread 摘要（W6） | Tailwind 預設 spacing | `ml-12`、`max-h-96`、`overflow-auto`、`h-8` |
 
 `style` 屬性只允許兩種用途：時間線容器的 `overflowAnchor: "none"`，以及虛擬捲動 item 的定位（`position`、`transform`、容器 `height`）。其他一律用 class（W1 §5.6.2）。
 

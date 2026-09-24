@@ -202,7 +202,8 @@
               "R04-json-secret-keys",
               "R05-bot-token",
               "R06-known-secrets",
-              "R07-observed-session"
+              "R07-observed-session",
+              "R08-provider-canary"
             ]
           }
         },
@@ -232,7 +233,8 @@
                 "enum": [
                   "R05-bot-token",
                   "R06-known-secrets",
-                  "R07-observed-session"
+                  "R07-observed-session",
+                  "R08-provider-canary"
                 ]
               }
             }

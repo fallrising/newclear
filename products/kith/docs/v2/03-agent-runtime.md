@@ -64,7 +64,7 @@ HostedGeneration DO                     Inbox live tail → GET /mcp/events（SS
 | `openai_responses` | `POST {base}/responses` | `Authorization: Bearer` | OpenAI（新 API）；部分 gateway | P1 |
 | `gemini` | `POST {base}/models/{model}:generateContent`（串流：`:streamGenerateContent?alt=sse`） | `x-goog-api-key` | Google AI Studio | P1（Gemini 也可先走 `openai_chat` 相容端點） |
 
-P0＝W4 必交；P1＝W4 可延到 W5。Phase 2 需以各家官方文件逐欄確認（見 [10](10-decisions.md) 來源表，標「待查證」）。
+P0＝W4 必交；P1＝W4 可延到 W5。Phase 2：P0 見 [W4](milestones/W4.md) §4.5，P1 與四種格式的串流見 [W5](milestones/W5.md) §4.4（官方 SDK 原始碼查證；少數推論逐條標註）。
 
 **RT-03** 新增一種格式＝新增一個 adapter 檔＋golden fixtures＋FM 清單，**不得**改 HostedGeneration 主流程。
 
@@ -80,9 +80,11 @@ P0＝W4 必交；P1＝W4 可延到 W5。Phase 2 需以各家官方文件逐欄�
 | `xai` | `openai_chat` | `https://api.x.ai/v1` | `GET /models` |
 | `deepseek` | `openai_chat` | `https://api.deepseek.com` | `GET /models` |
 | `openrouter` | `openai_chat` | `https://openrouter.ai/api/v1` | `GET /models` |
+| `mistral` | `openai_chat` | `https://api.mistral.ai/v1` | `GET /models` |
+| `groq` | `openai_chat` | `https://api.groq.com/openai/v1` | `GET /models` |
 | `custom` | 任選 | 必填 | 可關閉 |
 
-base URL 值以 Phase 2 查證為準；本表是框架。
+base URL 已在 [W4](milestones/W4.md) §4.5.3 查證（xAI、DeepSeek、Mistral、Groq 為次級來源）；`google` preset 與 `gemini` adapter 一起在 W5 加入。`openai` preset 的 `token_param` 預設 `max_completion_tokens`（Q-17）。
 
 ### 2.3 統一介面
 
@@ -137,7 +139,7 @@ interface LlmAdapter {
 - adapter 支援 SSE 串流時，HostedGeneration 以 `onDelta` 收文字，**節流**（≥ 250 ms 或累積 ≥ 64 字元）後經 Room 廣播 WS `draft` 封包（見 [04](04-backend.md) B-10）。
 - `draft` 不寫 D1、不佔 seq、不喚醒（V2-INV-03）。完成後照 v1 流程 `send_message`，正式訊息事件取代草稿。
 - 斷線重連的 client 不補發草稿；它只看到最終訊息。
-- 串流是每個 runtime 的設定（`stream: bool`），預設關，W5 才開放。
+- 串流是每個 runtime 的設定（`stream: bool`），預設關，W5 才開放。Phase 2：Worker 的 `ff_drafts` 關閉時忽略這個設定；已送出草稿的串流失敗不重試（Q-21）；見 [W5](milestones/W5.md) §4.2、§4.5.3。
 
 ### 2.5 回覆後處理
 
@@ -194,7 +196,7 @@ v1 `sidecar/` 綁 Codex。v2 把它泛化成 `kith-runner`，Codex 只是其中�
 ### 3.2 Adapter 設定
 
 ```toml
-# runner.toml（示意；Phase 2 鎖定 schema）
+# runner.toml（示意；Phase 2 定案的格式見 W6 §4.5 與 contracts/v2/runner-config.json）
 kith_url   = "https://kith.example.workers.dev"
 bot_token_file = "/var/lib/kith-runner/claude/token"      # 0600；不在 git
 state_dir  = "/var/lib/kith-runner/claude/state"
@@ -217,7 +219,7 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 | `gemini_cli` | 非互動模式，prompt 經 stdin | 同上 |
 | `command` | 固定 argv；stdin 送 JSON `{room_id, trigger, transcript}` | stdout JSON `{reply, traces[]}`，或純文字當 reply |
 
-各 CLI 的旗標與輸出格式在 Phase 2 查官方文件後鎖定（Q-08）。
+各 CLI 的旗標與輸出格式在 Phase 2 查官方文件後鎖定（Q-08）。Phase 2：已以各 CLI 的 `--help` 與型別定義查證，argv、home 變數、輸出解析見 [W6](milestones/W6.md) §4.6；`runner.toml` 另加必填的 `auth`、`operator_member_id`（`operator_personal` 時）與選填的 `rooms`、`mode`。
 
 **RT-06** quota 推廣：任何以**個人帳號登入**的 CLI（Codex device login、Claude 訂閱登入、Gemini 個人帳號）都必須 `quota_class=operator_personal`。runner 啟動時若偵測到 adapter 為訂閱登入卻設定 `api_key`，拒絕啟動（沿用 v1 Codex 規則，推廣到所有 adapter；偵測方法 Phase 2 定義，無法偵測時以設定檔顯式申報為準）。
 
@@ -281,20 +283,20 @@ argv = ["./my-agent", "--json"]   # 固定 argv；房間文字只走 stdin
 ## 7. v1 → v2 遷移
 
 1. D1 migration 新增 `provider_connections`、`agent_runtimes`，`generations` 加欄位（[04](04-backend.md) §4）。
-2. 若 `XAI_API_KEY` 存在：建立連線 `xai-default`（`secret_source=env`、`secret_env=XAI_API_KEY`、`openai_chat`、`https://api.x.ai/v1`）。
+2. 若 `XAI_API_KEY` 存在：建立連線 `xai-default`（`secret_source=env`、`secret_env=XAI_API_KEY`、`openai_chat`、`https://api.x.ai/v1`）。Phase 2：腳本無法讀 Worker secret，改由 operator 以 `--xai-secret-env XAI_API_KEY`／`--no-xai` 申報（[W4](milestones/W4.md) §4.7）。
 3. 每個 `quota_class=api_key` 的既有 agent，若沒有 runtime 列：建立 `runtime=hosted`、連線 `xai-default`、模型 `grok-4.5`。
 4. 每個 `operator_personal` 的既有 agent：建立 `runtime=runner`、adapter `codex`。
-5. `FAKE_LLM_TEXT` 保留為**測試專用** fake adapter（`api_format=fake`，只在 `KITH_DEV_ALLOW_HTTP_PROVIDERS=on` 或測試環境可選）。v1 的 `reply_limit.fixed` 在 v2 改由 fake adapter 產生。
+5. （Phase 2 修訂：不實作 `fake` adapter；E2E 改用 HTTP fake provider，`FAKE_LLM_TEXT` 只留給沒有 runtime 列的 agent，見 [W4](milestones/W4.md) §1.2、Q-15。）原文：`FAKE_LLM_TEXT` 保留為**測試專用** fake adapter（`api_format=fake`，只在 `KITH_DEV_ALLOW_HTTP_PROVIDERS=on` 或測試環境可選）。v1 的 `reply_limit.fixed` 在 v2 改由 fake adapter 產生。
 6. 遷移是冪等腳本，重跑不產生重複列。
 
 ---
 
 ## 8. Phase 2 待細化
 
-- [ ] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）。
-- [ ] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出。
-- [ ] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息。
-- [ ] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）。
-- [ ] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報。
-- [ ] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明。
-- [ ] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）。
+- [x] 每個 `api_format` 的請求／回應欄位對照表（含串流事件），並以官方文件查證（附 URL 與查閱日期）→ [W4](milestones/W4.md) §4.5、[W5](milestones/W5.md) §4.4（官方文件網站被網路政策擋下，改用官方 SDK 原始碼；推論逐條標註）。
+- [x] 每條 FM-LLM、FM-RUN 的 fixture 檔名與期望輸出 → [W4](milestones/W4.md) §8、[W5](milestones/W5.md) §8、[W6](milestones/W6.md) §8。
+- [x] `runner.toml` 完整 schema（JSON Schema）與錯誤訊息 → [`contracts/v2/runner-config.json`](../../contracts/v2/runner-config.json)、[W6](milestones/W6.md) §4.5、§4.7 `config.ts`。
+- [x] 各 CLI adapter 的非互動旗標與輸出解析（Q-08）→ [W6](milestones/W6.md) §4.6。
+- [x] RT-06「訂閱登入」的偵測方法，或明確改為只靠申報 → 只靠申報（`auth`），並檢查 API key 環境變數（[W6](milestones/W6.md) Q-27）。
+- [x] `kith-runner` 的打包方式（npm 套件？單檔？）與安裝說明 → repo 內 `runner/`，`node runner/main.ts`（[W6](milestones/W6.md) Q-25、§4.5）。
+- [x] RT-01 每種 runtime 轉換的狀態轉移表與 FM 清單（例如改動與 dispatch 同時發生）→ [W4](milestones/W4.md) §4.3.2、§4.6.5（epoch 在呼叫上游前後各比對一次）。

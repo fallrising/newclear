@@ -10,7 +10,7 @@ import subprocess
 import sys
 import threading
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -71,6 +71,9 @@ def main():
         "fixture-credits",
         "fixture-budget-cutoff",
         "fixture-budget-unknown",
+        "published-price-preview",
+        "published-price-cutoff",
+        "published-price-unknown",
     ]
     parser.add_argument("--case", choices=cases)
     parser.add_argument("--worker-fault", choices=["reserved", "settled", "delivered"])
@@ -107,7 +110,7 @@ def main():
     def fixture_response(data):
         fixture["upstream_calls"] += 1
         result = original_response(data)
-        if fixture["case"] == "fixture-budget-unknown":
+        if fixture["case"] in {"fixture-budget-unknown", "published-price-unknown"}:
             result["usage"] = {
                 "prompt_tokens": 1_000_000,
                 "completion_tokens": 5,
@@ -236,6 +239,14 @@ def main():
                         "limit_microcredits": 1 if case == "fixture-budget-cutoff" else 10_000_000,
                         "input_microcredits_per_token": 1,
                         "output_microcredits_per_token": 1,
+                    }
+                if case.startswith("published-price-"):
+                    now = datetime.now(UTC)
+                    model_config["published_price_preview"] = {
+                        "limit_nanodollars": 1 if case == "published-price-cutoff" else 100_000_000,
+                        "verified_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "expires_at": (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "public_payg_standard_confirmed": True,
                     }
                 policy.write_text(json.dumps(model_config))
                 profile = post(
@@ -426,6 +437,8 @@ def main():
                         "crash-settled",
                         "fixture-budget-cutoff",
                         "fixture-budget-unknown",
+                        "published-price-cutoff",
+                        "published-price-unknown",
                     }
                     else "cancelled"
                     if case == "cancel"
@@ -441,7 +454,8 @@ def main():
                 require(usage["guest_connected"], "guest_model_not_connected")
                 requests = (
                     0
-                    if case in {"expired", "revoked", "fixture-budget-cutoff"}
+                    if case
+                    in {"expired", "revoked", "fixture-budget-cutoff", "published-price-cutoff"}
                     else 1
                     if case
                     in {
@@ -450,13 +464,19 @@ def main():
                         "crash-reserved",
                         "crash-settled",
                         "fixture-budget-unknown",
+                        "published-price-unknown",
                     }
                     else 2
                 )
                 require(usage["request_slots_consumed"] == requests, "request_count_mismatch")
                 require(
                     fixture["upstream_calls"]
-                    == (0 if case in {"crash-reserved", "fixture-budget-cutoff"} else requests),
+                    == (
+                        0
+                        if case
+                        in {"crash-reserved", "fixture-budget-cutoff", "published-price-cutoff"}
+                        else requests
+                    ),
                     "upstream_redispatched",
                 )
                 if case in {"fixture-credits", "fixture-budget-cutoff", "fixture-budget-unknown"}:
@@ -477,6 +497,29 @@ def main():
                             usage["fixture_credits_committed_microcredits"]
                             == (30 if requests == 2 else 0),
                             "fixture_credit_settlement_mismatch",
+                        )
+                if case.startswith("published-price-"):
+                    require(usage["published_price_preview"], "published_price_preview_missing")
+                    require(not usage["hard_money_limit_supported"], "preview_claimed_hard_money")
+                    require(usage["amount_decimal"] is None, "preview_claimed_provider_bill")
+                    if case == "published-price-unknown":
+                        require(
+                            usage["entries"][0]["status"] == "unknown"
+                            and usage["quote_uncertain"]
+                            and usage["entries"][0]["quote_settled_nanodollars"] is None
+                            and usage["entries"][0]["quote_reserved_nanodollars"] == 21_657_600,
+                            "unknown_price_preview_was_refunded",
+                        )
+                    elif case == "published-price-preview":
+                        require(
+                            usage["quote_committed_usd"] == "0.000009"
+                            and not usage["quote_uncertain"],
+                            "price_preview_settlement_mismatch",
+                        )
+                    else:
+                        require(
+                            requests == 0 and fixture["upstream_calls"] == 0,
+                            "price_cutoff_dispatched",
                         )
                 raw = journal()
                 if before and case.startswith("crash-"):
@@ -512,6 +555,7 @@ def main():
                         "fixture_credits_committed_microcredits": usage[
                             "fixture_credits_committed_microcredits"
                         ],
+                        "quote_committed_usd": usage["quote_committed_usd"],
                         "terminal_checks": fixture["checks"],
                         "generation": current["generation"],
                     }

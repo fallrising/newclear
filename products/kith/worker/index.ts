@@ -170,12 +170,14 @@ app.get("/api/rooms/:id/messages", async (c) => {
   const beforeRaw = url.searchParams.get("before_seq");
   const limitRaw = url.searchParams.get("limit");
   const kindRaw = url.searchParams.get("kind") ?? "message";
+  const orderRaw = url.searchParams.get("order");
   const afterSeq = afterRaw == null || afterRaw === "" ? -1 : Number(afterRaw);
   const beforeSeq = beforeRaw == null || beforeRaw === "" ? null : Number(beforeRaw);
   const limit = Math.min(50, Math.max(1, limitRaw ? Number(limitRaw) : 50));
   if (!Number.isFinite(afterSeq) || (beforeSeq != null && !Number.isFinite(beforeSeq)) || !Number.isFinite(limit)) {
     return invalid(c, "invalid query");
   }
+  if (orderRaw !== null && orderRaw !== "asc" && orderRaw !== "desc") return invalid(c, "invalid order");
   const kinds = kindRaw.split(",").map((k) => k.trim()).filter(Boolean);
   if (kinds.some((k) => k !== "message" && k !== "trace")) return invalid(c, "invalid kind");
   const placeholders = kinds.map(() => "?").join(",");
@@ -189,10 +191,20 @@ app.get("/api/rooms/:id/messages", async (c) => {
     sql += ` AND seq < ?`;
     params.push(beforeSeq);
   }
-  sql += ` ORDER BY seq ASC LIMIT ?`;
-  params.push(limit);
+  if (orderRaw === null) {
+    sql += ` ORDER BY seq ASC LIMIT ?`;
+    params.push(limit);
+    const result = await c.env.DB.prepare(sql).bind(...params).all();
+    return c.json({ messages: result.results ?? [] });
+  }
+  sql += orderRaw === "desc" ? ` ORDER BY seq DESC LIMIT ?` : ` ORDER BY seq ASC LIMIT ?`;
+  params.push(limit + 1);
   const result = await c.env.DB.prepare(sql).bind(...params).all();
-  return c.json({ messages: result.results ?? [] });
+  const rows = result.results ?? [];
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows.slice();
+  if (orderRaw === "desc") page.reverse();
+  return c.json({ messages: page, has_more: hasMore });
 });
 
 app.post("/api/rooms/:id/messages", async (c) => {

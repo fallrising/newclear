@@ -24,6 +24,18 @@
   --radius-md: 10px;
   --radius-lg: 14px;
   --container-login: 400px;
+  --radius-avatar-agent: 28%;
+  --animate-message-in: message-in 160ms ease-out;
+  @keyframes message-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @theme inline {
@@ -48,6 +60,15 @@
   --color-success: var(--success);
   --color-focus: var(--focus);
   --shadow-popover: var(--shadow-popover);
+  --color-avatar-0: var(--avatar-0);
+  --color-avatar-1: var(--avatar-1);
+  --color-avatar-2: var(--avatar-2);
+  --color-avatar-3: var(--avatar-3);
+  --color-avatar-4: var(--avatar-4);
+  --color-avatar-5: var(--avatar-5);
+  --color-avatar-6: var(--avatar-6);
+  --color-avatar-7: var(--avatar-7);
+  --color-on-avatar: var(--on-avatar);
 }
 
 html,
@@ -65,4 +86,8 @@ body {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }

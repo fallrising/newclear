@@ -590,6 +590,134 @@ app.delete("/api/agents/:id/tokens/:tid", async (c) => {
   return c.json({ ok: true });
 });
 
+app.get("/api/members", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const url = new URL(c.req.url);
+  const q = (url.searchParams.get("q") ?? "").trim();
+  const kind = url.searchParams.get("kind");
+  const includeDisabled = url.searchParams.get("include_disabled");
+  const limitRaw = url.searchParams.get("limit");
+  const limit = limitRaw === null || limitRaw === "" ? 20 : Number(limitRaw);
+  if (q.length > 64) return invalid(c, "q too long");
+  if (kind !== null && kind !== "human" && kind !== "agent") return invalid(c, "invalid kind");
+  if (includeDisabled !== null && includeDisabled !== "0" && includeDisabled !== "1") return invalid(c, "invalid include_disabled");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) return invalid(c, "limit must be 1-100");
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (includeDisabled !== "1") where.push("disabled_at IS NULL");
+  if (kind !== null) {
+    where.push("kind = ?");
+    params.push(kind);
+  }
+  if (q !== "") {
+    const pattern = q.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_") + "%";
+    where.push("(handle LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\')");
+    params.push(pattern, pattern);
+  }
+  const sql = `SELECT ${ADMIN_MEMBER_COLUMNS} FROM members${where.length > 0 ? " WHERE " + where.join(" AND ") : ""}
+               ORDER BY handle COLLATE NOCASE ASC LIMIT ?`;
+  params.push(limit);
+  const result = await c.env.DB.prepare(sql).bind(...params).all<AdminMemberRow>();
+  return c.json({ members: (result.results ?? []).map(adminMember) });
+});
+
+app.post("/api/members", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["handle", "display_name", "password"]).length > 0) return invalid(c, "unknown field");
+  const handle = typeof obj.handle === "string" ? obj.handle.trim() : "";
+  const displayName = typeof obj.display_name === "string" ? obj.display_name.trim() : "";
+  const password = typeof obj.password === "string" ? obj.password : "";
+  if (!HANDLE_RE.test(handle)) return invalid(c, "handle must match [a-z0-9_]{2,32}");
+  if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  if (password.length < 12 || password.length > 128) return invalid(c, "password must be 12-128 characters");
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  const passwordHash = await hashPassword(password);
+  try {
+    await c.env.DB.prepare(
+      `INSERT INTO members (id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, created_at, must_change_password)
+       VALUES (?, 'human', ?, ?, ?, '[]', 'api_key', 0, ?, 1)`,
+    )
+      .bind(id, handle, displayName, passwordHash, createdAt)
+      .run();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/UNIQUE/i.test(message)) return c.json(errorBody("handle_taken", "handle taken"), 409);
+    return c.json(errorBody("not_ready", "failed to create member"), 503);
+  }
+  const row = await c.env.DB.prepare(`SELECT ${ADMIN_MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(id).first<AdminMemberRow>();
+  return c.json(adminMember(row!), 201);
+});
+
+app.patch("/api/members/:id", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const memberId = c.req.param("id");
+  const target = await loadMember(c.env, memberId);
+  if (!target) return c.json(errorBody("not_found", "member not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["display_name", "disabled"]).length > 0) return invalid(c, "unknown field");
+  if (obj.display_name === undefined && obj.disabled === undefined) return invalid(c, "display_name or disabled required");
+  let displayName: string | null = null;
+  if (obj.display_name !== undefined) {
+    if (typeof obj.display_name !== "string") return invalid(c, "invalid display_name");
+    displayName = obj.display_name.trim();
+    if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  }
+  if (obj.disabled !== undefined && typeof obj.disabled !== "boolean") return invalid(c, "disabled must be boolean");
+  if (obj.disabled === true && target.is_operator === 1) return forbidden(c, "cannot disable the operator");
+  if (displayName !== null) {
+    await c.env.DB.prepare(`UPDATE members SET display_name = ? WHERE id = ?`).bind(displayName, memberId).run();
+  }
+  if (obj.disabled === true) {
+    await c.env.DB.prepare(`UPDATE members SET disabled_at = COALESCE(disabled_at, ?) WHERE id = ?`)
+      .bind(new Date().toISOString(), memberId)
+      .run();
+  } else if (obj.disabled === false) {
+    await c.env.DB.prepare(`UPDATE members SET disabled_at = NULL WHERE id = ?`).bind(memberId).run();
+  }
+  const row = await c.env.DB.prepare(`SELECT ${ADMIN_MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<AdminMemberRow>();
+  return c.json(adminMember(row!));
+});
+
+app.post("/api/members/:id/password", async (c) => {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+  const memberId = c.req.param("id");
+  const target = await loadMember(c.env, memberId);
+  if (!target || target.kind !== "human") return c.json(errorBody("not_found", "member not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (target.id === auth.member.id) {
+    if (extraKeys(obj, ["old_password", "new_password"]).length > 0) return invalid(c, "unknown field");
+    const oldPassword = typeof obj.old_password === "string" ? obj.old_password : "";
+    const newPassword = typeof obj.new_password === "string" ? obj.new_password : "";
+    if (newPassword.length < 12 || newPassword.length > 128) return invalid(c, "password must be 12-128 characters");
+    if (!target.password_hash || !(await verifyPassword(oldPassword, target.password_hash))) {
+      return c.json(errorBody("wrong_password", "old password does not match"), 400);
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await c.env.DB.prepare(`UPDATE members SET password_hash = ?, must_change_password = 0 WHERE id = ?`)
+      .bind(passwordHash, memberId)
+      .run();
+    return c.json({ ok: true });
+  }
+  if (auth.member.is_operator !== 1) return forbidden(c, "operator required");
+  if (extraKeys(obj, ["password"]).length > 0) return invalid(c, "unknown field");
+  const password = typeof obj.password === "string" ? obj.password : "";
+  if (password.length < 12 || password.length > 128) return invalid(c, "password must be 12-128 characters");
+  const passwordHash = await hashPassword(password);
+  await c.env.DB.prepare(`UPDATE members SET password_hash = ?, must_change_password = 1 WHERE id = ?`)
+    .bind(passwordHash, memberId)
+    .run();
+  return c.json({ ok: true });
+});
+
 app.get("/api/metrics", async (c) => {
   const auth = await requireOperator(c);
   if (auth instanceof Response) return auth;
@@ -713,4 +841,32 @@ async function roomSummaries(
             created_at: row.lm_created_at,
           },
   }));
+}
+
+const ADMIN_MEMBER_COLUMNS = `id, kind, handle, display_name, is_operator, quota_class, created_at, disabled_at, must_change_password`;
+
+type AdminMemberRow = {
+  id: string;
+  kind: string;
+  handle: string;
+  display_name: string;
+  is_operator: number;
+  quota_class: string;
+  created_at: string;
+  disabled_at: string | null;
+  must_change_password: number;
+};
+
+function adminMember(row: AdminMemberRow) {
+  return {
+    id: row.id,
+    kind: row.kind,
+    handle: row.handle,
+    display_name: row.display_name,
+    is_operator: row.is_operator,
+    quota_class: row.quota_class,
+    created_at: row.created_at,
+    disabled_at: row.disabled_at,
+    must_change_password: row.must_change_password === 1,
+  };
 }

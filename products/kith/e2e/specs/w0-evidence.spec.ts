@@ -93,7 +93,9 @@ test(
     // 7. server.log: ready, and .dev.vars was not loaded (FM-E2E-05).
     const serverLog = readFileSync(join(goodDir, "server.log"), "utf8");
     expect(serverLog).toContain("Ready on http://127.0.0.1:");
-    expect(serverLog).not.toContain("Using secrets defined in");
+    const secretSources = serverLog.split("\n").filter((l) => l.includes("Using secrets defined in"));
+    for (const line of secretSources) expect(line.trimEnd()).toMatch(/\/state\/wrangler\.env$/);
+    expect(serverLog).not.toContain(".dev.vars");
 
     // 8. The nested stack is gone (FM-E2E-06).
     await expect(fetch(m.base_url + "/api/csrf")).rejects.toThrow();

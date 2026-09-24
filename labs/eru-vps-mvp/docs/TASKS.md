@@ -2,9 +2,9 @@
 
 建立：2026-09-23。此清單從目前尚未完成的工作開始編號；首次部署、worker-4 元件重裝 3/3、恢復／patched reapply、背景觀測工具、資料回收分析及本機 SIGKILL 驗證已完成，不重複計入。
 
-**目前剩餘 16 項：近期收尾 5 項，後續驗證／擴充 11 項。此清單內完成 2 項。** 先按近期收尾推進；後續項目保留原 SDD 範圍，不代表立即對 VPS 執行所有變更。
+**目前剩餘 15 項：近期收尾 4 項，後續驗證／擴充 11 項。此清單內完成 3 項。** 先按近期收尾推進；後續項目保留原 SDD 範圍，不代表立即對 VPS 執行所有變更。
 
-下一項：**ERU-003**，完成 24h 觀測後原 canary 的精確清理紀錄與配額對帳；清理操作與唯讀驗收已執行，交付紀錄待合併。ERU-006 網路隔離準備於 2026-09-24 04:06:02 UTC 開始，仍可獨立推進。近期 7 項完成表示這批收尾工作完成，不等同原 SDD 全部 V01–V11 或完整 HA 已通過。
+下一項：**ERU-004**，綜合歷史 etcd slow-fdatasync、近期唯讀快照與完整 24h 低頻觀測，說清楚證據支持的原因、影響與處理成本；目前仍不能證實歷史根因。ERU-006 網路隔離準備於 2026-09-24 04:06:02 UTC 開始，仍可獨立推進。近期 7 項完成表示這批收尾工作完成，不等同原 SDD 全部 V01–V11 或完整 HA 已通過。
 
 ## 計數與每次回報規則
 
@@ -15,13 +15,13 @@
 - 本檔是計數依據；其他交接／歷史 TODO 的複述不重複計數。完成時更新本表、完成紀錄及 HANDOFF；證據含私有資料時只放私有路徑與可公開摘要。
 - **之後每次交付回報：`本次完成：ERU-xxx（名稱）。目前剩餘 N 項（近期 A、後續 B）。下一項：ERU-yyy。`** 若只完成部分步驟，回報「本次完成編號：無；ERU-xxx 仍進行中」，數量不減。
 
-## 近期收尾：7 項（完成 2、剩餘 5）
+## 近期收尾：7 項（完成 3、剩餘 4）
 
 | 編號 | 任務 | 狀態 | 前置／完成標準 |
 | --- | --- | --- | --- |
 | ERU-001 | core 更新於替換前中斷的取消／封存 | 完成 | 先在本機實作新的 source-bound 操作；核對 replace-intent 尚未成立、原檔未改變，保留 journal／備份／未知資料；驗證中斷與回覆遺失，且 reapply 不會被錯誤放行。本機測試、操作文件與交付完成；實機 core 故障另列 ERU-005。驗收見 [ERU-001 紀錄](M2-CORE-CANCEL-2026-09-23.md)：167 tests 通過，原 journal 缺失仍拒絕取消，不將缺失視為安全。 |
 | ERU-002 | 回收並判讀目前 24h 觀測 | 完成 | run `20260923T112336Z-561e71e7`，共同涵蓋 86,400 秒；01–03 各 2,881 筆、最大間隔 30 秒，完整性錯誤／功能失敗／警告均為零。01 WAL fsync 6,308 observations、p99 桶上界 8 ms；backend commit 僅 2 observations，不能據此穩健估計尾端延遲。末端 snapshot etcd health 成功、workers 可用、兩個原 canary 仍在，隨後另依 ERU-003 清理。此為 30 秒低頻觀測，不是原 SDD V11 PASS，也沒有證實歷史慢 fdatasync 根因；詳見 [回收 TODO](TODO-SOAK-2026-09-23.md)。 |
-| ERU-003 | 精確清理本次 canaries 與配額對帳 | 進行中 | 原 canary run `20260923T112207Z-99e9508c` 已以新 hash-bound plan 精確清理：只涉及 worker-2／3 的兩個 run-owned workloads，post-state workloads 與三個 worker 配額皆歸零，節點可用、核心服務保留。操作與私有 journal 已驗證；本項待交付紀錄合併。 |
+| ERU-003 | 精確清理本次 canaries 與配額對帳 | 完成 | 原 canary run `20260923T112207Z-99e9508c` 僅由新 plan `20260924T112838Z-4deeeff4` 清理；plan 綁定原 smoke evidence 與 live snapshot，只列 worker-2／3 的兩個 run-owned workloads，執行前重核 owner/run/node。journal complete，post-state 無 workloads、worker-2／3／4 配額皆為零且可用；etcd、core、agents、Docker/containerd 均保留，firewall oneshot 與 proxy socket listener 維持 active。未做 blanket reset；私有 journal 不提交。
 | ERU-004 | etcd 慢同步的原因、影響與處理成本分析 | 進行中 | [階段性分析](M2-ETCD-ANALYSIS-2026-09-23.md) 已綜合歷史故障、6 小時 20 分觀測快照與官方資料，列出原因缺口、影響及相對成本；仍須納入 ERU-002 到期結果。若需額外修復實作，追加任務編號，不能宣稱根因已解決。 |
 | ERU-005 | core API 不可用時的實機恢復演練 | 待做 | ERU-003 後、etcd 健康且 runtime／metadata 空時，建立新的有界故障與恢復計畫；核對 backup、core SHA／API、workers、配額和保留服務。原備份可能含已知 bug，需連同回到已驗證修補版的路徑驗收；不在目前 soak 中注入故障。 |
 | ERU-006 | 補齊 host network 與管理埠隔離驗收 | 進行中 | [網路驗收準備](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md) 記錄 2026-09-24 04:06:02 UTC 開始的本機／唯讀準備。workers 的 UFW 對 TCP/80 明確允許 Anywhere，host-network 測試須先計畫暫時收斂到管理私網，再於 ERU-003 後驗證私網 HTTP、公網 v4/v6 隔離、管理埠、CNI egress NAT 及 port ownership。 |
@@ -59,5 +59,6 @@
 | 2026-09-23 | 初次彙整未完成任務 ERU-001～018；已完成歷史工作不重計，整理清單本身不算功能任務完成 | 0 | 18（近期 7、後續 11） |
 | 2026-09-23 | ERU-001 本機實作／中斷及回覆遺失驗證／操作文件完成；沒有新增、拆分或取消任務 | 1 | 17（近期 6、後續 11） |
 | 2026-09-24 | ERU-002 完成 24h 低頻觀測 evidence 收集、離線判讀及末端 cluster 核對；無新增、拆分或取消任務 | 2 | 16（近期 5、後續 11） |
+| 2026-09-24 | ERU-003 依新 hash-bound plan 精確清理原 canaries，驗證 workloads／配額歸零及服務保留；無新增、拆分或取消任務 | 3 | 15（近期 4、後續 11） |
 
 相關紀錄：[Soak 時間與查詢命令](TODO-SOAK-2026-09-23.md)、[core 中斷驗證與限制](M2-CRASH-RECOVERY-2026-09-23.md)、[原始驗收契約](SDD.md)。

@@ -1,0 +1,60 @@
+{
+  "milestone": "AT-11-C2b1",
+  "date": "2026-09-24",
+  "base_main": "77e5e14e0eb0bd62544ea3ece02aa448e08df456",
+  "scope": "control-side loopback OpenAI Chat Completions mock; no paid provider",
+  "environment": {
+    "runtime": "real KVM, Cocoon and pinned OpenHands 1.49.2 guest",
+    "network": "sealed explicit deny-all node; control-side loopback mock",
+    "database": "separate task-owned PostgreSQL test container per KVM case; all removed",
+    "preflight": {"vms": 0, "journal_entries": 192, "drained": true},
+    "final": {
+      "vms": 0,
+      "claims": 0,
+      "journal_entries": 197,
+      "all_journal_owners_stopped": true,
+      "connector_stopped": true,
+      "sandboxd_stopped": true,
+      "test_postgres_containers": 0
+    }
+  },
+  "tests": {
+    "m0_unittest": 45,
+    "platform_postgres_http_unittest": 190,
+    "web_vitest": 22,
+    "ruff_check_format": "passed",
+    "web_check_build": "passed",
+    "post_fix_focused_postgres_tests": 7,
+    "kvm_passed_cases": [
+      {"case": "mock-complete", "state": "succeeded", "requests": 2, "cleanup_confirmed": true, "public_secret_scan": true},
+      {"case": "mock-cutoff", "state": "failed", "requests": 1, "cleanup_confirmed": true, "public_secret_scan": true},
+      {"case": "mock-unknown", "state": "failed", "requests": 1, "usage_status": "unknown", "uncertain_requests": 1, "cleanup_confirmed": true, "public_secret_scan": true},
+      {"case": "isolation", "state": "succeeded", "requests": 2, "terminal_isolation_checks": 29, "cleanup_confirmed": true, "public_secret_scan": true}
+    ],
+    "initial_attempt": {
+      "case": "mock-complete",
+      "state": "failed",
+      "reason": "fixed workspace verifier expected run UUID; mock initially wrote a static value",
+      "vms_after": 0,
+      "claims_after": 0,
+      "resolution": "mock-only control-side run identity header; standard Chat Completions JSON body unchanged; successful KVM rerun"
+    }
+  },
+  "accounting": {
+    "actual_provider_calls": 0,
+    "amount_decimal": null,
+    "hard_money_limit_supported": false,
+    "unknown_requests_not_refunded_or_redispatched": true
+  },
+  "source_sha256": {
+    "src/agent_platform/model_policy.py": "a71e3a3d6bed45cdbf2a45e99989504d230c85a2bb174cfe7ab5c05b50ae06ca",
+    "src/agent_platform/model_dialect.py": "aba412f999a75968ddf89da7f0db34392c91fdab84dcf1c72c4594cd19ca270d",
+    "src/agent_platform/model_proxy.py": "c312c9707d442fdcde8bb61209f2ddd687392af64b0121b48d704b00dc1152f0",
+    "src/agent_platform/model_upstream.py": "dddc878c726e25cca50902efcb1932898e6d6cb116ceae3a381d99074f9b3b6e",
+    "src/agent_platform/model_mock.py": "3fc44c98fb7dbee858f4ff2f892b11389b0c39a83074267c24a7e9cf6825c243",
+    "src/agent_platform/model_cli.py": "5989104e5013d49aec2f12dfbbc9d260a45c65dab8f946c339364a6af589e56a",
+    "scripts/m3-guest-model-kvm.py": "d5a32365c6b1bda61af98b0ddb6aacbb3717b3654edacdf4238b76b0dc1213b3",
+    "tests_platform/test_guest_model.py": "e66164f4e44c08338d0421ff779afccf9d77d78ee386ea7bd1c000f29c1cdde9"
+  },
+  "private_material": "Raw SDK requests, loopback credentials, connector journals and logs remain outside the repository under /tmp/apm3-provider-mock-20260924 and the prior private test directories."
+}

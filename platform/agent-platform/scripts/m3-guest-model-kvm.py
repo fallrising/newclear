@@ -19,6 +19,7 @@ from fastapi.testclient import TestClient
 from model_kvm_checks import attack_response, child, cross_run_probe, install_attack
 
 import agent_platform.model_fixture as model_fixture
+import agent_platform.model_mock as model_mock
 import agent_platform.model_worker as model_worker
 from agent_platform.api import create_app
 from agent_platform.auth import bootstrap
@@ -27,6 +28,7 @@ from agent_platform.connector_journal import private_file
 from agent_platform.db import Database, migrate
 from agent_platform.domain import Problem
 from agent_platform.model_fixture import fixture_server
+from agent_platform.model_mock import mock_server
 from agent_platform.model_policy import Policy
 from agent_platform.model_proxy import ModelProxy, usage_view
 from agent_platform.runtime_client import RuntimeClient
@@ -74,6 +76,9 @@ def main():
         "published-price-preview",
         "published-price-cutoff",
         "published-price-unknown",
+        "mock-complete",
+        "mock-cutoff",
+        "mock-unknown",
     ]
     parser.add_argument("--case", choices=cases)
     parser.add_argument("--worker-fault", choices=["reserved", "settled", "delivered"])
@@ -100,12 +105,16 @@ def main():
     upstream = fixture_server(0, secret)
     upstream_thread = threading.Thread(target=upstream.serve_forever, daemon=True)
     upstream_thread.start()
+    mock = mock_server(0, secret, "local/mock-agent-v1")
+    mock_thread = threading.Thread(target=mock.serve_forever, daemon=True)
+    mock_thread.start()
     key = args.output / "fixture.key"
     key.write_text(secret)
     policy = args.output / "model.json"
     os.environ["MODEL_PROXY_CONFIG"] = str(policy)
     fixture = {"case": None, "rotated": False, "checks": None, "upstream_calls": 0}
     original_response = model_fixture.tool_response
+    original_mock_response = model_mock.mock_response
 
     def fixture_response(data):
         fixture["upstream_calls"] += 1
@@ -123,6 +132,16 @@ def main():
         )
 
     model_fixture.tool_response = fixture_response
+
+    def compatible_response(data, run_id):
+        fixture["upstream_calls"] += 1
+        result = original_mock_response(data, run_id)
+        if fixture["case"] == "mock-unknown":
+            result["usage"]["completion_tokens"] = data["max_tokens"] + 1
+            result["usage"]["total_tokens"] = 10 + data["max_tokens"] + 1
+        return result
+
+    model_mock.mock_response = compatible_response
 
     class Client(RuntimeClient):
         def operation(self, run, action):
@@ -155,11 +174,11 @@ def main():
     original_completion = model_worker.SDKCompletion
 
     class CaptureCompletion(original_completion):
-        def payload(self):
+        def payload(self, model="fixture:m2"):
             # Private acceptance artifact only; never copy raw prompt/tool schemas
             # to a public report, log or repository.
             (args.output / "sdk-request.json").write_text(json.dumps(self.data))
-            return super().payload()
+            return super().payload(model)
 
     model_worker.SDKCompletion = CaptureCompletion
     original_step, original_complete = model_worker.ModelSession.step, ModelProxy.complete
@@ -227,12 +246,19 @@ def main():
             )
             for case in [args.case] if args.case else cases:
                 fixture.update(case=case, rotated=False, checks=None, upstream_calls=0)
+                upstream_port = (
+                    mock.server_port if case.startswith("mock-") else upstream.server_port
+                )
                 model_config = {
-                    "origin": f"http://127.0.0.1:{upstream.server_port}",
+                    "origin": f"http://127.0.0.1:{upstream_port}",
                     "credential_file": str(key),
-                    "mode": "fixture-http-v1",
-                    "request_limit": 1 if case == "cutoff" else 10,
+                    "mode": "openai-compatible-mock-v1"
+                    if case.startswith("mock-")
+                    else "fixture-http-v1",
+                    "request_limit": 1 if case in {"cutoff", "mock-cutoff"} else 10,
                 }
+                if case.startswith("mock-"):
+                    model_config["model"] = "local/mock-agent-v1"
                 if case in {"fixture-credits", "fixture-budget-cutoff", "fixture-budget-unknown"}:
                     model_config["fixture_budget"] = {
                         "revision": "fixture-credit-2026-09",
@@ -439,6 +465,8 @@ def main():
                         "fixture-budget-unknown",
                         "published-price-cutoff",
                         "published-price-unknown",
+                        "mock-cutoff",
+                        "mock-unknown",
                     }
                     else "cancelled"
                     if case == "cancel"
@@ -465,10 +493,21 @@ def main():
                         "crash-settled",
                         "fixture-budget-unknown",
                         "published-price-unknown",
+                        "mock-cutoff",
+                        "mock-unknown",
                     }
                     else 2
                 )
                 require(usage["request_slots_consumed"] == requests, "request_count_mismatch")
+                if case.startswith("mock-"):
+                    require(not usage["hard_money_limit_supported"], "mock_claimed_hard_money")
+                    require(usage["amount_decimal"] is None, "mock_claimed_provider_bill")
+                    if case == "mock-unknown":
+                        require(
+                            usage["entries"][0]["status"] == "unknown"
+                            and usage["uncertain_requests"] == 1,
+                            "mock_unknown_not_retained",
+                        )
                 require(
                     fixture["upstream_calls"]
                     == (
@@ -583,10 +622,13 @@ def main():
         (args.output / "report.json").write_text(json.dumps(report, indent=2))
         upstream.shutdown()
         upstream.server_close()
+        mock.shutdown()
+        mock.server_close()
         db.close()
         model_worker.SDKCompletion = original_completion
         model_worker.ModelSession.step, ModelProxy.complete = original_step, original_complete
         model_fixture.tool_response = original_response
+        model_mock.mock_response = original_mock_response
 
 
 if __name__ == "__main__":

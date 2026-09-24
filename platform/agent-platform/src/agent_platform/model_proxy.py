@@ -10,7 +10,7 @@ from uuid import UUID
 
 from .auth import audit
 from .domain import Problem
-from .model_policy import MAX_REQUEST, MODEL, canonical, response, sensitive, sha
+from .model_policy import MAX_REQUEST, MOCK_MODE, MODEL, canonical, response, sensitive, sha
 from .model_pricing import (
     CONTEXT_TOKENS,
     MAX_OUTPUT_TOKENS,
@@ -337,19 +337,27 @@ class ModelProxy:
             audit(conn, None, "model.request_settled", str(run_id), status)
 
     def complete(self, run_id, token, request_id, data, *, sdk=False):
-        payload = data.payload()
-        if sdk:
+        if self.policy.mode == MOCK_MODE and not sdk:
+            raise Problem(422, "model_sdk_required")
+        payload = data.payload(self.policy.model) if sdk else data.payload()
+        if sdk and self.policy.mode == "fixture-http-v1":
             payload["fixture_run_id"] = str(UUID(str(run_id)))
         known = (token, self.policy.credential)
         if sensitive(payload, known):
             raise Problem(422, "model_sensitive_request")
         self.reserve(run_id, token, request_id, payload)
         try:
-            raw = self.upstream.complete(payload)
+            raw = (
+                self.upstream.complete(payload, mock_run_id=UUID(str(run_id)))
+                if self.policy.mode == MOCK_MODE
+                else self.upstream.complete(payload)
+            )
             if sdk:
                 from .model_dialect import sdk_response
 
-                value, usage = sdk_response(raw, payload, known)
+                value, usage = sdk_response(
+                    raw, payload, known, compatible=self.policy.mode == MOCK_MODE
+                )
             else:
                 value, usage = response(raw, payload["max_tokens"], known)
             if self.policy.budget and usage["prompt_tokens"] > len(canonical(payload)):
@@ -362,7 +370,14 @@ class ModelProxy:
         except Problem as exc:
             self.settle(run_id, request_id, reason=exc.code)
             raise
-        self.settle(run_id, request_id, usage=usage, reason="fixture_reported_usage")
+        self.settle(
+            run_id,
+            request_id,
+            usage=usage,
+            reason="mock_reported_usage"
+            if self.policy.mode == MOCK_MODE
+            else "fixture_reported_usage",
+        )
         # Accounting survives revocation; stale output cannot enter a resumed generation.
         with self.db.transaction() as conn:
             self.authorize(conn, run_id, token)

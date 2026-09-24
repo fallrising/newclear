@@ -20,7 +20,8 @@ from agent_platform.domain import Problem
 from agent_platform.guest_model import Mailbox, server
 from agent_platform.model_dialect import SDKCompletion, sdk_response
 from agent_platform.model_fixture import fixture_server, tool_response
-from agent_platform.model_policy import Policy, canonical
+from agent_platform.model_mock import mock_response, mock_server
+from agent_platform.model_policy import MOCK_MODE, Policy, canonical
 from agent_platform.model_proxy import ModelProxy, usage_view
 from agent_platform.store import Store
 from agent_platform.worker import Worker
@@ -92,6 +93,22 @@ class DialectTests(unittest.TestCase):
                 fn["arguments"] = '{"command":"canary-secret"}'
             with self.subTest(change=change), self.assertRaises(Problem):
                 sdk_response(canonical(bad), payload, ("canary-secret",))
+
+    def test_compatible_response_normalizes_metadata_and_rejects_unsafe_tools(self):
+        payload = SDKCompletion(request()).payload("local/mock-agent-v1")
+        value = mock_response(payload, str(uuid4()))
+        normalized, usage = sdk_response(canonical(value), payload, (), compatible=True)
+        self.assertEqual(normalized["model"], "local/mock-agent-v1")
+        self.assertNotIn("prompt_tokens_details", normalized["usage"])
+        self.assertEqual(usage["total_tokens"], 15)
+        bad = json.loads(json.dumps(value))
+        bad["choices"][0]["message"]["tool_calls"][0]["function"]["name"] = "host_shell"
+        with self.assertRaisesRegex(Problem, "model_response_invalid"):
+            sdk_response(canonical(bad), payload, (), compatible=True)
+        bad = json.loads(json.dumps(value))
+        bad["choices"][0]["finish_reason"] = "length"
+        with self.assertRaisesRegex(Problem, "model_response_invalid"):
+            sdk_response(canonical(bad), payload, (), compatible=True)
 
 
 class MailboxTests(unittest.TestCase):
@@ -343,6 +360,70 @@ class ModelTransportTests(PlatformFixture):
         with self.assertRaisesRegex(Problem, "model_token_invalid"):
             self.complete()
         self.assertEqual(usage_view(self.db, self.run)["request_slots_consumed"], 0)
+
+
+class MockTransportTests(PlatformFixture):
+    def setUp(self):
+        super().setUp()
+        with self.db.transaction() as conn:
+            conn.execute("DELETE FROM runtime_catalog")
+        test_runtime.RuntimeTests.real_profile(self)
+        self.run, self.worker = test_model_proxy.ModelProxyTests.running(self)
+        self.secret = secrets.token_urlsafe(32)
+        self.server = mock_server(0, self.secret, "local/mock-agent-v1")
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.addCleanup(self.close_server)
+        self.policy = Policy(
+            f"http://127.0.0.1:{self.server.server_port}",
+            self.secret,
+            2,
+            mode=MOCK_MODE,
+            model="local/mock-agent-v1",
+        )
+        self.proxy = ModelProxy(self.db, self.policy)
+        self.token = self.proxy.issue(self.run, 1, self.worker.owner)
+
+    def close_server(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+    def test_mock_wire_model_and_sql_usage_without_money_claim(self):
+        value = self.proxy.complete(
+            self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True
+        )
+        self.assertEqual(value["model"], "local/mock-agent-v1")
+        self.assertEqual(value["choices"][0]["finish_reason"], "tool_calls")
+        usage = usage_view(self.db, self.run)
+        self.assertEqual(usage["entries"][0]["status"], "final")
+        self.assertIsNone(usage["amount_decimal"])
+        self.assertFalse(usage["hard_money_limit_supported"])
+        with self.assertRaisesRegex(Problem, "model_sdk_required"):
+            self.proxy.complete(self.run, self.token, uuid4(), object())
+        self.assertEqual(usage_view(self.db, self.run)["request_slots_consumed"], 1)
+
+    def test_invalid_usage_retains_uncertain_request_and_pinned_model(self):
+        broken = mock_response(SDKCompletion(request()).payload(self.policy.model), str(self.run))
+        broken["usage"]["completion_tokens"] = 4097
+        broken["usage"]["total_tokens"] = 4107
+        with patch("agent_platform.model_mock.mock_response", return_value=broken):
+            with self.assertRaisesRegex(Problem, "model_response_invalid"):
+                self.proxy.complete(
+                    self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True
+                )
+        usage = usage_view(self.db, self.run)
+        self.assertEqual(usage["uncertain_requests"], 1)
+        self.assertEqual(usage["entries"][0]["status"], "unknown")
+        with self.assertRaisesRegex(Problem, "model_policy_changed"):
+            ModelProxy(
+                self.db,
+                Policy(self.policy.origin, self.secret, 2, mode=MOCK_MODE, model="other/mock"),
+            ).issue(self.run, 1, self.worker.owner)
+
+    def test_mock_policy_rejects_remote_origin_and_price_preview(self):
+        with self.assertRaises(ValueError):
+            Policy("https://api.example.test", self.secret, mode=MOCK_MODE, model="local/mock")
+        with self.assertRaises(ValueError):
+            Policy(self.policy.origin, self.secret, mode=MOCK_MODE, model="fixture:m2")
 
 
 class ModelCleanupTests(PlatformFixture):

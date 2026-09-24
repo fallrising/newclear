@@ -1,6 +1,17 @@
 # 開發接續紀錄 — 2026-09-24
 
-目前停止點：**AT-11-C2a 已加入固定公開價目／token 上界的金額預留演練**，仍只向本機 fixture dispatch。公開美元價目用於驗證 admission／ledger 故障語意，沒有付費 provider 帳單或硬金額上限；`amount_decimal` 繼續為 null。完整設計與限制見 [AT-11-C2a](M3-PUBLISHED-PRICE-PREVIEW.md)，驗收見 [evidence](evidence/m3-published-price-preview-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+目前停止點：**AT-11-C2b1 已以可設定模型 ID 的 OpenAI Chat Completions loopback mock 驗收原 guest／控制端通道**。仍是腳本化模型，沒有連付費或外部 API，也未能任意自然語言 coding；真實金額仍 unknown。設計與限制見 [AT-11-C2b1](M3-OPENAI-MOCK.md)，真實 KVM 與測試見 [evidence](evidence/m3-openai-mock-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+
+## 本次 AT-11-C2b1 本機 OpenAI 相容 mock
+
+- 從 GitHub 最新 main `77e5e14e0eb0bd62544ea3ece02aa448e08df456` 建立獨立 worktree `newclear-agent-provider-mock`，只修改 `platform/agent-platform`。使用者同意外部 API 依賴先以 mock 驗收，最後 E2E 再提供接口；因此未讀取主機既有 provider key，也未呼叫付費模型。
+- 新 `openai-compatible-mock-v1` 私有政策固定主機 loopback endpoint、credential fingerprint、可設定 model ID 與 request cap；不接受公開 URL、真實金額 preview 或 fixture credits。SDK 請求正規化為 Chat Completions 文字／function tools JSON；mock 回應只讓驗證後的文字、允許工具與三個 usage counters 進 guest。測試專用 run UUID header 只送 loopback mock，維持 JSON body 的相容形狀並完成目前固定 workspace assertion；未來真實 provider adapter 不可沿用。
+- 既有 job→run ownership、短效 token、先預留後 dispatch、unknown 不退款／不重送、tool gate、持久 cutoff 與完整 VM 停止證據不變。Mock 用量不是可信 provider 計量；`amount_decimal:null`、`hard_money_limit_supported:false`、Web usage capability 關閉。沒有 DB migration 或 launcher／OCI rebuild；啟用仍需先 drain，再同步配置所有 worker 的 `MODEL_PROXY_CONFIG`。
+- M0 45、平台 190、Web 22 項測試及 lint／format／build 通過；修正 mock verifier 契約後另跑 7 項針對性 PostgreSQL 測試。真實 KVM 的 `mock-complete`、`mock-cutoff`、`mock-unknown` 三個新案例及原 fixture `isolation` 回歸均通過，包含 29 項 terminal 隔離；每例都確認 VM／claim 清零、公開憑證掃描與停止證據。第一次 mock 成功案例因固定 verifier 預期 run UUID 而安全失敗且已清理，修正後重跑成功，公開 evidence 有記錄。
+- 私有原始 payload／mock key／logs 在 `/tmp/apm3-provider-mock-20260924`，沿用 `/tmp/apm3-egress-20260923/journal` 與 fences、原 Cocoon cache。收尾 connector／sandboxd 已停，VM／claims 為零，197 筆 journal 對應 VM 全部停止，測試 PostgreSQL container 為零。沒有刪除 journal／fences 或降低 generation。
+- 下個切片依使用者提供接口的時間安排獨立 HTTPS provider transport 與具體 dialect E2E；在此之前可先以 mock 完成安全 endpoint 設定、credential secret reference 及任務驗證契約。Claude／Gemini 原生 API 需獨立 adapter。真實帳戶費率／token 上界／帳單對帳與硬金額上限仍缺；不可把公開價目或 mock counters 當帳單。
+
+前次停止點：**AT-11-C2a 已加入固定公開價目／token 上界的金額預留演練**，仍只向本機 fixture dispatch。公開美元價目用於驗證 admission／ledger 故障語意，沒有付費 provider 帳單或硬金額上限；`amount_decimal` 繼續為 null。完整設計與限制見 [AT-11-C2a](M3-PUBLISHED-PRICE-PREVIEW.md)，驗收見 [evidence](evidence/m3-published-price-preview-2026-09-24.json)。
 
 ## 本次 AT-11-C2a 公開費率演練
 
@@ -115,14 +126,14 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 與 [AT-11-C2a 公開費率演練](M3-PUBLISHED-PRICE-PREVIEW.md) 接續 **真實 provider adapter、實際帳戶價格／token 上界適用性與可信金額結算**，再接 usage UI／明確 opt-in provider smoke，最後整合完整 AT-07／11。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
-2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture proxy；legacy 模式仍保留。Token counters 是上游 fixture 回報，不是可信 token／金額上界。
+1. 依 [SDD](../SDD.md) 與 [AT-11-C2b1 本機相容 mock](M3-OPENAI-MOCK.md)，先在不需外部接口的範圍完成安全 HTTPS endpoint／credential 配置及通用任務驗證契約，再等使用者提供接口做明確 opt-in provider E2E。實際帳戶價格／token 上界／計費例外與可信金額結算、usage UI 及完整 AT-07／11 尚未完成。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
+2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture／mock proxy；legacy 模式仍保留。Token counters 是上游 mock／fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
 5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
 7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-egress-20260923`（本次，最終 pinned-*／deny-final／控制回歸）、`/tmp/apm3-isolation-20260923`（前次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
-8. 本次先 drain、備份，再套用最新 `009_guest_model.sql`（包含前序 migrations）並更新 API／worker／connector。AT-11-B 的 ModelProxy 在 worker 端執行，另啟動固定 loopback fixture upstream；AT-11-A 獨立文字 endpoint 保留。從 PR #43 升級不需重建 launcher，guest helper 不原地修補。更舊版本須連同 guest／egress 升級步驟處理。不要刪 journal／fences 或降低 DB generation；已進入 guest 的工具不會因 worker lease 到期而自動停止。
+8. 從較舊版本升級時先 drain、備份，再套用最新 `011_published_price_preview.sql`（包含前序 migrations）並同步更新 API／worker／connector；本次 mock 模式本身沒有新 migration。ModelProxy 在 worker 端執行，另啟動固定 loopback fixture 或 mock upstream；AT-11-A 獨立文字 endpoint 保留。Guest helper 不原地修補；更舊版本須連同 guest／egress 升級步驟處理。不要刪 journal／fences 或降低 DB generation；已進入 guest 的工具不會因 worker lease 到期而自動停止。
 
 ## 必須保留的契約差異
 

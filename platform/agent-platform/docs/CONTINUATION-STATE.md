@@ -5,9 +5,9 @@ Updated: 2026-09-24. This file records the verified working state and user instr
 ## Checkout and PR
 
 - Repository: `fallrising/newclear`; worktree: `/home/ckc/test/codex/newclear-agent-provider-mock-c2b2`.
-- Branch: `agent/agent-platform/at-11-c2b2`; snapshot basis before this handoff update: `85d90010af4e5da1ca61b1a5fd759c9fb1ac0c7c`. This handoff-only update may make the branch tip newer; verify with Git before resuming.
+- Branch: `agent/agent-platform/at-11-c2b2`; snapshot basis before the continuation update: `85d90010af4e5da1ca61b1a5fd759c9fb1ac0c7c`. The follow-up handoff commit `48af9eb` was pushed with `[skip ci]`; verify the actual branch tip with Git before resuming.
 - Base last synchronized: `dba9ee94a49bcfe2efb298caa1d5324cfde03988`.
-- Draft PR: [#82](https://github.com/fallrising/newclear/pull/82). It is not merged. The latest workflow is cancelled, so GitHub reports the PR as unstable.
+- Draft PR: [#82](https://github.com/fallrising/newclear/pull/82). It is not merged. The last workflow was cancelled; the current handoff-only commit skipped CI, so there are no checks reported for the current head. Do not treat the current PR head as fully green.
 - All implementation changes are scoped to `platform/agent-platform`.
 
 ## Completed work
@@ -19,7 +19,7 @@ The two new dependency-backed Python suites live in `tests_platform`, matching t
 ## CI status
 
 - Full GitHub Actions run `36008490179` passed all three jobs (`check`, `web`, `control-plane`) on code commit `e099c6e1294a7010d461f5900c467b3bc6cb1110`. It included browser acceptance. Local `web-check` is unavailable because Node/npm is absent.
-- A later docs-only push triggered run `36009297291`. At the user's direction, it was cancelled before browser acceptance. The `web` job passed; `check` and `control-plane` were cancelled, and the browser acceptance step was skipped. Treat the earlier complete run as the last fully green CI result; do not describe the latest run as passed.
+- A later docs-only push triggered run `36009297291`. At the user's direction, it was cancelled before browser acceptance. The `web` job passed; `check` and `control-plane` were cancelled, and the browser acceptance step was skipped. Follow-up handoff commit `48af9eb` used `[skip ci]`, so no newer workflow was started. Treat the earlier complete run as the last fully green CI result; do not describe the latest run as passed.
 - The PR workflow runs browser acceptance on PR updates. Avoid pushing incremental commits to this open PR during development, because each push starts an E2E-bearing workflow. Keep intermediate work local or on a branch without an open PR, then batch the final push and the single final E2E run after development is complete.
 
 ## User instructions

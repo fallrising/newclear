@@ -2,7 +2,7 @@
   "milestone": "AT-11-C2b2",
   "date": "2026-09-24",
   "base_main": "dba9ee94a49bcfe2efb298caa1d5324cfde03988",
-  "status": "implementation-and-local-checks-passed; last-full-ci-pass-on-e099c6e; latest-docs-run-cancelled-per-user-e2e-policy; draft-pr-open; real-kvm-gate-incomplete",
+  "status": "implementation-and-local-checks-passed; last-full-ci-pass-on-e099c6e; latest-pr-run-cancelled-per-user-e2e-policy; handoff-only-head-skipped-ci; draft-pr-open; real-kvm-gate-incomplete",
   "pull_request": {
     "number": 82,
     "url": "https://github.com/fallrising/newclear/pull/82",
@@ -71,9 +71,9 @@
   ],
   "source_sha256": {
     "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
-    "docs/HANDOFF.md": "ef0f937c3d201e3d5103b16d9dc8c5012385e5a9de7942ed29a1d58fb7031810",
+    "docs/HANDOFF.md": "f71c2b8ca7ee7f059c2f87c9d3861be21d01cdb4116ff4b669eca686e3385494",
     "docs/M3-HTTPS-PROVIDER.md": "47192615ea3dff6e050e44979ba4967372722f47527776853992ce3488f4833b",
-    "docs/NEXT-PROMPT.md": "c537206b0c0916a44d5cb4de5d658a57a0ce93e5d0dc43304103e92c816bb19a",
+    "docs/NEXT-PROMPT.md": "e9534c4bddc2ae54bbfc8d76f088453ad69d5c5d97d380bbd07c32e0d5298982",
     "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
     "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
     "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",
@@ -106,7 +106,7 @@
     "docs/M3-RECOVERY.md": "2de763e89d2a90f113201934aed066d1eb4c0425ef52b7fd9c1968dca4b45095",
     "src/agent_platform/connector_recovery.py": "d19e02e271d86e28c0b52a76329d1b60d514ee7785bbe79464dde623a25678e1",
     "src/agent_platform/connector_journal.py": "4126f3e8354e6b8dda2291a07e890dbe9835c638f1b1b77489767deb01cc3ab9",
-    "docs/CONTINUATION-STATE.md": "dbd0f3080c87a12a229a10f40a765f996b18a9169cc94fcff56633a811a811e8"
+    "docs/CONTINUATION-STATE.md": "08acfd6460803fd8ee55200fd6c5b3f182053267a0e08e433e85b6dc2b17b386"
   },
   "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories.",
   "github_ci": {
@@ -126,7 +126,8 @@
       "web": "passed: npm check and build",
       "check": "cancelled after lint/unit tests and Agent Server contract; rootfs build was cancelled",
       "control_plane": "cancelled during platform acceptance; browser acceptance skipped"
-    }
+    },
+    "handoff_only_head_checks": "not run: follow-up documentation commits used [skip ci] to defer E2E as instructed"
   },
   "recovery_review": {
     "documented_rule": "unknown allocation without saved handle or VMM ownership stays quarantined and requires administrator reconciliation",

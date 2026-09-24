@@ -13,6 +13,8 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   outputDir: `${run.runDir}/test-output`,
+  globalSetup: "./global-setup.ts",
+  globalTeardown: "./global-teardown.ts",
   grepInvert: includeProbe ? undefined : /@probe/,
   reporter: [
     ["list"],

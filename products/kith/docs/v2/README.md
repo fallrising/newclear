@@ -48,7 +48,7 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | 里程碑 | 檔案 | 狀態 |
 | --- | --- | --- |
 | W0 E2E 與 web 骨架 | [milestones/W0.md](milestones/W0.md) | `VERIFIED` |
-| W1 聊天核心 | [milestones/W1.md](milestones/W1.md) | `DOC_READY` |
+| W1 聊天核心 | [milestones/W1.md](milestones/W1.md) | `VERIFIED` |
 | W2 房間與帳號 | [milestones/W2.md](milestones/W2.md) | `DOC_READY` |
 | W3 成員、提及、回覆狀態 | [milestones/W3.md](milestones/W3.md) | `DOC_READY` |
 | W4 Providers、hosted 多格式、控制台 | [milestones/W4.md](milestones/W4.md) | `DOC_READY` |

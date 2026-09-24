@@ -53,7 +53,7 @@ P1 大框架（#47）
   - `E2E-W1-05` Markdown 白名單與 XSS 向量（BR-34、FE-20）。
   - `E2E-W1-06 @mobile` 手機：列表→房間→返回；重新整理停在同一房。
 - 禁止：成員面板、agent 相關 UI、控制台。
-- 狀態：`DOC_READY`（施工圖：[milestones/W1.md](milestones/W1.md)）。
+- 狀態：`VERIFIED`（施工圖：[milestones/W1.md](milestones/W1.md)；全套 run `20260924-071613-24d2cc8`：W0–W1 共 9 個測試通過，`e2e:validate` ok）。
 
 ### W2 — 房間與帳號
 

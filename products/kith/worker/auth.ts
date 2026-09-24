@@ -106,9 +106,10 @@ export type MemberRow = {
   quota_class: string;
   is_operator: number;
   disabled_at: string | null;
+  must_change_password?: number;
 };
 
-const MEMBER_COLUMNS = `id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at`;
+const MEMBER_COLUMNS = `id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password`;
 
 export async function loadMember(env: Env, memberId: string): Promise<MemberRow | null> {
   return env.DB.prepare(`SELECT ${MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<MemberRow>();

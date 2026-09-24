@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { MEMBERS_PER_ROOM } from "../src/caps.ts";
 import { rejectMemberCount } from "../src/reject.ts";
-import { verifyPassword } from "../src/password.ts";
+import { hashPassword, verifyPassword } from "../src/password.ts";
 import { hashBotToken, issueBotToken } from "../src/token.ts";
 import {
   authorizationBearer,
@@ -82,7 +82,7 @@ app.post("/api/auth/login", async (c) => {
   if (!handle || !password) return invalid(c, "handle and password required");
 
   const member = await c.env.DB.prepare(
-    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at
+    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password
      FROM members WHERE handle = ? COLLATE NOCASE`,
   )
     .bind(handle)
@@ -110,7 +110,26 @@ app.post("/api/auth/logout", async (c) => {
 app.get("/api/me", async (c) => {
   const auth = await requireAuth(c);
   if (auth instanceof Response) return auth;
-  return c.json(publicMember(auth.member));
+  const operator = await c.env.DB.prepare(`SELECT display_name, handle FROM members WHERE is_operator = 1`).first<{
+    display_name: string;
+    handle: string;
+  }>();
+  return c.json({ ...publicMember(auth.member), operator_display_name: operator ? operator.display_name || operator.handle : null });
+});
+
+app.patch("/api/me", async (c) => {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["display_name"]).length > 0) return invalid(c, "unknown field");
+  if (typeof obj.display_name !== "string") return invalid(c, "display_name required");
+  const displayName = obj.display_name.trim();
+  if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  await c.env.DB.prepare(`UPDATE members SET display_name = ? WHERE id = ?`).bind(displayName, auth.member.id).run();
+  const member = await loadMember(c.env, auth.member.id);
+  if (!member) return unauthorized(c);
+  return c.json(publicMember(member));
 });
 
 app.get("/api/rooms", async (c) => {
@@ -566,6 +585,7 @@ function publicMember(member: MemberRow) {
     capabilities_json: member.capabilities_json,
     quota_class: member.quota_class,
     is_operator: member.is_operator,
+    must_change_password: member.must_change_password === 1,
   };
 }
 

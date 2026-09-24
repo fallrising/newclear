@@ -7,20 +7,21 @@
 
 先核對 GitHub 最新 main、最近 PR 與 CI，完整閱讀：
 https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HANDOFF.md
-以及 SDD.md、適用 AGENTS.md、M3-FIXTURE-BUDGET.md、M3-GUEST-MODEL.md、M3-MODEL-PROXY.md、M3-EGRESS.md、M3-GUEST-ISOLATION.md 和交接引用的控制／recovery 文件。
+以及 SDD.md、適用 AGENTS.md、M3-PUBLISHED-PRICE-PREVIEW.md、M3-FIXTURE-BUDGET.md、M3-GUEST-MODEL.md、M3-MODEL-PROXY.md、M3-EGRESS.md、M3-GUEST-ISOLATION.md 和交接引用的控制／recovery 文件。
 
 已知停止點：
+- AT-11-C2a（本次切片）以官方 gpt-4o-mini-2024-07-18 公開 Standard 稅前 USD 價格及 128k context 規格，在原真實 KVM／SQL／loopback fixture 通道演練金額預留、合法用量估算結算、unknown 保留全額及 cutoff。須由 operator 明確確認公開 pay-as-you-go 條件，價目 24 小時內到期。這是 preview，不呼叫付費 provider，沒有實際帳單或硬金額上限；amount_decimal 仍 null。以最新 GitHub PR／CI／evidence 為準，不能只憑本檔宣告合併。
 - PR #43 完成 AT-11-A 控制端 model proxy／request ledger；PR #46 完成 AT-11-B opt-in guest mailbox、固定 OpenHands 1.49.2 SDK tool-call、短效 token 更新及 request cutoff 的工具／VM 收尾。
 - AT-11-C1（PR #51，交接時已合併且 check／control-plane／web CI 通過）增加 opt-in、固定本機 fixture 的合成 credits：釘住價格版本／上限，按 canonical request bytes 與 max_tokens 預留，合法用量結算；unknown／SIGKILL 保留全額。這不是真實 provider 費率或帳單，`amount_decimal` 仍 null、硬金額上限仍關閉。開始時仍要重新核對 GitHub，不以本檔推定最新狀態。
 - Host 經授權 sandbox port relay 拉取 guest request；worker 使用相同 ModelProxy／SQL ledger 呼叫 host loopback fixture。Guest 不需要任何私網例外，上游 credential 只留控制端。
 - 新模式一律 AlwaysConfirm；手動／自動 terminal admission 均核對 live ownership／固定政策／額度。額度截止或模型錯誤持久撤權，完整停止證據才釋放 reservation。
 - Request UUID、SQL reservation 和 connector delivery intent 均持久；未知 dispatch 不重送、token 更新不重設 cap。已確認 delivery 可接回同 VM／prompt；不確定 completion 無通用 replay。
-- 新 migration 010；完整 drain 後更新 API／worker／connector。全部 real workers 設 MODEL_PROXY_CONFIG 指向 0600 fixture config 才啟用；空值的新 run 保留 legacy guest fixture。Active 模式不符時 fail closed，不自動換模型。Launcher／OCI 不需重建，guest helper 不能原地升級。
-- M0 45、平台 182 測試通過；新 budget 三個真實 KVM 案例含成功結算、零 dispatch 截止、超界回報保留全額，另回歸 AT-11-B 原 13 案（含 29 項 terminal 隔離）。以最新 evidence／CI 為準。
+- 新 migration 011；完整 drain 後更新 API／worker／connector。全部 real workers 設 MODEL_PROXY_CONFIG 指向 0600 fixture config 才啟用；空值的新 run 保留 legacy guest fixture。Active 模式不符時 fail closed，不自動換模型。Launcher／OCI 不需重建，guest helper 不能原地升級。
+- M0 45、平台 186、Web 22 測試通過；新公開價格演練三個真實 KVM 案例含成功估算結算、零 dispatch 截止、超界回報保留全額，並回歸原 16 案（含 29 項 terminal 隔離）。以最新 evidence／CI 為準。
 - Pause 與模型 I/O 競爭時，舊授權 completion 不交付；不能證實安全工具邊界就保持 pausing／容量，可取消或期限回收。不要把 SDK error 當 paused。
 
-下一里程碑 AT-11-C2：可信真實 provider pricing／token 上界、金額 reservation／settlement，再接 usage UI 和明確 opt-in provider smoke。
-先比較 SDD 與現有合成 fixture credits，選擇可獨立驗收的切片。沒有可信價格或 tokenizer 上界就不能提供硬金額上限；unknown usage 不能當零。不要使用主機既有 provider key 作隱含授權。完整 AT-07／AT-11／M3 仍未完成；streaming、真實自然語言 coding、M4 artifact／export／backup／GC／production 尚未完成。
+下一里程碑 AT-11-C2b：獨立真實 provider adapter、帳戶適用費率／token 與計費例外、可信金額結算，再接 usage UI 和明確 opt-in provider smoke。
+先比較 SDD、C1 合成 credits 及 C2a 公開費率演練，選擇可獨立驗收的切片。模型 snapshot 不固定費率；OpenAI Order Form、稅與價格更正可能使公開價格不是實際帳單。沒有可信帳戶價格及 token 上界就不能提供硬金額上限；unknown usage 不能當零。不要使用主機既有 provider key 作隱含授權。完整 AT-07／AT-11／M3 仍未完成；streaming、真實自然語言 coding、M4 artifact／export／backup／GC／production 尚未完成。
 
 開發分工：
 - 採用一位主代理統合、視需要最多兩位子代理的輕量團隊；子代理可以使用同一模型，不要求不同模型混搭。若本視窗沒有子代理工具，主代理照常獨立完成，不因此阻塞。
@@ -38,10 +39,10 @@ https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HA
 
 若仍同一主機：
 - 工作區 /home/ckc/test/codex
-- 本次 worktree /home/ckc/test/codex/newclear-agent-at11c
-- 私有配置／模型 payload／logs /tmp/apm3-at11c-20260923，勿公開原文；前次 /tmp/apm3-guest-model-20260923 保留。
+- 本次 worktree /home/ckc/test/codex/newclear-agent-at11c2
+- 私有配置／模型 payload／logs /tmp/apm3-at11c2-20260924，勿公開原文；前次 /tmp/apm3-at11c-20260923、/tmp/apm3-guest-model-20260923 保留。
 - 沿用 /tmp/apm3-egress-20260923/journal 與 fences、terminal、/tmp/apm2-20260922 Cocoon cache／runtime；全部舊交接目錄保留。
-- 本次收尾 VM／claims 為零、132 筆 journal 對應 VM 全部停止，connector／sandboxd 已停、測試 Postgres 已移除；這是交接時證據，不能取代開始前重新核對。
+- 本次收尾 VM／claims 為零、192 筆 journal 對應 VM 已核對停止，connector／sandboxd 已停、測試 Postgres 已移除；這是交接時證據，不能取代開始前重新核對。
 - Node 保持 explicit deny-all。開始前重新核對服務／VM／claims 與停止證據；同 journal 不可同時開 HTTP connector 與 direct driver。不假設 localhost:15000 registry 仍可拉取。
 
 現在核對最新進度並繼續開發。

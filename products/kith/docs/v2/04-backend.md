@@ -55,6 +55,7 @@
 - `GET /api/agents`（operator）：`[{id, handle, display_name, runtime, quota_class, created_at, disabled_at, rooms: [room_id], token_count, runtime_status}]`。
 - `GET /api/agents/:id`、`PATCH /api/agents/:id`（改 display_name、disabled）。
 - `runtime_status`：`ok`、`unconfigured`、`connection_error`、`runner_offline`、`disabled`；前端用它畫成員格的限制句，取代 v1 `reply_limit` 的推斷（`reply_limit` 保留給舊前端）。
+- Phase 2：契約 [`contracts/v2/http-agents.json`](../../contracts/v2/http-agents.json)；判斷順序、成員列表的 `agent_runtime` 欄位、沒有 runtime 列的「v1 設定」（Q-15）見 [W4](milestones/W4.md) §4.3。
 
 ### B-04 成員目錄（W2）
 
@@ -82,6 +83,7 @@
 - 欄位：`name`、`preset`、`api_format`、`base_url`、`secret`（只寫）或 `secret_env`、`extra_headers`、`default_quota_class`。
 - `POST /api/providers/:id/test`：用該連線做一次最小呼叫（列模型；不支援列模型則送 1 token 的 completion），回 `{ok, models?, error_class?}`。不回上游原文。
 - `DELETE` 時若有 agent 引用 → 409 `in_use`，除非帶 `?force=1`（引用的 agent 變 `unconfigured`）。
+- Phase 2：契約 [`contracts/v2/http-providers.json`](../../contracts/v2/http-providers.json)；另加 `POST /api/providers/test`（未儲存的草稿測試）與欄位 `token_param`（Q-17）；驗證規則與程式見 [W4](milestones/W4.md) §4.2、§4.6。
 
 ### B-08 自己的資料（W2）
 
@@ -98,6 +100,7 @@
   - `external`：`{}`
   - 選填 `revoke_tokens: bool`（預設 false；前端在 runner／external → hosted 時預設送 true）。
   - 回應含新的 `runtime_epoch`。
+  - Phase 2：每次 PUT 都 `runtime_epoch += 1` 並記錄變更（不只改種類時）；`stream: true` 在 W5 前回 400。見 [W4](milestones/W4.md) §4.3.2。
 - `GET /api/agents/:id/generations?limit=`：最近 generation 的狀態、`error_class`、耗時、usage（W5）。
 
 ### B-10 WS `draft` 封包（W5）
@@ -137,7 +140,7 @@ Server → client：
 
 ## 4. 資料模型增量（DDL 輪廓）
 
-只追加。Phase 2 改為每個里程碑各自一個 migration：`0002_v2_rooms_members.sql`（W2：`rooms.archived_at`、`members.must_change_password`，[W2](milestones/W2.md) §4.1），provider 與 runtime 相關表在 W4 的 `0003`。
+只追加。Phase 2 改為每個里程碑各自一個 migration：`0002_v2_rooms_members.sql`（W2：`rooms.archived_at`、`members.must_change_password`，[W2](milestones/W2.md) §4.1），provider 與 runtime 相關表在 W4 的 `0003_v2_providers.sql`（[W4](milestones/W4.md) §4.1；比下方輪廓多 `provider_connections.secret_updated_at`、`token_param`、`agent_runtimes.last_error_class` 與一個列層級 `CHECK`）。
 
 ```sql
 CREATE TABLE provider_connections (

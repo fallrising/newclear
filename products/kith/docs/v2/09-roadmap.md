@@ -80,7 +80,7 @@ P1 大框架（#47）
 ### W4 — Providers、hosted 多格式、控制台
 
 - 先決：W4 Phase 2 文件含各格式欄位對照（已查證）與 FM-LLM fixtures 清單。
-- 產物：migration 0002、B-03、B-07、B-09、`LlmAdapter`（`openai_chat`、`anthropic_messages` 必交；`openai_responses`、`gemini` 可延 W5）、遷移腳本（[03](03-agent-runtime.md) §7）、控制台 Agents／Providers／Tokens。
+- 產物：migration `0003`（W2 已用 `0002`）、B-03、B-07、B-09、`LlmAdapter`（`openai_chat`、`anthropic_messages` 必交；`openai_responses`、`gemini` 可延 W5）、遷移腳本（[03](03-agent-runtime.md) §7）、控制台 Agents／Providers／Tokens。
 - 驗收：
   - `E2E-W4-01` 新增連線（fake-provider，`openai_chat`）→ 測試成功→列出模型。
   - `E2E-W4-02` 新增 hosted agent → 邀進房 → @ → 回覆（UJ-07）。
@@ -91,6 +91,7 @@ P1 大框架（#47）
   - `E2E-W4-07` v1→v2 遷移腳本在含 v1 資料的 seed 上執行兩次，結果相同。
   - `E2E-W4-08` 改 runtime：hosted 回覆進行中（fake-provider 延遲）時把 agent 改成 external → 舊回覆不落盤、`reply ended`；身份與歷史不變；勾選撤銷時 token 失效（RT-01、V2-INV-06）。
 - 禁止：串流草稿、runner 改動。
+- 狀態：`DOC_READY`（施工圖：[milestones/W4.md](milestones/W4.md)）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
 
 ### W5 — 串流與可觀測
 

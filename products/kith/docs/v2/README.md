@@ -51,7 +51,8 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | W1 聊天核心 | [milestones/W1.md](milestones/W1.md) | `DOC_READY` |
 | W2 房間與帳號 | [milestones/W2.md](milestones/W2.md) | `DOC_READY` |
 | W3 成員、提及、回覆狀態 | [milestones/W3.md](milestones/W3.md) | `DOC_READY` |
-| W4–W7 | 尚未細化 | `NOT_STARTED` |
+| W4 Providers、hosted 多格式、控制台 | [milestones/W4.md](milestones/W4.md) | `DOC_READY` |
+| W5–W7 | 尚未細化 | `NOT_STARTED` |
 
 相關 ADR：
 

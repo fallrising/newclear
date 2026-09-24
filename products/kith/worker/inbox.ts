@@ -12,6 +12,7 @@ import {
 import { canWake } from "../src/quota.ts";
 import { flagOn, type Env } from "./env.ts";
 import type { BeginInput, BeginResult } from "./hosted/generation.ts";
+import { loadAgentRuntime, runtimeStatus } from "./providers/runtime.ts";
 import { inc } from "./metrics.ts";
 import type { AcquireAmbientResult, ConsumeWakeBudgetResult, RoomActivity } from "./room.ts";
 
@@ -279,8 +280,11 @@ export class Inbox extends DurableObject<Env> {
     // Keyword hosted is not this path. Ambient human uses set_alarm; agent @self uses mention.
     if (mode !== "mention" && senderKind !== "agent") return;
     if (!flagOn(this.env.ff_hosted_agent)) return;
-    // operator_personal is the sidecar path (INV-13 local). Do not also run HostedGeneration.
-    if (policy.quota_class === "operator_personal") return;
+    const gate = await this.hostedGate(self, policy.quota_class);
+    if (!gate.go) {
+      if (gate.code) await this.noteWakeReject(gate.code);
+      return;
+    }
 
     const generationId = crypto.randomUUID();
     await this.ctx.storage.delete("last_reject_code");
@@ -295,6 +299,7 @@ export class Inbox extends DurableObject<Env> {
       handle: policyRow.handle,
       transcript: payload.body,
       triggerSeq: payload.seq,
+      runtimeEpoch: gate.runtime_epoch,
       waitUntil: true,
     });
   }
@@ -368,7 +373,11 @@ export class Inbox extends DurableObject<Env> {
         return;
       }
       if (!flagOn(this.env.ff_hosted_agent)) return;
-      if (pending.envelope.policy.quota_class === "operator_personal") return;
+      const gate = await this.hostedGate(self, pending.envelope.policy.quota_class);
+      if (!gate.go) {
+        if (gate.code) await this.noteWakeReject(gate.code);
+        return;
+      }
       const started = await this.dispatchHosted({
         generationId,
         agentId: self,
@@ -376,6 +385,7 @@ export class Inbox extends DurableObject<Env> {
         handle: policyRow.handle,
         transcript: event.body,
         triggerSeq: event.seq,
+        runtimeEpoch: gate.runtime_epoch,
         waitUntil: false,
       });
       if (!started.ok) {
@@ -413,6 +423,26 @@ export class Inbox extends DurableObject<Env> {
       .first<PolicyRow>();
   }
 
+  /**
+   * v2 (ff_providers=on, agent has a runtime row): only `hosted` dispatches here; runner / external read
+   * /mcp/events. runtime_status other than ok → no generation (V2-INV-05). Otherwise the v1 rule.
+   */
+  private async hostedGate(
+    agentId: string,
+    quotaClass: string,
+  ): Promise<{ go: false; code?: string } | { go: true; runtime_epoch?: number }> {
+    if (flagOn(this.env.ff_providers)) {
+      const view = await loadAgentRuntime(this.env, agentId);
+      if (view && view.runtime !== null) {
+        if (view.runtime !== "hosted") return { go: false };
+        if (runtimeStatus(this.env, view) !== "ok") return { go: false, code: "runtime_unconfigured" };
+        return { go: true, runtime_epoch: view.runtime_epoch };
+      }
+    }
+    // v1: operator_personal is the sidecar path (INV-13 local). Do not also run HostedGeneration.
+    return quotaClass === "operator_personal" ? { go: false } : { go: true };
+  }
+
   private dispatchHosted(input: {
     generationId: string;
     agentId: string;
@@ -420,6 +450,7 @@ export class Inbox extends DurableObject<Env> {
     handle: string;
     transcript: string;
     triggerSeq: number;
+    runtimeEpoch?: number;
     waitUntil: boolean;
   }): Promise<BeginResult> {
     const stub = this.env.HOSTED.get(this.env.HOSTED.idFromName(input.generationId)) as HostedBeginStub;
@@ -431,6 +462,7 @@ export class Inbox extends DurableObject<Env> {
         handle: input.handle,
         transcript: input.transcript,
         trigger_seq: input.triggerSeq,
+        runtime_epoch: input.runtimeEpoch,
       })
       .catch((): BeginResult => ({ ok: false, code: "not_ready", message: "hosted begin failed" }));
     // begin() inserts + setAlarm; do not await the model. waitUntil keeps the notify RPC alive.

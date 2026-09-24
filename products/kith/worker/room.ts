@@ -143,6 +143,32 @@ export class Room extends DurableObject<Env> {
     return { ok: true };
   }
 
+  /** B-11: ephemeral `reply failed`. Only the operator's sockets get error_class. No D1 INSERT, no seq. */
+  async postReplyFailed(roomId: string, memberId: string, errorClass: string): Promise<{ ok: true } | PersistFail> {
+    await this.ctx.storage.put("room_id", roomId);
+    if (!(await this.memberInRoom(roomId, memberId))) {
+      return { ok: false, status: 403, code: "forbidden", message: "not a room member" };
+    }
+    const operator = await this.env.DB.prepare(`SELECT id FROM members WHERE is_operator = 1`).first<{ id: string }>();
+    const plain = JSON.stringify({ v: 1, type: "status", member_id: memberId, body: "reply failed" });
+    const detailed = JSON.stringify({
+      v: 1,
+      type: "status",
+      member_id: memberId,
+      body: "reply failed",
+      error_class: errorClass,
+    });
+    for (const ws of this.sockets()) {
+      const attachment = (ws.deserializeAttachment?.() ?? {}) as { member_id?: string };
+      try {
+        ws.send(operator && attachment.member_id === operator.id ? detailed : plain);
+      } catch {
+        /* drop closed */
+      }
+    }
+    return { ok: true };
+  }
+
   async activity(roomId: string): Promise<RoomActivity> {
     await this.ctx.storage.put("room_id", roomId);
     const lastHumanAt = (await this.ctx.storage.get<string>("last_human_at")) ?? null;

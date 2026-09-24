@@ -47,6 +47,11 @@ type RoomReleaseStub = DurableObjectStub & {
     state: string,
     body: string,
   ): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }>;
+  postReplyFailed(
+    roomId: string,
+    memberId: string,
+    errorClass: string,
+  ): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }>;
 };
 
 export class HostedGeneration extends DurableObject<Env> {
@@ -147,6 +152,7 @@ export class HostedGeneration extends DurableObject<Env> {
     const job = await this.ctx.storage.get<Job>("job");
     if (!job) return;
 
+    let failedClass: HostedErrorClass | null = null;
     try {
       await this.env.DB.prepare(
         `UPDATE generations SET state = 'streaming' WHERE id = ? AND state = 'dispatched'`,
@@ -161,18 +167,37 @@ export class HostedGeneration extends DurableObject<Env> {
       }
       if (!text) {
         await this.markGeneration(job.generation_id, "failed");
+        failedClass = "protocol";
         return;
       }
       const res = await this.sendToRoom(job, text);
       if (!res.ok) {
-        await this.markGeneration(job.generation_id, res.status === 409 ? "dropped" : "failed");
+        if (res.status === 409) {
+          await this.markGeneration(job.generation_id, "dropped");
+        } else {
+          await this.markGeneration(job.generation_id, "failed");
+          failedClass = "unknown";
+        }
       }
-    } catch {
+    } catch (err) {
       await this.markGeneration(job.generation_id, "failed");
+      failedClass = classifyHostedError(err);
     } finally {
+      if (failedClass !== null) {
+        await this.broadcastReplyFailed(job.room_id, job.agent_id, failedClass);
+      }
       await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
       // Mention generations never acquired the lock; Room no-ops on generation_id mismatch.
       await this.releaseAmbientLock(job);
+    }
+  }
+
+  private async broadcastReplyFailed(roomId: string, memberId: string, errorClass: HostedErrorClass): Promise<void> {
+    try {
+      const stub = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${roomId}`)) as RoomReleaseStub;
+      await stub.postReplyFailed(roomId, memberId, errorClass);
+    } catch {
+      /* a missed status line must not fail the generation */
     }
   }
 
@@ -273,4 +298,31 @@ function parseEnvModels(raw: string | undefined): string[] | undefined {
     .map((id) => id.trim())
     .filter((id) => id.length > 0);
   return models.length > 0 ? models : undefined;
+}
+
+export type HostedErrorClass =
+  | "auth"
+  | "not_found"
+  | "bad_request"
+  | "rate_limited"
+  | "overloaded"
+  | "network"
+  | "protocol"
+  | "unknown";
+
+/** Map the v1 client's thrown errors to 03 §2.3 LlmErrorClass names (subset available before W4). */
+export function classifyHostedError(err: unknown): HostedErrorClass {
+  const message = err instanceof Error ? err.message : String(err);
+  const status = /failed: (\d{3})$/.exec(message);
+  if (status) {
+    const code = Number(status[1]);
+    if (code === 401 || code === 403) return "auth";
+    if (code === 404) return "not_found";
+    if (code === 400 || code === 422) return "bad_request";
+    if (code === 429) return "rate_limited";
+    if (code === 503 || code === 529) return "overloaded";
+    return "unknown";
+  }
+  if (err instanceof TypeError) return "network";
+  return "unknown";
 }

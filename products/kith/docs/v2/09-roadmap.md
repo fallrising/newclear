@@ -65,7 +65,7 @@ P1 大框架（#47）
   - `E2E-W2-04` 非 operator 看不到控制台入口，直接開 URL 得到 403 畫面。
   - `E2E-W2-05` 封存房：列表移入「已封存」、composer 停用、WS／REST send 回 `room_archived`、@agent 不喚醒；解除封存後恢復（BR-14、V2-INV-07）。
   - `E2E-W2-06` 語言切換：zh-TW ↔ en，所有畫面字串切換、無缺 key；日期格式隨語言變（FE-05）。
-- 狀態：`IN_PROGRESS`（施工圖：[milestones/W2.md](milestones/W2.md)）。鍵盤快捷鍵與訊息操作選單移到 W3。
+- 狀態：`VERIFIED`（施工圖：[milestones/W2.md](milestones/W2.md)；全套 run `20260924-122951-daad1e7`：W0–W2 共 17 個測試通過、desktop 的 `E2E-W1-06` 依專案設定跳過，`e2e:validate` ok）。鍵盤快捷鍵與訊息操作選單移到 W3。
 
 ### W3 — 成員、提及、回覆狀態
 

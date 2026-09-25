@@ -26,6 +26,24 @@ const RUNTIME_KEYS: Record<string, readonly string[]> = {
   external: [],
 };
 
+const GENERATIONS_DEFAULT = 50; // 06 §6.1
+const GENERATIONS_MAX = 100;
+type GenerationRow = {
+  id: string;
+  room_id: string;
+  room_name: string | null;
+  trigger_seq: number;
+  state: string;
+  error_class: string | null;
+  created_at: string;
+  completed_at: string | null;
+  connection_id: string | null;
+  model: string | null;
+  runtime_epoch: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+};
+
 type AgentExtraRow = { id: string; display_name: string; created_at: string; rooms_json: string; token_count: number };
 
 /** Summary shared by GET /api/agents, GET /api/agents/:id and the room member list (no secrets by construction). */
@@ -148,6 +166,31 @@ export function mountAgentRoutes(app: Hono<AppEnv>): void {
     return c.json({ agent: await agentDetail(c.env, id) });
   });
 
+  /** B-09 generations list (W5): newest first, operator only, no prompt or reply text. */
+  app.get("/api/agents/:id/generations", async (c) => {
+    const denied = await gate(c);
+    if (denied) return denied;
+    const id = c.req.param("id");
+    if (!(await loadAgentRuntime(c.env, id))) return c.json(errorBody("not_found", "agent not found"), 404);
+    const rawLimit = c.req.query("limit");
+    const limit = rawLimit === undefined ? GENERATIONS_DEFAULT : Number(rawLimit);
+    if (!Number.isInteger(limit) || limit < 1 || limit > GENERATIONS_MAX) return invalid(c, "invalid limit");
+    const res = await c.env.DB.prepare(
+      `SELECT g.id, g.room_id, r.name AS room_name, g.trigger_seq, g.state, g.error_class, g.created_at, g.completed_at,
+              g.connection_id, g.model, g.runtime_epoch, g.input_tokens, g.output_tokens
+       FROM generations g LEFT JOIN rooms r ON r.id = g.room_id
+       WHERE g.agent_id = ? ORDER BY g.created_at DESC LIMIT ?`,
+    )
+      .bind(id, limit)
+      .all<GenerationRow>();
+    return c.json({
+      generations: (res.results ?? []).map((g) => ({
+        ...g,
+        duration_ms: g.completed_at ? Math.max(0, Date.parse(g.completed_at) - Date.parse(g.created_at)) : null,
+      })),
+    });
+  });
+
   /** B-09 / RT-01: one PUT = one epoch. Every field of the chosen runtime is replaced (no partial setups). */
   app.put("/api/agents/:id/runtime", async (c) => {
     const auth = await requireOperator(c);
@@ -199,8 +242,8 @@ export function mountAgentRoutes(app: Hono<AppEnv>): void {
         params.temperature = t;
       }
       if (obj.stream !== undefined) {
-        if (obj.stream !== false) return invalid(c, "stream is not available before W5");
-        params.stream = false;
+        if (typeof obj.stream !== "boolean") return invalid(c, "invalid stream");
+        params.stream = obj.stream; // honoured only while ff_drafts=on (W5 §4.3)
       }
     } else if (runtime === "runner") {
       if (typeof obj.adapter_kind !== "string" || !ADAPTER_KINDS.has(obj.adapter_kind)) return invalid(c, "invalid adapter_kind");

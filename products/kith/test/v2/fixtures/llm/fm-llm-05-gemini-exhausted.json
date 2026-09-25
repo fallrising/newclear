@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-05",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 429,
+    "headers": {},
+    "body": "{\"error\": {\"code\": 429, \"message\": \"quota\", \"status\": \"RESOURCE_EXHAUSTED\"}}"
+  },
+  "expect": {
+    "error_class": "rate_limited",
+    "retry_after_ms": null
+  }
+}

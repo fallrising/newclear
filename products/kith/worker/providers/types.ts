@@ -1,8 +1,8 @@
 /** v2 hosted LLM adapter contract (docs/v2/03-agent-runtime.md §2.3). */
 export type ApiFormat = "openai_chat" | "openai_responses" | "anthropic_messages" | "gemini" | "fake";
 export const API_FORMATS: readonly ApiFormat[] = ["openai_chat", "openai_responses", "anthropic_messages", "gemini", "fake"];
-/** Formats a W4 adapter exists for. The others are accepted by the DDL but refused by the API until W5. */
-export const W4_FORMATS: readonly ApiFormat[] = ["openai_chat", "anthropic_messages"];
+/** Formats an adapter exists for (W5: all four). `fake` stays DDL-only. */
+export const SUPPORTED_FORMATS: readonly ApiFormat[] = ["openai_chat", "anthropic_messages", "openai_responses", "gemini"];
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -24,6 +24,9 @@ export type NormalizedRequest = {
   stop?: string[];
   stream: boolean;
 };
+
+/** Cumulative text so far is the adapter caller's job; a delta is only the new piece. */
+export type NormalizedDelta = { type: "text"; text: string };
 
 export type NormalizedResult = {
   text: string;
@@ -66,5 +69,8 @@ export interface LlmAdapter {
     req: NormalizedRequest,
     fetchImpl: FetchLike,
     signal?: AbortSignal,
+    onDelta?: (delta: NormalizedDelta) => void,
   ): Promise<NormalizedResult>;
+  // req.stream = true → the adapter asks for SSE and calls onDelta per text piece. The promise still resolves only
+  // after the provider's terminal event; a stream that ends without one rejects with protocol (FM-LLM-08).
 }

@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-09",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"x\"}}\n\nevent: error\ndata: {\"type\": \"error\", \"error\": {\"type\": \"overloaded_error\", \"message\": \"Overloaded\"}}\n\n"
+  },
+  "expect": {
+    "error_class": "overloaded",
+    "deltas": [
+      "x"
+    ]
+  }
+}

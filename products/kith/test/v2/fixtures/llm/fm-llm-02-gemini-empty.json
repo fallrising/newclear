@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-02",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"candidates\": []}"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

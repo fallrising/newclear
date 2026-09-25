@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-09",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"id\": \"c\", \"object\": \"chat.completion.chunk\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"a\"}, \"finish_reason\": null}]}\n\ndata: {\"error\": {\"message\": \"slow down\", \"type\": \"requests\", \"code\": \"rate_limit_exceeded\"}}\n\n"
+  },
+  "expect": {
+    "error_class": "rate_limited",
+    "deltas": [
+      "a"
+    ]
+  }
+}

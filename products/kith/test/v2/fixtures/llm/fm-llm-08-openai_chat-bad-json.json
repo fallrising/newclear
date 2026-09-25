@@ -1,0 +1,16 @@
+{
+  "fm": "FM-LLM-08",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {not json\n\n"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

@@ -1,4 +1,4 @@
-// W4 §6 W4-T05: golden fixtures for 03 §2.7 FM-LLM-01…16 (non-streaming part). Written before the adapters.
+// W4-T05 / W5-T04: golden fixtures for 03 §2.7 FM-LLM-01…16, all four formats, streamed and not. Written before the adapters.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -11,7 +11,8 @@ type Fixture = {
   fm: string;
   format: ApiFormat;
   call: "complete" | "listModels";
-  response: { status: number; headers: Record<string, string>; body: string };
+  stream?: boolean;
+  response: { status: number; headers: Record<string, string>; body: string; chunks_b64?: string[] };
   expect: {
     text?: string;
     finish?: string;
@@ -20,15 +21,22 @@ type Fixture = {
     error_class?: string;
     retry_after_ms?: number | null;
     no_text?: string;
+    deltas?: string[];
   };
 };
 
 const DIR = join(import.meta.dirname, "fixtures", "llm");
 const NOW = Date.parse("2026-09-24T00:00:00Z");
+const BASE: Record<string, string> = {
+  openai_chat: "https://llm.example/v1",
+  openai_responses: "https://llm.example/v1",
+  anthropic_messages: "https://llm.example",
+  gemini: "https://llm.example/v1beta",
+};
 const CONN = (format: ApiFormat): ResolvedConnection => ({
   id: "c1",
   api_format: format,
-  base_url: format === "anthropic_messages" ? "https://llm.example" : "https://llm.example/v1",
+  base_url: BASE[format]!,
   secret: "sk-test-1234",
   extra_headers: { "X-Title": "kith" },
   token_param: "max_tokens",
@@ -38,14 +46,41 @@ const REQ: NormalizedRequest = { model: "m1", system: "sys", transcript: "UNTRUS
 function responseFor(f: Fixture): Response {
   const headers = new Headers(f.response.headers);
   if (headers.get("retry-after") === "@NOW+5s") headers.set("retry-after", new Date(NOW + 5000).toUTCString());
-  const body = f.response.body === "@BIG" ? "x".repeat(1024 * 1024 + 1) : f.response.body;
   const status = f.response.status;
+  if (f.response.chunks_b64) {
+    // Deliver the exact byte chunks (one may split a UTF-8 sequence or a \r\n pair).
+    const chunks = f.response.chunks_b64.map((b) => Uint8Array.from(Buffer.from(b, "base64")));
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const c of chunks) controller.enqueue(c);
+        controller.close();
+      },
+    });
+    return new Response(stream, { status, headers });
+  }
+  const body =
+    f.response.body === "@BIG" ? "x".repeat(1024 * 1024 + 1)
+    : f.response.body === "@BIGSSE" ? "data: " + "x".repeat(1024 * 1024 + 1) + "\n\n"
+    : f.response.body;
   return new Response(status === 204 || status === 304 ? null : body, { status, headers });
+}
+
+function expectedUrl(f: Fixture): string {
+  switch (f.format) {
+    case "openai_chat":
+      return "https://llm.example/v1/chat/completions";
+    case "anthropic_messages":
+      return "https://llm.example/v1/messages";
+    case "openai_responses":
+      return "https://llm.example/v1/responses";
+    default:
+      return f.stream ? "https://llm.example/v1beta/models/m1:streamGenerateContent?alt=sse" : "https://llm.example/v1beta/models/m1:generateContent";
+  }
 }
 
 describe("LLM adapters (FM-LLM fixtures)", () => {
   const files = readdirSync(DIR).filter((n) => n.endsWith(".json")).sort();
-  it("has fixtures", () => expect(files.length).toBeGreaterThanOrEqual(40));
+  it("has fixtures", () => expect(files.length).toBeGreaterThanOrEqual(84));
   for (const name of files) {
     const f = JSON.parse(readFileSync(join(DIR, name), "utf8")) as Fixture;
     it(`${f.fm} ${name}`, async () => {
@@ -58,13 +93,18 @@ describe("LLM adapters (FM-LLM fixtures)", () => {
       };
       try {
         const adapter = adapterFor(f.format)!;
-        const run = f.call === "complete" ? adapter.complete(CONN(f.format), REQ, fetchImpl) : adapter.listModels(CONN(f.format), fetchImpl);
+        const deltas: string[] = [];
+        const req = { ...REQ, stream: f.stream === true };
+        const run = f.call === "complete"
+          ? adapter.complete(CONN(f.format), req, fetchImpl, undefined, (d) => deltas.push(d.text))
+          : adapter.listModels(CONN(f.format), fetchImpl);
         if (f.expect.error_class) {
           const err = await run.then(() => null, (e: unknown) => e);
           expect(err).toBeInstanceOf(LlmError);
           expect((err as LlmError).errorClass).toBe(f.expect.error_class);
           if (f.expect.retry_after_ms !== undefined) expect((err as LlmError).retryAfterMs ?? null).toBe(f.expect.retry_after_ms);
           if (f.expect.no_text) expect(String((err as Error).message)).not.toContain(f.expect.no_text);
+          if (f.expect.deltas) expect(deltas).toEqual(f.expect.deltas); // partial text was shown, but the call failed
         } else if (f.expect.models) {
           expect(await run).toEqual(f.expect.models);
         } else {
@@ -72,13 +112,16 @@ describe("LLM adapters (FM-LLM fixtures)", () => {
           expect(result.text).toBe(f.expect.text);
           expect(result.finish).toBe(f.expect.finish);
           if (f.expect.usage !== undefined) expect(result.usage ?? null).toEqual(f.expect.usage);
+          if (f.expect.deltas) expect(deltas).toEqual(f.expect.deltas);
+          else expect(deltas).toEqual([]);
         }
         // Request shape: no tools key (RT-05), fixed paths, auth header per format, no "//" in the URL.
         const first = seen[0]!;
         expect(first.url.replace("https://", "")).not.toContain("//");
         const headers = first.init.headers as Record<string, string>;
         expect(headers["X-Title"]).toBe("kith");
-        if (f.format === "openai_chat") expect(headers.authorization).toBe("Bearer sk-test-1234");
+        if (f.format === "openai_chat" || f.format === "openai_responses") expect(headers.authorization).toBe("Bearer sk-test-1234");
+        else if (f.format === "gemini") expect(headers["x-goog-api-key"]).toBe("sk-test-1234");
         else {
           expect(headers["x-api-key"]).toBe("sk-test-1234");
           expect(headers["anthropic-version"]).toBe("2023-06-01");
@@ -86,8 +129,10 @@ describe("LLM adapters (FM-LLM fixtures)", () => {
         if (f.call === "complete") {
           const sent = JSON.parse(String(first.init.body)) as Record<string, unknown>;
           expect("tools" in sent).toBe(false);
-          expect("temperature" in sent).toBe(false);
-          expect(first.url).toBe(f.format === "openai_chat" ? "https://llm.example/v1/chat/completions" : "https://llm.example/v1/messages");
+          expect(JSON.stringify(sent)).not.toContain("temperature");
+          expect(first.url).toBe(expectedUrl(f));
+          if (f.format !== "gemini") expect(sent.stream).toBe(f.stream === true);
+          if (f.format === "openai_responses") expect(sent.store).toBe(false);
         }
       } finally {
         Date.now = realNow;
@@ -103,6 +148,35 @@ describe("LLM adapters (FM-LLM fixtures)", () => {
     controller.abort();
     const err = await run.then(() => null, (e: unknown) => e);
     expect((err as LlmError).errorClass).toBe("timeout");
+  });
+
+  it("FM-LLM-08 connection dropped mid-stream → protocol; aborted → timeout", async () => {
+    const dropping = () => {
+      let sent = false;
+      const stream = new ReadableStream<Uint8Array>({
+        pull(controller) {
+          if (!sent) {
+            sent = true;
+            controller.enqueue(new TextEncoder().encode('data: {"choices":[{"index":0,"delta":{"content":"a"},"finish_reason":null}]}\n\n'));
+          } else {
+            controller.error(new TypeError("network connection lost"));
+          }
+        },
+      });
+      return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const deltas: string[] = [];
+    const err = await adapterFor("openai_chat")!
+      .complete(CONN("openai_chat"), { ...REQ, stream: true }, async () => dropping(), undefined, (d) => deltas.push(d.text))
+      .then(() => null, (e: unknown) => e);
+    expect((err as LlmError).errorClass).toBe("protocol");
+    expect(deltas).toEqual(["a"]);
+    const controller = new AbortController();
+    controller.abort();
+    const err2 = await adapterFor("gemini")!
+      .complete(CONN("gemini"), { ...REQ, stream: true }, async () => dropping(), controller.signal)
+      .then(() => null, (e: unknown) => e);
+    expect((err2 as LlmError).errorClass).toBe("timeout");
   });
 
   it("network error → network", async () => {

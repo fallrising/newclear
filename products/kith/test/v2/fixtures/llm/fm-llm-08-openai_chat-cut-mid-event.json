@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-08",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"id\": \"c\", \"object\": \"chat.completion.chunk\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"a\"}, \"finish_reason\": null}]}\n\ndata: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"b\"}"
+  },
+  "expect": {
+    "error_class": "protocol",
+    "deltas": [
+      "a"
+    ]
+  }
+}

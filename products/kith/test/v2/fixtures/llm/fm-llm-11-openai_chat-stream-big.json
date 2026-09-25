@@ -1,0 +1,16 @@
+{
+  "fm": "FM-LLM-11",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "@BIGSSE"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

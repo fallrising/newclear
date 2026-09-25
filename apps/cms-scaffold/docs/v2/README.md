@@ -48,7 +48,7 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 | BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
 | BW1b | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1b.md](waves/BW1b.md) | B-02、B-09、B-10；G-02 |
 | BW1c | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1c.md](waves/BW1c.md) | B-06、B-13；G-07 |
-| W1 | DRAFT | 01 §12 | — | C-04～C-07、U-01、U-02、U-04 |
+| W1 | DOC_READY | 01 §12 | [waves/W1.md](waves/W1.md) | C-04～C-07、U-01、U-02、U-04 |
 | BW2 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW2.md](waves/BW2.md) | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | DRAFT | 01 §12 | — | C-08～C-10、U-03 |
 | W3 | DRAFT | 01 §12 | — | C-01～C-03、C-11、C-13、C-14、U-05 |

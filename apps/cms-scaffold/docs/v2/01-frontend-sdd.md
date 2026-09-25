@@ -205,7 +205,7 @@ W0 定案（細化時補上的值）：每站另有 `--surface`、`--surface-sub
 
 `AspectRatio`、`Carousel` 只給 Front 用。
 
-W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。
+W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。
 
 ### 6.2 模式元件（Polaris 式，建在 shadcn 之上）
 
@@ -221,7 +221,7 @@ W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMen
 | `StatusBadge` | 輸入 `publicationState` 與 `dirty`，輸出一或兩個 badge。 |
 | `QueryBoundary` | 包住一個 query 的四種狀態：loading → `Skeleton`；空 → `EmptyState`；錯誤 → 行內 Alert + 重試；404／403 → 交給路由層。**載入中永遠不顯示空狀態**（修 C-02）。 |
 
-W0 做 `AppFrame`、`PageHeader`、`EmptyState`、`QueryBoundary`；施工細節見 [`waves/W0.md`](waves/W0.md) §5.2。
+W0 做 `AppFrame`、`PageHeader`、`EmptyState`、`QueryBoundary`；施工細節見 [`waves/W0.md`](waves/W0.md) §5.2。W1 做 `IndexFilters`、`IndexTable`、`ResourceLayout`、`ContextualSaveBar`、`StatusBadge`，另加上表沒有的 `IndexPagination`（「共 N 筆」、上一頁／下一頁、每頁筆數）與 `Toaster`，並給 `PageHeader` 加 `moreActions`；施工細節見 [`waves/W1.md`](waves/W1.md) §5.2。
 
 ### 6.3 Front 區塊元件（section registry）
 
@@ -257,6 +257,8 @@ export const albumSite: SiteDefinition = {
 | 未知型別 | 唯讀 JSON 區塊 + 警告 | `—` | 存檔時原樣送回，不刪除該鍵（surface-back §3.1） |
 
 **序列化規則（修 C-05）：** `toFormValues` 與 `toPayload` 必須互為反函數，並用 property test 覆蓋；清空欄位時送 `null`（或 Content 規定的等價值，見 G-07），不可以略過不送。
+
+W1 實作本表除 `RelationPicker`、`MediaPicker`、`PrincipalPicker` 之外的全部 widget；在 W2 之前 `ref`、`media-ref`、`principal-ref` 唯讀顯示（標題＋狀態、縮圖＋標題、「已連結會員帳號」）。enum 的顯示名稱改用 BW1a 的 `enumLabels`（G-06 已由 BW1a 處理）。施工細節見 [`waves/W1.md`](waves/W1.md) §5.3。
 
 ---
 
@@ -467,6 +469,8 @@ export const albumSite: SiteDefinition = {
 - `slug` 下方顯示 Front 的公開網址（只在已發布時可點，開新分頁）。
 - 必填欄位標 `*`，並在送出前用 zod 做即時驗證；後端回 422 時把錯誤對到欄位上。
 
+B-S1～B-S3、Home、`/forbidden`、`/not-found` 的施工細節（線框修正、資料來源、狀態、互動）見 [`waves/W1.md`](waves/W1.md) §5.0。
+
 #### B-S4 MediaPicker 對話框
 
 ```
@@ -601,6 +605,8 @@ Resource index 版型：篩選為時間範圍、操作者、動作、結果（�
 
 施工細節（規則、各 app 的回跳清單、31 個測試向量）見 [`waves/W0.md`](waves/W0.md) §4.7。
 
+Back 的 401（session 過期時保留頁面、先詢問再導向登入）、403、404、409、422 施工細節見 [`waves/W1.md`](waves/W1.md) §4.1、§5.0.4、§5.5。
+
 ---
 
 ## 9. 後端缺口（前端需要的 API）
@@ -720,7 +726,7 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
 
-W0 施工細節見 [`waves/W0.md`](waves/W0.md)。
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -759,7 +765,14 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | --- | --- | --- |
 | Q-08 | shadcn/ui 元件本身依賴 `class-variance-authority`、`clsx`、`tailwind-merge`、`lucide-react`、`tw-animate-css`，§3、§4 沒有逐一列出。 | **A**：視為 D-02「採用 shadcn/ui」的組成，照 [waves/W0.md §4.8](waves/W0.md#48-npm-套件版本全部已查證23) 的精確版本安裝 |
 | Q-09 | 兩種環境類失敗沒有自動測試：Playwright 瀏覽器不存在或版本不符（W0-FM20）、npm registry 無法連線（W0-FM21）。 | **A**：比照 [02 BQ-09](02-backend-sdd.md#8-開放問題) 以 CI 為準；PR 說明必須寫明哪些檢查只在 CI 跑過 |
-| Q-10 | W0 實作後，前端的 codegen 新鮮度測試與帶型別的 fixture 會與 `openapi.yaml` 綁在一起；之後修改契約的後端波次（第一個是 BW1a：`Me.capabilities` 必填）若不同時更新前端，CI 的 `web` job 會紅；反之 BW1a 先實作，W0 的 fixture 就不符合契約。 | **前後端各自依自己的契約開發，差異在整合階段一起處理**（比照真實開發）。W0 仍以 BW0 契約撰寫；[waves/W0.md §2.1](waves/W0.md#21-前置波次) 的防呆保留：實作時若 `openapi.yaml` 已不是 BW0 版本，停下來回報，交給整合階段 |
+| Q-10 | W0 實作後，前端的 codegen 新鮮度測試與帶型別的 fixture 會與 `openapi.yaml` 綁在一起；之後修改契約的後端波次（第一個是 BW1a：`Me.capabilities` 必填）若不同時更新前端，CI 的 `web` job 會紅；反之 BW1a 先實作，W0 的 fixture 就不符合契約。 | **前後端各自依自己的契約開發，差異在整合階段一起處理**（比照真實開發）。W0 仍以 BW0 契約撰寫；[waves/W0.md §2.1](waves/W0.md#21-前置波次) 的防呆保留：實作時若 `openapi.yaml` 已不是 BW0 版本，停下來回報，交給整合階段。W1 同樣適用：codegen 讀 `contracts/BW1c.openapi.yaml`（[waves/W1.md §4.2](waves/W1.md#42-型別與-codegen)），整合階段再改回 `openapi.yaml` |
+
+### 13.4 W1 細化時新增（待確認）
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-11 | shadcn 的 `Calendar` 依賴 `react-day-picker`，`Sonner` 依賴 `sonner`；兩者都不在 §3、§4，也不在 Q-08 的清單。 | **A**：比照 Q-08，視為 D-02 的組成，照 [waves/W1.md §4.8](waves/W1.md#48-npm-套件版本已查證23) 的精確版本（`react-day-picker` 9.14.0、`sonner` 2.0.8）；**B**：不用 `Calendar`（datetime 改用原生 `<input type="datetime-local">`）、不用 toast（違反 U-04 的修法）。 | **A**。W1 施工圖依 A 撰寫 |
+| Q-12 | react-hook-form 把欄位名稱中的 `.` 當成巢狀路徑，W1 的表單也用 `$slug` 存網址代稱；但契約的 `CreateFieldRequest.key` 沒有 pattern，理論上可以建立 `a.b` 或 `$slug` 這種欄位 key（[waves/W1.md](waves/W1.md) W1-FM12）。 | **A**：請後端在 `CreateFieldRequest.key` 加 pattern `^[A-Za-z][A-Za-z0-9_]{0,62}$`（現有種子的 key 都符合）；**B**：前端改用巢狀表單值（`payload.<key>`），仍無法處理含 `.` 的 key。 | **A**，轉給後端窗口（BW2 之後的任一後端波次） |
 
 ## 14. 參考來源
 

@@ -4,7 +4,7 @@
     "contentType": "album",
     "slug": "coast-light-2026",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Coast Light 2026",
     "payload": {
       "title": "Coast Light 2026",
@@ -22,7 +22,7 @@
     "contentType": "photo",
     "slug": "coast-harbour",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Harbour wall",
     "payload": {
       "title": "Harbour wall",
@@ -40,7 +40,7 @@
     "contentType": "photo",
     "slug": "coast-sun",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Late sun",
     "payload": {
       "title": "Late sun",
@@ -58,7 +58,7 @@
     "contentType": "photo",
     "slug": "coast-concrete",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Concrete edge",
     "payload": {
       "title": "Concrete edge",
@@ -76,7 +76,7 @@
     "contentType": "photo",
     "slug": "coast-salt",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Salt air",
     "payload": {
       "title": "Salt air",
@@ -93,7 +93,7 @@
     "contentType": "photo",
     "slug": "coast-window",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Window light",
     "payload": {
       "title": "Window light",
@@ -110,7 +110,7 @@
     "contentType": "photo",
     "slug": "coast-ferry",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Last ferry",
     "payload": {
       "title": "Last ferry",
@@ -178,7 +178,7 @@
     "contentType": "album",
     "slug": "unlisted-proof",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Unlisted proof",
     "payload": {
       "title": "Unlisted proof",
@@ -194,8 +194,8 @@
     "contentType": "clinic_profile",
     "slug": "home",
     "publicationState": "published",
-    "version": 2,
-    "title": null,
+    "version": 1,
+    "title": "Cedar Pet Clinic",
     "payload": {
       "name": "Cedar Pet Clinic",
       "intro": "A small neighbourhood clinic for well animals.",
@@ -212,7 +212,7 @@
     "contentType": "vet",
     "slug": "james-carter",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "James Carter",
     "payload": {
       "title": "James Carter",
@@ -230,7 +230,7 @@
     "contentType": "vet",
     "slug": "helen-leary",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Helen Leary",
     "payload": {
       "title": "Helen Leary",
@@ -266,7 +266,7 @@
     "contentType": "owner",
     "slug": "george-franklin",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "George Franklin",
     "payload": {
       "title": "George Franklin",
@@ -285,7 +285,7 @@
     "contentType": "owner",
     "slug": "betty-davis",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Betty Davis",
     "payload": {
       "title": "Betty Davis",
@@ -302,7 +302,7 @@
     "contentType": "owner",
     "slug": "eduardo-rodriquez",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Eduardo Rodriquez",
     "payload": {
       "title": "Eduardo Rodriquez",
@@ -319,7 +319,7 @@
     "contentType": "pet",
     "slug": "leo",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Leo",
     "payload": {
       "title": "Leo",
@@ -337,7 +337,7 @@
     "contentType": "pet",
     "slug": "basil",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Basil",
     "payload": {
       "title": "Basil",
@@ -354,7 +354,7 @@
     "contentType": "pet",
     "slug": "jewel",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Jewel",
     "payload": {
       "title": "Jewel",
@@ -371,7 +371,7 @@
     "contentType": "visit",
     "slug": "leo-rabies",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Leo rabies shot",
     "payload": {
       "title": "Leo rabies shot",
@@ -413,7 +413,7 @@
     "contentType": "project",
     "slug": "cms-scaffold",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "CMS Scaffold",
     "payload": {
       "title": "CMS Scaffold",
@@ -430,7 +430,7 @@
     "contentType": "project",
     "slug": "internal-ops",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "Internal Ops",
     "payload": {
       "title": "Internal Ops",
@@ -464,7 +464,7 @@
     "contentType": "milestone",
     "slug": "m1-specs",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "M1 Specs",
     "payload": {
       "title": "M1 Specs",
@@ -481,7 +481,7 @@
     "contentType": "milestone",
     "slug": "m2-kernel",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "M2 Kernel",
     "payload": {
       "title": "M2 Kernel",
@@ -498,7 +498,7 @@
     "contentType": "milestone",
     "slug": "m3-surfaces",
     "publicationState": "published",
-    "version": 2,
+    "version": 1,
     "title": "M3 Surfaces",
     "payload": {
       "title": "M3 Surfaces",
@@ -595,5 +595,68 @@
     "dirty": false,
     "publishedAt": null,
     "updatedAt": "2026-09-20T00:34:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000035",
+    "contentType": "note",
+    "slug": "buy-film",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Buy film",
+    "payload": {
+      "title": "Buy film",
+      "body": "Portra 400, **two** rolls.",
+      "category": "todo",
+      "color": "yellow",
+      "priority": 2,
+      "pinned": true,
+      "dueAt": "2026-10-01T09:30:00Z",
+      "attachment": "20000000-0000-4000-8000-000000000001",
+      "location": {
+        "lat": 25.03,
+        "lng": 121.56
+      }
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:35:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000036",
+    "contentType": "note",
+    "slug": "lens-notes",
+    "publicationState": "published",
+    "version": 1,
+    "title": "Lens notes",
+    "payload": {
+      "title": "Lens notes",
+      "body": "Prime lenses only.",
+      "category": "reference",
+      "color": "blue",
+      "priority": 1,
+      "pinned": false,
+      "related": "30000000-0000-4000-8000-000000000035",
+      "attachment": "20000000-0000-4000-8000-000000000002"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:36:00Z",
+    "updatedAt": "2026-09-20T00:36:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000037",
+    "contentType": "note",
+    "slug": "spring-ideas",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Ideas for spring",
+    "payload": {
+      "title": "Ideas for spring",
+      "body": "Harbour at dawn.",
+      "category": "idea",
+      "color": "green"
+    },
+    "dirty": true,
+    "publishedAt": "2026-09-20T00:37:00Z",
+    "updatedAt": "2026-09-20T01:07:00Z"
   }
 ]

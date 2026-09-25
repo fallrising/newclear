@@ -1,0 +1,15 @@
+{
+  "fm": "FM-LLM-11",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-length": "2097152"
+    },
+    "body": "{}"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

@@ -1,17 +1,21 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
+import { PROVIDER_CANARY } from "../fixtures/accounts.ts";
+import { startFakeProvider, type FakeProvider } from "./fake-provider.ts";
 import { KITH_DIR, WEB_DIR, WEB_DIST_DIR, WRANGLER_BIN } from "./paths.ts";
-import { redactText } from "./redact.ts";
+import { recordObservedSecret, redactText } from "./redact.ts";
 
 // Starts and stops the isolated stack (docs/v2/milestones/W0.md §5.1.6). Only process groups this module
 // started are ever signalled: no pkill, no killall, nothing by name.
 
-export type StackStarted = { apiOrigin: string; baseUrl: string; webMode: "build" | "dev" };
+export type StackStarted = { apiOrigin: string; baseUrl: string; webMode: "build" | "dev"; fakeProviderUrl: string };
 
 const children: ChildProcess[] = [];
 let pidsFile: string | null = null;
+let fakeProvider: FakeProvider | null = null;
 
 export function wranglerEnv(): NodeJS.ProcessEnv {
   return { ...process.env, CLOUDFLARE_CF_FETCH_ENABLED: "false", WRANGLER_SEND_METRICS: "false", FORCE_COLOR: "0" };
@@ -75,14 +79,22 @@ export async function startStack(runDir: string, stateDir: string): Promise<Stac
     mkdirSync(assetsDir, { recursive: true });
     writeFileSync(join(assetsDir, "index.html"), "<!doctype html><title>assets placeholder</title>");
   }
+  fakeProvider = await startFakeProvider(PROVIDER_CANARY);
+  const serverLogPath = join(runDir, "server.log");
+  const prior = existsSync(serverLogPath) ? readFileSync(serverLogPath, "utf8") : "";
+  writeFileSync(serverLogPath, JSON.stringify({ fake_provider: fakeProvider.url }) + "\n" + prior);
+
   // --env-file keeps wrangler from loading a developer's .dev.vars (FM-E2E-05).
-  writeFileSync(join(stateDir, "wrangler.env"), "KITH_E2E=1\n");
+  const secretsKey = randomBytes(32).toString("base64url");
+  recordObservedSecret(secretsKey);
+  writeFileSync(join(stateDir, "wrangler.env"), `KITH_E2E=1\nKITH_SECRETS_KEY=${secretsKey}\n`);
 
   const args = [
     "dev", "--local", "--ip", "127.0.0.1", "--port", String(apiPort), "--inspector-port", String(inspectorPort),
     "--persist-to", stateDir, "--assets", assetsDir, "--env-file", join(stateDir, "wrangler.env"),
     "--show-interactive-dev-session=false",
     "--var", "ff_mcp:on", "--var", "ff_hosted_agent:on", "--var", "ff_sidecar:off", "--var", "ff_ambient:off",
+    "--var", "ff_providers:on", "--var", "KITH_DEV_ALLOW_HTTP_PROVIDERS:on",
   ];
   const wrangler = spawn(WRANGLER_BIN, args, { cwd: KITH_DIR, env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
   const serverLog = lineWriter(join(runDir, "server.log"));
@@ -93,7 +105,7 @@ export async function startStack(runDir: string, stateDir: string): Promise<Stac
   const apiOrigin = `http://127.0.0.1:${apiPort}`;
   await waitForHttp(apiOrigin + "/api/csrf", 60_000);
 
-  if (webMode === "build") return { apiOrigin, baseUrl: apiOrigin, webMode };
+  if (webMode === "build") return { apiOrigin, baseUrl: apiOrigin, webMode, fakeProviderUrl: fakeProvider.url };
 
   const webPort = await getFreePort();
   const vite = spawn("npm", ["run", "dev", "--", "--port", String(webPort), "--strictPort"], {
@@ -108,7 +120,7 @@ export async function startStack(runDir: string, stateDir: string): Promise<Stac
   track(vite, stateDir);
   const webUrl = `http://127.0.0.1:${webPort}`;
   await waitForHttp(webUrl + "/login", 60_000);
-  return { apiOrigin, baseUrl: webUrl, webMode };
+  return { apiOrigin, baseUrl: webUrl, webMode, fakeProviderUrl: fakeProvider.url };
 }
 
 function signalGroup(pid: number, signal: NodeJS.Signals): boolean {
@@ -143,4 +155,6 @@ export async function stopStack(): Promise<void> {
     if (groupAlive(pid)) signalGroup(pid, "SIGKILL");
   }
   children.length = 0;
+  await fakeProvider?.close();
+  fakeProvider = null;
 }

@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"m\", \"type\": \"message\", \"role\": \"assistant\", \"content\": [], \"stop_reason\": \"refusal\"}"
+  },
+  "expect": {
+    "error_class": "content_filter"
+  }
+}

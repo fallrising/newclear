@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-04",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 404,
+    "headers": {},
+    "body": "{\"error\": {\"message\": \"model x does not exist\", \"type\": \"invalid_request_error\", \"code\": \"model_not_found\"}}"
+  },
+  "expect": {
+    "error_class": "not_found"
+  }
+}

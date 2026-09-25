@@ -25,13 +25,14 @@ export function MembersPanel(props: { room: RoomSummary; me: Me; onClose: () => 
   const agents = data?.filter((member) => member.kind === "agent").sort(byName) ?? [];
   const operator = props.me.is_operator === 1;
   const selected = view.kind === "agent" ? data?.find((member) => member.id === view.id) : undefined;
-
-  if (view.kind === "agent" && selected) {
-    return <AgentDetail member={selected} viewerIsOperator={operator} onBack={() => setView({ kind: "list" })} />;
-  }
+  const showingAgent = view.kind === "agent" && selected != null;
 
   return (
     <section data-testid="members-panel" aria-label={t("members.title")} className="flex h-full min-h-0 flex-col">
+      {showingAgent && selected && (
+        <AgentDetail member={selected} viewerIsOperator={operator} onBack={() => setView({ kind: "list" })} />
+      )}
+      <div className={showingAgent ? "hidden" : "flex h-full min-h-0 flex-col"}>
       <header className="flex h-14 items-center justify-between border-b border-border px-4">
         <h2 className="text-lg font-semibold text-ink">{t("members.title")}</h2>
         <IconButton data-testid="members-close" label={t("members.close")} icon={X} onClick={props.onClose} />
@@ -88,6 +89,7 @@ export function MembersPanel(props: { room: RoomSummary; me: Me; onClose: () => 
       )}
       <RemoveMemberDialog roomId={props.room.id} member={removing} onOpenChange={(open) => { if (!open) setRemoving(null); }} />
       <AttentionDialog roomId={props.room.id} member={attention} onOpenChange={(open) => { if (!open) setAttention(null); }} />
+      </div>
     </section>
   );
 }

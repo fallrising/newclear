@@ -16,6 +16,8 @@ type TextFieldProps = {
   "data-testid"?: string;
   autoCapitalize?: "none" | "sentences";
   spellCheck?: boolean;
+  inputMode?: "text" | "numeric" | "decimal";
+  placeholder?: string;
 };
 
 const INPUT =
@@ -38,6 +40,8 @@ export function TextField(props: TextFieldProps): ReactElement {
         autoComplete={props.autoComplete}
         autoCapitalize={props.autoCapitalize}
         spellCheck={props.spellCheck}
+        inputMode={props.inputMode}
+        placeholder={props.placeholder}
         disabled={props.disabled}
         aria-invalid={props.invalid || undefined}
         aria-describedby={props.describedBy}

@@ -106,5 +106,6 @@ export function useRoomMembers(roomId: string): UseQueryResult<RoomMember[], Err
     queryKey: roomMembersQueryKey(roomId),
     queryFn: async ({ signal }) =>
       (await apiFetch<RoomMembersResponse>(`/api/rooms/${encodeURIComponent(roomId)}/members`, { signal })).members,
+    refetchInterval: 4_000,
   });
 }

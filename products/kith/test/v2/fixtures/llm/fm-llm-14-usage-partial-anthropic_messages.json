@@ -1,0 +1,17 @@
+{
+  "fm": "FM-LLM-14",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"m\", \"type\": \"message\", \"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"x\"}], \"stop_reason\": \"end_turn\", \"usage\": {\"output_tokens\": 2}}"
+  },
+  "expect": {
+    "text": "x",
+    "finish": "stop",
+    "usage": {
+      "output_tokens": 2
+    }
+  }
+}

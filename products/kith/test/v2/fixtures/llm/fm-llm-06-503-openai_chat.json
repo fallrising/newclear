@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-06",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 503,
+    "headers": {},
+    "body": "upstream busy"
+  },
+  "expect": {
+    "error_class": "overloaded"
+  }
+}

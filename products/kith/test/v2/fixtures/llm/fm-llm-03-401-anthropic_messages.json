@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-03",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 401,
+    "headers": {},
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"authentication_error\", \"message\": \"invalid x-api-key sk-live-LEAKME\"}}"
+  },
+  "expect": {
+    "error_class": "auth",
+    "no_text": "sk-live-LEAKME"
+  }
+}

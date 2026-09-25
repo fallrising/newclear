@@ -1,5 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { roomMembersQueryKey } from "../../api/rooms";
 import { useNow, useStatusStore } from "../../store/statuses";
 import type { RoomMember, RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
@@ -34,8 +36,16 @@ const LOAD_OLDER_PX = 200;
 
 export function Timeline(props: Props): ReactElement {
   const t = useT();
+  const queryClient = useQueryClient();
   const { timeline, meId } = props;
   const statuses = useStatusStore((s) => s.rooms[props.room.id]);
+  const missingReplyMember = Object.keys(statuses?.replies ?? {}).some(
+    (id) => !props.members?.some((member) => member.id === id),
+  );
+  useEffect(() => {
+    if (!missingReplyMember) return;
+    void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(props.room.id) });
+  }, [missingReplyMember, props.room.id, queryClient]);
   const now = useNow(1000);
   const items = useMemo(
     () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq, statuses, now, props.members),

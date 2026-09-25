@@ -8,6 +8,9 @@ export type Env = {
   ff_hosted_agent: string;
   ff_sidecar: string;
   ff_ambient: string;
+  ff_providers?: string;
+  KITH_DEV_ALLOW_HTTP_PROVIDERS?: string;
+  KITH_SECRETS_KEY?: string;
   XAI_API_KEY?: string;
   FAKE_LLM_TEXT?: string;
   FAKE_LLM_MODELS?: string;

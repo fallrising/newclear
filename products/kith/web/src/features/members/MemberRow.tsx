@@ -11,6 +11,8 @@ import { limitView, showsOperatorOnly, type LimitView } from "./limit";
 function limitCopy(view: LimitView, t: (key: CopyKey, vars?: Record<string, string | number>) => string): string | null {
   if (view.kind === "fixed") return t("members.limit.fixed", { text: view.text });
   if (view.kind === "sidecar_off") return t("members.limit.sidecarOff");
+  if (view.kind === "external") return t("members.limit.external");
+  if (view.kind === "runtime") return t(`members.limit.${view.status}`);
   return null;
 }
 
@@ -36,7 +38,7 @@ export function MemberRow(props: {
       data-kind={member.kind}
       className="group flex items-start gap-3 rounded-md px-3 py-2 hover:bg-surface-2"
     >
-      <Avatar size={28} id={member.id} name={name} kind={member.kind} />
+      <Avatar size={28} id={member.id} name={name} kind={member.kind} runtime={member.agent_runtime?.runtime ?? null} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           {agent ? (

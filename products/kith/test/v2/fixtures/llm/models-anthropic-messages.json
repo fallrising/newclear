@@ -1,0 +1,15 @@
+{
+  "fm": "BASE",
+  "format": "anthropic_messages",
+  "call": "listModels",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"data\": [{\"id\": \"c\"}], \"has_more\": false, \"first_id\": \"c\", \"last_id\": \"c\"}"
+  },
+  "expect": {
+    "models": [
+      "c"
+    ]
+  }
+}

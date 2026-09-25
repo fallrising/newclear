@@ -199,6 +199,8 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 
 新增 `GET /api/v1/principals/assignable?contentType=issue&q=`：只回傳 `id` 與 `displayName`；呼叫者必須對該類型有 `update`；最多 20 筆。
 
+施工細節（可指派的定義：啟用中、在 Back 對該類型有 `update`）見 `waves/BW2.md` §4.4、§5.6。
+
 ### 4.3 內容寫入
 
 | ID | 端點 | 規則 |
@@ -209,7 +211,7 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 | G-10 | 工作列表與 `GET /entries/{id}` 支援 `include=refs` | 回應新增 `refs: { "<fieldKey>": { "id", "contentType", "title", "publicationState" } }`；呼叫者沒有目標類型 `read_draft` 權限時，該關聯只回傳 `{ "id", "restricted": true }`。用一次 `IN` 查詢取得，不做 N+1。 |
 | G-11 | 所有投影 | 標題一律取 `payload[type.titleField]`。 |
 
-G-07 施工細節見 `waves/BW1c.md` §4.2（清空欄位）。
+G-07 施工細節見 `waves/BW1c.md` §4.2（清空欄位）。G-03、G-09、G-10 施工細節見 `waves/BW2.md` §5.5、§5.7、§5.8。
 
 ### 4.4 破壞性變更（與前端同一波上線）
 
@@ -242,6 +244,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 - `GET /api/v1/admin/audit`：參數 `page`、`size`、`from`、`to`、`actor`（username）、`action`（可用前綴，例如 `entry.`）、`category`、`targetType`、`targetId`、`outcome`；每筆回傳 `id`、`at`、`actor { id, username, displayName }`、`category`、`action`、`targetType`、`targetId`、`surface`、`outcome`。
 - `GET /api/v1/admin/audit/{id}`：多回傳 `detail`（`detail_json`）。
 - 審計只能新增，不能修改或刪除（surface-admin AC-J）。
+
+**BW2 細化後補充：** `category` 的值、每個動作的 `detail`、被拒治理操作的記法（動作名是治理 action，例如 `manage_types`，`outcome=denied`）見 `waves/BW2.md` §4.3。既有的 `ENTRY_PURGED`、`PERMISSION_CHANGED` 改為上表的 `entry.purge`、`role.permissions_update`（舊列不改）；另外新增 `entry.publish_request_cancel`。`action` 參數以 `.` 結尾時才是前綴。施工細節見 `waves/BW2.md` §4.3、§4.4、§5.3、§5.4。
 
 ### 4.7 類型與欄位的輸出（G-05、G-06）
 
@@ -307,6 +311,7 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 - `/me` 端點：`ownerField` 一律由伺服器設定，任何客戶端傳來的 owner 值都忽略（測試：傳入別人的 principal id，建立的 entry 仍然屬於自己）。
 - `batch-patch`：逐筆授權，不能用「第一筆有權限」代表全部。
 - `include=refs`：沒有權限讀的目標只回傳 `restricted`，不回傳標題（測試：operator-album 展開 `visit` 的 ref，看不到寵物名）。
+  - **BW2 細化後補充：** `seed-operator-album` 沒有 `visit` 的讀取權，所以上面的例子無法觸發；BW2 改以「只有 `photo` editor 權限的帳號展開照片的 `album`」測同一條規則（`waves/BW2.md` §5.8）。
 - 公開投影不得包含無法公開的媒體 id（B-13）。
 
 ---
@@ -350,6 +355,7 @@ BW0 施工細節見 `waves/BW0.md`。
 | BQ-09 | 兩種環境類失敗沒有自動測試：本機沒有 Docker 時 `integrationTest` 無法執行；Maven Central 回 HTTP 429 時依賴無法下載（waves/BW0.md §8 的 BW0-FM16、FM18）。選項：A. 接受，以 CI 為準，PR 說明必須寫明哪些閘門只在 CI 跑過；B. 另設 Maven 鏡像。 | A |
 | BQ-10 | 公開列表的 `ref.<field>` 以 `cms_entry_ref` 篩選，而 `cms_entry_ref` 記錄的是工作副本的關聯；已發布副本與工作副本的關聯不同時（例如照片已改到另一本相簿但還沒重新發布），公開列表依工作副本的關聯篩選（BW1b 細化時發現，waves/BW1b.md §1.2）。選項：A. 對 `ref`／`principal-ref` 欄位另外寫 `published` scope 的索引列，公開列表改用索引列篩選（BW2）；B. 維持。 | A |
 | BQ-11 | 公開列表的每一筆 entry，其 `media-ref` 值都由 `MediaService.resolvePublic` 各自查詢媒體 store（媒體、variants、attachments 與其 entry），查詢數隨筆數增加，§5.4 的「與筆數無關」因此只對 content store 成立（BW1b 細化時發現）。選項：A. BW1c 修 B-13 時一起改成整頁批次解析；B. 維持。 | A |
+| BQ-12 | 狀態變更與審計在同一個交易（BD-09），但沒有測試證明「審計寫入失敗時狀態變更也回滾」：`./gradlew test` 用 in-memory store（沒有交易），`integrationTest` 的 store 契約只測單一 store（BW2 細化時發現，waves/BW2.md §7.8）。選項：A. BW4 新增一個 `integrationTest`，以 PostgreSQL 啟動應用並讓審計寫入失敗（例如 actor 指向不存在的 principal，違反外鍵），檢查 entry 沒有改變；B. 維持。 | A |
 
 ---
 

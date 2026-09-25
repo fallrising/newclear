@@ -405,6 +405,66 @@ class Operator:
                 'remote_mutation_performed': False,
                 'path': str(path.relative_to(self.project)), 'receipt_sha256': receipt['sha256']}
 
+    def verify_reimage_host(self, plan_id, expected_hash):
+        plan_id = identifier(plan_id)
+        plan_path = self.root / 'plans' / (plan_id + '.json')
+        if plan_path.is_symlink() or not plan_path.is_file():
+            raise ValueError('provider reimage plan is missing or unsafe')
+        envelope = read(plan_path)
+        if not isinstance(envelope, dict):
+            raise ValueError('provider reimage plan envelope is malformed')
+        plan = envelope.get('plan')
+        if (not isinstance(plan, dict) or digest(plan) != envelope.get('sha256')
+                or expected_hash != envelope.get('sha256')):
+            raise ValueError('plan hash mismatch')
+        if (plan.get('operation') != 'rebuild-node' or plan.get('rebuild_mode') != 'provider-reimage'
+                or plan.get('executable') is not False):
+            raise ValueError('replacement host verification requires a review-only provider-reimage plan')
+
+        receipt_record_path = self.root / 'reimage-receipts' / (plan_id + '.json')
+        if receipt_record_path.is_symlink() or not receipt_record_path.is_file():
+            raise ValueError('owner reimage receipt record is missing or unsafe')
+        receipt_record = read(receipt_record_path)
+        if not isinstance(receipt_record, dict):
+            raise ValueError('owner reimage receipt record is malformed')
+        if (receipt_record.get('plan_id') != plan_id or receipt_record.get('plan_sha256') != expected_hash
+                or receipt_record.get('status') != 'owner-receipt-recorded'
+                or receipt_record.get('remote_mutation_performed') is not False):
+            raise ValueError('owner reimage receipt record does not match this plan')
+
+        from reimage_receipt import load_receipt, verify_local_hostkeys
+        receipt = load_receipt(self.project, receipt_record.get('receipt_path', ''),
+                               plan=plan, plan_sha256=expected_hash)
+        if (receipt['sha256'] != receipt_record.get('receipt_sha256')
+                or receipt['receipt'] != receipt_record.get('receipt')):
+            raise ValueError('owner reimage receipt changed after it was recorded')
+        trusted = verify_local_hostkeys(receipt['receipt']['target']['alias'],
+                                        receipt['receipt']['host_key_fingerprints'],
+                                        self.trusted_hostkeys_dir)
+        if trusted != receipt_record.get('trusted_host_key_file_check'):
+            raise ValueError('trusted worker host-key file changed after receipt recording')
+
+        path = self.root / 'reimage-observations' / (plan_id + '.json')
+        if path.exists() or path.is_symlink():
+            raise ValueError('replacement host observation already recorded; inspect it and do not overwrite')
+        from reimage_host import inspect_replacement_host
+        expected = {**receipt['receipt']['replacement'],
+                    'host_key_fingerprints': receipt['receipt']['host_key_fingerprints']}
+        observation = inspect_replacement_host(receipt['receipt']['target']['alias'], expected,
+                                               self.trusted_hostkeys_dir)
+        atomic_json(path, {
+            'plan_id': plan_id,
+            'plan_sha256': expected_hash,
+            'status': 'replacement-host-readonly-verified',
+            'remote_mutation_performed': False,
+            'receipt_sha256': receipt['sha256'],
+            'observation': observation,
+            'verified_at': now(),
+        })
+        return {'plan_id': plan_id, 'status': 'replacement-host-readonly-verified',
+                'remote_mutation_performed': False, 'alias': receipt['receipt']['target']['alias'],
+                'path': str(path.relative_to(self.project))}
+
     def worker_readiness(self, health_file, canary_run, snapshot, target='worker-4'):
         from core_patch import readiness, PatchOperator
         from canaries import guard_targets
@@ -580,6 +640,9 @@ def main():
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
     receipt.add_argument('--receipt', required=True, help='Private owner-reviewed receipt JSON')
+    verify_reimage = sub.add_parser('verify-reimage-host', help='Read-only identity and readiness check before worker bootstrap')
+    verify_reimage.add_argument('--plan', required=True)
+    verify_reimage.add_argument('--sha256', required=True)
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -614,6 +677,9 @@ def main():
             print(json.dumps(summary, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
+            print(json.dumps(result, indent=2))
+        elif args.command == 'verify-reimage-host':
+            result = operator.verify_reimage_host(args.plan, args.sha256)
             print(json.dumps(result, indent=2))
         elif args.command == 'execute':
             result = operator.execute(args.plan, args.sha256)

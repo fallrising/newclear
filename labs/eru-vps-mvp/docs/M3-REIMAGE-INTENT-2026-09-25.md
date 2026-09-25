@@ -21,10 +21,16 @@
 
 `python3 scripts/labctl.py record-reimage-receipt --plan PLAN_ID --sha256 PLAN_SHA256 --receipt private/reimage-receipts/worker-4.json` 只做本機 schema／hash／身份／時間核對，並要求 receipt 的 OOB fingerprint 與既有專用 alias trust file `~/.ssh/hzd-vps/known_hosts/disposable-04`（目標 alias 對應檔）完全一致，並把 trust file 路徑、指紋及檔案 SHA-256 一併寫入 immutable 的 private `owner-receipt-recorded` 記錄。owner 必須先在 provider console 核對 fingerprint，並自行完成本機 trust file 更新；此命令不連 SSH、不讀新 host、不呼叫 provider API，也不會寫入 `known_hosts`／verified key inventory、不會重新納管 worker、不會解除排程 fence，也不會把 plan 或 ERU-014 標成完成。它只核對 owner 的帶外聲明格式與綁定，不能證明 provider 操作或新機器狀態為真；新 host key 信任、worker-only bootstrap、註冊和 smoke 仍需分開驗證。
 
+## 唯讀 replacement-host gate（尚未對 VPS 執行）
+
+`python3 scripts/labctl.py verify-reimage-host --plan PLAN_ID --sha256 PLAN_SHA256` 僅在 owner receipt 已記錄後可用。它重核 plan、receipt 原始檔 SHA 與記錄時的 alias trust file SHA，然後只用 plan 綁定的 `ckc-disposable-02`～`04` alias，以 `BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、單一 alias trust file 執行遠端唯讀檢查。它比對新 machine ID、boot ID 與 OS release；要求 SSH、Tailscale、Docker、containerd active，Tailscale IPv4 屬於 tailnet 範圍，ERU runtime 為空，沒有 core／etcd／agent 殘留，並記錄 Docker／containerd 版本。通過結果只寫入 immutable private observation，包含新 tailnet IPv4；不輸出原始遠端 facts、不安裝元件、不註冊 node、不改 trust，也不解除 fence。
+
+本機測試以 fake SSH runner 驗證 alias、strict options、identity／service／runtime gate 與 trust drift；沒有連線到任何 VPS。此 gate 是之後 bootstrap 前的唯讀核對，不是 ERU-014 E2E PASS。
+
 ## 尚未解除的執行 blocker
 
 即使 intent 完全有效，plan 仍不可執行。目前沒有受控 drain／重新納管／resume adapter，也沒有新 host key 的 out-of-band 信任及 SSH／Tailscale／runtime bootstrap 流程。若 worker 尚有 ERU workload，必須先遷移並驗證；Docker workload 另需 ownership／遷移審閱。這些 blocker 保留了「日常元件重裝」與「人工 OS 重灌」的界線。有效 intent 不代表 owner 已經同意立即重灌，也不授權任何自動執行。
 
-本機測試只使用暫存目錄與假資源識別，除 intent 的正／負案例外，也覆蓋 receipt 的舊／新 machine ID、boot ID、plan hash、resource／volume scope、owner confirmation、OOB fingerprint、freshness、symlink 與 duplicate keys；確認記錄不可覆寫、OOB fingerprint 與既有 alias trust file 不符時拒絕且不造成 remote mutation。正式 host identity、provider inventory、credentials、raw evidence 均未讀取或新增。驗證結果：`test_labctl.py` 40 tests 通過，完整離線套件 289 tests 通過；receipt CLI `--help`、Python compile 與 `git diff --check` 通過。
+本機測試只使用暫存目錄與假資源識別，除 intent 的正／負案例外，也覆蓋 receipt 的舊／新 machine ID、boot ID、plan hash、resource／volume scope、owner confirmation、OOB fingerprint、freshness、symlink 與 duplicate keys；確認記錄不可覆寫、OOB fingerprint 與既有 alias trust file 不符時拒絕且不造成 remote mutation。正式 host identity、provider inventory、credentials、raw evidence 均未讀取或新增。驗證結果：`test_labctl.py` 42 tests 通過，完整離線套件 295 tests 通過；receipt／host verification CLI `--help`、Python compile 與 `git diff --check` 通過。
 
 ERU-014 仍為進行中；intent／receipt 都只是離線前置，待本機開發收尾後才安排實機驗收。OS 版本、重灌後身分、host key、SSH／Tailscale／runtime／worker-only ERU bootstrap、重新註冊、HTTP smoke 與其他 worker 保留都須分別核對。詳見 [TASKS](TASKS.md) 與 [HANDOFF](HANDOFF.md)。

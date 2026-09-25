@@ -40,17 +40,22 @@ def workload(document=None):
 
 class FakeEruAPI:
     def __init__(self, initial, fail_after_create=False, fail_before_create=False,
-                 create_count=None, probe_result=None, interrupt_probe=False):
+                 create_count=None, probe_result=None, interrupt_probe=False,
+                 fail_remove_before=False, fail_remove_after=False):
         self.live = copy.deepcopy(initial)
         self.fail_after_create = fail_after_create
         self.fail_before_create = fail_before_create
         self.create_count = create_count
-        self.probe_result = probe_result or {'status': 200, 'body': 'ready'}
+        self.probe_result = probe_result or {'status': 200, 'body_match': True}
+        self.preflight_result = {'health_ok': True, 'consistency_issues': []}
+        self.preflight_calls = 0
         self.interrupt_probe = interrupt_probe
         self.deploy_calls = 0
         self.list_calls = 0
         self.probe_calls = []
         self.removed = []
+        self.fail_remove_before = fail_remove_before
+        self.fail_remove_after = fail_remove_after
         self.snapshot_calls = 0
 
     def snapshot(self):
@@ -58,6 +63,10 @@ class FakeEruAPI:
         result = copy.deepcopy(self.live)
         result['at'] = 'observation-' + str(self.snapshot_calls)
         return result
+
+    def preflight(self, snapshot):
+        self.preflight_calls += 1
+        return copy.deepcopy(self.preflight_result)
 
     def deploy(self, plan):
         self.deploy_calls += 1
@@ -79,6 +88,21 @@ class FakeEruAPI:
         self.list_calls += 1
         return copy.deepcopy([row for row in self.live['workloads']
                               if row['id'].startswith(appname + '_')])
+
+    def get_workload(self, workload_id):
+        matches = [row for row in self.live['workloads'] if row['id'] == workload_id]
+        if len(matches) > 1:
+            raise RuntimeError('duplicate exact workload IDs')
+        return copy.deepcopy(matches[0]) if matches else None
+
+    def remove_exact(self, workload_id):
+        self.removed.append(workload_id)
+        if self.fail_remove_before:
+            raise TimeoutError('remove reply lost before delete')
+        self.live['workloads'] = [row for row in self.live['workloads']
+                                  if row['id'] != workload_id]
+        if self.fail_remove_after:
+            raise TimeoutError('remove reply lost after delete')
 
     def probe(self, row, desired):
         self.probe_calls.append(row['id'])
@@ -241,6 +265,25 @@ class AppExecutorTests(unittest.TestCase):
         self.assertEqual(api.deploy_calls, 0)
         self.assertFalse(executor.run_path(self.run_id).exists())
 
+    def test_live_preflight_is_rechecked_before_create(self):
+        results = (
+            {'health_ok': False, 'consistency_issues': []},
+            {'health_ok': True, 'consistency_issues': ['worker-2 usage mismatch']},
+        )
+        for index, result in enumerate(results):
+            with self.subTest(result=result):
+                api = FakeEruAPI(snapshot())
+                run_id = self.run_id + ('a' if index == 0 else 'b')
+                plan = execution_plan(spec(), api.snapshot(), True, (), run_id)
+                api.preflight_result = result
+                executor = AppExecutor(self.root, api)
+                with self.assertRaisesRegex(ValueError, 'preflight failed'):
+                    executor.execute(plan, plan['plan_sha256'])
+                journal = json.loads(executor.run_path(run_id).read_text())
+                self.assertEqual(journal['status'], 'failed')
+                self.assertEqual(journal['reason'], 'live_preflight_not_clean')
+                self.assertEqual(api.deploy_calls, 0)
+
     def test_snapshot_drift_blocks_create_before_mutation(self):
         api = FakeEruAPI(snapshot())
         plan = self.plan(api)
@@ -264,7 +307,7 @@ class AppExecutorTests(unittest.TestCase):
         self.assertEqual(api.probe_calls, [row['id']])
 
     def test_http_failure_keeps_new_workload_and_records_safe_summary(self):
-        api = FakeEruAPI(snapshot(), probe_result={'status': 503, 'body': 'not ready'})
+        api = FakeEruAPI(snapshot(), probe_result={'status': 503, 'body_match': False})
         plan = self.plan(api)
         executor = AppExecutor(self.root, api)
         with self.assertRaisesRegex(RuntimeError, 'readiness failed'):
@@ -275,7 +318,7 @@ class AppExecutorTests(unittest.TestCase):
         self.assertFalse(journal['probes'][0]['passed'])
         self.assertEqual(api.deploy_calls, 1)
         self.assertEqual(api.removed, [])
-        self.assertNotIn('not ready', json.dumps(journal))
+        self.assertNotIn('body', journal['probes'][0])
 
     def test_interrupted_after_create_reconciles_read_only_and_never_redeploys(self):
         api = FakeEruAPI(snapshot(), interrupt_probe=True)

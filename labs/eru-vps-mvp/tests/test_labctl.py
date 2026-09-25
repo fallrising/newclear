@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -32,6 +33,27 @@ class LockTests(unittest.TestCase):
                 with ClusterLock(project):
                     self.assertEqual(len(lock_fds()), 1)
             self.assertEqual(subprocess.run(command, env=env, capture_output=True).returncode, 0)
+
+    def test_competing_thread_is_rejected_despite_inherited_fd_environment(self):
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            result = []
+
+            def compete():
+                try:
+                    with ClusterLock(project):
+                        result.append('acquired')
+                except RuntimeError as exc:
+                    result.append(str(exc))
+
+            with ClusterLock(project):
+                thread = threading.Thread(target=compete)
+                thread.start()
+                thread.join(timeout=5)
+                self.assertFalse(thread.is_alive())
+                self.assertEqual(len(result), 1)
+                self.assertIn('already running', result[0])
+            self.assertEqual(len(result), 1)
 
     def test_surviving_child_keeps_parent_lock(self):
         with tempfile.TemporaryDirectory() as temp:

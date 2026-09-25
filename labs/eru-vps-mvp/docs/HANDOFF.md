@@ -40,7 +40,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
 
 - ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與獨立 24h run 尚未執行，仍為進行中。ERU-002 的 30 秒低頻觀測已完成，不能替代 V11。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
-- ERU-012 本機開發仍進行中：已有 digest-pinned stateless HTTP spec／review planner 與 hash-bound executor state machine；共 32 個 feature tests 使用 fake adapter，涵蓋快照漂移、journal、lost-reply 不重送及唯讀 reconcile。health／consistency 仍由 caller 提供，沒有正式 Eru CLI／SSH adapter、cleanup 或 VPS E2E；任務數仍是 12。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
+- ERU-012 本機開發仍進行中：已有 digest-pinned stateless HTTP spec／review planner、hash-bound executor、EruCLIAdapter 與 exact-ID cleanup；50 個 feature tests 以 fake Operator／API 驗證雙階段 preflight、ready-before-remove、lost-reply 對帳、bodyless HTTP 摘要及唯讀 reconcile。adapter 尚未對 VPS 驗證；quota admission 交由 Eru core，v1 沒有外部 traffic router。仍需真實 CLI/API/job 與 VPS E2E，固定剩餘數維持 12。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
 
 - ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
 
@@ -61,6 +61,6 @@ cd /home/ckc/test/codex/newclear-eru-delivery
  python3 labs/eru-vps-mvp/scripts/labctl.py status
 ```
 
-先依 soak TODO 查閱正在執行的任務，再唯讀讀取最新 journal／runtime／配額／健康。三次重裝的計次只能取 complete run 與 `worker-component-revisions.json`；初次因節點陣列順序而失敗的 run 保留 failed，沒有追認成 PASS。HTTP canaries 用其原 run 的精確 cleanup plan 清理；不 prune、不全群 reset、不刪 controller lock。
+soak TODO 所列 24h observer 已自然結束並完成回收，不需停止或重啟；之後只唯讀讀取最新 journal／runtime／配額／健康。三次重裝的計次只能取 complete run 與 `worker-component-revisions.json`；初次因節點陣列順序而失敗的 run 保留 failed，沒有追認成 PASS。HTTP canaries 用其原 run 的精確 cleanup plan 清理；不 prune、不全群 reset、不刪 controller lock。
 
 新程式、inventory、core revision 或 health evidence 會改變 plan bindings；使用新 plan，不複用失敗計畫。B 的 flock 只涵蓋同一 private 目錄的合作程序，操作期間維持 B 為唯一 mutation writer。

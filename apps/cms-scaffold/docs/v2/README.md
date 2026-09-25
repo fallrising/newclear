@@ -52,7 +52,7 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 | W2 | DRAFT | 01 §12 | — | C-08～C-10、U-03 |
 | W3 | DRAFT | 01 §12 | — | C-01～C-03、C-11、C-13、C-14、U-05 |
 | W4 | DRAFT | 01 §12 | — | C-19 |
-| BW3 | DRAFT | 02 §4.5、§7 | — | B-11；G-08 |
+| BW3 | DOC_READY | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
 | W3b | DRAFT | 01 §7.1 | — | Front 會員區（surface-front AC-10～12） |
 | W5 | DRAFT | 01 §10、§12 | — | 剩餘 P2、效能 |
 | BW4 | DRAFT | 02 §5.4、§7 | — | 效能、審計保留 |

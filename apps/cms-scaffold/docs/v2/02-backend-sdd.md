@@ -237,6 +237,8 @@ Clinic demo pack 新增 `appointment_request` 內容類型（欄位：`pet` ref�
 
 Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_HARD_DENY` 本來就沒有擋 `create`，所以不需要改 surface 規則。會員讀自己的草稿，是透過 `/me` 端點由伺服器用 owner 條件把關，**不會**把 `read_draft` 開放給 Front。
 
+**BW3 細化後補充：** member 只授與 `appointment_request` 在 Front 的 `create`；上文「帶 predicate 的 `read_draft`」不授與，因為 `/me` 以 owner 條件把關、Front 對 `read_draft` 是 hard-deny，這個 grant 不會被用到。另外：建立時必填欄位不可為空（會員不能發布，所以發布時的檢查提前）；指向「有 ownerField 的類型」的 ref 必須是自己的；頻率限制超過回 429 `RATE_LIMITED`（新代碼），限制保存在單一實例的記憶體中。surface-front §7.1 的 `/me/pets` 等路徑對應到本節的通用路徑。施工細節見 `waves/BW3.md` §4.2～§4.5。
+
 ### 4.6 審計（G-07 以外的治理需求）
 
 - 必須寫審計的動作：`entry.create`、`entry.publish`、`entry.unpublish`、`entry.archive`、`entry.restore`、`entry.soft_delete`、`entry.purge`、`entry.revert`、`entry.publish_request`、`type.enable`、`type.disable`、`type.create`、`navigation.publish`、`media.delete`、`role.permissions_update`，以及所有現有的 identity 事件。一般的 `entry.update` 不寫（量太大，而且有 `version` 與 revision 可以追）。

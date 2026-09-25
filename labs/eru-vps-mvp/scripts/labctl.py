@@ -223,7 +223,7 @@ class Operator:
         self.journal.setdefault('history', []).append({'at': now(), 'stage': stage})
         self.save_journal()
 
-    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None, guard_exclude=None):
+    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None, guard_exclude=None, reimage_intent=None):
         if fault_after and (operation != 'rebuild-node' or node != 'worker-4' or rebuild_mode not in [None, 'component-reinstall']):
             raise ValueError('--fault-after is only for a bounded worker-4 component recovery drill')
         if fault_after not in [None, 'quarantine', 'start']:
@@ -240,6 +240,8 @@ class Operator:
             raise ValueError('--exclude-node applies only to canary-start')
         if rebuild_mode and operation != 'rebuild-node':
             raise ValueError('--mode applies only to rebuild-node')
+        if reimage_intent is not None and not (operation == 'rebuild-node' and rebuild_mode == 'provider-reimage'):
+            raise ValueError('--reimage-intent applies only to provider-reimage rebuild-node plans')
         if rebuild_mode not in [None, 'component-reinstall', 'provider-reimage']:
             raise ValueError('unsupported rebuild mode')
         if operation == 'rebuild-node' and node not in ['worker-2', 'worker-3', 'worker-4']:
@@ -335,17 +337,32 @@ class Operator:
                     'Record a new worker component revision; preserve cluster generation and OS identity',
                 ]
             else:
+                if not reimage_intent:
+                    plan['blockers'].append(
+                        'Manual provider-console reimage requires --reimage-intent under private/reimage-intents/')
+                else:
+                    try:
+                        from reimage_review import load_intent
+                        intent = load_intent(self.project, reimage_intent, node=node, alias=host['alias'],
+                                             machine_id=snap['hosts'][host['alias']]['machine_id'])
+                        plan['provider_reimage_intent'] = intent['intent']
+                        plan['bindings']['provider_reimage_intent'] = {
+                            'path': intent['path'], 'sha256': intent['sha256']}
+                    except (OSError, ValueError, KeyError) as exc:
+                        plan['blockers'].append('invalid manual reimage intent: ' + str(exc))
                 plan['blockers'] += [
-                    'Manual provider-console reimage requires confirmed machine identity, OS image and disk/volume erase scope',
-                    'Trusted new host keys and OneVPS/Tailscale bootstrap procedure required',
+                    'Trusted replacement host keys and OneVPS/Tailscale bootstrap procedure are still required',
                     'Drain/re-registration/resume adapter is not implemented; provider API is optional',
                 ]
+                if plan['targets']:
+                    plan['blockers'].append(
+                        'ERU workloads must be migrated and verified before provider-console reimage')
                 if snap['hosts'][host['alias']]['docker']:
                     plan['blockers'].append('Docker workloads exist on target; separate ownership/migration review required')
                 plan['steps'] = [f'Quiesce {node}; enumerate and relocate owned workloads',
                     'Verify empty node/runtime; stop target agent; remove exact node registration',
-                    'Pause for operator to reimage reviewed host/disks in provider console; record completion evidence',
-                    'Verify new identity/host keys; rebuild SSH/Tailscale/runtime',
+                    'Pause for the owner to reimage only the bound provider resource and enumerated volumes in the console',
+                    'Verify new machine/boot identity and out-of-band trusted host key; rebuild SSH/Tailscale/runtime',
                     'Install worker only; register original name/capacity; start agent',
                     'Verify target nginx and continuous HTTP on other workers; record new host incarnation']
         if fault_after:
@@ -527,6 +544,7 @@ def main():
     plan.add_argument('--core-artifact', help='Validated deployed core artifact to preserve during reapply')
     plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
     plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
+    plan.add_argument('--reimage-intent', help='Private owner-reviewed provider resource, OS image, and exact volume scope for provider-reimage only')
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -548,9 +566,9 @@ def main():
     with ClusterLock(PROJECT):
         operator = Operator()
         if args.command == 'plan':
-            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after, args.exclude_node)
+            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after, args.exclude_node, args.reimage_intent)
             summary = {k: envelope['plan'][k] for k in ['id', 'operation', 'node', 'executable', 'mutation_hosts', 'targets', 'steps', 'blockers']}
-            for optional in ['rebuild_mode', 'component_scope', 'fault_after', 'guard_exclude', 'guard_nodes']:
+            for optional in ['rebuild_mode', 'component_scope', 'provider_reimage_intent', 'fault_after', 'guard_exclude', 'guard_nodes']:
                 if optional in envelope['plan']:
                     summary[optional] = envelope['plan'][optional]
             if envelope['plan'].get('patched_core'):

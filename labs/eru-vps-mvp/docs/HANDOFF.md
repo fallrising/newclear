@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-24。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前 12 項（近期 1、後續 11）；ERU-001～006 已完成，下一項 ERU-007 為正式 V11 小流量運行驗收。ERU-006 最終實機結果與限制見 [網路驗收紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-25。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前仍為 12 項（近期 1、後續 11）；ERU-001～006 已完成，ERU-007 仍待正式 V11 小流量驗收。依 owner 最新指示，先完成本機開發，再統一進行 VPS E2E；因此目前另推進 ERU-012 的離線 desired-state 前置，未減少任務數。ERU-006 最終實機結果與限制見 [網路驗收紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -40,6 +40,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
 
 - ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與獨立 24h run 尚未執行，仍為進行中。ERU-002 的 30 秒低頻觀測已完成，不能替代 V11。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
+- ERU-012 已開始本機開發：新增 digest-pinned stateless HTTP spec 驗證與 review-only desired-state diff planner，15 個新單元測試通過；沒有遠端執行器／容量核算／HTTP 驗收，也沒有執行 VPS 操作。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
 
 - ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
 

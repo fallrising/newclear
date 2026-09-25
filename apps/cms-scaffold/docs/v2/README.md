@@ -39,6 +39,8 @@ BW0 契約與品質基礎（完整 OpenAPI schema、store 契約測試、CI inte
                └─► W3 Front 公開面（不需要 BW2；需要 BW1b、BW1c）
                       └─► BW3 會員端點 ─► W3b Front 會員區
 W5 前端硬化、BW4 後端硬化：所有功能波之後
+BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會改錯誤代碼，
+    所以建議後端 BW0～BW5 先依序實作完，前端 W2、W4 以 BW5 的契約為準
 ```
 
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
@@ -57,6 +59,7 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 | W3b | DRAFT | 01 §7.1 | — | Front 會員區（surface-front AC-10～12） |
 | W5 | DRAFT | 01 §10、§12 | — | 剩餘 P2、效能 |
 | BW4 | DOC_READY | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
+| BW5 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | — | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 
 狀態：`DRAFT`（只有框架）→ `DOC_READY`（施工圖已合併）→ `IN_PROGRESS` → `VERIFIED`（實作已合併並通過交付檢查表）。
 

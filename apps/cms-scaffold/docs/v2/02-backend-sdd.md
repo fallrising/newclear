@@ -334,6 +334,7 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 | **BW2 前端 W2／W4 的前置** | `batch-patch`；`include=refs`；請求發布；可指派使用者；審計補齊與查詢 | B-07、B-11（部分）；G-03、G-04、G-09、G-10 | 每個新端點有授權、驗證、審計三類測試 |
 | **BW3 會員區** | `/me` 端點；`appointment_request` 類型與種子 | B-11；G-08 | surface-front AC-10～12 可以用 API 級測試驗收 |
 | **BW4 硬化** | 效能量測記錄；審計保留期限設定（surface-admin §7.2）；安全測試補齊 | — | §5.4 全部達標並記錄數字 |
+| **BW5 開放問題收尾** | BQ-06（`PRINCIPAL_NOT_FOUND`）、BQ-07（媒體錯誤代碼大寫）、BQ-08（管理端輸入驗證）、BQ-10（公開列表依已發布副本的關聯篩選）、BQ-11（媒體批次解析） | BQ-06、07、08、10、11 | 五項各有 API 級或 store 契約測試；§5.4 的 SQL 數對含媒體的公開列表也與筆數無關 |
 
 每波一個 PR；migration 只能新增，不能修改已經合併的 migration。
 
@@ -341,7 +342,9 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 
 **BW1c 細化後補充：** BW1c 的契約是在 BW1b 契約上修改後整檔取代，`EntryService`、`PublicContentController`、`ContentProjection` 的 diff 也以 BW1b 完成後為基準，所以實作順序改為 BW1a → BW1b → BW1c（上段「BW1c 可以與 BW1a、BW1b 平行」只適用於細化，不適用於實作）。施工細節見 `waves/BW1c.md` §2.1。
 
-**BW4 細化後補充：** 施工細節見 `waves/BW4.md`。審計保留的預設值採 surface-admin §7.2 的 90 天（該規格標為 Decided），與 BQ-03 建議欄的 365 天不同，已在 BW4 施工圖開頭請 owner 確認；改成 365 只需改兩處。
+**BW4 細化後補充：** 施工細節見 `waves/BW4.md`。審計保留的預設值採 surface-admin §7.2 的 90 天（owner 2026-09-25 確認，見 §8 的決定）。BW4 另外修正 BQ-13（store 接線）並加入 BQ-12 的回滾測試。
+
+**BW5 開放問題收尾（owner 決定，2026-09-25）：** BQ-06、07、08、10、11 owner 都選 A，但它們原本建議的波次（BW1c、BW2）已經細化完成，而每一波的 diff 都以前一波的結果為基準，改早期波次就得重做之後每一波的施工圖。所以集中成 **BW5**，以 BW4 完成後為基準。BW5 的變更（`PRINCIPAL_NOT_FOUND`、大寫的媒體錯誤代碼）對前端是破壞性的，所以後端 BW0～BW5 可以先依序實作完，前端 W2、W4 以 BW5 的契約為準（見 README 路線圖）。
 
 BW0 施工細節見 `waves/BW0.md`。
 
@@ -363,8 +366,11 @@ BW0 施工細節見 `waves/BW0.md`。
 | BQ-10 | 公開列表的 `ref.<field>` 以 `cms_entry_ref` 篩選，而 `cms_entry_ref` 記錄的是工作副本的關聯；已發布副本與工作副本的關聯不同時（例如照片已改到另一本相簿但還沒重新發布），公開列表依工作副本的關聯篩選（BW1b 細化時發現，waves/BW1b.md §1.2）。選項：A. 對 `ref`／`principal-ref` 欄位另外寫 `published` scope 的索引列，公開列表改用索引列篩選（BW2）；B. 維持。 | A |
 | BQ-11 | 公開列表的每一筆 entry，其 `media-ref` 值都由 `MediaService.resolvePublic` 各自查詢媒體 store（媒體、variants、attachments 與其 entry），查詢數隨筆數增加，§5.4 的「與筆數無關」因此只對 content store 成立（BW1b 細化時發現）。選項：A. BW1c 修 B-13 時一起改成整頁批次解析；B. 維持。 | A |
 | BQ-12 | 狀態變更與審計在同一個交易（BD-09），但沒有測試證明「審計寫入失敗時狀態變更也回滾」：`./gradlew test` 用 in-memory store（沒有交易），`integrationTest` 的 store 契約只測單一 store（BW2 細化時發現，waves/BW2.md §7.8）。選項：A. BW4 新增一個 `integrationTest`，以 PostgreSQL 啟動應用並讓審計寫入失敗（例如 actor 指向不存在的 principal，違反外鍵），檢查 entry 沒有改變；B. 維持。 | A |
+| BQ-13 | 三個 `*StoreConfig` 以 `@ConditionalOnBean(DataSource.class)` 選 JDBC store，但這個條件在一般 `@Configuration` 上會先於 Spring Boot 定義 `DataSource` 被判斷，所以有資料庫時仍然用 in-memory store，正式環境的資料重啟就消失（BW4 細化寫 BQ-12 的測試時發現）。選項：A. BW4 修正（在 bean 方法內以 `ObjectProvider<DataSource>` 判斷），並以應用程式層級的 `integrationTest` 驗證；B. BW0 修正（要改 BW0～BW4 施工圖的測試數）。 | A（owner 已決定，2026-09-25） |
 
-**BW4 細化後補充：** BQ-03 的保留期限由 BW4 實作（`GET`／`PATCH /api/v1/admin/settings/audit`、每日清理），預設值見 §7 的補充。BQ-05：BW4 細化時重新量測，三項 p95 分別約 43、42、9 ms，遠低於 §5.4 門檻（`perf-records.md`），所以 v2 維持索引表；BW4 實作量測若未達標，依 `waves/BW4.md` §5.4 回報時再評估 GIN。
+**Owner 決定（2026-09-25）：** BQ-03 預設 90 天（surface-admin §7.2），可選 30／90／365；BQ-06、07、08、10、11 選 A，在 BW5 做（§7）；BQ-12 選 A，在 BW4 做。
+
+**BW4 細化後補充：** BQ-03 的保留期限由 BW4 實作（`GET`／`PATCH /api/v1/admin/settings/audit`、每日清理）。BQ-05：BW4 細化時重新量測，三項 p95 分別約 43、42、9 ms，遠低於 §5.4 門檻（`perf-records.md`），所以 v2 維持索引表；BW4 實作量測若未達標，依 `waves/BW4.md` §5.4 回報時再評估 GIN。
 
 ---
 

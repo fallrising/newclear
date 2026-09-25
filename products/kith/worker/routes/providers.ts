@@ -6,9 +6,10 @@ import { extraKeys, parseObject } from "../json.ts";
 import { adapterFor } from "../providers/registry.ts";
 import { resolveConnection, type ConnectionSecretRow } from "../providers/runtime.ts";
 import { canStoreSecrets, sealSecret } from "../providers/secrets.ts";
-import { LlmError, W4_FORMATS, type ApiFormat, type LlmErrorClass, type ResolvedConnection } from "../providers/types.ts";
+import { LlmError, SUPPORTED_FORMATS, type ApiFormat, type LlmErrorClass, type ResolvedConnection } from "../providers/types.ts";
 import {
   PRESETS,
+  PRESET_ALT_FORMATS,
   TOKEN_PARAMS,
   checkHeaders,
   checkSecret,
@@ -104,8 +105,8 @@ async function parseDraft(env: Env, obj: Record<string, unknown>): Promise<Draft
   if (typeof preset !== "string" || !(preset in PRESETS)) return "invalid preset";
   const p = PRESETS[preset as Preset];
   const format = (obj.api_format ?? p.api_format) as unknown;
-  if (typeof format !== "string" || !W4_FORMATS.includes(format as ApiFormat)) return "unsupported api_format";
-  if (p.api_format !== null && obj.api_format !== undefined && obj.api_format !== p.api_format) {
+  if (typeof format !== "string" || !SUPPORTED_FORMATS.includes(format as ApiFormat)) return "unsupported api_format";
+  if (p.api_format !== null && format !== p.api_format && !(PRESET_ALT_FORMATS[preset as Preset] ?? []).includes(format as ApiFormat)) {
     return "api_format does not match preset";
   }
   const rawBase = obj.base_url ?? p.base_url;

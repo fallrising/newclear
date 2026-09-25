@@ -191,5 +191,26 @@
       "back": false,
       "admin": false
     }
+  },
+  "mock-operator-notes": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "operator",
+        "contentTypeCodes": [
+          "note"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
   }
 }

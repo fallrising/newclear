@@ -56,5 +56,5 @@ test("E2E-W4-04 revoking one of two tokens is immediate and isolated", { tag: ["
   await expect(page.getByTestId("tokens-list")).toBeVisible();
   await expect(page.getByTestId("token-issued")).toHaveCount(0);
   const agent = await api.call("GET", "/api/agents/" + aid);
-  expect((agent.json as { token_count: number }).token_count).toBe(1);
+  expect((agent.json as { agent: { token_count: number } }).agent.token_count).toBe(1);
 });

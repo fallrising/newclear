@@ -14,6 +14,7 @@ import { RemoveMemberDialog } from "../../members/RemoveMemberDialog";
 import { RuntimeChangeDialog } from "./RuntimeChangeDialog";
 import { RuntimeForm } from "./RuntimeForm";
 import { runtimeLabel, statusKey, statusTone } from "./runtimeText";
+import { TokensTab } from "./TokensTab";
 
 const TABS = ["overview", "runtime", "tokens", "rooms"] as const;
 type Tab = (typeof TABS)[number];
@@ -167,7 +168,7 @@ export function AgentDetailPage(): ReactElement {
         </div>
       )}
 
-      {tab === "tokens" && <p data-testid="tokens-empty">{t("console.tokens.empty")}</p>}
+      {tab === "tokens" && <TokensTab agentId={detail.id} />}
 
       {tab === "rooms" && (
         <div data-testid="agent-rooms" className="flex flex-col gap-3">

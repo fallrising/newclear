@@ -113,6 +113,11 @@ export async function failFromResponse(
   throw new LlmError(cls, res.status, retry);
 }
 
+/** true when the server actually answered with SSE. */
+export function isEventStream(res: Response): boolean {
+  return (res.headers.get("content-type") ?? "").toLowerCase().includes("text/event-stream");
+}
+
 export function nonNegativeInt(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
 }

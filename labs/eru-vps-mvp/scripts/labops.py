@@ -5,8 +5,10 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from threading import RLock
 
 LOCK_ENV = 'ERU_MVP_LOCK_FD'
+_PROCESS_LOCK = RLock()
 
 
 def digest(value):
@@ -47,28 +49,45 @@ class ClusterLock:
         self.path = Path(project) / 'private/controller.lock'
         self.fd = None
         self.inherited = False
+        self.thread_lock_acquired = False
 
     def __enter__(self):
-        self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        if LOCK_ENV in os.environ:
-            self.fd = int(os.environ[LOCK_ENV])
-            actual, expected = os.fstat(self.fd), self.path.stat()
-            if (actual.st_dev, actual.st_ino) != (expected.st_dev, expected.st_ino):
-                raise RuntimeError('inherited lock is not this cluster lock')
-            self.inherited = True
-        else:
-            self.fd = os.open(self.path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+        if not _PROCESS_LOCK.acquire(blocking=False):
+            raise RuntimeError('cluster operation already running on controller B')
+        self.thread_lock_acquired = True
         try:
+            self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            if LOCK_ENV in os.environ:
+                self.fd = int(os.environ[LOCK_ENV])
+                actual, expected = os.fstat(self.fd), self.path.stat()
+                if (actual.st_dev, actual.st_ino) != (expected.st_dev, expected.st_ino):
+                    raise RuntimeError('inherited lock is not this cluster lock')
+                self.inherited = True
+            else:
+                self.fd = os.open(self.path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
             fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            os.environ[LOCK_ENV] = str(self.fd)
+            return self
         except BlockingIOError:
-            if not self.inherited:
+            if self.fd is not None and not self.inherited:
                 os.close(self.fd)
+            self.thread_lock_acquired = False
+            _PROCESS_LOCK.release()
             raise RuntimeError('cluster operation already running on controller B') from None
-        os.environ[LOCK_ENV] = str(self.fd)
-        return self
+        except BaseException:
+            if self.fd is not None and not self.inherited:
+                os.close(self.fd)
+            self.thread_lock_acquired = False
+            _PROCESS_LOCK.release()
+            raise
 
     def __exit__(self, *exc):
-        if not self.inherited:
-            # close, not LOCK_UN: a surviving child must retain the lock.
-            os.close(self.fd)
-            os.environ.pop(LOCK_ENV, None)
+        try:
+            if not self.inherited:
+                # close, not LOCK_UN: a surviving child must retain the lock.
+                os.close(self.fd)
+                os.environ.pop(LOCK_ENV, None)
+        finally:
+            if self.thread_lock_acquired:
+                self.thread_lock_acquired = False
+                _PROCESS_LOCK.release()

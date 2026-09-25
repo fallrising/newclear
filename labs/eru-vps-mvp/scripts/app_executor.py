@@ -52,9 +52,8 @@ def execution_plan(document, snapshot, health_ok, consistency_issues=(), plan_id
         'execution_implemented': True,
         'capacity_admission': 'authoritative check is performed by Eru core during create',
         'checks_not_performed': [
-            'predictive resource fit before create; Eru core enforces quota at admission',
-            'registry availability before create',
-            'external caller cutover; older owned revisions are retained',
+            'predictive resource fit; authoritative quota admission is performed by Eru core',
+            'external service discovery or load-balancer cutover; v1 probes each worker directly',
         ],
     })
     plan['plan_sha256'] = plan_digest(plan)
@@ -98,9 +97,10 @@ class AppExecutor:
 
     Required adapter methods:
       snapshot() -> labctl-style snapshot
+      preflight(snapshot) -> {'health_ok': bool, 'consistency_issues': list[str]}
       deploy(plan) -> returns only after CLI reports completion (may lose reply)
-      list_revision(appname) -> workload rows filtered to the exact Eru appname
-      probe(row, spec) -> {'status': int, 'body': str}
+      list_revision(appname) -> workload rows for the exact Eru appname
+      probe(row, spec) -> {'status': int, 'body_match': bool}; never returns body text
     """
     def __init__(self, root, api):
         self.root = root
@@ -134,6 +134,7 @@ class AppExecutor:
             'target_node': plan['spec']['node'],
             'replicas': plan['spec']['replicas'],
             'spec': plan['spec'],
+            'older_owned_revisions': plan['older_owned_revisions'],
             'older_owned_revisions_retained': [x['id'] for x in plan['older_owned_revisions']],
             'events': [],
         }
@@ -151,17 +152,17 @@ class AppExecutor:
         probe_summaries = []
         for row in rows:
             result = self.api.probe(row, plan['spec'])
-            if not isinstance(result, dict) or isinstance(result.get('status'), bool):
+            if (not isinstance(result, dict) or isinstance(result.get('status'), bool)
+                    or not isinstance(result.get('body_match'), bool)):
                 journal.update(status='failed', reason='malformed_probe_result')
                 self._save(path, journal)
                 raise RuntimeError('HTTP probe returned an invalid result')
             status = result.get('status')
-            body = result.get('body')
-            if not isinstance(status, int) or not isinstance(body, str):
+            body_match = result['body_match']
+            if not isinstance(status, int):
                 journal.update(status='failed', reason='malformed_probe_result')
                 self._save(path, journal)
                 raise RuntimeError('HTTP probe returned an invalid result')
-            body_match = plan['spec']['service']['body_contains'] in body
             passed = status == plan['spec']['service']['expected_status'] and body_match
             probe_summaries.append({'workload_id': row['id'], 'http_status': status,
                                     'body_match': body_match, 'passed': passed})
@@ -219,6 +220,27 @@ class AppExecutor:
         try:
             self._stage(path, journal, 'preflight')
             current = self.api.snapshot()
+            live_preflight = self.api.preflight(current)
+            if (not isinstance(live_preflight, dict)
+                    or live_preflight.get('health_ok') is not True
+                    or not isinstance(live_preflight.get('consistency_issues'), list)
+                    or live_preflight.get('consistency_issues')):
+                journal.update(status='failed', reason='live_preflight_not_clean')
+                journal['preflight_recheck'] = {
+                    'health_ok': isinstance(live_preflight, dict)
+                                 and live_preflight.get('health_ok') is True,
+                    'consistency_issue_count': (
+                        len(live_preflight['consistency_issues'])
+                        if isinstance(live_preflight, dict)
+                        and isinstance(live_preflight.get('consistency_issues'), list)
+                        else None),
+                }
+                self._save(path, journal)
+                raise ValueError('live health/consistency preflight failed; no create attempted')
+            journal['preflight_recheck'] = {
+                'health_ok': True, 'consistency_issue_count': 0,
+            }
+            self._save(path, journal)
             if sha256(canonical_bytes(snapshot_binding(current))) != plan['snapshot_sha256']:
                 journal.update(status='failed', reason='cluster_snapshot_changed')
                 self._save(path, journal)

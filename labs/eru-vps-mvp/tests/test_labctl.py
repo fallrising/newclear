@@ -1,5 +1,6 @@
 """Safety regressions: concurrency, drift, exact ownership and uncertain results."""
 import copy
+import hashlib
 import importlib.util
 import json
 import os
@@ -14,6 +15,7 @@ from unittest.mock import patch
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
 import labctl
+import reimage_review
 from labops import ClusterLock, atomic_json, lock_fds
 
 
@@ -154,6 +156,29 @@ class OperatorTests(unittest.TestCase):
 
     def journal(self, envelope):
         return labctl.read(self.op.root / 'runs' / (envelope['plan']['id'] + '.json'))
+
+    def write_reimage_intent(self, changes=None):
+        target = next(host for host in self.inventory if host['node'] == 'worker-4')
+        data = {
+            'schema_version': 1,
+            'provider_api_used': False,
+            'provider_resource_ref': 'provider-instance-test-4',
+            'os_image_ref': 'debian-image-test-12',
+            'target': {'alias': target['alias'], 'node': target['node'],
+                       'machine_id': self.snapshot['hosts'][target['alias']]['machine_id']},
+            'erase_scope': {'boot_volume_ref': 'boot-volume-test-4',
+                            'additional_volume_refs': ['data-volume-test-4']},
+            'reviewed_at': labctl.now(),
+        }
+        if changes:
+            data.update(changes)
+        path = self.project / 'private/reimage-intents/worker-4.json'
+        atomic_json(path, data)
+        return path.relative_to(self.project)
+
+    def empty_reimage_target(self):
+        self.op.live['workloads'] = []
+        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
 
     def test_cleanup_recovers_uncertain_create_and_preserves_foreign_workload(self):
         # IDs may be missing if create succeeded but its response was lost.
@@ -376,10 +401,78 @@ class OperatorTests(unittest.TestCase):
     def test_manual_reimage_does_not_require_provider_api(self):
         plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage')['plan']
         self.assertEqual(plan['rebuild_mode'], 'provider-reimage')
-        self.assertTrue(any('provider console' in x for x in plan['steps']))
+        self.assertTrue(any('--reimage-intent' in x for x in plan['blockers']))
+        self.assertTrue(any('console' in x for x in plan['steps']))
         self.assertFalse(plan['executable'])
         with self.assertRaisesRegex(ValueError, 'only to rebuild-node'):
             self.op.plan('smoke', rebuild_mode='component-reinstall')
+
+    def test_manual_reimage_binds_exact_private_owner_reviewed_scope(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        path = self.project / intent_path
+        plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                            reimage_intent=str(intent_path))['plan']
+        intent = plan['provider_reimage_intent']
+        self.assertEqual(intent['target'], {'alias': labctl.ALIASES[3], 'node': 'worker-4',
+                                            'machine_id': 'id-' + labctl.ALIASES[3]})
+        self.assertEqual(intent['provider_resource_ref'], 'provider-instance-test-4')
+        self.assertEqual(intent['os_image_ref'], 'debian-image-test-12')
+        self.assertEqual(intent['erase_scope'], {'boot_volume_ref': 'boot-volume-test-4',
+                                                 'additional_volume_refs': ['data-volume-test-4']})
+        self.assertEqual(plan['bindings']['provider_reimage_intent'], {
+            'path': str(intent_path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+        self.assertFalse(plan['executable'])
+        self.assertTrue(any('Drain/re-registration/resume adapter' in x for x in plan['blockers']))
+        self.assertFalse(any('invalid manual reimage intent' in x for x in plan['blockers']))
+
+    def test_manual_reimage_rejects_wrong_identity_api_and_unsafe_scope(self):
+        invalid = [
+            {'provider_api_used': True},
+            {'target': {'alias': labctl.ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
+            {'erase_scope': {'boot_volume_ref': '*', 'additional_volume_refs': []}},
+            {'erase_scope': {'boot_volume_ref': 'boot-4', 'additional_volume_refs': ['disk-4', 'disk-4']}},
+            {'reviewed_at': '2020-01-01T00:00:00Z'},
+        ]
+        for changes in invalid:
+            with self.subTest(changes=changes):
+                path = self.write_reimage_intent(changes)
+                plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                    reimage_intent=str(path))['plan']
+                self.assertFalse(plan['executable'])
+                self.assertNotIn('provider_reimage_intent', plan)
+                self.assertTrue(any('invalid manual reimage intent' in x for x in plan['blockers']))
+
+    def test_manual_reimage_supports_checkout_private_symlink(self):
+        path = self.write_reimage_intent()
+        linked_project = self.project / 'linked-project'
+        linked_project.mkdir()
+        (linked_project / 'private').symlink_to(self.project / 'private', target_is_directory=True)
+        loaded = reimage_review.load_intent(
+            linked_project, 'private/reimage-intents/worker-4.json', node='worker-4',
+            alias=labctl.ALIASES[3], machine_id='id-' + labctl.ALIASES[3])
+        self.assertEqual(loaded['path'], str(path))
+        self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / path).read_bytes()).hexdigest())
+
+    def test_manual_reimage_intent_must_be_private_non_symlink_json(self):
+        path = self.write_reimage_intent()
+        outside = self.project / 'outside.json'
+        outside.write_text((self.project / path).read_text())
+        with self.assertRaisesRegex(ValueError, 'under private/reimage-intents'):
+            reimage_review.load_intent(self.project, outside, node='worker-4', alias=labctl.ALIASES[3],
+                                       machine_id='id-' + labctl.ALIASES[3])
+        linked = self.project / 'private/reimage-intents/linked.json'
+        linked.symlink_to(self.project / path)
+        with self.assertRaisesRegex(ValueError, 'under private/reimage-intents'):
+            reimage_review.load_intent(self.project, linked, node='worker-4', alias=labctl.ALIASES[3],
+                                       machine_id='id-' + labctl.ALIASES[3])
+        duplicate = self.project / 'private/reimage-intents/duplicate.json'
+        duplicate.write_text('{"schema_version":1,"schema_version":1}')
+        with self.assertRaisesRegex(ValueError, 'duplicate field'):
+            reimage_review.load_intent(self.project, duplicate, node='worker-4', alias=labctl.ALIASES[3],
+                                       machine_id='id-' + labctl.ALIASES[3])
+        with self.assertRaisesRegex(ValueError, 'only to provider-reimage'):
+            self.op.plan('rebuild-node', node='worker-4', reimage_intent=str(path))
 
     def test_dirty_worker_scope_blocks_plan(self):
         self.op.worker_scope = lambda alias: {'scope_verified': False, 'blockers': ['owned file modified']}

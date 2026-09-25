@@ -120,6 +120,9 @@ CREATE INDEX cms_entry_index_entry_idx ON cms_entry_index (entry_id, scope);
 ```
 
 - 既有資料的回填：用 Flyway Java migration `V7__backfill_entry_index`，逐類型讀出 entry 並重建索引。
+- **BW1b 細化後補充：** 索引的欄位另外包含 `publicRequiresPublishedRefs` 列出的欄位（公開列表要在 SQL 裡判斷「必要關聯必須公開」）；V6 另外加上 `value_kind` 的 CHECK，並刪除被 `cms_entry_index_str_idx` 取代的 `cms_entry_index_lookup_idx`；寫入 entry 與重建索引在同一個交易，修改類型設定或新增欄位時也重建該類型的索引。
+
+施工細節見 `waves/BW1b.md` §4.5、§5.1。
 
 ### 3.3 V8 — 請求發布與審計查詢
 
@@ -167,6 +170,10 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 2. 只要有任何一個 grant 不帶 predicate，就不加額外條件。
 3. 否則，把每個 `fieldEquals` predicate 編譯成一個以 `cms_entry_index` 為對象的 `EXISTS` 子句，多個 grant 之間用 `OR` 連接。predicate 引用的欄位若沒有建索引，**啟動時就失敗**（fail fast），而不是在執行期悄悄漏資料。
 4. 公開列表另外加上：`publication_state = 'published'`、`published_payload IS NOT NULL`、可見性欄位不等於 `private`／`unlisted`，以及 `publicRequiresPublishedRefs` 的 `EXISTS` 子句。
+
+**BW1b 細化後補充：** 第 4 點的可見性精確寫法是「有值且不等於 `public` 就排除」，與 BW1a 的 `PublicVisibility.indexable` 相同（種子的 enum 只有 `public`、`unlisted`、`private`，所以結果與上文一致）。`filter.<field>` 另外要求欄位有索引列；公開列表的 `ref.<field>` 只接受可見性 `public` 的關聯欄位；除了 `ref.<field>`，重複的參數回 400。修改角色權限時送入無法下推的 predicate，回 400 `VALIDATION_FAILED`。
+
+施工細節見 `waves/BW1b.md` §4.3、§4.4、§5.5。
 
 ### 4.2 身份與能力（G-01、G-04）
 
@@ -280,6 +287,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 
 測試資料用一個只在 `integrationTest` 使用的產生器；v2 不做正式的壓力測試。
 
+**BW1b 細化後補充：** 前三列在 store 層量測；最後一列以 content store 的 SQL 計算（`findTypeByKey`、`fieldsOf`、COUNT、分頁 SELECT，共 4 個）。identity 的查詢由 BW1a 的請求內快取保證與筆數無關；公開列表展開 `media-ref` 時的逐筆查詢不在這個數字內，見 BQ-11。施工細節見 `waves/BW1b.md` §5.6。
+
 ### 5.5 建置的可重現性
 
 2026-09-24 在雲端 sandbox 中遇到 Maven Central 回 HTTP 429，Gradle 無法解析依賴（見 [00 §1](00-v1-frontend-audit.md#1-怎麼查的)）。**Proposed：** 啟用 Gradle dependency locking 與 dependency verification（`gradle/verification-metadata.xml`），讓依賴版本固定、可以稽核。429 本身是環境的網路限制，不在 repo 內處理；CI 已經有 `setup-gradle` 快取。
@@ -333,6 +342,8 @@ BW0 施工細節見 `waves/BW0.md`。
 | BQ-07 | 媒體錯誤代碼是小寫（`not_found`、`variant_not_available`、`unsupported_media_type`、`quota_exceeded`、`file_too_large`、`gone`），其他代碼是大寫。BW0 保留原字串以免破壞。要統一嗎？選項：A. BW1 改成 `MEDIA_NOT_FOUND` 等大寫，與 §4.4 的破壞性變更同波上線；B. 維持。 | A |
 | BQ-08 | 管理端有些輸入沒驗證，會在資料庫層失敗成 500 `INTERNAL_ERROR`：例如 `POST /admin/content-types` 的 `slugPolicy` 不在 `required／optional／none`（違反 V3 的 CHECK），或 `POST /principals` 的 email 重複（違反唯一索引）。選項：A. BW2 補驗證，回 422 `FIELD_VALIDATION`／400 `VALIDATION_FAILED`；B. 維持。 | A |
 | BQ-09 | 兩種環境類失敗沒有自動測試：本機沒有 Docker 時 `integrationTest` 無法執行；Maven Central 回 HTTP 429 時依賴無法下載（waves/BW0.md §8 的 BW0-FM16、FM18）。選項：A. 接受，以 CI 為準，PR 說明必須寫明哪些閘門只在 CI 跑過；B. 另設 Maven 鏡像。 | A |
+| BQ-10 | 公開列表的 `ref.<field>` 以 `cms_entry_ref` 篩選，而 `cms_entry_ref` 記錄的是工作副本的關聯；已發布副本與工作副本的關聯不同時（例如照片已改到另一本相簿但還沒重新發布），公開列表依工作副本的關聯篩選（BW1b 細化時發現，waves/BW1b.md §1.2）。選項：A. 對 `ref`／`principal-ref` 欄位另外寫 `published` scope 的索引列，公開列表改用索引列篩選（BW2）；B. 維持。 | A |
+| BQ-11 | 公開列表的每一筆 entry，其 `media-ref` 值都由 `MediaService.resolvePublic` 各自查詢媒體 store（媒體、variants、attachments 與其 entry），查詢數隨筆數增加，§5.4 的「與筆數無關」因此只對 content store 成立（BW1b 細化時發現）。選項：A. BW1c 修 B-13 時一起改成整頁批次解析；B. 維持。 | A |
 
 ---
 

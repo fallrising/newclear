@@ -551,6 +551,59 @@ class OperatorTests(unittest.TestCase):
             self.op.record_reimage_receipt(plan['id'], '0' * 64, str(receipt_path))
         self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
 
+    def test_reimage_host_readonly_gate_records_immutable_observation(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
+        observation = {
+            'machine_id': 'replacement-machine-id-4',
+            'boot_id': '11111111-1111-1111-1111-111111111111',
+            'os_release': 'Debian GNU/Linux 13',
+            'tailscale_ipv4': '100.64.0.4',
+            'services': {'ssh.service': 'active', 'tailscaled.service': 'active',
+                         'docker.service': 'active', 'containerd.service': 'active'},
+            'runtime_counts': {'containers': 0, 'tasks': 0},
+            'core_config_present': False, 'etcd_data_present': False,
+            'eru_agent_binary_present': False, 'eru_agent_config_present': False,
+            'eru_agent_unit_present': False, 'docker_version': 'Docker version fake',
+            'containerd_version': 'containerd fake',
+            'ssh_verified_by_strict_host_key_check': True,
+        }
+        before = copy.deepcopy(self.op.live)
+        with patch('reimage_host.inspect_replacement_host', return_value=observation) as inspect:
+            result = self.op.verify_reimage_host(envelope['plan']['id'], envelope['sha256'])
+        self.assertEqual(result['status'], 'replacement-host-readonly-verified')
+        self.assertFalse(result['remote_mutation_performed'])
+        self.assertEqual(result['alias'], labctl.ALIASES[3])
+        recorded_path = self.op.root / 'reimage-observations' / (envelope['plan']['id'] + '.json')
+        recorded = labctl.read(recorded_path)
+        self.assertEqual(recorded['observation']['machine_id'], observation['machine_id'])
+        self.assertTrue(recorded['observation']['ssh_verified_by_strict_host_key_check'])
+        self.assertEqual(self.op.live, before)
+        self.assertEqual(self.op.removed, [])
+        with patch('reimage_host.inspect_replacement_host') as inspect_again:
+            with self.assertRaisesRegex(ValueError, 'already recorded'):
+                self.op.verify_reimage_host(envelope['plan']['id'], envelope['sha256'])
+            inspect_again.assert_not_called()
+
+    def test_reimage_host_gate_blocks_if_trust_file_changed_after_receipt(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
+        trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
+        trust_file.write_text(trust_file.read_text() + '# changed after receipt recording\n')
+        with patch('reimage_host.inspect_replacement_host') as inspect:
+            with self.assertRaisesRegex(ValueError, 'trusted worker host-key file changed'):
+                self.op.verify_reimage_host(envelope['plan']['id'], envelope['sha256'])
+            inspect.assert_not_called()
+        self.assertFalse((self.op.root / 'reimage-observations' / (envelope['plan']['id'] + '.json')).exists())
+
     def test_reimage_receipt_requires_manual_oob_key_in_local_trust_file(self):
         self.empty_reimage_target()
         intent_path = self.write_reimage_intent()

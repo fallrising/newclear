@@ -753,13 +753,13 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 
 ---
 
-### 13.3 待決定
+### 13.3 W0 細化時新增、已決定（owner，2026-09-25）
 
-| ID | 問題 | 選項 | 建議 |
-| --- | --- | --- | --- |
-| Q-08 | shadcn/ui 元件本身依賴 `class-variance-authority`、`clsx`、`tailwind-merge`（`cn()`）、`lucide-react`（元件內的圖示）、`tw-animate-css`（開關動畫）。§3、§4 只寫了「shadcn/ui（Radix）+ Tailwind v4」，沒有逐一列出這 5 個套件（W0 細化時發現）。 | A. 視為 D-02「採用 shadcn/ui」的組成，W0 照 [waves/W0.md §4.8](waves/W0.md#48-npm-套件版本全部已查證23) 的精確版本安裝；B. 不裝，自寫 `cn()`、改寫 11 個元件的圖示與動畫 class（與上游脫鉤，之後每加一個元件都要改寫） | A（W0 施工圖以 A 撰寫） |
-| Q-09 | 兩種環境類失敗沒有自動測試：Playwright 瀏覽器不存在或版本不符（W0-FM20）、npm registry 無法連線（W0-FM21）。 | A. 接受，比照 [02 BQ-09](02-backend-sdd.md#8-開放問題) 以 CI 為準；PR 說明必須寫明哪些檢查只在 CI 跑過；B. 另設 npm 鏡像與瀏覽器快取 | A |
-| Q-10 | **需要後端窗口處理。** W0 實作後，`@cms/api` 的 `codegen.test.ts` 會比對 `openapi.yaml` 與提交的 `schema.d.ts`，`@cms/mocks` 的 fixture 以產生的型別註記。任何之後修改 `openapi.yaml` 的後端波次（第一個是 BW1a：`Me`、`LoginResponse` 新增必填的 `capabilities`，類型與欄位新增屬性）若不同時更新前端，CI 的 `web` job 會紅。反過來，若 BW1a 先實作，W0 的 fixture 就不符合契約。 | A. 修改 `openapi.yaml` 的後端波次，在同一個 PR 內執行 `npm run gen -w @cms/api`，並更新 `docs/v2/contracts/fixtures/` 與 `packages/mocks/fixtures/`（再 `npm run gen -w @cms/mocks`）使前端閘門保持綠燈；各 BW 施工圖加一張卡寫明 fixture 的逐欄變更（BW1a 需要補：`me.json` 每位使用者的 `capabilities`、`work-content-types.json`／`admin-content-types.json`／`public-content-types.json` 的新屬性）；實作順序 W0 → BW1a。B. 前端每次在後端合併後開一個跟進 PR，期間 `main` 的 `web` job 是紅的。C. W0 延到 BW1c 之後再實作，屆時先更新 W0 的 fixture。 | A |
+| ID | 問題 | 決定 |
+| --- | --- | --- |
+| Q-08 | shadcn/ui 元件本身依賴 `class-variance-authority`、`clsx`、`tailwind-merge`、`lucide-react`、`tw-animate-css`，§3、§4 沒有逐一列出。 | **A**：視為 D-02「採用 shadcn/ui」的組成，照 [waves/W0.md §4.8](waves/W0.md#48-npm-套件版本全部已查證23) 的精確版本安裝 |
+| Q-09 | 兩種環境類失敗沒有自動測試：Playwright 瀏覽器不存在或版本不符（W0-FM20）、npm registry 無法連線（W0-FM21）。 | **A**：比照 [02 BQ-09](02-backend-sdd.md#8-開放問題) 以 CI 為準；PR 說明必須寫明哪些檢查只在 CI 跑過 |
+| Q-10 | W0 實作後，前端的 codegen 新鮮度測試與帶型別的 fixture 會與 `openapi.yaml` 綁在一起；之後修改契約的後端波次（第一個是 BW1a：`Me.capabilities` 必填）若不同時更新前端，CI 的 `web` job 會紅；反之 BW1a 先實作，W0 的 fixture 就不符合契約。 | **前後端各自依自己的契約開發，差異在整合階段一起處理**（比照真實開發）。W0 仍以 BW0 契約撰寫；[waves/W0.md §2.1](waves/W0.md#21-前置波次) 的防呆保留：實作時若 `openapi.yaml` 已不是 BW0 版本，停下來回報，交給整合階段 |
 
 ## 14. 參考來源
 

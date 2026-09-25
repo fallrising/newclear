@@ -47,6 +47,7 @@
 
 - **BW0 必須已是 `VERIFIED`**。本波次直接修改 BW0 新增的檔案：`ContentStoreContract.java`（新增案例並改 `listEntries` 呼叫）、`openapi.yaml`（以 BW1a 契約整檔取代）、`TestSession.java`（新測試使用）、`OpenApiValidationConfig`（全域回應驗證，所以 T08 前後的 `/auth/me` 回應必須與契約一致）。
 - 本檔所有 diff 都以「BW0 施工圖完成後」的檔案為基準；如果 `main` 上的這些檔案與 BW0 施工圖的結果不同，先停下來回報，不要硬套。
+- **與前端的關係（[01 Q-10](../01-frontend-sdd.md#133-w0-細化時新增已決定owner2026-09-25)，本檔寫成後才決定，BW1b 細化時補上）。** 前後端各自依自己的契約開發，差異在整合階段一起處理。如果實作本波次時 W0 已經合併，T08 換上 BW1a 契約後，`web` job 的 `packages/api/src/codegen.test.ts`（W0 的 E-02 新鮮度測試）與依 BW0 契約寫的 fixture 型別檢查會失敗。本波次**不改前端**：在 PR 說明列出失敗的測試名稱與「依 01 Q-10 交給整合階段」，T09 與 §9 的 `web` 一項改勾「只有 codegen 新鮮度或 fixture 型別失敗」。
 
 ### 2.2 環境
 
@@ -1870,7 +1871,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
   1. 執行 §9 的完整閘門。
   2. `docs/v2/README.md` 路線圖中 BW1a 那一列的狀態從 `DOC_READY` 改成 `VERIFIED`。
   3. 逐項勾選 §9，貼進 PR 說明。PR 標題：`feat(cms-scaffold): BW1a 類型設定與欄位中繼資料`；說明列出 B-03、B-04、B-05、B-12、G-01、G-05、G-06、G-11，以及 §4.2 的行為變更。
-- **完成條件**：§9 全部打勾；CI 的 `java`、`java-integration`、`web` 全綠。
+- **完成條件**：§9 全部打勾；CI 的 `java`、`java-integration` 全綠；`web` 全綠，或只有 §2.1 所說的 codegen 新鮮度／fixture 型別失敗並已在 PR 說明。
 - **驗證**：§9 的指令。
 - **對應 ID**：全部
 - **大小**：S
@@ -2580,7 +2581,7 @@ class GrantCacheTests {
 - [ ] T01～T09 全部完成。
 - [ ] `./gradlew test` 全綠（預期 139 個＝BW0 的 111＋本波 28）。
 - [ ] `./gradlew integrationTest` 全綠（49 個）；本機沒有 Docker 時勾「只在 CI 跑過」並附連結。
-- [ ] `npm ci && npm run lint && npm run typecheck && npm test && npm run build` 全綠。
+- [ ] `npm ci && npm run lint && npm run typecheck && npm test && npm run build` 全綠；或只有 §2.1 所說的 codegen 新鮮度／fixture 型別失敗，並已在 PR 說明列出（01 Q-10）。
 - [ ] `cmp docs/v2/contracts/BW1a.openapi.yaml services/cms-api/src/main/resources/openapi/openapi.yaml` 沒有輸出。
 - [ ] B-03：T06 的 `grep` 只輸出 `JdbcMediaStore.java` 那一行。
 - [ ] B-04／G-01：`CapabilitiesTests` 綠。

@@ -28,9 +28,13 @@ Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主�
 
 設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
 
-## Owner override 2026-09-24 — apps/cms-scaffold（documentation-only）
+## Owner override 2026-09-25 — apps/cms-scaffold
 
-Owner 要求盤點 `apps/cms-scaffold` 的前端問題，並以 Shopify 的前端設計為參考寫 v2 前端 SDD，之後交給 LLM agent 重寫。本次例外**僅限文件**：[v1 前端稽核與 v2 SDD](apps/cms-scaffold/docs/v2/README.md)。不改動應用程式碼，也不改變 cms-scaffold 的 tier C 分級；要開始實作（SDD §12 的 W0），需要 owner 另外登記。
+Owner 要求重啟 `apps/cms-scaffold`：先以 Shopify 的前端設計為參考重寫前端，後端配套演進，交給 LLM agent 分波實作。這是對 2026-09-05 freeze 的**明確例外**，範圍僅限 `apps/cms-scaffold`，tier 由 C 改為 A。
+
+目前處於 **設計階段**：v1 前端稽核、前端 v2 SDD、後端 v2 SDD 都是 v0.1，見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。實作依該索引的路線圖從 BW0 開始。總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變；其餘 2026-09-05 分級維持不變。
+
+（2026-09-24 曾登記為 documentation-only，本段取代之。）
 
 ## 2026-09-05 修復與補充驗證
 
@@ -168,7 +172,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/prism` | C | Phase 0 SDD; dormant investment |
 | `apps/loom` | C | Dormant |
 | `apps/flowshot` | C | Dormant |
-| `apps/cms-scaffold` | C | Dormant |
+| `apps/cms-scaffold` | A | Owner override 2026-09-25; v2 design phase |
 | `apps/cloudform` | D | Retired / historical |
 | `tools/streaming-converter` | D | Retired / historical |
 | `examples/bite-pi` | D | Disposable demo |

@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-24  
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫）  
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -20,7 +20,7 @@
 
 本文與 surface 規格衝突時：**權限與資料可見性**以 surface 規格為準；**視覺、佈局、元件選型**以本文為準。已知衝突列在 §13.2。
 
-**v2 的定義：** 重寫三個前端 app 與共用 packages。後端 `services/cms-api` 不在 v2 範圍內，唯一例外是 §9 由 owner 核准的缺口。
+**v2 的定義：** 重寫三個前端 app 與共用 packages。後端的配套變更由 [02 後端 SDD](02-backend-sdd.md) 規劃，前端需要的缺口列在 §9。
 
 ---
 
@@ -82,12 +82,12 @@ Horizon 是 Shopify 2025 年推出、取代 Dawn 的預設主題，特色是可�
 | ID | 決策 | 理由 | 狀態 |
 | --- | --- | --- | --- |
 | D-01 | 維持三個 Vite + React + TypeScript app，分開建置、分開 origin | 總綱凍結 | Decided |
-| D-02 | UI kit 用 **shadcn/ui（Radix）+ Tailwind v4**，**不**用 Polaris（React 或 web components）；在 shadcn 之上自建 Polaris 式的模式元件（§6） | 總綱 §7 凍結 shadcn；Polaris 的定位是讓 app 在 Shopify admin 裡看起來原生，拿到獨立產品是綁上不需要的生態。借模式比借套件便宜 | Proposed（見 Q-01） |
+| D-02 | UI kit 用 **shadcn/ui（Radix）+ Tailwind v4**，**不**用 Polaris（React 或 web components）；在 shadcn 之上自建 Polaris 式的模式元件（§6） | 總綱 §7 凍結 shadcn；Polaris 的定位是讓 app 在 Shopify admin 裡看起來原生，拿到獨立產品是綁上不需要的生態。借模式比借套件便宜 | Decided（Q-01） |
 | D-03 | 升級到 React 19、React Router 7（data router + lazy route）、TanStack Query 5 | 與同 repo 的 kith v2、dim-gate 對齊（E-04）；Query 解決 C-02、C-16、C-17 | Proposed |
 | D-04 | API client 從 `openapi.yaml` 產生（`openapi-typescript` + `openapi-fetch`），手寫型別禁止 | 總綱「前端不得發明未記載欄位」要有機制保證（E-02） | Proposed |
 | D-05 | 表單用 `react-hook-form` + `zod`；zod schema 在執行期由 content type 的欄位定義產生 | 讓 schema 驅動（surface-back §3.1）並修 C-05 | Proposed |
 | D-06 | 共用程式碼分四個 package（§4.2），三個 app 只剩路由與畫面組裝 | 修 E-01；總綱允許共享 `packages/ui` | Proposed |
-| D-07 | Back 與 Admin 用淺色為主、Shopify admin 式的中性配色；Front 各站自有配色。深色模式 v2 只給 Front 相簿站 | Shopify admin 本身是淺色為主；作業面的長時間閱讀與表格密度在淺色下較好。v1 全深色、又沒生效（F-01、F-03） | Proposed（見 Q-04） |
+| D-07 | Back 與 Admin 用淺色為主、Shopify admin 式的中性配色；Front 各站自有配色。深色模式 v2 只給 Front 相簿站 | Shopify admin 本身是淺色為主；作業面的長時間閱讀與表格密度在淺色下較好。v1 全深色、又沒生效（F-01、F-03） | Decided（Q-04） |
 | D-08 | Markdown 用 `react-markdown`，**不**啟用 raw HTML（不裝 `rehype-raw`） | 預設就安全（S-04） | Proposed |
 | D-09 | 前端開發與測試用 **MSW** 模擬 API，fixture 依 `DemoContentSeed` 撰寫，回應型別用產生的 OpenAPI 型別檢查 | 前端 agent 不必裝 JDK 25 或依賴 Maven Central（稽核 §1 的教訓） | Proposed |
 | D-10 | 拖放用 `@dnd-kit`，而且每個可拖的操作都要有非拖放的替代方式（鍵盤、選單） | surface-back §4.11 已允許 dnd-kit；無障礙與測試不能依賴拖放 | Proposed |
@@ -591,21 +591,23 @@ Resource index 版型：篩選為時間範圍、操作者、動作、結果（�
 
 ## 9. 後端缺口（前端需要的 API）
 
-v2 大部分畫面用現有 API 就能做。下列是真正的缺口；每一項都需要 owner 核准才能動 `services/cms-api`（見 Q-06）。沒核准前，前端依「暫行做法」實作，並在程式碼標 `// GAP(G-xx)`。
+v2 大部分畫面用現有 API 就能做。下列是真正的缺口，設計與排程都在 [02 後端 SDD](02-backend-sdd.md)。前端開工時，若對應的後端波次（BW）還沒合併，就依「暫行做法」實作，並在程式碼標 `// GAP(G-xx)`；後端合併後的那一波前端要移除這些標記。
 
-| ID | 缺口 | 影響的畫面 | 暫行做法 |
-| --- | --- | --- | --- |
-| G-01 | 取得「目前使用者可作業的類型與動作」：`GET /api/v1/auth/me` 加上 `permissions`，或讓本人可以查自己的 `effective-permissions`（目前要求 `manage_principals`） | Back 側欄、按鈕顯隱 | 非 admin 用 `me.roles[].contentTypeCodes`；admin 用 `GET /content-types` 的全部啟用類型（該端點只過濾啟用狀態，不過濾權限）。發布類按鈕先顯示，收到 403 後隱藏並提示 |
-| G-02 | 列表的伺服器分頁、排序、欄位篩選：`page`、`size`、`sort`、`filter.<field>`、`from`/`to` | 所有 index、行程 | 前端分頁；在 UI 標示「共 N 筆」 |
-| G-03 | 請求發布：`POST /entries/{id}/publish-requests`、`publishRequestedAt` | 編輯器、Home | 不顯示「請求發布」按鈕 |
-| G-04 | 可指派的使用者清單（非 admin 也能查） | `PrincipalPicker` | 唯讀顯示 ID |
-| G-05 | 欄位的 `label`、`listable`、`group`、`order`、`help` 中繼資料 | 所有 schema 驅動畫面 | 依型別分組；把 key 轉成人讀標籤 |
-| G-06 | enum 選項的顯示名稱 | badge、看板欄名 | 把 key 轉成人讀格式（`in_progress` → 「In progress」），並在 copy 檔覆寫 demo 用的中文名 |
-| G-07 | 「清空欄位」的語義：PATCH 帶 `null` 代表刪除該鍵 | 編輯器 | 送 `null`，並用契約測試確認後端行為 |
-| G-08 | 會員資料與預約：`/api/v1/me/*`、`appointment_request` 類型 | Front 會員區 | 不做會員區；導覽不顯示「登入」（修 C-11） |
-| G-09 | 原子重排：一次 PATCH 多筆 `sortOrder`，或 album 的 `photoIds` 有序 ref | 相簿編排 | 只 PATCH 有變動的照片，失敗就重新讀取 |
-| G-10 | 列表展開 ref 的標題：`include=refTitles` | 行程、看板、列表的關聯欄 | N+1 查詢，並加上 Query 快取 |
-| G-11 | 工作投影的 `title` 改用 `type.titleField()`（修 C-12） | Back 列表與編輯器標題 | 前端用 `payload[type.titleField]` 自行計算 |
+| ID | 缺口 | 影響的畫面 | 後端設計 | 後端波次 | 暫行做法 |
+| --- | --- | --- | --- | --- | --- |
+| G-01 | 取得目前使用者可作業的類型與動作 | Back 側欄、按鈕顯隱 | `/auth/me` 的 `capabilities`（[02 §4.2](02-backend-sdd.md#42-身份與能力g-01g-04)） | BW1 | 非 admin 用 `me.roles[].contentTypeCodes`；admin 用 `GET /content-types` 的全部啟用類型（該端點只過濾啟用狀態）。發布類按鈕先顯示，收到 403 後隱藏並提示 |
+| G-02 | 列表的伺服器分頁、排序、欄位篩選 | 所有 index、行程 | `page`／`size`／`sort`／`filter.<field>`（[02 §4.1](02-backend-sdd.md#41-列表查詢g-02)） | BW1 | 前端分頁；在 UI 標示「共 N 筆」 |
+| G-03 | 請求發布 | 編輯器、Home | `POST`／`DELETE /entries/{id}/publish-request`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | 不顯示「請求發布」按鈕 |
+| G-04 | 可指派的使用者清單 | `PrincipalPicker` | `GET /principals/assignable`（[02 §4.2](02-backend-sdd.md#42-身份與能力g-01g-04)） | BW2 | 唯讀顯示 ID |
+| G-05 | 欄位中繼資料（label、group、listable、filterable、help） | 所有 schema 驅動畫面 | [02 §3.1、§4.7](02-backend-sdd.md#47-類型與欄位的輸出g-05g-06) | BW1 | 依型別分組；把 key 轉成人讀標籤 |
+| G-06 | enum 選項的顯示名稱 | badge、看板欄名 | `enumLabels`（[02 §4.7](02-backend-sdd.md#47-類型與欄位的輸出g-05g-06)） | BW1 | 把 key 轉成人讀格式，並在 copy 檔覆寫 demo 用的中文名 |
+| G-07 | 「清空欄位」的語義 | 編輯器 | PATCH 帶 `null` 即清空（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW1 | 送 `null` |
+| G-08 | 會員資料與預約 | Front 會員區 | `/api/v1/me/*` + `appointment_request` 類型（[02 §4.5](02-backend-sdd.md#45-會員g-08)） | BW3 | 不做會員區；導覽不顯示「登入」（修 C-11） |
+| G-09 | 原子重排 | 相簿編排 | `POST /entries:batch-patch`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | 只 PATCH 有變動的照片，失敗就重新讀取 |
+| G-10 | 展開關聯的標題 | 行程、看板、列表的關聯欄 | `include=refs`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | N+1 查詢，並加上 Query 快取 |
+| G-11 | 標題一律取 `titleField`（修 C-12） | Back 列表與編輯器標題 | [02 §3.1](02-backend-sdd.md#31-v5--類型設定與欄位中繼資料) | BW1 | 前端用 `payload[type.titleField]` 自行計算 |
+
+另外，[02 §4.4](02-backend-sdd.md#44-破壞性變更與前端同一波上線) 有三項破壞性變更（PATCH 必帶 `version`、公開投影不回無法公開的媒體 id、422 一次回全部欄位錯誤），前端 W1／W3 必須配合。
 
 ---
 
@@ -689,30 +691,32 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 
 | 波 | 範圍 | 修掉 | 完成定義 |
 | --- | --- | --- | --- |
-| **W0 基礎** | `packages/{ui,api,fields,auth,mocks}` 骨架；tokens；shadcn 初始化與 `@source`；OpenAPI codegen；`safeReturnTo`；MSW；升級 React 19、Router 7；三個 app 換上新殼（內容暫時沿用 v1） | F-01～F-05、S-01、S-02、S-03、C-16～C-18、E-01～E-04 | §11.1 全綠；V2-AC-01、V2-AC-14（殼層頁）；Storybook 不強制 |
-| **W1 Back 核心** | 殼層、Home、Resource index、Resource details、欄位 widget（除 media-ref、ref）、ContextualSaveBar、發布動作、409、403／404 | C-04、C-05、C-06、C-07、U-01、U-02、U-04 | V2-AC-05～10、15 |
-| **W2 Back 媒體與視圖** | MediaPicker、RelationPicker、`/media`、預覽、修訂紀錄、三個自訂視圖重做 | C-08、C-09、C-10、U-03 | V2-AC-11～13 |
-| **W3 Front** | 四站 section registry、全部公開路由、燈箱、狀態頁、SEO meta、手機選單、Markdown | C-01～C-03、C-11、C-13、C-14、U-05 | V2-AC-02～04；surface-front AC-01～09、13、15、17、18 |
-| **W4 Admin** | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
+| **W0 基礎**（需要 BW0：OpenAPI 有完整 schema 才能 codegen） | `packages/{ui,api,fields,auth,mocks}` 骨架；tokens；shadcn 初始化與 `@source`；OpenAPI codegen；`safeReturnTo`；MSW；升級 React 19、Router 7；三個 app 換上新殼（內容暫時沿用 v1） | F-01～F-05、S-01、S-02、S-03、C-16～C-18、E-01～E-04 | §11.1 全綠；V2-AC-01、V2-AC-14（殼層頁）；Storybook 不強制 |
+| **W1 Back 核心**（需要 BW1） | 殼層、Home、Resource index、Resource details、欄位 widget（除 media-ref、ref）、ContextualSaveBar、發布動作、409、403／404 | C-04、C-05、C-06、C-07、U-01、U-02、U-04 | V2-AC-05～10、15 |
+| **W2 Back 媒體與視圖**（需要 BW2） | MediaPicker、RelationPicker、`/media`、預覽、修訂紀錄、三個自訂視圖重做 | C-08、C-09、C-10、U-03 | V2-AC-11～13 |
+| **W3 Front**（會員區需要 BW3，其餘不需要） | 四站 section registry、全部公開路由、燈箱、狀態頁、SEO meta、手機選單、Markdown | C-01～C-03、C-11、C-13、C-14、U-05 | V2-AC-02～04；surface-front AC-01～09、13、15、17、18 |
+| **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
 
-每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
+前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
 ---
 
 ## 13. 開放問題與已知衝突
 
-### 13.1 開放問題（需要 owner 決定）
+### 13.1 已決定（owner，2026-09-25）
 
-| ID | 問題 | 建議 |
+Owner 指示「其他按建議走」，以下全部依原建議定案。
+
+| ID | 問題 | 決定 |
 | --- | --- | --- |
-| Q-01 | 「參考 Shopify」是指借模式（D-02），還是直接用 Polaris 元件？ | 借模式。直接用 Polaris 會違反總綱 §7 凍結的 shadcn，要先改總綱 |
-| Q-02 | cms-scaffold 目前是 portfolio tier C（休眠）。v2 的實作要等 PORTFOLIO.md 登記 owner override 才能開始；這次只登記「文件先行」 | 確認後再開 W0 |
-| Q-03 | Front 要不要做建置時 prerender（不違反「不綁 Next.js」），換取更好的 SEO？ | v2 先不做；W5 後評估 |
-| Q-04 | Back／Admin 要不要同時提供深色模式？ | v2 只做淺色；tokens 預留 `[data-theme=dark]` |
-| Q-05 | 列表要不要做批次操作（批次發布、封存）？surface-back §4.5 說 v1 不做 | v2 不做；IndexTable 預留選取欄 |
-| Q-06 | §9 的後端缺口要不要跟著 v2 一起做？ | G-01、G-02、G-11 建議在 W1 前做（小、影響大）；其餘等對應波次 |
-| Q-07 | Session cookie：surface-front 提議 Front 與 Back 用不同 cookie，但實作只有一顆 `cms_session` | 屬於 Identity，v2 前端不處理；列入 Identity 的待辦 |
+| Q-01 | 借 Shopify 的模式，還是直接用 Polaris 元件？ | **借模式**（D-02）。不用 Polaris 套件，不改總綱 |
+| Q-02 | 休眠專案要不要啟動？ | **啟動**。PORTFOLIO.md 已登記 owner override，tier 改為 A |
+| Q-03 | Front 要不要做建置時 prerender？ | v2 不做；W5 後評估 |
+| Q-04 | Back／Admin 要不要深色模式？ | v2 只做淺色；tokens 預留 `[data-theme=dark]` |
+| Q-05 | 列表要不要批次操作？ | v2 不做；IndexTable 預留選取欄 |
+| Q-06 | 後端缺口要不要一起做？ | **一起做**，設計在 [02 後端 SDD](02-backend-sdd.md)；G-01、G-02、G-11 在 BW1、於前端 W1 之前完成 |
+| Q-07 | Front 與 Back 要不要分開 session cookie？ | 維持單一 `cms_session`（[02 BD-13](02-backend-sdd.md#2-決策)） |
 
 ### 13.2 與既有文件的衝突
 

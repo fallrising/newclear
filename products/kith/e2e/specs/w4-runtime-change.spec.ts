@@ -84,7 +84,8 @@ test(
 
       await expect(ben.page.locator(`[data-testid="reply-placeholder"][data-member="${aid}"]`)).toHaveCount(0, { timeout: 10_000 });
       await ben.page.waitForTimeout(3_000);
-      await expect(ben.page.getByTestId("message-row").filter({ hasText: "too-late-" + rand })).toHaveCount(0);
+      // The trigger row contains the directive. A dropped reply would add a second row.
+      await expect(ben.page.getByTestId("message-row").filter({ hasText: "too-late-" + rand })).toHaveCount(1);
       await expect(page.getByTestId("message-row").filter({ hasText: "too-late-" + rand })).toHaveCount(0);
       const history = await api.call("GET", "/api/rooms/" + roomId + "/messages?order=desc&limit=1");
       expect(history.status).toBe(200);
@@ -99,14 +100,16 @@ test(
 
       const agent = await api.call("GET", "/api/agents/" + aid);
       expect(agent.status).toBe(200);
-      const detail = agent.json as {
-        id: string;
-        handle: string;
-        runtime: string;
-        runtime_epoch: number;
-        rooms: string[];
-        runtime_changes: { from_runtime: string; to_runtime: string; created_at: string }[];
-      };
+      const detail = (agent.json as {
+        agent: {
+          id: string;
+          handle: string;
+          runtime: string;
+          runtime_epoch: number;
+          rooms: string[];
+          runtime_changes: { from_runtime: string | null; to_runtime: string; created_at: string }[];
+        };
+      }).agent;
       expect(detail.id).toBe(aid);
       expect(detail.handle).toBe(handle);
       expect(detail.runtime).toBe("external");

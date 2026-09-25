@@ -27,9 +27,9 @@
 ```
 BW0 契約與品質基礎（完整 OpenAPI schema、store 契約測試、CI integrationTest）
  ├─► W0 前端基礎（packages、tokens、codegen、MSW、新殼）
- ├─► BW1a 類型設定與欄位中繼資料（titleField、capabilities）
- │      └─► BW1b 列表查詢下推（分頁／篩選、predicate、索引）
- └─► BW1c 驗證與破壞性變更（error.fields、428、媒體 null）
+ └─► BW1a 類型設定與欄位中繼資料（titleField、capabilities）
+        └─► BW1b 列表查詢下推（分頁／篩選、predicate、索引）
+               └─► BW1c 驗證與破壞性變更（error.fields、428、媒體 null）
         （BW1a＋BW1b＋BW1c 都合併後）
         └─► W1 Back 核心（index、details、欄位 widget、發布動作）
                ├─► BW2（batch-patch、include=refs、請求發布、可指派使用者、審計）
@@ -46,7 +46,7 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 | W0 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W0.md](waves/W0.md) | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
 | BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
 | BW1b | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1b.md](waves/BW1b.md) | B-02、B-09、B-10；G-02 |
-| BW1c | DRAFT | 02 §7 | — | B-06、B-13；G-07 |
+| BW1c | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1c.md](waves/BW1c.md) | B-06、B-13；G-07 |
 | W1 | DRAFT | 01 §12 | — | C-04～C-07、U-01、U-02、U-04 |
 | BW2 | DRAFT | 02 §7 | — | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | DRAFT | 01 §12 | — | C-08～C-10、U-03 |

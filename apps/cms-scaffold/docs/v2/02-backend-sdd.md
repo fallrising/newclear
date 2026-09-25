@@ -40,20 +40,21 @@
 
 | ID | 級 | 問題 | 證據 |
 | --- | --- | --- | --- |
-| B-01 | P0 | OpenAPI 只有路徑，**幾乎沒有 schema**（`components.schemas` 只有 `Health`、`LoginRequest`、`ErrorEnvelope`），回應都只寫一句描述。前端無法從它產生型別（前端 D-04 會落空）。 | `openapi.yaml:474-535` |
+| B-01 | P0 | OpenAPI 只有路徑，**幾乎沒有 schema**（`components.schemas` 只有 `Health`、`LoginRequest`、`ErrorEnvelope`），回應都只寫一句描述。前端無法從它產生型別（前端 D-04 會落空）。另有幾個狀態碼與程式不符：`PUT /principals/{id}/roles` 與 `PUT /roles/{code}/permissions` 實際回 204（文件寫 200），`POST /principals/{id}/password` 實際回 200 帶 body（文件寫 204），`POST /media` 的錯誤實際是 409／413／415（文件寫 422）。 | `openapi.yaml:474-535`；`PrincipalController.java:85,96-102,126`；`MediaException.java:24-46` |
 | B-02 | P1 | 列表沒有分頁。工作列表一次回全部；公開列表先撈出該類型的全部 published entry，再在 Java 裡逐筆過濾可見性、predicate 與關聯是否公開，每筆都要額外查詢（N+1）。資料一多就會變慢，而且 `total` 永遠等於本頁筆數。 | `EntryController.java:80`、`EntryService.java:389-404` |
 | B-03 | P1 | kernel 寫死了 demo 的欄位名：工作投影的標題讀 `title`、搜尋用 `payload->>'title'`、公開排序讀 `sortOrder`、公開可見性讀 `visibility`。標題欄位不叫 `title` 的類型（`clinic_profile` 的是 `name`），標題和搜尋都會失效。 | `ContentProjection.java:22`、`JdbcContentStore.java`（`listEntries` 的 `q`）、`InMemoryContentStore.java:188`、`EntryService.java`（`publicOrder`）、`PublicVisibility.java:18` |
 | B-04 | P1 | 使用者查不到「自己能做什麼」。`/auth/me` 只回傳角色代碼；`effective-permissions` 需要 `manage_principals`。 | `AuthController.java`（`mePayload`）、`PrincipalAdminService.java:179` |
 | B-05 | P1 | 欄位的中繼資料已存在資料表（`help_text`、`visibility`、`sort_order`、`validations`、`default_value`），但 API 沒有輸出；也沒有顯示名稱、分組、列表欄、enum 選項名稱這些欄位。 | V3 `cms_field`；`AdminContentController.typeJson` |
 | B-06 | P1 | 驗證遇到第一個錯誤就拋出，錯誤沒有欄位路徑；`datetime`、`string` 完全不驗證（長度、格式都不檢查）。 | `EntryService.validatePayload` |
 | B-07 | P1 | 審計不完整：只有登入、使用者管理與 purge 寫審計；publish、unpublish、archive、restore、類型啟停、導覽發布、媒體刪除都沒有記錄。審計查詢不能分頁，也不回傳操作者。 | `EntryService.java:348` 是唯一的內容類審計；`AdminContentController.java:163-181` |
-| B-08 | P1 | PostgreSQL 版的 content 與 media store 沒有任何測試。`./gradlew test` 的 53 個測試全部跑在 in-memory store 上；`integrationTest` 只測 identity，而且 CI 沒有跑它。兩種 store 的行為可能已經不一致。 | `src/integrationTest/` 只有一個檔案；`.github/workflows/cms-scaffold-ci.yml` |
+| B-08 | P1 | PostgreSQL 版的 content 與 media store 沒有任何測試。`./gradlew test` 的 53 個測試全部跑在 in-memory store 上；`integrationTest` 只測 identity，而且 CI 沒有跑它。兩種 store 的行為已經不一致：BW0 細化時以契約測試找到 9 處（排序、部分欄位更新、重複 key、`q` 的萬用字元、NULL jsonb 讀成空 Map 等），清單見 [waves/BW0.md §5.4](waves/BW0.md#54-store-行為對齊02-bd-10)。 | `src/integrationTest/` 只有一個檔案；`.github/workflows/cms-scaffold-ci.yml` |
 | B-09 | P2 | `cms_entry_index` 資料表建了卻沒人寫入（程式碼裡只有 DELETE），所以無法依欄位值篩選。 | `JdbcContentStore.java:251` |
 | B-10 | P1 | 帶 predicate 的授權（例如「只能讀 `ownerPrincipalId` 是自己的」）不能用在列表：列表授權時傳入的 entry 是 `null`，predicate 一律判定為拒絕。所以會員「看自己的寵物」這種功能沒辦法做。 | `EntryService.listWork`、`AuthorizationService.predicateAllows` |
 | B-11 | P2 | 缺 surface 規格要求的能力：請求發布、會員自己的資料與預約、可指派的使用者清單、原子的批次更新。 | surface-back §4.7、surface-front §4.2 |
 | B-12 | P2 | 每次授權判斷都重新查角色與權限；公開列表對每一筆 entry 都判斷一次，一個請求可能產生數百次查詢。 | `AuthorizationService.collectGrants` |
 | B-13 | P2 | 公開投影中，無法公開的媒體引用會原樣留下 UUID（`orElse(raw)`），洩漏未發布媒體的 id。 | `PublicContentController.java:119` |
-| B-14 | P2 | 錯誤信封有兩套 handler（content 與 identity），形狀相近但欄位不完全一致；也沒有文件列出所有錯誤代碼。 | `ContentExceptionHandler`、`IdentityErrorWriter` |
+| B-14 | P2 | 錯誤信封由三個 `@RestControllerAdvice`（content、media、identity）加上 filter 層的 `IdentityErrorWriter` 各自產生，形狀相近但欄位不完全一致；媒體的錯誤代碼是小寫（`not_found`、`quota_exceeded`…），其他是大寫；也沒有文件列出所有錯誤代碼。壞 JSON、壞 UUID、錯的 method 等框架層錯誤回 Spring 預設格式，`ref.<field>` 不是 UUID、未知的 principal `status` 直接變成 500。 | `ContentExceptionHandler`、`MediaExceptionHandler`、`IdentityExceptionHandler`、`IdentityErrorWriter`；`MediaException.java:24-46`；`EntryController.java:72`、`PublicContentController.java:73`、`PrincipalAdminService.java:83` |
+| B-15 | P1 | `JdbcIdentityStore` 的 last-admin guard 以 `queryForObject(..., Long.class)` 讀 `pg_advisory_xact_lock`，但該函式回傳 `void`，所以在 PostgreSQL 上所有 `*KeepingUsableAdmin`（停用使用者、改角色、改權限）一律丟 `DataIntegrityViolationException`。既有的 `JdbcIdentityStoreIntegrationTests.lastAdminGuardRejectsRemovingAdministrativeCapability` 在真實 PostgreSQL 上是紅的，因為 CI 沒跑所以沒人發現（BW0 細化時以 PostgreSQL 16.13 重現）。 | `JdbcIdentityStore.java:296` |
 
 ---
 
@@ -252,11 +253,15 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 - `test` 用 in-memory 實作跑一次；`integrationTest` 用 Testcontainers PostgreSQL 跑同一組。
 - **規則：** 以後修改任何 store 的行為，必須先在契約測試加案例；兩種 store 都通過才能合併。
 
+施工細節見 `waves/BW0.md` §5.4、§7.6、§7.7。
+
 ### 5.3 OpenAPI 驗證（BD-03）
 
-- 在 MockMvc 測試中加入 OpenAPI 回應驗證。候選套件是 `com.atlassian.oai:swagger-request-validator-mockmvc`，BW0 時確認它支援 OpenAPI 3.1 與 Spring Boot 3.5 後定案。
+- 在 MockMvc 測試中加入 OpenAPI 回應驗證。~~候選套件是 `com.atlassian.oai:swagger-request-validator-mockmvc`，BW0 時確認它支援 OpenAPI 3.1 與 Spring Boot 3.5 後定案。~~ **BW0 細化後定案：** `openapi.yaml` 現在是 OpenAPI **3.0.3**（`openapi.yaml:1`），v2 維持 3.0.3，不需要 3.1。`swagger-request-validator-mockmvc` 3.0.0 已 relocate 到 `openapi-request-validator-mockmvc`，但該模組以 `javax.servlet` 與 Spring 5 建置，所以改用同一專案的 `com.atlassian.oai:openapi-request-validator-core:3.0.0`（僅 test scope），自寫 MockMvc 轉接。
 - 現有的 `OpenApiContractTests`（路徑一致）保留；另加一條：每個 operation 都必須有 `2xx` 回應 schema，以及至少一個錯誤回應。
 - 錯誤代碼集中在 `components.schemas.ErrorCode` 的 enum；新增錯誤代碼就必須改這個 enum，否則測試失敗。
+
+施工細節見 `waves/BW0.md` §4.1、§4.5、§5.1、§5.5。
 
 ### 5.4 效能目標（本機、PostgreSQL 16、單類型 10,000 筆）
 
@@ -272,6 +277,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 ### 5.5 建置的可重現性
 
 2026-09-24 在雲端 sandbox 中遇到 Maven Central 回 HTTP 429，Gradle 無法解析依賴（見 [00 §1](00-v1-frontend-audit.md#1-怎麼查的)）。**Proposed：** 啟用 Gradle dependency locking 與 dependency verification（`gradle/verification-metadata.xml`），讓依賴版本固定、可以稽核。429 本身是環境的網路限制，不在 repo 內處理；CI 已經有 `setup-gradle` 快取。
+
+BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verification metadata 未排入任何波次。
 
 ---
 
@@ -291,13 +298,15 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 
 | 波 | 範圍 | 解決 | 完成定義 |
 | --- | --- | --- | --- |
-| **BW0 契約與品質基礎** | 補完整 OpenAPI schema（現有全部 operation）；OpenAPI 回應驗證；錯誤信封統一與 `ErrorCode` enum；store 契約測試骨架；CI 新增 `integrationTest` job；dependency locking | B-01、B-08、B-14 | `./gradlew test integrationTest` 全綠；每個 operation 都有 schema；前端可以從 YAML 產生型別 |
+| **BW0 契約與品質基礎** | 補完整 OpenAPI schema（現有全部 operation）；OpenAPI 回應驗證；錯誤信封統一與 `ErrorCode` enum；store 契約測試骨架；CI 新增 `integrationTest` job；dependency locking | B-01、B-08、B-14、B-15 | `./gradlew test integrationTest` 全綠；每個 operation 都有 schema；前端可以從 YAML 產生型別 |
 | **BW1 前端 W1 的前置** | V5／V6／V7 migration；類型設定（`sortField` 等）；欄位中繼資料；列表分頁、排序、篩選、predicate 下推；`capabilities`；欄位級 422；§4.4 的三項破壞性變更；授權快取 | B-02～B-06、B-09、B-10、B-12、B-13；G-01、G-02、G-05、G-06、G-07、G-11 | 契約測試涵蓋每一種查詢參數；§5.4 的列表效能目標達標 |
 | **BW2 前端 W2／W4 的前置** | `batch-patch`；`include=refs`；請求發布；可指派使用者；審計補齊與查詢 | B-07、B-11（部分）；G-03、G-04、G-09、G-10 | 每個新端點有授權、驗證、審計三類測試 |
 | **BW3 會員區** | `/me` 端點；`appointment_request` 類型與種子 | B-11；G-08 | surface-front AC-10～12 可以用 API 級測試驗收 |
 | **BW4 硬化** | 效能量測記錄；審計保留期限設定（surface-admin §7.2）；安全測試補齊 | — | §5.4 全部達標並記錄數字 |
 
 每波一個 PR；migration 只能新增，不能修改已經合併的 migration。
+
+BW0 施工細節見 `waves/BW0.md`。
 
 ---
 
@@ -310,6 +319,10 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 | BQ-03 | 審計保留多久？ | 預設 365 天，可在 Admin 設定；BW4 再做清理工作 |
 | BQ-04 | `batch-patch` 是否也要支援 `publish`／`unpublish`？ | 不要。批次發布屬於前端 Q-05，v2 不做 |
 | BQ-05 | `cms_entry_index` 要不要改用 JSONB GIN 索引取代？ | 先用索引表：它已經存在，型別明確，也方便把 predicate 編譯成 SQL；BW4 量測後再評估 |
+| BQ-06 | `/principals/{id}` 系列在 id 不存在時回 **400** `VALIDATION_FAILED`（message `not found`），不是 404（`PrincipalAdminService.java:58` 等）。BW0 只把現況寫進契約。要改成 404 嗎？選項：A. BW2 改成 404 並新增 `PRINCIPAL_NOT_FOUND`，與 W4 Admin 同波上線（破壞性，但唯一使用者是 v2 Admin）；B. 維持 400。 | A |
+| BQ-07 | 媒體錯誤代碼是小寫（`not_found`、`variant_not_available`、`unsupported_media_type`、`quota_exceeded`、`file_too_large`、`gone`），其他代碼是大寫。BW0 保留原字串以免破壞。要統一嗎？選項：A. BW1 改成 `MEDIA_NOT_FOUND` 等大寫，與 §4.4 的破壞性變更同波上線；B. 維持。 | A |
+| BQ-08 | 管理端有些輸入沒驗證，會在資料庫層失敗成 500 `INTERNAL_ERROR`：例如 `POST /admin/content-types` 的 `slugPolicy` 不在 `required／optional／none`（違反 V3 的 CHECK），或 `POST /principals` 的 email 重複（違反唯一索引）。選項：A. BW2 補驗證，回 422 `FIELD_VALIDATION`／400 `VALIDATION_FAILED`；B. 維持。 | A |
+| BQ-09 | 兩種環境類失敗沒有自動測試：本機沒有 Docker 時 `integrationTest` 無法執行；Maven Central 回 HTTP 429 時依賴無法下載（waves/BW0.md §8 的 BW0-FM16、FM18）。選項：A. 接受，以 CI 為準，PR 說明必須寫明哪些閘門只在 CI 跑過；B. 另設 Maven 鏡像。 | A |
 
 ---
 

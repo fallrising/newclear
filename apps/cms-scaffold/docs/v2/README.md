@@ -8,7 +8,8 @@
 | [01 — 前端 v2 SDD](01-frontend-sdd.md) | 架構、Shopify 參考對照、tokens、元件、三個操作面的畫面、後端缺口、驗收、前端波次 |
 | [02 — 後端 v2 SDD](02-backend-sdd.md) | 後端現況問題、決策、資料表變更、API 變更、品質閘門、後端波次 |
 | [REFINE-PROMPT](REFINE-PROMPT.md) | 把一個波次細化成施工圖的 prompt（給 LLM agent） |
-| `waves/<波次>.md` | 各波次的施工圖（細化後產生） |
+| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md) |
+| `contracts/` | 施工圖的契約：OpenAPI 片段 `<波次>.openapi.yaml`、測試 fixture 規格 |
 
 與既有文件的關係：[總綱](../sdd/00-overview.md) 凍結、不改；[surface 與 kernel 規格](../specs/) 仍是路由、權限、領域規則的權威；v2 文件補架構、畫面、API 演進與交付方式。
 
@@ -38,7 +39,7 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
 | --- | --- | --- | --- | --- |
-| BW0 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | B-01、B-08、B-14 |
+| BW0 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW0.md](waves/BW0.md) | B-01、B-08、B-14、B-15 |
 | W0 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | — | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
 | BW1 | DRAFT | 02 §7 | — | B-02～B-06、B-09、B-10、B-12、B-13；G-01、G-02、G-05～G-07、G-11 |
 | W1 | DRAFT | 01 §12 | — | C-04～C-07、U-01、U-02、U-04 |

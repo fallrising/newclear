@@ -1,6 +1,6 @@
 # 接續開發交接：ERU VPS MVP
 
-更新：2026-09-25。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前仍為 12 項（近期 1、後續 11）；ERU-001～006 已完成，ERU-007 仍待正式 V11 小流量驗收。依 owner 最新指示，先完成本機開發，再統一進行 VPS E2E；因此目前另推進 ERU-012 的離線 desired-state 前置，未減少任務數。ERU-006 最終實機結果與限制見 [網路驗收紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
+更新：2026-09-25。**剩餘任務與固定編號以 [TASKS.md](TASKS.md) 為準：目前仍為 12 項（近期 1、後續 11）；ERU-001～006 已完成，ERU-007 仍待正式 V11 小流量驗收。依 owner 最新指示，先完成本機開發，再統一進行 VPS E2E；ERU-012 的本機 desired-state 功能已齊，ERU-013 的 provenance／版本 guard 正在收尾，均未減少任務數。正式 E2E 順序與限制見 TASKS.md。ERU-006 最終實機結果與限制見 [網路驗收紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。每完成一項必須更新清單，並向 owner 回報完成編號、剩餘數及下一項；新增／拆分需說明數量變化。** **24h 低頻觀測已於 2026-09-24 11:25:06 UTC 自然結束；摘要與限制見 [回收紀錄](TODO-SOAK-2026-09-23.md)。** 再讀 [恢復與 reapply 最新紀錄](M2-RECOVERY-2026-09-23.md)、[事故恢復操作](RECOVERY.md)，再讀 [優先路徑與故障分析](M2-PRIORITIES-2026-09-22.md)、[元件重裝契約](CONTROLLED-REINSTALL.md) 和 [操作器](OPERATOR.md)。歷史故障與早期未完成狀態保留於 M2-2026-09-22.md／M2-CONTINUATION-2026-09-22.md；不能把早期 PASS 當成目前健康保證。
 
 ## 目標與固定邊界
 
@@ -40,7 +40,8 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
 
 - ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與獨立 24h run 尚未執行，仍為進行中。ERU-002 的 30 秒低頻觀測已完成，不能替代 V11。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
-- ERU-012 本機開發仍進行中：已有 digest-pinned stateless HTTP spec／review planner、hash-bound executor、EruCLIAdapter 與 exact-ID cleanup；50 個 feature tests 以 fake Operator／API 驗證雙階段 preflight、ready-before-remove、lost-reply 對帳、bodyless HTTP 摘要及唯讀 reconcile。adapter 尚未對 VPS 驗證；quota admission 交由 Eru core，v1 沒有外部 traffic router。仍需真實 CLI/API/job 與 VPS E2E，固定剩餘數維持 12。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
+- ERU-012 本機功能已齊：digest-pinned stateless HTTP spec／review planner、hash-bound executor、EruCLIAdapter 與 exact-ID cleanup；沿用 labctl.Operator、固定 SSH aliases、雙階段 etcd/core/consistency preflight、digest image cache、bodyless worker probe，並在每次 remove 前驗新版 readiness。容量 admission 交由 Eru resource plugin，v1 不含外部 traffic routing。planner／executor／adapter／cleanup 共 50 個離線測試。adapter 尚未對 VPS 驗證，仍需真實 CLI/API/job 與 VPS E2E；依 owner 指示，這些整合驗收排在本機開發之後。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
+- ERU-013 本機功能進行中：patch validator 支援選定 patch、revision、精確 Go 版本／archive SHA 與版本專屬 test package；新增雙次 private build manifest publisher 與 versioned validator，綁定 source tag／commit、patch SHA、architecture、toolchain SHA、獨立重建 artifact SHA 及相容版本測試。core patch plan 區分 baseline install、同 artifact reapply、同版本 patch revision、跨版本 upgrade；隱性 downgrade 拒絕，回退仍必須引用原 source run。v0.1.5 現有 manifest 已轉 schema v1；尚無新 upstream 版本的真實 build／compatibility evidence，也未做 VPS upgrade／rollback E2E。[本機紀錄](M3-CORE-RELEASE-PROVENANCE-2026-09-25.md)。
 
 - ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
 
@@ -48,7 +49,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 
 - ERU-004 分析已交付，但歷史 23.53 秒 slow fdatasync 的底層根因仍未證實。完整 24h 低負載 run 沒有重現 slow warning／功能錯誤；WAL fsync p99 桶上界 8 ms，backend commit 僅 2 observations。這不是根因修復或排除間歇性風險；不把 WAL p99 單獨當硬性阻擋，也不以放大 timeout 掩蓋故障。若復發，先採集同時段 guest 與 provider telemetry，再決定是否新增實作／遷移任務。
 - ERU-005 已通過單次實機 core service outage 恢復與 patched binary 回切，但這不涵蓋真正 VM／磁碟 power-loss、etcd 資料損壞、未知新檔案歸屬與非空 workload 災難恢復；也未證明歷史慢 fdatasync 根因已修復。程序 SIGKILL 切點另已補驗。replace-intent 前且具備 durable backing-up journal 的顯式取消／封存已完成；原 journal 缺失時仍保留資料並拒絕自動處置。
-- 原 release reapply 仍禁止隱性 downgrade；已支援以 `--core-artifact` 明確核對並保留 patch 的同版本 reapply。後續跨版本升級／patch 發布管理仍分開設計。
+- 原 release reapply 仍禁止隱性 downgrade；ERU-013 本機 guard 現已為 versioned release 增加 artifact provenance 與版本轉移分類。可部署 catalog 目前只有 v0.1.5；下一個 upstream 版本仍須產生獨立重建與每個相容來源版本的成功測試記錄，並以 fresh plan 完成 upgrade／rollback／interruption 及 VPS 驗收。
 - ERU-008 已交付 worker-2／3 身分與空節點的唯讀計畫稽核、[目標外 HTTP 守護配對](M2-WORKER-PEER-GUARDS-2026-09-24.md)及[peer 重裝／恢復執行器本機驗證](M2-WORKER-PEER-EXECUTOR-2026-09-24.md)；[兩台歷史計畫](M2-WORKER-PEER-PREP-2026-09-23.md)。peer 實機重裝與恢復尚未驗收；非空 target 的 drain、OS 重灌、全群 fresh、HA／snapshot restore 尚未驗收。ERU-002／003／004 均已交付；worker-2／3 peer 實機重裝仍待驗收。
 
 ## 接手先做

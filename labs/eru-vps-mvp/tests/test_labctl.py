@@ -1,4 +1,5 @@
 """Safety regressions: concurrency, drift, exact ownership and uncertain results."""
+import base64
 import copy
 import hashlib
 import importlib.util
@@ -15,8 +16,9 @@ from unittest.mock import patch
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
 import labctl
+import reimage_receipt
 import reimage_review
-from labops import ClusterLock, atomic_json, lock_fds
+from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
 class LockTests(unittest.TestCase):
@@ -139,8 +141,8 @@ class OperatorTests(unittest.TestCase):
                         'labels': {'owner': 'another-project'}}
         self.evidence = {'run_id': self.run, 'nodes': {'worker-4': {'app': self.app, 'workload_ids': []}}}
         atomic_json(self.project / 'private/smoke' / (self.run + '.json'), self.evidence)
-        self.snapshot = {'hosts': {h['alias']: {'machine_id': 'id-' + h['alias'], 'containers': '',
-                                               'tasks': '', 'docker': ''} for h in self.inventory},
+        self.snapshot = {'hosts': {h['alias']: {'machine_id': 'id-' + h['alias'], 'boot_id': f'00000000-0000-0000-0000-{i:012x}',
+                                               'containers': '', 'tasks': '', 'docker': ''} for i, h in enumerate(self.inventory, 1)},
                          'pods': [{'name': 'eru'}], 'nodes': [
                              {'name': x['node'], 'endpoint': x['ip'], 'podname': 'eru', 'available': True,
                               'labels': {'owner': labctl.OWNER}, 'resource_capacity': '{}', 'resource_usage': '{}'}
@@ -179,6 +181,34 @@ class OperatorTests(unittest.TestCase):
     def empty_reimage_target(self):
         self.op.live['workloads'] = []
         self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+
+    def write_reimage_receipt(self, plan, changes=None):
+        intent = plan['provider_reimage_intent']
+        data = {
+            'schema_version': 1,
+            'provider_api_used': False,
+            'plan_id': plan['id'],
+            'plan_sha256': digest(plan),
+            'provider_resource_ref': intent['provider_resource_ref'],
+            'os_image_ref': intent['os_image_ref'],
+            'target': copy.deepcopy(intent['target']),
+            'erase_scope': copy.deepcopy(intent['erase_scope']),
+            'replacement': {'machine_id': 'replacement-machine-id-4',
+                            'boot_id': '11111111-1111-1111-1111-111111111111',
+                            'os_release': 'Debian GNU/Linux 13'},
+            'provider_console_action_ref': 'console-action-test-4',
+            'console_completed_at': labctl.now(),
+            'owner_confirmed': True,
+            'owner_reviewed_at': labctl.now(),
+            'host_key_verified_via': 'provider-console',
+            'host_key_fingerprints': {'ssh-ed25519': 'SHA256:' +
+                base64.b64encode(b'' * 32).decode().rstrip('=')},
+        }
+        if changes:
+            data.update(changes)
+        path = self.project / 'private/reimage-receipts/worker-4.json'
+        atomic_json(path, data)
+        return path.relative_to(self.project)
 
     def test_cleanup_recovers_uncertain_create_and_preserves_foreign_workload(self):
         # IDs may be missing if create succeeded but its response was lost.
@@ -453,6 +483,129 @@ class OperatorTests(unittest.TestCase):
             alias=labctl.ALIASES[3], machine_id='id-' + labctl.ALIASES[3])
         self.assertEqual(loaded['path'], str(path))
         self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / path).read_bytes()).hexdigest())
+
+    def test_reimage_receipt_records_owner_attestation_without_remote_mutation(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        plan = envelope['plan']
+        receipt_path = self.write_reimage_receipt(plan)
+        before = copy.deepcopy(self.op.live)
+        result = self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
+        self.assertEqual(result['status'], 'owner-receipt-recorded')
+        self.assertFalse(result['remote_mutation_performed'])
+        recorded_path = self.op.root / 'reimage-receipts' / (plan['id'] + '.json')
+        self.assertTrue(recorded_path.is_file())
+        self.assertEqual(recorded_path.stat().st_mode & 0o777, 0o600)
+        recorded = labctl.read(recorded_path)
+        self.assertEqual(recorded['receipt']['replacement']['machine_id'], 'replacement-machine-id-4')
+        self.assertEqual(recorded['receipt']['host_key_verified_via'], 'provider-console')
+        self.assertFalse(plan['executable'])
+        self.assertEqual(self.op.live, before)
+        self.assertEqual(self.op.removed, [])
+        with self.assertRaisesRegex(ValueError, 'already recorded'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
+
+    def test_reimage_receipt_rejects_scope_identity_trust_and_hash_drift(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        plan = envelope['plan']
+        intent = plan['provider_reimage_intent']
+        host = plan['snapshot']['hosts'][labctl.ALIASES[3]]
+        invalid = [
+            {'provider_resource_ref': 'another-instance'},
+            {'erase_scope': {'boot_volume_ref': 'other-boot', 'additional_volume_refs': []}},
+            {'target': {'alias': labctl.ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
+            {'replacement': {'machine_id': host['machine_id'], 'boot_id': '11111111-1111-1111-1111-111111111111',
+                             'os_release': 'Debian GNU/Linux 13'}},
+            {'replacement': {'machine_id': 'replacement-machine-id-4', 'boot_id': host['boot_id'],
+                             'os_release': 'Debian GNU/Linux 13'}},
+            {'host_key_verified_via': 'ssh-keyscan'},
+            {'host_key_fingerprints': {}},
+            {'host_key_fingerprints': {'ssh-ed25519': 'SHA256:!!!'}},
+            {'owner_confirmed': False},
+            {'owner_reviewed_at': '2020-01-01T00:00:00Z'},
+        ]
+        for change in invalid:
+            with self.subTest(change=change):
+                receipt_path = self.write_reimage_receipt(plan, change)
+                with self.assertRaises(ValueError):
+                    self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
+                self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
+        receipt_path = self.write_reimage_receipt(plan)
+        with self.assertRaisesRegex(ValueError, 'plan hash mismatch'):
+            self.op.record_reimage_receipt(plan['id'], '0' * 64, str(receipt_path))
+        self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
+
+    def test_reimage_receipt_supports_checkout_private_symlink(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        linked_project = self.project / 'linked-project'
+        linked_project.mkdir()
+        (linked_project / 'private').symlink_to(self.project / 'private', target_is_directory=True)
+        loaded = reimage_receipt.load_receipt(
+            linked_project, 'private/reimage-receipts/worker-4.json', plan=envelope['plan'],
+            plan_sha256=envelope['sha256'])
+        self.assertEqual(loaded['path'], str(receipt_path))
+        self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / receipt_path).read_bytes()).hexdigest())
+
+    def test_reimage_receipt_cannot_be_recorded_with_live_preflight_blockers(self):
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        with self.assertRaisesRegex(ValueError, 'unresolved preflight blockers'):
+            self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
+        self.assertFalse((self.op.root / 'reimage-receipts' / (envelope['plan']['id'] + '.json')).exists())
+
+    def test_reimage_receipt_rejects_external_symlink_and_duplicate_fields(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        plan = envelope['plan']
+        receipt_path = self.write_reimage_receipt(plan)
+        outside = self.project / 'outside-receipt.json'
+        outside.write_text((self.project / receipt_path).read_text())
+        with self.assertRaisesRegex(ValueError, 'under private/reimage-receipts'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(outside))
+        linked = self.project / 'private/reimage-receipts/linked.json'
+        linked.symlink_to(self.project / receipt_path)
+        with self.assertRaisesRegex(ValueError, 'regular JSON file'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(linked))
+        duplicate = self.project / 'private/reimage-receipts/duplicate.json'
+        duplicate.write_text('{"schema_version":1,"schema_version":1}')
+        with self.assertRaisesRegex(ValueError, 'duplicate field'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(duplicate))
+
+    def test_reimage_receipt_rejects_nested_path_and_symlink_directory(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        nested = self.project / 'private/reimage-receipts/nested/worker-4.json'
+        nested.parent.mkdir()
+        nested.write_bytes((self.project / receipt_path).read_bytes())
+        with self.assertRaisesRegex(ValueError, 'under private/reimage-receipts'):
+            self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(nested))
+
+        receipt_root = self.project / 'private/reimage-receipts'
+        saved_root = self.project / 'private/reimage-receipts.saved'
+        outside = self.project / 'receipt-directory'
+        outside.mkdir()
+        (outside / 'worker-4.json').write_bytes((self.project / receipt_path).read_bytes())
+        receipt_root.rename(saved_root)
+        receipt_root.symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, 'regular JSON file'):
+            self.op.record_reimage_receipt(
+                envelope['plan']['id'], envelope['sha256'], 'private/reimage-receipts/worker-4.json')
 
     def test_manual_reimage_intent_must_be_private_non_symlink_json(self):
         path = self.write_reimage_intent()

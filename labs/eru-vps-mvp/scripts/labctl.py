@@ -374,6 +374,32 @@ class Operator:
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
         return envelope
 
+    def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
+        plan_id = identifier(plan_id)
+        envelope = read(self.root / 'plans' / (plan_id + '.json'))
+        plan = envelope.get('plan')
+        if (not isinstance(plan, dict) or digest(plan) != envelope.get('sha256')
+                or expected_hash != envelope.get('sha256')):
+            raise ValueError('plan hash mismatch')
+        from reimage_receipt import load_receipt
+        receipt = load_receipt(self.project, receipt_file, plan=plan, plan_sha256=expected_hash)
+        path = self.root / 'reimage-receipts' / (plan_id + '.json')
+        if path.exists():
+            raise ValueError('reimage receipt already recorded; inspect it and do not overwrite')
+        atomic_json(path, {
+            'plan_id': plan_id,
+            'plan_sha256': expected_hash,
+            'status': 'owner-receipt-recorded',
+            'remote_mutation_performed': False,
+            'receipt_path': receipt['path'],
+            'receipt_sha256': receipt['sha256'],
+            'receipt': receipt['receipt'],
+            'recorded_at': now(),
+        })
+        return {'plan_id': plan_id, 'status': 'owner-receipt-recorded',
+                'remote_mutation_performed': False,
+                'path': str(path.relative_to(self.project)), 'receipt_sha256': receipt['sha256']}
+
     def worker_readiness(self, health_file, canary_run, snapshot, target='worker-4'):
         from core_patch import readiness, PatchOperator
         from canaries import guard_targets
@@ -545,6 +571,10 @@ def main():
     plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
     plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
     plan.add_argument('--reimage-intent', help='Private owner-reviewed provider resource, OS image, and exact volume scope for provider-reimage only')
+    receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
+    receipt.add_argument('--plan', required=True)
+    receipt.add_argument('--sha256', required=True)
+    receipt.add_argument('--receipt', required=True, help='Private owner-reviewed receipt JSON')
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -577,6 +607,9 @@ def main():
             summary['sha256'] = envelope['sha256']
             summary['path'] = str(operator.root / 'plans' / (summary['id'] + '.json'))
             print(json.dumps(summary, indent=2))
+        elif args.command == 'record-reimage-receipt':
+            result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
+            print(json.dumps(result, indent=2))
         elif args.command == 'execute':
             result = operator.execute(args.plan, args.sha256)
             print(json.dumps({k: result[k] for k in ['id', 'status', 'stage']}, indent=2))

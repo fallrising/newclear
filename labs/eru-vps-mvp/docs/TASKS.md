@@ -2,9 +2,9 @@
 
 建立：2026-09-23。此清單從目前尚未完成的工作開始編號；首次部署、worker-4 元件重裝 3/3、恢復／patched reapply、背景觀測工具、資料回收分析及本機 SIGKILL 驗證已完成，不重複計入。
 
-**目前剩餘 12 項：近期收尾 1 項，後續驗證／擴充 11 項。此清單內完成 6 項。** 先按近期收尾推進；後續項目保留原 SDD 範圍，不代表立即對 VPS 執行所有變更。
+**目前剩餘 12 項：近期收尾 1 項，後續驗證／擴充 11 項。此清單內完成 6 項。** 依 owner 指示，先收尾本機開發，再統一做正式 VPS E2E；ERU-012 本機功能已齊、待 E2E；ERU-013 尚有本機收尾與真實跨版本驗證，因此數量不變。後續項目保留原 SDD 範圍，不代表立即對 VPS 執行所有變更。
 
-下一項：**ERU-007**，正式 V11 小流量運行驗收。ERU-006 已完成 worker host-network 私網 HTTP、公網 v4/v6 TCP/80 隔離、core 公網管理埠阻擋、容器 DNS A 查詢與 IPv4 HTTPS egress 驗收；實機結果及限制見 [ERU-006 紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。近期 7 項完成仍不等於原 SDD 全部 V01–V11 或完整 HA 已通過。
+正式 E2E 待辦首項仍是 **ERU-007**（V11 小流量運行驗收），但暫緩到本機開發收尾後。ERU-006 已完成 worker host-network 私網 HTTP、公網 v4/v6 TCP/80 隔離、core 公網管理埠阻擋、容器 DNS A 查詢與 IPv4 HTTPS egress 驗收；實機結果及限制見 [ERU-006 紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。近期 7 項完成仍不等於原 SDD 全部 V01–V11 或完整 HA 已通過。
 
 ## 計數與每次回報規則
 
@@ -36,7 +36,7 @@
 | ERU-010 | worker 非計畫失聯恢復（V07） | 待做 | 有界演練偵測時間、先 fence、精確對帳 stale metadata／配額，於健康 worker 人工或一次性工具重建；不宣稱自動維持副本數。 |
 | ERU-011 | 可重現 bootstrap 與新 controller 接手 | 進行中 | [本機接手前置檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md) 已記錄 runner／OS package／artifact 與外部私有輸入、SSH alias 邊界；仍須從乾淨 controller 使用外部 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |
 | ERU-012 | 應用差異部署與真實無狀態服務 | 進行中 | 已有 v1 spec／digest planner、hash-bound executor、EruCLIAdapter 與 exact-ID cleanup plan／executor；沿用 labctl.Operator、固定 SSH aliases、雙階段 etcd/core/consistency preflight、digest image cache、bodyless worker probe，並在每次 remove 前驗新版 readiness。容量 admission 交由 Eru resource plugin，v1 不含外部 traffic routing。planner／executor／adapter／cleanup 共 50 個離線測試。尚需真實 CLI/API/job 與 VPS E2E 驗證，故任務未完成。詳見 [離線前置](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。 |
-| ERU-013 | patch 發布與跨版本升級／回退 | 待做 | 明確 artifact／build provenance 與版本相容性；升級、回退與中斷後的新 plan 驗證，不把目前同版本 reapply 當作跨版本升級能力。 |
+| ERU-013 | patch 發布與跨版本升級／回退 | 進行中 | [本機 provenance／版本 guard](M3-CORE-RELEASE-PROVENANCE-2026-09-25.md) 已加入 versioned validation manifest、雙次私有 build 摘要 publisher、source／patch／toolchain／artifact 綁定與 upgrade／reapply／downgrade 分類；相容舊版必須有兩次版本專屬成功測試。現有可部署 manifest 仍只有 v0.1.5，尚需下一個實際 upstream 版本的隔離建置、相容性測試、升級／回退／中斷新 plan 與最後 VPS E2E。相同版本 reapply 不算跨版本完成。 |
 | ERU-014 | 單 worker 人工 OS 重灌與重新納管 | 待做 | 由 owner 到 provider 控制台操作；先建立指定主機／磁碟範圍計畫，之後核對新身分、host key、SSH／Tailscale／runtime／ERU bootstrap、註冊與 smoke。與元件重裝分開驗收，不接 provider API。 |
 | ERU-015 | 全群 fresh 重建連續三次（V08） | 待做 | 獨立範圍計畫、新 generation、外部版本／secrets 可用；三次均重新驗證 V01–V04、舊 metadata／容量無殘留並記錄 RTO。不得以 worker-4 元件重裝 3/3 代替。 |
 | ERU-016 | 控制 metadata 備份／還原（V10） | 待做 | 外部取得完整 etcd keyspace snapshot，校驗、保存與還原；隔離舊控制面，對帳 worker／workload／plugin 與 HTTP，記錄 RPO／RTO。不冒充應用 volume 還原。 |

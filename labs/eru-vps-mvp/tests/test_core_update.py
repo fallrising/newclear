@@ -1,4 +1,5 @@
 import json
+import hashlib
 import os
 from pathlib import Path
 import sys
@@ -176,7 +177,34 @@ class PatchFlowTests(unittest.TestCase):
         report = ReadinessTests().report()
         for s in report['samples']: s['time'] += time.time() - 210
         atomic_json(self.project / 'private/health.json', report)
-        self.enterContext(patch('core_patch.artifact', return_value=(b'new', sha(b'new'))))
+        patch_dir = self.project / 'patches'
+        patch_dir.mkdir(parents=True)
+        patch_bytes = b'fixture patch\n'
+        (patch_dir / 'core-v0.1.5-lock-context.patch').write_bytes(patch_bytes)
+        artifact_sha = sha(b'new')
+        atomic_json(self.project / 'artifacts.amd64.lock.json', {'architecture': 'linux/amd64'})
+        atomic_json(self.project / 'upstream.lock.json', {'core': {'tag': 'v0.1.5', 'commit': 'a' * 40}})
+        atomic_json(patch_dir / 'core-v0.1.5-lock-context.validation.json', {
+            'schema_version': 1, 'release_id': 'core-v0.1.5-lock-context-r1',
+            'repository': 'projecteru2/core', 'source_tag': 'v0.1.5', 'target_version': 'v0.1.5',
+            'patch_revision': 1, 'compatible_from_versions': ['v0.1.5'], 'architecture': 'linux/amd64',
+            'patch_file': 'core-v0.1.5-lock-context.patch',
+            'patch_sha256': hashlib.sha256(patch_bytes).hexdigest(), 'source_commit': 'a' * 40,
+            'artifact_sha256': artifact_sha,
+            'toolchain': {'version': 'go1.27.1', 'os': 'linux', 'arch': 'amd64', 'sha256': 'b' * 64},
+            'steps': [{'name': name, 'argv': argv, 'exit_code': code} for name, argv, code in [
+                ('baseline-final', ['go', 'test', 'baseline'], 1),
+                ('patched-final', ['go', 'test', 'regression'], 0),
+                ('calcium-tests', ['go', 'test', './cluster/calcium'], 0),
+                ('lock-tests', ['go', 'test', './lock/...'], 0),
+                ('build', ['go', 'build'], 0)]],
+            'independent_runner_verification': {'status': 'verified-not-deployed',
+                'artifact_sha256': artifact_sha, 'byte_identical_to_first_build': True,
+                'steps': [{'name': name, 'exit_code': code} for name, code in [
+                    ('baseline', 1), ('regression', 0), ('calcium', 0), ('locks', 0), ('build', 0)]],
+            },
+        })
+        self.enterContext(patch('core_patch.artifact', return_value=(b'new', artifact_sha)))
 
     def plan(self): return self.op.make_plan('private/builds/fixture', 'private/health.json')
 
@@ -184,10 +212,47 @@ class PatchFlowTests(unittest.TestCase):
         plan = self.plan()
         result = self.op.apply_plan(plan['plan']['id'], plan['sha256'])
         self.assertEqual(result['status'], 'complete')
+        self.assertEqual(plan['plan']['version_transition']['kind'], 'baseline-install')
         self.assertEqual((self.op.installs, self.op.restarts), (1, 1))
+        revision = json.loads((self.op.root / 'core-revision.json').read_text())
+        self.assertEqual(revision['release']['release_id'], 'core-v0.1.5-lock-context-r1')
         with self.assertRaisesRegex(ValueError, 'never replay'):
             self.op.apply_plan(plan['plan']['id'], plan['sha256'])
         self.assertEqual((self.op.installs, self.op.restarts), (1, 1))
+
+    def test_hash_bound_plan_classifies_a_reviewed_cross_version_candidate(self):
+        import copy
+        self.op.restarts = 1  # The current running checksum maps to the reviewed v0.1.5 artifact.
+        old_path = self.project / 'patches/core-v0.1.5-lock-context.validation.json'
+        candidate = json.loads(old_path.read_text())
+        patch_bytes = b'v0.2.0 fixture patch\n'
+        patch_name = 'core-v0.2.0-lock-context.patch'
+        (self.project / 'patches' / patch_name).write_bytes(patch_bytes)
+        candidate.update({
+            'release_id': 'core-v0.2.0-lock-context-r1',
+            'source_tag': 'v0.2.0', 'target_version': 'v0.2.0',
+            'source_commit': 'b' * 40, 'patch_revision': 1,
+            'compatible_from_versions': ['v0.2.0', 'v0.1.5'],
+            'patch_file': patch_name,
+            'patch_sha256': hashlib.sha256(patch_bytes).hexdigest(),
+            'artifact_sha256': sha(b'newer'),
+        })
+        candidate['steps'].append({
+            'name': 'compatibility-from-v0.1.5',
+            'argv': ['go', 'test', './compatibility/v0.1.5'],
+            'exit_code': 0,
+        })
+        candidate['independent_runner_verification']['artifact_sha256'] = sha(b'newer')
+        validation_file = self.project / 'patches/core-v0.2.0-lock-context.validation.json'
+        atomic_json(validation_file, candidate)
+        with patch('core_patch.artifact', return_value=(b'newer', sha(b'newer'))):
+            plan = self.op.make_plan('private/builds/v0.2.0', 'private/health.json',
+                                     validation_file='patches/core-v0.2.0-lock-context.validation.json')
+        self.assertTrue(plan['plan']['executable'])
+        self.assertEqual(plan['plan']['version_transition'], {
+            'kind': 'cross-version-upgrade', 'from_version': 'v0.1.5',
+            'to_version': 'v0.2.0', 'cross_version': True,
+        })
 
     def test_lost_install_response_is_failed_and_never_retried_or_restarted(self):
         plan = self.plan()
@@ -197,6 +262,16 @@ class PatchFlowTests(unittest.TestCase):
         self.assertEqual((self.op.installs, self.op.restarts), (1, 0))
         with self.assertRaisesRegex(ValueError, 'never replay'):
             self.op.apply_plan(plan['plan']['id'], plan['sha256'])
+
+    def test_changed_release_validation_record_blocks_before_install(self):
+        plan = self.plan()
+        manifest_path = self.project / 'patches/core-v0.1.5-lock-context.validation.json'
+        record = json.loads(manifest_path.read_text())
+        record['release_id'] = 'changed-after-plan'
+        atomic_json(manifest_path, record)
+        with self.assertRaisesRegex(ValueError, 'bound inputs changed'):
+            self.op.apply_plan(plan['plan']['id'], plan['sha256'])
+        self.assertEqual((self.op.installs, self.op.restarts), (0, 0))
 
     def test_health_evidence_drift_prevents_install(self):
         plan = self.plan()

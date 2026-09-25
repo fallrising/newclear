@@ -84,6 +84,41 @@ def _fingerprints(value):
     return normalized
 
 
+def verify_local_hostkeys(alias, fingerprints, known_hosts_dir):
+    """Require the owner's OOB fingerprint to match the already trusted alias key."""
+    if alias not in {"ckc-disposable-02", "ckc-disposable-03", "ckc-disposable-04"}:
+        raise ValueError("replacement host key is not bound to a reviewed worker SSH alias")
+    expected = _fingerprints(fingerprints)
+    directory = Path(known_hosts_dir)
+    path = directory / alias.removeprefix("ckc-")
+    if (directory.is_symlink() or not directory.is_dir()
+            or path.is_symlink() or not path.is_file()):
+        raise ValueError("dedicated trusted host-key file is missing or unsafe")
+    raw = path.read_bytes()
+    if not raw or len(raw) > 65536:
+        raise ValueError("dedicated trusted host-key file is empty or exceeds 64 KiB")
+    actual = {}
+    for line in raw.decode("utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split()
+        if len(fields) != 3 or fields[1] not in HOST_KEY_TYPES:
+            raise ValueError("dedicated trusted host-key file has an unsupported entry")
+        key_type, encoded = fields[1], fields[2]
+        if key_type in actual:
+            raise ValueError("dedicated trusted host-key file has duplicate key algorithms")
+        try:
+            key_blob = base64.b64decode(encoded, validate=True)
+        except ValueError as exc:
+            raise ValueError("dedicated trusted host-key file has invalid public-key data") from exc
+        actual[key_type] = "SHA256:" + base64.b64encode(hashlib.sha256(key_blob).digest()).decode().rstrip("=")
+    if actual != expected:
+        raise ValueError("dedicated trusted host-key fingerprints differ from the owner receipt")
+    return {"alias": alias, "host_key_fingerprints": actual, "path": path.name,
+            "file_sha256": hashlib.sha256(raw).hexdigest()}
+
+
 def load_receipt(project, receipt_file, *, plan, plan_sha256, now=None):
     """Validate an owner attestation against a stored, review-only provider plan."""
     project = Path(project).resolve()

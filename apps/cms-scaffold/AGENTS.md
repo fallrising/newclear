@@ -4,9 +4,9 @@
 
 ## v2（2026-09-25 起，owner override）
 
-- 入口：`docs/v2/README.md`（路線圖、波次、細化窗口）。前端設計 `docs/v2/01-frontend-sdd.md`，後端設計 `docs/v2/02-backend-sdd.md`；兩者與 surface／kernel 規格衝突時，依各文件 §0 的權威範圍處理。
+- 入口：`docs/v2/README.md`（路線圖、波次、細化流程）。前端設計 `docs/v2/01-frontend-sdd.md`，後端設計 `docs/v2/02-backend-sdd.md`；兩者與 surface／kernel 規格衝突時，依各文件 §0 的權威範圍處理。
 - 一波一個 PR，只碰該波列出的路徑；PR 描述列出解決的稽核／缺口 ID（F-、S-、C-、U-、E-、B-、G-）。
-- 設計階段（細化窗口）只改 `docs/v2/**`，不寫程式。
+- 細化（施工圖）依 `docs/v2/REFINE-PROMPT.md`，只改 `docs/v2/**`，不寫程式；實作只依已是 `DOC_READY` 的施工圖 `docs/v2/waves/<波次>.md`。
 - Shopify 只借版型與互動模式；元件只用 shadcn/ui（經 `packages/ui`），不引入 Polaris 套件。
 - 後端在 `/api/v1` 上增量演進；migration 只新增、不改已合併的檔案；`openapi.yaml` 維持手寫，並且必須有完整 schema。
 - 閘門：`./gradlew test`（不需要 Docker）＋`./gradlew integrationTest`（BW0 起進 CI，Testcontainers）＋前端 `lint`／`typecheck`／`test`／`build`；v2 W0 起再加 `test:bundle` 與 `e2e:mock`（Playwright + MSW，不需要後端）。

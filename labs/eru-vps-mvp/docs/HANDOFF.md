@@ -40,7 +40,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 - ERU-001 已完成：`recovery.py plan --action core-cancel` 可為替換前中斷新增取消 intent／receipt，保留原 journal、部分備份與未知資料；reapply 核對封存後才排除該 pending update。新增 20 tests、12 次 SIGKILL，原 journal 缺失仍拒絕取消。只做本機驗證，沒有實機故障注入；[交付紀錄](M2-CORE-CANCEL-2026-09-23.md)。
 
 - ERU-007 的每秒私網 HTTP 模式與離線核對已在本機完成，另加 8 tests；實機短 pilot 與獨立 24h run 尚未執行，仍為進行中。ERU-002 的 30 秒低頻觀測已完成，不能替代 V11。[準備紀錄](M3-V11-PREP-2026-09-23.md)。
-- ERU-012 已開始本機開發：新增 digest-pinned stateless HTTP spec 驗證與 review-only desired-state diff planner，15 個新單元測試通過；沒有遠端執行器／容量核算／HTTP 驗收，也沒有執行 VPS 操作。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
+- ERU-012 本機開發仍進行中：已有 digest-pinned stateless HTTP spec／review planner 與 hash-bound executor state machine；共 32 個 feature tests 使用 fake adapter，涵蓋快照漂移、journal、lost-reply 不重送及唯讀 reconcile。health／consistency 仍由 caller 提供，沒有正式 Eru CLI／SSH adapter、cleanup 或 VPS E2E；任務數仍是 12。[前置紀錄](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。
 
 - ERU-011 新增 [controller 本機接手檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md)：記錄套件／來源／artifact／patch 與外部私有輸入、SSH alias；不連 VPS。乾淨 controller 實際 bootstrap 尚未驗收，總剩餘數不變。
 

@@ -179,7 +179,9 @@ FM 的 ID 格式是 `<波次>-FMxx`，至少涵蓋：
 | --- | --- |
 | BW0 | 現有**每一個** operation 的完整 schema（對照 `openapi.yaml` 全部路徑，逐一列出）；`ErrorCode` 全清單（從程式中所有 `ContentException`、`IdentityException`、`MediaException` 盤點）；store 契約測試的案例清單；CI 新 job 的完整 YAML；dependency locking 的步驟 |
 | W0 | 每個 npm 套件的精確版本（已查證）；shadcn 的初始化設定與元件清單；tokens 定案值與對比度計算（文字對底色 ≥ 4.5:1、大字與 UI ≥ 3:1）；MSW fixture 全文（`contracts/fixtures/`）；copy key 命名規則；`safeReturnTo` 的完整測試向量 |
-| BW1 | 查詢參數的文法（含錯誤輸入的處理）；predicate 編譯成 SQL 的規則與全部邊界案例；V5～V7 migration 全文；種子更新的逐欄內容；效能量測方法 |
+| BW1a | V5 migration 全文；種子更新的逐欄內容（類型設定、欄位標籤、enum 標籤）；`capabilities` 的計算規則 |
+| BW1b | 查詢參數的文法（含錯誤輸入的處理）；predicate 編譯成 SQL 的規則與全部邊界案例；V6、V7 migration 全文；效能量測方法 |
+| BW1c | 每一種欄位型別的驗證規則與錯誤代碼；`error.fields` 的路徑格式；三項破壞性變更各自的前後對照與測試 |
 | W1、W2、W3、W4 | 每個畫面：線框（沿用或修正 01 §7 的 ASCII 圖）、資料來源、每種狀態的畫面、互動規格，以及這些畫面用到的元件在 4.5 的完整規格 |
 | BW2、BW3 | 每個新端點的授權矩陣（角色 × surface × 結果）與審計事件的 `detail_json` 內容 |
 | W5、BW4 | 量測腳本、門檻值、未達標時的處理方式 |
@@ -203,7 +205,7 @@ FM 的 ID 格式是 `<波次>-FMxx`，至少涵蓋：
 
 ## 6. 順序
 
-依 README 路線圖：`BW0 → W0 → BW1 → W1 → BW2 → W2 → W3 → W4 → BW3 → W3b → W5 → BW4`。
+依 README 路線圖：`BW0 → W0 → BW1a → BW1b → BW1c → W1 → BW2 → W2 → W3 → W4 → BW3 → W3b → W5 → BW4`。BW1 已拆成 BW1a、BW1b、BW1c（02 §7）。
 
 - BW0 與 W0 是其他波次的基礎：錯誤代碼、schema 慣例、測試慣例、tokens、fixture、copy 規則都在這兩波定下來，後面的波次引用，不重複定義。
 - 一次一個波次、一個 PR。

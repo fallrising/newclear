@@ -8,7 +8,7 @@
 | [01 — 前端 v2 SDD](01-frontend-sdd.md) | 架構、Shopify 參考對照、tokens、元件、三個操作面的畫面、後端缺口、驗收、前端波次 |
 | [02 — 後端 v2 SDD](02-backend-sdd.md) | 後端現況問題、決策、資料表變更、API 變更、品質閘門、後端波次 |
 | [REFINE-PROMPT](REFINE-PROMPT.md) | 把一個波次細化成施工圖的 prompt（給 LLM agent） |
-| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md) |
+| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md)、[BW1a](waves/BW1a.md) |
 | `contracts/` | 施工圖的契約：OpenAPI 片段 `<波次>.openapi.yaml`、測試 fixture 規格 |
 
 與既有文件的關係：[總綱](../sdd/00-overview.md) 凍結、不改；[surface 與 kernel 規格](../specs/) 仍是路由、權限、領域規則的權威；v2 文件補架構、畫面、API 演進與交付方式。
@@ -27,12 +27,15 @@
 ```
 BW0 契約與品質基礎（完整 OpenAPI schema、store 契約測試、CI integrationTest）
  ├─► W0 前端基礎（packages、tokens、codegen、MSW、新殼）
- └─► BW1 前端 W1 的前置（分頁／篩選、capabilities、欄位中繼資料、titleField）
+ ├─► BW1a 類型設定與欄位中繼資料（titleField、capabilities）
+ │      └─► BW1b 列表查詢下推（分頁／篩選、predicate、索引）
+ └─► BW1c 驗證與破壞性變更（error.fields、428、媒體 null）
+        （BW1a＋BW1b＋BW1c 都合併後）
         └─► W1 Back 核心（index、details、欄位 widget、發布動作）
                ├─► BW2（batch-patch、include=refs、請求發布、可指派使用者、審計）
                │     ├─► W2 Back 媒體與自訂視圖
                │     └─► W4 Admin
-               └─► W3 Front 公開面（不需要 BW2）
+               └─► W3 Front 公開面（不需要 BW2；需要 BW1b、BW1c）
                       └─► BW3 會員端點 ─► W3b Front 會員區
 W5 前端硬化、BW4 後端硬化：所有功能波之後
 ```
@@ -41,7 +44,9 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 | --- | --- | --- | --- | --- |
 | BW0 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW0.md](waves/BW0.md) | B-01、B-08、B-14、B-15 |
 | W0 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W0.md](waves/W0.md) | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
-| BW1 | DRAFT | 02 §7 | — | B-02～B-06、B-09、B-10、B-12、B-13；G-01、G-02、G-05～G-07、G-11 |
+| BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
+| BW1b | DRAFT | 02 §7 | — | B-02、B-09、B-10；G-02 |
+| BW1c | DRAFT | 02 §7 | — | B-06、B-13；G-07 |
 | W1 | DRAFT | 01 §12 | — | C-04～C-07、U-01、U-02、U-04 |
 | BW2 | DRAFT | 02 §7 | — | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | DRAFT | 01 §12 | — | C-08～C-10、U-03 |

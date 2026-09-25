@@ -102,6 +102,8 @@ ALTER TABLE cms_field
 
 `PublicVisibility` 改成讀 `type.visibilityField()`；`publicOrder` 改成讀 `type.sortField()`；工作投影與搜尋改用 `type.titleField()`。
 
+施工細節見 `waves/BW1a.md` §4.5、§5.1～§5.3。
+
 ### 3.2 V6 — 欄位索引真正被寫入
 
 - 條件：`cms_field.indexed = true` 的欄位、`titleField`、`sortField`、`visibilityField`、`ownerField`。
@@ -186,6 +188,8 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 - `scoped: true` 表示權限帶有 predicate，只對部分 entry 有效。前端仍然要準備處理 403。
 - 只計算已啟用的類型；`FRONT_HARD_DENY` 與 `BACK_HARD_DENY` 已經先套用。
 
+施工細節（`capabilities`）見 `waves/BW1a.md` §4.4、§5.5。
+
 新增 `GET /api/v1/principals/assignable?contentType=issue&q=`：只回傳 `id` 與 `displayName`；呼叫者必須對該類型有 `update`；最多 20 筆。
 
 ### 4.3 內容寫入
@@ -202,9 +206,9 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 
 | 變更 | 原因 | 上線波次 |
 | --- | --- | --- |
-| `PATCH /entries/{id}` 必須帶 `version`，缺少時回 **428** `VERSION_REQUIRED` | 防止靜默覆蓋；v1 前端有時不帶 | BW1 + 前端 W1 |
-| 公開投影中無法公開的媒體引用改回傳 `null`，不再回傳原始 UUID | 修 B-13 | BW1 + 前端 W3 |
-| 422 錯誤一次回傳所有欄位錯誤（`error.fields`），`error.message` 只是摘要 | BD-08 | BW1 + 前端 W1 |
+| `PATCH /entries/{id}` 必須帶 `version`，缺少時回 **428** `VERSION_REQUIRED` | 防止靜默覆蓋；v1 前端有時不帶 | BW1c + 前端 W1 |
+| 公開投影中無法公開的媒體引用改回傳 `null`，不再回傳原始 UUID | 修 B-13 | BW1c + 前端 W3 |
+| 422 錯誤一次回傳所有欄位錯誤（`error.fields`），`error.message` 只是摘要 | BD-08 | BW1c + 前端 W1 |
 
 ### 4.5 會員（G-08）
 
@@ -233,6 +237,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 `GET /content-types/{key}` 與 `/admin/content-types` 對每個欄位輸出：`key`、`type`、`label`、`helpText`、`required`、`group`、`order`、`listable`、`filterable`、`enumValues`、`enumLabels`、`refTarget`、`placeholder`、`visibility`。類型層級輸出：`titleField`、`sortField`、`visibilityField`、`ownerField`、`slugPolicy`、`singleton`、`previewable`。
 
 `visibility = internal` 的欄位不輸出給 Back；`visibility != public` 的欄位不出現在公開投影中（現行的公開投影已經依欄位可見性過濾，v2 用測試固定下來）。
+
+施工細節見 `waves/BW1a.md` §4.1、§5.4。
 
 ---
 
@@ -299,12 +305,16 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 | 波 | 範圍 | 解決 | 完成定義 |
 | --- | --- | --- | --- |
 | **BW0 契約與品質基礎** | 補完整 OpenAPI schema（現有全部 operation）；OpenAPI 回應驗證；錯誤信封統一與 `ErrorCode` enum；store 契約測試骨架；CI 新增 `integrationTest` job；dependency locking | B-01、B-08、B-14、B-15 | `./gradlew test integrationTest` 全綠；每個 operation 都有 schema；前端可以從 YAML 產生型別 |
-| **BW1 前端 W1 的前置** | V5／V6／V7 migration；類型設定（`sortField` 等）；欄位中繼資料；列表分頁、排序、篩選、predicate 下推；`capabilities`；欄位級 422；§4.4 的三項破壞性變更；授權快取 | B-02～B-06、B-09、B-10、B-12、B-13；G-01、G-02、G-05、G-06、G-07、G-11 | 契約測試涵蓋每一種查詢參數；§5.4 的列表效能目標達標 |
+| **BW1a 類型設定與欄位中繼資料** | V5 migration；類型設定（`sortField`、`visibilityField`、`ownerField`）與 kernel 改讀這些設定；標題與搜尋改用 `titleField`；欄位中繼資料輸出；種子的 zh-Hant 標籤；`capabilities`；授權快取 | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 | 契約測試涵蓋新的 store 方法；kernel 原始碼不再出現 demo 欄位名 |
+| **BW1b 列表查詢下推** | V6／V7 migration（索引寫入與回填）；列表分頁、排序、篩選、predicate 下推到 SQL；公開列表的可見性與關聯條件下推；效能量測 | B-02、B-09、B-10；G-02 | 契約測試涵蓋每一種查詢參數；§5.4 的列表效能目標達標 |
+| **BW1c 驗證與破壞性變更** | 驗證一次收集所有欄位錯誤並輸出 `error.fields`；`datetime`／`string` 驗證；§4.4 的三項破壞性變更；清空欄位的契約測試 | B-06、B-13；G-07 | 每項破壞性變更都有 API 級測試 |
 | **BW2 前端 W2／W4 的前置** | `batch-patch`；`include=refs`；請求發布；可指派使用者；審計補齊與查詢 | B-07、B-11（部分）；G-03、G-04、G-09、G-10 | 每個新端點有授權、驗證、審計三類測試 |
 | **BW3 會員區** | `/me` 端點；`appointment_request` 類型與種子 | B-11；G-08 | surface-front AC-10～12 可以用 API 級測試驗收 |
 | **BW4 硬化** | 效能量測記錄；審計保留期限設定（surface-admin §7.2）；安全測試補齊 | — | §5.4 全部達標並記錄數字 |
 
 每波一個 PR；migration 只能新增，不能修改已經合併的 migration。
+
+**BW1 拆成三波（owner 決定，2026-09-25）：** 原 BW1 細化時估計約 44 張任務卡，超過 REFINE-PROMPT 的 30 張上限，owner 選擇拆成 BW1a、BW1b、BW1c。順序：BW1a → BW1b；BW1c 只依賴 BW0，可以與 BW1a、BW1b 平行。前端 W1 需要三波都完成；W3 需要 BW1b 與 BW1c。原 BW1 的 ID 全部分配到三波，沒有增減。
 
 BW0 施工細節見 `waves/BW0.md`。
 

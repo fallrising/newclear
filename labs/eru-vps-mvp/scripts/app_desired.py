@@ -31,6 +31,80 @@ def sha256(value):
     return hashlib.sha256(value).hexdigest()
 
 
+def snapshot_binding(snapshot):
+    """Return stable, non-inventory plan facts and discard observation time."""
+    if not isinstance(snapshot, dict):
+        raise ValueError('snapshot must be an object')
+    marker = '_eru_app_snapshot_binding_v1'
+    if marker in snapshot:
+        allowed = {marker, 'hosts_sha256', 'pods', 'nodes', 'workloads'}
+        if snapshot.get(marker) is not True or set(snapshot) - allowed:
+            raise ValueError('invalid normalized snapshot binding')
+        digest_fields = ('hosts_sha256',)
+        if any(key in snapshot and
+               (not isinstance(snapshot[key], str)
+                or not re.fullmatch(r'[0-9a-f]{64}', snapshot[key]))
+               for key in digest_fields):
+            raise ValueError('invalid normalized snapshot digest')
+        row_fields = {
+            'pods': ({'name'}, {'name', 'row_sha256'}),
+            'nodes': ({'name', 'available', 'row_sha256'},),
+            'workloads': ({'id', 'nodename', 'labels'},),
+        }
+        for key, accepted_shapes in row_fields.items():
+            if key not in snapshot:
+                continue
+            rows = snapshot[key]
+            if not isinstance(rows, list):
+                raise ValueError('invalid normalized snapshot rows')
+            for row in rows:
+                if (not isinstance(row, dict) or set(row) not in accepted_shapes):
+                    raise ValueError('invalid normalized snapshot row')
+                if ('row_sha256' in row and
+                        (not isinstance(row['row_sha256'], str)
+                         or not re.fullmatch(r'[0-9a-f]{64}', row['row_sha256']))):
+                    raise ValueError('invalid normalized snapshot row digest')
+                if key == 'workloads':
+                    labels = row['labels']
+                    if (not isinstance(labels, dict)
+                            or set(labels) - {'owner', 'logical_app', 'spec_sha256'}):
+                        raise ValueError('invalid normalized workload labels')
+        return dict(snapshot)
+    result = {marker: True}
+    if 'hosts' in snapshot:
+        # labctl host facts can include private inventory details. Bind them
+        # without copying those details into a reviewable or journaled plan.
+        result['hosts_sha256'] = sha256(canonical_bytes(snapshot['hosts']))
+    for key in ('pods', 'nodes', 'workloads'):
+        rows = snapshot.get(key)
+        if not isinstance(rows, list):
+            continue
+        normalized = []
+        for row in rows:
+            if not isinstance(row, dict):
+                normalized.append({'malformed_row_type': type(row).__name__})
+                continue
+            if key == 'pods':
+                item = {'name': row.get('name')}
+                if len(row) > 1:
+                    item['row_sha256'] = sha256(canonical_bytes(row))
+            elif key == 'nodes':
+                item = {'name': row.get('name'), 'available': row.get('available')}
+                item['row_sha256'] = sha256(canonical_bytes(row))
+            else:
+                labels = row.get('labels')
+                labels = labels if isinstance(labels, dict) else {}
+                item = {
+                    'id': row.get('id'),
+                    'nodename': row.get('nodename'),
+                    'labels': {label: labels[label] for label in
+                               ('owner', 'logical_app', 'spec_sha256') if label in labels},
+                }
+            normalized.append(item)
+        result[key] = sorted(normalized, key=canonical_bytes)
+    return result
+
+
 def validate_spec(document):
     if not isinstance(document, dict):
         raise ValueError('app spec must be a JSON object')
@@ -219,7 +293,7 @@ def build_plan(document, snapshot):
         'appname': appname,
         'spec': spec,
         'spec_sha256': spec_hash,
-        'snapshot_sha256': sha256(canonical_bytes(snapshot)),
+        'snapshot_sha256': sha256(canonical_bytes(snapshot_binding(snapshot))),
         'action': action,
         'decision': 'blocked' if blockers else 'reviewable',
         'executable': False,

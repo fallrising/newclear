@@ -1,0 +1,427 @@
+[
+  {
+    "id": "30000000-0000-4000-8000-000000000001",
+    "contentType": "album",
+    "slug": "coast-light-2026",
+    "title": "Coast Light 2026",
+    "payload": {
+      "title": "Coast Light 2026",
+      "description": "Sea and concrete.",
+      "visibility": "public",
+      "sortMode": "manual",
+      "cover": {
+        "id": "20000000-0000-4000-8000-000000000001",
+        "mediaId": "20000000-0000-4000-8000-000000000001",
+        "title": "Harbour wall",
+        "altText": "Harbour wall",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      }
+    },
+    "publishedAt": "2026-09-20T00:01:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000002",
+    "contentType": "photo",
+    "slug": "coast-harbour",
+    "title": "Harbour wall",
+    "payload": {
+      "title": "Harbour wall",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000001",
+        "mediaId": "20000000-0000-4000-8000-000000000001",
+        "title": "Harbour wall",
+        "altText": "Harbour wall",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 10,
+      "caption": "Tide against the harbour wall."
+    },
+    "publishedAt": "2026-09-20T00:02:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000003",
+    "contentType": "photo",
+    "slug": "coast-sun",
+    "title": "Late sun",
+    "payload": {
+      "title": "Late sun",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000002",
+        "mediaId": "20000000-0000-4000-8000-000000000002",
+        "title": "Late sun",
+        "altText": "Late sun",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 20,
+      "caption": "Late sun on the flats."
+    },
+    "publishedAt": "2026-09-20T00:03:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000004",
+    "contentType": "photo",
+    "slug": "coast-concrete",
+    "title": "Concrete edge",
+    "payload": {
+      "title": "Concrete edge",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000003",
+        "mediaId": "20000000-0000-4000-8000-000000000003",
+        "title": "Concrete edge",
+        "altText": "Concrete edge",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 30,
+      "caption": "A concrete edge catching spray."
+    },
+    "publishedAt": "2026-09-20T00:04:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000005",
+    "contentType": "photo",
+    "slug": "coast-salt",
+    "title": "Salt air",
+    "payload": {
+      "title": "Salt air",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000004",
+        "mediaId": "20000000-0000-4000-8000-000000000004",
+        "title": "Salt air",
+        "altText": "Salt air",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 40
+    },
+    "publishedAt": "2026-09-20T00:05:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000006",
+    "contentType": "photo",
+    "slug": "coast-window",
+    "title": "Window light",
+    "payload": {
+      "title": "Window light",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000005",
+        "mediaId": "20000000-0000-4000-8000-000000000005",
+        "title": "Window light",
+        "altText": "Window light",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 50
+    },
+    "publishedAt": "2026-09-20T00:06:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000007",
+    "contentType": "photo",
+    "slug": "coast-ferry",
+    "title": "Last ferry",
+    "payload": {
+      "title": "Last ferry",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": {
+        "id": "20000000-0000-4000-8000-000000000006",
+        "mediaId": "20000000-0000-4000-8000-000000000006",
+        "title": "Last ferry",
+        "altText": "Last ferry",
+        "contentType": "image/png",
+        "byteSize": 1240,
+        "width": 64,
+        "height": 64,
+        "variants": {
+          "original": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/original",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/png",
+            "byteSize": 1240
+          },
+          "thumbnail": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/thumbnail",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          },
+          "web": {
+            "url": "/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/web",
+            "width": 64,
+            "height": 64,
+            "contentType": "image/jpeg",
+            "byteSize": 1432
+          }
+        }
+      },
+      "sortOrder": 60
+    },
+    "publishedAt": "2026-09-20T00:07:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000011",
+    "contentType": "album",
+    "slug": "unlisted-proof",
+    "title": "Unlisted proof",
+    "payload": {
+      "title": "Unlisted proof",
+      "visibility": "unlisted",
+      "sortMode": "manual"
+    },
+    "publishedAt": "2026-09-20T00:11:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000012",
+    "contentType": "clinic_profile",
+    "slug": "home",
+    "title": "Cedar Pet Clinic",
+    "payload": {
+      "name": "Cedar Pet Clinic",
+      "intro": "A small neighbourhood clinic for well animals.",
+      "address": "14 Cedar Street",
+      "telephone": "6085553000",
+      "hours": "Mon–Fri 08:00–17:00"
+    },
+    "publishedAt": "2026-09-20T00:12:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000013",
+    "contentType": "vet",
+    "slug": "james-carter",
+    "title": "James Carter",
+    "payload": {
+      "title": "James Carter",
+      "firstName": "James",
+      "lastName": "Carter",
+      "specialty": "radiology",
+      "bio": "Imaging."
+    },
+    "publishedAt": "2026-09-20T00:13:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000014",
+    "contentType": "vet",
+    "slug": "helen-leary",
+    "title": "Helen Leary",
+    "payload": {
+      "title": "Helen Leary",
+      "firstName": "Helen",
+      "lastName": "Leary",
+      "specialty": "dentistry",
+      "bio": "Teeth."
+    },
+    "publishedAt": "2026-09-20T00:14:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000024",
+    "contentType": "project",
+    "slug": "cms-scaffold",
+    "title": "CMS Scaffold",
+    "payload": {
+      "title": "CMS Scaffold",
+      "summary": "Reusable CMS kernel with three surfaces.",
+      "visibility": "public",
+      "lifecycle": "active"
+    },
+    "publishedAt": "2026-09-20T00:24:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000027",
+    "contentType": "milestone",
+    "slug": "m1-specs",
+    "title": "M1 Specs",
+    "payload": {
+      "title": "M1 Specs",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 10
+    },
+    "publishedAt": "2026-09-20T00:27:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000028",
+    "contentType": "milestone",
+    "slug": "m2-kernel",
+    "title": "M2 Kernel",
+    "payload": {
+      "title": "M2 Kernel",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 20
+    },
+    "publishedAt": "2026-09-20T00:28:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000029",
+    "contentType": "milestone",
+    "slug": "m3-surfaces",
+    "title": "M3 Surfaces",
+    "payload": {
+      "title": "M3 Surfaces",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 30
+    },
+    "publishedAt": "2026-09-20T00:29:00Z"
+  }
+]

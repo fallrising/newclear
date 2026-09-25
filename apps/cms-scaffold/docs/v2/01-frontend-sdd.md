@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫）  
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3）  
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -138,6 +138,8 @@ packages/
 
 列表的篩選、搜尋、排序、分頁全部放在 URL query（`?state=draft&q=coast&page=2&sort=-updatedAt`）。可以分享、重新整理不會遺失，也方便 e2e 直接打網址。
 
+§4 的施工細節（套件內容、query key、錯誤正規化）見 [`waves/W0.md`](waves/W0.md) §4.2、§4.3、§5.0～§5.6。
+
 ---
 
 ## 5. 視覺語言（tokens）
@@ -159,6 +161,8 @@ packages/
 | `--surface` | `#FFFFFF` | 卡片、表格、dialog |
 | `--surface-subdued` | `#F7F7F7` | 表頭、次要區塊 |
 | `--border` | `#E3E3E3` | 卡片與表格分隔 |
+| `--border-strong` | `#8A8A8A` | 輸入框外框（W0 新增；UI 元件需 ≥ 3:1） |
+| `--surface-hover` | `#EBEBEB` | 懸停、目前的導覽項（W0 新增） |
 | `--text` | `#303030` | 主要文字 |
 | `--text-subdued` | `#616161` | 說明、中繼資料 |
 | `--primary` | `#303030` | 主要按鈕（深色實心，Shopify admin 的做法） |
@@ -170,7 +174,7 @@ packages/
 | `--info` | `#00527C`／`#E0F0FF` | 提示 |
 | 圓角 | 卡片 12px、控件 8px、badge 全圓 | |
 | 陰影 | 卡片 `0 1px 0 rgba(0,0,0,.07)` 加 1px border | 扁平、不浮誇 |
-| 字型 | `Inter, "Noto Sans TC", "PingFang TC", system-ui, sans-serif`；字重 450／550／650 | 需要真的載入或改用系統字型（修 F-04） |
+| 字型 | W0 定案：系統字型 `ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif`，不載入網路字型；字重 450／550／650（沒有可變字重的系統字型會取最接近的字重） | 修 F-04 |
 | 字級 | 正文 14px／20px；表格 13px；頁標題 20px／650；卡片標題 14px／650 | 中文在 13px 以下可讀性差，所以正文用 14px |
 | 間距 | 4px 基數；卡片內距 16px；卡片之間 16px；頁面左右 24px（手機 16px） | |
 
@@ -187,6 +191,10 @@ packages/
 
 Front 的字型：標題用 `"Noto Serif TC", Georgia, serif`（相簿、診所），內文用 `Inter, "Noto Sans TC"`。版面最大寬度 1200px；內容文字欄最大 68ch。
 
+W0 定案（細化時補上的值）：每站另有 `--surface`、`--surface-subdued`、`--surface-hover`、`--border`、`--border-strong`、`--text-subdued`、`--primary-fg`、`--focus`（相簿站 `#4C9AFF`）；字型同 §5.2 改用系統字型堆疊（相簿、診所的標題為 `"Noto Serif TC", "Songti TC", Georgia, serif`）；Front 字級為內文 16px／26px、區塊標題 22px／30px（600）、頁標題 32px／40px（600）。
+
+§5 的施工細節（全部定案值與 WCAG 對比度計算）見 [`waves/W0.md`](waves/W0.md) §4.4。
+
 ---
 
 ## 6. 元件
@@ -197,11 +205,13 @@ Front 的字型：標題用 `"Noto Serif TC", Georgia, serif`（相簿、診所�
 
 `AspectRatio`、`Carousel` 只給 Front 用。
 
+W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。
+
 ### 6.2 模式元件（Polaris 式，建在 shadcn 之上）
 
 | 元件 | 行為契約 |
 | --- | --- |
-| `AppFrame` | 頂列（產品名、全域搜尋或類型快速切換、帳號選單）+ `Sidebar` + 主區。窄於 1024px 時側欄收成 `Sheet`。 |
+| `AppFrame` | 頂列（產品名、全域搜尋或類型快速切換、帳號選單）+ 側欄 + 主區。窄於 1024px 時側欄收成 `Sheet`。側欄是語意化的 `<aside>`＋`<nav>`，不用 shadcn `Sidebar`（它的行動版斷點是 768px，另帶 cookie 狀態與快捷鍵；W0 細化時決定）。 |
 | `PageHeader` | `backTo?`、`title`、`badges?`、`secondaryActions?`（多於兩個就收進「更多動作」選單）、`primaryAction?`。標題同時寫入 `document.title`（修 F-05）。 |
 | `IndexFilters` | 狀態 tab、搜尋框（debounce 300ms）、篩選 chip、排序選單；全部與 URL query 同步。 |
 | `IndexTable` | 欄位定義由呼叫方給；支援 loading skeleton、空狀態插槽、整列可點（連結是真正的 `<a>`，可開新分頁）。v2 不做批次選取（見 Q-05）。 |
@@ -210,6 +220,8 @@ Front 的字型：標題用 `"Noto Serif TC", Georgia, serif`（相簿、診所�
 | `EmptyState` | 插圖（線條圖示即可）+ 標題 + 說明 + 可選的主要動作。 |
 | `StatusBadge` | 輸入 `publicationState` 與 `dirty`，輸出一或兩個 badge。 |
 | `QueryBoundary` | 包住一個 query 的四種狀態：loading → `Skeleton`；空 → `EmptyState`；錯誤 → 行內 Alert + 重試；404／403 → 交給路由層。**載入中永遠不顯示空狀態**（修 C-02）。 |
+
+W0 做 `AppFrame`、`PageHeader`、`EmptyState`、`QueryBoundary`；施工細節見 [`waves/W0.md`](waves/W0.md) §5.2。
 
 ### 6.3 Front 區塊元件（section registry）
 
@@ -587,6 +599,8 @@ Resource index 版型：篩選為時間範圍、操作者、動作、結果（�
 
 **`next`／`returnTo` 允許清單（修 S-01）：** 只接受以單一 `/` 開頭、第二個字元不是 `/` 或 `\`、不含 scheme 的相對路徑，而且必須符合該 app 已登記的路由樣式；不符合就改用預設頁。放在 `@cms/auth` 的 `safeReturnTo`，三個 app 共用，並有單元測試覆蓋 surface-front AC-13 列出的所有惡意輸入。
 
+施工細節（規則、各 app 的回跳清單、31 個測試向量）見 [`waves/W0.md`](waves/W0.md) §4.7。
+
 ---
 
 ## 9. 後端缺口（前端需要的 API）
@@ -634,11 +648,15 @@ v2 大部分畫面用現有 API 就能做。下列是真正的缺口，設計與
 - 所有使用者可見字串放在各 app 的 `copy.ts`（zh-Hant），key 沿用 surface-front §4.5 的命名（`empty.albums`、`notfound`…）。
 - 文案規則：講使用者的事，不講實作；不出現 HTTP 方法、欄位 key、`origin`、`PATCH`（修 U-01）。
 
+施工細節（copy key 命名規則、共用套件的 copy、自動檢查）見 [`waves/W0.md`](waves/W0.md) §4.6。
+
 ### 10.4 安全
 
 - 三個 app 都不使用 `dangerouslySetInnerHTML`；Markdown 依 D-08。
 - 不在 bundle 中出現種子帳號名稱（建置後掃描，修 S-02）。
 - `web-front` 的 bundle 掃描：不得出現 `/api/v1/entries`、`publicationState`、`previewToken`、`includeDraft`（surface-front AC-08）。
+
+施工細節見 [`waves/W0.md`](waves/W0.md) §5.8。
 
 ---
 
@@ -653,6 +671,8 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 ```
 
 `npm run e2e`（接真實 API 的 Compose）維持選用，不當閘門（AGENTS.md）。
+
+施工細節見 [`waves/W0.md`](waves/W0.md) §5.8～§5.10、§9。
 
 ### 11.2 驗收條件（v2 新增，與 surface 規格的 AC 並行）
 
@@ -683,6 +703,8 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 - 可以用 query 參數切換情境：`?mock=slow`、`?mock=error500`、`?mock=empty`、`?mock=conflict`。
 - MSW 的回應用產生的 OpenAPI 型別做 typecheck；後端改了契約，mock 就編譯失敗。
 
+施工細節（fixture 全文、handler 行為表、`?mock=none`、`?mockUser=`）見 [`waves/W0.md`](waves/W0.md) §4.5、§5.4。
+
 ---
 
 ## 12. 實作波次（給 LLM agent）
@@ -697,6 +719,8 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W3 Front**（會員區需要 BW3，其餘不需要） | 四站 section registry、全部公開路由、燈箱、狀態頁、SEO meta、手機選單、Markdown | C-01～C-03、C-11、C-13、C-14、U-05 | V2-AC-02～04；surface-front AC-01～09、13、15、17、18 |
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
+
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -728,6 +752,13 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | surface-admin §4.1 | 列出的 shadcn primitive 包含 `Progress` | 已涵蓋（媒體用量） |
 
 ---
+
+### 13.3 待決定
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-08 | shadcn/ui 元件本身依賴 `class-variance-authority`、`clsx`、`tailwind-merge`（`cn()`）、`lucide-react`（元件內的圖示）、`tw-animate-css`（開關動畫）。§3、§4 只寫了「shadcn/ui（Radix）+ Tailwind v4」，沒有逐一列出這 5 個套件（W0 細化時發現）。 | A. 視為 D-02「採用 shadcn/ui」的組成，W0 照 [waves/W0.md §4.8](waves/W0.md#48-npm-套件版本全部已查證23) 的精確版本安裝；B. 不裝，自寫 `cn()`、改寫 11 個元件的圖示與動畫 class（與上游脫鉤，之後每加一個元件都要改寫） | A（W0 施工圖以 A 撰寫） |
+| Q-09 | 兩種環境類失敗沒有自動測試：Playwright 瀏覽器不存在或版本不符（W0-FM20）、npm registry 無法連線（W0-FM21）。 | A. 接受，比照 [02 BQ-09](02-backend-sdd.md#8-開放問題) 以 CI 為準；PR 說明必須寫明哪些檢查只在 CI 跑過；B. 另設 npm 鏡像與瀏覽器快取 | A |
 
 ## 14. 參考來源
 

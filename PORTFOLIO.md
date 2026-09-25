@@ -28,6 +28,14 @@ Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主�
 
 設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
 
+## Owner override 2026-09-25 — apps/cms-scaffold
+
+Owner 要求重啟 `apps/cms-scaffold`：先以 Shopify 的前端設計為參考重寫前端，後端配套演進，交給 LLM agent 分波實作。這是對 2026-09-05 freeze 的**明確例外**，範圍僅限 `apps/cms-scaffold`，tier 由 C 改為 A。
+
+目前處於 **設計階段**：v1 前端稽核、前端 v2 SDD、後端 v2 SDD 都是 v0.1，見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。實作依該索引的路線圖從 BW0 開始。總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變；其餘 2026-09-05 分級維持不變。
+
+（2026-09-24 曾登記為 documentation-only，本段取代之。）
+
 ## 2026-09-05 修復與補充驗證
 
 這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。
@@ -164,7 +172,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/prism` | C | Phase 0 SDD; dormant investment |
 | `apps/loom` | C | Dormant |
 | `apps/flowshot` | C | Dormant |
-| `apps/cms-scaffold` | C | Dormant |
+| `apps/cms-scaffold` | A | Owner override 2026-09-25; v2 design phase |
 | `apps/cloudform` | D | Retired / historical |
 | `tools/streaming-converter` | D | Retired / historical |
 | `examples/bite-pi` | D | Disposable demo |

@@ -1,12 +1,13 @@
 # CMS Scaffold
 
-> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
 可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）、三個 demo pack。
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
-實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。
+實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
+v2（設計階段，前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
 目前實作到 **Wave E + Back 自訂視圖**：kernel 與三面已驗收；Back 另有相簿編排、當日行程、issue 看板（寫入仍走 entry API）。
 

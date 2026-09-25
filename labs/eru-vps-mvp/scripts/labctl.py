@@ -129,6 +129,7 @@ class Operator:
         self.project = project
         self.root = project / 'private/operations'
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.trusted_hostkeys_dir = Path.home() / '.ssh/hzd-vps/known_hosts'
         self.inventory = load_inventory(project)
         self.core = self.inventory[0]
         self.events = []
@@ -381,8 +382,11 @@ class Operator:
         if (not isinstance(plan, dict) or digest(plan) != envelope.get('sha256')
                 or expected_hash != envelope.get('sha256')):
             raise ValueError('plan hash mismatch')
-        from reimage_receipt import load_receipt
+        from reimage_receipt import load_receipt, verify_local_hostkeys
         receipt = load_receipt(self.project, receipt_file, plan=plan, plan_sha256=expected_hash)
+        trusted_host_key_check = verify_local_hostkeys(
+            receipt['receipt']['target']['alias'], receipt['receipt']['host_key_fingerprints'],
+            self.trusted_hostkeys_dir)
         path = self.root / 'reimage-receipts' / (plan_id + '.json')
         if path.exists():
             raise ValueError('reimage receipt already recorded; inspect it and do not overwrite')
@@ -393,6 +397,7 @@ class Operator:
             'remote_mutation_performed': False,
             'receipt_path': receipt['path'],
             'receipt_sha256': receipt['sha256'],
+            'trusted_host_key_file_check': trusted_host_key_check,
             'receipt': receipt['receipt'],
             'recorded_at': now(),
         })

@@ -93,6 +93,8 @@ with ClusterLock(Path(sys.argv[1])):
 class FakeOperator(labctl.Operator):
     def __init__(self, project, snapshot):
         super().__init__(project)
+        self.trusted_hostkeys_dir = project / 'trusted-hostkeys'
+        self.trusted_hostkeys_dir.mkdir()
         self.live = copy.deepcopy(snapshot)
         self.removed = []
         self.lose_response = False
@@ -184,6 +186,11 @@ class OperatorTests(unittest.TestCase):
 
     def write_reimage_receipt(self, plan, changes=None):
         intent = plan['provider_reimage_intent']
+        key_blob = b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00 ' + b'\x01' * 32
+        key_text = base64.b64encode(key_blob).decode()
+        fingerprint = 'SHA256:' + base64.b64encode(hashlib.sha256(key_blob).digest()).decode().rstrip('=')
+        trusted = self.op.trusted_hostkeys_dir / 'disposable-04'
+        trusted.write_text('ckc-disposable-04 ssh-ed25519 ' + key_text + '\n')
         data = {
             'schema_version': 1,
             'provider_api_used': False,
@@ -201,8 +208,7 @@ class OperatorTests(unittest.TestCase):
             'owner_confirmed': True,
             'owner_reviewed_at': labctl.now(),
             'host_key_verified_via': 'provider-console',
-            'host_key_fingerprints': {'ssh-ed25519': 'SHA256:' +
-                base64.b64encode(b'' * 32).decode().rstrip('=')},
+            'host_key_fingerprints': {'ssh-ed25519': fingerprint},
         }
         if changes:
             data.update(changes)
@@ -501,6 +507,11 @@ class OperatorTests(unittest.TestCase):
         recorded = labctl.read(recorded_path)
         self.assertEqual(recorded['receipt']['replacement']['machine_id'], 'replacement-machine-id-4')
         self.assertEqual(recorded['receipt']['host_key_verified_via'], 'provider-console')
+        self.assertEqual(recorded['trusted_host_key_file_check']['path'], 'disposable-04')
+        self.assertEqual(recorded['trusted_host_key_file_check']['host_key_fingerprints'],
+                         recorded['receipt']['host_key_fingerprints'])
+        self.assertEqual(recorded['trusted_host_key_file_check']['file_sha256'],
+                         hashlib.sha256((self.op.trusted_hostkeys_dir / 'disposable-04').read_bytes()).hexdigest())
         self.assertFalse(plan['executable'])
         self.assertEqual(self.op.live, before)
         self.assertEqual(self.op.removed, [])
@@ -538,6 +549,30 @@ class OperatorTests(unittest.TestCase):
         receipt_path = self.write_reimage_receipt(plan)
         with self.assertRaisesRegex(ValueError, 'plan hash mismatch'):
             self.op.record_reimage_receipt(plan['id'], '0' * 64, str(receipt_path))
+        self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
+
+    def test_reimage_receipt_requires_manual_oob_key_in_local_trust_file(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        plan = envelope['plan']
+        receipt_path = self.write_reimage_receipt(plan)
+        trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
+        changed_blob = b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00 ' + b'\x02' * 32
+        trust_file.write_text('ckc-disposable-04 ssh-ed25519 ' +
+                              base64.b64encode(changed_blob).decode() + '\n')
+        with self.assertRaisesRegex(ValueError, 'fingerprints differ'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
+        self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
+
+        trust_file.unlink()
+        outside = self.project / 'trusted-key-outside'
+        outside.write_text('ckc-disposable-04 ssh-ed25519 ' +
+                           base64.b64encode(changed_blob).decode() + '\n')
+        trust_file.symlink_to(outside)
+        with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+            self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
         self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
 
     def test_reimage_receipt_supports_checkout_private_symlink(self):

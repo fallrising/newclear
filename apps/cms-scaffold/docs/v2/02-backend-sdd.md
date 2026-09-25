@@ -209,6 +209,8 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 | G-10 | 工作列表與 `GET /entries/{id}` 支援 `include=refs` | 回應新增 `refs: { "<fieldKey>": { "id", "contentType", "title", "publicationState" } }`；呼叫者沒有目標類型 `read_draft` 權限時，該關聯只回傳 `{ "id", "restricted": true }`。用一次 `IN` 查詢取得，不做 N+1。 |
 | G-11 | 所有投影 | 標題一律取 `payload[type.titleField]`。 |
 
+G-07 施工細節見 `waves/BW1c.md` §4.2（清空欄位）。
+
 ### 4.4 破壞性變更（與前端同一波上線）
 
 | 變更 | 原因 | 上線波次 |
@@ -216,6 +218,8 @@ CREATE INDEX cms_audit_event_action_at_idx ON cms_audit_event (action, at DESC);
 | `PATCH /entries/{id}` 必須帶 `version`，缺少時回 **428** `VERSION_REQUIRED` | 防止靜默覆蓋；v1 前端有時不帶 | BW1c + 前端 W1 |
 | 公開投影中無法公開的媒體引用改回傳 `null`，不再回傳原始 UUID | 修 B-13 | BW1c + 前端 W3 |
 | 422 錯誤一次回傳所有欄位錯誤（`error.fields`），`error.message` 只是摘要 | BD-08 | BW1c + 前端 W1 |
+
+施工細節（前後對照、驗證規則、`error.fields` 路徑格式）見 `waves/BW1c.md` §4.2、§4.3。
 
 ### 4.5 會員（G-08）
 
@@ -324,6 +328,8 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 每波一個 PR；migration 只能新增，不能修改已經合併的 migration。
 
 **BW1 拆成三波（owner 決定，2026-09-25）：** 原 BW1 細化時估計約 44 張任務卡，超過 REFINE-PROMPT 的 30 張上限，owner 選擇拆成 BW1a、BW1b、BW1c。順序：BW1a → BW1b；BW1c 只依賴 BW0，可以與 BW1a、BW1b 平行。前端 W1 需要三波都完成；W3 需要 BW1b 與 BW1c。原 BW1 的 ID 全部分配到三波，沒有增減。
+
+**BW1c 細化後補充：** BW1c 的契約是在 BW1b 契約上修改後整檔取代，`EntryService`、`PublicContentController`、`ContentProjection` 的 diff 也以 BW1b 完成後為基準，所以實作順序改為 BW1a → BW1b → BW1c（上段「BW1c 可以與 BW1a、BW1b 平行」只適用於細化，不適用於實作）。施工細節見 `waves/BW1c.md` §2.1。
 
 BW0 施工細節見 `waves/BW0.md`。
 

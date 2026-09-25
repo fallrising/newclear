@@ -157,7 +157,8 @@ test(
       const beforeUnknown = (await fakeProviderLog()).length;
       const trigger = "@" + handle + " [[fake:status=500]]";
       await sendViaComposer(ben.page, trigger);
-      await expect(page.getByTestId("reply-failed")).toBeVisible();
+      // The overload banner stays up for 8s. Wait for this turn's unknown failure (reply.reason.other).
+      await expect(page.getByTestId("reply-failed")).toContainText("回覆失敗：回覆失敗", { timeout: 30_000 });
       const unknown = (await fakeProviderLog()).slice(beforeUnknown).filter((entry) => entry.status === 500);
       expect(unknown).toHaveLength(1);
 
@@ -240,7 +241,7 @@ test(
       await expect(page.locator(`[data-testid="provider-row"][data-name="w4d-openai-${rand}"]`)).toHaveCount(0);
       const agent = await api.call("GET", "/api/agents/" + aid);
       expect(agent.status).toBe(200);
-      const detail = agent.json as { runtime_status: string; connection_id: string | null };
+      const detail = (agent.json as { agent: { runtime_status: string; connection_id: string | null } }).agent;
       expect(detail.runtime_status).toBe("unconfigured");
       expect(detail.connection_id).toBeNull();
       await shot(page, info, "02-deleted");

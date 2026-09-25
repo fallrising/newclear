@@ -100,7 +100,9 @@ export async function startFakeProvider(key: string, port = 0): Promise<FakeProv
     if (!known.includes(model)) return reply(404, errorFor(format, 404));
     if ("tools" in body) return reply(400, errorFor(format, 400)); // RT-05: hosted must not send tools
     const directive = parseDirective(lastUserText(body.messages));
-    if (directive.delay_ms) await new Promise((r) => setTimeout(r, directive.delay_ms));
+    // Default pause keeps "is replying" on screen long enough for the e2e poll.
+    const pause = directive.delay_ms ?? 500;
+    if (pause > 0) await new Promise((r) => setTimeout(r, pause));
     if (directive.status) {
       return reply(directive.status, errorFor(format, directive.status), directive.status === 429 ? { "retry-after": "0" } : {});
     }

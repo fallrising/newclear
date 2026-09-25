@@ -94,7 +94,7 @@ export async function startStack(runDir: string, stateDir: string): Promise<Stac
     "--persist-to", stateDir, "--assets", assetsDir, "--env-file", join(stateDir, "wrangler.env"),
     "--show-interactive-dev-session=false",
     "--var", "ff_mcp:on", "--var", "ff_hosted_agent:on", "--var", "ff_sidecar:off", "--var", "ff_ambient:off",
-    "--var", "ff_providers:on", "--var", "KITH_DEV_ALLOW_HTTP_PROVIDERS:on",
+    "--var", "ff_providers:on", "--var", "ff_drafts:on", "--var", "KITH_DEV_ALLOW_HTTP_PROVIDERS:on",
   ];
   const wrangler = spawn(WRANGLER_BIN, args, { cwd: KITH_DIR, env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
   const serverLog = lineWriter(join(runDir, "server.log"));

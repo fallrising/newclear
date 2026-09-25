@@ -6,9 +6,9 @@
 日期：2026-09-25  
 讀者：實作 BW4 的 agent。只讀本檔、`contracts/BW4.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
-> **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW3 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04、T05 完成後，`./gradlew :services:cms-api:test` 依序是 225、229、230 個測試，唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 是 74 個全綠（本機 PostgreSQL 16.13，不是 Testcontainers）。各「測試先行」卡的預期紅燈也是實際跑出來的；§5.3 的矩陣測試另外做過反向檢查（故意改錯一格，測試會失敗並指出那一格）。
+> **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW3 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04、T05 完成後，`./gradlew :services:cms-api:test` 依序是 225、229、230 個測試，唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 在 T02 後是 74 個、T07 後是 76 個，全綠（本機 PostgreSQL 16.13，不是 Testcontainers）。各「測試先行」卡的預期紅燈也是實際跑出來的；§5.3 的矩陣測試與 §5.5 的回滾測試另外做過反向檢查（故意改錯一格、故意拿掉 `publish` 的交易，測試都會失敗）。
 
-> **請 owner 確認（不阻擋實作）：** 審計保留的預設值，本檔採 [surface-admin §7.2](../../specs/surface-admin.md) 的 **90 天**（該規格標為 Decided），不是 [02 BQ-03](../02-backend-sdd.md#8-開放問題) 建議欄的 365 天。兩者都在允許值 30／90／365 之內；若 owner 要 365，只改 §5.1 的 `DEFAULT_DAYS` 與 V9 的 `INSERT` 兩處，以及 §7 測試中的 90。
+> **Owner 決定（2026-09-25）：** 審計保留預設 **90 天**（[surface-admin §7.2](../../specs/surface-admin.md)，[02 BQ-03](../02-backend-sdd.md#8-開放問題)）；[02 BQ-12](../02-backend-sdd.md#8-開放問題) 選 A，在本波次加回滾測試（§5.5）；寫回滾測試時發現「應用程式有 DataSource 卻用 in-memory store」，owner 決定在本波次修正（§5.5，02 BQ-13）。
 
 ---
 
@@ -21,6 +21,8 @@
 | BW4「效能量測記錄」 | 02 §7、§5.4 | 量測腳本、門檻、未達標處理（§5.4）；數字寫進 `docs/v2/perf-records.md` |
 | BW4「審計保留期限設定」 | 02 §7、BQ-03；surface-admin §5.5、§7.2 | `GET`／`PATCH /api/v1/admin/settings/audit`；V9；每日清理工作 |
 | BW4「安全測試補齊」 | 02 §6 第一條 | BW0 之後新增的 10 個 operation，在每個不該用的 surface 與沒有權限的呼叫者都被拒絕（§5.3） |
+| BQ-12 | 02 §8（owner 選 A） | 應用程式在 PostgreSQL 上啟動，審計寫入失敗時狀態變更回滾（§5.5） |
+| BQ-13 | 02 §8（BW4 細化時發現，owner 決定在 BW4 修） | 三個 `*StoreConfig` 在有 DataSource 時改用 JDBC store（§5.5） |
 
 ### 1.2 不做
 
@@ -28,7 +30,7 @@
 - surface-admin §9 的 `/settings/media`、`/settings/security`：不在 02 §7 BW4 的範圍。
 - 「立刻清空」或單筆刪除審計：surface-admin §7.2 明定不提供。
 - 清理本身不寫審計事件（surface-admin §7.1 的事件表沒有它，§7.1 也說不要把審計變成 access log）；只寫一行應用程式日誌。
-- [02 BQ-12](../02-backend-sdd.md#8-開放問題)（交易回滾的測試）：owner 還沒決定，本波次不做。
+- 02 BQ-06、07、08、10、11（owner 選 A）：在 BW5 做，不在本波次。
 - [02 BQ-05](../02-backend-sdd.md#8-開放問題)（GIN 索引）：§5.4 的數字全部達標，不改索引設計；本 PR 在 BQ-05 補註量測結果。
 - 多實例部署時的清理協調：每個實例各自跑清理，`DELETE … WHERE at < ?` 重複執行無害（第二次刪 0 筆），不需要鎖。
 - 不新增依賴，所以 `gradle.lockfile` 不變（`@EnableScheduling` 在 `spring-context` 內）。
@@ -44,7 +46,7 @@
 
 ### 2.2 環境
 
-與 [BW0 §2.2](BW0.md#22-環境) 相同。T06 另外需要本機可以跑 `integrationTest`（Docker，見 BW0）。
+與 [BW0 §2.2](BW0.md#22-環境) 相同。T06～T08 另外需要本機可以跑 `integrationTest`（Docker，見 BW0）。
 
 ### 2.3 查證過的外部事實
 
@@ -78,10 +80,14 @@
 | `src/main/resources/application.yaml` | 修改 | 清理的兩個時間 | T04 |
 | `src/main/resources/openapi/openapi.yaml` | 修改 | 等於 `docs/v2/contracts/BW4.openapi.yaml` | T04 |
 | `src/test/java/com/fallrising/cms/SurfaceMatrixTests.java` | 新增 | surface 拒絕矩陣 | T05 |
-| `apps/cms-scaffold/docs/v2/perf-records.md` | 修改 | 加三列實測數字 | T06 |
-| `apps/cms-scaffold/docs/v2/README.md` | 修改 | 路線圖 BW4 狀態改 `VERIFIED` | T07 |
+| `src/integrationTest/java/com/fallrising/cms/AuditRollbackIntegrationTests.java` | 新增 | 應用程式在 PostgreSQL 上：JDBC store、審計失敗回滾 | T06 |
+| `src/main/java/com/fallrising/cms/identity/web/IdentityStoreConfig.java` | 修改 | 有 DataSource 時用 JDBC store | T07 |
+| `src/main/java/com/fallrising/cms/content/web/ContentStoreConfig.java` | 修改 | 同上 | T07 |
+| `src/main/java/com/fallrising/cms/media/web/MediaStoreConfig.java` | 修改 | 同上 | T07 |
+| `apps/cms-scaffold/docs/v2/perf-records.md` | 修改 | 加三列實測數字 | T08 |
+| `apps/cms-scaffold/docs/v2/README.md` | 修改 | 路線圖 BW4 狀態改 `VERIFIED` | T09 |
 
-不會碰：`build.gradle.kts`、`gradle.lockfile`、既有 migration、content 與 media 模組、`application-prod.yaml`、上表以外的測試（包括 `IdentitySurfaceHardeningTests.java`，見 §5.3）、前端、`e2e/`、workflow。
+不會碰：`build.gradle.kts`、`gradle.lockfile`、既有 migration、content 與 media 模組（上表的兩個 `*StoreConfig.java` 除外）、`application-prod.yaml`、上表以外的測試（包括 `IdentitySurfaceHardeningTests.java`，見 §5.3）、前端、`e2e/`、workflow。
 
 ---
 
@@ -723,7 +729,7 @@ T04 之後：`cmp docs/v2/contracts/BW4.openapi.yaml services/cms-api/src/main/r
 
 **T05 是補測試，不是測試先行**：它保護 BW2～BW4 已有的行為，建立後就應該是綠的。若有任何一格失敗，代表前面波次的實作與契約不一致：**停下來回報**失敗訊息（測試會列出每一個不符的格子），不要改測試的預期值來遷就。
 
-### 5.4 效能量測與紀錄（T06）
+### 5.4 效能量測與紀錄（T08）
 
 **門檻**（02 §5.4，不變）：
 
@@ -757,6 +763,139 @@ done
 3. 可以做的修正：只限 BW4 範圍內能改的東西（新增 migration 補索引，例如 V10）；需要改 SQL 產生方式或 schema 設計時，**停下來回報**，附上三次輸出與 `EXPLAIN` 結果，由 owner 決定（屆時一併評估 [02 BQ-05](../02-backend-sdd.md#8-開放問題) 的 GIN 選項）。
 4. 不得調高門檻、跳過或 `@Disabled` 測試、減少資料筆數。
 5. 只在 CI 失敗、本機達標時：依 AGENTS.md 只重跑一次 CI；再失敗就當成真的未達標，照第 2～3 步處理，並在 `perf-records.md` 加一列 CI 的結果（環境寫 `GitHub Actions ubuntu-latest`）。
+
+### 5.5 應用程式在 PostgreSQL 上：JDBC store 與審計回滾（T06、T07）
+
+**發現（BW4 細化，2026-09-25）。** 寫 02 BQ-12 的測試時，以 PostgreSQL 啟動整個應用程式，結果 `IdentityStore`、`ContentStore`、`MediaStore` 都是 in-memory 版本。原因：三個 `*StoreConfig` 以 `@ConditionalOnBean(DataSource.class)` 選 JDBC store，但這個條件在一般 `@Configuration` 上是在 Spring Boot 的自動設定定義 `DataSource` **之前**判斷的，所以永遠不成立。後果：正式環境的資料只存在記憶體，重啟就消失；`./gradlew test` 本來就用 in-memory，所以一直沒被發現。JDBC store 本身由 store 契約測試保證，問題只在接線。
+
+**修正**：與 BW2 的 `TransactionRunner` 相同，在 bean 方法內以 `ObjectProvider<DataSource>` 判斷：有 DataSource（identity 另外要有 `PlatformTransactionManager`）就建 JDBC store，否則 in-memory。bean 名稱改成 `identityStore`、`contentStore`、`mediaStore`；沒有程式以名稱取用它們。
+
+**回滾測試（02 BQ-12）**：`AuditRollbackIntegrationTests` 以 Testcontainers 的 PostgreSQL 啟動整個應用程式（`spring.autoconfigure.exclude` 清空、Flyway 開啟，覆蓋 `src/test/resources/application.yaml` 為 `./gradlew test` 關掉的資料庫設定）。`IdentityStore` 以 `@MockitoSpyBean` 包起來：`entry.publish` 的事件改成以一個不存在的 principal id 當 actor，交給同一個 DataSource 上的 `JdbcIdentityStore` 寫入，於是在資料庫違反 `cms_audit_event.actor_principal_id` 的外鍵。其他事件照常寫入。
+
+- 種子密碼：`integrationTest` 的 classpath 上，main 的 `application.yaml` 排在 test 的前面，所以 `cms.identity.seed-password` 會是空字串。測試以 `@DynamicPropertySource` 設一個每次執行都不同的隨機值（`UUID`），不寫進任何檔案。
+- 這個類別自己啟動一個 PostgreSQL 容器，不使用 `contract/PostgresFixture`（它是 package-private，而且給 store 契約用）。
+
+`src/main/java/com/fallrising/cms/identity/web/IdentityStoreConfig.java`：
+
+```diff
+--- a/src/main/java/com/fallrising/cms/identity/web/IdentityStoreConfig.java
++++ b/src/main/java/com/fallrising/cms/identity/web/IdentityStoreConfig.java
+@@ -3,8 +3,7 @@
+ import com.fallrising.cms.identity.store.IdentityStore;
+ import com.fallrising.cms.identity.store.InMemoryIdentityStore;
+ import com.fallrising.cms.identity.store.JdbcIdentityStore;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
++import org.springframework.beans.factory.ObjectProvider;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+ import org.springframework.transaction.PlatformTransactionManager;
+@@ -12,18 +11,19 @@
+ 
+ import javax.sql.DataSource;
+ 
++/**
++ * JDBC store when the application has a DataSource and a transaction manager, else in-memory (./gradlew test). The
++ * choice is made inside the bean method: @ConditionalOnBean on a user configuration is evaluated before Spring Boot's
++ * auto-configuration defines the DataSource, so it always chose the in-memory store (found in BW4, 02 BQ-12).
++ */
+ @Configuration
+ public class IdentityStoreConfig {
+ 
+     @Bean
+-    @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
+-    IdentityStore jdbcIdentityStore(DataSource dataSource, PlatformTransactionManager transactionManager) {
+-        return new JdbcIdentityStore(dataSource, new TransactionTemplate(transactionManager));
+-    }
+-
+-    @Bean
+-    @ConditionalOnMissingBean(IdentityStore.class)
+-    IdentityStore inMemoryIdentityStore() {
+-        return new InMemoryIdentityStore();
++    IdentityStore identityStore(ObjectProvider<DataSource> dataSource,
++            ObjectProvider<PlatformTransactionManager> transactionManager) {
++        DataSource ds = dataSource.getIfAvailable();
++        PlatformTransactionManager tm = transactionManager.getIfAvailable();
++        return ds != null && tm != null ? new JdbcIdentityStore(ds, new TransactionTemplate(tm)) : new InMemoryIdentityStore();
+     }
+ }
+```
+
+`src/main/java/com/fallrising/cms/content/web/ContentStoreConfig.java`：
+
+```diff
+--- a/src/main/java/com/fallrising/cms/content/web/ContentStoreConfig.java
++++ b/src/main/java/com/fallrising/cms/content/web/ContentStoreConfig.java
+@@ -4,25 +4,19 @@
+ import com.fallrising.cms.content.store.InMemoryContentStore;
+ import com.fallrising.cms.content.store.JdbcContentStore;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
++import org.springframework.beans.factory.ObjectProvider;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+ 
+ import javax.sql.DataSource;
+ 
++/** JDBC store when the application has a DataSource, else in-memory; see IdentityStoreConfig for why not @ConditionalOnBean. */
+ @Configuration
+ public class ContentStoreConfig {
+ 
+     @Bean
+-    @ConditionalOnBean(DataSource.class)
+-    ContentStore jdbcContentStore(DataSource dataSource, ObjectMapper objectMapper) {
+-        return new JdbcContentStore(dataSource, objectMapper);
+-    }
+-
+-    @Bean
+-    @ConditionalOnMissingBean(ContentStore.class)
+-    ContentStore inMemoryContentStore() {
+-        return new InMemoryContentStore();
++    ContentStore contentStore(ObjectProvider<DataSource> dataSource, ObjectMapper objectMapper) {
++        DataSource ds = dataSource.getIfAvailable();
++        return ds != null ? new JdbcContentStore(ds, objectMapper) : new InMemoryContentStore();
+     }
+ }
+```
+
+`src/main/java/com/fallrising/cms/media/web/MediaStoreConfig.java`：
+
+```diff
+--- a/src/main/java/com/fallrising/cms/media/web/MediaStoreConfig.java
++++ b/src/main/java/com/fallrising/cms/media/web/MediaStoreConfig.java
+@@ -5,9 +5,8 @@
+ import com.fallrising.cms.media.store.LocalDiskMediaObjectStore;
+ import com.fallrising.cms.media.store.MediaObjectStore;
+ import com.fallrising.cms.media.store.MediaStore;
++import org.springframework.beans.factory.ObjectProvider;
+ import org.springframework.beans.factory.annotation.Value;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+ 
+@@ -22,15 +21,10 @@
+         return new LocalDiskMediaObjectStore(Path.of(root));
+     }
+ 
++    /** JDBC store when the application has a DataSource, else in-memory; see IdentityStoreConfig. */
+     @Bean
+-    @ConditionalOnBean(DataSource.class)
+-    MediaStore jdbcMediaStore(DataSource dataSource) {
+-        return new JdbcMediaStore(dataSource);
+-    }
+-
+-    @Bean
+-    @ConditionalOnMissingBean(MediaStore.class)
+-    MediaStore inMemoryMediaStore() {
+-        return new InMemoryMediaStore();
++    MediaStore mediaStore(ObjectProvider<DataSource> dataSource) {
++        DataSource ds = dataSource.getIfAvailable();
++        return ds != null ? new JdbcMediaStore(ds) : new InMemoryMediaStore();
+     }
+ }
+```
 
 ---
 
@@ -820,10 +959,30 @@ done
 - **對應 ID**：BW4 安全測試補齊
 - **大小**：S
 
-### BW4-T06 效能量測紀錄
+### BW4-T06 【測試先行】應用程式在 PostgreSQL 上
+
+- **目標**：把 §5.5 的兩件事寫成測試。
+- **輸入**：T05。
+- **步驟**：建立 §7.4 的 `AuditRollbackIntegrationTests.java`（放在 `src/integrationTest`）。
+- **完成條件**：預期紅燈正好 2 個：`BW4_applicationWithADataSourceUsesTheJdbcStores`（store 是 `InMemoryIdentityStore`）、`BQ12_failedAuditInsertRollsBackThePublish`（in-memory store 沒有交易，entry 變成 `published`）。其餘 74 個綠。
+- **驗證**：`./gradlew :services:cms-api:integrationTest`（預期失敗）
+- **對應 ID**：BQ-12、BQ-13
+- **大小**：S
+
+### BW4-T07 store 接線
+
+- **目標**：§5.5 的修正。
+- **輸入**：T06。
+- **步驟**：套用 §5.5 的三段 diff（`IdentityStoreConfig`、`ContentStoreConfig`、`MediaStoreConfig`）。
+- **完成條件**：`integrationTest` 76 個全綠；`test` 230 個全綠（沒有 DataSource，仍是 in-memory）。
+- **驗證**：`./gradlew :services:cms-api:test`；`./gradlew :services:cms-api:integrationTest`
+- **對應 ID**：BQ-12、BQ-13
+- **大小**：S
+
+### BW4-T08 效能量測紀錄
 
 - **目標**：§5.4。
-- **輸入**：T05。
+- **輸入**：T07。
 - **步驟**：
   1. 執行 §5.4 的量測腳本。
   2. 在 `docs/v2/perf-records.md` 的表格末尾加三列。
@@ -833,14 +992,14 @@ done
 - **對應 ID**：BW4 效能量測記錄
 - **大小**：S
 
-### BW4-T07 完整閘門、狀態與 PR
+### BW4-T09 完整閘門、狀態與 PR
 
 - **目標**：交付。
-- **輸入**：T06。
+- **輸入**：T08。
 - **步驟**：
   1. 執行 §9 的完整閘門。
   2. `docs/v2/README.md` 路線圖中 BW4 的狀態從 `DOC_READY` 改成 `VERIFIED`。
-  3. 逐項勾選 §9，貼進 PR 說明，連同 T06 的三列數字。PR 標題：`feat(cms-scaffold): BW4 後端硬化`。
+  3. 逐項勾選 §9，貼進 PR 說明，連同 T08 的三列數字。PR 標題：`feat(cms-scaffold): BW4 後端硬化`。
 - **完成條件**：§9 全部打勾；CI 的 `java`、`java-integration` 全綠；`web` 全綠，或只有 BW1c §2.1 所說的失敗並已在 PR 說明。
 - **驗證**：§9 的指令。
 - **對應 ID**：全部
@@ -1262,9 +1421,149 @@ class SurfaceMatrixTests {
 }
 ```
 
-### 7.4 故障注入
+### 7.4 `AuditRollbackIntegrationTests`（`integrationTest`，Testcontainers）
 
-`AuditRetentionServiceTests` 以固定的 `Clock` 注入時間。資料庫失敗不另外測：`PATCH` 在交易內，失敗時設定與審計一起回滾，回 500（BW0 `ApiExceptionHandlerTests`）；排程中的清理失敗由 Spring 記錄例外，下一次照常執行。
+| 測試 | 斷言 |
+| --- | --- |
+| `BW4_applicationWithADataSourceUsesTheJdbcStores` | 三個 store 分別是 `JdbcIdentityStore`、`JdbcContentStore`、`JdbcMediaStore` |
+| `BQ12_failedAuditInsertRollsBackThePublish` | operator 建立相簿；讓 `entry.publish` 的審計寫入違反外鍵後發布：500 `INTERNAL_ERROR`；entry 仍是 `draft`、`version` 與 revision 數不變；審計沒有這筆的 `entry.publish` |
+
+`src/integrationTest/java/com/fallrising/cms/AuditRollbackIntegrationTests.java`：
+
+```java
+package com.fallrising.cms;
+
+import com.fallrising.cms.content.store.ContentStore;
+import com.fallrising.cms.content.store.JdbcContentStore;
+import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.store.IdentityStore;
+import com.fallrising.cms.identity.store.JdbcIdentityStore;
+import com.fallrising.cms.media.store.JdbcMediaStore;
+import com.fallrising.cms.media.store.MediaStore;
+import com.fallrising.cms.support.ApiFixture;
+import com.fallrising.cms.support.TestSession;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * 02 BQ-12 (BD-09): the application on PostgreSQL. When the audit insert of a state change fails in the database,
+ * the state change of the same request is rolled back. The failure is a real foreign-key violation: the
+ * entry.publish event is written with an actor id that is not a principal. Also checks that the application on a
+ * DataSource uses the JDBC stores (it did not before BW4; see IdentityStoreConfig).
+ */
+@SpringBootTest(properties = {"spring.autoconfigure.exclude=", "spring.flyway.enabled=true"})
+@AutoConfigureMockMvc
+@Testcontainers
+class AuditRollbackIntegrationTests {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    /** A random seed password per run: main's application.yaml precedes the test one on this classpath. */
+    static final String SEED = UUID.randomUUID().toString();
+
+    @DynamicPropertySource
+    static void database(DynamicPropertyRegistry registry) {
+        registry.add("cms.identity.seed-password", () -> SEED);
+        registry.add("cms.media.root", () -> "./build/tmp-media");
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper mapper;
+
+    @Autowired
+    DataSource dataSource;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
+
+    @Autowired
+    ContentStore contentStore;
+
+    @Autowired
+    MediaStore mediaStore;
+
+    @MockitoSpyBean
+    IdentityStore identityStore;
+
+    @Test
+    void BW4_applicationWithADataSourceUsesTheJdbcStores() {
+        assertThat(identityStore).isInstanceOf(JdbcIdentityStore.class);
+        assertThat(contentStore).isInstanceOf(JdbcContentStore.class);
+        assertThat(mediaStore).isInstanceOf(JdbcMediaStore.class);
+    }
+
+    @Test
+    void BQ12_failedAuditInsertRollsBackThePublish() throws Exception {
+        ApiFixture api = new ApiFixture(mockMvc, mapper);
+        TestSession op = TestSession.login(mockMvc, "seed-operator-album", SEED, TestSession.BACK);
+        String id = api.create(op, "album", Map.of("title", "Rollback")).get("id").asText();
+        JsonNode before = api.work(op, id);
+        int revisions = revisionCount(op, id);
+
+        JdbcIdentityStore direct = new JdbcIdentityStore(dataSource, new TransactionTemplate(transactionManager));
+        doAnswer(invocation -> {
+            AuditEvent event = invocation.getArgument(0);
+            direct.insertAudit(!event.action().equals("entry.publish") ? event : new AuditEvent(event.id(), event.at(),
+                    UUID.randomUUID(), event.category(), event.action(), event.targetType(), event.targetId(),
+                    event.surface(), event.outcome(), event.ip(), event.detailJson()));
+            return null;
+        }).when(identityStore).insertAudit(any());
+
+        api.action(op, id, "publish")
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error.code").value("INTERNAL_ERROR"));
+
+        JsonNode after = api.work(op, id);
+        assertThat(after.get("publicationState").asText()).isEqualTo("draft");
+        assertThat(after.get("version").asInt()).isEqualTo(before.get("version").asInt());
+        assertThat(revisionCount(op, id)).isEqualTo(revisions);
+        TestSession admin = TestSession.login(mockMvc, "seed-admin", SEED, TestSession.ADMIN);
+        mockMvc.perform(admin.apply(get("/api/v1/admin/audit").param("targetId", id).param("action", "entry.publish")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(0));
+    }
+
+    private int revisionCount(TestSession session, String id) throws Exception {
+        return mapper.readTree(mockMvc.perform(session.apply(get("/api/v1/entries/{id}/revisions", id)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("items").size();
+    }
+}
+```
+
+### 7.5 故障注入
+
+`AuditRetentionServiceTests` 以固定的 `Clock` 注入時間。`AuditRollbackIntegrationTests` 讓 `entry.publish` 的審計寫入在 PostgreSQL 違反外鍵（§7.4）。保留設定的 `PATCH` 不另外測資料庫失敗：它與 `publish` 同樣在 `TransactionRunner` 內；排程中的清理失敗由 Spring 記錄例外，下一次照常執行。
 
 ---
 
@@ -1285,19 +1584,22 @@ class SurfaceMatrixTests {
 | BW4-FM11 | 多個實例同時清理 | 重複 `DELETE` 無害 | 沒有測試（單一實例） | — |
 | BW4-FM12 | 既有資料庫升級 | V9 建表並寫入 90 天 | JDBC 契約（Flyway 從 V1 套到 V9） | T02 |
 | BW4-FM13 | 前面波次的端點在錯的 surface 被允許 | 矩陣測試失敗；停下來回報 | `SurfaceMatrixTests` | T05 |
-| BW4-FM14 | 效能未達標 | `integrationTest` 紅燈；依 §5.4 處理 | `ListQueryPerformanceTests` | T06 |
+| BW4-FM14 | 效能未達標 | `integrationTest` 紅燈；依 §5.4 處理 | `ListQueryPerformanceTests` | T08 |
 | BW4-FM15 | 資料庫失敗 | 500，交易回滾（不變） | BW0 `ApiExceptionHandlerTests` | — |
+| BW4-FM16 | 審計寫入在資料庫失敗（02 BQ-12） | 500；同一個請求的狀態變更、revision 都回滾，不留審計 | `BQ12_failedAuditInsertRollsBackThePublish` | T06、T07 |
+| BW4-FM17 | 應用程式有 DataSource 卻用 in-memory store（BW4 細化前的現況） | 啟動後三個 store 都是 JDBC | `BW4_applicationWithADataSourceUsesTheJdbcStores` | T06、T07 |
 
 ---
 
 ## 9. 交付檢查表
 
-- [ ] T01～T07 全部完成。
+- [ ] T01～T09 全部完成。
 - [ ] `./gradlew test` 全綠（預期 230 個＝BW3 的 223＋本波 7）。
-- [ ] `./gradlew integrationTest` 全綠（預期 74 個＝BW3 的 72＋本波 2）。
+- [ ] `./gradlew integrationTest` 全綠（預期 76 個＝BW3 的 72＋本波 4）。
 - [ ] `npm ci && npm run lint && npm run typecheck && npm test && npm run build` 全綠；或只有 BW1c §2.1 的 codegen 新鮮度／fixture 型別失敗，並已在 PR 說明列出。
 - [ ] `cmp docs/v2/contracts/BW4.openapi.yaml services/cms-api/src/main/resources/openapi/openapi.yaml` 沒有輸出。
 - [ ] `SurfaceMatrixTests` 綠，沒有改動 §5.3 的預期值。
+- [ ] `AuditRollbackIntegrationTests` 2 個綠（應用程式在 PostgreSQL 上用 JDBC store；審計失敗時回滾）。
 - [ ] §5.4 三次量測達標，`docs/v2/perf-records.md` 與 PR 說明都有三列數字。
 - [ ] `gradle.lockfile` 沒有變動。
 - [ ] 沒有秘密或密碼。

@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from app_desired import OWNER, build_plan, render_eru_spec, spec_identity, validate_spec
+from app_desired import OWNER, build_plan, render_eru_spec, snapshot_binding, spec_identity, validate_spec
 
 
 def spec():
@@ -157,6 +157,26 @@ class DesiredStatePlanTests(unittest.TestCase):
         self.assertEqual(plan['decision'], 'blocked')
         self.assertEqual(plan['action'], 'blocked')
         self.assertIn('target node is not available', plan['blockers'])
+
+    def test_snapshot_observation_time_and_row_order_do_not_change_binding(self):
+        second = workload()
+        second['id'] += '-other'
+        state = snapshot([workload(), second])
+        state['pods'].append({'name': 'other-pod'})
+        state['nodes'].append({'name': 'worker-3', 'available': True})
+        state['at'] = '2026-09-25T00:00:00Z'
+        state['hosts'] = {'control': {'private_ip': '100.64.1.1', 'detail': 'private'}}
+        reversed_state = copy.deepcopy(state)
+        reversed_state['at'] = '2026-09-25T00:00:05Z'
+        reversed_state['pods'].reverse()
+        reversed_state['nodes'].reverse()
+        reversed_state['workloads'].reverse()
+        self.assertEqual(snapshot_binding(state), snapshot_binding(reversed_state))
+        self.assertEqual(build_plan(spec(), state)['snapshot_sha256'],
+                         build_plan(spec(), reversed_state)['snapshot_sha256'])
+        changed_state = copy.deepcopy(state)
+        changed_state['hosts']['control']['private_ip'] = '100.64.1.2'
+        self.assertNotEqual(snapshot_binding(state), snapshot_binding(changed_state))
 
     def test_snapshot_change_changes_plan_binding(self):
         first = build_plan(spec(), snapshot())

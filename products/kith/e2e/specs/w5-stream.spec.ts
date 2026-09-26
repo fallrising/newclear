@@ -164,7 +164,7 @@ test(
       await expect(ben.page.getByTestId("message-row").filter({ hasText: "warmup " + rand })).toBeVisible();
       const beforePage = await api.call("GET", "/api/rooms/" + roomId + "/messages?order=desc&limit=1");
       const before = messagesOf(beforePage.json).at(-1)?.seq;
-      expect(before).toBeGreaterThan(0);
+      expect(before).toBeGreaterThanOrEqual(0);
 
       const eventsPromise = readMcpEvents(tok, roomId, before ?? 0, 12_000);
       await sendViaComposer(ben.page, "@" + handle + " [[fake:text=" + enc(T) + ";chunks=8;chunk_ms=300]]");

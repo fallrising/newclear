@@ -59,6 +59,7 @@ test(
       await expect(models).toContainText("fake-gemini-flash");
       await shot(page, info, "02-gemini-test");
       await page.getByTestId("provider-save").click();
+      await expect(page.locator(`[data-testid="provider-row"][data-name="w5g-${rand}"]`)).toBeVisible();
 
       const providers = await api.call("GET", "/api/providers");
       const list = (providers.json as { providers: { id: string; name: string }[] }).providers;
@@ -101,7 +102,7 @@ test(
         await watch;
         await expect(ben.page.getByTestId("message-row").filter({ hasText: text })).toBeVisible({ timeout: 30_000 });
         expect(sawDraft).toBe(agent.stream);
-        await shot(ben.page, info, "03-" + agent.handle);
+        await shot(ben.page, info, "03-" + agent.handle.replaceAll("_", "-"));
       }
 
       const log = await fakeProviderLog();

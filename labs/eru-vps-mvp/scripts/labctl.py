@@ -136,20 +136,33 @@ class Operator:
         self.journal_path = None
         self.journal = None
 
-    def command(self, host, argv, stdin=None, check=True, timeout=90):
+    def command(self, host, argv, stdin=None, check=True, timeout=90,
+                ssh_options=None, record_output=True):
         print(f'[{host}] {shlex.join(argv)}', flush=True)
         event = {'at': now(), 'host': host, 'argv': argv, 'status': 'started'}
+        if ssh_options:
+            event['ssh_options'] = list(ssh_options)
         self.events.append(event)
         self.save_journal()
+        ssh_argv = ['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+            '-o', 'PermitLocalCommand=no', '-o', 'ConnectTimeout=10']
+        if ssh_options:
+            for option in ssh_options:
+                if not isinstance(option, str) or not option:
+                    raise ValueError('SSH options must be non-empty argument strings')
+                ssh_argv += ['-o', option]
+        ssh_argv += [host, shlex.join(argv)]
         try:
-            p = subprocess.run(['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
-                '-o', 'PermitLocalCommand=no', '-o', 'ConnectTimeout=10', host, shlex.join(argv)],
-                input=stdin, capture_output=True, text=True, timeout=timeout, pass_fds=lock_fds())
+            p = subprocess.run(ssh_argv, input=stdin, capture_output=True, text=True,
+                               timeout=timeout, pass_fds=lock_fds())
         except BaseException as exc:
             event.update(status='uncertain', error=type(exc).__name__)
             self.save_journal()
             raise
-        event.update(status='complete', exit_code=p.returncode, stdout=p.stdout, stderr=p.stderr)
+        event.update(status='complete', exit_code=p.returncode,
+                     stdout=p.stdout if record_output else None, stderr=p.stderr)
+        if not record_output:
+            event['stdout_sha256'] = hashlib.sha256(p.stdout.encode()).hexdigest()
         self.save_journal()
         if check and p.returncode:
             raise RuntimeError(f'{host}: exit {p.returncode}: {p.stderr or p.stdout}')
@@ -415,6 +428,10 @@ class Operator:
         from reimage_worker_plan import plan_reimage_worker
         return plan_reimage_worker(self, source_plan_id, expected_hash)
 
+    def install_reimage_worker(self, bootstrap_plan_id, expected_hash):
+        from reimage_worker_install import install_reimage_worker
+        return install_reimage_worker(self, bootstrap_plan_id, expected_hash)
+
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
         envelope = read(self.root / 'plans' / (plan_id + '.json'))
@@ -654,6 +671,9 @@ class Operator:
         if journal.get('operation') == 'provider-reimage-prepare':
             from reimage_prepare import reconcile_preparation
             return reconcile_preparation(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-install':
+            from reimage_worker_install import reconcile_worker_install
+            return reconcile_worker_install(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -693,6 +713,9 @@ def main():
     bootstrap_plan = sub.add_parser('plan-reimage-worker', help='Build a private worker-only bootstrap plan from a verified replacement host')
     bootstrap_plan.add_argument('--plan', required=True, help='Source provider-reimage plan ID')
     bootstrap_plan.add_argument('--sha256', required=True, help='Source provider-reimage plan SHA-256')
+    install_reimage_worker = sub.add_parser('install-reimage-worker', help='Install locked worker-only ERU components while leaving the agent stopped and unregistered')
+    install_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    install_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -748,10 +771,16 @@ def main():
                           for row in plan['worker_files']],
                 'registration': {k: plan['registration'][k]
                                  for k in ['node', 'podname', 'labels', 'resource_capacity']},
+                'worker_install': plan['worker_install'],
                 'executable': plan['executable'], 'blockers': plan['blockers'],
                 'sha256': envelope['sha256'],
                 'path': str(operator.root / 'reimage-bootstrap-plans' / (plan['id'] + '.json')),
             }, indent=2))
+        elif args.command == 'install-reimage-worker':
+            result = operator.install_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'agent_started', 'node_registered', 'finished_at']}, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))

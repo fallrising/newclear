@@ -1,5 +1,7 @@
 # ERU-014 重灌後 worker-only 計畫器（2026-09-26）
 
+後續狀態更新（2026-09-26）：worker-only 遠端安裝階段現已有獨立 hash-bound executor 與 read-only reconcile；目前只完成 fake operator／response 離線驗證，沒有連線或修改 VPS。總 bootstrap plan 仍不可執行，node registration、smoke、resume、恢復 executor 與整體 E2E 仍未完成。詳見 [worker-only 安裝進度](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)。
+
 本紀錄交付 owner receipt 與 replacement-host observation 之後的**離線安裝計畫產生器**。它不連 VPS、不安裝、不註冊 node、不改 inventory、不更新 core known_hosts，也不執行 provider API。原 provider-reimage plan 仍保持 review-only。
 
 `plan-reimage-worker --plan PLAN_ID --sha256 PLAN_SHA256` 只接受同一來源 plan 綁定、preparation journal 已完成、receipt／帶外 host key record 有效、replacement observation 由 strict SSH gate 記錄且摘要未變的輸入。它再次核對本機 trust file、舊／新 machine ID 與 boot ID、OS、SSH/Tailscale/Docker/containerd service、空 ERU runtime、控制面 state absence 及 worker/core alias 身分。Observation 變更或 runtime 不空會拒絕。

@@ -18,6 +18,7 @@ sys.path.insert(0, str(SCRIPTS))
 import labctl
 import reimage_receipt
 import reimage_review
+import reimage_worker_install
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -152,12 +153,17 @@ class FakeReimageOperator(FakeOperator):
         raise AssertionError(argv)
 
     def host_snapshot(self):
-        return copy.deepcopy(self.live['hosts'])
+        aliases = {row['alias'] for row in self.inventory}
+        return {alias: copy.deepcopy(facts) for alias, facts in self.live['hosts'].items()
+                if alias in aliases}
 
-    def command(self, host, argv, stdin=None, check=True, timeout=90):
+    def command(self, host, argv, stdin=None, check=True, timeout=90,
+                ssh_options=None, record_output=True):
         self.remote_commands.append((host, list(argv)))
         event = {'at': '2026-09-26T00:00:00+00:00', 'host': host,
                  'argv': list(argv), 'status': 'started'}
+        if ssh_options:
+            event['ssh_options'] = list(ssh_options)
         self.events.append(event)
         self.save_journal()
         try:
@@ -638,6 +644,123 @@ class OperatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'runtime must be empty'):
             self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
 
+    def ready_worker_bootstrap(self):
+        scripts = self.project / 'scripts'
+        scripts.mkdir(exist_ok=True)
+        for source in SCRIPTS.glob('*.py'):
+            (scripts / source.name).write_bytes(source.read_bytes())
+        blob = bytes.fromhex('0000000b7373682d6564323535313900000020' + '07' * 32)
+        approved = 'ssh-ed25519 ' + base64.b64encode(blob).decode()
+        atomic_json(self.project / 'private/verified-host-public-keys.json',
+                    {labctl.ALIASES[0]: [approved]})
+        self.configure_reimage_bootstrap_inputs()
+        source = self.observed_reimage_source_plan()
+        envelope = self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
+        observation = labctl.read(self.op.root / 'reimage-observations' /
+                                  (source['plan']['id'] + '.json'))['observation']
+        self.op = FakeWorkerInstallOperator(self.project, self.op.live)
+        self.op.configure_install_reports(envelope['plan']['target'])
+        return envelope, observation
+
+    def test_worker_install_gate_is_separate_and_revalidates_local_bindings(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        self.assertFalse(plan['executable'])
+        self.assertEqual(plan['worker_install']['executable'], True)
+        self.assertEqual(plan['worker_install']['blockers'], [])
+        before = list(self.op.remote_commands)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            context = reimage_worker_install._validated_context(
+                self.op, plan['id'], envelope['sha256'])
+        self.assertEqual(context[0]['worker_payload_sha256'], plan['worker_payload_sha256'])
+        self.assertEqual(before, self.op.remote_commands)
+
+    def test_reimage_worker_install_only_installs_and_leaves_agent_and_node_absent(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(result['status'], 'installed-awaiting-registration')
+        self.assertFalse(result['agent_started'])
+        self.assertFalse(result['node_registered'])
+        self.assertEqual(self.op.install_calls, 1)
+        self.assertIn('from="100.64.0.1",command="/usr/local/libexec/eru-ssh-command",no-agent-forwarding,no-X11-forwarding,no-pty ssh-ed25519 ',
+                      self.op.install_input)
+        self.assertEqual([row['name'] for row in self.op.live['nodes']], ['worker-2', 'worker-3'])
+        self.assertEqual(result['post_install']['agent_active_state'], 'inactive')
+        self.assertEqual(result['post_install']['agent_unit_state'], 'disabled')
+        self.assertEqual(result['post_install']['proxy_socket_active_state'], 'active')
+        journal_text = json.dumps(result)
+        self.assertNotIn(self.op.public_key, journal_text)
+        target_events = [event for event in result['events'] if event['host'] == plan['target']['alias']]
+        self.assertTrue(target_events)
+        self.assertTrue(all(event.get('ssh_options') == [
+            'UserKnownHostsFile=' + str(self.op.trusted_hostkeys_dir / 'disposable-04'),
+            'GlobalKnownHostsFile=/dev/null', 'UpdateHostKeys=no'] for event in target_events
+            if event['argv'] != ['sudo', '-n', 'systemctl', 'stop', 'eru-agent.service']))
+        self.assertFalse(any('node' in argv and any(op in argv for op in ('add', 'up'))
+                             for _, argv in self.op.remote_commands))
+        with self.assertRaisesRegex(ValueError, 'already has a journal'):
+            with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+                self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(self.op.install_calls, 1)
+
+    def test_uncertain_worker_install_reconciles_read_only_and_is_never_replayed(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        self.op.lose_install_reply = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'response lost'):
+                self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        journal = self.journal(envelope)
+        self.assertEqual(journal['status'], 'failed')
+        self.assertIsNone(journal['remote_mutation_performed'])
+        self.assertTrue(journal['remote_mutation_attempted'])
+        count = self.op.install_calls
+        ssh_config = ('user ckc\\nhostname 100.64.0.44\\nport 22\\n'
+                      'proxycommand /usr/bin/tailscale nc %h %p\\n')
+        with patch('reimage_worker_install.subprocess.run',
+                   return_value=subprocess.CompletedProcess(['ssh', '-G'], 0, ssh_config, '')):
+            reconciled = self.op.reconcile(plan['id'])
+        self.assertFalse(reconciled['reconciliation']['remote_mutation_performed'])
+        self.assertTrue(reconciled['reconciliation']['target_registered'] is False)
+        self.assertEqual(reconciled['status'], 'failed')
+        self.assertEqual(self.op.install_calls, count)
+        self.assertEqual(self.op.install_calls, 1)
+        with self.assertRaisesRegex(ValueError, 'already has a journal'):
+            with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+                self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+
+    def test_worker_install_embedded_remote_sources_compile(self):
+        compile('import os\nEXPECTED = {}\n' + reimage_worker_install.INSTALL_PREFLIGHT,
+                'worker-install-preflight', 'exec')
+        compile(reimage_worker_install.POST_FACTS, 'worker-install-verifier', 'exec')
+        source = 'CONFIG = {}\n' + (SCRIPTS / 'remote_install.py').read_text()
+        compile(source, 'worker-remote-installer', 'exec')
+
+    def test_worker_install_rejects_core_key_drift_against_pinned_input(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        drifted = bytes.fromhex('0000000b7373682d6564323535313900000020' + '08' * 32)
+        self.op.public_key = 'ssh-ed25519 ' + base64.b64encode(drifted).decode() + ' eru-vps-mvp-core'
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'not uniquely approved'):
+                self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(self.op.install_calls, 0)
+        self.assertFalse(any(host == plan['target']['alias']
+                             for host, _ in self.op.remote_commands))
+        self.assertEqual(self.journal(envelope)['status'], 'failed')
+
+    def test_worker_install_preflight_drift_fails_before_installer(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        self.op.preflight['install_destinations_absent'] = False
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'clean, empty worker install target'):
+                self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(self.op.install_calls, 0)
+        self.assertEqual(self.journal(envelope)['status'], 'failed')
+
     def test_manual_reimage_has_separate_empty_worker_preparation_gate(self):
         envelope = self.reimage_preparation_plan()
         plan = envelope['plan']
@@ -1003,3 +1126,85 @@ class OperatorTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+class FakeWorkerInstallOperator(FakeReimageOperator):
+    def __init__(self, project, snapshot):
+        super().__init__(project, snapshot)
+        self.target_alias = next(row['alias'] for row in self.inventory if row['node'] == 'worker-4')
+        self.install_calls = 0
+        self.install_input = None
+        self.installed = False
+        self.lose_install_reply = False
+        blob = bytes.fromhex('0000000b7373682d6564323535313900000020' + '07' * 32)
+        self.public_key = 'ssh-ed25519 ' + base64.b64encode(blob).decode() + ' eru-vps-mvp-core'
+        self.preflight = None
+        self.post_facts = None
+
+    def _record_install_event(self, host, argv, stdin, check, timeout, ssh_options, record_output, output=''):
+        event = {'at': '2026-09-26T00:00:00+00:00', 'host': host,
+                 'argv': list(argv), 'status': 'started'}
+        if ssh_options:
+            event['ssh_options'] = list(ssh_options)
+        self.remote_commands.append((host, list(argv)))
+        self.events.append(event); self.save_journal()
+        event.update(status='complete', exit_code=0,
+                     stdout=output if record_output else None, stderr='')
+        if not record_output:
+            event['stdout_sha256'] = hashlib.sha256(output.encode()).hexdigest()
+        self.save_journal()
+        return output
+
+    def command(self, host, argv, stdin=None, check=True, timeout=90,
+                ssh_options=None, record_output=True):
+        if host == self.core['alias'] and argv == ['sudo', '-n', 'cat', '/etc/eru/ssh_key.pub']:
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output, self.public_key + chr(10))
+        if host == self.target_alias and argv == ['sudo', '-n', 'python3', '-']:
+            if isinstance(stdin, str) and stdin.startswith('CONFIG='):
+                self.install_input = stdin
+                self.install_calls += 1
+                self.installed = True
+                if self.lose_install_reply:
+                    event = self.events[-1] if self.events else None
+                    # Use the common fake event writer, then mark the result uncertain.
+                    self._record_install_event(host, argv, stdin, check, timeout,
+                                               ssh_options, record_output, '')
+                    self.events[-1].update(status='uncertain', error='TimeoutError')
+                    self.save_journal()
+                    raise TimeoutError('worker install SSH response lost')
+                return self._record_install_event(host, argv, stdin, check, timeout,
+                                                  ssh_options, record_output,
+                                                  json.dumps({'role': 'worker', 'install_complete': True}))
+            if isinstance(stdin, str) and stdin.startswith('import os'+chr(10)+'EXPECTED = '):
+                return self._record_install_event(host, argv, stdin, check, timeout,
+                    ssh_options, record_output, json.dumps(self.preflight or {}))
+            if stdin == reimage_worker_install.POST_FACTS:
+                return self._record_install_event(host, argv, stdin, check, timeout,
+                    ssh_options, record_output, json.dumps(self.post_facts or {}))
+        if host == self.target_alias and len(argv) == 5 and argv[:4] == ['sudo', '-n', 'python3', '-']:
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                ssh_options, record_output, json.dumps(self.audit_report()))
+        return super().command(host, argv, stdin, check, timeout, ssh_options, record_output)
+
+    def audit_report(self):
+        from worker_scope import REINSTALL_FILES, SHARED_FILES
+        return {'scope_verified': self.installed, 'blockers': [],
+                'node': 'worker-4', 'manifest_sha256': 'd' * 64,
+                'files_to_reinstall': [{'path': path, 'sha256': 'e' * 64} for path in REINSTALL_FILES],
+                'preserved_owned_files': list(SHARED_FILES)}
+
+    def configure_install_reports(self, target):
+        from reimage_worker_install import PRESERVED_SERVICES
+        services = {unit: 'active' for unit in PRESERVED_SERVICES}
+        self.preflight = {'schema_version': 1, 'services': services,
+            'runtime_counts': {'containers': 0, 'tasks': 0}, 'docker_containers': [],
+            'owner_manifest_present': False, 'install_destinations_absent': True,
+            'authorized_key_path_verified': True, 'docker_version': target['docker_version'],
+            'containerd_version': target['containerd_version']}
+        self.post_facts = {'schema_version': 1, 'machine_id': target['machine_id'],
+            'boot_id': target['boot_id'], 'os_release': target['os_release'],
+            'tailscale_ipv4': target['tailscale_ipv4'], 'services': services,
+            'runtime_counts': {'containers': 0, 'tasks': 0}, 'docker_containers': [],
+            'docker_version': target['docker_version'], 'containerd_version': target['containerd_version'],
+            'agent_active_state': 'inactive', 'agent_unit_state': 'disabled',
+            'proxy_socket_active_state': 'active', 'proxy_socket_unit_state': 'enabled',
+            'root_login_prohibited': True, 'owner_manifest_present': True}

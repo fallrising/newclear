@@ -1,5 +1,7 @@
 # ERU-014 人工控制台重灌 intent／receipt 前置（2026-09-25）
 
+後續狀態更新（2026-09-26）：worker-only 遠端安裝階段現已有獨立 hash-bound executor 與 read-only reconcile；目前只完成 fake operator／response 離線驗證，沒有連線或修改 VPS。總 bootstrap plan 仍不可執行，node registration、smoke、resume、恢復 executor 與整體 E2E 仍未完成。詳見 [worker-only 安裝進度](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)。
+
 本紀錄交付 ERU-014 的離線計畫輸入核對，**不是重灌執行器，也不是 VPS 驗收**。仍由 owner 在 provider 控制台操作；不呼叫 provider API、不需要供應商 token。intent、provider 資源識別及實機資料只存於 `private/`，此 repo 不提供可直接套用的實機範例。
 
 ## 離線核對契約

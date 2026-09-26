@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於選定空 worker-2／3／4；02／03 僅完成本機驗證，實機尚待觀測結束後安排；provider-reimage 的總計畫仍為唯讀；ERU-side 重灌前摘除器是獨立 hash-bound 命令，尚未對 VPS 執行。
+入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile 與 ERU-014 的獨立 worker-only install 階段。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。重灌前摘除與重灌後安裝都仍未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -89,9 +89,9 @@ python3 scripts/labctl.py status --run PLAN_ID
 python3 scripts/labctl.py plan-reimage-worker --plan SOURCE_PLAN_ID --sha256 SOURCE_PLAN_SHA256
 ```
 
-它只準備鎖定的 agent/CNI payload 與舊 node capacity/labels 的 registration 意圖，plan 仍不可執行。遠端安裝、更新單一 core host-key 記錄、先 fence 再註冊、smoke、resume、inventory/generation 更新與 recovery executor 尚待實作。詳見 [ERU-014 摘除紀錄](M3-REIMAGE-PREPARE-2026-09-26.md) 與 [worker-only 計畫紀錄](M3-REIMAGE-WORKER-PLAN-2026-09-26.md)。
+它只準備鎖定的 agent/CNI payload 與舊 node capacity／labels 的 registration 意圖；總 plan 仍不可執行。完成人工 OS 重灌與 strict host verification 後，可對計畫綁定的 ckc-disposable worker alias 執行 install-reimage-worker，並以 status 查看同一 run。安裝前會重核 owner receipt、host key、machine incarnation、core health／membership、其他 hosts、乾淨 install paths、保留服務與空 runtime；只安裝 locked worker artifacts／worker 設定與 core 公鑰，只啟動 eru-containerd-proxy.socket，agent 保持停止／disabled、node 保持未註冊。worker_install gate 只代表這個有限階段，總 plan executable 仍為 false。若中斷或回覆不確定，只對同一 run 執行 read-only reconcile，不能重播安裝。
 
-此命令本輪只以 fake operator 驗證，沒有連線或修改任何 VPS；正式 OS reimage acceptance 仍待本機開發收尾後另行安排。
+安裝階段目前只以 fake operator／remote responses 驗證，沒有連線或修改任何 VPS；重新納管、HTTP smoke、resume、恢復 executor 與正式 OS reimage acceptance 仍待本機開發收尾後另行安排。詳見 M3-REIMAGE-WORKER-INSTALL-2026-09-26.md。
 
 ## worker-4 重建計畫
 

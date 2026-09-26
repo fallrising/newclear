@@ -89,7 +89,22 @@ def main(config):
     if os.geteuid() != 0:
         raise RuntimeError('requires root')
     os.umask(0o077)
+    current = Path('/')
+    for part in ROOT.parts[1:]:
+        current = current / part
+        if current.is_symlink():
+            raise RuntimeError('refusing symlink in ERU owner path')
+    if ROOT.exists() and (not ROOT.is_dir() or ROOT.stat().st_uid != 0 or ROOT.stat().st_mode & 0o077):
+        raise RuntimeError('ERU owner directory is unsafe')
     ROOT.mkdir(mode=0o700, exist_ok=True)
+    if OWNER.is_symlink() or (OWNER.exists() and not OWNER.is_file()):
+        raise RuntimeError('ERU owner manifest has an unsafe type')
+    if OWNER.exists():
+        owner_stat = OWNER.stat()
+        if owner_stat.st_uid != 0 or owner_stat.st_mode & 0o077 or owner_stat.st_nlink != 1:
+            raise RuntimeError('ERU owner manifest permissions or links are unsafe')
+    if (ROOT / 'owner.json.tmp').exists() or (ROOT / 'owner.json.tmp').is_symlink():
+        raise RuntimeError('stale ERU owner journal file exists')
     state = json.loads(OWNER.read_text()) if OWNER.exists() else {'owner': 'eru-vps-mvp', 'files': {}}
     if state.get('owner') != 'eru-vps-mvp':
         raise RuntimeError('ownership mismatch')
@@ -98,12 +113,20 @@ def main(config):
 
     def persist():
         temp = ROOT / 'owner.json.tmp'
-        temp.write_text(json.dumps(state, indent=2) + '\n')
+        with temp.open('x') as stream:
+            stream.write(json.dumps(state, indent=2) + '\n')
         temp.chmod(0o600)
         temp.replace(OWNER)
 
     def install(path, content, mode):
         target = Path(path)
+        if not target.is_absolute():
+            raise RuntimeError(f'refusing non-absolute install path: {path}')
+        current = Path('/')
+        for part in target.parts[1:-1]:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError(f'refusing symlink ancestor: {path}')
         if target.is_symlink():
             raise RuntimeError(f'refusing symlink: {path}')
         data = content.encode() if isinstance(content, str) else content
@@ -189,6 +212,11 @@ def main(config):
         if key_paths != ['/etc/ssh/onevps-personal-admin/ckc.keys']:
             raise RuntimeError('unreviewed effective AuthorizedKeysFile: ' + repr(key_paths))
         auth = Path(key_paths[0])
+        current = Path('/')
+        for part in auth.parts[1:-1]:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError('refusing symlink in effective AuthorizedKeysFile path')
         original = auth.stat()
         if original.st_uid != 0 or original.st_mode & 0o022:
             raise RuntimeError('unsafe existing admin key file')

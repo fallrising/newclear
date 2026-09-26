@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install／fenced registration 階段。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 與新 registration executor 都尚未在 VPS 驗收；該 patch 仍未部署，smoke／resume 階段尚未接入。
+入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、fenced registration 與 fenced smoke stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；registration／smoke executors 僅以 fake 驗證，resume 階段尚未接入，以上皆未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -101,7 +101,20 @@ python3 scripts/labctl.py status --run BOOTSTRAP_PLAN_ID-register
 python3 scripts/labctl.py reconcile --run BOOTSTRAP_PLAN_ID-register
 ```
 
-registration 只會在安全 core 上 AddNode、啟動 agent，並等待 `available=true`、`bypass=true`，停在 `registered-awaiting-smoke`。它不會執行 `node up`、smoke 或 generation commit。這些階段目前只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
+registration 只會在安全 core 上 AddNode、啟動 agent，並等待 `available=true`、`bypass=true`，停在 `registered-awaiting-smoke`。它不會執行 `node up` 或 generation commit。下一個獨立 smoke stage 需要兩台其他 worker 上、且已包含在來源 reimage plan snapshot 的 run-owned nginx canaries：
+
+```bash
+# 先於 provider-reimage source plan 建立並保留 worker-2／3 canaries；之後用同一 run ID
+python3 scripts/labctl.py plan-reimage-worker-smoke --plan BOOTSTRAP_PLAN_ID \
+  --sha256 BOOTSTRAP_PLAN_SHA256 --canary-run CANARY_RUN_ID
+# B -> 01 core、目標 worker alias 與兩台 peer aliases；只跑目標 worker smoke，peer HTTP guards 持續運行
+python3 scripts/labctl.py smoke-reimage-worker --plan SMOKE_PLAN_ID --sha256 SMOKE_PLAN_SHA256
+python3 scripts/labctl.py status --run SMOKE_PLAN_ID
+# B -> 同 aliases；失敗或 response 不確定時只讀 reconcile，不能重跑 smoke plan
+python3 scripts/labctl.py reconcile --run SMOKE_PLAN_ID
+```
+
+成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。registration／smoke stages 只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
 
 ## worker-4 重建計畫
 

@@ -802,7 +802,9 @@ Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-1
 | Q-15 | surface-back §3.4 的全頁 token 預覽（`/preview/t/:token`、`POST /entries/{id}/preview-tokens`、`GET /preview/{token}`）在 BW0～BW5 的契約都沒有。 | **A**：請後端新增這兩個端點（TTL 15 分鐘、只給 Back），前端另開一波加路由；**B**：v2 只做編輯器內預覽（`GET /preview/entries/{id}`，W2 已做）。 | **B**。W2 依 B 撰寫 |
 | Q-16 | README 路線圖（BW5 合併後）建議「前端 W2、W4 以 BW5 的契約為準」；W2 細化時的指示是「W2 用 `BW2.openapi.yaml`」。BW5 對 W2 可見的差異只有 5 個媒體錯誤代碼改大寫（[waves/BW5.md](waves/BW5.md) §4.2）。 | **A**：W2 維持 BW2 契約，整合階段依 [waves/W2.md](waves/W2.md) §2.1 的對照表替換 5 個字串（Q-10 的做法）；**B**：W2 改以 BW5 產生型別，mock 與選擇器直接用大寫代碼（需要重新預演 W2）。 | **A**。W2 依 A 撰寫 |
 
-### 13.6 W3 細化時新增（待確認）
+### 13.6 W3 細化時新增、已決定（owner，2026-09-26）
+
+Owner 指示「按建議」：Q-17 選 A（轉後端窗口；在對應後端波次合併前，Front 依 W3 的做法在 `copy.ts` 自帶標籤）、Q-18 選 B、Q-19 選 A。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |

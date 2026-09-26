@@ -6,7 +6,7 @@
 
 | ID | 決策 | 理由 | 狀態 |
 | --- | --- | --- | --- |
-| D-01 | 新前端放 `products/kith/web/`，與 `frontend/` 並存到 W7 | 可逐步驗收；隨時可比對；切換風險集中在一個 PR | Proposed（使用者 2026-09-23 同意方向） |
+| D-01 | 新前端放 `products/kith/web/`，與 `frontend/` 並存到 W7 | 可逐步驗收；隨時可比對；切換風險集中在一個 PR | Accepted（W7 落地，2026-09-26） |
 | D-02 | v2 文件放 `docs/v2/`；v1 SDD 保留為既有後端契約 | 不打斷 v1 的權威鏈；v2 只加不改 | Proposed（同上） |
 | D-03 | 視覺方向：溫暖、親近（紙白、陶土、鼠尾草） | 產品名「Kith」＝親友；與 Slack／iOS 設定頁區隔 | Proposed（同上） |
 | D-04 | 所有訊息渲染安全 Markdown 子集 | agent 輸出幾乎都是 Markdown；v1 純文字可讀性差 | Proposed（同上） |
@@ -35,7 +35,7 @@ v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。
 | [ADR-0002](../adr/0002-credentials.md) Hosted default | 核心版 hosted 只直連 xAI；Secret `XAI_API_KEY` | xAI 成為 preset 之一；`XAI_API_KEY` 經遷移變成 env 連線 | W4 | ADR-0006 |
 | SDD §3 刻意不做；[08](../sdd/08-decisions-sources.md) | 核心版 Workers 不連 thinrouter | Kith 不內建個人訂閱轉 API 的 preset；operator 自接者必須標 `operator_personal`（BR-54、RT-11） | W4 | ADR-0006 |
 | SDD FR-07；[ADR-0003](../adr/0003-codex-pin.md) | personal agent＝Codex sidecar | runner 泛化（Codex 是 adapter 之一）；INV-13、INV-14 推廣到所有 adapter（RT-06、RT-07） | W6 | 本文件 |
-| [09 UI](../sdd/09-human-chat-ui.md)、[10 UI](../sdd/10-members-and-mention.md) 視覺與鎖字；[11 房間畫面](../sdd/11-room-screen.md)（#48 起取代 09、10 的畫面部分） | 11 的深色 rail／暖白紙面色票與版面；固定英文字串；`live` pill；不做 Markdown | v2 [06](06-ux.md)、[07](07-visual-design.md) 取代；09、10 的行為規則保留 | W7 | ADR-0005 |
+| [09 UI](../sdd/09-human-chat-ui.md)、[10 UI](../sdd/10-members-and-mention.md) 視覺與鎖字；[11 房間畫面](../sdd/11-room-screen.md)（#48 起取代 09、10 的畫面部分） | 11 的深色 rail／暖白紙面色票與版面；固定英文字串；`live` pill；不做 Markdown | v2 [06](06-ux.md)、[07](07-visual-design.md) 取代；09、10 的行為規則保留 | W7（已生效） | ADR-0005 |
 | SDD §3 刻意不做 | Markdown | 安全子集（BR-34） | W1（新前端） | D-04 |
 
 **不修訂**：INV-01–INV-19 全部保留。尤其 INV-08（Room 不呼叫 LLM）、INV-09（模型無管理工具）、INV-13（operator-only personal 配額）、INV-15（LLM fetch 只在 HostedGeneration DO）、INV-19（replay 不是工作佇列）。

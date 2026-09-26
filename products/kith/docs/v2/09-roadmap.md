@@ -122,7 +122,7 @@ P1 大框架（#47）
 - 驗收：
   - `E2E-W7-01` 全套 E2E 通過（唯一一次在里程碑內跑全套），證據資料夾附在 PR。
   - `E2E-W7-02` production build 大小與效能預算（[05](05-frontend-architecture.md) §7）。
-- 狀態：`IN_PROGRESS`（施工圖：[milestones/W7.md](milestones/W7.md)）。首次載入 JS 預算依實測改為 250 KiB（Q-31）；控制台改為延後載入；正式部署由 operator 依 W7 §4.7 手動執行，CI 不部署。
+- 狀態：`VERIFIED`（施工圖：[milestones/W7.md](milestones/W7.md)；全套 run `20260926-123648-a0ff1fa`：43 通過、desktop 的 `E2E-W1-06` 依專案設定跳過，遮罩命中 0，`e2e:validate` ok）。首次載入 JS gzip 224801 bytes（219.53 KiB）；控制台改為延後載入；正式部署由 operator 依 W7 §4.7 手動執行，CI 不部署。
 
 ## 4. Phase 2 的寫法（給之後的細化）
 

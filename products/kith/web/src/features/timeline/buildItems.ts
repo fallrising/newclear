@@ -9,7 +9,7 @@ export type TimelineItem =
   | { kind: "top"; key: "top" }
   | { kind: "date"; key: string; date: string }
   | { kind: "new"; key: "new" }
-  | { kind: "message"; key: string; row: ServerMessage; groupHead: boolean }
+  | { kind: "message"; key: string; row: ServerMessage; groupHead: boolean; replyCount: number; lastReplyAt: string | null }
   | { kind: "pending"; key: string; pending: PendingSend; groupHead: boolean }
   | { kind: "reply"; key: string; memberId: string; draft?: string; phase: ReplyPhase }
   | { kind: "failed"; key: string; memberId: string; errorClass: string | null; blocked: boolean };
@@ -30,9 +30,21 @@ export function buildItems(
   const items: TimelineItem[] = [{ kind: "top", key: "top" }];
   let prev: ServerMessage | null = null;
   let insertedNew = false;
+  const threadByRoot = new Map<string, { count: number; lastAt: string }>();
   for (const seq of t.seqs) {
     const row = t.rows[seq];
-    if (!row || row.kind !== "message") continue;
+    if (!row?.thread_id) continue;
+    const cur = threadByRoot.get(row.thread_id);
+    if (!cur) threadByRoot.set(row.thread_id, { count: 1, lastAt: row.created_at });
+    else {
+      cur.count += 1;
+      cur.lastAt = row.created_at;
+    }
+  }
+  for (const seq of t.seqs) {
+    const row = t.rows[seq];
+    // Main timeline is roots only. Thread replies and traces keep their seq for gap fill (FE-12).
+    if (!row || row.kind !== "message" || row.thread_id !== null) continue;
     const d = dateKey(row.created_at, timeZone);
     let groupHead: boolean;
     if (prev === null || dateKey(prev.created_at, timeZone) !== d) {
@@ -46,7 +58,15 @@ export function buildItems(
       insertedNew = true;
       groupHead = true;
     }
-    items.push({ kind: "message", key: "s:" + row.seq, row, groupHead });
+    const thread = threadByRoot.get(row.id);
+    items.push({
+      kind: "message",
+      key: "s:" + row.seq,
+      row,
+      groupHead,
+      replyCount: thread?.count ?? 0,
+      lastReplyAt: thread?.lastAt ?? null,
+    });
     prev = row;
   }
   for (const p of t.pending) {

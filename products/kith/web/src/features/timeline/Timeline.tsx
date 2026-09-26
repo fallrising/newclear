@@ -194,6 +194,7 @@ export function Timeline(props: Props): ReactElement {
             isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
           />
         );
       }
@@ -210,6 +211,7 @@ export function Timeline(props: Props): ReactElement {
             isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
           />
         );
       }

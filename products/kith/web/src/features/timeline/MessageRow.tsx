@@ -11,6 +11,7 @@ import { displayName } from "../../ui/displayName";
 import { formatClock } from "../../ui/time";
 import type { TimelineItem } from "./buildItems";
 import { MessageActions } from "./MessageActions";
+import { ThreadSummary } from "./ThreadSummary";
 
 type Props = {
   item: Extract<TimelineItem, { kind: "message" | "pending" }>;
@@ -22,6 +23,7 @@ type Props = {
   isOperator: boolean;
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
+  roomSlug: string;
 };
 
 export function MessageRow(props: Props): ReactElement {
@@ -66,6 +68,9 @@ export function MessageRow(props: Props): ReactElement {
         <div data-testid="message-body" className={"text-md text-ink" + (faded ? " opacity-70" : "")}>
           <Markdown source={body} mentionHandles={props.mentionHandles} />
         </div>
+        {item.kind === "message" && item.replyCount > 0 && item.lastReplyAt && (
+          <ThreadSummary roomSlug={props.roomSlug} rootId={item.row.id} count={item.replyCount} lastAt={item.lastReplyAt} />
+        )}
         {pending && (
           <div className="text-xs flex items-center gap-2">
             {(pending.state === "queued" || pending.state === "sending") && (
@@ -108,7 +113,7 @@ export function MessageRow(props: Props): ReactElement {
         className={outer}
       >
         {content}
-        <MessageActions row={item.row} isOperator={props.isOperator} />
+        <MessageActions row={item.row} isOperator={props.isOperator} roomSlug={props.roomSlug} />
       </article>
     );
   }

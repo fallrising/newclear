@@ -8,7 +8,7 @@
 | [01 — 前端 v2 SDD](01-frontend-sdd.md) | 架構、Shopify 參考對照、tokens、元件、三個操作面的畫面、後端缺口、驗收、前端波次 |
 | [02 — 後端 v2 SDD](02-backend-sdd.md) | 後端現況問題、決策、資料表變更、API 變更、品質閘門、後端波次 |
 | [REFINE-PROMPT](REFINE-PROMPT.md) | 把一個波次細化成施工圖的 prompt（給 LLM agent） |
-| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md)、[W0](waves/W0.md)、[BW1a](waves/BW1a.md)、[BW1b](waves/BW1b.md)、[BW1c](waves/BW1c.md)、[BW2](waves/BW2.md)、[BW3](waves/BW3.md)、[BW4](waves/BW4.md) |
+| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md)、[W0](waves/W0.md)、[BW1a](waves/BW1a.md)、[BW1b](waves/BW1b.md)、[BW1c](waves/BW1c.md)、[BW2](waves/BW2.md)、[BW3](waves/BW3.md)、[BW4](waves/BW4.md)、[BW5](waves/BW5.md) |
 | `contracts/` | 施工圖的契約：OpenAPI 片段 `<波次>.openapi.yaml`、測試 fixture 規格 |
 | [perf-records.md](perf-records.md) | 02 §5.4 效能目標的量測紀錄（預演與實作的數字） |
 
@@ -59,7 +59,7 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 | W3b | DRAFT | 01 §7.1 | — | Front 會員區（surface-front AC-10～12） |
 | W5 | DRAFT | 01 §10、§12 | — | 剩餘 P2、效能 |
 | BW4 | DOC_READY | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
-| BW5 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | — | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
+| BW5 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 
 狀態：`DRAFT`（只有框架）→ `DOC_READY`（施工圖已合併）→ `IN_PROGRESS` → `VERIFIED`（實作已合併並通過交付檢查表）。
 

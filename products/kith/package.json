@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev-bind.mjs worker",
-    "dev:frontend": "node scripts/dev-bind.mjs frontend",
+    "dev:web": "node scripts/dev-bind.mjs web",
     "dev:sidecar": "node scripts/run-sidecar-local.mjs",
     "check:live": "node scripts/check-live-prereqs.mjs",
     "db:migrate:local": "wrangler d1 migrations apply kith --local",

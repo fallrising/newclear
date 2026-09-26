@@ -102,9 +102,10 @@ export function useUpdateAttention(): UseMutationResult<
 }
 
 /** Deep link or a root older than the timeline window. Later replies arrive through RoomSync. */
-export function useThread(roomId: string, rootId: string): UseQueryResult<ServerMessage[], Error> {
+export function useThread(roomId: string, rootId: string, enabled = true): UseQueryResult<ServerMessage[], Error> {
   return useQuery({
     queryKey: ["rooms", roomId, "thread", rootId],
+    enabled,
     queryFn: async ({ signal }) => {
       const page = await apiFetch<MessagesPage>(
         `/api/rooms/${encodeURIComponent(roomId)}/messages?thread_id=${encodeURIComponent(rootId)}&kind=message,trace&order=asc&limit=50`,

@@ -70,6 +70,8 @@ export function buildItems(
     prev = row;
   }
   for (const p of t.pending) {
+    // Thread sends render in the thread panel, not under the root on the main timeline.
+    if (p.threadId) continue;
     const last = items[items.length - 1];
     const joins = last?.kind === "pending" || (last?.kind === "message" && last.row.sender_id === meId);
     items.push({ kind: "pending", key: "p:" + p.clientMessageId, pending: p, groupHead: !joins });

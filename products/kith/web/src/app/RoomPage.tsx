@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactElement } from "react";
-import { useParams } from "react-router";
+import { useCallback, useEffect, useState, type ReactElement } from "react";
+import { useNavigate, useParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMe } from "../api/auth";
 import { roomsQueryKey, useRoomMembers, useRooms, useUpdateRoom } from "../api/rooms";
@@ -10,6 +10,7 @@ import { TypingIndicator } from "../features/composer/TypingIndicator";
 import { InviteDialog } from "../features/console";
 import { MembersPanel } from "../features/members";
 import { RoomHeader, RoomNotFound } from "../features/rooms";
+import { ThreadPanel } from "../features/threads";
 import { Timeline } from "../features/timeline";
 import { useTimelineStore, useRoomTimeline } from "../store/timeline";
 import { readCursor, useUnreadStore } from "../store/unread";
@@ -28,9 +29,10 @@ function useMediaQuery(query: string): boolean {
   return matches;
 }
 
-function RoomView(props: { room: RoomSummary; me: Me }): ReactElement {
+function RoomView(props: { room: RoomSummary; me: Me; threadId?: string }): ReactElement {
   const t = useT();
-  const { room, me } = props;
+  const navigate = useNavigate();
+  const { room, me, threadId } = props;
   const members = useRoomMembers(room.id);
   const sync = useRoomSync(room.id, me.id);
   const timeline = useRoomTimeline(room.id);
@@ -42,6 +44,10 @@ function RoomView(props: { room: RoomSummary; me: Me }): ReactElement {
   const isMobile = useMediaQuery("(max-width: 767px)");
   const archived = room.archived_at !== null;
   const operator = me.is_operator === 1;
+  const threadOpen = threadId !== undefined && threadId.length > 0;
+  const closeThread = useCallback(() => {
+    navigate("/r/" + room.slug);
+  }, [navigate, room.slug]);
 
   useEffect(() => {
     return () => {
@@ -55,6 +61,22 @@ function RoomView(props: { room: RoomSummary; me: Me }): ReactElement {
   const panel = (
     <MembersPanel room={room} me={me} onClose={() => setMembersOpen(false)} onInvite={() => setInviteOpen(true)} />
   );
+  const thread = threadOpen ? (
+    <ThreadPanel
+      room={room}
+      rootId={threadId}
+      me={me}
+      members={members.data}
+      timeline={timeline}
+      phase={phase}
+      archived={archived}
+      onClose={closeThread}
+      onSend={(body) => sync?.send(body, { threadId })}
+      onTyping={() => sync?.sendTyping()}
+      onRetry={(cmid) => sync?.retry(cmid)}
+      onDiscard={(cmid) => sync?.discard(cmid)}
+    />
+  ) : null;
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -100,20 +122,27 @@ function RoomView(props: { room: RoomSummary; me: Me }): ReactElement {
           onTyping={() => sync?.sendTyping()}
         />
       </div>
-      {isLg && membersOpen && (
+      {isLg && thread && (
+        <aside className="flex w-80 min-h-0 shrink-0 flex-col border-l border-border bg-surface">{thread}</aside>
+      )}
+      {isLg && !threadOpen && membersOpen && (
         <aside data-testid="members-aside" className="hidden w-80 shrink-0 flex-col border-l border-border bg-surface lg:flex">
           {panel}
         </aside>
       )}
       {!isLg && (
         <Sheet
-          open={membersOpen}
-          onOpenChange={setMembersOpen}
+          open={threadOpen || membersOpen}
+          onOpenChange={(open) => {
+            if (open) return;
+            if (threadOpen) closeThread();
+            else setMembersOpen(false);
+          }}
           side={isMobile ? "bottom" : "right"}
-          title={t("members.title")}
-          data-testid="members-sheet"
+          title={threadOpen ? t("thread.title") : t("members.title")}
+          data-testid={threadOpen ? undefined : "members-sheet"}
         >
-          {panel}
+          {threadOpen ? thread : panel}
         </Sheet>
       )}
       <InviteDialog room={inviteOpen ? room : null} onOpenChange={setInviteOpen} />
@@ -122,7 +151,7 @@ function RoomView(props: { room: RoomSummary; me: Me }): ReactElement {
 }
 
 export function RoomPage(): ReactElement {
-  const { slug } = useParams();
+  const { slug, threadId } = useParams();
   const rooms = useRooms();
   const me = useMe().data!;
   const queryClient = useQueryClient();
@@ -133,5 +162,5 @@ export function RoomPage(): ReactElement {
   if (rooms.isError) return <RoomNotFound />;
   const room = rooms.data.find((r) => r.slug === slug);
   if (!room) return <RoomNotFound />;
-  return <RoomView key={room.id} room={room} me={me} />;
+  return <RoomView key={room.id} room={room} me={me} threadId={threadId} />;
 }

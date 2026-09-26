@@ -158,6 +158,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/dim-gate` | A | M0–M5 demo accepted locally |
 | `platform/ice-maker` | A | Knowledge-compiler investment line |
 | `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
+| `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
 | `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
 | `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
 | `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
@@ -179,3 +180,10 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `labs/bee-swarm` | D | Superseded by team-superpowers workflow |
 | `labs/aweshore` | D | Explicitly stopped |
 
+## Owner override 2026-09-27 — labs/mithril-research
+
+Owner 明確要求在 `fallrising/newclear` 建立項目並研究 `projecteru2/mithril`。本次例外僅限 [labs/mithril-research](labs/mithril-research/README.md) 的原始碼／文件研究、驗證設計與後續隔離實驗規劃；文檔檔位 A，當前 M0 為 documentation-only，runtime 尚未驗證。
+
+這不是新代理產品或 production 部署授權，不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane 的實作範圍。上游源碼不匯入 monorepo。M1 真正加入 fixture/harness 前先確認 disposable 環境、版本與安全邊界；實機變更及更大範圍整合另行決定。
+
+其餘 portfolio 決策維持不變；研究結論、固定來源、未完成驗證與下一步集中於該項目的 RESEARCH、SOURCES、VALIDATION、STATUS。

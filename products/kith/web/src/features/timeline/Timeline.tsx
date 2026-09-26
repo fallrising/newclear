@@ -195,6 +195,7 @@ export function Timeline(props: Props): ReactElement {
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
             roomSlug={props.room.slug}
+            roomId={props.room.id}
           />
         );
       }
@@ -212,6 +213,7 @@ export function Timeline(props: Props): ReactElement {
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
             roomSlug={props.room.slug}
+            roomId={props.room.id}
           />
         );
       }

@@ -12,6 +12,7 @@ import { formatClock } from "../../ui/time";
 import type { TimelineItem } from "./buildItems";
 import { MessageActions } from "./MessageActions";
 import { ThreadSummary } from "./ThreadSummary";
+import { TraceCard } from "./TraceCard";
 
 type Props = {
   item: Extract<TimelineItem, { kind: "message" | "pending" }>;
@@ -24,6 +25,7 @@ type Props = {
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
   roomSlug: string;
+  roomId: string;
 };
 
 export function MessageRow(props: Props): ReactElement {
@@ -31,6 +33,9 @@ export function MessageRow(props: Props): ReactElement {
   const { locale } = useLocale();
   const { item, sender, isMe } = props;
   const name = sender ? displayName(sender) : t("timeline.unknownSender");
+  if (item.kind === "message" && item.row.kind === "trace") {
+    return <TraceCard roomId={props.roomId} row={item.row} senderName={name} />;
+  }
   const body = item.kind === "message" ? item.row.body : item.pending.body;
   const createdAt = item.kind === "message" ? item.row.created_at : null;
   const mentionsMe = findMentions(body, [props.meHandle]).length > 0;

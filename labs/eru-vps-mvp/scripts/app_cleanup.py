@@ -267,6 +267,16 @@ class AppRevisionCleanup:
                 journal.update(status='failed', reason='malformed_workload_snapshot')
                 self._save(journal_path, journal)
                 raise ValueError('malformed workload snapshot; no remove attempted')
+            initial_workloads = snapshot_binding(current).get('workloads')
+            if (not isinstance(initial_workloads, list)
+                    or any(not isinstance(row, dict)
+                           or not isinstance(row.get('id'), str)
+                           for row in initial_workloads)
+                    or sorted(row.get('id') for row in initial_workloads
+                              if isinstance(row, dict)) != initial_ids):
+                journal.update(status='failed', reason='malformed_workload_identity_snapshot')
+                self._save(journal_path, journal)
+                raise ValueError('malformed workload identity snapshot; no remove attempted')
 
             for target in targets:
                 self._stage(journal_path, journal, 'verify_new_revision')
@@ -328,16 +338,22 @@ class AppRevisionCleanup:
 
                 self._stage(journal_path, journal, 'post_remove_audit')
                 after = self.api.snapshot()
-                expected_ids = sorted(set(initial_ids) - set(journal['removed_ids']))
+                removed_ids = set(journal['removed_ids'])
+                expected_ids = sorted(set(initial_ids) - removed_ids)
                 observed_ids = sorted(row['id'] for row in after['workloads']
                                       if isinstance(row, dict) and isinstance(row.get('id'), str))
+                expected_workloads = [row for row in initial_workloads
+                                      if row['id'] not in removed_ids]
+                observed_workloads = snapshot_binding(after).get('workloads')
                 clean, summary = self._preflight(after)
                 journal['last_preflight'] = summary
-                if observed_ids != expected_ids or not clean:
+                if (observed_ids != expected_ids
+                        or observed_workloads != expected_workloads or not clean):
                     journal.update(status='needs_review',
                                    reason='post_remove_state_or_consistency_changed')
                     self._save(journal_path, journal)
-                    raise RuntimeError('post-remove state changed or consistency failed')
+                    raise RuntimeError(
+                        'post-remove state changed: workload identity or consistency changed')
 
             self._stage(journal_path, journal, 'final_verify')
             ready, reason, probes = self._ready_current_revision(plan)
@@ -348,10 +364,18 @@ class AppRevisionCleanup:
             final = self.api.snapshot()
             final_ids = sorted(row['id'] for row in final['workloads']
                                if isinstance(row, dict) and isinstance(row.get('id'), str))
+            removed_ids = set(journal['removed_ids'])
+            expected_final_workloads = [
+                row for row in initial_workloads if row['id'] not in removed_ids]
+            final_workloads = snapshot_binding(final).get('workloads')
             if any(target['id'] in final_ids for target in targets):
                 journal.update(status='needs_review', reason='cleanup_target_still_visible')
                 self._save(journal_path, journal)
                 raise RuntimeError('a cleanup target remains visible')
+            if final_workloads != expected_final_workloads:
+                journal.update(status='needs_review', reason='final_workload_identity_changed')
+                self._save(journal_path, journal)
+                raise RuntimeError('final workload identities differ from the reviewed cleanup')
             clean, summary = self._preflight(final)
             if not clean:
                 journal.update(status='needs_review', reason='final_consistency_failed',

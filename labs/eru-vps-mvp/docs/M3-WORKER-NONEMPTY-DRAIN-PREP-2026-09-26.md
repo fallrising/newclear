@@ -29,7 +29,7 @@ plan 只包含 review 所需的 IDs、owner／digest、destination、snapshot �
 2. journal 先記錄 fence intent，再單次 fence target。若命令回覆遺失，只查詢目前 fence 狀態；確認不了就停在 uncertain。
 3. 逐 app 呼叫既有 `AppExecutor`，每次重核來源 exact IDs、destination、健康與 consistency。任一 replacement create／probe 不確定都不進 cleanup，所有來源 workload 保留。
 4. 所有 destination revisions 全部 exact owner／digest／replica／node 符合且 HTTP readiness 再驗成功後，才開始清理來源。
-5. 每 app 使用 `AppRevisionCleanup` 產生新 cleanup plan；plan targets 必須等於 review 中來源 ID 集合。遠端 remove 只按 exact workload ID 執行，任何不確定結果保留 fence。
+5. 每 app 使用 `AppRevisionCleanup` 產生新 cleanup plan；plan targets 必須等於 review 中來源 ID 集合。遠端 remove 只按 exact workload ID 執行，任何不確定結果保留 fence。共用 cleanup executor 每次 remove 後會比對全群 workload IDs 與正規化 identity（node／owner／logical app／digest），必須等於計畫 snapshot 扣除已確認移除的 exact IDs；最後 readiness probe 後再核對一次。其他 workload 即使 ID 未變，只要 identity 漂移就停止並保留尚未移除的來源。
 6. 全部來源清理後，沿用 `component_reinstall.empty_target` 同時核對 target metadata、ERU containers、tasks 與巢狀 resource usage 為零。只有這項完整檢查通過，drain journal 才記錄 `component_reinstall_allowed: true`；executor 隨即停止，由操作員另建一般 component-reinstall plan。
 
 所有 stage 共用 B 的 `ClusterLock`；parent journal 綁定 execution plan hash，child journals 分別沿用 ERU-012 executor／cleanup 格式。reconcile/recover 只讀 snapshot、node fence 狀態、replacement appname 與來源 exact IDs；不 deploy、不 probe、不 remove、不重送 fence，也不會讓失敗 plan 重跑。它先留下 `needs_review` 對帳結果，再給操作員下一步建議。
@@ -60,4 +60,4 @@ python3 scripts/labctl.py execute-worker-drain-cleanup \
 
 離線 `worker_drain.py` 輸出仍永遠 `executable: false`；執行需先用 live adapter 建立獨立 hash-bound execution plan。partial cleanup recovery 只支援完整、owned、stateless 的 ERU-012 workloads；legacy／foreign／stateful、partial 或 stale revisions 會阻擋，需先人工分類與另案設計。fresh plan 一次涵蓋一個 app；任何新 cleanup 嘗試前都要先做 read-only reconcile。空 target 一律走既有元件重裝路徑。沒有讀寫真實 private inventory，沒有連 VPS，沒有跑 E2E。
 
-26 個 drain fake tests（planner 10、executor／recovery／adapter／操作入口 16）覆蓋完整多 app mapping、未知 owner／workload、partial replica／舊 revision、preflight 與 drift gate、單次 fence 及遺失回覆對帳、所有替代 ready 前來源保留、readiness／create／cleanup 失敗、exact-ID 移除、failed-plan 禁止重播、partial cleanup fresh plan、child journal 唯讀對帳、stale proof／額外 workload 阻擋、私有路徑限制、空 worker gate，以及 `labctl` fresh cleanup plan／execute／recover 命令路由與輸出遮罩。ERU-012 cleanup 另有 fresh subset plan 測試。完整本機 suite 共 379 tests 通過（前一切片為 378）。ERU-009 仍缺真實 CLI／API/job 語意驗收與整體 VPS E2E。
+26 個 drain fake tests（planner 10、executor／recovery／adapter／操作入口 16）覆蓋完整多 app mapping、未知 owner／workload、partial replica／舊 revision、preflight 與 drift gate、單次 fence 及遺失回覆對帳、所有替代 ready 前來源保留、readiness／create／cleanup 失敗、exact-ID 移除、failed-plan 禁止重播、partial cleanup fresh plan、child journal 唯讀對帳、stale proof／額外 workload 阻擋、私有路徑限制、空 worker gate，以及 `labctl` fresh cleanup plan／execute／recover 命令路由與輸出遮罩。ERU-012 cleanup 回歸涵蓋 fresh subset plan、清理中途的其他 workload identity 漂移，以及最後 readiness probe 後的 identity 漂移。PR #136 合併時完整 suite 為 379 tests；此本機切片再新增 2 tests，目前完整 suite 381 tests 通過。ERU-009 仍缺真實 CLI／API/job 語意驗收與整體 VPS E2E。

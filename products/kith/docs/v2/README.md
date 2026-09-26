@@ -2,7 +2,7 @@
 
 - Version: 0.1.0（Phase 1：大框架）
 - Date: 2026-09-23
-- Status: Phase 1 已合併（#47）。尚未實作；各條 v1 修訂在對應里程碑落地時才生效（見 [10](10-decisions.md) §2）。
+- Status: W0–W7 已落地（以各里程碑 PR 為準）。
 - Scope: `products/kith/**`
 - Language: 繁體中文，保留必要英文術語
 
@@ -12,7 +12,7 @@ v1（M0–M7，見 [SDD.md](../../SDD.md)）把後端契約做得很扎實：單
 
 v2 要做三件事：
 
-1. **前端重新實作**：新目錄 `products/kith/web/`，與舊 `frontend/` 並存，最後一個里程碑才切換部署。
+1. **前端重新實作**：目錄 `products/kith/web/`。舊 `frontend/` 已於 W7 刪除。
 2. **agent 接入泛化**：不再以 Grok 或 Codex 為中心。Hosted agent 支援主流 LLM API 格式（OpenAI Chat Completions 相容、OpenAI Responses、Anthropic Messages、Gemini），外部 runner（Codex CLI、Claude Code、任意指令）與一般 MCP client 並列。
 3. **後端只做加法**：新增 API、欄位、表；不改既有 API 的語意，不破壞 v1 不變量（例外必須在 [10](10-decisions.md) 與 ADR 明寫）。
 
@@ -56,12 +56,12 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | W4 Providers、hosted 多格式、控制台 | [milestones/W4.md](milestones/W4.md) | `VERIFIED` |
 | W5 串流與可觀測 | [milestones/W5.md](milestones/W5.md) | `VERIFIED` |
 | W6 Runner、trace、thread | [milestones/W6.md](milestones/W6.md) | `VERIFIED` |
-| W7 切換 | [milestones/W7.md](milestones/W7.md) | `DOC_READY` |
+| W7 切換 | [milestones/W7.md](milestones/W7.md) | `VERIFIED` |
 
 相關 ADR：
 
-- [ADR-0005 — v2 web 前端](../adr/0005-v2-web-frontend.md)（Proposed）
-- [ADR-0006 — 多格式 LLM provider](../adr/0006-llm-provider-formats.md)（Proposed，將部分取代 ADR-0002 的 hosted 預設）
+- [ADR-0005 — v2 web 前端](../adr/0005-v2-web-frontend.md)（accepted，v2 W7）
+- [ADR-0006 — 多格式 LLM provider](../adr/0006-llm-provider-formats.md)（accepted，v2 W7；部分取代 ADR-0002 的 hosted 預設）
 
 ## 文件優先級
 

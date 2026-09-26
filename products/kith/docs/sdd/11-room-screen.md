@@ -2,6 +2,8 @@
 
 [回主 SDD](../../SDD.md) · 協定：[04](04-protocol.md) · 行為：[09](09-human-chat-ui.md)、[10](10-members-and-mention.md) · 驗收：[06](06-verification.md)
 
+> **Superseded（v2 W7，2026-09-26）：** 本章的畫面契約已由 v2 [06 UX](../v2/06-ux.md) 與 [07 視覺](../v2/07-visual-design.md) 取代，執行中的前端是 `products/kith/web/`，舊 `frontend/` 已刪除。本章保留的行為規則（IME、@ 補全鍵盤、邀請錯誤、回覆狀態過期、成員讀取失敗）由 v2 [06](../v2/06-ux.md) §9 承接並以 v2 E2E 驗收；本章其餘內容只供歷史對照。
+
 ## 目的
 
 打開就看得出這是人與 agent 一起說話的房間，並且知道下一步怎麼做。

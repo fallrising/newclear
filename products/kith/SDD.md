@@ -150,7 +150,7 @@ Sidecar: GET /mcp/events live tail --> 本地 INV-13 --> 官方 Codex CLI
 | `worker/` Inbox DO | `notify()` 同步 mention／keyword；ambient 只寫該房 pending + `setAlarm`；live tail ≤ 128／membership | 不 await LLM；禁止 sleep/setTimeout；不把多房 pending 塞進同一個 DO |
 | `worker/` HostedGeneration DO | 建立時綁定 `{generation_id, agent_id, room_id}`（無 bot token）；持有 LLM `fetch`；完成後以該 `agent_id` 向 Room send | 不自己分配 seq；失敗須釋放 ambient lock；不得冒充其他 agent |
 | `worker/` transport（Hono） | TLS 終止、auth、HTTP/WS/MCP 路由、`GET /mcp/events` 的 D1 catch-up 再接 Inbox live tail | 不分配 seq；不 `waitUntil` 跑模型 |
-| `frontend/` | React+Vite：房間列表、時間線、成員 badge、thread、status 細條、摺疊 traces | 不存 bot token；不執行房間內「MCP 指令」當 HTML |
+| `web/` | React 19＋Vite 6（v2，[docs/v2/05](docs/v2/05-frontend-architecture.md)）：房間列表、時間線、成員、thread、trace、控制台 | 不存 bot token；不執行房間內「MCP 指令」當 HTML |
 | `sidecar/` | operator 主機官方 CLI/SDK；MCP client + events GET；本地 INV-13 | 不把憑證上傳 Worker；不與 fanzloud 共用目錄；不對 `replay:true` exec |
 | `contracts/` | JSON Schema、heuristic 表、golden vectors（M0） | 不得出現 `subscribe_events` tool |
 
@@ -248,7 +248,7 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 
 文件優先級：本文件的不變量 > 專題章節 > roadmap 的示例命令。DESIGN 用於架構數字與模組邊界；來源文件用於理解及比較，不自動凌駕 kith 已明確選定的協定。
 
-根 `.github/workflows/kith.yml` 與 `docs/specs/monorepo-ci.md` 已有 Kith。`worker/`、`frontend/`、`sidecar/` 已存在。線上站是 `https://kith.fallrising.workers.dev`。
+根 `.github/workflows/kith.yml` 與 `docs/specs/monorepo-ci.md` 已有 Kith。`worker/`、`web/`、`sidecar/`、`runner/` 已存在（`frontend/` 於 v2 W7 刪除）。線上站是 `https://kith.fallrising.workers.dev`。
 
 ## 13. 章節索引
 
@@ -267,6 +267,6 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
 - [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)
-- [ADR-0005 v2 web 前端](docs/adr/0005-v2-web-frontend.md)（proposed）
+- [ADR-0005 v2 web 前端](docs/adr/0005-v2-web-frontend.md)（accepted）
 - [ADR-0006 多格式 LLM provider](docs/adr/0006-llm-provider-formats.md)（proposed）
 - [v2 設計文件](docs/v2/README.md)（proposed；列出它將修訂的 v1 條文）

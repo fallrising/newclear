@@ -1,6 +1,6 @@
 # ADR-0006 — Hosted agents use operator-configured providers in popular LLM API formats
 
-- Status: proposed
+- Status: accepted（v2 W7 切換，#130，2026-09-26）
 - Date: 2026-09-23
 - Applies to: kith v2 W4 起（[docs/v2/03](../v2/03-agent-runtime.md)）
 - Amends when accepted: [ADR-0002](0002-credentials.md)「Hosted default」、SDD FR-06、v1 [04 協定](../sdd/04-protocol.md) §7

@@ -7,7 +7,7 @@ import type { Me, RoomSummary } from "../api/types";
 import { useT } from "../copy";
 import { Composer } from "../features/composer";
 import { TypingIndicator } from "../features/composer/TypingIndicator";
-import { InviteDialog } from "../features/console";
+import { InviteDialog } from "../features/invite";
 import { MembersPanel } from "../features/members";
 import { RoomHeader, RoomNotFound } from "../features/rooms";
 import { ThreadPanel } from "../features/threads";

@@ -48,7 +48,7 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
 | --- | --- | --- | --- | --- |
 | BW0 | VERIFIED | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW0.md](waves/BW0.md) | B-01、B-08、B-14、B-15 |
-| W0 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W0.md](waves/W0.md) | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
+| W0 | VERIFIED | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W0.md](waves/W0.md) | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
 | BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
 | BW1b | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1b.md](waves/BW1b.md) | B-02、B-09、B-10；G-02 |
 | BW1c | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1c.md](waves/BW1c.md) | B-06、B-13；G-07 |

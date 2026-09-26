@@ -1,34 +1,99 @@
+/* Imported once by each app's main.tsx: `import "@cms/ui/styles.css"`. */
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "./tokens.css";
 
-:root {
-  color-scheme: dark;
-  --bg: #101418;
-  --panel: #181d24;
-  --line: #2a3340;
-  --text: #e8eef4;
-  --muted: #93a0b0;
-  --accent: #7eb6ff;
-  --danger: #ff8b8b;
+/* F-01: Tailwind v4 only detects classes under the app's own directory. Scan this package too. */
+@source "./";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-subdued: var(--surface-subdued);
+  --color-subdued: var(--text-subdued);
+  --color-border-strong: var(--border-strong);
+  --color-critical: var(--critical);
+  --color-critical-bg: var(--critical-bg);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-caution: var(--caution);
+  --color-caution-bg: var(--caution-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-admin-accent: var(--admin-accent);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
+@theme {
+  /* 01 §5.2: controls 8px, cards 12px, badges fully rounded. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  /* Operator type scale (01 §5.2). */
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-table: 13px;
+  --text-table--line-height: 18px;
+  --text-page-title: 20px;
+  --text-page-title--line-height: 28px;
+  --text-page-title--font-weight: 650;
+  --text-card-title: 14px;
+  --text-card-title--line-height: 20px;
+  --text-card-title--font-weight: 650;
+
+  /* Front type scale (01 §5.3). */
+  --text-front-body: 16px;
+  --text-front-body--line-height: 26px;
+  --text-front-title: 32px;
+  --text-front-title--line-height: 40px;
+  --text-front-title--font-weight: 600;
+  --text-front-heading: 22px;
+  --text-front-heading--line-height: 30px;
+  --text-front-heading--font-weight: 600;
 }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
 }

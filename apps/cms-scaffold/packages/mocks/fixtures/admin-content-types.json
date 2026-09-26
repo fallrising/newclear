@@ -1,0 +1,583 @@
+{
+  "items": [
+    {
+      "key": "album",
+      "displayName": "Album",
+      "pluralDisplayName": "Albums",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "sortMode",
+          "type": "enum",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "photo",
+      "displayName": "Photo",
+      "pluralDisplayName": "Photos",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "caption",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "album",
+          "type": "ref",
+          "required": true,
+          "indexed": false,
+          "refTarget": "album"
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "takenAt",
+          "type": "datetime",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "media",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "page",
+      "displayName": "Page",
+      "pluralDisplayName": "Pages",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "clinic_profile",
+      "displayName": "Clinic profile",
+      "pluralDisplayName": "Clinic profiles",
+      "titleField": "name",
+      "slugPolicy": "required",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "name",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "intro",
+          "type": "markdown",
+          "required": true,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "telephone",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "hours",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "hero",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "owner",
+      "displayName": "Owner",
+      "pluralDisplayName": "Owners",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "telephone",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "pet",
+      "displayName": "Pet",
+      "pluralDisplayName": "Pets",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "petType",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "birthDate",
+          "type": "datetime",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "owner",
+          "type": "ref",
+          "required": true,
+          "indexed": false,
+          "refTarget": "owner"
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "notes",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "photo",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "vet",
+      "displayName": "Vet",
+      "pluralDisplayName": "Vets",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "specialty",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "bio",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "photo",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "visit",
+      "displayName": "Visit",
+      "pluralDisplayName": "Visits",
+      "titleField": "title",
+      "slugPolicy": "none",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "pet",
+          "type": "ref",
+          "required": true,
+          "indexed": false,
+          "refTarget": "pet"
+        },
+        {
+          "key": "owner",
+          "type": "ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": "owner"
+        },
+        {
+          "key": "vet",
+          "type": "ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": "vet"
+        },
+        {
+          "key": "scheduledAt",
+          "type": "datetime",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "visitKind",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "project",
+      "displayName": "Project",
+      "pluralDisplayName": "Projects",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "summary",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "lifecycle",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "issue",
+      "displayName": "Issue",
+      "pluralDisplayName": "Issues",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "project",
+          "type": "ref",
+          "required": true,
+          "indexed": false,
+          "refTarget": "project"
+        },
+        {
+          "key": "milestone",
+          "type": "ref",
+          "required": false,
+          "indexed": false,
+          "refTarget": "milestone"
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "status",
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "assigneePrincipalId",
+          "type": "string",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        }
+      ]
+    },
+    {
+      "key": "milestone",
+      "displayName": "Milestone",
+      "pluralDisplayName": "Milestones",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "project",
+          "type": "ref",
+          "required": true,
+          "indexed": false,
+          "refTarget": "project"
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "dueDate",
+          "type": "datetime",
+          "required": false,
+          "indexed": false,
+          "refTarget": null
+        },
+        {
+          "key": "status",
+          "type": "enum",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "indexed": true,
+          "refTarget": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,3 @@
-import { createClient } from "@cms/api";
+import { createFrontClient } from "@cms/api/public";
 
-export const api = createClient({
-  base: import.meta.env.VITE_API_BASE || "http://localhost:8080",
-  surface: "front",
-});
+export const api = createFrontClient({ baseUrl: import.meta.env.VITE_API_BASE || "http://localhost:8080" });

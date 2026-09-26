@@ -1,0 +1,240 @@
+{
+  "items": [
+    {
+      "key": "album",
+      "displayName": "Album",
+      "pluralDisplayName": "Albums",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false
+        },
+        {
+          "key": "sortMode",
+          "type": "enum",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "photo",
+      "displayName": "Photo",
+      "pluralDisplayName": "Photos",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "caption",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "album",
+          "type": "ref",
+          "required": true
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false
+        },
+        {
+          "key": "takenAt",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "key": "media",
+          "type": "media-ref",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "page",
+      "displayName": "Page",
+      "pluralDisplayName": "Pages",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "clinic_profile",
+      "displayName": "Clinic profile",
+      "pluralDisplayName": "Clinic profiles",
+      "titleField": "name",
+      "fields": [
+        {
+          "key": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "intro",
+          "type": "markdown",
+          "required": true
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "telephone",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "hours",
+          "type": "markdown",
+          "required": false
+        },
+        {
+          "key": "hero",
+          "type": "media-ref",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "vet",
+      "displayName": "Vet",
+      "pluralDisplayName": "Vets",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "specialty",
+          "type": "enum",
+          "required": false
+        },
+        {
+          "key": "bio",
+          "type": "markdown",
+          "required": false
+        },
+        {
+          "key": "photo",
+          "type": "media-ref",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "project",
+      "displayName": "Project",
+      "pluralDisplayName": "Projects",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "summary",
+          "type": "markdown",
+          "required": false
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false
+        },
+        {
+          "key": "lifecycle",
+          "type": "enum",
+          "required": false
+        }
+      ]
+    },
+    {
+      "key": "milestone",
+      "displayName": "Milestone",
+      "pluralDisplayName": "Milestones",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "project",
+          "type": "ref",
+          "required": true
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false
+        },
+        {
+          "key": "dueDate",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "key": "status",
+          "type": "enum",
+          "required": false
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

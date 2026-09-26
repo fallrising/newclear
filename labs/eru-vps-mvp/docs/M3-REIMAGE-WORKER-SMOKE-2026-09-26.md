@@ -31,4 +31,4 @@ fake-only 測試覆蓋 fenced smoke 成功且清理 workload、peer canary drift
 
 ## 下一步
 
-接上單次 `eru_node_resume.py` 安全 resume stage，核對 available=true／bypass=false，再設計 resume 後 inventory／cluster generation commit 與跨階段 recovery。只有本機各階段完成並驗證後才安排正式 VPS E2E。OS reimage 與日常元件重裝分開驗收；不使用 provider API。
+下一階段已實作為 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)：僅在此 smoke 成功後，經 core alias 單次執行 `node up`，停在 `resumed-awaiting-generation-commit`。後續才提交 worker IP／host-key／cluster generation 並完成跨階段 recovery。只有本機各階段完成並驗證後才安排正式 VPS E2E。OS reimage 與日常元件重裝分開驗收；不使用 provider API。

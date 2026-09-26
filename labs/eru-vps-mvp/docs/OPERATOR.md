@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、fenced registration 與 fenced smoke stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；registration／smoke executors 僅以 fake 驗證，resume 階段尚未接入，以上皆未在 VPS 驗收。
+入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、fenced registration、fenced smoke 與 safe-resume stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；registration／smoke／resume executors 僅以 fake 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -114,7 +114,7 @@ python3 scripts/labctl.py status --run SMOKE_PLAN_ID
 python3 scripts/labctl.py reconcile --run SMOKE_PLAN_ID
 ```
 
-成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。registration／smoke stages 只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
+成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `ckc-disposable-01` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。registration／smoke／resume stages 只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
 
 ## worker-4 重建計畫
 

@@ -403,7 +403,7 @@ class Operator:
                 }
                 plan['blockers'] += [
                     'Owner console reimage, receipt and replacement-host verification are separate manual stages',
-                    'Safe resume, generation commit and recovery executor are not implemented',
+                    'Generation commit and recovery executor are not implemented',
                 ]
                 plan['steps'] = [f'Quiesce {node}; enumerate and relocate owned workloads',
                     'Verify empty node/runtime; stop target agent; remove exact node registration',
@@ -443,6 +443,14 @@ class Operator:
     def smoke_reimage_worker(self, plan_id, expected_hash):
         from reimage_worker_smoke import run_reimage_worker_smoke
         return run_reimage_worker_smoke(self, plan_id, expected_hash)
+
+    def plan_reimage_worker_resume(self, smoke_plan_id, smoke_hash):
+        from reimage_worker_resume import plan_reimage_worker_resume
+        return plan_reimage_worker_resume(self, smoke_plan_id, smoke_hash)
+
+    def resume_reimage_worker(self, plan_id, expected_hash):
+        from reimage_worker_resume import resume_reimage_worker
+        return resume_reimage_worker(self, plan_id, expected_hash)
 
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
@@ -692,6 +700,9 @@ class Operator:
         if journal.get('operation') == 'provider-reimage-worker-smoke':
             from reimage_worker_smoke import reconcile_reimage_worker_smoke
             return reconcile_reimage_worker_smoke(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-resume':
+            from reimage_worker_resume import reconcile_reimage_worker_resume
+            return reconcile_reimage_worker_resume(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -744,6 +755,12 @@ def main():
     smoke_worker = sub.add_parser('smoke-reimage-worker', help='Run a single-worker smoke while the replacement stays fenced')
     smoke_worker.add_argument('--plan', required=True, help='Worker smoke plan ID')
     smoke_worker.add_argument('--sha256', required=True, help='Worker smoke plan SHA-256')
+    plan_worker_resume = sub.add_parser('plan-reimage-worker-resume', help='Plan one safe resume after a successful fenced smoke')
+    plan_worker_resume.add_argument('--plan', required=True, help='Successful worker smoke plan ID')
+    plan_worker_resume.add_argument('--sha256', required=True, help='Worker smoke plan SHA-256')
+    resume_worker = sub.add_parser('resume-reimage-worker', help='Resume a smoked worker exactly once and keep generation unchanged')
+    resume_worker.add_argument('--plan', required=True, help='Worker resume plan ID')
+    resume_worker.add_argument('--sha256', required=True, help='Worker resume plan SHA-256')
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -838,6 +855,22 @@ def main():
             print(json.dumps({k: result.get(k) for k in [
                 'id', 'operation', 'status', 'stage', 'target', 'target_alias',
                 'available', 'bypass', 'smoke_evidence', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-resume':
+            envelope = operator.plan_reimage_worker_resume(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'smoke_plan': plan['smoke_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-resume-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'resume-reimage-worker':
+            result = operator.resume_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'available', 'bypass', 'resume_attempted', 'resume_outcome', 'finished_at']}, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))

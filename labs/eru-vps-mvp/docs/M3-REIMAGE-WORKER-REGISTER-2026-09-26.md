@@ -8,7 +8,7 @@ Plan 內的 `worker_registration` gate 綁定 `patches/core-v0.1.5-safe-node-add
 
 執行器先要求 worker install journal 是 `installed-awaiting-registration`，worker machine／boot identity、owner scope、健康、其他主機與 cluster snapshot 未改變，agent inactive／disabled，目標 node 尚不存在。它再以 plan 綁定的舊 node name、pod、endpoint、labels 和 resource capacity，對 `ckc-disposable-01` 執行單次 AddNode。AddNode 回來後立即核對新 node identity／capacity／labels、zero usage 及 `bypass=true`；接著只對 plan 指定的 worker alias 執行 `systemctl enable --now eru-agent.service`，等待 core 回報 `available=true`，並持續要求 `bypass=true`。最後重驗 host identity、services、其他 workers 與 core health，成功狀態為 `registered-awaiting-smoke`。
 
-此階段不執行 `node up`、HTTP smoke、其他 worker smoke、core known_hosts 寫入、private inventory 更新、cluster generation commit 或 cleanup。安全 resume helper `scripts/eru_node_resume.py` 留給後續明確核准的 resume stage。
+此階段不執行 `node up`、HTTP smoke、其他 worker smoke、core known_hosts 寫入、private inventory 更新、cluster generation commit 或 cleanup。後續 smoke 與 [safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 各有獨立 hash-bound stage；resume helper 只透過 core SSH alias 由其 executor 呼叫。
 
 ## 單次執行與 reconcile
 
@@ -30,4 +30,4 @@ registration journal 在每一個 mutation 前先保存 attempted state。若 Ad
 
 ## 後續
 
-registration 之後已有獨立 fenced smoke executor，詳見 [smoke stage](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)；它以 target-only nginx lifecycle smoke 與兩個 peer 的連續 HTTP guards 驗證並停在 `smoked-awaiting-resume`。ERU-014 尚需受控部署 safe core patch、host-key 對帳、單次安全 resume、resume 後核對、private inventory／generation commit，以及跨 install／registration／smoke／resume 階段 recovery executor。正式 VPS E2E 留待本機開發收尾後進行。OS reimage 與日常 ERU 元件重裝分開驗收；不使用 provider API。
+registration 之後已有獨立 fenced smoke executor，詳見 [smoke stage](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)；它以 target-only nginx lifecycle smoke 與兩個 peer 的連續 HTTP guards 驗證並停在 `smoked-awaiting-resume`。ERU-014 尚需受控部署 safe core patch、host-key 對帳、resume 後 private inventory／generation commit，以及跨 install／registration／smoke／resume／commit 階段 recovery executor。正式 VPS E2E 留待本機開發收尾後進行。OS reimage 與日常 ERU 元件重裝分開驗收；不使用 provider API。

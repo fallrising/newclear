@@ -1,13 +1,15 @@
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState, type ReactElement } from "react";
+import { useNavigate } from "react-router";
 import type { ServerMessage } from "../../api/types";
 import { useT } from "../../copy";
 import { Button } from "../../ui/Button";
 import { Dialog } from "../../ui/Dialog";
 import { Menu } from "../../ui/Menu";
 
-export function MessageActions(props: { row: ServerMessage; isOperator: boolean }): ReactElement {
+export function MessageActions(props: { row: ServerMessage; isOperator: boolean; roomSlug: string }): ReactElement {
   const t = useT();
+  const navigate = useNavigate();
   const { row } = props;
   const [coarse] = useState(() => window.matchMedia("(pointer: coarse)").matches);
   const [copied, setCopied] = useState(false);
@@ -50,6 +52,14 @@ export function MessageActions(props: { row: ServerMessage; isOperator: boolean 
             >
               <span aria-live="polite">{copied ? t("message.copied") : t("message.copy")}</span>
             </Menu.Item>
+            {props.row.thread_id === null && (
+              <Menu.Item
+                data-testid="message-action-thread"
+                onSelect={() => navigate("/r/" + props.roomSlug + "/t/" + props.row.id)}
+              >
+                {t("message.replyInThread")}
+              </Menu.Item>
+            )}
             {props.isOperator && (
               <Menu.Item data-testid="message-action-details" onSelect={() => setDetails(true)}>
                 {t("message.details")}

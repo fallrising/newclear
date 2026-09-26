@@ -18,6 +18,7 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "worker/**/*.ts",
+    "runner/**/*.ts",
     "vitest.config.ts",
     "vitest.worker.config.ts",
     "vitest.m3.config.ts"

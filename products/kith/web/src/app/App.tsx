@@ -76,7 +76,9 @@ export function App(): ReactElement {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/" element={<RequireAuth><Layout mobile="list"><HomeEmptyRoute /></Layout></RequireAuth>} />
-              <Route path="/r/:slug" element={<RequireAuth><Layout mobile="content"><RoomPage /></Layout></RequireAuth>} />
+              <Route path="/r/:slug" element={<RequireAuth><Layout mobile="content"><RoomPage /></Layout></RequireAuth>}>
+                <Route path="t/:threadId" element={null} />
+              </Route>
               <Route path="/settings" element={<RequireAuth><Layout mobile="content"><SettingsRoute /></Layout></RequireAuth>} />
               <Route path="/console" element={<RequireAuth><Navigate to="/console/agents" replace /></RequireAuth>} />
               <Route path="/console/agents" element={<ConsoleScreen active="agents"><AgentsPage /></ConsoleScreen>} />

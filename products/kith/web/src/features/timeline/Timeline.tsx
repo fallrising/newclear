@@ -194,6 +194,8 @@ export function Timeline(props: Props): ReactElement {
             isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
+            roomId={props.room.id}
           />
         );
       }
@@ -210,16 +212,18 @@ export function Timeline(props: Props): ReactElement {
             isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
+            roomId={props.room.id}
           />
         );
       }
       case "reply": {
         const member = props.members?.find((m) => m.id === item.memberId);
-        return member ? <ReplyPlaceholder member={member} draft={item.draft} /> : <span />;
+        return member ? <ReplyPlaceholder member={member} draft={item.draft} phase={item.phase} /> : <span />;
       }
       case "failed": {
         const member = props.members?.find((m) => m.id === item.memberId);
-        return member ? <ReplyFailed member={member} errorClass={item.errorClass} /> : <span />;
+        return member ? <ReplyFailed member={member} errorClass={item.errorClass} blocked={item.blocked} /> : <span />;
       }
     }
   };

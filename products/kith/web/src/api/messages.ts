@@ -27,8 +27,16 @@ export function fetchAfterMessages(roomId: string, afterSeq: number, signal: Abo
   return apiFetch<MessagesPage>(`${base(roomId)}?order=asc&after_seq=${afterSeq}&limit=50&kind=message`, { signal });
 }
 
-export function postMessage(roomId: string, body: string, clientMessageId: string, signal: AbortSignal): Promise<ServerMessage> {
-  return apiFetch<ServerMessage>(base(roomId), { method: "POST", body: { body, client_message_id: clientMessageId }, signal });
+export function postMessage(
+  roomId: string,
+  body: string,
+  clientMessageId: string,
+  signal: AbortSignal,
+  threadId?: string | null,
+): Promise<ServerMessage> {
+  const payload: { body: string; client_message_id: string; thread_id?: string } = { body, client_message_id: clientMessageId };
+  if (threadId) payload.thread_id = threadId;
+  return apiFetch<ServerMessage>(base(roomId), { method: "POST", body: payload, signal });
 }
 
 /** Only used to tell a lost session (401) apart from other WS upgrade failures. */

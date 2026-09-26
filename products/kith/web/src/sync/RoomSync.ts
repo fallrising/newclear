@@ -411,9 +411,17 @@ export class RoomSync {
     this.ws.send(JSON.stringify({ v: 1, type: "status", body: "typing" }));
   }
 
-  send(body: string): void {
+  send(body: string, opts?: { threadId?: string }): void {
     const cmid = newClientMessageId(this.d.random);
-    this.S().upsertPending(this.roomId, { clientMessageId: cmid, body, order: ++this.orderSeq, state: "queued", failCode: null });
+    const threadId = opts?.threadId;
+    this.S().upsertPending(this.roomId, {
+      clientMessageId: cmid,
+      body,
+      order: ++this.orderSeq,
+      state: "queued",
+      failCode: null,
+      threadId: threadId && threadId.length > 0 ? threadId : null,
+    });
     this.flushSends();
   }
 
@@ -452,7 +460,14 @@ export class RoomSync {
     }
     this.setPendingState(next.clientMessageId, "sending");
     this.inFlight = next.clientMessageId;
-    this.ws.send(JSON.stringify({ v: 1, type: "send", client_message_id: next.clientMessageId, body: next.body }));
+    const frame: { v: 1; type: "send"; client_message_id: string; body: string; thread_id?: string } = {
+      v: 1,
+      type: "send",
+      client_message_id: next.clientMessageId,
+      body: next.body,
+    };
+    if (next.threadId) frame.thread_id = next.threadId;
+    this.ws.send(JSON.stringify(frame));
     this.ackTimer = this.d.setTimer(() => this.onAckTimeout(), SEND_ACK_TIMEOUT_MS);
   }
 
@@ -470,7 +485,7 @@ export class RoomSync {
     if (!p) return;
     this.inFlight = cmid;
     try {
-      const row = await this.d.api.postMessage(this.roomId, p.body, cmid, this.abort.signal);
+      const row = await this.d.api.postMessage(this.roomId, p.body, cmid, this.abort.signal, p.threadId);
       if (this.stopped) return;
       this.S().mergeRows(this.roomId, [row]);
       this.resolvePendingFrom([row]);

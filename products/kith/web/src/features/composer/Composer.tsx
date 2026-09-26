@@ -19,7 +19,14 @@ type Props = {
   viewerIsOperator: boolean;
   onSend: (body: string) => void;
   onTyping: () => void;
+  /** When set, the send belongs in this thread and test ids gain the prefix (W6-T13). */
+  threadId?: string;
+  testIdPrefix?: string;
 };
+
+function draftStorageKey(roomId: string, threadId: string | undefined): string {
+  return threadId ? roomId + "\t" + threadId : roomId;
+}
 
 function byHandle(a: RoomMember, b: RoomMember): number {
   return a.handle.localeCompare(b.handle, "en", { sensitivity: "base" });
@@ -28,7 +35,9 @@ function byHandle(a: RoomMember, b: RoomMember): number {
 export function Composer(props: Props): ReactElement {
   const t = useT();
   const listId = useId();
-  const [value, setValue] = useState(() => loadDraft(props.roomId));
+  const storedKey = draftStorageKey(props.roomId, props.threadId);
+  const tid = (name: string): string => (props.testIdPrefix ?? "") + name;
+  const [value, setValue] = useState(() => loadDraft(storedKey));
   const [caret, setCaret] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
@@ -64,9 +73,9 @@ export function Composer(props: Props): ReactElement {
   }
 
   useEffect(() => {
-    const id = window.setTimeout(() => saveDraft(props.roomId, value), 300);
+    const id = window.setTimeout(() => saveDraft(storedKey, value), 300);
     return () => window.clearTimeout(id);
-  }, [props.roomId, value]);
+  }, [storedKey, value]);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -90,7 +99,7 @@ export function Composer(props: Props): ReactElement {
     props.onSend(value);
     setValue("");
     setCaret(0);
-    saveDraft(props.roomId, "");
+    saveDraft(storedKey, "");
     ref.current?.focus();
   };
 
@@ -150,7 +159,7 @@ export function Composer(props: Props): ReactElement {
 
   return (
     <form
-      data-testid="composer"
+      data-testid={tid("composer")}
       className="relative border-t border-border bg-surface px-3 pt-2 pb-safe"
       onSubmit={(e) => {
         e.preventDefault();
@@ -161,24 +170,24 @@ export function Composer(props: Props): ReactElement {
         <MentionPicker id={listId} options={options} activeIndex={active} viewerIsOperator={props.viewerIsOperator} onPick={pick} />
       )}
       {props.archived && (
-        <p data-testid="composer-archived" role="status" className="pb-1 text-sm text-ink-2">
+        <p data-testid={tid("composer-archived")} role="status" className="pb-1 text-sm text-ink-2">
           {t("composer.archived")}
         </p>
       )}
       {offline && (
-        <p data-testid="composer-offline" role="status" className="pb-1 text-sm text-warn">
+        <p data-testid={tid("composer-offline")} role="status" className="pb-1 text-sm text-warn">
           {t("composer.offline")}
         </p>
       )}
       {tooLong && (
-        <p data-testid="composer-too-long" role="alert" className="pb-1 text-sm text-danger">
+        <p data-testid={tid("composer-too-long")} role="alert" className="pb-1 text-sm text-danger">
           {t("composer.tooLong")}
         </p>
       )}
       <div className="flex items-end gap-2">
         <textarea
           ref={ref}
-          data-testid="composer-input"
+          data-testid={tid("composer-input")}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={open}
@@ -201,10 +210,16 @@ export function Composer(props: Props): ReactElement {
           onClick={(e) => syncCaret(e.currentTarget)}
           onBlur={() => setSuspended(true)}
           onKeyDown={onKeyDown}
-          placeholder={props.archived ? t("composer.archivedPlaceholder") : t("composer.placeholder", { room: props.roomName })}
+          placeholder={
+            props.archived
+              ? t("composer.archivedPlaceholder")
+              : props.threadId
+                ? t("thread.placeholder")
+                : t("composer.placeholder", { room: props.roomName })
+          }
           className="flex-1 resize-none rounded-md border border-border-strong bg-surface px-3 py-2 text-ink text-md-touch md:text-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         />
-        <Button variant="primary" type="submit" data-testid="composer-send" disabled={!canSend}>
+        <Button variant="primary" type="submit" data-testid={tid("composer-send")} disabled={!canSend}>
           {t("composer.send")}
         </Button>
       </div>

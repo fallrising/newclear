@@ -59,7 +59,8 @@ function lineWriter(file: string): (chunk: Buffer) => void {
   };
 }
 
-function track(child: ChildProcess, stateDir: string): void {
+/** Record a process this run started. stopStack signals its process group (W0 §5.1.6, W6 §5.1.2). */
+export function track(child: ChildProcess, stateDir: string): void {
   children.push(child);
   pidsFile = join(stateDir, "pids.json");
   const pids: { pid: number }[] = existsSync(pidsFile) ? (JSON.parse(readFileSync(pidsFile, "utf8")) as { pid: number }[]) : [];

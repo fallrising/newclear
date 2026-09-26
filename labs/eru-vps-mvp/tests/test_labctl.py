@@ -19,6 +19,7 @@ import labctl
 import reimage_receipt
 import reimage_review
 import reimage_worker_install
+import reimage_worker_registration
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -542,7 +543,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['bindings']['provider_reimage_intent'], {
             'path': str(intent_path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
         self.assertFalse(plan['executable'])
-        self.assertTrue(any('Worker-only install, re-registration and resume' in x for x in plan['blockers']))
+        self.assertTrue(any('Worker smoke, safe resume, generation commit' in x for x in plan['blockers']))
         self.assertFalse(any('invalid manual reimage intent' in x for x in plan['blockers']))
 
     def reimage_preparation_plan(self):
@@ -576,6 +577,11 @@ class OperatorTests(unittest.TestCase):
             ],
         }
         atomic_json(self.project / 'artifacts.amd64.lock.json', lock)
+        patches = self.project / 'patches'
+        patches.mkdir(exist_ok=True)
+        for filename in ['core-v0.1.5-safe-node-add.patch',
+                         'core-v0.1.5-safe-node-add.validation.json']:
+            (patches / filename).write_bytes((SCRIPTS.parent / 'patches' / filename).read_bytes())
 
     def observed_reimage_source_plan(self):
         envelope = self.prepared_reimage_plan()
@@ -730,6 +736,113 @@ class OperatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'already has a journal'):
             with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
                 self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+
+    def install_ready_worker_for_registration(self):
+        envelope, observation = self.ready_worker_bootstrap()
+        plan = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            installed = self.op.install_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(installed['status'], 'installed-awaiting-registration')
+        return envelope, observation
+
+    def test_reimage_worker_registration_adds_under_safe_core_and_stops_fenced(self):
+        envelope, observation = self.install_ready_worker_for_registration()
+        plan = envelope['plan']
+        generation_before = self.op.cluster()['generation']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(result['status'], 'registered-awaiting-smoke')
+        self.assertTrue(result['node_registered'])
+        self.assertTrue(result['agent_started'])
+        self.assertTrue(result['available'])
+        self.assertTrue(result['bypass'])
+        self.assertEqual(result['core_artifact_sha256'], reimage_worker_registration.validation_record(
+            self.project, 'patches/core-v0.1.5-safe-node-add.validation.json')['artifact_sha256'])
+        node = next(row for row in self.op.live['nodes'] if row['name'] == plan['target']['node'])
+        self.assertEqual(node['endpoint'], plan['registration']['endpoint'])
+        self.assertTrue(node['bypass'])
+        self.assertTrue(node['available'])
+        self.assertEqual(self.op.add_calls, 1)
+        self.assertEqual(self.op.agent_start_calls, 1)
+        args = next(argv for host, argv in self.op.remote_commands
+                    if host == self.op.core['alias'] and 'add' in argv)
+        self.assertEqual(args[args.index('--extra-resources') + 1], '{}')
+        self.assertEqual(self.op.cluster()['generation'], generation_before)
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+        self.assertEqual(self.op.live['workloads'], [])
+        with self.assertRaisesRegex(ValueError, 'already has a journal'):
+            with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+
+    def test_worker_registration_refuses_unpatched_core_before_mutation(self):
+        envelope, observation = self.install_ready_worker_for_registration()
+        plan = envelope['plan']
+        self.op.running_core_sha = 'a' * 64
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'not the verified safe AddNode release'):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(self.op.add_calls, 0)
+        self.assertEqual(self.op.agent_start_calls, 0)
+        journal = labctl.read(self.op.root / 'runs' / (plan['id'] + '-register.json'))
+        self.assertEqual(journal['status'], 'failed')
+
+    def test_core_restart_after_add_keeps_worker_fenced_and_agent_stopped(self):
+        envelope, observation = self.install_ready_worker_for_registration()
+        plan = envelope['plan']
+        self.op.rotate_core_after_add = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'core process changed before worker agent start'):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        node = next(row for row in self.op.live['nodes'] if row['name'] == plan['target']['node'])
+        self.assertTrue(node['bypass'])
+        self.assertFalse(node['available'])
+        self.assertEqual(self.op.add_calls, 1)
+        self.assertEqual(self.op.agent_start_calls, 0)
+
+    def test_lost_node_add_response_is_read_only_reconciled_without_replay(self):
+        envelope, observation = self.install_ready_worker_for_registration()
+        plan = envelope['plan']
+        self.op.lose_add_reply = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'node add response lost'):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        before_add_calls = self.op.add_calls
+        before_agent_calls = self.op.agent_start_calls
+        ssh_config = ('user ckc\nhostname 100.64.0.44\nport 22\n'
+                      'proxycommand /usr/bin/tailscale nc %h %p\nproxyjump none\n')
+        with patch('reimage_worker_registration.install.subprocess.run',
+                   return_value=subprocess.CompletedProcess(['ssh', '-G'], 0, ssh_config, '')):
+            result = self.op.reconcile(plan['id'] + '-register')
+        self.assertEqual(result['status'], 'failed')
+        self.assertTrue(result['reconciliation']['target_registration']['present'])
+        self.assertTrue(result['reconciliation']['target_registration']['bypass'])
+        self.assertTrue(result['reconciliation']['target_matches_plan'])
+        self.assertFalse(result['reconciliation']['remote_mutation_performed'])
+        self.assertEqual(self.op.add_calls, before_add_calls)
+        self.assertEqual(self.op.agent_start_calls, before_agent_calls)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'already has a journal'):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+
+    def test_lost_agent_start_response_reconciles_without_retry_or_resume(self):
+        envelope, observation = self.install_ready_worker_for_registration()
+        plan = envelope['plan']
+        self.op.lose_agent_start_reply = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'agent start response lost'):
+                self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        ssh_config = ('user ckc\nhostname 100.64.0.44\nport 22\n'
+                      'proxycommand /usr/bin/tailscale nc %h %p\nproxyjump none\n')
+        before_add_calls = self.op.add_calls
+        before_agent_calls = self.op.agent_start_calls
+        with patch('reimage_worker_registration.install.subprocess.run',
+                   return_value=subprocess.CompletedProcess(['ssh', '-G'], 0, ssh_config, '')):
+            result = self.op.reconcile(plan['id'] + '-register')
+        self.assertTrue(result['reconciliation']['target_registration']['bypass'])
+        self.assertEqual(result['reconciliation']['worker']['agent_active_state'], 'active')
+        self.assertEqual(self.op.add_calls, before_add_calls)
+        self.assertEqual(self.op.agent_start_calls, before_agent_calls)
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
 
     def test_worker_install_embedded_remote_sources_compile(self):
         compile('import os\nEXPECTED = {}\n' + reimage_worker_install.INSTALL_PREFLIGHT,
@@ -1138,6 +1251,13 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
         self.public_key = 'ssh-ed25519 ' + base64.b64encode(blob).decode() + ' eru-vps-mvp-core'
         self.preflight = None
         self.post_facts = None
+        self.agent_enabled = 'disabled'
+        self.add_calls = 0
+        self.agent_start_calls = 0
+        self.lose_add_reply = False
+        self.lose_agent_start_reply = False
+        self.rotate_core_after_add = False
+        self.running_core_sha = '0203e3a41c9abf51c35fb52e5224cc796b4ab99b220d610ec9fd5397921072fd'
 
     def _record_install_event(self, host, argv, stdin, check, timeout, ssh_options, record_output, output=''):
         event = {'at': '2026-09-26T00:00:00+00:00', 'host': host,
@@ -1155,14 +1275,47 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
 
     def command(self, host, argv, stdin=None, check=True, timeout=90,
                 ssh_options=None, record_output=True):
+        if host == self.core['alias'] and argv == ['sudo', '-n', 'python3', '-'] and stdin == reimage_worker_registration.RUNTIME_FACTS:
+            runtime = {'MainPID': '4242', 'ActiveState': 'active', 'InvocationID': 'fake-core-invocation',
+                       'NRestarts': '0', 'sha256': self.running_core_sha}
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output, json.dumps(runtime))
         if host == self.core['alias'] and argv == ['sudo', '-n', 'cat', '/etc/eru/ssh_key.pub']:
             return self._record_install_event(host, argv, stdin, check, timeout,
                                               ssh_options, record_output, self.public_key + chr(10))
+        if host == self.core['alias'] and 'node' in argv and 'add' in argv:
+            self.add_calls += 1
+            pod = argv[argv.index('add') + 1]
+            name = argv[argv.index('--nodename') + 1]
+            endpoint = argv[argv.index('--endpoint') + 1]
+            capacity = argv[argv.index('--extra-resources') + 1]
+            labels = {}
+            for index, value in enumerate(argv[:-1]):
+                if value == '--label':
+                    key, separator, label = argv[index + 1].partition('=')
+                    if separator:
+                        labels[key] = label
+            self.live['nodes'].append({
+                'name': name, 'podname': pod, 'endpoint': endpoint, 'labels': labels,
+                'resource_capacity': capacity, 'resource_usage': '{}', 'available': False, 'bypass': True,
+            })
+            output = json.dumps({'node_add': 'accepted'})
+            result = self._record_install_event(host, argv, stdin, check, timeout,
+                                                ssh_options, record_output, output)
+            if self.lose_add_reply:
+                self.events[-1].update(status='uncertain', error='TimeoutError')
+                self.save_journal()
+                raise TimeoutError('core node add response lost')
+            if self.rotate_core_after_add:
+                self.running_core_sha = 'c' * 64
+            return result
         if host == self.target_alias and argv == ['sudo', '-n', 'python3', '-']:
             if isinstance(stdin, str) and stdin.startswith('CONFIG='):
                 self.install_input = stdin
                 self.install_calls += 1
                 self.installed = True
+                self.agent_active = False
+                self.agent_enabled = 'disabled'
                 if self.lose_install_reply:
                     event = self.events[-1] if self.events else None
                     # Use the common fake event writer, then mark the result uncertain.
@@ -1178,8 +1331,25 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
                 return self._record_install_event(host, argv, stdin, check, timeout,
                     ssh_options, record_output, json.dumps(self.preflight or {}))
             if stdin == reimage_worker_install.POST_FACTS:
+                facts = dict(self.post_facts or {})
+                facts['agent_active_state'] = 'active' if self.agent_active else 'inactive'
+                facts['agent_unit_state'] = self.agent_enabled
                 return self._record_install_event(host, argv, stdin, check, timeout,
-                    ssh_options, record_output, json.dumps(self.post_facts or {}))
+                    ssh_options, record_output, json.dumps(facts))
+        if host == self.target_alias and argv == ['sudo', '-n', 'systemctl', 'enable', '--now', 'eru-agent.service']:
+            self.agent_start_calls += 1
+            self.agent_active = True
+            self.agent_enabled = 'enabled'
+            for row in self.live['nodes']:
+                if row['name'] == 'worker-4':
+                    row['available'] = True
+            output = self._record_install_event(host, argv, stdin, check, timeout,
+                                                ssh_options, record_output, '')
+            if self.lose_agent_start_reply:
+                self.events[-1].update(status='uncertain', error='TimeoutError')
+                self.save_journal()
+                raise TimeoutError('worker agent start response lost')
+            return output
         if host == self.target_alias and len(argv) == 5 and argv[:4] == ['sudo', '-n', 'python3', '-']:
             return self._record_install_event(host, argv, stdin, check, timeout,
                 ssh_options, record_output, json.dumps(self.audit_report()))

@@ -6,7 +6,7 @@ ERU-014 的 worker-only 安裝階段讓 agent 保持停止，並確認 core 尚�
 
 core patch revision 2 將新節點初始狀態改成 Bypass=true，並新增測試確認回傳節點與持久化記錄都 fenced。已有 lock-context 修正一併保留，因此這是新的同版本 patch artifact；排程仍須由明確 node up 開放。
 
-scripts/eru_node_resume.py 是單次 resume helper：限制 core／worker endpoint 為 Tailscale IPv4、node 為 worker-2 至 worker-4，讀取並比對 node name／endpoint，要求它一直保持 bypass=true，輪詢 agent readiness（available=true），才發出一次 node up，最後讀取確認 available=true、bypass=false。命令失敗或結果不確定時不會重試 node up。這個 helper 目前尚未接入 ERU-014 registration executor；不得把它當成已完成的重灌納管功能。
+scripts/eru_node_resume.py 是單次 resume helper：限制 core／worker endpoint 為 Tailscale IPv4、node 為 worker-2 至 worker-4，讀取並比對 node name／endpoint，要求它一直保持 bypass=true，輪詢 agent readiness（available=true），才發出一次 node up，最後讀取確認 available=true、bypass=false。命令失敗或結果不確定時不會重試 node up。此 helper 尚未接到新的 smoke／resume 階段；registration executor 會停在 fenced 狀態，不能把目前階段當成已完成的重灌納管流程。
 
 ## 離線驗證
 
@@ -16,4 +16,4 @@ resume helper 有本機 fake-runner 測試，涵蓋等待 fenced node 可用、�
 
 ## 後續
 
-ERU-014 還需要以既有 core patch operator 受控部署此 artifact，唯讀確認 core 的執行中 binary hash，再接上 worker registration executor。executor 需綁定 hash-bound bootstrap plan，先核對 identity／容量／labels／健康與其他 workers，再由已驗證的 patched core 新增 fenced node，啟動 agent，做 smoke 和隔離 guard，確認後 resume，最後才提交 inventory／cluster generation。每一階段另需 lost-response reconcile／recovery；在這些本機開發完成前，不做正式 E2E。這與日常 component-reinstall 及 provider console OS reimage 分開驗收，不使用 provider API。
+ERU-014 的 worker registration executor 已完成本機實作：綁定 hash-bound bootstrap plan，核對執行中 core binary SHA、worker identity／容量／labels／健康與其他 workers，再由已驗證的 patched core 新增 fenced node 並啟動 agent；只要 available=true、bypass=true 就停在 `registered-awaiting-smoke`。另提供 read-only reconcile，mutation 回覆不確定時不重播。接下來仍須由既有 core patch operator 受控部署 artifact 並唯讀確認 hash，再完成 smoke／隔離 guard、接上單次 resume helper、inventory／cluster generation commit、host-key 更新及跨階段 recovery。沒有連 VPS，safe artifact 仍 verified-not-deployed；本切片未做 E2E。這與日常 component-reinstall 及 provider console OS reimage 分開驗收，不使用 provider API。

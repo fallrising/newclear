@@ -411,6 +411,10 @@ class Operator:
         from reimage_prepare import prepare_reimage
         return prepare_reimage(self, plan_id, expected_hash)
 
+    def plan_reimage_worker(self, source_plan_id, expected_hash):
+        from reimage_worker_plan import plan_reimage_worker
+        return plan_reimage_worker(self, source_plan_id, expected_hash)
+
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
         envelope = read(self.root / 'plans' / (plan_id + '.json'))
@@ -501,6 +505,7 @@ class Operator:
             'status': 'replacement-host-readonly-verified',
             'remote_mutation_performed': False,
             'receipt_sha256': receipt['sha256'],
+            'observation_sha256': digest(observation),
             'observation': observation,
             'verified_at': now(),
         })
@@ -685,6 +690,9 @@ def main():
     prepare_reimage = sub.add_parser('prepare-reimage', help='Fence, stop the worker agent and remove its ERU registration before owner console reimage')
     prepare_reimage.add_argument('--plan', required=True)
     prepare_reimage.add_argument('--sha256', required=True)
+    bootstrap_plan = sub.add_parser('plan-reimage-worker', help='Build a private worker-only bootstrap plan from a verified replacement host')
+    bootstrap_plan.add_argument('--plan', required=True, help='Source provider-reimage plan ID')
+    bootstrap_plan.add_argument('--sha256', required=True, help='Source provider-reimage plan SHA-256')
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -726,6 +734,24 @@ def main():
             summary['sha256'] = envelope['sha256']
             summary['path'] = str(operator.root / 'plans' / (summary['id'] + '.json'))
             print(json.dumps(summary, indent=2))
+        elif args.command == 'plan-reimage-worker':
+            envelope = operator.plan_reimage_worker(args.plan, args.sha256)
+            plan = envelope['plan']
+            payload = plan['worker_payload']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'source_reimage_plan': plan['source_reimage_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node', 'index']},
+                'artifacts': [{'repository': row['repository'], 'tag': row['tag'], 'sha256': row['sha256']}
+                              for row in payload['artifacts']],
+                'files': [{'path': row['path'], 'sha256': row['sha256']}
+                          for row in plan['worker_files']],
+                'registration': {k: plan['registration'][k]
+                                 for k in ['node', 'podname', 'labels', 'resource_capacity']},
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-bootstrap-plans' / (plan['id'] + '.json')),
+            }, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))

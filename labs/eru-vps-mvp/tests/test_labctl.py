@@ -552,6 +552,92 @@ class OperatorTests(unittest.TestCase):
         self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
         return envelope
 
+    def configure_reimage_bootstrap_inputs(self):
+        self.inventory = [dict(row, ip=f'100.64.0.{i}')
+                          for i, row in enumerate(self.inventory, 1)]
+        atomic_json(self.project / 'private/deployment-plan.json', self.inventory)
+        for row in self.snapshot['nodes']:
+            i = int(row['name'].removeprefix('worker-'))
+            row['endpoint'] = 'containerd://ckc@100.64.0.' + str(i) + ':22'
+        self.op.live['nodes'] = copy.deepcopy(self.snapshot['nodes'])
+        lock = {
+            'architecture': 'linux/amd64',
+            'artifacts': [
+                {'repository': 'projecteru2/agent', 'tag': 'v0.1.3', 'sha256': 'b' * 64,
+                 'url': 'https://example.invalid/agent.tar.gz'},
+                {'repository': 'containernetworking/plugins', 'tag': 'v1.9.1', 'sha256': 'c' * 64,
+                 'url': 'https://example.invalid/cni.tar.gz'},
+            ],
+        }
+        atomic_json(self.project / 'artifacts.amd64.lock.json', lock)
+
+    def observed_reimage_source_plan(self):
+        envelope = self.prepared_reimage_plan()
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
+        receipt_record = labctl.read(self.op.root / 'reimage-receipts' / (envelope['plan']['id'] + '.json'))
+        observation = {
+            'schema_version': 1,
+            'machine_id': 'replacement-machine-id-4',
+            'boot_id': '11111111-1111-1111-1111-111111111111',
+            'os_release': 'Debian GNU/Linux 13',
+            'tailscale_ipv4': '100.64.0.44',
+            'services': {'ssh.service': 'active', 'tailscaled.service': 'active',
+                         'docker.service': 'active', 'containerd.service': 'active'},
+            'runtime_counts': {'containers': 0, 'tasks': 0},
+            'core_config_present': False, 'etcd_data_present': False,
+            'eru_agent_binary_present': False, 'eru_agent_config_present': False,
+            'eru_agent_unit_present': False, 'docker_version': 'Docker version fake',
+            'containerd_version': 'containerd fake',
+            'ssh_verified_by_strict_host_key_check': True,
+            'host_key_file_check': receipt_record['trusted_host_key_file_check'],
+        }
+        with patch('reimage_host.inspect_replacement_host', return_value=observation):
+            self.op.verify_reimage_host(envelope['plan']['id'], envelope['sha256'])
+        return envelope
+
+    def test_reimage_worker_plan_uses_only_verified_identity_and_worker_payload(self):
+        self.configure_reimage_bootstrap_inputs()
+        source = self.observed_reimage_source_plan()
+        before = list(self.op.remote_commands)
+        envelope = self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
+        plan = envelope['plan']
+        self.assertFalse(plan['executable'])
+        self.assertEqual(plan['operation'], 'provider-reimage-worker-bootstrap')
+        self.assertEqual(plan['source_reimage_plan'], {
+            'id': source['plan']['id'], 'sha256': source['sha256']})
+        self.assertEqual(plan['target']['tailscale_ipv4'], '100.64.0.44')
+        self.assertEqual(plan['target']['machine_id'], 'replacement-machine-id-4')
+        self.assertEqual(plan['registration']['endpoint'], 'containerd://ckc@100.64.0.44:22')
+        self.assertEqual(plan['registration']['resource_capacity'], source['plan']['snapshot']['nodes'][2]['resource_capacity'])
+        self.assertEqual(plan['registration']['labels'], source['plan']['snapshot']['nodes'][2]['labels'])
+        self.assertEqual({row['repository'] for row in plan['worker_payload']['artifacts']}, {
+            'projecteru2/agent', 'containernetworking/plugins'})
+        self.assertEqual(len(plan['worker_files']), 6)
+        self.assertFalse(any('core' in row['repository'] or 'etcd' in row['repository']
+                             for row in plan['worker_payload']['artifacts']))
+        self.assertEqual(before, self.op.remote_commands)
+        path = self.op.root / 'reimage-bootstrap-plans' / (plan['id'] + '.json')
+        self.assertTrue(path.is_file())
+        self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+
+    def test_reimage_worker_plan_rejects_observation_tampering_and_invalid_runtime(self):
+        self.configure_reimage_bootstrap_inputs()
+        source = self.observed_reimage_source_plan()
+        observation_path = self.op.root / 'reimage-observations' / (source['plan']['id'] + '.json')
+        changed = labctl.read(observation_path)
+        changed['observation']['tailscale_ipv4'] = '100.64.0.45'
+        atomic_json(observation_path, changed)
+        with self.assertRaisesRegex(ValueError, 'observation is missing, changed'):
+            self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
+
+        changed['observation_sha256'] = labctl.digest(changed['observation'])
+        changed['observation']['runtime_counts'] = {'containers': 1, 'tasks': 0}
+        changed['observation_sha256'] = labctl.digest(changed['observation'])
+        atomic_json(observation_path, changed)
+        with self.assertRaisesRegex(ValueError, 'runtime must be empty'):
+            self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
+
     def test_manual_reimage_has_separate_empty_worker_preparation_gate(self):
         envelope = self.reimage_preparation_plan()
         plan = envelope['plan']

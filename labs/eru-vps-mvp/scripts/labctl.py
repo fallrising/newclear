@@ -436,6 +436,14 @@ class Operator:
         from reimage_worker_registration import register_reimage_worker
         return register_reimage_worker(self, bootstrap_plan_id, expected_hash)
 
+    def plan_reimage_worker_access(self, bootstrap_plan_id, bootstrap_hash):
+        from reimage_worker_access import plan_reimage_worker_access
+        return plan_reimage_worker_access(self, bootstrap_plan_id, bootstrap_hash)
+
+    def prepare_reimage_worker_access(self, plan_id, expected_hash):
+        from reimage_worker_access import apply_reimage_worker_access
+        return apply_reimage_worker_access(self, plan_id, expected_hash)
+
     def plan_reimage_worker_smoke(self, bootstrap_plan_id, bootstrap_hash, canary_run):
         from reimage_worker_smoke import plan_reimage_worker_smoke
         return plan_reimage_worker_smoke(self, bootstrap_plan_id, bootstrap_hash, canary_run)
@@ -694,6 +702,9 @@ class Operator:
         if journal.get('operation') == 'provider-reimage-worker-install':
             from reimage_worker_install import reconcile_worker_install
             return reconcile_worker_install(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-access':
+            from reimage_worker_access import reconcile_reimage_worker_access
+            return reconcile_reimage_worker_access(self, run_id, journal)
         if journal.get('operation') == 'provider-reimage-worker-registration':
             from reimage_worker_registration import reconcile_worker_registration
             return reconcile_worker_registration(self, run_id, journal)
@@ -748,6 +759,12 @@ def main():
     register_reimage_worker = sub.add_parser('register-reimage-worker', help='Register the verified worker under safe core and leave it fenced for smoke testing')
     register_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
     register_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    plan_worker_access = sub.add_parser('plan-reimage-worker-access', help='Plan exact core SSH trust and firewall access for the replacement worker')
+    plan_worker_access.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    plan_worker_access.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    prepare_worker_access = sub.add_parser('prepare-reimage-worker-access', help='Apply planned core SSH trust and firewall access before registration')
+    prepare_worker_access.add_argument('--plan', required=True, help='Worker access plan ID')
+    prepare_worker_access.add_argument('--sha256', required=True, help='Worker access plan SHA-256')
     plan_worker_smoke = sub.add_parser('plan-reimage-worker-smoke', help='Plan a fenced target smoke with continuous peer HTTP guards')
     plan_worker_smoke.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
     plan_worker_smoke.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
@@ -817,6 +834,7 @@ def main():
                 'registration': {k: plan['registration'][k]
                                  for k in ['node', 'podname', 'labels', 'resource_capacity']},
                 'worker_install': plan['worker_install'],
+                'worker_access': plan['worker_access'],
                 'worker_registration': {
                     'executable': plan['worker_registration']['executable'],
                     'core_release_id': plan['worker_registration']['core_release']['release_id'],
@@ -838,6 +856,26 @@ def main():
                 'id', 'bootstrap_plan_id', 'operation', 'status', 'stage', 'target',
                 'target_alias', 'agent_started', 'node_registered', 'available', 'bypass',
                 'core_artifact_sha256', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-access':
+            envelope = operator.plan_reimage_worker_access(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'bootstrap_plan': plan['bootstrap_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'core_access_before': {k: plan['core_access_before'][k]
+                                       for k in ['known_hosts_sha256', 'firewall_sha256', 'nft_sha256']},
+                'core_access_after': plan['core_access_after'] | {
+                    'worker_ips': 'redacted (' + str(len(plan['core_access_after']['worker_ips'])) + ' entries)'},
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-access-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'prepare-reimage-worker-access':
+            result = operator.prepare_reimage_worker_access(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'access_plan_id', 'operation', 'status', 'stage', 'target',
+                'target_alias', 'remote_mutation_performed', 'finished_at']}, indent=2))
         elif args.command == 'plan-reimage-worker-smoke':
             envelope = operator.plan_reimage_worker_smoke(args.plan, args.sha256, args.canary_run)
             plan = envelope['plan']

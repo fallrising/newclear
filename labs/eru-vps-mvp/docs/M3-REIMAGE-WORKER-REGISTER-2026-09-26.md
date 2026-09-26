@@ -2,13 +2,13 @@
 
 ## 範圍
 
-此階段接在同一 hash-bound worker bootstrap plan 的 successful install journal 之後。它只重新加入舊 worker identity；不做 provider 操作、OS 安裝、smoke、resume 或 inventory／generation 更新。safe AddNode core artifact 目前為 `verified-not-deployed`，因此真實 executor 尚未執行；以下只以 fake operator 和假遠端 response 測試。
+此階段接在同一 hash-bound worker bootstrap plan 的 successful install journal 與 [core access preparation](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md) 之後。它只重新加入舊 worker identity；不做 provider 操作、OS 安裝、smoke、resume 或 inventory／generation 更新。safe AddNode core artifact 目前為 `verified-not-deployed`，因此真實 executor 尚未執行；以下只以 fake operator 和假遠端 response 測試。
 
 Plan 內的 `worker_registration` gate 綁定 `patches/core-v0.1.5-safe-node-add.validation.json`。執行器從 core 的 `eru-core.service` MainPID 讀 `/proc/<pid>/exe` SHA256，並要求 service active、PID／InvocationID 有效且 SHA 與 gate 完全相同。AddNode 前後會比對相同 runtime invocation，防止註冊期間 core process／binary 漂移。
 
-執行器先要求 worker install journal 是 `installed-awaiting-registration`，worker machine／boot identity、owner scope、健康、其他主機與 cluster snapshot 未改變，agent inactive／disabled，目標 node 尚不存在。它再以 plan 綁定的舊 node name、pod、endpoint、labels 和 resource capacity，對 `ckc-disposable-01` 執行單次 AddNode。AddNode 回來後立即核對新 node identity／capacity／labels、zero usage 及 `bypass=true`；接著只對 plan 指定的 worker alias 執行 `systemctl enable --now eru-agent.service`，等待 core 回報 `available=true`，並持續要求 `bypass=true`。最後重驗 host identity、services、其他 workers 與 core health，成功狀態為 `registered-awaiting-smoke`。
+執行器先要求 worker install journal 是 `installed-awaiting-registration`，worker machine／boot identity、owner scope、健康、其他主機與 cluster snapshot 未改變，agent inactive／disabled，目標 node 尚不存在。它先要求最新 access stage journal 成功，並重讀 core 的 known_hosts、firewall source 與 live nft table，確認新 worker host key 及 Tailscale IP 已生效。然後才以 plan 綁定的舊 node name、pod、endpoint、labels 和 resource capacity，對 `ckc-disposable-01` 執行單次 AddNode。AddNode 回來後立即核對新 node identity／capacity／labels、zero usage 及 `bypass=true`；接著只對 plan 指定的 worker alias 執行 `systemctl enable --now eru-agent.service`，等待 core 回報 `available=true`，並持續要求 `bypass=true`。最後重驗 host identity、services、其他 workers 與 core health，成功狀態為 `registered-awaiting-smoke`。
 
-此階段不執行 `node up`、HTTP smoke、其他 worker smoke、core known_hosts 寫入、private inventory 更新、cluster generation commit 或 cleanup。後續 smoke 與 [safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 各有獨立 hash-bound stage；resume helper 只透過 core SSH alias 由其 executor 呼叫。
+此 registration stage 不執行 `node up`、HTTP smoke、core known_hosts／firewall 寫入、private inventory 更新、cluster generation commit 或 cleanup；known_hosts／firewall 由前一個獨立 access stage 先行更新。後續 smoke 與 [safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 各有獨立 hash-bound stage；resume helper 只透過 core SSH alias 由其 executor 呼叫。
 
 ## 單次執行與 reconcile
 
@@ -26,7 +26,7 @@ registration journal 在每一個 mutation 前先保存 attempted state。若 Ad
 
 ## 本機驗證
 
-新增 fake-only tests 驗證：成功新增 fenced node 並等 agent available；core runtime SHA 不符時在 mutation 前拒絕；AddNode 後 core process 改變時不啟動 agent；AddNode response 遺失後 reconcile 發現節點仍 fenced 且不重播；agent-start response 遺失後只讀對帳，不重試或 resume。registration 前後 cluster generation 與 workload set 不變。未連 VPS、未讀寫 `private/`、未做 E2E。
+新增 fake-only tests 驗證：成功新增 fenced node 並等 agent available；core runtime SHA 不符時在 mutation 前拒絕；AddNode 後 core process 改變時不啟動 agent；AddNode response 遺失後 reconcile 發現節點仍 fenced 且不重播；agent-start response 遺失後只讀對帳，不重試或 resume。registration 前後 cluster generation 與 workload set 不變；缺少 access-ready journal 或 live access drift 時，AddNode 前即拒絕。未連 VPS、未讀寫真實 `private/`、未做 E2E。
 
 ## 後續
 

@@ -210,6 +210,10 @@ def register_reimage_worker(operator, bootstrap_plan_id, expected_hash, *, sleep
     }
     operator.stage("preflight")
     try:
+        import reimage_worker_access as worker_access
+        access_proof = worker_access.require_access_ready(operator, plan, expected_hash)
+        operator.journal["access_proof"] = access_proof
+        operator.save_journal()
         install._check_health(operator)
         install._cluster_unchanged(operator, source_plan)
         install._other_hosts_unchanged(operator, source_plan, alias)
@@ -230,6 +234,9 @@ def register_reimage_worker(operator, bootstrap_plan_id, expected_hash, *, sleep
         install._other_hosts_unchanged(operator, source_plan, alias)
         if _core_runtime(operator) != before_runtime:
             raise ValueError("core process changed during registration preflight")
+        if worker_access.require_access_ready(operator, plan, expected_hash,
+                                              expected_proof=access_proof) != access_proof:
+            raise ValueError("core worker access changed during registration preflight")
         registration = plan["registration"]
         argv = registration_argv(operator.core["ip"], registration)
         operator.journal.update(core_add_attempted=True, core_add_outcome="unknown")

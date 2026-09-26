@@ -2,11 +2,11 @@
 
 ## 範圍與順序
 
-此 stage 接在 `registered-awaiting-smoke` 之後，完成指定 worker 的 nginx lifecycle/resource smoke，並全程保留 `bypass=true`。成功停在 `smoked-awaiting-resume`；不執行 `node up`、不更新 inventory／worker IP／cluster generation，也不寫入 core `known_hosts`。
+此 stage 接在 `registered-awaiting-smoke` 之後；registration 已綁定並重驗前一個 [core access stage](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)，其 known_hosts 與 firewall allowlist 必須仍符合相同 proof。此 stage 完成指定 worker 的 nginx lifecycle/resource smoke，並全程保留 `bypass=true`。成功停在 `smoked-awaiting-resume`；不執行 `node up`、不更新 inventory／worker IP／cluster generation，也不改動 core `known_hosts` 或 firewall。
 
 Smoke 使用既有 `scripts/smoke-lab.py --node TARGET`，只在計畫目標上建立 run-owned nginx、驗證 HTTP／stop-start／超額資源拒絕，並依 exact app／labels 清理 workload。原始 smoke evidence 與子程序 log 留在 `private/smoke/`、`private/operations/runs/`。此路徑沿用 component-reinstall 已用過的行為：Bypass=true 時以明確 node 指派做目標驗證，不開放一般排程。
 
-兩台 peer 的 run-owned nginx canaries 必須在 provider-reimage source plan 建立前就存在，因為 source plan 固定了 workload 與 host baseline。smoke plan 只接受其餘兩個 worker 上各一個正確 owner/run/node 的 canary，並以 `HTTPGuards` 在 smoke 與 post-check 全程持續 GET。canary membership／evidence、bootstrap plan、registration journal、replacement identity、safe core artifact/runtime invocation、worker services、cluster snapshot 都綁在 smoke plan hash 中；任何漂移都要重新 plan。
+兩台 peer 的 run-owned nginx canaries 必須在 provider-reimage source plan 建立前就存在，因為 source plan 固定了 workload 與 host baseline。smoke plan 只接受其餘兩個 worker 上各一個正確 owner/run/node 的 canary，並以 `HTTPGuards` 在 smoke 與 post-check 全程持續 GET。canary membership／evidence、bootstrap plan、registration journal 內的 access proof、replacement identity、safe core artifact/runtime invocation、worker services、cluster snapshot 都綁在 smoke plan hash 中；任何漂移都要重新 plan。
 
 ## 使用介面
 

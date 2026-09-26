@@ -19,6 +19,7 @@ import labctl
 import reimage_receipt
 import reimage_review
 import reimage_worker_install
+import reimage_worker_access
 import reimage_worker_registration
 import reimage_worker_smoke
 import reimage_worker_resume
@@ -606,7 +607,7 @@ class OperatorTests(unittest.TestCase):
                          'core-v0.1.5-safe-node-add.validation.json']:
             (patches / filename).write_bytes((SCRIPTS.parent / 'patches' / filename).read_bytes())
 
-    def observed_reimage_source_plan(self, peer_canaries=False):
+    def observed_reimage_source_plan(self, peer_canaries=False, replacement_ip='100.64.0.44'):
         envelope = self.prepared_reimage_plan(peer_canaries=peer_canaries)
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
@@ -616,7 +617,7 @@ class OperatorTests(unittest.TestCase):
             'machine_id': 'replacement-machine-id-4',
             'boot_id': '11111111-1111-1111-1111-111111111111',
             'os_release': 'Debian GNU/Linux 13',
-            'tailscale_ipv4': '100.64.0.44',
+            'tailscale_ipv4': replacement_ip,
             'services': {'ssh.service': 'active', 'tailscaled.service': 'active',
                          'docker.service': 'active', 'containerd.service': 'active'},
             'runtime_counts': {'containers': 0, 'tasks': 0},
@@ -673,7 +674,7 @@ class OperatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'runtime must be empty'):
             self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
 
-    def ready_worker_bootstrap(self, peer_canaries=False):
+    def ready_worker_bootstrap(self, peer_canaries=False, replacement_ip='100.64.0.44'):
         scripts = self.project / 'scripts'
         scripts.mkdir(exist_ok=True)
         for source in SCRIPTS.glob('*.py'):
@@ -683,7 +684,8 @@ class OperatorTests(unittest.TestCase):
         atomic_json(self.project / 'private/verified-host-public-keys.json',
                     {labctl.ALIASES[0]: [approved]})
         self.configure_reimage_bootstrap_inputs()
-        source = self.observed_reimage_source_plan(peer_canaries=peer_canaries)
+        source = self.observed_reimage_source_plan(peer_canaries=peer_canaries,
+                                                   replacement_ip=replacement_ip)
         envelope = self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
         observation = labctl.read(self.op.root / 'reimage-observations' /
                                   (source['plan']['id'] + '.json'))['observation']
@@ -766,7 +768,159 @@ class OperatorTests(unittest.TestCase):
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             installed = self.op.install_reimage_worker(plan['id'], envelope['sha256'])
         self.assertEqual(installed['status'], 'installed-awaiting-registration')
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            access_plan = self.op.plan_reimage_worker_access(plan['id'], envelope['sha256'])
+            self.assertTrue(access_plan['plan']['executable'], access_plan['plan']['blockers'])
+            access_ready = self.op.prepare_reimage_worker_access(
+                access_plan['plan']['id'], access_plan['sha256'])
+        self.assertEqual(access_ready['status'], 'access-ready-awaiting-registration')
+        self.access_envelope = access_plan
         return envelope, observation
+
+    def install_worker_without_access(self, peer_canaries=False):
+        envelope, observation = self.ready_worker_bootstrap(peer_canaries=peer_canaries)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            installed = self.op.install_reimage_worker(envelope['plan']['id'], envelope['sha256'])
+        self.assertEqual(installed['status'], 'installed-awaiting-registration')
+        return envelope, observation
+
+    def test_worker_access_plan_is_read_only_then_updates_only_core_trust_and_allowlist(self):
+        envelope, observation = self.install_worker_without_access()
+        plan = envelope['plan']
+        before_files = copy.deepcopy(self.op.core_access_files)
+        before_nft = self.op.core_nft_table
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            access_envelope = self.op.plan_reimage_worker_access(plan['id'], envelope['sha256'])
+        access_plan = access_envelope['plan']
+        self.assertTrue(access_plan['executable'], access_plan['blockers'])
+        self.assertEqual(access_plan['old_worker_ip'], '100.64.0.4')
+        self.assertEqual(access_plan['new_worker_ip'], '100.64.0.44')
+        self.assertEqual(self.op.core_access_files, before_files)
+        self.assertEqual(self.op.core_nft_table, before_nft)
+        self.assertEqual(self.op.core_access_apply_calls, 0)
+        trusted_lines = (self.op.trusted_hostkeys_dir / 'disposable-04').read_text().splitlines()
+        trusted_key = ' '.join(trusted_lines[0].split()[1:3])
+        self.assertNotIn(trusted_key, json.dumps(access_plan))
+
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            prepared = self.op.prepare_reimage_worker_access(access_plan['id'], access_envelope['sha256'])
+        self.assertEqual(prepared['status'], 'access-ready-awaiting-registration')
+        self.assertTrue(prepared['remote_mutation_performed'])
+        self.assertEqual(self.op.core_access_apply_calls, 1)
+        self.assertEqual(self.op.core_access_files['firewall'],
+                         reimage_worker_access._firewall_text(
+                             self.op.core['ip'], access_plan['new_worker_ips']).encode())
+        known_lines = self.op.core_access_files['known_hosts'].decode().splitlines()
+        target_lines = [line for line in known_lines if line.split()[0] == '100.64.0.44']
+        self.assertEqual(len(target_lines), 1)
+        self.assertEqual(' '.join(target_lines[0].split()[1:3]), trusted_key)
+        self.assertFalse(any(line.split()[0] == '100.64.0.4' for line in known_lines))
+        self.assertEqual(reimage_worker_access._nft_worker_ips(
+            self.op.core_nft_table, self.op.core['ip']), access_plan['new_worker_ips'])
+        self.assertEqual([row['name'] for row in self.op.live['nodes']], ['worker-2', 'worker-3'])
+        self.assertEqual(self.op.agent_start_calls, 0)
+        write_calls = [row for row in self.op.remote_commands
+                       if row[1] == ['sudo', '-n', 'python3', '-c', reimage_worker_access.APPLY_CORE_ACCESS]]
+        self.assertEqual([row[0] for row in write_calls], [self.op.core['alias']])
+        journal_text = json.dumps(prepared)
+        self.assertNotIn(trusted_key, journal_text)
+
+    def test_worker_access_can_replace_host_key_when_tailscale_ip_is_unchanged(self):
+        envelope, observation = self.ready_worker_bootstrap(replacement_ip='100.64.0.4')
+        bootstrap = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            self.op.install_reimage_worker(bootstrap['id'], envelope['sha256'])
+            access = self.op.plan_reimage_worker_access(bootstrap['id'], envelope['sha256'])
+            result = self.op.prepare_reimage_worker_access(access['plan']['id'], access['sha256'])
+        self.assertEqual(result['status'], 'access-ready-awaiting-registration')
+        self.assertEqual(access['plan']['old_worker_ip'], access['plan']['new_worker_ip'])
+        self.assertEqual(access['plan']['core_access_before']['firewall_sha256'],
+                         access['plan']['core_access_after']['firewall_sha256'])
+        self.assertEqual(self.op.core_access_write_calls, 1)
+        self.assertEqual(self.op.core_access_apply_calls, 1)
+        self.assertEqual(reimage_worker_access._nft_worker_ips(
+            self.op.core_nft_table, self.op.core['ip']), access['plan']['old_worker_ips'])
+
+    def test_worker_access_fresh_plan_completes_exact_partial_known_hosts_state(self):
+        envelope, observation = self.install_worker_without_access()
+        bootstrap = envelope['plan']
+        context = reimage_worker_install._validated_context(
+            self.op, bootstrap['id'], envelope['sha256'])
+        trusted = context[4]
+        keys, _fingerprints, _check = reimage_worker_access._trusted_keys(
+            self.op, bootstrap, context[2], trusted)
+        partial_known_hosts = reimage_worker_access._known_hosts_after(
+            self.op.core_access_files['known_hosts'], '100.64.0.4', '100.64.0.44',
+            ['100.64.0.2', '100.64.0.3', '100.64.0.4'], keys)
+        self.op.core_access_files['known_hosts'] = partial_known_hosts
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            access = self.op.plan_reimage_worker_access(bootstrap['id'], envelope['sha256'])
+            result = self.op.prepare_reimage_worker_access(access['plan']['id'], access['sha256'])
+        self.assertEqual(result['status'], 'access-ready-awaiting-registration')
+        self.assertEqual(self.op.core_access_write_calls, 1)
+        self.assertEqual(reimage_worker_access._nft_worker_ips(
+            self.op.core_nft_table, self.op.core['ip']), access['plan']['new_worker_ips'])
+        self.assertEqual(self.op.core_access_files['known_hosts'], partial_known_hosts)
+
+    def test_worker_registration_requires_completed_core_access_stage(self):
+        envelope, observation = self.install_worker_without_access()
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'successful core worker access preparation'):
+                self.op.register_reimage_worker(envelope['plan']['id'], envelope['sha256'])
+        self.assertEqual(self.op.add_calls, 0)
+        self.assertEqual(self.op.agent_start_calls, 0)
+
+    def test_uncertain_worker_access_is_read_only_reconciled_then_adopted_by_fresh_plan(self):
+        envelope, observation = self.install_worker_without_access()
+        bootstrap = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            access = self.op.plan_reimage_worker_access(bootstrap['id'], envelope['sha256'])
+        self.op.lose_access_reply = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'core access SSH response lost'):
+                self.op.prepare_reimage_worker_access(access['plan']['id'], access['sha256'])
+        self.assertEqual(self.op.core_access_apply_calls, 1)
+        old_run_id = access['plan']['id'] + '-access'
+        reconciled = self.op.reconcile(old_run_id)
+        self.assertEqual(reconciled['status'], 'failed')
+        self.assertFalse(reconciled['reconciliation']['remote_mutation_performed'])
+        self.assertTrue(reconciled['reconciliation']['known_hosts_matches_plan'])
+        self.assertTrue(reconciled['reconciliation']['firewall_matches_plan'])
+        self.assertTrue(reconciled['reconciliation']['live_firewall_matches_plan'])
+        self.op.lose_access_reply = False
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            fresh = self.op.plan_reimage_worker_access(bootstrap['id'], envelope['sha256'])
+            adopted = self.op.prepare_reimage_worker_access(fresh['plan']['id'], fresh['sha256'])
+        self.assertEqual(adopted['status'], 'access-ready-awaiting-registration')
+        self.assertFalse(adopted['remote_mutation_attempted'])
+        self.assertFalse(adopted['remote_mutation_performed'])
+        self.assertEqual(self.op.core_access_apply_calls, 1)
+
+    def test_worker_access_executor_rejects_file_drift_before_remote_write(self):
+        envelope, observation = self.install_worker_without_access()
+        bootstrap = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            access = self.op.plan_reimage_worker_access(bootstrap['id'], envelope['sha256'])
+        self.op.core_access_files['known_hosts'] += b'# unexpected drift\n'
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'binding changed after planning: core_access_before'):
+                self.op.prepare_reimage_worker_access(access['plan']['id'], access['sha256'])
+        self.assertEqual(self.op.core_access_apply_calls, 0)
+
+    def test_access_parser_expands_an_exact_nft_ipv4_interval(self):
+        core_ip = self.op.core['ip']
+        table = ('table inet eru_mvp {\n'
+                 ' chain input {\n'
+                 '  type filter hook input priority filter - 10; policy accept;\n'
+                 '  ip daddr ' + core_ip + ' tcp dport 5001 ip saddr { 100.64.0.2-100.64.0.4 } accept\n'
+                 '  ip daddr ' + core_ip + ' tcp dport 5001 drop\n'
+                 ' }\n}\n')
+        self.assertEqual(reimage_worker_access._nft_worker_ips(table, core_ip),
+                         ['100.64.0.2', '100.64.0.3', '100.64.0.4'])
+
+    def test_access_remote_source_compiles(self):
+        compile(reimage_worker_access.INSPECT_CORE_ACCESS, 'inspect-core-access', 'exec')
+        compile(reimage_worker_access.APPLY_CORE_ACCESS, 'apply-core-access', 'exec')
 
     def test_reimage_worker_registration_adds_under_safe_core_and_stops_fenced(self):
         envelope, observation = self.install_ready_worker_for_registration()
@@ -1522,6 +1676,32 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
         self.lose_agent_start_reply = False
         self.rotate_core_after_add = False
         self.running_core_sha = '0203e3a41c9abf51c35fb52e5224cc796b4ab99b220d610ec9fd5397921072fd'
+        self.core_access_apply_calls = 0
+        self.core_access_write_calls = 0
+        self.lose_access_reply = False
+        old_worker_ips = [row['ip'] for row in self.inventory if row['role'] == 'worker']
+        old_host_key = 'ssh-ed25519 ' + base64.b64encode(
+            bytes.fromhex('0000000b7373682d6564323535313900000020' + '02' * 32)).decode()
+        self.core_access_files = {
+            'known_hosts': ''.join(ip + ' ' + old_host_key + chr(10) for ip in old_worker_ips).encode(),
+            'firewall': reimage_worker_access._firewall_text(
+                self.core['ip'], old_worker_ips).encode(),
+        }
+        self.core_nft_table = self._render_nft(old_worker_ips)
+
+    def _render_nft(self, worker_ips):
+        return ('table inet eru_mvp {\n'
+                ' chain input {\n'
+                '  type filter hook input priority -10; policy accept;\n'
+                '  ip daddr ' + self.core['ip'] + ' tcp dport 5001 ip saddr { ' +
+                ', '.join(worker_ips) + ' } accept\n'
+                '  ip daddr ' + self.core['ip'] + ' tcp dport 5001 drop\n'
+                ' }\n}\n')
+
+    def _core_file_observation(self, name):
+        raw = self.core_access_files[name]
+        return {'content': base64.b64encode(raw).decode(),
+                'sha256': hashlib.sha256(raw).hexdigest(), 'uid': 0, 'mode': 0o600}
 
     def _record_install_event(self, host, argv, stdin, check, timeout, ssh_options, record_output, output=''):
         event = {'at': '2026-09-26T00:00:00+00:00', 'host': host,
@@ -1539,6 +1719,50 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
 
     def command(self, host, argv, stdin=None, check=True, timeout=90,
                 ssh_options=None, record_output=True):
+        if (host == self.core['alias'] and argv == [
+                'sudo', '-n', 'python3', '-c', reimage_worker_access.INSPECT_CORE_ACCESS]):
+            result = {'known_hosts': self._core_file_observation('known_hosts'),
+                      'firewall': self._core_file_observation('firewall'),
+                      'nft_table': self.core_nft_table,
+                      'nft_sha256': hashlib.sha256(self.core_nft_table.encode()).hexdigest()}
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output,
+                                              json.dumps(result, sort_keys=True))
+        if (host == self.core['alias'] and argv == [
+                'sudo', '-n', 'python3', '-c', reimage_worker_access.APPLY_CORE_ACCESS]):
+            payload = json.loads(stdin)
+            self.core_access_apply_calls += 1
+            current_known = hashlib.sha256(self.core_access_files['known_hosts']).hexdigest()
+            current_firewall = hashlib.sha256(self.core_access_files['firewall']).hexdigest()
+            if current_known not in (payload['known_hosts_before_sha256'], payload['known_hosts_after_sha256']):
+                raise ValueError('fake known_hosts precondition failed')
+            if current_firewall not in (payload['firewall_before_sha256'], payload['firewall_after_sha256']):
+                raise ValueError('fake firewall precondition failed')
+            if hashlib.sha256(self.core_nft_table.encode()).hexdigest() != payload['nft_before_sha256']:
+                raise ValueError('fake nft precondition failed')
+            wanted_known = base64.b64decode(payload['known_hosts_after_base64'])
+            wanted_firewall = base64.b64decode(payload['firewall_after_base64'])
+            if self.core_access_files['known_hosts'] != wanted_known:
+                self.core_access_files['known_hosts'] = wanted_known
+                self.core_access_write_calls += 1
+            if self.core_access_files['firewall'] != wanted_firewall:
+                self.core_access_files['firewall'] = wanted_firewall
+                self.core_access_write_calls += 1
+            if payload['old_worker_ips'] != payload['new_worker_ips']:
+                self.core_nft_table = self._render_nft(payload['new_worker_ips'])
+            output = json.dumps({
+                'known_hosts_sha256': hashlib.sha256(self.core_access_files['known_hosts']).hexdigest(),
+                'firewall_sha256': hashlib.sha256(self.core_access_files['firewall']).hexdigest(),
+                'nft_sha256': hashlib.sha256(self.core_nft_table.encode()).hexdigest(),
+                'allowed_workers': payload['new_worker_ips'],
+            }, sort_keys=True)
+            result = self._record_install_event(host, argv, stdin, check, timeout,
+                                                ssh_options, record_output, output)
+            if self.lose_access_reply:
+                self.events[-1].update(status='uncertain', error='TimeoutError')
+                self.save_journal()
+                raise TimeoutError('core access SSH response lost')
+            return result
         if host == self.core['alias'] and argv == ['sudo', '-n', 'python3', '-'] and stdin == reimage_worker_registration.RUNTIME_FACTS:
             runtime = {'MainPID': '4242', 'ActiveState': 'active', 'InvocationID': 'fake-core-invocation',
                        'NRestarts': '0', 'sha256': self.running_core_sha}

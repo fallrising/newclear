@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、fenced registration、fenced smoke 與 safe-resume stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；registration／smoke／resume executors 僅以 fake 驗證，全部尚未在 VPS 驗收。
+入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration、fenced smoke 與 safe-resume stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume executors 僅以 fake 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -91,6 +91,22 @@ python3 scripts/labctl.py plan-reimage-worker --plan SOURCE_PLAN_ID --sha256 SOU
 
 它只準備鎖定的 agent/CNI payload 與舊 node capacity／labels 的 registration 意圖；總 plan 仍不可執行。完成人工 OS 重灌與 strict host verification 後，可對計畫綁定的 ckc-disposable worker alias 執行 install-reimage-worker，並以 status 查看同一 run。安裝前會重核 owner receipt、host key、machine incarnation、core health／membership、其他 hosts、乾淨 install paths、保留服務與空 runtime；只安裝 locked worker artifacts／worker 設定與 core 公鑰，只啟動 eru-containerd-proxy.socket，agent 保持停止／disabled、node 保持未註冊。worker_install gate 只代表這個有限階段，總 plan executable 仍為 false。若中斷或回覆不確定，只對同一 run 執行 read-only reconcile，不能重播安裝。
 
+worker install 後、registration 前，必須先對 core 的 SSH host-key 信任與 nft source allowlist 做獨立 plan／prepare；這是避免 core 無法 SSH 到新 worker 或 firewall 擋下 agent heartbeat 的前置條件：
+
+```bash
+# B -> ckc-disposable-01：唯讀規劃目標 worker 的 core known_hosts／firewall 更新
+python3 scripts/labctl.py plan-reimage-worker-access --plan BOOTSTRAP_PLAN_ID \
+  --sha256 BOOTSTRAP_PLAN_SHA256
+# B -> ckc-disposable-01：套用精確 target 變更，不重啟 core
+python3 scripts/labctl.py prepare-reimage-worker-access --plan ACCESS_PLAN_ID \
+  --sha256 ACCESS_PLAN_SHA256
+python3 scripts/labctl.py status --run ACCESS_PLAN_ID-access
+# B -> ckc-disposable-01：不確定時只讀核對，不重播
+python3 scripts/labctl.py reconcile --run ACCESS_PLAN_ID-access
+```
+
+access stage 以 owner receipt fingerprints 重核本機可信 host key；journal 不保存 key blob。它只改 target known_hosts entries 和 nft allowlist，變更前有 hash precondition、原子寫入及 live nft post-check，不重啟控制面。registration 要求最新成功 access journal，並在 AddNode 前再核對 access proof。失敗後須先 reconcile，再用 fresh plan 接手已知狀態。
+
 只有 safe AddNode patch 已由既有 core patch operator 部署，且執行中 core binary SHA 符合 validation manifest，才可執行 fenced registration：
 
 ```bash
@@ -101,7 +117,7 @@ python3 scripts/labctl.py status --run BOOTSTRAP_PLAN_ID-register
 python3 scripts/labctl.py reconcile --run BOOTSTRAP_PLAN_ID-register
 ```
 
-registration 只會在安全 core 上 AddNode、啟動 agent，並等待 `available=true`、`bypass=true`，停在 `registered-awaiting-smoke`。它不會執行 `node up` 或 generation commit。下一個獨立 smoke stage 需要兩台其他 worker 上、且已包含在來源 reimage plan snapshot 的 run-owned nginx canaries：
+registration 只會在成功 core access preparation 後、於安全 core 上 AddNode、啟動 agent，並等待 `available=true`、`bypass=true`，停在 `registered-awaiting-smoke`。它不會執行 `node up` 或 generation commit。下一個獨立 smoke stage 需要兩台其他 worker 上、且已包含在來源 reimage plan snapshot 的 run-owned nginx canaries：
 
 ```bash
 # 先於 provider-reimage source plan 建立並保留 worker-2／3 canaries；之後用同一 run ID
@@ -114,7 +130,7 @@ python3 scripts/labctl.py status --run SMOKE_PLAN_ID
 python3 scripts/labctl.py reconcile --run SMOKE_PLAN_ID
 ```
 
-成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `ckc-disposable-01` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。registration／smoke／resume stages 只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
+成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `ckc-disposable-01` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。registration／smoke／resume stages 只以 fake operator／remote responses 驗證，沒有連線或修改 VPS。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[core access](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
 
 ## worker-4 重建計畫
 

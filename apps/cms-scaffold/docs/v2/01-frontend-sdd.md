@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5）  
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5；同日 W3 細化：§6.1、§6.3、§7.1、§8、§9、§12 補施工細節連結，§13.2 補一列，新增 §13.6）  
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -205,7 +205,7 @@ W0 定案（細化時補上的值）：每站另有 `--surface`、`--surface-sub
 
 `AspectRatio`、`Carousel` 只給 Front 用。
 
-W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。W2 不新增 shadcn 元件（[`waves/W2.md`](waves/W2.md) §4.9）。
+W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。W2 不新增 shadcn 元件（[`waves/W2.md`](waves/W2.md) §4.9）。W3 加入 `Breadcrumb`；Front 不用 `NavigationMenu`（§13.2）、`AspectRatio`、`Carousel`、`Pagination`（比例用 Tailwind `aspect-*`、分頁用兩個連結）；施工細節見 [`waves/W3.md`](waves/W3.md) §4.9、§5.2。
 
 ### 6.2 模式元件（Polaris 式，建在 shadcn 之上）
 
@@ -240,6 +240,8 @@ export const albumSite: SiteDefinition = {
   ],
 };
 ```
+
+施工細節（`sites.ts` 的 registry 型別與三站的區塊、`home.tsx` 的區塊元件、卡片、`LightboxDialog`、`MarkdownBody`、狀態元件）見 [`waves/W3.md`](waves/W3.md) §5.0.3、§5.4、§5.5。
 
 ### 6.4 欄位 widget registry（Back）
 
@@ -378,6 +380,8 @@ W2 實作 `RelationPicker`（`ref`，對話框以 `Input`＋`RadioGroup` 搜尋�
 | 列表空 | `EmptyPublished`：「還沒有公開相簿」＋說明（surface-front §4.5 copy） |
 | 404／未發布／未知路由 | `NotFoundPublic`：「找不到這個頁面」＋「回到 {站名} 首頁」；`<meta name="robots" content="noindex">` |
 | 5xx／網路錯誤 | `ErrorPublic`：「暫時無法載入」＋「重試」按鈕（修 C-03） |
+
+F-S1～F-S6 與 Front 其他畫面（殼層、選擇器、列表、獸醫頁、里程碑列表與頁、登出）的施工細節（線框修正、資料來源、狀態、互動、SEO）見 [`waves/W3.md`](waves/W3.md) §4.7、§5.0。會員區三條路由在 W3b。
 
 ### 7.2 Back（`apps/web-back`）
 
@@ -611,6 +615,8 @@ Resource index 版型：篩選為時間範圍、操作者、動作、結果（�
 
 Back 的 401（session 過期時保留頁面、先詢問再導向登入）、403、404、409、422 施工細節見 [`waves/W1.md`](waves/W1.md) §4.1、§5.0.4、§5.5。
 
+Front 的載入、空、404／403、5xx 施工細節見 [`waves/W3.md`](waves/W3.md) §5.0.9、§8。
+
 ---
 
 ## 9. 後端缺口（前端需要的 API）
@@ -631,7 +637,7 @@ v2 大部分畫面用現有 API 就能做。下列是真正的缺口，設計與
 | G-10 | 展開關聯的標題 | 行程、看板、列表的關聯欄 | `include=refs`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | N+1 查詢，並加上 Query 快取 |
 | G-11 | 標題一律取 `titleField`（修 C-12） | Back 列表與編輯器標題 | [02 §3.1](02-backend-sdd.md#31-v5--類型設定與欄位中繼資料) | BW1 | 前端用 `payload[type.titleField]` 自行計算 |
 
-BW2 的 G-03、G-09、G-10 由前端 W2 使用；G-04 見 Q-13（[`waves/W2.md`](waves/W2.md) §1）。
+BW2 的 G-03、G-09、G-10 由前端 W2 使用；G-04 見 Q-13（[`waves/W2.md`](waves/W2.md) §1）。W3 依 G-08 的暫行做法不做會員區、導覽不顯示「登入」（[`waves/W3.md`](waves/W3.md) §1.1 C-11）。
 
 另外，[02 §4.4](02-backend-sdd.md#44-破壞性變更與前端同一波上線) 有三項破壞性變更（PATCH 必帶 `version`、公開投影不回無法公開的媒體 id、422 一次回全部欄位錯誤），前端 W1／W3 必須配合。
 
@@ -732,7 +738,7 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
 
-W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。W3 施工細節見 [`waves/W3.md`](waves/W3.md)（codegen 改用 BW5 契約，§13.5；e2e 依 owner 2026-09-26 指示延到專案完成後，規格在該檔附錄 A）。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -762,6 +768,7 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | surface-front §4.2 | `/login` 已登入時轉 `/clinic/me`；但 G-08 未完成前沒有會員區 | 暫時轉 `/`；G-08 完成後依規格 |
 | surface-back §3.3 | 建議 enum `todo \| in_progress \| blocked \| done`；種子實際是 `backlog \| ready \| in_progress \| in_review \| done` | 看板欄位一律從 schema 的 `enumValues` 產生，不寫死 |
 | surface-admin §4.1 | 列出的 shadcn primitive 包含 `Progress` | 已涵蓋（媒體用量） |
+| surface-front §3.4 | 站內主導覽「必用」shadcn `NavigationMenu`；本文 §6.1 沒有列它 | 依 §0（元件選型以本文為準）：各站導覽是 1～2 個連結的平面清單，用 `<nav>`＋`NavLink`，手機用 `Sheet`（W3 細化時補列，[`waves/W3.md`](waves/W3.md) §1.2） |
 
 ---
 
@@ -790,6 +797,14 @@ Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-1
 | Q-14 | `GET /media` 沒有 `page`、`size`、`q`（surface-back §6.5 要求有），整個媒體庫一次回傳；`MediaAsset` 也沒有「已刪除」旗標，條目引用的媒體被移到回收後，前端只能從縮圖 410 得知（[waves/W2.md](waves/W2.md) W2-FM12）。 | **A**：請後端為 `GET /media` 加 `page`、`size`（預設 24）、`q`（名稱包含），回 `MediaAssetPage`（`items`、`total`、`page`、`size`），並在 `MediaAsset` 加 `deletedAt`（nullable）；**B**：維持現狀，前端篩選與分頁（W2 的做法），demo 資料量可接受。 | **A**，轉給後端窗口；前端在對應後端波次之後把 `LibraryBody`、`LibraryTab` 改成伺服器分頁 |
 | Q-15 | surface-back §3.4 的全頁 token 預覽（`/preview/t/:token`、`POST /entries/{id}/preview-tokens`、`GET /preview/{token}`）在 BW0～BW5 的契約都沒有。 | **A**：請後端新增這兩個端點（TTL 15 分鐘、只給 Back），前端另開一波加路由；**B**：v2 只做編輯器內預覽（`GET /preview/entries/{id}`，W2 已做）。 | **B**。W2 依 B 撰寫 |
 | Q-16 | README 路線圖（BW5 合併後）建議「前端 W2、W4 以 BW5 的契約為準」；W2 細化時的指示是「W2 用 `BW2.openapi.yaml`」。BW5 對 W2 可見的差異只有 5 個媒體錯誤代碼改大寫（[waves/BW5.md](waves/BW5.md) §4.2）。 | **A**：W2 維持 BW2 契約，整合階段依 [waves/W2.md](waves/W2.md) §2.1 的對照表替換 5 個字串（Q-10 的做法）；**B**：W2 改以 BW5 產生型別，mock 與選擇器直接用大寫代碼（需要重新預演 W2）。 | **A**。W2 依 A 撰寫 |
+
+### 13.6 W3 細化時新增（待確認）
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-17 | 公開契約的 `PublicField` 只有 `key`、`type`、`required`，沒有 `enumLabels`（工作面的 `WorkField` 有，BW1a）。Front 要顯示獸醫專長、專案階段、里程碑狀態的中文名，只能在 `apps/web-front/src/copy.ts` 另存一份（`enum.<type>.<field>.<value>`，W3 的做法；值與種子的 `enumLabels` 相同）。後台改了標籤，Front 不會跟著變；新值沒有標籤時 Front 不顯示 badge（[waves/W3.md](waves/W3.md) W3-FM14）。 | **A**：請後端在 `PublicField` 加 `enumLabels`（只給 `visibility: public` 的 enum 欄位），Front 在對應後端波次後改讀 `GET /public/content-types`（多一個請求，可快取）；**B**：維持 W3 的做法（view pack 自帶標籤，surface-front §4.3「Demo 只註冊…欄位白名單」）。 | **A**，轉給後端窗口；在那之前依 B（W3 已依 B 撰寫） |
+| Q-18 | 公開導覽 API（`GET /api/v1/public/navigation/{menuKey}`）在種子只有 `front.primary` 一份選單：草稿、從未發布、英文標籤、連到三站的首頁（`ContentTypeSeed.java` 第 115～129 行），公開 GET 永遠 404；surface-front §6.3 要的是每站一份、`href` 限在該站 `basePath` 下。 | **A**：請後端種子為三站各建一份已發布的選單（例如 `front.album`、`front.clinic`、`front.projects`，中文標籤），Front 改成讀 API、失敗或空時用 `sites.ts` 的 fallback，並丟棄 `basePath` 以外的 `href`；**B**：v2 維持寫死的各站導覽（W3 的做法），導覽 API 只給 Admin 管理。 | **B**（v2 範圍最小；三站導覽只有 1～2 項）。選 A 時轉給後端窗口，前端另開一小波 |
+| Q-19 | owner 指示（2026-09-26）e2e 只在專案完成後執行，所以 W3 有兩個失敗模式在本波沒有自動測試：手機選單被 portal 出站的根元素後配色失效、shadcn 元件的 `cn`（tailwind-merge）把 `text-front-*` 當成顏色而刪掉 `text-foreground` 或被 `text-lg` 蓋掉字級（[waves/W3.md](waves/W3.md) W3-FM21、W3-FM22；jsdom 不計算 Tailwind 樣式）。預演已修正，並寫好 e2e 斷言（W3 附錄 A）。 | **A**：接受，專案完成後由附錄 A 的 e2e 覆蓋；**B**：加一個靜態 Vitest，禁止在傳給 `@cms/ui` 元件的 `className` 同時出現 `text-front-*` 與顏色 class；**C**：W3 實作時就跑附錄 A。 | **A**（owner 已決定 e2e 的時機；B 的靜態規則容易誤判） |
 
 ## 14. 參考來源
 

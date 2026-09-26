@@ -18,6 +18,7 @@ const PRESETS = ["openai", "anthropic", "xai", "deepseek", "openrouter", "mistra
 const PRESET_DEFAULTS: Record<ProviderPreset, { api_format: ApiFormat | null; base_url: string | null; token_param: "max_tokens" | "max_completion_tokens" }> = {
   openai: { api_format: "openai_chat", base_url: "https://api.openai.com/v1", token_param: "max_completion_tokens" },
   anthropic: { api_format: "anthropic_messages", base_url: "https://api.anthropic.com", token_param: "max_tokens" },
+  google: { api_format: "gemini", base_url: "https://generativelanguage.googleapis.com/v1beta", token_param: "max_tokens" },
   xai: { api_format: "openai_chat", base_url: "https://api.x.ai/v1", token_param: "max_tokens" },
   deepseek: { api_format: "openai_chat", base_url: "https://api.deepseek.com", token_param: "max_tokens" },
   openrouter: { api_format: "openai_chat", base_url: "https://openrouter.ai/api/v1", token_param: "max_tokens" },

@@ -1,9 +1,9 @@
 export type QuotaClass = "api_key" | "operator_personal";
 export type RuntimeKind = "hosted" | "runner" | "external";
 export type RuntimeStatus = "ok" | "unconfigured" | "connection_error" | "runner_offline" | "disabled";
-export type ApiFormat = "openai_chat" | "anthropic_messages";
+export type ApiFormat = "openai_chat" | "anthropic_messages" | "openai_responses" | "gemini";
 export type AdapterKind = "codex" | "claude_code" | "gemini_cli" | "command";
-export type ProviderPreset = "openai" | "anthropic" | "xai" | "deepseek" | "openrouter" | "mistral" | "groq" | "custom";
+export type ProviderPreset = "openai" | "anthropic" | "google" | "xai" | "deepseek" | "openrouter" | "mistral" | "groq" | "custom";
 export type LlmErrorClass =
   | "auth"
   | "not_found"
@@ -121,7 +121,8 @@ export type MessagesPage = { messages: ServerMessage[]; has_more: boolean };
 export type WsServerFrame =
   | { v: 1; type: "event"; event: ServerMessage }
   | { v: 1; type: "status"; member_id: string; body: string; error_class?: string }
-  | { v: 1; type: "error"; code: string };
+  | { v: 1; type: "error"; code: string }
+  | { v: 1; type: "draft"; member_id: string; generation_id: string; text: string; done: false };
 
 export type Provider = {
   id: string;
@@ -174,6 +175,22 @@ export type RuntimeChange = {
   changed_by: string;
   changed_by_name: string;
 };
+export type Generation = {
+  id: string;
+  room_id: string;
+  room_name: string | null;
+  trigger_seq: number;
+  state: "queued" | "dispatched" | "streaming" | "completed" | "dropped" | "failed";
+  error_class: LlmErrorClass | null;
+  created_at: string;
+  completed_at: string | null;
+  duration_ms: number | null;
+  connection_id: string | null;
+  model: string | null;
+  runtime_epoch: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+};
 export type AgentDetail = AdminAgent & {
   max_output_tokens: number;
   temperature: number | null;
@@ -190,6 +207,7 @@ export type PutRuntimeBody =
       system_prompt_addendum?: string;
       max_output_tokens?: number;
       temperature?: number | null;
+      stream?: boolean;
       revoke_tokens?: boolean;
     }
   | { runtime: "runner"; quota_class: QuotaClass; adapter_kind: AdapterKind; revoke_tokens?: boolean }

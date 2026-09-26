@@ -780,7 +780,9 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | Q-11 | shadcn 的 `Calendar` 依賴 `react-day-picker`，`Sonner` 依賴 `sonner`；兩者都不在 §3、§4，也不在 Q-08 的清單。 | **A**：比照 Q-08，視為 D-02 的組成，照 [waves/W1.md §4.8](waves/W1.md#48-npm-套件版本已查證23) 的精確版本（`react-day-picker` 9.14.0、`sonner` 2.0.8）；**B**：不用 `Calendar`（datetime 改用原生 `<input type="datetime-local">`）、不用 toast（違反 U-04 的修法）。 | **A**。W1 施工圖依 A 撰寫 |
 | Q-12 | react-hook-form 把欄位名稱中的 `.` 當成巢狀路徑，W1 的表單也用 `$slug` 存網址代稱；但契約的 `CreateFieldRequest.key` 沒有 pattern，理論上可以建立 `a.b` 或 `$slug` 這種欄位 key（[waves/W1.md](waves/W1.md) W1-FM12）。 | **A**：請後端在 `CreateFieldRequest.key` 加 pattern `^[A-Za-z][A-Za-z0-9_]{0,62}$`（現有種子的 key 都符合）；**B**：前端改用巢狀表單值（`payload.<key>`），仍無法處理含 `.` 的 key。 | **A**，轉給後端窗口（BW2 之後的任一後端波次） |
 
-### 13.5 W2 細化時新增（待確認）
+### 13.5 W2 細化時新增、已決定（owner，2026-09-26）
+
+Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-15 選 B、Q-16 選 A。之後的前端波次（W3、W4、W3b、W5）以最新的後端契約 `contracts/BW5.openapi.yaml` 產生型別（README 路線圖的建議；W2 維持 BW2，差異在整合階段處理）。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |

@@ -123,7 +123,7 @@ def _validated_context(operator,plan_id,expected_hash):
     from reimage_prepare import _load_plan,require_prepared
     from reimage_receipt import load_receipt,verify_local_hostkeys
     from reimage_host import REQUIRED_FACTS,validate_facts
-    from reimage_worker_plan import POST_REIMAGE_BLOCKER,WORKER_INDEX,_safe_json
+    from reimage_worker_plan import POST_REIMAGE_BLOCKER,WORKER_ACCESS_STEPS,WORKER_INDEX,_safe_json
 
     plan=_bootstrap(operator,plan_id,expected_hash)
     source=plan.get("source_reimage_plan",{})
@@ -209,6 +209,10 @@ def _validated_context(operator,plan_id,expected_hash):
         or plan.get("mutation_hosts")!=[operator.core["alias"],alias]):
         raise ValueError("worker bootstrap post-install stage contract changed; create a new plan")
     from core_release import validation_record
+    access_gate=plan.get("worker_access")
+    if (not isinstance(access_gate,dict) or access_gate.get("executable") is not True
+        or access_gate.get("blockers")!=[] or access_gate.get("steps")!=WORKER_ACCESS_STEPS):
+        raise ValueError("worker access gate is missing or blocked")
     registration_gate=plan.get("worker_registration")
     if (not isinstance(registration_gate,dict) or registration_gate.get("executable") is not True
         or registration_gate.get("blockers")!=[]

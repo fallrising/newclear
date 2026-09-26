@@ -2,7 +2,7 @@
 
 ## 範圍與 gate
 
-此 stage 只接受同一 bootstrap／registration／smoke chain 的 successful `smoked-awaiting-resume` journal。resume plan 綁定 smoke plan 與 journal hash、PASS evidence、兩台 peer canary／HTTP guard proof、safe core release/runtime、replacement machine／boot identity、worker ownership manifest、四台 service state 和 cluster snapshot。任何輸入或 live state 漂移都要先停止並重新評估。
+此 stage 只接受同一 bootstrap／registration／smoke chain 的 successful `smoked-awaiting-resume` journal；其中 registration 與 smoke 已驗證前置 [core access proof](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)。resume plan 綁定 smoke plan 與 journal hash、PASS evidence、兩台 peer canary／HTTP guard proof、safe core release/runtime、replacement machine／boot identity、worker ownership manifest、四台 service state 和 cluster snapshot。任何輸入或 live state 漂移都要先停止並重新評估。
 
 執行前會再次確認目標 `available=true` 且 `bypass=true`、worker 沒有 workload／resource usage，core SHA 和 InvocationID 正確，健康、其他 workers、peer canaries 及服務狀態未變。peer HTTP guards 從 resume 前持續到 node 與 post-check 完成。唯一遠端 mutation 是透過 `ckc-disposable-01` SSH alias 向 core 發出一次 `node up TARGET`；executor 等候 agent ready 並核對 `available=true`、`bypass=false`。
 

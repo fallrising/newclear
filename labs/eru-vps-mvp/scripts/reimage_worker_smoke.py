@@ -97,6 +97,9 @@ def _registration_journal(operator, bootstrap_plan, bootstrap_hash, *, require_s
             or journal.get('available') is not True
             or journal.get('bypass') is not True):
         raise ValueError('worker registration is not complete in the fenced, available state')
+    import reimage_worker_access as worker_access
+    worker_access.require_access_ready(
+        operator, bootstrap_plan, bootstrap_hash, expected_proof=journal.get('access_proof'))
     return journal, journal_hash
 
 

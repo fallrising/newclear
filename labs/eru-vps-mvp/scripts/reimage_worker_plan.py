@@ -19,6 +19,12 @@ POST_REIMAGE_BLOCKER = (
     'Generation commit and recovery executor are not implemented'
 )
 
+WORKER_ACCESS_STEPS = [
+    'Replace only the target worker entries in core known_hosts with owner-verified host keys',
+    'Replace only the target worker Tailscale address in the core firewall source allowlist',
+    'Apply the firewall source file without restarting core and verify live nft state',
+]
+
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
@@ -193,6 +199,11 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
                 'Verify installed owner manifest, preserved services, empty runtime and absent worker registration',
             ],
         },
+        'worker_access': {
+            'executable': True,
+            'blockers': [],
+            'steps': list(WORKER_ACCESS_STEPS),
+        },
         'worker_registration': {
             'executable': True,
             'blockers': [],
@@ -210,8 +221,9 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
         'steps': [
             'Revalidate owner receipt, host observation, trust file and core membership',
             'Install only locked agent/CNI artifacts and six ERU worker files; preserve OS, SSH/Tailscale, Docker/containerd',
-            'Add the prior worker name/capacity at the verified replacement Tailscale endpoint',
-            'Fence the new registration before starting eru-agent; require availability while still fenced',
+            'Prepare core SSH trust and firewall access for the verified replacement Tailscale endpoint',
+            'Add the prior worker name/capacity only after access proof; fence before starting eru-agent',
+            'Require availability while still fenced',
             'Run target smoke and other-worker guards; resume scheduling only after all checks pass',
             'Commit the new worker address and cluster generation after verified resume',
         ],

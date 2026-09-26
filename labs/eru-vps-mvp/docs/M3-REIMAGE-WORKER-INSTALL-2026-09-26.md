@@ -30,4 +30,4 @@ install plan 為 single-use。遠端命令一旦開始，任何非零退出、�
 
 本安裝切片的 58 項 test_labctl.py 測試通過，涵蓋 worker-only gate、pinned host key、receipt／plan bindings、worker agent 未啟動、node 未註冊、空 runtime／服務驗證、安裝前 drift 阻擋，以及 lost response 後 read-only reconcile 和禁止重播。embedded remote preflight、post-install verifier 與 installer source 也通過 Python compile 檢查。此切片沒有執行 E2E，沒有連線／修改 worker 或 core，也沒有更改 private inventory。
 
-fenced registration 與 smoke 之後已有單次 [safe resume executor](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)，各以 fake operator／peer HTTP guards 和 read-only reconcile 離線驗證。剩下的本機工作是 resume 後 host-key／worker IP 對帳、generation commit 與跨階段恢復 executor。safe AddNode core artifact 尚未部署；全程未做 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。
+fenced registration 與 smoke 之後已有單次 [safe resume executor](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)，各以 fake operator／peer HTTP guards 和 read-only reconcile 離線驗證。resume 後 host-key／worker IP 對帳與 generation commit 已接成獨立 fake-only stage，詳見 [generation commit](M3-REIMAGE-WORKER-GENERATION-2026-09-26.md)。剩下的本機工作是跨階段恢復 executor。safe AddNode core artifact 尚未部署；全程未做 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。

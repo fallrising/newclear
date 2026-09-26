@@ -460,6 +460,14 @@ class Operator:
         from reimage_worker_resume import resume_reimage_worker
         return resume_reimage_worker(self, plan_id, expected_hash)
 
+    def plan_reimage_worker_generation(self, resume_plan_id, resume_hash):
+        from reimage_worker_generation import plan_reimage_worker_generation
+        return plan_reimage_worker_generation(self, resume_plan_id, resume_hash)
+
+    def commit_reimage_worker_generation(self, plan_id, expected_hash):
+        from reimage_worker_generation import commit_reimage_worker_generation
+        return commit_reimage_worker_generation(self, plan_id, expected_hash)
+
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
         envelope = read(self.root / 'plans' / (plan_id + '.json'))
@@ -714,6 +722,9 @@ class Operator:
         if journal.get('operation') == 'provider-reimage-worker-resume':
             from reimage_worker_resume import reconcile_reimage_worker_resume
             return reconcile_reimage_worker_resume(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-generation':
+            from reimage_worker_generation import reconcile_reimage_worker_generation
+            return reconcile_reimage_worker_generation(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -778,6 +789,12 @@ def main():
     resume_worker = sub.add_parser('resume-reimage-worker', help='Resume a smoked worker exactly once and keep generation unchanged')
     resume_worker.add_argument('--plan', required=True, help='Worker resume plan ID')
     resume_worker.add_argument('--sha256', required=True, help='Worker resume plan SHA-256')
+    plan_worker_generation = sub.add_parser('plan-reimage-worker-generation', help='Plan the private inventory and generation commit after a successful worker resume')
+    plan_worker_generation.add_argument('--plan', required=True, help='Successful worker resume plan ID')
+    plan_worker_generation.add_argument('--sha256', required=True, help='Worker resume plan SHA-256')
+    commit_worker_generation = sub.add_parser('commit-reimage-worker-generation', help='Commit the verified replacement worker address and increment generation once')
+    commit_worker_generation.add_argument('--plan', required=True, help='Worker generation plan ID')
+    commit_worker_generation.add_argument('--sha256', required=True, help='Worker generation plan SHA-256')
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -909,6 +926,26 @@ def main():
             print(json.dumps({k: result.get(k) for k in [
                 'id', 'operation', 'status', 'stage', 'target', 'target_alias',
                 'available', 'bypass', 'resume_attempted', 'resume_outcome', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-generation':
+            envelope = operator.plan_reimage_worker_generation(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'resume_plan': plan['resume_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'generation_before': plan['cluster_before']['generation'],
+                'generation_after': plan['cluster_after']['generation'],
+                'inventory_before_sha256': plan['deployment_plan_before_sha256'],
+                'inventory_after_sha256': plan['deployment_plan_after_sha256'],
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-generation-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'commit-reimage-worker-generation':
+            result = operator.commit_reimage_worker_generation(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'committed_generation', 'finished_at']}, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))

@@ -33,6 +33,8 @@ export type StartRunnerOpts = {
   rooms?: string[];
   timeoutS?: number;
   kithUrl?: string;
+  /** Reuse this directory (and its state.json / invocations.jsonl) instead of creating one. E2E-W6-04. */
+  root?: string;
 };
 
 const live = new Set<ChildProcess>();
@@ -117,7 +119,8 @@ export async function startRunner(opts: StartRunnerOpts): Promise<RunnerHandle> 
   if (kithUrl === "") throw new Error("kithUrl is required (KITH_E2E_BASE_URL is not set)");
 
   const rand = randomBytes(4).toString("hex");
-  const root = join(runDir(), "state", `runner-${opts.name}-${rand}`);
+  const root = opts.root ?? join(runDir(), "state", `runner-${opts.name}-${rand}`);
+  if (opts.root && !existsSync(opts.root)) throw new Error("runner root does not exist");
   const work = join(root, "work");
   const state = join(root, "state");
   const cli = join(root, "cli");
@@ -194,6 +197,26 @@ export async function startRunner(opts: StartRunnerOpts): Promise<RunnerHandle> 
     },
     exited,
   };
+}
+
+/**
+ * Reject when the process has already exited. A missing runner/main.ts shows up here, in the log,
+ * instead of as a 15s online timeout.
+ */
+export async function expectRunnerAlive(handle: RunnerHandle, graceMs = 1500): Promise<void> {
+  const still = Symbol("still");
+  const early = await Promise.race([
+    handle.exited.then((code) => code),
+    new Promise<typeof still>((resolve) => setTimeout(() => resolve(still), graceMs)),
+  ]);
+  if (early === still) return;
+  let tail = "";
+  try {
+    tail = readFileSync(handle.logFile, "utf8").slice(-800);
+  } catch {
+    tail = "";
+  }
+  throw new Error(`runner exited ${early} before it was ready\n${tail}`);
 }
 
 /** Poll GET /api/agents/:id until `.agent.runtime_status` is `ok` (at most 15s). */

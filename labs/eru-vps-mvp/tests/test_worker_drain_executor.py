@@ -12,6 +12,8 @@ from app_cli_adapter import EruCLIAdapter
 from app_executor import UncertainExecution
 from worker_drain import build_plan
 from worker_drain_executor import WorkerDrainExecutor, execution_plan
+from worker_drain_ops import (execute_saved_plan, prepare_execution_plan,
+                              recover_run, save_review_plan)
 
 
 WORKERS = {
@@ -187,6 +189,19 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         self.review = build_plan('worker-4', self.initial, self.apps, self.destinations,
                                  True, (), '20260926T120000Z-drainrun')
 
+    def private_inputs(self):
+        private = Path(self.temp.name) / 'private'
+        private.mkdir(exist_ok=True)
+        source = private / 'worker-drain-input.json'
+        source.write_text(json.dumps({
+            'snapshot': self.initial, 'apps': self.apps,
+            'destinations': self.destinations, 'health_ok': True,
+            'consistency_issues': [],
+        }))
+        desired = private / 'worker-drain-apps.json'
+        desired.write_text(json.dumps(self.apps))
+        return source, desired
+
     def prepared(self, api):
         return execution_plan(self.review, self.apps, api)
 
@@ -320,6 +335,79 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         self.assertEqual(argv[-2:], ['down', 'worker-4'])
         self.assertIn('node', argv)
         self.assertEqual(kwargs['timeout'], 90)
+
+    def test_private_labctl_lifecycle_uses_fake_adapter_and_fixed_record_paths(self):
+        project = Path(self.temp.name)
+        input_path, apps_path = self.private_inputs()
+        review, review_path = save_review_plan(
+            project, 'worker-4', input_path, '20260926T130000Z-draincli')
+        self.assertFalse(review['executable'])
+        self.assertEqual(review_path.parent.name, 'review-plans')
+
+        api = FakeDrainAPI(self.initial)
+        execution, execution_path = prepare_execution_plan(
+            project, review['id'], review['plan_sha256'], apps_path, api)
+        self.assertTrue(execution['executable'])
+        self.assertEqual(execution_path.parent.name, 'execution-plans')
+        self.assertEqual((api.fence_calls, api.deploy_calls, api.remove_calls), (0, [], []))
+
+        result = execute_saved_plan(
+            project, execution['id'], execution['plan_sha256'], apps_path,
+            lambda: api)
+        self.assertEqual(result['status'], 'complete')
+        self.assertTrue(result['component_reinstall_allowed'])
+        self.assertEqual(api.fence_calls, 1)
+        self.assertEqual(set(api.remove_calls), {row['id'] for row in self.sources})
+
+    def test_labctl_recovery_route_is_read_only_after_uncertain_execute(self):
+        project = Path(self.temp.name)
+        input_path, apps_path = self.private_inputs()
+        review, _ = save_review_plan(
+            project, 'worker-4', input_path, '20260926T130100Z-draincli')
+        api = FakeDrainAPI(self.initial, fail_deploy_app='metrics-api')
+        execution, _ = prepare_execution_plan(
+            project, review['id'], review['plan_sha256'], apps_path, api)
+        with self.assertRaises(UncertainExecution):
+            execute_saved_plan(project, execution['id'], execution['plan_sha256'],
+                               apps_path, lambda: api)
+        before = (api.fence_calls, list(api.deploy_calls), list(api.remove_calls),
+                  list(api.probe_calls))
+
+        recovered = recover_run(project, execution['id'], lambda: api)
+
+        after = (api.fence_calls, list(api.deploy_calls), list(api.remove_calls),
+                 list(api.probe_calls))
+        self.assertEqual(before, after)
+        self.assertTrue(recovered['reconciliation']['read_only'])
+        self.assertFalse(recovered['reconciliation']['remove_replayed'])
+        self.assertFalse(recovered['reconciliation']['component_reinstall_allowed'])
+
+    def test_worker_drain_inputs_reject_outside_and_symlink_paths(self):
+        project = Path(self.temp.name)
+        outside = Path(self.temp.name).parent / 'outside-drain-input.json'
+        outside.write_text('{}')
+        self.addCleanup(lambda: outside.unlink(missing_ok=True))
+        with self.assertRaisesRegex(ValueError, 'inside project private'):
+            save_review_plan(project, 'worker-4', outside, 'outside-plan')
+
+        private = project / 'private'
+        private.mkdir(exist_ok=True)
+        link = private / 'linked-input.json'
+        link.symlink_to(outside)
+        with self.assertRaisesRegex(ValueError, 'symlinks'):
+            save_review_plan(project, 'worker-4', link, 'linked-plan')
+
+    def test_worker_drain_plan_hash_and_existing_record_block_prepare(self):
+        project = Path(self.temp.name)
+        input_path, apps_path = self.private_inputs()
+        review, _ = save_review_plan(
+            project, 'worker-4', input_path, '20260926T130200Z-draincli')
+        api = FakeDrainAPI(self.initial)
+        with self.assertRaisesRegex(ValueError, 'does not match'):
+            prepare_execution_plan(project, review['id'], '0' * 64, apps_path, api)
+        with self.assertRaisesRegex(FileExistsError, 'already exists'):
+            save_review_plan(project, 'worker-4', input_path, review['id'])
+        self.assertEqual((api.fence_calls, api.deploy_calls, api.remove_calls), (0, [], []))
 
 
 if __name__ == '__main__':

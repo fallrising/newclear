@@ -145,6 +145,30 @@ python3 scripts/labctl.py reconcile --run GENERATION_PLAN_ID-generation
 ```
 generation writer 只允許更新已 hash-bound 的 `private/deployment-plan.json` 與 `private/operations/cluster.json`；先更新 inventory，再把 generation 加一。唯讀 reconcile 會識別 before／after hash；精確 partial 只允許同一 plan 接續寫 generation，其餘 drift 停止人工檢查。registration／smoke／resume／generation executors 只以 fake fixtures 驗證，沒有連線或修改 VPS／真實 private data。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[core access](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)、[generation commit](M3-REIMAGE-WORKER-GENERATION-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
 
+## 跨階段 worker recovery
+
+ERU-014 的鏈結檢視與恢復命令會在六個既有 worker reimage stages 中定位第一個未完成／不確定的階段。先在 B 本機查看 hash-bound snapshot；若缺 smoke plan，可一併提供既有 peer canary run ID：
+
+```bash
+# B 本機：只讀本機 plan/journal，不執行輸出的下一階段命令
+python3 scripts/labctl.py plan-reimage-worker-recovery \
+  --plan BOOTSTRAP_PLAN_ID --sha256 BOOTSTRAP_PLAN_SHA256
+# 若尚無 smoke plan，另加已存在的 peer canary：--canary-run CANARY_RUN_ID
+```
+
+`next_action.kind` 為 `plan`、`execute` 或 `input-required` 時，操作員依輸出與原 stage 文件審查後手動執行；coordinator 不會代跑。若為 `reconcile`，輸出會同時列出 stage run ID 和 `host_scope`。只執行該 stage 的既有唯讀 reconciler：
+
+```bash
+# B -> 顯示的 ckc-disposable aliases；worker-generation 只讀 B 本機 private files
+python3 scripts/labctl.py recover-reimage-worker-chain \
+  --plan RECOVERY_PLAN_ID --sha256 RECOVERY_PLAN_SHA256
+python3 scripts/labctl.py status --run RECOVERY_PLAN_ID-recovery
+# B 本機：只檢視 wrapper journal，不再連線或呼叫 stage reconciler
+python3 scripts/labctl.py reconcile --run RECOVERY_PLAN_ID-recovery
+```
+
+recover 命令不重播遠端 mutation，也不自動跨到下一階段。它會拒絕規劃後已變動的 chain snapshot。reconcile 完成後重新建立並檢查 recovery plan。詳見 [跨階段 worker recovery](M3-REIMAGE-WORKER-RECOVERY-2026-09-26.md)。
+
 ## worker-4 重建計畫
 
 ```bash

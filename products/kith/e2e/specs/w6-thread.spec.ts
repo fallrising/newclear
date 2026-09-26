@@ -66,7 +66,9 @@ test(
 
       const input = ben.page.getByTestId("thread-composer-input");
       await input.fill(replyText);
-      await input.press("Enter");
+      const coarse = await ben.page.evaluate(() => matchMedia("(pointer: coarse)").matches);
+      if (coarse) await ben.page.getByTestId("thread-composer-send").click();
+      else await input.press("Enter");
       await expect(ben.page.getByTestId("thread-replies")).toContainText(replyText);
       await expect(timeline.getByTestId("message-body").filter({ hasText: replyText })).toHaveCount(0);
       await expect(rootRow.getByTestId("thread-summary")).toContainText(label);

@@ -46,7 +46,7 @@ M0 必須交出已填滿的 attention 純函式、mention tokenizer、keyword ma
 
 ## Parallel work and review
 
-Planner 維護里程碑與 acceptance IDs。Room、Inbox、HostedGeneration、sidecar、frontend 分別限定目錄。先固定跨模組介面及 golden vectors，再平行實作。Reviewer 不得只看 happy path；必須追蹤至少一次「D1 INSERT 成功但 broadcast 前 crash」及一次非 operator mention `operator_personal` agent 的完整事件序列。
+Planner 維護里程碑與 acceptance IDs。Room、Inbox、HostedGeneration、sidecar、runner、web 分別限定目錄。先固定跨模組介面及 golden vectors，再平行實作。Reviewer 不得只看 happy path；必須追蹤至少一次「D1 INSERT 成功但 broadcast 前 crash」及一次非 operator mention `operator_personal` agent 的完整事件序列。
 
 單一 writer 擁有同一份格式／協定規格。跨模組改動由整合者合併，不能讓多個 agent 同時改寫契約而互相覆蓋。
 

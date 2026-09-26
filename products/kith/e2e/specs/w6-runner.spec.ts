@@ -84,7 +84,8 @@ test(
       let shotRunning = false;
       await expect.poll(async () => {
         if (await placeholder.count()) {
-          const label = (await placeholder.first().getAttribute("aria-label")) ?? "";
+          // The placeholder can unmount between count() and the read when the reply lands.
+          const label = (await placeholder.first().getAttribute("aria-label", { timeout: 250 }).catch(() => "")) ?? "";
           if (label !== "" && labels.at(-1) !== label) labels.push(label);
           if (!shotRunning && label.includes("執行中")) {
             shotRunning = true;

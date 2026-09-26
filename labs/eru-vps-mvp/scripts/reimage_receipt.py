@@ -19,8 +19,8 @@ REQUIRED_FIELDS = {
 }
 HOST_KEY_TYPES = {"ssh-ed25519", "ecdsa-sha2-nistp256", "ssh-rsa"}
 EXPECTED_REVIEW_BLOCKERS = {
-    "Trusted replacement host keys and OneVPS/Tailscale bootstrap procedure are still required",
-    "Drain/re-registration/resume adapter is not implemented; provider API is optional",
+    "Owner console reimage, receipt and replacement-host verification are separate manual stages",
+    "Worker-only install, re-registration and resume stages are not implemented",
 }
 
 

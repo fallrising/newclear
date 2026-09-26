@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於選定空 worker-2／3／4；02／03 僅完成本機驗證，實機尚待觀測結束後安排；provider-reimage 仍是唯讀計畫。
+入口：[scripts/labctl.py](../scripts/labctl.py)。目前提供實際可執行的 plan、execute、status、reconcile；execute 支援 nginx smoke、同版本 reapply、依原 smoke evidence 精確清理。`rebuild-node` 的 component-reinstall 可在通過健康／ownership／HTTP guards 後作用於選定空 worker-2／3／4；02／03 僅完成本機驗證，實機尚待觀測結束後安排；provider-reimage 的總計畫仍為唯讀；ERU-side 重灌前摘除器是獨立 hash-bound 命令，尚未對 VPS 執行。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -66,6 +66,23 @@ reconcile 只讀遠端，不重播部署、不自動清理。若原控制程序�
 - `plans/` 放不可直接重播的計畫；`runs/` 放每階段 journal 與子程序 log；`observations/` 放 plan／reconcile 的私有證據。JSON 以同目錄暫存檔、fsync、atomic replace 寫入，權限 0600。
 - 執行前再次檢查 etcd 健康、runtime／metadata IDs、空節點配額與 node availability。檢查是當下的觀測，不能保證下一秒不發生磁碟延遲或網路故障。
 - 仍依賴本機 `private/preflight`、已驗證 host public keys 及既有 Debian 環境，尚非新 controller／新 OS 的 bootstrap 工具。
+
+## 人工 provider OS 重灌：前置摘除階段
+
+此後備路徑與日常元件重裝分開。`provider-reimage` 總計畫永遠保持 `executable: false`；只有 `reimage_preparation.executable` 為 true、preparation blockers 為空時，專用 `prepare-reimage` 才能依同一 plan hash fence 並摘除一台已空的 worker。它不呼叫 provider API、不重灌 OS，也不安裝 worker 元件。
+
+```bash
+# B -> core ckc-disposable-01 與計畫綁定的 worker alias；先建計畫並人工審查 blockers/hash
+python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
+  --mode provider-reimage --reimage-intent private/reimage-intents/worker-4.json
+# B -> SSH 僅使用 ckc-disposable-01～04 aliases；寫入變更只落在 01 與目標 worker alias
+python3 scripts/labctl.py prepare-reimage --plan PLAN_ID --sha256 PLAN_SHA256
+python3 scripts/labctl.py status --run PLAN_ID
+```
+
+命令會再核對健康、ERU workload／runtime／配額、Docker 容器、保留服務、主機身分與叢集 membership；在 core 確認 Bypass，只停止目標 `eru-agent.service`，再次檢查 runtime 後移除精確 node registration，最後停在 `awaiting-owner-console-reimage`。它不會自動 `node up`。timeout／失敗先用 `reconcile --run PLAN_ID` 唯讀檢查 core 狀態，不能重播原 plan。receipt 需同一 plan 的成功 preparation journal；重灌後的 host verification 仍只讀，worker-only 安裝／重新註冊／resume 尚待實作。詳細範圍與離線測試見 [ERU-014 摘除紀錄](M3-REIMAGE-PREPARE-2026-09-26.md)。
+
+此命令本輪只以 fake operator 驗證，沒有連線或修改任何 VPS；正式 OS reimage acceptance 仍待本機開發收尾後另行安排。
 
 ## worker-4 重建計畫
 

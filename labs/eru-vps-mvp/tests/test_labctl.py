@@ -94,7 +94,7 @@ class FakeOperator(labctl.Operator):
     def __init__(self, project, snapshot):
         super().__init__(project)
         self.trusted_hostkeys_dir = project / 'trusted-hostkeys'
-        self.trusted_hostkeys_dir.mkdir()
+        self.trusted_hostkeys_dir.mkdir(exist_ok=True)
         self.live = copy.deepcopy(snapshot)
         self.removed = []
         self.lose_response = False
@@ -122,6 +122,83 @@ class FakeOperator(labctl.Operator):
         if self.lose_response:
             raise TimeoutError('SSH response lost after remote remove')
         return ''
+
+
+class FakeReimageOperator(FakeOperator):
+    def __init__(self, project, snapshot):
+        super().__init__(project, snapshot)
+        self.agent_active = True
+        self.fail_after_fence = False
+        self.fail_after_remove = False
+        self.inject_runtime_after_stop = False
+        self.remote_commands = []
+
+    def cli(self, *argv):
+        command = ['sudo', '-n', '/usr/local/bin/eru-cli', '--eru',
+                   self.core['ip'] + ':5001', '--output', 'json', *argv]
+        event = {'at': '2026-09-26T00:00:00+00:00', 'host': self.core['alias'],
+                 'argv': command, 'status': 'complete', 'exit_code': 0,
+                 'stdout': '', 'stderr': ''}
+        self.events.append(event)
+        self.save_journal()
+        if argv == ('pod', 'list'):
+            return copy.deepcopy(self.live['pods'])
+        if argv == ('pod', 'nodes', 'eru'):
+            return copy.deepcopy(self.live['nodes'])
+        if argv == ('workload', 'list'):
+            return copy.deepcopy(self.live['workloads'])
+        if len(argv) == 3 and argv[:2] == ('node', 'get'):
+            return [copy.deepcopy(node) for node in self.live['nodes'] if node['name'] == argv[2]]
+        raise AssertionError(argv)
+
+    def host_snapshot(self):
+        return copy.deepcopy(self.live['hosts'])
+
+    def command(self, host, argv, stdin=None, check=True, timeout=90):
+        self.remote_commands.append((host, list(argv)))
+        event = {'at': '2026-09-26T00:00:00+00:00', 'host': host,
+                 'argv': list(argv), 'status': 'started'}
+        self.events.append(event)
+        self.save_journal()
+        try:
+            output = ''
+            status = 0
+            if argv[:4] == ['sudo', '-n', 'systemctl', 'is-active']:
+                units = argv[4:]
+                states = [('active' if unit != 'eru-agent.service' or self.agent_active else 'inactive')
+                          for unit in units]
+                output = '\n'.join(states) + '\n'
+                status = 0 if all(value == 'active' for value in states) else 3
+            elif argv[:4] == ['sudo', '-n', 'systemctl', 'stop'] and argv[4:] == ['eru-agent.service']:
+                self.agent_active = False
+                if self.inject_runtime_after_stop:
+                    self.live['hosts'][host]['containers'] = 'late-container'
+            elif 'node' in argv and 'down' in argv:
+                target = argv[-1]
+                next(row for row in self.live['nodes'] if row['name'] == target)['bypass'] = True
+                if self.fail_after_fence:
+                    event.update(status='uncertain', error='TimeoutError')
+                    self.save_journal()
+                    raise TimeoutError('SSH response lost after node down')
+            elif 'node' in argv and 'remove' in argv:
+                target = argv[-1]
+                self.live['nodes'] = [row for row in self.live['nodes'] if row['name'] != target]
+                if self.fail_after_remove:
+                    event.update(status='uncertain', error='TimeoutError')
+                    self.save_journal()
+                    raise TimeoutError('SSH response lost after node remove')
+            else:
+                raise AssertionError((host, argv))
+            event.update(status='complete', exit_code=status, stdout=output, stderr='')
+            self.save_journal()
+            if check and status:
+                raise RuntimeError('fake remote command failed')
+            return output
+        except BaseException:
+            if event.get('status') == 'started':
+                event.update(status='uncertain', error='Exception')
+                self.save_journal()
+            raise
 
 
 class OperatorTests(unittest.TestCase):
@@ -459,8 +536,127 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['bindings']['provider_reimage_intent'], {
             'path': str(intent_path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
         self.assertFalse(plan['executable'])
-        self.assertTrue(any('Drain/re-registration/resume adapter' in x for x in plan['blockers']))
+        self.assertTrue(any('Worker-only install, re-registration and resume' in x for x in plan['blockers']))
         self.assertFalse(any('invalid manual reimage intent' in x for x in plan['blockers']))
+
+    def reimage_preparation_plan(self):
+        self.empty_reimage_target()
+        self.op = FakeReimageOperator(self.project, self.op.live)
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        return envelope
+
+    def prepared_reimage_plan(self):
+        envelope = self.reimage_preparation_plan()
+        self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        return envelope
+
+    def test_manual_reimage_has_separate_empty_worker_preparation_gate(self):
+        envelope = self.reimage_preparation_plan()
+        plan = envelope['plan']
+        self.assertFalse(plan['executable'])
+        self.assertTrue(plan['reimage_preparation']['executable'], plan['reimage_preparation']['blockers'])
+        self.assertEqual(plan['reimage_preparation']['blockers'], [])
+        self.assertTrue(any('replacement-host verification' in item for item in plan['blockers']))
+        self.assertEqual(plan['reimage_preparation']['steps'][-1],
+                         'Stop at an owner-operated provider console boundary; do not reimage via API')
+
+    def test_prepare_reimage_fences_stops_only_agent_and_deregisters_target(self):
+        envelope = self.reimage_preparation_plan()
+        result = self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        self.assertEqual((result['status'], result['stage']), ('prepared', 'awaiting-owner-console-reimage'))
+        self.assertFalse(self.op.agent_active)
+        self.assertEqual([node['name'] for node in self.op.live['nodes']], ['worker-2', 'worker-3'])
+        self.assertEqual(set(host for host, _ in self.op.remote_commands),
+                         {labctl.ALIASES[0], labctl.ALIASES[3]})
+        self.assertTrue(all(host in labctl.ALIASES for host, _ in self.op.remote_commands))
+        self.assertTrue(any('node' in argv and 'down' in argv for _, argv in self.op.remote_commands))
+        self.assertTrue(any('systemctl' in argv and 'stop' in argv and 'eru-agent.service' in argv
+                            for _, argv in self.op.remote_commands))
+        self.assertFalse(any('docker' in argv or 'containerd' in argv and 'stop' in argv
+                             for _, argv in self.op.remote_commands))
+        journal = self.journal(envelope)
+        self.assertEqual(journal['registration_removed']['verified_absent'], True)
+        self.assertEqual(journal['status'], 'prepared')
+        with self.assertRaisesRegex(ValueError, 'journal; inspect/reconcile'):
+            self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+
+    def test_prepare_reimage_lost_fence_response_is_not_replayed(self):
+        envelope = self.reimage_preparation_plan()
+        self.op.fail_after_fence = True
+        with self.assertRaisesRegex(TimeoutError, 'response lost'):
+            self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        journal = self.journal(envelope)
+        self.assertEqual(journal['status'], 'failed')
+        self.assertEqual(journal['failed_at'], 'fencing-worker-4')
+        self.assertEqual(sum('node' in argv and 'down' in argv
+                             for _, argv in self.op.remote_commands), 1)
+        self.assertFalse(any('remove' in argv for _, argv in self.op.remote_commands))
+        self.assertTrue(next(node for node in self.op.live['nodes'] if node['name'] == 'worker-4')['bypass'])
+
+    def test_prepare_reimage_lost_remove_response_reconciles_read_only(self):
+        envelope = self.reimage_preparation_plan()
+        self.op.fail_after_remove = True
+        with self.assertRaisesRegex(TimeoutError, 'response lost'):
+            self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        before = list(self.op.remote_commands)
+        journal = self.op.reconcile(envelope['plan']['id'])
+        self.assertEqual(journal['status'], 'failed')
+        self.assertFalse(journal['reconciliation']['target_registered'])
+        self.assertEqual(journal['reconciliation']['target_workload_count'], 0)
+        self.assertEqual(before, self.op.remote_commands)
+
+    def test_prepare_reimage_rechecks_target_runtime_after_agent_stop(self):
+        envelope = self.reimage_preparation_plan()
+        self.op.inject_runtime_after_stop = True
+        with self.assertRaisesRegex(ValueError, 'runtime is not empty after stopping agent'):
+            self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        journal = self.journal(envelope)
+        self.assertEqual(journal['status'], 'failed')
+        self.assertEqual(journal['failed_at'], 'stopping-agent-worker-4')
+        self.assertFalse(any('remove' in argv for _, argv in self.op.remote_commands))
+        self.assertTrue(next(node for node in self.op.live['nodes'] if node['name'] == 'worker-4')['bypass'])
+
+    def test_prepare_reimage_refuses_plan_or_live_state_drift_before_mutation(self):
+        envelope = self.reimage_preparation_plan()
+        changed = copy.deepcopy(envelope['plan'])
+        changed['snapshot']['hosts'][labctl.ALIASES[3]]['machine_id'] = 'different'
+        atomic_json(self.op.root / 'plans' / (changed['id'] + '.json'),
+                    {'plan': changed, 'sha256': envelope['sha256']})
+        with self.assertRaisesRegex(ValueError, 'hash mismatch'):
+            self.op.prepare_reimage(changed['id'], envelope['sha256'])
+        self.assertEqual(self.op.remote_commands, [])
+
+        envelope = self.reimage_preparation_plan()
+        self.op.live['workloads'] = [self.foreign]
+        with self.assertRaisesRegex(ValueError, 'cluster state changed|runtime and metadata'):
+            self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
+        self.assertEqual(self.op.remote_commands, [])
+
+    def test_reimage_preparation_plan_blocks_docker_or_runtime_and_existing_fence(self):
+        cases = [
+            ('docker', 'container-foreign', 'Docker workloads'),
+            ('containers', 'foreign-container', 'must be empty'),
+            ('tasks', 'TASK SERVICE PID STATUS\nforeign task eru 12 RUNNING', 'must be empty'),
+        ]
+        for field, value, message in cases:
+            with self.subTest(field=field):
+                self.empty_reimage_target()
+                self.op.live['hosts'][labctl.ALIASES[3]][field] = value
+                intent_path = self.write_reimage_intent()
+                plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                    reimage_intent=str(intent_path))['plan']
+                self.assertFalse(plan['reimage_preparation']['executable'])
+                self.assertTrue(any(message in blocker for blocker in plan['reimage_preparation']['blockers']))
+
+        self.empty_reimage_target()
+        self.op.live['nodes'][2]['bypass'] = True
+        intent_path = self.write_reimage_intent()
+        plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                            reimage_intent=str(intent_path))['plan']
+        self.assertFalse(plan['reimage_preparation']['executable'])
+        self.assertTrue(any('already fenced' in blocker for blocker in plan['reimage_preparation']['blockers']))
 
     def test_manual_reimage_rejects_wrong_identity_api_and_unsafe_scope(self):
         invalid = [
@@ -491,10 +687,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / path).read_bytes()).hexdigest())
 
     def test_reimage_receipt_records_owner_attestation_without_remote_mutation(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         receipt_path = self.write_reimage_receipt(plan)
         before = copy.deepcopy(self.op.live)
@@ -519,10 +712,7 @@ class OperatorTests(unittest.TestCase):
             self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
 
     def test_reimage_receipt_rejects_scope_identity_trust_and_hash_drift(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         intent = plan['provider_reimage_intent']
         host = plan['snapshot']['hosts'][labctl.ALIASES[3]]
@@ -552,10 +742,7 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
 
     def test_reimage_host_readonly_gate_records_immutable_observation(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
         observation = {
@@ -590,10 +777,7 @@ class OperatorTests(unittest.TestCase):
             inspect_again.assert_not_called()
 
     def test_reimage_host_gate_blocks_if_trust_file_changed_after_receipt(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
         trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
@@ -605,10 +789,7 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse((self.op.root / 'reimage-observations' / (envelope['plan']['id'] + '.json')).exists())
 
     def test_reimage_receipt_requires_manual_oob_key_in_local_trust_file(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         receipt_path = self.write_reimage_receipt(plan)
         trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
@@ -629,10 +810,7 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse((self.op.root / 'reimage-receipts' / (plan['id'] + '.json')).exists())
 
     def test_reimage_receipt_supports_checkout_private_symlink(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         linked_project = self.project / 'linked-project'
         linked_project.mkdir()
@@ -642,6 +820,16 @@ class OperatorTests(unittest.TestCase):
             plan_sha256=envelope['sha256'])
         self.assertEqual(loaded['path'], str(receipt_path))
         self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / receipt_path).read_bytes()).hexdigest())
+
+    def test_reimage_receipt_requires_completed_preparation_journal(self):
+        self.empty_reimage_target()
+        intent_path = self.write_reimage_intent()
+        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
+                                reimage_intent=str(intent_path))
+        receipt_path = self.write_reimage_receipt(envelope['plan'])
+        with self.assertRaisesRegex(ValueError, 'preparation journal is missing or unsafe'):
+            self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
+        self.assertFalse((self.op.root / 'reimage-receipts' / (envelope['plan']['id'] + '.json')).exists())
 
     def test_reimage_receipt_cannot_be_recorded_with_live_preflight_blockers(self):
         intent_path = self.write_reimage_intent()
@@ -653,10 +841,7 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse((self.op.root / 'reimage-receipts' / (envelope['plan']['id'] + '.json')).exists())
 
     def test_reimage_receipt_rejects_external_symlink_and_duplicate_fields(self):
-        self.empty_reimage_target()
-        intent_path = self.write_reimage_intent()
-        envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
-                                reimage_intent=str(intent_path))
+        envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         receipt_path = self.write_reimage_receipt(plan)
         outside = self.project / 'outside-receipt.json'

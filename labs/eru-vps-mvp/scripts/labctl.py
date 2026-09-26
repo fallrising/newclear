@@ -351,15 +351,47 @@ class Operator:
                             'path': intent['path'], 'sha256': intent['sha256']}
                     except (OSError, ValueError, KeyError) as exc:
                         plan['blockers'].append('invalid manual reimage intent: ' + str(exc))
-                plan['blockers'] += [
-                    'Trusted replacement host keys and OneVPS/Tailscale bootstrap procedure are still required',
-                    'Drain/re-registration/resume adapter is not implemented; provider API is optional',
-                ]
                 if plan['targets']:
                     plan['blockers'].append(
                         'ERU workloads must be migrated and verified before provider-console reimage')
                 if snap['hosts'][host['alias']]['docker']:
                     plan['blockers'].append('Docker workloads exist on target; separate ownership/migration review required')
+                target_node = next(n for n in snap['nodes'] if n['name'] == node)
+                target_facts = snap['hosts'][host['alias']]
+                if target_node.get('bypass'):
+                    plan['blockers'].append('Target is already fenced; reconcile its existing operation before planning reimage')
+                task_rows = [line for line in target_facts.get('tasks', '').splitlines()
+                             if line.strip() and not line.upper().startswith('TASK ')]
+                if target_facts.get('containers', '').strip() or task_rows:
+                    plan['blockers'].append('Selected worker ERU runtime must be empty before preparation')
+                try:
+                    usage = json.loads(target_node['resource_usage'])
+                    def nonzero(value):
+                        if isinstance(value, dict):
+                            return any(nonzero(child) for child in value.values())
+                        if isinstance(value, list):
+                            return any(nonzero(child) for child in value)
+                        return isinstance(value, (int, float)) and value != 0
+                    if nonzero(usage):
+                        plan['blockers'].append('Selected worker must have zero ERU resource usage before preparation')
+                except (TypeError, json.JSONDecodeError, KeyError):
+                    plan['blockers'].append('Selected worker resource usage is unreadable')
+                prep_blockers = list(plan['blockers'])
+                plan['reimage_preparation'] = {
+                    'executable': not prep_blockers,
+                    'blockers': prep_blockers,
+                    'steps': [
+                        'Revalidate the exact plan, intent, healthy core, empty worker and unchanged cluster state',
+                        'Fence the selected worker and confirm Bypass on the core',
+                        'Stop only the selected worker eru-agent and verify SSH/Tailscale/Docker/containerd remain active',
+                        'Remove the exact ERU node registration and verify it is absent',
+                        'Stop at an owner-operated provider console boundary; do not reimage via API',
+                    ],
+                }
+                plan['blockers'] += [
+                    'Owner console reimage, receipt and replacement-host verification are separate manual stages',
+                    'Worker-only install, re-registration and resume stages are not implemented',
+                ]
                 plan['steps'] = [f'Quiesce {node}; enumerate and relocate owned workloads',
                     'Verify empty node/runtime; stop target agent; remove exact node registration',
                     'Pause for the owner to reimage only the bound provider resource and enumerated volumes in the console',
@@ -375,6 +407,10 @@ class Operator:
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
         return envelope
 
+    def prepare_reimage(self, plan_id, expected_hash):
+        from reimage_prepare import prepare_reimage
+        return prepare_reimage(self, plan_id, expected_hash)
+
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
         envelope = read(self.root / 'plans' / (plan_id + '.json'))
@@ -384,6 +420,8 @@ class Operator:
             raise ValueError('plan hash mismatch')
         from reimage_receipt import load_receipt, verify_local_hostkeys
         receipt = load_receipt(self.project, receipt_file, plan=plan, plan_sha256=expected_hash)
+        from reimage_prepare import require_prepared
+        preparation = require_prepared(self, plan, expected_hash)
         trusted_host_key_check = verify_local_hostkeys(
             receipt['receipt']['target']['alias'], receipt['receipt']['host_key_fingerprints'],
             self.trusted_hostkeys_dir)
@@ -398,6 +436,7 @@ class Operator:
             'receipt_path': receipt['path'],
             'receipt_sha256': receipt['sha256'],
             'trusted_host_key_file_check': trusted_host_key_check,
+            'preparation': preparation,
             'receipt': receipt['receipt'],
             'recorded_at': now(),
         })
@@ -438,6 +477,10 @@ class Operator:
         if (receipt['sha256'] != receipt_record.get('receipt_sha256')
                 or receipt['receipt'] != receipt_record.get('receipt')):
             raise ValueError('owner reimage receipt changed after it was recorded')
+        from reimage_prepare import require_prepared
+        preparation = require_prepared(self, plan, expected_hash)
+        if preparation != receipt_record.get('preparation'):
+            raise ValueError('provider reimage preparation journal changed after receipt recording')
         trusted = verify_local_hostkeys(receipt['receipt']['target']['alias'],
                                         receipt['receipt']['host_key_fingerprints'],
                                         self.trusted_hostkeys_dir)
@@ -603,6 +646,9 @@ class Operator:
     def reconcile(self, run_id):
         path = self.root / 'runs' / (identifier(run_id) + '.json')
         journal = read(path)
+        if journal.get('operation') == 'provider-reimage-prepare':
+            from reimage_prepare import reconcile_preparation
+            return reconcile_preparation(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -636,6 +682,9 @@ def main():
     plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
     plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
     plan.add_argument('--reimage-intent', help='Private owner-reviewed provider resource, OS image, and exact volume scope for provider-reimage only')
+    prepare_reimage = sub.add_parser('prepare-reimage', help='Fence, stop the worker agent and remove its ERU registration before owner console reimage')
+    prepare_reimage.add_argument('--plan', required=True)
+    prepare_reimage.add_argument('--sha256', required=True)
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -669,6 +718,8 @@ def main():
             for optional in ['rebuild_mode', 'component_scope', 'provider_reimage_intent', 'fault_after', 'guard_exclude', 'guard_nodes']:
                 if optional in envelope['plan']:
                     summary[optional] = envelope['plan'][optional]
+            if 'reimage_preparation' in envelope['plan']:
+                summary['reimage_preparation'] = envelope['plan']['reimage_preparation']
             if envelope['plan'].get('patched_core'):
                 summary['patched_core'] = {k: envelope['plan']['patched_core'][k]
                     for k in ['artifact', 'health_file', 'selection', 'blockers']}
@@ -678,6 +729,9 @@ def main():
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))
+        elif args.command == 'prepare-reimage':
+            result = operator.prepare_reimage(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in ['id', 'status', 'stage']}, indent=2))
         elif args.command == 'verify-reimage-host':
             result = operator.verify_reimage_host(args.plan, args.sha256)
             print(json.dumps(result, indent=2))

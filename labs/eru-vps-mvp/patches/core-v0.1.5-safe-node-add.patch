@@ -1,0 +1,140 @@
+diff --git a/cluster/calcium/lock.go b/cluster/calcium/lock.go
+index cfc4013..052986e 100644
+--- a/cluster/calcium/lock.go
++++ b/cluster/calcium/lock.go
+@@ -127 +127,2 @@ func (c *Calcium) withNodesLocked(ctx context.Context, nodeFilter *types.NodeFil
+-		lock, ctx, err = c.doLock(ctx, key, c.config.LockTimeout)
++		var lockCtx context.Context
++		lock, lockCtx, err = c.doLock(ctx, key, c.config.LockTimeout)
+@@ -130,0 +132 @@ func (c *Calcium) withNodesLocked(ctx context.Context, nodeFilter *types.NodeFil
++		ctx = lockCtx
+diff --git a/cluster/calcium/lock_test.go b/cluster/calcium/lock_test.go
+index ac04ca8..e87d781 100644
+--- a/cluster/calcium/lock_test.go
++++ b/cluster/calcium/lock_test.go
+@@ -363,0 +364,75 @@ func TestWithNodeOperationLocked(t *testing.T) {
++
++// The etcd lock returns (nil, err) on failure. Cleanup must keep a valid
++// parent context and return the error without panicking or calling f.
++func TestWithNodesPlanLockedNilContextOnLockFailure(t *testing.T) {
++	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
++	store := c.store.(*storemocks.Store)
++	store.On("GetNode", mock.Anything, "a1").Return(&types.Node{
++		NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true,
++	}, nil).Once()
++	failedLock := &lockmocks.DistributedLock{}
++	store.On("CreateLock", "cnode_op_poda_a1", mock.Anything).Return(failedLock, nil).Once()
++	failedLock.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once()
++	failedLock.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++		assert.NotNil(t, args.Get(0))
++		assert.NoError(t, args.Get(0).(context.Context).Err())
++	})
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(t.Context(), &types.NodeFilter{Includes: []string{"a1"}},
++			func(context.Context, map[string]*types.Node) error {
++				called = true
++				return nil
++			})
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	store.AssertExpectations(t)
++	failedLock.AssertExpectations(t)
++}
++
++// Already acquired locks must be released in reverse order even when a later
++// Lock returns a nil context and cancels its input.
++func TestWithNodesPlanLockedPartialFailureUnlocks(t *testing.T) {
++	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
++	store := c.store.(*storemocks.Store)
++	nodes := []*types.Node{
++		{NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true},
++		{NodeMeta: types.NodeMeta{Name: "a2", Podname: "poda"}, Available: true},
++	}
++	store.On("GetNodes", mock.Anything, []string{"a1", "a2"}).Return(nodes, nil).Once()
++	ctx, cancel := context.WithCancel(t.Context())
++	defer cancel()
++	keys := []string{"plock_poda", "cnode_op_poda_a1", "cnode_op_poda_a2"}
++	unlocked := []string{}
++	mocks := []*lockmocks.DistributedLock{}
++	for i, key := range keys {
++		lk := &lockmocks.DistributedLock{}
++		mocks = append(mocks, lk)
++		store.On("CreateLock", key, mock.Anything).Return(lk, nil).Once()
++		if i == 2 {
++			lk.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once().Run(func(mock.Arguments) { cancel() })
++		} else {
++			lk.On("Lock", mock.Anything).Return(ctx, nil).Once()
++		}
++		lk.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++			assert.NotNil(t, args.Get(0))
++			assert.NoError(t, args.Get(0).(context.Context).Err())
++			unlocked = append(unlocked, key)
++		})
++	}
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(ctx, &types.NodeFilter{Includes: []string{"a1", "a2"}},
++			func(context.Context, map[string]*types.Node) error { called = true; return nil })
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	assert.Equal(t, []string{keys[2], keys[1], keys[0]}, unlocked)
++	store.AssertExpectations(t)
++	for _, lk := range mocks {
++		lk.AssertExpectations(t)
++	}
++}
+diff --git a/store/common/node.go b/store/common/node.go
+index 7a305ec..c79a172 100644
+--- a/store/common/node.go
++++ b/store/common/node.go
+@@ -43,2 +43,3 @@ func (s *Store) AddNode(ctx context.Context, opts *types.AddNodeOptions) (*types
+-		Bypass:    false,
+-		Test:      opts.Test || strings.HasPrefix(opts.Endpoint, fakeengine.PrefixKey),
++		// A new node is not schedulable until an operator explicitly brings it up.
++		Bypass: true,
++		Test:   opts.Test || strings.HasPrefix(opts.Endpoint, fakeengine.PrefixKey),
+diff --git a/store/common/node_test.go b/store/common/node_test.go
+index 8277e46..1c7df9b 100644
+--- a/store/common/node_test.go
++++ b/store/common/node_test.go
+@@ -4,0 +5,2 @@ import (
++	"encoding/json"
++	"fmt"
+@@ -59,0 +62,32 @@ func (k *brokenWatchKV) NotFound(error) bool { return false }
++
++type addNodeCaptureKV struct {
++	KV
++	created map[string]string
++}
++
++func (k *addNodeCaptureKV) GetOne(_ context.Context, key string) (string, error) {
++	if key != fmt.Sprintf(PodInfoKey, "eru") {
++		return "", fmt.Errorf("unexpected key %s", key)
++	}
++	return `{"name":"eru"}`, nil
++}
++
++func (k *addNodeCaptureKV) Create(_ context.Context, data map[string]string) error {
++	k.created = data
++	return nil
++}
++
++func TestAddNodeStartsBypassed(t *testing.T) {
++	kv := &addNodeCaptureKV{}
++	store := New(kv, types.Config{}, nil)
++	node, err := store.AddNode(t.Context(), &types.AddNodeOptions{
++		Nodename: "worker-4", Endpoint: "containerd://ckc@100.64.0.44:22", Podname: "eru",
++	})
++	require.NoError(t, err)
++	assert.True(t, node.Bypass)
++
++	var persisted types.Node
++	require.NoError(t, json.Unmarshal([]byte(kv.created[fmt.Sprintf(NodeInfoKey, "worker-4")]), &persisted))
++	assert.True(t, persisted.Bypass)
++	assert.Equal(t, "containerd://ckc@100.64.0.44:22", persisted.Endpoint)
++}

@@ -22,3 +22,13 @@ class PatchRunnerTests(unittest.TestCase):
             apply_source_patch(source, patch, include='lock.go')
             self.assertEqual((source / 'lock.go').read_text(), 'fixed\n')
             self.assertTrue((source / '.git').is_dir())
+
+    def test_exact_source_patch_can_use_zero_context_hunks(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp)
+            (source / 'file.go').write_text('first\nsecond\n')
+            patch = source / 'insert.patch'
+            patch.write_text('--- a/file.go\n+++ b/file.go\n@@ -1,0 +2 @@\n+inserted\n')
+            apply_source_patch(source, patch, check=True)
+            apply_source_patch(source, patch, include='file.go')
+            self.assertEqual((source / 'file.go').read_text(), 'first\ninserted\nsecond\n')

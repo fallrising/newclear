@@ -30,4 +30,4 @@ install plan 為 single-use。遠端命令一旦開始，任何非零退出、�
 
 58 項 test_labctl.py 測試通過，涵蓋 worker-only gate、pinned host key、receipt／plan bindings、worker agent 未啟動、node 未註冊、空 runtime／服務驗證、安裝前 drift 阻擋，以及 lost response 後 read-only reconcile 和禁止重播。embedded remote preflight、post-install verifier 與 installer source 也通過 Python compile 檢查。此切片沒有執行 E2E，沒有連線／修改 worker 或 core，也沒有更改 private inventory。
 
-仍待本機開發：先 fence 新 registration、保留舊 node name／capacity／labels 納管、smoke 與其他 worker guards、經核實後 resume、inventory／cluster generation commit，以及 install/register/smoke/resume 各階段的故障恢復 executor。完成後再按 owner 要求安排整體 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。
+仍待本機開發：先受控部署並驗證 core safe AddNode patch；worker registration executor 必須核對執行中 core binary hash，確保 AddNode 當下已 fencing。之後保留舊 node name／capacity／labels 納管、啟動 agent 並驗 available+bypass、smoke 與其他 worker guards、經核實後 resume、inventory／cluster generation commit，以及 install/register/smoke/resume 各階段的故障恢復 executor。新 resume helper 尚未接入此 executor。完成後再按 owner 要求安排整體 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。

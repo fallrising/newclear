@@ -1,0 +1,115 @@
+{
+  "architecture": "linux/amd64",
+  "artifact_sha256": "0203e3a41c9abf51c35fb52e5224cc796b4ab99b220d610ec9fd5397921072fd",
+  "build_result_sha256": {
+    "independent": "398a8bb41453f8c9d52f3c076aa13f05d6627cdff4a157d1688f9b0b34bbb3fd",
+    "primary": "92bae3fda4deb8291ca6779e4a03732a6cf8c19b8386e02764a00ed8fb27e208"
+  },
+  "compatible_from_versions": [
+    "v0.1.5"
+  ],
+  "independent_runner_verification": {
+    "artifact_sha256": "0203e3a41c9abf51c35fb52e5224cc796b4ab99b220d610ec9fd5397921072fd",
+    "byte_identical_to_first_build": true,
+    "status": "verified-not-deployed",
+    "steps": [
+      {
+        "exit_code": 1,
+        "name": "baseline"
+      },
+      {
+        "exit_code": 0,
+        "name": "regression"
+      },
+      {
+        "exit_code": 0,
+        "name": "calcium"
+      },
+      {
+        "exit_code": 0,
+        "name": "locks"
+      },
+      {
+        "exit_code": 0,
+        "name": "build"
+      }
+    ]
+  },
+  "note": "Raw build logs and artifacts remain private; deployment state is tracked separately.",
+  "patch_file": "core-v0.1.5-safe-node-add.patch",
+  "patch_revision": 2,
+  "patch_sha256": "762b4c41882d7d237666a20276e2aa157b96a7fd83caffc51b0cfd163daf0259",
+  "release_id": "core-v0.1.5-core-v0.1.5-safe-node-add-r2",
+  "repository": "projecteru2/core",
+  "schema_version": 1,
+  "source_commit": "e19ceb7e09d95bedea3eb0c25bec9308101fecc5",
+  "source_tag": "v0.1.5",
+  "status": "verified-not-deployed",
+  "steps": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "./cluster/calcium",
+        "-run",
+        "^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)$",
+        "-count=1"
+      ],
+      "exit_code": 1,
+      "name": "baseline-final"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./cluster/calcium",
+        "-run",
+        "^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)$",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "patched-final"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./cluster/calcium",
+        "./store/common",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "calcium-tests"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./lock/...",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "name": "lock-tests"
+    },
+    {
+      "argv": [
+        "go",
+        "build",
+        "-buildvcs=false",
+        "-trimpath",
+        "-o",
+        "<private artifact>",
+        "."
+      ],
+      "exit_code": 0,
+      "name": "build"
+    }
+  ],
+  "target_version": "v0.1.5",
+  "toolchain": {
+    "arch": "amd64",
+    "os": "linux",
+    "sha256": "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445",
+    "version": "go1.27.1"
+  }
+}

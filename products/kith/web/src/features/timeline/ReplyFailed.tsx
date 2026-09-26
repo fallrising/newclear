@@ -13,11 +13,12 @@ function reasonKey(errorClass: string): CopyKey {
   return "reply.reason.other";
 }
 
-export function ReplyFailed(props: { member: RoomMember; errorClass: string | null }): ReactElement {
+export function ReplyFailed(props: { member: RoomMember; errorClass: string | null; blocked?: boolean }): ReactElement {
   const t = useT();
   const name = displayName(props.member);
-  const text =
-    props.errorClass === null
+  const text = props.blocked
+    ? t("reply.blocked", { name })
+    : props.errorClass === null
       ? t("reply.failed", { name })
       : t("reply.failedWithReason", { name, reason: t(reasonKey(props.errorClass)) });
   return (

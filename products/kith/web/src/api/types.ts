@@ -107,6 +107,9 @@ export type ServerMessage = {
   seq: number;
   kind: "message" | "trace";
   thread_id: string | null;
+  /** Present only on top_level=1 rows (B-05). */
+  thread_reply_count?: number;
+  thread_last_seq?: number | null;
   reply_to?: string | null;
   sender_id: string;
   body: string;

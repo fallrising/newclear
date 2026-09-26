@@ -5,11 +5,12 @@ import { ApiError } from "../../../api/client";
 import { errorCopyKey } from "../../../api/errors";
 import { useAllRooms, useInviteMember } from "../../../api/rooms";
 import type { PutRuntimeBody, RoomMember } from "../../../api/types";
-import { useT } from "../../../copy";
+import { useLocale, useT } from "../../../copy";
 import { Avatar } from "../../../ui/Avatar";
 import { Badge } from "../../../ui/Badge";
 import { Button } from "../../../ui/Button";
 import { SelectField } from "../../../ui/SelectField";
+import { formatListTime, localTimeZone } from "../../../ui/time";
 import { RemoveMemberDialog } from "../../members/RemoveMemberDialog";
 import { GenerationsTab } from "./GenerationsTab";
 import { RuntimeChangeDialog } from "./RuntimeChangeDialog";
@@ -22,6 +23,7 @@ type Tab = (typeof TABS)[number];
 
 export function AgentDetailPage(): ReactElement {
   const t = useT();
+  const { locale } = useLocale();
   const params = useParams();
   const id = params.id ?? "";
   const agent = useAgent(id);
@@ -118,6 +120,18 @@ export function AgentDetailPage(): ReactElement {
               <dt className="text-ink-3">{t("console.agents.quotaQuestion")}</dt>
               <dd data-testid="agent-quota">{t(`console.agents.quota.${detail.quota_class}`)}</dd>
             </div>
+            {detail.runtime === "runner" && (
+              <div>
+                <dt className="text-ink-3">Runner</dt>
+                <dd data-testid="agent-runner-seen">
+                  {detail.runner_last_seen_at
+                    ? t("console.agents.runnerSeen", {
+                        time: formatListTime(detail.runner_last_seen_at, locale, new Date(), localTimeZone()),
+                      })
+                    : t("console.agents.runnerNever")}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-ink-3">{t("console.agents.epoch", { n: detail.runtime_epoch })}</dt>
               <dd data-testid="agent-epoch">{t("console.agents.epoch", { n: detail.runtime_epoch })}</dd>

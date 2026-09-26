@@ -1,8 +1,9 @@
 import { useState, type ReactElement } from "react";
 import { useNavigate } from "react-router";
 import { useCreateAgent, useIssueToken, usePutRuntime } from "../../../api/agents";
+import { useMe } from "../../../api/auth";
 import { ApiError } from "../../../api/client";
-import type { PutRuntimeBody } from "../../../api/types";
+import type { AdapterKind, PutRuntimeBody } from "../../../api/types";
 import { useT } from "../../../copy";
 import { Button } from "../../../ui/Button";
 import { CopyBlock } from "../../../ui/CopyBlock";
@@ -11,24 +12,43 @@ import { RuntimeForm } from "./RuntimeForm";
 
 const HANDLE_RE = /^[a-z0-9_]{2,32}$/;
 
-function snippet(body: PutRuntimeBody, handle: string, token: string): string {
+const EXECUTABLE: Record<AdapterKind, string> = {
+  codex: "/usr/local/bin/codex",
+  claude_code: "/usr/local/bin/claude",
+  gemini_cli: "/usr/local/bin/gemini",
+  command: "/usr/local/bin/agent",
+};
+
+function snippet(body: PutRuntimeBody, handle: string, token: string, operatorId: string): string {
   const origin = window.location.origin;
   if (body.runtime === "external") {
     return JSON.stringify({ url: origin + "/mcp", headers: { Authorization: "Bearer " + token } }, null, 2);
   }
-  const adapter = body.runtime === "runner" ? body.adapter_kind : "";
-  return [
+  const kind = body.runtime === "runner" ? body.adapter_kind : "command";
+  const personal = body.quota_class === "operator_personal";
+  const lines = [
     'kith_url = "' + origin + '"',
     'bot_token_file = "/var/lib/kith-runner/' + handle + '/token"',
+    'state_dir = "/var/lib/kith-runner/' + handle + '/state"',
     'quota_class = "' + body.quota_class + '"',
+  ];
+  if (personal) lines.push('operator_member_id = "' + operatorId + '"');
+  lines.push(
+    'auth = "' + (personal ? "subscription" : "api_key") + '"',
+    "",
     "[adapter]",
-    'kind = "' + adapter + '"',
-  ].join("\n");
+    'kind = "' + kind + '"',
+    'executable = "' + EXECUTABLE[kind] + '" # edit this path',
+    'workdir = "/srv/kith-work/' + handle + '"',
+    'home = "/var/lib/kith-runner/' + handle + '/home"',
+  );
+  return lines.join("\n");
 }
 
 export function CreateAgentWizard(): ReactElement {
   const t = useT();
   const navigate = useNavigate();
+  const me = useMe();
   const create = useCreateAgent();
   const put = usePutRuntime();
   const issue = useIssueToken();
@@ -147,7 +167,7 @@ export function CreateAgentWizard(): ReactElement {
                   <CopyBlock
                     data-testid="wizard-snippet"
                     label={done.body.runtime === "runner" ? t("console.agents.snippetRunner") : t("console.agents.snippetExternal")}
-                    value={snippet(done.body, handle.trim(), done.token)}
+                    value={snippet(done.body, handle.trim(), done.token, me.data?.id ?? "")}
                     multiline
                   />
                   <p data-testid="wizard-token-once" className="text-sm text-warn">{t("console.agents.tokenOnce")}</p>

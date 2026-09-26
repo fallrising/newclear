@@ -66,7 +66,8 @@ test(
       await expect.poll(async () => {
         const draft = ben.page.getByTestId("reply-draft");
         if (await draft.count()) {
-          const text = ((await draft.textContent()) ?? "").trim();
+          // The draft node can unmount between count() and the read when the final message lands.
+          const text = ((await draft.textContent({ timeout: 250 }).catch(() => "")) ?? "").trim();
           if (text.length > 0 && seen.at(-1) !== text) {
             seen.push(text);
             if (seen.length === 2 && !shotMid) {

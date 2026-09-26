@@ -8,11 +8,13 @@ ff_mcp = "on"
 ff_hosted_agent = "on"
 ff_sidecar = "off"
 ff_ambient = "on"
+ff_providers = "on"
+ff_drafts = "on"
 FAKE_LLM_TEXT = "hello from grok"
 FAKE_LLM_MODELS = "grok-4.5"
 
 [assets]
-directory = "./frontend/dist"
+directory = "./web/dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
@@ -24,6 +26,10 @@ binding = "DB"
 database_name = "kith"
 database_id = "f7eb46f9-61f6-4ce8-a463-d790676557fc"
 migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "TRACES"
+bucket_name = "kith-traces"
 
 [[kv_namespaces]]
 binding = "SESSIONS"

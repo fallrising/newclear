@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 
-export type ReplyState = { at: number };
-export type FailureState = { at: number; errorClass: string | null };
+export type ReplyPhase = "replying" | "accepted" | "running";
+export type ReplyState = { at: number; phase: ReplyPhase };
+export type FailureState = { at: number; errorClass: string | null; blocked?: boolean };
 export type RoomStatuses = {
   replies: Record<string, ReplyState>;
   failures: Record<string, FailureState>;
@@ -42,15 +43,20 @@ export const useStatusStore = create<StatusStore>()((set) => ({
     set((state) => ({
       rooms: edit(state.rooms, roomId, (room) => {
         const id = frame.member_id;
-        if (frame.body === "is replying") {
-          room.replies[id] = { at: now };
+        if (frame.body === "is replying" || frame.body === "accepted" || frame.body === "running") {
+          const phase: ReplyPhase = frame.body === "accepted" ? "accepted" : frame.body === "running" ? "running" : "replying";
+          room.replies[id] = { at: now, phase };
           delete room.failures[id];
           delete room.typing[id];
         } else if (frame.body === "reply failed") {
           delete room.replies[id];
           room.failures[id] = { at: now, errorClass: frame.error_class ?? null };
-        } else if (frame.body === "reply ended") {
+        } else if (frame.body === "reply ended" || frame.body === "idle") {
           delete room.replies[id];
+        } else if (frame.body === "blocked") {
+          delete room.replies[id];
+          delete room.typing[id];
+          room.failures[id] = { at: now, errorClass: null, blocked: true };
         } else {
           room.typing[id] = now + TYPING_TTL_MS;
         }

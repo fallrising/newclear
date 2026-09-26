@@ -30,4 +30,4 @@ registration journal 在每一個 mutation 前先保存 attempted state。若 Ad
 
 ## 後續
 
-ERU-014 尚需受控部署 safe core patch，並完成目標 smoke／其他 workers guards、host-key 對帳、單次安全 resume、resume 後核對、private inventory／generation commit，以及跨 install／registration／smoke／resume 階段 recovery executor。正式 VPS E2E 留待本機開發收尾後進行。OS reimage 與日常 ERU 元件重裝分開驗收；不使用 provider API。
+registration 之後已有獨立 fenced smoke executor，詳見 [smoke stage](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)；它以 target-only nginx lifecycle smoke 與兩個 peer 的連續 HTTP guards 驗證並停在 `smoked-awaiting-resume`。ERU-014 尚需受控部署 safe core patch、host-key 對帳、單次安全 resume、resume 後核對、private inventory／generation commit，以及跨 install／registration／smoke／resume 階段 recovery executor。正式 VPS E2E 留待本機開發收尾後進行。OS reimage 與日常 ERU 元件重裝分開驗收；不使用 provider API。

@@ -20,6 +20,7 @@ import reimage_receipt
 import reimage_review
 import reimage_worker_install
 import reimage_worker_registration
+import reimage_worker_smoke
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -543,19 +544,40 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['bindings']['provider_reimage_intent'], {
             'path': str(intent_path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
         self.assertFalse(plan['executable'])
-        self.assertTrue(any('Worker smoke, safe resume, generation commit' in x for x in plan['blockers']))
+        self.assertTrue(any('Safe resume, generation commit' in x for x in plan['blockers']))
         self.assertFalse(any('invalid manual reimage intent' in x for x in plan['blockers']))
 
-    def reimage_preparation_plan(self):
+    def seed_worker_smoke_canaries(self):
+        run_id = '20260926T000000Z-peer1234'
+        nodes = {}
+        rows = []
+        for index, node in enumerate(('worker-2', 'worker-3'), 2):
+            app = 'erumvp' + f'{index:012x}'
+            workload_id = app + '_web_one'
+            rows.append({'id': workload_id, 'nodename': node, 'podname': 'eru', 'image': 'nginx:pinned',
+                         'labels': {'owner': labctl.OWNER, 'run': run_id}})
+            alias = labctl.ALIASES[index - 1]
+            self.op.live['hosts'][alias]['containers'] = workload_id
+            nodes[node] = {'app': app, 'worker_alias': alias, 'workload_ids': [workload_id]}
+        self.op.live['workloads'].extend(rows)
+        atomic_json(self.project / 'private/smoke' / (run_id + '.json'), {
+            'run_id': run_id, 'purpose': 'reinstall-canaries', 'status': 'running',
+            'nodes': nodes})
+        self.worker_smoke_canary_run = run_id
+        return run_id
+
+    def reimage_preparation_plan(self, peer_canaries=False):
         self.empty_reimage_target()
+        if peer_canaries:
+            self.seed_worker_smoke_canaries()
         self.op = FakeReimageOperator(self.project, self.op.live)
         intent_path = self.write_reimage_intent()
         envelope = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
                                 reimage_intent=str(intent_path))
         return envelope
 
-    def prepared_reimage_plan(self):
-        envelope = self.reimage_preparation_plan()
+    def prepared_reimage_plan(self, peer_canaries=False):
+        envelope = self.reimage_preparation_plan(peer_canaries=peer_canaries)
         self.op.prepare_reimage(envelope['plan']['id'], envelope['sha256'])
         return envelope
 
@@ -583,8 +605,8 @@ class OperatorTests(unittest.TestCase):
                          'core-v0.1.5-safe-node-add.validation.json']:
             (patches / filename).write_bytes((SCRIPTS.parent / 'patches' / filename).read_bytes())
 
-    def observed_reimage_source_plan(self):
-        envelope = self.prepared_reimage_plan()
+    def observed_reimage_source_plan(self, peer_canaries=False):
+        envelope = self.prepared_reimage_plan(peer_canaries=peer_canaries)
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
         receipt_record = labctl.read(self.op.root / 'reimage-receipts' / (envelope['plan']['id'] + '.json'))
@@ -650,7 +672,7 @@ class OperatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'runtime must be empty'):
             self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
 
-    def ready_worker_bootstrap(self):
+    def ready_worker_bootstrap(self, peer_canaries=False):
         scripts = self.project / 'scripts'
         scripts.mkdir(exist_ok=True)
         for source in SCRIPTS.glob('*.py'):
@@ -660,7 +682,7 @@ class OperatorTests(unittest.TestCase):
         atomic_json(self.project / 'private/verified-host-public-keys.json',
                     {labctl.ALIASES[0]: [approved]})
         self.configure_reimage_bootstrap_inputs()
-        source = self.observed_reimage_source_plan()
+        source = self.observed_reimage_source_plan(peer_canaries=peer_canaries)
         envelope = self.op.plan_reimage_worker(source['plan']['id'], source['sha256'])
         observation = labctl.read(self.op.root / 'reimage-observations' /
                                   (source['plan']['id'] + '.json'))['observation']
@@ -737,8 +759,8 @@ class OperatorTests(unittest.TestCase):
             with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
                 self.op.install_reimage_worker(plan['id'], envelope['sha256'])
 
-    def install_ready_worker_for_registration(self):
-        envelope, observation = self.ready_worker_bootstrap()
+    def install_ready_worker_for_registration(self, peer_canaries=False):
+        envelope, observation = self.ready_worker_bootstrap(peer_canaries=peer_canaries)
         plan = envelope['plan']
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             installed = self.op.install_reimage_worker(plan['id'], envelope['sha256'])
@@ -843,6 +865,124 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(self.op.add_calls, before_add_calls)
         self.assertEqual(self.op.agent_start_calls, before_agent_calls)
         self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+
+    def registered_worker_smoke_plan(self):
+        envelope, observation = self.install_ready_worker_for_registration(peer_canaries=True)
+        plan = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            registered = self.op.register_reimage_worker(plan['id'], envelope['sha256'])
+        self.assertEqual(registered['status'], 'registered-awaiting-smoke')
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            smoke_plan = self.op.plan_reimage_worker_smoke(
+                plan['id'], envelope['sha256'], self.worker_smoke_canary_run)
+        return envelope, observation, smoke_plan
+
+    def fake_worker_smoke_runner(self, *, leaves_workload=False, returncode=0):
+        def run(operator, plan):
+            node = plan['target']['node']
+            alias = plan['target']['alias']
+            app = 'erumvpabcdef012345'
+            workload_id = app + '_web_one'
+            row = {'id': workload_id, 'nodename': node, 'podname': 'eru', 'image': 'nginx:pinned',
+                   'labels': {'owner': labctl.OWNER, 'run': '20260926T000000Z-smoke1234'}}
+            target_node = next(item for item in operator.live['nodes'] if item['name'] == node)
+            assert target_node['bypass'] is True
+            operator.live['workloads'].append(row)
+            operator.live['hosts'][alias]['containers'] = workload_id
+            if not leaves_workload:
+                operator.live['workloads'].remove(row)
+                operator.live['hosts'][alias]['containers'] = ''
+            report = {'run_id': '20260926T000000Z-smoke1234', 'pass': returncode == 0,
+                      'nodes': {node: {'result': 'PASS' if returncode == 0 else 'FAIL',
+                                       'workload_ids': [workload_id],
+                                       'workloads_empty': not leaves_workload,
+                                       'usage_restored': not leaves_workload}}}
+            filename = report['run_id'] + '.json'
+            atomic_json(operator.project / 'private/smoke' / filename, report)
+            return {'returncode': returncode, 'evidence_files': [filename],
+                    'log_path': 'private/operations/runs/fake-worker-smoke.log',
+                    'log_sha256': 'f' * 64}
+        return run
+
+    def test_reimage_worker_fenced_smoke_cleans_target_and_keeps_peer_guards(self):
+        _bootstrap, observation, envelope = self.registered_worker_smoke_plan()
+        plan = envelope['plan']
+        generation_before = self.op.cluster()['generation']
+        guard_instances = []
+        def guard_factory(project, run_id, targets):
+            guard = FakeHTTPGuards(project, run_id, targets)
+            guard_instances.append(guard)
+            return guard
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = reimage_worker_smoke.run_reimage_worker_smoke(
+                self.op, plan['id'], envelope['sha256'], guard_factory=guard_factory,
+                smoke_runner=self.fake_worker_smoke_runner())
+        self.assertEqual(result['status'], 'smoked-awaiting-resume')
+        self.assertTrue(result['available'])
+        self.assertTrue(result['bypass'])
+        self.assertEqual(result['smoke_evidence']['result'], 'PASS')
+        self.assertEqual(result['smoke_evidence']['workloads_empty'], True)
+        self.assertEqual(len(guard_instances), 1)
+        self.assertEqual(set(guard_instances[0].summary['hosts']),
+                         {'ckc-disposable-02', 'ckc-disposable-03'})
+        self.assertEqual(self.op.cluster()['generation'], generation_before)
+        self.assertEqual([row['nodename'] for row in self.op.live['workloads']],
+                         ['worker-2', 'worker-3'])
+        node = next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')
+        self.assertTrue(node['bypass'])
+        self.assertTrue(node['available'])
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+
+    def test_reimage_worker_smoke_failure_keeps_target_fenced(self):
+        _bootstrap, observation, envelope = self.registered_worker_smoke_plan()
+        plan = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'does not prove a clean, successful target lifecycle'):
+                reimage_worker_smoke.run_reimage_worker_smoke(
+                    self.op, plan['id'], envelope['sha256'], guard_factory=FakeHTTPGuards,
+                    smoke_runner=self.fake_worker_smoke_runner(leaves_workload=True))
+        node = next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')
+        self.assertTrue(node['bypass'])
+        self.assertTrue(node['available'])
+        self.assertTrue(any(row['nodename'] == 'worker-4' for row in self.op.live['workloads']))
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+
+    def test_reimage_worker_smoke_rejects_peer_canary_drift_before_target_smoke(self):
+        _bootstrap, observation, envelope = self.registered_worker_smoke_plan()
+        plan = envelope['plan']
+        canary_path = self.project / 'private/smoke' / (plan['canary_run'] + '.json')
+        canary = labctl.read(canary_path)
+        canary['drift_marker'] = 'changed-after-plan'
+        atomic_json(canary_path, canary)
+        called = []
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'worker, canary, service, core or cluster state changed'):
+                reimage_worker_smoke.run_reimage_worker_smoke(
+                    self.op, plan['id'], envelope['sha256'],
+                    guard_factory=FakeHTTPGuards,
+                    smoke_runner=lambda *_: called.append(True))
+        self.assertEqual(called, [])
+        node = next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')
+        self.assertTrue(node['bypass'])
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+
+    def test_uncertain_reimage_worker_smoke_reconciles_read_only_without_replay(self):
+        _bootstrap, observation, envelope = self.registered_worker_smoke_plan()
+        plan = envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'smoke result lost'):
+                reimage_worker_smoke.run_reimage_worker_smoke(
+                    self.op, plan['id'], envelope['sha256'], guard_factory=FakeHTTPGuards,
+                    smoke_runner=lambda *_: (_ for _ in ()).throw(TimeoutError('smoke result lost')))
+        before = list(self.op.remote_commands)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.reconcile(plan['id'])
+        self.assertFalse(result['reconciliation']['remote_mutation_performed'])
+        self.assertTrue(result['reconciliation']['target_registration']['bypass'])
+        self.assertGreater(len(self.op.remote_commands), len(before))
+        self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
+        self.assertFalse(any('workload' in argv and any(word in argv for word in ('deploy', 'remove'))
+                             for _, argv in self.op.remote_commands))
 
     def test_worker_install_embedded_remote_sources_compile(self):
         compile('import os\nEXPECTED = {}\n' + reimage_worker_install.INSTALL_PREFLIGHT,
@@ -1239,6 +1379,29 @@ class OperatorTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+class FakeHTTPGuards:
+    def __init__(self, project, run_id, targets):
+        self.project = project
+        self.run_id = run_id
+        self.targets = targets
+        self.summary = None
+        self.fail = False
+
+    def __enter__(self):
+        if self.fail:
+            raise ValueError('fake HTTP guard failed')
+        return self
+
+    def check(self):
+        if self.fail:
+            raise ValueError('fake HTTP guard failed')
+
+    def __exit__(self, *args):
+        self.summary = {'failures': [], 'hosts': {row['alias']: {
+            'samples': 3, 'failures': 0, 'max_gap_seconds': 1, 'duration_seconds': 2,
+        } for row in self.targets}}
+
+
 class FakeWorkerInstallOperator(FakeReimageOperator):
     def __init__(self, project, snapshot):
         super().__init__(project, snapshot)
@@ -1283,6 +1446,14 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
         if host == self.core['alias'] and argv == ['sudo', '-n', 'cat', '/etc/eru/ssh_key.pub']:
             return self._record_install_event(host, argv, stdin, check, timeout,
                                               ssh_options, record_output, self.public_key + chr(10))
+        if argv[:4] == ['sudo', '-n', 'systemctl', 'show']:
+            output = host + ':' + ','.join(argv[5:]) + ':active\n'
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output, output)
+        if argv[:6] == ['sudo', '-n', 'ctr', '--namespace', 'eru', 'containers'] and argv[6:7] == ['info']:
+            output = json.dumps({'Labels': {'eru.network.eru': '10.88.0.2'}})
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output, output)
         if host == self.core['alias'] and 'node' in argv and 'add' in argv:
             self.add_calls += 1
             pod = argv[argv.index('add') + 1]

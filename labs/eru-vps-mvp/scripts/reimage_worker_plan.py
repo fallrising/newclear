@@ -16,7 +16,7 @@ WORKER_INDEX = {
     'ckc-disposable-04': ('worker-4', 4),
 }
 POST_REIMAGE_BLOCKER = (
-    'Worker smoke, safe resume, generation commit and recovery executor are not implemented'
+    'Safe resume, generation commit and recovery executor are not implemented'
 )
 
 

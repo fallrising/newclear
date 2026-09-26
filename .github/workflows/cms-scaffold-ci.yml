@@ -52,7 +52,7 @@ jobs:
 
   web:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: apps/cms-scaffold
@@ -70,3 +70,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run test:bundle
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e:mock

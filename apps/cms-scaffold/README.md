@@ -32,6 +32,25 @@ npm run build
 
 `./gradlew test` 會用 `openapi.yaml` 驗證每一個 MockMvc 回應；`./gradlew integrationTest` 對 PostgreSQL 跑同一組 store 契約測試（`src/test/.../contract/`）。兩者都是 CI 閘門。
 
+前端閘門（v2 W0 起，不需要後端或 JDK）：
+
+```bash
+npm run lint && npm run typecheck && npm test && npm run build
+npm run test:bundle
+npx playwright install chromium   # 第一次
+npm run e2e:mock
+```
+
+不接後端開發前端（MSW）：
+
+```bash
+npm run dev:mock -w @cms/web-front   # 5173
+npm run dev:mock -w @cms/web-back    # 5174；網址加 ?mockUser=seed-operator-album 直接登入
+npm run dev:mock -w @cms/web-admin   # 5175；?mockUser=seed-admin
+```
+
+情境：網址加 `?mock=slow`、`error500`、`empty`、`conflict`（`none` 恢復）。mock 登入接受任何非空密碼，`wrong-password` 除外。
+後端改了 `openapi.yaml`：`npm run gen -w @cms/api`；改了 fixture：`npm run gen -w @cms/mocks`。
 等價模組指令：`./gradlew :services:cms-api:test`。前端單元測試是 Vitest。
 
 UI e2e（Playwright，需要已啟動的 Compose 三面 + API）：

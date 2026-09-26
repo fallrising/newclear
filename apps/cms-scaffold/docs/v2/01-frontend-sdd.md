@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3）  
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5）  
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -205,7 +205,7 @@ W0 定案（細化時補上的值）：每站另有 `--surface`、`--surface-sub
 
 `AspectRatio`、`Carousel` 只給 Front 用。
 
-W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。
+W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。W2 不新增 shadcn 元件（[`waves/W2.md`](waves/W2.md) §4.9）。
 
 ### 6.2 模式元件（Polaris 式，建在 shadcn 之上）
 
@@ -259,6 +259,8 @@ export const albumSite: SiteDefinition = {
 **序列化規則（修 C-05）：** `toFormValues` 與 `toPayload` 必須互為反函數，並用 property test 覆蓋；清空欄位時送 `null`（或 Content 規定的等價值，見 G-07），不可以略過不送。
 
 W1 實作本表除 `RelationPicker`、`MediaPicker`、`PrincipalPicker` 之外的全部 widget；在 W2 之前 `ref`、`media-ref`、`principal-ref` 唯讀顯示（標題＋狀態、縮圖＋標題、「已連結會員帳號」）。enum 的顯示名稱改用 BW1a 的 `enumLabels`（G-06 已由 BW1a 處理）。施工細節見 [`waves/W1.md`](waves/W1.md) §5.3。
+
+W2 實作 `RelationPicker`（`ref`，對話框以 `Input`＋`RadioGroup` 搜尋，不用 `Command`，免裝 `cmdk`）與 `MediaPicker`（`media-ref`，媒體庫＋上傳兩個 tab）；`PrincipalPicker` 因 Q-13 維持唯讀。施工細節見 [`waves/W2.md`](waves/W2.md) §5.0.5、§5.3。
 
 ---
 
@@ -532,6 +534,8 @@ B-S1～B-S3、Home、`/forbidden`、`/not-found` 的施工細節（線框修正�
 - 「今天」以瀏覽器時區計算；查詢用當地日期的 00:00–24:00 換算成 UTC 範圍（修 C-09）。伺服器端的日期範圍篩選屬於 G-02；在 G-02 完成前，前端先抓全部再過濾，並在程式碼註記。
 - 顯示寵物與獸醫的名稱，不顯示 UUID（依賴 G-10 或 N+1 查詢；demo 資料量下 N+1 可接受）。
 
+B-S4～B-S7、預覽、修訂紀錄、媒體庫、請求發布（G-03）的施工細節（線框修正、資料來源、狀態、互動）見 [`waves/W2.md`](waves/W2.md) §5.0。
+
 ### 7.3 Admin（`apps/web-admin`）
 
 | 路徑 | 畫面 | 狀態 |
@@ -626,6 +630,8 @@ v2 大部分畫面用現有 API 就能做。下列是真正的缺口，設計與
 | G-09 | 原子重排 | 相簿編排 | `POST /entries:batch-patch`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | 只 PATCH 有變動的照片，失敗就重新讀取 |
 | G-10 | 展開關聯的標題 | 行程、看板、列表的關聯欄 | `include=refs`（[02 §4.3](02-backend-sdd.md#43-內容寫入)） | BW2 | N+1 查詢，並加上 Query 快取 |
 | G-11 | 標題一律取 `titleField`（修 C-12） | Back 列表與編輯器標題 | [02 §3.1](02-backend-sdd.md#31-v5--類型設定與欄位中繼資料) | BW1 | 前端用 `payload[type.titleField]` 自行計算 |
+
+BW2 的 G-03、G-09、G-10 由前端 W2 使用；G-04 見 Q-13（[`waves/W2.md`](waves/W2.md) §1）。
 
 另外，[02 §4.4](02-backend-sdd.md#44-破壞性變更與前端同一波上線) 有三項破壞性變更（PATCH 必帶 `version`、公開投影不回無法公開的媒體 id、422 一次回全部欄位錯誤），前端 W1／W3 必須配合。
 
@@ -726,7 +732,7 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
 
-W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -773,6 +779,15 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | --- | --- | --- | --- |
 | Q-11 | shadcn 的 `Calendar` 依賴 `react-day-picker`，`Sonner` 依賴 `sonner`；兩者都不在 §3、§4，也不在 Q-08 的清單。 | **A**：比照 Q-08，視為 D-02 的組成，照 [waves/W1.md §4.8](waves/W1.md#48-npm-套件版本已查證23) 的精確版本（`react-day-picker` 9.14.0、`sonner` 2.0.8）；**B**：不用 `Calendar`（datetime 改用原生 `<input type="datetime-local">`）、不用 toast（違反 U-04 的修法）。 | **A**。W1 施工圖依 A 撰寫 |
 | Q-12 | react-hook-form 把欄位名稱中的 `.` 當成巢狀路徑，W1 的表單也用 `$slug` 存網址代稱；但契約的 `CreateFieldRequest.key` 沒有 pattern，理論上可以建立 `a.b` 或 `$slug` 這種欄位 key（[waves/W1.md](waves/W1.md) W1-FM12）。 | **A**：請後端在 `CreateFieldRequest.key` 加 pattern `^[A-Za-z][A-Za-z0-9_]{0,62}$`（現有種子的 key 都符合）；**B**：前端改用巢狀表單值（`payload.<key>`），仍無法處理含 `.` 的 key。 | **A**，轉給後端窗口（BW2 之後的任一後端波次） |
+
+### 13.5 W2 細化時新增（待確認）
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-13 | 01 §6.4 的 `PrincipalPicker` 依賴 G-04（`GET /principals/assignable`），但該端點只回「對該類型有 Back `update` 的作業人員」；種子裡的 `principal-ref` 欄位全是「連結會員帳號」（`owner`、`pet`、`visit` 的 `ownerPrincipalId`），會員不在清單裡；看板要指派的 `issue.assigneePrincipalId` 型別又是 `string`。照現況做出的選擇器選不到該選的人。 | **A**：分成兩種用途——請後端為 `principal-ref` 加欄位中繼資料（例如 `principalScope: "staff" \| "member"`），`member` 用新的 `GET /principals/members?q=`（只回 id、displayName），`staff` 用 assignable；同時把 `issue.assigneePrincipalId` 改成 `principal-ref`（`staff`）。**B**：v2 不做 `PrincipalPicker`，`principal-ref` 一律唯讀，會員綁定只在 Admin 做。 | **B**（v2 範圍最小；A 需要後端新端點與種子變更，可在 v2 之後）。W2 依 B 撰寫；選 A 時轉給後端窗口，前端另開一波 |
+| Q-14 | `GET /media` 沒有 `page`、`size`、`q`（surface-back §6.5 要求有），整個媒體庫一次回傳；`MediaAsset` 也沒有「已刪除」旗標，條目引用的媒體被移到回收後，前端只能從縮圖 410 得知（[waves/W2.md](waves/W2.md) W2-FM12）。 | **A**：請後端為 `GET /media` 加 `page`、`size`（預設 24）、`q`（名稱包含），回 `MediaAssetPage`（`items`、`total`、`page`、`size`），並在 `MediaAsset` 加 `deletedAt`（nullable）；**B**：維持現狀，前端篩選與分頁（W2 的做法），demo 資料量可接受。 | **A**，轉給後端窗口；前端在對應後端波次之後把 `LibraryBody`、`LibraryTab` 改成伺服器分頁 |
+| Q-15 | surface-back §3.4 的全頁 token 預覽（`/preview/t/:token`、`POST /entries/{id}/preview-tokens`、`GET /preview/{token}`）在 BW0～BW5 的契約都沒有。 | **A**：請後端新增這兩個端點（TTL 15 分鐘、只給 Back），前端另開一波加路由；**B**：v2 只做編輯器內預覽（`GET /preview/entries/{id}`，W2 已做）。 | **B**。W2 依 B 撰寫 |
+| Q-16 | README 路線圖（BW5 合併後）建議「前端 W2、W4 以 BW5 的契約為準」；W2 細化時的指示是「W2 用 `BW2.openapi.yaml`」。BW5 對 W2 可見的差異只有 5 個媒體錯誤代碼改大寫（[waves/BW5.md](waves/BW5.md) §4.2）。 | **A**：W2 維持 BW2 契約，整合階段依 [waves/W2.md](waves/W2.md) §2.1 的對照表替換 5 個字串（Q-10 的做法）；**B**：W2 改以 BW5 產生型別，mock 與選擇器直接用大寫代碼（需要重新預演 W2）。 | **A**。W2 依 A 撰寫 |
 
 ## 14. 參考來源
 

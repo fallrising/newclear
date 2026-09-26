@@ -16,4 +16,4 @@ resume helper 有本機 fake-runner 測試，涵蓋等待 fenced node 可用、�
 
 ## 後續
 
-ERU-014 的 registration、fenced smoke 與 safe resume executors 都有獨立 hash-bound plan／journal 和 read-only reconcile；resume 成功停在 `resumed-awaiting-generation-commit`，不提交 inventory 或 generation。各 mutation 的不確定回覆都不重播。接下來仍須由既有 core patch operator 受控部署 artifact 並唯讀確認 hash，再接 host-key／worker IP 對帳、inventory／cluster generation commit 及跨階段 recovery。沒有連 VPS，safe artifact 仍 verified-not-deployed；本地切片未做 E2E。這與日常 component-reinstall 及 provider console OS reimage 分開驗收，不使用 provider API。
+ERU-014 的 registration、fenced smoke 與 safe resume executors 都有獨立 hash-bound plan／journal 和 read-only reconcile；resume 成功停在 `resumed-awaiting-generation-commit`，不提交 inventory 或 generation。各 mutation 的不確定回覆都不重播。跨階段 recovery 已交付（見 [恢復紀錄](M3-REIMAGE-WORKER-RECOVERY-2026-09-26.md)）。接下來仍須由既有 core patch operator 受控部署 artifact 並唯讀確認 hash，再做 host-key／worker IP 對帳、inventory／cluster generation commit 與整體 E2E。沒有連 VPS，safe artifact 仍 verified-not-deployed；本地切片未做 E2E。這與日常 component-reinstall 及 provider console OS reimage 分開驗收，不使用 provider API。

@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit executors 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
+入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 

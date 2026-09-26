@@ -32,4 +32,4 @@ python3 scripts/labctl.py reconcile --run GENERATION_PLAN_ID-generation
 
 新增的 fake-only tests 覆蓋新 IP 與 core render 更新、其他 worker 保留、generation 單次遞增、host-key blob 不進 plan、提交後禁止重播、第一次寫入後中斷的唯讀判讀及同 plan 明確續跑，以及第一個檔案寫入前失敗後 reconcile／重驗。測試使用 tempfile 建立的假 `private/`，沒有讀取或修改真實 inventory、credentials 或 raw evidence；沒有連線 VPS，沒有做 E2E。
 
-ERU-014 仍進行中：跨 install／registration／smoke／resume／generation commit 的恢復器、safe core patch 的受控部署，以及完整 OS-reimage E2E 尚未完成。元件重裝與人工 provider-console OS reimage 仍分開驗收，provider API 不使用；固定任務剩餘數維持 12。
+ERU-014 仍進行中：跨 install／access／registration／smoke／resume／generation commit 的恢復器已加入，見 [跨階段 recovery](M3-REIMAGE-WORKER-RECOVERY-2026-09-26.md)；safe core patch 的受控部署及完整 OS-reimage E2E 尚未完成。元件重裝與人工 provider-console OS reimage 仍分開驗收，provider API 不使用；固定任務剩餘數維持 12。

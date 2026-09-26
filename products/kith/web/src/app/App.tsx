@@ -6,6 +6,7 @@ import { useRooms } from "../api/rooms";
 import { LocaleProvider } from "../copy";
 import { ConsoleForbidden, ConsoleLayout, PeoplePage, RoomsAdminPage } from "../features/console";
 import { LoginPage } from "../features/auth/LoginPage";
+import { InviteDialog } from "../features/invite";
 import { HomeEmpty } from "../features/rooms";
 import { SettingsPage } from "../features/settings";
 import { AppLayout, CreateRoomContext } from "./AppLayout";
@@ -88,7 +89,7 @@ export function App(): ReactElement {
               <Route path="/console/providers/new" element={<ConsoleScreen active="providers"><ProviderForm mode="new" /></ConsoleScreen>} />
               <Route path="/console/providers/:id" element={<ConsoleScreen active="providers"><ProviderForm mode="edit" /></ConsoleScreen>} />
               <Route path="/console/people" element={<ConsoleScreen active="people"><PeoplePage /></ConsoleScreen>} />
-              <Route path="/console/rooms" element={<ConsoleScreen active="rooms"><RoomsAdminPage /></ConsoleScreen>} />
+              <Route path="/console/rooms" element={<ConsoleScreen active="rooms"><RoomsAdminPage renderInvite={(p) => <InviteDialog {...p} />} /></ConsoleScreen>} />
               <Route path="*" element={<RequireAuth><Layout mobile="content"><NotFoundPage /></Layout></RequireAuth>} />
             </Routes>
           </ErrorBoundary>

@@ -218,6 +218,8 @@ app.get("/api/rooms/:id/messages", async (c) => {
   const limitRaw = url.searchParams.get("limit");
   const kindRaw = url.searchParams.get("kind") ?? "message";
   const orderRaw = url.searchParams.get("order");
+  const threadId = url.searchParams.get("thread_id");
+  const topLevelRaw = url.searchParams.get("top_level");
   const afterSeq = afterRaw == null || afterRaw === "" ? -1 : Number(afterRaw);
   const beforeSeq = beforeRaw == null || beforeRaw === "" ? null : Number(beforeRaw);
   const limit = Math.min(50, Math.max(1, limitRaw ? Number(limitRaw) : 50));
@@ -225,26 +227,39 @@ app.get("/api/rooms/:id/messages", async (c) => {
     return invalid(c, "invalid query");
   }
   if (orderRaw !== null && orderRaw !== "asc" && orderRaw !== "desc") return invalid(c, "invalid order");
+  // B-05 (W6): thread_id → the root and its replies; top_level=1 → only rows outside threads, with reply counts.
+  if (threadId !== null && (threadId.length < 1 || threadId.length > 64)) return invalid(c, "invalid thread_id");
+  if (topLevelRaw !== null && topLevelRaw !== "1") return invalid(c, "invalid top_level");
+  if (threadId !== null && topLevelRaw !== null) return invalid(c, "thread_id and top_level are exclusive");
   const kinds = kindRaw.split(",").map((k) => k.trim()).filter(Boolean);
   if (kinds.some((k) => k !== "message" && k !== "trace")) return invalid(c, "invalid kind");
   const placeholders = kinds.map(() => "?").join(",");
-  const params: unknown[] = [roomId, afterSeq];
-  let sql = `SELECT id, room_id, seq, kind, thread_id, reply_to, sender_id, body, mentions_json,
-                    generation_id, client_message_id, origin, created_at
-             FROM messages
-             WHERE room_id = ? AND seq > ? AND kind IN (${placeholders})`;
-  params.push(...kinds);
+  const params: unknown[] = [];
+  const counts = topLevelRaw === "1"
+    ? `, (SELECT COUNT(*) FROM messages t WHERE t.room_id = m.room_id AND t.thread_id = m.id) AS thread_reply_count,
+         (SELECT MAX(t.seq) FROM messages t WHERE t.room_id = m.room_id AND t.thread_id = m.id) AS thread_last_seq`
+    : "";
+  let sql = `SELECT m.id, m.room_id, m.seq, m.kind, m.thread_id, m.reply_to, m.sender_id, m.body, m.mentions_json,
+                    m.generation_id, m.client_message_id, m.origin, m.created_at${counts}
+             FROM messages m
+             WHERE m.room_id = ? AND m.seq > ? AND m.kind IN (${placeholders})`;
+  params.push(roomId, afterSeq, ...kinds);
   if (beforeSeq != null) {
-    sql += ` AND seq < ?`;
+    sql += ` AND m.seq < ?`;
     params.push(beforeSeq);
   }
+  if (threadId !== null) {
+    sql += ` AND (m.id = ? OR m.thread_id = ?)`;
+    params.push(threadId, threadId);
+  }
+  if (topLevelRaw === "1") sql += ` AND m.thread_id IS NULL`;
   if (orderRaw === null) {
-    sql += ` ORDER BY seq ASC LIMIT ?`;
+    sql += ` ORDER BY m.seq ASC LIMIT ?`;
     params.push(limit);
     const result = await c.env.DB.prepare(sql).bind(...params).all();
     return c.json({ messages: result.results ?? [] });
   }
-  sql += orderRaw === "desc" ? ` ORDER BY seq DESC LIMIT ?` : ` ORDER BY seq ASC LIMIT ?`;
+  sql += orderRaw === "desc" ? ` ORDER BY m.seq DESC LIMIT ?` : ` ORDER BY m.seq ASC LIMIT ?`;
   params.push(limit + 1);
   const result = await c.env.DB.prepare(sql).bind(...params).all();
   const rows = result.results ?? [];

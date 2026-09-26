@@ -301,6 +301,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 
 **BW4 細化後補充：** 量測腳本、紀錄位置（`perf-records.md`）與未達標時的處理見 `waves/BW4.md` §5.4。
 
+**BW5 細化後補充：** BQ-11 完成後，公開列表與會員列表的媒體展開也與筆數無關（`PublicMediaCountTests`，`waves/BW5.md` §4.5）。
+
 ### 5.5 建置的可重現性
 
 2026-09-24 在雲端 sandbox 中遇到 Maven Central 回 HTTP 429，Gradle 無法解析依賴（見 [00 §1](00-v1-frontend-audit.md#1-怎麼查的)）。**Proposed：** 啟用 Gradle dependency locking 與 dependency verification（`gradle/verification-metadata.xml`），讓依賴版本固定、可以稽核。429 本身是環境的網路限制，不在 repo 內處理；CI 已經有 `setup-gradle` 快取。
@@ -344,7 +346,7 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 
 **BW4 細化後補充：** 施工細節見 `waves/BW4.md`。審計保留的預設值採 surface-admin §7.2 的 90 天（owner 2026-09-25 確認，見 §8 的決定）。BW4 另外修正 BQ-13（store 接線）並加入 BQ-12 的回滾測試。
 
-**BW5 開放問題收尾（owner 決定，2026-09-25）：** BQ-06、07、08、10、11 owner 都選 A，但它們原本建議的波次（BW1c、BW2）已經細化完成，而每一波的 diff 都以前一波的結果為基準，改早期波次就得重做之後每一波的施工圖。所以集中成 **BW5**，以 BW4 完成後為基準。BW5 的變更（`PRINCIPAL_NOT_FOUND`、大寫的媒體錯誤代碼）對前端是破壞性的，所以後端 BW0～BW5 可以先依序實作完，前端 W2、W4 以 BW5 的契約為準（見 README 路線圖）。
+**BW5 開放問題收尾（owner 決定，2026-09-25）：** BQ-06、07、08、10、11 owner 都選 A，但它們原本建議的波次（BW1c、BW2）已經細化完成，而每一波的 diff 都以前一波的結果為基準，改早期波次就得重做之後每一波的施工圖。所以集中成 **BW5**，以 BW4 完成後為基準。BW5 的變更（`PRINCIPAL_NOT_FOUND`、大寫的媒體錯誤代碼）對前端是破壞性的，所以後端 BW0～BW5 可以先依序實作完，前端 W2、W4 以 BW5 的契約為準（見 README 路線圖）。施工細節見 `waves/BW5.md`；前端看得到的變更對照見其 §4.2。
 
 BW0 施工細節見 `waves/BW0.md`。
 
@@ -369,6 +371,8 @@ BW0 施工細節見 `waves/BW0.md`。
 | BQ-13 | 三個 `*StoreConfig` 以 `@ConditionalOnBean(DataSource.class)` 選 JDBC store，但這個條件在一般 `@Configuration` 上會先於 Spring Boot 定義 `DataSource` 被判斷，所以有資料庫時仍然用 in-memory store，正式環境的資料重啟就消失（BW4 細化寫 BQ-12 的測試時發現）。選項：A. BW4 修正（在 bean 方法內以 `ObjectProvider<DataSource>` 判斷），並以應用程式層級的 `integrationTest` 驗證；B. BW0 修正（要改 BW0～BW4 施工圖的測試數）。 | A（owner 已決定，2026-09-25） |
 
 **Owner 決定（2026-09-25）：** BQ-03 預設 90 天（surface-admin §7.2），可選 30／90／365；BQ-06、07、08、10、11 選 A，在 BW5 做（§7）；BQ-12 選 A，在 BW4 做。
+
+**BW5 細化後補充：** BQ-06、07、08、10、11 的施工細節見 `waves/BW5.md`（§4.2～§4.5）。BQ-08 的範圍依盤點表（該檔 §4.3）：管理端所有會在資料庫層失敗的輸入；BQ-10 讓每個 ref 欄位都有索引列，並以 V10 重建既有資料的索引列。
 
 **BW4 細化後補充：** BQ-03 的保留期限由 BW4 實作（`GET`／`PATCH /api/v1/admin/settings/audit`、每日清理）。BQ-05：BW4 細化時重新量測，三項 p95 分別約 43、42、9 ms，遠低於 §5.4 門檻（`perf-records.md`），所以 v2 維持索引表；BW4 實作量測若未達標，依 `waves/BW4.md` §5.4 回報時再評估 GIN。
 

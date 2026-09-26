@@ -827,6 +827,20 @@ def main():
     status.add_argument('--run')
     reconcile = sub.add_parser('reconcile', help='Read actual state after failure; never replay mutations')
     reconcile.add_argument('--run', required=True)
+    drain_plan = sub.add_parser('plan-worker-drain', help='Save a private, offline ERU-009 review plan')
+    drain_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
+    drain_plan.add_argument('--input', required=True, help='Private JSON with snapshot, apps, destinations, and offline assertions')
+    drain_plan.add_argument('--plan-id')
+    drain_prepare = sub.add_parser('prepare-worker-drain', help='Read live state and save a private, hash-bound ERU-009 execution plan')
+    drain_prepare.add_argument('--plan', required=True, help='Saved offline drain review plan ID')
+    drain_prepare.add_argument('--sha256', required=True, help='Offline review plan SHA-256')
+    drain_prepare.add_argument('--apps', required=True, help='Private JSON array of exact current desired app specs')
+    drain_execute = sub.add_parser('execute-worker-drain', help='Execute one prepared ERU-009 drain exactly once')
+    drain_execute.add_argument('--plan', required=True, help='Saved live execution plan ID')
+    drain_execute.add_argument('--sha256', required=True, help='Live execution plan SHA-256')
+    drain_execute.add_argument('--apps', required=True, help='Private JSON array of exact current desired app specs')
+    drain_recover = sub.add_parser('recover-worker-drain', help='Read-only ERU-009 reconciliation after any uncertain result')
+    drain_recover.add_argument('--run', required=True, help='Worker drain run ID; never replays the saved plan')
     args = parser.parse_args()
     os.umask(0o077)
     if args.command == 'status':
@@ -837,6 +851,69 @@ def main():
         else:
             print(json.dumps([{k: read(f).get(k) for k in ['id', 'operation', 'status', 'stage', 'failed_at']}
                               for f in sorted(root.glob('*.json'))], indent=2))
+        return
+    if args.command == 'plan-worker-drain':
+        from worker_drain_ops import save_review_plan
+        with ClusterLock(PROJECT):
+            plan, path = save_review_plan(PROJECT, args.target, args.input, args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'blockers': plan['blockers'], 'sha256': plan['plan_sha256'],
+            'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'prepare-worker-drain':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import prepare_execution_plan
+        with ClusterLock(PROJECT):
+            api = EruCLIAdapter(Operator())
+            plan, path = prepare_execution_plan(
+                PROJECT, args.plan, args.sha256, args.apps, api)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'target': plan['target'], 'sha256': plan['plan_sha256'],
+            'path': str(path),
+        }, indent=2))
+        return
+    if args.command in ('execute-worker-drain', 'recover-worker-drain'):
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import execute_saved_plan, recover_run
+        if args.command == 'execute-worker-drain':
+            result = execute_saved_plan(
+                PROJECT, args.plan, args.sha256, args.apps,
+                lambda: EruCLIAdapter(Operator()))
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target',
+                'component_reinstall_allowed', 'empty_target_audit', 'next_step']}, indent=2))
+        else:
+            result = recover_run(
+                PROJECT, args.run, lambda: EruCLIAdapter(Operator()))
+            observation = result.get('reconciliation', {})
+            apps = []
+            for row in observation.get('apps', []):
+                states = {}
+                for source in row.get('sources', []):
+                    state = source.get('state', 'unknown')
+                    states[state] = states.get(state, 0) + 1
+                apps.append({
+                    'logical_app': row.get('logical_app'),
+                    'replacement': row.get('replacement', {}).get('state', 'unknown'),
+                    'sources': states,
+                    'staged_child_journal': row.get('staged_child_journal'),
+                    'cleanup_child_journal': row.get('cleanup_child_journal'),
+                })
+            print(json.dumps({
+                'id': result.get('id'), 'operation': result.get('operation'),
+                'status': result.get('status'), 'stage': result.get('stage'),
+                'read_only': observation.get('read_only'),
+                'target': {k: observation.get('target', {}).get(k)
+                           for k in ['available', 'bypass', 'preflight_clean']},
+                'apps': apps,
+                'component_reinstall_allowed': observation.get('component_reinstall_allowed', False),
+                'recovery_recommendation': observation.get('recovery_recommendation'),
+            }, indent=2))
         return
     with ClusterLock(PROJECT):
         operator = Operator()

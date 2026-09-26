@@ -23,11 +23,14 @@ v2（設計階段，前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.
 
 ```bash
 ./gradlew test
+./gradlew integrationTest   # 需要 Docker（Testcontainers PostgreSQL 16）
 npm test
 npm run lint
 npm run typecheck
 npm run build
 ```
+
+`./gradlew test` 會用 `openapi.yaml` 驗證每一個 MockMvc 回應；`./gradlew integrationTest` 對 PostgreSQL 跑同一組 store 契約測試（`src/test/.../contract/`）。兩者都是 CI 閘門。
 
 等價模組指令：`./gradlew :services:cms-api:test`。前端單元測試是 Vitest。
 

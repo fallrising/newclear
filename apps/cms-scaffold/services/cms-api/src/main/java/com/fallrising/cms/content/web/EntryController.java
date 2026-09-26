@@ -69,7 +69,7 @@ public class EntryController {
         for (String name : request.getParameterMap().keySet()) {
             if (name.startsWith("ref.") && request.getParameter(name) != null && !request.getParameter(name).isBlank()) {
                 refField = name.substring(4);
-                refTarget = UUID.fromString(request.getParameter(name));
+                refTarget = parseRefTarget(name, request.getParameter(name));
             }
         }
         List<Map<String, Object>> items = entries.listWork(
@@ -199,5 +199,13 @@ public class EntryController {
             throw IdentityException.surfaceForbidden("read_draft", null, Surface.FRONT.wire());
         }
         return identity;
+    }
+
+    private static UUID parseRefTarget(String name, String raw) {
+        try {
+            return UUID.fromString(raw);
+        } catch (IllegalArgumentException e) {
+            throw com.fallrising.cms.content.ContentException.invalidParameter(name + " must be a UUID");
+        }
     }
 }

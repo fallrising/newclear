@@ -1,47 +1,35 @@
 package com.fallrising.cms.media;
 
-import org.springframework.http.HttpStatus;
+import com.fallrising.cms.api.error.CmsApiException;
+import com.fallrising.cms.api.error.ErrorCode;
 
-public class MediaException extends RuntimeException {
+public class MediaException extends CmsApiException {
 
-    private final HttpStatus status;
-    private final String code;
-
-    public MediaException(HttpStatus status, String code, String message) {
-        super(message);
-        this.status = status;
-        this.code = code;
-    }
-
-    public HttpStatus status() {
-        return status;
-    }
-
-    public String code() {
-        return code;
+    public MediaException(ErrorCode code, String message) {
+        super(code, message, null, null, null);
     }
 
     public static MediaException notFound() {
-        return new MediaException(HttpStatus.NOT_FOUND, "not_found", "Media not found");
+        return new MediaException(ErrorCode.MEDIA_NOT_FOUND, "Media not found");
     }
 
     public static MediaException variantNotAvailable() {
-        return new MediaException(HttpStatus.NOT_FOUND, "variant_not_available", "Variant is not available");
+        return new MediaException(ErrorCode.MEDIA_VARIANT_NOT_AVAILABLE, "Variant is not available");
     }
 
     public static MediaException unsupportedType() {
-        return new MediaException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "unsupported_media_type", "File type is not allowed");
+        return new MediaException(ErrorCode.MEDIA_UNSUPPORTED_TYPE, "File type is not allowed");
     }
 
     public static MediaException quota() {
-        return new MediaException(HttpStatus.CONFLICT, "quota_exceeded", "Media library quota exceeded");
+        return new MediaException(ErrorCode.MEDIA_QUOTA_EXCEEDED, "Media library quota exceeded");
     }
 
     public static MediaException tooLarge() {
-        return new MediaException(HttpStatus.PAYLOAD_TOO_LARGE, "file_too_large", "File exceeds max size");
+        return new MediaException(ErrorCode.MEDIA_FILE_TOO_LARGE, "File exceeds max size");
     }
 
     public static MediaException gone() {
-        return new MediaException(HttpStatus.GONE, "gone", "Media has been deleted");
+        return new MediaException(ErrorCode.MEDIA_GONE, "Media has been deleted");
     }
 }

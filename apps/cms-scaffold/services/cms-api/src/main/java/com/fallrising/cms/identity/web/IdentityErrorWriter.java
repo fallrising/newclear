@@ -1,7 +1,8 @@
 package com.fallrising.cms.identity.web;
 
+import com.fallrising.cms.api.error.ErrorBody;
+import com.fallrising.cms.api.error.ErrorCode;
 import com.fallrising.cms.identity.IdentityException;
-import com.fallrising.cms.identity.domain.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
@@ -24,22 +24,7 @@ public class IdentityErrorWriter {
     }
 
     public Map<String, Object> body(IdentityException ex, String requestId) {
-        Map<String, Object> error = new LinkedHashMap<>();
-        error.put("code", ex.code().name());
-        error.put("message", ex.getMessage());
-        if (ex.action() != null) {
-            error.put("action", ex.action());
-        }
-        if (ex.contentType() != null) {
-            error.put("contentType", ex.contentType());
-        }
-        if (ex.surface() != null) {
-            error.put("surface", ex.surface());
-        }
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", error);
-        body.put("requestId", requestId);
-        return body;
+        return ErrorBody.of(ex, requestId);
     }
 
     public void write(HttpServletRequest request, HttpServletResponse response, IdentityException ex) throws IOException {
@@ -52,13 +37,9 @@ public class IdentityErrorWriter {
         objectMapper.writeValue(response.getOutputStream(), body(ex, requestId));
     }
 
-    public void write(HttpServletRequest request, HttpServletResponse response, AuthErrorCode code, int status, String message)
+    public void write(HttpServletRequest request, HttpServletResponse response, ErrorCode code, String message)
             throws IOException {
-        write(
-                request,
-                response,
-                new IdentityException(
-                        org.springframework.http.HttpStatus.valueOf(status), code, message, null, null, null));
+        write(request, response, new IdentityException(code, message, null, null, null));
     }
 
     public static String requestId(HttpServletRequest request) {

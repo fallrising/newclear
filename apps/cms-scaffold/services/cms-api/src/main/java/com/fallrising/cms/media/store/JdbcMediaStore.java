@@ -62,7 +62,7 @@ public class JdbcMediaStore implements MediaStore {
     @Override
     public List<MediaAsset> listAvailable() {
         return jdbc.query(
-                        "SELECT * FROM cms_media WHERE status = 'available' ORDER BY created_at DESC",
+                        "SELECT * FROM cms_media WHERE status = 'available' AND deleted_at IS NULL ORDER BY created_at DESC",
                         assetMapper())
                 .stream()
                 .map(this::withVariants)

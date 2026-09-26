@@ -1,6 +1,6 @@
 # CMS Scaffold v2
 
-狀態：**已啟動（設計階段）**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。目前三份文件都是 v0.1；接下來每個波次先細化成施工圖（§細化），再交給 agent 實作，從 BW0 開始。
+狀態：**已啟動（施工圖已完備，尚未實作）**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。00／01／02 保留架構與決策，所有實作波次都已細化成 `waves/` 施工圖；實作者依路線圖逐波施工，不從框架文件自行補設計。
 
 | 文件 | 內容 |
 | --- | --- |
@@ -8,9 +8,10 @@
 | [01 — 前端 v2 SDD](01-frontend-sdd.md) | 架構、Shopify 參考對照、tokens、元件、三個操作面的畫面、後端缺口、驗收、前端波次 |
 | [02 — 後端 v2 SDD](02-backend-sdd.md) | 後端現況問題、決策、資料表變更、API 變更、品質閘門、後端波次 |
 | [REFINE-PROMPT](REFINE-PROMPT.md) | 把一個波次細化成施工圖的 prompt（給 LLM agent） |
-| `waves/<波次>.md` | 各波次的施工圖（細化後產生）；已完成：[BW0](waves/BW0.md)、[W0](waves/W0.md)、[BW1a](waves/BW1a.md)、[BW1b](waves/BW1b.md)、[BW1c](waves/BW1c.md)、[BW2](waves/BW2.md)、[BW3](waves/BW3.md)、[BW4](waves/BW4.md)、[BW5](waves/BW5.md) |
+| `waves/<波次>.md` | 各波次的施工圖；後端 [BW0](waves/BW0.md)～[BW5](waves/BW5.md) 與前端 [W0](waves/W0.md)～[W5](waves/W5.md)（含 [W3b](waves/W3b.md)）均已完成細化 |
 | `contracts/` | 施工圖的契約：OpenAPI 片段 `<波次>.openapi.yaml`、測試 fixture 規格 |
-| [perf-records.md](perf-records.md) | 02 §5.4 效能目標的量測紀錄（預演與實作的數字） |
+| [perf-records.md](perf-records.md) | 02 §5.4 後端效能目標的量測紀錄（預演與實作的數字） |
+| [frontend-records.md](frontend-records.md) | W5 前端 bundle、Web Vitals、mock e2e、視覺基準與真實 API e2e 的追加式紀錄 |
 
 與既有文件的關係：[總綱](../sdd/00-overview.md) 凍結、不改；[surface 與 kernel 規格](../specs/) 仍是路由、權限、領域規則的權威；v2 文件補架構、畫面、API 演進與交付方式。
 
@@ -40,7 +41,8 @@ BW0 契約與品質基礎（完整 OpenAPI schema、store 契約測試、CI inte
                       └─► BW3 會員端點 ─► W3b Front 會員區
 W5 前端硬化、BW4 後端硬化：所有功能波之後
 BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會改錯誤代碼，
-    所以建議後端 BW0～BW5 先依序實作完，前端 W2、W4 以 BW5 的契約為準
+    所以建議後端 BW0～BW5 先依序實作完；W3、W4、W3b、W5 直接以 BW5
+    契約為準，W2 依 01 Q-16 在整合階段套用 BW5 的媒體錯誤代碼
 ```
 
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
@@ -50,14 +52,14 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 | BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
 | BW1b | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1b.md](waves/BW1b.md) | B-02、B-09、B-10；G-02 |
 | BW1c | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1c.md](waves/BW1c.md) | B-06、B-13；G-07 |
-| W1 | DOC_READY | 01 §12 | [waves/W1.md](waves/W1.md) | C-04～C-07、U-01、U-02、U-04 |
+| W1 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W1.md](waves/W1.md) | C-04～C-07、U-01、U-02、U-04 |
 | BW2 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW2.md](waves/BW2.md) | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
-| W2 | DOC_READY | 01 §12 | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
-| W3 | DOC_READY | 01 §12 | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
-| W4 | DOC_READY | 01 §12 | [waves/W4.md](waves/W4.md) | C-19 |
+| W2 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
+| W3 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
+| W4 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W4.md](waves/W4.md) | C-19 |
 | BW3 | DOC_READY | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
-| W3b | DRAFT | 01 §7.1 | — | Front 會員區（surface-front AC-10～12） |
-| W5 | DRAFT | 01 §10、§12 | — | 剩餘 P2、效能 |
+| W3b | DOC_READY | [01 §7.1](01-frontend-sdd.md#71-frontappsweb-front)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3b.md](waves/W3b.md) | G-08、C-11；surface-front AC-10～13 |
+| W5 | DOC_READY | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
 | BW4 | DOC_READY | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 
@@ -65,7 +67,7 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 
 ## 細化
 
-**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做」。它會依上表順序，挑第一個還不是 `DOC_READY` 的波次，產出 `waves/<波次>.md`（施工圖）與 `contracts/`（OpenAPI 片段、fixture），開 PR 並合併，最後把狀態改成 `DOC_READY`。要指定波次，就在同一句話後面加「本次細化：BW0」。
+細化已完成。若施工時發現新矛盾，需要重開某一波的施工圖，**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做。本次細化：<波次>」。Agent 只修改該波的 `waves/<波次>.md`、契約／fixture 與必要的框架連結；一波仍只進一個 PR。
 
 施工圖的標準：能力較弱的 agent 只讀施工圖就能實作，不需要做任何設計決定。細化時若發現框架本身有矛盾，agent 會新增開放問題並停下來問。
 

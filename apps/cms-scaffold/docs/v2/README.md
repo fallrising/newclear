@@ -54,7 +54,7 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 | BW2 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW2.md](waves/BW2.md) | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | DOC_READY | 01 §12 | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
 | W3 | DRAFT | 01 §12 | — | C-01～C-03、C-11、C-13、C-14、U-05 |
-| W4 | DRAFT | 01 §12 | — | C-19 |
+| W4 | DOC_READY | 01 §12 | [waves/W4.md](waves/W4.md) | C-19 |
 | BW3 | DOC_READY | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
 | W3b | DRAFT | 01 §7.1 | — | Front 會員區（surface-front AC-10～12） |
 | W5 | DRAFT | 01 §10、§12 | — | 剩餘 P2、效能 |

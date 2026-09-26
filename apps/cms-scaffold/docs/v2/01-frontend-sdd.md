@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5）  
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5；同日 W4 細化：§6.1、§6.4、§7.3、§12 補施工細節連結，新增 §13.6）  
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -205,7 +205,7 @@ W0 定案（細化時補上的值）：每站另有 `--surface`、`--surface-sub
 
 `AspectRatio`、`Carousel` 只給 Front 用。
 
-W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。W2 不新增 shadcn 元件（[`waves/W2.md`](waves/W2.md) §4.9）。
+W0 只加入其中 11 個（`Alert`、`Badge`、`Button`、`Card`、`DropdownMenu`、`Input`、`Label`、`Separator`、`Sheet`、`Skeleton`、`Textarea`），其餘由第一個用到的波次加入。施工細節見 [`waves/W0.md`](waves/W0.md) §4.9、§5.3。W1 加入 `Table`、`Tabs`、`Select`、`RadioGroup`、`Switch`、`Dialog`、`AlertDialog`、`Popover`、`Calendar`；`Sonner` 由 `@cms/ui` 的 `Toaster` 直接包 `sonner`（上游 `sonner.tsx` 依賴 `next-themes`）；施工細節見 [`waves/W1.md`](waves/W1.md) §4.9、§5.2.3。W2 不新增 shadcn 元件（[`waves/W2.md`](waves/W2.md) §4.9）。W4 加入 `Checkbox`、`Progress`（上游 `progress.tsx` 沒有把 `value` 傳給 Radix，W4 補上）；施工細節見 [`waves/W4.md`](waves/W4.md) §4.9。
 
 ### 6.2 模式元件（Polaris 式，建在 shadcn 之上）
 
@@ -261,6 +261,8 @@ export const albumSite: SiteDefinition = {
 W1 實作本表除 `RelationPicker`、`MediaPicker`、`PrincipalPicker` 之外的全部 widget；在 W2 之前 `ref`、`media-ref`、`principal-ref` 唯讀顯示（標題＋狀態、縮圖＋標題、「已連結會員帳號」）。enum 的顯示名稱改用 BW1a 的 `enumLabels`（G-06 已由 BW1a 處理）。施工細節見 [`waves/W1.md`](waves/W1.md) §5.3。
 
 W2 實作 `RelationPicker`（`ref`，對話框以 `Input`＋`RadioGroup` 搜尋，不用 `Command`，免裝 `cmdk`）與 `MediaPicker`（`media-ref`，媒體庫＋上傳兩個 tab）；`PrincipalPicker` 因 Q-13 維持唯讀。施工細節見 [`waves/W2.md`](waves/W2.md) §5.0.5、§5.3。
+
+依 Q-13（B），會員帳號連結（`principal-ref`）在 Admin 的緊急條目檢視器做，施工細節見 [`waves/W4.md`](waves/W4.md) §5.0.10。
 
 ---
 
@@ -590,6 +592,8 @@ Resource index 版型：篩選為時間範圍、操作者、動作、結果（�
 
 停用類型、停用使用者、硬刪 entry、硬刪媒體：一律用 `AlertDialog`，要求輸入資源名稱才能按確認（Shopify 刪除商店資料的模式），並說明影響範圍（修 C-19）。
 
+A-S1～A-S4 與其他 Admin 畫面的施工細節（線框修正、資料來源、狀態、互動；權限矩陣依 BW5 的 `(action, contentTypeCode)` 授權模型改寫，角色建立、類型計數、媒體治理等缺 API 的部分見 §13.6）見 [`waves/W4.md`](waves/W4.md) §5.0。
+
 ---
 
 ## 8. 共通狀態與錯誤
@@ -732,7 +736,7 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
 
-W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。W4 施工細節見 [`waves/W4.md`](waves/W4.md)（codegen 改讀 `contracts/BW5.openapi.yaml`，並替換 W2 的 5 個媒體錯誤代碼，§13.5）。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -790,6 +794,19 @@ Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-1
 | Q-14 | `GET /media` 沒有 `page`、`size`、`q`（surface-back §6.5 要求有），整個媒體庫一次回傳；`MediaAsset` 也沒有「已刪除」旗標，條目引用的媒體被移到回收後，前端只能從縮圖 410 得知（[waves/W2.md](waves/W2.md) W2-FM12）。 | **A**：請後端為 `GET /media` 加 `page`、`size`（預設 24）、`q`（名稱包含），回 `MediaAssetPage`（`items`、`total`、`page`、`size`），並在 `MediaAsset` 加 `deletedAt`（nullable）；**B**：維持現狀，前端篩選與分頁（W2 的做法），demo 資料量可接受。 | **A**，轉給後端窗口；前端在對應後端波次之後把 `LibraryBody`、`LibraryTab` 改成伺服器分頁 |
 | Q-15 | surface-back §3.4 的全頁 token 預覽（`/preview/t/:token`、`POST /entries/{id}/preview-tokens`、`GET /preview/{token}`）在 BW0～BW5 的契約都沒有。 | **A**：請後端新增這兩個端點（TTL 15 分鐘、只給 Back），前端另開一波加路由；**B**：v2 只做編輯器內預覽（`GET /preview/entries/{id}`，W2 已做）。 | **B**。W2 依 B 撰寫 |
 | Q-16 | README 路線圖（BW5 合併後）建議「前端 W2、W4 以 BW5 的契約為準」；W2 細化時的指示是「W2 用 `BW2.openapi.yaml`」。BW5 對 W2 可見的差異只有 5 個媒體錯誤代碼改大寫（[waves/BW5.md](waves/BW5.md) §4.2）。 | **A**：W2 維持 BW2 契約，整合階段依 [waves/W2.md](waves/W2.md) §2.1 的對照表替換 5 個字串（Q-10 的做法）；**B**：W2 改以 BW5 產生型別，mock 與選擇器直接用大寫代碼（需要重新預演 W2）。 | **A**。W2 依 A 撰寫 |
+
+### 13.6 W4 細化時新增（待確認）
+
+以下缺口都不阻擋 W4：W4 依各題的「W4 的做法」撰寫，選 A 時轉給後端窗口，前端另開一波補畫面。
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-17 | surface-admin §4.4、§5.1、AC-B 要求類型列表顯示 `pack`、`entryCount`、`publishedCount`，停用確認文案含「目前 published = {n}」，並可設定 `defaultVisibility`、`surfaces`；BW5 的 `AdminContentType` 沒有這些欄位，也只有 `enable`／`disable` 兩個寫入端點。 | **A**：後端在 `AdminContentType` 加 `pack`（nullable）、`entryCount`、`publishedCount`（不含軟刪），前端補欄位與確認文案；`defaultVisibility`、`surfaces` 另案。**B**：維持；W4 的列表與確認文案不含數量。 | **A**（計數對「停用會影響多少已發布內容」很重要，後端成本低）。W4 依 B |
+| Q-18 | surface-admin §4.4 與流程 B（§6.3、AC-D）要求建立、複製（Clone）、改名、刪除自訂角色（例如 `clinic_operator`），角色另有 `surfaces[]`；BW5 只有 `GET /roles` 與 `GET`／`PUT /roles/{code}/permissions`。 | **A**：後端新增 `POST /roles`（`{code, displayName, cloneFrom?}`）、`PATCH /roles/{code}`、`DELETE /roles/{code}`（系統角色 409），前端補 `/roles/new` 與複製。**B**：v2 只用 5 個系統角色；「只給診所」以帳號的類型範圍（`contentTypeCodes`）達成。 | **B**（系統角色＋帳號類型範圍已能表達三個 demo）。W4 依 B |
+| Q-19 | surface-admin §4.4、§6.5、AC-F、AC-G 要求依帳號的媒體用量、調整配額（`PATCH /settings/media`）、媒體硬刪（`DELETE /media/{id}?mode=hard`）、`/settings/storage`、`/settings/security`；BW5 只有 `GET /media/quota`（整個媒體庫）。 | **A**：後端新增 `GET /admin/media/usage`（`byPrincipal`）、`PATCH /admin/settings/media`、`POST /admin/media/{id}/purge`，前端補 `/media/:id` 與設定頁。**B**：v2 只顯示整體用量。 | **B**（v2 範圍）；配額調整需要時再選 A。W4 依 B |
+| Q-20 | `Principal` 沒有角色與 `lastLoginAt`，`GET /principals` 也不能依角色篩選：帳號列表無法顯示角色、總覽無法警示「只剩 1 位管理員」、會員連結對話框無法只列會員（只能列出全部啟用中的帳號）。 | **A**：後端在 `Principal` 加 `roles: string[]` 與 `lastLoginAt`（nullable），`GET /principals` 加 `role` 參數。**B**：維持；對話框以說明文字提醒只連結會員。 | **A**（會員連結選錯人的風險最高）。W4 依 B |
+| Q-21 | `PatchPrincipalRequest` 的 `null` 代表「不變」，沒有清除電子郵件的寫法。 | **A**：後端約定空字串代表清除（寫進契約 description）。**B**：維持；畫面提示「目前無法清除電子郵件」。 | **A**。W4 依 B |
+| Q-22 | surface-admin §8 的後端閘門（`confirmPhrase`／`confirmId`、`SELF_DEMOTION_FORBIDDEN`、`SELF_DISABLE_FORBIDDEN`）在 BW5 沒有：`purgeEntry` 不需要確認欄位，自己停用自己、移除自己的管理員角色只有在變成「沒有管理員」時才被 `LAST_ADMIN` 擋下。 | **A**：後端補上確認欄位與兩個 `SELF_*` 檢查（403），前端改送確認欄位。**B**：只在前端擋（W4 已做：輸入名稱才能確認；自己的帳號沒有停用與移除管理員角色的控件）。 | **A**（防止直接呼叫 API 的誤操作）。W4 依 B |
 
 ## 14. 參考來源
 

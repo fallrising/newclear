@@ -1,0 +1,208 @@
+[
+  {
+    "id": "70000000-0000-4000-8000-000000000012",
+    "at": "2026-09-26T01:12:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "SCHEMA",
+    "action": "type.disable",
+    "targetType": "content_type",
+    "targetId": "50000000-0000-4000-8000-000000000008",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000011",
+    "at": "2026-09-26T00:55:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "ROLE_ASSIGNED",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000006",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000010",
+    "at": "2026-09-26T00:50:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "GOVERNANCE",
+    "action": "manage_types",
+    "targetType": null,
+    "targetId": null,
+    "surface": "back",
+    "outcome": "denied",
+    "detail": {
+      "reason": "SURFACE_FORBIDDEN"
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000009",
+    "at": "2026-09-26T00:40:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "LOGIN_SUCCESS",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000001",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000008",
+    "at": "2026-09-25T09:30:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "role.permissions_update",
+    "targetType": "role",
+    "targetId": "40000000-0000-4000-8000-000000000003",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": {
+      "roleCode": "editor",
+      "permissions": 5
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000007",
+    "at": "2026-09-25T08:00:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "SETTINGS",
+    "action": "settings.retention_updated",
+    "targetType": "settings",
+    "targetId": null,
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": {
+      "from": 30,
+      "to": 90
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000006",
+    "at": "2026-09-24T10:00:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "PRINCIPAL_CREATED",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000010",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000005",
+    "at": "2026-09-20T00:37:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000036",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000004",
+    "at": "2026-09-20T00:37:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000037",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000003",
+    "at": "2026-09-20T00:01:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000001",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000002",
+    "at": "2026-09-20T00:01:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.create",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000001",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000001",
+    "at": "2026-09-20T00:00:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "username": "seed-editor-album",
+      "displayName": "Album editor"
+    },
+    "category": "CONTENT",
+    "action": "entry.create",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000002",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": null
+  }
+]

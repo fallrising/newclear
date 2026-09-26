@@ -21,6 +21,7 @@ import reimage_review
 import reimage_worker_install
 import reimage_worker_registration
 import reimage_worker_smoke
+import reimage_worker_resume
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -544,7 +545,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['bindings']['provider_reimage_intent'], {
             'path': str(intent_path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
         self.assertFalse(plan['executable'])
-        self.assertTrue(any('Safe resume, generation commit' in x for x in plan['blockers']))
+        self.assertTrue(any('Generation commit' in x for x in plan['blockers']))
         self.assertFalse(any('invalid manual reimage intent' in x for x in plan['blockers']))
 
     def seed_worker_smoke_canaries(self):
@@ -984,6 +985,103 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse(any('workload' in argv and any(word in argv for word in ('deploy', 'remove'))
                              for _, argv in self.op.remote_commands))
 
+    def smoked_worker_resume_plan(self):
+        _bootstrap, observation, smoke_envelope = self.registered_worker_smoke_plan()
+        smoke_plan = smoke_envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = reimage_worker_smoke.run_reimage_worker_smoke(
+                self.op, smoke_plan['id'], smoke_envelope['sha256'],
+                guard_factory=FakeHTTPGuards, smoke_runner=self.fake_worker_smoke_runner())
+        self.assertEqual(result['status'], 'smoked-awaiting-resume')
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            resume_envelope = self.op.plan_reimage_worker_resume(
+                smoke_plan['id'], smoke_envelope['sha256'])
+        return observation, smoke_envelope, resume_envelope
+
+    def test_worker_resume_uses_core_alias_once_and_keeps_generation_unchanged(self):
+        observation, _smoke_envelope, envelope = self.smoked_worker_resume_plan()
+        plan = envelope['plan']
+        generation_before = self.op.cluster()['generation']
+        guards = []
+        def guard_factory(project, run_id, targets):
+            guard = FakeHTTPGuards(project, run_id, targets)
+            guards.append(guard)
+            return guard
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = reimage_worker_resume.resume_reimage_worker(
+                self.op, plan['id'], envelope['sha256'], guard_factory=guard_factory,
+                sleep=lambda _: None, attempts=3, interval=0)
+        self.assertEqual(result['status'], 'resumed-awaiting-generation-commit')
+        self.assertTrue(result['resume_attempted'])
+        self.assertEqual(result['resume_outcome'], 'response-received')
+        self.assertTrue(result['available'])
+        self.assertFalse(result['bypass'])
+        self.assertEqual(self.op.resume_calls, 1)
+        self.assertEqual(self.op.cluster()['generation'], generation_before)
+        up_events = [(host, argv) for host, argv in self.op.remote_commands
+                     if argv[-3:-1] == ['node', 'up']]
+        self.assertEqual(len(up_events), 1)
+        self.assertEqual(up_events[0][0], 'ckc-disposable-01')
+        self.assertEqual(set(guards[0].summary['hosts']), {'ckc-disposable-02', 'ckc-disposable-03'})
+        target = next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')
+        self.assertTrue(target['available'])
+        self.assertFalse(target['bypass'])
+
+    def test_worker_resume_rejects_smoke_or_canary_drift_before_node_up(self):
+        observation, smoke_envelope, envelope = self.smoked_worker_resume_plan()
+        plan = envelope['plan']
+        path = self.project / 'private/smoke' / (plan['canary_run'] + '.json')
+        changed = labctl.read(path)
+        changed['changed_after_resume_plan'] = True
+        atomic_json(path, changed)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'worker, canary, service, core or cluster state changed'):
+                reimage_worker_resume.resume_reimage_worker(
+                    self.op, plan['id'], envelope['sha256'], guard_factory=FakeHTTPGuards,
+                    sleep=lambda _: None, attempts=2, interval=0)
+        self.assertEqual(self.op.resume_calls, 0)
+        journal = labctl.read(self.op.root / 'runs' / (plan['id'] + '.json'))
+        self.assertFalse(journal['resume_attempted'])
+        self.assertTrue(next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')['bypass'])
+
+    def test_uncertain_worker_resume_reconciles_without_a_second_node_up(self):
+        observation, _smoke_envelope, envelope = self.smoked_worker_resume_plan()
+        plan = envelope['plan']
+        self.op.lose_resume_reply = True
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(TimeoutError, 'core node up response lost'):
+                reimage_worker_resume.resume_reimage_worker(
+                    self.op, plan['id'], envelope['sha256'], guard_factory=FakeHTTPGuards,
+                    sleep=lambda _: None, attempts=2, interval=0)
+        before = self.op.resume_calls
+        self.assertEqual(before, 1)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.reconcile(plan['id'])
+        self.assertFalse(result['reconciliation']['node_up_replayed'])
+        self.assertEqual(result['reconciliation']['target_registration']['bypass'], False)
+        self.assertEqual(self.op.resume_calls, before)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'already has a journal'):
+                reimage_worker_resume.resume_reimage_worker(
+                    self.op, plan['id'], envelope['sha256'], guard_factory=FakeHTTPGuards)
+        with self.assertRaisesRegex(ValueError, 'already attempted'):
+            self.op.plan_reimage_worker_resume(
+                plan['smoke_plan']['id'], plan['smoke_plan']['sha256'])
+
+    def test_worker_resume_requires_completed_fenced_smoke(self):
+        _bootstrap, observation, smoke_envelope = self.registered_worker_smoke_plan()
+        plan = smoke_envelope['plan']
+        atomic_json(self.op.root / 'runs' / (plan['id'] + '.json'), {
+            'id': plan['id'], 'operation': 'provider-reimage-worker-smoke',
+            'plan_hash': smoke_envelope['sha256'], 'target': plan['target']['node'],
+            'target_alias': plan['target']['alias'], 'status': 'failed',
+            'available': True, 'bypass': True, 'remote_mutation_performed': None,
+        })
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with self.assertRaisesRegex(ValueError, 'has not completed successfully'):
+                self.op.plan_reimage_worker_resume(plan['id'], smoke_envelope['sha256'])
+        self.assertEqual(self.op.resume_calls, 0)
+
     def test_worker_install_embedded_remote_sources_compile(self):
         compile('import os\nEXPECTED = {}\n' + reimage_worker_install.INSTALL_PREFLIGHT,
                 'worker-install-preflight', 'exec')
@@ -1417,6 +1515,9 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
         self.agent_enabled = 'disabled'
         self.add_calls = 0
         self.agent_start_calls = 0
+        self.resume_calls = 0
+        self.lose_resume_reply = False
+        self.resume_keeps_fence = False
         self.lose_add_reply = False
         self.lose_agent_start_reply = False
         self.rotate_core_after_add = False
@@ -1480,6 +1581,24 @@ class FakeWorkerInstallOperator(FakeReimageOperator):
             if self.rotate_core_after_add:
                 self.running_core_sha = 'c' * 64
             return result
+        if host == self.core['alias'] and argv[-3:-1] == ['node', 'get']:
+            name = argv[-1]
+            rows = [copy.deepcopy(row) for row in self.live['nodes'] if row['name'] == name]
+            return self._record_install_event(host, argv, stdin, check, timeout,
+                                              ssh_options, record_output, json.dumps(rows))
+        if host == self.core['alias'] and argv[-3:-1] == ['node', 'up']:
+            name = argv[-1]
+            self.resume_calls += 1
+            node = next(row for row in self.live['nodes'] if row['name'] == name)
+            if not self.resume_keeps_fence:
+                node['bypass'] = False
+            output = self._record_install_event(host, argv, stdin, check, timeout,
+                                                ssh_options, record_output, '')
+            if self.lose_resume_reply:
+                self.events[-1].update(status='uncertain', error='TimeoutError')
+                self.save_journal()
+                raise TimeoutError('core node up response lost')
+            return output
         if host == self.target_alias and argv == ['sudo', '-n', 'python3', '-']:
             if isinstance(stdin, str) and stdin.startswith('CONFIG='):
                 self.install_input = stdin

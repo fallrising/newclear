@@ -1,5 +1,4 @@
 """Wait for a newly added, fenced worker to report ready before bringing it up."""
-import argparse
 import ipaddress
 import json
 import re
@@ -76,13 +75,7 @@ def resume_registered_worker(core_ip, name, endpoint, *, runner=subprocess.run,
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--core-ip", required=True)
-    parser.add_argument("--node", required=True)
-    parser.add_argument("--endpoint", required=True)
-    args = parser.parse_args()
-    result = resume_registered_worker(args.core_ip, args.node, args.endpoint)
-    print(json.dumps(result, sort_keys=True))
+    raise SystemExit("Use scripts/labctl.py resume-reimage-worker with a reviewed hash-bound plan")
 
 
 if __name__ == "__main__":

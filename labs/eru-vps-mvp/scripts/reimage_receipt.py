@@ -20,7 +20,7 @@ REQUIRED_FIELDS = {
 HOST_KEY_TYPES = {"ssh-ed25519", "ecdsa-sha2-nistp256", "ssh-rsa"}
 EXPECTED_REVIEW_BLOCKERS = {
     "Owner console reimage, receipt and replacement-host verification are separate manual stages",
-    "Safe resume, generation commit and recovery executor are not implemented",
+    "Generation commit and recovery executor are not implemented",
 }
 
 

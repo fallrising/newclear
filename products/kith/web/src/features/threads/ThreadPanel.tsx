@@ -68,7 +68,7 @@ export function ThreadPanel(props: Props): ReactElement {
   }, [props.onClose]);
 
   return (
-    <section data-testid="thread-panel" data-root={rootId} aria-label={t("thread.title")} className="flex h-full min-h-0 flex-col">
+    <section data-testid="thread-panel" data-root={rootId} aria-label={t("thread.title")} className="flex min-h-0 flex-1 flex-col">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4">
         <h2 className="text-lg font-semibold text-ink">{t("thread.title")}</h2>
         <IconButton data-testid="thread-close" label={t("thread.close")} icon={X} onClick={props.onClose} />

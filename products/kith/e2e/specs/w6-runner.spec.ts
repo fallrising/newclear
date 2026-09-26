@@ -132,8 +132,9 @@ test(
       await expect(ben.page.getByTestId("message-body").filter({ hasText: `（@${handle} 沒有完成：exit 3）` })).toBeVisible();
       await shot(ben.page, info, "05-blocked");
       const failRow = ben.page.getByTestId("message-row").filter({ hasText: "[[cli:exit=3;stderr=boom]]" });
+      const failRoot = await failRow.getByTestId("thread-summary").getAttribute("data-root");
       await failRow.getByTestId("thread-summary").click();
-      await expect(ben.page.getByTestId("thread-panel")).toBeVisible();
+      await expect(ben.page.getByTestId("thread-panel")).toHaveAttribute("data-root", failRoot ?? "");
       const cards = ben.page.getByTestId("trace-card");
       const cardCount = await cards.count();
       for (let i = 0; i < cardCount; i++) await cards.nth(i).getByTestId("trace-toggle").click();
@@ -144,7 +145,9 @@ test(
       const truncated = await waitForMessage(api, roomId, (m) => m.kind === "message" && m.body.endsWith("（已截斷）"));
       expect(new TextEncoder().encode(truncated.body).length).toBe(8192);
       const bigRow = ben.page.getByTestId("message-row").filter({ hasText: "[[cli:big=1;traces=0]]" });
+      const bigRoot = await bigRow.getByTestId("thread-summary").getAttribute("data-root");
       await bigRow.getByTestId("thread-summary").click();
+      await expect(ben.page.getByTestId("thread-panel")).toHaveAttribute("data-root", bigRoot ?? "");
       await ben.page.getByTestId("trace-toggle").first().click();
       await ben.page.getByTestId("trace-load-full").click();
       const full = ((await ben.page.getByTestId("trace-full").textContent()) ?? "").trim();

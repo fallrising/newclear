@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import type { RoomMember } from "../../api/types";
 import { useT, type CopyKey } from "../../copy";
 import type { ReplyPhase } from "../../store/statuses";
@@ -12,10 +12,26 @@ const PHASE_KEY: Record<ReplyPhase, CopyKey> = {
   running: "reply.running",
 };
 
+/** Runner posts `running` immediately after `accepted` (~30ms). Keep 已接受 readable. */
+const ACCEPTED_HOLD_MS = 300;
+
 export function ReplyPlaceholder(props: { member: RoomMember; draft?: string; phase?: ReplyPhase }): ReactElement {
   const t = useT();
   const name = displayName(props.member);
-  const label = t(PHASE_KEY[props.phase ?? "replying"], { name });
+  const phase = props.phase ?? "replying";
+  const [shown, setShown] = useState(phase);
+  const shownAt = useRef(Date.now());
+  useEffect(() => {
+    if (phase === shown) return;
+    const elapsed = Date.now() - shownAt.current;
+    const wait = shown === "accepted" && phase === "running" ? Math.max(0, ACCEPTED_HOLD_MS - elapsed) : 0;
+    const id = window.setTimeout(() => {
+      shownAt.current = Date.now();
+      setShown(phase);
+    }, wait);
+    return () => window.clearTimeout(id);
+  }, [phase, shown]);
+  const label = t(PHASE_KEY[shown], { name });
   return (
     <div
       data-testid="reply-placeholder"

@@ -8,6 +8,7 @@ import uuid
 
 from labops import atomic_json, digest
 from worker_payload import build_worker_payload
+from core_release import validation_record
 
 WORKER_INDEX = {
     'ckc-disposable-02': ('worker-2', 2),
@@ -15,8 +16,14 @@ WORKER_INDEX = {
     'ckc-disposable-04': ('worker-4', 4),
 }
 POST_REIMAGE_BLOCKER = (
-    'Node registration, smoke, resume and recovery executor are not implemented'
+    'Generation commit and recovery executor are not implemented'
 )
+
+WORKER_ACCESS_STEPS = [
+    'Replace only the target worker entries in core known_hosts with owner-verified host keys',
+    'Replace only the target worker Tailscale address in the core firewall source allowlist',
+    'Apply the firewall source file without restarting core and verify live nft state',
+]
 
 
 def _now():
@@ -151,6 +158,8 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
         'labels': old_node['labels'],
         'resource_capacity': old_node['resource_capacity'],
     }
+    core_release = validation_record(
+        operator.project, 'patches/core-v0.1.5-safe-node-add.validation.json')
     plan = {
         'schema': 1,
         'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
@@ -190,14 +199,31 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
                 'Verify installed owner manifest, preserved services, empty runtime and absent worker registration',
             ],
         },
+        'worker_access': {
+            'executable': True,
+            'blockers': [],
+            'steps': list(WORKER_ACCESS_STEPS),
+        },
+        'worker_registration': {
+            'executable': True,
+            'blockers': [],
+            'core_release': core_release,
+            'steps': [
+                'Verify the running core binary matches the reviewed Bypass-at-Add release',
+                'Add the exact prior worker identity and resource map; require Bypass=true',
+                'Start only eru-agent and wait for available=true while Bypass remains true',
+                'Stop before smoke, node up, inventory update or cluster generation commit',
+            ],
+        },
         'mutation_hosts': [operator.core['alias'], alias],
         'executable': False,
         'blockers': [POST_REIMAGE_BLOCKER],
         'steps': [
             'Revalidate owner receipt, host observation, trust file and core membership',
             'Install only locked agent/CNI artifacts and six ERU worker files; preserve OS, SSH/Tailscale, Docker/containerd',
-            'Add the prior worker name/capacity at the verified replacement Tailscale endpoint',
-            'Fence the new registration before starting eru-agent; require availability while still fenced',
+            'Prepare core SSH trust and firewall access for the verified replacement Tailscale endpoint',
+            'Add the prior worker name/capacity only after access proof; fence before starting eru-agent',
+            'Require availability while still fenced',
             'Run target smoke and other-worker guards; resume scheduling only after all checks pass',
             'Commit the new worker address and cluster generation after verified resume',
         ],

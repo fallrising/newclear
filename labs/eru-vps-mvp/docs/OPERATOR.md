@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。可執行一般 plan／execute／status／reconcile 與 ERU-014 的獨立 worker-only install 階段。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 的 safe AddNode patch 已本機驗證但尚未部署；重灌後 registration／resume 執行器及重灌、元件重裝仍未在 VPS 驗收。
+入口：scripts/labctl.py。`scripts/worker_drain.py` 另提供 ERU-009 的離線、review-only planner；不連 SSH、不執行 deploy／remove／fence／reinstall，計畫永遠不可執行。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -91,7 +91,83 @@ python3 scripts/labctl.py plan-reimage-worker --plan SOURCE_PLAN_ID --sha256 SOU
 
 它只準備鎖定的 agent/CNI payload 與舊 node capacity／labels 的 registration 意圖；總 plan 仍不可執行。完成人工 OS 重灌與 strict host verification 後，可對計畫綁定的 ckc-disposable worker alias 執行 install-reimage-worker，並以 status 查看同一 run。安裝前會重核 owner receipt、host key、machine incarnation、core health／membership、其他 hosts、乾淨 install paths、保留服務與空 runtime；只安裝 locked worker artifacts／worker 設定與 core 公鑰，只啟動 eru-containerd-proxy.socket，agent 保持停止／disabled、node 保持未註冊。worker_install gate 只代表這個有限階段，總 plan executable 仍為 false。若中斷或回覆不確定，只對同一 run 執行 read-only reconcile，不能重播安裝。
 
-安裝階段目前只以 fake operator／remote responses 驗證，沒有連線或修改任何 VPS。pinned core safe AddNode patch 也尚未部署，resume helper 尚未接入 ERU-014；重新納管、HTTP smoke、恢復 executor 與正式 OS reimage acceptance 仍待本機開發收尾後另行安排。詳見 M3-REIMAGE-WORKER-INSTALL-2026-09-26.md 與 M3-CORE-SAFE-NODE-ADD-2026-09-26.md。
+worker install 後、registration 前，必須先對 core 的 SSH host-key 信任與 nft source allowlist 做獨立 plan／prepare；這是避免 core 無法 SSH 到新 worker 或 firewall 擋下 agent heartbeat 的前置條件：
+
+```bash
+# B -> ckc-disposable-01：唯讀規劃目標 worker 的 core known_hosts／firewall 更新
+python3 scripts/labctl.py plan-reimage-worker-access --plan BOOTSTRAP_PLAN_ID \
+  --sha256 BOOTSTRAP_PLAN_SHA256
+# B -> ckc-disposable-01：套用精確 target 變更，不重啟 core
+python3 scripts/labctl.py prepare-reimage-worker-access --plan ACCESS_PLAN_ID \
+  --sha256 ACCESS_PLAN_SHA256
+python3 scripts/labctl.py status --run ACCESS_PLAN_ID-access
+# B -> ckc-disposable-01：不確定時只讀核對，不重播
+python3 scripts/labctl.py reconcile --run ACCESS_PLAN_ID-access
+```
+
+access stage 以 owner receipt fingerprints 重核本機可信 host key；journal 不保存 key blob。它只改 target known_hosts entries 和 nft allowlist，變更前有 hash precondition、原子寫入及 live nft post-check，不重啟控制面。registration 要求最新成功 access journal，並在 AddNode 前再核對 access proof。失敗後須先 reconcile，再用 fresh plan 接手已知狀態。
+
+只有 safe AddNode patch 已由既有 core patch operator 部署，且執行中 core binary SHA 符合 validation manifest，才可執行 fenced registration：
+
+```bash
+# B -> ckc-disposable-01 core 與 plan 綁定的 ckc-disposable worker alias
+python3 scripts/labctl.py register-reimage-worker --plan BOOTSTRAP_PLAN_ID --sha256 BOOTSTRAP_PLAN_SHA256
+python3 scripts/labctl.py status --run BOOTSTRAP_PLAN_ID-register
+# B -> 同一 core／worker aliases；若結果不確定，只讀 reconcile，絕不重播 registration
+python3 scripts/labctl.py reconcile --run BOOTSTRAP_PLAN_ID-register
+```
+
+registration 只會在成功 core access preparation 後、於安全 core 上 AddNode、啟動 agent，並等待 `available=true`、`bypass=true`，停在 `registered-awaiting-smoke`。它不會執行 `node up` 或 generation commit。下一個獨立 smoke stage 需要兩台其他 worker 上、且已包含在來源 reimage plan snapshot 的 run-owned nginx canaries：
+
+```bash
+# 先於 provider-reimage source plan 建立並保留 worker-2／3 canaries；之後用同一 run ID
+python3 scripts/labctl.py plan-reimage-worker-smoke --plan BOOTSTRAP_PLAN_ID \
+  --sha256 BOOTSTRAP_PLAN_SHA256 --canary-run CANARY_RUN_ID
+# B -> 01 core、目標 worker alias 與兩台 peer aliases；只跑目標 worker smoke，peer HTTP guards 持續運行
+python3 scripts/labctl.py smoke-reimage-worker --plan SMOKE_PLAN_ID --sha256 SMOKE_PLAN_SHA256
+python3 scripts/labctl.py status --run SMOKE_PLAN_ID
+# B -> 同 aliases；失敗或 response 不確定時只讀 reconcile，不能重跑 smoke plan
+python3 scripts/labctl.py reconcile --run SMOKE_PLAN_ID
+```
+
+成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `ckc-disposable-01` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。generation stage 先用現有 aliases 唯讀重驗，再只更新 B 本機的 private deployment plan 與 cluster generation：
+
+```bash
+# B -> 唯讀重驗 core／worker aliases，產生本機 generation plan
+python3 scripts/labctl.py plan-reimage-worker-generation --plan RESUME_PLAN_ID \
+  --sha256 RESUME_PLAN_SHA256
+# B 本機：依新 plan/hash 寫 private inventory 與 generation，不做遠端寫入
+python3 scripts/labctl.py commit-reimage-worker-generation --plan GENERATION_PLAN_ID \
+  --sha256 GENERATION_PLAN_SHA256
+python3 scripts/labctl.py status --run GENERATION_PLAN_ID-generation
+# B 本機唯讀 reconcile；精確 partial 狀態經審閱後才重跑同一 plan
+python3 scripts/labctl.py reconcile --run GENERATION_PLAN_ID-generation
+```
+generation writer 只允許更新已 hash-bound 的 `private/deployment-plan.json` 與 `private/operations/cluster.json`；先更新 inventory，再把 generation 加一。唯讀 reconcile 會識別 before／after hash；精確 partial 只允許同一 plan 接續寫 generation，其餘 drift 停止人工檢查。registration／smoke／resume／generation executors 只以 fake fixtures 驗證，沒有連線或修改 VPS／真實 private data。詳見 [worker install](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)、[core access](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[fenced smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)、[generation commit](M3-REIMAGE-WORKER-GENERATION-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
+
+## 跨階段 worker recovery
+
+ERU-014 的鏈結檢視與恢復命令會在六個既有 worker reimage stages 中定位第一個未完成／不確定的階段。先在 B 本機查看 hash-bound snapshot；若缺 smoke plan，可一併提供既有 peer canary run ID：
+
+```bash
+# B 本機：只讀本機 plan/journal，不執行輸出的下一階段命令
+python3 scripts/labctl.py plan-reimage-worker-recovery \
+  --plan BOOTSTRAP_PLAN_ID --sha256 BOOTSTRAP_PLAN_SHA256
+# 若尚無 smoke plan，另加已存在的 peer canary：--canary-run CANARY_RUN_ID
+```
+
+`next_action.kind` 為 `plan`、`execute` 或 `input-required` 時，操作員依輸出與原 stage 文件審查後手動執行；coordinator 不會代跑。若為 `reconcile`，輸出會同時列出 stage run ID 和 `host_scope`。只執行該 stage 的既有唯讀 reconciler：
+
+```bash
+# B -> 顯示的 ckc-disposable aliases；worker-generation 只讀 B 本機 private files
+python3 scripts/labctl.py recover-reimage-worker-chain \
+  --plan RECOVERY_PLAN_ID --sha256 RECOVERY_PLAN_SHA256
+python3 scripts/labctl.py status --run RECOVERY_PLAN_ID-recovery
+# B 本機：只檢視 wrapper journal，不再連線或呼叫 stage reconciler
+python3 scripts/labctl.py reconcile --run RECOVERY_PLAN_ID-recovery
+```
+
+recover 命令不重播遠端 mutation，也不自動跨到下一階段。它會拒絕規劃後已變動的 chain snapshot。reconcile 完成後重新建立並檢查 recovery plan。詳見 [跨階段 worker recovery](M3-REIMAGE-WORKER-RECOVERY-2026-09-26.md)。
 
 ## worker-4 重建計畫
 

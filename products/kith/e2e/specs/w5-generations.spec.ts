@@ -43,7 +43,9 @@ test(
       for (const body of ["@" + handle + " ok", "@" + handle + " [[fake:status=529]]", "@" + handle + " [[fake:chunks=4;chunk_ms=200;cut_after=2]]"]) {
         await sendViaComposer(ben.page, body);
         await expect(ben.page.getByTestId("message-row").filter({ hasText: body })).toBeVisible();
-        await expect(ben.page.locator(`[data-testid="reply-placeholder"][data-member="${aid}"]`)).toHaveCount(0, { timeout: 30_000 });
+        const placeholder = ben.page.locator(`[data-testid="reply-placeholder"][data-member="${aid}"]`);
+        await expect(placeholder).toBeVisible({ timeout: 30_000 });
+        await expect(placeholder).toHaveCount(0, { timeout: 30_000 });
       }
 
       await page.goto("/console/agents/" + aid + "?tab=generations");

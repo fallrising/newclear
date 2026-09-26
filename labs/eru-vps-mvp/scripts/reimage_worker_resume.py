@@ -362,6 +362,7 @@ def reconcile_reimage_worker_resume(operator, run_id, journal=None):
     result = {
         'at': _now(),
         'policy': 'Read-only resume reconciliation; never send node up, smoke, cleanup or inventory changes.',
+        'remote_mutation_performed': False,
         'node_up_replayed': False,
     }
     try:

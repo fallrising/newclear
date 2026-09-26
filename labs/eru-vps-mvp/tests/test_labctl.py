@@ -24,6 +24,7 @@ import reimage_worker_registration
 import reimage_worker_smoke
 import reimage_worker_resume
 import reimage_worker_generation
+import reimage_worker_recovery
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -1166,6 +1167,113 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse(any('workload' in argv and any(word in argv for word in ('deploy', 'remove'))
                              for _, argv in self.op.remote_commands))
 
+    def test_worker_recovery_plan_selects_first_unstarted_stage_without_remote_commands(self):
+        bootstrap, _observation = self.ready_worker_bootstrap()
+        before = len(self.op.remote_commands)
+        envelope = self.op.plan_reimage_worker_recovery(
+            bootstrap['plan']['id'], bootstrap['sha256'])
+        plan = envelope['plan']
+        self.assertEqual(plan['current_stage'], 'worker-install')
+        self.assertEqual(plan['next_action']['kind'], 'execute')
+        self.assertIn('install-reimage-worker', plan['next_action']['command'])
+        self.assertEqual(plan['next_action']['host_scope'], ['ckc-disposable-01', 'ckc-disposable-04'])
+        self.assertFalse(plan['executable'])
+        self.assertEqual(len(self.op.remote_commands), before)
+
+    def test_worker_recovery_reconciles_only_the_bound_stage_and_detects_stale_snapshot(self):
+        bootstrap, _observation = self.ready_worker_bootstrap()
+        bootstrap_plan = bootstrap['plan']
+        run_path = self.op.root / 'runs' / (bootstrap_plan['id'] + '.json')
+        atomic_json(run_path, {
+            'id': bootstrap_plan['id'], 'operation': 'provider-reimage-worker-install',
+            'plan_hash': bootstrap['sha256'], 'target': bootstrap_plan['target']['node'],
+            'target_alias': bootstrap_plan['target']['alias'], 'status': 'failed',
+            'stage': 'installing-worker-artifacts', 'remote_mutation_performed': True,
+            'events': [],
+        })
+        envelope = self.op.plan_reimage_worker_recovery(
+            bootstrap_plan['id'], bootstrap['sha256'])
+        plan = envelope['plan']
+        self.assertEqual(plan['current_stage'], 'worker-install')
+        self.assertEqual(plan['next_action']['kind'], 'reconcile')
+        self.assertEqual(plan['next_action']['run_id'], bootstrap_plan['id'])
+        self.assertEqual(plan['next_action']['host_scope'],
+                         ['ckc-disposable-01', bootstrap_plan['target']['alias']])
+
+        tampered = labctl.read(run_path)
+        tampered['stage'] = 'different-stage'
+        atomic_json(run_path, tampered)
+        with patch.object(reimage_worker_install, 'reconcile_worker_install') as reconcile:
+            with self.assertRaisesRegex(ValueError, 'chain changed'):
+                self.op.recover_reimage_worker_chain(plan['id'], envelope['sha256'])
+        reconcile.assert_not_called()
+
+        envelope = self.op.plan_reimage_worker_recovery(
+            bootstrap_plan['id'], bootstrap['sha256'])
+        plan = envelope['plan']
+        before = len(self.op.remote_commands)
+        expected = {
+            'id': bootstrap_plan['id'], 'status': 'interrupted', 'stage': 'install-worker',
+            # This flag describes the earlier install attempt, not the reconciliation.
+            'remote_mutation_performed': True,
+            'reconciliation': {'remote_mutation_performed': False, 'node_up_replayed': False},
+        }
+        with patch.object(reimage_worker_install, 'reconcile_worker_install',
+                          return_value=expected) as reconcile:
+            result = self.op.recover_reimage_worker_chain(plan['id'], envelope['sha256'])
+        reconcile.assert_called_once()
+        self.assertEqual(reconcile.call_args.args[1], bootstrap_plan['id'])
+        self.assertEqual(result['status'], 'reconciled')
+        self.assertFalse(result['remote_mutation_performed'])
+        self.assertEqual(result['stage_reconciliation']['run_id'], bootstrap_plan['id'])
+        self.assertEqual(len(self.op.remote_commands), before)
+
+    def test_worker_recovery_resume_reconciler_must_attest_no_node_up_replay(self):
+        _observation, smoke_envelope, resume_envelope = self.completed_worker_resume()
+        resume_plan = resume_envelope['plan']
+        resume_path = self.op.root / 'runs' / (resume_plan['id'] + '.json')
+        resume_journal = labctl.read(resume_path)
+        resume_journal['status'] = 'failed'
+        atomic_json(resume_path, resume_journal)
+        bootstrap_ref = smoke_envelope['plan']['bootstrap_plan']
+        plan_envelope = self.op.plan_reimage_worker_recovery(
+            bootstrap_ref['id'], bootstrap_ref['sha256'])
+        recovery_plan = plan_envelope['plan']
+        self.assertEqual(recovery_plan['current_stage'], 'worker-resume')
+        self.assertEqual(recovery_plan['next_action']['kind'], 'reconcile')
+        self.assertEqual(recovery_plan['next_action']['host_scope'],
+                         ['ckc-disposable-01', 'ckc-disposable-04',
+                          'ckc-disposable-02', 'ckc-disposable-03'])
+        historical_result = {
+            'id': resume_plan['id'], 'status': 'failed',
+            # Existing node up belongs to the old resume attempt; reconcile never repeats it.
+            'remote_mutation_performed': True,
+            'reconciliation': {'remote_mutation_performed': False, 'node_up_replayed': False},
+        }
+        with patch.object(reimage_worker_resume, 'reconcile_reimage_worker_resume',
+                          return_value=historical_result) as reconcile:
+            result = self.op.recover_reimage_worker_chain(
+                recovery_plan['id'], plan_envelope['sha256'])
+        reconcile.assert_called_once()
+        self.assertEqual(reconcile.call_args.args[1], resume_plan['id'])
+        self.assertFalse(result['remote_mutation_performed'])
+        self.assertFalse(result['stage_reconciliation']['node_up_replayed'])
+
+    def test_worker_recovery_points_to_generation_plan_with_full_read_scope(self):
+        _observation, smoke_envelope, _resume_envelope = self.completed_worker_resume()
+        bootstrap_ref = smoke_envelope['plan']['bootstrap_plan']
+        before = len(self.op.remote_commands)
+        envelope = self.op.plan_reimage_worker_recovery(
+            bootstrap_ref['id'], bootstrap_ref['sha256'])
+        action = envelope['plan']['next_action']
+        self.assertEqual(action['stage'], 'worker-generation')
+        self.assertEqual(action['kind'], 'plan')
+        self.assertIn('plan-reimage-worker-generation', action['command'])
+        self.assertEqual(action['host_scope'], [
+            'ckc-disposable-01', 'ckc-disposable-04',
+            'ckc-disposable-02', 'ckc-disposable-03'])
+        self.assertEqual(len(self.op.remote_commands), before)
+
     def smoked_worker_resume_plan(self, replacement_ip='100.64.0.44'):
         _bootstrap, observation, smoke_envelope = self.registered_worker_smoke_plan(
             replacement_ip=replacement_ip)
@@ -1193,7 +1301,7 @@ class OperatorTests(unittest.TestCase):
         return observation, smoke_envelope, resume_envelope
 
     def test_worker_generation_commit_updates_only_target_inventory_and_increments_once(self):
-        observation, _smoke_envelope, resume_envelope = self.completed_worker_resume()
+        observation, smoke_envelope, resume_envelope = self.completed_worker_resume()
         resume_plan = resume_envelope['plan']
         deployment_before = (self.project / 'private/deployment-plan.json').read_bytes()
         remote_before = len(self.op.remote_commands)
@@ -1232,6 +1340,14 @@ class OperatorTests(unittest.TestCase):
         reconciled = self.op.reconcile(run_id)
         self.assertEqual(reconciled['reconciliation']['state'], 'complete')
         self.assertEqual(len(self.op.remote_commands), before_reconcile)
+        before_recovery_plan = len(self.op.remote_commands)
+        recovery = self.op.plan_reimage_worker_recovery(
+            smoke_envelope['plan']['bootstrap_plan']['id'],
+            smoke_envelope['plan']['bootstrap_plan']['sha256'])
+        self.assertEqual(recovery['plan']['current_stage'], 'complete')
+        self.assertEqual(recovery['plan']['next_action']['kind'], 'complete')
+        self.assertTrue(recovery['plan']['complete'])
+        self.assertEqual(len(self.op.remote_commands), before_recovery_plan)
         with self.assertRaisesRegex(ValueError, 'already has a journal'):
             self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
         self.assertGreater(len(self.op.remote_commands), remote_before)

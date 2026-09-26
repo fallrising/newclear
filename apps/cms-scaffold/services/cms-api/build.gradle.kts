@@ -26,7 +26,8 @@ tasks.named<Jar>("jar") {
 val integrationTest by sourceSets.creating {
     java.srcDir("src/integrationTest/java")
     resources.srcDir("src/integrationTest/resources")
-    compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
+    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output +
+        configurations.testRuntimeClasspath.get()
     runtimeClasspath += output + compileClasspath
 }
 
@@ -34,7 +35,7 @@ configurations[integrationTest.implementationConfigurationName].extendsFrom(conf
 configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 tasks.register<Test>("integrationTest") {
-    description = "Runs PostgreSQL-backed Identity integration tests."
+    description = "Runs PostgreSQL-backed store contract and integration tests (Testcontainers)."
     group = "verification"
     testClassesDirs = integrationTest.output.classesDirs
     classpath = integrationTest.runtimeClasspath
@@ -55,9 +56,14 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("com.atlassian.oai:openapi-request-validator-core:3.0.0")
 
     add(integrationTest.implementationConfigurationName, "org.springframework.boot:spring-boot-starter-test")
     add(integrationTest.implementationConfigurationName, "org.testcontainers:junit-jupiter")
     add(integrationTest.implementationConfigurationName, "org.testcontainers:postgresql")
     add(integrationTest.runtimeOnlyConfigurationName, "org.postgresql:postgresql")
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }

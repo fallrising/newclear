@@ -14,6 +14,7 @@ import com.fallrising.cms.identity.domain.SessionRecord;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -50,7 +51,10 @@ public class InMemoryIdentityStore implements IdentityStore {
 
     @Override
     public List<Principal> listPrincipals() {
-        return principals.values().stream().filter(p -> !p.deleted()).toList();
+        return principals.values().stream()
+                .filter(p -> !p.deleted())
+                .sorted(Comparator.comparing(Principal::username))
+                .toList();
     }
 
     @Override
@@ -83,7 +87,7 @@ public class InMemoryIdentityStore implements IdentityStore {
 
     @Override
     public List<Role> listRoles() {
-        return List.copyOf(roles.values());
+        return roles.values().stream().sorted(Comparator.comparing(Role::code)).toList();
     }
 
     @Override
@@ -108,7 +112,9 @@ public class InMemoryIdentityStore implements IdentityStore {
 
     @Override
     public List<Permission> permissionsOfRole(UUID roleId) {
-        return List.copyOf(permissions.getOrDefault(roleId, List.of()));
+        return permissions.getOrDefault(roleId, List.of()).stream()
+                .sorted(Comparator.comparing(Permission::action))
+                .toList();
     }
 
     @Override
@@ -181,8 +187,9 @@ public class InMemoryIdentityStore implements IdentityStore {
     @Override
     public List<AuditEvent> listAudits(String action, UUID targetId) {
         return audits.stream()
-                .filter(event -> action == null || action.equals(event.action()))
+                .filter(event -> action == null || action.isBlank() || action.equals(event.action()))
                 .filter(event -> targetId == null || targetId.equals(event.targetId()))
+                .sorted(Comparator.comparing(AuditEvent::at).reversed())
                 .toList();
     }
 

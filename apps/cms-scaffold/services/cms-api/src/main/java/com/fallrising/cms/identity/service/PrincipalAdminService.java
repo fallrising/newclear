@@ -80,7 +80,7 @@ public class PrincipalAdminService {
         authService.requireManagePrincipals(request);
         Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
         Instant now = Instant.now();
-        PrincipalStatus nextStatus = status == null ? current.status() : PrincipalStatus.fromWire(status);
+        PrincipalStatus nextStatus = status == null ? current.status() : parseStatus(status);
         Principal updated = current.withProfile(displayName == null ? current.displayName() : displayName,
                 email == null ? current.email() : email, now);
         if (nextStatus != current.status()) updated = updated.withStatus(nextStatus, now);
@@ -204,5 +204,13 @@ public class PrincipalAdminService {
     private void audit(IdentityRequest request, String action, UUID targetId) {
         store.insertAudit(new AuditEvent(UUID.randomUUID(), Instant.now(), request.principal() == null ? null : request.principal().id(),
                 "AUTH", action, "principal", targetId, request.surface().wire(), "ok", request.ip(), null));
+    }
+
+    private static PrincipalStatus parseStatus(String status) {
+        try {
+            return PrincipalStatus.fromWire(status);
+        } catch (IllegalArgumentException e) {
+            throw IdentityException.validation("unknown status");
+        }
     }
 }

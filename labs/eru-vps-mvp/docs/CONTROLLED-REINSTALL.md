@@ -19,7 +19,7 @@
 
 ## 指定 worker 的具體範圍
 
-每次要求所選 worker 沒有 workload、runtime container／task 或殘留配額；不自動搬移業務應用。01 僅負責禁止／恢復該節點排程與驗證；其他兩台 worker 只作 HTTP 守護，不做安裝或清理。02／03 的執行器只完成本機驗證，實機結果待觀測結束後取得。
+一般 component-reinstall executor 仍要求所選 worker 沒有 workload、runtime container／task 或殘留配額，不會自行搬移業務應用。ERU-009 現有離線 planner 僅涵蓋完整 owned ERU-012 stateless apps，且不可執行；其他 workload 仍需人工分類。01 僅負責禁止／恢復該節點排程與驗證；其他兩台 worker 只作 HTTP 守護，不做安裝或清理。02／03 的執行器只完成本機驗證，實機結果待觀測結束後取得。
 
 計画中的六個重裝檔案：
 

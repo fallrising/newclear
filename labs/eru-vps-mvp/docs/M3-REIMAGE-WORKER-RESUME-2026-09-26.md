@@ -31,4 +31,4 @@ fake-only 測試覆蓋完整 smoke 後經 core SSH alias 單次 resume、generat
 
 ## 下一步
 
-接上 resume 後 worker IP／host-key 對帳與 private inventory／cluster generation commit，再完成 install、registration、smoke、resume、commit 的跨階段 recovery executor。依 owner 指示，這些本機開發完成後才安排正式 VPS E2E；OS reimage 與日常元件清理重裝分開驗收。
+resume 後 private inventory／cluster generation commit 已完成 fake-only executor 與唯讀 reconcile；操作方式與 partial-write 邊界見 [generation commit stage](M3-REIMAGE-WORKER-GENERATION-2026-09-26.md)。依 owner 指示，仍先完成 install、registration、smoke、resume、commit 之間的跨階段 recovery，再安排正式 VPS E2E；OS reimage 與日常元件清理重裝分開驗收。

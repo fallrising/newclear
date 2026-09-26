@@ -23,6 +23,7 @@ import reimage_worker_access
 import reimage_worker_registration
 import reimage_worker_smoke
 import reimage_worker_resume
+import reimage_worker_generation
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 
@@ -238,6 +239,7 @@ class OperatorTests(unittest.TestCase):
                              for x in self.inventory[1:]], 'workloads': [self.own, self.foreign]}
         self.snapshot['hosts'][labctl.ALIASES[3]]['containers'] = self.own['id'] + '\n' + self.foreign['id']
         self.op = FakeOperator(self.project, self.snapshot)
+        self.render_reimage_deployment = False
 
     def plan_cleanup(self):
         return self.op.plan('cleanup', smoke_run=self.run)
@@ -586,7 +588,6 @@ class OperatorTests(unittest.TestCase):
     def configure_reimage_bootstrap_inputs(self):
         self.inventory = [dict(row, ip=f'100.64.0.{i}')
                           for i, row in enumerate(self.inventory, 1)]
-        atomic_json(self.project / 'private/deployment-plan.json', self.inventory)
         for row in self.snapshot['nodes']:
             i = int(row['name'].removeprefix('worker-'))
             row['endpoint'] = 'containerd://ckc@100.64.0.' + str(i) + ':22'
@@ -601,6 +602,30 @@ class OperatorTests(unittest.TestCase):
             ],
         }
         atomic_json(self.project / 'artifacts.amd64.lock.json', lock)
+        if self.render_reimage_deployment:
+            from worker_payload import build_worker_payload
+            core_ip = self.inventory[0]['ip']
+            old_worker_ips = [row['ip'] for row in self.inventory[1:]]
+            old_blob = bytes.fromhex('0000000b7373682d6564323535313900000020' + '02' * 32)
+            old_key = 'ssh-ed25519 ' + base64.b64encode(old_blob).decode()
+            known_hosts = ''.join(ip + ' ' + old_key + chr(10) for ip in old_worker_ips)
+            rows = []
+            for index, host in enumerate(self.inventory, 1):
+                indexed = {**host, 'index': index}
+                if index == 1:
+                    row = {**indexed, 'core_ip': core_ip, 'role': 'core', 'artifacts': [],
+                           'files': [
+                               {'path': '/etc/eru/known_hosts', 'content': known_hosts, 'mode': 0o600},
+                               {'path': '/etc/eru/mvp-firewall.nft',
+                                'content': reimage_worker_access._firewall_text(core_ip, old_worker_ips),
+                                'mode': 0o600},
+                           ], 'start_units': [], 'verify_units': []}
+                else:
+                    row = build_worker_payload(indexed, core_ip, lock)
+                rows.append(row)
+            atomic_json(self.project / 'private/deployment-plan.json', rows)
+        else:
+            atomic_json(self.project / 'private/deployment-plan.json', self.inventory)
         patches = self.project / 'patches'
         patches.mkdir(exist_ok=True)
         for filename in ['core-v0.1.5-safe-node-add.patch',
@@ -762,8 +787,9 @@ class OperatorTests(unittest.TestCase):
             with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
                 self.op.install_reimage_worker(plan['id'], envelope['sha256'])
 
-    def install_ready_worker_for_registration(self, peer_canaries=False):
-        envelope, observation = self.ready_worker_bootstrap(peer_canaries=peer_canaries)
+    def install_ready_worker_for_registration(self, peer_canaries=False, replacement_ip='100.64.0.44'):
+        envelope, observation = self.ready_worker_bootstrap(
+            peer_canaries=peer_canaries, replacement_ip=replacement_ip)
         plan = envelope['plan']
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             installed = self.op.install_reimage_worker(plan['id'], envelope['sha256'])
@@ -1021,8 +1047,9 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(self.op.agent_start_calls, before_agent_calls)
         self.assertFalse(any('node' in argv and 'up' in argv for _, argv in self.op.remote_commands))
 
-    def registered_worker_smoke_plan(self):
-        envelope, observation = self.install_ready_worker_for_registration(peer_canaries=True)
+    def registered_worker_smoke_plan(self, replacement_ip='100.64.0.44'):
+        envelope, observation = self.install_ready_worker_for_registration(
+            peer_canaries=True, replacement_ip=replacement_ip)
         plan = envelope['plan']
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             registered = self.op.register_reimage_worker(plan['id'], envelope['sha256'])
@@ -1139,8 +1166,9 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse(any('workload' in argv and any(word in argv for word in ('deploy', 'remove'))
                              for _, argv in self.op.remote_commands))
 
-    def smoked_worker_resume_plan(self):
-        _bootstrap, observation, smoke_envelope = self.registered_worker_smoke_plan()
+    def smoked_worker_resume_plan(self, replacement_ip='100.64.0.44'):
+        _bootstrap, observation, smoke_envelope = self.registered_worker_smoke_plan(
+            replacement_ip=replacement_ip)
         smoke_plan = smoke_envelope['plan']
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             result = reimage_worker_smoke.run_reimage_worker_smoke(
@@ -1151,6 +1179,150 @@ class OperatorTests(unittest.TestCase):
             resume_envelope = self.op.plan_reimage_worker_resume(
                 smoke_plan['id'], smoke_envelope['sha256'])
         return observation, smoke_envelope, resume_envelope
+
+    def completed_worker_resume(self, replacement_ip='100.64.0.44'):
+        self.render_reimage_deployment = True
+        observation, smoke_envelope, resume_envelope = self.smoked_worker_resume_plan(
+            replacement_ip=replacement_ip)
+        plan = resume_envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = reimage_worker_resume.resume_reimage_worker(
+                self.op, plan['id'], resume_envelope['sha256'], guard_factory=FakeHTTPGuards,
+                sleep=lambda _: None, attempts=3, interval=0)
+        self.assertEqual(result['status'], 'resumed-awaiting-generation-commit')
+        return observation, smoke_envelope, resume_envelope
+
+    def test_worker_generation_commit_updates_only_target_inventory_and_increments_once(self):
+        observation, _smoke_envelope, resume_envelope = self.completed_worker_resume()
+        resume_plan = resume_envelope['plan']
+        deployment_before = (self.project / 'private/deployment-plan.json').read_bytes()
+        remote_before = len(self.op.remote_commands)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            generation = self.op.plan_reimage_worker_generation(
+                resume_plan['id'], resume_envelope['sha256'])
+        plan = generation['plan']
+        self.assertTrue(plan['executable'])
+        self.assertEqual(plan['cluster_before']['generation'], 1)
+        self.assertEqual(plan['cluster_after']['generation'], 2)
+        self.assertEqual((self.project / 'private/deployment-plan.json').read_bytes(), deployment_before)
+        serialized_plan = json.dumps(plan)
+        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'disposable-04').read_text().split()[1:3])
+        self.assertNotIn(trusted_key, serialized_plan)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        self.assertEqual(result['status'], 'complete')
+        self.assertEqual(result['committed_generation'], 2)
+        updated = labctl.read(self.project / 'private/deployment-plan.json')
+        self.assertEqual(updated[3]['ip'], '100.64.0.44')
+        self.assertEqual(updated[2]['ip'], '100.64.0.3')
+        core_files = {row['path']: row['content'] for row in updated[0]['files']}
+        target_known = [line for line in core_files['/etc/eru/known_hosts'].splitlines()
+                        if line.startswith('100.64.0.44 ')]
+        self.assertEqual(len(target_known), 1)
+        self.assertEqual(' '.join(target_known[0].split()[1:3]), trusted_key)
+        self.assertEqual(core_files['/etc/eru/mvp-firewall.nft'],
+                         reimage_worker_access._firewall_text(
+                             '100.64.0.1', ['100.64.0.2', '100.64.0.3', '100.64.0.44']))
+        self.assertEqual(self.op.cluster()['generation'], 2)
+        self.assertEqual(self.op.resume_calls, 1)
+        self.assertEqual(len([argv for _host, argv in self.op.remote_commands
+                              if argv[-3:-1] == ['node', 'up']]), 1)
+        run_id = plan['id'] + '-generation'
+        before_reconcile = len(self.op.remote_commands)
+        reconciled = self.op.reconcile(run_id)
+        self.assertEqual(reconciled['reconciliation']['state'], 'complete')
+        self.assertEqual(len(self.op.remote_commands), before_reconcile)
+        with self.assertRaisesRegex(ValueError, 'already has a journal'):
+            self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        self.assertGreater(len(self.op.remote_commands), remote_before)
+
+    def test_worker_generation_commit_handles_replacement_that_keeps_its_tailnet_ip(self):
+        observation, _smoke_envelope, resume_envelope = self.completed_worker_resume('100.64.0.4')
+        resume_plan = resume_envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            generation = self.op.plan_reimage_worker_generation(
+                resume_plan['id'], resume_envelope['sha256'])
+            result = self.op.commit_reimage_worker_generation(
+                generation['plan']['id'], generation['sha256'])
+        self.assertEqual(result['status'], 'complete')
+        self.assertEqual(self.op.cluster()['generation'], 2)
+        updated = labctl.read(self.project / 'private/deployment-plan.json')
+        self.assertEqual(updated[3]['ip'], '100.64.0.4')
+        known = [line for line in updated[0]['files'][0]['content'].splitlines()
+                 if line.startswith('100.64.0.4 ')]
+        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'disposable-04').read_text().split()[1:3])
+        self.assertEqual([' '.join(line.split()[1:3]) for line in known], [trusted_key])
+
+    def test_worker_generation_commit_reconciles_exact_local_partial_without_remote_replay(self):
+        observation, _smoke_envelope, resume_envelope = self.completed_worker_resume()
+        resume_plan = resume_envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            generation = self.op.plan_reimage_worker_generation(
+                resume_plan['id'], resume_envelope['sha256'])
+        plan = generation['plan']
+        real_atomic_json = reimage_worker_generation.atomic_json
+        cluster_path = self.op.root / 'cluster.json'
+        failed = []
+
+        def fail_cluster_once(path, value):
+            if Path(path) == cluster_path and not failed:
+                failed.append(True)
+                raise OSError('simulated local interruption between atomic files')
+            return real_atomic_json(path, value)
+
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with patch.object(reimage_worker_generation, 'atomic_json', side_effect=fail_cluster_once):
+                with self.assertRaisesRegex(OSError, 'simulated local interruption'):
+                    self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        run_id = plan['id'] + '-generation'
+        journal_path = self.op.root / 'runs' / (run_id + '.json')
+        self.assertEqual(labctl.read(journal_path)['status'], 'generation-commit-partial')
+        target_row = labctl.read(self.project / 'private/deployment-plan.json')[3]
+        self.assertEqual(target_row['ip'], '100.64.0.44')
+        self.assertEqual(self.op.cluster()['generation'], 1)
+        remote_before = len(self.op.remote_commands)
+        reconciled = self.op.reconcile(run_id)
+        self.assertEqual(reconciled['reconciliation']['state'], 'partial-inventory-committed')
+        self.assertEqual(len(self.op.remote_commands), remote_before)
+        result = self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        self.assertEqual(result['status'], 'complete')
+        self.assertEqual(self.op.cluster()['generation'], 2)
+        self.assertEqual(self.op.resume_calls, 1)
+        self.assertEqual(len(self.op.remote_commands), remote_before)
+
+    def test_worker_generation_commit_retries_prewrite_failure_only_after_reconcile(self):
+        observation, _smoke_envelope, resume_envelope = self.completed_worker_resume()
+        resume_plan = resume_envelope['plan']
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            generation = self.op.plan_reimage_worker_generation(
+                resume_plan['id'], resume_envelope['sha256'])
+        plan = generation['plan']
+        deployment_path = self.project / 'private/deployment-plan.json'
+        real_atomic_json = reimage_worker_generation.atomic_json
+        failed = []
+
+        def fail_before_inventory_once(path, value):
+            if Path(path) == deployment_path and not failed:
+                failed.append(True)
+                raise OSError('simulated failure before first private write')
+            return real_atomic_json(path, value)
+
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            with patch.object(reimage_worker_generation, 'atomic_json', side_effect=fail_before_inventory_once):
+                with self.assertRaisesRegex(OSError, 'before first private write'):
+                    self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        run_id = plan['id'] + '-generation'
+        self.assertEqual(labctl.read(self.op.root / 'runs' / (run_id + '.json'))['status'], 'failed')
+        remote_before_reconcile = len(self.op.remote_commands)
+        reconciled = self.op.reconcile(run_id)
+        self.assertEqual(reconciled['reconciliation']['state'], 'not-started')
+        self.assertEqual(len(self.op.remote_commands), remote_before_reconcile)
+        with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
+            result = self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
+        self.assertEqual(result['status'], 'complete')
+        self.assertTrue(result['recovered_after_reconcile'])
+        self.assertEqual(self.op.cluster()['generation'], 2)
+        self.assertEqual(self.op.resume_calls, 1)
 
     def test_worker_resume_uses_core_alias_once_and_keeps_generation_unchanged(self):
         observation, _smoke_envelope, envelope = self.smoked_worker_resume_plan()

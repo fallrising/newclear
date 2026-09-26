@@ -999,7 +999,7 @@ class WorkerDrainExecutor:
                     reconciled = child_journal
                     target_states = {workload_id: 'absent' for workload_id in target_ids}
                 else:
-                    reconciled = AppRevisionCleanup(self.app_root, self.api).reconcile(
+                    reconciled = AppRevisionCleanup(self.app_root, self.api)._reconcile_locked(
                         child['id'])
                     evidence = reconciled.get('reconciliation')
                     if (not isinstance(evidence, dict)

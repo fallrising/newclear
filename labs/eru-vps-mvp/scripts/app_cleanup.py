@@ -398,6 +398,10 @@ class AppRevisionCleanup:
 
     def reconcile(self, plan_id):
         """Read-only cleanup reconciliation; never removes or probes workloads."""
+        with ClusterLock(self.root.parents[2]):
+            return self._reconcile_locked(plan_id)
+
+    def _reconcile_locked(self, plan_id):
         path = self.journal_path(plan_id)
         if not path.exists() or path.is_symlink():
             raise FileNotFoundError('app cleanup journal missing')

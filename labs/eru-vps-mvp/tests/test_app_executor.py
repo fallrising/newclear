@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from app_desired import OWNER, canonical_bytes, sha256, snapshot_binding, spec_identity
 from app_executor import AppExecutor, UncertainExecution, execution_plan
+from labops import ClusterLock
 
 
 def spec():
@@ -348,6 +349,25 @@ class AppExecutorTests(unittest.TestCase):
         self.assertFalse(result['reconciliation']['exact_revision_observed'])
         self.assertEqual(result['status'], 'needs_review')
         self.assertEqual(api.deploy_calls, before_deploy)
+
+    def test_reconcile_obeys_shared_lock_before_reading_or_writing_journal(self):
+        api = FakeEruAPI(snapshot(), interrupt_probe=True)
+        plan = self.plan(api)
+        executor = AppExecutor(self.root, api)
+        with self.assertRaises(KeyboardInterrupt):
+            executor.execute(plan, plan['plan_sha256'])
+        path = executor.run_path(self.run_id)
+        journal_before = path.read_text()
+        list_calls_before = api.list_calls
+
+        with ClusterLock(self.root.parents[2]):
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(executor.reconcile, self.run_id)
+                with self.assertRaisesRegex(RuntimeError, 'already running'):
+                    future.result()
+
+        self.assertEqual(path.read_text(), journal_before)
+        self.assertEqual(api.list_calls, list_calls_before)
 
 
 if __name__ == '__main__':

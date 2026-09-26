@@ -169,6 +169,26 @@ export class Room extends DurableObject<Env> {
     return { ok: true };
   }
 
+  /**
+   * B-10: ephemeral full-text draft from HostedGeneration. No D1 write, no seq, not in /mcp/events, no Inbox
+   * notify (V2-INV-03). Internal RPC only; the caller already checked membership when the generation began.
+   */
+  async postDraft(roomId: string, memberId: string, generationId: string, text: string): Promise<{ ok: true } | PersistFail> {
+    await this.ctx.storage.put("room_id", roomId);
+    if (utf8Bytes(text) > BODY_MAX_BYTES) {
+      return { ok: false, status: 400, code: "payload_too_large", message: "draft exceeds 8192 UTF-8 bytes" };
+    }
+    const frame = JSON.stringify({ v: 1, type: "draft", member_id: memberId, generation_id: generationId, text, done: false });
+    for (const ws of this.sockets()) {
+      try {
+        ws.send(frame);
+      } catch {
+        /* drop closed */
+      }
+    }
+    return { ok: true };
+  }
+
   async activity(roomId: string): Promise<RoomActivity> {
     await this.ctx.storage.put("room_id", roomId);
     const lastHumanAt = (await this.ctx.storage.get<string>("last_human_at")) ?? null;

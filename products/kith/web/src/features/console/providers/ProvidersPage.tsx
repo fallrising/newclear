@@ -5,7 +5,7 @@ import type { Provider } from "../../../api/types";
 import { useT } from "../../../copy";
 import { Badge } from "../../../ui/Badge";
 import { Button } from "../../../ui/Button";
-import { errorClassKey } from "../agents/runtimeText";
+import { errorClassKey, formatLabel } from "../agents/runtimeText";
 
 function hostOf(baseUrl: string): string {
   try {
@@ -55,10 +55,7 @@ export function ProvidersPage(): ReactElement {
         <ul data-testid="providers-list" className="flex flex-col gap-2">
           {data.providers.map((provider) => {
             const status = statusOf(provider);
-            const format =
-              provider.api_format === "openai_chat" || provider.api_format === "anthropic_messages"
-                ? t(`console.providers.format.${provider.api_format}`)
-                : provider.api_format;
+            const format = formatLabel(t, provider.api_format);
             const key =
               provider.secret_source === "stored"
                 ? t("console.providers.keyLast4", { last4: provider.secret_last4 ?? "" })

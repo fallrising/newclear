@@ -2,7 +2,8 @@ import { useEffect, useState, type ReactElement } from "react";
 import { Link } from "react-router";
 import { useProviders, useTestProvider } from "../../../api/providers";
 import type { AdapterKind, AgentDetail, PutRuntimeBody, QuotaClass, RuntimeKind } from "../../../api/types";
-import { useT, type CopyKey } from "../../../copy";
+import { useT } from "../../../copy";
+import { formatLabel } from "./runtimeText";
 import { Button } from "../../../ui/Button";
 import { SelectField } from "../../../ui/SelectField";
 import { TextArea } from "../../../ui/TextArea";
@@ -18,11 +19,6 @@ type RuntimeFormProps = {
 
 const ADAPTERS: AdapterKind[] = ["codex", "claude_code", "gemini_cli", "command"];
 const KINDS: RuntimeKind[] = ["hosted", "runner", "external"];
-
-function formatLabel(t: (key: CopyKey) => string, format: string): string {
-  if (format === "openai_chat" || format === "anthropic_messages") return t(`console.providers.format.${format}`);
-  return format;
-}
 
 export function RuntimeForm(props: RuntimeFormProps): ReactElement {
   const t = useT();
@@ -42,6 +38,7 @@ export function RuntimeForm(props: RuntimeFormProps): ReactElement {
     props.mode === "edit" && current?.temperature != null ? String(current.temperature) : "",
   );
   const [addendum, setAddendum] = useState(props.mode === "edit" ? (current?.system_prompt_addendum ?? "") : "");
+  const [stream, setStream] = useState(props.mode === "edit" ? current?.stream === true : false);
   const [listed, setListed] = useState<{ ok: true; models: string[] | null } | { ok: false } | null>(null);
   const [modelError, setModelError] = useState(false);
   const [maxError, setMaxError] = useState(false);
@@ -121,6 +118,7 @@ export function RuntimeForm(props: RuntimeFormProps): ReactElement {
         system_prompt_addendum: addendum,
         max_output_tokens: maxValue,
         ...(tempValue === null ? {} : { temperature: tempValue }),
+        stream,
       });
       return;
     }
@@ -250,6 +248,11 @@ export function RuntimeForm(props: RuntimeFormProps): ReactElement {
               value={addendum}
               onChange={setAddendum}
             />
+            <label className="flex items-center gap-2 text-sm text-ink">
+              <input type="checkbox" data-testid="runtime-stream" checked={stream} onChange={(event) => setStream(event.target.checked)} />
+              {t("console.agents.stream")}
+            </label>
+            <p className="text-xs text-ink-3">{t("console.agents.streamHelp")}</p>
           </div>
         </details>
       )}

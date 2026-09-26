@@ -32,6 +32,8 @@ export type PendingSend = {
   state: PendingState;
   /** Error code when failed. */
   failCode: string | null;
+  /** Set when the send belongs in a thread. Absent sends stay on the main timeline. */
+  threadId?: string | null;
 };
 
 export type RoomTimeline = {

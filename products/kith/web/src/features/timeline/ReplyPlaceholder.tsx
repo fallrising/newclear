@@ -1,20 +1,28 @@
 import type { ReactElement } from "react";
 import type { RoomMember } from "../../api/types";
-import { useT } from "../../copy";
+import { useT, type CopyKey } from "../../copy";
+import type { ReplyPhase } from "../../store/statuses";
 import { Avatar } from "../../ui/Avatar";
 import { Badge } from "../../ui/Badge";
 import { displayName } from "../../ui/displayName";
 
-export function ReplyPlaceholder(props: { member: RoomMember; draft?: string }): ReactElement {
+const PHASE_KEY: Record<ReplyPhase, CopyKey> = {
+  replying: "reply.replying",
+  accepted: "reply.accepted",
+  running: "reply.running",
+};
+
+export function ReplyPlaceholder(props: { member: RoomMember; draft?: string; phase?: ReplyPhase }): ReactElement {
   const t = useT();
   const name = displayName(props.member);
+  const label = t(PHASE_KEY[props.phase ?? "replying"], { name });
   return (
     <div
       data-testid="reply-placeholder"
       data-member={props.member.id}
       role="status"
       aria-busy="true"
-      aria-label={t("reply.replying", { name })}
+      aria-label={label}
       className="flex gap-3 px-4 pt-3 pb-0.5"
     >
       <Avatar size={36} id={props.member.id} name={name} kind="agent" />
@@ -23,6 +31,7 @@ export function ReplyPlaceholder(props: { member: RoomMember; draft?: string }):
           <span className="text-md font-medium text-ink">{name}</span>
           <Badge tone="neutral">AI</Badge>
         </div>
+        <p className="text-sm text-ink-2">{label}</p>
         {props.draft ? (
           <p data-testid="reply-draft" aria-hidden="true" className="whitespace-pre-wrap break-words text-md text-ink">
             {props.draft}

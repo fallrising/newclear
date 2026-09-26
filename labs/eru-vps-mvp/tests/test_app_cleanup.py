@@ -125,6 +125,31 @@ class AppRevisionCleanupTests(unittest.TestCase):
             cleanup.execute(plan, plan['plan_sha256'])
         self.assertEqual(api.removed, [old['id']])
 
+    def test_fresh_plan_after_partial_cleanup_contains_only_remaining_exact_ids(self):
+        older = spec()
+        older['replicas'] = 2
+        older['image'] = 'registry.example/hello@sha256:' + 'b' * 64
+        first = workload(older)
+        second = dict(first, id=first['id'].rsplit('_', 1)[0] + '_two')
+        api = FakeEruAPI(snapshot([first, second]))
+        plan = execution_plan(spec(), api.snapshot(), True, (), self.source_id)
+        AppExecutor(self.root, api).execute(plan, plan['plan_sha256'])
+
+        api.live['workloads'] = [row for row in api.live['workloads']
+                                 if row['id'] != first['id']]
+        cleanup = AppRevisionCleanup(self.root, api)
+        fresh = cleanup.plan(self.source_id, '20260925T123200Z-clean002')
+
+        self.assertTrue(fresh['executable'])
+        self.assertEqual(fresh['targets'], [
+            {'id': second['id'], 'node': older['node'],
+             'spec_sha256': first['labels']['spec_sha256']},
+        ])
+        self.assertEqual(api.removed, [])
+        result = cleanup.execute(fresh, fresh['plan_sha256'])
+        self.assertEqual(result['removed_ids'], [second['id']])
+        self.assertEqual(api.removed, [second['id']])
+
 
 if __name__ == '__main__':
     unittest.main()

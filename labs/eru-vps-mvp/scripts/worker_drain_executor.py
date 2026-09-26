@@ -623,6 +623,8 @@ class WorkerDrainExecutor:
             'at': _now(), 'read_only': True, 'fence_replayed': False,
             'deploy_replayed': False, 'remove_replayed': False,
             'target': {}, 'apps': [],
+            'snapshot_matches_reconciled_state': False,
+            'fresh_cleanup_plan_allowed': False,
         }
         snapshot = None
         try:
@@ -638,8 +640,8 @@ class WorkerDrainExecutor:
                 'live_preflight': summary, 'preflight_clean': clean,
             }
             try:
-                self._check_state(snapshot, journal, self._identity_rows_from_observation(
-                    journal, snapshot), require_fenced=False)
+                self._check_state(snapshot, journal, _identity_rows(snapshot),
+                                  require_fenced=False)
                 observation['snapshot_readable'] = True
             except Exception as exc:
                 observation['snapshot_readable'] = False
@@ -703,17 +705,71 @@ class WorkerDrainExecutor:
                 move['cleanup_plan_id'])
             observation['apps'].append(app_observation)
 
+        (observation['fresh_cleanup_children'],
+         fresh_cleanup_children_clear) = self._reconcile_fresh_cleanup_children(
+             journal, observation['apps'])
+
+        # Recheck the complete normalized cluster view after exact-ID queries.
+        # A fresh cleanup plan is gated on one stable snapshot matching the
+        # baseline minus confirmed-absent sources plus exact replacements.
+        try:
+            final_snapshot = self.api.snapshot()
+            clean, final_summary = _preflight(self.api, final_snapshot)
+            confirmed = self.api.snapshot()
+            if (not clean
+                    or snapshot_binding(confirmed) != snapshot_binding(final_snapshot)):
+                raise ValueError('final read-only snapshot/preflight is not stable and clean')
+            expected = self._expected_observed_workloads(journal, observation)
+            target = self._check_state(confirmed, journal, expected, require_fenced=False)
+            observation['target'] = {
+                'available': target.get('available'), 'bypass': target.get('bypass'),
+                'live_preflight': final_summary, 'preflight_clean': True,
+            }
+            snapshot = confirmed
+            observation['snapshot_matches_reconciled_state'] = True
+        except Exception as exc:
+            observation['snapshot_matches_reconciled_state'] = False
+            observation['snapshot_state_issue_type'] = type(exc).__name__
+
+        source_queries_clear = all(
+            isinstance(source, dict)
+            and source.get('state') in {'present_exact', 'absent'}
+            for app in observation['apps'] for source in app.get('sources', []))
+        remaining_source_ids = [
+            source['workload_id'] for app in observation['apps']
+            for source in app.get('sources', [])
+            if source.get('state') == 'present_exact']
+        readiness_evidence = (
+            self._stored_replacement_readiness(journal)
+            and all(app.get('staged_child_journal') == 'complete_with_probe_evidence'
+                    for app in observation['apps']))
+        cleanup_state_confirmed = (
+            observation.get('read_only') is True
+            and observation.get('snapshot_matches_reconciled_state') is True
+            and observation.get('target', {}).get('available') is True
+            and observation.get('target', {}).get('bypass') is True
+            and observation.get('target', {}).get('preflight_clean') is True
+            and all_replacements_observed and source_queries_clear
+            and readiness_evidence and fresh_cleanup_children_clear)
+        observation['fresh_cleanup_plan_allowed'] = (
+            cleanup_state_confirmed and bool(remaining_source_ids))
+
         if observation.get('target', {}).get('bypass') is not True:
             recommendation = 'target_fence_not_confirmed_operator_review_required'
         elif not all_replacements_observed:
             recommendation = 'retain_sources_and_create_no_mutations'
         elif not all_source_absent:
-            recommendation = 'replacement_presence_observed_revalidate_before_any_fresh_exact_cleanup_plan'
+            if observation['fresh_cleanup_plan_allowed']:
+                recommendation = 'replacement_presence_observed_revalidate_before_any_fresh_exact_cleanup_plan'
+            elif not readiness_evidence:
+                recommendation = 'replacement_readiness_not_confirmed_cleanup_blocked'
+            else:
+                recommendation = 'snapshot_or_source_identity_uncertain_cleanup_blocked'
         elif (snapshot is not None
-              and observation.get('snapshot_readable') is True
+              and observation.get('snapshot_matches_reconciled_state') is True
               and observation.get('target', {}).get('preflight_clean') is True
               and observation.get('target', {}).get('available') is True):
-            if not self._stored_replacement_readiness(journal):
+            if not readiness_evidence:
                 recommendation = 'replacement_readiness_not_confirmed_reinstall_blocked'
                 observation['component_reinstall_allowed'] = False
             else:
@@ -739,11 +795,78 @@ class WorkerDrainExecutor:
         self._save(path, journal)
         return journal
 
-    def _identity_rows_from_observation(self, journal, snapshot):
-        # Recovery compares only the currently observed set with itself here;
-        # exact source/replacement identities are independently queried below.
-        # This marks the snapshot readable without inventing expected mutations.
-        return _identity_rows(snapshot)
+    @staticmethod
+    def _expected_observed_workloads(journal, observation):
+        baseline = journal.get('baseline', {}).get('workloads')
+        apps = observation.get('apps')
+        if not isinstance(baseline, list) or not isinstance(apps, list):
+            raise ValueError('recovery lacks baseline or per-app observations')
+        expected = {}
+        for row in baseline:
+            if (not isinstance(row, dict) or not isinstance(row.get('id'), str)
+                    or row['id'] in expected):
+                raise ValueError('recovery baseline workload IDs are malformed')
+            expected[row['id']] = copy.deepcopy(row)
+        by_app = {row.get('logical_app'): row for row in apps
+                  if isinstance(row, dict) and isinstance(row.get('logical_app'), str)}
+        moves = journal.get('moves')
+        if not isinstance(moves, list) or set(by_app) != {
+                move.get('logical_app') for move in moves if isinstance(move, dict)}:
+            raise ValueError('recovery app observations do not cover the reviewed moves')
+        seen_source_ids = set()
+        seen_replacement_ids = set()
+        for move in moves:
+            logical = move['logical_app']
+            app = by_app[logical]
+            sources = app.get('sources')
+            source_ids = move.get('source', {}).get('workload_ids')
+            if (not isinstance(sources, list) or not isinstance(source_ids, list)
+                    or len(set(source_ids)) != len(source_ids)
+                    or seen_source_ids.intersection(source_ids)):
+                raise ValueError('recovery source ID observations are malformed')
+            source_states = {row.get('workload_id'): row.get('state')
+                             for row in sources if isinstance(row, dict)}
+            if set(source_states) != set(source_ids) or len(source_states) != len(sources):
+                raise ValueError('recovery source observations do not match reviewed IDs')
+            seen_source_ids.update(source_ids)
+            source = move['source']
+            for workload_id in source_ids:
+                baseline_row = expected.get(workload_id)
+                if (not isinstance(baseline_row, dict)
+                        or baseline_row.get('nodename') != source.get('node')
+                        or baseline_row.get('labels') != {
+                            'owner': OWNER, 'logical_app': logical,
+                            'spec_sha256': source.get('spec_sha256')}):
+                    raise ValueError('recovery source ID differs from baseline identity')
+                state = source_states[workload_id]
+                if state == 'absent':
+                    expected.pop(workload_id)
+                elif state != 'present_exact':
+                    raise ValueError('recovery source identity is uncertain')
+
+            replacement = move.get('replacement')
+            replacement_observation = app.get('replacement')
+            replacement_ids = move.get('replacement_workload_ids')
+            if (not isinstance(replacement, dict)
+                    or not isinstance(replacement_observation, dict)
+                    or replacement_observation.get('state') != 'exact_revision_present'
+                    or not isinstance(replacement_ids, list)
+                    or len(set(replacement_ids)) != len(replacement_ids)
+                    or replacement_observation.get('workload_ids') != sorted(replacement_ids)
+                    or seen_replacement_ids.intersection(replacement_ids)):
+                raise ValueError('recovery replacement identity is uncertain')
+            seen_replacement_ids.update(replacement_ids)
+            for workload_id in replacement_ids:
+                row = {
+                    'id': workload_id, 'nodename': replacement['node'],
+                    'labels': {'owner': OWNER, 'logical_app': logical,
+                               'spec_sha256': replacement['spec_sha256']},
+                }
+                existing = expected.get(workload_id)
+                if existing is not None and existing != row:
+                    raise ValueError('replacement ID conflicts with baseline workload')
+                expected[workload_id] = row
+        return sorted(expected.values(), key=lambda item: item['id'])
 
     @staticmethod
     def _source_row_matches(row, move):
@@ -780,6 +903,145 @@ class WorkerDrainExecutor:
         except (OSError, json.JSONDecodeError):
             return 'unreadable'
         return str(data.get('status', 'unknown'))
+
+    def _reconcile_fresh_cleanup_children(self, journal, apps):
+        """Read-only reconcile every executed worker-drain recovery cleanup."""
+        directory = self.root / 'recovery-cleanup-plans'
+        if not directory.exists():
+            return [], True
+        if directory.is_symlink() or not directory.is_dir():
+            return [{'state': 'recovery_plan_directory_unavailable'}], False
+
+        moves = {move['logical_app']: move for move in journal.get('moves', [])}
+        source_states = {}
+        for app in apps:
+            if (not isinstance(app, dict) or not isinstance(app.get('logical_app'), str)
+                    or not isinstance(app.get('sources'), list)):
+                return [{'state': 'source_observations_malformed'}], False
+            source_states[app['logical_app']] = {
+                row.get('workload_id'): row.get('state')
+                for row in app['sources'] if isinstance(row, dict)
+            }
+
+        observations = []
+        all_clear = True
+        for path in sorted(directory.glob('*.json')):
+            if path.is_symlink() or not path.is_file():
+                observations.append({'state': 'recovery_plan_unreadable'})
+                all_clear = False
+                continue
+            try:
+                wrapper = json.loads(path.read_text())
+            except (OSError, json.JSONDecodeError):
+                observations.append({'state': 'recovery_plan_unreadable'})
+                all_clear = False
+                continue
+            if (not isinstance(wrapper, dict)
+                    or wrapper.get('operation') != 'worker-drain-recovery-cleanup-plan'
+                    or wrapper.get('worker_drain_run_id') != journal.get('id')):
+                continue
+
+            child = wrapper.get('cleanup_plan')
+            logical = wrapper.get('logical_app')
+            targets = child.get('targets') if isinstance(child, dict) else None
+            target_ids = ([row.get('id') for row in targets]
+                          if isinstance(targets, list)
+                          and all(isinstance(row, dict) for row in targets) else None)
+            unsigned = dict(wrapper)
+            unsigned.pop('plan_sha256', None)
+            child_unsigned = dict(child) if isinstance(child, dict) else {}
+            child_hash = child_unsigned.pop('plan_sha256', None)
+            valid = (
+                wrapper.get('id') == path.stem
+                and wrapper.get('plan_sha256') == sha256(canonical_bytes(unsigned))
+                and isinstance(logical, str) and logical in moves
+                and isinstance(child, dict)
+                and isinstance(child.get('id'), str)
+                and child['id'].startswith('drainrmfresh-')
+                and child.get('source_run_id') == moves[logical].get('app_run_id')
+                and isinstance(target_ids, list)
+                and all(isinstance(item, str) for item in target_ids)
+                and len(set(target_ids)) == len(target_ids)
+                and wrapper.get('source_workload_ids') == sorted(target_ids)
+                and wrapper.get('cleanup_plan_sha256') == child_hash
+                and child_hash == sha256(canonical_bytes(child_unsigned))
+                and set(target_ids).issubset(
+                    set(moves[logical].get('source', {}).get('workload_ids', [])))
+            )
+            if not valid:
+                observations.append({'recovery_plan_id': path.stem,
+                                     'logical_app': logical,
+                                     'state': 'recovery_plan_identity_invalid'})
+                all_clear = False
+                continue
+
+            child_path = self.app_root / 'runs' / ('remove-' + child['id'] + '.json')
+            if not child_path.exists() and not child_path.is_symlink():
+                continue
+            if child_path.is_symlink() or not child_path.is_file():
+                observations.append({'recovery_plan_id': path.stem,
+                                     'logical_app': logical,
+                                     'state': 'cleanup_journal_unreadable'})
+                all_clear = False
+                continue
+            try:
+                child_journal = json.loads(child_path.read_text())
+                if (not isinstance(child_journal, dict)
+                        or child_journal.get('id') != child['id']
+                        or child_journal.get('operation') != 'app-remove'
+                        or child_journal.get('logical_app') != logical
+                        or not isinstance(child_journal.get('targets'), list)
+                        or sorted(row.get('id') for row in child_journal['targets']
+                                  if isinstance(row, dict)) != sorted(target_ids)
+                        or len(child_journal['targets']) != len(target_ids)):
+                    raise ValueError('cleanup journal identity differs from its fresh plan')
+                if child_journal.get('status') == 'complete':
+                    reconciled = child_journal
+                    target_states = {workload_id: 'absent' for workload_id in target_ids}
+                else:
+                    reconciled = AppRevisionCleanup(self.app_root, self.api).reconcile(
+                        child['id'])
+                    evidence = reconciled.get('reconciliation')
+                    if (not isinstance(evidence, dict)
+                            or evidence.get('read_only') is not True
+                            or evidence.get('remove_replayed') is not False
+                            or not isinstance(evidence.get('targets'), list)):
+                        raise ValueError('cleanup journal lacks read-only exact-ID evidence')
+                    target_states = {
+                        row.get('workload_id'): row.get('state')
+                        for row in evidence['targets'] if isinstance(row, dict)
+                    }
+                    if (len(target_states) != len(evidence['targets'])
+                            or set(target_states) != set(target_ids)):
+                        raise ValueError('cleanup reconciliation does not cover exact targets')
+                current_states = source_states.get(logical, {})
+                expected_states = {
+                    workload_id: ('absent' if state == 'absent'
+                                  else 'matches_target' if state == 'present_exact'
+                                  else 'uncertain')
+                    for workload_id, state in current_states.items()
+                    if workload_id in target_ids
+                }
+                if (set(expected_states) != set(target_ids)
+                        or any(target_states.get(workload_id) != expected
+                               for workload_id, expected in expected_states.items())):
+                    raise ValueError('cleanup reconciliation differs from worker recovery')
+                observations.append({
+                    'recovery_plan_id': path.stem, 'logical_app': logical,
+                    'cleanup_plan_id': child['id'],
+                    'status': reconciled.get('status'),
+                    'read_only': child_journal.get('status') == 'complete'
+                                 or reconciled.get('reconciliation', {}).get('read_only') is True,
+                    'remove_replayed': False, 'target_count': len(target_ids),
+                    'state': 'confirmed',
+                })
+            except Exception as exc:
+                observations.append({'recovery_plan_id': path.stem,
+                                     'logical_app': logical,
+                                     'state': 'cleanup_reconciliation_uncertain',
+                                     'error_type': type(exc).__name__})
+                all_clear = False
+        return observations, all_clear
 
     @staticmethod
     def _stored_replacement_readiness(journal):

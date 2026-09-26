@@ -12,7 +12,8 @@ from app_cli_adapter import EruCLIAdapter
 from app_executor import UncertainExecution
 from worker_drain import build_plan
 from worker_drain_executor import WorkerDrainExecutor, execution_plan
-from worker_drain_ops import (execute_saved_plan, prepare_execution_plan,
+from worker_drain_ops import (execute_fresh_cleanup, execute_saved_plan,
+                              prepare_execution_plan, prepare_fresh_cleanup,
                               recover_run, save_review_plan)
 
 
@@ -272,9 +273,13 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         self.assertEqual(api.remove_calls, [])
 
     def test_partial_cleanup_recovery_only_reads_and_never_retries(self):
+        first_source_id = next(row['id'] for row in self.sources
+                               if row['labels']['logical_app'] == 'metrics-api'
+                               and row['id'].endswith('_1'))
         second_source_id = next(row['id'] for row in self.sources
-                                if row['labels']['logical_app'] == 'metrics-api')
-        api = FakeDrainAPI(self.initial, fail_remove_id=second_source_id)
+                                if row['labels']['logical_app'] == 'metrics-api'
+                                and row['id'].endswith('_2'))
+        api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
         plan = self.prepared(api)
         executor = WorkerDrainExecutor(self.root, api, self.app_root)
         with self.assertRaises(UncertainExecution):
@@ -292,6 +297,114 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         self.assertEqual(reconciled['reconciliation']['recovery_recommendation'],
                          'replacement_presence_observed_revalidate_before_any_fresh_exact_cleanup_plan')
         self.assertFalse(reconciled['reconciliation']['component_reinstall_allowed'])
+        self.assertTrue(reconciled['reconciliation']['snapshot_readable'])
+        self.assertTrue(reconciled['reconciliation']['snapshot_matches_reconciled_state'])
+        self.assertTrue(reconciled['reconciliation']['fresh_cleanup_plan_allowed'])
+        self.assertNotIn(second_source_id, api.remove_calls)
+
+    def test_partial_cleanup_uses_fresh_exact_plan_after_read_only_reconcile(self):
+        project = Path(self.temp.name)
+        first_source_id = next(row['id'] for row in self.sources
+                               if row['labels']['logical_app'] == 'metrics-api'
+                               and row['id'].endswith('_1'))
+        second_source_id = next(row['id'] for row in self.sources
+                                if row['labels']['logical_app'] == 'metrics-api'
+                                and row['id'].endswith('_2'))
+        api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
+        plan = self.prepared(api)
+        with self.assertRaises(UncertainExecution):
+            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+                plan, plan['plan_sha256'], self.apps)
+
+        calls_before_plan = (api.fence_calls, list(api.deploy_calls),
+                             list(api.remove_calls), list(api.probe_calls))
+        fresh, path = prepare_fresh_cleanup(project, plan['id'], lambda: api)
+        self.assertEqual(path.parent.name, 'recovery-cleanup-plans')
+        self.assertFalse(fresh['executable'])
+        self.assertEqual(fresh['decision'], 'ready')
+        self.assertEqual(fresh['logical_app'], 'metrics-api')
+        self.assertEqual(fresh['source_workload_ids'], [first_source_id, second_source_id])
+        self.assertEqual([row['id'] for row in fresh['cleanup_plan']['targets']],
+                         [first_source_id, second_source_id])
+        self.assertEqual(calls_before_plan,
+                         (api.fence_calls, api.deploy_calls,
+                          api.remove_calls, api.probe_calls))
+
+        # A new read-only reconciliation invalidates the prior proof; it must
+        # be followed by another fresh plan rather than execution of stale data.
+        recover_run(project, plan['id'], lambda: api)
+        calls_before_stale_execute = list(api.remove_calls)
+        with self.assertRaisesRegex(ValueError, 'reconciliation changed'):
+            execute_fresh_cleanup(
+                project, fresh['id'], fresh['plan_sha256'],
+                fresh['cleanup_plan_sha256'], lambda: api)
+        self.assertEqual(api.remove_calls, calls_before_stale_execute)
+
+        fresh, _ = prepare_fresh_cleanup(project, plan['id'], lambda: api)
+        self.assertEqual(fresh['source_workload_ids'], [first_source_id, second_source_id])
+        api.fail_remove_id = second_source_id
+        with self.assertRaises(UncertainExecution):
+            execute_fresh_cleanup(
+                project, fresh['id'], fresh['plan_sha256'],
+                fresh['cleanup_plan_sha256'], lambda: api)
+        calls_before_child_recovery = (api.fence_calls, list(api.deploy_calls),
+                                       list(api.remove_calls), list(api.probe_calls))
+        recovered_child = recover_run(project, plan['id'], lambda: api)
+        self.assertEqual(calls_before_child_recovery,
+                         (api.fence_calls, api.deploy_calls,
+                          api.remove_calls, api.probe_calls))
+        self.assertEqual(len(recovered_child['reconciliation']['fresh_cleanup_children']), 1)
+        child_observation = recovered_child['reconciliation']['fresh_cleanup_children'][0]
+        self.assertTrue(child_observation['read_only'])
+        self.assertFalse(child_observation['remove_replayed'])
+        self.assertEqual(child_observation['state'], 'confirmed')
+        self.assertEqual(child_observation['status'], 'needs_review')
+        self.assertEqual(recovered_child['reconciliation']['fresh_cleanup_plan_allowed'], True)
+
+        fresh, _ = prepare_fresh_cleanup(project, plan['id'], lambda: api)
+        self.assertEqual(fresh['source_workload_ids'], [second_source_id])
+        api.fail_remove_id = None
+        result = execute_fresh_cleanup(
+            project, fresh['id'], fresh['plan_sha256'],
+            fresh['cleanup_plan_sha256'], lambda: api)
+        self.assertEqual(result['status'], 'complete')
+        self.assertEqual(result['removed_ids'], [second_source_id])
+        self.assertEqual(api.remove_calls.count(first_source_id), 2)
+        self.assertEqual(api.remove_calls.count(second_source_id), 2)
+
+        after_remove = list(api.remove_calls)
+        with self.assertRaisesRegex(ValueError, 'already has a journal'):
+            execute_fresh_cleanup(
+                project, fresh['id'], fresh['plan_sha256'],
+                fresh['cleanup_plan_sha256'], lambda: api)
+        self.assertEqual(api.remove_calls, after_remove)
+
+        reconciled = recover_run(project, plan['id'], lambda: api)
+        self.assertTrue(reconciled['reconciliation']['component_reinstall_allowed'])
+        self.assertFalse(reconciled['reconciliation']['fresh_cleanup_plan_allowed'])
+
+    def test_unexpected_workload_blocks_fresh_cleanup_plan_after_reconcile(self):
+        project = Path(self.temp.name)
+        first_source_id = next(row['id'] for row in self.sources
+                               if row['labels']['logical_app'] == 'metrics-api'
+                               and row['id'].endswith('_1'))
+        api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
+        plan = self.prepared(api)
+        with self.assertRaises(UncertainExecution):
+            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+                plan, plan['plan_sha256'], self.apps)
+        api.live['workloads'].append({
+            'id': 'foreign-workload', 'nodename': 'worker-3', 'labels': {},
+        })
+        api._refresh_runtime()
+
+        reconciled = recover_run(project, plan['id'], lambda: api)
+        self.assertFalse(reconciled['reconciliation']['snapshot_matches_reconciled_state'])
+        self.assertFalse(reconciled['reconciliation']['fresh_cleanup_plan_allowed'])
+        before = list(api.remove_calls)
+        with self.assertRaisesRegex(ValueError, 'does not permit a fresh cleanup plan'):
+            prepare_fresh_cleanup(project, plan['id'], lambda: api)
+        self.assertEqual(api.remove_calls, before)
 
     def test_stale_live_snapshot_rejects_execution_before_fence(self):
         api = FakeDrainAPI(self.initial)

@@ -1,6 +1,6 @@
 # ERU-009 非空 worker drain 前置（2026-09-26）
 
-狀態：離線 planner、多 app staged executor／唯讀 recovery、`labctl` 本機操作入口均已交付，ERU-009 仍進行中。planner 本身保持 review-only；executor 使用既有 ERU-012 adapter API，操作入口與 executor 都以 fake adapter 驗證。沒有連 VPS、執行 Eru CLI 或跑 E2E。
+狀態：離線 planner、多 app staged executor／唯讀 recovery、partial-cleanup fresh exact-ID recovery 與 `labctl` 操作入口均已交付，ERU-009 仍進行中。planner 本身保持 review-only；executor 使用既有 ERU-012 adapter API，操作入口與 executor 都以 fake adapter 驗證。沒有連 VPS、執行 Eru CLI 或跑 E2E。
 
 ## 規劃契約
 
@@ -34,6 +34,8 @@ plan 只包含 review 所需的 IDs、owner／digest、destination、snapshot �
 
 所有 stage 共用 B 的 `ClusterLock`；parent journal 綁定 execution plan hash，child journals 分別沿用 ERU-012 executor／cleanup 格式。reconcile/recover 只讀 snapshot、node fence 狀態、replacement appname 與來源 exact IDs；不 deploy、不 probe、不 remove、不重送 fence，也不會讓失敗 plan 重跑。它先留下 `needs_review` 對帳結果，再給操作員下一步建議。
 
+如果 cleanup 只完成一部分，`recover-worker-drain` 會重新查詢每個來源 exact ID、做穩定的雙 snapshot／preflight，並以唯讀 exact-ID 查詢 reconcile 已執行的 fresh cleanup child journal。child 與 parent 對帳狀態不一致、查詢失敗、identity 不明或 snapshot 有額外 workload 時，fresh cleanup 與一般重裝都會被阻擋。狀態清楚時，`plan-worker-drain-cleanup` 只把仍為 `present_exact` 的來源 IDs 放進一個 app 的新 ERU-012 cleanup plan；不存在的 IDs 不會重播。保存的 recovery wrapper 永遠 `executable: false`，並綁定 parent run、reconciliation hash、child plan hash 及 exact IDs。`execute-worker-drain-cleanup` 需同時提供兩個 hash；ERU-012 cleanup 仍會重核 live snapshot、readiness 與 exact targets，journal 確保 child plan 不可重播。每次 cleanup 後要再唯讀 reconcile，才可替下一個 app 規劃；來源全部確認不存在且 target 完全為空後，才開一般 component-reinstall gate。
+
 ## `labctl` 本機操作入口
 
 輸入檔、desired specs、計畫與 journal 都必須留在專案 `private/` 下；輸入檔不能經由 symlink 指向其他路徑。離線輸入 JSON 剛好含 `snapshot`、`apps`、`destinations`、`health_ok`、`consistency_issues` 五個欄位：
@@ -46,12 +48,16 @@ python3 scripts/labctl.py prepare-worker-drain --plan PLAN_ID \
 python3 scripts/labctl.py execute-worker-drain --plan PLAN_ID \
   --sha256 EXECUTION_SHA256 --apps private/operations/worker-drain-apps.json
 python3 scripts/labctl.py recover-worker-drain --run RUN_ID
+python3 scripts/labctl.py plan-worker-drain-cleanup --run RUN_ID
+python3 scripts/labctl.py execute-worker-drain-cleanup \
+  --plan RECOVERY_CLEANUP_PLAN_ID --sha256 RECOVERY_SHA256 \
+  --cleanup-sha256 CLEANUP_SHA256
 ```
 
-`plan-worker-drain` 只建立不可執行的本機 review plan。`prepare-worker-drain` 會以唯讀 live snapshot／health／consistency 核對後，將 execution plan 存入 private storage。`execute-worker-drain` 是明確的遠端 mutation 入口，本階段沒有呼叫它；它只接受已保存且 hash 相符的計畫，existing journal 會阻止重播。遇到不確定結果時用 `recover-worker-drain` 只讀對帳，輸出摘要不含 workload IDs。這些命令尚未對真實 CLI／API／job 語意做驗收。
+`plan-worker-drain` 只建立不可執行的本機 review plan。`prepare-worker-drain` 會以唯讀 live snapshot／health／consistency 核對後，將 execution plan 存入 private storage。`execute-worker-drain` 是明確的遠端 mutation 入口。遇到不確定結果時先用 `recover-worker-drain` 唯讀對帳，不重播失敗計畫；只有 recovery 顯示 `fresh_cleanup_plan_allowed` 才可用 cleanup plan 命令。`plan-worker-drain-cleanup` 會再次先做 recovery，並私下保存單一 app 的新 exact-ID cleanup 計畫；輸出只有計畫 ID／hash 與剩餘數量。`execute-worker-drain-cleanup` 是另一個明確的遠端 mutation 入口，需同時核對 recovery wrapper 與 ERU-012 child plan hash。這些執行入口目前都只以 fake adapter 測試，沒有呼叫；真實 CLI／API／job 語意尚未驗收。
 
 ## 限制與下一步
 
-離線 `worker_drain.py` 輸出仍永遠 `executable: false`；執行需先用 live adapter 建立獨立 hash-bound execution plan。若 partial cleanup 之後需要再清理剩餘 IDs，recovery 目前只對帳並停止，不會產生或執行第二個 cleanup plan；需另外人工審查新 plan。planner 只支援 ERU-012 managed stateless apps；legacy／foreign／stateful workloads 會阻擋，需先人工分類與另案設計。空 target 一律走既有元件重裝路徑。沒有讀寫真實 private inventory，沒有連 VPS，沒有跑 E2E。
+離線 `worker_drain.py` 輸出仍永遠 `executable: false`；執行需先用 live adapter 建立獨立 hash-bound execution plan。partial cleanup recovery 只支援完整、owned、stateless 的 ERU-012 workloads；legacy／foreign／stateful、partial 或 stale revisions 會阻擋，需先人工分類與另案設計。fresh plan 一次涵蓋一個 app；任何新 cleanup 嘗試前都要先做 read-only reconcile。空 target 一律走既有元件重裝路徑。沒有讀寫真實 private inventory，沒有連 VPS，沒有跑 E2E。
 
-23 個 drain fake tests（planner 10、executor／adapter／操作入口 13）覆蓋完整多 app mapping、未知 owner／workload、partial replica／舊 revision、preflight 與 drift gate、單次 fence 及遺失回覆對帳、所有替代 ready 前來源保留、readiness／create／cleanup 失敗、exact-ID 移除、failed-plan 禁止重播、私有路徑限制、唯讀 recovery 與空 worker gate。完整本機 suite 共 375 tests 通過，先前基準為 371（ERU-009 前置前的基準為 362）。後續仍須補 partial-cleanup fresh exact-ID plan 規劃，再依整體本機開發順序做 VPS E2E。
+25 個 drain fake tests（planner 10、executor／recovery／adapter／操作入口 15）覆蓋完整多 app mapping、未知 owner／workload、partial replica／舊 revision、preflight 與 drift gate、單次 fence 及遺失回覆對帳、所有替代 ready 前來源保留、readiness／create／cleanup 失敗、exact-ID 移除、failed-plan 禁止重播、partial cleanup fresh plan、child journal 唯讀對帳、stale proof／額外 workload 阻擋、私有路徑限制及空 worker gate。ERU-012 cleanup 另有 fresh subset plan 測試。完整本機 suite 共 378 tests 通過（前一切片為 375）。ERU-009 仍缺真實 CLI／API/job 語意驗收與整體 VPS E2E。

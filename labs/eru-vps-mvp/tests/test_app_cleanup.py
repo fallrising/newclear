@@ -5,12 +5,14 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 
 TESTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TESTS))
 sys.path.insert(0, str(TESTS.parent / 'scripts'))
 from app_cleanup import AppRevisionCleanup
 from app_executor import AppExecutor, UncertainExecution, execution_plan, plan_digest
+from labops import ClusterLock
 from test_app_executor import FakeEruAPI, snapshot, spec, workload
 
 
@@ -124,6 +126,23 @@ class AppRevisionCleanupTests(unittest.TestCase):
         self.assertEqual(observed['reconciliation']['targets'][0]['state'], 'matches_target')
         with self.assertRaisesRegex(ValueError, 'already has a journal'):
             cleanup.execute(plan, plan['plan_sha256'])
+        self.assertEqual(api.removed, [old['id']])
+
+    def test_reconcile_obeys_shared_lock_before_reading_or_writing_journal(self):
+        api, _, old, _ = self.deployment_with_prior(fail_remove_before=True)
+        cleanup, plan = self.make_plan(api)
+        with self.assertRaises(UncertainExecution):
+            cleanup.execute(plan, plan['plan_sha256'])
+        path = cleanup.journal_path(self.cleanup_id)
+        journal_before = path.read_text()
+
+        with ClusterLock(self.root.parents[2]):
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(cleanup.reconcile, self.cleanup_id)
+                with self.assertRaisesRegex(RuntimeError, 'already running'):
+                    future.result()
+
+        self.assertEqual(path.read_text(), journal_before)
         self.assertEqual(api.removed, [old['id']])
 
     def test_fresh_plan_after_partial_cleanup_contains_only_remaining_exact_ids(self):

@@ -295,6 +295,10 @@ class AppExecutor:
 
     def reconcile(self, run_id):
         """Read-only lookup after interruption; never deploy, probe, or remove."""
+        with ClusterLock(self.root.parents[2]):
+            return self._reconcile_locked(run_id)
+
+    def _reconcile_locked(self, run_id):
         path = self.run_path(run_id)
         if not path.exists() or path.is_symlink():
             raise FileNotFoundError('app run journal missing')

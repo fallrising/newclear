@@ -208,6 +208,13 @@ def _validated_context(operator,plan_id,expected_hash):
     if (plan.get("blockers")!=[POST_REIMAGE_BLOCKER]
         or plan.get("mutation_hosts")!=[operator.core["alias"],alias]):
         raise ValueError("worker bootstrap post-install stage contract changed; create a new plan")
+    from core_release import validation_record
+    registration_gate=plan.get("worker_registration")
+    if (not isinstance(registration_gate,dict) or registration_gate.get("executable") is not True
+        or registration_gate.get("blockers")!=[]
+        or registration_gate.get("core_release")!=validation_record(
+            operator.project,"patches/core-v0.1.5-safe-node-add.validation.json")):
+        raise ValueError("safe worker registration release binding changed; create a new plan")
     return plan,source_plan,receipt,obs,trusted,prep
 
 
@@ -328,7 +335,7 @@ def _preflight(operator,plan,key,trusted):
     return report
 
 
-def _post_facts(operator,plan,trusted):
+def _post_facts(operator,plan,trusted,expected_agent_active="inactive",expected_agent_unit="disabled"):
     alias=plan["target"]["alias"]
     raw=operator.command(alias,["sudo","-n","python3","-"],POST_FACTS,
                          timeout=90,ssh_options=_ssh_options(operator,trusted))
@@ -349,10 +356,14 @@ def _post_facts(operator,plan,trusted):
     if facts["services"]!={unit:"active" for unit in PRESERVED_SERVICES}:
         raise ValueError("preserved SSH/Tailscale/Docker/containerd service stopped during install")
     if (facts["runtime_counts"]!={"containers":0,"tasks":0} or facts["docker_containers"]
-        or facts["agent_active_state"]!="inactive" or facts["agent_unit_state"]!="disabled"
         or facts["proxy_socket_active_state"]!="active" or facts["proxy_socket_unit_state"]!="enabled"
         or facts["root_login_prohibited"] is not True or facts["owner_manifest_present"] is not True):
-        raise ValueError("worker install did not leave an empty, agent-stopped state with the proxy socket active")
+        raise ValueError("worker install did not leave an empty state with the proxy socket active")
+    if ((expected_agent_active is not None and facts["agent_active_state"]!=expected_agent_active)
+        or (expected_agent_unit is not None and facts["agent_unit_state"]!=expected_agent_unit)):
+        raise ValueError("worker agent service state differs from the expected registration phase")
+    if facts["agent_active_state"] not in {"active","inactive"} or facts["agent_unit_state"] not in {"enabled","disabled"}:
+        raise ValueError("worker agent service state is unreadable")
     return facts
 
 
@@ -443,7 +454,8 @@ def install_reimage_worker(operator,bootstrap_plan_id,expected_hash):
 
 def _reconcile_context(operator,journal):
     from reimage_receipt import verify_local_hostkeys
-    plan=_bootstrap(operator,journal.get("id"),journal.get("plan_hash"))
+    plan_id=journal.get("bootstrap_plan_id",journal.get("id"))
+    plan=_bootstrap(operator,plan_id,journal.get("plan_hash"))
     source=plan.get("source_reimage_plan",{})
     source_env,_=_read_json(operator.root/"plans"/(source.get("id","")+".json"),"source reimage plan")
     source_plan=source_env.get("plan")

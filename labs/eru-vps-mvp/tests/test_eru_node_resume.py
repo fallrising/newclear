@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from eru_node_resume import resume_registered_worker
+from eru_node_resume import main, resume_registered_worker
 
 
 CORE_IP = '100.64.0.1'
@@ -80,6 +80,10 @@ class EruNodeResumeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'outcome is uncertain'):
             resume_registered_worker(CORE_IP, NODE, ENDPOINT, runner=runner, sleep=lambda _: None)
         self.assertEqual(sum(call[-3:] == ['node', 'up', NODE] for call in runner.calls), 1)
+
+    def test_standalone_cli_requires_the_hash_bound_labctl_plan(self):
+        with self.assertRaisesRegex(SystemExit, 'Use scripts/labctl.py resume-reimage-worker'):
+            main()
 
     def test_scope_is_limited_to_tailnet_and_reviewed_worker_names(self):
         runner = Runner([])

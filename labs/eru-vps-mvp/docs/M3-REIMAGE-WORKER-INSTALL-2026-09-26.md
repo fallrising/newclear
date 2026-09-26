@@ -28,6 +28,6 @@ install plan 為 single-use。遠端命令一旦開始，任何非零退出、�
 
 ## 離線驗證與未完成項目
 
-58 項 test_labctl.py 測試通過，涵蓋 worker-only gate、pinned host key、receipt／plan bindings、worker agent 未啟動、node 未註冊、空 runtime／服務驗證、安裝前 drift 阻擋，以及 lost response 後 read-only reconcile 和禁止重播。embedded remote preflight、post-install verifier 與 installer source 也通過 Python compile 檢查。此切片沒有執行 E2E，沒有連線／修改 worker 或 core，也沒有更改 private inventory。
+本安裝切片的 58 項 test_labctl.py 測試通過，涵蓋 worker-only gate、pinned host key、receipt／plan bindings、worker agent 未啟動、node 未註冊、空 runtime／服務驗證、安裝前 drift 阻擋，以及 lost response 後 read-only reconcile 和禁止重播。embedded remote preflight、post-install verifier 與 installer source 也通過 Python compile 檢查。此切片沒有執行 E2E，沒有連線／修改 worker 或 core，也沒有更改 private inventory。
 
-仍待本機開發：先受控部署並驗證 core safe AddNode patch；worker registration executor 必須核對執行中 core binary hash，確保 AddNode 當下已 fencing。之後保留舊 node name／capacity／labels 納管、啟動 agent 並驗 available+bypass、smoke 與其他 worker guards、經核實後 resume、inventory／cluster generation commit，以及 install/register/smoke/resume 各階段的故障恢復 executor。新 resume helper 尚未接入此 executor。完成後再按 owner 要求安排整體 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。
+fenced registration 與 smoke 之後已有單次 [safe resume executor](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)，各以 fake operator／peer HTTP guards 和 read-only reconcile 離線驗證。剩下的本機工作是 resume 後 host-key／worker IP 對帳、generation commit 與跨階段恢復 executor。safe AddNode core artifact 尚未部署；全程未做 E2E。provider API 不使用；OS reimage 與日常 component-reinstall 分開驗收。

@@ -33,8 +33,8 @@
 
 ## 尚未解除的執行 blocker
 
-即使 intent 完全有效，plan 仍不可執行。目前沒有受控 drain／重新納管／resume adapter，也沒有新 host key 的 out-of-band 信任及 SSH／Tailscale／runtime bootstrap 流程。若 worker 尚有 ERU workload，必須先遷移並驗證；Docker workload 另需 ownership／遷移審閱。這些 blocker 保留了「日常元件重裝」與「人工 OS 重灌」的界線。有效 intent 不代表 owner 已經同意立即重灌，也不授權任何自動執行。
+即使 intent 完全有效，plan 仍不可由通用 `execute` 執行。重灌前的空 worker fence／agent stop／registration removal preparation 已在 [2026-09-26 紀錄](M3-REIMAGE-PREPARE-2026-09-26.md) 另行實作並只用 fake operator 測試；仍缺新 host 的 SSH／Tailscale／runtime bootstrap、worker-only 遠端安裝、重新納管與 resume。若 worker 尚有 ERU workload，必須先遷移並驗證；Docker workload 另需 ownership／遷移審閱。這些 blocker 保留了「日常元件重裝」與「人工 OS 重灌」的界線。有效 intent 不代表 owner 已經同意立即重灌，也不授權任何自動執行。
 
 本機測試只使用暫存目錄與假資源識別，除 intent 的正／負案例外，也覆蓋 receipt 的舊／新 machine ID、boot ID、plan hash、resource／volume scope、owner confirmation、OOB fingerprint、freshness、symlink 與 duplicate keys；確認記錄不可覆寫、OOB fingerprint 與既有 alias trust file 不符時拒絕且不造成 remote mutation。正式 host identity、provider inventory、credentials、raw evidence 均未讀取或新增。驗證結果：`test_labctl.py` 42 tests、worker payload 4 tests 通過，完整離線套件 299 tests 通過；receipt／host verification CLI `--help`、Python compile（含 `deploy-lab.py`）與 `git diff --check` 通過。
 
-ERU-014 仍為進行中；intent／receipt 都只是離線前置，待本機開發收尾後才安排實機驗收。OS 版本、重灌後身分、host key、SSH／Tailscale／runtime／worker-only ERU bootstrap、重新註冊、HTTP smoke 與其他 worker 保留都須分別核對。詳見 [TASKS](TASKS.md) 與 [HANDOFF](HANDOFF.md)。
+ERU-014 仍為進行中；intent／receipt 與重灌前摘除器都尚未對 VPS 執行，待本機開發收尾後才安排實機驗收。OS 版本、重灌後身分、host key、SSH／Tailscale／runtime／worker-only ERU bootstrap、重新註冊、HTTP smoke 與其他 worker 保留都須分別核對。詳見 [TASKS](TASKS.md) 與 [HANDOFF](HANDOFF.md)。

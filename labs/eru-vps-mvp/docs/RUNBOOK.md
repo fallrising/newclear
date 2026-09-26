@@ -114,9 +114,9 @@ eru-cli node resource worker-2
 
 日常改走 [自控元件清理重裝](CONTROLLED-REINSTALL.md)，不需要 provider API。以下保留真正 OS 重灌的後備流程，由 owner 在 provider 控制台操作；它不是日常元件重裝腳本。
 
-Profile A 優先選 worker-4。Profile B 中 worker-2／3 兼任 etcd，不能直接套此流程。每次只處理一台。
+Profile A 優先選 worker-4。Profile B 中 worker-2／3 兼任 etcd，不能直接套此流程。每次只處理一台。ERU-014 的 [重灌前摘除器](M3-REIMAGE-PREPARE-2026-09-26.md) 目前只經 fake operator 驗證；實機使用須等本機開發完成並另行驗收。
 
-1. 外部 journal 建立 plan：provider ID、私網 IP、角色、generation、app IDs、磁碟清除範圍、替代容量與可恢復資料。取得 cluster mutation lock。
+1. 在 B 的私有 `labctl` plan 綁定 owner-reviewed provider intent、machine ID、provider ID、OS image、generation、精確 volumes 與 workload 狀態；檢查準備 blockers、替代容量與可恢復資料。取得 cluster mutation lock。
 2. 在 core 執行 `eru-cli node down worker-4`，再 `eru-cli node get worker-4` 確認 Bypass。這不是 drain，既有 workload 還在。
 3. `eru-cli node workloads worker-4` 列出實際 workload。在健康 worker 依原 spec／digest 部署替代實例，HTTP 通過後切換 caller／proxy。無外部路由的 smoke 可直接停止。
 4. 逐筆移除舊 workload，確認列表為空。在 worker-4 停止 `eru-agent`，避免移除註冊期間持續回報；在 core 執行 `eru-cli node remove worker-4`。此 API 拒絕移除非空 node，並清理 resource manager 的 node 狀態。

@@ -80,7 +80,16 @@ python3 scripts/labctl.py prepare-reimage --plan PLAN_ID --sha256 PLAN_SHA256
 python3 scripts/labctl.py status --run PLAN_ID
 ```
 
-命令會再核對健康、ERU workload／runtime／配額、Docker 容器、保留服務、主機身分與叢集 membership；在 core 確認 Bypass，只停止目標 `eru-agent.service`，再次檢查 runtime 後移除精確 node registration，最後停在 `awaiting-owner-console-reimage`。它不會自動 `node up`。timeout／失敗先用 `reconcile --run PLAN_ID` 唯讀檢查 core 狀態，不能重播原 plan。receipt 需同一 plan 的成功 preparation journal；重灌後的 host verification 仍只讀，worker-only 安裝／重新註冊／resume 尚待實作。詳細範圍與離線測試見 [ERU-014 摘除紀錄](M3-REIMAGE-PREPARE-2026-09-26.md)。
+命令會再核對健康、ERU workload／runtime／配額、Docker 容器、保留服務、主機身分與叢集 membership；在 core 確認 Bypass，只停止目標 `eru-agent.service`，再次檢查 runtime 後移除精確 node registration，最後停在 `awaiting-owner-console-reimage`。它不會自動 `node up`。timeout／失敗先用 `reconcile --run PLAN_ID` 唯讀檢查 core 狀態，不能重播原 plan。receipt 需同一 plan 的成功 preparation journal；重灌後的 host verification 仍只讀。
+
+有了同 plan 的 owner receipt 與 replacement-host observation 後，可離線產生 worker bootstrap plan：
+
+```bash
+# B 本機讀取 private plan/receipt/observation；不連 core/worker
+python3 scripts/labctl.py plan-reimage-worker --plan SOURCE_PLAN_ID --sha256 SOURCE_PLAN_SHA256
+```
+
+它只準備鎖定的 agent/CNI payload 與舊 node capacity/labels 的 registration 意圖，plan 仍不可執行。遠端安裝、更新單一 core host-key 記錄、先 fence 再註冊、smoke、resume、inventory/generation 更新與 recovery executor 尚待實作。詳見 [ERU-014 摘除紀錄](M3-REIMAGE-PREPARE-2026-09-26.md) 與 [worker-only 計畫紀錄](M3-REIMAGE-WORKER-PLAN-2026-09-26.md)。
 
 此命令本輪只以 fake operator 驗證，沒有連線或修改任何 VPS；正式 OS reimage acceptance 仍待本機開發收尾後另行安排。
 

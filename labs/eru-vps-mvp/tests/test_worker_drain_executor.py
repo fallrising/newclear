@@ -1,15 +1,19 @@
 """Exercise multi-app worker drains with an in-memory ERU adapter only."""
+import contextlib
 import copy
+import io
 import json
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from app_desired import OWNER, spec_identity
 from app_cli_adapter import EruCLIAdapter
 from app_executor import UncertainExecution
+import labctl
 from worker_drain import build_plan
 from worker_drain_executor import WorkerDrainExecutor, execution_plan
 from worker_drain_ops import (execute_fresh_cleanup, execute_saved_plan,
@@ -405,6 +409,59 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'does not permit a fresh cleanup plan'):
             prepare_fresh_cleanup(project, plan['id'], lambda: api)
         self.assertEqual(api.remove_calls, before)
+
+    def test_labctl_fresh_cleanup_plan_execute_and_recover_routes_use_fake_adapter(self):
+        project = Path(self.temp.name)
+        first_source_id = next(row['id'] for row in self.sources
+                               if row['labels']['logical_app'] == 'metrics-api'
+                               and row['id'].endswith('_1'))
+        second_source_id = next(row['id'] for row in self.sources
+                                if row['labels']['logical_app'] == 'metrics-api'
+                                and row['id'].endswith('_2'))
+        api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
+        execution = self.prepared(api)
+        with self.assertRaises(UncertainExecution):
+            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+                execution, execution['plan_sha256'], self.apps)
+
+        def invoke(argv):
+            output = io.StringIO()
+            with (patch.object(labctl, 'PROJECT', project),
+                  patch.object(labctl, 'Operator', return_value=api),
+                  patch('app_cli_adapter.EruCLIAdapter', side_effect=lambda operator: operator),
+                  patch.object(sys, 'argv', ['labctl.py', *argv]),
+                  contextlib.redirect_stdout(output)):
+                labctl.main()
+            return json.loads(output.getvalue())
+
+        before_plan = (api.fence_calls, list(api.deploy_calls),
+                       list(api.remove_calls), list(api.probe_calls))
+        planned = invoke(['plan-worker-drain-cleanup', '--run', execution['id']])
+        self.assertEqual(planned['decision'], 'ready')
+        self.assertFalse(planned['executable'])
+        self.assertEqual(planned['remaining_source_count'], 2)
+        self.assertNotIn(first_source_id, json.dumps(planned))
+        self.assertNotIn(second_source_id, json.dumps(planned))
+        self.assertEqual(before_plan, (api.fence_calls, api.deploy_calls,
+                                       api.remove_calls, api.probe_calls))
+
+        api.fail_remove_id = None
+        executed = invoke([
+            'execute-worker-drain-cleanup', '--plan', planned['id'],
+            '--sha256', planned['sha256'],
+            '--cleanup-sha256', planned['cleanup_plan_sha256'],
+        ])
+        self.assertEqual(executed['status'], 'complete')
+        self.assertEqual(executed['removed_count'], 2)
+        self.assertNotIn(first_source_id, json.dumps(executed))
+        self.assertNotIn(second_source_id, json.dumps(executed))
+
+        recovered = invoke(['recover-worker-drain', '--run', execution['id']])
+        self.assertTrue(recovered['read_only'])
+        self.assertTrue(recovered['component_reinstall_allowed'])
+        self.assertFalse(recovered['fresh_cleanup_plan_allowed'])
+        self.assertNotIn(first_source_id, json.dumps(recovered))
+        self.assertNotIn(second_source_id, json.dumps(recovered))
 
     def test_stale_live_snapshot_rejects_execution_before_fence(self):
         api = FakeDrainAPI(self.initial)

@@ -1,0 +1,599 @@
+[
+  {
+    "id": "30000000-0000-4000-8000-000000000001",
+    "contentType": "album",
+    "slug": "coast-light-2026",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Coast Light 2026",
+    "payload": {
+      "title": "Coast Light 2026",
+      "description": "Sea and concrete.",
+      "visibility": "public",
+      "sortMode": "manual",
+      "cover": "20000000-0000-4000-8000-000000000001"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:01:00Z",
+    "updatedAt": "2026-09-20T00:01:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000002",
+    "contentType": "photo",
+    "slug": "coast-harbour",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Harbour wall",
+    "payload": {
+      "title": "Harbour wall",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000001",
+      "sortOrder": 10,
+      "caption": "Tide against the harbour wall."
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:02:00Z",
+    "updatedAt": "2026-09-20T00:02:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000003",
+    "contentType": "photo",
+    "slug": "coast-sun",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Late sun",
+    "payload": {
+      "title": "Late sun",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000002",
+      "sortOrder": 20,
+      "caption": "Late sun on the flats."
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:03:00Z",
+    "updatedAt": "2026-09-20T00:03:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000004",
+    "contentType": "photo",
+    "slug": "coast-concrete",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Concrete edge",
+    "payload": {
+      "title": "Concrete edge",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000003",
+      "sortOrder": 30,
+      "caption": "A concrete edge catching spray."
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:04:00Z",
+    "updatedAt": "2026-09-20T00:04:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000005",
+    "contentType": "photo",
+    "slug": "coast-salt",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Salt air",
+    "payload": {
+      "title": "Salt air",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000004",
+      "sortOrder": 40
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:05:00Z",
+    "updatedAt": "2026-09-20T00:05:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000006",
+    "contentType": "photo",
+    "slug": "coast-window",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Window light",
+    "payload": {
+      "title": "Window light",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000005",
+      "sortOrder": 50
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:06:00Z",
+    "updatedAt": "2026-09-20T00:06:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000007",
+    "contentType": "photo",
+    "slug": "coast-ferry",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Last ferry",
+    "payload": {
+      "title": "Last ferry",
+      "album": "30000000-0000-4000-8000-000000000001",
+      "media": "20000000-0000-4000-8000-000000000006",
+      "sortOrder": 60
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:07:00Z",
+    "updatedAt": "2026-09-20T00:07:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000008",
+    "contentType": "album",
+    "slug": "private-studio",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Studio (unpublished)",
+    "payload": {
+      "title": "Studio (unpublished)",
+      "visibility": "public",
+      "sortMode": "manual"
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:08:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000009",
+    "contentType": "photo",
+    "slug": "studio-polaroid",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Polaroid test",
+    "payload": {
+      "title": "Polaroid test",
+      "album": "30000000-0000-4000-8000-000000000008",
+      "media": "20000000-0000-4000-8000-000000000007",
+      "sortOrder": 10,
+      "caption": "Not for the wall yet."
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:09:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000010",
+    "contentType": "photo",
+    "slug": "studio-softbox",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Softbox",
+    "payload": {
+      "title": "Softbox",
+      "album": "30000000-0000-4000-8000-000000000008",
+      "media": "20000000-0000-4000-8000-000000000008",
+      "sortOrder": 20
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:10:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000011",
+    "contentType": "album",
+    "slug": "unlisted-proof",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Unlisted proof",
+    "payload": {
+      "title": "Unlisted proof",
+      "visibility": "unlisted",
+      "sortMode": "manual"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:11:00Z",
+    "updatedAt": "2026-09-20T00:11:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000012",
+    "contentType": "clinic_profile",
+    "slug": "home",
+    "publicationState": "published",
+    "version": 2,
+    "title": null,
+    "payload": {
+      "name": "Cedar Pet Clinic",
+      "intro": "A small neighbourhood clinic for well animals.",
+      "address": "14 Cedar Street",
+      "telephone": "6085553000",
+      "hours": "Mon–Fri 08:00–17:00"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:12:00Z",
+    "updatedAt": "2026-09-20T00:12:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000013",
+    "contentType": "vet",
+    "slug": "james-carter",
+    "publicationState": "published",
+    "version": 2,
+    "title": "James Carter",
+    "payload": {
+      "title": "James Carter",
+      "firstName": "James",
+      "lastName": "Carter",
+      "specialty": "radiology",
+      "bio": "Imaging."
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:13:00Z",
+    "updatedAt": "2026-09-20T00:13:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000014",
+    "contentType": "vet",
+    "slug": "helen-leary",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Helen Leary",
+    "payload": {
+      "title": "Helen Leary",
+      "firstName": "Helen",
+      "lastName": "Leary",
+      "specialty": "dentistry",
+      "bio": "Teeth."
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:14:00Z",
+    "updatedAt": "2026-09-20T00:14:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000015",
+    "contentType": "vet",
+    "slug": "linda-douglas",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Linda Douglas",
+    "payload": {
+      "title": "Linda Douglas",
+      "firstName": "Linda",
+      "lastName": "Douglas",
+      "specialty": "surgery",
+      "bio": "Draft surgeon."
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:15:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000016",
+    "contentType": "owner",
+    "slug": "george-franklin",
+    "publicationState": "published",
+    "version": 2,
+    "title": "George Franklin",
+    "payload": {
+      "title": "George Franklin",
+      "firstName": "George",
+      "lastName": "Franklin",
+      "city": "Madison",
+      "telephone": "6085551023",
+      "ownerPrincipalId": "10000000-0000-4000-8000-000000000004"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:16:00Z",
+    "updatedAt": "2026-09-20T00:16:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000017",
+    "contentType": "owner",
+    "slug": "betty-davis",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Betty Davis",
+    "payload": {
+      "title": "Betty Davis",
+      "firstName": "Betty",
+      "lastName": "Davis",
+      "city": "Madison"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:17:00Z",
+    "updatedAt": "2026-09-20T00:17:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000018",
+    "contentType": "owner",
+    "slug": "eduardo-rodriquez",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Eduardo Rodriquez",
+    "payload": {
+      "title": "Eduardo Rodriquez",
+      "firstName": "Eduardo",
+      "lastName": "Rodriquez",
+      "city": "McFarland"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:18:00Z",
+    "updatedAt": "2026-09-20T00:18:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000019",
+    "contentType": "pet",
+    "slug": "leo",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Leo",
+    "payload": {
+      "title": "Leo",
+      "name": "Leo",
+      "petType": "cat",
+      "owner": "30000000-0000-4000-8000-000000000016",
+      "ownerPrincipalId": "10000000-0000-4000-8000-000000000004"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:19:00Z",
+    "updatedAt": "2026-09-20T00:19:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000020",
+    "contentType": "pet",
+    "slug": "basil",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Basil",
+    "payload": {
+      "title": "Basil",
+      "name": "Basil",
+      "petType": "hamster",
+      "owner": "30000000-0000-4000-8000-000000000017"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:20:00Z",
+    "updatedAt": "2026-09-20T00:20:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000021",
+    "contentType": "pet",
+    "slug": "jewel",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Jewel",
+    "payload": {
+      "title": "Jewel",
+      "name": "Jewel",
+      "petType": "dog",
+      "owner": "30000000-0000-4000-8000-000000000018"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:21:00Z",
+    "updatedAt": "2026-09-20T00:21:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000022",
+    "contentType": "visit",
+    "slug": "leo-rabies",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Leo rabies shot",
+    "payload": {
+      "title": "Leo rabies shot",
+      "pet": "30000000-0000-4000-8000-000000000019",
+      "owner": "30000000-0000-4000-8000-000000000016",
+      "vet": "30000000-0000-4000-8000-000000000013",
+      "scheduledAt": "2026-03-01T10:00:00Z",
+      "description": "rabies shot",
+      "visitKind": "vaccine",
+      "ownerPrincipalId": "10000000-0000-4000-8000-000000000004"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:22:00Z",
+    "updatedAt": "2026-09-20T00:22:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000023",
+    "contentType": "visit",
+    "slug": "leo-checkup",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Leo checkup",
+    "payload": {
+      "title": "Leo checkup",
+      "pet": "30000000-0000-4000-8000-000000000019",
+      "owner": "30000000-0000-4000-8000-000000000016",
+      "vet": "30000000-0000-4000-8000-000000000013",
+      "scheduledAt": "2026-09-20T09:00:00Z",
+      "description": "annual checkup",
+      "visitKind": "checkup",
+      "ownerPrincipalId": "10000000-0000-4000-8000-000000000004"
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:23:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000024",
+    "contentType": "project",
+    "slug": "cms-scaffold",
+    "publicationState": "published",
+    "version": 2,
+    "title": "CMS Scaffold",
+    "payload": {
+      "title": "CMS Scaffold",
+      "summary": "Reusable CMS kernel with three surfaces.",
+      "visibility": "public",
+      "lifecycle": "active"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:24:00Z",
+    "updatedAt": "2026-09-20T00:24:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000025",
+    "contentType": "project",
+    "slug": "internal-ops",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Internal Ops",
+    "payload": {
+      "title": "Internal Ops",
+      "summary": "Not for the public site.",
+      "visibility": "private",
+      "lifecycle": "active"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:25:00Z",
+    "updatedAt": "2026-09-20T00:25:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000026",
+    "contentType": "project",
+    "slug": "draft-lab",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Draft Lab",
+    "payload": {
+      "title": "Draft Lab",
+      "summary": "Still a draft.",
+      "visibility": "public",
+      "lifecycle": "active"
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:26:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000027",
+    "contentType": "milestone",
+    "slug": "m1-specs",
+    "publicationState": "published",
+    "version": 2,
+    "title": "M1 Specs",
+    "payload": {
+      "title": "M1 Specs",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 10
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:27:00Z",
+    "updatedAt": "2026-09-20T00:27:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000028",
+    "contentType": "milestone",
+    "slug": "m2-kernel",
+    "publicationState": "published",
+    "version": 2,
+    "title": "M2 Kernel",
+    "payload": {
+      "title": "M2 Kernel",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 20
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:28:00Z",
+    "updatedAt": "2026-09-20T00:28:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000029",
+    "contentType": "milestone",
+    "slug": "m3-surfaces",
+    "publicationState": "published",
+    "version": 2,
+    "title": "M3 Surfaces",
+    "payload": {
+      "title": "M3 Surfaces",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "planned",
+      "sortOrder": 30
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:29:00Z",
+    "updatedAt": "2026-09-20T00:29:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000030",
+    "contentType": "issue",
+    "slug": "write-album-pack",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Write album pack",
+    "payload": {
+      "title": "Write album pack",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "milestone": "30000000-0000-4000-8000-000000000027",
+      "status": "done",
+      "sortOrder": 10
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:30:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000031",
+    "contentType": "issue",
+    "slug": "visit-timeline-query",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Visit timeline query",
+    "payload": {
+      "title": "Visit timeline query",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "in_progress",
+      "sortOrder": 20
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:31:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000032",
+    "contentType": "issue",
+    "slug": "kanban-dnd",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Kanban DnD",
+    "payload": {
+      "title": "Kanban DnD",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "ready",
+      "sortOrder": 30
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:32:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000033",
+    "contentType": "issue",
+    "slug": "private-project-leak-test",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Private project leak test",
+    "payload": {
+      "title": "Private project leak test",
+      "project": "30000000-0000-4000-8000-000000000024",
+      "status": "backlog",
+      "sortOrder": 40
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:33:00Z"
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000034",
+    "contentType": "issue",
+    "slug": "secret-infra-task",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Secret infra task",
+    "payload": {
+      "title": "Secret infra task",
+      "project": "30000000-0000-4000-8000-000000000025",
+      "status": "backlog",
+      "sortOrder": 10
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:34:00Z"
+  }
+]

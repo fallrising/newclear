@@ -3,9 +3,11 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
-  server: { port: 5173, host: true },
-  preview: { port: 5173, host: true },
+  // `--mode mock` serves the MSW worker script from @cms/mocks; production builds never contain it.
+  publicDir: mode === "mock" ? "../../packages/mocks/public" : "public",
+  server: { port: 5173, strictPort: true, host: true },
+  preview: { port: 5173, strictPort: true, host: true },
   test: { environment: "jsdom", setupFiles: "./src/test-setup.ts" },
-});
+}));

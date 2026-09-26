@@ -1,0 +1,21 @@
+{
+  "name": "@cms/mocks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts",
+    "./node": "./src/node.ts"
+  },
+  "scripts": {
+    "gen": "node scripts/gen-fixtures.mjs",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cms/api": "*",
+    "msw": "2.15.0"
+  }
+}

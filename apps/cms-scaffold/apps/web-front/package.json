@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",
+    "dev:mock": "vite --mode mock --port 5173",
     "build": "vite build",
     "preview": "vite preview --port 5173 --host",
     "typecheck": "tsc --noEmit",
@@ -12,15 +13,18 @@
   },
   "dependencies": {
     "@cms/api": "*",
+    "@cms/auth": "*",
     "@cms/ui": "*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.1"
+    "@tanstack/react-query": "5.103.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router": "7.18.4"
   },
   "devDependencies": {
+    "@cms/mocks": "*",
     "@tailwindcss/vite": "^4.1.12",
-    "@types/react": "^18.3.24",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "^5.0.2",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2",

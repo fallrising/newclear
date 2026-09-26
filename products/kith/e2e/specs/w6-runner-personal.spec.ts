@@ -97,7 +97,12 @@ test(
       await shot(ben.page, info, "01-ben-no-run");
 
       await sendViaComposer(page, `@${handle} please [[cli:text=from-ada-${rand}]]`);
-      await expect(page.getByTestId("message-body").filter({ hasText: "from-ada-" + rand })).toBeVisible({ timeout: 30_000 });
+      // The trigger row also contains from-ada-${rand}. Wait until a body equals the reply.
+      const reply = "from-ada-" + rand;
+      await expect.poll(async () => {
+        const bodies = await page.getByTestId("message-body").allTextContents();
+        return bodies.some((body) => body.trim() === reply) ? 1 : 0;
+      }, { timeout: 30_000, intervals: [100] }).toBe(1);
       expect(runner.invocations()).toHaveLength(1);
       await shot(page, info, "02-ada-runs");
 

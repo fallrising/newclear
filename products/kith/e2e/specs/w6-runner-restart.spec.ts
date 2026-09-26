@@ -12,6 +12,13 @@ import { expectRunnerAlive, startRunner, waitForRunnerOnline, type RunnerHandle 
 
 type RoomMessage = { id: string; seq: number; body: string; kind: string };
 
+async function expectExactBody(page: Page, text: string): Promise<void> {
+  await expect.poll(async () => {
+    const bodies = await page.getByTestId("message-body").allTextContents();
+    return bodies.some((body) => body.trim() === text) ? 1 : 0;
+  }, { timeout: 30_000, intervals: [100] }).toBe(1);
+}
+
 async function expectLive(page: Page): Promise<void> {
   await expect(page.getByTestId("timeline")).toBeVisible();
   await expect(page.getByTestId("room-connection")).toHaveCount(0);
@@ -71,7 +78,7 @@ test(
       await expectLive(ben.page);
       await waitForRunnerOnline(api, aid);
       await sendViaComposer(ben.page, `@${handle} one [[cli:text=one-${rand}]]`);
-      await expect(ben.page.getByTestId("message-body").filter({ hasText: "one-" + rand })).toBeVisible({ timeout: 30_000 });
+      await expectExactBody(ben.page, "one-" + rand);
       expect(runner.invocations()).toHaveLength(1);
 
       expect(await runner.stop()).toBe(0);
@@ -90,7 +97,7 @@ test(
       expect(state.rooms?.[roomId]?.cursor ?? -1).toBeGreaterThanOrEqual(off.seq);
 
       await sendViaComposer(ben.page, `@${handle} two [[cli:text=two-${rand}]]`);
-      await expect(ben.page.getByTestId("message-body").filter({ hasText: "two-" + rand })).toBeVisible({ timeout: 30_000 });
+      await expectExactBody(ben.page, "two-" + rand);
       expect(runner2.invocations()).toHaveLength(2);
 
       await page.goto("/console/agents/" + aid + "?tab=tokens");

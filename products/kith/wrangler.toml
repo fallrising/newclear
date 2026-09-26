@@ -25,6 +25,10 @@ database_name = "kith"
 database_id = "f7eb46f9-61f6-4ce8-a463-d790676557fc"
 migrations_dir = "migrations"
 
+[[r2_buckets]]
+binding = "TRACES"
+bucket_name = "kith-traces"
+
 [[kv_namespaces]]
 binding = "SESSIONS"
 id = "344a51ec4d224a71a4f2cc5ae07ae2e6"

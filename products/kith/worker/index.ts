@@ -47,6 +47,7 @@ import { Room } from "./room.ts";
 import { loadAllAgentRuntimes } from "./providers/runtime.ts";
 import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
 import { mountProviderRoutes } from "./routes/providers.ts";
+import { mountTraceRoutes } from "./routes/traces.ts";
 
 export { HostedGeneration, Inbox, Room };
 
@@ -743,6 +744,7 @@ app.post("/api/members/:id/password", async (c) => {
 
 mountProviderRoutes(app);
 mountAgentRoutes(app);
+mountTraceRoutes(app);
 
 app.get("/api/metrics", async (c) => {
   const auth = await requireOperator(c);

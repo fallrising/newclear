@@ -4,6 +4,7 @@ export type Env = {
   ROOM: DurableObjectNamespace;
   INBOX: DurableObjectNamespace;
   HOSTED: DurableObjectNamespace;
+  TRACES?: R2Bucket;
   ff_mcp: string;
   ff_hosted_agent: string;
   ff_sidecar: string;

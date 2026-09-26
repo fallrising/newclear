@@ -75,7 +75,8 @@ test(
             }
           }
         }
-        return await ben.page.getByTestId("message-row").filter({ hasText: rand }).count();
+        const bodies = await ben.page.getByTestId("message-body").allTextContents();
+        return bodies.some((body) => body.trim() === T) ? 1 : 0;
       }, { timeout: 15_000, intervals: [100] }).toBeGreaterThan(0);
       expect(seen.length).toBeGreaterThanOrEqual(3);
       let prev = 0;
@@ -109,7 +110,10 @@ test(
 
       const held = chaos.add({ kind: "hold", match: { dir: "in", type: "draft" } });
       await sendViaComposer(ben.page, "@" + handle + " [[fake:text=late-" + rand + ";chunks=4;chunk_ms=200]]");
-      await expect(ben.page.getByTestId("message-row").filter({ hasText: "late-" + rand })).toBeVisible({ timeout: 30_000 });
+      await expect.poll(async () => {
+        const bodies = await ben.page.getByTestId("message-body").allTextContents();
+        return bodies.some((body) => body.trim() === "late-" + rand);
+      }, { timeout: 30_000 }).toBe(true);
       chaos.release(held);
       await ben.page.waitForTimeout(500);
       await expect(ben.page.getByTestId("reply-draft")).toHaveCount(0);

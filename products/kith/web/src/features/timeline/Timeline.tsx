@@ -2,6 +2,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { roomMembersQueryKey } from "../../api/rooms";
+import { useDraftStore } from "../../store/drafts";
 import { useNow, useStatusStore } from "../../store/statuses";
 import type { RoomMember, RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
@@ -39,7 +40,8 @@ export function Timeline(props: Props): ReactElement {
   const queryClient = useQueryClient();
   const { timeline, meId } = props;
   const statuses = useStatusStore((s) => s.rooms[props.room.id]);
-  const missingReplyMember = Object.keys(statuses?.replies ?? {}).some(
+  const drafts = useDraftStore((s) => s.byRoom[props.room.id]);
+  const missingReplyMember = [...Object.keys(statuses?.replies ?? {}), ...Object.keys(drafts ?? {})].some(
     (id) => !props.members?.some((member) => member.id === id),
   );
   useEffect(() => {
@@ -48,8 +50,8 @@ export function Timeline(props: Props): ReactElement {
   }, [missingReplyMember, props.room.id, queryClient]);
   const now = useNow(1000);
   const items = useMemo(
-    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq, statuses, now, props.members),
-    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq, statuses, now, props.members],
+    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq, statuses, now, props.members, drafts),
+    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq, statuses, now, props.members, drafts],
   );
   const hasMessages = items.some((i) => i.kind === "message");
 
@@ -151,6 +153,18 @@ export function Timeline(props: Props): ReactElement {
     }
   }, [lastKey]);
 
+  const draftLength = Object.values(drafts ?? {}).reduce((n, draft) => n + draft.text.length, 0);
+  const prevDraftLength = useRef(draftLength);
+  useEffect(() => {
+    const prev = prevDraftLength.current;
+    prevDraftLength.current = draftLength;
+    if (prev === draftLength || !atBottomRef.current) return;
+    const id = requestAnimationFrame(() => {
+      if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [draftLength, items.length, virtualizer]);
+
   useEffect(() => {
     const onLatest = (): void => {
       if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
@@ -201,7 +215,7 @@ export function Timeline(props: Props): ReactElement {
       }
       case "reply": {
         const member = props.members?.find((m) => m.id === item.memberId);
-        return member ? <ReplyPlaceholder member={member} /> : <span />;
+        return member ? <ReplyPlaceholder member={member} draft={item.draft} /> : <span />;
       }
       case "failed": {
         const member = props.members?.find((m) => m.id === item.memberId);

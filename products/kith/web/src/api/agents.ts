@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { apiFetch } from "./client";
-import type { AdminAgent, AgentDetail, BotToken, PutRuntimeBody, QuotaClass } from "./types";
+import type { AdminAgent, AgentDetail, BotToken, Generation, PutRuntimeBody, QuotaClass } from "./types";
 
 export const agentsQueryKey = ["admin", "agents"] as const;
 
@@ -65,7 +65,20 @@ export function usePutRuntime(): UseMutationResult<
         method: "PUT",
         body: input.body,
       }),
-    onSuccess: () => invalidateAgents(queryClient),
+    onSuccess: (_data, input) => {
+      invalidateAgents(queryClient);
+      void queryClient.invalidateQueries({ queryKey: [...agentsQueryKey, input.id, "generations"] });
+    },
+  });
+}
+
+export function useAgentGenerations(id: string): UseQueryResult<Generation[], Error> {
+  return useQuery({
+    queryKey: [...agentsQueryKey, id, "generations"],
+    queryFn: async ({ signal }) =>
+      (await apiFetch<{ generations: Generation[] }>("/api/agents/" + encodeURIComponent(id) + "/generations?limit=50", { signal }))
+        .generations,
+    refetchOnWindowFocus: true,
   });
 }
 

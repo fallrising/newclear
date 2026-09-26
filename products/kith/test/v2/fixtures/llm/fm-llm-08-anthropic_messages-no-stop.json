@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-08",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: message_start\ndata: {\"type\": \"message_start\", \"message\": {\"usage\": {\"input_tokens\": 1}}}\n\nevent: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"part\"}}\n\n"
+  },
+  "expect": {
+    "error_class": "protocol",
+    "deltas": [
+      "part"
+    ]
+  }
+}

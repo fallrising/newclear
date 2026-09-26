@@ -1,0 +1,21 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "openai_responses",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"r\", \"object\": \"response\", \"status\": \"in_progress\", \"output\": [], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 0, \"item_id\": \"m\", \"output_index\": 0, \"content_index\": 0, \"delta\": \"Str\"}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 0, \"item_id\": \"m\", \"output_index\": 0, \"content_index\": 0, \"delta\": \"eam\"}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 0, \"response\": {\"id\": \"r\", \"object\": \"response\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"m\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Stream\", \"annotations\": []}]}], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}}}\n\n"
+  },
+  "expect": {
+    "text": "Stream",
+    "finish": "stop",
+    "deltas": [
+      "Str",
+      "eam"
+    ]
+  }
+}

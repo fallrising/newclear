@@ -1,5 +1,5 @@
 import type { CopyKey, CopyVars } from "../../../copy";
-import type { AgentRuntimeSummary, LlmErrorClass, RuntimeStatus } from "../../../api/types";
+import type { AgentRuntimeSummary, ApiFormat, LlmErrorClass, RuntimeStatus } from "../../../api/types";
 
 type T = (key: CopyKey, vars?: CopyVars) => string;
 
@@ -31,6 +31,18 @@ const ERROR_KEYS = {
   protocol: "console.errorClass.protocol",
   unknown: "console.errorClass.unknown",
 } as const satisfies Record<LlmErrorClass, CopyKey>;
+
+const FORMAT_KEYS = {
+  openai_chat: "console.providers.format.openai_chat",
+  anthropic_messages: "console.providers.format.anthropic_messages",
+  openai_responses: "console.providers.format.openai_responses",
+  gemini: "console.providers.format.gemini",
+} as const satisfies Record<ApiFormat, CopyKey>;
+
+export function formatLabel(t: T, format: string): string {
+  if (format in FORMAT_KEYS) return t(FORMAT_KEYS[format as ApiFormat]);
+  return format;
+}
 
 export function runtimeLabel(t: T, summary: AgentRuntimeSummary): string {
   if (summary.runtime === null) return t("console.agents.runtime.v1");

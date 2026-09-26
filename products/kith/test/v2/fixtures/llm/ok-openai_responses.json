@@ -1,0 +1,18 @@
+{
+  "fm": "BASE",
+  "format": "openai_responses",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"r\", \"object\": \"response\", \"status\": \"completed\", \"output\": [{\"type\": \"reasoning\", \"id\": \"rs\", \"summary\": []}, {\"type\": \"message\", \"id\": \"m\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Hi\", \"annotations\": []}, {\"type\": \"output_text\", \"text\": \"!\", \"annotations\": []}]}], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}}"
+  },
+  "expect": {
+    "text": "Hi!",
+    "finish": "stop",
+    "usage": {
+      "input_tokens": 4,
+      "output_tokens": 2
+    }
+  }
+}

@@ -1,8 +1,9 @@
 import type { ApiFormat } from "./types.ts";
 
-/** 03 §2.2. Values checked 2026-09-24 against SDK defaults (see W4 §10). */
+/** 03 §2.2. Values checked 2026-09-24 against SDK defaults (W4 §4.5.3, W5 §4.4). */
 export const PRESETS = {
   openai: { api_format: "openai_chat", base_url: "https://api.openai.com/v1", token_param: "max_completion_tokens" },
+  google: { api_format: "gemini", base_url: "https://generativelanguage.googleapis.com/v1beta", token_param: "max_tokens" },
   anthropic: { api_format: "anthropic_messages", base_url: "https://api.anthropic.com", token_param: "max_tokens" },
   xai: { api_format: "openai_chat", base_url: "https://api.x.ai/v1", token_param: "max_tokens" },
   deepseek: { api_format: "openai_chat", base_url: "https://api.deepseek.com", token_param: "max_tokens" },
@@ -12,6 +13,8 @@ export const PRESETS = {
   custom: { api_format: null, base_url: null, token_param: "max_tokens" },
 } as const satisfies Record<string, { api_format: ApiFormat | null; base_url: string | null; token_param: string }>;
 export type Preset = keyof typeof PRESETS;
+/** Formats a preset may switch to (03 §2.2 "可改"). Others must equal the preset's own format. */
+export const PRESET_ALT_FORMATS: Partial<Record<Preset, readonly ApiFormat[]>> = { openai: ["openai_responses"] };
 export const TOKEN_PARAMS = ["max_tokens", "max_completion_tokens"] as const;
 
 const FORBIDDEN_HEADERS = new Set([

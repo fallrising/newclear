@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-08",
+  "format": "gemini",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"par\"}]}, \"index\": 0}]}\n\n"
+  },
+  "expect": {
+    "error_class": "protocol",
+    "deltas": [
+      "par"
+    ]
+  }
+}

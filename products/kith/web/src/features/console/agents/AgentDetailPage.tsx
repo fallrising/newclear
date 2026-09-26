@@ -11,12 +11,13 @@ import { Badge } from "../../../ui/Badge";
 import { Button } from "../../../ui/Button";
 import { SelectField } from "../../../ui/SelectField";
 import { RemoveMemberDialog } from "../../members/RemoveMemberDialog";
+import { GenerationsTab } from "./GenerationsTab";
 import { RuntimeChangeDialog } from "./RuntimeChangeDialog";
 import { RuntimeForm } from "./RuntimeForm";
 import { runtimeLabel, statusKey, statusTone } from "./runtimeText";
 import { TokensTab } from "./TokensTab";
 
-const TABS = ["overview", "runtime", "tokens", "rooms"] as const;
+const TABS = ["overview", "runtime", "tokens", "rooms", "generations"] as const;
 type Tab = (typeof TABS)[number];
 
 export function AgentDetailPage(): ReactElement {
@@ -169,6 +170,8 @@ export function AgentDetailPage(): ReactElement {
       )}
 
       {tab === "tokens" && <TokensTab agentId={detail.id} />}
+
+      {tab === "generations" && <GenerationsTab agentId={detail.id} />}
 
       {tab === "rooms" && (
         <div data-testid="agent-rooms" className="flex flex-col gap-3">

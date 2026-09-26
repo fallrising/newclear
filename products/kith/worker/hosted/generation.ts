@@ -66,6 +66,12 @@ type RoomReleaseStub = DurableObjectStub & {
     memberId: string,
     errorClass: string,
   ): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }>;
+  postDraft(
+    roomId: string,
+    memberId: string,
+    generationId: string,
+    text: string,
+  ): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }>;
 };
 
 export class HostedGeneration extends DurableObject<Env> {
@@ -252,6 +258,7 @@ export class HostedGeneration extends DurableObject<Env> {
   private async runJobV2(job: Job & { v2: V2Job }): Promise<void> {
     let failedClass: LlmErrorClass | null = null;
     let rescheduled = false;
+    let drafts: DraftThrottle | null = null;
     try {
       await this.env.DB.prepare(
         `UPDATE generations SET state = 'streaming' WHERE id = ? AND state = 'dispatched'`,
@@ -274,6 +281,9 @@ export class HostedGeneration extends DurableObject<Env> {
       }
 
       const params = hostedParams(view.params_json);
+      // B-10: stream only while ff_drafts=on; otherwise the runtime's stream setting is ignored.
+      const streaming = params.stream && flagOn(this.env.ff_drafts);
+      drafts = streaming ? new DraftThrottle((text) => this.broadcastDraft(job, text)) : null;
       const addendum = view.system_prompt_addendum.trim();
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
@@ -287,13 +297,15 @@ export class HostedGeneration extends DurableObject<Env> {
             transcript: wrapTranscript(job.transcript),
             max_output_tokens: params.max_output_tokens,
             temperature: params.temperature,
-            stream: false,
+            stream: streaming,
           },
           fetch,
           controller.signal,
+          drafts ? (d) => drafts?.push(d.text) : undefined,
         );
       } finally {
         clearTimeout(timer);
+        await drafts?.settle(); // every draft is delivered before the final event or the failure (FM-SYNC-14)
       }
 
       // V2-INV-06: re-read the epoch after the model returns; a change during the call drops the reply.
@@ -320,7 +332,9 @@ export class HostedGeneration extends DurableObject<Env> {
       }
     } catch (err) {
       const cls: LlmErrorClass = err instanceof LlmError ? err.errorClass : "unknown";
-      if (RETRYABLE.has(cls) && job.v2.attempt === 0) {
+      await drafts?.settle();
+      // No retry once a draft was shown: a second attempt would restart the visible text (03 §2.6 + B-10).
+      if (RETRYABLE.has(cls) && job.v2.attempt === 0 && !drafts?.sentAny) {
         // 03 §2.6: one retry, scheduled with a DO alarm (never sleep).
         const wait = err instanceof LlmError && err.retryAfterMs !== undefined ? err.retryAfterMs : RETRY_DEFAULT_MS;
         await this.ctx.storage.put("job", { ...job, v2: { ...job.v2, attempt: 1 } });
@@ -338,6 +352,16 @@ export class HostedGeneration extends DurableObject<Env> {
         await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
         await this.releaseAmbientLock(job);
       }
+    }
+  }
+
+  /** B-10 frame through the Room; a lost draft never fails the generation. */
+  private async broadcastDraft(job: Job, text: string): Promise<void> {
+    try {
+      const stub = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${job.room_id}`)) as RoomReleaseStub;
+      await stub.postDraft(job.room_id, job.agent_id, job.generation_id, text);
+    } catch {
+      /* drafts are best effort */
     }
   }
 
@@ -518,4 +542,46 @@ export function truncateBody(text: string): string {
     used += size;
   }
   return out + TRUNCATED_SUFFIX;
+}
+
+export const DRAFT_MIN_INTERVAL_MS = 250; // 03 §2.4
+export const DRAFT_MIN_CHARS = 64;
+
+/**
+ * Throttles cumulative-text drafts: send when ≥ 250 ms or ≥ 64 new characters since the last send.
+ * Sends are chained so they arrive in order; above 8 KiB drafting stops and the final message is awaited (B-10).
+ */
+export class DraftThrottle {
+  private text = "";
+  private lastSentLength = 0;
+  private lastSentAt = 0;
+  private stopped = false;
+  private chain: Promise<void> = Promise.resolve();
+  sentAny = false;
+
+  constructor(
+    private readonly send: (text: string) => Promise<void>,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  push(delta: string): void {
+    if (this.stopped) return;
+    this.text += delta;
+    if (utf8Bytes(this.text) > BODY_MAX_BYTES) {
+      this.stopped = true;
+      return;
+    }
+    const t = this.now();
+    if (t - this.lastSentAt < DRAFT_MIN_INTERVAL_MS && this.text.length - this.lastSentLength < DRAFT_MIN_CHARS) return;
+    this.lastSentAt = t;
+    this.lastSentLength = this.text.length;
+    this.sentAny = true;
+    const snapshot = this.text;
+    this.chain = this.chain.then(() => this.send(snapshot));
+  }
+
+  async settle(): Promise<void> {
+    this.stopped = true;
+    await this.chain;
+  }
 }

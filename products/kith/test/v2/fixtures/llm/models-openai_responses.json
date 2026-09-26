@@ -1,0 +1,15 @@
+{
+  "fm": "BASE",
+  "format": "openai_responses",
+  "call": "listModels",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"object\": \"list\", \"data\": [{\"id\": \"gpt-x\"}]}"
+  },
+  "expect": {
+    "models": [
+      "gpt-x"
+    ]
+  }
+}

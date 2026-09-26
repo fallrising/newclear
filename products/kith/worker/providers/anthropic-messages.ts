@@ -1,4 +1,5 @@
-import { failFromResponse, joinUrl, nonNegativeInt, readJsonObject, send } from "./http.ts";
+import { failFromResponse, isEventStream, joinUrl, nonNegativeInt, readJsonObject, send } from "./http.ts";
+import { parseJsonObject, readSse } from "./sse.ts";
 import { LlmError, type LlmAdapter, type LlmErrorClass, type NormalizedResult } from "./types.ts";
 
 /** Current and only published value (Anthropic TS SDK 0.128.0 client.ts default header). */
@@ -27,13 +28,13 @@ export const anthropicMessages: LlmAdapter = {
     return ids;
   },
 
-  async complete(conn, req, fetchImpl, signal) {
+  async complete(conn, req, fetchImpl, signal, onDelta) {
     const payload: Record<string, unknown> = {
       model: req.model,
       max_tokens: req.max_output_tokens,
       system: req.system,
       messages: [{ role: "user", content: req.transcript }],
-      stream: false,
+      stream: req.stream,
     };
     // Newer Claude models reject any temperature except 1.0 (SDK 0.128.0 marks it deprecated); send only when set.
     if (req.temperature !== undefined) payload.temperature = req.temperature;
@@ -41,10 +42,15 @@ export const anthropicMessages: LlmAdapter = {
     const res = await send(
       fetchImpl,
       joinUrl(conn.base_url, "v1/messages"),
-      { method: "POST", headers: { ...headers(conn), "content-type": "application/json" }, body: JSON.stringify(payload) },
+      {
+        method: "POST",
+        headers: { ...headers(conn), "content-type": "application/json", accept: req.stream ? "text/event-stream" : "application/json" },
+        body: JSON.stringify(payload),
+      },
       signal,
     );
     if (!res.ok) return failFromResponse(res, refine);
+    if (req.stream && isEventStream(res)) return readStream(res, onDelta, signal);
     const body = await readJsonObject(res);
     if (!body || !Array.isArray(body.content)) throw new LlmError("protocol", res.status);
     const blocks = body.content.filter((b): b is Record<string, unknown> => !!b && typeof b === "object");
@@ -54,6 +60,56 @@ export const anthropicMessages: LlmAdapter = {
     return { text: texts.join(""), finish: finish(body.stop_reason), usage: usage(body.usage) };
   },
 };
+
+/**
+ * Messages SSE: message_start → content_block_start/delta/stop … → message_delta → message_stop; ping anywhere;
+ * `error` may arrive mid-stream (FM-LLM-09). Only message_stop ends the stream properly (FM-LLM-08).
+ * The event name is taken from the JSON `type`, falling back to the SSE `event:` line.
+ */
+async function readStream(
+  res: Response,
+  onDelta?: (d: { type: "text"; text: string }) => void,
+  signal?: AbortSignal,
+): Promise<NormalizedResult> {
+  let text = "";
+  let stopReason: unknown = null;
+  let input: number | undefined;
+  let output: number | undefined;
+  let sawStop = false;
+  for await (const ev of readSse(res, signal)) {
+    const data = parseJsonObject(ev.data);
+    if (!data) throw new LlmError("protocol", res.status);
+    const type = typeof data.type === "string" ? data.type : ev.event;
+    if (type === "ping" || type === "content_block_start" || type === "content_block_stop") continue;
+    if (type === "error") throw new LlmError(refine(res.status, data) ?? "unknown", res.status);
+    if (type === "message_start") {
+      const message = data.message && typeof data.message === "object" ? (data.message as Record<string, unknown>) : null;
+      const u = message?.usage && typeof message.usage === "object" ? (message.usage as Record<string, unknown>) : null;
+      input = nonNegativeInt(u?.input_tokens);
+    } else if (type === "content_block_delta") {
+      const delta = data.delta && typeof data.delta === "object" ? (data.delta as Record<string, unknown>) : null;
+      if (delta?.type === "text_delta" && typeof delta.text === "string" && delta.text.length > 0) {
+        text += delta.text;
+        onDelta?.({ type: "text", text: delta.text });
+      }
+    } else if (type === "message_delta") {
+      const delta = data.delta && typeof data.delta === "object" ? (data.delta as Record<string, unknown>) : null;
+      if (delta && delta.stop_reason !== undefined && delta.stop_reason !== null) stopReason = delta.stop_reason;
+      const u = data.usage && typeof data.usage === "object" ? (data.usage as Record<string, unknown>) : null;
+      output = nonNegativeInt(u?.output_tokens) ?? output;
+    } else if (type === "message_stop") {
+      sawStop = true;
+      break;
+    }
+  }
+  if (!sawStop) throw new LlmError("protocol", res.status);
+  if (stopReason === "refusal" && text.trim() === "") throw new LlmError("content_filter", res.status);
+  return {
+    text,
+    finish: finish(stopReason),
+    usage: input === undefined && output === undefined ? undefined : { input_tokens: input, output_tokens: output },
+  };
+}
 
 function headers(conn: { secret: string; extra_headers: Record<string, string> }): Record<string, string> {
   const h: Record<string, string> = { ...conn.extra_headers, accept: "application/json", "anthropic-version": ANTHROPIC_VERSION };

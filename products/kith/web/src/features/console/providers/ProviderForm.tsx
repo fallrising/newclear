@@ -14,10 +14,11 @@ import { DeleteProviderDialog } from "./DeleteProviderDialog";
 
 const NAME_RE = /^[A-Za-z0-9][A-Za-z0-9 ._-]{0,47}$/;
 const ENV_RE = /^[A-Z][A-Z0-9_]{0,63}$/;
-const PRESETS = ["openai", "anthropic", "xai", "deepseek", "openrouter", "mistral", "groq", "custom"] as const;
+const PRESETS = ["openai", "anthropic", "google", "xai", "deepseek", "openrouter", "mistral", "groq", "custom"] as const;
 const PRESET_DEFAULTS: Record<ProviderPreset, { api_format: ApiFormat | null; base_url: string | null; token_param: "max_tokens" | "max_completion_tokens" }> = {
   openai: { api_format: "openai_chat", base_url: "https://api.openai.com/v1", token_param: "max_completion_tokens" },
   anthropic: { api_format: "anthropic_messages", base_url: "https://api.anthropic.com", token_param: "max_tokens" },
+  google: { api_format: "gemini", base_url: "https://generativelanguage.googleapis.com/v1beta", token_param: "max_tokens" },
   xai: { api_format: "openai_chat", base_url: "https://api.x.ai/v1", token_param: "max_tokens" },
   deepseek: { api_format: "openai_chat", base_url: "https://api.deepseek.com", token_param: "max_tokens" },
   openrouter: { api_format: "openai_chat", base_url: "https://openrouter.ai/api/v1", token_param: "max_tokens" },
@@ -78,7 +79,8 @@ function secretInvalid(secret: string): boolean {
 
 function fromProvider(provider: Provider): FormState {
   const preset = (PRESETS as readonly string[]).includes(provider.preset) ? provider.preset : "custom";
-  const format: ApiFormat = provider.api_format === "anthropic_messages" ? "anthropic_messages" : "openai_chat";
+  const known: readonly string[] = ["openai_chat", "anthropic_messages", "openai_responses", "gemini"];
+  const format: ApiFormat = known.includes(provider.api_format) ? (provider.api_format as ApiFormat) : "openai_chat";
   return {
     preset,
     apiFormat: format,
@@ -201,10 +203,19 @@ export function ProviderForm(props: { mode: "new" | "edit" }): ReactElement {
     }
   }
 
-  const formatOptions = [
-    { value: "openai_chat", label: t("console.providers.format.openai_chat") },
-    { value: "anthropic_messages", label: t("console.providers.format.anthropic_messages") },
-  ];
+  const formatOptions =
+    form.preset === "openai"
+      ? [
+          { value: "openai_chat", label: t("console.providers.format.openai_chat") },
+          { value: "openai_responses", label: t("console.providers.format.openai_responses") },
+        ]
+      : [
+          { value: "openai_chat", label: t("console.providers.format.openai_chat") },
+          { value: "anthropic_messages", label: t("console.providers.format.anthropic_messages") },
+          { value: "openai_responses", label: t("console.providers.format.openai_responses") },
+          { value: "gemini", label: t("console.providers.format.gemini") },
+        ];
+  const showFormat = props.mode === "new" && (form.preset === "custom" || form.preset === "openai");
 
   return (
     <form
@@ -242,7 +253,7 @@ export function ProviderForm(props: { mode: "new" | "edit" }): ReactElement {
           {t(`console.providers.preset.${form.preset === "" ? "custom" : form.preset}` as CopyKey)}
         </p>
       )}
-      {form.preset === "custom" && props.mode === "new" ? (
+      {showFormat ? (
         <SelectField
           id="provider-format"
           data-testid="provider-format"
@@ -251,10 +262,6 @@ export function ProviderForm(props: { mode: "new" | "edit" }): ReactElement {
           options={formatOptions}
           onChange={(value) => setForm({ ...form, apiFormat: value as ApiFormat })}
         />
-      ) : form.preset !== "" ? (
-        <p data-testid="provider-format" className="text-sm text-ink-2">
-          {form.apiFormat === "anthropic_messages" ? t("console.providers.format.anthropic_messages") : t("console.providers.format.openai_chat")}
-        </p>
       ) : null}
       <TextField
         id="provider-name"

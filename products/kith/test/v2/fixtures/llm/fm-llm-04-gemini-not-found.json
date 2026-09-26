@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-04",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 404,
+    "headers": {},
+    "body": "{\"error\": {\"code\": 404, \"message\": \"models/x is not found\", \"status\": \"NOT_FOUND\"}}"
+  },
+  "expect": {
+    "error_class": "not_found"
+  }
+}

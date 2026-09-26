@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-09",
+  "format": "gemini",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"a\"}]}, \"index\": 0}]}\n\ndata: {\"error\": {\"code\": 503, \"message\": \"x\", \"status\": \"UNAVAILABLE\"}}\n\n"
+  },
+  "expect": {
+    "error_class": "overloaded",
+    "deltas": [
+      "a"
+    ]
+  }
+}

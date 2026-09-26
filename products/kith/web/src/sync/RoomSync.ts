@@ -1,6 +1,7 @@
 import { ApiError } from "../api/client";
 import type { fetchAfter, fetchLatest, fetchOlder, postMessage, probeMe } from "../api/messages";
 import type { ServerMessage } from "../api/types";
+import { useDraftStore } from "../store/drafts";
 import { useStatusStore } from "../store/statuses";
 import { useTimelineStore } from "../store/timeline";
 import { backoffDelay } from "./backoff";
@@ -83,6 +84,7 @@ export class RoomSync {
 
   stop(): void {
     useStatusStore.getState().clearRoom(this.roomId);
+    useDraftStore.getState().clearRoom(this.roomId);
     this.stopped = true;
     this.abort.abort();
     this.clearTimers();
@@ -194,6 +196,7 @@ export class RoomSync {
 
   private async onClose(): Promise<void> {
     useStatusStore.getState().clearRoom(this.roomId);
+    useDraftStore.getState().clearRoom(this.roomId);
     this.ws = null;
     if (this.ackTimer !== null) {
       this.d.clearTimer(this.ackTimer);
@@ -227,6 +230,7 @@ export class RoomSync {
 
   private readonly onOffline = (): void => {
     useStatusStore.getState().clearRoom(this.roomId);
+    useDraftStore.getState().clearRoom(this.roomId);
     this.phase("offline");
     if (this.reconnectTimer !== null) {
       this.d.clearTimer(this.reconnectTimer);
@@ -329,6 +333,8 @@ export class RoomSync {
       member_id?: unknown;
       body?: unknown;
       error_class?: unknown;
+      generation_id?: unknown;
+      text?: unknown;
     };
     if (f.type === "event" && f.event) {
       const row = f.event;
@@ -340,6 +346,7 @@ export class RoomSync {
         else if (!this.catchingUp) this.scheduleGap();
       }
       if (row.kind === "message") useStatusStore.getState().onMessage(this.roomId, row.sender_id);
+      if (row.generation_id !== null) useDraftStore.getState().complete(this.roomId, row.generation_id);
     } else if (f.type === "error") {
       this.handleSendError(typeof f.code === "string" ? f.code : "unknown");
     } else if (f.type === "status" && typeof f.member_id === "string" && typeof f.body === "string") {
@@ -352,6 +359,14 @@ export class RoomSync {
         },
         Date.now(),
       );
+      if (f.body === "reply ended" || f.body === "reply failed") useDraftStore.getState().clearMember(this.roomId, f.member_id);
+    } else if (
+      f.type === "draft" &&
+      typeof f.member_id === "string" &&
+      typeof f.generation_id === "string" &&
+      typeof f.text === "string"
+    ) {
+      useDraftStore.getState().apply(this.roomId, { member_id: f.member_id, generation_id: f.generation_id, text: f.text });
     }
   }
 

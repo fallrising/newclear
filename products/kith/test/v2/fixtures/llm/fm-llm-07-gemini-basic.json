@@ -1,0 +1,25 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "gemini",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"Ol\"}]}, \"index\": 0}]}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"á\"}]}, \"finishReason\": \"STOP\", \"index\": 0}], \"usageMetadata\": {\"promptTokenCount\": 3, \"candidatesTokenCount\": 2}}\r\n\r\n"
+  },
+  "expect": {
+    "text": "Olá",
+    "finish": "stop",
+    "usage": {
+      "input_tokens": 3,
+      "output_tokens": 2
+    },
+    "deltas": [
+      "Ol",
+      "á"
+    ]
+  }
+}

@@ -54,7 +54,7 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 | W2 房間與帳號 | [milestones/W2.md](milestones/W2.md) | `VERIFIED` |
 | W3 成員、提及、回覆狀態 | [milestones/W3.md](milestones/W3.md) | `VERIFIED` |
 | W4 Providers、hosted 多格式、控制台 | [milestones/W4.md](milestones/W4.md) | `VERIFIED` |
-| W5 串流與可觀測 | [milestones/W5.md](milestones/W5.md) | `DOC_READY` |
+| W5 串流與可觀測 | [milestones/W5.md](milestones/W5.md) | `VERIFIED` |
 | W6 Runner、trace、thread | [milestones/W6.md](milestones/W6.md) | `DOC_READY` |
 | W7 切換 | [milestones/W7.md](milestones/W7.md) | `DOC_READY` |
 

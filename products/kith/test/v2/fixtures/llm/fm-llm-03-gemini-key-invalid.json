@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-03",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 400,
+    "headers": {},
+    "body": "{\"error\": {\"code\": 400, \"message\": \"API key not valid. sk-live-LEAKME\", \"status\": \"INVALID_ARGUMENT\", \"details\": [{\"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\", \"reason\": \"API_KEY_INVALID\", \"domain\": \"googleapis.com\"}]}}"
+  },
+  "expect": {
+    "error_class": "auth",
+    "no_text": "sk-live-LEAKME"
+  }
+}

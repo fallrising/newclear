@@ -1,0 +1,16 @@
+{
+  "fm": "BASE",
+  "format": "gemini",
+  "call": "listModels",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"models\": [{\"name\": \"models/gemini-x\"}, {\"name\": \"models/gemini-y\"}]}"
+  },
+  "expect": {
+    "models": [
+      "gemini-x",
+      "gemini-y"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"thinking_delta\", \"thinking\": \"hmm\"}}\n\nevent: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 1, \"delta\": {\"type\": \"text_delta\", \"text\": \"ok\"}}\n\nevent: message_delta\ndata: {\"type\": \"message_delta\", \"delta\": {\"stop_reason\": \"max_tokens\"}}\n\nevent: message_stop\ndata: {\"type\": \"message_stop\"}\n\n"
+  },
+  "expect": {
+    "text": "ok",
+    "finish": "length",
+    "deltas": [
+      "ok"
+    ]
+  }
+}

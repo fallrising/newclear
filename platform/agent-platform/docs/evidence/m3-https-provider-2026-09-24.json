@@ -1,0 +1,143 @@
+{
+  "milestone": "AT-11-C2b2",
+  "date": "2026-09-24",
+  "base_main": "dba9ee94a49bcfe2efb298caa1d5324cfde03988",
+  "status": "implementation-and-local-checks-passed; last-full-ci-pass-on-e099c6e; latest-pr-run-cancelled-per-user-e2e-policy; handoff-only-head-skipped-ci; draft-pr-open; real-kvm-gate-incomplete",
+  "pull_request": {
+    "number": 82,
+    "url": "https://github.com/fallrising/newclear/pull/82",
+    "draft": true,
+    "merged": false
+  },
+  "scope": "fixed OpenAI-compatible HTTPS transport and profile-pinned task verification; no external provider",
+  "accounting": {
+    "external_provider_calls": 0,
+    "host_provider_credentials_read": 0,
+    "amount_decimal": null,
+    "hard_money_limit_supported": false,
+    "provider_usage_source": "provider_reported_usage_unbilled"
+  },
+  "tests": {
+    "python_unit_tests": {
+      "passed": 45
+    },
+    "postgres_http_platform_tests": {
+      "passed": 200
+    },
+    "ruff_check": "passed",
+    "ruff_format_check": "passed",
+    "web_check": {
+      "status": "not-run-locally; github-web-ci-passed",
+      "reason": "npm executable is unavailable locally; GitHub web job passed npm check and build"
+    }
+  },
+  "kvm": {
+    "case": "mock-https-complete",
+    "status": "blocked",
+    "passed": false,
+    "reason": "sandboxd was started without the documented supplementary kvm group; /dev/kvm access returned EACCES and the Cocoon clone child was terminated",
+    "sg_kvm_read_only_access_check": "passed",
+    "preflight": {
+      "old_journal_rows": 197,
+      "old_release_stop_proofs_valid": 197,
+      "host_vms": 0,
+      "sandbox_claims": 0,
+      "warm_pool_targets_zero": true,
+      "pinned_template_in_local_cocoon_store": true
+    },
+    "after_attempt": {
+      "journal_rows": 198,
+      "old_release_stop_proofs_valid": 197,
+      "new_allocation_state": "started",
+      "new_allocation_handle_present": false,
+      "new_allocation_observed_state_present": false,
+      "managed_drain_check": "blocked: allocation ownership uncertain",
+      "host_vms": 0,
+      "sandbox_claims": 0,
+      "failed_clone_runtime_directory_present": false,
+      "failed_clone_cpu_scope_present": false,
+      "connector_stopped": true,
+      "sandboxd_stopped": true,
+      "owned_postgres_containers": 0,
+      "manual_journal_or_fence_edit_or_delete": false,
+      "new_test_intent_and_fence_preserved": true
+    },
+    "next_gate": "A formal, auditable same-journal recovery decision is required before any further KVM allocation; do not delete/edit the intent, switch state directories, lower generation, or use a direct driver."
+  },
+  "limitations": [
+    "The real-KVM HTTPS guest path was not validated.",
+    "The configured verification commands prove only their pinned checks; they do not establish that a repository's test suite is complete or independent.",
+    "Real provider dialect, account pricing, token bounds, billing reconciliation, Claude/Gemini native adapters, streaming, and unrestricted natural-language coding remain unimplemented or unverified."
+  ],
+  "source_sha256": {
+    "SDD.md": "1a1b51d1d5d753f5d65af583570dd8a684f32644901bc037794d4860ccc70bdf",
+    "docs/HANDOFF.md": "431f2c94b1813fe7b2ee72962828587640f5338a86637c4491d856f553169273",
+    "docs/M3-HTTPS-PROVIDER.md": "47192615ea3dff6e050e44979ba4967372722f47527776853992ce3488f4833b",
+    "docs/NEXT-PROMPT.md": "3511ecb3127cc176c8eae56f6bcade0af6ed09ea78735410d9d5ddb1e7fa7472",
+    "src/agent_platform/connector.py": "542f0163d52ff61374809e3eb86055cc572f661cbe263b6d5c50112143b898a4",
+    "src/agent_platform/connector_output.py": "1f9222e8f40b3074a3d40126db92c78b042fd25d89e64b55a9cb9fb7847c74ce",
+    "src/agent_platform/domain.py": "ecefb49c33639e4ad57ca0f0bb1b36d255126817c1e9814b19c8b7fec88bc4fe",
+    "src/agent_platform/guest_workspace.py": "75054e2b00b0e96dcf7d06a1149a645047072bd1ca52a14cf899406ad0abd90c",
+    "src/agent_platform/migrations/012_openai_compatible_model_ref.sql": "d344cea519d683dda7b6deb32c78d247a9faf9ecd65a6b2ae6fbd5a083bd160b",
+    "src/agent_platform/model_mock.py": "b603f0b20d052f1e5b287c2e1381a1c9f59dc075cd59c220f748193ed104f2d9",
+    "src/agent_platform/model_policy.py": "b46bfedb751708b89b23b7bb761dd16729845f8e9351fe40981c7e6124016616",
+    "src/agent_platform/model_proxy.py": "59acd6bae39fe799eeefe4a76868f45fc8c9ac6fffacc6c03d60a0d8511588fb",
+    "src/agent_platform/model_upstream.py": "2858602df9e27c061803d25dd4a2f60606e0ba3d82091ee7ad70a74c62f41647",
+    "src/agent_platform/model_worker.py": "1c568f96e0887b84b4639d2f48bf23eb29043901316b84a8d27c61d13a1b6f7b",
+    "src/agent_platform/runtime_client.py": "b607ef7611dfc41946cd3595696496ef494302ecf8b85e527df6c777188eda77",
+    "src/agent_platform/runtime_worker.py": "9109cccdd674801d6c8e5bec73f4f8ad0b895f22a4321a4e96f67c5b760c019f",
+    "src/agent_platform/store.py": "409d8314e6b829b34e22c35915839f62a50199f605be673b99c882994bf0e2b6",
+    "src/agent_platform/verification.py": "284d0ab4407625ee32303c979ccb6751959f37f5cf29075727ed77e24823d15a",
+    "scripts/m2-kvm.py": "4d0e05af90a271bc625117398fa6d526c169b98fdc666b2747060e035f788007",
+    "scripts/m3-egress-kvm.py": "bdc2830cf864f9536341d9f84e5acfc1d598bab707cdc1141d2dc5c7172c4942",
+    "scripts/m3-guest-model-kvm.py": "df9ef696f69df5aef0d820147f4a04290f6803de641880d375fce85e0e768827",
+    "scripts/m3-isolation-kvm.py": "b22f510a4e0d976e91d785999a405b4b5f635c63c5ac99532d802661f5ebd481",
+    "scripts/m3-output-kvm.py": "154bb1801711bd3eea988c3b619f1500352942d7100c566edb6c995e6c6a31fa",
+    "scripts/m3-pause-kvm.py": "062762c477a891f10b797a9acf960509abe2fc9cea1ff3996fd05934beb569b7",
+    "scripts/m3-recovery-kvm.py": "a9891d92a11aec23c2b6af3738e7b57c1e88c8593dd5b1f650233efd8c724666",
+    "tests_platform/test_control_plane.py": "57da5b619f9afe3b7ccbbe00138cfae7a86b804f5d9cfdc6277cc98561c7ce8d",
+    "tests_platform/test_output_security.py": "14a9264f723e02a020eb63819fe69aa1238afc5fe0c2daa73be339d17acc68f6",
+    "tests_platform/test_runtime.py": "05337962512a38eb58bf2b2490ea436c117894b44b4e874fd41d72675f4f0ff3",
+    "web/src/App.tsx": "e361ad98b87d3c7f20f361616f1c83b166fc5ca8e85012509583bf1a9999e030",
+    "web/src/api.ts": "d794eef2a4c14b1b63db79750eb558823c3dc4fd0b1ff97ea60f8ea77a916cef",
+    "tests_platform/test_provider_https.py": "a077048410856c27c0bd81bb8a51e9a97caa7e6f08a244b3348abb4e360933ea",
+    "tests_platform/test_verification_contract.py": "bfc33e3477dae4b23a6e84aa57d67f6cbd3fc52fd23ddaa35d7ee1d5a18b5402",
+    "web/src/App.test.tsx": "0f3a32d1b0c24d8e867f4a4a1e3c6a95f851aae79f7b835acc80f7d0839b9d6f",
+    "docs/M3-RECOVERY.md": "2de763e89d2a90f113201934aed066d1eb4c0425ef52b7fd9c1968dca4b45095",
+    "src/agent_platform/connector_recovery.py": "d19e02e271d86e28c0b52a76329d1b60d514ee7785bbe79464dde623a25678e1",
+    "src/agent_platform/connector_journal.py": "4126f3e8354e6b8dda2291a07e890dbe9835c638f1b1b77489767deb01cc3ab9",
+    "docs/CONTINUATION-STATE.md": "9fd8a52bb7148d21116d0b06ceeea41d8677bd8e5958cd56d9c2deae6314d9f2"
+  },
+  "private_material": "TLS keys, mock credentials, SDK requests, connector journals, and service logs remain outside the repository in task-private directories.",
+  "github_ci": {
+    "initial_failed_run_id": 36006771058,
+    "initial_failure": "fast check imported new platform dependency-backed tests without locked runtime dependencies; web job had one stale status-label assertion",
+    "last_fully_passed_run_id": 36008490179,
+    "last_fully_passed_head_commit": "e099c6e1294a7010d461f5900c467b3bc6cb1110",
+    "last_fully_passed_jobs": {
+      "check": "passed",
+      "web": "passed: npm check and build",
+      "control_plane": "passed: platform-check and browser acceptance"
+    },
+    "latest_run_id": 36009297291,
+    "latest_run_head_commit": "85d90010af4e5da1ca61b1a5fd759c9fb1ac0c7c",
+    "latest_run_status": "cancelled per user instruction before browser E2E",
+    "latest_run_jobs": {
+      "web": "passed: npm check and build",
+      "check": "cancelled after lint/unit tests and Agent Server contract; rootfs build was cancelled",
+      "control_plane": "cancelled during platform acceptance; browser acceptance skipped"
+    },
+    "handoff_only_head_checks": "not run: follow-up documentation commits used [skip ci] to defer E2E as instructed"
+  },
+  "recovery_review": {
+    "documented_rule": "unknown allocation without saved handle or VMM ownership stays quarantined and requires administrator reconciliation",
+    "inspect_behavior": "read-only; returns allocation_ownership_uncertain when handle or observation is absent",
+    "release_requirement": "saved observed VM ownership and complete stop proof",
+    "supported_same_journal_reconciliation_for_this_row": false,
+    "kvm_rerun": "blocked pending a formal, auditable recovery decision; journal and fence preserved"
+  },
+  "user_testing_instruction": {
+    "e2e": "Run E2E only once after overall development is complete; avoid incremental pushes to the open PR because its workflow includes browser acceptance.",
+    "ordinary_unit_and_platform_checks": "May be run during development when useful."
+  }
+}

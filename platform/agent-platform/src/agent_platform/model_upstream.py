@@ -1,4 +1,4 @@
-"""Bounded fixed-destination HTTP fixture transport; never retries or redirects."""
+"""Bounded fixture or exact-destination HTTPS transport; never retries or redirects."""
 
 import http.client
 import socket
@@ -7,7 +7,7 @@ import time
 from urllib.parse import urlsplit
 
 from .domain import Problem
-from .model_policy import MAX_RESPONSE, canonical
+from .model_policy import HTTPS_MODE, MAX_RESPONSE, canonical, tls_client_context
 
 TOTAL_SECONDS = 10
 
@@ -25,7 +25,15 @@ class FixtureUpstream:
 
     def complete(self, payload, *, mock_run_id=None):
         url = urlsplit(self.policy.origin)
-        connection = http.client.HTTPConnection("127.0.0.1", url.port, timeout=5)
+        if self.policy.mode == HTTPS_MODE:
+            context = tls_client_context(self.policy.ca_bundle)
+            connection = http.client.HTTPSConnection(
+                url.hostname, url.port or 443, timeout=5, context=context
+            )
+            path = url.path
+        else:
+            connection = http.client.HTTPConnection("127.0.0.1", url.port, timeout=5)
+            path = "/v1/chat/completions"
         result, watchdog = None, None
         try:
             deadline = time.monotonic() + TOTAL_SECONDS
@@ -46,7 +54,7 @@ class FixtureUpstream:
                 headers["X-Local-Mock-Run-Id"] = str(mock_run_id)
             connection.request(
                 "POST",
-                "/v1/chat/completions",
+                path,
                 body=canonical(payload),
                 headers=headers,
             )

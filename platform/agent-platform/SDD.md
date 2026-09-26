@@ -2,14 +2,14 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過，AT-11-A 控制端 model proxy、AT-11-B opt-in guest transport／SDK tool-call／短效 token 更新、AT-11-C1 固定 fixture credits、AT-11-C2a 公開費率金額演練及 AT-11-C2b1 本機 OpenAI 相容 mock 已驗收，AT-07／11 仍開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 HTTPS transport／profile verification 已實作且 Python／PostgreSQL 測試通過，但 real-KVM acceptance 尚未通過。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
 - Product reference：OpenHands Agent Canvas
 - Runtime direction：OpenHands Software Agent SDK／Agent Server + Cocoon sandbox
 
-本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)／[M1](docs/M1.md)／[M2](docs/M2.md)／[M3 recovery](docs/M3-RECOVERY.md)／[M3 cancel](docs/M3-CANCEL.md)／[M3 approval](docs/M3-APPROVAL.md)／[M3 pause](docs/M3-PAUSE.md)；已執行的 Docker 檢查不等於全部契約通過。
+本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)／[M1](docs/M1.md)／[M2](docs/M2.md)／[M3 recovery](docs/M3-RECOVERY.md)／[M3 cancel](docs/M3-CANCEL.md)／[M3 approval](docs/M3-APPROVAL.md)／[M3 pause](docs/M3-PAUSE.md)／[AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md)；已執行的 Docker 檢查不等於全部契約通過。
 
 ## 1. 問題、目標與決策
 
@@ -257,7 +257,7 @@ stateDiagram-v2
 
 表為完整補充：`pausing/resuming` 可 cancel；控制操作在未知狀態保留 pausing／resuming 與 reservation，paused 重新核對失敗回 pausing。其他 active state 發生無法核對的斷線可轉 `interrupted`，保留 `interrupted_from`；`interrupted` 可 cancel。`interrupted` 只在確認同一 backend instance 仍可安全恢復後回原狀態，不能自動另建第二份 agent。`finalizing` 是有界成果保存階段，cancel 回 `409 finalizing`，避免把已完成工作誤判成取消。
 
-`succeeded/failed/cancelled` 為不可重開終態；重試建立新的 run／attempt，舊事件與成果不變。Agent 報告完成後必須封存結果才 `succeeded`。程式工作以 profile 指定的驗證命令結果作判準；未設定驗證只能標記「agent reported completion / 未驗證」，不能標示 tests passed。
+`succeeded/failed/cancelled` 為不可重開終態；重試建立新的 run／attempt，舊事件與成果不變。Agent 報告完成後必須封存結果才 `succeeded`。程式工作採 profile revision 固定的 verification contract：`commands` 以 bounded direct argv 執行並驗證 workspace diff；`fixture-m2` 只供固定 M2 acceptance；預設 `none` 回報 unknown 並 fail closed，不能標示 tests passed。Connector 核對 profile revision／contract hash、check 結果與 diff hash；超時、輸出超界、程序不確定或 verifier 改動 workspace 不視為通過。這證明已配置的命令結果，不保證 test suite 完整或獨立。
 
 固定模式的安全 pause／resume 實作以 AlwaysConfirm admission barrier、持鎖的即時狀態與 guest 程序基準共同判定；保持原 VM／容量／期限，恢復不自動核准需審批的工具。細節與保守限制見 [M3 pause](docs/M3-PAUSE.md)。
 
@@ -341,6 +341,8 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 
 [AT-11-C2b1 OpenAI 相容 mock](docs/M3-OPENAI-MOCK.md)在原 guest／控制端安全邊界中驗收可設定模型 ID 的 Chat Completions 文字與工具格式。目的地仍限主機 loopback 腳本 mock；真實外部 HTTPS transport、Claude／Gemini 原生 adapter、任意自然語言 coding 與付費帳單均未驗收。
 
+[AT-11-C2b2 HTTPS transport／profile verification](docs/M3-HTTPS-PROVIDER.md)增加控制端固定 HTTPS Chat Completions endpoint、file-backed credential reference、TLS／CA 驗證及不可變 profile 驗證命令。HTTPS 呼叫仍由 worker 控制端執行，沒有新增 guest egress；provider usage 仍是 unbilled，金額 unknown。Python／PostgreSQL 測試通過，但本次 real-KVM case 未通過，不能宣稱 end-to-end 驗收完成。
+
 ### 11.3 工具與網路
 
 工具按能力分成 workspace read/write、bounded exec、network access、external mutation。Workspace 內一般編輯與測試可在設定政策內自動執行；額外 network 或 external mutation 須經 deterministic policy／approval。無法可靠分類的任意 shell 不得宣稱能逐條阻止外部副作用：MVP 以 guest 網路 allowlist、沒有 write credential 與 VM 隔離落實邊界。
@@ -419,9 +421,9 @@ MVP 不使用 Kubernetes；日後多節點保留相同 API 與 run identity，�
 | AT-06 | approval replay、修改參數、逾期、兩人／兩分頁競爭；只有一次合法決策成功，其他 409 | M3 |
 | AT-07 | canary secrets、跨 workspace 存取、metadata/private-network 連線、artifact XSS；未洩露且阻擋有效 | M3 |
 | AT-08 | cancel 長命令、cancel provisioning、node 不可達：狀態與 observed reality 一致，timeout 不假成功 | M3 |
-| AT-09 | artifact store 失敗、測試非零、agent 無驗證宣稱成功：UI 呈現真實結果，無虛構 tests passed | M4 |
+| AT-09 | artifact store 失敗、profile verification 非零／unknown、agent 無驗證宣稱成功：UI 呈現真實結果，無虛構 tests passed | M4 |
 | AT-10 | backend 缺 pause／resume／approval capability；UI 正確 disable，API 回 unsupported，沒有任意 exec fallback | M2 |
-| AT-11 | 並行模型請求 reservation／settlement、未知价格、429 與預算截止；不再 admission 新請求且用量標示正確 | M3 |
+| AT-11 | 並行模型請求 reservation／settlement、未知價格、429、預算截止、HTTPS TLS 邊界及 profile verification unknown；不再 admission 新請求且用量標示正確 | M3 |
 | AT-12 | fake GitHub：export 重送／遠端成功後斷線／base drift；只有一個預期 branch/PR，未授權不寫入；live 僅測試 repo opt-in | M4 |
 | AT-13 | DB/artifact restore、stale binding cleanup、retention expiry；可恢復結果，陌生 VM／active state 不被回收 | M4 |
 
@@ -435,7 +437,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收，AT-11-A proxy／request ledger、AT-11-B opt-in guest transport／SDK tool-call／credential 更新／request cutoff、AT-11-C1 fixture credits 及 AT-11-C2a 公開費率演練已驗收，可信真實金額預算及完整 AT-07/11 待完成，見 [AT-11-C2a](docs/M3-PUBLISHED-PRICE-PREVIEW.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 HTTPS／profile verification 實作與 Python／PostgreSQL 測試通過，real-KVM gate 未通過；可信真實金額預算及完整 AT-07/11 待完成，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |

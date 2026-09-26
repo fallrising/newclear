@@ -5,8 +5,10 @@ The request/response dialect is intentionally smaller than a general provider AP
 """
 
 import hashlib
+import ipaddress
 import json
 import re
+import ssl
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
@@ -33,6 +35,10 @@ MAX_RESPONSE = 256 * 1024
 MODEL = "fixture:m2"
 REVISION = "control-model-proxy-v1"
 MOCK_MODE = "openai-compatible-mock-v1"
+HTTPS_MODE = "openai-compatible-https-v1"
+COMPATIBLE_MODES = {MOCK_MODE, HTTPS_MODE}
+PROVIDER_TOKEN = re.compile(r"[A-Za-z0-9._~+/_-]{8,4096}={0,}")
+MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,99}")
 
 
 def canonical(value):
@@ -41,6 +47,21 @@ def canonical(value):
 
 def sha(value):
     return hashlib.sha256(value).hexdigest()
+
+
+def tls_client_context(ca_bundle=None):
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.check_hostname = True
+    if ca_bundle is None:
+        context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    else:
+        cadata = (
+            ca_bundle.decode("ascii") if b"-----BEGIN CERTIFICATE-----" in ca_bundle else ca_bundle
+        )
+        context.load_verify_locations(cadata=cadata)
+    return context
 
 
 def sensitive(value, secrets):
@@ -87,17 +108,62 @@ class Policy:
     budget: FixtureBudget | None = None
     price_quote: PublishedPriceQuote | None = None
     model: str = MODEL
+    ca_bundle: bytes | None = field(default=None, repr=False)
 
     def __post_init__(self):
-        # Deliberately no public/provider mode until guest transport and pricing gates.
         url = urlsplit(self.origin)
+        if self.mode in {"fixture-http-v1", MOCK_MODE}:
+            endpoint_valid = (
+                re.fullmatch(r"http://127\.0\.0\.1:[0-9]{4,5}", self.origin) is not None
+                and 1024 <= (url.port or 0) <= 65535
+            )
+        elif self.mode == HTTPS_MODE:
+            try:
+                port = url.port
+            except ValueError:
+                port = -1
+            path = url.path
+            hostname = url.hostname or ""
+            try:
+                ipaddress.ip_address(hostname)
+                host_valid = True
+            except ValueError:
+                host_valid = bool(
+                    len(hostname) <= 253
+                    and re.fullmatch(
+                        r"(?=.{1,253}\Z)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(?:\.(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))*",
+                        hostname,
+                    )
+                )
+            endpoint_valid = (
+                url.scheme == "https"
+                and host_valid
+                and url.username is None
+                and url.password is None
+                and not url.query
+                and not url.fragment
+                and "?" not in self.origin
+                and "#" not in self.origin
+                and bool(re.fullmatch(r"/[A-Za-z0-9._~/-]{1,512}", path))
+                and "//" not in path
+                and "\\" not in path
+                and all(segment not in {".", ".."} for segment in path.split("/"))
+                and (port is None or 1 <= port <= 65535)
+                and len(self.origin) <= 2048
+                and (
+                    self.ca_bundle is None
+                    or (
+                        isinstance(self.ca_bundle, bytes) and 0 < len(self.ca_bundle) <= 1024 * 1024
+                    )
+                )
+            )
+        else:
+            endpoint_valid = False
         if (
-            self.mode not in {"fixture-http-v1", MOCK_MODE}
-            or not re.fullmatch(r"http://127\.0\.0\.1:[0-9]{4,5}", self.origin)
-            or not 1024 <= (url.port or 0) <= 65535
+            not endpoint_valid
             or type(self.request_limit) is not int
             or not 1 <= self.request_limit <= 100
-            or not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", self.credential)
+            or not isinstance(self.credential, str)
             or (self.budget is not None and not isinstance(self.budget, FixtureBudget))
             or (
                 self.price_quote is not None
@@ -106,28 +172,57 @@ class Policy:
             or (self.budget is not None and self.price_quote is not None)
             or (self.mode == "fixture-http-v1" and self.model != MODEL)
             or (
-                self.mode == MOCK_MODE
+                self.mode in COMPATIBLE_MODES
                 and (
                     not isinstance(self.model, str)
-                    or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,99}", self.model)
+                    or not MODEL_ID.fullmatch(self.model)
                     or self.model == MODEL
                     or self.budget is not None
                     or self.price_quote is not None
                 )
             )
+            or (
+                self.mode == "fixture-http-v1"
+                and not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", self.credential)
+            )
+            or (
+                self.mode == MOCK_MODE
+                and not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", self.credential)
+            )
+            or (self.mode == HTTPS_MODE and not PROVIDER_TOKEN.fullmatch(self.credential))
+            or (self.mode != HTTPS_MODE and self.ca_bundle is not None)
         ):
             raise ValueError("invalid_model_fixture_policy")
+        if self.mode == HTTPS_MODE and self.ca_bundle is not None:
+            tls_client_context(self.ca_bundle)
+
+    @property
+    def compatible(self):
+        return self.mode in COMPATIBLE_MODES
 
     @property
     def digest(self):
         fields = {
-            "revision": REVISION if self.mode == "fixture-http-v1" else MOCK_MODE,
+            "revision": {
+                "fixture-http-v1": REVISION,
+                MOCK_MODE: MOCK_MODE,
+                HTTPS_MODE: HTTPS_MODE,
+            }[self.mode],
             "mode": self.mode,
             "origin": self.origin,
             "model": self.model,
             "request_limit": self.request_limit,
             "credential_sha256": sha(self.credential.encode()),
         }
+        if self.mode == HTTPS_MODE:
+            fields["tls"] = {
+                "minimum_version": "TLSv1.2",
+                "certificate_verification": "required",
+                "hostname_verification": "required",
+                "redirects": "disabled",
+                "ambient_proxy": "disabled",
+                "ca_bundle_sha256": sha(self.ca_bundle) if self.ca_bundle is not None else None,
+            }
         # Preserve the digest of existing, unpriced fixture runs across migration.
         if self.budget:
             fields["fixture_budget"] = {
@@ -159,20 +254,49 @@ class Policy:
         if path.stat().st_size > 4096:
             raise ValueError("model_config_too_large")
         data = json.loads(path.read_text())
-        if not isinstance(data, dict) or set(data) not in (
-            {
-                "origin",
-                "credential_file",
+        if not isinstance(data, dict) or not isinstance(data.get("mode"), str):
+            raise ValueError("invalid_model_fixture_config")
+        if data["mode"] == HTTPS_MODE:
+            allowed = {
+                "endpoint",
+                "credential_ref",
                 "request_limit",
                 "mode",
-            },
-            {
-                "origin",
-                "credential_file",
-                "request_limit",
-                "mode",
-                "fixture_budget",
-            },
+                "model",
+            }
+            if "ca_bundle_file" in data:
+                allowed.add("ca_bundle_file")
+            if set(data) != allowed:
+                raise ValueError("invalid_https_provider_config")
+            endpoint = data.pop("endpoint")
+            credential_ref = data.pop("credential_ref")
+            if not isinstance(endpoint, str):
+                raise ValueError("invalid_https_endpoint")
+            secret_path = cls._private_reference(credential_ref, "model_credential_too_large")
+            if secret_path.stat().st_size > 4096:
+                raise ValueError("model_credential_too_large")
+            credential = secret_path.read_text().strip()
+            ca_bundle = None
+            if "ca_bundle_file" in data:
+                ca_path = cls._private_reference(
+                    data.pop("ca_bundle_file"), "model_ca_bundle_too_large"
+                )
+                if ca_path.stat().st_size > 1024 * 1024:
+                    raise ValueError("model_ca_bundle_too_large")
+                ca_bundle = ca_path.read_bytes()
+                if b"PRIVATE KEY" in ca_bundle:
+                    raise ValueError("private_key_not_allowed_in_ca_bundle")
+            mode = data.pop("mode")
+            return cls(
+                origin=endpoint,
+                credential=credential,
+                mode=mode,
+                ca_bundle=ca_bundle,
+                **data,
+            )
+        if set(data) not in (
+            {"origin", "credential_file", "request_limit", "mode"},
+            {"origin", "credential_file", "request_limit", "mode", "fixture_budget"},
             {
                 "origin",
                 "credential_file",
@@ -180,13 +304,7 @@ class Policy:
                 "mode",
                 "published_price_preview",
             },
-            {
-                "origin",
-                "credential_file",
-                "request_limit",
-                "mode",
-                "model",
-            },
+            {"origin", "credential_file", "request_limit", "mode", "model"},
         ):
             raise ValueError("invalid_model_fixture_config")
         if "published_price_preview" in data and data["published_price_preview"] is None:
@@ -218,6 +336,17 @@ class Policy:
         if secret.stat().st_size > 129:
             raise ValueError("model_credential_too_large")
         return cls(credential=secret.read_text().strip(), **data)
+
+    @staticmethod
+    def _private_reference(reference, size_error):
+        from pathlib import Path
+
+        if not isinstance(reference, str) or not Path(reference).is_absolute():
+            raise ValueError("private_reference_must_be_absolute")
+        try:
+            return private_file(reference)
+        except (OSError, ValueError):
+            raise ValueError(size_error) from None
 
 
 class Completion(BaseModel):

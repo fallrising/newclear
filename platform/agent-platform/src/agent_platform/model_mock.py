@@ -55,7 +55,9 @@ def mock_response(data, run_id):
     }
 
 
-def mock_server(port, credential, model):
+def mock_server(port, credential, model, *, fixed_run_id=None):
+    model_calls = []
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -74,7 +76,12 @@ def mock_server(port, credential, model):
                 if not 0 < size <= MAX_REQUEST:
                     raise ValueError()
                 data = json.loads(self.rfile.read(size))
-                run_id = str(UUID(self.headers.get("X-Local-Mock-Run-Id", "")))
+                if fixed_run_id is None:
+                    run_id = str(UUID(self.headers.get("X-Local-Mock-Run-Id", "")))
+                else:
+                    if self.headers.get("X-Local-Mock-Run-Id") is not None:
+                        raise ValueError()
+                    run_id = str(UUID(fixed_run_id))
                 if (
                     not isinstance(data, dict)
                     or set(data) != {"model", "messages", "tools", "max_tokens", "stream"}
@@ -86,6 +93,13 @@ def mock_server(port, credential, model):
                     or not isinstance(data["tools"], list)
                 ):
                     raise ValueError()
+                model_calls.append(
+                    {
+                        "path": self.path,
+                        "authorization": self.headers.get("Authorization"),
+                        "test_run_header": self.headers.get("X-Local-Mock-Run-Id"),
+                    }
+                )
             except (ValueError, KeyError, TypeError):
                 self.send_error(422)
                 return
@@ -96,4 +110,6 @@ def mock_server(port, credential, model):
             self.end_headers()
             self.wfile.write(raw)
 
-    return ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    server.model_calls = model_calls
+    return server

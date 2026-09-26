@@ -1,6 +1,16 @@
 # 開發接續紀錄 — 2026-09-24
 
-目前停止點：**AT-11-C2b1 已以可設定模型 ID 的 OpenAI Chat Completions loopback mock 驗收原 guest／控制端通道**。仍是腳本化模型，沒有連付費或外部 API，也未能任意自然語言 coding；真實金額仍 unknown。設計與限制見 [AT-11-C2b1](M3-OPENAI-MOCK.md)，真實 KVM 與測試見 [evidence](evidence/m3-openai-mock-2026-09-24.json)。下一視窗指示見 [NEXT-PROMPT.md](NEXT-PROMPT.md)。
+目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作；45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff 通過。完整 GitHub CI run `36008490179` 在程式碼 commit `e099c6e` 全部通過。之後文件更新觸發的 run `36009297291` 依使用者指示於 browser E2E 前取消；web job 通過，check／control-plane job 取消。後續 handoff-only commits 使用 `[skip ci]`，目前 head 沒有 checks 報告；最後一個完整通過的 run 仍是 `36008490179`。real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 因 unresolved same-journal recovery／KVM gate 未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。跨 agent 接手摘要見 [CONTINUATION-STATE.md](CONTINUATION-STATE.md)，設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。
+
+## 本次 AT-11-C2b2 HTTPS provider 與 verification
+
+- 最終工作樹已對齊 GitHub main `dba9ee94a49bcfe2efb298caa1d5324cfde03988`，改動只在 `platform/agent-platform`。新 `openai-compatible-https-v1` 固定完整 HTTPS endpoint、model、request cap、file-backed credential reference、CA fingerprint 與 TLS policy digest；強制 TLS 1.2+、憑證鏈及 hostname 驗證，不使用 ambient proxy、不跟 redirect、不自動 retry。Provider usage 標成 unbilled；`amount_decimal:null`、`hard_money_limit_supported:false`。未呼叫外部 API，未讀取既有 provider key。
+- Immutable profile revision 保存 strict verification policy：預設 `none` 是 unknown；`commands` 直接執行 bounded argv，限制 check 數量／timeout／輸出並核對 workspace diff；舊 KVM harness 明確使用 `fixture-m2`。Connector 重新核對 revision、contract hash、check 結果與 diff hash；只有完整通過才可成功。
+- 新增 migration 012，讓新 profile model reference 走 `openai-compatible:chat-completions`，保留舊 `fixture:m2` revision。`mock-https-complete` real-KVM harness 已加入本機 TLS mock、測試 CA、無 mock run-ID header 與 guest profile check。
+- 最新 `make platform-check` 通過：45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff lint／format。第一次 PR CI 的 fast check 因缺少平台 runtime dependencies 無法 import 兩個新測試；已把它們移到已安裝鎖定依賴的 `tests_platform` suite。Web CI 的 1 個舊狀態文案 assertion 已更新；run `36008490179` 的 check／web／control-plane 全部通過，包含 browser acceptance。本機 `make web-check` 因沒有 Node/npm 未能執行。使用者後續要求整體開發完成後才跑一次 E2E；文件更新觸發的 run `36009297291` 在 browser acceptance 前取消，詳見 [continuation state](CONTINUATION-STATE.md)。`mock-https-complete` 未通過：managed launcher 未套用文件要求的 supplementary `kvm` group，`/dev/kvm` open 得到 `EACCES`，sandboxd 記錄 Cocoon clone 子程序被終止。只讀確認 `sg kvm` 有 device 存取權；沒有在該錯誤後重試 KVM。
+- 原 197 筆 journal release result 仍全部通過 exact stop-proof validator。此次另外留下 1 筆 `allocate=started` 且無 handle／observed／release proof 的 intent；無 active claims／VM、clone runtime directory 或 CPU scope。產品 `drained()` 因 ownership 不確定而拒絕通過。此新 row、舊 journal 與 fences 均保留；connector、sandboxd 已停，owned PostgreSQL container 數為零。不能刪 row、換 state directory、改 generation 或直接 driver 繞過它；下一次同 journal KVM 前必須有正式、可稽核的 recovery 決定。
+- Implementation commit `aae40ce`、交接 commit `70ce010`、CI 修正 `e099c6e` 及後續狀態／接手文件已推至 `agent/agent-platform/at-11-c2b2`。最後完整通過 CI 為 `36008490179`（head `e099c6e`）；其後 run `36009297291` 依 E2E 時序指示取消，後續 handoff-only commits 跳過 CI，故目前 PR head 沒有 checks 報告。Repo recovery review 確認 `M3-RECOVERY.md` 對沒有 handle／VMM ownership 的未知 allocation 要求管理員對帳；產品 inspect 只讀並回 `allocation_ownership_uncertain`，release 又要求已保存的 observed VM。沒有可用於此筆 row 的受支援 reconciliation command/API。PR 不得在正式 same-journal recovery 決策與 real-KVM gate 前 merge。
+- 私有輸出留在 `/tmp/apm3-at11c2b2-20260924`，不要公開 TLS key、mock key、model／SDK request 或 journal。
 
 ## 本次 AT-11-C2b1 本機 OpenAI 相容 mock
 
@@ -126,14 +136,14 @@
 
 ## 下一步
 
-1. 依 [SDD](../SDD.md) 與 [AT-11-C2b1 本機相容 mock](M3-OPENAI-MOCK.md)，先在不需外部接口的範圍完成安全 HTTPS endpoint／credential 配置及通用任務驗證契約，再等使用者提供接口做明確 opt-in provider E2E。實際帳戶價格／token 上界／計費例外與可信金額結算、usage UI 及完整 AT-07／11 尚未完成。固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策；模型通道不得靠全節點 private-IP override 開洞。
+1. 先定義正式、可稽核的 same-journal recovery，處理 C2b2 留下的 `allocate=started`／無 handle quarantine；不可手改／刪 journal、換 state directory、降低 generation 或走 direct driver。完成 recovery 後才可依 [M3-HTTPS-PROVIDER](M3-HTTPS-PROVIDER.md) 以 `sg kvm` 啟動 sandboxd／connector，重新核對 deny-all／zero-warm／empty node，重跑 HTTPS mock KVM 與必要 isolation 回歸。之後再等使用者提供真實接口做明確 opt-in E2E。真實帳戶價格／token 上界／計費例外、可信金額結算、usage UI 及完整 AT-07／11 尚未完成；固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策。
 2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture／mock proxy；legacy 模式仍保留。Token counters 是上游 mock／fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。
 5. OpenHands cancel、pause／resume 已開啟；approval 由 profile opt-in。M0 primitive 通過不代表 M3 平台安全語意已完成；不要提供 host shell fallback。
 6. 256 KiB 以下 diff 與 fixture verification 保存於 DB；M4 的 artifact store／download、explicit export、backup／GC／production 仍未完成。
-7. 重跑 KVM 使用專用 zero-warm node；本機私密測試目錄 `/tmp/apm3-egress-20260923`（本次，最終 pinned-*／deny-final／控制回歸）、`/tmp/apm3-isolation-20260923`（前次，使用 nonroot-* 最終證據）、`/tmp/apm3-security-20260922`（輸出安全）、`/tmp/apm3-pause-20260922`（pause）、`/tmp/apm3-approval-20260922`（approval）、`/tmp/apm3-cancel-20260922`（cancel）、`/tmp/apm3-20260922`（recovery）與 `/tmp/apm2-20260922`（cache／runtime）保留。測試結束 connector／sandboxd 已停、VM／claims 為零。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
-8. 從較舊版本升級時先 drain、備份，再套用最新 `011_published_price_preview.sql`（包含前序 migrations）並同步更新 API／worker／connector；本次 mock 模式本身沒有新 migration。ModelProxy 在 worker 端執行，另啟動固定 loopback fixture 或 mock upstream；AT-11-A 獨立文字 endpoint 保留。Guest helper 不原地修補；更舊版本須連同 guest／egress 升級步驟處理。不要刪 journal／fences 或降低 DB generation；已進入 guest 的工具不會因 worker lease 到期而自動停止。
+7. 重跑 KVM 使用專用 zero-warm node；本機私密目錄 `/tmp/apm3-at11c2b2-20260924`（本次 HTTPS mock attempt，保留）、`/tmp/apm3-provider-mock-20260924`（C2b1）、`/tmp/apm3-at11c2-20260924`、`/tmp/apm3-at11c-20260923`、`/tmp/apm3-egress-20260923`（journal／fences／node configs）、`/tmp/apm2-20260922`（Cocoon cache／runtime）及所有舊交接目錄保留。C2b2 收尾 connector／sandboxd 已停、VM／claims 為零、測試 PostgreSQL container 為零；journal 有 198 筆，其中原 197 筆 stop proof 有效，新一筆仍 quarantine。不要輸出 token／journal 原文。M0 registry 已移除；使用既有 Cocoon cache，不能假設 `localhost:15000` 可拉取。
+8. 從較舊版本升級先 drain／備份，再套用最新 `012_openai_compatible_model_ref.sql`（包含前序 migrations）並同步更新 API／worker／connector；新 profile revision 才能使用 `openai-compatible:chat-completions`，舊 `fixture:m2` 保留。另配置 worker 私有 HTTPS policy；不需重建 launcher／OCI，也不增加 guest egress。未驗收 `make web-check`（本機缺 Node/npm）及 real KVM；不要把 Python／PostgreSQL tests 誤稱為完整 E2E。不要刪 journal／fences、切換 state directory 或降低 DB generation。
 
 ## 必須保留的契約差異
 

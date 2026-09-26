@@ -150,7 +150,9 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "fixture:m2" if data.backend == "openhands" else "fixture:m1",
+                "openai-compatible:chat-completions"
+                if data.backend == "openhands"
+                else "fixture:m1",
                 template,
                 Jsonb(
                     {
@@ -165,6 +167,7 @@ class Store:
                         "deadline_seconds": data.deadline_seconds,
                         "cpu": 4,
                         "memory_bytes": 4 * 1024**3,
+                        "verification": data.verification.model_dump(mode="json"),
                     }
                 ),
             ),

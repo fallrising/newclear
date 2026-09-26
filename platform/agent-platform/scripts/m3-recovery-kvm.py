@@ -207,6 +207,11 @@ def main():
                     "backend": "openhands",
                     "deadline_seconds": 300,
                     "require_approval": args.scenario == "approval",
+                    "verification": {
+                        "mode": "fixture-m2",
+                        "revision": "fixture-m2-v1",
+                        "checks": [],
+                    },
                 },
             )
             points = ["after_allocate", "after_prompt"]

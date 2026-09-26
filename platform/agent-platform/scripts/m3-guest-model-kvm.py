@@ -6,6 +6,7 @@ import json
 import os
 import secrets
 import signal
+import ssl
 import subprocess
 import sys
 import threading
@@ -29,7 +30,7 @@ from agent_platform.db import Database, migrate
 from agent_platform.domain import Problem
 from agent_platform.model_fixture import fixture_server
 from agent_platform.model_mock import mock_server
-from agent_platform.model_policy import Policy
+from agent_platform.model_policy import HTTPS_MODE, Policy
 from agent_platform.model_proxy import ModelProxy, usage_view
 from agent_platform.runtime_client import RuntimeClient
 from agent_platform.store import Store
@@ -49,6 +50,39 @@ def wait(check, seconds=120):
         require(time.monotonic() < deadline, "acceptance_wait_expired")
         time.sleep(0.1)
     return value
+
+
+def local_tls_certificate(output):
+    certificate = output / "local-mock-ca.pem"
+    private_key = output / "local-mock.key"
+    subprocess.run(
+        [
+            "openssl",
+            "req",
+            "-x509",
+            "-newkey",
+            "rsa:2048",
+            "-nodes",
+            "-keyout",
+            str(private_key),
+            "-out",
+            str(certificate),
+            "-days",
+            "3",
+            "-subj",
+            "/CN=localhost",
+            "-addext",
+            "subjectAltName=DNS:localhost",
+            "-addext",
+            "basicConstraints=critical,CA:TRUE",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    os.chmod(certificate, 0o600)
+    os.chmod(private_key, 0o600)
+    return certificate, private_key
 
 
 def main():
@@ -79,6 +113,7 @@ def main():
         "mock-complete",
         "mock-cutoff",
         "mock-unknown",
+        "mock-https-complete",
     ]
     parser.add_argument("--case", choices=cases)
     parser.add_argument("--worker-fault", choices=["reserved", "settled", "delivered"])
@@ -108,6 +143,18 @@ def main():
     mock = mock_server(0, secret, "local/mock-agent-v1")
     mock_thread = threading.Thread(target=mock.serve_forever, daemon=True)
     mock_thread.start()
+    tls_certificate, tls_private_key = local_tls_certificate(args.output)
+    mock_https = mock_server(
+        0,
+        secret,
+        "local/https-mock-agent-v1",
+        fixed_run_id=str(uuid4()),
+    )
+    tls_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    tls_context.load_cert_chain(tls_certificate, tls_private_key)
+    mock_https.socket = tls_context.wrap_socket(mock_https.socket, server_side=True)
+    mock_https_thread = threading.Thread(target=mock_https.serve_forever, daemon=True)
+    mock_https_thread.start()
     key = args.output / "fixture.key"
     key.write_text(secret)
     policy = args.output / "model.json"
@@ -246,19 +293,29 @@ def main():
             )
             for case in [args.case] if args.case else cases:
                 fixture.update(case=case, rotated=False, checks=None, upstream_calls=0)
-                upstream_port = (
-                    mock.server_port if case.startswith("mock-") else upstream.server_port
-                )
-                model_config = {
-                    "origin": f"http://127.0.0.1:{upstream_port}",
-                    "credential_file": str(key),
-                    "mode": "openai-compatible-mock-v1"
-                    if case.startswith("mock-")
-                    else "fixture-http-v1",
-                    "request_limit": 1 if case in {"cutoff", "mock-cutoff"} else 10,
-                }
-                if case.startswith("mock-"):
-                    model_config["model"] = "local/mock-agent-v1"
+                if case == "mock-https-complete":
+                    model_config = {
+                        "mode": HTTPS_MODE,
+                        "endpoint": f"https://localhost:{mock_https.server_port}/v1/chat/completions",
+                        "credential_ref": str(key),
+                        "ca_bundle_file": str(tls_certificate),
+                        "request_limit": 10,
+                        "model": "local/https-mock-agent-v1",
+                    }
+                else:
+                    upstream_port = (
+                        mock.server_port if case.startswith("mock-") else upstream.server_port
+                    )
+                    model_config = {
+                        "origin": f"http://127.0.0.1:{upstream_port}",
+                        "credential_file": str(key),
+                        "mode": "openai-compatible-mock-v1"
+                        if case.startswith("mock-")
+                        else "fixture-http-v1",
+                        "request_limit": 1 if case in {"cutoff", "mock-cutoff"} else 10,
+                    }
+                    if case.startswith("mock-"):
+                        model_config["model"] = "local/mock-agent-v1"
                 if case in {"fixture-credits", "fixture-budget-cutoff", "fixture-budget-unknown"}:
                     model_config["fixture_budget"] = {
                         "revision": "fixture-credit-2026-09",
@@ -282,6 +339,28 @@ def main():
                         "backend": "openhands",
                         "require_approval": case in {"approval", "pause", "cancel", "cross-run"},
                         "deadline_seconds": 600,
+                        "verification": {
+                            "mode": "commands" if case == "mock-https-complete" else "fixture-m2",
+                            "revision": "https-mock-task-check-v1"
+                            if case == "mock-https-complete"
+                            else "fixture-m2-v1",
+                            "checks": (
+                                [
+                                    {
+                                        "id": "result-file-exists",
+                                        "argv": [
+                                            "python3",
+                                            "-c",
+                                            "from pathlib import Path; p=Path('m2-result.txt'); "
+                                            "assert p.is_file() and p.stat().st_size < 100",
+                                        ],
+                                        "timeout_seconds": 10,
+                                    }
+                                ]
+                                if case == "mock-https-complete"
+                                else []
+                            ),
+                        },
                     },
                 )
                 run = post(
@@ -502,12 +581,33 @@ def main():
                 if case.startswith("mock-"):
                     require(not usage["hard_money_limit_supported"], "mock_claimed_hard_money")
                     require(usage["amount_decimal"] is None, "mock_claimed_provider_bill")
+                    require(
+                        usage["entries"][0]["reason"]
+                        in {"mock_reported_usage", "provider_reported_usage_unbilled"},
+                        "mock_usage_source_invalid",
+                    )
                     if case == "mock-unknown":
                         require(
                             usage["entries"][0]["status"] == "unknown"
                             and usage["uncertain_requests"] == 1,
                             "mock_unknown_not_retained",
                         )
+                if case == "mock-https-complete":
+                    require(
+                        current["result"]["verification"]["status"] == "passed"
+                        and current["result"]["verification"]["name"] == "profile_verification",
+                        "https_profile_verification_failed",
+                    )
+                    require(
+                        len(mock_https.model_calls) == requests
+                        and all(
+                            item["path"] == "/v1/chat/completions"
+                            and item["authorization"] == "Bearer " + secret
+                            and not item["test_run_header"]
+                            for item in mock_https.model_calls
+                        ),
+                        "https_mock_transport_contract_failed",
+                    )
                 require(
                     fixture["upstream_calls"]
                     == (
@@ -624,6 +724,8 @@ def main():
         upstream.server_close()
         mock.shutdown()
         mock.server_close()
+        mock_https.shutdown()
+        mock_https.server_close()
         db.close()
         model_worker.SDKCompletion = original_completion
         model_worker.ModelSession.step, ModelProxy.complete = original_step, original_complete

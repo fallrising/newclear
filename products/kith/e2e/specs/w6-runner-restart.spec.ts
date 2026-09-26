@@ -122,7 +122,7 @@ test(
   },
 );
 
-test("FM-RUN-02/05 gap and duplicate live events against a stub Kith", { tag: ["@W6"] }, async ({}, info) => {
+test("E2E-W6-04 FM-RUN-02/05 gap and duplicate live events against a stub Kith", { tag: ["@W6"] }, async ({}, info) => {
   test.setTimeout(60_000);
   const stub = await startKithStub();
   const runner = await startRunner({

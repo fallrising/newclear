@@ -106,7 +106,11 @@ class AppRevisionCleanup:
         current_ids = sorted(item['id'] for item in reviewed['current_revision'])
         if sorted(source_ids) != current_ids:
             blockers.append('new revision identity differs from the ready source run')
-        if prior != reviewed['older_owned_revisions']:
+        prior_by_id = {item['id']: item for item in prior}
+        remaining_targets = reviewed['older_owned_revisions']
+        if (not remaining_targets
+                or any(prior_by_id.get(item['id']) != item
+                       for item in remaining_targets)):
             blockers.append('older revision ownership differs from the ready source run')
 
         plan_id = plan_id or (datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-')
@@ -127,7 +131,7 @@ class AppRevisionCleanup:
             'snapshot': snapshot_binding(snapshot),
             'preflight': preflight_summary,
             'current_revision': reviewed['current_revision'],
-            'targets': prior,
+            'targets': remaining_targets,
             'decision': 'blocked' if blockers else 'ready',
             'blockers': sorted(set(blockers)),
             'executable': not blockers,
@@ -144,12 +148,17 @@ class AppRevisionCleanup:
 
     def _source_matches_plan(self, plan):
         source, spec, digest, appname, targets = self._read_source(plan['source_run_id'])
+        planned_targets = plan.get('targets')
+        if (not isinstance(planned_targets, list)
+                or len({item.get('id') for item in planned_targets
+                        if isinstance(item, dict)}) != len(planned_targets)
+                or any(item not in targets for item in planned_targets)):
+            raise ValueError('cleanup plan target IDs are not a subset of the ready source run')
         if (source.get('plan_sha256') != plan.get('source_plan_sha256')
                 or source['logical_app'] != plan.get('logical_app')
                 or source['appname'] != plan.get('appname')
                 or digest != plan.get('spec_sha256')
                 or spec != plan.get('spec')
-                or targets != plan.get('targets')
                 or source['observed_workload_ids'] !=
                    sorted(item['id'] for item in plan.get('current_revision', []))):
             raise ValueError('ready source run differs from the reviewed cleanup plan')

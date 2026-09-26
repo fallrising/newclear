@@ -841,6 +841,12 @@ def main():
     drain_execute.add_argument('--apps', required=True, help='Private JSON array of exact current desired app specs')
     drain_recover = sub.add_parser('recover-worker-drain', help='Read-only ERU-009 reconciliation after any uncertain result')
     drain_recover.add_argument('--run', required=True, help='Worker drain run ID; never replays the saved plan')
+    drain_cleanup_plan = sub.add_parser('plan-worker-drain-cleanup', help='Reconcile read-only, then plan one fresh exact-ID cleanup for remaining source workloads')
+    drain_cleanup_plan.add_argument('--run', required=True, help='Worker drain run ID')
+    drain_cleanup_execute = sub.add_parser('execute-worker-drain-cleanup', help='Execute one fresh ERU-012 exact-ID cleanup plan after recovery review')
+    drain_cleanup_execute.add_argument('--plan', required=True, help='Saved worker-drain recovery cleanup plan ID')
+    drain_cleanup_execute.add_argument('--sha256', required=True, help='Recovery cleanup plan SHA-256')
+    drain_cleanup_execute.add_argument('--cleanup-sha256', required=True, help='Nested ERU-012 exact cleanup plan SHA-256')
     args = parser.parse_args()
     os.umask(0o077)
     if args.command == 'status':
@@ -912,8 +918,43 @@ def main():
                            for k in ['available', 'bypass', 'preflight_clean']},
                 'apps': apps,
                 'component_reinstall_allowed': observation.get('component_reinstall_allowed', False),
+                'fresh_cleanup_plan_allowed': observation.get('fresh_cleanup_plan_allowed', False),
                 'recovery_recommendation': observation.get('recovery_recommendation'),
             }, indent=2))
+        return
+    if args.command == 'plan-worker-drain-cleanup':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import prepare_fresh_cleanup
+        result, path = prepare_fresh_cleanup(
+            PROJECT, args.run, lambda: EruCLIAdapter(Operator()))
+        if path is None:
+            print(json.dumps({k: result.get(k) for k in [
+                'worker_drain_run_id', 'decision', 'component_reinstall_allowed']}, indent=2))
+        else:
+            cleanup_plan = result['cleanup_plan']
+            print(json.dumps({
+                'id': result['id'], 'operation': result['operation'],
+                'decision': result['decision'], 'executable': result['executable'],
+                'worker_drain_run_id': result['worker_drain_run_id'],
+                'logical_app': result['logical_app'],
+                'remaining_source_count': len(result['source_workload_ids']),
+                'sha256': result['plan_sha256'],
+                'cleanup_plan_sha256': result['cleanup_plan_sha256'],
+                'path': str(path),
+            }, indent=2))
+        return
+    if args.command == 'execute-worker-drain-cleanup':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import execute_fresh_cleanup
+        result = execute_fresh_cleanup(
+            PROJECT, args.plan, args.sha256, args.cleanup_sha256,
+            lambda: EruCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'logical_app': result.get('logical_app'),
+            'removed_count': len(result.get('removed_ids', [])),
+        }, indent=2))
         return
     with ClusterLock(PROJECT):
         operator = Operator()

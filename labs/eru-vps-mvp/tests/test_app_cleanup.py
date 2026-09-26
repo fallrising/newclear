@@ -1,4 +1,5 @@
 """Offline exact-ID old revision cleanup state-machine tests."""
+import copy
 import json
 from pathlib import Path
 import sys
@@ -149,6 +150,77 @@ class AppRevisionCleanupTests(unittest.TestCase):
         result = cleanup.execute(fresh, fresh['plan_sha256'])
         self.assertEqual(result['removed_ids'], [second['id']])
         self.assertEqual(api.removed, [second['id']])
+
+    def test_identity_drift_on_an_unrelated_workload_stops_after_one_remove(self):
+        older = spec()
+        older['replicas'] = 2
+        older['image'] = 'registry.example/hello@sha256:' + 'b' * 64
+        first = workload(older)
+        second = copy.deepcopy(first)
+        second['id'] = first['id'].rsplit('_', 1)[0] + '_two'
+        other_spec = spec()
+        other_spec['name'] = 'metrics-api'
+        unrelated = workload(other_spec)
+
+        class DriftAfterFirstRemoveAPI(FakeEruAPI):
+            def remove_exact(self, workload_id):
+                super().remove_exact(workload_id)
+                if len(self.removed) == 1:
+                    row = next(row for row in self.live['workloads']
+                               if row['id'] == unrelated['id'])
+                    row['labels']['owner'] = 'foreign'
+
+        api = DriftAfterFirstRemoveAPI(snapshot([first, second, unrelated]))
+        app_plan = execution_plan(spec(), api.snapshot(), True, (), self.source_id)
+        AppExecutor(self.root, api).execute(app_plan, app_plan['plan_sha256'])
+        cleanup = AppRevisionCleanup(self.root, api)
+        plan = cleanup.plan(self.source_id, self.cleanup_id)
+        self.assertEqual([row['id'] for row in plan['targets']],
+                         [first['id'], second['id']])
+
+        with self.assertRaisesRegex(RuntimeError, 'post-remove state changed'):
+            cleanup.execute(plan, plan['plan_sha256'])
+
+        journal = json.loads(cleanup.journal_path(self.cleanup_id).read_text())
+        live_ids = {row['id'] for row in api.live['workloads']}
+        self.assertEqual(journal['status'], 'needs_review')
+        self.assertEqual(api.removed, [first['id']])
+        self.assertIn(second['id'], live_ids)
+        self.assertIn(unrelated['id'], live_ids)
+
+    def test_final_identity_audit_catches_drift_after_last_remove_audit(self):
+        older = spec()
+        older['image'] = 'registry.example/hello@sha256:' + 'b' * 64
+        old = workload(older)
+        other_spec = spec()
+        other_spec['name'] = 'metrics-api'
+        unrelated = workload(other_spec)
+
+        class DriftOnFinalProbeAPI(FakeEruAPI):
+            drifted = False
+
+            def probe(self, row, desired):
+                result = super().probe(row, desired)
+                if self.removed and not self.drifted:
+                    current = next(item for item in self.live['workloads']
+                                   if item['id'] == unrelated['id'])
+                    current['nodename'] = 'worker-3'
+                    self.drifted = True
+                return result
+
+        api = DriftOnFinalProbeAPI(snapshot([old, unrelated]))
+        app_plan = execution_plan(spec(), api.snapshot(), True, (), self.source_id)
+        AppExecutor(self.root, api).execute(app_plan, app_plan['plan_sha256'])
+        cleanup = AppRevisionCleanup(self.root, api)
+        plan = cleanup.plan(self.source_id, self.cleanup_id)
+
+        with self.assertRaisesRegex(RuntimeError, 'final workload identities'):
+            cleanup.execute(plan, plan['plan_sha256'])
+
+        journal = json.loads(cleanup.journal_path(self.cleanup_id).read_text())
+        self.assertEqual(journal['status'], 'needs_review')
+        self.assertEqual(api.removed, [old['id']])
+        self.assertTrue(api.drifted)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "research_date": "2026-09-27",
+  "repository": "https://github.com/projecteru2/mithril",
+  "default_branch_observed": "master",
+  "commit": "9959fe2e5cd466614dc20ef7b710befaaf1d746a",
+  "manifest_version": "0.1.7",
+  "release_tag_verified": false,
+  "rust_toolchain": "1.98.0",
+  "license_identifier": "AGPL-3.0-only",
+  "baseline_newclear_commit": "268fb9ad7b683a02731e6fc18f8b974ba0c44022",
+  "verification": "GitHub ref/file/tree inspection only; no upstream build or runtime verification",
+  "sources": [
+    {
+      "id": "S01",
+      "path": "Cargo.toml",
+      "git_blob_sha": "fd1ba25df7df4943bd5d2eed6a26fbd06254a132",
+      "read_scope": "full"
+    },
+    {
+      "id": "S02",
+      "path": "docs/architecture.md",
+      "git_blob_sha": "2de858799cfc983d52e9c7c8c6f3eee1b80cd715",
+      "read_scope": "full"
+    },
+    {
+      "id": "S03",
+      "path": "docs/behavior.md",
+      "git_blob_sha": "c4b85c862efada84410d854f5f0dc08eb6f09617",
+      "read_scope": "full"
+    },
+    {
+      "id": "S04",
+      "path": "docs/compatibility.md",
+      "git_blob_sha": "e8aaea2c737f79a7b74e33b6f44932cd1293af20",
+      "read_scope": "full"
+    },
+    {
+      "id": "S05",
+      "path": "docs/benchmarks.md",
+      "git_blob_sha": "535fd5fdfe704ae1d305b0ee0ec39fe82eac8090",
+      "read_scope": "full"
+    },
+    {
+      "id": "S06",
+      "path": "docs/configuration.md",
+      "git_blob_sha": "d6593d5313181746f573866a488a8957d7a47bb9",
+      "read_scope": "full"
+    },
+    {
+      "id": "S07",
+      "path": "docs/operations.md",
+      "git_blob_sha": "00d455c23c59eb6959996545e0b96ae00cc3c7b1",
+      "read_scope": "full"
+    },
+    {
+      "id": "S08",
+      "path": "mithril.conf.sample",
+      "git_blob_sha": "3cd758270b7d138b83897c1a9b11dc2f6f40c4e9",
+      "read_scope": "full"
+    },
+    {
+      "id": "S09",
+      "path": "Makefile",
+      "git_blob_sha": "c8d0bde96c3f92ddc4f3e09173c172a12b1c49ba",
+      "read_scope": "full"
+    },
+    {
+      "id": "S10",
+      "path": "src/route.rs",
+      "git_blob_sha": "f3156148a7c6b8c1089dd4bde351f85c2c252aeb",
+      "read_scope": "full"
+    },
+    {
+      "id": "S11",
+      "path": "src/multikey.rs",
+      "git_blob_sha": "38bf733a611aaecb5c7391c222288e2e4591ee5a",
+      "read_scope": "lines 1-240"
+    },
+    {
+      "id": "S12",
+      "path": "src/shard.rs",
+      "git_blob_sha": "bdcfee97e78dedbba975df0f3903a5efb5e2417f",
+      "read_scope": "full"
+    },
+    {
+      "id": "S13",
+      "path": "src/server.rs",
+      "git_blob_sha": "65bca3f912c039e6af9a1b382875aeaf76cce7ff",
+      "read_scope": "lines 1-210"
+    },
+    {
+      "id": "S14",
+      "path": "src/resp.rs",
+      "git_blob_sha": "0116fcd141d180c3f60eb0c3a378d0d5e7dfafe5",
+      "read_scope": "lines 1-170"
+    },
+    {
+      "id": "S15",
+      "path": "rust-toolchain.toml",
+      "git_blob_sha": "aa20bc990d6f843fffb559d502c73c74132111d0",
+      "read_scope": "full"
+    },
+    {
+      "id": "S16",
+      "path": "Cargo.lock",
+      "git_blob_sha": "0224b51155ae005a076d6e906ed97301641c9b6e",
+      "read_scope": "tree metadata only"
+    }
+  ]
+}

@@ -1,38 +1,45 @@
 # Mithril research lab
 
-> **Portfolio doc tier: A (active, bounded research)** — 研究入口：[docs/quickstart.md](docs/quickstart.md)。政策：[portfolio-doc-tiers](../../docs/portfolio-doc-tiers.md)。Owner 授權範圍：[PORTFOLIO.md](../../PORTFOLIO.md)。
+> **Portfolio doc tier: A (active, bounded research)** — 使用入口：[docs/quickstart.md](docs/quickstart.md)。政策：[portfolio-doc-tiers](../../docs/portfolio-doc-tiers.md)。Owner 授權範圍：[PORTFOLIO.md](../../PORTFOLIO.md)。
 
-研究對象是 [projecteru2/mithril](https://github.com/projecteru2/mithril)，不是 Mithril.js 或其他同名專案。本目錄是我們自己的研究與驗證設計，**不是上游 fork、Redis 伺服器實作或已部署的代理服務**。
+研究對象是 [projecteru2/mithril](https://github.com/projecteru2/mithril)，不是 Mithril.js。本目錄是原創研究與實驗設計，**不是上游 fork、Redis server 實作或已部署的代理服務**。
 
-**狀態：M0 原始碼／文件研究完成；M1 可執行環境與獨立驗證尚未開始。** 本輪沒有編譯 Mithril、執行上游整合測試、建立 Redis Cluster 或取得效能成績。證據與限制見 [VALIDATION](docs/VALIDATION.md)。
+**目前：M0 研究與四機使用計劃已形成文件；M1–M3 runtime 尚未驗證。** Owner 已確認四台測試機可用，但真實主機映射、盤點與部署批准仍待下一輪；本次只做文件／PR 交付，不安裝或操作四台機器。實際驗證範圍見 [VALIDATION](docs/VALIDATION.md)。
 
-## 先看結論
+## 從哪裡開始
 
-Mithril 值得研究的核心，是如何把 Redis Cluster 的路由、連線與部分相容性複雜度集中到代理層，並在多核心、pipeline、保序和背壓之間取捨。它沒有把叢集變成一個具完整單機語意的 Redis；跨 slot 寫入、交易、RESP3、快取與重試仍有重要邊界。[S02], [S03], [S04]
+先讀 **[四台測試機使用計劃](docs/FOUR-NODE-PLAN.md)**：三台承載 Redis 三主三副本，主副本交叉放置；第四台放 Mithril 與低流量 client。第一個成果是「啟動 → 讀寫 → 停止 → 保留資料重啟 → 精確清理」，再做故障、快取與效能。這是設計，不是已驗收拓撲。
 
-本輪決策：**繼續做隔離實驗；尚不決定採用或取代現有服務。** 下一個可驗收成果是固定版本的本機叢集 fixture 與功能測試，而不是另一套運維平台。
+上游可用容器、預編譯 binary 或 source build；不必先在四台安裝 Rust。固定 artifact、認證、網路、所有後端 advertised address 與資源 ownership 都要在部署前核對。[U01]
+
+Mithril 集中處理 Redis Cluster 路由、連線與部分協議複雜度，但不提供完整單機 Redis 語意；跨 slot、交易、重試、RESP3 與快取都有明確邊界。目前只支持繼續隔離驗證，不代表已決定採用。[S02]、[S03]、[S04]
 
 ## 文件入口
 
 | 文件 | 用途 |
 | --- | --- |
-| [RESEARCH](docs/RESEARCH.md) | PREP 摘要、架構、原始碼發現、相容性、效能判讀、與既有專案的關係 |
-| [SDD](docs/SDD.md) | 本研究實驗台的設計、需求、測試矩陣與採用閘門；不是宣稱重寫 Mithril |
-| [quickstart](docs/quickstart.md) | 固定版本的接手步驟與明示尚未執行的命令 |
-| [STATUS](docs/STATUS.md) | 固定任務編號、完成／待做／阻塞與下一步 |
-| [SOURCES](docs/SOURCES.md) | 來源、讀取範圍、事實／上游聲明／推論的區分 |
-| [VALIDATION](docs/VALIDATION.md) | 本輪驗證與未執行項目 |
+| [FOUR-NODE-PLAN](docs/FOUR-NODE-PLAN.md) | 四機角色、安裝、安全、使用、P0–P6 驗收與回復計劃 |
+| [EXECUTION_PROMPT](docs/EXECUTION_PROMPT.md) | 下一個 session 的完整路徑、讀取要求與操作授權邊界 |
+| [RESEARCH](docs/RESEARCH.md) | PREP、架構、原始碼、相容性、效能判讀與既有專案比較 |
+| [SDD](docs/SDD.md) | 需求 MR-R01–09、測例 C01–13、實驗與採用閘門 |
+| [quickstart](docs/quickstart.md) | 當前可做／不可做，及固定來源建置參考 |
+| [STATUS](docs/STATUS.md) | 唯一固定任務清單與下一步 |
+| [SOURCES](docs/SOURCES.md) | 原始研究來源、閱讀範圍與證據分級 |
+| [VALIDATION](docs/VALIDATION.md) | 本輪／歷史驗證與未執行項目 |
 | [upstream.lock.json](upstream.lock.json) | 研究 commit、toolchain 與來源 blob IDs |
-| [mithril.local.conf](examples/mithril.local.conf) | 僅供可信隔離本機的範例；不是安全的對外服務設定 |
+| [mithril.local.conf](examples/mithril.local.conf) | 舊單機可信隔離範例；不是四機部署設定 |
 | [AGENTS](AGENTS.md) | Agent 接續規則 |
 
-上游固定 commit：`9959fe2e5cd466614dc20ef7b710befaaf1d746a`。其 Cargo manifest 版本為 `0.1.7`；這裡不把 manifest 版本等同於已核實的 release tag。[S01]
+上游固定 commit：`9959fe2e5cd466614dc20ef7b710befaaf1d746a`；Cargo manifest 為 `0.1.7`，不把 manifest 版本等同於已核實 release tag。[S01] 四機 runtime lock、Compose、lifecycle CLI 與實機 evidence 尚未交付；不要執行不存在的 up/smoke/down 腳本。
 
 ## 邊界
 
-不修改或復活 [systems/snail](../../systems/snail/README.md)，不變更 [Eru VPS 實驗](../eru-vps-mvp/README.md) 的主機與 runtime，不修改 `fallrising/kernel` 或知識庫。不放入真實 IP、密碼、SSH key、dump 或運維 evidence。Mithril 上游 manifest 標示 `AGPL-3.0-only`；本目錄只交付原創分析與實驗設計，不匯入上游原始碼，後續再散布或產品整合需另審授權。[S01]
+不修改或復活 [systems/snail](../../systems/snail/README.md)，不接管 [Eru 實驗](../eru-vps-mvp/README.md) 或 `fallrising/kernel` 的主機／runtime，不修改知識庫。四機是否與既有環境相同，先盤點，不猜測。不提交真實 IP、SSH alias、金鑰、密碼、dump 或 raw evidence。
+
+上游 manifest 標示 `AGPL-3.0-only`；本目錄只交付原創分析與設計，不匯入上游原始碼。後續修改、再散布或產品整合另審授權，不將 newclear 根 MIT 套用到上游。[S01]
 
 [S01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/Cargo.toml
 [S02]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/architecture.md
 [S03]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/behavior.md
 [S04]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/compatibility.md
+[U01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/installation.md

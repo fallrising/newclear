@@ -1,14 +1,22 @@
-# Quickstart：接手研究，不等於已驗證部署
+# Quickstart：從四機計劃到可操作實驗
 
-## 本輪可用與不可用
+## 現在能做什麼
 
-可用：閱讀 [RESEARCH](RESEARCH.md)、[SDD](SDD.md) 和固定來源。本輪所有下列 upstream build／runtime 命令均為 **SKIPPED**：工作環境沒有 cargo、rustc、Docker、redis-server 或 redis-cli，且 shell 無法解析 github.com。GitHub connector 可讀寫 repository，但不能代替 runtime 執行。詳見 [VALIDATION](VALIDATION.md)。
+閱讀 [四機使用計劃](FOUR-NODE-PLAN.md)，並以 [EXECUTION_PROMPT](EXECUTION_PROMPT.md) 接手 MR-004 / P0。Owner 已提供四台測試機，但主機映射與現場盤點尚未完成；本輪只做文檔和 GitHub 交付。
 
-這裡提供接手命令，**不是已跑通的完整 Redis Cluster quickstart**。叢集 fixture 尚待 MR-004 實作；不要以真實 Redis 代替它。
+**這裡還沒有一鍵四機啟動包。** Compose、runtime lock、lifecycle CLI、auth templates 與 smoke harness 待 P1 實作；不能執行文件中尚不存在的 up/smoke/down 工具。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
 
-## 1. 在獨立工作目錄取得固定上游
+## 正式接手順序
 
-前置：git、可使用 GitHub SSH 的帳號／已驗證 host key、Rust toolchain 安裝能力；不要關閉 StrictHostKeyChecking。`$HOME/mithril-study-work` 應是新目錄，已有目錄時先核對，不覆蓋。
+完整閱讀 [AGENTS](../AGENTS.md) 指定文件，核對 main／PR／既有工作樹；先唯讀盤點四台與保留服務，再建立精確部署計劃。首輪實機批准後依 P1–P3 完成固定 artifacts、交叉副本、健康／安全、真正讀寫、保留資料重啟與精確清理。
+
+跨機 baseline 使用私網、認證與獨立 run ownership；舊 [mithril.local.conf](../examples/mithril.local.conf) 只供可信單機 loopback 實驗，不可直接複製到四台、改成 wildcard 或連既有 Redis。
+
+上游提供容器、release binary 與 source build；只有 source build 要 Rust toolchain。**不把「本工作環境不能編譯」誤當成「四台不能安裝使用」。** 預編譯 artifact 必須核對來源、架構、commit 與 checksum/digest；不能只看顯示版本。[U01]
+
+## 固定來源建置參考（選用，尚未在本輪執行）
+
+這是隔離 builder 的參考，不是四台主機的安裝指令。前置是已配置 GitHub SSH／host key、git、可取得固定 Rust toolchain 與 dependencies。目錄已存在時先核對，不覆蓋；不要把上游 checkout 放進 newclear 受追蹤路徑。
 
 ```bash
 set -eu
@@ -19,17 +27,6 @@ git clone git@github.com:projecteru2/mithril.git "$WORK/upstream"
 cd "$WORK/upstream"
 git checkout --detach 9959fe2e5cd466614dc20ef7b710befaaf1d746a
 test "$(git rev-parse HEAD)" = 9959fe2e5cd466614dc20ef7b710befaaf1d746a
-git status --short
-```
-
-不要把 checkout 放入 newclear 的受追蹤子目錄，不建立 submodule 或複製上游 LICENSE／程式碼到本研究。下載與保存上游副本的行為與本研究成果分開。
-
-## 2. 建置與原生檢查（本輪未執行）
-
-固定來源要求 Rust 1.98，toolchain 檔固定 1.98.0、rustfmt 與 clippy。Makefile 的原生入口是 build/test/lint/fmt-check；下列直接用 Cargo 加 `--locked`，避免解析依賴時改動 lockfile。[S01], [S09], [S15]
-
-```bash
-# 仍在 "$WORK/upstream"；rustup 會依 rust-toolchain.toml 使用固定 toolchain。
 rustc --version
 cargo --version
 cargo build --locked --release
@@ -39,38 +36,13 @@ cargo fmt --check
 sha256sum target/release/mithril
 ```
 
-保存 toolchain 版本、stdout/stderr、exit status、binary SHA-256、HEAD、完整設定 hash。直接 Cargo build 與 Makefile 注入的 build metadata 可能不同；不能只靠 INFO 的顯示版本判定執行的是哪個 commit。未經編譯成功不進行下一步。
+上游 rust-toolchain.toml 固定 1.98.0；Makefile 會注入 build metadata，直接 Cargo build 的顯示資訊可能不同。保存 HEAD、toolchain、binary SHA-256、命令／exit status；不能只靠 INFO 認定實際執行的 commit。[U01]、[U04]
 
-## 3. 啟動前必須先有自己的 disposable cluster
+## 第一次實際使用會得到什麼
 
-MR-004 尚未交付建立／健康檢查／精確清理腳本。由下一輪建立 digest-pinned 的 3-master/3-replica fixture，驗證 cluster_state、slot coverage、replication 與所有 advertised node address 皆可被 proxy 存取。**bootstrap seed 可達不等於所有後端 node address 可達。**
+P2 通過後才提供私有 Mithril endpoint、app user、密碼提示式連線指令與本 run key prefix。預期用 standalone redis-cli／SDK 完成 PING、帶 TTL 的 SET、GET、DEL，再用受控 direct backend 核對跨三個 shard 的真實資料；預期回覆見四機計劃 P3。
 
-在此前不執行代理啟動與寫入 smoke。不要把下面的 7001–7003 自動解讀為你的真實服務。
+不要用 Mithril PING／虛擬 CLUSTER 回覆代替六節點檢查，不把預期回覆寫成實測。正常 down 保留資料；同 run up 驗證重啟；purge 另核對精確物件與批准。此流程仍待實作與實機驗收。
 
-[設定範例](../examples/mithril.local.conf) 只綁 127.0.0.1:7979、限制連線與 buffer、關 cache 與 replica routing，固定 backend-sharding no。無密碼只適用可信、隔離、無不信任本機使用者的實驗主機。跨主機前必須改為私有認證設定並確認傳輸保護。[S04], [S06]
-
-## 4. 已核准 fixture 中的啟動與 smoke（本輪未執行）
-
-先確認 7979 沒有既有服務，將範例複製到私有 `$WORK/mithril.local.conf`，並核對 bootstrap 屬於該 run。前景啟動，在第二個 shell 測試：
-
-```bash
-"$WORK/upstream/target/release/mithril" "$WORK/mithril.local.conf"
-```
-
-```bash
-redis-cli -h 127.0.0.1 -p 7979 PING
-redis-cli -h 127.0.0.1 -p 7979 SET 'mithril-study:{smoke}:key' value
-redis-cli -h 127.0.0.1 -p 7979 GET 'mithril-study:{smoke}:key'
-redis-cli -h 127.0.0.1 -p 7979 DEL 'mithril-study:{smoke}:key'
-redis-cli -h 127.0.0.1 -p 7979 INFO
-```
-
-預期 smoke 值為 PONG、OK、value、1；這是預期而非本輪實測。它也不驗證 RESP3、跨 slot、故障、cache 或 performance。Ctrl-C 只停止自己的 foreground proxy；cluster 清理由 MR-004 的 ownership-aware 操作器完成，不提供全域 prune。
-
-下一步執行 SDD C01–C05，不先跑高流量 benchmark。
-
-[S01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/Cargo.toml
-[S04]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/compatibility.md
-[S06]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/configuration.md
-[S09]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/Makefile
-[S15]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/rust-toolchain.toml
+[U01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/installation.md
+[U04]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/rust-toolchain.toml

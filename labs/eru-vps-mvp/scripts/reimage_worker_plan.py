@@ -15,7 +15,7 @@ WORKER_INDEX = {
     'ckc-disposable-04': ('worker-4', 4),
 }
 POST_REIMAGE_BLOCKER = (
-    'Worker-only remote install, node registration, smoke, resume and recovery executor are not implemented'
+    'Node registration, smoke, resume and recovery executor are not implemented'
 )
 
 
@@ -180,6 +180,16 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
         },
         'worker_files': worker_files,
         'artifacts_lock_sha256': hashlib.sha256(artifacts_lock_path.read_bytes()).hexdigest(),
+        'worker_install': {
+            'executable': True,
+            'blockers': [],
+            'steps': [
+                'Revalidate the owner receipt, strict host trust, fresh host identity and unchanged core membership',
+                'Install only locked ERU agent/CNI artifacts and worker configuration; preserve OS, SSH/Tailscale and Docker/containerd',
+                'Start only eru-containerd-proxy.socket; leave eru-agent stopped and disabled',
+                'Verify installed owner manifest, preserved services, empty runtime and absent worker registration',
+            ],
+        },
         'mutation_hosts': [operator.core['alias'], alias],
         'executable': False,
         'blockers': [POST_REIMAGE_BLOCKER],

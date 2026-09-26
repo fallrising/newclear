@@ -48,7 +48,7 @@ python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode c
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 --mode provider-reimage
 ```
 
-未提供 `--health` 與 `--canary-run` 的 component-reinstall 計畫仍會阻擋；完整用法見 OPERATOR.md。只有選定空 worker、已部署的 core patch、近期完整健康觀測、ownership 與兩台 guard canaries 全部符合時才可執行。provider-reimage 一律 `executable: false`。
+未提供 health 與 canary-run 的 component-reinstall 計畫仍會阻擋；完整用法見 OPERATOR.md。只有選定空 worker、已部署的 core patch、近期完整健康觀測、ownership 與兩台 guard canaries 全部符合時才可執行。provider-reimage 的總計畫一律 executable: false；重灌後另有獨立 worker-only install gate，但不會啟動 agent 或重新註冊 node，且尚未做實機驗收。
 
 ## 執行契約
 

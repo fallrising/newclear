@@ -1,5 +1,7 @@
 # ERU-014 重灌前節點摘除器（2026-09-26）
 
+後續狀態更新（2026-09-26）：worker-only 遠端安裝階段現已有獨立 hash-bound executor 與 read-only reconcile；目前只完成 fake operator／response 離線驗證，沒有連線或修改 VPS。總 bootstrap plan 仍不可執行，node registration、smoke、resume、恢復 executor 與整體 E2E 仍未完成。詳見 [worker-only 安裝進度](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)。
+
 本紀錄交付人工 OS 重灌的 ERU-side preparation 階段，**只做本機 fake-operator 驗證，沒有連 VPS、沒有建立實機 intent／receipt，也沒有呼叫 provider API**。不屬於日常 ERU 元件清理重裝；OS reimage 仍是 owner 在 provider 控制台的後備操作。
 
 ## 執行契約

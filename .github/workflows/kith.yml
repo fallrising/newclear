@@ -39,12 +39,12 @@ jobs:
       - run: npm run lint
       - run: npm test
 
-  frontend:
+  web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
-        working-directory: products/kith/frontend
+        working-directory: products/kith/web
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,7 +53,42 @@ jobs:
         with:
           node-version: "24.18.0"
           cache: npm
-          cache-dependency-path: products/kith/frontend/package-lock.json
+          cache-dependency-path: products/kith/web/package-lock.json
       - run: npm ci
-      - run: npm test
       - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: products/kith
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: |
+            products/kith/package-lock.json
+            products/kith/web/package-lock.json
+            products/kith/e2e/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: products/kith/web
+      - run: npm ci
+        working-directory: products/kith/e2e
+      - run: npx playwright install --with-deps chromium
+        working-directory: products/kith/e2e
+      - run: npm run e2e:all
+      - if: ${{ !cancelled() }}
+        run: npm run e2e:validate
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: kith-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: products/kith/e2e/artifacts/
+          if-no-files-found: warn
+          retention-days: 14

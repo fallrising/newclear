@@ -403,7 +403,7 @@ class Operator:
                 }
                 plan['blockers'] += [
                     'Owner console reimage, receipt and replacement-host verification are separate manual stages',
-                    'Worker-only install, re-registration and resume stages are not implemented',
+                    'Worker smoke, safe resume, generation commit and recovery executor are not implemented',
                 ]
                 plan['steps'] = [f'Quiesce {node}; enumerate and relocate owned workloads',
                     'Verify empty node/runtime; stop target agent; remove exact node registration',
@@ -431,6 +431,10 @@ class Operator:
     def install_reimage_worker(self, bootstrap_plan_id, expected_hash):
         from reimage_worker_install import install_reimage_worker
         return install_reimage_worker(self, bootstrap_plan_id, expected_hash)
+
+    def register_reimage_worker(self, bootstrap_plan_id, expected_hash):
+        from reimage_worker_registration import register_reimage_worker
+        return register_reimage_worker(self, bootstrap_plan_id, expected_hash)
 
     def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
         plan_id = identifier(plan_id)
@@ -674,6 +678,9 @@ class Operator:
         if journal.get('operation') == 'provider-reimage-worker-install':
             from reimage_worker_install import reconcile_worker_install
             return reconcile_worker_install(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-registration':
+            from reimage_worker_registration import reconcile_worker_registration
+            return reconcile_worker_registration(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -716,6 +723,9 @@ def main():
     install_reimage_worker = sub.add_parser('install-reimage-worker', help='Install locked worker-only ERU components while leaving the agent stopped and unregistered')
     install_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
     install_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    register_reimage_worker = sub.add_parser('register-reimage-worker', help='Register the verified worker under safe core and leave it fenced for smoke testing')
+    register_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    register_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
     receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
     receipt.add_argument('--plan', required=True)
     receipt.add_argument('--sha256', required=True)
@@ -772,6 +782,12 @@ def main():
                 'registration': {k: plan['registration'][k]
                                  for k in ['node', 'podname', 'labels', 'resource_capacity']},
                 'worker_install': plan['worker_install'],
+                'worker_registration': {
+                    'executable': plan['worker_registration']['executable'],
+                    'core_release_id': plan['worker_registration']['core_release']['release_id'],
+                    'core_artifact_sha256': plan['worker_registration']['core_release']['artifact_sha256'],
+                    'steps': plan['worker_registration']['steps'],
+                },
                 'executable': plan['executable'], 'blockers': plan['blockers'],
                 'sha256': envelope['sha256'],
                 'path': str(operator.root / 'reimage-bootstrap-plans' / (plan['id'] + '.json')),
@@ -781,6 +797,12 @@ def main():
             print(json.dumps({k: result.get(k) for k in [
                 'id', 'operation', 'status', 'stage', 'target', 'target_alias',
                 'agent_started', 'node_registered', 'finished_at']}, indent=2))
+        elif args.command == 'register-reimage-worker':
+            result = operator.register_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'bootstrap_plan_id', 'operation', 'status', 'stage', 'target',
+                'target_alias', 'agent_started', 'node_registered', 'available', 'bypass',
+                'core_artifact_sha256', 'finished_at']}, indent=2))
         elif args.command == 'record-reimage-receipt':
             result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
             print(json.dumps(result, indent=2))

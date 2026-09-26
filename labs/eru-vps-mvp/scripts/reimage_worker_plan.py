@@ -8,6 +8,7 @@ import uuid
 
 from labops import atomic_json, digest
 from worker_payload import build_worker_payload
+from core_release import validation_record
 
 WORKER_INDEX = {
     'ckc-disposable-02': ('worker-2', 2),
@@ -15,7 +16,7 @@ WORKER_INDEX = {
     'ckc-disposable-04': ('worker-4', 4),
 }
 POST_REIMAGE_BLOCKER = (
-    'Node registration, smoke, resume and recovery executor are not implemented'
+    'Worker smoke, safe resume, generation commit and recovery executor are not implemented'
 )
 
 
@@ -151,6 +152,8 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
         'labels': old_node['labels'],
         'resource_capacity': old_node['resource_capacity'],
     }
+    core_release = validation_record(
+        operator.project, 'patches/core-v0.1.5-safe-node-add.validation.json')
     plan = {
         'schema': 1,
         'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
@@ -188,6 +191,17 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
                 'Install only locked ERU agent/CNI artifacts and worker configuration; preserve OS, SSH/Tailscale and Docker/containerd',
                 'Start only eru-containerd-proxy.socket; leave eru-agent stopped and disabled',
                 'Verify installed owner manifest, preserved services, empty runtime and absent worker registration',
+            ],
+        },
+        'worker_registration': {
+            'executable': True,
+            'blockers': [],
+            'core_release': core_release,
+            'steps': [
+                'Verify the running core binary matches the reviewed Bypass-at-Add release',
+                'Add the exact prior worker identity and resource map; require Bypass=true',
+                'Start only eru-agent and wait for available=true while Bypass remains true',
+                'Stop before smoke, node up, inventory update or cluster generation commit',
             ],
         },
         'mutation_hosts': [operator.core['alias'], alias],

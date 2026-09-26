@@ -210,7 +210,7 @@ def _load_plan(operator, plan_id, expected_hash):
         raise ValueError('provider reimage target is outside the reviewed worker names')
     if plan.get('blockers') != readiness['blockers'] + [
             'Owner console reimage, receipt and replacement-host verification are separate manual stages',
-            'Worker-only install, re-registration and resume stages are not implemented']:
+            'Worker smoke, safe resume, generation commit and recovery executor are not implemented']:
         raise ValueError('provider reimage plan stage contract changed; create a new plan')
     current_bindings = {
         'inventory': load_inventory(operator.project),

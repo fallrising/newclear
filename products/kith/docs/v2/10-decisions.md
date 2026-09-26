@@ -6,7 +6,7 @@
 
 | ID | 決策 | 理由 | 狀態 |
 | --- | --- | --- | --- |
-| D-01 | 新前端放 `products/kith/web/`，與 `frontend/` 並存到 W7 | 可逐步驗收；隨時可比對；切換風險集中在一個 PR | Accepted（W7 落地，2026-09-26） |
+| D-01 | 新前端放 `products/kith/web/`，與 `frontend/` 並存到 W7 | 可逐步驗收；隨時可比對；切換風險集中在一個 PR | Accepted（W7 落地，#130） |
 | D-02 | v2 文件放 `docs/v2/`；v1 SDD 保留為既有後端契約 | 不打斷 v1 的權威鏈；v2 只加不改 | Proposed（同上） |
 | D-03 | 視覺方向：溫暖、親近（紙白、陶土、鼠尾草） | 產品名「Kith」＝親友；與 Slack／iOS 設定頁區隔 | Proposed（同上） |
 | D-04 | 所有訊息渲染安全 Markdown 子集 | agent 輸出幾乎都是 Markdown；v1 純文字可讀性差 | Proposed（同上） |

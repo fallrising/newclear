@@ -22,7 +22,9 @@ TESTS = '^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)
 def apply_source_patch(source, patch, *, include=None, check=False):
     # Keep upstream-relative paths independent of any enclosing monorepo.
     subprocess.run(['git', 'init', '--quiet'], cwd=source, check=True)
-    argv = ['git', 'apply']
+    # The reviewed patch is bound to an exact upstream commit. Allowing zero-context
+    # hunks keeps the patch file itself clean under git diff --check.
+    argv = ['git', 'apply', '--unidiff-zero']
     if check:
         argv.append('--check')
     if include:
@@ -120,9 +122,11 @@ def main():
         if not failed or baseline.count('cannot create context from nil parent') < 2:
             raise ValueError('baseline did not reproduce both expected nil-context failures')
         apply_source_patch(source, patch, include='cluster/calcium/lock.go')
+        apply_source_patch(source, patch, include='store/common/node.go')
+        apply_source_patch(source, patch, include='store/common/node_test.go')
         for name, argv in [
             ('regression', [go, 'test', './cluster/calcium', '-run', TESTS, '-count=1']),
-            ('calcium', [go, 'test', './cluster/calcium', '-count=1']),
+            ('calcium', [go, 'test', './cluster/calcium', './store/common', '-count=1']),
             ('locks', [go, 'test', './lock/...', '-count=1']),
             ('build', [go, 'build', '-buildvcs=false', '-trimpath', '-o', str(root / 'eru-core'), '.']),
         ]:

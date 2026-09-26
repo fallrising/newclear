@@ -1,6 +1,6 @@
 # ERU-014 重灌後 worker-only 計畫器（2026-09-26）
 
-後續狀態更新（2026-09-26）：worker-only 遠端安裝階段現已有獨立 hash-bound executor 與 read-only reconcile；目前只完成 fake operator／response 離線驗證，沒有連線或修改 VPS。總 bootstrap plan 仍不可執行，node registration、smoke、resume、恢復 executor 與整體 E2E 仍未完成。詳見 [worker-only 安裝進度](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md)。
+後續狀態更新（2026-09-26）：worker-only 遠端安裝階段已有獨立 hash-bound executor 與 read-only reconcile，僅以 fake operator／response 離線驗證。另已確認 pinned v0.1.5 AddNode 原始預設為 Bypass=false，並新增本機驗證的 Bypass-at-Add patch；它尚未部署，resume helper 也尚未接入重灌 registration executor。總 bootstrap plan 仍不可執行，registration、smoke、recovery 與整體 E2E 仍未完成。詳見 [worker-only 安裝進度](M3-REIMAGE-WORKER-INSTALL-2026-09-26.md) 與 [safe AddNode patch](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)。
 
 本紀錄交付 owner receipt 與 replacement-host observation 之後的**離線安裝計畫產生器**。它不連 VPS、不安裝、不註冊 node、不改 inventory、不更新 core known_hosts，也不執行 provider API。原 provider-reimage plan 仍保持 review-only。
 
@@ -10,4 +10,4 @@
 
 結果寫入 private `reimage-bootstrap-plans/`，保存 source plan、receipt、preparation、observation 與 artifact lock hashes。CLI 摘要不輸出新 endpoint；計畫現在仍 `executable: false`，blocker 明列遠端 installer、node registration、smoke、resume 與 recovery executor 尚未完成。
 
-下一個實作階段仍須處理 strict alias 遠端安裝、安裝後保持 agent 停止、node add 後先設 Bypass、agent 啟動後驗 available+BYPASS、目標 smoke／其他 worker guards、明確 resume，以及只在成功後更新 private worker IP／cluster generation。還需安全更新 core `/etc/eru/known_hosts` 中該 worker 的單一 host-key 記錄。所有這些功能之後仍要分開做本機 fake tests 與正式 VPS 驗收；本輪未進行 E2E。
+下一個階段仍須在完成 core patch 受控部署及 runtime hash 核對後，實作 strict-alias worker registration executor；AddNode 必須由已驗證的 Bypass-at-Add core 建立 fenced node。安裝後啟動 agent，確認 identity／endpoint 不變、available=true 且 bypass=true，再跑目標 smoke 與其他 worker guards，最後明確 resume；僅全數成功後更新 private worker IP／cluster generation。還需安全更新 core /etc/eru/known_hosts 中該 worker 的單一 host-key 記錄。resume helper 目前是獨立本機測試元件，尚未接線。各階段之後仍要分開做 fake tests 與正式 VPS 驗收；本輪未進行 E2E。

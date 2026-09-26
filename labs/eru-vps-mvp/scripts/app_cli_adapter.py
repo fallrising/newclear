@@ -116,6 +116,14 @@ class EruCLIAdapter:
         finally:
             self.operator.command(core_alias, ['rm', '--', spec_path], timeout=20)
 
+    def fence_node(self, node):
+        """Issue one exact worker scheduling fence for ERU-009 drain."""
+        if node not in {'worker-2', 'worker-3', 'worker-4'}:
+            raise ValueError('worker drain fence requires a reviewed worker')
+        self.operator.command(
+            self._core_alias(), self._core_cli_prefix() + ['node', 'down', node],
+            timeout=90)
+
     def list_revision(self, appname):
         if not isinstance(appname, str) or not APPNAME.fullmatch(appname):
             raise ValueError('invalid deterministic Eru appname')

@@ -1,6 +1,6 @@
-import importlib.util,pathlib,tempfile,json,unittest
+import importlib.util,pathlib,tempfile,json,unittest,sys
 P=pathlib.Path(__file__).parents[1]/"codex_usage.py"
-S=importlib.util.spec_from_file_location("codex_usage",P);m=importlib.util.module_from_spec(S);S.loader.exec_module(m)
+S=importlib.util.spec_from_file_location("codex_usage",P);m=importlib.util.module_from_spec(S);sys.modules[S.name]=m;S.loader.exec_module(m)
 
 class Calculation(unittest.TestCase):
  def test_remaining(self):

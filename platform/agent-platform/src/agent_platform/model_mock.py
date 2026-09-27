@@ -6,7 +6,10 @@ It exercises the provider wire shape without a paid API or guest network access.
 import hmac
 import json
 import re
+import subprocess
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from uuid import UUID
 
 from .model_policy import MAX_REQUEST, canonical
@@ -109,6 +112,39 @@ def mock_response(data, run_id):
             "total_tokens": 15,
             "prompt_tokens_details": {"cached_tokens": 0},
         },
+    }
+
+
+def rehearse(directory, goal, run_id):
+    """Run the mock's edit in a local directory. This is not a VM and not a paid call."""
+    root = Path(directory)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("mock_rehearsal_directory_invalid")
+    response = mock_response(
+        {
+            "model": "local-mock",
+            "messages": [{"role": "user", "content": goal}],
+            "tools": [],
+            "max_tokens": 16,
+            "stream": False,
+        },
+        str(run_id),
+    )
+    call = response["choices"][0]["message"]["tool_calls"][0]["function"]
+    if call["name"] != "terminal":
+        raise ValueError("mock_rehearsal_not_an_edit")
+    command = json.loads(call["arguments"])["command"]
+    prefix = 'python3 -c "'
+    if not command.startswith(prefix) or not command.endswith('"') or "subprocess" in command:
+        raise ValueError("mock_rehearsal_command_rejected")
+    code = command[len(prefix) : -1]
+    if not code.startswith("from pathlib import Path; Path("):
+        raise ValueError("mock_rehearsal_command_rejected")
+    subprocess.run([sys.executable, "-c", code], cwd=root, check=True, timeout=5)
+    fixture = root / "m2-result.txt"
+    return {
+        "fixture_matches_run": fixture.is_file() and fixture.read_text() == f"{run_id}\n",
+        "files": sorted(path.name for path in root.iterdir() if path.is_file()),
     }
 
 

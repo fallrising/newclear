@@ -1,8 +1,10 @@
 import json
+import tempfile
 import unittest
+from pathlib import Path
 from uuid import uuid4
 
-from agent_platform.model_mock import mock_response
+from agent_platform.model_mock import mock_response, rehearse
 
 
 def payload(content):
@@ -42,6 +44,14 @@ class MockTaskCardTests(unittest.TestCase):
         raw = value["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
         self.assertIn("m2-result.txt", json.loads(raw)["command"])
         self.assertIn(run_id, json.loads(raw)["command"])
+
+    def test_rehearsal_writes_the_card_and_passes_the_fixture_check(self):
+        run_id = str(uuid4())
+        with tempfile.TemporaryDirectory() as directory:
+            result = rehearse(directory, "FILE note.txt\nTEXT hello", run_id)
+            self.assertTrue(result["fixture_matches_run"])
+            self.assertEqual((Path(directory) / "note.txt").read_text(), "hello\n")
+            self.assertEqual((Path(directory) / "m2-result.txt").read_text(), run_id + "\n")
 
     def test_paths_and_shell_text_are_not_a_card(self):
         for content in (

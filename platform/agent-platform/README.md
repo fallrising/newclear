@@ -5,7 +5,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-09-27）：M0–M2 已驗收。M3 已有 recovery、cancel、approval、pause、guest 隔離、固定節點 egress、本機模型通道與唯讀用量畫面。模型預設是本機 mock，不需要 API key。以後要換真接口時，暫定用 OpenCode Zen 裡走 Chat Completions 的模型；key 只放 0600 檔，現在不要申請。完整 AT-07／AT-11、硬金額上限、M4 與 24 小時停留都還沒做。**
+**目前狀態（2026-09-27）：M0–M2 已驗收。M3 已有 recovery、cancel、approval、pause、guest 隔離、固定節點 egress、本機模型通道與唯讀用量畫面。模型預設是本機 mock，不需要 API key。以後要換真接口時，暫定用 OpenCode Go 裡走 Chat Completions 的模型，位址是 `https://opencode.ai/zen/go/v1/chat/completions`；key 只放 0600 檔，現在不要申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。完整 AT-07／AT-11、硬金額上限、M4 與 24 小時停留都還沒做。**
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 

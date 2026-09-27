@@ -2,7 +2,7 @@
 
 此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `kvm8745` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。
 
-現行做法：用本機 mock 把任務流程做完。以後的真接口暫定 OpenCode Zen Chat Completions，`https://opencode.ai/zen/v1/chat/completions`。key 只放 0600 檔，現在沒有這份檔。`/responses` 與 `/messages` 不是目前的 transport。24 小時停留留到 release 前。
+現行做法：用本機 mock 把任務流程做完。以後的真接口暫定 OpenCode Go Chat Completions，`https://opencode.ai/zen/go/v1/chat/completions`。這是 Go 訂閱 key，不是 Zen 按量 key。key 只放 0600 檔，現在沒有這份檔。Go 的 `/responses` 與 `/messages` 不是目前的 transport。24 小時停留留到 release 前。
 
 ```text
 請接續開發 fallrising/newclear 的 platform/agent-platform。

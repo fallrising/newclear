@@ -660,9 +660,11 @@ function RunActivity({ run }: { run: Run }) {
         </div>
       </dl>
       <p className="muted">
-        {run.execution_mode === 'cocoon-fixture'
-          ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
-          : '模擬環境 · 排程驗證'}
+        {run.result?.execution_mode === 'local-mock'
+          ? '本機 mock · 未開虛擬機 · 不需要 API key'
+          : run.execution_mode === 'cocoon-fixture'
+            ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
+            : '模擬環境 · 排程驗證'}
       </p>
       <UsagePanel runId={run.id} />
       <RunControls run={run} />
@@ -736,7 +738,9 @@ function RunActivity({ run }: { run: Run }) {
               <pre className="diff" aria-label="檔案差異">
                 {run.result.diff || '沒有檔案變更。'}
               </pre>
-              <p className="muted mono">SHA-256: {run.result.diff_sha256}</p>
+              {run.result.diff_sha256 && (
+                <p className="muted mono">SHA-256: {run.result.diff_sha256}</p>
+              )}
             </>
           )}
         </section>

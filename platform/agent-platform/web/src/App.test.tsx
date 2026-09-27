@@ -280,6 +280,29 @@ it('renders a saved real VM diff as text and keeps unsupported controls disabled
   expect(screen.getByText(/Profile 設定的驗證通過/)).toBeVisible();
 });
 
+it('labels a saved local-mock card and shows its diff', async () => {
+  result = {
+    execution_mode: 'local-mock',
+    summary: '本機 mock 已寫入工作檔與驗收檔。沒有付費 API，也沒有虛擬機。',
+    diff: 'diff --git a/note.txt b/note.txt\n+hello\n',
+    diff_sha256: 'abc123',
+    verification: {
+      status: 'passed',
+      name: 'm2_fixture_workspace_assertion',
+      reason: 'Local mock rehearsal',
+    },
+  };
+  runState = 'succeeded';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('本機 mock · 未開虛擬機 · 不需要 API key')).toBeInTheDocument();
+  expect(screen.getByLabelText('檔案差異')).toHaveTextContent('+hello');
+  expect(screen.getByText('SHA-256: abc123')).toBeInTheDocument();
+  expect(screen.getByText(/固定檔案修改驗收通過/)).toBeInTheDocument();
+});
+
 it('shows model usage without presenting an unknown amount as a bill', async () => {
   usageConfigured = true;
   const user = userEvent.setup();

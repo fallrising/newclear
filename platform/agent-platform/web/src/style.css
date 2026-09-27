@@ -8,7 +8,7 @@
     sans-serif;
   color: #17243b;
   background: #f4f6fa;
-  font-synthesis: none;
+  font-synthesis: weight;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -37,8 +37,13 @@ button:hover:not(:disabled) {
   filter: brightness(0.94);
 }
 button:disabled {
-  opacity: 0.6;
-  cursor: wait;
+  background: #e3e8f0;
+  color: #7a879b;
+  cursor: not-allowed;
+}
+button.quiet:disabled {
+  background: transparent;
+  color: #9aa5b6;
 }
 button:focus-visible,
 a:focus-visible {
@@ -56,6 +61,22 @@ textarea {
   border-radius: 6px;
   padding: 0.65rem 0.75rem;
   margin-top: 0.35rem;
+  font-weight: 400;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #8592a6;
+}
+select:disabled {
+  background: #f1f4f8;
+  color: #7a879b;
+}
+.field-hint {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #59677d;
 }
 input:focus,
 select:focus,
@@ -261,6 +282,12 @@ p {
 .task-list {
   border-right: 1px solid #dce2ed;
   background: #fafbfe;
+  /* Scroll within the column instead of stretching the page. */
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  align-self: start;
+  position: sticky;
+  top: 0;
 }
 .list-heading {
   padding: 1.1rem 1.3rem;
@@ -296,6 +323,31 @@ p {
 .task-title {
   font-weight: 650;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+}
+.retry-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.9rem 1.75rem;
+  border-bottom: 1px solid #e1e6ef;
+  background: #fafbfe;
+}
+.retry-bar p,
+.retry-bar .error {
+  margin: 0;
 }
 .task-project {
   font-size: 0.85rem;
@@ -479,10 +531,6 @@ form .muted {
 .catalog-list li h3 {
   margin-bottom: 0.3rem;
 }
-.load-more {
-  width: 100%;
-  margin: 0.8rem 0;
-}
 @media (max-width: 900px) {
   .topbar {
     gap: 1rem;
@@ -553,13 +601,19 @@ form .muted {
     border-bottom: 1px solid #dce2ed;
     max-height: 340px;
     overflow: auto;
+    position: static;
   }
   .detail-body,
-  .detail-heading {
+  .detail-heading,
+  .retry-bar {
     padding: 1.25rem;
   }
   .detail > .empty {
     padding: 3rem 1rem;
+  }
+  /* Tall enough that choosing a task can scroll the detail to the top. */
+  .detail {
+    min-height: 100vh;
   }
   .catalog,
   .form-grid {

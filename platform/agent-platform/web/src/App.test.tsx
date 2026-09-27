@@ -32,6 +32,7 @@ let cancelEnabled: boolean;
 let runState: string;
 let cancelKeys: string[];
 let cancelLostResponse: boolean;
+let retryPayload: Record<string, unknown> | null;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -45,6 +46,7 @@ beforeEach(() => {
   runState = 'queued';
   cancelKeys = [];
   cancelLostResponse = false;
+  retryPayload = null;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -120,11 +122,18 @@ beforeEach(() => {
         runState = 'cancelling';
         return Response.json({ command_id: 'cancel-command', status: 'pending' }, { status: 202 });
       }
+      if (path === '/api/v1/tasks/missing')
+        return Response.json({ error: 'not_found' }, { status: 404 });
+      if (path === '/api/v1/tasks/task-1/runs' && method === 'POST') {
+        retryPayload = JSON.parse(String(options.body));
+        return Response.json({ id: 'run-2' }, { status: 202 });
+      }
       if (path === '/api/v1/tasks/task-1') {
         const run: Run = {
           id: 'run-1',
           task_id: 'task-1',
           attempt_no: 1,
+          profile_revision: 'profile-1',
           state: runState,
           capabilities: { cancel: cancelEnabled },
           state_version: 1,
@@ -135,7 +144,10 @@ beforeEach(() => {
           event_floor: 1,
           result,
         };
-        return Response.json({ task: tasks[0], runs: [run] });
+        const runs = retryPayload
+          ? [{ ...run, id: 'run-2', attempt_no: 2, state: 'queued', result: null }, run]
+          : [run];
+        return Response.json({ task: tasks[0], runs });
       }
       throw new Error(`Unexpected request: ${method} ${path}`);
     }),
@@ -256,4 +268,54 @@ it('retries a lost cancel response with the same command key', async () => {
   expect(await screen.findByText(/正在確認執行環境已停止/)).toBeVisible();
   expect(cancelKeys).toHaveLength(2);
   expect(cancelKeys[0]).toBe(cancelKeys[1]);
+});
+
+it('re-runs a finished task with the latest attempt inputs', async () => {
+  runState = 'failed';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '重新執行' }));
+  await waitFor(() =>
+    expect(retryPayload).toEqual({
+      goal: 'Add a regression check',
+      base_sha: '7bb80d00d03d93a2d392185adba65588c5fe2462',
+      profile_revision: 'profile-1',
+      expected_state_version: 1,
+    }),
+  );
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull();
+});
+
+it('explains a missing task link and returns to the list', async () => {
+  window.location.hash = 'missing';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  expect(await screen.findByText(/找不到這個任務/)).toBeVisible();
+  await user.click(screen.getByRole('button', { name: '返回任務列表' }));
+  expect(await screen.findByRole('heading', { name: '選擇一個任務' })).toBeVisible();
+  expect(window.location.hash).toBe('');
+});
+
+it('switches back to the task view when a task link is opened elsewhere', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.click(screen.getByRole('button', { name: '專案' }));
+  await screen.findByRole('heading', { name: '專案', level: 1 });
+  window.location.hash = 'missing';
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+  expect(await screen.findByRole('heading', { name: '任務與進度' })).toBeVisible();
+});
+
+it('offers tool approval only for a backend that supports it', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.click(screen.getByRole('button', { name: 'Agent 設定' }));
+  expect(await screen.findByLabelText(/工具審批/)).toBeDisabled();
+  expect(screen.getByText('模擬環境不支援工具審批。')).toBeVisible();
 });

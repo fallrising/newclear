@@ -20,6 +20,7 @@ export type Run = {
   id: string;
   task_id: string;
   attempt_no: number;
+  profile_revision: string;
   state: string;
   state_version: number;
   backend_cursor?: string | null;
@@ -62,9 +63,11 @@ export function setCsrf(value: string) {
 }
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, code: string) {
+  fields: string[];
+  constructor(status: number, code: string, fields: string[] = []) {
     super(code);
     this.status = status;
+    this.fields = fields;
   }
 }
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -75,7 +78,10 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, body.error ?? 'request_failed');
+    const fields = Array.isArray(body.fields)
+      ? body.fields.map((field: unknown) => (Array.isArray(field) ? String(field.at(-1)) : ''))
+      : [];
+    throw new ApiError(response.status, body.error ?? 'request_failed', fields);
   }
   return response.status === 204 ? (undefined as T) : response.json();
 }
@@ -118,8 +124,23 @@ export class PendingCommand {
   }
 }
 
+// Field-specific hints for 422 invalid_input; the first recognised field wins.
+const fieldHints: Record<string, string> = {
+  task_id: '連結中的任務 ID 格式不正確。',
+  run_id: '連結中的執行 ID 格式不正確。',
+  canonical_repo: 'Repository URL 必須是 https:// 開頭的網址。',
+  base_sha: 'Base commit SHA 必須是完整 40 或 64 字元的小寫十六進位。',
+};
+
 export function errorText(error: unknown) {
   if (error instanceof ApiError) {
+    if (error.message === 'invalid_input') {
+      const field = error.fields.find((name) => name in fieldHints);
+      if (field) return fieldHints[field];
+    }
+    if (error.message === 'unsupported_capability:approval')
+      return '這個執行方式不支援工具審批，請改用 OpenHands 或關閉審批。';
+    if (error.message.startsWith('unsupported_capability:')) return '這個執行方式尚不支援此操作。';
     return (
       (
         {
@@ -134,7 +155,8 @@ export function errorText(error: unknown) {
           database_unavailable: '服務暫時無法連線，請稍後再試。',
           runtime_not_configured: '真實執行環境尚未由管理員登錄。',
           repository_revision_not_registered: '這個 repository 或 commit 尚未登錄為可用版本。',
-          invalid_input: '請檢查欄位內容與 commit SHA。',
+          invalid_input: '請檢查欄位內容。',
+          not_found: '找不到這筆資料，可能連結有誤或已不存在。',
           active_run_exists: '這個任務已有尚未結束的執行。',
           state_conflict: '執行狀態已改變，已重新載入。',
           approval_expired: '審批已逾期，這份核准不能再使用。',

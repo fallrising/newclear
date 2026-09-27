@@ -6,6 +6,7 @@ import type { Run } from './api';
 
 const run: Run = {
   attempt_no: 1,
+  profile_revision: 'profile-1',
   base_sha: 'a'.repeat(40),
   goal: 'test',
   cleanup_state: 'pending',

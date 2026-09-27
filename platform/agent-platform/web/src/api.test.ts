@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, PendingCommand, setCsrf, session } from './api';
+import { ApiError, PendingCommand, errorText, request, setCsrf, session } from './api';
 
 afterEach(() => vi.unstubAllGlobals());
 describe('command delivery', () => {
@@ -71,4 +71,27 @@ it('ignores an old session refresh after an authentication transition cancels it
   await expect(refresh).rejects.toMatchObject({ name: 'AbortError' });
   await new PendingCommand().send('/tasks', { goal: 'one' });
   expect(fetcher.mock.calls[1][1].headers['X-CSRF-Token']).toBe('newer-session-csrf');
+});
+
+describe('error text', () => {
+  it('names the rejected field and missing resources', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json(
+            { error: 'invalid_input', fields: [['body', 'canonical_repo']] },
+            { status: 422 },
+          ),
+        ),
+    );
+    const error = await request('/projects').catch((e: unknown) => e);
+    expect(errorText(error)).toContain('https://');
+    expect(errorText(new ApiError(422, 'invalid_input', ['task_id']))).toContain('任務 ID');
+    expect(errorText(new ApiError(422, 'invalid_input'))).toBe('請檢查欄位內容。');
+    expect(errorText(new ApiError(404, 'not_found'))).toContain('找不到');
+    expect(errorText(new ApiError(409, 'unsupported_capability:approval'))).toContain('審批');
+    expect(errorText(new ApiError(409, 'unsupported_capability:pause'))).toContain('不支援');
+  });
 });

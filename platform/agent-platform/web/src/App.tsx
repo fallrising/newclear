@@ -164,7 +164,14 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
     onSuccess: onLogout,
   });
   useEffect(() => {
-    const update = () => setSelected(window.location.hash.slice(1));
+    const update = () => {
+      const id = window.location.hash.slice(1);
+      setSelected(id);
+      if (id) {
+        setView('tasks');
+        setCreating(false);
+      }
+    };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
@@ -176,10 +183,14 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
     )
       void cache.invalidateQueries({ queryKey: ['session'] });
   }, [runtime.error, projects.error, profiles.error, cache]);
+  const detail = useRef<HTMLElement>(null);
   function choose(id: string) {
     window.location.hash = id;
     setSelected(id);
     setCreating(false);
+    // Single-column layout stacks the detail below the list; bring it into view.
+    if (window.matchMedia?.('(max-width: 650px)').matches)
+      requestAnimationFrame(() => detail.current?.scrollIntoView({ block: 'start' }));
   }
   return (
     <div className="app-shell">
@@ -262,9 +273,16 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
             )}
             <div className="workbench">
               <TaskList selected={selected} onSelect={choose} />
-              <section className="detail" aria-label="任務工作台">
+              <section className="detail" aria-label="任務工作台" ref={detail}>
                 {selected ? (
-                  <TaskWorkspace key={selected} taskId={selected} />
+                  <TaskWorkspace
+                    key={selected}
+                    taskId={selected}
+                    onClose={() => {
+                      window.location.hash = '';
+                      setSelected('');
+                    }}
+                  />
                 ) : (
                   <Empty>
                     <h2>選擇一個任務</h2>
@@ -383,7 +401,9 @@ function TaskForm({
   );
 }
 function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: string) => void }) {
-  const [cursor, setCursor] = useState<string | null>(null);
+  // Cursors of the pages visited so far; the last entry is the current page.
+  const [pages, setPages] = useState<(string | null)[]>([null]);
+  const cursor = pages[pages.length - 1];
   const tasks = useQuery({
     queryKey: ['tasks', cursor],
     queryFn: () =>
@@ -395,9 +415,9 @@ function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: str
   return (
     <aside className="task-list" aria-label="任務列表">
       <div className="list-heading">
-        <h2>最近任務</h2>
-        {cursor && (
-          <button className="quiet" onClick={() => setCursor(null)}>
+        <h2>最近任務{pages.length > 1 ? ` · 第 ${pages.length} 頁` : ''}</h2>
+        {pages.length > 1 && (
+          <button className="quiet" onClick={() => setPages([null])}>
             回到最新
           </button>
         )}
@@ -437,15 +457,28 @@ function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: str
           ))}
         </ul>
       )}
-      {tasks.data?.next_cursor && (
-        <button className="quiet load-more" onClick={() => setCursor(tasks.data.next_cursor)}>
-          較早的任務 →
-        </button>
+      {(pages.length > 1 || tasks.data?.next_cursor) && (
+        <div className="pager">
+          <button
+            className="quiet"
+            disabled={pages.length < 2}
+            onClick={() => setPages(pages.slice(0, -1))}
+          >
+            ← 較新的任務
+          </button>
+          <button
+            className="quiet"
+            disabled={!tasks.data?.next_cursor}
+            onClick={() => setPages([...pages, tasks.data!.next_cursor])}
+          >
+            較早的任務 →
+          </button>
+        </div>
       )}
     </aside>
   );
 }
-function TaskWorkspace({ taskId }: { taskId: string }) {
+function TaskWorkspace({ taskId, onClose }: { taskId: string; onClose: () => void }) {
   const task = useQuery({
     queryKey: ['task', taskId],
     queryFn: () => request<TaskDetail>(`/tasks/${encodeURIComponent(taskId)}`),
@@ -453,14 +486,27 @@ function TaskWorkspace({ taskId }: { taskId: string }) {
   });
   const [runId, setRunId] = useState('');
   if (task.isPending) return <Empty>正在載入執行紀錄…</Empty>;
-  if (task.isError)
+  if (task.isError) {
+    const missing = task.error instanceof ApiError && [404, 422].includes(task.error.status);
     return (
       <div className="detail-body">
-        <ErrorNotice error={task.error} />
-        <button onClick={() => void task.refetch()}>重新載入</button>
+        {missing ? (
+          <p className="error" role="alert">
+            找不到這個任務。連結可能有誤，或任務已不存在。
+          </p>
+        ) : (
+          <ErrorNotice error={task.error} />
+        )}
+        {missing ? (
+          <button onClick={onClose}>返回任務列表</button>
+        ) : (
+          <button onClick={() => void task.refetch()}>重新載入</button>
+        )}
       </div>
     );
-  const run = task.data.runs.find((r) => r.id === runId) ?? task.data.runs[0];
+  }
+  const latest = task.data.runs[0];
+  const run = task.data.runs.find((r) => r.id === runId) ?? latest;
   return (
     <>
       <div className="detail-heading">
@@ -479,8 +525,52 @@ function TaskWorkspace({ taskId }: { taskId: string }) {
           </select>
         </label>
       </div>
+      {terminal.includes(latest.state) && (
+        <RetryRun taskId={taskId} latest={latest} onCreated={setRunId} />
+      )}
       <RunActivity key={run.id} run={run} />
     </>
+  );
+}
+const terminal = ['succeeded', 'failed', 'cancelled'];
+function RetryRun({
+  taskId,
+  latest,
+  onCreated,
+}: {
+  taskId: string;
+  latest: Run;
+  onCreated: (runId: string) => void;
+}) {
+  const cache = useQueryClient();
+  const command = useRef(new PendingCommand());
+  const retry = useMutation({
+    // Same goal, commit and profile revision as the latest attempt.
+    mutationFn: () =>
+      command.current.send<Run>(`/tasks/${encodeURIComponent(taskId)}/runs`, {
+        goal: latest.goal,
+        base_sha: latest.base_sha,
+        profile_revision: latest.profile_revision,
+        expected_state_version: latest.state_version,
+      }),
+    onSuccess: (created) => {
+      onCreated(created.id);
+      void cache.invalidateQueries({ queryKey: ['task', taskId] });
+      void cache.invalidateQueries({ queryKey: ['tasks'] });
+      void cache.invalidateQueries({ queryKey: ['runtime'] });
+    },
+    onError: () => void cache.invalidateQueries({ queryKey: ['task', taskId] }),
+  });
+  return (
+    <div className="retry-bar">
+      <p className="muted">
+        以相同目標、commit 與 Agent 設定重新執行，會建立第 {latest.attempt_no + 1} 次執行紀錄。
+      </p>
+      <button onClick={() => retry.mutate()} disabled={retry.isPending}>
+        {retry.isPending ? '送出中…' : '重新執行'}
+      </button>
+      <ErrorNotice error={retry.error} />
+    </div>
   );
 }
 function RunActivity({ run }: { run: Run }) {
@@ -654,12 +744,16 @@ function Catalog({
   const cache = useQueryClient();
   const command = useRef(new PendingCommand());
   const form = useRef<HTMLFormElement>(null);
+  const [chosen, setBackend] = useState(backends[0]);
+  const backend = backends.includes(chosen) ? chosen : backends[0];
+  const approvalSupported = backend === 'openhands';
   const create = useMutation({
     mutationFn: (data: unknown) =>
       command.current.send(kind === 'projects' ? '/projects' : '/agent-profiles', data),
     onSuccess: () => {
       void cache.invalidateQueries({ queryKey: [kind] });
       form.current?.reset();
+      setBackend(backends[0]);
     },
   });
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -715,7 +809,11 @@ function Catalog({
             <>
               <label>
                 執行方式
-                <select name="backend">
+                <select
+                  name="backend"
+                  value={backend}
+                  onChange={(event) => setBackend(event.target.value)}
+                >
                   {backends.map((backend) => (
                     <option key={backend} value={backend}>
                       {backend === 'openhands'
@@ -727,10 +825,20 @@ function Catalog({
               </label>
               <label>
                 工具審批
-                <select name="require_approval" defaultValue="false">
+                <select
+                  name="require_approval"
+                  defaultValue="false"
+                  disabled={!approvalSupported}
+                  aria-describedby={approvalSupported ? undefined : 'approval-hint'}
+                >
                   <option value="false">固定驗收操作自動執行</option>
                   <option value="true">每批工具操作都需核准（OpenHands）</option>
                 </select>
+                {!approvalSupported && (
+                  <span id="approval-hint" className="field-hint">
+                    模擬環境不支援工具審批。
+                  </span>
+                )}
               </label>
               <p className="notice">
                 真實 VM 只接受管理員已登錄的 repository 與

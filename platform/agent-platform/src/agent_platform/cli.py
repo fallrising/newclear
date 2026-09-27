@@ -36,7 +36,21 @@ def main():
     api.add_argument("--web-dist", type=Path)
     worker = commands.add_parser("worker")
     worker.add_argument("--once", action="store_true")
+    reconcile = commands.add_parser("reconcile-unconfirmed-allocation")
+    reconcile.add_argument("--config", type=Path, required=True)
+    reconcile.add_argument("--run-id", required=True)
     args = parser.parse_args()
+    if args.command == "reconcile-unconfirmed-allocation":
+        from agent_platform_m0.kvm_lifecycle import Host
+
+        from .connector_journal import private_file
+        from .connector_recovery import reconcile_unconfirmed_allocation
+
+        config = json.loads(private_file(args.config).read_text())
+        observed = Host(Path(config["cocoon_config"]), Path(config["sandbox_data_dir"]))
+        result = reconcile_unconfirmed_allocation(config, observed, args.run_id)
+        print(result["decision"])
+        return 0
     if args.command == "connector":
         from .connector import create_connector
         from .connector_journal import private_file

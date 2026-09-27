@@ -1,5 +1,9 @@
 # 開發接續紀錄 — 2026-09-24
 
+> 2026-09-26：本機 `hrv` 與 SSH 的四台 disposable 都沒有 `/tmp/apm3-*`、`/tmp/apm2-20260922` 或 sandboxd journal。使用者說明舊 controller 已重灌。那筆 `allocate=started` 無法再對帳，下一輪 KVM 使用新的 state directory。新主機先選 `ckc-disposable-04`（hostname `kvm8745`，Debian 13）。
+>
+> 2026-09-27：`kvm8745` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
+
 目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作；45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff 通過。完整 GitHub CI run `36008490179` 在程式碼 commit `e099c6e` 全部通過。之後文件更新觸發的 run `36009297291` 依使用者指示於 browser E2E 前取消；web job 通過，check／control-plane job 取消。後續 handoff-only commits 使用 `[skip ci]`，目前 head 沒有 checks 報告；最後一個完整通過的 run 仍是 `36008490179`。real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 因 unresolved same-journal recovery／KVM gate 未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。跨 agent 接手摘要見 [CONTINUATION-STATE.md](CONTINUATION-STATE.md)，設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。
 
 ## 本次 AT-11-C2b2 HTTPS provider 與 verification
@@ -136,7 +140,7 @@
 
 ## 下一步
 
-1. 先定義正式、可稽核的 same-journal recovery，處理 C2b2 留下的 `allocate=started`／無 handle quarantine；不可手改／刪 journal、換 state directory、降低 generation 或走 direct driver。完成 recovery 後才可依 [M3-HTTPS-PROVIDER](M3-HTTPS-PROVIDER.md) 以 `sg kvm` 啟動 sandboxd／connector，重新核對 deny-all／zero-warm／empty node，重跑 HTTPS mock KVM 與必要 isolation 回歸。之後再等使用者提供真實接口做明確 opt-in E2E。真實帳戶價格／token 上界／計費例外、可信金額結算、usage UI 及完整 AT-07／11 尚未完成；固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策。
+1. 用 `agent-platform reconcile-unconfirmed-allocation` 處理 C2b2 留下的 `allocate=started`／無 handle quarantine。這個命令會在同一 journal 寫下對帳決定；不可手改／刪 journal、換 state directory、降低 generation 或走 direct driver。命令在 KVM 主機成功後，才可依 [M3-HTTPS-PROVIDER](M3-HTTPS-PROVIDER.md) 以 `sg kvm` 啟動 sandboxd／connector，重新核對 deny-all／zero-warm／empty node，重跑 HTTPS mock KVM 與必要 isolation 回歸。之後再等使用者提供真實接口做明確 opt-in E2E。真實帳戶價格／token 上界／計費例外、可信金額結算、usage UI 及完整 AT-07／11 尚未完成；固定節點 egress 不支援 project-specific policy／即時撤銷／TLS 內容政策。
 2. **仍使用固定模擬模型**：只執行 `m2-result.txt` 驗收，不解讀自然語言任務、不呼叫付費 provider。Guest 在明確啟用 AT-11-B 後才連控制端 fixture／mock proxy；legacy 模式仍保留。Token counters 是上游 mock／fixture 回報，不是可信 token／金額上界。
 3. `connector.py`／`connector_journal.py` 擁有上游操作與私密 state，`runtime_worker.py` 擁有平台生命週期。沒有足夠停止證據時 reservation 必須保留，不得把 restart 當作重新配置授權。
 4. 任務輸入只允許 catalog 中的 canonical repo／base SHA；目前以 8 MiB 以下固定 bundle 提供 repository，沒有任意遠端 clone／私有 GitHub credential 流程。

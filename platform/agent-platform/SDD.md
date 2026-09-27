@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 HTTPS transport／profile verification 已實作且 Python／PostgreSQL 測試通過，但 real-KVM acceptance 尚未通過。AT-07／11 仍開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 HTTPS transport／profile verification 已在 2026-09-27 的新主機通過 `mock-https-complete` 與 isolation。這次結果還沒進 GitHub CI。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
@@ -267,7 +267,7 @@ stateDiagram-v2
 - 在 DB transaction 同時 reserve node RAM/CPU/disk 與 active-run slot；release 以 sandbox 確認終止為條件，不能只看 worker lease 到期。
 - VM 內既有長命令不會因 DB fencing 自動停止。Worker 失聯時，connector 必須核對／停止舊實例後才允許 replacement；無法確認就 quarantine 該 binding，保留容量。
 - 不宣稱任意 tool effect exactly-once。平台命令、prompt admission、export 使用 operation ID；對無 idempotency 的 backend，送出結果不明時 inspect／reconcile，仍不明則等待 operator，不盲目重送。
-- Run TTL、sandbox lease、worker lease 分開。Sandbox lease 必須覆蓋 run deadline + 2 分鐘收尾。已讀到的 sandbox claim 支援 `ttl_seconds`（預設 5 分鐘、上限 24 小時），但沒有據此確認一般 lease renewal；因此 MVP 在 allocate 時一次申請足額 TTL，不依賴 `renew`。未來只有 capability 與實測通過才啟用 renewal；期限不足就提前取消／封存，不能讓 VM 在任務仍顯示 running 時被回收。
+- Run TTL、sandbox lease、worker lease 分開。Sandbox lease 必須覆蓋 run deadline + 2 分鐘收尾。已讀到的 sandbox claim 支援 `ttl_seconds`（預設 5 分鐘、上限 24 小時），但沒有據此確認一般 lease renewal；因此 MVP 在 allocate 時一次申請足額 TTL，不依賴 `renew`。目前 profile 的 `deadline_seconds` 上限是 2 小時，對應 sandbox TTL 上限 7320 秒。把 VM 實測留到 24 小時是 release 前的整合測試，不放進功能切片；屆時可改做縮短實驗，證明到期前取消／封存且沒有續租。未來只有該整合測試與 capability 通過才啟用 renewal。期限不足就提前取消／封存，不能讓 VM 在任務仍顯示 running 時被回收。
 
 ### 9.3 故障處理
 
@@ -341,7 +341,7 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 
 [AT-11-C2b1 OpenAI 相容 mock](docs/M3-OPENAI-MOCK.md)在原 guest／控制端安全邊界中驗收可設定模型 ID 的 Chat Completions 文字與工具格式。目的地仍限主機 loopback 腳本 mock；真實外部 HTTPS transport、Claude／Gemini 原生 adapter、任意自然語言 coding 與付費帳單均未驗收。
 
-[AT-11-C2b2 HTTPS transport／profile verification](docs/M3-HTTPS-PROVIDER.md)增加控制端固定 HTTPS Chat Completions endpoint、file-backed credential reference、TLS／CA 驗證及不可變 profile 驗證命令。HTTPS 呼叫仍由 worker 控制端執行，沒有新增 guest egress；provider usage 仍是 unbilled，金額 unknown。Python／PostgreSQL 測試通過，但本次 real-KVM case 未通過，不能宣稱 end-to-end 驗收完成。
+[AT-11-C2b2 HTTPS transport／profile verification](docs/M3-HTTPS-PROVIDER.md)增加控制端固定 HTTPS Chat Completions endpoint、file-backed credential reference、TLS／CA 驗證及不可變 profile 驗證命令。HTTPS 呼叫仍由 worker 控制端執行，沒有新增 guest egress；provider usage 仍是 unbilled，金額 unknown。Python／PostgreSQL 測試通過。2026-09-27 在新的 deny-all node 上，`mock-https-complete` 與 isolation 皆 succeeded；這不是付費 provider E2E，也還沒進 GitHub CI。
 
 ### 11.3 工具與網路
 
@@ -437,7 +437,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 HTTPS／profile verification 實作與 Python／PostgreSQL 測試通過，real-KVM gate 未通過；可信真實金額預算及完整 AT-07/11 待完成，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 HTTPS／profile verification 的 `mock-https-complete` 與 isolation 已在新主機通過，尚未進 GitHub CI。可信真實金額預算及完整 AT-07/11 待完成。24 小時實機停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |

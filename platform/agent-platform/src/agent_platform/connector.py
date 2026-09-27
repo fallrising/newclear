@@ -36,7 +36,7 @@ from .connector_fence import Fences, Lease
 from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, attest
 from .connector_journal import Journal, private_file
 from .connector_output import OutputPolicy, workspace_result
-from .connector_recovery import inspect
+from .connector_recovery import blocks_new_admission, inspect
 from .domain import Input, Problem
 from .verification import VerificationPolicy
 
@@ -235,13 +235,7 @@ class Connector:
                 if any(p["target"] != 0 for p in info["pools"]):
                     raise Problem(409, "warm_pool_not_supported")
                 pending = [json.loads(p.read_text()) for p in self.journal.root.glob("*.json")]
-                unresolved = [
-                    r
-                    for r in pending
-                    if r["operations"].get("allocate", {}).get("state") == "started"
-                    and not r.get("handle")
-                    and r["run_id"] != str(run_id)
-                ]
+                unresolved = [r for r in pending if blocks_new_admission(r, run_id)]
                 if unresolved:
                     raise Problem(409, "unresolved_allocation_blocks_admission")
                 if max(len(self.client.sandboxes()), len(self.host.vms())) >= 4:

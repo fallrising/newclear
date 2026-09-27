@@ -70,9 +70,26 @@ python3 scripts/labctl.py prepare-worker-loss --plan REVIEW_PLAN_ID \
 python3 scripts/labctl.py execute-worker-loss-cleanup \
   --plan EXECUTION_PLAN_ID --sha256 EXECUTION_PLAN_SHA256
 python3 scripts/labctl.py recover-worker-loss --run EXECUTION_PLAN_ID
+python3 scripts/labctl.py plan-worker-loss-recovery-cleanup \
+  --run UNCERTAIN_RUN_ID --plan-id FRESH_CLEANUP_PLAN_ID
+python3 scripts/labctl.py execute-worker-loss-recovery-cleanup \
+  --plan FRESH_CLEANUP_PLAN_ID --sha256 FRESH_CLEANUP_PLAN_SHA256
+python3 scripts/labctl.py plan-worker-loss-replacement \
+  --run COMPLETED_CLEANUP_RUN_ID \
+  --input private/operations/worker-loss-input.json \
+  --plan-id FRESH_REPLACEMENT_PLAN_ID
+python3 scripts/labctl.py execute-worker-loss-replacement \
+  --plan FRESH_REPLACEMENT_PLAN_ID --sha256 FRESH_REPLACEMENT_PLAN_SHA256 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py recover-worker-loss-replacement \
+  --run FRESH_REPLACEMENT_PLAN_ID
 ```
 
-離線輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。review plan 永遠不可執行；`prepare-worker-loss` 不 SSH target，只讀 core 與兩台健康 workers，經兩次 stable snapshot／preflight 才保存獨立 execution plan。execute 每個 exact ID 只送一次 dissociate，回覆遺失時查 ID 而不重播；每步核對全群 workload identities，末端 quota 必須為零，從不執行 `resource --fix`。成功只開 fresh replacement-plan gate，不會 node remove 或 deploy。`recover-worker-loss` 只讀且不 replay。偵測超過 180 秒會記為 V07 acceptance gap。這些路徑目前只以 fake fixtures 驗證，正式 V11 期間不可執行；完整限制見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
+離線輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。review plan 永遠不可執行；`prepare-worker-loss` 不 SSH target，只讀 core 與兩台健康 workers，經兩次 stable snapshot／preflight 才保存獨立 execution plan。execute 每個 exact ID 只送一次 dissociate，回覆遺失時查 ID 而不重播；每步核對全群 workload identities，末端 quota 必須為零，從不執行 `resource --fix`。`recover-worker-loss` 只讀且不 replay。
+
+partial cleanup 必須先用 recovery route 建新的 exact-ID subset plan；舊 plan 已有 journal 就永不重播。replacement planner 只接受所有原 stale IDs absent、target quota zero、兩次 live snapshot 穩定且原 private desired specs 完整重驗的狀態。replacement executor 在共用鎖內依序建立 fresh ERU-012 child plans，每個 app 的 exact replicas 與 HTTP 都 ready 後才進下一個，全部 ready 才完成。replacement recovery 只讀 exact revisions，不 deploy、不重做 HTTP probe。任何不確定結果保留 private journals，不能重播原 wrapper。公開輸出只有計數、狀態與 gates，不列 exact IDs 或 specs。
+
+偵測超過 180 秒會記為 V07 acceptance gap。這些路徑目前只以 fake fixtures 驗證，正式 V11 期間不可執行；本 slice 不做 provider fence 驗證、`resource --fix`、lost node remove 或 target resume。完整限制見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
 
 ## 鎖、紀錄與適用邊界
 

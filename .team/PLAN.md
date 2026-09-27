@@ -1585,3 +1585,54 @@ Tiered documentation: root catalog + policy + component README banners + A-tier 
 
 - Host missing Go/pytest for some quickstart live runs
 - Future rename `specs/fleet` → `systems/fleet` still open
+
+## Program: eru-vps-mvp / Variant: ERU-010 loss recovery continuation
+
+### Identity and objective
+
+| Field | Value |
+| --- | --- |
+| project / run | `labs/eru-vps-mvp` / `ERU-010-20260927-01` |
+| target / work branch | `main` at `17f5d90` / `agent/eru010-loss-recovery-replacement` |
+| active owner | Codex orchestrator |
+| formal task state | ERU-010 remains in progress; no fixed task-count change |
+| V11 boundary | run `20260927T082116Z-2dd7b6bc` remains active until 2026-09-28T08:22:46Z; remote work is read-only status only |
+| objective | Add a fresh exact-ID subset cleanup plan for partial worker-loss recovery, then a fresh hash-bound ERU-012 replacement plan gated on complete stale-ID absence and zero target quota, with private lifecycle, CLI, docs, and regression coverage |
+
+### Dependencies and safety boundaries
+
+- Reuse the merged PR #164 review-plan, live-prepare, exact dissociation, journal, and read-only recovery contracts.
+- Reuse ERU-012 `AppExecutor` and its readiness semantics; never replay the original loss plan or a failed child plan.
+- Fail closed on exact-ID identity drift, query failure, snapshot/fence/quota drift, healthy-worker drift, desired-spec drift, or incomplete replacement readiness.
+- Keep full IDs/specs/plans/journals under project `private/`; public CLI output must contain counts, gates, IDs/hashes of plans, and private paths only.
+- Do not connect this local-development slice to VPSs, do not remove the lost node, restore the target, or run `resource --fix`.
+- Preserve the user's untracked `labs/eru-vps-mvp/prompts/` directory.
+
+### Bounded tasks
+
+| Task | Goal | Writable scope | State |
+| --- | --- | --- | --- |
+| [T-101](tasks/T-101.md) | Read-only architecture and reuse audit for loss recovery, drain recovery, and ERU-012 executors | `reports/T-101.md` only | DONE — report validated |
+| [T-102](tasks/T-102.md) | Read-only regression/CLI contract audit against the requested negative cases | `reports/T-102.md` only | DONE — report validated |
+| T-103 | Orchestrator TDD implementation, docs, and repository checks | ERU-010 scoped source/tests/docs plus this ERU plan section | DONE — local candidate gates passed |
+| [T-104](tasks/T-104.md) | Independent fixed-diff review after implementation | `reports/T-104.md` only | DONE — report validated; no open findings |
+
+### Verification gates
+
+- Red: at least one focused regression must fail for the intended missing recovery/replacement behavior before implementation.
+- Focused worker-loss and ERU-012 tests pass, including partial subset, lost reply/no replay, rehashed tampering, identity/snapshot/fence/quota/healthy-worker drift, replacement gate/readiness, private path/symlink/duplicate-plan, and stdout redaction.
+- Full `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v` passes.
+- CI parity AST/JSON/Markdown-link/private-file-exclusion/diff check passes exactly as defined in `.github/workflows/eru-vps-mvp-ci.yml`.
+- Orchestrator reviews the complete diff and T-104 independent findings, then applies the `codex-evidence-gate`; failed or skipped checks remain explicit.
+- Only after local gates pass: commit, push, create PR, wait for GitHub `local-checks`, merge under the owner's explicit continuation authorization, and fast-forward local main. No deployment.
+
+### Decisions and current evidence
+
+- ERU-D001: 2026-09-27T14:46:46Z read-only V11 status showed 3/3 observers active/running, 769 samples each, both HTTP observers 23,041/23,041 successful, and zero failures/warnings/skips with 1% peak disk. The run was not collected or stopped.
+- ERU-D002: GitHub main was reconciled at `17f5d90`; intervening PRs #165–#169 touch Agent Platform, portfolio, and shared frontend-review documents, with no ERU or ERU ledger overlap. PR #164 and its ERU `local-checks` were successful.
+- ERU-D003: Workers T-101/T-102 are read-only and may not delegate, edit product files, commit, push, or mutate external systems. The orchestrator owns all implementation and acceptance.
+- ERU-D004: Red evidence was an import failure for the intentionally missing `execute_fresh_cleanup` API. The implementation keeps every recovery cleanup and replacement wrapper on a fresh plan ID/hash/journal and validates source plan/journal semantic equality in addition to hashes.
+- ERU-D005: Replacement is one wrapper plan, but ERU-012 child plans are created and executed sequentially from a fresh snapshot after the prior child is exact and HTTP-ready; a fresh wrapper may adopt an already exact revision through ERU-012 `no_op`, while an existing wrapper/child journal remains non-replayable.
+- ERU-D006: Both independent audit reports validate. T-101's provenance and sequential-child constraints and T-102's negative matrix were incorporated. Final local verification passes 30/30 focused worker-loss tests, 55/55 ERU-012 app tests, 413/413 full tests, and the exact CI parity source/document/private-file/diff validation.
+- ERU-D007: Independent T-104 review found and closed two issues before acceptance: a jointly edited/rehashed source plan+journal authorization bypass and symlink traversal through a source record parent. Recursive immutable-review provenance, symlink-safe source reads, and both regressions are present; T-104 validates with no open findings.
+- ERU-D008: The `codex-evidence-gate` decision in `reports/ERU-010-evidence.md` is PASS for the local reviewable candidate. No local required check failed or was skipped. Formal ERU-010 and the fixed 12-task count remain unchanged; authorized PR/CI/merge are the next delivery steps, and deployment remains prohibited.

@@ -129,3 +129,12 @@ class WorkerLossCLIAdapter:
             self.app._core_alias(),
             self.app._core_cli_prefix() + ['workload', 'dissociate', workload_id],
             timeout=90)
+
+    def deploy(self, plan):
+        return self.app.deploy(plan)
+
+    def list_revision(self, appname):
+        return self.app.list_revision(appname)
+
+    def probe(self, row, desired):
+        return self.app.probe(row, desired)

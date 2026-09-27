@@ -325,6 +325,18 @@ class PlatformTests(PlatformFixture):
             self.scalar("SELECT count(*) FROM resource_reservations WHERE released_at IS NULL"), 0
         )
 
+    def test_local_mock_card_is_saved_without_a_vm(self):
+        self.payload["goal"] = "FILE note.txt\nTEXT hello"
+        value = self.create()
+        self.assertTrue(Worker(self.db).run_once())
+        run = self.client.get(f"/api/v1/runs/{value['run']['id']}").json()
+        self.assertEqual(run["state"], "succeeded")
+        self.assertEqual(run["result"]["execution_mode"], "local-mock")
+        self.assertEqual(run["result"]["verification"]["status"], "passed")
+        self.assertIn("+hello", run["result"]["diff"])
+        self.assertIn(value["run"]["id"], run["result"]["diff"])
+        self.assertEqual(run["cleanup_state"], "confirmed")
+
     def test_events_dedupe_concurrent_producers_and_retention_cursor(self):
         value = self.create()
         run_id = value["run"]["id"]

@@ -47,4 +47,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- PR_PLACEHOLDER：撰寫 DESIGN.md，依原始碼修正 PROMPT.md 與 targets.json（Closes #147）。
+- fallrising/newclear#176：撰寫 DESIGN.md，依原始碼修正 PROMPT.md 與 targets.json（Closes #147）。

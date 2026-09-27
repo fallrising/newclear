@@ -4,18 +4,33 @@
 
 > 狀態：**只定義，未執行**。各 `targets.json` 的 `verified: false` 表示啟動指令、port、頁面清單都是從原始碼推斷，尚未實際跑過。第一次執行的 agent 必須先驗證並修正它們。
 
+## 0. 執行環境
+
+FE review 一律在**受控的隔離環境**執行，例如專用容器或 CI runner。這是讓各專案的啟動限制可以統一處理的前提：
+
+- 使用獨立的 network namespace（容器預設網路即可），**不要**用 `--network host`，也不要和其他服務共用 pod。
+- 被測服務與 headless 瀏覽器在同一個環境內，服務綁 `127.0.0.1`。在獨立 namespace 裡，loopback 從外部連不到；即使容器發布了 port，轉發目標也是容器網卡而不是 loopback。
+- 所有帳號、token、憑證、上傳檔都是本次執行產生的合成資料，執行結束即丟棄。截圖與報告會被提交或轉發，所以這條與網路隔離無關，仍然必須遵守。
+- 所需的測試 CA、client certificate、admin token 由 agent 在環境內即時產生，不使用任何既有環境的憑證。
+
+**拆不開就是耦合。** 如果某個 UI 無法在上述環境單獨跑起來，例如綁定位址寫死、UI 只能透過完整後端和正式認證才能載入，這本身就是 review 的發現。處理方式：
+
+1. 在報告中記為 `major`，說明耦合點（file:line）。
+2. 在報告中提出修正方向：讓部署策略可注入，**而不是**移除安全邊界；提議的選項只能讓行為更窄（例如綁定只接受 loopback），不得包含認證旁路或對外綁定。這類修改屬後端變更，依第 4 節只提議、不直接實作，由擁有者決定。
+3. 前端可以脫離後端驗證時，優先用 API contract 的 mock 與合成資料擷取畫面；再用一次完整整合執行（真實伺服器＋即時產生的測試憑證）確認接線。
+
 ## 1. 流程總覽
 
 每一輪 review 固定走這六步，不要跳步：
 
 1. **Discover** — 讀元件 `README.md`、`AGENTS.md`（若有）、`package.json`／建置檔、router 與頁面元件，確認 `targets.json` 的內容仍然正確。
-2. **Launch** — 以最小依賴在本機啟動 UI：優先使用專案自帶的 mock／fixture／demo 模式；只綁 `127.0.0.1`；不連任何正式環境。
+2. **Launch** — 在第 0 節的隔離環境內以最小依賴啟動 UI：優先使用專案自帶的 mock／fixture／demo 模式；只綁 `127.0.0.1`；不連任何正式環境。
 3. **Baseline capture** — 執行 `capture.mjs` 產生第一組截圖與 `capture.json`。
 4. **Review** — 依第 3 節檢查清單逐頁檢視截圖與 `capture.json`，也讀對應原始碼找根因。
 5. **Optimize** — 只修第 4 節允許範圍內、證據明確的問題；每個修正都跑專案自己的 lint／typecheck／test／build。
 6. **Re-capture & report** — 重新截圖，寫 `REPORT.md`，列出 before／after 與未處理事項。
 
-啟動失敗不是結束：把失敗原因、已嘗試的指令、缺少的依賴寫進 `REPORT.md`，並修正 `targets.json` 中可確定的部分。
+啟動失敗不是結束：把失敗原因、已嘗試的指令、缺少的依賴寫進 `REPORT.md`，並修正 `targets.json` 中可確定的部分。若失敗原因是耦合，依第 0 節處理。
 
 ## 2. 截圖
 

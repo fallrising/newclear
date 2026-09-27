@@ -51,7 +51,7 @@
 | [`apps/flowshot`](apps/flowshot/) | Local-first 嚴格唯讀 Markdown annotation desktop app | Python, TS | C |
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
-| [`tools/cc-quota`](tools/cc-quota/) | Claude Code 額度 pacing 監控：每小時採集落庫、報表只讀、偏離才通知 | Python, SQLite, launchd | A |
+| [`tools/cc-quota`](tools/cc-quota/) | Claude Code 額度 pacing 監控：每小時採集落庫、報表只讀、偏離才通知 | Python, SQLite, launchd | A |\n| [`tools/codex-usage`](tools/codex-usage/) | Codex ChatGPT 訂閱用量唯讀採集器：App Server 單次快照、無模型 turn、fail-closed JSON | Python, Codex App Server | A |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗

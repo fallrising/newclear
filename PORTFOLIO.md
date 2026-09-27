@@ -159,7 +159,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/ice-maker` | A | Knowledge-compiler investment line |
 | `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
 | `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
-| `tools/cc-quota` | A | Owner override 2026-09-27; offline tests in CI, target-machine path unverified |
+| `tools/cc-quota` | A | Owner override 2026-09-27; offline tests in CI, target-machine path unverified |\n| `tools/codex-usage` | A | Owner override 2026-09-27; stateless read-only collector, offline tests in CI, target Codex CLI/account live acceptance pending |
 | `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
 | `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
 | `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
@@ -194,3 +194,12 @@ Owner 明確要求在 `fallrising/newclear` 建立項目並研究 `projecteru2/m
 這不是新代理產品或 production 部署授權，不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane 的實作範圍。上游源碼不匯入 monorepo。M1 真正加入 fixture/harness 前先確認 disposable 環境、版本與安全邊界；實機變更及更大範圍整合另行決定。
 
 其餘 portfolio 決策維持不變；研究結論、固定來源、未完成驗證與下一步集中於該項目的 RESEARCH、SOURCES、VALIDATION、STATUS。
+
+
+## Owner override 2026-09-27 — tools/codex-usage
+
+Owner 要求參照既有 `tools/cc-quota`，在 `fallrising/newclear` 建立 Codex 對應小工具並放入本次已完成的訂閱用量採集實作。範圍限於 [tools/codex-usage](tools/codex-usage/README.md)，文檔檔位 A。
+
+第一階段只做 **ChatGPT/Codex 訂閱用量的單次唯讀採集**：透過官方 Codex CLI App Server 讀取 account/rate-limit/usage 資料，輸出 fail-closed JSON；不建立模型 thread/turn，不以 API Platform usage 替代，不讀出 credential，不建立 scheduler、SQLite、通知或自動任務調度。
+
+offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實際版本、登入 workspace、live schema 與真實 snapshot 尚待驗收。完成 live acceptance 前不得宣稱 production-ready，也不得為了取得資料改抓私人網頁端點。其餘 portfolio 決策維持不變。

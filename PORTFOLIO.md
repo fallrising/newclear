@@ -159,6 +159,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/ice-maker` | A | Knowledge-compiler investment line |
 | `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
 | `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
+| `tools/cc-quota` | A | Owner override 2026-09-27; offline tests in CI, target-machine path unverified |
 | `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
 | `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
 | `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
@@ -179,6 +180,12 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `examples/bite-pi` | D | Disposable demo |
 | `labs/bee-swarm` | D | Superseded by team-superpowers workflow |
 | `labs/aweshore` | D | Explicitly stopped |
+
+## Owner override 2026-09-27 — tools/cc-quota
+
+Owner 要求在 `fallrising/newclear` 開一個項目，實作 Claude Code 額度的 pacing 監控：每小時採集並落庫，另以報表讀取，採集與展示解耦。範圍僅限 [tools/cc-quota](tools/cc-quota/README.md)，文檔檔位 A；依賴 Python 標準函式庫，離線測試由 `cc-quota-ci.yml` 執行。
+
+真實額度端點（未公開文件）與 macOS launchd／Keychain 路徑尚未在目標機器驗證。本工具不刷新或轉存憑證，也不自動調度任務；其餘 portfolio 決策維持不變。
 
 ## Owner override 2026-09-27 — labs/mithril-research
 

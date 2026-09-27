@@ -1,0 +1,36 @@
+name: cc-quota CI
+
+on:
+  pull_request:
+    paths:
+      - tools/cc-quota/**
+      - .github/workflows/cc-quota-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - tools/cc-quota/**
+      - .github/workflows/cc-quota-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cc-quota-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tools/cc-quota
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Offline unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Check installer syntax
+        run: bash -n install.sh

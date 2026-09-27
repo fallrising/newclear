@@ -5,7 +5,9 @@ Unknown effects retain the original binding and resource reservation.
 """
 
 import os
+import tempfile
 from contextlib import contextmanager
+from pathlib import Path
 from uuid import uuid4
 
 from psycopg.types.json import Jsonb
@@ -227,7 +229,82 @@ class Worker:
             from .runtime_worker import execute_real
 
             return execute_real(self, claim)
+        from .model_mock import task_card
+
+        with self.owned(claim) as (conn, run):
+            goal = run["goal"]
+        if task_card([{"role": "user", "content": goal}]):
+            return self.execute_local_mock(claim)
         return self.execute_fake(claim)
+
+    def execute_local_mock(self, claim):
+        with self.owned(claim) as (conn, run):
+            if run["state"] != "provisioning":
+                raise Problem(409, "unexpected_worker_state")
+            self.sandbox.allocate(conn, run, f"{run['id']}:allocate")
+            backend = self.agent.create(conn, run, f"{run['id']}:conversation")
+            conn.execute("UPDATE runs SET backend_ref=%s WHERE id=%s", (backend["ref"], run["id"]))
+            self.state(conn, run, "running")
+        with self.owned(claim) as (conn, run):
+            from .model_mock import rehearse
+
+            with tempfile.TemporaryDirectory() as directory:
+                outcome = rehearse(directory, run["goal"], run["id"])
+                diff = workspace_diff(Path(directory))
+            message_id = uuid4()
+            content = "本機 mock 已寫入工作檔與驗收檔。沒有付費 API，也沒有虛擬機。"
+            conn.execute(
+                "INSERT INTO run_messages(id,run_id,role,content,backend_message_id) "
+                "VALUES (%s,%s,'assistant',%s,%s)",
+                (message_id, run["id"], content, str(message_id)),
+            )
+            event(
+                conn,
+                run["id"],
+                "message.created",
+                {"id": str(message_id), "role": "assistant", "content": content},
+                source="local-mock",
+                source_id=str(message_id),
+            )
+            passed = outcome["fixture_matches_run"]
+            result = {
+                "execution_mode": "local-mock",
+                "summary": content,
+                "diff": diff,
+                "verification": {
+                    "status": "passed" if passed else "failed",
+                    "name": "m2_fixture_workspace_assertion",
+                    "reason": "Local mock rehearsal; repository tests are not configured.",
+                },
+            }
+            conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
+            event(conn, run["id"], "run.result_saved", result)
+            self.state(conn, run, "finalizing")
+        with self.owned(claim) as (conn, run):
+            self.state(
+                conn,
+                run,
+                "succeeded" if run["result"]["verification"]["status"] == "passed" else "failed",
+            )
+        with self.owned(claim) as (conn, run):
+            self.sandbox.release(conn, run, f"{run['id']}:release")
+            observed = self.sandbox.inspect(conn, run)
+            if observed["observed_state"] != "stopped":
+                raise Problem(409, "cleanup_unconfirmed")
+            conn.execute(
+                "UPDATE resource_reservations SET released_at=now() WHERE sandbox_id=%s",
+                (run["sandbox_id"],),
+            )
+            conn.execute("UPDATE runs SET cleanup_state='confirmed' WHERE id=%s", (run["id"],))
+            event(
+                conn,
+                run["id"],
+                "runtime.cleaned",
+                {"execution_mode": "local-mock", "observed_state": "stopped"},
+            )
+            conn.execute(
+                "UPDATE jobs SET status='done',lease_until=NULL WHERE id=%s", (claim["job_id"],)
+            )
 
     def execute_fake(self, claim):
         with self.owned(claim) as (conn, run):
@@ -302,3 +379,19 @@ class Worker:
             return False
         self.execute(claim)
         return True
+
+
+def workspace_diff(root):
+    parts = []
+    for path in sorted(root.iterdir()):
+        if not path.is_file() or path.is_symlink():
+            continue
+        lines = path.read_text().splitlines()
+        body = "".join(f"+{line}\n" for line in lines)
+        parts.append(
+            f"diff --git a/{path.name} b/{path.name}\n"
+            "--- /dev/null\n"
+            f"+++ b/{path.name}\n"
+            f"@@ -0,0 +1,{len(lines)} @@\n{body}"
+        )
+    return "".join(parts)

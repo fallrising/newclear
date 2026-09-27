@@ -4,7 +4,7 @@
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)，第 2 輪的範圍與對外契約見 [DESIGN.md](DESIGN.md)。
 
 ## 專案概況
 
@@ -15,14 +15,18 @@
 
 ## 啟動線索（未驗證）
 
-- `go run ./cmd/fleetd`，以 `internal/config/config.go` 的環境變數指定暫存資料目錄；操作員登入用本機產生的測試憑證。
-- 需要節點資料時以 `fleet-agent` 或 API 註冊假節點，不連真實主機。
+- 在 `specs/fleet` 執行 `mkdir -p fe-review/runs/.state && go run ./cmd/fleetd`，環境變數見 `targets.json`。`FLEET_UI_HOSTNAME`、`FLEET_API_HOSTNAME` 必填（缺少時直接結束，`internal/config/config.go:76-78`）；`FLEETD_DB` 指到 `fe-review/runs/.state/`。未設定 `CF_API_TOKEN` 時 ingress 是 `Noop`，不對外連線。
+- 操作員登入：在環境內即時產生 `FLEETD_BOOTSTRAP_OPERATOR_TOKEN=flt_op_<隨機>`，以環境變數傳入（不寫進 `targets.json`），在 `/login` 貼上。以 `127.0.0.1` 連線時會提供 HTML（`Host` 不等於 API hostname）。
+- 節點與服務：以 `FLEETD_BOOTSTRAP_NODE_TOKEN=flt_bs_<隨機>` 透過 API 註冊假節點 `vps-fe-1`、建立服務 `hello` 與兩個 release，不連真實主機、不跑 `fleet-agent`（第 2 輪寫成 `seed.sh`，見 DESIGN.md M9）。節點 60 秒沒有 heartbeat 會轉為 `offline`。
+- 只有淺色主題（`app.css` 沒有深色模式），`colorSchemes` 只擷取 `light`；UI 文字是英文。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
 - 登入 → catalog → 節點詳情 → 服務詳情
+- catalog 按一次 Stop 再按 Start（htmx 換掉該列，焦點應留在按鈕上）
+- 服務頁按一次 Redeploy 與 Rollback
 
 ## 專案特有檢查重點
 
@@ -36,16 +40,16 @@
 
 - `internal/ui/templates/`、`internal/ui/static/`。
 
-## 待補的頁面
+## 狀態擷取
 
-`/nodes/{id}`、`/services/{name}`：註冊假資料後補齊。
+另外擷取：空資料庫的 catalog（只登入、不建立資料）、沒有服務的節點頁、沒有 release 的服務頁、節點 heartbeat 逾時後的 `offline-node`、動作失敗時的錯誤提示。
 
 ## 執行步驟
 
 先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
 
 1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
+2. **第 2 輪（修改）：** 只做 `DESIGN.md` 的修改項目，不改變其中列出的對外契約；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
 3. **第 3 輪（完整 e2e）：** 從 repository root 執行
    ```bash
    node docs/fe-review/capture.mjs specs/fleet/fe-review/targets.json --dry-run

@@ -91,6 +91,20 @@ partial cleanup 必須先用 recovery route 建新的 exact-ID subset plan；舊
 
 偵測超過 180 秒會記為 V07 acceptance gap。這些路徑目前只以 fake fixtures 驗證，正式 V11 期間不可執行；本 slice 不做 provider fence 驗證、`resource --fix`、lost node remove 或 target resume。完整限制見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
 
+## 全群 fresh rebuild：只建立 review plan
+
+ERU-015 的本機入口只讀取固定 private inputs 並寫入一份不可執行 plan：
+
+```bash
+python3 scripts/labctl.py plan-fresh-rebuild \
+  --input private/fresh-rebuild-intents/ITERATION.json \
+  --plan-id FRESH_REVIEW_ID
+```
+
+它要求 Profile A 的四份 owner-reviewed reimage intents、現行 inventory／cluster generation、24 小時內且仍符合目前乾淨 Git HEAD 的 controller preflight、pinned source locks、三項外部 material attestations、全新且不同的 etcd token digest，以及非空 ERU-012 desired specs。相同 provider／volume、wildcard、混用 OS image、舊 generation、stale report／intent、source dirty／commit drift、restore source、重用 token、stateful／unpinned app、private path/symlink 或重複 plan ID 都會 fail closed；available／quiescence／data disposition 明確為 false 時只可保存 `decision: blocked` 的 plan。第 2／3 次 iteration 另須驗證上一份 immutable plan 和獨立 accepted-run record，不能只提交自稱已通過的 ID/hash。
+
+公開輸出不展開四台 identity、provider／volume、IP、OS image 或 app spec，只顯示 counts、generation、decision、hash 與 relative private path。plan 永遠是 `executable: false`／`execution_implemented: false`，沒有 `execute-fresh-rebuild` 命令，也不能交給 generic `execute`。建立它不會連 SSH/provider、不會停止 writer、不會動 etcd/runtime/workload 或 `cluster.json`。完整 schema、stages 與 V08 尚缺證據見 [ERU-015 本機前置](M3-FRESH-REBUILD-PREP-2026-09-27.md)。
+
 ## 鎖、紀錄與適用邊界
 
 - `private/controller.lock` 使用 flock，計畫／執行／reconcile 與直接呼叫的 deploy／smoke 腳本共用。子程序繼承同一 FD；父程序離開後，仍執行中的合作子程序會繼續持鎖。不要刪除 lock file 來解鎖。

@@ -130,7 +130,7 @@ HTTP 分兩次驗收：第一輪 `--network eru`，在 workload 所在 worker �
 
 ### 6.2 CLI 契約與實作進度
 
-以下是完整目標契約。2026-09-22 已提供 [scripts/labctl.py 的有限操作](OPERATOR.md)：plan／execute／status／reconcile，支援 smoke、同版本 reapply 與指定 smoke run 清理；rebuild-node 僅能計畫。下表的 bootstrap、desired-state apply、重灌與備份還原仍未實作。
+以下是完整目標契約。至 2026-09-27，[scripts/labctl.py 的有限操作](OPERATOR.md) 已包含 smoke／reapply／精確 cleanup、ERU-012 desired-state、ERU-009／010 recovery 與 ERU-014 單 worker reimage 的本機 fake-tested stages；各項是否已做 VPS 驗收以 [TASKS](TASKS.md) 為準。ERU-015 新增的 `plan-fresh-rebuild` 只產生不可執行的全群 review plan；下表 `rebuild-cluster --mode fresh` 的 destructive executor、完整 bootstrap 及備份還原仍未實作。
 
 | 命令 | 語意 | 重試契約 |
 | --- | --- | --- |
@@ -152,7 +152,7 @@ HTTP 分兩次驗收：第一輪 `--network eru`，在 workload 所在 worker �
 | 模式 | 保留 | 移除／重建 | 適用 |
 | --- | --- | --- | --- |
 | 應用重建 | OS、node、etcd、keys | 指定 app 的容器與可丟棄資料 | 日常部署驗證 |
-| worker 元件清理重裝（預設） | OS、SSH／Tailscale、既有 runtime、core／etcd 與 node 身分 | 指定 worker 的 ERU 專用檔案與本機狀態 | 日常可控重建；目前完成計畫／audit，執行器待實作 |
+| worker 元件清理重裝（預設） | OS、SSH／Tailscale、既有 runtime、core／etcd 與 node 身分 | 指定 worker 的 ERU 專用檔案與本機狀態 | 日常可控重建；worker-4 已有實機驗收，peer 路徑仍待實機 E2E |
 | 單 worker OS 重装（後備） | 健康控制面與其他 workers | 被選定 worker 的 OS、runtime、註冊紀錄 | 主機替換、乾淨化 |
 | 全群冷重建 | Git、外部 secrets／備份／run journal | 4 VPS 的實驗環境、全新 etcd、全部實驗 workload | 3 次可重現性驗收；Profile A → B |
 

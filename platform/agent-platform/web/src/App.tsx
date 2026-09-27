@@ -1,3 +1,4 @@
+import { refreshUsage, UsagePanel } from './Usage';
 import { RunControls } from './RunControls';
 import { Approvals } from './Approvals';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
@@ -594,6 +595,7 @@ function RunActivity({ run }: { run: Run }) {
             void cache.invalidateQueries({ queryKey: ['tasks'] });
             void cache.invalidateQueries({ queryKey: ['runtime'] });
           }
+          if (event.type === 'usage.updated') refreshUsage(cache, run.id);
         });
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -661,6 +663,7 @@ function RunActivity({ run }: { run: Run }) {
           ? 'OpenHands · 獨立 VM · 固定模擬模型'
           : '模擬環境 · 排程驗證'}
       </p>
+      <UsagePanel runId={run.id} />
       <RunControls run={run} />
       {run.require_approval && <Approvals run={run} />}
       {notice && <p className="notice">{notice}</p>}
@@ -699,7 +702,9 @@ function RunActivity({ run }: { run: Run }) {
                             ? '已收到取消請求。'
                             : event.type === 'run.cancel_completed'
                               ? '執行環境已停止，取消完成。'
-                              : String(event.payload.content ?? event.type)}
+                              : event.type === 'usage.updated'
+                                ? '模型用量已更新。金額仍未知。'
+                                : String(event.payload.content ?? event.type)}
             </p>
           </li>
         ))}

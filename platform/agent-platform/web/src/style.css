@@ -417,6 +417,12 @@ time {
   align-items: center;
   gap: 0.7rem;
 }
+.usage {
+  margin: 0 0 1.2rem;
+}
+.usage .run-facts {
+  margin-bottom: 0.6rem;
+}
 .run-facts {
   display: flex;
   gap: 3rem;

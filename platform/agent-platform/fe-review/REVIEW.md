@@ -59,3 +59,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- fallrising/newclear#178：第 1 輪 `DESIGN.md` 草稿與 REVIEW／PROMPT／targets 修正（待確認）。

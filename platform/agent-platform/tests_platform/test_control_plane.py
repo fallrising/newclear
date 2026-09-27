@@ -335,6 +335,7 @@ class PlatformTests(PlatformFixture):
         self.assertEqual(run["result"]["verification"]["status"], "passed")
         self.assertIn("+hello", run["result"]["diff"])
         self.assertIn(value["run"]["id"], run["result"]["diff"])
+        self.assertEqual(len(run["result"]["diff_sha256"]), 64)
         self.assertEqual(run["cleanup_state"], "confirmed")
 
     def test_events_dedupe_concurrent_producers_and_retention_cursor(self):

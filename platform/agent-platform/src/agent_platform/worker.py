@@ -4,6 +4,7 @@ Expired real-runtime ownership is reconciled against the existing instance.
 Unknown effects retain the original binding and resource reservation.
 """
 
+import hashlib
 import os
 import tempfile
 from contextlib import contextmanager
@@ -271,6 +272,7 @@ class Worker:
                 "execution_mode": "local-mock",
                 "summary": content,
                 "diff": diff,
+                "diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
                 "verification": {
                     "status": "passed" if passed else "failed",
                     "name": "m2_fixture_workspace_assertion",

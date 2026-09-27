@@ -49,5 +49,5 @@
 
 1. A 檔（active）：`products/kith`、`platform/dim-gate`、`products/hai-taskboard`、`platform/agent-platform`、`apps/cms-scaffold`、`platform/ice-maker`。
 2. B 檔：`specs/fleet`（修改不得改變對外契約）。
-3. C 檔（休眠，依 [PORTFOLIO.md](../../PORTFOLIO.md)「Owner override 2026-09-27 — fe-review 休眠元件」可修改前端，但不做新功能或 major 升級）：`systems/ojbquay`、`products/goku`、`products/phark`、`apps/flowshot` 與 `apps/loom`（兩者的 Tauri IPC 解耦方式相同，可同一個 PR）、`gateways/pokercase`、`systems/clarkq`、`platform/fanzloud`。
+3. C 檔（休眠，依 [PORTFOLIO.md](../../PORTFOLIO.md)「休眠」一節的 fe-review 例外可修改前端，但不做新功能或 major 升級）：`systems/ojbquay`、`products/goku`、`products/phark`、`apps/flowshot` 與 `apps/loom`（兩者的 Tauri IPC 解耦方式相同，可同一個 PR）、`gateways/pokercase`、`systems/clarkq`、`platform/fanzloud`。
 4. 跳過 D 檔（退役）：`apps/cloudform`、`labs/aweshore`、`tools/streaming-converter`。

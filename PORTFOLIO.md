@@ -1,241 +1,151 @@
-# Portfolio 投入決策
+# Portfolio
 
-盤點日期：2026-09-05
+只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-09-27。
 
-## 結論
+## 怎麼讀
 
-目前不是缺少可做的題目，而是同時開了太多戰線。35 個 portfolio unit 裡，只有 4 個 component 建議繼續投入；其中 `knowledge-base` 與 `ice-maker` 算同一條知識工作流，所以實際是 **3 條投入戰線**：知識編譯、個人意圖捕捉、雲端檔案盤點。
+- **投入**（開發投入）：是否為這個 codebase 規劃新功能。
+  - **繼續投入**：在範圍與限制內開發。
+  - **維護**：不規劃新功能，只修 bug、相容性與安全問題。
+  - **休眠**：不規劃新功能；投入預算的決定，不是品質判斷。在用的產品出問題時仍可修復。
+  - **收掉**：只留歷史，不維護。
+  - **未分級**：尚未做投入決定。
+- **使用**：產品有沒有在用，只記 owner 確認的狀態（在用／沒在用／未知）。**使用與投入互不推導**：
+  在用不代表要繼續開發，沒在用也不代表要停。
+- **檔位**：文檔深度 A–D，只決定文件深度，不決定投入。政策見 [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md)，
+  分類見 [docs/taxonomy.md](docs/taxonomy.md)。C 檔的 `Dormant since` 預設 2026-09-04，除非元件 README 另有更明確的日期。
+  「—」表示不在 newclear 的檔位制度內（其他 repository）。
+- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄。
+- `newclear/refs/` 是第三方索引，不是自有元件，不列入。
 
-3 條是上限，不是最低配額。在其中一條產生真實、重複使用的成果之前，不應從休眠區提新專案上來。
+## 元件
 
-本次依檔案樹、原始 source history、實際檢查、branch/PR 與依賴邊界判斷；不把 2026-09-04 的 squash import、migration、merge、successor notice、純格式或純 README commit 當成實質進度。`newclear/MIGRATION.md` 與 root README 明示 `newclear/refs/` 的 66 個項目是第三方索引，因此不算自有 component。
+### 繼續投入
 
-測試證據有一個整體限制：`newclear` 與 `kernel` 都沒有 root `.github/workflows`，匯入後留在 component 子目錄的 workflow 不會成為 monorepo CI；GitHub 目前也沒有這兩個 repo 的 Actions run。下表的「通過」是 2026-09-04 至 2026-09-05 在本機或 pinned disposable Docker 中重跑的結果，不代表 monorepo 有持續 gate。
+| 元件 | 使用 | 檔位 | 範圍與限制 |
+| --- | --- | --- | --- |
+| `knowledge-base` | 未知 | — | 唯一 canonical knowledge store；停止擴張 schema。寫入邊界見下方「知識、文件與個人筆記」。 |
+| `newclear/platform/ice-maker` | 未知 | A | 唯一 ingestion/compiler；產生真實成果，不再新增 pipeline abstraction。 |
+| `kernel/personal/pif` | 在用 | — | 仍在開發，尚未確認為可用產品。 |
+| `kernel/personal/clouddrive` | 未知 | — | read-only-first；只用供應商授權且受支援的 surface，不走帳密型 reverse-engineered API。 |
+| `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
+| `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
+| `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
+| `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
+| `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |
+| `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |
 
-Branch/PR 也以例外清單核對：目前 `newclear`、`kernel` 都只有 `main` 且沒有 open PR。公開 source 中需要決策的是 Goku、Phark、Fanzloud、Flowshot、Bee Swarm；其中只有 archived Fanzloud 還有 open PR #3/#4。Kernel source 中 OneCloud/PIF/CloudDrive/plugin 的 non-ancestor refs 都是較舊或已取代 tree，RelayVault task refs 在 main 後方，OneVPS/OneFleet 只有 main。8 個獨立 repo 中需要決策的是 Knowledge Base 的 4 條 note、Ice Maker 的保存快照、Local OCR T006 與兩條 fraud M7 WIP；目前 10 個 active repo 都沒有 open PR。其餘 component 沒有未合併 worker/agent 工作。
+### 維護
 
-分級是依目前可觀察證據做的決策。凡是只有你知道的線上使用、真實使用者或期限，列在最後的問題；答案若成立，才調整分級。確認後，所有「休眠」項目的最近 README 應標注 `Dormant since 2026-09-04`、恢復條件與 canonical successor；本輪不先改 README。
+| 元件 | 使用 | 檔位 | 範圍與限制 |
+| --- | --- | --- | --- |
+| `kernel/agents/codex-team-superpowers` | 未知 | — | 只修 validator、契約或相容性 bug，不擴建 dispatcher/UI。 |
+| `newclear/platform/local-ocr-services` | 未知 | B | Ice Maker 的隔離 OCR adapter。`agent/t006` load-test WIP 暫停，Ice Maker 的實際 workload 證明容量不足才恢復；redistribution 前補 license review。 |
+| `doc_analysis_study` | 未知 | — | evidence-bounded study corpus；只在有新研究題目時新增，不發展成第二套知識系統。 |
+| `fallrising` | 未知 | — | GitHub profile map；只在 portfolio ownership 改變時同步。 |
+| `kernel/personal/tgstash` | 在用 | — | 維持現狀。Tailscale-only 暫存轉移，不是備份。 |
+| `kernel/personal/ts-upload` | 在用 | — | 維持現狀。 |
+| `kernel/personal/ts-download` | 在用 | — | 維持現狀。 |
 
-## Owner override 2026-09-20 — products/kith
+### 休眠
 
-Owner 要求在此公開 monorepo 新增一條人機群聊產品。這是對 2026-09-05 freeze 的**明確第四條戰線例外**，範圍僅限 `products/kith`。不得復活 `labs/bee-swarm`。不得擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。其餘 2026-09-05 分級維持不變。kith 在 M0 之前僅為 documentation-only。
+fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) 第 2 輪，依各元件 `fe-review/DESIGN.md` 做前端修改與所需的最小解耦；
+不授權新功能或 major 依賴升級。D 檔元件不進入第 2、3 輪。
 
-## Owner override 2026-09-21 — platform/agent-platform
+| 元件 | 使用 | 檔位 | 範圍與限制 |
+| --- | --- | --- | --- |
+| `newclear/products/goku` | 未知 | C | 保留 `copilot`／`gemini` branch，去留待決。 |
+| `newclear/products/phark` | 未知 | C | 保存 branch 是否視為被 PR #10/#11 取代，待決。 |
+| `newclear/gateways/pokercase` | 未知 | C | 不加入另一套 agent orchestration。 |
+| `newclear/systems/clarkq` | 未知 | C | 不加 cluster feature。 |
+| `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
+| `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
+| `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
+| `newclear/platform/fanzloud` | 未知 | C | 不投資 cloud execution layer。archive source 的 open PR #3/#4 保存決策待決。 |
+| `newclear/platform/prism` | 未知 | C | Phase 0 SDD。 |
+| `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
+| `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
+| `newclear/specs/fleet` | 未知 | B | 只作 public contract，不發展成第二個 control plane。 |
+| `kernel/infra/onevps` | 未知 | — | 見「VPS 與 fleet」邊界。 |
+| `kernel/infra/onefleet` | 未知 | — | 見「VPS 與 fleet」邊界。 |
+| `kernel/infra/specs` | 未知 | — | 歷史設計 corpus，保留為 reference，沒有新 feature。 |
+| `kernel/infra/legacy/vps-hygiene` | 未知 | — | 只作 fleet contract 的行為參考，不得當成新產品開發；`--apply` 具 privileged／destructive 風險。 |
+| `kernel/fraud/edge-decision` | 未知 | — | 與 event-policy 是同一條 fraud program，一起休眠、一起恢復。 |
+| `kernel/fraud/event-policy` | 未知 | — | 同上。 |
+| `journal` | 未知 | — | 舊 capture archive，唯讀；只有選定的 durable note 搬到 Knowledge Base。 |
 
-Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主流平台、選定一個範本並撰寫 SDD。Owner 隨後明確要求「合併 pr，然後開始開發」；PR #14 已合併。本次例外擴至 `platform/agent-platform` 的實作與專屬驗證 CI，目前為 **M0 in progress**；不是部署或已完成產品的宣告。
+### 收掉
 
-範本選定 OpenHands Agent Canvas，方向為自管伺服器上的多任務 agent Web 工作台與 Cocoon sandbox 整合。與 `platform/fanzloud` 的 personal BYOS／Codex Cloud、`products/kith` 的群聊責任分開，不改動這些元件的實作，不復活 `labs/bee-swarm`。目前第一個切片是 SDD 的 M0 相容性驗證：Docker Agent Server 契約測試已實作，Cocoon／KVM gate 待驗；既有 portfolio 分級不因此改變。
-
-設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
-
-## Owner override 2026-09-25 — apps/cms-scaffold
-
-Owner 要求重啟 `apps/cms-scaffold`：先以 Shopify 的前端設計為參考重寫前端，後端配套演進，交給 LLM agent 分波實作。這是對 2026-09-05 freeze 的**明確例外**，範圍僅限 `apps/cms-scaffold`，tier 由 C 改為 A。
-
-目前處於 **設計階段**：v1 前端稽核、前端 v2 SDD、後端 v2 SDD 都是 v0.1，見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。實作依該索引的路線圖從 BW0 開始。總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變；其餘 2026-09-05 分級維持不變。
-
-（2026-09-24 曾登記為 documentation-only，本段取代之。）
-
-## 2026-09-05 修復與補充驗證
-
-這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。
-
-這些修復沒有改變 portfolio 投入分級：能編譯或通過測試是最低技術門檻，不是使用者、部署或期限證據。仍需保留的限制包括：Ojbquay Java 有 10 個 Testcontainers case 因未掛 Docker socket 而無結果；Wotar 有 3 個 certificate-dependent skip；Goku `npm audit` 報 58 個 dependency vulnerability；jstgbot 報 3 個；CloudForm 有 14 個 non-failing lint warning；AweShore 有 1 個 non-failing Qwik warning。沒有在本輪自動升級 dependency。
-
-## 繼續投入
-
-| Component | 可驗證事實 | 理由 |
+| 元件 | 檔位 | 後繼或理由 |
 | --- | --- | --- |
-| `knowledge-base` | 最後實質工作：2026-09-03 `a7fdf1d`；是有 index/governance 的知識 corpus，沒有 dependency manifest 或 native quality gate。`agent/personal-intent-router-t004` 已 patch-equivalent；4 條 `cursor/*` note branch 有獨有內容、無 open PR。 | 作為唯一 canonical durable knowledge store；先停止擴張 schema，把未合併 note 收斂成一份。 |
-| `ice-maker` | 最後實質工作：2026-09-04 `ba28ad9`；read-only audit tree 起初擋住 runtime state，之後把同一 tree 複製到 writable temp 重跑 `make check`：303 tests 全過、5 skipped；同日 `main` GitHub CI run `33835493783` 也成功。需要 Python >=3.11，document ingestion extras 有 pin，production runner/VPS evidence 仍待真實環境。31 條 worker branch 多為已整合或被 main 超越的保存快照，目前無 open PR。 | 是知識線唯一 compiler/ingestion engine，而且仍有可驗證的近期實作；下一步應產生真實成果，不再擴建框架。 |
-| `kernel/personal/pif` | 最後實質工作：2026-09-04 `41a224a`；239 個 deterministic tests 通過；舊 worker branch 是較舊／已取代 tree。依賴 pinned `cryptography==50.0.1`，尚無真實 Telegram/token smoke。 | 已有完整 local capture、加密、reconciliation、backup vertical slice；值得用一條真實 capture path 驗證是否會形成日常習慣。 |
-| `kernel/personal/clouddrive` | 最後實質工作：2026-09-04 `bf0bf2b`；sandbox 內先有 6 組 loopback setup error，允許 disposable loopback socket 後重跑 `make check`，215 tests 全過；舊 branch 已被較新的 main 取代。真實路徑需要 operator-issued PikPak/WebDAV endpoint 與 credential。 | 對應明確的雲端 inventory、下載與校驗需求；但只做 read-only-first、已授權且 vendor-supported 的 surface spike，不走帳密型 reverse-engineered API。 |
+| `newclear/apps/cloudform` | D | 沒有獨特用途；只留歷史。 |
+| `newclear/tools/streaming-converter` | D | 只留歷史。 |
+| `newclear/examples/bite-pi` | D | 會快速過時的 demo；gateway 指引由 Pokercase 或一份短文件接手。 |
+| `newclear/labs/bee-swarm` | D | 由 `kernel/agents/codex-team-superpowers` 取代。 |
+| `newclear/labs/aweshore` | D | 與 Knowledge Base 重疊，已明示停止開發。 |
+| `kernel/infra/legacy`（`config-center`、`crontab`、`ocmesh`、`doorkeeper`） | — | 由 OneVPS／OneFleet 取代；繼續維護只會製造雙重權威。 |
+| `kernel/personal/legacy/jstgbot` | — | 由 PIF 取代。 |
+| `kernel/infra/legacy/mac-in-docker` | — | 未驗證的 research draft，需要 KVM 與外部 image，另有 EULA 風險。 |
 
-## 維護模式
+### 未分級
 
-| Component | 可驗證事實 | 理由 |
-| --- | --- | --- |
-| `kernel/agents/codex-team-superpowers` | 最後實質工作：2026-09-04 `14309ca`；Python stdlib 實作的 16 tests 通過；目前這次盤點即在使用它的 task/report/evidence gate。nested workflow 在 monorepo 中不會執行；舊 agent refs 已被較新的 main 取代。 | 有真實用途且現有功能足夠；只修 validator、契約或相容性 bug，不擴建 dispatcher/UI。 |
-| `local-ocr-services` | 最後實質工作：2026-09-04 `f98e59a`；Docker test image 38 tests 通過，3 組 Compose profile 可 render。`agent/t006` 有 233 行 load-test WIP、目前無 open PR；沒有 mandatory paid service，但 redistribution 前要補 license review。 | 保持為 Ice Maker 的隔離 OCR adapter；T006 load WIP 先標記 paused，只有 Ice Maker 的真實 workload 證明容量不足才恢復，平時只修相容性與安全 bug。 |
-| `doc_analysis_study` | 最後實質工作：2026-09-03 `ad28e5c`；無外部 dependency manifest，Python repository validator 通過（3 studies、109 Markdown files）；所有 agent branch 已整合，無 open PR。 | 保留為 evidence-bounded study corpus，只在有新的真實研究題目時新增，不把它發展成第二套知識系統。 |
-| `fallrising` | 2026-09-04 `dd978eb` 只是 portfolio README；除此之外沒有可執行內容、測試或依賴。 | GitHub profile map 本身在線且有用；只在 portfolio ownership 改變時同步。 |
-
-## 休眠
-
-| Component | 可驗證事實 | 理由 |
-| --- | --- | --- |
-| `newclear/products/goku` | 最後實質工作：2025-08-05 `fd181bd`；API、CLI、consumer 的 `go test ./...` 全過；web 清除 2 個 unused lint error 後 lint/build 通過，但仍無自有 test/CI，且 `npm audit` 報 58 個 dependency vulnerability。依賴 MQTT。`copilot` diverges、`gemini` 無共同 ancestor；本輪查詢時皆無 open PR。 | 多服務 prototype 已一年無實質進展；先保留 branch，除非你確認仍有每週使用者，否則不再投入。 |
-| `newclear/products/phark` | 最後實質工作：2026-09-04 `9661090`；196 source files 與完整部署材料；Java 17 Maven suite 的 610 tests 全過，frontend clean install/lint/build 通過。24 條 worker branch 含 25 個 non-ancestor commit，其中 20 條 branch 已完整 merged；migration 說其餘工作已被 PR #10/#11 取代，但沒有 patch map；本輪查詢時無 open PR。 | **技術上是最完整的公開產品，但本輪未取得真實使用者／部署證據。** 在確認用途前，程式碼量不是繼續投入的理由。 |
-| `newclear/gateways/pokercase` | 最後實質工作：2026-07-29 `c6b2cb7`；`cargo test --locked` 通過。要產生價值必須接個人 subscription token 或 provider credential；provider refresh/ToS 漂移是持續成本。source 只剩 successor notice，無待合併工作。 | 可用，但本輪未取得 post-import 使用證據；若它不是現在每天實際使用的 gateway，就停手。 |
-| `newclear/systems/clarkq` | 最後實質工作：2026-07-30 `d18b65d`；有 deploy/demo/SDK，Go 1.22 `go test ./...` 通過；無 worker branch。 | 成熟 queue 不等於需要另一個 queue；本輪未取得真實 consumer 證據，不再加 cluster feature。 |
-| `newclear/systems/snail` | 最後實質工作：2026-07-30 `55f24a2`；`cargo test --locked` 通過，Linux/io_uring 壓力宣稱未在本輪重驗；無 worker branch。 | 是不錯的系統程式練習，但本輪未觀察到真實 workload；保留 benchmark 歷史即可。 |
-| `newclear/systems/ojbquay` | 最後實質工作：2026-07-30 `90d4a66`；280 個 Java/TS/shell files；console clean suite 的 5 tests 全過。Java 25/Gradle 產生 44 份結果，其中 10 個 Kafka/JDBC integration test 全因 Testcontainers 無法 discovery Docker 而失敗，不能判成 source regression。既有 `ojbquay-demo`/Kafka containers 已運行約五週，但仍未證明真實 consumer；agent branch 已整合。 | 技術與運維成本很高；先維持現有環境、不擴建，在確認它不是只有 demo 且有明確 consumer 後再升級投入。 |
-| `newclear/systems/wotar` | 最後實質工作：2026-07-16 `6e1b4be`；Python 3.12 focused suite 為 175 passed、3 certificate-dependent skipped、16 deselected；真實 broker 驗證仍要 EMQX/Docker。 | security-sensitive E2EE client 不能只靠 local suite 維護；本輪未取得實際 MQTT 場景證據，先停。 |
-| `newclear/platform/fanzloud` | 最後實質工作：2026-07-30 `c4b0b73`；focused domain tests 10 個通過，但 live BYOS smoke 從未跑。archive source 目前仍有 open PR #3（event store）與 #4（event replay），另有未匯入 branch。 | portfolio 投資面會與現有 Codex Cloud/agent tool 路線重疊；先處理兩個 open PR 的保存決策，再休眠，不應繼續擴建平台。 |
-| `newclear/apps/loom` | 最後實質工作：2026-06-14 `1ba9dfa`；Node typecheck、35 tests 與 production build 通過，仍缺 Tauri GUI end-to-end；完整使用還要 LLM API credential。 | contract core 可保留，但本輪未取得日常 desktop 使用證據；不再做 plugin/runtime backlog。 |
-| `newclear/apps/flowshot` | 最後實質工作：2026-07-30 `fbff4e9`；clean install、lint、6 tests 與 build 通過，仍是 N00 foundation，缺 GUI evidence；`agent/sdd-baseline` 有一個獨有 commit；本輪查詢時無 open PR。 | 需求合理但目前主要是規格與底座；只有在你願意把它當唯一閱讀工具時才恢復。 |
-| `newclear/specs/fleet` | 最後實質工作：2026-09-04 `fc0504b`；Go 1.23 `go test ./...`（含 example）通過，nested CI 已失效；live ingress 依賴 Docker/Cloudflare。 | 與 `kernel/infra/onefleet` 問題域重疊；本決策只保留它作 public contract，不另外發展成第二個 control plane。 |
-| `kernel/infra/onevps` | 最後實質工作：2026-09-02 `288db59`；preflight/bootstrap/schema/release/runtime checks 通過；真實 apply 需要 root、Docker/Tailscale 與目標 VPS。 | 本輪未取得 target-host 使用證據；若它沒有管理現役 VPS，就不是維護中的產品。 |
-| `kernel/infra/onefleet` | 最後實質工作：2026-09-04 `8b038e4`；Go 1.24 `go test ./...` 通過，包含 M1 control-plane、unit/e2e targets 與 Docker fixture；真實 ingress 仍需要 Docker/Cloudflare。 | 本輪未取得第一個真實 node/service 證據，先暫停；恢復條件是能管理一個你真的在用的服務。 |
-| `kernel/infra/specs` | 最後實質工作：2026-09-03 `396cbc4`；1,112 個 specification/evidence files。修正 monorepo root 與 restrictive-umask fixture 後完整 `make check` 通過，包括 disposable PostgreSQL/Redis isolation、restore 與 cleanup；Wave 7 仍明示缺 24 小時 soak/full-stack/scanner release evidence。 | 大量規格不是另一條產品線；先保留為 reference，沒有新 feature。 |
-| `kernel/personal/relayvault` | 最後實質工作：2026-09-04 `d89d769`，其後 source head 明示為 WIP。缺失的 upload HTTP control plane 已補齊；fmt、clippy 與 102 個 workspace tests 通過，並有未授權 request 零 body-poll 與真實雙 SQLite connection lifecycle 測試。 | 技術 blocker 已解除，但仍與 CloudDrive transfer/verification 鄰近；先讓 CloudDrive 證明需求，再決定是否恢復。 |
-| `kernel/infra/legacy/vps-hygiene` | 2026-09-04 前沒有 Git history；shell syntax 通過，含 host inventory/cleanup 與 dry-run，但 `--apply` 具 privileged/destructive 風險。 | 仍是 fleet contract 的行為參考，所以保留；不得當成新產品開發。 |
-| `journal` | 最後內容變更：2024-10-26 `e6ef3ca`；最後 script 變更是 2024-10-19 `8d3dcfc`，只有一個 syntax-valid helper。 | 約 22 個月無活動；先作唯讀來源，只有選定的 durable note 才搬到 Knowledge Base。 |
-| `fraud-edge-decision` | 最後實質工作：2026-09-04 `b5793cd`；`make check` 的 format、normal/race tests、build、acceptance/process packages 全通過。`agent/m7-local-infrastructure` 有 80 行 spec/WIP，目前無 open PR。 | **技術完成度高，但本輪未取得真實 stakeholder、流量或交付期限證據。** 未確認外部用途前，不把 M7/M8 做下去。 |
-| `fraud-event-policy` | 最後實質工作：2026-09-04 `99b6426`；同樣通過完整 `make check`。`agent/m7-local-infrastructure` 有 79 行 spec/WIP，目前無 open PR。 | 與 edge component 是同一條 fraud program；本輪未取得真實 policy contract/consumer 證據，兩者一起休眠，不能把它算第二個成就。 |
-
-## 收掉
-
-| Component | 可驗證事實 | 理由 |
-| --- | --- | --- |
-| `newclear/apps/cloudform` | 最後實質工作：2026-06-15 `65e537e`；117 個 Java/TS files；Java 17 backend 23 tests 通過，frontend 補齊 ESLint 9 config 並修 2 個 lint error 後 lint/build 通過，保留 14 個 non-failing warning。完整路徑仍要 PostgreSQL、Redis、Docker。 | 寬而淺的多服務 prototype，雖已可重現 build，仍沒有獨特用途或真實部署證據；只留歷史。 |
-| `newclear/tools/streaming-converter` | 最後實質工作：2024-11-13 `29a38ed`；沒有 tests/CI；`scripts/upload.sh` 的錯誤 `}` 已改為 `fi`，逐檔 `bash -n` 通過。仍依賴 FFmpeg、jq、bc、rclone、Nginx、Cloudflare R2。 | 語法 blocker 已修，但兩年未維護且整條 upload path 缺實際 smoke；除非仍在線上使用，否則不值得恢復投入。 |
-| `newclear/examples/bite-pi` | 最後實質工作：2026-07-28 `0ddb21f`；Compose render 與 shell syntax 通過，但沒有 test suite，依賴外部 `decolua/9router` image 與 LLM keys。 | 是會快速過時的 demo/template；gateway 指引應由 Pokercase 或一份短文件接手。 |
-| `newclear/labs/bee-swarm` | 最後實質工作：2025-07-26 `cc9d8a0`；simulation 可 compile 但無 tests，SimPy 未 pin；`project-restructure` 分歧 +33/-38、無 open PR。 | 多 agent workflow 問題已由實際使用中的 `codex-team-superpowers` 取代；保留歷史即可。 |
-| `newclear/labs/aweshore` | 最後實質工作：2024-03-25 `504ad33`；README 已明示停止開發。修復缺少的 optional-platform lock metadata 與既有格式後，fresh Linux `npm ci`、Prettier、lint、typecheck、build 通過；API 仍找不到 `go.mod`，也無 tests/CI。 | 與 Knowledge Base 重疊；即使 UI build 已可重現，產品邊界仍不完整，確認 canonical note 後只留歷史。 |
-| `kernel/infra/legacy` predecessor bundle（`config-center`、`crontab`、`ocmesh`、`doorkeeper`） | source head 分別止於 2023-11-27、2024-12-31、2026-09-04、2024-11-07；部分精確實質日期因原歷史未掛載而未核實。shell syntax 通過；ocmesh Go 1.24 `make test`（含 local E2E）通過，doorkeeper Deno check 仍未跑。已被 OneVPS/OneFleet 取代；其中 archived `config_center` 歷史還有已曝光 credential 風險。 | successor 已明確，繼續維護只會製造雙重權威；留下歷史與必要設計決策，不再當 component。 |
-| `kernel/personal/legacy/jstgbot` | source head 2024-10-27；Node 20 clean `npm ci` 與 `node --check bot.js` 通過，但無 tests、runtime 要 Telegram/MQTT credential，且 npm 報 2 moderate/1 high vulnerability；已被 PIF 取代。 | 沒有獨立價值；保留 history，不維護。 |
-| `kernel/infra/legacy/mac-in-docker` | 2026-09-04 前沒有 Git history；shell syntax 通過，但只是未驗證的 Docker-OSX/noVNC research draft，需要 KVM、大量資源與外部 image，另有 EULA 風險。 | 不是可靠 workload，也不是必要 contract；不再投入。 |
-
-這裡用 migration-compatible 的 **11 個 kernel unit** 計數：7 個 active component、1 個 `infra/legacy` predecessor bundle、1 個 `personal/legacy/jstgbot`、以及另外盤點的 `vps-hygiene`、`mac-in-docker`。bundle 內四個 source boundary 的證據仍分別檢查，避免把不同年代與風險混成一筆。
+| 元件 | 使用 | 檔位 | 說明 |
+| --- | --- | --- | --- |
+| `newclear/products/hai-taskboard` | 未知 | A | Human–AI delivery control plane（Work Graph／Fake-core）開發中；`fallrising/desk` 格式的未來消費者。 |
+| `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo。 |
+| `newclear/labs/eru-vps-mvp` | 未知 | A | live VPS MVP 實驗。 |
+| `newclear/systems/mkfk` | 未知 | B | 教學／契約實作；不新增 tutorial。 |
 
 ## 重疊與 canonical 邊界
 
 ### 知識、文件與個人筆記
 
-`knowledge-base` 是唯一 canonical knowledge store；`ice-maker` 是唯一 ingestion/compiler；`local-ocr-services` 只是隔離的 OCR runtime adapter；`doc_analysis_study` 是受限來源的 study staging area。研究結論經審核後進 Knowledge Base，不把整個 study repo 合併進去。
+`knowledge-base` 是唯一 canonical knowledge store；`ice-maker` 是唯一 ingestion/compiler；`local-ocr-services` 只是隔離的
+OCR runtime adapter；`doc_analysis_study` 是受限來源的 study staging area。研究結論經審核後進 Knowledge Base，不把整個
+study repo 合併進去。
 
-寫入來源的邊界（2026-09-05 由 owner 確認）：`ice-maker` 與 `doc_analysis_study` 是**配套的一組**——抽取引擎加上受限來源的 study corpus，兩者都允許自動化寫入，但輸出**永遠停在候選狀態**。`knowledge-base` 是 owner 與 agent 協作的筆記，**不接受任何自動化來源直接寫入**；每一則進 KB 的內容都要有 owner 在場的那一次決定。這條邊界不是流程潔癖：沒有這道閘，pipeline 產出會以「反正已經整理好了」的理由逐次落進 KB，KB 會退化成流水帳，失去它作為 canonical store 的價值。
+寫入來源的邊界：`ice-maker` 與 `doc_analysis_study` 是配套的一組，都允許自動化寫入，但輸出永遠停在候選狀態。
+`knowledge-base` 不接受任何自動化來源直接寫入；每一則進 KB 的內容都要有 owner 在場的那一次決定。
 
-`journal` 只作舊 capture archive，`aweshore` 收掉；`flowshot`、`loom` 與 `goku` 雖然形態不同，也都在爭奪「讀、記、整理資訊」的注意力。除非其中一個已是你每天使用的介面，不能與 Knowledge Base/Ice Maker 同時開發。
+`flowshot`、`loom`、`goku` 與 Knowledge Base／Ice Maker 爭奪「讀、記、整理資訊」的同一份注意力，不同時開發。
 
 ### VPS 與 fleet
 
-canonical boundary 應是：`kernel/infra/onevps` 擁有 privileged host lifecycle，`kernel/infra/onefleet` 擁有 application workload lifecycle；兩者不可合併權限。本決策只把 `newclear/specs/fleet` 當 public contract，不讓它形成第二套 runtime。`kernel/infra/specs` 是歷史設計 corpus；`ocmesh`、`doorkeeper`、`config-center`、`crontab` 已由前兩者取代；`vps-hygiene` 只保留作行為參考。
+`kernel/infra/onevps` 擁有 privileged host lifecycle，`kernel/infra/onefleet` 擁有 application workload lifecycle，兩者不可合併權限。
+`newclear/specs/fleet` 只作 public contract，不形成第二套 runtime。`kernel/infra/specs` 是歷史設計 corpus。
 
 ### Agent 與 LLM 工具
 
-`kernel/agents/codex-team-superpowers` 是現有可驗證 workflow canonical。`bee-swarm` 收掉；本決策不另投資 `fanzloud` 的 cloud execution layer，因為它會與既有 Codex Cloud/agent tool 路線競爭同一份注意力，而且缺 live smoke；`bite-pi` 只是 demo。`pokercase` 只在它真的作為日常 gateway 時保留，不能順勢加入另一套 agent orchestration。
+`kernel/agents/codex-team-superpowers` 是可驗證的 workflow canonical。`agent-platform`（自管 agent 工作台）、`kith`（人機群聊）、
+`fanzloud`（personal BYOS／Codex Cloud，休眠）責任分開。`pokercase` 不加入 agent orchestration。
 
 ### 個人自動化與傳輸
 
-PIF 取代 `jstgbot`，擁有 capture/reconcile/backup。CloudDrive 擁有 cloud inventory、annotation、transfer/verification lifecycle。RelayVault 的 HTTP upload control plane 現已編譯並通過安全邊界測試，可作未來 adapter；但需求仍與 CloudDrive 鄰近，沒有理由同時開工。
+PIF 擁有 capture／reconcile／backup。CloudDrive 擁有 cloud inventory、annotation、transfer／verification lifecycle。
+RelayVault 擁有私有檔案中繼，可作 CloudDrive 的未來 adapter；兩者可同時開發，但不重疊實作。
+tgstash、ts-upload、ts-download 是 Tailscale-only 的小工具，不承擔備份或長期保存。
 
 ### Messaging 與資料基礎設施
 
-ClarkQ、Snail、Ojbquay、Wotar 的協定不同，不需要硬合併；真正重疊的是它們都在消耗「基礎設施作品」預算，而本輪未取得 consumer 證據。在你確認真實 workload 前，四個一起休眠比選一個繼續加功能更合理。
+ClarkQ、Snail、Ojbquay、Wotar 的協定不同，不硬合併；它們消耗同一份「基礎設施作品」預算，所以一起休眠。
 
 ### Fraud clean-room
 
-`fraud-edge-decision` 與 `fraud-event-policy` 的 runtime/storage/outbox 邊界應保持分離，不能為減少 repo 數硬合併；但 portfolio 上只能算 **一條 fraud program**。沒有真實 stakeholder 時兩者一起休眠；有明確交付時一起恢復，edge 擁有 request/effect admission，policy 擁有 feature resolution/evaluation。
+`edge-decision` 與 `event-policy` 的 runtime／storage／outbox 邊界保持分離，不為減少 repo 數硬合併；portfolio 上只算一條 fraud program。
+edge 擁有 request／effect admission，policy 擁有 feature resolution／evaluation。
 
-## 「繼續投入」的下一步
+## 下一步
 
-1. **Knowledge Base** — 在 4 條獨有 `cursor/*` branch 中選出要保留的內容，合成一份 canonical multi-model routing note；其餘明確標記 superseded。在完成前不新增第二份同題筆記。
-2. **Ice Maker** — 用一份你真的需要的文件跑完整 ingestion → OCR（需要時）→ provenance → readable result，將一個有 citation 的成果落進 Knowledge Base；不要再新增 pipeline abstraction。
-3. **PIF** — 用授權的非 production Telegram/test identity 做一次 capture → durable state → reconcile → encrypted backup/restore smoke；連續兩週沒有真實使用就降為休眠。
-4. **CloudDrive** — 只做一個低權限、read-only-first spike：若供應商有授權且受支援的 WebDAV／connected-app surface，驗證其遞迴 listing、pagination、stable ID、size、download/resume 與可取得的 integrity metadata；若只能靠帳密型 private API，判定 No-Go。
+1. **Knowledge Base**：在 4 條獨有 `cursor/*` branch 中選出要保留的內容，合成一份 canonical multi-model routing note，其餘標記 superseded；
+   完成前不新增同題筆記。
+2. **Ice Maker**：用一份真的需要的文件跑完整 ingestion → OCR（需要時）→ provenance → readable result，把一個有 citation 的成果落進 Knowledge Base。
 
-## 需要你回答
+## 待決
 
-1. 過去 30 天內，哪些真的有被你或其他人使用、部署或依賴：Goku、Phark、Pokercase、ClarkQ、OneVPS、OneFleet、PIF、CloudDrive、Ice Maker、Local OCR？請給「使用者／主機／頻率」；這會決定休眠項是否升為維護，也會驗證目前 3 條投入戰線。
-2. 兩個 fraud repo 是否有真實 stakeholder、資料契約或明確截止日？若沒有，是否同意在 M6 停下並把兩條 M7 branch 標記為 paused？
-3. 是否要保留下列未合併工作：Fanzloud open PR #3/#4、Knowledge Base 4 條 `cursor/*` note、Local OCR `agent/t006`、兩個 fraud M7 branch、Goku `copilot`/`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否可依 migration 結論視為被 PR #10/#11 取代？
-4. archived `config_center` 歷史中暴露的 n8n PostgreSQL/basic-auth credential 是否已完成輪換？「repo 已 archive」不等於風險已解除。
-5. 是否同意把「繼續投入」限制為上述 3 條 90 天戰線，並在確認後為所有休眠／收掉項補狀態與停止日期？
-
-## Documentation tiers
-
-Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentation depth only**. It does not reopen investment fronts. Policy: [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md). Taxonomy: [docs/taxonomy.md](docs/taxonomy.md).
-
-`Dormant since` for C-tier rows defaults to **2026-09-04** (portfolio freeze date) unless a component README already states a clearer stop date.
-
-| Path | Doc tier | Notes |
-| --- | --- | --- |
-| `products/kith` | A | Owner override active product |
-| `products/hai-taskboard` | A | Fake-core / Work Graph in progress |
-| `platform/agent-platform` | A | Owner override; M0–M3 evidence in tree |
-| `platform/dim-gate` | A | M0–M5 demo accepted locally |
-| `platform/ice-maker` | A | Knowledge-compiler investment line |
-| `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
-| `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
-| `tools/cc-quota` | A | Owner override 2026-09-27; offline tests in CI, target-machine path unverified |\n| `tools/codex-usage` | A | Owner override 2026-09-27; stateless read-only collector, offline tests in CI, target Codex CLI/account live acceptance pending |
-| `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
-| `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
-| `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
-| `products/goku` | C | Dormant product |
-| `products/phark` | C | Dormant product |
-| `gateways/pokercase` | C | Dormant unless daily gateway use resumes |
-| `systems/clarkq` | C | Dormant |
-| `systems/snail` | C | Dormant |
-| `systems/ojbquay` | C | Dormant |
-| `systems/wotar` | C | Dormant |
-| `platform/fanzloud` | C | Dormant |
-| `platform/prism` | C | Phase 0 SDD; dormant investment |
-| `apps/loom` | C | Dormant |
-| `apps/flowshot` | C | Dormant |
-| `apps/cms-scaffold` | A | Owner override 2026-09-25; v2 design phase |
-| `apps/cloudform` | D | Retired / historical |
-| `tools/streaming-converter` | D | Retired / historical |
-| `examples/bite-pi` | D | Disposable demo |
-| `labs/bee-swarm` | D | Superseded by team-superpowers workflow |
-| `labs/aweshore` | D | Explicitly stopped |
-
-## Owner override 2026-09-27 — tools/cc-quota
-
-Owner 要求在 `fallrising/newclear` 開一個項目，實作 Claude Code 額度的 pacing 監控：每小時採集並落庫，另以報表讀取，採集與展示解耦。範圍僅限 [tools/cc-quota](tools/cc-quota/README.md)，文檔檔位 A；依賴 Python 標準函式庫，離線測試由 `cc-quota-ci.yml` 執行。
-
-真實額度端點（未公開文件）與 macOS launchd／Keychain 路徑尚未在目標機器驗證。本工具不刷新或轉存憑證，也不自動調度任務；其餘 portfolio 決策維持不變。
-
-## Owner override 2026-09-27 — labs/mithril-research
-
-Owner 明確要求在 `fallrising/newclear` 建立項目並研究 `projecteru2/mithril`。本次例外僅限 [labs/mithril-research](labs/mithril-research/README.md) 的原始碼／文件研究、驗證設計與後續隔離實驗規劃；文檔檔位 A，當前 M0 為 documentation-only，runtime 尚未驗證。
-
-這不是新代理產品或 production 部署授權，不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane 的實作範圍。上游源碼不匯入 monorepo。M1 真正加入 fixture/harness 前先確認 disposable 環境、版本與安全邊界；實機變更及更大範圍整合另行決定。
-
-其餘 portfolio 決策維持不變；研究結論、固定來源、未完成驗證與下一步集中於該項目的 RESEARCH、SOURCES、VALIDATION、STATUS。
-
-
-## Owner override 2026-09-27 — tools/codex-usage
-
-Owner 要求參照既有 `tools/cc-quota`，在 `fallrising/newclear` 建立 Codex 對應小工具並放入本次已完成的訂閱用量採集實作。範圍限於 [tools/codex-usage](tools/codex-usage/README.md)，文檔檔位 A。
-
-第一階段只做 **ChatGPT/Codex 訂閱用量的單次唯讀採集**：透過官方 Codex CLI App Server 讀取 account/rate-limit/usage 資料，輸出 fail-closed JSON；不建立模型 thread/turn，不以 API Platform usage 替代，不讀出 credential，不建立 scheduler、SQLite、通知或自動任務調度。
-
-offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實際版本、登入 workspace、live schema 與真實 snapshot 尚待驗收。完成 live acceptance 前不得宣稱 production-ready，也不得為了取得資料改抓私人網頁端點。其餘 portfolio 決策維持不變。
-
-## Owner override 2026-09-27 — fe-review 休眠元件
-
-Owner 決定：[fe-review](docs/fe-review/README.md) 工作包中的 C 檔（休眠）元件，可以在 fe-review 第 2 輪做前端修改；D 檔（退役）元件暫緩，不進入第 2、3 輪。
-
-這個例外只涵蓋 fe-review 第 2 輪在各元件 `fe-review/DESIGN.md` 範圍內的前端修改，以及修改所需的最小解耦。它不恢復這些元件的投入，文檔檔位不變，也不授權新功能或 major 依賴升級；後兩者仍需另行決定。其餘 portfolio 決策維持不變。
-
-## Owner override 2026-09-27 — kernel personal；使用與投入分離
-
-來源：`fallrising/desk` 從 monorepo 反向還原盤點時 owner 的答覆（desk task T-0008、T-0005 的 Owner 答覆）。
-
-### 使用與投入是兩個獨立維度
-
-本文件的「繼續投入／維護模式／休眠／收掉」分級只表示**開發投入**：是否繼續為該 codebase 規劃新功能。產品**有沒有在用**是另一個維度，是部署與使用的觀察事實。兩者互不推導：天天在用的產品可以不再開發，仍在開發的產品也可能還沒有人用。休眠表示不規劃新功能，不表示不能修：在用的產品出問題時，仍可以做修復。
-
-下列條款中「以使用判定投入」的部分自本日起被取代；原文保留，作為 2026-09-05 當時的判斷紀錄：
-
-- 「結論」：「凡是只有你知道的線上使用、真實使用者或期限，列在最後的問題；答案若成立，才調整分級。」使用事實不再調整分級；期限仍可以是投入決策的依據。
-- 「重疊與 canonical 邊界 › Messaging 與資料基礎設施」：「在你確認真實 workload 前，四個一起休眠」。四者維持休眠，但理由是投入預算，不是缺乏使用證據；確認有 workload 只記錄使用狀態，不自動恢復投入。
-- 「「繼續投入」的下一步」第 3 條：PIF「連續兩週沒有真實使用就降為休眠」。此條件取消。
-- 「需要你回答」第 1 題：「這會決定休眠項是否升為維護」。該題的答案只記錄使用狀態，不改變分級。
-
-### 分級與使用狀態
-
-| Component | 開發投入 | 使用 | 依據 |
-| --- | --- | --- | --- |
-| `kernel/personal/relayvault` | 休眠 → **繼續投入** | 未知 | Owner 決定。2026-09-10 至 09-16 的 v0.2 開發視為已認可的工作；v0.2 release 仍待 production no-overwrite cutover（元件 `.team/reports/T-043.md`）與另行授權 |
-| `kernel/personal/pif` | 繼續投入（不變） | 在用 | Owner：有在用，仍在開發中，尚未確定已是可用產品；不因使用與否調整投入 |
-| `kernel/personal/tgstash` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
-| `kernel/personal/ts-upload` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
-| `kernel/personal/ts-download` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
-| `products/kith` | 繼續投入（2026-09-20 override，不變） | 在用（已部署） | Owner 答覆 |
-
-RelayVault 恢復投入後，本文件「個人自動化與傳輸」一段所說「需求與 CloudDrive 鄰近，沒有理由同時開工」不再成立；兩者的 canonical 邊界（CloudDrive 擁有 cloud inventory 與 transfer/verification lifecycle，RelayVault 擁有私有檔案中繼）不變。
-
-其餘 portfolio 決策維持不變。之後各元件的使用狀態以 `fallrising/desk` 中對應 plan 的 `usage` 欄位為準。
+1. 兩個 fraud 元件是否有真實 stakeholder、資料契約或截止日？若沒有，是否在 M6 停下，並把兩條 `agent/m7-local-infrastructure` branch 標為 paused？
+2. 是否保留下列未合併工作：Fanzloud open PR #3/#4、Knowledge Base 4 條 `cursor/*` note、Local OCR `agent/t006`、兩個 fraud M7 branch、
+   Goku `copilot`／`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否視為被 PR #10/#11 取代？
+3. archived `config_center` 歷史中曝光的 n8n PostgreSQL／basic-auth credential 是否已輪換？repo 已 archive 不等於風險已解除。
+4. 繼續投入目前有 11 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？
+5. 未分級的 4 個元件要放在哪一級？

@@ -459,6 +459,7 @@ class Connector:
             )
             # send_message(run=False) initializes the terminal before any tool admission.
             row["guest_baseline"] = self.quiescence(row)
+            row["goal"] = goal
             self.journal.write(row)
             self.guard(row)
             http.expect("POST", path + "/run")
@@ -583,21 +584,25 @@ class Connector:
             180,
             max(90, 10 + sum(item["timeout_seconds"] for item in verification.get("checks", []))),
         )
+        from .model_mock import task_card
+
+        card = task_card([{"role": "user", "content": row.get("goal") or ""}])
+        request = {
+            "action": "result",
+            "run_id": row["run_id"],
+            "base_sha": row["input"]["base_sha"],
+            "verification": row["input"].get(
+                "verification",
+                {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
+            ),
+        }
+        if card:
+            request["card"] = {"name": card[0], "text": card[1]}
         raw = sb.exec(
             "python3",
             "-I",
             CODE + "/guest_workspace.py",
-            json.dumps(
-                {
-                    "action": "result",
-                    "run_id": row["run_id"],
-                    "base_sha": row["input"]["base_sha"],
-                    "verification": row["input"].get(
-                        "verification",
-                        {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
-                    ),
-                }
-            ),
+            json.dumps(request),
             user="agentprobe",
             timeout=helper_timeout,
         )

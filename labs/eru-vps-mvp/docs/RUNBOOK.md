@@ -140,7 +140,7 @@ ansible-playbook -i "$ERU_INVENTORY" "$ERU_UPSTREAM/cluster.yml" \
 
 確認舊 runtime 不會復活後，針對該節點的已核對 workload ID 使用 `eru-cli workload dissociate <id>` 清除無法正常 remove 的 metadata，再移除空 node、重建替代機並部署。dissociate 不會停止／刪除遠端容器，因此不能在舊主機可能繼續寫資料時使用。健康節點上的 workload 一律不套用此操作。
 
-本機 `labctl plan-worker-loss` 可先把 detection、外部 fence proof digest、exact stale IDs／quota 與 replacement destinations 固定成不可執行的 review plan；見 [ERU-010 前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。目前尚未提供 dissociate／quota reconciliation executor，不得把 review plan 當成已執行或 V07 已通過。
+本機 `labctl plan-worker-loss` 可先把 detection、外部 fence proof digest、exact stale IDs／quota 與 replacement destinations 固定成不可執行的 review plan；另有不連 target SSH 的 `prepare-worker-loss`、單次 exact dissociation executor 與唯讀 recovery，見 [ERU-010 前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。這些路徑目前只有 fake fixture 驗證，尚未執行 VPS 演練；partial fresh cleanup 與 replacement deployment plan 仍未實作，不得把本機程式或 review plan 當成 V07 已通過。
 
 ## 6. 全群 fresh 重建：推薦 MVP 主路徑
 

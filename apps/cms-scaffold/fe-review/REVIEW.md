@@ -53,3 +53,4 @@ v2 的 W2、W3、W4 施工圖以前一波的結果為起點，`修改` 類檔案
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- fallrising/newclear#179：第 1 輪 `DESIGN.md`（草稿，待擁有者確認）。

@@ -389,8 +389,8 @@ function TaskForm({
           />
         </label>
         <p className="muted">
-          真實 VM 使用本機 mock，不需要 API key。一般目標仍只做固定驗收檔；兩行 FILE 檔名與 TEXT
-          內容時，mock 會寫入那個檔。
+          真實 VM 使用本機 mock，不需要 API key。目標裡若有相鄰的 FILE 檔名與 TEXT 內容，mock
+          會寫入那個檔，並仍寫固定驗收檔。
         </p>
         <ErrorNotice error={create.error} />
         <div className="form-actions">
@@ -854,8 +854,7 @@ function Catalog({
               </label>
               <p className="notice">
                 真實 VM 只接受管理員已登錄的 repository 與 commit。不需要申請模型
-                key。目標若是「FILE 檔名」加「TEXT 內容」兩行，本機 mock
-                會寫入該檔；其他目標仍寫固定驗收檔。
+                key。目標裡相鄰的「FILE 檔名」和「TEXT 內容」會寫入該檔，並保留固定驗收檔。
               </p>
             </>
           )}

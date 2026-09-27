@@ -38,4 +38,4 @@ workspace 依 lockfile 決定 npm／pnpm，`targets.json` 的 install 目前是�
 ## 相關 PR
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- {THIS_PR}：記錄擁有者決定與設計文件入口。
+- fallrising/newclear#144：記錄擁有者決定與設計文件入口。

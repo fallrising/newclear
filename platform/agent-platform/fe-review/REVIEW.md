@@ -38,4 +38,4 @@ repo 內有 `model_mock.py`、`fake_model.py`，但後端如何切換到它們�
 ## 相關 PR
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- {THIS_PR}：記錄擁有者決定與設計文件入口。
+- fallrising/newclear#144：記錄擁有者決定與設計文件入口。

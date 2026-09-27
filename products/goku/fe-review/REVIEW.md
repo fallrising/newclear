@@ -44,4 +44,4 @@ React 18、Vite 5、Tailwind 3；PROTOCOL 禁止未經提議升級 major 版本�
 ## 相關 PR
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- {THIS_PR}：記錄擁有者決定與設計文件入口。
+- fallrising/newclear#144：記錄擁有者決定與設計文件入口。

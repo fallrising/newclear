@@ -1,6 +1,8 @@
 # 新視窗接續開發 prompt
 
-此 prompt 可交給任何 LLM coding agent；不依賴前一段對話或特定模型記憶。接手先讀 [CONTINUATION-STATE.md](CONTINUATION-STATE.md)、[HANDOFF.md](HANDOFF.md) 與本檔，再查 GitHub 最新 main／PR／CI；這些快照可能過期，不能只憑本機 branch 名稱或文件推定合併。使用者指示：**E2E 測試只在整體開發完成後執行一次**。由於 PR #82 的每次更新會自動啟動含 browser acceptance 的 workflow，開發期間不要向該 PR 分批 push；將中間成果保存在本機或沒有開啟 PR 的工作分支，完成整體開發與 recovery 後才一次整合／push 並執行最後 E2E。
+此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `kvm8745` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。
+
+現行做法：用本機 mock 把任務流程做完。以後的真接口暫定 OpenCode Zen Chat Completions，`https://opencode.ai/zen/v1/chat/completions`。key 只放 0600 檔，現在沒有這份檔。`/responses` 與 `/messages` 不是目前的 transport。24 小時停留留到 release 前。
 
 ```text
 請接續開發 fallrising/newclear 的 platform/agent-platform。

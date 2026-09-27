@@ -389,7 +389,8 @@ function TaskForm({
           />
         </label>
         <p className="muted">
-          真實 VM 設定使用固定模擬模型，執行檔案修改驗收；任務目標會保存，但不會由真實模型推理。
+          真實 VM 使用本機 mock，不需要 API key。一般目標仍只做固定驗收檔；兩行 FILE 檔名與 TEXT
+          內容時，mock 會寫入那個檔。
         </p>
         <ErrorNotice error={create.error} />
         <div className="form-actions">
@@ -660,7 +661,7 @@ function RunActivity({ run }: { run: Run }) {
       </dl>
       <p className="muted">
         {run.execution_mode === 'cocoon-fixture'
-          ? 'OpenHands · 獨立 VM · 固定模擬模型'
+          ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
           : '模擬環境 · 排程驗證'}
       </p>
       <UsagePanel runId={run.id} />
@@ -828,7 +829,7 @@ function Catalog({
                   {backends.map((backend) => (
                     <option key={backend} value={backend}>
                       {backend === 'openhands'
-                        ? 'OpenHands · 真實 VM · 固定模擬模型'
+                        ? 'OpenHands · 真實 VM · 本機 mock，不需要 API key'
                         : '模擬環境 · 排程驗證'}
                     </option>
                   ))}
@@ -852,8 +853,9 @@ function Catalog({
                 )}
               </label>
               <p className="notice">
-                真實 VM 只接受管理員已登錄的 repository 與
-                commit。固定模型會修改驗收檔案，不會呼叫付費模型。
+                真實 VM 只接受管理員已登錄的 repository 與 commit。不需要申請模型
+                key。目標若是「FILE 檔名」加「TEXT 內容」兩行，本機 mock
+                會寫入該檔；其他目標仍寫固定驗收檔。
               </p>
             </>
           )}

@@ -5,23 +5,68 @@ It exercises the provider wire shape without a paid API or guest network access.
 
 import hmac
 import json
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from uuid import UUID
 
 from .model_policy import MAX_REQUEST, canonical
 
+FILE_NAME = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
+PLAIN_TEXT = re.compile(r"^[A-Za-z0-9 ._-]{0,80}$")
+
+
+def message_text(message):
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return None
+    parts = []
+    for item in content:
+        if (
+            not isinstance(item, dict)
+            or item.get("type") != "text"
+            or not isinstance(item.get("text"), str)
+        ):
+            return None
+        parts.append(item["text"])
+    return "\n".join(parts)
+
+
+def task_card(messages):
+    """A two-line local card, not a natural-language interpreter."""
+    text = None
+    for message in messages:
+        if message.get("role") == "user":
+            text = message_text(message)
+    if text is None:
+        return None
+    lines = text.splitlines()
+    if len(lines) != 2 or not lines[0].startswith("FILE ") or not lines[1].startswith("TEXT "):
+        return None
+    name, body = lines[0][5:], lines[1][5:]
+    if name in {".", ".."} or not FILE_NAME.fullmatch(name) or not PLAIN_TEXT.fullmatch(body):
+        return None
+    return name, body
+
 
 def mock_response(data, run_id):
     called = any(message["role"] == "tool" for message in data["messages"])
+    card = None if called else task_card(data["messages"])
     name = "finish" if called else "terminal"
-    arguments = (
-        {"message": "Local mock completed."}
-        if called
-        else {
+    if called:
+        arguments = {"message": "Local mock completed."}
+    elif card:
+        filename, body = card
+        arguments = {
+            "command": 'python3 -c "from pathlib import Path; '
+            f"Path({filename!r}).write_text({body!r} + '\\n')\""
+        }
+    else:
+        arguments = {
             "command": 'python3 -c "from pathlib import Path; '
             f"Path('m2-result.txt').write_text('{run_id}\\n')\""
         }
-    )
     return {
         "id": "chatcmpl-local-mock",
         "object": "chat.completion",

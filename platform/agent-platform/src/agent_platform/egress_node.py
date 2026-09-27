@@ -136,8 +136,7 @@ def drained(config, host):
                 )
             else:
                 require(
-                    "allocate" not in row["operations"]
-                    or unconfirmed_allocation_reconciled(row),
+                    "allocate" not in row["operations"] or unconfirmed_allocation_reconciled(row),
                     "egress_allocation_ownership_uncertain",
                 )
     finally:

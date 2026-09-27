@@ -101,9 +101,7 @@ class UnconfirmedAllocationTests(unittest.TestCase):
         runtime = self.root / "cocoon"
         (runtime / "vm-orphan").mkdir(parents=True)
         with self.assertRaises(Problem):
-            reconcile_unconfirmed_allocation(
-                self.config, host(root_dir=str(runtime)), self.run_id
-            )
+            reconcile_unconfirmed_allocation(self.config, host(root_dir=str(runtime)), self.run_id)
         self.assertEqual(self.path().read_bytes(), before)
 
     def test_reconcile_refuses_saved_handle_or_fence_mismatch(self):

@@ -98,10 +98,9 @@ def reconcile_unconfirmed_allocation(config, host, run_id):
                 if fence.get("generation") != row.get("generation"):
                     raise Problem(409, "unconfirmed_allocation_fence_mismatch")
                 return row["operations"]["allocate"]["result"]
-            if (
-                not unconfirmed_allocate_pending(row)
-                or set(row.get("operations", {})) != {"allocate"}
-            ):
+            if not unconfirmed_allocate_pending(row) or set(row.get("operations", {})) != {
+                "allocate"
+            }:
                 raise Problem(409, "unconfirmed_allocation_not_reconcilable")
             if fence.get("generation") != row.get("generation"):
                 raise Problem(409, "unconfirmed_allocation_fence_mismatch")

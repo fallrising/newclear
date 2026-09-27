@@ -1,16 +1,16 @@
 # FE Review — fleet — REVIEW
 
-> 活文件：只描述目前狀態。已解決的項目直接刪除或改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — `PROMPT.md`、`targets.json` 與本檔已建立，等待擁有者確認下列事項。
+- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
 ## 修改權限
 
-文檔檔位 **B（maintain / public contract）**：UI 修改不得改變對外契約；不新增 tutorial 系列。
+文檔檔位 **B（maintain / public contract）**：第 2 輪修改不得改變對外契約；不新增 tutorial 系列。
 
 ## 矛盾點
 
@@ -28,13 +28,14 @@
 
 - 選項：(a) 只允許樣式與 a11y 修正；(b) 允許模板結構調整。
 - 建議：(a)，符合 B 檔的契約限制。
-- 狀態：**待擁有者決定**
+- 狀態：**待擁有者決定**。撰寫 `DESIGN.md` 時可先以建議作為「假設」，在設計 PR 中由擁有者確認。
 
 ## 進入第 2 輪的條件
 
-- 上述每個待決定事項都有擁有者的決定，並已改寫成結論。
-- `PROMPT.md` 與 `targets.json` 已依決定更新。
+- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
+- `PROMPT.md` 與 `targets.json` 已依設計更新。
 
 ## 相關 PR
 
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏（第 1 輪）。
+- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
+- fallrising/newclear#144：記錄擁有者決定與設計文件入口。

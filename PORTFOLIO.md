@@ -203,3 +203,9 @@ Owner 要求參照既有 `tools/cc-quota`，在 `fallrising/newclear` 建立 Cod
 第一階段只做 **ChatGPT/Codex 訂閱用量的單次唯讀採集**：透過官方 Codex CLI App Server 讀取 account/rate-limit/usage 資料，輸出 fail-closed JSON；不建立模型 thread/turn，不以 API Platform usage 替代，不讀出 credential，不建立 scheduler、SQLite、通知或自動任務調度。
 
 offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實際版本、登入 workspace、live schema 與真實 snapshot 尚待驗收。完成 live acceptance 前不得宣稱 production-ready，也不得為了取得資料改抓私人網頁端點。其餘 portfolio 決策維持不變。
+
+## Owner override 2026-09-27 — fe-review 休眠元件
+
+Owner 決定：[fe-review](docs/fe-review/README.md) 工作包中的 C 檔（休眠）元件，可以在 fe-review 第 2 輪做前端修改；D 檔（退役）元件暫緩，不進入第 2、3 輪。
+
+這個例外只涵蓋 fe-review 第 2 輪在各元件 `fe-review/DESIGN.md` 範圍內的前端修改，以及修改所需的最小解耦。它不恢復這些元件的投入，文檔檔位不變，也不授權新功能或 major 依賴升級；後兩者仍需另行決定。其餘 portfolio 決策維持不變。

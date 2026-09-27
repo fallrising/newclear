@@ -1,0 +1,34 @@
+{
+  "project": "fleet",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light",
+    "dark"
+  ],
+  "apps": [
+    {
+      "name": "fleetd",
+      "kind": "server",
+      "cwd": "specs/fleet",
+      "install": "go mod download",
+      "start": "go run ./cmd/fleetd",
+      "env": {
+        "FLEETD_LISTEN": "127.0.0.1:18765"
+      },
+      "baseUrl": "http://127.0.0.1:18765",
+      "ready": "/healthz",
+      "pages": [
+        {
+          "id": "login",
+          "path": "/login"
+        },
+        {
+          "id": "catalog",
+          "path": "/"
+        }
+      ]
+    }
+  ]
+}

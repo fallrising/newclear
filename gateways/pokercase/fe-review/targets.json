@@ -1,0 +1,59 @@
+{
+  "project": "pokercase",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light",
+    "dark"
+  ],
+  "apps": [
+    {
+      "name": "admin",
+      "kind": "server",
+      "cwd": "gateways/pokercase",
+      "install": "cargo build",
+      "start": "cargo run -- serve --host 127.0.0.1 --port 20128",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:20128",
+      "ready": "/admin/login",
+      "pages": [
+        {
+          "id": "login",
+          "path": "/admin/login"
+        },
+        {
+          "id": "dashboard",
+          "path": "/admin"
+        },
+        {
+          "id": "connections",
+          "path": "/admin/connections"
+        },
+        {
+          "id": "routes",
+          "path": "/admin/routes"
+        },
+        {
+          "id": "keys",
+          "path": "/admin/keys"
+        },
+        {
+          "id": "usage",
+          "path": "/admin/usage"
+        }
+      ]
+    },
+    {
+      "name": "tui",
+      "kind": "terminal",
+      "cwd": "gateways/pokercase",
+      "start": "cargo run -- tui",
+      "capture": "tmux capture-pane -p -e",
+      "sizes": [
+        "80x24",
+        "120x40"
+      ]
+    }
+  ]
+}

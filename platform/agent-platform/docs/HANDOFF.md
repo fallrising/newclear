@@ -4,7 +4,7 @@
 >
 > 2026-09-27：`kvm8745` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
 
-目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作；45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff 通過。完整 GitHub CI run `36008490179` 在程式碼 commit `e099c6e` 全部通過。之後文件更新觸發的 run `36009297291` 依使用者指示於 browser E2E 前取消；web job 通過，check／control-plane job 取消。後續 handoff-only commits 使用 `[skip ci]`，目前 head 沒有 checks 報告；最後一個完整通過的 run 仍是 `36008490179`。real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 因 unresolved same-journal recovery／KVM gate 未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。跨 agent 接手摘要見 [CONTINUATION-STATE.md](CONTINUATION-STATE.md)，設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。
+目前停止點：**PR #82 已合併。** `kvm8745` 上 `mock-https-complete` 與 isolation 已通過。工作台唯讀顯示 `/runs/{id}/usage`：金額維持未知，不顯示成帳單。真實 provider、硬金額上限與 24 小時停留都還沒做。舊交接裡「PR #82 未合併、KVM 未過」是 2026-09-24 的紀錄。
 
 ## 本次 AT-11-C2b2 HTTPS provider 與 verification
 

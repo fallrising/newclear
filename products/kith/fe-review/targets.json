@@ -1,7 +1,7 @@
 {
   "project": "kith",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "由原始碼推斷，尚未實際啟動。start 只起 Vite，需要另外有綁 127.0.0.1 的 worker（e2e harness 路徑，見 DESIGN.md M1）；除 /login 外的頁面需要 storageState。頁面 id 來自 e2e seed base-v1。第 2 輪依 DESIGN.md M3 拆分 app、加上 storageState，跑通後改為 true。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light",
@@ -18,7 +18,7 @@
         "KITH_API_ORIGIN": "http://127.0.0.1:8787"
       },
       "baseUrl": "http://127.0.0.1:5174",
-      "ready": "/",
+      "ready": "/login",
       "pages": [
         {
           "id": "login",
@@ -27,6 +27,22 @@
         {
           "id": "home",
           "path": "/"
+        },
+        {
+          "id": "room-lobby",
+          "path": "/r/lobby"
+        },
+        {
+          "id": "room-long-history",
+          "path": "/r/long-history"
+        },
+        {
+          "id": "room-quiet",
+          "path": "/r/quiet"
+        },
+        {
+          "id": "room-ada-private",
+          "path": "/r/ada-private"
         },
         {
           "id": "settings",
@@ -41,12 +57,28 @@
           "path": "/console/agents"
         },
         {
+          "id": "console-agent-grok",
+          "path": "/console/agents/m-grok"
+        },
+        {
+          "id": "console-agent-new",
+          "path": "/console/agents/new"
+        },
+        {
           "id": "console-people",
           "path": "/console/people"
         },
         {
           "id": "console-providers",
           "path": "/console/providers"
+        },
+        {
+          "id": "console-provider-new",
+          "path": "/console/providers/new"
+        },
+        {
+          "id": "not-found",
+          "path": "/does-not-exist"
         }
       ]
     }

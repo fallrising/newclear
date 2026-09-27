@@ -8,6 +8,7 @@
 | --- | --- |
 | [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
 | [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
+| [DESIGN.md](DESIGN.md) | 活文件：第 2 輪的修改範圍與驗收方式（草稿，待擁有者確認） |
 | [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
 | `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
 

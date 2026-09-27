@@ -1,0 +1,92 @@
+{
+  "project": "dim-gate",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light",
+    "dark"
+  ],
+  "apps": [
+    {
+      "name": "web",
+      "kind": "spa",
+      "cwd": "platform/dim-gate",
+      "install": "npm ci",
+      "start": "npm run dev -- --port 5173 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5173",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "home",
+          "path": "/"
+        },
+        {
+          "id": "guide",
+          "path": "/guide"
+        },
+        {
+          "id": "ops",
+          "path": "/ops"
+        },
+        {
+          "id": "ops-cmdb",
+          "path": "/ops/cmdb"
+        },
+        {
+          "id": "ops-incidents",
+          "path": "/ops/incidents"
+        },
+        {
+          "id": "ops-topology",
+          "path": "/ops/topology"
+        },
+        {
+          "id": "ops-releases",
+          "path": "/ops/releases"
+        },
+        {
+          "id": "ci-detail",
+          "path": "/cis/ci-aws-checkout-01"
+        },
+        {
+          "id": "rd",
+          "path": "/rd"
+        },
+        {
+          "id": "rd-apps",
+          "path": "/rd/apps"
+        },
+        {
+          "id": "rd-catalog",
+          "path": "/rd/catalog"
+        },
+        {
+          "id": "rd-pipelines",
+          "path": "/rd/pipelines"
+        },
+        {
+          "id": "alert-rules",
+          "path": "/alert-rules"
+        },
+        {
+          "id": "slo-policies",
+          "path": "/slo-policies"
+        },
+        {
+          "id": "admin",
+          "path": "/admin"
+        },
+        {
+          "id": "admin-users",
+          "path": "/admin/users"
+        },
+        {
+          "id": "admin-audit",
+          "path": "/admin/audit"
+        }
+      ]
+    }
+  ]
+}

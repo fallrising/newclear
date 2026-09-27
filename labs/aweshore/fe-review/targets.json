@@ -1,0 +1,44 @@
+{
+  "project": "aweshore",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light",
+    "dark"
+  ],
+  "apps": [
+    {
+      "name": "ui",
+      "kind": "spa",
+      "cwd": "labs/aweshore/ui",
+      "install": "npm ci",
+      "start": "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5173",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "home",
+          "path": "/"
+        },
+        {
+          "id": "notes",
+          "path": "/demo/notes/"
+        },
+        {
+          "id": "todolist",
+          "path": "/demo/todolist/"
+        },
+        {
+          "id": "flower",
+          "path": "/demo/flower/"
+        },
+        {
+          "id": "hello",
+          "path": "/demo/hello/"
+        }
+      ]
+    }
+  ]
+}

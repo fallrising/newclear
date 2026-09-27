@@ -1,6 +1,6 @@
 # 操作手冊：Eru VPS MVP
 
-現有四台已走 Debian／OneVPS 適配路徑，見 [部署結果](DEPLOYMENT-RESULT-2026-09-22.md)。下方第 1 節起保留最初 Ubuntu／空白主機的設計，**不可直接對現有四台執行原版 make up**。provider reimage、etcd restore overlay 與完整 `labctl` 尚待實作。
+現有四台已走 Debian／OneVPS 適配路徑，見 [部署結果](DEPLOYMENT-RESULT-2026-09-22.md)。下方第 1 節起保留最初 Ubuntu／空白主機的設計，**不可直接對現有四台執行原版 make up**。單 worker 人工 console reimage 的本機 stages 已有 fake-fixture 前置，全群 fresh 只有不可執行 review planner；provider／VPS 實機驗收、全群 executor 與 etcd restore overlay 仍未完成。
 
 ## 現有 Debian 叢集：從 controller B 操作
 
@@ -143,6 +143,16 @@ ansible-playbook -i "$ERU_INVENTORY" "$ERU_UPSTREAM/cluster.yml" \
 本機 `labctl plan-worker-loss` 可先把 detection、外部 fence proof digest、exact stale IDs／quota 與 replacement destinations 固定成不可執行的 review plan；另有不連 target SSH 的 `prepare-worker-loss`、單次 exact dissociation executor、唯讀 recovery、partial run 的 fresh exact-ID subset cleanup，以及重新驗證原 private specs 後依序執行 ERU-012 的 replacement wrapper，見 [ERU-010 前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。所有 mutation 都需要新的 hash-bound plan/journal；不重播舊 cleanup、child 或 wrapper plan。replacement 必須在 stale IDs 全 absent、quota zero、fence／健康 workers／雙 snapshot 穩定後才建立，且全部 exact replicas 與 HTTP-ready 才完成。本 slice 不做 provider fence 驗證、quota repair、lost node remove 或 target resume。這些路徑目前只有 fake fixture 驗證，尚未執行 VPS 演練；不得把本機程式或 review plan 當成 V07 已通過。
 
 ## 6. 全群 fresh 重建：推薦 MVP 主路徑
+
+先在 B 本機依 [ERU-015 review-plan 契約](M3-FRESH-REBUILD-PREP-2026-09-27.md) 建立並審閱私有 plan：
+
+```bash
+python3 scripts/labctl.py plan-fresh-rebuild \
+  --input private/fresh-rebuild-intents/ITERATION.json \
+  --plan-id FRESH_REVIEW_ID
+```
+
+只可核對公開 summary 的 `fresh`、`G → G+1`、iteration、四台／磁碟／app 計數、decision 與 hash，再到 private record 審閱精確 provider／volume／host／spec 範圍。這個命令不連 VPS、不停止 writer、不重灌、不建立 etcd、不重播 app、不更新 generation；本版也沒有對應 executor。未另行完成 destructive executor／recovery 審閱及明確操作授權前，停在 review plan，不執行下列人工流程。
 
 1. 外部保存 run plan、Git／image digest、private inventory、keys、provider IDs、上次驗收。確認沒有不可丟棄的本機資料；需保留的 app data 另行備份。
 2. 停止 deploy writer／定時任務，停止或 fence 舊 workloads。列出將移除的 4 台與磁碟，進入本次 fresh generation。

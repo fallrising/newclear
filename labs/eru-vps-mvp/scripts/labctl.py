@@ -827,6 +827,13 @@ def main():
     status.add_argument('--run')
     reconcile = sub.add_parser('reconcile', help='Read actual state after failure; never replay mutations')
     reconcile.add_argument('--run', required=True)
+    fresh_plan = sub.add_parser(
+        'plan-fresh-rebuild',
+        help='Save one private, non-executable ERU-015 full-cluster fresh review plan')
+    fresh_plan.add_argument(
+        '--input', required=True,
+        help='Reviewed JSON under private/fresh-rebuild-intents/')
+    fresh_plan.add_argument('--plan-id', help='Optional fresh bounded review-plan ID')
     drain_plan = sub.add_parser('plan-worker-drain', help='Save a private, offline ERU-009 review plan')
     drain_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
     drain_plan.add_argument('--input', required=True, help='Private JSON with snapshot, apps, destinations, and offline assertions')
@@ -878,6 +885,25 @@ def main():
     loss_replace_recover.add_argument('--run', required=True, help='Worker-loss replacement wrapper run ID')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'plan-fresh-rebuild':
+        from fresh_rebuild_ops import save_review_plan
+        envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)
+        fresh = envelope['plan']
+        print(json.dumps({
+            'id': fresh['id'], 'operation': fresh['operation'],
+            'mode': fresh['mode'], 'decision': fresh['decision'],
+            'executable': fresh['executable'],
+            'execution_implemented': fresh['execution_implemented'],
+            'generation_before': fresh['generation_before'],
+            'generation_after': fresh['generation_after'],
+            'series_iteration': fresh['series']['iteration'],
+            'host_count': fresh['scope']['host_count'],
+            'volume_count': fresh['scope']['volume_count'],
+            'desired_app_count': len(fresh['desired_apps']),
+            'blockers': fresh['blockers'], 'sha256': envelope['sha256'],
+            'path': path.as_posix(),
+        }, indent=2))
+        return
     if args.command == 'status':
         root = PROJECT / 'private/operations/runs'
         if args.run:

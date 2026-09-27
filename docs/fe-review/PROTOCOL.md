@@ -25,8 +25,8 @@ FE review 一律在**受控的隔離環境**執行，例如專用容器或 CI ru
 
 | 輪次 | 目的 | 允許的動作 | 完成條件 |
 | --- | --- | --- | --- |
-| **第 1 輪：文檔先行** | 確認思路正確 | 讀原始碼與文件；撰寫與打磨 `PROMPT.md`、`targets.json`、`REVIEW.md`。**不啟動、不修改程式碼** | `REVIEW.md` 的每個待決定事項都有擁有者的決定 |
-| **第 2 輪：修改** | 依已確認的文件實作 | 實作已決定的修改（含解耦）；在第 0 節環境內確認 UI 能啟動並修正 `targets.json`；跑元件自己的 lint／typecheck／test／build | 已決定事項全部落地，`targets.json` 改為 `verified: true` |
+| **第 1 輪：文檔先行** | 確認思路正確 | 讀原始碼與文件；撰寫與打磨 `PROMPT.md`、`targets.json`、`REVIEW.md`，再依 [DESIGN-PROMPT.md](DESIGN-PROMPT.md) 撰寫 `DESIGN.md`。**不啟動、不修改程式碼** | `DESIGN.md` 已合併，其中每個假設都已由擁有者確認 |
+| **第 2 輪：修改** | 依已確認的文件實作 | 只實作 `DESIGN.md` 範圍內的修改（含解耦）；在第 0 節環境內確認 UI 能啟動並修正 `targets.json`；跑元件自己的 lint／typecheck／test／build | 已決定事項全部落地，`targets.json` 改為 `verified: true` |
 | **第 3 輪：完整 e2e** | 整體開發完成後驗收 | 依下方六步完整擷取與檢查，寫 `REPORT.md` | 報告提交；新發現寫回 `REVIEW.md`，由新的第 2 輪 PR 處理 |
 
 第 3 輪的六步：
@@ -43,8 +43,14 @@ FE review 一律在**受控的隔離環境**執行，例如專用容器或 CI ru
 ### `REVIEW.md` 規則
 
 - 每個元件一份，是**活文件**：只描述目前狀態。已解決的項目直接刪除或改寫成目前的結論，不留過期、不合時宜的描述；歷史由 Git 與 PR 保存。
-- 內容分為：目前輪次、修改權限（文檔檔位等）、矛盾點、需要放開或決定的點、進入下一輪的條件、相關 PR。
-- 待決定事項由擁有者決定；agent 只提出選項與建議，不自行把「待決定」改成「已決定」。
+- 內容分為：目前輪次、修改權限（文檔檔位等）、矛盾點、已決定、需要放開或決定的點、進入下一輪的條件、相關 PR。
+- 待決定事項由擁有者決定；agent 只提出選項與建議，不自行把「待決定」改成「已決定」。撰寫 `DESIGN.md` 時可以把建議當作「假設」寫進設計，並在 PR 中列出，由擁有者在 review 時確認；確認後才移到「已決定」。
+
+### `DESIGN.md` 規則
+
+- 每個進入設計的元件一份，放在 `<component>/fe-review/DESIGN.md`，格式依 [DESIGN-TEMPLATE.md](DESIGN-TEMPLATE.md)。
+- 它是第 2 輪的唯一範圍：沒寫進 `DESIGN.md` 的修改，第 2 輪不做。
+- 與 `REVIEW.md` 分工：`REVIEW.md` 記「還有什麼要決定」，`DESIGN.md` 記「決定之後要怎麼改、怎麼驗收」。同樣是活文件，每次修改都走 PR。
 - 每次修改 `REVIEW.md`、`PROMPT.md`、`targets.json` 都走 PR，PR 說明哪些項目新增、解決或改寫。
 
 ## 2. 截圖

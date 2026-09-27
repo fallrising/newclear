@@ -2,11 +2,13 @@
 
 給 LLM agent 自主檢查與優化前端的工作包索引。每個帶 UI 的元件都有一個 `fe-review/` 目錄，內含專屬的 `PROMPT.md`、`targets.json`，以及記錄矛盾點與待決定事項的活文件 `REVIEW.md`；本目錄放共用的規範與截圖腳本。
 
-**狀態：** 所有元件都在第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動 UI 或產生截圖。所有 `targets.json` 都是 `verified: false`。三輪節奏見 [PROTOCOL.md](PROTOCOL.md) 第 1 節。
+**狀態：** 退役（D 檔）元件暫緩；其餘元件都在第 1 輪（文檔先行），下一步是依 [DESIGN-PROMPT.md](DESIGN-PROMPT.md) 撰寫 `DESIGN.md`。尚未修改程式碼、啟動 UI 或產生截圖。所有 `targets.json` 都是 `verified: false`。三輪節奏見 [PROTOCOL.md](PROTOCOL.md) 第 1 節。
 
 ## 共用檔案
 
 - [PROTOCOL.md](PROTOCOL.md) — 流程、截圖方式、檢查清單、優化範圍、報告格式、`targets.json` 欄位。
+- [DESIGN-TEMPLATE.md](DESIGN-TEMPLATE.md) — 各元件 `DESIGN.md` 的結構（第 1 輪後半、第 2 輪的範圍依據）。
+- [DESIGN-PROMPT.md](DESIGN-PROMPT.md) — 開新 session 撰寫 `DESIGN.md` 時交給 agent 的提示詞，含本 repository 的處理順序。
 - [capture.mjs](capture.mjs) — Playwright headless 截圖與 browser-health 擷取（console／page error、失敗 request、水平溢出、選用 axe）。
 
 ## 帶 UI 的元件（18）

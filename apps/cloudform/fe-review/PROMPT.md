@@ -4,7 +4,7 @@
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**暫緩（退役）**。擁有者決定退役元件不進入第 2、3 輪；本檔只保留供日後恢復時參考。見 [REVIEW.md](REVIEW.md)。
 
 ## 專案概況
 

@@ -34,20 +34,31 @@ def message_text(message):
 
 
 def task_card(messages):
-    """A two-line local card, not a natural-language interpreter."""
+    """One FILE/TEXT pair inside the latest user message, not a language interpreter."""
     text = None
     for message in messages:
         if message.get("role") == "user":
-            text = message_text(message)
+            candidate = message_text(message)
+            if candidate is not None:
+                text = candidate
     if text is None:
         return None
+    found = []
     lines = text.splitlines()
-    if len(lines) != 2 or not lines[0].startswith("FILE ") or not lines[1].startswith("TEXT "):
+    for index in range(len(lines) - 1):
+        if not lines[index].startswith("FILE ") or not lines[index + 1].startswith("TEXT "):
+            continue
+        name, body = lines[index][5:], lines[index + 1][5:]
+        if (
+            name in {".", "..", "m2-result.txt"}
+            or not FILE_NAME.fullmatch(name)
+            or not PLAIN_TEXT.fullmatch(body)
+        ):
+            return None
+        found.append((name, body))
+    if len(found) != 1:
         return None
-    name, body = lines[0][5:], lines[1][5:]
-    if name in {".", ".."} or not FILE_NAME.fullmatch(name) or not PLAIN_TEXT.fullmatch(body):
-        return None
-    return name, body
+    return found[0]
 
 
 def mock_response(data, run_id):
@@ -60,7 +71,8 @@ def mock_response(data, run_id):
         filename, body = card
         arguments = {
             "command": 'python3 -c "from pathlib import Path; '
-            f"Path({filename!r}).write_text({body!r} + '\\n')\""
+            f"Path({filename!r}).write_text({body!r} + '\\n'); "
+            f"Path('m2-result.txt').write_text('{run_id}\\n')\""
         }
     else:
         arguments = {

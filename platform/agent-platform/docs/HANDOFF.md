@@ -4,7 +4,7 @@
 >
 > 2026-09-27：`kvm8745` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
 
-目前停止點：**PR #82 與用量畫面已合併。** 本機 mock 不需要 API key。目標若剛好是 `FILE 檔名` 與 `TEXT 內容` 兩行，mock 會寫入該檔；其他目標仍寫 `m2-result.txt`。這不是自然語言 coding。真實 provider、硬金額上限與 24 小時停留都還沒做。
+目前停止點：**PR #82、用量畫面與本機 mock 卡片已合併。** 卡片可以出現在較長的使用者訊息裡，而且會同時寫入該檔與 `m2-result.txt`，固定驗收才過得了。這不是自然語言 coding。真實 provider、硬金額上限與 24 小時停留都還沒做。
 
 ## 本次 AT-11-C2b2 HTTPS provider 與 verification
 

@@ -184,7 +184,21 @@ sha256sum "$ERU_BACKUP/snapshot.db"
 
 V10 先停止應用管理 mutation，待 in-flight deploy 完成，停止 core（及其發起的 plugin 呼叫），worker runtime 保留；agent 寫入暫不可用。此時取快照並保存 node／workload 清單、版本與 core key 的加密備份。一般每 15 分鐘的線上快照是另一種備份，其 in-flight／revision 恢復行為須另驗。
 
-### 7.2 restore-control 設計流程（M3 待實作）
+### 7.2 本機 restore-control review plan
+
+已具備的 ERU-016 入口只審查既有外部 snapshot evidence，不擷取或還原 snapshot：
+
+```bash
+python3 scripts/labctl.py plan-control-restore \
+  --input private/restore-control-intents/ITERATION.json \
+  --plan-id RESTORE_REVIEW_ID
+```
+
+輸入必須固定現行 inventory／cluster record／controller report、來源 generation snapshot、`private/control-metadata-snapshots/` 下的 regular `.db` bytes 與串流 SHA256、獨立 status JSON、外部加密 catalog receipt、相同已鎖定 v3.6 release 的 `etcd`／`etcdctl`／`etcdutl` digests、writer quiescence、舊控制面隔離、Profile A core host 上的新 token／data-dir membership、依 snapshot revision／write rate／restore window 算出的 revision bump、涵蓋 core／agent／plugins 的完整 restart set、三台 workers 的 exact node/workload/runtime/plugin records、core key availability／revoke set、evidence store 及候選 RPO 900 秒／RTO 1800 秒。snapshot/status/source、catalog、toolchain 與 available core-key record 必須另由 `control-restore-trust.json` allowlist，且檔案 bytes 必須和目前 Git HEAD 相同；預設空清單不信任任何真實備份。copied DB、prefix export、fresh mode、應用 volume claim、舊 token／data-dir、Profile B membership、path escape／任何 descendant symlink、duplicate JSON、hash／generation／tool drift 均 fail closed。外部 prerequisite 明確為 false 時只保存 `decision: blocked`。
+
+stdout 只有 plan/status/count/digest 與相對 private path，不列 endpoint、host/member identity、token、data-dir、workload ID、raw status 或 spec。plan 永久不可執行；沒有 `execute-control-restore`，generic `execute` 也不能消費它。本入口不呼叫 `etcdutl`，status record 是預先取得且 hash-bound 的證據，不是 planner 自行重跑的驗證。實際 snapshot capture／restore、old-control isolation、服務啟停、worker reconciliation、HTTP、generation commit 與 RPO／RTO 計時仍未執行。詳見 [本機前置](M3-CONTROL-RESTORE-PREP-2026-09-27.md)。
+
+### 7.3 restore-control 實機設計流程（尚未實作）
 
 1. 隔離舊控制面，保留 worker runtime；確認沒有另一組 core 繼續寫入。若 workers 也全消失，改採 fresh + app replay。
 2. 從外部下載同一份完整快照，核對 SHA256／snapshot status。不能只還原 `/eru` 而遺漏 plugin prefix。
@@ -194,7 +208,7 @@ V10 先停止應用管理 mutation，待 in-flight deploy 完成，停止 core�
 6. 還原 core 私鑰，或輪換到新公鑰並授權到每一 worker，撤銷舊 key；更新 inventory 與 core／plugin etcd endpoints。啟動 core，再恢復 agents。
 7. 對帳 snapshot 中的 node／workload 與每個 worker runtime、plugin 配額；保留差異證據，清除或重建經確認的 stale records。HTTP 與資源檢查通過後才恢復 mutation writer。
 
-### 7.3 尚有 quorum 的 etcd 單成員替換
+### 7.4 尚有 quorum 的 etcd 單成員替換
 
 依 [etcd runtime reconfiguration](https://etcd.io/docs/v3.6/op-guide/runtime-configuration/) 先確認健康 quorum，隔離故障成員並移除其 member ID；新主機以 learner 加入，用回傳 membership 與 `initial-cluster-state: existing` 啟動，追上後 promote，檢查健康再做下一個變更。新主機不可攜帶已移除 member 的舊 data-dir。若 quorum 已失去，停止此流程，走完整 snapshot restore。
 

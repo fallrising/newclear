@@ -145,6 +145,8 @@ HTTP 分兩次驗收：第一輪 `--network eru`，在 workload 所在 worker �
 
 有破壞性的操作 MUST 綁定 plan hash、inventory hash、cluster generation 與操作者明確指定的 scope；不接受「預設所有主機」。同一 cluster 同時只允許一個操作者進行 mutation，鎖與 journal 在叢集外。apply 前重讀主機身分與角色；inventory 或版本漂移就重新計畫。
 
+ERU-016 目前只實作 `plan-control-restore` 的本機 review-only 契約。它把外部取得的 `etcdctl snapshot save` 完整 keyspace bytes、檔案 SHA256、獨立 `etcdutl snapshot status` record、外部加密 catalog receipt、來源 generation／Profile A topology、鎖定的 v3.6 toolchain、新 logical cluster member／token／data-dir intent、revision bump + mark-compacted policy、保留 workers 的 exact runtime／node／workload／plugin records、core key availability 與 RPO／RTO evidence 定義綁到不可變 private plan。snapshot/status/source、catalog receipt、toolchain 與 core-key record 還必須出現在 Git HEAD bytes 完全相符的 `control-restore-trust.json`；其預設空清單不授權任何真實 snapshot，外部證據經獨立審查後才能以 digest 更新、commit 並重新跑 controller preflight。所有 restore stages 都是 `checks_not_performed`，且永久 `executable: false`；本 slice 不執行 snapshot capture、`etcdutl`、服務啟停、generation commit 或遠端命令。完整契約見 [ERU-016 本機前置](M3-CONTROL-RESTORE-PREP-2026-09-27.md)。
+
 操作狀態：`planned → preflighted → quiesced → rebuilding → registered → verified → complete`。任何失敗記錄 `failed_at`，保留實際結果；不得回報成功或自動接著清理其他節點。恢復執行由上一階段的實際資源核對開始，不盲目重放有副作用的命令。OS 已重灌後沒有「取消即可回復」，rollback 是從舊版本基線重建或從備份還原。
 
 ### 6.3 四種操作不能混用
@@ -166,6 +168,8 @@ HTTP 分兩次驗收：第一輪 `--network eru`，在 workload 所在 worker �
 - etcd 尚有 quorum 時的單成員替換走 member remove／add learner／promote，逐一驗證；失去 quorum 走 disaster restore。兩者不共用「清空目錄再 make up」。
 - core key 由 quickstart 建立。core 重灌後須恢復金鑰，或把新公鑰加到所有 workers 並撤掉舊公鑰；重跑 lineinfile 只會加 key，不會自動撤銷舊 key。
 - etcd snapshot 必須包含所有 prefix：不只 core `/eru`，還包括 resource-storage、啟用中的其他 plugin 與鎖／協調狀態。只清 `/eru` 會留下 plugin 舊紀錄。
+- 保留型 restore 必須以同一份 snapshot 建立新的 logical etcd cluster，使用新 token 與新 data dirs，並先隔離所有舊 member／writer；拒絕 copied live `member/snap/db`、`--skip-hash-check`、`--force-new-cluster`、prefix export 及先啟動空 etcd 再覆蓋 live data-dir。
+- 已知 watch/cache consumer 的舊 revision 風險必須以明確的正整數 revision bump、mark-compacted 與 client restart set 處理，不能把「檔案 hash 正確」當成 cache 已一致。
 - 控制面快照還原後須對帳 metadata 與 runtime。若 workers 已全重灌，優先選 fresh + app manifest 重播；直接還原舊 metadata 不會讓已消失的容器復活。
 - 本輪不把 `node resource --fix` 作萬用修復：先保留差異、查明 stale record，再執行有界限修復。
 

@@ -98,6 +98,21 @@ def assess(project=PROJECT, ssh_home=None, run=command):
     upstream_path = project / 'upstream.lock.json'
     if json_input(upstream_path, blockers, 'upstream lock') is not None:
         report['locks']['upstream_sha256'] = sha(upstream_path)
+    restore_trust_path = project / 'control-restore-trust.json'
+    restore_trust = json_input(
+        restore_trust_path, blockers, 'control restore trust index')
+    if restore_trust is not None:
+        report['locks']['restore_trust_sha256'] = sha(restore_trust_path)
+        if (not isinstance(restore_trust, dict)
+                or set(restore_trust) != {
+                    'schema_version', 'operation', 'status_receipts',
+                    'catalog_receipts', 'toolchains', 'core_key_records'}
+                or restore_trust.get('schema_version') != 1
+                or restore_trust.get('operation') != 'control-restore-trust-index'
+                or any(not isinstance(restore_trust.get(name), list) for name in (
+                    'status_receipts', 'catalog_receipts', 'toolchains',
+                    'core_key_records'))):
+            blockers.append('control restore trust index shape invalid')
     validation_path = project / 'patches/core-v0.1.5-lock-context.validation.json'
     validation = json_input(validation_path, blockers, 'core patch validation')
     if validation is not None:

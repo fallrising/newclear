@@ -25,6 +25,11 @@ class PreflightTests(unittest.TestCase):
             {'repository': repo, 'tag': 'v1', 'sha256': 'a' * 64, 'url': 'https://example.invalid'}
             for repo in sorted(cp.ARTIFACT_REPOS)]})
         self.write('upstream.lock.json', {'status': 'baseline'})
+        self.write('control-restore-trust.json', {
+            'schema_version': 1, 'operation': 'control-restore-trust-index',
+            'status_receipts': [], 'catalog_receipts': [], 'toolchains': [],
+            'core_key_records': [],
+        })
         binary = self.private / 'builds/core-lock-context-go1.27.1/eru-core'
         binary.parent.mkdir(parents=True)
         binary.write_bytes(b'patched-core')

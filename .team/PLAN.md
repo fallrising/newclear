@@ -1684,3 +1684,52 @@ Tiered documentation: root catalog + policy + component README banners + A-tier 
 - ERU15-D005: Green evidence is 16/16 focused fresh-rebuild tests, 45/45 focused plus reused contracts, 429/429 complete ERU tests, and the exact ERU CI AST/JSON/Markdown/private-file/diff validation. No VPS, provider, SSH, generation write, private production input, shared browser E2E, or deployment was used.
 - ERU15-D006: T-108's adversarial review exposed concurrent overwrite, fabricated predecessor, stale controller cleanliness, campaign drift, blocked-predecessor, and non-finite JSON/RTO risks during the correction loop. The final tree closes all findings; the reviewer reran 16/16 tests, passed diff and AST no-executor proofs, and reports no open blocking/high/medium/low finding.
 - ERU15-D007: The `codex-evidence-gate` decision in `reports/ERU-015-evidence.md` is PASS for the bounded local planner candidate. Formal ERU-015 remains in progress: a destructive executor, accepted-run writer, and three live V08 generations are not implemented or accepted. Authorized Git/PR/ERU-CI integration is the next delivery step; deployment remains prohibited.
+
+## Program: eru-vps-mvp / Variant: ERU-016 control-metadata restore planning
+
+### Identity and objective
+
+| Field | Value |
+| --- | --- |
+| project / run | `labs/eru-vps-mvp` / `ERU-016-20260927-01` |
+| target / work branch | `main` at `6ff7455` / `agent/eru016-restore-review-plan` |
+| active owner | none; local planner slice closed by evidence gate |
+| formal task state | ERU-016 remains in progress; this local slice cannot change the fixed task count |
+| remote boundary | owner directed local development before remaining E2E; no VPS/provider/SSH/snapshot/restore/deployment mutation in this slice |
+| objective | Add the first reviewable, non-executable V10 control-metadata restore plan: bind an externally captured full-keyspace etcd snapshot, source generation/topology and tool provenance, isolation and membership intent, revision policy, retained worker/runtime reconciliation, RPO/RTO and evidence requirements without saving or restoring a snapshot |
+
+### Scope and safety boundaries
+
+- This slice is planner/private lifecycle/CLI/docs/tests only. It cannot quiesce writers, stop a core, save/download/decrypt a snapshot, run `etcdutl`, create a data directory, start a new control plane, reconcile live workers, or commit a generation.
+- Restore-control must create a new logical etcd cluster from one integrity-checked full-keyspace snapshot and must not accept fresh empty-etcd semantics, copied live `member/snap/db`, `--skip-hash-check`, `--force-new-cluster`, partial-prefix exports, or application-volume restore claims.
+- Exact snapshot bytes, etcd status/revision/key count/size, source generation/topology, pinned etcd/etcdctl/etcdutl provenance, external-copy evidence, old-control-plane isolation review, target membership/token, revision handling, retained worker snapshot and post-restore evidence must be hash-bound and private.
+- Public output must be count/digest/status only. The plan remains permanently non-executable and cannot be passed to generic execute.
+- Preserve the user's untracked `labs/eru-vps-mvp/prompts/` directory. Shared browser E2E and live V10 validation remain deferred by owner direction.
+
+### Bounded tasks
+
+| Task | Goal | Writable scope | State |
+| --- | --- | --- | --- |
+| [T-109](tasks/T-109.md) | Read-only V10/etcd architecture and unsafe-reuse audit | `reports/T-109.md` only | DONE / VALIDATED |
+| [T-110](tasks/T-110.md) | Read-only red-first tests, private lifecycle, CLI and docs audit | `reports/T-110.md` only | DONE / VALIDATED |
+| [T-111](tasks/T-111.md) | Orchestrator TDD implementation, docs, verification and integration | ERU-016 scoped source/tests/docs plus this plan section | DONE / REPORT VALIDATED / LOCAL EVIDENCE GATE PASS |
+| [T-112](tasks/T-112.md) | Independent fixed-diff adversarial review | `reports/T-112.md` only | PARTIAL / 1 HIGH + 4 MEDIUM FOUND |
+| [T-113](tasks/T-113.md) | Independent corrected fixed-diff closure review | `reports/T-113.md` only | DONE / VALIDATED / NO OPEN FINDINGS |
+
+### Verification gates
+
+- Record one focused failing test for the missing V10 review planner before implementation.
+- Focused tests cover snapshot/status/hash/version/source, full-keyspace contract, generation/topology, restore/fresh exclusion, isolation, new membership/token, revision policy, retained-worker reconciliation, private/symlink/duplicate/concurrency lifecycle, deterministic hashing and stdout redaction.
+- Run relevant reused contracts and the complete ERU Python suite.
+- Run exact ERU CI source/document/private-file/diff validation; do not wait for shared foundation browser E2E.
+- Independently review the fixed diff and apply `codex-evidence-gate` before any completion claim.
+
+### Decisions
+
+- ERU16-D001: With ERU-010 and ERU-015 local slices delivered, ERU-016 is the earliest `待做` capability that can advance without disturbing the owner-deferred VPS E2E queue.
+- ERU16-D002: Official etcd 3.6 recovery semantics require one snapshot for all restored members, new logical member/cluster identity, integrity verification, explicit updated membership/token, and an intentional revision-bump/compaction decision for watch/cache consumers. The first slice will bind these facts for review but implement no command execution.
+- ERU16-D003: V10 restores control metadata only. Application data volumes, worker runtime reconstruction, stale-record deletion, node/resource repair, and fresh-cluster bootstrap are separate operations and cannot be inferred from a snapshot-plan hash.
+- ERU16-D004: T-109 and T-110 reports pass the repository task/report validators. Their shared minimum is a local-only immutable planner with independently bound snapshot, status and catalog evidence; no etcd subprocess or restore executor belongs to this slice.
+- ERU16-D005: Red was recorded with the required single test and failed for the intended missing `control_restore` module. The first candidate passes 12/12 restore tests and 33/33 restore plus adjacent fresh/controller contracts; fixed-diff review is now required before broad acceptance.
+- ERU16-D006: T-112 rejected self-asserted provenance, aggregate/conflated reconciliation, weak revision/core-key/target bindings and path-based TOCTOU. The correction adds a source-bound default-deny trust index, exact Eru/runtime/plugin records, separate etcd/Eru membership, derived revision/consumer/target-data-dir bindings, explicit core-key availability, and anchored dirfd/O_NOFOLLOW reads plus atomic link-once writes. Final corrected evidence is 19/19 restore tests and 40/40 with adjacent fresh/controller contracts. T-113 independently closed every prior HIGH/MEDIUM finding and found no new open finding.
+- ERU16-D007: ACCEPT T-111 only as a local non-executable planner slice after the evidence gate mapped every task requirement to implementation, 40/40 focused/reused tests, 448/448 complete ERU tests, exact CI validation (`ast=91`, `json=3`, `docs=52`, private exclusion and diff check passed), compileall, and validated T-113 closure evidence. No shared browser/VPS E2E was required or started under owner direction. ERU-016 remains in progress with 12 fixed tasks remaining because snapshot capture/restore execution, isolated live reconciliation, generation acceptance and measured V10/RPO/RTO are still absent.

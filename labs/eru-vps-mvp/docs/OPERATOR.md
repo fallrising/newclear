@@ -105,6 +105,20 @@ python3 scripts/labctl.py plan-fresh-rebuild \
 
 公開輸出不展開四台 identity、provider／volume、IP、OS image 或 app spec，只顯示 counts、generation、decision、hash 與 relative private path。plan 永遠是 `executable: false`／`execution_implemented: false`，沒有 `execute-fresh-rebuild` 命令，也不能交給 generic `execute`。建立它不會連 SSH/provider、不會停止 writer、不會動 etcd/runtime/workload 或 `cluster.json`。完整 schema、stages 與 V08 尚缺證據見 [ERU-015 本機前置](M3-FRESH-REBUILD-PREP-2026-09-27.md)。
 
+## 控制 metadata restore：只建立 review plan
+
+ERU-016 的本機入口只讀已由外部流程擷取、驗證與登錄的 private evidence：
+
+```bash
+python3 scripts/labctl.py plan-control-restore \
+  --input private/restore-control-intents/ITERATION.json \
+  --plan-id RESTORE_REVIEW_ID
+```
+
+輸入固定現行 Profile A inventory／generation、controller/source locks、完整 `etcdctl snapshot save` bytes 與串流 SHA256、獨立 status record、叢集外加密 catalog receipt、pinned etcd 3.6 tool digests、writer quiescence、舊 member isolation、新 token／data-dir membership、revision bump／mark-compacted 與涵蓋 core／agent／plugins 的完整 restart set、三台保留 workers 的 exact node/workload/runtime/plugin records、core key availability／revoke set、evidence store 及 RPO／RTO definitions。snapshot/status/source、catalog、toolchain 與 available core-key record 必須已由獨立審查加入 `control-restore-trust.json`，而 planner 會核對其 bytes 和目前 Git HEAD；預設空 allowlist 不能建立 reviewable 真實 plan，更新後須 commit 並重新產生 controller preflight。輸入只可放在文件指定的 exact private directories；整個 transaction 固定同一個 trusted top-level `private` directory FD，底下以 anchored dirfd + `O_NOFOLLOW` 拒絕 root swap、descendant symlink、escape、duplicate field、非標準數字、hash／generation／tool drift。
+
+公開 summary 是固定 allowlist：plan ID／operation／mode／decision、不可執行旗標、`G → G+1`、snapshot revision／key count／digests、member／worker／workload counts、revision-policy kind、blocker codes、plan hash 與相對 private path。不要從 summary 推論舊控制面已隔離、restore 已完成或 V10 已通過。plan 永久 `executable: false`、所有 stages 都是 `checks_not_performed`；沒有 `execute-control-restore`，不連 VPS、不呼叫 etcd 工具、不動 `cluster.json`。它只處理控制 metadata，絕不代表應用 DB／volume 或已消失容器已恢復。完整 schema 與後續 gates 見 [ERU-016 本機前置](M3-CONTROL-RESTORE-PREP-2026-09-27.md)。
+
 ## 鎖、紀錄與適用邊界
 
 - `private/controller.lock` 使用 flock，計畫／執行／reconcile 與直接呼叫的 deploy／smoke 腳本共用。子程序繼承同一 FD；父程序離開後，仍執行中的合作子程序會繼續持鎖。不要刪除 lock file 來解鎖。

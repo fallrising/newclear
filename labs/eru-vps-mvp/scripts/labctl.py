@@ -60,6 +60,9 @@ def code_inputs(project):
     files += list((project / 'patches').glob('*.validation.json'))
     files += [project / x for x in ['artifacts.amd64.lock.json', 'upstream.lock.json',
               'private/deployment-plan.json', 'private/verified-host-public-keys.json']]
+    restore_trust = project / 'control-restore-trust.json'
+    if restore_trust.exists():
+        files.append(restore_trust)
     files += sorted((project / 'private/preflight').glob('*.json'))
     revision = project / 'private/operations/core-revision.json'
     if revision.exists():
@@ -834,6 +837,13 @@ def main():
         '--input', required=True,
         help='Reviewed JSON under private/fresh-rebuild-intents/')
     fresh_plan.add_argument('--plan-id', help='Optional fresh bounded review-plan ID')
+    restore_plan = sub.add_parser(
+        'plan-control-restore',
+        help='Save one private, non-executable ERU-016 control-metadata restore review plan')
+    restore_plan.add_argument(
+        '--input', required=True,
+        help='Reviewed JSON under private/restore-control-intents/')
+    restore_plan.add_argument('--plan-id', help='Optional restore review-plan ID')
     drain_plan = sub.add_parser('plan-worker-drain', help='Save a private, offline ERU-009 review plan')
     drain_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
     drain_plan.add_argument('--input', required=True, help='Private JSON with snapshot, apps, destinations, and offline assertions')
@@ -885,6 +895,30 @@ def main():
     loss_replace_recover.add_argument('--run', required=True, help='Worker-loss replacement wrapper run ID')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'plan-control-restore':
+        from control_restore_ops import save_review_plan
+        envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)
+        restore = envelope['plan']
+        print(json.dumps({
+            'id': restore['id'], 'operation': restore['operation'],
+            'mode': restore['mode'], 'decision': restore['decision'],
+            'executable': restore['executable'],
+            'execution_implemented': restore['execution_implemented'],
+            'generation_before': restore['generation_before'],
+            'generation_after': restore['generation_after'],
+            'snapshot_revision': restore['snapshot']['status']['revision'],
+            'snapshot_total_keys': restore['snapshot']['status']['total_keys'],
+            'snapshot_sha256': restore['snapshot']['source']['sha256'],
+            'status_sha256': restore['snapshot']['status']['source']['sha256'],
+            'member_count': len(restore['target_etcd']['members']),
+            'worker_count': restore['retained_workers']['worker_count'],
+            'workload_count': restore['source_cluster']['workload_count'],
+            'isolation_gate_required': True,
+            'revision_policy_kind': restore['revision_policy']['mode'],
+            'blocker_codes': restore['blocker_codes'],
+            'sha256': envelope['sha256'], 'path': path.as_posix(),
+        }, indent=2))
+        return
     if args.command == 'plan-fresh-rebuild':
         from fresh_rebuild_ops import save_review_plan
         envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)

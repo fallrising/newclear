@@ -3,12 +3,16 @@
 import hashlib
 import json
 import os
+import re
 import selectors
 import signal
 import subprocess
 import sys
 import time
 from pathlib import Path
+
+FILE_NAME = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
+PLAIN_TEXT = re.compile(r"^[A-Za-z0-9 ._-]{0,80}$")
 
 ROOT = Path("/home/agentprobe/workspace")
 LIMIT = 256 * 1024
@@ -152,6 +156,31 @@ def check_command(check, run_id, base_sha):
     }
 
 
+def card_matches(card):
+    if card is None:
+        return True
+    if not isinstance(card, dict):
+        return False
+    name = card.get("name")
+    text = card.get("text")
+    if (
+        not isinstance(name, str)
+        or not isinstance(text, str)
+        or name in {".", "..", "m2-result.txt"}
+        or not FILE_NAME.fullmatch(name)
+        or not PLAIN_TEXT.fullmatch(text)
+    ):
+        return False
+    path = Path(name)
+    expected = text + "\n"
+    return (
+        path.is_file()
+        and not path.is_symlink()
+        and path.stat().st_size < 200
+        and path.read_text() == expected
+    )
+
+
 def contract_sha256(contract):
     raw = json.dumps(contract, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return hashlib.sha256(raw).hexdigest()
@@ -170,6 +199,7 @@ def result(request):
             and not output.is_symlink()
             and output.stat().st_size < 100
             and output.read_text() == expected
+            and card_matches(request.get("card"))
         )
         verification = {
             "status": "passed" if verified else "failed",

@@ -83,4 +83,4 @@ python -m agent_platform_m0.kvm_egress \
 
 結束時 claim／VM 數均為 0，已停止專用 user service、移除其 cgroup，刪除短期 registry container／volume。保留本機 guest image、開發虛擬環境與私密原始測試檔，供追查與重跑；不表示有 VM 繼續執行。主機工具是 operator 已安裝的依賴，沒有解除安裝。
 
-45 個本機 tests 與 lint／format 通過；原始映像和 guest 各 14 項 Docker checks、真實 sandbox 19 checks，以及上述硬體 cases 均已執行。M0 CI 只執行單元／Docker checks，不能取代本文件的硬體證據。硬體驗收當時 M1 尚未開始；目前進度見 [M1](M1.md)。
+45 個本機 tests 與 lint／format 通過；原始映像和 guest 各 14 項 Docker checks、真實 sandbox 19 checks，以及上述硬體 cases 均已執行。M0 CI 只執行單元／Docker checks，不能取代本文件的硬體證據。硬體驗收當時 M1 尚未開始。2026-09-27 的進度見 [交接](HANDOFF.md) 與 [SDD §15](../SDD.md)。

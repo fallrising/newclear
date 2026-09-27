@@ -4,7 +4,7 @@
 >
 > 2026-09-27：`kvm8745` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
 
-目前停止點：**先把整條流程用本機 mock 做完，再換成真 API。** 真接口暫定 OpenCode Zen 的 Chat Completions（`https://opencode.ai/zen/v1/chat/completions`）。key 以後從 [opencode.ai/auth](https://opencode.ai/auth) 建立，只放 0600 檔。現在沒有 key，也不要為了開發去申請。`/responses` 和 `/messages` 還接不上。卡片可以出現在較長的使用者訊息裡，並同時寫入該檔與 `m2-result.txt`。這不是自然語言 coding。硬金額上限與 24 小時停留都還沒做。
+目前停止點：**先把整條流程用本機 mock 做完，再換成真 API。** 真接口暫定 [OpenCode Go](https://opencode.ai/docs/go) 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。這是 Go 訂閱的 key，不是 Zen 的按量 key。以後在 [opencode.ai/auth](https://opencode.ai/auth) 訂 Go 再建立 key，只放 0600 檔。現在沒有 key，也不要為了開發去申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。卡片可以出現在較長的使用者訊息裡，並同時寫入該檔與 `m2-result.txt`。這不是自然語言 coding。硬金額上限與 24 小時停留都還沒做。
 
 下面各節是 2026-09-24 前後的施工日記。其中「PR #82 未合併、KVM 未過、沒有對帳命令、必須先 recovery 才能開發」已經過期，不能當成現在的指令。
 

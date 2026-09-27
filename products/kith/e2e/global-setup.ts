@@ -97,6 +97,7 @@ export default async function globalSetup(): Promise<void> {
 
     process.env.KITH_E2E_BASE_URL = stack.baseUrl;
     process.env.KITH_E2E_API_ORIGIN = stack.apiOrigin;
+    process.env.KITH_E2E_FAKE_PROVIDER_URL = stack.fakeProviderUrl;
     process.env.KITH_E2E_SETUP_OK = "1";
   } catch (e) {
     await stopStack();

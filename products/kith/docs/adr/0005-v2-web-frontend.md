@@ -1,6 +1,6 @@
 # ADR-0005 — v2 web frontend beside the v1 frontend
 
-- Status: proposed
+- Status: accepted（v2 W7 切換，#130，2026-09-26）
 - Date: 2026-09-23
 - Applies to: kith v2（[docs/v2](../v2/README.md)）
 

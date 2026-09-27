@@ -9,7 +9,7 @@
 
 **狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
 
-**v2（Proposed，未實作）：** 前端重做（`web/`）與 agent 接入泛化（主流 LLM API 格式、通用 runner）的設計在 [docs/v2](docs/v2/README.md)。批准並落地前，以下 v1 文件仍是現行契約。
+**v2（W7 起為現行前端）：** 前端是 `web/`（設計見 [docs/v2](docs/v2/README.md)）；舊 `frontend/` 已刪除。hosted agent 經 provider 連線呼叫主流 LLM API 格式，外部 CLI 以 `kith-runner`（`runner/`）接入。v1 文件中未被 [docs/v2/10](docs/v2/10-decisions.md) §2 修訂的條文仍是現行契約。
 
 ## 從這裡開始
 
@@ -62,7 +62,7 @@ node cmd/kithctl.mjs bootstrap --operator-id ... --operator-hash ... --second-ha
 cp .dev.vars.example .dev.vars   # gitignored；L1 可留空 XAI_API_KEY
 npm run db:migrate:local         # wrangler d1 migrations apply kith --local
 npm run dev                      # Worker :8787（0.0.0.0，含 Tailscale）
-npm run dev:frontend             # Vite :5173 綁 Tailscale IPv4（tailscale ip -4）
+npm run dev:web             # Vite :5173 綁 Tailscale IPv4（tailscale ip -4）
 ```
 
 L1 驗收：`GET /api/csrf` 回 JSON。還沒有 seed 帳號，登入會失敗（屬 L2）。不要把 `.dev.vars` 或密碼雜湊提交進 git。
@@ -73,7 +73,7 @@ L1 驗收：`GET /api/csrf` 回 JSON。還沒有 seed 帳號，登入會失敗�
 npm run db:migrate:local
 npm run db:bootstrap:local    # 印出 owner/guest 密碼；寫入 gitignored .dev.accounts
 npm run dev
-npm run dev:frontend          # 另開終端；瀏覽器 http://127.0.0.1:5173
+npm run dev:web          # 另開終端；瀏覽器 http://127.0.0.1:5173
 ```
 
 預設 handle：`owner`（operator）、`guest`。兩者都已加入 `lobby`（`room-1`）。密碼只在本機 `.dev.accounts`，不進 git。可用環境變數 `KITH_OWNER_PASSWORD` / `KITH_GUEST_PASSWORD` 覆寫後再跑 bootstrap。
@@ -115,7 +115,7 @@ npm run dev:sidecar          # 另開終端；讀 .wrangler/sidecar.local.toml
 
 Worker 已在 <https://kith.fallrising.workers.dev>。`wrangler.toml` 的 `ff_mcp`、`ff_hosted_agent`、`ff_ambient` 為 `on`，`ff_sidecar` 為 `off`。沒有 `XAI_API_KEY` 時，線上 @grok 仍走 `FAKE_LLM_TEXT`。在 `products/kith` 跑 `npm run check:live` 看還缺什麼。
 
-1. **再部署：** 已有 Cloudflare API token 或 `npx wrangler login` 時，在 `products/kith` 先 `npm run build --prefix frontend`，再 `npx wrangler deploy`。不要把 token 寫進 git。
+1. **再部署：** 已有 Cloudflare API token 或 `npx wrangler login` 時，在 `products/kith` 先 `npm run web:build`，再 `npx wrangler deploy`。不要把 token 寫進 git。v2 首次部署（W7 切換）照 [docs/v2/milestones/W7.md](docs/v2/milestones/W7.md) §4.7 的順序。
 2. **真 Grok（可選）：** 把 `XAI_API_KEY` 放進 gitignored `.dev.vars`（有值就不再走 fake LLM），然後再部署才會進 Worker。
 3. **真 Codex（可選）：** 官方 CLI 若已安裝，kith 的 `CODEX_HOME` 必須與預設 `~/.codex` 分開。請跑：
    `CODEX_HOME=$HOME/.local/kith-dev/codex-home codex login`

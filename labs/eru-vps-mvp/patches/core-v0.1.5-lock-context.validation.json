@@ -93,5 +93,16 @@
         "exit_code": 0
       }
     ]
-  }
+  },
+  "schema_version": 1,
+  "release_id": "core-v0.1.5-lock-context-r1",
+  "repository": "projecteru2/core",
+  "source_tag": "v0.1.5",
+  "target_version": "v0.1.5",
+  "patch_revision": 1,
+  "compatible_from_versions": [
+    "v0.1.5"
+  ],
+  "architecture": "linux/amd64",
+  "patch_file": "core-v0.1.5-lock-context.patch"
 }

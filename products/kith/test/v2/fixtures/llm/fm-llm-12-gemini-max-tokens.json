@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"cut\"}]}, \"finishReason\": \"MAX_TOKENS\", \"index\": 0}]}"
+  },
+  "expect": {
+    "text": "cut",
+    "finish": "length"
+  }
+}

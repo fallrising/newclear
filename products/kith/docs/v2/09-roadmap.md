@@ -75,7 +75,7 @@ P1 大框架（#47）
   - `E2E-W3-02` @ 補全：鍵盤、點按、IME、Escape（v1 UI-10-02 的行為）。
   - `E2E-W3-03` `@agent` → 佔位 → 正式訊息；`reply failed` → 失敗提示。
   - `E2E-W3-04` 非 operator @ `operator_personal`：事前可見限制、落盤、無回覆中（UJ-06）。
-- 狀態：`DOC_READY`（施工圖：[milestones/W3.md](milestones/W3.md)）。B-11 的封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
+- 狀態：`VERIFIED`（施工圖：[milestones/W3.md](milestones/W3.md)；全套 run `20260924-140805-2a14c97`：W0–W3 共 22 個測試通過、desktop 的 `E2E-W1-06` 依專案設定跳過，`e2e:validate` ok）。B-11 的封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
 
 ### W4 — Providers、hosted 多格式、控制台
 
@@ -91,7 +91,7 @@ P1 大框架（#47）
   - `E2E-W4-07` v1→v2 遷移腳本在含 v1 資料的 seed 上執行兩次，結果相同。
   - `E2E-W4-08` 改 runtime：hosted 回覆進行中（fake-provider 延遲）時把 agent 改成 external → 舊回覆不落盤、`reply ended`；身份與歷史不變；勾選撤銷時 token 失效（RT-01、V2-INV-06）。
 - 禁止：串流草稿、runner 改動。
-- 狀態：`DOC_READY`（施工圖：[milestones/W4.md](milestones/W4.md)）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
+- 狀態：`VERIFIED`（施工圖：[milestones/W4.md](milestones/W4.md)；全套 run `20260925-063736-41d1e88`：W0–W4 共 30 個測試通過、desktop 的 `E2E-W1-06` 依專案設定跳過，`e2e:validate` ok）。`openai_responses`、`gemini` 延到 W5；契約 [contracts/v2/http-providers.json](../../contracts/v2/http-providers.json)、[http-agents.json](../../contracts/v2/http-agents.json)。
 
 ### W5 — 串流與可觀測
 
@@ -102,7 +102,7 @@ P1 大框架（#47）
   - `E2E-W5-03` 串流中斷（fake-provider 中途斷線）→ 失敗提示，不落盤半截（FM-LLM-08）。
   - `E2E-W5-04` operator 在 generation 列表看到失敗類別；一般成員看不到。
   - `E2E-W5-05` `openai_responses` 與 `gemini` 連線（串流與非串流）都能回覆（Phase 2 新增，對應延後的 adapter 格式）。
-- 狀態：`DOC_READY`（施工圖：[milestones/W5.md](milestones/W5.md)）。B-06 不做（Q-20）；草稿封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
+- 狀態：`VERIFIED`（施工圖：[milestones/W5.md](milestones/W5.md)；全套 run `20260926-070300-349aff0`：W0–W5 共 35 個測試通過、desktop 的 `E2E-W1-06` 依專案設定跳過，`e2e:validate` ok）。B-06 不做（Q-20）；草稿封包 schema 在 [contracts/v2/ws-server.json](../../contracts/v2/ws-server.json)。
 
 ### W6 — Runner、trace、thread
 
@@ -114,7 +114,7 @@ P1 大框架（#47）
   - `E2E-W6-03` thread：主時間線只見根訊息＋回覆數；面板內讀寫（UJ-10）。
   - `E2E-W6-04` runner 斷線重連後不重跑已完成 trigger；`replay:true` 不執行（FM-RUN-01、02、05）。
   - `E2E-W6-05` v1 sidecar 既有測試（`npm run test:sidecar`）仍通過。
-- 狀態：`DOC_READY`（施工圖：[milestones/W6.md](milestones/W6.md)）。`kith-runner` 在 repo 內 `runner/`，`sidecar/` 不改；契約 [mcp-events.json](../../contracts/v2/mcp-events.json)、[http-traces.json](../../contracts/v2/http-traces.json)、[runner-config.json](../../contracts/v2/runner-config.json)。
+- 狀態：`VERIFIED`（施工圖：[milestones/W6.md](milestones/W6.md)；全套 run `20260926-115611-1bcd56b`：42 通過、desktop 的 `E2E-W1-06` 依專案設定跳過，遮罩命中 0，`e2e:validate` ok）。`kith-runner` 在 repo 內 `runner/`，`sidecar/` 不改；契約 [mcp-events.json](../../contracts/v2/mcp-events.json)、[http-traces.json](../../contracts/v2/http-traces.json)、[runner-config.json](../../contracts/v2/runner-config.json)。
 
 ### W7 — 切換
 
@@ -122,7 +122,7 @@ P1 大框架（#47）
 - 驗收：
   - `E2E-W7-01` 全套 E2E 通過（唯一一次在里程碑內跑全套），證據資料夾附在 PR。
   - `E2E-W7-02` production build 大小與效能預算（[05](05-frontend-architecture.md) §7）。
-- 狀態：`DOC_READY`（施工圖：[milestones/W7.md](milestones/W7.md)）。首次載入 JS 預算依實測改為 250 KiB（Q-31）；控制台改為延後載入；正式部署由 operator 依 W7 §4.7 手動執行，CI 不部署。
+- 狀態：`VERIFIED`（施工圖：[milestones/W7.md](milestones/W7.md)；全套 run `20260926-123648-a0ff1fa`：43 通過、desktop 的 `E2E-W1-06` 依專案設定跳過，遮罩命中 0，`e2e:validate` ok）。首次載入 JS gzip 224801 bytes（219.53 KiB）；控制台改為延後載入；正式部署由 operator 依 W7 §4.7 手動執行，CI 不部署。
 
 ## 4. Phase 2 的寫法（給之後的細化）
 

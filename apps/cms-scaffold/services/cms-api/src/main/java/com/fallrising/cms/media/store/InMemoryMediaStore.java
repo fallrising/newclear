@@ -43,7 +43,23 @@ public class InMemoryMediaStore implements MediaStore {
 
     @Override
     public void update(MediaAsset asset) {
-        assets.put(asset.id(), asset);
+        assets.computeIfPresent(asset.id(), (id, current) -> new MediaAsset(
+                current.id(),
+                current.ownerPrincipalId(),
+                asset.title(),
+                asset.altText(),
+                current.originalFilename(),
+                current.contentType(),
+                current.byteSize(),
+                asset.storedBytes(),
+                current.width(),
+                current.height(),
+                current.checksumSha256(),
+                asset.status(),
+                asset.deletedAt(),
+                current.createdAt(),
+                asset.updatedAt(),
+                current.variants()));
     }
 
     @Override

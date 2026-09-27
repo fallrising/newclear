@@ -28,6 +28,14 @@ Owner 要求在 `fallrising/newclear` 新增 agent 平台項目，先搜尋主�
 
 設計與來源見 [項目入口](platform/agent-platform/README.md)、[SDD](platform/agent-platform/SDD.md) 與 [範本研究](platform/agent-platform/docs/reference-selection.md)。
 
+## Owner override 2026-09-25 — apps/cms-scaffold
+
+Owner 要求重啟 `apps/cms-scaffold`：先以 Shopify 的前端設計為參考重寫前端，後端配套演進，交給 LLM agent 分波實作。這是對 2026-09-05 freeze 的**明確例外**，範圍僅限 `apps/cms-scaffold`，tier 由 C 改為 A。
+
+目前處於 **設計階段**：v1 前端稽核、前端 v2 SDD、後端 v2 SDD 都是 v0.1，見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。實作依該索引的路線圖從 BW0 開始。總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變；其餘 2026-09-05 分級維持不變。
+
+（2026-09-24 曾登記為 documentation-only，本段取代之。）
+
 ## 2026-09-05 修復與補充驗證
 
 這次把盤點中可安全修復的 source/build blocker 留在未提交 working tree，並用 repository-native gate 重驗：Streaming Converter 的 `upload.sh` 語法已修正；RelayVault 補齊 upload create/resume/status/cancel HTTP vertical slice 與 authorization-before-body 回歸測試；`infra/specs` 改為從 script 自身位置解析 monorepo component root，並修正 restrictive umask 下的公開 PostgreSQL/Redis fixture mode；Goku 與 CloudForm 清掉實際 lint error；AweShore lockfile 恢復 clean Linux install，五個檔案的既有 Prettier debt 也已清除。
@@ -150,6 +158,8 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/dim-gate` | A | M0–M5 demo accepted locally |
 | `platform/ice-maker` | A | Knowledge-compiler investment line |
 | `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
+| `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
+| `tools/cc-quota` | A | Owner override 2026-09-27; offline tests in CI, target-machine path unverified |\n| `tools/codex-usage` | A | Owner override 2026-09-27; stateless read-only collector, offline tests in CI, target Codex CLI/account live acceptance pending |
 | `specs/fleet` | B | Public contract + Phase 1 code; not root `docs/` |
 | `platform/local-ocr-services` | B | Maintained OCR adapter for Ice Maker |
 | `systems/mkfk` | B | Teaching / contract implementation; no new tutorials |
@@ -164,10 +174,38 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `platform/prism` | C | Phase 0 SDD; dormant investment |
 | `apps/loom` | C | Dormant |
 | `apps/flowshot` | C | Dormant |
-| `apps/cms-scaffold` | C | Dormant |
+| `apps/cms-scaffold` | A | Owner override 2026-09-25; v2 design phase |
 | `apps/cloudform` | D | Retired / historical |
 | `tools/streaming-converter` | D | Retired / historical |
 | `examples/bite-pi` | D | Disposable demo |
 | `labs/bee-swarm` | D | Superseded by team-superpowers workflow |
 | `labs/aweshore` | D | Explicitly stopped |
 
+## Owner override 2026-09-27 — tools/cc-quota
+
+Owner 要求在 `fallrising/newclear` 開一個項目，實作 Claude Code 額度的 pacing 監控：每小時採集並落庫，另以報表讀取，採集與展示解耦。範圍僅限 [tools/cc-quota](tools/cc-quota/README.md)，文檔檔位 A；依賴 Python 標準函式庫，離線測試由 `cc-quota-ci.yml` 執行。
+
+真實額度端點（未公開文件）與 macOS launchd／Keychain 路徑尚未在目標機器驗證。本工具不刷新或轉存憑證，也不自動調度任務；其餘 portfolio 決策維持不變。
+
+## Owner override 2026-09-27 — labs/mithril-research
+
+Owner 明確要求在 `fallrising/newclear` 建立項目並研究 `projecteru2/mithril`。本次例外僅限 [labs/mithril-research](labs/mithril-research/README.md) 的原始碼／文件研究、驗證設計與後續隔離實驗規劃；文檔檔位 A，當前 M0 為 documentation-only，runtime 尚未驗證。
+
+這不是新代理產品或 production 部署授權，不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane 的實作範圍。上游源碼不匯入 monorepo。M1 真正加入 fixture/harness 前先確認 disposable 環境、版本與安全邊界；實機變更及更大範圍整合另行決定。
+
+其餘 portfolio 決策維持不變；研究結論、固定來源、未完成驗證與下一步集中於該項目的 RESEARCH、SOURCES、VALIDATION、STATUS。
+
+
+## Owner override 2026-09-27 — tools/codex-usage
+
+Owner 要求參照既有 `tools/cc-quota`，在 `fallrising/newclear` 建立 Codex 對應小工具並放入本次已完成的訂閱用量採集實作。範圍限於 [tools/codex-usage](tools/codex-usage/README.md)，文檔檔位 A。
+
+第一階段只做 **ChatGPT/Codex 訂閱用量的單次唯讀採集**：透過官方 Codex CLI App Server 讀取 account/rate-limit/usage 資料，輸出 fail-closed JSON；不建立模型 thread/turn，不以 API Platform usage 替代，不讀出 credential，不建立 scheduler、SQLite、通知或自動任務調度。
+
+offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實際版本、登入 workspace、live schema 與真實 snapshot 尚待驗收。完成 live acceptance 前不得宣稱 production-ready，也不得為了取得資料改抓私人網頁端點。其餘 portfolio 決策維持不變。
+
+## Owner override 2026-09-27 — fe-review 休眠元件
+
+Owner 決定：[fe-review](docs/fe-review/README.md) 工作包中的 C 檔（休眠）元件，可以在 fe-review 第 2 輪做前端修改；D 檔（退役）元件暫緩，不進入第 2、3 輪。
+
+這個例外只涵蓋 fe-review 第 2 輪在各元件 `fe-review/DESIGN.md` 範圍內的前端修改，以及修改所需的最小解耦。它不恢復這些元件的投入，文檔檔位不變，也不授權新功能或 major 依賴升級；後兩者仍需另行決定。其餘 portfolio 決策維持不變。

@@ -13,6 +13,11 @@ const CODE_KEYS: Record<string, CopyKey> = {
   already_member: "error.code.already_member",
   room_full: "error.code.room_full",
   not_found: "error.code.not_found",
+  in_use: "error.code.in_use",
+  name_taken: "error.code.name_taken",
+  provider_disabled: "error.code.provider_disabled",
+  secrets_key_missing: "error.code.secrets_key_missing",
+  secret_unavailable: "error.code.secret_unavailable",
 };
 
 /** Copy key for an error, or for a server error code string (WS `error` frames, failed sends). */

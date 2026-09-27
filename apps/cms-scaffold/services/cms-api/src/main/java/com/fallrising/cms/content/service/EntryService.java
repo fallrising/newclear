@@ -1,5 +1,6 @@
 package com.fallrising.cms.content.service;
 
+import com.fallrising.cms.api.error.ErrorCode;
 import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.PublicVisibility;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
@@ -76,7 +77,7 @@ public class EntryService {
         ContentTypeRecord type = requireType(typeKey);
         authorization.require(principal, CmsAction.CREATE, typeKey, payload, surface);
         if (type.singleton() && store.countEntries(type.id(), true) > 0) {
-            throw new ContentException(org.springframework.http.HttpStatus.CONFLICT, "SINGLETON_EXISTS", "Singleton already exists");
+            throw ContentException.singletonExists();
         }
         ensureSlugFree(type.id(), slug, null);
         Instant now = Instant.now();
@@ -201,7 +202,7 @@ public class EntryService {
             return current;
         }
         if ("required".equals(type.slugPolicy()) && (current.slug() == null || current.slug().isBlank())) {
-            throw ContentException.validation("SLUG_REQUIRED", "Slug is required to publish");
+            throw ContentException.validation(ErrorCode.SLUG_REQUIRED, "Slug is required to publish");
         }
         validatePayload(type, current.payload(), true);
         Instant now = Instant.now();
@@ -494,13 +495,13 @@ public class EntryService {
         List<FieldRecord> fields = store.fieldsOf(type.id());
         for (String key : payload.keySet()) {
             if (RESERVED.contains(key)) {
-                throw ContentException.validation("FIELD_VALIDATION", "Reserved field: " + key);
+                throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Reserved field: " + key);
             }
         }
         for (FieldRecord field : fields) {
             Object value = payload.get(field.fieldKey());
             if (publish && field.required() && isBlank(value)) {
-                throw ContentException.validation("FIELD_VALIDATION", "Missing required field " + field.fieldKey());
+                throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Missing required field " + field.fieldKey());
             }
             if (isBlank(value)) {
                 continue;
@@ -508,38 +509,38 @@ public class EntryService {
             switch (field.fieldType()) {
                 case "int" -> {
                     if (!(value instanceof Number)) {
-                        throw ContentException.validation("FIELD_VALIDATION", field.fieldKey() + " must be a number");
+                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be a number");
                     }
                 }
                 case "boolean" -> {
                     if (!(value instanceof Boolean)) {
-                        throw ContentException.validation("FIELD_VALIDATION", field.fieldKey() + " must be boolean");
+                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be boolean");
                     }
                 }
                 case "enum" -> {
                     if (field.enumValues() != null
                             && !field.enumValues().isEmpty()
                             && !field.enumValues().contains(String.valueOf(value))) {
-                        throw ContentException.validation("FIELD_VALIDATION", field.fieldKey() + " is not a valid enum value");
+                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " is not a valid enum value");
                     }
                 }
                 case "ref" -> {
                     UUID targetId = parseUuid(value, field.fieldKey());
                     EntryRecord target = store.findEntry(targetId).orElseThrow(() ->
-                            ContentException.validation("REF_TARGET_NOT_FOUND", "Referenced entry not found"));
+                            ContentException.validation(ErrorCode.REF_TARGET_NOT_FOUND, "Referenced entry not found"));
                     if (field.refTargetTypeKey() != null && !field.refTargetTypeKey().equals(target.contentTypeKey())) {
-                        throw ContentException.validation("REF_TARGET_WRONG_TYPE", "Referenced entry is the wrong type");
+                        throw ContentException.validation(ErrorCode.REF_TARGET_WRONG_TYPE, "Referenced entry is the wrong type");
                     }
                 }
                 case "principal-ref" -> {
                     UUID principalId = parseUuid(value, field.fieldKey());
                     if (identityStore.findPrincipalById(principalId).isEmpty()) {
-                        throw ContentException.validation("PRINCIPAL_REF_UNRESOLVED", "Principal not found");
+                        throw ContentException.validation(ErrorCode.PRINCIPAL_REF_UNRESOLVED, "Principal not found");
                     }
                 }
                 case "media-ref" -> {
                     if (MediaService.parseMediaId(value) == null) {
-                        throw ContentException.validation("FIELD_VALIDATION", field.fieldKey() + " must be a media UUID");
+                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be a media UUID");
                     }
                 }
                 default -> {
@@ -592,7 +593,7 @@ public class EntryService {
         try {
             return UUID.fromString(String.valueOf(value));
         } catch (IllegalArgumentException e) {
-            throw ContentException.validation("FIELD_VALIDATION", field + " must be a UUID");
+            throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field + " must be a UUID");
         }
     }
 

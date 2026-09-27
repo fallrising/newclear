@@ -1,12 +1,13 @@
 # CMS Scaffold
 
-> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
 可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）、三個 demo pack。
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
-實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。
+實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
+v2（設計階段，前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
 目前實作到 **Wave E + Back 自訂視圖**：kernel 與三面已驗收；Back 另有相簿編排、當日行程、issue 看板（寫入仍走 entry API）。
 
@@ -22,12 +23,34 @@
 
 ```bash
 ./gradlew test
+./gradlew integrationTest   # 需要 Docker（Testcontainers PostgreSQL 16）
 npm test
 npm run lint
 npm run typecheck
 npm run build
 ```
 
+`./gradlew test` 會用 `openapi.yaml` 驗證每一個 MockMvc 回應；`./gradlew integrationTest` 對 PostgreSQL 跑同一組 store 契約測試（`src/test/.../contract/`）。兩者都是 CI 閘門。
+
+前端閘門（v2 W0 起，不需要後端或 JDK）：
+
+```bash
+npm run lint && npm run typecheck && npm test && npm run build
+npm run test:bundle
+npx playwright install chromium   # 第一次
+npm run e2e:mock
+```
+
+不接後端開發前端（MSW）：
+
+```bash
+npm run dev:mock -w @cms/web-front   # 5173
+npm run dev:mock -w @cms/web-back    # 5174；網址加 ?mockUser=seed-operator-album 直接登入
+npm run dev:mock -w @cms/web-admin   # 5175；?mockUser=seed-admin
+```
+
+情境：網址加 `?mock=slow`、`error500`、`empty`、`conflict`（`none` 恢復）。mock 登入接受任何非空密碼，`wrong-password` 除外。
+後端改了 `openapi.yaml`：`npm run gen -w @cms/api`；改了 fixture：`npm run gen -w @cms/mocks`。
 等價模組指令：`./gradlew :services:cms-api:test`。前端單元測試是 Vitest。
 
 UI e2e（Playwright，需要已啟動的 Compose 三面 + API）：

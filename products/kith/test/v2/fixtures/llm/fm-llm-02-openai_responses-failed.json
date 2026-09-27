@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-02",
+  "format": "openai_responses",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"r\", \"object\": \"response\", \"status\": \"failed\", \"output\": [], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}, \"error\": {\"code\": \"rate_limit_exceeded\", \"message\": \"x\"}}"
+  },
+  "expect": {
+    "error_class": "rate_limited"
+  }
+}

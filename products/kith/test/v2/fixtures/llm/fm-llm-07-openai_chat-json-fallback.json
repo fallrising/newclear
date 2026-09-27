@@ -1,0 +1,18 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": "{\"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"plain\"}, \"finish_reason\": \"stop\"}]}"
+  },
+  "expect": {
+    "text": "plain",
+    "finish": "stop",
+    "deltas": []
+  }
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Bind local preview to the Tailscale IPv4 (and keep loopback for Vite→Worker proxy).
- * Usage: node scripts/dev-bind.mjs worker|frontend
+ * Usage: node scripts/dev-bind.mjs worker|web
  */
 import { execSync, spawn } from "node:child_process";
 import { dirname, join } from "node:path";
@@ -44,14 +44,14 @@ if (which === "worker") {
     { cwd: ROOT, stdio: "inherit", env: process.env },
   );
   child.on("exit", (code) => process.exit(code ?? 1));
-} else if (which === "frontend") {
+} else if (which === "web") {
   const child = spawn(
     "npm",
-    ["run", "dev", "--prefix", "frontend", "--", "--host", ts, "--port", "5173", "--strictPort"],
+    ["run", "dev", "--prefix", "web", "--", "--host", ts, "--port", "5173", "--strictPort"],
     { cwd: ROOT, stdio: "inherit", env: { ...process.env, KITH_DEV_HOST: ts } },
   );
   child.on("exit", (code) => process.exit(code ?? 1));
 } else {
-  process.stderr.write("usage: node scripts/dev-bind.mjs worker|frontend\n");
+  process.stderr.write("usage: node scripts/dev-bind.mjs worker|web\n");
   process.exit(1);
 }

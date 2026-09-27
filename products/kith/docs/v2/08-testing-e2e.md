@@ -48,7 +48,7 @@ products/kith/e2e/
 
 - 後端：`wrangler dev --local --persist-to <run_dir>/state`，每次執行一個全新目錄，執行 migration 與 seed。port 與 inspector port 每次取空閒 port，所以巢狀或並行的執行不會互撞。
 - 隔離：wrangler 一律帶 `--env-file <run_dir>/state/wrangler.env`，因此**不**讀開發者的 `.dev.vars`（FM-E2E-05）；並設 `CLOUDFLARE_CF_FETCH_ENABLED=false`、`WRANGLER_SEND_METRICS=false`，不對外連線。flag 以 `--var` 傳入，不改 `wrangler.toml`（值見 [W0](milestones/W0.md) §2.3）。
-- 前端：`web/` 以 `vite build` 產出後由 wrangler `--assets web/dist` 提供（與 production 相同路徑；`--assets` 覆蓋 `wrangler.toml` 的 `./frontend/dist`，W7 前兩者並存）。開發期可改用 `vite dev` 代理（`E2E_WEB=dev`）。
+- 前端：`web/` 以 `vite build` 產出，wrangler 以 `wrangler.toml` 的 `./web/dist`（harness 另以 `--assets` 指向同一目錄）提供。開發期可改用 `vite dev` 代理（`E2E_WEB=dev`）。
 - LLM：`fake-provider` 在 `127.0.0.1:<port>` 提供各格式端點；後端以 `KITH_DEV_ALLOW_HTTP_PROVIDERS=on` 允許。它可依 prompt 中的指令字串回傳固定文字、延遲、串流分段、特定錯誤碼（對應 FM-LLM-xx）。
 - runner：`kith-runner` 以真實程式執行，adapter 設為 `command` 並指向 `fake-cli`。
 - 沒有任何真實 API key、真實 CLI 登入、外部網路。

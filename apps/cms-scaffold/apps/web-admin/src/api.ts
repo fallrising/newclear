@@ -1,6 +1,3 @@
-import { createClient } from "@cms/api";
+import { createCmsClient } from "@cms/api";
 
-export const api = createClient({
-  base: import.meta.env.VITE_API_BASE || "http://localhost:8080",
-  surface: "admin",
-});
+export const api = createCmsClient({ baseUrl: import.meta.env.VITE_API_BASE || "http://localhost:8080" });

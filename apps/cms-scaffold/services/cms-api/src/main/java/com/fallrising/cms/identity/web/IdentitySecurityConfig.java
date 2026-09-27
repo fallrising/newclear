@@ -2,7 +2,7 @@ package com.fallrising.cms.identity.web;
 
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.IdentityProperties;
-import com.fallrising.cms.identity.domain.AuthErrorCode;
+import com.fallrising.cms.api.error.ErrorCode;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,8 +47,7 @@ public class IdentitySecurityConfig {
                                 errorWriter.write(
                                         request,
                                         response,
-                                        AuthErrorCode.FORBIDDEN,
-                                        403,
+                                        ErrorCode.FORBIDDEN,
                                         "Forbidden")))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health", "/openapi.yaml")
                         .permitAll()

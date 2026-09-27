@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev-bind.mjs worker",
-    "dev:frontend": "node scripts/dev-bind.mjs frontend",
+    "dev:web": "node scripts/dev-bind.mjs web",
     "dev:sidecar": "node scripts/run-sidecar-local.mjs",
     "check:live": "node scripts/check-live-prereqs.mjs",
     "db:migrate:local": "wrangler d1 migrations apply kith --local",
@@ -22,6 +22,7 @@
     "test:m6": "vitest run --config vitest.m6.config.ts --maxWorkers=1 --no-isolate",
     "test:m7": "vitest run --config vitest.m7.config.ts --maxWorkers=1 --no-isolate",
     "lint": "tsc --noEmit",
+    "runner": "node runner/main.ts",
     "e2e": "npm --prefix e2e run test --",
     "e2e:all": "KITH_E2E_SCOPE=full npm --prefix e2e run test --",
     "e2e:open": "npm --prefix e2e run open --",

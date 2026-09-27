@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
-import { apiFetch } from "./client";
-import type { RoomMember, RoomMembersResponse, RoomSummary, RoomsResponse } from "./types";
+import { ApiError, apiFetch } from "./client";
+import type { AttentionUpdate, MessagesPage, RoomMember, RoomMembersResponse, RoomSummary, RoomsResponse, ServerMessage } from "./types";
 
 export const roomsQueryKey = ["rooms"] as const;
 export const allRoomsQueryKey = ["rooms", "all"] as const;
@@ -68,10 +68,72 @@ export function useInviteMember(): UseMutationResult<
   });
 }
 
+export function useRemoveMember(): UseMutationResult<{ ok: true }, Error, { roomId: string; memberId: string }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) =>
+      apiFetch<{ ok: true }>(
+        "/api/rooms/" + encodeURIComponent(input.roomId) + "/members/" + encodeURIComponent(input.memberId),
+        { method: "DELETE" },
+      ),
+    onSuccess: (_data, input) => {
+      void queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(input.roomId) });
+    },
+  });
+}
+
+export function useUpdateAttention(): UseMutationResult<
+  { ok: true },
+  Error,
+  { roomId: string; memberId: string; update: AttentionUpdate }
+> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) =>
+      apiFetch<{ ok: true }>(
+        "/api/rooms/" + encodeURIComponent(input.roomId) + "/members/" + encodeURIComponent(input.memberId) + "/attention",
+        { method: "PATCH", body: input.update },
+      ),
+    onSuccess: (_data, input) => {
+      void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(input.roomId) });
+    },
+  });
+}
+
+/** Deep link or a root older than the timeline window. Later replies arrive through RoomSync. */
+export function useThread(roomId: string, rootId: string, enabled = true): UseQueryResult<ServerMessage[], Error> {
+  return useQuery({
+    queryKey: ["rooms", roomId, "thread", rootId],
+    enabled,
+    queryFn: async ({ signal }) => {
+      const page = await apiFetch<MessagesPage>(
+        `/api/rooms/${encodeURIComponent(roomId)}/messages?thread_id=${encodeURIComponent(rootId)}&kind=message,trace&order=asc&limit=50`,
+        { signal },
+      );
+      return page.messages;
+    },
+  });
+}
+
+/** Full trace text. 404 (not a trace, or no full text stored) is null. */
+export async function fetchTraceFull(roomId: string, messageId: string): Promise<string | null> {
+  try {
+    const res = await apiFetch<{ message_id: string; body: string }>(
+      "/api/rooms/" + encodeURIComponent(roomId) + "/traces/" + encodeURIComponent(messageId),
+    );
+    return res.body;
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null;
+    throw e;
+  }
+}
+
 export function useRoomMembers(roomId: string): UseQueryResult<RoomMember[], Error> {
   return useQuery({
     queryKey: roomMembersQueryKey(roomId),
     queryFn: async ({ signal }) =>
       (await apiFetch<RoomMembersResponse>(`/api/rooms/${encodeURIComponent(roomId)}/members`, { signal })).members,
+    refetchInterval: 4_000,
   });
 }

@@ -1,5 +1,9 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { roomMembersQueryKey } from "../../api/rooms";
+import { useDraftStore } from "../../store/drafts";
+import { useNow, useStatusStore } from "../../store/statuses";
 import type { RoomMember, RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
 import type { RoomTimeline } from "../../sync/types";
@@ -9,6 +13,8 @@ import { DateDivider } from "./DateDivider";
 import { NewDivider } from "./NewDivider";
 import { JumpToLatest } from "./JumpToLatest";
 import { MessageRow } from "./MessageRow";
+import { ReplyFailed } from "./ReplyFailed";
+import { ReplyPlaceholder } from "./ReplyPlaceholder";
 import { SyncNotice } from "./SyncNotice";
 import { TimelineTop } from "./TimelineTop";
 
@@ -17,6 +23,8 @@ type Props = {
   timeline: RoomTimeline;
   members: RoomMember[] | undefined;
   meId: string;
+  meHandle: string;
+  isOperator: boolean;
   onLoadOlder(): void;
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
@@ -29,10 +37,21 @@ const LOAD_OLDER_PX = 200;
 
 export function Timeline(props: Props): ReactElement {
   const t = useT();
+  const queryClient = useQueryClient();
   const { timeline, meId } = props;
+  const statuses = useStatusStore((s) => s.rooms[props.room.id]);
+  const drafts = useDraftStore((s) => s.byRoom[props.room.id]);
+  const missingReplyMember = [...Object.keys(statuses?.replies ?? {}), ...Object.keys(drafts ?? {})].some(
+    (id) => !props.members?.some((member) => member.id === id),
+  );
+  useEffect(() => {
+    if (!missingReplyMember) return;
+    void queryClient.invalidateQueries({ queryKey: roomMembersQueryKey(props.room.id) });
+  }, [missingReplyMember, props.room.id, queryClient]);
+  const now = useNow(1000);
   const items = useMemo(
-    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq),
-    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq],
+    () => buildItems(timeline, meId, localTimeZone(), props.dividerAfterSeq, statuses, now, props.members, drafts),
+    [timeline.seqs, timeline.rows, timeline.pending, meId, props.dividerAfterSeq, statuses, now, props.members, drafts],
   );
   const hasMessages = items.some((i) => i.kind === "message");
 
@@ -134,6 +153,26 @@ export function Timeline(props: Props): ReactElement {
     }
   }, [lastKey]);
 
+  const draftLength = Object.values(drafts ?? {}).reduce((n, draft) => n + draft.text.length, 0);
+  const prevDraftLength = useRef(draftLength);
+  useEffect(() => {
+    const prev = prevDraftLength.current;
+    prevDraftLength.current = draftLength;
+    if (prev === draftLength || !atBottomRef.current) return;
+    const id = requestAnimationFrame(() => {
+      if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [draftLength, items.length, virtualizer]);
+
+  useEffect(() => {
+    const onLatest = (): void => {
+      if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
+    };
+    window.addEventListener("kith:scroll-latest", onLatest);
+    return () => window.removeEventListener("kith:scroll-latest", onLatest);
+  }, [items.length, virtualizer]);
+
   const renderItem = (item: TimelineItem): ReactElement => {
     switch (item.kind) {
       case "top":
@@ -150,14 +189,41 @@ export function Timeline(props: Props): ReactElement {
             sender={sender}
             senderId={item.row.sender_id}
             isMe={item.row.sender_id === meId}
+            mentionHandles={props.members?.map((member) => member.handle) ?? []}
+            meHandle={props.meHandle}
+            isOperator={props.isOperator}
             onRetry={props.onRetry}
             onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
+            roomId={props.room.id}
           />
         );
       }
       case "pending": {
         const sender = props.members?.find((m) => m.id === meId);
-        return <MessageRow item={item} sender={sender} senderId={meId} isMe onRetry={props.onRetry} onDiscard={props.onDiscard} />;
+        return (
+          <MessageRow
+            item={item}
+            sender={sender}
+            senderId={meId}
+            isMe
+            mentionHandles={props.members?.map((member) => member.handle) ?? []}
+            meHandle={props.meHandle}
+            isOperator={props.isOperator}
+            onRetry={props.onRetry}
+            onDiscard={props.onDiscard}
+            roomSlug={props.room.slug}
+            roomId={props.room.id}
+          />
+        );
+      }
+      case "reply": {
+        const member = props.members?.find((m) => m.id === item.memberId);
+        return member ? <ReplyPlaceholder member={member} draft={item.draft} phase={item.phase} /> : <span />;
+      }
+      case "failed": {
+        const member = props.members?.find((m) => m.id === item.memberId);
+        return member ? <ReplyFailed member={member} errorClass={item.errorClass} blocked={item.blocked} /> : <span />;
       }
     }
   };

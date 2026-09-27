@@ -1,14 +1,15 @@
-import { useState, type ReactElement } from "react";
+import { useState, type ReactElement, type ReactNode } from "react";
 import { useAllRooms, useUpdateRoom } from "../../api/rooms";
 import type { RoomSummary } from "../../api/types";
 import { useT } from "../../copy";
 import { Badge } from "../../ui/Badge";
 import { Button } from "../../ui/Button";
 import { ArchiveRoomDialog } from "./ArchiveRoomDialog";
-import { InviteDialog } from "./InviteDialog";
 import { RenameRoomDialog } from "./RenameRoomDialog";
 
-export function RoomsAdminPage(): ReactElement {
+export function RoomsAdminPage(props: {
+  renderInvite: (props: { room: RoomSummary | null; onOpenChange: (open: boolean) => void }) => ReactNode;
+}): ReactElement {
   const t = useT();
   const rooms = useAllRooms();
   const update = useUpdateRoom();
@@ -59,7 +60,7 @@ export function RoomsAdminPage(): ReactElement {
       )}
       <RenameRoomDialog room={rename} onOpenChange={(open) => { if (!open) setRename(null); }} />
       <ArchiveRoomDialog room={archive} onOpenChange={(open) => { if (!open) setArchive(null); }} />
-      <InviteDialog room={invite} onOpenChange={(open) => { if (!open) setInvite(null); }} />
+      {props.renderInvite({ room: invite, onOpenChange: (open) => { if (!open) setInvite(null); } })}
     </div>
   );
 }

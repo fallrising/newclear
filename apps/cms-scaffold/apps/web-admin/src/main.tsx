@@ -1,13 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "@cms/ui/styles.css";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
+async function start() {
+  // `vite --mode mock` only. In a production build MODE is "production", so this branch and the
+  // @cms/mocks import are removed (checked by `npm run test:bundle`).
+  if (import.meta.env.MODE === "mock") {
+    const { startMockWorker } = await import("@cms/mocks/browser");
+    await startMockWorker("admin");
+  }
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
       <App />
-    </BrowserRouter>
-  </StrictMode>,
-);
+    </StrictMode>,
+  );
+}
+
+void start();

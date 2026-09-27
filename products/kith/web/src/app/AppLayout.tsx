@@ -6,6 +6,9 @@ import { useT } from "../copy";
 import { CreateRoomDialog, RoomList } from "../features/rooms";
 import { IconButton } from "../ui/IconButton";
 import { Wordmark } from "../ui/Wordmark";
+import { QuickSwitcher } from "./QuickSwitcher";
+import { ShortcutsDialog } from "./ShortcutsDialog";
+import { useShortcuts } from "./useShortcuts";
 import { UserMenu } from "./UserMenu";
 
 export const CreateRoomContext = createContext<() => void>(() => {});
@@ -14,6 +17,7 @@ export const CreateRoomContext = createContext<() => void>(() => {});
 export function AppLayout(props: { me: Me; mobile: "list" | "content"; children: ReactNode }): ReactElement {
   const t = useT();
   const [createOpen, setCreateOpen] = useState(false);
+  const shortcuts = useShortcuts();
   return (
     <CreateRoomContext.Provider value={() => setCreateOpen(true)}>
       <div data-testid="app-shell" className="h-dvh flex bg-bg text-ink font-sans">
@@ -52,6 +56,8 @@ export function AppLayout(props: { me: Me; mobile: "list" | "content"; children:
         </main>
       </div>
       <CreateRoomDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <QuickSwitcher open={shortcuts.switcherOpen} onOpenChange={shortcuts.setSwitcherOpen} />
+      <ShortcutsDialog open={shortcuts.helpOpen} onOpenChange={shortcuts.setHelpOpen} />
     </CreateRoomContext.Provider>
   );
 }

@@ -14,6 +14,7 @@ import uuid
 
 from labctl import Operator, PROJECT, code_inputs, consistency_issues, identifier, membership, now, read
 from labops import ClusterLock, atomic_json, digest
+from core_release import classify_transition, runtime_release, validation_record
 
 ALIAS = 'ckc-disposable-01'
 PROTECTED_UNITS = ['eru-etcd', 'docker', 'containerd', 'ssh', 'tailscaled', 'eru-mvp-firewall']
@@ -43,14 +44,14 @@ def readiness(report, at=None):
             'summary': summary}
 
 
-def artifact(project, name):
+DEFAULT_VALIDATION = 'patches/core-v0.1.5-lock-context.validation.json'
+
+
+def artifact(project, name, validation_file=DEFAULT_VALIDATION):
     path = (project / name).resolve()
     if not path.is_relative_to((project / 'private/builds').resolve()):
         raise ValueError('artifact must be in the private build directory')
-    verified = read(project / 'patches/core-v0.1.5-lock-context.validation.json')
-    patch = project / 'patches/core-v0.1.5-lock-context.patch'
-    if hashlib.sha256(patch.read_bytes()).hexdigest() != verified['patch_sha256']:
-        raise ValueError('patch has changed since validation')
+    verified = validation_record(project, validation_file)
     data = path.read_bytes()
     if not data.startswith(b'\x7fELF') or hashlib.sha256(data).hexdigest() != verified['artifact_sha256']:
         raise ValueError('binary is not the independently validated core artifact')
@@ -91,31 +92,51 @@ print(json.dumps(r))
             raise ValueError('core is not active')
         return result
 
-    def make_plan(self, build, health_file, rollback_run=None):
+    def make_plan(self, build, health_file, rollback_run=None, validation_file=DEFAULT_VALIDATION):
         snapshot = self.snapshot()
         issues = consistency_issues(snapshot, self.inventory)
         if snapshot['workloads']:
-            issues.append('first core patch trial requires no live ERU workloads')
+            issues.append('core patch trial requires no live ERU workloads')
         if self.health()['exit_code']:
             issues.append('etcd health failed')
         gate = readiness(read(self.project / health_file))
         issues += gate['blockers']
         machine = snapshot['hosts'][ALIAS]['machine_id']
         footprint = self.remote({'action': 'inspect', 'machine_id': machine})
+        current_runtime = self.core_runtime()
+        revision_path = self.root / 'core-revision.json'
+        revision_record = read(revision_path) if revision_path.exists() else None
+        current_release = runtime_release(self.project, current_runtime['sha256'], revision_record)
+        rollback_release = None
         if rollback_run:
             source = read(self.root / 'plans' / (identifier(rollback_run) + '.json'))['plan']
             if source['operation'] != 'core-patch' or source['snapshot']['hosts'][ALIAS]['machine_id'] != machine:
                 raise ValueError('rollback must reference a core patch on this same host')
             checksum = source['footprint']['binary']['sha256']
+            rollback_release = source.get('current_release')
+            release = None
+            version_transition = {'kind': 'explicit-source-run-rollback',
+                                  'from_version': current_release['target_version'] if current_release else None,
+                                  'to_version': rollback_release['target_version'] if rollback_release else None,
+                                  'cross_version': False}
         else:
-            _, checksum = artifact(self.project, build)
+            release = validation_record(self.project, validation_file)
+            _, checksum = artifact(self.project, build, validation_file)
+            baseline = read(self.project / 'upstream.lock.json')['core']['tag']
+            try:
+                version_transition = classify_transition(current_release, release, baseline)
+            except ValueError as exc:
+                issues.append(str(exc))
+                version_transition = {'kind': 'blocked', 'reason': str(exc), 'cross_version': False}
         plan = {'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
                 'operation': 'core-rollback' if rollback_run else 'core-patch', 'created_at': now(),
-                'artifact': build, 'sha256': checksum, 'rollback_run': rollback_run,
+                'artifact': build, 'validation_file': validation_file if release else None,
+                'release': release, 'current_release': current_release, 'rollback_release': rollback_release,
+                'version_transition': version_transition, 'sha256': checksum, 'rollback_run': rollback_run,
                 'health_file': health_file, 'health_sha256': digest(read(self.project / health_file)),
                 'readiness': gate, 'snapshot': snapshot, 'footprint': footprint,
                 'bindings': {'inputs': code_inputs(self.project), 'inventory': self.inventory, 'cluster': self.cluster()},
-                'protected_services': self.protected_services(), 'core_runtime': self.core_runtime(),
+                'protected_services': self.protected_services(), 'core_runtime': current_runtime,
                 'mutation_hosts': [ALIAS], 'steps': ['Verify fresh health, empty workloads and hashes',
                     'Back up the owned core binary and manifest; atomically replace only that binary',
                     'Restart only eru-core; verify running binary, API and preserved services'],
@@ -149,7 +170,8 @@ print(json.dumps(r))
                 raise ValueError('cluster is unhealthy or has live workloads')
             if before['hosts'] != plan['snapshot']['hosts'] or membership(before) != membership(plan['snapshot']):
                 raise ValueError('host/runtime/membership drift')
-            if self.protected_services() != plan['protected_services'] or self.core_runtime() != plan['core_runtime']:
+            current_runtime = self.core_runtime()
+            if self.protected_services() != plan['protected_services'] or current_runtime != plan['core_runtime']:
                 raise ValueError('service identity changed')
             config = {'action': 'inspect', 'machine_id': before['hosts'][ALIAS]['machine_id']}
             if self.remote(config) != plan['footprint']:
@@ -158,9 +180,19 @@ print(json.dumps(r))
             if plan['rollback_run']:
                 config.update(action='rollback', source_run=plan['rollback_run'])
             else:
-                data, verified = artifact(self.project, plan['artifact'])
+                verified_release = validation_record(self.project, plan['validation_file'])
+                if verified_release != plan['release']:
+                    raise ValueError('patch validation provenance changed')
+                data, verified = artifact(self.project, plan['artifact'], plan['validation_file'])
                 if verified != plan['sha256']:
                     raise ValueError('artifact changed')
+                revision_path = self.root / 'core-revision.json'
+                revision_record = read(revision_path) if revision_path.exists() else None
+                live_release = runtime_release(self.project, current_runtime['sha256'], revision_record)
+                baseline = read(self.project / 'upstream.lock.json')['core']['tag']
+                live_transition = classify_transition(live_release, verified_release, baseline)
+                if live_release != plan['current_release'] or live_transition != plan['version_transition']:
+                    raise ValueError('installed core release transition changed')
                 config.update(action='install', expected=plan['footprint'], sha256=verified,
                               payload=base64.b64encode(gzip.compress(data, mtime=0)).decode(), payload_encoding='gzip-base64')
             self.stage('replacing-core-binary')
@@ -192,8 +224,13 @@ print(json.dumps(r))
             if self.protected_services() != plan['protected_services']:
                 raise ValueError('protected service state changed')
             self.journal.update(after=after, core_runtime=runtime, status='complete', finished_at=now())
-            atomic_json(self.root / 'core-revision.json', {'operation': plan['operation'], 'run': plan_id,
-                        'artifact_sha256': plan['sha256'], 'core_runtime': runtime})
+            revision = {'operation': plan['operation'], 'run': plan_id,
+                        'artifact_sha256': plan['sha256'], 'core_runtime': runtime}
+            if plan['operation'] == 'core-patch':
+                revision['release'] = plan['release']
+            elif plan.get('rollback_release'):
+                revision['release'] = plan['rollback_release']
+            atomic_json(self.root / 'core-revision.json', revision)
             self.stage('complete')
         except BaseException as exc:
             self.journal.update(status='failed', failed_at=self.journal['stage'], error=str(exc), finished_at=now())
@@ -209,6 +246,7 @@ def main():
     plan.add_argument('--artifact')
     plan.add_argument('--rollback-run')
     plan.add_argument('--health', required=True)
+    plan.add_argument('--validation', default=DEFAULT_VALIDATION)
     execute = sub.add_parser('execute')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -218,8 +256,8 @@ def main():
         if args.command == 'plan':
             if bool(args.artifact) == bool(args.rollback_run):
                 parser.error('provide exactly one of --artifact or --rollback-run')
-            result = op.make_plan(args.artifact, args.health, args.rollback_run)
-            print(json.dumps({k: result['plan'][k] for k in ['id', 'operation', 'mutation_hosts', 'steps', 'executable', 'blockers']}, indent=2))
+            result = op.make_plan(args.artifact, args.health, args.rollback_run, args.validation)
+            print(json.dumps({k: result['plan'][k] for k in ['id', 'operation', 'mutation_hosts', 'steps', 'version_transition', 'executable', 'blockers']}, indent=2))
             print('Plan SHA256:', result['sha256'])
         else:
             result = op.apply_plan(args.plan, args.sha256)

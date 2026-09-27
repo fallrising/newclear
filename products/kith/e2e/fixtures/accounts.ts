@@ -12,6 +12,9 @@ export const ACCOUNTS = {
 /** 非機密的 canary：只用來證明遮罩有效。不是任何真實 key。 */
 export const CANARY = "kith-e2e-canary-3f9c";
 
+/** V2-INV-01 canary. Never add to knownSecrets(): it must stay visible to the R08 scan (§5.1.3). */
+export const PROVIDER_CANARY = "sk-kith-e2e-provider-canary-5b7e";
+
 export function canaryBotToken(): string {
   return "kith_bot_" + createHash("sha256").update(CANARY).digest("hex");
 }

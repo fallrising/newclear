@@ -129,26 +129,40 @@ class Operator:
         self.project = project
         self.root = project / 'private/operations'
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.trusted_hostkeys_dir = Path.home() / '.ssh/hzd-vps/known_hosts'
         self.inventory = load_inventory(project)
         self.core = self.inventory[0]
         self.events = []
         self.journal_path = None
         self.journal = None
 
-    def command(self, host, argv, stdin=None, check=True, timeout=90):
+    def command(self, host, argv, stdin=None, check=True, timeout=90,
+                ssh_options=None, record_output=True):
         print(f'[{host}] {shlex.join(argv)}', flush=True)
         event = {'at': now(), 'host': host, 'argv': argv, 'status': 'started'}
+        if ssh_options:
+            event['ssh_options'] = list(ssh_options)
         self.events.append(event)
         self.save_journal()
+        ssh_argv = ['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+            '-o', 'PermitLocalCommand=no', '-o', 'ConnectTimeout=10']
+        if ssh_options:
+            for option in ssh_options:
+                if not isinstance(option, str) or not option:
+                    raise ValueError('SSH options must be non-empty argument strings')
+                ssh_argv += ['-o', option]
+        ssh_argv += [host, shlex.join(argv)]
         try:
-            p = subprocess.run(['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
-                '-o', 'PermitLocalCommand=no', '-o', 'ConnectTimeout=10', host, shlex.join(argv)],
-                input=stdin, capture_output=True, text=True, timeout=timeout, pass_fds=lock_fds())
+            p = subprocess.run(ssh_argv, input=stdin, capture_output=True, text=True,
+                               timeout=timeout, pass_fds=lock_fds())
         except BaseException as exc:
             event.update(status='uncertain', error=type(exc).__name__)
             self.save_journal()
             raise
-        event.update(status='complete', exit_code=p.returncode, stdout=p.stdout, stderr=p.stderr)
+        event.update(status='complete', exit_code=p.returncode,
+                     stdout=p.stdout if record_output else None, stderr=p.stderr)
+        if not record_output:
+            event['stdout_sha256'] = hashlib.sha256(p.stdout.encode()).hexdigest()
         self.save_journal()
         if check and p.returncode:
             raise RuntimeError(f'{host}: exit {p.returncode}: {p.stderr or p.stdout}')
@@ -223,7 +237,7 @@ class Operator:
         self.journal.setdefault('history', []).append({'at': now(), 'stage': stage})
         self.save_journal()
 
-    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None, guard_exclude=None):
+    def plan(self, operation, node=None, smoke_run=None, rebuild_mode=None, health_file=None, canary_run=None, core_artifact=None, fault_after=None, guard_exclude=None, reimage_intent=None):
         if fault_after and (operation != 'rebuild-node' or node != 'worker-4' or rebuild_mode not in [None, 'component-reinstall']):
             raise ValueError('--fault-after is only for a bounded worker-4 component recovery drill')
         if fault_after not in [None, 'quarantine', 'start']:
@@ -240,6 +254,8 @@ class Operator:
             raise ValueError('--exclude-node applies only to canary-start')
         if rebuild_mode and operation != 'rebuild-node':
             raise ValueError('--mode applies only to rebuild-node')
+        if reimage_intent is not None and not (operation == 'rebuild-node' and rebuild_mode == 'provider-reimage'):
+            raise ValueError('--reimage-intent applies only to provider-reimage rebuild-node plans')
         if rebuild_mode not in [None, 'component-reinstall', 'provider-reimage']:
             raise ValueError('unsupported rebuild mode')
         if operation == 'rebuild-node' and node not in ['worker-2', 'worker-3', 'worker-4']:
@@ -335,17 +351,64 @@ class Operator:
                     'Record a new worker component revision; preserve cluster generation and OS identity',
                 ]
             else:
-                plan['blockers'] += [
-                    'Manual provider-console reimage requires confirmed machine identity, OS image and disk/volume erase scope',
-                    'Trusted new host keys and OneVPS/Tailscale bootstrap procedure required',
-                    'Drain/re-registration/resume adapter is not implemented; provider API is optional',
-                ]
+                if not reimage_intent:
+                    plan['blockers'].append(
+                        'Manual provider-console reimage requires --reimage-intent under private/reimage-intents/')
+                else:
+                    try:
+                        from reimage_review import load_intent
+                        intent = load_intent(self.project, reimage_intent, node=node, alias=host['alias'],
+                                             machine_id=snap['hosts'][host['alias']]['machine_id'])
+                        plan['provider_reimage_intent'] = intent['intent']
+                        plan['bindings']['provider_reimage_intent'] = {
+                            'path': intent['path'], 'sha256': intent['sha256']}
+                    except (OSError, ValueError, KeyError) as exc:
+                        plan['blockers'].append('invalid manual reimage intent: ' + str(exc))
+                if plan['targets']:
+                    plan['blockers'].append(
+                        'ERU workloads must be migrated and verified before provider-console reimage')
                 if snap['hosts'][host['alias']]['docker']:
                     plan['blockers'].append('Docker workloads exist on target; separate ownership/migration review required')
+                target_node = next(n for n in snap['nodes'] if n['name'] == node)
+                target_facts = snap['hosts'][host['alias']]
+                if target_node.get('bypass'):
+                    plan['blockers'].append('Target is already fenced; reconcile its existing operation before planning reimage')
+                task_rows = [line for line in target_facts.get('tasks', '').splitlines()
+                             if line.strip() and not line.upper().startswith('TASK ')]
+                if target_facts.get('containers', '').strip() or task_rows:
+                    plan['blockers'].append('Selected worker ERU runtime must be empty before preparation')
+                try:
+                    usage = json.loads(target_node['resource_usage'])
+                    def nonzero(value):
+                        if isinstance(value, dict):
+                            return any(nonzero(child) for child in value.values())
+                        if isinstance(value, list):
+                            return any(nonzero(child) for child in value)
+                        return isinstance(value, (int, float)) and value != 0
+                    if nonzero(usage):
+                        plan['blockers'].append('Selected worker must have zero ERU resource usage before preparation')
+                except (TypeError, json.JSONDecodeError, KeyError):
+                    plan['blockers'].append('Selected worker resource usage is unreadable')
+                prep_blockers = list(plan['blockers'])
+                plan['reimage_preparation'] = {
+                    'executable': not prep_blockers,
+                    'blockers': prep_blockers,
+                    'steps': [
+                        'Revalidate the exact plan, intent, healthy core, empty worker and unchanged cluster state',
+                        'Fence the selected worker and confirm Bypass on the core',
+                        'Stop only the selected worker eru-agent and verify SSH/Tailscale/Docker/containerd remain active',
+                        'Remove the exact ERU node registration and verify it is absent',
+                        'Stop at an owner-operated provider console boundary; do not reimage via API',
+                    ],
+                }
+                plan['blockers'] += [
+                    'Owner console reimage, receipt and replacement-host verification are separate manual stages',
+                    'Generation commit and recovery executor are not implemented',
+                ]
                 plan['steps'] = [f'Quiesce {node}; enumerate and relocate owned workloads',
                     'Verify empty node/runtime; stop target agent; remove exact node registration',
-                    'Pause for operator to reimage reviewed host/disks in provider console; record completion evidence',
-                    'Verify new identity/host keys; rebuild SSH/Tailscale/runtime',
+                    'Pause for the owner to reimage only the bound provider resource and enumerated volumes in the console',
+                    'Verify new machine/boot identity and out-of-band trusted host key; rebuild SSH/Tailscale/runtime',
                     'Install worker only; register original name/capacity; start agent',
                     'Verify target nginx and continuous HTTP on other workers; record new host incarnation']
         if fault_after:
@@ -356,6 +419,160 @@ class Operator:
         atomic_json(self.root / 'plans' / (plan['id'] + '.json'), envelope)
         atomic_json(self.root / 'observations' / (plan['id'] + '.json'), self.events)
         return envelope
+
+    def prepare_reimage(self, plan_id, expected_hash):
+        from reimage_prepare import prepare_reimage
+        return prepare_reimage(self, plan_id, expected_hash)
+
+    def plan_reimage_worker(self, source_plan_id, expected_hash):
+        from reimage_worker_plan import plan_reimage_worker
+        return plan_reimage_worker(self, source_plan_id, expected_hash)
+
+    def install_reimage_worker(self, bootstrap_plan_id, expected_hash):
+        from reimage_worker_install import install_reimage_worker
+        return install_reimage_worker(self, bootstrap_plan_id, expected_hash)
+
+    def register_reimage_worker(self, bootstrap_plan_id, expected_hash):
+        from reimage_worker_registration import register_reimage_worker
+        return register_reimage_worker(self, bootstrap_plan_id, expected_hash)
+
+    def plan_reimage_worker_access(self, bootstrap_plan_id, bootstrap_hash):
+        from reimage_worker_access import plan_reimage_worker_access
+        return plan_reimage_worker_access(self, bootstrap_plan_id, bootstrap_hash)
+
+    def prepare_reimage_worker_access(self, plan_id, expected_hash):
+        from reimage_worker_access import apply_reimage_worker_access
+        return apply_reimage_worker_access(self, plan_id, expected_hash)
+
+    def plan_reimage_worker_smoke(self, bootstrap_plan_id, bootstrap_hash, canary_run):
+        from reimage_worker_smoke import plan_reimage_worker_smoke
+        return plan_reimage_worker_smoke(self, bootstrap_plan_id, bootstrap_hash, canary_run)
+
+    def smoke_reimage_worker(self, plan_id, expected_hash):
+        from reimage_worker_smoke import run_reimage_worker_smoke
+        return run_reimage_worker_smoke(self, plan_id, expected_hash)
+
+    def plan_reimage_worker_resume(self, smoke_plan_id, smoke_hash):
+        from reimage_worker_resume import plan_reimage_worker_resume
+        return plan_reimage_worker_resume(self, smoke_plan_id, smoke_hash)
+
+    def resume_reimage_worker(self, plan_id, expected_hash):
+        from reimage_worker_resume import resume_reimage_worker
+        return resume_reimage_worker(self, plan_id, expected_hash)
+
+    def plan_reimage_worker_generation(self, resume_plan_id, resume_hash):
+        from reimage_worker_generation import plan_reimage_worker_generation
+        return plan_reimage_worker_generation(self, resume_plan_id, resume_hash)
+
+    def commit_reimage_worker_generation(self, plan_id, expected_hash):
+        from reimage_worker_generation import commit_reimage_worker_generation
+        return commit_reimage_worker_generation(self, plan_id, expected_hash)
+
+    def plan_reimage_worker_recovery(self, bootstrap_plan_id, bootstrap_hash, canary_run=None):
+        from reimage_worker_recovery import plan_reimage_worker_recovery
+        return plan_reimage_worker_recovery(self, bootstrap_plan_id, bootstrap_hash, canary_run)
+
+    def recover_reimage_worker_chain(self, plan_id, expected_hash):
+        from reimage_worker_recovery import recover_reimage_worker_chain
+        return recover_reimage_worker_chain(self, plan_id, expected_hash)
+
+    def record_reimage_receipt(self, plan_id, expected_hash, receipt_file):
+        plan_id = identifier(plan_id)
+        envelope = read(self.root / 'plans' / (plan_id + '.json'))
+        plan = envelope.get('plan')
+        if (not isinstance(plan, dict) or digest(plan) != envelope.get('sha256')
+                or expected_hash != envelope.get('sha256')):
+            raise ValueError('plan hash mismatch')
+        from reimage_receipt import load_receipt, verify_local_hostkeys
+        receipt = load_receipt(self.project, receipt_file, plan=plan, plan_sha256=expected_hash)
+        from reimage_prepare import require_prepared
+        preparation = require_prepared(self, plan, expected_hash)
+        trusted_host_key_check = verify_local_hostkeys(
+            receipt['receipt']['target']['alias'], receipt['receipt']['host_key_fingerprints'],
+            self.trusted_hostkeys_dir)
+        path = self.root / 'reimage-receipts' / (plan_id + '.json')
+        if path.exists():
+            raise ValueError('reimage receipt already recorded; inspect it and do not overwrite')
+        atomic_json(path, {
+            'plan_id': plan_id,
+            'plan_sha256': expected_hash,
+            'status': 'owner-receipt-recorded',
+            'remote_mutation_performed': False,
+            'receipt_path': receipt['path'],
+            'receipt_sha256': receipt['sha256'],
+            'trusted_host_key_file_check': trusted_host_key_check,
+            'preparation': preparation,
+            'receipt': receipt['receipt'],
+            'recorded_at': now(),
+        })
+        return {'plan_id': plan_id, 'status': 'owner-receipt-recorded',
+                'remote_mutation_performed': False,
+                'path': str(path.relative_to(self.project)), 'receipt_sha256': receipt['sha256']}
+
+    def verify_reimage_host(self, plan_id, expected_hash):
+        plan_id = identifier(plan_id)
+        plan_path = self.root / 'plans' / (plan_id + '.json')
+        if plan_path.is_symlink() or not plan_path.is_file():
+            raise ValueError('provider reimage plan is missing or unsafe')
+        envelope = read(plan_path)
+        if not isinstance(envelope, dict):
+            raise ValueError('provider reimage plan envelope is malformed')
+        plan = envelope.get('plan')
+        if (not isinstance(plan, dict) or digest(plan) != envelope.get('sha256')
+                or expected_hash != envelope.get('sha256')):
+            raise ValueError('plan hash mismatch')
+        if (plan.get('operation') != 'rebuild-node' or plan.get('rebuild_mode') != 'provider-reimage'
+                or plan.get('executable') is not False):
+            raise ValueError('replacement host verification requires a review-only provider-reimage plan')
+
+        receipt_record_path = self.root / 'reimage-receipts' / (plan_id + '.json')
+        if receipt_record_path.is_symlink() or not receipt_record_path.is_file():
+            raise ValueError('owner reimage receipt record is missing or unsafe')
+        receipt_record = read(receipt_record_path)
+        if not isinstance(receipt_record, dict):
+            raise ValueError('owner reimage receipt record is malformed')
+        if (receipt_record.get('plan_id') != plan_id or receipt_record.get('plan_sha256') != expected_hash
+                or receipt_record.get('status') != 'owner-receipt-recorded'
+                or receipt_record.get('remote_mutation_performed') is not False):
+            raise ValueError('owner reimage receipt record does not match this plan')
+
+        from reimage_receipt import load_receipt, verify_local_hostkeys
+        receipt = load_receipt(self.project, receipt_record.get('receipt_path', ''),
+                               plan=plan, plan_sha256=expected_hash)
+        if (receipt['sha256'] != receipt_record.get('receipt_sha256')
+                or receipt['receipt'] != receipt_record.get('receipt')):
+            raise ValueError('owner reimage receipt changed after it was recorded')
+        from reimage_prepare import require_prepared
+        preparation = require_prepared(self, plan, expected_hash)
+        if preparation != receipt_record.get('preparation'):
+            raise ValueError('provider reimage preparation journal changed after receipt recording')
+        trusted = verify_local_hostkeys(receipt['receipt']['target']['alias'],
+                                        receipt['receipt']['host_key_fingerprints'],
+                                        self.trusted_hostkeys_dir)
+        if trusted != receipt_record.get('trusted_host_key_file_check'):
+            raise ValueError('trusted worker host-key file changed after receipt recording')
+
+        path = self.root / 'reimage-observations' / (plan_id + '.json')
+        if path.exists() or path.is_symlink():
+            raise ValueError('replacement host observation already recorded; inspect it and do not overwrite')
+        from reimage_host import inspect_replacement_host
+        expected = {**receipt['receipt']['replacement'],
+                    'host_key_fingerprints': receipt['receipt']['host_key_fingerprints']}
+        observation = inspect_replacement_host(receipt['receipt']['target']['alias'], expected,
+                                               self.trusted_hostkeys_dir)
+        atomic_json(path, {
+            'plan_id': plan_id,
+            'plan_sha256': expected_hash,
+            'status': 'replacement-host-readonly-verified',
+            'remote_mutation_performed': False,
+            'receipt_sha256': receipt['sha256'],
+            'observation_sha256': digest(observation),
+            'observation': observation,
+            'verified_at': now(),
+        })
+        return {'plan_id': plan_id, 'status': 'replacement-host-readonly-verified',
+                'remote_mutation_performed': False, 'alias': receipt['receipt']['target']['alias'],
+                'path': str(path.relative_to(self.project))}
 
     def worker_readiness(self, health_file, canary_run, snapshot, target='worker-4'):
         from core_patch import readiness, PatchOperator
@@ -495,6 +712,30 @@ class Operator:
     def reconcile(self, run_id):
         path = self.root / 'runs' / (identifier(run_id) + '.json')
         journal = read(path)
+        if journal.get('operation') == 'provider-reimage-prepare':
+            from reimage_prepare import reconcile_preparation
+            return reconcile_preparation(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-install':
+            from reimage_worker_install import reconcile_worker_install
+            return reconcile_worker_install(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-access':
+            from reimage_worker_access import reconcile_reimage_worker_access
+            return reconcile_reimage_worker_access(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-registration':
+            from reimage_worker_registration import reconcile_worker_registration
+            return reconcile_worker_registration(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-smoke':
+            from reimage_worker_smoke import reconcile_reimage_worker_smoke
+            return reconcile_reimage_worker_smoke(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-resume':
+            from reimage_worker_resume import reconcile_reimage_worker_resume
+            return reconcile_reimage_worker_resume(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-generation':
+            from reimage_worker_generation import reconcile_reimage_worker_generation
+            return reconcile_reimage_worker_generation(self, run_id, journal)
+        if journal.get('operation') == 'provider-reimage-worker-chain-recovery':
+            from reimage_worker_recovery import reconcile_reimage_worker_chain
+            return reconcile_reimage_worker_chain(self, run_id, journal)
         # Caller holds the mutation lock. No child that inherited it may still run.
         observation = {'at': now(), 'policy': 'Read-only reconciliation; no remote command replay or automatic cleanup.'}
         try:
@@ -527,6 +768,58 @@ def main():
     plan.add_argument('--core-artifact', help='Validated deployed core artifact to preserve during reapply')
     plan.add_argument('--canary-run', help='Running worker-2/3 canary evidence ID')
     plan.add_argument('--mode', choices=['component-reinstall', 'provider-reimage'], help='rebuild-node defaults to component-reinstall; provider-reimage remains review-only')
+    plan.add_argument('--reimage-intent', help='Private owner-reviewed provider resource, OS image, and exact volume scope for provider-reimage only')
+    prepare_reimage = sub.add_parser('prepare-reimage', help='Fence, stop the worker agent and remove its ERU registration before owner console reimage')
+    prepare_reimage.add_argument('--plan', required=True)
+    prepare_reimage.add_argument('--sha256', required=True)
+    bootstrap_plan = sub.add_parser('plan-reimage-worker', help='Build a private worker-only bootstrap plan from a verified replacement host')
+    bootstrap_plan.add_argument('--plan', required=True, help='Source provider-reimage plan ID')
+    bootstrap_plan.add_argument('--sha256', required=True, help='Source provider-reimage plan SHA-256')
+    install_reimage_worker = sub.add_parser('install-reimage-worker', help='Install locked worker-only ERU components while leaving the agent stopped and unregistered')
+    install_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    install_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    register_reimage_worker = sub.add_parser('register-reimage-worker', help='Register the verified worker under safe core and leave it fenced for smoke testing')
+    register_reimage_worker.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    register_reimage_worker.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    plan_worker_access = sub.add_parser('plan-reimage-worker-access', help='Plan exact core SSH trust and firewall access for the replacement worker')
+    plan_worker_access.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    plan_worker_access.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    prepare_worker_access = sub.add_parser('prepare-reimage-worker-access', help='Apply planned core SSH trust and firewall access before registration')
+    prepare_worker_access.add_argument('--plan', required=True, help='Worker access plan ID')
+    prepare_worker_access.add_argument('--sha256', required=True, help='Worker access plan SHA-256')
+    plan_worker_smoke = sub.add_parser('plan-reimage-worker-smoke', help='Plan a fenced target smoke with continuous peer HTTP guards')
+    plan_worker_smoke.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    plan_worker_smoke.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    plan_worker_smoke.add_argument('--canary-run', required=True, help='Existing run-owned nginx canary run on the other workers')
+    smoke_worker = sub.add_parser('smoke-reimage-worker', help='Run a single-worker smoke while the replacement stays fenced')
+    smoke_worker.add_argument('--plan', required=True, help='Worker smoke plan ID')
+    smoke_worker.add_argument('--sha256', required=True, help='Worker smoke plan SHA-256')
+    plan_worker_resume = sub.add_parser('plan-reimage-worker-resume', help='Plan one safe resume after a successful fenced smoke')
+    plan_worker_resume.add_argument('--plan', required=True, help='Successful worker smoke plan ID')
+    plan_worker_resume.add_argument('--sha256', required=True, help='Worker smoke plan SHA-256')
+    resume_worker = sub.add_parser('resume-reimage-worker', help='Resume a smoked worker exactly once and keep generation unchanged')
+    resume_worker.add_argument('--plan', required=True, help='Worker resume plan ID')
+    resume_worker.add_argument('--sha256', required=True, help='Worker resume plan SHA-256')
+    plan_worker_generation = sub.add_parser('plan-reimage-worker-generation', help='Plan the private inventory and generation commit after a successful worker resume')
+    plan_worker_generation.add_argument('--plan', required=True, help='Successful worker resume plan ID')
+    plan_worker_generation.add_argument('--sha256', required=True, help='Worker resume plan SHA-256')
+    commit_worker_generation = sub.add_parser('commit-reimage-worker-generation', help='Commit the verified replacement worker address and increment generation once')
+    commit_worker_generation.add_argument('--plan', required=True, help='Worker generation plan ID')
+    commit_worker_generation.add_argument('--sha256', required=True, help='Worker generation plan SHA-256')
+    plan_worker_recovery = sub.add_parser('plan-reimage-worker-recovery', help='Plan one read-only reconciliation at the first incomplete worker reimage stage')
+    plan_worker_recovery.add_argument('--plan', required=True, help='Worker bootstrap plan ID')
+    plan_worker_recovery.add_argument('--sha256', required=True, help='Worker bootstrap plan SHA-256')
+    plan_worker_recovery.add_argument('--canary-run', help='Existing run-owned peer canary run ID if the smoke plan is not created yet')
+    recover_worker_chain = sub.add_parser('recover-reimage-worker-chain', help='Run only the selected stage read-only reconciler')
+    recover_worker_chain.add_argument('--plan', required=True, help='Worker chain recovery plan ID')
+    recover_worker_chain.add_argument('--sha256', required=True, help='Worker chain recovery plan SHA-256')
+    receipt = sub.add_parser('record-reimage-receipt', help='Record owner attestation after manual console reimage; no SSH or provider API')
+    receipt.add_argument('--plan', required=True)
+    receipt.add_argument('--sha256', required=True)
+    receipt.add_argument('--receipt', required=True, help='Private owner-reviewed receipt JSON')
+    verify_reimage = sub.add_parser('verify-reimage-host', help='Read-only identity and readiness check before worker bootstrap')
+    verify_reimage.add_argument('--plan', required=True)
+    verify_reimage.add_argument('--sha256', required=True)
     execute = sub.add_parser('execute', help='Execute one reviewed plan exactly once')
     execute.add_argument('--plan', required=True)
     execute.add_argument('--sha256', required=True)
@@ -534,6 +827,26 @@ def main():
     status.add_argument('--run')
     reconcile = sub.add_parser('reconcile', help='Read actual state after failure; never replay mutations')
     reconcile.add_argument('--run', required=True)
+    drain_plan = sub.add_parser('plan-worker-drain', help='Save a private, offline ERU-009 review plan')
+    drain_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
+    drain_plan.add_argument('--input', required=True, help='Private JSON with snapshot, apps, destinations, and offline assertions')
+    drain_plan.add_argument('--plan-id')
+    drain_prepare = sub.add_parser('prepare-worker-drain', help='Read live state and save a private, hash-bound ERU-009 execution plan')
+    drain_prepare.add_argument('--plan', required=True, help='Saved offline drain review plan ID')
+    drain_prepare.add_argument('--sha256', required=True, help='Offline review plan SHA-256')
+    drain_prepare.add_argument('--apps', required=True, help='Private JSON array of exact current desired app specs')
+    drain_execute = sub.add_parser('execute-worker-drain', help='Execute one prepared ERU-009 drain exactly once')
+    drain_execute.add_argument('--plan', required=True, help='Saved live execution plan ID')
+    drain_execute.add_argument('--sha256', required=True, help='Live execution plan SHA-256')
+    drain_execute.add_argument('--apps', required=True, help='Private JSON array of exact current desired app specs')
+    drain_recover = sub.add_parser('recover-worker-drain', help='Read-only ERU-009 reconciliation after any uncertain result')
+    drain_recover.add_argument('--run', required=True, help='Worker drain run ID; never replays the saved plan')
+    drain_cleanup_plan = sub.add_parser('plan-worker-drain-cleanup', help='Reconcile read-only, then plan one fresh exact-ID cleanup for remaining source workloads')
+    drain_cleanup_plan.add_argument('--run', required=True, help='Worker drain run ID')
+    drain_cleanup_execute = sub.add_parser('execute-worker-drain-cleanup', help='Execute one fresh ERU-012 exact-ID cleanup plan after recovery review')
+    drain_cleanup_execute.add_argument('--plan', required=True, help='Saved worker-drain recovery cleanup plan ID')
+    drain_cleanup_execute.add_argument('--sha256', required=True, help='Recovery cleanup plan SHA-256')
+    drain_cleanup_execute.add_argument('--cleanup-sha256', required=True, help='Nested ERU-012 exact cleanup plan SHA-256')
     args = parser.parse_args()
     os.umask(0o077)
     if args.command == 'status':
@@ -545,20 +858,256 @@ def main():
             print(json.dumps([{k: read(f).get(k) for k in ['id', 'operation', 'status', 'stage', 'failed_at']}
                               for f in sorted(root.glob('*.json'))], indent=2))
         return
+    if args.command == 'plan-worker-drain':
+        from worker_drain_ops import save_review_plan
+        with ClusterLock(PROJECT):
+            plan, path = save_review_plan(PROJECT, args.target, args.input, args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'blockers': plan['blockers'], 'sha256': plan['plan_sha256'],
+            'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'prepare-worker-drain':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import prepare_execution_plan
+        with ClusterLock(PROJECT):
+            api = EruCLIAdapter(Operator())
+            plan, path = prepare_execution_plan(
+                PROJECT, args.plan, args.sha256, args.apps, api)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'target': plan['target'], 'sha256': plan['plan_sha256'],
+            'path': str(path),
+        }, indent=2))
+        return
+    if args.command in ('execute-worker-drain', 'recover-worker-drain'):
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import execute_saved_plan, recover_run
+        if args.command == 'execute-worker-drain':
+            result = execute_saved_plan(
+                PROJECT, args.plan, args.sha256, args.apps,
+                lambda: EruCLIAdapter(Operator()))
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target',
+                'component_reinstall_allowed', 'empty_target_audit', 'next_step']}, indent=2))
+        else:
+            result = recover_run(
+                PROJECT, args.run, lambda: EruCLIAdapter(Operator()))
+            observation = result.get('reconciliation', {})
+            apps = []
+            for row in observation.get('apps', []):
+                states = {}
+                for source in row.get('sources', []):
+                    state = source.get('state', 'unknown')
+                    states[state] = states.get(state, 0) + 1
+                apps.append({
+                    'logical_app': row.get('logical_app'),
+                    'replacement': row.get('replacement', {}).get('state', 'unknown'),
+                    'sources': states,
+                    'staged_child_journal': row.get('staged_child_journal'),
+                    'cleanup_child_journal': row.get('cleanup_child_journal'),
+                })
+            print(json.dumps({
+                'id': result.get('id'), 'operation': result.get('operation'),
+                'status': result.get('status'), 'stage': result.get('stage'),
+                'read_only': observation.get('read_only'),
+                'target': {k: observation.get('target', {}).get(k)
+                           for k in ['available', 'bypass', 'preflight_clean']},
+                'apps': apps,
+                'component_reinstall_allowed': observation.get('component_reinstall_allowed', False),
+                'fresh_cleanup_plan_allowed': observation.get('fresh_cleanup_plan_allowed', False),
+                'recovery_recommendation': observation.get('recovery_recommendation'),
+            }, indent=2))
+        return
+    if args.command == 'plan-worker-drain-cleanup':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import prepare_fresh_cleanup
+        result, path = prepare_fresh_cleanup(
+            PROJECT, args.run, lambda: EruCLIAdapter(Operator()))
+        if path is None:
+            print(json.dumps({k: result.get(k) for k in [
+                'worker_drain_run_id', 'decision', 'component_reinstall_allowed']}, indent=2))
+        else:
+            cleanup_plan = result['cleanup_plan']
+            print(json.dumps({
+                'id': result['id'], 'operation': result['operation'],
+                'decision': result['decision'], 'executable': result['executable'],
+                'worker_drain_run_id': result['worker_drain_run_id'],
+                'logical_app': result['logical_app'],
+                'remaining_source_count': len(result['source_workload_ids']),
+                'sha256': result['plan_sha256'],
+                'cleanup_plan_sha256': result['cleanup_plan_sha256'],
+                'path': str(path),
+            }, indent=2))
+        return
+    if args.command == 'execute-worker-drain-cleanup':
+        from app_cli_adapter import EruCLIAdapter
+        from worker_drain_ops import execute_fresh_cleanup
+        result = execute_fresh_cleanup(
+            PROJECT, args.plan, args.sha256, args.cleanup_sha256,
+            lambda: EruCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'logical_app': result.get('logical_app'),
+            'removed_count': len(result.get('removed_ids', [])),
+        }, indent=2))
+        return
     with ClusterLock(PROJECT):
         operator = Operator()
         if args.command == 'plan':
-            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after, args.exclude_node)
+            envelope = operator.plan(args.operation, args.node, args.smoke_run, args.mode, args.health, args.canary_run, args.core_artifact, args.fault_after, args.exclude_node, args.reimage_intent)
             summary = {k: envelope['plan'][k] for k in ['id', 'operation', 'node', 'executable', 'mutation_hosts', 'targets', 'steps', 'blockers']}
-            for optional in ['rebuild_mode', 'component_scope', 'fault_after', 'guard_exclude', 'guard_nodes']:
+            for optional in ['rebuild_mode', 'component_scope', 'provider_reimage_intent', 'fault_after', 'guard_exclude', 'guard_nodes']:
                 if optional in envelope['plan']:
                     summary[optional] = envelope['plan'][optional]
+            if 'reimage_preparation' in envelope['plan']:
+                summary['reimage_preparation'] = envelope['plan']['reimage_preparation']
             if envelope['plan'].get('patched_core'):
                 summary['patched_core'] = {k: envelope['plan']['patched_core'][k]
                     for k in ['artifact', 'health_file', 'selection', 'blockers']}
             summary['sha256'] = envelope['sha256']
             summary['path'] = str(operator.root / 'plans' / (summary['id'] + '.json'))
             print(json.dumps(summary, indent=2))
+        elif args.command == 'plan-reimage-worker':
+            envelope = operator.plan_reimage_worker(args.plan, args.sha256)
+            plan = envelope['plan']
+            payload = plan['worker_payload']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'source_reimage_plan': plan['source_reimage_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node', 'index']},
+                'artifacts': [{'repository': row['repository'], 'tag': row['tag'], 'sha256': row['sha256']}
+                              for row in payload['artifacts']],
+                'files': [{'path': row['path'], 'sha256': row['sha256']}
+                          for row in plan['worker_files']],
+                'registration': {k: plan['registration'][k]
+                                 for k in ['node', 'podname', 'labels', 'resource_capacity']},
+                'worker_install': plan['worker_install'],
+                'worker_access': plan['worker_access'],
+                'worker_registration': {
+                    'executable': plan['worker_registration']['executable'],
+                    'core_release_id': plan['worker_registration']['core_release']['release_id'],
+                    'core_artifact_sha256': plan['worker_registration']['core_release']['artifact_sha256'],
+                    'steps': plan['worker_registration']['steps'],
+                },
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-bootstrap-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'install-reimage-worker':
+            result = operator.install_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'agent_started', 'node_registered', 'finished_at']}, indent=2))
+        elif args.command == 'register-reimage-worker':
+            result = operator.register_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'bootstrap_plan_id', 'operation', 'status', 'stage', 'target',
+                'target_alias', 'agent_started', 'node_registered', 'available', 'bypass',
+                'core_artifact_sha256', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-access':
+            envelope = operator.plan_reimage_worker_access(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'bootstrap_plan': plan['bootstrap_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'core_access_before': {k: plan['core_access_before'][k]
+                                       for k in ['known_hosts_sha256', 'firewall_sha256', 'nft_sha256']},
+                'core_access_after': plan['core_access_after'] | {
+                    'worker_ips': 'redacted (' + str(len(plan['core_access_after']['worker_ips'])) + ' entries)'},
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-access-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'prepare-reimage-worker-access':
+            result = operator.prepare_reimage_worker_access(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'access_plan_id', 'operation', 'status', 'stage', 'target',
+                'target_alias', 'remote_mutation_performed', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-smoke':
+            envelope = operator.plan_reimage_worker_smoke(args.plan, args.sha256, args.canary_run)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'bootstrap_plan': plan['bootstrap_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'canary_run': plan['canary_run'], 'executable': plan['executable'],
+                'blockers': plan['blockers'], 'steps': plan['steps'],
+                'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-smoke-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'smoke-reimage-worker':
+            result = operator.smoke_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'available', 'bypass', 'smoke_evidence', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-resume':
+            envelope = operator.plan_reimage_worker_resume(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'smoke_plan': plan['smoke_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-resume-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'resume-reimage-worker':
+            result = operator.resume_reimage_worker(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'available', 'bypass', 'resume_attempted', 'resume_outcome', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-generation':
+            envelope = operator.plan_reimage_worker_generation(args.plan, args.sha256)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'resume_plan': plan['resume_plan'],
+                'target': {k: plan['target'][k] for k in ['alias', 'node']},
+                'generation_before': plan['cluster_before']['generation'],
+                'generation_after': plan['cluster_after']['generation'],
+                'inventory_before_sha256': plan['deployment_plan_before_sha256'],
+                'inventory_after_sha256': plan['deployment_plan_after_sha256'],
+                'executable': plan['executable'], 'blockers': plan['blockers'],
+                'steps': plan['steps'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-generation-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'commit-reimage-worker-generation':
+            result = operator.commit_reimage_worker_generation(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'committed_generation', 'finished_at']}, indent=2))
+        elif args.command == 'plan-reimage-worker-recovery':
+            envelope = operator.plan_reimage_worker_recovery(args.plan, args.sha256, args.canary_run)
+            plan = envelope['plan']
+            print(json.dumps({
+                'id': plan['id'], 'operation': plan['operation'],
+                'bootstrap_plan': plan['bootstrap_plan'],
+                'target': plan['target'], 'current_stage': plan['current_stage'],
+                'next_action': plan['next_action'], 'complete': plan['complete'],
+                'executable': plan['executable'], 'sha256': envelope['sha256'],
+                'path': str(operator.root / 'reimage-worker-recovery-plans' / (plan['id'] + '.json')),
+            }, indent=2))
+        elif args.command == 'recover-reimage-worker-chain':
+            result = operator.recover_reimage_worker_chain(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in [
+                'id', 'operation', 'status', 'stage', 'target', 'target_alias',
+                'stage_run_id', 'stage_reconciliation', 'remote_mutation_performed',
+                'finished_at']}, indent=2))
+        elif args.command == 'record-reimage-receipt':
+            result = operator.record_reimage_receipt(args.plan, args.sha256, args.receipt)
+            print(json.dumps(result, indent=2))
+        elif args.command == 'prepare-reimage':
+            result = operator.prepare_reimage(args.plan, args.sha256)
+            print(json.dumps({k: result.get(k) for k in ['id', 'status', 'stage']}, indent=2))
+        elif args.command == 'verify-reimage-host':
+            result = operator.verify_reimage_host(args.plan, args.sha256)
+            print(json.dumps(result, indent=2))
         elif args.command == 'execute':
             result = operator.execute(args.plan, args.sha256)
             print(json.dumps({k: result[k] for k in ['id', 'status', 'stage']}, indent=2))

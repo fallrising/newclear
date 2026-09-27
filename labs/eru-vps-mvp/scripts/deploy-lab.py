@@ -13,6 +13,7 @@ import subprocess
 import sys
 
 from labops import ClusterLock, lock_fds
+from worker_payload import build_worker_payload
 
 PROJECT = Path(__file__).resolve().parent.parent
 ALIASES = [f'ckc-disposable-{i:02d}' for i in range(1, 5)]
@@ -73,13 +74,15 @@ def main():
     plans = []
     for host in hosts:
         is_core = host == hosts[0]
-        targets = ({'projecteru2/core': {'eru-core': '/usr/local/bin/eru-core'},
-                    'projecteru2/cli': {'eru-cli': '/usr/local/bin/eru-cli'},
-                    'projecteru2/resource-extend': {'resource-storage': '/etc/eru/plugins/resource-storage'},
-                    'etcd-io/etcd': {x: '/usr/local/bin/' + x for x in ['etcd', 'etcdctl', 'etcdutl']}}
-                   if is_core else
-                   {'projecteru2/agent': {'eru-agent': '/usr/local/bin/eru-agent'},
-                    'containernetworking/plugins': {x: '/opt/cni/bin/' + x for x in ['bridge', 'host-local', 'loopback']}})
+        if not is_core:
+            plans.append(build_worker_payload(host, core, lock))
+            continue
+        targets = {
+            'projecteru2/core': {'eru-core': '/usr/local/bin/eru-core'},
+            'projecteru2/cli': {'eru-cli': '/usr/local/bin/eru-cli'},
+            'projecteru2/resource-extend': {'resource-storage': '/etc/eru/plugins/resource-storage'},
+            'etcd-io/etcd': {x: '/usr/local/bin/' + x for x in ['etcd', 'etcdctl', 'etcdutl']},
+        }
         artifacts = [{**a, 'files': targets[a['repository']]} for a in lock['artifacts'] if a['repository'] in targets]
         configs = []
         units = []
@@ -186,83 +189,6 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 '''}
             units = list(definitions)
-        else:
-            configs.append(file('/usr/local/libexec/eru-ssh-command', '''#!/bin/sh
-set -eu
-# This forced command is attached only to the source-restricted ERU core key.
-# ckc already has NOPASSWD sudo; root SSH remains disabled.
-[ -n "${SSH_ORIGINAL_COMMAND:-}" ] || exit 64
-case "$SSH_ORIGINAL_COMMAND" in
-  internal-sftp) exec sudo -n -- /usr/lib/openssh/sftp-server ;;
-  *) exec sudo -n -- /bin/sh -c "$SSH_ORIGINAL_COMMAND" ;;
-esac
-''', 0o755))
-            configs.append(file('/etc/eru/agent.yaml', f'''pid: /run/eru-agent.pid
-core: ["{core}:5001"]
-store: grpc
-heartbeat_interval: 30
-runtimes:
-  containerd:
-    socket: /run/eru/containerd.sock
-    namespace: eru
-meta_dir: /run/eru/workloads
-state_dir: /var/lib/eru-agent
-api:
-  addr: 127.0.0.1:12345
-metrics:
-  step: 10
-log:
-  stdout: false
-healthcheck:
-  interval: 30
-  timeout: 10
-  cache_ttl: 300
-global_connection_timeout: 15s
-'''))
-            cni = {'cniVersion': '1.0.0', 'name': 'eru', 'plugins': [
-                {'type': 'bridge', 'bridge': 'eru0', 'isGateway': True, 'ipMasq': True,
-                 'ipMasqBackend': 'nftables', 'hairpinMode': True,
-                 'ipam': {'type': 'host-local', 'ranges': [[{'subnet': f"10.66.{host['index']}.0/24"}]],
-                          'routes': [{'dst': '0.0.0.0/0'}]}}]}
-            configs.append(file('/etc/cni/net.d/10-eru.conflist', json.dumps(cni, indent=2) + '\n'))
-            definitions = {
-                'eru-containerd-proxy.socket': '''[Unit]
-Description=ERU ckc-only containerd proxy socket
-[Socket]
-ListenStream=/run/eru/containerd.sock
-SocketUser=ckc
-SocketGroup=ckc
-SocketMode=0600
-DirectoryMode=0711
-RemoveOnStop=yes
-[Install]
-WantedBy=sockets.target
-''',
-                'eru-containerd-proxy.service': '''[Unit]
-Description=ERU containerd Unix socket bridge
-After=containerd.service
-Requires=containerd.service
-[Service]
-ExecStart=/usr/lib/systemd/systemd-socket-proxyd /run/containerd/containerd.sock
-NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=yes
-''',
-                'eru-agent.service': f'''[Unit]
-Description=ERU lab agent
-After=network-online.target containerd.service eru-containerd-proxy.socket
-Requires=eru-containerd-proxy.socket
-[Service]
-Environment=ERU_HOSTNAME={host['node']}
-ExecStart=/usr/local/bin/eru-agent --config /etc/eru/agent.yaml
-Restart=on-failure
-RestartSec=5
-RestartKillSignal=SIGUSR1
-LimitNOFILE=65536
-[Install]
-WantedBy=multi-user.target
-'''}
-            units = ['eru-containerd-proxy.socket']
         configs += [file('/etc/systemd/system/' + name, text) for name, text in definitions.items()]
         plan = {**host, 'core_ip': core, 'role': 'core' if is_core else 'worker', 'artifacts': artifacts,
                 'files': configs, 'start_units': units,

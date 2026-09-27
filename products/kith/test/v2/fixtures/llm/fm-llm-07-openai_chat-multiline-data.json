@@ -1,0 +1,20 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"choices\":[{\"index\":0,\ndata: \"delta\":{\"content\":\"x\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+  },
+  "expect": {
+    "text": "x",
+    "finish": "stop",
+    "deltas": [
+      "x"
+    ]
+  }
+}

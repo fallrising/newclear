@@ -3,20 +3,29 @@ import type { ReactElement } from "react";
 import { errorCopyKey } from "../../api/errors";
 import type { RoomMember } from "../../api/types";
 import { Markdown } from "../../markdown/Markdown";
+import { findMentions } from "../../markdown/mentions";
 import { useLocale, useT } from "../../copy";
 import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { displayName } from "../../ui/displayName";
 import { formatClock } from "../../ui/time";
 import type { TimelineItem } from "./buildItems";
+import { MessageActions } from "./MessageActions";
+import { ThreadSummary } from "./ThreadSummary";
+import { TraceCard } from "./TraceCard";
 
 type Props = {
   item: Extract<TimelineItem, { kind: "message" | "pending" }>;
   sender: RoomMember | undefined;
   senderId: string;
   isMe: boolean;
+  mentionHandles: readonly string[];
+  meHandle: string;
+  isOperator: boolean;
   onRetry(cmid: string): void;
   onDiscard(cmid: string): void;
+  roomSlug: string;
+  roomId: string;
 };
 
 export function MessageRow(props: Props): ReactElement {
@@ -24,10 +33,16 @@ export function MessageRow(props: Props): ReactElement {
   const { locale } = useLocale();
   const { item, sender, isMe } = props;
   const name = sender ? displayName(sender) : t("timeline.unknownSender");
+  if (item.kind === "message" && item.row.kind === "trace") {
+    return <TraceCard roomId={props.roomId} row={item.row} senderName={name} />;
+  }
   const body = item.kind === "message" ? item.row.body : item.pending.body;
   const createdAt = item.kind === "message" ? item.row.created_at : null;
+  const mentionsMe = findMentions(body, [props.meHandle]).length > 0;
   const outer =
-    "group relative flex gap-3 px-4 pb-0.5 animate-message-in " + (item.groupHead ? "pt-3" : "pt-0.5") + (isMe ? " bg-accent-tint" : "");
+    "group relative flex gap-3 px-4 pb-0.5 animate-message-in " +
+    (item.groupHead ? "pt-3" : "pt-0.5") +
+    (mentionsMe ? " border-l-2 border-accent bg-mention-tint" : isMe ? " bg-accent-tint" : "");
   const pending = item.kind === "pending" ? item.pending : null;
   const faded = pending !== null && pending.state !== "failed";
 
@@ -56,8 +71,11 @@ export function MessageRow(props: Props): ReactElement {
           </div>
         )}
         <div data-testid="message-body" className={"text-md text-ink" + (faded ? " opacity-70" : "")}>
-          <Markdown source={body} />
+          <Markdown source={body} mentionHandles={props.mentionHandles} />
         </div>
+        {item.kind === "message" && item.replyCount > 0 && item.lastReplyAt && (
+          <ThreadSummary roomSlug={props.roomSlug} rootId={item.row.id} count={item.replyCount} lastAt={item.lastReplyAt} />
+        )}
         {pending && (
           <div className="text-xs flex items-center gap-2">
             {(pending.state === "queued" || pending.state === "sending") && (
@@ -91,8 +109,16 @@ export function MessageRow(props: Props): ReactElement {
 
   if (item.kind === "message") {
     return (
-      <article data-testid="message-row" data-seq={item.row.seq} data-sender={item.row.sender_id} data-cmid={item.row.client_message_id} className={outer}>
+      <article
+        data-testid="message-row"
+        data-seq={item.row.seq}
+        data-sender={item.row.sender_id}
+        data-cmid={item.row.client_message_id}
+        data-mentions-me={mentionsMe ? "true" : undefined}
+        className={outer}
+      >
         {content}
+        <MessageActions row={item.row} isOperator={props.isOperator} roomSlug={props.roomSlug} />
       </article>
     );
   }

@@ -1,17 +1,16 @@
 import { test, expect } from "../fixtures/kith.ts";
 import { ACCOUNTS } from "../fixtures/accounts.ts";
-import { loginViaUi, uniqueText } from "../fixtures/actors.ts";
-import { note, shot } from "../harness/evidence.ts";
-import { startLegacyWeb } from "../harness/legacy-web.ts";
+import { loginViaUi } from "../fixtures/actors.ts";
+import { note } from "../harness/evidence.ts";
 
 type Row = Record<string, unknown> & { seq: number; body: string; sender_id: string; mentions_json?: string };
 
 test(
-  "E2E-W1-01 legacy frontend still logs in and sends after B-01",
+  "E2E-W1-01 v1 message queries are unchanged (V2-INV-04)",
   { tag: ["@W1"] },
-  async ({ page, api, browser, recorder }, info) => {
+  async ({ page, api }, info) => {
     test.skip(info.project.name !== "desktop", "desktop only");
-    test.setTimeout(180_000);
+    test.setTimeout(60_000);
 
     // 1. Without `order` the response is v1.
     await loginViaUi(page, ACCOUNTS.ada);
@@ -35,36 +34,5 @@ test(
     expect(j2.has_more).toBe(true);
     expect(j2.messages.map((m) => m.seq)).toEqual([7, 8, 9, 10, 11]);
     note(info, "order=desc returns ascending rows with has_more");
-
-    // 3–6. The legacy frontend still logs in and sends.
-    const legacy = await startLegacyWeb(process.env.KITH_E2E_API_ORIGIN!);
-    const ctx = await browser.newContext({ baseURL: legacy.url, viewport: { width: 1280, height: 800 } });
-    try {
-      const lp = await ctx.newPage();
-      recorder.watch(lp, "legacy");
-      await lp.goto("/");
-      await expect(lp.getByLabel(/handle/i)).toBeVisible();
-      await lp.getByLabel(/handle/i).fill("ada");
-      await lp.getByLabel(/password/i).fill(ACCOUNTS.ada.password);
-      await lp.getByRole("button", { name: /sign in/i }).click();
-      await lp.getByRole("button", { name: "安靜的房間 Quiet" }).click();
-      await expect(lp.getByText("live", { exact: true })).toBeVisible();
-      await shot(lp, info, "legacy-room");
-
-      const text = uniqueText("legacy");
-      await lp.getByLabel("Message 安靜的房間 Quiet").fill(text);
-      await lp.getByLabel("Message 安靜的房間 Quiet").press("Enter");
-      await expect(lp.getByText(text)).toBeVisible();
-      await shot(lp, info, "legacy-sent");
-
-      const r3 = await api.call("GET", "/api/rooms/room-quiet/messages?order=desc&limit=1");
-      const last = (r3.json as { messages: Row[] }).messages.at(-1);
-      expect(last?.body).toBe(text);
-      expect(last?.sender_id).toBe("m-ada");
-      note(info, "legacy send persisted");
-    } finally {
-      await ctx.close();
-      await legacy.close();
-    }
   },
 );

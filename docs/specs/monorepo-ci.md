@@ -6,7 +6,7 @@ The imported component workflows remain under component directories, which GitHu
 
 ## Goal
 
-Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active. Named members of this set include Goku, Phark, CloudForm, AweShore, Streaming Converter, Ojbquay, Prism, Ice Maker, Local OCR Services, CMS Scaffold, Dim Gate, and Kith.
+Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active. Named members of this set include Goku, Phark, CloudForm, AweShore, Streaming Converter, Ojbquay, Prism, Ice Maker, Local OCR Services, CMS Scaffold, Dim Gate, Kith, and cc-quota.
 
 ## Non-goals
 
@@ -41,7 +41,7 @@ Scenario: Kith source changes
   Given a change under `products/kith/**` or `.github/workflows/kith.yml`
   When GitHub evaluates root workflows
   Then `.github/workflows/kith.yml` is eligible
-  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith` with `contents: read` and no secrets or deploy
+  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith`, `npm ci` and `npm run build` in `products/kith/web`, and the Playwright E2E suite (`npm run e2e:all`, `npm run e2e:validate`) with evidence uploaded as an artifact, with `contents: read` and no secrets or deploy
 
 ## Constraints
 
@@ -67,7 +67,8 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | Local OCR Services | `local-ocr-services-ci.yml` | `platform/local-ocr-services/**`, `.github/workflows/local-ocr-services-ci.yml` | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
 | CMS Scaffold | `cms-scaffold-ci.yml` | `apps/cms-scaffold/**`, `.github/workflows/cms-scaffold-ci.yml` | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
 | Dim Gate | `dim-gate-ci.yml` | `platform/dim-gate/**`, `.github/workflows/dim-gate-ci.yml` | Component-native lint/test with `contents: read` |
-| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `contents: read`; no secrets or deploy |
+| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`; `npm run e2e:all` + `npm run e2e:validate` (Playwright 1.56.1 Chromium), evidence artifact kept 14 days; `contents: read`; no secrets or deploy |
+| cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 

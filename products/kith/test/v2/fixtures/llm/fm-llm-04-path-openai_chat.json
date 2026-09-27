@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-04",
+  "format": "openai_chat",
+  "call": "listModels",
+  "response": {
+    "status": 404,
+    "headers": {},
+    "body": "Not Found"
+  },
+  "expect": {
+    "error_class": "not_found"
+  }
+}

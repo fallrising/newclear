@@ -170,8 +170,8 @@ public class JdbcContentStore implements ContentStore {
             args.addAll(states);
         }
         if (q != null && !q.isBlank()) {
-            sql.append(" AND e.payload->>'title' ILIKE ?");
-            args.add("%" + q + "%");
+            sql.append(" AND e.payload->>'title' ILIKE ? ESCAPE '\\'");
+            args.add("%" + escapeLike(q) + "%");
         }
         if (refField != null && refTarget != null) {
             sql.append(
@@ -406,7 +406,7 @@ public class JdbcContentStore implements ContentStore {
                 PublicationState.fromWire(rs.getString("publication_state")),
                 rs.getInt("version"),
                 readMap(rs.getString("payload")),
-                readMap(rs.getString("published_payload")),
+                readNullableMap(rs.getString("published_payload")),
                 instant(rs, "published_at"),
                 instant(rs, "archived_at"),
                 instant(rs, "deleted_at"),
@@ -436,7 +436,7 @@ public class JdbcContentStore implements ContentStore {
                 rs.getString("publication_state"),
                 rs.getInt("version"),
                 readMap(rs.getString("document")),
-                readMap(rs.getString("published_document")),
+                readNullableMap(rs.getString("published_document")),
                 rs.getObject("updated_by", UUID.class),
                 instant(rs, "updated_at"));
     }
@@ -462,6 +462,14 @@ public class JdbcContentStore implements ContentStore {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private Map<String, Object> readNullableMap(String raw) {
+        return raw == null ? null : readMap(raw);
+    }
+
+    static String escapeLike(String raw) {
+        return raw.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
     private List<String> readStrings(String raw) {

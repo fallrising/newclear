@@ -1,5 +1,5 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
-import { knownSecrets } from "../fixtures/accounts.ts";
+import { knownSecrets, PROVIDER_CANARY } from "../fixtures/accounts.ts";
 
 // Redaction rules (docs/v2/milestones/W0.md §5.1.5).
 
@@ -11,9 +11,10 @@ export const RULE_IDS = [
   "R05-bot-token",
   "R06-known-secrets",
   "R07-observed-session",
+  "R08-provider-canary",
 ] as const;
 
-export type ScanRule = "R05-bot-token" | "R06-known-secrets" | "R07-observed-session";
+export type ScanRule = "R05-bot-token" | "R06-known-secrets" | "R07-observed-session" | "R08-provider-canary";
 
 const REDACTED = "[REDACTED]";
 const KEPT_HEADERS = new Set(["content-type", "cookie", "set-cookie", "authorization", "x-csrf-token"]);
@@ -83,5 +84,6 @@ export function scanText(text: string, observed: string[]): ScanRule[] {
   if (new RegExp(BOT_TOKEN.source).test(text)) hits.push("R05-bot-token");
   if (knownSecrets().some((s) => text.includes(s))) hits.push("R06-known-secrets");
   if (observed.some((s) => text.includes(s))) hits.push("R07-observed-session");
+  if (text.includes(PROVIDER_CANARY)) hits.push("R08-provider-canary");
   return hits;
 }

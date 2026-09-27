@@ -1,0 +1,268 @@
+{
+  "items": [
+    {
+      "id": "20000000-0000-4000-8000-000000000008",
+      "mediaId": "20000000-0000-4000-8000-000000000008",
+      "title": "Softbox",
+      "altText": "Softbox",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000008/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000008/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000008/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000007",
+      "mediaId": "20000000-0000-4000-8000-000000000007",
+      "title": "Polaroid test",
+      "altText": "Polaroid test",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000007/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000007/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000007/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000006",
+      "mediaId": "20000000-0000-4000-8000-000000000006",
+      "title": "Last ferry",
+      "altText": "Last ferry",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000006/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000006/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000006/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000005",
+      "mediaId": "20000000-0000-4000-8000-000000000005",
+      "title": "Window light",
+      "altText": "Window light",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000005/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000005/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000004",
+      "mediaId": "20000000-0000-4000-8000-000000000004",
+      "title": "Salt air",
+      "altText": "Salt air",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000004/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000004/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "mediaId": "20000000-0000-4000-8000-000000000003",
+      "title": "Concrete edge",
+      "altText": "Concrete edge",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000003/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000003/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "mediaId": "20000000-0000-4000-8000-000000000002",
+      "title": "Late sun",
+      "altText": "Late sun",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000002/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000002/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "mediaId": "20000000-0000-4000-8000-000000000001",
+      "title": "Harbour wall",
+      "altText": "Harbour wall",
+      "contentType": "image/png",
+      "byteSize": 1240,
+      "width": 64,
+      "height": 64,
+      "variants": {
+        "original": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000001/file/original",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/png",
+          "byteSize": 1240
+        },
+        "thumbnail": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        },
+        "web": {
+          "url": "/api/v1/media/20000000-0000-4000-8000-000000000001/file/web",
+          "width": 64,
+          "height": 64,
+          "contentType": "image/jpeg",
+          "byteSize": 1432
+        }
+      }
+    }
+  ]
+}

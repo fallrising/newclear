@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-05",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 429,
+    "headers": {},
+    "body": "{\"error\": {\"message\": \"rl\"}}"
+  },
+  "expect": {
+    "error_class": "rate_limited",
+    "retry_after_ms": null
+  }
+}

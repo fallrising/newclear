@@ -1,0 +1,30 @@
+{
+  "project": "fanzloud",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light",
+    "dark"
+  ],
+  "apps": [
+    {
+      "name": "control-plane",
+      "kind": "server",
+      "cwd": "platform/fanzloud/apps/control-plane",
+      "install": "cargo build",
+      "start": "cargo run",
+      "env": {
+        "CODEBOX_LISTEN_ADDRESS": "127.0.0.1:18080"
+      },
+      "baseUrl": "http://127.0.0.1:18080",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "home",
+          "path": "/"
+        }
+      ]
+    }
+  ]
+}

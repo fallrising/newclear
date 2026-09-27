@@ -1,0 +1,195 @@
+{
+  "seed-admin": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "admin",
+        "contentTypeCodes": []
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": true
+    }
+  },
+  "seed-editor-album": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "username": "seed-editor-album",
+      "displayName": "Album editor",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "editor",
+        "contentTypeCodes": [
+          "album",
+          "photo"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-operator-album": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "operator",
+        "contentTypeCodes": [
+          "album",
+          "photo"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-member-clinic": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000004",
+      "username": "seed-member-clinic",
+      "displayName": "Clinic member",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "member",
+        "contentTypeCodes": []
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": false,
+      "admin": false
+    }
+  },
+  "seed-editor-clinic": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000005",
+      "username": "seed-editor-clinic",
+      "displayName": "Clinic editor",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "editor",
+        "contentTypeCodes": [
+          "clinic_profile",
+          "vet"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-operator-clinic": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000006",
+      "username": "seed-operator-clinic",
+      "displayName": "Clinic operator",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "operator",
+        "contentTypeCodes": [
+          "clinic_profile",
+          "owner",
+          "pet",
+          "vet",
+          "visit"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-editor-projects": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000007",
+      "username": "seed-editor-projects",
+      "displayName": "Projects editor",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "editor",
+        "contentTypeCodes": [
+          "project",
+          "milestone"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-operator-projects": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000008",
+      "username": "seed-operator-projects",
+      "displayName": "Projects operator",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "operator",
+        "contentTypeCodes": [
+          "project",
+          "issue",
+          "milestone"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    }
+  },
+  "seed-member-projects": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000009",
+      "username": "seed-member-projects",
+      "displayName": "Projects member",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "member",
+        "contentTypeCodes": []
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": false,
+      "admin": false
+    }
+  }
+}

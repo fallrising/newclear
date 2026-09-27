@@ -37,17 +37,34 @@ public class InMemoryContentStore implements ContentStore {
 
     @Override
     public void insertType(ContentTypeRecord type) {
-        types.put(type.typeKey(), type);
+        if (types.putIfAbsent(type.typeKey(), type) != null) {
+            throw new IllegalStateException("type key taken: " + type.typeKey());
+        }
     }
 
     @Override
     public void updateType(ContentTypeRecord type) {
-        types.put(type.typeKey(), type);
+        types.computeIfPresent(type.typeKey(), (key, current) -> new ContentTypeRecord(
+                current.id(),
+                current.typeKey(),
+                type.displayName(),
+                type.pluralDisplayName(),
+                type.description(),
+                current.titleField(),
+                current.slugPolicy(),
+                current.singleton(),
+                type.enabled(),
+                current.previewable(),
+                current.publicRequiresPublishedRefs(),
+                current.createdAt(),
+                type.updatedAt()));
     }
 
     @Override
     public List<FieldRecord> fieldsOf(UUID typeId) {
-        return List.copyOf(fields.getOrDefault(typeId, List.of()));
+        return fields.getOrDefault(typeId, List.of()).stream()
+                .sorted(Comparator.comparingInt(FieldRecord::sortOrder).thenComparing(FieldRecord::fieldKey))
+                .toList();
     }
 
     @Override

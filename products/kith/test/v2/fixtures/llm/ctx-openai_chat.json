@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 400,
+    "headers": {},
+    "body": "{\"error\": {\"message\": \"too long\", \"type\": \"invalid_request_error\", \"param\": \"messages\", \"code\": \"context_length_exceeded\"}}"
+  },
+  "expect": {
+    "error_class": "context_length"
+  }
+}

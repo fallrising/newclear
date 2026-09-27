@@ -1,0 +1,14 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "openai_responses",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"r\", \"object\": \"response\", \"status\": \"incomplete\", \"output\": [{\"type\": \"message\", \"id\": \"m\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"cut\", \"annotations\": []}]}], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}, \"incomplete_details\": {\"reason\": \"max_output_tokens\"}}"
+  },
+  "expect": {
+    "text": "cut",
+    "finish": "length"
+  }
+}

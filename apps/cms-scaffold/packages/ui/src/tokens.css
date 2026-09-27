@@ -1,0 +1,110 @@
+/*
+ * Design tokens (01 §5). Contrast ratios are listed in waves/W0.md §4.4.
+ * Operator surfaces (Back, Admin) use :root. Front sets data-scheme on its page root.
+ * Dark mode for operator surfaces is reserved (Q-04): add a [data-theme="dark"] block later; none in v2.
+ */
+:root {
+  --bg: #f1f1f1;
+  --surface: #ffffff;
+  --surface-subdued: #f7f7f7;
+  --surface-hover: #ebebeb;
+  --border: #e3e3e3;
+  --border-strong: #8a8a8a;
+  --text: #303030;
+  --text-subdued: #616161;
+  --primary: #303030;
+  --primary-fg: #ffffff;
+  --focus: #005bd3;
+  --critical: #8e1f0b;
+  --critical-bg: #fee9e8;
+  --success: #0c5132;
+  --success-bg: #cdfee1;
+  --caution: #5e4200;
+  --caution-bg: #fff1c2;
+  --info: #00527c;
+  --info-bg: #e0f0ff;
+  --admin-accent: #8a3ffc;
+
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-display: var(--font-body);
+}
+
+[data-scheme="selector"] {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-subdued: #f4f4ef;
+  --surface-hover: #ecece6;
+  --border: #e4e4df;
+  --border-strong: #8a8a84;
+  --text: #1a1a1a;
+  --text-subdued: #5c5c57;
+  --primary: #1a1a1a;
+  --primary-fg: #fafaf7;
+  --focus: #005bd3;
+}
+
+[data-scheme="gallery-dark"] {
+  --bg: #111111;
+  --surface: #1c1c1c;
+  --surface-subdued: #181818;
+  --surface-hover: #262626;
+  --border: #2e2e2e;
+  --border-strong: #6b6b6b;
+  --text: #f2f2f2;
+  --text-subdued: #a3a3a3;
+  --primary: #f2f2f2;
+  --primary-fg: #111111;
+  --focus: #4c9aff;
+  --critical: #ff8a80;
+  --font-display: "Noto Serif TC", "Songti TC", Georgia, serif;
+}
+
+[data-scheme="clinic-warm"] {
+  --bg: #f7f4ee;
+  --surface: #ffffff;
+  --surface-subdued: #f2eee6;
+  --surface-hover: #ebe6dc;
+  --border: #e6e1d6;
+  --border-strong: #8c887d;
+  --text: #2a2a26;
+  --text-subdued: #5c5a52;
+  --primary: #2f6b4f;
+  --primary-fg: #ffffff;
+  --focus: #005bd3;
+  --font-display: "Noto Serif TC", "Songti TC", Georgia, serif;
+}
+
+[data-scheme="projects-neutral"] {
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --surface-subdued: #eff2f5;
+  --surface-hover: #e6eaef;
+  --border: #d1d9e0;
+  --border-strong: #818b98;
+  --text: #1f2328;
+  --text-subdued: #59636e;
+  --primary: #0b57d0;
+  --primary-fg: #ffffff;
+  --focus: #005bd3;
+}
+
+/* shadcn variable names, recomputed wherever a scheme changes the base tokens. */
+:root,
+[data-scheme] {
+  --background: var(--surface);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary-foreground: var(--primary-fg);
+  --secondary: var(--surface-subdued);
+  --secondary-foreground: var(--text);
+  --muted: var(--surface-subdued);
+  --muted-foreground: var(--text-subdued);
+  --accent: var(--surface-hover);
+  --accent-foreground: var(--text);
+  --destructive: var(--critical);
+  --input: var(--border-strong);
+  --ring: var(--focus);
+}

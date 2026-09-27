@@ -57,16 +57,22 @@ reconcile 只讀遠端，不重播部署、不自動清理。若原控制程序�
 
 先檢查私有 run log、smoke evidence、runtime 與配額，再建立新的計畫處理明確範圍。timeout 代表結果不確定，不能以 timeout 直接推論遠端沒執行。
 
-## worker 非計畫失聯：離線 review plan
+## worker 非計畫失聯：review、exact cleanup 與 recovery
 
 已由 provider power off 或能阻止原 workload 繼續寫入的網路層 fence 隔離 target 後，可在 B 本機保存 ERU-010 review plan：
 
 ```bash
 python3 scripts/labctl.py plan-worker-loss --target worker-4 \
   --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py prepare-worker-loss --plan REVIEW_PLAN_ID \
+  --sha256 REVIEW_PLAN_SHA256 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py execute-worker-loss-cleanup \
+  --plan EXECUTION_PLAN_ID --sha256 EXECUTION_PLAN_SHA256
+python3 scripts/labctl.py recover-worker-loss --run EXECUTION_PLAN_ID
 ```
 
-輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。計畫會列 exact stale IDs 與 quota digest，但永遠 `executable: false`，不會 SSH、dissociate、執行 `resource --fix`、node remove 或 deploy。偵測超過 180 秒會記為 V07 acceptance gap，仍允許建立事故處理 review plan。完整輸入及後續尚未實作的安全順序見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
+離線輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。review plan 永遠不可執行；`prepare-worker-loss` 不 SSH target，只讀 core 與兩台健康 workers，經兩次 stable snapshot／preflight 才保存獨立 execution plan。execute 每個 exact ID 只送一次 dissociate，回覆遺失時查 ID 而不重播；每步核對全群 workload identities，末端 quota 必須為零，從不執行 `resource --fix`。成功只開 fresh replacement-plan gate，不會 node remove 或 deploy。`recover-worker-loss` 只讀且不 replay。偵測超過 180 秒會記為 V07 acceptance gap。這些路徑目前只以 fake fixtures 驗證，正式 V11 期間不可執行；完整限制見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
 
 ## 鎖、紀錄與適用邊界
 

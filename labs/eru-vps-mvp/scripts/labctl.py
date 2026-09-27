@@ -851,6 +851,15 @@ def main():
     loss_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
     loss_plan.add_argument('--input', required=True, help='Private JSON with stale state, detection, fence, and explicit destinations')
     loss_plan.add_argument('--plan-id')
+    loss_prepare = sub.add_parser('prepare-worker-loss', help='Read live control-plane state and save a hash-bound ERU-010 stale-cleanup plan')
+    loss_prepare.add_argument('--plan', required=True, help='Saved worker-loss review plan ID')
+    loss_prepare.add_argument('--sha256', required=True, help='Worker-loss review plan SHA-256')
+    loss_prepare.add_argument('--input', required=True, help='Original private worker-loss review input')
+    loss_execute = sub.add_parser('execute-worker-loss-cleanup', help='Dissociate exact reviewed stale IDs once; never fixes quota or deploys replacements')
+    loss_execute.add_argument('--plan', required=True, help='Saved live worker-loss cleanup plan ID')
+    loss_execute.add_argument('--sha256', required=True, help='Live worker-loss cleanup plan SHA-256')
+    loss_recover = sub.add_parser('recover-worker-loss', help='Read-only exact-ID and quota reconciliation after worker-loss cleanup')
+    loss_recover.add_argument('--run', required=True, help='Worker-loss cleanup run ID')
     args = parser.parse_args()
     os.umask(0o077)
     if args.command == 'status':
@@ -885,6 +894,51 @@ def main():
             'detection_seconds': plan['detection']['seconds'],
             'detection_within_candidate': plan['detection']['within_candidate'],
             'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'prepare-worker-loss':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import prepare_execution_plan
+        with ClusterLock(PROJECT):
+            plan, path = prepare_execution_plan(
+                PROJECT, args.plan, args.sha256, args.input,
+                WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'target': plan['target'], 'target_count': len(plan['targets']),
+            'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'execute-worker-loss-cleanup':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import execute_saved_plan
+        result = execute_saved_plan(
+            PROJECT, args.plan, args.sha256,
+            lambda: WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'dissociated_count': len(result.get('dissociated_ids', [])),
+            'replacement_plan_allowed': result.get('replacement_plan_allowed', False),
+            'next_step': result.get('next_step'),
+        }, indent=2))
+        return
+    if args.command == 'recover-worker-loss':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import recover_run
+        result = recover_run(
+            PROJECT, args.run, lambda: WorkerLossCLIAdapter(Operator()))
+        observation = result.get('reconciliation', {})
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'read_only': observation.get('read_only'),
+            'dissociate_replayed': observation.get('dissociate_replayed'),
+            'remaining_exact_count': len(observation.get('remaining_exact_ids', [])),
+            'fresh_cleanup_plan_allowed': observation.get('fresh_cleanup_plan_allowed', False),
+            'replacement_plan_allowed': observation.get('replacement_plan_allowed', False),
+            'recovery_recommendation': observation.get('recovery_recommendation'),
         }, indent=2))
         return
     if args.command == 'prepare-worker-drain':

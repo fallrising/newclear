@@ -1,6 +1,6 @@
-# ERU-010 worker 非計畫失聯：離線 recovery review plan（2026-09-27）
+# ERU-010 worker 非計畫失聯：本機 recovery 前置（2026-09-27）
 
-狀態：已交付離線、review-only planner 與 `labctl` 私有 plan 入口；ERU-010 仍進行中。此切片沒有連 VPS、沒有驗證外部 fence，也沒有執行 metadata dissociate、quota 修復、node remove 或 replacement deploy。正式 V11 24 小時 run 進行期間不安排失聯演練。
+狀態：已交付離線 review planner、不依賴失聯 target SSH 的 live prepare adapter、journaled exact-ID dissociation executor、唯讀 recovery 與 `labctl` 私有入口；ERU-010 仍進行中。全部只用 fake/temp fixtures 驗證，沒有連 VPS、沒有自行驗證 provider fence，也沒有執行真實 metadata dissociate、quota 修復、node remove 或 replacement deploy。正式 V11 24 小時 run 進行期間不安排失聯演練。
 
 ## 目的與邊界
 
@@ -34,22 +34,31 @@ target 上有 unknown workload、partial replicas、舊／foreign revision、模
 ```bash
 python3 scripts/labctl.py plan-worker-loss --target worker-4 \
   --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py prepare-worker-loss --plan REVIEW_PLAN_ID \
+  --sha256 REVIEW_PLAN_SHA256 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py execute-worker-loss-cleanup \
+  --plan EXECUTION_PLAN_ID --sha256 EXECUTION_PLAN_SHA256
+python3 scripts/labctl.py recover-worker-loss --run EXECUTION_PLAN_ID
 ```
 
-`labctl` 在共用 `ClusterLock` 下把 plan 寫到 `private/operations/worker-loss/review-plans/`，拒絕 private 外路徑、symlink 與重複 plan ID。公開 stdout 只列 decision、blockers、detection summary、plan ID/hash 與私有路徑，不列 workload IDs。完整 plan 仍含 private workload IDs，只能留在 private storage。standalone `worker_loss.py` 會把完整 plan 印到 stdout，應只導向受保護的本機檔案。
+`labctl` 在共用 `ClusterLock` 下把 review／execution plans 與 run journal 寫到 `private/operations/worker-loss/`，拒絕 private 外路徑、symlink、輸入 drift、錯誤 hash 與重複 plan/run ID。公開 stdout 只列 decision、計數、gate、plan ID/hash 與私有路徑，不列 workload IDs。完整 plan／journal 仍含 private workload IDs，只能留在 private storage。standalone `worker_loss.py` 會把完整 review plan 印到 stdout，應只導向受保護的本機檔案。
 
-## 固定的未執行順序
+## Live prepare、exact cleanup 與 recovery
 
-本切片只把後續順序寫入 plan，沒有實作 mutation：
+`scripts/worker_loss_adapter.py` 的 live snapshot 只經 core CLI 讀 pods／nodes／workloads；健康檢查只連 core 與失聯 target 以外兩台 workers，核對 etcd、core service、固定 inventory endpoint／owner，以及各健康 worker 的 runtime containers／tasks 與 metadata。它不 SSH 失聯 target。兩次 snapshot／preflight 必須穩定，且 control-plane state、exact IDs、quota digest 都仍符合離線 review plan，才保存可執行 plan。外部 fence 仍是 caller attestation 的 proof digest；prepare 不會把它提升成 provider API 驗證。
 
-1. 再次獨立核對外部 fence proof，以及 target 仍為 unavailable/bypassed。
-2. journal intent 後只 dissociate plan 綁定的 stale exact IDs；healthy-worker workload 不得套用。
-3. 唯讀重查 metadata 與 quota；exact IDs 必須全部不存在、target usage 必須為零。回覆遺失時只 reconcile，不重播。
-4. 使用另一份 live、hash-bound plan 在明確的健康 workers 各建立一次 replacement，核對 owner、digest、replica、node 與 HTTP readiness。
-5. 保存 detection、fence、reconciliation、replacement 與末端 consistency evidence；不宣稱自動補副本。
+`scripts/worker_loss_executor.py` 已實作下列有界順序：
 
-下一個本機切片須先定義不依賴失聯 target SSH 的 live control-plane snapshot，再實作 journaled exact dissociation／read-only recovery。replacement 可重用 ERU-012 executor，但必須在 stale metadata／quota 已精確清除後建立 fresh plan。VPS 有界故障演練仍須等 V11 結束及現場清理完成後另行安排。
+1. 執行前重核 live preflight、完整 workload identity set、target `available=false`／`bypass=true` 與 node static digest。
+2. 每個 exact ID 先 durable journal intent，再單次送出 `workload dissociate ID`。命令與 adapter 都驗證 deterministic ERU-012 workload ID，不接受 selector 或任意參數。
+3. 回覆遺失時只查同一 exact ID：已不存在才記為成功；仍存在或 identity 改變即停在 uncertain。同一 plan 一旦有 journal 就不能重播。
+4. 每次 dissociate 後核對全群 control-plane workload identities、健康 worker runtime／metadata、etcd/core 與 target fence；任何額外 drift 都停止。
+5. 所有 stale IDs 不存在後，再以兩次穩定 snapshot 核對 target quota 為零。非零時停在 `needs_review`，不呼叫 `resource --fix`。
+6. 成功只開 `replacement_plan_allowed` gate 並停止，不部署 replacement、不移除 node、不恢復 target。
+
+`recover-worker-loss` 只查 exact IDs、兩次 control-plane snapshot、健康 workers 與 quota，永遠標示 `dissociate_replayed: false`。它能區分 `present_exact`／`absent`／identity changed，並輸出 `fresh_cleanup_plan_allowed` 或 `replacement_plan_allowed`；目前尚未實作 partial run 的 fresh subset cleanup plan builder，也未建立 replacement plan。replacement 可重用 ERU-012 executor，但必須由新的 hash-bound plan 重新讀取原 desired specs、確認 stale metadata／quota 已清除並再做容量 admission。VPS 有界故障演練仍須等 V11 結束及現場清理完成後另行安排。
 
 ## 驗證範圍
 
-新增 9 個 focused tests，覆蓋 confirmed fence 正向 plan、未 fence／未 down+bypass 阻擋、偵測超時 evidence、partial／foreign revision、destination 健康、quota／preflight fail-closed、stable hashes、private path／symlink／重複 plan，以及 `labctl` stdout 遮罩。這些全是 temp/fake fixture；沒有讀取真實 private data 或呼叫遠端介面。
+目前 20 個 worker-loss focused tests：原 9 個 planner tests 加 11 個 live prepare／adapter／executor／recovery／ops tests。新增範圍涵蓋不連 target SSH、stable live binding、exact dissociation、回覆遺失前後、禁止重播、partial recovery、quota residue、identity／fence drift、重新計算 hash 的 payload tampering、private lifecycle、三個新 `labctl` routes 與 stdout ID 遮罩。這些全是 temp/fake fixture；沒有讀取真實 private data 或呼叫遠端介面。

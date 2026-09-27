@@ -8,7 +8,7 @@
 
 ## 修改權限
 
-文檔檔位 **D（retired）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「Owner override 2026-09-27 — fe-review 休眠元件」，退役元件**暫緩**，不進入第 2、3 輪。本檔保留目前已知的矛盾點，供日後恢復時參考。
+文檔檔位 **D（retired）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「休眠」一節的 fe-review 例外，退役元件**暫緩**，不進入第 2、3 輪。本檔保留目前已知的矛盾點，供日後恢復時參考。
 
 ## 矛盾點
 

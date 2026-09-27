@@ -209,3 +209,33 @@ offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實�
 Owner 決定：[fe-review](docs/fe-review/README.md) 工作包中的 C 檔（休眠）元件，可以在 fe-review 第 2 輪做前端修改；D 檔（退役）元件暫緩，不進入第 2、3 輪。
 
 這個例外只涵蓋 fe-review 第 2 輪在各元件 `fe-review/DESIGN.md` 範圍內的前端修改，以及修改所需的最小解耦。它不恢復這些元件的投入，文檔檔位不變，也不授權新功能或 major 依賴升級；後兩者仍需另行決定。其餘 portfolio 決策維持不變。
+
+## Owner override 2026-09-27 — kernel personal；使用與投入分離
+
+來源：`fallrising/desk` 從 monorepo 反向還原盤點時 owner 的答覆（desk task T-0008、T-0005 的 Owner 答覆）。
+
+### 使用與投入是兩個獨立維度
+
+本文件的「繼續投入／維護模式／休眠／收掉」分級只表示**開發投入**：是否繼續為該 codebase 規劃新功能。產品**有沒有在用**是另一個維度，是部署與使用的觀察事實。兩者互不推導：天天在用的產品可以不再開發，仍在開發的產品也可能還沒有人用。休眠表示不規劃新功能，不表示不能修：在用的產品出問題時，仍可以做修復。
+
+下列條款中「以使用判定投入」的部分自本日起被取代；原文保留，作為 2026-09-05 當時的判斷紀錄：
+
+- 「結論」：「凡是只有你知道的線上使用、真實使用者或期限，列在最後的問題；答案若成立，才調整分級。」使用事實不再調整分級；期限仍可以是投入決策的依據。
+- 「重疊與 canonical 邊界 › Messaging 與資料基礎設施」：「在你確認真實 workload 前，四個一起休眠」。四者維持休眠，但理由是投入預算，不是缺乏使用證據；確認有 workload 只記錄使用狀態，不自動恢復投入。
+- 「「繼續投入」的下一步」第 3 條：PIF「連續兩週沒有真實使用就降為休眠」。此條件取消。
+- 「需要你回答」第 1 題：「這會決定休眠項是否升為維護」。該題的答案只記錄使用狀態，不改變分級。
+
+### 分級與使用狀態
+
+| Component | 開發投入 | 使用 | 依據 |
+| --- | --- | --- | --- |
+| `kernel/personal/relayvault` | 休眠 → **繼續投入** | 未知 | Owner 決定。2026-09-10 至 09-16 的 v0.2 開發視為已認可的工作；v0.2 release 仍待 production no-overwrite cutover（元件 `.team/reports/T-043.md`）與另行授權 |
+| `kernel/personal/pif` | 繼續投入（不變） | 在用 | Owner：有在用，仍在開發中，尚未確定已是可用產品；不因使用與否調整投入 |
+| `kernel/personal/tgstash` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
+| `kernel/personal/ts-upload` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
+| `kernel/personal/ts-download` | 未分級 → **維護（不規劃新功能，可修復）** | 在用 | Owner：維持現狀 |
+| `products/kith` | 繼續投入（2026-09-20 override，不變） | 在用（已部署） | Owner 答覆 |
+
+RelayVault 恢復投入後，本文件「個人自動化與傳輸」一段所說「需求與 CloudDrive 鄰近，沒有理由同時開工」不再成立；兩者的 canonical 邊界（CloudDrive 擁有 cloud inventory 與 transfer/verification lifecycle，RelayVault 擁有私有檔案中繼）不變。
+
+其餘 portfolio 決策維持不變。之後各元件的使用狀態以 `fallrising/desk` 中對應 plan 的 `usage` 欄位為準。

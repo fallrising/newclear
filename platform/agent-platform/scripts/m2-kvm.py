@@ -104,6 +104,11 @@ def main():
                     "name": "OpenHands real VM fixture",
                     "backend": "openhands",
                     "deadline_seconds": 600,
+                    "verification": {
+                        "mode": "fixture-m2",
+                        "revision": "fixture-m2-v1",
+                        "checks": [],
+                    },
                 },
             )
             for i in range(5):

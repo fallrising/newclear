@@ -17,7 +17,7 @@ from uuid import uuid4
 from agent_platform_m0.kvm_lifecycle import Host, process_identity
 
 from .connector_journal import Journal, private_file
-from .connector_recovery import stopped
+from .connector_recovery import stopped, unconfirmed_allocation_reconciled
 from .domain import Problem
 from .egress_policy import REVISION, SANDBOXD_SHA256, require, validate_node
 
@@ -136,7 +136,8 @@ def drained(config, host):
                 )
             else:
                 require(
-                    "allocate" not in row["operations"], "egress_allocation_ownership_uncertain"
+                    "allocate" not in row["operations"] or unconfirmed_allocation_reconciled(row),
+                    "egress_allocation_ownership_uncertain",
                 )
     finally:
         with_journal.close()

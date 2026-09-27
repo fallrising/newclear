@@ -47,7 +47,7 @@ class ModelSession:
         # regenerates the completion: SQL request ID and connector intent persist.
         result = {
             **result,
-            "model": "gpt-4o-mini",
+            "model": self.proxy.policy.model,
             "id": "chatcmpl-" + str(identity),
             "object": "chat.completion",
             "created": 0,

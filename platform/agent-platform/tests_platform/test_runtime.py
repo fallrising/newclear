@@ -56,7 +56,7 @@ class RuntimeTests(PlatformFixture):
             self.post("/agent-profiles", {"name": "Real", "backend": "openhands"}).status_code, 503
         )
         profile = self.real_profile()
-        self.assertEqual(profile["model_ref"], "fixture:m2")
+        self.assertEqual(profile["model_ref"], "openai-compatible:chat-completions")
         self.assertTrue(profile["capabilities"]["event_replay"])
         self.assertTrue(profile["capabilities"]["pause"])
         self.assertEqual(

@@ -36,8 +36,9 @@ from .connector_fence import Fences, Lease
 from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, attest
 from .connector_journal import Journal, private_file
 from .connector_output import OutputPolicy, workspace_result
-from .connector_recovery import inspect
+from .connector_recovery import blocks_new_admission, inspect
 from .domain import Input, Problem
+from .verification import VerificationPolicy
 
 MAX_BUNDLE = 8 * 1024 * 1024
 
@@ -51,6 +52,7 @@ class Allocate(Input):
     deadline: datetime
     require_approval: bool = False
     model_transport: bool = False
+    verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
 
 
 class ModelExchange(Input):
@@ -233,13 +235,7 @@ class Connector:
                 if any(p["target"] != 0 for p in info["pools"]):
                     raise Problem(409, "warm_pool_not_supported")
                 pending = [json.loads(p.read_text()) for p in self.journal.root.glob("*.json")]
-                unresolved = [
-                    r
-                    for r in pending
-                    if r["operations"].get("allocate", {}).get("state") == "started"
-                    and not r.get("handle")
-                    and r["run_id"] != str(run_id)
-                ]
+                unresolved = [r for r in pending if blocks_new_admission(r, run_id)]
                 if unresolved:
                     raise Problem(409, "unresolved_allocation_blocks_admission")
                 if max(len(self.client.sandboxes()), len(self.host.vms())) >= 4:
@@ -579,6 +575,14 @@ class Connector:
         if status != "finished":
             raise Problem(409, "agent_not_finished")
         self.guard(row)
+        verification = row["input"].get(
+            "verification",
+            {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
+        )
+        helper_timeout = min(
+            180,
+            max(90, 10 + sum(item["timeout_seconds"] for item in verification.get("checks", []))),
+        )
         raw = sb.exec(
             "python3",
             "-I",
@@ -588,11 +592,16 @@ class Connector:
                     "action": "result",
                     "run_id": row["run_id"],
                     "base_sha": row["input"]["base_sha"],
+                    "verification": row["input"].get(
+                        "verification",
+                        {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
+                    ),
                 }
             ),
             user="agentprobe",
-            timeout=90,
+            timeout=helper_timeout,
         )
+        self.guard(row)
         return workspace_result(raw, row, OutputPolicy(self, row))
 
     def release(self, row):

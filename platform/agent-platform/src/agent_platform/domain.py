@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .verification import VerificationPolicy
+
 TERMINAL = {"succeeded", "failed", "cancelled"}
 CAPABILITIES = {
     "protocol_revision": "m1-fake-1",
@@ -64,6 +66,7 @@ class ProfileInput(Input):
     backend: Literal["fake", "openhands"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
     require_approval: bool = False
+    verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
 
 
 class RunInput(Input):

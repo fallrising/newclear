@@ -58,7 +58,7 @@ class ModelProxy:
         ).fetchone()
         if (
             not profile
-            or profile["model_ref"] != MODEL
+            or profile["model_ref"] not in {MODEL, "openai-compatible:chat-completions"}
             or not binding
             or binding["run_id"] != run["id"]
             or binding["generation"] != generation
@@ -238,7 +238,11 @@ class ModelProxy:
                     "cost_status": "unknown",
                     "request_slots_consumed": count + 1,
                     "request_limit": self.policy.request_limit,
-                    "fixture": True,
+                    "fixture": self.policy.mode != "openai-compatible-https-v1",
+                    "usage_source": {
+                        "openai-compatible-mock-v1": "mock_reported_unbilled",
+                        "openai-compatible-https-v1": "provider_reported_unbilled",
+                    }.get(self.policy.mode, "fixture_reported"),
                     "fixture_reserved_microcredits": reserved,
                     "quote_reserved_nanodollars": quoted_reserved,
                 },
@@ -329,7 +333,11 @@ class ModelProxy:
                     "input_tokens": usage["prompt_tokens"] if usage else None,
                     "output_tokens": usage["completion_tokens"] if usage else None,
                     "amount_decimal": None,
-                    "fixture": True,
+                    "fixture": self.policy.mode != "openai-compatible-https-v1",
+                    "usage_source": {
+                        "openai-compatible-mock-v1": "mock_reported_unbilled",
+                        "openai-compatible-https-v1": "provider_reported_unbilled",
+                    }.get(self.policy.mode, "fixture_reported"),
                     "fixture_settled_microcredits": charged,
                     "quote_settled_nanodollars": quoted_charged,
                 },
@@ -337,7 +345,7 @@ class ModelProxy:
             audit(conn, None, "model.request_settled", str(run_id), status)
 
     def complete(self, run_id, token, request_id, data, *, sdk=False):
-        if self.policy.mode == MOCK_MODE and not sdk:
+        if self.policy.compatible and not sdk:
             raise Problem(422, "model_sdk_required")
         payload = data.payload(self.policy.model) if sdk else data.payload()
         if sdk and self.policy.mode == "fixture-http-v1":
@@ -355,9 +363,7 @@ class ModelProxy:
             if sdk:
                 from .model_dialect import sdk_response
 
-                value, usage = sdk_response(
-                    raw, payload, known, compatible=self.policy.mode == MOCK_MODE
-                )
+                value, usage = sdk_response(raw, payload, known, compatible=self.policy.compatible)
             else:
                 value, usage = response(raw, payload["max_tokens"], known)
             if self.policy.budget and usage["prompt_tokens"] > len(canonical(payload)):
@@ -374,9 +380,10 @@ class ModelProxy:
             run_id,
             request_id,
             usage=usage,
-            reason="mock_reported_usage"
-            if self.policy.mode == MOCK_MODE
-            else "fixture_reported_usage",
+            reason={
+                "openai-compatible-mock-v1": "mock_reported_usage",
+                "openai-compatible-https-v1": "provider_reported_usage_unbilled",
+            }.get(self.policy.mode, "fixture_reported_usage"),
         )
         # Accounting survives revocation; stale output cannot enter a resumed generation.
         with self.db.transaction() as conn:
@@ -496,7 +503,7 @@ def usage_view(db, run_id):
         for entry in entries
     )
     return {
-        "scope": "control-model-proxy-fixture",
+        "scope": "control-model-proxy",
         "guest_connected": policy["guest_connected"] if policy else False,
         "cutoff_reason": policy["cutoff_reason"] if policy else None,
         "configured": policy is not None,

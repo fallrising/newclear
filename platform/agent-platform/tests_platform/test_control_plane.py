@@ -67,6 +67,7 @@ class PlatformFixture(unittest.TestCase):
             {"name": "Test repository", "canonical_repo": "https://github.com/fallrising/newclear"},
         ).json()
         self.profile = self.post("/agent-profiles", {"name": "Deterministic M1"}).json()
+        self.assertEqual(self.profile["limits"]["verification"]["mode"], "none")
         self.payload = {
             "title": "Persistent work",
             "goal": "Verify the queued task",
@@ -239,6 +240,41 @@ class PlatformTests(PlatformFixture):
     def test_bootstrap_is_one_time_and_profiles_immutable(self):
         with self.assertRaises(ValueError):
             bootstrap(self.db, "second", self.password)
+        configured = self.post(
+            "/agent-profiles",
+            {
+                "name": "Pinned repository checks",
+                "verification": {
+                    "mode": "commands",
+                    "revision": "unit-checks-v1",
+                    "checks": [
+                        {
+                            "id": "smoke",
+                            "argv": ["python3", "-c", "pass"],
+                            "timeout_seconds": 5,
+                        }
+                    ],
+                },
+            },
+        ).json()
+        self.assertEqual(configured["limits"]["verification"]["revision"], "unit-checks-v1")
+        self.assertEqual(configured["limits"]["verification"]["checks"][0]["id"], "smoke")
+        self.assertEqual(
+            self.post(
+                "/agent-profiles",
+                {
+                    "name": "Duplicate check IDs",
+                    "verification": {
+                        "mode": "commands",
+                        "checks": [
+                            {"id": "same", "argv": ["true"], "timeout_seconds": 1},
+                            {"id": "same", "argv": ["true"], "timeout_seconds": 1},
+                        ],
+                    },
+                },
+            ).status_code,
+            422,
+        )
         newer = self.post(
             "/agent-profiles", {"name": "New revision", "profile_id": self.profile["profile_id"]}
         ).json()

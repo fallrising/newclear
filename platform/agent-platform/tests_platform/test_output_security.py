@@ -208,7 +208,16 @@ class OutputBoundaryTests(PlatformFixture):
         self.connector = self.server.client
         self.connector.register(self.db)
         self.payload["profile_revision"] = self.post(
-            "/agent-profiles", {"name": "Security fixture", "backend": "openhands"}
+            "/agent-profiles",
+            {
+                "name": "Security fixture",
+                "backend": "openhands",
+                "verification": {
+                    "mode": "fixture-m2",
+                    "revision": "fixture-m2-v1",
+                    "checks": [],
+                },
+            },
         ).json()["id"]
 
     def execute(self, mode):

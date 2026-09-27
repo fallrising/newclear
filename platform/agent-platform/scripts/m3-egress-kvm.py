@@ -171,6 +171,11 @@ def main():
                 canonical_repo=repo["canonical_repo"],
                 base_sha=repo["base_sha"],
                 deadline=datetime.now(UTC) + timedelta(seconds=420),
+                verification={
+                    "mode": "fixture-m2",
+                    "revision": "fixture-m2-v1",
+                    "checks": [],
+                },
             ),
         )
         try:

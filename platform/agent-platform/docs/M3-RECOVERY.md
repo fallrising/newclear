@@ -22,7 +22,7 @@ Worker 每 5 秒續 30 秒 DB lease，commit 後才把同一到期時間交給�
 | node 不可達、VM 身分不同、conversation 不一致 | 保持 interrupted／unknown，不配置 replacement |
 | 已有 binding／conversation，但 connector journal 缺失 | 拒絕重新配置，等待處理 |
 
-未知操作每 30 秒再次**核對**，不代表每 30 秒重送 mutation。沒有保存 handle 或 VMM ownership 的未知 allocation，仍需管理員對帳；即使 claim-list 空了，也不能自行推論停止證據。Known VM 若已完全消失且沒有保存結果，run 以 `runtime_stopped_before_result` 失敗；不虛構成功結果。終態 run 只處理清理，不重開執行。
+未知操作每 30 秒再次**核對**，不代表每 30 秒重送 mutation。沒有保存 handle 或 VMM ownership 的未知 allocation，仍需管理員對帳；即使 claim-list 空了，也不能自行推論停止證據。對帳命令是 `agent-platform reconcile-unconfirmed-allocation --config <私人 connector.json> --run-id <UUID>`。它只接受 allocate 仍是 `started`、沒有 handle／observed、fence generation 與 journal 相同，而且當下沒有 VM、claim、`vm-*.scope` 或 Cocoon `root_dir` 下的 `vm-*`。成功時把同一筆 journal 記成 `reconciled`／`unconfirmed_allocation_not_observed`，不刪檔、不改 fence、不降低 generation。connector 或 fence lock 被佔用時拒絕。有 handle 的列仍走原來的四項停止證據。Known VM 若已完全消失且沒有保存結果，run 以 `runtime_stopped_before_result` 失敗；不虛構成功結果。終態 run 只處理清理，不重開執行。
 
 `003_recovery.sql` 加入 `interrupted_from`、`reconciled_at` 與 recovery index。事件保存來源 ID／cursor、已保存結果與 cleanup 事件去重；`runtime.reconcile` audit 記錄 run 與接管 generation。Run API 保留原中斷階段與成功核對時間，工作台既有活動流顯示 `runtime.reconciled`、state 與 cleanup 事件。
 

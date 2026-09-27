@@ -1,11 +1,19 @@
-"""Read-only reconciliation of the exact journaled sandbox and conversation.
+"""Reconciliation of the exact journaled sandbox and conversation.
 
 Unknown upstream mutations remain quarantined. Even an absent claim is not
-proof that the VMM, runtime directory and cgroup have disappeared.
+proof that the VMM, runtime directory and cgroup have disappeared. The only
+supported decision for an allocate intent with no saved handle is the explicit
+command below; it records the decision in the same journal and does not delete
+the row, edit the fence, or lower generation.
 """
+
+import json
+from pathlib import Path
+from uuid import UUID
 
 from agent_platform_m0.contracts import OPENHANDS_SHA, OPENHANDS_VERSION
 
+from .connector_journal import Journal
 from .domain import Problem
 
 STOP_KEYS = {
@@ -14,6 +22,102 @@ STOP_KEYS = {
     "runtime_directory_gone",
     "cpu_scope_gone",
 }
+UNCONFIRMED_ALLOCATION_DECISION = "unconfirmed_allocation_not_observed"
+
+
+def unconfirmed_allocate_pending(row):
+    operation = row.get("operations", {}).get("allocate")
+    return bool(
+        operation
+        and operation.get("state") == "started"
+        and not row.get("handle")
+        and not row.get("observed")
+    )
+
+
+def blocks_new_admission(row, run_id):
+    return unconfirmed_allocate_pending(row) and row.get("run_id") != str(run_id)
+
+
+def unconfirmed_allocation_reconciled(row):
+    operation = row.get("operations", {}).get("allocate") or {}
+    result = operation.get("result") or {}
+    return bool(
+        operation.get("state") == "reconciled"
+        and result.get("decision") == UNCONFIRMED_ALLOCATION_DECISION
+        and result.get("generation") == row.get("generation")
+        and not row.get("handle")
+        and not row.get("observed")
+        and set(row.get("operations", {})) == {"allocate"}
+    )
+
+
+def host_not_clear(config, host):
+    if host.vms():
+        return True
+    claims = Path(config["sandbox_data_dir"]) / "claims.json"
+    if claims.exists():
+        try:
+            parsed = json.loads(claims.read_text())
+        except (OSError, json.JSONDecodeError):
+            return True
+        if parsed != {}:
+            return True
+    cgroup = getattr(host, "cgroup", None)
+    if cgroup is not None and any(Path(cgroup).glob("vm-*.scope")):
+        return True
+    root_dir = (getattr(host, "config", None) or {}).get("root_dir")
+    return bool(root_dir and any(Path(root_dir).glob("vm-*")))
+
+
+def reconcile_unconfirmed_allocation(config, host, run_id):
+    """Record one explicit decision. Caller must already hold no connector lock."""
+    run_id = str(UUID(str(run_id)))
+    state_dir = Path(config["state_dir"])
+    fence_root = state_dir / "fences"
+    if not state_dir.is_dir() or not fence_root.is_dir():
+        raise Problem(409, "unconfirmed_allocation_fence_missing")
+    try:
+        journal = Journal(state_dir)
+    except BlockingIOError:
+        raise Problem(409, "connector_journal_busy") from None
+    fences = None
+    try:
+        try:
+            fences = Journal(fence_root)
+        except BlockingIOError:
+            raise Problem(409, "connector_journal_busy") from None
+        with journal.locked(run_id):
+            if host_not_clear(config, host):
+                raise Problem(409, "unconfirmed_allocation_host_not_clear")
+            row = journal.read(run_id)
+            fence = fences.read(run_id)
+            if row is None or fence is None:
+                raise Problem(409, "unconfirmed_allocation_fence_missing")
+            if unconfirmed_allocation_reconciled(row):
+                if fence.get("generation") != row.get("generation"):
+                    raise Problem(409, "unconfirmed_allocation_fence_mismatch")
+                return row["operations"]["allocate"]["result"]
+            if not unconfirmed_allocate_pending(row) or set(row.get("operations", {})) != {
+                "allocate"
+            }:
+                raise Problem(409, "unconfirmed_allocation_not_reconcilable")
+            if fence.get("generation") != row.get("generation"):
+                raise Problem(409, "unconfirmed_allocation_fence_mismatch")
+            result = {
+                "decision": UNCONFIRMED_ALLOCATION_DECISION,
+                "generation": row["generation"],
+                "host_vm_count": 0,
+                "sandbox_claim_count": 0,
+            }
+            row["operations"]["allocate"]["state"] = "reconciled"
+            row["operations"]["allocate"]["result"] = result
+            journal.write(row)
+            return result
+    finally:
+        if fences is not None:
+            fences.close()
+        journal.close()
 
 
 def stopped(value):

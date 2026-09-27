@@ -56,12 +56,20 @@ def execute_real(worker, claim):
     def snapshot():
         with worker.owned(claim) as (conn, run):
             context = conn.execute(
-                "SELECT p.canonical_repo,a.template_digest,b.provider_handle FROM tasks t "
+                "SELECT p.canonical_repo,a.template_digest,a.limits AS profile_limits,"
+                "b.provider_handle FROM tasks t "
                 "JOIN projects p ON p.id=t.project_id JOIN agent_profile_revisions a ON a.id=%s "
                 "JOIN sandbox_bindings b ON b.id=%s WHERE t.id=%s",
                 (run["profile_revision"], run["sandbox_id"], run["task_id"]),
             ).fetchone()
-            return {**run, **context}
+            return {
+                **run,
+                **context,
+                "verification": context["profile_limits"].get(
+                    "verification",
+                    {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
+                ),
+            }
 
     def ensure_live(run, lost):
         if lost.is_set():
@@ -91,11 +99,18 @@ def execute_real(worker, claim):
                 source_id="result",
             )
             passed = result["verification"]["status"] == "passed"
+            reason = (
+                None
+                if passed
+                else "verification_unverified"
+                if result["verification"]["status"] == "unknown"
+                else "verification_failed"
+            )
             state(
                 conn,
                 run,
                 "succeeded" if passed else "failed",
-                None if passed else "verification_failed",
+                reason,
             )
 
     def cleaned(proof):

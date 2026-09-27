@@ -156,6 +156,7 @@ Added 2026-09-24 for the `portfolio-docs` program. This table sets **documentati
 | `products/hai-taskboard` | A | Fake-core / Work Graph in progress |
 | `platform/agent-platform` | A | Owner override; M0–M3 evidence in tree |
 | `platform/dim-gate` | A | M0–M5 demo accepted locally |
+| `platform/edge-ops` | A | Owner override 2026-09-27; Cloudflare host monitoring/control SDD only; implementation and live tests not started |
 | `platform/ice-maker` | A | Knowledge-compiler investment line |
 | `labs/eru-vps-mvp` | A | Live VPS MVP experiment |
 | `labs/mithril-research` | A | Owner override 2026-09-27; bounded source research, runtime unverified |
@@ -209,3 +210,11 @@ offline unit tests 與 CI 已加入；目標主機的 Codex CLI/App Server 實�
 Owner 決定：[fe-review](docs/fe-review/README.md) 工作包中的 C 檔（休眠）元件，可以在 fe-review 第 2 輪做前端修改；D 檔（退役）元件暫緩，不進入第 2、3 輪。
 
 這個例外只涵蓋 fe-review 第 2 輪在各元件 `fe-review/DESIGN.md` 範圍內的前端修改，以及修改所需的最小解耦。它不恢復這些元件的投入，文檔檔位不變，也不授權新功能或 major 依賴升級；後兩者仍需另行決定。其餘 portfolio 決策維持不變。
+
+## Owner override 2026-09-27 — platform/edge-ops
+
+Owner 明確要求在 `fallrising/newclear` 以 Cloudflare 與自有 Host Agent 建立監控／受控操作專案，先撰寫前端、後端、Agent SDD，包含可選初始化能力及 image／Terraform／cloud-init 的業界分工。工作名稱為 [platform/edge-ops](platform/edge-ops/README.md)，文檔檔位 A；目前僅為 SDD v0.1 draft，沒有 runtime、installer 或 live deployment。
+
+本次例外限於此專案的設計、來源研究、契約與驗收規劃，不授權真實主機安裝、Terraform apply、重新開機、格式化或改動 SSH／firewall。後續實作與 disposable/live 環境各依明確授權及安全 gate 進行，不能把本次 SDD 當成部署批准。
+
+既有 OneVPS privileged host authority、OneFleet workload authority、dim-gate UI／CMDB 與 agent-platform LLM／Cocoon 邊界不變。受既有控制器管理的主機只讀或透過後續 typed adapter 委派；Edge Ops standalone 操作只限明確交付 host authority 的獨立目標，不建立競爭的 reconciler。沒有修改其他 component 的投入檔位或實作。

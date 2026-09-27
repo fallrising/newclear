@@ -1,8 +1,8 @@
 # FE Review
 
-給 LLM agent 自主檢查與優化前端的工作包索引。每個帶 UI 的元件都有一個 `fe-review/` 目錄，內含專屬的 `PROMPT.md` 與 `targets.json`；本目錄放共用的規範與截圖腳本。
+給 LLM agent 自主檢查與優化前端的工作包索引。每個帶 UI 的元件都有一個 `fe-review/` 目錄，內含專屬的 `PROMPT.md`、`targets.json`，以及記錄矛盾點與待決定事項的活文件 `REVIEW.md`；本目錄放共用的規範與截圖腳本。
 
-**狀態：** 只完成盤點與執行前的目錄、文件，尚未實際啟動任何 UI 或產生截圖。所有 `targets.json` 都是 `verified: false`。
+**狀態：** 所有元件都在第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動 UI 或產生截圖。所有 `targets.json` 都是 `verified: false`。三輪節奏見 [PROTOCOL.md](PROTOCOL.md) 第 1 節。
 
 ## 共用檔案
 
@@ -32,6 +32,6 @@
 
 ## 使用方式
 
-對單一元件：請 agent 閱讀 `<component>/fe-review/PROMPT.md` 並依指示執行。PROMPT 會引用本目錄的 PROTOCOL.md。
+對單一元件：請 agent 閱讀 `<component>/fe-review/PROMPT.md`，並依 `REVIEW.md` 的目前輪次執行。PROMPT 會引用本目錄的 PROTOCOL.md。每次修改工作包都走 PR。
 
-新增帶 UI 的元件時，複製任一元件的 `fe-review/` 結構，更新 `PROMPT.md`、`targets.json`，並加入上方清單。
+新增帶 UI 的元件時，複製任一元件的 `fe-review/` 結構，更新 `PROMPT.md`、`targets.json`、`REVIEW.md`，並加入上方清單。

@@ -1,8 +1,8 @@
 # FE Review Protocol
 
-每個 `<component>/fe-review/PROMPT.md` 都引用這份共用規範。它規定 LLM agent 如何自主檢查一個 UI、用 headless 瀏覽器產生截圖，並在限定範圍內優化。專案特有的資訊（入口、啟動線索、頁面、重點風險）寫在各自的 `PROMPT.md` 與 `targets.json`。
+每個 `<component>/fe-review/PROMPT.md` 都引用這份共用規範。它規定 LLM agent 如何自主檢查一個 UI、用 headless 瀏覽器產生截圖，並在限定範圍內優化。專案特有的資訊（入口、啟動線索、頁面、重點風險）寫在各自的 `PROMPT.md` 與 `targets.json`；尚未解決的矛盾與待決定事項寫在各自的 `REVIEW.md`。
 
-> 狀態：**只定義，未執行**。各 `targets.json` 的 `verified: false` 表示啟動指令、port、頁面清單都是從原始碼推斷，尚未實際跑過。第一次執行的 agent 必須先驗證並修正它們。
+> 狀態：所有元件都在**第 1 輪（文檔先行）**。各 `targets.json` 的 `verified: false` 表示啟動指令、port、頁面清單都是從原始碼推斷，尚未實際跑過。
 
 ## 0. 執行環境
 
@@ -15,22 +15,37 @@ FE review 一律在**受控的隔離環境**執行，例如專用容器或 CI ru
 
 **拆不開就是耦合。** 如果某個 UI 無法在上述環境單獨跑起來，例如綁定位址寫死、UI 只能透過完整後端和正式認證才能載入，這本身就是 review 的發現。處理方式：
 
-1. 在報告中記為 `major`，說明耦合點（file:line）。
-2. 在報告中提出修正方向：讓部署策略可注入，**而不是**移除安全邊界；提議的選項只能讓行為更窄（例如綁定只接受 loopback），不得包含認證旁路或對外綁定。這類修改屬後端變更，依第 4 節只提議、不直接實作，由擁有者決定。
+1. 記入元件的 `REVIEW.md`（第 3 輪發現時也寫進 `REPORT.md`，嚴重度 `major`），說明耦合點（file:line）。
+2. 在 `REVIEW.md` 提出修正方向：讓部署策略可注入，**而不是**移除安全邊界；提議的選項只能讓行為更窄（例如綁定只接受 loopback），不得包含認證旁路或對外綁定。這類修改屬後端變更，依第 4 節只提議、不直接實作，由擁有者決定。
 3. 前端可以脫離後端驗證時，優先用 API contract 的 mock 與合成資料擷取畫面；再用一次完整整合執行（真實伺服器＋即時產生的測試憑證）確認接線。
 
-## 1. 流程總覽
+## 1. 三輪節奏
 
-每一輪 review 固定走這六步，不要跳步：
+每個元件依序走三輪。上一輪的文件被擁有者確認後，才進入下一輪；每一輪的每次變更都是一個 PR。
 
-1. **Discover** — 讀元件 `README.md`、`AGENTS.md`（若有）、`package.json`／建置檔、router 與頁面元件，確認 `targets.json` 的內容仍然正確。
-2. **Launch** — 在第 0 節的隔離環境內以最小依賴啟動 UI：優先使用專案自帶的 mock／fixture／demo 模式；只綁 `127.0.0.1`；不連任何正式環境。
-3. **Baseline capture** — 執行 `capture.mjs` 產生第一組截圖與 `capture.json`。
+| 輪次 | 目的 | 允許的動作 | 完成條件 |
+| --- | --- | --- | --- |
+| **第 1 輪：文檔先行** | 確認思路正確 | 讀原始碼與文件；撰寫與打磨 `PROMPT.md`、`targets.json`、`REVIEW.md`。**不啟動、不修改程式碼** | `REVIEW.md` 的每個待決定事項都有擁有者的決定 |
+| **第 2 輪：修改** | 依已確認的文件實作 | 實作已決定的修改（含解耦）；在第 0 節環境內確認 UI 能啟動並修正 `targets.json`；跑元件自己的 lint／typecheck／test／build | 已決定事項全部落地，`targets.json` 改為 `verified: true` |
+| **第 3 輪：完整 e2e** | 整體開發完成後驗收 | 依下方六步完整擷取與檢查，寫 `REPORT.md` | 報告提交；新發現寫回 `REVIEW.md`，由新的第 2 輪 PR 處理 |
+
+第 3 輪的六步：
+
+1. **Discover** — 確認 `PROMPT.md`、`targets.json` 與程式碼一致。
+2. **Launch** — 在第 0 節的隔離環境內啟動 UI：優先使用專案自帶的 mock／fixture／demo 模式；只綁 `127.0.0.1`；不連任何正式環境。
+3. **Capture** — 執行 `capture.mjs`，並走完 `PROMPT.md` 的主要流程。
 4. **Review** — 依第 3 節檢查清單逐頁檢視截圖與 `capture.json`，也讀對應原始碼找根因。
-5. **Optimize** — 只修第 4 節允許範圍內、證據明確的問題；每個修正都跑專案自己的 lint／typecheck／test／build。
-6. **Re-capture & report** — 重新截圖，寫 `REPORT.md`，列出 before／after 與未處理事項。
+5. **Classify** — 可以在第 4 節允許範圍內直接修的，記為第 2 輪待辦；需要決定的，寫進 `REVIEW.md`。第 3 輪本身不修改程式碼，好讓報告對應同一個 commit。
+6. **Report** — 寫 `REPORT.md`，列出發現與未處理事項。
 
-啟動失敗不是結束：把失敗原因、已嘗試的指令、缺少的依賴寫進 `REPORT.md`，並修正 `targets.json` 中可確定的部分。若失敗原因是耦合，依第 0 節處理。
+啟動失敗不是結束：把失敗原因、已嘗試的指令、缺少的依賴寫進 `REPORT.md` 與 `REVIEW.md`。若失敗原因是耦合，依第 0 節處理。
+
+### `REVIEW.md` 規則
+
+- 每個元件一份，是**活文件**：只描述目前狀態。已解決的項目直接刪除或改寫成目前的結論，不留過期、不合時宜的描述；歷史由 Git 與 PR 保存。
+- 內容分為：目前輪次、修改權限（文檔檔位等）、矛盾點、需要放開或決定的點、進入下一輪的條件、相關 PR。
+- 待決定事項由擁有者決定；agent 只提出選項與建議，不自行把「待決定」改成「已決定」。
+- 每次修改 `REVIEW.md`、`PROMPT.md`、`targets.json` 都走 PR，PR 說明哪些項目新增、解決或改寫。
 
 ## 2. 截圖
 
@@ -104,7 +119,7 @@ node docs/fe-review/capture.mjs <component>/fe-review/targets.json --start
 - 為了讓檢查通過而刪除、跳過、放寬測試。
 - 提交截圖 PNG 或 `storageState`。
 
-每個修正：一個問題一個 commit；commit message 說明問題、證據（截圖檔名或 `capture.json` 欄位）與驗證指令。遵守元件自己的 `AGENTS.md` 與 portfolio 文檔檔位規則。
+以上範圍適用於第 2 輪。每個修正：一個問題一個 commit；commit message 說明問題、證據（截圖檔名、`capture.json` 欄位或 `REVIEW.md` 項目編號）與驗證指令。遵守元件自己的 `AGENTS.md` 與 portfolio 文檔檔位規則。
 
 ## 5. `REPORT.md` 格式
 
@@ -125,17 +140,17 @@ node docs/fe-review/capture.mjs <component>/fe-review/targets.json --start
 - 頁面／viewport：
 - 證據：screenshots/<file>.png、capture.json 欄位
 - 根因：<file:line>
-- 處理：已修（commit）／提議（原因）／不處理（原因）
+- 去向：第 2 輪待辦／寫入 REVIEW.md（項目編號）／不處理（原因）
 
-## Before / After
-<已修項目的截圖檔名對照>
+## 與上一份報告比較
+<上一份報告的發現中，哪些已消失、哪些仍在；第一次報告寫「無」>
 
 ## 檢查清單
 <第 3 節逐項 pass／issue／n/a>
 
 ## 未驗證與後續
-- targets.json 修正內容
 - 無法啟動或無法覆蓋的頁面，以及需要的條件
+- 本報告新增到 REVIEW.md 的項目編號
 ```
 
 嚴重度定義：**blocker** 頁面無法使用或資料錯誤；**major** 主要流程受阻、a11y critical／serious、明顯破版；**minor** 局部版面或狀態缺漏；**nit** 一致性與潤飾。

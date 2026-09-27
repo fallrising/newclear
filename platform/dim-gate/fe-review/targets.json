@@ -1,90 +1,73 @@
 {
   "project": "dim-gate",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "由原始碼推斷（src/app/routes/AppRoutes.tsx、vite.config.ts base /dim-gate/、.env.demo），尚未實際啟動；第 2 輪驗證並修正後改為 true。每頁都是新 context，因此一律是預設身分 user-rd-commerce（僅 RD 中心）；Ops／Admin 與深色主題由 DESIGN.md M2 的 capture-personas.mjs 擷取。",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
-    "dark"
+    "light"
   ],
   "apps": [
     {
       "name": "web",
       "kind": "spa",
       "cwd": "platform/dim-gate",
-      "install": "npm ci",
-      "start": "npm run dev -- --port 5173 --strictPort",
+      "install": "pnpm install --frozen-lockfile",
+      "start": "pnpm dev --mode demo --port 5173 --strictPort",
       "env": {},
-      "baseUrl": "http://127.0.0.1:5173",
-      "ready": "/",
+      "baseUrl": "http://127.0.0.1:5173/dim-gate/",
+      "ready": "/dim-gate/",
       "pages": [
         {
           "id": "home",
-          "path": "/"
+          "path": "/dim-gate/"
         },
         {
           "id": "guide",
-          "path": "/guide"
-        },
-        {
-          "id": "ops",
-          "path": "/ops"
-        },
-        {
-          "id": "ops-cmdb",
-          "path": "/ops/cmdb"
-        },
-        {
-          "id": "ops-incidents",
-          "path": "/ops/incidents"
-        },
-        {
-          "id": "ops-topology",
-          "path": "/ops/topology"
-        },
-        {
-          "id": "ops-releases",
-          "path": "/ops/releases"
-        },
-        {
-          "id": "ci-detail",
-          "path": "/cis/ci-aws-checkout-01"
+          "path": "/dim-gate/guide"
         },
         {
           "id": "rd",
-          "path": "/rd"
+          "path": "/dim-gate/rd"
         },
         {
           "id": "rd-apps",
-          "path": "/rd/apps"
+          "path": "/dim-gate/rd/apps"
+        },
+        {
+          "id": "rd-app-detail",
+          "path": "/dim-gate/rd/apps/app-checkout"
+        },
+        {
+          "id": "rd-environment-detail",
+          "path": "/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod"
         },
         {
           "id": "rd-catalog",
-          "path": "/rd/catalog"
+          "path": "/dim-gate/rd/catalog"
+        },
+        {
+          "id": "rd-requests",
+          "path": "/dim-gate/rd/requests"
         },
         {
           "id": "rd-pipelines",
-          "path": "/rd/pipelines"
+          "path": "/dim-gate/rd/pipelines"
         },
         {
-          "id": "alert-rules",
-          "path": "/alert-rules"
+          "id": "rd-observability",
+          "path": "/dim-gate/rd/observability"
         },
         {
-          "id": "slo-policies",
-          "path": "/slo-policies"
+          "id": "ops-forbidden",
+          "path": "/dim-gate/ops"
         },
         {
-          "id": "admin",
-          "path": "/admin"
+          "id": "admin-forbidden",
+          "path": "/dim-gate/admin"
         },
         {
-          "id": "admin-users",
-          "path": "/admin/users"
-        },
-        {
-          "id": "admin-audit",
-          "path": "/admin/audit"
+          "id": "unknown-route",
+          "path": "/dim-gate/does-not-exist"
         }
       ]
     }

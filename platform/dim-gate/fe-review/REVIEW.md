@@ -4,7 +4,7 @@
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
+- **第 1 輪：文檔先行（進行中）** — [DESIGN.md](DESIGN.md) 已草擬，待擁有者在設計 PR 確認假設 A1、A2（對應 D1）。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -14,13 +14,21 @@
 
 ## 矛盾點
 
-### C1 demo 模式的啟用方式未確認
-
-`.env.demo` 定義 `VITE_DATA_MODE`，但 `targets.json` 的 `npm run dev` 是否載入 demo 資料未驗證；smoke 設定可能用不同的啟動參數。
-
 ### C2 既有 e2e 與 fe-review 可能重疊
 
-`e2e/` 已有大量 Playwright spec（含 browser health、keyboard、isolation）。fe-review 若再寫一套，會出現兩個互相漂移的真相。
+`e2e/` 已有大量 Playwright spec（含 browser health、keyboard、isolation），部分 spec 也做 axe 與 viewport 檢查（`e2e/m2-admin.spec.ts:192-205`、`e2e/w5-identity.spec.ts:37-39`）。fe-review 若再寫一套流程，會出現兩個互相漂移的真相。處理方式待 D1。
+
+### C3 `capture.mjs` 只能擷取預設身分
+
+`capture.mjs` 每頁都開新 context（`docs/fe-review/capture.mjs:114-120`）。demo session 存在分頁的 `sessionStorage`（`src/demo/browser.ts:15-37`），預設身分 `user-rd-commerce`（`src/demo/controller.ts:72`）只有 RD 中心（`src/demo/seed/core.ts:4`），所以 Ops／Admin 頁面只會擷取到 403（`src/app/layouts/CenterLayout.tsx:9`）。修正方向見 DESIGN.md M2。
+
+### C4 深色主題不跟隨 `prefers-color-scheme`
+
+主題由 `localStorage` 的 `dim-gate.ui.v1` 決定（`src/app/shell/AppShell.tsx:27-31`、`:61`），`capture.mjs` 的 `colorSchemes` 模擬不會切換主題。`targets.json` 目前只擷取淺色；深色由 DESIGN.md M2 處理。
+
+## 已決定
+
+- 無
 
 ## 需要放開或決定的點
 
@@ -28,14 +36,15 @@
 
 - 選項：(a) fe-review 只負責截圖與視覺／a11y 檢查，流程正確性交給既有 e2e；(b) 把 `capture.mjs` 的頁面清單改由既有 e2e 產生。
 - 建議：(a)。責任清楚，不重複維護流程。
-- 狀態：**待擁有者決定**。撰寫 `DESIGN.md` 時可先以建議作為「假設」，在設計 PR 中由擁有者確認。
+- 狀態：**待擁有者決定**。DESIGN.md 以 (a) 作為假設 A1（並推出 A2），在設計 PR 中由擁有者確認。
 
 ## 進入第 2 輪的條件
 
 - `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
+- `PROMPT.md` 與 `targets.json` 已依設計更新（本次設計 PR 已依原始碼先行修正，仍為 `verified: false`）。
 
 ## 相關 PR
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- PR_PLACEHOLDER：撰寫 DESIGN.md，依原始碼修正 PROMPT.md 與 targets.json（Closes #147）。

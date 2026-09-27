@@ -131,7 +131,7 @@ def normalize_usage(payload):
 def collect(o):
  started=time.monotonic();out={"snapshot_schema_version":"1.0","collector_version":VERSION,"status":"error","collection_started_at":dt.datetime.now(dt.timezone.utc).isoformat(),"collected_at":None,"source":{"kind":"official_codex_cli_app_server","codex_version":None},"identity":None,"queries":{"account":q(),"rate_limits":q(),"usage":q()},"quota_buckets":None,"token_statistics":None,"errors":[]}
  exe=shutil.which(o.codex) if os.sep not in o.codex else o.codex
- if not exe:
+ if not exe or not os.path.isfile(exe) or not os.access(exe,os.X_OK):
   out["errors"].append(E("codex_cli_not_found").public());out["collected_at"]=dt.datetime.now(dt.timezone.utc).isoformat();return out
  env=os.environ.copy()
  if o.codex_home:env["CODEX_HOME"]=o.codex_home

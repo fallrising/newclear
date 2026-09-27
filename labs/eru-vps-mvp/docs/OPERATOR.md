@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。`scripts/worker_drain.py` 另提供 ERU-009 的離線、review-only planner；不連 SSH、不執行 deploy／remove／fence／reinstall，計畫永遠不可執行。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
+入口：scripts/labctl.py。`scripts/worker_drain.py` 提供 ERU-009 的離線、review-only planner；`scripts/worker_loss.py` 提供 ERU-010 的失聯偵測／外部 fence／stale state recovery review planner。兩者不因產生 plan 而執行遠端 mutation。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -56,6 +56,17 @@ python3 scripts/labctl.py reconcile --run PLAN_ID
 reconcile 只讀遠端，不重播部署、不自動清理。若原控制程序中斷而 journal 停在 running，取得鎖後會標成 interrupted，保留 failed_at 與目前觀測。SSH 無法連線時亦保存部分命令紀錄與 error，不把無法讀取當成空集合。
 
 先檢查私有 run log、smoke evidence、runtime 與配額，再建立新的計畫處理明確範圍。timeout 代表結果不確定，不能以 timeout 直接推論遠端沒執行。
+
+## worker 非計畫失聯：離線 review plan
+
+已由 provider power off 或能阻止原 workload 繼續寫入的網路層 fence 隔離 target 後，可在 B 本機保存 ERU-010 review plan：
+
+```bash
+python3 scripts/labctl.py plan-worker-loss --target worker-4 \
+  --input private/operations/worker-loss-input.json
+```
+
+輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。計畫會列 exact stale IDs 與 quota digest，但永遠 `executable: false`，不會 SSH、dissociate、執行 `resource --fix`、node remove 或 deploy。偵測超過 180 秒會記為 V07 acceptance gap，仍允許建立事故處理 review plan。完整輸入及後續尚未實作的安全順序見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
 
 ## 鎖、紀錄與適用邊界
 

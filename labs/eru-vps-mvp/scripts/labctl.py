@@ -847,6 +847,10 @@ def main():
     drain_cleanup_execute.add_argument('--plan', required=True, help='Saved worker-drain recovery cleanup plan ID')
     drain_cleanup_execute.add_argument('--sha256', required=True, help='Recovery cleanup plan SHA-256')
     drain_cleanup_execute.add_argument('--cleanup-sha256', required=True, help='Nested ERU-012 exact cleanup plan SHA-256')
+    loss_plan = sub.add_parser('plan-worker-loss', help='Save a private, offline ERU-010 worker-loss recovery review plan')
+    loss_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
+    loss_plan.add_argument('--input', required=True, help='Private JSON with stale state, detection, fence, and explicit destinations')
+    loss_plan.add_argument('--plan-id')
     args = parser.parse_args()
     os.umask(0o077)
     if args.command == 'status':
@@ -867,6 +871,20 @@ def main():
             'decision': plan['decision'], 'executable': plan['executable'],
             'blockers': plan['blockers'], 'sha256': plan['plan_sha256'],
             'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'plan-worker-loss':
+        from worker_loss_ops import save_review_plan
+        with ClusterLock(PROJECT):
+            plan, path = save_review_plan(
+                PROJECT, args.target, args.input, args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'blockers': plan['blockers'],
+            'detection_seconds': plan['detection']['seconds'],
+            'detection_within_candidate': plan['detection']['within_candidate'],
+            'sha256': plan['plan_sha256'], 'path': str(path),
         }, indent=2))
         return
     if args.command == 'prepare-worker-drain':

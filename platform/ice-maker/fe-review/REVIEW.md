@@ -47,4 +47,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- 本次設計 PR（`fe-review/design-ice-maker`，Closes #151）：新增 `DESIGN.md`，改寫 C1，新增 C3、C4，修正 `PROMPT.md` 與 `targets.json`。
+- fallrising/newclear#180：新增 `DESIGN.md`，改寫 C1，新增 C3、C4，修正 `PROMPT.md` 與 `targets.json`。

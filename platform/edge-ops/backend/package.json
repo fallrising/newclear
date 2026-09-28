@@ -1,1 +1,26 @@
-{"name":"edge-ops-backend","private":true,"type":"module","scripts":{"start":"node src/server.js","test":"node --test"},"engines":{"node":">=20"}}
+{
+  "name": "@edge-ops/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Edge Ops control plane: M0 contracts, strict parsing, signatures and D1 stores, plus the loopback S0 demo Worker.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test --test-reporter=spec \"test/**/*.test.ts\"",
+    "check": "npm run typecheck && npm test",
+    "vectors": "node tools/writeVectors.ts",
+    "dev": "wrangler dev --local --var MODE:demo",
+    "db:migrate:local": "wrangler d1 migrations apply edge-ops-demo --local",
+    "test:workerd": "node scripts/workerd-smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "ajv": "8.20.0",
+    "typescript": "5.9.3",
+    "wrangler": "4.135.0"
+  }
+}

@@ -4,7 +4,7 @@
 
 以 Cloudflare 為控制面、以主機常駐 Agent 為資料面，提供多機監控、選定日誌、受控任務與可選初始化能力。`edge-ops` 是本次採用的工作名稱；不是 CF-Server-Monitor 的 fork，也不是 LLM agent 執行平台。
 
-**目前只有 SDD 與 M0 契約層（strict JSON、請求／批准／註冊簽章、TS 與 Go 共用向量、D1 transaction spike），尚無可部署的前端、Worker、Agent、安裝器或雲端部署。** 文件中的 API 路徑、配額策略與驗收目標仍是待實作契約，不能當成已可使用功能。此階段不授權登入或變更任何真實主機。
+**目前有 SDD、M0 契約層（strict JSON、請求／批准／註冊簽章、TS 與 Go 共用向量、D1 transaction spike），以及只綁 loopback 的 S0 mock 鏈路（mock Agent → Worker → SQLite／local D1 → React，見 [DEV-MOCK](docs/DEV-MOCK.md)）；尚無可部署的 Worker、真實 Agent、安裝器或雲端部署。** 文件中的 API 路徑、配額策略與驗收目標仍是待實作契約，不能當成已可使用功能。此階段不授權登入或變更任何真實主機。
 
 ## 三條實作線
 

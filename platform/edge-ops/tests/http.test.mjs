@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {startServer} from '../scripts/serve.mjs';
+import {run,call,target} from '../scripts/mock-agent.mjs';
+const exec=promisify(execFile);
+test('real HTTP mock agent → Worker handler → SQLite → query, replay, offline/recovery and restart',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'edgeops-'));t.after(()=>rm(dir,{recursive:true,force:true}));const file=join(dir,'demo.sqlite');
+ let app=await startServer({port:0,file,mode:'demo'});t.after(async()=>{if(app) await app.close();});
+ const env={...process.env,DEMO_URL:app.url};
+ const seeded=await exec(process.execPath,['scripts/mock-agent.mjs','seed'],{env});assert.ok(seeded.stdout.includes('durable_ack'));
+ let nodes=(await call(app.url,'/api/v1/nodes')).data.nodes;assert.equal(nodes.length,3);assert.equal(nodes.reduce((sum,n)=>sum+n.sample_count,0),36);
+ await run('replay',app.url,()=>{});await run('offline',app.url,()=>{});
+ assert.ok((await call(app.url,'/api/v1/nodes')).data.nodes.every(n=>n.connectivity==='offline'));
+ await run('recover',app.url,()=>{});nodes=(await call(app.url,'/api/v1/nodes')).data.nodes;
+ assert.equal(nodes[0].connectivity,'online');assert.equal(nodes[1].connectivity,'offline');assert.equal(nodes[0].sample_count,13);
+ await app.close();app=null;
+ app=await startServer({port:0,file,mode:'demo'});
+ nodes=(await call(app.url,'/api/v1/nodes')).data.nodes;assert.equal(nodes.reduce((sum,n)=>sum+n.sample_count,0),37);
+ assert.equal(nodes[0].connectivity,'online');assert.equal(nodes[1].connectivity,'offline');
+ await run('reset',app.url,()=>{});assert.equal((await call(app.url,'/api/v1/nodes')).data.nodes.length,0);
+});
+test('mock driver refuses remote endpoints, paths, credentials and redirects',()=>{
+ for(const u of ['https://example.invalid','http://127.0.0.1.evil.invalid','http://user@localhost','http://127.0.0.1/api','http://127.0.0.1?x=1']) assert.throws(()=>target(u));
+ assert.equal(target('http://127.0.0.1:8787'),'http://127.0.0.1:8787');
+});

@@ -20,8 +20,8 @@ SDD v0.1 已隨 #161 merge 進 main（base `05809fc951ef929665e798846aba348d6c90
 | D1 CAS／0-row／rollback spike | implemented on **node:sqlite stand-in** | `backend/test/jobStore.test.ts` 等；**尚未在 workerd/D1 執行**，D1 batch 語義仍待 M1 以 wrangler/miniflare 驗證 |
 | Enrollment／telemetry store | implemented on stand-in | AC-ID-01、AC-MON-01 的伺服器側邏輯 |
 | Root CI `edge-ops-ci.yml` | added | path-scoped、`contents: read`、timeout、concurrency、無 credentials；action SHA 沿用 repo 既有 workflow 已使用的值，本次未重新核對上游 |
-| Frontend `web/` | not started | 依 06 §2，M0 後才分派 |
-| Worker HTTP 路由、DO、R2、Agent collector | not started | M1 |
+| Frontend `web/` | mock slice implemented | React/Vite fleet overview 讀取 `/api/v1/nodes`；尚未接 Cloudflare deploy |
+| HTTP mock backend / mock Agent | implemented in current branch | Node HTTP + memory store + mock telemetry；Cloudflare Worker/D1/DO/R2 與真實 collector 仍未接線 |
 | 獨立 review／owner acceptance | pending | 本次只有作者自查 |
 | Target-host／Cloudflare live tests | not run | 未授權 |
 
@@ -46,10 +46,17 @@ GitHub Actions `Edge Ops CI` 在 PR #188 上兩個 job（Node 24.18.0 TS、Go 1.
 - `requestAuth` 只做簽章與格式層；nonce 重放表、credential 撤銷／generation 查詢屬 M1 HTTP 層，尚未串接。
 - operator 將 `reconciling` 標為 `unknown`、start permit、execd 本地 journal 屬 M4，尚未實作。
 
+## 2026-09-28 mock vertical slice
+
+依 owner 要求改採功能先行：新增 `backend/` Node HTTP mock、`mock-agent/` 與 `web/` React/Vite dashboard。資料流為 mock Agent → `/agent/v1/telemetry` → memory store → `/api/v1/nodes` → dashboard；另提供 per-node metrics history endpoint。這一批刻意不把完整 QA／E2E、安全 hardening 當前置。
+
+目前尚未在本工具環境實際啟動三個 process；branch 內只有 backend 的小型 `node:test`，因此本段只標記 implemented、**不標記 runtime verified**。完整跑法見 `docs/DEV-MOCK.md`。
+
 ## 下一個最小切片
 
-1. Owner／獨立 reviewer 審 `contracts/` 與簽署位元組定義（任何修改需同步 TS、Go、向量）。
-2. M1：`backend` 加入 Worker 入口與 `/agent/v1/enroll`、`/agent/v1/telemetry`、`/api/v1/nodes*`，以 wrangler/miniflare 跑相同 store 測試於本地 D1；`agent` 加入非 root collector（Linux/systemd）與有界 spool；`web/` 以向量 fixtures 做唯讀面板。仍不部署、不接觸真機，disposable VM 另行授權。
+1. 在可執行 Node/npm 的開發環境跑 backend test、啟動 backend + mock-agent、build web，修第一輪整合 bug。
+2. 將 memory store 換成既有 M0 store/D1 adapter，讓 HTTP 路由開始使用正式 contracts；UI 再加 node detail/history。
+3. 完成這一輪功能後再集中做 QA，不提前擴寫 logs/jobs/bootstrap。
 
 ## 續作規則
 

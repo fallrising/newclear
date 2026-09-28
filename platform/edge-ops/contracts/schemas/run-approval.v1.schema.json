@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/edge-ops/contracts/schemas/run-approval.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "key_id",
+    "manifest_sha256",
+    "signature"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "edgeops.approval.v1"
+    },
+    "key_id": {
+      "type": "string",
+      "pattern": "^key_[a-z0-9][a-z0-9_-]{0,62}$"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$",
+      "description": "Ed25519 over 'EDGEOPS-RUN-V1\\n' || sha256(manifest bytes), unpadded base64url"
+    }
+  },
+  "title": "Edge Ops run approval v1",
+  "description": "Max 4 KiB. Produced only by the independent operator signing CLI."
+}

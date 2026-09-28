@@ -4,7 +4,7 @@
 
 以 Cloudflare 為控制面、以主機常駐 Agent 為資料面，提供多機監控、選定日誌、受控任務與可選初始化能力。`edge-ops` 是本次採用的工作名稱；不是 CF-Server-Monitor 的 fork，也不是 LLM agent 執行平台。
 
-**目前只有 SDD，尚無前端、Worker、Agent、安裝器或雲端部署。** 文件中的 API、路徑、配額策略與驗收目標是待實作契約，不能當成已可使用功能。此階段不授權登入或變更任何真實主機。
+**目前只有 SDD 與 M0 契約層（strict JSON、請求／批准／註冊簽章、TS 與 Go 共用向量、D1 transaction spike），尚無可部署的前端、Worker、Agent、安裝器或雲端部署。** 文件中的 API 路徑、配額策略與驗收目標仍是待實作契約，不能當成已可使用功能。此階段不授權登入或變更任何真實主機。
 
 ## 三條實作線
 
@@ -22,6 +22,7 @@
 - [詳細設計索引](docs/sdd/README.md)：前端、後端、Agent、image/bootstrap、契約與驗收。
 - [初始化與業界做法](docs/sdd/04-bootstrap-and-images.md)：Packer、Terraform、cloud-init、SSM／VM Agent／OS Config 的分工。
 - [狀態與下一步](docs/STATUS.md)：本專案唯一的進度權威；不把規格完成當成產品完成。
+- [契約](contracts/README.md)：strict JSON、簽署位元組、向量、狀態機、OpenAPI／JSON Schema；[quickstart](docs/quickstart.md) 有離線驗證命令。
 - [來源](docs/SOURCES.md)：固定上游 revision、官方文件與研究限制。
 - [後續開發入口](DEVELOPMENT_PROMPT.md)及[開發約定](AGENTS.md)。
 

@@ -4,7 +4,9 @@
 
 本檔只適用於 `platform/edge-ops/`。先讀 repository 的 README、PORTFOLIO、docs/taxonomy.md、docs/portfolio-doc-tiers.md、docs/specs/monorepo-ci.md，再完整閱讀本專案 SDD、docs/sdd/ 下全部文件、docs/STATUS.md 與本次選定契約。
 
-目前為 documentation-only。看到下一個 milestone，不代表取得實作、部署、安裝、Terraform apply、重啟或主機權限變更授權。使用者只要求設計時，停在設計 PR。
+目前只有 M0 契約層程式碼（`contracts/`、`backend/`、`agent/`，見 docs/STATUS.md）。看到下一個 milestone，不代表取得實作、部署、安裝、Terraform apply、重啟或主機權限變更授權。使用者只要求設計時，停在設計 PR。
+
+`contracts/` 由整合者維護：改變 wire、簽署位元組或上限時，同一 PR 內更新 TS（`backend/src/domain/contract/`）、Go（`agent/internal/contract/`）、`contracts/vectors/`（`npm run vectors`）與 `contracts/README.md`，兩邊測試都要通過。
 
 ## 不變量
 

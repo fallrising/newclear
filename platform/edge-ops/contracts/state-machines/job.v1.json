@@ -1,0 +1,47 @@
+{
+  "schema_version": "edgeops.state-machine.v1",
+  "machine": "job",
+  "notes": [
+    "cancel_requested is a request flag stored beside the state, never a terminal state",
+    "lease loss moves an attempt to reconciling; it never creates a new attempt or means the process stopped",
+    "unknown is terminal for the attempt; retrying needs operator reconciliation and a new approval"
+  ],
+  "states": [
+    "draft",
+    "awaiting_approval",
+    "queued",
+    "leased",
+    "running",
+    "reconciling",
+    "expired",
+    "succeeded",
+    "failed",
+    "timed_out",
+    "cancelled",
+    "unknown"
+  ],
+  "terminal": ["expired", "succeeded", "failed", "timed_out", "cancelled", "unknown"],
+  "transitions": [
+    { "from": "draft", "to": "awaiting_approval", "by": "operator", "evidence": "manifest bytes frozen and digested" },
+    { "from": "draft", "to": "cancelled", "by": "operator", "evidence": "no attempt exists" },
+    { "from": "awaiting_approval", "to": "queued", "by": "server", "evidence": "owner approval verified over exact manifest bytes" },
+    { "from": "awaiting_approval", "to": "expired", "by": "cron", "evidence": "manifest expires_at passed" },
+    { "from": "awaiting_approval", "to": "cancelled", "by": "operator", "evidence": "no attempt exists" },
+    { "from": "queued", "to": "leased", "by": "courier", "evidence": "claim CAS succeeded; attempt and fence created" },
+    { "from": "queued", "to": "expired", "by": "cron", "evidence": "manifest expires_at passed before claim" },
+    { "from": "queued", "to": "cancelled", "by": "operator", "evidence": "no attempt exists" },
+    { "from": "leased", "to": "running", "by": "courier", "evidence": "start permit issued and execd journal reported started" },
+    { "from": "leased", "to": "cancelled", "by": "courier", "evidence": "execd reported not started after permit refusal" },
+    { "from": "leased", "to": "reconciling", "by": "cron", "evidence": "lease expired; start state unknown to server" },
+    { "from": "running", "to": "succeeded", "by": "courier", "evidence": "journal result and postcheck" },
+    { "from": "running", "to": "failed", "by": "courier", "evidence": "journal result" },
+    { "from": "running", "to": "timed_out", "by": "courier", "evidence": "local deadline enforced with stop evidence" },
+    { "from": "running", "to": "cancelled", "by": "courier", "evidence": "stop evidence after cancel_requested" },
+    { "from": "running", "to": "reconciling", "by": "cron", "evidence": "lease expired or connection lost" },
+    { "from": "reconciling", "to": "succeeded", "by": "courier", "evidence": "journal replay and postcheck" },
+    { "from": "reconciling", "to": "failed", "by": "courier", "evidence": "journal replay" },
+    { "from": "reconciling", "to": "timed_out", "by": "courier", "evidence": "journal replay with stop evidence" },
+    { "from": "reconciling", "to": "cancelled", "by": "courier", "evidence": "journal replay with stop evidence" },
+    { "from": "reconciling", "to": "unknown", "by": "operator", "evidence": "no journal or postcheck can prove the outcome" }
+  ]
+}

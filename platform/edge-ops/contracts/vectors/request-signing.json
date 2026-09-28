@@ -1,0 +1,620 @@
+{
+  "description": "edgeops-req-v1 machine request signatures (SDD 05 §2). Test-only keys.",
+  "generated_by": "platform/edge-ops/backend/tools/vectors.ts",
+  "seed_derivation": "sha256(utf8(\"edgeops-test-vector-seed:\" + label))",
+  "credentials": {
+    "cred_test_telemetry": "2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ",
+    "cred_test_courier": "BaMfKpKh30ddKbg8umZdVbD9yNqixz0QMKItGCLhtE8"
+  },
+  "cases": [
+    {
+      "name": "valid_post",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "valid_get_canonical_query",
+      "request": {
+        "method": "GET",
+        "path": "/agent/v1/jobs/next",
+        "query": "a=1&b=x.y",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "jobs",
+          "edgeops-credential": "cred_test_courier",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edgeops-signature": "VvU4jn5viIRGINm8GRo8Is4R7oiScsZMPkQ6otuHw5dIbdn7402b3ifVWJhOes2SieZFuZB03oYAjujwMsbKDw"
+        },
+        "body_text": ""
+      },
+      "expected_purpose": "jobs",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-courier-1",
+      "canonical_text": "EDGEOPS-REQ-V1\njobs\ncred_test_courier\nGET\n/agent/v1/jobs/next\na=1&b=x.y\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "clock_skew_boundary_ok",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:02:00Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "clock_skew_exceeded",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:02:01Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "clock_skew",
+        "field": "edgeops-sent-at"
+      }
+    },
+    {
+      "name": "clock_skew_future",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2025-12-31T23:57:59Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "clock_skew",
+        "field": "edgeops-sent-at"
+      }
+    },
+    {
+      "name": "unsorted_query",
+      "request": {
+        "method": "GET",
+        "path": "/agent/v1/jobs/next",
+        "query": "b=1&a=1",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "jobs",
+          "edgeops-credential": "cred_test_courier",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edgeops-signature": "KqY9ssC0Kdp_a7OEszwAagTjsOA7i3Ejam9XOJgT2ZN77DXjZbdylt_cdFEx_t0xS5aSZKpPlrkIyUrCf5NVAA"
+        },
+        "body_text": ""
+      },
+      "expected_purpose": "jobs",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-courier-1",
+      "canonical_text": "EDGEOPS-REQ-V1\njobs\ncred_test_courier\nGET\n/agent/v1/jobs/next\nb=1&a=1\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expect": {
+        "ok": false,
+        "code": "non_canonical_query",
+        "field": "query"
+      }
+    },
+    {
+      "name": "duplicate_query_key",
+      "request": {
+        "method": "GET",
+        "path": "/agent/v1/jobs/next",
+        "query": "a=1&a=2",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "jobs",
+          "edgeops-credential": "cred_test_courier",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edgeops-signature": "FjgEtZ6oWi3KncNjO6JMtpTwNar-qkjWYx1QFC-MPnzh714QDUPR_7crAH78YxZ4ADxyUwuZ1CmiZnn-DyC3BA"
+        },
+        "body_text": ""
+      },
+      "expected_purpose": "jobs",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-courier-1",
+      "canonical_text": "EDGEOPS-REQ-V1\njobs\ncred_test_courier\nGET\n/agent/v1/jobs/next\na=1&a=2\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expect": {
+        "ok": false,
+        "code": "non_canonical_query",
+        "field": "query"
+      }
+    },
+    {
+      "name": "percent_encoded_path",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/tele%6Detry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "ard1NT5RPK8ij2wLEUvl0u5h1HrTmWv2eaSMCyJ2N7xiwGmqB-8b-ZFHcTdD87IqZ9KIx1wVc701OioB-eNpDg"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/tele%6Detry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "non_canonical_path",
+        "field": "path"
+      }
+    },
+    {
+      "name": "dot_segment_path",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/../api/v1/nodes",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "Lnt5dkt1F_dpjUmfWVPbIcVF1ShAiv8JcS-eJtq-sXJ8WsKTV3ed5DJM8mN1vO6Nbao79d5iZeDLi2Q2kHv5Ag"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/../api/v1/nodes\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "non_canonical_path",
+        "field": "path"
+      }
+    },
+    {
+      "name": "trailing_slash_path",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry/",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "CfbXQIbLBjnwjgIOYTc2w69ywqXpsFZCfFvfqaZCqQuNRVB0tRck1FXdVnBe4MBehnfyRfnf_Y6iPIB8sjV2Cg"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry/\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "non_canonical_path",
+        "field": "path"
+      }
+    },
+    {
+      "name": "body_tampered",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":false}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "body_digest_mismatch",
+        "field": "edgeops-content-sha256"
+      }
+    },
+    {
+      "name": "body_and_digest_tampered",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "dbd4b35000f7f530153ce627205f8ff8beabcfdbc47e9961e65a5186f9221737",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":false}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "edgeops-signature"
+      }
+    },
+    {
+      "name": "path_changed_after_signing",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/log-chunks",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "edgeops-signature"
+      }
+    },
+    {
+      "name": "purpose_header_changed",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "jobs",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "jobs",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "edgeops-signature"
+      }
+    },
+    {
+      "name": "purpose_not_allowed_on_route",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "jobs",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "purpose_mismatch",
+        "field": "edgeops-purpose"
+      }
+    },
+    {
+      "name": "unsupported_version",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "2",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "bad_version",
+        "field": "edgeops-version"
+      }
+    },
+    {
+      "name": "missing_nonce",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "missing_header",
+        "field": "edgeops-nonce"
+      }
+    },
+    {
+      "name": "malformed_request_id",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_BAD ID",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "invalid_header",
+        "field": "edgeops-request-id"
+      }
+    },
+    {
+      "name": "impossible_sent_at",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-13-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "TiTtWdh0m3S3YlJtj0f5OISXZNtQA_wMJ1tsL3ho4vYCerOe9-A7kpV2xX6k3uLa0CH9VK3zTL_G6yUGD0HIDw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "invalid_header",
+        "field": "edgeops-sent-at"
+      }
+    },
+    {
+      "name": "unknown_credential",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_unknown",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "hzTODHWQUFHu50l5d_wCV0vNRJdhnS9diOy_ozT7YXDGgQCoPo7gEeI_e2GzdY9ksUbep_iczVXkiOR10qw8BQ"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_unknown\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "unknown_credential",
+        "field": "edgeops-credential"
+      }
+    },
+    {
+      "name": "other_key",
+      "request": {
+        "method": "POST",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "dOPDqi98cU-c-yhqhMPjDVSJ-F71J48182O9RiPhJIXTn7suHkT8Hqi18WZNmWogELSt2WfsmZv6-Zy4_2SXCQ"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "attacker-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPOST\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "edgeops-signature"
+      }
+    },
+    {
+      "name": "method_not_allowed",
+      "request": {
+        "method": "PUT",
+        "path": "/agent/v1/telemetry",
+        "query": "",
+        "headers": {
+          "edgeops-version": "1",
+          "edgeops-purpose": "telemetry",
+          "edgeops-credential": "cred_test_telemetry",
+          "edgeops-request-id": "req_0001",
+          "edgeops-sent-at": "2026-01-01T00:00:00Z",
+          "edgeops-nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+          "edgeops-content-sha256": "bba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+          "edgeops-signature": "FVJLLIEIW6qLcCkTD9PYww52ATdZtlyLwlvz1tzsAnShPX2odaxWWmybszZSzNd4zKBpNXhU5EBP2IrW6cKzBw"
+        },
+        "body_text": "{\"example\":true}"
+      },
+      "expected_purpose": "telemetry",
+      "now": "2026-01-01T00:00:30Z",
+      "signer_seed_label": "node-telemetry-1",
+      "canonical_text": "EDGEOPS-REQ-V1\ntelemetry\ncred_test_telemetry\nPUT\n/agent/v1/telemetry\n\nreq_0001\n2026-01-01T00:00:00Z\nBBBBBBBBBBBBBBBBBBBBBB\nbba2d36669004a3ef16764b0dfe370dfc0c22263976dfd3d896370b3fa39be0d",
+      "expect": {
+        "ok": false,
+        "code": "method_not_allowed",
+        "field": "method"
+      }
+    }
+  ]
+}

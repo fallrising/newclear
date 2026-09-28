@@ -51,4 +51,4 @@ python scripts/test-postgres.py python scripts/m3-recovery-kvm.py \
 
 升級需先 drain、套用 `005_approvals.sql`，再一起更新 API／worker／connector／web。保留既有 journal、fences 與 generation；不要在有 active run 的情況切換 worker／connector 契約。
 
-目前下一步：AT-07 egress／secret 與 AT-11 model proxy／budget／usage。M4 artifact／export／備份／GC／production gate 保持原範圍。
+本切片完成時的下一步是 AT-07 egress／secret 與 AT-11。那些項目後來只完成部分切片。M4 仍未開始。2026-09-27 進度見 [交接](HANDOFF.md)。

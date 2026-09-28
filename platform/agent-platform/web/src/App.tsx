@@ -1,3 +1,4 @@
+import { refreshUsage, UsagePanel } from './Usage';
 import { RunControls } from './RunControls';
 import { Approvals } from './Approvals';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
@@ -388,7 +389,8 @@ function TaskForm({
           />
         </label>
         <p className="muted">
-          真實 VM 設定使用固定模擬模型，執行檔案修改驗收；任務目標會保存，但不會由真實模型推理。
+          真實 VM 使用本機 mock，不需要 API key。目標裡若有相鄰的 FILE 檔名與 TEXT 內容，mock
+          會寫入那個檔，並仍寫固定驗收檔。
         </p>
         <ErrorNotice error={create.error} />
         <div className="form-actions">
@@ -594,6 +596,7 @@ function RunActivity({ run }: { run: Run }) {
             void cache.invalidateQueries({ queryKey: ['tasks'] });
             void cache.invalidateQueries({ queryKey: ['runtime'] });
           }
+          if (event.type === 'usage.updated') refreshUsage(cache, run.id);
         });
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -657,10 +660,13 @@ function RunActivity({ run }: { run: Run }) {
         </div>
       </dl>
       <p className="muted">
-        {run.execution_mode === 'cocoon-fixture'
-          ? 'OpenHands · 獨立 VM · 固定模擬模型'
-          : '模擬環境 · 排程驗證'}
+        {run.result?.execution_mode === 'local-mock'
+          ? '本機 mock · 未開虛擬機 · 不需要 API key'
+          : run.execution_mode === 'cocoon-fixture'
+            ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
+            : '模擬環境 · 排程驗證'}
       </p>
+      <UsagePanel runId={run.id} />
       <RunControls run={run} />
       {run.require_approval && <Approvals run={run} />}
       {notice && <p className="notice">{notice}</p>}
@@ -699,7 +705,9 @@ function RunActivity({ run }: { run: Run }) {
                             ? '已收到取消請求。'
                             : event.type === 'run.cancel_completed'
                               ? '執行環境已停止，取消完成。'
-                              : String(event.payload.content ?? event.type)}
+                              : event.type === 'usage.updated'
+                                ? '模型用量已更新。金額仍未知。'
+                                : String(event.payload.content ?? event.type)}
             </p>
           </li>
         ))}
@@ -730,7 +738,9 @@ function RunActivity({ run }: { run: Run }) {
               <pre className="diff" aria-label="檔案差異">
                 {run.result.diff || '沒有檔案變更。'}
               </pre>
-              <p className="muted mono">SHA-256: {run.result.diff_sha256}</p>
+              {run.result.diff_sha256 && (
+                <p className="muted mono">SHA-256: {run.result.diff_sha256}</p>
+              )}
             </>
           )}
         </section>
@@ -823,7 +833,7 @@ function Catalog({
                   {backends.map((backend) => (
                     <option key={backend} value={backend}>
                       {backend === 'openhands'
-                        ? 'OpenHands · 真實 VM · 固定模擬模型'
+                        ? 'OpenHands · 真實 VM · 本機 mock，不需要 API key'
                         : '模擬環境 · 排程驗證'}
                     </option>
                   ))}
@@ -847,8 +857,8 @@ function Catalog({
                 )}
               </label>
               <p className="notice">
-                真實 VM 只接受管理員已登錄的 repository 與
-                commit。固定模型會修改驗收檔案，不會呼叫付費模型。
+                真實 VM 只接受管理員已登錄的 repository 與 commit。不需要申請模型
+                key。目標裡相鄰的「FILE 檔名」和「TEXT 內容」會寫入該檔，並保留固定驗收檔。
               </p>
             </>
           )}

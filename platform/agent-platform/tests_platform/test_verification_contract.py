@@ -77,6 +77,23 @@ class VerificationContractTests(unittest.TestCase):
     def accept(self, value):
         return workspace_result(json.dumps(value), self.row, self.output_policy)
 
+    def test_fixture_card_file_must_match_before_the_run_passes(self):
+        (self.root / "m2-result.txt").write_text(RUN_ID + "\n")
+        (self.root / "note.txt").write_text("hello\n")
+        request = {
+            "run_id": RUN_ID,
+            "base_sha": self.base_sha,
+            "verification": {"mode": "fixture-m2", "revision": "fixture-m2-v1", "checks": []},
+            "card": {"name": "note.txt", "text": "hello"},
+        }
+        with patch("agent_platform.guest_workspace.ROOT", self.root):
+            passed = workspace_result_from_guest(request)
+        self.assertEqual(passed["verification"]["status"], "passed")
+        (self.root / "note.txt").write_text("nope\n")
+        with patch("agent_platform.guest_workspace.ROOT", self.root):
+            failed = workspace_result_from_guest(request)
+        self.assertEqual(failed["verification"]["status"], "failed")
+
     def test_profile_contract_bounds_and_identity(self):
         policy = self.command_policy(["python3", "-c", "pass"])
         self.assertEqual(policy.mode, "commands")

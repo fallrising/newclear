@@ -4,7 +4,7 @@
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。
 
-入口：scripts/labctl.py。`scripts/worker_drain.py` 另提供 ERU-009 的離線、review-only planner；不連 SSH、不執行 deploy／remove／fence／reinstall，計畫永遠不可執行。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
+入口：scripts/labctl.py。`scripts/worker_drain.py` 提供 ERU-009 的離線、review-only planner；`scripts/worker_loss.py` 提供 ERU-010 的失聯偵測／外部 fence／stale state recovery review planner。兩者不因產生 plan 而執行遠端 mutation。可執行一般 plan／execute／status／reconcile，以及 ERU-014 的獨立 worker-only install、core access preparation、fenced registration／smoke／resume 與 resume 後 generation commit stages。component-reinstall 只作用於通過健康／ownership／HTTP guards 的空 worker；provider-reimage 的總計畫仍唯讀不可執行。pinned core v0.1.5 safe AddNode patch 尚未部署；access／registration／smoke／resume／generation commit 與跨階段 recovery coordinator 僅以 fake fixtures 驗證，全部尚未在 VPS 驗收。
 
 最新本機進度與健康诊斷命令見 [接續紀錄](M2-CONTINUATION-2026-09-22.md)。重裝正向流程已接線；最新實測計次與剩餘恢復工作見優先路徑文件。
 
@@ -56,6 +56,54 @@ python3 scripts/labctl.py reconcile --run PLAN_ID
 reconcile 只讀遠端，不重播部署、不自動清理。若原控制程序中斷而 journal 停在 running，取得鎖後會標成 interrupted，保留 failed_at 與目前觀測。SSH 無法連線時亦保存部分命令紀錄與 error，不把無法讀取當成空集合。
 
 先檢查私有 run log、smoke evidence、runtime 與配額，再建立新的計畫處理明確範圍。timeout 代表結果不確定，不能以 timeout 直接推論遠端沒執行。
+
+## worker 非計畫失聯：review、exact cleanup 與 recovery
+
+已由 provider power off 或能阻止原 workload 繼續寫入的網路層 fence 隔離 target 後，可在 B 本機保存 ERU-010 review plan：
+
+```bash
+python3 scripts/labctl.py plan-worker-loss --target worker-4 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py prepare-worker-loss --plan REVIEW_PLAN_ID \
+  --sha256 REVIEW_PLAN_SHA256 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py execute-worker-loss-cleanup \
+  --plan EXECUTION_PLAN_ID --sha256 EXECUTION_PLAN_SHA256
+python3 scripts/labctl.py recover-worker-loss --run EXECUTION_PLAN_ID
+python3 scripts/labctl.py plan-worker-loss-recovery-cleanup \
+  --run UNCERTAIN_RUN_ID --plan-id FRESH_CLEANUP_PLAN_ID
+python3 scripts/labctl.py execute-worker-loss-recovery-cleanup \
+  --plan FRESH_CLEANUP_PLAN_ID --sha256 FRESH_CLEANUP_PLAN_SHA256
+python3 scripts/labctl.py plan-worker-loss-replacement \
+  --run COMPLETED_CLEANUP_RUN_ID \
+  --input private/operations/worker-loss-input.json \
+  --plan-id FRESH_REPLACEMENT_PLAN_ID
+python3 scripts/labctl.py execute-worker-loss-replacement \
+  --plan FRESH_REPLACEMENT_PLAN_ID --sha256 FRESH_REPLACEMENT_PLAN_SHA256 \
+  --input private/operations/worker-loss-input.json
+python3 scripts/labctl.py recover-worker-loss-replacement \
+  --run FRESH_REPLACEMENT_PLAN_ID
+```
+
+離線輸入固定 failure/detection timestamps、外部 fence proof digest、控制面 snapshot、每個 target app 的現行 ERU-012 spec、明確 destination 與健康 assertions。target 必須是 `available=false`、`bypass=true`；destination 必須 available 且未 bypass。review plan 永遠不可執行；`prepare-worker-loss` 不 SSH target，只讀 core 與兩台健康 workers，經兩次 stable snapshot／preflight 才保存獨立 execution plan。execute 每個 exact ID 只送一次 dissociate，回覆遺失時查 ID 而不重播；每步核對全群 workload identities，末端 quota 必須為零，從不執行 `resource --fix`。`recover-worker-loss` 只讀且不 replay。
+
+partial cleanup 必須先用 recovery route 建新的 exact-ID subset plan；舊 plan 已有 journal 就永不重播。replacement planner 只接受所有原 stale IDs absent、target quota zero、兩次 live snapshot 穩定且原 private desired specs 完整重驗的狀態。replacement executor 在共用鎖內依序建立 fresh ERU-012 child plans，每個 app 的 exact replicas 與 HTTP 都 ready 後才進下一個，全部 ready 才完成。replacement recovery 只讀 exact revisions，不 deploy、不重做 HTTP probe。任何不確定結果保留 private journals，不能重播原 wrapper。公開輸出只有計數、狀態與 gates，不列 exact IDs 或 specs。
+
+偵測超過 180 秒會記為 V07 acceptance gap。這些路徑目前只以 fake fixtures 驗證，正式 V11 期間不可執行；本 slice 不做 provider fence 驗證、`resource --fix`、lost node remove 或 target resume。完整限制見 [ERU-010 本機前置](M3-WORKER-LOSS-PREP-2026-09-27.md)。
+
+## 全群 fresh rebuild：只建立 review plan
+
+ERU-015 的本機入口只讀取固定 private inputs 並寫入一份不可執行 plan：
+
+```bash
+python3 scripts/labctl.py plan-fresh-rebuild \
+  --input private/fresh-rebuild-intents/ITERATION.json \
+  --plan-id FRESH_REVIEW_ID
+```
+
+它要求 Profile A 的四份 owner-reviewed reimage intents、現行 inventory／cluster generation、24 小時內且仍符合目前乾淨 Git HEAD 的 controller preflight、pinned source locks、三項外部 material attestations、全新且不同的 etcd token digest，以及非空 ERU-012 desired specs。相同 provider／volume、wildcard、混用 OS image、舊 generation、stale report／intent、source dirty／commit drift、restore source、重用 token、stateful／unpinned app、private path/symlink 或重複 plan ID 都會 fail closed；available／quiescence／data disposition 明確為 false 時只可保存 `decision: blocked` 的 plan。第 2／3 次 iteration 另須驗證上一份 immutable plan 和獨立 accepted-run record，不能只提交自稱已通過的 ID/hash。
+
+公開輸出不展開四台 identity、provider／volume、IP、OS image 或 app spec，只顯示 counts、generation、decision、hash 與 relative private path。plan 永遠是 `executable: false`／`execution_implemented: false`，沒有 `execute-fresh-rebuild` 命令，也不能交給 generic `execute`。建立它不會連 SSH/provider、不會停止 writer、不會動 etcd/runtime/workload 或 `cluster.json`。完整 schema、stages 與 V08 尚缺證據見 [ERU-015 本機前置](M3-FRESH-REBUILD-PREP-2026-09-27.md)。
 
 ## 鎖、紀錄與適用邊界
 

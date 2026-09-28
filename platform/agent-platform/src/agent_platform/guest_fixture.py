@@ -1,19 +1,81 @@
 """M2 deterministic model, run inside one guest. Emits a real terminal tool call.
 
 This is a test model, not an implementation of arbitrary natural-language goals.
-Only the platform-generated UUID is interpolated into the fixed command.
+A FILE/TEXT card uses the same write as the control-side mock. Anything else
+writes only the fixture file. Only the platform-generated UUID is interpolated.
 """
 
 import json
 import os
+import re
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from uuid import UUID
 
-RUN = str(UUID(os.environ["FIXTURE_RUN_ID"]))
-COMMAND = (
-    "python3 -c \"from pathlib import Path; Path('m2-result.txt').write_text('" + RUN + "\\n')\""
-)
+FILE_NAME = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
+PLAIN_TEXT = re.compile(r"^[A-Za-z0-9 ._-]{0,80}$")
+
+
+def message_text(message):
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return None
+    parts = []
+    for item in content:
+        if (
+            not isinstance(item, dict)
+            or item.get("type") != "text"
+            or not isinstance(item.get("text"), str)
+        ):
+            return None
+        parts.append(item["text"])
+    return "\n".join(parts)
+
+
+def task_card(messages):
+    text = None
+    for message in messages:
+        if message.get("role") == "user":
+            candidate = message_text(message)
+            if candidate is not None:
+                text = candidate
+    if text is None:
+        return None
+    found = []
+    lines = text.splitlines()
+    for index in range(len(lines) - 1):
+        if not lines[index].startswith("FILE ") or not lines[index + 1].startswith("TEXT "):
+            continue
+        name, body = lines[index][5:], lines[index + 1][5:]
+        if (
+            name in {".", "..", "m2-result.txt"}
+            or not FILE_NAME.fullmatch(name)
+            or not PLAIN_TEXT.fullmatch(body)
+        ):
+            return None
+        found.append((name, body))
+    if len(found) != 1:
+        return None
+    return found[0]
+
+
+def edit_command(messages, run_id):
+    card = task_card(messages)
+    if card:
+        filename, body = card
+        return (
+            'python3 -c "from pathlib import Path; '
+            f"Path({filename!r}).write_text({body!r} + '\\n'); "
+            f"Path('m2-result.txt').write_text('{run_id}\\n')\""
+        )
+    return (
+        f"python3 -c \"from pathlib import Path; Path('m2-result.txt').write_text('{run_id}\\n')\""
+    )
+
+
+RUN = str(UUID(os.environ["FIXTURE_RUN_ID"])) if os.environ.get("FIXTURE_RUN_ID") else ""
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -33,7 +95,10 @@ class Handler(BaseHTTPRequestHandler):
         called = any(m.get("role") == "tool" for m in messages)
         functions = {t["function"]["name"]: t["function"] for t in request.get("tools", [])}
         if not called and "terminal" in functions:
-            name, arguments = "terminal", {"command": COMMAND}
+            if not RUN:
+                self.send_error(500)
+                return
+            name, arguments = "terminal", {"command": edit_command(messages, RUN)}
         elif "finish" in functions:
             name, arguments = (
                 "finish",
@@ -75,4 +140,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    if not RUN:
+        raise SystemExit("FIXTURE_RUN_ID is required")
     ThreadingHTTPServer(("127.0.0.1", 18080), Handler).serve_forever()

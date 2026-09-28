@@ -5,23 +5,83 @@ It exercises the provider wire shape without a paid API or guest network access.
 
 import hmac
 import json
+import re
+import subprocess
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from uuid import UUID
 
 from .model_policy import MAX_REQUEST, canonical
 
+FILE_NAME = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
+PLAIN_TEXT = re.compile(r"^[A-Za-z0-9 ._-]{0,80}$")
+
+
+def message_text(message):
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return None
+    parts = []
+    for item in content:
+        if (
+            not isinstance(item, dict)
+            or item.get("type") != "text"
+            or not isinstance(item.get("text"), str)
+        ):
+            return None
+        parts.append(item["text"])
+    return "\n".join(parts)
+
+
+def task_card(messages):
+    """One FILE/TEXT pair inside the latest user message, not a language interpreter."""
+    text = None
+    for message in messages:
+        if message.get("role") == "user":
+            candidate = message_text(message)
+            if candidate is not None:
+                text = candidate
+    if text is None:
+        return None
+    found = []
+    lines = text.splitlines()
+    for index in range(len(lines) - 1):
+        if not lines[index].startswith("FILE ") or not lines[index + 1].startswith("TEXT "):
+            continue
+        name, body = lines[index][5:], lines[index + 1][5:]
+        if (
+            name in {".", "..", "m2-result.txt"}
+            or not FILE_NAME.fullmatch(name)
+            or not PLAIN_TEXT.fullmatch(body)
+        ):
+            return None
+        found.append((name, body))
+    if len(found) != 1:
+        return None
+    return found[0]
+
 
 def mock_response(data, run_id):
     called = any(message["role"] == "tool" for message in data["messages"])
+    card = None if called else task_card(data["messages"])
     name = "finish" if called else "terminal"
-    arguments = (
-        {"message": "Local mock completed."}
-        if called
-        else {
+    if called:
+        arguments = {"message": "Local mock completed."}
+    elif card:
+        filename, body = card
+        arguments = {
+            "command": 'python3 -c "from pathlib import Path; '
+            f"Path({filename!r}).write_text({body!r} + '\\n'); "
+            f"Path('m2-result.txt').write_text('{run_id}\\n')\""
+        }
+    else:
+        arguments = {
             "command": 'python3 -c "from pathlib import Path; '
             f"Path('m2-result.txt').write_text('{run_id}\\n')\""
         }
-    )
     return {
         "id": "chatcmpl-local-mock",
         "object": "chat.completion",
@@ -52,6 +112,39 @@ def mock_response(data, run_id):
             "total_tokens": 15,
             "prompt_tokens_details": {"cached_tokens": 0},
         },
+    }
+
+
+def rehearse(directory, goal, run_id):
+    """Run the mock's edit in a local directory. This is not a VM and not a paid call."""
+    root = Path(directory)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("mock_rehearsal_directory_invalid")
+    response = mock_response(
+        {
+            "model": "local-mock",
+            "messages": [{"role": "user", "content": goal}],
+            "tools": [],
+            "max_tokens": 16,
+            "stream": False,
+        },
+        str(run_id),
+    )
+    call = response["choices"][0]["message"]["tool_calls"][0]["function"]
+    if call["name"] != "terminal":
+        raise ValueError("mock_rehearsal_not_an_edit")
+    command = json.loads(call["arguments"])["command"]
+    prefix = 'python3 -c "'
+    if not command.startswith(prefix) or not command.endswith('"') or "subprocess" in command:
+        raise ValueError("mock_rehearsal_command_rejected")
+    code = command[len(prefix) : -1]
+    if not code.startswith("from pathlib import Path; Path("):
+        raise ValueError("mock_rehearsal_command_rejected")
+    subprocess.run([sys.executable, "-c", code], cwd=root, check=True, timeout=5)
+    fixture = root / "m2-result.txt"
+    return {
+        "fixture_matches_run": fixture.is_file() and fixture.read_text() == f"{run_id}\n",
+        "files": sorted(path.name for path in root.iterdir() if path.is_file()),
     }
 
 

@@ -4,7 +4,9 @@
 >
 > 2026-09-27：`kvm8745` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
 
-目前停止點：**AT-11-C2b2 的 HTTPS provider transport 與 profile verification 已實作；45 個 dependency-free unit tests、200 個 PostgreSQL／HTTP platform tests、Ruff 通過。完整 GitHub CI run `36008490179` 在程式碼 commit `e099c6e` 全部通過。之後文件更新觸發的 run `36009297291` 依使用者指示於 browser E2E 前取消；web job 通過，check／control-plane job 取消。後續 handoff-only commits 使用 `[skip ci]`，目前 head 沒有 checks 報告；最後一個完整通過的 run 仍是 `36008490179`。real-KVM acceptance 尚未通過。Draft PR [#82](https://github.com/fallrising/newclear/pull/82) 因 unresolved same-journal recovery／KVM gate 未合併。** 沒有呼叫付費／外部 provider，也未使用主機既有 provider key；真實費用仍 unknown。跨 agent 接手摘要見 [CONTINUATION-STATE.md](CONTINUATION-STATE.md)，設計與限制見 [AT-11-C2b2](M3-HTTPS-PROVIDER.md)，本次結果見 [evidence](evidence/m3-https-provider-2026-09-24.json)。
+目前停止點：**先把整條流程用本機 mock 做完，再換成真 API。** 真接口暫定 [OpenCode Go](https://opencode.ai/docs/go) 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。這是 Go 訂閱的 key，不是 Zen 的按量 key。以後在 [opencode.ai/auth](https://opencode.ai/auth) 訂 Go 再建立 key，只放 0600 檔。現在沒有 key，也不要為了開發去申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。卡片可以出現在較長的使用者訊息裡，並同時寫入該檔與 `m2-result.txt`。一般 fake 任務仍不改 repository。目標含一張 FILE／TEXT 卡片時，同一個 worker 會把本機 mock 的寫檔結果存進 run，不開虛擬機、不呼叫 OpenCode Go。虛擬機裡的固定模型 `guest_fixture.py` 用同一張卡片。2026-09-27 在 `kvm8745` 用 `scripts/m2-card-kvm.py` 跑過一台真實 VM：目標是 `FILE note.txt` / `TEXT hello`，run succeeded，diff 含 `note.txt` 與 `m2-result.txt`，結束時 VM 與 claim 為零。fixture 驗收現在也核對卡片檔的內容；內容不符就不能通過。工作台會把這種本機 mock 結果標成「未開虛擬機」，並顯示 diff 與 SHA-256。硬金額上限與 24 小時停留都還沒做。
+
+下面各節是 2026-09-24 前後的施工日記。其中「PR #82 未合併、KVM 未過、沒有對帳命令、必須先 recovery 才能開發」已經過期，不能當成現在的指令。
 
 ## 本次 AT-11-C2b2 HTTPS provider 與 verification
 

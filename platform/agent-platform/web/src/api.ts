@@ -35,6 +35,7 @@ export type Run = {
   result: {
     diff?: string;
     diff_sha256?: string;
+    execution_mode?: string;
     summary: string;
     verification: {
       status: string;
@@ -43,6 +44,22 @@ export type Run = {
       checks?: Array<{ id: string; status: string; exit_code: number | null }>;
     };
   } | null;
+};
+export type Usage = {
+  configured: boolean;
+  guest_connected: boolean;
+  request_limit: number | null;
+  request_slots_consumed: number;
+  uncertain_requests: number;
+  cost_status: string;
+  amount_decimal: string | null;
+  hard_money_limit_supported: boolean;
+  published_price_preview: boolean;
+  quote_committed_usd: string | null;
+  quote_uncertain: boolean | null;
+  fixture_credit_limit_supported: boolean;
+  fixture_credits_committed_microcredits: number | null;
+  fixture_credits_uncertain: boolean | null;
 };
 export type RunEvent = {
   event_id: string;

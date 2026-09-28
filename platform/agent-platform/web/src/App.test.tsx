@@ -33,6 +33,7 @@ let runState: string;
 let cancelKeys: string[];
 let cancelLostResponse: boolean;
 let retryPayload: Record<string, unknown> | null;
+let usageConfigured: boolean;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -47,6 +48,7 @@ beforeEach(() => {
   cancelKeys = [];
   cancelLostResponse = false;
   retryPayload = null;
+  usageConfigured = false;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -128,6 +130,42 @@ beforeEach(() => {
         retryPayload = JSON.parse(String(options.body));
         return Response.json({ id: 'run-2' }, { status: 202 });
       }
+      if (path === '/api/v1/runs/run-1/usage')
+        return Response.json(
+          usageConfigured
+            ? {
+                configured: true,
+                guest_connected: true,
+                request_limit: 10,
+                request_slots_consumed: 2,
+                uncertain_requests: 0,
+                cost_status: 'unknown',
+                amount_decimal: null,
+                hard_money_limit_supported: false,
+                published_price_preview: false,
+                quote_committed_usd: null,
+                quote_uncertain: null,
+                fixture_credit_limit_supported: false,
+                fixture_credits_committed_microcredits: null,
+                fixture_credits_uncertain: null,
+              }
+            : {
+                configured: false,
+                guest_connected: false,
+                request_limit: null,
+                request_slots_consumed: 0,
+                uncertain_requests: 0,
+                cost_status: 'unknown',
+                amount_decimal: null,
+                hard_money_limit_supported: false,
+                published_price_preview: false,
+                quote_committed_usd: null,
+                quote_uncertain: null,
+                fixture_credit_limit_supported: false,
+                fixture_credits_committed_microcredits: null,
+                fixture_credits_uncertain: null,
+              },
+        );
       if (path === '/api/v1/tasks/task-1') {
         const run: Run = {
           id: 'run-1',
@@ -240,6 +278,41 @@ it('renders a saved real VM diff as text and keeps unsupported controls disabled
   for (const name of ['暫停', '繼續', '取消', '審批'])
     expect(screen.getByRole('button', { name })).toBeDisabled();
   expect(screen.getByText(/Profile 設定的驗證通過/)).toBeVisible();
+});
+
+it('labels a saved local-mock card and shows its diff', async () => {
+  result = {
+    execution_mode: 'local-mock',
+    summary: '本機 mock 已寫入工作檔與驗收檔。沒有付費 API，也沒有虛擬機。',
+    diff: 'diff --git a/note.txt b/note.txt\n+hello\n',
+    diff_sha256: 'abc123',
+    verification: {
+      status: 'passed',
+      name: 'm2_fixture_workspace_assertion',
+      reason: 'Local mock rehearsal',
+    },
+  };
+  runState = 'succeeded';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('本機 mock · 未開虛擬機 · 不需要 API key')).toBeInTheDocument();
+  expect(screen.getByLabelText('檔案差異')).toHaveTextContent('+hello');
+  expect(screen.getByText('SHA-256: abc123')).toBeInTheDocument();
+  expect(screen.getByText(/固定檔案修改驗收通過/)).toBeInTheDocument();
+});
+
+it('shows model usage without presenting an unknown amount as a bill', async () => {
+  usageConfigured = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const usage = await screen.findByRole('region', { name: '模型用量' });
+  expect(usage).toHaveTextContent('2 / 10');
+  expect(usage).toHaveTextContent('未知，不是帳單');
+  expect(usage).not.toHaveTextContent('$');
 });
 
 it('submits cancellation and keeps pending stop distinct from cancelled', async () => {

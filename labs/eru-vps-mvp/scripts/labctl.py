@@ -827,6 +827,13 @@ def main():
     status.add_argument('--run')
     reconcile = sub.add_parser('reconcile', help='Read actual state after failure; never replay mutations')
     reconcile.add_argument('--run', required=True)
+    fresh_plan = sub.add_parser(
+        'plan-fresh-rebuild',
+        help='Save one private, non-executable ERU-015 full-cluster fresh review plan')
+    fresh_plan.add_argument(
+        '--input', required=True,
+        help='Reviewed JSON under private/fresh-rebuild-intents/')
+    fresh_plan.add_argument('--plan-id', help='Optional fresh bounded review-plan ID')
     drain_plan = sub.add_parser('plan-worker-drain', help='Save a private, offline ERU-009 review plan')
     drain_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
     drain_plan.add_argument('--input', required=True, help='Private JSON with snapshot, apps, destinations, and offline assertions')
@@ -847,8 +854,56 @@ def main():
     drain_cleanup_execute.add_argument('--plan', required=True, help='Saved worker-drain recovery cleanup plan ID')
     drain_cleanup_execute.add_argument('--sha256', required=True, help='Recovery cleanup plan SHA-256')
     drain_cleanup_execute.add_argument('--cleanup-sha256', required=True, help='Nested ERU-012 exact cleanup plan SHA-256')
+    loss_plan = sub.add_parser('plan-worker-loss', help='Save a private, offline ERU-010 worker-loss recovery review plan')
+    loss_plan.add_argument('--target', required=True, choices=['worker-2', 'worker-3', 'worker-4'])
+    loss_plan.add_argument('--input', required=True, help='Private JSON with stale state, detection, fence, and explicit destinations')
+    loss_plan.add_argument('--plan-id')
+    loss_prepare = sub.add_parser('prepare-worker-loss', help='Read live control-plane state and save a hash-bound ERU-010 stale-cleanup plan')
+    loss_prepare.add_argument('--plan', required=True, help='Saved worker-loss review plan ID')
+    loss_prepare.add_argument('--sha256', required=True, help='Worker-loss review plan SHA-256')
+    loss_prepare.add_argument('--input', required=True, help='Original private worker-loss review input')
+    loss_execute = sub.add_parser('execute-worker-loss-cleanup', help='Dissociate exact reviewed stale IDs once; never fixes quota or deploys replacements')
+    loss_execute.add_argument('--plan', required=True, help='Saved live worker-loss cleanup plan ID')
+    loss_execute.add_argument('--sha256', required=True, help='Live worker-loss cleanup plan SHA-256')
+    loss_recover = sub.add_parser('recover-worker-loss', help='Read-only exact-ID and quota reconciliation after worker-loss cleanup')
+    loss_recover.add_argument('--run', required=True, help='Worker-loss cleanup run ID')
+    loss_cleanup_plan = sub.add_parser('plan-worker-loss-recovery-cleanup', help='Reconcile read-only, then save a fresh exact-ID cleanup plan')
+    loss_cleanup_plan.add_argument('--run', required=True, help='Uncertain worker-loss cleanup run ID')
+    loss_cleanup_plan.add_argument('--plan-id', help='Fresh recovery cleanup plan ID')
+    loss_cleanup_execute = sub.add_parser('execute-worker-loss-recovery-cleanup', help='Execute one fresh exact-ID worker-loss recovery cleanup plan')
+    loss_cleanup_execute.add_argument('--plan', required=True, help='Saved recovery cleanup plan ID')
+    loss_cleanup_execute.add_argument('--sha256', required=True, help='Recovery cleanup plan SHA-256')
+    loss_replace_plan = sub.add_parser('plan-worker-loss-replacement', help='Reconcile cleared stale state and save a fresh all-app replacement plan')
+    loss_replace_plan.add_argument('--run', required=True, help='Completed worker-loss cleanup run ID')
+    loss_replace_plan.add_argument('--input', required=True, help='Original private worker-loss review input')
+    loss_replace_plan.add_argument('--plan-id', help='Fresh replacement wrapper plan ID')
+    loss_replace_execute = sub.add_parser('execute-worker-loss-replacement', help='Execute one saved all-app replacement wrapper exactly once')
+    loss_replace_execute.add_argument('--plan', required=True, help='Saved worker-loss replacement plan ID')
+    loss_replace_execute.add_argument('--sha256', required=True, help='Replacement wrapper plan SHA-256')
+    loss_replace_execute.add_argument('--input', required=True, help='Original private worker-loss review input')
+    loss_replace_recover = sub.add_parser('recover-worker-loss-replacement', help='Read-only replacement identity reconciliation; never redeploys')
+    loss_replace_recover.add_argument('--run', required=True, help='Worker-loss replacement wrapper run ID')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'plan-fresh-rebuild':
+        from fresh_rebuild_ops import save_review_plan
+        envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)
+        fresh = envelope['plan']
+        print(json.dumps({
+            'id': fresh['id'], 'operation': fresh['operation'],
+            'mode': fresh['mode'], 'decision': fresh['decision'],
+            'executable': fresh['executable'],
+            'execution_implemented': fresh['execution_implemented'],
+            'generation_before': fresh['generation_before'],
+            'generation_after': fresh['generation_after'],
+            'series_iteration': fresh['series']['iteration'],
+            'host_count': fresh['scope']['host_count'],
+            'volume_count': fresh['scope']['volume_count'],
+            'desired_app_count': len(fresh['desired_apps']),
+            'blockers': fresh['blockers'], 'sha256': envelope['sha256'],
+            'path': path.as_posix(),
+        }, indent=2))
+        return
     if args.command == 'status':
         root = PROJECT / 'private/operations/runs'
         if args.run:
@@ -867,6 +922,146 @@ def main():
             'decision': plan['decision'], 'executable': plan['executable'],
             'blockers': plan['blockers'], 'sha256': plan['plan_sha256'],
             'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'plan-worker-loss':
+        from worker_loss_ops import save_review_plan
+        with ClusterLock(PROJECT):
+            plan, path = save_review_plan(
+                PROJECT, args.target, args.input, args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'blockers': plan['blockers'],
+            'detection_seconds': plan['detection']['seconds'],
+            'detection_within_candidate': plan['detection']['within_candidate'],
+            'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'prepare-worker-loss':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import prepare_execution_plan
+        with ClusterLock(PROJECT):
+            plan, path = prepare_execution_plan(
+                PROJECT, args.plan, args.sha256, args.input,
+                WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'target': plan['target'], 'target_count': len(plan['targets']),
+            'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'execute-worker-loss-cleanup':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import execute_saved_plan
+        result = execute_saved_plan(
+            PROJECT, args.plan, args.sha256,
+            lambda: WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'dissociated_count': len(result.get('dissociated_ids', [])),
+            'replacement_plan_allowed': result.get('replacement_plan_allowed', False),
+            'next_step': result.get('next_step'),
+        }, indent=2))
+        return
+    if args.command == 'recover-worker-loss':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import recover_run
+        result = recover_run(
+            PROJECT, args.run, lambda: WorkerLossCLIAdapter(Operator()))
+        observation = result.get('reconciliation', {})
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'read_only': observation.get('read_only'),
+            'dissociate_replayed': observation.get('dissociate_replayed'),
+            'remaining_exact_count': len(observation.get('remaining_exact_ids', [])),
+            'fresh_cleanup_plan_allowed': observation.get('fresh_cleanup_plan_allowed', False),
+            'replacement_plan_allowed': observation.get('replacement_plan_allowed', False),
+            'recovery_recommendation': observation.get('recovery_recommendation'),
+        }, indent=2))
+        return
+    if args.command == 'plan-worker-loss-recovery-cleanup':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import prepare_fresh_cleanup
+        plan, path = prepare_fresh_cleanup(
+            PROJECT, args.run, lambda: WorkerLossCLIAdapter(Operator()),
+            args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'remaining_exact_count': len(plan['targets']),
+            'stable_snapshot_count': len(
+                plan.get('recovery', {}).get('stable_snapshot_sha256', [])),
+            'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'execute-worker-loss-recovery-cleanup':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import execute_fresh_cleanup
+        result = execute_fresh_cleanup(
+            PROJECT, args.plan, args.sha256,
+            lambda: WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'dissociated_count': len(result.get('dissociated_ids', [])),
+            'replacement_plan_allowed': result.get('replacement_plan_allowed', False),
+            'next_step': result.get('next_step'),
+        }, indent=2))
+        return
+    if args.command == 'plan-worker-loss-replacement':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import prepare_replacement_plan
+        plan, path = prepare_replacement_plan(
+            PROJECT, args.run, args.input,
+            lambda: WorkerLossCLIAdapter(Operator()), args.plan_id)
+        print(json.dumps({
+            'id': plan['id'], 'operation': plan['operation'],
+            'decision': plan['decision'], 'executable': plan['executable'],
+            'replacement_count': len(plan['moves']),
+            'target_quota_zero':
+                plan['baseline']['target_resource_usage_nonzero'] is False,
+            'sha256': plan['plan_sha256'], 'path': str(path),
+        }, indent=2))
+        return
+    if args.command == 'execute-worker-loss-replacement':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import execute_replacement_plan
+        result = execute_replacement_plan(
+            PROJECT, args.plan, args.sha256, args.input,
+            lambda: WorkerLossCLIAdapter(Operator()))
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'replacement_count': len(result.get('moves', [])),
+            'all_replacements_ready': result.get('all_replacements_ready'),
+            'next_step': result.get('next_step'),
+        }, indent=2))
+        return
+    if args.command == 'recover-worker-loss-replacement':
+        from worker_loss_adapter import WorkerLossCLIAdapter
+        from worker_loss_ops import recover_replacement_run
+        result = recover_replacement_run(
+            PROJECT, args.run, lambda: WorkerLossCLIAdapter(Operator()))
+        observation = result.get('reconciliation', {})
+        states = {}
+        for row in observation.get('apps', []):
+            state = row.get('state', 'unknown')
+            states[state] = states.get(state, 0) + 1
+        print(json.dumps({
+            'id': result.get('id'), 'operation': result.get('operation'),
+            'status': result.get('status'), 'stage': result.get('stage'),
+            'read_only': observation.get('read_only'),
+            'deploy_replayed': observation.get('deploy_replayed'),
+            'replacement_states': states,
+            'all_replacement_identities_exact':
+                observation.get('all_replacement_identities_exact'),
+            'replacement_completion_previously_proven':
+                observation.get('replacement_completion_previously_proven'),
+            'http_readiness_reprobed': observation.get('http_readiness_reprobed'),
         }, indent=2))
         return
     if args.command == 'prepare-worker-drain':

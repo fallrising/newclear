@@ -36,10 +36,21 @@ def main():
     api.add_argument("--web-dist", type=Path)
     worker = commands.add_parser("worker")
     worker.add_argument("--once", action="store_true")
+    rehearse = commands.add_parser("rehearse-mock")
+    rehearse.add_argument("--directory", type=Path, required=True)
+    rehearse.add_argument("--goal", required=True)
+    rehearse.add_argument("--run-id", required=True)
     reconcile = commands.add_parser("reconcile-unconfirmed-allocation")
     reconcile.add_argument("--config", type=Path, required=True)
     reconcile.add_argument("--run-id", required=True)
     args = parser.parse_args()
+    if args.command == "rehearse-mock":
+        from .model_mock import rehearse
+
+        result = rehearse(args.directory, args.goal, args.run_id)
+        print("fixture_matches_run=" + str(result["fixture_matches_run"]).lower())
+        print("files=" + ",".join(result["files"]))
+        return 0 if result["fixture_matches_run"] else 1
     if args.command == "reconcile-unconfirmed-allocation":
         from agent_platform_m0.kvm_lifecycle import Host
 

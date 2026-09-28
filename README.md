@@ -45,6 +45,7 @@
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
+| [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（SDD-only） | Go, SQLite, React（規劃） | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |
 | [`platform/local-ocr-services`](platform/local-ocr-services/) | 可自託管 CPU-first OCR HTTP services | Python, Docker | B |
 | [`platform/prism`](platform/prism/) | Storage-pluggable observability compatibility layer | Go | C |

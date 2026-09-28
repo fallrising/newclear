@@ -1,36 +1,41 @@
 # Edge Ops
 
-> **Portfolio doc tier: A (active design)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [quickstart／目前阻擋](docs/quickstart.md)。
+> **Portfolio doc tier: A** — [Policy](../../docs/portfolio-doc-tiers.md) · [Portfolio](../../PORTFOLIO.md) · [Quickstart](docs/quickstart.md)
 
-以 Cloudflare 為控制面、以主機常駐 Agent 為資料面，提供多機監控、選定日誌、受控任務與可選初始化能力。`edge-ops` 是本次採用的工作名稱；不是 CF-Server-Monitor 的 fork，也不是 LLM agent 執行平台。
+Cloudflare 控制面 + Host Agent 的主機觀測與受控作業平台。**目前交付 S0：前端／後端／假 Agent 的本地 monitoring-only 垂直切片。沒有真實主機採集、認證或雲端部署。**
 
-**目前只有 SDD，尚無前端、Worker、Agent、安裝器或雲端部署。** 文件中的 API、路徑、配額策略與驗收目標是待實作契約，不能當成已可使用功能。此階段不授權登入或變更任何真實主機。
+```text
+獨立 Mock Agent CLI → HTTP → 共用 Worker handler → Store / SQLite
+                                                  ↓
+React ← HTTP Query API ← 持久化資料與新鮮度判斷
+```
 
-## 三條實作線
+前端不是靜態 fixtures：它只讀 API。Mock CLI 產生合成節點與指標，資料經 HTTP 寫入 SQLite；重啟後保留。相同 Worker handler 另有 Wrangler local D1 驗證入口，兩種 runtime 證據分開記錄，不能把 Node SQLite 測試稱作 workerd 驗證。
 
-| 工作線 | 責任 | 第一個交付切片 |
+## 現有能力
+
+| 區塊 | S0 實作 | 尚未實作 |
 | --- | --- | --- |
-| Frontend | 主機清單、健康與新鮮度、圖表、日誌、任務、審批及稽核 | 使用契約 fixtures 的唯讀主機面板 |
-| Backend | Workers API、身分與授權、D1 狀態、DO 通知、R2 物件 | 一台 Agent 註冊、上報、查詢、離線判斷 |
-| Agent | 非 root 指標採集、有限緩衝、選定日誌、可選執行器 | Linux/systemd amd64、arm64 的唯讀探針 |
+| React / TypeScript UI | 清單、搜尋、詳情、CPU 圖表、原始樣本、回執、手機布局、API 故障提示 | 登入、WS 推送、logs/jobs/bootstrap |
+| TypeScript Worker API | 合成註冊、指標上報、去重、歷史、新鮮度、工作區查詢隔離、大小／容量限制 | 真實 enrollment、Access JWT、Ed25519、DO/R2、告警通知 |
+| Mock Agent CLI | seed/tick/replay/offline/recover/reset，真正的本地 HTTP 請求 | Go Agent、OS 採集、systemd、主機操作 |
+| Persistence | SQLite 實際持久化 + D1 binding adapter / migration | 雲端部署、計費量測、長期可靠性驗收 |
 
-預設 `monitor-only`；日誌是獨立 opt-in；操作能力還須在主機安裝與啟用獨立執行器。**無入站監聽埠，不等於沒有遠端控制風險。** 一旦允許操作，就必須滿足獨立簽署、主機本地政策、不可變腳本與執行證據等邊界。
+只允許 `node_demo01..10` 的合成資料；所有節點 `host_authority=none`、`mode=monitor-only`。假身分標頭不是登入驗證，不能接入真實節點、公開 Tunnel 或 production。Worker 預設 disabled，只有明確 demo + loopback 可用；未實作的控制通道回 501。
 
-## 閱讀入口
+## 開始
 
-- [SDD 總綱](SDD.md)：產品範圍、架構、責任歸屬、優先級與設計決策。
-- [詳細設計索引](docs/sdd/README.md)：前端、後端、Agent、image/bootstrap、契約與驗收。
-- [初始化與業界做法](docs/sdd/04-bootstrap-and-images.md)：Packer、Terraform、cloud-init、SSM／VM Agent／OS Config 的分工。
-- [狀態與下一步](docs/STATUS.md)：本專案唯一的進度權威；不把規格完成當成產品完成。
-- [來源](docs/SOURCES.md)：固定上游 revision、官方文件與研究限制。
-- [後續開發入口](DEVELOPMENT_PROMPT.md)及[開發約定](AGENTS.md)。
+完整命令、測試和限制見 [quickstart](docs/quickstart.md)。目前已執行的本地證據：21 項 Node／SQLite／HTTP 測試、共用契約檢查、後端型別檢查。React 建置、Playwright 與 workerd 的實際 CI 結果以 [STATUS](docs/STATUS.md) 與 PR checks 為準，不以測試檔存在宣稱通過。
 
-## 與既有專案的邊界
+## 文件
 
-`dim-gate` 可透過未來 adapter 顯示本專案的主機觀測與任務狀態，現有 demo 不因本 SDD 變成 live。`agent-platform` 繼續擁有 LLM/Cocoon 任務執行；`specs/fleet`／OneFleet 繼續擁有 workload lifecycle。本專案不部署應用、不接管 Docker socket、不另建 CMDB。
+- [S0 scope / contract amendment](docs/S0-MOCK-CHAIN.md)：這次 owner 選定的 mock 切片，不等同完整 M0/M1 驗收。
+- [SDD](SDD.md) 與 [詳細 SDD](docs/sdd/README.md)：長期架構、前後端／Agent／bootstrap／安全／容量。
+- [STATUS](docs/STATUS.md)：唯一進度權威；[本地證據](docs/evidence/S0-LOCAL.md)。
+- [DEVELOPMENT_PROMPT](DEVELOPMENT_PROMPT.md) 與 [AGENTS](AGENTS.md)：後續 session 入口。
 
-既有 OneVPS 管理的主機使用 `host_authority=external`；Edge Ops 不競爭寫入主機設定。只有明確指定由 Edge Ops 管理的獨立測試主機，才可在後續授權階段使用其初始化與操作能力。
+## 平台邊界
 
-## 授權
+不接管 OneVPS host lifecycle、OneFleet workload lifecycle、dim-gate CMDB 或 agent-platform 的 LLM/Cocoon 執行。SDD 中的操作與初始化仍需後續明確授權及完整安全 gate。沒有命令執行器、SSH、root 或 Docker socket。
 
-新撰寫內容沿用 repository 根目錄 MIT。上游只作概念與需求研究，沒有複製程式碼、安裝腳本、UI 或圖片；未來引用第三方程式碼須另做版本及授權審查。
+新內容沿用根 MIT；未匯入上游 CF-Server-Monitor 程式碼。套件鎖檔是本 repository 固定版本的工具鏈快照，來源及未完成的依賴精簡見 S0 文件。

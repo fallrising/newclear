@@ -1,0 +1,7 @@
+{
+  "name":"@newclear/edge-ops-worker","version":"0.0.0","private":true,"type":"module","engines":{"node":"24.18.0"},
+  "scripts":{"typecheck":"tsc --noEmit","dev":"wrangler dev --local --var MODE:demo","db:migrate:local":"wrangler d1 migrations apply edge-ops-demo --local","test:workerd":"node scripts/workerd-smoke.mjs"},
+  "dependencies":{"hono":"4.13.8"},
+  "devDependencies":{"@cloudflare/vitest-plugin":"1.1.13","@cloudflare/workers-types":"5.20260920.1","@types/node":"26.6.2","@vitest/runner":"4.1.11","@vitest/snapshot":"4.1.11","ajv":"8.20.0","typescript":"7.0.2","vite":"6.4.3","vitest":"4.1.11","wrangler":"4.135.0"},
+  "allowScripts":{"esbuild@0.28.1":true,"workerd@1.20260918.1":true,"esbuild@0.25.12":true}
+}

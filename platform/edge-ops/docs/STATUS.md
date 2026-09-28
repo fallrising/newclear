@@ -1,30 +1,25 @@
 # Edge Ops — STATUS
 
-本檔是本專案唯一的進度權威。日期：2026-09-27。
+日期：2026-09-28。本檔是本專案唯一進度權威。
 
-## 目前狀態
+## 已接受設計與本次授權
 
-**SDD v0.1 draft / documentation-only。尚未實作、尚未部署、尚未完成 owner acceptance。**
+SDD PR #161 已合併，merge `05809fc951ef929665e798846aba348d6c9071a5`。Owner 隨後要求先開發前後端骨架，使用 mock 跑通資料鏈路。本次交付 S0 local monitoring slice，詳見 [S0 scope](S0-MOCK-CHAIN.md)。不等於完整 M0/M1 驗收；沒有任何 host/deploy 授權。
 
-本次範圍：建立 `platform/edge-ops` 設計專案，研究 CF-Server-Monitor 與官方 provisioning/agent 模式，拆分前端／後端／Agent，定義 optional 初始化與安全驗收。未授權也未執行真實主機變更。
-
-| 項目 | 狀態 | 證據／限制 |
+| 項目 | 狀態 | 證據／邊界 |
 | --- | --- | --- |
-| Repository 規範與相鄰邊界 | 已讀取 | 固定 base `0497fc2ade6c1dd085623f700a368c4402ee22b1`，詳見 SOURCES |
-| Upstream 與官方文件研究 | 已整理 | SOURCES 的 S01–S20；上游只讀 README 指定段落，非 source audit |
-| Frontend／Backend／Agent SDD | draft | docs/sdd/01–03；沒有 runtime 程式碼 |
-| Image／bootstrap 與業界說明 | draft | docs/sdd/04；不是可执行 user-data 或安裝器 |
-| 安全／契約／驗收／容量 | draft | docs/sdd/05–07；schema 和測試尚待 M0 |
-| 獨立 review／owner acceptance | pending | 不能用本次自查代替独立安全審查 |
-| M0–M6 implementation | not started | 沒有 Node/Go dependency installation 或 build |
-| Target-host／Cloudflare live tests | not run | 本次非部署授權，沒有使用 production credential |
+| Common telemetry types/schema/fixture + 8 operations | implemented / local checked | demo schema，不含完整 production response codegen |
+| Worker handler + SQLite test adapter + HTTP mock Agent | implemented / local passed | 21 tests passed、0 failed、0 skipped |
+| Backend typecheck | local passed | Node22.16 / global TS5.8.3；locked compiler另由CI驗證 |
+| React UI / Vite build / 5 browser tests | implemented / CI pending | local npm DNS blocked；尚不宣稱browser驗收通過 |
+| Local workerd + D1 smoke | implemented / CI pending | 不以SQLite adapter測試代替此證據 |
+| Root path-scoped CI | added | contents:read、固定actions、无deploy／secrets |
+| Independent review / owner product acceptance | pending | 作者自查不等於獨立review |
+| Actual Go collector / real identity / DO / logs / jobs / bootstrap | not implemented | 原M0–M6安全gate仍保留 |
+| Cloudflare deployment / target-host tests | not run | 本次無部署或真實主機操作 |
 
-## 下一個最小切片
+基底固定 `05809fc951ef929665e798846aba348d6c9071a5`；本地執行證據見 [S0-LOCAL](evidence/S0-LOCAL.md)。遠端驗收以此交付PR的exact-head checks為準；後續更新本檔不得把pending自動寫成passed。
 
-owner 接受設計且明確要求實作後，開始 M0：把 API、metrics envelope、JobManifest、strict JSON policy 與狀態機落成契約；做 TS/Go 簽章 vectors、D1 CAS/0-row transaction fixtures，再允許三條工作線平行。
+## 下一步
 
-M0 不包含遠端主機、Cloudflare deploy、Terraform apply 或有副作用 scripts。第一個有 executable code 的 PR 才接 root path-scoped CI，並記錄確切 toolchain／lockfile。
-
-## 續作規則
-
-先核對實際 main、相關 PR 與此檔；不要僅憑固定入口 prompt 認定仍在 M0。每次完成更新固定 commit、實測／未測、pending review、下一步。PR merge、設計接受、功能驗收與 deployment 分開記錄。
+先處理S0的CI或使用者驗收問題；完成後再補M0生產契約、Go/TS簽章、真實註冊及Job CAS驗證。S0不部署、不合併其他PR、不安裝現役主機Agent；新的實作PR未經owner要求不自動merge。

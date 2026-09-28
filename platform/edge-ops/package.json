@@ -1,0 +1,16 @@
+{
+  "name": "@newclear/edge-ops",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22.16.0"},
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "start:local": "node --experimental-strip-types scripts/serve.mjs --demo",
+    "demo": "npm --prefix web run build && node --experimental-strip-types scripts/serve.mjs --demo --seed",
+    "mock-agent": "node scripts/mock-agent.mjs",
+    "check:contracts": "node --experimental-strip-types scripts/check-contracts.mjs",
+    "check": "npm run check:contracts && npm test",
+    "test:browser": "npm --prefix web run test:e2e"
+  }
+}

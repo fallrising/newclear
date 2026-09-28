@@ -31,6 +31,7 @@
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
 | `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；目前僅 SDD，無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
 | `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
 | `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |

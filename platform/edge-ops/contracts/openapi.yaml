@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+  title: Edge Ops API
+  version: 1.0.0-draft.m0
+  description: |
+    Draft v1 contract from SDD 05 §3. **None of these paths are implemented or deployed yet.**
+    Human routes sit behind Cloudflare Access; the Worker re-verifies the Access JWT and looks up
+    workspace membership. workspace_id always comes from that authorization, never from the body.
+    Machine routes (/agent/v1/*) use per-node Ed25519 request signatures (edgeops-req-v1, see
+    contracts/README.md) and are never redirected to a human login page.
+    All bodies use the strict JSON profile. Errors are `Error`, never secrets, SQL or stacks.
+  license:
+    name: MIT
+servers:
+  - url: https://edge-ops.example.invalid
+security:
+  - accessJwt: []
+tags:
+  - name: agent
+  - name: nodes
+  - name: jobs
+
+components:
+  securitySchemes:
+    accessJwt:
+      type: apiKey
+      in: header
+      name: Cf-Access-Jwt-Assertion
+      description: Verified for issuer, audience, signature and expiry before membership lookup.
+    agentSignature:
+      type: apiKey
+      in: header
+      name: edgeops-signature
+      description: edgeops-req-v1; requires all edgeops-* headers listed in contracts/README.md.
+  parameters:
+    NodeId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, pattern: '^node_[a-z0-9][a-z0-9_-]{0,62}$' }
+    JobId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, pattern: '^job_[a-z0-9][a-z0-9_-]{0,62}$' }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 128 }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string, maxLength: 256 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+  responses:
+    Error:
+      description: Error body. 401 unauthenticated, 403 capability, 409 idempotency/CAS, 413 too large, 422 schema/platform, 429 quota, 503 unavailable.
+      headers:
+        Retry-After:
+          schema: { type: integer, minimum: 1 }
+      content:
+        application/json:
+          schema:
+            $ref: './schemas/error.v1.schema.json'
+  schemas:
+    NodeSummary:
+      type: object
+      additionalProperties: false
+      required: [id, display_name, os, arch, agent_version, status, mode, host_authority, connectivity, last_seen_received_at, revision]
+      properties:
+        id: { type: string }
+        display_name: { type: string }
+        os: { type: string }
+        arch: { type: string }
+        agent_version: { type: string }
+        status: { enum: [pending_confirmation, active, revoked] }
+        mode: { enum: [monitor-only, managed] }
+        host_authority: { enum: [none, external, edge-ops] }
+        connectivity:
+          enum: [online, stale, offline, never_seen]
+          description: Derived from last_seen_received_at; offline when older than 3 x heartbeat + 30s.
+        last_seen_received_at: { type: [string, 'null'], format: date-time }
+        revision: { type: integer }
+    TelemetryAck:
+      type: object
+      additionalProperties: false
+      required: [request_id, seq, result]
+      properties:
+        request_id: { type: string }
+        seq: { type: integer }
+        result:
+          enum: [stored, duplicate]
+          description: Both are durable acks. A same-seq, different-digest body is 409, not an ack.
+    JobState:
+      enum: [draft, awaiting_approval, queued, leased, running, reconciling, expired, succeeded, failed, timed_out, cancelled, unknown]
+      description: See state-machines/job.v1.json. cancel_requested_at is a separate request flag.
+
+paths:
+  /agent/v1/enroll:
+    post:
+      tags: [agent]
+      operationId: agentEnroll
+      security: []
+      summary: Consume a one-time enrollment token with proof of key possession
+      description: Same token + same key recovers the existing node (lost response); any other key is refused.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/enroll-request.v1.schema.json'
+      responses:
+        '200':
+          description: Enrolled or recovered.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [request_id, node_id, credential_id, status]
+                properties:
+                  request_id: { type: string }
+                  node_id: { type: string }
+                  credential_id: { type: string }
+                  status: { enum: [pending_confirmation, active] }
+        default: { $ref: '#/components/responses/Error' }
+
+  /agent/v1/telemetry:
+    post:
+      tags: [agent]
+      operationId: agentTelemetry
+      security: [{ agentSignature: [] }]
+      summary: Durable telemetry ingest (purpose=telemetry; body <= 256 KiB; never carries commands)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/telemetry-report.v1.schema.json'
+      responses:
+        '200':
+          description: Durable ack after the sample row exists.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TelemetryAck' }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/enrollments:
+    post:
+      tags: [nodes]
+      operationId: createEnrollment
+      summary: node-admin creates a one-time token (shown once; only its hash is stored)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [display_name, host_authority, ttl_seconds]
+              properties:
+                display_name: { type: string, maxLength: 128 }
+                host_authority: { enum: [none, external] }
+                ttl_seconds: { type: integer, minimum: 60, maximum: 3600, default: 600 }
+                expected_fingerprint: { type: string, pattern: '^[0-9a-f]{64}$' }
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [request_id, enrollment_id, token, expires_at]
+                properties:
+                  request_id: { type: string }
+                  enrollment_id: { type: string }
+                  token: { type: string, description: Displayed once; never retrievable again. }
+                  expires_at: { type: string, format: date-time }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/nodes:
+    get:
+      tags: [nodes]
+      operationId: listNodes
+      summary: viewer lists nodes in the caller's workspace
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Page of nodes.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [request_id, items, next_cursor]
+                properties:
+                  request_id: { type: string }
+                  items: { type: array, items: { $ref: '#/components/schemas/NodeSummary' } }
+                  next_cursor: { type: [string, 'null'] }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/nodes/{id}:
+    get:
+      tags: [nodes]
+      operationId: getNode
+      parameters: [{ $ref: '#/components/parameters/NodeId' }]
+      responses:
+        '200':
+          description: Node; 404 for nodes outside the caller's workspace (no existence oracle).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NodeSummary' }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/nodes/{id}/metrics:
+    get:
+      tags: [nodes]
+      operationId: getNodeMetrics
+      summary: Raw one-minute windows; from/to span at most 7 days
+      parameters:
+        - $ref: '#/components/parameters/NodeId'
+        - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Windows ordered by observed time, with explicit gaps; null metrics stay null.
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/nodes/{id}/revoke:
+    post:
+      tags: [nodes]
+      operationId: revokeNode
+      summary: node-admin revokes future machine access (cannot undo past side effects)
+      parameters: [{ $ref: '#/components/parameters/NodeId' }]
+      responses:
+        '200': { description: Revoked; open live sessions for this node are closed. }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/jobs:
+    post:
+      tags: [jobs]
+      operationId: createJob
+      summary: operator creates a single-node draft; manifest is frozen on submit for approval
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '201': { description: Draft created (same key + same payload returns the existing job). }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/jobs/{id}:
+    get:
+      tags: [jobs]
+      operationId: getJob
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { description: Job with revision, every attempt, unknown state and output cursor. }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/jobs/{id}/approvals:
+    post:
+      tags: [jobs]
+      operationId: submitApproval
+      summary: approver submits an approval produced by the independent signing CLI
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/run-approval.v1.schema.json'
+      responses:
+        '200': { description: Verified over the stored manifest bytes; job becomes queued. }
+        default: { $ref: '#/components/responses/Error' }
+
+  /api/v1/jobs/{id}/cancel:
+    post:
+      tags: [jobs]
+      operationId: cancelJob
+      summary: Idempotent cancel request; running work waits for stop evidence
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '202': { description: cancel_requested recorded; not a terminal state. }
+        default: { $ref: '#/components/responses/Error' }
+
+  /agent/v1/jobs/claim:
+    post:
+      tags: [agent]
+      operationId: agentClaimJob
+      security: [{ agentSignature: [] }]
+      summary: courier claims at most one job (purpose=jobs); lost responses return the same attempt
+      responses:
+        '200':
+          description: Claimed/redelivered attempt with manifest bytes, approval, fence and lease, or none.
+        default: { $ref: '#/components/responses/Error' }
+
+  /agent/v1/jobs/{id}/events:
+    post:
+      tags: [agent]
+      operationId: agentJobEvents
+      security: [{ agentSignature: [] }]
+      summary: courier reports attempt transitions fenced by attempt/fence/sequence/digest
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { description: Durable ack. }
+        default: { $ref: '#/components/responses/Error' }

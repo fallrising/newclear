@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/edge-ops/contracts/schemas/enroll-request.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "enrollment_token",
+    "public_key",
+    "proof",
+    "agent_version",
+    "os",
+    "arch"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "edgeops.enroll.v1"
+    },
+    "enrollment_token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "public_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "Ed25519 raw public key, unpadded base64url"
+    },
+    "proof": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$",
+      "description": "Ed25519 over 'EDGEOPS-ENROLL-V1\\n' || sha256(utf8(token)) || public_key"
+    },
+    "agent_version": {
+      "type": "string",
+      "pattern": "^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,6}(-[0-9A-Za-z.-]{1,32})?$"
+    },
+    "os": {
+      "enum": [
+        "linux"
+      ]
+    },
+    "arch": {
+      "enum": [
+        "amd64",
+        "arm64"
+      ]
+    }
+  },
+  "title": "Edge Ops enrollment request v1",
+  "description": "Max 4 KiB."
+}

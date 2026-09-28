@@ -1,0 +1,496 @@
+{
+  "description": "RunManifest v1 approvals (SDD 05 §4). Test-only keys derived from public seed labels.",
+  "generated_by": "platform/edge-ops/backend/tools/vectors.ts",
+  "seed_derivation": "sha256(utf8(\"edgeops-test-vector-seed:\" + label))",
+  "signing_domain": "EDGEOPS-RUN-V1\\n",
+  "trusted_keys": {
+    "key_owner_1": "aiDUGHAfxUH-3Re04syFHpmhGU8rXNKJfYVeHc96zZE"
+  },
+  "cases": [
+    {
+      "name": "valid",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "valid_exact_bytes_with_whitespace",
+      "manifest_text": "{\n  \"schema_version\": \"edgeops.run.v1\",\n  \"workspace_id\": \"ws_example\",\n  \"job_id\": \"job_example\",\n  \"attempt_id\": \"attempt_example\",\n  \"node_id\": \"node_example\",\n  \"enrollment_generation\": 1,\n  \"recipe_version\": \"service-status@1\",\n  \"artifact_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"parameters\": {\n    \"unit\": \"example.service\",\n    \"lines\": 50,\n    \"follow\": false\n  },\n  \"execution_profile\": \"unprivileged-diagnostic\",\n  \"policy_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n  \"timeout_seconds\": 30,\n  \"not_before\": \"2026-01-01T00:00:00Z\",\n  \"expires_at\": \"2026-01-01T01:00:00Z\",\n  \"nonce\": \"AAAAAAAAAAAAAAAAAAAAAA\"\n}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"be3db999bf6729c1f07f19738b2ed2db8b822088e7d944dc07b873f3f2e044f7\",\"signature\":\"_eK8KEjXo-KQyN8nXFxiNi7QpRefCcVtUldRzhTPm_wBXA1F5Z11aV3qEQhFh4q_ZxOuJtJTIRWEnaVONcreBw\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "parameter_changed_after_signing",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"other.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "digest_mismatch",
+        "field": "manifest_sha256"
+      }
+    },
+    {
+      "name": "reserialized_manifest_is_not_the_signed_bytes",
+      "manifest_text": "{\n  \"schema_version\": \"edgeops.run.v1\",\n  \"workspace_id\": \"ws_example\",\n  \"job_id\": \"job_example\",\n  \"attempt_id\": \"attempt_example\",\n  \"node_id\": \"node_example\",\n  \"enrollment_generation\": 1,\n  \"recipe_version\": \"service-status@1\",\n  \"artifact_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"parameters\": {\n    \"unit\": \"example.service\",\n    \"lines\": 50,\n    \"follow\": false\n  },\n  \"execution_profile\": \"unprivileged-diagnostic\",\n  \"policy_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n  \"timeout_seconds\": 30,\n  \"not_before\": \"2026-01-01T00:00:00Z\",\n  \"expires_at\": \"2026-01-01T01:00:00Z\",\n  \"nonce\": \"AAAAAAAAAAAAAAAAAAAAAA\"\n}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "digest_mismatch",
+        "field": "manifest_sha256"
+      }
+    },
+    {
+      "name": "unpinned_key_id",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_unknown\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "untrusted_key",
+        "field": "key_id"
+      }
+    },
+    {
+      "name": "pinned_key_id_other_signer",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"_4EqBUHS9SfGo2Ccai_hB4LW90kp3s54QJdHtiZ033LloxDiYZqN67rFt4K6h_cnsR4w_0hZJIIN4wiQKDRkBg\"}",
+      "signer_seed_label": "attacker-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "signature"
+      }
+    },
+    {
+      "name": "signature_without_domain_separator",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"bPMayF_p3aTHYM48kzaoSCgo-sxtX1UDHgIVTqZJlGjXvJpd0m3X-x7gsTSJ-YpiExVtSYY-KFJQdIOd9wU8Bw\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "no_domain",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "signature"
+      }
+    },
+    {
+      "name": "non_canonical_signature_s",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmHDOH_Xm_3XmSx6ryARFhmNZ8nBriDCuatf8FER9TpFQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "noncanonical_s",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "signature"
+      }
+    },
+    {
+      "name": "other_node",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_other",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "node_mismatch",
+        "field": "node_id"
+      }
+    },
+    {
+      "name": "other_generation",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 2,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "generation_mismatch",
+        "field": "enrollment_generation"
+      }
+    },
+    {
+      "name": "not_yet_valid",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2025-12-31T23:59:59Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "not_yet_valid",
+        "field": "not_before"
+      }
+    },
+    {
+      "name": "expired_at_boundary",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T01:00:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "expired",
+        "field": "expires_at"
+      }
+    },
+    {
+      "name": "duplicate_key_signed",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"timeout_seconds\":86400,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"3ae51f2ad5c8e87e58ab259775861903efa2c276a360eea2b46bd1c91f002e0f\",\"signature\":\"frvfLs88gcMB-v6XjSxxUIAUvo7AM_Jm4Y9hhSE6e7klugxMM5UQRSDnOTwoz0IX_Q0SyxyR60-gg_lqagHiDw\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "duplicate_key"
+      }
+    },
+    {
+      "name": "unknown_privileged_field",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"run_as\":\"root\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"ddd6baae4846e35bb729d24c8dd2716a537ee4a159d8afa0acb53b4bb1b76ce2\",\"signature\":\"i0Tb5S4P5ccFDRWOABQUckiCOAgOa-qsytrYarzqCBZ8PZUuMlYETKqgFmwjw6ln1ONqQEvDVDR2iprEfdu4Bw\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown_field",
+        "field": "run_as"
+      }
+    },
+    {
+      "name": "missing_field",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"8faf1263ae166dc65b132837b9d55f803435da2c0a1a254021950c679448361b\",\"signature\":\"ylMKqiRqCFttP6vfPI6ggkxUHKvWc5YJzXO7c_3m_XQBx8vho5gMk-XYDsEas5_epGLzKOlbVcaE7Xjm05eKBg\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "missing_field",
+        "field": "policy_digest"
+      }
+    },
+    {
+      "name": "unsupported_major",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v2\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"1d1b67b544ffab503334c9c9954a4b3e59796990ec037e38de52e40bfeced0f8\",\"signature\":\"aABma_QaEwboSVOzJJITaJcScnFPdpStVA98U9khZGe2pNYo3uAmmvPC6lz5unNCdtF14shUaKSQYWBV3fntAQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unsupported_version",
+        "field": "schema_version"
+      }
+    },
+    {
+      "name": "float_parameter",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50.5,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"6986773a18be682a921dcb58d6f0668927f38459ba5d6a8861590fb97f48f2f9\",\"signature\":\"Ky3eLuWLlMZMKVhMIvGn5hLyT-6l5mCnCzCI6Y4N-1_hsi6KiuaqPlmmuqF-Vk5q-8vu5NhttlqZQkTOIkWcDQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "non_integer_number"
+      }
+    },
+    {
+      "name": "exponent_parameter",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":5e1,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"30c19fddc0b78b427fe632cfa472b7e38d9cba53936b4e7cdf9ef4f48f3b0258\",\"signature\":\"YnR9m2Gi5qPtifqTqGThH9ralJJLkwa0JbCbGjFzLnJeuw3BCCQOw_5Yj5Aib2UCzdstVGy4Q0Y74unWkTX2CA\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "non_integer_number"
+      }
+    },
+    {
+      "name": "nested_parameter",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":{\"name\":\"x\"}},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"c47f2ad37d2df6bd5b02e306ab3b8d58dfee0b00c94b6512b9d101328aab1bc2\",\"signature\":\"OUmc9hV57vfgw76L5Qv9HK3rAUd3ps5GDTLJ6S4eU5ENsueWTGocOrf72LUzsYdpGzFJFkVJOmzMacvSmHGkCA\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "parameters.unit"
+      }
+    },
+    {
+      "name": "null_parameter",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":null},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"b1dc2c60e5c9f0ea50586d628c33c3fc9fe112c839115a602c416e86796458bf\",\"signature\":\"itzj74RSqu25pKD_SETYfBZ7OtKww5h6Af-4EMPZveK7DOk2mEzgevDBAkn2RVFqvmssTfEj3KFpL2XzOnFzDQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "parameters.unit"
+      }
+    },
+    {
+      "name": "parameter_name_injection",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit;rm\":\"x\"},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"d9800e4ec03aa10e8401301fb7d5f13fd24f37225430fe4393900985fa510bf0\",\"signature\":\"s08YNNGnZJaP8uASuuiHF1_NS3lEmkTfF4ni_9i6FFJjlZ7RplhM5VC_Oj0IMMOZWVYXdfn9Pw92Rbo5d2p7Cw\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "parameters.unit;rm"
+      }
+    },
+    {
+      "name": "zero_timeout",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":0,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"d1ef98ead506a8831a62b5c4f43409e67f9c55e742b2dede97da4637237c5a2c\",\"signature\":\"zXIfSS1A6IVMu5JPYDVc-2QNEkMnR0_d93akcBOpozHtTFwcb7ZleBzDmd5ZYcK5eidkf4q-upmW_tXtW6ZxDA\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "timeout_seconds"
+      }
+    },
+    {
+      "name": "impossible_date",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-02-30T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"1a69f048ddc5277d8e88bce30afd0cfa64073fa1c500b432a342d67666f74002\",\"signature\":\"PROodCcFXYaII-ekUSHv-XjfGn8N9D1kYAM19oPsXmZHVPGgSqr1_DHr3VamRIwW7i-B5m54_4VAkJ9guxYYCQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "not_before"
+      }
+    },
+    {
+      "name": "local_offset_time",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T08:00:00+08:00\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"72e75b1afe8759e45e5b16bd499d6accd7a2d4fa620d98cf79c253e0aee53ebd\",\"signature\":\"9S4N6YtSrpTLWW5ynSwuHIxrp-W25m3jsc7QS6Xn8_M-Yfz6r7TnA4ydT99TiFS18Im-LLb4qwNRh2Ylw3zgAg\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "not_before"
+      }
+    },
+    {
+      "name": "window_longer_than_24h",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-02T00:00:01Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"3f0f7b6dc0bc575d28c580a0d41c73359d0d008ae61954a5eb69d04d060af7c4\",\"signature\":\"PDsfSRPIVoBrWNfPkh8YnQ4ZTFfEUjhr8hiSoV4XfMru6Mc1An9hnAKkBdRK-OT1r6s7a-u2I07gPSzDjoSgCQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "expires_at"
+      }
+    },
+    {
+      "name": "unknown_profile",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"root\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"6af996933a723cefc980ef3ab248dc0ded1c2e947687c1ef147b6a3c5f6f63d3\",\"signature\":\"pA8JC_DMKJ4YROgoyp7BXos4aWpordE01Fi0zp5-3G7s6GZedhkm1FcCZ37O-rXWp8L8-GYkuiT8b_-3YTOYBA\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "execution_profile"
+      }
+    },
+    {
+      "name": "uppercase_digest",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"dcfedf1d58fd13aa74abb47dfd0c078e97926f6aac7e5f6e3ba5a28748cb927c\",\"signature\":\"u8OvECnaF2C4NwH6QQEqhNx7bipYvJNfSnb5Cp_IHVrDfgH8ZVm3uagPY1h2p8SIFhIzKHizMNocUirt5DnoDA\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "artifact_sha256"
+      }
+    },
+    {
+      "name": "approval_duplicate_key",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"key_id\":\"key_other\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "duplicate_key"
+      }
+    },
+    {
+      "name": "approval_padded_signature",
+      "manifest_text": "{\"schema_version\":\"edgeops.run.v1\",\"workspace_id\":\"ws_example\",\"job_id\":\"job_example\",\"attempt_id\":\"attempt_example\",\"node_id\":\"node_example\",\"enrollment_generation\":1,\"recipe_version\":\"service-status@1\",\"artifact_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"parameters\":{\"unit\":\"example.service\",\"lines\":50,\"follow\":false},\"execution_profile\":\"unprivileged-diagnostic\",\"policy_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"timeout_seconds\":30,\"not_before\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T01:00:00Z\",\"nonce\":\"AAAAAAAAAAAAAAAAAAAAAA\"}",
+      "approval_text": "{\"schema_version\":\"edgeops.approval.v1\",\"key_id\":\"key_owner_1\",\"manifest_sha256\":\"f2eb0b983ef97161ff687f16c8e035f679ffab3b816691a1fa2726139a6ec740\",\"signature\":\"p4s8v19JhXXLbj1Y_0RxKaBzB_3hAcDG6YESLOHAtYmaOOuiRAzlBo4U8xmiSnlRNZ8nBriDCuatf8FER9TpBQ==\"}",
+      "signer_seed_label": "approval-owner-1",
+      "signing_variant": "standard",
+      "binding": {
+        "node_id": "node_example",
+        "enrollment_generation": 1,
+        "now": "2026-01-01T00:01:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "signature"
+      }
+    }
+  ]
+}

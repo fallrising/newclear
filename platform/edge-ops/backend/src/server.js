@@ -1,0 +1,1 @@
+import http from"node:http";import{createApp}from"./app.js";const port=Number(process.env.PORT||8787);http.createServer(createApp()).listen(port,()=>console.log("edge-ops backend http://127.0.0.1:"+port));

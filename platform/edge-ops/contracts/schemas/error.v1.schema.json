@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/edge-ops/contracts/schemas/error.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "message",
+    "retryable",
+    "request_id"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "request_id": {
+      "type": "string"
+    }
+  },
+  "title": "Edge Ops error body",
+  "description": "Never contains secrets, SQL or stack traces."
+}

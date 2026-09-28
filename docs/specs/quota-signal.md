@@ -81,7 +81,7 @@ based on this signal.
 ## Acceptance Criteria
 
 - Each tool has offline tests for QS-1 to QS-5 using recorded fixtures.
-- `codex-usage` gets a root path-scoped CI workflow consistent with `docs/specs/monorepo-ci.md`
-  (it currently has none); `cc-quota` CI covers the new command.
+- The existing root workflows `codex-usage-ci.yml` and `cc-quota-ci.yml` run the new tests and
+  cover the new command.
 - Both tools' README and quickstart document the command; steps not run on a real account stay
   marked `skipped` with the reason.

@@ -2,6 +2,9 @@
 
 只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-09-28。
 
+> **權威來源**：投入決策與工作追蹤（做不做、做到哪、下一步）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
+> 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
+
 ## 怎麼讀
 
 - **投入**（開發投入）：是否為這個 codebase 規劃新功能。
@@ -15,7 +18,9 @@
 - **檔位**：文檔深度 A–D，只決定文件深度，不決定投入。政策見 [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md)，
   分類見 [docs/taxonomy.md](docs/taxonomy.md)。C 檔的 `Dormant since` 預設 2026-09-04，除非元件 README 另有更明確的日期。
   「—」表示不在 newclear 的檔位制度內（其他 repository）。
-- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄。
+- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄；排程與優先序在私人帳本。
+- 帳本只有「投入中」與「暫停」兩種開發狀態：「繼續投入」對應投入中；「維護」與「休眠」都是暫停（不規劃新功能，
+  在用的產品出問題仍可修復），兩者的差別只在修復的積極程度。
 - `newclear/refs/` 是第三方索引，不是自有元件，不列入。
 
 ## 元件
@@ -37,6 +42,9 @@
 | `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
 | `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |
 | `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |
+| `newclear/products/hai-taskboard` | 未知 | A | Human–AI delivery control plane（Work Graph／Fake-core）；私人項目帳本格式的未來消費者，不取代帳本本身。 |
+| `newclear/labs/eru-vps-mvp` | 未知 | A | live VPS MVP 實驗；實機變更另行授權。 |
+| `kernel/infra/pvehost` | 未知 | — | Proxmox 宿主機分階段操作包，由人以 root 手動執行；不是自動化控制面。 |
 
 ### 維護
 
@@ -68,6 +76,8 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/platform/prism` | 未知 | C | Phase 0 SDD。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
+| `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |
+| `newclear/systems/mkfk` | 未知 | B | 教學／契約實作；不新增 tutorial。 |
 | `newclear/specs/fleet` | 未知 | B | 只作 public contract，不發展成第二個 control plane。 |
 | `kernel/infra/onevps` | 未知 | — | 見「VPS 與 fleet」邊界。 |
 | `kernel/infra/onefleet` | 未知 | — | 見「VPS 與 fleet」邊界。 |
@@ -92,12 +102,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 
 ### 未分級
 
-| 元件 | 使用 | 檔位 | 說明 |
-| --- | --- | --- | --- |
-| `newclear/products/hai-taskboard` | 未知 | A | Human–AI delivery control plane（Work Graph／Fake-core）開發中；`fallrising/desk` 格式的未來消費者。 |
-| `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo。 |
-| `newclear/labs/eru-vps-mvp` | 未知 | A | live VPS MVP 實驗。 |
-| `newclear/systems/mkfk` | 未知 | B | 教學／契約實作；不新增 tutorial。 |
+目前沒有。新元件在私人帳本做投入決定後，再列入上方各表。
 
 ## 重疊與 canonical 邊界
 
@@ -139,9 +144,7 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
 
 ## 下一步
 
-1. **Knowledge Base**：在 4 條獨有 `cursor/*` branch 中選出要保留的內容，合成一份 canonical multi-model routing note，其餘標記 superseded；
-   完成前不新增同題筆記。
-2. **Ice Maker**：用一份真的需要的文件跑完整 ingestion → OCR（需要時）→ provenance → readable result，把一個有 citation 的成果落進 Knowledge Base。
+下一步與排程在私人項目帳本追蹤，本檔不列。
 
 ## 待決
 
@@ -149,5 +152,4 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
 2. 是否保留下列未合併工作：Fanzloud open PR #3/#4、Knowledge Base 4 條 `cursor/*` note、Local OCR `agent/t006`、兩個 fraud M7 branch、
    Goku `copilot`／`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否視為被 PR #10/#11 取代？
 3. archived `config_center` 歷史中曝光的 n8n PostgreSQL／basic-auth credential 是否已輪換？repo 已 archive 不等於風險已解除。
-4. 繼續投入目前有 11 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？
-5. 未分級的 4 個元件要放在哪一級？
+4. 繼續投入目前有 16 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？

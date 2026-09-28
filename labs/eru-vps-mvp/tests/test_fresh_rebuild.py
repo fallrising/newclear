@@ -505,6 +505,11 @@ class FreshRebuildPlanTests(unittest.TestCase):
             first['plan']['desired_apps_sha256'], changed['plan']['desired_apps_sha256'])
 
     def test_cli_output_is_count_digest_only_and_does_not_register_an_executor(self):
+        # The CLI takes the wall clock; pin it to the fixture time so the 1-day review window holds.
+        clock_patch = patch.object(fresh_rebuild_ops, 'datetime')
+        clock = clock_patch.start()
+        self.addCleanup(clock_patch.stop)
+        clock.now.return_value = self.now
         stdout = StringIO()
         stderr = StringIO()
         argv = ['labctl.py', 'plan-fresh-rebuild', '--input', self.input_path,

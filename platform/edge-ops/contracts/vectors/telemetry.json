@@ -1,0 +1,53 @@
+{
+  "description": "edgeops.telemetry.v1 report bodies. `base` is valid; each case applies `set` (JSON-pointer-like dotted paths, null allowed) and/or `delete`, or supplies `input` verbatim. Synthetic values only.",
+  "base": {
+    "schema_version": "edgeops.telemetry.v1",
+    "node_id": "node_example",
+    "enrollment_generation": 1,
+    "boot_id": "00000000-0000-4000-8000-000000000001",
+    "seq": 42,
+    "window_start": "2026-01-01T00:00:00Z",
+    "window_end": "2026-01-01T00:01:00Z",
+    "sample_count": 6,
+    "agent_version": "0.1.0-dev",
+    "spool_dropped_reports": 0,
+    "metrics": {
+      "cpu_busy_bp": { "avg": 1250, "max": 4000, "last": 900 },
+      "load1_milli": 150,
+      "load5_milli": 120,
+      "load15_milli": 80,
+      "mem_total_bytes": "2147483648",
+      "mem_available_bytes": "1073741824",
+      "swap_total_bytes": "0",
+      "swap_free_bytes": "0",
+      "uptime_seconds": 86400,
+      "mounts": [{ "mount": "/", "total_bytes": "21474836480", "avail_bytes": "10737418240" }],
+      "disk_io": [{ "device": "vda", "read_bytes_total": "18446744073709551615", "write_bytes_total": "0" }],
+      "net": [{ "iface": "eth0", "rx_bytes_total": "123456789", "tx_bytes_total": "987654321" }]
+    }
+  },
+  "cases": [
+    { "name": "valid", "expect": { "ok": true } },
+    { "name": "unsupported_metrics_are_null", "set": { "metrics.cpu_busy_bp": null, "metrics.disk_io": null, "metrics.swap_total_bytes": null }, "expect": { "ok": true } },
+    { "name": "empty_series", "set": { "metrics.net": [] }, "expect": { "ok": true } },
+    { "name": "missing_metric_is_not_zero", "delete": ["metrics.load1_milli"], "expect": { "ok": false, "code": "missing_field", "field": "metrics.load1_milli" } },
+    { "name": "unknown_metric", "set": { "metrics.gpu_util_bp": 5 }, "expect": { "ok": false, "code": "unknown_field", "field": "metrics.gpu_util_bp" } },
+    { "name": "command_field_rejected", "set": { "command": "id" }, "expect": { "ok": false, "code": "unknown_field", "field": "command" } },
+    { "name": "counter_as_number", "set": { "metrics.mem_total_bytes": 2147483648 }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.mem_total_bytes" } },
+    { "name": "counter_overflow", "set": { "metrics.net": [{ "iface": "eth0", "rx_bytes_total": "18446744073709551616", "tx_bytes_total": "0" }] }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.net[0].rx_bytes_total" } },
+    { "name": "counter_leading_zero", "set": { "metrics.swap_free_bytes": "01" }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.swap_free_bytes" } },
+    { "name": "negative_counter", "set": { "metrics.swap_free_bytes": "-1" }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.swap_free_bytes" } },
+    { "name": "cpu_over_100_percent", "set": { "metrics.cpu_busy_bp": { "avg": 10001, "max": 10001, "last": 0 } }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.cpu_busy_bp.avg" } },
+    { "name": "cpu_max_below_avg", "set": { "metrics.cpu_busy_bp": { "avg": 50, "max": 10, "last": 0 } }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.cpu_busy_bp.max" } },
+    { "name": "negative_load", "set": { "metrics.load5_milli": -1 }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.load5_milli" } },
+    { "name": "duplicate_series_label", "set": { "metrics.mounts": [{ "mount": "/", "total_bytes": "1", "avail_bytes": "1" }, { "mount": "/", "total_bytes": "2", "avail_bytes": "2" }] }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.mounts[1]" } },
+    { "name": "label_with_control_char", "set": { "metrics.net": [{ "iface": "eth0\u001b[31m", "rx_bytes_total": "0", "tx_bytes_total": "0" }] }, "expect": { "ok": false, "code": "invalid_field", "field": "metrics.net[0].iface" } },
+    { "name": "series_entry_extra_field", "set": { "metrics.mounts": [{ "mount": "/", "total_bytes": "1", "avail_bytes": "1", "path": "/etc" }] }, "expect": { "ok": false, "code": "unknown_field", "field": "metrics.mounts[0].path" } },
+    { "name": "window_reversed", "set": { "window_end": "2025-12-31T23:59:00Z" }, "expect": { "ok": false, "code": "invalid_field", "field": "window_end" } },
+    { "name": "boot_id_uppercase", "set": { "boot_id": "00000000-0000-4000-8000-00000000000A" }, "expect": { "ok": false, "code": "invalid_field", "field": "boot_id" } },
+    { "name": "negative_seq", "set": { "seq": -1 }, "expect": { "ok": false, "code": "invalid_field", "field": "seq" } },
+    { "name": "unsupported_major", "set": { "schema_version": "edgeops.telemetry.v2" }, "expect": { "ok": false, "code": "unsupported_version", "field": "schema_version" } },
+    { "name": "not_an_object", "input": "[]", "expect": { "ok": false, "code": "invalid_document", "field": "$" } },
+    { "name": "float_metric", "input": "{\"schema_version\":\"edgeops.telemetry.v1\",\"seq\":1.5}", "expect": { "ok": false, "code": "non_integer_number" } }
+  ]
+}

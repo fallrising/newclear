@@ -1,0 +1,61 @@
+{
+  "description": "edgeops.enroll.v1 proof of key possession bound to one token (SDD 05 §2). Test-only keys and tokens.",
+  "generated_by": "platform/edge-ops/backend/tools/vectors.ts",
+  "seed_derivation": "sha256(utf8(\"edgeops-test-vector-seed:\" + label))",
+  "signing_domain": "EDGEOPS-ENROLL-V1\\n",
+  "cases": [
+    {
+      "name": "valid",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"PItSK85OaWowQzNii10CXLJ9Np-Gowc7zYzactEslW0\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"g2DG34-hKHG75BCoN-kXVIPIF_Yn-AHIT2afnGW-y5IGIyLNWCNxMc_qOZMrBOYgpeoc3JPkH1IuGRU38YHJCw\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"amd64\"}",
+      "expect": {
+        "ok": true,
+        "token_hash": "5de8e99d3175010ddc33e1435dab447883495ee585e0f8d334dd9c7b49587019"
+      }
+    },
+    {
+      "name": "proof_by_other_key",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"PItSK85OaWowQzNii10CXLJ9Np-Gowc7zYzactEslW0\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"nvqx-wDL_Gwd4se8HZTjoSztWhLihAqjMobLO5g0C_EV4sEpQP6KNRV886uSh5JIUpPhCobBgMDz6nry4MTuBQ\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"amd64\"}",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "proof"
+      }
+    },
+    {
+      "name": "proof_for_other_token",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"PItSK85OaWowQzNii10CXLJ9Np-Gowc7zYzactEslW0\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"pcftQtb3DNW4Pp9WH5o9zTzCyXFiPDQm_g8DXm7Yz1YGtTAd2n-WRVTLJGen7xv2gOqfV9vOULFHCxrtjPeiAw\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"amd64\"}",
+      "expect": {
+        "ok": false,
+        "code": "bad_signature",
+        "field": "proof"
+      }
+    },
+    {
+      "name": "unknown_field",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"PItSK85OaWowQzNii10CXLJ9Np-Gowc7zYzactEslW0\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"g2DG34-hKHG75BCoN-kXVIPIF_Yn-AHIT2afnGW-y5IGIyLNWCNxMc_qOZMrBOYgpeoc3JPkH1IuGRU38YHJCw\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"amd64\",\"hostname\":\"host.example.invalid\"}",
+      "expect": {
+        "ok": false,
+        "code": "unknown_field",
+        "field": "hostname"
+      }
+    },
+    {
+      "name": "unsupported_arch",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"PItSK85OaWowQzNii10CXLJ9Np-Gowc7zYzactEslW0\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"g2DG34-hKHG75BCoN-kXVIPIF_Yn-AHIT2afnGW-y5IGIyLNWCNxMc_qOZMrBOYgpeoc3JPkH1IuGRU38YHJCw\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"riscv64\"}",
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "arch"
+      }
+    },
+    {
+      "name": "short_token",
+      "request_text": "{\"schema_version\":\"edgeops.enroll.v1\",\"enrollment_token\":\"short\",\"public_key\":\"2GKk54v-Pb3uoF8-_Pt6X-tV2V_0rjKdAWfBsICthpQ\",\"proof\":\"g2DG34-hKHG75BCoN-kXVIPIF_Yn-AHIT2afnGW-y5IGIyLNWCNxMc_qOZMrBOYgpeoc3JPkH1IuGRU38YHJCw\",\"agent_version\":\"0.1.0-dev\",\"os\":\"linux\",\"arch\":\"amd64\"}",
+      "expect": {
+        "ok": false,
+        "code": "invalid_field",
+        "field": "enrollment_token"
+      }
+    }
+  ]
+}

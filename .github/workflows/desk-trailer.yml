@@ -1,0 +1,51 @@
+name: Desk trailer reminder
+
+# Reminds, never blocks: commits in a pull request should carry a `Desk-Task: T-####` trailer
+# (or `Desk-Exempt: <reason>`). Only the commit SHA is printed; commit text is never echoed.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desk-trailer-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trailer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Report commits without a Desk-Task trailer
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          while read -r sha; do
+            [ -n "$sha" ] || continue
+            task=$(git log -1 --format='%(trailers:key=Desk-Task,valueonly)' "$sha")
+            exempt=$(git log -1 --format='%(trailers:key=Desk-Exempt,valueonly)' "$sha")
+            if [ -z "${task//[[:space:]]/}" ] && [ -z "${exempt//[[:space:]]/}" ]; then
+              echo "::warning::commit ${sha:0:10} has no Desk-Task trailer"
+              missing=$((missing + 1))
+            fi
+          done < <(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA")
+          {
+            echo "## Desk trailer"
+            echo
+            if [ "$missing" -eq 0 ]; then
+              echo "Every non-merge commit carries a Desk-Task or Desk-Exempt trailer."
+            else
+              echo "$missing commit(s) without a Desk-Task trailer. This is a reminder only;"
+              echo "add the trailer to the squash message when merging, or use Desk-Exempt for bot and mirror commits."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

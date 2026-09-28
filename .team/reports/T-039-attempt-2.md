@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T039 attempt2, run DG-W3-20260923-01, W3contractrevision3. Sole lead Codex orchestrator W3, canonical /home/ckc/test/codex/newclear-dim-gate-w3, agent/dim-gate/mainline/w3-service-delivery, existing draftPR37. User's latest instruction narrows this window to W3 closeout and repository handoff; W4/W5 continue in a new window after W3 accepted/merged. No gate waiver. Earlier attempts and failures remain preserved.
+T039 attempt2, run DG-W3-20260923-01, W3contractrevision3. Sole lead Codex orchestrator W3, canonical <operator-home>/test/codex/newclear-dim-gate-w3, agent/dim-gate/mainline/w3-service-delivery, existing draftPR37. User's latest instruction narrows this window to W3 closeout and repository handoff; W4/W5 continue in a new window after W3 accepted/merged. No gate waiver. Earlier attempts and failures remain preserved.
 
 Final32-file T037 domain and21-file T038 feature/browser/report manifests are SHA-verified and integrated. Both workers released exclusive ownership. T03813feature production bytes equal initialUI1 plus canonicalOpsbacklinkdelta2. New strict integrity/audit/changedrefs and189domain tests are in T037slice3. Public172schema names/JSON and complete contractSchemas graph parity are exact; generatedOpenAPI127ops259schemas stays equivalent. Lead API transport defers unused feature clients, preserving per-call input and identity before load, refuses actor/session/generation/policy/epoch changes before transport. Startup models/seed/migration/integrity remain eager. Existing Guide controls moved unchanged into its lazy route. No startupbudget/exclusion/retry/health threshold changed.
 

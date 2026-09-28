@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-031 attempt1; run DG-W1-20260923-01; lead owner, branch `agent/dim-gate/mainline/w1-workspaces`, worktree `/home/ckc/test/codex/newclear-dim-gate-w1`. Base7a7b41b; initial remote contract checkpoint02a8b9a and draft PR33. This containing commit is the first integrated implementation candidate; no immutable product acceptance claimed yet. Domain worker released eight owned paths to lead; no competing writer remains. W1 contract revision2, AC-WS-01/02/16/17/18.
+T-031 attempt1; run DG-W1-20260923-01; lead owner, branch `agent/dim-gate/mainline/w1-workspaces`, worktree `<operator-home>/test/codex/newclear-dim-gate-w1`. Base7a7b41b; initial remote contract checkpoint02a8b9a and draft PR33. This containing commit is the first integrated implementation candidate; no immutable product acceptance claimed yet. Domain worker released eight owned paths to lead; no competing writer remains. W1 contract revision2, AC-WS-01/02/16/17/18.
 
 The Shell now separates workspace and Demo identity, limits grouped navigation to the active authorized workspace and retains diagnostic return context. RD/Ops/Admin homes use one scoped canonical dashboard with URL filters, freshness, source IDs and working destination filters. Existing Request/Release commands and snapshot versions are unchanged. Added seven real browser journeys; existing multi-role/Guide regressions follow the explicitly new navigation behavior.
 

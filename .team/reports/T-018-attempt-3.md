@@ -44,7 +44,7 @@ Portable remote evidence: [CI browser artifact](https://github.com/fallrising/ne
 
 Local evidence directory: `/tmp/dim-gate-m3-resume-evidence/`. Final logs, gate manifest, extracted JSON/text attachments and aggregate health/concurrency summary are in `final/`. Browser archive `04d6646-browser.tar.gz` SHA-256: `665d4180f637a3269222561671d84aa199ee4c3cf957c2fea32e60f0906fb56b`. Historical browser archives and both adversarial probe sources/results remain alongside it. Local archives are not claimed remotely portable.
 
-Reproduce from `platform/dim-gate` using PATH `/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`, LD_LIBRARY_PATH `/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu` and FONTCONFIG_FILE `/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf`, then the commands above. Browser config starts `pnpm preview --port 4173 --strictPort` at `http://127.0.0.1:4173/dim-gate/`; it exits after tests. Port 4173 was confirmed free after the final local suite.
+Reproduce from `platform/dim-gate` using PATH `<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`, LD_LIBRARY_PATH `/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu` and FONTCONFIG_FILE `/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf`, then the commands above. Browser config starts `pnpm preview --port 4173 --strictPort` at `http://127.0.0.1:4173/dim-gate/`; it exits after tests. Port 4173 was confirmed free after the final local suite.
 
 ## Risks and Follow-ups
 

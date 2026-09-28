@@ -4,7 +4,7 @@ Updated: 2026-09-24. This file records the verified working state and user instr
 
 ## Checkout and PR
 
-- Repository: `fallrising/newclear`; worktree: `/home/ckc/test/codex/newclear-agent-provider-mock-c2b2`.
+- Repository: `fallrising/newclear`; worktree: `<operator-home>/test/codex/newclear-agent-provider-mock-c2b2`.
 - Branch: `agent/agent-platform/at-11-c2b2`; snapshot basis before the continuation update: `85d90010af4e5da1ca61b1a5fd759c9fb1ac0c7c`. Follow-up handoff-only commits used `[skip ci]`; verify the actual branch tip with Git before resuming.
 - Base last synchronized: `dba9ee94a49bcfe2efb298caa1d5324cfde03988`.
 - Draft PR: [#82](https://github.com/fallrising/newclear/pull/82). It is not merged. The last workflow was cancelled; the current handoff-only commit skipped CI, so there are no checks reported for the current head. Do not treat the current PR head as fully green.

@@ -1,5 +1,7 @@
 # dim-gate 狀態
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 更新：2026-09-24。W1–W5 均已驗收合併；本文件下方較早的 W5/W4「待驗收／待合併」文字是固定時間的歷史 checkpoint，最新事實依 PLAN DG-D102 與 PR closeout。
 
 W5 固定產品／測試 `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` 依 PLAN DG-D101 接受 AC-WS-13–18；獨立 T049 attempts1–3 關閉 F1–F7。[PR61](https://github.com/fallrising/newclear/pull/61) 正常合併為 `77e5e14`；實際合併後 [CI35949443651 attempt2](https://github.com/fallrising/newclear/actions/runs/35949443651) 通過426原生、100 Chromium、12 Firefox/WebKit、3效能、2隔離和所有靜態／建置檢查。[Artifact10789818355](https://github.com/fallrising/newclear/actions/runs/35949443651/artifacts/10789818355) 綁定實際 merge，測得297,608初始gzip bytes、LCP中位數1,284ms、查詢p95 0.8ms、Mock HTTP p95 183ms，均低於固定預算。attempt1 因45分鐘 job 上限取消於效能測試後；attempt2 完成全部 gate。

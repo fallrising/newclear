@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T039 attempt1, run DG-W3-20260923-01, W3 contract revision3. Earliest unaccepted increment W3 is in actual implementation; W1/W2 are ACCEPTED/MERGED. Sole lead owner Codex orchestrator W3, branch agent/dim-gate/mainline/w3-service-delivery, worktree /home/ckc/test/codex/newclear-dim-gate-w3, existing draftPR37. Remote contract checkpoint e7afd17; product integration below remains working diff, not accepted or fully remote-saved yet.
+T039 attempt1, run DG-W3-20260923-01, W3 contract revision3. Earliest unaccepted increment W3 is in actual implementation; W1/W2 are ACCEPTED/MERGED. Sole lead owner Codex orchestrator W3, branch agent/dim-gate/mainline/w3-service-delivery, worktree <operator-home>/test/codex/newclear-dim-gate-w3, existing draftPR37. Remote contract checkpoint e7afd17; product integration below remains working diff, not accepted or fully remote-saved yet.
 
 T037 immutable schema slice2 (four exact SHA256 files, manifest /tmp/t037-schema-slice-2.json) is integrated. Lead implements36 W3 API operations, typed client, generated OpenAPI/runtime, strict W1/W2→V3 atomic reader, six draft definitions/six typed draft configs, genuine W2 fixture, real MSW HTTP regressions, registered routes/app-environment links, typed WorkItems triage and immutable run snapshot UI. Domain execution and four feature pages are still worker-owned and pending functional handback; no source placeholders substitute acceptance.
 

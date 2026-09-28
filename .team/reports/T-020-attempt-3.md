@@ -4,7 +4,7 @@ STATUS: DONE
 
 ## Summary
 
-Independent review completed for fixed candidate `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` in unchanged checkout `/home/ckc/test/codex/newclear-m3-review-final`. **No blocking, high, or medium findings remain.** The review retained the broader M3 inspection against `e760d8e988c0e2a837b226c600805a659a362c10` and examined the final correction from `f7905bb`.
+Independent review completed for fixed candidate `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` in unchanged checkout `<operator-home>/test/codex/newclear-m3-review-final`. **No blocking, high, or medium findings remain.** The review retained the broader M3 inspection against `e760d8e988c0e2a837b226c600805a659a362c10` and examined the final correction from `f7905bb`.
 
 The four original findings are closed: scoped clock receipts/replay, invalid persisted scheduler positions, missing playback and premature completion feedback. Subsequent pause and route-remount concurrency findings are also closed. This is independent static review with inspection of lead-produced runtime evidence, not an independent execution of tests/browser code.
 

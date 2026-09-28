@@ -38,15 +38,15 @@ python3 scripts/soak.py stop --run SOAK_RUN
 manifest、來源 SHA、初始 snapshot、啟動事件與最新狀態在 B 的 `private/soak/SOAK_RUN/`。遠端資料包括 `config.json`、`status.json`、`samples.jsonl`。下列以 01 為例，02、03 使用各自 alias 和相同 run；不可將 raw evidence 提交 Git。
 
 ```bash
-# [ckc-disposable-01] 程序、退出碼與最後紀錄
-ssh ckc-disposable-01 sudo -n systemctl show eru-mvp-soak-SOAK_RUN.service \
+# [<disposable-01>] 程序、退出碼與最後紀錄
+ssh <disposable-01> sudo -n systemctl show eru-mvp-soak-SOAK_RUN.service \
   --property=ActiveState,SubState,MainPID,Result,ExecMainStatus
-ssh ckc-disposable-01 sudo -n journalctl -u eru-mvp-soak-SOAK_RUN.service --no-pager -n 80
-ssh ckc-disposable-01 sudo -n cat /var/lib/eru-mvp/soak/SOAK_RUN/status.json
-# [B ← ckc-disposable-01] 到期或停止後另存原始資料；02、03 同理
+ssh <disposable-01> sudo -n journalctl -u eru-mvp-soak-SOAK_RUN.service --no-pager -n 80
+ssh <disposable-01> sudo -n cat /var/lib/eru-mvp/soak/SOAK_RUN/status.json
+# [B ← <disposable-01>] 到期或停止後另存原始資料；02、03 同理
 umask 077
-ssh ckc-disposable-01 sudo -n cat /var/lib/eru-mvp/soak/SOAK_RUN/samples.jsonl \
-  > private/soak/SOAK_RUN/ckc-disposable-01.samples.jsonl
+ssh <disposable-01> sudo -n cat /var/lib/eru-mvp/soak/SOAK_RUN/samples.jsonl \
+  > private/soak/SOAK_RUN/<disposable-01>.samples.jsonl
 ```
 
 `active/exited`、MainPID 0 是正常完成後保留的 unit，需同時讀 status。`complete` 只表示收集到截止樣本，仍為 `pending_review`；HTTP／健康失敗、服務變更、取樣缺口及 counter reset 不會被後續成功抹除。重新連線會辨識 reboot、stale、missing evidence。最終須核對三台原始紀錄完整、共同開始／截止與樣本間隔、所有 failures/warnings、服務與 workload 身分，再唯讀檢查叢集。
@@ -95,17 +95,17 @@ CPU 使用 aggregate counters 的差值，guest 欄位不重複加總。iowait �
 目前 30 秒間隔的 run `20260923T112336Z-561e71e7` 保持原樣；其來源與 config 已固定。正式 V11 需待該 run 回收、canaries 依 ERU-003 清理後，用新的 canary-start plan 啟動全新觀測。不能沿用舊 run、把既有 30 秒 HTTP 結果換名，或在仍有觀測時疊加另一個 observer。
 
 ```bash
-# [B → ckc-disposable-01～04] 到期且完成舊 canary 清理後，另建兩個 owned nginx canaries。
+# [B → <disposable-01>～04] 到期且完成舊 canary 清理後，另建兩個 owned nginx canaries。
 python3 scripts/labctl.py plan --operation canary-start
 python3 scripts/labctl.py execute --plan NEW_CANARY_PLAN --sha256 PLAN_SHA256
-# [B → ckc-disposable-01～03] 可先用新 run 做短 pilot；report 會標為 incomplete，不是正式 V11。
+# [B → <disposable-01>～03] 可先用新 run 做短 pilot；report 會標為 incomplete，不是正式 V11。
 python3 scripts/soak.py start --canary-run NEW_CANARY_PLAN --acceptance v11 --duration-seconds 30
-# [B ← ckc-disposable-01～03] pilot 到期後，依新 run ID 回收與離線判讀。
+# [B ← <disposable-01>～03] pilot 到期後，依新 run ID 回收與離線判讀。
 python3 scripts/soak.py collect --run PILOT_RUN
 python3 scripts/soak.py report --run PILOT_RUN
-# [B → ckc-disposable-01～03] 確認 pilot evidence 後，結束其 unit／解除觀測重疊門檻。
+# [B → <disposable-01>～03] 確認 pilot evidence 後，結束其 unit／解除觀測重疊門檻。
 python3 scripts/soak.py stop --run PILOT_RUN
-# [B → ckc-disposable-01～03] 用另一個全新 run 做 24h 正式驗收。
+# [B → <disposable-01>～03] 用另一個全新 run 做 24h 正式驗收。
 python3 scripts/soak.py start --canary-run NEW_CANARY_PLAN --acceptance v11 --duration-seconds 86400
 ```
 

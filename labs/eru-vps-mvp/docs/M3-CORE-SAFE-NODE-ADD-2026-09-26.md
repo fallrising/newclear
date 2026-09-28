@@ -6,7 +6,7 @@ ERU-014 的 worker-only 安裝階段讓 agent 保持停止，並確認 core 尚�
 
 core patch revision 2 將新節點初始狀態改成 Bypass=true，並新增測試確認回傳節點與持久化記錄都 fenced。已有 lock-context 修正一併保留，因此這是新的同版本 patch artifact；排程仍須由明確 node up 開放。
 
-scripts/eru_node_resume.py 保留單次 resume 的 endpoint／node scope、fence 與 readiness gate；它現在只由 hash-bound `labctl resume-reimage-worker` 呼叫，直接 CLI 已停用。resume plan 僅接受成功 fenced smoke，並綁定 core/runtime、replacement identity、peer canaries、worker services 與 cluster state。執行器在 `ckc-disposable-01` SSH alias 上只送一次 `node up`，最後核對 available=true、bypass=false。
+scripts/eru_node_resume.py 保留單次 resume 的 endpoint／node scope、fence 與 readiness gate；它現在只由 hash-bound `labctl resume-reimage-worker` 呼叫，直接 CLI 已停用。resume plan 僅接受成功 fenced smoke，並綁定 core/runtime、replacement identity、peer canaries、worker services 與 cluster state。執行器在 `<disposable-01>` SSH alias 上只送一次 `node up`，最後核對 available=true、bypass=false。
 
 ## 離線驗證
 

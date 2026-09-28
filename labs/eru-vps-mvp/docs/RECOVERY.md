@@ -1,6 +1,6 @@
 # 元件事故恢復與修補版 reapply
 
-恢復使用獨立的新 plan／run，固定原始 plan hash、原 journal hash、目前檔案／runtime／健康及程式輸入。舊失敗 run 保留 failed；恢復不增加 worker component revision，也不追認成重裝成功。所有實機命令仍經 `ckc-disposable-01`～`04` aliases，證據留在 private。
+恢復使用獨立的新 plan／run，固定原始 plan hash、原 journal hash、目前檔案／runtime／健康及程式輸入。舊失敗 run 保留 failed；恢復不增加 worker component revision，也不追認成重裝成功。所有實機命令仍經 `<disposable-01>`～`04` aliases，證據留在 private。
 
 ## 先對帳
 
@@ -35,9 +35,9 @@ python3 scripts/recovery.py execute --plan NEW_RECOVERY_PLAN --sha256 PLAN_SHA25
 ## core 更新在 replace-intent 前中斷：取消／封存（ERU-001）
 
 ```bash
-# [B → ckc-disposable-01～04] 唯讀核對來源、主機／runtime／服務；計畫只寫 B。
+# [B → <disposable-01>～04] 唯讀核對來源、主機／runtime／服務；計畫只寫 B。
 python3 scripts/recovery.py plan --action core-cancel --source-run FAILED_CORE_PATCH_RUN
-# [B → ckc-disposable-01] 使用剛建立的新 plan；遠端只新增取消紀錄。
+# [B → <disposable-01>] 使用剛建立的新 plan；遠端只新增取消紀錄。
 python3 scripts/recovery.py execute --plan NEW_CANCEL_PLAN --sha256 PLAN_SHA256
 ```
 

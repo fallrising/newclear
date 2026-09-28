@@ -16,7 +16,7 @@ Smoke 使用既有 `scripts/smoke-lab.py --node TARGET`，只在計畫目標上�
 # B 本機透過 ckc-disposable aliases 做唯讀健康、host、core 與 cluster checks
 python3 scripts/labctl.py plan-reimage-worker-smoke --plan BOOTSTRAP_PLAN_ID \
   --sha256 BOOTSTRAP_PLAN_SHA256 --canary-run CANARY_RUN_ID
-# B -> ckc-disposable-01、計畫目標 worker alias 與兩台 peer aliases
+# B -> <disposable-01>、計畫目標 worker alias 與兩台 peer aliases
 python3 scripts/labctl.py smoke-reimage-worker --plan SMOKE_PLAN_ID --sha256 SMOKE_PLAN_SHA256
 python3 scripts/labctl.py status --run SMOKE_PLAN_ID
 # B -> 同 aliases；失敗或回覆不確定只做唯讀對帳，絕不重播 smoke

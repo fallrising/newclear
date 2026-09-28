@@ -2,7 +2,7 @@ STATUS: DONE
 
 ## Summary
 
-T035 attempt3 local integration closeout, run DG-W2-20260923-01, W2 contract revision3. This DONE covers implemented scope and completed local validation; milestone ACCEPTED/MERGED still requires latest exact PR-head CI and lead decision. Canonical branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`, existing PR36. Earlier attempts and their actual failed results remain in Git and separate attempt files.
+T035 attempt3 local integration closeout, run DG-W2-20260923-01, W2 contract revision3. This DONE covers implemented scope and completed local validation; milestone ACCEPTED/MERGED still requires latest exact PR-head CI and lead decision. Canonical branch `agent/dim-gate/mainline/w2-resources`, worktree `<operator-home>/test/codex/newclear-dim-gate-w2`, existing PR36. Earlier attempts and their actual failed results remain in Git and separate attempt files.
 
 Domain/API/migration source is fixed4a69e07233fb31a90d2abafa664c39d3b91c4f23. Finalbf3f168a09c2b4f5ae442703588f2a3dd4d5cb20 adds only the bounded WorkItems layout and browser readiness/geometry correction. It preserves canonical resources, current authorization, atomic reservation/execution, Request/Release projections and the genuine W1 migration path. No snapshot or source-state change follows4a69.
 

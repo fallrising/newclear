@@ -6,7 +6,7 @@
 請接手 dim-gate，繼續實際開發最早未驗收的 M5，執行真實瀏覽器驗證，不要只提計畫。
 
 Repository: git@github.com:fallrising/newclear.git
-目前 M4 worktree: /home/ckc/test/codex/newclear-m4
+目前 M4 worktree: <operator-home>/test/codex/newclear-m4
 Component: platform/dim-gate
 目前 branch: agent/dim-gate/mainline/m4-observability
 M4 product/test candidate: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3
@@ -39,7 +39,7 @@ M3 parent PR: https://github.com/fallrising/newclear/pull/17
 從 `platform/dim-gate` 執行，process-local 設定，不修改全域環境：
 
 ```sh
-export PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
 export LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu
 export FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf
 ```

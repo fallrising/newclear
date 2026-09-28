@@ -13,7 +13,7 @@ ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action co
 在 B 的專案根執行：
 
 ```bash
-cd /home/ckc/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
+cd <operator-home>/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
 python3 scripts/labctl.py plan --operation smoke --node worker-4
 ```
 
@@ -120,10 +120,10 @@ python3 scripts/labctl.py plan-fresh-rebuild \
 此後備路徑與日常元件重裝分開。`provider-reimage` 總計畫永遠保持 `executable: false`；只有 `reimage_preparation.executable` 為 true、preparation blockers 為空時，專用 `prepare-reimage` 才能依同一 plan hash fence 並摘除一台已空的 worker。它不呼叫 provider API、不重灌 OS，也不安裝 worker 元件。
 
 ```bash
-# B -> core ckc-disposable-01 與計畫綁定的 worker alias；先建計畫並人工審查 blockers/hash
+# B -> core <disposable-01> 與計畫綁定的 worker alias；先建計畫並人工審查 blockers/hash
 python3 scripts/labctl.py plan --operation rebuild-node --node worker-4 \
   --mode provider-reimage --reimage-intent private/reimage-intents/worker-4.json
-# B -> SSH 僅使用 ckc-disposable-01～04 aliases；寫入變更只落在 01 與目標 worker alias
+# B -> SSH 僅使用 <disposable-01>～04 aliases；寫入變更只落在 01 與目標 worker alias
 python3 scripts/labctl.py prepare-reimage --plan PLAN_ID --sha256 PLAN_SHA256
 python3 scripts/labctl.py status --run PLAN_ID
 ```
@@ -142,14 +142,14 @@ python3 scripts/labctl.py plan-reimage-worker --plan SOURCE_PLAN_ID --sha256 SOU
 worker install 後、registration 前，必須先對 core 的 SSH host-key 信任與 nft source allowlist 做獨立 plan／prepare；這是避免 core 無法 SSH 到新 worker 或 firewall 擋下 agent heartbeat 的前置條件：
 
 ```bash
-# B -> ckc-disposable-01：唯讀規劃目標 worker 的 core known_hosts／firewall 更新
+# B -> <disposable-01>：唯讀規劃目標 worker 的 core known_hosts／firewall 更新
 python3 scripts/labctl.py plan-reimage-worker-access --plan BOOTSTRAP_PLAN_ID \
   --sha256 BOOTSTRAP_PLAN_SHA256
-# B -> ckc-disposable-01：套用精確 target 變更，不重啟 core
+# B -> <disposable-01>：套用精確 target 變更，不重啟 core
 python3 scripts/labctl.py prepare-reimage-worker-access --plan ACCESS_PLAN_ID \
   --sha256 ACCESS_PLAN_SHA256
 python3 scripts/labctl.py status --run ACCESS_PLAN_ID-access
-# B -> ckc-disposable-01：不確定時只讀核對，不重播
+# B -> <disposable-01>：不確定時只讀核對，不重播
 python3 scripts/labctl.py reconcile --run ACCESS_PLAN_ID-access
 ```
 
@@ -158,7 +158,7 @@ access stage 以 owner receipt fingerprints 重核本機可信 host key；journa
 只有 safe AddNode patch 已由既有 core patch operator 部署，且執行中 core binary SHA 符合 validation manifest，才可執行 fenced registration：
 
 ```bash
-# B -> ckc-disposable-01 core 與 plan 綁定的 ckc-disposable worker alias
+# B -> <disposable-01> core 與 plan 綁定的 ckc-disposable worker alias
 python3 scripts/labctl.py register-reimage-worker --plan BOOTSTRAP_PLAN_ID --sha256 BOOTSTRAP_PLAN_SHA256
 python3 scripts/labctl.py status --run BOOTSTRAP_PLAN_ID-register
 # B -> 同一 core／worker aliases；若結果不確定，只讀 reconcile，絕不重播 registration
@@ -178,7 +178,7 @@ python3 scripts/labctl.py status --run SMOKE_PLAN_ID
 python3 scripts/labctl.py reconcile --run SMOKE_PLAN_ID
 ```
 
-成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `ckc-disposable-01` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。generation stage 先用現有 aliases 唯讀重驗，再只更新 B 本機的 private deployment plan 與 cluster generation：
+成功停在 `smoked-awaiting-resume`；目標仍 `available=true`、`bypass=true`，沒有 `node up`、inventory 或 generation 更新。canary evidence、smoke evidence、子程序 log 與 guard samples 都留在 `private/`。fenced resume 的下一組獨立命令見 [safe resume stage](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)；它只透過 `<disposable-01>` SSH alias 單次送出 `node up`，並停在 `resumed-awaiting-generation-commit`。generation stage 先用現有 aliases 唯讀重驗，再只更新 B 本機的 private deployment plan 與 cluster generation：
 
 ```bash
 # B -> 唯讀重驗 core／worker aliases，產生本機 generation plan
@@ -275,7 +275,7 @@ python3 scripts/labctl.py execute --plan CLEANUP_PLAN --sha256 CLEANUP_HASH
 入口：[scripts/network_acceptance.py](../scripts/network_acceptance.py)。這是一次性的 worker-4 acceptance run，與 worker 元件重裝及 provider OS 重灌分開。plan 只讀取叢集與 worker-4 狀態，驗證 B 的 Tailscale source、worker 公網 v4/v6 路徑及 TCP/22 control、core 公網路徑、runtime 空狀態、UFW routed policy、Fail2ban、forward chain、worker DNS resolver／鎖定 HTTPS endpoint、nftables hook 順序與鎖定 nginx image；private addresses、完整觀測與命令輸出只寫在 `private/operations/network/`。
 
 ```bash
-cd /home/ckc/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
+cd <operator-home>/test/codex/newclear-eru-delivery/labs/eru-vps-mvp
 python3 scripts/network_acceptance.py plan
 python3 scripts/network_acceptance.py status
 ```
@@ -296,4 +296,4 @@ python3 scripts/network_acceptance.py cleanup-plan --run RUN_ID
 python3 scripts/network_acceptance.py cleanup-execute --plan CLEANUP_PLAN_ID --sha256 CLEANUP_PLAN_SHA256
 ```
 
-reconcile 不重播遠端命令，也不自動清理；只有實際 workload、CNI NAT rule、tagged forward exception 與 guard 都已消失，且原 cluster、host、service、防火牆 policy 回到 baseline 時，才會依讀回狀態補記本機清理 journal。`status` 只讀本機私有摘要。所有遠端連線固定經 `ckc-disposable-01`（core）及 `ckc-disposable-04`（worker-4）；不得改用裸 IP、其他 worker、provider API 或全域 reset。
+reconcile 不重播遠端命令，也不自動清理；只有實際 workload、CNI NAT rule、tagged forward exception 與 guard 都已消失，且原 cluster、host、service、防火牆 policy 回到 baseline 時，才會依讀回狀態補記本機清理 journal。`status` 只讀本機私有摘要。所有遠端連線固定經 `<disposable-01>`（core）及 `<disposable-04>`（worker-4）；不得改用裸 IP、其他 worker、provider API 或全域 reset。

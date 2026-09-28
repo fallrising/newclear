@@ -3,7 +3,7 @@ STATUS: PARTIAL
 # T-022 attempt 1 — Observation UI implementation handoff
 
 Date: 2026-09-22. Worker branch: `agent/dim-gate/task/t022-observation-ui`.
-Worktree: `/home/ckc/test/codex/newclear-m4-ui`.
+Worktree: `<operator-home>/test/codex/newclear-m4-ui`.
 Evidence base: `157605bfb32d818a4b09e5bf17d3f21b6f3c3cbe`, plus the uncommitted files below. No worker commit or push was made. The frozen `src/domain/schemas.ts` and central `src/api/client.ts` are lead-synchronized inputs for schema/composition and are excluded from this worker's deliverable.
 
 ## Summary
@@ -23,7 +23,7 @@ Runtime actually checked: Node `v24.18.0`, pnpm `11.18.0`.
 All commands ran from `platform/dim-gate` with:
 
 ```sh
-PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
 pnpm_config_verify_deps_before_run=false
 ```
 

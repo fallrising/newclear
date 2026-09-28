@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-031 attempt2, runDG-W1-20260923-01; lead owns all correction paths following T-030 worker release. Original base7a7b41b, previous reviewed7d60786, contract revision3 committedabd4b6c before code. Correction worktree `/home/ckc/test/codex/newclear-dim-gate-w1-rework`, branch `agent/dim-gate/task/t031-workspace-rework`; same PR33 continuation branch `agent/dim-gate/mainline/w1-workspaces` will receive this containing candidate via SSH. NOT_ACCEPTED.
+T-031 attempt2, runDG-W1-20260923-01; lead owns all correction paths following T-030 worker release. Original base7a7b41b, previous reviewed7d60786, contract revision3 committedabd4b6c before code. Correction worktree `<operator-home>/test/codex/newclear-dim-gate-w1-rework`, branch `agent/dim-gate/task/t031-workspace-rework`; same PR33 continuation branch `agent/dim-gate/mainline/w1-workspaces` will receive this containing candidate via SSH. NOT_ACCEPTED.
 
 All three independent medium findings are corrected: legal project/environment retained into Admin; strict RD workOwner=all|mine controls actual Request.requesterId / Release.createdBy totals and rows; visible crossCenterRead diagnostic paths preserve source workspace/return for multi-grant users. URL, query keys, OpenAPI and docs updated together without snapshot/schema/seed/ID changes. Added shared-project two-initiator domain/HTTP/browser checks, full real-UI Pipeline→incident→observation→Back/reload, and repeatable nonempty Request→failed job→Admin draft/audit browser regression. All source entities remain canonical.
 

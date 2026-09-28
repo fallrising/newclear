@@ -1,5 +1,7 @@
 # Repository team ledger
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
+
 此檔保存主控計畫與接受決策；目前只有 dim-gate 試點。其他 program 使用獨立區塊，只有對應 program/variant 的主控可更新本區；worker 只能讀。
 
 ## Program: dim-gate / Variant: mainline
@@ -439,7 +441,7 @@ parent_pr: https://github.com/fallrising/newclear/pull/17
 parent_commit: 7d20bbc48a25e82c82c048304da8b74a897ec14e
 target_ref: agent/dim-gate/mainline/m3-delivery
 continuation_ref: agent/dim-gate/mainline/m4-observability
-worktree: /home/ckc/test/codex/newclear-m4
+worktree: <operator-home>/test/codex/newclear-m4
 tasks: T-021 / T-022 / T-023 / T-024
 spec_revision: M4-INTEGRATION-CONTRACT revision1
 integration_state: NOT_OPENED
@@ -473,7 +475,7 @@ parent_commit: 7d20bbc48a25e82c82c048304da8b74a897ec14e
 last_reconciled_main: eb2023f81d02ad5e9a7419a0b8bf67751e135758
 target_ref: agent/dim-gate/mainline/m3-delivery
 continuation_ref: agent/dim-gate/mainline/m4-observability
-worktree: /home/ckc/test/codex/newclear-m4
+worktree: <operator-home>/test/codex/newclear-m4
 task_id: T-021 / T-022 / T-023 / T-024
 implementation_commit: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3
 local_tested_commit: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3
@@ -516,7 +518,7 @@ active_owner: Codex orchestrator
 milestone: M5 NOT_ACCEPTED
 target_ref: main
 continuation_ref: agent/dim-gate/mainline/m5-delivery
-worktree: /home/ckc/test/codex/newclear-m5
+worktree: <operator-home>/test/codex/newclear-m5
 task_id: T-025 / T-026 / T-027 / T-028
 spec_revision: M5-INTEGRATION-CONTRACT revision1
 integration_state: NOT_OPENED
@@ -550,7 +552,7 @@ target_ref: main
 last_reconciled_main: b252d4e62c8380803af1854997d95c4b242bc18a
 main_integration_commit: 2464b5283b8c1a168a073220a316d78e404397dc
 continuation_ref: agent/dim-gate/mainline/m5-delivery
-worktree: /home/ckc/test/codex/newclear-m5
+worktree: <operator-home>/test/codex/newclear-m5
 task_id: T-025 / T-026 / T-027 / T-028
 implementation_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
 local_tested_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
@@ -588,7 +590,7 @@ task_id: T-029
 target_ref: main
 last_reconciled_main: ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad
 continuation_ref: agent/dim-gate/mainline/role-workspace-sdd
-worktree: /home/ckc/test/codex/newclear-dim-gate-views
+worktree: <operator-home>/test/codex/newclear-dim-gate-views
 integration_state: NOT_OPENED
 remote_durability: local task checkpoint
 blockers: []
@@ -612,7 +614,7 @@ task_id: T-029
 target_ref: main
 last_reconciled_main: ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad
 continuation_ref: agent/dim-gate/mainline/role-workspace-sdd
-worktree: /home/ckc/test/codex/newclear-dim-gate-views
+worktree: <operator-home>/test/codex/newclear-dim-gate-views
 implementation_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540
 local_tested_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540 — documentation only
 spec_revision: WS-SDD revision1
@@ -649,7 +651,7 @@ task_id: T-030/T-031/T-032
 target_ref: main
 last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
 continuation_ref: agent/dim-gate/mainline/w1-workspaces
-worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
 implementation_commit: none
 local_tested_commit: none
 spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision1
@@ -672,7 +674,7 @@ terminal_state: null
 milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
 task_id: T-030/T-031/T-032
 continuation_ref: agent/dim-gate/mainline/w1-workspaces
-worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
 last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
 implementation_commit: containing checkpoint; resolve via git
 local_tested_commit: working diff preliminary only; fixed gates next
@@ -702,7 +704,7 @@ terminal_state: null
 milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
 task_id: T-030/T-031/T-032
 continuation_ref: agent/dim-gate/mainline/w1-workspaces
-worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
 last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
 implementation_commit: containing final-correction checkpoint
 local_tested_commit: working-diff focused only; new immutable full gates next
@@ -727,7 +729,7 @@ milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
 task_id: T-030/T-031/T-032
 continuation_ref: agent/dim-gate/mainline/w1-workspaces
 supplemental_continuation_ref: agent/dim-gate/task/t031-regression-readiness
-worktree: /home/ckc/test/codex/newclear-dim-gate-w1-readiness
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1-readiness
 last_reconciled_main: 00333ef34247410bb6e9c3d21194934e5c304186
 implementation_commit: 5cf495f60e22789b482b578b06e0ea64d135b177 product; 4ab62327b47c5924a22c84e99bab9c79e1dfbb0a test-only repair
 local_tested_commit: 5cf495f full runner ongoing; 4ab6232 bounded gates passed
@@ -749,7 +751,7 @@ terminal_state: null
 milestone: W1 — LOCAL_GATES_PASSED / final-head CI pending
 task_id: T-030 ACCEPTED; T-031 IN_REVIEW; T-032 independent review complete
 continuation_ref: agent/dim-gate/mainline/w1-workspaces
-worktree: /home/ckc/test/codex/newclear-dim-gate-w1
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
 last_reconciled_main: 00333ef34247410bb6e9c3d21194934e5c304186
 evaluated_implementation_commit: 5cf495f60e22789b482b578b06e0ea64d135b177
 evaluated_test_correction_commit: 4ab62327b47c5924a22c84e99bab9c79e1dfbb0a
@@ -768,7 +770,7 @@ DG-D054 (2026-09-23): W1 ACCEPTED/MERGED. Exact final head f51aac3788560f44981ed
 
 ### W2 execution — DG-W2-20260923-01
 
-DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole Codex lead takes new run from actual main b4ef57f, branch `agent/dim-gate/mainline/w2-resources`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2`. No competing dim-gate PR/owner observed. [W2 contract](../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes complete AC-WS-03–09/15–18 before code, canonical resource/change models, catalog variants, quota/policy, snapshot migration, APIs/routes, safe support matrix and single owners. T033 domain/schema/engine, T034 additive fixtures/controller/migration, T035 lead API/UI/integration/Git, T036 uninvolved fixed reviewer. Workers isolated/no commits/push/delegation; schema onlyT033 and router/manifest/CI onlylead. Pinned kernel237aa277 already read in full; no update adoption. Built-in agent route with exact runtime model slug unavailable, no Claude/multi-model claim. User authorization remains applicable across milestones. Node24.18.0/pnpm11.18.0; existing browser/runtime prerequisites preserved.
+DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole Codex lead takes new run from actual main b4ef57f, branch `agent/dim-gate/mainline/w2-resources`, worktree `<operator-home>/test/codex/newclear-dim-gate-w2`. No competing dim-gate PR/owner observed. [W2 contract](../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes complete AC-WS-03–09/15–18 before code, canonical resource/change models, catalog variants, quota/policy, snapshot migration, APIs/routes, safe support matrix and single owners. T033 domain/schema/engine, T034 additive fixtures/controller/migration, T035 lead API/UI/integration/Git, T036 uninvolved fixed reviewer. Workers isolated/no commits/push/delegation; schema onlyT033 and router/manifest/CI onlylead. Pinned kernel237aa277 already read in full; no update adoption. Built-in agent route with exact runtime model slug unavailable, no Claude/multi-model claim. User authorization remains applicable across milestones. Node24.18.0/pnpm11.18.0; existing browser/runtime prerequisites preserved.
 
 | Task | Owner | State |
 | --- | --- | --- |
@@ -790,7 +792,7 @@ task_id: T-033/T-034/T-035/T-036
 target_ref: main
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
 implementation_commit: none
 local_tested_commit: none for W2
 spec_revision: WS-SDDrevision1;W2-INTEGRATION-CONTRACTrevision1
@@ -822,7 +824,7 @@ terminal_state: null
 milestone: W2 IMPLEMENTING / NOT_ACCEPTED
 task_id: T033 handed_back; T034 attempt2 HTTPverification; T035 active; T036 pendingfixedreview
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 implementation_commit: containing checkpoint; parent1c0d230f2e662cca8488550cdf1f02087280c021
 local_tested_commit: working-diff299unit/typecheck/lint/build; fixed1c0d230performance3passed
@@ -838,7 +840,7 @@ DG-D060: checkpoint285b46f SSHsaved to existingPR36, PRdescriptionupdated. Actua
 
 DG-D061: ae3bb49 focus/settledclock correction SSHcheckpoint onPR36, fixed4W2browserrerunactive. T034attempt2 exacttest/report hashes integrated:13HTTPcases cover18W2operations, whole demo81/81;sourceproductionownership remains released. Reassignedattempt3 only new W2governance browserfile with read-only leadhelpers, no product/API edits; ownerbounded andisolated. T033attempt2 enginecommandlazy split separately active; rootUI/browser/docs ownershipunchanged. No W2acceptanceclaimed.
 
-DG-D062: ae3bb49 actual W2 browser2/4pass (stagingRedisrefresh+scopeK8s/Admin); Kafka failure/retry reachedsuccess but console found HTMLpattern/v-flag invalid hyphen; accessibility found quota horizontalregion missingkeyboardfocus. Root corrected pattern escaping, named focusable scrollregions and768px readable detailcolumns; no test suppressions.312unit nowpass includingT034HTTP13;typecheck/lint/demo buildpass before Guide/smoke additions. Added resourceGuideentrypoints and Firefox/WebKit completeRedis smoke. T034attempt3 runs in NEW isolatedtree /home/ckc/test/codex/newclear-dim-gate-w2-browser branchagent/dim-gate/task/t034-resource-browser baseae3bb49 plus6namedreadonlydependencies (manifest/tmp/t034-browser-readonly-dependencies.json); originalmigrationtree entirelypreserved. Full-overwrite copy was rejected byautomaticreview; safe newtreecreation/frozenofflineinstall usedinstead, noblockedwork. T033attempt2 lazycommands now168domain/301standaloneunitpass, actualbenchmarkpending; lead hasnotcopiedmutableworker files. W2NOT_ACCEPTED.
+DG-D062: ae3bb49 actual W2 browser2/4pass (stagingRedisrefresh+scopeK8s/Admin); Kafka failure/retry reachedsuccess but console found HTMLpattern/v-flag invalid hyphen; accessibility found quota horizontalregion missingkeyboardfocus. Root corrected pattern escaping, named focusable scrollregions and768px readable detailcolumns; no test suppressions.312unit nowpass includingT034HTTP13;typecheck/lint/demo buildpass before Guide/smoke additions. Added resourceGuideentrypoints and Firefox/WebKit completeRedis smoke. T034attempt3 runs in NEW isolatedtree <operator-home>/test/codex/newclear-dim-gate-w2-browser branchagent/dim-gate/task/t034-resource-browser baseae3bb49 plus6namedreadonlydependencies (manifest/tmp/t034-browser-readonly-dependencies.json); originalmigrationtree entirelypreserved. Full-overwrite copy was rejected byautomaticreview; safe newtreecreation/frozenofflineinstall usedinstead, noblockedwork. T033attempt2 lazycommands now168domain/301standaloneunitpass, actualbenchmarkpending; lead hasnotcopiedmutableworker files. W2NOT_ACCEPTED.
 
 DG-D063: fixed0ab838a completeaffectedChromium20/20PASS (4.0min), includes allM1+M2Admin+M2Request regressions, Redis staging/reload, Kafka failure/newdecision/retry, scopeK8s/Admin, W2responsivekeyboard/themeaxe andChromiumresourceSmoke. Production/dist fixed0ab artifacts test-results-w2-0ab838a; no gatesuppression. T033attempt2 stopped/released; exact7sourcefiles+report SHAverified andnowintegrated bylead. Worker168domain/301standaloneunitandunchangedbenchmark3/3passed303891gzip/720msLCP/0.4msquery/168.3msHTTP; leadcombinedfixedmeasurementnext. AddedgenuineW1activeRelease+Job browsermigration fixturecase (samefixedSHA, onlyupgradeboundary installsrawbytes; completionvisibleGuideclock), typecheck/lintpassed. T034attempt35governancebrowsercasesinprogress; first2pass, test-only catalogcollection/permissionexpectations beingcorrected. FullremainingM3–M5/W1regression,Firefox/WebKit,finalperf/isolation/review/latestCIstillpending;W2NOT_ACCEPTED.
 
@@ -858,7 +860,7 @@ terminal_state: null
 milestone: W2 IMPLEMENTED / FULL_GATES_PENDING / NOT_ACCEPTED
 task_id: T033/T034 handed_back; T035 integration; T036 fixed review next
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 implementation_commit: 740a2bca6c8ce657c185c276b61dcf661488ce3c
 local_tested_commit: 740a2bc native314/benchmark3/migration1; containing checkpoint adds governance5/isolation1 tests only
@@ -893,9 +895,9 @@ terminal_state: null
 milestone: W2 IMPLEMENTED / REVIEW_CORRECTIONS / NOT_ACCEPTED
 task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
 supplemental_continuation_ref: agent/dim-gate/task/t035-w2-closeout
-supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+supplemental_worktree: <operator-home>/test/codex/newclear-dim-gate-w2-closeout
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus containing bounded layout/test correction
 local_tested_commit: 4a69 native321/13W2browser/3benchmark; full77 and8smoke/2isolation stillrunning in supplemental tree
@@ -921,8 +923,8 @@ terminal_state: null
 milestone: W2 IMPLEMENTED / FINAL_BROWSER_CORRECTIONS / NOT_ACCEPTED
 task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
-supplemental_worktree: /home/ckc/test/codex/newclear-dim-gate-w2-closeout
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+supplemental_worktree: <operator-home>/test/codex/newclear-dim-gate-w2-closeout
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus d07166c and containing CSS/test-only correction
 local_tested_commit: 4a69 native321/13W2browser/3benchmark; d071 layout2/benchmark3 pass and smoke7of8 failed; fixed4a69 full77 running
@@ -950,7 +952,7 @@ terminal_state: null
 milestone: W2 LOCAL_GATES_COMPLETE / FINAL_CI_PENDING / NOT_ACCEPTED
 task_id: T033/T034 ACCEPTED bounded handback; T035 IN_REVIEW; T036 DONE
 continuation_ref: agent/dim-gate/mainline/w2-resources
-worktree: /home/ckc/test/codex/newclear-dim-gate-w2
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
 last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
 implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23
 final_bounded_delta_commit: bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20
@@ -980,7 +982,7 @@ terminal_state: null
 milestone: W3 CONTRACT_FIXED / NOT_IMPLEMENTED / NOT_ACCEPTED
 task_id: T037 domain; T038 UI; T039 integration; T040 uninvolved review
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: 91626851fb17df7ab31c96dee9353b9ee4d42c92
 implementation_commit: none_W3
 local_tested_commit: none_W3
@@ -1018,7 +1020,7 @@ terminal_state: null
 milestone: W3 INITIAL_FUNCTIONAL_INTEGRATION / NOT_ACCEPTED
 task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
 implementation_commit: containing_partial_functional_checkpoint
 local_tested_commit: workingdiff_Slices_T037functional1_T038UI1_plus_lead_API_seed_migration
@@ -1044,7 +1046,7 @@ terminal_state: null
 milestone: W3 FUNCTIONAL_VALIDATION_AND_PERFORMANCE_CORRECTION / NOT_ACCEPTED
 task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
 implementation_commit: dfb146c
 local_tested_commit: a4736261518ba4d27d5967b5a78d2e6e9bdbe914
@@ -1070,7 +1072,7 @@ terminal_state: null
 milestone: W3 FIXED_CANDIDATE_GATES / NOT_ACCEPTED
 task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 integration_active; T040 finalreview_pending
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
 implementation_commit: containing_final_handbacks_and_performance_correction
 local_tested_commit: working_candidate_matching_owned_manifests_plus_lead_API_Guide_correction
@@ -1097,7 +1099,7 @@ terminal_reason: user_requested_new_window_handoff; next_orchestrator_must_compl
 milestone: W3 IMPLEMENTED / NOT_ACCEPTED / NOT_MERGED
 task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 PARTIAL_handoff; T040 PARTIAL_review_resume_required
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
 implementation_commit: 35f594f
 local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
@@ -1124,7 +1126,7 @@ terminal_reason: user_requested_handoff; next_orchestrator_to_fix_confirmed_regr
 milestone: W3 IMPLEMENTED_WITH_CONFIRMED_REGRESSION / NOT_ACCEPTED / NOT_MERGED
 task_id: T037 handback_complete_owner_released; T038 handback_complete_owner_released; T039 PARTIAL; T040 PARTIAL_review_incomplete_owner_released
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
 implementation_commit: 35f594f
 local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
@@ -1150,7 +1152,7 @@ terminal_state: null
 milestone: W3 REGRESSION_REPAIR / NOT_ACCEPTED / NOT_MERGED
 task_id: T039 attempt4 RUNNING; T040 attempt2 pending fixed candidate
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_reconciled_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
 implementation_commit: 35f594f
 local_tested_commit: no_new_candidate_yet
@@ -1184,7 +1186,7 @@ terminal_state: null
 milestone: W3 IMPLEMENTED_LOCAL_GATES_PASS / NOT_ACCEPTED / NOT_MERGED
 task_id: T039 attempt4 IN_REVIEW; T040 attempt4 PARTIAL_exactCIpending
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_incorporated_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
 last_observed_main: 928ce00; observed_2026-09-23T13:04Z; no_component_sharedgate_or_PLAN_delta
 implementation_commit: 46e3a557fcd1ff40221ce6881a7565b73c5daa7e
@@ -1212,7 +1214,7 @@ terminal_state: null
 milestone: W3 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
 task_id: T037 ACCEPTED; T038 ACCEPTED; T039 attempt4 ACCEPTED; T040 attempt4 ACCEPTED
 continuation_ref: agent/dim-gate/mainline/w3-service-delivery
-worktree: /home/ckc/test/codex/newclear-dim-gate-w3
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
 last_incorporated_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
 last_observed_main: 928ce00; observed_2026-09-23T13:04Z; unrelated_components_only
 evaluated_implementation_commit: 46e3a557fcd1ff40221ce6881a7565b73c5daa7e
@@ -1243,7 +1245,7 @@ target_ref: origin/main
 source_commit: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
 last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
 integration_state: NOT_OPENED
 remote_durability: contract_checkpoint_local_pending_SSHpush
@@ -1266,7 +1268,7 @@ terminal_state: null
 milestone: W4 INTEGRATED / FINAL_CHROMIUM_REVIEW_CI_PENDING / NOT_ACCEPTED
 task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 READY_AFTER_FIXED_COMMIT
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
 last_observed_main: d25bac0767b2a5abeffefacfd3bb151000000cdb; unrelated_components_only
 spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
@@ -1290,7 +1292,7 @@ terminal_state: null
 milestone: W4 REVIEW_F1_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
 task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1 PARTIAL_F1; attempt2 READY_AFTER_FIXED_COMMIT
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 review_ref: .team/reports/T-044-attempt-1.md
 report_ref: .team/reports/dim-gate-w4-validation.md
 integration_state: PR50_DRAFT_OPEN_old_product_CI_CANCELLED
@@ -1313,7 +1315,7 @@ terminal_state: null
 milestone: W4 REVIEW_F2_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
 task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1_F1_closed_attempt2_F2_partial_attempt3_pending
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 review_ref: .team/reports/T-044-attempt-2.md
 report_ref: .team/reports/dim-gate-w4-validation.md
 integration_state: PR50_DRAFT_OPEN_obsolete_CI_cancelled
@@ -1336,7 +1338,7 @@ terminal_state: null
 milestone: W4 PRODUCT_LOCAL_GATES_AND_REVIEW_PASS / EXACT_CI_PENDING / NOT_ACCEPTED
 task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt3 DONE_no_open_findings
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 review_ref: .team/reports/T-044-attempt-3.md
 report_ref: .team/reports/dim-gate-w4-validation.md
 implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
@@ -1361,7 +1363,7 @@ terminal_state: null
 milestone: W4 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
 task_id: T041 INTEGRATED_ACCEPTED; T042 INTEGRATED_ACCEPTED; T043 INTEGRATED_ACCEPTED; T044 attempt3 ACCEPTED
 continuation_ref: agent/dim-gate/mainline/w4-alerting
-worktree: /home/ckc/test/codex/newclear-dim-gate-w4
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
 evaluated_implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
 product_ci: 35909643363 SUCCESS; checkout305939a; identical_component_tree_b4cdaf5b44cb306c8453238c7ee37106316a7150
 review_ref: .team/reports/T-044-attempt-3.md
@@ -1373,7 +1375,7 @@ next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal
 ```
 
 
-DG-D096: W4 actual integration closeout reconciled before W5 ownership claim. [PR50](https://github.com/fallrising/newclear/pull/50) MERGED normally at `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` (parents main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and accepted evidence head `9cc2a921eb319b7c90b5c9ffdea03bdadce4006d`). Actual main and PR head share full dim-gate tree `bf36efc99c763826510d430777fed68729b123c7`; latest-head CI35914655882 SUCCESS. Actual [post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS on exact merge: 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and native/docs/contracts/CI/architecture/build. Post-merge artifact10778013202 expires2026-10-23T21:37:42Z; downloaded raw samples name55ce00a: 302886 initial gzip bytes, coldLCP1036ms, queryp95 0.8ms, HTTPp95 176.2ms. Mirror35919602710 SUCCESS. PR body holds these late facts and W4 owner release, terminal DONE; no further W4 commit or main push. Old W4 branch/worktrees remain. W5 has no prior branch/PR/task and is the next unimplemented increment. New isolated worktree `/home/ckc/test/codex/newclear-dim-gate-w5` and branch `agent/dim-gate/mainline/w5-platform-governance` start from exact actual main55ce00a. W5 contract revision1 and [T045](tasks/T-045.md) domain, [T046](tasks/T-046.md) API/migration, [T047](tasks/T-047.md) UI/browser, [T048](tasks/T-048.md) integration, [T049](tasks/T-049.md) uninvolved review are fixed before implementation; five task validators pass. W5 is CONTRACT_LOCAL_PENDING_CHECKPOINT / NOT_ACCEPTED; no product code or external side effect yet. Lead retains W5 ownership.
+DG-D096: W4 actual integration closeout reconciled before W5 ownership claim. [PR50](https://github.com/fallrising/newclear/pull/50) MERGED normally at `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` (parents main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and accepted evidence head `9cc2a921eb319b7c90b5c9ffdea03bdadce4006d`). Actual main and PR head share full dim-gate tree `bf36efc99c763826510d430777fed68729b123c7`; latest-head CI35914655882 SUCCESS. Actual [post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS on exact merge: 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and native/docs/contracts/CI/architecture/build. Post-merge artifact10778013202 expires2026-10-23T21:37:42Z; downloaded raw samples name55ce00a: 302886 initial gzip bytes, coldLCP1036ms, queryp95 0.8ms, HTTPp95 176.2ms. Mirror35919602710 SUCCESS. PR body holds these late facts and W4 owner release, terminal DONE; no further W4 commit or main push. Old W4 branch/worktrees remain. W5 has no prior branch/PR/task and is the next unimplemented increment. New isolated worktree `<operator-home>/test/codex/newclear-dim-gate-w5` and branch `agent/dim-gate/mainline/w5-platform-governance` start from exact actual main55ce00a. W5 contract revision1 and [T045](tasks/T-045.md) domain, [T046](tasks/T-046.md) API/migration, [T047](tasks/T-047.md) UI/browser, [T048](tasks/T-048.md) integration, [T049](tasks/T-049.md) uninvolved review are fixed before implementation; five task validators pass. W5 is CONTRACT_LOCAL_PENDING_CHECKPOINT / NOT_ACCEPTED; no product code or external side effect yet. Lead retains W5 ownership.
 
 ```yaml
 project_id: dim-gate
@@ -1389,7 +1391,7 @@ target_ref: origin/main
 source_commit: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
 last_incorporated_main: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
 continuation_ref: agent/dim-gate/mainline/w5-platform-governance
-worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
 spec_ref: platform/dim-gate/docs/W5-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-13-18
 report_ref: .team/reports/dim-gate-w5-preflight.md
 integration_state: NOT_OPENED
@@ -1412,7 +1414,7 @@ terminal_state: null
 milestone: W5_IDENTITY_PRODUCT_CHECKPOINT / OTHER_W5_SLICES_PENDING / NOT_ACCEPTED
 task_id: T045 PARTIAL_identity; T046 PARTIAL_identity_API_migration; T047 PARTIAL_identity_UI_browser; T048 READY_AFTER_SLICES; T049 READY_AFTER_FIXED_PRODUCT
 continuation_ref: agent/dim-gate/mainline/w5-platform-governance
-worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
 implementation_commit: ace27ff833de58541236b44b9b410cf58f7a8f17
 report_ref: .team/reports/dim-gate-w5-identity-checkpoint.md
 integration_state: PR61_DRAFT_OPEN_not_accepted
@@ -1435,7 +1437,7 @@ terminal_state: null
 milestone: W5_FIXED_PRODUCT_7ab_LOCAL_NATIVE_PASS / FULL_GATES_AND_REVIEW_REPORT_PENDING / NOT_ACCEPTED
 task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 FIXED_SOURCE_REVIEW_REPORT_PENDING
 continuation_ref: agent/dim-gate/mainline/w5-platform-governance
-worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
 implementation_commit: 7ab67ce5eb99967b820fa59df44c31808a40d631
 review_ref: .team/reports/T-049-attempt-1.md pending
 report_ref: .team/reports/dim-gate-w5-validation.md pending
@@ -1459,7 +1461,7 @@ terminal_state: null
 milestone: W5_FIXED_PRODUCT_b35_NATIVE_AND_REVIEW_PASS / FULL_GATES_PENDING / NOT_ACCEPTED
 task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt1_AND_attempt2_DONE_no_open_findings
 continuation_ref: agent/dim-gate/mainline/w5-platform-governance
-worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
 implementation_commit: b35e6ed502f60e5291e4d27dd804f6f189c6832d
 review_ref: .team/reports/T-049-attempt-2.md
 report_ref: .team/reports/dim-gate-w5-validation.md
@@ -1482,7 +1484,7 @@ terminal_state: null
 milestone: W5_FIXED_PRODUCT_03c_NATIVE_PASS / FULL_GATES_AND_REVIEW_PENDING / NOT_ACCEPTED
 task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt3_IN_PROGRESS
 continuation_ref: agent/dim-gate/mainline/w5-platform-governance
-worktree: /home/ckc/test/codex/newclear-dim-gate-w5
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
 implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
 review_ref: .team/reports/T-049-attempt-3.md pending
 report_ref: .team/reports/dim-gate-w5-validation.md pending

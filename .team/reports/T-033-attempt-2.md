@@ -12,7 +12,7 @@ Synchronous read and startup snapshot/integrity validation remain eager. Nine sm
 
 ## Verification
 
-All native commands used component cwd, Node 24.18.0 through `/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin` on PATH and component-pinned pnpm 11.18.0. Read-only dependency files are exact fixed 285b46f bytes; they are not part of the seven-file owned handback.
+All native commands used component cwd, Node 24.18.0 through `<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin` on PATH and component-pinned pnpm 11.18.0. Read-only dependency files are exact fixed 285b46f bytes; they are not part of the seven-file owned handback.
 
 - Pre-edit byte comparison of every existing domain file with fixed 285b46f — passed
 - Initial attempt to run `pnpm --dir platform/dim-gate typecheck` from repository cwd invoked the root pnpm 12.5.1 through Corepack and rejected the required 11.18.0; no bypass or package-manager configuration edit, corrected to component cwd — failed

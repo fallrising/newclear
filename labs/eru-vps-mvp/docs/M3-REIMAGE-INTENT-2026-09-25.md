@@ -25,7 +25,7 @@
 
 ## 唯讀 replacement-host gate（尚未對 VPS 執行）
 
-`python3 scripts/labctl.py verify-reimage-host --plan PLAN_ID --sha256 PLAN_SHA256` 僅在 owner receipt 已記錄後可用。它重核 plan、receipt 原始檔 SHA 與記錄時的 alias trust file SHA，然後只用 plan 綁定的 `ckc-disposable-02`～`04` alias，以 `BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、單一 alias trust file 執行遠端唯讀檢查。它比對新 machine ID、boot ID 與 OS release；要求 SSH、Tailscale、Docker、containerd active，Tailscale IPv4 屬於 tailnet 範圍，ERU runtime 為空，沒有 core／etcd／agent 殘留，並記錄 Docker／containerd 版本。通過結果只寫入 immutable private observation，包含新 tailnet IPv4；不輸出原始遠端 facts、不安裝元件、不註冊 node、不改 trust，也不解除 fence。
+`python3 scripts/labctl.py verify-reimage-host --plan PLAN_ID --sha256 PLAN_SHA256` 僅在 owner receipt 已記錄後可用。它重核 plan、receipt 原始檔 SHA 與記錄時的 alias trust file SHA，然後只用 plan 綁定的 `<disposable-02>`～`04` alias，以 `BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、單一 alias trust file 執行遠端唯讀檢查。它比對新 machine ID、boot ID 與 OS release；要求 SSH、Tailscale、Docker、containerd active，Tailscale IPv4 屬於 tailnet 範圍，ERU runtime 為空，沒有 core／etcd／agent 殘留，並記錄 Docker／containerd 版本。通過結果只寫入 immutable private observation，包含新 tailnet IPv4；不輸出原始遠端 facts、不安裝元件、不註冊 node、不改 trust，也不解除 fence。
 
 本機測試以 fake SSH runner 驗證 alias、strict options、identity／service／runtime gate 與 trust drift；沒有連線到任何 VPS。此 gate 是之後 bootstrap 前的唯讀核對，不是 ERU-014 E2E PASS。
 

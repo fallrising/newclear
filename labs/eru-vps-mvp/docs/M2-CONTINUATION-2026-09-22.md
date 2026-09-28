@@ -21,7 +21,7 @@ python3 scripts/validate_core_patch.py --source /tmp/eru-core-review \
 
 ## 01 儲存問題尚未解除
 
-所有 B→VPS 操作均使用 `ckc-disposable-01`～`04`。先唯讀檢查四台：workload 0、runtime／配額一致，未重播失敗 plan。
+所有 B→VPS 操作均使用 `<disposable-01>`～`04`。先唯讀檢查四台：workload 0、runtime／配額一致，未重播失敗 plan。
 
 13:27:54–13:37:54 UTC 約十分鐘共 61 次 endpoint health 全部成功，觀測的 core／etcd／Docker／containerd invocation 未變。窗口新增 120 次 WAL fsync，其 p99 所在 bucket 為 **(8 ms, 16 ms]**；backend commit 沒有新增觀測，不能據此判定 commit 延遲合格。原 collector 中途遇到 histogram 換行解析錯誤的一筆不完整 evidence 亦保留，已修正並加入回歸測試。
 
@@ -34,7 +34,7 @@ python3 scripts/validate_core_patch.py --source /tmp/eru-core-review \
 新工具：
 
 ```bash
-# controller B → ckc-disposable-01；唯讀窗口，原始輸出只存 private。
+# controller B → <disposable-01>；唯讀窗口，原始輸出只存 private。
 python3 scripts/control_health.py --samples 61 --interval 10
 # 明確的有限暫存檔寫入診斷；不是唯讀，也不是 etcd 壓測。
 python3 scripts/control_health.py --disk-probe

@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-037 attempt 1 delivers the complete W3 domain implementation for run `DG-W3-20260923-01`, under W3 contract revisions 1–3 and the lead-authorized performance clarification. Worker branch is `agent/dim-gate/task/t037-delivery-domain`, fixed checkout `9b4a4c70a562b55b7f03f38d43d379e02eb997fc`, worktree `/home/ckc/test/codex/newclear-dim-gate-w3-domain`. Accepted W2 baseline remains `91626851fb17df7ab31c96dee9353b9ee4d42c92`. This worker did not commit, push, delegate, modify a historical worktree, or self-accept.
+T-037 attempt 1 delivers the complete W3 domain implementation for run `DG-W3-20260923-01`, under W3 contract revisions 1–3 and the lead-authorized performance clarification. Worker branch is `agent/dim-gate/task/t037-delivery-domain`, fixed checkout `9b4a4c70a562b55b7f03f38d43d379e02eb997fc`, worktree `<operator-home>/test/codex/newclear-dim-gate-w3-domain`. Accepted W2 baseline remains `91626851fb17df7ab31c96dee9353b9ee4d42c92`. This worker did not commit, push, delegate, modify a historical worktree, or self-accept.
 
 Canonical schema3 adds PipelineDefinition, ServiceConfig, TrafficPolicy and ServiceExecution collections. Strict original V1 and V2 snapshots retain their original navigation/run shapes; pure legacy integrity helpers normalize only empty W3 collections (and empty W2 collections for V1) before checking original relationships. Registered fictional references, bounded typed configuration entries, exact supported traffic plans and strict scenario target combinations are explicit schemas. The first schema handoff preceded API/UI implementation. Public DTO names and shapes stayed unchanged through later module extraction; all 172 exported schemas and the complete shared-reference contract graph compare exactly before/after.
 
@@ -18,7 +18,7 @@ Existing delivery and observation mutations/schedulers now live behind the origi
 
 ## Verification
 
-All native commands used component cwd `/home/ckc/test/codex/newclear-dim-gate-w3-domain/platform/dim-gate`, Node24.18.0 at `/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin` on PATH, and component-pinned pnpm11.18.0. Commands used approved escalated execution because the default bubblewrap sandbox cannot launch. No dependency, budget, benchmark, build configuration or threshold was changed.
+All native commands used component cwd `<operator-home>/test/codex/newclear-dim-gate-w3-domain/platform/dim-gate`, Node24.18.0 at `<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin` on PATH, and component-pinned pnpm11.18.0. Commands used approved escalated execution because the default bubblewrap sandbox cannot launch. No dependency, budget, benchmark, build configuration or threshold was changed.
 
 - `pnpm install --offline --frozen-lockfile`:334 cached packages, no dependency changes — passed
 - Early focused checks identified a missing WorkItem source dispatch, additive W1/W2 draft assertions, and a transient overly broad config/traffic integrity guard; these were fixed and covered by final tests — failed

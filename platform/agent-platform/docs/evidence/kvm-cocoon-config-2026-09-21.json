@@ -1,7 +1,7 @@
 {
-  "root_dir": "/tmp/apm0-20260921/cocoon",
-  "run_dir": "/tmp/apm0-20260921/run",
-  "log_dir": "/tmp/apm0-20260921/logs",
+  "root_dir": "<tmp>/apm0-20260921/cocoon",
+  "run_dir": "<tmp>/apm0-20260921/run",
+  "log_dir": "<tmp>/apm0-20260921/logs",
   "ch_binary": "/usr/local/bin/cloud-hypervisor",
   "meta_backend": "sqlite",
   "cni_conf_dir": "",

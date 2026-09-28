@@ -6,7 +6,7 @@
 
 部署報告將 V03 記為 PARTIAL：bridge 內 HTTP 與從 B 對外探測 2379／2380／5001 已驗證，但 host-network 私網 HTTP 與容器出站 NAT 未測。SDD 要求管理端可到指定 worker 的 host-network TCP/80，並由叢集外確認管理服務埠不可達；CNI bridge 和 host-network 是兩條不同路徑。
 
-2026-09-24 04:06 UTC 經 `ckc-disposable-02`、`ckc-disposable-03`、`ckc-disposable-04` 唯讀檢查，三台 UFW 均為 active、預設 deny incoming，但另有明確的 `80/tcp ALLOW IN Anywhere` 與 IPv6 Anywhere 規則；三台當時都沒有主機 TCP/80 listener。私有輸出保存在 `private/diagnostics/eru006-worker{2,3,4}-{ufw,listen}-20260924T0406Z.txt`。worker-4 的 ruleset 與 firewall unit 狀態另存在同目錄。沒有把沒有 listener 時的連線失敗解讀為防火牆已隔離。
+2026-09-24 04:06 UTC 經 `<disposable-02>`、`<disposable-03>`、`<disposable-04>` 唯讀檢查，三台 UFW 均為 active、預設 deny incoming，但另有明確的 `80/tcp ALLOW IN Anywhere` 與 IPv6 Anywhere 規則；三台當時都沒有主機 TCP/80 listener。私有輸出保存在 `private/diagnostics/eru006-worker{2,3,4}-{ufw,listen}-20260924T0406Z.txt`。worker-4 的 ruleset 與 firewall unit 狀態另存在同目錄。沒有把沒有 listener 時的連線失敗解讀為防火牆已隔離。
 
 程式檢查顯示 `deploy-lab.py` 只在 core 01 安裝 `eru-mvp-firewall`，目前規則只限制 core TCP/5001 的來源；worker 沒有由此專案安裝的 host TCP/80 私網限制。因此，host-network workload 會直接使用 worker 的主機網路；**不可在目前 broad allow 規則下啟動 nginx**，否則服務可能由公網 IPv4／IPv6 存取。現有 02／03 canaries 走 `eru` bridge，並未占用 host TCP/80，這仍不構成隔離證明。
 

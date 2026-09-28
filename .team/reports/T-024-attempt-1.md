@@ -20,7 +20,7 @@ Chromium passed empty/strict window/dedupe/fallback/reopen, failed rollback/rese
 
 Raw console/network/DOM/PNG/trace/HTML evidence is preserved at `/tmp/dim-gate-m4-evidence/298a563-browser-attempt-1.tar.gz` before any rerun. Local-only artifacts are not portable proof by themselves; PR CI preserves remote artifacts. Actual screenshots render CJK correctly and reveal cramped wrapping in the new desktop toolbar. Follow-up adjusts notification/search/breadcrumb sizing, adds open-notification panel viewport evidence, and makes Guide manual clock pending wait for all invalidated projections.
 
-Runtime from component directory: `PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`, `LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu`, `FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf`. Playwright1.63 uses cached Chromium153.0.8010.12 rev1243. Preview4173 is managed by Playwright strictPort with reuseExistingServer=false. Vitest console times are local Europe/Berlin, despite the T-022 worker report labeling its09:30:32timestamp UTC; actual UTC is07:30:32.
+Runtime from component directory: `PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`, `LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu`, `FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf`. Playwright1.63 uses cached Chromium153.0.8010.12 rev1243. Preview4173 is managed by Playwright strictPort with reuseExistingServer=false. Vitest console times are local Europe/Berlin, despite the T-022 worker report labeling its09:30:32timestamp UTC; actual UTC is07:30:32.
 
 ## Documentation
 

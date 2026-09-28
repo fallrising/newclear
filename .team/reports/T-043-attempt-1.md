@@ -20,7 +20,7 @@ This attempt is a partial handback; its missing-sibling failures and unrun brows
 
 # T-043 attempt 1 — W4 UI/browser bounded handback
 
-Run `DG-W4-20260923-01`; task revision 1; base contract commit `9fd3279ead6aa9e776c56c9fb3066e670631484a`; dedicated worktree `/home/ckc/test/codex/newclear-dim-gate-w4-ui`. Worker scope only `platform/dim-gate/src/features/**`, `src/app/**`, `e2e/**`, and this report. No commit, push, acceptance, deployment, external notification or main branch mutation was made. Lead owns integration and gates.
+Run `DG-W4-20260923-01`; task revision 1; base contract commit `9fd3279ead6aa9e776c56c9fb3066e670631484a`; dedicated worktree `<operator-home>/test/codex/newclear-dim-gate-w4-ui`. Worker scope only `platform/dim-gate/src/features/**`, `src/app/**`, `e2e/**`, and this report. No commit, push, acceptance, deployment, external notification or main branch mutation was made. Lead owns integration and gates.
 
 ## Implemented for integration
 

@@ -2,7 +2,7 @@ STATUS: SUCCESS
 
 ## Scope and provenance
 
-T-010 attempt 1 ran in the isolated worktree `/home/ckc/test/codex/newclear-t010` on branch `agent/dim-gate/task/t010-topology`. Dispatch HEAD remained `73771958d93d405a877886a4805d667a67b67d8c`; accepted product base was `888d81203d01aab8781c42ac47138e053bf2c487`, and the fixed M1 integration contract revision was `9ea032f66daabf68350482bfedac81f63e5221ec`. The built-in collaboration worker's exact inherited model ID was not exposed and is not guessed.
+T-010 attempt 1 ran in the isolated worktree `<operator-home>/test/codex/newclear-t010` on branch `agent/dim-gate/task/t010-topology`. Dispatch HEAD remained `73771958d93d405a877886a4805d667a67b67d8c`; accepted product base was `888d81203d01aab8781c42ac47138e053bf2c487`, and the fixed M1 integration contract revision was `9ea032f66daabf68350482bfedac81f63e5221ec`. The built-in collaboration worker's exact inherited model ID was not exposed and is not guessed.
 
 The worker read the complete task and every required input before editing: `platform/dim-gate/AGENTS.md`, `platform/dim-gate/SDD.md`, `platform/dim-gate/docs/STATUS.md`, `platform/dim-gate/docs/sdd/README.md`, `platform/dim-gate/docs/M1-INTEGRATION-CONTRACT.md`, and SDD topics 01, 02, 04 and 05. No recursive delegation, commit, push, PLAN/STATUS edit, public CMDB export edit, central composition edit, route edit, generated contract edit, global CSS edit, E2E edit or acceptance decision occurred.
 
@@ -31,7 +31,7 @@ The worker read the complete task and every required input before editing: `plat
 
 Commands used workspace-local Node 24.18.0 and pnpm 11.18.0 via:
 
-`PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH COREPACK_HOME=/home/ckc/test/codex/.toolchains/corepack`
+`PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH COREPACK_HOME=<operator-home>/test/codex/.toolchains/corepack`
 
 - `pnpm exec vitest run src/api/clients/topology.test.ts src/features/cmdb/topology/TopologyRoute.test.tsx` — passed, 7/7 tests in 2 files.
 - `pnpm lint` — passed.

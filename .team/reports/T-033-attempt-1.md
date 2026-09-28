@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-033 attempt 1 delivers the complete bounded W2 canonical resource domain implementation for run DG-W2-20260923-01. Fixed checkpoint `7086a443416fbc9876612e66bac889e83c8200ad`, branch `agent/dim-gate/task/t033-resource-domain`, worktree `/home/ckc/test/codex/newclear-dim-gate-w2-domain`. Evidence binds to that unchanged HEAD plus the 16 owned source files hashed below. Worker did not commit, push, delegate or accept its own work. Lead owns integrated fixed-commit gates, browser validation, independent review and acceptance.
+T-033 attempt 1 delivers the complete bounded W2 canonical resource domain implementation for run DG-W2-20260923-01. Fixed checkpoint `7086a443416fbc9876612e66bac889e83c8200ad`, branch `agent/dim-gate/task/t033-resource-domain`, worktree `<operator-home>/test/codex/newclear-dim-gate-w2-domain`. Evidence binds to that unchanged HEAD plus the 16 owned source files hashed below. Worker did not commit, push, delegate or accept its own work. Lead owns integrated fixed-commit gates, browser validation, independent review and acceptance.
 
 Implemented schemaVersion 2 with typed compute/Redis/Kafka catalogs, canonical ResourceObject/ResourceBinding/ResourceQuota/ChangeRequest/ChangeExecution, strict change inputs and scoped resource inventory/service/WorkItem DTOs. Original Request.templateSnapshot remains compute-only. Exported strict legacySnapshotSchema and pure legacyIntegrityErrors let T-034 validate original relationships before migration; no migration or business seed implementation belongs to this worker.
 
@@ -14,7 +14,7 @@ Lead-confirmed contract clarifications: RD shared resize requires every affected
 
 ## Verification
 
-Every pnpm command used Node 24.18.0 via `PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH`, component-pinned pnpm 11.18.0 and component cwd. Verification below is worker evidence, not a milestone gate claim.
+Every pnpm command used Node 24.18.0 via `PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH`, component-pinned pnpm 11.18.0 and component cwd. Verification below is worker evidence, not a milestone gate claim.
 
 - `pnpm install --frozen-lockfile`: 334 cached packages, 680 ms; no manifest or lockfile edit — passed
 - Initial `pnpm exec vitest run src/domain/engine.test.ts`: 42/45 passed; three original 60/30 count assertions required the intentional additive 63/33 fixture update, completed later — failed

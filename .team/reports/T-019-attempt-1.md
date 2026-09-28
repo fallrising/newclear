@@ -5,7 +5,7 @@ STATUS: PARTIAL
 ## Summary
 
 - Task: T-019, revision 1, attempt 1; project `dim-gate`, variant `mainline`.
-- Worker scope: `/home/ckc/test/codex/newclear-m3-ui`, branch `agent/dim-gate/task/t019-delivery-ui`.
+- Worker scope: `<operator-home>/test/codex/newclear-m3-ui`, branch `agent/dim-gate/task/t019-delivery-ui`.
 - Input base: `f1c5cc6a0d9f47e796c675eb7041ae3b9bf25116`; [M3 integration contract revision 1](../../platform/dim-gate/docs/M3-INTEGRATION-CONTRACT.md); AC-13–16 and AC-24, with AC-20 and accessibility regression scenarios.
 - The lead created UI checkpoint `d40b98eadb6c7ca993cd91eefe8df804d8fcd4be` while this worker finished the browser scenarios. The worker did not commit, push, merge, delegate, change shared files, or deploy.
 - Typed API methods and four delivery pages are implemented. Browser scenarios are authored and discovered; integrated browser execution remains the lead's gate, so this report is PARTIAL and is not acceptance.

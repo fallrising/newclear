@@ -157,7 +157,7 @@ versioned API and can be deployed and scaled independently for parallel external
 ## Decision log
 
 - 2026-09-04: Created the local repository at
-  `/home/ckc/test/codex/local-ocr-services`; no GitHub remote or deployment is authorized.
+  `<operator-home>/test/codex/local-ocr-services`; no GitHub remote or deployment is authorized.
 - 2026-09-04: Selected one shared API with separate engine images so consumers do not
   depend on engine-specific payloads and engines can scale independently.
 - 2026-09-04: Selected RapidOCR as the default general OCR service, Tesseract as the

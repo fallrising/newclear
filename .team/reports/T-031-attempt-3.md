@@ -2,7 +2,7 @@ STATUS: DONE
 
 ## Summary
 
-T-031 attempt3, runDG-W1-20260923-01, contractrev4 fixed9be2c18 before code; baseline7a7b41b, previous03a7ee5. Sole lead works again in `/home/ckc/test/codex/newclear-dim-gate-w1`, original PR33 branch `agent/dim-gate/mainline/w1-workspaces`. This containing commit fixes F-04/F-05 from preserved independent T-032 attempt2. At this earlier checkpoint W1 was NOT_ACCEPTED; actual acceptance is recorded below.
+T-031 attempt3, runDG-W1-20260923-01, contractrev4 fixed9be2c18 before code; baseline7a7b41b, previous03a7ee5. Sole lead works again in `<operator-home>/test/codex/newclear-dim-gate-w1`, original PR33 branch `agent/dim-gate/mainline/w1-workspaces`. This containing commit fixes F-04/F-05 from preserved independent T-032 attempt2. At this earlier checkpoint W1 was NOT_ACCEPTED; actual acceptance is recorded below.
 
 Tablet641–1100 now retains200px labelled/grouped navigation; mobile drawer remains keyboard operable. Workspace switch validates project/environment using the existing canonical dashboard read. Mismatched env is removed; invalid project is removed while independently valid env is rechecked unfiltered and retained. Read failure keeps original URL/workspace/domain and explains retry. Pending workspace text is distinct from identity switching. Added missing/mismatched/partly-valid/read-failure/retry browser cases plus explicit visible label/group and keyboard navigation at768/390 in both themes. Cross-browser smoke now includes a legal project filter during workspace switch.
 

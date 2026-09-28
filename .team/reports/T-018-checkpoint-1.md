@@ -4,7 +4,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-User requested saving progress and a new-conversation prompt on 2026-09-21. Work stops at a recoverable checkpoint, not M3 acceptance. Product correction: `b58298e9ddc2498830f1fd144277b1c6345359b1`; branch `agent/dim-gate/mainline/m3-delivery`; worktree `/home/ckc/test/codex/newclear-m3`.
+User requested saving progress and a new-conversation prompt on 2026-09-21. Work stops at a recoverable checkpoint, not M3 acceptance. Product correction: `b58298e9ddc2498830f1fd144277b1c6345359b1`; branch `agent/dim-gate/mainline/m3-delivery`; worktree `<operator-home>/test/codex/newclear-m3`.
 
 M0/M1/M2 remain ACCEPTED and MERGED. PR #13 is verified MERGED at `29bed41788a33684f24d216f4fd4d5f3f998c672`. M3 started from `e760d8e`; latest SSH-fetched main is `aafd24d7e7110454847ef8856bc15cd76626c2c7`. That delta touches agent-platform/root portfolio documentation only, not dim-gate or its ledger. It is not merged into this branch yet. No M3 PR exists at this checkpoint, and no M3 remote CI is claimed.
 
@@ -41,17 +41,17 @@ Original production preview was `pnpm preview --port 4173 --strictPort`, URL `ht
 Runtime and local artifacts:
 
 ```sh
-export PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
 export LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu
 export FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf
-cd /home/ckc/test/codex/newclear-m3/platform/dim-gate
+cd <operator-home>/test/codex/newclear-m3/platform/dim-gate
 pnpm install --frozen-lockfile
 pnpm build --mode demo
 pnpm exec playwright test e2e/m3-delivery.spec.ts
 # then all prescribed gates, including pnpm test:e2e
 ```
 
-- Existing Playwright Chromium 1243 is under `/home/ckc/.cache/ms-playwright`; normal config uses it. `actionlint` is `/tmp/dim-gate-actionlint/actionlint`.
+- Existing Playwright Chromium 1243 is under `<operator-home>/.cache/ms-playwright`; normal config uses it. `actionlint` is `/tmp/dim-gate-actionlint/actionlint`.
 - Original browser trace/report/screenshot archive: `/tmp/dim-gate-m3-browser-attempt-1.tar.gz`, local-only. It is preserved, not claimed remotely portable.
 - Original screenshots lacked CJK fonts. Ubuntu `fonts-noto-cjk` was downloaded/extracted to the temporary directory above; task-local fontconfig resolves Noto CJK. No system font installation/global configuration changed. Font-corrected screenshots are still pending.
 - Kernel contract fully read at pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15` in `/tmp/dim-gate-m3-kernel-ykJiGn/repo`; original read-only reference remains `664d176`. Latest SSH kernel HEAD observed during handoff is `0902d57b3516014f3f15e7167f37cdc744fd2973`; its changed instructions have not been read, so do not claim adoption.

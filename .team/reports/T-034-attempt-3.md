@@ -2,7 +2,7 @@ STATUS: DONE
 
 ## Summary
 
-T-034 attempt3, run DG-W2-20260923-01, W2 contractrevision2 and bounded browser extension DG-D061. Worker `/root/w2_migration` completed its assigned verification and releases this bounded write ownership to lead. Worktree `/home/ckc/test/codex/newclear-dim-gate-w2-browser`, branch `agent/dim-gate/task/t034-resource-browser`, implementation base `ae3bb49a5976099fb0c877cf09e444e1a4e82653`. Exclusive handback is `platform/dim-gate/e2e/w2-governance.spec.ts` plus this report. No production edits, commits/pushes, delegation or self-acceptance. DONE refers only to this bounded verification assignment; W2 milestone acceptance remains lead-owned.
+T-034 attempt3, run DG-W2-20260923-01, W2 contractrevision2 and bounded browser extension DG-D061. Worker `/root/w2_migration` completed its assigned verification and releases this bounded write ownership to lead. Worktree `<operator-home>/test/codex/newclear-dim-gate-w2-browser`, branch `agent/dim-gate/task/t034-resource-browser`, implementation base `ae3bb49a5976099fb0c877cf09e444e1a4e82653`. Exclusive handback is `platform/dim-gate/e2e/w2-governance.spec.ts` plus this report. No production edits, commits/pushes, delegation or self-acceptance. DONE refers only to this bounded verification assignment; W2 milestone acceptance remains lead-owned.
 
 Exact tested test file SHA256: `b6861140a797bc56ba33977ed2a7046dc884f36d97e66471ef29964e1cb3168d`. Base implementation plus the six unchanged lead-provided read-only dependencies below is the actual tested source, not an invented clean commit. Built `dist/.vite/manifest.json` SHA256: `6ee4ec1712e90e6e779fca31c43ad975015187ffabe16db3dfeabe1bcbf31f56`. Reproducible manifest: `/tmp/t034-attempt3-test-manifest.json`.
 

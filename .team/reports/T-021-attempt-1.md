@@ -4,7 +4,7 @@ STATUS: PARTIAL
 
 Task: T-021, dim-gate/mainline M4, revision 1, attempt 1. Worker implementation is ready for lead integration; this report does not accept the task or milestone.
 
-- Worktree: `/home/ckc/test/codex/newclear-m4-domain`; branch: `agent/dim-gate/task/t021-observation-domain`.
+- Worktree: `<operator-home>/test/codex/newclear-m4-domain`; branch: `agent/dim-gate/task/t021-observation-domain`.
 - Tested base commit: `157605bfb32d818a4b09e5bf17d3f21b6f3c3cbe` plus the listed uncommitted implementation files and the lead-synchronized schema navigation enum. No worker commits, pushes, merges, network or cloud operations.
 - Final implementation aggregate SHA-256: `4647dc08593695160416d8e72592f04087354b8976bdc50c883b36b68116a31c`. Computed by concatenating each ordered relative path, NUL, its exact bytes, NUL in the deliverable order below.
 - Implemented one-minute RED telemetry, correlated trace/log projections, sustained threshold evaluation, dedupe/reopen, reasoned/versioned Ops incident writes and authorization before replay, deterministic 60/120/180-tick rollback recovery, stale-release and new-anomaly cancellation, demo integrations, scoped incident search/audit/dashboard/notifications, coherent Guide business selectors and restore integrity.
@@ -29,7 +29,7 @@ The worker did not edit shared schemas. The lead copied the current `src/domain/
 
 ## Verification
 
-All commands ran in the component directory with `PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`. Actual runtime: Node v24.18.0, pnpm 11.18.0. Lockfile SHA-256: `0da752e9e75f7b22902ba601583d1979e0a0d63b34275bcc445c4286dec7a32b`.
+All commands ran in the component directory with `PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`. Actual runtime: Node v24.18.0, pnpm 11.18.0. Lockfile SHA-256: `0da752e9e75f7b22902ba601583d1979e0a0d63b34275bcc445c4286dec7a32b`.
 
 The local `node_modules` symlink points to the lead's installed dependency directory. The first plain `pnpm typecheck` tried pnpm's automatic dependency verification/install and aborted before module changes (`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`). Subsequent invocations explicitly disable that implicit install using `--config.verify-deps-before-run=false`; no dependency or lockfile edits were made.
 

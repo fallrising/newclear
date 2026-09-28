@@ -1,5 +1,7 @@
 # ADR-005: SQLite driver, artifact storage and local deployment
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../../docs/remediation/2026-09-host-info.md](../../../../docs/remediation/2026-09-host-info.md)。
+
 Status: Accepted at G0 for P0-A
 Date: 2026-09-05
 

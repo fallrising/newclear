@@ -4,7 +4,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-Independent in-environment reviewer returned **REWORK** for fixed candidate `f7905bbab0c3032b28387d4596795c3a64800c58`, compared with base `e760d8e988c0e2a837b226c600805a659a362c10`, in unchanged checkout `/home/ckc/test/codex/newclear-m3-review2`. One medium finding remains. No blocking/high findings or additional medium findings were substantiated in inspected domain/API/UI paths. The inherited runtime's exact model slug was not exposed; no multi-model review is claimed.
+Independent in-environment reviewer returned **REWORK** for fixed candidate `f7905bbab0c3032b28387d4596795c3a64800c58`, compared with base `e760d8e988c0e2a837b226c600805a659a362c10`, in unchanged checkout `<operator-home>/test/codex/newclear-m3-review2`. One medium finding remains. No blocking/high findings or additional medium findings were substantiated in inspected domain/API/UI paths. The inherited runtime's exact model slug was not exposed; no multi-model review is claimed.
 
 ### Medium: pausing playback permits overlapping clock requests
 

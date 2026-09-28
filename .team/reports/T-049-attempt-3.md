@@ -8,7 +8,7 @@ The sole change adds `await expect(page.getByRole('region', { name: 'rd 工作�
 
 The lead reported that `b35` full Chromium ended 99/100, with the Kafka case attempting a sessionStorage read while the startup screen was still visible; the unchanged case reran 1/1, and both cases passed 2/2 after this readiness wait. I did not independently inspect that trace or run a browser while the lead was rerunning the full gate, so those outcomes are lead-reported evidence only. This report does not claim W5 acceptance, terminal full-suite success or PR-head CI success.
 
-I used detached checkout `/home/ckc/test/codex/newclear-dim-gate-w5-review`. I did not implement product/tests, delegate, edit product/config/tests/docs/PLAN, commit, push, merge or deploy. My only checkout writes are T-049 attempt reports. The available reviewer route was built-in Codex; the exact runtime model slug is not independently exposed. No Claude or multi-model claim is made.
+I used detached checkout `<operator-home>/test/codex/newclear-dim-gate-w5-review`. I did not implement product/tests, delegate, edit product/config/tests/docs/PLAN, commit, push, merge or deploy. My only checkout writes are T-049 attempt reports. The available reviewer route was built-in Codex; the exact runtime model slug is not independently exposed. No Claude or multi-model claim is made.
 
 ## Verification
 

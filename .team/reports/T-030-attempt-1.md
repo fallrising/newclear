@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-030 attempt 1 delivers the bounded W1 dashboard domain/API implementation for run DG-W1-20260923-01. Worker branch `agent/dim-gate/task/t030-workspace-domain`, worktree `/home/ckc/test/codex/newclear-dim-gate-w1-domain`, fixed base `02a8b9ac055a9696f381156079dea347d6f83a12` plus the eight uncommitted scoped source files hashed below. This report is worker evidence, not task or W1 acceptance. Lead owns integration, fixed-commit verification, independent review and delivery.
+T-030 attempt 1 delivers the bounded W1 dashboard domain/API implementation for run DG-W1-20260923-01. Worker branch `agent/dim-gate/task/t030-workspace-domain`, worktree `<operator-home>/test/codex/newclear-dim-gate-w1-domain`, fixed base `02a8b9ac055a9696f381156079dea347d6f83a12` plus the eight uncommitted scoped source files hashed below. This report is worker evidence, not task or W1 acceptance. Lead owns integration, fixed-commit verification, independent review and delivery.
 
 The existing GET `/dashboard` now returns its original counters/pendingItems/dataAsOf plus required authorized scope options/filters and a role-discriminated workspace. RD projects actual environment health/readiness, requests and release history. Ops projects incidents, failed jobs/releases, actionable requests/releases, physical pool capacity and CI staleness. Admin projects actual catalog drafts, safe integration status and access audit references. Sections carry exact filtered totals and at most 20 deterministic items; routes use canonical IDs and registered pages. The existing typed client accepts optional filters using URLSearchParams. No new operation, dependency, persisted field, snapshot/schema/seed version, ID or business command is introduced.
 
@@ -12,7 +12,7 @@ Owned files changed: `src/domain/schemas.ts`, `src/domain/engine.ts`, new `src/d
 
 ## Verification
 
-Runtime: Node 24.18.0 and component-pinned pnpm 11.18.0, with `PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH` for every pnpm command. Commands ran from `platform/dim-gate` unless stated otherwise.
+Runtime: Node 24.18.0 and component-pinned pnpm 11.18.0, with `PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH` for every pnpm command. Commands ran from `platform/dim-gate` unless stated otherwise.
 
 - `pnpm install --frozen-lockfile`, 334 cached packages, 710 ms; manifest/lockfile unchanged. — passed
 - Initial `pnpm test -- src/domain/w1.test.ts`, 234 tests / 22 files, 6.21 s. This pnpm/Vitest invocation actually discovers the full suite despite the trailing paths. — passed

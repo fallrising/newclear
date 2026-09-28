@@ -1,5 +1,7 @@
 # dim-gate 三工作區接手
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 ## 最新恢復狀態（2026-09-24）
 
 W1–W5 已完成；W5 固定產品／測試 `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` 依 PLAN DG-D101 接受 AC-WS-13–18。[PR61](https://github.com/fallrising/newclear/pull/61) 正常合併為 `77e5e14`；其實際合併後 [CI35949443651 attempt 2](https://github.com/fallrising/newclear/actions/runs/35949443651) 通過426原生、100 Chromium、12 Firefox/WebKit、3效能、2隔離及所有靜態／建置檢查。[Artifact10789818355](https://github.com/fallrising/newclear/actions/runs/35949443651/artifacts/10789818355) 綁定 `77e5e14`，初始 gzip JS 297,608 bytes、LCP 中位數1,284ms、查詢 p95 0.8ms、Mock HTTP p95 183ms，均在既定預算內。attempt1 因45分鐘 job 上限在效能測試後取消；attempt2 完成全部 gate。
@@ -18,7 +20,7 @@ SDD第14章只列 W1–W5，沒有 W6 或 AC-WS-19 之後的已接受範圍。�
 
 歷史 W5 產品 checkpoint（2026-09-24）：同一隔離分支的 `ace27ff833de58541236b44b9b410cf58f7a8f17` 已實作 v5 Demo User／Team 身分切片、嚴格 v1–v4→v5 升級、typed Admin API 和 `/admin/users` 頁面，409 native、專題 Chromium 1、原 benchmark 3 和原生檢查通過。詳細 source-bound 證據見[身分 checkpoint](../../../.team/reports/dim-gate-w5-identity-checkpoint.md)及 PLAN DG-D097。PR61 保持草稿；T045–T047 仍 PARTIAL，T048/T049 未開始；W5 **未驗收／未合併**。下一步依固定 W5 契約完成 feature cohort、PlatformRoute、scoped notification，再跑完整 gate、獨立 review 和精確 head CI。下段「產品尚未實作」屬上一個規格 checkpoint，勿作目前狀態。
 
-歷史 W5 接續 run（2026-09-23）：W4 [PR50](https://github.com/fallrising/newclear/pull/50) 已合併於 `55ce00a`、[post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS、owner 已釋放。W5 主控從該實際 main 建立乾淨的 `/home/ckc/test/codex/newclear-dim-gate-w5`、branch `agent/dim-gate/mainline/w5-platform-governance`；[W5 contract](W5-INTEGRATION-CONTRACT.md) revision 1、T045–T049 與 PLAN DG-D096 固定規格／驗收邊界，W5 產品尚未實作或驗收。先按固定契約完成 v5 domain／遷移／API／UI、完整 gate、獨立 review 與精確 CI，再正常合併。全部舊 worktree 保留；不部署、不連真實身分／雲端／通知。以下 W4「待 postmerge CI」與更早 W3 段落為歷史 checkpoint。
+歷史 W5 接續 run（2026-09-23）：W4 [PR50](https://github.com/fallrising/newclear/pull/50) 已合併於 `55ce00a`、[post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS、owner 已釋放。W5 主控從該實際 main 建立乾淨的 `<operator-home>/test/codex/newclear-dim-gate-w5`、branch `agent/dim-gate/mainline/w5-platform-governance`；[W5 contract](W5-INTEGRATION-CONTRACT.md) revision 1、T045–T049 與 PLAN DG-D096 固定規格／驗收邊界，W5 產品尚未實作或驗收。先按固定契約完成 v5 domain／遷移／API／UI、完整 gate、獨立 review 與精確 CI，再正常合併。全部舊 worktree 保留；不部署、不連真實身分／雲端／通知。以下 W4「待 postmerge CI」與更早 W3 段落為歷史 checkpoint。
 
 歷史 W4 驗收 checkpoint（2026-09-23）：固定產品 `dd90ccb` 已由主控依 PLAN DG-D095 **ACCEPT** AC-WS-12/15–18；獨立 T044 attempt3 無開放缺陷，完整本機門檻與精確產品 [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) SUCCESS，合成 checkout305939a 的完整 dim-gate tree 與產品相同。PR50 草稿仍未合併；下一步是證據-only checkpoint、最新 head CI、正常合併與實際 merge/tree/postmerge CI／owner release。W5 必須待 W4 整合 closeout 後另開 run。下面「W4 未驗收」為此前固定時間的歷史 checkpoint；詳見 [W4 validation](../../../.team/reports/dim-gate-w4-validation.md) 與 PR50。
 
@@ -30,7 +32,7 @@ SDD第14章只列 W1–W5，沒有 W6 或 AC-WS-19 之後的已接受範圍。�
 
 W3 [PR37](https://github.com/fallrising/newclear/pull/37) 已合併於 `30bc902ef884cda9927bcaaf15bc595b694f609d`、owner 釋放；實際合併後 [CI35873299419](https://github.com/fallrising/newclear/actions/runs/35873299419) 已完成 SUCCESS。下方 W3「待最終 CI／merge」「W4 未開始」段落是當時 checkpoint，不是目前狀態。
 
-W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 開始，主控隔離 worktree `/home/ckc/test/codex/newclear-dim-gate-w4`、branch `agent/dim-gate/mainline/w4-alerting`；[草稿 PR50](https://github.com/fallrising/newclear/pull/50) 遠端已有首個整合產品 `65a4c36` 及最新 main merge `899065c`。W4 [integration contract revision1](W4-INTEGRATION-CONTRACT.md)、PLAN DG-D089–092、T041 domain、T042 API/demo、T043 UI 已由主控整合；三個 worker 在各自 worktree 無 commit/push。獨立[T044 attempt1](../../../.team/reports/T-044-attempt-1.md)發現 Silence 生效 revision／冪等重放 F1；主控已本地修正並新增回歸，398 原生與原生檢查通過。舊 head 的 CI35907137495 與完整 Chromium 重跑在發現 F1 後主動取消，修正版全部瀏覽器、效能、隔離、獨立 attempt2、精確 PR-head CI 和合併尚待執行，**W4 未驗收，W5 未開始**。產品 gate 與固定版本結果以[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)及 PR50 後續 closeout 核對。原有全部 worktree 與預覽均保留，未部署／發送外部通知。
+W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a` 開始，主控隔離 worktree `<operator-home>/test/codex/newclear-dim-gate-w4`、branch `agent/dim-gate/mainline/w4-alerting`；[草稿 PR50](https://github.com/fallrising/newclear/pull/50) 遠端已有首個整合產品 `65a4c36` 及最新 main merge `899065c`。W4 [integration contract revision1](W4-INTEGRATION-CONTRACT.md)、PLAN DG-D089–092、T041 domain、T042 API/demo、T043 UI 已由主控整合；三個 worker 在各自 worktree 無 commit/push。獨立[T044 attempt1](../../../.team/reports/T-044-attempt-1.md)發現 Silence 生效 revision／冪等重放 F1；主控已本地修正並新增回歸，398 原生與原生檢查通過。舊 head 的 CI35907137495 與完整 Chromium 重跑在發現 F1 後主動取消，修正版全部瀏覽器、效能、隔離、獨立 attempt2、精確 PR-head CI 和合併尚待執行，**W4 未驗收，W5 未開始**。產品 gate 與固定版本結果以[W4 validation](../../../.team/reports/dim-gate-w4-validation.md)及 PR50 後續 closeout 核對。原有全部 worktree 與預覽均保留，未部署／發送外部通知。
 
 ## 接續 run 最新狀態（2026-09-23）
 
@@ -54,7 +56,7 @@ W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe69
 - 完整89Chromium、10Firefox/WebKit、2isolation 尚在執行鏈；T040固定版本獨立review保存PARTIAL checkpoint，最終verdict未完成；[同headCI35857078458](https://github.com/fallrising/newclear/actions/runs/35857078458) 已完成原生檢查，瀏覽器gate進行中。**PR37仍DRAFT／OPEN／NOT_ACCEPTED，尚未merge。**
 - Local runner `/tmp/dim-gate-w3-evidence/run-fixed-gates.py`，2026-09-23 11:59UTC觀察PID2209053，tool session31482。進度 `/tmp/dim-gate-w3-evidence/fixed-gates.json`，每項實際輸出 `fixed-*.log`。新視窗先 `ps -p 2209053 -o pid,args` 和讀JSON/log確認是否仍存活，不假設舊tool session可跨視窗使用，也不把stale RUNNING當成功。不要在舊runner仍跑時重建dist或重啟4350。
 - Runner順序native→benchmark→89Chromium→10smoke→2isolation。完整Chromium會清理test-results，因此第一輪fixedbenchmarkJSON被清掉，pass log仍在；若仍需本機完整原始benchmark附件，等整個runner結束後再執行一次unchanged `pnpm benchmark`，保存JSON再執行其他會清理輸出的工具。CI順序在完整browser後benchmark，會保存正式附件。
-- Root canonical完整productbytes未改；獨立checkout `/home/ckc/test/codex/newclear-dim-gate-w3-review` 固定6c19fe7，reviewer已保存 PARTIAL report並停止寫入、釋放report ownership。報告 [T-040-attempt-1](../../../.team/reports/T-040-attempt-1.md) SHA e65a0fb0741db809351dc64cb836b25101fc2ce9861c593e36ab8b781c5c0d57，獨立native371/371通過，精確剩餘審查清單在report末節。T037/T038 productowners已釋放。T038另在獨立browsercontext完成configuration/Ops頁面與run/decisiondialog的18項axe／6項keyboard補充驗收；189筆response零health error，不修改產品。
+- Root canonical完整productbytes未改；獨立checkout `<operator-home>/test/codex/newclear-dim-gate-w3-review` 固定6c19fe7，reviewer已保存 PARTIAL report並停止寫入、釋放report ownership。報告 [T-040-attempt-1](../../../.team/reports/T-040-attempt-1.md) SHA e65a0fb0741db809351dc64cb836b25101fc2ce9861c593e36ab8b781c5c0d57，獨立native371/371通過，精確剩餘審查清單在report末節。T037/T038 productowners已釋放。T038另在獨立browsercontext完成configuration/Ops頁面與run/decisiondialog的18項axe／6項keyboard補充驗收；189筆response零health error，不修改產品。
 - 38個原始worktree全部存在，目前59個；原W1/W2/design worktree均clean且保留原head。查核 `/tmp/dim-gate-w3-evidence/worktree-preservation.json`。
 
 本文件隨 W3 closeout 更新。**先重新核對 GitHub 與 PLAN，不以本文件的歷史 checkpoint 當成已驗收。** 使用者本輪最新要求是保存進度、依 gate 合併可交付 PR，然後新視窗繼續；目前視窗在 W3 收尾，W4／W5 留待下一輪。
@@ -71,7 +73,7 @@ W4 run `DG-W4-20260923-01` 從當時實際遠端 main `d80028c64c2d359d6a44bbe69
 
 - Repository: `git@github.com:fallrising/newclear.git`；Git 傳輸只用 SSH。
 - Component: `platform/dim-gate/`。
-- W3 canonical worktree: `/home/ckc/test/codex/newclear-dim-gate-w3`。
+- W3 canonical worktree: `<operator-home>/test/codex/newclear-dim-gate-w3`。
 - Branch: `agent/dim-gate/mainline/w3-service-delivery`；沿用 [PR37](https://github.com/fallrising/newclear/pull/37)，禁止另建重複 PR。
 - Current run: `DG-W3-20260923-01`；owner／terminal state 以 root [.team/PLAN.md](../../../.team/PLAN.md) 最後一個 dim-gate resume block 和 PR closeout 為準。若 owner 尚未釋放，先對帳，不與其他主控競寫。
 
@@ -90,7 +92,7 @@ W3 初始 source `dfb146c`、normal latestmain merge `a473626`、test/progress c
 ## 直接執行的下一步
 
 ```sh
-cd /home/ckc/test/codex/newclear-dim-gate-w3
+cd <operator-home>/test/codex/newclear-dim-gate-w3
 git remote -v
 git status --short
 git worktree list --porcelain
@@ -104,7 +106,7 @@ gh pr view 37 --json state,isDraft,headRefOid,mergeCommit,statusCheckRollup,body
 執行原生命令必須在 component cwd，使用 Node24.18.0/pnpm11.18.0：
 
 ```sh
-export PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH
+export PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH
 cd platform/dim-gate
 pnpm lint
 pnpm typecheck

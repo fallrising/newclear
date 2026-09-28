@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "host": "kvm8745",
+  "host": "<kvm-host>",
   "goal": "FILE note.txt\nTEXT hello",
   "card_kvm_passed": true,
   "state": "succeeded",

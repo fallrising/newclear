@@ -1,26 +1,26 @@
 {
   "project": "agent-platform",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；第 2 輪依 DESIGN.md「啟動方式」驗證後改為 true。啟動前需先 build web/dist，並在環境變數設好指向專用資料庫 agent_platform_test 的 TEST_DATABASE_URL（密碼即時產生，不提交）。登入後的畫面由 fe-review 的互動腳本擷取（DESIGN.md M1）。",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
-    "dark"
+    "light"
   ],
   "apps": [
     {
       "name": "web",
-      "kind": "spa",
+      "kind": "server",
       "cwd": "platform/agent-platform/web",
-      "install": "npm ci",
-      "start": "npm run dev",
+      "install": "npm ci && npm run build（Python 依 ../docs/quickstart.md 建立 ../.venv）",
+      "start": "../.venv/bin/python ../scripts/browser-fixture.py serve",
       "env": {},
-      "baseUrl": "http://127.0.0.1:5173",
-      "ready": "/",
+      "baseUrl": "http://127.0.0.1:18600",
+      "ready": "/api/v1/session",
       "pages": [
         {
-          "id": "home",
-          "path": "/"
+          "id": "login",
+          "path": "/",
+          "waitFor": "form"
         }
       ]
     }

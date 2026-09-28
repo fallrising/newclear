@@ -4,7 +4,7 @@
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第 1 輪（文檔先行）**，[`DESIGN.md`](DESIGN.md) 已草擬待確認。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
 
 ## 專案概況
 
@@ -15,25 +15,30 @@
 
 ## 啟動線索（未驗證）
 
-- 在 `web/` 執行 `npm ci` 與 `npm run dev -- --host 127.0.0.1 --port 5173`。
+- 專案釘選 Node 24.20.0、pnpm 11.25.0（`docs/reproducibility.md`），只有 `pnpm-lock.yaml`，不能用 `npm ci`。
+- 在 `web/` 執行 `corepack pnpm install --frozen-lockfile`，再 `corepack pnpm exec vite --host 127.0.0.1 --port 5173 --strictPort`。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
-- 看板總覽 → 開啟 work item 詳情 → 嘗試狀態轉移（含被 guard 拒絕的情況）→ attention／recovery 狀態
+- 四個 surface（Board、Work item、Attention、Impact preview，由導覽按鈕切換）
+- Board 選取 work item → 一次被接受的轉移 → 一次被 QA guard 拒絕的轉移 → Attention 的 recovery／stale 狀態
+- 用畫面上的主題按鈕切到深色後重拍（主題不跟隨系統設定，`colorSchemes` 無效）
 
 ## 專案特有檢查重點
 
 在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
 
-- 因為沒有 URL 路由，需要在 capture 後用 Playwright 互動腳本補拍詳情面板、轉移對話框等狀態，並把腳本放在 `fe-review/`。
+- 因為沒有 URL 路由，需要在 capture 後用 Playwright 互動腳本補拍各 surface、轉移結果與深色主題（畫面上沒有對話框），腳本放在 `fe-review/`。
+- 轉移被拒絕時，畫面上是否有可見回饋（目前只有 `sr-only` 的 live region，見 REVIEW.md C3）。
 - 卡片密度、欄位捲動、拖曳或鍵盤轉移的可達性（參考既有 `board-transition-accessibility.spec.tsx`）。
 - 主題與縮放（既有 `responsive-theme-zoom.spec.tsx`）：200% zoom 下不破版。
 
 ## 可重用的既有資產
 
-- `web/src/*.spec.tsx`：既有互動與 a11y 測試，對照其涵蓋範圍。
+- `web/src/*.spec.tsx`：既有互動與 a11y 測試（Vitest + jsdom），對照其涵蓋範圍。
+- `web/package.json` 已有 `@playwright/test` 與 `@axe-core/playwright` devDependencies，擷取腳本直接使用，不另裝。
 
 ## 待補的頁面
 

@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-032 attempt1, uninvolved read-only built-in reviewer; precise inherited model slug not exposed, no Claude/multi-model claim. Base7a7b41b2e74c2c635642dcb6c980363f6958968b; candidate7d60786fe51d11f2a7ebc96cbfe597294df82f56; detached review checkout `/home/ckc/test/codex/newclear-dim-gate-w1-review`. WS-SDD revision1 / W1 contract revision2. Verdict: three medium findings require REWORK; no blocker/high found. Reviewer did not modify files, commit/push/delegate or accept product.
+T-032 attempt1, uninvolved read-only built-in reviewer; precise inherited model slug not exposed, no Claude/multi-model claim. Base7a7b41b2e74c2c635642dcb6c980363f6958968b; candidate7d60786fe51d11f2a7ebc96cbfe597294df82f56; detached review checkout `<operator-home>/test/codex/newclear-dim-gate-w1-review`. WS-SDD revision1 / W1 contract revision2. Verdict: three medium findings require REWORK; no blocker/high found. Reviewer did not modify files, commit/push/delegate or accept product.
 
 F-01 MEDIUM, AppShell.tsx:73–76: target Admin unconditionally drops project/environment though its dashboard supports them. Independent Chromium/Admin UI grant reproduces RD project-store/env-checkout-dev → Admin unfiltered. Preserve compatible scope, reload and return.
 

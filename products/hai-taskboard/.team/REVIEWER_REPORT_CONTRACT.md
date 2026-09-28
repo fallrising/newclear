@@ -1,5 +1,7 @@
 # Reviewer report compatibility contract
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 Status: Candidate v1; requires independent review and orchestrator acceptance.
 
 Captured: 2026-09-05
@@ -20,7 +22,7 @@ the current validator can check without a separate reviewer mode.
 The compatibility baseline is:
 
 - Package/cache identity: `codex-team-superpowers/0.1.0+codex.20260904040057`.
-- Source: `/home/ckc/.codex/plugins/cache/fallrising-private/codex-team-superpowers/0.1.0+codex.20260904040057/scripts/teamctl.py`.
+- Source: `<operator-home>/.codex/plugins/cache/fallrising-private/codex-team-superpowers/0.1.0+codex.20260904040057/scripts/teamctl.py`.
 - Source SHA-256: `a8c49a0e6181614c173b36fbbf0e35931f5edbbce4604b6d7e69d70b10017185`.
 - Runtime used for this inventory: `Python 3.11.2`.
 - Help invocation: `python3 <source> --help`; it exposes `validate-task`, `validate-report`, `task`,

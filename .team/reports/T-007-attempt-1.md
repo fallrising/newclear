@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Scope and provenance
 
-T-007 attempt 1 ran in the isolated worktree `/home/ckc/test/codex/newclear-t007` on branch `agent/dim-gate/task/t007-shared`. Dispatch base and current uncommitted HEAD are both `93568d0fa2026213e5a2c5f8457b6c6bedb478e8`; the fixed M1 contract revision is `9ea032f66daabf68350482bfedac81f63e5221ec`. The built-in collaboration worker's exact inherited model ID was not exposed and is not guessed.
+T-007 attempt 1 ran in the isolated worktree `<operator-home>/test/codex/newclear-t007` on branch `agent/dim-gate/task/t007-shared`. Dispatch base and current uncommitted HEAD are both `93568d0fa2026213e5a2c5f8457b6c6bedb478e8`; the fixed M1 contract revision is `9ea032f66daabf68350482bfedac81f63e5221ec`. The built-in collaboration worker's exact inherited model ID was not exposed and is not guessed.
 
 All task-listed inputs were read completely before edits: `platform/dim-gate/AGENTS.md`, M1/M0 contracts, SDD, CMDB/permissions/API/delivery specifications, PLAN and the T-006 report. No delegation, commit, push, PLAN edit, generated OpenAPI edit, composition-root edit or acceptance decision occurred.
 
@@ -39,7 +39,7 @@ All task-listed inputs were read completely before edits: `platform/dim-gate/AGE
 
 Commands used workspace-local Node 24.18.0 and pnpm 11.18.0 via:
 
-`PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH COREPACK_HOME=/home/ckc/test/codex/.toolchains/corepack`
+`PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH COREPACK_HOME=<operator-home>/test/codex/.toolchains/corepack`
 
 - `corepack pnpm lint` — passed.
 - `corepack pnpm typecheck` — passed.

@@ -1,6 +1,6 @@
 # 新視窗接續開發 prompt
 
-此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `kvm8745` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。
+此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `<kvm-host>` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。
 
 現行做法：用本機 mock 把任務流程做完。以後的真接口暫定 OpenCode Go Chat Completions，`https://opencode.ai/zen/go/v1/chat/completions`。這是 Go 訂閱 key，不是 Zen 按量 key。key 只放 0600 檔，現在沒有這份檔。Go 的 `/responses` 與 `/messages` 不是目前的 transport。24 小時停留留到 release 前。
 
@@ -42,10 +42,10 @@ https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/HA
 6. 定期繁體中文回報；里程碑完成更新 HANDOFF.md、NEXT-PROMPT.md，提供 PR、測試、剩餘工作、是否需我操作與新視窗 prompt。
 
 若仍同一主機：
-- 工作區 /home/ckc/test/codex
-- 本次 worktree /home/ckc/test/codex/newclear-agent-provider-mock-c2b2
-- 私有配置／TLS key／mock credential／SDK payload／logs /tmp/apm3-at11c2b2-20260924，勿公開原文；C2b1 `/tmp/apm3-provider-mock-20260924` 與更早目錄保留。
-- 沿用 /tmp/apm3-egress-20260923/journal 與 fences、terminal、/tmp/apm2-20260922 Cocoon cache／runtime；全部舊交接目錄保留。
+- 工作區 <operator-home>/test/codex
+- 本次 worktree <operator-home>/test/codex/newclear-agent-provider-mock-c2b2
+- 私有配置／TLS key／mock credential／SDK payload／logs <tmp>/apm3-at11c2b2-20260924，勿公開原文；C2b1 `<tmp>/apm3-provider-mock-20260924` 與更早目錄保留。
+- 沿用 <tmp>/apm3-egress-20260923/journal 與 fences、terminal、<tmp>/apm2-20260922 Cocoon cache／runtime；全部舊交接目錄保留。
 - 本次收尾 VM／claims 為零；原 197 筆 journal stop proofs 全部有效，另有 1 筆 C2b2 allocation intent 保持 unresolved；connector／sandboxd 已停、測試 Postgres 已移除。不能把此狀態當成 drain pass，開始前仍要先解決 quarantine。
 - Node 保持 explicit deny-all。開始前重新核對服務／VM／claims 與停止證據；同 journal 不可同時開 HTTP connector 與 direct driver。不假設 localhost:15000 registry 仍可拉取。
 

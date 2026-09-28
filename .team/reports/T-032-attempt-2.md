@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-T-032 attempt2; uninvolved built-in read-only reviewer, exact runtime model slug not independently exposed. Base7a7b41b2e74c2c635642dcb6c980363f6958968b; candidate03a7ee59c63dbe81d026116bac46058431744451; delta from7d60786; contractrev3/WS-SDDrev1; checkout `/home/ckc/test/codex/newclear-dim-gate-w1-review-2`. F-01–03 independently verified resolved. Two new medium findings require REWORK; no blocker/high found. No product acceptance.
+T-032 attempt2; uninvolved built-in read-only reviewer, exact runtime model slug not independently exposed. Base7a7b41b2e74c2c635642dcb6c980363f6958968b; candidate03a7ee59c63dbe81d026116bac46058431744451; delta from7d60786; contractrev3/WS-SDDrev1; checkout `<operator-home>/test/codex/newclear-dim-gate-w1-review-2`. F-01–03 independently verified resolved. Two new medium findings require REWORK; no blocker/high found. No product acceptance.
 
 F-04 MEDIUM, styles.css:233 / AppShell.tsx:102: at768px all5 Admin group headings display:none, seven Admin links are the same shield with empty visible text and no title, and menu expansion button display:none. Accessible names alone do not make grouped navigation recognizable to sighted users. Add readable groups/labels or operable expansion and direct text/keyboard checks beyond axe/overflow.
 

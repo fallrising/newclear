@@ -156,7 +156,7 @@ catalog 已推上 GitHub、三個 upstream 已消失的 fork 已排除並改為�
 ### 已處理事項
 
 1. **憑證** — `config_center` 的 `n8n/.env` 僅供私人測試用途,不需輪換。該檔案未遷入 `kernel`。
-2. **公開內容中的本機路徑** — 已清除全部 10 處 `/home/ckc/...`：
+2. **公開內容中的本機路徑** — 已清除全部 10 處 `<operator-home>/...`：
    - `apps/flowshot/docs/tasks/N00/evidence/`（2 處）— 錯誤訊息中的路徑改為 `<repo-root>`
    - `specs/fleet/docs/SDD.md`（7 處）— 改以專案名稱與 monorepo 路徑指稱
    - `systems/clarkq/demo/cluster/run-stress.sh`（1 處）— 移除硬編碼的 Go 工具鏈 `PATH`；
@@ -165,7 +165,7 @@ catalog 已推上 GitHub、三個 upstream 已消失的 fork 已排除並改為�
 ### 先前未版控的本機專案（已納入）
 
 `vps-hygiene`（18 檔）與 `mac-in-docker`（8 檔）原本只存在於本機
-`/home/ckc/test/grok/` 之下，不是 git repository，也不在 GitHub 上，沒有任何備份。
+`<operator-home>/test/grok/` 之下，不是 git repository，也不在 GitHub 上，沒有任何備份。
 兩者都在 `specs/fleet/docs/SDD.md` 中被反覆引用，是 fleet agent 設計時的實際契約來源
 （port 範圍、heartbeat facts 欄位、clean-docker 對 `fleet-*` volume 的風險）。
 

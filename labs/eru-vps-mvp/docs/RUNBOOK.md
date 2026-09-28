@@ -4,10 +4,10 @@
 
 ## 現有 Debian 叢集：從 controller B 操作
 
-SSH 入口 `~/.ssh/config` 匯入 `~/.ssh/hzd-vps/config`。使用 `ckc-disposable-01`～`04`，不是替換原 g1ops 帳號；B 管理與收集結果，01 承載 etcd／core，02–04 承載 worker。安裝腳本不修改既有 sshd／sudoers／Docker／containerd 配置。
+SSH 入口 `~/.ssh/config` 匯入 `~/.ssh/hzd-vps/config`。使用 `<disposable-01>`～`04`，不是替換原 g1ops 帳號；B 管理與收集結果，01 承載 etcd／core，02–04 承載 worker。安裝腳本不修改既有 sshd／sudoers／Docker／containerd 配置。
 
 ```bash
-cd /home/ckc/test/newclear/labs/eru-vps-mvp
+cd <operator-home>/test/newclear/labs/eru-vps-mvp
 python3 scripts/deploy-lab.py
 python3 scripts/smoke-lab.py
 # 僅驗證其中一台：

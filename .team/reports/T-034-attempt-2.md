@@ -4,7 +4,7 @@ STATUS: DONE
 
 T-034 attempt2, run DG-W2-20260923-01, dim-gate/mainline. Lead fixed this bounded verification extension in W2 contractrevision2/task/PLAN DG-D058 before implementation. Worker exclusively owns new `platform/dim-gate/src/demo/w2-handlers.test.ts` and this report. Production source ownership remains released from attempt1; all dependency files were copied read-only with lead authorization and must be excluded from this handback.
 
-Worktree `/home/ckc/test/codex/newclear-dim-gate-w2-migration`; branch `agent/dim-gate/task/t034-resource-migration`; tested_commit/base `7086a443416fbc9876612e66bac889e83c8200ad` plus exact local test diff and published lead/T033 dependency bytes. There is no worker-created implementation commit. Final test SHA256 `9e9250fd2db31f17aebacd800e733a526beee588509baa2a3485ecb6498cb217`.
+Worktree `<operator-home>/test/codex/newclear-dim-gate-w2-migration`; branch `agent/dim-gate/task/t034-resource-migration`; tested_commit/base `7086a443416fbc9876612e66bac889e83c8200ad` plus exact local test diff and published lead/T033 dependency bytes. There is no worker-created implementation commit. Final test SHA256 `9e9250fd2db31f17aebacd800e733a526beee588509baa2a3485ecb6498cb217`.
 
 Added13 real MSW HTTP/typed-client tests. The first drives every18 W2 operation among91 registered operations. An HTTP wrapper validates actual success status, strict generated-contract response envelope and Cache-Control no-store before the typed client consumes each response; failures validate the strict error envelope. All business mutations use HTTP/canonical commands. No test writes the store to manufacture a successful workflow.
 

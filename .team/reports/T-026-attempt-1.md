@@ -17,7 +17,7 @@ All successful browser business setup uses visible UI. Only storage-write failur
 ## Verification
 
 Runtime: Node 24.18.0, pnpm 11.18.0; Playwright 1.63.0 / Chromium 153.0.8010.12, cached build 1243. Local browser environment:
-`PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`,
+`PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin`,
 `LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu`,
 `FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf`.
 Normal sandbox execution failed with bwrap loopback `Failed RTM_NEWADDR: Operation not permitted`; subsequent scoped reads/writes/tests used separately approved narrow escalation. No rejected escalation was bypassed.

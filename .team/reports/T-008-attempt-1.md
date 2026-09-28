@@ -6,7 +6,7 @@ STATUS: DONE
 
 - Task: `T-008`, attempt 1, worker role; built-in collaboration worker. The runtime did not expose an exact model ID, so none is guessed.
 - Dispatch HEAD: `73771958d93d405a877886a4805d667a67b67d8c`; accepted product base: `888d81203d01aab8781c42ac47138e053bf2c487`.
-- Worktree/branch: `/home/ckc/test/codex/newclear-t008`, `agent/dim-gate/task/t008-rd`.
+- Worktree/branch: `<operator-home>/test/codex/newclear-t008`, `agent/dim-gate/task/t008-rd`.
 - Implemented a typed application feature client for scoped list, application detail and environment detail reads using the fixed generated-contract Zod schemas.
 - Implemented real RD application list, application detail and environment detail route components with loading, scoped empty, retryable error and non-disclosing 404 states.
 - Environment placements retain canonical `ciId`, aggregate duplicate placement roles into one visible CI row, and provide the required `/ops/cmdb/:ciId` deep link. Successful zero placements are explicitly distinguished from unknown data.

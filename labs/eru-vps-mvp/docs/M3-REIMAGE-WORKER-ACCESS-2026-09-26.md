@@ -8,21 +8,21 @@ worker-only install 完成後，目標的新 Tailscale IPv4 與帶外驗證的 h
 
 ## 安全條件與執行順序
 
-入口接在成功的 `installed-awaiting-registration` worker install journal 之後。read-only planner 經 `ckc-disposable-01` 核對 control health、core runtime／safe AddNode artifact、原 cluster membership、其他 hosts、replacement machine／boot identity、worker owner manifest 與 agent stopped state。它讀 core known_hosts、firewall source 與 `nft list table inet eru_mvp`，要求檔案為 root-owned mode 0600，且目前檔案／live allowlist 只能是 source inventory 的舊狀態或此 target 已完成更新的精確狀態。
+入口接在成功的 `installed-awaiting-registration` worker install journal 之後。read-only planner 經 `<disposable-01>` 核對 control health、core runtime／safe AddNode artifact、原 cluster membership、其他 hosts、replacement machine／boot identity、worker owner manifest 與 agent stopped state。它讀 core known_hosts、firewall source 與 `nft list table inet eru_mvp`，要求檔案為 root-owned mode 0600，且目前檔案／live allowlist 只能是 source inventory 的舊狀態或此 target 已完成更新的精確狀態。
 
 pinned core v0.1.5 的成功 `RemoveNode` 會呼叫 `RemoveEngineFromCache(endpoint)`，後續 `GetEngine` 會重新建立 engine；其 SSH config 在新 engine 建立時讀取 `/etc/eru/known_hosts`。所以替換 worker 即使重用原 Tailscale IP，也不需要為了清除舊 host-key cache 重啟 core，前提是 source plan 的 node removal 已成功：[RemoveNode cache eviction](https://github.com/projecteru2/core/blob/v0.1.5/cluster/calcium/node.go#L107-L126)、[engine cache creation](https://github.com/projecteru2/core/blob/v0.1.5/engine/factory/factory.go#L185-L207)、[known_hosts loading](https://github.com/projecteru2/core/blob/v0.1.5/engine/sshrunner/ssh.go#L303-L317)。
 
 新 host key 由 owner receipt 的 SHA256 fingerprints 與本機專用 trust file 再次核對。計畫和 journal 只記錄 fingerprints、檔案 SHA256、目標別名與狀態摘要，不保存或輸出 host key blob。known_hosts 只重寫 target 的舊／新 IP entries，其他行逐行保留；firewall source 必須符合部署器產生的精確模板，僅替換 target IP。任何未知 host、key、規則、模式、檔案 hash、live nft set 或 inventory 衝突都會 fail closed。
 
 ```bash
-# B -> ckc-disposable-01：唯讀讀取 core access、health、cluster 與目標 worker
+# B -> <disposable-01>：唯讀讀取 core access、health、cluster 與目標 worker
 python3 scripts/labctl.py plan-reimage-worker-access --plan BOOTSTRAP_PLAN_ID \
   --sha256 BOOTSTRAP_PLAN_SHA256
-# B -> ckc-disposable-01：只更新目標 known_hosts 與 firewall allowlist，不重啟 core
+# B -> <disposable-01>：只更新目標 known_hosts 與 firewall allowlist，不重啟 core
 python3 scripts/labctl.py prepare-reimage-worker-access --plan ACCESS_PLAN_ID \
   --sha256 ACCESS_PLAN_SHA256
 python3 scripts/labctl.py status --run ACCESS_PLAN_ID-access
-# B -> ckc-disposable-01：失敗或 SSH 回覆不確定時唯讀核對，不重播原 plan
+# B -> <disposable-01>：失敗或 SSH 回覆不確定時唯讀核對，不重播原 plan
 python3 scripts/labctl.py reconcile --run ACCESS_PLAN_ID-access
 ```
 

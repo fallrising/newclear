@@ -4,7 +4,7 @@ STATUS: DONE
 
 T-025 attempt 1 completed the assigned local AC-27 implementation and measurements. This is a worker result, not milestone acceptance. Source-only `codex-task-worker` instructions were read from fixed kernel `237aa277`; no skill was installed. Lead approved task revision 2 for narrow `src/api/contracts.ts` and `src/features/foundation/routes.tsx` edits, then revision 3 for public lazy exports in `src/features/cmdb/index.ts`.
 
-Tested worktree: `/home/ckc/test/codex/newclear-m5-performance`. Actual Git HEAD at final measurement: `01ee259e6c1c9791469a0c00ad8979bf0cfe69d1` plus the uncommitted scoped changes below; tracked source/Vite diff SHA-256 `b1d3ad368cc21c1ba7c73e82b5caeda168ff700b1545c5f4a28f50f79266cef9`. The task's original base field was `36415c54b4a65726e5a3507231e1c5ee81f9c948`; the evidence records the observed HEAD rather than assuming that field stayed current. No worker commit, push, merge, dependency, lockfile, PLAN, deployment, cloud or other-worktree mutation occurred.
+Tested worktree: `<operator-home>/test/codex/newclear-m5-performance`. Actual Git HEAD at final measurement: `01ee259e6c1c9791469a0c00ad8979bf0cfe69d1` plus the uncommitted scoped changes below; tracked source/Vite diff SHA-256 `b1d3ad368cc21c1ba7c73e82b5caeda168ff700b1545c5f4a28f50f79266cef9`. The task's original base field was `36415c54b4a65726e5a3507231e1c5ee81f9c948`; the evidence records the observed HEAD rather than assuming that field stayed current. No worker commit, push, merge, dependency, lockfile, PLAN, deployment, cloud or other-worktree mutation occurred.
 
 Changes:
 
@@ -25,7 +25,7 @@ The 5,000-CI profile consists of baseline 60 CIs plus 4,940 deterministic provid
 All commands ran from `platform/dim-gate` with process-local pinned runtime:
 
 ```sh
-export PATH=/home/ckc/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH
+export PATH=<operator-home>/test/codex/.toolchains/node-v24.18.0-linux-x64/bin:$PATH
 export LD_LIBRARY_PATH=/tmp/dim-gate-playwright-libs/usr/lib/x86_64-linux-gnu
 export FONTCONFIG_FILE=/tmp/dim-gate-m3-fonts-kaBaS8/fonts.conf
 ```

@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-Independent read-only review by in-environment agent m4_independent_review, not involved in implementation. Exact fixed checkout `/home/ckc/test/codex/newclear-m4-review-298a563`, candidate `298a563da0d163ecafa8cc90259a2e06a97ca84c`, compared with accepted M3 parent `7d20bbc48a25e82c82c048304da8b74a897ec14e`.
+Independent read-only review by in-environment agent m4_independent_review, not involved in implementation. Exact fixed checkout `<operator-home>/test/codex/newclear-m4-review-298a563`, candidate `298a563da0d163ecafa8cc90259a2e06a97ca84c`, compared with accepted M3 parent `7d20bbc48a25e82c82c048304da8b74a897ec14e`.
 
 No reproducible blocker, high, or medium implementation findings were identified in this bounded static pass. This is not milestone acceptance. Reviewer inspected AC-17–19/25 and M3 preservation: scope for metrics/raw traces/logs/evidence/notifications/search/dashboard/audit/Guide, current authorization before replay, sample streaks and incident dedupe/reopen, recovery timing/cancellation/restore, atomic storage, Guide chain selection, UI permissions/conflicts/pending/refresh.
 

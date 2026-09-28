@@ -1,12 +1,14 @@
 # HAI Taskboard Handoff
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 Updated: 2026-09-16
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
 - Branch: `agent/hai-taskboard-p0a`
-- Worktree: `/home/ckc/test/codex/worktrees/hai-taskboard-p0a`
+- Worktree: `<operator-home>/test/codex/worktrees/hai-taskboard-p0a`
 - Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE

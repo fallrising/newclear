@@ -18,7 +18,7 @@ F-02 (medium, evidence): the extra-browser Guide helper proceeded from persona s
 
 ## Documentation
 
-Review worktree `/home/ckc/test/codex/newclear-m5-review-5ec58f7` is immutable and retained. Source-only pinned kernel evidence-gate applied. Lead manifest and first candidate evidence are in [T-027 attempt1](T-027-attempt-1.md). Original47 Chromium tests and lockfile remain byte-identical to accepted M4.
+Review worktree `<operator-home>/test/codex/newclear-m5-review-5ec58f7` is immutable and retained. Source-only pinned kernel evidence-gate applied. Lead manifest and first candidate evidence are in [T-027 attempt1](T-027-attempt-1.md). Original47 Chromium tests and lockfile remain byte-identical to accepted M4.
 
 ## Risks and Follow-ups
 

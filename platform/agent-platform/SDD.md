@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `kvm8745` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字

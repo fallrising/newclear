@@ -4,7 +4,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-Fixed candidate `2abbec9ca4ca812b9be0278e6a5ca14c303c87b9`, base `e760d8e988c0e2a837b226c600805a659a362c10`, isolated read-only checkout `/home/ckc/test/codex/newclear-m3-review`. A fresh in-environment reviewer who did not implement M3 returned **REWORK**, four medium findings, no independently substantiated blocker/high finding. Exact inherited runtime model identifier was unavailable; this was independent multi-agent, not claimed multi-model review.
+Fixed candidate `2abbec9ca4ca812b9be0278e6a5ca14c303c87b9`, base `e760d8e988c0e2a837b226c600805a659a362c10`, isolated read-only checkout `<operator-home>/test/codex/newclear-m3-review`. A fresh in-environment reviewer who did not implement M3 returned **REWORK**, four medium findings, no independently substantiated blocker/high finding. Exact inherited runtime model identifier was unavailable; this was independent multi-agent, not claimed multi-model review.
 
 Claude CLI preflight was successful, but source transmission to that external service was denied by the environment. The source-review command did not execute and that rejection was not bypassed. No private source/credentials were copied into this report.
 

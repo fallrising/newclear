@@ -10,9 +10,9 @@
 
 執行前會重核 plan hash、固定 inventory／專案輸入／cluster generation／intent SHA，並重讀四台 host 與 Eru membership。etcd、Eru 一致性、target 身分、target ERU workloads／containers／tasks／配額、Docker containers、SSH/Tailscale/Docker/containerd 服務或現有 fence 只要不符合即拒絕。目標必須先由 owner 遷移完 ERU workloads；任何 Docker workload 都要求獨立 ownership／遷移審閱。
 
-通過 preflight 後，journal 會先落盤，再由 `ckc-disposable-01` 發出唯一一次 `node down <target>`，並以 `node get` 確認 Bypass。之後只在綁定的 worker alias 停止 `eru-agent.service`；SSH、Tailscale、Docker、containerd 必須仍為 active。停止後再從 aliases 唯讀核對 host 身分、ERU/Docker runtime 為空及 cluster workload/node 狀態，摘除前再核對一次，最後由 `ckc-disposable-01` 移除精確 node registration 並確認該 node 已不存在、其他 node／pod／workload 未變。journal 停在 `status=prepared, stage=awaiting-owner-console-reimage`，不會自動 `node up`。
+通過 preflight 後，journal 會先落盤，再由 `<disposable-01>` 發出唯一一次 `node down <target>`，並以 `node get` 確認 Bypass。之後只在綁定的 worker alias 停止 `eru-agent.service`；SSH、Tailscale、Docker、containerd 必須仍為 active。停止後再從 aliases 唯讀核對 host 身分、ERU/Docker runtime 為空及 cluster workload/node 狀態，摘除前再核對一次，最後由 `<disposable-01>` 移除精確 node registration 並確認該 node 已不存在、其他 node／pod／workload 未變。journal 停在 `status=prepared, stage=awaiting-owner-console-reimage`，不會自動 `node up`。
 
-所有 B→VPS SSH 都透過 `ckc-disposable-01`～`04` aliases；遠端修改只對 core alias 與 plan 綁定的 worker alias 發送。發生 timeout 或回覆遺失時，不重試原命令、不摘除更多狀態、不自動解除 fence。`reconcile --run` 對此 journal 只讀 core membership／health，不連 worker，也不重播命令；依 journal 與觀測明確規劃恢復。
+所有 B→VPS SSH 都透過 `<disposable-01>`～`04` aliases；遠端修改只對 core alias 與 plan 綁定的 worker alias 發送。發生 timeout 或回覆遺失時，不重試原命令、不摘除更多狀態、不自動解除 fence。`reconcile --run` 對此 journal 只讀 core membership／health，不連 worker，也不重播命令；依 journal 與觀測明確規劃恢復。
 
 `record-reimage-receipt` 現在還要求同 plan hash 的 preparation journal 成功完成、已觀測 fence／agent stop／runtime empty／registration absent，並檢查 journal 命令只走 core 與 bound worker aliases。後續 receipt、帶外 host key 與 `verify-reimage-host` 仍只是重灌後前置，不能單獨重新納管。
 

@@ -8,8 +8,8 @@
 
 | 目標 | 私有計畫 ID | 唯讀結果 |
 | --- | --- | --- |
-| worker-2／`ckc-disposable-02` | `20260923T175431Z-4dbc5a20` | scope 身分與 ownership 通過；仍有本次 nginx，計畫 `executable=false` |
-| worker-3／`ckc-disposable-03` | `20260923T175508Z-9ab05efd` | scope 身分與 ownership 通過；仍有本次 nginx，計畫 `executable=false` |
+| worker-2／`<disposable-02>` | `20260923T175431Z-4dbc5a20` | scope 身分與 ownership 通過；仍有本次 nginx，計畫 `executable=false` |
+| worker-3／`<disposable-03>` | `20260923T175508Z-9ab05efd` | scope 身分與 ownership 通過；仍有本次 nginx，計畫 `executable=false` |
 
 兩份計畫都列出目標非空、缺少新的 health／canary evidence，及 peer 執行器／恢復／守護能力尚未啟用。它們是已保存的**唯讀歷史計畫**，日後不可補欄位或拿舊 hash 執行。原始內容在 `private/operations/plans/`，命令輸出在 `private/diagnostics/`，不可提交。
 

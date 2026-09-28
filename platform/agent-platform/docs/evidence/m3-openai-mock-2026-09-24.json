@@ -56,5 +56,5 @@
     "scripts/m3-guest-model-kvm.py": "d5a32365c6b1bda61af98b0ddb6aacbb3717b3654edacdf4238b76b0dc1213b3",
     "tests_platform/test_guest_model.py": "e66164f4e44c08338d0421ff779afccf9d77d78ee386ea7bd1c000f29c1cdde9"
   },
-  "private_material": "Raw SDK requests, loopback credentials, connector journals and logs remain outside the repository under /tmp/apm3-provider-mock-20260924 and the prior private test directories."
+  "private_material": "Raw SDK requests, loopback credentials, connector journals and logs remain outside the repository under <tmp>/apm3-provider-mock-20260924 and the prior private test directories."
 }

@@ -6,7 +6,7 @@
 
 Plan 內的 `worker_registration` gate 綁定 `patches/core-v0.1.5-safe-node-add.validation.json`。執行器從 core 的 `eru-core.service` MainPID 讀 `/proc/<pid>/exe` SHA256，並要求 service active、PID／InvocationID 有效且 SHA 與 gate 完全相同。AddNode 前後會比對相同 runtime invocation，防止註冊期間 core process／binary 漂移。
 
-執行器先要求 worker install journal 是 `installed-awaiting-registration`，worker machine／boot identity、owner scope、健康、其他主機與 cluster snapshot 未改變，agent inactive／disabled，目標 node 尚不存在。它先要求最新 access stage journal 成功，並重讀 core 的 known_hosts、firewall source 與 live nft table，確認新 worker host key 及 Tailscale IP 已生效。然後才以 plan 綁定的舊 node name、pod、endpoint、labels 和 resource capacity，對 `ckc-disposable-01` 執行單次 AddNode。AddNode 回來後立即核對新 node identity／capacity／labels、zero usage 及 `bypass=true`；接著只對 plan 指定的 worker alias 執行 `systemctl enable --now eru-agent.service`，等待 core 回報 `available=true`，並持續要求 `bypass=true`。最後重驗 host identity、services、其他 workers 與 core health，成功狀態為 `registered-awaiting-smoke`。
+執行器先要求 worker install journal 是 `installed-awaiting-registration`，worker machine／boot identity、owner scope、健康、其他主機與 cluster snapshot 未改變，agent inactive／disabled，目標 node 尚不存在。它先要求最新 access stage journal 成功，並重讀 core 的 known_hosts、firewall source 與 live nft table，確認新 worker host key 及 Tailscale IP 已生效。然後才以 plan 綁定的舊 node name、pod、endpoint、labels 和 resource capacity，對 `<disposable-01>` 執行單次 AddNode。AddNode 回來後立即核對新 node identity／capacity／labels、zero usage 及 `bypass=true`；接著只對 plan 指定的 worker alias 執行 `systemctl enable --now eru-agent.service`，等待 core 回報 `available=true`，並持續要求 `bypass=true`。最後重驗 host identity、services、其他 workers 與 core health，成功狀態為 `registered-awaiting-smoke`。
 
 此 registration stage 不執行 `node up`、HTTP smoke、core known_hosts／firewall 寫入、private inventory 更新、cluster generation commit 或 cleanup；known_hosts／firewall 由前一個獨立 access stage 先行更新。後續 smoke 與 [safe resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md) 各有獨立 hash-bound stage；resume helper 只透過 core SSH alias 由其 executor 呼叫。
 
@@ -15,7 +15,7 @@ Plan 內的 `worker_registration` gate 綁定 `patches/core-v0.1.5-safe-node-add
 在安全 core 已部署且執行中 SHA 已核對後，操作介面為：
 
 ```bash
-# B -> ckc-disposable-01 core 與 plan 綁定的 ckc-disposable worker alias
+# B -> <disposable-01> core 與 plan 綁定的 ckc-disposable worker alias
 python3 scripts/labctl.py register-reimage-worker --plan BOOTSTRAP_PLAN_ID --sha256 BOOTSTRAP_PLAN_SHA256
 python3 scripts/labctl.py status --run BOOTSTRAP_PLAN_ID-register
 # B -> 同 aliases；只讀檢查結果，絕不重播 AddNode 或 systemctl

@@ -12,7 +12,7 @@
 # [新 B 本機] 只查本機；缺少 private/ 時只顯示 blocker，不建立替代 inventory。
 cd labs/eru-vps-mvp
 python3 scripts/controller_preflight.py
-# [新 B → ckc-disposable-01～04] 前一步可審閱後，重新收集當下遠端唯讀盤點。
+# [新 B → <disposable-01>～04] 前一步可審閱後，重新收集當下遠端唯讀盤點。
 python3 scripts/preflight.py --output-dir private/preflight
 python3 scripts/labctl.py status
 ```

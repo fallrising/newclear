@@ -1,5 +1,7 @@
 # Reproducibility contract
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE/
 vertical-integration plus T-090 authority-repair evidence; broader G1 remains NotRun
 Observed: 2026-09-15

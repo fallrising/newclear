@@ -8,10 +8,10 @@
 
 | 主機 | 動作 | 持久影響 |
 | --- | --- | --- |
-| ckc-disposable-01 | 安裝 etcd／etcdctl／etcdutl、core／CLI、storage plugin；啟動 `eru-etcd`、`eru-core`、`eru-mvp-firewall` | root 執行的服務；新 etcd 資料目錄；私網 gRPC listener；專用 firewall table |
-| ckc-disposable-02 | 安裝 agent／CNI；新增 worker-2；啟動 agent 與 Unix socket proxy | root agent、可由 ckc 使用的 runtime proxy、core 公鑰與 CNI 設定 |
-| ckc-disposable-03 | 同上，worker-3 | 同上 |
-| ckc-disposable-04 | 同上，worker-4 | 同上 |
+| <disposable-01> | 安裝 etcd／etcdctl／etcdutl、core／CLI、storage plugin；啟動 `eru-etcd`、`eru-core`、`eru-mvp-firewall` | root 執行的服務；新 etcd 資料目錄；私網 gRPC listener；專用 firewall table |
+| <disposable-02> | 安裝 agent／CNI；新增 worker-2；啟動 agent 與 Unix socket proxy | root agent、可由 ckc 使用的 runtime proxy、core 公鑰與 CNI 設定 |
+| <disposable-03> | 同上，worker-3 | 同上 |
+| <disposable-04> | 同上，worker-4 | 同上 |
 
 主機上持續運行 Docker／containerd，管理員讀取 `docker ps -a` 已確認目前沒有容器。現有 namespace 僅 `moby`。ERU 使用新 namespace `eru`；它不是安全隔離邊界。containerd 的 native／overlayfs snapshotter、task 與 restart plugin 均健康。
 

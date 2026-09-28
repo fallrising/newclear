@@ -8,11 +8,11 @@
 
 日常只清理／重裝指定 worker 的 ERU 元件，保留 OS、SSH、Tailscale、Docker/containerd、控制面與 node 身分。provider 控制台人工重灌僅作最後手段，不接 provider API；元件重裝、全新 OS、全群 fresh 分開驗收。
 
-工作樹 `/home/ckc/test/codex/newclear-eru-delivery`，分支 `main`，專案 `labs/eru-vps-mvp`。其他工作樹的 Kith 未提交修改必須保留。Repo 本輪整併見根目錄 `docs/repo-consolidation-2026-09-22.md`；GitHub PR #29–#31 已合併。
+工作樹 `<operator-home>/test/codex/newclear-eru-delivery`，分支 `main`，專案 `labs/eru-vps-mvp`。其他工作樹的 Kith 未提交修改必須保留。Repo 本輪整併見根目錄 `docs/repo-consolidation-2026-09-22.md`；GitHub PR #29–#31 已合併。
 
-B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機。01 是 core／單成員 etcd／CLI／storage plugin，02–04 是 worker-2／3／4。ckc 登入後 sudo，不改 root SSH 禁令；有效公鑰檔是 `/etc/ssh/onevps-personal-admin/ckc.keys`。
+B→VPS 一律使用 `<disposable-01>`～`04` SSH aliases，命令標示主機。01 是 core／單成員 etcd／CLI／storage plugin，02–04 是 worker-2／3／4。ckc 登入後 sudo，不改 root SSH 禁令；有效公鑰檔是 `/etc/ssh/onevps-personal-admin/ckc.keys`。
 
-`private/` 連回 `/home/ckc/test/newclear/labs/eru-vps-mvp/private/`。真實 inventory、credentials、host identity、artifact 與 raw evidence 不可提交。新工作樹先連回可信資料，不採用 public examples 作實機 inventory。不要 reset 其他工作樹。
+`private/` 連回 `<operator-home>/test/newclear/labs/eru-vps-mvp/private/`。真實 inventory、credentials、host identity、artifact 與 raw evidence 不可提交。新工作樹先連回可信資料，不採用 public examples 作實機 inventory。不要 reset 其他工作樹。
 
 ## 已交付
 
@@ -60,7 +60,7 @@ B→VPS 一律使用 `ckc-disposable-01`～`04` SSH aliases，命令標示主機
 ## 接手先做
 
 ```bash
-cd /home/ckc/test/codex/newclear-eru-delivery
+cd <operator-home>/test/codex/newclear-eru-delivery
  git status --short --branch
  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s labs/eru-vps-mvp/tests -v
  python3 labs/eru-vps-mvp/scripts/controller_preflight.py

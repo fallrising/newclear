@@ -1,5 +1,7 @@
 # HAI Taskboard P0-A Delivery Plan
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
+
 ## Objective
 
 Create a new `products/hai-taskboard` project in the `newclear` monorepo and deliver the first

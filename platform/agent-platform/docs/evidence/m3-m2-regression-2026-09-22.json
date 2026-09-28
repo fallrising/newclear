@@ -144,7 +144,7 @@
       "cpu": 4,
       "memory_bytes": 4294967296,
       "cpu_max": "400000 100000",
-      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/CRSQSSR4ZTE342KOZBMZFFZMYI",
+      "run_dir": "<tmp>/apm2-20260922/run/cloudhypervisor/CRSQSSR4ZTE342KOZBMZFFZMYI",
       "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-CRSQSSR4ZTE342KOZBMZFFZMYI.scope"
     },
     {
@@ -161,7 +161,7 @@
       "cpu": 4,
       "memory_bytes": 4294967296,
       "cpu_max": "400000 100000",
-      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/DM5QKTTUXGRYIEFLUAT5IW5WTZ",
+      "run_dir": "<tmp>/apm2-20260922/run/cloudhypervisor/DM5QKTTUXGRYIEFLUAT5IW5WTZ",
       "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-DM5QKTTUXGRYIEFLUAT5IW5WTZ.scope"
     },
     {
@@ -178,7 +178,7 @@
       "cpu": 4,
       "memory_bytes": 4294967296,
       "cpu_max": "400000 100000",
-      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/CGBGVFNM3OTYNGXVSJMEGH446L",
+      "run_dir": "<tmp>/apm2-20260922/run/cloudhypervisor/CGBGVFNM3OTYNGXVSJMEGH446L",
       "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-CGBGVFNM3OTYNGXVSJMEGH446L.scope"
     },
     {
@@ -195,7 +195,7 @@
       "cpu": 4,
       "memory_bytes": 4294967296,
       "cpu_max": "400000 100000",
-      "run_dir": "/tmp/apm2-20260922/run/cloudhypervisor/VJ23R4LXT3J36GZSVLSQQP2OU6",
+      "run_dir": "<tmp>/apm2-20260922/run/cloudhypervisor/VJ23R4LXT3J36GZSVLSQQP2OU6",
       "scope": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/agent-platform-m2.service/vms/vm-VJ23R4LXT3J36GZSVLSQQP2OU6.scope"
     }
   ],

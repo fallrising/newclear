@@ -1,6 +1,6 @@
 # ERU Debian MVP：部署與測試結果
 
-2026-09-22，owner 回覆「批准。」後，由 controller B 經 `ckc-disposable-01`～`04` 完成首次安裝。**1 core + 3 workers 已運行，三台 nginx 功能測試全部通過；再次批准後，帶 nginx 的四台同版本重複 apply（V05）亦通過。這證明四台 VPS 可以做此功能 MVP；反覆 OS 重裝管理仍未完成。**
+2026-09-22，owner 回覆「批准。」後，由 controller B 經 `<disposable-01>`～`04` 完成首次安裝。**1 core + 3 workers 已運行，三台 nginx 功能測試全部通過；再次批准後，帶 nginx 的四台同版本重複 apply（V05）亦通過。這證明四台 VPS 可以做此功能 MVP；反覆 OS 重裝管理仍未完成。**
 
 後續 M2 測試發現 etcd 磁碟同步延遲及 core 的 nil-context panic，詳見 [開發紀錄](M2-2026-09-22.md)。以下 PASS 是先前部署／V05 時段的結果，不代表已通過穩定性或重建驗收。
 
@@ -8,10 +8,10 @@
 
 | SSH alias | Eru 角色 | 已完成檢查 |
 | --- | --- | --- |
-| ckc-disposable-01 | etcd、core、CLI、storage plugin | etcd health、CLI、3 workers available、workload 清空 |
-| ckc-disposable-02 | worker-2、agent、CNI | nginx lifecycle／HTTP／資源拒絕／清理 PASS |
-| ckc-disposable-03 | worker-3、agent、CNI | 同上 PASS |
-| ckc-disposable-04 | worker-4、agent、CNI | 同上 PASS |
+| <disposable-01> | etcd、core、CLI、storage plugin | etcd health、CLI、3 workers available、workload 清空 |
+| <disposable-02> | worker-2、agent、CNI | nginx lifecycle／HTTP／資源拒絕／清理 PASS |
+| <disposable-03> | worker-3、agent、CNI | 同上 PASS |
+| <disposable-04> | worker-4、agent、CNI | 同上 PASS |
 
 每台 worker 註冊容量為 2 CPU、2 GiB RAM、10 GiB storage，測試容器使用 1 CPU、256 MiB RAM、1 GiB storage。這是本次 Eru 排程容量，不是 VPS 實際總容量。core／CLI 0.1.5、agent 0.1.3、etcd 3.6.14、CNI 1.9.1；使用已存在的 containerd 2.3.5。下載以 [artifact lock](../artifacts.amd64.lock.json) 的 SHA256 校驗，nginx 以 digest 固定。
 

@@ -51,7 +51,7 @@ python3 scripts/check-binaries.py --output-dir private/binary-checks
 
 ## 現有 Debian 實驗叢集
 
-controller B 的 SSH 入口是 `~/.ssh/config`，匯入 `~/.ssh/hzd-vps/config`；安裝與測試使用 `ckc-disposable-01`～`04`，登入 ckc 並 sudo。01 為控制面，02–04 為 worker。
+controller B 的 SSH 入口是 `~/.ssh/config`，匯入 `~/.ssh/hzd-vps/config`；安裝與測試使用 `<disposable-01>`～`04`，登入 ckc 並 sudo。01 為控制面，02–04 為 worker。
 
 ```bash
 # 只在 B 產生 private/deployment-plan.json，沒有遠端變更。

@@ -4,7 +4,7 @@
 
 ## 前置條件與輸出
 
-`plan-reimage-worker-generation --plan RESUME_PLAN_ID --sha256 RESUME_PLAN_SHA256` 只接受 `resumed-awaiting-generation-commit` 成功 journal。規劃時使用既有 `ckc-disposable-01`～`04` aliases 做唯讀 resume reconcile，重核 core health／safe binary、target registration endpoint 與 available／bypass、worker machine／boot identity、服務與 runtime、peer canary／smoke evidence、core access proof 及未變更的 cluster generation。
+`plan-reimage-worker-generation --plan RESUME_PLAN_ID --sha256 RESUME_PLAN_SHA256` 只接受 `resumed-awaiting-generation-commit` 成功 journal。規劃時使用既有 `<disposable-01>`～`04` aliases 做唯讀 resume reconcile，重核 core health／safe binary、target registration endpoint 與 available／bypass、worker machine／boot identity、服務與 runtime、peer canary／smoke evidence、core access proof 及未變更的 cluster generation。
 
 新 worker IP 來自已核驗的 replacement bootstrap observation，並須與成功 resume plan 的 registration endpoint 和最新 core access proof 相符。本機專用 host-key trust file 會再次以 owner receipt fingerprints 核對。原 deployment plan 必須符合固定四主機拓撲；只變更目標 worker 的 `ip`，以及 core row 內 `/etc/eru/known_hosts` 與 `/etc/eru/mvp-firewall.nft` 的 rendered content。其他 workers、artifact／service config、OS、SSH、Tailscale、Docker/containerd 與 core state 都不改。
 

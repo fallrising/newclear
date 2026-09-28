@@ -1,1 +1,0 @@
-{"name":"edge-ops-mock-agent","private":true,"type":"module","scripts":{"run":"node index.js"},"engines":{"node":">=20"}}

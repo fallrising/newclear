@@ -1,7 +1,7 @@
 {
   "project": "ice-maker",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "由原始碼推斷，尚未實際啟動。start 指向 DESIGN.md M1 在第 2 輪新增的合成啟動腳本（fe-review/serve_fixture.py），新增前無法執行；結果頁待腳本印出 batch_id 後補齊，驗證後改為 true。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light",
@@ -12,9 +12,11 @@
       "name": "document-service",
       "kind": "server",
       "cwd": "platform/ice-maker",
-      "install": "pip install -e '.[<document-service extras>]'",
-      "start": "document-service --state-root fe-review/runs/.state --config config/document-ingestion.json --host 127.0.0.1 --port 8765 --pdfinfo \"$(command -v pdfinfo)\"",
-      "env": {},
+      "install": "pip install -e '.[document-ingestion]'",
+      "start": "python3 fe-review/serve_fixture.py",
+      "env": {
+        "PYTHONPATH": "src"
+      },
       "baseUrl": "http://127.0.0.1:8765",
       "ready": "/healthz",
       "pages": [

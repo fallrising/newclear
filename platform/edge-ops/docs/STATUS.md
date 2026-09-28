@@ -4,7 +4,7 @@
 
 ## 目前狀態
 
-**M0 Contract foundation：已實作於 branch `claude/newclear-sdd-implementation-7bm747`（實作 commit `7194b50`），Draft PR [#188](https://github.com/fallrising/newclear/pull/188)；未 merge、未經 owner acceptance、未經獨立安全審查。沒有部署，沒有接觸任何主機或 Cloudflare 帳號。**
+**M0 Contract foundation：已實作於 branch `claude/newclear-sdd-implementation-7bm747`（實作 commit `7194b50`），經使用者明確要求以 PR [#188](https://github.com/fallrising/newclear/pull/188) 合併進 main；merge 不等於 owner acceptance，仍未經獨立安全審查。沒有部署，沒有接觸任何主機或 Cloudflare 帳號。**
 
 SDD v0.1 已隨 #161 merge 進 main（base `05809fc951ef929665e798846aba348d6c9071a5`）；merge 只代表設計進入 tree，不代表 owner 已接受全部 gate。本次由使用者明確要求「開始實現代碼」，範圍限定為最早未完成的 M0。
 
@@ -35,7 +35,9 @@ SDD v0.1 已隨 #161 merge 進 main（base `05809fc951ef929665e798846aba348d6c90
 | 變異檢查：竄改一個 strict-json 與兩個 run-approval 向量 | 同上 | TS 與 Go 皆如預期失敗，還原後通過 |
 | `actionlint -no-color .github/workflows/edge-ops-ci.yml` | actionlint v1.7.7（go install） | exit 0 |
 
-未執行：CI 指定的 Node 24.18.0（本地只有 22.22.2）；GitHub Actions 實跑；workerd／D1／DO／R2；任何 live 環境。
+GitHub Actions `Edge Ops CI` 在 PR #188 上兩個 job（Node 24.18.0 TS、Go 1.24.7）皆通過。
+
+未執行：workerd／D1／DO／R2；任何 live 環境。
 
 ## 已知限制與風險
 

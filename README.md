@@ -8,12 +8,15 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| [PORTFOLIO.md](PORTFOLIO.md) | 投入／休眠／收掉決策與**文檔檔位** |
+| [PORTFOLIO.md](PORTFOLIO.md) | 投入／休眠／收掉決策的**公開摘要**（權威在私人項目帳本）與**文檔檔位** |
 | [docs/taxonomy.md](docs/taxonomy.md) | 頂層目錄分類規則（含 `specs/` ≠ 純文檔） |
 | [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md) | A/B/C/D 文檔深度政策與模板 |
 | [MIGRATION.md](MIGRATION.md) | 收斂遷移紀錄 |
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
+
+**Commit trailer：** 2026-09-28 起，開發工作先在私人項目帳本開任務，每個 commit 帶 `Desk-Task: T-####` trailer；
+依賴更新 bot、mirror 與 owner 標記的 hotfix（帶 `Desk-Exempt: <原因>`）例外。沒有 trailer 的 commit 會在定期稽核中被列出。
 
 ## 目錄
 
@@ -53,7 +56,8 @@
 | [`apps/flowshot`](apps/flowshot/) | Local-first 嚴格唯讀 Markdown annotation desktop app | Python, TS | C |
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
-| [`tools/cc-quota`](tools/cc-quota/) | Claude Code 額度 pacing 監控：每小時採集落庫、報表只讀、偏離才通知 | Python, SQLite, launchd | A |\n| [`tools/codex-usage`](tools/codex-usage/) | Codex ChatGPT 訂閱用量唯讀採集器：App Server 單次快照、無模型 turn、fail-closed JSON | Python, Codex App Server | A |
+| [`tools/cc-quota`](tools/cc-quota/) | Claude Code 額度 pacing 監控：每小時採集落庫、報表只讀、偏離才通知 | Python, SQLite, launchd | A |
+| [`tools/codex-usage`](tools/codex-usage/) | Codex ChatGPT 訂閱用量唯讀採集器：App Server 單次快照、無模型 turn、fail-closed JSON | Python, Codex App Server | A |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗

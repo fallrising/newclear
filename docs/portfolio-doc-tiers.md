@@ -26,8 +26,10 @@ to run the component today.
 
 1. Default assignment for this program is the 檔位 column of the component
    tables in [PORTFOLIO.md](../PORTFOLIO.md).
-2. Changing a component’s **investment** tier still requires an owner decision
-   in PORTFOLIO.md. Documentation tier should follow, not lead.
+2. Changing a component’s **investment** tier still requires an owner decision.
+   That decision is made in the owner's private project ledger; PORTFOLIO.md is
+   its public summary and is updated to match. Documentation tier should
+   follow, not lead.
 3. `specs/` at the monorepo root is **not** “docs-only”. A tree with `cmd/`,
    tests, and Dockerfiles is a component (usually B or C), not material for
    root `docs/`.

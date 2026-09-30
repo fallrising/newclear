@@ -27,7 +27,7 @@ for (const key of Object.keys(env))
     delete env[key];
 const state = resolve(root, ".wrangler/test-state");
 const wrangler = resolve(root, "node_modules/.bin/wrangler");
-const children = new Set();
+const children = new Map();
 let interrupted = false;
 await mkdir(resolve(root, "artifacts"), { recursive: true });
 async function free(port) {
@@ -47,14 +47,17 @@ async function run(cmd, args, log) {
     stdio: fd ? ["ignore", fd.fd, fd.fd] : "inherit",
     detached: true,
   });
-  children.add(child);
   const result = new Promise((yes, no) => {
-    child.once("error", no);
+    child.once("error", (error) => {
+      children.delete(child);
+      no(error);
+    });
     child.once("exit", (code, signal) => {
       children.delete(child);
       yes({ code, signal });
     });
   });
+  children.set(child, { child, result });
   if (fd) await fd.close();
   return { child, result };
 }
@@ -64,7 +67,7 @@ async function command(cmd, args) {
   if (code !== 0) throw new Error(`${cmd} exited ${code} ${signal ?? ""}`);
 }
 function stopAll() {
-  for (const c of children) {
+  for (const c of children.keys()) {
     try {
       process.kill(-c.pid, "SIGTERM");
     } catch {
@@ -84,7 +87,15 @@ async function stop(handle) {
   } catch {
     /* Already stopped. */
   }
-  await Promise.race([handle.result, delay(5000)]);
+  const timeout = new AbortController();
+  try {
+    await Promise.race([
+      handle.result,
+      delay(5000, undefined, { signal: timeout.signal }),
+    ]);
+  } finally {
+    timeout.abort();
+  }
   if (children.has(handle.child)) {
     try {
       process.kill(-handle.child.pid, "SIGKILL");
@@ -97,9 +108,9 @@ async function stop(handle) {
 async function ready(url, processHandle) {
   for (let i = 0; i < 120; i++) {
     if (interrupted) throw new Error("Local run interrupted");
-    if (processHandle.exitCode !== null)
+    if (processHandle.exitCode !== null || processHandle.signalCode !== null)
       throw new Error(
-        `Worker exited while waiting for ${url}; inspect artifacts/*-local.log`,
+        `Worker exited ${processHandle.exitCode ?? processHandle.signalCode} while waiting for ${url}; inspect artifacts/*-local.log`,
       );
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(1000) });
@@ -169,7 +180,14 @@ try {
     console.log(
       `Local app: ${env.SP_WEB_URL}; API test URL: ${env.SP_API_URL}`,
     );
-    await Promise.race([api.result, web.result]);
+    const result = await Promise.race([
+      api.result.then((result) => ({ worker: "API", ...result })),
+      web.result.then((result) => ({ worker: "Web", ...result })),
+    ]);
+    if (!interrupted)
+      throw new Error(
+        `${result.worker} worker exited unexpectedly: ${result.code ?? result.signal}`,
+      );
   } else {
     if (mode === "all" || mode === "integration") {
       const files = (await readdir(resolve(root, "tests/integration")))
@@ -229,6 +247,5 @@ try {
   console.error(e.message);
   process.exitCode = 1;
 } finally {
-  stopAll();
-  await delay(500);
+  await Promise.all([...children.values()].map(stop));
 }

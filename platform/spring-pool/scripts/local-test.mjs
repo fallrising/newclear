@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdir, open } from "node:fs/promises";
+import { mkdir, open, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import net from "node:net";
@@ -28,6 +28,7 @@ for (const key of Object.keys(env))
 const state = resolve(root, ".wrangler/test-state");
 const wrangler = resolve(root, "node_modules/.bin/wrangler");
 const children = new Set();
+let interrupted = false;
 await mkdir(resolve(root, "artifacts"), { recursive: true });
 async function free(port) {
   const s = net.createServer();
@@ -38,6 +39,7 @@ async function free(port) {
   await new Promise((yes) => s.close(yes));
 }
 async function run(cmd, args, log) {
+  if (interrupted) throw new Error("Local run interrupted");
   const fd = log ? await open(resolve(root, "artifacts", log), "a") : null;
   const child = spawn(cmd, args, {
     cwd: root,
@@ -70,10 +72,31 @@ function stopAll() {
     }
   }
 }
-process.once("SIGINT", stopAll);
-process.once("SIGTERM", stopAll);
+const interrupt = () => {
+  interrupted = true;
+  stopAll();
+};
+process.once("SIGINT", interrupt);
+process.once("SIGTERM", interrupt);
+async function stop(handle) {
+  try {
+    process.kill(-handle.child.pid, "SIGTERM");
+  } catch {
+    /* Already stopped. */
+  }
+  await Promise.race([handle.result, delay(5000)]);
+  if (children.has(handle.child)) {
+    try {
+      process.kill(-handle.child.pid, "SIGKILL");
+    } catch {
+      /* Already stopped. */
+    }
+    await handle.result;
+  }
+}
 async function ready(url, processHandle) {
   for (let i = 0; i < 120; i++) {
+    if (interrupted) throw new Error("Local run interrupted");
     if (processHandle.exitCode !== null)
       throw new Error(
         `Worker exited while waiting for ${url}; inspect artifacts/*-local.log`,
@@ -102,7 +125,7 @@ try {
     "--persist-to",
     state,
   ]);
-  const api = await run(
+  let api = await run(
     wrangler,
     [
       "dev",
@@ -148,12 +171,57 @@ try {
     );
     await Promise.race([api.result, web.result]);
   } else {
-    if (mode === "all" || mode === "integration")
+    if (mode === "all" || mode === "integration") {
+      const files = (await readdir(resolve(root, "tests/integration")))
+        .filter(
+          (name) =>
+            name.endsWith(".test.mjs") && name !== "persistence.test.mjs",
+        )
+        .sort()
+        .map((name) => `tests/integration/${name}`);
       await command(process.execPath, [
         "--test",
         "--test-concurrency=1",
-        "tests/integration/*.test.mjs",
+        ...files,
       ]);
+      env.SP_PERSIST_STATE = resolve(
+        root,
+        "artifacts/persistence-fixture.json",
+      );
+      env.SP_PERSIST_PHASE = "seed";
+      await command(process.execPath, [
+        "--test",
+        "tests/integration/persistence.test.mjs",
+      ]);
+      await stop(api);
+      api = await run(
+        wrangler,
+        [
+          "dev",
+          "--local",
+          "--config",
+          "api/wrangler.toml",
+          "--ip",
+          "127.0.0.1",
+          "--port",
+          String(apiPort),
+          "--inspector-port",
+          "0",
+          "--persist-to",
+          state,
+          "--show-interactive-dev-session=false",
+        ],
+        "api-local.log",
+      );
+      await ready(`${env.SP_API_URL}/v1/health`, api.child);
+      env.SP_PERSIST_PHASE = "verify";
+      await command(process.execPath, [
+        "--test",
+        "tests/integration/persistence.test.mjs",
+      ]);
+      delete env.SP_PERSIST_PHASE;
+      await ready(`${env.SP_WEB_URL}/healthz`, web.child);
+    }
     if (mode === "all" || mode === "e2e")
       await command(resolve(root, "node_modules/.bin/playwright"), ["test"]);
   }

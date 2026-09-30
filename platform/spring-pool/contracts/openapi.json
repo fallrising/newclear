@@ -1,0 +1,1856 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "spring-pool internal API",
+    "version": "1.0.0",
+    "description": "Internal JSON API of the spring-pool-api Worker, reachable only through the web Worker's service binding (placeholder host https://api.internal). Source of truth for behavior: docs/SDD.md. Schema constraints beyond JSON types (lengths, patterns, item counts, byte limits) are validated semantically: violations return 422 validation_failed, except script body > 65536 UTF-8 bytes which returns 413 script_too_large. Malformed JSON, wrong types, missing required fields and unknown fields return 400 invalid_request. Any unexpected failure returns 500 internal_error; wrong method on a known path returns 405 method_not_allowed with an Allow header; unknown paths return 404 not_found. Raw request bodies over 524288 bytes return 413 request_too_large."
+  },
+  "servers": [
+    {
+      "url": "https://api.internal",
+      "description": "Service-binding placeholder host; not publicly routable."
+    }
+  ],
+  "security": [
+    {
+      "internalActor": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "health"
+    },
+    {
+      "name": "scripts"
+    },
+    {
+      "name": "runbooks"
+    },
+    {
+      "name": "audit"
+    }
+  ],
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "operationId": "getHealth",
+        "summary": "Liveness and build revision (no account info).",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database check failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scripts": {
+      "get": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "listScripts",
+        "summary": "List/search scripts by head title substring and exact tag; ordered by id DESC.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Q"
+          },
+          {
+            "$ref": "#/components/parameters/Tag"
+          },
+          {
+            "$ref": "#/components/parameters/Archived"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/BeforeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of scripts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "createScript",
+        "summary": "Create a script with revision 1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScriptCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "headers": {
+              "Location": {
+                "$ref": "#/components/headers/Location"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Script"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "413": {
+            "$ref": "#/components/responses/TooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/scripts/{script_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ScriptId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "getScript",
+        "summary": "Read the head revision (also when archived).",
+        "responses": {
+          "200": {
+            "description": "Script head.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Script"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "updateScript",
+        "summary": "Save a new immutable revision (expected_revision + 1).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScriptUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated; revision advanced by 1.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Script"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/TooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/scripts/{script_id}/archive": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ScriptId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "archiveScript",
+        "summary": "Archive (soft, irreversible in v1). Revision number unchanged.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Archived.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Script"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/scripts/{script_id}/revisions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ScriptId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "listScriptRevisions",
+        "summary": "List revisions, ordered by revision DESC.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/BeforeRevision"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of revisions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/scripts/{script_id}/revisions/{revision}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ScriptId"
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        }
+      ],
+      "get": {
+        "tags": [
+          "scripts"
+        ],
+        "operationId": "getScriptRevision",
+        "summary": "Read one immutable revision (readable regardless of archive).",
+        "responses": {
+          "200": {
+            "description": "Revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRevision"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/runbooks": {
+      "get": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "listRunbooks",
+        "summary": "List/search runbooks by head title substring; ordered by id DESC.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Q"
+          },
+          {
+            "$ref": "#/components/parameters/Archived"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/BeforeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of runbooks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunbookList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "createRunbook",
+        "summary": "Create a runbook with revision 1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunbookCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "headers": {
+              "Location": {
+                "$ref": "#/components/headers/Location"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Runbook"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "413": {
+            "$ref": "#/components/responses/TooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/runbooks/{runbook_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RunbookId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "getRunbook",
+        "summary": "Read the head revision with steps (also when archived).",
+        "responses": {
+          "200": {
+            "description": "Runbook head.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Runbook"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "updateRunbook",
+        "summary": "Save a new immutable revision (full step list replacement).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunbookUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Runbook"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/TooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/runbooks/{runbook_id}/archive": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RunbookId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "archiveRunbook",
+        "summary": "Archive (soft, irreversible in v1). Revision number unchanged.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Archived.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Runbook"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          }
+        }
+      }
+    },
+    "/v1/runbooks/{runbook_id}/revisions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RunbookId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "listRunbookRevisions",
+        "summary": "List revisions, ordered by revision DESC.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/BeforeRevision"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of revisions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunbookRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/runbooks/{runbook_id}/revisions/{revision}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RunbookId"
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        }
+      ],
+      "get": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "getRunbookRevision",
+        "summary": "Read one immutable runbook revision with its pinned steps.",
+        "responses": {
+          "200": {
+            "description": "Revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunbookRevision"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/runbooks/{runbook_id}/revisions/{revision}/export": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RunbookId"
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        }
+      ],
+      "get": {
+        "tags": [
+          "runbooks"
+        ],
+        "operationId": "exportRunbookRevision",
+        "summary": "Markdown export embedding pinned script bodies in backtick fences of length max(3, longest backtick run + 1). Format: docs/SDD.md section 5.5.",
+        "responses": {
+          "200": {
+            "description": "Markdown document.",
+            "headers": {
+              "Content-Disposition": {
+                "description": "attachment; filename=\"runbook-{runbook_id}-r{revision}.md\"",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "text/markdown; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/audit": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "operationId": "listAuditEvents",
+        "summary": "Append-only audit events (no bodies), ordered by id DESC.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/BeforeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of audit events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "internalActor": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Spring-Pool-Actor",
+        "description": "Lowercased owner email, set only by the web Worker after Cloudflare Access JWT verification (or explicit local mode). 3-254 chars, contains '@', no control characters. Missing/invalid returns 401 unauthenticated."
+      }
+    },
+    "headers": {
+      "Location": {
+        "description": "Path of the created resource, e.g. /v1/scripts/7.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "parameters": {
+      "ScriptId": {
+        "name": "script_id",
+        "in": "path",
+        "required": true,
+        "description": "Must match ^[1-9][0-9]{0,15}$; otherwise 404 not_found.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "RunbookId": {
+        "name": "runbook_id",
+        "in": "path",
+        "required": true,
+        "description": "Must match ^[1-9][0-9]{0,15}$; otherwise 404 not_found.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "Revision": {
+        "name": "revision",
+        "in": "path",
+        "required": true,
+        "description": "Must match ^[1-9][0-9]{0,15}$; otherwise 404 revision_not_found. Missing or cleaned-up revisions also return 404 revision_not_found.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "Q": {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Case-insensitive (ASCII) substring of the head revision title.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "Tag": {
+        "name": "tag",
+        "in": "query",
+        "required": false,
+        "description": "Exact tag match on the head revision.",
+        "schema": {
+          "$ref": "#/components/schemas/Tag"
+        }
+      },
+      "Archived": {
+        "name": "archived",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "exclude",
+            "include",
+            "only"
+          ],
+          "default": "exclude"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "BeforeId": {
+        "name": "before_id",
+        "in": "query",
+        "required": false,
+        "description": "Return items with id strictly less than this (keyset pagination).",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "BeforeRevision": {
+        "name": "before_revision",
+        "in": "query",
+        "required": false,
+        "description": "Return revisions strictly less than this.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "invalid_request: malformed JSON, wrong types, missing/unknown fields, or invalid query.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthenticated": {
+        "description": "unauthenticated: missing or invalid X-Spring-Pool-Actor.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "not_found or revision_not_found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "revision_conflict (expected_revision is not the head; current_revision included) or archived (entity is archived; current_revision included).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "TooLarge": {
+        "description": "request_too_large (raw body > 524288 bytes) or script_too_large (body > 65536 UTF-8 bytes; details[0].field = \"body\").",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unprocessable": {
+        "description": "validation_failed with one details entry per failing field.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "UTC ISO-8601 with milliseconds, e.g. 2026-09-30T12:34:56.789Z.",
+        "examples": [
+          "2026-09-30T12:34:56.789Z"
+        ]
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "bash",
+          "python",
+          "powershell"
+        ]
+      },
+      "Tag": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+      },
+      "Tags": {
+        "type": "array",
+        "maxItems": 10,
+        "uniqueItems": true,
+        "items": {
+          "$ref": "#/components/schemas/Tag"
+        }
+      },
+      "Title": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200,
+        "description": "Trimmed by the API; 1-200 Unicode scalar values; no control characters."
+      },
+      "Description": {
+        "type": "string",
+        "maxLength": 2000,
+        "description": "Trimmed by the API; \\n and \\t allowed, other control characters rejected."
+      },
+      "ScriptBody": {
+        "type": "string",
+        "minLength": 1,
+        "description": "UTF-8 text, 1-65536 bytes when UTF-8 encoded, no U+0000. Stored byte-for-byte (no trimming or newline normalization). Over-limit returns 413 script_too_large."
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "service",
+          "build",
+          "database"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "const": "spring-pool-api"
+          },
+          "build": {
+            "type": "string",
+            "description": "BUILD_REVISION var (git short SHA or \"dev\")."
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ]
+          }
+        }
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "issue"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "JSON-path-like, 0-based, e.g. steps[2].instruction.",
+            "examples": [
+              "title",
+              "tags[1]",
+              "steps[0].script_revision"
+            ]
+          },
+          "issue": {
+            "type": "string",
+            "enum": [
+              "required",
+              "too_short",
+              "too_long",
+              "invalid_format",
+              "invalid_value",
+              "duplicate",
+              "too_few_items",
+              "too_many_items",
+              "not_found"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "invalid_request",
+                  "unauthenticated",
+                  "not_found",
+                  "revision_not_found",
+                  "method_not_allowed",
+                  "revision_conflict",
+                  "archived",
+                  "request_too_large",
+                  "script_too_large",
+                  "validation_failed",
+                  "internal_error"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable; never contains bodies, stack traces or actor emails."
+              },
+              "current_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Present only on 409."
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ValidationIssue"
+                },
+                "description": "Present on 413 and 422 (possibly empty); optional otherwise."
+              }
+            }
+          }
+        }
+      },
+      "ScriptCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "language",
+          "body"
+        ],
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/Title"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description",
+            "default": ""
+          },
+          "tags": {
+            "$ref": "#/components/schemas/Tags",
+            "default": []
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "body": {
+            "$ref": "#/components/schemas/ScriptBody"
+          }
+        }
+      },
+      "ScriptUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision",
+          "title",
+          "language",
+          "body"
+        ],
+        "description": "Full replacement; every accepted save creates revision expected_revision + 1, even if content is identical.",
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "$ref": "#/components/schemas/Title"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description",
+            "default": ""
+          },
+          "tags": {
+            "$ref": "#/components/schemas/Tags",
+            "default": []
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "body": {
+            "$ref": "#/components/schemas/ScriptBody"
+          }
+        }
+      },
+      "Script": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "title",
+          "description",
+          "tags",
+          "language",
+          "body",
+          "byte_size",
+          "created_at",
+          "updated_at",
+          "archived_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Head revision."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "body": {
+            "type": "string"
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ScriptSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "title",
+          "tags",
+          "language",
+          "byte_size",
+          "updated_at",
+          "archived_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ScriptList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "next_before_id"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScriptSummary"
+            }
+          },
+          "next_before_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      },
+      "ScriptRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "script_id",
+          "revision",
+          "title",
+          "description",
+          "tags",
+          "language",
+          "body",
+          "byte_size",
+          "created_at",
+          "created_by",
+          "is_current",
+          "script_archived_at"
+        ],
+        "properties": {
+          "script_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "body": {
+            "type": "string"
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "is_current": {
+            "type": "boolean"
+          },
+          "script_archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ScriptRevisionSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "title",
+          "language",
+          "byte_size",
+          "created_at",
+          "created_by"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "created_by": {
+            "type": "string"
+          }
+        }
+      },
+      "ScriptRevisionList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "next_before_revision"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScriptRevisionSummary"
+            }
+          },
+          "next_before_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      },
+      "ArchiveRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "StepInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "script_id",
+          "script_revision",
+          "instruction"
+        ],
+        "properties": {
+          "script_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "script_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Must exist (else 422 not_found on steps[i].script_revision). Archived scripts may be pinned."
+          },
+          "instruction": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Plain text; trimmed; \\n and \\t allowed."
+          }
+        }
+      },
+      "RunbookCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "steps"
+        ],
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/Title"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description",
+            "default": ""
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/StepInput"
+            },
+            "description": "Ordered; position = index + 1."
+          }
+        }
+      },
+      "RunbookUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision",
+          "title",
+          "steps"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "$ref": "#/components/schemas/Title"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description",
+            "default": ""
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/StepInput"
+            }
+          }
+        }
+      },
+      "RunbookStep": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "position",
+          "script_id",
+          "script_revision",
+          "instruction",
+          "script_title",
+          "script_language",
+          "script_archived"
+        ],
+        "properties": {
+          "position": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "script_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "script_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "instruction": {
+            "type": "string"
+          },
+          "script_title": {
+            "type": "string",
+            "description": "Title of the pinned revision (not the head)."
+          },
+          "script_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "script_archived": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Runbook": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "title",
+          "description",
+          "steps",
+          "created_at",
+          "updated_at",
+          "archived_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/RunbookStep"
+            }
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "RunbookSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "title",
+          "step_count",
+          "updated_at",
+          "archived_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "step_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "RunbookList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "next_before_id"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunbookSummary"
+            }
+          },
+          "next_before_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      },
+      "RunbookRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "runbook_id",
+          "revision",
+          "title",
+          "description",
+          "steps",
+          "created_at",
+          "created_by",
+          "is_current",
+          "runbook_archived_at"
+        ],
+        "properties": {
+          "runbook_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/RunbookStep"
+            }
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "is_current": {
+            "type": "boolean"
+          },
+          "runbook_archived_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "RunbookRevisionSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "title",
+          "step_count",
+          "created_at",
+          "created_by"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "step_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "created_by": {
+            "type": "string"
+          }
+        }
+      },
+      "RunbookRevisionList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "next_before_revision"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunbookRevisionSummary"
+            }
+          },
+          "next_before_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      },
+      "AuditEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "occurred_at",
+          "actor",
+          "action",
+          "entity_type",
+          "entity_id",
+          "revision"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "occurred_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "script.create",
+              "script.update",
+              "script.archive",
+              "runbook.create",
+              "runbook.update",
+              "runbook.archive"
+            ]
+          },
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "script",
+              "runbook"
+            ]
+          },
+          "entity_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Revision created, archived at, or head at cleanup time."
+          }
+        }
+      },
+      "AuditList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "next_before_id"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEvent"
+            }
+          },
+          "next_before_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}

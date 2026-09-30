@@ -17,7 +17,11 @@
     "build:api": "cd api && worker-build --release",
     "build:web": "wrangler deploy --config web/wrangler.jsonc --dry-run --outdir ../dist/web",
     "build": "npm run build:api && npm run build:web",
-    "dev": "wrangler dev --config web/wrangler.jsonc --config api/wrangler.toml"
+    "dev": "wrangler dev --config web/wrangler.jsonc --config api/wrangler.toml",
+    "test:local": "node scripts/local-test.mjs",
+    "test:local:integration": "node scripts/local-test.mjs integration",
+    "test:local:e2e": "node scripts/local-test.mjs e2e",
+    "dev:tests": "node scripts/local-test.mjs serve"
   },
   "dependencies": {
     "hono": "4.13.12"

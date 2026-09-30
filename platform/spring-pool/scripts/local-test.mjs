@@ -1,0 +1,166 @@
+import { spawn } from "node:child_process";
+import { mkdir, open } from "node:fs/promises";
+import { resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
+import net from "node:net";
+
+// Operates only on local workerd and its dedicated local persistence directory.
+const root = resolve(import.meta.dirname, "..");
+const mode = process.argv[2] ?? "all";
+if (!["all", "integration", "e2e", "serve"].includes(mode))
+  throw new Error("Expected all, integration, e2e or serve");
+const apiPort = Number(process.env.SP_API_PORT ?? 8818);
+const webPort = Number(process.env.SP_WEB_PORT ?? 8817);
+const env = {
+  ...process.env,
+  WRANGLER_SEND_METRICS: "false",
+  BROWSER: "none",
+  SP_API_URL: `http://127.0.0.1:${apiPort}`,
+  SP_WEB_URL: `http://127.0.0.1:${webPort}`,
+};
+for (const key of Object.keys(env))
+  if (
+    /CLOUDFLARE_(API_TOKEN|API_KEY|EMAIL|ACCOUNT_ID)|CF_API_(TOKEN|KEY)/.test(
+      key,
+    )
+  )
+    delete env[key];
+const state = resolve(root, ".wrangler/test-state");
+const wrangler = resolve(root, "node_modules/.bin/wrangler");
+const children = new Set();
+await mkdir(resolve(root, "artifacts"), { recursive: true });
+async function free(port) {
+  const s = net.createServer();
+  await new Promise((yes, no) => {
+    s.once("error", no);
+    s.listen(port, "127.0.0.1", yes);
+  });
+  await new Promise((yes) => s.close(yes));
+}
+async function run(cmd, args, log) {
+  const fd = log ? await open(resolve(root, "artifacts", log), "a") : null;
+  const child = spawn(cmd, args, {
+    cwd: root,
+    env,
+    stdio: fd ? ["ignore", fd.fd, fd.fd] : "inherit",
+    detached: true,
+  });
+  children.add(child);
+  const result = new Promise((yes, no) => {
+    child.once("error", no);
+    child.once("exit", (code, signal) => {
+      children.delete(child);
+      yes({ code, signal });
+    });
+  });
+  if (fd) await fd.close();
+  return { child, result };
+}
+async function command(cmd, args) {
+  const { result } = await run(cmd, args);
+  const { code, signal } = await result;
+  if (code !== 0) throw new Error(`${cmd} exited ${code} ${signal ?? ""}`);
+}
+function stopAll() {
+  for (const c of children) {
+    try {
+      process.kill(-c.pid, "SIGTERM");
+    } catch {
+      /* Already stopped. */
+    }
+  }
+}
+process.once("SIGINT", stopAll);
+process.once("SIGTERM", stopAll);
+async function ready(url, processHandle) {
+  for (let i = 0; i < 120; i++) {
+    if (processHandle.exitCode !== null)
+      throw new Error(
+        `Worker exited while waiting for ${url}; inspect artifacts/*-local.log`,
+      );
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(1000) });
+      if (r.ok) return;
+    } catch {
+      /* Startup only. */
+    }
+    await delay(500);
+  }
+  throw new Error(`Local Worker did not become ready: ${url}`);
+}
+try {
+  await free(apiPort);
+  await free(webPort);
+  await command(wrangler, [
+    "d1",
+    "migrations",
+    "apply",
+    "DB",
+    "--local",
+    "--config",
+    "api/wrangler.toml",
+    "--persist-to",
+    state,
+  ]);
+  const api = await run(
+    wrangler,
+    [
+      "dev",
+      "--local",
+      "--config",
+      "api/wrangler.toml",
+      "--ip",
+      "127.0.0.1",
+      "--port",
+      String(apiPort),
+      "--inspector-port",
+      "0",
+      "--persist-to",
+      state,
+      "--show-interactive-dev-session=false",
+    ],
+    "api-local.log",
+  );
+  await ready(`${env.SP_API_URL}/v1/health`, api.child);
+  const web = await run(
+    wrangler,
+    [
+      "dev",
+      "--local",
+      "--config",
+      "web/wrangler.jsonc",
+      "--ip",
+      "127.0.0.1",
+      "--port",
+      String(webPort),
+      "--inspector-port",
+      "0",
+      "--var",
+      "LOCAL_OWNER_EMAIL:owner@example.test",
+      "--show-interactive-dev-session=false",
+    ],
+    "web-local.log",
+  );
+  await ready(`${env.SP_WEB_URL}/healthz`, web.child);
+  if (mode === "serve") {
+    console.log(
+      `Local app: ${env.SP_WEB_URL}; API test URL: ${env.SP_API_URL}`,
+    );
+    await Promise.race([api.result, web.result]);
+  } else {
+    if (mode === "all" || mode === "integration")
+      await command(process.execPath, [
+        "--test",
+        "--test-concurrency=1",
+        "tests/integration/*.test.mjs",
+      ]);
+    if (mode === "all" || mode === "e2e")
+      await command(resolve(root, "node_modules/.bin/playwright"), ["test"]);
+  }
+} catch (e) {
+  console.error(e.message);
+  process.exitCode = 1;
+} finally {
+  stopAll();
+  await delay(500);
+}

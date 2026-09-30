@@ -125,11 +125,9 @@ mod tests {
 
     #[test]
     fn prefixed_d1_errors_keep_conflict_and_archive() {
-        let prefixed = "D1_ERROR: SQLITE_CONSTRAINT: script_revisions_guard_insert: sp:revision_conflict";
-        assert_eq!(
-            classify_write_error(prefixed),
-            WriteClass::RevisionConflict
-        );
+        let prefixed =
+            "D1_ERROR: SQLITE_CONSTRAINT: script_revisions_guard_insert: sp:revision_conflict";
+        assert_eq!(classify_write_error(prefixed), WriteClass::RevisionConflict);
         assert_eq!(
             classify_write_error("Error: sp:archived"),
             WriteClass::Archived
@@ -184,10 +182,7 @@ mod tests {
                 current_revision: 4
             }
         );
-        assert_eq!(
-            classify_archive(1, Some(&live), 4),
-            ArchiveClass::Updated
-        );
+        assert_eq!(classify_archive(1, Some(&live), 4), ArchiveClass::Updated);
         assert_eq!(classify_archive(0, None, 1), ArchiveClass::NotFound);
         assert_eq!(
             classify_archive(0, Some(&live), 4),

@@ -71,7 +71,10 @@ mod tests {
         assert_eq!(parse(r#"{"n":true}"#).unwrap(), 1);
         assert_eq!(parse(r#"{"n":false}"#).unwrap(), 0);
         assert_eq!(parse(r#"{"n":"4"}"#).unwrap(), 4);
-        assert_eq!(parse(r#"{"n":"9007199254740993"}"#).unwrap(), 9_007_199_254_740_993);
+        assert_eq!(
+            parse(r#"{"n":"9007199254740993"}"#).unwrap(),
+            9_007_199_254_740_993
+        );
         assert!(parse(r#"{"n":1.5}"#).is_err());
         assert!(parse(r#"{"n":null}"#).is_err());
     }

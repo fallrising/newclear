@@ -58,7 +58,7 @@ WHERE (
     OR (?1 = 'only' AND s.archived_at IS NOT NULL)
   )
   AND (?2 = 0 OR s.id < ?3)
-  AND (?4 = 0 OR r.title LIKE ?5 ESCAPE '\\')
+  AND (?4 = 0 OR instr(lower(r.title), lower(?5)) > 0)
   AND (?6 = 0 OR r.tag_index LIKE '%,' || ?7 || ',%')
 ORDER BY s.id DESC
 LIMIT ?8";
@@ -225,7 +225,7 @@ WHERE (
     OR (?1 = 'only' AND rb.archived_at IS NOT NULL)
   )
   AND (?2 = 0 OR rb.id < ?3)
-  AND (?4 = 0 OR rr.title LIKE ?5 ESCAPE '\\')
+  AND (?4 = 0 OR instr(lower(rr.title), lower(?5)) > 0)
 ORDER BY rb.id DESC
 LIMIT ?6";
 
@@ -342,7 +342,7 @@ mod tests {
     #[test]
     fn search_pagination_archive_and_historical_pins() {
         assert!(LIST_SCRIPTS.contains("ORDER BY s.id DESC"));
-        assert!(LIST_SCRIPTS.contains("ESCAPE '\\'"));
+        assert!(LIST_SCRIPTS.contains("instr(lower(r.title), lower(?5)) > 0"));
         assert!(LIST_SCRIPTS.contains("tag_index LIKE '%,' || ?7 || ',%'"));
         assert!(LIST_RUNBOOKS.contains("ORDER BY rb.id DESC"));
         assert!(LIST_SCRIPT_REVISIONS.contains("ORDER BY revision DESC"));

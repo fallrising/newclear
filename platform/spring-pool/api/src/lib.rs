@@ -86,7 +86,11 @@ mod contract_files {
         assert!(!upper.contains("BEGIN TRANSACTION"));
         assert!(!upper.contains("COMMIT"));
         assert!(!upper.contains("DELETE FROM"));
-        assert!(!sql.contains("cleanup"));
+        let statements: String = sql
+            .lines()
+            .filter(|line| !line.trim_start().starts_with("--"))
+            .collect();
+        assert!(!statements.contains("cleanup"));
     }
 
     #[test]

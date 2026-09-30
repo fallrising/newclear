@@ -192,7 +192,10 @@ mod tests {
         assert_eq!(status_code(&invalid), 422);
         let json = serde_json::to_value(&invalid).unwrap();
         assert!(json["error"].get("current_revision").is_none());
-        assert_eq!(json["error"]["details"][0]["field"], "steps[0].script_revision");
+        assert_eq!(
+            json["error"]["details"][0]["field"],
+            "steps[0].script_revision"
+        );
         assert_eq!(json["error"]["details"][0]["issue"], "not_found");
 
         let too_big = script_too_large();

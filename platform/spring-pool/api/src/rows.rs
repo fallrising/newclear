@@ -10,206 +10,210 @@ use crate::export::{ExportRunbook, ExportStep};
 use crate::validate::{canonical_language, NormalizedScript};
 use serde::Deserialize;
 
+/// Invalid persisted row shape; raw database contents are never exposed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RowError;
+
 #[derive(Debug, Deserialize)]
-pub(crate) struct IdRow {
+pub struct IdRow {
     #[serde(alias = "max(id)", deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
+    pub id: i64,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct OkRow {
+pub struct OkRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) ok: i64,
+    pub ok: i64,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct SnapRow {
+pub struct SnapRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) current_revision: i64,
+    pub current_revision: i64,
     #[serde(default)]
-    pub(crate) archived_at: Option<String>,
+    pub archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct ScriptRow {
+pub struct ScriptRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
+    pub id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) description: String,
-    pub(crate) tags_json: String,
-    pub(crate) language: String,
-    pub(crate) body: String,
-    pub(crate) created_at: String,
-    pub(crate) updated_at: String,
+    pub revision: i64,
+    pub title: String,
+    pub description: String,
+    pub tags_json: String,
+    pub language: String,
+    pub body: String,
+    pub created_at: String,
+    pub updated_at: String,
     #[serde(default)]
-    pub(crate) archived_at: Option<String>,
+    pub archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct ScriptSummaryRow {
+pub struct ScriptSummaryRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
+    pub id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) tags_json: String,
-    pub(crate) language: String,
+    pub revision: i64,
+    pub title: String,
+    pub tags_json: String,
+    pub language: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) byte_size: i64,
-    pub(crate) updated_at: String,
+    pub byte_size: i64,
+    pub updated_at: String,
     #[serde(default)]
-    pub(crate) archived_at: Option<String>,
+    pub archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct ScriptRevisionRow {
+pub struct ScriptRevisionRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_id: i64,
+    pub script_id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) description: String,
-    pub(crate) tags_json: String,
-    pub(crate) language: String,
-    pub(crate) body: String,
-    pub(crate) created_at: String,
-    pub(crate) created_by: String,
+    pub revision: i64,
+    pub title: String,
+    pub description: String,
+    pub tags_json: String,
+    pub language: String,
+    pub body: String,
+    pub created_at: String,
+    pub created_by: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) is_current: i64,
+    pub is_current: i64,
     #[serde(default)]
-    pub(crate) script_archived_at: Option<String>,
+    pub script_archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct ScriptRevisionSummaryRow {
+pub struct ScriptRevisionSummaryRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) language: String,
+    pub revision: i64,
+    pub title: String,
+    pub language: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) byte_size: i64,
-    pub(crate) created_at: String,
-    pub(crate) created_by: String,
+    pub byte_size: i64,
+    pub created_at: String,
+    pub created_by: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct RunbookRow {
+pub struct RunbookRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
+    pub id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) description: String,
+    pub revision: i64,
+    pub title: String,
+    pub description: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) step_count: i64,
-    pub(crate) created_at: String,
-    pub(crate) updated_at: String,
+    pub step_count: i64,
+    pub created_at: String,
+    pub updated_at: String,
     #[serde(default)]
-    pub(crate) archived_at: Option<String>,
+    pub archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct RunbookSummaryRow {
+pub struct RunbookSummaryRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
+    pub id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
+    pub revision: i64,
+    pub title: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) step_count: i64,
-    pub(crate) updated_at: String,
+    pub step_count: i64,
+    pub updated_at: String,
     #[serde(default)]
-    pub(crate) archived_at: Option<String>,
+    pub archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct RunbookRevisionRow {
+pub struct RunbookRevisionRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) runbook_id: i64,
+    pub runbook_id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
-    pub(crate) description: String,
+    pub revision: i64,
+    pub title: String,
+    pub description: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) step_count: i64,
-    pub(crate) created_at: String,
-    pub(crate) created_by: String,
+    pub step_count: i64,
+    pub created_at: String,
+    pub created_by: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) is_current: i64,
+    pub is_current: i64,
     #[serde(default)]
-    pub(crate) runbook_archived_at: Option<String>,
+    pub runbook_archived_at: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct RunbookRevisionSummaryRow {
+pub struct RunbookRevisionSummaryRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
-    pub(crate) title: String,
+    pub revision: i64,
+    pub title: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) step_count: i64,
-    pub(crate) created_at: String,
-    pub(crate) created_by: String,
+    pub step_count: i64,
+    pub created_at: String,
+    pub created_by: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct StepRow {
+pub struct StepRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) position: i64,
+    pub position: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_id: i64,
+    pub script_id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_revision: i64,
-    pub(crate) instruction: String,
-    pub(crate) script_title: String,
-    pub(crate) script_language: String,
+    pub script_revision: i64,
+    pub instruction: String,
+    pub script_title: String,
+    pub script_language: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_archived: i64,
+    pub script_archived: i64,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct ExportStepRow {
+pub struct ExportStepRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) position: i64,
+    pub position: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_id: i64,
+    pub script_id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_revision: i64,
-    pub(crate) instruction: String,
-    pub(crate) script_title: String,
-    pub(crate) script_language: String,
-    pub(crate) script_body: String,
+    pub script_revision: i64,
+    pub instruction: String,
+    pub script_title: String,
+    pub script_language: String,
+    pub script_body: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) script_archived: i64,
+    pub script_archived: i64,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct AuditRow {
+pub struct AuditRow {
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) id: i64,
-    pub(crate) occurred_at: String,
-    pub(crate) actor: String,
-    pub(crate) action: String,
-    pub(crate) entity_type: String,
+    pub id: i64,
+    pub occurred_at: String,
+    pub actor: String,
+    pub action: String,
+    pub entity_type: String,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) entity_id: i64,
+    pub entity_id: i64,
     #[serde(deserialize_with = "crate::flex::i64")]
-    pub(crate) revision: i64,
+    pub revision: i64,
 }
 
-pub(crate) fn require_new_id(row: &IdRow) -> Result<i64, ()> {
+pub fn require_new_id(row: &IdRow) -> Result<i64, RowError> {
     pos_id(row.id)
 }
 
-pub(crate) fn head_snap(row: SnapRow) -> HeadSnap {
+pub fn head_snap(row: SnapRow) -> HeadSnap {
     HeadSnap {
         current_revision: row.current_revision,
         archived: row.archived_at.is_some(),
     }
 }
 
-pub(crate) fn map_script(row: ScriptRow) -> Result<ScriptResponse, ()> {
+pub fn map_script(row: ScriptRow) -> Result<ScriptResponse, RowError> {
     Ok(ScriptResponse {
         id: pos_id(row.id)?,
         revision: pos_id(row.revision)?,
@@ -225,7 +229,7 @@ pub(crate) fn map_script(row: ScriptRow) -> Result<ScriptResponse, ()> {
     })
 }
 
-pub(crate) fn map_script_summary(row: ScriptSummaryRow) -> Result<ScriptSummary, ()> {
+pub fn map_script_summary(row: ScriptSummaryRow) -> Result<ScriptSummary, RowError> {
     Ok(ScriptSummary {
         id: pos_id(row.id)?,
         revision: pos_id(row.revision)?,
@@ -238,7 +242,7 @@ pub(crate) fn map_script_summary(row: ScriptSummaryRow) -> Result<ScriptSummary,
     })
 }
 
-pub(crate) fn map_script_revision(row: ScriptRevisionRow) -> Result<ScriptRevisionResponse, ()> {
+pub fn map_script_revision(row: ScriptRevisionRow) -> Result<ScriptRevisionResponse, RowError> {
     Ok(ScriptRevisionResponse {
         script_id: pos_id(row.script_id)?,
         revision: pos_id(row.revision)?,
@@ -255,9 +259,9 @@ pub(crate) fn map_script_revision(row: ScriptRevisionRow) -> Result<ScriptRevisi
     })
 }
 
-pub(crate) fn map_script_revision_summary(
+pub fn map_script_revision_summary(
     row: ScriptRevisionSummaryRow,
-) -> Result<ScriptRevisionSummary, ()> {
+) -> Result<ScriptRevisionSummary, RowError> {
     Ok(ScriptRevisionSummary {
         revision: pos_id(row.revision)?,
         title: row.title,
@@ -268,7 +272,7 @@ pub(crate) fn map_script_revision_summary(
     })
 }
 
-pub(crate) fn map_runbook(row: RunbookRow, steps: Vec<StepRow>) -> Result<RunbookResponse, ()> {
+pub fn map_runbook(row: RunbookRow, steps: Vec<StepRow>) -> Result<RunbookResponse, RowError> {
     Ok(RunbookResponse {
         id: pos_id(row.id)?,
         revision: pos_id(row.revision)?,
@@ -281,7 +285,7 @@ pub(crate) fn map_runbook(row: RunbookRow, steps: Vec<StepRow>) -> Result<Runboo
     })
 }
 
-pub(crate) fn map_runbook_summary(row: RunbookSummaryRow) -> Result<RunbookSummary, ()> {
+pub fn map_runbook_summary(row: RunbookSummaryRow) -> Result<RunbookSummary, RowError> {
     Ok(RunbookSummary {
         id: pos_id(row.id)?,
         revision: pos_id(row.revision)?,
@@ -292,10 +296,10 @@ pub(crate) fn map_runbook_summary(row: RunbookSummaryRow) -> Result<RunbookSumma
     })
 }
 
-pub(crate) fn map_runbook_revision(
+pub fn map_runbook_revision(
     row: RunbookRevisionRow,
     steps: Vec<StepRow>,
-) -> Result<RunbookRevisionResponse, ()> {
+) -> Result<RunbookRevisionResponse, RowError> {
     Ok(RunbookRevisionResponse {
         runbook_id: pos_id(row.runbook_id)?,
         revision: pos_id(row.revision)?,
@@ -309,9 +313,9 @@ pub(crate) fn map_runbook_revision(
     })
 }
 
-pub(crate) fn map_runbook_revision_summary(
+pub fn map_runbook_revision_summary(
     row: RunbookRevisionSummaryRow,
-) -> Result<RunbookRevisionSummary, ()> {
+) -> Result<RunbookRevisionSummary, RowError> {
     Ok(RunbookRevisionSummary {
         revision: pos_id(row.revision)?,
         title: row.title,
@@ -321,10 +325,10 @@ pub(crate) fn map_runbook_revision_summary(
     })
 }
 
-pub(crate) fn map_export(
+pub fn map_export(
     row: RunbookRevisionRow,
     steps: Vec<ExportStepRow>,
-) -> Result<ExportRunbook, ()> {
+) -> Result<ExportRunbook, RowError> {
     let id = pos_id(row.runbook_id)?;
     let revision = pos_id(row.revision)?;
     Ok(ExportRunbook {
@@ -337,9 +341,9 @@ pub(crate) fn map_export(
     })
 }
 
-pub(crate) fn map_audit(row: AuditRow) -> Result<AuditEventResponse, ()> {
+pub fn map_audit(row: AuditRow) -> Result<AuditEventResponse, RowError> {
     if !is_audit_action(&row.action) || !is_entity_type(&row.entity_type) {
-        return Err(());
+        return Err(RowError);
     }
     Ok(AuditEventResponse {
         id: pos_id(row.id)?,
@@ -352,11 +356,11 @@ pub(crate) fn map_audit(row: AuditRow) -> Result<AuditEventResponse, ()> {
     })
 }
 
-pub(crate) fn synthesized_script(
+pub fn synthesized_script(
     id: i64,
     script: NormalizedScript,
     now: &str,
-) -> Result<ScriptResponse, ()> {
+) -> Result<ScriptResponse, RowError> {
     Ok(ScriptResponse {
         id: pos_id(id)?,
         revision: 1,
@@ -372,16 +376,16 @@ pub(crate) fn synthesized_script(
     })
 }
 
-fn map_steps(rows: Vec<StepRow>, step_count: i64) -> Result<Vec<RunbookStepResponse>, ()> {
+fn map_steps(rows: Vec<StepRow>, step_count: i64) -> Result<Vec<RunbookStepResponse>, RowError> {
     let count = step_count_ok(step_count)?;
     if i64::try_from(rows.len()).ok() != Some(count) {
-        return Err(());
+        return Err(RowError);
     }
     let mut steps = Vec::with_capacity(rows.len());
     for (index, row) in rows.into_iter().enumerate() {
-        let position = i64::try_from(index).map_err(|_| ())? + 1;
+        let position = i64::try_from(index).map_err(|_| RowError)? + 1;
         if row.position != position {
-            return Err(());
+            return Err(RowError);
         }
         steps.push(RunbookStepResponse {
             position,
@@ -396,18 +400,21 @@ fn map_steps(rows: Vec<StepRow>, step_count: i64) -> Result<Vec<RunbookStepRespo
     Ok(steps)
 }
 
-fn map_export_steps(rows: Vec<ExportStepRow>, step_count: i64) -> Result<Vec<ExportStep>, ()> {
+fn map_export_steps(
+    rows: Vec<ExportStepRow>,
+    step_count: i64,
+) -> Result<Vec<ExportStep>, RowError> {
     let count = step_count_ok(step_count)?;
     if i64::try_from(rows.len()).ok() != Some(count) {
-        return Err(());
+        return Err(RowError);
     }
     let mut steps = Vec::with_capacity(rows.len());
     for (index, row) in rows.into_iter().enumerate() {
-        let position = i64::try_from(index).map_err(|_| ())? + 1;
+        let position = i64::try_from(index).map_err(|_| RowError)? + 1;
         if row.position != position {
-            return Err(());
+            return Err(RowError);
         }
-        let position_u32 = u32::try_from(position).map_err(|_| ())?;
+        let position_u32 = u32::try_from(position).map_err(|_| RowError)?;
         byte_len(&row.script_body)?;
         steps.push(ExportStep {
             position: position_u32,
@@ -423,40 +430,42 @@ fn map_export_steps(rows: Vec<ExportStepRow>, step_count: i64) -> Result<Vec<Exp
     Ok(steps)
 }
 
-fn language_of(value: &str) -> Result<String, ()> {
-    canonical_language(value).map(str::to_string).ok_or(())
+fn language_of(value: &str) -> Result<String, RowError> {
+    canonical_language(value)
+        .map(str::to_string)
+        .ok_or(RowError)
 }
 
-fn tags_of(value: &str) -> Result<Vec<String>, ()> {
-    serde_json::from_str(value).map_err(|_| ())
+fn tags_of(value: &str) -> Result<Vec<String>, RowError> {
+    serde_json::from_str(value).map_err(|_| RowError)
 }
 
-fn byte_len(body: &str) -> Result<i64, ()> {
-    let size = i64::try_from(body.len()).map_err(|_| ())?;
+fn byte_len(body: &str) -> Result<i64, RowError> {
+    let size = i64::try_from(body.len()).map_err(|_| RowError)?;
     byte_col(size)
 }
 
-fn byte_col(size: i64) -> Result<i64, ()> {
+fn byte_col(size: i64) -> Result<i64, RowError> {
     if (1..=65_536).contains(&size) {
         Ok(size)
     } else {
-        Err(())
+        Err(RowError)
     }
 }
 
-fn pos_id(value: i64) -> Result<i64, ()> {
+fn pos_id(value: i64) -> Result<i64, RowError> {
     if value >= 1 {
         Ok(value)
     } else {
-        Err(())
+        Err(RowError)
     }
 }
 
-fn step_count_ok(count: i64) -> Result<i64, ()> {
+fn step_count_ok(count: i64) -> Result<i64, RowError> {
     if (1..=30).contains(&count) {
         Ok(count)
     } else {
-        Err(())
+        Err(RowError)
     }
 }
 
@@ -524,7 +533,7 @@ mod tests {
         bad_tags["tags_json"] = json!("{\"a\":1}");
         assert!(map_script(parse(bad_tags)).is_err());
 
-        let mut empty = script_value("");
+        let empty = script_value("");
         assert!(map_script(parse(empty)).is_err());
 
         let mut summary = script_value("ignored");

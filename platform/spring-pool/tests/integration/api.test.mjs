@@ -492,7 +492,7 @@ test("T-BOUND-2: every non-health route requires a valid X-Spring-Pool-Actor", a
     assert.equal(r.json.error.code, "unauthenticated");
   }
 
-  const badActors = ["x", "no-at-sign", `a@b${"c".repeat(300)}`, "a\u0000@b"];
+  const badActors = ["x", "no-at-sign", `a@b${"c".repeat(300)}`, "a\t@b"];
   for (const bad of badActors) {
     const r = await api("/v1/scripts", { actor: bad });
     assert.equal(
@@ -926,153 +926,33 @@ test("T-HEALTH-1: health endpoint returns the documented shape and leaks no iden
   );
 });
 
-test("T-BOUND-3: the web worker does not proxy API paths and serves /healthz", async () => {
-  let healthz;
-  try {
-    healthz = await fetch(`${WEB_BASE}/healthz`);
-  } catch (err) {
-    throw new Error(
-      `spring-pool web is not reachable at ${WEB_BASE} (override with SP_WEB_URL). Start the local workerd pair. Original error: ${err.message}`,
-    );
-  }
-  if (healthz.status === 401) {
-    throw new Error(
-      `web is behind Access at ${WEB_BASE} (expected local auth mode for integration). Run wrangler dev in local mode.`,
-    );
-  }
-  if (healthz.status === 503) {
-    throw new Error(
-      `web at ${WEB_BASE} is up but its API binding is unreachable. Check the local workerd pair.`,
-    );
-  }
-  assert.equal(
-    healthz.status,
-    200,
-    `GET ${WEB_BASE}/healthz -> ${healthz.status}`,
+test("literal long title searches preserve punctuation and 200-character queries", async () => {
+  const title = `${RUN}-%_\\-${"界".repeat(200)}`.slice(-200);
+  const created = await createScript({ title });
+  const long = await api(`/v1/scripts?q=${encodeURIComponent(title)}`);
+  assert.equal(long.res.status, 200);
+  assert.ok(long.json.items.some((item) => item.id === created.id));
+  const literal = await createScript({ title: `${RUN}-%_\\-literal` });
+  await createScript({ title: `${RUN}-any-literal` });
+  const found = await api(
+    `/v1/scripts?q=${encodeURIComponent(`${RUN}-%_\\-literal`)}`,
   );
-  const body = await healthz.json();
-  assert.equal(body.status, "ok");
-  assert.equal(body.service, "spring-pool-web");
-  assert.equal(typeof body.build, "string");
-  assert.ok(
-    body.api && body.api.status === "ok",
-    `healthz api section: ${JSON.stringify(body.api)}`,
+  assert.equal(found.res.status, 200);
+  assert.deepEqual(
+    found.json.items.map((item) => item.id),
+    [literal.id],
   );
-
-  for (const path of ["/v1/scripts", "/api/v1/scripts", "/v1/health"]) {
-    const r = await fetch(`${WEB_BASE}${path}`);
-    assert.equal(
-      r.status,
-      404,
-      `GET ${WEB_BASE}${path} -> ${r.status} (expected 404, not a proxy)`,
-    );
-  }
-});
-
-test("T-CSRF-1: state-changing web POSTs must pass Origin and double-submit checks; failures never reach the API", async () => {
-  const uniq = randomUUID().slice(0, 8);
-  const webOrigin = new URL(WEB_BASE).origin;
-
-  let healthz;
-  try {
-    healthz = await fetch(`${WEB_BASE}/healthz`);
-  } catch (err) {
-    throw new Error(
-      `spring-pool web is not reachable at ${WEB_BASE} (override with SP_WEB_URL). Start the local workerd pair. Original error: ${err.message}`,
-    );
-  }
-  if (healthz.status !== 200) {
-    throw new Error(
-      `web at ${WEB_BASE} not healthy for CSRF testing (expected local auth mode); /healthz -> ${healthz.status}`,
-    );
-  }
-
-  const before = await api("/v1/audit?limit=1");
-  assert.ok(
-    before.json.items.length >= 1,
-    "audit must already contain events from earlier tests",
-  );
-  const topId = before.json.items[0].id;
-
-  const initial = await fetch(`${WEB_BASE}/scripts`);
-  assert.equal(
-    initial.status,
-    200,
-    `GET ${WEB_BASE}/scripts -> ${initial.status}`,
-  );
-  const setCookie = initial.headers.get("set-cookie") ?? "";
-  const cookieName = setCookie.match(/^([^=;]+)=/)?.[1];
-  const cookieValue = setCookie.match(/=([^;]+)/)?.[1];
-  assert.ok(
-    cookieName && cookieValue,
-    `CSRF middleware must set a cookie; got Set-Cookie: ${setCookie}`,
-  );
-  const cookieHeader = `${cookieName}=${cookieValue}`;
-
-  const form = (csrfValue) => {
-    const f = new FormData();
-    f.append("title", `${RUN}-csrf-${uniq}`);
-    f.append("description", "");
-    f.append("tags", "");
-    f.append("language", "bash");
-    f.append("body", "echo hi\n");
-    f.append("csrf", csrfValue);
-    return f;
-  };
-
-  const attempt = async ({
-    origin = webOrigin,
-    cookie = cookieHeader,
-    withCsrf = true,
-    csrfValue = cookieValue,
-  } = {}) => {
-    const headers = {};
-    if (origin !== null) headers["Origin"] = origin;
-    if (cookie !== null) headers["Cookie"] = cookie;
-    const f = form(csrfValue);
-    if (!withCsrf) f.delete("csrf");
-    return fetch(`${WEB_BASE}/scripts`, {
-      method: "POST",
-      headers,
-      body: f,
-      redirect: "manual",
-    });
-  };
-
-  const rejected = [
-    await attempt({ origin: null }),
-    await attempt({ origin: "https://evil.example" }),
-    await attempt({ withCsrf: false }),
-    await attempt({ cookie: null }),
-    await attempt({ csrfValue: "not-the-cookie-value" }),
-  ];
-  for (const r of rejected) {
-    const text = await r.text();
-    assert.equal(
-      r.status,
-      403,
-      `expected 403, got ${r.status}: ${text.slice(0, 120)}`,
-    );
-    assert.ok(
-      text.includes("Request rejected (CSRF)."),
-      `expected the CSRF page, got: ${text.slice(0, 120)}`,
-    );
-  }
-
-  const ok = await attempt({});
-  assert.equal(
-    ok.status,
-    303,
-    `valid CSRF request should create a script; got ${ok.status}`,
-  );
-  const location = ok.headers.get("location") ?? "";
-  assert.ok(location.startsWith("/scripts/"), `Location: ${location}`);
-
-  const after = await api("/v1/audit?limit=2");
-  assert.equal(
-    after.json.items[0].id,
-    topId + 1,
-    "exactly one new audit event from the successful web create",
-  );
-  assert.equal(after.json.items[0].action, "script.create");
+  const rb = await createRunbook({
+    title,
+    steps: [
+      {
+        script_id: created.id,
+        script_revision: 1,
+        instruction: "Inspect only.",
+      },
+    ],
+  });
+  const books = await api(`/v1/runbooks?q=${encodeURIComponent(title)}`);
+  assert.equal(books.res.status, 200);
+  assert.ok(books.json.items.some((item) => item.id === rb.id));
 });

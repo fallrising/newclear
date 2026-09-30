@@ -1,6 +1,6 @@
 # spring-pool
 
-> **Documentation tier A · Active MVP development.** See the [portfolio documentation policy](../../docs/portfolio-doc-tiers.md). Runtime and staging verification are pending; this is not a deployment or acceptance claim.
+> **Documentation tier A · Active MVP development.** See the [portfolio documentation policy](../../docs/portfolio-doc-tiers.md). Local Rust/Wasm API and D1 contracts pass; frontend and staging verification are pending; this is not a deployment or acceptance claim.
 
 A single-owner operations script library. Keep Bash, Python and PowerShell text in immutable revisions, assemble ordered runbooks that pin exact revisions, and export them as Markdown. Script storage and runbook editing do not execute commands.
 

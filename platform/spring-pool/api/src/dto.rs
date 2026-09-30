@@ -261,10 +261,10 @@ mod tests {
             r#"{"title":"T","language":"bash","body":"x","tags":null}"#
         )
         .is_err());
-        assert!(serde_json::from_str::<ScriptCreate>(
-            r#"{"title":"T","language":1,"body":"x"}"#
-        )
-        .is_err());
+        assert!(
+            serde_json::from_str::<ScriptCreate>(r#"{"title":"T","language":1,"body":"x"}"#)
+                .is_err()
+        );
         assert!(serde_json::from_str::<ScriptCreate>(r#"{"language":"bash","body":"x"}"#).is_err());
         assert!(serde_json::from_str::<ScriptCreate>(
             r#"{"title":"T","language":"bash","body":"x","tags":[1]}"#
@@ -297,7 +297,9 @@ mod tests {
         assert_eq!(ok.expected_revision, 2);
 
         assert!(serde_json::from_str::<ArchiveRequest>(r#"{}"#).is_err());
-        assert!(serde_json::from_str::<ArchiveRequest>(r#"{"expected_revision":1,"x":1}"#).is_err());
+        assert!(
+            serde_json::from_str::<ArchiveRequest>(r#"{"expected_revision":1,"x":1}"#).is_err()
+        );
     }
 
     #[test]

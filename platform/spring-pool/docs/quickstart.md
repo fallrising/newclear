@@ -1,6 +1,6 @@
 # Local quickstart
 
-Status: development checkpoint. The dependency installation and toolchain commands below were executed during preparation; API/frontend/runtime tests are not yet complete. Do not treat this page as proof of a deployed service.
+Status: development checkpoint. The dependency installation and toolchain commands below were executed during preparation; The Rust API and local D1 contracts have passed; frontend, complete browser journeys and staging remain incomplete. Do not treat this page as proof of a deployed service.
 
 From `platform/spring-pool`, use Node 24.18.0, Rust 1.98.1 and the wasm32 target:
 
@@ -26,10 +26,10 @@ npm run build
 npm run test:local
 ```
 
-These are pending implementation, not passing results. `test:local` runs dedicated local D1 migrations and starts two local Workers on loopback ports 8817 (web) and 8818 (API), then executes contract/integration tests and browser journeys. It refuses occupied ports and only stops processes it created. Local synthetic state persists under `.wrangler/test-state`; no cloud credentials are passed. A user running `dev:tests` can inspect the local app until stopping the command.
+At the backend checkpoint, Rust test/fmt/Clippy on both host and Wasm, Node focused tests, typecheck of the present helpers, and formatting passed. Full `npm test`, the web build and full `test:local` still require the frontend. `test:local` runs dedicated local D1 migrations and starts two local Workers on loopback ports 8817 (web) and 8818 (API), then executes contract/integration tests and browser journeys. It refuses occupied ports and only stops processes it created. Local synthetic state persists under `.wrangler/test-state`; no cloud credentials are passed. A user running `dev:tests` can inspect the local app until stopping the command.
 
-`npm run test:local:api` starts only the API Worker and runs the same API contracts plus seed→restart→verify persistence checks. It does not start the frontend or browser and cannot establish service-binding or UI behavior. This mode has a child-process fixture regression; real Workers execution remains pending.
+`npm run test:local:api` starts only the API Worker and runs the same API contracts plus seed→restart→verify persistence checks. It does not start the frontend or browser and cannot establish service-binding or UI behavior. This mode passed 18 real Rust/Wasm API contracts, then seeded local D1, stopped/restarted the API and verified byte-identical stored content and Markdown export. Its child-process regressions separately check crash, signal and forced cleanup behavior.
 
 Cloud staging is a separate operator action after independent review and evidence checks. Never place an API token in Worker configuration, application code or model input. The API must have no public route, workers.dev endpoint or preview URL. Access identity verification remains fail-closed until the operator supplies the staging team domain, audience and owner identity.
 
-No deployment, release, acceptance or automatic recovery is established by these commands. Runtime receipts, exact revisions and open findings will be added after execution.
+No deployment, release, acceptance or automatic recovery is established by these commands. The backend result does not establish web service-binding behavior, live Access interoperability, staging health or owner acceptance.

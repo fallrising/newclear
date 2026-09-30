@@ -1,12 +1,12 @@
 //! D1 bind lists for list queries. Parameter order matches `sql.rs`.
 
 use crate::sqljson::{json_i64, json_str};
-use crate::validate::{like_contains_pattern, ParsedQuery};
+use crate::validate::ParsedQuery;
 use serde_json::Value;
 
 pub fn script_list_args(query: &ParsedQuery) -> Vec<Value> {
     let (has_before, before_id) = flag_id(query.before_id);
-    let (has_q, pattern) = like_flag(query.q.as_deref());
+    let (has_q, pattern) = substring_flag(query.q.as_deref());
     let (has_tag, tag) = text_flag(query.tag.as_deref());
     vec![
         json_str(query.archived.as_str()),
@@ -22,7 +22,7 @@ pub fn script_list_args(query: &ParsedQuery) -> Vec<Value> {
 
 pub fn runbook_list_args(query: &ParsedQuery) -> Vec<Value> {
     let (has_before, before_id) = flag_id(query.before_id);
-    let (has_q, pattern) = like_flag(query.q.as_deref());
+    let (has_q, pattern) = substring_flag(query.q.as_deref());
     vec![
         json_str(query.archived.as_str()),
         has_before,
@@ -62,9 +62,9 @@ fn text_flag(value: Option<&str>) -> (Value, Value) {
     }
 }
 
-fn like_flag(value: Option<&str>) -> (Value, Value) {
+fn substring_flag(value: Option<&str>) -> (Value, Value) {
     match value {
-        Some(text) => (json_i64(1), json_str(&like_contains_pattern(text))),
+        Some(text) => (json_i64(1), json_str(text)),
         None => (json_i64(0), json_str("")),
     }
 }
@@ -90,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn script_list_defaults_and_escapes_the_pattern() {
+    fn script_list_defaults_and_keeps_literal_substring() {
         let args = script_list_args(&query());
         assert_eq!(args.len(), 8);
         assert_eq!(args[0], json_str("exclude"));
@@ -113,7 +113,7 @@ mod tests {
         assert_eq!(args[1], json_i64(1));
         assert_eq!(args[2], json_str(&i64::MAX.to_string()));
         assert_eq!(args[3], json_i64(1));
-        assert_eq!(args[4], json_str("%100\\%\\_\\\\%"));
+        assert_eq!(args[4], json_str("100%_\\"));
         assert_eq!(args[5], json_i64(1));
         assert_eq!(args[6], json_str("ops"));
         assert_eq!(args[7], json_i64(101));
@@ -134,7 +134,7 @@ mod tests {
                 json_i64(1),
                 json_i64(9),
                 json_i64(1),
-                json_str("%a\\_b%"),
+                json_str("a_b"),
                 json_i64(2),
             ]
         );

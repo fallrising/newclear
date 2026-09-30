@@ -196,7 +196,9 @@ try {
       const files = (await readdir(resolve(root, "tests/integration")))
         .filter(
           (name) =>
-            name.endsWith(".test.mjs") && name !== "persistence.test.mjs",
+            name.endsWith(".test.mjs") &&
+            name !== "persistence.test.mjs" &&
+            (mode !== "api" || name !== "web.test.mjs"),
         )
         .sort()
         .map((name) => `tests/integration/${name}`);

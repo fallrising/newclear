@@ -24,10 +24,7 @@ mod tests {
     #[test]
     fn safe_integers_stay_numbers_and_large_ones_are_strings() {
         assert_eq!(json_i64(1), Value::Number(Number::from(1)));
-        assert_eq!(
-            json_i64(MAX_SAFE),
-            Value::Number(Number::from(MAX_SAFE))
-        );
+        assert_eq!(json_i64(MAX_SAFE), Value::Number(Number::from(MAX_SAFE)));
         assert_eq!(json_i64(-MAX_SAFE), Value::Number(Number::from(-MAX_SAFE)));
         assert_eq!(
             json_i64(MAX_SAFE + 1),

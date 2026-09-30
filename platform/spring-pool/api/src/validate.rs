@@ -91,17 +91,19 @@ pub struct ParsedQuery {
 
 pub fn validate_actor(value: &str) -> bool {
     let count = value.chars().count();
-    (3..=254).contains(&count)
-        && value.contains('@')
-        && !value.chars().any(is_c0_or_del)
+    (3..=254).contains(&count) && value.contains('@') && !value.chars().any(is_c0_or_del)
 }
 
 pub fn validate_script(input: &ScriptCreate) -> Result<NormalizedScript, ScriptFailure> {
     if input.body.len() > SCRIPT_BODY_MAX_BYTES {
         return Err(ScriptFailure::TooLarge);
     }
-    let (title, description, tags, language, mut issues) =
-        text_fields(&input.title, &input.description, &input.tags, &input.language);
+    let (title, description, tags, language, mut issues) = text_fields(
+        &input.title,
+        &input.description,
+        &input.tags,
+        &input.language,
+    );
     push_body(&input.body, &mut issues);
     if issues.is_empty() {
         Ok(NormalizedScript {
@@ -122,8 +124,12 @@ pub fn validate_script_update(
     if input.body.len() > SCRIPT_BODY_MAX_BYTES {
         return Err(ScriptFailure::TooLarge);
     }
-    let (title, description, tags, language, mut issues) =
-        text_fields(&input.title, &input.description, &input.tags, &input.language);
+    let (title, description, tags, language, mut issues) = text_fields(
+        &input.title,
+        &input.description,
+        &input.tags,
+        &input.language,
+    );
     if let Some(issue) = check_expected_revision(input.expected_revision) {
         issues.insert(0, issue);
     }
@@ -215,6 +221,9 @@ pub fn canonical_language(language: &str) -> Option<&'static str> {
 }
 
 pub fn tag_index(tags: &[String]) -> String {
+    if tags.is_empty() {
+        return String::from(",");
+    }
     let mut out = String::from(",");
     for (index, tag) in tags.iter().enumerate() {
         if index > 0 {
@@ -237,7 +246,10 @@ pub fn like_contains_pattern(query: &str) -> String {
     format!("%{escaped}%")
 }
 
-pub fn parse_query(kind: QueryKind, pairs: &[(String, String)]) -> Result<ParsedQuery, ()> {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryError;
+
+pub fn parse_query(kind: QueryKind, pairs: &[(String, String)]) -> Result<ParsedQuery, QueryError> {
     let allowed: &[&str] = match kind {
         QueryKind::ScriptList => &["q", "tag", "archived", "limit", "before_id"],
         QueryKind::RunbookList => &["q", "archived", "limit", "before_id"],
@@ -246,7 +258,7 @@ pub fn parse_query(kind: QueryKind, pairs: &[(String, String)]) -> Result<Parsed
     };
     for (key, _) in pairs {
         if !allowed.contains(&key.as_str()) {
-            return Err(());
+            return Err(QueryError);
         }
     }
     let q = match kind {
@@ -315,7 +327,7 @@ fn title_and_description(title: &str, description: &str) -> (String, String, Vec
 fn normalize_title(raw: &str, issues: &mut Vec<Issue>) -> String {
     let title = raw.trim().to_string();
     if title.is_empty() {
-        issues.push(issue("title", IssueCode::Required));
+        issues.push(issue("title", IssueCode::TooShort));
     } else {
         if title.chars().count() > 200 {
             issues.push(issue("title", IssueCode::TooLong));
@@ -332,7 +344,7 @@ fn normalize_description(raw: &str, issues: &mut Vec<Issue>) -> String {
     if description.chars().count() > 2000 {
         issues.push(issue("description", IssueCode::TooLong));
     }
-    if description.chars().any(forbidden_prose) {
+    if raw.chars().any(forbidden_prose) {
         issues.push(issue("description", IssueCode::InvalidValue));
     }
     description
@@ -398,7 +410,7 @@ fn normalize_steps(steps: &[StepInput], issues: &mut Vec<Issue>) -> Vec<Normaliz
                     IssueCode::TooLong,
                 ));
             }
-            if instruction.chars().any(forbidden_prose) {
+            if step.instruction.chars().any(forbidden_prose) {
                 issues.push(issue(
                     format!("steps[{index}].instruction"),
                     IssueCode::InvalidValue,
@@ -441,16 +453,16 @@ fn issue(field: impl Into<String>, code: IssueCode) -> Issue {
     }
 }
 
-fn take_one<'a>(pairs: &'a [(String, String)], key: &str) -> Result<Option<&'a str>, ()> {
+fn take_one<'a>(pairs: &'a [(String, String)], key: &str) -> Result<Option<&'a str>, QueryError> {
     let mut matches = pairs.iter().filter(|(candidate, _)| candidate == key);
     match (matches.next(), matches.next()) {
         (None, _) => Ok(None),
         (Some((_, value)), None) => Ok(Some(value.as_str())),
-        _ => Err(()),
+        _ => Err(QueryError),
     }
 }
 
-fn optional_q(pairs: &[(String, String)]) -> Result<Option<String>, ()> {
+fn optional_q(pairs: &[(String, String)]) -> Result<Option<String>, QueryError> {
     match take_one(pairs, "q")? {
         None => Ok(None),
         Some(value) => {
@@ -458,49 +470,49 @@ fn optional_q(pairs: &[(String, String)]) -> Result<Option<String>, ()> {
             if (1..=200).contains(&count) {
                 Ok(Some(value.to_string()))
             } else {
-                Err(())
+                Err(QueryError)
             }
         }
     }
 }
 
-fn optional_tag(pairs: &[(String, String)]) -> Result<Option<String>, ()> {
+fn optional_tag(pairs: &[(String, String)]) -> Result<Option<String>, QueryError> {
     match take_one(pairs, "tag")? {
         None => Ok(None),
         Some(value) if valid_tag(value) => Ok(Some(value.to_string())),
-        Some(_) => Err(()),
+        Some(_) => Err(QueryError),
     }
 }
 
-fn optional_archived(pairs: &[(String, String)]) -> Result<Archived, ()> {
+fn optional_archived(pairs: &[(String, String)]) -> Result<Archived, QueryError> {
     match take_one(pairs, "archived")? {
         None => Ok(Archived::Exclude),
         Some("exclude") => Ok(Archived::Exclude),
         Some("include") => Ok(Archived::Include),
         Some("only") => Ok(Archived::Only),
-        Some(_) => Err(()),
+        Some(_) => Err(QueryError),
     }
 }
 
-fn optional_limit(pairs: &[(String, String)]) -> Result<u32, ()> {
+fn optional_limit(pairs: &[(String, String)]) -> Result<u32, QueryError> {
     match take_one(pairs, "limit")? {
         None => Ok(50),
-        Some(value) => parse_u32_range(value, 1, 100).ok_or(()),
+        Some(value) => parse_u32_range(value, 1, 100).ok_or(QueryError),
     }
 }
 
-fn optional_positive(pairs: &[(String, String)], key: &str) -> Result<Option<i64>, ()> {
+fn optional_positive(pairs: &[(String, String)], key: &str) -> Result<Option<i64>, QueryError> {
     match take_one(pairs, key)? {
         None => Ok(None),
         Some(value) => {
             if value.is_empty() || value.len() > 18 || !value.bytes().all(|b| b.is_ascii_digit()) {
-                return Err(());
+                return Err(QueryError);
             }
-            let parsed = value.parse::<i64>().map_err(|_| ())?;
+            let parsed = value.parse::<i64>().map_err(|_| QueryError)?;
             if parsed >= 1 {
                 Ok(Some(parsed))
             } else {
-                Err(())
+                Err(QueryError)
             }
         }
     }
@@ -523,7 +535,13 @@ mod tests {
     use super::*;
     use crate::dto::StepInput;
 
-    fn script(title: &str, description: &str, tags: &[&str], language: &str, body: &str) -> ScriptCreate {
+    fn script(
+        title: &str,
+        description: &str,
+        tags: &[&str],
+        language: &str,
+        body: &str,
+    ) -> ScriptCreate {
         ScriptCreate {
             title: title.into(),
             description: description.into(),
@@ -542,8 +560,14 @@ mod tests {
 
     #[test]
     fn script_normalizes_trim_and_keeps_body_bytes() {
-        let ok = validate_script(&script("  Hello  ", "\nnote\n", &["ops", "db"], "python", "  echo  \r\n"))
-            .unwrap();
+        let ok = validate_script(&script(
+            "  Hello  ",
+            "\nnote\n",
+            &["ops", "db"],
+            "python",
+            "  echo  \r\n",
+        ))
+        .unwrap();
         assert_eq!(ok.title, "Hello");
         assert_eq!(ok.description, "note");
         assert_eq!(ok.tags, vec!["ops".to_string(), "db".to_string()]);
@@ -568,7 +592,7 @@ mod tests {
         assert_eq!(
             codes(&issues),
             vec![
-                ("title", IssueCode::Required),
+                ("title", IssueCode::TooShort),
                 ("description", IssueCode::InvalidValue),
                 ("tags[0]", IssueCode::InvalidFormat),
                 ("tags[2]", IssueCode::Duplicate),
@@ -779,16 +803,8 @@ mod tests {
         assert!(parse_query(QueryKind::ScriptList, &[("limit".into(), "0".into())]).is_err());
         assert!(parse_query(QueryKind::ScriptList, &[("limit".into(), "101".into())]).is_err());
         assert!(parse_query(QueryKind::ScriptList, &[("q".into(), "".into())]).is_err());
-        assert!(parse_query(
-            QueryKind::ScriptList,
-            &[("q".into(), "é".repeat(201))]
-        )
-        .is_err());
-        assert!(parse_query(
-            QueryKind::ScriptList,
-            &[("q".into(), "é".repeat(200))]
-        )
-        .is_ok());
+        assert!(parse_query(QueryKind::ScriptList, &[("q".into(), "é".repeat(201))]).is_err());
+        assert!(parse_query(QueryKind::ScriptList, &[("q".into(), "é".repeat(200))]).is_ok());
         assert!(parse_query(QueryKind::ScriptList, &[("tag".into(), "Bad".into())]).is_err());
         assert!(parse_query(
             QueryKind::ScriptList,
@@ -798,15 +814,25 @@ mod tests {
         assert!(parse_query(QueryKind::ScriptList, &[("before_id".into(), "0".into())]).is_err());
         assert!(parse_query(
             QueryKind::ScriptList,
-            &[("before_id".into(), "1".into()), ("before_id".into(), "2".into())]
+            &[
+                ("before_id".into(), "1".into()),
+                ("before_id".into(), "2".into())
+            ]
         )
         .is_err());
         assert!(parse_query(QueryKind::RunbookList, &[("tag".into(), "ops".into())]).is_err());
         assert!(parse_query(QueryKind::RevisionList, &[("q".into(), "a".into())]).is_err());
-        assert!(parse_query(QueryKind::AuditList, &[("archived".into(), "include".into())]).is_err());
+        assert!(parse_query(
+            QueryKind::AuditList,
+            &[("archived".into(), "include".into())]
+        )
+        .is_err());
         let revisions = parse_query(
             QueryKind::RevisionList,
-            &[("before_revision".into(), "3".into()), ("limit".into(), "1".into())],
+            &[
+                ("before_revision".into(), "3".into()),
+                ("limit".into(), "1".into()),
+            ],
         )
         .unwrap();
         assert_eq!(revisions.before_revision, Some(3));

@@ -276,6 +276,8 @@ A D1 `batch()` runs as one implicit transaction: if any statement fails, the who
 
 Under concurrency, two updates with the same `expected_revision` both try to insert revision `N+1`. D1 serializes writes, so the second one fails the trigger (`sp:revision_conflict`) or the primary key, and is reported as `409`. Exactly one revision and one audit row are written.
 
+Runbook pin existence is validated in one bound `json_each` query before the atomic batch. This keeps a maximum-size runbook write below the Free plan's 50 D1-query limit per invocation. The title-search implementation also avoids the 50-byte LIKE-pattern limit while preserving literal ASCII-insensitive matching. See [D1 limits](https://developers.cloudflare.com/d1/platform/limits/).
+
 ## 5. HTTP API (API worker)
 
 Base path `/v1`. JSON in and out: `Content-Type: application/json; charset=utf-8`, except the export route. There is no CORS, because the API has no browser caller.
@@ -294,7 +296,7 @@ Base path `/v1`. JSON in and out: `Content-Type: application/json; charset=utf-8
 
 | Field | Rule |
 |---|---|
-| `title` | Trimmed by the API. After trimming: 1–200 Unicode scalar values, no control chars (U+0000–U+001F, U+007F). |
+| `title` | Trimmed by the API. After trimming: 1–200 Unicode scalar values (empty → `too_short`), no control chars (U+0000–U+001F, U+007F). |
 | `description` | Optional, default `""`. Trimmed; ≤ 2000 scalar values. `\n` and `\t` allowed; other control chars rejected. |
 | `tags` | Optional, default `[]`. ≤ 10 items, each matching `^[a-z0-9][a-z0-9-]{0,31}$`, unique (`duplicate`). Order preserved. |
 | `language` | `bash` \| `python` \| `powershell`. |
@@ -333,7 +335,7 @@ All routes except health require `X-Spring-Pool-Actor`. Schemas are named as in 
 
 Search semantics:
 
-- `q` is a case-insensitive (ASCII) substring match on the **head** revision title, using `LIKE '%'||?||'%' ESCAPE '\'` after escaping `\`, `%`, `_`.
+- `q` is a case-insensitive (ASCII), literal substring match on the **head** revision title using `instr(lower(title), lower(?)) > 0`. The bound query stays literal, including `%`, `_` and backslash. This supports the agreed 200-scalar query limit without exceeding D1's 50-byte LIKE-pattern limit.
 - `tag` is an exact match via `tag_index LIKE '%,'||?||',%'`.
 - Both filters combine with AND.
 - Pagination: the API fetches `limit+1` rows. `next_before_id` / `next_before_revision` is the last returned item's id or revision when more rows exist; otherwise `null`.

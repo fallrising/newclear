@@ -28,10 +28,7 @@ pub fn export_filename(id: i64, revision: i64) -> String {
 }
 
 pub fn content_disposition(id: i64, revision: i64) -> String {
-    format!(
-        "attachment; filename=\"{}\"",
-        export_filename(id, revision)
-    )
+    format!("attachment; filename=\"{}\"", export_filename(id, revision))
 }
 
 pub fn fence_width(body: &str) -> usize {
@@ -278,13 +275,12 @@ mod tests {
         let mut document = doc("see # x", vec![step]);
         document.title = "# x <script> [a](javascript:1) ```".into();
         let rendered = render(&document);
-        assert!(rendered.starts_with(
-            "# \\# x \\<script\\> \\[a\\]\\(javascript:1\\) \\`\\`\\`\n"
-        ));
+        assert!(
+            rendered.starts_with("# \\# x \\<script\\> \\[a\\]\\(javascript\\:1\\) \\`\\`\\`\n")
+        );
         assert!(rendered.contains("## Step 1: \\# x \\<script\\>\n"));
-        assert!(rendered.contains(
-            "\\# x  \n\\<script\\>  \n\\[a\\]\\(javascript:1\\)  \n\\`\\`\\`\n"
-        ));
+        assert!(rendered
+            .contains("\\# x  \n\\<script\\>  \n\\[a\\]\\(javascript\\:1\\)  \n\\`\\`\\`\n"));
         assert!(!rendered.contains("<script>"));
         let blocks = code_blocks(&rendered);
         assert_eq!(blocks.len(), 1);
@@ -303,7 +299,7 @@ mod tests {
         second.language = "powershell".into();
         second.script_title = "Tail".into();
         let rendered = render(&doc("Keep this.", vec![first, second]));
-        assert!(rendered.contains("# Nightly\n\nKeep this.\n\n_Runbook 9, revision 4, saved 2026-09-30T12:34:56.789Z_\n"));
+        assert!(rendered.contains("# Nightly\n\nKeep this\\.\n\n_Runbook 9, revision 4, saved 2026-09-30T12:34:56.789Z_\n"));
         assert!(rendered.contains("_Script 3, revision 2, python_\n"));
         assert!(rendered.contains("_Script 8, revision 1, powershell, archived_\n"));
         let blocks = code_blocks(&rendered);
@@ -312,7 +308,8 @@ mod tests {
         assert_eq!(blocks[1].1, "two ` tick\n");
         assert!(rendered.find("one\n").unwrap() < rendered.find("two ` tick").unwrap());
         let omitted = render(&doc("", vec![step("x\n", false)]));
-        assert!(omitted.contains("# Nightly\n\n_Runbook 9, revision 4, saved 2026-09-30T12:34:56.789Z_\n"));
+        assert!(omitted
+            .contains("# Nightly\n\n_Runbook 9, revision 4, saved 2026-09-30T12:34:56.789Z_\n"));
         assert!(!omitted.contains("# Nightly\n\n\n"));
     }
 

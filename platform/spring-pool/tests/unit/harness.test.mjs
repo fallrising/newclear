@@ -23,7 +23,12 @@ async function freePort() {
   await new Promise((yes) => server.close(yes));
   return port;
 }
-for (const scenario of ["crash", "startup-signal", "stubborn-child"]) {
+for (const scenario of [
+  "crash",
+  "startup-signal",
+  "stubborn-child",
+  "api-only",
+]) {
   test(`local harness handles ${scenario}`, { timeout: 15000 }, async () => {
     const fixture = await mkdtemp(join(tmpdir(), "spring-pool-harness-"));
     let child;
@@ -44,21 +49,45 @@ const args = process.argv.slice(2);
 if (args[0] === 'd1') process.exit(0);
 const port = Number(args[args.indexOf('--port') + 1]);
 const isWeb = args.includes('web/wrangler.jsonc');
+if (process.env.SP_SCENARIO === 'api-only' && isWeb) process.exit(24);
 if (process.env.SP_SCENARIO === 'startup-signal' && !isWeb) process.kill(process.pid, 'SIGKILL');
 if (process.env.SP_SCENARIO === 'stubborn-child' && !isWeb) process.on('SIGTERM', () => {});
 const server = http.createServer((_req, res) => {
-  res.setHeader('Content-Type', 'application/json'); res.end('{"status":"ok"}');
+  res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({status:'ok',pid:process.pid}));
   if (isWeb) setTimeout(() => process.exit(23), 150);
 });
 server.listen(port, '127.0.0.1');
 `,
       );
       await chmod(stub, 0o700);
+      if (scenario === "api-only") {
+        await mkdir(join(fixture, "tests/integration"), { recursive: true });
+        await writeFile(
+          join(fixture, "tests/integration/probe.test.mjs"),
+          `
+import assert from 'node:assert/strict';
+assert.equal((await fetch(process.env.SP_API_URL+'/v1/health')).status,200);
+`,
+        );
+        await writeFile(
+          join(fixture, "tests/integration/persistence.test.mjs"),
+          `
+import assert from 'node:assert/strict';
+import {writeFile,readFile} from 'node:fs/promises';
+const {pid}=await (await fetch(process.env.SP_API_URL+'/v1/health')).json();
+if(process.env.SP_PERSIST_PHASE==='seed') await writeFile(process.env.SP_PERSIST_STATE,String(pid));
+else { assert.equal(process.env.SP_PERSIST_PHASE,'verify'); assert.notEqual(await readFile(process.env.SP_PERSIST_STATE,'utf8'),String(pid)); }
+`,
+        );
+      }
       const api = await freePort();
       const web = await freePort();
       child = spawn(
         process.execPath,
-        [join(fixture, "scripts/local-test.mjs"), "serve"],
+        [
+          join(fixture, "scripts/local-test.mjs"),
+          scenario === "api-only" ? "api" : "serve",
+        ],
         {
           env: {
             ...process.env,
@@ -80,11 +109,15 @@ server.listen(port, '127.0.0.1');
         child.once("error", no);
         child.once("exit", (code, signal) => yes({ code, signal }));
       });
-      assert.notEqual(result.code, 0, `worker exit 23 was masked: ${output}`);
-      assert.match(
-        output,
-        scenario === "startup-signal" ? /worker.*SIGKILL/i : /worker.*23/i,
-      );
+      if (scenario === "api-only") {
+        assert.equal(result.code, 0, output);
+      } else {
+        assert.notEqual(result.code, 0, `worker exit 23 was masked: ${output}`);
+        assert.match(
+          output,
+          scenario === "startup-signal" ? /worker.*SIGKILL/i : /worker.*23/i,
+        );
+      }
       await Promise.all(
         [api, web].map(async (port) => {
           const server = net.createServer();

@@ -8,8 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc -p web/tsconfig.json --noEmit",
-    "format": "prettier --check web tests e2e scripts package.json contracts/openapi.json",
-    "format:write": "prettier --write web tests e2e scripts package.json contracts/openapi.json",
+    "format": "prettier --check web tests e2e scripts package.json contracts/openapi.json playwright.config.ts",
+    "format:write": "prettier --write web tests e2e scripts package.json contracts/openapi.json playwright.config.ts",
     "lint": "npm run typecheck",
     "test": "node --test tests/unit/*.test.mjs tests/config/*.test.mjs",
     "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.mjs",
@@ -21,7 +21,8 @@
     "test:local": "node scripts/local-test.mjs",
     "test:local:integration": "node scripts/local-test.mjs integration",
     "test:local:e2e": "node scripts/local-test.mjs e2e",
-    "dev:tests": "node scripts/local-test.mjs serve"
+    "dev:tests": "node scripts/local-test.mjs serve",
+    "test:local:api": "node scripts/local-test.mjs api"
   },
   "dependencies": {
     "hono": "4.13.12"

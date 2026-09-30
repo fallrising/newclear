@@ -7,8 +7,8 @@ import net from "node:net";
 // Operates only on local workerd and its dedicated local persistence directory.
 const root = resolve(import.meta.dirname, "..");
 const mode = process.argv[2] ?? "all";
-if (!["all", "integration", "e2e", "serve"].includes(mode))
-  throw new Error("Expected all, integration, e2e or serve");
+if (!["all", "integration", "api", "e2e", "serve"].includes(mode))
+  throw new Error("Expected all, integration, api, e2e or serve");
 const apiPort = Number(process.env.SP_API_PORT ?? 8818);
 const webPort = Number(process.env.SP_WEB_PORT ?? 8817);
 const env = {
@@ -124,7 +124,7 @@ async function ready(url, processHandle) {
 }
 try {
   await free(apiPort);
-  await free(webPort);
+  if (mode !== "api") await free(webPort);
   await command(wrangler, [
     "d1",
     "migrations",
@@ -156,26 +156,29 @@ try {
     "api-local.log",
   );
   await ready(`${env.SP_API_URL}/v1/health`, api.child);
-  const web = await run(
-    wrangler,
-    [
-      "dev",
-      "--local",
-      "--config",
-      "web/wrangler.jsonc",
-      "--ip",
-      "127.0.0.1",
-      "--port",
-      String(webPort),
-      "--inspector-port",
-      "0",
-      "--var",
-      "LOCAL_OWNER_EMAIL:owner@example.test",
-      "--show-interactive-dev-session=false",
-    ],
-    "web-local.log",
-  );
-  await ready(`${env.SP_WEB_URL}/healthz`, web.child);
+  let web;
+  if (mode !== "api") {
+    web = await run(
+      wrangler,
+      [
+        "dev",
+        "--local",
+        "--config",
+        "web/wrangler.jsonc",
+        "--ip",
+        "127.0.0.1",
+        "--port",
+        String(webPort),
+        "--inspector-port",
+        "0",
+        "--var",
+        "LOCAL_OWNER_EMAIL:owner@example.test",
+        "--show-interactive-dev-session=false",
+      ],
+      "web-local.log",
+    );
+    await ready(`${env.SP_WEB_URL}/healthz`, web.child);
+  }
   if (mode === "serve") {
     console.log(
       `Local app: ${env.SP_WEB_URL}; API test URL: ${env.SP_API_URL}`,
@@ -189,7 +192,7 @@ try {
         `${result.worker} worker exited unexpectedly: ${result.code ?? result.signal}`,
       );
   } else {
-    if (mode === "all" || mode === "integration") {
+    if (mode === "all" || mode === "integration" || mode === "api") {
       const files = (await readdir(resolve(root, "tests/integration")))
         .filter(
           (name) =>
@@ -238,7 +241,7 @@ try {
         "tests/integration/persistence.test.mjs",
       ]);
       delete env.SP_PERSIST_PHASE;
-      await ready(`${env.SP_WEB_URL}/healthz`, web.child);
+      if (web) await ready(`${env.SP_WEB_URL}/healthz`, web.child);
     }
     if (mode === "all" || mode === "e2e")
       await command(resolve(root, "node_modules/.bin/playwright"), ["test"]);

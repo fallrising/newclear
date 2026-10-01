@@ -2,6 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
+- Experimental addendum：2026-10-02，Agent Computer（AC）設計提案；見 §2.4，未實作、未執行實機驗收。
 - Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
@@ -55,7 +56,17 @@ Owner 先要求在 newclear 新增 agent 平台並撰寫 SDD，於 2026-09-21 �
 
 ### 2.3 非目標
 
-MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、手機／桌面 computer-use、模型訓練／推論服務、任意第三方 agent 一鍵相容、跨節點 live migration、SaaS 計費、平台代管公開註冊、VM 主機安裝自動化或自動 merge／部署成果。
+M0–M4 的 coding MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、手機／桌面 computer-use、模型訓練／推論服務、任意第三方 agent 一鍵相容、跨節點 live migration、SaaS 計費、平台代管公開註冊、VM 主機安裝自動化或自動 merge／部署成果。
+
+### 2.4 Agent Computer 實驗（AC，Proposed）
+
+2026-10-02 依 owner 指示，另立受限的 desktop computer-use 實驗，以 CocoonBox 參考畫面的功能效果為目標；詳細方案與 AC 驗收唯一入口為 [docs/AGENT-COMPUTER.md](docs/AGENT-COMPUTER.md)。本次只交付文件，並不授權安裝、VM 啟動、模型呼叫、網路變更或部署。
+
+範圍是單 operator、單 Linux/KVM worker：外部 MCP client 驅動 guest 的可見 Chromium／桌面工具，工作台同步顯示同一個桌面、工具事件與控制權；區分 Disconnect、Save now／Checkpoint、Hibernate／Restore、Branch 與 Release。先證明同一環境的觀看／控制，再驗證生命週期；headless CDP smoke、靜態 UI 或 shell 代寫 GUI 結果都不算完成。
+
+這是 §2.3 之外的獨立實驗，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
+
+本文件其他章節的 MVP、介面、狀態與 AT-xx 均仍指 coding 主線；AC 使用獨立能力宣告與 AC-AT-xx 驗收，不能用本次文件、舊 M0 證據或上游 README 代替其實機證據。手機、通用多租戶桌面、原生 macOS 外殼、GPU／4K 效能保證及跨節點遷移仍不在此實驗內。
 
 ## 3. 使用者故事與成功條件
 
@@ -445,6 +456,10 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 M0 若無法在隔離 guest 可靠執行 Agent Server，可評估外部 agent loop + sandbox tools 的替代方案，但需更新 ADR、資料與故障契約；不得以 host 上直接跑 agent 作為悄悄 fallback。M0 未解的 hard gate 不靠 mock 的通過宣告完成。
 
 M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(schedule_id, scheduled_at)` 唯一；預設同 automation 不重疊執行、missed schedule 最多補一次。自動化只建立 run，不能繞過批准範圍／預算。第一版不同時引入上游 automation scheduler 與本平台 scheduler 造成雙重權威。
+
+### 15.1 獨立 AC 實驗的進度
+
+[Agent Computer 計劃](docs/AGENT-COMPUTER.md) 的 AC-0 是本次文件設計；AC-1～AC-4 為後續、尚未執行的版本固定、桌面／工具／觀看整合及最終驗收。所有 AC 實機 gate 目前均為 Not run。上表 M0–M6 的狀態保持不變，M3 仍是 coding 主線最早未完成的里程碑，M6 的完整平台 checkpoint／fork 整合也不因 AC 局部實驗而變成 Passed。
 
 ## 16. 待驗證項與主要風險
 

@@ -9,8 +9,15 @@
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
+## Agent Computer 實驗（2026-10-02，僅文件）
+
+新增 [Agent Computer 實驗計劃](docs/AGENT-COMPUTER.md)，以 CocoonBox 參考畫面的**功能效果**為目標：外部 Claude Code／MCP client 控制 Cocoon VM 內的可見桌面與 Chromium，operator 同時觀看同一個桌面，並可受控接管、保存、休眠、恢復與銷毀環境。
+
+**目前是 Proposed 設計，不是已可啟動的功能。** Headless browser／CDP smoke 只是前置能力，不能取代完整桌面與真實 Agent 操作驗收。實驗使用獨立的 AC 階段與驗收 ID，不更改既有 M0–M4 的狀態；不在本次啟動 VM、接入真實模型、變更主機或部署。下一階段須另行授權。
+
 ## 文件入口
 
+- [Agent Computer 實驗](docs/AGENT-COMPUTER.md)：目標效果、能力缺口、控制／觀看契約、分階段計劃與最終驗收。
 - [最新交接](docs/HANDOFF.md)：停止點、升級方式、測試資產與下一步。
 - [新視窗接續 prompt](docs/NEXT-PROMPT.md)：每個切片完成時更新的接續指示。
 - [M3 guest model transport](docs/M3-GUEST-MODEL.md)：啟用設定、SDK tool-call、credential 更新、cutoff 與真實 KVM 證據。

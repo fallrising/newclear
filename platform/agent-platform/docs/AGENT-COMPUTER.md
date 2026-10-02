@@ -1,6 +1,6 @@
 # Agent Computer — Cocoon 可見桌面實驗
 
-- Revision：AC-design-0.1，2026-10-02。
+- Revision：AC-design-0.2，2026-10-02。
 - Status：**Proposed / documentation only**。本次未建映像、未啟動 VM、未連接模型、未做實機驗收。
 - Scope：`fallrising/newclear/platform/agent-platform` 的獨立 AC 實驗；[SDD §2.4](../SDD.md#24-agent-computer-實驗acproposed) 是範圍入口。
 - Goal：做出 CocoonBox 參考畫面的功能效果，不以「成功開 VM」或 headless browser smoke 代替 Agent Computer。
@@ -18,7 +18,7 @@ Owner 提供的參考畫面包含 VM／連線管理、中央的 Linux 桌面與�
 | 右側 Agent | 外部 MCP client 的對話／工具活動與 computer ID 可對應；每步可回看 | 只顯示「完成」文字，沒有工具與結果證據 |
 | 工作結果 | 搜尋、選定結果、播放／全螢幕；以及鍵鼠操作原生編輯器並保存檔案 | 只點播放鍵、只看影片標題、以 shell 寫檔冒充 GUI |
 
-第一版可用 Web 工作台整合；外部 CLI 的訊息可經明確 adapter 投影，也可先用有同一 session 標識的相鄰 client 面板驗證。**最終截圖效果 gate 仍須交付整合工作台**，不能把兩個互不對應的視窗列為完整完成。原生 macOS 外殼、品牌像素復刻、音訊串流、GPU／4K 解碼效能、多租戶與手機 computer-use 不在本次範圍。
+第一版可用 Web 工作台整合；外部 CLI 的訊息依 §4.4 由官方 NDJSON 輸出投影，也可先用有同一 session 標識的相鄰 client 面板驗證。**最終截圖效果 gate 仍須交付整合工作台**，不能把兩個互不對應的視窗列為完整完成。原生 macOS 外殼、品牌像素復刻、音訊串流、GPU／4K 解碼效能、多租戶與手機 computer-use 不在本次範圍。
 
 ## 2. 既有基礎與真正缺口
 
@@ -93,6 +93,77 @@ Operator browser                         External agent on operator machine
 第一個可驗收 client 以外部 Claude Code／MCP client 為方向，實作前固定其版本、工具 manifest 與允許權限。模型認證留在 operator 的受控環境，不複製到 guest；預設開發仍用 mock，不因本文件自動使用現有登入或付費額度。
 
 外部 CLI 自己可能仍有本機 shell／檔案能力；**有 VM 不代表該 CLI 的所有行為都被隔離**。AC profile 必須限制本機工具，只授權指定的 bridge；不能停用的能力需明列並另經 owner 接受。原生 GUI 的視覺模型 adapter 與 Claude Code 的一般 browser MCP 能力分別驗收，不把名稱相同當成原生 computer-use protocol 已相容。
+
+### 4.4 Agent 事件的實際接入方案（待實作）
+
+**選用外部 Claude Code 的官方 print-mode 輸出，不假設它有可被工作台訂閱的 HTTP API。** 2026-10-02 查閱的 [headless 文件][claude-headless] 確認 `-p --output-format stream-json --verbose --include-partial-messages` 可輸出逐行 JSON 事件，並以 `result` 訊息回傳結果與 session metadata；[CLI reference][claude-cli] 另列出 `--resume`、`--tools` 與 `--strict-mcp-config`。此處只核對官方介面，**本輪沒有執行 CLI／模型，尚未選定或驗收 client binary 版本**。AC-1 必須記錄 `claude --version`、`--help`、實際事件 fixture 與 parser schema hash；缺少必要介面就停，不改抓 TUI 畫面冒充協定。
+
+| 邊界 | 本實驗擬議實作與約束 |
+| --- | --- |
+| Launcher → CLI | Mac／controller 的受控 launcher 以固定 executable 與 argv 啟動子程序，分開讀 stdout NDJSON 與 stderr；一個 turn 一個受控程序。模型認證留在該外部環境，不能送入 guest。續接須明確使用原 `session_id`，不得用「最近一個對話」猜測；每次仍重新核對 computer binding、epoch、lease 與 operator 新指令。 |
+| CLI → event adapter | 只投影可顯示的 user／assistant text、tool-use／tool-result 與 result；streaming text delta 是暫態顯示，完整訊息到達時取代暫態文字，避免重複追加。無法識別的事件保存受限診斷，不推論成功；沒有 final result 的程序退出標 `interrupted`。不輸出 thinking block、憑證、完整 provider payload 或任意 stderr。 |
+| Bridge → operation journal | 工具 admission 時先持久化 `operation_id`、computer binding、epoch、參數 hash，再派送到 guest；bridge 的 started／completed／failed／unknown 才是操作事實，CLI 的「完成」文字不能覆寫它。每個工具結果回傳 `operation_id`。 |
+| 兩種事件的關聯 | 自有 event envelope 固定 `computer_id`、`binding_generation`、`agent_session_id`、`source`、`source_event_id`、`seq`、`kind`、`operation_id`（可空）。CLI 的 `tool_use_id` 先和其 tool result 配對，再從結果中的 `operation_id` 關聯 journal；不假設 MCP request ID 等於 CLI tool-use ID，也不靠時間或同名工具猜配。未取得結果的呼叫顯示 `uncorrelated`，仍可獨立查看同一 computer 的 journal。 |
+| Adapter → 工作台 | launcher 經私網、session-scoped 認證通道送到自有 controller；controller 驗證來源與 binding 後配置單調 `seq`，持久化脫敏事件，再以 SSE 投影至右側。這些 ingestion／SSE 端點是待實作的本專案介面，不是 Claude Code 或 sandboxd 現有 API。operator 輸入由 launcher 記錄，不從模型回覆反推。 |
+| 重接／接管 | 以持久 cursor 重播「顯示事件」，不得重新執行模型或工具。來源 UUID 存在時用它去重，否則用持久的 producer generation＋offset；buffer 溢位或遺失就記 `event_gap`。接管先在 bridge 撤權，再停止／中斷 launcher 程序；殺程序不是 guest 動作已停止的證據，仍須按 §4.2 對帳。 |
+
+CLI profile 使用 `--tools ""` 限制一般 built-in 工具，以及 `--strict-mcp-config` 載入唯一受控 bridge；依 pinned help 核對可能保留的終止工具。`--allowedTools` 是免詢問授權，不是「其他工具皆不存在」的保證，不能單獨拿它當隔離。profile 必須另外排除本機 Chrome integration、任意 hooks／plugins／自動載入的專案設定；不能達到時 AC-1 阻塞，不使用 bypass-permissions。工具的最後授權仍在 bridge，不在模型 prompt。
+
+**AC-AT-12 補充驗收：** 用離線合成 NDJSON 測試 parser、重複 delta／完整訊息、未知事件、錯誤 session、event gap 與重連；fixture 測試不啟動 CLI。後續 opt-in 真 client 驗收須把至少一次 browser 操作及一次 desktop 操作的 tool result 關聯到 journal `operation_id`。對話、工具結果、同一桌面與 box 狀態須在同一工作台出現；斷流不冒充持續運作，也不自動重新派送。
+
+### 4.5 Screenshot、輸入、逾時與錯誤契約（設計基準）
+
+MCP wire baseline 選用固定的 [2025-06-18 tools specification][mcp-wire]；這不是宣稱它是最新 revision。實作時保存 initialize 協商版本、client／server 版本及工具 schema hash；不支援下列 image／result 契約時停止，不靜默降級成純文字。`computer_screenshot`、`computer_pointer`、`computer_key`、`computer_text`、`computer_operation_status` 是**本 bridge 擬議工具名稱**，不是聲稱 sandbox-mcp 已提供它們。
+
+| 契約 | 要求 |
+| --- | --- |
+| 圖像內容 | `computer_screenshot` 回傳 MCP image content：`type: image`、`mimeType: image/png`、`data: <base64 PNG>`，不是 URL 或 data-URI；metadata 放 `structuredContent`，並在 text content 放相同 metadata 的 JSON，供 client 明確讀取。原始 base64 不寫進公開 log。 |
+| 必要 metadata | `computer_id`、`binding_generation`、`display_id`、`display_revision`、`frame_id`、`captured_at`（UTC）、`input_seq`、`control_epoch`、`native_width`、`native_height`、`image_width`、`image_height`、`sha256`。hash 是實際回傳 PNG bytes 的 SHA-256；授權取自 server binding，不信任 client 自報 metadata。 |
+| E1 display profile | 原生與輸出皆為 1280×800、device scale 1、原點左上、x 向右／y 向下、整數像素、無裁切。pointer 範圍為 `0 <= x < 1280`、`0 <= y < 800`。不暗中縮圖、裁圖或 clamp 越界座標；PNG 超過實驗 profile 的 5 MiB 上限就回 `IMAGE_TOO_LARGE`。日後縮放需新 profile，明列轉換並重驗收。 |
+| 輸入前置 | pointer／key／text 都攜帶最新 `frame_id` 與 `control_epoch`；bridge 核對仍是該 binding／display revision、觀測後沒有其他 writer input、frame 未超過 30 秒，再於單 writer 臨界區派送。resize／restore／接管會使既有 frame 失效。過期回 `STALE_FRAME`，重取畫面後由 agent 重新判斷，而非自動重送原動作。 |
+| 元素 ref | browser ref 與 `snapshot_id`、browser target、document revision、binding generation 綁定。navigation、target 關閉或新的控制權使舊 ref 失效；用過的 ref 不跨下一次寫入沿用，先重新 snapshot。無法確認目標還一致時回 `STALE_REF`，不能 fallback 成猜座標。 |
+| 鍵盤／文字 | `computer_key` 只接受版本化 allowlist 中的鍵與有限組合，保證 finally 釋放按鍵；`computer_text` 是有大小上限的 Unicode 鍵盤輸入，不接受 shell、檔案路徑寫入或 DOM script。中文輸入／IME 相容性另驗，E2 先用固定 ASCII fixture。operator 系統剪貼簿不共享。 |
+
+上述 frame 檢查只能拒絕可觀測的過期狀態，**不保證消除擷取到 input 注入之間的 TOCTOU**：網頁 timer／外部視窗仍可能自行變動。涉及外部提交時仍需明確確認；高風險動作不能只靠 frame age 放行。viewer CSS 縮放由 viewer input adapter 轉回原生像素後，也必須通過同一組 frame／epoch 檢查。
+
+以下數字是本實驗的可調設計預設，不是上游 SLA；client 只可縮短，不能延長 server 上限。有效期限取「呼叫期限、工具上限、剩餘 lease」最小值；等待使用 monotonic clock，恢復時再核對持久化 UTC deadline。
+
+| 類型 | 初始 server 上限 | 到期處理 |
+| --- | --- | --- |
+| Relay 連線／screenshot | 各 5 秒 | 唯讀操作可重新觀測；連線失敗不另建 browser／VM。 |
+| Browser snapshot／operation status | 10 秒 | 回明確錯誤，UI 不將上一次內容標 live。 |
+| Pointer／key／text | 5 秒 | 送出前失敗可證明 `not_started`；已派送卻無 ACK 則 `unknown`，不得重試。 |
+| Browser navigation／結構化動作 | 30 秒 | timeout 不等於網站沒收到動作；保留 operation journal 並重新觀測。 |
+| Pause／takeover drain | 5 秒 | admission 先關閉；不能確認在途 input 結束時進 `control_transition_unknown`，不放行新 writer。 |
+| Checkpoint／hibernate／restore／release | 120 秒 | ACK 遺失只查詢 operation／runtime 狀態；沒有停止／清理證據不標完成，不延長 lease。 |
+
+格式錯誤、未知工具等使用 MCP／JSON-RPC protocol error；已識別工具的授權、過期、relay、guest 與執行失敗使用 `isError: true` 的 tool result。應用層錯誤結構為 `error_code`、安全的 `message`、`operation_id`（尚未 admission 可空）、`execution_state`（`not_started / completed / unknown`）、`retryable`、`next_action`。不要把自訂字串當成新的 MCP 數值錯誤碼。
+
+| `error_code` | 必要語意 |
+| --- | --- |
+| `FORBIDDEN`／`STALE_BINDING`／`STALE_CONTROL_EPOCH` | 拒絕後不得降權重試或改 target；重新授權／綁定，舊 writer 保持失效。 |
+| `STALE_FRAME`／`STALE_REF`／`OUT_OF_BOUNDS`／`IMAGE_TOO_LARGE` | 本次 input 未派送；要求重新觀測或修正 profile，不盲點擊。 |
+| `TARGET_UNAVAILABLE`／`DEADLINE_EXCEEDED`／`LEASE_EXPIRED` | 區分未派送與派送後未知；lease 到期關閉所有新操作，cleanup 另行對帳。 |
+| `EXTERNAL_EFFECT_UNKNOWN`／`CONTROL_TRANSITION_UNKNOWN`／`RELEASE_UNKNOWN` | `retryable: false`；保持阻塞，查 journal／runtime／外部 fixture，由 operator 確認結果。不得靠換新 operation ID 繞過 unknown gate。 |
+
+同一 operation 的重複查詢只回既存結果，不再次執行；對外部網站不宣稱 exactly-once。範例為「表單可能已送出、ACK 遺失」的 tool result，下面兩份 metadata 必須相同：
+
+```json
+{
+  "isError": true,
+  "content": [{"type": "text", "text": "{\"error_code\":\"EXTERNAL_EFFECT_UNKNOWN\",\"message\":\"Submission acknowledgement missing; reconcile before another write.\",\"operation_id\":\"op-fixture-17\",\"execution_state\":\"unknown\",\"retryable\":false,\"next_action\":\"reconcile_then_operator_decision\"}"}],
+  "structuredContent": {
+    "error_code": "EXTERNAL_EFFECT_UNKNOWN",
+    "message": "Submission acknowledgement missing; reconcile before another write.",
+    "operation_id": "op-fixture-17",
+    "execution_state": "unknown",
+    "retryable": false,
+    "next_action": "reconcile_then_operator_decision"
+  }
+}
+```
+
+**AC-AT-10／11 補充驗收：** 合成測試涵蓋 1280×800 四角、越界、PNG 大小限制、30 秒 stale、resize、old epoch／ref、relay 在 admission 前後斷線、guest crash、TTL 到期與 ACK 遺失。fixture server 用 submission counter 證明未知結果沒有重送。這些目前都是驗收設計；本輪只檢查文件與 JSON 範例，沒有執行 guest 或 browser 測試。
 
 ## 5. 生命週期：電腦不等於聊天 session
 
@@ -169,7 +240,7 @@ CDP、VNC、desktop input、sandboxd 不公開到 Internet；入口經受認證�
 | AC-AT-09 分支隔離 | 從保存點分支，parent／child 同名文件不同內容，跨 session 工具與 viewer token 被拒 | 兩組 binding／hash、parent 不變、token 隔離 |
 | AC-AT-10 清理與故障 | release 後 VM／claim／資源／relay 清零；重複 release 不另作用；未知 allocation／ACK 不重複配置或輸入 | 獨立 stop proof、operation journal、unknown／超時場景 |
 | AC-AT-11 網路與內容 | 未批准站點、metadata／私網被阻擋；惡意頁面不能更改 bridge target／policy；resize／越界座標被拒 | proxy denial、跨 session／stale revision 拒絕、無秘密公開輸出 |
-| AC-AT-12 整合工作台 | 一個工作台具 computer 管理、live desktop、可對應的 agent 對話／工具紀錄；每個 disabled／unknown 有原因 | 實際全畫面錄影、狀態轉換、owner 逐項核對 |
+| AC-AT-12 整合工作台 | 一個工作台具 computer 管理、live desktop、可對應的 agent 對話／工具紀錄；每個 disabled／unknown 有原因 | 實際全畫面錄影、狀態轉換、§4.4 事件／operation 關聯與 replay fixture、owner 逐項核對 |
 
 AC-AT-05 先以可控制的 guest 影片 fixture 做穩定驗證；真實 YouTube 搜尋／播放是額外、明確允許的展示段。網站阻擋、廣告、登入或網路政策不滿足時記 blocked／not run，不能繞過，也不能宣稱 YouTube 展示已通過。**只有真實外部 client、可見桌面、非 DOM GUI、生命週期與整合工作台均有證據，才能稱為功能等價展示完成。** 文件審閱通過不代表這些 gate passed。
 
@@ -189,3 +260,9 @@ AC-AT-05 先以可控制的 guest 影片 fixture 做穩定驗證；真實 YouTub
 [mcp]: https://github.com/cocoonstack/sandbox/blob/90230c072781a387114bff4bf37f9907d285702b/docs/mcp.md
 [tools]: https://github.com/cocoonstack/sandbox/blob/90230c072781a387114bff4bf37f9907d285702b/mcp/tools.go
 [egress]: https://github.com/cocoonstack/sandbox/blob/90230c072781a387114bff4bf37f9907d285702b/docs/egress.md
+
+補充介面來源查閱日：2026-10-02。CLI 文件是當日官方說明、沒有不可變版本標記；client binary 仍待 AC-1 釘選。MCP wire 使用下列固定 revision；§4.4／4.5 的 launcher、事件投影、工具名稱、timeout 與錯誤字串均為本專案設計，不是上游已實作承諾。
+
+[claude-headless]: https://code.claude.com/docs/en/headless
+[claude-cli]: https://code.claude.com/docs/en/cli-reference
+[mcp-wire]: https://modelcontextprotocol.io/specification/2025-06-18/server/tools

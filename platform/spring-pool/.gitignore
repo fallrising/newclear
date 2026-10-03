@@ -1,0 +1,16 @@
+node_modules/
+.team/
+.cursor/
+.grok/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+api/target/
+api/build/
+dist/
+artifacts/
+test-results/
+playwright-report/
+*.local.json

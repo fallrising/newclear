@@ -71,6 +71,8 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 `npm ci`, `npm run typecheck`, `npm test` in `platform/edge-ops/backend`; Go 1.24.7 `gofmt` check, `go vet`, `go test` in `platform/edge-ops/agent`; offline contract vectors only, no Cloudflare credentials or deploy |
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 
+| Spring Pool | `spring-pool-ci.yml` | `platform/spring-pool/**`, `.github/workflows/spring-pool-ci.yml` | Pinned Node/Rust; native validation/export tests, type/format/build, compiled Wasm + local workerd/D1 integration, three browser journeys; synthetic fixtures only, no Cloudflare token or deploy |
+
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
 ## Steps

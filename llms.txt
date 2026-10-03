@@ -1,0 +1,55 @@
+# newclear
+
+> `fallrising`'s public technical portfolio: 23 projects that were previously scattered across separate repositories, now canonical here. Products, gateways and systems software, platform services, desktop applications, specifications and labs.
+
+This file is the single-fetch index. Each entry links to the project's own `llms.txt` where one exists, and otherwise to the project directory. A project's own file is the one to trust about that project: it declares status, interfaces, entrypoint, auth and where the machine-readable contract lives. See [docs/specs/llms-txt.md](https://github.com/fallrising/newclear/blob/main/docs/specs/llms-txt.md) for the format and the required keys.
+
+Capability files exist so far for four projects — `systems/clarkq`, `products/kith`, `systems/snail` and `products/goku` — chosen because they fail differently. Adoption is deliberately incomplete; the remaining entries link to their README, which may or may not describe the interface.
+
+Several projects here are approved specifications with no runnable code. Where a project has a capability file, its `Status` line says so. Where it does not, check its README before assuming anything is callable.
+
+Private work lives in a separate repository, `kernel`, and is not indexed here.
+
+## Products
+
+- [products/goku](https://github.com/fallrising/newclear/blob/main/products/goku/llms.txt): bookmark ingestion and management — HTTP API over SQLite, CLI, MQTT consumer, React UI. Production, no auth. Has a capability file.
+- [products/phark](https://github.com/fallrising/newclear/blob/main/products/phark/README.md): social stream deck — accounts, interactions, search, media, moderation. Spring, React, SQLite.
+- [products/kith](https://github.com/fallrising/newclear/blob/main/products/kith/llms.txt): group chat where humans and LLM agents are first-class members of one room — MCP, HTTP, WebSocket on Cloudflare Workers. Specification complete, not deployed. Has a capability file.
+
+## Gateways and systems software
+
+- [gateways/pokercase](https://github.com/fallrising/newclear/blob/main/gateways/pokercase/README.md): multi-provider LLM gateway — routing, subscription import, UI and TUI. Rust, SQLite. Client setup is in [docs/CLIENTS.md](https://github.com/fallrising/newclear/blob/main/gateways/pokercase/docs/CLIENTS.md).
+- [systems/clarkq](https://github.com/fallrising/newclear/blob/main/systems/clarkq/llms.txt): HTTP FIFO message queue in Go — durability, auth, encryption, metrics, three client SDKs. Production, v1.5.1. Has a capability file.
+- [systems/snail](https://github.com/fallrising/newclear/blob/main/systems/snail/llms.txt): RESP2-compatible in-memory data server in Rust, focused on C10K/C100K/io_uring. Partial — command set works, upper connection limits unproven. Has a capability file.
+- [systems/ojbquay](https://github.com/fallrising/newclear/blob/main/systems/ojbquay/README.md): Kafka-based enterprise messaging control and data plane. Java, gRPC. The interface contract is [proto/ojbk/v1/](https://github.com/fallrising/newclear/blob/main/systems/ojbquay/proto/ojbk/v1/). Apache-2.0.
+- [systems/wotar](https://github.com/fallrising/newclear/blob/main/systems/wotar/README.md): MQTT application-layer end-to-end encryption client and protocol. Python. Protocol in [secure-mqtt-e2ee/docs/protocol.md](https://github.com/fallrising/newclear/blob/main/systems/wotar/secure-mqtt-e2ee/docs/protocol.md).
+- [systems/mkfk](https://github.com/fallrising/newclear/blob/main/systems/mkfk/README.md): Kafka-inspired distributed log — partition WAL, Raft, ISR, idempotent producer, consumer groups. Specification baseline, not implemented. Schemas in [api/schemas/](https://github.com/fallrising/newclear/blob/main/systems/mkfk/api/schemas/).
+
+## Platform and applications
+
+- [platform/fanzloud](https://github.com/fallrising/newclear/blob/main/platform/fanzloud/README.md): cloud coding-agent platform and BYOS control layer. Rust. HTTP surface specified in [docs/specs/SPEC-T005B-p0-http-api.md](https://github.com/fallrising/newclear/blob/main/platform/fanzloud/docs/specs/SPEC-T005B-p0-http-api.md).
+- [platform/dim-gate](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/README.md): CMDB-centred enterprise operations self-service front end. Specification baseline, not implemented; [docs/openapi.json](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/docs/openapi.json) is generated from Zod and verified in CI.
+- [platform/ice-maker](https://github.com/fallrising/newclear/blob/main/platform/ice-maker/README.md): local-first personal engineering knowledge compiler — document ingestion and reproducible publishing. Python, CLI and FastAPI.
+- [platform/local-ocr-services](https://github.com/fallrising/newclear/blob/main/platform/local-ocr-services/README.md): self-hostable CPU-first OCR HTTP services. Python, Docker. Endpoints, headers and response shape in [docs/api.md](https://github.com/fallrising/newclear/blob/main/platform/local-ocr-services/docs/api.md).
+- [platform/prism](https://github.com/fallrising/newclear/blob/main/platform/prism/README.md): Go service with an SPI and a console API. References: [19-CONSOLE-API-REFERENCE.md](https://github.com/fallrising/newclear/blob/main/platform/prism/docs/sdd/19-CONSOLE-API-REFERENCE.md), [14-SPI-GO-REFERENCE.md](https://github.com/fallrising/newclear/blob/main/platform/prism/docs/sdd/14-SPI-GO-REFERENCE.md), [02-COMPATIBILITY-CONTRACT.md](https://github.com/fallrising/newclear/blob/main/platform/prism/docs/sdd/02-COMPATIBILITY-CONTRACT.md).
+- [apps/loom](https://github.com/fallrising/newclear/blob/main/apps/loom/README.md): AI-native canvas, terminal and document workspace. Tauri, Rust, React. Desktop; no documented external interface.
+- [apps/flowshot](https://github.com/fallrising/newclear/blob/main/apps/flowshot/README.md): local-first, strictly read-only Markdown annotation desktop app. Desktop; contracts in [contracts/](https://github.com/fallrising/newclear/blob/main/apps/flowshot/contracts/).
+- [apps/cloudform](https://github.com/fallrising/newclear/blob/main/apps/cloudform/README.md): Terraform-schema-driven cloud provisioning with a WYSIWYG form designer. TypeScript. API design in [docs/04-api-design.md](https://github.com/fallrising/newclear/blob/main/apps/cloudform/docs/04-api-design.md).
+- [apps/cms-scaffold](https://github.com/fallrising/newclear/blob/main/apps/cms-scaffold/README.md): reusable CMS kernel — Java API with front, back and admin surfaces. The contract source is a handwritten [openapi.yaml](https://github.com/fallrising/newclear/blob/main/apps/cms-scaffold/services/cms-api/src/main/resources/openapi/openapi.yaml).
+- [tools/streaming-converter](https://github.com/fallrising/newclear/blob/main/tools/streaming-converter/README.md): FFmpeg HLS conversion, cleanup, Nginx serving and a web player. Bash.
+
+## Specifications, examples and labs
+
+- [specs/fleet](https://github.com/fallrising/newclear/blob/main/specs/fleet/README.md): public specification for service lifecycle — `fleet.yaml`, Compose, outbound agents, Cloudflare. JSON Schemas in [schemas/](https://github.com/fallrising/newclear/blob/main/specs/fleet/schemas/). Apache-2.0.
+- [examples/bite-pi](https://github.com/fallrising/newclear/blob/main/examples/bite-pi/README.md): public Pi agent demonstration consuming a published platform contract. A consumer, not a service.
+- [labs/bee-swarm](https://github.com/fallrising/newclear/blob/main/labs/bee-swarm/README.md): AI role collaboration design and workflow simulation. Flask; [docs/09-appendix/api-reference.md](https://github.com/fallrising/newclear/blob/main/labs/bee-swarm/docs/09-appendix/api-reference.md).
+- [labs/aweshore](https://github.com/fallrising/newclear/blob/main/labs/aweshore/README.md): Go HTTP service. Minimal documentation.
+
+## Optional
+
+- [README.md](https://github.com/fallrising/newclear/blob/main/README.md): the human-facing catalog, in Traditional Chinese, with the technology stack per project.
+- [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md): portfolio framing of the same projects.
+- [MIGRATION.md](https://github.com/fallrising/newclear/blob/main/MIGRATION.md): how these projects were consolidated from separate repositories into this monorepo.
+- [docs/specs/monorepo-ci.md](https://github.com/fallrising/newclear/blob/main/docs/specs/monorepo-ci.md): which components have root-level CI and what those workflows do and do not cover.
+- [refs/INDEX.md](https://github.com/fallrising/newclear/blob/main/refs/INDEX.md): 67 repositories written by other people, kept as an index of notes and tags rather than forks. Nothing here is this author's work.
+- [LICENSE](https://github.com/fallrising/newclear/blob/main/LICENSE): MIT at the root. `systems/ojbquay` and `specs/fleet` are Apache-2.0 per their own `LICENSE`.

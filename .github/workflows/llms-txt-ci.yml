@@ -1,0 +1,34 @@
+name: llms.txt CI
+
+on:
+  pull_request:
+    paths:
+      - "**/llms.txt"
+      - .github/scripts/validate_llms_txt.py
+      - .github/workflows/llms-txt-ci.yml
+      - docs/specs/llms-txt.md
+  push:
+    branches: [main]
+    paths:
+      - "**/llms.txt"
+      - .github/scripts/validate_llms_txt.py
+      - .github/workflows/llms-txt-ci.yml
+      - docs/specs/llms-txt.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: llms-txt-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 .github/scripts/validate_llms_txt.py

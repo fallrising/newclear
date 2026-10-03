@@ -1,0 +1,37 @@
+# Goku
+
+> Bookmark ingestion and management, in four deployable pieces: a Go HTTP API over SQLite, a Go CLI, an MQTT consumer that batches URLs into the API, and a React web UI. Built for bulk import of large browser exports.
+
+Status: production
+Interfaces: http, cli
+Entrypoint: API on `:8080`, base path `/api/v1`; `goku` CLI binary; consumer subscribes to an MQTT topic and posts to the API
+Auth: none. The API has no authentication of any kind — do not expose it to an untrusted network.
+Spec: none — no OpenAPI document exists. The route list below was read from `api/api/v1/router.go` and is authoritative.
+
+This directory has no `README.md`; each of the four components has its own. There is no single place that describes how they fit together, so: the CLI and the consumer are both producers against the API, the API owns the SQLite database, and the web UI talks to the API over HTTP.
+
+The API serves five bookmark operations plus a health check, all under `/api/v1`:
+
+- `POST /api/v1/upload` — upload new bookmarks (the batch entry point the consumer uses)
+- `GET /api/v1/bookmarks` — retrieve all bookmarks
+- `GET /api/v1/bookmark?url=...` — retrieve one bookmark by URL
+- `PUT /api/v1/bookmark` — update an existing bookmark
+- `DELETE /api/v1/bookmark/:id` — delete by ID
+- `GET /api/v1/health` — health check
+
+**`api/README.md` lists these paths without the `/api/v1` prefix and omits the health check.** The code mounts the whole group at `/api/v1` (`api/cmd/api/main.go`), so the README's paths return 404. `consumer/README.md` repeats the error in its `API_ENDPOINT=http://your-goku-api:8080/upload` example; the working value ends in `/api/v1/upload`. Use the list above, not either README, until they are corrected.
+
+The CLI covers `add`, `get`, `list`, `search`, `update`, `delete`, `purge`, `import`, `export`, `tag`, `fetch`, `sync` and `stats`, with multi-user profiles and a bulk-import path intended for 100k+ bookmarks.
+
+## Interface reference
+
+- [api/README.md](https://github.com/fallrising/newclear/blob/main/products/goku/api/README.md): build, run, Docker and the configuration environment variables (`PORT`, `DB_PATH`). Its endpoint list is stale — see above.
+- [cli/README.md](https://github.com/fallrising/newclear/blob/main/products/goku/cli/README.md): the CLI's features, installation and worked examples for import, search, export and profiles. The most complete document in the project.
+- [consumer/README.md](https://github.com/fallrising/newclear/blob/main/products/goku/consumer/README.md): the MQTT consumer's configuration — `MQTT_BROKER`, `TOPIC`, `CLIENT_ID`, `BATCH_SIZE`, `API_ENDPOINT` — settable by environment variable or `config.json`.
+- [api/api/v1/router.go](https://github.com/fallrising/newclear/blob/main/products/goku/api/api/v1/router.go): the route definitions themselves, and the reason the list above differs from the README.
+
+## Optional
+
+- [cli/docs/PRD.md](https://github.com/fallrising/newclear/blob/main/products/goku/cli/docs/PRD.md): the CLI's product requirements.
+- [web/README.md](https://github.com/fallrising/newclear/blob/main/products/goku/web/README.md): a stub. The UI is a Vite, React and TypeScript application using TipTap and axios; read `web/package.json` instead.
+- [cli/scripts/README.md](https://github.com/fallrising/newclear/blob/main/products/goku/cli/scripts/README.md): maintenance and validation scripts.

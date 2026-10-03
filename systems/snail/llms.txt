@@ -1,0 +1,28 @@
+# rudis
+
+> Rust in-memory data server speaking RESP2 over TCP, wire-compatible with Redis. `redis-cli`, `redis-benchmark` and mainstream Redis SDKs connect with no adaptation. The focus is connection scale — C10K, C100K and io_uring — rather than feature parity.
+
+Status: partial
+Interfaces: wire
+Entrypoint: TCP, RESP2. Connect with any Redis client.
+Auth: none
+Spec: none applicable — the interface is the Redis wire protocol. The command coverage table in the README is the contract, and [docs/STATUS.md](https://github.com/fallrising/newclear/blob/main/systems/snail/docs/STATUS.md) holds the full list and the gaps.
+
+The directory is `systems/snail`; the project calls itself `rudis`. Both names refer to this server.
+
+`partial` means the protocol and the M1 command set work, and scale milestones are still open: M0 skeleton and M1 full semantics with multi-core are done with the C10K gate passing; M2 (C100K hold) and M3 (C1M, io_uring behind `RUDIS_IO_URING=1`) are in progress. Treat the command coverage as real and the upper connection limits as unproven.
+
+Supported in M1, by category: server (`PING`, `ECHO`, `HELLO`, `INFO`, `DBSIZE`, `FLUSHDB`, `CONFIG GET`, `COMMAND`), string (`GET`, `SET`, `INCR`, `MGET`, `MSET`, `APPEND`, `GETRANGE`), list (`LPUSH`, `RPOP`, `LRANGE`, `LTRIM`, `LINDEX`), hash (`HSET`, `HGET`, `HGETALL`, `HINCRBY`, `HSCAN`), set (`SADD`, `SINTER`, `SUNION`, `SMEMBERS`, `SPOP`, `SSCAN`), sorted set (`ZADD`, `ZRANGE`, `ZRANGEBYSCORE`, `ZRANK`, `ZPOPMIN`) and keys (`DEL`, `EXPIRE`, `TTL`, `SCAN`, `TYPE`, `RENAME`).
+
+Not Redis. There is no persistence, no replication, no cluster mode, no pub/sub and no Lua. Anything outside the table above is absent rather than degraded, and the README's "Semantic differences from standalone Redis" section lists where behaviour diverges for commands that do exist. A client that assumes a full Redis will fail on the first unsupported command, so check the table before pointing an existing application at it.
+
+## Interface reference
+
+- [README, "Supported commands (M1)" and "Semantic differences from standalone Redis"](https://github.com/fallrising/newclear/blob/main/systems/snail/README.md): the command table and every known behavioural divergence. Read both before connecting an existing client.
+- [docs/STATUS.md](https://github.com/fallrising/newclear/blob/main/systems/snail/docs/STATUS.md): complete command coverage, known limitations and what each milestone still owes. More precise than the README table.
+- [README, "Configuration"](https://github.com/fallrising/newclear/blob/main/systems/snail/README.md): precedence is CLI flags, then `RUDIS_*` environment variables, then the TOML file, then built-in defaults.
+
+## Optional
+
+- [docs/design.md](https://github.com/fallrising/newclear/blob/main/systems/snail/docs/design.md): the shard and event-loop architecture behind the connection-scale work.
+- [scripts/](https://github.com/fallrising/newclear/blob/main/systems/snail/scripts/): the C10K, C100K and C1M benchmarks, plus the sysctl tuning script used to reproduce the gates.

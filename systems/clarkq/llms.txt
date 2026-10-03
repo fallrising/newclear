@@ -1,0 +1,29 @@
+# clarkQ
+
+> Lightweight HTTP message queue in Go. Named FIFO queues over a small REST API, with optional WAL durability, API-key/JWT auth, envelope encryption, multi-node sharding and Prometheus metrics. Released and running; v1.5.1.
+
+Status: production
+Interfaces: http, library
+Entrypoint: HTTP listener on `:8080`; API base path `/api/v1`; admin UI at `/ui/`
+Auth: none by default. When configured, every `/api/*` route requires an API key (`X-API-Key`, or `Authorization: Bearer`) and/or a JWT bearer token; `/health` and `/metrics` stay public. JWT `scope`/`roles` claims carry a per-queue ACL in the form `queue:name:action`.
+Spec: none — no OpenAPI document exists. The endpoint table in the README is the contract.
+
+Use it for short-lived buffering, job handoff between services, worker pools and local development. Queue names match `[a-zA-Z0-9_-]`, 1–64 characters, case-sensitive, and are created lazily on first write.
+
+Do not use it as a durable event log or for ordered replay: a consumed message is removed, there is no consumer group, no offset and no replay. For a partitioned log with consumer groups see [systems/mkfk](https://github.com/fallrising/newclear/blob/main/systems/mkfk/), and for Kafka-based enterprise messaging see [systems/ojbquay](https://github.com/fallrising/newclear/blob/main/systems/ojbquay/).
+
+Nine HTTP operations, all under `/api/v1` except the four public paths: enqueue (`POST /queue/{name}`), consume (`GET /queue/{name}`, removes unless `peek=true`, long-polls up to 30s with `timeout=N`), clear (`DELETE /queue/{name}`), list queues, JSON metrics, cluster membership, crypto config and public key, plus public `/health`, `/version`, `/metrics` and `/ui/`.
+
+## Interface reference
+
+- [README, "API overview"](https://github.com/fallrising/newclear/blob/main/systems/clarkq/README.md): the endpoint table, request and response bodies, status codes, auth headers and the queue-name rules. The section an agent needs before calling anything.
+- [docs/USAGE.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/docs/USAGE.md): task-oriented walkthroughs for the common flows.
+- [configs/clarkq.example.yaml](https://github.com/fallrising/newclear/blob/main/systems/clarkq/configs/clarkq.example.yaml): every configuration key with its default. Environment variables override file values.
+- [sdk/README.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/sdk/README.md): the Go, Python and JavaScript clients, including the client-side encryption helpers. Prefer an SDK over raw HTTP when the queue uses end-to-end or envelope encryption.
+
+## Optional
+
+- [TECHNICAL_DESIGN.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/TECHNICAL_DESIGN.md): internal design — WAL format, snapshot compaction, consistent-hash sharding, replication factor and quorum behaviour.
+- [demo/README.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/demo/README.md): one-command Docker demo running six business scenarios; the cluster demo adds failover, partition and latency scenarios.
+- [CHANGELOG.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/CHANGELOG.md), [ROADMAP.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/ROADMAP.md), [PROGRESS.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/PROGRESS.md): release history and planned work.
+- [deploy/](https://github.com/fallrising/newclear/blob/main/systems/clarkq/deploy/): Docker Compose, Helm chart and example Prometheus alerts.

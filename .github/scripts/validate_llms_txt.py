@@ -9,6 +9,7 @@ Exit codes: 0 pass, 1 diagnostics failed, 2 could not complete.
 
 from __future__ import annotations
 
+import posixpath
 import re
 import subprocess
 import sys
@@ -57,16 +58,26 @@ def tracked_dirs(files: set[str]) -> set[str]:
     return dirs
 
 
-def in_repo_target(url: str) -> str | None:
-    """Return the repository path a link points at, or None if external."""
+def in_repo_target(url: str, base_dir: str = "") -> str | None:
+    """Return the repository path a link points at, or None if external.
+
+    Absolute repository URLs are taken as-is. A relative link resolves against
+    the directory of the file that contains it, as a browser or an agent
+    joining it to that file's URL would; a leading "/" means the repo root.
+    """
     if url.startswith(BLOB_PREFIX):
         path = url[len(BLOB_PREFIX) :]
     elif url.startswith(("http://", "https://", "mailto:", "#")):
         return None
+    elif url.startswith("/"):
+        path = url.lstrip("/")
     else:
-        path = url
+        path = posixpath.join(base_dir, url)
     path = path.split("#", 1)[0].split("?", 1)[0]
-    return path.rstrip("/") or None
+    path = posixpath.normpath(path) if path else path
+    if path in ("", "."):
+        return None
+    return path.rstrip("/")
 
 
 def catalog_tiers() -> dict[str, str]:
@@ -97,6 +108,7 @@ def check_file(
     checked in main()."""
     errors: list[str] = []
     is_root_index = path == "llms.txt"
+    base_dir = posixpath.dirname(path)
     text = Path(path).read_text(encoding="utf-8")
     lines = text.splitlines()
 
@@ -173,7 +185,7 @@ def check_file(
         spec = values["Spec"]
         if not spec.lower().startswith("none"):
             for url in LINK.findall(spec) or [spec.strip()]:
-                target = in_repo_target(url)
+                target = in_repo_target(url, base_dir)
                 if target and target not in files and target not in dirs:
                     errors.append(f"{path}: Spec names a missing path: {target}")
 
@@ -184,8 +196,10 @@ def check_file(
                 f"markdown link"
             )
 
-    for url in LINK.findall("\n".join(lines[first_h2:])):
-        target = in_repo_target(url)
+    # Every link in the file, including the prose block above the first H2,
+    # where dormancy notes and successor pointers live.
+    for url in LINK.findall("\n".join(lines)):
+        target = in_repo_target(url, base_dir)
         if target and target not in files and target not in dirs:
             errors.append(f"{path}: broken in-repo link: {target}")
 

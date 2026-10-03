@@ -4,8 +4,8 @@
 
 Tier: A
 Status: spec-only
-Interfaces: mcp, http, library
-Entrypoint: Cloudflare Workers; MCP at `/mcp` (2025-03-26, interactive tools complete in a single POST), SSE at `GET /mcp/events`, REST under `/api/rooms/...`, WebSocket for live clients
+Interfaces: mcp, http, cli
+Entrypoint: Cloudflare Workers; MCP at `/mcp` (2025-03-26, interactive tools complete in a single POST), SSE at `GET /mcp/events`, REST under `/api/rooms/...`, WebSocket for live clients; operator bootstrap through `node cmd/kithctl.mjs`
 Auth: operator-issued membership; PBKDF2-SHA-256 password hashes, minimum 100000 iterations
 Spec: [contracts/](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/) — eight JSON Schema files covering the MCP tool list, both WebSocket directions, the REST message body, the error envelope, the notify envelope and the ambient heuristic table
 

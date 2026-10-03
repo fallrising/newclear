@@ -152,6 +152,11 @@ class Broker:
             audit(conn, None, "tool.token_issued", str(run_id))
         return token
 
+    def authorize(self, run_id, token):
+        """Recheck current authority before a host relay exposes a completion."""
+        with self.db.transaction() as conn:
+            self._authorize(conn, UUID(str(run_id)), token)
+
     def _authorize(self, conn, run_id, token):
         if not isinstance(token, str) or not re.fullmatch(r"tb1_[A-Za-z0-9_-]{43}", token):
             raise Problem(401, "tool_token_invalid")

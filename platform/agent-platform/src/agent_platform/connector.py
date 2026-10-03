@@ -4,6 +4,7 @@ The API/worker never receive node or guest credentials. A private durable journa
 quarantines uncertain mutations; recovery only reattaches proven instances.
 """
 
+import asyncio
 import hashlib
 import hmac
 import json
@@ -18,7 +19,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlencode
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
@@ -33,7 +34,7 @@ from agent_platform_m0.sandbox_smoke import Config
 from agent_platform_m0.transport import HTTP
 
 from .connector_fence import Fences, Lease
-from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, attest
+from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, TOOL_HELPERS, attest
 from .connector_journal import Journal, private_file
 from .connector_output import OutputPolicy, workspace_result
 from .connector_recovery import blocks_new_admission, inspect
@@ -52,6 +53,7 @@ class Allocate(Input):
     deadline: datetime
     require_approval: bool = False
     model_transport: bool = False
+    tool_transport: bool = False
     verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
 
 
@@ -94,6 +96,7 @@ def fingerprint(value):
 
 class Connector:
     def __init__(self, config, *, client=None, host=None):
+        self.tool_epoch = str(uuid4())
         self.config = config
         Config(config["origin"], config["template"]).validate()
         self.journal = Journal(config["state_dir"])
@@ -198,7 +201,12 @@ class Connector:
         return self.client.attach(value["owner"], value["id"], value["token"])
 
     def allocate(self, run_id, request):
+        if request.tool_transport and self.config.get("tool_transport_fixture") is not True:
+            raise Problem(409, "tool_fixture_not_enabled")
         data = request.model_dump(mode="json")
+        if not request.tool_transport:
+            # Preserve durable allocation hashes for default/legacy runs.
+            data.pop("tool_transport")
         if request.egress_policy_sha256 != self.network()["policy_sha256"]:
             raise Problem(409, "egress_run_policy_changed")
         if request.template != self.config["template"]:
@@ -323,7 +331,8 @@ class Connector:
             mode=0o644,
         )
         sb.exec("install", "-d", "-m", "0755", CODE, timeout=10)
-        for name in HELPERS:
+        tool_transport = row["input"].get("tool_transport", False)
+        for name in HELPERS + (TOOL_HELPERS if tool_transport else ()):
             self.guard(row)
             sb.write_file(
                 CODE + "/" + name,
@@ -332,7 +341,11 @@ class Connector:
             )
         self.guard(row)
         sb.exec(
-            "python3", "-I", CODE + "/guest_control.py", json.dumps({"action": "setup"}), timeout=10
+            "python3",
+            "-I",
+            CODE + "/guest_control.py",
+            json.dumps({"action": "setup", "tool_transport": tool_transport}),
+            timeout=10,
         )
         sb.write_file(CODE + "/terminal", self.launcher(), mode=0o700)
         sb.exec("chown", "0:2001", CODE + "/terminal", timeout=5)
@@ -351,6 +364,18 @@ class Connector:
         if data.get("model_transport"):
             row["model_local_key"] = secrets.token_urlsafe(32)
         self.journal.write(row)
+        if tool_transport:
+            row["tool_relay_key"] = secrets.token_urlsafe(32)
+            self.journal.write(row)
+            self.guard(row)
+            sb.spawn(
+                "python3",
+                "-I",
+                CODE + "/guest_tool.py",
+                user="agentcontrol",
+                cwd=CONTROL,
+                env={"TOOL_RUN_ID": row["run_id"], "TOOL_RELAY_KEY": row["tool_relay_key"]},
+            )
         self.guard(row)
         sb.spawn(
             "python3",
@@ -433,6 +458,8 @@ class Connector:
             )
             if created.get("id") != row["run_id"]:
                 raise Problem(409, "conversation_mismatch")
+        if tool_transport:
+            row["tool_isolation_revision"] = "tool-mailbox-v1"
         row["isolation_revision"] = REVISION
         self.isolation(row)
         self.journal.write(row)
@@ -676,13 +703,43 @@ def create_connector(config, service=None):
     async def boundary(request: Request, call_next):
         if request.headers.get("origin"):
             return JSONResponse({"error": "browser_origin_forbidden"}, status_code=403)
-        chunks, size = [], 0
-        async for chunk in request.stream():
-            size += len(chunk)
-            if size > (384 * 1024 if request.url.path.endswith("/model") else 65536):
-                return JSONResponse({"error": "request_too_large"}, status_code=413)
-            chunks.append(chunk)
-        request._body = b"".join(chunks)
+        tool = request.url.path.endswith("/tool")
+        if tool and (
+            request.url.query
+            or "origin" in request.headers
+            or "cookie" in request.headers
+            or "content-encoding" in request.headers
+            or "transfer-encoding" in request.headers
+            or len(request.headers.getlist("x-session-api-key")) != 1
+            or len(request.headers.getlist("content-length")) != 1
+            or request.headers.get("content-type") != "application/json"
+        ):
+            return JSONResponse({"error": "tool_envelope_invalid"}, status_code=422)
+        limit = (
+            1024 * 1024 + 4096
+            if tool
+            else (384 * 1024 if request.url.path.endswith("/model") else 65536)
+        )
+
+        async def read_body():
+            chunks, size = [], 0
+            async for chunk in request.stream():
+                size += len(chunk)
+                if size > limit:
+                    raise Problem(413, "request_too_large")
+                chunks.append(chunk)
+            return b"".join(chunks)
+
+        try:
+            request._body = await asyncio.wait_for(read_body(), 5) if tool else await read_body()
+            if tool:
+                from .connector_tool import validate_wire
+
+                validate_wire(request._body)
+        except Problem as exc:
+            return JSONResponse({"error": exc.code}, status_code=exc.status)
+        except (ValueError, RecursionError, TimeoutError):
+            return JSONResponse({"error": "tool_envelope_invalid"}, status_code=422)
         try:
             response = await call_next(request)
         except Exception:
@@ -728,6 +785,13 @@ def create_connector(config, service=None):
         from .connector_approval import approve
 
         return approve(service, run_id, data)
+
+    from .connector_tool import ToolExchange
+    from .connector_tool import exchange as tool_exchange
+
+    @app.post("/v1/runs/{run_id}/tool")
+    def tool_channel(run_id: UUID, data: ToolExchange, _=auth):
+        return tool_exchange(service, run_id, data)
 
     @app.post("/v1/runs/{run_id}/model")
     def model_exchange(run_id: UUID, data: ModelExchange, _=auth):

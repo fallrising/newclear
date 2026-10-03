@@ -205,7 +205,7 @@ unavailable and conservatively represented, as specified in `sdd/persistent-fake
 
 | Clause | Executable oracle | Evidence | Status |
 | --- | --- | --- | --- |
-| HAI-CI-001 | root HAI workflow on a PR touching the component; `scripts/check-backend.sh`, `scripts/check-web.sh`, `scripts/check-ci-pins.sh` | T-110/T-111, actual PR run to be recorded in PLAN | Candidate |
+| HAI-CI-001 | root HAI workflow on a PR touching the component; `scripts/check-backend.sh`, `scripts/check-web.sh`, `scripts/check-ci-pins.sh` | T-110/T-113, fresh T-112 PASS; candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb`, [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046); acceptance in PLAN | Passing bounded |
 
 The workflow covers native backend and fixture-UI gates. It supplies no missing browser, import,
 restore or real-provider acceptance evidence.

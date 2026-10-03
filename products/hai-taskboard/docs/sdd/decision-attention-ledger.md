@@ -1,8 +1,9 @@
 # Mini-SDD: Decisions, attention and external ledger import
 
-Status: **HAI-CI-001 clause accepted (normative, 2026-10-04)**; its implementation remains
-Candidate until the PR-run oracle passes. The bounded CI slice has owner-authorized
-T-110/T-111 recorded in `.team/PLAN.md`. The remaining Decision/Attention/ledger clauses remain
+Status: **HAI-CI-001 clause and bounded implementation accepted (2026-10-04)**. Candidate
+`8f45a951d6f5285d833a51fe452eda708a86ceeb` passed the actual PR-run oracle and fresh T-112
+independent review; `.team/PLAN.md` records the exact acceptance evidence and retained failed
+predecessor. The remaining Decision/Attention/ledger clauses remain
 **Proposed** (2026-09-28). Per HAI-DELIVERY-001 no production behavior may precede acceptance of
 its clause and named oracle. Merging this design file alone does not accept every proposed feature.
 

@@ -3,7 +3,7 @@
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
 Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE/
-vertical-integration and T-099 persistent-runtime evidence; bounded HAI-CI-001 candidate; broader G1 remains NotRun
+vertical-integration and T-099 persistent-runtime evidence; bounded HAI-CI-001 accepted; broader G1 remains NotRun
 Observed: 2026-10-04
 
 ## Toolchains and packages
@@ -50,6 +50,11 @@ The bounded HAI-CI-001 workflow has backend and web jobs in their respective dig
 environments. Both call the same component scripts used locally. `scripts/check-ci-pins.sh` compares
 workflow image pins with this table, `go.mod`, `.node-version`, package metadata and the exact pnpm
 bootstrap. Runtime version mismatches fail before dependency installation.
+
+Candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb` passed both jobs in actual PR #238 run
+[37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046), followed by the
+independent T-112 PASS and orchestrator acceptance recorded in `.team/PLAN.md`. This supersedes
+the predecessor's build-stamping failure without rewriting its retained T-111/PR failure evidence.
 
 The workflow uses no secret, release, publish, deploy or external mutation permission. Browser E2E
 and OpenAPI lint are not implemented by these two jobs. The planned E2E job will depend on both
@@ -142,7 +147,7 @@ Playwright browser/contrast/zoom/coarse-pointer checks, SQLite backup/restore an
 interruption, full SBOM/CVE inventory, broader action/image provenance and TypeScript 7 migration
 remain NotRun. Automatic persistent outbox/worker polling has bounded T-099 native acceptance;
 see `sdd/persistent-fake-runtime.md`. The new CI workflow and its PR-run evidence are tracked by
-T-110/T-111 in `.team/PLAN.md`; this does not retroactively turn historical NotRun records into passes.
+T-110/T-113/T-112 in `.team/PLAN.md`; this does not retroactively turn historical NotRun records into passes.
 The manually driven deterministic T-047 integration does not imply those operations. Every later
 vertical-slice family remains unaccepted. These gaps prevent a G1, release or production-complete
 claim.

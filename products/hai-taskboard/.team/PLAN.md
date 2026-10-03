@@ -553,14 +553,14 @@ execution. P0-A remains Fake-only.
 
 The owner authorized continuation through the missing HAI-CI-001 gate, independent review and a
 Draft PR. The HAI-CI-001 clause from `docs/sdd/decision-attention-ledger.md` is accepted as the
-normative contract; implementation acceptance remains pending the actual PR-run oracle.
+normative contract; implementation acceptance is recorded below against the actual PR-run oracle.
 Other Decision/Attention/ledger clauses and T-050 remain outside this implementation.
 This adds backend and frontend CI only; absent browser/restore/import evidence remains NotRun.
 
 | ID | Goal | Dependency | Status | Acceptance owner |
 | --- | --- | --- | --- | --- |
-| T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Candidate; worker checks passed | Orchestrator |
-| T-111 | Independent CI permission, pin and failure-path review | T-110 | Historical REWORK; container build concern awaits actual CI | Orchestrator |
+| T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Accepted with T-113 repair and T-112 review | Orchestrator |
+| T-111 | Independent CI permission, pin and failure-path review | T-110 | Historical REWORK; B1 reproduced then repaired | Orchestrator |
 
 Orchestrator scope: this PLAN, worker contracts, `docs/reproducibility.md`,
 `docs/local-development.md`, `docs/HANDOFF.md`, `docs/traceability.md`, and the bounded
@@ -587,5 +587,21 @@ not a replacement for its visible REWORK decision. The original failed gate rema
 
 | ID | Goal | Dependency | Status | Acceptance owner |
 | --- | --- | --- | --- | --- |
-| T-113 | CI compile gate VCS-stamping repair | T-111 | Candidate; local repaired build passed | Orchestrator |
-| T-112 | Fresh repaired CI evidence review | T-113 | Pending | Orchestrator |
+| T-113 | CI compile gate VCS-stamping repair | T-111 | Accepted by T-112 and orchestrator gate | Orchestrator |
+| T-112 | Fresh repaired CI evidence review | T-113 | Accepted; unconditional PASS | Orchestrator |
+
+2026-10-04 acceptance: candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb` passed actual
+PR #238 run [37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+Both digest-pinned backend and web jobs, including every required step, completed successfully.
+Actions tested merge `e8d18fcb7cf957b71f47d67fc36e59e2a2b34049` containing that exact head.
+Fresh independent T-112 report SHA-256
+`c16bd63785c19025ef63622fe1e6b4e77d5e54ad2737e7124a9bc828a29aafce` is accepted.
+The orchestrator inspected the candidate diff and authoritative run metadata, reran report
+validation, and confirmed T-111 remains unchanged at SHA-256
+`183a788e40095716be58e7350da7c39f663e3b2993d5c9c1ad95585fd93ae73f`.
+Local shell/actionlint/pin checks, four rejecting pin/runtime probes, native web gates and the
+pinned backend full/race gate also passed. The original failed PR run and malformed raw T-111
+report remain historical evidence; neither was rewritten into a pass.
+This accepts only HAI-CI-001. The PR remains Draft; no merge, T-050, Decision/Attention/import,
+browser, restore or broader G1 acceptance follows. Later documentation commits must pass their
+own PR checks before handoff; this record identifies the validated implementation candidate.

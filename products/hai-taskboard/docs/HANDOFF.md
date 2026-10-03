@@ -122,7 +122,7 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
   failure or skip.
 - At the T-094 checkpoint, automatic worker polling and root CI were still NotRun. The later
   T-099 persistent-runtime checkpoint below supersedes polling status; bounded CI is now tracked
-  by T-110/T-111. Restore/backup and broader evidence remain NotRun. T-047 alone does not imply them.
+  by T-110/T-113/T-112. Restore/backup and broader evidence remain NotRun. T-047 alone does not imply them.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
 - The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
   remain immutable process evidence; later repairs and acceptance do not rewrite them.
@@ -141,15 +141,18 @@ admission remains fail-closed, verified coverage is unavailable, and global proj
 
 ## CI continuation checkpoint
 
-The current bounded continuation is HAI-CI-001 on `agent/hai-taskboard/decision-attention`: shared
-backend/web gate scripts plus the root workflow, with acceptance tracked by T-110/T-111 in PLAN.
-It does not connect the fixture UI, admit specifications or implement restore. Full PR-run evidence
-must be checked before accepting the CI slice. The earlier branch references describe historical
-checkpoints and do not override this continuation.
+HAI-CI-001 on `agent/hai-taskboard/decision-attention` is accepted for candidate
+`8f45a951d6f5285d833a51fe452eda708a86ceeb`: shared backend/web gate scripts plus the root
+workflow passed both jobs in [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+T-112 independently passed the repaired implementation; PLAN records the report hash and
+orchestrator acceptance. The original T-111 REWORK and failed predecessor run remain preserved.
+PR #238 remains Draft. This does not connect the fixture UI, admit specifications or implement
+restore. The earlier branch references describe historical checkpoints and do not override this
+continuation. Check the latest PR head's checks separately from this implementation checkpoint.
 
 ## Safe next action
 
-After accepting the bounded CI slice, T-050 reconciliation/restore/handoff is the next bounded
+With the bounded CI slice accepted, T-050 reconciliation/restore/handoff is the next bounded
 component scope after the accepted T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
 start T-050, merge, deploy, add an importer or enable a real provider.
 

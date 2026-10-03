@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { keys, workQueries, type WorkEntry } from "@cms/api";
-import { Alert, AlertDescription, Badge, Button, Card, CardContent, Input, Label, PageHeader, QueryBoundary } from "@cms/ui";
+import { keys, workQueries, type WorkContentType, type WorkEntry } from "@cms/api";
+import { enumLabel, formatDateTime } from "@cms/fields";
+import { Button, Card, CardContent, fill, Input, Label, PageHeader, QueryBoundary, StatusBadge, toast } from "@cms/ui";
 import { api } from "../api";
 import { copy } from "../copy";
 
-// W0 ports the v1 custom views unchanged in behaviour. W2 redoes them (C-08, C-09, C-10, U-03).
-const ISSUE_COLUMNS = ["backlog", "ready", "in_progress", "in_review", "done"] as const;
+// W1 only rewrites what the views show (U-01, U-04: wording, labels, toasts). W2 redoes their behaviour
+// (C-08, C-09, C-10, U-03). Preserve BW1b complete-list reads for every composition.
 const SELECT = "h-9 w-full rounded-md border border-input bg-background px-3";
 
 function sortOrder(entry: WorkEntry): number {
@@ -21,13 +22,11 @@ function mediaId(value: unknown): string | undefined {
   return undefined;
 }
 
-function Notice({ text, error }: { text: string; error: boolean }) {
-  if (!text) return null;
-  return (
-    <Alert variant={error ? "destructive" : "default"} className="mb-4" data-testid="view-notice">
-      <AlertDescription>{text}</AlertDescription>
-    </Alert>
-  );
+/** Display name of an enum value of `type.fields[key]`; the raw value while the schema loads. */
+function enumText(type: WorkContentType | undefined, key: string, value: unknown): string {
+  const field = type?.fields.find((f) => f.key === key);
+  const text = typeof value === "string" ? value : "";
+  return field && text ? enumLabel(field, text) : text;
 }
 
 export function AlbumComposerPage() {
@@ -35,41 +34,40 @@ export function AlbumComposerPage() {
   const albums = useQuery(workQueries.allEntries(api.work, "album"));
   const [picked, setPicked] = useState("");
   const albumId = picked || albums.data?.items[0]?.id || "";
-  const photos = useQuery({ ...workQueries.allEntries(api.work, "photo", { ref: { album: albumId } }), enabled: albumId !== "" });
+  const photoParams = { ref: { album: albumId } };
+  const photos = useQuery({ ...workQueries.allEntries(api.work, "photo", photoParams), enabled: albumId !== "" });
   const sorted = useMemo(() => [...(photos.data?.items ?? [])].sort((a, b) => sortOrder(a) - sortOrder(b)), [photos.data]);
   const album = albums.data?.items.find((item) => item.id === albumId);
-  const [notice, setNotice] = useState({ text: "", error: false });
 
-  // C-08 (two separate PATCHes, not atomic) is fixed in W2.
+  // C-08 (two separate writes, not atomic) is fixed in W2.
   const swap = useMutation({
     mutationFn: async ({ left, right }: { left: WorkEntry; right: WorkEntry }) => {
       await api.work.patch(left.id, { payload: { sortOrder: sortOrder(right) }, version: left.version });
       await api.work.patch(right.id, { payload: { sortOrder: sortOrder(left) }, version: right.version });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: keys.entries.lists("photo") }),
-    onSuccess: () => setNotice({ text: copy["composer.reordered"], error: false }),
-    onError: () => setNotice({ text: copy["editor.error"], error: true }),
+    onSuccess: () => toast.success(copy["composer.reordered"]),
+    onError: () => toast.error(copy["view.failed"]),
   });
 
   const setCover = useMutation({
     mutationFn: (cover: string) => api.work.patch(album!.id, { payload: { cover }, version: album!.version }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: keys.entries.lists("album") });
-      setNotice({ text: copy["composer.coverSet"], error: false });
+      toast.success(copy["composer.coverSet"]);
     },
-    onError: () => setNotice({ text: copy["editor.error"], error: true }),
+    onError: () => toast.error(copy["view.failed"]),
   });
 
   return (
     <>
       <PageHeader title={copy["view.album.composer"]} secondaryActions={[{ label: copy["composer.albumList"], to: "/entries/album" }]} />
-      <Notice {...notice} />
       <div className="mb-4 flex flex-col gap-2">
         <Label htmlFor="composer-album">{copy["composer.album"]}</Label>
         <select id="composer-album" className={SELECT} value={albumId} onChange={(e) => setPicked(e.target.value)}>
           {(albums.data?.items ?? []).map((item) => (
             <option key={item.id} value={item.id}>
-              {item.title || item.slug}
+              {item.title || copy["index.untitled"]}
             </option>
           ))}
         </select>
@@ -82,9 +80,9 @@ export function AlbumComposerPage() {
                 <Card>
                   <CardContent className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <strong>{photo.title || photo.slug}</strong>
+                      <strong>{photo.title || copy["index.untitled"]}</strong>
                       <p className="text-subdued">
-                        sortOrder {sortOrder(photo)}
+                        {fill(copy["composer.position"], { n: index + 1 })}
                         {photo.payload.caption ? ` · ${String(photo.payload.caption)}` : ""}
                       </p>
                     </div>
@@ -101,7 +99,7 @@ export function AlbumComposerPage() {
                         onClick={() => {
                           const cover = mediaId(photo.payload.media);
                           if (cover) setCover.mutate(cover);
-                          else setNotice({ text: copy["composer.noMedia"], error: true });
+                          else toast.error(copy["composer.noMedia"]);
                         }}
                       >
                         {copy["composer.cover"]}
@@ -126,8 +124,9 @@ function scheduledDay(entry: WorkEntry): string {
 }
 
 export function ClinicSchedulePage() {
-  // C-09 (UTC "today") is fixed in W2.
+  // C-09 (UTC "today" and UTC day matching) is fixed in W2.
   const [day, setDay] = useState(() => new Date().toISOString().slice(0, 10));
+  const visitType = useQuery(workQueries.type(api.work, "visit"));
   const visits = useQuery(workQueries.allEntries(api.work, "visit"));
   return (
     <>
@@ -146,12 +145,13 @@ export function ClinicSchedulePage() {
             <ul className="flex flex-col gap-2">
               {ofDay.map((visit) => (
                 <li key={visit.id}>
-                  <Link to={`/entries/visit/${visit.id}`} className="block rounded-xl border bg-surface p-4 hover:bg-accent">
-                    <strong>{visit.title || copy["schedule.fallbackTitle"]}</strong>
-                    <p className="text-subdued">
-                      {String(visit.payload.scheduledAt || "")}
-                      {visit.payload.visitKind ? ` · ${String(visit.payload.visitKind)}` : ""} · {visit.publicationState}
-                    </p>
+                  <Link to={`/entries/visit/${visit.id}`} className="flex flex-col gap-1 rounded-xl border bg-surface p-4 hover:bg-accent">
+                    <strong>{visit.title || copy["schedule.untitled"]}</strong>
+                    <span className="flex flex-wrap items-center gap-2 text-subdued">
+                      {formatDateTime(visit.payload.scheduledAt)}
+                      {visit.payload.visitKind ? ` · ${enumText(visitType.data, "visitKind", visit.payload.visitKind)}` : ""}
+                      <StatusBadge state={visit.publicationState} dirty={visit.dirty} />
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -167,12 +167,14 @@ export function ProjectsBoardPage() {
   const queryClient = useQueryClient();
   const [params] = useSearchParams();
   const projects = useQuery(workQueries.allEntries(api.work, "project"));
+  const issueType = useQuery(workQueries.type(api.work, "issue"));
   // C-10 (?project= read only once) is fixed in W2.
   const [picked, setPicked] = useState(() => params.get("project") ?? "");
   const projectId = picked || projects.data?.items[0]?.id || "";
   const issueParams = { ref: { project: projectId } };
   const issues = useQuery({ ...workQueries.allEntries(api.work, "issue", issueParams), enabled: projectId !== "" });
-  const [notice, setNotice] = useState({ text: "", error: false });
+  // 01 §13.2: columns come from the schema's enumValues, never a hard-coded list.
+  const columns = issueType.data?.fields.find((f) => f.key === "status")?.enumValues ?? [];
 
   const move = useMutation({
     mutationFn: ({ issue, status }: { issue: WorkEntry; status: string }) =>
@@ -181,62 +183,67 @@ export function ProjectsBoardPage() {
       queryClient.setQueryData(keys.entries.allEntries("issue", issueParams), (page: typeof issues.data) =>
         page ? { ...page, items: page.items.map((item) => (item.id === updated.id ? updated : item)) } : page,
       );
-      setNotice({ text: `${copy["board.moved"]} ${updated.title ?? updated.id} → ${String(updated.payload.status)}`, error: false });
+      toast.success(fill(copy["board.moved"], { title: updated.title || copy["board.untitled"], status: enumText(issueType.data, "status", updated.payload.status) }));
     },
-    onError: () => setNotice({ text: copy["editor.error"], error: true }),
+    onError: () => toast.error(copy["view.failed"]),
   });
 
   return (
     <>
       <PageHeader title={copy["view.projects.board"]} secondaryActions={[{ label: copy["board.issueList"], to: "/entries/issue" }]} />
-      <Notice {...notice} />
       <div className="mb-4 flex flex-col gap-2">
         <Label htmlFor="board-project">{copy["board.project"]}</Label>
         <select id="board-project" className={SELECT} value={projectId} onChange={(e) => setPicked(e.target.value)}>
           {(projects.data?.items ?? []).map((item) => (
             <option key={item.id} value={item.id}>
-              {item.title || item.slug}
+              {item.title || copy["index.untitled"]}
             </option>
           ))}
         </select>
       </div>
-      <p className="mb-4 text-subdued">{copy["board.note"]}</p>
+      <p className="mb-4 text-subdued">{copy["board.lead"]}</p>
       <QueryBoundary query={issues}>
         {(page) => {
           const open = page.items.filter((item) => item.publicationState !== "archived");
           return (
             <div className="grid gap-3 md:grid-cols-5">
-              {ISSUE_COLUMNS.map((column) => (
-                <section key={column} aria-label={column}>
-                  <h2 className="mb-2 text-table font-semibold text-subdued">{column}</h2>
-                  <div className="flex flex-col gap-2">
-                    {open
-                      .filter((issue) => String(issue.payload.status) === column)
-                      .map((issue) => (
-                        <Card key={issue.id}>
-                          <CardContent className="flex flex-col gap-2">
-                            <Link to={`/entries/issue/${issue.id}`} className="font-semibold hover:underline">
-                              {issue.title}
-                            </Link>
-                            <Badge variant="secondary">{issue.publicationState}</Badge>
-                            <select
-                              aria-label={`${copy["board.statusLabel"]} ${issue.title ?? issue.id}`}
-                              className={SELECT}
-                              value={String(issue.payload.status)}
-                              onChange={(e) => move.mutate({ issue, status: e.target.value })}
-                            >
-                              {ISSUE_COLUMNS.map((status) => (
-                                <option key={status} value={status}>
-                                  {status}
-                                </option>
-                              ))}
-                            </select>
-                          </CardContent>
-                        </Card>
-                      ))}
-                  </div>
-                </section>
-              ))}
+              {columns.map((column) => {
+                const label = enumText(issueType.data, "status", column);
+                return (
+                  <section key={column} aria-label={label} data-testid={`board-column-${column}`}>
+                    <h2 className="mb-2 text-table font-semibold text-subdued">{label}</h2>
+                    <div className="flex flex-col gap-2">
+                      {open
+                        .filter((issue) => String(issue.payload.status) === column)
+                        .map((issue) => {
+                          const title = issue.title || copy["board.untitled"];
+                          return (
+                            <Card key={issue.id}>
+                              <CardContent className="flex flex-col gap-2">
+                                <Link to={`/entries/issue/${issue.id}`} className="font-semibold hover:underline">
+                                  {title}
+                                </Link>
+                                <StatusBadge state={issue.publicationState} dirty={issue.dirty} />
+                                <select
+                                  aria-label={fill(copy["board.statusLabel"], { title })}
+                                  className={SELECT}
+                                  value={String(issue.payload.status)}
+                                  onChange={(e) => move.mutate({ issue, status: e.target.value })}
+                                >
+                                  {columns.map((status) => (
+                                    <option key={status} value={status}>
+                                      {enumText(issueType.data, "status", status)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           );
         }}

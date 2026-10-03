@@ -18,7 +18,9 @@
     "@tanstack/react-query": "5.103.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-router": "7.18.4"
+    "react-router": "7.18.4",
+    "@cms/fields": "*",
+    "react-hook-form": "7.88.0"
   },
   "devDependencies": {
     "@cms/mocks": "*",

@@ -8,8 +8,8 @@
 | --- | --- | --- |
 | CRUD／發布 | 共用 entry、revision、權限、media | 檔案補償；P0 已在本地補齊交易／原子版本／發布媒體隔離 |
 | 測試 | BW0 記憶體／PostgreSQL store 契約、OpenAPI 回應驗證、CI | P0 已新增服務層故障回滾／競爭測試並重新執行；正式部署驗收仍待完成 |
-| 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器 |
-| 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata 已本地驗證；動態導覽、後續模型治理仍待實作 |
+| 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器已本地驗證；關聯／媒體選擇器待 W2 |
+| 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata 已本地驗證；動態導覽已於 W1 本地驗證；後續模型治理仍待實作 |
 | 操作維護 | 本機 Compose、DB/media volume、prod cookie 設定 | 正式初始化、HTTPS、備份還原演練、升級回滾 |
 
 過去對封存版本的「沒有 CI／只有 Identity 的整合測試」觀察不能套用到此基準。規格中的 DOC_READY 只是設計可施工；VERIFIED、測試通過與真實生產可用是三個不同主張。
@@ -54,16 +54,20 @@ P0 已於 PR #212 合併，CI 全通過：[完整紀錄](../../.team/reports/DEL
 
 類型設定是 kernel 的資料來源；BW1a 不提供管理端編輯 metadata 的 UI／API，完整模型治理仍在後续波次。種子會補齊內建 demo 類型設定。既有自訂類型若曾依賴 payload 的固定 `visibility` 鍵，升級前須盤點 `visibilityField`：未設定的類型將忽略該同名 payload 鍵；不能把有 `visibility: private` 當作足夠的公開存取限制。此行為變更與 BW1a 原契約一致，正式使用前要連同既有媒體索引一併驗證。
 
-BW1a 本地驗收：151＋65 後端測試、140 前端測試、17 mock E2E 全通過；完整紀錄見 [BW1a 交付](../../.team/reports/BW1a-DELIVERY.md)。此波尚未提交／合併，個人生產可用門檻不因本地測試通過而自動完成。
+BW1a 本地驗收：151＋65 後端測試、140 前端測試、17 mock E2E 全通過；完整紀錄見 [BW1a 交付](../../.team/reports/BW1a-DELIVERY.md)。此波已於 PR #223 合併，個人生產可用門檻不因本地測試通過而自動完成。
 
 ## BW1b 本地驗收與升級注意
 
-BW1b 狀態 `LOCAL_VERIFIED`，尚未提交／合併：[交付報告](../../.team/reports/BW1b-DELIVERY.md)。202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E 與 lint/typecheck/build/bundle 全通過；10,000 筆 store 量測 p95：工作列表 85ms、公開列表 77ms、更新 18ms，不包含 HTTP／identity／媒體展開。
+BW1b 狀態 `VERIFIED`，PR #224 已合併：[交付報告](../../.team/reports/BW1b-DELIVERY.md)。202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E 與 lint/typecheck/build/bundle 全通過；10,000 筆 store 量測 p95：工作列表 85ms、公開列表 77ms、更新 18ms，不包含 HTTP／identity／媒體展開。
 
 V6 的 NUMERIC 轉換與 V7 索引重建需要維護／備份規劃；不清除舊小數值。公開 ref 篩選仍讀工作 refs（BQ-10），媒體仍逐項解析（BQ-11）。跨頁若資料異動造成總數不一致或重複，完整列表 helper 會明確失敗，需重試；W1 才加入顯式分頁 UI。正式部署與備份還原演練仍未完成。
 
 ## BW1c 本地驗收與相容性
 
-BW1c 狀態 `LOCAL_VERIFIED`，尚未提交／合併：[交付報告](../../.team/reports/BW1c-DELIVERY.md)。226 單元／API＋93 PostgreSQL、179 前端＋17 mock E2E，以及 lint/typecheck/build/bundle/bootJar 全通過。10,000 筆 store p95 工作／公開／更新 75／77／22ms，維持原門檻；這不是 HTTP 全鏈路量測。
+BW1c 狀態 `VERIFIED`，PR #225 已合併：[交付報告](../../.team/reports/BW1c-DELIVERY.md)。226 單元／API＋93 PostgreSQL、179 前端＋17 mock E2E，以及 lint/typecheck/build/bundle/bootJar 全通過。10,000 筆 store p95 工作／公開／更新 75／77／22ms，維持原門檻；這不是 HTTP 全鏈路量測。
 
-PATCH 缺少或 null 版本回 428，舊版本仍回 409；422 列出全部欄位錯誤；公開不可讀媒體回 null。寫入規則收緊含文字長度、datetime、整數及 ref 格式。舊值不自動清理或截斷；讀取仍可用，但合併後仍不合法的 patch、publish、revert 會被拒絕，需先改正。乾淨已發布內容的重複 publish 維持 P0 no-op。client 與 MSW 已同步，W1 的完整欄位錯誤 UI／分頁控制仍未完成；正式使用的操作驗收門檻不變。
+PATCH 缺少或 null 版本回 428，舊版本仍回 409；422 列出全部欄位錯誤；公開不可讀媒體回 null。寫入規則收緊含文字長度、datetime、整數及 ref 格式。舊值不自動清理或截斷；讀取仍可用，但合併後仍不合法的 patch、publish、revert 會被拒絕，需先改正。乾淨已發布內容的重複 publish 維持 P0 no-op。client 與 MSW 已同步，W1 的完整欄位錯誤 UI／分頁控制已本地驗證；正式使用的操作驗收門檻不變。
+
+## W1 本地驗收
+
+[W1 交付](../../.team/reports/W1-DELIVERY.md)：300 前端、27 mock E2E、226 Java、lint/typecheck/build/bundle/npm ci 通過；五個畫面 axe 無 serious／critical，桌面與手機截圖無阻擋性瀏覽器問題。W1 尚未提交／合併，正式使用的操作驗收門檻不變。媒體／關聯欄位暫為唯讀，未知型別保留原值；選擇器於 W2。

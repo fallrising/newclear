@@ -48,7 +48,7 @@ export function LoginPage({ auth, surface, title, returnParam, returnRoutes, fal
   const session = useOptionalSession();
   const target = safeReturnTo(params.get(returnParam), returnRoutes, fallback);
 
-  if (session?.me?.surfaces[surface]) return <Navigate to={target} replace />;
+  if (session?.status === "authenticated" && session.me?.surfaces[surface]) return <Navigate to={target} replace />;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -66,6 +66,7 @@ export function LoginPage({ auth, surface, title, returnParam, returnRoutes, fal
         return;
       }
       queryClient.setQueryData(keys.auth.me(), me);
+      queryClient.setQueryData(keys.auth.expired(), false);
       navigate(target, { replace: true });
     } catch (caught) {
       setError(errorKey(caught));

@@ -1,8 +1,8 @@
 import { http, HttpResponse } from "msw";
-import type { EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "@cms/api";
+import type { CmsAction, EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "@cms/api";
 import { db } from "../db";
 import { workContentTypes } from "../fixtures.gen";
-import { allowedType, canPublish, requireWork } from "../guards";
+import { can, canGlobal, requireWork } from "../guards";
 import { apiError, png } from "../respond";
 import { getState } from "../state";
 import { validatePayload } from "../validation";
@@ -22,13 +22,15 @@ function forbidden(action: string, type: string) {
 }
 
 /** Loads an entry the signed-in user may work on, or returns the error response. */
-function loadEntry(id: string, action: string): WorkEntry | Response {
+function loadEntry(id: string, action: CmsAction): WorkEntry | Response {
   const user = requireWork();
   if (user instanceof Response) return user;
   const entry = db.workEntries.find((e) => e.id === id);
   if (!entry) return apiError(404, "ENTRY_NOT_FOUND", "Entry not found");
-  if (!allowedType(user, entry.contentType)) return forbidden(action, entry.contentType);
-  if (["publish", "unpublish", "archive"].includes(action) && !canPublish(user)) return forbidden(action, entry.contentType);
+  if (!can(user, action, entry.contentType)
+      && !(action === "read_draft" && entry.publicationState === "published" && can(user, "read_published", entry.contentType))) {
+    return forbidden(action, entry.contentType);
+  }
   return entry;
 }
 
@@ -37,24 +39,34 @@ function save(entry: WorkEntry, changes: Partial<WorkEntry>): WorkEntry {
   return entry;
 }
 
-function transition(action: "publish" | "unpublish" | "archive") {
+function transition(action: "publish" | "unpublish" | "archive" | "restore") {
   return http.post(`*/api/v1/entries/:id/${action}`, ({ params }) => {
-    const entry = loadEntry(String(params.id), action);
+    const entry = loadEntry(String(params.id), action === "restore" ? "archive" : action);
     if (entry instanceof Response) return entry;
     const from = entry.publicationState;
     if (action === "publish" && from !== "archived") {
       if (from === "published" && !entry.dirty) return HttpResponse.json<WorkEntry>(entry);
+      const type = findType(entry.contentType);
+      if (type?.slugPolicy === "required" && !entry.slug?.trim()) return apiError(422, "SLUG_REQUIRED", "Slug is required to publish");
       const validation = validatePayload(entry.contentType, entry.payload, true);
       if (validation) return validation;
-      return HttpResponse.json<WorkEntry>(
-        save(entry, { publicationState: "published", dirty: false, publishedAt: new Date().toISOString() }),
-      );
+      const publishedAt = new Date().toISOString();
+      save(entry, { publicationState: "published", dirty: false, publishedAt });
+      db.publicEntries = db.publicEntries.filter((snapshot) => snapshot.id !== entry.id);
+      db.publicEntries.push({ id: entry.id, contentType: entry.contentType, slug: entry.slug, title: entry.title,
+        payload: structuredClone(entry.payload), publishedAt });
+      return HttpResponse.json<WorkEntry>(entry);
     }
     if (action === "unpublish" && from === "published") {
-      return HttpResponse.json<WorkEntry>(save(entry, { publicationState: "draft", dirty: false }));
+      db.publicEntries = db.publicEntries.filter((snapshot) => snapshot.id !== entry.id);
+      return HttpResponse.json<WorkEntry>(save(entry, { publicationState: "draft", dirty: false, publishedAt: null }));
     }
     if (action === "archive" && from !== "archived") {
+      db.publicEntries = db.publicEntries.filter((snapshot) => snapshot.id !== entry.id);
       return HttpResponse.json<WorkEntry>(save(entry, { publicationState: "archived", dirty: false }));
+    }
+    if (action === "restore" && from === "archived") {
+      return HttpResponse.json<WorkEntry>(save(entry, { publicationState: "draft", dirty: false, publishedAt: null }));
     }
     return apiError(409, "INVALID_STATE_TRANSITION", `Cannot ${action} from ${from}`);
   });
@@ -78,8 +90,10 @@ export const workHandlers = [
     if (user instanceof Response) return user;
     const type = String(params.type);
     if (!findType(type)) return apiError(404, "CONTENT_TYPE_NOT_FOUND", "Content type not found");
-    if (!allowedType(user, type)) return forbidden("read_draft", type);
     const url = new URL(request.url);
+    const states = url.searchParams.getAll("state").flatMap((value) => value.split(",")).map((value) => value.trim()).filter(Boolean);
+    const action = states.length > 0 && states.every((state) => state === "published") ? "read_published" : "read_draft";
+    if (!can(user, action, type)) return forbidden(action, type);
     const items = getState().scenario === "empty" ? [] : db.workEntries.filter((e) => e.contentType === type);
     const metadata = db.adminTypes.find((t) => t.key === type)!;
     const result = listPage(url, metadata, items, false);
@@ -91,8 +105,14 @@ export const workHandlers = [
     if (user instanceof Response) return user;
     const type = findType(String(params.type));
     if (!type) return apiError(404, "CONTENT_TYPE_NOT_FOUND", "Content type not found");
-    if (!allowedType(user, type.key)) return forbidden("create", type.key);
+    if (!can(user, "create", type.key)) return forbidden("create", type.key);
     const body = ((await request.json().catch(() => null)) ?? {}) as EntryWriteRequest;
+    if (type.singleton && db.workEntries.some((entry) => entry.contentType === type.key)) {
+      return apiError(409, "SINGLETON_EXISTS", "Singleton entry already exists");
+    }
+    if (body.slug?.trim() && db.workEntries.some((entry) => entry.contentType === type.key && entry.slug === body.slug)) {
+      return apiError(409, "SLUG_CONFLICT", "Slug already used in this type");
+    }
     const payload = body.payload ?? {};
     const validation = validatePayload(type.key, payload);
     if (validation) return validation;
@@ -127,6 +147,9 @@ export const workHandlers = [
     if (getState().scenario === "conflict" || body.version !== entry.version) {
       return apiError(409, "VERSION_CONFLICT", "Version conflict");
     }
+    if (body.slug?.trim() && db.workEntries.some((other) => other.id !== entry.id && other.contentType === entry.contentType && other.slug === body.slug)) {
+      return apiError(409, "SLUG_CONFLICT", "Slug already used in this type");
+    }
     const payload = { ...entry.payload, ...(body.payload ?? {}) };
     const validation = validatePayload(entry.contentType, payload);
     if (validation) return validation;
@@ -143,6 +166,27 @@ export const workHandlers = [
   transition("publish"),
   transition("unpublish"),
   transition("archive"),
+  transition("restore"),
+
+  http.delete("*/api/v1/entries/:id", ({ params }) => {
+    const entry = loadEntry(String(params.id), "delete");
+    if (entry instanceof Response) return entry;
+    const referenced = db.workEntries.some((other) =>
+      (db.adminTypes.find((type) => type.key === other.contentType)?.fields ?? []).some((field) =>
+        field.type === "ref" && other.payload[field.key] === entry.id));
+    if (referenced) return apiError(409, "REF_CONSTRAINT", "Entry has incoming references");
+    db.workEntries = db.workEntries.filter((other) => other.id !== entry.id);
+    db.publicEntries = db.publicEntries.filter((snapshot) => snapshot.id !== entry.id);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get("*/api/v1/media/:id", ({ params }) => {
+    const user = requireWork();
+    if (user instanceof Response) return user;
+    if (!canGlobal(user, "manage_media")) return forbidden("manage_media", "media");
+    const asset = db.media.find((media) => media.id === params.id);
+    return asset ? HttpResponse.json<MediaAsset>(asset) : apiError(404, "not_found", "Media not found");
+  }),
 
   http.post("*/api/v1/media", async ({ request }) => {
     const user = requireWork();

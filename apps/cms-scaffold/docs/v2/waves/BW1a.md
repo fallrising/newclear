@@ -2,7 +2,7 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW1a](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW1a.openapi.yaml](../contracts/BW1a.openapi.yaml) ・ 前一波：[BW0](BW0.md)
 
-狀態：**LOCAL_VERIFIED**（2026-10-03，實作與整合檢查已通過，未提交／合併）
+狀態：**VERIFIED**（2026-10-03，[PR #223](https://github.com/fallrising/newclear/pull/223) 已合併，遠端四項 CI 通過）
 日期：2026-09-25
 讀者：實作 BW1a 的 agent。只讀本檔、`contracts/BW1a.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 

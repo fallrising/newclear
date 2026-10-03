@@ -107,3 +107,34 @@ Task DoD assignment bullets remain unchanged for teamctl's unchecked-contract re
 ## BW1 publication authorization — 2026-10-03
 
 The owner explicitly authorized committing, opening and merging one PR per completed BW1a/BW1b/BW1c wave, then continuing development. Earlier local-only statements record acceptance-time history. This publication is reconstructed from preserved per-wave snapshots; original dirty worktrees remain untouched. Required remote CI must pass before each merge. No deployment is authorized. No private tracking contents are published or modified.
+
+## W1 — documentation-first continuation
+
+Owner authorized five new runtime packages at the pinned W1 versions after authorizing BW1a/BW1b/BW1c PRs and merges. W1 section 0 overrides stale whole-file replacement instructions before code. Original integration tree and three immutable snapshots remain preserved; W1 uses a new isolated integration worktree. W1 is local development only; no deployment.
+
+- T-501 Codex high: shared UI components/patterns and typed fields; preserve old exports/tests. Isolated worker, no manifests.
+- T-502 Codex high: incremental API/auth/MSW support and focused regressions. Preserve BW1abc pagination/validation and all current tests. Isolated worker.
+- T-503 Codex medium: capability navigation, resource index/editor, custom-view copy and mock E2E; preserve/migrate P0 behavior tests. Isolated worker, consume reviewed T501/T502 files without ownership.
+- Orchestrator: manifests/lock, document decisions, scoped integration, tests/build/bundle/browser evidence and acceptance. Independent cheaper Codex review after integration. No recursive delegation; at most three concurrent workers.
+
+Dependencies: all BW1 remote gates and merges before implementation; root npm install before worker environment setup. T501/T502 publish interfaces early; T503 can implement against documented interfaces but cannot claim green before dependent integration. Root checks each diff against explicit scope before copying.
+
+Acceptance gates: focused Red→Green; retain source protection and meaningful P0 tests; full frontend lint/typecheck/test/build/bundle; mock E2E including W1 and axe; desktop/mobile browser health; Java test and referenced unchanged-backend PostgreSQL evidence; contract equality; task/report validators and diff review. Historical counts are not acceptance targets. Failures/skips stay explicit until resolved.
+
+BW1 publication closed: PR #223 (`7b29dce`), #224 (`a15e550`) and #225 (`d87f54d`) merged with java/java-integration/web/trailer all successful; see reports/BW1-PUBLICATION.md. New work begins from merged main. Root verified the five npm versions and no pre-existing external package version changed; existing dev-transitive brace-expansion advisory remains. Copied shadcn components retain upstream MIT notice in packages/ui/LICENSE.shadcn.md.
+
+## W1 acceptance — LOCAL_VERIFIED (2026-10-03)
+
+- [x] T501 accepted: UI17 + fields49, preservation Red→Green; final root visual/CSS correction also covered by computed-style E2E.
+- [x] T502 accepted: API30/auth43/mocks59, inherited53 mock tests retained; cached401/500 session protection and baseline fixture preservation.
+- [x] T503 accepted: Back86, migrated18 P0 cases, full root27 E2E plus responsive captures; historical failed label/environment runs retained.
+- [x] T504 independent cheaper Codex source/evidence audit found no concrete defect; manifests and browser findings checked.
+- [x] Root full frontend chain300 tests/lint/typecheck/build/bundle,Java226; final affected builds/bundle/full27E2E and browser health repeated after favicon/CSS fixes.
+- [x] npm ci reproduced the authorized lock; subsequent all-app build/bundle passed. Source362/protected190 hashes remain valid; original tree and snapshots intact.
+- [x] Documentation/report validators and diff/new-file hygiene closed; W1 remains uncommitted/unmerged, no deployment.
+
+Root visual review found missing fields Tailwind scanning (documented then focused expected Red0px→Green128px) and favicon404. Corrected incrementally without changing runtime dependencies or thresholds. CJK font/browser library gaps were repaired in temporary local runtime only. Small-touch-target advisories remain. See reports/W1-DELIVERY.md for exact commands, mappings and residual limits. The next product wave follows the roadmap; no further implementation is claimed here.
+
+## W1 publication authorization — 2026-10-03
+
+Owner requested saving the verified W1 progress to GitHub and continuing the next roadmap task. Publish W1 as one PR and merge only after CI passes; do not deploy. Existing LOCAL_VERIFIED reports describe the earlier local acceptance. BW2 follows W1, with incremental documentation and isolated bounded workers before implementation.

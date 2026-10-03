@@ -41,6 +41,16 @@ export function workApi(t: Transport) {
     archive(id: string): Promise<WorkEntry> {
       return t.call(() => t.client.POST("/api/v1/entries/{id}/archive", { params: { path: { id } } }));
     },
+    restore(id: string): Promise<WorkEntry> {
+      return t.call(() => t.client.POST("/api/v1/entries/{id}/restore", { params: { path: { id } } }));
+    },
+    /** Soft delete (move to recycling). */
+    remove(id: string): Promise<void> {
+      return t.call(() => t.client.DELETE("/api/v1/entries/{id}", { params: { path: { id } } }));
+    },
+    media(id: string, signal?: AbortSignal): Promise<MediaAsset> {
+      return t.call(() => t.client.GET("/api/v1/media/{id}", { params: { path: { id } }, signal }));
+    },
     upload(file: File, title?: string): Promise<MediaAsset> {
       const form = new FormData();
       form.append("file", file);
@@ -66,6 +76,8 @@ export const workQueries = {
     queryOptions({ queryKey: keys.entries.allEntries(type, params), queryFn: ({ signal }) => api.allEntries(type, params, signal) }),
   entries: (api: WorkApi, type: string, params: WorkListParams = {}) =>
     queryOptions({ queryKey: keys.entries.list(type, params), queryFn: ({ signal }) => api.entries(type, params, signal) }),
+  media: (api: WorkApi, id: string) =>
+    queryOptions({ queryKey: keys.media.detail(id), queryFn: ({ signal }) => api.media(id, signal) }),
   entry: (api: WorkApi, id: string) =>
     queryOptions({ queryKey: keys.entries.detail(id), queryFn: ({ signal }) => api.entry(id, signal) }),
 };

@@ -1,4 +1,4 @@
-import type { Me } from "@cms/api";
+import type { CmsAction, Me } from "@cms/api";
 import { capabilities, me as seedUsers } from "./fixtures.gen";
 import { db } from "./db";
 import { apiError } from "./respond";
@@ -16,6 +16,15 @@ export function currentUser(): Me | null {
 
 export function isAdmin(user: Me) {
   return user.roles.some((r) => r.code === "admin");
+}
+
+/** Capabilities are the action contract on the current surface, including type disabling. */
+export function can(user: Me, action: CmsAction, type: string) {
+  return user.capabilities.types.some((capability) => capability.key === type && capability.actions.includes(action));
+}
+
+export function canGlobal(user: Me, action: CmsAction) {
+  return user.capabilities.global.includes(action);
 }
 
 export function allowedType(user: Me, type: string) {
@@ -42,7 +51,7 @@ export function requireWork(): Me | Response {
   const user = currentUser();
   if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");
   if (getState().surface === "front") return apiError(403, "SURFACE_FORBIDDEN", "Surface front is not allowed");
-  if (!user.surfaces.back) return apiError(403, "FORBIDDEN", "Missing permission");
+  if (!user.surfaces[getState().surface]) return apiError(403, "FORBIDDEN", "Missing permission");
   return user;
 }
 

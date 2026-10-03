@@ -1,0 +1,40 @@
+{
+  "viewport": {
+    "name": "1440x900",
+    "width": 1440,
+    "height": 900
+  },
+  "metrics": {
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "scrollWidth": 1425,
+    "scrollHeight": 901,
+    "outsideViewport": [],
+    "smallTouchTargets": [
+      "a",
+      "button#radix-_r_3_"
+    ],
+    "title": "CMS Back"
+  },
+  "findings": [
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "a"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_3_"
+    },
+    {
+      "type": "http-error-response",
+      "severity": "blocking",
+      "detail": {
+        "url": "http://localhost:5184/favicon.ico",
+        "status": 404
+      }
+    }
+  ],
+  "url": "http://localhost:5184/entries/note/30000000-0000-4000-8000-000000000036?mockUser=mock-operator-notes"
+}

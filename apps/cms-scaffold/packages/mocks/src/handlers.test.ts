@@ -20,7 +20,9 @@ describe("@cms/mocks fixtures", () => {
   });
 
   it("E-03 fixtures mirror DemoContentSeed: 34 work entries, 15 publicly readable", () => {
-    expect(db.workEntries).toHaveLength(34);
+    expect(db.workEntries.filter((entry) => entry.contentType !== "note")).toHaveLength(34);
+    expect(db.workEntries.filter((entry) => entry.contentType === "note")).toHaveLength(3);
+    expect(db.workEntries).toHaveLength(37);
     expect(db.publicEntries).toHaveLength(15);
     expect(db.publicEntries.some((e) => e.slug === "private-studio")).toBe(false);
     expect(db.publicEntries.some((e) => e.slug === "internal-ops")).toBe(false);
@@ -201,7 +203,9 @@ describe("@cms/mocks admin and scenarios", () => {
     setUser("seed-admin");
     await expect(client().admin.principals()).rejects.toMatchObject({ code: "SURFACE_FORBIDDEN" });
     setSurface("admin");
-    await expect(client().admin.principals()).resolves.toMatchObject({ total: 9 });
+    const principals = await client().admin.principals();
+    expect(principals.total).toBe(10);
+    expect(principals.items.filter((principal) => principal.username !== "mock-operator-notes")).toHaveLength(9);
     setUser("seed-operator-album");
     await expect(client().admin.types()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
@@ -360,7 +364,7 @@ describe("BW1c mock write and public boundaries", () => {
   });
   it("allows null clearing but reports required fields at publish", async () => {
     setUser("seed-operator-album");
-    const created = await client().work.create("album", { payload: { title: "Draft" } });
+    const created = await client().work.create("album", { slug: "required-fields", payload: { title: "Draft" } });
     const cleared = await client().work.patch(created.id, { version: created.version, payload: { title: null } });
     expect(cleared.payload).toHaveProperty("title", null);
     await expect(client().work.publish(created.id)).rejects.toMatchObject({ status: 422, fields: [{ field: "payload.title", code: "REQUIRED" }] });
@@ -452,7 +456,7 @@ describe("BW1c preserved parser and projection rules", () => {
     const type = db.adminTypes.find((e) => e.key === "album")!;
     const title = type.fields.find((f) => f.key === "title")!;
     type.fields.push({ ...title, key: "slug", order: 100 });
-    const created = await client().work.create("album", { payload: { title: "test" } });
+    const created = await client().work.create("album", { slug: "reserved-metadata", payload: { title: "test" } });
     await expect(client().work.publish(created.id)).rejects.toMatchObject({ fields: [{ field: "payload.slug", code: "REQUIRED" }] });
     const entry = db.publicEntries.find((e) => e.contentType === "album" && e.slug === "coast-light-2026")!;
     const cover = type.fields.find((f) => f.key === "cover")!;
@@ -464,5 +468,96 @@ describe("BW1c preserved parser and projection rules", () => {
     // Other enabled photo fields can attach this same media; isolate this published snapshot.
     db.publicEntries = [entry];
     expect((await raw(`/api/v1/public/media/${id}/file/web`)).status).toBe(404);
+  });
+});
+
+
+describe("W1 incremental work support", () => {
+  const post = (path: string) => raw(path, { method: "POST", headers: { "X-CSRF-Token": "mock-csrf-token" } });
+  const remove = (id: string) => raw(`/api/v1/entries/${id}`, { method: "DELETE", headers: { "X-CSRF-Token": "mock-csrf-token" } });
+
+  it("adds a notes-only operator and note metadata without losing demo fixtures", async () => {
+    const me = await client().auth.login("mock-operator-notes", "pw");
+    expect(me.capabilities.types.filter((type) => type.actions.includes("read_draft")).map((type) => type.key)).toEqual(["note"]);
+    const note = await client().work.type("note");
+    expect(note.fields.find((field) => field.key === "location")).toMatchObject({ type: "geo", label: "位置" });
+    expect((await client().work.entries("note")).total).toBe(3);
+    await expect(client().work.entries("album")).rejects.toMatchObject({ status: 403 });
+    setSurface("admin");
+    expect((await client().auth.me()).capabilities).toMatchObject({ types: [], global: [] });
+    setUser("seed-admin");
+    expect((await client().auth.me()).capabilities.types.filter((type) => type.key === "note")).toHaveLength(1);
+  });
+
+  it("restores archived entries as drafts with an incremented version and rejects invalid transitions", async () => {
+    setUser("seed-operator-album");
+    const entry = db.workEntries.find((item) => item.slug === "private-studio")!;
+    const before = structuredClone(entry);
+    expect((await post(`/api/v1/entries/${entry.id}/restore`)).status).toBe(409);
+    expect(entry).toEqual(before);
+    await client().work.archive(entry.id);
+    const response = await post(`/api/v1/entries/${entry.id}/restore`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ publicationState: "draft", version: before.version + 2, publishedAt: null });
+  });
+
+  it("soft deletion hides an entry and refuses entries with incoming references unchanged", async () => {
+    setUser("seed-operator-album");
+    const album = db.workEntries.find((item) => item.slug === "coast-light-2026")!;
+    const before = structuredClone(album);
+    const denied = await remove(album.id);
+    expect(denied.status).toBe(409);
+    expect(await denied.json()).toMatchObject({ error: { code: "REF_CONSTRAINT" } });
+    expect(album).toEqual(before);
+    const entry = await client().work.create("album", { slug: "removable", payload: { title: "Remove" } });
+    expect((await remove(entry.id)).status).toBe(204);
+    await expect(client().work.entry(entry.id)).rejects.toMatchObject({ status: 404 });
+    expect(db.workEntries.some((item) => item.id === entry.id)).toBe(false);
+  });
+
+  it("uses surface capabilities for restore/delete and work media metadata", async () => {
+    setUser("seed-editor-album");
+    const entry = db.workEntries.find((item) => item.slug === "private-studio")!;
+    const before = structuredClone(entry);
+    expect((await post(`/api/v1/entries/${entry.id}/restore`)).status).toBe(403);
+    expect((await remove(entry.id)).status).toBe(403);
+    expect(entry).toEqual(before);
+    const media = await raw(`/api/v1/media/${db.media[0].id}`);
+    expect(media.status).toBe(200);
+    expect(await media.json()).toMatchObject({ id: db.media[0].id, variants: { thumbnail: { url: expect.stringContaining("/api/v1/media/") } } });
+    setUser(null);
+    expect((await raw(`/api/v1/media/${db.media[0].id}`)).status).toBe(401);
+  });
+
+  it("checks singleton and slug conflicts before mutating entries, and publish requires a slug", async () => {
+    setUser("seed-operator-album");
+    const entry = db.workEntries.find((item) => item.slug === "private-studio")!;
+    const before = structuredClone(entry);
+    await expect(client().work.patch(entry.id, { version: entry.version, slug: "coast-light-2026" })).rejects.toMatchObject({ code: "SLUG_CONFLICT" });
+    expect(entry).toEqual(before);
+    await expect(client().work.create("album", { slug: "coast-light-2026", payload: { title: "Copy" } })).rejects.toMatchObject({ code: "SLUG_CONFLICT" });
+    const bare = await client().work.create("album", { payload: { title: "Bare" } });
+    await expect(client().work.publish(bare.id)).rejects.toMatchObject({ code: "SLUG_REQUIRED", fields: [] });
+    setUser("seed-operator-clinic");
+    await expect(client().work.create("clinic_profile", { payload: { name: "Second" } })).rejects.toMatchObject({ code: "SINGLETON_EXISTS" });
+  });
+
+  it("keeps draft media private until publication and clears the published snapshot on unpublish", async () => {
+    setUser("seed-operator-album");
+    const entry = await client().work.create("album", { slug: "new-publication", payload: { title: "Before", visibility: "public", cover: db.media[0].id } });
+    await client().work.publish(entry.id);
+    await expect(client().public.byId("album", entry.id)).resolves.toMatchObject({ title: "Before" });
+    const current = await client().work.entry(entry.id);
+    const privateMedia = db.media.find((asset) => asset.title === "Polaroid test")!;
+    await client().work.patch(entry.id, { version: current.version, payload: { title: "After", cover: privateMedia.id } });
+    await expect(client().public.byId("album", entry.id)).resolves.toMatchObject({ title: "Before" });
+    expect((await raw(`/api/v1/public/media/${privateMedia.id}/file/web`)).status).toBe(404);
+    await client().work.publish(entry.id);
+    await expect(client().public.byId("album", entry.id)).resolves.toMatchObject({ title: "After" });
+    expect((await raw(`/api/v1/public/media/${privateMedia.id}/file/web`)).status).toBe(200);
+    await client().work.unpublish(entry.id);
+    await expect(client().public.byId("album", entry.id)).rejects.toMatchObject({ status: 404 });
+    expect((await raw(`/api/v1/public/media/${privateMedia.id}/file/web`)).status).toBe(404);
+    await expect(client().work.entry(entry.id)).resolves.toMatchObject({ publishedAt: null });
   });
 });

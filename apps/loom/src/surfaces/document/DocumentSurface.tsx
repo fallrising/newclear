@@ -12,6 +12,8 @@ import { createEditor, type EditorHandle } from "./editor";
 import { readRunIn } from "./frontmatter";
 import { blockKey } from "./runnable_block";
 import { STRINGS, CSS } from "./config";
+import { DocumentLifecycle, DocumentReadGate, createMissingDocument } from "./lifecycle";
+import { AiEventGate, collectContext } from "./ai_lifecycle";
 
 interface DocumentSurfaceProps {
   /// Vault-relative or absolute path to open.
@@ -30,8 +32,7 @@ interface DocumentSurfaceProps {
   /// Sources (docs and/or terminal scrollbacks) whose content should be
   /// pinned into the AI prompt, derived from incoming `context_for`
   /// edges on the canvas. Docs are fetched via `doc_read`; terminals via
-  /// `pty_scrollback`. The panel ships the assembled set as cached
-  /// context blocks.
+  /// `pty_scrollback`. The panel refreshes all requested sources at send.
   pinnedContextSources?: ContextSource[];
 }
 
@@ -80,8 +81,22 @@ export function DocumentSurface({
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<EditorHandle | null>(null);
-  const dirtyRef = useRef(false);
-  const onDiskHashRef = useRef<string>("");
+  const lifecycleRef = useRef(new DocumentLifecycle());
+  const buffer = lifecycleRef.current;
+  const readGateRef = useRef(new DocumentReadGate());
+  const documentGenerationRef = useRef(0);
+  const backendStateQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+  const syncBackend = (snapshot?: doc.DocSnapshot) => {
+    const operation = backendStateQueueRef.current.then(async () => {
+      if (snapshot) await doc.docOpen(snapshot.path, snapshot.on_disk_hash);
+      if (!buffer.path) return;
+      if (buffer.dirty) await doc.docMarkDirty(buffer.path);
+      else await doc.docMarkClean(buffer.path);
+    });
+    backendStateQueueRef.current = operation.catch((e) => flash(`document state error: ${String(e)}`));
+    return operation;
+  };
+  const [loadGeneration, setLoadGeneration] = useState(0);
 
   const [status, setStatus] = useState<
     "loading" | "missing" | "ready" | "error"
@@ -96,10 +111,11 @@ export function DocumentSurface({
   const [aiStatus, setAiStatus] = useState<ai.AiStatus | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiRequestId, setAiRequestId] = useState<string | null>(null);
-  const aiRequestIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    aiRequestIdRef.current = aiRequestId;
-  }, [aiRequestId]);
+  const aiGateRef = useRef(new AiEventGate());
+  const aiBusyRef = useRef(false);
+  const aiAliveRef = useRef(true);
+  const [aiBusy, setAiBusy] = useState(false);
+  const aiListenerReadyRef = useRef<Promise<void> | null>(null);
 
   // Fetched bodies of incoming context_for edges. Re-fetched whenever the
   // canvas-resolved set of pinned doc paths changes. Source = relative
@@ -162,73 +178,77 @@ export function DocumentSurface({
     })();
   }, []);
 
+  const aiDeliverRef = useRef<(event: ai.AiEvent) => void>(() => undefined);
+
   // Listen for streamed AI chunks targeted at *our* in-flight request.
   useEffect(() => {
     let alive = true;
     let off: (() => void) | undefined;
-    void (async () => {
-      const unlisten = await ai.onAiEvent((ev) => {
-        if (ev.request_id !== aiRequestIdRef.current) return;
-        switch (ev.kind) {
-          case "started":
-            // Open a quoted scaffold the streamer can pile into. The
-            // cursor lands at the line below `> 🤖`, ready to receive
-            // text chunks.
-            editorRef.current?.insertAtCursor("\n\n> 🤖 ");
-            break;
-          case "text":
-            // Insert raw delta. Newlines become `\n` continuations of
-            // the quoted block; users can clean up after.
-            editorRef.current?.insertAtCursor(
-              ev.delta.replace(/\n/g, "\n> "),
-            );
-            break;
-          case "done":
-            editorRef.current?.insertAtCursor(
-              `\n\n_(input ${ev.usage.input_tokens}, output ${ev.usage.output_tokens}` +
-                (ev.usage.cache_read_input_tokens > 0
-                  ? `, cache hit ${ev.usage.cache_read_input_tokens}`
-                  : "") +
-                `)_\n\n`,
-            );
-            setAiRequestId(null);
-            flash("AI done");
-            break;
-          case "error":
-            editorRef.current?.insertAtCursor(
-              `\n\n_(AI error: ${ev.message})_\n\n`,
-            );
-            setAiRequestId(null);
-            break;
-          case "cancelled":
-            editorRef.current?.insertAtCursor("\n\n_(cancelled)_\n\n");
-            setAiRequestId(null);
-            break;
-        }
-      });
-      if (!alive) {
-        unlisten();
-        return;
+    aiAliveRef.current = true;
+    const deliver = (ev: ai.AiEvent) => {
+      if (!alive) return;
+      switch (ev.kind) {
+        case "started": editorRef.current?.insertAtCursor("\n\n> 🤖 "); break;
+        case "text": editorRef.current?.insertAtCursor(ev.delta.replace(/\n/g, "\n> ")); break;
+        case "done":
+          editorRef.current?.insertAtCursor(
+            `\n\n_(input ${ev.usage.input_tokens}, output ${ev.usage.output_tokens}` +
+            (ev.usage.cache_read_input_tokens > 0 ? `, cache hit ${ev.usage.cache_read_input_tokens}` : "") + `)_\n\n`,
+          );
+          flash("AI done");
+          break;
+        case "error": editorRef.current?.insertAtCursor(`\n\n_(AI error: ${ev.message})_\n\n`); break;
+        case "cancelled": editorRef.current?.insertAtCursor("\n\n_(cancelled)_\n\n"); break;
       }
+      if (ev.kind === "done" || ev.kind === "error" || ev.kind === "cancelled") {
+        aiBusyRef.current = false;
+        setAiBusy(false);
+        setAiRequestId(null);
+      }
+    };
+    aiDeliverRef.current = deliver;
+    const ready = (async () => {
+      const unlisten = await ai.onAiEvent((ev) => aiGateRef.current.accept(ev, deliver));
+      if (!alive) { unlisten(); throw new Error("AI listener disposed"); }
       off = unlisten;
     })();
+    aiListenerReadyRef.current = ready;
+    void ready.catch(() => { /* submission surfaces listener failure */ });
     return () => {
       alive = false;
       off?.();
+      aiGateRef.current.reset();
+      aiAliveRef.current = false;
     };
   }, []);
 
   const submitAiPrompt = async () => {
-    if (!aiStatus?.key_present) return;
-    if (!aiPrompt.trim()) return;
-    if (aiRequestId) return;
+    if (!aiStatus?.key_present || !aiPrompt.trim() || aiBusyRef.current) return;
+    aiBusyRef.current = true;
+    setAiBusy(true);
+    let requestedId: string | null = null;
     try {
-      const view = editorRef.current?.view;
-      const docText = view ? view.state.doc.toString() : "";
-      const id = await ai.aiAsk(aiPrompt, docText || null, pinnedContextBodies);
+      const ready = aiListenerReadyRef.current;
+      if (!ready) throw new Error("AI listener is not ready");
+      await ready;
+      const context = await collectContext(pinnedContextSources ?? [], doc.docRead, ipc.ptyScrollback);
+      if (!aiAliveRef.current) return;
+      setPinnedContextBodies(context);
+      const docText = editorRef.current?.view.state.doc.toString() ?? "";
+      aiGateRef.current.begin();
+      const id = await ai.aiAsk(aiPrompt, docText || null, context);
+      requestedId = id;
+      if (!aiAliveRef.current) { await ai.aiCancel(id); return; }
       setAiRequestId(id);
+      aiGateRef.current.activate(id, aiDeliverRef.current);
       setAiPrompt("");
     } catch (e) {
+      if (requestedId) void ai.aiCancel(requestedId).catch(() => undefined);
+      if (!aiAliveRef.current) return;
+      aiGateRef.current.reset();
+      aiBusyRef.current = false;
+      setAiBusy(false);
+      setAiRequestId(null);
       flash(`AI request failed: ${String(e)}`);
     }
   };
@@ -243,35 +263,50 @@ export function DocumentSurface({
   };
 
   // Save through the backend. Returns true iff bytes hit disk.
-  const save = async (force = false): Promise<boolean> => {
-    const view = editorRef.current?.view;
-    if (!view) return false;
-    const content = view.state.doc.toString();
-    const expected = force ? null : onDiskHashRef.current || null;
+  const save = async (): Promise<boolean> => {
+    if (!editorRef.current || !buffer.path) return false;
+    const generation = documentGenerationRef.current;
+    const revision = buffer.revision;
+    readGateRef.current.invalidate();
     try {
-      const outcome = await doc.docWrite(path, content, expected);
+      const outcome = await buffer.save(() => {
+        if (!editorRef.current) throw new Error("Document editor was closed before save");
+        return editorRef.current.view.state.doc.toString();
+      }, doc.docWrite);
+      if (documentGenerationRef.current !== generation || buffer.revision !== revision) return outcome.kind === "written";
+      readGateRef.current.invalidate();
       if (outcome.kind === "conflict") {
         setConflict({ kind: "pending", lastSeenHash: outcome.current_disk_hash });
         flash("Save blocked: on-disk hash drifted");
         return false;
       }
-      onDiskHashRef.current = outcome.new_hash;
-      dirtyRef.current = false;
-      setDirty(false);
+      setDirty(buffer.dirty);
       setConflict({ kind: "none" });
-      void doc.docMarkClean(path);
-      flash("saved");
+      await syncBackend({ path: buffer.path, content: "", on_disk_hash: outcome.new_hash });
+      flash(buffer.dirty ? "saved earlier version — newer edits remain unsaved" : "saved");
       return true;
     } catch (e) {
+      if (documentGenerationRef.current !== generation || buffer.revision !== revision) return false;
       setError(String(e));
       flash(`save error: ${String(e)}`);
       return false;
     }
   };
 
+  const applySnapshot = async (snapshot: doc.DocSnapshot) => {
+    buffer.load(snapshot);
+    editorRef.current?.replaceDoc(snapshot.content);
+    reportRunIn(snapshot.content);
+    setDirty(false);
+    setConflict({ kind: "none" });
+    setStatus("ready");
+    await syncBackend(snapshot);
+  };
+
   // Mount the editor once content is loaded.
   useEffect(() => {
     let disposed = false;
+    documentGenerationRef.current++;
     void (async () => {
       try {
         let snap: doc.DocSnapshot;
@@ -289,8 +324,8 @@ export function DocumentSurface({
         if (disposed) return;
         const host = hostRef.current;
         if (!host) return;
-        onDiskHashRef.current = snap.on_disk_hash;
-        void doc.docOpen(path, snap.on_disk_hash);
+        buffer.load(snap);
+        void syncBackend(snap);
         // Report the initial run_in before the user has touched anything.
         reportRunIn(snap.content);
 
@@ -298,11 +333,10 @@ export function DocumentSurface({
           parent: host,
           initialContent: snap.content,
           onChange: (next) => {
-            if (!dirtyRef.current) {
-              dirtyRef.current = true;
-              setDirty(true);
-              void doc.docMarkDirty(path);
-            }
+            const wasDirty = buffer.dirty;
+            buffer.edit();
+            setDirty(true);
+            if (!wasDirty) void syncBackend();
             // Cheap re-parse: only the first ~200 bytes matter for
             // frontmatter; readRunIn bails fast when no fence is present.
             reportRunIn(next);
@@ -362,11 +396,15 @@ export function DocumentSurface({
 
     return () => {
       disposed = true;
+      documentGenerationRef.current++;
+      readGateRef.current.invalidate();
+      buffer.close();
       editorRef.current?.destroy();
       editorRef.current = null;
-      void doc.docClose(path);
+      const closedPath = buffer.path || path;
+      backendStateQueueRef.current = backendStateQueueRef.current.then(() => doc.docClose(closedPath)).catch(() => undefined);
     };
-  }, [path]);
+  }, [path, loadGeneration]);
 
   // Listen for pty:io batches: append to the active capture block if
   // the batch is from the session ▶ targeted. No feeds_output_to gate —
@@ -402,30 +440,30 @@ export function DocumentSurface({
     void (async () => {
       const unlisten = await ipc.onLoomEvent(async (ev: LoomEvent) => {
         if (ev.kind !== "fs_changed") return;
-        if (ev.path !== path) return;
+        if (ev.path !== buffer.path) return;
         const c: FsChangeKind = ev.change;
         if (c.kind === "deleted") {
+          readGateRef.current.invalidate();
+          documentGenerationRef.current++;
+          buffer.invalidate();
           setStatus("missing");
           return;
         }
-        // For Created / Modified / Renamed: re-check conflict.
-        const status = await doc.docCheckConflict(path);
-        if (status === "conflict") {
-          setConflict({
-            kind: "pending",
-            lastSeenHash: onDiskHashRef.current,
-          });
-        } else if (status === "no_conflict" && !dirtyRef.current) {
-          // Editor was clean: silently reload bytes.
-          try {
-            const fresh = await doc.docRead(path);
-            onDiskHashRef.current = fresh.on_disk_hash;
-            editorRef.current?.replaceDoc(fresh.content);
+        try {
+          const version = buffer.version;
+          const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path));
+          if (!alive || !fresh || buffer.saving) return;
+          if (buffer.version !== version && !buffer.dirty) return;
+          if (buffer.dirty) {
+            if (fresh.on_disk_hash !== buffer.hash) {
+              setConflict({ kind: "pending", lastSeenHash: fresh.on_disk_hash });
+            }
+          } else {
+            await applySnapshot(fresh);
             flash("reloaded from disk");
-          } catch (e) {
-            flash(`reload failed: ${String(e)}`);
           }
-        }
+        } catch (e) { if (alive) flash(`reload failed: ${String(e)}`); }
+
       });
       if (!alive) {
         unlisten();
@@ -441,13 +479,9 @@ export function DocumentSurface({
 
   const reloadFromDisk = async () => {
     try {
-      const fresh = await doc.docRead(path);
-      onDiskHashRef.current = fresh.on_disk_hash;
-      editorRef.current?.replaceDoc(fresh.content);
-      dirtyRef.current = false;
-      setDirty(false);
-      setConflict({ kind: "none" });
-      void doc.docMarkClean(path);
+      const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path || path));
+      if (!fresh) return;
+      await applySnapshot(fresh);
       flash("reloaded — your edits are gone");
     } catch (e) {
       flash(`reload failed: ${String(e)}`);
@@ -455,11 +489,10 @@ export function DocumentSurface({
   };
 
   const keepEditing = () => {
-    // The user accepted that their next save will overwrite on-disk bytes.
-    // We clear the conflict banner but keep `dirty` true; next save uses
-    // `force=true` so the optimistic-concurrency check is skipped.
+    if (conflict.kind !== "pending") return;
+    buffer.keep(conflict.lastSeenHash);
     setConflict({ kind: "none" });
-    flash("keeping unsaved edits — next save will overwrite disk");
+    flash("keeping edits — next save checks the confirmed disk version");
   };
 
   return (
@@ -467,7 +500,7 @@ export function DocumentSurface({
       <div className="document-header">
         <strong>{path}</strong>
         {dirty && <span className="document-dirty">●</span>}
-        <button onClick={() => void save(conflict.kind === "pending")}>
+        <button onClick={() => void save()}>
           save
         </button>
         <button
@@ -500,7 +533,7 @@ export function DocumentSurface({
               </div>
               {pinnedContextBodies.length > 0 && (
                 <div className="loom-ai-pinned">
-                  pinned context:{" "}
+                  pinned context preview (refreshed at send):{" "}
                   {pinnedContextBodies.map((pc, idx) => (
                     <span key={pc.source} className="loom-ai-pinned-chip">
                       <code>{pc.source}</code>{" "}
@@ -521,7 +554,7 @@ export function DocumentSurface({
                     void submitAiPrompt();
                   }
                 }}
-                disabled={aiRequestId !== null}
+                disabled={aiBusy}
                 rows={3}
               />
               <div className="loom-ai-actions">
@@ -530,7 +563,7 @@ export function DocumentSurface({
                 ) : (
                   <button
                     onClick={() => void submitAiPrompt()}
-                    disabled={!aiPrompt.trim()}
+                    disabled={!aiPrompt.trim() || aiBusy}
                   >
                     send (⌘↵)
                   </button>
@@ -561,22 +594,35 @@ export function DocumentSurface({
           </p>
           <button
             onClick={async () => {
+              const generation = documentGenerationRef.current;
               try {
-                await doc.docWrite(path, "", null);
-                const fresh = await doc.docRead(path);
-                onDiskHashRef.current = fresh.on_disk_hash;
-                void doc.docOpen(path, fresh.on_disk_hash);
-                setStatus("loading");
-                // Re-trigger the load effect by changing a key would be
-                // cleaner, but a soft refresh works for v1: replace the
-                // mount target's child and re-create the editor.
-                window.location.reload();
+                const editor = editorRef.current;
+                const savedVersion = buffer.version;
+                const fresh = await readGateRef.current.read(() => createMissingDocument(
+                  buffer.path || path,
+                  editor?.view.state.doc.toString() ?? "",
+                  doc.docWrite,
+                  doc.docRead,
+                ));
+                if (!fresh || generation !== documentGenerationRef.current) return;
+                if (editorRef.current) {
+                  if (buffer.version === savedVersion) await applySnapshot(fresh);
+                  else {
+                    // Typing during recreate is newer than the saved bytes.
+                    buffer.recreated(fresh, savedVersion);
+                    await syncBackend(fresh);
+                    setStatus("ready");
+                  }
+                } else { setStatus("loading"); setLoadGeneration((value) => value + 1); }
+
               } catch (e) {
+                if (generation !== documentGenerationRef.current) return;
                 setError(String(e));
+                flash(`create failed: ${String(e)}`);
               }
             }}
           >
-            create empty file
+            {editorRef.current ? "recreate with current edits" : "create empty file"}
           </button>
         </div>
       )}

@@ -80,3 +80,13 @@ Automated checks are not desktop GUI acceptance or live provider validation. Rec
 The filesystem and streaming repair stage passes 140 Rust workspace tests: 37 contracts and 103 core/unit/integration tests. The original self-save rename failure now passes, as do delayed-reconcile, deleted-file conflict, descendant-symlink rejection, canonical document identity, split UTF-8, SSE framing/error/EOF/cancellation regressions. Provider tests use deterministic loopback HTTP; no live API calls were made.
 
 The nonfrozen `doc_read` DTO adds absolute `path` for watcher identity. `doc_write` with an expected hash returns the existing conflict variant with empty `current_disk_hash` when the destination was deleted; other read failures return an I/O error. An absent expected hash remains explicit create/overwrite. Symlink checks are preflight checks below the canonical trusted root, not race-safe confinement. Optimistic hash checks are not cross-process compare-and-swap.
+
+## Frontend repair verification (2026-10-04)
+
+The frontend repair stage passes 75 tests in 8 files, both TypeScript checks and the production frontend build. Independent review caught an array-valued edge kind accepted by string coercion; a failing regression preceded the final strict-string repair.
+
+Sidecar read failures disable autosave and offer explicit read retry. Valid v1 variants this renderer cannot restore, and additive fields it cannot preserve, remain untouched with recovery feedback. Save failures and terminal cleanup failures expose retry. Dimensions/group metadata and typed edge handles round-trip; grouping remains metadata, not a newly introduced layout feature.
+
+Document save/reload epochs protect newer buffers, toolbar/shortcut saves share a queue, and Keep uses the last displayed disk hash for one attempt. A subsequent disk change conflicts again. Explicit recreation uses the current buffer and updates only that document. AI submission refreshes context and registers/buffers events before invoking the backend.
+
+A Chromium run against the actual built app with mocked Tauri IPC passed five flows: malformed/future/invalid-collection sidecars never autosave; repeated canonical external changes stay clean; typing during a delayed save stays dirty and the next save persists it; Keep saves the confirmed version; creating another document preserves the first dirty buffer. This is browser integration evidence, not native IPC or live-provider acceptance.

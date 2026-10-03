@@ -1,6 +1,6 @@
 # Signal Hub M0 contracts
 
-這個目錄定義事件、設定與 HTTP API，並提供離線驗證。沒有 HTTP server、資料庫 migration、背景工作或部署。
+這個目錄定義事件、設定與 HTTP API，並提供離線驗證；M1 runtime 的啟動邊界見 [runtime contract](../docs/runtime.md)，實際進度見 [STATUS](../docs/STATUS.md)。
 
 ## 驗證
 
@@ -41,7 +41,7 @@ python3 -m venv /tmp/signalhub-contracts
 
 ### 設定與篩選
 
-- 設定 schema 驗證解析後的物件；本次 fixtures 用 JSON（YAML 1.2 的子集）。未來 YAML loader 必須拒絕重複 key，不讀取或執行自訂 tags。
+- 設定 schema 驗證解析後的物件；本次 fixtures 用 JSON（YAML 1.2 的子集）。M1 loader 只接受嚴格 JSON 子集；未來一般 YAML loader 必須拒絕重複 key，不讀取或執行自訂 tags。
 - filter 各條件之間 AND，同一列表內 OR；省略條件表示不限制，空列表拒絕。`types` 是 exact 或以 `.*` 結尾的 prefix pattern；`sources` 是 exact 或只在末尾加 `*`。沒有正則或任意運算式。
 - `filter.data` 的 key 是1至3層的點分路徑；值為 JSON scalar，作型別敏感的等值比較（false 不等於0）。不存在的路徑不匹配，包括想比對 null 時；只有顯式 null 匹配 null。
 - sources.name、rules.id、subscriptions.id 在各自集合中唯一。token／secret 只允許 `file:/...` 參考，檢查器不開啟這些檔案。name/id 限1–64字元的小寫字母、數字與連字號，首字為字母。
@@ -51,6 +51,8 @@ python3 -m venv /tmp/signalhub-contracts
 - 規則內容變更卻未增加 version，需要比較既有生效設定；M0 靜態 checker 沒有該歷史狀態，留給 M3 驗收。
 
 ### HTTP 與投遞
+
+- M1 啟動契約明訂每個 body 最多4 MiB、JSON 巢狀最多64層；每筆 data 仍另限16 KiB。Alertmanager 本機 mapping 提前在 M1 驗證，實際生產者接入仍是 M6。
 
 - OpenAPI 的回應 schema 是機械契約。單筆新增202 `{seq}`；重複200 `{seq,duplicate:true}`；錯誤 `{error:{code,message}}`。
 - batch 外層必須是1–100項陣列；外層正常解析且認證通過後回200 `{results:[...]}`。每項有輸入順序的零起算 index、status，以及成功 seq／duplicate 或失敗 error。每項獨立驗證，部分錯誤不取消其他項；OpenAPI batch items 刻意不先套事件 schema。2xx仍必須等對應資料持久化。
@@ -70,4 +72,4 @@ checker 另以 RFC 4231 test case 1 核對 HMAC 已知答案。所有 keys、ID�
 
 ## 尚未驗證
 
-沒有 ingest、SQLite、token授權執行、rule evaluator、持久化去重、dispatcher、來源新鮮度、YAML loader、UI 或部署。OpenAPI 通過只證明文件結構有效；fixtures 通過只證明M0 checker 的契約案例，不能標為 M1–M6 的 runtime 驗收。
+本 checker 不執行 ingest、SQLite、token 授權或持久化驗證。M1 另有 Go 測試及真實 binary HTTP／SQLite smoke；見 [quickstart](../docs/quickstart.md)。OpenAPI 尚含後續階段的路由，不能由文件通過推斷所有 endpoint 已實作。rule evaluator、dispatcher、來源新鮮度、一般 YAML loader、UI 與部署仍未驗收。

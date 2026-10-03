@@ -11,7 +11,7 @@
       "post": {
         "operationId": "ingestEvents",
         "summary": "Ingest a single CloudEvent or independent batch members",
-        "description": "Source bearer only; authorize source_prefix and allowed_types per event. Unauthorized type or external signalhub.* is forbidden (403). New events return 202 only after SQLite commit; identical source + id and RFC 8785 canonical content return 200 with original seq and duplicate:true; differing content returns 409 without changing the original. data is at most 16384 UTF-8 bytes after RFC 8785 serialization. Batch must be a JSON array of 1–100 members; member validation is deliberately not applied to the outer request schema. After envelope/authentication validation batch always returns 200 with results in request order, including member failures. Outer malformed JSON/envelope or auth errors return 4xx; individual invalid_event/forbidden/event_conflict/payload_too_large/unavailable failures belong in results. Each successful member has committed before its result is returned. Content-Type must select a supported media type.",
+        "description": "Source bearer only; authorize source_prefix and allowed_types per event. Unauthorized type or external signalhub.* is forbidden (403). New events return 202 only after SQLite commit; identical source + id and RFC 8785 canonical content return 200 with original seq and duplicate:true; differing content returns 409 without changing the original. data is at most 16384 UTF-8 bytes after RFC 8785 serialization. Batch must be a JSON array of 1–100 members; member validation is deliberately not applied to the outer request schema. After envelope/authentication validation batch always returns 200 with results in request order, including member failures. Outer malformed JSON/envelope or auth errors return 4xx; individual invalid_event/forbidden/event_conflict/payload_too_large/unavailable failures belong in results. Each successful member has committed before its result is returned. Content-Type must select a supported media type. Entire HTTP request body is limited to 4 MiB, including whitespace and envelope attributes; oversized bodies return 413 payload_too_large. JSON nesting beyond 64 levels returns 400 invalid_json.",
         "security": [
           {
             "sourceBearer": []
@@ -105,7 +105,7 @@
             }
           },
           "413": {
-            "description": "Serialized event data exceeds 16 KiB (payload_too_large).",
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
             "content": {
               "application/json": {
                 "schema": {
@@ -367,10 +367,10 @@
     "/v1/adapters/alertmanager": {
       "post": {
         "operationId": "ingestAlertmanager",
-        "summary": "Planned M6 Alertmanager v4 adapter",
-        "x-signalhub-milestone": "M6",
-        "x-signalhub-implementation": "planned",
-        "description": "Planned contract only; M0 includes no runtime. Source bearer is scoped to urn:signalhub:alertmanager:<receiver> and allowed alertmanager.alert.* types. Each alerts array member maps to a CloudEvent per SDD 01; firing uses startsAt, resolved uses endsAt, and stable id is fingerprint:startsAt:status. Results use the zero-based alerts array index and independent ingest semantics. Duplicate notifications retain the original seq. Invalid webhook envelope returns 400; authorization failure returns 401/403.",
+        "summary": "Alertmanager v4 adapter",
+        "x-signalhub-milestone": "M1",
+        "x-signalhub-implementation": "runtime",
+        "description": "Local mapping is part of M1; real producer integration is M6. Source bearer is scoped to urn:signalhub:alertmanager:<receiver> and allowed alertmanager.alert.* types. Each alerts array member maps to a CloudEvent per SDD 01; firing uses startsAt, resolved uses endsAt, and stable id is fingerprint:startsAt:status. Results use the zero-based alerts array index and independent ingest semantics. Duplicate notifications retain the original seq. Invalid webhook envelope returns 400; authorization failure returns 401/403. Entire HTTP request body is limited to 4 MiB, including whitespace and envelope attributes; oversized bodies return 413 payload_too_large. JSON nesting beyond 64 levels returns 400 invalid_json.",
         "security": [
           {
             "sourceBearer": []
@@ -439,6 +439,16 @@
           },
           "503": {
             "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
             "content": {
               "application/json": {
                 "schema": {
@@ -2256,7 +2266,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertmanagerAlert"
-            }
+            },
+            "maxItems": 100
           },
           "groupLabels": {
             "type": "object",
@@ -2293,7 +2304,7 @@
           "alerts"
         ],
         "additionalProperties": true,
-        "description": "Planned M6 Alertmanager webhook v4 envelope. Each alert becomes a CloudEvent using the mapping in SDD 01; not implemented in M0."
+        "description": "M1 local Alertmanager webhook v4 mapping; up to 100 alerts, including an empty heartbeat. Real producer integration is M6."
       }
     },
     "parameters": {

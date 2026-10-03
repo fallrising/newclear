@@ -1,6 +1,6 @@
 # CMS Scaffold v2
 
-狀態：**已啟動（施工圖已完備，尚未實作）**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。00／01／02 保留架構與決策，所有實作波次都已細化成 `waves/` 施工圖；實作者依路線圖逐波施工，不從框架文件自行補設計。
+狀態：**BW0／W0 已實作；其餘波次依下表區分施工圖與實作狀態**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。00／01／02 保留架構與決策，BW0～BW5、W0～W5 已細化成 `waves/` 施工圖；BW6／W6 仍為 DRAFT；實作者依路線圖逐波施工，不從框架文件自行補設計。
 
 | 文件 | 內容 |
 | --- | --- |
@@ -15,12 +15,18 @@
 
 與既有文件的關係：[總綱](../sdd/00-overview.md) 凍結、不改；[surface 與 kernel 規格](../specs/) 仍是路由、權限、領域規則的權威；v2 文件補架構、畫面、API 演進與交付方式。
 
+## 本次個人使用補強（2026-10-03）
+
+目前工程來源為 `newclear/apps/cms-scaffold`；封存的獨立倉庫不再代表最新進度。先完成 [P0 資料可靠性](waves/P0.md)，再沿既有 BW1a／BW1b／BW1c 與 W1 演進；另見 [個人使用驗收與介面參考](03-personal-use-readiness.md)。P0 文件先定義範圍後開始實作，不把尚未實作的模型管理／能力導覽列為現成功能。
+
 ## 已定案的方向
 
 - **Shopify 只借模式、不借套件**：Back／Admin 用 Shopify admin（Polaris）的版型與互動，Front 用 Shopify 商店主題的版面語言；元件庫仍是總綱凍結的 shadcn/ui + Tailwind。
 - **後端增量演進**：同一個 `cms-api`、同一個 `/api/v1`，補分頁、能力查詢、欄位中繼資料、完整 OpenAPI schema、審計、會員端點；kernel 不再寫死 demo 欄位名。
 - **前端開發不依賴後端啟動**：MSW mock，回應型別由 OpenAPI 產生。
 - v2 不做：Front prerender、作業面深色模式、批次操作、token 預覽、Polaris 套件。
+
+Back／Admin 新增 [shadcn-admin 參考對照](03-personal-use-readiness.md#介面參考)；使用既有 shadcn/ui 元件與 React Router，不搬入模板的身份或路由系統。
 
 ## 路線圖
 
@@ -49,6 +55,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
 | --- | --- | --- | --- | --- |
+| P0 | LOCAL_VERIFIED（本地，未合併） | [個人使用驗收](03-personal-use-readiness.md) | [waves/P0.md](waves/P0.md) | 資料交易、原子版本檢查、表單值安全 |
 | BW0 | VERIFIED | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW0.md](waves/BW0.md) | B-01、B-08、B-14、B-15 |
 | W0 | VERIFIED | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W0.md](waves/W0.md) | F-01～F-05、S-01～S-03、C-16～C-18、E-01～E-04 |
 | BW1a | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW1a.md](waves/BW1a.md) | B-03、B-04、B-05、B-12；G-01、G-05、G-06、G-11 |
@@ -67,11 +74,13 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
+本地交付另用 `LOCAL_VERIFIED`：整合檢查已通過，但未提交／合併，不能等同正式 `VERIFIED`。
+
 狀態：`DRAFT`（只有框架）→ `DOC_READY`（施工圖已合併）→ `IN_PROGRESS` → `VERIFIED`（實作已合併並通過交付檢查表）。
 
 ## 細化
 
-細化已完成。若施工時發現新矛盾，需要重開某一波的施工圖，**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做。本次細化：<波次>」。Agent 只修改該波的 `waves/<波次>.md`、契約／fixture 與必要的框架連結；一波仍只進一個 PR。
+BW0～BW5、W0～W5 的細化已完成；BW6／W6 尚待細化。若施工時發現新矛盾，需要重開某一波的施工圖，**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做。本次細化：<波次>」。Agent 只修改該波的 `waves/<波次>.md`、契約／fixture 與必要的框架連結；一波仍只進一個 PR。
 
 施工圖的標準：能力較弱的 agent 只讀施工圖就能實作，不需要做任何設計決定。細化時若發現框架本身有矛盾，agent 會新增開放問題並停下來問。
 

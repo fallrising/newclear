@@ -10,6 +10,7 @@ import com.fallrising.cms.content.domain.RevisionRecord;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public interface ContentStore {
 
@@ -37,9 +38,19 @@ public interface ContentStore {
 
     EntryRecord insertEntry(EntryRecord entry);
 
+    /** Atomically replaces an entry only when its stored version is entry.version() - 1. */
     EntryRecord updateEntry(EntryRecord entry);
 
-    void hardDeleteEntry(UUID id);
+    /** Database writes across content, media, and identity stores share this transaction. */
+    default <T> T writeTransaction(Supplier<T> work) {
+        return work.get();
+    }
+
+    default void hardDeleteEntry(UUID id) {
+        hardDeleteEntry(id, findEntry(id).orElseThrow(com.fallrising.cms.content.ContentException::notFound).version());
+    }
+
+    void hardDeleteEntry(UUID id, int expectedVersion);
 
     void insertRevision(RevisionRecord revision);
 

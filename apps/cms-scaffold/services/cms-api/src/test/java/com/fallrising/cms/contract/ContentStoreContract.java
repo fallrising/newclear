@@ -282,6 +282,77 @@ public abstract class ContentStoreContract {
         assertThat(store.findNavigation("front.primary")).contains(published);
     }
 
+    @Test
+    void P0_sameVersionUpdateCannotOverwriteWinner() {
+        ContentTypeRecord type = insertType("cas");
+        EntryRecord original = entry(type, "original", PublicationState.DRAFT, Map.of("title", "old"), t(1));
+        store.insertEntry(original);
+        EntryRecord winner = new EntryRecord(original.id(), type.id(), type.typeKey(), "winner",
+                PublicationState.DRAFT, 2, Map.of("title", "winner"), null, null, null, null,
+                null, null, original.createdAt(), t(2));
+        EntryRecord loser = new EntryRecord(original.id(), type.id(), type.typeKey(), "loser",
+                PublicationState.PUBLISHED, 2, Map.of("title", "loser"), Map.of("title", "loser"),
+                t(3), null, null, null, null, original.createdAt(), t(3));
+        store.updateEntry(winner);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> store.updateEntry(loser))
+                .isInstanceOf(com.fallrising.cms.content.ContentException.class)
+                .hasMessage("Entry version does not match");
+        assertThat(store.findEntry(original.id())).contains(winner);
+    }
+
+    @Test
+    void P0_staleDeleteCannotRemoveNewerEntryOrDependents() {
+        ContentTypeRecord type = insertType("delete_cas");
+        EntryRecord original = entry(type, "original", PublicationState.DRAFT, Map.of(), t(1));
+        store.insertEntry(original);
+        RevisionRecord revision = revision(original, 1, t(1));
+        store.insertRevision(revision);
+        UUID target = UUID.randomUUID();
+        store.replaceRefs(original.id(), List.of(new EntryRefRecord(original.id(), "cover", target, "media", 0)));
+        EntryRecord newer = new EntryRecord(original.id(), type.id(), type.typeKey(), "newer",
+                PublicationState.DRAFT, 2, Map.of(), null, null, null, null,
+                null, null, original.createdAt(), t(2));
+        store.updateEntry(newer);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> store.hardDeleteEntry(original.id(), 1))
+                .isInstanceOf(com.fallrising.cms.content.ContentException.class);
+        assertThat(store.findEntry(original.id())).contains(newer);
+        assertThat(store.revisionsOf(original.id())).containsExactly(revision);
+        assertThat(store.refsTo(target)).hasSize(1);
+    }
+
+    @Test
+    void P0_competingUpdatesHaveExactlyOneWinner() throws Exception {
+        ContentTypeRecord type = insertType("race");
+        EntryRecord original = entry(type, "original", PublicationState.DRAFT, Map.of(), t(1));
+        store.insertEntry(original);
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            java.util.List<java.util.concurrent.Future<String>> results = new java.util.ArrayList<>();
+            for (String title : List.of("first", "second")) {
+                results.add(executor.submit(() -> {
+                    start.await();
+                    EntryRecord next = new EntryRecord(original.id(), type.id(), type.typeKey(), original.slug(),
+                            PublicationState.DRAFT, 2, Map.of("title", title), null, null, null, null,
+                            null, null, original.createdAt(), t(2));
+                    try {
+                        store.updateEntry(next);
+                        return title;
+                    } catch (com.fallrising.cms.content.ContentException conflict) {
+                        assertThat(conflict.getMessage()).isEqualTo("Entry version does not match");
+                        return "conflict";
+                    }
+                }));
+            }
+            start.countDown();
+            List<String> outcomes = List.of(results.get(0).get(10, java.util.concurrent.TimeUnit.SECONDS),
+                    results.get(1).get(10, java.util.concurrent.TimeUnit.SECONDS));
+            assertThat(outcomes).containsOnlyOnce("conflict");
+            EntryRecord stored = store.findEntry(original.id()).orElseThrow();
+            assertThat(stored.version()).isEqualTo(2);
+            assertThat(outcomes).contains(stored.payload().get("title").toString());
+        }
+    }
+
     // ---- fixtures ----
 
     protected static Instant t(int seconds) {

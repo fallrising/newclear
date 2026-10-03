@@ -12,6 +12,14 @@
 - 閘門：`./gradlew test`（不需要 Docker）＋`./gradlew integrationTest`（BW0 起進 CI，Testcontainers）＋前端 `lint`／`typecheck`／`test`／`build`；v2 W0 起再加 `test:bundle` 與 `e2e:mock`（Playwright + MSW，不需要後端）。
 - 接真實 API 的 `npm run e2e` 仍然不是閘門。
 
+## P0 個人使用可靠性（2026-10-03 使用者授權）
+
+- 先讀 `docs/v2/waves/P0.md` 與 `docs/v2/03-personal-use-readiness.md`；本波文件先行，再修內容寫入與 Back 表單。
+- 分工與驗收記錄放在本元件 `.team/`，不要覆寫 monorepo 根目錄既有任務。
+- P0 先於 BW1a；之後整檔取代式施工圖須保留 P0 的交易／版本／表單回歸。
+- Back／Admin 可參考 shadcn-admin 的資訊架構與互動，仍用既有 `packages/ui`，不自動授權新增依賴或替換身份／路由。
+- 2026-10-03 使用者追加授權：整理、提交並合併本波 P0 PR，之後繼續文件先行開發；此授權不包含部署或其他項目的 PR。
+
 ## UI e2e（本波）允許寫
 
 - `e2e/` Playwright：Front 公開相簿/診所/專案、Back 自訂視圖與登入拒絕、Admin 治理

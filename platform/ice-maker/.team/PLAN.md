@@ -83,6 +83,15 @@ inferred from that merge.
 
 ## Decisions and discoveries
 
+- 2026-10-03: The first owner-selected real-document attempt stopped at runtime
+  preflight. A RED regression reproduced incorrect Poppler detection caused by
+  using `--version`; the minimal `-v` fix passes ten doctor tests. The real host
+  remains unsupported (Docker/service extras absent, root operator), and the
+  existing service startup refuses it. No corpus ingestion or cited candidate
+  is claimed. Full validation and a clean-base comparison retain the same five
+  failing/erroring tests and five environment skips. See
+  `docs/verification/first-real-result.md` and its machine-readable evidence.
+
 - 2026-09-04: ACCEPT T-043 after rebuilding source revision `832ce5d...`,
   preserving the prior private state, and starting a fresh isolated loopback
   service. The same 10 files completed from an empty cache in about 546 seconds

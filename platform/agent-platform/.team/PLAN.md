@@ -15,6 +15,10 @@ Frontend: operator invokes a download button; fetch same-origin session credenti
 
 Verification: make platform-check; make web-check; relevant browser suite using real PostgreSQL/API and fake runtime records; git diff --check and team contracts. No live VM/provider operations.
 
-Acceptance: backend T-003 accepted after inspected diff and root targeted7passed; full platform45unit+220SQL/HTTP, frontend37 and browser2passed. Independent final review pending. Scope is only this M3 slice.
+Acceptance: backend T-003 accepted after inspected diff and root targeted7passed; full platform45unit+260SQL/HTTP, frontend37 and browser2passed. Independent T-004 final review accepted after source/evidence inspection; no required findings. Scope is only this M3 slice.
 
 Frontend scope includes web/src/api.ts to declare the persisted diff byte count and base commit fields already returned by the API.
+
+Rebased cleanly onto current main 10d5729 (mock tool broker); all required checks rerun. Platform: 45 unit and 260 SQL/HTTP; frontend37, browser2; no skips. Backend worker scope inspected; no code conflicts with latest main.
+
+Evidence gate: all defined checks map to code tests, final logs and sanitized evidence; tasks/reports valid, scope bounded. Slice accepted for Draft PR review.

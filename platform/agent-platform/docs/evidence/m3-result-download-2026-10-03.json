@@ -7,7 +7,7 @@
   "node": "24.18.0",
   "checks": {
     "platform_unit": 45,
-    "platform_sql_http": 220,
+    "platform_sql_http": 260,
     "frontend": 37,
     "browser": 2,
     "targeted_backend": 7,
@@ -20,10 +20,10 @@
   "log_sha256": {
     "backend_red": "f57fd475d07d587f6c9a65cc36ef569d0cf7bca1e95051e654d5e590730155c4",
     "backend_targeted": "e7ba8d6758889250a04a78447704b1c67b1f15800146d54a48af6f0f96183685",
-    "platform_check": "b87b6a7f75db5275985332404cd641387089c7e61ffb99b5c62157b20ab74355",
+    "platform_check": "61069540d6b2c9bc41373937c0f93aee9f9359eae623c34491ba73a97083976d",
     "frontend_red": "e951369e83c4683b49ab31d05058d4f15645fedc1155b83d8cb4fb014bd29f67",
-    "web_check": "f5364e7076d9fafc831fb0f286a36a05fe9c3c3be76ab6fd8d4e168b9c3d26a9",
-    "browser_test": "c5e382788eb7e341ef4ad57d164a32ffa9cd3ff3c835834347afdb9718a9ae61"
+    "web_check": "8653fa6a4bec94ba561eff04908dc6a1b862491178ed861c0f221d308cdbda31",
+    "browser_test": "534302fab7a931f8cb441f7c2bd9ce028be318630cfcd40d70c26e976d74eae2"
   },
   "limitations": [
     "This is a bounded M3 slice, not full M3 acceptance.",
@@ -35,5 +35,7 @@
     "Browser fixture import path corrected using absolute source path.",
     "Chromium shared libraries extracted to a temporary test directory; no host package installation.",
     "Generated browser output moved aside before existing Prettier check."
-  ]
+  ],
+  "base_commit": "10d572936642b14d4df81865a4e066500cffbbfb",
+  "review": "Independent source and final evidence review completed with no required findings (T-004)."
 }

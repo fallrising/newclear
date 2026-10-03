@@ -1,0 +1,552 @@
+diff --git a/cluster/calcium/lock.go b/cluster/calcium/lock.go
+index cfc4013..052986e 100644
+--- a/cluster/calcium/lock.go
++++ b/cluster/calcium/lock.go
+@@ -127 +127,2 @@ func (c *Calcium) withNodesLocked(ctx context.Context, nodeFilter *types.NodeFil
+-		lock, ctx, err = c.doLock(ctx, key, c.config.LockTimeout)
++		var lockCtx context.Context
++		lock, lockCtx, err = c.doLock(ctx, key, c.config.LockTimeout)
+@@ -130,0 +132 @@ func (c *Calcium) withNodesLocked(ctx context.Context, nodeFilter *types.NodeFil
++		ctx = lockCtx
+diff --git a/cluster/calcium/lock_test.go b/cluster/calcium/lock_test.go
+index ac04ca8..e87d781 100644
+--- a/cluster/calcium/lock_test.go
++++ b/cluster/calcium/lock_test.go
+@@ -363,0 +364,75 @@ func TestWithNodeOperationLocked(t *testing.T) {
++
++// The etcd lock returns (nil, err) on failure. Cleanup must keep a valid
++// parent context and return the error without panicking or calling f.
++func TestWithNodesPlanLockedNilContextOnLockFailure(t *testing.T) {
++	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
++	store := c.store.(*storemocks.Store)
++	store.On("GetNode", mock.Anything, "a1").Return(&types.Node{
++		NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true,
++	}, nil).Once()
++	failedLock := &lockmocks.DistributedLock{}
++	store.On("CreateLock", "cnode_op_poda_a1", mock.Anything).Return(failedLock, nil).Once()
++	failedLock.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once()
++	failedLock.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++		assert.NotNil(t, args.Get(0))
++		assert.NoError(t, args.Get(0).(context.Context).Err())
++	})
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(t.Context(), &types.NodeFilter{Includes: []string{"a1"}},
++			func(context.Context, map[string]*types.Node) error {
++				called = true
++				return nil
++			})
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	store.AssertExpectations(t)
++	failedLock.AssertExpectations(t)
++}
++
++// Already acquired locks must be released in reverse order even when a later
++// Lock returns a nil context and cancels its input.
++func TestWithNodesPlanLockedPartialFailureUnlocks(t *testing.T) {
++	c := NewTestCluster()
++	c.config.LockTimeout = 30 * time.Second
++	store := c.store.(*storemocks.Store)
++	nodes := []*types.Node{
++		{NodeMeta: types.NodeMeta{Name: "a1", Podname: "poda"}, Available: true},
++		{NodeMeta: types.NodeMeta{Name: "a2", Podname: "poda"}, Available: true},
++	}
++	store.On("GetNodes", mock.Anything, []string{"a1", "a2"}).Return(nodes, nil).Once()
++	ctx, cancel := context.WithCancel(t.Context())
++	defer cancel()
++	keys := []string{"plock_poda", "cnode_op_poda_a1", "cnode_op_poda_a2"}
++	unlocked := []string{}
++	mocks := []*lockmocks.DistributedLock{}
++	for i, key := range keys {
++		lk := &lockmocks.DistributedLock{}
++		mocks = append(mocks, lk)
++		store.On("CreateLock", key, mock.Anything).Return(lk, nil).Once()
++		if i == 2 {
++			lk.On("Lock", mock.Anything).Return(nil, types.ErrMockError).Once().Run(func(mock.Arguments) { cancel() })
++		} else {
++			lk.On("Lock", mock.Anything).Return(ctx, nil).Once()
++		}
++		lk.On("Unlock", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
++			assert.NotNil(t, args.Get(0))
++			assert.NoError(t, args.Get(0).(context.Context).Err())
++			unlocked = append(unlocked, key)
++		})
++	}
++	called := false
++	assert.NotPanics(t, func() {
++		err := c.withNodesPlanLocked(ctx, &types.NodeFilter{Includes: []string{"a1", "a2"}},
++			func(context.Context, map[string]*types.Node) error { called = true; return nil })
++		assert.ErrorIs(t, err, types.ErrMockError)
++	})
++	assert.False(t, called)
++	assert.Equal(t, []string{keys[2], keys[1], keys[0]}, unlocked)
++	store.AssertExpectations(t)
++	for _, lk := range mocks {
++		lk.AssertExpectations(t)
++	}
++}
+diff --git a/store/common/node.go b/store/common/node.go
+index 7a305ec..c79a172 100644
+--- a/store/common/node.go
++++ b/store/common/node.go
+@@ -43,2 +43,3 @@ func (s *Store) AddNode(ctx context.Context, opts *types.AddNodeOptions) (*types
+-		Bypass:    false,
+-		Test:      opts.Test || strings.HasPrefix(opts.Endpoint, fakeengine.PrefixKey),
++		// A new node is not schedulable until an operator explicitly brings it up.
++		Bypass: true,
++		Test:   opts.Test || strings.HasPrefix(opts.Endpoint, fakeengine.PrefixKey),
+diff --git a/store/common/node_test.go b/store/common/node_test.go
+index 8277e46..1c7df9b 100644
+--- a/store/common/node_test.go
++++ b/store/common/node_test.go
+@@ -4,0 +5,2 @@ import (
++	"encoding/json"
++	"fmt"
+@@ -59,0 +62,32 @@ func (k *brokenWatchKV) NotFound(error) bool { return false }
++
++type addNodeCaptureKV struct {
++	KV
++	created map[string]string
++}
++
++func (k *addNodeCaptureKV) GetOne(_ context.Context, key string) (string, error) {
++	if key != fmt.Sprintf(PodInfoKey, "eru") {
++		return "", fmt.Errorf("unexpected key %s", key)
++	}
++	return `{"name":"eru"}`, nil
++}
++
++func (k *addNodeCaptureKV) Create(_ context.Context, data map[string]string) error {
++	k.created = data
++	return nil
++}
++
++func TestAddNodeStartsBypassed(t *testing.T) {
++	kv := &addNodeCaptureKV{}
++	store := New(kv, types.Config{}, nil)
++	node, err := store.AddNode(t.Context(), &types.AddNodeOptions{
++		Nodename: "worker-4", Endpoint: "containerd://ckc@100.64.0.44:22", Podname: "eru",
++	})
++	require.NoError(t, err)
++	assert.True(t, node.Bypass)
++
++	var persisted types.Node
++	require.NoError(t, json.Unmarshal([]byte(kv.created[fmt.Sprintf(NodeInfoKey, "worker-4")]), &persisted))
++	assert.True(t, persisted.Bypass)
++	assert.Equal(t, "containerd://ckc@100.64.0.44:22", persisted.Endpoint)
++}
+diff --git a/compat/v015/README.md b/compat/v015/README.md
+new file mode 100644
+--- /dev/null
++++ b/compat/v015/README.md
+@@ -0,0 +1,34 @@
++# v0.1.5 metadata compatibility contract
++
++`testdata/legacy.json` is synthetic metadata using the JSON tags and nested raw
++resource shapes reviewed in `types/workload.go`, `types/node.go`,
++`resource/types/resource.go`, and the store key layout at upstream v0.1.5
++commit `e19ceb7e09d95bedea3eb0c25bec9308101fecc5`. It is not a live export or a
++claim that an older binary generated this exact fixture.
++
++The tests exercise real core store update/delete/status binding and RPC
++conversion. Only the KV transport and cluster retrieval boundary are fixtures.
++They assert exact workload identity and owner/digest labels, persisted resource
++round trips, fenced node identity, RPC resource capacity/usage preservation,
++exact four-key cleanup with unrelated data preserved, and missing status that
++must never inherit a neighboring node's readiness. Metadata cleanup deliberately
++does not claim to repair external resource-plugin quota.
++
++The error migration is intentional: v0.1.5 classified an empty etcd exact read
++as invalid cardinality and returned the custom GetWorkload RPC code. v0.1.7
++must distinguish empty reads (`ErrKeyNotFound` / workload `NotFound`) from
++ambiguous counts and backend failures. Narrow no-network tests alongside the
++etcd meta package exercise the actual GetOne/GetMulti implementation and reject
++partial results when one exact key is absent or ambiguous.
++
++Run both parts against the patched candidate:
++
++```sh
++go test ./compat/v015 -count=1 -v
++go test ./store/etcdv3/meta -run '^TestV015' -count=1 -v
++```
++
++These are bounded metadata/wire compatibility tests. They do not establish
++plugin accounting, rolling upgrade, live runtime, network, or VPS compatibility.
++A compile failure or either command failing blocks publication; do not replace
++this evidence with unrelated package tests or alter upstream code silently.
+diff --git a/compat/v015/compat_test.go b/compat/v015/compat_test.go
+new file mode 100644
+--- /dev/null
++++ b/compat/v015/compat_test.go
+@@ -0,0 +1,286 @@
++// Package v015_test exercises the v0.1.5 persisted metadata/wire contract on
++// the candidate core. Fixtures use the JSON tags and resource shapes reviewed
++// at v0.1.5 e19ceb7e09d95bedea3eb0c25bec9308101fecc5. They are synthetic,
++// contain no live identities, and deliberately do not claim plugin or VPS E2E.
++package v015_test
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"iter"
++	"os"
++	"reflect"
++	"strings"
++	"testing"
++	"time"
++
++	"github.com/projecteru2/core/cluster"
++	"github.com/projecteru2/core/rpc"
++	pb "github.com/projecteru2/core/rpc/gen"
++	"github.com/projecteru2/core/store/common"
++	"github.com/projecteru2/core/types"
++	"github.com/projecteru2/core/utils"
++	"google.golang.org/grpc/codes"
++	"google.golang.org/grpc/status"
++)
++
++type legacy struct {
++	Workload     types.Workload         `json:"workload"`
++	Node         types.Node             `json:"node"`
++	ResourceInfo types.NodeResourceInfo `json:"resource_info"`
++	Status       types.StatusMeta       `json:"status"`
++}
++
++func fixture(t *testing.T) legacy {
++	t.Helper()
++	raw, err := os.ReadFile("testdata/legacy.json")
++	if err != nil {
++		t.Fatal(err)
++	}
++	var f legacy
++	if err := json.Unmarshal(raw, &f); err != nil {
++		t.Fatal(err)
++	}
++	return f
++}
++func jsonEqual(t *testing.T, expected, actual any) {
++	t.Helper()
++	decode := func(v any) any {
++		raw, err := json.Marshal(v)
++		if err != nil {
++			t.Fatal(err)
++		}
++		var out any
++		if err := json.Unmarshal(raw, &out); err != nil {
++			t.Fatal(err)
++		}
++		return out
++	}
++	if !reflect.DeepEqual(decode(expected), decode(actual)) {
++		t.Fatalf("JSON changed: want %#v, got %#v", expected, actual)
++	}
++}
++
++// Embedding the interface makes an unexpected storage operation fail immediately.
++// The implemented methods model only storage; all core transformations are real.
++var fixtureNotFound = errors.New("fixture key absent")
++
++type fixtureKV struct {
++	common.KV
++	data    map[string]string
++	failure error
++	deleted []string
++}
++
++func (k *fixtureKV) GetMulti(_ context.Context, keys []string) (map[string]string, error) {
++	if k.failure != nil {
++		return nil, k.failure
++	}
++	out := map[string]string{}
++	for _, key := range keys {
++		value, ok := k.data[key]
++		if !ok {
++			return nil, fmt.Errorf("%s: %w", key, fixtureNotFound)
++		}
++		out[key] = value
++	}
++	return out, nil
++}
++func (k *fixtureKV) GetOne(ctx context.Context, key string) (string, error) {
++	rows, err := k.GetMulti(ctx, []string{key})
++	return rows[key], err
++}
++func (k *fixtureKV) GetPrefix(_ context.Context, prefix string, _ int64) (map[string]string, error) {
++	out := map[string]string{}
++	for key, value := range k.data {
++		if strings.HasPrefix(key, prefix) {
++			out[key] = value
++		}
++	}
++	return out, nil
++}
++func (*fixtureKV) NotFound(err error) bool { return errors.Is(err, fixtureNotFound) }
++func (k *fixtureKV) Update(_ context.Context, data map[string]string) error {
++	for key, value := range data {
++		k.data[key] = value
++	}
++	return nil
++}
++func (k *fixtureKV) Delete(_ context.Context, keys []string) error {
++	k.deleted = append([]string{}, keys...)
++	for _, key := range keys {
++		delete(k.data, key)
++	}
++	return nil
++}
++func (*fixtureKV) Watch(_ context.Context, prefix string) iter.Seq[common.Event] {
++	return func(yield func(common.Event) bool) {
++		yield(common.Event{Key: prefix + "legacy-exact-id", Type: common.EventPut})
++	}
++}
++func TestLegacyMetadataUpdateAndExactCleanup(t *testing.T) {
++	f := fixture(t)
++	kv := &fixtureKV{data: map[string]string{"/unrelated/peer": "preserve", "/resource/worker-4": "quota-preserved"}}
++	s := fixtureStore(t, kv)
++	if err := s.UpdateWorkload(t.Context(), &f.Workload); err != nil {
++		t.Fatal(err)
++	}
++	keys := []string{"/workloads/legacy-exact-id", "/node/worker-4:workloads/legacy-exact-id", "/deploy/hello/web/worker-4/legacy-exact-id"}
++	if len(kv.data) != 5 {
++		t.Fatalf("unexpected metadata writes: %v", kv.data)
++	}
++	for _, key := range keys {
++		var row types.Workload
++		if err := json.Unmarshal([]byte(kv.data[key]), &row); err != nil {
++			t.Fatal(err)
++		}
++		jsonEqual(t, f.Workload, row)
++	}
++	statusKey := "/status/hello/web/worker-4/legacy-exact-id"
++	kv.data[statusKey] = "status"
++	if err := s.RemoveWorkload(t.Context(), &f.Workload); err != nil {
++		t.Fatal(err)
++	}
++	want := []string{statusKey, keys[2], keys[0], keys[1]}
++	if !reflect.DeepEqual(kv.deleted, want) {
++		t.Fatalf("cleanup scope changed: %v", kv.deleted)
++	}
++	if !reflect.DeepEqual(kv.data, map[string]string{"/unrelated/peer": "preserve", "/resource/worker-4": "quota-preserved"}) {
++		t.Fatalf("cleanup changed unrelated metadata: %v", kv.data)
++	}
++}
++func TestLegacyStatusBindingDoesNotBorrowSiblingStatus(t *testing.T) {
++	for _, present := range []bool{true, false} {
++		t.Run(fmt.Sprint(present), func(t *testing.T) {
++			f := fixture(t)
++			raw, _ := json.Marshal(f.Workload)
++			state, _ := json.Marshal(f.Status)
++			kv := &fixtureKV{data: map[string]string{"/workloads/legacy-exact-id": string(raw), "/status/hello/web/worker-40/legacy-exact-id": string(state)}}
++			if present {
++				kv.data["/status/hello/web/worker-4/legacy-exact-id"] = string(state)
++			}
++			s := fixtureStore(t, kv)
++			ch := s.WorkloadStatusStream(t.Context(), "hello", "web", "worker-4", map[string]string{"owner": "eru-vps-mvp"})
++			select {
++			case msg := <-ch:
++				if msg == nil || msg.Error != nil || msg.Workload == nil {
++					t.Fatalf("legacy metadata unreadable: %#v", msg)
++				}
++				jsonEqual(t, f.Workload, *msg.Workload)
++				if present {
++					if msg.Workload.StatusMeta == nil || !msg.Workload.StatusMeta.Running || !msg.Workload.StatusMeta.Healthy {
++						t.Fatal("legacy status lost")
++					}
++				} else if msg.Workload.StatusMeta != nil {
++					t.Fatal("sibling status incorrectly marks workload healthy")
++				}
++			case <-time.After(time.Second):
++				t.Fatal("status read timed out")
++			}
++			select {
++			case _, ok := <-ch:
++				if ok {
++					t.Fatal("unexpected extra event")
++				}
++			case <-time.After(time.Second):
++				t.Fatal("status stream did not finish")
++			}
++		})
++	}
++}
++
++type fixtureCluster struct {
++	cluster.Cluster
++	workload *types.Workload
++	node     *types.Node
++	store    *common.Store
++}
++
++func (c *fixtureCluster) GetWorkload(ctx context.Context, id string) (*types.Workload, error) {
++	if c.store != nil {
++		return c.store.GetWorkload(ctx, id)
++	}
++	if id != c.workload.ID {
++		return nil, types.ErrWorkloadNotExists
++	}
++	return c.workload, nil
++}
++func (c *fixtureCluster) GetNode(_ context.Context, name string) (*types.Node, error) {
++	if name != c.node.Name {
++		return nil, types.ErrInvaildNodeFilter
++	}
++	return c.node, nil
++}
++func TestLegacyRPCIdentityAndResourceFields(t *testing.T) {
++	f := fixture(t)
++	f.Workload.StatusMeta = &f.Status
++	f.Node.ResourceInfo = f.ResourceInfo
++	server := rpc.New(&fixtureCluster{workload: &f.Workload, node: &f.Node}, types.Config{}, make(chan struct{}))
++	w, err := server.GetWorkload(t.Context(), &pb.WorkloadID{Id: f.Workload.ID})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if w.Id != f.Workload.ID || w.Name != f.Workload.Name || w.Nodename != f.Workload.Nodename || w.Podname != f.Workload.Podname || w.Image != f.Workload.Image || w.CreateTime != f.Workload.CreateTime {
++		t.Fatalf("legacy workload identity changed: %v", w)
++	}
++	if !reflect.DeepEqual(w.Labels, f.Workload.Labels) || !reflect.DeepEqual(w.Env, f.Workload.Env) || !w.Status.Running || !w.Status.Healthy {
++		t.Fatal("legacy ownership or readiness lost")
++	}
++	var resources map[string]any
++	if err := json.Unmarshal([]byte(w.Resources), &resources); err != nil {
++		t.Fatal(err)
++	}
++	jsonEqual(t, f.Workload.Resources, resources)
++	n, err := server.GetNode(t.Context(), &pb.GetNodeOptions{Nodename: f.Node.Name})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if n.Name != f.Node.Name || n.Endpoint != f.Node.Endpoint || n.Podname != f.Node.Podname || !n.Bypass || !reflect.DeepEqual(n.Labels, f.Node.Labels) {
++		t.Fatalf("legacy fenced node identity changed: %v", n)
++	}
++	for _, pair := range []struct {
++		wire string
++		want any
++	}{{n.ResourceCapacity, f.ResourceInfo.Capacity}, {n.ResourceUsage, f.ResourceInfo.Usage}} {
++		var decoded any
++		if err := json.Unmarshal([]byte(pair.wire), &decoded); err != nil {
++			t.Fatal(err)
++		}
++		jsonEqual(t, pair.want, decoded)
++	}
++}
++func TestMissingWorkloadMigrationKeepsBackendFailuresDistinct(t *testing.T) {
++	// v0.1.5 returned custom code 1051 for missing metadata. v0.1.7 must
++	// expose standard NotFound; ambiguous counts and transport errors stay errors.
++	for _, tc := range []struct {
++		name    string
++		failure error
++		want    codes.Code
++	}{{"absent", nil, codes.NotFound}, {"ambiguous", types.ErrInvaildCount, rpc.GetWorkload}, {"transport", errors.New("backend unavailable"), rpc.GetWorkload}} {
++		t.Run(tc.name, func(t *testing.T) {
++			kv := &fixtureKV{data: map[string]string{}, failure: tc.failure}
++			s := fixtureStore(t, kv)
++			_, storeErr := s.GetWorkload(t.Context(), "legacy-exact-id")
++			if (tc.failure == nil) != errors.Is(storeErr, types.ErrWorkloadNotExists) {
++				t.Fatalf("missing workload classification changed: %v", storeErr)
++			}
++			server := rpc.New(&fixtureCluster{store: s}, types.Config{}, make(chan struct{}))
++			row, err := server.GetWorkload(t.Context(), &pb.WorkloadID{Id: "legacy-exact-id"})
++			if row != nil || status.Code(err) != tc.want {
++				t.Fatalf("want %v, got %v / %v", tc.want, row, err)
++			}
++		})
++	}
++}
++
++func fixtureStore(t *testing.T, kv *fixtureKV) *common.Store {
++	t.Helper()
++	pool, err := utils.NewPool(2)
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(pool.Release)
++	return common.New(kv, types.Config{}, pool)
++}
+diff --git a/compat/v015/testdata/legacy.json b/compat/v015/testdata/legacy.json
+new file mode 100644
+--- /dev/null
++++ b/compat/v015/testdata/legacy.json
+@@ -0,0 +1,6 @@
++{
++  "workload": {"resources":{"cpumem":{"cpu":0.25,"memory":134217728},"storage":{"storage":268435456}},"engine_params":{"cpumem":{"cpu":0.25,"memory":134217728}},"id":"legacy-exact-id","name":"hello_web_abcdef","podname":"eru","nodename":"worker-4","hook":null,"privileged":false,"user":"1000","env":["MODE=compat"],"image":"registry.example/hello@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","labels":{"owner":"eru-vps-mvp","logical_app":"hello","spec_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"create_time":1790208000},
++  "node": {"name":"worker-4","endpoint":"containerd://operator@192.0.2.4:22","podname":"eru","labels":{"owner":"eru-vps-mvp"},"bypass":true},
++  "resource_info": {"capacity":{"cpumem":{"cpu":4,"memory":4294967296},"storage":{"storage":42949672960}},"usage":{"cpumem":{"cpu":0.25,"memory":134217728},"storage":{"storage":268435456}}},
++  "status": {"id":"legacy-exact-id","running":true,"healthy":true}
++}
+diff --git a/store/etcdv3/meta/compat_v015_test.go b/store/etcdv3/meta/compat_v015_test.go
+new file mode 100644
+--- /dev/null
++++ b/store/etcdv3/meta/compat_v015_test.go
+@@ -0,0 +1,66 @@
++package meta
++
++import (
++	"github.com/projecteru2/core/store/etcdv3/meta/mocks"
++	"github.com/projecteru2/core/types"
++	"github.com/stretchr/testify/mock"
++	"github.com/stretchr/testify/require"
++	"go.etcd.io/etcd/api/v3/etcdserverpb"
++	"go.etcd.io/etcd/api/v3/mvccpb"
++	clientv3 "go.etcd.io/etcd/client/v3"
++	"testing"
++)
++
++// v0.1.5 classified a zero-row exact read as ErrInvaildCount. The v0.1.7
++// migration distinguishes absence from corrupt/ambiguous cardinality. Inject
++// client responses directly: this test starts no etcd service or network.
++func TestV015MissingKeyMigration(t *testing.T) {
++	for _, tc := range []struct {
++		name  string
++		count int64
++		want  error
++	}{{"missing", 0, types.ErrKeyNotFound}, {"ambiguous", 2, types.ErrInvaildCount}} {
++		t.Run(tc.name, func(t *testing.T) {
++			client := &mocks.ETCDClientV3{}
++			e := &ETCD{cliv3: client}
++			client.On("Get", mock.Anything, "/workloads/legacy-id").Return(&clientv3.GetResponse{Count: tc.count}, nil).Once()
++			row, err := e.GetOne(t.Context(), "/workloads/legacy-id")
++			require.Nil(t, row)
++			require.ErrorIs(t, err, tc.want)
++			if tc.count == 0 {
++				require.NotErrorIs(t, err, types.ErrInvaildCount)
++			} else {
++				require.NotErrorIs(t, err, types.ErrKeyNotFound)
++			}
++			client.AssertExpectations(t)
++		})
++	}
++}
++func TestV015MultiReadMissingKeyNeverReturnsPartialMetadata(t *testing.T) {
++	for _, tc := range []struct {
++		name  string
++		count int64
++		want  error
++	}{{"missing", 0, types.ErrKeyNotFound}, {"ambiguous", 2, types.ErrInvaildCount}} {
++		t.Run(tc.name, func(t *testing.T) {
++			client := &mocks.ETCDClientV3{}
++			txn := &mocks.Txn{}
++			e := &ETCD{cliv3: client}
++			client.On("Txn", mock.Anything).Return(txn).Once()
++			txn.On("If").Return(txn).Once()
++			txn.On("Then", mock.Anything, mock.Anything).Return(txn).Once()
++			txn.On("Else").Return(txn).Once()
++			response := &clientv3.TxnResponse{Succeeded: true, Responses: []*etcdserverpb.ResponseOp{
++				{Response: &etcdserverpb.ResponseOp_ResponseRange{ResponseRange: &etcdserverpb.RangeResponse{Count: 1, Kvs: []*mvccpb.KeyValue{{Key: []byte("/workloads/present"), Value: []byte("legacy metadata")}}}}},
++				{Response: &etcdserverpb.ResponseOp_ResponseRange{ResponseRange: &etcdserverpb.RangeResponse{Count: tc.count}}},
++			}}
++			txn.On("Commit").Return(response, nil).Once()
++			rows, err := e.GetMulti(t.Context(), []string{"/workloads/present", "/workloads/missing"})
++			require.Nil(t, rows)
++			require.ErrorIs(t, err, tc.want)
++			require.Contains(t, err.Error(), "/workloads/missing")
++			client.AssertExpectations(t)
++			txn.AssertExpectations(t)
++		})
++	}
++}

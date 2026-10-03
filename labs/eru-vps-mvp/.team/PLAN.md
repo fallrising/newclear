@@ -37,3 +37,15 @@ The current five-task acceptance matrix is in docs/LOCAL-CLOSEOUT-2026-10-03.md.
 T-204 returned no blocking findings; T-203 code/tests accepted unchanged. Integrated full suite: 438 tests, zero failures/errors/skips. Compileall and exact workflow parity passed. T-205 records PASS for the bounded guard slice and PARTIAL for the broader five-task closeout. Unimplemented/new-version/live requirements remain explicit; no task count is reduced.
 
 Final staged-file CI parity: `ast=88 json=2 docs=58 tracked=158 private_exclusion=pass diff_check=pass`. Latest upstream main advanced in unrelated components only; ERU sources and workflow are unchanged.
+
+## Continued local work after merged PR #213
+
+Owner resumed the remaining work; ledger claim renewed before editing. Baseline `1e4bd8e`. T-206 adds an explicit source candidate to the validator without changing deployment locks; T-207 supplies legacy-to-new compatibility regressions; T-208 specifies the fresh executor/recovery boundary. Workers have isolated disjoint worktrees. The orchestrator pins official source/toolchain, performs two independent builds, integrates patches, and runs final gates with independent review. No real private data or VPS mutation. Complete local work first, record any missing full acceptance honestly.
+
+## Resumed candidate gate
+
+T-209 independently reviews the frozen patch, validator and design in an isolated review worktree. T-210 implements documentation in a separate worktree after actual evidence arrives. The orchestrator reviews before importing the patch, performs two isolated builds, exact component CI, publication/manifest verification, final privacy/diff review, authorized Draft PR and ledger sync. Prior call budget is carried forward; full task remains PARTIAL while executor/live requirements are missing.
+
+## Candidate acceptance evidence
+
+T-206/207 implementation and T-208 design accepted within their bounded scope after T-209 independent review. T-210 documentation integrated with actual evidence; its original pending report remains historical. Two isolated source/toolchain/GOPATH/GOCACHE builds passed all patched and compatibility stages, expected baseline panics reproduced, and actual binaries are byte-identical: `312fc5ccffed086ff0d772b8c609ed079b055710b45e052830a7d67db3f5c356`. Only module downloads shared a cache. New v0.1.7 validation manifest and both existing manifests load successfully. Full suite 446 tests passed (68.675 seconds), original CI validation and compileall passed. Deployment locks remain unchanged. The broader local closeout remains PARTIAL: fresh executor and live upgrade/rollback/fresh-generation acceptance are absent.

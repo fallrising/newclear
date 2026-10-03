@@ -13,8 +13,8 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
 | HAI-STATE-001..006 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | NotRun |
 | HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
-| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical subset (T-073/T-089); automatic polling and restore remain NotRun |
-| HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | NotRun |
+| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical and persistent polling subsets (T-073/T-089/T-099); restore remains NotRun |
+| HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | Passing bounded pure kernel (T-024); durable import/activation remains NotRun |
 | HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
 | HAI-API-002..004 | SDD §8 | SSE gap/backpressure/reset/high-water tests | Passing bounded transport (T-081); T-089 binds durable response-loss/result projection, not an SSE end-to-end loop |
 | HAI-UX-001..006 | SDD §9 | component/a11y/keyboard/rejection/disconnect Playwright tests | NotRun |
@@ -200,3 +200,12 @@ later. They MUST NOT be reported as P0-A coverage.
 Native Go 1.27.1 and Node 24.20.0/pnpm 11.25.0 evidence does not substitute for unavailable
 container/browser/root-CI evidence. Global project-event gaps reset; current-policy coverage is
 unavailable and conservatively represented, as specified in `sdd/persistent-fake-runtime.md`.
+
+## Bounded CI gate
+
+| Clause | Executable oracle | Evidence | Status |
+| --- | --- | --- | --- |
+| HAI-CI-001 | root HAI workflow on a PR touching the component; `scripts/check-backend.sh`, `scripts/check-web.sh`, `scripts/check-ci-pins.sh` | T-110/T-113, fresh T-112 PASS; candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb`, [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046); acceptance in PLAN | Passing bounded |
+
+The workflow covers native backend and fixture-UI gates. It supplies no missing browser, import,
+restore or real-provider acceptance evidence.

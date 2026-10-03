@@ -548,3 +548,60 @@ execution. P0-A remains Fake-only.
 3. Read the latest accepted ADRs and `docs/HANDOFF.md`.
 4. Select only the next `Ready` task whose dependencies are accepted.
 5. Never infer acceptance from a worker report or prior chat.
+
+## Bounded CI continuation (2026-10-04)
+
+The owner authorized continuation through the missing HAI-CI-001 gate, independent review and a
+Draft PR. The HAI-CI-001 clause from `docs/sdd/decision-attention-ledger.md` is accepted as the
+normative contract; implementation acceptance is recorded below against the actual PR-run oracle.
+Other Decision/Attention/ledger clauses and T-050 remain outside this implementation.
+This adds backend and frontend CI only; absent browser/restore/import evidence remains NotRun.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Accepted with T-113 repair and T-112 review | Orchestrator |
+| T-111 | Independent CI permission, pin and failure-path review | T-110 | Historical REWORK; B1 reproduced then repaired | Orchestrator |
+
+Orchestrator scope: this PLAN, worker contracts, `docs/reproducibility.md`,
+`docs/local-development.md`, `docs/HANDOFF.md`, `docs/traceability.md`, and the bounded
+HAI-CI-001 acceptance note in `docs/sdd/decision-attention-ledger.md`, plus the stale G0 status
+paragraph in `docs/SDD.md` (status correction only).
+Gates: task/report validators, shell syntax, actionlint, same native backend/full/race/vet/module/format
+and frontend frozen-install/format/lint/typecheck/unit/build commands, independent review, and an
+actual PR workflow run. Required failures stay visible; no G1, browser or production acceptance follows.
+Workers do not commit, push, delegate, change PLAN or widen the Fake-only product boundary.
+
+Independent T-111 review raised a probable container Git-ownership/build-stamping issue (B1),
+explicitly conditional on the actual backend CI result, and two non-blocking wording issues.
+The wording now distinguishes normative clause approval from implementation acceptance and marks
+the missing-workflow statement as historical. B1 is not treated as a reproduced defect. The
+original review remains preserved; PR #238 runs the unmodified backend gate to test that concern.
+
+T-111 B1 was reproduced by PR #238 run [37147306521](https://github.com/fallrising/newclear/actions/runs/37147306521)
+on candidate `0b445f690db2906924a00ff6d7bba66c18a0bafb`: full/race tests passed, but
+`go build ./...` failed obtaining VCS status (exit 128). Route T-113 to disable build stamping only
+for the compilation gate, followed by T-112 fresh independent review and a new actual PR run.
+T-111 is preserved byte-for-byte from the reviewer output. It has report-format incompatibilities
+(header before STATUS and malformed verification suffixes); validation failure is process metadata,
+not a replacement for its visible REWORK decision. The original failed gate remains visible.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-113 | CI compile gate VCS-stamping repair | T-111 | Accepted by T-112 and orchestrator gate | Orchestrator |
+| T-112 | Fresh repaired CI evidence review | T-113 | Accepted; unconditional PASS | Orchestrator |
+
+2026-10-04 acceptance: candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb` passed actual
+PR #238 run [37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+Both digest-pinned backend and web jobs, including every required step, completed successfully.
+Actions tested merge `e8d18fcb7cf957b71f47d67fc36e59e2a2b34049` containing that exact head.
+Fresh independent T-112 report SHA-256
+`c16bd63785c19025ef63622fe1e6b4e77d5e54ad2737e7124a9bc828a29aafce` is accepted.
+The orchestrator inspected the candidate diff and authoritative run metadata, reran report
+validation, and confirmed T-111 remains unchanged at SHA-256
+`183a788e40095716be58e7350da7c39f663e3b2993d5c9c1ad95585fd93ae73f`.
+Local shell/actionlint/pin checks, four rejecting pin/runtime probes, native web gates and the
+pinned backend full/race gate also passed. The original failed PR run and malformed raw T-111
+report remain historical evidence; neither was rewritten into a pass.
+This accepts only HAI-CI-001. The PR remains Draft; no merge, T-050, Decision/Attention/import,
+browser, restore or broader G1 acceptance follows. Later documentation commits must pass their
+own PR checks before handoff; this record identifies the validated implementation candidate.

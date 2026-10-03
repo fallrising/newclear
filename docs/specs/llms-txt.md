@@ -2,7 +2,7 @@
 
 ## Context
 
-This monorepo holds 31 components (excluding `refs/` and root `docs/`). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
+This monorepo holds 32 components (excluding `refs/` and root `docs/`). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
 
 OpenAPI cannot serve as that entry point: roughly a third of the projects expose no HTTP surface at all. `AGENTS.md` cannot either — by its own specification it carries instructions for agents *working on* a project, not a description of the interface its consumers call.
 
@@ -26,7 +26,7 @@ A project capability file additionally requires, in the prose block between the 
 
 | Key | Value |
 | --- | --- |
-| `Tier` | `A`, `B`, `C` or `D`, copied from the component's 文檔檔 column in the root `README.md` catalog. Owner-assigned; a capability file reports it and never sets it. |
+| `Tier` | `A`, `B`, `C`, `D` or `ungraded`, copied from the component's 文檔檔 column in the root `README.md` catalog, where `ungraded` stands for 未分級. Owner-assigned; a capability file reports it and never sets it. |
 | `Status` | `production`, `partial`, `spec-only` or `retired`. `spec-only` means the specification is written and the code is not usable yet. |
 | `Interfaces` | comma-separated from `http`, `cli`, `mcp`, `grpc`, `wire`, `library`, `desktop`, `spec` |
 | `Entrypoint` | how a caller reaches it: listen address and base path, binary name, or transport |
@@ -69,6 +69,13 @@ Scenario: The root index stays truthful
   Then it declares none of the six project keys
   And every in-repo link resolves to a tracked file
   And every project that has its own `llms.txt` is linked from the root index
+  And every component in the README catalog, graded or not, is linked from the root index
+
+Scenario: A component lands on main without an index entry
+  Given a new row in the README catalog
+  And no link to that component in the root `llms.txt`
+  When the validator runs
+  Then it fails and names the component
 
 Scenario: A project has no capability file yet
   Given a project directory without an `llms.txt`

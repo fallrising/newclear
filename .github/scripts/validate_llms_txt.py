@@ -15,7 +15,10 @@ import sys
 from pathlib import Path
 
 REQUIRED_KEYS = ["Tier", "Status", "Interfaces", "Entrypoint", "Auth", "Spec"]
-TIER_VALUES = {"A", "B", "C", "D"}
+TIER_VALUES = {"A", "B", "C", "D", "ungraded"}
+# The README catalog writes an unassigned tier as 未分級; a capability file
+# reports it as `ungraded`.
+CATALOG_TIER_NAMES = {"未分級": "ungraded"}
 STATUS_VALUES = {"production", "partial", "spec-only", "retired"}
 INTERFACE_VALUES = {
     "http",
@@ -31,7 +34,7 @@ INTERFACE_VALUES = {
 KEY_LINE = re.compile(r"^([A-Z][A-Za-z]*): *(.+)$")
 # A root README catalog row: | [`products/goku`](products/goku/) | … | … | C |
 CATALOG_ROW = re.compile(
-    r"^\| *\[`(?P<path>[a-z0-9-]+/[a-z0-9-]+)`\]\([^)]*\).*\| *(?P<tier>[ABCD]) *\|? *$"
+    r"^\| *\[`(?P<path>[a-z0-9-]+/[a-z0-9-]+)`\]\([^)]*\).*\| *(?P<tier>[ABCD]|未分級) *\|? *$"
 )
 LIST_ITEM = re.compile(r"^- *\[")
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
@@ -80,7 +83,8 @@ def catalog_tiers() -> dict[str, str]:
     for line in readme.read_text(encoding="utf-8").splitlines():
         match = CATALOG_ROW.match(line.rstrip())
         if match:
-            tiers[match.group("path")] = match.group("tier")
+            tier = match.group("tier")
+            tiers[match.group("path")] = CATALOG_TIER_NAMES.get(tier, tier)
     return tiers
 
 
@@ -218,6 +222,22 @@ def main() -> int:
             if path not in root:
                 errors.append(
                     f"llms.txt: root index does not link {path}"
+                )
+        # Every catalog component must be reachable from the root index. A
+        # single-fetch index that silently omits a component is worse than no
+        # index, and components land on main faster than anyone re-reads it.
+        linked = {
+            target
+            for target in (in_repo_target(url) for url in LINK.findall(root))
+            if target
+        }
+        for component in sorted(tiers):
+            if not any(
+                t == component or t.startswith(component + "/") for t in linked
+            ):
+                errors.append(
+                    f"llms.txt: root index does not link catalog component "
+                    f"{component}"
                 )
 
     for error in errors:

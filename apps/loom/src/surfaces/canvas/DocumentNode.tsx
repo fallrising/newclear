@@ -32,12 +32,12 @@ export interface DocumentNodeData {
   onRunInChange?: (name: string | null) => void;
 }
 
-export function DocumentNode({ data }: NodeProps) {
+export function DocumentNode({ data, width, height }: NodeProps) {
   const d = data as unknown as DocumentNodeData;
   return (
     <div
       className={CSS.nodeFrame}
-      style={{ width: NODE_SIZE.document.width, height: NODE_SIZE.document.height }}
+      style={{ width: width ?? NODE_SIZE.document.width, height: height ?? NODE_SIZE.document.height }}
     >
       {/* Left handle accepts `feeds_output_to` from a terminal. */}
       <Handle type="target" position={Position.Left} id="in" />

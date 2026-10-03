@@ -343,7 +343,9 @@ export interface paths {
          *     `[back, admin]` otherwise.
          *     Errors:
          *     - 400 VALIDATION_FAILED: unknown role, unknown action, unknown surface, duplicate
-         *       permission, malformed predicate, or an empty list for the anonymous role.
+         *       permission, malformed predicate, a predicate without `contentType`, a predicate whose field is
+         *       not an enabled string, enum, ref or principal-ref field with index rows in that type (02 §4.1),
+         *       or an empty list for the anonymous role.
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          */
@@ -379,16 +381,25 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Published entries only. When the type has a visibilityField, entries whose value in that field is
-         *     `unlisted` or `private` are omitted. Order: the type's sortField ascending (entries without a number
-         *     last), otherwise publishedAt descending; ties by updatedAt descending. Not paginated in this version
-         *     (`offset` is 0 and `limit` equals the item count).
-         *     Relation filter: a query parameter named `ref.<fieldKey>` with an entry UUID value keeps
-         *     entries whose `<fieldKey>` references that entry. When several are given, one of them
-         *     is applied.
+         * @description Published copies only (02 §4.1). Omitted: entries not published, deleted entries, entries whose
+         *     published value of the type's visibilityField is present and not `public`, entries whose
+         *     `publicRequiresPublishedRefs` field points to an entry that is missing, deleted, unpublished or
+         *     `private`, and entries outside the caller's predicate grants. Search, filters and sort read the
+         *     published copy.
+         *     Default order: the type's sortField ascending when set, otherwise `-publishedAt`. Ties: updatedAt
+         *     descending, then id text ascending. Entries without a value for the sort key come last.
+         *     Field filters: `filter.<fieldKey>=<value>` on a field with
+         *     `filterable=true`, index rows and visibility `public`; datetime fields take
+         *     `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive) as ISO-8601 with offset.
+         *     Relation filters: `ref.<fieldKey>=<entry uuid>` on a public ref field; may repeat, all must match.
+         *     They read the relations of the working copy (02 BQ-10).
+         *     Other query parameters are ignored.
          *     Errors:
          *     - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
-         *     - 400 VALIDATION_FAILED: a `ref.<fieldKey>` value is not a UUID.
+         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; `sort` names a key that is not sortable;
+         *       a filter names a field that is not filterable or has a value of the wrong kind; a
+         *       `ref.<fieldKey>` is not a public ref field or its value is not a UUID; a parameter other than
+         *       `ref.<fieldKey>` is repeated.
          *     - 403 FORBIDDEN: caller may not read_published this type.
          *     - 404 ENTRY_NOT_FOUND: type does not exist or is disabled.
          */
@@ -516,14 +527,22 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Work copies, newest `updatedAt` first. Not paginated in this version (`offset` is 0 and
-         *     `limit` equals the item count). Without `state` all three states are returned.
-         *     Relation filter: `ref.<fieldKey>=<uuid>` as in listPublicEntries.
+         * @description Work copies (02 §4.1). Default order `-updatedAt`; ties by updatedAt descending, then id text
+         *     ascending. Without `state` the states are `draft,published` (archived entries need
+         *     `state=archived`). Search, filters and sort read the working copy.
+         *     The caller needs `read_draft` when the states include draft or archived, otherwise `read_published`.
+         *     When every matching grant carries a predicate, only entries whose working copy satisfies at least
+         *     one predicate are listed; `total` counts only those.
+         *     Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
+         *     datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
+         *     Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
+         *     Other query parameters are ignored.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: a `ref.<fieldKey>` value is not a UUID.
+         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; unknown `state` value; `sort` names a key
+         *       that is not sortable; a filter names a field that is not filterable or has a value of the wrong
+         *       kind; a `ref.<fieldKey>` value is not a UUID; a parameter other than `ref.<fieldKey>` is repeated.
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
-         *     - 403 FORBIDDEN: caller lacks `read_draft` (or `read_published` when `state=published`)
-         *       on this type, or holds only a predicate-scoped grant (B-10).
+         *     - 403 FORBIDDEN: caller has no grant of the needed action on this type.
          *     - 404 CONTENT_TYPE_NOT_FOUND: type does not exist.
          */
         get: operations["listWorkEntries"];
@@ -1261,8 +1280,16 @@ export interface components {
         };
         PublicEntryPage: {
             items: components["schemas"]["PublicEntry"][];
+            /**
+             * Format: int64
+             * @description Number of matching entries on all pages.
+             */
             total: number;
+            page: number;
+            size: number;
+            /** @description (page - 1) * size. Kept for v1 clients. */
             offset: number;
+            /** @description Equals size. Kept for v1 clients. */
             limit: number;
         };
         /** @description Navigation document. The seeded menus use an items array of objects with label and href. */
@@ -1336,8 +1363,16 @@ export interface components {
         };
         WorkEntryPage: {
             items: components["schemas"]["WorkEntry"][];
+            /**
+             * Format: int64
+             * @description Number of matching entries on all pages.
+             */
             total: number;
+            page: number;
+            size: number;
+            /** @description (page - 1) * size. Kept for v1 clients. */
             offset: number;
+            /** @description Equals size. Kept for v1 clients. */
             limit: number;
         };
         EntryWriteRequest: {
@@ -1607,10 +1642,20 @@ export interface components {
         RoleCode: string;
         RevisionNo: number;
         Variant: "original" | "thumbnail" | "web";
-        /** @description Case-insensitive literal substring of payload[titleField]. */
+        /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
         Q: string;
-        /** @description Comma-separated publication states, for example `draft,published`. */
+        /** @description Comma-separated subset of `draft`, `published`, `archived`. Default `draft,published`. */
         State: string;
+        /** @description 1-based page number. Default 1. */
+        Page: number;
+        /** @description Page size. Default 20, maximum 100. */
+        Size: number;
+        /**
+         * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+         *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+         *     visibility `public` only).
+         */
+        Sort: string;
         /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
         CsrfHeader: string;
     };
@@ -2168,8 +2213,18 @@ export interface operations {
     listPublicEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive literal substring of payload[titleField]. */
+                /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
                 q?: components["parameters"]["Q"];
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
             };
             header?: never;
             path: {
@@ -2324,10 +2379,20 @@ export interface operations {
     listWorkEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive literal substring of payload[titleField]. */
+                /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
                 q?: components["parameters"]["Q"];
-                /** @description Comma-separated publication states, for example `draft,published`. */
+                /** @description Comma-separated subset of `draft`, `published`, `archived`. Default `draft,published`. */
                 state?: components["parameters"]["State"];
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
             };
             header?: never;
             path: {

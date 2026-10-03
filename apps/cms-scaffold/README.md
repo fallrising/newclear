@@ -7,11 +7,13 @@
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
 實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
-v2（BW0／W0／P0 已合併，BW1a 已本地驗證；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
+v2（BW0／W0／P0 已合併，BW1a／BW1b 已本地驗證；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
 目前已合併 **Wave E＋Back 自訂視圖＋v2 BW0／W0＋P0**：後端 OpenAPI／store 契約測試、前端共用套件／MSW／新殼已存在；Back 另有相簿編排、當日行程、issue 看板。後續模型與編輯器功能仍依 v2 波次開發。
 
 BW1a 已本地通過 [整合驗收](.team/reports/BW1a-DELIVERY.md)：類型設定／欄位 metadata、capabilities 與請求內授權快取，並同步前端契約；尚未提交／合併。完整表單、動態導覽與模型管理畫面仍依後續波次開發。
+
+BW1b 已本地通過 [整合驗收](.team/reports/BW1b-DELIVERY.md)：列表分頁／篩選／predicate 下推、雙 scope 索引與回填、前端完整列表相容。202＋91 後端、166 前端、17 mock E2E 通過；狀態 `LOCAL_VERIFIED`，尚未提交／合併。
 
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 

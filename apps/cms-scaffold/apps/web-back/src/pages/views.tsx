@@ -32,10 +32,10 @@ function Notice({ text, error }: { text: string; error: boolean }) {
 
 export function AlbumComposerPage() {
   const queryClient = useQueryClient();
-  const albums = useQuery(workQueries.entries(api.work, "album"));
+  const albums = useQuery(workQueries.allEntries(api.work, "album"));
   const [picked, setPicked] = useState("");
   const albumId = picked || albums.data?.items[0]?.id || "";
-  const photos = useQuery({ ...workQueries.entries(api.work, "photo", { ref: { album: albumId } }), enabled: albumId !== "" });
+  const photos = useQuery({ ...workQueries.allEntries(api.work, "photo", { ref: { album: albumId } }), enabled: albumId !== "" });
   const sorted = useMemo(() => [...(photos.data?.items ?? [])].sort((a, b) => sortOrder(a) - sortOrder(b)), [photos.data]);
   const album = albums.data?.items.find((item) => item.id === albumId);
   const [notice, setNotice] = useState({ text: "", error: false });
@@ -128,7 +128,7 @@ function scheduledDay(entry: WorkEntry): string {
 export function ClinicSchedulePage() {
   // C-09 (UTC "today") is fixed in W2.
   const [day, setDay] = useState(() => new Date().toISOString().slice(0, 10));
-  const visits = useQuery(workQueries.entries(api.work, "visit"));
+  const visits = useQuery(workQueries.allEntries(api.work, "visit"));
   return (
     <>
       <PageHeader title={copy["view.clinic.schedule"]} primaryAction={{ label: copy["schedule.newVisit"], to: "/entries/visit/new" }} />
@@ -166,19 +166,19 @@ export function ClinicSchedulePage() {
 export function ProjectsBoardPage() {
   const queryClient = useQueryClient();
   const [params] = useSearchParams();
-  const projects = useQuery(workQueries.entries(api.work, "project"));
+  const projects = useQuery(workQueries.allEntries(api.work, "project"));
   // C-10 (?project= read only once) is fixed in W2.
   const [picked, setPicked] = useState(() => params.get("project") ?? "");
   const projectId = picked || projects.data?.items[0]?.id || "";
   const issueParams = { ref: { project: projectId } };
-  const issues = useQuery({ ...workQueries.entries(api.work, "issue", issueParams), enabled: projectId !== "" });
+  const issues = useQuery({ ...workQueries.allEntries(api.work, "issue", issueParams), enabled: projectId !== "" });
   const [notice, setNotice] = useState({ text: "", error: false });
 
   const move = useMutation({
     mutationFn: ({ issue, status }: { issue: WorkEntry; status: string }) =>
       api.work.patch(issue.id, { payload: { status }, version: issue.version }),
     onSuccess: (updated) => {
-      queryClient.setQueryData(keys.entries.list("issue", issueParams), (page: typeof issues.data) =>
+      queryClient.setQueryData(keys.entries.allEntries("issue", issueParams), (page: typeof issues.data) =>
         page ? { ...page, items: page.items.map((item) => (item.id === updated.id ? updated : item)) } : page,
       );
       setNotice({ text: `${copy["board.moved"]} ${updated.title ?? updated.id} → ${String(updated.payload.status)}`, error: false });

@@ -6,6 +6,9 @@ import com.fallrising.cms.content.domain.EntryRefRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.NavigationRecord;
 import com.fallrising.cms.content.domain.RevisionRecord;
+import com.fallrising.cms.content.index.IndexRow;
+import com.fallrising.cms.content.query.EntryQuery;
+import com.fallrising.cms.content.query.EntryPage;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +25,12 @@ public interface ContentStore {
 
     void updateType(ContentTypeRecord type);
 
-    /** Writes only sortField, visibilityField, ownerField and updatedAt of the type with type.id(). */
+    /** Writes only type settings and updatedAt, then atomically rebuilds its entry index rows. */
     void updateTypeSettings(ContentTypeRecord type);
 
     List<FieldRecord> fieldsOf(UUID typeId);
 
+    /** Inserts the field and atomically reindexes existing entries of its type. */
     void insertField(FieldRecord field);
 
     /** Writes only label, groupKey, listable, filterable, enumLabels, placeholder and helpText of the field with field.id(). */
@@ -38,15 +42,18 @@ public interface ContentStore {
 
     Optional<EntryRecord> findBySlug(UUID typeId, String slug);
 
-    /** q matches payload[titleField] case-insensitively as a literal substring; blank q means no filter. */
-    List<EntryRecord> listEntries(
-            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget);
+    /** Both scopes, ordered by scope then field key. */
+    List<IndexRow> indexRowsOf(UUID id);
+
+    /** Evaluates filters and authorization before pagination; excludes deleted entries. */
+    EntryPage queryEntries(EntryQuery query);
 
     long countEntries(UUID typeId, boolean includeDeleted);
 
+    /** Atomically inserts the entry and both work/published index scopes. */
     EntryRecord insertEntry(EntryRecord entry);
 
-    /** Atomically replaces an entry only when its stored version is entry.version() - 1. */
+    /** Atomically replaces an entry and both index scopes only when stored version is entry.version() - 1. */
     EntryRecord updateEntry(EntryRecord entry);
 
     /** Database writes across content, media, and identity stores share this transaction. */

@@ -4,7 +4,7 @@ import { db } from "../db";
 import { publicContentTypes, workContentTypes } from "../fixtures.gen";
 import { apiError, png } from "../respond";
 import { getState } from "../state";
-import { matchesList } from "./common";
+import { listPage } from "./list";
 
 const AUDIENCE_PARAMS = ["state", "includeDraft", "asOf"];
 
@@ -20,29 +20,19 @@ function typeError(type: string) {
 function visibility(entry: PublicEntry) {
   const field = db.adminTypes.find((type) => type.key === entry.contentType)?.visibilityField;
   const raw = field ? entry.payload[field] : null;
-  return raw == null || String(raw).trim() === "" ? "public" : String(raw);
+  return raw == null ? "public" : typeof raw === "string" ? raw.trim() === "" ? "public" : raw.trim() : "invalid";
 }
 
+// Seed settings are internal and absent from the AdminContentType API projection.
+const requiredPublishedRefs: Record<string, readonly string[]> = { photo: ["album"], milestone: ["project"] };
+function baseReadable(entry: PublicEntry) {
+  return db.adminTypes.some((type) => type.key === entry.contentType && type.enabled) && ["public", "unlisted"].includes(visibility(entry));
+}
 function readable(entry: PublicEntry) {
-  return db.adminTypes.some((type) => type.key === entry.contentType && type.enabled) && visibility(entry) !== "private";
-}
-
-function publicOrder(typeKey: string) {
-  const field = db.adminTypes.find((type) => type.key === typeKey)?.sortField;
-  const updatedAt = (entry: PublicEntry) => db.workEntries.find((work) => work.id === entry.id)?.updatedAt ?? "";
-  return (a: PublicEntry, b: PublicEntry) => {
-    let primary: number;
-    if (field) {
-      const aValue = a.payload[field];
-      const bValue = b.payload[field];
-      const aNumber = typeof aValue === "number" ? aValue : Number.MAX_VALUE;
-      const bNumber = typeof bValue === "number" ? bValue : Number.MAX_VALUE;
-      primary = aNumber - bNumber;
-    } else {
-      primary = b.publishedAt.localeCompare(a.publishedAt);
-    }
-    return primary || updatedAt(b).localeCompare(updatedAt(a));
-  };
+  return baseReadable(entry) && (requiredPublishedRefs[entry.contentType] ?? []).every((field) => {
+    const id = entry.payload[field];
+    return typeof id === "string" && db.publicEntries.some((target) => target.id === id && baseReadable(target));
+  });
 }
 
 function audienceError(url: URL) {
@@ -74,9 +64,10 @@ export const publicHandlers = [
       getState().scenario === "empty"
         ? []
         : db.publicEntries.filter(
-            (e) => e.contentType === type && readable(e) && visibility(e) === "public" && matchesList(url, e),
-          ).sort(publicOrder(type));
-    return HttpResponse.json<PublicEntryPage>({ items, total: items.length, offset: 0, limit: items.length });
+            (e) => e.contentType === type && readable(e) && visibility(e) === "public",
+          );
+    const result = listPage(url, db.adminTypes.find((t) => t.key === type)!, items, true);
+    return result instanceof Response ? result : HttpResponse.json<PublicEntryPage>(result);
   }),
 
   http.get("*/api/v1/public/content-types/:type/entries/:id", ({ request, params }) => {

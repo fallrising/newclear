@@ -9,6 +9,11 @@ import com.fallrising.cms.content.domain.EntryRefRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.PublicationState;
 import com.fallrising.cms.content.domain.RevisionRecord;
+import com.fallrising.cms.content.index.IndexScope;
+import com.fallrising.cms.content.query.AccessFilter;
+import com.fallrising.cms.content.query.EntryPage;
+import com.fallrising.cms.content.query.EntryQuery;
+import com.fallrising.cms.content.query.ListQueryParser;
 import com.fallrising.cms.content.store.ContentStore;
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
@@ -24,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,23 +132,38 @@ public class EntryService {
         return entry;
     }
 
-    public List<EntryRecord> listWork(
-            Principal principal,
-            Surface surface,
-            String typeKey,
-            List<String> states,
-            String q,
-            String refField,
-            UUID refTarget) {
+    /** One list page with the type and fields used to build it, so callers project items without further store reads. */
+    public record ListResult(ContentTypeRecord type, List<FieldRecord> fields, EntryPage page, int pageNo, int size) {}
+
+    /**
+     * Work list (02 §4.1). Needs read_draft when the states include draft or archived, otherwise read_published;
+     * predicate grants become an AccessFilter evaluated by the store (B-10).
+     */
+    public ListResult listWork(Principal principal, Surface surface, String typeKey, Map<String, String[]> params) {
         ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::typeNotFound);
-        List<String> wanted = states == null || states.isEmpty() ? List.of("draft", "published", "archived") : states;
-        boolean needsDraft = wanted.stream().anyMatch(s -> !"published".equals(s));
-        if (needsDraft) {
-            authorization.require(principal, CmsAction.READ_DRAFT, typeKey, null, surface);
-        } else {
-            authorization.require(principal, CmsAction.READ_PUBLISHED, typeKey, null, surface);
+        List<FieldRecord> fields = store.fieldsOf(type.id());
+        AccessFilter access = accessFilter(authorization.listAccess(
+                principal, workListAction(params), typeKey, surface));
+        ListQueryParser.Parsed parsed = ListQueryParser.parse(type, fields, IndexScope.WORK, params);
+        EntryPage page = store.queryEntries(new EntryQuery(type.id(), IndexScope.WORK, parsed.states(), type.titleField(),
+                parsed.q(), parsed.filters(), parsed.refs(), access, null, List.of(), parsed.sort(), parsed.page(), parsed.size()));
+        return new ListResult(type, fields, page, parsed.page(), parsed.size());
+    }
+
+    /** Determine the action before validating other parameters, so denied callers always receive 403. */
+    private static CmsAction workListAction(Map<String, String[]> params) {
+        String[] values = params.get("state");
+        if (values == null) return CmsAction.READ_DRAFT;
+        boolean published = false;
+        for (String raw : values) {
+            if (raw == null) continue;
+            for (String state : raw.split(",")) {
+                if (state.isBlank()) continue;
+                if (!"published".equals(state.trim())) return CmsAction.READ_DRAFT;
+                published = true;
+            }
         }
-        return store.listEntries(type.id(), wanted, false, type.titleField(), q, refField, refTarget);
+        return published ? CmsAction.READ_PUBLISHED : CmsAction.READ_DRAFT;
     }
 
     public EntryRecord patch(Principal principal, Surface surface, UUID id, String slug, Map<String, Object> payload, Integer version) {
@@ -408,23 +427,29 @@ public class EntryService {
         return entry;
     }
 
-    public List<EntryRecord> publicList(Principal principal, String typeKey, String q, String refField, UUID refTarget) {
+    /**
+     * Public list (02 §4.1): published copies only; visibility, publicRequiresPublishedRefs and predicate grants are
+     * evaluated by the store in the same query (B-02).
+     */
+    public ListResult publicList(Principal principal, String typeKey, Map<String, String[]> params) {
         ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::notFound);
         if (!type.enabled()) {
             throw ContentException.notFound();
         }
-        if (!authorization.hasAction(principal, CmsAction.READ_PUBLISHED, typeKey, Surface.FRONT)) {
-            throw IdentityException.forbidden(CmsAction.READ_PUBLISHED.wire(), typeKey, Surface.FRONT.wire());
-        }
-        return store.listEntries(type.id(), List.of("published"), false, type.titleField(), q, refField, refTarget).stream()
-                .filter(e -> e.publishedPayload() != null)
-                .filter(e -> PublicVisibility.indexable(type, e.publishedPayload()))
-                .filter(e -> authorization.allow(
-                                principal, CmsAction.READ_PUBLISHED, typeKey, e.publishedPayload(), Surface.FRONT)
-                        .allowed())
-                .filter(e -> publishedRefsPublic(e, type))
-                .sorted(publicOrder(type))
-                .toList();
+        AccessFilter access = accessFilter(authorization.listAccess(principal, CmsAction.READ_PUBLISHED, typeKey, Surface.FRONT));
+        List<FieldRecord> fields = store.fieldsOf(type.id());
+        ListQueryParser.Parsed parsed = ListQueryParser.parse(type, fields, IndexScope.PUBLISHED, params);
+        EntryPage page = store.queryEntries(new EntryQuery(type.id(), IndexScope.PUBLISHED, parsed.states(), type.titleField(),
+                parsed.q(), parsed.filters(), parsed.refs(), access, type.visibilityField(), type.publicRequiresPublishedRefs(),
+                parsed.sort(), parsed.page(), parsed.size()));
+        return new ListResult(type, fields, page, parsed.page(), parsed.size());
+    }
+
+    private static AccessFilter accessFilter(AuthorizationService.ListAccess access) {
+        if (access.unrestricted()) return AccessFilter.none();
+        return AccessFilter.anyOf(access.anyOf().stream()
+                .map(clause -> new AccessFilter.Clause(clause.field(), clause.value()))
+                .toList());
     }
 
     private boolean publishedRefsPublic(EntryRecord entry, ContentTypeRecord type) {
@@ -447,24 +472,6 @@ public class EntryService {
             }
         }
         return true;
-    }
-
-    /**
-     * Public list order (02 §3.1): with a sortField, numeric value ascending (entries without a number last),
-     * then updatedAt descending; without a sortField, publishedAt descending, then updatedAt descending.
-     */
-    static Comparator<EntryRecord> publicOrder(ContentTypeRecord type) {
-        Comparator<EntryRecord> newestUpdate = Comparator.comparing(EntryRecord::updatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
-        String sortField = type.sortField();
-        if (sortField == null) {
-            return Comparator.comparing(EntryRecord::publishedAt, Comparator.nullsLast(Comparator.reverseOrder()))
-                    .thenComparing(newestUpdate);
-        }
-        return Comparator.comparingDouble((EntryRecord e) -> {
-                    Object value = e.publishedPayload() == null ? null : e.publishedPayload().get(sortField);
-                    return value instanceof Number number ? number.doubleValue() : Double.MAX_VALUE;
-                })
-                .thenComparing(newestUpdate);
     }
 
     public List<RevisionRecord> revisions(Principal principal, Surface surface, UUID id) {

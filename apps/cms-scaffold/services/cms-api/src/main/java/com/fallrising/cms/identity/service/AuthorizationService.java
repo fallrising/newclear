@@ -79,6 +79,44 @@ public class AuthorizationService {
     }
 
     /**
+     * Authorization of a list query (02 §4.1 "授權如何下推到 SQL"). Hard-deny sets apply first and throw
+     * SURFACE_FORBIDDEN. Grants are matched ignoring predicates: none → FORBIDDEN; any grant without a predicate →
+     * unrestricted; otherwise one clause per compilable fieldEquals predicate, with $currentPrincipalId replaced by
+     * the caller's id. A predicate on $currentPrincipalId yields no clause for an anonymous caller, and a malformed
+     * predicate yields no clause, matching allow(), which rejects both.
+     */
+    public ListAccess listAccess(Principal principal, CmsAction action, String contentType, Surface surface) {
+        Surface resolved = surface == null ? Surface.FRONT : surface;
+        if (hardDenied(resolved, action)) throw IdentityException.surfaceForbidden(action.wire(), contentType, resolved.wire());
+        List<Grant> matching = collectGrants(principal).stream().filter(g -> matchesGrant(g, action, contentType, resolved)).toList();
+        if (matching.isEmpty()) throw IdentityException.forbidden(action.wire(), contentType, resolved.wire());
+        List<ListAccess.Clause> clauses = new ArrayList<>();
+        for (Grant grant : matching) {
+            String json = grant.permission.predicateJson();
+            if (json == null || json.isBlank()) return ListAccess.all();
+            FieldEqualsPredicate predicate = FieldEqualsPredicate.parse(objectMapper, json);
+            if (predicate == null) continue;
+            String value = predicate.value();
+            if (FieldEqualsPredicate.CURRENT_PRINCIPAL.equals(value)) {
+                if (principal == null) continue;
+                value = principal.id().toString();
+            }
+            ListAccess.Clause clause = new ListAccess.Clause(predicate.field(), value);
+            if (!clauses.contains(clause)) clauses.add(clause);
+        }
+        return new ListAccess(false, List.copyOf(clauses));
+    }
+
+    /** Result of listAccess: unrestricted, or entries whose field equals the value of at least one clause. */
+    public record ListAccess(boolean unrestricted, List<Clause> anyOf) {
+        public record Clause(String field, String value) {}
+
+        static ListAccess all() {
+            return new ListAccess(true, List.of());
+        }
+    }
+
+    /**
      * Capabilities of the principal on the surface (02 §4.2). Hard-deny sets are applied first; an action is listed
      * when at least one grant matches it ignoring predicates; scoped is true when every matching grant of some listed
      * action carries a predicate.

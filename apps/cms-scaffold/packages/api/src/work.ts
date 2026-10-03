@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import type { Transport } from "./core";
 import { keys, type WorkListParams } from "./keys";
-import { listQuery } from "./query";
+import { completeList, listQuery } from "./query";
 import type { EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "./schema";
 
 export function workApi(t: Transport) {
@@ -12,10 +12,13 @@ export function workApi(t: Transport) {
     type(type: string, signal?: AbortSignal): Promise<WorkContentType> {
       return t.call(() => t.client.GET("/api/v1/content-types/{typeKey}", { params: { path: { typeKey: type } }, signal }));
     },
+    allEntries(type: string, params: Omit<WorkListParams, "page" | "size"> = {}, signal?: AbortSignal) {
+      return completeList((page) => this.entries(type, { ...params, page, size: 100 }, signal), signal);
+    },
     entries(type: string, params: WorkListParams = {}, signal?: AbortSignal): Promise<WorkEntryPage> {
       return t.call(() =>
         t.client.GET("/api/v1/content-types/{typeKey}/entries", {
-          params: { path: { typeKey: type }, query: listQuery({ q: params.q, state: params.state }, params) },
+          params: { path: { typeKey: type }, query: listQuery({ q: params.q, state: params.state, page: params.page, size: params.size, sort: params.sort }, params) },
           signal,
         }),
       );
@@ -59,6 +62,8 @@ export const workQueries = {
   types: (api: WorkApi) => queryOptions({ queryKey: keys.types.list(), queryFn: ({ signal }) => api.types(signal) }),
   type: (api: WorkApi, type: string) =>
     queryOptions({ queryKey: keys.types.detail(type), queryFn: ({ signal }) => api.type(type, signal) }),
+  allEntries: (api: WorkApi, type: string, params: Omit<WorkListParams, "page" | "size"> = {}) =>
+    queryOptions({ queryKey: keys.entries.allEntries(type, params), queryFn: ({ signal }) => api.allEntries(type, params, signal) }),
   entries: (api: WorkApi, type: string, params: WorkListParams = {}) =>
     queryOptions({ queryKey: keys.entries.list(type, params), queryFn: ({ signal }) => api.entries(type, params, signal) }),
   entry: (api: WorkApi, id: string) =>

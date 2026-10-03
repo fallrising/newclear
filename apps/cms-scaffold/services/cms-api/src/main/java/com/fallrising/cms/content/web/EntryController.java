@@ -18,11 +18,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,29 +53,14 @@ public class EntryController {
     }
 
     @GetMapping("/content-types/{typeKey}/entries")
-    public Map<String, Object> list(
-            @PathVariable String typeKey,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String q,
-            HttpServletRequest request) {
+    public Map<String, Object> list(@PathVariable String typeKey, HttpServletRequest request) {
         IdentityRequest identity = work(request, CmsAction.READ_DRAFT, typeKey);
-        List<String> states = state == null || state.isBlank()
-                ? List.of()
-                : Arrays.stream(state.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        String refField = null;
-        UUID refTarget = null;
-        for (String name : request.getParameterMap().keySet()) {
-            if (name.startsWith("ref.") && request.getParameter(name) != null && !request.getParameter(name).isBlank()) {
-                refField = name.substring(4);
-                refTarget = parseRefTarget(name, request.getParameter(name));
-            }
-        }
-        List<Map<String, Object>> items = entries.listWork(
-                        identity.principal(), identity.surface(), typeKey, states, q, refField, refTarget)
-                .stream()
-                .map(this::workJson)
+        EntryService.ListResult result = entries.listWork(
+                identity.principal(), identity.surface(), typeKey, request.getParameterMap());
+        List<Map<String, Object>> items = result.page().items().stream()
+                .map(entry -> ContentProjection.work(entry, result.type()))
                 .toList();
-        return Map.of("items", items, "total", items.size(), "offset", 0, "limit", items.size());
+        return ContentProjection.page(items, result);
     }
 
     @PostMapping("/content-types/{typeKey}/entries")
@@ -185,13 +168,5 @@ public class EntryController {
             throw IdentityException.surfaceForbidden("read_draft", null, Surface.FRONT.wire());
         }
         return identity;
-    }
-
-    private static UUID parseRefTarget(String name, String raw) {
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            throw com.fallrising.cms.content.ContentException.invalidParameter(name + " must be a UUID");
-        }
     }
 }

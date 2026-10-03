@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
@@ -60,25 +59,13 @@ public class PublicContentController {
     }
 
     @GetMapping("/content-types/{typeKey}/entries")
-    public Map<String, Object> list(
-            @PathVariable String typeKey,
-            @RequestParam(required = false) String q,
-            HttpServletRequest request) {
+    public Map<String, Object> list(@PathVariable String typeKey, HttpServletRequest request) {
         rejectAudienceParams(request);
-        String refField = null;
-        UUID refTarget = null;
-        for (String name : request.getParameterMap().keySet()) {
-            if (name.startsWith("ref.") && request.getParameter(name) != null && !request.getParameter(name).isBlank()) {
-                refField = name.substring(4);
-                refTarget = parseRefTarget(name, request.getParameter(name));
-            }
-        }
-        ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::notFound);
-        List<EntryRecord> found = entries.publicList(principal(request), typeKey, q, refField, refTarget);
-        List<Map<String, Object>> items = found.stream()
-                .map(e -> ContentProjection.published(e, type, store.fieldsOf(type.id()), this::expandMedia))
+        EntryService.ListResult result = entries.publicList(principal(request), typeKey, request.getParameterMap());
+        List<Map<String, Object>> items = result.page().items().stream()
+                .map(e -> ContentProjection.published(e, result.type(), result.fields(), this::expandMedia))
                 .toList();
-        return page(items);
+        return ContentProjection.page(items, result);
     }
 
     @GetMapping("/content-types/{typeKey}/entries/{id}")
@@ -119,10 +106,6 @@ public class PublicContentController {
         return media.resolvePublic(raw).map(Object.class::cast).orElse(raw);
     }
 
-    private static Map<String, Object> page(List<Map<String, Object>> items) {
-        return Map.of("items", items, "total", items.size(), "offset", 0, "limit", items.size());
-    }
-
     private static void rejectAudienceParams(HttpServletRequest request) {
         if (request.getParameter("state") != null
                 || request.getParameter("includeDraft") != null
@@ -134,13 +117,5 @@ public class PublicContentController {
     private static Principal principal(HttpServletRequest request) {
         IdentityRequest identity = AuthController.current(request);
         return identity == null ? null : identity.principal();
-    }
-
-    private static UUID parseRefTarget(String name, String raw) {
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            throw com.fallrising.cms.content.ContentException.invalidParameter(name + " must be a UUID");
-        }
     }
 }

@@ -68,6 +68,46 @@ class EntryAtomicWriteTests {
     }
 
     @Test
+    void createIndexFailureRollsBackEntryRefsAttachmentsAndAudit() {
+        store.insertField(new FieldRecord(UUID.randomUUID(), type.id(), "title", "string", false, false,
+                true, "public", 0, null, "restrict", List.of(), true, false));
+        UUID cover = insertMedia();
+        jdbc.execute("ALTER TABLE cms_entry_index ADD CONSTRAINT injected_index_failure CHECK (value_string <> 'blocked')");
+        assertThatThrownBy(() -> service.create(null, Surface.BACK, type.typeKey(), "failed-index",
+                Map.of("title", "blocked", "cover", cover.toString())))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(store.countEntries(type.id(), true)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM cms_entry_index", Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM cms_entry_ref", Long.class)).isZero();
+        assertThat(media.attachmentsOfMedia(cover)).isEmpty();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM cms_audit_event", Long.class)).isZero();
+    }
+
+    @Test
+    void patchIndexFailurePreservesVersionBothScopesRefsAttachmentsAndRevisions() {
+        store.insertField(new FieldRecord(UUID.randomUUID(), type.id(), "title", "string", false, false,
+                true, "public", 0, null, "restrict", List.of(), true, false));
+        UUID cover = insertMedia();
+        EntryRecord draft = service.create(null, Surface.BACK, type.typeKey(), "indexed",
+                Map.of("title", "Original", "cover", cover.toString()));
+        service.publish(null, Surface.BACK, draft.id());
+        EntryRecord before = store.findEntry(draft.id()).orElseThrow();
+        var rows = store.indexRowsOf(before.id());
+        var revisions = store.revisionsOf(before.id());
+        var refs = store.refsTo(cover);
+        var attachments = media.attachmentsOfMedia(cover);
+        jdbc.execute("ALTER TABLE cms_entry_index ADD CONSTRAINT injected_index_failure CHECK (value_string <> 'blocked')");
+        assertThatThrownBy(() -> service.patch(null, Surface.BACK, before.id(), "changed-index",
+                Map.of("title", "blocked"), before.version()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(store.findEntry(before.id())).contains(before);
+        assertThat(store.indexRowsOf(before.id())).containsExactlyElementsOf(rows);
+        assertThat(store.revisionsOf(before.id())).containsExactlyElementsOf(revisions);
+        assertThat(store.refsTo(cover)).containsExactlyElementsOf(refs);
+        assertThat(media.attachmentsOfMedia(cover)).containsExactlyElementsOf(attachments);
+    }
+
+    @Test
     void createAttachmentFailureRollsBackEntryAndRefs() {
         assertThatThrownBy(() -> service.create(null, Surface.BACK, type.typeKey(), "failed",
                 Map.of("cover", UUID.randomUUID().toString())))

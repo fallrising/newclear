@@ -41,14 +41,16 @@ public class PrincipalAdminService {
     private final AuthService authService;
     private final AuthorizationService authorizationService;
     private final ObjectMapper objectMapper;
+    private final ContentTypeDirectory contentTypes;
 
     public PrincipalAdminService(IdentityStore store, PasswordHasher passwordHasher, AuthService authService,
-            AuthorizationService authorizationService, ObjectMapper objectMapper) {
+            AuthorizationService authorizationService, ObjectMapper objectMapper, ContentTypeDirectory contentTypes) {
         this.store = store;
         this.passwordHasher = passwordHasher;
         this.authService = authService;
         this.authorizationService = authorizationService;
         this.objectMapper = objectMapper;
+        this.contentTypes = contentTypes;
     }
 
     public List<Principal> list(IdentityRequest request) { authService.requireManagePrincipals(request); return store.listPrincipals(); }
@@ -167,6 +169,8 @@ public class PrincipalAdminService {
             List<String> surfaces = p.allowedSurfaces() == null || p.allowedSurfaces().isEmpty() ? defaultSurfaces(action.wire()) : p.allowedSurfaces().stream().distinct().toList();
             if (surfaces.stream().anyMatch(s -> !SURFACES.contains(s))) throw IdentityException.validation("unknown surface");
             validatePredicate(p.predicateJson());
+            String predicateProblem = PredicateIndexCheck.problem(objectMapper, contentTypes, p.contentTypeCode(), p.predicateJson());
+            if (predicateProblem != null) throw IdentityException.validation(predicateProblem);
             String key = action.wire() + "|" + (p.contentTypeCode() == null ? "" : p.contentTypeCode()) + "|" + (p.predicateJson() == null ? "" : p.predicateJson()) + "|" + surfaces;
             if (!seen.add(key)) throw IdentityException.validation("duplicate permission");
             next.add(new Permission(UUID.randomUUID(), role.id(), action.wire(), p.contentTypeCode(), p.predicateJson(), surfaces, now));

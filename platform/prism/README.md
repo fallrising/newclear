@@ -9,17 +9,16 @@ metrics, logs, traces, and alerting. Its design accepts standard telemetry
 protocols and exposes Prometheus, Loki, Jaeger, and Alertmanager-compatible APIs
 behind a public Go storage SPI.
 
-**Status:** UTM/SPI contracts, the memory driver, configuration, HTTP lifecycle,
-secret redaction, a self-telemetry registry, and P1-01 normalization exist.
-P1-03 adds a bounded ingest pipeline that connects normalization, P1-02 limits,
-priority batch queues, and asynchronous SPI writers. The daemon currently
-serves health and Go/process metrics only: telemetry receivers, the write/query
-pipeline, production drivers, alerting, agent, and console are not connected.
-Prism is not yet a usable APM service.
+**Status:** UTM/SPI, the memory driver, normalization, per-tenant limits and a
+bounded asynchronous pipeline are implemented. P1-04 connects authenticated OTLP
+metrics/logs/traces over HTTP and gRPC to the all-in-one and ingest daemon roles.
+The initial runtime supports a single configured tenant and file-backed bearer
+key. Compatible query APIs, production drivers, alerting, agent and console
+remain unimplemented; this is not yet a complete APM service.
 
 ## Start here
 
-- [Development quickstart](docs/quickstart.md): tests and the local HTTP skeleton.
+- [Development quickstart](docs/quickstart.md): tests and authenticated local OTLP ingestion.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,
   known gaps, and the next integration boundary.
 - [SDD](docs/sdd/README.md) and [task sequence](docs/sdd/12-IMPLEMENTATION-PHASES.md).
@@ -30,11 +29,12 @@ Prism is not yet a usable APM service.
 - `drivers/memory`: the implemented reference backend.
 - `internal/config`, `secret`, `server`, `telemetry`: supporting packages.
 - `internal/ingest/normalize`: protocol-to-UTM normalization and bounded delta state.
-- [`internal/ingest`](internal/ingest/README.md): package-level pipeline, bounded
+- [`internal/ingest`](internal/ingest/README.md): bounded pipeline,
   tenant lifecycle, atomic admission, owned batches, retries and shutdown.
 - [`internal/ingest/limits`](internal/ingest/limits/README.md): verified per-tenant
   quotas, bounded cardinality tracking, record limits and byte admission.
-- `cmd/prismd`: the runnable HTTP skeleton; `prism-agent` and `prismctl` remain placeholders.
+- `internal/compat/otlp`: bounded HTTP/gRPC receivers and protocol-native responses.
+- `cmd/prismd`: health/metrics plus OTLP in ingest roles; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
 The Go module is `github.com/fallrising/newclear/platform/prism`.
@@ -66,3 +66,9 @@ New Go code is reviewed against the version-specific
 with `platform/prism/go.mod` as the language-version boundary. The `modernize`
 linter checks supported modernization opportunities; see the
 [inventory](docs/inventory.md#go-style-reference) for the reference and verification details.
+
+The [external-client acceptance gate](test/e2e/README.md) runs pinned telemetrygen
+against both transports and verifies stored data through SPI. The
+[P1-04 contract](docs/specs/p1-04-otlp.md) describes authentication, partial success,
+capacity and shutdown. Logical memory budgeting is not a hard RSS limit, and the
+memory backend has unbounded retention.

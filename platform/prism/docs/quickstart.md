@@ -1,13 +1,14 @@
 # Prism development quickstart
 
-This exercises the existing local HTTP skeleton with the memory backend. It does
-not accept telemetry or expose the planned compatible query APIs. The fixture
-configuration and fixture credentials are for loopback development only.
+This exercises authenticated OTLP ingestion with the memory backend. Compatible
+query APIs and production storage are later milestones. Fixture credentials are
+public and intended only for loopback development.
 
 ## Prerequisites
 
-Go 1.23+, a C compiler for race tests, and Bash. Run commands from
-`platform/prism`. Initial module/toolchain download requires network access.
+Go 1.23+, a C compiler for race tests, and Bash. Python 3 is needed for the daemon
+smoke probe. Run commands from `platform/prism`; initial module/tool downloads
+require network access. No module dependency or language upgrade is needed.
 
 ## Verify the source
 
@@ -18,49 +19,69 @@ scripts/test-dependency-guard.sh
 go build ./...
 ```
 
-These commands passed on the inventoried baseline with Go 1.23.0 and on the
-integrated P1-02 delivery with `GOTOOLCHAIN=go1.23.12` on Linux amd64
-(12 race-tested packages).
-See [inventory](inventory.md) for the scope and remaining acceptance gaps.
+See [inventory](inventory.md) for observed results and the remaining acceptance
+boundaries. The separate [external-client gate](../test/e2e/README.md) uses a
+pinned telemetrygen and checks actual memory contents through SPI.
 
-## Check configuration
+## Check configuration and start
 
 ```sh
 go run ./cmd/prismd --config internal/config/testdata/prismd.yaml --config-check
-```
-
-Expected: `prismd: configuration valid`. The fixture selects `memory` and binds
-HTTP to `127.0.0.1:9090`. The production `deploy/prismd.yaml` is not present yet;
-the default storage selection is ClickHouse, whose driver is not implemented.
-
-## Start and inspect
-
-```sh
 go build -o /tmp/prism-dev-prismd ./cmd/prismd
 /tmp/prism-dev-prismd --config internal/config/testdata/prismd.yaml
 ```
+
+Expected config output: `prismd: configuration valid`. The fixture uses `memory`
+and loopback HTTP/gRPC listeners. `deploy/prismd.yaml` is an administrator-facing
+configuration example, not a deployment or an implemented ClickHouse stack.
+The default storage selection still requires an explicitly selected implemented
+driver; currently that is memory, which retains data without a storage-size cap.
+
+The `all-in-one` and `ingest` roles require an independent
+`auth.ingest_api_key_file` containing at least 32 bytes. The file is read with a
+size limit and its value is redacted. Do not reuse the JWT secret or the public
+test key. This milestone supports only `tenancy.mode: single`; strict ingest
+configuration fails validation until full tenant authentication is implemented.
+Client tenant selectors, when present, must match the key's configured tenant.
+
+## Inspect and export
 
 In another terminal:
 
 ```sh
 curl --fail http://127.0.0.1:9090/-/healthy
 curl --fail http://127.0.0.1:9090/metrics
+prism_demo_key="$(cat internal/config/testdata/secrets/ingest_api_key)"
+curl --fail --header 'Content-Type: application/json' \
+  --header "Authorization: Bearer $prism_demo_key" \
+  --data '{}' http://127.0.0.1:9090/v1/metrics
+unset prism_demo_key
 ```
 
-Health returns `ok`; metrics expose Go/process collectors. The Prism-specific
-telemetry registry is implemented separately but is not wired into this daemon.
-Stop the foreground process with Ctrl-C; SIGTERM is also handled gracefully.
-If 9090 is busy, set `PRISM_SERVER_HTTP_LISTEN=127.0.0.1:19090` for the start
-command and use that port for the probes.
+HTTP also accepts `/v1/logs` and `/v1/traces`, with JSON or protobuf and optional
+gzip. gRPC exposes the three OTLP Export services on port 4317. Every write,
+including an empty export, requires bearer authentication. Both listeners use
+the configured TLS certificate when TLS is enabled. Plaintext examples are for
+local testing or a trusted network.
 
-The same build/configuration/start/HTTP/SIGTERM path was tested using an ephemeral
-loopback port and a Python HTTP client: both endpoints returned 200 and SIGTERM
-exited with status 0. The documented `curl --fail` probes also passed against a Go 1.23.12 build on
-an ephemeral loopback port.
+Health returns `ok`; metrics expose Go/process collectors. Prism's separate
+self-telemetry registry is not yet populated by the daemon. Successful OTLP
+responses acknowledge bounded asynchronous admission, not durable storage.
+Partial-success counts use original OTLP units; clients must not retry a partial
+success as a whole request. See the [receiver design](specs/p1-04-otlp.md).
 
-## Integration boundary
+Ctrl-C or SIGTERM stops new receiver work, drains requests and queued writes
+within one deadline, then closes storage. Set `PRISM_SERVER_HTTP_LISTEN` and
+`PRISM_SERVER_GRPC_LISTEN` to unused loopback ports if the defaults are busy.
 
-SDD [P1-03](sdd/12-IMPLEMENTATION-PHASES.md) adds the ingest pipeline after the
-limits package. Tenant configuration, receiver status mapping, telemetry report
-consumption and alert delivery require later integration. Do not expose this
-skeleton as a production receiver.
+## Resource and integration boundaries
+
+Daemon queues use smaller defaults than the standalone pipeline package. The
+configuration validates conservative logical payload/receive-buffer capacity
+against `ingest.memory_limit`; this is not a process RSS ceiling. Decoded pdata,
+allocator overhead, transient normalization and state, and backend retention are
+additional costs. Do not treat the memory backend as durable production storage.
+
+Remote-write, Loki push, query APIs, full multi-tenant authentication, registered
+pipeline telemetry, live reload and deployment remain later work. Follow the
+[SDD task order](sdd/12-IMPLEMENTATION-PHASES.md).

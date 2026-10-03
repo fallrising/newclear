@@ -169,3 +169,20 @@ func waitForEndpoint(t *testing.T, endpoint, wantBody string) {
 		}
 	}
 }
+
+func TestConfigCheckModeOverrideSkipsIngestCredential(t *testing.T) {
+	t.Setenv("PRISM_AUTH_INGEST_API_KEY_FILE", "")
+	path, err := filepath.Abs(filepath.Join("..", "..", "internal", "config", "testdata", "prismd.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	if exit := run(context.Background(), []string{"--config", path, "--mode", "query", "--config-check"}, &stdout, &stderr); exit != 0 {
+		t.Fatalf("query mode requires ingest key: %s", stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if exit := run(context.Background(), []string{"--config", path, "--mode", "ingest", "--config-check"}, &stdout, &stderr); exit != 1 || !strings.Contains(stderr.String(), "ingest_api_key_file") {
+		t.Fatalf("ingest accepted missing key: %s", stderr.String())
+	}
+}

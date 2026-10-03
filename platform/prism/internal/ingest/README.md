@@ -1,8 +1,8 @@
 # Bounded ingest pipeline
 
 This package implements standalone P1-03 admission, normalization, limits,
-accumulation and asynchronous SPI writes. Receivers, YAML configuration, daemon
-startup and registered telemetry population are later integration work.
+accumulation and asynchronous SPI writes. YAML configuration and daemon startup are composed by the runtime; registered
+telemetry population remains later integration work.
 
 ```go
 options := ingest.DefaultOptions()
@@ -56,7 +56,15 @@ adapters must invoke their existing normalizers before using those paths.
 `Result.Accepted` and `Rejected` count the final normalizer output handed to
 limits, not original OTLP datapoints. Metric expansion and delta baseline drops
 make these unsuitable as OTLP `partial_success.rejected_data_points` directly.
-Adapters must interpret normalization diagnostics and track original units.
+`Result.OTLPRejected` separately counts original OTLP data points, log records or
+spans, including normalization rejection. UTM submissions keep this field zero.
+Metric provenance maps each distinct original point to its contiguous expanded
+output range; per-output acceptance bits survive limiter label mutations. Any
+lost expanded child rejects its original point once; remaining children may
+still be accepted. A consumed delta baseline has zero rejection, as does
+unsupported metadata; both retain explicit diagnostics. Rejection counts never
+sum exemplar, attribute, event or upstream-drop diagnostics. This accounting
+does not change preview/reservation/byte-admission/delta commit ordering.
 Normalizer diagnostics (`drop`, `delta_baseline`, etc.) remain separate from
 registered telemetry label domains. Bounded limits alarms, trace truncation IDs
 and event overflow are returned to the caller, never retained in lifetime Stats.

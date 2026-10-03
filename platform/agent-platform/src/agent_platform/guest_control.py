@@ -73,6 +73,13 @@ def main():
             require(not path.is_symlink())
             os.chown(path, 2001, 2001, follow_symlinks=False)
             require(stat.S_ISDIR(check_path(path, 0o700, 2001, 2001).st_mode))
+        if request.get("tool_transport"):
+            tools = ROOT / "tools"
+            tools.mkdir(mode=0o755, exist_ok=True)
+            require(not tools.is_symlink())
+            os.chown(tools, 2001, 2001, follow_symlinks=False)
+            tools.chmod(0o755)
+            require(stat.S_ISDIR(check_path(tools, 0o755, 2001, 2001).st_mode))
         print(json.dumps({"revision": REVISION}))
         return
     require(stat.S_ISDIR(check_path(ROOT, 0o755).st_mode))
@@ -112,12 +119,19 @@ def main():
                 "guest_workspace.py",
                 "guest_fixture.py",
                 "guest_model.py",
+                "guest_tool.py",
+                "guest_tool_client.py",
             }
         )
         path = CODE / name
         mode = 0o4750 if name == "terminal" else 0o644
         require(stat.S_ISREG(check_path(path, mode, gid=2001 if name == "terminal" else 0).st_mode))
         require(hashlib.sha256(path.read_bytes()).hexdigest() == expected)
+    tool_controls = []
+    if request.get("tool_transport"):
+        require(stat.S_ISDIR(check_path(ROOT / "tools", 0o755, 2001, 2001).st_mode))
+        require(stat.S_ISSOCK(check_path(ROOT / "tools/request.sock", 0o666, 2001, 2001).st_mode))
+        require(stat.S_ISREG(check_path(CONTROL / "tool-mailbox.json", 0o600, 2001, 2001).st_mode))
     controls, terminals = [], []
     for path in Path("/proc").glob("[0-9]*"):
         try:
@@ -128,6 +142,11 @@ def main():
                 require(status["Gid"].split() == ["2001"] * 4)
                 require(int(status["CapEff"], 16) == 0)
                 controls.append(int(path.name))
+            if request.get("tool_transport") and str(CODE / "guest_tool.py").encode() in arguments:
+                require(status["Uid"].split() == ["2001"] * 4)
+                require(status["Gid"].split() == ["2001"] * 4)
+                require(int(status["CapEff"], 16) == 0)
+                tool_controls.append(int(path.name))
             # proc inode ownership can become root when a process disables dumping.
             if status["Uid"].split()[0] == "2000" and status["State"].strip()[0] != "Z":
                 require(status["Uid"].split() == ["2000"] * 4)
@@ -140,6 +159,8 @@ def main():
             # A racing process is not proof of a stable security boundary.
             raise RuntimeError("guest_isolation_unstable") from None
     require(bool(controls))
+    if request.get("tool_transport"):
+        require(len(tool_controls) == 1)
     if request.get("terminal"):
         require(bool(terminals))
     print(

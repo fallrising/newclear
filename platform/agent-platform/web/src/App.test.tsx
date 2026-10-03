@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -39,7 +39,7 @@ let taskQueries: URLSearchParams[];
 let paginateTasks: boolean;
 const clients: QueryClient[] = [];
 beforeEach(() => {
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
   authenticated = false;
   tasks = [];
   lastPayload = {};
@@ -76,7 +76,7 @@ beforeEach(() => {
         return Response.json({
           items: [
             {
-              id: 'project-1',
+              id: '11111111-1111-4111-8111-111111111111',
               name: 'Newclear',
               canonical_repo: 'https://github.com/fallrising/newclear',
             },
@@ -495,10 +495,13 @@ it('submits a literal search, combines project/state filters, and clears them', 
   expect(taskQueries).toHaveLength(count);
   await user.click(screen.getByRole('button', { name: '搜尋' }));
   await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\'));
-  await user.selectOptions(screen.getByLabelText('篩選專案'), 'project-1');
+  await user.selectOptions(
+    screen.getByLabelText('篩選專案'),
+    '11111111-1111-4111-8111-111111111111',
+  );
   await user.selectOptions(screen.getByLabelText('篩選狀態'), 'failed');
   await waitFor(() => {
-    expect(taskQueries.at(-1)?.get('project_id')).toBe('project-1');
+    expect(taskQueries.at(-1)?.get('project_id')).toBe('11111111-1111-4111-8111-111111111111');
     expect(taskQueries.at(-1)?.get('state')).toBe('failed');
     expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\');
   });
@@ -537,4 +540,99 @@ it('explains empty filtered results and provides a clear action', async () => {
   expect(await screen.findByText('沒有符合篩選條件的任務。')).toBeVisible();
   await user.click(screen.getByRole('button', { name: '清除篩選' }));
   expect(await screen.findByText(/還沒有任務/)).toBeVisible();
+});
+
+it('restores valid filter links after login without rewriting the URL', async () => {
+  const query = new URLSearchParams({
+    q: '  你好 %_\\ 😀  ',
+    project_id: 'ABCDEFAB-1234-4234-8234-ABCDEFABCDEF',
+    state: 'failed',
+    view: 'keep',
+  });
+  window.history.replaceState(null, '', `/?${query}#missing`);
+  const original = window.location.href;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\ 😀'));
+  expect(taskQueries.at(-1)?.get('project_id')).toBe('abcdefab-1234-4234-8234-abcdefabcdef');
+  expect(taskQueries.at(-1)?.get('state')).toBe('failed');
+  expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('你好 %_\\ 😀');
+  expect(screen.getByLabelText('篩選專案')).toHaveValue('abcdefab-1234-4234-8234-abcdefabcdef');
+  expect(screen.getByRole('option', { selected: true, name: /專案名稱無法取得/ })).toBeVisible();
+  expect(window.location.href).toBe(original);
+  await user.click(screen.getByRole('button', { name: '專案' }));
+  await user.click(screen.getByRole('button', { name: '任務' }));
+  expect(await screen.findByRole('searchbox', { name: '搜尋任務' })).toHaveValue('你好 %_\\ 😀');
+  expect(window.location.hash).toBe('#missing');
+});
+
+it('keeps hash and unrelated parameters while pushing only changed normalized filters', async () => {
+  window.history.replaceState(null, '', '/?view=keep&view=second#missing');
+  const push = vi.spyOn(window.history, 'pushState');
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  const input = screen.getByRole('searchbox', { name: '搜尋任務' });
+  await user.type(input, '  history  ');
+  expect(push).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(push).toHaveBeenCalledTimes(1);
+  expect(new URLSearchParams(window.location.search).get('q')).toBe('history');
+  expect(window.location.hash).toBe('#missing');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(push).toHaveBeenCalledTimes(1);
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'failed');
+  expect(push).toHaveBeenCalledTimes(2);
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(push).toHaveBeenCalledTimes(3);
+  expect([...new URLSearchParams(window.location.search)]).toEqual([
+    ['view', 'keep'],
+    ['view', 'second'],
+  ]);
+  expect(window.location.hash).toBe('#missing');
+  push.mockRestore();
+});
+
+it('restores filters and resets pagination on back or forward navigation', async () => {
+  window.history.replaceState(null, '', '/?q=first&state=running&cursor=untrusted');
+  paginateTasks = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.click(screen.getByRole('button', { name: '較早的任務 →' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('cursor')).toBe('page-two'));
+  await user.type(screen.getByRole('searchbox', { name: '搜尋任務' }), 'draft');
+  for (const state of ['failed', 'running']) {
+    act(() => {
+      window.history.replaceState(null, '', `/?q=restored&state=${state}&cursor=untrusted`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('restored');
+      expect(screen.getByLabelText('篩選狀態')).toHaveValue(state);
+      expect(taskQueries.at(-1)?.get('state')).toBe(state);
+      expect(taskQueries.at(-1)?.has('cursor')).toBe(false);
+    });
+    expect(screen.queryByText(/第 2 頁/)).toBeNull();
+  }
+});
+
+it('rejects an invalid link before API calls and clears only its owned filters', async () => {
+  window.history.replaceState(null, '', '/?q=one&q=two&state=failed&view=keep#missing');
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  expect(
+    await within(screen.getByRole('complementary', { name: '任務列表' })).findByRole('alert'),
+  ).toHaveTextContent('連結中的篩選條件無效');
+  expect(taskQueries.length).toBeGreaterThan(0);
+  expect(taskQueries.every((query) => query.size === 0)).toBe(true);
+  expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('');
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(
+    within(screen.getByRole('complementary', { name: '任務列表' })).queryByRole('alert'),
+  ).toBeNull();
+  expect(window.location.search).toBe('?view=keep');
+  expect(window.location.hash).toBe('#missing');
 });

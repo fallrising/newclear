@@ -36,3 +36,17 @@ Acceptance gates: platform-check/web-check/browser-test, diff/contracts, indepen
 Task search gates: root platform45unit/273SQLHTTP, frontend40/build, browser3; backend worker13targeted/ruff/diff inspected and accepted. Independent T-006 DONE accepted, no required findings, sevenloghashes verified; scope unchanged. Source base82cd9d8 verified against current main.
 
 Task-search evidence gate accepted: every required item maps to tests, actual final commandlogs and review; definedscope/authorization preserved. Deliver Draft PR, no merge/deployment.
+
+# Persistent task filter links
+
+Continue task history with URL q/project_id/state (no cursor). On initial load/remount and popstate read validated normalized filters; restore search field and reset page cursors. Existing task #hash remains independent and must survive updates. New tab/reload loads the same filter+selected task.
+
+Explicit submit/select/clear writes a browser history entry when filters change; typing and reapplying identical normalized filters do not add entries. Preserve unknown query parameters and hash; clear removes only owned filter keys. Back/Forward synchronizes UI/API without commands. Unknown cursor parameter must not affect paging (only q/project/state owned).
+
+URL input is untrusted: q <=200 Unicode code points before trim, no NUL; canonical UUID project (normalize case), existing state allowlist; duplicate owned params invalid. Any invalid filter falls back to recent tasks with a visible recoverable notice, no invalid filter sent to API. A valid project absent from loaded names gets an explicit selected fallback option, not “all projects.”
+
+T-007 isolated worker owns App.tsx/App.test.tsx/new taskLocation.ts and tests/report. Root owns browser tests/docs/evidence/acceptance. T-008 independent read-only review. No backend/dependency changes; required web-check/browser-test/diff/contracts. Parent PR211 headc9cf96a already all CIpassed, new PR stacked on its branch; no merge.
+
+Persistent links integration: T-007 frontend diff inspected and integrated within declared scope. Root web-check57tests/build and complete browser-test6cases passed; browser cases cover real history/new-tab/reload, invalid recovery, unavailable projects, parent search pagination and prior security/reconnect behavior. T-008 independent review DONE accepted; no required findings, all six evidence hashes independently verified. Backend unchanged.
+
+Persistent-links evidence gate accepted: URL/helper/UI/browser tests map to all defined behaviors; root web/browser suites and diff/contracts passed, independent review accepted. Parent PR211 exact headc9cf96a reconfirmed with all CI green. Deliver this bounded slice as a stacked Draft PR; no merge or deployment.

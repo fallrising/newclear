@@ -60,7 +60,7 @@ export function LoginPage({ auth, surface, title, returnParam, returnRoutes, fal
     setSubmitting(true);
     try {
       const result = await auth.login(username.trim(), password);
-      const me: Me = { principal: result.principal, roles: result.roles, surfaces: result.surfaces };
+      const me: Me = { principal: result.principal, roles: result.roles, surfaces: result.surfaces, capabilities: result.capabilities };
       if (!me.surfaces[surface]) {
         setError("auth.login.error.noSurface");
         return;

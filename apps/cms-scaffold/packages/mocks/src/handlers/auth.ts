@@ -16,7 +16,9 @@ export const authHandlers = [
     const user = seedUsers[username];
     if (!user || password === MOCK_WRONG_PASSWORD) return apiError(401, "INVALID_CREDENTIALS", "Invalid credentials");
     setUser(username);
-    return HttpResponse.json<LoginResponse>({ ...user, csrfToken: MOCK_CSRF_TOKEN });
+    const me = currentUser();
+    if (!me) return apiError(401, "UNAUTHENTICATED", "Authentication required");
+    return HttpResponse.json<LoginResponse>({ ...me, csrfToken: MOCK_CSRF_TOKEN });
   }),
 
   http.post("*/api/v1/auth/logout", () => {

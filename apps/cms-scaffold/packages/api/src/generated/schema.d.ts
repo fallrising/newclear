@@ -379,9 +379,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Published entries only. Entries whose `visibility` payload value is `unlisted` or
-         *     `private` are omitted. Not paginated in this version (`offset` is 0 and `limit`
-         *     equals the item count).
+         * @description Published entries only. When the type has a visibilityField, entries whose value in that field is
+         *     `unlisted` or `private` are omitted. Order: the type's sortField ascending (entries without a number
+         *     last), otherwise publishedAt descending; ties by updatedAt descending. Not paginated in this version
+         *     (`offset` is 0 and `limit` equals the item count).
          *     Relation filter: a query parameter named `ref.<fieldKey>` with an entry UUID value keeps
          *     entries whose `<fieldKey>` references that entry. When several are given, one of them
          *     is applied.
@@ -412,7 +413,7 @@ export interface paths {
          *     - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
          *     - 403 FORBIDDEN: caller may not read_published this type or this entry.
          *     - 404 ENTRY_NOT_FOUND: type missing or disabled; entry missing, deleted, not published,
-         *       `private`, of another type, or referencing an unpublished required relation.
+         *       `private` in the type's visibilityField, of another type, or referencing an unpublished required relation.
          */
         get: operations["getPublicEntry"];
         put?: never;
@@ -1107,15 +1108,34 @@ export interface components {
             back: boolean;
             admin: boolean;
         };
+        TypeCapability: {
+            key: string;
+            /** @description Subset of read_published, read_draft, create, update, publish, unpublish, delete, archive, in that order. */
+            actions: components["schemas"]["CmsAction"][];
+            /** @description True when some listed action is granted only with a predicate; the caller must still expect 403 on some entries. */
+            scoped: boolean;
+        };
+        /**
+         * @description What the caller may do on the surface of this request (G-01). Only enabled types with at least one action
+         *     are listed, in type key order. Surface hard-deny rules are already applied.
+         */
+        Capabilities: {
+            surface: components["schemas"]["Surface"];
+            types: components["schemas"]["TypeCapability"][];
+            /** @description Subset of manage_media, manage_types, manage_principals, manage_settings, read_audit, in that order. */
+            global: components["schemas"]["CmsAction"][];
+        };
         Me: {
             principal: components["schemas"]["MePrincipal"];
             roles: components["schemas"]["RoleAssignment"][];
             surfaces: components["schemas"]["SurfaceFlags"];
+            capabilities: components["schemas"]["Capabilities"];
         };
         LoginResponse: {
             principal: components["schemas"]["MePrincipal"];
             roles: components["schemas"]["RoleAssignment"][];
             surfaces: components["schemas"]["SurfaceFlags"];
+            capabilities: components["schemas"]["Capabilities"];
             csrfToken: string;
         };
         PasswordChangeRequest: {
@@ -1249,20 +1269,48 @@ export interface components {
         NavigationDocument: {
             [key: string]: unknown;
         };
+        /** @description Field schema for Back (02 §4.7). Disabled fields and visibility internal are not listed. */
         WorkField: {
             key: string;
             type: string;
+            /** @description zh-Hant display name. Null means the client derives a label from the key. */
+            label: string | null;
+            helpText: string | null;
             required: boolean;
-            refTarget: string | null;
+            /** @description main, media, relations, settings, or a custom key. Null means main. */
+            group: string | null;
+            /**
+             * Format: int32
+             * @description Form order (ascending).
+             */
+            order: number;
+            listable: boolean;
+            filterable: boolean;
             enumValues: string[];
+            /** @description Enum value to zh-Hant display name. Empty when no labels are set. */
+            enumLabels: {
+                [key: string]: string;
+            };
+            refTarget: string | null;
+            placeholder: string | null;
+            /** @enum {string} */
+            visibility: "public" | "back" | "internal";
         };
         WorkContentType: {
             key: string;
             displayName: string;
             pluralDisplayName: string;
             titleField: string;
+            /** @description Field that orders public lists ascending. Null means publishedAt descending. */
+            sortField: string | null;
+            /** @description Enum field with public, unlisted or private. Null means every published entry is public. */
+            visibilityField: string | null;
+            /** @description principal-ref field naming the owning member. */
+            ownerField: string | null;
             /** @enum {string} */
             slugPolicy: "required" | "optional" | "none";
+            singleton: boolean;
+            previewable: boolean;
             fields: components["schemas"]["WorkField"][];
         };
         WorkContentTypeList: {
@@ -1276,7 +1324,7 @@ export interface components {
             publicationState: components["schemas"]["PublicationState"];
             /** Format: int32 */
             version: number;
-            /** @description Value of payload.title (not titleField; see B-03, fixed in BW1). */
+            /** @description Value of payload[titleField] of the entry's type (G-11). */
             title: string | null;
             payload: components["schemas"]["EntryPayload"];
             /** @description True when published and the work copy differs from the published copy. */
@@ -1312,20 +1360,50 @@ export interface components {
         RevisionList: {
             items: components["schemas"]["Revision"][];
         };
+        /** @description Field schema for Admin. Lists every field, including disabled and internal ones. */
         AdminField: {
             key: string;
             type: string;
+            /** @description zh-Hant display name. Null means the client derives a label from the key. */
+            label: string | null;
+            helpText: string | null;
             required: boolean;
-            indexed: boolean;
+            /** @description main, media, relations, settings, or a custom key. Null means main. */
+            group: string | null;
+            /**
+             * Format: int32
+             * @description Form order (ascending).
+             */
+            order: number;
+            listable: boolean;
+            filterable: boolean;
+            enumValues: string[];
+            /** @description Enum value to zh-Hant display name. Empty when no labels are set. */
+            enumLabels: {
+                [key: string]: string;
+            };
             refTarget: string | null;
+            placeholder: string | null;
+            /** @enum {string} */
+            visibility: "public" | "back" | "internal";
+            indexed: boolean;
+            enabled: boolean;
         };
         AdminContentType: {
             key: string;
             displayName: string;
             pluralDisplayName: string;
             titleField: string;
+            /** @description Field that orders public lists ascending. Null means publishedAt descending. */
+            sortField: string | null;
+            /** @description Enum field with public, unlisted or private. Null means every published entry is public. */
+            visibilityField: string | null;
+            /** @description principal-ref field naming the owning member. */
+            ownerField: string | null;
             /** @enum {string} */
             slugPolicy: "required" | "optional" | "none";
+            singleton: boolean;
+            previewable: boolean;
             enabled: boolean;
             fields: components["schemas"]["AdminField"][];
         };
@@ -1529,7 +1607,7 @@ export interface components {
         RoleCode: string;
         RevisionNo: number;
         Variant: "original" | "thumbnail" | "web";
-        /** @description Case-insensitive substring of the payload `title` value. */
+        /** @description Case-insensitive literal substring of payload[titleField]. */
         Q: string;
         /** @description Comma-separated publication states, for example `draft,published`. */
         State: string;
@@ -2090,7 +2168,7 @@ export interface operations {
     listPublicEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive substring of the payload `title` value. */
+                /** @description Case-insensitive literal substring of payload[titleField]. */
                 q?: components["parameters"]["Q"];
             };
             header?: never;
@@ -2246,7 +2324,7 @@ export interface operations {
     listWorkEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive substring of the payload `title` value. */
+                /** @description Case-insensitive literal substring of payload[titleField]. */
                 q?: components["parameters"]["Q"];
                 /** @description Comma-separated publication states, for example `draft,published`. */
                 state?: components["parameters"]["State"];

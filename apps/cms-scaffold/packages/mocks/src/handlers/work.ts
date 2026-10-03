@@ -11,6 +11,11 @@ function findType(key: string): WorkContentType | undefined {
   return workContentTypes.items.find((t) => t.key === key);
 }
 
+function workTitle(type: WorkContentType | undefined, payload: Record<string, unknown>) {
+  const value = type?.titleField ? payload[type.titleField] : null;
+  return value == null ? null : String(value);
+}
+
 function forbidden(action: string, type: string) {
   return apiError(403, "FORBIDDEN", `Missing permission ${action} on content type ${type}`);
 }
@@ -94,7 +99,7 @@ export const workHandlers = [
       slug: body.slug || null,
       publicationState: "draft",
       version: 1,
-      title: typeof payload.title === "string" ? payload.title : null,
+      title: workTitle(type, payload),
       payload,
       dirty: false,
       publishedAt: null,
@@ -122,7 +127,7 @@ export const workHandlers = [
       save(entry, {
         slug: body.slug ?? entry.slug,
         payload,
-        title: typeof payload.title === "string" ? payload.title : null,
+        title: workTitle(findType(entry.contentType), payload),
         dirty: entry.publicationState === "published",
       }),
     );

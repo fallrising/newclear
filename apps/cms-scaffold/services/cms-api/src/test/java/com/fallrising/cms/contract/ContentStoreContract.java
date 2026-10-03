@@ -60,14 +60,15 @@ public abstract class ContentStoreContract {
 
     @Test
     void B08_updateTypeChangesOnlyMutableColumns() {
-        ContentTypeRecord album = type("album");
+        ContentTypeRecord album = type("album").withSettings("rank", "shownTo", "owner", T0);
         store.insertType(album);
         ContentTypeRecord changed = new ContentTypeRecord(album.id(), "album", "Albums!", "Many albums", "desc",
                 "name", "none", true, false, false, List.of("cover"), t(50), t(60));
         store.updateType(changed);
         ContentTypeRecord expected = new ContentTypeRecord(album.id(), "album", "Albums!", "Many albums", "desc",
                 album.titleField(), album.slugPolicy(), album.singleton(), false, album.previewable(),
-                album.publicRequiresPublishedRefs(), album.createdAt(), t(60));
+                album.publicRequiresPublishedRefs(), album.createdAt(), t(60),
+                album.sortField(), album.visibilityField(), album.ownerField());
         assertThat(store.findTypeByKey("album")).contains(expected);
     }
 
@@ -93,11 +94,14 @@ public abstract class ContentStoreContract {
     void B08_markMediaRefsPublicOnlyTouchesMediaRefFields() {
         ContentTypeRecord album = type("album");
         store.insertType(album);
-        store.insertField(field(album.id(), "cover", "media-ref", 0));
+        FieldRecord cover = field(album.id(), "cover", "media-ref", 0).withMetadata(
+                "封面", "media", true, false, Map.of(), "選擇封面", "公開圖片");
+        store.insertField(cover);
         store.insertField(field(album.id(), "title", "string", 1));
         store.markMediaRefsPublic();
         assertThat(store.fieldsOf(album.id())).extracting(FieldRecord::fieldKey, FieldRecord::publicBytes)
                 .containsExactly(org.assertj.core.groups.Tuple.tuple("cover", true), org.assertj.core.groups.Tuple.tuple("title", false));
+        assertThat(store.fieldsOf(album.id())).contains(cover.withPublicBytes(true));
     }
 
     @Test
@@ -150,11 +154,11 @@ public abstract class ContentStoreContract {
         EntryRecord other = entry(page, "o", PublicationState.DRAFT, Map.of("title", "o"), t(50));
         List.of(draft, published, archived, gone, other).forEach(store::insertEntry);
 
-        assertThat(store.listEntries(album.id(), List.of(), false, null, null, null))
+        assertThat(store.listEntries(album.id(), List.of(), false, "title", null, null, null))
                 .extracting(EntryRecord::slug).containsExactly("p", "a", "d");
-        assertThat(store.listEntries(album.id(), List.of("draft", "published"), false, null, null, null))
+        assertThat(store.listEntries(album.id(), List.of("draft", "published"), false, "title", null, null, null))
                 .extracting(EntryRecord::slug).containsExactly("p", "d");
-        assertThat(store.listEntries(album.id(), List.of(), true, null, null, null))
+        assertThat(store.listEntries(album.id(), List.of(), true, "title", null, null, null))
                 .extracting(EntryRecord::slug).containsExactly("x", "p", "a", "d");
     }
 
@@ -185,9 +189,9 @@ public abstract class ContentStoreContract {
         store.replaceRefs(p1.id(), List.of(new EntryRefRecord(p1.id(), "album", a1.id(), "entry", 0)));
         store.replaceRefs(p2.id(), List.of(new EntryRefRecord(p2.id(), "album", a2.id(), "entry", 0)));
 
-        assertThat(store.listEntries(photo.id(), List.of(), false, null, "album", a1.id()))
+        assertThat(store.listEntries(photo.id(), List.of(), false, "title", null, "album", a1.id()))
                 .extracting(EntryRecord::slug).containsExactly("p1");
-        assertThat(store.listEntries(photo.id(), List.of(), false, null, "cover", a1.id())).isEmpty();
+        assertThat(store.listEntries(photo.id(), List.of(), false, "title", null, "cover", a1.id())).isEmpty();
     }
 
     @Test
@@ -353,6 +357,54 @@ public abstract class ContentStoreContract {
         }
     }
 
+    @Test
+    void B03_typeSettingsRoundTrip() {
+        ContentTypeRecord photo = type("photo").withSettings("sortOrder", "visibility", "ownerPrincipalId", T0);
+        store.insertType(photo);
+        assertThat(store.findTypeByKey("photo")).contains(photo);
+    }
+
+    @Test
+    void B03_updateTypeSettingsChangesOnlySettings() {
+        ContentTypeRecord album = type("album");
+        store.insertType(album);
+        ContentTypeRecord changed = new ContentTypeRecord(album.id(), "album", "Other", "Others", "desc", "name",
+                "none", true, false, false, List.of("cover"), t(50), t(60), "sortOrder", "visibility", "owner");
+        store.updateTypeSettings(changed);
+        assertThat(store.findTypeByKey("album")).contains(album.withSettings("sortOrder", "visibility", "owner", t(60)));
+    }
+
+    @Test
+    void B05_fieldMetadataRoundTrip() {
+        ContentTypeRecord album = insertType("album");
+        FieldRecord visibility = field(album.id(), "visibility", "enum", 0).withMetadata(
+                "可見性", "settings", true, true, Map.of("public", "公開", "unlisted", "不公開列出"), "選一個", "說明文字");
+        store.insertField(visibility);
+        assertThat(store.fieldsOf(album.id())).containsExactly(visibility);
+    }
+
+    @Test
+    void B05_updateFieldMetadataChangesOnlyMetadata() {
+        ContentTypeRecord album = insertType("album");
+        FieldRecord title = field(album.id(), "title", "string", 0);
+        store.insertField(title);
+        FieldRecord changed = new FieldRecord(title.id(), album.id(), "renamed", "int", true, true, true, "back", 9,
+                "page", "cascade_soft", List.of("x"), false, true, "標題", "main", true, false, Map.of(), "輸入標題", "顯示在列表");
+        store.updateFieldMetadata(changed);
+        assertThat(store.fieldsOf(album.id())).containsExactly(
+                title.withMetadata("標題", "main", true, false, Map.of(), "輸入標題", "顯示在列表"));
+    }
+
+    @Test
+    void B03_searchUsesGivenTitleField() {
+        ContentTypeRecord profile = insertType("clinic_profile");
+        store.insertEntry(entry(profile, "c1", PublicationState.DRAFT, Map.of("name", "Cedar Clinic", "title", "zzz"), t(1)));
+        store.insertEntry(entry(profile, "c2", PublicationState.DRAFT, Map.of("name", "Oak", "title", "Cedar"), t(2)));
+        assertThat(store.listEntries(profile.id(), List.of(), false, "name", "cedar", null, null))
+                .extracting(EntryRecord::slug).containsExactly("c1");
+        assertThat(store.listEntries(profile.id(), List.of(), false, null, "cedar", null, null)).isEmpty();
+    }
+
     // ---- fixtures ----
 
     protected static Instant t(int seconds) {
@@ -394,6 +446,6 @@ public abstract class ContentStoreContract {
     }
 
     private List<String> slugs(ContentTypeRecord type, String q) {
-        return store.listEntries(type.id(), List.of(), false, q, null, null).stream().map(EntryRecord::slug).toList();
+        return store.listEntries(type.id(), List.of(), false, "title", q, null, null).stream().map(EntryRecord::slug).toList();
     }
 }

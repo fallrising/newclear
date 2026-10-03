@@ -12,14 +12,15 @@ final class ContentProjection {
 
     private ContentProjection() {}
 
-    static Map<String, Object> work(EntryRecord entry) {
+    /** Work copy. title is payload[type.titleField] (G-11); type is null only when the type row is missing. */
+    static Map<String, Object> work(EntryRecord entry, ContentTypeRecord type) {
         Map<String, Object> json = new LinkedHashMap<>();
         json.put("id", entry.id().toString());
         json.put("contentType", entry.contentTypeKey());
         json.put("slug", entry.slug());
         json.put("publicationState", entry.publicationState().wire());
         json.put("version", entry.version());
-        json.put("title", title(entry.payload(), "title"));
+        json.put("title", title(entry.payload(), type == null ? null : type.titleField()));
         json.put("payload", entry.payloadCopy());
         json.put("dirty", entry.dirty());
         json.put("publishedAt", entry.publishedAt());
@@ -52,6 +53,55 @@ final class ContentProjection {
         json.put("title", title(source, type.titleField()));
         json.put("payload", payload);
         json.put("publishedAt", entry.publishedAt());
+        return json;
+    }
+
+    /**
+     * Type schema for Back and Admin (02 §4.7). admin=true adds enabled, and per field indexed and enabled,
+     * and includes internal and disabled fields; admin=false omits internal and disabled fields.
+     */
+    static Map<String, Object> typeSchema(ContentTypeRecord type, List<FieldRecord> fields, boolean admin) {
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("key", type.typeKey());
+        json.put("displayName", type.displayName());
+        json.put("pluralDisplayName", type.pluralDisplayName());
+        json.put("titleField", type.titleField());
+        json.put("sortField", type.sortField());
+        json.put("visibilityField", type.visibilityField());
+        json.put("ownerField", type.ownerField());
+        json.put("slugPolicy", type.slugPolicy());
+        json.put("singleton", type.singleton());
+        json.put("previewable", type.previewable());
+        if (admin) {
+            json.put("enabled", type.enabled());
+        }
+        json.put("fields", fields.stream()
+                .filter(f -> admin || (f.enabled() && !"internal".equals(f.visibility())))
+                .map(f -> fieldSchema(f, admin))
+                .toList());
+        return json;
+    }
+
+    static Map<String, Object> fieldSchema(FieldRecord field, boolean admin) {
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("key", field.fieldKey());
+        json.put("type", field.fieldType());
+        json.put("label", field.label());
+        json.put("helpText", field.helpText());
+        json.put("required", field.required());
+        json.put("group", field.groupKey());
+        json.put("order", field.sortOrder());
+        json.put("listable", field.listable());
+        json.put("filterable", field.filterable());
+        json.put("enumValues", field.enumValues());
+        json.put("enumLabels", field.enumLabels());
+        json.put("refTarget", field.refTargetTypeKey());
+        json.put("placeholder", field.placeholder());
+        json.put("visibility", field.visibility());
+        if (admin) {
+            json.put("indexed", field.indexed());
+            json.put("enabled", field.enabled());
+        }
         return json;
     }
 

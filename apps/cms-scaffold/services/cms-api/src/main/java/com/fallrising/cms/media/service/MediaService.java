@@ -177,7 +177,8 @@ public class MediaService {
             boolean allowedField = content.fieldsOf(entry.get().contentTypeId()).stream()
                     .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && "media-ref".equals(f.fieldType()) && f.publicBytes() && f.enabled());
             if (allowedField
-                    && PublicVisibility.gettable(entry.get().publishedPayload())
+                    && PublicVisibility.gettable(
+                            content.findTypeByKey(entry.get().contentTypeKey()).orElse(null), entry.get().publishedPayload())
                     && publishedRefsOk(entry.get())) {
                 return true;
             }
@@ -256,7 +257,8 @@ public class MediaService {
                 if (target == null
                         || target.deleted()
                         || target.publicationState() != PublicationState.PUBLISHED
-                        || !PublicVisibility.gettable(target.publishedPayload())) {
+                        || !PublicVisibility.gettable(
+                                content.findTypeByKey(target.contentTypeKey()).orElse(null), target.publishedPayload())) {
                     return false;
                 }
             } catch (IllegalArgumentException e) {

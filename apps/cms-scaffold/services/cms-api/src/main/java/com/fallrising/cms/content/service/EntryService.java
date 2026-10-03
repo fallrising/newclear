@@ -144,7 +144,7 @@ public class EntryService {
         } else {
             authorization.require(principal, CmsAction.READ_PUBLISHED, typeKey, null, surface);
         }
-        return store.listEntries(type.id(), wanted, false, q, refField, refTarget);
+        return store.listEntries(type.id(), wanted, false, type.titleField(), q, refField, refTarget);
     }
 
     public EntryRecord patch(Principal principal, Surface surface, UUID id, String slug, Map<String, Object> payload, Integer version) {
@@ -396,7 +396,7 @@ public class EntryService {
                 || entry.deleted()
                 || entry.publicationState() != PublicationState.PUBLISHED
                 || entry.publishedPayload() == null
-                || !PublicVisibility.gettable(entry.publishedPayload())) {
+                || !PublicVisibility.gettable(type, entry.publishedPayload())) {
             throw ContentException.notFound();
         }
         if (!authorization.allow(principal, CmsAction.READ_PUBLISHED, typeKey, entry.publishedPayload(), Surface.FRONT).allowed()) {
@@ -416,14 +416,14 @@ public class EntryService {
         if (!authorization.hasAction(principal, CmsAction.READ_PUBLISHED, typeKey, Surface.FRONT)) {
             throw IdentityException.forbidden(CmsAction.READ_PUBLISHED.wire(), typeKey, Surface.FRONT.wire());
         }
-        return store.listEntries(type.id(), List.of("published"), false, q, refField, refTarget).stream()
+        return store.listEntries(type.id(), List.of("published"), false, type.titleField(), q, refField, refTarget).stream()
                 .filter(e -> e.publishedPayload() != null)
-                .filter(e -> PublicVisibility.indexable(e.publishedPayload()))
+                .filter(e -> PublicVisibility.indexable(type, e.publishedPayload()))
                 .filter(e -> authorization.allow(
                                 principal, CmsAction.READ_PUBLISHED, typeKey, e.publishedPayload(), Surface.FRONT)
                         .allowed())
                 .filter(e -> publishedRefsPublic(e, type))
-                .sorted(publicOrder())
+                .sorted(publicOrder(type))
                 .toList();
     }
 
@@ -438,7 +438,8 @@ public class EntryService {
                 if (target == null
                         || target.deleted()
                         || target.publicationState() != PublicationState.PUBLISHED
-                        || !PublicVisibility.gettable(target.publishedPayload())) {
+                        || !PublicVisibility.gettable(
+                                store.findTypeByKey(target.contentTypeKey()).orElse(null), target.publishedPayload())) {
                     return false;
                 }
             } catch (IllegalArgumentException e) {
@@ -448,15 +449,22 @@ public class EntryService {
         return true;
     }
 
-    private static Comparator<EntryRecord> publicOrder() {
-        return Comparator.comparingInt((EntryRecord e) -> {
-                    Object value = e.publishedPayload() == null ? null : e.publishedPayload().get("sortOrder");
-                    if (value instanceof Number number) {
-                        return number.intValue();
-                    }
-                    return Integer.MAX_VALUE;
+    /**
+     * Public list order (02 §3.1): with a sortField, numeric value ascending (entries without a number last),
+     * then updatedAt descending; without a sortField, publishedAt descending, then updatedAt descending.
+     */
+    static Comparator<EntryRecord> publicOrder(ContentTypeRecord type) {
+        Comparator<EntryRecord> newestUpdate = Comparator.comparing(EntryRecord::updatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+        String sortField = type.sortField();
+        if (sortField == null) {
+            return Comparator.comparing(EntryRecord::publishedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(newestUpdate);
+        }
+        return Comparator.comparingDouble((EntryRecord e) -> {
+                    Object value = e.publishedPayload() == null ? null : e.publishedPayload().get(sortField);
+                    return value instanceof Number number ? number.doubleValue() : Double.MAX_VALUE;
                 })
-                .thenComparing(EntryRecord::updatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+                .thenComparing(newestUpdate);
     }
 
     public List<RevisionRecord> revisions(Principal principal, Surface surface, UUID id) {

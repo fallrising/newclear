@@ -3,6 +3,2409 @@ import type { components } from "@cms/api";
 
 type S = components["schemas"];
 
+export const capabilities: Record<string, Record<S["Surface"], S["Capabilities"]>> = {
+  "seed-admin": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media",
+        "manage_types",
+        "manage_principals",
+        "manage_settings",
+        "read_audit"
+      ]
+    }
+  },
+  "seed-editor-album": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-album": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-member-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    }
+  },
+  "seed-editor-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-editor-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-member-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    }
+  },
+  "mock-operator-notes": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  }
+};
+
 export const me: Record<string, S["Me"]> = {
   "seed-admin": {
     "principal": {
@@ -21,6 +2424,182 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": true
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-editor-album": {
@@ -43,6 +2622,69 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-operator-album": {
@@ -65,6 +2707,77 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-member-clinic": {
@@ -84,6 +2797,82 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": false,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
     }
   },
   "seed-editor-clinic": {
@@ -106,6 +2895,69 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-operator-clinic": {
@@ -131,6 +2983,119 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-editor-projects": {
@@ -153,6 +3118,69 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-operator-projects": {
@@ -176,6 +3204,91 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": true,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   },
   "seed-member-projects": {
@@ -195,6 +3308,174 @@ export const me: Record<string, S["Me"]> = {
       "front": true,
       "back": false,
       "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    }
+  },
+  "mock-operator-notes": {
+    "principal": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator",
+      "status": "active"
+    },
+    "roles": [
+      {
+        "code": "operator",
+        "contentTypeCodes": [
+          "note"
+        ]
+      }
+    ],
+    "surfaces": {
+      "front": true,
+      "back": true,
+      "admin": false
+    },
+    "capabilities": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
     }
   }
 };
@@ -277,48 +3558,104 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Album",
       "pluralDisplayName": "Albums",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": "visibility",
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "description",
           "type": "markdown",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "cover",
           "type": "media-ref",
+          "label": "封面",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "visibility",
           "type": "enum",
+          "label": "可見性",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "settings",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "public",
             "unlisted"
-          ]
+          ],
+          "enumLabels": {
+            "public": "公開",
+            "unlisted": "不公開列出"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "sortMode",
           "type": "enum",
+          "label": "排序方式",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": false,
           "enumValues": [
             "manual",
             "captured_at"
-          ]
+          ],
+          "enumLabels": {
+            "manual": "手動",
+            "captured_at": "拍攝時間"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -327,49 +3664,108 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Photo",
       "pluralDisplayName": "Photos",
       "titleField": "title",
+      "sortField": "sortOrder",
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "caption",
           "type": "string",
+          "label": "圖說",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "album",
           "type": "ref",
+          "label": "相簿",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "album",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "takenAt",
           "type": "datetime",
+          "label": "拍攝時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "media",
           "type": "media-ref",
+          "label": "圖片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -378,21 +3774,44 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Page",
       "pluralDisplayName": "Pages",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "body",
           "type": "markdown",
+          "label": "內文",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -401,49 +3820,108 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Clinic profile",
       "pluralDisplayName": "Clinic profiles",
       "titleField": "name",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": true,
+      "previewable": true,
       "fields": [
         {
           "key": "name",
           "type": "string",
+          "label": "名稱",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "intro",
           "type": "markdown",
+          "label": "簡介",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "address",
           "type": "string",
+          "label": "地址",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "telephone",
           "type": "string",
+          "label": "電話",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "hours",
           "type": "markdown",
+          "label": "門診時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "hero",
           "type": "media-ref",
+          "label": "主視覺",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -452,63 +3930,140 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Owner",
       "pluralDisplayName": "Owners",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "firstName",
           "type": "string",
+          "label": "名",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "lastName",
           "type": "string",
+          "label": "姓",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "address",
           "type": "string",
+          "label": "地址",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "city",
           "type": "string",
+          "label": "城市",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "telephone",
           "type": "string",
+          "label": "電話",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "email",
           "type": "string",
+          "label": "電子郵件",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -517,27 +4072,55 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Pet",
       "pluralDisplayName": "Pets",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "name",
           "type": "string",
+          "label": "名字",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "petType",
           "type": "enum",
+          "label": "種類",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "cat",
             "dog",
@@ -546,42 +4129,99 @@ export const workContentTypes: S["WorkContentTypeList"] = {
             "lizard",
             "snake",
             "other"
-          ]
+          ],
+          "enumLabels": {
+            "cat": "貓",
+            "dog": "狗",
+            "bird": "鳥",
+            "hamster": "倉鼠",
+            "lizard": "蜥蜴",
+            "snake": "蛇",
+            "other": "其他"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "birthDate",
           "type": "datetime",
+          "label": "出生日期",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "owner",
           "type": "ref",
+          "label": "飼主",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "owner",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "notes",
           "type": "markdown",
+          "label": "備註",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "photo",
           "type": "media-ref",
+          "label": "照片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -590,54 +4230,118 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Vet",
       "pluralDisplayName": "Vets",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "firstName",
           "type": "string",
+          "label": "名",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "lastName",
           "type": "string",
+          "label": "姓",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "specialty",
           "type": "enum",
+          "label": "專長",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "general",
             "radiology",
             "surgery",
             "dentistry"
-          ]
+          ],
+          "enumLabels": {
+            "general": "一般",
+            "radiology": "放射科",
+            "surgery": "外科",
+            "dentistry": "牙科"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "bio",
           "type": "markdown",
+          "label": "簡介",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "photo",
           "type": "media-ref",
+          "label": "照片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -646,68 +4350,150 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Visit",
       "pluralDisplayName": "Visits",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "none",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "pet",
           "type": "ref",
+          "label": "寵物",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "pet",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "owner",
           "type": "ref",
+          "label": "飼主",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "owner",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "vet",
           "type": "ref",
+          "label": "獸醫",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "vet",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "scheduledAt",
           "type": "datetime",
+          "label": "預約時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "description",
           "type": "string",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "visitKind",
           "type": "enum",
+          "label": "類別",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "checkup",
             "vaccine",
             "surgery",
             "other"
-          ]
+          ],
+          "enumLabels": {
+            "checkup": "健康檢查",
+            "vaccine": "疫苗",
+            "surgery": "手術",
+            "other": "其他"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -716,48 +4502,104 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Project",
       "pluralDisplayName": "Projects",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": "visibility",
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "summary",
           "type": "markdown",
+          "label": "摘要",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "cover",
           "type": "media-ref",
+          "label": "封面",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "visibility",
           "type": "enum",
+          "label": "可見性",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "settings",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "public",
             "private"
-          ]
+          ],
+          "enumLabels": {
+            "public": "公開",
+            "private": "不公開"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "lifecycle",
           "type": "enum",
+          "label": "階段",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "active",
             "completed"
-          ]
+          ],
+          "enumLabels": {
+            "active": "進行中",
+            "completed": "已完成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -766,62 +4608,136 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Issue",
       "pluralDisplayName": "Issues",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "project",
           "type": "ref",
+          "label": "專案",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "project",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "milestone",
           "type": "ref",
+          "label": "里程碑",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "milestone",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "body",
           "type": "markdown",
+          "label": "內容",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "status",
           "type": "enum",
+          "label": "狀態",
+          "helpText": null,
           "required": true,
-          "refTarget": null,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "backlog",
             "ready",
             "in_progress",
             "in_review",
             "done"
-          ]
+          ],
+          "enumLabels": {
+            "backlog": "待辦",
+            "ready": "就緒",
+            "in_progress": "進行中",
+            "in_review": "審查中",
+            "done": "完成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "assigneePrincipalId",
           "type": "string",
+          "label": "負責人",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     },
@@ -830,53 +4746,312 @@ export const workContentTypes: S["WorkContentTypeList"] = {
       "displayName": "Milestone",
       "pluralDisplayName": "Milestones",
       "titleField": "title",
+      "sortField": "sortOrder",
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "project",
           "type": "ref",
+          "label": "專案",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": "project",
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "description",
           "type": "markdown",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "dueDate",
           "type": "datetime",
+          "label": "到期日",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "status",
           "type": "enum",
+          "label": "狀態",
+          "helpText": null,
           "required": false,
-          "refTarget": null,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
           "enumValues": [
             "planned",
             "reached",
             "missed"
-          ]
+          ],
+          "enumLabels": {
+            "planned": "已規劃",
+            "reached": "已達成",
+            "missed": "未達成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
           "refTarget": null,
-          "enumValues": []
+          "placeholder": null,
+          "visibility": "public"
+        }
+      ]
+    },
+    {
+      "key": "note",
+      "displayName": "Note",
+      "pluralDisplayName": "Notes",
+      "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
+      "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "label": "標題",
+          "helpText": null,
+          "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "label": "內文",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "category",
+          "type": "enum",
+          "label": "分類",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "idea",
+            "todo",
+            "reference"
+          ],
+          "enumLabels": {
+            "idea": "點子",
+            "todo": "待辦",
+            "reference": "參考"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "color",
+          "type": "enum",
+          "label": "顏色",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+          ],
+          "enumLabels": {
+            "red": "紅",
+            "orange": "橙",
+            "yellow": "黃",
+            "green": "綠",
+            "blue": "藍",
+            "purple": "紫"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "priority",
+          "type": "int",
+          "label": "優先順序",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "pinned",
+          "type": "boolean",
+          "label": "置頂",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "dueAt",
+          "type": "datetime",
+          "label": "到期時間",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "related",
+          "type": "ref",
+          "label": "相關筆記",
+          "helpText": null,
+          "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "note",
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "attachment",
+          "type": "media-ref",
+          "label": "附件",
+          "helpText": null,
+          "required": false,
+          "group": "media",
+          "order": 8,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "location",
+          "type": "geo",
+          "label": "位置",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 9,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
         }
       ]
     }
@@ -890,43 +5065,115 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Album",
       "pluralDisplayName": "Albums",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": "visibility",
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "description",
           "type": "markdown",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "cover",
           "type": "media-ref",
+          "label": "封面",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "visibility",
           "type": "enum",
+          "label": "可見性",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "public",
+            "unlisted"
+          ],
+          "enumLabels": {
+            "public": "公開",
+            "unlisted": "不公開列出"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "sortMode",
           "type": "enum",
+          "label": "排序方式",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [
+            "manual",
+            "captured_at"
+          ],
+          "enumLabels": {
+            "manual": "手動",
+            "captured_at": "拍攝時間"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -935,50 +5182,121 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Photo",
       "pluralDisplayName": "Photos",
       "titleField": "title",
+      "sortField": "sortOrder",
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "caption",
           "type": "string",
+          "label": "圖說",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "album",
           "type": "ref",
+          "label": "相簿",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "album",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "album"
+          "enabled": true
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "takenAt",
           "type": "datetime",
+          "label": "拍攝時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "media",
           "type": "media-ref",
+          "label": "圖片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -987,22 +5305,49 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Page",
       "pluralDisplayName": "Pages",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "body",
           "type": "markdown",
+          "label": "內文",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1011,50 +5356,121 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Clinic profile",
       "pluralDisplayName": "Clinic profiles",
       "titleField": "name",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": true,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "name",
           "type": "string",
+          "label": "名稱",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "intro",
           "type": "markdown",
+          "label": "簡介",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "address",
           "type": "string",
+          "label": "地址",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "telephone",
           "type": "string",
+          "label": "電話",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "hours",
           "type": "markdown",
+          "label": "門診時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "hero",
           "type": "media-ref",
+          "label": "主視覺",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1063,64 +5479,157 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Owner",
       "pluralDisplayName": "Owners",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "firstName",
           "type": "string",
+          "label": "名",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "lastName",
           "type": "string",
+          "label": "姓",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "address",
           "type": "string",
+          "label": "地址",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "city",
           "type": "string",
+          "label": "城市",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "telephone",
           "type": "string",
+          "label": "電話",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "email",
           "type": "string",
+          "label": "電子郵件",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1129,64 +5638,173 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Pet",
       "pluralDisplayName": "Pets",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "name",
           "type": "string",
+          "label": "名字",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "petType",
           "type": "enum",
+          "label": "種類",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "cat",
+            "dog",
+            "bird",
+            "hamster",
+            "lizard",
+            "snake",
+            "other"
+          ],
+          "enumLabels": {
+            "cat": "貓",
+            "dog": "狗",
+            "bird": "鳥",
+            "hamster": "倉鼠",
+            "lizard": "蜥蜴",
+            "snake": "蛇",
+            "other": "其他"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "birthDate",
           "type": "datetime",
+          "label": "出生日期",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "owner",
           "type": "ref",
+          "label": "飼主",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "owner",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "owner"
+          "enabled": true
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "notes",
           "type": "markdown",
+          "label": "備註",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "photo",
           "type": "media-ref",
+          "label": "照片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1195,50 +5813,131 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Vet",
       "pluralDisplayName": "Vets",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "firstName",
           "type": "string",
+          "label": "名",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "lastName",
           "type": "string",
+          "label": "姓",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "specialty",
           "type": "enum",
+          "label": "專長",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "general",
+            "radiology",
+            "surgery",
+            "dentistry"
+          ],
+          "enumLabels": {
+            "general": "一般",
+            "radiology": "放射科",
+            "surgery": "外科",
+            "dentistry": "牙科"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "bio",
           "type": "markdown",
+          "label": "簡介",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "photo",
           "type": "media-ref",
+          "label": "照片",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1247,64 +5946,167 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Visit",
       "pluralDisplayName": "Visits",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": "ownerPrincipalId",
       "slugPolicy": "none",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "pet",
           "type": "ref",
+          "label": "寵物",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "pet",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "pet"
+          "enabled": true
         },
         {
           "key": "owner",
           "type": "ref",
+          "label": "飼主",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "owner",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "owner"
+          "enabled": true
         },
         {
           "key": "vet",
           "type": "ref",
+          "label": "獸醫",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "vet",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "vet"
+          "enabled": true
         },
         {
           "key": "scheduledAt",
           "type": "datetime",
+          "label": "預約時間",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "description",
           "type": "string",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "visitKind",
           "type": "enum",
+          "label": "類別",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "checkup",
+            "vaccine",
+            "surgery",
+            "other"
+          ],
+          "enumLabels": {
+            "checkup": "健康檢查",
+            "vaccine": "疫苗",
+            "surgery": "手術",
+            "other": "其他"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "ownerPrincipalId",
           "type": "principal-ref",
+          "label": "會員帳號",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1313,43 +6115,115 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Project",
       "pluralDisplayName": "Projects",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": "visibility",
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "summary",
           "type": "markdown",
+          "label": "摘要",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "cover",
           "type": "media-ref",
+          "label": "封面",
+          "helpText": null,
           "required": false,
+          "group": "media",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "visibility",
           "type": "enum",
+          "label": "可見性",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 3,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "public",
+            "private"
+          ],
+          "enumLabels": {
+            "public": "公開",
+            "private": "不公開"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "lifecycle",
           "type": "enum",
+          "label": "階段",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "active",
+            "completed"
+          ],
+          "enumLabels": {
+            "active": "進行中",
+            "completed": "已完成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1358,57 +6232,151 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Issue",
       "pluralDisplayName": "Issues",
       "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "project",
           "type": "ref",
+          "label": "專案",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "project",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "project"
+          "enabled": true
         },
         {
           "key": "milestone",
           "type": "ref",
+          "label": "里程碑",
+          "helpText": null,
           "required": false,
+          "group": "relations",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "milestone",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "milestone"
+          "enabled": true
         },
         {
           "key": "body",
           "type": "markdown",
+          "label": "內容",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "status",
           "type": "enum",
+          "label": "狀態",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "backlog",
+            "ready",
+            "in_progress",
+            "in_review",
+            "done"
+          ],
+          "enumLabels": {
+            "backlog": "待辦",
+            "ready": "就緒",
+            "in_progress": "進行中",
+            "in_review": "審查中",
+            "done": "完成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "assigneePrincipalId",
           "type": "string",
+          "label": "負責人",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         }
       ]
     },
@@ -1417,50 +6385,346 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
       "displayName": "Milestone",
       "pluralDisplayName": "Milestones",
       "titleField": "title",
+      "sortField": "sortOrder",
+      "visibilityField": null,
+      "ownerField": null,
       "slugPolicy": "required",
+      "singleton": false,
+      "previewable": true,
       "enabled": true,
       "fields": [
         {
           "key": "title",
           "type": "string",
+          "label": "標題",
+          "helpText": null,
           "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "project",
           "type": "ref",
+          "label": "專案",
+          "helpText": null,
           "required": true,
+          "group": "relations",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "project",
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": "project"
+          "enabled": true
         },
         {
           "key": "description",
           "type": "markdown",
+          "label": "說明",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "dueDate",
           "type": "datetime",
+          "label": "到期日",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": false,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "status",
           "type": "enum",
+          "label": "狀態",
+          "helpText": null,
           "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "planned",
+            "reached",
+            "missed"
+          ],
+          "enumLabels": {
+            "planned": "已規劃",
+            "reached": "已達成",
+            "missed": "未達成"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
         },
         {
           "key": "sortOrder",
           "type": "int",
+          "label": "排序",
+          "helpText": null,
           "required": false,
+          "group": "settings",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
           "indexed": true,
-          "refTarget": null
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "key": "note",
+      "displayName": "Note",
+      "pluralDisplayName": "Notes",
+      "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
+      "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "label": "標題",
+          "helpText": null,
+          "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "label": "內文",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "category",
+          "type": "enum",
+          "label": "分類",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "idea",
+            "todo",
+            "reference"
+          ],
+          "enumLabels": {
+            "idea": "點子",
+            "todo": "待辦",
+            "reference": "參考"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "color",
+          "type": "enum",
+          "label": "顏色",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+          ],
+          "enumLabels": {
+            "red": "紅",
+            "orange": "橙",
+            "yellow": "黃",
+            "green": "綠",
+            "blue": "藍",
+            "purple": "紫"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "priority",
+          "type": "int",
+          "label": "優先順序",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "pinned",
+          "type": "boolean",
+          "label": "置頂",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "dueAt",
+          "type": "datetime",
+          "label": "到期時間",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "related",
+          "type": "ref",
+          "label": "相關筆記",
+          "helpText": null,
+          "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "note",
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "attachment",
+          "type": "media-ref",
+          "label": "附件",
+          "helpText": null,
+          "required": false,
+          "group": "media",
+          "order": 8,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "location",
+          "type": "geo",
+          "label": "位置",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 9,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
         }
       ]
     }
@@ -1905,7 +7169,7 @@ export const workEntries: S["WorkEntry"][] = [
     "slug": "home",
     "publicationState": "published",
     "version": 2,
-    "title": null,
+    "title": "Cedar Pet Clinic",
     "payload": {
       "name": "Cedar Pet Clinic",
       "intro": "A small neighbourhood clinic for well animals.",

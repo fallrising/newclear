@@ -1,0 +1,2402 @@
+{
+  "seed-admin": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media",
+        "manage_types",
+        "manage_principals",
+        "manage_settings",
+        "read_audit"
+      ]
+    }
+  },
+  "seed-editor-album": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-album": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-member-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    }
+  },
+  "seed-editor-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-clinic": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-editor-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-operator-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "issue",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  },
+  "seed-member-projects": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "owner",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "pet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "visit",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": true
+        }
+      ],
+      "global": []
+    }
+  },
+  "mock-operator-notes": {
+    "front": {
+      "surface": "front",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": []
+    },
+    "back": {
+      "surface": "back",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    },
+    "admin": {
+      "surface": "admin",
+      "types": [
+        {
+          "key": "album",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "clinic_profile",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "milestone",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "note",
+          "actions": [
+            "read_published",
+            "read_draft",
+            "create",
+            "update",
+            "publish",
+            "unpublish",
+            "delete",
+            "archive"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "page",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "photo",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "project",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        },
+        {
+          "key": "vet",
+          "actions": [
+            "read_published"
+          ],
+          "scoped": false
+        }
+      ],
+      "global": [
+        "manage_media"
+      ]
+    }
+  }
+}

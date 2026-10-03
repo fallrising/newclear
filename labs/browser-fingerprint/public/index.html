@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="Daylight 今日工作台：把今天留給重要的事。">
+  <title>Daylight · 今日工作台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/experiment.css">
+  <script src="/fingerprint.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="工作台導覽">
+      <a class="brand" href="/" aria-label="Daylight 首頁"><span class="brand-mark">✳</span> daylight<span class="brand-dot">.</span></a>
+      <div class="workspace-label">你的日常，井然有序</div>
+      <div class="nav-active"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>今日工作台<span>01</span></div>
+      <div class="sidebar-heading">專案</div>
+      <div class="project-nav">
+        <button class="project-link" data-project="設計"><span class="project-dot design"></span>設計<span class="project-count" data-count="設計">—</span></button>
+        <button class="project-link" data-project="開發"><span class="project-dot development"></span>開發<span class="project-count" data-count="開發">—</span></button>
+        <button class="project-link" data-project="生活"><span class="project-dot life"></span>生活<span class="project-count" data-count="生活">—</span></button>
+      </div>
+      <div class="sidebar-note"><span class="little-sun">☀</span><p>做得少一點，<br>把重要的做好。</p><span>ONE THING AT A TIME</span></div>
+      <div class="profile"><span class="avatar">D</span><div><strong>我的工作空間</strong><span>示範工作台</span></div><span class="profile-more" aria-hidden="true">···</span></div>
+    </aside>
+    <div class="page">
+      <header class="topbar"><span class="breadcrumb">工作空間 <span>/</span> <strong>今日工作台</strong></span><span class="connection" id="connection"><span></span>連線中</span></header>
+      <main>
+        <section class="page-heading">
+          <div><div class="eyebrow" id="today">給今天一個好的開始</div><h1>把今天，留給重要的事<span>。</span></h1><p>清楚安排，輕鬆前進。每一步都算數。</p></div>
+          <button class="primary-button" id="add-task"><span aria-hidden="true">＋</span>新增任務</button>
+        </section>
+        <section class="experiment-panel" aria-labelledby="experiment-heading">
+          <div class="experiment-top"><div><span class="experiment-badge">連線觀測實驗</span><h2 id="experiment-heading">從伺服器的視角，看看這次瀏覽。</h2></div><button class="secondary-button" id="start-tutorial">開始操作教學 <span aria-hidden="true">↗</span></button></div>
+          <p>本頁會記錄設備與瀏覽器特徵、連線 IP 和操作事件，保存在此機器的實驗日誌。日誌不記錄帳號、驗證 Cookie 內容或輸入文字。</p>
+          <details class="observation-disclosure"><summary><span id="observation-status" role="status">正在收集觀測資料…</span><span id="fingerprint-id"></span></summary><dl id="observation-details"></dl></details>
+          <div class="tutorial-progress" id="tutorial-progress" hidden><div><strong id="tutorial-title"></strong><p id="tutorial-instruction"></p></div><button class="text-button" id="stop-tutorial">結束教學</button></div>
+        </section>
+        <section class="overview" aria-label="任務概覽">
+          <div class="stat-card"><div class="stat-title">所有任務 <span class="stat-icon" aria-hidden="true">▤</span></div><div class="stat-value" id="total">—</div><div class="stat-caption">讓每件事都有位置</div></div>
+          <div class="stat-card"><div class="stat-title">待辦任務 <span class="stat-icon" aria-hidden="true">◷</span></div><div class="stat-value" id="remaining">—</div><div class="stat-caption"><span class="tiny-dot"></span>一步一步，慢慢來</div></div>
+          <div class="stat-card"><div class="stat-title">已完成 <span class="stat-icon" aria-hidden="true">✓</span></div><div class="stat-value" id="completed">—</div><div class="stat-caption">為自己的進展喝采</div></div>
+          <div class="progress-card"><div><div class="stat-title">今天的進度</div><strong id="progress-message">正在準備你的工作台</strong><span>保持自己的節奏就好。</span></div><div class="progress-ring" id="progress-ring"><div><strong id="percent">0</strong><span>%</span></div></div></div>
+        </section>
+        <section class="task-panel" aria-labelledby="task-heading">
+          <div class="panel-heading"><div><h2 id="task-heading">我的任務</h2><span id="task-summary">正在載入任務…</span></div><div class="search-wrapper"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input type="search" id="search" placeholder="搜尋任務…" aria-label="搜尋任務"><kbd>/</kbd></div></div>
+          <div class="task-toolbar"><div class="tabs" aria-label="任務狀態篩選"><button class="tab active" data-filter="all" aria-pressed="true">全部任務<span id="all-count">0</span></button><button class="tab" data-filter="pending" aria-pressed="false">待辦</button><button class="tab" data-filter="completed" aria-pressed="false">已完成</button></div><label class="project-select"><span class="sr-only">篩選專案</span><select id="project-filter"><option value="all">所有專案</option><option value="設計">設計</option><option value="開發">開發</option><option value="生活">生活</option></select></label></div>
+          <div class="error-box" id="error-box" role="alert" hidden><span id="error-message"></span><button id="retry">重新載入</button></div>
+          <div class="list-labels" aria-hidden="true"><span>任務名稱</span><span>專案</span><span>優先程度</span></div>
+          <ul class="task-list" id="task-list" aria-busy="true"><li class="loading-state">正在載入你的任務…</li></ul>
+          <div class="panel-footer"><span><span class="tiny-dot"></span>小小的進展，也值得記錄。</span><span id="visible-count"></span></div>
+        </section>
+        <footer class="page-footer"><span>DAYLIGHT — MAKE ROOM FOR WHAT MATTERS.</span><span>今天也辛苦了 <span aria-hidden="true">✳</span></span></footer>
+      </main>
+    </div>
+  </div>
+  <dialog id="task-dialog" aria-labelledby="dialog-title">
+    <form id="task-form">
+      <div class="dialog-heading"><div><div class="eyebrow">A LITTLE STEP FORWARD</div><h2 id="dialog-title">新增一件重要的事</h2></div><button class="close-button" type="button" id="close-dialog" aria-label="關閉">×</button></div>
+      <label class="form-label" for="task-title">任務名稱</label><input class="form-input" id="task-title" name="title" placeholder="你想完成什麼？" maxlength="100" required autocomplete="off">
+      <div class="form-columns"><div><label class="form-label" for="task-project">專案</label><select class="form-input" name="project" id="task-project"><option>設計</option><option>開發</option><option>生活</option></select></div><div><label class="form-label" for="task-priority">優先程度</label><select class="form-input" name="priority" id="task-priority"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></div></div>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="secondary-button" type="button" id="cancel-task">取消</button><button class="primary-button" type="submit" id="save-task">建立任務<span aria-hidden="true">↗</span></button></div>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog" aria-labelledby="delete-title"><div class="dialog-heading"><h2 id="delete-title">刪除這個任務？</h2></div><p id="delete-description"></p><div class="dialog-actions"><button class="secondary-button" id="cancel-delete">保留任務</button><button class="danger-button" id="confirm-delete">確認刪除</button></div></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

@@ -102,7 +102,11 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 
 ### 未分級
 
-目前沒有。新元件在私人帳本做投入決定後，再列入上方各表。
+新元件在私人帳本做投入決定後，再列入上方各表。
+
+| 元件 | 使用 | 檔位 | 範圍與限制 |
+| --- | --- | --- | --- |
+| `newclear/labs/browser-fingerprint` | 未知 | 未分級 | 有界的瀏覽器設備／操作觀測實驗：Go mock CRUD、既有五步操作教學、分析工具與公開／私人 Quick Tunnel 啟動方式；未決定長期投入。見 [README](labs/browser-fingerprint/README.md)。 |
 
 ## 重疊與 canonical 邊界
 

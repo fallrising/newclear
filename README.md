@@ -70,6 +70,7 @@
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |
 | [`labs/eru-vps-mvp`](labs/eru-vps-mvp/) | Project Eru 四機 VPS MVP 實驗 | A |
 | [`labs/mithril-research`](labs/mithril-research/) | Mithril Redis Cluster proxy：固定版本研究與驗證設計（runtime 待驗） | A |
+| [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
 
 ### 外部參考
 

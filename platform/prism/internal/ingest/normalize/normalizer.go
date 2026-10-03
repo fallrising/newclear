@@ -124,9 +124,10 @@ type MetricBatch struct {
 
 // Normalizer owns the bounded delta-to-cumulative state used by OTLP metrics.
 type Normalizer struct {
-	options      Options
-	delta        *deltaconv.Converter
-	logAllowlist map[string]struct{}
+	previewMetrics bool
+	options        Options
+	delta          *deltaconv.Converter
+	logAllowlist   map[string]struct{}
 }
 
 // New constructs a normalizer. Close must be called to stop the delta-state

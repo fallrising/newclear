@@ -1,8 +1,8 @@
 # Prism implementation inventory
 
-Reviewed 2026-10-03 against newclear `82cd9d8159b31cdd852f333a219132dc614e5d66`.
-The later main snapshot `1e4bd8e` has no changes to Prism, its instructions or its
-portfolio row. Development resumed on 2026-10-03. Product usage remains unknown.
+Reviewed 2026-10-03 against newclear `b43cdf4b0777414674d47edb71fd3b33dc5f536a`
+plus the local P1-03 changes. P1-02 is included in that baseline. Historical
+verification below retains its original scope. Product usage remains unknown.
 
 ## Code and contract coverage
 
@@ -19,8 +19,9 @@ portfolio row. Development resumed on 2026-10-03. Product usage remains unknown.
 | P0-09 | ADR-001 through ADR-010 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
-| P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | No receiver/pipeline calls the normalizer yet. |
-| P1-02 | Verified standalone [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Full module gates pass below; runtime/config/receiver/telemetry wiring remains P1-03 and later. |
+| P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Called by the package-level P1-03 pipeline; receivers remain unconnected. |
+| P1-02 | [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Used by P1-03; runtime/config/receiver/telemetry wiring remains outstanding. |
+| P1-03 | [`internal/ingest`](../internal/ingest/README.md): bounded tenant registry, atomic reservation, normalization/limits, three priority lanes per signal, owned batches and SPI writers | Package options only; daemon, receiver, config and self-telemetry registration are not connected. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -72,27 +73,66 @@ do not establish a whole-process memory budget. The earlier HTTP smoke remains
 applicable: this standalone package is not imported by the daemon and changes no
 runtime wiring. No additional complete-stack smoke or E2E result is implied.
 
+## Integrated P1-03 verification
+
+The reviewed package snapshot was integrated without changing its ten source,
+test and package-document identities. Fresh checks ran on Linux amd64 with
+`GOTOOLCHAIN=go1.23.12` and `GOFLAGS=-mod=readonly`; Go/module dependencies and the
+public SPI remain unchanged.
+
+| Exact command (from `platform/prism`) | Observed result |
+| --- | --- |
+| `GOTOOLCHAIN=go1.23.12 make lint test` | Formatting/vet pass; all 14 packages pass `-race -count=1`, including ingest (1.615s) and batcher (2.987s). |
+| `GOTOOLCHAIN=go1.23.12 scripts/check-dependencies.sh` | PASS. |
+| `GOTOOLCHAIN=go1.23.12 scripts/test-dependency-guard.sh` | All five deliberate prohibited-import cases detected; PASS. |
+| `GOTOOLCHAIN=go1.23.12 go build ./...` | Exit 0. |
+| `GOTOOLCHAIN=go1.23.12 golangci-lint run ./...` (CI-pinned v2.12.2) | `0 issues.`, exit 0. |
+
+Independent review reran focused ingest race/vet and 20 repetitions of pipeline,
+reservation and worker concurrency tests on the final unchanged snapshot. These
+cover full-queue/mixed-priority atomic admission, delta replay without consuming
+rejected byte quota, cancellation commit, tenant lifecycle and overrides,
+expansion-product bounds, nested ownership and metadata capacity, finite retry,
+concurrent admission/Close, deadline cancellation, and parent-cancel shutdown.
+Both new packages run goroutine-leak checks. A transient-contention test flake
+was corrected with retries restricted to admission-busy errors; intentional
+queue/rate/tenant rejection tests require their precise causes.
+
+These package/memory-backend tests do not establish HTTP/gRPC receiver wiring or
+complete-stack behavior. No new daemon smoke is implied: runtime entrypoints and
+configuration remain unchanged. The baseline HTTP smoke above retains only its
+original scope.
+
 ## Next integration boundary
 
-P1-03 adds the bounded pipeline/batcher after P1-02. Its integration must cover:
+P1-03 owns a fixed, non-evicting tenant registry and resolves effective tenant
+attribute limits before normalization. Preflight and queue reservation precede
+byte admission and stateful delta conversion. Queued payloads own their data;
+metadata consumes the same finite metric-lane capacity. The
+[pipeline contract](../internal/ingest/README.md) defines admission, cancellation,
+priority, retry, payload accounting and shutdown behavior.
 
-- Resolve tenant overrides before normalization. The current normalizer already
-  truncates attributes to its effective maximum and applies a fixed high-cardinality
-  denylist; a downstream limiter cannot restore removed input.
-- Define an explicit translation for normalization report actions/reasons to the
-  registered telemetry domains. Current `drop`, `rename`, and `clamp` keys differ
-  from registry `drop_label`, `sanitize_name`, and `clamp_time`.
-- Own a bounded collection of tenant limiters and their configuration lifecycle.
-  A bounded per-tenant instance is not a global tenant bound.
-- Consume byte-rate retry information, rejection reports and bounded cardinality
-  observations. HTTP/gRPC error mapping belongs to receivers; alert delivery is
-  part of the later alerting phase.
-- Preserve trace truncation information across batches. Already persisted spans
-  cannot be mutated retroactively by a standalone limits package.
+Later runtime integration still must:
+
+- Authenticate callers and supply a trusted tenant identity. The package context
+  helper does not authenticate requests.
+- Map whole-request admission errors and per-record outcomes to HTTP/gRPC.
+  Normalized UTM record counts are not OTLP rejected-data-point counts.
+- Translate normalization and limit reports into registered telemetry domains;
+  package snapshots do not register metrics or deliver alerts.
+- Set a deployment-wide capacity budget across tenants, signals, priority lanes,
+  queues and workers. The conservative default three-signal formula permits
+  5,808 MiB of logical payload, before transient allocations and tenant state;
+  it does not meet or establish the SDD 1 GiB process-memory target. Logical
+  payload bounds are not a process RSS guarantee.
+- Preserve trace truncation information across batches. Previously persisted
+  spans cannot be mutated retroactively by the limits package.
 
 The existing config type exposes only four limits settings. Complete YAML/env/
 control-plane configurability requires synchronized type/default/validation/SDD/
-deployment changes; a package options API alone does not provide it.
+deployment changes; a package options API alone does not provide it. Tenant state
+lasts until pipeline close; live configuration reload and registry eviction are
+outside this slice.
 
 ## Remaining phases
 

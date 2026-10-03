@@ -67,6 +67,20 @@ impl SessionStore {
         })
     }
 
+    /// Atomically replace complete metadata under the store's single-writer lock.
+    pub async fn save(&self, meta: SessionMeta) -> StoreResult<()> {
+        let db = self.db.clone();
+        tokio::task::spawn_blocking(move || {
+            let mut conn = db.lock();
+            let tx = conn.transaction()?;
+            tx.execute("DELETE FROM sessions WHERE id = ?1", [&meta.id.0])?;
+            db::insert(&tx, &meta)?;
+            tx.commit()?;
+            Ok(())
+        })
+        .await?
+    }
+
     pub async fn insert(&self, meta: SessionMeta) -> StoreResult<()> {
         let db = self.db.clone();
         tokio::task::spawn_blocking(move || db::insert(&db.lock(), &meta)).await?

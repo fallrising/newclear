@@ -23,7 +23,7 @@ function validDateTime(value: string): boolean {
 
 function fieldSchema(field: WorkField, publish: boolean): z.ZodType {
   if (!isKnown(field)) return z.unknown();
-  if (!isEditable(field) || field.type === "boolean") return z.unknown().superRefine((value, ctx) => {
+  if (!isEditable(field) || ["boolean", "ref", "media-ref"].includes(field.type)) return z.unknown().superRefine((value, ctx) => {
     const empty = value == null || value === "";
     if (empty && publish && field.required) ctx.addIssue({ code: "custom", message: "REQUIRED" });
     else if (!empty && field.type === "boolean" && typeof value !== "boolean") ctx.addIssue({ code: "custom", message: "WRONG_TYPE" });

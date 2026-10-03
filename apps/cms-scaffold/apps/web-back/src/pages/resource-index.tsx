@@ -19,6 +19,8 @@ const SORTS = [
   { value: "-createdAt", label: copy["index.sort.createdDesc"] },
 ];
 const DEFAULT_SORT = "-updatedAt";
+/** Filter key of the 發布請求 control; "$" keeps it apart from field keys, which are identifiers (01 Q-12). */
+const REQUESTED = "$publishRequested";
 const DEFAULT_SIZE = 20;
 
 /** Filterable enum fields get a filter control. Datetime range filters arrive with the W2 schedule view. */
@@ -33,6 +35,8 @@ export interface IndexState {
   page: number;
   size: number;
   filter: Record<string, string>;
+  /** `?publishRequested=true`: only entries with an open publish request (G-03). */
+  requested: boolean;
 }
 
 /**
@@ -51,7 +55,7 @@ export function readIndexState(type: WorkContentType, params: URLSearchParams): 
     const value = params.get(`filter.${field.key}`);
     if (value && field.enumValues.includes(value)) filter[field.key] = value;
   }
-  return { tab, q: (params.get("q") ?? "").trim(), sort, page, size, filter };
+  return { tab, q: (params.get("q") ?? "").trim(), sort, page, size, filter, requested: params.get("publishRequested") === "true" };
 }
 
 /** Index state → list request (BW1b §4.3). "all" sends no state, which the API reads as draft,published. */
@@ -60,6 +64,7 @@ export function toListParams(state: IndexState): WorkListParams {
     ...(state.tab === "all" ? {} : { state: state.tab }),
     ...(state.q ? { q: state.q } : {}),
     ...(Object.keys(state.filter).length ? { filter: state.filter } : {}),
+    ...(state.requested ? { publishRequested: true } : {}),
     sort: state.sort,
     page: state.page,
     size: state.size,
@@ -70,8 +75,12 @@ function IndexBody({ type }: { type: WorkContentType }) {
   const me = useSession().me!;
   const [params, setParams] = useSearchParams();
   const state = readIndexState(type, params);
-  const entries = useQuery({ ...workQueries.entries(api.work, type.key, toListParams(state)), placeholderData: keepPreviousData });
-  const narrowed = state.tab !== "all" || state.q !== "" || Object.keys(state.filter).length > 0;
+  const listable = type.fields.filter((f) => f.listable && f.key !== type.titleField).sort((a, b) => a.order - b.order);
+  // G-10: ref columns show the target's title from the list itself (include=refs), not one request per cell.
+  const refColumns = listable.some((f) => f.type === "ref");
+  const listParams = { ...toListParams(state), ...(refColumns ? { include: "refs" as const } : {}) };
+  const entries = useQuery({ ...workQueries.entries(api.work, type.key, listParams), placeholderData: keepPreviousData });
+  const narrowed = state.tab !== "all" || state.q !== "" || Object.keys(state.filter).length > 0 || state.requested;
   const canCreate = can(me, type.key, "create");
   const singletonTaken = type.singleton && (entries.data?.total ?? 0) > 0 && !narrowed;
 
@@ -92,11 +101,18 @@ function IndexBody({ type }: { type: WorkContentType }) {
   );
   const onQueryChange = useCallback((q: string) => update({ q }), [update]);
 
-  const listable = type.fields.filter((f) => f.listable && f.key !== type.titleField).sort((a, b) => a.order - b.order);
   const columns: IndexColumn<WorkEntry>[] = [
     { key: "title", header: copy["index.col.title"], cell: () => null },
-    { key: "status", header: copy["index.col.status"], cell: (e) => <StatusBadge state={e.publicationState} dirty={e.dirty} /> },
-    ...listable.map((field) => ({ key: field.key, header: fieldLabel(field), cell: (e: WorkEntry) => <FieldCell field={field} value={e.payload[field.key]} /> })),
+    {
+      key: "status",
+      header: copy["index.col.status"],
+      cell: (e) => <StatusBadge state={e.publicationState} dirty={e.dirty} requested={e.publishRequestedAt !== null} />,
+    },
+    ...listable.map((field) => ({
+      key: field.key,
+      header: fieldLabel(field),
+      cell: (e: WorkEntry) => <FieldCell field={field} value={e.payload[field.key]} summary={e.refs?.[field.key]} />,
+    })),
     { key: "updatedAt", header: copy["index.col.updated"], cell: (e) => formatDateTime(e.updatedAt), className: "whitespace-nowrap" },
   ];
 
@@ -134,13 +150,22 @@ function IndexBody({ type }: { type: WorkContentType }) {
         onTabChange={(tab) => update({ state: tab === "all" ? null : tab })}
         query={state.q}
         onQueryChange={onQueryChange}
-        filters={enumFilters(type).map((field) => ({
-          key: field.key,
-          label: fieldLabel(field),
-          options: field.enumValues.map((value) => ({ value, label: enumLabel(field, value) })),
-          value: state.filter[field.key] ?? "",
-        }))}
-        onFilterChange={(key, value) => update({ [`filter.${key}`]: value })}
+        filters={[
+          ...enumFilters(type).map((field) => ({
+            key: field.key,
+            label: fieldLabel(field),
+            options: field.enumValues.map((value) => ({ value, label: enumLabel(field, value) })),
+            value: state.filter[field.key] ?? "",
+          })),
+          // G-03: 發布請求 is not a field; it maps to ?publishRequested=true.
+          {
+            key: REQUESTED,
+            label: copy["index.filter.requested"],
+            options: [{ value: "true", label: copy["index.filter.requestedOnly"] }],
+            value: state.requested ? "true" : "",
+          },
+        ]}
+        onFilterChange={(key, value) => update(key === REQUESTED ? { publishRequested: value } : { [`filter.${key}`]: value })}
         sortOptions={SORTS}
         sort={state.sort}
         onSortChange={(sort) => update({ sort: sort === DEFAULT_SORT ? null : sort })}

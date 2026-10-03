@@ -891,8 +891,40 @@ def main():
     fresh_inspect = sub.add_parser('inspect-fresh-execution', help='Observe one exact execution and pending reservation without mutation or release')
     fresh_inspect.add_argument('--run', required=True, help='Execution ID')
     fresh_inspect.add_argument('--sha256', required=True, help='Expected execution digest')
+    fresh_collect = sub.add_parser('collect-fresh-baseline', help='Read four reviewed hosts and save immutable private baseline evidence')
+    fresh_collect.add_argument('--plan', required=True, help='Reviewed fresh plan ID')
+    fresh_collect.add_argument('--sha256', required=True, help='Expected review-plan digest')
+    fresh_collect.add_argument('--run-id', required=True, help='Target execution ID')
+    fresh_collect.add_argument('--observation-id', required=True, help='New immutable observation ID')
+    fresh_receipts = sub.add_parser('inspect-fresh-reimage-receipts', help='Validate four private manual-console receipts without executing or accepting a stage')
+    fresh_receipts.add_argument('--run', required=True, help='Prepared execution ID')
+    fresh_receipts.add_argument('--sha256', required=True, help='Expected execution digest')
+    fresh_receipts.add_argument('--input', required=True, help='Private four-host receipt request')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'inspect-fresh-reimage-receipts':
+        from fresh_reimage_receipt_ops import inspect_receipts
+        try:
+            result = inspect_receipts(PROJECT, args.run, args.sha256, args.input)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh receipt inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command == 'collect-fresh-baseline':
+        from fresh_observation_ops import collect_observation
+        try:
+            result, _refs = collect_observation(
+                PROJECT, args.plan, args.sha256, args.run_id, args.observation_id)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh observation rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'host_count', 'generation_before',
+                  'target_generation', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command in ('prepare-fresh-execution', 'inspect-fresh-execution'):
         from fresh_execution_ops import prepare_execution, inspect_execution, public_summary
         try:

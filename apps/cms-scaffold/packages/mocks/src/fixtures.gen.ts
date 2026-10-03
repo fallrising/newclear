@@ -8767,3 +8767,19 @@ export const mediaQuota: S["MediaQuota"] = {
   "maxLibraryBytes": 1073741824,
   "maxFileBytes": 15728640
 };
+
+export const revisions: Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]> = {
+  "30000000-0000-4000-8000-000000000037": [
+    {
+      "revisionNo": 1,
+      "slug": "spring-ideas",
+      "publishedAt": "2026-09-20T00:37:00Z",
+      "payload": {
+        "title": "Ideas for spring",
+        "body": "Harbour at night.",
+        "category": "idea",
+        "color": "green"
+      }
+    }
+  ]
+};

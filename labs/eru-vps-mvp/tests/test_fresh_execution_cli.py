@@ -78,6 +78,29 @@ class FreshExecutionCLITests(unittest.TestCase):
                 self.assertEqual(str(caught.exception), 'fresh execution request rejected; check private inputs and evidence')
                 self.assertNotIn('PRIVATE-SENTINEL', output.getvalue())
 
+    def test_collect_routes_exact_bindings_and_redacts_private_refs(self):
+        collect = Mock(return_value=({**self.summary, 'raw': 'PRIVATE-SENTINEL'},
+                                    {'private': 'PRIVATE-SENTINEL'}))
+        with patch.dict(sys.modules, {'fresh_observation_ops': SimpleNamespace(
+                collect_observation=collect)}):
+            out = self.invoke(['collect-fresh-baseline', '--plan', 'review-one',
+                               '--sha256', 'a' * 64, '--run-id', 'run-one',
+                               '--observation-id', 'observation-one'])
+        collect.assert_called_once_with(self.project, 'review-one', 'a' * 64,
+                                        'run-one', 'observation-one')
+        self.assertEqual(json.loads(out), self.summary)
+        self.assertNotIn('PRIVATE-SENTINEL', out)
+
+    def test_collect_failure_redacts_transport_error(self):
+        collect = Mock(side_effect=OSError('PRIVATE-SENTINEL'))
+        with patch.dict(sys.modules, {'fresh_observation_ops': SimpleNamespace(
+                collect_observation=collect)}), self.assertRaises(SystemExit) as caught:
+            self.invoke(['collect-fresh-baseline', '--plan', 'review-one',
+                         '--sha256', 'a' * 64, '--run-id', 'run-one',
+                         '--observation-id', 'observation-one'])
+        self.assertEqual(str(caught.exception),
+                         'fresh observation rejected; check private inputs and evidence')
+
     def test_inspection_requires_explicit_expected_digest(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as caught:
             self.invoke(['inspect-fresh-execution', '--run', 'run-one'])

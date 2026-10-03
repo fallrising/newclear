@@ -1,5 +1,6 @@
 // User-visible strings of @cms/ui (zh-Hant). Key rule: waves/W0.md §4.6.
 export const uiCopy = {
+  "ui.status.requested": "等待發布",
   "ui.skipLink": "跳到主要內容",
   "ui.nav.open": "開啟選單",
   "ui.nav.label": "主要導覽",

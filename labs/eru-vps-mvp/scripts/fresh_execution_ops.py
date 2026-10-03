@@ -385,6 +385,16 @@ def _inputs(files, input_file, plan, review_sha, run_id, now):
     exact(document, {'schema_version', 'binding'} | KINDS)
     evidence = {kind: files.binding(document[kind]) for kind in KINDS}
     binding = context(plan, review_sha, run_id)
+    baseline = evidence['host_baseline']
+    if type(baseline) is dict and type(baseline.get('schema_version')) is int and baseline['schema_version'] == 2:
+        exact(baseline, {'schema_version', 'kind', 'binding', 'observed_at', 'hosts', 'observation'})
+        from fresh_observation_ops import load_observation
+        derived = load_observation(files, baseline['observation'], plan, binding, now)
+        declared = {key: value for key, value in baseline.items() if key != 'observation'}
+        declared['schema_version'] = 1
+        if plan_digest(declared) != plan_digest(derived):
+            raise ValueError('host baseline differs from observation')
+        evidence['host_baseline'] = derived
     validate_evidence(document, evidence, plan, binding, now)
     for material in evidence['external_materials']['materials'].values():
         raw, relative_material, actual = files.read(material['path'])

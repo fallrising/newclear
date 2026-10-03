@@ -1,0 +1,18 @@
+[
+  {
+    "file": "backup.md",
+    "source_uri": "fixture://openviking-context/backup.md",
+    "source_revision": "synthetic-v1",
+    "sha256": "49062c4e4b8f909ca8c2425c3aeda00e8c45ca6cf89c6c94a18fa9c171c5487c",
+    "claim_type": "synthetic_source_fact",
+    "state": "approved"
+  },
+  {
+    "file": "context.md",
+    "source_uri": "fixture://openviking-context/context.md",
+    "source_revision": "synthetic-v1",
+    "sha256": "bf46bbc7b1b3edc0a3ec1b37623991b41d003da25218f363810f199a35cf8a15",
+    "claim_type": "synthetic_source_fact",
+    "state": "approved"
+  }
+]

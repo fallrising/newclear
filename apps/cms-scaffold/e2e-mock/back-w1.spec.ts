@@ -13,7 +13,7 @@ test.describe("W1 Back core", () => {
   test("V2-AC-10 a notes-only operator sees only Notes; list and editor work", async ({ page }) => {
     await page.goto(`${BACK}/?mockUser=mock-operator-notes`);
     const nav = page.getByRole("navigation", { name: "主要導覽" });
-    await expect(nav.getByRole("link")).toHaveText(["首頁", "Notes"]);
+    await expect(nav.getByRole("link")).toHaveText(["首頁", "Notes", "媒體庫"]);
     await nav.getByRole("link", { name: "Notes" }).click();
     await page.getByRole("link", { name: "Buy film" }).click();
     await expect(page.getByLabel(/^標題/)).toHaveValue("Buy film");

@@ -2,7 +2,7 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW2](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW2.openapi.yaml](../contracts/BW2.openapi.yaml) ・ 前一波：[BW1c](BW1c.md)
 
-狀態：**LOCAL_VERIFIED**（2026-10-03，依 §0 完成本地整合驗收；尚未提交／合併）
+狀態：**VERIFIED**（2026-10-03，PR #235 完整 CI 通過並合併）
 日期：2026-09-25  
 讀者：實作 BW2 的 agent。只讀本檔、`contracts/BW2.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
@@ -42,7 +42,7 @@
 - [x] 10,000筆 store p95：工作列表86ms、公開列表80ms、更新19ms；未降低原門檻，不代表HTTP全鏈路效能。
 - [x] 故障注入驗證 entry、batch CAS／第二筆寫入、type、navigation、media、role及identity狀態和審計共同回滾；治理／登入拒絕紀錄可跨外層回滾保存。
 
-完整指令／錯誤歷史／驗收界線：[BW2交付](../../../.team/reports/BW2-DELIVERY.md)。W1 已於 PR #229 合併；本波尚未提交／合併，不宣稱生產可用。W2/W4 UI、BW4應用層store選用／啟動及運維門檻仍待後續。
+完整指令／錯誤歷史／驗收界線：[BW2交付](../../../.team/reports/BW2-DELIVERY.md)。W1 已於 PR #229 合併；本波已於 PR #235 合併，另見 [合併驗證](../../../.team/reports/BW2-PUBLICATION.md)；不宣稱生產可用。W2/W4 UI、BW4應用層store選用／啟動及運維門檻仍待後續。
 
 ---
 

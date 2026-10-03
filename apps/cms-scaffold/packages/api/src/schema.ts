@@ -36,3 +36,9 @@ export type AdminContentTypeList = S["AdminContentTypeList"];
 export type MediaAsset = S["MediaAsset"];
 export type MediaAssetList = S["MediaAssetList"];
 export type MediaQuota = S["MediaQuota"];
+
+export type WorkEntryList = S["WorkEntryList"];
+export type RefSummary = S["RefSummary"];
+export type BatchPatchRequest = S["BatchPatchRequest"];
+export type Revision = S["Revision"];
+export type RevisionList = S["RevisionList"];

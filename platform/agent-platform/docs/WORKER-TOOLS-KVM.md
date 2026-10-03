@@ -1,11 +1,9 @@
 # Normal Worker tool workflow: real KVM acceptance contract
 
-Status: planned; no acceptance driver or KVM results are delivered by this document.
-The prerequisite is merged normal Worker tool integration. The inspected baseline
-`61dbc06` has a fixture-owned ToolSession, but `Worker` and `execute_real` do not
-own or advance it. Resolve the integration's actual configuration, immutable
-profile contract and failure states from its merged source before implementing
-this acceptance. Do not invent those interfaces in an independent harness.
+Status: real KVM acceptance passed on 2026-10-03; mock-only scope.
+Normal Worker integration is merged in `7abd71a`. Its `mock_tools: true` profile
+flag and private `TOOL_BROKER_MOCK_CONFIG` are the enablement contract described
+in [Worker tools](WORKER-TOOLS.md). Acceptance uses these unchanged interfaces.
 
 ## Objective and boundaries
 
@@ -67,11 +65,10 @@ Before provisioning any VM:
    total run deadline and deterministic barriers. Use only loopback test origins;
    no production credential or live GitHub request is needed.
 
-Only after these checks implement/run `scripts/worker-tools-kvm.py` with its
-focused `tests_platform/test_worker_tools_kvm.py` coverage. Those files are planned
-entry points, not runnable commands at this document's initial revision. The
-source digest must include every driver, fixture and production module used by
-the eventual run. Existing fixture-only acceptance results are not substitutes.
+Run `scripts/worker-tools-kvm.py` with its focused
+`tests_platform/test_worker_tools_kvm.py` coverage only after these checks.
+The source digest includes the driver, fixtures and production modules used by
+the run. Existing fixture-only acceptance results are not substitutes.
 
 ## Minimal KVM matrix
 
@@ -167,10 +164,59 @@ prerequisite is absent. After authorized merge, check main CI and hand off revie
 
 ## Current evidence status
 
-At baseline `61dbc06`, normal Worker tool integration is absent. Inspection of
-`worker.py` and `runtime_worker.py` confirms ModelSession support but no normal
-ToolSession lifecycle; `tool_worker.py` is absent. This document specifies the
-next acceptance boundary and contains no implementation or new runtime evidence.
-No KVM resources were created for this contract. All matrix rows, driver
-regressions, native integration validation and real KVM cleanup proof remain
-**not run**, pending the prerequisite and driver implementation.
+The [sanitized evidence](evidence/worker-tools-kvm.json) records five passing
+real KVM cases against 145 matching local/remote source files. Normal, disabled
+and partial-proof cases reached SDK finished/caught_up, saved the exact expected
+diff and passed the configured verification. Cancellation and uncertain upstream
+outcome each admitted one operation and made one authenticated hop, with zero
+deliver/ACK attempts. Authority was revoked. Partial proof retained capacity
+until native reconciliation received complete proof after its normal retry wait.
+
+Final cleanup confirmed zero owned VMs, claims, reservations, CPU scopes and
+Worker/connector processes; the node service stopped and the owned PostgreSQL
+container was removed. Native `PYTHONPATH=src make platform-check` passed 45 unit
+and 380 platform tests, including 14 driver oracle regressions, plus Ruff check
+and format. Independent review covers both assertions and private/public evidence.
+
+Earlier failures remain in the evidence: stale local imports, an in-progress
+oracle revision mismatch, fixture policy timeout, non-atomic approval observation,
+temporary-filesystem reserve rejection and relocated receipt-directory validation.
+The allocation failure retained capacity and needed the existing offline native
+reconciliation command; it is not counted as a passing case. The final matrix
+needed no operator recovery. The original document-only revision had no KVM proof.
+
+Run only on a dedicated prepared node with private configuration:
+
+```sh
+PYTHONPATH=src python scripts/test-postgres.py python scripts/worker-tools-kvm.py \
+  --config /private/owned/connector.json --origin http://127.0.0.1:PORT \
+  --output /private/owned/new-evidence-directory
+```
+
+Omit `--case` for the complete matrix. Use `--case normal` for the focused normal
+workflow. Preserve private worker traces and the report; publish only allowlisted
+counts, states, hashes and proof facts. This proves the bounded mock workflow,
+not live GitHub, paid-model behavior or production readiness.
+
+## Concrete fixture seams
+
+The test client calls native prepare, then installs only extra deterministic
+model/test files in its own VM before returning the original prepare response.
+It changes no attested helper bytes or production lifecycle methods. The native
+Worker then binds and prompts. Three terminal actions each require public
+approval. The guestcontrol model observes each distinct persisted mailbox ACK
+before proposing the next action; it neither writes ACKs nor retries a call.
+The SDK's existing four-iteration limit remains unchanged and is part of the
+normal acceptance gate. The disabled case copies only the existing credential-free
+client for a denied socket attempt; it never installs a tool helper or grant.
+
+Repository identity and commit come from the registered catalog and are mirrored
+by the authenticated loopback mock. A commands-mode profile checks the exact
+worker-tools.json boolean artifact and its saved diff. Test observation records
+normal Worker event response metadata, markers, tool action/operation IDs and
+cleanup proof facts. Approval rows and their run state/version are observed in
+one read-only SQL join. Exact approval counts and applied identities are
+required. Fault cases reject any deliver/ACK attempt and require revoked grant
+and token authority; nonzero child process counts fail the cleanup gate.
+For partial proof, native quarantine/recovery waits for its real retry time;
+there are no SQL lease/state/deadline rewrites.

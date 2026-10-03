@@ -35,6 +35,8 @@ export type Run = {
   result: {
     diff?: string;
     diff_sha256?: string;
+    diff_bytes?: number;
+    base_sha?: string;
     execution_mode?: string;
     summary: string;
     verification: {

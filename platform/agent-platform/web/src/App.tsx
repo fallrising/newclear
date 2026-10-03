@@ -575,6 +575,51 @@ function RetryRun({
     </div>
   );
 }
+function DiffDownload({ run }: { run: Run }) {
+  const download = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/v1/runs/${encodeURIComponent(run.id)}/result.diff`, {
+        credentials: 'same-origin',
+      });
+      if (!response.ok) throw new Error(`下載失敗（${response.status}），請重新載入結果後再試。`);
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `run-${run.id}.diff`;
+      document.body.append(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    },
+  });
+  const result = run.result;
+  if (
+    typeof result?.diff !== 'string' ||
+    !Number.isInteger(result.diff_bytes) ||
+    result.diff_bytes! < 0 ||
+    result.diff_bytes! > 256 * 1024 ||
+    new TextEncoder().encode(result.diff).length !== result.diff_bytes ||
+    !/^[a-f0-9]{64}$/.test(result.diff_sha256 ?? '') ||
+    !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(result.base_sha ?? '') ||
+    result.base_sha !== run.base_sha
+  )
+    return null;
+  return (
+    <>
+      <button onClick={() => download.mutate()} disabled={download.isPending}>
+        {download.isPending ? '下載中…' : '下載 diff'}
+      </button>
+      {download.isError && (
+        <p className="error" role="alert">
+          下載失敗，請確認登入狀態並重新載入結果後再試。
+        </p>
+      )}
+    </>
+  );
+}
 function RunActivity({ run }: { run: Run }) {
   const cache = useQueryClient();
   const [events, setEvents] = useState<RunEvent[]>([]);
@@ -735,6 +780,7 @@ function RunActivity({ run }: { run: Run }) {
           {run.result.diff !== undefined && (
             <>
               <h3>檔案變更</h3>
+              <DiffDownload key={run.id} run={run} />
               <pre className="diff" aria-label="檔案差異">
                 {run.result.diff || '沒有檔案變更。'}
               </pre>

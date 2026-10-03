@@ -34,6 +34,7 @@ let cancelKeys: string[];
 let cancelLostResponse: boolean;
 let retryPayload: Record<string, unknown> | null;
 let usageConfigured: boolean;
+let downloadStatus: number;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -49,6 +50,7 @@ beforeEach(() => {
   cancelLostResponse = false;
   retryPayload = null;
   usageConfigured = false;
+  downloadStatus = 200;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -166,6 +168,12 @@ beforeEach(() => {
                 fixture_credits_uncertain: null,
               },
         );
+      if (path === '/api/v1/runs/run-1/result.diff') {
+        expect(options.credentials).toBe('same-origin');
+        return downloadStatus === 200
+          ? new Response(result?.diff ?? '', { headers: { 'Content-Type': 'text/plain' } })
+          : Response.json({ error: 'result_diff_invalid' }, { status: downloadStatus });
+      }
       if (path === '/api/v1/tasks/task-1') {
         const run: Run = {
           id: 'run-1',
@@ -391,4 +399,74 @@ it('offers tool approval only for a backend that supports it', async () => {
   await user.click(screen.getByRole('button', { name: 'Agent 設定' }));
   expect(await screen.findByLabelText(/工具審批/)).toBeDisabled();
   expect(screen.getByText('模擬環境不支援工具審批。')).toBeVisible();
+});
+
+function downloadableResult(diff = '') {
+  return {
+    summary: 'Saved diff',
+    verification: { status: 'unknown', reason: 'inspectable' },
+    base_sha: '7bb80d00d03d93a2d392185adba65588c5fe2462',
+    diff,
+    diff_bytes: new TextEncoder().encode(diff).length,
+    diff_sha256: 'a'.repeat(64),
+  };
+}
+it('downloads an empty saved diff and releases its object URL', async () => {
+  result = downloadableResult();
+  const create = vi.fn(() => 'blob:fixture');
+  const revoke = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+      static revokeObjectURL = revoke;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '下載 diff' }));
+  await waitFor(() => expect(create).toHaveBeenCalledOnce());
+  expect(click).toHaveBeenCalledOnce();
+  await waitFor(() => expect(revoke).toHaveBeenCalledWith('blob:fixture'), { timeout: 2000 });
+  click.mockRestore();
+});
+it('shows rejected downloads without creating a file', async () => {
+  result = downloadableResult('+你好');
+  downloadStatus = 409;
+  const create = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '下載 diff' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('下載失敗');
+  expect(create).not.toHaveBeenCalled();
+  expect(click).not.toHaveBeenCalled();
+  click.mockRestore();
+});
+it.each([
+  { diff_bytes: -1 },
+  { diff_bytes: true },
+  { diff_bytes: 262145 },
+  { diff_bytes: 1 },
+  { diff_sha256: 'invalid' },
+  { base_sha: 'b'.repeat(40) },
+])('hides download for invalid metadata %j', async (invalid) => {
+  result = { ...downloadableResult(), ...invalid } as Run['result'];
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await screen.findByRole('heading', { name: '執行結果' });
+  expect(screen.queryByRole('button', { name: '下載 diff' })).toBeNull();
 });

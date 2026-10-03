@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "implementation_base": "adfaceddfc98fa6da1f258254e07c4613e053cfd",
+  "source_sha256": {
+    "scripts/tool-broker-kvm.py": "6ec8e71f55a2884e7eac94eb10fac4e3e7a11b77286c937254bfb02f626dee9d",
+    "scripts/tool_kvm_probe.py": "a8177ee6e84365a4132395c636fad6ab51a8807238e06d8dafaaed143b21763f",
+    "tests_platform/test_tool_kvm_probe.py": "7d174bdcda111b0ec85fae385078dae9ab30d04b226207d969b9fd73d0d2e86b",
+    "src/agent_platform/tool_broker/adapter.py": "ca46017ee3bd437a73e22f6856e2a0ee595c18f58eba136b80c2f78758ddf505",
+    "src/agent_platform/tool_broker/policy.py": "6ee5517dad0e685496d9baf5634269d60d64297eff10cc425e9e9f22e32cdcc2",
+    "src/agent_platform/tool_session.py": "044b4e0c58dfd611edbc87f13094d17671ecc3213f1d893fdea04ad54120c65a",
+    "src/agent_platform/connector_tool.py": "4903590b3bcc33dcf05dccb171e8995ed9a3ff762bbe8e21684c181a456fd485",
+    "src/agent_platform/guest_tool.py": "a11d658d27d9fbccc700147c03765b42228e629f00eb51774d58bf1ea8cef5a2",
+    "src/agent_platform/guest_tool_client.py": "8938ee4f99abd7313244d7830be20515e44be65a756c3ae19a356cb3cf97e8c5"
+  },
+  "runtime": {
+    "kernel": "6.12.43+deb13-amd64",
+    "architecture": "x86_64",
+    "driver_sha256": "6ec8e71f55a2884e7eac94eb10fac4e3e7a11b77286c937254bfb02f626dee9d",
+    "probe_sha256": "a8177ee6e84365a4132395c636fad6ab51a8807238e06d8dafaaed143b21763f",
+    "sandboxd_sha256": "d46adf71c028d428560a50a4e7ecfe08ac3c76c20ba0712497d82441d9efd6ca",
+    "terminal_launcher_sha256": "b65cf19ecb32a8efb1fef07a2f969214756b662cff98e0ee88b2c4e5ef393810"
+  },
+  "adapter_revision": "github-read-mock-v1",
+  "github_api_revision": "2022-11-28",
+  "command": "PYTHONPATH=src python scripts/test-postgres.py python scripts/tool-broker-kvm.py --config <private-state>/connector.json --origin http://127.0.0.1:17888 --output <new-private-output>",
+  "acceptance": {
+    "schema_version": 1,
+    "started_at": "2026-10-03T14:53:08.912776+00:00",
+    "transport": "sdk-terminal-unix-connector-http-sql-broker-mock-github",
+    "live_github": false,
+    "production_activation": false,
+    "passed": true,
+    "cases": [
+      {
+        "case": "complete",
+        "passed": true,
+        "sdk_terminal_roundtrip": true,
+        "broker_acknowledged": 3,
+        "authenticated_upstream_hops": 7,
+        "isolation": {
+          "attestation_write_denied": true,
+          "clean_environment": true,
+          "client_write_denied": true,
+          "control_directory_unreadable": true,
+          "control_environment_unreadable": true,
+          "control_processes_present": true,
+          "control_signal_denied": true,
+          "direct_ipv4_connection_blocked": true,
+          "direct_ipv6_connection_blocked": true,
+          "helper_write_denied": true,
+          "launcher_write_denied": true,
+          "mailbox_unreadable": true,
+          "mailbox_write_denied": true,
+          "no_capabilities": true,
+          "no_new_privileges": true,
+          "no_supplementary_groups": true,
+          "relay_missing_key_denied": true,
+          "relay_wrong_key_denied": true,
+          "sdk_policy_unreadable": true,
+          "sdk_policy_write_denied": true,
+          "sdk_state_unreadable": true,
+          "socket_metadata_change_denied": true,
+          "socket_parent_protected": true,
+          "terminal_uid_gid_2000": true,
+          "terminal_workspace": true
+        },
+        "approval_required": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "cross-run",
+        "passed": true,
+        "two_live_guests": true,
+        "cross_binding_denied": true,
+        "stale_generation_denied": true,
+        "cross_run_bearer_denied": true,
+        "cross_guest_relay_key_denied": true,
+        "agent_server_key_denied_by_tool": true,
+        "model_local_key_denied_by_tool": true,
+        "zero_dispatch": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "helper-restart",
+        "passed": true,
+        "helper_restart_denied": true,
+        "original_dispatches": 1,
+        "no_replay": true,
+        "restart_with_existing_socket": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "session-rebind",
+        "passed": true,
+        "fresh_host_session_denied": true,
+        "original_authority_revoked": true,
+        "original_dispatches": 1,
+        "no_replay": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "worker-takeover",
+        "passed": true,
+        "worker_owner_changed": true,
+        "generation_advanced": true,
+        "capacity_retained": true,
+        "original_dispatches": 1,
+        "no_replay": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "revoke",
+        "passed": true,
+        "inflight_dispatches": 1,
+        "control_returned_while_upstream_blocked": true,
+        "admission_closed": true,
+        "capacity_retained": true,
+        "late_result_not_acknowledged": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "pause",
+        "passed": true,
+        "pause_observed": true,
+        "resume_observed": true,
+        "no_replay_after_resume": true,
+        "inflight_dispatches": 1,
+        "control_returned_while_upstream_blocked": true,
+        "admission_closed": true,
+        "capacity_retained": true,
+        "late_result_not_acknowledged": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "cancel",
+        "passed": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false,
+        "inflight_dispatches": 1,
+        "control_returned_while_upstream_blocked": true,
+        "admission_closed": true,
+        "capacity_retained": true,
+        "late_result_not_acknowledged": true
+      },
+      {
+        "case": "cutoff",
+        "passed": true,
+        "inflight_dispatches": 1,
+        "control_returned_while_upstream_blocked": true,
+        "admission_closed": true,
+        "capacity_retained": true,
+        "late_result_not_acknowledged": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": false
+      },
+      {
+        "case": "stop-proof",
+        "passed": true,
+        "cleanup_confirmed": true,
+        "capacity_retained_until_full_proof": true,
+        "partial_proof_rejected": true
+      }
+    ],
+    "sealed_deny_all_policy_confirmed": true,
+    "egress_policy_sha256": "ed685044a612dbf83b2f69d86c6957a4ac0f5d50ada7949cffb0a7583276de3b",
+    "cleanup_failures": 0,
+    "remaining_claims": 0,
+    "remaining_vms": 0,
+    "remaining_reservations": 0,
+    "finished_at": "2026-10-03T14:59:30.178387+00:00"
+  },
+  "host_cleanup": {
+    "claims": 0,
+    "vms": 0,
+    "vm_cpu_scopes": 0,
+    "owned_test_postgres_containers": 0,
+    "test_connector_stopped": true,
+    "test_node_stopped": true,
+    "private_journals_preserved": true
+  },
+  "native_verification": {
+    "command": "PATH=<locked-venv>/bin:$PATH PYTHONPATH=src make platform-check",
+    "unit_tests": 45,
+    "platform_tests": 318,
+    "ruff_files": 120,
+    "focused_final_tests": 6,
+    "status": "passed"
+  },
+  "limitations": [
+    "Synthetic mock GitHub only; TB-AT-12 live access not run; production transport disabled.",
+    "Worker takeover uses injected SQL lease expiry and real reconciliation/claim, not OS process restart.",
+    "Incomplete stop-proof injection happens after actual VM stop; no physically leaked cgroup.",
+    "SDK terminal roundtrip and broker ACK established; later SDK finished events not required. Generic postapproval event409 observed during development remains unresolved.",
+    "Model-local-key audience tested on unprompted sibling; simultaneous model/tool orchestration not claimed."
+  ],
+  "intermediate_failures": [
+    {
+      "case": "initial_host_setup",
+      "reason": "delegated supervisor subgroup omitted; corrected using existing documented service layout; empty-host intent reconciled"
+    },
+    {
+      "case": "cross_run_harness",
+      "reason": "expected wrong status; broker correctly rejected401; fixed exact status/code matcher with regression"
+    },
+    {
+      "case": "restart_fault_timing",
+      "reason": "fast upstream could finish before fault; explicit barrier added"
+    },
+    {
+      "case": "postapproval_event_polling",
+      "reason": "generic connector refusal; unresolved; tool oracle explicitly scoped to fixed SDK terminal proof and durable ledger"
+    }
+  ]
+}

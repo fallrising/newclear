@@ -5,6 +5,7 @@ import { workContentTypes } from "../fixtures.gen";
 import { allowedType, canPublish, requireWork } from "../guards";
 import { apiError, png } from "../respond";
 import { getState } from "../state";
+import { validatePayload } from "../validation";
 import { listPage } from "./list";
 
 function findType(key: string): WorkContentType | undefined {
@@ -42,6 +43,9 @@ function transition(action: "publish" | "unpublish" | "archive") {
     if (entry instanceof Response) return entry;
     const from = entry.publicationState;
     if (action === "publish" && from !== "archived") {
+      if (from === "published" && !entry.dirty) return HttpResponse.json<WorkEntry>(entry);
+      const validation = validatePayload(entry.contentType, entry.payload, true);
+      if (validation) return validation;
       return HttpResponse.json<WorkEntry>(
         save(entry, { publicationState: "published", dirty: false, publishedAt: new Date().toISOString() }),
       );
@@ -90,6 +94,8 @@ export const workHandlers = [
     if (!allowedType(user, type.key)) return forbidden("create", type.key);
     const body = ((await request.json().catch(() => null)) ?? {}) as EntryWriteRequest;
     const payload = body.payload ?? {};
+    const validation = validatePayload(type.key, payload);
+    if (validation) return validation;
     const now = new Date().toISOString();
     const entry: WorkEntry = {
       id: crypto.randomUUID(),
@@ -116,11 +122,14 @@ export const workHandlers = [
     const entry = loadEntry(String(params.id), "update");
     if (entry instanceof Response) return entry;
     const body = ((await request.json().catch(() => null)) ?? {}) as EntryWriteRequest;
-    if (getState().scenario === "conflict" || (body.version != null && body.version !== entry.version)) {
+    if (entry.publicationState === "archived") return apiError(409, "INVALID_STATE_TRANSITION", "Archived entries are read-only");
+    if (body.version == null) return apiError(428, "VERSION_REQUIRED", "PATCH requires the entry version");
+    if (getState().scenario === "conflict" || body.version !== entry.version) {
       return apiError(409, "VERSION_CONFLICT", "Version conflict");
     }
-    if (entry.publicationState === "archived") return apiError(409, "INVALID_STATE_TRANSITION", "Archived entries are read-only");
     const payload = { ...entry.payload, ...(body.payload ?? {}) };
+    const validation = validatePayload(entry.contentType, payload);
+    if (validation) return validation;
     return HttpResponse.json<WorkEntry>(
       save(entry, {
         slug: body.slug ?? entry.slug,

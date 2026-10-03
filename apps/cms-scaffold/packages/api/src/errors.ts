@@ -1,4 +1,4 @@
-import type { ErrorCode } from "./schema";
+import type { ErrorCode, FieldError } from "./schema";
 
 /** Codes produced by the client itself, never by the server. */
 export type ClientErrorCode = "NETWORK_ERROR" | "INVALID_RESPONSE";
@@ -10,13 +10,15 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: ApiErrorCode;
   readonly requestId: string | undefined;
+  readonly fields: FieldError[] | undefined;
 
-  constructor(status: number, code: ApiErrorCode, message: string, requestId?: string) {
+  constructor(status: number, code: ApiErrorCode, message: string, requestId?: string, fields?: FieldError[]) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.requestId = requestId;
+    this.fields = fields;
   }
 }
 
@@ -27,12 +29,16 @@ export function isApiError(value: unknown): value is ApiError {
 /** Turns an error response body into ApiError. Bodies that are not an ErrorEnvelope become INVALID_RESPONSE (C-18). */
 export function errorFromBody(status: number, body: unknown): ApiError {
   if (body && typeof body === "object" && "error" in body) {
-    const envelope = body as { error?: { code?: unknown; message?: unknown }; requestId?: unknown };
+    const envelope = body as { error?: { code?: unknown; message?: unknown; fields?: unknown }; requestId?: unknown };
     const code = envelope.error?.code;
     if (typeof code === "string") {
       const message = typeof envelope.error?.message === "string" ? envelope.error.message : "";
       const requestId = typeof envelope.requestId === "string" ? envelope.requestId : undefined;
-      return new ApiError(status, code as ErrorCode, message, requestId);
+      const rawFields = envelope.error?.fields;
+      const fields = Array.isArray(rawFields) && rawFields.every((field) => field && typeof field === "object" &&
+        typeof field.field === "string" && typeof field.code === "string" && typeof field.message === "string")
+        ? rawFields as FieldError[] : undefined;
+      return new ApiError(status, code as ErrorCode, message, requestId, fields);
     }
   }
   return new ApiError(status, "INVALID_RESPONSE", `HTTP ${status} without an error envelope`);

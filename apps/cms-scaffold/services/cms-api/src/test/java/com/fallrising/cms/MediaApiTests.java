@@ -96,7 +96,7 @@ class MediaApiTests {
                         .header("Origin", BACK)
                         .header("X-CSRF-Token", op.csrf)
                         .cookie(op.sessionCookie(), op.csrfCookie())
-                        .content("{\"payload\":{\"media\":\"%s\"}}".formatted(draftMediaId)))
+                        .content("{\"version\":%d,\"payload\":{\"media\":\"%s\"}}".formatted(currentVersion(op, photoId), draftMediaId)))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/v1/public/media/" + mediaId + "/file/thumbnail"))
                 .andExpect(status().isOk());
@@ -138,6 +138,14 @@ class MediaApiTests {
                         .header("Origin", BACK)
                         .cookie(op.sessionCookie()))
                 .andExpect(status().isOk());
+    }
+
+    private int currentVersion(Session session, String id) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/entries/" + id)
+                        .header("Origin", BACK).cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(result.getResponse().getContentAsString()).get("version").asInt();
     }
 
     private String createAlbum(Session session, String slug) throws Exception {

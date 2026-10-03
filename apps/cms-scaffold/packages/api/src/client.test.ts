@@ -170,3 +170,14 @@ describe("@cms/api transport", () => {
     expect(api.url("https://cdn.test/x.jpg")).toBe("https://cdn.test/x.jpg");
   });
 });
+
+describe("BW1c field error transport", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("preserves ordered field errors and requestId from a failed write", async () => {
+    const fields = [{ field: "payload.title", code: "TOO_LONG", message: "title must be at most 1000 characters" }];
+    stubFetch((call) => call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) :
+      json(422, { error: { code: "FIELD_VALIDATION", message: "Invalid fields", fields }, requestId: "write-422" }));
+    await expect(createCmsClient({ baseUrl: "http://api.test" }).work.patch(entry.id, { version: 1, payload: {} }))
+      .rejects.toMatchObject({ status: 422, code: "FIELD_VALIDATION", fields, requestId: "write-422" });
+  });
+});

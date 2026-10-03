@@ -75,6 +75,35 @@ Independent worktrees receive identical BW1a snapshots; no worker commits or rec
 
 Task-file unchecked DoD bullets remain the immutable assignment contract because teamctl requires them; completed acceptance boxes are recorded above. Historical worker Red/intermediate failures remain in reports, while resolved pending root gates now cite final evidence. BW1a/BW1b remain uncommitted/unmerged; P0 #212 is the last merged wave. No deployment or production readiness claim. Separate BW1b delta is recorded against the preserved BW1a snapshot; BW1c starts only after this closure.
 
+## BW1c — documentation ready, local implementation
+
+BW1b acceptance is closed before this wave. New immutable BW1b snapshot isolates the BW1c delta; existing BW1a snapshot remains untouched. docs/v2/waves/BW1c.md §0 supersedes stale historical patches before any code writes.
+
+- T-401 Codex gpt-6.1-sol high: pure PayloadValidator, FieldError types and unit regression scope in isolated validator worktree; send interface readiness to lead.
+- T-402 Codex gpt-6.1-sol high: service/error/API/media-null and backend regressions in isolated service worktree; lead imports reviewed T401 files as read-only dependency. Preserve P0/BW1a/BW1b.
+- T-403 Codex gpt-6.1-sol medium: generated client/MSW/consumer compatibility in isolated web worktree, focused Red→Green and frontend gates.
+- Lead: documentation, routing, scope/diff review, final native backend/frontend gates and evidence-gate acceptance. Lightweight independent Codex Luna audit follows integration; no third-party CLI export of unreleased sources.
+
+Final gates: backend test/integrationTest/bootJar with uncached tasks; frontend lint/typecheck/test/build/bundle/mock E2E; runtime BW1c OpenAPI equality; dependencies/migrations unchanged; task/report validation. Failed and skipped checks remain explicit. No commits, push, merge, deployment or production-readiness claim.
+
+### BW1c review record
+
+T-401 accepted in bounded scope after direct source review and XML 15/0/0/0. The historical sample duplicated reserved metadata errors; a behavioral Red observed six errors versus three, and reported-key tracking fixed it. T-402 adds 428 before payload validation and leaves transaction/CAS wiring intact; root inspected legacy DB regressions and existing assertion-preserving version adaptations. T-403 review found Date.parse normalization/minute-precision differences, media UUID shorthand and disabled-field projection gaps; targeted regressions fixed them before root integration. T-404 independent Codex Luna backend review found no concrete defect; final evidence acceptance follows root gates.
+
+Root independently observed frontend chain exit 0: lint/typecheck, 179 tests, build/bundle and 17 mock E2E (24.8s). Backend combined gate subsequently passed as recorded below. Scope comparison confirms 27 dependency/migration/store/index files unchanged; all 304 gate source fingerprints unchanged after launch. BW1b original complete logs/XML were preserved before the new gate.
+
+## BW1c acceptance — LOCAL_VERIFIED (2026-10-03)
+
+- [x] T-401 DoD accepted:15 focused unit tests and meaningful reserved-key Red→Green; final root coverage includes these tests.
+- [x] T-402 DoD accepted:226 unit/API,17 focused DB tests; root final93 PostgreSQL covers both new legacy cases plus all prior contracts/migrations/performance. Existing assertions preserved with actual-version inputs.
+- [x] T-403 DoD accepted: required-version client, retained fields, MSW parity and existing forms; final179 frontend +17 mock E2E, lint/typecheck/build/bundle all pass.
+- [x] T-404 read-only independent backend review and final evidence audit accepted; no concrete defect;304 source fingerprints match.
+- [x] Root combined backend gate exit0 in4m36s,226/93 tests and bootJar; all required final checks zero failures/errors/skips. 10k store p95 work75/public77/patch22ms within150/100/80ms.
+- [x] BW1c runtime OpenAPI equals docs contract; no raw media fallback;27 protected dependency/migration/store/index files unchanged; original BW1a snapshot intact.
+- [x] README/readiness/wave/roadmap updated; report/task validators, relative links, delta manifest and whitespace review completed. Exact commands/artifacts in reports/BW1c-DELIVERY.md.
+
+Task DoD assignment bullets remain unchanged for teamctl's unchecked-contract requirement; completion is recorded in the acceptance boxes here. BW1a/BW1b/BW1c remain uncommitted/unmerged and the next roadmap wave is W1. No new PR, push, merge or deployment; local acceptance is not production readiness. Preserve both earlier snapshots and frozen BW1b evidence/delta when reviewing the combined working tree.
+
 ## BW1 publication authorization — 2026-10-03
 
 The owner explicitly authorized committing, opening and merging one PR per completed BW1a/BW1b/BW1c wave, then continuing development. Earlier local-only statements record acceptance-time history. This publication is reconstructed from preserved per-wave snapshots; original dirty worktrees remain untouched. Required remote CI must pass before each merge. No deployment is authorized. No private tracking contents are published or modified.

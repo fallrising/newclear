@@ -1,6 +1,9 @@
 package com.fallrising.cms.contract;
 
 import com.fallrising.cms.content.ContentException;
+import com.fallrising.cms.api.error.ErrorCode;
+import com.fallrising.cms.api.error.FieldErrorCode;
+import com.fallrising.cms.content.domain.PublicationState;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.EntryRefRecord;
@@ -148,7 +151,7 @@ class EntryAtomicWriteTests {
         UUID nextCover = insertMedia();
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", originalCover.toString()));
         service.publish(null, Surface.BACK, entry.id());
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", nextCover.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", nextCover.toString()), store.findEntry(entry.id()).orElseThrow().version());
         EntryRecord published = service.publish(null, Surface.BACK, entry.id());
         EntryRecord reverted = service.revert(null, Surface.BACK, entry.id(), 1);
         assertThat(reverted.version()).isEqualTo(published.version() + 1);
@@ -166,7 +169,7 @@ class EntryAtomicWriteTests {
         UUID nextCover = insertMedia();
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", originalCover.toString()));
         service.publish(null, Surface.BACK, entry.id());
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", nextCover.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", nextCover.toString()), store.findEntry(entry.id()).orElseThrow().version());
         EntryRecord before = store.findEntry(entry.id()).orElseThrow();
         jdbc.update("DELETE FROM cms_media WHERE id = ?", originalCover);
         assertThatThrownBy(() -> service.revert(null, Surface.BACK, entry.id(), 1))
@@ -188,7 +191,7 @@ class EntryAtomicWriteTests {
         assertThat(service.restore(null, Surface.BACK, entry.id()).version()).isEqualTo(5);
         assertThatThrownBy(() -> service.patch(null, Surface.BACK, entry.id(), null, Map.of(), 1))
                 .isInstanceOf(ContentException.class);
-        assertThat(service.patch(null, Surface.BACK, entry.id(), null, Map.of(), null).version()).isEqualTo(6);
+        assertThat(service.patch(null, Surface.BACK, entry.id(), null, Map.of(), store.findEntry(entry.id()).orElseThrow().version()).version()).isEqualTo(6);
         service.softDelete(null, Surface.BACK, entry.id());
         assertThat(store.findEntry(entry.id()).orElseThrow().version()).isEqualTo(7);
     }
@@ -219,7 +222,7 @@ class EntryAtomicWriteTests {
         try (var executor = Executors.newFixedThreadPool(2)) {
             var publish = executor.submit(() -> outcome(() -> racingService.publish(null, Surface.BACK, original.id())));
             var patch = executor.submit(() -> outcome(() -> racingService.patch(null, Surface.BACK, original.id(), null,
-                    Map.of("title", "new"), null)));
+                    Map.of("title", "new"), original.version())));
             assertThat(List.of(publish.get(15, TimeUnit.SECONDS), patch.get(15, TimeUnit.SECONDS)))
                     .containsExactlyInAnyOrder("ok", "conflict");
         }
@@ -280,7 +283,7 @@ class EntryAtomicWriteTests {
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", first.toString()));
         service.publish(null, Surface.BACK, entry.id());
         assertThat(mediaService.publiclyReadable(first)).isTrue();
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), store.findEntry(entry.id()).orElseThrow().version());
         assertThat(mediaService.publiclyReadable(first)).isTrue();
         assertThat(mediaService.publiclyReadable(second)).isFalse();
         assertThat(media.attachmentsOfMedia(first)).hasSize(1);
@@ -298,7 +301,7 @@ class EntryAtomicWriteTests {
         // Identical working/published attachments are deduplicated.
         assertThat(media.attachmentsOfMedia(first)).hasSize(1);
         assertThat(media.attachmentsOfMedia(second)).isEmpty();
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), store.findEntry(entry.id()).orElseThrow().version());
         service.unpublish(null, Surface.BACK, entry.id());
         assertThat(media.attachmentsOfMedia(first)).isEmpty();
         assertThat(media.attachmentsOfMedia(second)).hasSize(1);
@@ -324,7 +327,7 @@ class EntryAtomicWriteTests {
         UUID second = insertMedia();
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", first.toString()));
         service.publish(null, Surface.BACK, entry.id());
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), store.findEntry(entry.id()).orElseThrow().version());
         service.archive(null, Surface.BACK, entry.id());
         assertThat(media.attachmentsOfMedia(first)).isEmpty();
         assertThat(media.attachmentsOfMedia(second)).hasSize(1);
@@ -341,7 +344,7 @@ class EntryAtomicWriteTests {
         UUID second = insertMedia();
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", first.toString()));
         service.publish(null, Surface.BACK, entry.id());
-        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), null);
+        service.patch(null, Surface.BACK, entry.id(), null, Map.of("cover", second.toString()), store.findEntry(entry.id()).orElseThrow().version());
         EntryRecord before = store.findEntry(entry.id()).orElseThrow();
         jdbc.execute("ALTER TABLE cms_media_attachment ADD CONSTRAINT injected_failure CHECK (field_key = 'never') NOT VALID");
         assertThatThrownBy(() -> service.unpublish(null, Surface.BACK, entry.id()))
@@ -351,6 +354,63 @@ class EntryAtomicWriteTests {
         assertThat(media.attachmentsOfMedia(second)).hasSize(1);
         assertThat(mediaService.publiclyReadable(first)).isTrue();
         assertThat(mediaService.publiclyReadable(second)).isFalse();
+    }
+
+    @Test
+    void legacyFractionalIntRemainsReadableButRejectedWritesLeaveAllDependentsUnchanged() {
+        store.insertField(new FieldRecord(UUID.randomUUID(), type.id(), "rank", "int", false, false,
+                true, "public", 0, null, "restrict", List.of(), true, false));
+        UUID cover = insertMedia();
+        EntryRecord legacy = ContentStoreContract.entry(type, "legacy", PublicationState.DRAFT,
+                Map.of("rank", 1.5, "cover", cover.toString()), Instant.now());
+        store.insertEntry(legacy);
+        store.replaceRefs(legacy.id(), List.of(new EntryRefRecord(legacy.id(), "cover", cover, "media", 0)));
+        mediaService.replaceAttachments(legacy.id(), List.of(new com.fallrising.cms.media.domain.MediaAttachment(
+                cover, legacy.id(), "cover", Instant.now())));
+        store.insertRevision(new com.fallrising.cms.content.domain.RevisionRecord(UUID.randomUUID(), legacy.id(), 1,
+                legacy.slug(), legacy.payload(), Instant.now(), null, legacy.contentTypeKey()));
+        var before = store.findEntry(legacy.id()).orElseThrow();
+        var rows = store.indexRowsOf(legacy.id());
+        var revisions = store.revisionsOf(legacy.id());
+        var refs = store.refsTo(cover);
+        var attachments = media.attachmentsOfMedia(cover);
+        assertThat(service.getWork(null, Surface.BACK, legacy.id())).isEqualTo(before);
+        assertThat(before.payload()).containsEntry("rank", 1.5);
+        for (Runnable write : List.<Runnable>of(
+                () -> service.patch(null, Surface.BACK, legacy.id(), "changed", Map.of("title", "changed"), before.version()),
+                () -> service.publish(null, Surface.BACK, legacy.id()),
+                () -> service.revert(null, Surface.BACK, legacy.id(), 1))) {
+            assertThatThrownBy(write::run).isInstanceOfSatisfying(ContentException.class, failure -> {
+                assertThat(failure.code()).isEqualTo(ErrorCode.FIELD_VALIDATION);
+                assertThat(failure.fields()).singleElement().satisfies(field -> {
+                    assertThat(field.field()).isEqualTo("payload.rank");
+                    assertThat(field.code()).isEqualTo(FieldErrorCode.WRONG_TYPE);
+                });
+            });
+            assertThat(store.findEntry(legacy.id())).contains(before);
+            assertThat(store.indexRowsOf(legacy.id())).containsExactlyElementsOf(rows);
+            assertThat(store.revisionsOf(legacy.id())).containsExactlyElementsOf(revisions);
+            assertThat(store.refsTo(cover)).containsExactlyElementsOf(refs);
+            assertThat(media.attachmentsOfMedia(cover)).containsExactlyElementsOf(attachments);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM cms_audit_event", Long.class)).isZero();
+        }
+        assertThat(service.patch(null, Surface.BACK, legacy.id(), null, Map.of("rank", 2), before.version()).payload())
+                .containsEntry("rank", 2);
+    }
+
+    @Test
+    void cleanLegacyPublicationRemainsReadOnlyNoOpUnderTighterValidation() {
+        store.insertField(new FieldRecord(UUID.randomUUID(), type.id(), "rank", "int", false, false,
+                true, "public", 0, null, "restrict", List.of(), true, false));
+        EntryRecord legacy = ContentStoreContract.entry(type, "legacy-published", PublicationState.PUBLISHED,
+                Map.of("rank", 1.5), Instant.now());
+        store.insertEntry(legacy);
+        EntryRecord before = store.findEntry(legacy.id()).orElseThrow();
+        var rows = store.indexRowsOf(legacy.id());
+        assertThat(service.publish(null, Surface.BACK, legacy.id())).isEqualTo(before);
+        assertThat(store.findEntry(legacy.id())).contains(before);
+        assertThat(store.indexRowsOf(legacy.id())).containsExactlyElementsOf(rows);
+        assertThat(store.revisionsOf(legacy.id())).isEmpty();
     }
 
     private Principal admin() {

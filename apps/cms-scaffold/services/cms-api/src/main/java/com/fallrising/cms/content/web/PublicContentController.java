@@ -103,7 +103,7 @@ public class PublicContentController {
     }
 
     private Object expandMedia(Object raw) {
-        return media.resolvePublic(raw).map(Object.class::cast).orElse(raw);
+        return media.resolvePublic(raw).map(Object.class::cast).orElse(null);
     }
 
     private static void rejectAudienceParams(HttpServletRequest request) {

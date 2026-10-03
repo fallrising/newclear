@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/port"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/service"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/sqlite"
@@ -17,7 +18,7 @@ import (
 )
 
 const (
-	healthPayload = "{\"status\":\"ready\",\"commands\":\"ready\",\"persistence\":\"ready\",\"automatic_execution\":\"unavailable\",\"projections\":\"unavailable\"}"
+	healthPayload = "{\"status\":\"ready\",\"commands\":\"ready\",\"persistence\":\"ready\",\"automatic_execution\":\"ready\",\"projections\":\"ready\"}"
 	methodPayload = "{\"status\":\"method_not_allowed\"}"
 )
 
@@ -28,7 +29,9 @@ type runningRuntime struct {
 	listener       net.Listener
 	serveResult    chan error
 	shutdownResult chan error
-	stopAfter      func() bool
+	stopRuntime    context.CancelFunc
+	handlers       *runtimeHandlers
+	workerResult   chan error
 
 	waitOnce sync.Once
 	waitDone chan struct{}
@@ -91,7 +94,7 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		Clock:       clock,
 		IDs:         cryptoIDSource{},
 		Artifacts:   artifacts,
-		Projections: unavailableProjectionSource{},
+		Projections: httpapi.PersistedProjections{Store: store},
 		Authority:   authority,
 		Application: service.Config{
 			Operator:       config.SessionActor,
@@ -110,6 +113,10 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 	if err != nil {
 		return nil, errors.New("compose local runtime")
 	}
+	workerID, err := (cryptoIDSource{}).Next(port.IDRun)
+	if err != nil {
+		return nil, err
+	}
 
 	listener := supplied
 	if listener == nil {
@@ -127,8 +134,11 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		}
 	}()
 
+	runtimeContext, stopRuntime := context.WithCancel(ctx)
+	handlers := &runtimeHandlers{next: runtimeHTTPHandler{api: composed.Handler}}
 	server := &http.Server{
-		Handler:           runtimeHTTPHandler{api: composed.Handler},
+		Handler:           handlers,
+		BaseContext:       func(net.Listener) context.Context { return runtimeContext },
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       30 * time.Second,
 	}
@@ -140,8 +150,12 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		serveResult:    make(chan error, 1),
 		shutdownResult: make(chan error, 1),
 		waitDone:       make(chan struct{}),
+		stopRuntime:    stopRuntime,
+		handlers:       handlers,
+		workerResult:   make(chan error, 1),
 	}
-	runtime.stopAfter = context.AfterFunc(ctx, func() {
+	context.AfterFunc(runtimeContext, func() {
+		handlers.stopAdmission()
 		shutdownContext, cancel := context.WithTimeout(context.Background(), config.ShutdownWindow)
 		defer cancel()
 		shutdownErr := server.Shutdown(shutdownContext)
@@ -151,7 +165,16 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		runtime.shutdownResult <- shutdownErr
 	})
 	go func() {
+		workerErr := (persistentWorker{store: store, commands: composed.Commands, executor: executor,
+			clock: clock, holder: domain.ActorID(workerID)}).run(runtimeContext)
+		runtime.workerResult <- workerErr
+		if workerErr != nil {
+			stopRuntime()
+		}
+	}()
+	go func() {
 		serveErr := server.Serve(listener)
+		stopRuntime()
 		if errors.Is(serveErr, http.ErrServerClosed) {
 			serveErr = nil
 		}
@@ -194,11 +217,11 @@ func (runtime *runningRuntime) Wait(ctx context.Context) error {
 	runtime.waitOnce.Do(func() {
 		go func() {
 			serveErr := <-runtime.serveResult
-			var shutdownErr error
-			if runtime.stopAfter != nil && !runtime.stopAfter() {
-				shutdownErr = <-runtime.shutdownResult
-			}
-			runtime.waitErr = errors.Join(serveErr, shutdownErr, runtime.store.Close(), runtime.artifacts.Close())
+			runtime.stopRuntime()
+			workerErr := <-runtime.workerResult
+			shutdownErr := <-runtime.shutdownResult
+			runtime.handlers.active.Wait()
+			runtime.waitErr = errors.Join(serveErr, shutdownErr, workerErr, runtime.store.Close(), runtime.artifacts.Close())
 			close(runtime.waitDone)
 		}()
 	})
@@ -208,6 +231,34 @@ func (runtime *runningRuntime) Wait(ctx context.Context) error {
 	case <-runtime.waitDone:
 		return runtime.waitErr
 	}
+}
+
+// Admission closes before Wait: no Add can race with a zero-count Wait, even
+// when forced socket closure races with an HTTP goroutine entering the handler.
+type runtimeHandlers struct {
+	mu      sync.Mutex
+	closing bool
+	active  sync.WaitGroup
+	next    http.Handler
+}
+
+func (handlers *runtimeHandlers) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	handlers.mu.Lock()
+	if handlers.closing {
+		handlers.mu.Unlock()
+		response.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+	handlers.active.Add(1)
+	handlers.mu.Unlock()
+	defer handlers.active.Done()
+	handlers.next.ServeHTTP(response, request)
+}
+
+func (handlers *runtimeHandlers) stopAdmission() {
+	handlers.mu.Lock()
+	handlers.closing = true
+	handlers.mu.Unlock()
 }
 
 type runtimeHTTPHandler struct {

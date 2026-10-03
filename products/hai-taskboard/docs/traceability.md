@@ -187,3 +187,16 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 Real provider conformance, credentials, host/network sandboxing beyond Fake, Slack/Lark/MCP,
 multi-user authorization, deploy/release and cross-project orchestration are `Deferred` to G2 or
 later. They MUST NOT be reported as P0-A coverage.
+
+## Persistent local runtime (T-095/T-096/T-098, accepted by T-099)
+
+| Clause | Executable oracle | Evidence | Status |
+| --- | --- | --- | --- |
+| HAI-RUNTIME-101..102 | `TestPersistentRuntime_ExecutesPendingFakeOnce`, `TestPersistentRuntime_ConcurrentScansClaimOnce`, `TestPersistentRuntime_ProcessPollerAndHTTP` | T-095 native full/race | Passing bounded native T-099 |
+| HAI-RUNTIME-103 | `TestPersistentRuntime_RestartPendingAndClaimed` | T-095 Pending/claimed restart and no redispatch | Passing bounded native T-099 |
+| HAI-RUNTIME-104 | `TestPersistentRuntime_ShutdownJoinsWorker`, `TestPersistentRuntime_WorkerFailureDrainsHandlers` | T-095 native full/race | Passing bounded native T-099 |
+| HAI-RUNTIME-105..106 | `TestPersistedProjection_SnapshotAndRestart`, `TestPersistedProjection_ReplayIntegrityAndProjectScope`, `TestPersistentRuntime_ProcessPollerAndHTTP` | T-096/T-095 native SQLite/HTTP/full/race | Passing bounded native T-099 |
+
+Native Go 1.27.1 and Node 24.20.0/pnpm 11.25.0 evidence does not substitute for unavailable
+container/browser/root-CI evidence. Global project-event gaps reset; current-policy coverage is
+unavailable and conservatively represented, as specified in `sdd/persistent-fake-runtime.md`.

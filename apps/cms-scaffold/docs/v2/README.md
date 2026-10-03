@@ -43,6 +43,8 @@ W5 前端硬化、BW4 後端硬化：所有功能波之後
 BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會改錯誤代碼，
     所以建議後端 BW0～BW5 先依序實作完；W3、W4、W3b、W5 直接以 BW5
     契約為準，W2 依 01 Q-16 在整合階段套用 BW5 的媒體錯誤代碼
+BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026-10-03 選 A）：
+    以 BW5 為基準 ─► W6 後端缺口補畫面（以 W5 的結果為起點）
 ```
 
 | 波 | 狀態 | 框架 | 施工圖 | 解決 |
@@ -62,6 +64,8 @@ BW5 開放問題收尾（BQ-06／07／08／10／11）：以 BW4 為基準；會�
 | W5 | DOC_READY | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
 | BW4 | DOC_READY | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
+| BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
+| W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
 狀態：`DRAFT`（只有框架）→ `DOC_READY`（施工圖已合併）→ `IN_PROGRESS` → `VERIFIED`（實作已合併並通過交付檢查表）。
 

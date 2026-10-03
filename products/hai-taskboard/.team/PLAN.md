@@ -552,14 +552,15 @@ execution. P0-A remains Fake-only.
 ## Bounded CI continuation (2026-10-04)
 
 The owner authorized continuation through the missing HAI-CI-001 gate, independent review and a
-Draft PR. HAI-CI-001 from `docs/sdd/decision-attention-ledger.md` is accepted for this bounded slice.
+Draft PR. The HAI-CI-001 clause from `docs/sdd/decision-attention-ledger.md` is accepted as the
+normative contract; implementation acceptance remains pending the actual PR-run oracle.
 Other Decision/Attention/ledger clauses and T-050 remain outside this implementation.
 This adds backend and frontend CI only; absent browser/restore/import evidence remains NotRun.
 
 | ID | Goal | Dependency | Status | Acceptance owner |
 | --- | --- | --- | --- | --- |
 | T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Candidate; worker checks passed | Orchestrator |
-| T-111 | Independent CI permission, pin and failure-path review | T-110 | In review | Orchestrator |
+| T-111 | Independent CI permission, pin and failure-path review | T-110 | Historical REWORK; container build concern awaits actual CI | Orchestrator |
 
 Orchestrator scope: this PLAN, worker contracts, `docs/reproducibility.md`,
 `docs/local-development.md`, `docs/HANDOFF.md`, `docs/traceability.md`, and the bounded
@@ -569,3 +570,22 @@ Gates: task/report validators, shell syntax, actionlint, same native backend/ful
 and frontend frozen-install/format/lint/typecheck/unit/build commands, independent review, and an
 actual PR workflow run. Required failures stay visible; no G1, browser or production acceptance follows.
 Workers do not commit, push, delegate, change PLAN or widen the Fake-only product boundary.
+
+Independent T-111 review raised a probable container Git-ownership/build-stamping issue (B1),
+explicitly conditional on the actual backend CI result, and two non-blocking wording issues.
+The wording now distinguishes normative clause approval from implementation acceptance and marks
+the missing-workflow statement as historical. B1 is not treated as a reproduced defect. The
+original review remains preserved; PR #238 runs the unmodified backend gate to test that concern.
+
+T-111 B1 was reproduced by PR #238 run [37147306521](https://github.com/fallrising/newclear/actions/runs/37147306521)
+on candidate `0b445f690db2906924a00ff6d7bba66c18a0bafb`: full/race tests passed, but
+`go build ./...` failed obtaining VCS status (exit 128). Route T-113 to disable build stamping only
+for the compilation gate, followed by T-112 fresh independent review and a new actual PR run.
+T-111 is preserved byte-for-byte from the reviewer output. It has report-format incompatibilities
+(header before STATUS and malformed verification suffixes); validation failure is process metadata,
+not a replacement for its visible REWORK decision. The original failed gate remains visible.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-113 | CI compile gate VCS-stamping repair | T-111 | Candidate; local repaired build passed | Orchestrator |
+| T-112 | Fresh repaired CI evidence review | T-113 | Pending | Orchestrator |

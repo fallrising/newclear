@@ -1,6 +1,7 @@
 # Mini-SDD: Decisions, attention and external ledger import
 
-Status: **HAI-CI-001 accepted for the bounded CI slice (2026-10-04)**, with owner-authorized
+Status: **HAI-CI-001 clause accepted (normative, 2026-10-04)**; its implementation remains
+Candidate until the PR-run oracle passes. The bounded CI slice has owner-authorized
 T-110/T-111 recorded in `.team/PLAN.md`. The remaining Decision/Attention/ledger clauses remain
 **Proposed** (2026-09-28). Per HAI-DELIVERY-001 no production behavior may precede acceptance of
 its clause and named oracle. Merging this design file alone does not accept every proposed feature.
@@ -22,7 +23,8 @@ Three things a single operator needs every day are still missing:
    HAI Taskboard cannot show that work without retyping it, and the SDD forbids bidirectional
    Markdown/DB synchronization.
 
-There is also no root CI workflow for this component.
+At the design baseline there was no root CI workflow for this component. T-110 now supplies the
+bounded backend/web workflow; its acceptance and PR-run evidence are tracked in `.team/PLAN.md`.
 
 ## 2. Scope
 

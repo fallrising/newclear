@@ -149,8 +149,8 @@ checkpoints and do not override this continuation.
 
 ## Safe next action
 
-After accepting the bounded CI slice, T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
-T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
+After accepting the bounded CI slice, T-050 reconciliation/restore/handoff is the next bounded
+component scope after the accepted T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
 start T-050, merge, deploy, add an importer or enable a real provider.
 
 ## Restore invariant

@@ -79,7 +79,7 @@ execution. P0-A remains Fake-only.
 | T-031 | Independent web-shell code/evidence review | T-030 | Failed; bootstrap hygiene/pins incomplete | Orchestrator |
 | T-032 | Repair web pins, shadcn provenance and generated-output hygiene | T-031 | Accepted by T-033 | Independent reviewer |
 | T-033 | Independent web-shell re-review | T-032 | Accepted | Orchestrator |
-| T-040 | Persistence, command API, SSE and Fake execution vertical slice | T-024,T-033 | In progress via child slices | Independent reviewer |
+| T-040 | Persistence, command API, SSE and Fake execution vertical slice | T-024,T-033 | Runtime gap accepted via T-095/T-096/T-098 and T-099 native review | Independent reviewer |
 | T-041 | Executable T-040 design and child-scope decomposition | T-012,T-024,T-033 | Accepted after T-048/T-051/T-052 | Independent reviewer |
 | T-042 | Independent T-041 design/decomposition review | T-041 | Failed; four executable-boundary blockers | Orchestrator |
 | T-048 | Repair T-041 executable boundary findings | T-042 | Accepted after T-052 | Independent reviewer |
@@ -130,7 +130,12 @@ execution. P0-A remains Fake-only.
 | T-092 | Independent T-091 runtime/security/restart review | T-091 | Failed; four security/config repairs required | Orchestrator |
 | T-093 | Repair T-092 root, Origin, token and artifact-confinement findings | T-092 | Accepted by T-094 and orchestrator evidence gate | Independent reviewer |
 | T-094 | Fresh T-091/T-093 runtime security and lifecycle re-review | T-093 | Accepted by orchestrator evidence gate | Orchestrator |
-| T-050 | Reconciliation, restore and handoff slice | T-040 | Pending | Independent reviewer |
+| T-095 | Persistent local Fake worker | T-094 | Accepted with T-098 repair by T-099 | Independent reviewer |
+| T-096 | Persisted board and SSE reads | T-094 | Accepted by T-099 | Independent reviewer |
+| T-097 | Initial persistent runtime review | T-095,T-096 | Historical FAIL, preserved | Orchestrator |
+| T-098 | Fatal-worker handler lifetime repair | T-097 | Accepted by T-099 | Independent reviewer |
+| T-099 | Fresh repaired-runtime review | T-098 | Accepted by orchestrator native evidence gate | Orchestrator |
+| T-050 | Reconciliation, restore and handoff slice | T-040 | Ready for a separately authorized bounded task | Independent reviewer |
 | T-060 | Repository-level evidence gate and P0-A acceptance | T-050 | Pending | Human/orchestrator |
 
 ## Required verification gates
@@ -520,19 +525,26 @@ execution. P0-A remains Fake-only.
 
 ## Current development boundary
 
-- T-040 remains in progress after accepted serial children T-043 through T-047 and the accepted
-  T-091/T-093 runnable-runtime bootstrap. T-047 vertical
-  integration is accepted through T-087/T-089 and the bounded T-090 pre-push authority repair plus
-  orchestrator gates; T-047/T-082/T-084/T-088/T-092 remain immutable PARTIAL/FAIL history, and
-  T-083/T-085 predecessor changes were independently reviewed by T-086. Before T-050, the next
-  bounded feature slice should supply automatic persistent outbox/Fake execution and persisted
-  projection reads for the runnable process. Restore/backup, browser evidence, real providers,
-  Slack/Lark, deployment and release remain NotRun or forbidden.
+- 2026-10-03: the T-040 persistent runtime gap is accepted for the bounded native slice.
+  T-095/T-096 added automatic Pending execution, safe claimed-run recovery and SQLite projections.
+  T-097 FAIL report `104ca62f1140f41b89ae18064063b77ddbe180935b1d242467bf17c6fa1bf5a2`
+  reproduced premature resource closure on worker failure. T-098 repaired shared cancellation and
+  handler joining. Fresh T-099 PASS report
+  `51f50bcd9e773bbe2f304f1c60c4bcbaa2fd6e49d6e97bfc86c2a1ca7fcb28a5` independently
+  passed worker/caller/Serve shutdown, cross-project/tamper probes, full backend and race checks.
+- The orchestrator inspected the code/reports and separately passed native Go 1.27.1 module
+  verification, format, vet, full/race and build; Node 24.20.0/pnpm 11.25.0 frozen install, format,
+  lint, 8 Vitest tests, TypeScript and Vite build passed. Repaired eleven-file code manifest:
+  `38ea1779857929a75153bfbd0efc39fb2ab00cf465dfd0228d7a14d8c8ee8391`.
+- T-050 is the next bounded scope. Specification admission/current-policy coverage, restore/backup,
+  browser/live UI, real providers and broader G1/G2 are not claimed. Docker was unavailable; native
+  evidence is not mislabeled as historical digest-pinned container evidence. Root CI is checked at
+  PR delivery separately. Historical FAIL/PARTIAL reports remain unchanged.
 
 ## Resume
 
 1. Read this file and `products/hai-taskboard/AGENTS.md`.
-2. Verify branch `agent/hai-taskboard-p0a` and baseline ancestry.
+2. Verify branch `agent/hai-taskboard/persistent-outbox`, base `e2c901304570428a5c78744e274739206dbf3387`, and current diff. Historical shallow-clone ancestry is not acceptance evidence.
 3. Read the latest accepted ADRs and `docs/HANDOFF.md`.
 4. Select only the next `Ready` task whose dependencies are accepted.
 5. Never infer acceptance from a worker report or prior chat.

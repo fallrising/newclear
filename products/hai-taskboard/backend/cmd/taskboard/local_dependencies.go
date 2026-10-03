@@ -397,12 +397,14 @@ func newLocalFakeAdapter() (*fake.Adapter, error) {
 	scenario, err := fake.NewScenario("local-success", capabilities, []fake.Step{
 		{Tick: 0, Kind: fake.ObservationDispatchReceived, Message: "accepted"},
 		{Tick: 1, Kind: fake.ObservationStartAcknowledged, Message: "started"},
-		{Tick: 2, Kind: fake.ObservationTerminalSuccess, Message: "completed"},
+		{Tick: 2, Kind: fake.ObservationTerminalSuccess, Message: "completed", Artifact: &fake.Artifact{
+			Name: "result.txt", MediaType: "text/plain", Bytes: []byte("local fake result\n"),
+		}},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fake.NewAdapter(capabilities, []fake.Scenario{scenario}, nil)
+	return fake.NewAdapter(capabilities, []fake.Scenario{scenario}, localFakeStaging{})
 }
 
 var _ port.Clock = systemClock{}

@@ -3,8 +3,8 @@
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
 Status: Accepted bootstrap pins and bounded kernel/web/SQLite/application-command/Fake/HTTP-SSE/
-vertical-integration plus T-090 authority-repair evidence; broader G1 remains NotRun
-Observed: 2026-09-15
+vertical-integration and T-099 persistent-runtime evidence; bounded HAI-CI-001 candidate; broader G1 remains NotRun
+Observed: 2026-10-04
 
 ## Toolchains and packages
 
@@ -46,17 +46,25 @@ a reviewed candidate, never silent drift.
 contents permission, cancellation concurrency, explicit timeouts and checkout v7.0.1 pinned at
 `3d3c42e5aac5ba805825da76410c181273ba90b1` with persisted credentials disabled.
 
-Backend, frontend and E2E jobs call the component scripts in the three digest-pinned environments.
-E2E depends on backend/frontend. The workflow uses no secret, release, publish, deploy or external
-mutation permission.
+The bounded HAI-CI-001 workflow has backend and web jobs in their respective digest-pinned
+environments. Both call the same component scripts used locally. `scripts/check-ci-pins.sh` compares
+workflow image pins with this table, `go.mod`, `.node-version`, package metadata and the exact pnpm
+bootstrap. Runtime version mismatches fail before dependency installation.
+
+The workflow uses no secret, release, publish, deploy or external mutation permission. Browser E2E
+and OpenAPI lint are not implemented by these two jobs. The planned E2E job will depend on both
+backend and web when a separate task supplies the browser suite and readiness/cleanup contract; its
+image pin above remains the reserved selection, not evidence of an existing job.
 
 ## Gate commands
 
-- Backend: assert version; module download/verify; gofmt check; vet; unit/contract/fault/integration
-  tests; race tests.
-- Web: assert Node/pnpm; frozen install; format; lint; `tsc --noEmit`; Vitest/a11y; production build.
-- E2E: assert package/image equality; readiness without sleep; Playwright/axe; bounded failure
-  artifacts; deterministic cleanup.
+- `bash scripts/check-backend.sh`: assert Go; require a C compiler and CGO for race coverage; module
+  download/verify; gofmt check; vet; unit/contract/fault/integration tests; race tests; build.
+- `bash scripts/check-web.sh`: assert Node/pnpm; frozen install with lifecycle scripts disabled;
+  format; lint; Vitest/component a11y; existing build runs `tsc --noEmit` and Vite.
+- `bash scripts/check-ci-pins.sh`: compare the duplicated static pins without installing packages.
+- Planned browser gate (NotRun): package/image equality, readiness without sleep, Playwright/axe,
+  bounded failure artifacts and deterministic cleanup. Component jsdom tests do not establish it.
 
 ## Accepted bounded evidence
 
@@ -130,9 +138,11 @@ SQLite in 6.254s and the final race run included SQLite in 27.609s.
 
 ## Evidence still NotRun
 
-Playwright browser/contrast/zoom/coarse-pointer checks, automatic persistent outbox/worker polling,
-SQLite backup/restore and disk-full/migration interruption, full SBOM/CVE inventory,
-action/image provenance, root workflow policy/path selection and TypeScript 7 migration are NotRun.
+Playwright browser/contrast/zoom/coarse-pointer checks, SQLite backup/restore and disk-full/migration
+interruption, full SBOM/CVE inventory, broader action/image provenance and TypeScript 7 migration
+remain NotRun. Automatic persistent outbox/worker polling has bounded T-099 native acceptance;
+see `sdd/persistent-fake-runtime.md`. The new CI workflow and its PR-run evidence are tracked by
+T-110/T-111 in `.team/PLAN.md`; this does not retroactively turn historical NotRun records into passes.
 The manually driven deterministic T-047 integration does not imply those operations. Every later
 vertical-slice family remains unaccepted. These gaps prevent a G1, release or production-complete
 claim.

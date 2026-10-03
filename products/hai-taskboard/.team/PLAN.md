@@ -548,3 +548,24 @@ execution. P0-A remains Fake-only.
 3. Read the latest accepted ADRs and `docs/HANDOFF.md`.
 4. Select only the next `Ready` task whose dependencies are accepted.
 5. Never infer acceptance from a worker report or prior chat.
+
+## Bounded CI continuation (2026-10-04)
+
+The owner authorized continuation through the missing HAI-CI-001 gate, independent review and a
+Draft PR. HAI-CI-001 from `docs/sdd/decision-attention-ledger.md` is accepted for this bounded slice.
+Other Decision/Attention/ledger clauses and T-050 remain outside this implementation.
+This adds backend and frontend CI only; absent browser/restore/import evidence remains NotRun.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Candidate; worker checks passed | Orchestrator |
+| T-111 | Independent CI permission, pin and failure-path review | T-110 | In review | Orchestrator |
+
+Orchestrator scope: this PLAN, worker contracts, `docs/reproducibility.md`,
+`docs/local-development.md`, `docs/HANDOFF.md`, `docs/traceability.md`, and the bounded
+HAI-CI-001 acceptance note in `docs/sdd/decision-attention-ledger.md`, plus the stale G0 status
+paragraph in `docs/SDD.md` (status correction only).
+Gates: task/report validators, shell syntax, actionlint, same native backend/full/race/vet/module/format
+and frontend frozen-install/format/lint/typecheck/unit/build commands, independent review, and an
+actual PR workflow run. Required failures stay visible; no G1, browser or production acceptance follows.
+Workers do not commit, push, delegate, change PLAN or widen the Fake-only product boundary.

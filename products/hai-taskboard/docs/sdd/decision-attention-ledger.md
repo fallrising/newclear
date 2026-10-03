@@ -1,8 +1,9 @@
 # Mini-SDD: Decisions, attention and external ledger import
 
-Status: **Proposed** (2026-09-28). Not accepted. Per HAI-DELIVERY-001 no production behavior may
-precede acceptance of these clauses and their named oracles. Acceptance means the owner merges this
-file and `.team/PLAN.md` gains the corresponding tasks.
+Status: **HAI-CI-001 accepted for the bounded CI slice (2026-10-04)**, with owner-authorized
+T-110/T-111 recorded in `.team/PLAN.md`. The remaining Decision/Attention/ledger clauses remain
+**Proposed** (2026-09-28). Per HAI-DELIVERY-001 no production behavior may precede acceptance of
+its clause and named oracle. Merging this design file alone does not accept every proposed feature.
 
 Parent: `../SDD.md` (§5 domain, §6 HAI-EXEC-008, §8 API, §9 Attention, §12 delivery).
 

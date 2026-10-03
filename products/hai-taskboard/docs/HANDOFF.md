@@ -120,8 +120,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
   orchestrator evidence gate passed configuration attacks, descriptor lifecycle, two-start process
   restart, exact tests, full tests, race, build and offline module inventory without a required
   failure or skip.
-- Automatic persistent outbox/worker polling, root CI execution, restore/backup and broader evidence
-  remain NotRun; T-047's deterministic manually driven vertical integration does not imply them.
+- At the T-094 checkpoint, automatic worker polling and root CI were still NotRun. The later
+  T-099 persistent-runtime checkpoint below supersedes polling status; bounded CI is now tracked
+  by T-110/T-111. Restore/backup and broader evidence remain NotRun. T-047 alone does not imply them.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
 - The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
   remain immutable process evidence; later repairs and acceptance do not rewrite them.
@@ -138,9 +139,17 @@ Native Go 1.27.1 full/race/vet/build and Node 24.20.0/pnpm 11.25.0 format/lint/8
 Docker/browser/root CI are separate evidence; no broader acceptance is implied. Specification
 admission remains fail-closed, verified coverage is unavailable, and global project event gaps reset.
 
+## CI continuation checkpoint
+
+The current bounded continuation is HAI-CI-001 on `agent/hai-taskboard/decision-attention`: shared
+backend/web gate scripts plus the root workflow, with acceptance tracked by T-110/T-111 in PLAN.
+It does not connect the fixture UI, admit specifications or implement restore. Full PR-run evidence
+must be checked before accepting the CI slice. The earlier branch references describe historical
+checkpoints and do not override this continuation.
+
 ## Safe next action
 
-T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
+After accepting the bounded CI slice, T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
 T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
 start T-050, merge, deploy, add an importer or enable a real provider.
 

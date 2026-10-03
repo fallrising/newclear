@@ -20,22 +20,13 @@ import {
   type TaskDetail,
 } from './api';
 import { mergeEvents, readEvents } from './events';
+import {
+  readTaskLocation,
+  taskLocationHref,
+  taskStateNames as stateNames,
+  type TaskFilters,
+} from './taskLocation';
 
-const stateNames: Record<string, string> = {
-  queued: '排隊中',
-  provisioning: '準備環境',
-  running: '執行中',
-  finalizing: '保存結果',
-  succeeded: '已完成',
-  failed: '失敗',
-  interrupted: '需要處理',
-  pausing: '正在暫停',
-  paused: '已暫停',
-  resuming: '正在恢復',
-  cancelled: '已取消',
-  cancelling: '正在取消',
-  awaiting_approval: '等待審批',
-};
 function State({ state }: { state: string }) {
   return <span className={`state state-${state}`}>{stateNames[state] ?? state}</span>;
 }
@@ -416,14 +407,36 @@ function TaskList({
   onSelect: (id: string) => void;
   projects: Project[];
 }) {
-  const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({ q: '', project_id: '', state: '' });
+  const [location, setLocation] = useState(() => readTaskLocation(window.location.search));
+  const { filters, invalid } = location;
+  const [search, setSearch] = useState(filters.q);
   const [pages, setPages] = useState<(string | null)[]>([null]);
   const cursor = pages[pages.length - 1];
   const filtered = Boolean(filters.q || filters.project_id || filters.state);
-  function apply(change: Partial<typeof filters>) {
+  useEffect(() => {
+    function restore() {
+      const next = readTaskLocation(window.location.search);
+      setLocation(next);
+      setSearch(next.filters.q);
+      setPages([null]);
+    }
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
+  function apply(change: Partial<TaskFilters>) {
+    const next = { ...filters, ...change };
+    const current = readTaskLocation(window.location.search);
+    if (
+      current.invalid ||
+      next.q !== current.filters.q ||
+      next.project_id !== current.filters.project_id ||
+      next.state !== current.filters.state
+    ) {
+      window.history.pushState(null, '', taskLocationHref(window.location.href, next));
+    }
     setPages([null]);
-    setFilters((old) => ({ ...old, ...change }));
+    if ('q' in change) setSearch(next.q);
+    setLocation({ filters: next, invalid: false });
   }
   function clear() {
     setSearch('');
@@ -454,6 +467,11 @@ function TaskList({
           </button>
         )}
       </div>
+      {invalid && (
+        <p className="notice" role="alert">
+          連結中的篩選條件無效，已顯示最近任務。請清除篩選後重新設定。
+        </p>
+      )}
       <form
         className="task-filters"
         role="search"
@@ -482,6 +500,10 @@ function TaskList({
             onChange={(event) => apply({ project_id: event.target.value })}
           >
             <option value="">所有專案</option>
+            {filters.project_id &&
+              !projects.some((project) => project.id === filters.project_id) && (
+                <option value={filters.project_id}>專案名稱無法取得 · {filters.project_id}</option>
+              )}
             {projects.map((project) => (
               <option key={project.id} value={project.id}>
                 {project.name}
@@ -500,7 +522,7 @@ function TaskList({
             ))}
           </select>
         </label>
-        {(filtered || search) && (
+        {(filtered || search || invalid) && (
           <button type="button" className="quiet" onClick={clear}>
             清除篩選
           </button>

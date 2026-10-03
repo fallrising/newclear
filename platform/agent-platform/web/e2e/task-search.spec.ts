@@ -46,7 +46,9 @@ test('search combines latest state and project across pages without rerunning ta
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText('Different project');
   await page.reload();
-  await expect(page.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('');
+  await expect(page.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('你好 %_');
+  await expect(page.getByLabel('篩選專案')).toHaveValue(seed.other_project_id);
+  await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText('Different project');
   expect(counts()).toEqual(before);
 });

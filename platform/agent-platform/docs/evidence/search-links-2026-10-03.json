@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-03",
+  "base_commit": "c9cf96a2382d4775163e47418105146f56a79f3b",
+  "parent_pr": 211,
+  "feature": "persistent task filter links with reload, shared addresses and browser history",
+  "mode": "read-only local API/PostgreSQL/Chromium; fake effects unchanged",
+  "environments": {
+    "browser_api_python": "3.13.5",
+    "node": "24.18.0"
+  },
+  "checks": {
+    "frontend": 57,
+    "browser": 6,
+    "skipped": 0
+  },
+  "required_commands": [
+    "make web-check",
+    "make browser-test",
+    "git diff --check",
+    "team contract validation",
+    "independent review"
+  ],
+  "backend_suite": "Not rerun for this frontend-only slice; backend source and dependencies unchanged.",
+  "red_green": [
+    "Before implementation: four new App behavior failures, 23 existing tests pass; parser module absent.",
+    "After implementation: targeted39 passed, finalfrontend57 passed."
+  ],
+  "log_sha256": {
+    "frontend_red": "6a437a7501731a2d9b533a36ad658a8a4a3c1fcf1b4c5a83f00e6b4fd429a35a",
+    "frontend_targeted_green": "6ab258e6f521b13cf647f87a3a1e6c79c3321480ed7a04f023b8dc33e0b6d0f8",
+    "worker_web_check": "f12198a87e50584184df4c8192728dd7d7b30d0cd2222841029b66d9a4da0ebf",
+    "worker_build": "d0ddbed8b89cb3704baaa766cb574a47af7038437466b95185f35ef0bc528eda",
+    "web_check": "0e584fd7c134741585e1b4f7f4d0d5e1446cd9f1df2683a3a1217315e272c41e",
+    "browser_test": "cea9d5ddaede887b859e5218d3cebdf2d92868272d6e7e9fcc5d3313621ef785"
+  },
+  "limitations": [
+    "History restores filters and selected task; it starts pagination on the first page.",
+    "Matches can change as latest attempts change; not a result snapshot.",
+    "Shared addresses require an authenticated operator session.",
+    "Stacked on PR211 until parent merges. No VM/provider/billing/deployment or full-M3 acceptance claim."
+  ],
+  "review": "Independent T-008 DONE accepted: no required findings; all six log hashes and final counts independently verified."
+}

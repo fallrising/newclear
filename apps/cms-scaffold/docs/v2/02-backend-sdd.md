@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Draft v0.1**（第一版，待細化）  
-日期：2026-09-25  
+日期：2026-09-25（2026-10-03 更新：§7 新增 BW6）  
 讀者：負責改 `services/cms-api` 的 LLM agent，以及審這些 PR 的人  
 輸入：[01 前端 SDD §9 後端缺口](01-frontend-sdd.md#9-後端缺口前端需要的-api)、[總綱](../sdd/00-overview.md)、`docs/specs/kernel-{content,identity,media}.md`、現有原始碼（`main` @ `a5a87bb`）
 
@@ -337,6 +337,7 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 | **BW3 會員區** | `/me` 端點；`appointment_request` 類型與種子 | B-11；G-08 | surface-front AC-10～12 可以用 API 級測試驗收 |
 | **BW4 硬化** | 效能量測記錄；審計保留期限設定（surface-admin §7.2）；安全測試補齊 | — | §5.4 全部達標並記錄數字 |
 | **BW5 開放問題收尾** | BQ-06（`PRINCIPAL_NOT_FOUND`）、BQ-07（媒體錯誤代碼大寫）、BQ-08（管理端輸入驗證）、BQ-10（公開列表依已發布副本的關聯篩選）、BQ-11（媒體批次解析） | BQ-06、07、08、10、11 | 五項各有 API 級或 store 契約測試；§5.4 的 SQL 數對含媒體的公開列表也與筆數無關 |
+| **BW6 前端缺口收尾** | `CreateFieldRequest.key` 加 pattern（01 Q-12）；`GET /media` 分頁與 `q`、`MediaAsset.deletedAt`（Q-14）；`PublicField.enumLabels`（Q-17）；`AdminContentType` 加 `pack`、`entryCount`、`publishedCount`（Q-20）；`Principal` 加 `roles`、`lastLoginAt`，`GET /principals?role=`（Q-23）；`PatchPrincipalRequest` 空字串清除電子郵件（Q-24）；危險操作的確認欄位與 `SELF_DEMOTION_FORBIDDEN`、`SELF_DISABLE_FORBIDDEN`（Q-25）；`seed-operator-clinic` 可讀寫 `appointment_request`（Q-26） | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26 | 每題有 API 級測試；契約以 BW5 為基準整檔更新為 `contracts/BW6.openapi.yaml` |
 
 每波一個 PR；migration 只能新增，不能修改已經合併的 migration。
 
@@ -347,6 +348,8 @@ BW0 只做 dependency locking；施工細節見 `waves/BW0.md` §5.8。verificat
 **BW4 細化後補充：** 施工細節見 `waves/BW4.md`。審計保留的預設值採 surface-admin §7.2 的 90 天（owner 2026-09-25 確認，見 §8 的決定）。BW4 另外修正 BQ-13（store 接線）並加入 BQ-12 的回滾測試。
 
 **BW5 開放問題收尾（owner 決定，2026-09-25）：** BQ-06、07、08、10、11 owner 都選 A，但它們原本建議的波次（BW1c、BW2）已經細化完成，而每一波的 diff 都以前一波的結果為基準，改早期波次就得重做之後每一波的施工圖。所以集中成 **BW5**，以 BW4 完成後為基準。BW5 的變更（`PRINCIPAL_NOT_FOUND`、大寫的媒體錯誤代碼）對前端是破壞性的，所以後端 BW0～BW5 可以先依序實作完，前端 W2、W4 以 BW5 的契約為準（見 README 路線圖）。施工細節見 `waves/BW5.md`；前端看得到的變更對照見其 §4.2。
+
+**BW6 前端缺口收尾（owner 決定，2026-10-03）：** 前端波次全部細化後，01 §13 有八題選 A、轉給後端，卻沒有任何後端波次承接（01 Q-12、Q-14、Q-17、Q-20、Q-23、Q-24、Q-25、Q-26）。owner 指示集中成 **BW6**，以 BW5 完成後為基準（理由同 BW5：不改已細化的波次）；前端由 **W6**（01 §12）消化。狀態 `DRAFT`。細化時若任務卡超過 30 張，依 REFINE-PROMPT §9 提議拆分（例如 BW6a 契約與種子、BW6b 治理面）。
 
 BW0 施工細節見 `waves/BW0.md`。
 

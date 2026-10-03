@@ -3,7 +3,7 @@
 [回 v2 索引](README.md)
 
 狀態：**Framework v0.1；全部前端波次已細化為 DOC_READY 施工圖**
-日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5；同日 W3 細化：§6.1、§6.3、§7.1、§8、§9、§12 補施工細節連結，§13.2 補一列，新增 §13.6；同日 W4 細化：§6.1、§6.4、§7.3、§12 補施工細節連結，新增 §13.7；同日 W3b、W5 細化：會員流程與 §10 硬化補施工細節連結）
+日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5；同日 W3 細化：§6.1、§6.3、§7.1、§8、§9、§12 補施工細節連結，§13.2 補一列，新增 §13.6；同日 W4 細化：§6.1、§6.4、§7.3、§12 補施工細節連結，新增 §13.7；同日 W3b、W5 細化：會員流程與 §10 硬化補施工細節連結；2026-10-03 owner 決定 §13.4、§13.7，新增 §13.8 與 §12 的 W6 列）
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
 
@@ -748,8 +748,9 @@ npm run e2e:mock        # 新增：Playwright + MSW，不需要後端；含 axe 
 | **W4 Admin**（審計需要 BW2） | Overview、類型、角色矩陣、使用者、審計、媒體用量、危險操作 | C-19 | V2-AC-16；surface-admin AC-A～L 中不依賴後端缺口的項目 |
 | **W3b Front 會員區**（需要 W3、BW3） | `/clinic/me`、預約建立與詳情、診所會員導覽、登入安全回跳、會員 MSW | G-08、C-11 | surface-front AC-10～13；V2-AC-14、15（會員頁） |
 | **W5 硬化** | 效能預算、bundle 掃描、全頁 axe、截圖基準、`e2e`（真 API）跑一次並記錄結果 | 剩餘 P2 | §10 全部達標 |
+| **W6 後端缺口補畫面**（需要 BW6；以 W5 的結果為起點） | Back 媒體庫改伺服器分頁並顯示已刪除媒體（Q-14）；Front 改讀公開 `enumLabels`、刪除 `copy.ts` 的 `enum.*` 標籤（Q-17）；Admin 類型列表的計數與停用確認文案（Q-20）、帳號列表的角色與最後登入、會員連結對話框只列會員、總覽「只剩 1 位管理員」警示（Q-23）、清除電子郵件（Q-24）、危險操作送確認欄位並處理 `SELF_*` 錯誤（Q-25）；Back 側欄與 fixture 加入預約申請（Q-26）；受影響畫面的 axe 與截圖基準 | Q-14、Q-17、Q-20、Q-23～Q-26 的前端部分 | 各題的畫面有 Vitest；§11.1 閘門全綠 |
 
-W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。W4 施工細節見 [`waves/W4.md`](waves/W4.md)（codegen 改讀 `contracts/BW5.openapi.yaml`，並替換 W2 的 5 個媒體錯誤代碼，§13.5）。W3 施工細節見 [`waves/W3.md`](waves/W3.md)（codegen 改用 BW5 契約，§13.5；e2e 依 owner 2026-09-26 指示延到 W5，規格在該檔附錄 A）。W3b 施工細節見 [`waves/W3b.md`](waves/W3b.md)。W5 施工細節見 [`waves/W5.md`](waves/W5.md)。
+W0 施工細節見 [`waves/W0.md`](waves/W0.md)。W1 施工細節見 [`waves/W1.md`](waves/W1.md)。W2 施工細節見 [`waves/W2.md`](waves/W2.md)（範圍另含 BW2 的 G-03、G-09、G-10 在 Back 的使用，依 [BW2.md](waves/BW2.md) §1.1「前端依賴本波次的是 W2」）。W4 施工細節見 [`waves/W4.md`](waves/W4.md)（codegen 改讀 `contracts/BW5.openapi.yaml`，並替換 W2 的 5 個媒體錯誤代碼，§13.5）。W3 施工細節見 [`waves/W3.md`](waves/W3.md)（codegen 改用 BW5 契約，§13.5；e2e 依 owner 2026-09-26 指示延到 W5，規格在該檔附錄 A）。W3b 施工細節見 [`waves/W3b.md`](waves/W3b.md)。W5 施工細節見 [`waves/W5.md`](waves/W5.md)。W6 是 owner 2026-10-03 決定新增的波次（§13.4、§13.7、§13.8 中選 A 的前端部分），狀態 `DRAFT`，施工圖待細化；W5 已以 W0～W4、W3b 為基準細化完成，所以 W6 排在 W5 之後，自行更新它改到的畫面的 axe 與截圖基準。
 
 前後端的整體順序見 [README § 路線圖](README.md#路線圖)。每波開工前，agent 先讀本文與對應 surface 規格；遇到本文沒寫到、又會影響其他波的決定，停下來在 PR 描述裡提問，不要自行擴充規格。
 
@@ -791,7 +792,9 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 | Q-09 | 兩種環境類失敗沒有自動測試：Playwright 瀏覽器不存在或版本不符（W0-FM20）、npm registry 無法連線（W0-FM21）。 | **A**：比照 [02 BQ-09](02-backend-sdd.md#8-開放問題) 以 CI 為準；PR 說明必須寫明哪些檢查只在 CI 跑過 |
 | Q-10 | W0 實作後，前端的 codegen 新鮮度測試與帶型別的 fixture 會與 `openapi.yaml` 綁在一起；之後修改契約的後端波次（第一個是 BW1a：`Me.capabilities` 必填）若不同時更新前端，CI 的 `web` job 會紅；反之 BW1a 先實作，W0 的 fixture 就不符合契約。 | **前後端各自依自己的契約開發，差異在整合階段一起處理**（比照真實開發）。W0 仍以 BW0 契約撰寫；[waves/W0.md §2.1](waves/W0.md#21-前置波次) 的防呆保留：實作時若 `openapi.yaml` 已不是 BW0 版本，停下來回報，交給整合階段。W1 同樣適用：codegen 讀 `contracts/BW1c.openapi.yaml`（[waves/W1.md §4.2](waves/W1.md#42-型別與-codegen)），整合階段再改回 `openapi.yaml` |
 
-### 13.4 W1 細化時新增（待確認）
+### 13.4 W1 細化時新增、已決定（owner，2026-10-03）
+
+Owner 指示「按建議」：Q-11 選 A（W1 已依 A 撰寫）、Q-12 選 A（由後端 BW6 承接，[02 §7](02-backend-sdd.md#7-後端波次)）。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |
@@ -800,7 +803,7 @@ Owner 指示「其他按建議走」，以下全部依原建議定案。
 
 ### 13.5 W2 細化時新增、已決定（owner，2026-09-26）
 
-Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-15 選 B、Q-16 選 A。之後的前端波次（W3、W4、W3b、W5）以最新的後端契約 `contracts/BW5.openapi.yaml` 產生型別（README 路線圖的建議；W2 維持 BW2，差異在整合階段處理）。
+Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口；2026-10-03 起由 BW6 與 W6 承接）、Q-15 選 B、Q-16 選 A。之後的前端波次（W3、W4、W3b、W5）以最新的後端契約 `contracts/BW5.openapi.yaml` 產生型別（README 路線圖的建議；W2 維持 BW2，差異在整合階段處理）。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |
@@ -811,7 +814,7 @@ Owner 指示「按建議」：Q-13 選 B、Q-14 選 A（轉後端窗口）、Q-1
 
 ### 13.6 W3 細化時新增、已決定（owner，2026-09-26）
 
-Owner 指示「按建議」：Q-17 選 A（轉後端窗口；在對應後端波次合併前，Front 依 W3 的做法在 `copy.ts` 自帶標籤）、Q-18 選 B、Q-19 選 A。
+Owner 指示「按建議」：Q-17 選 A（轉後端窗口；2026-10-03 起由 BW6 與 W6 承接；在 W6 合併前，Front 依 W3 的做法在 `copy.ts` 自帶標籤）、Q-18 選 B、Q-19 選 A。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |
@@ -819,9 +822,9 @@ Owner 指示「按建議」：Q-17 選 A（轉後端窗口；在對應後端波�
 | Q-18 | 公開導覽 API（`GET /api/v1/public/navigation/{menuKey}`）在種子只有 `front.primary` 一份選單：草稿、從未發布、英文標籤、連到三站的首頁（`ContentTypeSeed.java` 第 115～129 行），公開 GET 永遠 404；surface-front §6.3 要的是每站一份、`href` 限在該站 `basePath` 下。 | **A**：請後端種子為三站各建一份已發布的選單（例如 `front.album`、`front.clinic`、`front.projects`，中文標籤），Front 改成讀 API、失敗或空時用 `sites.ts` 的 fallback，並丟棄 `basePath` 以外的 `href`；**B**：v2 維持寫死的各站導覽（W3 的做法），導覽 API 只給 Admin 管理。 | **B**（v2 範圍最小；三站導覽只有 1～2 項）。選 A 時轉給後端窗口，前端另開一小波 |
 | Q-19 | owner 指示（2026-09-26）e2e 只在專案完成後執行，所以 W3 有兩個失敗模式在本波沒有自動測試：手機選單被 portal 出站的根元素後配色失效、shadcn 元件的 `cn`（tailwind-merge）把 `text-front-*` 當成顏色而刪掉 `text-foreground` 或被 `text-lg` 蓋掉字級（[waves/W3.md](waves/W3.md) W3-FM21、W3-FM22；jsdom 不計算 Tailwind 樣式）。預演已修正，並寫好 e2e 斷言（W3 附錄 A）。 | **A**：接受，專案完成後由附錄 A 的 e2e 覆蓋；**B**：加一個靜態 Vitest，禁止在傳給 `@cms/ui` 元件的 `className` 同時出現 `text-front-*` 與顏色 class；**C**：W3 實作時就跑附錄 A。 | **A**（owner 已決定 e2e 的時機；B 的靜態規則容易誤判） |
 
-### 13.7 W4 細化時新增（待確認）
+### 13.7 W4 細化時新增、已決定（owner，2026-10-03）
 
-以下缺口都不阻擋 W4：W4 依各題的「W4 的做法」撰寫，選 A 時轉給後端窗口，前端另開一波補畫面。
+以下缺口都不阻擋 W4：W4 依各題的「W4 的做法」撰寫。Owner 指示「按建議」：Q-20 選 A、Q-21 選 B、Q-22 選 B、Q-23 選 A、Q-24 選 A、Q-25 選 A。選 A 的四題由後端 BW6 與前端 W6 承接（§12、[02 §7](02-backend-sdd.md#7-後端波次)）。
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |
@@ -831,6 +834,14 @@ Owner 指示「按建議」：Q-17 選 A（轉後端窗口；在對應後端波�
 | Q-23 | `Principal` 沒有角色與 `lastLoginAt`，`GET /principals` 也不能依角色篩選：帳號列表無法顯示角色、總覽無法警示「只剩 1 位管理員」、會員連結對話框無法只列會員（只能列出全部啟用中的帳號）。 | **A**：後端在 `Principal` 加 `roles: string[]` 與 `lastLoginAt`（nullable），`GET /principals` 加 `role` 參數。**B**：維持；對話框以說明文字提醒只連結會員。 | **A**（會員連結選錯人的風險最高）。W4 依 B |
 | Q-24 | `PatchPrincipalRequest` 的 `null` 代表「不變」，沒有清除電子郵件的寫法。 | **A**：後端約定空字串代表清除（寫進契約 description）。**B**：維持；畫面提示「目前無法清除電子郵件」。 | **A**。W4 依 B |
 | Q-25 | surface-admin §8 的後端閘門（`confirmPhrase`／`confirmId`、`SELF_DEMOTION_FORBIDDEN`、`SELF_DISABLE_FORBIDDEN`）在 BW5 沒有：`purgeEntry` 不需要確認欄位，自己停用自己、移除自己的管理員角色只有在變成「沒有管理員」時才被 `LAST_ADMIN` 擋下。 | **A**：後端補上確認欄位與兩個 `SELF_*` 檢查（403），前端改送確認欄位。**B**：只在前端擋（W4 已做：輸入名稱才能確認；自己的帳號沒有停用與移除管理員角色的控件）。 | **A**（防止直接呼叫 API 的誤操作）。W4 依 B |
+
+### 13.8 整合複查時新增、已決定（owner，2026-10-03）
+
+前端波次全部細化完成後，複查 01 §13、02 §8 中轉給後端、尚未有後端波次承接的項目時發現。Owner 指示「按建議」：Q-26 選 A，由 BW6 與 W6 承接。
+
+| ID | 問題 | 選項 | 建議 |
+| --- | --- | --- | --- |
+| Q-26 | BW3 的種子只給 member 建立 `appointment_request` 的權限；`seed-operator-clinic` 的類型範圍是 `clinic_profile`、`owner`、`pet`、`vet`、`visit`（`services/cms-api/src/main/java/com/fallrising/cms/identity/service/SeedService.java` 第 77 行），沒有 `appointment_request`。會員送出的預約申請只有 admin 能在 Back 讀到，surface-front §3.5「Operator 在 Back 把請求變成 `visit`」做不到；前端的 MSW fixture（`work-content-types.json`、`capabilities.json`）也沒有這個類型。 | **A**：後端種子把 `appointment_request` 加進 `seed-operator-clinic` 的類型範圍（`read_draft`、`update`；不給 `publish`），前端 fixture 加入類型與能力，Back 側欄出現「預約申請」；**B**：維持，只有 admin 看得到。 | **A**（否則會員預約在作業面沒有人接） |
 
 ## 14. 參考來源
 

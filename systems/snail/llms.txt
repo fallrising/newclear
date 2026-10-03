@@ -2,6 +2,7 @@
 
 > Rust in-memory data server speaking RESP2 over TCP, wire-compatible with Redis. `redis-cli`, `redis-benchmark` and mainstream Redis SDKs connect with no adaptation. The focus is connection scale — C10K, C100K and io_uring — rather than feature parity.
 
+Tier: C
 Status: partial
 Interfaces: wire
 Entrypoint: TCP, RESP2. Connect with any Redis client.
@@ -9,6 +10,8 @@ Auth: none
 Spec: none applicable — the interface is the Redis wire protocol. The command coverage table in the README is the contract, and [docs/STATUS.md](https://github.com/fallrising/newclear/blob/main/systems/snail/docs/STATUS.md) holds the full list and the gaps.
 
 The directory is `systems/snail`; the project calls itself `rudis`. Both names refer to this server.
+
+Dormant (tier C), kept for its benchmark history. [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records that [labs/mithril-research](https://github.com/fallrising/newclear/blob/main/labs/mithril-research/) will not revive it: the open milestones below stay open. Treat this as a finished experiment with a working subset, not as work in progress.
 
 `partial` means the protocol and the M1 command set work, and scale milestones are still open: M0 skeleton and M1 full semantics with multi-core are done with the C10K gate passing; M2 (C100K hold) and M3 (C1M, io_uring behind `RUDIS_IO_URING=1`) are in progress. Treat the command coverage as real and the upper connection limits as unproven.
 

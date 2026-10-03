@@ -2,7 +2,7 @@
 
 ## Context
 
-This monorepo holds 23 in-scope projects (excluding `refs/` and retired code). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
+This monorepo holds 31 components (excluding `refs/` and root `docs/`). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
 
 OpenAPI cannot serve as that entry point: roughly a third of the projects expose no HTTP surface at all. `AGENTS.md` cannot either — by its own specification it carries instructions for agents *working on* a project, not a description of the interface its consumers call.
 
@@ -20,19 +20,28 @@ Replacing `README.md`, `AGENTS.md`, SDD documents or existing contracts; generat
 
 Required by the upstream specification: an H1 project name, then an optional blockquote summary, then optional prose without headings, then zero or more H2 sections whose list items each begin with a markdown hyperlink.
 
-There are two kinds of file. A **project capability file** sits in a project directory and describes that project. The **root index** at `llms.txt` describes no single project; it names every project and links each one's capability file where it exists. The keys below are required of a project capability file and forbidden in the root index, whose own obligation is to link every project file that exists.
+There are two kinds of file. A **project capability file** sits in a project directory and describes that project. The **root index** at `llms.txt` describes no single project; it names every project and links each one's capability file where it exists. The keys below are required of a project capability file and forbidden in the root index, whose own obligation is to link every project file that exists and to name every component with its tier.
 
 A project capability file additionally requires, in the prose block between the blockquote and the first H2, these lines in this order, one per line, each `Key: value`:
 
 | Key | Value |
 | --- | --- |
+| `Tier` | `A`, `B`, `C` or `D`, copied from the component's 文檔檔 column in the root `README.md` catalog. Owner-assigned; a capability file reports it and never sets it. |
 | `Status` | `production`, `partial`, `spec-only` or `retired`. `spec-only` means the specification is written and the code is not usable yet. |
 | `Interfaces` | comma-separated from `http`, `cli`, `mcp`, `grpc`, `wire`, `library`, `desktop`, `spec` |
 | `Entrypoint` | how a caller reaches it: listen address and base path, binary name, or transport |
 | `Auth` | what a caller must present, or `none` |
 | `Spec` | repository path of the machine-readable contract, or `none` with the reason |
 
-`Status` is not optional. Several projects here are approved specifications with no runnable code, and an agent that cannot tell those apart from shipped services will call something that does not exist.
+`Tier` and `Status` answer different questions and both are needed. `Tier` is the owner's investment and documentation decision from [portfolio-doc-tiers.md](../portfolio-doc-tiers.md); `Status` is whether the code runs. A released, working, dormant component is `Tier: C` and `Status: production`, and an agent needs both facts: it can call the thing, and nobody is maintaining it. Declaring only one produces the "looks runnable" rot the tier policy exists to prevent, in the other direction — an agent reading `production` alone will treat a dormant component as supported.
+
+`Status` is not optional either. Several projects here are approved specifications with no runnable code, and an agent that cannot tell those apart from shipped services will call something that does not exist.
+
+The validator cross-checks `Tier` against the README catalog, so the two cannot drift apart silently. When they disagree the README wins, because the tier is assigned in the owner's private project ledger and PORTFOLIO.md is its public summary.
+
+### Relation to the documentation tier policy
+
+An `llms.txt` is not a quickstart, a tutorial or a how-to, so the tier policy's prohibitions do not reach it: a `C` or `D` component may have one, and should. For a dormant component it is the cheapest honest way to say *this exists, here is its surface, nobody is maintaining it, here is what replaced it* — which is close to what the policy already asks a `C` README to say, in a form an agent can act on. The prose block of a `C` or `D` file should carry the dormancy facts and any successor named in [PORTFOLIO.md](../../PORTFOLIO.md), and must not acquire new how-to material to compensate.
 
 Prose after those lines should state what the project is for and what it is not for. Absolute `https://github.com/fallrising/newclear/blob/main/...` URLs are used in links so that a file stays resolvable when an agent fetches it on its own.
 
@@ -44,14 +53,20 @@ Scenario: A project declares its capabilities
   Given a project directory with an `llms.txt`
   When the validator runs
   Then the file has exactly one H1 on its first line
-  And the five required keys are present, in order, with accepted values
+  And the six required keys are present, in order, with accepted values
   And every H2 list item starts with a markdown hyperlink
   And every link that points inside this repository resolves to a tracked file
+
+Scenario: A declared tier contradicts the catalog
+  Given a project `llms.txt` whose `Tier` is `A`
+  And a root `README.md` catalog row assigning that component `C`
+  When the validator runs
+  Then it fails and names the component, the declared tier and the catalog tier
 
 Scenario: The root index stays truthful
   Given the root `llms.txt`
   When the validator runs
-  Then it declares none of the five project keys
+  Then it declares none of the six project keys
   And every in-repo link resolves to a tracked file
   And every project that has its own `llms.txt` is linked from the root index
 

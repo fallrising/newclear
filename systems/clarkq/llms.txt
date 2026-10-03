@@ -2,11 +2,14 @@
 
 > Lightweight HTTP message queue in Go. Named FIFO queues over a small REST API, with optional WAL durability, API-key/JWT auth, envelope encryption, multi-node sharding and Prometheus metrics. Released and running; v1.5.1.
 
+Tier: C
 Status: production
 Interfaces: http, library
 Entrypoint: HTTP listener on `:8080`; API base path `/api/v1`; admin UI at `/ui/`
 Auth: none by default. When configured, every `/api/*` route requires an API key (`X-API-Key`, or `Authorization: Bearer`) and/or a JWT bearer token; `/health` and `/metrics` stay public. JWT `scope`/`roles` claims carry a per-queue ACL in the form `queue:name:action`.
 Spec: none — no OpenAPI document exists. The endpoint table in the README is the contract.
+
+Dormant (tier C) but released and working: v1.5.1 runs as documented. Nobody is developing it, and [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records the standing boundary that no cluster features will be added — the clustering that exists stays, it does not grow. Use it as it is or not at all.
 
 Use it for short-lived buffering, job handoff between services, worker pools and local development. Queue names match `[a-zA-Z0-9_-]`, 1–64 characters, case-sensitive, and are created lazily on first write.
 

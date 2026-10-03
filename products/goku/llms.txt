@@ -2,11 +2,14 @@
 
 > Bookmark ingestion and management, in four deployable pieces: a Go HTTP API over SQLite, a Go CLI, an MQTT consumer that batches URLs into the API, and a React web UI. Built for bulk import of large browser exports.
 
+Tier: C
 Status: production
 Interfaces: http, cli
 Entrypoint: API on `:8080`, base path `/api/v1`; `goku` CLI binary; consumer subscribes to an MQTT topic and posts to the API
 Auth: none. The API has no authentication of any kind — do not expose it to an untrusted network.
 Spec: none — no OpenAPI document exists. The route list below was read from `api/api/v1/router.go` and is authoritative.
+
+Dormant (tier C) and its future undecided: [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records that the `copilot` and `gemini` branches are kept while whether to continue is still open, and that Goku competes with `flowshot`, `loom` and Ice Maker for the same "read, note, organise information" attention, so they are not developed at the same time. The four components below work; nobody is extending them.
 
 This directory has no `README.md`; each of the four components has its own. There is no single place that describes how they fit together, so: the CLI and the consumer are both producers against the API, the API owns the SQLite database, and the web UI talks to the API over HTTP.
 

@@ -14,7 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-REQUIRED_KEYS = ["Status", "Interfaces", "Entrypoint", "Auth", "Spec"]
+REQUIRED_KEYS = ["Tier", "Status", "Interfaces", "Entrypoint", "Auth", "Spec"]
+TIER_VALUES = {"A", "B", "C", "D"}
 STATUS_VALUES = {"production", "partial", "spec-only", "retired"}
 INTERFACE_VALUES = {
     "http",
@@ -28,6 +29,10 @@ INTERFACE_VALUES = {
 }
 
 KEY_LINE = re.compile(r"^([A-Z][A-Za-z]*): *(.+)$")
+# A root README catalog row: | [`products/goku`](products/goku/) | … | … | C |
+CATALOG_ROW = re.compile(
+    r"^\| *\[`(?P<path>[a-z0-9-]+/[a-z0-9-]+)`\]\([^)]*\).*\| *(?P<tier>[ABCD]) *\|? *$"
+)
 LIST_ITEM = re.compile(r"^- *\[")
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 BLOB_PREFIX = "https://github.com/fallrising/newclear/blob/main/"
@@ -61,7 +66,27 @@ def in_repo_target(url: str) -> str | None:
     return path.rstrip("/") or None
 
 
-def check_file(path: str, files: set[str], dirs: set[str]) -> list[str]:
+def catalog_tiers() -> dict[str, str]:
+    """Component path -> doc tier, read from the root README catalog tables.
+
+    The tier is assigned in the owner's private project ledger and surfaced
+    here; a capability file may only report it. An unreadable README yields an
+    empty mapping, which skips the cross-check rather than inventing a tier.
+    """
+    readme = Path("README.md")
+    if not readme.is_file():
+        return {}
+    tiers: dict[str, str] = {}
+    for line in readme.read_text(encoding="utf-8").splitlines():
+        match = CATALOG_ROW.match(line.rstrip())
+        if match:
+            tiers[match.group("path")] = match.group("tier")
+    return tiers
+
+
+def check_file(
+    path: str, files: set[str], dirs: set[str], tiers: dict[str, str]
+) -> list[str]:
     """Validate one file. The root index is a different kind of file from a
     project capability file: it describes no single project, so the five keys
     do not apply to it. Its own obligation — linking every project file — is
@@ -106,6 +131,25 @@ def check_file(path: str, files: set[str], dirs: set[str]) -> list[str]:
             )
 
     values = dict(found)
+    if "Tier" in values:
+        declared_tier = values["Tier"]
+        if declared_tier not in TIER_VALUES:
+            errors.append(
+                f"{path}: Tier must be one of {sorted(TIER_VALUES)}, "
+                f"found {declared_tier!r}"
+            )
+        else:
+            component = str(Path(path).parent)
+            catalog_tier = tiers.get(component)
+            if catalog_tier is None:
+                errors.append(
+                    f"{path}: {component} has no tier row in the README catalog"
+                )
+            elif catalog_tier != declared_tier:
+                errors.append(
+                    f"{path}: {component} declares Tier {declared_tier} but the "
+                    f"README catalog assigns {catalog_tier}; the catalog wins"
+                )
     if "Status" in values and values["Status"] not in STATUS_VALUES:
         errors.append(
             f"{path}: Status must be one of {sorted(STATUS_VALUES)}, "
@@ -161,9 +205,10 @@ def main() -> int:
         print("no llms.txt files tracked; nothing to validate")
         return 0
 
+    tiers = catalog_tiers()
     errors: list[str] = []
     for path in targets:
-        errors.extend(check_file(path, files, dirs))
+        errors.extend(check_file(path, files, dirs, tiers))
 
     if "llms.txt" in files:
         root = Path("llms.txt").read_text(encoding="utf-8")

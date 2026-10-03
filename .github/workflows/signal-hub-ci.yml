@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -65,7 +65,10 @@ jobs:
         working-directory: platform/signal-hub/browser
         env:
           SIGNALHUB_BINARY: /tmp/signalhub
+          # Ubuntu allows the packaged Chrome sandbox at its installed path.
+          SIGNALHUB_CHROMIUM: /opt/google/chrome/chrome
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          test -x "$SIGNALHUB_CHROMIUM"
+          "$SIGNALHUB_CHROMIUM" --version
           npm test

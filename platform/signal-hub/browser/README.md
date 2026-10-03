@@ -33,3 +33,9 @@ the silent transition is observed after more than four seconds.
 Successful runs also save desktop timeline and mobile timeline/detail/sources
 screenshots in `test-results/` for visual inspection. Chinese system fonts are
 needed to inspect the Traditional Chinese interface accurately.
+
+CI uses the Ubuntu 24.04 runner's preinstalled Google Chrome at
+`/opt/google/chrome/chrome`, whose installed path is supported by Ubuntu's
+AppArmor policy. The browser version is printed in the job log. This preserves
+Chromium sandboxing without changing host security policy; the local default
+continues to use Playwright's pinned Chromium download.

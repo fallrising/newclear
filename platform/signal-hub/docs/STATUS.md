@@ -29,6 +29,7 @@
 - `TestQueryPerformance30K` 以一筆 fixture transaction 建立 3 萬筆合成事件，量測 public store query；這是本機第一頁讀取成本，並非網路／瀏覽器延遲或生產容量保證。
 - 獨立 reviewer 未發現 high／medium 問題；審查範圍包括來源交易／權限、cursor、token 記憶體生命週期、URL 篩選、安全連結與 CSP。
 - Playwright 1.63.0／Chromium 153.0.8010.12，以非 root UID、Chromium sandbox 啟用執行 5/5 通過。涵蓋 401／403、105 筆分頁、URL 歷史／重開、token 不落地、raw JSON／危險連結、來源沉默／恢復及 390px 手機頁面；桌面／手機截圖已目視檢查。
+- 遠端 Ubuntu 24.04 CI 使用 runner 預裝 Chrome，版本記在 job log；保留 Chromium sandbox，不調整 AppArmor 政策。本機固定版 Chromium 的驗證結果如上。
 - 固定程式版本以本次 PR head SHA 為準，避免在檔內引用自身 commit。
 
 ## 限制與下一步

@@ -1,5 +1,6 @@
 package com.fallrising.cms.content.store;
 
+import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.EntryRefRecord;
@@ -145,13 +146,23 @@ public class InMemoryContentStore implements ContentStore {
 
     @Override
     public EntryRecord updateEntry(EntryRecord entry) {
-        entries.put(entry.id(), entry);
+        entries.compute(entry.id(), (id, current) -> {
+            if (current == null || current.version() != entry.version() - 1) {
+                throw ContentException.versionConflict();
+            }
+            return entry;
+        });
         return entry;
     }
 
     @Override
-    public void hardDeleteEntry(UUID id) {
-        entries.remove(id);
+    public void hardDeleteEntry(UUID id, int expectedVersion) {
+        entries.compute(id, (key, current) -> {
+            if (current == null || current.version() != expectedVersion) {
+                throw ContentException.versionConflict();
+            }
+            return null;
+        });
         revisions.remove(id);
         refs.remove(id);
     }

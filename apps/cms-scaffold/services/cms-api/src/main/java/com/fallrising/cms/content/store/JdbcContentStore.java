@@ -1,5 +1,6 @@
 package com.fallrising.cms.content.store;
 
+import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.EntryRefRecord;
@@ -11,6 +12,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class JdbcContentStore implements ContentStore {
 
@@ -31,10 +35,17 @@ public class JdbcContentStore implements ContentStore {
 
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
+    private final TransactionTemplate transactions;
 
     public JdbcContentStore(DataSource dataSource, ObjectMapper mapper) {
         this.jdbc = new JdbcTemplate(dataSource);
         this.mapper = mapper;
+        this.transactions = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+    }
+
+    @Override
+    public <T> T writeTransaction(Supplier<T> work) {
+        return transactions.execute(status -> work.get());
     }
 
     @Override
@@ -225,12 +236,12 @@ public class JdbcContentStore implements ContentStore {
 
     @Override
     public EntryRecord updateEntry(EntryRecord entry) {
-        jdbc.update(
+        int changed = jdbc.update(
                 """
                 UPDATE cms_entry SET slug = ?, publication_state = ?, version = ?, payload = CAST(? AS jsonb),
                   published_payload = CAST(? AS jsonb), published_at = ?, archived_at = ?, deleted_at = ?,
                   updated_by = ?, updated_at = ?
-                WHERE id = ?
+                WHERE id = ? AND version = ?
                 """,
                 entry.slug(),
                 entry.publicationState().wire(),
@@ -242,16 +253,20 @@ public class JdbcContentStore implements ContentStore {
                 ts(entry.deletedAt()),
                 entry.updatedBy(),
                 ts(entry.updatedAt()),
-                entry.id());
+                entry.id(),
+                entry.version() - 1);
+        if (changed != 1) {
+            throw ContentException.versionConflict();
+        }
         return entry;
     }
 
     @Override
-    public void hardDeleteEntry(UUID id) {
-        jdbc.update("DELETE FROM cms_entry_index WHERE entry_id = ?", id);
-        jdbc.update("DELETE FROM cms_entry_ref WHERE from_entry_id = ?", id);
-        jdbc.update("DELETE FROM cms_entry_revision WHERE entry_id = ?", id);
-        jdbc.update("DELETE FROM cms_entry WHERE id = ?", id);
+    public void hardDeleteEntry(UUID id, int expectedVersion) {
+        // Content dependents have ON DELETE CASCADE; claim the version before deleting anything.
+        if (jdbc.update("DELETE FROM cms_entry WHERE id = ? AND version = ?", id, expectedVersion) != 1) {
+            throw ContentException.versionConflict();
+        }
     }
 
     @Override

@@ -2,7 +2,7 @@
 
 [回 v2 索引](README.md)
 
-狀態：**Framework v0.1；全部前端波次已細化為 DOC_READY 施工圖**
+狀態：**Framework v0.1；W0 已實作，W1～W5 已有施工圖，W6 仍為 DRAFT**
 日期：2026-09-24（2026-09-25 更新：§9、§12、§13 依 owner 決定改寫；同日 W0 細化：§5 補 token、§6.2 `AppFrame` 側欄、新增 §13.3；2026-09-26 W2 細化：§6、§7.2、§9、§12 補施工細節連結，新增 §13.5；同日 W3 細化：§6.1、§6.3、§7.1、§8、§9、§12 補施工細節連結，§13.2 補一列，新增 §13.6；同日 W4 細化：§6.1、§6.4、§7.3、§12 補施工細節連結，新增 §13.7；同日 W3b、W5 細化：會員流程與 §10 硬化補施工細節連結；2026-10-03 owner 決定 §13.4、§13.7，新增 §13.8 與 §12 的 W6 列）
 讀者：負責重寫前端的 LLM agent，以及審這些 PR 的人  
 輸入：[00 v1 前端稽核](00-v1-frontend-audit.md)、[總綱](../sdd/00-overview.md)、[surface-front](../specs/surface-front.md)、[surface-back](../specs/surface-back.md)、[surface-admin](../specs/surface-admin.md)
@@ -43,7 +43,9 @@
 
 ---
 
-## 2. Shopify 參考：借什麼、不借什麼
+## 2. 介面參考：Shopify 與 shadcn-admin
+
+2026-10-03 使用者補充 shadcn-admin 參考；對照與採用邊界見 [03 §介面參考](03-personal-use-readiness.md#介面參考)。沿用 packages/ui 與 token，Back／Admin 的新畫面以 shadcn-admin 的側欄、表格、表單模式補充本節；既有權限、狀態、離開前提示等功能契約保持。P0 僅先修表單值與寫入回饋，完整畫面仍由 W1／W4 擁有。
 
 借的是**資訊架構與互動模式**，不是品牌外觀，也不引入 Shopify 的套件（理由見 D-02）。
 

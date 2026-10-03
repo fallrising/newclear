@@ -169,8 +169,13 @@ public class MediaService {
             if (entry.isEmpty() || entry.get().deleted() || entry.get().publicationState() != PublicationState.PUBLISHED) {
                 continue;
             }
+            if (content.findTypeByKey(entry.get().contentTypeKey()).filter(type -> type.enabled()).isEmpty()
+                    || entry.get().publishedPayload() == null
+                    || !mediaId.equals(parseMediaId(entry.get().publishedPayload().get(attachment.fieldKey())))) {
+                continue;
+            }
             boolean allowedField = content.fieldsOf(entry.get().contentTypeId()).stream()
-                    .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && f.publicBytes() && f.enabled());
+                    .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && "media-ref".equals(f.fieldType()) && f.publicBytes() && f.enabled());
             if (allowedField
                     && PublicVisibility.gettable(entry.get().publishedPayload())
                     && publishedRefsOk(entry.get())) {

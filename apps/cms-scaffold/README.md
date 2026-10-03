@@ -7,9 +7,11 @@
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
 實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
-v2（設計階段，前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
+v2（BW0／W0 已實作，前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
-目前實作到 **Wave E + Back 自訂視圖**：kernel 與三面已驗收；Back 另有相簿編排、當日行程、issue 看板（寫入仍走 entry API）。
+目前包含 **Wave E＋Back 自訂視圖＋v2 BW0／W0**：後端 OpenAPI／store 契約測試、前端共用套件／MSW／新殼已存在；Back 另有相簿編排、當日行程、issue 看板。後續模型與編輯器功能仍依 v2 波次開發。
+
+個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 
 ## 需求
 
@@ -106,4 +108,4 @@ Demo 種子（無密碼、無 demo 專用表）：
 - 診所：`clinic_profile` slug `home`；James Carter / Helen Leary 公開，Linda Douglas 草稿；飼主不可匿名讀
 - 專案：公開 `cms-scaffold`、private `internal-ops`、draft `draft-lab`；issue 對匿名 403
 
-Compose 若沿用舊 Postgres volume、缺少新欄位或種子，先 `docker compose down -v` 再 `up --wait --build`。
+既有資料庫升級應保留 volume 並由 Flyway 執行新增 migration；先備份 PostgreSQL 與媒體並驗證可還原。`docker compose down -v` 會刪除資料卷，只可用於明確可丟棄的 demo 資料，不能當成正式資料的升級方式。

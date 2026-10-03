@@ -74,36 +74,38 @@ public class EntryService {
     }
 
     public EntryRecord create(Principal principal, Surface surface, String typeKey, String slug, Map<String, Object> payload) {
-        ContentTypeRecord type = requireType(typeKey);
-        authorization.require(principal, CmsAction.CREATE, typeKey, payload, surface);
-        if (type.singleton() && store.countEntries(type.id(), true) > 0) {
-            throw ContentException.singletonExists();
-        }
-        ensureSlugFree(type.id(), slug, null);
-        Instant now = Instant.now();
-        UUID actor = principal == null ? null : principal.id();
-        Map<String, Object> body = payload == null ? new LinkedHashMap<>() : new LinkedHashMap<>(payload);
-        validatePayload(type, body, false);
-        EntryRecord entry = new EntryRecord(
-                UUID.randomUUID(),
-                type.id(),
-                type.typeKey(),
-                slug,
-                PublicationState.DRAFT,
-                1,
-                body,
-                null,
-                null,
-                null,
-                null,
-                actor,
-                actor,
-                now,
-                now);
-        store.insertEntry(entry);
-        store.replaceRefs(entry.id(), extractRefs(entry, type));
-        mediaService.replaceAttachments(entry.id(), extractMediaAttachments(entry, type));
-        return entry;
+        return store.writeTransaction(() -> {
+            ContentTypeRecord type = requireType(typeKey);
+            authorization.require(principal, CmsAction.CREATE, typeKey, payload, surface);
+            if (type.singleton() && store.countEntries(type.id(), true) > 0) {
+                throw ContentException.singletonExists();
+            }
+            ensureSlugFree(type.id(), slug, null);
+            Instant now = Instant.now();
+            UUID actor = principal == null ? null : principal.id();
+            Map<String, Object> body = payload == null ? new LinkedHashMap<>() : new LinkedHashMap<>(payload);
+            validatePayload(type, body, false);
+            EntryRecord entry = new EntryRecord(
+                    UUID.randomUUID(),
+                    type.id(),
+                    type.typeKey(),
+                    slug,
+                    PublicationState.DRAFT,
+                    1,
+                    body,
+                    null,
+                    null,
+                    null,
+                    null,
+                    actor,
+                    actor,
+                    now,
+                    now);
+            store.insertEntry(entry);
+            store.replaceRefs(entry.id(), extractRefs(entry, type));
+            mediaService.replaceAttachments(entry.id(), extractMediaAttachments(entry, type));
+            return entry;
+        });
     }
 
     public EntryRecord getWork(Principal principal, Surface surface, UUID id) {
@@ -146,218 +148,237 @@ public class EntryService {
     }
 
     public EntryRecord patch(Principal principal, Surface surface, UUID id, String slug, Map<String, Object> payload, Integer version) {
-        EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
-        if (current.deleted() || current.publicationState() == PublicationState.ARCHIVED) {
-            throw ContentException.invalidTransition();
-        }
-        authorization.require(principal, CmsAction.UPDATE, current.contentTypeKey(), current.payload(), surface);
-        if (version != null && version != current.version()) {
-            throw ContentException.versionConflict();
-        }
-        ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
-        String nextSlug = slug != null ? slug : current.slug();
-        ensureSlugFree(type.id(), nextSlug, current.id());
-        Map<String, Object> nextPayload = current.payloadCopy();
-        if (payload != null) {
-            nextPayload.putAll(payload);
-        }
-        validatePayload(type, nextPayload, false);
-        Instant now = Instant.now();
-        EntryRecord updated = new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                nextSlug,
-                current.publicationState(),
-                current.version() + 1,
-                nextPayload,
-                current.publishedPayload(),
-                current.publishedAt(),
-                current.archivedAt(),
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now);
-        store.updateEntry(updated);
-        store.replaceRefs(updated.id(), extractRefs(updated, type));
-        mediaService.replaceAttachments(updated.id(), extractMediaAttachments(updated, type));
-        return updated;
+        return store.writeTransaction(() -> {
+            EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
+            if (current.deleted() || current.publicationState() == PublicationState.ARCHIVED) {
+                throw ContentException.invalidTransition();
+            }
+            authorization.require(principal, CmsAction.UPDATE, current.contentTypeKey(), current.payload(), surface);
+            if (version != null && version != current.version()) {
+                throw ContentException.versionConflict();
+            }
+            ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
+            String nextSlug = slug != null ? slug : current.slug();
+            ensureSlugFree(type.id(), nextSlug, current.id());
+            Map<String, Object> nextPayload = current.payloadCopy();
+            if (payload != null) {
+                nextPayload.putAll(payload);
+            }
+            validatePayload(type, nextPayload, false);
+            Instant now = Instant.now();
+            EntryRecord updated = new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    nextSlug,
+                    current.publicationState(),
+                    current.version() + 1,
+                    nextPayload,
+                    current.publishedPayload(),
+                    current.publishedAt(),
+                    current.archivedAt(),
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now);
+            store.updateEntry(updated);
+            store.replaceRefs(updated.id(), extractRefs(updated, type));
+            mediaService.replaceAttachments(updated.id(), extractMediaAttachments(updated, type));
+            return updated;
+        });
     }
 
     public EntryRecord publish(Principal principal, Surface surface, UUID id) {
-        EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
-        if (current.deleted()) {
-            throw ContentException.notFound();
-        }
-        authorization.require(principal, CmsAction.PUBLISH, current.contentTypeKey(), current.payload(), surface);
-        if (current.publicationState() == PublicationState.ARCHIVED) {
-            throw ContentException.invalidTransition();
-        }
-        ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
-        if (!type.enabled()) {
-            throw ContentException.typeDisabled();
-        }
-        if (current.publicationState() == PublicationState.PUBLISHED && !current.dirty()) {
-            return current;
-        }
-        if ("required".equals(type.slugPolicy()) && (current.slug() == null || current.slug().isBlank())) {
-            throw ContentException.validation(ErrorCode.SLUG_REQUIRED, "Slug is required to publish");
-        }
-        validatePayload(type, current.payload(), true);
-        Instant now = Instant.now();
-        int nextNo = store.revisionsOf(current.id()).stream().mapToInt(RevisionRecord::revisionNo).max().orElse(0) + 1;
-        store.insertRevision(new RevisionRecord(
-                UUID.randomUUID(),
-                current.id(),
-                nextNo,
-                current.slug(),
-                current.payloadCopy(),
-                now,
-                principal == null ? null : principal.id(),
-                current.contentTypeKey()));
-        store.deleteOldestRevisions(current.id(), REVISION_KEEP);
-        EntryRecord published = new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                PublicationState.PUBLISHED,
-                current.version(),
-                current.payloadCopy(),
-                current.payloadCopy(),
-                now,
-                null,
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now);
-        return store.updateEntry(published);
+        return store.writeTransaction(() -> {
+            EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
+            if (current.deleted()) {
+                throw ContentException.notFound();
+            }
+            authorization.require(principal, CmsAction.PUBLISH, current.contentTypeKey(), current.payload(), surface);
+            if (current.publicationState() == PublicationState.ARCHIVED) {
+                throw ContentException.invalidTransition();
+            }
+            ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
+            if (!type.enabled()) {
+                throw ContentException.typeDisabled();
+            }
+            if (current.publicationState() == PublicationState.PUBLISHED && !current.dirty()) {
+                return current;
+            }
+            if ("required".equals(type.slugPolicy()) && (current.slug() == null || current.slug().isBlank())) {
+                throw ContentException.validation(ErrorCode.SLUG_REQUIRED, "Slug is required to publish");
+            }
+            validatePayload(type, current.payload(), true);
+            Instant now = Instant.now();
+            int nextNo = store.revisionsOf(current.id()).stream().mapToInt(RevisionRecord::revisionNo).max().orElse(0) + 1;
+            EntryRecord published = new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    PublicationState.PUBLISHED,
+                    current.version() + 1,
+                    current.payloadCopy(),
+                    current.payloadCopy(),
+                    now,
+                    null,
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now);
+            store.updateEntry(published);
+            mediaService.replaceAttachments(published.id(), extractMediaAttachments(published, type));
+            store.insertRevision(new RevisionRecord(
+                    UUID.randomUUID(),
+                    current.id(),
+                    nextNo,
+                    current.slug(),
+                    current.payloadCopy(),
+                    now,
+                    principal == null ? null : principal.id(),
+                    current.contentTypeKey()));
+            store.deleteOldestRevisions(current.id(), REVISION_KEEP);
+            return published;
+        });
     }
 
     public EntryRecord unpublish(Principal principal, Surface surface, UUID id) {
-        EntryRecord current = loadForTransition(principal, surface, id, CmsAction.UNPUBLISH);
-        if (current.publicationState() != PublicationState.PUBLISHED) {
-            throw ContentException.invalidTransition();
-        }
-        Instant now = Instant.now();
-        return store.updateEntry(new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                PublicationState.DRAFT,
-                current.version(),
-                current.payloadCopy(),
-                null,
-                null,
-                current.archivedAt(),
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now));
+        return store.writeTransaction(() -> {
+            EntryRecord current = loadForTransition(principal, surface, id, CmsAction.UNPUBLISH);
+            if (current.publicationState() != PublicationState.PUBLISHED) {
+                throw ContentException.invalidTransition();
+            }
+            Instant now = Instant.now();
+            return updateEntryAndAttachments(new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    PublicationState.DRAFT,
+                    current.version() + 1,
+                    current.payloadCopy(),
+                    null,
+                    null,
+                    current.archivedAt(),
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now));
+        });
     }
 
     public EntryRecord archive(Principal principal, Surface surface, UUID id) {
-        EntryRecord current = loadForTransition(principal, surface, id, CmsAction.ARCHIVE);
-        if (current.publicationState() == PublicationState.ARCHIVED) {
-            throw ContentException.invalidTransition();
-        }
-        Instant now = Instant.now();
-        return store.updateEntry(new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                PublicationState.ARCHIVED,
-                current.version(),
-                current.payloadCopy(),
-                null,
-                current.publishedAt(),
-                now,
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now));
+        return store.writeTransaction(() -> {
+            EntryRecord current = loadForTransition(principal, surface, id, CmsAction.ARCHIVE);
+            if (current.publicationState() == PublicationState.ARCHIVED) {
+                throw ContentException.invalidTransition();
+            }
+            Instant now = Instant.now();
+            return updateEntryAndAttachments(new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    PublicationState.ARCHIVED,
+                    current.version() + 1,
+                    current.payloadCopy(),
+                    null,
+                    current.publishedAt(),
+                    now,
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now));
+        });
     }
 
     public EntryRecord restore(Principal principal, Surface surface, UUID id) {
-        EntryRecord current = loadForTransition(principal, surface, id, CmsAction.ARCHIVE);
-        if (current.publicationState() != PublicationState.ARCHIVED) {
-            throw ContentException.invalidTransition();
-        }
-        Instant now = Instant.now();
-        return store.updateEntry(new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                PublicationState.DRAFT,
-                current.version(),
-                current.payloadCopy(),
-                null,
-                current.publishedAt(),
-                null,
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now));
+        return store.writeTransaction(() -> {
+            EntryRecord current = loadForTransition(principal, surface, id, CmsAction.ARCHIVE);
+            if (current.publicationState() != PublicationState.ARCHIVED) {
+                throw ContentException.invalidTransition();
+            }
+            Instant now = Instant.now();
+            return updateEntryAndAttachments(new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    PublicationState.DRAFT,
+                    current.version() + 1,
+                    current.payloadCopy(),
+                    null,
+                    current.publishedAt(),
+                    null,
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now));
+        });
     }
 
     public void softDelete(Principal principal, Surface surface, UUID id) {
-        EntryRecord current = loadForTransition(principal, surface, id, CmsAction.DELETE);
-        if (!store.refsTo(id).isEmpty()) {
-            throw ContentException.refConstraint();
-        }
-        Instant now = Instant.now();
-        store.updateEntry(new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                current.publicationState(),
-                current.version(),
-                current.payloadCopy(),
-                current.publishedPayload(),
-                current.publishedAt(),
-                current.archivedAt(),
-                now,
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now));
+        store.writeTransaction(() -> {
+            EntryRecord current = loadForTransition(principal, surface, id, CmsAction.DELETE);
+            if (!store.refsTo(id).isEmpty()) {
+                throw ContentException.refConstraint();
+            }
+            Instant now = Instant.now();
+            store.updateEntry(new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    current.publicationState(),
+                    current.version() + 1,
+                    current.payloadCopy(),
+                    current.publishedPayload(),
+                    current.publishedAt(),
+                    current.archivedAt(),
+                    now,
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now));
+            return null;
+        });
     }
 
     public void purge(Principal principal, Surface surface, UUID id) {
-        if (surface != Surface.ADMIN) {
-            throw IdentityException.surfaceForbidden(CmsAction.DELETE.wire(), null, surface == null ? null : surface.wire());
-        }
-        if (principal == null
-                || identityStore.rolesOf(principal.id()).stream()
-                        .noneMatch(role -> RoleCode.ADMIN.wire().equals(role.roleCode()))) {
-            throw IdentityException.forbidden(CmsAction.DELETE.wire(), null, surface.wire());
-        }
-        EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
-        if (!store.refsTo(id).isEmpty()) {
-            throw ContentException.refConstraint();
-        }
-        store.hardDeleteEntry(id);
-        identityStore.insertAudit(new AuditEvent(
-                UUID.randomUUID(),
-                Instant.now(),
-                principal.id(),
-                "CONTENT",
-                "ENTRY_PURGED",
-                "entry",
-                current.id(),
-                surface.wire(),
-                "ok",
-                null,
-                null));
+        store.writeTransaction(() -> {
+            if (surface != Surface.ADMIN) {
+                throw IdentityException.surfaceForbidden(CmsAction.DELETE.wire(), null, surface == null ? null : surface.wire());
+            }
+            if (principal == null
+                    || identityStore.rolesOf(principal.id()).stream()
+                            .noneMatch(role -> RoleCode.ADMIN.wire().equals(role.roleCode()))) {
+                throw IdentityException.forbidden(CmsAction.DELETE.wire(), null, surface.wire());
+            }
+            EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
+            if (!store.refsTo(id).isEmpty()) {
+                throw ContentException.refConstraint();
+            }
+            store.hardDeleteEntry(id, current.version());
+            mediaService.replaceAttachments(id, List.of());
+            identityStore.insertAudit(new AuditEvent(
+                    UUID.randomUUID(),
+                    Instant.now(),
+                    principal.id(),
+                    "CONTENT",
+                    "ENTRY_PURGED",
+                    "entry",
+                    current.id(),
+                    surface.wire(),
+                    "ok",
+                    null,
+                    null));
+            return null;
+        });
     }
 
     public EntryRecord publicGet(Principal principal, String typeKey, UUID id, String slug) {
@@ -445,30 +466,37 @@ public class EntryService {
     }
 
     public EntryRecord revert(Principal principal, Surface surface, UUID id, int revisionNo) {
-        EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
-        authorization.require(principal, CmsAction.UPDATE, current.contentTypeKey(), current.payload(), surface);
-        RevisionRecord revision = store.revisionsOf(id).stream()
-                .filter(r -> r.revisionNo() == revisionNo)
-                .findFirst()
-                .orElseThrow(ContentException::notFound);
-        Instant now = Instant.now();
-        EntryRecord updated = new EntryRecord(
-                current.id(),
-                current.contentTypeId(),
-                current.contentTypeKey(),
-                current.slug(),
-                current.publicationState(),
-                current.version() + 1,
-                new LinkedHashMap<>(revision.payload()),
-                current.publishedPayload(),
-                current.publishedAt(),
-                current.archivedAt(),
-                current.deletedAt(),
-                current.createdBy(),
-                principal == null ? current.updatedBy() : principal.id(),
-                current.createdAt(),
-                now);
-        return store.updateEntry(updated);
+        return store.writeTransaction(() -> {
+            EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
+            authorization.require(principal, CmsAction.UPDATE, current.contentTypeKey(), current.payload(), surface);
+            RevisionRecord revision = store.revisionsOf(id).stream()
+                    .filter(r -> r.revisionNo() == revisionNo)
+                    .findFirst()
+                    .orElseThrow(ContentException::notFound);
+            Instant now = Instant.now();
+            EntryRecord updated = new EntryRecord(
+                    current.id(),
+                    current.contentTypeId(),
+                    current.contentTypeKey(),
+                    current.slug(),
+                    current.publicationState(),
+                    current.version() + 1,
+                    new LinkedHashMap<>(revision.payload()),
+                    current.publishedPayload(),
+                    current.publishedAt(),
+                    current.archivedAt(),
+                    current.deletedAt(),
+                    current.createdBy(),
+                    principal == null ? current.updatedBy() : principal.id(),
+                    current.createdAt(),
+                    now);
+            ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
+            validatePayload(type, updated.payload(), false);
+            store.updateEntry(updated);
+            store.replaceRefs(updated.id(), extractRefs(updated, type));
+            mediaService.replaceAttachments(updated.id(), extractMediaAttachments(updated, type));
+            return updated;
+        });
     }
 
     private EntryRecord loadForTransition(Principal principal, Surface surface, UUID id, CmsAction action) {
@@ -574,6 +602,13 @@ public class EntryService {
         return refs;
     }
 
+    private EntryRecord updateEntryAndAttachments(EntryRecord entry) {
+        store.updateEntry(entry);
+        ContentTypeRecord type = store.findTypeByKey(entry.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
+        mediaService.replaceAttachments(entry.id(), extractMediaAttachments(entry, type));
+        return entry;
+    }
+
     private List<MediaAttachment> extractMediaAttachments(EntryRecord entry, ContentTypeRecord type) {
         Instant now = Instant.now();
         List<MediaAttachment> attachments = new ArrayList<>();
@@ -581,9 +616,15 @@ public class EntryService {
             if (!"media-ref".equals(field.fieldType())) {
                 continue;
             }
-            UUID mediaId = MediaService.parseMediaId(entry.payload() == null ? null : entry.payload().get(field.fieldKey()));
-            if (mediaId != null) {
-                attachments.add(new MediaAttachment(mediaId, entry.id(), field.fieldKey(), now));
+            UUID workingId = MediaService.parseMediaId(entry.payload() == null ? null : entry.payload().get(field.fieldKey()));
+            if (workingId != null) {
+                attachments.add(new MediaAttachment(workingId, entry.id(), field.fieldKey(), now));
+            }
+            // Keep the published snapshot attached while draft edits or reverts change the working copy.
+            UUID publishedId = entry.publicationState() == PublicationState.PUBLISHED && entry.publishedPayload() != null
+                    ? MediaService.parseMediaId(entry.publishedPayload().get(field.fieldKey())) : null;
+            if (publishedId != null && !publishedId.equals(workingId)) {
+                attachments.add(new MediaAttachment(publishedId, entry.id(), field.fieldKey(), now));
             }
         }
         return attachments;

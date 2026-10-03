@@ -1,5 +1,7 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-03 後續：[唯讀 fresh baseline observation](M3-FRESH-OBSERVATION-2026-10-03.md) 接續四機／etcd／ERU metadata 基線及 schema-v2 host evidence 重導出；本輪只用 fake／contract tests，未做 VPS 操作。這不是 fresh stage acceptance，正式剩餘仍為 12 項。
+
 2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
 
 2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。

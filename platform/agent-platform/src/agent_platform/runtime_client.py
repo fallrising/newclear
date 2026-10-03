@@ -92,6 +92,7 @@ class RuntimeClient:
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
                 "model_transport": getattr(self, "model_transport", False),
+                "tool_transport": run.get("tool_transport", False),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),
                 "verification": run.get(
                     "verification",

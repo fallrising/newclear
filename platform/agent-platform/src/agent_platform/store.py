@@ -110,6 +110,8 @@ class Store:
         return {"status": 201, "body": row}
 
     def create_profile(self, conn, data):
+        if data.mock_tools and data.backend != "openhands":
+            raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
         profile = data.profile_id or uuid4()
@@ -160,6 +162,7 @@ class Store:
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
+                        "mock_tools": data.mock_tools,
                     }
                 ),
                 Jsonb(

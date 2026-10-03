@@ -1,5 +1,7 @@
 # ERU-015 fresh executor：執行與恢復設計
 
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
 日期：2026-10-03。來源基線：`1e4bd8e43bd5fe30cb536e91479e44c9d2beb303`。本文是後續實作契約草案；本次只做 source/contract review，沒有建立執行器、執行 stage、讀取真實 private 資料或操作主機。ERU-015／V08 仍未完成，[SDD](SDD.md) 的驗收不變。
 
 ## 後續本機實作進度

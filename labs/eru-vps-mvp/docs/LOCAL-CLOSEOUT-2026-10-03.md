@@ -1,5 +1,7 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
 本檔 guard 修補的歷史基線為 `82cd9d8`，沿用固定 18 項任務；完成 6、剩餘 12（近期 1、後續 11）。本機測試不替代 VPS 驗收。本輪僅修正版本驗證工具及整理證據，沒有部署、重裝、故障注入或讀寫真實 private 資料。
 
 後續 v0.1.7 候選驗證見 [雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md)（已通過雙次隔離建置與有界 compatibility）；ERU-015 已補 [executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已接續 [本機 simulation](M3-FRESH-SIMULATION-2026-10-03.md)，仍缺 production executor。下列 429／438 tests 為 guard 修補當時的已驗證快照，不替代候選 patch 的新版測試結果。

@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import uuid
 
 from labops import atomic_json
@@ -36,7 +37,12 @@ def _read_result(project, result_file):
     if (candidate.is_symlink() or not path.is_relative_to(builds)
             or path.name != "result.json" or not path.is_file()):
         raise ValueError("build result must be a regular result.json under private/builds/")
-    raw = path.read_bytes()
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(descriptor, 'rb') as result_file:
+        identity = os.fstat(result_file.fileno())
+        if not stat.S_ISREG(identity.st_mode):
+            raise ValueError("build result must be a regular result.json under private/builds/")
+        raw = result_file.read()
     result = json.loads(raw)
     if not isinstance(result, dict):
         raise ValueError("build result must contain a JSON object")
@@ -105,7 +111,7 @@ def _read_result(project, result_file):
     patch_sha = result.get("patch_sha256")
     if not isinstance(patch_sha, str) or not SHA256.fullmatch(patch_sha) or _sha(patch.read_bytes()) != patch_sha:
         raise ValueError("build result patch checksum does not match the reviewed patch")
-    return result, raw
+    return result, raw, (identity.st_dev, identity.st_ino)
 
 
 def _public_argv(argv):
@@ -124,8 +130,10 @@ def _public_argv(argv):
 
 def publish(project, first_result, independent_result, output):
     project = Path(project).resolve()
-    first, first_raw = _read_result(project, first_result)
-    second, second_raw = _read_result(project, independent_result)
+    first, first_raw, first_file = _read_result(project, first_result)
+    second, second_raw, second_file = _read_result(project, independent_result)
+    if first_file == second_file:
+        raise ValueError("independent builds require distinct result files")
     identity = (
         "release_id", "repository", "source_tag", "target_version", "patch_revision",
         "compatible_from_versions", "architecture", "patch_file", "patch_sha256",
@@ -192,13 +200,14 @@ def publish(project, first_result, independent_result, output):
     try:
         atomic_json(temporary, report)
         validation_record(project, temporary)
-        os.replace(temporary, output_path)
-    except BaseException:
+        # Linking a complete validated file publishes atomically without replacing
+        # a manifest another writer created after the initial existence check.
+        os.link(temporary, output_path)
+    finally:
         try:
             temporary.unlink()
         except FileNotFoundError:
             pass
-        raise
     return report
 
 

@@ -1,5 +1,7 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-03 本機收尾核對：[驗收矩陣與缺口](LOCAL-CLOSEOUT-2026-10-03.md)。ERU-009／010／014 已具備有限本機流程；ERU-013 本輪修補 release provenance 守護，仍缺新版正式建置與跨版本驗收；ERU-015 只有 planner，仍缺 executor。不得將五項一律標成「本機完成、只待 E2E」。正式完成數與剩餘數不變。
+
 建立：2026-09-23。此清單從目前尚未完成的工作開始編號；首次部署、worker-4 元件重裝 3/3、恢復／patched reapply、背景觀測工具、資料回收分析及本機 SIGKILL 驗證已完成，不重複計入。
 
 **目前剩餘 12 項：近期收尾 1 項，後續驗證／擴充 11 項。此清單內完成 6 項。** 依 owner 指示先完成本機開發，再統一做正式 VPS E2E。ERU-010 已新增失聯 worker 的離線 review planner、live prepare、exact-ID dissociation executor、唯讀 recovery、partial fresh-subset cleanup 與 ERU-012 replacement wrapper，全部只用 fake tests，尚無實機演練；ERU-012 本機功能已齊待 E2E；ERU-013 的 v0.1.5 patch 已用 Go 1.27.1 重驗，另對 unreleased master commit 做 forward-compatibility probe；仍等下一個 stable tag 與正式跨版本 evidence；ERU-014 已有 preparation、worker-only install、registration 前 core known_hosts／nft access、fenced registration／smoke／resume、hash-bound inventory／generation commit，以及跨六 stages 的 snapshot/recovery coordinator；全部只用 fake tests 驗證，patch 仍未部署、整體 E2E 未完成，任務數不變。

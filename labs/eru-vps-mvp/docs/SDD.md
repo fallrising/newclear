@@ -13,6 +13,8 @@
 
 SDD 的 MUST 是後續實作要求，不代表已具備功能。本文的資源、延遲、RTO 與 RPO 數字皆是本案候選門檻，不是上游保證。
 
+2026-10-03 的本機驗收分界、release provenance 修補契約與 ERU-015 executor 待審邊界見 [本機收尾矩陣](LOCAL-CLOSEOUT-2026-10-03.md)。本輪沒有變更 V01–V11 或將 review-only planner 視為可執行重建。
+
 ## 2. Eru 的用途與能力邊界
 
 Eru core 是 gRPC 資源排程器。quickstart 使用 Ansible 安裝 etcd、core、資源 plugins、CLI 與 worker runtime；agent 回報 node／workload 狀態。Eru pod 是節點分組，並非 Kubernetes Pod。工作負載規格描述 app 與 entrypoint，部署參數提供 image、位置與資源。參見 [上游說明](https://github.com/projecteru2/quickstart/tree/023412becd4202b5b8c5d992552310512a2d6790)。

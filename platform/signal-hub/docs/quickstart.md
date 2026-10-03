@@ -1,15 +1,22 @@
-# Quickstart — 目前為設計閱讀入口
+# Quickstart — M0 契約驗證
 
-**Runtime blocked / not implemented。** 目前沒有 Go binary、前端、設定 schema 或 fixtures。本檔明確記錄阻擋，不提供會讓人以為能執行的指令。
+目前可以執行離線契約檢查，尚無可啟動的 Signal Hub 服務。
 
-閱讀順序：[總綱](../SDD.md) → [SDD 索引](sdd/README.md) → [狀態](STATUS.md) → [開發約定](../AGENTS.md)。
+從 repository 根目錄執行：
 
-| 驗證種類 | 本階段狀態 | 理由 |
+```sh
+python3 -m venv /tmp/signalhub-contracts
+/tmp/signalhub-contracts/bin/pip install --only-binary=:all: -r platform/signal-hub/contracts/requirements.txt
+/tmp/signalhub-contracts/bin/python platform/signal-hub/contracts/check.py
+```
+
+本次已在 Python 3.12 隔離環境安裝並執行相同 requirements 與 checker；安裝完成後檢查只讀本地檔案。細節見 [契約](../contracts/README.md)。
+
+| 驗證種類 | 狀態 | 邊界 |
 | --- | --- | --- |
-| 設計閱讀／邊界自查 | 可進行 | 所有 SDD 與來源都在 tree 中 |
-| schema／fixtures 驗證 | skipped | M0 尚未開始 |
-| Go 單元與整合測試 | skipped | 沒有 Go module |
-| 前端 build | skipped | 沒有 package 與 lockfile |
-| 部署與真實資料 | skipped | 需要另行授權 |
+| schemas／正反 fixtures | 可執行 | 結構、格式、設定語意及 data bytes |
+| webhook／canonical vectors | 可執行 | 合成輸入，沒有 HTTP 接收端或持久化去重 |
+| OpenAPI | 可執行 | 文件結構與引用，不代表 endpoint 已實作 |
+| Go、UI、SQLite、部署 | 未實作 | M1 起逐階段處理；部署需另行授權 |
 
-M1 完成後，把本檔改成真正執行過、可重現的本機啟動與驗證步驟。
+進度與限制見 [STATUS](STATUS.md)。

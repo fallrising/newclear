@@ -1,6 +1,6 @@
 # Signal Hub — Software Design Document
 
-版本：0.1 draft · 日期：2026-09-28 · 狀態：設計提案，尚未實作。
+版本：0.1 + M0 契約釐清 · 日期：2026-10-03 · runtime 狀態見 docs/STATUS.md。
 
 ## 1. 結論與理由
 
@@ -81,7 +81,7 @@ flowchart LR
 | 設定 | YAML 檔，放在 private 設定 repo | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
 | 部署 | OneFleet 管理的一個 workload（需另行授權） | 不另建部署機制 |
 
-精確依賴版本在 M0 以可重現的 build 鎖定，不在沒有安裝測試時寫入 lockfile。
+M0 鎖定實際安裝並驗證過的契約檢查工具版本；Go／前端 runtime 的依賴與 build 在對應實作階段再鎖定。
 
 ## 6. 詳細設計
 

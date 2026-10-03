@@ -1,32 +1,31 @@
 # Signal Hub — STATUS
 
-本檔是本專案唯一的進度權威。日期：2026-09-28。
+本檔是本專案唯一的進度權威。日期：2026-10-03。
 
 ## 目前狀態
 
-**SDD v0.1 draft，只有文件。沒有程式碼、沒有部署、沒有完成 owner acceptance。**
+**M0 契約已實作、待 PR 審查；沒有 runtime、前端、資料庫或部署。** 本次開發指令以 SDD v0.1 為 M0 基準，不代表 M1–M6 或未定部署選項已驗收。
 
 | 項目 | 狀態 | 證據／限制 |
 | --- | --- | --- |
-| 產品邊界與既有專案分工 | 已整理 | knowledge-base `44.05` 筆記（PR #72 已合併） |
-| 總綱與 01–06 詳細設計 | draft | 本目錄；schema 與 fixtures 尚待 M0 |
-| 官方來源查核 | 已整理 | [SOURCES](SOURCES.md)；部分官方網站被網路 proxy 擋住，改讀官方 GitHub repository |
-| 獨立 review／owner acceptance | pending | 自查不等於獨立審查 |
-| M0–M5 實作 | not started | 沒有 Go module、前端 package 或 lockfile |
-| M6 部署與真實資料 | not started | 需要另行授權 |
+| 事件／sources／rules／subscriptions／filter／完整設定 | 已建立 | `contracts/schemas/`，JSON Schema 2020-12 |
+| API 契約 | 已建立 | `contracts/openapi.json`，OpenAPI 3.1.1，12 paths／13 operations |
+| 正反 fixtures、canonical／簽章向量 | 已驗證 | `contracts/check.py`；結果見下 |
+| 獨立模型審查 | passed | gpt-6-astra 複核四項修正並重跑 checker；只涵蓋 M0 契約 |
+| 完整設計與功能 owner acceptance | pending | M0 開工不等於整體功能驗收 |
+| M1–M6 | not started | 沒有 server、UI、migration 或真實資料 |
 
-## 下一個最小切片
+## 交付證據
 
-owner 接受設計並明確要求實作後，開始 M0：事件 JSON Schema、設定 schema（sources、rules、subscriptions）、OpenAPI、正反 fixtures，以及 webhook 簽章的 test vectors。M0 沒有 runtime，也不需要任何 secret 或主機。
+- 固定來源 commit：`e2c901304570428a5c78744e274739206dbf3387`。M0 提交 SHA 由本檔所屬 PR 的 commit 固定，不自填循環引用。
+- 環境：Linux、Python 3.12、隔離 venv；實際安裝的版本鎖在 `contracts/requirements.txt`。
+- 執行：`python contracts/check.py`（元件目錄內）；通過6份 schema、61個正反 fixtures、15個 webhook 向量、5個 canonical 向量、16 KiB UTF-8 邊界、strict JSON、RFC 4231 及完整 OpenAPI 驗證。
+- 向量可以由 `contracts/generate_vectors.py` 重生。測試 secret 全為合成 bytes，不讀帳號或 secret 檔。
+- root CI 依本次 M0 範圍尚未接線；首次 runtime PR 加入本專案 path-scoped CI。契約檢查是離線工具，不是 runtime。
+- 未執行：Go/runtime、資料庫、UI、token 認證與真實 HTTP 投遞、主機／tailnet／部署，因為尚無實作且本次不含這些階段。
 
-第一個含可執行程式碼的 PR（M1）才加入 root path-scoped CI。
+## 風險與下一步
 
-## 待 owner 決定
-
-- 熱資料期實際天數（提案 90 天）與 rollup 保留期（提案 2 年）
-- 圖表函式庫（候選 ECharts）
-- 部署主機與設定 repo 的位置（私人資訊，不寫在本 repo）
-
-## 續作規則
-
-先核對實際 main、相關 PR 與本檔，不要只憑本檔判斷目前在哪個里程碑。每次完成時更新：固定 commit、實際執行的測試、未執行的項目與原因、待審項目、下一步。
+- M0 固定下的批次回應、JCS bytes、filter、webhook immediate 與 daily ntfy digest 細節見 [契約](../contracts/README.md)。schema 與 checker 通過不證明持久化、SSRF 防護或 at-least-once 行為已驗收。
+- 下一個最小切片為 M1：Go ingest／來源授權、SQLite schema、source+id 去重／衝突、查詢 API與專屬CI；另行點名後開始。
+- 熱資料90天／rollup2年仍是提案；圖表函式庫、部署主機與私人設定位置留到對應階段決定。

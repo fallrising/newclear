@@ -883,8 +883,32 @@ def main():
     loss_replace_execute.add_argument('--input', required=True, help='Original private worker-loss review input')
     loss_replace_recover = sub.add_parser('recover-worker-loss-replacement', help='Read-only replacement identity reconciliation; never redeploys')
     loss_replace_recover.add_argument('--run', required=True, help='Worker-loss replacement wrapper run ID')
+    fresh_prepare = sub.add_parser('prepare-fresh-execution', help='Validate private evidence and save a non-executable fresh execution envelope')
+    fresh_prepare.add_argument('--plan', required=True, help='Reviewed fresh plan ID')
+    fresh_prepare.add_argument('--sha256', required=True, help='Expected review-plan digest')
+    fresh_prepare.add_argument('--input', required=True, help='Private execution evidence request')
+    fresh_prepare.add_argument('--run-id', required=True, help='New immutable execution ID')
+    fresh_inspect = sub.add_parser('inspect-fresh-execution', help='Observe one exact execution and pending reservation without mutation or release')
+    fresh_inspect.add_argument('--run', required=True, help='Execution ID')
+    fresh_inspect.add_argument('--sha256', required=True, help='Expected execution digest')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command in ('prepare-fresh-execution', 'inspect-fresh-execution'):
+        from fresh_execution_ops import prepare_execution, inspect_execution, public_summary
+        try:
+            if args.command == 'prepare-fresh-execution':
+                envelope, _path = prepare_execution(
+                    PROJECT, args.plan, args.sha256, args.input, args.run_id)
+                result = public_summary(envelope)
+            else:
+                result = inspect_execution(PROJECT, args.run, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh execution request rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'host_count', 'generation_before',
+                  'target_generation', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command == 'plan-fresh-rebuild':
         from fresh_rebuild_ops import save_review_plan
         envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)

@@ -1,5 +1,7 @@
 # Pending-generation：controller 本機 admission barrier
 
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
 日期：2026-10-03。接續 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md) 與 [simulation coordinator](M3-FRESH-SIMULATION-2026-10-03.md)。這個切片實作持久 reservation 與既有合作式 controller 入口的攔截；仍不是完整 fresh executor、跨 controller 鎖或實際 writer fence。正式 ERU-015／V08 與剩餘 12 項任務不變。
 
 ## API 與持久停止點

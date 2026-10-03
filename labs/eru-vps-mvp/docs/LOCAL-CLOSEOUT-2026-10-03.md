@@ -1,5 +1,7 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
 2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
 
 本檔 guard 修補的歷史基線為 `82cd9d8`，沿用固定 18 項任務；完成 6、剩餘 12（近期 1、後續 11）。本機測試不替代 VPS 驗收。本輪僅修正版本驗證工具及整理證據，沒有部署、重裝、故障注入或讀寫真實 private 資料。

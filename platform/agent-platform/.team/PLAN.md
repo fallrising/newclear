@@ -50,3 +50,17 @@ T-007 isolated worker owns App.tsx/App.test.tsx/new taskLocation.ts and tests/re
 Persistent links integration: T-007 frontend diff inspected and integrated within declared scope. Root web-check57tests/build and complete browser-test6cases passed; browser cases cover real history/new-tab/reload, invalid recovery, unavailable projects, parent search pagination and prior security/reconnect behavior. T-008 independent review DONE accepted; no required findings, all six evidence hashes independently verified. Backend unchanged.
 
 Persistent-links evidence gate accepted: URL/helper/UI/browser tests map to all defined behaviors; root web/browser suites and diff/contracts passed, independent review accepted. Parent PR211 exact headc9cf96a reconfirmed with all CI green. Deliver this bounded slice as a stacked Draft PR; no merge or deployment.
+
+# Editable retry goals
+
+Next bounded workbench feature: keep one-click retry and add an explicit editor prefilled from the latest terminal attempt. Operator may change only goal, then submit a new attempt using latest base SHA/profile revision/state version. Cancel does not mutate; old attempt goal/result remain immutable. Display the selected attempt goal as inert multiline text in its activity panel.
+
+Validate non-whitespace goal and <=20000 Unicode code points without trimming the submitted content. Preserve draft during polling of the same attempt. When latest attempt identity changes, reset the editor; pending requests disable competing actions and edits. Preserve PendingCommand idempotency and error recovery; selecting history never changes a previous run. New active latest attempts remove retry controls.
+
+T-009 isolated frontend worker owns App.tsx/App.test.tsx/style.css/report. Root owns browser fixture/case, documentation/evidence and acceptance. T-010 independent reviewer. Required root web-check/browser-test, diff/contracts, independent review and PR CI. Backend APIs/dependencies unchanged; local backend suite need not rerun. Base mainc4b1ad6 includes merged PR211/216. Root budget100calls, worker45/review20. No merge/deploy/live provider.
+
+Editable retry integration: T-009 frontend/test/style diff inspected and copied within scope. Root web-check68tests/build, browser-test7cases and fixture Ruff lint/format/diff passed. New browser case verifies raw request metadata, one submission, original run equality, historical goal/result and persisted new goal. Intermediate React key collision and test typing failures were resolved and retained as evidence. T-010 independent review DONE accepted with no required corrections; all nine log hashes verified.
+
+Editable-retry evidence gate accepted: each defined behavior maps to UI or real browser coverage, worker scope inspected, root required checks passed, intermediate issues resolved and independent review accepted. Parent main c4b1ad6 reconfirmed. Deliver a new Draft PR; no merge/deploy.
+
+Precommit base update: main advanced to532e587 in an unrelated component. Fast-forwarded cleanly, and git diff --quiet confirmed agent-platform is identical to tested basec4b1ad6. Product verification remains applicable without rerunning unchanged suites.

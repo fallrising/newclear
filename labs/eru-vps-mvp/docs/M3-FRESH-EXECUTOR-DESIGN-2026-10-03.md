@@ -2,6 +2,10 @@
 
 日期：2026-10-03。來源基線：`1e4bd8e43bd5fe30cb536e91479e44c9d2beb303`。本文是後續實作契約草案；本次只做 source/contract review，沒有建立執行器、執行 stage、讀取真實 private 資料或操作主機。ERU-015／V08 仍未完成，[SDD](SDD.md) 的驗收不變。
 
+## 後續本機實作進度
+
+[Simulation journal／receipt coordinator](M3-FRESH-SIMULATION-2026-10-03.md) 已接續本設計進行本機實作：immutable record store、stage-level fake actions、no-replay 與 observation-only recovery。這不代表下列 production stages 已實作；實際 host receipts、全域 pending barrier、bootstrap、V01–V04／residue probes 與 generation commit/seal 都仍待完成。本文原始設計及其完整驗收標準保留。
+
 ## 已固定的範圍
 
 延續 [fresh prep](M3-FRESH-REBUILD-PREP-2026-09-27.md) 與 [本機收尾](LOCAL-CLOSEOUT-2026-10-03.md)：僅 Profile A，精確四台 provider resource 與所有受影響 volume，一次 `G → G+1`；OS 重灌由 owner 在 provider console 完成，`provider_api_used=false`。fresh 只建立全新 etcd，不匯入 snapshot、舊 data-dir、membership、node/workload/plugin metadata。日常元件重裝、單 worker OS 重灌、控制面還原都不替代這個流程。

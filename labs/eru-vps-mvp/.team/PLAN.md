@@ -49,3 +49,17 @@ T-209 independently reviews the frozen patch, validator and design in an isolate
 ## Candidate acceptance evidence
 
 T-206/207 implementation and T-208 design accepted within their bounded scope after T-209 independent review. T-210 documentation integrated with actual evidence; its original pending report remains historical. Two isolated source/toolchain/GOPATH/GOCACHE builds passed all patched and compatibility stages, expected baseline panics reproduced, and actual binaries are byte-identical: `312fc5ccffed086ff0d772b8c609ed079b055710b45e052830a7d67db3f5c356`. Only module downloads shared a cache. New v0.1.7 validation manifest and both existing manifests load successfully. Full suite 446 tests passed (68.675 seconds), original CI validation and compileall passed. Deployment locks remain unchanged. The broader local closeout remains PARTIAL: fresh executor and live upgrade/rollback/fresh-generation acceptance are absent.
+
+## Fresh simulation foundation after merged candidate delivery
+
+Baseline 532e587. New bounded tasks: T-212 durable immutable record store, T-213 fake-only 12-stage coordinator (frozen store API), T-214 independent adversarial review. Writers use isolated worktrees and disjoint paths; root owns integration, documentation, native CI and evidence acceptance. Start with lost-response RED; verify durable intent before dispatch, no replay, exact chain/binding recovery, one-winner publication and simulation-only output. Real adapters, global mutation barrier integration, bootstrap, generation acceptance and live operations remain absent. Prior candidate evidence is preserved and not rebuilt.
+
+### Integration and independent review
+
+T-212 store imported after SHA verification and root 16-test pass. T-213 coordinator imported with final frozen test snapshot after its contention expectation was corrected; root 36-test integration passed. T-214 adds five independent adversarial checks against real directory fsync failure, unknown valid JSON, root replacement, foreign action evidence and observation linkage. Its formatting finding on a trailing blank line was fixed without behavior change. Final focused suite: 41 tests, 1.647 seconds, OK. Original 482-test integration passed before the five independent tests were added; final full suite is required before acceptance.
+
+No validation was relaxed: active publication temporaries may conservatively block a competing reader, with at most one fake dispatch and an auditable journal after contention. Full production executor, external fencing, global pending barrier, bootstrap/probes, generation commit/seal and live acceptance remain absent. The module has no production CLI or remote adapter path.
+
+### Final evidence gate
+
+T-212/T-213 implementation and T-214 independent review accepted for the bounded simulation foundation. Final suite: 487 tests, 68.977 seconds, OK; focused 41 tests and original CI validation/compileall pass. Root applied only an EOF whitespace cleanup to the coordinator test snapshot after independent review. T-215 maps acceptance evidence and keeps the overall local closeout PARTIAL. No formal ERU completion count changed.

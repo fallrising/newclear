@@ -49,7 +49,7 @@ function publicMediaIds() {
     for (const field of db.adminTypes.find((type) => type.key === entry.contentType)?.fields ?? []) {
       if (!field.enabled || field.visibility !== "public" || field.type !== "media-ref") continue;
       const id = mediaId(entry.payload[field.key]);
-      if (id && db.media.some((asset) => asset.id === id)) ids.add(id);
+      if (id && !db.deletedMedia.includes(id) && db.media.some((asset) => asset.id === id)) ids.add(id);
     }
   }
   return ids;

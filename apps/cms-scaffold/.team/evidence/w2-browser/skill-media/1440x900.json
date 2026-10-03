@@ -1,0 +1,44 @@
+{
+  "viewport": {
+    "name": "1440x900",
+    "width": 1440,
+    "height": 900
+  },
+  "metrics": {
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "scrollWidth": 1425,
+    "scrollHeight": 901,
+    "outsideViewport": [],
+    "smallTouchTargets": [
+      "a",
+      "button#radix-_r_3_",
+      "button",
+      "input#media-search"
+    ],
+    "title": "媒體庫 · CMS 作業台"
+  },
+  "findings": [
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "a"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_3_"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "input#media-search"
+    }
+  ],
+  "url": "http://localhost:5184/media?mockUser=seed-operator-album"
+}

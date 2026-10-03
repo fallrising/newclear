@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import type { Transport } from "./core";
 import { keys, type WorkListParams } from "./keys";
 import { completeList, listQuery } from "./query";
-import type { EntryPatchRequest, EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "./schema";
+import type { BatchPatchRequest, EntryPatchRequest, EntryWriteRequest, MediaAsset, MediaAssetList, MediaQuota, RevisionList, WorkEntryList, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "./schema";
 
 export function workApi(t: Transport) {
   return {
@@ -18,7 +18,7 @@ export function workApi(t: Transport) {
     entries(type: string, params: WorkListParams = {}, signal?: AbortSignal): Promise<WorkEntryPage> {
       return t.call(() =>
         t.client.GET("/api/v1/content-types/{typeKey}/entries", {
-          params: { path: { typeKey: type }, query: listQuery({ q: params.q, state: params.state, page: params.page, size: params.size, sort: params.sort }, params) },
+          params: { path: { typeKey: type }, query: listQuery({ q: params.q, state: params.state, page: params.page, size: params.size, sort: params.sort, publishRequested: params.publishRequested, include: params.include }, params) },
           signal,
         }),
       );
@@ -26,11 +26,17 @@ export function workApi(t: Transport) {
     entry(id: string, signal?: AbortSignal): Promise<WorkEntry> {
       return t.call(() => t.client.GET("/api/v1/entries/{id}", { params: { path: { id } }, signal }));
     },
+    preview(id: string, signal?: AbortSignal): Promise<WorkEntry> {
+      return t.call(() => t.client.GET("/api/v1/preview/entries/{id}", { params: { path: { id } }, signal }));
+    },
     create(type: string, body: EntryWriteRequest): Promise<WorkEntry> {
       return t.call(() => t.client.POST("/api/v1/content-types/{typeKey}/entries", { params: { path: { typeKey: type } }, body }));
     },
     patch(id: string, body: EntryPatchRequest): Promise<WorkEntry> {
       return t.call(() => t.client.PATCH("/api/v1/entries/{id}", { params: { path: { id } }, body }));
+    },
+    batchPatch(items: BatchPatchRequest["items"]): Promise<WorkEntryList> {
+      return t.call(() => t.client.POST("/api/v1/entries:batch-patch", { body: { items } }));
     },
     publish(id: string): Promise<WorkEntry> {
       return t.call(() => t.client.POST("/api/v1/entries/{id}/publish", { params: { path: { id } } }));
@@ -44,12 +50,39 @@ export function workApi(t: Transport) {
     restore(id: string): Promise<WorkEntry> {
       return t.call(() => t.client.POST("/api/v1/entries/{id}/restore", { params: { path: { id } } }));
     },
-    /** Soft delete (move to recycling). */
+    /** Request publication of the saved work copy. */
+    requestPublish(id: string): Promise<WorkEntry> {
+      return t.call(() => t.client.POST("/api/v1/entries/{id}/publish-request", { params: { path: { id } } }));
+    },
+    /** 撤回發布請求. Without a request the entry is returned unchanged. */
+    cancelPublishRequest(id: string): Promise<WorkEntry> {
+      return t.call(() => t.client.DELETE("/api/v1/entries/{id}/publish-request", { params: { path: { id } } }));
+    },
+    /** Soft delete ("移到回收"). */
     remove(id: string): Promise<void> {
       return t.call(() => t.client.DELETE("/api/v1/entries/{id}", { params: { path: { id } } }));
     },
+    revisions(id: string, signal?: AbortSignal): Promise<RevisionList> {
+      return t.call(() => t.client.GET("/api/v1/entries/{id}/revisions", { params: { path: { id } }, signal }));
+    },
+    /** Copies the revision payload into the work copy; the published copy is unchanged. */
+    revert(id: string, revisionNo: number): Promise<WorkEntry> {
+      return t.call(() =>
+        t.client.POST("/api/v1/entries/{id}/revisions/{revisionNo}/revert", { params: { path: { id, revisionNo } } }),
+      );
+    },
+    /** The whole library, newest first (not paged by the API). Needs manage_media. */
+    mediaList(signal?: AbortSignal): Promise<MediaAssetList> {
+      return t.call(() => t.client.GET("/api/v1/media", { signal }));
+    },
+    mediaQuota(signal?: AbortSignal): Promise<MediaQuota> {
+      return t.call(() => t.client.GET("/api/v1/media/quota", { signal }));
+    },
     media(id: string, signal?: AbortSignal): Promise<MediaAsset> {
       return t.call(() => t.client.GET("/api/v1/media/{id}", { params: { path: { id } }, signal }));
+    },
+    removeMedia(id: string): Promise<void> {
+      return t.call(() => t.client.DELETE("/api/v1/media/{id}", { params: { path: { id } } }));
     },
     upload(file: File, title?: string): Promise<MediaAsset> {
       const form = new FormData();
@@ -76,6 +109,12 @@ export const workQueries = {
     queryOptions({ queryKey: keys.entries.allEntries(type, params), queryFn: ({ signal }) => api.allEntries(type, params, signal) }),
   entries: (api: WorkApi, type: string, params: WorkListParams = {}) =>
     queryOptions({ queryKey: keys.entries.list(type, params), queryFn: ({ signal }) => api.entries(type, params, signal) }),
+  preview: (api: WorkApi, id: string) =>
+    queryOptions({ queryKey: keys.entries.preview(id), queryFn: ({ signal }) => api.preview(id, signal), staleTime: 0 }),
+  revisions: (api: WorkApi, id: string) =>
+    queryOptions({ queryKey: keys.entries.revisions(id), queryFn: ({ signal }) => api.revisions(id, signal), staleTime: 0 }),
+  mediaList: (api: WorkApi) => queryOptions({ queryKey: keys.media.list(), queryFn: ({ signal }) => api.mediaList(signal) }),
+  mediaQuota: (api: WorkApi) => queryOptions({ queryKey: keys.media.quota(), queryFn: ({ signal }) => api.mediaQuota(signal), staleTime: 30_000 }),
   media: (api: WorkApi, id: string) =>
     queryOptions({ queryKey: keys.media.detail(id), queryFn: ({ signal }) => api.media(id, signal) }),
   entry: (api: WorkApi, id: string) =>

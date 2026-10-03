@@ -9,13 +9,14 @@ export function isKnown(field: WorkField): boolean {
   return (KNOWN_TYPES as readonly string[]).includes(field.type);
 }
 
-/** W1 reference widgets are read-only; retain their server representation verbatim. */
+/** Only writable widgets participate in PATCH; read-only and unknown fields remain intact. */
 export function isEditable(field: WorkField): boolean {
-  return isKnown(field) && !["ref", "media-ref", "principal-ref"].includes(field.type);
+  return isKnown(field) && field.type !== "principal-ref" && (field.type !== "ref" || !!field.refTarget);
 }
 
 function formValue(field: WorkField, value: unknown): unknown {
   if (!isEditable(field)) return value;
+  if (field.type === "ref" || field.type === "media-ref") return value;
   if (field.type === "boolean") return value === null ? null : value === true;
   if (value === null || value === undefined) return "";
   return typeof value === "string" ? value : String(value);
@@ -23,6 +24,7 @@ function formValue(field: WorkField, value: unknown): unknown {
 
 function payloadValue(field: WorkField, value: unknown): unknown {
   if (!isEditable(field)) return value;
+  if (field.type === "ref" || field.type === "media-ref") return typeof value === "string" && value.trim() === "" ? null : value;
   if (field.type === "boolean") return value === null ? null : value === true;
   if (typeof value !== "string" || value.trim() === "") return null;
   return field.type === "int" ? Number(value) : value;
@@ -41,9 +43,13 @@ export function toPayload(type: WorkContentType, values: FormValues): Record<str
   const payload: Record<string, unknown> = {};
   for (const field of type.fields) {
     const value = payloadValue(field, values[field.key]);
-    if (isEditable(field) || value !== undefined) payload[field.key] = value;
+    if (value !== undefined || (isEditable(field) && !["ref", "media-ref"].includes(field.type))) payload[field.key] = value;
   }
   return payload;
+}
+
+function mediaIdentity(value: unknown): unknown {
+  return value && typeof value === "object" && "mediaId" in value ? value.mediaId : value;
 }
 
 /** Only editable fields whose form value changed, encoded as in toPayload. PATCH merges, so nothing else changes (C-05). */
@@ -51,7 +57,11 @@ export function diffPayload(type: WorkContentType, initial: FormValues, values: 
   const changes: Record<string, unknown> = {};
   for (const field of type.fields) {
     if (!isEditable(field)) continue;
-    if (values[field.key] !== initial[field.key]) changes[field.key] = payloadValue(field, values[field.key]);
+    const before = initial[field.key];
+    const after = values[field.key];
+    // react-hook-form clones nested defaults. A media projection and its chosen id denote the same value.
+    const changed = field.type === "media-ref" ? mediaIdentity(before) !== mediaIdentity(after) : before !== after;
+    if (changed) changes[field.key] = payloadValue(field, after);
   }
   return changes;
 }

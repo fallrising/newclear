@@ -150,6 +150,38 @@ describe("@cms/api transport", () => {
     ]);
   });
 
+  it("G-03 G-10 serializes publishRequested and include=refs (BW2 §4.4)", async () => {
+    const calls = stubFetch(() => json(200, { items: [], total: 0, page: 1, size: 20, offset: 0, limit: 20 }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.work.entries("visit", { publishRequested: true, include: "refs", sort: "scheduledAt" });
+    await api.work.entries("visit", { publishRequested: false });
+    expect([...new URL(calls[0].url).searchParams.entries()]).toEqual([
+      ["sort", "scheduledAt"],
+      ["publishRequested", "true"],
+      ["include", "refs"],
+    ]);
+    expect(new URL(calls[1].url).search).toBe("?publishRequested=false");
+  });
+
+  it("G-09 G-03 batchPatch, publish requests and revert are CSRF-protected writes on the BW2 paths", async () => {
+    const calls = stubFetch((call) => (call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) : json(200, call.url.includes("batch") ? { items: [entry] } : entry)));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    const batch = await api.work.batchPatch([{ id: entry.id, version: 1, payload: { sortOrder: 10 } }]);
+    await api.work.requestPublish(entry.id);
+    await api.work.cancelPublishRequest(entry.id);
+    await api.work.revert(entry.id, 2);
+    expect(batch.items).toHaveLength(1);
+    expect(calls.map((c) => `${c.method} ${new URL(c.url).pathname}`)).toEqual([
+      "GET /api/v1/auth/csrf",
+      "POST /api/v1/entries:batch-patch",
+      `POST /api/v1/entries/${entry.id}/publish-request`,
+      `DELETE /api/v1/entries/${entry.id}/publish-request`,
+      `POST /api/v1/entries/${entry.id}/revisions/2/revert`,
+    ]);
+    expect(JSON.parse(calls[1].body!)).toEqual({ items: [{ id: entry.id, version: 1, payload: { sortOrder: 10 } }] });
+    expect(calls.slice(1).every((c) => c.headers.get("X-CSRF-Token") === "t")).toBe(true);
+  });
+
   it("AC-08 the Front client only reaches /api/v1/public and /api/v1/auth", async () => {
     const calls = stubFetch((call) =>
       call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) : json(200, { items: [], total: 0, offset: 0, limit: 0 }),

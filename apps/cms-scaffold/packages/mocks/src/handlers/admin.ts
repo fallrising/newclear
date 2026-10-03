@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { AdminContentType, AdminContentTypeList, MediaQuota, PrincipalList } from "@cms/api";
 import { db } from "../db";
 import { mediaQuota, principals } from "../fixtures.gen";
-import { requireAdmin, requireWork } from "../guards";
+import { canGlobal, requireAdmin, requireWork } from "../guards";
 import { apiError } from "../respond";
 
 function toggle(enabled: boolean) {
@@ -32,6 +32,9 @@ export const adminHandlers = [
 
   http.get("*/api/v1/media/quota", () => {
     const user = requireWork();
-    return user instanceof Response ? user : HttpResponse.json<MediaQuota>(mediaQuota);
+    if (user instanceof Response) return user;
+    if (!canGlobal(user, "manage_media")) return apiError(403, "FORBIDDEN", "Missing permission manage_media on content type media");
+    const assets = db.media;
+    return HttpResponse.json<MediaQuota>({ ...mediaQuota, usedFiles: assets.length, usedBytes: assets.reduce((sum, asset) => sum + Object.values(asset.variants).reduce((bytes, variant) => bytes + (variant?.byteSize ?? 0), 0), 0) });
   }),
 ];

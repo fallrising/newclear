@@ -158,3 +158,35 @@ Resolved history includes initial missing endpoint/schema Red, accidental naviga
 ## BW2 publication authorization — 2026-10-03
 
 Owner explicitly requested merging the completed PR and continuing development. Publish the verified BW2 source as one PR, require all remote CI checks, and merge the exact reviewed head. Earlier LOCAL_VERIFIED statements record local acceptance history. Continue W2 with documentation first; no deployment. Rechecked384 source hashes,171 protected hashes,all retained log hashes and prior snapshots before publication. Main changes since W1 are outside CMS and its CI.
+
+## W2 plan — 2026-10-03
+
+Publish BW2 PR235 and merge only after all CI succeeds, then implement W2 incrementally under its new section0. Owner authorized PR merge and continued development. New dependency approval remains pending; do independent work first. Next scope: C-08/C-09/C-10/U-03, G-03/G-09/G-10 UI, media/ref pickers, preview/history/media library.
+
+T701 Codex high owns API/MSW in isolated worktree; T702 Codex high owns Back pages/tests and mock E2E in another. Root owns UI/fields/docs/manifests/lock/integration. T703 Codex Luna independently reviews final diff/evidence. Explicit worker reports and bounded Red-Green checks precede root acceptance. No recursive delegation. Full repository-native gates, responsive browser evidence, unchanged-source/snapshot checks, task/report validation required.
+
+T703 accepted finding: private media byte handler mock lacked existing attachment authorization. Root documents before code and routes bounded T704 to T701 worker; no backend or authorization-policy change. Final source gate must include this correction.
+
+## Owner standing publication workflow — 2026-10-03
+
+Owner replaced the session AGENTS guidance: for each already requested milestone, after implementation/documentation/review/required verification, automatically commit, push a work branch, create/update PR, wait for CI/review, merge and verify remote results, then update handoff/tracking. Do not re-ask publication permission. This applies to W2 when complete; it does not authorize deployment or new runtime dependencies. The existing explicit question for dnd-kit versions remains pending, so partial W2 must not be published as a completed milestone.
+
+## W2 evidence checkpoint — PARTIAL (2026-10-03)
+
+T701 API/MSW and T704 private-media correction accepted in their bounded scopes. T702 non-drag Back implementation accepted after root integration/browser checks; pointer dragging remains pending. T703 independent review confirms both concrete findings resolved and no additional non-drag defect. Full frontend380 passed, final mocks92 replace prior78 for latest per-package394, selected37 E2E passed; two retained drag cases explicitly excluded. Eight desktop/mobile screenshots and health checks pass after Red/Green layout corrections.
+
+Root froze403 final source hashes and231 protected hashes; five post-full-gate files have targeted revalidation. All five snapshots412/449/468/566/602 and original468-file integration remain unchanged. Java/PostgreSQL sources unchanged; reuse successful BW2 complete remote CI rather than invent a W2 run. Existing dev-transitive brace-expansion audit remains visible and unchanged. See reports/W2-PROGRESS.md for exact commands/failures/skips.
+
+Do not accept the entire W2 milestone or publish it as complete until runtime dependency approval, drag implementation/review and all39 E2E pass. Owner standing publication authorization applies automatically after acceptance. Preserve prepared patch and isolated workers; no further milestone or deployment begun.
+
+## W2 drag authorization and closeout — 2026-10-03
+
+Owner explicitly approved @dnd-kit/core6.3.1 and @dnd-kit/sortable10.0.0. Root owns exact dependency installation and synchronizes current integrated sources into the existing isolated Back worker. T705 completes and validates the prepared drag patch; T706 independently reviews the integrated change. Preserve all prior root fixes and regressions. Root runs affected/full frontend gates, all39 mock E2E, final browser evidence and acceptance documentation; publication then follows standing authorization without another permission request. Backend source/build dependencies remain unchanged, allowing prior local backend evidence reuse and fresh required remote CI.
+
+T705 uses a NEW work/cms-w2-drag worktree; automatic review rejected broad synchronization into an existing dirty worker. A clean isolated worktree removes that overwrite risk and preserves all older worker files. Exact dependency install and npmci succeeded; all old locked versions unchanged, only four dnd-kit package entries added. Non-drag checkpoint manifests/summary/log hashes retained under w2-nondrag-* before final refresh.
+
+## W2 acceptance — LOCAL_VERIFIED (2026-10-03)
+
+T701/T704 API/mock and T702 non-drag scope accepted, T705 drag completion accepted after root five-file diff/hash review. T703 historical findings resolved; T706 final independent evidence audit closes review. Root observed complete frontend chain exit0:395 tests, lint/typecheck/build/bundle; all39 mock E2E passed2.0m with no exclusions/retries. Eight final desktop/mobile captures visually reviewed with0errors/overflow. Source403 unchanged since gate launch; protected229 excludes only the two authorized dependency files. Prior checkpoint and failures retained. All existing locked package versions unchanged, inherited audit advisory explicit.
+
+Owner-approved W2 is ready for automatic commit/push/PR, required remoteCI and exact-head merge. Do not stop after local commit or PR. Source snapshots and original integration remain preserved; no deployment or new milestone. Final required document/scope checks run before commit.

@@ -9,5 +9,5 @@ export default defineConfig(({ mode }) => ({
   publicDir: mode === "mock" ? "../../packages/mocks/public" : "public",
   server: { port: 5174, strictPort: true, host: true },
   preview: { port: 5174, strictPort: true, host: true },
-  test: { environment: "jsdom", setupFiles: "./src/test-setup.ts" },
+  test: { env: { TZ: "Asia/Taipei" }, environment: "jsdom", setupFiles: "./src/test-setup.ts" },
 }));

@@ -2,14 +2,14 @@
 import type { Me } from "@cms/api";
 import { describe, expect, it } from "vitest";
 import { publicUrl } from "./front-links";
-import { can, navFor, viewsFor, workTypeKeys } from "./nav";
+import { can, canGlobal, navFor, viewsFor, workTypeKeys } from "./nav";
 
-function me(types: [string, string[]][]): Me {
+function me(types: [string, string[]][], global: string[] = []): Me {
   return {
     principal: { id: "10000000-0000-4000-8000-000000000099", username: "t", displayName: "T", status: "active" },
     roles: [],
     surfaces: { front: true, back: true, admin: false },
-    capabilities: { surface: "back", types: types.map(([key, actions]) => ({ key, actions, scoped: false })), global: [] },
+    capabilities: { surface: "back", types: types.map(([key, actions]) => ({ key, actions, scoped: false })), global },
   } as unknown as Me;
 }
 
@@ -28,6 +28,18 @@ describe("nav from capabilities (C-07, G-01)", () => {
 
   it("Home and the nav are empty (only 首頁) when nothing is workable", () => {
     expect(navFor(me([["page", ["read_published"]]]), [])).toEqual([{ items: [{ label: "首頁", to: "/", end: true }] }]);
+  });
+});
+
+describe("media library link (W2, surface-back §3.6-3)", () => {
+  it("媒體庫 appears only with manage_media, after the views", () => {
+    const user = me([["note", ["read_draft"]]], ["manage_media"]);
+    expect(canGlobal(user, "manage_media")).toBe(true);
+    expect(navFor(user, [])).toEqual([
+      { items: [{ label: "首頁", to: "/", end: true }] },
+      { label: "媒體", items: [{ label: "媒體庫", to: "/media" }] },
+    ]);
+    expect(navFor(me([["note", ["read_draft"]]]), []).map((s) => s.label)).toEqual([undefined]);
   });
 });
 

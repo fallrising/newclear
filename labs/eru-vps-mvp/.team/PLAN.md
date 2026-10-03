@@ -63,3 +63,17 @@ No validation was relaxed: active publication temporaries may conservatively blo
 ### Final evidence gate
 
 T-212/T-213 implementation and T-214 independent review accepted for the bounded simulation foundation. Final suite: 487 tests, 68.977 seconds, OK; focused 41 tests and original CI validation/compileall pass. Root applied only an EOF whitespace cleanup to the coordinator test snapshot after independent review. T-215 maps acceptance evidence and keeps the overall local closeout PARTIAL. No formal ERU completion count changed.
+
+## Pending-generation admission barrier (2026-10-03)
+
+Continue the merged simulation foundation at `7d4f005`. Implement a persistent controller-local admission barrier without remote operations, generation acceptance or automatic release. Existing mutation locks must reject a pending or malformed reservation, including inherited locks. The trusted `private` root symlink convention remains supported; descendants cannot redirect the barrier. Scope is local API and real admission integration, not a complete production fresh executor or external writer fence.
+
+- T-216: isolated implementation of reservation storage, ClusterLock admission and focused regressions.
+- T-217: independent read-only entrypoint audit, followed by fixed-diff adversarial review.
+- Orchestrator: integrate any audited uncovered mutation routes, documentation and full native CI parity, task/report checks and evidence gate.
+- No accepted-run writer, reservation release, production fresh CLI, dependency or deployment. Read-only paths must be explicitly inventoried; conservative denial of lock-taking recovery is documented rather than adding an unaudited bypass.
+- Acceptance requires real temporary-file crash/path/inheritance tests, entrypoint evidence, independent review, complete offline suite and original workflow validation. Formal outstanding count remains 12.
+
+### Barrier acceptance decision
+
+T-216 and T-217 accepted after root inspected the full diff, exact source hashes and report contracts. Historical RED was the empty-pending-directory context-entry regression; resolved without weakening admission. Root 31 focused tests and 514 full tests passed; original CI validation, compileall, scope/privacy and whitespace gates passed. Evidence gate T-218 accepts this local slice only and remains PARTIAL for the full executor. No production reservation caller, release/completion or VPS operation was added. Stable trusted backing root, quiescence and external fencing remain explicit prerequisites.

@@ -1,5 +1,7 @@
 # ERU-015：本機 simulation journal 與 receipt coordinator
 
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
 日期：2026-10-03。基線 `532e587`。本文件描述 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md) 的第一個可執行本機切片，41 項 focused integration、獨立審查與完整 487 項 suite 均通過。正式 ERU-015 仍進行中，固定剩餘 12 項；simulation 不構成 V01–V04／V08 或正式 generation acceptance。
 
 ## 本機契約

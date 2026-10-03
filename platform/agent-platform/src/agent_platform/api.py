@@ -31,6 +31,7 @@ from .domain import (
 )
 from .result_download import DOWNLOAD_CSP, diff_bytes
 from .store import Store, json_value
+from .task_query import TaskState
 
 
 def command_response(result):
@@ -167,9 +168,12 @@ def create_app(settings=None, db=None, web_dist=None):
     def tasks(
         cursor: str | None = Query(default=None, max_length=512),
         limit: int = Query(default=30, ge=1, le=100),
+        q: str = Query(default="", max_length=200, pattern=r"^[^\x00]*$"),
+        project_id: UUID | None = None,
+        state: TaskState | None = None,
         session=authenticated,
     ):
-        return store.tasks(cursor, limit)
+        return store.tasks(cursor, limit, q=q, project_id=project_id, state=state)
 
     @app.post("/api/v1/tasks", status_code=202)
     def task(

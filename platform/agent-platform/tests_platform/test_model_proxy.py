@@ -313,14 +313,21 @@ class ModelProxyTests(PlatformFixture):
 
     def test_fixture_unknown_usage_keeps_full_reservation_and_blocks_next_request(self):
         upper = len(canonical(self.payload_model)) + self.payload_model["max_tokens"]
-        run, _, proxy, token = self.priced(upper + 10)
+        run, worker, proxy, token = self.priced(upper + 10)
+        identity = uuid4()
         self.upstream.status = 429
         with self.assertRaisesRegex(Problem, "model_rate_limited"):
-            proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
+            proxy.complete(run, token, identity, Completion(**self.payload_model))
         self.upstream.status = 200
+        proxy = ModelProxy(self.db, proxy.policy)
+        token = proxy.issue(run, 1, worker.owner)
+        with self.assertRaisesRegex(Problem, "model_request_already_reserved"):
+            proxy.complete(run, token, identity, Completion(**self.payload_model))
         with self.assertRaisesRegex(Problem, "model_fixture_budget_exhausted"):
             proxy.complete(run, token, uuid4(), Completion(**self.payload_model))
         view = usage_view(self.db, run)
+        self.assertEqual(view["entries"][0]["status"], "unknown")
+        self.assertIsNone(view["entries"][0]["fixture_settled_microcredits"])
         self.assertEqual(view["fixture_credits_committed_microcredits"], upper)
         self.assertTrue(view["fixture_credits_uncertain"])
         self.assertEqual(view["request_slots_consumed"], 1)
@@ -844,10 +851,24 @@ class ModelProxyTests(PlatformFixture):
                         },
                     )
                     self.assertEqual(reply.status_code, expected, reply.text)
+                    new_request = client.post(
+                        self.path,
+                        json=self.payload_model,
+                        headers={
+                            "Authorization": "Bearer " + self.token,
+                            "Idempotency-Key": str(uuid4()),
+                        },
+                    )
+                    if expected == 200:
+                        self.assertEqual(new_request.status_code, 200, new_request.text)
+                    else:
+                        self.assertEqual(new_request.status_code, 429, new_request.text)
+                        self.assertEqual(new_request.json()["error"], "model_request_limit_reached")
             finally:
                 process.terminate()
                 process.wait(timeout=10)
-        self.assertEqual(len(self.upstream.calls), 1)
+        self.assertEqual(len(self.upstream.calls), 2)
+        self.assertEqual(self.usage()["request_slots_consumed"], 2)
 
     def crash(self, stage):
         config = self.config_file()

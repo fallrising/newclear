@@ -9,7 +9,7 @@ Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal 
 | Area | Implemented | Remaining limitation |
 |---|---|---|
 | Contracts | Rust types, generated TypeScript, fixtures/origin tests | Live AI IPC uses separate Rust/TS DTOs rather than the frozen generated AI shape |
-| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding and shared node cleanup have regressions; full desktop restart/Run/Pin acceptance remains separate |
+| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding and shared node cleanup have regression tests; full desktop restart/Run/Pin acceptance remains separate |
 | Documents | CodeMirror, disk reads/writes, hash conflicts, runnable Run and local output Pin | Versioned/serialized saves and canonical event identity tested; cross-process CAS is not provided |
 | Canvas | Nodes, three edge kinds, sidecar persistence, named `run_in` routing | Invalid/unsupported sidecars block autosave with recovery feedback; no LOD or formal stress acceptance |
 | AI | Anthropic/OpenAI/DeepSeek streaming, connected context sources | UTF-8/framing/EOF/cancellation and send-time context/event ordering tested offline; live providers unverified |
@@ -56,6 +56,8 @@ npm run build
 ```
 
 The 2026-10-03 baseline had 37 passing contract tests, 35 passing frontend parser tests, successful typechecks/frontend build, and **72 passing / 1 failing core tests** (Linux self-write rename echo). This is historical baseline evidence, not the result for subsequent repairs. A frontend build is not desktop end-to-end verification.
+
+The [2026-10-04 repair verification](docs/verification-2026-10-04.md) records 140 passing Rust tests, 75 passing frontend tests, five mocked-IPC browser flows and a native Linux startup smoke, with remaining acceptance gaps. Monorepo automation is defined in [Loom CI](../../.github/workflows/loom-ci.yml); the nested `.github/workflows/ci.yml` is a historical standalone-repository workflow and is not discovered by GitHub in this layout.
 
 ## Layout
 

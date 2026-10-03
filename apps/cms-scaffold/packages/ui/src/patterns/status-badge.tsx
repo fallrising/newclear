@@ -10,8 +10,11 @@ const TONE: Record<PublicationStateValue, string> = {
   archived: "bg-surface-subdued text-subdued border-border",
 };
 
-/** 01 §6.2: the publication state as a badge, plus "有未發布的變更" when a published entry is dirty. */
-export function StatusBadge({ state, dirty = false }: { state: PublicationStateValue; dirty?: boolean }) {
+/**
+ * 01 §6.2: the publication state as a badge, plus "有未發布的變更" when a published entry is dirty and "等待發布"
+ * when someone asked for it to be published (BW2 `publishRequestedAt`, G-03).
+ */
+export function StatusBadge({ state, dirty = false, requested = false }: { state: PublicationStateValue; dirty?: boolean; requested?: boolean }) {
   return (
     <span className="inline-flex flex-wrap gap-1" data-testid="status-badge" data-state={state}>
       <Badge variant="outline" className={cn("rounded-full", TONE[state])}>
@@ -20,6 +23,11 @@ export function StatusBadge({ state, dirty = false }: { state: PublicationStateV
       {state === "published" && dirty ? (
         <Badge variant="outline" className="rounded-full border-transparent bg-caution-bg text-caution">
           {uiCopy["ui.status.dirty"]}
+        </Badge>
+      ) : null}
+      {requested ? (
+        <Badge variant="outline" className="rounded-full border-transparent bg-caution-bg text-caution" data-testid="status-requested">
+          {uiCopy["ui.status.requested"]}
         </Badge>
       ) : null}
     </span>

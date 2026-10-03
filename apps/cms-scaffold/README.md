@@ -19,9 +19,11 @@ BW1c 已合併並通過 [整合驗收](.team/reports/BW1c-DELIVERY.md)：全部�
 
 W1 已本地通過 [整合驗收](.team/reports/W1-DELIVERY.md)：能力導覽、分頁列表、typed editor、離開保護與欄位錯誤 UI。300 前端＋27 mock E2E、226 Java，以及 lint/typecheck/build/bundle/npm ci 與桌面／手機檢查通過；`VERIFIED`，PR #229 已合併。
 
-BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-PUBLICATION.md)；W1 見 [PR #229 發布證據](.team/reports/W1-PUBLICATION.md)。BW2 已本地通過 [整合驗收](.team/reports/BW2-DELIVERY.md)：審計／請求發布／可指派使用者／原子批次更新／關聯摘要。254 Java、120 PostgreSQL（完整輪＋唯一變更測試類別重驗）、300 前端、27 mock E2E 與 lint/typecheck/build/bundle 通過；`LOCAL_VERIFIED`，未提交／合併。
+BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-PUBLICATION.md)；W1 見 [PR #229 發布證據](.team/reports/W1-PUBLICATION.md)。BW2 已於 [PR #235](https://github.com/fallrising/newclear/pull/235) 合併，並通過 [整合驗收](.team/reports/BW2-DELIVERY.md)：審計／請求發布／可指派使用者／原子批次更新／關聯摘要。254 Java、120 PostgreSQL（完整輪＋唯一變更測試類別重驗）、300 前端、27 mock E2E 與 lint/typecheck/build/bundle 通過；遠端完整 CI 亦通過，見 [合併驗證](.team/reports/BW2-PUBLICATION.md)。
 
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
+
+W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；狀態LOCAL_VERIFIED，遠端CI／合併另行核對，沒有部署。
 
 ## 需求
 

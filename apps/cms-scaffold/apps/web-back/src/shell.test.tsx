@@ -57,19 +57,19 @@ describe("CMS Back shell (W1)", () => {
     setUser("seed-editor-album");
     renderRoute("/");
     // Editor-album may read clinic_profile, page… published only (read_published): not workable, not listed.
-    await expectNav(["首頁", "Albums", "Photos", "相簿編排"]);
+    await expectNav(["首頁", "Albums", "Photos", "相簿編排", "媒體庫"]);
   });
 
   it("C-07 an admin gets every type and all three views", async () => {
     setUser("seed-admin");
     renderRoute("/");
-    await expectNav(["首頁", "Albums", "Clinic profiles", "Issues", "Milestones", "Notes", "Owners", "Pages", "Pets", "Photos", "Projects", "Vets", "Visits", "相簿編排", "當日行程", "看板"]);
+    await expectNav(["首頁", "Albums", "Clinic profiles", "Issues", "Milestones", "Notes", "Owners", "Pages", "Pets", "Photos", "Projects", "Vets", "Visits", "相簿編排", "當日行程", "看板", "媒體庫"]);
   });
 
   it("V2-AC-10 a notes-only fixture user sees only Notes, and its list and editor work without code changes", async () => {
     setUser("mock-operator-notes");
     const { router } = renderRoute("/");
-    await expectNav(["首頁", "Notes"]);
+    await expectNav(["首頁", "Notes", "媒體庫"]);
     expect(await screen.findByTestId("home-type-note")).toHaveTextContent("Notes");
     expect(screen.queryByTestId("home-view-album.composer")).not.toBeInTheDocument();
     await router.navigate("/entries/note");

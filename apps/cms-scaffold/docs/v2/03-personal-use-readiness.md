@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | CRUD／發布 | 共用 entry、revision、權限、media | 檔案補償；P0 已在本地補齊交易／原子版本／發布媒體隔離 |
 | 測試 | BW0 記憶體／PostgreSQL store 契約、OpenAPI 回應驗證、CI | P0 已新增服務層故障回滾／競爭測試並重新執行；正式部署驗收仍待完成 |
-| 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器已本地驗證；關聯／媒體選擇器待 W2 |
+| 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器已本地驗證；W2選擇器與媒體／自訂視圖已本地驗證，待遠端CI／合併 |
 | 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata 已本地驗證；動態導覽已於 W1 本地驗證；後續模型治理仍待實作 |
 | 操作維護 | 本機 Compose、DB/media volume、prod cookie 設定 | 正式初始化、HTTPS、備份還原演練、升級回滾 |
 
@@ -72,10 +72,16 @@ PATCH 缺少或 null 版本回 428，舊版本仍回 409；422 列出全部欄�
 
 [W1 交付](../../.team/reports/W1-DELIVERY.md)：300 前端、27 mock E2E、226 Java、lint/typecheck/build/bundle/npm ci 通過；五個畫面 axe 無 serious／critical，桌面與手機截圖無阻擋性瀏覽器問題。W1 已於 PR #229 合併，Java／PostgreSQL／web CI 通過；正式使用的操作驗收門檻不變。媒體／關聯欄位暫為唯讀，未知型別保留原值；選擇器於 W2。
 
-## BW2 本地驗收與界線
+## BW2 驗收與界線
 
 [BW2交付](../../.team/reports/BW2-DELIVERY.md)：254 Java、120 PostgreSQL案例、300前端、27mock E2E通過，並通過lint/typecheck/build/bundle與契約生成。PostgreSQL數字來自完整輪108個不變案例＋修正測試比較後強制實跑12個identity案例；舊失敗日誌保留，沒有把失敗的完整命令改寫為exit0。10,000筆store p95為86／80／19ms。
 
 新增審計分頁／詳情、請求發布、可指派使用者、原子批次PATCH與安全關聯摘要。批次保留P0的CAS與交易；既有身份事件補齊狀態／審計原子性，名稱、密碼與session規則不變。發布請求的實際變更會提高version，舊客戶端應採用回傳的version。
 
-本波未提交／合併；不新增依賴、不部署。W2選擇器與自訂視圖、W4治理畫面尚未實作。測試使用實際PostgreSQL store／服務；BW4仍須完整應用啟動與DataSource/store選用（BQ-13）驗證，不能因此宣稱正式運行或重啟持久性已達生產驗收。備份還原、seed／升級／媒體索引盤點等既有運維門檻仍適用。
+本波已於 [PR #235](https://github.com/fallrising/newclear/pull/235) 通過完整遠端 CI 並合併；BW2 不新增依賴、未部署。W2選擇器與自訂視圖已完成本地驗收，待遠端CI／合併；W4治理畫面尚未實作。測試使用實際PostgreSQL store／服務；BW4仍須完整應用啟動與DataSource/store選用（BQ-13）驗證，不能因此宣稱正式運行或重啟持久性已達生產驗收。備份還原、seed／升級／媒體索引盤點等既有運維門檻仍適用。
+
+## W2 驗收與界線
+
+[W2交付](../../.team/reports/W2-DELIVERY.md)已LOCAL_VERIFIED：媒體／關聯選擇器、媒體庫、請求發布、預覽／還原、當日行程、看板／相簿動作選單及pointer拖放均已整合。395前端測試、完整39 mock E2E（無排除）、lint/typecheck/build/bundle與桌面／390px瀏覽器檢查通過。兩個dnd-kit精確版本已獲Owner明確授權；既有鎖定套件版本不變。遠端CI與合併仍須另行核對。
+
+Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，引用BW2完整遠端CI成功證據；本波PR仍執行必要後端CI。既有dev-transitive brace-expansion high advisory仍在；未自動升級相關依賴。實際應用串接與正式使用的操作驗收門檻不變，沒有部署。

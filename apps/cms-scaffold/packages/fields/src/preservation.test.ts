@@ -19,7 +19,7 @@ describe("P0 value preservation", () => {
     const { future, ...declared } = payload;
     expect(initial.future).toEqual(future);
     expect(toPayload(type, initial)).toMatchObject(declared);
-    expect(diffPayload(type, initial, { ...initial, title: "Edited", media: "changed", reference: "changed", principal: "changed", location: null })).toEqual({ title: "Edited" });
+    expect(diffPayload(type, initial, { ...initial, title: "Edited", reference: "changed", principal: "changed", location: null })).toEqual({ title: "Edited" });
   });
 
   it("clears a boolean with explicit null and keeps false distinct from unset", () => {
@@ -49,5 +49,23 @@ describe("P0 value preservation", () => {
     const result = buildZod(booleanType, "publish").safeParse(values);
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error.issues[0].message).toBe("REQUIRED");
+  });
+});
+
+
+describe("W2 reference edits", () => {
+  it("does not PATCH an unchanged media projection after react-hook-form clones default values", () => {
+    const initial = toFormValues(type, { title: "Original", media: { mediaId: "media-id", variants: { original: { url: "/file" } } } });
+    const cloned = structuredClone(initial);
+    expect(diffPayload(type, initial, { ...cloned, title: "Edited" })).toEqual({ title: "Edited" });
+    expect(diffPayload(type, initial, { ...cloned, media: "media-id" })).toEqual({});
+  });
+  it("patches only chosen media/ref ids and sends null on clear while preserving unknown and principal values", () => {
+    const editableType = { ...type, fields: type.fields.map((f) => f.key === "reference" ? { ...f, refTarget: "example" } : f) };
+    const initial = toFormValues(editableType, { title: "Title", reference: "old-ref", media: { mediaId: "old-media", future: 2 }, principal: "same", location: { lat: 2 } });
+    expect(diffPayload(editableType, initial, { ...initial, reference: "new-ref", media: "new-media", principal: "ignored", location: null })).toEqual({ reference: "new-ref", media: "new-media" });
+    expect(diffPayload(editableType, initial, { ...initial, reference: "", media: "" })).toEqual({ reference: null, media: null });
+    expect(diffPayload(editableType, initial, { ...initial, title: "New" })).toEqual({ title: "New" });
+    expect(toPayload(editableType, initial).media).toEqual({ mediaId: "old-media", future: 2 });
   });
 });

@@ -15,6 +15,7 @@ const FIXTURES = [
   ["public-entries.json", "publicEntries", 'S["PublicEntry"][]'],
   ["media-assets.json", "mediaAssets", 'S["MediaAssetList"]'],
   ["media-quota.json", "mediaQuota", 'S["MediaQuota"]'],
+  ["revisions.json", "revisions", 'Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]>'],
 ];
 
 function render() {

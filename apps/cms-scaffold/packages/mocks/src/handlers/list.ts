@@ -34,6 +34,13 @@ export function listPage<T extends Entry>(url: URL, type: AdminContentType, entr
     const indexed = (field: Field) => field.enabled && kinds.has(field.type) && (field.indexed || [type.titleField, type.sortField, type.visibilityField, type.ownerField].includes(field.key));
     const visible = (field: Field) => !publicRead || field.visibility === "public";
     const filters: ((entry: T) => boolean)[] = [];
+    if (!publicRead) {
+      const requested = params.get("publishRequested")?.trim();
+      if (requested && requested !== "true" && requested !== "false") fail("publishRequested must be true or false");
+      if (requested === "true") filters.push((entry) => "publishRequestedAt" in entry && entry.publishRequestedAt !== null);
+      const include = parseInclude(params);
+      if (typeof include === "string") fail(include);
+    }
     const q = params.get("q");
     if (q?.trim()) filters.push((e) => (e.title ?? "").toLowerCase().includes(q.toLowerCase()));
     for (const [name, raw] of params) {
@@ -88,4 +95,13 @@ export function listPage<T extends Entry>(url: URL, type: AdminContentType, entr
   } catch (error) {
     return apiError(400, "VALIDATION_FAILED", error instanceof Error ? error.message : "Invalid list query");
   }
+}
+
+/** BW2 include accepts comma-separated refs, ignoring empty parts. */
+export function parseInclude(params: URLSearchParams): boolean | string {
+  const all = params.getAll("include");
+  if (all.length > 1) return "include must not repeat";
+  const parts = (all[0] ?? "").split(",").map((part) => part.trim()).filter(Boolean);
+  const bad = parts.find((part) => part !== "refs");
+  return bad ? `include: unknown value ${bad}` : parts.length > 0;
 }

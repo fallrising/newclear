@@ -14,13 +14,15 @@
   "dependencies": {
     "@cms/api": "*",
     "@cms/auth": "*",
+    "@cms/fields": "*",
     "@cms/ui": "*",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
     "@tanstack/react-query": "5.103.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-router": "7.18.4",
-    "@cms/fields": "*",
-    "react-hook-form": "7.88.0"
+    "react-hook-form": "7.88.0",
+    "react-router": "7.18.4"
   },
   "devDependencies": {
     "@cms/mocks": "*",

@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { createCmsClient } from "@cms/api";
+import { ApiError, createCmsClient } from "@cms/api";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { db, MOCK_WRONG_PASSWORD, setScenario, setSurface, setUser } from "./index";
 import { resetMocks, server } from "./node";
@@ -559,5 +559,150 @@ describe("W1 incremental work support", () => {
     await expect(client().public.byId("album", entry.id)).rejects.toMatchObject({ status: 404 });
     expect((await raw(`/api/v1/public/media/${privateMedia.id}/file/web`)).status).toBe(404);
     await expect(client().work.entry(entry.id)).resolves.toMatchObject({ publishedAt: null });
+  });
+});
+
+async function failure(promise: Promise<unknown>): Promise<ApiError> {
+  try { await promise; } catch (error) { if (error instanceof ApiError) return error; throw error; }
+  throw new Error("Expected an API failure");
+}
+
+describe("@cms/mocks BW2 behaviour (W2)", () => {
+  const bySlug = (slug: string) => db.workEntries.find((e) => e.slug === slug)!;
+
+  it("G-03 a publish request needs update, increments version, survives PATCH and is cleared by publish", async () => {
+    setUser("seed-editor-album");
+    const polaroid = bySlug("studio-polaroid");
+    const asked = await client().work.requestPublish(polaroid.id);
+    expect(asked).toMatchObject({ publicationState: "draft", version: 2, publishRequestedBy: "10000000-0000-4000-8000-000000000002" });
+    expect(Date.parse(asked.publishRequestedAt!)).not.toBeNaN();
+    const again = await client().work.requestPublish(polaroid.id);
+    expect(again.publishRequestedAt).toBe(asked.publishRequestedAt);
+    const patched = await client().work.patch(polaroid.id, { version: asked.version, payload: { caption: "Ready." } });
+    expect(patched.publishRequestedAt).toBe(asked.publishRequestedAt);
+    await expect(client().work.publish(polaroid.id)).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+    setUser("seed-operator-album");
+    const requested = await client().work.entries("photo", { publishRequested: true });
+    expect(requested.items.map((e) => e.slug)).toEqual(["studio-polaroid"]);
+    await expect(client().work.publish(polaroid.id)).resolves.toMatchObject({ publicationState: "published", publishRequestedAt: null, publishRequestedBy: null });
+    expect((await client().work.entries("photo", { publishRequested: true })).total).toBe(0);
+  });
+
+  it("G-03 cancel clears the request; published without changes and archived entries answer 409; bad filter is 400", async () => {
+    setUser("seed-operator-album");
+    const studio = bySlug("private-studio");
+    await client().work.requestPublish(studio.id);
+    await expect(client().work.cancelPublishRequest(studio.id)).resolves.toMatchObject({ publishRequestedAt: null });
+    await expect(client().work.requestPublish(bySlug("coast-light-2026").id)).rejects.toMatchObject({ status: 409, code: "INVALID_STATE_TRANSITION" });
+    await client().work.archive(studio.id);
+    await expect(client().work.requestPublish(studio.id)).rejects.toMatchObject({ status: 409, code: "INVALID_STATE_TRANSITION" });
+    const response = await raw("/api/v1/content-types/photo/entries?publishRequested=yes");
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ error: { message: "publishRequested must be true or false" } });
+  });
+
+  it("G-09 batch-patch writes every item or none; the first failing item is named; field errors of all items come back together", async () => {
+    setUser("seed-operator-album");
+    const [a, b, c] = ["coast-harbour", "coast-sun", "coast-concrete"].map(bySlug);
+    const initialVersion = a.version;
+    const conflict = await failure(client().work.batchPatch([
+      { id: a.id, version: initialVersion, payload: { sortOrder: 20 } },
+      { id: b.id, version: 9, payload: { sortOrder: 10 } },
+    ]));
+    expect(conflict).toMatchObject({ status: 409, code: "VERSION_CONFLICT", message: "items[1]: Version conflict" });
+    expect(bySlug("coast-harbour").version).toBe(initialVersion);
+    const invalid = await failure(client().work.batchPatch([
+      { id: a.id, version: initialVersion, payload: { sortOrder: 20 } },
+      { id: b.id, version: initialVersion, payload: { sortOrder: "x" } },
+      { id: c.id, version: initialVersion, payload: { takenAt: "soon" } },
+    ]));
+    expect(invalid.fields.map((f) => [f.field, f.code])).toEqual([
+      ["items[1].payload.sortOrder", "WRONG_TYPE"],
+      ["items[2].payload.takenAt", "INVALID_DATETIME"],
+    ]);
+    expect(bySlug("coast-harbour").payload.sortOrder).toBe(10);
+    const done = await client().work.batchPatch([
+      { id: a.id, version: initialVersion, payload: { sortOrder: 20 } },
+      { id: b.id, version: initialVersion, payload: { sortOrder: 10 } },
+    ]);
+    expect(done.items.map((e) => [e.slug, e.payload.sortOrder, e.version])).toEqual([["coast-harbour", 20, initialVersion + 1], ["coast-sun", 10, initialVersion + 1]]);
+  });
+
+  it("G-09 batch-patch 400 rules, 428 and the Front surface", async () => {
+    setUser("seed-operator-album");
+    const a = bySlug("coast-harbour");
+    await expect(client().work.batchPatch([])).rejects.toMatchObject({ status: 400, message: "items must contain 1 to 100 entries" });
+    await expect(client().work.batchPatch([{ id: a.id, version: 1 }, { id: a.id, version: 1 }])).rejects.toMatchObject({ status: 400, message: "items[1].id is repeated" });
+    await expect(client().work.batchPatch([{ id: a.id } as never])).rejects.toMatchObject({ status: 428, code: "VERSION_REQUIRED" });
+    await expect(client().work.batchPatch([{ id: bySlug("leo-rabies").id, version: 1 }])).rejects.toMatchObject({ status: 403, message: "items[0]: Missing permission update on content type visit" });
+    setSurface("front");
+    await expect(client().work.batchPatch([{ id: a.id, version: 1 }])).rejects.toMatchObject({ status: 403, code: "SURFACE_FORBIDDEN" });
+  });
+
+  it("G-10 include=refs adds a summary per ref field: readable, restricted or missing; other values are 400", async () => {
+    setUser("seed-operator-clinic");
+    const visits = await client().work.entries("visit", { include: "refs", sort: "scheduledAt" });
+    expect(visits.items[0].refs).toEqual({
+      pet: { id: bySlug("leo").id, contentType: "pet", title: "Leo", publicationState: "published" },
+      owner: { id: bySlug("george-franklin").id, contentType: "owner", title: "George Franklin", publicationState: "published" },
+      vet: { id: bySlug("james-carter").id, contentType: "vet", title: "James Carter", publicationState: "published" },
+    });
+    expect((await client().work.entries("visit")).items[0].refs).toBeUndefined();
+    setUser("seed-editor-album");
+    bySlug("coast-sun").payload.album = "30000000-0000-4000-8000-00000000ffff";
+    const photos = await client().work.entries("photo", { include: "refs", ref: { album: bySlug("private-studio").id } });
+    expect(photos.items.map((e) => e.refs?.album)).toEqual([
+      { id: bySlug("private-studio").id, contentType: "album", title: "Studio (unpublished)", publicationState: "draft" },
+      { id: bySlug("private-studio").id, contentType: "album", title: "Studio (unpublished)", publicationState: "draft" },
+    ]);
+    const missing = await raw(`/api/v1/entries/${bySlug("coast-sun").id}?include=refs`);
+    expect((await missing.json()).refs).toEqual({ album: { id: "30000000-0000-4000-8000-00000000ffff", missing: true } });
+    setUser("mock-operator-notes");
+    bySlug("lens-notes").payload.related = bySlug("private-studio").id;
+    const restricted = await raw(`/api/v1/entries/${bySlug("lens-notes").id}?include=refs`);
+    expect((await restricted.json()).refs).toEqual({ related: { id: bySlug("private-studio").id, restricted: true } });
+    const bad = await raw("/api/v1/content-types/note/entries?include=refs,owner");
+    expect(await bad.json()).toMatchObject({ error: { code: "VALIDATION_FAILED", message: "include: unknown value owner" } });
+  });
+
+  it("revisions list newest first without payload; revert copies a snapshot into the work copy; publish adds a revision", async () => {
+    setUser("mock-operator-notes");
+    const spring = bySlug("spring-ideas");
+    expect(await client().work.revisions(spring.id)).toEqual({ items: [{ revisionNo: 1, slug: "spring-ideas", publishedAt: "2026-09-20T00:37:00Z" }] });
+    const reverted = await client().work.revert(spring.id, 1);
+    expect(reverted).toMatchObject({ version: 4, publicationState: "published", dirty: false, payload: { body: "Harbour at night." } });
+    await expect(client().work.revert(spring.id, 7)).rejects.toMatchObject({ status: 404, code: "ENTRY_NOT_FOUND" });
+    await client().work.patch(spring.id, { version: reverted.version, payload: { body: "New published content." } });
+    await client().work.publish(spring.id);
+    expect((await client().work.revisions(spring.id)).items.map((r) => r.revisionNo)).toEqual([2, 1]);
+    expect((await client().work.revisions(bySlug("lens-notes").id)).items).toHaveLength(1);
+    expect((await client().work.revisions(bySlug("buy-film").id)).items).toEqual([]);
+  });
+
+  it("preview returns the work copy with the errors of GET /entries/{id}", async () => {
+    setUser("mock-operator-notes");
+    await expect(client().work.preview(bySlug("spring-ideas").id)).resolves.toMatchObject({ dirty: true, payload: { body: "Harbour at dawn." } });
+    await expect(client().work.preview(bySlug("coast-light-2026").id)).resolves.toMatchObject({ slug: "coast-light-2026" });
+    await expect(client().work.preview(bySlug("private-studio").id)).rejects.toMatchObject({ status: 403 });
+    await expect(client().work.preview("30000000-0000-4000-8000-00000000ffff")).rejects.toMatchObject({ status: 404, code: "ENTRY_NOT_FOUND" });
+  });
+
+  it("media library: newest first, soft delete hides an asset and its files answer 410; upload rejects other types and big files", async () => {
+    setUser("seed-operator-album");
+    const library = await client().work.mediaList();
+    expect(library.items).toHaveLength(8);
+    expect(library.items[0].title).toBe("Softbox");
+    await client().work.removeMedia(library.items[0].id);
+    expect((await client().work.mediaList()).items).toHaveLength(7);
+    await expect(client().work.media(library.items[0].id)).resolves.toMatchObject({ title: "Softbox" });
+    expect((await raw(library.items[0].variants.thumbnail!.url)).status).toBe(410);
+    await expect(client().work.upload(new File(["x"], "notes.txt", { type: "text/plain" }))).rejects.toMatchObject({ status: 415, code: "unsupported_media_type" });
+    const big = new File([new Uint8Array(15 * 1024 * 1024 + 1)], "big.png", { type: "image/png" });
+    await expect(client().work.upload(big)).rejects.toMatchObject({ status: 413, code: "file_too_large" });
+    const uploaded = await client().work.upload(new File(["png"], "dock.png", { type: "image/png" }));
+    expect((await client().work.mediaList()).items[0]).toMatchObject({ id: uploaded.id, title: "dock.png" });
+    setUser("seed-member-clinic");
+    setSurface("back");
+    await expect(client().work.mediaList()).rejects.toMatchObject({ status: 403 });
   });
 });

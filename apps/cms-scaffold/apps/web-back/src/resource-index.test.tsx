@@ -18,13 +18,13 @@ function rowTitles() {
 describe("Resource index URL state", () => {
   it("01 §4.4 G-02 reads tab, search, sort, page, size and enum filters from the URL", () => {
     const state = readIndexState(album, new URLSearchParams("state=published&q=coast&sort=title&page=2&size=50&filter.visibility=unlisted"));
-    expect(state).toEqual({ tab: "published", q: "coast", sort: "title", page: 2, size: 50, filter: { visibility: "unlisted" } });
+    expect(state).toEqual({ tab: "published", q: "coast", sort: "title", page: 2, size: 50, filter: { visibility: "unlisted" }, requested: false });
     expect(toListParams(state)).toEqual({ state: "published", q: "coast", filter: { visibility: "unlisted" }, sort: "title", page: 2, size: 50 });
   });
 
   it("W1-FM04 values the UI cannot produce fall back to defaults, so the API never sees a 400", () => {
     const state = readIndexState(album, new URLSearchParams("state=deleted&sort=payload&page=-3&size=500&filter.visibility=secret&filter.title=x"));
-    expect(state).toEqual({ tab: "all", q: "", sort: "-updatedAt", page: 1, size: 20, filter: {} });
+    expect(state).toEqual({ tab: "all", q: "", sort: "-updatedAt", page: 1, size: 20, filter: {}, requested: false });
     expect(toListParams(state)).toEqual({ sort: "-updatedAt", page: 1, size: 20 });
   });
 });

@@ -8,6 +8,10 @@ export const BACK_RETURN_ROUTES = [
   "/entries/:type",
   "/entries/:type/new",
   "/entries/:type/:id",
+  "/entries/:type/:id/preview",
+  "/entries/:type/:id/history",
+  "/media",
+  "/media/:id",
   "/views/album.composer",
   "/views/clinic.schedule",
   "/views/projects.board",
@@ -16,6 +20,11 @@ export const BACK_RETURN_ROUTES = [
 /** True when me.capabilities (BW1a §4.4, Back surface) grants `action` on `type`. The only permission check in web-back (C-07). */
 export function can(me: Me, type: string, action: CmsAction): boolean {
   return me.capabilities.types.some((t) => t.key === type && t.actions.includes(action));
+}
+
+/** True when me.capabilities grants a global action (BW1a §4.4), for example manage_media for the media library. */
+export function canGlobal(me: Me, action: CmsAction): boolean {
+  return me.capabilities.global.includes(action);
 }
 
 /** 01 §7.2 B-S1: a type is workable when the user has read_draft, create or update on it. Order follows capabilities. */
@@ -32,7 +41,7 @@ export interface ViewLink {
   path: string;
 }
 
-// A view appears only when every type it reads is workable (surface-back §3.3). W2 redoes the views themselves.
+// A view appears only when every type it reads is workable (surface-back §3.3).
 const VIEWS = [
   { key: "album.composer", types: ["album", "photo"] },
   { key: "clinic.schedule", types: ["visit"] },
@@ -55,12 +64,14 @@ export function workTypes(me: Me, types: WorkContentType[] | undefined): WorkCon
   return workTypeKeys(me).flatMap((key) => (byKey.has(key) ? [byKey.get(key)!] : []));
 }
 
-/** Side navigation: 首頁, 內容 (pluralDisplayName, U-02), 視圖. No hard-coded type list (C-07). */
+/** Side navigation: 首頁, 內容 (pluralDisplayName, U-02), 視圖, 媒體 (manage_media). No hard-coded type list (C-07). */
 export function navFor(me: Me, types: WorkContentType[] | undefined): NavSection[] {
   const sections: NavSection[] = [{ items: [{ label: copy["nav.home"], to: "/", end: true }] }];
   const content = workTypes(me, types);
   if (content.length) sections.push({ label: copy["nav.content"], items: content.map((t) => ({ label: t.pluralDisplayName, to: `/entries/${t.key}` })) });
   const views = viewsFor(me);
   if (views.length) sections.push({ label: copy["nav.views"], items: views.map((v) => ({ label: v.label, to: v.path })) });
+  // GET /media needs manage_media, so the library appears only with it (surface-back §3.6-3).
+  if (canGlobal(me, "manage_media")) sections.push({ label: copy["nav.media"], items: [{ label: copy["nav.mediaLibrary"], to: "/media" }] });
   return sections;
 }

@@ -30,7 +30,8 @@ import { fieldsCopy, type FieldsCopyKey } from "./copy";
 import { formatDate } from "./format";
 import { isKnown, type FormValues } from "./form";
 import { enumLabel, fieldLabel } from "./labels";
-import { MediaValue, RefValue } from "./values";
+import { RefValue } from "./values";
+import { MediaPicker, RelationPicker } from "./pickers";
 
 const NONE = "__none__";
 /** 01 §6.4: enums with up to five options use radio buttons, more use a select. */
@@ -186,10 +187,10 @@ export function FieldWidget({ field, control, disabled }: FieldWidgetProps) {
             control = <DatetimeWidget id={id} value={text} disabled={disabled} required={field.required} invalid={!!error} described={described} onChange={input.onChange} />;
             break;
           case "ref":
-            control = text ? <RefValue id={text} /> : <span className="text-subdued">{fieldsCopy["fields.unset"]}</span>;
+            control = field.refTarget ? <RelationPicker id={id} field={field} value={text} disabled={disabled} onChange={input.onChange} /> : text ? <RefValue id={text} /> : <span className="text-subdued">{fieldsCopy["fields.unset"]}</span>;
             break;
           case "media-ref":
-            control = text ? <MediaValue id={text} /> : <span className="text-subdued">{fieldsCopy["fields.unset"]}</span>;
+            control = <MediaPicker id={id} field={field} value={text} disabled={disabled} onChange={input.onChange} />;
             break;
           case "principal-ref":
             control = <span className={text ? undefined : "text-subdued"}>{text ? fieldsCopy["fields.principal.linked"] : fieldsCopy["fields.unset"]}</span>;
@@ -206,7 +207,7 @@ export function FieldWidget({ field, control, disabled }: FieldWidgetProps) {
         }
         return (
           <div className="flex flex-col gap-2" data-testid={`field-${field.key}-row`} data-field-type={isKnown(field) ? field.type : "unknown"}>
-            <Label id={`${id}-label`} htmlFor={field.type === "enum" && field.enumValues.length <= RADIO_LIMIT ? undefined : id}>
+            <Label id={`${id}-label`} htmlFor={["ref", "media-ref", "principal-ref"].includes(field.type) || (field.type === "enum" && field.enumValues.length <= RADIO_LIMIT) ? undefined : id}>
               {label}
               {field.required ? (
                 <span className="text-critical" aria-label={fieldsCopy["fields.required"]}>

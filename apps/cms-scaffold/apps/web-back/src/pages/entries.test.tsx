@@ -26,7 +26,7 @@ const writes = (requests: ReturnType<typeof recordRequests>) => requests.filter(
 async function submit() { fireEvent.click(screen.getByTestId("save-bar-save")); }
 
 describe("P0 typed entry editing migrated to W1", () => {
-  it("sends explicit null for cleared editable fields and preserves readonly media", async () => {
+  it("sends explicit null for cleared editable fields and preserves untouched media", async () => {
     const { requests, entry } = open();
     const media = entry.payload.media;
     fireEvent.change(await screen.findByLabelText(/^標題/), { target: { value: "" } });
@@ -56,7 +56,7 @@ describe("P0 typed entry editing migrated to W1", () => {
     expect(screen.getByLabelText(/^數量/)).toHaveValue(raw);
     expect(requests.filter((r) => r.method === "PATCH")).toHaveLength(0);
   });
-  it("omits unset readonly fields on new entries", async () => {
+  it("omits unset editable media on new entries", async () => {
     const { requests } = open(true);
     fireEvent.change(await screen.findByLabelText(/^標題/), { target: { value: "New draft" } });
     await submit();

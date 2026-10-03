@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError, keys, workQueries, type WorkContentType, type WorkEntry } from "@cms/api";
@@ -38,7 +38,7 @@ import { can } from "../nav";
 import { TypeGate } from "../type-gate";
 import { Confirm, formOf, placeServerErrors, saveResolver, SideCard, SLUG, slugMessage } from "./entry-form";
 
-type Transition = "publish" | "unpublish" | "archive" | "restore" | "remove";
+type Transition = "publish" | "unpublish" | "archive" | "restore" | "remove" | "requestPublish" | "cancelPublishRequest";
 
 const DONE: Record<Transition, string> = {
   publish: copy["details.published"],
@@ -46,6 +46,8 @@ const DONE: Record<Transition, string> = {
   archive: copy["details.archived"],
   restore: copy["details.restored"],
   remove: copy["details.deleted"],
+  requestPublish: copy["details.requested"],
+  cancelPublishRequest: copy["details.requestCancelled"],
 };
 
 interface EditorProps {
@@ -72,6 +74,7 @@ function EntryEditor({ type, entry }: EditorProps) {
 
   const state = base?.publicationState ?? "draft";
   const readOnly = base !== null && (state === "archived" || !can(me, type.key, "update"));
+  const requested = base?.publishRequestedAt != null;
   const listPath = `/entries/${type.key}`;
 
   // Leave /new only after reset() has cleared the dirty flag, so the save bar's blocker does not ask.
@@ -82,6 +85,8 @@ function EntryEditor({ type, entry }: EditorProps) {
   function adopt(saved: WorkEntry) {
     queryClient.setQueryData(keys.entries.detail(saved.id), saved);
     void queryClient.invalidateQueries({ queryKey: keys.entries.lists(type.key) });
+    void queryClient.invalidateQueries({ queryKey: keys.entries.revisions(saved.id) });
+    void queryClient.invalidateQueries({ queryKey: keys.entries.preview(saved.id) });
     setBase(saved);
     form.reset(formOf(type, saved));
   }
@@ -191,14 +196,17 @@ function EntryEditor({ type, entry }: EditorProps) {
   const busy = save.isPending || act.isPending || reloading;
   const title = base ? base.title || copy["index.untitled"] : fill(copy["details.new"], { name: type.displayName });
 
-  // surface-back §4.7: at most one primary action, never while there are unsaved changes (the save bar owns that).
+  // Saved content may be published or requested; local changes must be saved first.
+  const publishable = base !== null && (state === "draft" || (state === "published" && base.dirty));
   let primary: PageAction | undefined;
   if (!base) {
     primary = dirty ? undefined : { label: copy["details.create"], onSelect: saveDraft, disabled: busy, testId: "details-create" };
-  } else if (!dirty && can(me, type.key, "publish")) {
-    if (state === "draft") primary = { label: copy["details.publish"], onSelect: publish, disabled: busy, testId: "details-publish" };
-    if (state === "published" && base.dirty) primary = { label: copy["details.publishChanges"], onSelect: publish, disabled: busy, testId: "details-publish" };
+  } else if (!dirty && publishable && can(me, type.key, "publish")) {
+    primary = { label: state === "draft" ? copy["details.publish"] : copy["details.publishChanges"], onSelect: publish, disabled: busy, testId: "details-publish" };
+  } else if (!dirty && publishable && !requested && can(me, type.key, "update")) {
+    primary = { label: copy["details.requestPublish"], onSelect: () => transition("requestPublish"), disabled: busy, testId: "details-request-publish" };
   }
+  const secondary: PageAction[] = base && type.previewable ? [{ label: copy["details.preview"], to: `${listPath}/${base.id}/preview`, testId: "details-preview", disabled: busy }] : [];
 
   const more: PageAction[] = [];
   if (base && can(me, type.key, "archive")) {
@@ -225,7 +233,8 @@ function EntryEditor({ type, entry }: EditorProps) {
       <PageHeader
         title={title}
         backTo={{ to: listPath, label: type.pluralDisplayName }}
-        badges={base ? <StatusBadge state={state} dirty={base.dirty} /> : null}
+        badges={base ? <StatusBadge state={state} dirty={base.dirty} requested={requested} /> : null}
+        secondaryActions={secondary}
         moreActions={more}
         primaryAction={primary}
       />
@@ -253,12 +262,23 @@ function EntryEditor({ type, entry }: EditorProps) {
               <SideCard title={copy["card.publish"]} testId="card-publish">
                 <p>
                   <span className="text-subdued">{copy["card.publish.state"]} </span>
-                  <StatusBadge state={state} dirty={base.dirty} />
+                  <StatusBadge state={state} dirty={base.dirty} requested={requested} />
                 </p>
                 <p>
                   <span className="text-subdued">{copy["card.publish.lastPublished"]} </span>
                   {base.publishedAt ? formatDateTime(base.publishedAt) : copy["card.publish.never"]}
                 </p>
+                {requested ? (
+                  <div className="flex flex-col gap-2 rounded-md bg-caution-bg p-3 text-caution" data-testid="publish-request">
+                    <p>{copy["card.publish.requestedAt"]} {formatDateTime(base.publishRequestedAt)}</p>
+                    <p>{copy["card.publish.requestedNote"]}</p>
+                    {can(me, type.key, "update") && state !== "archived" ? (
+                      <Button type="button" variant="outline" className="self-start" onClick={() => transition("cancelPublishRequest")} disabled={busy || dirty} data-testid="details-cancel-request">
+                        {copy["details.cancelRequest"]}
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
                 {state === "published" && can(me, type.key, "unpublish") ? (
                   <Button type="button" variant="outline" onClick={() => transition("unpublish")} disabled={busy || dirty} data-testid="details-unpublish">
                     {copy["details.unpublish"]}
@@ -328,6 +348,7 @@ function EntryEditor({ type, entry }: EditorProps) {
                   <span className="text-subdued">{copy["card.meta.updated"]} </span>
                   {formatDateTime(base.updatedAt)}
                 </p>
+                <Link to={`${listPath}/${base.id}/history`} className="text-link hover:underline" data-testid="history-link">{copy["card.meta.history"]}</Link>
               </SideCard>
             ) : null}
           </>

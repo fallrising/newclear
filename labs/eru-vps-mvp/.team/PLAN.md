@@ -107,3 +107,17 @@ Continue merged preparation at `e0d3172`. Add a strictly read-only four-host/run
 ### Observation acceptance decision
 
 Accepted T-222 and T-223 for the bounded observer after frozen source hashes and actual diffs/tests were inspected. Independent review caught and verified process-group cleanup and the pinned etcd member-header revision contract; per-host after-identity checks and malformed-data normalization were added. Root focused57, independent68 and full586 tests passed. Independent final import-only cleanup passed11 tests. Original workflow validation, compileall and team/scope/privacy gates passed. T-224 remains PARTIAL for overall closeout; no formal task count, generation or live authority changed.
+
+## Four-host manual reimage receipt validation (2026-10-03)
+
+Continue at merged c12d510. The approved fresh design requires a dedicated core-and-workers receipt contract; existing single-worker rebuild-node validation must remain unchanged. Deliver strict, read-only validation of four manual console actions/receipts bound to a prepared execution, original host observation, exact provider/volume/image scope and generation. This independent hosts-reimaged input slice does not implement external fencing or declare any stage accepted.
+
+- T-225: isolated pure receipt contract and safe local read-only assessment API, synthetic tests, no remote calls or writes.
+- T-226: independent contract/negative-path review and real temporary-file regressions, isolated worktree.
+- Root: document-first frozen scope, CLI integration/redaction, remaining-task report, full native validation and evidence gate, authorized GitHub delivery and ledger synchronization.
+- Evidence must distinguish historical preparation freshness from current receipt age; do not accept malformed rehashed execution or bypass current source/input/root checks. Receipt acceptance never refreshes authorization or fence, updates trust/inventory, reserves/releases generation, or authorizes dispatch.
+- Formal remaining count stays12. Require exact four order/identity, unique actions/new identities/OOB Ed25519 fingerprints, old-identity rejection, exact erase results, action/completion/review chronology, digest/path safety, pending consistency and no writes. Future real-host verification remains a separate gate.
+
+### Four-host receipt acceptance decision
+
+Accepted T-225 and T-226 after frozen hashes, source/diff inspection and independent tests. Root44, worker124, independent138+4 and full614 tests passed; original CI validation, compileall and task/report/scope/privacy gates passed. No existing single-worker validator was changed and independent tests retain its core rejection. T-227 accepts the assessment slice only and remains PARTIAL for the full executor. No live actions, renewed authority, stage acceptance or formal task-count change.

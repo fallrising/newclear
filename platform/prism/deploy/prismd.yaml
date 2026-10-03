@@ -1,0 +1,87 @@
+# P1-04 config reference. Later-phase drivers/control-plane remain unavailable.
+server:
+  http_listen: ":9090"
+  grpc_listen: ":4317"
+  mode: all-in-one            # all-in-one | ingest | query | ruler | console
+  shutdown_timeout: 30s
+  external_url: "https://prism.example.com"   # 用於告警的 generatorURL
+
+storage:
+  driver: clickhouse          # ★ 換底層只需改這一行
+  dsn: "clickhouse://prism:${CH_PASSWORD}@127.0.0.1:9000/prism"
+  options:
+    cluster: ""
+    async_insert: "1"
+  retention:
+    metrics_days: 30
+    logs_days: 14
+    traces_days: 7
+    red_days: 90
+  # 多後端組合：不同 signal 走不同驅動（Phase 5）
+  # split:
+  #   metrics: {driver: vmvl,       dsn: "..."}
+  #   logs:    {driver: vmvl,       dsn: "..."}
+  #   traces:  {driver: clickhouse, dsn: "..."}
+
+controlplane:
+  postgres_dsn: "postgres://prism:${PG_PASSWORD}@127.0.0.1:5432/prism?sslmode=disable"
+
+tenancy:
+  mode: single                # single | strict
+  default_tenant: default
+
+auth:
+  allow_anonymous_read: true  # 單機自用預設開啟；對外必須關閉
+  jwt_secret_file: /etc/prism/secrets/jwt
+  ingest_api_key_file: /etc/prism/secrets/ingest_api_key # ingest 必填，至少 32 bytes；不得共用 JWT
+
+ingest:
+  max_request_bytes: 16MiB
+  queue_depth: 4              # 每訊號三條優先佇列；runtime 單租戶、每訊號兩名 worker
+  otlp:
+    max_recv_msg_size: 4MiB
+    max_concurrent_requests: 16 # HTTP/gRPC 共用即時拒絕的解碼閘門
+  batch:
+    metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
+    logs:    {max_items: 5000,  max_bytes: 8MiB, flush_interval: 1s}
+    traces:  {max_items: 5000,  max_bytes: 8MiB, flush_interval: 1s}
+  clock_skew_policy: clamp
+  max_past: 1h
+  max_future: 5m
+  memory_limit: 1GiB          # 驗證 logical queue + receive budget；非 RSS 硬上限
+
+limits:                       # 見 04-DATA-MODEL.md §5，此處為全域預設
+  max_active_series_per_tenant: 500000
+  max_log_line_bytes: 256KiB
+  cardinality_alarm_threshold: 10000
+  auto_drop_high_cardinality: false
+
+query:
+  timeout: 60s
+  max_concurrent: 16
+  max_concurrent_per_tenant: 8
+  max_lookback: 30d
+  max_range: 7d
+  max_points: 11000
+  max_samples: 50000000
+  lookback_delta: 5m
+  force_fallback: false
+  fallback:
+    max_range: 24h
+    max_rows: 5000000
+
+rules:
+  path: /etc/prism/rules
+  db_sync_interval: 30s
+  eval_timeout: 30s
+  state_flush_interval: 60s
+  builtin_enabled: true
+
+notify:
+  config_path: /etc/prism/alertmanager.yaml
+  deadletter_receiver: ops-fallback
+
+telemetry:
+  self_monitor: true          # 把自身指標寫入自己的存儲
+  log_level: info
+  log_format: json

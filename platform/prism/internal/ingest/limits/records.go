@@ -18,6 +18,20 @@ const truncationMarker = "prism.truncated"
 // canceled or oversized batches return a classified error through SPI helpers.
 // Metric identity and trusted system labels are never shortened.
 func (l *Limiter) Metrics(ctx context.Context, input []utm.MetricPoint) ([]utm.MetricPoint, Report, error) {
+	return l.metrics(ctx, input, nil)
+}
+
+// MetricsWithAcceptance returns one acceptance bit per bounded input point.
+// Indices preserve distinct identical points and survive label normalization.
+func (l *Limiter) MetricsWithAcceptance(ctx context.Context, input []utm.MetricPoint) ([]utm.MetricPoint, []bool, Report, error) {
+	var accepted []bool
+	if len(input) <= l.options.MaxRecords {
+		accepted = make([]bool, len(input))
+	}
+	output, report, err := l.metrics(ctx, input, accepted)
+	return output, accepted, report, err
+}
+func (l *Limiter) metrics(ctx context.Context, input []utm.MetricPoint, accepted []bool) ([]utm.MetricPoint, Report, error) {
 	report := newReport(l.options.MaxReportEvents)
 	if err := l.begin(ctx, len(input), &report); err != nil {
 		return nil, report, err
@@ -31,7 +45,7 @@ func (l *Limiter) Metrics(ctx context.Context, input []utm.MetricPoint) ([]utm.M
 		return nil, report, err
 	}
 	output := make([]utm.MetricPoint, 0, len(input))
-	for _, point := range input {
+	for index, point := range input {
 		if err := ctx.Err(); err != nil {
 			return output, report, err
 		}
@@ -117,6 +131,9 @@ func (l *Limiter) Metrics(ctx context.Context, input []utm.MetricPoint) ([]utm.M
 		point.Labels = final
 		point = cloneMetric(point)
 		output = append(output, point)
+		if accepted != nil {
+			accepted[index] = true
+		}
 	}
 	return output, report, nil
 }

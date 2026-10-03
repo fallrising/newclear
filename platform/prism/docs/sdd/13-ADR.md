@@ -179,3 +179,39 @@
 **後果**：
 - 使用者必須額外部署 Grafana。`deploy/docker-compose.yml` 預設包含它以降低摩擦。
 - 產品的「一體感」較弱。Phase 6 可用 Apache-2.0 的 Perses 元件補上，不需要 fork Grafana。
+
+## ADR-011：Phase 1 OTLP 寫入使用單租戶 file-backed bearer
+
+**狀態**：P1-04 實作決策，2026-10-03。
+
+**背景**：P1-03 的 tenant context 只接受可信身分。完整 API-key store、mTLS
+租戶映射及控制平面尚未實作；直接信任客戶端租戶 header 會繞過隔離。
+
+**決策**：P1-04 先支援 `tenancy.mode: single`，寫入一律驗證
+`auth.ingest_api_key_file` 載入的獨立 bearer key，且只允許設定的 default tenant。
+`X-Scope-OrgID`、`X-Prism-Tenant` 若出現，必須單一且等於該租戶；跨租戶或
+互相衝突的 selector 不能覆蓋 key 身分。這明確限縮 `02` §0.1 的通用解析順序：
+在完整認證映射實作前，不提供任意 header 選租戶，也不提供 mTLS 身分認證。
+`all-in-one`／`ingest` 在缺少有效 key 或設定 strict tenancy 時拒絕啟動與
+config-check。其他角色仍不需要 ingest key。JWT secret 不重用為寫入 key。
+
+**結果**：可驗收真實三訊號接收且不引入匿名寫入。部署需自行管理與輪替 key；
+本次不提供 live reload、多租戶 key store 或部署。TLS certificate 設定同時套用
+HTTP 與 gRPC；明文只適合本機測試或可信網路。key 不進 log、錯誤或序列化設定。
+
+**計數**：OTLP 部分失敗以原始 datapoint/log/span 為單位。若一個 metric point
+展開出的任一 UTM child 被拒絕，原始 point 計一次 rejected；其他 child 可能已被
+接受，客戶端不得因 partial success 重送整批。delta baseline、metadata 不支援與
+可恢復正規化警告不可冒充資料點拒絕數。詳見 [P1-04 設計](../specs/p1-04-otlp.md)
+及 [OTLP 規範](https://opentelemetry.io/docs/specs/otlp/)。
+
+**容量**：daemon 使用一租戶、每 lane queue depth 4 的預設，與保留相容性的
+pipeline package defaults 分開。`ingest.memory_limit` 驗證邏輯 payload 與接收
+buffer 預算；它不是硬性 RSS 上限，不包含 memory backend 無界資料保留。
+
+**gRPC 早期限流**：固定版本 grpc-go 的 tap abort 不保留 status details，因此解碼前
+的 receiver 容量不足回 `Unavailable`，讓 OTLP 客戶端使用標準 backoff 重試。
+pipeline 佇列／rate limit 仍在正常 unary handler 回 `ResourceExhausted` 加
+`RetryInfo`，符合 `02` §1.1 的佇列滿契約。使用標準 MethodDesc 及 bounded raw
+request，避免依賴不受支援的 stream descriptor flags；協定錯誤在 handler
+分類，原生 framing/compression 錯誤保留函式庫行為。

@@ -344,7 +344,7 @@ func TestReserve_OversizeAbortAndInvalidCommit(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-	r, err := b.Reserve(context.Background(), "tenant", []int{2, 2})
+	r, err := reserveReady(b, []int{2, 2})
 	if r != nil {
 		r.Abort()
 	}

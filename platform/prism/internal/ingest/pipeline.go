@@ -63,7 +63,9 @@ func TenantFromContext(ctx context.Context) string {
 // Result counts output records; metrics may expand one input point into many.
 // Normalize diagnostics are deliberately separate from registered telemetry domains.
 type Result struct {
-	Accepted, Rejected                    int
+	Accepted, Rejected int
+	// OTLPRejected counts original data points, log records or spans; zero for UTM submissions.
+	OTLPRejected                          int
 	MetadataAccepted, MetadataUnsupported int
 	RetryAfter                            time.Duration
 	InternalFailures                      int
@@ -352,13 +354,16 @@ func (p *Pipeline) submitMetrics(ctx context.Context, batch normalize.MetricBatc
 			result.InternalFailures++
 		}
 	}
-	points, report, stageErr := state.limiter.Metrics(detached, batch.Points)
+	points, accepted, report, stageErr := state.limiter.MetricsWithAcceptance(detached, batch.Points)
 	if stageErr != nil {
 		result.InternalFailures++
 	}
 	result.Limits = report
 	result.Accepted = len(points)
 	result.Rejected = len(batch.Points) - len(points)
+	if otlp {
+		result.OTLPRejected = originalMetricRejections(batch.Origins, accepted)
+	}
 	if p.metadataSupported {
 		result.MetadataAccepted = len(batch.Metadata)
 	} else {
@@ -372,6 +377,9 @@ func (p *Pipeline) submitMetrics(ctx context.Context, batch normalize.MetricBatc
 		result.Rejected += result.Accepted
 		result.Accepted = 0
 		result.MetadataAccepted = 0
+		if otlp {
+			result.OTLPRejected = originalMetricRejections(batch.Origins, nil)
+		}
 		result.InternalFailures++
 	}
 	return result, nil
@@ -436,9 +444,15 @@ func (p *Pipeline) submitLogs(ctx context.Context, input []utm.LogRecord, otlp p
 	result.Limits = report
 	result.Accepted = len(output)
 	result.Rejected = len(input) - len(output)
+	if isOTLP {
+		result.OTLPRejected = otlp.LogRecordCount() - len(output)
+	}
 	if err := reservation.Commit(output); err != nil {
 		result.Rejected += result.Accepted
 		result.Accepted = 0
+		if isOTLP {
+			result.OTLPRejected = otlp.LogRecordCount()
+		}
 		result.InternalFailures++
 	}
 	return result, nil
@@ -494,9 +508,15 @@ func (p *Pipeline) submitSpans(ctx context.Context, input []utm.Span, otlp ptrac
 	result.Limits = report
 	result.Accepted = len(output)
 	result.Rejected = len(input) - len(output)
+	if isOTLP {
+		result.OTLPRejected = otlp.SpanCount() - len(output)
+	}
 	if err := reservation.Commit(output); err != nil {
 		result.Rejected += result.Accepted
 		result.Accepted = 0
+		if isOTLP {
+			result.OTLPRejected = otlp.SpanCount()
+		}
 		result.InternalFailures++
 	}
 	return result, nil
@@ -557,4 +577,18 @@ func (p *Pipeline) Close(ctx context.Context) error {
 	}
 	clear(p.tenants)
 	return errors.Join(errs...)
+}
+
+func originalMetricRejections(origins []normalize.MetricOrigin, accepted []bool) int {
+	rejected := 0
+	for _, origin := range origins {
+		lost := origin.Rejected
+		for i := origin.Start; i < origin.End && !lost; i++ {
+			lost = i >= len(accepted) || !accepted[i]
+		}
+		if lost {
+			rejected++
+		}
+	}
+	return rejected
 }

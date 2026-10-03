@@ -10,31 +10,15 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/goleak"
 )
 
-func TestMain(tests *testing.M) {
-	os.Exit(runTestMain(tests))
-}
-
-func runTestMain(tests *testing.M) int {
-	baseline := runtime.NumGoroutine()
-	exitCode := tests.Run()
-	if transport, ok := http.DefaultTransport.(*http.Transport); ok {
-		transport.CloseIdleConnections()
-	}
-	if exitCode == 0 && !goroutineCountReturnsTo(baseline) {
-		_, _ = fmt.Fprintf(os.Stderr, "goroutine leak: before=%d after=%d\n%s", baseline, runtime.NumGoroutine(), allGoroutineStacks())
-		return 1
-	}
-	return exitCode
-}
+func TestMain(tests *testing.M) { goleak.VerifyTestMain(tests) }
 
 func TestNew_Validation(t *testing.T) {
 	tests := []struct {
@@ -338,27 +322,4 @@ func waitForHealthy(t *testing.T, endpoint string) {
 			t.Fatalf("health endpoint %s did not become ready", endpoint)
 		}
 	}
-}
-
-func goroutineCountReturnsTo(want int) bool {
-	ticker := time.NewTicker(10 * time.Millisecond)
-	defer ticker.Stop()
-	timeout := time.NewTimer(time.Second)
-	defer timeout.Stop()
-	for {
-		if runtime.NumGoroutine() <= want {
-			return true
-		}
-		select {
-		case <-ticker.C:
-		case <-timeout.C:
-			return false
-		}
-	}
-}
-
-func allGoroutineStacks() string {
-	buffer := make([]byte, 1<<20)
-	length := runtime.Stack(buffer, true)
-	return string(buffer[:length])
 }

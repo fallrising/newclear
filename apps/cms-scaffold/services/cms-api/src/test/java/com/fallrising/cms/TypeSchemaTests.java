@@ -112,7 +112,9 @@ class TypeSchemaTests {
                 .doesNotContainKeys("indexed", "enabled");
         identity.setSurface(com.fallrising.cms.identity.domain.Surface.ADMIN);
         var authorization = org.mockito.Mockito.mock(com.fallrising.cms.identity.service.AuthorizationService.class);
-        var admin = new com.fallrising.cms.content.web.AdminContentController(store, null, null, null, authorization);
+        var admin = new com.fallrising.cms.content.web.AdminContentController(store, null, null, authorization,
+                com.fallrising.cms.platform.TransactionRunner.withoutDatabase(),
+                org.mockito.Mockito.mock(com.fallrising.cms.identity.service.AuditLog.class));
         @SuppressWarnings("unchecked")
         var adminTypes = (java.util.List<java.util.Map<String, Object>>) admin.listTypes(request).get("items");
         org.assertj.core.api.Assertions.assertThat(adminTypes.getFirst()).containsEntry("enabled", true);

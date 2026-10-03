@@ -22,6 +22,15 @@ public class ContentException extends CmsApiException {
                 fields.size() + " invalid field(s); first: " + fields.getFirst().message(), fields);
     }
 
+    public static ContentException inBatchItem(int index, CmsApiException failure) {
+        return new ContentException(failure.code(), "items[" + index + "]: " + failure.getMessage(),
+                failure.action(), failure.contentType(), failure.surface(), failure.fields());
+    }
+
+    private ContentException(ErrorCode code, String message, String action, String contentType, String surface, List<FieldError> fields) {
+        super(code, message, action, contentType, surface, fields);
+    }
+
     public static ContentException versionRequired() {
         return new ContentException(ErrorCode.VERSION_REQUIRED, "PATCH requires the entry version");
     }

@@ -24,6 +24,8 @@ final class ContentProjection {
         json.put("title", title(entry.payload(), type == null ? null : type.titleField()));
         json.put("payload", entry.payloadCopy());
         json.put("dirty", entry.dirty());
+        json.put("publishRequestedAt", entry.publishRequestedAt());
+        json.put("publishRequestedBy", entry.publishRequestedBy() == null ? null : entry.publishRequestedBy().toString());
         json.put("publishedAt", entry.publishedAt());
         json.put("updatedAt", entry.updatedAt());
         return json;

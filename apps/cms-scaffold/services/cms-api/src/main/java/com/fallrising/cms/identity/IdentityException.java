@@ -61,6 +61,10 @@ public class IdentityException extends CmsApiException {
                 "admin");
     }
 
+    public static IdentityException auditNotFound() {
+        return new IdentityException(ErrorCode.AUDIT_EVENT_NOT_FOUND, "Audit event not found", null, null, null);
+    }
+
     public static IdentityException validation(String message) {
         return new IdentityException(ErrorCode.VALIDATION_FAILED, message, null, null, null);
     }

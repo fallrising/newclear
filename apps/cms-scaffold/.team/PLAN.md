@@ -138,3 +138,23 @@ Root visual review found missing fields Tailwind scanning (documented then focus
 ## W1 publication authorization — 2026-10-03
 
 Owner requested saving the verified W1 progress to GitHub and continuing the next roadmap task. Publish W1 as one PR and merge only after CI passes; do not deploy. Existing LOCAL_VERIFIED reports describe the earlier local acceptance. BW2 follows W1, with incremental documentation and isolated bounded workers before implementation.
+
+## BW2 plan — 2026-10-03
+
+Objective: next roadmap backend wave B-07/B-11(part), G-03/G-04/G-09/G-10 after publishing W1 PR229. Specification BW2 section0 is written before code. Preserve P0 atomic/CAS writes, BW1 queries/validation, and W1 UI. No runtime dependency or deployment. All older snapshots and integration trees remain intact.
+
+T-601 owns audit/identity/assignable and non-entry transactional audit in an isolated worktree. T-602 owns entry/store/query/publish-request/batch/refs and V8 in another. They publish interfaces early; root transfers only completed scoped files between isolated trees when needed. Root owns OpenAPI/runtime/TS codegen, mock/schema compatibility, docs and integration gates. T-603 is cheaper independent read-only review. Workers may not delegate or commit/push/merge.
+
+Acceptance requires worker diff review, Java226+ baseline with added behavior regressions, PostgreSQL93+ baseline with genuine failure-injection rollback/CAS checks, all frontend300+/mock27 regression gates, lint/typecheck/build/bundle, byte-equal OpenAPI, report/task validation and visible evidence. Historical spec gate exceptions and lack of rollback tests are superseded. BW2 is IN_PROGRESS, not accepted or published.
+
+T-603 independent review found pre-existing audited identity writes outside transaction, inconsistent with BW2 B-07/BD-09. Accept finding; T-604 is a new bounded root-cause fix, documented before code, for PrincipalAdminService/AuthService audited changes and PostgreSQL failure injection. Identity event names and security semantics remain unchanged. Do not claim BW2 accepted while this gap remains.
+
+## BW2 acceptance — 2026-10-03
+
+ACCEPT T601/T602/T604 after scoped diff review and root evidence gate; T603 independent review DONE. The accepted identity-transaction finding was corrected with docs-first T604, not deferred or hidden. Root source254 Java passed; full PostgreSQL118 retained6 identity test fixture comparison failures, all108 other cases passed. Only that test file changed; root forced12-case rerun passed, yielding120 unique cases with current per-class evidence. Frontend300/mock27 and lint/typecheck/build/bundle/npmci/codegen passed. Source manifests384/171 bind the result; snapshots412/449/468/566 and original468-file integration tree remain intact.
+
+Resolved history includes initial missing endpoint/schema Red, accidental navigation SQL edit, invalid synthetic type key, nanosecond/microsecond fixture comparisons, clean-published request residue, repeated-request timestamp precision, and identity byte-array record comparison. No validator weakened. Prior failed logs retained. BW2 LOCAL_VERIFIED only; no commit/push/PR/deploy for this new wave. W1 PR229 MERGED48a303b; next default frontend task W2, preceded by incremental documentation. BW4 application wiring and operational acceptance remain explicit.
+
+## BW2 publication authorization — 2026-10-03
+
+Owner explicitly requested merging the completed PR and continuing development. Publish the verified BW2 source as one PR, require all remote CI checks, and merge the exact reviewed head. Earlier LOCAL_VERIFIED statements record local acceptance history. Continue W2 with documentation first; no deployment. Rechecked384 source hashes,171 protected hashes,all retained log hashes and prior snapshots before publication. Main changes since W1 are outside CMS and its CI.

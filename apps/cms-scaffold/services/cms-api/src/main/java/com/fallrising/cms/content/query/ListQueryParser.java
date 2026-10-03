@@ -53,7 +53,12 @@ public final class ListQueryParser {
             List<RefFilter> refs,
             SortKey sort,
             int page,
-            int size) {}
+            int size,
+            boolean publishRequested) {
+        public Parsed(List<String> states, String q, List<FieldFilter> filters, List<RefFilter> refs, SortKey sort, int page, int size) {
+            this(states, q, filters, refs, sort, page, size, false);
+        }
+    }
 
     private ListQueryParser() {}
 
@@ -119,7 +124,11 @@ public final class ListQueryParser {
             }
         }
         ranges.forEach((key, bounds) -> filters.add(FieldFilter.range(key, bounds[0], bounds[1])));
-        return new Parsed(states, q, filters, refs, sort, page, size);
+        String requested = publicScope ? null : single(params, "publishRequested");
+        if (requested != null && !requested.isBlank() && !"true".equals(requested) && !"false".equals(requested)) {
+            throw ContentException.invalidParameter("publishRequested must be true or false");
+        }
+        return new Parsed(states, q, filters, refs, sort, page, size, "true".equals(requested));
     }
 
     private static List<String> states(Map<String, String[]> params) {

@@ -10,6 +10,8 @@ import com.fallrising.cms.content.index.IndexRow;
 import com.fallrising.cms.content.query.EntryQuery;
 import com.fallrising.cms.content.query.EntryPage;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +41,9 @@ public interface ContentStore {
     default void markMediaRefsPublic() {}
 
     Optional<EntryRecord> findEntry(UUID id);
+
+    /** Reads all matching IDs, including deleted targets, in one bounded store operation. */
+    Map<UUID, EntryRecord> findEntries(Collection<UUID> ids);
 
     Optional<EntryRecord> findBySlug(UUID typeId, String slug);
 

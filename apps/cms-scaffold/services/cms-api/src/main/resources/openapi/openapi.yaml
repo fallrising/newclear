@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.7.0
+  version: 0.8.0
   license:
     name: Proprietary
 servers:
@@ -202,6 +202,31 @@ paths:
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
         "415": { $ref: "#/components/responses/Error415" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/principals/assignable:
+    get:
+      operationId: listAssignablePrincipals
+      tags: [Principals]
+      description: |
+        Principals that entries of `contentType` can be assigned to (G-04): active, not deleted, holding
+        `update` on the type on the Back surface (predicates ignored). The caller needs `update` on the type
+        on its own surface. `q` is a case-insensitive substring of username or displayName. Order:
+        displayName, then username; at most 20. Only `id` and `displayName` are returned.
+        Errors:
+        - 400 VALIDATION_FAILED: `contentType` missing, unknown or disabled.
+        - 403 FORBIDDEN: caller lacks `update` on the type.
+      parameters:
+        - { in: query, name: contentType, required: true, schema: { type: string } }
+        - { in: query, name: q, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: Assignable principals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssignablePrincipalList" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}:
     get:
@@ -614,9 +639,11 @@ paths:
         Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
         datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
         Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
+        `publishRequested=true` keeps only entries with an open publish request (G-03); false leaves the list unfiltered.
+        `include=refs` adds `refs` to every item (G-10): two more store reads per page, not per item.
         Other query parameters are ignored.
         Errors:
-        - 400 VALIDATION_FAILED: `page` or `size` out of range; unknown `state` value; `sort` names a key
+        - 400 VALIDATION_FAILED: `include` other than `refs`; `publishRequested` other than true or false; `page` or `size` out of range; unknown `state` value; `sort` names a key
           that is not sortable; a filter names a field that is not filterable or has a value of the wrong
           kind; a `ref.<fieldKey>` value is not a UUID; a parameter other than `ref.<fieldKey>` is repeated.
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
@@ -629,6 +656,11 @@ paths:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
         - $ref: "#/components/parameters/Sort"
+        - in: query
+          name: publishRequested
+          required: false
+          schema: { type: boolean }
+        - $ref: "#/components/parameters/IncludeRefs"
       responses:
         "200":
           description: Work entries including drafts
@@ -682,12 +714,15 @@ paths:
       operationId: getWorkEntry
       tags: [Content]
       description: |
+        `include=refs` adds `refs` (G-10).
         Errors:
+        - 400 VALIDATION_FAILED: `include` other than `refs`.
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
         - 403 FORBIDDEN: caller may not read this entry.
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
       parameters:
         - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/IncludeRefs"
       responses:
         "200":
           description: Work copy
@@ -763,7 +798,9 @@ paths:
       operationId: publishEntry
       tags: [Content]
       description: |
-        Publishing a published entry without changes returns it unchanged.
+        Publishing a published entry without changes and without an open request returns it unchanged.
+        If its working payload is clean but a request remains open, clear the request with a version increment
+        and entry.publish_request_cancel audit; do not create a revision or an entry.publish event.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `publish`).
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -786,6 +823,95 @@ paths:
         "404": { $ref: "#/components/responses/Error404" }
         "409": { $ref: "#/components/responses/Error409" }
         "422": { $ref: "#/components/responses/Error422" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/entries:batch-patch:
+    post:
+      operationId: batchPatchEntries
+      tags: [Content]
+      description: |
+        Patches 1 to 100 entries atomically (G-09). Each item gets the checks of patchEntry, in item order.
+        The first failing check that is not a field error stops the batch with that error; its message starts
+        with `items[<i>]: `. Otherwise all field errors of all items are returned together as one 422 with
+        paths `items[<i>].payload.<fieldKey>`. Nothing is written unless every item passes; then all items
+        are written in one transaction. `slug` cannot be changed here. No audit event (as patchEntry).
+        Errors:
+        - 400 VALIDATION_FAILED: `items` empty or longer than 100; an item without `id`; an id repeated.
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN; 404 ENTRY_NOT_FOUND; 409 INVALID_STATE_TRANSITION, VERSION_CONFLICT;
+          428 VERSION_REQUIRED: as patchEntry, for the first failing item.
+        - 422 with `error.fields`: as patchEntry, for all items.
+      parameters:
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BatchPatchRequest" }
+      responses:
+        "200":
+          description: Updated entries in item order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntryList" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "409": { $ref: "#/components/responses/Error409" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "428": { $ref: "#/components/responses/Error428" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/entries/{id}/publish-request:
+    post:
+      operationId: requestPublish
+      tags: [Content]
+      description: |
+        Asks for the entry to be published (G-03). Needs `update`. The entry must be a draft, or published
+        with unpublished changes (`dirty`). An open request is returned unchanged. Creating a request increments
+        `version` and changes `updatedAt`, using compare-and-set. Publish, unpublish, archive and restore clear
+        the request. Audit: `entry.publish_request`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+        - 409 INVALID_STATE_TRANSITION: archived, or published without changes.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/CsrfHeader"
+      responses:
+        "200":
+          description: Entry with an open publish request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "409": { $ref: "#/components/responses/Error409" }
+        "500": { $ref: "#/components/responses/Error500" }
+    delete:
+      operationId: cancelPublishRequest
+      tags: [Content]
+      description: |
+        Withdraws the open publish request. Needs `update`. Without a request the entry is returned
+        unchanged. Clearing an existing request increments `version` and changes `updatedAt`, using compare-and-set.
+        Audit: `entry.publish_request_cancel`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/CsrfHeader"
+      responses:
+        "200":
+          description: Entry without a publish request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/entries/{id}/unpublish:
     post:
@@ -1104,29 +1230,62 @@ paths:
       operationId: listAudit
       tags: [Admin]
       description: |
-        Newest first. Not paginated in this version.
+        Audit search (02 §4.6, B-07). Order: `at` descending, then id text ascending. Blank parameters mean
+        no condition; other parameters are ignored. `actor` is a username; an unknown username gives an
+        empty page. `action` matches exactly, or as a prefix when the value ends with `.` (for example
+        `entry.`). `from` is inclusive and `to` exclusive.
         Errors:
-        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface.
-        - 403 FORBIDDEN: caller lacks `read_audit`.
+        - 400 VALIDATION_FAILED: `page` or `size` out of range; `from`, `to` or `targetId` malformed; a
+          parameter repeated.
+        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+          denied `read_audit`).
+        - 403 FORBIDDEN: caller lacks `read_audit` (also written as denied).
       parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - { in: query, name: from, required: false, schema: { type: string, format: date-time } }
+        - { in: query, name: to, required: false, schema: { type: string, format: date-time } }
+        - { in: query, name: actor, required: false, description: Username of the actor., schema: { type: string } }
         - in: query
           name: action
           required: false
-          description: Exact audit action, for example `LOGIN_SUCCESS`.
+          description: Exact action, for example `entry.publish`; a value ending with `.` is a prefix.
           schema: { type: string }
-        - in: query
-          name: targetId
-          required: false
-          schema: { type: string, format: uuid }
+        - { in: query, name: category, required: false, schema: { type: string } }
+        - { in: query, name: targetType, required: false, schema: { type: string } }
+        - { in: query, name: targetId, required: false, schema: { type: string, format: uuid } }
+        - { in: query, name: outcome, required: false, schema: { type: string } }
       responses:
         "200":
-          description: Audit events
+          description: One page of audit events
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/AuditEventList" }
+              schema: { $ref: "#/components/schemas/AuditEventPage" }
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/admin/audit/{id}:
+    get:
+      operationId: getAuditEvent
+      tags: [Admin]
+      description: |
+        One audit event with its `detail`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listAudit.
+        - 404 AUDIT_EVENT_NOT_FOUND: no event with this id.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Audit event
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditEventDetail" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/media:
     get:
@@ -1383,6 +1542,12 @@ components:
         type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
         visibility `public` only).
       schema: { type: string }
+    IncludeRefs:
+      in: query
+      name: include
+      required: false
+      description: Comma-separated; the only value is `refs`.
+      schema: { type: string }
     CsrfHeader:
       in: header
       name: X-CSRF-Token
@@ -1472,6 +1637,7 @@ components:
         - ENTRY_NOT_FOUND
         - CONTENT_TYPE_NOT_FOUND
         - NAVIGATION_NOT_FOUND
+        - AUDIT_EVENT_NOT_FOUND
         - AUDIENCE_PARAM_REJECTED
         - INVALID_STATE_TRANSITION
         - SLUG_CONFLICT
@@ -1692,6 +1858,21 @@ components:
       properties:
         currentPassword: { type: string }
         newPassword: { type: string, minLength: 12 }
+    AssignablePrincipalList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, displayName]
+            properties:
+              id: { type: string, format: uuid }
+              displayName: { type: string }
     Principal:
       type: object
       additionalProperties: false
@@ -1985,7 +2166,8 @@ components:
     WorkEntry:
       type: object
       additionalProperties: false
-      required: [id, contentType, slug, publicationState, version, title, payload, dirty, publishedAt, updatedAt]
+      required: [id, contentType, slug, publicationState, version, title, payload, dirty, publishedAt, updatedAt,
+        publishRequestedAt, publishRequestedBy]
       properties:
         id: { type: string, format: uuid }
         contentType: { type: string }
@@ -2002,6 +2184,60 @@ components:
           description: True when published and the work copy differs from the published copy.
         publishedAt: { type: string, format: date-time, nullable: true }
         updatedAt: { type: string, format: date-time }
+        publishRequestedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When an open publish request was made (G-03); null without one.
+        publishRequestedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: Principal who made the open publish request.
+        refs:
+          type: object
+          description: Present only with `include=refs` (G-10); one key per ref field that holds an entry id.
+          additionalProperties: { $ref: "#/components/schemas/RefSummary" }
+    BatchPatchRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required: [id, version]
+            properties:
+              id: { type: string, format: uuid }
+              version: { type: integer, format: int32 }
+              payload:
+                allOf:
+                  - $ref: "#/components/schemas/EntryPayload"
+                nullable: true
+    WorkEntryList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/WorkEntry" }
+    RefSummary:
+      type: object
+      additionalProperties: false
+      required: [id]
+      description: |
+        Target of a ref field. Readable (caller has read_draft on the target): id, contentType, title,
+        publicationState. Not readable: id and restricted=true. Missing or soft-deleted: id and missing=true.
+      properties:
+        id: { type: string, format: uuid }
+        contentType: { type: string }
+        title: { type: string, nullable: true }
+        publicationState: { $ref: "#/components/schemas/PublicationState" }
+        restricted: { type: boolean }
+        missing: { type: boolean }
     WorkEntryPage:
       type: object
       additionalProperties: false
@@ -2200,24 +2436,77 @@ components:
           allOf:
             - $ref: "#/components/schemas/NavigationDocument"
           nullable: true
+    AuditActor:
+      type: object
+      additionalProperties: false
+      required: [id, username, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        username:
+          type: string
+          nullable: true
+          description: Null when the principal no longer exists.
+        displayName: { type: string, nullable: true }
     AuditEventSummary:
       type: object
       additionalProperties: false
-      required: [action, targetType, targetId, outcome, at]
+      required: [id, at, actor, category, action, targetType, targetId, surface, outcome]
       properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        actor:
+          allOf:
+            - $ref: "#/components/schemas/AuditActor"
+          nullable: true
+          description: Null for events without an actor (anonymous login attempts, seeding).
+        category:
+          type: string
+          description: AUTH, CONTENT, SCHEMA, SETTINGS, MEDIA or GOVERNANCE.
+        action:
+          type: string
+          description: For example `entry.publish`, `type.create`, `LOGIN_SUCCESS`, or a denied governance action such as `manage_types`.
+        targetType: { type: string, nullable: true }
+        targetId: { type: string, format: uuid, nullable: true }
+        surface: { type: string, nullable: true }
+        outcome:
+          type: string
+          description: ok or denied.
+    AuditEventDetail:
+      type: object
+      additionalProperties: false
+      description: AuditEventSummary plus detail.
+      required: [id, at, actor, category, action, targetType, targetId, surface, outcome, detail]
+      properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        actor:
+          allOf:
+            - $ref: "#/components/schemas/AuditActor"
+          nullable: true
+        category: { type: string }
         action: { type: string }
         targetType: { type: string, nullable: true }
         targetId: { type: string, format: uuid, nullable: true }
+        surface: { type: string, nullable: true }
         outcome: { type: string }
-        at: { type: string, format: date-time }
-    AuditEventList:
+        detail:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: The event's detail_json, or null.
+    AuditEventPage:
       type: object
       additionalProperties: false
-      required: [items]
+      required: [items, total, page, size, offset, limit]
       properties:
         items:
           type: array
           items: { $ref: "#/components/schemas/AuditEventSummary" }
+        total: { type: integer, format: int64 }
+        page: { type: integer, minimum: 1 }
+        size: { type: integer, minimum: 1, maximum: 100 }
+        offset: { type: integer }
+        limit: { type: integer }
     MediaVariantLink:
       type: object
       additionalProperties: false

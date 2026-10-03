@@ -798,6 +798,37 @@ public abstract class ContentStoreContract {
         return T0.plusSeconds(seconds);
     }
 
+    @Test
+    void G03_publishRequestsRoundTripClearAndFilterOnlyWorkQueries() {
+        ContentTypeRecord album = insertType("album");
+        UUID actor = UUID.randomUUID();
+        EntryRecord requested = entry(album, "requested", PublicationState.PUBLISHED, Map.of("title", "requested"), t(1))
+                .withPublishRequest(t(2), actor);
+        EntryRecord plain = entry(album, "plain", PublicationState.PUBLISHED, Map.of("title", "plain"), t(3));
+        store.insertEntry(requested); store.insertEntry(plain);
+        assertThat(store.findEntry(requested.id())).contains(requested);
+        assertThat(store.queryEntries(query(album).publishRequested(true).build()).items()).containsExactly(requested);
+        assertThat(store.queryEntries(query(album).publishRequested(false).build()).total()).isEqualTo(2);
+        assertThat(store.queryEntries(publicQuery(album).publishRequested(true).build()).total()).isEqualTo(2);
+        EntryRecord cleared = new EntryRecord(requested.id(), requested.contentTypeId(), requested.contentTypeKey(), requested.slug(),
+                requested.publicationState(), requested.version() + 1, requested.payload(), requested.publishedPayload(), requested.publishedAt(),
+                requested.archivedAt(), requested.deletedAt(), requested.createdBy(), requested.updatedBy(), requested.createdAt(), t(4));
+        store.updateEntry(cleared);
+        assertThat(store.findEntry(requested.id())).contains(cleared);
+        assertThat(store.queryEntries(query(album).publishRequested(true).build()).items()).isEmpty();
+    }
+
+    @Test
+    void G10_findEntriesReadsDistinctTargetsIncludingDeletedAndOmitsMissing() {
+        ContentTypeRecord album = insertType("album");
+        EntryRecord a = entry(album, "a", PublicationState.DRAFT, Map.of("title", "a"), t(1));
+        EntryRecord b = deleted(entry(album, "b", PublicationState.DRAFT, Map.of("title", "b"), t(2)), t(3));
+        store.insertEntry(a); store.insertEntry(b);
+        assertThat(store.findEntries(List.of(a.id(), b.id(), a.id(), UUID.randomUUID())))
+                .containsOnlyKeys(a.id(), b.id()).containsEntry(a.id(), a).containsEntry(b.id(), b);
+        assertThat(store.findEntries(List.of())).isEmpty();
+    }
+
     protected static ContentTypeRecord type(String key) {
         return new ContentTypeRecord(UUID.randomUUID(), key, key + " one", key + " many", null, "title", "optional",
                 false, true, true, List.of(), T0, T0);
@@ -919,6 +950,7 @@ public abstract class ContentStoreContract {
         private SortKey sort = SortKey.system("updatedAt", true);
         private int page = 1;
         private int size = 100;
+        private boolean publishRequested;
 
         QueryBuilder(ContentTypeRecord type, IndexScope scope) {
             this.type = type;
@@ -937,10 +969,11 @@ public abstract class ContentStoreContract {
         QueryBuilder sort(SortKey v) { sort = v; return this; }
         QueryBuilder page(int v) { page = v; return this; }
         QueryBuilder size(int v) { size = v; return this; }
+        QueryBuilder publishRequested(boolean v) { publishRequested = v; return this; }
 
         EntryQuery build() {
             return new EntryQuery(type.id(), scope, states, titleField, q, filters, refs, access, visibilityField,
-                    requiredRefs, sort, page, size);
+                    requiredRefs, sort, page, size, publishRequested);
         }
     }
 }

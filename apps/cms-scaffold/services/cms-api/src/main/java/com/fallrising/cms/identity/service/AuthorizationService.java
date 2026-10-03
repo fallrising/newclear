@@ -1,6 +1,7 @@
 package com.fallrising.cms.identity.service;
 
 import com.fallrising.cms.identity.IdentityException;
+import com.fallrising.cms.identity.domain.AuditEvent;
 import com.fallrising.cms.identity.domain.Capabilities;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Permission;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,16 +48,33 @@ public class AuthorizationService {
 
     private final IdentityStore store;
     private final ObjectMapper objectMapper;
+    private final com.fallrising.cms.platform.TransactionRunner transactions;
 
     public AuthorizationService(IdentityStore store, ObjectMapper objectMapper) {
-        this.store = store;
-        this.objectMapper = objectMapper;
+        this(store, objectMapper, com.fallrising.cms.platform.TransactionRunner.withoutDatabase());
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
+    public AuthorizationService(IdentityStore store, ObjectMapper objectMapper,
+            com.fallrising.cms.platform.TransactionRunner transactions) {
+        this.store = store;
+        this.objectMapper = objectMapper;
+        this.transactions = transactions;
+    }
+
+    /**
+     * Throws SURFACE_FORBIDDEN or FORBIDDEN unless allowed. A denied governance action (CmsAction.GOVERNANCE) is also
+     * written to the audit log with outcome "denied" (02 §4.6).
+     */
     public void require(Principal principal, CmsAction action, String contentType, Map<String, Object> entry, Surface surface) {
         Decision decision = allow(principal, action, contentType, entry, surface);
-        if (decision.kind() == DecisionKind.SURFACE_FORBIDDEN) throw IdentityException.surfaceForbidden(action.wire(), contentType, surface.wire());
-        if (decision.kind() == DecisionKind.FORBIDDEN) throw IdentityException.forbidden(action.wire(), contentType, surface.wire());
+        if (!decision.allowed() && CmsAction.GOVERNANCE.contains(action)) {
+            transactions.independently(() -> store.insertAudit(new AuditEvent(UUID.randomUUID(), Instant.now(), principal == null ? null : principal.id(),
+                    "GOVERNANCE", action.wire(), null, null, decision.surface().wire(), "denied",
+                    null, "{\"reason\":\"" + decision.kind().name() + "\"}")));
+        }
+        if (decision.kind() == DecisionKind.SURFACE_FORBIDDEN) throw IdentityException.surfaceForbidden(action.wire(), contentType, decision.surface().wire());
+        if (decision.kind() == DecisionKind.FORBIDDEN) throw IdentityException.forbidden(action.wire(), contentType, decision.surface().wire());
     }
 
     public Decision allow(Principal principal, CmsAction action, String contentType, Map<String, Object> entry, Surface surface) {

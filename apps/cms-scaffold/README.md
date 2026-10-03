@@ -7,15 +7,19 @@
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
 實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
-v2（BW0／W0／P0 已合併，BW1a／BW1b／BW1c 已本地驗證；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
+v2（BW0／W0／P0／BW1a／BW1b／BW1c 已合併；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
-目前已合併 **Wave E＋Back 自訂視圖＋v2 BW0／W0＋P0**：後端 OpenAPI／store 契約測試、前端共用套件／MSW／新殼已存在；Back 另有相簿編排、當日行程、issue 看板。後續模型與編輯器功能仍依 v2 波次開發。
+目前已合併 **Wave E＋Back 自訂視圖＋v2 BW0／W0＋P0＋BW1a／BW1b／BW1c**：後端 OpenAPI／store 契約測試、前端共用套件／MSW／新殼已存在；Back 另有相簿編排、當日行程、issue 看板。後續模型與編輯器功能仍依 v2 波次開發。
 
-BW1a 已本地通過 [整合驗收](.team/reports/BW1a-DELIVERY.md)：類型設定／欄位 metadata、capabilities 與請求內授權快取，並同步前端契約；尚未提交／合併。完整表單、動態導覽與模型管理畫面仍依後續波次開發。
+BW1a 已合併並通過 [整合驗收](.team/reports/BW1a-DELIVERY.md)：類型設定／欄位 metadata、capabilities 與請求內授權快取，並同步前端契約；PR #223 已合併。完整表單與動態導覽見 W1；模型治理畫面仍依後續波次開發。
 
-BW1b 已本地通過 [整合驗收](.team/reports/BW1b-DELIVERY.md)：列表分頁／篩選／predicate 下推、雙 scope 索引與回填、前端完整列表相容。202＋91 後端、166 前端、17 mock E2E 通過；狀態 `LOCAL_VERIFIED`，尚未提交／合併。
+BW1b 已合併並通過 [整合驗收](.team/reports/BW1b-DELIVERY.md)：列表分頁／篩選／predicate 下推、雙 scope 索引與回填、前端完整列表相容。202＋91 後端、166 前端、17 mock E2E 通過；狀態 `VERIFIED`，PR #224 已合併。
 
-BW1c 已本地通過 [整合驗收](.team/reports/BW1c-DELIVERY.md)：全部欄位錯誤、PATCH 必帶版本、公開不可讀媒體為 null，並同步 client／MSW。226＋93 後端、179 前端、17 mock E2E 通過；`LOCAL_VERIFIED`，尚未提交／合併。W1 完整編輯器與欄位錯誤 UI 尚待開發。
+BW1c 已合併並通過 [整合驗收](.team/reports/BW1c-DELIVERY.md)：全部欄位錯誤、PATCH 必帶版本、公開不可讀媒體為 null，並同步 client／MSW。226＋93 後端、179 前端、17 mock E2E 通過；`VERIFIED`，PR #225 已合併。W1 完整編輯器與欄位錯誤 UI 已完成本地驗收。
+
+W1 已本地通過 [整合驗收](.team/reports/W1-DELIVERY.md)：能力導覽、分頁列表、typed editor、離開保護與欄位錯誤 UI。300 前端＋27 mock E2E、226 Java，以及 lint/typecheck/build/bundle/npm ci 與桌面／手機檢查通過；`LOCAL_VERIFIED`，未提交／合併。
+
+三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-PUBLICATION.md)。
 
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 

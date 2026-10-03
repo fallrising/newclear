@@ -1,0 +1,134 @@
+{
+  "viewport": {
+    "name": "375x812",
+    "width": 375,
+    "height": 812
+  },
+  "metrics": {
+    "innerWidth": 375,
+    "innerHeight": 812,
+    "scrollWidth": 375,
+    "scrollHeight": 1907,
+    "outsideViewport": [],
+    "smallTouchTargets": [
+      "a",
+      "button",
+      "button#radix-_r_3_",
+      "button#radix-_r_5_",
+      "input#field-title",
+      "button#radix-_r_7_-trigger-edit",
+      "button#radix-_r_7_-trigger-preview",
+      "textarea#field-body",
+      "button#field-category-__none__",
+      "input",
+      "button#field-category-idea",
+      "button#field-category-todo",
+      "button#field-category-reference",
+      "button#field-color",
+      "select",
+      "input#field-priority",
+      "button#field-pinned",
+      "button#field-dueAt",
+      "input#field-slug"
+    ],
+    "title": "Lens notes · CMS 作業台"
+  },
+  "findings": [
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "a"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_3_"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_5_"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "input#field-title"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_7_-trigger-edit"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_7_-trigger-preview"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "textarea#field-body"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-category-__none__"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "input"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-category-idea"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-category-todo"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-category-reference"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-color"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "select"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "input#field-priority"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-pinned"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#field-dueAt"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "input#field-slug"
+    }
+  ],
+  "url": "http://localhost:5184/entries/note/30000000-0000-4000-8000-000000000036?mockUser=mock-operator-notes"
+}

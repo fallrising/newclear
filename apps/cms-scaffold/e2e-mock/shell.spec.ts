@@ -4,12 +4,12 @@ import { ADMIN, BACK, computed, expectNoSeriousA11yViolations, FRONT } from "./h
 test.describe("W0 shell pages", () => {
   test("V2-AC-01 Back: @cms/ui classes are generated and the page title uses the token size", async ({ page }) => {
     await page.goto(`${BACK}/entries/album?mockUser=seed-operator-album`);
-    await expect(page.getByRole("heading", { level: 1, name: "album" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Albums" })).toBeVisible();
     expect(await computed(page, "h1", "font-size")).toBe("20px");
     expect(await computed(page, "h1", "font-weight")).toBe("650");
     expect(await computed(page, "header", "background-color")).toBe("rgb(255, 255, 255)");
     expect(await computed(page, "body", "background-color")).toBe("rgb(241, 241, 241)");
-    await expect(page).toHaveTitle("album · CMS 作業台");
+    await expect(page).toHaveTitle("Albums · CMS 作業台");
   });
 
   test("V2-AC-01 Admin: cards have border and radius, the accent bar is drawn", async ({ page }) => {
@@ -70,7 +70,7 @@ test.describe("W0 shell pages", () => {
     await page.getByLabel("密碼").fill("any-password");
     await page.getByTestId("login-submit").click();
     await expect(page).toHaveURL(`${BACK}/entries/photo`);
-    await expect(page.getByRole("heading", { level: 1, name: "photo" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Photos" })).toBeVisible();
   });
 
   test("E-01 AppFrame moves the side navigation into a sheet below 1024px", async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe("W0 shell pages", () => {
     await expect(page.getByTestId("nav-open")).toBeVisible();
     await expect(page.locator("aside")).toBeHidden();
     await page.getByTestId("nav-open").click();
-    await page.getByRole("dialog").getByRole("link", { name: "album" }).click();
+    await page.getByRole("dialog").getByRole("link", { name: "Albums" }).click();
     await expect(page).toHaveURL(`${BACK}/entries/album`);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBe(0);

@@ -18,6 +18,7 @@ export interface WorkListParams extends PublicListParams {
 export const keys = {
   auth: {
     me: () => ["auth", "me"] as const,
+    expired: () => ["auth", "expired"] as const,
   },
   public: {
     all: () => ["public"] as const,
@@ -37,6 +38,9 @@ export const keys = {
     list: (type: string, params: WorkListParams = {}) => ["entries", "list", type, params] as const,
     allEntries: (type: string, params: WorkListParams = {}) => ["entries", "list", type, "all", params] as const,
     detail: (id: string) => ["entries", "detail", id] as const,
+  },
+  media: {
+    detail: (id: string) => ["media", "detail", id] as const,
   },
   admin: {
     types: () => ["admin", "types"] as const,

@@ -2,6 +2,8 @@
 
 This records the bounded maintenance repair against [reliability.md](reliability.md). It does not certify the entire desktop product. Documentation baseline: `152bc2c`; backend repair: `8c97116`; frontend repair: `230704c`.
 
+Subsequent work: [session recovery verification](session-recovery-verification.md) records desktop SQLite integration and native boot/recovery checks. The results and remaining gaps below describe this earlier repair revision.
+
 ## Executed checks
 
 | Check | Observed result | Scope |

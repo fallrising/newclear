@@ -70,6 +70,30 @@ export async function sessionMeta(
   return invoke<SessionMeta | null>("pty_session_meta", { sessionId });
 }
 
+// Runtime history DTOs are intentionally outside the frozen v1 contracts.
+export interface SessionHistorySnapshot {
+  sessions: SessionMeta[];
+  live_session_ids: SessionId[];
+  persistent: boolean;
+  warning: string | null;
+}
+
+export function sessionHistory(): Promise<SessionHistorySnapshot> {
+  return invoke<SessionHistorySnapshot>("session_history");
+}
+
+export function restartSession(sessionId: SessionId): Promise<SessionId> {
+  return invoke<SessionId>("session_restart", { origin: USER, sessionId, cols: 120, rows: 30 });
+}
+
+export async function forgetSession(sessionId: SessionId): Promise<void> {
+  await invoke("session_forget", { origin: USER, sessionId });
+}
+
+export function onSessionChanged(handler: () => void): Promise<UnlistenFn> {
+  return listen("session:changed", () => handler());
+}
+
 export async function ptyScrollback(
   sessionId: SessionId,
   maxChars?: number,

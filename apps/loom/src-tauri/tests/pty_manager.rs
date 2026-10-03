@@ -146,39 +146,118 @@ async fn pty_exited_event_emitted_when_child_exits() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn flood_pushes_through_batcher_with_dropped_old_under_pressure() {
-    // Hit a small ring cap so we exercise the drop-old reporting.
-    std::env::set_var(loom_core::pty::RING_CAP_ENV_VAR, "32");
     let (mgr, batches, _events) = manager_and_sinks();
-
-    let config = SpawnConfig {
-        cwd: std::env::temp_dir(),
-        // 1000 lines fast — well above the ring cap of 32.
-        cmd: Some("i=1; while [ $i -le 1000 ]; do printf 'line %d\\n' $i; i=$((i+1)); done".into()),
-        shell: shell(),
-        cols: 80,
-        rows: 24,
-    };
+    let mut config = SpawnConfig::for_shell(std::env::temp_dir(), shell());
+    config.cmd = Some("exec cat".into());
     let sid = mgr.spawn(&Origin::User, config).expect("spawn");
+    let ring = mgr.get_session(&sid).unwrap().ring();
     let _stream = mgr.subscribe(&sid).expect("subscribe");
 
-    // Wait for the script to finish and the batcher to flush.
-    tokio::time::sleep(Duration::from_millis(600)).await;
-
-    let snap = batches.snapshot();
-    assert!(!snap.is_empty(), "expected batches under flood");
-    let combined: String = snap.iter().flat_map(|b| b.frames.iter().cloned()).collect();
-    // Tail must be visible (drop-old, not drop-new — D-2 requirement).
-    assert!(
-        combined.contains("line 1000"),
-        "tail (line 1000) must survive the flood"
-    );
-
-    let total_dropped: u64 = snap.iter().map(|b| u64::from(b.dropped_old)).sum();
-    assert!(total_dropped > 0, "drop reporting should fire under flood");
-
+    // Ring capacity counts reader frames, not output lines. A native read may
+    // coalesce 1000 lines into fewer than 32 frames, so line count cannot force
+    // pressure. Inject known frames into this real session's ring instead of
+    // changing process-global environment or assuming OS read boundaries.
+    let frame_count = ring.capacity() + 32;
+    for index in 0..frame_count {
+        ring.push(format!("line {index}\n"));
+    }
+    assert_eq!(ring.dropped_total(), 32, "pressure was actually induced");
+    let tail = format!("line {}\n", frame_count - 1);
+    tokio::time::timeout(Duration::from_secs(3), async {
+        loop {
+            let snap = batches.snapshot();
+            let total_dropped: u64 = snap.iter().map(|b| u64::from(b.dropped_old)).sum();
+            let contains_tail = snap
+                .iter()
+                .flat_map(|b| &b.frames)
+                .any(|frame| frame.contains(&tail));
+            if total_dropped == 32 && contains_tail {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .expect("batcher must report exact evictions and preserve the newest frame");
     mgr.detach(&sid).expect("detach");
-    let _ = mgr.kill(&Origin::User, &sid);
-    std::env::remove_var(loom_core::pty::RING_CAP_ENV_VAR);
-
+    mgr.remove(&sid).expect("remove");
     let _ = DEFAULT_BATCH_INTERVAL; // touch the re-export so it stays public
+}
+
+/// Hold an emit *inside* the sink while another thread detaches. Aborting the
+/// async task alone cannot stop synchronous work already executing on a worker.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn detach_waits_for_an_in_flight_emission_before_returning() {
+    use loom_contracts::PtyBatch;
+    use loom_core::pty::BatchSink;
+    use std::sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc, Arc, Mutex,
+    };
+
+    struct HeldSink {
+        entered: mpsc::Sender<()>,
+        release: Mutex<mpsc::Receiver<()>>,
+        completed: AtomicBool,
+    }
+    impl BatchSink for HeldSink {
+        fn emit(&self, _batch: PtyBatch) {
+            self.entered.send(()).unwrap();
+            self.release
+                .lock()
+                .unwrap()
+                .recv_timeout(Duration::from_secs(3))
+                .unwrap();
+            self.completed.store(true, Ordering::SeqCst);
+        }
+    }
+    let (entered_tx, entered_rx) = mpsc::channel();
+    let (release_tx, release_rx) = mpsc::channel();
+    let sink = Arc::new(HeldSink {
+        entered: entered_tx,
+        release: Mutex::new(release_rx),
+        completed: AtomicBool::new(false),
+    });
+    let manager = Arc::new(PtyManager::with_interval(
+        sink.clone(),
+        VecEventSink::shared(),
+        Duration::from_millis(1),
+    ));
+    let mut config = SpawnConfig::for_shell(std::env::temp_dir(), shell());
+    config.cmd = Some("exec cat".into());
+    let sid = manager.spawn(&Origin::User, config).unwrap();
+    manager.subscribe(&sid).unwrap();
+    manager
+        .get_session(&sid)
+        .unwrap()
+        .ring()
+        .push("controlled frame".into());
+    entered_rx
+        .recv_timeout(Duration::from_secs(3))
+        .expect("batch is executing inside sink");
+    let (started_tx, started_rx) = mpsc::channel();
+    let (done_tx, done_rx) = mpsc::channel();
+    let detaching = manager.clone();
+    let detached_id = sid.clone();
+    let observed = sink.clone();
+    let thread = std::thread::spawn(move || {
+        started_tx.send(()).unwrap();
+        detaching.detach(&detached_id).unwrap();
+        done_tx
+            .send(observed.completed.load(Ordering::SeqCst))
+            .unwrap();
+    });
+    started_rx.recv_timeout(Duration::from_secs(3)).unwrap();
+    // This timeout deliberately tests that detach stays blocked on the held
+    // emit; it is not a sleep to let an asynchronous abort eventually settle.
+    let premature = done_rx.recv_timeout(Duration::from_millis(100)).ok();
+    release_tx.send(()).unwrap();
+    let completed_before_detach =
+        premature.unwrap_or_else(|| done_rx.recv_timeout(Duration::from_secs(3)).unwrap());
+    thread.join().unwrap();
+    manager.remove(&sid).unwrap();
+    assert!(
+        completed_before_detach,
+        "detach returned while its sink emit was still in flight"
+    );
 }

@@ -20,6 +20,7 @@ import "@xyflow/react/dist/style.css";
 
 import type { Event as LoomEvent } from "../../contracts/Event";
 import type { SessionId } from "../../contracts/SessionId";
+import type { SessionMeta } from "../../contracts/SessionMeta";
 import * as ipc from "../../ipc";
 
 import { CSS, NODE_SIZE, PLACEMENT_STRIDE } from "./config";
@@ -43,6 +44,9 @@ import {
 } from "./persistence";
 
 import { CanvasStorage, removalPlan, withoutKeys } from "./lifecycle";
+import { SessionHistory } from "./SessionHistory";
+import { appendHistoryNode, withObservedExit, type AttachmentOptions } from "./recoveryCanvas";
+import { cleanupUnattachedSession } from "./history";
 
 /// Stable node-types map. react-flow requires referential stability.
 const NODE_TYPES: NodeTypes = {
@@ -121,6 +125,15 @@ function CanvasInner({
   const [cleanupErrors, setCleanupErrors] = useState<Map<string, string>>(() => new Map());
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [saveAttempt, setSaveAttempt] = useState(0);
+  const [spawnError, setSpawnError] = useState<string | null>(null);
+  const mountedRef = useRef(false);
+  const hydratedRef = useRef(hydrated);
+  const observedExitsRef = useRef(new Map<string, number | null>());
+  hydratedRef.current = hydrated;
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
   const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
   // docNodeId → `run_in:` frontmatter value. Updated by DocumentSurface
@@ -277,6 +290,7 @@ function CanvasInner({
   /// rewritten to point at the new session — so a doc that was wired to
   /// the dead terminal keeps working.
   const pendingRestartsRef = useRef(new Set<string>());
+  const attachSessionRef = useRef<(meta: SessionMeta, options?: AttachmentOptions) => boolean>(() => false);
   const restartTombstone = useCallback(
     async (
       tombNodeId: string,
@@ -287,8 +301,14 @@ function CanvasInner({
         name?: string | null;
       },
     ) => {
-      if (pendingRestartsRef.current.has(tombNodeId)) return;
+      if (!mountedRef.current || !hydratedRef.current || pendingRestartsRef.current.has(tombNodeId)) return;
+      const currentNode = nodesRef.current.find((node) => node.id === tombNodeId);
+      if (!currentNode || currentNode.type !== "tombstone") return;
+      // Read the current name/config instead of a pre-rename callback snapshot.
+      was = currentNode.data.was as typeof was;
       pendingRestartsRef.current.add(tombNodeId);
+      setSpawnError(null);
+      let spawnedId: SessionId | null = null;
       try {
         const newSid = await ipc.spawnPty({
           cwd: was.cwd,
@@ -297,59 +317,54 @@ function CanvasInner({
           cols: 120,
           rows: 30,
         });
-        if (!nodesRef.current.some((node) => node.id === tombNodeId)) {
-          await killTerminal(newSid);
+        spawnedId = newSid;
+        if (!mountedRef.current || !nodesRef.current.some((node) => node.id === tombNodeId)) {
+          await cleanupUnattachedSession(newSid, ipc.killPty);
+          spawnedId = null;
           return;
         }
-        const newNodeId = `t-${newSid}`;
-        setTerminals((prev) => {
-          const next = new Map(prev);
-          next.set(newSid, { id: newSid });
-          return next;
-        });
-        setNodes((prev) =>
-          prev.map((n) => {
-            if (n.id !== tombNodeId) return n;
-            return {
-              ...n,
-              id: newNodeId,
-              type: "terminal",
-              data: {
-                sidecarGroup: n.data.sidecarGroup,
-                sessionId: newSid,
-                // Carry the spawn config forward so persistence and a
-                // future re-kill produce another tombstone with the
-                // same `was`.
-                cwd: was.cwd,
-                cmd: was.cmd,
-                shell: was.shell,
-                name: was.name ?? null,
-                onKill: () => void killTerminal(newSid),
-                onClose: () => closeTerminal(newSid, newNodeId),
-                onRename: (next: string | null) =>
-                  renameTerminal(newNodeId, next),
-              },
-            };
-          }),
-        );
-        setEdges((prev) =>
-          prev.map((e) =>
-            e.target === tombNodeId
-              ? { ...e, target: newNodeId }
-              : e.source === tombNodeId
-                ? { ...e, source: newNodeId }
-                : e,
-          ),
-        );
+        const meta = await ipc.sessionMeta(newSid);
+        if (!meta) throw new Error("New session metadata is unavailable");
+        if (!attachSessionRef.current(meta, { replaceNodeId: tombNodeId, name: was.name })) {
+          await cleanupUnattachedSession(newSid, ipc.killPty);
+        }
+        spawnedId = null;
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("restart failed", e);
+        if (spawnedId) await cleanupUnattachedSession(spawnedId, ipc.killPty);
+        if (mountedRef.current) setSpawnError(`Restart failed: ${String(e)}. The saved node is unchanged; try Restart again.`);
       } finally {
         pendingRestartsRef.current.delete(tombNodeId);
       }
     },
-    [closeTerminal, killTerminal, renameTerminal],
+    [],
   );
+
+  const attachSession = useCallback((meta: SessionMeta, options: AttachmentOptions = {}) => {
+    if (!mountedRef.current || !hydratedRef.current) return false;
+    if (options.replaceNodeId && !nodesRef.current.some((node) => node.id === options.replaceNodeId)) return false;
+    meta = withObservedExit(meta, observedExitsRef.current);
+    const position = options.position ?? pickNextPosition(nodesRef.current.length);
+    const hooks = {
+      kill: (sid: string) => { void killTerminal(sid); }, close: closeTerminal, rename: renameTerminal,
+      restart: (id: string, was: { cwd: string; cmd: string | null; shell: string; name: string | null }) => { void restartTombstone(id, was); },
+      dismiss: removeNode,
+    };
+    nodesRef.current = appendHistoryNode(nodesRef.current, meta, position, hooks, options);
+    setNodes((prev) => appendHistoryNode(prev, meta, position, hooks, options));
+    if (meta.state.kind !== "exited" && meta.state.kind !== "tombstone") {
+      setTerminals((prev) => new Map(prev).set(meta.id, { id: meta.id }));
+    }
+    if (options.replaceNodeId) {
+      const oldId = options.replaceNodeId;
+      const newId = `t-${meta.id}`;
+      setEdges((prev) => prev.map((edge) => ({ ...edge,
+        source: edge.source === oldId ? newId : edge.source,
+        target: edge.target === oldId ? newId : edge.target,
+      })));
+    }
+    return true;
+  }, [killTerminal, closeTerminal, renameTerminal, restartTombstone, removeNode]);
+  attachSessionRef.current = attachSession;
 
   // Track refs so `useEffect`-spawned callbacks always read the latest
   // value without forcing the whole effect to re-run.
@@ -385,7 +400,8 @@ function CanvasInner({
     let unlisten: (() => void) | undefined;
     void (async () => {
       const off = await ipc.onLoomEvent(async (ev: LoomEvent) => {
-        if (ev.kind !== "pty_exited") return;
+        if (!alive || ev.kind !== "pty_exited") return;
+        observedExitsRef.current.set(ev.session_id, ev.exit_code);
         setTerminals((prev) => {
           const next = new Map(prev);
           const existing = next.get(ev.session_id);
@@ -399,12 +415,16 @@ function CanvasInner({
         } catch {
           /* fall back to defaults */
         }
+        if (!alive) return;
         setNodes((prev) =>
           prev.map((n) => {
             if (n.type !== "terminal") return n;
             const data = n.data as {
               sessionId?: SessionId;
               name?: string | null;
+              cwd?: string;
+              cmd?: string | null;
+              shell?: string;
             };
             if (data.sessionId !== ev.session_id) return n;
             const tombId = n.id;
@@ -416,9 +436,9 @@ function CanvasInner({
                   name: data.name ?? null,
                 }
               : {
-                  cwd: "~",
-                  cmd: null,
-                  shell: "/bin/sh",
+                  cwd: data.cwd ?? "~",
+                  cmd: data.cmd ?? null,
+                  shell: data.shell ?? "/bin/sh",
                   name: data.name ?? null,
                 };
             return {
@@ -627,6 +647,8 @@ function CanvasInner({
     void (async () => {
       try {
         const cwd = await ipc.homeDir();
+        if (cancelled) return;
+        setSpawnError(null);
         const sid = await ipc.spawnPty({
           cwd,
           cmd: null,
@@ -635,49 +657,25 @@ function CanvasInner({
           rows: 30,
         });
         spawnedId = sid;
-        if (cancelled) { await killTerminal(sid); return; }
+        if (cancelled) { await cleanupUnattachedSession(sid, ipc.killPty); spawnedId = null; return; }
         // Pull the resolved cwd/cmd/shell so persistence has the durable
         // values (the backend defaulted shell from $SHELL).
         const meta = await ipc.sessionMeta(sid);
-        if (cancelled) { await killTerminal(sid); return; }
-        const nodeId = `t-${sid}`;
-        setTerminals((prev) => {
-          const next = new Map(prev);
-          next.set(sid, { id: sid });
-          return next;
-        });
-        setNodes((prev) => [
-          ...prev,
-          {
-            id: nodeId,
-            type: "terminal",
-            position: addTerminalAt,
-            data: {
-              sessionId: sid,
-              cwd: meta?.cwd ?? cwd,
-              cmd: meta?.cmd ?? null,
-              shell: meta?.shell ?? "/bin/sh",
-              name: null,
-              onKill: () => void killTerminal(sid),
-              onClose: () => closeTerminal(sid, nodeId),
-              onRename: (next: string | null) =>
-                renameTerminal(nodeId, next),
-            },
-            style: NODE_SIZE.terminal,
-          },
-        ]);
+        if (cancelled) { await cleanupUnattachedSession(sid, ipc.killPty); spawnedId = null; return; }
+        if (!meta) throw new Error("New session metadata is unavailable");
+        if (!attachSessionRef.current(meta, { position: addTerminalAt })) await cleanupUnattachedSession(sid, ipc.killPty);
+        spawnedId = null;
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("spawnPty failed", e);
-        if (spawnedId) await killTerminal(spawnedId);
+        if (!cancelled) setSpawnError(`Terminal could not be started: ${String(e)}. Try adding a terminal again.`);
+        if (spawnedId) await cleanupUnattachedSession(spawnedId, ipc.killPty);
       } finally {
-        onConsumedAdd();
+        if (!cancelled) onConsumedAdd();
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [hydrated, addTerminalAt, closeTerminal, killTerminal, onConsumedAdd, renameTerminal]);
+  }, [hydrated, addTerminalAt, onConsumedAdd]);
 
   // Add a document node when the App signals.
   useEffect(() => {
@@ -820,6 +818,10 @@ function CanvasInner({
 
   return (
     <div className={CSS.canvasRoot}>
+      <SessionHistory canvasReady={hydrated} onRestarted={attachSession} />
+      {spawnError && <div role="alert" style={{ position: "absolute", zIndex: 21, bottom: 80, left: 16, background: "#402020", padding: 12 }}>
+        {spawnError} <button onClick={() => setSpawnError(null)}>Dismiss</button>
+      </div>}
       {cleanupErrors.size > 0 && <div role="alert" style={{ position: "absolute", zIndex: 21, bottom: 16, left: 16, background: "#402020", padding: 12 }}>
         {Array.from(cleanupErrors, ([sid, message]) => <div key={sid}>
           Terminal cleanup failed: {message} <button onClick={() => void killTerminal(sid)}>retry cleanup</button>

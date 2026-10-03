@@ -1,12 +1,12 @@
 # Desktop session recovery
 
-Status: implementation specification, 2026-10-04. The existing session-store library is not yet connected to desktop startup at this document's initial revision. This slice connects it without changing frozen contracts or source-of-truth assignments.
+Status: implemented and verified on Linux, 2026-10-04; see [verification and limits](session-recovery-verification.md). The initial specification preceded implementation. This slice connects the existing session-store library without changing frozen contracts or source-of-truth assignments.
 
 ## User-visible behavior
 
 - The desktop opens a per-vault `.loom/sessions.db` before accepting terminal commands. Terminal cwd, original command, resolved shell, state and last activity survive app restart.
 - On a fresh process, rows that claimed to be spawning/active/detached become restartable tombstones. Exited rows retain their exit status. Opening the app never reruns a saved command.
-- A session-history panel lists stored metadata and offers explicit **Restart** and **Forget history** for sessions absent from the live manager. Restart creates a new session ID and terminal node, preserving the original history row. Repeated clicks while a request is pending cannot create duplicate sessions.
+- A session-history panel lists stored metadata and offers explicit **Restart** and **Forget history** for sessions that are no longer running, including commands that exited naturally in the current process. Restart creates a new session ID and terminal node, preserving the original history row. Repeated clicks while a request is pending cannot create duplicate sessions.
 - Existing canvas restoration is unchanged: sidecar nodes restore in their recorded positions as documents or terminal tombstones. Session history is a separate view, not an automatic source of new canvas nodes. Opening history never duplicates/replaces canvas topology. Forgetting a history entry does not delete its existing canvas node or files.
 - Storage failure is visible: the app remains usable with in-memory session metadata and a warning that history will not survive restart. A later persistence failure is also surfaced rather than silently claiming durability. Restart/forget failures remain visible and retryable.
 - A saved command's working directory may no longer exist. Restart failure preserves the history row and does not remove or rewrite the canvas. Successful restart attaches the new terminal through the same cleanup/active-route path as a normal spawn; unmount/cancellation must not leave an unseen child running.
@@ -21,9 +21,11 @@ One persistent runtime owns a vault at a time. A second app opening the same vau
 
 ## Runtime and IPC
 
-Boot completes store open/fallback and reconciliation before terminal IPC becomes available. A reusable runtime service, called by the actual Tauri setup/commands, owns the PTY manager and store integration. All lifecycle state transitions are ordered: a fast child exit cannot race ahead of the insert and leave a permanent active row; subscribe/detach cannot overwrite a known exit. Failed spawn creates no misleading durable active row. Restart accepts only a stored, non-live exited/tombstone session, never arbitrary caller-supplied replacement metadata.
+Boot completes store open/fallback and reconciliation before terminal IPC becomes available. A reusable runtime service, called by the actual Tauri setup/commands, owns the PTY manager and store integration. All lifecycle state transitions are ordered: a fast child exit cannot race ahead of the insert and leave a permanent active row; subscribe/detach cannot overwrite a known exit. Failed spawn creates no misleading durable active row. Restart accepts only a stored, non-running exited/tombstone session, never arbitrary caller-supplied replacement metadata. Resolve relative working directories at spawn so restart does not depend on the next app process's working directory.
 
-State changes are persisted for spawn, subscribe/detach, exit/kill and explicit restart. Last activity updates on accepted user input/lifecycle operations; it is not a promise of per-byte output activity tracking. Close/dismiss does not silently erase history; explicit Forget does, and rejects live-manager IDs. Shutdown terminates owned PTYs and completes pending state writes where practical; abrupt termination is covered by next-boot reconciliation.
+State changes are persisted for spawn, subscribe/detach, exit/kill and explicit restart. Last activity updates on accepted user input/lifecycle operations; it is not a promise of per-byte output activity tracking. Close/dismiss does not silently erase history; explicit Forget does, and rejects running IDs. Exited manager entries may retain transient replay/scrollback until explicit cleanup, but must not appear in `live_session_ids` or block history actions. Shutdown terminates owned PTYs and completes pending state writes where practical; abrupt termination is covered by next-boot reconciliation.
+
+Detaching or replacing a subscription synchronizes with any in-flight batch emission: once detach returns, that subscription must emit no further batches. Canceling an asynchronous task alone does not establish this boundary. PTY capture continues for later replay.
 
 Commands (camelCase invocation arguments, snake_case DTO fields):
 

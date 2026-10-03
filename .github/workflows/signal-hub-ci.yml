@@ -21,8 +21,8 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: platform/signal-hub
@@ -35,6 +35,21 @@ jobs:
           go-version: "1.26.8"
           cache: true
           cache-dependency-path: platform/signal-hub/go.sum
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.19.0"
+          cache: npm
+          cache-dependency-path: |
+            platform/signal-hub/web/package-lock.json
+            platform/signal-hub/browser/package-lock.json
+      - name: Board types, unit tests and reproducible assets
+        working-directory: platform/signal-hub/web
+        run: |
+          npm ci
+          npm run format:check
+          npm test
+          npm run build
+          git diff --exit-code -- dist
       - name: Format
         run: test -z "$(gofmt -l .)"
       - run: go vet ./...
@@ -46,3 +61,14 @@ jobs:
           /tmp/signalhub-contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
           /tmp/signalhub-contracts/bin/python contracts/check.py
           /tmp/signalhub-contracts/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
+      - name: Real Go binary browser acceptance
+        working-directory: platform/signal-hub/browser
+        env:
+          SIGNALHUB_BINARY: /tmp/signalhub
+          # Ubuntu allows the packaged Chrome sandbox at its installed path.
+          SIGNALHUB_CHROMIUM: /opt/google/chrome/chrome
+        run: |
+          npm ci
+          test -x "$SIGNALHUB_CHROMIUM"
+          "$SIGNALHUB_CHROMIUM" --version
+          npm test

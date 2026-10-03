@@ -19,6 +19,7 @@ import (
 	"github.com/fallrising/newclear/platform/signal-hub/internal/config"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/httpapi"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
+	"github.com/fallrising/newclear/platform/signal-hub/web"
 )
 
 func main() {
@@ -81,18 +82,42 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		return errors.New("database could not be opened or migrated")
 	}
 	defer db.Close()
+	if err := db.ConfigureSources(ctx, cfg.Sources, time.Now().UTC()); err != nil {
+		return errors.New("source configuration could not be initialized")
+	}
+	if err := db.EvaluateSources(ctx, time.Now().UTC()); err != nil {
+		return errors.New("source freshness could not be initialized")
+	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return errors.New("could not bind requested interface")
 	}
 	server := &http.Server{
-		Handler:           httpapi.New(db, credentials),
+		Handler:           web.Handler(httpapi.New(db, credentials)),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
 		MaxHeaderBytes:    16 << 10,
 	}
+	workerCtx, stopWorker := context.WithCancel(ctx)
+	workerDone := make(chan struct{})
+	go func() {
+		defer close(workerDone)
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-workerCtx.Done():
+				return
+			case now := <-ticker.C:
+				if err := db.EvaluateSources(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
+					fmt.Fprintln(output, "signalhub: source freshness evaluation failed; retrying")
+				}
+			}
+		}
+	}()
+	defer func() { stopWorker(); <-workerDone }()
 	result := make(chan error, 1)
 	go func() { result <- server.Serve(listener) }()
 	fmt.Fprintf(output, "signalhub listening on %s\n", listener.Addr())

@@ -109,8 +109,8 @@ pub enum StreamEvent {
     /// Usage update. Providers send these at varying times; the streamer
     /// folds them into a single final usage report.
     Usage(Usage),
-    /// A non-fatal hint from the provider (e.g., OpenAI's `[DONE]` line).
-    /// The streamer breaks on this when present.
+    /// Required terminal marker (e.g., OpenAI's `[DONE]` line).
+    /// The streamer completes immediately; EOF without it is an error.
     StreamDone,
 }
 

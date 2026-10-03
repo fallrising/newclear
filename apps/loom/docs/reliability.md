@@ -74,3 +74,9 @@ Stages: documentation baseline; backend filesystem and stream correctness; front
 Use `npm ci`, `npm test`, `npm run typecheck:contracts`, `npm run typecheck:app`, `npm run build`, and `cargo test --locked --workspace --no-fail-fast`. Generated `src/contracts` must remain unchanged. Baseline Rust core: 72 passed / 1 failed (self-save rename), contract tests 37 passed, frontend 35 passed. The sidecar audit harness rejected malformed/future/invalid-collection data in its expectations, and all three checks failed against baseline.
 
 Automated checks are not desktop GUI acceptance or live provider validation. Record those separately. No completion percentage is inferred from passing test counts.
+
+## Backend repair verification (2026-10-03)
+
+The filesystem and streaming repair stage passes 140 Rust workspace tests: 37 contracts and 103 core/unit/integration tests. The original self-save rename failure now passes, as do delayed-reconcile, deleted-file conflict, descendant-symlink rejection, canonical document identity, split UTF-8, SSE framing/error/EOF/cancellation regressions. Provider tests use deterministic loopback HTTP; no live API calls were made.
+
+The nonfrozen `doc_read` DTO adds absolute `path` for watcher identity. `doc_write` with an expected hash returns the existing conflict variant with empty `current_disk_hash` when the destination was deleted; other read failures return an I/O error. An absent expected hash remains explicit create/overwrite. Symlink checks are preflight checks below the canonical trusted root, not race-safe confinement. Optimistic hash checks are not cross-process compare-and-swap.

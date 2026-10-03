@@ -9,10 +9,10 @@ Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal 
 | Area | Implemented | Remaining limitation |
 |---|---|---|
 | Contracts | Rust types, generated TypeScript, fixtures/origin tests | Live AI IPC uses separate Rust/TS DTOs rather than the frozen generated AI shape |
-| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Cross-chunk Unicode and lifecycle correctness need regression coverage |
+| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding tested; frontend lifecycle repairs tracked separately |
 | Documents | CodeMirror, disk reads/writes, hash conflicts, runnable Run and local output Pin | Save races and filesystem-event identity need repair |
 | Canvas | Nodes, three edge kinds, sidecar persistence, named `run_in` routing | Invalid/unsupported sidecars must not be overwritten; no LOD or formal stress acceptance |
-| AI | Anthropic/OpenAI/DeepSeek streaming, connected context sources | Context freshness, event ordering and stream framing need repair; no live-provider validation in the current audit |
+| AI | Anthropic/OpenAI/DeepSeek streaming, connected context sources | UTF-8/framing/EOF/cancellation tested offline; frontend context freshness/event ordering repairs tracked separately; live providers unverified |
 | Session storage | SQLite session/recovery library with tests | Desktop startup does not instantiate it; canvas restores terminal restart metadata as tombstones |
 | Future capabilities | Design/contract material | MCP host, capability/approval gate, plugin runtime and inbox remain unimplemented |
 

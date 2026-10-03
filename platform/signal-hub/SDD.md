@@ -34,12 +34,12 @@
 | 階段 | 價值 | 能力 | 明確排除 |
 | --- | --- | --- | --- |
 | M0 | 契約先行 | 事件 JSON Schema、規則與訂閱設定 schema、OpenAPI、正反 fixtures | 任何 runtime |
-| M1 | 事件可靠落地 | ingest API、來源 token、去重、事件庫、查詢 API | UI、指標、投遞 |
+| M1 | 事件可靠落地 | ingest API、來源 token、去重、事件庫、查詢 API、本機 Alertmanager mapping | UI、指標、投遞 |
 | M2 | 看得見 | 時間線、事件詳情、關聯鏈、來源新鮮度 | 圖表 |
 | M3 | 看得懂趨勢 | 指標規則、rollup、回填、門檻事件、圖表 | 百分位數聚合 |
 | M4 | 送得出去 | 訂閱、webhook、ntfy、即時與摘要、重試、DLQ、重放 | Email、Telegram、Slack |
 | M5 | 放得久、救得回 | 封存、SQLite 備份、還原演練 | 異地備份的自動化（沿用既有備份工具） |
-| M6 | 真實資料 | 發佈、巡檢、Alertmanager 三個生產者 adapter；部署（需另行授權） | 新聞、業務日誌衍生事件（放下一階段） |
+| M6 | 真實資料 | 發佈、巡檢、Alertmanager 三個生產者真實接入；部署（需另行授權） | 新聞、業務日誌衍生事件（放下一階段） |
 
 決策閉環（決策系統訂閱巡檢失敗 → 策略推薦 → 人選擇 → 執行 → 結果事件）是 M4 之後的下一個專案。中樞一側只需要 M4 的 webhook 與 M2 的關聯鏈檢視，不為它另加能力。
 
@@ -78,7 +78,7 @@ flowchart LR
 | 儲存 | SQLite（WAL 模式） | 量級小；單檔易備份；不需另外維運資料庫 |
 | 前端 | React + TypeScript + Vite，建置後以 `go:embed` 內嵌 | 與 dim-gate、edge-ops 一致；部署只有一個檔案 |
 | 圖表 | 候選 Apache ECharts | 44.02 已評估；M3 前確認授權與 bundle 大小 |
-| 設定 | YAML 檔，放在 private 設定 repo | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
+| 設定 | YAML 檔，M1 先支援 strict JSON 子集；設定由 git 管理 | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
 | 部署 | OneFleet 管理的一個 workload（需另行授權） | 不另建部署機制 |
 
 M0 鎖定實際安裝並驗證過的契約檢查工具版本；Go／前端 runtime 的依賴與 build 在對應實作階段再鎖定。

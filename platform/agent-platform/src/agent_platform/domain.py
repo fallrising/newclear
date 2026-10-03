@@ -66,6 +66,7 @@ class ProfileInput(Input):
     backend: Literal["fake", "openhands"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
     require_approval: bool = False
+    mock_tools: bool = Field(default=False, strict=True)
     verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
 
 

@@ -64,3 +64,15 @@ Editable retry integration: T-009 frontend/test/style diff inspected and copied 
 Editable-retry evidence gate accepted: each defined behavior maps to UI or real browser coverage, worker scope inspected, root required checks passed, intermediate issues resolved and independent review accepted. Parent main c4b1ad6 reconfirmed. Deliver a new Draft PR; no merge/deploy.
 
 Precommit base update: main advanced to532e587 in an unrelated component. Fast-forwarded cleanly, and git diff --quiet confirmed agent-platform is identical to tested basec4b1ad6. Product verification remains applicable without rerunning unchanged suites.
+
+# Normal Worker mock tool integration
+
+Objective and contract: docs/WORKER-TOOLS.md. Source base48a303bf; no edits to concurrent process-recovery source scope. New immutable OpenHands profile opt-in plus trusted private mock-only configuration; per-run allocation flag; Worker owns provisioning/session lifecycle and conservative failure/cleanup. No automatic grant rebind/replay. Default disabled, no dependency/schema/UI changes.
+
+T-011 isolated implementation worker owns domain.py/store.py/worker.py/runtime_worker.py/runtime_client.py/new tool_worker.py and new tests_platform/test_worker_tools.py/worker_tools_fixture.py; meaningful red-green and focused SQL/HTTP checks. Root owns docs, evidence, integration and full platform-check. T-012 separate independent read-only review. Workers do not delegate or commit; root alone accepts and publishes a Draft PR. Root budget160, implementation70, review30. No merge/deployment or KVM-host mutation; test evidence explicitly mock-only.
+
+Normal Worker integration checkpoint: inspected and integrated T-011's six production/two test files; exact source SHA256 manifest recorded. Root meaningful red5 reproduced missing profile field. Final worker18 focused passed. Root pinned Python3.12.15 platform-check passed45unit/360SQL-HTTP with all126files formatted; initial host diagnostic compiler errors and fixture collision remain historical and resolved. Main advanced to61dbc06c with six process-recovery regressions and no production source changes; fast-forward preserved all eight manifest hashes, all six added tests passed, and final Ruff129/diff passed. No actual KVM or new provider activation is claimed. Independent T-012 review and PR CI remain final gates.
+
+Evidence gate: ACCEPT T-011 implementation and T-012 independent review for this bounded mock integration. Reviewer found no required corrections and independently checked all eight source/seven log hashes. Every defined item maps to profile/config/normal-worker/fault tests, actual root full checks plus newly merged regression checks, and documented limits. Team contracts/diff passed. Publish a Draft PR and require its exact-head CI before final delivery; no merge or deployment.
+
+Prepublication main advanced to e0d31720 in unrelated components; agent-platform diff from61dbc06c is empty. Fast-forwarded while preserving exact verified implementation hashes. Existing verification remains applicable.

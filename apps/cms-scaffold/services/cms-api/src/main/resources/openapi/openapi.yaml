@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.6.0
+  version: 0.7.0
   license:
     name: Proprietary
 servers:
@@ -652,8 +652,9 @@ paths:
         - 409 TYPE_DISABLED: type is disabled.
         - 409 SINGLETON_EXISTS: singleton type already has an entry.
         - 409 SLUG_CONFLICT: slug already used in this type.
-        - 422 FIELD_VALIDATION: reserved key, wrong value type, or unknown enum value.
-        - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+        - 422: the payload is invalid. `error.fields` lists every invalid key (see `FieldError`);
+          `error.code` is the first field's code when it is REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE or
+          PRINCIPAL_REF_UNRESOLVED, otherwise FIELD_VALIDATION; `error.message` is a summary.
       parameters:
         - $ref: "#/components/parameters/TypeKey"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -702,16 +703,19 @@ paths:
       operationId: patchEntry
       tags: [Content]
       description: |
-        Merges `payload` keys into the work copy; a key with value null is stored as null.
-        When `version` is present it must equal the current version.
-        Errors:
-        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+        Merges `payload` keys into the work copy. A key whose value is null clears the field: the key is
+        stored with value null and is not validated (G-07). A blank string is stored as sent and, like null,
+        counts as empty (only REQUIRED at publish applies). Keys not sent keep their values.
+        `version` is required and must equal the current version.
+        Errors (checked in this order):
+        - 403 SURFACE_FORBIDDEN: called from the Front surface.
         - 404 ENTRY_NOT_FOUND: entry missing.
         - 409 INVALID_STATE_TRANSITION: entry is archived or soft-deleted.
+        - 403 FORBIDDEN: caller lacks `update` on this entry.
+        - 428 VERSION_REQUIRED: `version` is missing or null.
         - 409 VERSION_CONFLICT: `version` does not match.
         - 409 SLUG_CONFLICT: slug already used in this type.
-        - 422 FIELD_VALIDATION, REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE,
-          PRINCIPAL_REF_UNRESOLVED: as createEntry.
+        - 422 with `error.fields`: as createEntry, for the merged payload.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -719,7 +723,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/EntryWriteRequest" }
+            schema: { $ref: "#/components/schemas/EntryPatchRequest" }
       responses:
         "200":
           description: Work copy updated
@@ -733,6 +737,7 @@ paths:
         "409": { $ref: "#/components/responses/Error409" }
         "415": { $ref: "#/components/responses/Error415" }
         "422": { $ref: "#/components/responses/Error422" }
+        "428": { $ref: "#/components/responses/Error428" }
         "500": { $ref: "#/components/responses/Error500" }
     delete:
       operationId: softDeleteEntry
@@ -765,8 +770,7 @@ paths:
         - 409 INVALID_STATE_TRANSITION: entry is archived.
         - 409 TYPE_DISABLED: type is disabled.
         - 422 SLUG_REQUIRED: slug policy `required` and slug empty.
-        - 422 FIELD_VALIDATION: a required field is empty or a value is invalid.
-        - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+        - 422 with `error.fields`: a required field is empty (REQUIRED) or a value is invalid, as createEntry.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -1431,6 +1435,11 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    Error428:
+      description: Precondition required (VERSION_REQUIRED).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Error500:
       description: INTERNAL_ERROR.
       content:
@@ -1467,6 +1476,7 @@ components:
         - INVALID_STATE_TRANSITION
         - SLUG_CONFLICT
         - VERSION_CONFLICT
+        - VERSION_REQUIRED
         - TYPE_DISABLED
         - TYPE_IN_USE
         - REF_CONSTRAINT
@@ -1512,6 +1522,41 @@ components:
             surface:
               type: string
               description: Present on FORBIDDEN and SURFACE_FORBIDDEN.
+            fields:
+              type: array
+              minItems: 1
+              description: Present on 422 payload validation errors; every invalid key, in validation order.
+              items: { $ref: "#/components/schemas/FieldError" }
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [field, code, message]
+      properties:
+        field:
+          type: string
+          description: Path of the input, `payload.<fieldKey>`.
+          example: payload.title
+        code: { $ref: "#/components/schemas/FieldErrorCode" }
+        message:
+          type: string
+          description: English developer message. Not for display.
+    FieldErrorCode:
+      type: string
+      description: |
+        Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
+        markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+        REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+      enum:
+        - REQUIRED
+        - RESERVED_KEY
+        - WRONG_TYPE
+        - TOO_LONG
+        - INVALID_DATETIME
+        - NOT_IN_ENUM
+        - INVALID_UUID
+        - REF_TARGET_NOT_FOUND
+        - REF_TARGET_WRONG_TYPE
+        - PRINCIPAL_REF_UNRESOLVED
     Health:
       type: object
       additionalProperties: true
@@ -1828,8 +1873,8 @@ components:
       additionalProperties: false
       required: [id, contentType, slug, title, payload, publishedAt]
       description: |
-        Published copy. Only public fields are present. A readable `media-ref` value is
-        replaced by a MediaAsset object; any other `media-ref` value is returned as stored (B-13).
+        Published copy. Only public fields are present. A `media-ref` value is replaced by a MediaAsset
+        object when the media is publicly readable, and by null otherwise; the stored id is never returned (B-13).
       properties:
         id: { type: string, format: uuid }
         contentType: { type: string }
@@ -1989,7 +2034,24 @@ components:
           type: integer
           format: int32
           nullable: true
-          description: Optimistic lock for PATCH; ignored on create.
+          description: Ignored on create.
+    EntryPatchRequest:
+      type: object
+      required: [version]
+      properties:
+        slug:
+          type: string
+          nullable: true
+          description: Omitted or null keeps the current slug.
+        payload:
+          allOf:
+            - $ref: "#/components/schemas/EntryPayload"
+          nullable: true
+          description: Keys to merge; a null value clears that field (G-07).
+        version:
+          type: integer
+          format: int32
+          description: Current version of the entry (optimistic lock). Missing or null is 428 VERSION_REQUIRED.
     Revision:
       type: object
       additionalProperties: false

@@ -323,3 +323,146 @@ describe("BW1b public default sort safety", () => {
     await expect(client().public.entries("photo", { sort: "sortOrder" })).rejects.toMatchObject({ status: 400, code: "VALIDATION_FAILED" });
   });
 });
+
+describe("BW1c mock write and public boundaries", () => {
+  it("requires a version after auth, existence, state and permissions; rejects without mutation", async () => {
+    const entry = db.workEntries.find((e) => e.contentType === "album")!;
+    const patch = (body: unknown, id = entry.id) => raw(`/api/v1/entries/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-CSRF-Token": "mock-csrf-token" }, body: JSON.stringify(body) });
+    expect((await patch({ payload: {} })).status).toBe(401);
+    setUser("seed-operator-album");
+    // Client obtains the canonical token; raw requests deliberately bypass required-version typing.
+    const token = (await (await raw("/api/v1/auth/csrf")).json()).csrfToken;
+    const write = (body: unknown, id = entry.id) => raw(`/api/v1/entries/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-CSRF-Token": token }, body: JSON.stringify(body) });
+    expect((await write({}, "missing")).status).toBe(404);
+    const before = structuredClone(entry);
+    for (const body of [{ payload: { title: "changed" } }, { version: null }]) {
+      const response = await write(body);
+      expect(response.status).toBe(428);
+      expect(await response.json()).toMatchObject({ error: { code: "VERSION_REQUIRED" } });
+    }
+    expect(entry).toEqual(before);
+    setUser("seed-operator-clinic");
+    expect((await write({})).status).toBe(403);
+    setUser("seed-operator-album"); setSurface("front");
+    expect((await write({})).status).toBe(403);
+  });
+  it("collects errors in reserved then metadata order and leaves failed writes unchanged", async () => {
+    setUser("seed-operator-album");
+    const entry = db.workEntries.find((e) => e.contentType === "album")!;
+    const before = structuredClone(entry);
+    await expect(client().work.patch(entry.id, { version: entry.version, payload: { slug: "reserved", title: "x".repeat(1001), cover: "bad", visibility: "secret", sortMode: 5 } }))
+      .rejects.toMatchObject({ status: 422, code: "FIELD_VALIDATION", fields: [
+        { field: "payload.slug", code: "RESERVED_KEY" }, { field: "payload.title", code: "TOO_LONG" },
+        { field: "payload.cover", code: "INVALID_UUID" }, { field: "payload.visibility", code: "NOT_IN_ENUM" },
+        { field: "payload.sortMode", code: "WRONG_TYPE" },
+      ] });
+    expect(entry).toEqual(before);
+  });
+  it("allows null clearing but reports required fields at publish", async () => {
+    setUser("seed-operator-album");
+    const created = await client().work.create("album", { payload: { title: "Draft" } });
+    const cleared = await client().work.patch(created.id, { version: created.version, payload: { title: null } });
+    expect(cleared.payload).toHaveProperty("title", null);
+    await expect(client().work.publish(created.id)).rejects.toMatchObject({ status: 422, fields: [{ field: "payload.title", code: "REQUIRED" }] });
+  });
+  it("returns null for unresolved media through list, id and slug without changing stored payload", async () => {
+    const entry = db.publicEntries.find((e) => e.contentType === "album" && e.slug === "coast-light-2026")!;
+    const missing = "00000000-0000-4000-8000-000000009999";
+    for (const value of [missing, { mediaId: missing }, { nope: "bad" }, null]) {
+      entry.payload.cover = value;
+      expect((await client().public.entries("album")).items[0].payload).toHaveProperty("cover", null);
+      expect((await client().public.byId("album", entry.id)).payload).toHaveProperty("cover", null);
+      expect((await client().public.bySlug("album", entry.slug!)).payload).toHaveProperty("cover", null);
+      expect(entry.payload.cover).toEqual(value);
+    }
+  });
+});
+
+describe("BW1c mock validation compatibility", () => {
+  it("reads legacy fractional ints but rejects merged writes without mutation", async () => {
+    setUser("seed-operator-album");
+    const photo = db.workEntries.find((e) => e.contentType === "photo")!;
+    photo.payload.sortOrder = 0.5;
+    const before = structuredClone(photo);
+    expect((await client().work.entry(photo.id)).payload.sortOrder).toBe(0.5);
+    await expect(client().work.patch(photo.id, { version: photo.version, payload: { caption: "new" } }))
+      .rejects.toMatchObject({ status: 422, fields: [{ field: "payload.sortOrder", code: "WRONG_TYPE" }] });
+    expect(photo).toEqual(before);
+    await expect(client().work.patch(photo.id, { version: photo.version, payload: { sortOrder: 1 } })).resolves.toMatchObject({ payload: { sortOrder: 1 } });
+  });
+  it("keeps the first reference error top-level code and validates canonical references", async () => {
+    setUser("seed-operator-album");
+    await expect(client().work.create("photo", { payload: { album: "00000000-0000-4000-8000-000000009999", takenAt: "yesterday" } }))
+      .rejects.toMatchObject({ code: "REF_TARGET_NOT_FOUND", fields: [{ code: "REF_TARGET_NOT_FOUND" }, { code: "INVALID_DATETIME" }] });
+    const album = db.workEntries.find((entry) => entry.contentType === "album")!;
+    const upper = "AAAAAAAA-0000-4000-8000-000000000001";
+    db.workEntries.push({ ...structuredClone(album), id: upper.toLowerCase() });
+    await expect(client().work.create("photo", { payload: { album: upper } }))
+      .rejects.toMatchObject({ fields: [{ field: "payload.album", code: "INVALID_UUID" }] });
+    await expect(client().work.create("photo", { payload: { album: db.workEntries.find((entry) => entry.contentType === "photo")!.id } }))
+      .rejects.toMatchObject({ code: "REF_TARGET_WRONG_TYPE" });
+  });
+  it("checks disabled private fields and reports a reserved metadata key only once", async () => {
+    setUser("seed-operator-album");
+    const type = db.adminTypes.find((entry) => entry.key === "album")!;
+    const title = type.fields.find((field) => field.key === "title")!;
+    title.enabled = false; title.visibility = "internal";
+    type.fields.push({ ...title, key: "slug", order: -1 });
+    await expect(client().work.create("album", { payload: { slug: 5, title: false } }))
+      .rejects.toMatchObject({ fields: [{ field: "payload.slug", code: "RESERVED_KEY" }, { field: "payload.title", code: "WRONG_TYPE" }] });
+  });
+  it("counts code points, permits empty/unknown values, and rejects oversized markdown", async () => {
+    setUser("seed-operator-album");
+    await expect(client().work.create("album", { payload: { title: "😀".repeat(1000), unknown: { custom: true }, visibility: " " } })).resolves.toMatchObject({ version: 1 });
+    await expect(client().work.create("album", { payload: { title: "😀".repeat(1001), description: "x".repeat(100001) } }))
+      .rejects.toMatchObject({ fields: [{ code: "TOO_LONG" }, { code: "TOO_LONG" }] });
+  });
+  it("checks archived state before version and keeps clean publish a no-op", async () => {
+    setUser("seed-operator-album");
+    const entry = db.workEntries.find((e) => e.contentType === "album" && !e.dirty && e.publicationState === "published")!;
+    const before = structuredClone(entry);
+    await expect(client().work.publish(entry.id)).resolves.toEqual(before);
+    entry.publicationState = "archived";
+    const response = await raw(`/api/v1/entries/${entry.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-CSRF-Token": (await (await raw("/api/v1/auth/csrf")).json()).csrfToken }, body: "{}" });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ error: { code: "INVALID_STATE_TRANSITION" } });
+  });
+  it("resolves a published raw media UUID while keeping work edits isolated", async () => {
+    const entry = db.publicEntries.find((e) => e.contentType === "album" && e.slug === "coast-light-2026")!;
+    const id = (entry.payload.cover as { mediaId: string }).mediaId;
+    entry.payload.cover = id;
+    expect((await client().public.byId("album", entry.id)).payload.cover).toMatchObject({ mediaId: id });
+    const work = db.workEntries.find((e) => e.id === entry.id)!;
+    work.payload.cover = db.media.find((e) => e.title === "Polaroid test")!.id;
+    expect((await client().public.byId("album", entry.id)).payload.cover).toMatchObject({ mediaId: id });
+    expect((await raw(`/api/v1/public/media/${work.payload.cover}/file/web`)).status).toBe(404);
+  });
+});
+
+describe("BW1c preserved parser and projection rules", () => {
+  it("accepts minute precision and rejects normalized invalid calendar dates", async () => {
+    setUser("seed-operator-album");
+    await expect(client().work.create("photo", { payload: { takenAt: "2026-01-01T00:00Z" } })).resolves.toMatchObject({ version: 1 });
+    await expect(client().work.create("photo", { payload: { takenAt: "2026-02-30T00:00:00Z" } }))
+      .rejects.toMatchObject({ fields: [{ field: "payload.takenAt", code: "INVALID_DATETIME" }] });
+    await expect(client().work.create("album", { payload: { cover: "1-1-1-1-1" } })).resolves.toMatchObject({ version: 1 });
+  });
+  it("checks required reserved metadata once when absent and omits disabled/private public fields", async () => {
+    setUser("seed-operator-album");
+    const type = db.adminTypes.find((e) => e.key === "album")!;
+    const title = type.fields.find((f) => f.key === "title")!;
+    type.fields.push({ ...title, key: "slug", order: 100 });
+    const created = await client().work.create("album", { payload: { title: "test" } });
+    await expect(client().work.publish(created.id)).rejects.toMatchObject({ fields: [{ field: "payload.slug", code: "REQUIRED" }] });
+    const entry = db.publicEntries.find((e) => e.contentType === "album" && e.slug === "coast-light-2026")!;
+    const cover = type.fields.find((f) => f.key === "cover")!;
+    const id = (entry.payload.cover as { mediaId: string }).mediaId;
+    cover.enabled = false; title.visibility = "back";
+    const projected = await client().public.byId("album", entry.id);
+    expect(projected.payload).not.toHaveProperty("cover");
+    expect(projected.payload).not.toHaveProperty("title");
+    // Other enabled photo fields can attach this same media; isolate this published snapshot.
+    db.publicEntries = [entry];
+    expect((await raw(`/api/v1/public/media/${id}/file/web`)).status).toBe(404);
+  });
+});

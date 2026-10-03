@@ -84,7 +84,7 @@ function EditorForm({ type, schema, entry }: { type: string; schema: WorkContent
 
   const save = useMutation({
     mutationFn: (body: Record<string, unknown>) => entry
-      ? api.work.patch(entry.id, { slug, payload: body, version: editVersion.current })
+      ? api.work.patch(entry.id, { slug, payload: body, version: editVersion.current ?? entry.version })
       : api.work.create(type, { slug, payload: body }),
     onSuccess: (saved) => {
       stored(saved);

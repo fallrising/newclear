@@ -5,6 +5,9 @@ export type { components, operations, paths };
 
 type S = components["schemas"];
 
+export type FieldError = S["FieldError"];
+export type FieldErrorCode = S["FieldErrorCode"];
+export type EntryPatchRequest = S["EntryPatchRequest"];
 export type ErrorCode = S["ErrorCode"];
 export type ErrorEnvelope = S["ErrorEnvelope"];
 export type Surface = S["Surface"];

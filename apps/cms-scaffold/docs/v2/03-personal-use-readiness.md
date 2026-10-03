@@ -61,3 +61,9 @@ BW1a 本地驗收：151＋65 後端測試、140 前端測試、17 mock E2E 全�
 BW1b 狀態 `LOCAL_VERIFIED`，尚未提交／合併：[交付報告](../../.team/reports/BW1b-DELIVERY.md)。202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E 與 lint/typecheck/build/bundle 全通過；10,000 筆 store 量測 p95：工作列表 85ms、公開列表 77ms、更新 18ms，不包含 HTTP／identity／媒體展開。
 
 V6 的 NUMERIC 轉換與 V7 索引重建需要維護／備份規劃；不清除舊小數值。公開 ref 篩選仍讀工作 refs（BQ-10），媒體仍逐項解析（BQ-11）。跨頁若資料異動造成總數不一致或重複，完整列表 helper 會明確失敗，需重試；W1 才加入顯式分頁 UI。正式部署與備份還原演練仍未完成。
+
+## BW1c 本地驗收與相容性
+
+BW1c 狀態 `LOCAL_VERIFIED`，尚未提交／合併：[交付報告](../../.team/reports/BW1c-DELIVERY.md)。226 單元／API＋93 PostgreSQL、179 前端＋17 mock E2E，以及 lint/typecheck/build/bundle/bootJar 全通過。10,000 筆 store p95 工作／公開／更新 75／77／22ms，維持原門檻；這不是 HTTP 全鏈路量測。
+
+PATCH 缺少或 null 版本回 428，舊版本仍回 409；422 列出全部欄位錯誤；公開不可讀媒體回 null。寫入規則收緊含文字長度、datetime、整數及 ref 格式。舊值不自動清理或截斷；讀取仍可用，但合併後仍不合法的 patch、publish、revert 會被拒絕，需先改正。乾淨已發布內容的重複 publish 維持 P0 no-op。client 與 MSW 已同步，W1 的完整欄位錯誤 UI／分頁控制仍未完成；正式使用的操作驗收門檻不變。

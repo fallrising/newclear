@@ -556,8 +556,9 @@ export interface paths {
          *     - 409 TYPE_DISABLED: type is disabled.
          *     - 409 SINGLETON_EXISTS: singleton type already has an entry.
          *     - 409 SLUG_CONFLICT: slug already used in this type.
-         *     - 422 FIELD_VALIDATION: reserved key, wrong value type, or unknown enum value.
-         *     - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+         *     - 422: the payload is invalid. `error.fields` lists every invalid key (see `FieldError`);
+         *       `error.code` is the first field's code when it is REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE or
+         *       PRINCIPAL_REF_UNRESOLVED, otherwise FIELD_VALIDATION; `error.message` is a summary.
          */
         post: operations["createEntry"];
         delete?: never;
@@ -592,16 +593,19 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * @description Merges `payload` keys into the work copy; a key with value null is stored as null.
-         *     When `version` is present it must equal the current version.
-         *     Errors:
-         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         * @description Merges `payload` keys into the work copy. A key whose value is null clears the field: the key is
+         *     stored with value null and is not validated (G-07). A blank string is stored as sent and, like null,
+         *     counts as empty (only REQUIRED at publish applies). Keys not sent keep their values.
+         *     `version` is required and must equal the current version.
+         *     Errors (checked in this order):
+         *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
          *     - 404 ENTRY_NOT_FOUND: entry missing.
          *     - 409 INVALID_STATE_TRANSITION: entry is archived or soft-deleted.
+         *     - 403 FORBIDDEN: caller lacks `update` on this entry.
+         *     - 428 VERSION_REQUIRED: `version` is missing or null.
          *     - 409 VERSION_CONFLICT: `version` does not match.
          *     - 409 SLUG_CONFLICT: slug already used in this type.
-         *     - 422 FIELD_VALIDATION, REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE,
-         *       PRINCIPAL_REF_UNRESOLVED: as createEntry.
+         *     - 422 with `error.fields`: as createEntry, for the merged payload.
          */
         patch: operations["patchEntry"];
         trace?: never;
@@ -623,8 +627,7 @@ export interface paths {
          *     - 409 INVALID_STATE_TRANSITION: entry is archived.
          *     - 409 TYPE_DISABLED: type is disabled.
          *     - 422 SLUG_REQUIRED: slug policy `required` and slug empty.
-         *     - 422 FIELD_VALIDATION: a required field is empty or a value is invalid.
-         *     - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+         *     - 422 with `error.fields`: a required field is empty (REQUIRED) or a value is invalid, as createEntry.
          */
         post: operations["publishEntry"];
         delete?: never;
@@ -1071,7 +1074,7 @@ export interface components {
          * @description Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1085,8 +1088,27 @@ export interface components {
                 contentType?: string;
                 /** @description Present on FORBIDDEN and SURFACE_FORBIDDEN. */
                 surface?: string;
+                /** @description Present on 422 payload validation errors; every invalid key, in validation order. */
+                fields?: components["schemas"]["FieldError"][];
             };
         };
+        FieldError: {
+            /**
+             * @description Path of the input, `payload.<fieldKey>`.
+             * @example payload.title
+             */
+            field: string;
+            code: components["schemas"]["FieldErrorCode"];
+            /** @description English developer message. Not for display. */
+            message: string;
+        };
+        /**
+         * @description Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
+         *     markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+         *     REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+         * @enum {string}
+         */
+        FieldErrorCode: "REQUIRED" | "RESERVED_KEY" | "WRONG_TYPE" | "TOO_LONG" | "INVALID_DATETIME" | "NOT_IN_ENUM" | "INVALID_UUID" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED";
         Health: {
             /** @example UP */
             status: string;
@@ -1264,8 +1286,8 @@ export interface components {
             items: components["schemas"]["PublicContentType"][];
         };
         /**
-         * @description Published copy. Only public fields are present. A readable `media-ref` value is
-         *     replaced by a MediaAsset object; any other `media-ref` value is returned as stored (B-13).
+         * @description Published copy. Only public fields are present. A `media-ref` value is replaced by a MediaAsset
+         *     object when the media is publicly readable, and by null otherwise; the stored id is never returned (B-13).
          */
         PublicEntry: {
             /** Format: uuid */
@@ -1380,9 +1402,20 @@ export interface components {
             payload?: components["schemas"]["EntryPayload"] | null;
             /**
              * Format: int32
-             * @description Optimistic lock for PATCH; ignored on create.
+             * @description Ignored on create.
              */
             version?: number | null;
+        };
+        EntryPatchRequest: {
+            /** @description Omitted or null keeps the current slug. */
+            slug?: string | null;
+            /** @description Keys to merge; a null value clears that field (G-07). */
+            payload?: components["schemas"]["EntryPayload"] | null;
+            /**
+             * Format: int32
+             * @description Current version of the entry (optimistic lock). Missing or null is 428 VERSION_REQUIRED.
+             */
+            version: number;
         };
         Revision: {
             /** Format: int32 */
@@ -1617,6 +1650,15 @@ export interface components {
         };
         /** @description Unprocessable content. See the operation description for codes. */
         Error422: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description Precondition required (VERSION_REQUIRED). */
+        Error428: {
             headers: {
                 [name: string]: unknown;
             };
@@ -2525,7 +2567,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EntryWriteRequest"];
+                "application/json": components["schemas"]["EntryPatchRequest"];
             };
         };
         responses: {
@@ -2545,6 +2587,7 @@ export interface operations {
             409: components["responses"]["Error409"];
             415: components["responses"]["Error415"];
             422: components["responses"]["Error422"];
+            428: components["responses"]["Error428"];
             500: components["responses"]["Error500"];
         };
     };

@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import type { Transport } from "./core";
 import { keys, type WorkListParams } from "./keys";
 import { completeList, listQuery } from "./query";
-import type { EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "./schema";
+import type { EntryPatchRequest, EntryWriteRequest, MediaAsset, WorkContentType, WorkContentTypeList, WorkEntry, WorkEntryPage } from "./schema";
 
 export function workApi(t: Transport) {
   return {
@@ -29,7 +29,7 @@ export function workApi(t: Transport) {
     create(type: string, body: EntryWriteRequest): Promise<WorkEntry> {
       return t.call(() => t.client.POST("/api/v1/content-types/{typeKey}/entries", { params: { path: { typeKey: type } }, body }));
     },
-    patch(id: string, body: EntryWriteRequest): Promise<WorkEntry> {
+    patch(id: string, body: EntryPatchRequest): Promise<WorkEntry> {
       return t.call(() => t.client.PATCH("/api/v1/entries/{id}", { params: { path: { id } }, body }));
     },
     publish(id: string): Promise<WorkEntry> {

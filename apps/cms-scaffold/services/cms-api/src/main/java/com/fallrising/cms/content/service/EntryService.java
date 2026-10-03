@@ -1,6 +1,8 @@
 package com.fallrising.cms.content.service;
 
 import com.fallrising.cms.api.error.ErrorCode;
+import com.fallrising.cms.api.error.FieldError;
+import com.fallrising.cms.content.validation.PayloadValidator;
 import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.PublicVisibility;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
@@ -32,31 +34,18 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class EntryService {
 
-    private static final Set<String> RESERVED = Set.of(
-            "id",
-            "slug",
-            "contentType",
-            "publicationState",
-            "version",
-            "createdAt",
-            "updatedAt",
-            "publishedAt",
-            "deletedAt",
-            "createdBy",
-            "updatedBy",
-            "payload");
     private static final int REVISION_KEEP = 20;
 
     private final ContentStore store;
     private final AuthorizationService authorization;
     private final IdentityStore identityStore;
     private final MediaService mediaService;
+    private final PayloadValidator payloadValidator;
 
     public EntryService(
             ContentStore store,
@@ -67,6 +56,7 @@ public class EntryService {
         this.authorization = authorization;
         this.identityStore = identityStore;
         this.mediaService = mediaService;
+        this.payloadValidator = new PayloadValidator(store, identityStore);
     }
 
     public ContentTypeRecord requireType(String typeKey) {
@@ -173,7 +163,10 @@ public class EntryService {
                 throw ContentException.invalidTransition();
             }
             authorization.require(principal, CmsAction.UPDATE, current.contentTypeKey(), current.payload(), surface);
-            if (version != null && version != current.version()) {
+            if (version == null) {
+                throw ContentException.versionRequired();
+            }
+            if (version != current.version()) {
                 throw ContentException.versionConflict();
             }
             ContentTypeRecord type = store.findTypeByKey(current.contentTypeKey()).orElseThrow(ContentException::typeNotFound);
@@ -535,61 +528,9 @@ public class EntryService {
     }
 
     private void validatePayload(ContentTypeRecord type, Map<String, Object> payload, boolean publish) {
-        List<FieldRecord> fields = store.fieldsOf(type.id());
-        for (String key : payload.keySet()) {
-            if (RESERVED.contains(key)) {
-                throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Reserved field: " + key);
-            }
-        }
-        for (FieldRecord field : fields) {
-            Object value = payload.get(field.fieldKey());
-            if (publish && field.required() && isBlank(value)) {
-                throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Missing required field " + field.fieldKey());
-            }
-            if (isBlank(value)) {
-                continue;
-            }
-            switch (field.fieldType()) {
-                case "int" -> {
-                    if (!(value instanceof Number)) {
-                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be a number");
-                    }
-                }
-                case "boolean" -> {
-                    if (!(value instanceof Boolean)) {
-                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be boolean");
-                    }
-                }
-                case "enum" -> {
-                    if (field.enumValues() != null
-                            && !field.enumValues().isEmpty()
-                            && !field.enumValues().contains(String.valueOf(value))) {
-                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " is not a valid enum value");
-                    }
-                }
-                case "ref" -> {
-                    UUID targetId = parseUuid(value, field.fieldKey());
-                    EntryRecord target = store.findEntry(targetId).orElseThrow(() ->
-                            ContentException.validation(ErrorCode.REF_TARGET_NOT_FOUND, "Referenced entry not found"));
-                    if (field.refTargetTypeKey() != null && !field.refTargetTypeKey().equals(target.contentTypeKey())) {
-                        throw ContentException.validation(ErrorCode.REF_TARGET_WRONG_TYPE, "Referenced entry is the wrong type");
-                    }
-                }
-                case "principal-ref" -> {
-                    UUID principalId = parseUuid(value, field.fieldKey());
-                    if (identityStore.findPrincipalById(principalId).isEmpty()) {
-                        throw ContentException.validation(ErrorCode.PRINCIPAL_REF_UNRESOLVED, "Principal not found");
-                    }
-                }
-                case "media-ref" -> {
-                    if (MediaService.parseMediaId(value) == null) {
-                        throw ContentException.validation(ErrorCode.FIELD_VALIDATION, field.fieldKey() + " must be a media UUID");
-                    }
-                }
-                default -> {
-                    // string, markdown, datetime, date: accept scalar
-                }
-            }
+        List<FieldError> errors = payloadValidator.validate(store.fieldsOf(type.id()), payload, publish);
+        if (!errors.isEmpty()) {
+            throw ContentException.fieldErrors(errors);
         }
     }
 

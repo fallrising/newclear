@@ -39,9 +39,9 @@ final class ContentProjection {
         for (FieldRecord field : fields) {
             if (field.enabled() && "public".equals(field.visibility()) && source.containsKey(field.fieldKey())) {
                 Object value = source.get(field.fieldKey());
-                if ("media-ref".equals(field.fieldType()) && mediaExpander != null) {
+                if (value != null && "media-ref".equals(field.fieldType()) && mediaExpander != null) {
                     Object expanded = mediaExpander.apply(value);
-                    payload.put(field.fieldKey(), expanded == null ? value : expanded);
+                    payload.put(field.fieldKey(), expanded);
                 } else {
                     payload.put(field.fieldKey(), value);
                 }

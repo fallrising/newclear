@@ -14,6 +14,7 @@ import com.fallrising.cms.identity.domain.SessionRecord;
 import com.fallrising.cms.identity.domain.Surface;
 import com.fallrising.cms.identity.service.AuthService;
 import com.fallrising.cms.identity.service.AuthorizationService;
+import com.fallrising.cms.identity.service.ContentTypeDirectory;
 import com.fallrising.cms.identity.service.PrincipalAdminService;
 import com.fallrising.cms.identity.store.IdentityStore;
 import com.fallrising.cms.identity.store.InMemoryIdentityStore;
@@ -113,7 +114,7 @@ class IdentityHardeningTests {
         ObjectMapper mapper = new ObjectMapper();
         AuthorizationService authz = new AuthorizationService(store, mapper);
         AuthService auth = new AuthService(store, hasher, props, authz);
-        PrincipalAdminService admin = new PrincipalAdminService(store, hasher, auth, authz, mapper);
+        PrincipalAdminService admin = new PrincipalAdminService(store, hasher, auth, authz, mapper, NO_TYPES);
         Principal principal = store.findPrincipalByUsername("admin").orElseThrow();
         IdentityRequest request = adminRequest(principal);
 
@@ -140,7 +141,7 @@ class IdentityHardeningTests {
         ObjectMapper mapper = new ObjectMapper();
         AuthorizationService authz = new AuthorizationService(store, mapper);
         AuthService auth = new AuthService(store, hasher, props, authz);
-        PrincipalAdminService admin = new PrincipalAdminService(store, hasher, auth, authz, mapper);
+        PrincipalAdminService admin = new PrincipalAdminService(store, hasher, auth, authz, mapper, NO_TYPES);
         Principal principal = store.findPrincipalByUsername("admin").orElseThrow();
         IdentityRequest request = adminRequest(principal);
         Role adminRole = store.findRoleByCode("admin").orElseThrow();
@@ -151,6 +152,18 @@ class IdentityHardeningTests {
                 .isInstanceOf(IdentityException.class);
         assertThat(store.permissionsOfRole(adminRole.id())).containsExactlyElementsOf(before);
     }
+
+    private static final ContentTypeDirectory NO_TYPES = new ContentTypeDirectory() {
+        @Override
+        public List<String> enabledTypeKeys() {
+            return List.of();
+        }
+
+        @Override
+        public boolean predicateFieldCompilable(String typeKey, String fieldKey) {
+            return false;
+        }
+    };
 
     private static IdentityProperties props() {
         IdentityProperties props = new IdentityProperties();

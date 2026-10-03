@@ -8,6 +8,15 @@ import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.NavigationRecord;
 import com.fallrising.cms.content.domain.PublicationState;
 import com.fallrising.cms.content.domain.RevisionRecord;
+import com.fallrising.cms.content.index.EntryIndexer;
+import com.fallrising.cms.content.index.IndexRow;
+import com.fallrising.cms.content.index.IndexScope;
+import com.fallrising.cms.content.query.AccessFilter;
+import com.fallrising.cms.content.query.EntryPage;
+import com.fallrising.cms.content.query.EntryQuery;
+import com.fallrising.cms.content.query.FieldFilter;
+import com.fallrising.cms.content.query.RefFilter;
+import com.fallrising.cms.content.query.SortKey;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -104,6 +113,13 @@ public class JdbcContentStore implements ContentStore {
 
     @Override
     public void updateTypeSettings(ContentTypeRecord type) {
+        transactions.executeWithoutResult(status -> {
+            writeTypeSettings(type);
+            reindexType(type.id());
+        });
+    }
+
+    private void writeTypeSettings(ContentTypeRecord type) {
         jdbc.update(
                 "UPDATE cms_content_type SET sort_field = ?, visibility_field = ?, owner_field = ?, updated_at = ? WHERE id = ?",
                 type.sortField(),
@@ -123,6 +139,13 @@ public class JdbcContentStore implements ContentStore {
 
     @Override
     public void insertField(FieldRecord field) {
+        transactions.executeWithoutResult(status -> {
+            writeField(field);
+            reindexType(field.contentTypeId());
+        });
+    }
+
+    private void writeField(FieldRecord field) {
         jdbc.update(
                 """
                 INSERT INTO cms_field
@@ -203,43 +226,39 @@ public class JdbcContentStore implements ContentStore {
     }
 
     @Override
-    public List<EntryRecord> listEntries(
-            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget) {
-        StringBuilder sql = new StringBuilder(
-                """
-                SELECT e.*, t.type_key FROM cms_entry e
-                JOIN cms_content_type t ON t.id = e.content_type_id
-                WHERE e.content_type_id = ?
-                """);
+    public EntryPage queryEntries(EntryQuery query) {
         List<Object> args = new ArrayList<>();
-        args.add(typeId);
-        if (!includeDeleted) {
-            sql.append(" AND e.deleted_at IS NULL");
-        }
-        if (states != null && !states.isEmpty()) {
-            sql.append(" AND e.publication_state IN (");
-            sql.append(String.join(",", states.stream().map(s -> "?").toList()));
-            sql.append(")");
-            args.addAll(states);
-        }
-        if (q != null && !q.isBlank()) {
-            sql.append(" AND e.payload->>? ILIKE ? ESCAPE '\\'");
-            args.add(titleField);
-            args.add("%" + escapeLike(q) + "%");
-        }
-        if (refField != null && refTarget != null) {
-            sql.append(
-                    """
-                     AND EXISTS (
-                       SELECT 1 FROM cms_entry_ref r
-                       WHERE r.from_entry_id = e.id AND r.field_key = ? AND r.to_id = ?
-                     )
-                    """);
-            args.add(refField);
-            args.add(refTarget);
-        }
-        sql.append(" ORDER BY e.updated_at DESC");
-        return jdbc.query(sql.toString(), entryMapper(), args.toArray());
+        String where = where(query, args);
+        Long total = jdbc.queryForObject("SELECT COUNT(*) FROM cms_entry e WHERE " + where, Long.class, args.toArray());
+        List<Object> pageArgs = new ArrayList<>();
+        String sortColumn = sortColumn(query, pageArgs);
+        pageArgs.addAll(args);
+        SortKey sort = query.sort();
+        String direction = sort.descending() ? "DESC" : "ASC";
+        String sql = "SELECT e.*, t.type_key, " + sortColumn + " AS sort_value FROM cms_entry e"
+                + " JOIN cms_content_type t ON t.id = e.content_type_id WHERE " + where
+                + " ORDER BY sort_value " + direction + " NULLS LAST, e.updated_at DESC NULLS LAST, e.id::text COLLATE \"C\" ASC"
+                + " LIMIT ? OFFSET ?";
+        pageArgs.add(query.size());
+        pageArgs.add(query.offset());
+        List<EntryRecord> items = jdbc.query(sql, entryMapper(), pageArgs.toArray());
+        return new EntryPage(items, total == null ? 0 : total);
+    }
+
+    @Override
+    public List<IndexRow> indexRowsOf(UUID entryId) {
+        return jdbc.query(
+                "SELECT * FROM cms_entry_index WHERE entry_id = ? ORDER BY scope COLLATE \"C\", field_key COLLATE \"C\"",
+                (rs, n) -> new IndexRow(
+                        rs.getObject("entry_id", UUID.class),
+                        rs.getString("field_key"),
+                        IndexScope.fromWire(rs.getString("scope")),
+                        rs.getString("value_kind"),
+                        rs.getString("value_string"),
+                        rs.getBigDecimal("value_int"),
+                        rs.getObject("value_bool") == null ? null : rs.getBoolean("value_bool"),
+                        instant(rs, "value_ts")),
+                entryId);
     }
 
     @Override
@@ -253,6 +272,14 @@ public class JdbcContentStore implements ContentStore {
 
     @Override
     public EntryRecord insertEntry(EntryRecord entry) {
+        transactions.executeWithoutResult(status -> {
+            writeNewEntry(entry);
+            reindex(entry);
+        });
+        return entry;
+    }
+
+    private void writeNewEntry(EntryRecord entry) {
         jdbc.update(
                 """
                 INSERT INTO cms_entry
@@ -274,11 +301,18 @@ public class JdbcContentStore implements ContentStore {
                 entry.updatedBy(),
                 ts(entry.createdAt()),
                 ts(entry.updatedAt()));
-        return entry;
     }
 
     @Override
     public EntryRecord updateEntry(EntryRecord entry) {
+        return writeTransaction(() -> {
+            writeEntry(entry);
+            reindex(entry);
+            return entry;
+        });
+    }
+
+    private void writeEntry(EntryRecord entry) {
         int changed = jdbc.update(
                 """
                 UPDATE cms_entry SET slug = ?, publication_state = ?, version = ?, payload = CAST(? AS jsonb),
@@ -301,7 +335,6 @@ public class JdbcContentStore implements ContentStore {
         if (changed != 1) {
             throw ContentException.versionConflict();
         }
-        return entry;
     }
 
     @Override
@@ -419,6 +452,170 @@ public class JdbcContentStore implements ContentStore {
                     ts(menu.updatedAt()));
         }
     }
+
+    // ---- index maintenance ----
+
+    private void reindex(EntryRecord entry) {
+        List<ContentTypeRecord> type = jdbc.query("SELECT * FROM cms_content_type WHERE id = ?", typeMapper(), entry.contentTypeId());
+        jdbc.update("DELETE FROM cms_entry_index WHERE entry_id = ?", entry.id());
+        if (type.isEmpty()) return;
+        insertRows(EntryIndexer.rows(type.getFirst(), fieldsOf(type.getFirst().id()), entry));
+    }
+
+    private void reindexType(UUID typeId) {
+        List<ContentTypeRecord> type = jdbc.query("SELECT * FROM cms_content_type WHERE id = ?", typeMapper(), typeId);
+        if (type.isEmpty()) return;
+        List<FieldRecord> fields = fieldsOf(typeId);
+        List<EntryRecord> all = jdbc.query(
+                """
+                SELECT e.*, t.type_key FROM cms_entry e
+                JOIN cms_content_type t ON t.id = e.content_type_id
+                WHERE e.content_type_id = ?
+                """,
+                entryMapper(),
+                typeId);
+        jdbc.update("DELETE FROM cms_entry_index WHERE entry_id IN (SELECT id FROM cms_entry WHERE content_type_id = ?)", typeId);
+        List<IndexRow> rows = new ArrayList<>();
+        all.forEach(entry -> rows.addAll(EntryIndexer.rows(type.getFirst(), fields, entry)));
+        insertRows(rows);
+    }
+
+    private void insertRows(List<IndexRow> rows) {
+        if (rows.isEmpty()) return;
+        jdbc.batchUpdate(
+                """
+                INSERT INTO cms_entry_index
+                  (entry_id, field_key, scope, value_kind, value_string, value_int, value_bool, value_ts)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                rows.stream().map(row -> new Object[] {
+                        row.entryId(), row.fieldKey(), row.scope().wire(), row.kind(), row.stringValue(),
+                        row.intValue(), row.boolValue(), ts(row.tsValue())}).toList());
+    }
+
+
+    // ---- query translation; must match InMemoryContentStore.queryEntries ----
+
+    // The PostgreSQL blank check follows Java String.isBlank, including Unicode whitespace.
+    private static final String BLANK_CHARACTERS = java.util.stream.IntStream.rangeClosed(1, Character.MAX_VALUE)
+            .filter(Character::isWhitespace).collect(StringBuilder::new, StringBuilder::appendCodePoint,
+                    StringBuilder::append).toString();
+
+    private static final String UUID_TEXT = "'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'";
+
+    private String where(EntryQuery query, List<Object> args) {
+        String scope = query.scope().wire();
+        StringBuilder sql = new StringBuilder("e.content_type_id = ? AND e.deleted_at IS NULL");
+        args.add(query.typeId());
+        if (query.scope() == IndexScope.WORK) {
+            if (query.states().isEmpty()) {
+                sql.append(" AND FALSE");
+            } else {
+                sql.append(" AND e.publication_state IN (")
+                        .append(String.join(", ", query.states().stream().map(s -> "?").toList()))
+                        .append(")");
+                args.addAll(query.states());
+            }
+        } else {
+            sql.append(" AND e.publication_state = 'published' AND e.published_payload IS NOT NULL");
+            if (query.visibilityField() != null) {
+                sql.append(" AND (e.published_payload ->> ? = 'public'"
+                        + " OR btrim(COALESCE(e.published_payload ->> ?, ''), ?) = '')");
+                args.add(query.visibilityField());
+                args.add(query.visibilityField());
+                args.add(BLANK_CHARACTERS);
+            }
+            for (String refField : query.requiredRefs()) {
+                sql.append(" ").append("""
+                         AND (e.published_payload ->> ? IS NULL OR EXISTS (
+                           SELECT 1 FROM cms_entry te JOIN cms_content_type tt ON tt.id = te.content_type_id
+                           WHERE te.id = (CASE WHEN e.published_payload ->> ? ~ %s
+                             THEN CAST(e.published_payload ->> ? AS uuid) END)
+                             AND te.deleted_at IS NULL AND te.publication_state = 'published'
+                             AND te.published_payload IS NOT NULL
+                             AND COALESCE(te.published_payload ->> tt.visibility_field, '') <> 'private'))
+                        """.formatted(UUID_TEXT));
+                args.add(refField);
+                args.add(refField);
+                args.add(refField);
+            }
+        }
+        if (query.q() != null && !query.q().isBlank()) {
+            sql.append(" ").append("""
+                     AND EXISTS (SELECT 1 FROM cms_entry_index x WHERE x.entry_id = e.id AND x.scope = ?
+                       AND x.field_key = ? AND x.value_string ILIKE ? ESCAPE '\\')""");
+            args.add(scope);
+            args.add(query.titleField());
+            args.add("%" + escapeLike(query.q()) + "%");
+        }
+        for (FieldFilter filter : query.filters()) {
+            sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_index f WHERE f.entry_id = e.id AND f.scope = ? AND f.field_key = ?");
+            args.add(scope);
+            args.add(filter.fieldKey());
+            if (filter.op() == FieldFilter.Op.RANGE) {
+                sql.append(" AND f.value_ts IS NOT NULL");
+                if (filter.from() != null) {
+                    sql.append(" AND f.value_ts >= ?");
+                    args.add(ts(filter.from()));
+                }
+                if (filter.to() != null) {
+                    sql.append(" AND f.value_ts < ?");
+                    args.add(ts(filter.to()));
+                }
+            } else {
+                sql.append(switch (filter.kind()) {
+                    case "int" -> " AND f.value_int = ?";
+                    case "bool" -> " AND f.value_bool = ?";
+                    default -> " AND f.value_string = ?";
+                });
+                args.add(filter.value());
+            }
+            sql.append(")");
+        }
+        for (RefFilter ref : query.refs()) {
+            sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_ref rf WHERE rf.from_entry_id = e.id AND rf.field_key = ? AND rf.to_id = ?)");
+            args.add(ref.fieldKey());
+            args.add(ref.targetId());
+        }
+        AccessFilter access = query.access();
+        if (!access.unrestricted()) {
+            if (access.anyOf().isEmpty()) {
+                sql.append(" AND FALSE");
+            } else {
+                sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_index a WHERE a.entry_id = e.id AND a.scope = ? AND (");
+                args.add(scope);
+                List<String> clauses = new ArrayList<>();
+                for (AccessFilter.Clause clause : access.anyOf()) {
+                    clauses.add("(a.field_key = ? AND a.value_string = ?)");
+                    args.add(clause.fieldKey());
+                    args.add(clause.value());
+                }
+                sql.append(String.join(" OR ", clauses)).append("))");
+            }
+        }
+        return sql.toString();
+    }
+
+    private static String sortColumn(EntryQuery query, List<Object> args) {
+        SortKey sort = query.sort();
+        if (sort.source() == SortKey.Source.SYSTEM) {
+            return switch (sort.key()) {
+                case "createdAt" -> "e.created_at";
+                case "publishedAt" -> "e.published_at";
+                default -> "e.updated_at";
+            };
+        }
+        String column = switch (sort.kind()) {
+            case "int" -> "s.value_int";
+            case "bool" -> "s.value_bool";
+            case "datetime" -> "s.value_ts";
+            default -> "s.value_string COLLATE \"C\"";
+        };
+        args.add(query.scope().wire());
+        args.add(sort.key());
+        return "(SELECT " + column + " FROM cms_entry_index s WHERE s.entry_id = e.id AND s.scope = ? AND s.field_key = ? LIMIT 1)";
+    }
+
 
     private RowMapper<ContentTypeRecord> typeMapper() {
         return (rs, n) -> new ContentTypeRecord(

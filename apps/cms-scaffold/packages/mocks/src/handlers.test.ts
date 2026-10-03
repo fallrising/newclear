@@ -227,3 +227,99 @@ describe("@cms/mocks admin and scenarios", () => {
     expect(await response.json()).toMatchObject({ error: { code: "ROUTE_NOT_FOUND" } });
   });
 });
+
+describe("BW1b mock list contract", () => {
+  it("paginates and totals before slicing, and complete lists include more than 20", async () => {
+    setUser("seed-operator-album");
+    const base = db.workEntries.find((e) => e.contentType === "album")!;
+    db.workEntries = Array.from({ length: 25 }, (_, i) => ({ ...structuredClone(base), id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`, title: `Album ${String(i).padStart(2, "0")}`, payload: { ...base.payload, title: `Album ${String(i).padStart(2, "0")}` } }));
+    const first = await client().work.entries("album", { sort: "title" });
+    expect(first).toMatchObject({ total: 25, page: 1, size: 20, offset: 0, limit: 20 });
+    expect(first.items).toHaveLength(20);
+    const second = await client().work.entries("album", { sort: "title", page: 2 });
+    expect(second.items.map((e) => e.title)).toEqual(["Album 20", "Album 21", "Album 22", "Album 23", "Album 24"]);
+    expect((await client().work.allEntries("album")).items).toHaveLength(25);
+  });
+  it("applies enum and datetime filters before totals with inclusive from and exclusive to", async () => {
+    setUser("seed-operator-album");
+    await expect(client().work.entries("album", { filter: { visibility: "not-an-option" } })).resolves.toMatchObject({ total: 0 });
+    const metadata = db.adminTypes.find((t) => t.key === "photo")!;
+    const date = metadata.fields.find((f) => f.type === "datetime")!;
+    date.filterable = true; date.indexed = true;
+    const photos = db.workEntries.filter((e) => e.contentType === "photo");
+    photos.forEach((e, i) => { e.payload[date.key] = i === 0 ? "2026-01-01T00:00:00Z" : "2026-01-02T00:00:00Z"; });
+    const result = await client().work.entries("photo", { filter: { [`${date.key}.from`]: "2026-01-01T08:00:00+08:00", [`${date.key}.to`]: "2026-01-02T00:00:00Z" } });
+    expect(result.items.map((e) => e.id)).toEqual([photos[0].id]);
+  });
+  it("repeated refs require every value to match; defaults exclude archived", async () => {
+    setUser("seed-operator-album");
+    const photo = db.workEntries.find((e) => e.contentType === "photo")!;
+    const album = String(photo.payload.album);
+    await expect(client().work.entries("photo", { ref: { album: [album, "00000000-0000-4000-8000-000000009999"] } })).resolves.toMatchObject({ total: 0 });
+    photo.publicationState = "archived";
+    expect((await client().work.entries("photo")).items.some((e) => e.id === photo.id)).toBe(false);
+    expect((await client().work.entries("photo", { state: "archived" })).items.some((e) => e.id === photo.id)).toBe(true);
+  });
+  it("rejects private public filters, sort aliases and refs before reading values", async () => {
+    const type = db.adminTypes.find((t) => t.key === "album")!;
+    type.fields.find((f) => f.key === "visibility")!.visibility = "back";
+    type.fields.find((f) => f.key === "title")!.visibility = "back";
+    for (const params of [{ filter: { visibility: "public" } }, { sort: "title" }, { ref: { missing: "00000000-0000-4000-8000-000000000001" } }]) {
+      await expect(client().public.entries("album", params)).rejects.toMatchObject({ status: 400, code: "VALIDATION_FAILED" });
+    }
+  });
+  it("rejects duplicates and invalid values even for empty results", async () => {
+    setUser("seed-operator-album"); setScenario("empty");
+    for (const query of ["size=101", "page=0", "q=x&q=y", "unknown=a&unknown=b", "filter.title=x", "ref.album=nope", "state=gone"]) {
+      const response = await raw(`/api/v1/content-types/album/entries?${query}`);
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({ error: { code: "VALIDATION_FAILED" } });
+    }
+  });
+});
+describe("BW1b numeric compatibility", () => {
+  it("retains fractional numeric sorting and puts missing or wrong types last", async () => {
+    const base = db.publicEntries.find((e) => e.contentType === "photo")!;
+    const parents = db.publicEntries.filter((e) => e.contentType !== "photo");
+    db.publicEntries = [1.5, 0.5, null, "1"].map((rank, i) => ({ ...structuredClone(base), id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`, payload: { ...base.payload, sortOrder: rank } }));
+    db.publicEntries.push(...parents);
+    const page = await client().public.entries("photo", { sort: "sortOrder" });
+    expect(page.items.map((e) => e.payload.sortOrder)).toEqual([0.5, 1.5, null, "1"]);
+  });
+});
+describe("BW1b parser edge compatibility", () => {
+  it.each(["page=&size= ", "unknown=a"])("defaults blank paging and ignores unknown parameters: %s", async (query) => {
+    setUser("seed-operator-album");
+    const result = await raw(`/api/v1/content-types/album/entries?${query}`);
+    expect(result.status).toBe(200);
+    expect(await result.json()).toMatchObject({ page: 1, size: 20 });
+  });
+  it.each(["state=bogus", "state=draft&state=published"])("public controller rejects audience query: %s", async (query) => {
+    const response = await raw(`/api/v1/public/content-types/album/entries?${query}`);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ error: { code: "AUDIENCE_PARAM_REJECTED" } });
+  });
+  it("hides malformed raw visibility and required refs to private or missing published entries", async () => {
+    const album = db.publicEntries.find((e) => e.contentType === "album")!;
+    for (const invalid of [[], {}, "private"]) {
+      album.payload.visibility = invalid;
+      await expect(client().public.entries("album")).resolves.toMatchObject({ total: 0 });
+      await expect(client().public.entries("photo")).resolves.toMatchObject({ total: 0 });
+    }
+    album.payload.visibility = "  ";
+    await expect(client().public.entries("album")).resolves.toMatchObject({ total: 1 });
+  });
+});
+describe("BW1b public default sort safety", () => {
+  it.each(["private", "disabled", "ref"])("falls back to publishedAt when configured sort field is %s", async (invalid) => {
+    const type = db.adminTypes.find((t) => t.key === "photo")!;
+    const field = type.fields.find((f) => f.key === "sortOrder")!;
+    if (invalid === "private") field.visibility = "back";
+    if (invalid === "disabled") field.enabled = false;
+    if (invalid === "ref") field.type = "ref";
+    const photos = db.publicEntries.filter((e) => e.contentType === "photo");
+    const result = await client().public.entries("photo");
+    expect(result.items.map((e) => e.id)).toEqual([...photos].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).map((e) => e.id));
+    await expect(client().public.entries("photo", { sort: "sortOrder" })).rejects.toMatchObject({ status: 400, code: "VALIDATION_FAILED" });
+  });
+});

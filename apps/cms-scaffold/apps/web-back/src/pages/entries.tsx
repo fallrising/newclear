@@ -10,7 +10,7 @@ import { canPublish } from "../nav";
 
 export function EntryListPage() {
   const { type = "" } = useParams();
-  const entries = useQuery(workQueries.entries(api.work, type));
+  const entries = useQuery(workQueries.allEntries(api.work, type));
   return (
     <>
       <PageHeader title={type} primaryAction={{ label: copy["list.create"], to: `/entries/${type}/new`, testId: "entry-create" }} />

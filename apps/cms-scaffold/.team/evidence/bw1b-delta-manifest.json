@@ -1,0 +1,367 @@
+[
+  {
+    "path": ".team/PLAN.md",
+    "before_sha256": "5057433fcf697caf7af53b393a0ef418843d89f4b1316f9e4f5c5b0f0ab71982",
+    "after_sha256": "e22dcff0ba099646368d47250a9b611cff548f761632f210fefb5a5891f61599"
+  },
+  {
+    "path": ".team/evidence/bw1b-cli-review-status.json",
+    "before_sha256": null,
+    "after_sha256": "c98b12b7fecea0391c8b336f64492da109f8ce9cf1e7f0af048959ccc2608c17"
+  },
+  {
+    "path": ".team/evidence/bw1b-cursor-review.txt",
+    "before_sha256": null,
+    "after_sha256": "ff2c167a1222c584d4130760bcae7e974f093b66c7c3de32471ce14ab0c99dc7"
+  },
+  {
+    "path": ".team/evidence/bw1b-public-review-sources.json",
+    "before_sha256": null,
+    "after_sha256": "259608c5f739c15df64258f25e3a09f03692dcf7426c68a8c4d756bce9f3fa9d"
+  },
+  {
+    "path": ".team/evidence/bw1b-review-triage.md",
+    "before_sha256": null,
+    "after_sha256": "3318b88c8877f6bf27aab2b47c0736cbcd7b8d351307c9107fdc07193f217550"
+  },
+  {
+    "path": ".team/evidence/bw1b-test-summary.json",
+    "before_sha256": null,
+    "after_sha256": "a523c979c39d16ff8d688eecd7ce5b3a4f34439b43ffdf4d9c2b3d4f192c6dcd"
+  },
+  {
+    "path": ".team/reports/BW1b-DELIVERY.md",
+    "before_sha256": null,
+    "after_sha256": "7f41de655a86e30ca82ce6f5453e0a936c5ff567e153dcb20908bad7105f75f2"
+  },
+  {
+    "path": ".team/reports/T-301.md",
+    "before_sha256": null,
+    "after_sha256": "3fcbd36c4cbf086c7ecd9258d058d4c4175d97ab60a8f80094542a6742296315"
+  },
+  {
+    "path": ".team/reports/T-302.md",
+    "before_sha256": null,
+    "after_sha256": "a03fae2f06302d0f387e2e1f4fb066b34cc90dfceda1e3a6d99aaeca5c3c92be"
+  },
+  {
+    "path": ".team/reports/T-303.md",
+    "before_sha256": null,
+    "after_sha256": "666f1eb6b78b9b5df6a4fa10e26b1d34d84bf891d5078b3f6de747bb86f9b0a3"
+  },
+  {
+    "path": ".team/reports/T-304.md",
+    "before_sha256": null,
+    "after_sha256": "e771c1f43b997dbd60fa7fd2ac7cc24478b435b5fa088ba1f1a9e3544d420df4"
+  },
+  {
+    "path": ".team/tasks/T-301.md",
+    "before_sha256": null,
+    "after_sha256": "804ad86c24c84e6bf2e9cfbe8ef4f0461b27d61a64bbe413f185874616cedd7f"
+  },
+  {
+    "path": ".team/tasks/T-302.md",
+    "before_sha256": null,
+    "after_sha256": "728164d6885d7f43942db188525488b06a3a34e03a2ae61a35da3d617e06190d"
+  },
+  {
+    "path": ".team/tasks/T-303.md",
+    "before_sha256": null,
+    "after_sha256": "3696898e3dde35d83eb6434ea1207d3ed6b90be9f6a6967e03915936e76d0d72"
+  },
+  {
+    "path": ".team/tasks/T-304.md",
+    "before_sha256": null,
+    "after_sha256": "1e97d8f879dc67c2211b468a678596a3fc888446d6d153bc8cdc8d186a7bd0f4"
+  },
+  {
+    "path": "README.md",
+    "before_sha256": "8a767733d97098f9d8d6e5a8a80bdc4bf1c6a8a056e900b92d612c2ceaa13b4d",
+    "after_sha256": "2b93bb9a791e9c2775b3fc6305f13aba7da220ca9165c734d857b7eb595cbb95"
+  },
+  {
+    "path": "apps/web-back/src/App.test.tsx",
+    "before_sha256": "a901ae9f0cb359146f2c102c60db0caa1a4f09777abefa5aec5356734924078d",
+    "after_sha256": "b60a8410273ca3004ccce361cf0391acf45125a56c14faff81e038fe530fcd83"
+  },
+  {
+    "path": "apps/web-back/src/pages/entries.tsx",
+    "before_sha256": "d40fe763bf8a02d20f7675eba8116e9913a131562c6820d5a5f975669bce4ca1",
+    "after_sha256": "8756a24522f2329134e6f6d44c32a4f83c095e82f5c9bd8470b873c6f17bdcec"
+  },
+  {
+    "path": "apps/web-back/src/pages/views.tsx",
+    "before_sha256": "5f707a88c50edc544811074b68fc9df4ef36229215acefbd7ecae2331c8e8ce8",
+    "after_sha256": "f44153f760416b0042273d3dcb22f27f2bde6073e92390848ed93a0b6967029b"
+  },
+  {
+    "path": "apps/web-front/src/pages/album.tsx",
+    "before_sha256": "d4839b077fddc2986fa775951c207b924a5ae0fd91a09a4f2526ca775ff1869d",
+    "after_sha256": "6279fa5e20ccd80d00421111570ca71c365081ccde2f5fbd78392086025bf9fe"
+  },
+  {
+    "path": "apps/web-front/src/pages/clinic.tsx",
+    "before_sha256": "3bb559859fcf9da62d5a3bcfe99c604675a0076f8e9812e32452559edbc3fdb4",
+    "after_sha256": "a46e87c40abec0ccdb74b168365d48044190991f574b72fa0e69bbb5cda6aaed"
+  },
+  {
+    "path": "apps/web-front/src/pages/projects.tsx",
+    "before_sha256": "0b0394cc7902c61f045ff946ab10ddcdca4d433c6b5db4016bd232abdb6c7582",
+    "after_sha256": "fa51375dda7d1dfb67566d76ff133b28a333cd409a09b9d6d6931f271d3ac954"
+  },
+  {
+    "path": "docs/v2/03-personal-use-readiness.md",
+    "before_sha256": "2f65e2da0843a746ab13d5052392bd31f777e070add1508d3c4e24a41f19bdbc",
+    "after_sha256": "7bf46084adfc54310c5e7192e9875c9ee3aa6f820e161c459ca2d04886fa60a7"
+  },
+  {
+    "path": "docs/v2/README.md",
+    "before_sha256": "62ceca2381928deaba953d3e2f36c5bbd4d1f4582ce7df40fcf4aa5cd2f72be6",
+    "after_sha256": "2d088827ff3ace980e7eb2bb6605b13321a91b9c9024ed29b38481123a374496"
+  },
+  {
+    "path": "docs/v2/waves/BW1b.md",
+    "before_sha256": "15d91050606acf87ec4e1def11c6e1f2c1938482b7e4b85f3f801c42948e0776",
+    "after_sha256": "966e39175259bc141ce9f315d2b8db5dd7066d4aff789524969d73f59b05d226"
+  },
+  {
+    "path": "packages/api/src/generated/schema.d.ts",
+    "before_sha256": "e5ffdebb3cb171357be2d4c77af4b8172bfd52c3eda55956d581c7691d661c0f",
+    "after_sha256": "e5977810430b18964bf015c10319ba05b942fe4caf056a0170093c4e282fdc4f"
+  },
+  {
+    "path": "packages/api/src/keys.ts",
+    "before_sha256": "966f3232994cef678180bfc19679b2731a1739c6b76b279a18f527357d35654c",
+    "after_sha256": "90571ac367271b0ff2a3072da849dfe4acec474750951d72f5e9e3c61e9fc2ec"
+  },
+  {
+    "path": "packages/api/src/paging.test.ts",
+    "before_sha256": null,
+    "after_sha256": "fa37be549d54baeab0e2426efb6cadd5c705fb3d372ceee010c4ae594d0b815c"
+  },
+  {
+    "path": "packages/api/src/public.ts",
+    "before_sha256": "8cd366c862587ff2dcb50c641e25601f3ab79f45df33f285124d06a17590cee6",
+    "after_sha256": "aa5ebe8b5d0ff0a4e0f4317e47869762a61c330b39743a28bcec486e4413387e"
+  },
+  {
+    "path": "packages/api/src/query.ts",
+    "before_sha256": "e74a6f93ff56faa2d6d636cef1a598942682318ad773ead94643c65fa0981b43",
+    "after_sha256": "1541ad51b63c5b96fd4dd9827fa17636620441cf093b4f6933d2a5615a9fece8"
+  },
+  {
+    "path": "packages/api/src/work.ts",
+    "before_sha256": "10563d9ceac4caad28c6f28e7f0a1a56fd0f9f2669fecf7be460b65ffd6b5cfb",
+    "after_sha256": "58b08b63505e9cd98b6bc28029591f510ecc2756a63cad1a93c0d17164b7a091"
+  },
+  {
+    "path": "packages/mocks/src/handlers.test.ts",
+    "before_sha256": "263f538e2f503d2d306f525bc1daaea284f95ae7d3ca4d91c80a281654556392",
+    "after_sha256": "a0a2f94a3f2abac282d64706625e8e0f87aef06997ae2291bf7d09898d5030a5"
+  },
+  {
+    "path": "packages/mocks/src/handlers/list.ts",
+    "before_sha256": null,
+    "after_sha256": "34bab85e622e90b7bd11c12d264ec52209eb5ab11acaf04314b889fddb8d5477"
+  },
+  {
+    "path": "packages/mocks/src/handlers/public.ts",
+    "before_sha256": "07039c4baa3b1395cc6b3ecc7c391e1035665492672080847ed2296e17c5ecb2",
+    "after_sha256": "2c9713ad4445c10ba998f6d349a41e89f35e2eb33ffbaa89bfd30d26454d5016"
+  },
+  {
+    "path": "packages/mocks/src/handlers/work.ts",
+    "before_sha256": "7634a22b55c0be785101ee6abb5bcbdaaec72f8ed8490f3a531f8ffe881b92ec",
+    "after_sha256": "d7b2870f27db11e05d693730ee764ca35d51321c5597072fd928e3d57567625b"
+  },
+  {
+    "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/EntryAtomicWriteTests.java",
+    "before_sha256": "0af4ba626ac385a91d1ea9f3cf0e7571d7d7002b86f531af946a78e71daea8c8",
+    "after_sha256": "3a389ae766ce46ffed78ee89b1ed8375f1c9f197fe71f9b1ddf4bea991d8a218"
+  },
+  {
+    "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/EntryIndexBackfillTests.java",
+    "before_sha256": null,
+    "after_sha256": "c7f8755d4017bc49bf6e79538fa77880a68c4fa84fbddb21848b1764826458ad"
+  },
+  {
+    "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/ListQueryPerformanceTests.java",
+    "before_sha256": null,
+    "after_sha256": "119aef8c33c6a9025df5ef363385dd62bacc6b3eae240373c6a896fe59c0eb4b"
+  },
+  {
+    "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/PostgresFixture.java",
+    "before_sha256": "de7cbd426dd7aece9fc67fd5fc4bce0f15b4fe89adfccf8e0d698497a5c110a2",
+    "after_sha256": "b7655dd3d7bd86bb2284f667574eb53681aa93258c28e5764663abbfdede169f"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/index/EntryIndexer.java",
+    "before_sha256": null,
+    "after_sha256": "d7d8bf44a6bd6054ac786845afc87bc952a789067371bd9e44d1392e768809f9"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/index/IndexRow.java",
+    "before_sha256": null,
+    "after_sha256": "dfc8e0a1e9ad83fa0cbfbb8f4f3b30497e688ecc65193b99f959cfdd6642b396"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/index/IndexScope.java",
+    "before_sha256": null,
+    "after_sha256": "7ddaabe4ebcf1251dc48ef140a6a6b9da1b879ab283f5c0bfa0b63e649e27b3c"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/AccessFilter.java",
+    "before_sha256": null,
+    "after_sha256": "48d46d4cfeec437c3b9d9d99677ab3caebd947953074e11b489422e7f5243db9"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/EntryPage.java",
+    "before_sha256": null,
+    "after_sha256": "ce3cf98b211fa21b4643124f0abfea1e65eadeff26263c30395a1718cb67fa13"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/EntryQuery.java",
+    "before_sha256": null,
+    "after_sha256": "cf5c5b3b8e84f14f3b37d2be0b6d78eb373fa6323f1a424df4c1eb259aa6138e"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/FieldFilter.java",
+    "before_sha256": null,
+    "after_sha256": "b35caff80d3324e188bf5d2b0e9dc981be170d4a5ef9ccc581120f16291cc88d"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/ListQueryParser.java",
+    "before_sha256": null,
+    "after_sha256": "aade6aed4aa6c37b64ebae5be3e2dc566d05b39774faced351000ab3b0e65f7f"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/RefFilter.java",
+    "before_sha256": null,
+    "after_sha256": "4010b367b74e00b5c9fce16f70b706d7f7cde7f65183c1c7d1572d4472a8a738"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/query/SortKey.java",
+    "before_sha256": null,
+    "after_sha256": "6c6bab78e7c8068a52a70204f3608a79f4746a872eeac18505e22e459140347f"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/service/EntryService.java",
+    "before_sha256": "f0bd115ef0d3612f96c7ca806ed506dc269b61cc1d06b2b10b11de94880fb787",
+    "after_sha256": "cb806c3450bfee84eedc6915d34552599498e76826ee3a7d3f80e8dd1d15f7dc"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/store/ContentStore.java",
+    "before_sha256": "7c82b20c6467c9d9870dc38b4ed1f3e950d8e7061395cab0f4b321145027cb40",
+    "after_sha256": "199519538052b432cf4e1855ce0b3340d340f923afc85120e4817dc68fb739db"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/store/InMemoryContentStore.java",
+    "before_sha256": "07eec8464fecd824215d1ff335ec281780f3677aa032304b07e84bfcca0680b0",
+    "after_sha256": "93e940718adb1321794235c8d1866840a4d56e5d1d92299aab5dd7c0907e599e"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/store/JdbcContentStore.java",
+    "before_sha256": "986dd8acfd4c7bcd1062931ba6bd2dccdc4999d3a1d4a00f8c6a57fe8451550c",
+    "after_sha256": "10c452712a2f57f902ea8b7dc56422ec2a470296875abe73d4a06b09f7c84261"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/ContentProjection.java",
+    "before_sha256": "e7bd736423ecc86bee9255946bbd61cde1834107cb2aebd5c233914a5bf0ae37",
+    "after_sha256": "43622bdbafe55f9dbb3630f16f78af26774873e3c3b617891361d3d1bdcd5a33"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/EntryController.java",
+    "before_sha256": "9e3bedab1b81cb516b817180745aa2b1918d7533822b6bbd4bb7ac2ef377d1d0",
+    "after_sha256": "4683c0cbf4f3fe5dc5007bbcbcca53fa4056816484415ffd6394206c94a5036f"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/PublicContentController.java",
+    "before_sha256": "827a1777bd5a7c224f1b12e8115dad9d40105248e6150adf62c1a238b7d8ab1a",
+    "after_sha256": "86c3884d5ca7d804d843e7388d5d83be6905bc8adf23e6af29f9b3c80110bdf0"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/StoreContentTypeDirectory.java",
+    "before_sha256": "7f7b3a73e8cd17dfb8e803cab787f53d2495e90572c49f3e7fdf2c1773e78c2d",
+    "after_sha256": "3fa494529fd06687fa4d5eebf6785716be4cc6de00e44c060e44c169a095d2b8"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/identity/service/AuthorizationService.java",
+    "before_sha256": "c3aa4e43d5fc643c31598f2f8e75a0e50d454194cef7e61014fc19352d97ddd4",
+    "after_sha256": "0eb88748a986df65495f580de1b363ae95aa9de86e1ee1addabbb695f03a60b2"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/identity/service/ContentTypeDirectory.java",
+    "before_sha256": "1836bbf7d45fd42d57e026d1876dfa4481009b6a0ce7398a9b3c16b54e83be21",
+    "after_sha256": "80850b7efcb06d0c5136baf2c0b74beb7003c4f320d8f341635756368e8f23ea"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/identity/service/FieldEqualsPredicate.java",
+    "before_sha256": null,
+    "after_sha256": "74f963ddbfc71fb7d70c6d224dc75fe41fc28063ac553dc8810e023e678a3995"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/identity/service/PredicateIndexCheck.java",
+    "before_sha256": null,
+    "after_sha256": "fa0c7ba7e4531b3559be212c95d4e75eb63c8c28b3bf9890a7fe393cb500d065"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/identity/service/PrincipalAdminService.java",
+    "before_sha256": "6d5db8f0a465816e93acd2786511cb44d3fa5b6202c4f6f769820e4d90ca879b",
+    "after_sha256": "c4645571da8715fb5bbb09ea5f447cb4f1be64b9a80138d5486c59824469b317"
+  },
+  {
+    "path": "services/cms-api/src/main/java/db/migration/V7__backfill_entry_index.java",
+    "before_sha256": null,
+    "after_sha256": "ce1b3db0f7178d57c09b601e4f00977b99ec45c4625afaba7ae32d3ee3d1477f"
+  },
+  {
+    "path": "services/cms-api/src/main/resources/db/migration/V6__entry_index_scope.sql",
+    "before_sha256": null,
+    "after_sha256": "33bc02c7ce1c7cba82a202e23fe4b6029fa90bafeda8598632106b1722f93104"
+  },
+  {
+    "path": "services/cms-api/src/main/resources/openapi/openapi.yaml",
+    "before_sha256": "56a53cd14c3e2591df88491951cfe267d302f3b84f0eb9c8553ab0c7cd3ac562",
+    "after_sha256": "c42950aaa9f5f0eb1f25d770320641a57172a1027ff250c0d3d6c4cf4c4b1b33"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/IdentityHardeningTests.java",
+    "before_sha256": "2d197a9bb3d14637a7080bfb0efce68647459f4ad9c39dc43d30a665be0a083e",
+    "after_sha256": "a9bf380f301bea9858e2295f511ca164e46d69e02a5662a2a8134c801db0b9e8"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/ListQueryApiTests.java",
+    "before_sha256": null,
+    "after_sha256": "79375cd3218f73f6b0e1d2fa71e33c6bfbc39b6d14f4b17d17cae8c3736e2b8e"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/ListQueryCountTests.java",
+    "before_sha256": null,
+    "after_sha256": "09d7c80ae5267e5c4243779aecc986b7cc17cf9d70032b71fff99306be9c2db4"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/content/query/ListQueryParserTests.java",
+    "before_sha256": null,
+    "after_sha256": "6ed601d6887aae673452f04497d0c5d12c4edeeb76faaaec80b10723926f2faa"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/content/service/PublicOrderTests.java",
+    "before_sha256": "3ccc1352490e95e3d0b79d66b17f987f4fcb910bb0ee6d51a164e1da06010ed5",
+    "after_sha256": null
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/contract/ContentStoreContract.java",
+    "before_sha256": "3fc7d2bef974d05fdef5b30616a51cfa6f929309e3feb623865942dbdf46766e",
+    "after_sha256": "278f4c56e1ee7aa9189a30de5cb23ec2da1b416fef3b9fd68ee575109ac0ee85"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/identity/service/ListAccessTests.java",
+    "before_sha256": null,
+    "after_sha256": "7f944d929f17d9cc32e78314f0ff5c00b4def11c9c9f862d1d7d89c90eefd61d"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/identity/service/PredicateIndexCheckTests.java",
+    "before_sha256": null,
+    "after_sha256": "2f8ff99e469b6d13d613217ae216fd631c54f0680495d0e7509e8e47b408dce1"
+  }
+]

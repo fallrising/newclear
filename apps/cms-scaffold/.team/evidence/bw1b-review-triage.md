@@ -1,0 +1,9 @@
+# BW1b independent review disposition
+
+Cursor composer-2.5 reviewed anonymously fetched public GitHub BW1b specification only, without tools or access to unpublished implementation. Exit 0 in 23.2 seconds; no provider cost receipt available. The source URL/hash/HTTP200 receipt and final review text are adjacent. Codex coordinated implementation and independently reviewed actual local diffs. Earlier BW1a delivery also successfully exercised Grok and OpenCode; this wave did not repeat every provider.
+
+- Index duplicates/stale data: current writers delete/replace index rows in the same transaction as entry mutation; V7 rebuilds the entire index. Tests cover repeated writes, backfill and index failure rollback. Arbitrary direct database corruption is not claimed recoverable. No uniqueness constraint added solely from this hypothetical finding.
+- Predicate behavior (malformed grant empty list, unconditional grant OR override, absent principal clause): required by explicit BW1b contract and covered by list access/store/API tests. Startup and permission mutation reject noncompilable predicates. No extra post-page authorization that could distort totals.
+- Canonical UUID required references and empty work states: explicit query semantics; bound UUID cast protects malformed legacy values. Store contracts cover public parent readability and empty access results.
+- Auth-before-parse: fixed service ordering and regression proving forbidden caller with malformed paging remains forbidden. Public audience guard remains its existing outer-controller exception.
+- Local Codex/frontend review additionally found offset overflow, loss of previously accepted fractions, public title sort alias bypass, missing-index visibility/required-ref fail-open behavior, and duplicate unknown parameter validation. Documentation was amended before compatibility changes; focused regressions and integrated gates determine acceptance.

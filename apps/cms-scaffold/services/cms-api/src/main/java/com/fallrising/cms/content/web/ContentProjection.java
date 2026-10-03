@@ -3,6 +3,7 @@ package com.fallrising.cms.content.web;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
+import com.fallrising.cms.content.service.EntryService;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -110,5 +111,17 @@ final class ContentProjection {
             return null;
         }
         return payload.get(titleField);
+    }
+
+    /** List response (02 §4.1): page and size, plus offset and limit kept for v1 clients. */
+    static Map<String, Object> page(List<Map<String, Object>> items, EntryService.ListResult result) {
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("items", items);
+        json.put("total", result.page().total());
+        json.put("page", result.pageNo());
+        json.put("size", result.size());
+        json.put("offset", (result.pageNo() - 1L) * result.size());
+        json.put("limit", result.size());
+        return json;
     }
 }

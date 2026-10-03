@@ -53,6 +53,28 @@ Acceptance: required Java, PostgreSQL and frontend checks all pass; P0 preserved
 
 Evidence: reports/BW1a-DELIVERY.md. No BW1a commit, push, PR merge or deployment; P0 merge is the only external repository delivery action authorized and performed. Remaining product phases and production operations stay explicitly pending.
 
+## BW1b — active local continuation
+
+Owner requested continued development. Baseline is locally verified BW1a (151 Java +65 PostgreSQL +140 frontend +17 mock E2E), preserved in a local file snapshot before changes. No new external mutations authorized. Documentation §0 precedes implementation and preserves P0/BW1a plus complete-list consumer compatibility.
+
+- T-301 Codex high: index/store/query/value objects, V6/V7/backfill/performance and store regressions. Keep legacy list methods until service integration is ready; remove them as final integration step.
+- T-302 Codex high: parser/predicate/access policy and HTTP/service paging; consume reviewed T301 objects/store interfaces before full checks. Preserve P0 transactions and BW1a caches.
+- T-303 Codex medium: generated API/client/MSW and existing complete-list consumers, with focused Red→Green tests. No UI redesign.
+- Lead: bounded public-spec CLI review, dependency imports, complete diff review and final integrated gates, report actual 10k timings. Use codex-evidence-gate before acceptance.
+
+Independent worktrees receive identical BW1a snapshots; no worker commits or recursive delegation. Root .team remains untouched. New delivery delta is measured against the preserved snapshot, not just git HEAD (which is P0).
+
+## BW1b acceptance — LOCAL_VERIFIED (2026-10-03)
+
+- [x] T-301 DoD: atomic indexing/query/backfill, P0 CAS/rollback preserved; scoped diff review and 202 unit/API +91 PostgreSQL final root XML support acceptance.
+- [x] T-302 DoD: parser/access/controller/schema behavior, Red→Green history and final integrated Java checks accepted; runtime OpenAPI equals BW1b contract.
+- [x] T-303 DoD: generated client/MSW/complete-list behavior, Red→Green and final 166 frontend +17 mock E2E accepted; lint/typecheck/build/bundle pass.
+- [x] Required checks mapped in reports/BW1b-DELIVERY.md; final backend log includes bootJar, 9 executed tasks, zero failures/errors/skips. Store p95 work/public/patch 85/77/18ms preserves thresholds.
+- [x] Independent T-304 evidence reread and codex-evidence-gate closure; no full rerun for documentation-only changes.
+- [x] Portable documentation/status updated; task/report contracts and diff whitespace checked; BW1a snapshot and protected dependency/V1–V5 files preserved.
+
+Task-file unchecked DoD bullets remain the immutable assignment contract because teamctl requires them; completed acceptance boxes are recorded above. Historical worker Red/intermediate failures remain in reports, while resolved pending root gates now cite final evidence. BW1a/BW1b remain uncommitted/unmerged; P0 #212 is the last merged wave. No deployment or production readiness claim. Separate BW1b delta is recorded against the preserved BW1a snapshot; BW1c starts only after this closure.
+
 ## BW1 publication authorization — 2026-10-03
 
 The owner explicitly authorized committing, opening and merging one PR per completed BW1a/BW1b/BW1c wave, then continuing development. Earlier local-only statements record acceptance-time history. This publication is reconstructed from preserved per-wave snapshots; original dirty worktrees remain untouched. Required remote CI must pass before each merge. No deployment is authorized. No private tracking contents are published or modified.

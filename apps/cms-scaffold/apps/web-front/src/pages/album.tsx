@@ -8,7 +8,7 @@ import { mediaUrl, text } from "../media";
 import { FrontTitle } from "../shell";
 
 export function AlbumHome() {
-  const albums = useQuery(publicQueries.entries(api.public, "album"));
+  const albums = useQuery(publicQueries.allEntries(api.public, "album"));
   return (
     <>
       <FrontTitle actions={<Link to="/album/albums" className="hover:underline">{copy["album.all"]}</Link>}>
@@ -52,7 +52,7 @@ function AlbumNotFound() {
 }
 
 function AlbumPhotos({ albumId }: { albumId: string }) {
-  const photos = useQuery(publicQueries.entries(api.public, "photo", { ref: { album: albumId } }));
+  const photos = useQuery(publicQueries.allEntries(api.public, "photo", { ref: { album: albumId } }));
   return (
     <QueryBoundary query={photos} isEmpty={(page) => page.items.length === 0} empty={<EmptyState title={copy["empty.photos"]} />}>
       {(page) => (

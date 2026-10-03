@@ -5,7 +5,7 @@ import { workContentTypes } from "../fixtures.gen";
 import { allowedType, canPublish, requireWork } from "../guards";
 import { apiError, png } from "../respond";
 import { getState } from "../state";
-import { matchesList } from "./common";
+import { listPage } from "./list";
 
 function findType(key: string): WorkContentType | undefined {
   return workContentTypes.items.find((t) => t.key === key);
@@ -76,12 +76,10 @@ export const workHandlers = [
     if (!findType(type)) return apiError(404, "CONTENT_TYPE_NOT_FOUND", "Content type not found");
     if (!allowedType(user, type)) return forbidden("read_draft", type);
     const url = new URL(request.url);
-    const states = (url.searchParams.get("state") || "draft,published,archived").split(",").map((s) => s.trim());
-    const items =
-      getState().scenario === "empty"
-        ? []
-        : db.workEntries.filter((e) => e.contentType === type && states.includes(e.publicationState) && matchesList(url, e));
-    return HttpResponse.json<WorkEntryPage>({ items, total: items.length, offset: 0, limit: items.length });
+    const items = getState().scenario === "empty" ? [] : db.workEntries.filter((e) => e.contentType === type);
+    const metadata = db.adminTypes.find((t) => t.key === type)!;
+    const result = listPage(url, metadata, items, false);
+    return result instanceof Response ? result : HttpResponse.json<WorkEntryPage>(result);
   }),
 
   http.post("*/api/v1/content-types/:type/entries", async ({ request, params }) => {

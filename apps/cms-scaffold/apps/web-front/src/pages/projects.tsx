@@ -8,7 +8,7 @@ import { text } from "../media";
 import { FrontTitle } from "../shell";
 
 export function ProjectsHome() {
-  const projects = useQuery(publicQueries.entries(api.public, "project"));
+  const projects = useQuery(publicQueries.allEntries(api.public, "project"));
   return (
     <>
       <FrontTitle>{copy["projects.title"]}</FrontTitle>
@@ -33,7 +33,7 @@ export function ProjectsHome() {
 }
 
 function Milestones({ projectId }: { projectId: string }) {
-  const milestones = useQuery(publicQueries.entries(api.public, "milestone", { ref: { project: projectId } }));
+  const milestones = useQuery(publicQueries.allEntries(api.public, "milestone", { ref: { project: projectId } }));
   return (
     <QueryBoundary query={milestones} isEmpty={(page) => page.items.length === 0} empty={<EmptyState title={copy["empty.milestones"]} />}>
       {(page) => (

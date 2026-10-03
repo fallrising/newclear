@@ -108,6 +108,8 @@ describe("CMS Back custom views", () => {
     setUser("seed-operator-album");
     const requests = recordRequests();
     renderRoute("/views/album.composer");
+    await screen.findByRole("option", { name: "Coast Light 2026" });
+    fireEvent.change(screen.getByLabelText("相簿"), { target: { value: db.workEntries.find((e) => e.slug === "coast-light-2026")!.id } });
     expect(await screen.findByText("Harbour wall")).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "下移" })[0]);
     await waitFor(() => expect(requests.filter((r) => r.method === "PATCH")).toHaveLength(2));
@@ -130,7 +132,7 @@ describe("CMS Back custom views", () => {
   it("T-BO-05 the board moves a card with PATCH status and never publishes", async () => {
     setUser("seed-operator-projects");
     const requests = recordRequests();
-    renderRoute("/views/projects.board");
+    renderRoute(`/views/projects.board?project=${db.workEntries.find((e) => e.slug === "cms-scaffold")!.id}`);
     const select = await screen.findByLabelText("狀態 Kanban DnD");
     fireEvent.change(select, { target: { value: "in_progress" } });
     const column = await screen.findByRole("region", { name: "in_progress" });

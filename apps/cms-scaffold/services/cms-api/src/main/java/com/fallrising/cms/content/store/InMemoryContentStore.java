@@ -6,12 +6,24 @@ import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.EntryRefRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.NavigationRecord;
+import com.fallrising.cms.content.domain.PublicationState;
 import com.fallrising.cms.content.domain.RevisionRecord;
+import com.fallrising.cms.content.index.EntryIndexer;
+import com.fallrising.cms.content.index.IndexRow;
+import com.fallrising.cms.content.index.IndexScope;
+import com.fallrising.cms.content.query.AccessFilter;
+import com.fallrising.cms.content.query.EntryPage;
+import com.fallrising.cms.content.query.EntryQuery;
+import com.fallrising.cms.content.query.FieldFilter;
+import com.fallrising.cms.content.query.RefFilter;
+import com.fallrising.cms.content.query.SortKey;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +37,7 @@ public class InMemoryContentStore implements ContentStore {
     private final ConcurrentHashMap<UUID, List<RevisionRecord>> revisions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, List<EntryRefRecord>> refs = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, NavigationRecord> menus = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, List<IndexRow>> index = new ConcurrentHashMap<>();
 
     @Override
     public Optional<ContentTypeRecord> findTypeByKey(String typeKey) {
@@ -65,10 +78,11 @@ public class InMemoryContentStore implements ContentStore {
     }
 
     @Override
-    public void updateTypeSettings(ContentTypeRecord type) {
+    public synchronized void updateTypeSettings(ContentTypeRecord type) {
         types.computeIfPresent(type.typeKey(), (key, current) -> current.id().equals(type.id())
                 ? current.withSettings(type.sortField(), type.visibilityField(), type.ownerField(), type.updatedAt())
                 : current);
+        reindexType(type.id());
     }
 
     @Override
@@ -79,8 +93,9 @@ public class InMemoryContentStore implements ContentStore {
     }
 
     @Override
-    public void insertField(FieldRecord field) {
+    public synchronized void insertField(FieldRecord field) {
         fields.computeIfAbsent(field.contentTypeId(), ignored -> new CopyOnWriteArrayList<>()).add(field);
+        reindexType(field.contentTypeId());
     }
 
     @Override
@@ -126,15 +141,19 @@ public class InMemoryContentStore implements ContentStore {
     }
 
     @Override
-    public List<EntryRecord> listEntries(
-            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget) {
-        return entries.values().stream()
-                .filter(e -> e.contentTypeId().equals(typeId))
-                .filter(e -> includeDeleted || !e.deleted())
-                .filter(e -> states == null || states.isEmpty() || states.contains(e.publicationState().wire()))
-                .filter(e -> matchesQ(e, titleField, q))
-                .filter(e -> matchesRef(e.id(), refField, refTarget))
-                .sorted(Comparator.comparing(EntryRecord::updatedAt).reversed())
+    public synchronized EntryPage queryEntries(EntryQuery query) {
+        List<EntryRecord> matching = entries.values().stream()
+                .filter(e -> matches(e, query))
+                .sorted(order(query))
+                .toList();
+        List<EntryRecord> page = matching.stream().skip(query.offset()).limit(query.size()).toList();
+        return new EntryPage(page, matching.size());
+    }
+
+    @Override
+    public synchronized List<IndexRow> indexRowsOf(UUID entryId) {
+        return index.getOrDefault(entryId, List.of()).stream()
+                .sorted(Comparator.comparing((IndexRow r) -> r.scope().wire()).thenComparing(IndexRow::fieldKey))
                 .toList();
     }
 
@@ -147,24 +166,28 @@ public class InMemoryContentStore implements ContentStore {
     }
 
     @Override
-    public EntryRecord insertEntry(EntryRecord entry) {
+    public synchronized EntryRecord insertEntry(EntryRecord entry) {
+        List<IndexRow> rows = rowsFor(entry);
         entries.put(entry.id(), entry);
+        index.put(entry.id(), rows);
         return entry;
     }
 
     @Override
-    public EntryRecord updateEntry(EntryRecord entry) {
+    public synchronized EntryRecord updateEntry(EntryRecord entry) {
+        List<IndexRow> rows = rowsFor(entry);
         entries.compute(entry.id(), (id, current) -> {
             if (current == null || current.version() != entry.version() - 1) {
                 throw ContentException.versionConflict();
             }
             return entry;
         });
+        index.put(entry.id(), rows);
         return entry;
     }
 
     @Override
-    public void hardDeleteEntry(UUID id, int expectedVersion) {
+    public synchronized void hardDeleteEntry(UUID id, int expectedVersion) {
         entries.compute(id, (key, current) -> {
             if (current == null || current.version() != expectedVersion) {
                 throw ContentException.versionConflict();
@@ -173,6 +196,7 @@ public class InMemoryContentStore implements ContentStore {
         });
         revisions.remove(id);
         refs.remove(id);
+        index.remove(id);
     }
 
     @Override
@@ -217,19 +241,147 @@ public class InMemoryContentStore implements ContentStore {
         menus.put(menu.menuKey(), menu);
     }
 
-    private boolean matchesQ(EntryRecord entry, String titleField, String q) {
-        if (q == null || q.isBlank()) {
-            return true;
-        }
-        Object title = entry.payload() == null || titleField == null ? null : entry.payload().get(titleField);
-        return title != null && title.toString().toLowerCase(Locale.ROOT).contains(q.toLowerCase(Locale.ROOT));
+    // ---- index maintenance ----
+
+    private void reindex(EntryRecord entry) {
+        index.put(entry.id(), rowsFor(entry));
     }
 
-    private boolean matchesRef(UUID fromId, String field, UUID target) {
-        if (field == null || target == null) {
-            return true;
-        }
-        return refs.getOrDefault(fromId, List.of()).stream()
-                .anyMatch(r -> field.equals(r.fieldKey()) && target.equals(r.toId()));
+    private List<IndexRow> rowsFor(EntryRecord entry) {
+        ContentTypeRecord type = typeById(entry.contentTypeId());
+        return type == null ? List.of() : EntryIndexer.rows(type, fieldsOf(type.id()), entry);
     }
+
+    private void reindexType(UUID typeId) {
+        entries.values().stream().filter(e -> e.contentTypeId().equals(typeId)).forEach(this::reindex);
+    }
+
+    private ContentTypeRecord typeById(UUID typeId) {
+        return types.values().stream().filter(t -> t.id().equals(typeId)).findFirst().orElse(null);
+    }
+
+
+    // ---- query evaluation; must match JdbcContentStore.queryEntries ----
+
+    private boolean matches(EntryRecord e, EntryQuery query) {
+        if (!e.contentTypeId().equals(query.typeId()) || e.deleted()) return false;
+        IndexScope scope = query.scope();
+        if (scope == IndexScope.WORK) {
+            if (!query.states().contains(e.publicationState().wire())) return false;
+        } else {
+            if (e.publicationState() != PublicationState.PUBLISHED || e.publishedPayload() == null) return false;
+            if (query.visibilityField() != null) {
+                Object visibility = e.publishedPayload().get(query.visibilityField());
+                if (visibility != null && !String.valueOf(visibility).isBlank()
+                        && !"public".equals(String.valueOf(visibility))) return false;
+            }
+            for (String refField : query.requiredRefs()) {
+                Object ref = e.publishedPayload().get(refField);
+                if (ref != null && !publiclyReadable(String.valueOf(ref))) return false;
+            }
+        }
+        if (query.q() != null && !query.q().isBlank()) {
+            IndexRow title = query.titleField() == null ? null : row(e.id(), scope, query.titleField());
+            if (title == null || title.stringValue() == null
+                    || !title.stringValue().toLowerCase(Locale.ROOT).contains(query.q().toLowerCase(Locale.ROOT))) {
+                return false;
+            }
+        }
+        for (FieldFilter filter : query.filters()) {
+            if (!matches(row(e.id(), scope, filter.fieldKey()), filter)) return false;
+        }
+        for (RefFilter ref : query.refs()) {
+            boolean found = refs.getOrDefault(e.id(), List.of()).stream()
+                    .anyMatch(r -> ref.fieldKey().equals(r.fieldKey()) && ref.targetId().equals(r.toId()));
+            if (!found) return false;
+        }
+        AccessFilter access = query.access();
+        if (!access.unrestricted()) {
+            boolean allowed = access.anyOf().stream().anyMatch(clause -> {
+                IndexRow row = row(e.id(), scope, clause.fieldKey());
+                return row != null && clause.value().equals(row.stringValue());
+            });
+            if (!allowed) return false;
+        }
+        return true;
+    }
+
+    private static boolean matches(IndexRow row, FieldFilter filter) {
+        if (row == null) return false;
+        if (filter.op() == FieldFilter.Op.RANGE) {
+            Instant ts = row.tsValue();
+            if (ts == null) return false;
+            return (filter.from() == null || !ts.isBefore(filter.from())) && (filter.to() == null || ts.isBefore(filter.to()));
+        }
+        return switch (filter.kind()) {
+            case "int" -> row.intValue() != null && filter.value() instanceof Number number
+                    && row.intValue().compareTo(new java.math.BigDecimal(number.toString())) == 0;
+            case "bool" -> Objects.equals(row.boolValue(), filter.value());
+            default -> Objects.equals(row.stringValue(), filter.value());
+        };
+    }
+
+    /** Target id text of a required ref: the entry exists, is not deleted, is published and is not private. */
+    private boolean publiclyReadable(String targetText) {
+        UUID targetId;
+        try {
+            targetId = UUID.fromString(targetText);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        if (!targetId.toString().equals(targetText)) return false;
+        EntryRecord target = entries.get(targetId);
+        if (target == null || target.deleted() || target.publicationState() != PublicationState.PUBLISHED
+                || target.publishedPayload() == null) {
+            return false;
+        }
+        ContentTypeRecord targetType = typeById(target.contentTypeId());
+        if (targetType == null || targetType.visibilityField() == null) return true;
+        Object visibility = target.publishedPayload().get(targetType.visibilityField());
+        return visibility == null || !"private".equals(String.valueOf(visibility));
+    }
+
+    private IndexRow row(UUID entryId, IndexScope scope, String fieldKey) {
+        return index.getOrDefault(entryId, List.of()).stream()
+                .filter(r -> r.scope() == scope && r.fieldKey().equals(fieldKey))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Comparator<EntryRecord> order(EntryQuery query) {
+        SortKey sort = query.sort();
+        Comparator<EntryRecord> primary = (a, b) -> {
+            Comparable<Object> va = sortValue(a, sort, query.scope());
+            Comparable<Object> vb = sortValue(b, sort, query.scope());
+            if (va == null && vb == null) return 0;
+            if (va == null) return 1;
+            if (vb == null) return -1;
+            int result = va.compareTo(vb);
+            return sort.descending() ? -result : result;
+        };
+        return primary
+                .thenComparing(EntryRecord::updatedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(e -> e.id().toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Comparable<Object> sortValue(EntryRecord e, SortKey sort, IndexScope scope) {
+        if (sort.source() == SortKey.Source.SYSTEM) {
+            return (Comparable<Object>) (Comparable<?>) switch (sort.key()) {
+                case "createdAt" -> e.createdAt();
+                case "publishedAt" -> e.publishedAt();
+                default -> e.updatedAt();
+            };
+        }
+        IndexRow row = row(e.id(), scope, sort.key());
+        if (row == null) return null;
+        return (Comparable<Object>) (Comparable<?>) switch (sort.kind()) {
+            case "int" -> row.intValue();
+            case "bool" -> row.boolValue();
+            case "datetime" -> row.tsValue();
+            default -> row.stringValue();
+        };
+    }
+
+
 }

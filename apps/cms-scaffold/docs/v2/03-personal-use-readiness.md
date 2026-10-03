@@ -55,3 +55,9 @@ P0 已於 PR #212 合併，CI 全通過：[完整紀錄](../../.team/reports/DEL
 類型設定是 kernel 的資料來源；BW1a 不提供管理端編輯 metadata 的 UI／API，完整模型治理仍在後续波次。種子會補齊內建 demo 類型設定。既有自訂類型若曾依賴 payload 的固定 `visibility` 鍵，升級前須盤點 `visibilityField`：未設定的類型將忽略該同名 payload 鍵；不能把有 `visibility: private` 當作足夠的公開存取限制。此行為變更與 BW1a 原契約一致，正式使用前要連同既有媒體索引一併驗證。
 
 BW1a 本地驗收：151＋65 後端測試、140 前端測試、17 mock E2E 全通過；完整紀錄見 [BW1a 交付](../../.team/reports/BW1a-DELIVERY.md)。此波尚未提交／合併，個人生產可用門檻不因本地測試通過而自動完成。
+
+## BW1b 本地驗收與升級注意
+
+BW1b 狀態 `LOCAL_VERIFIED`，尚未提交／合併：[交付報告](../../.team/reports/BW1b-DELIVERY.md)。202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E 與 lint/typecheck/build/bundle 全通過；10,000 筆 store 量測 p95：工作列表 85ms、公開列表 77ms、更新 18ms，不包含 HTTP／identity／媒體展開。
+
+V6 的 NUMERIC 轉換與 V7 索引重建需要維護／備份規劃；不清除舊小數值。公開 ref 篩選仍讀工作 refs（BQ-10），媒體仍逐項解析（BQ-11）。跨頁若資料異動造成總數不一致或重複，完整列表 helper 會明確失敗，需重試；W1 才加入顯式分頁 UI。正式部署與備份還原演練仍未完成。

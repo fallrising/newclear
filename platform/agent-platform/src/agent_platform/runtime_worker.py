@@ -52,11 +52,13 @@ def heartbeat(worker, claim):
 def execute_real(worker, claim):
     client = worker.connector
     model = ModelSession(worker, claim) if worker.model_proxy else None
+    tools = None
 
     def snapshot():
         with worker.owned(claim) as (conn, run):
             context = conn.execute(
                 "SELECT p.canonical_repo,a.template_digest,a.limits AS profile_limits,"
+                "a.tool_policy AS profile_tools,"
                 "b.provider_handle FROM tasks t "
                 "JOIN projects p ON p.id=t.project_id JOIN agent_profile_revisions a ON a.id=%s "
                 "JOIN sandbox_bindings b ON b.id=%s WHERE t.id=%s",
@@ -65,6 +67,7 @@ def execute_real(worker, claim):
             return {
                 **run,
                 **context,
+                "tool_transport": context["profile_tools"].get("mock_tools", False) is True,
                 "verification": context["profile_limits"].get(
                     "verification",
                     {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
@@ -152,15 +155,23 @@ def execute_real(worker, claim):
     with heartbeat(worker, claim) as lost:
         try:
             run = snapshot()
+            if run["tool_transport"]:
+                from .tool_worker import ToolLifecycle
+
+                tools = ToolLifecycle(worker, claim)
             client.fence(run)
             if run["state"] == "cancelling":
                 from .cancellation import execute_cancel
 
+                if tools:
+                    tools.close()
                 execute_cancel(worker, claim, run)
                 return
             if run["control_action"]:
                 from .controls import execute_control
 
+                if tools:
+                    tools.close()
                 execute_control(worker, claim, run)
                 return
             reason = cutoff_reason(worker, run["id"])
@@ -183,7 +194,11 @@ def execute_real(worker, claim):
                         {"phase": phase, "generation": run["generation"]},
                     )
             if phase == "stopped":
+                if tools:
+                    tools.close()
                 if observed.get("result"):
+                    if tools:
+                        tools.recovered_result()
                     save_result(observed["result"])
                 with worker.owned(claim) as (conn, current):
                     if current["state"] not in TERMINAL:
@@ -194,9 +209,20 @@ def execute_real(worker, claim):
                 # A terminal run can only finish cleaning its existing, attested instance.
                 if phase != "result":
                     raise Problem(409, "terminal_runtime_state_mismatch")
+                if tools:
+                    tools.recovered_result()
+                    tools.close()
                 cleaned(client.operation(run, "release"))
                 return
             ensure_live(run, lost)
+            if tools:
+                if claim.get("recovery"):
+                    if phase != "result":
+                        raise Problem(409, "tool_recovery_unconfirmed")
+                    tools.recovered_result()
+                    tools.close()
+                else:
+                    tools.configure(run)
             if phase == "absent":
                 if (
                     run["backend_ref"]
@@ -244,6 +270,8 @@ def execute_real(worker, claim):
                 state(conn, current, "finalizing" if phase == "result" else "running")
             run = snapshot()
             ensure_live(run, lost)
+            if tools and phase != "result":
+                tools.start(run)
             if model and phase != "result":
                 model.step(run)
             if phase in {"absent", "allocated", "prepared"}:
@@ -269,9 +297,12 @@ def execute_real(worker, claim):
                                 "UPDATE runs SET backend_cursor=%s WHERE id=%s",
                                 (item["cursor"], run["id"]),
                             )
-                        if events["state"] == "finished" and events["caught_up"]:
+                    if events["state"] == "finished" and events["caught_up"]:
+                        if tools:
+                            tools.finish()
+                        with worker.owned(claim) as (conn, current):
                             state(conn, current, "finalizing")
-                            break
+                        break
                     if events["state"] == "waiting_for_confirmation" and events["caught_up"]:
                         from .approvals import handle_approval
 
@@ -282,6 +313,8 @@ def execute_real(worker, claim):
                     elif events["state"] == "running":
                         with worker.owned(claim) as (conn, current):
                             state(conn, current, "running")
+                        if tools:
+                            tools.step(snapshot())
                     if events["state"] in {"error", "stuck", "paused"}:
                         raise Problem(409, "backend_stopped_without_completion")
                     time.sleep(0.3)
@@ -296,6 +329,11 @@ def execute_real(worker, claim):
             cleaned(client.operation(run, "release"))
         except Exception as exc:
             reason = exc.code if isinstance(exc, Problem) else "runtime_operation_uncertain"
+            if tools:
+                try:
+                    tools.close()
+                except Exception:
+                    pass
             if model:
                 try:
                     # Lease/state validation excludes stale owners after user control.
@@ -309,8 +347,21 @@ def execute_real(worker, claim):
                     return
                 except Exception:
                     pass
+            if tools:
+                try:
+                    stop_model(snapshot(), reason)
+                    return
+                except Exception:
+                    pass
             try:
                 quarantine(worker, claim, reason)
             except Exception:
                 # Lost DB/ownership is reconciled by the next worker; TTL bounds VM lifetime.
                 pass
+        finally:
+            if tools:
+                try:
+                    tools.close()
+                except Exception:
+                    # Lost authority is reconciled by the next owner; never rebind.
+                    pass

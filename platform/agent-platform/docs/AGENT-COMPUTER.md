@@ -1,6 +1,6 @@
 # Agent Computer — Cocoon 可見桌面實驗
 
-- Revision：AC-design-0.2，2026-10-02。
+- Revision：AC-design-0.3，2026-10-03。
 - Status：**Proposed / documentation only**。本次未建映像、未啟動 VM、未連接模型、未做實機驗收。
 - Scope：`fallrising/newclear/platform/agent-platform` 的獨立 AC 實驗；[SDD §2.4](../SDD.md#24-agent-computer-實驗acproposed) 是範圍入口。
 - Goal：做出 CocoonBox 參考畫面的功能效果，不以「成功開 VM」或 headless browser smoke 代替 Agent Computer。
@@ -19,6 +19,47 @@ Owner 提供的參考畫面包含 VM／連線管理、中央的 Linux 桌面與�
 | 工作結果 | 搜尋、選定結果、播放／全螢幕；以及鍵鼠操作原生編輯器並保存檔案 | 只點播放鍵、只看影片標題、以 shell 寫檔冒充 GUI |
 
 第一版可用 Web 工作台整合；外部 CLI 的訊息依 §4.4 由官方 NDJSON 輸出投影，也可先用有同一 session 標識的相鄰 client 面板驗證。**最終截圖效果 gate 仍須交付整合工作台**，不能把兩個互不對應的視窗列為完整完成。原生 macOS 外殼、品牌像素復刻、音訊串流、GPU／4K 解碼效能、多租戶與手機 computer-use 不在本次範圍。
+
+### 1.1 追加截圖的功能證據
+
+以下依 2026-10-03 提供的淺色／深色畫面整理。「可見」只代表 UI／工具紀錄呈現該資訊，並非我們已測過原產品；「設計」是本實驗要交付的行為。產品可理解為**可管理的遠端電腦、agent 接入與人類工作台**三部分。
+
+| 截圖可見的證據 | 可合理確認的功能 | 尚不能確認的能力 |
+| --- | --- | --- |
+| 中央標示 `Agent Computer`、1280×800、`view only`；Linux 桌面包含瀏覽器或 terminal | 給人觀看的 agent 桌面區域，當時是唯讀模式 | 不是另一台「人類專屬 VM」的證據；靜態圖片不證明串流協定、幀率或低延遲 |
+| 右側標示 Claude Code 在 Mac 上透過 MCP 驅動 box，並呈現終端介面 | 此次示範採外部 agent＋遠端工具；Mac 外殼與 Linux guest 是不同角色 | 無法從外觀判斷內嵌 PTY、事件轉換或其他實作；§4.4 NDJSON 是我們的選擇 |
+| `browser_snapshot` 回傳頁面與元素 ref，`browser_click` 使用 ref；另有輸入後按 Enter 的紀錄 | 有結構化瀏覽器操作路徑，可直接指定元素 | 不能說所有步驟都靠模型看圖找座標，或單憑工具名認定採 Playwright |
+| `computer_act` 的 `launch_app` 啟動 `xfce4-terminal`，並回傳結果與桌面截圖 | 有原生程式啟動路徑，控制範圍超過網頁內容 | 啟動程式不等於已驗證原生 GUI 鍵鼠、通用 shell、sudo 或安裝軟體；畫圖軟體只被提議安裝 |
+| 工具紀錄有 `screenshot` 與 `max_edge: 800`；桌面標示 1280×800 | 工具圖片與人類 viewer 可有不同顯示尺寸 | 不能把預覽寬高當原生輸入座標；縮圖規則仍需實測 |
+| 加號選單分 `Agent in the box` 與 `Local agent`，後者列 Claude Code／Codex／Cursor | UI 提供兩種 agent 放置方式與多種 client 選項 | 每一選項都能正常工作、模型標籤代表已驗證模型、所有 client 都原生具有相同 computer-use 介面 |
+| Agent 清單有歷史列、狀態點與 `Hide earlier` | 可選取／查看多筆 agent 連線或 session | 清單長度不代表 VM 數量、同時工作的 agent 數量，或已實作自動協作 |
+| `RUNNING`／`live`、Ensure／Hibernate、Save now／保存時間、啟動進度與停用的升級按鈕 | 有資源狀態、連線狀態、保存與啟動流程的 UI | 保存是否包含 RAM、是否自動保存、休眠後的資源回收與升級行為皆未由截圖證明 |
+| 右側 `End`；頂部有手形等圖示；中央仍是 `view only` | 能看到結束入口與可能的控制切換入口 | 手形圖示不能證明接管已完成；End 是否保留 VM 須由產品契約明定 |
+
+**即時畫面與歷史證據要分開讀。** 淺色圖的中央影片頁與右側 click 結果指向不同影片網址，歷史 snapshot 仍是搜尋頁；可能是不同時間點或頁面切換，不能僅據此判定原產品同步故障。中央又可見廣告／遮擋，`全屏播放` 出現在輸入處，沒有相應完成證據。因此截圖不證明指定影片已播放、已進全螢幕或以 4K 傳輸。
+
+### 1.2 我們要交付的操作流程
+
+本表是 **Proposed**。第一輪一台 computer、一個 active writer、一種經驗證的外部 client；清單可保留歷史 session。Guest 內執行 agent、Codex／Cursor adapter 與多 agent 協作均不列為第一輪完成條件。
+
+| 使用者行為 | 工作台應有的結果 | 對應驗收 |
+| --- | --- | --- |
+| 開啟／連回 computer | 分別顯示 VM 狀態、viewer 連線、agent session 與控制者；啟動中顯示真實進度，未知／不支援的按鈕附原因 | AC-AT-01／07／12 |
+| 連接外部 agent、送出文字指令 | 清楚標示 agent 執行位置、實際 client／model 識別或 unknown、綁定 computer；文字指令不自動取得 viewer 鍵鼠控制權 | AC-AT-03／12 |
+| 查看搜尋、點擊與截圖 | 中央是目前桌面；右側保留當時的工具、目標與結果。歷史卡片顯示擷取時間及 session，不自動覆蓋中央 live view | AC-AT-02／12 |
+| 說「點第一個」 | 對照最新頁面與對話中所指清單，確認目標名稱／URL；兩種順序不一致時先釐清，不只照舊 ref 點擊 | AC-AT-03／05 |
+| 要求開 terminal 或操作 editor | 區分程式啟動、畫面可見與後續鍵鼠動作；啟動回覆成功不等於 GUI 任務成功 | AC-AT-04 |
+| 按接管／交還 | 顯示控制權轉換；依 §4.2 停止 agent 寫入後，人類才能操作同一桌面；交還後重新觀測 | AC-AT-06 |
+| 按 End／關閉 agent 面板 | End 結束 agent session 並撤銷工具權；僅關閉面板則視為 viewer disconnect，不默默終止 agent。兩者均不等於刪除 VM，須明示仍占資源 | AC-AT-07／10 |
+| 保存、休眠、恢復或銷毀 | 顯示各自操作進度與結果；最後保存時間只在收到成功證據後更新，保存失敗保留舊時間並標示失敗 | AC-AT-08／09／10 |
+
+`End` 的保留 VM 語意是我們的設計，不是原產品已證實行為。End 與暫停分開：舊 agent 授權不能再使用；之後如要續聊，須重新建立授權並核對同一 computer。若在途操作未知，仍停在 §4.2 的轉換狀態，不因 UI 已關閉而宣告安全收尾。VM 的保留均受原 deadline 限制。
+
+### 1.3 Computer use 的責任分層
+
+MCP 是 client 與工具間的協定；實際畫面來自 guest 的 capture／display service，鍵鼠或元素操作由 guest adapter 執行。Agent 負責讀取回傳內容並決定下一步。因而「CLI 可連 MCP」、「模型能理解圖片」、「工具能操作這台電腦」是三個要分別驗證的能力。圖中的自訂 `cocoonbox` 呼叫不能證明 Codex／Claude Code 開箱即提供這個 Linux 桌面。
+
+同樣地，**sandbox 決定環境邊界，不能替模型保證任務成功**。開源元件可以提供桌面擷取、鍵鼠、程式啟動與觀看；接入 agent 後能嘗試跨網頁及原生軟體的多步任務。能否正確辨認廣告、處理彈窗、選對對象、恢復中斷並驗證成果，仍須逐項測量，不能由一次工具成功推導無人值守可靠性。
 
 ## 2. 既有基礎與真正缺口
 
@@ -39,25 +80,17 @@ Owner 提供的參考畫面包含 VM／連線管理、中央的 Linux 桌面與�
 
 以下是 **本實驗的設計**，不是上游現成的 CocoonBox 安裝拓撲。
 
-```text
-Operator browser                         External agent on operator machine
-  │ authenticated viewer / controls        │ MCP (pinned tool profile)
-  └───────────────────┬────────────────────┘
-                      ▼
-       ComputerSession controller + tool bridge
-       identity / input ownership / deadlines / journal
-          │ viewer relay          │ CDP + desktop-tool relay
-          └──────────────┬────────┘
-                         ▼
-          authorized sandbox SDK → sandboxd → vsock → silkd
-                                                       │
-                                  Cocoon MicroVM        ▼
-                    ┌──────────────────────────────────────────┐
-                    │ one virtual display + window manager     │
-                    │ one headed Chromium (loopback CDP)       │
-                    │ editor / screenshot / keyboard / mouse    │
-                    │ loopback viewer service (VNC candidate)  │
-                    └──────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    U["Operator Web 工作台"] -->|生命週期與接管| C["ComputerSession controller"]
+    A["外部 agent"] -->|MCP| B["受控 tool bridge"]
+    C -->|授權與單一 writer| B
+    B -->|操作事實| J["Operation journal"]
+    J -->|工具與歷史證據| U
+    C -->|sandbox SDK| R["sandboxd／Cocoon runtime"]
+    R -->|配置與恢復| D["Guest 同一個 display"]
+    B -->|guest relay：CDP 或桌面輸入| D
+    D -->|受認證 viewer relay| U
 ```
 
 **Runtime** 負責 VM、資源、快照與回收；**ComputerSession controller** 擁有 sandbox handle、生命週期與持久身分；**tool bridge** 將 browser／desktop 動作限定到該 session；**viewer** 顯示相同 display；**外部 agent** 負責模型推理。SDK 上游服務與本平台保持獨立，不重寫 hypervisor，不把 host shell 當 fallback。
@@ -65,6 +98,21 @@ Operator browser                         External agent on operator machine
 桌面映像候選是 Ubuntu＋虛擬 X11 display（例如 Xvfb）＋輕量 window manager＋headed Chromium＋文字編輯器。觀看通道候選是 VNC／noVNC，實作前固定版本與認證方式；本文件不是宣稱上游已內建這一組 desktop flavor。顯示不需要物理螢幕，但不據此承諾 GPU、影片流暢度或音訊。
 
 部署候選是專用 Linux/KVM worker。若放在 hypervisor 管理的 Linux VM 內，必須針對該 nested-KVM 拓撲重新驗證 `/dev/kvm`、cgroup、vsock 與快照能力；舊的 bare-metal M0 不替新環境背書。不把桌面服務直接裝進虛擬化宿主機，也不為此變更主機權限。
+
+### 3.1 開源元件的採用邊界
+
+2026-10-03 核對下列官方 repository 文件；來源固定於 §10 的 commit。以下是功能與程式碼授權標示的盤點，**沒有在 Cocoon 上安裝或驗證相容性**。Cocoon runtime、桌面 payload、agent loop、工作台可分別選型，無須為了觀看桌面同時更換四層。
+
+| 候選 | 官方文件提供的能力 | 採用判斷與缺口 |
+| --- | --- | --- |
+| [Cua Driver][cua-driver]／[Cua 授權邊界][cua-license] | Driver 提供 capture／input 與 stdio MCP；Driver、SDK 等採 MIT；Spaces app／部分串流與服務採 FSL-1.1-MIT | Driver 可列 guest adapter 候選，需驗證 Linux display 與 MCP profile；不能把完整 Spaces 當成全 MIT 產品。可選 perception 模型另有授權，第一輪不引入 |
+| [Rivet Sandbox Agent][rivet-readme]／[Computer Use][rivet-desktop] | Apache-2.0；agent HTTP／SSE 統一介面，以及 Xvfb／Openbox 桌面、截圖、鍵鼠、啟動程式、錄影、WebRTC 與 React viewer 接線 | 優先研究桌面模組與 viewer 的可重用邊界；它本身不提供 VM 隔離。完整 agent server 的 guest 內執行模式不直接替換外部 client 方案；仍需自有 MCP bridge、權限與事件關聯 |
+| [E2B Desktop][e2b-desktop] | Apache-2.0；桌面模板與範例含程式啟動、截圖、鍵鼠、整桌面／單視窗串流；SDK 已移到 E2B monorepo | 可參考 desktop payload 與工具介面；預設 quickstart 使用 E2B API key，不能當作已可直接接 Cocoon 的 adapter 或已驗證自架方案 |
+| [Agent Infra AIO Sandbox][aio-sandbox] | Apache-2.0；一個 Docker 環境整合 browser、VNC、CDP／MCP、shell、檔案、VSCode／Jupyter | 適合參考同環境服務組裝；容器本身不等於 MicroVM 隔離，browser MCP 也不能替代原生 GUI 驗收。第一輪不載入無需求的 IDE／Notebook 服務 |
+
+**AC-1 選型方向：保留 Cocoon＋自有 controller，優先比較簡單 VNC／noVNC 與 Rivet 的桌面方案，Cua Driver 作控制能力候選。** 初始預設仍為可經現有受控 relay 傳送的 viewer；Rivet 的 WebRTC 文件另列 UDP media ports，僅轉送 HTTP／WebSocket signaling 不代表媒體已可穿越 none lane／vsock。須先證明支援的傳輸路徑與授權邊界；不為採用它改成公開端口或寬鬆網路。MCP bridge 也不把候選 server 的任意 process／filesystem API 全部轉交 agent。
+
+AC-1 的比較產物至少包含：固定版本／依賴授權、需要哪些 guest 程序、同 display 的 capture／input／viewer 身分、只讀 viewer 與接管能否在 server 強制執行、none-lane 傳輸、斷線與恢復後重綁、實際資源需求。未通過者標 unsupported／待補，不只按 UI 接近程度選擇；CocoonBox 原版 UI／bridge 的公開來源仍未確認。
 
 ## 4. 最小控制契約
 
@@ -75,6 +123,8 @@ Operator browser                         External agent on operator machine
 1. **觀看**：短效、session-scoped viewer 憑證，只讀。畫面附 computer／display 身分、frame sequence、擷取時間；斷線顯示 stale，不把舊畫面當 live。
 2. **瀏覽器工具**：由 bridge 經 `ProxyPort`／`DialPort` 連到該 guest 的 loopback CDP；browser snapshot／click 用結構化頁面資訊。上游 [browser 文件][browser] 說明 preview URL 的 Host 重寫與 CDP 不相容，不能把任意 preview URL 填成 CDP endpoint。
 3. **桌面工具**：screenshot、pointer move／click、scroll、key、text input；固定 display，不接受任意 shell。這才驗證非 DOM 的視窗與原生程式操作。
+
+程式啟動第一輪可由桌面選單／鍵鼠完成。若另加 `launch_app` 便利工具，必須用 server-side app ID 對應固定 executable／argv allowlist，不接受任意命令；啟動後另取畫面確認視窗出現。它仍須通過同一 writer／epoch／journal，且原生 GUI 驗收關閉這類捷徑。
 
 瀏覽器控制、桌面 screenshot 與 viewer 必須對應同一個 Chromium／display。Chrome 未 ready、CDP 斷線或 handle 不明時返回明確錯誤，**不能開本機瀏覽器、另一個 headless instance 或新的 VM 頂替**。原生 GUI 驗收 profile 關閉 shell／檔案寫入與 CDP 改頁工具，避免繞過待測行為。
 
@@ -110,6 +160,8 @@ Operator browser                         External agent on operator machine
 CLI profile 使用 `--tools ""` 限制一般 built-in 工具，以及 `--strict-mcp-config` 載入唯一受控 bridge；依 pinned help 核對可能保留的終止工具。`--allowedTools` 是免詢問授權，不是「其他工具皆不存在」的保證，不能單獨拿它當隔離。profile 必須另外排除本機 Chrome integration、任意 hooks／plugins／自動載入的專案設定；不能達到時 AC-1 阻塞，不使用 bypass-permissions。工具的最後授權仍在 bridge，不在模型 prompt。
 
 **AC-AT-12 補充驗收：** 用離線合成 NDJSON 測試 parser、重複 delta／完整訊息、未知事件、錯誤 session、event gap 與重連；fixture 測試不啟動 CLI。後續 opt-in 真 client 驗收須把至少一次 browser 操作及一次 desktop 操作的 tool result 關聯到 journal `operation_id`。對話、工具結果、同一桌面與 box 狀態須在同一工作台出現；斷流不冒充持續運作，也不自動重新派送。
+
+工具證據卡由 journal 補齊 `observed_at`、`browser_target_id`／`snapshot_id` 或 `frame_id`、安全的目標摘要，以及相同 binding／operation 關聯。原始 URL 可能含秘密，公開事件不保留敏感 query。中央 live view 與歷史卡片各有時間／新鮮度；切換歷史事件不得把舊圖標成 live。無法關聯時明示 unknown，不靠相近時間猜配。AC-AT-12 要注入「工具結果延遲抵達，但桌面已換頁」的 fixture，驗證兩者不混淆。
 
 ### 4.5 Screenshot、輸入、逾時與錯誤契約（設計基準）
 
@@ -266,3 +318,12 @@ AC-AT-05 先以可控制的 guest 影片 fixture 做穩定驗證；真實 YouTub
 [claude-headless]: https://code.claude.com/docs/en/headless
 [claude-cli]: https://code.claude.com/docs/en/cli-reference
 [mcp-wire]: https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+
+開源候選查閱日：2026-10-03。以下 commit 是研究快照，不是已選定的部署版本；採用前仍需固定 binary／image 與 transitive dependencies。Rivet、E2B 的根目錄 LICENSE 同時核對為 Apache-2.0；Cua 依子目錄授權，不能只看根目錄。
+
+[cua-driver]: https://github.com/trycua/cua/blob/379085c5e267451db8d52989f47bd9fb85ab38ef/libs/cua-driver/README.md
+[cua-license]: https://github.com/trycua/cua/blob/379085c5e267451db8d52989f47bd9fb85ab38ef/LICENSING.md
+[rivet-readme]: https://github.com/rivet-dev/sandbox-agent/blob/bbc195cc3fb5a1dd9cb05d8437442768c511e17e/README.md
+[rivet-desktop]: https://github.com/rivet-dev/sandbox-agent/blob/bbc195cc3fb5a1dd9cb05d8437442768c511e17e/docs/computer-use.mdx
+[e2b-desktop]: https://github.com/e2b-dev/desktop/blob/1ff98a36306989d155ce5eceab2a2d38c9a8d6d2/README.md
+[aio-sandbox]: https://github.com/agent-infra/sandbox/blob/7f1afaf8d82bd30531a19caeb1a24dfebbc97d8c/README.md

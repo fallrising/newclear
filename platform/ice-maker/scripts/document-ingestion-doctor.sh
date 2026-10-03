@@ -42,10 +42,10 @@ resolve_cmd() {
   if [[ "$1" == */* ]]; then [[ -x "$1" ]] && printf '%s' "$1"; else command -v "$1" 2>/dev/null || true; fi
 }
 tool_status() {
-  local var="$1" default="$2" cmd
+  local var="$1" default="$2" version_flag="${3:---version}" cmd
   cmd="${!var:-$default}"
   cmd="$(resolve_cmd "$cmd")"
-  [[ -n "$cmd" ]] && run0 "$cmd" --version >/dev/null
+  [[ -n "$cmd" ]] && run0 "$cmd" "$version_flag" >/dev/null
 }
 
 uname_cmd="${DOCTOR_UNAME_CMD:-uname}"
@@ -92,9 +92,9 @@ fi
 security_ok=0; (( cgroups_ok && seccomp_ok && apparmor_ok )) && security_ok=1
 
 pdfinfo_ok=0; pdftotext_ok=0; pdftoppm_ok=0; tesseract_ok=0
-tool_status DOCTOR_PDFINFO_CMD pdfinfo && pdfinfo_ok=1
-tool_status DOCTOR_PDFTOTEXT_CMD pdftotext && pdftotext_ok=1
-tool_status DOCTOR_PDFTOPPM_CMD pdftoppm && pdftoppm_ok=1
+tool_status DOCTOR_PDFINFO_CMD pdfinfo -v && pdfinfo_ok=1
+tool_status DOCTOR_PDFTOTEXT_CMD pdftotext -v && pdftotext_ok=1
+tool_status DOCTOR_PDFTOPPM_CMD pdftoppm -v && pdftoppm_ok=1
 tool_status DOCTOR_TESSERACT_CMD tesseract && tesseract_ok=1
 required_languages="${DOCTOR_OCR_LANGUAGES:-eng,chi_tra}"
 required_langs=(); configured_langs=(); observed_langs=(); langs_ok=0; language_config_ok=1

@@ -14,6 +14,13 @@ requires Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`), Tesseract with configured
 languages, and Pillow, FastAPI, Uvicorn, and python-multipart. GPU absence is
 not a failure.
 
+The doctor probes Poppler with `-v` and Tesseract with `--version`. Poppler's
+`--version` is not a supported version probe and previously made installed PDF
+tools appear unavailable. A failed probe still reports that tool as unavailable.
+Tool availability alone does not clear the Docker, isolation, capacity, or
+runtime-package gates. An `unsupported` host must not be used to run this
+document service; retain the diagnostic and resume on a supported host.
+
 ## Measured host observation
 
 Observation date: 2026-09-03. This is dated evidence, not a hard-coded doctor

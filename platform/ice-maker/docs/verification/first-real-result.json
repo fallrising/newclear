@@ -1,0 +1,115 @@
+{
+  "task_id": "T-0061",
+  "base_sha": "7b29dceac92fb5e62490662f78b0f630d66423d0",
+  "status": "blocked",
+  "summary": "Real PDF acquired and identity recorded privately; no duplicate study found. Fixed false-negative Poppler version probes with RED/GREEN coverage. Runtime preflight remains unsupported; real ingestion and the cited knowledge candidate were not produced. Usage below describes local verification subprocesses only, not this interactive session.",
+  "changed_files": [
+    ".team/PLAN.md",
+    "docs/runbooks/production-document-ingestion.md",
+    "docs/verification/first-real-result.md",
+    "docs/verification/first-real-result.json",
+    "scripts/document-ingestion-doctor.sh",
+    "tests/test_document_ingestion_doctor.py"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_document_ingestion_doctor.DocumentIngestionDoctorTests.test_poppler_uses_short_version_flag_and_tesseract_uses_long_flag -v",
+      "exit_code": 1,
+      "output": "Before fix: 1 test failed as expected; all three installed Poppler tools incorrectly reported unavailable."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_document_ingestion_doctor -v",
+      "exit_code": 0,
+      "output": "Ran 10 tests; OK."
+    },
+    {
+      "command": "DOCTOR_OCR_LANGUAGES=eng scripts/document-ingestion-doctor.sh --json",
+      "exit_code": 2,
+      "output": "unsupported; pdfinfo/pdftotext/pdftoppm/tesseract true; eng available; Docker and service packages unavailable."
+    },
+    {
+      "command": "scripts/run-document-service.sh <private-data-directory> 18080",
+      "exit_code": 77,
+      "output": "run as a non-root operator; no service started. Data-directory argument is deliberately redacted."
+    },
+    {
+      "command": "make check",
+      "exit_code": 2,
+      "output": "Unchanged base 7b29dceac92fb5e62490662f78b0f630d66423d0: policy passed; 303 tests, 293 passed, 3 failures, 2 errors, 5 skipped."
+    },
+    {
+      "command": "make check",
+      "exit_code": 2,
+      "output": "Working tree after doctor fix: policy passed; 305 tests, 295 passed, same 3 failures, 2 errors, 5 skipped."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_hardening_e2e tests.test_publication_e2e -v",
+      "exit_code": 0,
+      "output": "Ran 3 tests; OK. Synthetic control evidence only."
+    },
+    {
+      "command": "bash -n scripts/document-ingestion-doctor.sh",
+      "exit_code": 0,
+      "output": "Shell syntax valid."
+    },
+    {
+      "command": "sha256sum -c docs/execution/sdd-source.sha256",
+      "exit_code": 0,
+      "output": "All 11 immutable source files: OK."
+    },
+    {
+      "command": "python3 -m compileall -q src tests",
+      "exit_code": 0,
+      "output": "Completed without errors."
+    },
+    {
+      "command": "PYTHONPATH=src python3 scripts/check_repo.py",
+      "exit_code": 0,
+      "output": "Phase 0 check passed."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": "No whitespace errors."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "Accurate Poppler version detection without weakening failures",
+      "status": "pass",
+      "evidence": "Strict version-flag RED; all 10 doctor tests GREEN; real Poppler 24.02.0 detected."
+    },
+    {
+      "criterion": "Full local verification",
+      "status": "fail",
+      "evidence": "305 tests run; five failing/erroring cases reproduce on the untouched 303-test baseline; five environment skips."
+    },
+    {
+      "criterion": "Real PDF ingestion through readable result and provenance",
+      "status": "not-tested",
+      "evidence": "Doctor exit 2; service startup exit 77. No batch or extraction was run."
+    },
+    {
+      "criterion": "Citation-backed knowledge candidate and Draft PR",
+      "status": "not-tested",
+      "evidence": "No extracted evidence; no candidate created or promoted."
+    }
+  ],
+  "tests": {
+    "passed": 295,
+    "failed": 5
+  },
+  "risks": [
+    "Five environment-dependent skips are excluded from passed tests.",
+    "Docker, required isolation, a non-root operator and service packages remain external gates.",
+    "The full suite has four publication cases blocked by missing gh and one Pillow-absence assumption. Baseline reproduces all five failures/errors.",
+    "No OCR accuracy, page coverage, citation validity, production readiness, or end-to-end success is claimed."
+  ],
+  "open_questions": [],
+  "usage": {
+    "provider": "none",
+    "model": "none",
+    "estimated_cost_usd": 0,
+    "elapsed_seconds": 35
+  }
+}

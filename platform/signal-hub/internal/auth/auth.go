@@ -144,7 +144,7 @@ func Authorize(p Principal, e *event.Event) bool {
 		return false
 	}
 	source, ok := e.Fields["source"].(string)
-	if !ok || !strings.HasPrefix(source, p.Source.SourcePrefix) {
+	if !ok || !strings.HasPrefix(source, p.Source.SourcePrefix) || strings.HasPrefix(source, "urn:signalhub:sources:") {
 		return false
 	}
 	typ, ok := e.Fields["type"].(string)

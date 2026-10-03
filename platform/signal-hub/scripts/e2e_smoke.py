@@ -117,6 +117,16 @@ def main():
             call("POST", "/v1/events", body=event, want=401)
             call("GET", "/v1/events", "source", want=403)
             call("POST", "/v1/events", "reader", event, want=403)
+            call("GET", "/v1/sources", want=401)
+            call("GET", "/v1/sources", "source", want=403)
+            sources = call("GET", "/v1/sources?limit=1", "reader")
+            assert sources["items"][0]["name"] == "alert"
+            assert sources["items"][0]["status"] == "never"
+            source_cursor = urllib.parse.quote(sources["next_cursor"], safe="")
+            sources = call("GET", "/v1/sources?limit=1&cursor=" + source_cursor, "reader")
+            assert sources["items"][0]["name"] == "demo" and sources["next_cursor"] is None
+            assert sources["items"][0]["last_received_at"] is None
+            call("GET", "/v1/sources?limit=201", "reader", want=400)
             first = call("POST", "/v1/events", "source", event, want=202)
             assert call("POST", "/v1/events", "source", event)["seq"] == first["seq"]
             assert call("POST", "/v1/events", "source", dict(event, originurl=None))["duplicate"]
@@ -125,6 +135,10 @@ def main():
             call("POST", "/v1/events", "source", dict(event, data={"large": "x" * 16384}), want=413)
             call("POST", "/v1/events", "source", '{"id":1,"id":2}', want=400)
             call("POST", "/v1/events", "source", [], "application/cloudevents-batch+json", want=400)
+            sources = call("GET", "/v1/sources", "owner")
+            demo = next(item for item in sources["items"] if item["name"] == "demo")
+            assert demo["status"] == "fresh" and demo["expected_interval"] is None
+            assert demo["last_event_time"] == event["time"] and demo["last_received_at"]
             second = dict(event, id="second", time="2026-10-03T12:00:00.0000000001Z")
             batch = call("POST", "/v1/events", "source", [event, {}, second], "application/cloudevents-batch+json")
             assert [row["status"] for row in batch["results"]] == [200, 400, 202]
@@ -168,6 +182,8 @@ def main():
             process, base = start()
             assert call("POST", "/v1/events", "source", event)["seq"] == first["seq"]
             assert call("GET", "/v1/events/" + str(first["seq"]), "reader")["item"]["event"] == event
+            sources = call("GET", "/v1/sources", "reader")
+            assert all(item["status"] == "fresh" for item in sources["items"])
             connection = sqlite3.connect(db)
             try:
                 assert connection.execute("PRAGMA journal_mode").fetchone()[0] == "wal"

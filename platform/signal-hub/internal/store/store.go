@@ -34,6 +34,9 @@ const BusyTimeout = 1000 * time.Millisecond
 //go:embed migrations/001_events.sql
 var migration1 string
 
+//go:embed migrations/002_sources.sql
+var migration2 string
+
 type Store struct{ db *sql.DB }
 type Result struct {
 	Seq       int64
@@ -120,6 +123,9 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err := tx.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return unavailable(err)
 	}
+	if version < 0 || version > 2 {
+		return unavailable(fmt.Errorf("unsupported schema version %d", version))
+	}
 	switch version {
 	case 0:
 		if _, err := tx.ExecContext(ctx, migration1); err != nil {
@@ -128,9 +134,15 @@ func (s *Store) initialize(ctx context.Context) error {
 		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 1"); err != nil {
 			return unavailable(err)
 		}
+		fallthrough
 	case 1:
-	default:
-		return unavailable(fmt.Errorf("unsupported schema version %d", version))
+		if _, err := tx.ExecContext(ctx, migration2); err != nil {
+			return unavailable(err)
+		}
+		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 2"); err != nil {
+			return unavailable(err)
+		}
+	case 2:
 	}
 	if err := tx.Commit(); err != nil {
 		return unavailable(err)
@@ -210,7 +222,35 @@ func attr(e *event.Event, key string) string { v, _ := e.Fields[key].(string); r
 
 var severities = map[string]int{"debug": 0, "info": 1, "notice": 2, "warning": 3, "error": 4, "critical": 5}
 
+// Ingest appends a validated event without producer attribution (internal/legacy callers).
 func (s *Store) Ingest(ctx context.Context, e *event.Event, received time.Time) (Result, error) {
+	return s.IngestSource(ctx, e, received, "")
+}
+
+// IngestSource commits event identity and authenticated source liveness together.
+func (s *Store) IngestSource(ctx context.Context, e *event.Event, received time.Time, sourceName string) (Result, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return Result{}, unavailable(err)
+	}
+	defer tx.Rollback()
+	result, err := ingestTx(ctx, tx, e, received)
+	if err != nil && !errors.Is(err, ErrConflict) {
+		return Result{}, err
+	}
+	if err == nil && sourceName != "" {
+		if refreshErr := refreshSource(ctx, tx, sourceName, attr(e, "time"), received); refreshErr != nil {
+			return Result{}, refreshErr
+		}
+	}
+	if commitErr := tx.Commit(); commitErr != nil {
+		return Result{}, unavailable(commitErr)
+	}
+	return result, err
+}
+
+func ingestTx(ctx context.Context, tx *sql.Tx, e *event.Event, received time.Time) (Result, error) {
+
 	if e == nil {
 		return Result{}, errors.New("nil validated event")
 	}
@@ -227,26 +267,15 @@ func (s *Store) Ingest(ctx context.Context, e *event.Event, received time.Time) 
 			return Result{}, err
 		}
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return Result{}, unavailable(err)
-	}
-	defer tx.Rollback()
 	var seq int64
 	var hash []byte
 	err = tx.QueryRowContext(ctx, "SELECT seq, content_hash FROM events WHERE source = ? AND id = ?", attr(e, "source"), attr(e, "id")).Scan(&seq, &hash)
 	if err == nil {
 		if bytes.Equal(hash, e.ContentHash[:]) {
-			if err := tx.Commit(); err != nil {
-				return Result{}, unavailable(err)
-			}
 			return Result{Seq: seq, Duplicate: true}, nil
 		}
 		_, err = tx.ExecContext(ctx, "INSERT INTO ingest_conflicts(source,id,received_at,content_hash,raw_json) VALUES(?,?,?,?,?)", attr(e, "source"), attr(e, "id"), received.UTC().Format(time.RFC3339Nano), e.ContentHash[:], raw)
 		if err != nil {
-			return Result{}, unavailable(err)
-		}
-		if err := tx.Commit(); err != nil {
 			return Result{}, unavailable(err)
 		}
 		return Result{}, ErrConflict
@@ -265,9 +294,6 @@ func (s *Store) Ingest(ctx context.Context, e *event.Event, received time.Time) 
 	}
 	seq, err = result.LastInsertId()
 	if err != nil {
-		return Result{}, unavailable(err)
-	}
-	if err := tx.Commit(); err != nil {
 		return Result{}, unavailable(err)
 	}
 	return Result{Seq: seq}, nil

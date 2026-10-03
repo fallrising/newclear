@@ -1,6 +1,6 @@
-# M1 runtime contract
+# M1–M2 runtime contract
 
-M1 提供事件 HTTP API、SQLite WAL 與本機 Alertmanager v4 adapter。M2–M6 路由尚未提供。
+提供事件 HTTP API、SQLite WAL、本機 Alertmanager v4 adapter、來源新鮮度與內嵌 React 唯讀看板。M3–M6 路由尚未提供。
 
 ## 啟動
 
@@ -22,8 +22,8 @@ M1 提供事件 HTTP API、SQLite WAL 與本機 Alertmanager v4 adapter。M2–M
 
 查詢參數不可重複；未知參數、空的時間／cursor／limit、錯誤格式回400 invalid_query。省略 severity_min 不限制嚴重度；省略事件 severity 以 info 索引，但不修改原事件。游標綁定篩選條件與第一頁的最大 seq；新插入事件從新的查詢開始看見。查詢 q 是大小寫敏感的字面子字串，不解析 SQL wildcard。
 
-未實作路由回404 not_found。healthz 僅確認 process 活著；readyz 檢查 SQLite 可用性，失敗只回503 {"status":"not_ready"}。這不宣稱磁碟剩餘容量、所有 future workers 或實際生產可用性。
+`/` 與 `/assets/*` 提供無事件資料的靜態看板；事件與來源 API 仍要求 owner／readonly bearer。看板 token 只存在記憶體，重新整理需重新輸入。未實作路由回404 not_found。healthz 僅確認 process 活著；readyz 檢查 SQLite 可用性，失敗只回503 {"status":"not_ready"}。這不宣稱磁碟剩餘容量、所有 future workers 或實際生產可用性。
 
 ## 範圍
 
-本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。尚無 retention cleanup、封存、source freshness evaluator、UI、指標與投遞；retention_days／expected_interval 可驗證並保留設定語義，但不宣稱已生效。
+本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。M2 已實作 UI 與 source freshness evaluator，詳細持久化／升級語義見 [來源新鮮度契約](source-freshness.md)。尚無 retention cleanup、封存、指標與投遞；retention_days 只驗證設定，尚未清除資料。

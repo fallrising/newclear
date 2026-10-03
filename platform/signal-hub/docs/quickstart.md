@@ -1,6 +1,6 @@
-# Quickstart — M1 本機事件中樞
+# Quickstart — M2 本機事件中樞
 
-M1 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢與 Alertmanager v4 adapter。服務預設只監聽 `127.0.0.1:8080`。規則執行、投遞、UI、封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
+M2 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。規則執行、投遞、封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
 以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
@@ -55,6 +55,24 @@ PY
 ```
 
 保持此終端機開啟；`Ctrl-C` 會正常停止服務。預設只綁定 loopback。非 loopback 綁定僅接受明確的 Tailscale 位址，且此檢查本身不會驗證主機、ACL 或 tailnet 部署狀態。
+
+## 使用看板
+
+開啟 `http://127.0.0.1:8080/`，輸入 `.local/readonly.token` 的內容。token 只存在頁面記憶體；不寫入 URL、cookie 或 browser storage，重新整理後需再次輸入。篩選與詳情保存在 URL，可重開或分享給有權限的讀者。
+
+時間線可篩選、分頁並查看原始事件與關聯事件。來源頁區分新鮮、延遲、沉默、尚未收到事件；本範例沒有 `expected_interval`，收到事件後會顯示「未啟用新鮮度檢查」。如設定 `expected_interval: "5m"` 並重啟，逾 5 分鐘為延遲、逾 10 分鐘為沉默。從 M1 升級後，來源先保持 never，直到收到首次合法上報；詳見[來源契約](source-freshness.md)。
+
+前端產物已提交並由 Go embed，因此使用者只需 Go 即可建置。修改前端時先使用 Node 24.19.0 執行：
+
+```sh
+cd web
+npm ci
+npm test
+npm run build
+cd ..
+```
+
+再重新建置 Go binary。CI 會確認重新建置的 `web/dist` 與提交內容一致。
 
 ## 寫入、重送並唯讀查詢
 
@@ -139,3 +157,13 @@ go build -o /tmp/signalhub ./cmd/signalhub
 ```
 
 `e2e_smoke.py` 使用本機合成憑證及暫存資料庫執行 HTTP／SQLite smoke test，不會部署服務或連接外部系統。契約檢查驗證 schemas、fixtures、vectors 與 OpenAPI；它不取代 runtime 測試。
+
+
+瀏覽器驗證使用 Playwright 和真正的 Go binary，建立自己的合成 token／事件與暫存資料庫。請以支援 Chromium sandbox 的非 root 開發環境執行：
+
+```sh
+cd browser
+npm ci
+npx playwright install --with-deps chromium
+SIGNALHUB_BINARY=/tmp/signalhub npm test
+```

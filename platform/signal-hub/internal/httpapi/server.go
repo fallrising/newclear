@@ -24,10 +24,11 @@ const MaxBodyBytes = 4 << 20
 type Server struct {
 	db   *store.Store
 	auth *auth.Authenticator
+	now  func() time.Time
 }
 
 func New(db *store.Store, credentials *auth.Authenticator) http.Handler {
-	return &Server{db: db, auth: credentials}
+	return &Server{db: db, auth: credentials, now: time.Now}
 }
 
 type errorDetail struct {
@@ -71,7 +72,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ingest := r.Method == http.MethodPost && (path == "/v1/events" || path == "/v1/adapters/alertmanager")
-	query := r.Method == http.MethodGet && (path == "/v1/events" || strings.HasPrefix(path, "/v1/events/"))
+	query := r.Method == http.MethodGet && (path == "/v1/events" || path == "/v1/sources" || strings.HasPrefix(path, "/v1/events/"))
 	if !ingest && !query {
 		fail(w, 404, "not_found", "route not found")
 		return
@@ -174,7 +175,7 @@ func (s *Server) ingest(ctx context.Context, principal auth.Principal, body []by
 	if !auth.Authorize(principal, e) {
 		return ingestResult{Status: 403, Error: &errorDetail{"forbidden", "source or type is not permitted"}}
 	}
-	result, err := s.db.Ingest(ctx, e, time.Now().UTC())
+	result, err := s.db.IngestSource(ctx, e, s.now().UTC(), principal.Source.Name)
 	if errors.Is(err, store.ErrConflict) {
 		return ingestResult{Status: 409, Error: &errorDetail{"event_conflict", "source and id already have different content"}}
 	}
@@ -189,6 +190,10 @@ func (s *Server) ingest(ctx context.Context, principal auth.Principal, body []by
 }
 
 func (s *Server) query(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/v1/sources" {
+		s.sources(w, r)
+		return
+	}
 	if r.URL.Path != "/v1/events" {
 		if r.URL.RawQuery != "" {
 			fail(w, 400, "invalid_query", "detail takes no query parameters")
@@ -239,6 +244,38 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		fail(w, 503, "unavailable", "event store unavailable")
+		return
+	}
+	writeJSON(w, 200, page)
+}
+
+func (s *Server) sources(w http.ResponseWriter, r *http.Request) {
+	values, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		fail(w, 400, "invalid_query", "invalid query encoding")
+		return
+	}
+	for key, entries := range values {
+		if (key != "cursor" && key != "limit") || len(entries) != 1 || entries[0] == "" {
+			fail(w, 400, "invalid_query", "invalid or repeated query parameter")
+			return
+		}
+	}
+	q := store.SourceQuery{Cursor: values.Get("cursor")}
+	if raw := values.Get("limit"); raw != "" {
+		q.Limit, err = strconv.Atoi(raw)
+		if err != nil || q.Limit < 1 || q.Limit > 200 {
+			fail(w, 400, "invalid_query", "limit must be 1 to 200")
+			return
+		}
+	}
+	page, err := s.db.ListSources(r.Context(), q, s.now().UTC())
+	if errors.Is(err, store.ErrInvalidQuery) {
+		fail(w, 400, "invalid_query", "invalid cursor")
+		return
+	}
+	if err != nil {
+		fail(w, 503, "unavailable", "source store unavailable")
 		return
 	}
 	writeJSON(w, 200, page)

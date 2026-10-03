@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Experimental addendum：2026-10-02，Agent Computer（AC）設計提案；見 §2.4，未實作、未執行實機驗收。
+- Experimental addendum：2026-10-03，Agent Computer（AC）設計提案 AC-design-0.3；見 §2.4，未實作、未執行實機驗收。
 - Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
@@ -63,6 +63,8 @@ M0–M4 的 coding MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、�
 2026-10-02 依 owner 指示，另立受限的 desktop computer-use 實驗，以 CocoonBox 參考畫面的功能效果為目標；詳細方案與 AC 驗收唯一入口為 [docs/AGENT-COMPUTER.md](docs/AGENT-COMPUTER.md)。本次只交付文件，並不授權安裝、VM 啟動、模型呼叫、網路變更或部署。
 
 範圍是單 operator、單 Linux/KVM worker：外部 MCP client 驅動 guest 的可見 Chromium／桌面工具，工作台同步顯示同一個桌面、工具事件與控制權；區分 Disconnect、Save now／Checkpoint、Hibernate／Restore、Branch 與 Release。先證明同一環境的觀看／控制，再驗證生命週期；headless CDP smoke、靜態 UI 或 shell 代寫 GUI 結果都不算完成。
+
+2026-10-03 的追加截圖分析見 AC §1.1–1.3，開源元件評估見 §3.1。中央 `view only` 與工具歷史截圖分開呈現，兩者須可追溯至同一 computer 與各自時間；人工接管是待驗收能力。第一輪一台 computer、一個 active writer、一種外部 client；guest agent、多 client adapter 與多 agent 協作另行規劃。保留 Cocoon 底座，候選桌面／viewer 元件未被認定已相容，也不因來源有程式碼就視為全部採開源授權。
 
 這是 §2.3 之外的獨立實驗，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
 

@@ -9,9 +9,11 @@
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
-## Agent Computer 實驗（2026-10-02，僅文件）
+## Agent Computer 實驗（2026-10-03，僅文件）
 
 新增 [Agent Computer 實驗計劃](docs/AGENT-COMPUTER.md)，以 CocoonBox 參考畫面的**功能效果**為目標：外部 Claude Code／MCP client 控制 Cocoon VM 內的可見桌面與 Chromium，operator 同時觀看同一個桌面，並可受控接管、保存、休眠、恢復與銷毀環境。
+
+AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌面、右側歷史工具紀錄、瀏覽器元素與桌面操作、外部／guest agent 選項，以及 End 與 VM 生命週期的區別。§3.1 比較 Cua Driver、Rivet Sandbox Agent、E2B Desktop 與 AIO Sandbox 的可重用部分；第一輪維持 Web、單 computer、單 writer、一種外部 client，未承諾所有選單選項或 4K 效能。
 
 **目前是 Proposed 設計，不是已可啟動的功能。** Headless browser／CDP smoke 只是前置能力，不能取代完整桌面與真實 Agent 操作驗收。實驗使用獨立的 AC 階段與驗收 ID，不更改既有 M0–M4 的狀態；不在本次啟動 VM、接入真實模型、變更主機或部署。下一階段須另行授權。
 

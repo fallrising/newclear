@@ -11,8 +11,8 @@ behind a public Go storage SPI.
 
 **Status:** UTM/SPI contracts, the memory driver, configuration, HTTP lifecycle,
 secret redaction, a self-telemetry registry, and P1-01 normalization exist.
-P1-02 ingest limits are verified as a standalone package; P1-03 pipeline
-integration is the next task. The daemon currently
+P1-03 adds a bounded ingest pipeline that connects normalization, P1-02 limits,
+priority batch queues, and asynchronous SPI writers. The daemon currently
 serves health and Go/process metrics only: telemetry receivers, the write/query
 pipeline, production drivers, alerting, agent, and console are not connected.
 Prism is not yet a usable APM service.
@@ -30,6 +30,8 @@ Prism is not yet a usable APM service.
 - `drivers/memory`: the implemented reference backend.
 - `internal/config`, `secret`, `server`, `telemetry`: supporting packages.
 - `internal/ingest/normalize`: protocol-to-UTM normalization and bounded delta state.
+- [`internal/ingest`](internal/ingest/README.md): package-level pipeline, bounded
+  tenant lifecycle, atomic admission, owned batches, retries and shutdown.
 - [`internal/ingest/limits`](internal/ingest/limits/README.md): verified per-tenant
   quotas, bounded cardinality tracking, record limits and byte admission.
 - `cmd/prismd`: the runnable HTTP skeleton; `prism-agent` and `prismctl` remain placeholders.

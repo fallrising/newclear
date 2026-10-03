@@ -41,6 +41,15 @@ func (n *Normalizer) NormalizeMetrics(ctx context.Context, metrics pmetric.Metri
 	return batch, report, nil
 }
 
+// PreviewMetrics performs the same mapping without changing delta state. Owners
+// must bound all expanded candidates below MaxRecords and use the same receivedAt
+// for preview and commit; otherwise output truncation can hide later candidates.
+func (n *Normalizer) PreviewMetrics(ctx context.Context, metrics pmetric.Metrics, receivedAt time.Time) (MetricBatch, Report, error) {
+	preview := *n
+	preview.previewMetrics = true
+	return preview.NormalizeMetrics(ctx, metrics, receivedAt)
+}
+
 func (n *Normalizer) normalizeMetric(metric pmetric.Metric, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	baseName := utm.SanitizeMetricName(validUTF8(metric.Name()))
 	if baseName != metric.Name() {
@@ -107,7 +116,7 @@ func (n *Normalizer) normalizeNumberPoints(points pmetric.NumberDataPointSlice, 
 			value = math.NaN()
 		}
 		pointLabels := n.metricLabels(point.Attributes(), resource, report)
-		if delta && !math.IsNaN(value) {
+		if delta && !n.previewMetrics && !math.IsNaN(value) {
 			var status deltaconv.Status
 			value, status = n.delta.Convert(deltaSeriesKey(name, pointLabels), value)
 			switch status {

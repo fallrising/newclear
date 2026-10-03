@@ -1,7 +1,10 @@
 # Local development
 
 The current executable is a loopback-only Fake/SQLite integration runtime. It accepts and persists
-commands; automatic Run execution and board/SSE projections are intentionally unavailable.
+commands, executes durable Pending Runs through the deterministic `local-success` Fake scenario,
+and serves persisted board/SSE projections. It does not admit new accepted specifications;
+`MarkReady` still fails closed without an admitted specification. Synthetic integration fixtures
+exercise that boundary and are not an end-user specification import workflow.
 
 From `products/hai-taskboard/backend`, build the binary:
 
@@ -30,7 +33,7 @@ IPv4-mapped aliases, expanded IPv6 aliases, broad/public roots, roots not owned 
 effective UID, and roots whose mode is not already `0700` are rejected without chmod before storage
 or a listener is opened.
 
-Readiness is public but reports the unavailable runtime surfaces explicitly:
+Readiness is public and reports command, persistence, automatic execution and projection availability:
 
 ```sh
 curl --fail-with-body http://127.0.0.1:8080/healthz
@@ -57,7 +60,7 @@ curl --fail-with-body \
   http://127.0.0.1:8080/api/v1/projects/prj_0123456789ABCDEFGHJKMNPR/commands/cmd_0123456789ABCDEFGHJKMNPQ
 ```
 
-Stop cleanly and wait for the process to close HTTP before SQLite:
+Stop cleanly and wait for the process to stop HTTP and join the persistent worker before closing SQLite:
 
 ```sh
 kill -TERM "$taskboard_pid"
@@ -72,3 +75,13 @@ Unset the token when finished:
 unset HAI_TASKBOARD_SESSION_TOKEN
 rm -rf -- "$taskboard_private_parent"
 ```
+
+The poller scans at startup and every 250 ms, in bounded batches. Claimed work is never
+redispatched after restart. Expired nonterminal claims become `NeedsReconcile` / `OutcomeUnknown`;
+no automatic retry or Done transition follows. A worker/storage failure terminates the process.
+
+Authenticated board reads use `/api/v1/projects/{project_id}/board`; durable event replay uses
+`/api/v1/projects/{project_id}/events`. The current global event allocator can produce a gap between
+project events: replay explicitly requests a fresh snapshot instead of leaking other projects.
+Snapshot evidence coverage is conservative (`effective_satisfied=false`, `covered_ac_count=0`):
+current-policy evidence evaluation is unavailable here, not proof that no evidence exists.

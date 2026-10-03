@@ -2,14 +2,14 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-09-16
+Updated: 2026-10-03
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard-p0a`
-- Worktree: `<operator-home>/test/codex/worktrees/hai-taskboard-p0a`
-- Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
+- Branch: `agent/hai-taskboard/persistent-outbox`
+- Worktree: task-scoped checkout; verify actual Git state.
+- Current delivery base: `newclear/main@e2c901304570428a5c78744e274739206dbf3387`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
   boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
@@ -126,12 +126,23 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
 - The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
   remain immutable process evidence; later repairs and acceptance do not rewrite them.
 
+## Persistent runtime checkpoint
+
+T-095/T-096/T-098 are accepted by fresh T-099 independent native review plus the orchestrator gate.
+The process executes durable Pending work, never redispatches claimed work, marks expired unknown
+work for reconciliation, serves SQLite board/replay reads and joins workers/handlers before closing
+resources. T-097 remains immutable FAIL evidence; its lifecycle defect was repaired, not erased.
+T-099 report SHA-256: `51f50bcd9e773bbe2f304f1c60c4bcbaa2fd6e49d6e97bfc86c2a1ca7fcb28a5`.
+
+Native Go 1.27.1 full/race/vet/build and Node 24.20.0/pnpm 11.25.0 format/lint/8-tests/build passed.
+Docker/browser/root CI are separate evidence; no broader acceptance is implied. Specification
+admission remains fail-closed, verified coverage is unavailable, and global project event gaps reset.
+
 ## Safe next action
 
-Preserve this accepted checkpoint. The next bounded feature slice should add automatic persistent
-outbox/Fake execution and persisted projection reads to the runnable local process, with an explicit
-task/review boundary. T-050 reconciliation/restore/handoff follows only after that remaining T-040
-runtime gap is accepted. Real-provider work remains outside P0-A.
+T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
+T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
+start T-050, merge, deploy, add an importer or enable a real provider.
 
 ## Restore invariant
 

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -35,6 +35,8 @@ let cancelLostResponse: boolean;
 let retryPayload: Record<string, unknown> | null;
 let usageConfigured: boolean;
 let downloadStatus: number;
+let taskQueries: URLSearchParams[];
+let paginateTasks: boolean;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   window.location.hash = '';
@@ -51,6 +53,8 @@ beforeEach(() => {
   retryPayload = null;
   usageConfigured = false;
   downloadStatus = 200;
+  taskQueries = [];
+  paginateTasks = false;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
@@ -114,7 +118,15 @@ beforeEach(() => {
         if (lostResponse && keys.length === 1) throw new TypeError('lost response');
         return Response.json({ task: tasks[0] }, { status: 202 });
       }
-      if (path === '/api/v1/tasks') return Response.json({ items: tasks, next_cursor: null });
+      if (path === '/api/v1/tasks') {
+        const query = new URL(input, 'http://localhost').searchParams;
+        taskQueries.push(query);
+        const items = query.get('q') === 'no matches' ? [] : tasks;
+        return Response.json({
+          items,
+          next_cursor: paginateTasks && !query.has('cursor') ? 'page-two' : null,
+        });
+      }
       if (path === '/api/v1/runs/run-1/actions' && method === 'POST') {
         cancelKeys.push((options.headers as Record<string, string>)['Idempotency-Key']);
         expect(JSON.parse(String(options.body))).toEqual({
@@ -331,7 +343,9 @@ it('submits cancellation and keeps pending stop distinct from cancelled', async 
   await fillTask(user);
   await user.click(await screen.findByRole('button', { name: '取消' }));
   expect(await screen.findByText(/正在確認執行環境已停止/)).toBeVisible();
-  expect(screen.queryByText('已取消')).not.toBeInTheDocument();
+  expect(
+    within(screen.getByRole('region', { name: '任務工作台' })).queryByText('已取消'),
+  ).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: '取消' })).toBeDisabled();
   expect(cancelKeys).toHaveLength(1);
 });
@@ -469,4 +483,58 @@ it.each([
   await fillTask(user);
   await screen.findByRole('heading', { name: '執行結果' });
   expect(screen.queryByRole('button', { name: '下載 diff' })).toBeNull();
+});
+
+it('submits a literal search, combines project/state filters, and clears them', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  const search = await screen.findByRole('searchbox', { name: '搜尋任務' });
+  const count = taskQueries.length;
+  await user.type(search, '  你好 %_\\  ');
+  expect(taskQueries).toHaveLength(count);
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\'));
+  await user.selectOptions(screen.getByLabelText('篩選專案'), 'project-1');
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'failed');
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('project_id')).toBe('project-1');
+    expect(taskQueries.at(-1)?.get('state')).toBe('failed');
+    expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\');
+  });
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  await waitFor(() => expect([...taskQueries.at(-1)!.keys()]).toEqual([]));
+  expect(search).toHaveValue('');
+  expect(screen.getByLabelText('篩選專案')).toHaveValue('');
+  expect(screen.getByLabelText('篩選狀態')).toHaveValue('');
+});
+it('keeps filters while paging and resets the cursor when filters change', async () => {
+  paginateTasks = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.type(await screen.findByRole('searchbox', { name: '搜尋任務' }), 'history');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('history'));
+  await user.click(screen.getByRole('button', { name: '較早的任務 →' }));
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('cursor')).toBe('page-two');
+    expect(taskQueries.at(-1)?.get('q')).toBe('history');
+  });
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'awaiting_approval');
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('state')).toBe('awaiting_approval');
+    expect(taskQueries.at(-1)?.has('cursor')).toBe(false);
+  });
+  expect(screen.queryByText(/第 2 頁/)).toBeNull();
+});
+it('explains empty filtered results and provides a clear action', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.type(await screen.findByRole('searchbox', { name: '搜尋任務' }), 'no matches');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(await screen.findByText('沒有符合篩選條件的任務。')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(await screen.findByText(/還沒有任務/)).toBeVisible();
 });

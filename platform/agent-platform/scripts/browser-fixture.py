@@ -63,7 +63,7 @@ def main():
                 "tasks.create",
                 uuid4().hex,
                 task,
-                lambda conn, command: store.create_task(conn, operator, task, command),
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
             )["body"]
             output.parent.mkdir(exist_ok=True)
             output.write_text(
@@ -88,6 +88,79 @@ def main():
                 host="127.0.0.1",
                 port=18600,
                 access_log=False,
+            )
+        elif action == "search":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+                other = store.create_project(
+                    conn,
+                    ProjectInput(
+                        name="Search other project",
+                        canonical_repo="https://example.invalid/search/other",
+                    ),
+                )["body"]
+            targets = []
+            for index in range(32):
+                task = TaskInput(
+                    title=f"History Needle {index:02d}",
+                    goal="Find this history entry",
+                    project_id=template["project_id"],
+                    profile_revision=template["profile_revision"],
+                    base_sha="a" * 40,
+                )
+                created = store.command(
+                    operator,
+                    "tasks.create",
+                    uuid4().hex,
+                    task,
+                    lambda conn, command, task=task: store.create_task(
+                        conn, operator, task, command
+                    ),
+                )["body"]
+                targets.append(str(created["task"]["id"]))
+                with db.transaction() as conn:
+                    conn.execute(
+                        "UPDATE jobs SET status='done' WHERE run_id=%s", (created["run"]["id"],)
+                    )
+                    conn.execute(
+                        "UPDATE runs SET state='failed' WHERE id=%s", (created["run"]["id"],)
+                    )
+            task = TaskInput(
+                title="Different project",
+                goal="Unicode goal 你好 %_",
+                project_id=other["id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
+            )["body"]
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE jobs SET status='done' WHERE run_id=%s", (created["run"]["id"],)
+                )
+            print(
+                json.dumps(
+                    {
+                        "project_id": str(template["project_id"]),
+                        "other_project_id": str(other["id"]),
+                        "tasks": targets,
+                        "other_task": str(created["task"]["id"]),
+                    }
+                )
             )
         elif action == "security":
             value = json.loads(output.read_text())
@@ -118,7 +191,7 @@ def main():
                 "tasks.create",
                 uuid4().hex,
                 task,
-                lambda conn, command: store.create_task(conn, operator, task, command),
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
             )["body"]
             run_id = created["run"]["id"]
             with db.transaction() as conn:

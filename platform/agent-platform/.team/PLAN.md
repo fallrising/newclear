@@ -22,3 +22,17 @@ Frontend scope includes web/src/api.ts to declare the persisted diff byte count 
 Rebased cleanly onto current main 10d5729 (mock tool broker); all required checks rerun. Platform: 45 unit and 260 SQL/HTTP; frontend37, browser2; no skips. Backend worker scope inspected; no code conflicts with latest main.
 
 Evidence gate: all defined checks map to code tests, final logs and sanitized evidence; tasks/reports valid, scope bounded. Slice accepted for Draft PR review.
+
+# Task search and filters
+
+Next bounded feature: literal substring search across task title and latest run goal; optional project UUID and latest-run state, composable with existing keyset pagination. No writes or new schema/dependency. q trimmed with max200 raw characters; empty is no search; %/_/backslash are literal. State allowlist from existing schema. Query params q, project_id, state. API authenticated and parameterized SQL.
+
+Filtered cursors bind canonical q/project/state. Mismatched filters produce422 invalid_cursor; preserve existing unfiltered list cursor behavior. T-005 isolated backend worker owns API/store/new task_query and SQL tests. Root owns UI/browser/docs. T-006 independent review, root acceptance after actual checks.
+
+UI explicit search submit (no keystroke queries), project/state select, clear filters; apply any filter resets pages. Retain selected task independently of list filter; no task rerun. Empty filtered state says no matches and offers clear. Query cache keys include full filter+cursor; responses cannot replace newer queries.
+
+Acceptance gates: platform-check/web-check/browser-test, diff/contracts, independent review. Root budget110, worker35/review20. No VM/provider/export/billing work.
+
+Task search gates: root platform45unit/273SQLHTTP, frontend40/build, browser3; backend worker13targeted/ruff/diff inspected and accepted. Independent T-006 DONE accepted, no required findings, sevenloghashes verified; scope unchanged. Source base82cd9d8 verified against current main.
+
+Task-search evidence gate accepted: every required item maps to tests, actual final commandlogs and review; definedscope/authorization preserved. Deliver Draft PR, no merge/deployment.

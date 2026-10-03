@@ -29,6 +29,7 @@ const stateNames: Record<string, string> = {
   succeeded: '已完成',
   failed: '失敗',
   interrupted: '需要處理',
+  pausing: '正在暫停',
   paused: '已暫停',
   resuming: '正在恢復',
   cancelled: '已取消',
@@ -273,7 +274,11 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
               />
             )}
             <div className="workbench">
-              <TaskList selected={selected} onSelect={choose} />
+              <TaskList
+                selected={selected}
+                onSelect={choose}
+                projects={projects.data?.items ?? []}
+              />
               <section className="detail" aria-label="任務工作台" ref={detail}>
                 {selected ? (
                   <TaskWorkspace
@@ -402,28 +407,105 @@ function TaskForm({
     </section>
   );
 }
-function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: string) => void }) {
-  // Cursors of the pages visited so far; the last entry is the current page.
+function TaskList({
+  selected,
+  onSelect,
+  projects,
+}: {
+  selected: string;
+  onSelect: (id: string) => void;
+  projects: Project[];
+}) {
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({ q: '', project_id: '', state: '' });
   const [pages, setPages] = useState<(string | null)[]>([null]);
   const cursor = pages[pages.length - 1];
+  const filtered = Boolean(filters.q || filters.project_id || filters.state);
+  function apply(change: Partial<typeof filters>) {
+    setPages([null]);
+    setFilters((old) => ({ ...old, ...change }));
+  }
+  function clear() {
+    setSearch('');
+    apply({ q: '', project_id: '', state: '' });
+  }
   const tasks = useQuery({
-    queryKey: ['tasks', cursor],
-    queryFn: () =>
-      request<{ items: Task[]; next_cursor: string | null }>(
-        '/tasks' + (cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''),
-      ),
+    queryKey: ['tasks', filters, cursor],
+    queryFn: () => {
+      const query = new URLSearchParams();
+      for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+      if (cursor) query.set('cursor', cursor);
+      return request<{ items: Task[]; next_cursor: string | null }>(
+        '/tasks' + (query.size ? `?${query}` : ''),
+      );
+    },
     refetchInterval: 5000,
   });
   return (
     <aside className="task-list" aria-label="任務列表">
       <div className="list-heading">
-        <h2>最近任務{pages.length > 1 ? ` · 第 ${pages.length} 頁` : ''}</h2>
+        <h2>
+          {filtered ? '篩選結果' : '最近任務'}
+          {pages.length > 1 ? ` · 第 ${pages.length} 頁` : ''}
+        </h2>
         {pages.length > 1 && (
           <button className="quiet" onClick={() => setPages([null])}>
             回到最新
           </button>
         )}
       </div>
+      <form
+        className="task-filters"
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          apply({ q: search.trim() });
+        }}
+      >
+        <label>
+          搜尋任務
+          <input
+            type="search"
+            value={search}
+            maxLength={200}
+            placeholder="任務名稱或執行目標"
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
+        <button type="submit" className="quiet">
+          搜尋
+        </button>
+        <label>
+          篩選專案
+          <select
+            value={filters.project_id}
+            onChange={(event) => apply({ project_id: event.target.value })}
+          >
+            <option value="">所有專案</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          篩選狀態
+          <select value={filters.state} onChange={(event) => apply({ state: event.target.value })}>
+            <option value="">所有狀態</option>
+            {Object.entries(stateNames).map(([state, name]) => (
+              <option key={state} value={state}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {(filtered || search) && (
+          <button type="button" className="quiet" onClick={clear}>
+            清除篩選
+          </button>
+        )}
+      </form>
       {tasks.isPending ? (
         <Empty>正在載入任務…</Empty>
       ) : tasks.isError ? (
@@ -435,9 +517,15 @@ function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: str
         </>
       ) : tasks.data.items.length === 0 ? (
         <Empty>
-          還沒有任務。
-          <br />
-          從「建立任務」開始。
+          {filtered ? (
+            '沒有符合篩選條件的任務。'
+          ) : (
+            <>
+              還沒有任務。
+              <br />
+              從「建立任務」開始。
+            </>
+          )}
         </Empty>
       ) : (
         <ul>

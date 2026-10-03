@@ -28,12 +28,13 @@ CMDB 是配置項身分、責任與關係的共用核心。Resource CI、應用�
 | CatalogItem | `orgId, name, description, revision, status: draft/published/disabled, allowedProjectIds, template`；已發布 revision immutable |
 | Request | `orgId, requesterId, applicationId, environmentName, stage, catalogItemId, catalogRevision, templateSnapshot, provider, poolId, cpu, memoryMiB, purpose, state, approval?, environmentId?, latestJobId?, correlationId` |
 | ProvisionJob | `orgId, requestId, attempt, state: queued/running/succeeded/failed/cancelled, plannedCiIds, failureCode?, startedAt?, completedAt?, correlationId` |
-| PipelineRun | `orgId, applicationId, environmentId, revision, artifactDigest?, stages, state, releaseId?, triggeredBy, retryOfRunId?, correlationId` |
-| Release | `orgId, applicationId, environmentId, artifactDigest, kind: deploy/rollback, state, previousReleaseId: ID\|null, targetReleaseId?, pipelineRunId?, createdBy, correlationId` |
-| Incident | `orgId, applicationId, environmentId, affectedCiIds, severity: critical/warning, state, assigneeId?, relatedReleaseId?, evidence, recoverySamples, correlationId` |
+| PipelineRun | `orgId, applicationId, environmentId, revision, artifactDigest?, stages, state, releaseId?, triggeredBy, retryOfRunId?, correlationId, failureCode?`；stage 保留 startedAt/completedAt |
+| Release | `orgId, applicationId, environmentId, artifactDigest, kind: deploy/rollback, state, previousReleaseId: ID\|null, targetReleaseId?, pipelineRunId?, createdBy, correlationId, health: pending/healthy/unhealthy, approval?, reason?, failureCode?, startedAt?, completedAt?` |
+| Artifact | `orgId, applicationId, digest, revision, recipe: demo-web-v1, filename`；package 成功後建立的 immutable 模擬 registry 記錄；digest 明示 synthetic |
+| Incident | `orgId, applicationId, environmentId, affectedCiIds, severity: critical/warning, state, ruleKey, episode, assigneeId?, relatedReleaseId?, evidence, recoverySamples, correlationId` |
 | AuditEvent | `id, orgId, actorId, action, entityType, entityId, scopeSnapshot, outcome, diffSummary, reason?, requestId, correlationId, occurredAt`；append-only，無 mutable version |
 
-其他配置：`RoleAssignment(userId, role, scopeType, scopeId, stages?)`、`NavigationItem(routeKey, label, group, order, enabled)`、`ModelField(kind, key, label, valueType, required=false, hidden=false, constraints)`、`Integration(kind, displayName, state, lastSyncAt, fieldMappings, lastTestResult?)`。四者都帶 orgId 與 base fields；Integration 僅顯示 demo metadata。NavigationItem 的 required action 取自固定 route registry，不能由配置覆寫。
+其他配置：`RoleAssignment(userId, role, scopeType, scopeId, stages?)`、`NavigationItem(routeKey, label, group, order, enabled)`、`ModelField(kind, key, label, valueType, required=false, hidden=false, constraints)`、`Integration(kind, displayName, poolIds, endpointLabel, state, lastSyncAt, fieldMappings, lastTestResult?)`。四者都帶 orgId 與 base fields；Integration 僅顯示 demo metadata。NavigationItem 的 required action 取自固定 route registry，不能由配置覆寫。
 
 `template` 固定形狀：`{allowedProviders, allowedStages, allowedPoolIds, defaults:{cpu,memoryMiB}, limits:{maxCpu,maxMemoryMiB}, requiresApproval:true, resourceKind:"compute", bootstrapProfile:"web-service"}`。first version 不接受任意 executable template 或 script。
 
@@ -127,7 +128,7 @@ flowchart TB
 
 ## 6. Fixture 契約
 
-M1 固定 seed `dim-gate-m1-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。snapshot schemaVersion 與 seedVersion 分開記錄；舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
+M1 的 inventory 基線延續到 M4 seed `dim-gate-m4-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario engine 推進 demo clock。M4 不預填任何成功發布或 incident；snapshot schemaVersion 與 seedVersion 分開記錄，舊 milestone seed 不可靜默沿用，須保留原存檔並進入明確 reset／memory recovery。
 
 | 種子資料 | 固定定位與用途 |
 | --- | --- |
@@ -144,3 +145,24 @@ M1 固定 seed `dim-gate-m1-v1`，基準時間 `2026-09-20T09:00:00Z`，scenario
 主線新資料使用 deterministic prefix + session sequence：`req-0001`、`env-0001`、`job-0001` 等。baseline 只包含 12 個既有環境；checkout staging 尚不存在。主線新增環境後 aggregate 應為 13，不維持假固定數字。
 
 Fixture 需含健康／unknown／stale、零匹配 filter、跨團隊共享依賴、無回滾目標及 scope 外實體。`capacity-exhausted`、`provision-failure`、`build-failure`、`health-failure`、`post-release-latency`、`rollback-failure` 為明確 scenario，禁止隨機故障。
+
+M4 的 observation buckets／traces／logs／recoveries、scope projection、Guide 與通知 DTO 詳見 [M4 integration contract](../M4-INTEGRATION-CONTRACT.md)；time-series 不存入 CMDB attributes。
+
+
+## W2 integration delta
+
+W2 snapshot version2 adds ResourceObject, ResourceBinding, ResourceQuota, ChangeRequest and ChangeExecution with shared canonical IDs. Bindings reuse one Placement per app/env/CI; legacy Placement grants no access. Redis quotaMiB and Kafka topics/partitions/KiB-per-second are distinct from physical CPU/memory and unknown observed usage. Parent/kind/namespace/externalRef uniqueness and stable planned IDs survive retry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約新增 pipeline-definitions、service-configs、traffic-policies 三類列表／詳情／版本化 command 與 application delivery-options；完整路徑和 typed bodies 見合約。讀 scope 外404、action403、invalid422、stale/base/lock409、storage507；目前授權先於 replay。OpenAPI、runtime manifest、Mock、typed client 與行為測試在同 PR 一致交付。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+MonitorPolicy、AlertRule、SLOPolicy 和 Silence 使用既有 app/env 或 CI 參照，不建立另一份服務或資源。CI-only incident 是既有 Ops incident list/detail/action 的 typed variant，對無 Placement 的 CI 仍保留 canonical ID 與 evidence，不建頁面副本。規則修訂、source-time evaluation lineage、模擬通知投遞和有界基建樣本是 snapshot v4 的領域資料；CMDB 的 CI health/observedAt 不因規則啟用被偽造成時序樣本。每筆投遞保留狀態及安全 channel reference，不存任意 URL。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 does not fork CI, Application, Environment, Incident or W4 delivery identity. Platform governance references existing organization/team/project/integration and canonical W4 event/delivery IDs; recipient-specific attempts are separate references, not duplicated incidents or raw telemetry in CMDB. Unknown or unauthorized source references are rejected before writes.

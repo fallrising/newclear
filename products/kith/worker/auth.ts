@@ -45,11 +45,16 @@ export async function destroySession(env: Env, sessionId: string | undefined): P
   await env.SESSIONS.delete(`session:${sessionId}`);
 }
 
+function cookieSecure(c: Context<{ Bindings: Env }>): boolean {
+  return new URL(c.req.url).protocol === "https:";
+}
+
 export function setSessionCookie(c: Context<{ Bindings: Env }>, sessionId: string): void {
   setCookie(c, SESSION_COOKIE, sessionId, {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
+    secure: cookieSecure(c),
     maxAge: SESSION_TTL_SECONDS,
   });
 }
@@ -62,6 +67,7 @@ export function setCsrfCookie(c: Context<{ Bindings: Env }>, token: string): voi
   setCookie(c, CSRF_COOKIE, token, {
     path: "/",
     sameSite: "Lax",
+    secure: cookieSecure(c),
     maxAge: SESSION_TTL_SECONDS,
   });
 }
@@ -100,14 +106,20 @@ export type MemberRow = {
   quota_class: string;
   is_operator: number;
   disabled_at: string | null;
+  must_change_password?: number;
 };
 
+const MEMBER_COLUMNS = `id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password`;
+
 export async function loadMember(env: Env, memberId: string): Promise<MemberRow | null> {
+  return env.DB.prepare(`SELECT ${MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<MemberRow>();
+}
+
+export async function loadActiveMemberByHandle(env: Env, handle: string): Promise<MemberRow | null> {
   return env.DB.prepare(
-    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at
-     FROM members WHERE id = ?`,
+    `SELECT ${MEMBER_COLUMNS} FROM members WHERE handle = ? COLLATE NOCASE AND kind IN ('human', 'agent') AND disabled_at IS NULL`,
   )
-    .bind(memberId)
+    .bind(handle)
     .first<MemberRow>();
 }
 

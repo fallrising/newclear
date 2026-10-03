@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { spliceEvents, type SpliceRow } from "../src/splice.ts";
+import { wakeHint, type WakeHint } from "../src/wake.ts";
 import {
   authorizationBearer,
   forbidden,
@@ -86,8 +87,8 @@ function catchupPayload(row: MessageCatchup): Record<string, unknown> {
   };
 }
 
-function livePayload(item: InboxNotifyPayload): Record<string, unknown> {
-  return {
+function livePayload(item: InboxNotifyPayload, wake: WakeHint | null): Record<string, unknown> {
+  const out: Record<string, unknown> = {
     id: item.id,
     room_id: item.room_id,
     seq: item.seq,
@@ -97,6 +98,64 @@ function livePayload(item: InboxNotifyPayload): Record<string, unknown> {
     origin: item.origin,
     replay: false,
   };
+  // B-12 (W6): additive fields; v1 clients ignore them. `wake` only on live messages, never on replay.
+  if (item.thread_id !== undefined) out.thread_id = item.thread_id;
+  if (Array.isArray(item.mentions)) out.mentions = item.mentions;
+  if (wake) out.wake = wake;
+  return out;
+}
+
+type WakePolicyRow = { attention_mode: string; keywords_json: string; quota_class: string; operator_id: string | null };
+
+/** Current attention + quota for this agent in this room (re-read per batch: the operator may change it). */
+async function loadWakePolicy(env: Env, roomId: string, memberId: string): Promise<WakePolicyRow | null> {
+  return env.DB.prepare(
+    `SELECT rm.attention_mode, rm.keywords_json, m.quota_class,
+            (SELECT id FROM members WHERE is_operator = 1 AND disabled_at IS NULL LIMIT 1) AS operator_id
+     FROM room_members rm JOIN members m ON m.id = rm.member_id
+     WHERE rm.room_id = ? AND rm.member_id = ?`,
+  )
+    .bind(roomId, memberId)
+    .first<WakePolicyRow>();
+}
+
+function hintFor(item: InboxNotifyPayload, self: string, policy: WakePolicyRow | null): WakeHint | null {
+  if (!policy || item.kind !== "message" || item.origin !== "local") return null;
+  let keywords: string[] = [];
+  try {
+    const parsed: unknown = JSON.parse(policy.keywords_json);
+    if (Array.isArray(parsed)) keywords = parsed.filter((k): k is string => typeof k === "string");
+  } catch {
+    keywords = [];
+  }
+  const mode = ["silent", "mention", "keyword", "ambient"].includes(policy.attention_mode)
+    ? (policy.attention_mode as "silent" | "mention" | "keyword" | "ambient")
+    : "silent";
+  return wakeHint({
+    self,
+    mode,
+    keywords,
+    quota_class: policy.quota_class === "operator_personal" ? "operator_personal" : "api_key",
+    operator_member_id: policy.operator_id ?? "",
+    sender_id: item.sender_id,
+    sender_kind: item.sender_kind === "agent" ? "agent" : "human",
+    mentions: Array.isArray(item.mentions) ? item.mentions : [],
+    body: item.body,
+  });
+}
+
+const RUNNER_SEEN_EVERY_MS = 60_000;
+
+/** W6: a runner's event stream is its heartbeat (runtime_status runner_offline after 5 min without one). */
+async function noteRunnerSeen(env: Env, memberId: string): Promise<void> {
+  if (!flagOn(env.ff_providers)) return;
+  try {
+    await env.DB.prepare(`UPDATE agent_runtimes SET runner_last_seen_at = ? WHERE agent_id = ? AND runtime = 'runner'`)
+      .bind(new Date().toISOString(), memberId)
+      .run();
+  } catch {
+    /* table absent before migration 0003 */
+  }
 }
 
 export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
@@ -130,7 +189,10 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
   };
 
   const run = async () => {
+    // Heartbeat while the stream is open; waitAfter() blocks until data, so it cannot drive this.
+    const heartbeat = setInterval(() => void noteRunnerSeen(c.env, auth.member.id), RUNNER_SEEN_EVERY_MS);
     try {
+      await noteRunnerSeen(c.env, auth.member.id);
       let cursor = initialCursor;
       for (;;) {
         if (signal.aborted) break;
@@ -161,10 +223,11 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
           return true;
         }
         const bySeq = new Map(items.map((item) => [item.seq, item]));
+        const policy = spliced.events.length > 0 ? await loadWakePolicy(c.env, roomId, auth.member.id) : null;
         for (const ev of spliced.events) {
           const item = bySeq.get(ev.seq);
           if (!item) continue;
-          await write(formatEvent("room", item.seq, livePayload(item)));
+          await write(formatEvent("room", item.seq, livePayload(item, hintFor(item, auth.member.id, policy))));
           cursor = ev.seq;
         }
         return false;
@@ -185,6 +248,7 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
     } catch {
       /* client gone or write failed */
     } finally {
+      clearInterval(heartbeat);
       try {
         await writer.close();
       } catch {

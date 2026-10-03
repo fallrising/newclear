@@ -116,7 +116,7 @@ test('production subpath refresh scopes the service worker and leaves another ap
     const unrelated = await fetch('/other-app/api/v1/session')
     return { scope: registration?.scope, type: unrelated.headers.get('content-type'), body: await unrelated.text() }
   })
-  expect(result.scope).toBe('http://127.0.0.1:4173/dim-gate/')
+  expect(result.scope).toBe(`${new URL(page.url()).origin}/dim-gate/`)
   expect(result.type).not.toContain('application/json')
   expect(result.body).not.toContain('"sessionId"')
 })

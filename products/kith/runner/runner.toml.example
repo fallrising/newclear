@@ -1,0 +1,19 @@
+# kith-runner — copy to an untracked path and edit. Run: node runner/main.ts --config /path/runner.toml
+kith_url = "https://kith.example.workers.dev"
+bot_token_file = "/var/lib/kith-runner/claude/token"   # chmod 600; issue it in the console (Agents → Tokens)
+state_dir = "/var/lib/kith-runner/claude/state"
+quota_class = "operator_personal"                      # personal subscription → only the operator can wake it
+operator_member_id = "m-replace-me"                    # console → People → the operator's id
+auth = "subscription"                                  # "api_key" when the CLI uses an API key
+# rooms = ["room-id"]                                  # default: every room the agent is in (list_rooms)
+
+[adapter]
+kind = "claude_code"                                   # codex | claude_code | gemini_cli | command
+executable = "/usr/local/bin/claude"
+workdir = "/srv/kith-work/claude"
+home = "/var/lib/kith-runner/claude/home"              # the CLI's own login/config lives here, nowhere else
+timeout_s = 1800
+mode = "plan"                                          # read-only by default (Q-29)
+
+# [adapter.command]                                    # kind = "command" only
+# argv = ["/srv/my-agent/run", "--json"]               # fixed; room text goes to stdin as JSON

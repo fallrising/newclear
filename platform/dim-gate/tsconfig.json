@@ -29,7 +29,8 @@
     "src",
     "e2e",
     "vite.config.ts",
-    "playwright.config.ts",
-    "scripts/openapi.ts"
+    "scripts/openapi.ts",
+    "playwright*.config.ts",
+    "scripts/benchmark-query.ts"
   ]
 }

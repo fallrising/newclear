@@ -70,7 +70,7 @@ demo deployment 在 candidate slot 執行，health gate 成功才切換 active�
 1. RD 選歷史 target、填 reason；handler 再驗 scope、version、ready 環境與操作鎖。
 2. 新 release 記錄 previousReleaseId=當前 active、targetReleaseId=選擇目標；dev/staging 直接 queued，prod 走同一 Ops approval。
 3. deploying → verifying → succeeded／failed。成功使 activeReleaseId 指向**新 rollback release**，effective artifactDigest 與 target 相同；失敗保持原 active。
-4. 成功後寫 observation recovery event，但 incident 要在 3 個連續健康 sample、每 tick 一筆後才 resolved；不能在按下回滾時就關告警。
+4. 成功後寫 observation recovery event，但 incident 要在 3 個連續健康的一分鐘 sample、每 60 ticks 一筆（1 tick = 1 秒）後才 resolved；不能在按下回滾時就關告警。
 5. 回滾失敗保留 incident、原因和重新操作入口；下一次 retry 使用新 release ID 及新的 idempotency key。
 
 ## 5. APM 與 incident
@@ -92,6 +92,7 @@ stateDiagram-v2
 - 同一 environment + ruleKey 在非 resolved 期間只更新同一 incident；新增 evidence，不重複建立。resolved 後新異常重開同一 incident，新增 episode 與 audit。
 - acknowledge 設 assignee=current Ops；investigate 只允許 assignee 或同 scope Ops 接手並附理由。RD 有 read，不能關閉 incident。
 - incident evidence 包含 threshold、sample window、trace/log refs、affected CI、related release；observed fact 與 suspected relation 分開。
+- post-release-latency 明示推進 180 個 demo ticks，經同一 scheduler 注入三個連續一分鐘窗口；不使用早於相關 release 的假歷史樣本。回滾恢復按成功 health gate 後的第 60／120／180 tick 產生；active release 改變或新異常會取消過期恢復排程。
 - normal healthy samples 為 p95=120ms、errorRate=0.2%、rate=80 req/s；異常示例 p95=900ms、errorRate=8%、rate=80 req/s。label 與 unit 固定，time window 的歷史錯誤不因恢復被抹除。
 - v0.1 不提供無證據的手動「恢復」按鈕。導覽的「恢復樣本」明示為 scenario 控制，適用於無法回滾的分支；它仍經 observation engine。
 
@@ -118,3 +119,22 @@ stateDiagram-v2
 所有成功 mutation 都產生 audit，包括 role assignment、menu、catalog、CI、request、release、incident。拒絕／衝突的寫入可產生 outcome=denied/conflict 的 audit，不修改原 entity version。Audit 無任意 payload、token 或完整 log，diffSummary 只記安全的欄位差異。
 
 store commit 後發出單一 revision notification；TanStack Query 對影響的 resource family invalidation 後重新讀取。頁面上不能靠手工調整某張卡的數字模仿完成。角色切換要取消舊 requests、清 query cache，再按新 scope 讀取；reset 同時清資料、cache、timer 與 scenario faults。
+
+
+## W2 integration delta
+
+W2 new resource.bind/resource.resize/kafka.topic.create changes follow draft → submitted → independent Ops approval → explicit execution → succeeded/failed. Immutable proposal/catalog snapshots, all target versions, append-only decisions/attempts, shared scheduler/locks and atomic quota reservations govern each transition. Failed retry returns to submitted and requires a new independent decision; changes to content create a new draft. Existing Request and Release remain separate source state machines projected as WorkItems. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約新增 /rd/apps/:appId/delivery、configuration、traffic，environmentId/revisionId 查詢保留範圍和歷史版本；Ops source detail 為 /ops/service-changes/:sourceType/:sourceId。服務與環境入口及原 WorkItems 導向同一來源。三種具型別編輯器、diff、獨立批准、實際時鐘執行與失敗證據；讀回成功前保持確認 pending。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+規則 create/revise、validate、submit、approve/reject、activate 是分開的版本化 command；prod 服務規則由另一位具 project/stage scope 的 Ops 決策，批准不等同啟用。基建規則由 pool scope Ops 操作。sample-time 順序、連續已知樣本和 ruleRevision 決定 evaluation；同一未恢復 episode 不重複建立 incident。Silence 只改通知判斷，歷史 incident/evidence 與健康恢復門檻不變；到期後僅後續符合條件的通知可重新投遞。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 platform feature disable blocks new eligible commands but never mutates already approved/running Request, Release, Change or Traffic snapshots. A route diagnostic is a local Mock with revision and safe failure/fallback, never a network proxy. A failed notification retry appends a new recipient attempt after current scope/channel checks; Silence never resolves incidents or bulk-sends expired history.

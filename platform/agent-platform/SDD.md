@@ -2,14 +2,15 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Status：設計基準已合併；M0 開發中，Docker／guest rootfs 契約測試與遠端 sandbox probe 已實作，KVM gate 待驗
+- Experimental addendum：2026-10-02，Agent Computer（AC）設計提案；見 §2.4，未實作、未執行實機驗收。
+- Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
 - Language：繁體中文，保留必要協定與程式識別字
 - Product reference：OpenHands Agent Canvas
 - Runtime direction：OpenHands Software Agent SDK／Agent Server + Cocoon sandbox
 
-本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)；已執行的 Docker 檢查不等於全部契約通過。
+本文件定義預計實作的契約，不是現成功能說明。`MUST` 為此平台的驗收要求；上游已提供的能力與尚待驗證的整合，分別在 [研究紀錄](docs/reference-selection.md) 與第 16 節列明。實作進度與證據見 [M0](docs/M0.md)／[M1](docs/M1.md)／[M2](docs/M2.md)／[M3 recovery](docs/M3-RECOVERY.md)／[M3 cancel](docs/M3-CANCEL.md)／[M3 approval](docs/M3-APPROVAL.md)／[M3 pause](docs/M3-PAUSE.md)／[AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md)；已執行的 Docker 檢查不等於全部契約通過。
 
 ## 1. 問題、目標與決策
 
@@ -55,7 +56,17 @@ Owner 先要求在 newclear 新增 agent 平台並撰寫 SDD，於 2026-09-21 �
 
 ### 2.3 非目標
 
-MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、手機／桌面 computer-use、模型訓練／推論服務、任意第三方 agent 一鍵相容、跨節點 live migration、SaaS 計費、平台代管公開註冊、VM 主機安裝自動化或自動 merge／部署成果。
+M0–M4 的 coding MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、手機／桌面 computer-use、模型訓練／推論服務、任意第三方 agent 一鍵相容、跨節點 live migration、SaaS 計費、平台代管公開註冊、VM 主機安裝自動化或自動 merge／部署成果。
+
+### 2.4 Agent Computer 實驗（AC，Proposed）
+
+2026-10-02 依 owner 指示，另立受限的 desktop computer-use 實驗，以 CocoonBox 參考畫面的功能效果為目標；詳細方案與 AC 驗收唯一入口為 [docs/AGENT-COMPUTER.md](docs/AGENT-COMPUTER.md)。本次只交付文件，並不授權安裝、VM 啟動、模型呼叫、網路變更或部署。
+
+範圍是單 operator、單 Linux/KVM worker：外部 MCP client 驅動 guest 的可見 Chromium／桌面工具，工作台同步顯示同一個桌面、工具事件與控制權；區分 Disconnect、Save now／Checkpoint、Hibernate／Restore、Branch 與 Release。先證明同一環境的觀看／控制，再驗證生命週期；headless CDP smoke、靜態 UI 或 shell 代寫 GUI 結果都不算完成。
+
+這是 §2.3 之外的獨立實驗，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
+
+本文件其他章節的 MVP、介面、狀態與 AT-xx 均仍指 coding 主線；AC 使用獨立能力宣告與 AC-AT-xx 驗收，不能用本次文件、舊 M0 證據或上游 README 代替其實機證據。手機、通用多租戶桌面、原生 macOS 外殼、GPU／4K 效能保證及跨節點遷移仍不在此實驗內。
 
 ## 3. 使用者故事與成功條件
 
@@ -156,7 +167,7 @@ flowchart TB
 - API／worker／connector：Python + FastAPI，便於接 OpenHands 與 sandbox Python SDK；獨立程序／權限，即使共用 package。
 - Persistence：PostgreSQL、SQL migrations；durable job 用 `FOR UPDATE SKIP LOCKED` 與明確 lease。
 - Artifacts：MVP 可使用不在 Web root 的本機目錄，加 authenticated download API；保留 S3-compatible adapter 邊界。
-- Run runtime：Linux/KVM、Cocoon、sandboxd、固定 digest 的 guest template；Agent Server 在 guest 中以非 root 執行。
+- Run runtime：Linux/KVM、Cocoon、sandboxd、固定 digest 的 guest template；Agent Server 在 guest 中以獨立非 root 控制帳號執行；terminal 經固定 launcher 降至另一個工具帳號，SDK 控制 workspace 與 repository 分離。實作與權限驗收見 [M3 guest isolation](docs/M3-GUEST-ISOLATION.md)。
 - Deployment：控制面容器／服務與 host-level sandboxd 分離；不把 `/dev/kvm` 或 Docker socket 暴露給 Web／agent。
 - Exact versions、lockfiles、image digests、SDK schema hash 與 release compatibility matrix 在 M0 產出並於 M1 固定，不使用 `latest` 當可重現部署契約。
 
@@ -234,7 +245,11 @@ stateDiagram-v2
     awaiting_approval --> running
     running --> pausing
     pausing --> paused
-    paused --> running
+    awaiting_approval --> pausing
+    paused --> resuming
+    resuming --> running
+    resuming --> awaiting_approval
+    resuming --> cancelling
     running --> finalizing
     finalizing --> succeeded
     queued --> cancelling
@@ -251,9 +266,11 @@ stateDiagram-v2
     interrupted --> failed
 ```
 
-表為完整補充：`pausing` 可 cancel；任何 active state 發生無法核對的斷線可轉 `interrupted`，保留 `interrupted_from`；`interrupted` 可 cancel。`interrupted` 只在確認同一 backend instance 仍可安全恢復後回原狀態，不能自動另建第二份 agent。`finalizing` 是有界成果保存階段，cancel 回 `409 finalizing`，避免把已完成工作誤判成取消。
+表為完整補充：`pausing/resuming` 可 cancel；控制操作在未知狀態保留 pausing／resuming 與 reservation，paused 重新核對失敗回 pausing。其他 active state 發生無法核對的斷線可轉 `interrupted`，保留 `interrupted_from`；`interrupted` 可 cancel。`interrupted` 只在確認同一 backend instance 仍可安全恢復後回原狀態，不能自動另建第二份 agent。`finalizing` 是有界成果保存階段，cancel 回 `409 finalizing`，避免把已完成工作誤判成取消。
 
-`succeeded/failed/cancelled` 為不可重開終態；重試建立新的 run／attempt，舊事件與成果不變。Agent 報告完成後必須封存結果才 `succeeded`。程式工作以 profile 指定的驗證命令結果作判準；未設定驗證只能標記「agent reported completion / 未驗證」，不能標示 tests passed。
+`succeeded/failed/cancelled` 為不可重開終態；重試建立新的 run／attempt，舊事件與成果不變。Agent 報告完成後必須封存結果才 `succeeded`。程式工作採 profile revision 固定的 verification contract：`commands` 以 bounded direct argv 執行並驗證 workspace diff；`fixture-m2` 只供固定 M2 acceptance；預設 `none` 回報 unknown 並 fail closed，不能標示 tests passed。Connector 核對 profile revision／contract hash、check 結果與 diff hash；超時、輸出超界、程序不確定或 verifier 改動 workspace 不視為通過。這證明已配置的命令結果，不保證 test suite 完整或獨立。
+
+固定模式的安全 pause／resume 實作以 AlwaysConfirm admission barrier、持鎖的即時狀態與 guest 程序基準共同判定；保持原 VM／容量／期限，恢復不自動核准需審批的工具。細節與保守限制見 [M3 pause](docs/M3-PAUSE.md)。
 
 ### 9.2 Lease 與 fencing
 
@@ -261,7 +278,7 @@ stateDiagram-v2
 - 在 DB transaction 同時 reserve node RAM/CPU/disk 與 active-run slot；release 以 sandbox 確認終止為條件，不能只看 worker lease 到期。
 - VM 內既有長命令不會因 DB fencing 自動停止。Worker 失聯時，connector 必須核對／停止舊實例後才允許 replacement；無法確認就 quarantine 該 binding，保留容量。
 - 不宣稱任意 tool effect exactly-once。平台命令、prompt admission、export 使用 operation ID；對無 idempotency 的 backend，送出結果不明時 inspect／reconcile，仍不明則等待 operator，不盲目重送。
-- Run TTL、sandbox lease、worker lease 分開。Sandbox lease 必須覆蓋 run deadline + 2 分鐘收尾。已讀到的 sandbox claim 支援 `ttl_seconds`（預設 5 分鐘、上限 24 小時），但沒有據此確認一般 lease renewal；因此 MVP 在 allocate 時一次申請足額 TTL，不依賴 `renew`。未來只有 capability 與實測通過才啟用 renewal；期限不足就提前取消／封存，不能讓 VM 在任務仍顯示 running 時被回收。
+- Run TTL、sandbox lease、worker lease 分開。Sandbox lease 必須覆蓋 run deadline + 2 分鐘收尾。已讀到的 sandbox claim 支援 `ttl_seconds`（預設 5 分鐘、上限 24 小時），但沒有據此確認一般 lease renewal；因此 MVP 在 allocate 時一次申請足額 TTL，不依賴 `renew`。目前 profile 的 `deadline_seconds` 上限是 2 小時，對應 sandbox TTL 上限 7320 秒。把 VM 實測留到 24 小時是 release 前的整合測試，不放進功能切片；屆時可改做縮短實驗，證明到期前取消／封存且沒有續租。未來只有該整合測試與 capability 通過才啟用 renewal。期限不足就提前取消／封存，不能讓 VM 在任務仍顯示 running 時被回收。
 
 ### 9.3 故障處理
 
@@ -329,9 +346,19 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 - Repository checkout credential 為唯讀、repo-scoped、短效。可寫 GitHub credential 只給 export worker；agent 不可自行 push 或建立 PR。
 - Export 綁定 run、artifact hash、target repo、branch 與 approval。Base SHA 漂移／衝突需重新檢查；不強制 push、不自動 merge。遠端結果不明時先查 branch／PR marker，不盲目重建。
 
+目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md)、[AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 與 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新、合成 fixture credits 的保守預留／結算及 cutoff 工具／VM 收尾。Guest 通道與 fixture credits 均需明確啟用；後者只驗證固定本機 fixture 的合成計量，不是真實 provider tokenizer 或帳單。`amount_decimal` 保持 null，沒有可信真實金額硬上限。工作台已有唯讀用量，並標明不是帳單。付費呼叫仍未做；預定真接口是 OpenCode Go Chat Completions，key 尚未配置。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
+
+[AT-11-C2a 公開費率演練](docs/M3-PUBLISHED-PRICE-PREVIEW.md)另以固定官方模型規格／公開價目在同一 fixture 通道驗收美元上界預留與估算結算。它仍不呼叫 provider，不聲稱 fixture counters 是 provider 帳單；真實 `amount_decimal` 及硬金額上限保持關閉。
+
+[AT-11-C2b1 OpenAI 相容 mock](docs/M3-OPENAI-MOCK.md)在原 guest／控制端安全邊界中驗收可設定模型 ID 的 Chat Completions 文字與工具格式。目的地仍限主機 loopback 腳本 mock；真實外部 HTTPS transport、Claude／Gemini 原生 adapter、任意自然語言 coding 與付費帳單均未驗收。
+
+[AT-11-C2b2 HTTPS transport／profile verification](docs/M3-HTTPS-PROVIDER.md)增加控制端固定 HTTPS Chat Completions endpoint、file-backed credential reference、TLS／CA 驗證及不可變 profile 驗證命令。HTTPS 呼叫仍由 worker 控制端執行，沒有新增 guest egress；provider usage 仍是 unbilled，金額 unknown。Python／PostgreSQL 測試通過。2026-09-27 在新的 deny-all node 上，`mock-https-complete` 與 isolation 皆 succeeded；這不是付費 provider E2E，也還沒進 GitHub CI。
+
 ### 11.3 工具與網路
 
 工具按能力分成 workspace read/write、bounded exec、network access、external mutation。Workspace 內一般編輯與測試可在設定政策內自動執行；額外 network 或 external mutation 須經 deterministic policy／approval。無法可靠分類的任意 shell 不得宣稱能逐條阻止外部副作用：MVP 以 guest 網路 allowlist、沒有 write credential 與 VM 隔離落實邊界。
+
+目前已實作 [固定節點 egress](docs/M3-EGRESS.md)：none-lane＋啟用的 host proxy、sealed 啟動配置／live process 核對、profile／run 政策 digest；政策變更須完整 drain 後重啟，不支援 live revocation。CONNECT 是目的地 TCP 授權，不宣告過濾 tunnel 內的 HTTP 方法／內容。以下保留完整產品目標。
 
 Guest 出站只經受控 egress/proxy；阻擋 metadata、loopback、控制面與未允許的私網位址，處理 DNS 解析與 redirect 後的目的地檢查。Package registry 與 model proxy 為明確 allowlist。平台不保證防住所有 guest exploit；M0/M3 必須驗證設定實際生效。
 
@@ -405,9 +432,9 @@ MVP 不使用 Kubernetes；日後多節點保留相同 API 與 run identity，�
 | AT-06 | approval replay、修改參數、逾期、兩人／兩分頁競爭；只有一次合法決策成功，其他 409 | M3 |
 | AT-07 | canary secrets、跨 workspace 存取、metadata/private-network 連線、artifact XSS；未洩露且阻擋有效 | M3 |
 | AT-08 | cancel 長命令、cancel provisioning、node 不可達：狀態與 observed reality 一致，timeout 不假成功 | M3 |
-| AT-09 | artifact store 失敗、測試非零、agent 無驗證宣稱成功：UI 呈現真實結果，無虛構 tests passed | M4 |
+| AT-09 | artifact store 失敗、profile verification 非零／unknown、agent 無驗證宣稱成功：UI 呈現真實結果，無虛構 tests passed | M4 |
 | AT-10 | backend 缺 pause／resume／approval capability；UI 正確 disable，API 回 unsupported，沒有任意 exec fallback | M2 |
-| AT-11 | 並行模型請求 reservation／settlement、未知价格、429 與預算截止；不再 admission 新請求且用量標示正確 | M3 |
+| AT-11 | 並行模型請求 reservation／settlement、未知價格、429、預算截止、HTTPS TLS 邊界及 profile verification unknown；不再 admission 新請求且用量標示正確 | M3 |
 | AT-12 | fake GitHub：export 重送／遠端成功後斷線／base drift；只有一個預期 branch/PR，未授權不寫入；live 僅測試 repo opt-in | M4 |
 | AT-13 | DB/artifact restore、stale binding cleanup、retention expiry；可恢復結果，陌生 VM／active state 不被回收 | M4 |
 
@@ -418,10 +445,10 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | Milestone | 交付 | 完成條件 | 目前狀態 |
 | --- | --- | --- | --- |
 | SDD | 本文件、來源比較、項目入口與 portfolio 邊界 | 文件一致、來源可追溯、設計與已實作功能標示清楚 | Merged (#14) |
-| M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | In progress：Docker/rootfs 已測，SDK probe 已實作；KVM 待驗 |
-| M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Not started |
-| M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Not started |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | Not started |
+| M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
+| M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
+| M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。可信金額及完整 AT-07/11 待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
 | M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
@@ -429,6 +456,10 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 M0 若無法在隔離 guest 可靠執行 Agent Server，可評估外部 agent loop + sandbox tools 的替代方案，但需更新 ADR、資料與故障契約；不得以 host 上直接跑 agent 作為悄悄 fallback。M0 未解的 hard gate 不靠 mock 的通過宣告完成。
 
 M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(schedule_id, scheduled_at)` 唯一；預設同 automation 不重疊執行、missed schedule 最多補一次。自動化只建立 run，不能繞過批准範圍／預算。第一版不同時引入上游 automation scheduler 與本平台 scheduler 造成雙重權威。
+
+### 15.1 獨立 AC 實驗的進度
+
+[Agent Computer 計劃](docs/AGENT-COMPUTER.md) 的 AC-0 是本次文件設計；AC-1～AC-4 為後續、尚未執行的版本固定、桌面／工具／觀看整合及最終驗收。所有 AC 實機 gate 目前均為 Not run。上表 M0–M6 的狀態保持不變，M3 仍是 coding 主線最早未完成的里程碑，M6 的完整平台 checkpoint／fork 整合也不因 AC 局部實驗而變成 Passed。
 
 ## 16. 待驗證項與主要風險
 
@@ -450,7 +481,7 @@ M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(s
 - 本 SDD 為本項目的設計基準；研究紀錄說明觀察與選擇，不能用上游 roadmap 覆蓋本地驗收。
 - 實作時以 milestone 切片交付，記錄 change、tests、evidence、limitations；任何相容性失敗先更新 ADR／capability matrix。
 - 本目錄包含 M0 probe 與 dependency manifest，根目錄 CI 執行單元／SDK HTTP 契約與 Docker/rootfs 實測；不把它們當作 MicroVM 驗收。後續實作繼續遵守 newclear 的 [monorepo CI](../../docs/specs/monorepo-ci.md) 設定 root path-scoped workflow。
-- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。下一步固定為最早未完成的 M0。
+- 不把日期、版本 pin、延遲目標或文件存在當作功能完成證據。M0 的固定配置已通過硬體 gate；M2 真實 runtime／固定模擬模型切片已通過，最早未完成里程碑仍為 M3；worker recovery、安全 cancel、工具 approval 與 pause/resume 切片已完成，其餘安全控制尚未完成。
 
 ## 18. 來源
 

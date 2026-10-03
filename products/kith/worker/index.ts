@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { MEMBERS_PER_ROOM } from "../src/caps.ts";
 import { rejectMemberCount } from "../src/reject.ts";
-import { verifyPassword } from "../src/password.ts";
+import { hashPassword, verifyPassword } from "../src/password.ts";
 import { hashBotToken, issueBotToken } from "../src/token.ts";
 import {
   authorizationBearer,
@@ -13,6 +13,7 @@ import {
   forbidden,
   invalid,
   isRoomMember,
+  loadActiveMemberByHandle,
   loadMember,
   requireAuth,
   requireOperator,
@@ -30,6 +31,7 @@ import {
   MEMBER_HEADER,
   ROOM_HEADER,
   SESSION_COOKIE,
+  flagOn,
   type Env,
 } from "./env.ts";
 import { errorBody } from "./errors.ts";
@@ -40,7 +42,12 @@ import { HostedGeneration } from "./hosted/generation.ts";
 import { Inbox } from "./inbox.ts";
 import { handleMcpPost } from "./mcp.ts";
 import { snapshot } from "./metrics.ts";
+import { replyLimit } from "./reply-limit.ts";
 import { Room } from "./room.ts";
+import { loadAllAgentRuntimes } from "./providers/runtime.ts";
+import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
+import { mountProviderRoutes } from "./routes/providers.ts";
+import { mountTraceRoutes } from "./routes/traces.ts";
 
 export { HostedGeneration, Inbox, Room };
 
@@ -79,7 +86,7 @@ app.post("/api/auth/login", async (c) => {
   if (!handle || !password) return invalid(c, "handle and password required");
 
   const member = await c.env.DB.prepare(
-    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at
+    `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password
      FROM members WHERE handle = ? COLLATE NOCASE`,
   )
     .bind(handle)
@@ -107,22 +114,36 @@ app.post("/api/auth/logout", async (c) => {
 app.get("/api/me", async (c) => {
   const auth = await requireAuth(c);
   if (auth instanceof Response) return auth;
-  return c.json(publicMember(auth.member));
+  const operator = await c.env.DB.prepare(`SELECT display_name, handle FROM members WHERE is_operator = 1`).first<{
+    display_name: string;
+    handle: string;
+  }>();
+  return c.json({ ...publicMember(auth.member), operator_display_name: operator ? operator.display_name || operator.handle : null });
+});
+
+app.patch("/api/me", async (c) => {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["display_name"]).length > 0) return invalid(c, "unknown field");
+  if (typeof obj.display_name !== "string") return invalid(c, "display_name required");
+  const displayName = obj.display_name.trim();
+  if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  await c.env.DB.prepare(`UPDATE members SET display_name = ? WHERE id = ?`).bind(displayName, auth.member.id).run();
+  const member = await loadMember(c.env, auth.member.id);
+  if (!member) return unauthorized(c);
+  return c.json(publicMember(member));
 });
 
 app.get("/api/rooms", async (c) => {
   const auth = await requireAuth(c);
   if (auth instanceof Response) return auth;
-  const result = await c.env.DB.prepare(
-    `SELECT r.id, r.slug, r.name, r.created_at, rm.role
-     FROM rooms r
-     JOIN room_members rm ON rm.room_id = r.id
-     WHERE rm.member_id = ?
-     ORDER BY r.created_at ASC`,
-  )
-    .bind(auth.member.id)
-    .all();
-  return c.json({ rooms: result.results ?? [] });
+  const all = new URL(c.req.url).searchParams.get("all");
+  if (all !== null && all !== "1") return invalid(c, "invalid all");
+  if (all === "1" && (auth.via !== "session" || auth.member.is_operator !== 1)) return forbidden(c, "operator required");
+  const rooms = await roomSummaries(c.env, auth.member.id, { all: all === "1" });
+  return c.json({ rooms });
 });
 
 app.post("/api/rooms", async (c) => {
@@ -156,6 +177,36 @@ app.post("/api/rooms", async (c) => {
   return c.json({ id, slug, name, created_at: createdAt });
 });
 
+app.patch("/api/rooms/:id", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const roomId = c.req.param("id");
+  if (!(await roomExists(c.env, roomId))) return c.json(errorBody("not_found", "room not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["name", "archived"]).length > 0) return invalid(c, "unknown field");
+  if (obj.name === undefined && obj.archived === undefined) return invalid(c, "name or archived required");
+  let name: string | null = null;
+  if (obj.name !== undefined) {
+    if (typeof obj.name !== "string") return invalid(c, "invalid name");
+    name = obj.name.trim();
+    if (name.length < 1 || name.length > 80) return invalid(c, "name must be 1-80 characters");
+  }
+  if (obj.archived !== undefined && typeof obj.archived !== "boolean") return invalid(c, "archived must be boolean");
+  if (name !== null) {
+    await c.env.DB.prepare(`UPDATE rooms SET name = ? WHERE id = ?`).bind(name, roomId).run();
+  }
+  if (obj.archived === true) {
+    await c.env.DB.prepare(`UPDATE rooms SET archived_at = COALESCE(archived_at, ?) WHERE id = ?`)
+      .bind(new Date().toISOString(), roomId)
+      .run();
+  } else if (obj.archived === false) {
+    await c.env.DB.prepare(`UPDATE rooms SET archived_at = NULL WHERE id = ?`).bind(roomId).run();
+  }
+  const [room] = await roomSummaries(c.env, auth.member.id, { all: true, roomId });
+  return c.json(room);
+});
+
 app.get("/api/rooms/:id/messages", async (c) => {
   const auth = await requireAuth(c);
   if (auth instanceof Response) return auth;
@@ -167,29 +218,56 @@ app.get("/api/rooms/:id/messages", async (c) => {
   const beforeRaw = url.searchParams.get("before_seq");
   const limitRaw = url.searchParams.get("limit");
   const kindRaw = url.searchParams.get("kind") ?? "message";
+  const orderRaw = url.searchParams.get("order");
+  const threadId = url.searchParams.get("thread_id");
+  const topLevelRaw = url.searchParams.get("top_level");
   const afterSeq = afterRaw == null || afterRaw === "" ? -1 : Number(afterRaw);
   const beforeSeq = beforeRaw == null || beforeRaw === "" ? null : Number(beforeRaw);
   const limit = Math.min(50, Math.max(1, limitRaw ? Number(limitRaw) : 50));
   if (!Number.isFinite(afterSeq) || (beforeSeq != null && !Number.isFinite(beforeSeq)) || !Number.isFinite(limit)) {
     return invalid(c, "invalid query");
   }
+  if (orderRaw !== null && orderRaw !== "asc" && orderRaw !== "desc") return invalid(c, "invalid order");
+  // B-05 (W6): thread_id → the root and its replies; top_level=1 → only rows outside threads, with reply counts.
+  if (threadId !== null && (threadId.length < 1 || threadId.length > 64)) return invalid(c, "invalid thread_id");
+  if (topLevelRaw !== null && topLevelRaw !== "1") return invalid(c, "invalid top_level");
+  if (threadId !== null && topLevelRaw !== null) return invalid(c, "thread_id and top_level are exclusive");
   const kinds = kindRaw.split(",").map((k) => k.trim()).filter(Boolean);
   if (kinds.some((k) => k !== "message" && k !== "trace")) return invalid(c, "invalid kind");
   const placeholders = kinds.map(() => "?").join(",");
-  const params: unknown[] = [roomId, afterSeq];
-  let sql = `SELECT id, room_id, seq, kind, thread_id, reply_to, sender_id, body, mentions_json,
-                    generation_id, client_message_id, origin, created_at
-             FROM messages
-             WHERE room_id = ? AND seq > ? AND kind IN (${placeholders})`;
-  params.push(...kinds);
+  const params: unknown[] = [];
+  const counts = topLevelRaw === "1"
+    ? `, (SELECT COUNT(*) FROM messages t WHERE t.room_id = m.room_id AND t.thread_id = m.id) AS thread_reply_count,
+         (SELECT MAX(t.seq) FROM messages t WHERE t.room_id = m.room_id AND t.thread_id = m.id) AS thread_last_seq`
+    : "";
+  let sql = `SELECT m.id, m.room_id, m.seq, m.kind, m.thread_id, m.reply_to, m.sender_id, m.body, m.mentions_json,
+                    m.generation_id, m.client_message_id, m.origin, m.created_at${counts}
+             FROM messages m
+             WHERE m.room_id = ? AND m.seq > ? AND m.kind IN (${placeholders})`;
+  params.push(roomId, afterSeq, ...kinds);
   if (beforeSeq != null) {
-    sql += ` AND seq < ?`;
+    sql += ` AND m.seq < ?`;
     params.push(beforeSeq);
   }
-  sql += ` ORDER BY seq ASC LIMIT ?`;
-  params.push(limit);
+  if (threadId !== null) {
+    sql += ` AND (m.id = ? OR m.thread_id = ?)`;
+    params.push(threadId, threadId);
+  }
+  if (topLevelRaw === "1") sql += ` AND m.thread_id IS NULL`;
+  if (orderRaw === null) {
+    sql += ` ORDER BY m.seq ASC LIMIT ?`;
+    params.push(limit);
+    const result = await c.env.DB.prepare(sql).bind(...params).all();
+    return c.json({ messages: result.results ?? [] });
+  }
+  sql += orderRaw === "desc" ? ` ORDER BY m.seq DESC LIMIT ?` : ` ORDER BY m.seq ASC LIMIT ?`;
+  params.push(limit + 1);
   const result = await c.env.DB.prepare(sql).bind(...params).all();
-  return c.json({ messages: result.results ?? [] });
+  const rows = result.results ?? [];
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows.slice();
+  if (orderRaw === "desc") page.reverse();
+  return c.json({ messages: page, has_more: hasMore });
 });
 
 app.post("/api/rooms/:id/messages", async (c) => {
@@ -225,11 +303,23 @@ app.get("/api/rooms/:id/members", async (c) => {
   )
     .bind(roomId)
     .all();
+  const views = flagOn(c.env.ff_providers)
+    ? new Map((await loadAllAgentRuntimes(c.env)).map((v) => [v.agent_id, v]))
+    : null;
   const members = (result.results ?? []).map((row) => {
     const r = row as Record<string, unknown>;
+    const view = views?.get(String(r.id));
     return {
       ...r,
+      agent_runtime: view ? runtimeSummary(c.env, view) : null,
       operator_only: r.quota_class === "operator_personal",
+      reply_limit: replyLimit({
+        kind: typeof r.kind === "string" ? r.kind : "",
+        quotaClass: typeof r.quota_class === "string" ? r.quota_class : "",
+        sidecarOn: flagOn(c.env.ff_sidecar),
+        hasApiKey: Boolean(c.env.XAI_API_KEY),
+        fakeText: c.env.FAKE_LLM_TEXT,
+      }),
     };
   });
   return c.json({ members });
@@ -242,13 +332,23 @@ app.post("/api/rooms/:id/members", async (c) => {
   if (!(await roomExists(c.env, roomId))) return c.json(errorBody("not_found", "room not found"), 404);
   const obj = parseObject(await c.req.text());
   if (!obj) return invalid(c, "invalid json");
-  if (extraKeys(obj, ["member_id", "role"]).length > 0) return invalid(c, "unknown field");
-  const memberId = typeof obj.member_id === "string" ? obj.member_id : "";
-  if (!memberId) return invalid(c, "member_id required");
+  if (extraKeys(obj, ["member_id", "handle", "role"]).length > 0) return invalid(c, "unknown field");
+  const hasIdKey = Object.prototype.hasOwnProperty.call(obj, "member_id");
+  const hasHandleKey = Object.prototype.hasOwnProperty.call(obj, "handle");
+  if (hasIdKey === hasHandleKey) return invalid(c, "member_id or handle required");
   const role = obj.role === undefined ? "member" : obj.role;
   if (role !== "member" && role !== "owner") return invalid(c, "invalid role");
-  const target = await loadMember(c.env, memberId);
-  if (!target) return c.json(errorBody("not_found", "member not found"), 404);
+  let target: MemberRow | null;
+  if (hasHandleKey) {
+    if (typeof obj.handle !== "string" || obj.handle.trim() === "") return invalid(c, "handle required");
+    target = await loadActiveMemberByHandle(c.env, obj.handle.trim());
+    if (!target) return c.json(errorBody("not_found", "handle not found"), 404);
+  } else {
+    if (typeof obj.member_id !== "string" || obj.member_id === "") return invalid(c, "member_id required");
+    target = await loadMember(c.env, obj.member_id);
+    if (!target || target.disabled_at) return c.json(errorBody("not_found", "member not found"), 404);
+  }
+  const memberId = target.id;
   if (target.kind !== "human" && target.kind !== "agent") return invalid(c, "invalid member kind");
   if (role === "owner" && target.kind === "agent") return forbidden(c, "agent cannot be owner");
   const already = await isRoomMember(c.env, roomId, memberId);
@@ -514,6 +614,138 @@ app.delete("/api/agents/:id/tokens/:tid", async (c) => {
   return c.json({ ok: true });
 });
 
+app.get("/api/members", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const url = new URL(c.req.url);
+  const q = (url.searchParams.get("q") ?? "").trim();
+  const kind = url.searchParams.get("kind");
+  const includeDisabled = url.searchParams.get("include_disabled");
+  const limitRaw = url.searchParams.get("limit");
+  const limit = limitRaw === null || limitRaw === "" ? 20 : Number(limitRaw);
+  if (q.length > 64) return invalid(c, "q too long");
+  if (kind !== null && kind !== "human" && kind !== "agent") return invalid(c, "invalid kind");
+  if (includeDisabled !== null && includeDisabled !== "0" && includeDisabled !== "1") return invalid(c, "invalid include_disabled");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) return invalid(c, "limit must be 1-100");
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (includeDisabled !== "1") where.push("disabled_at IS NULL");
+  if (kind !== null) {
+    where.push("kind = ?");
+    params.push(kind);
+  }
+  if (q !== "") {
+    const pattern = q.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_") + "%";
+    where.push("(handle LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\')");
+    params.push(pattern, pattern);
+  }
+  const sql = `SELECT ${ADMIN_MEMBER_COLUMNS} FROM members${where.length > 0 ? " WHERE " + where.join(" AND ") : ""}
+               ORDER BY handle COLLATE NOCASE ASC LIMIT ?`;
+  params.push(limit);
+  const result = await c.env.DB.prepare(sql).bind(...params).all<AdminMemberRow>();
+  return c.json({ members: (result.results ?? []).map(adminMember) });
+});
+
+app.post("/api/members", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["handle", "display_name", "password"]).length > 0) return invalid(c, "unknown field");
+  const handle = typeof obj.handle === "string" ? obj.handle.trim() : "";
+  const displayName = typeof obj.display_name === "string" ? obj.display_name.trim() : "";
+  const password = typeof obj.password === "string" ? obj.password : "";
+  if (!HANDLE_RE.test(handle)) return invalid(c, "handle must match [a-z0-9_]{2,32}");
+  if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  if (password.length < 12 || password.length > 128) return invalid(c, "password must be 12-128 characters");
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  const passwordHash = await hashPassword(password);
+  try {
+    await c.env.DB.prepare(
+      `INSERT INTO members (id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, created_at, must_change_password)
+       VALUES (?, 'human', ?, ?, ?, '[]', 'api_key', 0, ?, 1)`,
+    )
+      .bind(id, handle, displayName, passwordHash, createdAt)
+      .run();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/UNIQUE/i.test(message)) return c.json(errorBody("handle_taken", "handle taken"), 409);
+    return c.json(errorBody("not_ready", "failed to create member"), 503);
+  }
+  const row = await c.env.DB.prepare(`SELECT ${ADMIN_MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(id).first<AdminMemberRow>();
+  return c.json(adminMember(row!), 201);
+});
+
+app.patch("/api/members/:id", async (c) => {
+  const auth = await requireOperator(c);
+  if (auth instanceof Response) return auth;
+  const memberId = c.req.param("id");
+  const target = await loadMember(c.env, memberId);
+  if (!target) return c.json(errorBody("not_found", "member not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (extraKeys(obj, ["display_name", "disabled"]).length > 0) return invalid(c, "unknown field");
+  if (obj.display_name === undefined && obj.disabled === undefined) return invalid(c, "display_name or disabled required");
+  let displayName: string | null = null;
+  if (obj.display_name !== undefined) {
+    if (typeof obj.display_name !== "string") return invalid(c, "invalid display_name");
+    displayName = obj.display_name.trim();
+    if (displayName.length < 1 || displayName.length > 64) return invalid(c, "display_name must be 1-64 characters");
+  }
+  if (obj.disabled !== undefined && typeof obj.disabled !== "boolean") return invalid(c, "disabled must be boolean");
+  if (obj.disabled === true && target.is_operator === 1) return forbidden(c, "cannot disable the operator");
+  if (displayName !== null) {
+    await c.env.DB.prepare(`UPDATE members SET display_name = ? WHERE id = ?`).bind(displayName, memberId).run();
+  }
+  if (obj.disabled === true) {
+    await c.env.DB.prepare(`UPDATE members SET disabled_at = COALESCE(disabled_at, ?) WHERE id = ?`)
+      .bind(new Date().toISOString(), memberId)
+      .run();
+  } else if (obj.disabled === false) {
+    await c.env.DB.prepare(`UPDATE members SET disabled_at = NULL WHERE id = ?`).bind(memberId).run();
+  }
+  const row = await c.env.DB.prepare(`SELECT ${ADMIN_MEMBER_COLUMNS} FROM members WHERE id = ?`).bind(memberId).first<AdminMemberRow>();
+  return c.json(adminMember(row!));
+});
+
+app.post("/api/members/:id/password", async (c) => {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+  const memberId = c.req.param("id");
+  const target = await loadMember(c.env, memberId);
+  if (!target || target.kind !== "human") return c.json(errorBody("not_found", "member not found"), 404);
+  const obj = parseObject(await c.req.text());
+  if (!obj) return invalid(c, "invalid json");
+  if (target.id === auth.member.id) {
+    if (extraKeys(obj, ["old_password", "new_password"]).length > 0) return invalid(c, "unknown field");
+    const oldPassword = typeof obj.old_password === "string" ? obj.old_password : "";
+    const newPassword = typeof obj.new_password === "string" ? obj.new_password : "";
+    if (newPassword.length < 12 || newPassword.length > 128) return invalid(c, "password must be 12-128 characters");
+    if (!target.password_hash || !(await verifyPassword(oldPassword, target.password_hash))) {
+      return c.json(errorBody("wrong_password", "old password does not match"), 400);
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await c.env.DB.prepare(`UPDATE members SET password_hash = ?, must_change_password = 0 WHERE id = ?`)
+      .bind(passwordHash, memberId)
+      .run();
+    return c.json({ ok: true });
+  }
+  if (auth.member.is_operator !== 1) return forbidden(c, "operator required");
+  if (extraKeys(obj, ["password"]).length > 0) return invalid(c, "unknown field");
+  const password = typeof obj.password === "string" ? obj.password : "";
+  if (password.length < 12 || password.length > 128) return invalid(c, "password must be 12-128 characters");
+  const passwordHash = await hashPassword(password);
+  await c.env.DB.prepare(`UPDATE members SET password_hash = ?, must_change_password = 1 WHERE id = ?`)
+    .bind(passwordHash, memberId)
+    .run();
+  return c.json({ ok: true });
+});
+
+mountProviderRoutes(app);
+mountAgentRoutes(app);
+mountTraceRoutes(app);
+
 app.get("/api/metrics", async (c) => {
   const auth = await requireOperator(c);
   if (auth instanceof Response) return auth;
@@ -534,6 +766,7 @@ function publicMember(member: MemberRow) {
     capabilities_json: member.capabilities_json,
     quota_class: member.quota_class,
     is_operator: member.is_operator,
+    must_change_password: member.must_change_password === 1,
   };
 }
 
@@ -557,9 +790,111 @@ async function forwardSend(env: Env, roomId: string, memberId: string, jsonText:
   );
 }
 
+app.notFound(async (c) => {
+  const path = new URL(c.req.url).pathname;
+  if (path.startsWith("/api/") || path === "/mcp" || path.startsWith("/mcp/")) {
+    return c.json(errorBody("not_found", "not found"), 404);
+  }
+  if (c.env.ASSETS) {
+    return c.env.ASSETS.fetch(c.req.raw);
+  }
+  return c.json(errorBody("not_found", "not found"), 404);
+});
+
 export default {
   fetch: app.fetch.bind(app),
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(gcAllRooms(env.DB));
   },
 };
+
+type RoomSummaryRow = {
+  id: string;
+  slug: string;
+  name: string;
+  created_at: string;
+  role: string | null;
+  archived_at: string | null;
+  last_seq: number | null;
+  member_count: number;
+  lm_seq: number | null;
+  lm_sender_id: string | null;
+  lm_body_preview: string | null;
+  lm_created_at: string | null;
+  lm_sender_display_name: string | null;
+  lm_sender_handle: string | null;
+};
+
+async function roomSummaries(
+  env: Env,
+  memberId: string,
+  options: { all: boolean; roomId?: string },
+): Promise<Array<Record<string, unknown>>> {
+  const params: unknown[] = [memberId];
+  let sql = `SELECT r.id, r.slug, r.name, r.created_at, rm.role, r.archived_at,
+                    (SELECT MAX(m.seq) FROM messages m WHERE m.room_id = r.id) AS last_seq,
+                    (SELECT COUNT(*) FROM room_members x WHERE x.room_id = r.id) AS member_count,
+                    lm.seq AS lm_seq, lm.sender_id AS lm_sender_id,
+                    substr(lm.body, 1, 140) AS lm_body_preview, lm.created_at AS lm_created_at,
+                    sm.display_name AS lm_sender_display_name, sm.handle AS lm_sender_handle
+             FROM rooms r
+             ${options.all ? "LEFT JOIN" : "JOIN"} room_members rm ON rm.room_id = r.id AND rm.member_id = ?
+             LEFT JOIN messages lm ON lm.room_id = r.id
+               AND lm.seq = (SELECT MAX(m2.seq) FROM messages m2 WHERE m2.room_id = r.id AND m2.kind = 'message')
+             LEFT JOIN members sm ON sm.id = lm.sender_id`;
+  if (options.roomId !== undefined) {
+    sql += ` WHERE r.id = ?`;
+    params.push(options.roomId);
+  }
+  sql += ` ORDER BY r.created_at ASC`;
+  const result = await env.DB.prepare(sql).bind(...params).all<RoomSummaryRow>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    created_at: row.created_at,
+    role: row.role,
+    archived_at: row.archived_at,
+    last_seq: row.last_seq,
+    member_count: row.member_count,
+    last_message:
+      row.lm_seq === null
+        ? null
+        : {
+            seq: row.lm_seq,
+            sender_id: row.lm_sender_id,
+            sender_display_name: row.lm_sender_display_name,
+            sender_handle: row.lm_sender_handle,
+            body_preview: row.lm_body_preview,
+            created_at: row.lm_created_at,
+          },
+  }));
+}
+
+const ADMIN_MEMBER_COLUMNS = `id, kind, handle, display_name, is_operator, quota_class, created_at, disabled_at, must_change_password`;
+
+type AdminMemberRow = {
+  id: string;
+  kind: string;
+  handle: string;
+  display_name: string;
+  is_operator: number;
+  quota_class: string;
+  created_at: string;
+  disabled_at: string | null;
+  must_change_password: number;
+};
+
+function adminMember(row: AdminMemberRow) {
+  return {
+    id: row.id,
+    kind: row.kind,
+    handle: row.handle,
+    display_name: row.display_name,
+    is_operator: row.is_operator,
+    quota_class: row.quota_class,
+    created_at: row.created_at,
+    disabled_at: row.disabled_at,
+    must_change_password: row.must_change_password === 1,
+  };
+}

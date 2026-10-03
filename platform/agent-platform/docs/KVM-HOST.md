@@ -1,5 +1,7 @@
 # M0 KVM 測試主機準備
 
+2026-09-21 已在第二台主機完成固定 none-lane M0 硬體驗收，結果與限制見 [KVM 驗收](KVM-VALIDATION.md)。本文件保留通用準備流程與早期障礙診斷。
+
 ## 先處理硬體能力
 
 2026-09-21 開發機診斷：Ubuntu 24.04／AMD EPYC-Milan，`hypervisor` flag 有、`svm` flag 無、`/dev/kvm` 無。這表示目前 VM 沒有暴露所需的硬體虛擬化能力。套件安裝不能取代宿主機設定。
@@ -16,9 +18,21 @@ agent-platform-m0 preflight
 
 設定依據：[Linux 官方 nested KVM 文件](https://docs.kernel.org/virt/kvm/x86/running-nested-guests.html)。硬體準備完成後，agent 可在同一台機器或透過 SSH tunnel 執行測試。
 
+### 裝置存在但權限不足
+
+2026-09-21 第二台主機已暴露 `svm`，`/dev/kvm` 為 `root:kvm`、0660，但執行帳號不在 `kvm` 群組；preflight 回 `kvm_permission_denied`。這個障礙應先由裝置權限處理；仍需重跑 preflight 的 KVM API 檢查。管理員可將實際執行帳號加入 `kvm` 群組，重新登入／重新開啟 agent session 後重跑 preflight；例如本次帳號為 `ckc`：
+
+```bash
+sudo usermod -aG kvm ckc
+# 重新登入後，在已啟用本專案虛擬環境的終端：
+agent-platform-m0 preflight
+```
+
+裝置權限只解除 KVM API 的檢查障礙。Cocoon 的主機安裝仍需管理員權限；VM lifecycle 通常由 root runtime 執行，上游也支援有 delegated CPU controller 的 systemd user slice。本次已以 user service 通過 none-lane 測試，設定與限制見 KVM 驗收。若採 root runtime 且 `sudo -n true` 回「需要密碼」，由管理員在自己的終端完成下列準備並啟動 sandboxd，再提供 loopback／SSH tunnel 連線。不要在聊天傳遞 sudo 密碼，也不需為此設定全域免密碼 sudo。[新主機紀錄](evidence/new-host-2026-09-21.md) 保留安裝前的障礙與準備項目。
+
 ## 主機套件與服務
 
-以下是這個 M0 切片的安裝基準，仍待真實 KVM 整合驗證；使用獨立測試主機與新的 sandboxd data directory。
+以下是這個 M0 切片的安裝基準；已測版本見 KVM 驗收。使用獨立測試主機與新的 sandboxd data directory。
 
 | 元件 | 版本／用途 |
 | --- | --- |
@@ -65,11 +79,11 @@ docker build -t newclear-agent-m0:local guest
 agent-platform-m0 guest-image-smoke --image newclear-agent-m0:local --output .artifacts/guest-check
 ```
 
-若本機 Docker 沒有 Buildx，可在 `docker build` 前設 `DOCKER_BUILDKIT=0`。本次已在 Docker 中通過 rootfs 的 14 項 Agent Server 檢查；尚未證明它能以 MicroVM 開機。證據見 [guest report](evidence/guest-docker-2026-09-21.json)。
+若本機 Docker 沒有 Buildx，可在 `docker build` 前設 `DOCKER_BUILDKIT=0`。本次已在 Docker 中通過 rootfs 的 14 項 Agent Server 檢查；Docker 結果本身不能證明 MicroVM 開機。原始 Docker 證據見 [guest report](evidence/guest-docker-2026-09-21.json)；後續真實開機證據見 KVM 驗收。
 
-後續需把此映像提供給測試主機可讀取的 registry／Cocoon image store。本次只有本機 build，沒有自動 publish。`sandbox-smoke --template` 要求 **OCI manifest digest**（`registry/path@sha256:…`），不能使用 tag 或 Docker inspect 的 image config ID。取得真正 manifest digest 後，由 operator 設 `GUEST_TEMPLATE` 並透過 Cocoon 匯入／拉取；不要填寫虛構 digest。
+後續需把此映像提供給測試主機可讀取的 registry／Cocoon image store。本次曾透過短期 loopback registry 完成 OCI pull／MicroVM 驗證；registry 已清理，沒有對外 publish。`sandbox-smoke --template` 要求 **OCI manifest digest**（`registry/path@sha256:…`），不能使用 tag 或 Docker inspect 的 image config ID。取得真正 manifest digest 後，由 operator 設 `GUEST_TEMPLATE` 並透過 Cocoon 匯入／拉取；不要填寫虛構 digest。
 
-將同一 guest 的 `/boot` 檔案安裝到主機相同路徑，並依 [sandbox deployment](https://github.com/cocoonstack/sandbox/blob/de42fd50be5cdbfaaa6ddf890081566edb503d3c/docs/deploy.md) 先確認 Cocoon 能啟動它。Kernel、silkd、sandboxd 的組合仍需實測；report 不會因 Docker build 成功而將 boot gate 關閉。
+將同一 guest 的 `/boot` 檔案安裝到主機相同路徑，並依 [sandbox deployment](https://github.com/cocoonstack/sandbox/blob/de42fd50be5cdbfaaa6ddf890081566edb503d3c/docs/deploy.md) 先確認 Cocoon 能啟動它。本次固定 Kernel／silkd／sandboxd 組合已實測；版本或映像改變時需重驗，不能只因 Docker build 成功而關閉 boot gate。
 
 ## 單節點 sandboxd 配置與連線
 
@@ -114,8 +128,8 @@ HTTPS origin 也可使用，憑證必須可驗證。SDK wrapper 只允許指定 
 - `sandbox_contract_passed=true`：此次 claim、binary／固定 OCI claim key／lease、REST/WS、guest 程序重啟後接續、release ACK 與 claim-list 檢查通過。
 - `guest_process_restart_*` 只表示 Agent Server 程序重啟，不是 VM 重啟或 checkpoint restore。
 - 配置 POST timeout／未知回應時，不重試建立；報告保存 claim_ref 與可見 matching claims，交由 operator 依主機 journal 核對。沒有 claim token 時不會假裝完成 release；TTL 是回收上限之一，不是已清理的證據。
-- `vm_removal_confirmed=false`、`full_m0_complete=false` 保留至獨立的 VM 停止、TTL 到期、跨工作區隔離、egress 正反案例與故障注入證據完成。release ACK／claim-list 消失不能單獨關閉這些 gate。
+- 單一 sandbox probe 保留 `vm_removal_confirmed=false`、`full_m0_complete=false`。本次另以 host lifecycle／egress probes 完成獨立證據，gate report 才宣告範圍內的 M0 通過；release ACK／claim-list 消失仍不能單獨關閉 gate。
 
-SDK 0.1.12 的 `client.py` 與研究 revision 一致，`sandbox.py` 不一致：發布 wheel 尚未包含研究 commit 中的 exec-timeout kill 和 proxy accept polling 修正。本切片使用發布 wheel 實測 control-plane HTTP，結束 proxy 時主動 shutdown listener；exec timeout 不能當作程序已終止的證據。完整 data-plane／MicroVM 的 wire 行為仍待真實主機測試。
+SDK 0.1.12 的 `client.py` 與研究 revision 一致，`sandbox.py` 不一致：發布 wheel 尚未包含研究 commit 中的 exec-timeout kill 和 proxy accept polling 修正。本切片使用發布 wheel 實測 control-plane HTTP，結束 proxy 時主動 shutdown listener；exec timeout 不能當作程序已終止的證據。本次 none-lane data-plane／MicroVM 的受測 wire 行為已通過，未測能力不因此擴大。
 
-`template_digest` 是 promoted snapshot export 的內容雜湊，**不是 OCI manifest digest**；configured pool／cold image claim 通常沒有這個欄位。本 probe 僅使用後兩者，核對 claim-list 中完整的 template/net/size/claim_ref，再驗證 guest binary。若收到 promoted digest 會拒絕使用。這仍不是 guest rootfs 的完整 attestation，boot/template gate 保留。語意依據：[sandbox claim API](https://github.com/cocoonstack/sandbox/blob/de42fd50be5cdbfaaa6ddf890081566edb503d3c/docs/sandboxd-api.md)。
+`template_digest` 是 promoted snapshot export 的內容雜湊，**不是 OCI manifest digest**；configured pool／cold image claim 通常沒有這個欄位。本 probe 僅使用後兩者，核對 claim-list 中完整的 template/net/size/claim_ref，再驗證 guest binary。若收到 promoted digest 會拒絕使用。Guest rootfs 的完整 attestation 仍不在此 probe 的保證範圍；boot/template gate 另以 host 及 binary 證據核對。語意依據：[sandbox claim API](https://github.com/cocoonstack/sandbox/blob/de42fd50be5cdbfaaa6ddf890081566edb503d3c/docs/sandboxd-api.md)。

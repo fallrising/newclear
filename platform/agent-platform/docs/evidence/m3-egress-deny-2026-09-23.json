@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-23T11:35:52.589713+00:00",
+  "scope": "node-egress-v1",
+  "deny_all": true,
+  "passed": true,
+  "full_at07_complete": false,
+  "policy_sha256": "ed685044a612dbf83b2f69d86c6957a4ac0f5d50ada7949cffb0a7583276de3b",
+  "live_policy_api_rejected": true,
+  "guest_checks": {
+    "terminal_uid_2000": true,
+    "proxy_environment": true,
+    "no_guest_nic": true,
+    "direct_public_blocked": true,
+    "direct_metadata_blocked": true,
+    "direct_private_blocked": true,
+    "socks_disabled": true,
+    "previous_http_grant_revoked": true,
+    "previous_connect_grant_revoked": true
+  },
+  "active_vm_blocks_policy_change": true,
+  "live_config_mutation_denied": true,
+  "changed_policy_admission_denied": true,
+  "cleanup_confirmed": true,
+  "remaining_claims": 0,
+  "remaining_vms": 0,
+  "finished_at": "2026-09-23T11:36:03.920486+00:00"
+}

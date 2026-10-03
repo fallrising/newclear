@@ -1,0 +1,51 @@
+{
+   "schemaVersion": 2,
+   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+   "config": {
+      "mediaType": "application/vnd.docker.container.image.v1+json",
+      "size": 8884,
+      "digest": "sha256:0df265f213d032f3673cc2de0aebbdd75a6f06bb81edbe18af5c5c5786c40053"
+   },
+   "layers": [
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 30628175,
+         "digest": "sha256:ef852a6561054e2528338669160bc648ab24739a41fabc62c49df57495f3dcaa"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 47094721,
+         "digest": "sha256:88cbae61af8cc596c5abc34a9d74eebc533f92c4fe88fa6644c36b6c8a92efd0"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 10617653,
+         "digest": "sha256:270dc7bf255e456fcbe9f36dd5dfc8e819dee2e6a592c25ad02455a2ec07f077"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 1364357,
+         "digest": "sha256:de5db7266899f9efe9d9ab1532a8011b1c28d7975870a9640accd640e19a3469"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 21800134,
+         "digest": "sha256:3fa97c0f8afd7d97d8983a16e608374defe7303f2127ede9ba6fafc00a936dfd"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 7405357,
+         "digest": "sha256:314f286c1c8195babc5309785267c2239fc42b25cb3db4ca48622415677af651"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 111839135,
+         "digest": "sha256:473eafd3e6076309a67d8aa1f6327127f3b0aa8e3ad094810f9ed82105aacfbc"
+      },
+      {
+         "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+         "size": 3919,
+         "digest": "sha256:73433bbc790d41fc6993386875003e6f4a9dd549b19f78c195de95180bc764e8"
+      }
+   ]
+}

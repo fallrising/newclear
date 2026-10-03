@@ -50,6 +50,7 @@ export function CiDetailPage({ session, ciId: explicitId }: { session: SessionVi
   return <article className="ci-detail" aria-label="配置項詳情">
     <Link className="back-link" to="/ops/cmdb"><ArrowLeft size={15} aria-hidden="true" />返回 CMDB</Link>
     <PageHeading eyebrow={`${providerLabels[ci.provider]} · ${ci.id}`} title={ci.name} description="Ops 與 RD deep link 指向同一 canonical CI ID；scope 外詳情以 404 呈現。" action={canUpdate ? <CiMetadataDialog ci={ci} onReload={() => detail.refetch()} /> : undefined} />
+    {session.effectiveActions.includes('resourceObject.read') && ['cache', 'queue', 'cluster'].includes(ci.kind) && <Button asChild variant="outline"><Link to={`/ops/${ci.kind === 'cache' ? 'caches' : ci.kind === 'queue' ? 'messaging' : 'clusters'}/${ci.id}`}>查看專業資源與消費者</Link></Button>}
     <div className="detail-status-grid">
       <section className="panel"><h2>目前狀態</h2><dl className="detail-list"><div><dt>健康度</dt><dd><span className={`status status-${ci.health}`}>{healthLabels[ci.health]}</span></dd></div><div><dt>資料新鮮度</dt><dd><span className={`status freshness-${freshness}`}>{freshnessText(ci, session.logicalClock)}</span>{freshness === 'stale' && <Button variant="ghost" onClick={() => void detail.refetch()}><RefreshCw size={14} aria-hidden="true" />重新整理</Button>}</dd></div><div><dt>來源</dt><dd>{ci.source === 'manual' ? '手動納管' : ci.source === 'discovered' ? '探索匯入' : '交付建立'}</dd></div></dl></section>
       <section className="panel"><h2>Canonical identity</h2><IdentityDetails ci={ci} /></section>

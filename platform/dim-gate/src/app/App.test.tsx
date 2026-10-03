@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { serviceDeliveryMutationKey } from '../api/query-definitions'
 import type { DashboardView, SessionView } from '../domain/schemas'
 import { AppSession, createAppQueryClient } from './App'
 
@@ -12,11 +13,13 @@ const client = vi.hoisted(() => ({
   listeners: new Set<() => void>(),
   clock: 7,
   commandCount: 1,
+  getNotifications: vi.fn(), getNavigation: vi.fn(), listApplications: vi.fn(),
   getSession: vi.fn(), getPersonas: vi.fn(), getDashboard: vi.fn(), getGuide: vi.fn(), setPersona: vi.fn(), advanceClock: vi.fn(), reset: vi.fn(),
 }))
 
 vi.mock('../api/client', () => ({
   api: {
+    getNotifications: client.getNotifications, getNavigation: client.getNavigation, listApplications: client.listApplications,
     getSession: client.getSession, getPersonas: client.getPersonas, getDashboard: client.getDashboard,
     getGuide: client.getGuide, setPersona: client.setPersona, advanceClock: client.advanceClock, reset: client.reset,
     subscribe: (listener: () => void) => { client.listeners.add(listener); return () => client.listeners.delete(listener) },
@@ -29,10 +32,9 @@ function makeSession(id = 'user-rd-commerce', epoch = 1): SessionView {
   return { user: { id, displayName: id === 'user-rd-commerce' ? 'Commerce 研發' : 'Data 研發' }, assignments: [], effectiveActions: ['app.read', 'environment.read', 'ci.read'], centers: ['rd'], demo: true, sessionId: 'session-test', identityEpoch: epoch, generation: 1, policyVersion: 1, storeRevision: 1, logicalClock: 7, storageMode: 'session' }
 }
 function dashboard(count = 2): DashboardView {
-  return { center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }
+  return { scope: { projects: [], environments: [], pools: [], filters: {} }, workspace: { kind: 'rd', services: { title: '服務健康', total: 0, items: [] }, work: { title: '我的工作', total: 0, items: [] }, deliveries: { title: '近期交付', total: 0, items: [] } }, activeIncidentCount: 0, pendingItems: [], center: 'rd', title: '研發中心', applicationCount: count, environmentCount: count, ciCount: count, providers: [{ provider: 'aws', count }, { provider: 'aliyun', count: 0 }, { provider: 'onprem', count: 0 }], dataAsOf: '2026-09-20T09:00:00Z' }
 }
-function mount(path = '/rd') {
-  const queryClient = createAppQueryClient()
+function mount(path = '/rd', queryClient = createAppQueryClient()) {
   return render(<QueryClientProvider client={queryClient}><MemoryRouter initialEntries={[path]}><AppSession /></MemoryRouter></QueryClientProvider>)
 }
 function notify() { for (const listener of client.listeners) listener() }
@@ -46,8 +48,11 @@ beforeEach(() => {
   localStorage.clear()
   client.getSession.mockImplementation(async () => structuredClone(client.session))
   client.getPersonas.mockResolvedValue([{ id: 'user-rd-commerce', displayName: 'Commerce 研發', description: '商務專案', centers: ['rd'] }, { id: 'user-rd-data', displayName: 'Data 研發', description: '資料專案', centers: ['rd'] }])
+  client.getNotifications.mockResolvedValue({ items: [] })
+  client.getNavigation.mockResolvedValue([])
+  client.listApplications.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 100 })
   client.getDashboard.mockResolvedValue(dashboard())
-  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', seedVersion: 'dim-gate-m2-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
+  client.getGuide.mockImplementation(async () => ({ logicalClock: client.clock, storeRevision: client.commandCount, sessionId: 'session-test', applicationId: null, environmentId: null, steps: [], seedVersion: 'dim-gate-m4-v1', schemaVersion: 1, pendingTasks: 0, commandCount: client.commandCount }))
   client.setPersona.mockImplementation(async (id: string) => { client.session = makeSession(id, 2); notify(); return structuredClone(client.session) })
   client.advanceClock.mockImplementation(async (ticks: number) => { client.clock += ticks; client.commandCount++; notify(); return { entityType: 'session', entityId: 'session-test', entityVersion: 2, correlationId: 'corr-test', changed: [] } })
   client.reset.mockImplementation(async () => { client.clock = 0; client.commandCount = 0; client.session = { ...makeSession(), identityEpoch: 2, generation: 2 }; notify(); return structuredClone(client.session) })
@@ -74,7 +79,7 @@ describe('M0 role centers and session controls', () => {
     const summary = await screen.findByRole('region', { name: '可見資源摘要' })
     expect(within(summary).getByRole('table')).toBeVisible()
     expect(within(summary).getByText('AWS')).toBeVisible()
-    expect(client.getDashboard).toHaveBeenCalledWith('rd')
+    expect(client.getDashboard).toHaveBeenCalledWith('rd', {})
   })
 
   it('invalidates scope data on persona switch and renders only the new identity', async () => {
@@ -118,10 +123,18 @@ describe('M0 role centers and session controls', () => {
     mount('/guide')
     await screen.findByTestId('logical-clock')
     fireEvent.change(screen.getByLabelText('前進幅度'), { target: { value: '5' } })
+    const releaseRefreshes: (() => void)[] = []
+    client.getNotifications.mockImplementation(() => new Promise(resolve => releaseRefreshes.push(() => resolve({ items: [] }))))
     fireEvent.click(screen.getByRole('button', { name: '前進演示時鐘' }))
     await waitFor(() => expect(screen.getByTestId('logical-clock')).toHaveTextContent('12ticks'))
     expect(client.advanceClock).toHaveBeenCalledWith(5)
     const trigger = screen.getByRole('button', { name: '重置示範' })
+    expect(trigger).toBeDisabled()
+    expect(screen.queryByText('演示時鐘已前進 5 個 tick。')).not.toBeInTheDocument()
+    await act(async () => { for (const release of releaseRefreshes) release() })
+    await screen.findByText('演示時鐘已前進 5 個 tick。')
+    await waitFor(() => expect(trigger).toBeEnabled())
+    client.getNotifications.mockResolvedValue({ items: [] })
     trigger.focus()
     fireEvent.click(trigger)
     const dialog = await screen.findByRole('dialog', { name: '重置這個示範 session？' })
@@ -151,4 +164,27 @@ describe('M0 role centers and session controls', () => {
     expect(client.reset).not.toHaveBeenCalled()
     expect(client.advanceClock).not.toHaveBeenCalled()
   })
+})
+
+
+it('holds Demo persona/reset controls through a committed service command and its still-pending readback', async () => {
+  const queryClient = createAppQueryClient()
+  mount('/guide', queryClient)
+  const persona = await screen.findByLabelText('示範身分')
+  const reset = await screen.findByRole('button', { name: /^重置示範$/ })
+  await waitFor(() => expect(persona).toBeEnabled())
+  let finishCommand!: () => void, finishReadback!: () => void
+  const command = new Promise<void>(resolve => { finishCommand = resolve })
+  const readback = new Promise<void>(resolve => { finishReadback = resolve })
+  const mutation = queryClient.getMutationCache().build(queryClient, { mutationKey: serviceDeliveryMutationKey,
+    mutationFn: async () => { await command; await readback } })
+  let pending!: Promise<void>
+  act(() => { pending = mutation.execute(undefined) })
+  await waitFor(() => { expect(persona).toBeDisabled(); expect(reset).toBeDisabled() })
+  await act(async () => { finishCommand(); await command })
+  expect(persona).toBeDisabled(); expect(reset).toBeDisabled()
+  fireEvent.change(persona, { target: { value: 'user-rd-data' } })
+  expect(client.setPersona).not.toHaveBeenCalled()
+  await act(async () => { finishReadback(); await pending })
+  await waitFor(() => { expect(persona).toBeEnabled(); expect(reset).toBeEnabled() })
 })

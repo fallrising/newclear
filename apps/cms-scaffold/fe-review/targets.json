@@ -1,0 +1,131 @@
+{
+  "project": "cms-scaffold",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動；頁面清單對應 v2 W0 的路由。第 2 輪依 DESIGN.md M1 驗證、M2 在 v2 前端波次完成後同步並改為 true。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light"
+  ],
+  "apps": [
+    {
+      "name": "web-front",
+      "kind": "spa",
+      "cwd": "apps/cms-scaffold/apps/web-front",
+      "install": "npm ci（在 apps/cms-scaffold/ 執行，workspace 共用 package-lock.json）",
+      "start": "npm run dev:mock -- --host 127.0.0.1 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5173",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "selector",
+          "path": "/"
+        },
+        {
+          "id": "login",
+          "path": "/login"
+        },
+        {
+          "id": "album",
+          "path": "/album"
+        },
+        {
+          "id": "albums",
+          "path": "/album/albums"
+        },
+        {
+          "id": "album-detail",
+          "path": "/album/albums/coast-light-2026"
+        },
+        {
+          "id": "photo",
+          "path": "/album/photos/coast-harbour"
+        },
+        {
+          "id": "clinic",
+          "path": "/clinic"
+        },
+        {
+          "id": "projects",
+          "path": "/projects"
+        },
+        {
+          "id": "project-detail",
+          "path": "/projects/cms-scaffold"
+        }
+      ]
+    },
+    {
+      "name": "web-back",
+      "kind": "spa",
+      "cwd": "apps/cms-scaffold/apps/web-back",
+      "install": "npm ci（在 apps/cms-scaffold/ 執行，workspace 共用 package-lock.json）",
+      "start": "npm run dev:mock -- --host 127.0.0.1 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5174",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "sign-in",
+          "path": "/sign-in"
+        },
+        {
+          "id": "home",
+          "path": "/?mockUser=seed-operator-album"
+        },
+        {
+          "id": "entries-album",
+          "path": "/entries/album?mockUser=seed-operator-album"
+        },
+        {
+          "id": "entry-new",
+          "path": "/entries/album/new?mockUser=seed-operator-album"
+        },
+        {
+          "id": "entry-edit",
+          "path": "/entries/album/30000000-0000-4000-8000-000000000001?mockUser=seed-operator-album"
+        },
+        {
+          "id": "album-composer",
+          "path": "/views/album.composer?mockUser=seed-operator-album"
+        },
+        {
+          "id": "clinic-schedule",
+          "path": "/views/clinic.schedule?mockUser=seed-operator-clinic"
+        },
+        {
+          "id": "projects-board",
+          "path": "/views/projects.board?mockUser=seed-operator-projects"
+        }
+      ]
+    },
+    {
+      "name": "web-admin",
+      "kind": "spa",
+      "cwd": "apps/cms-scaffold/apps/web-admin",
+      "install": "npm ci（在 apps/cms-scaffold/ 執行，workspace 共用 package-lock.json）",
+      "start": "npm run dev:mock -- --host 127.0.0.1 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5175",
+      "ready": "/",
+      "pages": [
+        {
+          "id": "login",
+          "path": "/login"
+        },
+        {
+          "id": "home",
+          "path": "/?mockUser=seed-admin"
+        },
+        {
+          "id": "types",
+          "path": "/types?mockUser=seed-admin"
+        },
+        {
+          "id": "users",
+          "path": "/users?mockUser=seed-admin"
+        }
+      ]
+    }
+  ]
+}

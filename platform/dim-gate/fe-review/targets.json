@@ -1,0 +1,75 @@
+{
+  "project": "dim-gate",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷（src/app/routes/AppRoutes.tsx、vite.config.ts base /dim-gate/、.env.demo），尚未實際啟動；第 2 輪驗證並修正後改為 true。每頁都是新 context，因此一律是預設身分 user-rd-commerce（僅 RD 中心）；Ops／Admin 與深色主題由 DESIGN.md M2 的 capture-personas.mjs 擷取。",
+  "locale": "zh-TW",
+  "colorSchemes": [
+    "light"
+  ],
+  "apps": [
+    {
+      "name": "web",
+      "kind": "spa",
+      "cwd": "platform/dim-gate",
+      "install": "pnpm install --frozen-lockfile",
+      "start": "pnpm dev --mode demo --port 5173 --strictPort",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5173/dim-gate/",
+      "ready": "/dim-gate/",
+      "pages": [
+        {
+          "id": "home",
+          "path": "/dim-gate/"
+        },
+        {
+          "id": "guide",
+          "path": "/dim-gate/guide"
+        },
+        {
+          "id": "rd",
+          "path": "/dim-gate/rd"
+        },
+        {
+          "id": "rd-apps",
+          "path": "/dim-gate/rd/apps"
+        },
+        {
+          "id": "rd-app-detail",
+          "path": "/dim-gate/rd/apps/app-checkout"
+        },
+        {
+          "id": "rd-environment-detail",
+          "path": "/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod"
+        },
+        {
+          "id": "rd-catalog",
+          "path": "/dim-gate/rd/catalog"
+        },
+        {
+          "id": "rd-requests",
+          "path": "/dim-gate/rd/requests"
+        },
+        {
+          "id": "rd-pipelines",
+          "path": "/dim-gate/rd/pipelines"
+        },
+        {
+          "id": "rd-observability",
+          "path": "/dim-gate/rd/observability"
+        },
+        {
+          "id": "ops-forbidden",
+          "path": "/dim-gate/ops"
+        },
+        {
+          "id": "admin-forbidden",
+          "path": "/dim-gate/admin"
+        },
+        {
+          "id": "unknown-route",
+          "path": "/dim-gate/does-not-exist"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+"""Root-side scoped installer, delivered over the controller's admin SSH alias.
+
+Only accepts the controller-generated payload. Existing unowned files are
+refused. Ownership/checksum records persist after every write so interrupted
+runs can be examined and resumed. No changes to sshd, sudoers or containerd.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import subprocess
+import tarfile
+import tempfile
+import urllib.request
+
+ROOT = Path('/var/lib/eru-mvp')
+OWNER = ROOT / 'owner.json'
+
+
+def run(argv):
+    print(json.dumps({'command': argv}), flush=True)
+    p = subprocess.run(argv, capture_output=True, text=True, timeout=90)
+    if p.stdout:
+        print(p.stdout.strip(), flush=True)
+    if p.returncode:
+        raise RuntimeError(f'{argv[0]} failed ({p.returncode}): {p.stderr}')
+    return p.stdout
+
+
+def verify_core_selection(config, state, root=Path('/'), owner_uid=0, runtime_sha=None):
+    from core_update import CoreUpdate, BINARY
+    updater = CoreUpdate(root, owner_uid)
+    journals = []
+    directory = updater.path('/var/lib/eru-mvp/core-updates')
+    if directory.exists():
+        updater.entry('/var/lib/eru-mvp/core-updates')
+    for update in sorted(directory.iterdir()) if directory.exists() else []:
+        entry = updater.entry('/' + str(update.relative_to(root)))
+        if not entry or entry['type'] != 'directory':
+            raise ValueError('unsafe core update directory')
+        path = update / 'journal.json'
+        name = '/' + str(path.relative_to(root))
+        entry = updater.entry(name)
+        if not entry or entry['type'] != 'file':
+            raise ValueError('unsafe core update journal')
+        record = json.loads(path.read_text())
+        marker = updater.entry('/' + str((update / 'cancelled.json').relative_to(root)))
+        if marker:
+            if updater.cancellation_archive(update.name) is None:
+                raise ValueError('cancellation receipt disappeared')
+            continue
+        if record.get('stage') != 'rolled-back':
+            journals.append(record)
+    selected = config.get('preserve_core')
+    if not selected:
+        if journals:
+            raise ValueError('core patch/update journal exists; release downgrade blocked')
+        return
+    if len(journals) != 1 or journals[0].get('id') != selected['run'] or journals[0].get('stage') != 'installed':
+        raise ValueError('unfinished or different core update; reconcile before reapply')
+    footprint = updater.inspect()
+    checksum = selected['sha256']
+    if journals[0].get('new_sha256') != checksum or footprint['binary']['sha256'] != checksum:
+        raise ValueError('installed core does not match selected patch')
+    if state['files'].get(BINARY) != checksum:
+        raise ValueError('core owner manifest differs')
+    # No second installer route may write the core binary while preserving it.
+    for item in config['files']:
+        if item['path'] == BINARY:
+            raise ValueError('core binary is also present in configuration payload')
+    core_artifacts = [a for a in config['artifacts'] if a['repository'] == 'projecteru2/core']
+    if len(core_artifacts) != 1 or core_artifacts[0]['files'] != {'eru-core': BINARY}:
+        raise ValueError('unexpected upstream core artifact mapping')
+    if any(BINARY in a['files'].values() for a in config['artifacts'] if a['repository'] != 'projecteru2/core'):
+        raise ValueError('another artifact would overwrite core')
+    if runtime_sha is None:
+        process = subprocess.run(['systemctl', 'show', 'eru-core', '--property=MainPID,ActiveState'],
+                                 capture_output=True, text=True, check=True, timeout=15)
+        runtime = dict(line.split('=', 1) for line in process.stdout.splitlines())
+        if runtime['ActiveState'] != 'active' or int(runtime['MainPID']) <= 0:
+            raise ValueError('core is not active')
+        runtime_sha = hashlib.sha256(Path('/proc', runtime['MainPID'], 'exe').read_bytes()).hexdigest()
+    if runtime_sha != checksum:
+        raise ValueError('running core differs from selected patch')
+
+
+def main(config):
+    if os.geteuid() != 0:
+        raise RuntimeError('requires root')
+    os.umask(0o077)
+    current = Path('/')
+    for part in ROOT.parts[1:]:
+        current = current / part
+        if current.is_symlink():
+            raise RuntimeError('refusing symlink in ERU owner path')
+    if ROOT.exists() and (not ROOT.is_dir() or ROOT.stat().st_uid != 0 or ROOT.stat().st_mode & 0o077):
+        raise RuntimeError('ERU owner directory is unsafe')
+    ROOT.mkdir(mode=0o700, exist_ok=True)
+    if OWNER.is_symlink() or (OWNER.exists() and not OWNER.is_file()):
+        raise RuntimeError('ERU owner manifest has an unsafe type')
+    if OWNER.exists():
+        owner_stat = OWNER.stat()
+        if owner_stat.st_uid != 0 or owner_stat.st_mode & 0o077 or owner_stat.st_nlink != 1:
+            raise RuntimeError('ERU owner manifest permissions or links are unsafe')
+    if (ROOT / 'owner.json.tmp').exists() or (ROOT / 'owner.json.tmp').is_symlink():
+        raise RuntimeError('stale ERU owner journal file exists')
+    state = json.loads(OWNER.read_text()) if OWNER.exists() else {'owner': 'eru-vps-mvp', 'files': {}}
+    if state.get('owner') != 'eru-vps-mvp':
+        raise RuntimeError('ownership mismatch')
+    if config['role'] == 'core':
+        verify_core_selection(config, state)
+
+    def persist():
+        temp = ROOT / 'owner.json.tmp'
+        with temp.open('x') as stream:
+            stream.write(json.dumps(state, indent=2) + '\n')
+        temp.chmod(0o600)
+        temp.replace(OWNER)
+
+    def install(path, content, mode):
+        target = Path(path)
+        if not target.is_absolute():
+            raise RuntimeError(f'refusing non-absolute install path: {path}')
+        current = Path('/')
+        for part in target.parts[1:-1]:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError(f'refusing symlink ancestor: {path}')
+        if target.is_symlink():
+            raise RuntimeError(f'refusing symlink: {path}')
+        data = content.encode() if isinstance(content, str) else content
+        digest = hashlib.sha256(data).hexdigest()
+        if target.exists():
+            current = hashlib.sha256(target.read_bytes()).hexdigest()
+            recorded = state['files'].get(path)
+            if recorded is None or current != recorded:
+                raise RuntimeError(f'refusing existing unowned or changed file: {path}')
+            if current == digest:
+                target.chmod(mode)
+                return False
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
+        with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as f:
+            f.write(data)
+            temporary = Path(f.name)
+        temporary.chmod(mode)
+        # Save intended digest first; interrupted replacement fails closed.
+        state['files'][path] = digest
+        persist()
+        temporary.replace(target)
+        print(json.dumps({'installed': path, 'sha256': digest}), flush=True)
+        return True
+
+    # Re-check deployment assumptions before any service/config changes.
+    if run(['id', '-un', str(pwd.getpwnam('ckc').pw_uid)]).strip() != 'ckc':
+        raise RuntimeError('unexpected admin principal')
+    policy = run(['/usr/sbin/sshd', '-T'])
+    if 'permitrootlogin no\n' not in policy:
+        raise RuntimeError('expected existing root-login prohibition')
+    run(['systemctl', 'is-active', 'containerd', 'docker'])
+    expected = run(['containerd', '--version'])
+    if 'v2.3.5 ' not in expected:
+        raise RuntimeError('unreviewed containerd version')
+    # Never replace the Docker runtime or its packages.
+    for artifact in config['artifacts']:
+        if config.get('preserve_core') and artifact['repository'] == 'projecteru2/core':
+            continue
+        if not artifact['files']:
+            continue
+        with tempfile.TemporaryDirectory(prefix='eru-install-') as directory:
+            archive = Path(directory) / 'archive'
+            digest = hashlib.sha256()
+            request = urllib.request.Request(artifact['url'], headers={'User-Agent': 'eru-vps-mvp-installer'})
+            with urllib.request.urlopen(request, timeout=30) as source, archive.open('wb') as output:
+                while chunk := source.read(1024 * 1024):
+                    digest.update(chunk)
+                    output.write(chunk)
+            if digest.hexdigest() != artifact['sha256']:
+                raise RuntimeError('archive checksum mismatch')
+            with tarfile.open(archive) as tar:
+                for binary, destination in artifact['files'].items():
+                    entries = [m for m in tar.getmembers() if m.isfile() and Path(m.name).name == binary]
+                    if len(entries) != 1:
+                        raise RuntimeError(f'archive member ambiguous or absent: {binary}')
+                    with tar.extractfile(entries[0]) as source:
+                        install(destination, source.read(), 0o755)
+
+    for file in config['files']:
+        install(file['path'], file['content'], file['mode'])
+
+    if config['role'] == 'core':
+        key = Path('/etc/eru/ssh_key')
+        if not key.exists():
+            run(['ssh-keygen', '-q', '-t', 'ed25519', '-N', '', '-C', 'eru-vps-mvp-core', '-f', str(key)])
+            state['key_generated'] = True
+            persist()
+        elif not state.get('key_generated'):
+            raise RuntimeError('refusing unknown existing core key')
+        key.chmod(0o600)
+        run(['nft', '--check', '-f', '/etc/eru/mvp-firewall.nft'])
+    else:
+        user = pwd.getpwnam('ckc')
+        sshdir = Path(user.pw_dir) / '.ssh'
+        sshdir.mkdir(mode=0o700, exist_ok=True)
+        if sshdir.is_symlink():
+            raise RuntimeError('refusing symlink ssh directory')
+        # OneVPS uses a Match User ckc AuthorizedKeysFile outside the home.
+        effective = run(['/usr/sbin/sshd', '-T', '-C',
+                         'user=ckc,host=' + config['core_ip'] + ',addr=' + config['core_ip']])
+        key_paths = next(line.split()[1:] for line in effective.splitlines()
+                         if line.startswith('authorizedkeysfile '))
+        if key_paths != ['/etc/ssh/onevps-personal-admin/ckc.keys']:
+            raise RuntimeError('unreviewed effective AuthorizedKeysFile: ' + repr(key_paths))
+        auth = Path(key_paths[0])
+        current = Path('/')
+        for part in auth.parts[1:-1]:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError('refusing symlink in effective AuthorizedKeysFile path')
+        original = auth.stat()
+        if original.st_uid != 0 or original.st_mode & 0o022:
+            raise RuntimeError('unsafe existing admin key file')
+        if auth.is_symlink():
+            raise RuntimeError('refusing symlink authorized_keys')
+        text = auth.read_text() if auth.exists() else ''
+        line = config['authorized_key']
+        if line not in text.splitlines():
+            # Refuse replacement of a previous task key; explicit rotation required.
+            if any('eru-vps-mvp-core' in x for x in text.splitlines()):
+                raise RuntimeError('existing task key differs; explicit rotation required')
+            with tempfile.NamedTemporaryFile(dir=auth.parent, delete=False) as f:
+                f.write((text.rstrip('\n') + '\n' + line + '\n').lstrip('\n').encode())
+                temp = Path(f.name)
+            temp.chmod(original.st_mode & 0o777)
+            os.chown(temp, original.st_uid, original.st_gid)
+            temp.replace(auth)
+            state['authorized_key'] = line
+            state['authorized_key_path'] = str(auth)
+            persist()
+        inactive = sshdir / 'authorized_keys'
+        if inactive.exists() and not inactive.is_symlink():
+            old = inactive.read_text().splitlines()
+            if line in old:
+                kept = [entry for entry in old if entry != line]
+                if kept:
+                    inactive.write_text('\n'.join(kept) + '\n')
+                else:
+                    inactive.unlink()
+        os.chown(sshdir, user.pw_uid, user.pw_gid)
+        sshdir.chmod(0o700)
+
+    run(['systemd-analyze', 'verify', *config['verify_units']])
+    run(['systemctl', 'daemon-reload'])
+    for unit in config['start_units']:
+        run(['systemctl', 'enable', '--now', unit])
+        run(['systemctl', 'is-active', unit])
+    persist()
+    print(json.dumps({'role': config['role'], 'install_complete': True}), flush=True)
+
+
+if __name__ == '__main__':
+    main(CONFIG)

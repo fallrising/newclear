@@ -1,0 +1,11 @@
+# Image, resource budget, placement and network are CLI parameters.
+appname: eru-mvp-nginx
+entrypoints:
+  web:
+    commands:
+      - nginx
+      - -g
+      - "daemon off;"
+    restart: always
+    publish:
+      - "80"

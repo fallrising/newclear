@@ -1,0 +1,54 @@
+name: ERU VPS MVP CI
+
+on:
+  pull_request:
+    paths: ["labs/eru-vps-mvp/**", ".github/workflows/eru-vps-mvp-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["labs/eru-vps-mvp/**", ".github/workflows/eru-vps-mvp-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eru-vps-mvp-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: labs/eru-vps-mvp
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test controller safety without VPS access
+        run: python3 -m unittest discover -s tests -v
+      - name: Validate sources, documents and private-file exclusion
+        run: |
+          python3 - <<'PY'
+          import ast, json, re, subprocess
+          from pathlib import Path
+          root = Path.cwd()
+          for path in [*root.glob('scripts/*.py'), *root.glob('tests/*.py')]:
+              ast.parse(path.read_text(), filename=str(path))
+          for path in root.glob('*.json'):
+              json.loads(path.read_text())
+          for path in root.rglob('*.md'):
+              if 'private' in path.relative_to(root).parts:
+                  continue
+              for target in re.findall(r'\]\(([^)]+)\)', path.read_text()):
+                  if '://' not in target and not target.startswith('#'):
+                      assert (path.parent / target.split('#')[0]).exists(), (path, target)
+              assert all(line == line.rstrip() for line in path.read_text().splitlines()), path
+          tracked = subprocess.check_output(['git', 'ls-files', '-z', '--', '.']).decode().split('\0')
+          for name in filter(None, tracked):
+              assert not {'private', '__pycache__', '.state', 'backups', 'vendor', 'artifacts'} & set(Path(name).parts), name
+          subprocess.run(['git', 'diff', '--check'], check=True)
+          PY

@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-02",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"x\", \"object\": \"chat.completion\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": 42}, \"finish_reason\": \"stop\"}]}"
+  },
+  "expect": {
+    "error_class": "protocol"
+  }
+}

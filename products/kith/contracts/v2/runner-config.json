@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/runner-config.json",
+  "title": "kith-runner runner.toml (parsed) v2",
+  "description": "The object runner.toml parses to (runner/toml.ts subset). runner/config.ts enforces the same rules plus file-system checks (RT-06, RT-07, token file mode). Defined in docs/v2/milestones/W6.md §4.5.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kith_url",
+    "bot_token_file",
+    "state_dir",
+    "quota_class",
+    "auth",
+    "adapter"
+  ],
+  "properties": {
+    "kith_url": {
+      "type": "string",
+      "pattern": "^(https://|http://(127\\.0\\.0\\.1|localhost)(:[0-9]+)?(/|$))"
+    },
+    "bot_token_file": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "state_dir": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "quota_class": {
+      "enum": [
+        "api_key",
+        "operator_personal"
+      ]
+    },
+    "operator_member_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auth": {
+      "enum": [
+        "api_key",
+        "subscription"
+      ]
+    },
+    "rooms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_-]{1,64}$"
+      }
+    },
+    "max_rooms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "executable",
+        "workdir"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "codex",
+            "claude_code",
+            "gemini_cli",
+            "command"
+          ]
+        },
+        "executable": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "workdir": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "home": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "timeout_s": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 7200
+        },
+        "mode": {
+          "type": "string"
+        },
+        "command": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "argv"
+          ],
+          "properties": {
+            "argv": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "command"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "mode": false,
+              "command": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "else": {
+            "properties": {
+              "command": false,
+              "home": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "home"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "codex"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "read-only",
+                  "workspace-write"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "claude_code"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "plan",
+                  "dontAsk",
+                  "acceptEdits"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "gemini_cli"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "plan",
+                  "default",
+                  "auto_edit"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "quota_class": {
+            "const": "operator_personal"
+          }
+        },
+        "required": [
+          "quota_class"
+        ]
+      },
+      "then": {
+        "required": [
+          "operator_member_id"
+        ],
+        "properties": {
+          "operator_member_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "auth": {
+            "const": "subscription"
+          }
+        },
+        "required": [
+          "auth"
+        ]
+      },
+      "then": {
+        "properties": {
+          "quota_class": {
+            "const": "operator_personal"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "fm": "BASE",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"x\", \"object\": \"chat.completion\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"hi\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 5, \"completion_tokens\": 1}}"
+  },
+  "expect": {
+    "text": "hi",
+    "finish": "stop",
+    "usage": {
+      "input_tokens": 5,
+      "output_tokens": 1
+    }
+  }
+}

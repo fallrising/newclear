@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "username": "seed-editor-album",
+      "displayName": "Album editor",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000005",
+      "username": "seed-editor-clinic",
+      "displayName": "Clinic editor",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000007",
+      "username": "seed-editor-projects",
+      "displayName": "Projects editor",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000004",
+      "username": "seed-member-clinic",
+      "displayName": "Clinic member",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000009",
+      "username": "seed-member-projects",
+      "displayName": "Projects member",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000006",
+      "username": "seed-operator-clinic",
+      "displayName": "Clinic operator",
+      "email": null,
+      "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000008",
+      "username": "seed-operator-projects",
+      "displayName": "Projects operator",
+      "email": null,
+      "status": "active"
+    }
+  ],
+  "page": 0,
+  "size": 9,
+  "total": 9
+}

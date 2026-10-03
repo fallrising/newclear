@@ -66,7 +66,9 @@ E2E：真實 UI 點擊 persona switch、表單、審批、pipeline、rollback。
 
 每個階段依[開發恢復協定](../DEVELOPMENT_PROTOCOL.md)，在task/report及PLAN保存commit/PR、被測版本、執行命令、結果與接受決策；STATUS只附摘要、連結與未覆蓋項。截圖／trace/video 放 CI artifacts 或 PR attachments，不大量提交二進位到 repo。規劃中的 `pnpm check:docs` 檢查本component及其引用的dim-gate ledger文件連結，不掃描修復整個 monorepo。
 
-## 5. 下一輪開發的起始任務
+## 5. 歷史 M0 起始任務（保留基線）
+
+M0–M5 現已驗收；以下保留最初起始契約，不是目前進度。後續角色深化的交付與新 AC 見 [14](14-workspace-delivery.md)，目前狀態先核對 PLAN。
 
 第一個 implementation PR 執行 M0：讀總綱與本章 → 選定相容版本并鎖定 → 建立 schema/seed/controller 最小閉環 → 完成shell、persona switch、reset → 建立native scripts與root path-scoped CI → 提交AC-01～03證據。M0允許使用最小seed，完整60 CI在M1補齊；schema身分／scope/版控不可延後。
 
@@ -75,3 +77,27 @@ M0不應一口氣生成所有module的空白頁，也不需要登入雲帳戶。
 ## 6. 未來真實整合的獨立 gate
 
 需要另立 backend/integration SDD：server session/SSO、source reconciliation與credentials、durable jobs、external idempotency、雲商partial failure、multi-user concurrency、telemetry query adapters、production auditing。選定至少一個真實測試環境、驗證read-only inventory，再導入受控write path。前端v0.1的完成不代表此gate已完成。
+
+
+## W1 追加驗證
+
+新 AC-WS-01/02/16/17/18 按 [14](14-workspace-delivery.md) 驗證。`e2e/w1-workspaces.spec.ts` 以真實 Admin grant/revoke、workspace/persona selector、canonical drilldown、刷新、實際舊 HTTP response、keyboard與三尺寸明暗 axe 取得證據；不得以直接寫 store 建立成功流程。原 M0–M5 regression 全保留，舊 multi-grant 混合導航断言更新為同 user 分工作區導航。`DIM_GATE_TEST_PORT` 可隔離本機 preview，預設4173不變。新增 W1 Firefox/WebKit smoke；原效能與隔離套件照常執行。最終結果仍須依固定commit報告，測試檔存在不代表通過。
+
+
+## W2 integration delta
+
+W2 acceptance is AC-WS-03–09/15–18 from14-workspace-delivery.md, including actual staging Request → Redis binding, Kafka uniqueness/failure/retry, quota races, shared resize/nonself approval, Admin catalog governance, readonly K8s, current-policy isolation and genuine old-session migration. Full original regressions, new browser journeys, fixed commit review, latest-head CI and verified merge remain mandatory. Preliminary tests/build are not milestone acceptance. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 完整 exit AC-WS-10/11/15–18：定義修訂不改舊run、prod獨立批准、配置失敗保留與新版本restore、同env10→50→100真實健康窗口及失敗留住已驗證權重、雙向鎖/撤權/replay、原子W1/W2migration及既有回歸。需完整native/Chromium/smoke/benchmark/isolation、未參與實作的固定commitreview及精確最新PRheadCI後才可接受合併。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+W4 exit 為 AC-WS-12/15–18：服務與基建授權分離、prod 獨立批准、source-time/ruleRevision 評估、Silence 僅抑制投遞、四種可查 Mock delivery 狀態，並維持原 M4/W3 因果鏈。至少需要 domain+direct HTTP+真 UI success/denial/failure、舊存檔遷移與損壞/quota 回歸、全部 native/Chromium/Firefox-WebKit/benchmark/isolation、固定 commit 獨立唯讀 review、最新 PR head CI 和實際合併對帳。缺任一 gate 不標 ACCEPTED；W5 在 W4 合併後才啟動。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 2 fixes the implementation boundary for this section. W5 acceptance covers AC-WS-13/14 plus regression AC-WS-15–18. Test no automatic User login/grant, self/last-admin, stable cohort/authorization intersection, route failure/recovery, recipient redaction/dedupe/retry/revoke, strict v1–v4→v5 migration, current-scope HTTP and browser race. Run unchanged native, full Chromium, Firefox/WebKit smoke, benchmark and isolation gates; independent fixed-commit review, exact latest PR-head CI and actual merge/postmerge closeout are required.

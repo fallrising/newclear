@@ -10,6 +10,7 @@ import com.fallrising.cms.identity.domain.PrincipalStatus;
 import com.fallrising.cms.identity.domain.Role;
 import com.fallrising.cms.identity.domain.SessionRecord;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -293,7 +294,7 @@ public class JdbcIdentityStore implements IdentityStore {
     }
 
     private void acquireAdminGuard() {
-        jdbc.queryForObject("SELECT pg_advisory_xact_lock(?)", Long.class, ADMIN_GUARD_KEY);
+        jdbc.query("SELECT pg_advisory_xact_lock(?)", (RowCallbackHandler) rs -> {}, ADMIN_GUARD_KEY);
     }
 
     private void ensureUsableAdmin() {

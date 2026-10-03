@@ -1,13 +1,26 @@
 {
   "name": "@cms/api",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./public": "./src/public-entry.ts"
   },
   "scripts": {
+    "gen": "openapi-typescript ../../services/cms-api/src/main/resources/openapi/openapi.yaml -o src/generated/schema.d.ts",
     "test": "vitest run",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.103.2",
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   }
 }

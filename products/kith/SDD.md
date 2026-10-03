@@ -150,7 +150,7 @@ Sidecar: GET /mcp/events live tail --> 本地 INV-13 --> 官方 Codex CLI
 | `worker/` Inbox DO | `notify()` 同步 mention／keyword；ambient 只寫該房 pending + `setAlarm`；live tail ≤ 128／membership | 不 await LLM；禁止 sleep/setTimeout；不把多房 pending 塞進同一個 DO |
 | `worker/` HostedGeneration DO | 建立時綁定 `{generation_id, agent_id, room_id}`（無 bot token）；持有 LLM `fetch`；完成後以該 `agent_id` 向 Room send | 不自己分配 seq；失敗須釋放 ambient lock；不得冒充其他 agent |
 | `worker/` transport（Hono） | TLS 終止、auth、HTTP/WS/MCP 路由、`GET /mcp/events` 的 D1 catch-up 再接 Inbox live tail | 不分配 seq；不 `waitUntil` 跑模型 |
-| `frontend/` | React+Vite：房間列表、時間線、成員 badge、thread、status 細條、摺疊 traces | 不存 bot token；不執行房間內「MCP 指令」當 HTML |
+| `web/` | React 19＋Vite 6（v2，[docs/v2/05](docs/v2/05-frontend-architecture.md)）：房間列表、時間線、成員、thread、trace、控制台 | 不存 bot token；不執行房間內「MCP 指令」當 HTML |
 | `sidecar/` | operator 主機官方 CLI/SDK；MCP client + events GET；本地 INV-13 | 不把憑證上傳 Worker；不與 fanzloud 共用目錄；不對 `replay:true` exec |
 | `contracts/` | JSON Schema、heuristic 表、golden vectors（M0） | 不得出現 `subscribe_events` tool |
 
@@ -242,13 +242,13 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 
 ## 12. 開發流程與變更規則
 
-詳細實作順序見 [07](docs/sdd/07-roadmap.md)，驗收見 [06](docs/sdd/06-verification.md)。先做 M0 固定契約與測試框架，再依切片完成 M1–M5，最後 M6 ambient。一次一個 milestone。
+詳細實作順序見 [07](docs/sdd/07-roadmap.md)，驗收見 [06](docs/sdd/06-verification.md)。M0–M7 已在 `main`（#12）。人跟人聊天 P0 見 [09](docs/sdd/09-human-chat-ui.md)。之後的變更仍一次一個可驗收的切片。
 
 修改 persisted format、seq 語意、attention、quota_class、MCP tool 集合或 generation 綁定時，先更新 ADR、版本及 golden vectors；不能只改程式。
 
 文件優先級：本文件的不變量 > 專題章節 > roadmap 的示例命令。DESIGN 用於架構數字與模組邊界；來源文件用於理解及比較，不自動凌駕 kith 已明確選定的協定。
 
-M0 已新增根 `.github/workflows/kith.yml` 並更新 `docs/specs/monorepo-ci.md`。仍不建立空 `worker/` / `frontend/` / `sidecar/` 目錄（屬 M1+）。
+根 `.github/workflows/kith.yml` 與 `docs/specs/monorepo-ci.md` 已有 Kith。`worker/`、`web/`、`sidecar/`、`runner/` 已存在（`frontend/` 於 v2 W7 刪除）。線上站是 `https://kith.fallrising.workers.dev`。
 
 ## 13. 章節索引
 
@@ -261,6 +261,12 @@ M0 已新增根 `.github/workflows/kith.yml` 並更新 `docs/specs/monorepo-ci.m
 - [06 — 驗證](docs/sdd/06-verification.md)
 - [07 — 交付計畫](docs/sdd/07-roadmap.md)
 - [08 — 決策與來源](docs/sdd/08-decisions-sources.md)
+- [09 — 人跟人聊天 UI](docs/sdd/09-human-chat-ui.md)
+- [10 — 成員與提及](docs/sdd/10-members-and-mention.md)（畫面由 11 取代）
+- [11 — 房間畫面](docs/sdd/11-room-screen.md)
 - [ADR-0001 技術棧](docs/adr/0001-stack.md)
 - [ADR-0002 憑證邊界](docs/adr/0002-credentials.md)
 - [ADR-0004 可選 AES-GCM（not E2EE）](docs/adr/0004-crypto.md)
+- [ADR-0005 v2 web 前端](docs/adr/0005-v2-web-frontend.md)（accepted）
+- [ADR-0006 多格式 LLM provider](docs/adr/0006-llm-provider-formats.md)（proposed）
+- [v2 設計文件](docs/v2/README.md)（proposed；列出它將修訂的 v1 條文）

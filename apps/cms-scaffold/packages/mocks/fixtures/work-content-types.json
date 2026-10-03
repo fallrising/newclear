@@ -1,0 +1,612 @@
+{
+  "items": [
+    {
+      "key": "album",
+      "displayName": "Album",
+      "pluralDisplayName": "Albums",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "public",
+            "unlisted"
+          ]
+        },
+        {
+          "key": "sortMode",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "manual",
+            "captured_at"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "photo",
+      "displayName": "Photo",
+      "pluralDisplayName": "Photos",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "caption",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "album",
+          "type": "ref",
+          "required": true,
+          "refTarget": "album",
+          "enumValues": []
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "takenAt",
+          "type": "datetime",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "media",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "page",
+      "displayName": "Page",
+      "pluralDisplayName": "Pages",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "clinic_profile",
+      "displayName": "Clinic profile",
+      "pluralDisplayName": "Clinic profiles",
+      "titleField": "name",
+      "slugPolicy": "required",
+      "fields": [
+        {
+          "key": "name",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "intro",
+          "type": "markdown",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "telephone",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "hours",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "hero",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "owner",
+      "displayName": "Owner",
+      "pluralDisplayName": "Owners",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "telephone",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "pet",
+      "displayName": "Pet",
+      "pluralDisplayName": "Pets",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "petType",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "cat",
+            "dog",
+            "bird",
+            "hamster",
+            "lizard",
+            "snake",
+            "other"
+          ]
+        },
+        {
+          "key": "birthDate",
+          "type": "datetime",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "owner",
+          "type": "ref",
+          "required": true,
+          "refTarget": "owner",
+          "enumValues": []
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "notes",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "photo",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "vet",
+      "displayName": "Vet",
+      "pluralDisplayName": "Vets",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "specialty",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "general",
+            "radiology",
+            "surgery",
+            "dentistry"
+          ]
+        },
+        {
+          "key": "bio",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "photo",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "visit",
+      "displayName": "Visit",
+      "pluralDisplayName": "Visits",
+      "titleField": "title",
+      "slugPolicy": "none",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "pet",
+          "type": "ref",
+          "required": true,
+          "refTarget": "pet",
+          "enumValues": []
+        },
+        {
+          "key": "owner",
+          "type": "ref",
+          "required": false,
+          "refTarget": "owner",
+          "enumValues": []
+        },
+        {
+          "key": "vet",
+          "type": "ref",
+          "required": false,
+          "refTarget": "vet",
+          "enumValues": []
+        },
+        {
+          "key": "scheduledAt",
+          "type": "datetime",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "visitKind",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "checkup",
+            "vaccine",
+            "surgery",
+            "other"
+          ]
+        },
+        {
+          "key": "ownerPrincipalId",
+          "type": "principal-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "project",
+      "displayName": "Project",
+      "pluralDisplayName": "Projects",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "summary",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "cover",
+          "type": "media-ref",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "visibility",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "public",
+            "private"
+          ]
+        },
+        {
+          "key": "lifecycle",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "active",
+            "completed"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "issue",
+      "displayName": "Issue",
+      "pluralDisplayName": "Issues",
+      "titleField": "title",
+      "slugPolicy": "optional",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "project",
+          "type": "ref",
+          "required": true,
+          "refTarget": "project",
+          "enumValues": []
+        },
+        {
+          "key": "milestone",
+          "type": "ref",
+          "required": false,
+          "refTarget": "milestone",
+          "enumValues": []
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "status",
+          "type": "enum",
+          "required": true,
+          "refTarget": null,
+          "enumValues": [
+            "backlog",
+            "ready",
+            "in_progress",
+            "in_review",
+            "done"
+          ]
+        },
+        {
+          "key": "assigneePrincipalId",
+          "type": "string",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    },
+    {
+      "key": "milestone",
+      "displayName": "Milestone",
+      "pluralDisplayName": "Milestones",
+      "titleField": "title",
+      "slugPolicy": "required",
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "project",
+          "type": "ref",
+          "required": true,
+          "refTarget": "project",
+          "enumValues": []
+        },
+        {
+          "key": "description",
+          "type": "markdown",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "dueDate",
+          "type": "datetime",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        },
+        {
+          "key": "status",
+          "type": "enum",
+          "required": false,
+          "refTarget": null,
+          "enumValues": [
+            "planned",
+            "reached",
+            "missed"
+          ]
+        },
+        {
+          "key": "sortOrder",
+          "type": "int",
+          "required": false,
+          "refTarget": null,
+          "enumValues": []
+        }
+      ]
+    }
+  ]
+}

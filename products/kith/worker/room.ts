@@ -143,6 +143,52 @@ export class Room extends DurableObject<Env> {
     return { ok: true };
   }
 
+  /** B-11: ephemeral `reply failed`. Only the operator's sockets get error_class. No D1 INSERT, no seq. */
+  async postReplyFailed(roomId: string, memberId: string, errorClass: string): Promise<{ ok: true } | PersistFail> {
+    await this.ctx.storage.put("room_id", roomId);
+    if (!(await this.memberInRoom(roomId, memberId))) {
+      return { ok: false, status: 403, code: "forbidden", message: "not a room member" };
+    }
+    const operator = await this.env.DB.prepare(`SELECT id FROM members WHERE is_operator = 1`).first<{ id: string }>();
+    const plain = JSON.stringify({ v: 1, type: "status", member_id: memberId, body: "reply failed" });
+    const detailed = JSON.stringify({
+      v: 1,
+      type: "status",
+      member_id: memberId,
+      body: "reply failed",
+      error_class: errorClass,
+    });
+    for (const ws of this.sockets()) {
+      const attachment = (ws.deserializeAttachment?.() ?? {}) as { member_id?: string };
+      try {
+        ws.send(operator && attachment.member_id === operator.id ? detailed : plain);
+      } catch {
+        /* drop closed */
+      }
+    }
+    return { ok: true };
+  }
+
+  /**
+   * B-10: ephemeral full-text draft from HostedGeneration. No D1 write, no seq, not in /mcp/events, no Inbox
+   * notify (V2-INV-03). Internal RPC only; the caller already checked membership when the generation began.
+   */
+  async postDraft(roomId: string, memberId: string, generationId: string, text: string): Promise<{ ok: true } | PersistFail> {
+    await this.ctx.storage.put("room_id", roomId);
+    if (utf8Bytes(text) > BODY_MAX_BYTES) {
+      return { ok: false, status: 400, code: "payload_too_large", message: "draft exceeds 8192 UTF-8 bytes" };
+    }
+    const frame = JSON.stringify({ v: 1, type: "draft", member_id: memberId, generation_id: generationId, text, done: false });
+    for (const ws of this.sockets()) {
+      try {
+        ws.send(frame);
+      } catch {
+        /* drop closed */
+      }
+    }
+    return { ok: true };
+  }
+
   async activity(roomId: string): Promise<RoomActivity> {
     await this.ctx.storage.put("room_id", roomId);
     const lastHumanAt = (await this.ctx.storage.get<string>("last_human_at")) ?? null;
@@ -391,6 +437,13 @@ export class Room extends DurableObject<Env> {
 
     const existing = await this.lookupByClientId(input.roomId, input.senderId, input.clientMessageId);
     if (existing) return { ok: true, row: existing, uniqueHit: true };
+
+    const archived = await this.env.DB.prepare(`SELECT archived_at FROM rooms WHERE id = ?`)
+      .bind(input.roomId)
+      .first<{ archived_at: string | null }>();
+    if (archived?.archived_at) {
+      return { ok: false, status: 409, code: "room_archived", message: "room is archived" };
+    }
 
     if (input.generationId != null) {
       const gen = await this.env.DB.prepare(`SELECT agent_id, state FROM generations WHERE id = ?`)

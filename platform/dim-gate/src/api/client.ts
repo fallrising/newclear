@@ -1,13 +1,11 @@
 import { z } from 'zod'
-import { apiErrorSchema, apiResultSchema } from '../domain/schemas'
+import { apiErrorSchema, apiResultSchema } from '../domain/schema-models'
 import type { SessionView } from '../domain/schemas'
-import { createAdminClient } from './clients/admin'
-import { createApplicationClient } from './clients/application'
 import { createCmdbClient } from './clients/cmdb'
 import { createSessionClient } from './clients/session'
-import { createSelfServiceClient } from './clients/self-service'
-import { createTopologyClient } from './clients/topology'
+import { createShellClient } from './clients/shell'
 import { ApiRequestError } from './core/errors'
+import { deferredClient } from './core/deferred-client'
 import { identityOf, sameIdentity, type ClientConfiguration, type ClientIdentity } from './core/identity'
 import type { ApiRequest, RequestOptions } from './core/request'
 import { scopedQueryKey } from './query-definitions'
@@ -122,11 +120,52 @@ export function createApiClient() {
   }
   const api = {
     ...createSessionClient(request),
-    ...createApplicationClient(request),
+    ...createShellClient(request),
+    ...deferredClient(() => import('./clients/application').then(module => module.createApplicationClient(request)), {
+      listApplications: true, getApplication: true, getEnvironment: true
+    }, getClientIdentity),
     ...createCmdbClient(request),
-    ...createTopologyClient(request),
-    ...createSelfServiceClient(request),
-    ...createAdminClient(request),
+    ...deferredClient(() => import('./clients/topology').then(module => module.createTopologyClient(request)), {
+      search: true, getTopology: true, listRelations: true, createRelation: true, deleteRelation: true
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/self-service').then(module => module.createSelfServiceClient(request)), {
+      listPools: true, getCapacity: true, listCatalog: true, getCatalog: true, createRequest: true, listRequests: true, getRequest: true, submitRequest: true, approveRequest: true, rejectRequest: true, cancelRequest: true, provisionRequest: true, retryRequest: true, listJobs: true, getJob: true
+    }, getClientIdentity),
+    ...deferredClient<Omit<ReturnType<typeof import('./clients/admin').createAdminClient>, 'getNavigation'>>(() => import('./clients/admin').then(module => module.createAdminClient(request)), {
+      getAccess: true, listAdminUsers: true, getAdminUser: true, createAdminUser: true, updateAdminUser: true,
+      listAdminTeams: true, getAdminTeam: true, createAdminTeam: true, patchAdminTeam: true,
+      listPlatformFeatures: true, getPlatformFeature: true, previewPlatformFeature: true, getCapabilityRegistry: true,
+      createPlatformFeature: true, revisePlatformFeature: true, platformFeatureAction: true, restorePlatformFeature: true,
+      listPlatformRoutes: true, getPlatformRoute: true, getPlatformRouteDiagnostic: true, getPlatformRouteRegistry: true,
+      createPlatformRoute: true, revisePlatformRoute: true, platformRouteAction: true, restorePlatformRoute: true,
+      createAssignment: true, revokeAssignment: true, patchUser: true, getAdminNavigation: true, patchNavigation: true, createCatalogRevision: true, patchCatalog: true, publishCatalog: true, disableCatalog: true, getModels: true, createModelField: true, patchModelField: true, listAudit: true
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/delivery').then(module => module.createDeliveryClient(request)), {
+      listPipelines: true, getPipeline: true, createPipeline: true, cancelPipeline: true, retryPipeline: true, listReleases: true, getRelease: true, approveRelease: true, rejectRelease: true, rollbackRelease: true
+    }, getClientIdentity),
+    ...deferredClient<Omit<ReturnType<typeof import('./clients/observability').createObservabilityClient>, 'getNotifications'>>(() => import('./clients/observability').then(module => module.createObservabilityClient(request)), {
+      getMetrics: true, listTraces: true, getTrace: true, listLogs: true, listIncidents: true, getIncident: true, acknowledgeIncident: true, investigateIncident: true, listIntegrations: true, testIntegration: true
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/resources').then(module => module.createResourcesClient(request)), {
+      listResourceObjects: true, getResourceObject: true, listBindings: true, getBinding: true, listResourceInventory: true, getResourceInventory: true, getServiceResources: true, listWorkItems: true, listChanges: true, getChange: true, createChange: true, patchChange: true, changeAction: true
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/service-delivery').then(module => module.createServiceDeliveryClient(request)), {
+      getDeliveryOptions: true, listPipelineDefinitions: true, getPipelineDefinition: true, createPipelineDefinition: true, patchPipelineDefinition: true, pipelineDefinitionAction: true, runPipelineDefinition: true, listServiceConfigs: true, getServiceConfig: true, createServiceConfig: true, patchServiceConfig: true, serviceConfigAction: true, reviseServiceConfig: true, restoreServiceConfig: true, listTrafficPolicies: true, getTrafficPolicy: true, createTrafficPolicy: true, patchTrafficPolicy: true, trafficPolicyAction: true, reviseTrafficPolicy: true
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/alerting').then(module => module.createAlertingClient(request)), {
+      listMonitorPolicies: true, getMonitorPolicy: true, createMonitorPolicy: true, reviseMonitorPolicy: true, monitorPolicyAction: true,
+      listAlertRules: true, getAlertRule: true, createAlertRule: true, reviseAlertRule: true, alertRuleAction: true,
+      listSloPolicies: true, getSloPolicy: true, createSloPolicy: true, reviseSloPolicy: true, sloPolicyAction: true,
+      listSilences: true, getSilence: true, createSilence: true, listAlertEvaluations: true, getAlertEvaluation: true,
+      listNotificationDeliveries: true, getNotificationDelivery: true,
+    }, getClientIdentity),
+    ...deferredClient(() => import('./clients/notifications').then(module => module.createNotificationClient(request)), {
+      listAdminChannels: true, createChannel: true, patchChannel: true, testChannel: true,
+      listAdminNotificationTemplates: true, createNotificationTemplate: true, reviseNotificationTemplate: true, notificationTemplateAction: true,
+      listAdminNotificationPolicies: true, patchNotificationPolicy: true, listNotificationChannels: true,
+      listNotificationSubscriptions: true, createNotificationSubscription: true, patchNotificationSubscription: true,
+      listNotificationAttempts: true, getNotificationAttempt: true, retryNotificationAttempt: true,
+    }, getClientIdentity),
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   }
   const queryKey = (resourceFamily: string, scope: unknown = null, filters: unknown = null) =>

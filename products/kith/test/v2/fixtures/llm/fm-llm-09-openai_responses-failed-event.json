@@ -1,0 +1,16 @@
+{
+  "fm": "FM-LLM-09",
+  "format": "openai_responses",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: response.failed\ndata: {\"type\": \"response.failed\", \"sequence_number\": 0, \"response\": {\"id\": \"r\", \"object\": \"response\", \"status\": \"failed\", \"output\": [], \"usage\": {\"input_tokens\": 4, \"output_tokens\": 2, \"total_tokens\": 6}, \"error\": {\"code\": \"server_error\", \"message\": \"x\"}}}\n\n"
+  },
+  "expect": {
+    "error_class": "unknown"
+  }
+}

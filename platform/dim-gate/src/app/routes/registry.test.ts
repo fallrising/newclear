@@ -8,7 +8,7 @@ const session = (overrides: Partial<SessionView> = {}): SessionView => ({
   logicalClock: 0, identityEpoch: 1, generation: 1, storageMode: 'session', ...overrides,
 })
 
-describe('M2 route registry', () => {
+describe('registered route permissions', () => {
   it('matches only real static and dynamic routes', () => {
     expect(routeForPath('/rd/apps')?.key).toBe('rd.apps')
     expect(routeForPath('/rd/apps/app-checkout')?.key).toBe('rd.app-detail')
@@ -32,4 +32,69 @@ describe('M2 route registry', () => {
     const selfService = session({ effectiveActions: [...rd.effectiveActions, 'catalog.read', 'request.create', 'request.read'] })
     expect(visibleNavigation(selfService).map((route) => route.key)).toEqual(['rd.overview', 'rd.apps', 'rd.catalog', 'rd.requests', 'guide'])
   })
+
+  it('permits M3 read-only deep links by action while keeping center lists and writes separate', () => {
+    const reader = session({ centers: ['ops'], effectiveActions: ['pipeline.read', 'release.read'] })
+    expect(canAccessRoute(reader, routeForPath('/rd/pipelines/run-0001')!)).toBe(true)
+    expect(canAccessRoute(reader, routeForPath('/rd/releases/release-0001')!)).toBe(true)
+    expect(canAccessRoute(reader, routeForPath('/rd/pipelines')!)).toBe(false)
+    const admin = session({ centers: ['admin'], effectiveActions: ['release.read'] })
+    expect(canAccessRoute(admin, routeForPath('/rd/releases/release-0001')!)).toBe(true)
+    expect(canAccessRoute(admin, routeForPath('/rd/pipelines/run-0001')!)).toBe(false)
+  })
+})
+
+
+it('keeps M4 diagnostic deep links action-guarded without adding another center to navigation', () => {
+  const rd = session({ effectiveActions: ['ci.read', 'incident.read', 'observation.read', 'app.read', 'environment.read'] })
+  expect(canAccessRoute(rd, routeForPath('/ops/incidents/incident-1')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/cmdb/ci-1')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/topology')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/incidents')!)).toBe(false)
+  expect(visibleNavigation(rd).some(route => route.center === 'ops')).toBe(false)
+  expect(canAccessRoute(session({ effectiveActions: [] }), routeForPath('/ops/incidents/incident-1')!)).toBe(false)
+})
+
+
+it('registers W3 source routes with business read actions independent of workspace navigation', () => {
+  const ops = session({ centers: ['ops'], effectiveActions: ['pipelineDefinition.read', 'serviceConfig.read', 'trafficPolicy.read', 'serviceChange.read'] })
+  const paths = ['/rd/apps/app-checkout/delivery?revisionId=definition-1', '/rd/apps/app-checkout/configuration?environmentId=env-checkout-dev', '/rd/apps/app-checkout/traffic', '/ops/service-changes/serviceConfig/config-1']
+  expect(paths.map(path => routeForPath(path)?.key)).toEqual(['rd.delivery', 'rd.configuration', 'rd.traffic', 'ops.service-change'])
+  for (const path of paths) {
+    const route = routeForPath(path)!
+    expect(route.navigation.visible).toBe(false)
+    expect(canAccessRoute(ops, route)).toBe(true)
+    expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write', 'app.read'] }), route)).toBe(false)
+  }
+})
+
+it('registers W4 service and Ops alerting routes without granting cross-role writes', () => {
+  const rd = session({ centers: ['rd'], effectiveActions: ['monitorPolicy.read', 'alertRule.read'] })
+  const ops = session({ centers: ['ops'], effectiveActions: ['monitorPolicy.read', 'alertRule.read'] })
+  expect(routeForPath('/rd/apps/app-checkout/monitoring?environmentId=env-checkout-prod')?.key).toBe('rd.monitoring')
+  expect(routeForPath('/rd/apps/app-checkout/alerts?environmentId=env-checkout-prod')?.key).toBe('rd.alerts')
+  expect(routeForPath('/ops/alerting')?.key).toBe('ops.alerting')
+  expect(visibleNavigation(rd).some(route => route.key === 'rd.alerts' || route.key === 'rd.monitoring' || route.key === 'ops.alerting')).toBe(false)
+  expect(visibleNavigation(ops).some(route => route.key === 'ops.alerting')).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/ops/alerting')!)).toBe(false)
+  expect(canAccessRoute(ops, routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/rd/apps/app-checkout/alerts')!)).toBe(false)
+})
+
+it('keeps cohort navigation separate from grant-guarded readback routes and protects Admin governance', () => {
+  const rd = session({ centers: ['rd'], effectiveActions: ['monitorPolicy.read', 'pipelineDefinition.read'], featureKeys: ['rd.delivery'] })
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/monitoring')!)).toBe(true)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout/delivery')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['rd'], effectiveActions: [], featureKeys: ['rd.monitoring'] }),
+    routeForPath('/rd/apps/app-checkout/monitoring')!)).toBe(false)
+  const ops = session({ centers: ['ops'], effectiveActions: ['alertRule.read'], featureKeys: [] })
+  expect(canAccessRoute(ops, routeForPath('/ops/alerting')!)).toBe(true)
+  expect(visibleNavigation(ops).some(route => route.key === 'ops.alerting')).toBe(false)
+  expect(canAccessRoute(rd, routeForPath('/rd/apps/app-checkout')!)).toBe(false)
+  const admin = session({ centers: ['admin'], effectiveActions: ['access.write', 'platformFeature.write'], featureKeys: [] })
+  expect(canAccessRoute(admin, routeForPath('/admin/features')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['platformRoute.write'] }), routeForPath('/admin/routes')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['notificationPolicy.write'] }), routeForPath('/admin/notifications')!)).toBe(true)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/features')!)).toBe(false)
+  expect(canAccessRoute(session({ centers: ['admin'], effectiveActions: ['access.write'] }), routeForPath('/admin/routes')!)).toBe(false)
 })

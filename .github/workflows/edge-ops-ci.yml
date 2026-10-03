@@ -1,0 +1,99 @@
+name: Edge Ops CI
+
+on:
+  pull_request:
+    paths:
+      - platform/edge-ops/**
+      - .github/workflows/edge-ops-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - platform/edge-ops/**
+      - .github/workflows/edge-ops-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-ops-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend contracts, demo chain and workerd (TS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: platform/edge-ops/backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: platform/edge-ops/backend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Mock Agent vs M0 contract, Worker handler and HTTP chain on node:sqlite
+        working-directory: platform/edge-ops
+        run: npm run check
+      - name: Real local workerd and D1 HTTP chain (no remote resources)
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npm run test:workerd
+
+  agent:
+    name: Agent contracts (Go)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: platform/edge-ops/agent
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: "1.24.7"
+          cache: false
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -count=1 ./...
+
+  browser:
+    name: Demo UI (React build + Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: platform/edge-ops/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: platform/edge-ops/web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: React + real HTTP + mock Agent browser acceptance
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: edge-ops-browser-evidence
+          retention-days: 7
+          path: |
+            platform/edge-ops/web/playwright-report/
+            platform/edge-ops/web/test-results/

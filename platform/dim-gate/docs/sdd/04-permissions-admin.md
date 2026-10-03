@@ -33,6 +33,8 @@ scopeType 為 `org | project | pool`；scopeId 指向同 org 實體；可選 `st
 
 導航使用 route registry 的 required action 決定可見性；page guard 防止直接 URL 跳入；button guard 顯示 state-specific reason；MSW handler 仍須再驗證。三層使用同一 policy evaluator 與 context resolver，不各寫一組 if role。
 
+M4 的診斷 detail／topology deep link 依所需 read action 和 entity scope 允許跨 Center，例如 RD 可讀可見的 `/ops/cmdb/:id`，但不取得 CI metadata 編輯權。Center 首頁與清單仍要求該 Center；可讀 detail 不代表可進入 Ops CMDB 清單。
+
 未登入回 401；對 center/action 無權回 403；不存在或 scope 外 entity detail 統一 404，不能洩漏 existence。列表先 filter 再算 total；search、graph、time series、audit 同樣授權。能看到 app 不代表能看到其 shared CI 的其他 tenant-like project placements。
 
 權限變更導致 `policyVersion` 增加；mutation 或導航前使用最新 policy。切換 persona／scope／policyVersion 都清除舊 cache 和選中 detail；在途 response 帶舊 identity epoch 時丟棄。角色撤銷後已有 dialog 的 confirm 仍要被 handler 拒絕。
@@ -67,3 +69,27 @@ AWS／Aliyun／IDC、CI provider、APM provider 使用 `Integration` metadata，
 - 同一 user 自批 prod release 被拒；切另一 persona 後可批准，但 audit 顯示真實 initiator/approver。
 - 從別的 tab 複製 request ID 不表示分享了 state 或取得了權限。
 - permission revoked、entity changed、catalog disabled、navigation hidden 各有不同可讀結果，不能一律顯示「系統錯誤」。
+
+
+## W1 工作區與身分隔離
+
+工作區是 UI 投影，不是 grant 或身份切換。單 grant 仍有常駐名稱；多 grant 只顯示目前工作區導航；無 grant 顯示禁止及獨立 Demo recovery。跨中心 read detail 保留來源入口並說明讀取授權，不能新增目標中心清單或寫權。工作區切換不寫 domain snapshot、policy、user 或 command count。W1 多／零 grant 的驗證由既有 Admin assignment command/UI 建立，不另改預設 seed 或加入 implicit Admin 業務權限。首頁全部由共用 policy 先裁切後統計。
+
+
+## W2 integration delta
+
+W2 explicit actions binding.read/resourceObject.read/change.* and resource.manage are independent of navigation. RD reads through authorized bindings and project/stage; Ops physical pool access does not reveal service-private objects without project/stage. Shared resize requires all affected consumers. Self approval is denied; a qualified requester may execute after a different Ops decision. Admin receives typed Redis/Kafka catalog governance, without resource payload or execution authority. Registered catalog metadata does not grant access. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約新增三種業務 read/write 與 serviceChange.read/approve。RD requester 現有 project/stage 決定寫入；Ops 全部受影響 project/stage 且非本人批准，Admin-only 和 pool-only 無業務配置權。prod 执行重查批准者現行 scope；移除 prod target 仍以當前 active family revision 為基準計算受影響範圍，複製未批准草稿不能繞過審批。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+服務 MonitorPolicy/AlertRule/SLOPolicy 讀寫以現行 app/env 的 project/stage scope 為準；RD 可草擬自己的服務規則，prod 需不同 actor 的 Ops 批准。基建規則與 Silence 依 CI 所屬 pool 由 Ops 管理；pool grant 不賦予服務規則修改權。Admin 核准的固定安全 channel reference 可被選用，但 Admin-only 不因此有業務規則或 incident 操作權。列表、detail、evaluation、audit 與 delivery 均先做目前 scope 過濾，不暴露隱藏名稱或總數。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. Admin can create/edit Demo Users/Teams and grant via existing RoleAssignment commands, but teamIds never grant actions and new Users never auto-enter the fixed persona list. Current actor/grant, self and last-enabled-Admin protections apply on every write. Feature eligibility is current underlying grant/action ∩ capability support ∩ deterministic cohort. Notification reads, dispatch and retry recompute recipient scope; revoked users cannot receive an old private payload.

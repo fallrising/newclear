@@ -1,0 +1,47 @@
+{
+  "project": "fleet",
+  "verified": false,
+  "verifiedNote": "由原始碼推斷，尚未實際啟動。需要環境內即時產生的 FLEETD_BOOTSTRAP_OPERATOR_TOKEN（flt_op_）與 FLEETD_BOOTSTRAP_NODE_TOKEN（flt_bs_），以環境變數傳入、不寫進本檔；啟動後跑 seed.sh 產生節點 vps-fe-1、服務 hello 與 storageState（DESIGN.md M9）。驗證後改為 true。",
+  "locale": "en-US",
+  "colorSchemes": [
+    "light"
+  ],
+  "apps": [
+    {
+      "name": "fleetd",
+      "kind": "server",
+      "cwd": "specs/fleet",
+      "install": "go mod download",
+      "start": "mkdir -p fe-review/runs/.state && go run ./cmd/fleetd",
+      "env": {
+        "FLEETD_LISTEN": "127.0.0.1:18765",
+        "FLEETD_DB": "fe-review/runs/.state/fleet.db",
+        "FLEET_UI_HOSTNAME": "fleet.invalid",
+        "FLEET_API_HOSTNAME": "fleet-api.invalid",
+        "FLEET_BASE_DOMAIN": "fleet.invalid"
+      },
+      "baseUrl": "http://127.0.0.1:18765",
+      "ready": "/healthz",
+      "storageState": "specs/fleet/fe-review/runs/.state/auth.storage.json",
+      "pages": [
+        {
+          "id": "login",
+          "path": "/login"
+        },
+        {
+          "id": "catalog",
+          "path": "/",
+          "waitFor": "#catalog"
+        },
+        {
+          "id": "node",
+          "path": "/nodes/vps-fe-1"
+        },
+        {
+          "id": "service",
+          "path": "/services/hello"
+        }
+      ]
+    }
+  ]
+}

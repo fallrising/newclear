@@ -1,5 +1,8 @@
 # Ice Maker
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 Ice Maker is a local-first Personal Engineering Knowledge Compiler. It combines
 deterministic spec-driven development, bounded multi-provider agent adapters,
 provenance-preserving knowledge ingestion, and reproducible Markdown/HTML

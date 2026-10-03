@@ -1,0 +1,21 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "data: {\"id\": \"c\", \"object\": \"chat.completion.chunk\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"Hel\"}, \"finish_reason\": null}]}\n\n:keepalive\n\ndata: {\"id\": \"c\", \"object\": \"chat.completion.chunk\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"lo\"}, \"finish_reason\": null}]}\n\ndata: {\"id\": \"c\", \"object\": \"chat.completion.chunk\", \"choices\": [{\"index\": 0, \"delta\": {}, \"finish_reason\": \"stop\"}]}\n\ndata: [DONE]\n\n"
+  },
+  "expect": {
+    "text": "Hello",
+    "finish": "stop",
+    "deltas": [
+      "Hel",
+      "lo"
+    ]
+  }
+}

@@ -207,8 +207,8 @@ describe("kith M2 worker", () => {
     expect((dup.body as unknown as { error: { code: string } }).error.code).toBe("handle_taken");
 
     const mcp = await api("POST", "/mcp", op.cookie, op.csrf, {});
-    expect(mcp.status).toBe(503);
-    expect(((await mcp.json()) as { error: { code: string } }).error.code).toBe("not_ready");
+    expect(mcp.status).toBe(401);
+    expect(((await mcp.json()) as { error: { code: string } }).error.code).toBe("unauthorized");
 
     const token = await issueToken(op, created.body.id);
     expect(token.res.status).toBe(200);

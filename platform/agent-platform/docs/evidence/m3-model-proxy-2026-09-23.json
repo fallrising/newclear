@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-23T12:24:02.482568+00:00",
+  "scope": "AT-11-A control-side fixture model proxy, request-count reservations and usage ledger",
+  "full_m3_complete": false,
+  "full_at11_complete": false,
+  "full_at07_complete": false,
+  "guest_connected": false,
+  "paid_provider_calls": 0,
+  "new_kvm_acceptance_cases": 0,
+  "tests": {
+    "m0": 45,
+    "platform": 161,
+    "new_model_proxy": 32,
+    "all_passed": true,
+    "lint": "passed",
+    "format": "passed",
+    "real_proxy_process_restart": "passed",
+    "sigkill_points": [
+      "after_reservation_commit",
+      "after_upstream_response",
+      "after_settlement_commit"
+    ]
+  },
+  "model_proxy_tests": [
+    "test_429_and_timeout_remain_unknown_and_consume_slots",
+    "test_browser_cookie_query_and_non_json_rejected_without_upstream",
+    "test_cancel_transaction_revokes_admission_without_waiting_for_provider",
+    "test_cli_token_written_exclusively_private_and_not_printed",
+    "test_concurrent_distinct_requests_reserve_before_provider_and_cap_at_two",
+    "test_concurrent_duplicate_and_changed_payload_never_dispatch_again",
+    "test_database_failure_before_reservation_never_reaches_provider",
+    "test_deadline_and_unknown_runtime_keep_vm_reservation",
+    "test_expired_revoked_and_released_binding_deny_without_capacity_mutation",
+    "test_generation_owner_and_lease_are_checked_for_every_request",
+    "test_lock_wait_cannot_use_transaction_start_time_as_live_lease",
+    "test_malformed_unknown_or_over_limit_usage_cannot_be_final",
+    "test_missing_unknown_duplicate_and_cross_run_token_rejected",
+    "test_model_allowlist_streaming_and_strict_input_types",
+    "test_paused_cancelled_interrupted_and_terminal_states_reject",
+    "test_policy_change_cannot_silently_raise_bound_budget_or_change_destination",
+    "test_policy_only_supports_explicit_local_fixture_and_private_files",
+    "test_real_http_proxy_process_preserves_request_ledger_across_restart",
+    "test_real_upstream_socket_timeout_stays_unknown_without_retry",
+    "test_redirect_not_followed_and_arbitrary_url_headers_not_forwarded",
+    "test_request_body_and_response_size_bounds",
+    "test_secret_in_nested_request_or_response_never_enters_public_data_or_ledger",
+    "test_sigkill_after_provider_response_keeps_unknown_not_zero_or_retry",
+    "test_sigkill_after_reservation_never_dispatches_on_restart",
+    "test_sigkill_after_settlement_does_not_charge_or_dispatch_twice",
+    "test_slow_drip_headers_obey_total_deadline_not_only_idle_timeout",
+    "test_success_private_provider_credential_and_authenticated_usage",
+    "test_token_expiration_rotation_and_explicit_revocation",
+    "test_token_rotation_and_new_generation_never_reset_request_budget",
+    "test_truncation_and_encoded_response_are_unknown",
+    "test_unconfigured_usage_explicitly_does_not_claim_zero_model_cost",
+    "test_usage_sum_and_output_bound_are_checked"
+  ],
+  "source_sha256": {
+    "src/agent_platform/api.py": "ef7b9b699d6b6e6d34e0ca0be427ff428eb7c682f817293d768bb61a5eac4a33",
+    "src/agent_platform/migrations/008_model_proxy.sql": "c2255fe1d2fcc467017a2774ffd5808b96c04932e03ffda414788a3d5952de69",
+    "src/agent_platform/model_api.py": "97be861277f017ad7f8bc199e7bc080a1d119b439b31b307c7fc69e2c18f620c",
+    "src/agent_platform/model_cli.py": "a2e883359f16ec5d87c6e9cb6dd037f548d016718c6e8401aa4dd44bf3df1893",
+    "src/agent_platform/model_fixture.py": "f52e4052d561f47f4eec20ee5190edc5fb06076084e739613a665a93dd7f9ffd",
+    "src/agent_platform/model_policy.py": "c9865a14cd704cd88a22bda04cd9534a8eba3d27ef6f43ea666badf41841c115",
+    "src/agent_platform/model_proxy.py": "7c4cdcfa27c82d395007155c1c9458c4948d0547952df77f83c7cf00cc7b6b21",
+    "src/agent_platform/model_upstream.py": "106c80ccfef19ae60b1fbbea3c457dcbc1e50cf6b78132c54d82b577951319d0",
+    "tests_platform/model_proxy_crash.py": "98465960d174ed52d44640a78e01c0c94700164c9e6ebf02f7af56ca9c4087cb",
+    "tests_platform/test_model_proxy.py": "f995faae457ce7867d5e018fe4c2f015d9dbd76aede9e53e3f3045b83f8c4c9f"
+  },
+  "cleanup": {
+    "remaining_vms": 0,
+    "remaining_claims": 0,
+    "prior_journal_stop_proofs_verified": true,
+    "connector_stopped": true,
+    "sandboxd_stopped": true,
+    "journals_and_fences_retained": true,
+    "test_postgres_removed": true,
+    "test_proxy_processes_stopped": true
+  },
+  "limitations": [
+    "Only explicit local authenticated text fixture mode; no guest/SDK/tool/streaming or paid-provider integration.",
+    "Request count cap only. All money/price/currency remain null; final status refers to fixture token counters.",
+    "All reserved requests consume slots, including 429, timeouts and crashes before dispatch. No automatic refund, redispatch or completion replay.",
+    "An admitted upstream request can outlive cancellation; accounting is settled but revoked output is withheld.",
+    "No VM reservation released by this component. Existing guest fixture and tool admission are not governed by this standalone proxy.",
+    "No new KVM acceptance claimed; previous node remains stopped and its journals/fences are retained."
+  ],
+  "validation_notes": [
+    "Initial review exposed unclosed HTTP error responses; explicit response close verified by final regression without ResourceWarning.",
+    "A socket idle timeout alone cannot bound slowly delivered headers. A total-deadline socket watchdog is verified with real slow-drip HTTP."
+  ]
+}

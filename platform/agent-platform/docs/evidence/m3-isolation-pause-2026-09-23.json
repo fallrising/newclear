@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-23T06:14:52.450888+00:00",
+  "transport": "cocoon-kvm-platform-pause",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "cases": [
+    {
+      "case": "automatic",
+      "run_id": "53f369bb-6054-4ab6-bc7f-34f241b2730a",
+      "vm_id": "GRXP4D2CBARBSDT7JYIHCUE2QH",
+      "same_instance": true,
+      "state": "succeeded",
+      "generation": 31,
+      "pending_observed": true,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "case": "approval",
+      "run_id": "131d7abf-cee3-419d-bdfe-c6a222630a81",
+      "vm_id": "2RV7JSNT2X6IF6INJTSPQHOOQR",
+      "same_instance": true,
+      "state": "succeeded",
+      "generation": 6,
+      "pending_observed": false,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "case": "background",
+      "run_id": "66f973da-6a56-4bd4-8042-8a35a0b2a4fb",
+      "vm_id": "W77E6AP4FNHZZOHMYRAZQVB5AF",
+      "same_instance": true,
+      "state": "succeeded",
+      "generation": 58,
+      "pending_observed": true,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "case": "inflight",
+      "run_id": "125e78cd-ebea-467d-bae3-0fc9c95bcc25",
+      "vm_id": "3WLTODWVQOEC7KDHN7VLTECFKH",
+      "same_instance": true,
+      "state": "succeeded",
+      "generation": 33,
+      "pending_observed": true,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "case": "cancel",
+      "run_id": "8ea7ed4d-1555-4390-a16e-f29c90cfe8a5",
+      "vm_id": "CV7NLUPGPURBG24FCQDHCJSVYV",
+      "same_instance": true,
+      "state": "cancelled",
+      "generation": 30,
+      "pending_observed": true,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "case": "deadline",
+      "run_id": "dbd22f72-4137-48c8-b7e6-8270ebf11113",
+      "vm_id": "GPIILYESFBAB3NMT6NXRJ77JJ4",
+      "same_instance": true,
+      "state": "failed",
+      "generation": 29,
+      "pending_observed": true,
+      "user_message_count": 1,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    }
+  ],
+  "passed": true,
+  "cleanup_errors": [],
+  "vm_count_after": 0,
+  "claim_count_after": 0,
+  "finished_at": "2026-09-23T06:16:57.043286+00:00"
+}

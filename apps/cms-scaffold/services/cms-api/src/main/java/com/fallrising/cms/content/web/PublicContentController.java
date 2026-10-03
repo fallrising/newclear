@@ -70,7 +70,7 @@ public class PublicContentController {
         for (String name : request.getParameterMap().keySet()) {
             if (name.startsWith("ref.") && request.getParameter(name) != null && !request.getParameter(name).isBlank()) {
                 refField = name.substring(4);
-                refTarget = UUID.fromString(request.getParameter(name));
+                refTarget = parseRefTarget(name, request.getParameter(name));
             }
         }
         ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::notFound);
@@ -134,5 +134,13 @@ public class PublicContentController {
     private static Principal principal(HttpServletRequest request) {
         IdentityRequest identity = AuthController.current(request);
         return identity == null ? null : identity.principal();
+    }
+
+    private static UUID parseRefTarget(String name, String raw) {
+        try {
+            return UUID.fromString(raw);
+        } catch (IllegalArgumentException e) {
+            throw com.fallrising.cms.content.ContentException.invalidParameter(name + " must be a UUID");
+        }
     }
 }

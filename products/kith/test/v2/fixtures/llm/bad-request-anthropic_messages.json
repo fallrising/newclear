@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 400,
+    "headers": {},
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"invalid_request_error\", \"message\": \"temperature\"}}"
+  },
+  "expect": {
+    "error_class": "bad_request"
+  }
+}

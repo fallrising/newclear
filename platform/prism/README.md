@@ -1,5 +1,8 @@
 # Prism
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 Prism is a storage-pluggable observability compatibility layer for metrics,
 logs, traces, and alerting. It accepts standard telemetry protocols and exposes
 Prometheus, Loki, Jaeger, and Alertmanager-compatible APIs while keeping storage

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/http-rooms.json",
+  "title": "Rooms v2 (B-02, B-14)",
+  "description": "GET /api/rooms response and PATCH /api/rooms/:id request/response. Defined in docs/v2/milestones/W2.md §4.2.4.",
+  "$defs": {
+    "lastMessage": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "seq",
+        "sender_id",
+        "sender_display_name",
+        "sender_handle",
+        "body_preview",
+        "created_at"
+      ],
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sender_id": {
+          "type": "string"
+        },
+        "sender_display_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sender_handle": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "body_preview": {
+          "type": "string",
+          "maxLength": 140,
+          "description": "First 140 characters of the body (SQLite substr counts characters)."
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "roomSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "created_at",
+        "role",
+        "archived_at",
+        "last_seq",
+        "member_count",
+        "last_message"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "owner",
+            "member",
+            null
+          ],
+          "description": "Caller's role; null only with all=1 when the operator is not a member."
+        },
+        "archived_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_seq": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Max seq in the room including traces."
+        },
+        "member_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_message": {
+          "$ref": "#/$defs/lastMessage"
+        }
+      }
+    },
+    "listQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "const": "1"
+        }
+      }
+    },
+    "listResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rooms"
+      ],
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/roomSummary"
+          }
+        }
+      }
+    },
+    "patchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Trimmed server-side; must be 1-80 characters after trim."
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "patchResponse": {
+      "$ref": "#/$defs/roomSummary"
+    }
+  }
+}

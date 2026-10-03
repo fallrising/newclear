@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/edge-ops/contracts/schemas/run-manifest.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workspace_id",
+    "job_id",
+    "attempt_id",
+    "node_id",
+    "enrollment_generation",
+    "recipe_version",
+    "artifact_sha256",
+    "parameters",
+    "execution_profile",
+    "policy_digest",
+    "timeout_seconds",
+    "not_before",
+    "expires_at",
+    "nonce"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "edgeops.run.v1"
+    },
+    "workspace_id": {
+      "type": "string",
+      "pattern": "^ws_[a-z0-9][a-z0-9_-]{0,62}$"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^job_[a-z0-9][a-z0-9_-]{0,62}$"
+    },
+    "attempt_id": {
+      "type": "string",
+      "pattern": "^attempt_[a-z0-9][a-z0-9_-]{0,62}$"
+    },
+    "node_id": {
+      "type": "string",
+      "pattern": "^node_[a-z0-9][a-z0-9_-]{0,62}$"
+    },
+    "enrollment_generation": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "recipe_version": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}@[1-9][0-9]{0,8}$"
+    },
+    "artifact_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "parameters": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,63}$"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "<= 1024 UTF-8 bytes"
+          },
+          {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "execution_profile": {
+      "enum": [
+        "unprivileged-diagnostic",
+        "privileged"
+      ]
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    },
+    "not_before": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "description": "UTC seconds; impossible dates rejected by implementations"
+    },
+    "expires_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "description": "UTC seconds; impossible dates rejected by implementations"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{22,64}$"
+    }
+  },
+  "title": "Edge Ops run manifest v1",
+  "description": "Max 32 KiB. Signed as exact bytes; never re-serialize before verification. not_before < expires_at <= not_before + 24h."
+}

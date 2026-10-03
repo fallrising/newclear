@@ -51,7 +51,7 @@ export function GlobalSearch({ session, client = defaultClient, disabled = false
       {result.isPending ? <p role="status">正在搜尋目前授權範圍…</p>
         : result.isError ? <p role="alert">搜尋失敗；資料未顯示。</p>
           : hits.length === 0 ? <p role="status">目前授權範圍沒有符合結果。</p>
-            : <ul>{hits.map((hit) => <li key={`${hit.type}:${hit.id}`}><Link to={hit.route} onClick={clear}><span>{hit.title}</span><small>{hit.type} · <code>{hit.id}</code></small></Link></li>)}</ul>}
+            : <ul>{hits.map((hit) => <li key={`${hit.type}:${hit.id}`}><Link to={hit.route} onClick={clear}><span>{hit.title}</span><small>{routeForPath(hit.route)?.center?.toUpperCase() ?? '平台'} · {hit.type} · <code>{hit.id}</code></small></Link></li>)}</ul>}
     </section>}
   </div>
 }

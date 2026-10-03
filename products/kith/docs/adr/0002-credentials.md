@@ -3,6 +3,7 @@
 - Status: accepted
 - Date: 2026-09-20
 - Applies to: kith core v0.1; projects fanzloud ADR-0002（personal BYOS）
+- Note: 「Hosted default」一節將由 [ADR-0006](0006-llm-provider-formats.md)（proposed）修訂；INV-13、INV-14 不變並推廣到所有 runner。
 
 ## Context
 

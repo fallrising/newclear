@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "host": "<kvm-host>",
+  "goal": "FILE note.txt\nTEXT hello",
+  "card_kvm_passed": true,
+  "state": "succeeded",
+  "reason": null,
+  "verification": {
+    "name": "m2_fixture_workspace_assertion",
+    "status": "passed"
+  },
+  "vm_count_after": 0,
+  "claim_count_after": 0
+}

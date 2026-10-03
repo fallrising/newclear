@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/e2e-seed.json",
+  "title": "Kith E2E seed description v1",
+  "description": "Written by e2e/global-setup.ts to e2e/artifacts/<run_id>/seed.json. Describes the seed without any password, hash or token. Defined in docs/v2/milestones/W0.md §4.4.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "sha256",
+    "generated_by",
+    "counts",
+    "members",
+    "rooms"
+  ],
+  "properties": {
+    "schema": {
+      "const": "kith-e2e-seed/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 of the exact seed.sql text executed."
+    },
+    "generated_by": {
+      "const": "e2e/fixtures/seed.ts"
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "members",
+        "rooms",
+        "room_members",
+        "messages",
+        "bot_tokens"
+      ],
+      "properties": {
+        "members": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rooms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "room_members": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "messages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bot_tokens": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "handle",
+          "display_name",
+          "is_operator",
+          "quota_class",
+          "disabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^m-[a-z0-9_]{2,32}$"
+          },
+          "kind": {
+            "enum": [
+              "human",
+              "agent"
+            ]
+          },
+          "handle": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{2,32}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "is_operator": {
+            "type": "boolean"
+          },
+          "quota_class": {
+            "enum": [
+              "api_key",
+              "operator_personal"
+            ]
+          },
+          "disabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "member_ids",
+          "message_count",
+          "first_seq",
+          "last_seq"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^room-[a-z0-9-]{1,40}$"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,40}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "member_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^m-[a-z0-9_]{2,32}$"
+            }
+          },
+          "message_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "first_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "last_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-23T17:33:18.730339+00:00",
+  "milestone": "AT-11-C1 synthetic fixture credit reservation and settlement",
+  "passed": true,
+  "full_at11c_complete": false,
+  "full_at11_complete": false,
+  "full_at07_complete": false,
+  "full_m3_complete": false,
+  "source_base": "d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a",
+  "tests": {
+    "m0": 45,
+    "platform": 182,
+    "new_budget_tests": 6,
+    "ruff_lint": "passed",
+    "ruff_format": "passed",
+    "log_sha256": "cde7e407d4e78db1a350fd540d3139342bb886ad974a49942a2044fbc2ee1852"
+  },
+  "kvm": {
+    "started_at": "2026-09-23T17:27:15.241390+00:00",
+    "finished_at": "2026-09-23T17:30:00.230077+00:00",
+    "passed": true,
+    "node_policy": "sealed explicit deny-all",
+    "case_count": 16,
+    "cases": [
+      {
+        "case": "complete",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "cutoff",
+        "state": "failed",
+        "requests": 1,
+        "upstream_calls": 1,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "approval",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "pause",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 6
+      },
+      {
+        "case": "cancel",
+        "state": "cancelled",
+        "requests": 1,
+        "upstream_calls": 1,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 3
+      },
+      {
+        "case": "isolation",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1,
+        "terminal_isolation_checks_passed": 29
+      },
+      {
+        "case": "rotate",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "expired",
+        "state": "failed",
+        "requests": 0,
+        "upstream_calls": 0,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "revoked",
+        "state": "failed",
+        "requests": 0,
+        "upstream_calls": 0,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "crash-reserved",
+        "state": "failed",
+        "requests": 1,
+        "upstream_calls": 0,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 2
+      },
+      {
+        "case": "crash-settled",
+        "state": "failed",
+        "requests": 1,
+        "upstream_calls": 1,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 2
+      },
+      {
+        "case": "crash-delivered",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": null,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 2
+      },
+      {
+        "case": "cross-run",
+        "cleanup_confirmed": true,
+        "two_live_vms": true,
+        "cross_run_relay_rejected": true,
+        "cross_run_sdk_rejected": true,
+        "cross_run_proxy_rejected": true
+      },
+      {
+        "case": "fixture-credits",
+        "state": "succeeded",
+        "requests": 2,
+        "upstream_calls": 2,
+        "fixture_credits_committed_microcredits": 30,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "fixture-budget-cutoff",
+        "state": "failed",
+        "requests": 0,
+        "upstream_calls": 0,
+        "fixture_credits_committed_microcredits": 0,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      },
+      {
+        "case": "fixture-budget-unknown",
+        "state": "failed",
+        "requests": 1,
+        "upstream_calls": 1,
+        "fixture_credits_committed_microcredits": 26134,
+        "cleanup_confirmed": true,
+        "public_secret_scan": true,
+        "generation": 1
+      }
+    ],
+    "zero_vms": true,
+    "zero_claims": true,
+    "journal_stop_proof_count": 132,
+    "connector_stopped": true,
+    "sandboxd_stopped": true,
+    "test_postgres_removed": true,
+    "log_sha256": "d80f26a9409100d74d6d97e50dccda899375c7e81e2d4f89b34951d490ec0854"
+  },
+  "safety": {
+    "real_provider_used": false,
+    "provider_key_used": false,
+    "guest_private_network_exception": false,
+    "host_shell_fallback": false,
+    "real_money_amount_known": false,
+    "hard_money_limit_supported": false,
+    "journal_and_fences_preserved": true
+  },
+  "source_sha256": {
+    "src/agent_platform/model_policy.py": "814dee1c79c870bbf7e6a4925b7fb489defbc88166b7cc36088febc543badd91",
+    "src/agent_platform/model_proxy.py": "3803c6abd99dfcf86a0d8e15e3693266af1e400fc994ca64fb480f5c22f224c3",
+    "src/agent_platform/migrations/010_fixture_budget.sql": "3b2d293b509bbc0d34fbca9462978f175d69f56194439becf13ca6d3fb343d5e",
+    "scripts/m3-guest-model-kvm.py": "6ef6aa439dc9cbd8b6ecb61d550e2cd2ba28f531ca139f171fd554bdeec5f78a",
+    "tests_platform/test_model_proxy.py": "627c9345f6c88a3053fc06231faf63e34322292649d4379f56c932546b2d8f7d"
+  }
+}

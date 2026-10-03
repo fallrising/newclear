@@ -1,0 +1,18 @@
+{
+  "fm": "BASE",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"candidates\": [{\"content\": {\"role\": \"model\", \"parts\": [{\"text\": \"thinking…\", \"thought\": true}, {\"text\": \"Hola\"}]}, \"finishReason\": \"STOP\", \"index\": 0}], \"usageMetadata\": {\"promptTokenCount\": 9, \"candidatesTokenCount\": 2, \"totalTokenCount\": 11}}"
+  },
+  "expect": {
+    "text": "Hola",
+    "finish": "stop",
+    "usage": {
+      "input_tokens": 9,
+      "output_tokens": 2
+    }
+  }
+}

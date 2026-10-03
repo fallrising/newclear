@@ -1,0 +1,10 @@
+{
+  "at": "2026-09-21T17:33:07.626468+00:00",
+  "claims_before_shutdown": 0,
+  "vms_before_shutdown": 0,
+  "runtime_service_inactive": true,
+  "test_service_cgroup_removed": true,
+  "owned_registry_container_and_volume_removed": true,
+  "guest_image_retained_locally": true,
+  "full_m0_complete": false
+}

@@ -1,5 +1,8 @@
 # AweShore（2024,已停止開發）
 
+> **Portfolio doc tier: D (retired / historical)** — Keep for history only. Do not extend features or write new tutorials. Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 個人筆記 / PKM 產品的早期嘗試,分成 Go 後端與 Qwik City 前端兩半。
 目標是本機個人化 avatar LLM + vector database、pure/default 兩種筆記模式、
 自訂爬蟲產生 AI 摘要筆記,以及 Zapier/n8n 整合。

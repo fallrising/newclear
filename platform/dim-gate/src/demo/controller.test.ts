@@ -21,6 +21,20 @@ const identity = (controller: DemoController) => {
 afterEach(() => vi.useRealTimers())
 
 describe('persisted controller identity and transactions', () => {
+  it('preserves impossible delivery scheduler bytes until explicit recovery reset', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'corrupt-resume' }, 'trigger', identity(controller))
+    const saved = JSON.parse(h.raw!) as { snapshot: ReturnType<typeof controller.getSnapshot> }
+    saved.snapshot.scheduler.tasks[0].stepIndex = 99
+    const raw = JSON.stringify(saved)
+    h.storage.setItem(SNAPSHOT_KEY, raw)
+    expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
+    expect(h.raw).toBe(raw)
+    const recovered = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
+    expect(recovered.getSnapshot().scheduler.tasks).toEqual([])
+    expect(h.raw).not.toBe(raw)
+  })
   it('reload preserves domain state, selected persona, identity epoch and command replay', async () => {
     const h = harness()
     const first = h.start()
@@ -115,11 +129,11 @@ describe('persisted controller identity and transactions', () => {
     }
   })
 
-  it('rejects an older seed snapshot without altering it until explicit recovery', () => {
+  it.each(['dim-gate-m1-v1', 'dim-gate-m2-v1', 'dim-gate-m3-v1'])('rejects older %s bytes until explicit recovery', (seedVersion) => {
     const current = harness()
     current.start()
     const legacy = JSON.parse(current.raw!)
-    legacy.snapshot.seedVersion = 'dim-gate-m1-v1'
+    legacy.snapshot.seedVersion = seedVersion
     delete legacy.snapshot.entities.catalogs
     delete legacy.snapshot.entities.catalogHistory
     delete legacy.snapshot.entities.requests
@@ -128,8 +142,8 @@ describe('persisted controller identity and transactions', () => {
     expect(old.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
     expect(old.raw).toBe(raw)
     const recovered = createController({ storage: old.storage, createSessionId: old.createSessionId, recovery: 'reset' })
-    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-m2-v1' })
-    expect(recovered.getSnapshot().entities.cis).toHaveLength(60)
+    expect(recovered.getSnapshot()).toMatchObject({ seedVersion: 'dim-gate-w5-v1' })
+    expect(recovered.getSnapshot().entities.cis).toHaveLength(63)
   })
 
   it('read-only/unavailable storage never silently selects memory', () => {
@@ -174,4 +188,102 @@ describe('persisted controller identity and transactions', () => {
     expect(duplicate.getTabOwnershipId()).not.toBe(claimedOwnership)
     expect(duplicate.getSession().sessionId).not.toBe(controller.getSession().sessionId)
   })
+
+  it('preserves corrupt M4 recovery bytes, resumes valid minute work, and reset removes future observations', async () => {
+    const h = harness(), controller = h.start()
+    let sequence = 0
+    const command = (path: string, body: unknown) => controller.command('POST', path, body, `m4-${++sequence}`, identity(controller))
+    const env = () => controller.getSnapshot().entities.environments.find(e => e.id === 'env-checkout-dev')!
+    const deploy = async (revision: string) => {
+      await command('/pipelines', { applicationId: env().applicationId, environmentId: env().id, environmentVersion: env().version, revision })
+      await command('/clock/advance', { ticks: 6 })
+      return controller.getSnapshot().entities.releases.find(r => r.id === env().activeReleaseId)!
+    }
+    const stable = await deploy('stable'), candidate = await deploy('candidate')
+    await command('/scenarios', { scenarioKey: 'post-release-latency', environmentId: env().id })
+    await command(`/releases/${candidate.id}/rollback`, { expectedVersion: candidate.version, environmentVersion: env().version, targetReleaseId: stable.id, reason: 'Recover service' })
+    await command('/clock/advance', { ticks: 3 }); await command('/clock/advance', { ticks: 60 })
+    expect(controller.getSnapshot().entities.incidents[0].recoverySamples).toBe(1)
+    const reloaded = h.start()
+    expect(reloaded.getSnapshot()).toEqual(controller.getSnapshot())
+    await reloaded.command('POST', '/clock/advance', { ticks: 60 }, 'm4-resume', identity(reloaded))
+    expect(reloaded.getSnapshot().entities.incidents[0]).toMatchObject({ state: 'open', recoverySamples: 2 })
+    const saved = JSON.parse(h.raw!) as { snapshot: ReturnType<typeof controller.getSnapshot> }
+    saved.snapshot.observations.recoveries[0].dueTick += 1
+    const raw = JSON.stringify(saved); h.storage.setItem(SNAPSHOT_KEY, raw)
+    expect(h.start).toThrow(expect.objectContaining({ code: 'DEMO_SNAPSHOT_INCOMPATIBLE' }))
+    expect(h.raw).toBe(raw)
+    const memory = createController({ storage: h.storage, createSessionId: h.createSessionId, mode: 'memory' })
+    expect(memory.getSnapshot().observations.recoveries).toEqual([]); expect(h.raw).toBe(raw)
+    const reset = createController({ storage: h.storage, createSessionId: h.createSessionId, recovery: 'reset' })
+    expect(reset.getSnapshot().observations).toEqual({ buckets: [], traces: [], logs: [], recoveries: [], infrastructureMetrics: [] })
+    await reset.command('POST', '/clock/advance', { ticks: 60 }, 'after-recovery-reset', identity(reset))
+    expect(reset.getSnapshot().entities.incidents).toEqual([])
+    expect(reset.getSnapshot().observations.buckets).toEqual([])
+  })
+
+  it.each(['snapshot', 'envelope'])('%s serialization failure leaves running scheduler, receipts and all domain state unchanged', async (boundary) => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'serialize-resume' }, 'serialize-trigger', identity(controller))
+    await controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-step', identity(controller))
+    const before = controller.getSnapshot(), raw = h.raw
+    const stringify = JSON.stringify
+    const failure = vi.spyOn(JSON, 'stringify').mockImplementation((value, replacer, space) => {
+      if (value && typeof value === 'object' && (boundary === 'snapshot' ? 'schemaVersion' in value : 'formatVersion' in value)) throw new TypeError('Injected serialization failure')
+      return stringify(value, replacer as Parameters<typeof stringify>[1], space)
+    })
+    try {
+      await expect(controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-retry', identity(controller)))
+        .rejects.toMatchObject({ status: 507, code: 'DEMO_STORAGE_FULL' })
+      expect(controller.getSnapshot()).toEqual(before)
+      expect(h.raw).toBe(raw)
+    } finally { failure.mockRestore() }
+    await controller.command('POST', '/clock/advance', { ticks: 1 }, 'serialize-retry', identity(controller))
+    expect(controller.getSnapshot().logicalClock).toBe(before.logicalClock + 1)
+    expect(controller.getSnapshot().idempotency).toHaveLength(before.idempotency.length + 1)
+  })
+
+  it('enforces the real 3 MiB UTF-8 budget atomically without dropping audit or receipt history', async () => {
+    const h = harness(), controller = h.start()
+    await controller.command('POST', '/pipelines', { applicationId: 'app-checkout', environmentId: 'env-checkout-dev', environmentVersion: 1, revision: 'size-resume' }, 'size-trigger', identity(controller))
+    await controller.setPersona('user-ops', 'budget-persona', identity(controller))
+    const tags = Object.fromEntries(Array.from({ length: 20 }, (_, index) => ['tag-' + index, '容'.repeat(256)]))
+    let rejected = false
+    for (let index = 0; index < 250; index++) {
+      const before = controller.getSnapshot(), raw = h.raw
+      const ci = before.entities.cis.find(item => item.provider === 'aws')!
+      try {
+        await controller.command('PATCH', '/cis/' + ci.id, { expectedVersion: ci.version, tags }, 'large-' + index, identity(controller))
+      } catch (error) {
+        expect(error).toMatchObject({ status: 507, code: 'DEMO_STORAGE_FULL' })
+        expect(controller.getSnapshot()).toEqual(before)
+        expect(h.raw).toBe(raw)
+        expect(new TextEncoder().encode(raw!).byteLength).toBeLessThanOrEqual(3 * 1024 * 1024)
+        expect(before.commandCount).toBeLessThan(1000)
+        expect(before.scheduler.tasks).toHaveLength(1)
+        rejected = true
+        break
+      }
+    }
+    expect(rejected).toBe(true)
+  }, 30_000)
+
+  it('counts persona and domain commands together while preserving idempotent replay at the limit', async () => {
+    const h = harness(), controller = h.start()
+    for (let index = 0; index < 999; index++) await controller.setPersona('user-rd-commerce', 'persona-' + index, identity(controller))
+    const receipt = await controller.command('POST', '/clock/advance', { ticks: 1 }, 'last-command', identity(controller))
+    const before = controller.getSnapshot(), raw = h.raw, session = controller.getSession()
+    expect(await controller.command('POST', '/clock/advance', { ticks: 1 }, 'last-command', identity(controller))).toEqual(receipt)
+    await expect(controller.command('POST', '/clock/advance', { ticks: 1 }, 'over-limit', identity(controller)))
+      .rejects.toMatchObject({ status: 429, code: 'DEMO_COMMAND_LIMIT' })
+    await expect(controller.setPersona('user-ops', 'over-limit-persona', identity(controller)))
+      .rejects.toMatchObject({ status: 429, code: 'DEMO_COMMAND_LIMIT' })
+    expect(controller.getSnapshot()).toEqual(before)
+    expect(controller.getSession()).toEqual(session)
+    expect(h.raw).toBe(raw)
+    await controller.reset('reset-full-session', identity(controller))
+    expect(controller.getSnapshot().commandCount).toBe(0)
+  }, 30_000)
+
+
 })

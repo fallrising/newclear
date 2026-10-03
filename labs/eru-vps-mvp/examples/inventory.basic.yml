@@ -1,0 +1,42 @@
+# Design example only: replace addresses in a PRIVATE copy.
+# Use for a FRESH cluster; not an etcd membership migration.
+# Give each rebuild generation a fresh etcd_cluster_token.
+all:
+  children:
+    etcd:
+      hosts:
+        10.77.0.11:
+          etcd_name: etcd0
+    core:
+      hosts:
+        10.77.0.11: {}
+    node_containerd:
+      hosts:
+        10.77.0.12:
+          node_containerd_name: worker-2
+          node_containerd_subnet: 10.66.2.0/24
+          node_containerd_storage: 10G
+          node_containerd_labels:
+          - owner=eru-vps-mvp
+          - worker=2
+        10.77.0.13:
+          node_containerd_name: worker-3
+          node_containerd_subnet: 10.66.3.0/24
+          node_containerd_storage: 10G
+          node_containerd_labels:
+          - owner=eru-vps-mvp
+          - worker=3
+        10.77.0.14:
+          node_containerd_name: worker-4
+          node_containerd_subnet: 10.66.4.0/24
+          node_containerd_storage: 10G
+          node_containerd_labels:
+          - owner=eru-vps-mvp
+          - worker=4
+    node_process: {}
+    node_cocoon: {}
+  vars:
+    ansible_user: root
+    plugins_enabled:
+    - resource-storage
+    etcd_cluster_token: eru-vps-mvp-basic-example

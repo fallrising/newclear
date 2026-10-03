@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-12",
+  "format": "gemini",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"promptFeedback\": {\"blockReason\": \"SAFETY\"}}"
+  },
+  "expect": {
+    "error_class": "content_filter"
+  }
+}

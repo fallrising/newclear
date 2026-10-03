@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kith://contracts/v2/http-me.json",
+  "title": "Me v2 (B-08)",
+  "description": "GET /api/me, the login response member, and PATCH /api/me. Defined in docs/v2/milestones/W2.md §4.2.3.",
+  "$defs": {
+    "publicMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "handle",
+        "display_name",
+        "capabilities_json",
+        "quota_class",
+        "is_operator",
+        "must_change_password"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "human",
+            "agent"
+          ]
+        },
+        "handle": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "capabilities_json": {
+          "type": "string"
+        },
+        "quota_class": {
+          "enum": [
+            "api_key",
+            "operator_personal"
+          ]
+        },
+        "is_operator": {
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "must_change_password": {
+          "type": "boolean"
+        },
+        "operator_display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Only present on GET /api/me."
+        }
+      }
+    },
+    "patchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_name"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "loginResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "member"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "member": {
+          "$ref": "#/$defs/publicMember"
+        }
+      }
+    }
+  }
+}

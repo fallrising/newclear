@@ -1,5 +1,8 @@
 # Fleet Catalog
 
+> **Portfolio doc tier: B (maintain / public contract)** — Keep the contract usable; do not expand into a second product line without an owner override. Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 Personal multi-VPS service catalog and thin control plane.
 
 - **Contract:** `fleet.yaml` in each workload repo
@@ -9,6 +12,10 @@ Personal multi-VPS service catalog and thin control plane.
 - **Binaries:** `fleetd` (control plane), `fleet-agent` (node)
 
 This is a Phase 1 MVP. The source of truth for protocols, schemas, and APIs is **[docs/SDD.md](docs/SDD.md)**.
+
+## Monorepo path note
+
+This tree lives under `specs/fleet` for historical migration reasons, but it is an **implementable control-plane component** (Go binaries, Compose, CI), not monorepo documentation. Root `docs/` is for portfolio policy only. See [taxonomy](../../docs/taxonomy.md).
 
 ## Status
 

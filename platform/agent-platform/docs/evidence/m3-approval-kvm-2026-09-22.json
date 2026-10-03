@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-22T11:21:52.011265+00:00",
+  "transport": "cocoon-kvm-platform-approval",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "cases": [
+    {
+      "decision": "approve",
+      "run_id": "00c1d0a7-9a45-4e7d-a063-eb5217b12778",
+      "vm_id": "JTWRB6KH7FIBEQMMUZICWGOYK3",
+      "state": "succeeded",
+      "not_executed_before_decision": true,
+      "action_digest": "b5d35b57cc941c48d65cbabff3e669c32856a7e239112a2cc99540f4ae10123c",
+      "generation": 2,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    },
+    {
+      "decision": "deny",
+      "run_id": "1a871958-4e20-48e0-85ae-476763777a13",
+      "vm_id": "DEERB7Z6QO4OLEOYWSZAM2XA6V",
+      "state": "cancelled",
+      "not_executed_before_decision": true,
+      "action_digest": "b5d9bd37d44fd6d258c176a248fdd1dd184e11e7b54b69464de28caff3ddf7c8",
+      "generation": 4,
+      "proof": {
+        "original_vmm_process_gone": true,
+        "vm_record_gone": true,
+        "runtime_directory_gone": true,
+        "cpu_scope_gone": true
+      }
+    }
+  ],
+  "passed": true,
+  "cleanup_errors": [],
+  "vm_count_after": 0,
+  "claim_count_after": 0,
+  "finished_at": "2026-09-22T11:22:11.992258+00:00"
+}

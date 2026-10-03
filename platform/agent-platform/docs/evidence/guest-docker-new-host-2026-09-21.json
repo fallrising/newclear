@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-21T16:50:00.247324+00:00",
+  "transport": "docker",
+  "image": "newclear-agent-m0:local",
+  "checks": {
+    "ready": "passed",
+    "rest_auth_required": "passed",
+    "pinned_server_revision": "passed",
+    "openapi_routes": "passed",
+    "create_conversation": "passed",
+    "message_does_not_autorun": "passed",
+    "fake_model_run_finished": "passed",
+    "websocket_reconnect_deduplicates": "passed",
+    "interrupt_means_paused": "passed",
+    "resume_after_interrupt": "passed",
+    "container_restart_retains_history": "passed",
+    "continue_after_container_restart": "passed",
+    "conversation_delete": "passed",
+    "owned_docker_resources_removed": "passed"
+  },
+  "pending_kvm_gates": [
+    "cocoon_guest_boot_and_template_digest",
+    "sandbox_rest_and_websocket_relay",
+    "cross_workspace_and_egress_isolation",
+    "sandbox_ttl_and_allocation_reconciliation",
+    "microvm_stop_and_confirmed_resource_release"
+  ],
+  "full_m0_complete": false,
+  "local_image_id": "sha256:0df265f213d032f3673cc2de0aebbdd75a6f06bb81edbe18af5c5c5786c40053",
+  "observed_server": {
+    "version": "1.49.2",
+    "sdk_version": "1.49.2",
+    "build_git_sha": "856d99d48e4b11c70c5f1cab21e7830570dbc324"
+  },
+  "openapi_sha256": "07b9a08c06426d6d351b836b93b10793d0f8149d44f8eeacc68ea1a50edaaf71",
+  "subscription_snapshots": 3,
+  "unique_events": 19,
+  "docker_contract_passed": true,
+  "finished_at": "2026-09-21T16:50:12.541454+00:00"
+}

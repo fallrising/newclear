@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-23T11:36:04.156508+00:00",
+  "transport": "cocoon-kvm-product-connector-output",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "cases": [
+    {
+      "case": "safe",
+      "probe": {
+        "uid": 2000,
+        "proxy": {
+          "public_http": 403,
+          "public_https": 403,
+          "metadata": 403,
+          "private": 403,
+          "loopback": 403,
+          "ipv6_loopback": 403,
+          "unlisted": 403
+        },
+        "direct_blocked": true,
+        "interfaces": {
+          "lo": {
+            "type": 772,
+            "state": "unknown"
+          },
+          "sit0": {
+            "type": 776,
+            "state": "down"
+          }
+        },
+        "other_workspace_absent": true,
+        "session_credential_readable": false
+      },
+      "events_redacted": true,
+      "result": "validated"
+    },
+    {
+      "case": "secret_diff",
+      "probe": {
+        "uid": 2000,
+        "proxy": {
+          "public_http": 403,
+          "public_https": 403,
+          "metadata": 403,
+          "private": 403,
+          "loopback": 403,
+          "ipv6_loopback": 403,
+          "unlisted": 403
+        },
+        "direct_blocked": true,
+        "interfaces": {
+          "lo": {
+            "type": 772,
+            "state": "unknown"
+          },
+          "sit0": {
+            "type": 776,
+            "state": "down"
+          }
+        },
+        "other_workspace_absent": true,
+        "session_credential_readable": false
+      },
+      "events_redacted": true,
+      "result": "rejected_without_receipt"
+    }
+  ],
+  "full_at07_complete": false,
+  "passed": true,
+  "cleanup_confirmed": true,
+  "remaining_claims": 0,
+  "remaining_vms": 0,
+  "finished_at": "2026-09-23T11:36:26.283298+00:00"
+}

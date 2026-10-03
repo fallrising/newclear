@@ -1,0 +1,6 @@
+import './resources.css'
+export { ServiceResourcesPage } from './ServiceResourcesPage'
+export { InventoryListPage, InventoryDetailPage } from './InventoryPages'
+export { ChangeWizardPage } from './ChangeForm'
+export { ChangeDetailPage } from './ChangeDetailPage'
+export { WorkItemsPage } from './WorkItemsPage'

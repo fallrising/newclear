@@ -1,5 +1,7 @@
 # Repository team ledger
 
+> 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
+
 此檔保存主控計畫與接受決策；目前只有 dim-gate 試點。其他 program 使用獨立區塊，只有對應 program/variant 的主控可更新本區；worker 只能讀。
 
 ## Program: dim-gate / Variant: mainline
@@ -9,19 +11,23 @@
 | 欄位 | 值 |
 | --- | --- |
 | project_id / variant_id | dim-gate / mainline |
-| protocol_version / ledger_revision | 1 / 18 |
+| protocol_version / ledger_revision | 1 / 102 |
 | target_repo / target_ref | fallrising/newclear / main |
 | parent_variant / fork_commit | none / none |
-| active_owner / run_id | Codex orchestrator / DG-M2-20260920-01 |
-| active_work_branch | agent/dim-gate/mainline/m2-governance |
-| source / last_reconciled_target | M1 source `50294b687d06f08e94290f6f327187e8f69248bc` / reconciled `a5982bf4547bba85429fec50494751562b5fe7c6`, 2026-09-20 |
-| source kernel protocol | `664d176a07568fc17506185d3b99e7349897ce05` |
-| spec revision | M2 integration contract revision 1; implementation checkpoint `a9e64276273fc3698105c2bf8b0b7bc833444057` |
-| open implementation PRs at recovery | Draft PR #13 for M2; M0 PR #7 and M1 PR #11 are merged |
+| active_owner / last_run_id | none / DG-W5-20260923-01 (DONE) |
+| active_work_branch | none |
+| source / last_reconciled_target | W5 integration closeout / main `70a409ab5e522d0941cc6ae20c44b93b1c0a41c1` (2026-09-24); no later dim-gate, workflow or PLAN delta |
+| initial M0 recovery kernel protocol | read pinned `237aa277b0d067f65c8f64f49c6854597f7f8b15`; newer remote HEAD was observed but not adopted for that recovery |
+| spec revision | W5 integration contract revision2 accepted at `03c15883abfedd39b4f9fe4fe893a8e17fc391a8`; SDD14 defines W1–W5 only |
+| open implementation PRs | none; M0–M5 and W1–W5 are accepted and merged; latest closeout PRs #61 and #69 |
 
 入口：[DEVELOPMENT_PROMPT](../platform/dim-gate/DEVELOPMENT_PROMPT.md)。規則：[DEVELOPMENT_PROTOCOL](../platform/dim-gate/docs/DEVELOPMENT_PROTOCOL.md)。產品：[SDD](../platform/dim-gate/SDD.md)。摘要：[STATUS](../platform/dim-gate/docs/STATUS.md)。
 
-### Accepted baseline and recovery evidence
+### Current accepted baseline
+
+W1–W5 / AC-WS-01–18 and M0–M5 are accepted and integrated. W5 product `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` is merged via PR61 (`77e5e14`); CI-hardening PR69 is merged via `616d67e`. Exact post-merge CI passed on both merges, and actual main was reconciled at `70a409a`. DG-D102 and the final resume block below hold the full closeout evidence. No new W6 or AC-WS-19 scope has been selected; the next step is product-owner selection of a capability and observable flow.
+
+### Historical M0 recovery evidence
 
 - [SDD PR #5](https://github.com/fallrising/newclear/pull/5) merged `746585718429615288c85bf0027ae4a31c13e36b`；[protocol PR #6](https://github.com/fallrising/newclear/pull/6) merged at source main. Both were documentation, not application acceptance.
 - [Preflight](reports/dim-gate-m0-preflight.md) records complete mandatory/source-reference reading, exact blob SHAs, branches/worktrees/PR reconciliation and unavailable tools. No implementation task or active owner existed at recovery; the prior documentation checkout was preserved.
@@ -33,10 +39,10 @@
 | --- | --- | --- | --- | --- |
 | M0 | ACCEPTED | `695e962304276ab80885c985ce0f7287b15b4698` | MERGED — PR #7, merge `50294b687d06f08e94290f6f327187e8f69248bc` | AC-01–03; 82 tests, 7 E2E, independent review and remote CI passed |
 | M1 | ACCEPTED | `784f771a040be72fedf2f1521912900990c09dbf` | MERGED — PR #11, merge `b8dae76034caf63bf7d0721cba99a58a0586ae85` | AC-04–08,20; 122 tests, 11 E2E, independent review, synthetic-merge and post-merge CI passed |
-| M2 | RUNNING | none | DRAFT PR #13 | T-014 domain/API, T-015 RD/Ops UI and T-016 Admin UI checkpoints accepted; integrated review outstanding; AC-09–12,21–23 |
-| M3 | NOT_STARTED | none | NOT_OPENED | M2; AC-13–16,24 |
-| M4 | NOT_STARTED | none | NOT_OPENED | M3; AC-17–19,25 |
-| M5 | NOT_STARTED | none | NOT_OPENED | M4; AC-26–30 and all regression |
+| M2 | ACCEPTED | `513e6cc2f3ff9d1fc8228805c366ce4f9d732925` | MERGED — PR #13, merge `29bed41788a33684f24d216f4fd4d5f3f998c672` | AC-09–12,21–23; independent review, 138 tests, 22 Chromium journeys and post-merge CI passed |
+| M3 | ACCEPTED | `04d6646a2a325bb4efc18c44b463e0e6fd1747f3` | MERGED — PR #17, merge `9dd4f160de9d115c983f1d27661b7c399f0f0ef3` | AC-13–16,24; 170 tests, 40 Chromium journeys, independent closure and exact-head CI |
+| M4 | ACCEPTED | `93a4bbc8cafe03588ff8ef12014eeb2523a93de3` | MERGED — PR #20, merge `a61653b3a131f1cca6c0f476ef7ca0cc2456df12` | AC-17–19,25;207 tests,47 Chromium, independent closure and product-head CI passed |
+| M5 | ACCEPTED | `043a13aba3f74de2d3dd14aa2481024a68e2f6b2` | MERGED — PR #23, merge `24b11e1eccf678490cfc8d7449748e0c445218f4` | AC-26–30; 211 tests, 52 Chromium, 4 Firefox/WebKit, 3 benchmark, 2 isolation, independent review and post-merge CI passed |
 
 Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.md) defines milestone gates. Accepted branch work and merged integration are separate events.
 
@@ -60,6 +66,10 @@ Only [delivery validation](../platform/dim-gate/docs/sdd/07-delivery-validation.
 | [T-014](tasks/T-014.md) / 1 | 09–12/21–23 shared domain/API | merged M1 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-014.md); `a9e6427`, 132 tests, 11 production E2E |
 | [T-015](tasks/T-015.md) / 1 | 09–12 RD/Ops UI | T-014 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-015.md); `3eaea29`, 135 tests, 14 production E2E |
 | [T-016](tasks/T-016.md) / 1 | 21–23 Admin UI | T-015 | orchestrator / local tools | 1 / ACCEPTED_CHECKPOINT | agent/dim-gate/mainline/m2-governance | [report](reports/T-016.md); `f9f1472`, 136 tests, 17 production E2E |
+| [T-017](tasks/T-017.md) | M2 integrated review | T-014–016 | independent review + lead | ACCEPTED | agent/dim-gate/mainline/m2-governance | [report](reports/T-017.md); M2 accepted and PR #13 merged |
+| [T-018](tasks/T-018.md) / 1 | 13–16/24 domain and integration | merged M2 | orchestrator | 3 / ACCEPTED | agent/dim-gate/mainline/m3-delivery | [report](reports/T-018.md); final `04d6646`, 170 tests, 40 Chromium, review and CI passed |
+| [T-019](tasks/T-019.md) / 1 | M3 UI/browser | T-018 contract | bounded isolated worker + lead | integrated / ACCEPTED | agent/dim-gate/task/t019-delivery-ui | [report](reports/T-019.md); original worker preserved, final integration verified at `04d6646` |
+| [T-020](tasks/T-020.md) / 3 | independent M3 review | fixed candidate | independent read-only in-environment reviewer | 3 / ACCEPTED | detached 04d6646 | [report](reports/T-020.md); original and adversarial findings closed |
 
 Worker original reports remain immutable history; their PARTIAL statuses do not become acceptance automatically. Lead integrated their scoped files, central wire DTO/OpenAPI tooling and the UI contrast fix. Lead accepts the integrated results at the immutable correction after native checks and independent review; original worker limitations remain preserved.
 
@@ -293,3 +303,1386 @@ remote_durability: T-017 product and evidence head are on the SSH remote branch;
 blockers: []
 next_action: commit and SSH-push acceptance metadata, require final metadata-head CI, then perform the explicitly authorized PR #13 merge without deployment
 ```
+
+### M3 recovery and execution checkpoint
+
+DG-D028: Reconcile M2 as ACCEPTED and MERGED. PR #13 merged at `29bed41788a33684f24d216f4fd4d5f3f998c672`; metadata CI 35591097020, post-merge CI 35591531196 and mirror 35591531198 passed. Main advanced to `e760d8e988c0e2a837b226c600805a659a362c10` through unrelated agent-platform documentation PR #14. Source and M1/M2 worktrees remain unchanged; the new isolated M3 branch starts here.
+
+DG-D029: User approved the first M3 vertical slice. Freeze [M3 integration contract revision 1](../platform/dim-gate/docs/M3-INTEGRATION-CONTRACT.md) and start [T-018](tasks/T-018.md), then bounded UI and independent review. No unresolved owner decision blocks this slice. Built-in Codex owns implementation and a separate read-only session owns review; exact runtime model IDs are not inferred. Kernel `237aa277b0d067f65c8f64f49c6854597f7f8b15` was read from an isolated SSH sparse checkout; the existing reference remains unchanged at `664d176`.
+
+DG-D030: REWORK candidate `2abbec9` following independent T-020 attempt 1: clock receipt scope leak, impossible persisted scheduler steps, absent per-second playback and premature clock-completion feedback. Lead first reproduced both domain failures; correction `b58298e` passes 170 tests, lint, typecheck and architecture. Initial production M3 Chromium was 7/9, not acceptance. User requested saving progress/new conversation before corrected build/browser/independent re-review; preserve the checkpoint and release active ownership. No M3 PR/CI, merge or deployment is claimed.
+
+The routing and resume sections above for M0–M2 are historical. Current M3 routing: bounded UI worker and fresh independent reviewer through existing collaboration. External Claude preflight succeeded but code transmission was denied; source review did not run there. One initial review completed; its bounded correction exists, and the single same-approach follow-up remains pending.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-01
+terminal_state: null
+handoff_reason: user_requested_save_and_new_conversation
+active_owner: none
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: aafd24d7e7110454847ef8856bc15cd76626c2c7
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3
+task_id: T-018 / T-019 / T-020
+implementation_commit: b58298e9ddc2498830f1fd144277b1c6345359b1
+local_tested_commit: b58298e9ddc2498830f1fd144277b1c6345359b1 — unit/lint/typecheck/architecture only
+browser_tested_commit: 2abbec9ca4ca812b9be0278e6a5ca14c303c87b9 — 7 passed / 2 failed, not correction evidence
+spec_revision: M3-INTEGRATION-CONTRACT revision 1
+evidence_refs:
+  - .team/reports/T-018.md
+  - .team/reports/T-018-attempt-1.md
+  - .team/reports/T-019.md
+  - .team/reports/T-020.md
+  - .team/reports/T-020-attempt-1.md
+integration_state: NOT_OPENED
+remote_durability: product and containing evidence checkpoint to be SSH-pushed before handoff; verify remote branch tip on resume
+blockers: []
+next_action: read T-018 checkpoint; add playback/scope browser coverage, rebuild current HEAD with CJK fonts, rerun affected and full gates, then fixed-commit independent follow-up and current-head PR CI
+```
+
+### M3 resumed verification run
+
+DG-D031: Resume the user's explicit M3 handoff on 2026-09-21 at clean SSH-durable `24c55944f7f57010c7294df90c4feafb5976e75c`. Remote branch matches; no M3 PR or CI exists. Latest main `7bb80d00d03d93a2d392185adba65588c5fe2462` contains unrelated agent-platform changes and is integrated by a normal merge before validation. Source, accepted, worker and original fixed-review worktrees are preserved, including dirty historical workers. The prior owner explicitly released the variant.
+
+Run DG-M3-20260921-02: lead owns playback/scope/focus Chromium regression and full native gates; a fresh in-environment read-only reviewer will inspect the resulting immutable commit as T-020 attempt 2. Exact inherited model slug is not exposed. No external Claude source transfer. Kernel contract stays pinned at `237aa277b0d067f65c8f64f49c6854597f7f8b15`, re-read locally; newer kernel instructions are not adopted. Three-cycle total budget and one same-approach follow-up remain in force. Required commands: frozen install, lint, typecheck, test, check:docs, check:contracts, check:ci, check:architecture, build --mode demo, test:e2e, actionlint, diff --check. No acceptance until independent review and current-head remote CI pass.
+
+DG-D032: REWORK fixed candidate `f7905bbab0c3032b28387d4596795c3a64800c58` for an additional playback concurrency boundary found during independent T-020 attempt 2. Lead Chromium reproduction delayed delivery of real clock responses by 2500ms without changing response/domain content: pause immediately reopened manual stepping, producing two unsettled clock requests. The prior effect-local cancellation assumption is replaced by persistent in-flight ownership and pending UI state; pause stops scheduling but manual/resume wait for response plus refresh. Contract revision 2 makes this existing no-overlap requirement explicit. This is the third bounded cycle, with an adversarial in-flight regression and new immutable candidate required; do not repeat the earlier review unchanged or accept its green baseline tests.
+
+Third-cycle refinement before final verdict: immutable intermediate `30b8d04a709c5b8f681654402284edbdfeeb9da8` closes same-view pause but independent inspection exposed the hook-remount lifetime boundary. Lead repeated the real-response-delay probe with detail→list→detail; maxPending remained 2. The design now uses the existing shared TanStack Query mutation cache rather than a hook-local ref, covering playback, delivery manual controls and Guide through response plus refresh; timer intent stays view-local. Original fixed review checkouts remain unchanged. Draft PR #17 exists for remote validation, not acceptance.
+
+### M3 pre-acceptance resume block — DG-M3-20260921-02 (historical)
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-02
+terminal_state: null
+active_owner: Codex orchestrator
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: 7bb80d00d03d93a2d392185adba65588c5fe2462
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3
+task_id: T-018 / T-019 / T-020
+implementation_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+local_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3 — full native gates pass; full Chromium running
+spec_revision: M3-INTEGRATION-CONTRACT revision 2
+evidence_refs:
+  - .team/reports/T-018.md
+  - .team/reports/T-018-attempt-2.md
+  - .team/reports/T-019-attempt-1.md
+  - .team/reports/T-020-attempt-2.md
+integration_state: OPEN_DRAFT_PR_17
+remote_durability: product candidate verified on SSH remote branch
+blockers: []
+next_action: await fixed-candidate Chromium, independent third-cycle closure and latest-head CI; then preserve acceptance evidence and wait metadata-head CI without merging
+```
+
+DG-D033: ACCEPT M3 AC-13–16 and AC-24. Evaluated implementation `04d6646a2a325bb4efc18c44b463e0e6fd1747f3`; report_ref `.team/reports/T-018-attempt-3.md`; review_ref `.team/reports/T-020-attempt-3.md`. Local 170 tests, all native gates, 40/40 production Chromium journeys and independent no-blocking/high/medium review pass. Exact product-head CI [35637762270](https://github.com/fallrising/newclear/actions/runs/35637762270) passed at synthetic merge `2320eeb2e7a012c9bcf012a591404cb223a5f261`, with browser artifact retained. Latest SSH main `7bb80d0` is integrated. Observation time: 2026-09-21 18:30 UTC. PR #17 is unmerged; evidence metadata and its final head CI remain the administrative closeout, reported on the PR without another self-referential commit. No merge/deployment authorization exists.
+
+### Final M3 acceptance resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M3-20260921-02
+terminal_state: null
+active_owner: Codex orchestrator — final metadata-head CI closeout
+target_ref: main
+source_main: e760d8e988c0e2a837b226c600805a659a362c10
+last_reconciled_target: 7bb80d00d03d93a2d392185adba65588c5fe2462
+continuation_ref: agent/dim-gate/mainline/m3-delivery
+milestone: M3 ACCEPTED
+task_id: T-018 / T-019 / T-020
+implementation_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+local_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3
+browser_tested_commit: 04d6646a2a325bb4efc18c44b463e0e6fd1747f3 — 40/40
+ci_tested_merge: 2320eeb2e7a012c9bcf012a591404cb223a5f261
+ci_run: https://github.com/fallrising/newclear/actions/runs/35637762270
+spec_revision: M3-INTEGRATION-CONTRACT revision 2
+evidence_refs:
+  - .team/reports/T-018-attempt-3.md
+  - .team/reports/T-019.md
+  - .team/reports/T-020-attempt-3.md
+integration_state: OPEN_PR_17_NOT_MERGED
+remote_durability: product is SSH-durable; this evidence checkpoint will be SSH-pushed, with final head and CI recorded on PR 17
+blockers: []
+next_action: require current evidence-head CI before Ready/handoff; final PR metadata records DONE and released ownership after success, without an infinite self-reference commit; merge requires a separate user instruction
+```
+
+### M4 continuation — DG-M4-20260922-01
+
+DG-D034: Reconciled accepted M3 parent PR17, OPEN Ready at7d20bbc, CI35639600714 success and prior owner release recorded on that PR. User authorized continued development and a handoff prompt if needed; no merge/deploy authorization. Start M4 from fixed M3 evidence commit in isolated newclear-m4, stacked branch agent/dim-gate/mainline/m4-observability. Parent PR17 stays unmodified. SSH remote main remains7bb80d0; unrelated agent-platform activity is preserved. Initial worktree HEAD/dirty manifest is /tmp/dim-gate-m4-evidence/initial-worktrees.json (local-only).
+
+[Contract revision1](../platform/dim-gate/docs/M4-INTEGRATION-CONTRACT.md) freezes observation windows/schema, incident threshold/reopen/recovery, scope/read projections and UI exports. Three-cycle maximum and one same-approach rework. Lead owns shared contracts, router/Guide/shell, integration, validation, PLAN and Git. T-021 owns domain/seed/tests in isolated worker worktree; T-022 owns feature UI/client in a disjoint worker worktree; T-023 independent reviewer writes no implementation; T-024 owns delivery. Built-in agents inherit current runtime, exact model slug unavailable; no external Claude transfer and no verified multi-model claim. The unchanged fully read kernel237aa277 contract remains the source; no new kernel update adopted.
+
+| Task | State | Scope | Evidence |
+| --- | --- | --- | --- |
+| [T-021](tasks/T-021.md) | ACCEPTED at93a4bbc | shared observation/incident domain | [canonical](reports/T-021.md); immutable worker attempt retained |
+| [T-022](tasks/T-022.md) | ACCEPTED at93a4bbc | observation/incident/integration UI | [canonical](reports/T-022.md);12 worker tests plus integrated browser evidence |
+| [T-023](tasks/T-023.md) | ACCEPTED at93a4bbc | independent read-only review | [final closure](reports/T-023-attempt-3.md) |
+| [T-024](tasks/T-024.md) | ACCEPTED; final metadata CI closeout | integration/full gates/Chromium/CI | [canonical](reports/T-024.md);207 tests/47 E2E/current product-head CI |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M4-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator
+milestone: M4 NOT_ACCEPTED
+parent_pr: https://github.com/fallrising/newclear/pull/17
+parent_commit: 7d20bbc48a25e82c82c048304da8b74a897ec14e
+target_ref: agent/dim-gate/mainline/m3-delivery
+continuation_ref: agent/dim-gate/mainline/m4-observability
+worktree: <operator-home>/test/codex/newclear-m4
+tasks: T-021 / T-022 / T-023 / T-024
+spec_revision: M4-INTEGRATION-CONTRACT revision1
+integration_state: NOT_OPENED
+remote_durability: local contract checkpoint; SSH push required before handoff
+next_action: complete domain/UI integration, production Chromium and independent fixed-candidate review; open stacked PR and require current-head CI; no merge/deployment
+```
+
+M4 integration checkpoint: frozen install, lint/typecheck, all 207 tests, docs/contracts/CI/architecture gates passed on the integrated local product diff. Full production Chromium and fixed-commit independent review remain pending. Native actionlint was initially invoked with an incorrect relative path; corrected root workflow invocation is required. No acceptance decision.
+
+DG-D035: REWORK first M4 candidate298a563 after actual production Chromium4/7: three provider cases share a test-author Provider selector mismatch; preserved attempt1 artifacts. Independent T-023 static pass found no blocker/high/medium implementation issue. Lead also corrects screenshot-proven toolbar wrapping and extends Guide pending ownership through all projection refresh. Draft stacked PR20 is open; M4 remains NOT_ACCEPTED. This begins bounded validation cycle2; next fixed candidate requires full Chromium and review delta closure.
+
+M4 cycle2 evidence refinement: c0ff3fc provider journeys reached third healthy sample then failed a premature test count during Guide startup; CI35701711435 reproduced a legacy reset test clicking during the correctly extended refresh guard. Preserve T-024-attempt-2; final test-only correction adds retrying Guide count and explicit pending-refresh assertions, without changing product behavior. Third bounded candidate now requires full native/Chromium and current-head CI plus reviewer closure.
+
+
+DG-D036: ACCEPT M4 AC-17–19/25 at `93a4bbc8cafe03588ff8ef12014eeb2523a93de3`. Local pinned native gates207tests, fresh demo and47/47Chromium passed. Independent T-023 found no blocker/high/medium implementation issue and inspected raw evidence. Exact-head [CI35705801700](https://github.com/fallrising/newclear/actions/runs/35705801700), synthetic merge3a6670352f9e535dd95ff265f39f3b57d4177615, passed207tests/47Chromium and retains artifact10684483634. Report refs: T-024-attempt-3 and T-023-attempt-3. Third validation cycle preserves original failed attempts: test selector/startup synchronization, obsolete center-route assertion, precisely evidenced retired reads, then CI-exposed150mssearch timing. Final deterministic search test holds actual successful Data bytes across persona switching and proves no stale result. No production changes afterc0ff3fc.
+
+M4 now implements RED/trace/log correlation, incident threshold/dedupe/reopen and Ops writes, three minute-spaced recovery samples after successful rollback, scoped integrations/notifications and coherent eight-step Guide. M5 remains NOT_STARTED. The final evidence-only checkpoint requires its own latest-head CI before Ready/owner release; record that closeout on PR20 without another self-referential commit. Accepted/source/worker/review worktrees remain preserved; no merge/deployment.
+
+### Final M4 acceptance resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M4-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator — final metadata-head CI closeout
+milestone: M4 ACCEPTED
+parent_pr: https://github.com/fallrising/newclear/pull/17
+parent_commit: 7d20bbc48a25e82c82c048304da8b74a897ec14e
+last_reconciled_main: eb2023f81d02ad5e9a7419a0b8bf67751e135758
+target_ref: agent/dim-gate/mainline/m3-delivery
+continuation_ref: agent/dim-gate/mainline/m4-observability
+worktree: <operator-home>/test/codex/newclear-m4
+task_id: T-021 / T-022 / T-023 / T-024
+implementation_commit: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3
+local_tested_commit: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3
+browser_tested_commit: 93a4bbc8cafe03588ff8ef12014eeb2523a93de3 — 47/47
+ci_tested_merge: 3a6670352f9e535dd95ff265f39f3b57d4177615
+ci_run: https://github.com/fallrising/newclear/actions/runs/35705801700
+spec_revision: M4-INTEGRATION-CONTRACT revision1
+evidence_refs:
+  - .team/reports/T-021.md
+  - .team/reports/T-022.md
+  - .team/reports/T-023-attempt-3.md
+  - .team/reports/T-024-attempt-3.md
+integration_state: OPEN_PR_20_STACKED_NOT_MERGED
+remote_durability: product SSH-durable; containing evidence commit is pushed next, latest metadata head/CI and final owner release recorded on PR20
+blockers: []
+next_action: require latest metadata-head CI, then Ready/DONE/owner release on PR20; next development run follows docs/HANDOFF-M5.md after reconciliation, without auto-merge or deployment
+```
+
+
+### M5 execution — DG-M5-20260922-01
+
+DG-D037: Reconcile final M4 metadata d83560d / CI35707390643 success and released ownership in PR20 body. M3 metadata7d20bbc / CI35639600714 and owner release also confirmed. Initial source/accepted/worker/review HEAD and dirty manifest saved locally at /tmp/dim-gate-m5-evidence/initial-worktrees.json. User first prohibited auto-merge, then explicitly authorized commit, SSH push and PR merge; deployment/real cloud remain excluded. M3 PR17 merged at9dd4f160de9d115c983f1d27661b7c399f0f0ef3; M4 PR20 retargeted to main and new base checks pending. Isolated M5 branch starts from accepted M4 and normally merges current main; no original worktree changed.
+
+[Contract revision1](../platform/dim-gate/docs/M5-INTEGRATION-CONTRACT.md). T-025 performance worker; T-026 reliability/isolation worker; T-027 lead keyboard/UI/shared config/integration; T-028 uninvolved fixed-commit reviewer. Workers use isolated worktrees and disjoint ownership. Available built-in collaboration inherits runtime; exact model slug unavailable, no verified multi-model claim. Kernel pinned237aa277 read locally; no new source revision adopted or external Claude transfer. Three-cycle budget, one same-approach rework.
+
+| Task | State | Scope |
+| --- | --- | --- |
+| [T-025](tasks/T-025.md) | ACCEPTED at043a13a | AC27; [canonical evidence](reports/T-025.md) |
+| [T-026](tasks/T-026.md) | ACCEPTED at043a13a | AC28/29; [canonical evidence](reports/T-026.md) |
+| [T-027](tasks/T-027.md) | ACCEPTED; evidence-head CI/merge closeout | AC26/30; [canonical evidence](reports/T-027.md) |
+| [T-028](tasks/T-028.md) | ACCEPTED at043a13a | [independent final review](reports/T-028-attempt-2.md) |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M5-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator
+milestone: M5 NOT_ACCEPTED
+target_ref: main
+continuation_ref: agent/dim-gate/mainline/m5-delivery
+worktree: <operator-home>/test/codex/newclear-m5
+task_id: T-025 / T-026 / T-027 / T-028
+spec_revision: M5-INTEGRATION-CONTRACT revision1
+integration_state: NOT_OPENED
+remote_durability: local initial contract; SSH push required
+blockers: []
+next_action: implement bounded M5 scopes, integrate and validate exact candidate, independent review and latest-head CI, then explicitly authorized merge; no deployment
+```
+
+DG-D038: User-authorized M3/M4 integration completed: PR17 merge9dd4f160de9d115c983f1d27661b7c399f0f0ef3 (post-merge CI35715757530 success), PR20 mergea61653b3a131f1cca6c0f476ef7ca0cc2456df12 (post-merge CI35716558999 pending at this observation). M5 normally integrates both into its isolated branch. Original source/accepted/worker/review branches and worktrees retained. T-025 task revision2 expands import-only ownership to foundation/routes.tsx and api/contracts.ts, preserving all runtime schemas and operations.
+
+DG-D039: REWORK first M5 candidate5ec58f7 following independent T-028 attempt1. Medium F-01 maps snapshot serializer failure incorrectly; lead reproduces both snapshot/envelope boundaries and moves byte serialization into existing atomic persistence catch. Medium F-02 is new extra-browser proof proceeding before persona/navigation settles; wait actual identity/route before next UI action. Native210 gates were green, smoke2/4 was not acceptance. Preserve all failures in T-027/T-028 attempt1. Second bounded review cycle requires new immutable candidate and full gates. Additional test-only correction polls actual1000-command UI results at25ms instead of default backoff, preserving every real click and150ms HTTP. Existing47 browser regressions unchanged; generated smoke artifacts get the same lint exclusion as baseline reports.
+
+
+DG-D040: ACCEPT M5 AC-26–30 at `043a13aba3f74de2d3dd14aa2481024a68e2f6b2`. Complete native gates211tests,52/52Chromium,4/4Firefox-WebKit,3/3performance,2/2isolation and independent T-028 attempt2 no-blocker/high/medium review passed. Exact product-head [CI35718464916](https://github.com/fallrising/newclear/actions/runs/35718464916), synthetic merge585dced93a8ef547a634020c0960860908902f67, also passed and retains artifact10691481213. Accepted details: T-027 attempt2. Initial JS297,794gzip bytes; local5-sample cold4×CPU LCP median708ms, query100p95 0.5ms, persisted HTTP100p95 167.2ms. Remote equivalents1148/1.1/184.9ms also pass unchanged SDD budgets.
+
+Second bounded review cycle closes F-01 serializer mapping, F-02 persona/navigation test synchronization and F-03 local Firefox CJK font sandbox visibility. F-03 changes only a temporary local font-directory read permission; standard CI font screenshots are readable. Original failed reports/artifacts, both detached M5 review worktrees, worker worktrees and every original worktree remain preserved. T-026 worker PARTIAL remains truthful; lead owns its corrected engine and accepted integrated evidence. Local runner actionlint log-path failure occurred before execution and the two remaining checks separately passed, with no product test rerun.
+
+M3 PR17 merge9dd4f16 and M4 PR20 mergea61653b both have successful post-merge CI35715757530/35716558999. Latest main b252d4e adds only agent-platform and is normally merged at2464b52 with no change to reviewed dim-gate/CI/ledger content. User explicitly authorized commit/SSHpush/PRmerge, superseding the historical no-auto-merge instruction for this run; no deployment or real cloud is authorized. v0.1 is accepted for local demonstration. Evidence-head CI and PR23 merge/owner release are recorded on the PR after this checkpoint, avoiding a self-reference commit loop.
+
+### Final M5 acceptance resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-M5-20260922-01
+terminal_state: null
+active_owner: Codex orchestrator — final metadata-head CI and authorized merge closeout
+milestone: M5 ACCEPTED; local-demo v0.1
+target_ref: main
+last_reconciled_main: b252d4e62c8380803af1854997d95c4b242bc18a
+main_integration_commit: 2464b5283b8c1a168a073220a316d78e404397dc
+continuation_ref: agent/dim-gate/mainline/m5-delivery
+worktree: <operator-home>/test/codex/newclear-m5
+task_id: T-025 / T-026 / T-027 / T-028
+implementation_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
+local_tested_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2
+browser_tested_commit: 043a13aba3f74de2d3dd14aa2481024a68e2f6b2 — Chromium52/52; Firefox-WebKit4/4; performance3/3; isolation2/2
+ci_tested_merge: 585dced93a8ef547a634020c0960860908902f67
+ci_run: https://github.com/fallrising/newclear/actions/runs/35718464916
+spec_revision: M5-INTEGRATION-CONTRACT revision1
+evidence_refs:
+  - .team/reports/T-025.md
+  - .team/reports/T-026.md
+  - .team/reports/T-027-attempt-2.md
+  - .team/reports/T-028-attempt-2.md
+integration_state: OPEN_PR_23_EVIDENCE_HEAD_CI_THEN_AUTHORIZED_MERGE
+remote_durability: product SSH-durable; containing metadata commit pushed next, final head/CI/merge/owner release recorded on PR23
+blockers: []
+next_action: require latest metadata-head CI, then Ready and user-authorized merge; record DONE and released ownership on PR23; preserve all branches/worktrees; no deployment/real cloud
+```
+
+
+### Role workspace design — DG-VIEWS-20260922-01
+
+DG-D041: Reconcile M5 PR23 MERGED at24b11e1eccf678490cfc8d7449748e0c445218f4, released ownership in PR body, and post-merge CI35724197709 success. Latest main ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad contains unchanged dim-gate product/SDD/ledger; intervening work belongs to other components. Historical M5 pending owner/merge fields above describe earlier observations and are superseded by this reconciliation. Preserve all existing worktrees and the running M5 preview.
+
+User now requests separate RD/Ops/Admin SDDs as logical views of one shared service/resource platform. [T-029](tasks/T-029.md) is RUNNING, documentation only; no M0–M5 reopening or new product implementation. Earlier user authorization for commit, SSH push and PR merge remains; deployment/real cloud remain excluded. Single-agent drafting and consistency review; no independent implementation review or new product acceptance claim. Kernel validator uses existing fixed237aa277 source. One draft/review cycle plus at most one correction.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-VIEWS-20260922-01
+active_owner: Codex orchestrator
+terminal_state: null
+milestone: workspace SDD revision1; design only
+task_id: T-029
+target_ref: main
+last_reconciled_main: ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad
+continuation_ref: agent/dim-gate/mainline/role-workspace-sdd
+worktree: <operator-home>/test/codex/newclear-dim-gate-views
+integration_state: NOT_OPENED
+remote_durability: local task checkpoint
+blockers: []
+next_action: write shared/role/capability/acceptance specifications, check documentation, save fixed evidence, SSH-push and require PR CI before authorized merge
+```
+
+
+DG-D042: ACCEPT T-029 documentation at `deeffb0bd9fd6a1f2c975be51d87a873090df540`; [attempt1](reports/T-029-attempt-1.md), [canonical](reports/T-029.md). Six SDDs define shared state and RD/Ops/Admin projections, 28 capability groups, 10 requirements and 18 mapped acceptance cases; docs134/316, diff check, task contract and lead consistency review passed. This is document acceptance only; W1–W5 and all AC-WS product gates remain unimplemented/unverified. No product/test/API/lockfile/workflow changed. No independent implementation review claimed for this document task.
+
+### Workspace SDD resume block
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+run_id: DG-VIEWS-20260922-01
+active_owner: Codex orchestrator — final PR CI and authorized merge closeout
+terminal_state: null
+milestone: WS-SDD revision1 documentation ACCEPTED; W1–W5 NOT_IMPLEMENTED
+task_id: T-029
+target_ref: main
+last_reconciled_main: ad73f55cf4aa0d19e515e2a3bb9eb2d6bf6d9bad
+continuation_ref: agent/dim-gate/mainline/role-workspace-sdd
+worktree: <operator-home>/test/codex/newclear-dim-gate-views
+implementation_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540
+local_tested_commit: deeffb0bd9fd6a1f2c975be51d87a873090df540 — documentation only
+spec_revision: WS-SDD revision1
+evidence_refs: [.team/reports/T-029-attempt-1.md, .team/reports/T-029.md]
+integration_state: NOT_OPENED — final head/CI/merge recorded in PR closeout
+remote_durability: containing evidence commit is SSH-pushed next; verify remote and PR
+blockers: []
+next_action: require latest PR-head CI, perform user-authorized merge without deleting branch/worktrees, record DONE/owner release on PR; then W1 needs its own implementation task/contract
+```
+
+
+### W1 execution — DG-W1-20260923-01
+
+DG-D043 (2026-09-23): Reconcile latest SSH origin/main `7a7b41b2e74c2c635642dcb6c980363f6958968b`. PR31 MERGED at `73d48292f28743db01e92be2fb8b38d12c82e04e`, exact-head CI35741665554 and post-merge CI35745274207 succeeded; PR body releases DG-VIEWS ownership as DONE. No open PR and no W implementation remote branch at observation. Main contains unchanged dim-gate/ledger since design. M0–M5 remain ACCEPTED/MERGED; W1–W5 are unimplemented. All38 original worktrees preserved, including11 dirty historical/other-component trees; read-only manifest `/tmp/dim-gate-w1-evidence/initial-worktrees.json` is local-only. Existing preview4173 preserved.
+
+Lead takes this new isolated W1 run under user's explicit commit/SSH push/PR/merge authorization, applicable to each sequential milestone. [W1 contract](../platform/dim-gate/docs/W1-INTEGRATION-CONTRACT.md) freezes full scope and AC before code. T-030 domain/API worker owns shared schema/engine; T-031 lead owns Shell/UI/tests/docs and router/manifest/CI; T-032 uninvolved read-only reviewer. Built-in Codex collaboration inherits runtime; precise provider model slug not independently exposed. Claude CLI2.1.278 is authenticated, but concrete model/safe read-only routing not yet verified; built-in independent reviewer is the disclosed fallback, no multi-model claim. No external model source transfer. Complete kernel237aa277 source read from local Git objects, no new revision adopted or remote update verified. Node24.18.0 and component-pinned pnpm11.18.0; existing Chromium/Firefox/WebKit installations available.
+
+| Task | Owner | State |
+| --- | --- | --- |
+| [T-030](tasks/T-030.md) | bounded domain/API worker | READY |
+| [T-031](tasks/T-031.md) | Codex lead | RUNNING |
+| [T-032](tasks/T-032.md) | uninvolved reviewer | READY after candidate |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 43
+run_id: DG-W1-20260923-01
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+target_ref: main
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
+implementation_commit: none
+local_tested_commit: none
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision1
+evidence_refs: []
+integration_state: NOT_OPENED
+remote_durability: local contract/task checkpoint; SSH push and draft PR next
+blockers: []
+next_action: implement scoped dashboard and independent workspace/persona UI, validate all W1 gates and fixed review, then latest PR-head CI and authorized merge before W2
+```
+
+DG-D044: W1 contract revision2 clarifies legacy action-specific Ops scope: Request approval retains project/pool intersection; Release approval and Incident work retain project/stage-only grants. Lead early diff review corrected an overbroad pool filter before acceptance; no AC or baseline policy reduced. Product work is in progress, PR33 draft; local Shell lint/architecture/docs pass, browser/fixed-review still pending.
+
+DG-D045: T-030 handed back eight owned product files and report; worker released ownership without commits/push. Lead integrated UI/domain, corrected navigation lookup typing, and verified240 tests, typecheck and demo build on working diff. Full immutable gates/review remain pending; no ACCEPT. PR33 draft at initial02a8b9a has successful CI35823661263. This implementation checkpoint is SSH-pushed next; exact source ref is its containing commit.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 45
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+implementation_commit: containing checkpoint; resolve via git
+local_tested_commit: working diff preliminary only; fixed gates next
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision2
+evidence_refs: [.team/reports/T-030-attempt-1.md, .team/reports/T-031-attempt-1.md]
+integration_state: OPEN — PR33 draft
+remote_durability: initial02a8b9a saved; containing implementation checkpoint SSH-pushed next
+blockers: []
+next_action: finish W1 browser tests; run fixed candidate native/full browser/smoke/benchmark/isolation gates and T-032 review; latest-head CI before authorized merge then W2
+```
+
+DG-D046: Implementation6f41224 SSH-pushed to PR33. Initial W1 browser6/7 failure was a nonexistent test label; real no-grant recovery/denial passes after using visible Session control. Initial3/3 benchmark passes; no budget relaxed. Preserve preliminary evidence in T-031 attempt1; next candidate starts fixed validation and T-032 independent review, not acceptance.
+
+DG-D047: REWORK candidate7d60786: independent T-032 identified legal scope lost when switching to Admin and missing SDD10§2 own-work filter; diagnostic visible-route source context is also under review. W1 contract revision3 freezes own-work query and cross-workspace requirements before corrections. Lead retains runDG-W1-20260923-01, owns all files after T-030 release, and uses isolated `newclear-dim-gate-w1-rework` / `agent/dim-gate/task/t031-workspace-rework` so the unchanged7d60786 complete gate run can finish. No other mainline writer; existing PR33 retained. Attempt1 failures remain, attempt2 will need full gates and uninvolved re-review; W1 NOT_ACCEPTED. After correction, fast-forward the PR branch and SSH-push; no W2 before merge. Native gates and6/6 Firefox/WebKit already pass on7d60786; full Chromium is still running. Supplemental non-empty real-UI request/failed-job/draft/audit5-step walkthrough passed, local evidence not remote yet.
+
+DG-D048: T-031/T-030 correction attempt2 implements T-032 F-01/02/03 under contractrev3;34 focused tests,9 W1 browser journeys plus extended real incident chain1/1 and nonempty home1/1 pass preliminarily. T-032 attempt1 is preserved in repository. New containing candidate is not accepted; run full fixed native/browser/benchmark/isolation and independent re-review. Owner remains sole Codex lead. SSH-push this candidate to existing PR33 branch; original7d60786 checkout remains untouched until its runner completes. Current implementation worktree newclear-dim-gate-w1-rework, temporary branch agent/dim-gate/task/t031-workspace-rework; canonical remote continuation unchanged. No W2 before accepted merge.
+
+DG-D049: REWORK03a7ee5 after independent T-032 attempt2: F-01–03 independently confirmed fixed; new medium F-04 (768px identical unlabeled icons with no expansion) and F-05 (nonexistent/mismatched scope retained on workspace switch) require correction. Contractrev4 fixes canonical validation and readable tablet navigation before code. Prior7d60786 immutable complete runner finished:240 tests,59/59 Chromium,6/6 Firefox/WebKit,3/3 benchmark,2/2 isolation and all native/workflow checks pass; this is regression evidence, not acceptance of its known findings. Artifacts copied to local /tmp/dim-gate-w1-evidence/7d60786-final-artifacts. Its lead checkout is clean and fast-forwarded to03a7ee5, then reused for attempt3; parallel03a7ee5 runner remains unchanged in rework tree. Sole owner Codex lead, originalbranch/worktree active; existing PR33 unchanged; user authorization persists. W1 NOT_ACCEPTED. Next fix F04/F05, fixed third review and all gates, then authorized merge before W2.
+
+DG-D050: F04/F05 corrected under contractrev4, focused11/11 Chromium passes including readable768/390 keyboard routes and canonical scope/failure recovery. Source remains NOT_ACCEPTED until full new immutable64-test regression,6 browser smoke,benchmark/isolation/native,third uninvolved review and latest-head CI. New containing candidate SSH-pushed next to existing PR33; owner sole Codex lead, original branch/worktree. Final correction scope is Shell/CSS/browser/docs only; domain schema/projection remain03a7ee5. Prior fixed03a7ee5 runner is in separate rework tree and may finish independently.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 50
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
+last_reconciled_main: 7a7b41b2e74c2c635642dcb6c980363f6958968b
+implementation_commit: containing final-correction checkpoint
+local_tested_commit: working-diff focused only; new immutable full gates next
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision4
+evidence_refs: [.team/reports/T-030-attempt-2.md, .team/reports/T-031-attempt-3.md, .team/reports/T-032-attempt-2.md]
+integration_state: OPEN — PR33 draft
+remote_durability: 03a7ee5 saved; containing correction checkpoint SSH-pushed next
+blockers: []
+next_action: run fixed candidate full gates and independent third review; latest-head CI and authorized merge, then confirm merge tree/postmerge CI and release owner before W2
+```
+
+DG-D051: During attempt3, older immutable03a7ee5 regression exposed an existing M4 Guide readiness gap: after sample1 the test reloads then immediately navigates to Guide before restored incident renders. Trace shows the old boot session request overlaps document navigation (Vite404/body unavailable), causing browser-health afterEach timeout; business assertions before cleanup succeeded, but the gate is failed. Preserve the failure; do not suppress health errors or relax timeout. Lead creates isolated `newclear-dim-gate-w1-readiness` / `agent/dim-gate/task/t031-regression-readiness` from5cf495f while both fixed runs continue untouched. Bounded correction within T-031 attempt3 adds explicit same incident ID, state and recovery sample assertions after reload; T-032 reviews this test-only delta before acceptance. No product contract, AC, source, dependency or health-gate behavior changes.5cf495f native245 and6 smoke pass, full64/benchmark/isolation and CI35827980156 remain pending. Sole owner unchanged; original PR33 remains draft/NOT_ACCEPTED.
+
+DG-D052: Fixed4ab6232 test-only reload correction passed frozen install/lint/typecheck/docs/build, all3 provider Guide stories and diffcheck; independent narrow review passes.4ab6232 and pre-edit scope SSH-saved on temporary taskbranch, no duplicate PR. Source0f9140a normally merges SSH main00333ef; diff proves no dim-gate/.team/workflow change from main. Older03a finished61/62 failed, preserved `03a7ee5-failed-artifacts`; final5cf native245/smoke6 pass and long full64 suite still running, then benchmark/isolation. Sole lead owns readiness checkout; original lead5cf stays immutable until its runner ends. SDD status headings now distinguish implemented W1 from unimplemented W2–W5; no product AC is prematurely accepted.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 52
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — IMPLEMENTED / NOT_ACCEPTED
+task_id: T-030/T-031/T-032
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+supplemental_continuation_ref: agent/dim-gate/task/t031-regression-readiness
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1-readiness
+last_reconciled_main: 00333ef34247410bb6e9c3d21194934e5c304186
+implementation_commit: 5cf495f60e22789b482b578b06e0ea64d135b177 product; 4ab62327b47c5924a22c84e99bab9c79e1dfbb0a test-only repair
+local_tested_commit: 5cf495f full runner ongoing; 4ab6232 bounded gates passed
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision4
+evidence_refs: [.team/reports/T-030-attempt-2.md, .team/reports/T-031-attempt-3.md, .team/reports/T-032-attempt-2.md]
+integration_state: OPEN — PR33 draft at5cf495f
+remote_durability: product5cf PRbranch and repair4ab taskbranch SSH-saved; containing evidence checkpoint saved to taskbranch next
+blockers: []
+next_action: after5cf full runner completes, preserve artifacts, obtain final third review, fast-forward PRbranch to readiness candidate and require full latest-head CI; authorized merge then verify merge tree/CI and release W1 owner before W2
+```
+
+DG-D053: T-030 domain/API bounded scope ACCEPT based on5cf245tests, strict contract checks and uninvolved T-032 source verification; worker ownership remains released. T-031 fixed local gates now all pass:5cf245unit/64Chromium/6smoke/3benchmark/2isolation and native/actionlint/diff;4ab test-only repair3/3provider stories and nativechecks pass. [W1 validation](reports/dim-gate-w1-validation.md) records complete AC mapping, runtime, metrics, health/artifacts and preserved historical failures. T-032 third review finds no blocker/high/medium after independently reproducing closure ofF01–F05, reviewing4ab testdelta and checking all fixed artifacts; final report linked below. W1 remains NOT_ACCEPTED until final exact PR-head CI and remote delivery gates complete. All existing source/test/lock/workflow content after4ab is unchanged; main00333ef changes only siblings. Final metadata checkpoint will fast-forward the existing PR33 branch; no force or replacement PR.
+
+```yaml
+run_id: DG-W1-20260923-01
+ledger_revision: 53
+active_owner: Codex orchestrator W1
+terminal_state: null
+milestone: W1 — LOCAL_GATES_PASSED / final-head CI pending
+task_id: T-030 ACCEPTED; T-031 IN_REVIEW; T-032 independent review complete
+continuation_ref: agent/dim-gate/mainline/w1-workspaces
+worktree: <operator-home>/test/codex/newclear-dim-gate-w1
+last_reconciled_main: 00333ef34247410bb6e9c3d21194934e5c304186
+evaluated_implementation_commit: 5cf495f60e22789b482b578b06e0ea64d135b177
+evaluated_test_correction_commit: 4ab62327b47c5924a22c84e99bab9c79e1dfbb0a
+local_tested_commit: 5cf495f complete15gates;4ab6232 testdelta/native7gates
+spec_revision: WS-SDD revision1; W1-INTEGRATION-CONTRACT revision4
+evidence_refs: [.team/reports/T-030-attempt-2.md, .team/reports/T-031-attempt-3.md, .team/reports/dim-gate-w1-validation.md]
+review_ref: .team/reports/T-032-attempt-3.md
+integration_state: OPEN — PR33; final-head CI required
+remote_durability: source5cf/repair4ab and checkpointcf48818 SSH-saved; containing final evidence checkpoint is next normal PRbranch push
+blockers: []
+next_action: verify SSH PRbranch matches containing checkpoint, wait latest-head full CI; if all green record final ACCEPT in PR33 closeout, recheck main/head, merge under user authorization, verify actual merge tree/postmergeCI, release DG-W1 ownership and persist actual outcomes in next run before W2 implementation
+```
+
+
+DG-D054 (2026-09-23): W1 ACCEPTED/MERGED. Exact final head f51aac3788560f44981ed75456870b824a528994 passed CI35830388459 (245unit,64Chromium,6smoke,3benchmark,2isolation; every step success). Uninvolved T032 attempt3 has no unresolved blocker/high/medium. User-authorized PR33 merged2026-09-23T07:41:23Z at b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d. SSH main/ancestry and dim-gate tree71290cfe7b95d7c5e57cea10adb0270e7108ff9e equal accepted head. T030/T031 ACCEPTED,T032 DONE; DG-W1-20260923-01 terminal DONE, active_owner none. PR closeout remotely saved. PostmergeCI35833033838 running, mirror35833033846 success; no premature postmerge pass claim. Superseded5cfCI35827980156 failed63/64 at the already-fixed reload race; downloaded trace preserved in local evidence and PR33. All original38 worktrees and subsequent W1 trees/dirty history preserved.
+
+### W2 execution — DG-W2-20260923-01
+
+DG-D055: Earliest missing increment W2; W1 merged and owner released above. Sole Codex lead takes new run from actual main b4ef57f, branch `agent/dim-gate/mainline/w2-resources`, worktree `<operator-home>/test/codex/newclear-dim-gate-w2`. No competing dim-gate PR/owner observed. [W2 contract](../platform/dim-gate/docs/W2-INTEGRATION-CONTRACT.md) fixes complete AC-WS-03–09/15–18 before code, canonical resource/change models, catalog variants, quota/policy, snapshot migration, APIs/routes, safe support matrix and single owners. T033 domain/schema/engine, T034 additive fixtures/controller/migration, T035 lead API/UI/integration/Git, T036 uninvolved fixed reviewer. Workers isolated/no commits/push/delegation; schema onlyT033 and router/manifest/CI onlylead. Pinned kernel237aa277 already read in full; no update adoption. Built-in agent route with exact runtime model slug unavailable, no Claude/multi-model claim. User authorization remains applicable across milestones. Node24.18.0/pnpm11.18.0; existing browser/runtime prerequisites preserved.
+
+| Task | Owner | State |
+| --- | --- | --- |
+| [T-033](tasks/T-033.md) | bounded domain worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-034](tasks/T-034.md) | bounded migration worker | ACCEPTED bounded handback; owner released, DG-D072 |
+| [T-035](tasks/T-035.md) | sole Codex lead | IN_REVIEW — local gates complete, latest-head CI pending |
+| [T-036](tasks/T-036.md) | uninvolved reviewer | DONE attempt2; no unresolved finding, owner released |
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 55
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 — CONTRACT_FIXED / NOT_IMPLEMENTED
+task_id: T-033/T-034/T-035/T-036
+target_ref: main
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+implementation_commit: none
+local_tested_commit: none for W2
+spec_revision: WS-SDDrevision1;W2-INTEGRATION-CONTRACTrevision1
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: NOT_OPENED
+remote_durability: containing contract/task/W1closeout checkpoint SSH-pushed next, then one W2 draftPR
+blockers: []
+next_action: publish this checkpoint; assign isolated T033 schema/domain and T034 fixtures/migration; lead typed API/UI; validate full W2 plus preserved regressions, uninvolved fixed review and latest-headCI, merge before W3
+```
+
+
+DG-D056: Contract/task checkpoint7086a443416fbc9876612e66bac889e83c8200ad SSH-saved, single draftPR36 opened. T033 RUNNING in newclear-dim-gate-w2-domain / agent/dim-gate/task/t033-resource-domain; exclusive domain/schema. T034 RUNNING in newclear-dim-gate-w2-migration / agent/dim-gate/task/t034-resource-migration; exclusive seed/controller/migration. T035 sole lead works in canonical W2 tree; T036 remains uninvolved/idle until fixed candidate. No competing writers, no worker commits/pushes. Initial contract/docs165Markdown366links and all task/report validators pass. Root runtime-only extraction preserves exact generated OpenAPI (73ops173schemas); typecheck/lint and all245existing tests pass on working diff. Generated lightweight operation manifest and named runtime wire DTOs remove build-time registration from browser startup; no status/validator/budget change. New resource business implementation still pending. Next commit/push this recoverable slice, measure fresh benchmark on fixed ref, then consume T033 published schemas for typed UI/API.
+
+
+DG-D057: W2contractrevision2 clarifies full canonical shared-change confidentiality before view implementation. Since targetVersions include every consumer env, no partial reader gets full change. RD shared resize proposal/read needs all affected RD project/stage grants but no Ops pool grant; Ops maintenance/approval/execute needs pool+allOpsproject/stage. Partial physical/resource view stays scoped with impactIncomplete; no hidden IDs/counts. T033 raised this at interface review; lead accepts action-specific clarification, no AC or DTO reduced. T033 concrete schemas hash707177f2d70e675f326f28227c8b3fd599a0f91a9a4b63dd9ebbcad64db68f3a published first, later adds registered safe profiles under same ownership. T034/T035 consume read-only dependency copies, no second schema writer. W2 remains IMPLEMENTING/NOT_ACCEPTED, PR36 existing.
+
+DG-D058: T034 migration handback exact digest ba1c1b0aefc30cc4ff05e140cd01f817b0ce4a7143ee61c5c630afc7c7396a77 integrated byte-for-byte (10 owned files); 33 focused tests pass and implementation ownership released, report stays PARTIAL until lead integration. Reassigned attempt2 narrowly owns new W2 MSW HTTP integration test only; production sources are read-only. T033 published domain163/163 tests passing, final authorization cases pending. Lead confirms nonself approval, qualified requester execution, Ops-only resource catalog access and unchanged registered snapshot metadata semantics in contract before final code. Lead routes/UI integrated; preliminary typecheck found legacy catalog union narrowing (fixed) and extra InventoryList session props (fixed), worker m2 typed test pending handback. W1 postmergeCI35833033838 now SUCCESS (observed2026-09-23T08:13Z), mirror remains SUCCESS; DG-W1 owner remains released. W2 remains IMPLEMENTING/NOT_ACCEPTED; single draftPR36.
+
+DG-D059: Final T03316files and T03410files integrated with SHA256 manifest verification; source owners released, no competing writer. T034 attempt2 exclusively owns new HTTPtest; solelead owns integrated product. W2 APIs91ops209schemas, initialUI allregisteredroutes and typedAdmin editors implemented. Working-diff typecheck/lint299unit/build pass; first297/299failure staleproviderassertions preserved then corrected. W2 browser4initialjourneys written, execution/perf/fullreview/CI pending; noACCEPT. Remote1c0d230 runtimeextract benchmark3/3passed (298781gzipbytes). LatestSSHmain unchangedb4ef57f. W1postmergeCI35833033838SUCCESS, ownernone.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 59
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTING / NOT_ACCEPTED
+task_id: T033 handed_back; T034 attempt2 HTTPverification; T035 active; T036 pendingfixedreview
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: containing checkpoint; parent1c0d230f2e662cca8488550cdf1f02087280c021
+local_tested_commit: working-diff299unit/typecheck/lint/build; fixed1c0d230performance3passed
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-1.md, .team/reports/T-034-attempt-1.md, .team/reports/T-035-attempt-1.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: parent1c0d230SSHsaved; containingintegrationcheckpoint nextSSHpush
+blockers: []
+next_action: SSHsavecheckpoint/updatePR36; runfixedW2browser and fullnative/perf/smoke/regression, finishremainingACcoverage; uninvolvedT036review thenlatestheadCI andauthorizedmerge; verifymergeandreleaseW2beforeW3
+```
+
+DG-D060: checkpoint285b46f SSHsaved to existingPR36, PRdescriptionupdated. Actual fixed browser0/4: staging test reloaded before final tick response completed; Kafka business path reached success but audit request was still in flight during persona switch; Admin denial test sent invalid emptybody422 rather than validbody403; real UI defect dialog Escape lost initiating-button focus. Root owns correcting UI focus and precise settled browser assertions, no health suppression. Fixed285b46f benchmark2/3: initialJS314429bytes fails307200budget, query/HTTPpass. T033attempt2 reactivated sole domain owner for bounded lazy non-startup mutation/clock split under contract; no other production changes. T034attempt2 HTTP13/13passespendingreport. All failed evidence retained; W2NOT_ACCEPTED.
+
+DG-D061: ae3bb49 focus/settledclock correction SSHcheckpoint onPR36, fixed4W2browserrerunactive. T034attempt2 exacttest/report hashes integrated:13HTTPcases cover18W2operations, whole demo81/81;sourceproductionownership remains released. Reassignedattempt3 only new W2governance browserfile with read-only leadhelpers, no product/API edits; ownerbounded andisolated. T033attempt2 enginecommandlazy split separately active; rootUI/browser/docs ownershipunchanged. No W2acceptanceclaimed.
+
+DG-D062: ae3bb49 actual W2 browser2/4pass (stagingRedisrefresh+scopeK8s/Admin); Kafka failure/retry reachedsuccess but console found HTMLpattern/v-flag invalid hyphen; accessibility found quota horizontalregion missingkeyboardfocus. Root corrected pattern escaping, named focusable scrollregions and768px readable detailcolumns; no test suppressions.312unit nowpass includingT034HTTP13;typecheck/lint/demo buildpass before Guide/smoke additions. Added resourceGuideentrypoints and Firefox/WebKit completeRedis smoke. T034attempt3 runs in NEW isolatedtree <operator-home>/test/codex/newclear-dim-gate-w2-browser branchagent/dim-gate/task/t034-resource-browser baseae3bb49 plus6namedreadonlydependencies (manifest/tmp/t034-browser-readonly-dependencies.json); originalmigrationtree entirelypreserved. Full-overwrite copy was rejected byautomaticreview; safe newtreecreation/frozenofflineinstall usedinstead, noblockedwork. T033attempt2 lazycommands now168domain/301standaloneunitpass, actualbenchmarkpending; lead hasnotcopiedmutableworker files. W2NOT_ACCEPTED.
+
+DG-D063: fixed0ab838a completeaffectedChromium20/20PASS (4.0min), includes allM1+M2Admin+M2Request regressions, Redis staging/reload, Kafka failure/newdecision/retry, scopeK8s/Admin, W2responsivekeyboard/themeaxe andChromiumresourceSmoke. Production/dist fixed0ab artifacts test-results-w2-0ab838a; no gatesuppression. T033attempt2 stopped/released; exact7sourcefiles+report SHAverified andnowintegrated bylead. Worker168domain/301standaloneunitandunchangedbenchmark3/3passed303891gzip/720msLCP/0.4msquery/168.3msHTTP; leadcombinedfixedmeasurementnext. AddedgenuineW1activeRelease+Job browsermigration fixturecase (samefixedSHA, onlyupgradeboundary installsrawbytes; completionvisibleGuideclock), typecheck/lintpassed. T034attempt35governancebrowsercasesinprogress; first2pass, test-only catalogcollection/permissionexpectations beingcorrected. FullremainingM3–M5/W1regression,Firefox/WebKit,finalperf/isolation/review/latestCIstillpending;W2NOT_ACCEPTED.
+
+DG-D064: leadcombinedlazy-source workingdiff allnativePASS: frozenofflineinstall,lint,typecheck,314unit/29files,docs168/394,contracts91/209,CI,architecture,demo build. Sourcecandidatecontainingcheckpoint willbeSSHsavedandfixedperformance/migrationcheckednext. Existing0abCI35838780029 inprogresswithallnativepassed, Chromiumrunning; earlier1cCI35834058865SUCCESS, superseded285/ae3CIcancelledbyconfiguredconcurrency, notfailed/relabelled. W2ownerleadactive;T033released;T034browserattempt3active;T036stilluninvolved.
+
+DG-D065: fixed740a2bc leadbenchmark3/3PASS, fiveactualrequiredJS303924/307200bytes, LCPmedian724ms,5000CIqueryP950.5ms,100HTTPpersistP95168.6ms; emptytrackeddiff source metadata/rawJSONarchived740a2bc-performance. GenuineW1migrationbrowser1/1PASS8.0s; activeoriginalRelease+Job completeonceviaUIclockthenreload. Addedheldreal200resource-response isolationbrowser1/1PASS3.8s against740product+newtestfile;noDOMflash, scopedsearch,actualsuccesspayloadprecondition. T034attempt3 allwritesstopped/released, exactnewtest+reportSHAverified/integrated;5/5visiblegovernancejourneys2.1min/13axechecks pass. Workers nowallidle; leadsoleintegrationowner. Fullcandidate contains76Chromiumtests and8Firefox/WebKitsmokes; beginfullfixedgates anduninvolvedT036reviewnext. Actionlint/task/canonicalreportvalidatorspass; W2NOT_ACCEPTED/unmerged.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 65
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FULL_GATES_PENDING / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 integration; T036 fixed review next
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 740a2bca6c8ce657c185c276b61dcf661488ce3c
+local_tested_commit: 740a2bc native314/benchmark3/migration1; containing checkpoint adds governance5/isolation1 tests only
+spec_revision: WS-SDDrevision1 / W2contractrevision2
+evidence_refs: [.team/reports/T-033-attempt-2.md, .team/reports/T-034-attempt-3.md, .team/reports/T-035-attempt-2.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 740a2bc SSH-saved; containing test/evidence checkpoint next SSH push
+blockers: []
+next_action: immutable candidate full76Chromium/8smoke/isolation; uninvolved T036 review; resolve findings, complete latest-headCI, recheck main/head and authorized merge; verify actual merge/tree/postmergeCI and release W2 before W3
+```
+
+
+DG-D066: a05491ce6ee9883f7d3e41a5e0c8d227aa739292 SSH-saved to existing draftPR36; full native314/29files,lint/typecheck/docs170/395/contracts91/209/CI/architecture/actionlint/diff pass. Product source equals740a2bc exactly. Full76Chromium→8Firefox/WebKit→2isolation running in immutable lead checkout; T036 now independently reviews detached a054 in newclear-dim-gate-w2-review, only its own reports writable. Lead-only newclear-dim-gate-w2-closeout / agent/dim-gate/task/t035-w2-closeout preserves fixed runner while synchronizing current document headings and final evidence. All initial38worktree paths remain present; one sibling agent-platform worktree independently committed its former dirty files as1f8429d/7e79063, no dim-gate writes there. Latest SSHmain remainsb4ef57f. CI35840564865 pending/in progress; no final pass or acceptance claim. Sole W2owner remains lead; no W3run started.
+
+DG-D067: T036 F01 MEDIUM reproduced on fixeda054: UI parent-level impactIncomplete disables a Redis object's maintenance even when actor has all its affected scopes; same canonical command succeeds201. Dialog also listed all parent consumers. Lead decision REWORK T035attempt3 under contractrevision3 fixed before implementation: per-visible-object impact/capability DTO using shared policy, parent redaction unchanged, object-only dialog; no snapshot/state-machine change. Lead owns all correction files in isolatedcloseout tree after worker release. Keep fulla054 runner/evidence and review other findings; fixed corrected candidate and independent follow-up required, W2NOT_ACCEPTED.
+
+DG-D068: T036 F02/F03 MEDIUM accepted as same attempt3 REWORK. Approved WorkItems omitted from execution filter; triage omitted required kind/risk/unit delta. Contractrevision3 now fixes overlapping source-phase membership and canonical read-only summary (unknown baselines explicit), before implementation. No source states, business persistence or AC narrowed. Lead continues sole shared schema/policy/view/UI owner; fixeda054 full regression stillrunning, reviewer continues full scope.
+
+DG-D069: T035attempt3 F01–F03 corrections implemented in isolatedcloseout tree, all native321/29files and91operations/210schemas pass. Strict required readDTOs only; no persisted schema/state change. UIobject eligibility now uses sharedpolicy, list/detail/approval share typedrisk/delta, approvedRequest/Change appear inexecution anddecided. Tests include hidden-sibling allow, hidden-affected/no-pool refusal, scope revoked afteroldread, signed/unknownbase summaries. T036 full source review confirmed onlythreeMEDIUM findings; its olda054 focused11browser/65domain andnativechecks pass, independentreport pending. Freeze correction beforefocusedbrowser/performance, then independent follow-up andfull/latestCI. Existinga054 fullrunner has nofailures throughM5reliability; W2 remainsNOT_ACCEPTED.
+
+DG-D070: fixed4a69e07 SSHsaved to taskbranch then normal remotePRbranchfastforward (PR36confirmedhead4a69, CI35842903725inprogress); originalmainlinelocaltree stayeda054 untilrunnerfinished. a054 actual76/76Chromium24.5min and2/2isolation pass; smoke6/8FAIL, W2Firefox/WebKit initialdoublegoto cancels requiredstartupmodule/MSW beforefirstpage isready. Trace shows initialrd→wizard within91/104ms; completebusinesssuccessdoesnotwaivefailedhealth. Failures/artifacts archived beforeanynewrun. Correct test enters wizard directly through existing createResource helper; no health/timeout/retry relaxation. IndependentreviewconfirmedF01–03sourceclosure on4a69; F04LOW narrowtable readability accepted for smallCSSfix (minwidth andeachrefblock), plusrealkeyboardhorizontal-scroll assertions. Oldcloseout4a69full77runner remainsimmutable; canonicalleadbranch nowFF4a69 withthisboundedlayout/test correction, T035attempt3stillactive. T036attempt1reports exactSHA c006bb83c9c5c0537367b22c5d8347c2c91ec2c91d099a0f0b55363fa361f591 integrated. Fresh4a69performance3/3pass304484gzipbytes/LCP792ms/query0.6ms/HTTP169.4ms;13/13W2browser3.9minpass2686responses/37images/zeroerrors. W2NOT_ACCEPTED.
+
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 70
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / REVIEW_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+supplemental_continuation_ref: agent/dim-gate/task/t035-w2-closeout
+supplemental_worktree: <operator-home>/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus containing bounded layout/test correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; full77 and8smoke/2isolation stillrunning in supplemental tree
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: 4a69 SSH-saved on task andPRbranches; containing correction/evidence nextSSHpush
+blockers: []
+next_action: fixed bounded layout browser andall8smoke; preserve actualfull4a69 results (oldsmoke may reproduce known fixed startup test defect); independent finaldelta review; complete latestPRheadCI, recheckmain/head, authorizedmerge andactualmerge/tree/postmergeCI/owner closeout beforeW3
+```
+
+
+DG-D071: d07166c SSH-saved to existing PR36; actual layout2/2 and unchanged benchmark3/3 pass (304484gzip bytes, LCP756ms, queryP950.6ms, HTTP169ms). Its smoke7/8 FAIL: Firefox firstsubmit closesdialog before sequential detail→audit readback, then persona change retires oldactor; strict audit409 health remainsfailed. Independent rawtrace confirms sequence; complete artifacts archived d07166c-failed-smoke-html/artifacts. Firststartup doublegoto is fixed (WebKitW2passes). Reviewer DOM measurement also proves old CSS58rem was overridden by .table-scroll table680px, targetcell57.6px; scrolling alone didnot prove readability. Lead narrowcorrection raises specificity, bounds target/state columns, keeps targetIDs unbroken; governance browser measures computedminimum/realcolumnwidth/IDlinecounts plus actualkeyboardscroll. Smoke now awaits fresh completionnotice/submittedheading/visiblechange.submit audit before switchingpersona; no health/timeout/retry weakening. Workingdiff lint/typecheck/demo build pass. Freeze this delta and run layout/smoke before independent followup; immutable4a69 full77 remainsrunning. W2NOT_ACCEPTED; all originalworktrees retained.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 71
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 IMPLEMENTED / FINAL_BROWSER_CORRECTIONS / NOT_ACCEPTED
+task_id: T033/T034 handed_back; T035 attempt3 integration; T036 attempt2 independent review
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+supplemental_worktree: <operator-home>/test/codex/newclear-dim-gate-w2-closeout
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23 plus d07166c and containing CSS/test-only correction
+local_tested_commit: 4a69 native321/13W2browser/3benchmark; d071 layout2/benchmark3 pass and smoke7of8 failed; fixed4a69 full77 running
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: d07166c SSH-saved; containing correction/evidence nextSSHpush
+blockers: []
+next_action: run fixed layout2 andall8smoke; preservefull4a69 gates; independent finaldelta review; final reports/latestPRheadCI then authorizedmerge/actualmerge-tree-postCI/ownerrelease before W3
+```
+
+
+DG-D072 (2026-09-23T10:00Z): W2 local gates complete. Evaluated domain/API/migration implementation4a69e07233fb31a90d2abafa664c39d3b91c4f23 and bounded final layout/test delta bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20. Full native321/29files,91operations/210schemas, all lint/typecheck/docs/CI/architecture/build/actionlint checks pass. Fixed4a69 full77/77 Chromium24.8min,43health attachments/24589responses/119images with zero pageErrors/failedRequests; sibling/live isolation2/2pass. Finalbf smoke8/8Firefox/WebKit2.5min and affected real triage/layout1/1 pass; geometry812px/252px, four unbroken IDs and keyboard horizontal scroll. Final fresh benchmark3/3:304477gzipbytes, LCP756ms/queryP950.6ms/HTTP169.2ms, clean tracked source metadata. Immutable4a69 oldsmoke6/8 failed known bootstrap race; d0717/8 failed unfinished audit readback; their logs/traces remain historical failures, finalbf evidence supersedes only affected paths without relaxing gates.
+
+Independent T036attempt2 report SHA256372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 integrated unchanged; reviewer independently ran321native/12Chromium/finallayout1/final2browser and inspected complete lead evidence. F01–03MEDIUM/F04LOW closed, no unresolved finding. Report ownership released. Decision: ACCEPT bounded T033/T034 handbacks at their original revisions plus integrated4a69 validation; T036 DONE; T035 local integration DONE but orchestration IN_REVIEW pending latest exact PR-head CI. W2 remains NOT_ACCEPTED/unmerged until that gate. Reports T033/T034/T035/T036 and dim-gate-w2-validation are current; old attempts remain. All original38worktree paths remain, currenttotal53, no deletions. SSHmain observed09:58Z remainsb4ef57f; remotePR36headbf3f168. CI35844753406 is inprogress, not calledpassed. This checkpoint is metadata-only; no product/test/config/lockfile/workflow changes afterbf3f168. Final metadata-head CI and actual merge/ownership closeout belong onPR36, then next-run reconciliation saves actual outcomes without a self-SHA commit loop.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 72
+run_id: DG-W2-20260923-01
+active_owner: Codex orchestrator W2
+terminal_state: null
+milestone: W2 LOCAL_GATES_COMPLETE / FINAL_CI_PENDING / NOT_ACCEPTED
+task_id: T033/T034 ACCEPTED bounded handback; T035 IN_REVIEW; T036 DONE
+continuation_ref: agent/dim-gate/mainline/w2-resources
+worktree: <operator-home>/test/codex/newclear-dim-gate-w2
+last_reconciled_main: b4ef57f1e15082f3e980b2eb0d8451b1f1f4433d
+implementation_commit: 4a69e07233fb31a90d2abafa664c39d3b91c4f23
+final_bounded_delta_commit: bf3f168a09c2b4f5ae442703588f2a3dd4d5cb20
+local_tested_commit: 4a69 full77/native321/isolation2; bf3f168 affectedlayout1/smoke8/freshbenchmark3
+spec_revision: WS-SDDrevision1 / W2contractrevision3
+evidence_refs: [.team/reports/dim-gate-w2-validation.md, .team/reports/T-035-attempt-3.md, .team/reports/T-036-attempt-2.md]
+review_sha256: 372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6
+integration_state: draftPR36 / NOT_ACCEPTED / unmerged
+remote_durability: bf3f168 SSH-saved; containing metadata checkpoint nextSSHpush
+blockers: []
+next_action: validate metadata-only diff and SSHsave samePR36; waitlatestexactheadCI, recheckSSHmain/PRhead, ACCEPT thenauthorizedmerge; verifyactualmerge/tree/postmergeCI, savecloseout/releaseW2, thencreateW3run
+```
+
+
+DG-D073 (2026-09-23): W2 actual closeout reconciled 2026-09-23: PR36 ACCEPTED/MERGED at 2026-09-23T10:37:05Z, accepted head e8c7ec113d01a778642d2600b1af002dc7831651, actual merge 91626851fb17df7ab31c96dee9353b9ee4d42c92. Exact-head [CI35846286919](https://github.com/fallrising/newclear/actions/runs/35846286919) succeeded with321unit/77Chromium/8Firefox-WebKit/3benchmark/2isolation and all native gates; artifact10745167006, dim-gate-m5-0c72ed5243b32edccb0a8b5c879575660e846674, expires2026-10-23. SSH main ancestry and component tree410fe5f8aeafc7391754b08f9c9ad31328ddcc26 equal accepted head. Independent T036attempt2 SHA372ae44d6ed11374a3f4b6bbc3df82b3994d27ea77f35868b00bf4c5fd5489f6 unchanged; no unresolved findings. DG-W2-20260923-01 terminalDONE, T033/T034/T035 ACCEPTED, T036 DONE; active_owner NONE. Postmerge CI35849832030 observed in_progress, mirror35849832043 SUCCESS; this is status verification, not a claim that pending CI passed. PR36 body has actual closeout; original53worktrees retained. No deployment or external side effect.
+
+DG-D074: Begin DG-W3-20260923-01 at actual accepted W2 main9162685. No open W3 PR or recoverable W3 branch existed. Created isolated canonical worktree/branch below, original53 preserved. W3 contract revision1 fixes fullAC-WS-10/11/15–18, schema3/strictW1W2 migration, PipelineDefinition/config/traffic revisions, prod independent decisions, shared release/config/traffic locks, exact API/routes and startup budget. T037 owns domain; T038 only new delivery UI/browser; T039 lead owns API/Mock/migration/router/shared integration and sole PLAN; T040 uninvolved readonly. Workers receive separate fresh worktrees, publish interfaces then SHA handback/release. Builtin fallback disclosed; no Claude or multi-model claim. Pinned kernel237aa277 already read; no update. User commit/SSHpush/PR/merge authorization persists, no deploy/external side effect. Only contract/tasks/closeout metadata now; no W3 implementation or acceptance claim. Three bounded cycles per run, do not relax gates. Next remote checkpoint before product code.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 74
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 CONTRACT_FIXED / NOT_IMPLEMENTED / NOT_ACCEPTED
+task_id: T037 domain; T038 UI; T039 integration; T040 uninvolved review
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 91626851fb17df7ab31c96dee9353b9ee4d42c92
+implementation_commit: none_W3
+local_tested_commit: none_W3
+spec_revision: WS-SDDrevision1 / W3contractrevision1
+evidence_refs: [.team/reports/T-039-attempt-1.md, .team/reports/dim-gate-w2-validation.md]
+integration_state: no_W3_PR_yet / NOT_ACCEPTED
+remote_durability: W2 merged; containing W3 contract checkpoint nextSSHpush
+blockers: []
+next_action: validate and SSHsave contract to one draftW3PR; create isolated T037/T038 worktrees, publish schema/client interfaces, implement fullW3; monitor actualW2postmergeCI; complete all gates/review/latestheadCI/authorizedmerge before W4
+```
+
+
+DG-D075: contract checkpoint9b4a4c7 SSH-saved in single draft [PR37](https://github.com/fallrising/newclear/pull/37). T037/T038 active only in separate new worktrees at9b; T040 remains uninvolved/idle. Revision2 fixes agreed public DTO/page names, historical revisionId query and execution-targeted Demo faults before dependent implementation; no AC reduction. Lead captured genuine W2 snapshot with concurrent Release/ProvisionJob/KafkaChange via canonical controller commands in fresh detached accepted9162685 capture tree; actual baseline full322 tests/30files passed, output /tmp/dim-gate-w3-evidence/w2-fixture-capture.log. Original capture tree retained. This proves fixture provenance, not W3 migration. W3 domain/API/UI/validation remains underway and NOT_ACCEPTED; PR37 preserves continuation branch and single lead ownership.
+
+
+DG-D076: W2 postmerge reconciliation: actual merge91626851fb17df7ab31c96dee9353b9ee4d42c92 [CI35849832030](https://github.com/fallrising/newclear/actions/runs/35849832030) is now SUCCESS, as is mirror35849832043. W2 stays ACCEPTED/MERGED, terminalDONE/ownerNONE. Prior running observations remain historical. W3 current fullscope continues under single owner; no repeated W2 work.
+
+
+DG-D077: uninvolved T040 preliminary audit at fixed7a6eb40 found two MEDIUM contract wording ambiguities, not implementation findings or final review. Revision3 clarifies original prod Pipeline/Release awaiting approval still holds envlock; only new unstarted W3 source pending approval is lockfree. Definition affectedtargets union proposed and actual CURRENT ACTIVE family baseline (baseActiveRevisionId), preventing prod-removal bypass through unapproved draft copychains. T037/T038 notified before dependent implementation; regression required. No scope/gate reduction. W3 remains IN_PROGRESS/NOT_ACCEPTED; product review stillpending. Latest SSHmain ea88b88724698657b7bae0ecdac5410197d82a58 adds only Kith PR38; dim-gate/PLAN unchanged, preserveandnormallyintegrate beforefinalgates.
+
+
+DG-D078: T040 readonly fixed e7afd17 preliminary recheck closes both contract wording findings; final productreview stillpending. T037 schema slice2 hashverified integrated; leadAPI36newops/OpenAPI127/259, atomicW1/W2V3 reader, genuinefixture androutes/triage/snapshotUI workingdiff.52migration/controller and35baselineHTTP/clienttests pass; focusedlint/docs/contracts/CI/architecture pass. Wholeapptypecheck currentlyfails onlymissing4T038featureexports; documented actualpendingintegration, notaccepted. T037functionalengine andT038UI handbacks pending, exclusiveowners retained. LeadT039attempt1 savescommands/logs/limitations; next productcheckpointSSHsave aftercompilablefunctionalhandoff. Lastdurablecontracthead e7afd17 inPR37.
+
+
+DG-D079: actual W3 functional checkpoint integrated exact T037 immutable24-file slice1 and T038 immutable13-file UI slice1, worker ownership remains active for tests/corrections. Lead realHTTP/migration44/44pass covers all36newoperations (127total/259schemas); UI/shell/routes16/16pass. Initial wholeapp typecheck failed missingunhandedbackpages, then found lead TestingLibrary-only exact:true option; corrected to anchoredname. Wholeapp typecheck/lint/demo build nowpass; firstshell suite import failure remainshistorical notpassed. No full W3 acceptance yet. Nativefull/focusedbrowser/budget next on containingfixedcheckpoint, followedby workerfinaltests/handoffs/allregression/review. Latestmain ea88b88 onlyKith; normallymergeaftercheckpoint. ProductandmetadataabouttoSSHsave existingdraftPR37, no newPR. W2actualpostmergeCI success alreadyremoteinPR36.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 79
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 INITIAL_FUNCTIONAL_INTEGRATION / NOT_ACCEPTED
+task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
+implementation_commit: containing_partial_functional_checkpoint
+local_tested_commit: workingdiff_Slices_T037functional1_T038UI1_plus_lead_API_seed_migration
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-1.md]
+integration_state: draftPR37 / NOT_ACCEPTED
+remote_durability: e7afd17_contract_SSHsaved; containing_functionalcheckpoint_nextSSHpush
+blockers: []
+next_action: freeze_SSHsave_partialfunctional; normalmerge_latestmain; fixed_nativefull_andbenchmark; T038actualbrowser; consume_finalSHAhandbacks; fullgates_independentT040_exactheadCI_thenauthorizedmerge_actualcloseout_beforeW4
+```
+
+
+DG-D080: W3 initial product checkpoint dfb146c is SSH-saved in existing draftPR37; normal merge a473626 includes latest main ea88b88, with identical component product tree. Fixed fullnative and actual exact-head CI35854397207 both357/360: three obsolete zero/mine expectations caused by legitimate W3 draft fixtures. Lead corrected Data WorkItem regression to exactly six scoped draft IDs and explicit absence of Commerce source IDs/names; focused14/14pass. T037 owns the two remaining W1 assertions and domain integrity/performance work. Actual fresh fullUI benchmark at a473626 product bytes: initialJS309048 exceeds unchanged307200 by1848; query/persistedcommands pass. T037 is separating command-only schema builders from eager model validation with identical exports/strict shapes; startup validation remains eager. T038 actual Chromium config/traffic journeys pass provisionally, browser suite still in progress. No fullgate/review/acceptance claim; raw failures preserved. Next integrate final SHA handbacks, rerun all required gates on fixed source and uninvolved T040 review.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 80
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 FUNCTIONAL_VALIDATION_AND_PERFORMANCE_CORRECTION / NOT_ACCEPTED
+task_id: T037 domain_active; T038 UI_browser_active; T039 integration_active; T040 uninvolved_finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: ea88b88724698657b7bae0ecdac5410197d82a58
+implementation_commit: dfb146c
+local_tested_commit: a4736261518ba4d27d5967b5a78d2e6e9bdbe914
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-1.md]
+integration_state: draftPR37 / checkpointCI35854397207_FAILED / NOT_ACCEPTED
+remote_durability: a473626_SSHsaved; containing_test_and_progress_correction_nextSSHpush
+blockers: []
+next_action: consume_final_worker_SHAhandbacks; correct_initialJS_and_fixture_regressions; freeze_allgates_and_independentT040; exactheadCI_then_authorizedmerge_actualcloseout_beforeW4
+```
+
+
+DG-D081: User now requests save/merge/handoff for a new window. This run will close W3 only, without bypassing any gate; W4/W5 are delegated to the future continuation, not started here. Final T03732-file and T03821-file manifests fully SHA-verified; both workers released ownership. All domain/UI production bytes match their final handbacks. Lead corrections preserve original schema JSON semantics while separating command constructors, keep eager startup migration/integrity, and defer feature API clients with call-time input+identity guards (7 meaningful held-import/failure tests). Existing Guide UI is now a lazy route with identical controls. Candidate native371/371 across34files pluslint/typecheck/docs/contracts127ops259schemas/CI/architecture pass; full12 new browserjourneys pass on worker's explicitly older dependency snapshot and require rootintegration rerun. Fresh completeUI benchmark306290bytes, LCP756ms/queryP950.7ms/HTTP169.8ms,3/3PASS; original overbudget failures preserved. Added HANDOFF-WORKSPACES.md with exact recovery commands and futureW4/W5scope. Latestmain707f77d (othercomponents only) will be normally merged before fixedcandidate gates. T040finalproductreview and fullrootbrowser/smoke/isolation/exactheadCI stillpending. Noacceptance/mergeclaim.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 81
+run_id: DG-W3-20260923-01
+active_owner: Codex orchestrator W3
+terminal_state: null
+milestone: W3 FIXED_CANDIDATE_GATES / NOT_ACCEPTED
+task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 integration_active; T040 finalreview_pending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: containing_final_handbacks_and_performance_correction
+local_tested_commit: working_candidate_matching_owned_manifests_plus_lead_API_Guide_correction
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-037-attempt-1.md, .team/reports/T-038-attempt-1.md, .team/reports/T-039-attempt-2.md]
+integration_state: draftPR37 / NOT_ACCEPTED
+remote_durability: 31b5c88_SSHsaved; containing_finalcandidate_nextSSHpush
+blockers: []
+next_action: commit_and_normalmerge_latestmain; fixed_complete_native_89Chromium_10smoke_3benchmark_2isolation; uninvolvedT040_review; latestheadCI_thenauthorizedmerge_actualcloseout; releaseowner_updatehandoff_stop_for_newwindow_W4_W5
+```
+
+
+DG-D082: USER-REQUESTED NEW-WINDOW HANDOFF, W3 NOT_ACCEPTED. User asked to save progress and continue in a new window, then asked current context/state and remaining undeveloped work. Lead explicitly states PR37 cannot merge while fullregression/review/latestCI remain pending. No gate waiver and no W4/W5 work in this run. Final product35f594f and latestmain normalmerge6c19fe7 are SSH-saved. Fixed6c19fe7 native371/371 plusallnativegates and3/3benchmark PASS; saved initial asset SHA values exactly match306290-byte measurement. Root complete89Chromium/10smoke/2isolation chain remains running readonly, metadata /tmp/dim-gate-w3-evidence/fixed-gates.json, PID2209053 at11:59UTC; nextlead must verify process/liveness/logs and not duplicate its port/build. IndependentT040review is PARTIAL, no confirmedfinding sofar but explicitremainingUI/router/browser/parity/evidencework; finalverdictpending. T038supplemental fixedsource18axe/6keyboard/189response checks pass, noerrors, bothimplementationworkers stopped/released. Reviewer savespartialcheckpoint then stops. Primarypublishing/implementationownership is released by this containing handoff checkpoint; ongoinglocal/GitHubchecks are validation only and cannotaccept/merge. Nextwindow may claim samevariant/newrun and continueT039/T040 withoutrewritingacceptedW1/W2 orrecreatingPR37. No ACCEPTED/DONE claim forW3.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 82
+run_id: DG-W3-20260923-01
+active_owner: NONE
+terminal_state: OWNER_DECISION_REQUIRED
+terminal_reason: user_requested_new_window_handoff; next_orchestrator_must_complete_and_judge_pending_W3_gates
+milestone: W3 IMPLEMENTED / NOT_ACCEPTED / NOT_MERGED
+task_id: T037 handed_back_owner_released; T038 handed_back_owner_released; T039 PARTIAL_handoff; T040 PARTIAL_review_resume_required
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: 35f594f
+local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-037-attempt-1.md, .team/reports/T-038-attempt-1.md, .team/reports/T-038-attempt-2.md, .team/reports/T-039-attempt-3.md, .team/reports/T-040-attempt-1.md]
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: product6c19fe7_SSHsaved; containing_docs_only_handoff_nextSSHpush; actualheadCI_in_PRbody
+blockers: [complete_89Chromium_10FFWK_2isolation_pending, independent_product_review_incomplete, latest_PR_head_CI_pending]
+next_action: read_HANDOFF_WORKSPACES_and_actual_PR37; verify_old_runner_PID_logs; claim_new_owner_run; resume_T040_remainingreview_and_T039_gates; preserve_failed_attempts; only_after_allgates_latestheadCI_merge_verify_actualcloseout; then_new_W4_and_W5_runs
+```
+
+
+DG-D083: FINAL HANDOFF CORRECTION — full root regression confirmed one product defect affecting two accepted M4 cases. At fixed6c19fe7, e2e/m4-observability.spec.ts:302 and:338 fail atAdminintegration controls. Pageerror state says structuredClone cannotcloneAbortSignal. Cause: src/features/observability/integrations.tsx:14 passes api.listIntegrations directly asReactQuery queryFn; new src/api/core/deferred-client.ts clones all callbackargs, including QueryFunctionContext.signal, although listIntegrations iszeroargument. DoNOT classifythisasflakytimeout orrelaxexpectations. Productfixnotmadeafterownershiprelease. Nextowner firstfixesthezeroargumentcallbackboundary (explicitqueryFnthunk orcorrectignored-extraargumentsemantics), addsmeaningfulregression andrerunsaffectedM4/fullgates. Forcleanuserrequestedhandoff, SIGINTsentonlytoverifiedownedPlaywrightPID2210364. Runnerexited130, final49passed/2failed/1interrupted/37notrun (89planned), noFFWK/isolationexecuted. Bothrunnerand4350testserverstopped; originaluserpreviewsunchanged. PartialHTML/tracescopied /tmp/dim-gate-w3-evidence/partial-playwright-report andconfirmed-admin-integration-regression. IndependentT040PARTIALreportSHAe65a0fb...integrated, reviewerwritesstopped; itdoesnotclaimfinalno-findings. Priorrecordrunningstatementsarehistorical. Code/test/config/workflowbytesremainexact6c19fe7. Product+firsthandoff826e230alreadySSHsaved; thisdocs-onlydefectclarificationnextpush, finalheadCI/ownershipinPRbody. W3stillNOT_ACCEPTED/NOT_MERGED; W4/W5unstarted; activeownerNONE.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 83
+run_id: DG-W3-20260923-01
+active_owner: NONE
+terminal_state: OWNER_DECISION_REQUIRED
+terminal_reason: user_requested_handoff; next_orchestrator_to_fix_confirmed_regression_and_complete_gates
+milestone: W3 IMPLEMENTED_WITH_CONFIRMED_REGRESSION / NOT_ACCEPTED / NOT_MERGED
+task_id: T037 handback_complete_owner_released; T038 handback_complete_owner_released; T039 PARTIAL; T040 PARTIAL_review_incomplete_owner_released
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 707f77d2c670b6a344ef25d9c4204521223687c1
+implementation_commit: 35f594f
+local_tested_commit: 6c19fe7b849ec4c5c5982c6ede4995ec6829fd83
+local_validation_state: stopped_exit130_after_49PASS_2FAIL_1INTERRUPTED_37NOTRUN
+review_ref: .team/reports/T-040-attempt-1.md
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: 826e230_SSHsaved; containing_final_failure_handoff_nextpush; actualfinalhead_andCI_in_PRbody
+blockers: [Admin_integrations_AbortSignal_clone_regression, incomplete_full_browser_smoke_isolation, incomplete_independent_review, latest_head_CI_pending]
+next_action: claim_continuation_owner; read_HANDOFF_WORKSPACES; fix_integrations_queryFn_deferredclient_boundary; targeted_M4_then_allgates; resume_independentT040; onlygreenlatestheadCI_thenaccept_merge_actualcloseout; thenW4_W5
+```
+
+
+DG-D084 (2026-09-23): Resume DG-W3-20260923-02 on the existing canonical branch and PR37 after DG-D083 explicitly released all owners. Read the complete HANDOFF-WORKSPACES, applicable AGENTS, prompt/protocol, SDD09–14, W3 revision3, T039/T040 reports and fixed kernel237aa277 workflow/skills/contracts. No updated kernel policy adopted. Remote PR37 head e31b3a1 is DRAFT/OPEN; old local runner PIDs2209053/2210364 are absent. Fresh SSH main61d021e changes only Kith and was normally merged without changing dim-gate. Preserve all59 existing worktrees and historical failed evidence. Lead owns T039 attempt4: repair explicit React Query callback boundaries, reproduce regression, then fixed native/browser/performance/isolation gates. T040 attempt2 will independently review fixed source in a new detached checkout, including remaining attempt1 coverage. Existing builtin uninvolved reviewer fallback remains available; exact model slug is not asserted. Claude CLI2.1.278 auth exists; model execution preflight is pending and auth alone is not proof. Three bounded implementation/review cycles, no reduced gates. User authorizes continuation, scoped commits, SSH push and existing PR updates; gated merge authorization is recorded in handoff and task. No deployment or real external product effects.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 84
+run_id: DG-W3-20260923-02
+active_owner: Codex orchestrator W3 continuation
+terminal_state: null
+milestone: W3 REGRESSION_REPAIR / NOT_ACCEPTED / NOT_MERGED
+task_id: T039 attempt4 RUNNING; T040 attempt2 pending fixed candidate
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_reconciled_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
+implementation_commit: 35f594f
+local_tested_commit: no_new_candidate_yet
+spec_revision: WS-SDDrevision1 / W3contractrevision3
+evidence_refs: [.team/reports/T-039-attempt-3.md, .team/reports/T-040-attempt-1.md]
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: e31b3a1 SSHsaved; continuation checkpoint local
+blockers: [confirmed_integration_regression, full_gates_and_independent_review_pending]
+next_action: repair_callback_boundary_with_regression; freeze_and_validate; independent_review; latest_exact_head_CI_before_acceptance_and_gated_merge
+```
+
+
+DG-D085: Fixed25ba5ca repaired the actual AbortSignal regression;20focused native and2affected M4 Chromium passed,372native/all native/build gates passed. Full89Chromium at25ba5ca remains running. Claude2.1.278/runtime claude-sonnet-5 independent T040attempt2 is preserved verbatim: PARTIAL, unable to run verification due CLI-specific command permission matching, with incomplete contract coverage. Its HIGH claim for bare deliveryApi.createPipeline is NOT accepted as proven: actual installed QueryClient context structuredClone succeeds (`[{revision:"demo"},{client:{}}]`), and fixed25ba5ca M3 pipeline browser flows already pass. It did correctly locate one additional callback boundary inconsistent with the new explicit-arguments convention. Bounded84089270fed1f9c145901de5220599706cab4107 wraps that single pipeline callback without changing API/domain behavior. Parent fullbrowser build remains25ba5ca; no dist replacement during that suite. Final delta gets its own native and affected-M3 verification, fresh benchmark/isolation and exact840 latesthead fullCI. Root report must distinguish25 baseline from840 delta.
+
+Decision: REASSIGN independent T040 final review to an uninvolved built-in reviewer in new detached newclear-dim-gate-w3-review-3 at8408927, with actual native/browser tool access and full remaining contract/evidence scope. Exact built-in runtime model slug is not asserted. This is a disclosed route correction after the preferred Claude attempt, not fabricated successful Claude acceptance. Attempt2 remains historical; attempt3 owns final report only. No worker delegation/Git/product writes. W3 remainsNOT_ACCEPTED; root is sole active orchestrator. Same overall three-cycle bound, no gate relaxation.
+
+
+DG-D086: Independent T040attempt3 completed the full source/contract audit at8408927 and independently ran372native,11W3Chromium and2W3Firefox/WebKit. Sole confirmed MEDIUM F1: a stored timeout-failed traffic execution could contain an already-complete healthy prefix and still pass eager snapshot validation. Lead decision REWORK. Actual saved reproducer independently accepts corruption at840, exit1; original failed evidence retained. Product46e3a557fcd1ff40221ce6881a7565b73c5daa7e validates the first terminal sample prefix, consecutive health windows and health-before-timeout precedence, preserving threshold semantics. Three real engine-state corruption regressions first fail, then29focused W3domain/migration tests pass; lead reproducer now rejects INVALID_SNAPSHOT atomically.375native and lint/typecheck/docs/contracts/CI/architecture pass at46. Reviewer remains uninvolved; attempt4 in new detached review-4 verifies the correction with actual tools. Full local baseline25 browser/smoke is not relabeled46;840 M3 delta18/18passed, fresh46benchmark/isolation and full sameheadCI35862758449 pending. No acceptance yet.
+
+
+DG-D087: Complete local source-bound gates pass.25baseline89Chromium/10FFWK;840bounded callback18M3;46native375 and allnativegates, freshbenchmark3/isolation2. IndependentT040attempt4 closesF1 with noopenfindings,375native/4affectedChromium/2FFWK plus60/120/180window matrix; report PARTIAL solely exactCIpending. No sourcechanges pending. Latestmain928ce00 fetched/read-only; onlyEru/agent-platformpaths changed, no dim-gate/rootCI/PLAN delta from incorporated61d021e. No need to invalidate component evidence for unrelatedmainchanges. Evidence checkpoint summaries updated, prior reports preserved byte-for-byte before canonical refresh. Allpriorworktrees preserved (64observed, including unrelatedowner additions). JS306447B leaves753B underunchanged307200budget. W3NOT_ACCEPTED until exact46CI and final independent evidence check; no merge yet.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 87
+run_id: DG-W3-20260923-02
+active_owner: Codex orchestrator W3 continuation
+terminal_state: null
+milestone: W3 IMPLEMENTED_LOCAL_GATES_PASS / NOT_ACCEPTED / NOT_MERGED
+task_id: T039 attempt4 IN_REVIEW; T040 attempt4 PARTIAL_exactCIpending
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_incorporated_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
+last_observed_main: 928ce00; observed_2026-09-23T13:04Z; no_component_sharedgate_or_PLAN_delta
+implementation_commit: 46e3a557fcd1ff40221ce6881a7565b73c5daa7e
+local_tested_commit: 46e3a55 native_freshbenchmark_isolation_review; 25ba5ca full89_10; 8408927 M3_18
+evidence_refs: [.team/reports/T-039-attempt-4.md, .team/reports/T-040-attempt-4.md, .team/reports/dim-gate-w3-validation.md]
+integration_state: PR37_DRAFT_OPEN / NOT_ACCEPTED / NOT_MERGED
+remote_durability: product46e3a55_SSHsaved; evidence_checkpoint_local_pending_CIacceptance
+blockers: [exact46_CI35862758449_in_progress]
+next_action: inspect_exact46_CI_artifacts_then_independent_finalevidence_verdict; accept_fixed46; commit_SSHpush_evidence_only; latestheadCI_then_authorizedmerge_actualcloseout_ownerrelease
+```
+
+
+DG-D088: ACCEPT complete W3 fixed product46e3a557fcd1ff40221ce6881a7565b73c5daa7e and T037/T038 integrated implementation, T039attempt4 and T040attempt4 at unchanged revision3/AC-WS-10/11/15–18. Allnative375/34files and full89Chromium/10FFWK/3benchmark/2isolation pass in terminal productCI35862758449. ActualCIcheckout928b563aeabe909528bd6e16f355463a11d635d0 (parentsf4a233d+46) has exactcomponenttreef4dc14f9ecafa926cab771a5c068979d1dd16766 matching46; root and uninvolved reviewer independently checked logs/decoded artifacts. T040final DONE SHA9274658eb769ff1a2273c3a7e9cd3761ffc39840c308f2cff7e6194201431825, F1closed/noopenfindings. Original failed/partial attempts and both interimcanonicalcheckpoints retained. No scope/gate reduction. Artifact10751674277 expires2026-10-23T13:27:47Z. JS306447B leaves753B budget; explicit followupconstraint. Taskacceptance/productcompletion is separate from PRintegration.
+
+This containing checkpoint changes only docs/evidence/tasks/PLAN. FinalPRhead may reuse46product evidence only after code/test/config/lockfile/workflow identity and docs checks. Lead will SSHpush, inspect latestexactmetadataheadCI, then execute already-authorized normal PR37 merge with match-head protection, preservebranch/worktrees, verifyactualmerge/componenttree/postmergeCI and releaseowner in PR37closeout. LateCI/merge/ownerreleasefacts are recorded in PRbody under this decision to avoid self-SHA commit loops; nextsession must reconcile it before claimingownership or opening W4. No deployment or externalproducteffects.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 88
+run_id: DG-W3-20260923-02
+active_owner: Codex orchestrator integration_closeout_only
+terminal_state: null
+milestone: W3 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
+task_id: T037 ACCEPTED; T038 ACCEPTED; T039 attempt4 ACCEPTED; T040 attempt4 ACCEPTED
+continuation_ref: agent/dim-gate/mainline/w3-service-delivery
+worktree: <operator-home>/test/codex/newclear-dim-gate-w3
+last_incorporated_main: 61d021eebdf9b4c2b5e766f6aed93b947095ef31
+last_observed_main: 928ce00; observed_2026-09-23T13:04Z; unrelated_components_only
+evaluated_implementation_commit: 46e3a557fcd1ff40221ce6881a7565b73c5daa7e
+product_ci: 35862758449 SUCCESS; checkout928b563; identical_component_tree_f4dc14f9ecafa926cab771a5c068979d1dd16766
+report_ref: .team/reports/T-039-attempt-4.md
+review_ref: .team/reports/T-040-attempt-4.md
+evidence_refs: [.team/reports/dim-gate-w3-validation.md, .team/reports/T-037-attempt-1.md, .team/reports/T-038-attempt-1.md, .team/reports/T-038-attempt-2.md]
+integration_state: PR37_DRAFT_OPEN_at_checkpoint; late_exactheadCI_merge_and_ownerrelease_in_PR37closeout
+remote_durability: product46e3a55_SSHsaved; containing_evidence_checkpoint_nextSSHpush
+blockers: []
+next_action: push_evidence_only; latestexactheadCI; authorizedmerge_actualtree_postmergeCI_then_PRcloseout_ownerrelease; nextseparate_run_W4_then_W5
+```
+
+
+DG-D089: W4 ownership claim after reconciling PR37 closeout. PR37 is MERGED at 30bc902ef884cda9927bcaaf15bc595b694f609d, run DG-W3-20260923-02 is DONE and owner NONE. Its actual post-merge workflow35873299419 is now completed/SUCCESS; previous aggregate lag was historical. Remote main d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a descends from that merge and has no subsequent dim-gate/PLAN/shared gate delta. No W4 branch/PR/task existed. Created isolated `agent/dim-gate/mainline/w4-alerting` at actual remote main and fixed W4 contract revision1 before implementation. T041 domain, T042 API/demo and T043 UI have bounded nonoverlapping worker scopes; T044 is reserved for uninvolved final read-only review. Lead alone owns contract/PLAN/integration/acceptance. Node24.18.0/pnpm11.18.0 available; initial JS headroom753bytes under unchanged307200-byte budget. W4 is IN_PROGRESS, not accepted; W5 remains unstarted. No deployment, live collector, external notification, main/force push, or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 89
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 CONTRACT_FIXED / IMPLEMENTATION_PENDING / NOT_ACCEPTED
+task_id: T041 READY; T042 READY; T043 READY; T044 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; create_isolated_worker_worktrees; implement_bounded_T041_T042_T043; integrate_and_test; uninvolved_T044_then_fullgates_exactheadCI_authorizedmerge_closeout_before_W5
+```
+
+DG-D090: Contract/task checkpoint `9fd3279ead6aa9e776c56c9fb3066e670631484a` is SSH saved; [draft PR50](https://github.com/fallrising/newclear/pull/50) is OPEN and explicitly not accepted. T041/T042/T043 started in their three independent worktrees at that exact base, nonoverlapping product paths; T044 remains unassigned until a fixed product. Lead added affected 01–07 W4 delta and validation index in canonical W4 worktree; these docs are local pending a later checkpoint. T041 owns domain source, T042 owns API/demo, T043 owns UI/e2e; lead owns docs/PLAN/integration. Task validator passed all four tasks; docs gate passed at contract checkpoint (202files/440links) and after affected-spec edits (202files/447links). W4 product/native/browser/review gates remain pending, W5 unstarted. Latest actual W3 postmerge workflow aggregate35873299419 is now completed/SUCCESS, resolving the historical GitHub bookkeeping discrepancy without rewriting the PR37 observation.
+
+DG-D091: T041/T042/T043 bounded handbacks were SHA-verified and integrated by the lead in the canonical W4 worktree; workers made no commit/push. Fixed v4 domain, strict legacy migration, typed Mock API/OpenAPI and scoped RD/Ops UI now exercise W4 production independent approval, source-time incident evidence, Silence and Mock delivery. Lead corrected W4 navigation decoding and route grants, nested CMDB lazy loading, infrastructure Incident audit visibility, and old W2/W3 browser migration expectations. A narrowly scoped M2 Admin axe test timeout is 60s because 18 unchanged scans exceeded 30s in contract-only CI35894949839; that historical failure is retained. Current precommit native gate passes 397/397 in37files, frozen install, lint/typecheck/docs (206files/452links), contract (161ops/313schemas), CI/architecture and demo build. Initial full Chromium completed 89/92; two stale v3 expectations and one W4 smoke read-before-command-completion failed, then all three focused cases passed after fixes. Firefox/WebKit smoke12/12, fresh unchanged benchmark3/3 (302874 initial gzip bytes, medianLCP732ms, queryp95 0.6ms, HTTPp95 171ms), and isolation2/2 pass. Complete Chromium on corrected tests is now running. Latest observed main d25bac0 only changes unrelated components from original d80028c; no dim-gate/PLAN/shared-gate delta. W4 remains NOT_ACCEPTED pending complete Chromium, T044 fixed-source independent review, exact PR-head CI and authorized merge/actual closeout. W5 remains unstarted. No deployment, live collector, external notification, force/main push or worktree deletion.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 91
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 INTEGRATED / FINAL_CHROMIUM_REVIEW_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+last_incorporated_main: d80028c64c2d359d6a44bbe699a09d1d1d2bfe8a
+last_observed_main: d25bac0767b2a5abeffefacfd3bb151000000cdb; unrelated_components_only
+spec_ref: platform/dim-gate/docs/W4-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-12/15-18
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_contract_head_only
+remote_durability: product_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: finish_corrected_full_Chromium; fixed_product_commit; uninvolved_T044_review; exact_headCI_then_authorized_merge_actualcloseout_before_W5
+```
+
+DG-D092: Uninvolved T044 attempt1 at exact fixed product65a4c36 independently reproduced blocking F1: a rule with activeRevision1 but a new draft rejected a fresh Silence, and same-key replay failed after clock advancement or revision because mutable state/time checks ran before the replay branch. Report `.team/reports/T-044-attempt-1.md` PARTIAL, SHA256 0ea0451f28a149063c627ada1f2de6ab3df5163c0341513518192e4eac65a42c, was copied byte-identically from the review worktree and validator passed. Lead corrected `monitoring-commands.ts` to authorize against current target before replay, then validate active revision and bounded time only inside a new command's apply; the persisted Silence pins the actual active revision. New domain test covers same receipt/no writes after clock advance and rule draft, fresh Silence under active revision, and current pool-grant revocation returning 403. Corrected local 398/398 native, typecheck/lint/contracts/architecture/CI/docs/build pass; browser/smoke/benchmark/isolation must be rerun on a committed corrected SHA. Old 899065c CI35907137495 was explicitly cancelled after F1; local incomplete Chromium was SIGINT stopped at 51 passed/1 interrupted/40 not run. Neither is an acceptance result. W4 remains NOT_ACCEPTED, W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 92
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F1_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1 PARTIAL_F1; attempt2 READY_AFTER_FIXED_COMMIT
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-1.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_old_product_CI_CANCELLED
+remote_durability: F1_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F1_commit; T044_attempt2_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```
+
+
+DG-D093: Independent T044 attempt2 reviewed exact F1 correction `460424b12e27bffdea44912ba6101b6fd90b8a89`, closed F1 and confirmed new blocking F2: an old AlertRule create replay returned 422 after a referenced monitor acquired a new draft, and hidden monitor metric compatibility leaked as 403 versus 422. Report `.team/reports/T-044-attempt-2.md` PARTIAL, SHA256 `552199643dc36b83261e03be8c84c9d632b45c7fea3e135add1872c8a9fddf39`, was copied byte-identically and validator passed. Lead moved mutable spec/approval checks into fresh-command apply, while checking current original/proposed target scope before replay; adjacent SLO and cross-scope revise regressions were added. Local focused8/8 and full400/400 native, frozen install, lint/typecheck, OpenAPI161/313, CI/architecture/docs and demo build pass. Contract and Ops SDD now state replay and active-revision behavior. The obsolete PR-head CI35908469757 and local incomplete Chromium were intentionally cancelled after F2, not accepted. This correction is local until its fixed commit; T044 attempt3, final browser/performance/isolation, exact latest PR-head CI, merge and actual closeout remain pending. W4 NOT_ACCEPTED; W5 unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 93
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 REVIEW_F2_CORRECTED_LOCALLY / REGATES_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt1_F1_closed_attempt2_F2_partial_attempt3_pending
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-2.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_obsolete_CI_cancelled
+remote_durability: F2_correction_local_pending_fixed_commit_and_SSHpush
+blockers: []
+next_action: fixed_F2_commit; T044_attempt3_independent_review; full_fixed_gates_exactheadCI_then_authorizedmerge_actualcloseout_before_W5
+```
+
+
+DG-D094: Fixed W4 product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` is SSH saved as PR50 head. Independent T044 attempt3 DONE on that exact SHA closes F1/F2 with no confirmed source finding; report `.team/reports/T-044-attempt-3.md` was copied byte-identically (SHA256 `866b5c6a7c335780cccad72ddf68a8ce1c874d78c6f1098ab55b272252394834`) and validator passed. Local source-bound gates: frozen install; 400/400 native in37 files; lint/typecheck/docs (209 files/464 links), OpenAPI161/313, CI/architecture, demo build; complete Chromium92/92; Firefox/WebKit smoke12/12; unchanged benchmark3/3 (302886 initial gzip bytes of307200 budget, median coldLCP724ms, 5000-CI queryp95 0.6ms, persisted Mock HTTPp95 170.7ms); isolation2/2. The first isolation attempt failed before browser launch because LD_LIBRARY_PATH was omitted from that command and libasound.so.2 could not load; same-source rerun with the established local browser environment passed both, without test/product changes. Remote exact-product CI35909643363 is IN_PROGRESS and has not been claimed as success. Latest observed main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` changes only unrelated `products/kith` paths since incorporated main; no dim-gate/PLAN/shared gate delta. W4 remains NOT_ACCEPTED until exact-head CI and final acceptance, then evidence-only head CI and authorized normal merge/actual closeout. W5 remains unstarted.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 94
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator W4
+terminal_state: null
+milestone: W4 PRODUCT_LOCAL_GATES_AND_REVIEW_PASS / EXACT_CI_PENDING / NOT_ACCEPTED
+task_id: T041 HANDED_BACK; T042 HANDED_BACK; T043 HANDED_BACK; T044 attempt3 DONE_no_open_findings
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+local_tested_commit: dd90ccb_400_native_92_chromium_12_smoke_3_benchmark_2_isolation
+integration_state: PR50_DRAFT_OPEN_exact_product_CI35909643363_in_progress
+remote_durability: product_dd90_SSHsaved; evidence_checkpoint_local_pending_CI
+blockers: [exact_product_CI35909643363_in_progress]
+next_action: inspect_exact_product_CI_artifacts; accept_fixed_product; evidence_only_commit_SSHpush_latestheadCI_then_authorized_normal_merge_actualcloseout_ownerrelease_before_W5
+```
+
+
+DG-D095: ACCEPT W4 fixed product `dd90ccbfd815b560932a7d9e231b98d6b4d76051` for AC-WS-12/15–18 and the integrated T041/T042/T043 results, after uninvolved T044 attempt3 DONE closed F1/F2 with no open finding. Exact-product [CI35909643363](https://github.com/fallrising/newclear/actions/runs/35909643363) completed SUCCESS on 2026-09-23T20:10:42Z, head dd90, synthetic checkout `305939aa5d83da45cc4f8f6a561a14ab8b295429` with parents latest main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and dd90; both checkout and dd90 have identical full `platform/dim-gate` tree `b4cdaf5b44cb306c8453238c7ee37106316a7150`. CI logs confirm 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation, docs/contracts/CI/architecture/build; artifact `10775045030` expires 2026-10-23T20:10:36Z. Downloaded artifact performance raw samples bind checkout305939a: 302886 initial gzip bytes, median LCP1312ms, queryp95 0.9ms, HTTPp95 184.5ms, all below unchanged budgets. This is product acceptance, not PR integration. T041–043 original PARTIAL handback reports remain immutable history; their integrated results are accepted here. Previous failed/cancelled CI and browser attempts remain historical. Next: evidence-only checkpoint commit and SSH push, latest exact metadata-head CI, authorized normal PR50 merge with match-head protection, actual merge/component-tree/postmerge CI verification, PR closeout/owner release, then separate W5 run. No deployment/external message/live cloud action.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 95
+run_id: DG-W4-20260923-01
+active_owner: Codex orchestrator integration_closeout_only
+terminal_state: null
+milestone: W4 PRODUCT_ACCEPTED / FINAL_PR_INTEGRATION_PENDING
+task_id: T041 INTEGRATED_ACCEPTED; T042 INTEGRATED_ACCEPTED; T043 INTEGRATED_ACCEPTED; T044 attempt3 ACCEPTED
+continuation_ref: agent/dim-gate/mainline/w4-alerting
+worktree: <operator-home>/test/codex/newclear-dim-gate-w4
+evaluated_implementation_commit: dd90ccbfd815b560932a7d9e231b98d6b4d76051
+product_ci: 35909643363 SUCCESS; checkout305939a; identical_component_tree_b4cdaf5b44cb306c8453238c7ee37106316a7150
+review_ref: .team/reports/T-044-attempt-3.md
+report_ref: .team/reports/dim-gate-w4-validation.md
+integration_state: PR50_DRAFT_OPEN_at_checkpoint; final_evidence_headCI_merge_and_ownerrelease_pending
+remote_durability: product_dd90_SSHsaved; containing_evidence_checkpoint_nextSSHpush
+blockers: []
+next_action: commit_SSHpush_evidence_only; latest_exactheadCI; authorized_normal_merge_actualtree_postmergeCI_PRcloseout_ownerrelease; then W5
+```
+
+
+DG-D096: W4 actual integration closeout reconciled before W5 ownership claim. [PR50](https://github.com/fallrising/newclear/pull/50) MERGED normally at `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952` (parents main `b4137dd9b1816ebe59343d6a7a1ca206de545dc7` and accepted evidence head `9cc2a921eb319b7c90b5c9ffdea03bdadce4006d`). Actual main and PR head share full dim-gate tree `bf36efc99c763826510d430777fed68729b123c7`; latest-head CI35914655882 SUCCESS. Actual [post-merge CI35919602730](https://github.com/fallrising/newclear/actions/runs/35919602730) SUCCESS on exact merge: 400 native, 92 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and native/docs/contracts/CI/architecture/build. Post-merge artifact10778013202 expires2026-10-23T21:37:42Z; downloaded raw samples name55ce00a: 302886 initial gzip bytes, coldLCP1036ms, queryp95 0.8ms, HTTPp95 176.2ms. Mirror35919602710 SUCCESS. PR body holds these late facts and W4 owner release, terminal DONE; no further W4 commit or main push. Old W4 branch/worktrees remain. W5 has no prior branch/PR/task and is the next unimplemented increment. New isolated worktree `<operator-home>/test/codex/newclear-dim-gate-w5` and branch `agent/dim-gate/mainline/w5-platform-governance` start from exact actual main55ce00a. W5 contract revision1 and [T045](tasks/T-045.md) domain, [T046](tasks/T-046.md) API/migration, [T047](tasks/T-047.md) UI/browser, [T048](tasks/T-048.md) integration, [T049](tasks/T-049.md) uninvolved review are fixed before implementation; five task validators pass. W5 is CONTRACT_LOCAL_PENDING_CHECKPOINT / NOT_ACCEPTED; no product code or external side effect yet. Lead retains W5 ownership.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 96
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5 CONTRACT_FIXED_LOCAL / PRODUCT_NOT_STARTED / NOT_ACCEPTED
+task_id: T045 READY; T046 READY; T047 READY; T048 READY; T049 READY_AFTER_FIXED_PRODUCT
+target_ref: origin/main
+source_commit: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+last_incorporated_main: 55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
+spec_ref: platform/dim-gate/docs/W5-INTEGRATION-CONTRACT.md revision1; WS-SDDrevision1 AC-WS-13-18
+report_ref: .team/reports/dim-gate-w5-preflight.md
+integration_state: NOT_OPENED
+remote_durability: contract_checkpoint_local_pending_SSHpush
+blockers: []
+next_action: validate_and_SSHsave_contract; implement_T045_domain_T046_API_migration_T047_UI; integrate_T048_fullgates; uninvolved_T049_review; exactheadCI_authorizedmerge_actualcloseout
+```
+
+
+DG-D097: W5 product checkpoint `ace27ff833de58541236b44b9b410cf58f7a8f17` implements the bounded Demo User/Team identity lifecycle, strict v1–v4→v5 source migration, typed Admin routes and `/admin/users` UI without an automatic role grant or login persona. W5 contract revision1 remains unchanged. Local 409/409 native, focused production Chromium1/1 (refresh, permission denial, two themes × three widths axe/overflow), lint/typecheck/docs/contracts168/324/CI/architecture/build, and unchanged benchmark3/3 pass. An initial benchmark attempt failed before browser launch because the established local `LD_LIBRARY_PATH` was omitted; corrected environment rerun passed without source changes. The source-bound [identity checkpoint](reports/dim-gate-w5-identity-checkpoint.md) records evidence and open work. T045/T046/T047 are PARTIAL; feature cohort, safe registered PlatformRoute and recipient-specific notification remain, so T048 integration gates and T049 uninvolved fixed-commit review have not begun. Draft PR61 is open. This is **not W5 acceptance or merge**; branch ownership remains with Codex W5. Save this evidence checkpoint by SSH push, continue remaining fixed-contract slices and complete full gates before review/acceptance.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 97
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_IDENTITY_PRODUCT_CHECKPOINT / OTHER_W5_SLICES_PENDING / NOT_ACCEPTED
+task_id: T045 PARTIAL_identity; T046 PARTIAL_identity_API_migration; T047 PARTIAL_identity_UI_browser; T048 READY_AFTER_SLICES; T049 READY_AFTER_FIXED_PRODUCT
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
+implementation_commit: ace27ff833de58541236b44b9b410cf58f7a8f17
+report_ref: .team/reports/dim-gate-w5-identity-checkpoint.md
+integration_state: PR61_DRAFT_OPEN_not_accepted
+remote_durability: identity_product_commit_local_pending_SSHpush; evidence_checkpoint_local_pending_commit_and_SSHpush
+blockers: []
+next_action: SSHsave_checkpoint; implement_feature_cohort_PlatformRoute_scoped_notification; full_W5_gates; T049_independent_review; exactheadCI_and_authorized_normal_merge_actualcloseout
+```
+
+
+DG-D098: W5 integrated product and review-correction candidate `7ab67ce5eb99967b820fa59df44c31808a40d631` is SSH saved as existing draft PR61 head on `agent/dim-gate/mainline/w5-platform-governance`; actual `origin/main` remains W4 merge `55ce00a2c469a1f262c25b9eaeec6bb7ef3d5952`. Contract revision2 includes persisted feature activation history, original-W4 migration proof and per-project session cohort projection. T045–T047 are implemented in the lead-owned integration; independent T049 found and lead corrected recipient, readback, organization, migration, channel selection and per-project UI findings F1–F7. T049 has rerun 97 focused fixed-source tests at 7ab and closed F7, with formal report still pending. Local frozen install, 426 native in46 files, lint/typecheck/docs/contracts207/398/CI/architecture, demo build and new per-project Chromium1 pass on 7ab. Earlier W5 focused5/5 on prior5cb, complete runs interrupted after new findings, and cancelled CI35934645580/35935179696/35937375121 are historical, not final gate evidence. Full 7ab Chromium100 is running; Firefox/WebKit smoke, benchmark, isolation and exact-product [CI35937914805](https://github.com/fallrising/newclear/actions/runs/35937914805) remain to be reconciled before acceptance. No product acceptance, merge, deployment or owner release is claimed.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 98
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_7ab_LOCAL_NATIVE_PASS / FULL_GATES_AND_REVIEW_REPORT_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 FIXED_SOURCE_REVIEW_REPORT_PENDING
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
+implementation_commit: 7ab67ce5eb99967b820fa59df44c31808a40d631
+review_ref: .team/reports/T-049-attempt-1.md pending
+report_ref: .team/reports/dim-gate-w5-validation.md pending
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35937914805_in_progress
+remote_durability: fixed_product_7ab_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_and_exact_CI_pending]
+next_action: finish_7ab_Chromium100_smoke_benchmark_isolation; collect_T049_report_and_exact_CI; accept_product_only_after_all_gates; evidence_only_checkpoint_latestheadCI_then_authorized_normal_merge_actualcloseout
+```
+
+
+DG-D099: The full `7ab67ce` Chromium diagnostic completed 98/100 in30.8m: its only two failures were historical W1→current and W2→current browser migration specs that still asserted v4 seedVersion/schema despite the correct v5 output. No other M0–W5 browser case failed; 1,000 actual UI commands and atomic 1,001st refusal passed. Lead updated only those two specs to assert strict v5, source classification, safe W5 default collections and unchanged legacy work/receipts; focused real Chromium2/2, lint/typecheck and diff check passed. New fixed product/test SHA `b35e6ed502f60e5291e4d27dd804f6f189c6832d` is SSH saved as PR61 head. Uninvolved T049 attempt2 reviewed `7ab..b35`, independently passed50 migration native cases and typecheck with no new finding; report `.team/reports/T-049-attempt-2.md` was copied byte-identically, SHA256 `3db3320326ec57a63659620d994ffd810d385122b853782bb50cf2d8e6e23e92`, validator passed. Local b35 frozen install, 426/426 native, lint/typecheck/docs/contracts207/398/CI/architecture and fresh demo build pass. Full b35 Chromium100, Firefox/WebKit smoke12 on separate port, unchanged benchmark/isolation and exact-product [CI35940402377](https://github.com/fallrising/newclear/actions/runs/35940402377) remain in progress/pending. Old CI35937914805 was cancelled and cannot be accepted. W5 remains NOT_ACCEPTED / PR61 DRAFT OPEN; no merge, deploy or owner release.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 99
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_b35_NATIVE_AND_REVIEW_PASS / FULL_GATES_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt1_AND_attempt2_DONE_no_open_findings
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
+implementation_commit: b35e6ed502f60e5291e4d27dd804f6f189c6832d
+review_ref: .team/reports/T-049-attempt-2.md
+report_ref: .team/reports/dim-gate-w5-validation.md
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35940402377_in_progress
+remote_durability: fixed_product_b35_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_and_exact_CI_pending]
+next_action: complete_b35_Chromium100_smoke_benchmark_isolation; verify_exact_product_CI; accept_only_after_all_pass; evidence_only_checkpoint_latestheadCI_authorized_normal_merge_actual_closeout
+```
+
+DG-D100: Fixed `b35e6ed` local full Chromium finished 99/100 in30.5m. The only failure was the historical W2 Kafka governance browser case reading `sessionStorage` immediately after `page.goto` while the screen still showed demo initialization; its trace captured a null snapshot. The unchanged Kafka case passed alone 1/1. The lead added one readiness assertion before the first snapshot in the shared Redis/Kafka case, preserving all authorization, immutable-history, axe, layout and command assertions; both variants passed 2/2 on the corrected worktree. Corrected fixed product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` is SSH saved as PR61 head. On 03c, 426/426 native, lint/typecheck, docs223/503, contracts207/398, CI/architecture and diff check pass; full Chromium100 and exact [CI35943030312](https://github.com/fallrising/newclear/actions/runs/35943030312) are running. Independent T049 attempt3 is reviewing only `b35..03c`; no verdict is inferred. The earlier b35 Firefox/WebKit smoke12/12 passed but is prior-source evidence; benchmark and isolation remain pending for the final source. Old CI35940402377 was cancelled after the known race and cannot stand for final acceptance. `origin/main` advanced to `3982f64491b6f771c5a28bddc737efd0b42d4fb5` via unrelated ERU/Kith changes; no `platform/dim-gate`, dim-gate CI or PLAN delta exists, and the branch still needs latest-main reconciliation before merge. W5 remains NOT_ACCEPTED / PR61 DRAFT OPEN; no merge, deploy or owner release.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 100
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5
+terminal_state: null
+milestone: W5_FIXED_PRODUCT_03c_NATIVE_PASS / FULL_GATES_AND_REVIEW_PENDING / NOT_ACCEPTED
+task_id: T045 INTEGRATED; T046 INTEGRATED; T047 INTEGRATED; T048 IN_PROGRESS; T049 attempt3_IN_PROGRESS
+continuation_ref: agent/dim-gate/mainline/w5-platform-governance
+worktree: <operator-home>/test/codex/newclear-dim-gate-w5
+implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+review_ref: .team/reports/T-049-attempt-3.md pending
+report_ref: .team/reports/dim-gate-w5-validation.md pending
+integration_state: PR61_DRAFT_OPEN_exact_product_CI35943030312_in_progress
+remote_durability: fixed_product_03c_SSHsaved; evidence_checkpoint_pending
+blockers: [full_fixed_gates_review_and_exact_CI_pending]
+next_action: finish_03c_full_Chromium_smoke_benchmark_isolation_and_independent_review; verify_exact_CI; then_accept_product_and_save_evidence_only; reconcile_latest_main; latestheadCI_authorized_normal_merge_actual_closeout
+```
+
+DG-D101: Lead ACCEPTS W5 fixed product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` for AC-WS-13–18 under W5 contract revision2. Uninvolved T049 attempts1–3 close F1–F7 with no open confirmed source/test finding on the final one-line readiness delta; SHA256 reports are in [W5 validation](reports/dim-gate-w5-validation.md). On exact 03c, local frozen install lineage, lint/typecheck, 426/426 native, docs225/514 at evidence preparation, contracts207/398, CI/architecture, fresh demo build, full Chromium100/100 in31.0m, Firefox/WebKit12/12 in3.9m, demo/live isolation2/2 and unchanged benchmark3/3 passed. Local raw benchmark: 297608/307200 initial gzip bytes, LCP median748/2500ms, 5000-CI query p95 0.5/150ms, persisted Mock HTTP p95 172.2/500ms over100 successful requests. Exact product [CI35943030312](https://github.com/fallrising/newclear/actions/runs/35943030312) SUCCESS with 426 native, 100 Chromium, 12 Firefox/WebKit, 3 benchmark, 2 isolation and all static/build gates. Its actual PR synthetic checkout `61a26d5e42755dfab13bbbfef3a59e063c863cdf` (parents then-main `cfb52ce62a7d15f63fe1de5aa8fb4faaf812de45` and product03c) has complete dim-gate tree `22f996667ce908b5012473930e40a3c41e3cc5a6`, exactly equal to product03c. [Artifact10785969077](https://github.com/fallrising/newclear/actions/runs/35943030312/artifacts/10785969077), expires2026-10-24T02:11:17Z, was downloaded and decoded: all five CI cold loads 297608bytes, medianLCP1316ms, queryp95 0.9ms, HTTPp95 185.7ms with100 HTTP200. No skipped/failed gate is accepted. This is **product acceptance only**; PR61 remains DRAFT OPEN and W5 ownership stays with the lead through evidence-only checkpoint, latest-head CI, normal merge, actual tree and post-merge CI. Latest fetched main3100143 contains no dim-gate source/workflow/PLAN delta from W4 base; incorporate it before merge. No deployment, external notification, real identity/cloud operation, force or main push.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 101
+run_id: DG-W5-20260923-01
+active_owner: Codex orchestrator W5 integration_closeout_only
+terminal_state: null
+milestone: W5_PRODUCT_ACCEPTED_AC_WS_13_18 / PR_INTEGRATION_PENDING
+accepted_implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+review_ref: .team/reports/T-049-attempt-1.md; .team/reports/T-049-attempt-2.md; .team/reports/T-049-attempt-3.md
+report_ref: .team/reports/dim-gate-w5-validation.md; .team/reports/T-048-attempt-1.md
+product_ci: 35943030312 SUCCESS; synthetic61a26d5; identical_component_tree_22f996667ce908b5012473930e40a3c41e3cc5a6
+integration_state: PR61_DRAFT_OPEN_evidence_head_CI_merge_actual_closeout_pending
+remote_durability: product03c_SSHsaved; evidence_checkpoint_pending_commit_and_SSHpush
+blockers: []
+next_action: commit_SSHpush_evidence_only; merge_latest_origin_main_into_branch_if_still_disjoint; latest_exacthead_CI; authorized_normal_merge_actual_tree_postmerge_CI_PRcloseout_ownerrelease
+```
+
+DG-D102: Final W5 and CI-hardening reconciliation. W5 product/test `03c15883abfedd39b4f9fe4fe893a8e17fc391a8` remains accepted for AC-WS-13–18; T049 attempts1–3 have no open confirmed source finding. PR61 merged normally as `77e5e14`; exact post-merge CI35949443651 attempt2 passed 426 native, 100 Chromium, 12 Firefox/WebKit, 3 benchmark and 2 isolation cases plus static/build gates. Attempt1 was canceled at the former 45-minute foundation limit after benchmark and before isolation, so it is not complete evidence. Follow-up PR69 raised the timeout to60 minutes and added the run-attempt suffix to artifact names; it merged normally as `616d67e`. Exact post-merge CI35956716320 passed all gates on `616d67e`. Artifacts10789818355 and10792066235 were downloaded and decoded; both are bound to their merge commits and meet unchanged performance budgets. Actual current main was rechecked at `70a409ab5e522d0941cc6ae20c44b93b1c0a41c1` on 2026-09-24; changes after `616d67e` touch no dim-gate source, its workflow, or this ledger, and the component/workflow trees remain `775bcb7`/`b8a65ac`. T048 and the W5 run are DONE; active owner is NONE. No deployment or external integration occurred. SDD14 defines only W1–W5 and AC-WS-01–18; no W6 or AC-WS-19 is approved. Capability-map entries marked later/to clarify have no chosen priority or acceptance contract. Next step is to obtain product-owner priority and an observable user flow before creating a new task or claiming W6.
+
+```yaml
+project_id: dim-gate
+variant_id: mainline
+protocol_version: 1
+ledger_revision: 102
+run_id: DG-W5-20260923-01
+active_owner: none
+terminal_state: DONE
+target_ref: main
+last_reconciled_target: 70a409ab5e522d0941cc6ae20c44b93b1c0a41c1
+last_observed_at: 2026-09-24T11:55:22Z
+continuation_ref: none
+milestone: W1_W5_COMPLETE / AC-WS-01_18_ACCEPTED_AND_MERGED
+task_id: T045 ACCEPTED; T046 ACCEPTED; T047 ACCEPTED; T048 DONE; T049 DONE
+accepted_implementation_commit: 03c15883abfedd39b4f9fe4fe893a8e17fc391a8
+pr61_merge_commit: 77e5e14e0eb0bd62544ea3ece02aa448e08df456
+pr69_merge_commit: 616d67ec62df763dab9d08d539852767d0fb8c0e
+review_ref: .team/reports/T-049-attempt-1.md; .team/reports/T-049-attempt-2.md; .team/reports/T-049-attempt-3.md
+report_ref: .team/reports/dim-gate-w5-validation.md
+product_ci: 35943030312 SUCCESS
+postmerge_ci: 35949443651 attempt2 SUCCESS; 35956716320 SUCCESS
+integration_state: MERGED_PR61_AND_PR69
+remote_durability: PRs_and_CI_artifacts_remote; actual_main_reconciled_at_70a409a
+blockers: []
+next_action: obtain_product_owner_priority_and_observable_user_flow_for_a_new_capability_before_creating_task_or_W6
+```
+
+## Program: portfolio-docs / Variant: mainline
+
+### Identity
+
+| Field | Value |
+| --- | --- |
+| project_id / variant_id | portfolio-docs / mainline |
+| target_repo / branch | fallrising/newclear / docs/portfolio-docs-tiers |
+| active_owner / run_id | Cursor orchestrator / PD-20260924-01 |
+| protocol | Same task/report contract as team-superpowers; does not modify dim-gate program block above |
+
+### Objective
+
+Tiered documentation: root catalog + policy + component README banners + A-tier quickstarts only. No code moves. Open PR for human review.
+
+### Tasks
+
+| Task | Goal | State |
+| --- | --- | --- |
+| [T-100](tasks/T-100.md) | Policy, taxonomy, README catalog, banners, A quickstarts, goku README | DONE — [report](reports/T-100.md) |
+| T-010 tutorials | Optional golden-path tutorials | SKIPPED — A-tier links existing local-dev docs instead |
+
+### Decisions
+
+| ID | Decision |
+| --- | --- |
+| PD-D001 | Doc tiers A/B/C/D per orchestrator recommendation; owner “按你建議” |
+| PD-D002 | A = kith, hai-taskboard, agent-platform, dim-gate, ice-maker, eru-vps-mvp |
+| PD-D003 | B = fleet, local-ocr-services, mkfk; fleet stays under `specs/` this PR |
+| PD-D004 | C dormant since 2026-09-04 default; D = cloudform, streaming-converter, bite-pi, bee-swarm, aweshore |
+| PD-D005 | No new tutorials in this PR |
+
+### Verification gate
+
+- Inventory completeness passed (26/26)
+- ice_maker `status --json` passed
+- Diff Markdown-only passed
+- ice_maker `make check` env failure recorded in T-100 risks (not claimed pass)
+
+### Residual risks
+
+- Host missing Go/pytest for some quickstart live runs
+- Future rename `specs/fleet` → `systems/fleet` still open
+
+## Program: eru-vps-mvp / Variant: ERU-010 loss recovery continuation
+
+### Identity and objective
+
+| Field | Value |
+| --- | --- |
+| project / run | `labs/eru-vps-mvp` / `ERU-010-20260927-01` |
+| target / work branch | `main` at `17f5d90` / `agent/eru010-loss-recovery-replacement` |
+| active owner | Codex orchestrator |
+| formal task state | ERU-010 remains in progress; no fixed task-count change |
+| V11 boundary | run `20260927T082116Z-2dd7b6bc` remains active until 2026-09-28T08:22:46Z; remote work is read-only status only |
+| objective | Add a fresh exact-ID subset cleanup plan for partial worker-loss recovery, then a fresh hash-bound ERU-012 replacement plan gated on complete stale-ID absence and zero target quota, with private lifecycle, CLI, docs, and regression coverage |
+
+### Dependencies and safety boundaries
+
+- Reuse the merged PR #164 review-plan, live-prepare, exact dissociation, journal, and read-only recovery contracts.
+- Reuse ERU-012 `AppExecutor` and its readiness semantics; never replay the original loss plan or a failed child plan.
+- Fail closed on exact-ID identity drift, query failure, snapshot/fence/quota drift, healthy-worker drift, desired-spec drift, or incomplete replacement readiness.
+- Keep full IDs/specs/plans/journals under project `private/`; public CLI output must contain counts, gates, IDs/hashes of plans, and private paths only.
+- Do not connect this local-development slice to VPSs, do not remove the lost node, restore the target, or run `resource --fix`.
+- Preserve the user's untracked `labs/eru-vps-mvp/prompts/` directory.
+
+### Bounded tasks
+
+| Task | Goal | Writable scope | State |
+| --- | --- | --- | --- |
+| [T-101](tasks/T-101.md) | Read-only architecture and reuse audit for loss recovery, drain recovery, and ERU-012 executors | `reports/T-101.md` only | DONE — report validated |
+| [T-102](tasks/T-102.md) | Read-only regression/CLI contract audit against the requested negative cases | `reports/T-102.md` only | DONE — report validated |
+| T-103 | Orchestrator TDD implementation, docs, and repository checks | ERU-010 scoped source/tests/docs plus this ERU plan section | DONE — local candidate gates passed |
+| [T-104](tasks/T-104.md) | Independent fixed-diff review after implementation | `reports/T-104.md` only | DONE — report validated; no open findings |
+
+### Verification gates
+
+- Red: at least one focused regression must fail for the intended missing recovery/replacement behavior before implementation.
+- Focused worker-loss and ERU-012 tests pass, including partial subset, lost reply/no replay, rehashed tampering, identity/snapshot/fence/quota/healthy-worker drift, replacement gate/readiness, private path/symlink/duplicate-plan, and stdout redaction.
+- Full `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v` passes.
+- CI parity AST/JSON/Markdown-link/private-file-exclusion/diff check passes exactly as defined in `.github/workflows/eru-vps-mvp-ci.yml`.
+- Orchestrator reviews the complete diff and T-104 independent findings, then applies the `codex-evidence-gate`; failed or skipped checks remain explicit.
+- Only after local gates pass: commit, push, create PR, wait for GitHub `local-checks`, merge under the owner's explicit continuation authorization, and fast-forward local main. No deployment.
+
+### Decisions and current evidence
+
+- ERU-D001: 2026-09-27T14:46:46Z read-only V11 status showed 3/3 observers active/running, 769 samples each, both HTTP observers 23,041/23,041 successful, and zero failures/warnings/skips with 1% peak disk. The run was not collected or stopped.
+- ERU-D002: GitHub main was reconciled at `17f5d90`; intervening PRs #165–#169 touch Agent Platform, portfolio, and shared frontend-review documents, with no ERU or ERU ledger overlap. PR #164 and its ERU `local-checks` were successful.
+- ERU-D003: Workers T-101/T-102 are read-only and may not delegate, edit product files, commit, push, or mutate external systems. The orchestrator owns all implementation and acceptance.
+- ERU-D004: Red evidence was an import failure for the intentionally missing `execute_fresh_cleanup` API. The implementation keeps every recovery cleanup and replacement wrapper on a fresh plan ID/hash/journal and validates source plan/journal semantic equality in addition to hashes.
+- ERU-D005: Replacement is one wrapper plan, but ERU-012 child plans are created and executed sequentially from a fresh snapshot after the prior child is exact and HTTP-ready; a fresh wrapper may adopt an already exact revision through ERU-012 `no_op`, while an existing wrapper/child journal remains non-replayable.
+- ERU-D006: Both independent audit reports validate. T-101's provenance and sequential-child constraints and T-102's negative matrix were incorporated. Final local verification passes 30/30 focused worker-loss tests, 55/55 ERU-012 app tests, 413/413 full tests, and the exact CI parity source/document/private-file/diff validation.
+- ERU-D007: Independent T-104 review found and closed two issues before acceptance: a jointly edited/rehashed source plan+journal authorization bypass and symlink traversal through a source record parent. Recursive immutable-review provenance, symlink-safe source reads, and both regressions are present; T-104 validates with no open findings.
+- ERU-D008: The `codex-evidence-gate` decision in `reports/ERU-010-evidence.md` is PASS for the local reviewable candidate. No local required check failed or was skipped. Formal ERU-010 and the fixed 12-task count remain unchanged; authorized PR/CI/merge are the next delivery steps, and deployment remains prohibited.
+
+## Program: eru-vps-mvp / Variant: ERU-015 fresh rebuild planning
+
+### Identity and objective
+
+| Field | Value |
+| --- | --- |
+| project / run | `labs/eru-vps-mvp` / `ERU-015-20260927-01` |
+| target / work branch | `main` at `77e30ae` / `agent/eru015-fresh-rebuild-plan` |
+| active owner | Codex orchestrator |
+| formal task state | ERU-015 remains pending; this local slice cannot change the fixed task count |
+| V11 boundary | the active formal run remains read-only until its documented end; no VPS mutation, collect, stop, cleanup, or target change |
+| objective | Add the first reviewable, non-executable ERU-015 full-cluster fresh-rebuild plan: bind all four reviewed host scopes, current inventory/generation, pinned sources/artifacts, external secrets/backups readiness, desired apps, empty-etcd semantics, stage order, and V01–V04/V08 evidence requirements without performing remote or provider operations |
+
+### Scope and safety boundaries
+
+- This slice is planner/private-lifecycle/CLI/docs/tests only. It cannot format disks, reimage hosts, stop services, clear etcd/runtime, deploy apps, commit a generation, or access provider APIs.
+- A fresh rebuild must create a new generation and an empty etcd. It must reject any snapshot-restore input or attempt to mix V08 fresh semantics with V10 control-plane restore.
+- The plan must cover exactly the reviewed four-host topology, require external recovery material and desired app manifests to be declared available, and bind their digests without exposing secrets, inventory, host identities, or app/workload details on stdout.
+- Reuse existing inventory/generation, private-path, artifact/source binding, owner intent, and desired-spec validation contracts where they fit; do not weaken ERU-014 or ERU-012 invariants.
+- Preserve the user's untracked `labs/eru-vps-mvp/prompts/` directory. Shared foundation browser E2E is deferred by owner direction until all local development is complete.
+
+### Bounded tasks
+
+| Task | Goal | Writable scope | State |
+| --- | --- | --- | --- |
+| [T-105](tasks/T-105.md) | Read-only architecture audit for the narrowest safe V08 review-plan boundary and reusable ERU-011/014/012 contracts | `reports/T-105.md` only | DONE / VALIDATED |
+| [T-106](tasks/T-106.md) | Read-only red-first test, private lifecycle, CLI redaction, and documentation audit for the V08 planner | `reports/T-106.md` only | DONE / VALIDATED |
+| [T-107](tasks/T-107.md) | Orchestrator TDD implementation, docs, relevant tests, CI parity, and integration | ERU-015 scoped source/tests/docs plus this ERU plan section | DONE / VALIDATED; 429 TESTS PASS |
+| [T-108](tasks/T-108.md) | Independent fixed-diff review after implementation | `reports/T-108.md` only | DONE / VALIDATED; NO OPEN FINDING |
+
+### Verification gates
+
+- Record one focused failing test for the missing V08 planner/lifecycle before implementation.
+- Focused tests cover exact four-host scope, new-generation binding, pinned inputs, external-material readiness, desired apps, fresh-vs-restore separation, drift/tampering, private/symlink/duplicate paths, deterministic plan hashing, and stdout redaction.
+- Run the relevant controller/reimage/app/fresh-rebuild regression suites and the complete ERU Python suite.
+- Run the exact ERU CI parity source/document/private-file/diff validation. Do not wait for shared foundation browser E2E in this local-development phase.
+- Independently review the fixed diff, then apply `codex-evidence-gate`. Only then commit, push, create a PR, wait for ERU `local-checks`, merge under existing owner authorization, and fast-forward local main. No deployment.
+
+### Decisions
+
+- ERU15-D001: ERU-008–014 already have their intended local operators or are externally blocked by active V11, clean-controller/VPS execution, or a future upstream release. ERU-015 is the earliest task still marked `待做` and its review-only planner is the next independent local capability.
+- ERU15-D002: This slice deliberately stops before a destructive executor. The planner makes the full-host scope, empty-etcd contract, generation transition, external inputs, desired apps, and evidence gates reviewable without interpreting plan creation as authorization to rebuild.
+- ERU15-D003: Red was recorded with `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_fresh_rebuild -v`: the focused test failed at import with the intended `ModuleNotFoundError: fresh_rebuild_ops`. No planner implementation existed at that point.
+- ERU15-D004: T-105 and T-106 validate. The candidate follows their shared minimum: one Profile A generation per immutable review plan, four existing reimage intents, strict read-only generation loading, new empty-etcd token, ERU-012 spec identities, explicit external/readiness attestations, no reuse of the ERU-014 executor, and count/digest-only stdout.
+- ERU15-D005: Green evidence is 16/16 focused fresh-rebuild tests, 45/45 focused plus reused contracts, 429/429 complete ERU tests, and the exact ERU CI AST/JSON/Markdown/private-file/diff validation. No VPS, provider, SSH, generation write, private production input, shared browser E2E, or deployment was used.
+- ERU15-D006: T-108's adversarial review exposed concurrent overwrite, fabricated predecessor, stale controller cleanliness, campaign drift, blocked-predecessor, and non-finite JSON/RTO risks during the correction loop. The final tree closes all findings; the reviewer reran 16/16 tests, passed diff and AST no-executor proofs, and reports no open blocking/high/medium/low finding.
+- ERU15-D007: The `codex-evidence-gate` decision in `reports/ERU-015-evidence.md` is PASS for the bounded local planner candidate. Formal ERU-015 remains in progress: a destructive executor, accepted-run writer, and three live V08 generations are not implemented or accepted. Authorized Git/PR/ERU-CI integration is the next delivery step; deployment remains prohibited.

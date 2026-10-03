@@ -1,5 +1,8 @@
 # Codebox
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 [![CI](https://github.com/fallrising/fanzloud/actions/workflows/ci.yml/badge.svg)](https://github.com/fallrising/fanzloud/actions/workflows/ci.yml)
 
 Codebox is a provider-neutral cloud coding agent platform written in Rust. It is designed to run

@@ -1,5 +1,7 @@
 # 01 — 產品範圍、資訊架構與互動
 
+本文為 v0.1 基線。後續三工作區的入口、首頁與角色深化見 [09](09-shared-workspaces.md)、[RD](10-rd-workspace.md)、[Ops](11-ops-workspace.md)、[Admin](12-admin-workspace.md)；新需求另以 REQ-WS-* 定義；W1 的本輪介面增量見文末與 integration contract，验收狀態以 STATUS/PLAN 為準。
+
 ## 1. 需求
 
 | ID | 要求 | v0.1 深度 |
@@ -48,6 +50,7 @@
 | `/ops/jobs`、`/ops/jobs/:jobId` | provisioning jobs 的進度、log 與結果 CI | 觀察與導向來源請求；retry 從 request 發起 | M2 |
 | `/ops/incidents`、`/ops/incidents/:incidentId` | 告警來源、受影響物件、變更、時序 | 認領、標記處理中、查看恢復證據 | M4 |
 | `/ops/capacity` | pool 容量／使用／保留／申請差額 | scope／provider 篩選，導向 CI 和 pending requests | M2 |
+| `/ops/releases`、`/ops/releases/:releaseId` | scope 內的發布與回滾候選、artifact、health、actor 與 audit | 不同 initiator 的 Ops 核准／拒絕 prod，合法跨 Center detail | M3 |
 | `/admin` | 配置狀態、整合健康、最近 policy／catalog 變更 | 統計可下鑽 | M2 |
 | `/admin/access` | 業務線、團隊、專案、使用者與固定角色綁定 | 選 user／role／scope、授予／撤銷、effective preview | M2 |
 | `/admin/navigation` | 三中心選單配置 | 標題、分組、排序、可見性編輯與預覽 | M2 |
@@ -103,3 +106,31 @@ Typography：系統 sans-serif，CJK fallback；ID／digest／log 採 monospace�
 | success | 畫面可看到新狀態、相應 detail 與 audit；toast 只是補充 |
 
 最低驗收寬度 1280px；1440px 為主要設計尺寸。768px 以收合 sidebar／sheet 提供探索；390px 可讀主要摘要，複雜表格有局部橫向滾動，不保證所有管理編輯適合手機。Dialog focus trap、Esc、focus return、label／error 關聯、skip-to-content 與 reduced-motion 必須支援。圖表／拓撲有文字或表格替代，不以 canvas 作唯一資訊來源。
+
+
+## W1 工作區介面增量
+
+依 [W1 contract](../W1-INTEGRATION-CONTRACT.md)，頂部「工作區」只在目前 user 的 centers 間切換；「Demo · 體驗其他角色」獨立選擇示範身分。側欄僅呈現 active workspace，按服務／交付／自助資源、值勤／審批／資源、平台總覽／身分／入口／整合分組。既有 Admin 自訂 navigation metadata 優先；舊 seed 的預設 group 由 registry 作呈現映射，不改存檔。
+
+RD 首頁以服務環境健康、待處理工作與近期發布為主；Ops 優先事件、失敗、可處理審批，再顯示容量與時效；Admin 顯示待發布目錄、整合及權限變更。沒有 sample 顯示 unknown；觀測超過5分鐘為 stale，CI/整合資料超過24小時為 stale。容量是配置帳本，不當成即時用量。每區塊/來源有資料時間與 canonical detail。首頁 project/environment、Ops provider/pool 保存在 URL，browser Back 與刷新保留；跨工作區清除不適用 scope 並顯示說明。
+
+W1 revision4：641–1100px 保留可辨識文字及分組導航，<=640px 使用原有可操作選單。切工作區前以canonical API確認scope；清除不合法／不匹配條件時說明，保留獨立合法部分。確認失敗保留原URL與工作區，讓使用者重新選擇重試。
+
+
+## W2 integration delta
+
+W2 adds service resources at /rd/apps/:appId/resources, typed resource-request wizards, canonical change detail, Ops cache/messaging/cluster pages and WorkItem projections at existing request-list routes. Compute Request and Release detail/commands are preserved. Scope/filter/deep refresh and explicit denial apply to each route. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 契約定義 PipelineDefinition family/revision、typed ServiceConfig、兩個同環境健康 Release 的 TrafficPolicy 及共同 ServiceExecution；源版本、凍結內容、批准與執行證據都留在同一 snapshot3。既有 PipelineRun 僅在由 definition 啟動時增加不可變的執行必要快照；legacy run 不補造來源。config/traffic 不改 activeReleaseId；所有 release/config/traffic 共用衍生環境鎖。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+RD 服務詳情新增 `/rd/apps/:appId/monitoring` 與 `/alerts`，以合法 `environmentId` 篩選同一服務；Ops 新增 `/ops/alerting`。設定與運行狀態分開，分別顯示生效修訂、樣本資料時間、incident、Silence 剩餘時間及模擬投遞結果。規則啟用不表示已有健康樣本；到期的 Silence 不刪舊抑制紀錄。原 `/rd/observability` 和 `/ops/incidents` 因果鏈保持可用。完整行為見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)；目前僅固定規格，不宣稱實作通過。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 adds Admin governance tasks for Demo Users/Teams, feature cohort, registered adapter routes and notification metadata. The RD alerts flow gains scoped subscriptions; Ops alerting gains recipient-safe attempts and retry. Every state distinguishes draft, active, disabled, unknown, failed and Mock-only success. A stored User does not become a login persona; team membership does not imply a grant. All new pages retain keyboard, focus, light/dark and 1440/768/390 behavior.

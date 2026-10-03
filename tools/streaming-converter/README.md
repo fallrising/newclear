@@ -1,5 +1,8 @@
 # Video Processing System
 
+> **Portfolio doc tier: D (retired / historical)** — Keep for history only. Do not extend features or write new tutorials. Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 A complete solution for converting videos to HLS format with adaptive bitrate streaming and web playback support.
 
 ## Table of Contents

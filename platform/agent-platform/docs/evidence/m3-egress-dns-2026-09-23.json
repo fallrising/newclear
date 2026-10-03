@@ -1,0 +1,7 @@
+{
+  "upstream_revision": "de42fd50be5cdbfaaa6ddf890081566edb503d3c",
+  "source_sha256": "4df2c7107a65b076af8d79568f8735298c12affcbcc3d4476a85b01878b1cae2",
+  "tests": 2,
+  "passed": true,
+  "scope": "exact upstream dialer functions, real UDP DNS; no KVM claim"
+}

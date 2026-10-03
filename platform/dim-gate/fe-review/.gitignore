@@ -1,0 +1,5 @@
+# 截圖、登入狀態與暫存資料不提交；REPORT.md 與 capture.json 需提交。
+runs/*/screenshots/
+runs/*/tui/
+runs/*/*.storage.json
+runs/.state/

@@ -1,5 +1,8 @@
 # clarkQ
 
+> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+
+
 [![version](https://img.shields.io/badge/version-1.5.1-blue)](CHANGELOG.md)
 
 Lightweight **HTTP message queue** written in Go. Current release **v1.5.1** — see [CHANGELOG.md](CHANGELOG.md) and [ROADMAP.md](ROADMAP.md).

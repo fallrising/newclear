@@ -1,0 +1,38 @@
+.observation-page { min-width: 0; }
+.observation-scope, .observation-links { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 14px 0; }
+.observation-page a, .observation-scope a, .observation-links a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.observation-note { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 9px 0; }
+.observation-page code, .observation-audit code, .observation-dialog code { overflow-wrap: anywhere; }
+.observation-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; align-items: end; }
+.observation-filters label, .observation-dialog label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; }
+.observation-filters input, .observation-filters select, .observation-dialog textarea { width: 100%; min-width: 0; min-height: 40px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+.observation-empty { padding: 25px 0; color: var(--muted); line-height: 1.75; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 16px 0; }
+.metric-grid .panel + .panel { margin-top: 0; }
+.metric-panel { min-width: 0; }
+.metric-chart { width: 100%; height: auto; margin: 12px 0; overflow: visible; }
+.metric-chart text { fill: var(--muted); font: 14px ui-monospace, monospace; }
+.metric-axis { fill: none; stroke: var(--border); stroke-width: 1.5; }
+.metric-line { stroke: var(--primary); stroke-width: 2; }
+.metric-point { fill: var(--primary); }
+.metric-table summary { cursor: pointer; color: var(--primary); font-size: 12px; padding: 8px 0; }
+.metric-table .table-scroll table { min-width: 310px; font-size: 11px; }
+.observation-page .table-scroll { margin-top: 15px; }
+.trace-waterfall { min-width: 720px; }
+.trace-waterfall td:last-child { width: 42%; }
+.span-track { height: 18px; min-width: 210px; background: var(--muted-surface); position: relative; border-radius: 3px; }
+.span-bar { position: absolute; height: 12px; top: 3px; min-width: 2px; border-radius: 2px; background: var(--primary); }
+.span-error { background: var(--destructive); }
+.observation-log-message { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 500px; }
+.observation-log-target { outline: 2px solid var(--primary); outline-offset: -2px; }
+.observation-evidence, .observation-audit { list-style: none; padding: 0; margin: 15px 0 0; }
+.observation-evidence > li, .observation-audit > li { padding: 14px 0; border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+.observation-audit time { display: block; color: var(--muted); font-size: 11px; margin-bottom: 5px; }
+.observation-audit p { margin-top: 5px; }
+.observation-dialog form { display: grid; gap: 12px; }
+.observation-dialog textarea { resize: vertical; }
+.observation-page .detail-list { margin: 16px 0; }
+.integration-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); gap: 16px; }
+.integration-grid > .panel + .panel { margin-top: 0; }
+@media (max-width: 1100px) { .metric-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .observation-filters { grid-template-columns: 1fr; } .observation-links { align-items: flex-start; flex-direction: column; } }

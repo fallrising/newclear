@@ -1,0 +1,17 @@
+# Private operational files; examples remain public.
+/private/
+/.state/
+/artifacts/
+/vendor/
+/backups/
+/inventory.yml
+/inventory.*.local.yml
+*.key
+*.pem
+*.db
+.env
+.env.*
+
+# Python controller tools.
+__pycache__/
+*.py[cod]

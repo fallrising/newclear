@@ -1,5 +1,6 @@
 package com.fallrising.cms.content.web;
 
+import com.fallrising.cms.api.error.ErrorCode;
 import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
@@ -72,10 +73,10 @@ public class AdminContentController {
     public Map<String, Object> createType(@RequestBody TypeBody body, HttpServletRequest request) {
         manageTypes(request);
         if (body.key() == null || !body.key().matches("^[a-z][a-z0-9_]{1,62}$")) {
-            throw ContentException.validation("FIELD_VALIDATION", "Invalid type key");
+            throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Invalid type key");
         }
         if (store.findTypeByKey(body.key()).isPresent()) {
-            throw ContentException.validation("FIELD_VALIDATION", "Type already exists");
+            throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Type already exists");
         }
         Instant now = Instant.now();
         ContentTypeRecord type = new ContentTypeRecord(

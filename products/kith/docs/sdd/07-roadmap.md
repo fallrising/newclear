@@ -2,7 +2,7 @@
 
 [回主 SDD](../../SDD.md)
 
-Milestone 狀態：M0–M6 核心與可選 M7（GC／metrics／AES-GCM keyring）在 local working tree（尚未 merge）。不得把平台 at-rest 寫成 E2EE。未宣稱 live smoke。
+Milestone 狀態：M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 在 #26 `b76283b`，網址 `https://kith.fallrising.workers.dev`。人跟人聊天 P0 見 [09](09-human-chat-ui.md)。不得把平台 at-rest 寫成 E2EE。未宣稱 live xAI 或 live Codex smoke。
 
 ## 1. Dependency map
 
@@ -124,7 +124,7 @@ After M6 only: M7 observability / GC / optional keyring
 
 **輸入：** M6 或至少 M4。metrics、`trace` GC（seq 洞合法）、可選 AES-GCM keyring、README 狀態句。不阻擋 M0–M6 核心完成定義。不得把平台 at-rest 寫成 E2EE。
 
-**狀態（working tree）：** 可選 AES-GCM keyring 已落地、預設 off、**不是**端對端（not E2EE）。metrics／GC 另切片。不宣稱 live smoke。
+**狀態：** 可選 AES-GCM keyring 已落地、預設 off、**不是**端對端（not E2EE）。trace GC 與 `GET /api/metrics` 已在 M7 測試（M7-GC-01/02、M7-MET-01）。不宣稱 live xAI 或 live Codex smoke。
 
 ---
 
@@ -136,7 +136,7 @@ Telegram、跨 instance 橋、fanzloud API 整合、pokercase 原始碼改動、
 
 ## 11. Planned command contract
 
-下列命令是未來應建立的介面，**目前檔案／targets 尚不存在**：
+下列命令已經存在。工作目錄是 `products/kith`，Node 是 24.18.0。
 
 | Milestone 起 | 命令 | 必須執行的工作 |
 | --- | --- | --- |
@@ -153,6 +153,6 @@ CI 使用根 workflow，不在 component 內建立以為會自動執行的 neste
 
 ---
 
-## 12. Copyable first implementation task
+## 12. 不要重做 M0
 
-> 在 `fallrising/newclear` 的 `products/kith` 實作 M0。先讀 `AGENTS.md`、`SDD.md` 及 `docs/sdd/` 的全部章節，檢查當前 branch/ancestor 規則。只固定 Node 24.18.0、JSON Schema、attention 純函式與 golden vectors、D1 recovery 函式、INV-02 SQL fixture、非空的基本 gates；不要提前實作 Durable Objects、真 LLM、frontend、sidecar 或 UI。維持本文所有不變量，新增需要的 ADR。若加 CI：根 `.github/workflows/kith.yml` + 更新 `docs/specs/monorepo-ci.md`，`contents: read`，無 secrets。PR 說明列出執行命令、exit codes、實際驗證項目、未做事項，以及 M1 的明確交接；不修改 pokercase/fanzloud/bee-swarm，不部署、不合併其他 PR。
+M0–M7 已在 `main`。人跟人聊天的畫面契約是 [09](09-human-chat-ui.md)，不是再寫一套 schema。新工作先讀 `AGENTS.md`、`SDD.md` 和本章狀態句。不要改 pokercase、fanzloud、bee-swarm。沒有使用者明確授權就不要 commit、push、merge 或 deploy。

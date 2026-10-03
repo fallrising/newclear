@@ -1,0 +1,26 @@
+{
+  "fm": "FM-LLM-07",
+  "format": "openai_chat",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "@CHUNKS",
+    "chunks_b64": [
+      "ZGF0YTogeyJpZCI6ICJjIiwgIm9iamVjdCI6ICJjaGF0LmNvbXBsZXRpb24uY2h1bmsiLCAiY2hvaWNlcyI6IFt7ImluZGV4IjogMCwgImRlbHRhIjogeyJjb250ZW50IjogIkjD",
+      "qSJ9LCAiZmluaXNoX3JlYXNvbiI6IG51bGx9XX0N",
+      "Cg0KZGF0YTogeyJpZCI6ICJjIiwgIm9iamVjdCI6ICJjaGF0LmNvbXBsZXRpb24uY2h1bmsiLCAiY2hvaWNlcyI6IFt7ImluZGV4IjogMCwgImRlbHRhIjogeyJjb250ZW50IjogImxsbyJ9LCAiZmluaXNoX3JlYXNvbiI6IG51bGx9XX0NCg0KZGF0YTogeyJpZCI6ICJjIiwgIm9iamVjdCI6ICJjaGF0LmNvbXBsZXRpb24uY2h1bmsiLCAiY2hvaWNlcyI6IFt7ImluZGV4IjogMCwgImRlbHRhIjoge30sICJmaW5pc2hfcmVhc29uIjogInN0b3AifV19DQoNCmRhdGE6IFtET05FXQ0KDQo="
+    ]
+  },
+  "expect": {
+    "text": "Héllo",
+    "finish": "stop",
+    "deltas": [
+      "Hé",
+      "llo"
+    ]
+  }
+}

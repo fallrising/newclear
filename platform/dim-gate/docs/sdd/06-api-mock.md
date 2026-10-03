@@ -2,11 +2,11 @@
 
 ## 1. 契約範圍
 
-這是 dim-gate 前端預期的 BFF contract，**不是宣稱 AWS、Aliyun、Prism 或 CI 工具原生已有相同 API**。v0.1 由 MSW 實現；future backend 需自己完成 adapter 與 server-side authentication。M0–M2 將目前里程碑契約實體化為 Zod DTO 與 OpenAPI 文件，避免手寫頁面與 mock 各自漂移。
+這是 dim-gate 前端預期的 BFF contract，**不是宣稱 AWS、Aliyun、Prism 或 CI 工具原生已有相同 API**。v0.1 由 MSW 實現；future backend 需自己完成 adapter 與 server-side authentication。M0–M4 將目前里程碑契約實體化為 Zod DTO 與 OpenAPI 文件，避免手寫頁面與 mock 各自漂移。
 
 Base path `/api/v1` 相對於 application base；預設部署 `/dim-gate/` 時實際 URL 為 `/dim-gate/api/v1`，demo controls 同理為 `/dim-gate/__demo/v1`。JSON UTF-8；id opaque；時間 ISO-8601 UTC；bytes／CPU／memory 的單位按欄位名稱。未知 enum 是 schema error，不 fallback 到成功。禁止任意 filter DSL 或可執行 template。
 
-Wire source 為 `src/domain/schemas.ts`、`src/api/control-dto.ts` 與 `src/api/contracts.ts`；[OpenAPI 3.1](../openapi.json) 由 Zod 產生，native check 比對完整結果與 `$ref`。72 個 operations 中，52 個 M0–M2 operations 已實作；其餘 M3／M4 operations 以 `x-implementation-status: planned` 標示未提供。JSON Schema 不能完整表達的跨 entity/provider/scope/state 規則仍須由 domain 驗證。新增 detail DTO 採具名包裝：`{application,environments}`、`{environment,placements,activeRelease}`、`{request,jobs}`、`{job,logs}`、`{run,logs}`；不可將 forward schema 的存在視為業務流程完成。後續里程碑擴充 typed pending items、完整 guide steps 等內容時須同步 schema、OpenAPI 與驗收。
+Wire source 為 `src/domain/schemas.ts`、`src/api/control-dto.ts` 與 `src/api/contracts.ts`；[OpenAPI 3.1](../openapi.json) 由 Zod 產生，native check 比對完整結果與 `$ref`。M4 新增 scoped notifications operation，完成既有 observation／incident／integration paths；共 73 個 operations，執行與驗收狀態仍以 PLAN 及精確 commit 證據為準。JSON Schema 不能完整表達的跨 entity/provider/scope/state 規則仍須由 domain 驗證。Detail DTO 採具名包裝：`{application,environments}`、`{environment,placements,activeRelease}`、`{request,jobs}`、`{job,logs}`、`{run,logs}`、`{release,artifact,rollbackTargets}`；不可將 forward schema 的存在視為業務流程完成。後續里程碑擴充 typed pending items、完整 guide steps 等內容時須同步 schema、OpenAPI 與驗收。
 
 CI wire projection 另有 `CIView`：只列出 caller 可見 project IDs；只有 pool grant 的 Ops 可以看到 CI 但得到空 visibilityProjectIds。保存的 CI 仍必須至少一個有效 project，不因回傳裁切放寬 domain invariant。
 
@@ -77,7 +77,7 @@ Mutation 一律需要 `Idempotency-Key`，對 existing entity 的更新另需 bo
 | `/requests`、`/requests/{id}` | 列表 `state?, applicationId?, requesterId?` | `Page<Request>`／Request detail + job summaries |
 | `/jobs`、`/jobs/{id}` | `requestId?, state?` | `Page<ProvisionJob>`／job + bounded step logs |
 | `/pipelines`、`/pipelines/{id}` | `applicationId?, environmentId?, state?` | `Page<PipelineRun>`／run + stages + bounded logs |
-| `/releases`、`/releases/{id}` | `environmentId?, state?, kind?` | `Page<Release>`／release + artifact metadata |
+| `/releases`、`/releases/{id}` | 列表 `environmentId?, state?, kind?` | `Page<Release>`／`{release,artifact,rollbackTargets}`；targets 僅含同環境、成功、異於 active artifact 且 registry 存在的版本 |
 | `/observability/metrics` | `applicationId, environmentId, from, to, step=60s` | series `{metric,unit,points:[{t,value:null\|number}],sampleCount}` |
 | `/observability/traces`、`/observability/traces/{id}` | 列表 app/env/from/to、`status?` | `Page<TraceSummary>`／Trace + spans(parentId,start,durationMs,status) |
 | `/observability/logs` | app/env/from/to、`traceId?, releaseId?, level?` | `Page<LogEntry>`；单条 message ≤2KiB，每頁≤500 lines 的 UI cap，API pageSize 仍≤100 |
@@ -87,6 +87,7 @@ Mutation 一律需要 `Idempotency-Key`，對 existing entity 的更新另需 bo
 | `/admin/navigation` | Admin only、`center?` | 可配置 NavigationItem[] |
 | `/admin/cmdb-models` | Admin only | CI kinds + ModelField[] |
 | `/integrations` | Admin／Ops scope | 可見 Integration[] |
+| `/notifications` | 無 | `{items: Notification[]}`，最近最多 20 個可見 domain events，無隱藏總數 |
 
 時間窗口 from<to，最多24h；固定 demo clock 允許 UI 選近15m／1h／24h。沒有 sample 回空 points，不補0。百分比在資料層使用0..1 fraction，UI 顯示 percent；latency 使用ms、rate 使用requests/second。Trace／log references 必須與 caller 的 app/environment scope 相符，不能僅因知曉 traceId 就讀取。
 
@@ -181,3 +182,31 @@ Scenario 必須可重現同一結果：capacity-exhausted 在指定 pool 建立�
 events 至少包含 eventId、entity refs、type、occurredAt、correlationId。scheduler 在 commit 失敗時不前進 stepIndex；若 quota 無法保存，暫停並提示，而非不斷重试寫入。
 
 未來接真實 backend 時保留 UI/DTO/query keys，替換 transport/bootstrap adapter；移除 persona headers、scenario endpoints、MSW 與 demo store，重新驗證授權、async reconciliation、partial failures 與 API 相容性。這是獨立後續里程碑，不能只改一個 base URL 宣稱完成。
+
+
+## W1 dashboard 擴充
+
+GET `/dashboard` 沿用原 counters/pendingItems/dataAsOf，新增 `workspace`（kind=rd/ops/admin discriminated union）與 `scope`（authorized project/environment/pool options及filters）。共同區塊為 title/total/items，最多20筆 canonical sourceType/sourceId/title/state/route/dataAsOf/detail；不持久化第二份工作狀態。RD services/work/deliveries、Ops incidents/failures/approvals/capacity/staleness、Admin drafts/integrations/accessChanges。完整 DTO／權限規則見 [W1 contract](../W1-INTEGRATION-CONTRACT.md) 與生成 OpenAPI。
+
+projectId/environmentId 先授權且相互匹配；Ops 新增 provider/poolId，其他中心傳這兩項回422。合法但無權或不匹配 scope 回空投影，不暴露實體存在／名稱／隱藏筆數。未知 keys/enums 回422。保留73個operations與全部原 command；僅擴充既有 dashboard read，Mock 共用原 handler/engine。
+
+W1 revision3：RD `workOwner=all|mine` 納入 URL、完整 query key 和 strict dashboard DTO；mine 只篩工作／交付的實際 requester/creator，不改服務範圍與持久化。切到 Ops/Admin 清除此不適用條件並說明，合法 project/environment 在三工作區均保留。
+
+
+## W2 integration delta
+
+W2 appends18 operations to the existing73: scoped resource objects/bindings/inventory/service resources/work-items and change read/create/patch/submit/approve/reject/cancel/execute/retry. All use existing request identity, strict Zod validation, typed client, MSW/domain owner and receipt envelope; execute returns202. Current authorization precedes replay; detail404/action403, invalid422 and stale/conflict409. OpenAPI and runtime descriptors are generated from the same91 operation registry. See [W2 integration contract](../W2-INTEGRATION-CONTRACT.md) for exact types, operations, policy, support matrix and owners. Current validation/acceptance is recorded separately in [STATUS](../STATUS.md).
+
+
+## W3 實作前契約
+
+W3 使用 snapshot3 / dim-gate-w3-v1，同一 envelope1 / dim-gate.demo.v1。嚴格凍結 W1/V2 原始 shape，先驗證原關係後一次原子遷移；只加空 W3 business collections，不補造舊發布的 definition/config/history/grant/persona。真實 W2 accepted merge9162685 的 active Release/ProvisionJob/Kafka fixture SHA2180e098e84bdcccaa35c6573d623577985b2480b780e30a1302965078e6607b 保存命令來源。新增有 executionId 的 configure/traffic abnormal/missing 示範場景。 行為細節與 owner 以 [W3 contract revision3](../W3-INTEGRATION-CONTRACT.md) 為準；這是實作前規格，尚不是通過驗收的宣稱。
+
+## W4 實作前契約
+
+Snapshot v4 / `dim-gate-w4-v1` 保持 envelope1 與 `dim-gate.demo.v1` storage key；嚴格凍結 v3/v2/v1 reader，先驗舊關係後一次原子加空業務集合（含 CI-only infrastructureIncidents）與固定 W4 導航 metadata，不重寫舊導航、不賦權，失敗保留原 bytes。新增固定 schema 的 monitor-policies、alert-rules、slo-policies、silences、alert-evaluations、notification-deliveries 列表/detail/command，CI-only incident 沿用 Ops incident 路徑；OpenAPI、runtime manifest、typed client 與 Mock 同步，idempotency/current-policy/expectedVersion 使用原 envelope 契約。固定 Demo channel 與故障場景僅在本機模擬，絕不向外部 URL 發送。詳見 [W4 contract revision1](../W4-INTEGRATION-CONTRACT.md)。
+
+
+## W5 platform governance delta (2026-09-23)
+
+[W5 integration contract](../W5-INTEGRATION-CONTRACT.md) revision 1 fixes the implementation boundary for this section. W5 uses strict typed v5 schema, v1–v4 proof-before-additive migration, runtime manifest/OpenAPI and bounded routes in the W5 contract. User/team, feature, route and notification commands recheck current scope and replay semantics before fresh mutation; arbitrary URL, destination, script or external adapter input is forbidden. Mock route test and notification delivery have deterministic safe failure codes and no outbound network.

@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-21T17:30:57.439585+00:00",
+  "template": "localhost:15000/newclear-agent-m0@sha256:349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+  "network_lane": "none",
+  "full_m0_complete": false,
+  "guest_results": {
+    "allowed_http": {
+      "status": 200,
+      "example_body": true,
+      "secret_returned": false
+    },
+    "allowed_https": {
+      "status": 200,
+      "example_body": true,
+      "secret_returned": false
+    },
+    "unlisted_host": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "metadata": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "private_network": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "control_plane": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "unlisted_port": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "unlisted_method": {
+      "status": 403,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "allowlisted_loopback_ip_guard": {
+      "status": 502,
+      "example_body": false,
+      "secret_returned": false
+    },
+    "secret_scan": {
+      "files_scanned": 13,
+      "files_skipped": 1,
+      "file_matches": 0,
+      "environment_matches": 0
+    }
+  },
+  "egress_audit": [
+    {
+      "t": "2026-09-21T19:30:57.777167079+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "example.com",
+      "method": "GET",
+      "port": 80,
+      "decision": "allow",
+      "secret": "m0-canary"
+    },
+    {
+      "t": "2026-09-21T19:30:57.810243686+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "example.com",
+      "method": "CONNECT",
+      "port": 443,
+      "decision": "allow"
+    },
+    {
+      "t": "2026-09-21T19:30:57.84766034+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "denied.invalid",
+      "method": "GET",
+      "port": 80,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.84838086+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "169.254.169.254",
+      "method": "GET",
+      "port": 80,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.848895764+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "10.0.0.1",
+      "method": "GET",
+      "port": 80,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.849316459+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "127.0.0.1",
+      "method": "GET",
+      "port": 7777,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.849650765+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "example.com",
+      "method": "GET",
+      "port": 8000,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.85000688+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "example.com",
+      "method": "HEAD",
+      "port": 80,
+      "decision": "deny"
+    },
+    {
+      "t": "2026-09-21T19:30:57.850638072+02:00",
+      "id": "sb_73db01b5a4319cb3",
+      "op": "egress",
+      "dest": "127.0.0.1",
+      "method": "GET",
+      "port": 18999,
+      "decision": "allow"
+    }
+  ],
+  "private_endpoint_requests": 1,
+  "checks_passed": true,
+  "vm_removal": {
+    "original_vmm_process_gone": true,
+    "vm_record_gone": true,
+    "runtime_directory_gone": true,
+    "cpu_scope_gone": true
+  },
+  "cleanup_passed": true,
+  "egress_passed": true,
+  "finished_at": "2026-09-21T17:30:58.441623+00:00"
+}

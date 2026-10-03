@@ -1,0 +1,13 @@
+{
+  "fm": "FM-LLM-06",
+  "format": "anthropic_messages",
+  "call": "complete",
+  "response": {
+    "status": 529,
+    "headers": {},
+    "body": "{\"type\": \"error\", \"error\": {\"type\": \"overloaded_error\", \"message\": \"busy\"}}"
+  },
+  "expect": {
+    "error_class": "overloaded"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "fm": "FM-LLM-14",
+  "format": "openai_chat",
+  "call": "complete",
+  "response": {
+    "status": 200,
+    "headers": {},
+    "body": "{\"id\": \"x\", \"object\": \"chat.completion\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"x\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": \"5\", \"completion_tokens\": -1}}"
+  },
+  "expect": {
+    "text": "x",
+    "finish": "stop",
+    "usage": null
+  }
+}

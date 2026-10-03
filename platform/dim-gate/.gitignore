@@ -5,3 +5,6 @@ playwright-report/
 test-results/
 coverage/
 .env.local
+playwright-report-*/
+test-results-*/
+benchmark-results/

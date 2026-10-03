@@ -1,10 +1,15 @@
 # kith
 
+> **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
+
+
 單 operator、自托管的人機群聊：人類與 LLM agent 是同一房間裡的一等成員。瀏覽器、MCP client、本機 Codex sidecar、以及 Cloudflare Workers 上的 hosted conversational agent，寫入同一條 Room Durable Object 訊息匯流排。
 
 對外產品名：**Kith**。目錄與程式 id 為 `kith`。
 
-**狀態：M0–M6 核心路徑與可選 M7（GC／metrics／AES-GCM keyring）在 working tree（尚未 merge）。** **不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
+**狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
+
+**v2（W7 起為現行前端）：** 前端是 `web/`（設計見 [docs/v2](docs/v2/README.md)）；舊 `frontend/` 已刪除。hosted agent 經 provider 連線呼叫主流 LLM API 格式，外部 CLI 以 `kith-runner`（`runner/`）接入。v1 文件中未被 [docs/v2/10](docs/v2/10-decisions.md) §2 修訂的條文仍是現行契約。
 
 ## 從這裡開始
 
@@ -26,6 +31,9 @@
 | [Attention](docs/sdd/05-attention.md) | notify envelope、CAS、tokenizer、keyword、heuristic、wake budget |
 | [驗證](docs/sdd/06-verification.md) | requirement → test ID、fake LLM/Codex、canary secrets |
 | [決策與來源](docs/sdd/08-decisions-sources.md) | EdgeChat GPL、ADR-0002、MCP、xAI、Cloudflare limits |
+| [人跟人聊天 UI](docs/sdd/09-human-chat-ui.md) | 開房、以 handle 邀請、桌面並排／窄螢幕先列表、輸入列 |
+| [成員與提及](docs/sdd/10-members-and-mention.md) | 常駐成員列、`@` 本房成員、agent 限制與回覆狀態（畫面由 11 取代） |
+| [房間畫面](docs/sdd/11-room-screen.md) | 取代 09／10 的畫面契約：深色選房 rail、暖白對話、人與 agent 成員卡、桌面／窄螢幕與 UI-11 驗收 |
 
 ## Bootstrap 食譜（第一個 owner + 第一個房間）
 
@@ -53,8 +61,8 @@ node cmd/kithctl.mjs bootstrap --operator-id ... --operator-hash ... --second-ha
 ```text
 cp .dev.vars.example .dev.vars   # gitignored；L1 可留空 XAI_API_KEY
 npm run db:migrate:local         # wrangler d1 migrations apply kith --local
-npm run dev                      # Worker http://127.0.0.1:8787
-npm run dev:frontend             # Vite http://127.0.0.1:5173 代理 /api 與 /mcp
+npm run dev                      # Worker :8787（0.0.0.0，含 Tailscale）
+npm run dev:web             # Vite :5173 綁 Tailscale IPv4（tailscale ip -4）
 ```
 
 L1 驗收：`GET /api/csrf` 回 JSON。還沒有 seed 帳號，登入會失敗（屬 L2）。不要把 `.dev.vars` 或密碼雜湊提交進 git。
@@ -65,7 +73,7 @@ L1 驗收：`GET /api/csrf` 回 JSON。還沒有 seed 帳號，登入會失敗�
 npm run db:migrate:local
 npm run db:bootstrap:local    # 印出 owner/guest 密碼；寫入 gitignored .dev.accounts
 npm run dev
-npm run dev:frontend          # 另開終端；瀏覽器 http://127.0.0.1:5173
+npm run dev:web          # 另開終端；瀏覽器 http://127.0.0.1:5173
 ```
 
 預設 handle：`owner`（operator）、`guest`。兩者都已加入 `lobby`（`room-1`）。密碼只在本機 `.dev.accounts`，不進 git。可用環境變數 `KITH_OWNER_PASSWORD` / `KITH_GUEST_PASSWORD` 覆寫後再跑 bootstrap。
@@ -102,6 +110,18 @@ npm run dev:sidecar          # 另開終端；讀 .wrangler/sidecar.local.toml
 `npm run dev` 本機也開 `ff_ambient`。bootstrap 把 **grok** 設成 `attention_mode=ambient`、`debounce_ms=0`（仍可用 operator `PATCH /api/rooms/room-1/members/grok/attention` 改回 `mention`）。
 
 空房間打一句通過 heuristic 的話（例如 `are you there?`，不必 @）：alarm 後 grok 應回 fake LLM。若最近 10 則已有 agent 發言，H4 會否決，這是規格不是故障。`@grok` 仍走 mention，不經 heuristic。
+
+## 線上與還需本人授權的項目（L7）
+
+Worker 已在 <https://kith.fallrising.workers.dev>。`wrangler.toml` 的 `ff_mcp`、`ff_hosted_agent`、`ff_ambient` 為 `on`，`ff_sidecar` 為 `off`。沒有 `XAI_API_KEY` 時，線上 @grok 仍走 `FAKE_LLM_TEXT`。在 `products/kith` 跑 `npm run check:live` 看還缺什麼。
+
+1. **再部署：** 已有 Cloudflare API token 或 `npx wrangler login` 時，在 `products/kith` 先 `npm run web:build`，再 `npx wrangler deploy`。不要把 token 寫進 git。v2 首次部署（W7 切換）照 [docs/v2/milestones/W7.md](docs/v2/milestones/W7.md) §4.7 的順序。
+2. **真 Grok（可選）：** 把 `XAI_API_KEY` 放進 gitignored `.dev.vars`（有值就不再走 fake LLM），然後再部署才會進 Worker。
+3. **真 Codex（可選）：** 官方 CLI 若已安裝，kith 的 `CODEX_HOME` 必須與預設 `~/.codex` 分開。請跑：
+   `CODEX_HOME=$HOME/.local/kith-dev/codex-home codex login`
+   然後把 `.wrangler/sidecar.local.toml` 的 `executable` 改成該 CLI 絕對路徑。**不要**複製 `~/.codex/auth.json`。
+
+缺第 2 或第 3 項時，對應能力停在 fake。人類聊天不依賴這兩項。
 
 ## 明確禁止
 

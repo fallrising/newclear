@@ -2,9 +2,9 @@
 
 ## Scope and authority
 
-本文件適用於 `systems/mkfk/**`。先讀 `SDD.md`、本次 milestone 所引用章節及 `docs/sdd/06-decisions-sources.md`。目前只有規格；不要把未執行的測試、未建立的命令或預期吞吐量描述成已完成。
+本文件適用於 `systems/mkfk/**`。先讀 `SDD-enhanced-csr.md`（實作權威）、`SDD.md`、本次 milestone 所引用章節及 `docs/sdd/06-decisions-sources.md`。目前已有 M0–M5 實作；完成範圍以 README、ADR 與測試證據為準，不要把規格中的未執行測試、未建立命令或預期吞吐量描述成已完成。
 
-`SDD.md` 的安全不變量優先於章節細節；章節優先於 milestone 範例。發現互相矛盾時，先提出修訂及測試反例，不能挑較容易的版本實作。
+安全不變量以 `SDD-enhanced-csr.md` / `SDD.md` 為準（取更嚴格者）；章節優先於 milestone 範例。發現互相矛盾時，先提出修訂及測試反例，不能挑較容易的版本實作。
 
 ## Change boundary
 

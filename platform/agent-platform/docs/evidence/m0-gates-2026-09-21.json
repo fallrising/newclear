@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-21T17:36:58.265897+00:00",
+  "scope": "Linux amd64, single node, large (4 vCPU/4 GiB), no guest NIC, vsock HTTP egress, delegated user cgroup v2",
+  "full_m0_complete": true,
+  "pending_kvm_gates": [],
+  "gate_results": {
+    "cocoon_guest_boot_and_template_digest": {
+      "status": "passed",
+      "evidence": [
+        "kvm-sandbox-2026-09-21.json",
+        "kvm-lifecycle-2026-09-21.json",
+        "guest-oci-manifest-2026-09-21.json"
+      ]
+    },
+    "sandbox_rest_and_websocket_relay": {
+      "status": "passed",
+      "evidence": [
+        "kvm-sandbox-2026-09-21.json"
+      ]
+    },
+    "cross_workspace_and_egress_isolation": {
+      "status": "passed",
+      "evidence": [
+        "kvm-lifecycle-2026-09-21.json",
+        "kvm-egress-2026-09-21.json",
+        "kvm-default-deny-2026-09-21.json"
+      ]
+    },
+    "sandbox_ttl_and_allocation_reconciliation": {
+      "status": "passed",
+      "evidence": [
+        "kvm-lifecycle-2026-09-21.json",
+        "kvm-lost-reply-2026-09-21.json"
+      ]
+    },
+    "microvm_stop_and_confirmed_resource_release": {
+      "status": "passed",
+      "evidence": [
+        "kvm-lifecycle-2026-09-21.json",
+        "kvm-egress-2026-09-21.json",
+        "kvm-cleanup-2026-09-21.json"
+      ]
+    }
+  },
+  "evidence_sha256": {
+    "guest-oci-manifest-2026-09-21.json": "349579c9197fff1b95f24cc8734de25948e32ee804c2db6d1347dc0b1eaf9b6e",
+    "kvm-cleanup-2026-09-21.json": "969d8d0df6ac2deee8c8b005939a54945a158da159b8a176a00f60ac7b07bacc",
+    "kvm-default-deny-2026-09-21.json": "0c93ce54734da9d1e629defca42b3027db0b919e78fc3a27cdb2014ea89742ac",
+    "kvm-egress-2026-09-21.json": "6326d961d4c5f4f83bd22fbd968f29c78534401ceda7c6f1e84cfe3e92c08d25",
+    "kvm-lifecycle-2026-09-21.json": "eb468f66b27d9ee62e10a9d61f181f3dc4d3d86c22a3b4f26c26aa4700602305",
+    "kvm-lost-reply-2026-09-21.json": "a70dd461d79fbb270a091d161d1e3320d709450976a25719e490a1f67d8a45c1",
+    "kvm-sandbox-2026-09-21.json": "62228291744f26817d2d4ddb532081d20c479156cd7fdcdac0ecb50b87dfc19a"
+  },
+  "local_checks": {
+    "unit_tests_passed": 45,
+    "ruff_lint": "passed",
+    "ruff_format": "passed"
+  },
+  "limitations": [
+    "No bridge/CNI guest networking acceptance; no-NIC proxy only.",
+    "No arbitrary in-flight tool or MicroVM checkpoint resume guarantee.",
+    "Lost allocation response is injected at the SDK boundary after a real allocation, not a host network partition.",
+    "Canary scan covers guest environment and regular files up to 5 MiB under /home/agentprobe, /tmp, /var/log; skipped files are reported.",
+    "No real model provider, production deployment, M1 API/UI or later milestone acceptance."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "fm": "FM-LLM-09",
+  "format": "openai_responses",
+  "call": "complete",
+  "stream": true,
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/event-stream"
+    },
+    "body": "event: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 0, \"delta\": \"a\"}\n\nevent: error\ndata: {\"type\": \"error\", \"sequence_number\": 0, \"code\": \"rate_limit_exceeded\", \"message\": \"x\", \"param\": null}\n\n"
+  },
+  "expect": {
+    "error_class": "rate_limited",
+    "deltas": [
+      "a"
+    ]
+  }
+}

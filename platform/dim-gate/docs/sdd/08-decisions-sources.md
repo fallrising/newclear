@@ -52,3 +52,9 @@
 - chart與graph的初始bundle分割、繁體中文排版及鍵盤替代視圖。
 
 這些是implementation evidence tasks，不需要重新詢問已確認的產品名稱、範圍或Mock-first方向。
+
+### M4 implementation clarification
+
+ADR-020: Observation charts use bounded native SVG and CSS time bars with an equivalent numeric table, retaining semantic tokens, unit/window/source labels and keyboard-readable links. No new chart runtime is required for the three fixed demo metrics. This refines the initial Recharts choice in 05 without reducing APM behavior or M5 measurement gates.
+
+ADR-021: One logical tick remains one second. Recovery observations use three consecutive one-minute windows, scheduled every60 ticks after successful rollback. Explicit latency/recovery scenarios advance180 ticks through the central scheduler and label the synthetic sample windows; this corrects the earlier ambiguous “one recovery sample per tick” wording in03.

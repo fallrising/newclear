@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -196,25 +195,7 @@ public class AdminContentController {
     }
 
     private Map<String, Object> typeJson(ContentTypeRecord type) {
-        Map<String, Object> json = new LinkedHashMap<>();
-        json.put("key", type.typeKey());
-        json.put("displayName", type.displayName());
-        json.put("pluralDisplayName", type.pluralDisplayName());
-        json.put("titleField", type.titleField());
-        json.put("slugPolicy", type.slugPolicy());
-        json.put("enabled", type.enabled());
-        List<Map<String, Object>> fields = new ArrayList<>();
-        for (FieldRecord field : store.fieldsOf(type.id())) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("key", field.fieldKey());
-            item.put("type", field.fieldType());
-            item.put("required", field.required());
-            item.put("indexed", field.indexed());
-            item.put("refTarget", field.refTargetTypeKey());
-            fields.add(item);
-        }
-        json.put("fields", fields);
-        return json;
+        return ContentProjection.typeSchema(type, store.fieldsOf(type.id()), true);
     }
 
     private static Map<String, Object> navJson(com.fallrising.cms.content.domain.NavigationRecord menu) {

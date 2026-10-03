@@ -1,11 +1,17 @@
 import type { Me } from "@cms/api";
-import { me as seedUsers } from "./fixtures.gen";
+import { capabilities, me as seedUsers } from "./fixtures.gen";
+import { db } from "./db";
 import { apiError } from "./respond";
 import { getState, MOCK_CSRF_TOKEN } from "./state";
 
 export function currentUser(): Me | null {
   const name = getState().user;
-  return name ? (seedUsers[name] ?? null) : null;
+  const user = name ? seedUsers[name] : null;
+  if (!name || !user) return null;
+  const capability = capabilities[name][getState().surface];
+  return { ...user, capabilities: { ...capability,
+    types: capability.types.filter((type) => db.adminTypes.some((item) => item.key === type.key && item.enabled)),
+  } };
 }
 
 export function isAdmin(user: Me) {

@@ -52,6 +52,75 @@ describe("@cms/mocks auth", () => {
   });
 });
 
+describe("BW1a mock contract integration", () => {
+  it("projects and searches a non-title titleField after work edits", async () => {
+    setUser("seed-operator-clinic");
+    const clinic = db.workEntries.find((entry) => entry.contentType === "clinic_profile")!;
+    await expect(client().work.entries("clinic_profile", { q: "Cedar" })).resolves.toMatchObject({ total: 1 });
+    await expect(client().work.patch(clinic.id, { payload: { name: "New Clinic" }, version: clinic.version }))
+      .resolves.toMatchObject({ title: "New Clinic" });
+    await expect(client().work.entries("clinic_profile", { q: "new clinic" })).resolves.toMatchObject({ total: 1 });
+  });
+
+  it("uses configured public visibility and publication ordering", async () => {
+    const clinic = db.publicEntries.find((entry) => entry.contentType === "clinic_profile")!;
+    clinic.payload.visibility = "unlisted"; // Not its configured visibility field: still public.
+    const newer = { ...structuredClone(clinic), id: "new-clinic", slug: "new-clinic", publishedAt: "2030-01-01T00:00:00Z" };
+    db.publicEntries.push(newer);
+    const page = await client().public.entries("clinic_profile");
+    expect(page.items.map((entry) => entry.id)).toEqual([newer.id, clinic.id]);
+    const album = db.publicEntries.find((entry) => entry.slug === "coast-light-2026")!;
+    album.payload.visibility = "private";
+    await expect(client().public.entries("album")).resolves.toMatchObject({ total: 0 });
+    await expect(client().public.bySlug("album", album.slug!)).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("returns surface-specific capabilities without mutating another surface", async () => {
+    setUser("seed-operator-album");
+    setSurface("front");
+    const front = await client().auth.me();
+    expect(front).toMatchObject({ capabilities: { surface: "front", global: [], types: expect.arrayContaining([
+      { key: "album", actions: ["read_published"], scoped: false },
+    ]) } });
+    setSurface("back");
+    expect(await client().auth.me()).toMatchObject({ capabilities: { surface: "back", types: expect.arrayContaining([
+      { key: "album", actions: expect.arrayContaining(["create", "publish"]), scoped: false },
+    ]) } });
+    expect(front).toMatchObject({ capabilities: { surface: "front", global: [] } });
+  });
+
+  it("login includes capabilities and member grants remain scoped", async () => {
+    setSurface("front");
+    const result = await client().auth.login("seed-member-clinic", "anything");
+    expect(result).toMatchObject({ csrfToken: expect.any(String), capabilities: { surface: "front", types: expect.arrayContaining([
+      { key: "pet", actions: ["read_published"], scoped: true },
+    ]) } });
+  });
+
+  it("excludes disabled types from the next capability response", async () => {
+    setUser("seed-admin");
+    setSurface("admin");
+    await client().admin.disableType("visit");
+    const body = await (await raw("/api/v1/auth/me")).json();
+    expect(body.capabilities).toBeDefined();
+    expect(body.capabilities.types.map((type: { key: string }) => type.key)).not.toContain("visit");
+    await client().admin.enableType("visit");
+    expect(await client().auth.me()).toMatchObject({ capabilities: { types: expect.arrayContaining([
+      expect.objectContaining({ key: "visit" }),
+    ]) } });
+  });
+
+  it("serves BW1a labels, enum labels and type settings", async () => {
+    setUser("seed-operator-album");
+    expect(await client().work.type("album")).toMatchObject({ visibilityField: "visibility", singleton: false, previewable: true,
+      fields: expect.arrayContaining([
+        expect.objectContaining({ key: "title", label: "標題", group: "main", order: 0 }),
+        expect.objectContaining({ key: "visibility", enumLabels: { public: "公開", unlisted: "不公開列出" } }),
+      ]),
+    });
+  });
+});
+
 describe("@cms/mocks public reads", () => {
   it("E-03 AC-03 lists published, listed albums only", async () => {
     const page = await client().public.entries("album");

@@ -98,7 +98,7 @@ public class AuthService {
     }
 
     public MeResult toMe(Principal principal) {
-        List<PrincipalRoleAssignment> roles = store.rolesOf(principal.id());
+        List<PrincipalRoleAssignment> roles = authorizationService.rolesOf(principal.id());
         boolean admin = roles.stream().anyMatch(r -> RoleCode.ADMIN.wire().equals(r.roleCode()));
         boolean staff = admin || roles.stream().anyMatch(r -> RoleCode.EDITOR.wire().equals(r.roleCode()) || RoleCode.OPERATOR.wire().equals(r.roleCode()));
         return new MeResult(principal, roles, Map.of("front", true, "back", staff, "admin", admin));

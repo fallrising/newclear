@@ -22,9 +22,15 @@ public interface ContentStore {
 
     void updateType(ContentTypeRecord type);
 
+    /** Writes only sortField, visibilityField, ownerField and updatedAt of the type with type.id(). */
+    void updateTypeSettings(ContentTypeRecord type);
+
     List<FieldRecord> fieldsOf(UUID typeId);
 
     void insertField(FieldRecord field);
+
+    /** Writes only label, groupKey, listable, filterable, enumLabels, placeholder and helpText of the field with field.id(). */
+    void updateFieldMetadata(FieldRecord field);
 
     default void markMediaRefsPublic() {}
 
@@ -32,7 +38,9 @@ public interface ContentStore {
 
     Optional<EntryRecord> findBySlug(UUID typeId, String slug);
 
-    List<EntryRecord> listEntries(UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget);
+    /** q matches payload[titleField] case-insensitively as a literal substring; blank q means no filter. */
+    List<EntryRecord> listEntries(
+            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget);
 
     long countEntries(UUID typeId, boolean includeDeleted);
 

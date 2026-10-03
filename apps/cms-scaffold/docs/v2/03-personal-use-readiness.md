@@ -9,7 +9,7 @@
 | CRUD／發布 | 共用 entry、revision、權限、media | 檔案補償；P0 已在本地補齊交易／原子版本／發布媒體隔離 |
 | 測試 | BW0 記憶體／PostgreSQL store 契約、OpenAPI 回應驗證、CI | P0 已新增服務層故障回滾／競爭測試並重新執行；正式部署驗收仍待完成 |
 | 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器 |
-| 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata、動態導覽、後續模型治理 |
+| 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata 已本地驗證；動態導覽、後續模型治理仍待實作 |
 | 操作維護 | 本機 Compose、DB/media volume、prod cookie 設定 | 正式初始化、HTTPS、備份還原演練、升級回滾 |
 
 過去對封存版本的「沒有 CI／只有 Identity 的整合測試」觀察不能套用到此基準。規格中的 DOC_READY 只是設計可施工；VERIFIED、測試通過與真實生產可用是三個不同主張。
@@ -46,6 +46,12 @@ Codex 負責範圍、資料一致性與最終驗收。較輕量模型負責短�
 
 ## 本輪交付證據
 
-P0 已本地整合驗證，未提交／合併：[完整紀錄](../../.team/reports/DELIVERY.md)。後端 114＋60、前端 133、mock E2E 17 全通過；lint、typecheck、build、bundle 及桌面／手機表單 smoke 通過。此數字不包含未執行的真 API 瀏覽器旅程或備份还原演練。
+P0 已於 PR #212 合併，CI 全通過：[完整紀錄](../../.team/reports/DELIVERY.md)。後端 114＋60、前端 133、mock E2E 17 全通過；lint、typecheck、build、bundle 及桌面／手機表單 smoke 通過。此數字不包含未執行的真 API 瀏覽器旅程或備份还原演練。
 
 既有發布內容若早已缺失媒體 attachment 索引，本波不全量修復；後續內容異動才重建工作／發布聯集，升級前須另行盤點。依賴稽核另有既存開發用間接依賴 brace-expansion 的 high advisory，未在本波更換依賴。
+
+## BW1a 升級注意
+
+類型設定是 kernel 的資料來源；BW1a 不提供管理端編輯 metadata 的 UI／API，完整模型治理仍在後续波次。種子會補齊內建 demo 類型設定。既有自訂類型若曾依賴 payload 的固定 `visibility` 鍵，升級前須盤點 `visibilityField`：未設定的類型將忽略該同名 payload 鍵；不能把有 `visibility: private` 當作足夠的公開存取限制。此行為變更與 BW1a 原契約一致，正式使用前要連同既有媒體索引一併驗證。
+
+BW1a 本地驗收：151＋65 後端測試、140 前端測試、17 mock E2E 全通過；完整紀錄見 [BW1a 交付](../../.team/reports/BW1a-DELIVERY.md)。此波尚未提交／合併，個人生產可用門檻不因本地測試通過而自動完成。

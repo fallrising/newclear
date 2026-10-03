@@ -58,7 +58,17 @@ public class InMemoryContentStore implements ContentStore {
                 current.previewable(),
                 current.publicRequiresPublishedRefs(),
                 current.createdAt(),
-                type.updatedAt()));
+                type.updatedAt(),
+                current.sortField(),
+                current.visibilityField(),
+                current.ownerField()));
+    }
+
+    @Override
+    public void updateTypeSettings(ContentTypeRecord type) {
+        types.computeIfPresent(type.typeKey(), (key, current) -> current.id().equals(type.id())
+                ? current.withSettings(type.sortField(), type.visibilityField(), type.ownerField(), type.updatedAt())
+                : current);
     }
 
     @Override
@@ -74,26 +84,24 @@ public class InMemoryContentStore implements ContentStore {
     }
 
     @Override
+    public void updateFieldMetadata(FieldRecord field) {
+        List<FieldRecord> list = fields.get(field.contentTypeId());
+        if (list == null) {
+            return;
+        }
+        list.replaceAll(current -> current.id().equals(field.id())
+                ? current.withMetadata(field.label(), field.groupKey(), field.listable(), field.filterable(),
+                        field.enumLabels(), field.placeholder(), field.helpText())
+                : current);
+    }
+
+    @Override
     public void markMediaRefsPublic() {
         fields.replaceAll((typeId, list) -> {
             List<FieldRecord> next = new CopyOnWriteArrayList<>();
             for (FieldRecord field : list) {
                 if ("media-ref".equals(field.fieldType()) && !field.publicBytes()) {
-                    next.add(new FieldRecord(
-                            field.id(),
-                            field.contentTypeId(),
-                            field.fieldKey(),
-                            field.fieldType(),
-                            field.required(),
-                            field.uniqueInType(),
-                            field.indexed(),
-                            field.visibility(),
-                            field.sortOrder(),
-                            field.refTargetTypeKey(),
-                            field.onDelete(),
-                            field.enumValues(),
-                            field.enabled(),
-                            true));
+                    next.add(field.withPublicBytes(true));
                 } else {
                     next.add(field);
                 }
@@ -119,12 +127,12 @@ public class InMemoryContentStore implements ContentStore {
 
     @Override
     public List<EntryRecord> listEntries(
-            UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget) {
+            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget) {
         return entries.values().stream()
                 .filter(e -> e.contentTypeId().equals(typeId))
                 .filter(e -> includeDeleted || !e.deleted())
                 .filter(e -> states == null || states.isEmpty() || states.contains(e.publicationState().wire()))
-                .filter(e -> matchesQ(e, q))
+                .filter(e -> matchesQ(e, titleField, q))
                 .filter(e -> matchesRef(e.id(), refField, refTarget))
                 .sorted(Comparator.comparing(EntryRecord::updatedAt).reversed())
                 .toList();
@@ -209,11 +217,11 @@ public class InMemoryContentStore implements ContentStore {
         menus.put(menu.menuKey(), menu);
     }
 
-    private boolean matchesQ(EntryRecord entry, String q) {
+    private boolean matchesQ(EntryRecord entry, String titleField, String q) {
         if (q == null || q.isBlank()) {
             return true;
         }
-        Object title = entry.payload() == null ? null : entry.payload().get("title");
+        Object title = entry.payload() == null || titleField == null ? null : entry.payload().get(titleField);
         return title != null && title.toString().toLowerCase(Locale.ROOT).contains(q.toLowerCase(Locale.ROOT));
     }
 

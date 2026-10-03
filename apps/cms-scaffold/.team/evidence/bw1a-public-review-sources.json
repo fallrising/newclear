@@ -1,0 +1,30 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/fallrising/newclear/82cd9d8159b31cdd852f333a219132dc614e5d66/apps/cms-scaffold/docs/v2/waves/BW1a.md",
+    "http_status": 200,
+    "sha256": "0d0de1d2c0ddd22cc6c5807f984b40f1a521a67b2a90d416190963d2f05078f6",
+    "bytes": 138746,
+    "authenticated": false
+  },
+  {
+    "url": "https://raw.githubusercontent.com/fallrising/newclear/8c7aa9467ee4b5a280489874c39bc6fff582bcd3/apps/cms-scaffold/docs/v2/waves/P0.md",
+    "http_status": 200,
+    "sha256": "6602f668a78425563869279ad18ea1a53b6ef96a517ded133223e94241e01981",
+    "bytes": 6739,
+    "authenticated": false
+  },
+  {
+    "url": "https://raw.githubusercontent.com/fallrising/newclear/82cd9d8159b31cdd852f333a219132dc614e5d66/apps/cms-scaffold/packages/mocks/src/handlers/auth.ts",
+    "http_status": 200,
+    "sha256": "d0257f866590c9cc76c53f188ca350eeecb96b8d0af39040fbd12fe059dee47b",
+    "bytes": 1567,
+    "authenticated": false
+  },
+  {
+    "url": "https://raw.githubusercontent.com/fallrising/newclear/82cd9d8159b31cdd852f333a219132dc614e5d66/apps/cms-scaffold/packages/mocks/src/fixtures.gen.ts",
+    "http_status": 200,
+    "sha256": "afd76376dc346b5f9914e7ce1381384a54b4556972ee5b30c7c03bada13dd667",
+    "bytes": 75753,
+    "authenticated": false
+  }
+]

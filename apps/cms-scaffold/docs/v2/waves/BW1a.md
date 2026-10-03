@@ -2,13 +2,26 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW1a](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW1a.openapi.yaml](../contracts/BW1a.openapi.yaml) ・ 前一波：[BW0](BW0.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
-日期：2026-09-25  
+狀態：**LOCAL_VERIFIED**（2026-10-03，實作與整合檢查已通過，未提交／合併）
+日期：2026-09-25
 讀者：實作 BW1a 的 agent。只讀本檔、`contracts/BW1a.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW0 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04、T06、T08 完成後，`./gradlew :services:cms-api:test` 依序是 116、120、124、139 個測試，每次唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 每次都是 49 個全綠，但用的是本機 PostgreSQL 16.13，不是 Testcontainers。各「測試先行」卡的預期紅燈清單也是實際跑出來的。
 
 ---
+
+## 0. P0／W0 整合補充（2026-10-03，施工前）
+
+本節優先於下方以 BW0 為基準的歷史程式碼與驗收數字。P0 已由 [PR #212](https://github.com/fallrising/newclear/pull/212) 合併，基準為 `10a4c8d`，四項 CI 全通過。BW1a 本輪文件先行，再實作；狀態完成時先標 LOCAL_VERIFIED，合併後才可標 VERIFIED。
+
+- **增量保留 P0。** 不可整檔覆蓋 ContentStore／EntryService／MediaService：保留交易、原子 version CAS、purge 條件、工作／發布媒體 attachment 聯集，以及公開媒體精確匹配 publishedPayload 的規則。只把公開可見性／排序／標題來源切換到類型設定；授權仍由伺服器執行。
+- **保留回歸。** 所有 P0 單元／HTTP／PostgreSQL 回滾及競爭測試必須持續通過。新 record 保留舊建構子；listEntries 新參數對既有呼叫作機械更新，不刪除舊斷言。新增測試數字依實際 XML 計算，不沿用 139／49 的舊總數。
+- **同期契約整合。** W0 已存在，本輪將 BW1a 契約同步到 generated TypeScript 型別與 mock／測試 fixtures，全部前端閘門必須通過。取代 §2.1、T09、§9「允許 codegen／fixture 紅燈延後整合」例外。只做相容性適配，不提前新增 W1 UI 行為、不把 capabilities 當作伺服器授權替代品。
+- **額外允許路徑。** `packages/api/src/generated/schema.d.ts`、`packages/api/src/schema.ts`、`packages/mocks/src/**`、`packages/mocks/fixtures/**`、`packages/mocks/scripts/gen-fixtures.mjs`、`packages/auth/src/login-page.tsx` 的登入快取映射及既有測試的 Me fixtures、`apps/web-back` 既有測試 fixtures 與 `docs/v2/contracts/fixtures/**`（僅必要的 BW1a 契約資料同步）；必要時同步其他既有前端測試的相同 required 欄位。既有 P0 integration 測試只允許新參數／類型設定適配，不削弱資料安全斷言。README／本節／驗收紀錄可更新。
+- **相容性原則。** fixtures／mock 必須輸出 required capabilities 與欄位 metadata；依 surface 與帳號表達權限，包含 Front hard-deny、停用類型排除與 scoped 提示。缺欄位不能靠 `as` 強制轉型繞過。
+- **Mock 行為對齊。** 工作投影／搜尋使用 titleField，公開可見性／排序依設定；登入快取保留 capabilities。只同步本波已定義的可觀察行為，不新增路由或 UI。
+- **B-12 整條登入路徑。** `AuthService.toMe` 也讀 rolesOf；須與 AuthorizationService 共用 request-local 角色指派快取，讓一次登入／me 投影加 capabilities 不再重讀角色。新增 `identity/service/AuthService.java` 為必要可寫路徑；測試覆蓋實際 toMe＋capabilities 同請求一次讀取、不同請求權限變更立即生效，不新增跨請求快取。
+- **驗證。** `./gradlew test integrationTest bootJar`、`npm run lint`、`npm run typecheck`、`npm test`、`npm run build`、`npm run test:bundle`、`npm run e2e:mock`；新契約與執行中 OpenAPI 必須逐 byte 相等。沒有新增執行期依賴，沒有部署。
 
 ## 1. 範圍
 
@@ -414,30 +427,30 @@ Store：
 --- a/src/main/java/com/fallrising/cms/content/store/ContentStore.java
 +++ b/src/main/java/com/fallrising/cms/content/store/ContentStore.java
 @@ -21,17 +21,25 @@
- 
+
      void updateType(ContentTypeRecord type);
- 
+
 +    /** Writes only sortField, visibilityField, ownerField and updatedAt of the type with type.id(). */
 +    void updateTypeSettings(ContentTypeRecord type);
 +
      List<FieldRecord> fieldsOf(UUID typeId);
- 
+
      void insertField(FieldRecord field);
- 
+
 +    /** Writes only label, groupKey, listable, filterable, enumLabels, placeholder and helpText of the field with field.id(). */
 +    void updateFieldMetadata(FieldRecord field);
 +
      default void markMediaRefsPublic() {}
- 
+
      Optional<EntryRecord> findEntry(UUID id);
- 
+
      Optional<EntryRecord> findBySlug(UUID typeId, String slug);
- 
+
 -    List<EntryRecord> listEntries(UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget);
 +    /** q matches payload[titleField] case-insensitively as a literal substring; blank q means no filter. */
 +    List<EntryRecord> listEntries(
 +            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget);
- 
+
      long countEntries(UUID typeId, boolean includeDeleted);
 ```
 
@@ -463,11 +476,11 @@ Store：
 +                ? current.withSettings(type.sortField(), type.visibilityField(), type.ownerField(), type.updatedAt())
 +                : current);
      }
- 
+
      @Override
 @@ -73,26 +83,24 @@
      }
- 
+
      @Override
 +    public void updateFieldMetadata(FieldRecord field) {
 +        List<FieldRecord> list = fields.get(field.contentTypeId());
@@ -506,7 +519,7 @@ Store：
                      next.add(field);
                  }
 @@ -118,12 +126,12 @@
- 
+
      @Override
      public List<EntryRecord> listEntries(
 -            UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget) {
@@ -523,7 +536,7 @@ Store：
 @@ -198,11 +206,11 @@
          menus.put(menu.menuKey(), menu);
      }
- 
+
 -    private boolean matchesQ(EntryRecord entry, String q) {
 +    private boolean matchesQ(EntryRecord entry, String titleField, String q) {
          if (q == null || q.isBlank()) {
@@ -541,11 +554,11 @@ Store：
 --- a/src/main/java/com/fallrising/cms/content/store/JdbcContentStore.java
 +++ b/src/main/java/com/fallrising/cms/content/store/JdbcContentStore.java
 @@ -28,6 +28,7 @@
- 
+
      private static final TypeReference<Map<String, Object>> MAP = new TypeReference<>() {};
      private static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
 +    private static final TypeReference<Map<String, String>> LABELS = new TypeReference<>() {};
- 
+
      private final JdbcTemplate jdbc;
      private final ObjectMapper mapper;
 @@ -53,8 +54,9 @@
@@ -570,11 +583,11 @@ Store：
 +                type.visibilityField(),
 +                type.ownerField());
      }
- 
+
      @Override
 @@ -87,6 +92,17 @@
      }
- 
+
      @Override
 +    public void updateTypeSettings(ContentTypeRecord type) {
 +        jdbc.update(
@@ -634,10 +647,10 @@ Store：
 +                field.helpText(),
 +                field.id());
      }
- 
+
      @Override
 @@ -151,7 +193,7 @@
- 
+
      @Override
      public List<EntryRecord> listEntries(
 -            UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget) {
@@ -665,7 +678,7 @@ Store：
 +                rs.getString("visibility_field"),
 +                rs.getString("owner_field"));
      }
- 
+
      private RowMapper<FieldRecord> fieldMapper() {
 @@ -394,7 +440,14 @@
                  rs.getString("on_delete"),
@@ -681,7 +694,7 @@ Store：
 +                rs.getString("placeholder"),
 +                rs.getString("help_text"));
      }
- 
+
      private RowMapper<EntryRecord> entryMapper() {
 @@ -462,6 +515,18 @@
          } catch (Exception e) {
@@ -700,7 +713,7 @@ Store：
 +            throw new IllegalStateException(e);
 +        }
      }
- 
+
      private Map<String, Object> readNullableMap(String raw) {
 ```
 
@@ -716,7 +729,7 @@ Store：
 -        return store.listEntries(type.id(), wanted, false, q, refField, refTarget);
 +        return store.listEntries(type.id(), wanted, false, type.titleField(), q, refField, refTarget);
      }
- 
+
      public EntryRecord patch(Principal principal, Surface surface, UUID id, String slug, Map<String, Object> payload, Integer version) {
 @@ -395,7 +395,7 @@
          if (!authorization.hasAction(principal, CmsAction.READ_PUBLISHED, typeKey, Surface.FRONT)) {
@@ -801,7 +814,7 @@ public final class PublicVisibility {
 +                .sorted(publicOrder(type))
                  .toList();
      }
- 
+
 @@ -417,7 +417,8 @@
                  if (target == null
                          || target.deleted()
@@ -815,7 +828,7 @@ public final class PublicVisibility {
 @@ -427,15 +428,22 @@
          return true;
      }
- 
+
 -    private static Comparator<EntryRecord> publicOrder() {
 -        return Comparator.comparingInt((EntryRecord e) -> {
 -                    Object value = e.publishedPayload() == null ? null : e.publishedPayload().get("sortOrder");
@@ -841,7 +854,7 @@ public final class PublicVisibility {
 -                .thenComparing(EntryRecord::updatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
 +                .thenComparing(newestUpdate);
      }
- 
+
      public List<RevisionRecord> revisions(Principal principal, Surface surface, UUID id) {
 ```
 
@@ -1256,9 +1269,9 @@ public class ContentTypeSeed {
 --- a/src/main/java/com/fallrising/cms/content/web/ContentProjection.java
 +++ b/src/main/java/com/fallrising/cms/content/web/ContentProjection.java
 @@ -12,14 +12,15 @@
- 
+
      private ContentProjection() {}
- 
+
 -    static Map<String, Object> work(EntryRecord entry) {
 +    /** Work copy. title is payload[type.titleField] (G-11); type is null only when the type row is missing. */
 +    static Map<String, Object> work(EntryRecord entry, ContentTypeRecord type) {
@@ -1276,7 +1289,7 @@ public class ContentTypeSeed {
 @@ -55,6 +56,55 @@
          return json;
      }
- 
+
 +    /**
 +     * Type schema for Back and Admin (02 §4.7). admin=true adds enabled, and per field indexed and enabled,
 +     * and includes internal and disabled fields; admin=false omits internal and disabled fields.
@@ -1352,7 +1365,7 @@ public class ContentTypeSeed {
 -        return ContentProjection.work(created);
 +        return workJson(created);
      }
- 
+
      @GetMapping("/entries/{id}")
      public Map<String, Object> get(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
@@ -1360,7 +1373,7 @@ public class ContentTypeSeed {
 -        return ContentProjection.work(entry);
 +        return workJson(entry);
      }
- 
+
      @PatchMapping("/entries/{id}")
 @@ -104,31 +104,31 @@
          IdentityRequest identity = rejectFront(request);
@@ -1369,35 +1382,35 @@ public class ContentTypeSeed {
 -        return ContentProjection.work(updated);
 +        return workJson(updated);
      }
- 
+
      @PostMapping("/entries/{id}/publish")
      public Map<String, Object> publish(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
 -        return ContentProjection.work(entries.publish(identity.principal(), identity.surface(), id));
 +        return workJson(entries.publish(identity.principal(), identity.surface(), id));
      }
- 
+
      @PostMapping("/entries/{id}/unpublish")
      public Map<String, Object> unpublish(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
 -        return ContentProjection.work(entries.unpublish(identity.principal(), identity.surface(), id));
 +        return workJson(entries.unpublish(identity.principal(), identity.surface(), id));
      }
- 
+
      @PostMapping("/entries/{id}/archive")
      public Map<String, Object> archive(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
 -        return ContentProjection.work(entries.archive(identity.principal(), identity.surface(), id));
 +        return workJson(entries.archive(identity.principal(), identity.surface(), id));
      }
- 
+
      @PostMapping("/entries/{id}/restore")
      public Map<String, Object> restore(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
 -        return ContentProjection.work(entries.restore(identity.principal(), identity.surface(), id));
 +        return workJson(entries.restore(identity.principal(), identity.surface(), id));
      }
- 
+
      @DeleteMapping("/entries/{id}")
 @@ -154,13 +154,13 @@
      @PostMapping("/entries/{id}/revisions/{revisionNo}/revert")
@@ -1406,18 +1419,18 @@ public class ContentTypeSeed {
 -        return ContentProjection.work(entries.revert(identity.principal(), identity.surface(), id, revisionNo));
 +        return workJson(entries.revert(identity.principal(), identity.surface(), id, revisionNo));
      }
- 
+
      @GetMapping("/preview/entries/{id}")
      public Map<String, Object> preview(@PathVariable UUID id, HttpServletRequest request) {
          IdentityRequest identity = rejectFront(request);
 -        return ContentProjection.work(entries.getWork(identity.principal(), identity.surface(), id));
 +        return workJson(entries.getWork(identity.principal(), identity.surface(), id));
      }
- 
+
      private static IdentityRequest work(HttpServletRequest request, CmsAction action, String typeKey) {
 @@ -172,25 +172,11 @@
      }
- 
+
      private Map<String, Object> typeJson(ContentTypeRecord type) {
 -        java.util.LinkedHashMap<String, Object> json = new java.util.LinkedHashMap<>();
 -        json.put("key", type.typeKey());
@@ -1444,7 +1457,7 @@ public class ContentTypeSeed {
 +    private Map<String, Object> workJson(EntryRecord entry) {
 +        return ContentProjection.work(entry, store.findTypeByKey(entry.contentTypeKey()).orElse(null));
      }
- 
+
      private static IdentityRequest rejectFront(HttpServletRequest request) {
 ```
 
@@ -1455,7 +1468,7 @@ public class ContentTypeSeed {
 +++ b/src/main/java/com/fallrising/cms/content/web/AdminContentController.java
 @@ -196,25 +196,7 @@
      }
- 
+
      private Map<String, Object> typeJson(ContentTypeRecord type) {
 -        Map<String, Object> json = new LinkedHashMap<>();
 -        json.put("key", type.typeKey());
@@ -1478,7 +1491,7 @@ public class ContentTypeSeed {
 -        return json;
 +        return ContentProjection.typeSchema(type, store.fieldsOf(type.id()), true);
      }
- 
+
      private static Map<String, Object> navJson(com.fallrising.cms.content.domain.NavigationRecord menu) {
 ```
 
@@ -1557,7 +1570,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +++ b/src/main/java/com/fallrising/cms/identity/service/AuthorizationService.java
 @@ -1,6 +1,7 @@
  package com.fallrising.cms.identity.service;
- 
+
  import com.fallrising.cms.identity.IdentityException;
 +import com.fallrising.cms.identity.domain.Capabilities;
  import com.fallrising.cms.identity.domain.CmsAction;
@@ -1569,13 +1582,13 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
  import org.springframework.stereotype.Service;
 +import org.springframework.web.context.request.RequestAttributes;
 +import org.springframework.web.context.request.RequestContextHolder;
- 
+
  import java.util.ArrayList;
  import java.util.HashSet;
 @@ -24,6 +27,18 @@
  @Service
  public class AuthorizationService {
- 
+
 +    /** Per-content-type actions reported by capabilities(), in this order. */
 +    public static final List<CmsAction> TYPE_ACTIONS = List.of(
 +            CmsAction.READ_PUBLISHED, CmsAction.READ_DRAFT, CmsAction.CREATE, CmsAction.UPDATE,
@@ -1594,7 +1607,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 @@ -63,6 +78,42 @@
          return false;
      }
- 
+
 +    /**
 +     * Capabilities of the principal on the surface (02 §4.2). Hard-deny sets are applied first; an action is listed
 +     * when at least one grant matches it ignoring predicates; scoped is true when every matching grant of some listed
@@ -1637,7 +1650,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 @@ -100,16 +151,34 @@
          }
      }
- 
+
 +    /**
 +     * Grants of the principal plus anonymous grants. Inside an HTTP request the result is cached as a request
 +     * attribute, so one request reads roles and permissions from the store once per principal (B-12).
@@ -1669,7 +1682,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 -        return grants;
 +        return List.copyOf(grants);
      }
- 
+
      public List<Map<String, Object>> effectivePermissions(UUID principalId) {
 ```
 
@@ -1682,7 +1695,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +++ b/src/main/java/com/fallrising/cms/identity/web/AuthController.java
 @@ -1,9 +1,13 @@
  package com.fallrising.cms.identity.web;
- 
+
  import com.fallrising.cms.identity.crypto.SessionTokens;
 +import com.fallrising.cms.identity.domain.Capabilities;
  import com.fallrising.cms.identity.domain.Principal;
@@ -1695,12 +1708,12 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
  import jakarta.servlet.http.HttpServletResponse;
  import jakarta.validation.Valid;
 @@ -32,10 +36,18 @@
- 
+
      private final AuthService authService;
      private final CookieSupport cookies;
 +    private final AuthorizationService authorization;
 +    private final ContentTypeDirectory contentTypes;
- 
+
 -    public AuthController(AuthService authService, CookieSupport cookies) {
 +    public AuthController(
 +            AuthService authService,
@@ -1712,7 +1725,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +        this.authorization = authorization;
 +        this.contentTypes = contentTypes;
      }
- 
+
      @PostMapping("/login")
 @@ -45,7 +57,7 @@
          AuthService.LoginResult result = authService.login(body.username(), body.password(), identity);
@@ -1724,19 +1737,19 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
          return payload;
      }
 @@ -60,7 +72,8 @@
- 
+
      @GetMapping("/me")
      public Map<String, Object> me(HttpServletRequest request) {
 -        return mePayload(authService.me(current(request)));
 +        IdentityRequest identity = current(request);
 +        return mePayload(authService.me(identity), identity.surface());
      }
- 
+
      @GetMapping("/csrf")
 @@ -82,7 +95,7 @@
          return (IdentityRequest) request.getAttribute(IdentityErrorWriter.ATTR);
      }
- 
+
 -    static Map<String, Object> mePayload(AuthService.MeResult me) {
 +    Map<String, Object> mePayload(AuthService.MeResult me, Surface surface) {
          Principal principal = me.principal();
@@ -1750,7 +1763,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +                authorization.capabilities(principal, surface, contentTypes.enabledTypeKeys())));
          return body;
      }
- 
+
 +    private static Map<String, Object> capabilitiesJson(Capabilities capabilities) {
 +        Map<String, Object> json = new LinkedHashMap<>();
 +        json.put("surface", capabilities.surface());
@@ -1900,7 +1913,7 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 @@ -150,11 +150,11 @@
          EntryRecord other = entry(page, "o", PublicationState.DRAFT, Map.of("title", "o"), t(50));
          List.of(draft, published, archived, gone, other).forEach(store::insertEntry);
- 
+
 -        assertThat(store.listEntries(album.id(), List.of(), false, null, null, null))
 +        assertThat(store.listEntries(album.id(), List.of(), false, "title", null, null, null))
                  .extracting(EntryRecord::slug).containsExactly("p", "a", "d");
@@ -1911,23 +1924,23 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +        assertThat(store.listEntries(album.id(), List.of(), true, "title", null, null, null))
                  .extracting(EntryRecord::slug).containsExactly("x", "p", "a", "d");
      }
- 
+
 @@ -185,9 +185,9 @@
          store.replaceRefs(p1.id(), List.of(new EntryRefRecord(p1.id(), "album", a1.id(), "entry", 0)));
          store.replaceRefs(p2.id(), List.of(new EntryRefRecord(p2.id(), "album", a2.id(), "entry", 0)));
- 
+
 -        assertThat(store.listEntries(photo.id(), List.of(), false, null, "album", a1.id()))
 +        assertThat(store.listEntries(photo.id(), List.of(), false, "title", null, "album", a1.id()))
                  .extracting(EntryRecord::slug).containsExactly("p1");
 -        assertThat(store.listEntries(photo.id(), List.of(), false, null, "cover", a1.id())).isEmpty();
 +        assertThat(store.listEntries(photo.id(), List.of(), false, "title", null, "cover", a1.id())).isEmpty();
      }
- 
+
      @Test
 @@ -282,6 +282,54 @@
          assertThat(store.findNavigation("front.primary")).contains(published);
      }
- 
+
 +    @Test
 +    void B03_typeSettingsRoundTrip() {
 +        ContentTypeRecord photo = type("photo").withSettings("sortOrder", "visibility", "ownerPrincipalId", T0);
@@ -1977,11 +1990,11 @@ public class StoreContentTypeDirectory implements ContentTypeDirectory {
 +    }
 +
      // ---- fixtures ----
- 
+
      protected static Instant t(int seconds) {
 @@ -323,6 +371,6 @@
      }
- 
+
      private List<String> slugs(ContentTypeRecord type, String q) {
 -        return store.listEntries(type.id(), List.of(), false, q, null, null).stream().map(EntryRecord::slug).toList();
 +        return store.listEntries(type.id(), List.of(), false, "title", q, null, null).stream().map(EntryRecord::slug).toList();
@@ -2602,3 +2615,14 @@ class GrantCacheTests {
 | V5 migration 全文 | §4.5 |
 | 種子更新的逐欄內容 | §5.3 表格 |
 | `capabilities` 的計算規則 | §4.4 |
+
+## 11. 本次整合驗收（2026-10-03）
+
+施工前先完成 §0 補充；P0 PR #212 已合併，再進入 BW1a。T01–T08 與 W0 契約相容性已在本地整合。T09 的合併與遠端 CI 狀態仍未執行，不標 VERIFIED。
+
+- 後端 `test integrationTest bootJar` 禁用快取並全部重跑：151 個單元／API＋65 個 PostgreSQL 整合測試，零失敗／錯誤／略過。
+- 前端 lint／typecheck／test／build／bundle 全通過，140 個測試；mock E2E 17 個全通過。
+- Runtime OpenAPI 與 BW1a 契約完全相等；未變更依賴或舊 migration；P0 回歸全部保留。
+- Codex 主導實作／整合；Grok、Cursor、OpenCode 完成公開規格的有界審查。審查結果與採納／不採納理由均有記錄。
+
+完整命令、Red→Green、未執行項目、既有警告與升級注意見 [BW1a 交付紀錄](../../../.team/reports/BW1a-DELIVERY.md)。

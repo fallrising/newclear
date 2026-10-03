@@ -32,6 +32,7 @@ public class JdbcContentStore implements ContentStore {
 
     private static final TypeReference<Map<String, Object>> MAP = new TypeReference<>() {};
     private static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
+    private static final TypeReference<Map<String, String>> LABELS = new TypeReference<>() {};
 
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
@@ -64,8 +65,9 @@ public class JdbcContentStore implements ContentStore {
                 """
                 INSERT INTO cms_content_type
                   (id, type_key, display_name, plural_display_name, description, title_field, slug_policy,
-                   singleton, enabled, previewable, public_requires_published_refs, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?)
+                   singleton, enabled, previewable, public_requires_published_refs, created_at, updated_at,
+                   sort_field, visibility_field, owner_field)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?)
                 """,
                 type.id(),
                 type.typeKey(),
@@ -79,7 +81,10 @@ public class JdbcContentStore implements ContentStore {
                 type.previewable(),
                 json(type.publicRequiresPublishedRefs()),
                 ts(type.createdAt()),
-                ts(type.updatedAt()));
+                ts(type.updatedAt()),
+                type.sortField(),
+                type.visibilityField(),
+                type.ownerField());
     }
 
     @Override
@@ -98,6 +103,17 @@ public class JdbcContentStore implements ContentStore {
     }
 
     @Override
+    public void updateTypeSettings(ContentTypeRecord type) {
+        jdbc.update(
+                "UPDATE cms_content_type SET sort_field = ?, visibility_field = ?, owner_field = ?, updated_at = ? WHERE id = ?",
+                type.sortField(),
+                type.visibilityField(),
+                type.ownerField(),
+                ts(type.updatedAt()),
+                type.id());
+    }
+
+    @Override
     public List<FieldRecord> fieldsOf(UUID typeId) {
         return jdbc.query(
                 "SELECT * FROM cms_field WHERE content_type_id = ? ORDER BY sort_order, field_key",
@@ -111,8 +127,9 @@ public class JdbcContentStore implements ContentStore {
                 """
                 INSERT INTO cms_field
                   (id, content_type_id, field_key, field_type, required, unique_in_type, indexed, visibility,
-                   sort_order, ref_target_type_key, on_delete, enum_values, enabled, public_bytes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?)
+                   sort_order, ref_target_type_key, on_delete, enum_values, enabled, public_bytes,
+                   label, group_key, listable, filterable, enum_labels, placeholder, help_text)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?)
                 """,
                 field.id(),
                 field.contentTypeId(),
@@ -127,7 +144,32 @@ public class JdbcContentStore implements ContentStore {
                 field.onDelete(),
                 json(field.enumValues()),
                 field.enabled(),
-                field.publicBytes());
+                field.publicBytes(),
+                field.label(),
+                field.groupKey(),
+                field.listable(),
+                field.filterable(),
+                json(field.enumLabels()),
+                field.placeholder(),
+                field.helpText());
+    }
+
+    @Override
+    public void updateFieldMetadata(FieldRecord field) {
+        jdbc.update(
+                """
+                UPDATE cms_field SET label = ?, group_key = ?, listable = ?, filterable = ?,
+                  enum_labels = CAST(? AS jsonb), placeholder = ?, help_text = ?
+                WHERE id = ?
+                """,
+                field.label(),
+                field.groupKey(),
+                field.listable(),
+                field.filterable(),
+                json(field.enumLabels()),
+                field.placeholder(),
+                field.helpText(),
+                field.id());
     }
 
     @Override
@@ -162,7 +204,7 @@ public class JdbcContentStore implements ContentStore {
 
     @Override
     public List<EntryRecord> listEntries(
-            UUID typeId, List<String> states, boolean includeDeleted, String q, String refField, UUID refTarget) {
+            UUID typeId, List<String> states, boolean includeDeleted, String titleField, String q, String refField, UUID refTarget) {
         StringBuilder sql = new StringBuilder(
                 """
                 SELECT e.*, t.type_key FROM cms_entry e
@@ -181,7 +223,8 @@ public class JdbcContentStore implements ContentStore {
             args.addAll(states);
         }
         if (q != null && !q.isBlank()) {
-            sql.append(" AND e.payload->>'title' ILIKE ? ESCAPE '\\'");
+            sql.append(" AND e.payload->>? ILIKE ? ESCAPE '\\'");
+            args.add(titleField);
             args.add("%" + escapeLike(q) + "%");
         }
         if (refField != null && refTarget != null) {
@@ -391,7 +434,10 @@ public class JdbcContentStore implements ContentStore {
                 rs.getBoolean("previewable"),
                 readStrings(rs.getString("public_requires_published_refs")),
                 instant(rs, "created_at"),
-                instant(rs, "updated_at"));
+                instant(rs, "updated_at"),
+                rs.getString("sort_field"),
+                rs.getString("visibility_field"),
+                rs.getString("owner_field"));
     }
 
     private RowMapper<FieldRecord> fieldMapper() {
@@ -409,7 +455,14 @@ public class JdbcContentStore implements ContentStore {
                 rs.getString("on_delete"),
                 readStrings(rs.getString("enum_values")),
                 rs.getBoolean("enabled"),
-                columnOrFalse(rs, "public_bytes"));
+                columnOrFalse(rs, "public_bytes"),
+                rs.getString("label"),
+                rs.getString("group_key"),
+                rs.getBoolean("listable"),
+                rs.getBoolean("filterable"),
+                readLabels(rs.getString("enum_labels")),
+                rs.getString("placeholder"),
+                rs.getString("help_text"));
     }
 
     private RowMapper<EntryRecord> entryMapper() {
@@ -474,6 +527,18 @@ public class JdbcContentStore implements ContentStore {
         try {
             Map<String, Object> map = mapper.readValue(raw, MAP);
             return map == null ? new LinkedHashMap<>() : new LinkedHashMap<>(map);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private Map<String, String> readLabels(String raw) {
+        if (raw == null || raw.isBlank() || "null".equals(raw)) {
+            return Map.of();
+        }
+        try {
+            Map<String, String> labels = mapper.readValue(raw, LABELS);
+            return labels == null ? Map.of() : labels;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

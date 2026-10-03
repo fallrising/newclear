@@ -85,7 +85,7 @@ def until(check, *, seconds=60):
 
 
 def terminal_proof(context, path):
-    """Read only a fixed test artifact; do not drive SDK state after approval."""
+    """Read a supplementary fixed artifact; SDK completion requires event polling."""
     return json.loads(
         context["sb"].exec(
             "python3",
@@ -224,6 +224,8 @@ for index,payload in enumerate(requests,1):
         checks['withheld_result']=(reply.returncode!=0 and
                                   value=={{'error':'tool_transport_unavailable'}})
 Path({ROUNDTRIP!r}).write_text(json.dumps(checks))
+if all(checks.values()):
+    print('TOOL_KVM_COMPLETE' if {complete!r} else 'TOOL_KVM_WITHHELD',flush=True)
 """
     sb.write_file(CODE + "/tool_roundtrip.py", program.encode(), mode=0o644)
     sb.exec(
@@ -406,6 +408,15 @@ class Harness:
     def events(self, context):
         run = context["run"]
         events = self.client.events(run)
+        observation = context.setdefault("sdk_events", {"polls": 0, "ids": [], "markers": []})
+        observation["polls"] += 1
+        for event in events["events"]:
+            require(event["event_id"] not in observation["ids"], "sdk_event_replayed")
+            observation["ids"].append(event["event_id"])
+            if event["payload"]["kind"] == "ObservationEvent":
+                for marker in ("TOOL_KVM_COMPLETE", "TOOL_KVM_WITHHELD"):
+                    if marker in event["payload"]["content"]:
+                        observation["markers"].append(marker)
         if events["events"]:
             run["backend_cursor"] = events["events"][-1]["cursor"]
             with self.db.transaction() as conn:
@@ -414,6 +425,23 @@ class Harness:
                     (run["backend_cursor"], run["id"]),
                 )
         return events
+
+    def finished(self, context, marker):
+        def progress():
+            events = self.events(context)
+            return events["state"] == "finished" and events["caught_up"]
+
+        until(progress, seconds=45)
+        observed = context["sdk_events"]
+        require(observed["markers"].count(marker) == 1, "sdk_terminal_observation_missing")
+        context["sdk_completion"] = {
+            "sdk_finished": True,
+            "sdk_caught_up": True,
+            "sdk_terminal_observation": marker,
+            "sdk_event_count": len(observed["ids"]),
+            "sdk_poll_count": observed["polls"],
+            "sdk_no_duplicate_events": True,
+        }
 
     def prompt(self, context, complete=False):
         install_fixture(context["sb"], context["run"]["id"], complete=complete)
@@ -466,6 +494,7 @@ class Harness:
             while written < acknowledged:
                 written += 1
                 context["sb"].write_file(CODE + "/tool-ack-" + str(written), b"ack\n", mode=0o444)
+            self.events(context)
             return acknowledged == 3
 
         until(progress, seconds=90)
@@ -474,6 +503,7 @@ class Harness:
             proof == {"operation_1": True, "operation_2": True, "operation_3": True},
             "roundtrip_mismatch",
         )
+        self.finished(context, "TOOL_KVM_COMPLETE")
         isolation = validate_proof(json.loads(context["sb"].exec("cat", PROOF_PATH, timeout=5)))
         require(self.mock.calls == self.mock.authenticated == 7, "upstream_hop_count_mismatch")
         return {
@@ -559,8 +589,7 @@ class Harness:
         until(progress, seconds=60)
 
     def withheld(self, context):
-        # The tool assertion concerns the fixed terminal invocation and SQL
-        # delivery ledger, independently of later SDK finish/approval events.
+        self.finished(context, "TOOL_KVM_WITHHELD")
         proof = until(lambda: terminal_proof(context, ROUNDTRIP), seconds=45)
         require(proof == {"withheld_result": True}, "late_result_exposed")
         rows = self.operations(context)
@@ -829,6 +858,7 @@ def run_case(harness, case):
         )
     result.update(harness.cancel(run["id"]))
     require(not harness.node.sandboxes() and not harness.host.vms(), "case_cleanup_incomplete")
+    result.update(context.get("sdk_completion", {}))
     result["passed"] = True
     return result
 

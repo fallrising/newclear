@@ -105,6 +105,11 @@ class Node:
 
 
 class FixtureConnector(Connector):
+    def conversation(self, row, http):
+        # This in-memory upstream has one synchronous state, with no autosaved copy.
+        # Dedicated event tests exercise production polling; KVM covers live approvals.
+        return http.expect("GET", "/api/conversations/" + row["run_id"])
+
     def network(self, row=None):
         from agent_platform.domain import Problem
 

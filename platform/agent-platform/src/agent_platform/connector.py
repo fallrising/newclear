@@ -506,7 +506,13 @@ class Connector:
         )
 
     def conversation(self, row, http):
-        if row.get("pause") or row["input"].get("model_transport"):
+        # Approval mutations need a fresh, stable boundary. Active event polling
+        # uses durable status events instead so it never waits on the SDK tool lock.
+        if (
+            row.get("pause")
+            or row["input"].get("model_transport")
+            or row["input"].get("require_approval")
+        ):
             from .connector_state import live_state
 
             return live_state(row, http)
@@ -520,7 +526,10 @@ class Connector:
             self.network(row)
             with self.relay(row) as http:
                 path = "/api/conversations/" + row["run_id"]
-                state = self.conversation(row, http)["execution_status"]
+                # Full-state subscriptions wait on the active SDK tool lock. Read
+                # durable status changes with the events instead; REST is only a
+                # fallback for histories with no status update (e.g. before run).
+                state = http.expect("GET", path)["execution_status"]
                 all_events, page_id, seen = [], None, set()
                 for _ in range(100):
                     query = {"limit": 100}
@@ -543,6 +552,22 @@ class Connector:
                 raise Problem(409, "backend_duplicate_event")
             if cursor and cursor not in ids:
                 raise Problem(409, "backend_event_gap")
+            for item in all_events:
+                if (
+                    item.get("kind") == "ConversationStateUpdateEvent"
+                    and item.get("key") == "execution_status"
+                ):
+                    state = policy.metadata(item.get("value"), 128)
+                    if state not in {
+                        "idle",
+                        "running",
+                        "waiting_for_confirmation",
+                        "finished",
+                        "paused",
+                        "stuck",
+                        "error",
+                    }:
+                        raise Problem(409, "backend_execution_status_invalid")
             pending = all_events[ids.index(cursor) + 1 :] if cursor else all_events
             normalized = []
             for item in pending[:100]:
@@ -590,9 +615,23 @@ class Connector:
                 )
             response = {"events": normalized, "state": state, "caught_up": len(pending) <= 100}
             if state == "waiting_for_confirmation":
-                from .connector_approval import pending_approval
+                from .connector_approval import approval_from_history
 
-                response["approval"] = pending_approval(self, row)
+                approval = approval_from_history(self, row, all_events)
+                # A successful ACK may precede the SDK's asynchronous run start.
+                # An exact completed receipt proves only this batch was applied;
+                # it cannot finish a run or authorize a new batch.
+                applied = any(
+                    key.startswith("approval:")
+                    and operation.get("state") == "completed"
+                    and operation.get("result", {}).get("action_digest")
+                    == approval["action_digest"]
+                    for key, operation in row["operations"].items()
+                )
+                if applied:
+                    response["state"] = "running"
+                else:
+                    response["approval"] = approval
             return response
 
     def result(self, row):

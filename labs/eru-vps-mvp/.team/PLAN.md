@@ -92,3 +92,18 @@ Continue at merged barrier baseline `7bafbf5`. Implement a separate immutable pr
 ### Execution preparation acceptance decision
 
 Accepted T-219 and T-220 after root source/diff/hash inspection and independent adversarial tests. Canonical-cluster redirection was fixed before acceptance; Git queries now explicitly disable optional index writes. Root focused73 (2.164s), full550 (69.419s), independent73 (2.201s), original workflow validation, compileall and team/public-scope gates passed. T-221 accepts only nonexecuting preparation and pending observation, remaining PARTIAL for the full executor. Attestation trust, stable backing root, no automatic reservation/release and future live gates are explicit.
+
+## Fresh baseline observation adapter (2026-10-03)
+
+Continue merged preparation at `e0d3172`. Add a strictly read-only four-host/runtime and core etcd/ERU metadata observer with bounded transport, exact review binding, immutable private evidence, and observation-backed host evidence accepted by preparation. Tests invoke only fake transports or synthetic local processes; no VPS/SSH/provider session is run by the team. Observation cannot establish external fencing, mutate/reserve/release, or mark a stage accepted.
+
+- T-222: isolated fixed-command collector, snapshot validator, safe local evidence lifecycle and fake/contract tests.
+- T-223: independent protocol/command audit and frozen-candidate adversarial review.
+- Root: envelope v2 host-evidence and CLI wiring, documentation, native suite/workflow parity and evidence gate; authorized PR/merge after exact-head CI.
+- Preserve v1 manual host attestation semantics; observation-backed evidence must carry a separate immutable record ref, verified raw-command linkage and exact run/review/scope/generation. No weakening of original parser to accept arbitrary fields.
+- Capture old-state baseline, not residue acceptance. Bounded key inventory must detect truncation, values, duplicate keys, revision/identity drift; unsupported/nonempty/unknown facts are never silently promoted.
+- Formal outstanding count remains 12; complete fresh dispatch/bootstrap/acceptance and external fencing remain separate gates.
+
+### Observation acceptance decision
+
+Accepted T-222 and T-223 for the bounded observer after frozen source hashes and actual diffs/tests were inspected. Independent review caught and verified process-group cleanup and the pinned etcd member-header revision contract; per-host after-identity checks and malformed-data normalization were added. Root focused57, independent68 and full586 tests passed. Independent final import-only cleanup passed11 tests. Original workflow validation, compileall and team/scope/privacy gates passed. T-224 remains PARTIAL for overall closeout; no formal task count, generation or live authority changed.

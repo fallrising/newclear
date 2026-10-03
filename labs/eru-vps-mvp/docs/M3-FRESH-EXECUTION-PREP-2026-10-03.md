@@ -1,5 +1,7 @@
 # Fresh execution envelope：本機準備與 pending observation
 
+後續補充：[observation-backed schema-v2 host evidence](M3-FRESH-OBSERVATION-2026-10-03.md) 已接入 preparation／inspection；下列原始 schema-1 attestation 與 550-test 證據保留歷史語境。
+
 日期：2026-10-03。接續 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md) 與 [pending-generation barrier](M3-PENDING-GENERATION-2026-10-03.md)。本輪新增獨立 immutable execution preparation 與專用只讀 inspection。這是 production 格式的本機輸入核對，沒有 destructive stage dispatch；ERU-015 尚未完成，正式剩餘仍為 12 項。
 
 ## 操作入口

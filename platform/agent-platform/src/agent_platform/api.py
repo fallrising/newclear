@@ -29,6 +29,7 @@ from .domain import (
     RetryInput,
     TaskInput,
 )
+from .result_download import DOWNLOAD_CSP, diff_bytes
 from .store import Store, json_value
 
 
@@ -100,10 +101,13 @@ def create_app(settings=None, db=None, web_dist=None):
         )
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; style-src 'self'; "
-            "connect-src 'self'; img-src 'self' data:; frame-ancestors "
-            "'none'; base-uri 'none'; object-src 'none'; form-action 'self'"
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            (
+                "default-src 'self'; script-src 'self'; style-src 'self'; "
+                "connect-src 'self'; img-src 'self' data:; frame-ancestors "
+                "'none'; base-uri 'none'; object-src 'none'; form-action 'self'"
+            ),
         )
         return response
 
@@ -208,6 +212,17 @@ def create_app(settings=None, db=None, web_dist=None):
     @app.get("/api/v1/runs/{run_id}")
     def run(run_id: UUID, session=authenticated):
         return store.run(run_id)
+
+    @app.get("/api/v1/runs/{run_id}/result.diff")
+    def result_diff(run_id: UUID, session=authenticated):
+        return Response(
+            content=diff_bytes(store.run(run_id)),
+            media_type="text/plain; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="run-{run_id}.diff"',
+                "Content-Security-Policy": DOWNLOAD_CSP,
+            },
+        )
 
     @app.get("/api/v1/runs/{run_id}/approvals")
     def approvals(run_id: UUID, session=authenticated):

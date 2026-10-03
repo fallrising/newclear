@@ -1,0 +1,11 @@
+{
+  "name": "browser-fingerprint-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Task dashboard with a Go mock CRUD API and local browser observation logs",
+  "scripts": {
+    "start": "go run .",
+    "test": "go test ./...",
+    "build": "go build -o .runtime/daylight-server.exe ."
+  }
+}

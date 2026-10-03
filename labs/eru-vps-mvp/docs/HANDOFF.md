@@ -1,5 +1,7 @@
 # 接續開發交接：ERU VPS MVP
 
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
 2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
 
 2026-10-03 接手核對與修正見 [本機驗收矩陣](LOCAL-CLOSEOUT-2026-10-03.md)：ERU-013 的 manifest 發布／獨立建置守護已納入本輪修補；上游已有 v0.1.7，[候選 patch／雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md) 已通過兩次隔離 byte-identical build 與有界 metadata／wire compatibility，狀態 verified-not-deployed。ERU-015 已有 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已接續 [fake simulation store／coordinator](M3-FRESH-SIMULATION-2026-10-03.md) 實作；destructive executor、全域 barrier／bootstrap／generation acceptance 仍未完成，不能宣稱五項本機收尾全部完成。下列歷史部署與測試數保留日期語境；正式剩餘仍為 12 項，本輪沒有 VPS mutation。

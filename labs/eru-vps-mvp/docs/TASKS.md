@@ -1,5 +1,7 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
 2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
 
 2026-10-03 本機收尾核對：[驗收矩陣與缺口](LOCAL-CLOSEOUT-2026-10-03.md)。ERU-009／010／014 已具備有限本機流程；ERU-013 本輪修補 release provenance 守護，[v0.1.7 候選驗證](M3-CORE-V017-VALIDATION-2026-10-03.md) 已通過雙次隔離 build／有界 compatibility，仍缺跨版本實機驗收；ERU-015 已有 [executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已有 [本機 simulation journal／coordinator](M3-FRESH-SIMULATION-2026-10-03.md)，production executor 仍未實作。不得將五項一律標成「本機完成、只待 E2E」。正式完成數與剩餘數不變。

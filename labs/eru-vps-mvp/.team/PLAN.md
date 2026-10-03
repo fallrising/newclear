@@ -77,3 +77,18 @@ Continue the merged simulation foundation at `7d4f005`. Implement a persistent c
 ### Barrier acceptance decision
 
 T-216 and T-217 accepted after root inspected the full diff, exact source hashes and report contracts. Historical RED was the empty-pending-directory context-entry regression; resolved without weakening admission. Root 31 focused tests and 514 full tests passed; original CI validation, compileall, scope/privacy and whitespace gates passed. Evidence gate T-218 accepts this local slice only and remains PARTIAL for the full executor. No production reservation caller, release/completion or VPS operation was added. Stable trusted backing root, quiescence and external fencing remain explicit prerequisites.
+
+## Execution-envelope preparation and barrier-aware observation (2026-10-03)
+
+Continue at merged barrier baseline `7bafbf5`. Implement a separate immutable production-shaped execution envelope bound to an existing review plan, current local source/input hashes and explicit recent authorization/fence/host/material evidence. This is local preparation plus observation-only recovery; it cannot execute destructive stages, reserve automatically, accept a generation or clear a barrier. Existing review envelopes remain immutable and non-executable.
+
+- T-219 owns the bounded strict validation/storage and recovery API with temporary-file regressions in an isolated worktree.
+- T-220 independently audits contracts and reviews a frozen candidate; owns only independent regression tests and report.
+- Root owns CLI integration, documentation, full native checks, evidence gate and authorized Git delivery.
+- The reserve API already exists; preparation must never call it implicitly. Recovery compares its exact bindings if present, classifies prepared/reserved/blocked/absent, and never adopts an unknown run or treats reservation as remote-stage completion.
+- No broad ClusterLock bypass. Observation uses bounded no-follow reads and rechecks record/root identity; no lock-held mutation permission is returned.
+- Gate: test-first missing lifecycle regression, drift/freshness/scope/duplicate/path/crash cases, independent review, all ERU tests and original workflow parity. Formal remaining count stays 12.
+
+### Execution preparation acceptance decision
+
+Accepted T-219 and T-220 after root source/diff/hash inspection and independent adversarial tests. Canonical-cluster redirection was fixed before acceptance; Git queries now explicitly disable optional index writes. Root focused73 (2.164s), full550 (69.419s), independent73 (2.201s), original workflow validation, compileall and team/public-scope gates passed. T-221 accepts only nonexecuting preparation and pending observation, remaining PARTIAL for the full executor. Attestation trust, stable backing root, no automatic reservation/release and future live gates are explicit.

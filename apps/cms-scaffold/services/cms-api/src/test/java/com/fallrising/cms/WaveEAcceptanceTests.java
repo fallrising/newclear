@@ -139,13 +139,13 @@ class WaveEAcceptanceTests {
                         .cookie(admin.sessionCookie(), admin.csrfCookie()))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/v1/admin/audit")
-                        .param("action", "ENTRY_PURGED")
+                        .param("action", "entry.purge")
                         .param("targetId", id)
                         .header("Origin", ADMIN)
                         .cookie(admin.sessionCookie()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.items[0].action").value("ENTRY_PURGED"));
+                .andExpect(jsonPath("$.items[0].action").value("entry.purge"));
         mockMvc.perform(get("/api/v1/admin/audit")
                         .header("Origin", BACK)
                         .cookie(op.sessionCookie()))

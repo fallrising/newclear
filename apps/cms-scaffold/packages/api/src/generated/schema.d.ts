@@ -160,6 +160,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/principals/assignable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Principals that entries of `contentType` can be assigned to (G-04): active, not deleted, holding
+         *     `update` on the type on the Back surface (predicates ignored). The caller needs `update` on the type
+         *     on its own surface. `q` is a case-insensitive substring of username or displayName. Order:
+         *     displayName, then username; at most 20. Only `id` and `displayName` are returned.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `contentType` missing, unknown or disabled.
+         *     - 403 FORBIDDEN: caller lacks `update` on the type.
+         */
+        get: operations["listAssignablePrincipals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/principals/{id}": {
         parameters: {
             query?: never;
@@ -536,9 +561,11 @@ export interface paths {
          *     Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
          *     datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
          *     Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
+         *     `publishRequested=true` keeps only entries with an open publish request (G-03); false leaves the list unfiltered.
+         *     `include=refs` adds `refs` to every item (G-10): two more store reads per page, not per item.
          *     Other query parameters are ignored.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; unknown `state` value; `sort` names a key
+         *     - 400 VALIDATION_FAILED: `include` other than `refs`; `publishRequested` other than true or false; `page` or `size` out of range; unknown `state` value; `sort` names a key
          *       that is not sortable; a filter names a field that is not filterable or has a value of the wrong
          *       kind; a `ref.<fieldKey>` value is not a UUID; a parameter other than `ref.<fieldKey>` is repeated.
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
@@ -575,7 +602,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Errors:
+         * @description `include=refs` adds `refs` (G-10).
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `include` other than `refs`.
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
          *     - 403 FORBIDDEN: caller may not read this entry.
          *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -620,7 +649,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Publishing a published entry without changes returns it unchanged.
+         * @description Publishing a published entry without changes and without an open request returns it unchanged.
+         *     If its working payload is clean but a request remains open, clear the request with a version increment
+         *     and entry.publish_request_cancel audit; do not create a revision or an entry.publish event.
          *     Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `publish`).
          *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -631,6 +662,68 @@ export interface paths {
          */
         post: operations["publishEntry"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entries:batch-patch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Patches 1 to 100 entries atomically (G-09). Each item gets the checks of patchEntry, in item order.
+         *     The first failing check that is not a field error stops the batch with that error; its message starts
+         *     with `items[<i>]: `. Otherwise all field errors of all items are returned together as one 422 with
+         *     paths `items[<i>].payload.<fieldKey>`. Nothing is written unless every item passes; then all items
+         *     are written in one transaction. `slug` cannot be changed here. No audit event (as patchEntry).
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `items` empty or longer than 100; an item without `id`; an id repeated.
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN; 404 ENTRY_NOT_FOUND; 409 INVALID_STATE_TRANSITION, VERSION_CONFLICT;
+         *       428 VERSION_REQUIRED: as patchEntry, for the first failing item.
+         *     - 422 with `error.fields`: as patchEntry, for all items.
+         */
+        post: operations["batchPatchEntries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entries/{id}/publish-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Asks for the entry to be published (G-03). Needs `update`. The entry must be a draft, or published
+         *     with unpublished changes (`dirty`). An open request is returned unchanged. Creating a request increments
+         *     `version` and changes `updatedAt`, using compare-and-set. Publish, unpublish, archive and restore clear
+         *     the request. Audit: `entry.publish_request`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+         *     - 409 INVALID_STATE_TRANSITION: archived, or published without changes.
+         */
+        post: operations["requestPublish"];
+        /**
+         * @description Withdraws the open publish request. Needs `update`. Without a request the entry is returned
+         *     unchanged. Clearing an existing request increments `version` and changes `updatedAt`, using compare-and-set.
+         *     Audit: `entry.publish_request_cancel`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+         */
+        delete: operations["cancelPublishRequest"];
         options?: never;
         head?: never;
         patch?: never;
@@ -908,12 +1001,40 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Newest first. Not paginated in this version.
+         * @description Audit search (02 §4.6, B-07). Order: `at` descending, then id text ascending. Blank parameters mean
+         *     no condition; other parameters are ignored. `actor` is a username; an unknown username gives an
+         *     empty page. `action` matches exactly, or as a prefix when the value ends with `.` (for example
+         *     `entry.`). `from` is inclusive and `to` exclusive.
          *     Errors:
-         *     - 403 SURFACE_FORBIDDEN: called from the Front or Back surface.
-         *     - 403 FORBIDDEN: caller lacks `read_audit`.
+         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; `from`, `to` or `targetId` malformed; a
+         *       parameter repeated.
+         *     - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+         *       denied `read_audit`).
+         *     - 403 FORBIDDEN: caller lacks `read_audit` (also written as denied).
          */
         get: operations["listAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One audit event with its `detail`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listAudit.
+         *     - 404 AUDIT_EVENT_NOT_FOUND: no event with this id.
+         */
+        get: operations["getAuditEvent"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1074,7 +1195,7 @@ export interface components {
          * @description Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1182,6 +1303,13 @@ export interface components {
         PasswordChangeRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        AssignablePrincipalList: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                displayName: string;
+            }[];
         };
         Principal: {
             /** Format: uuid */
@@ -1382,6 +1510,45 @@ export interface components {
             publishedAt: string | null;
             /** Format: date-time */
             updatedAt: string;
+            /**
+             * Format: date-time
+             * @description When an open publish request was made (G-03); null without one.
+             */
+            publishRequestedAt: string | null;
+            /**
+             * Format: uuid
+             * @description Principal who made the open publish request.
+             */
+            publishRequestedBy: string | null;
+            /** @description Present only with `include=refs` (G-10); one key per ref field that holds an entry id. */
+            refs?: {
+                [key: string]: components["schemas"]["RefSummary"];
+            };
+        };
+        BatchPatchRequest: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: int32 */
+                version: number;
+                payload?: components["schemas"]["EntryPayload"] | null;
+            }[];
+        };
+        WorkEntryList: {
+            items: components["schemas"]["WorkEntry"][];
+        };
+        /**
+         * @description Target of a ref field. Readable (caller has read_draft on the target): id, contentType, title,
+         *     publicationState. Not readable: id and restricted=true. Missing or soft-deleted: id and missing=true.
+         */
+        RefSummary: {
+            /** Format: uuid */
+            id: string;
+            contentType?: string;
+            title?: string | null;
+            publicationState?: components["schemas"]["PublicationState"];
+            restricted?: boolean;
+            missing?: boolean;
         };
         WorkEntryPage: {
             items: components["schemas"]["WorkEntry"][];
@@ -1511,17 +1678,58 @@ export interface components {
         NavigationPatchRequest: {
             document?: components["schemas"]["NavigationDocument"] | null;
         };
+        AuditActor: {
+            /** Format: uuid */
+            id: string;
+            /** @description Null when the principal no longer exists. */
+            username: string | null;
+            displayName: string | null;
+        };
         AuditEventSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            at: string;
+            /** @description Null for events without an actor (anonymous login attempts, seeding). */
+            actor: components["schemas"]["AuditActor"] | null;
+            /** @description AUTH, CONTENT, SCHEMA, SETTINGS, MEDIA or GOVERNANCE. */
+            category: string;
+            /** @description For example `entry.publish`, `type.create`, `LOGIN_SUCCESS`, or a denied governance action such as `manage_types`. */
             action: string;
             targetType: string | null;
             /** Format: uuid */
             targetId: string | null;
+            surface: string | null;
+            /** @description ok or denied. */
             outcome: string;
+        };
+        /** @description AuditEventSummary plus detail. */
+        AuditEventDetail: {
+            /** Format: uuid */
+            id: string;
             /** Format: date-time */
             at: string;
+            actor: components["schemas"]["AuditActor"] | null;
+            category: string;
+            action: string;
+            targetType: string | null;
+            /** Format: uuid */
+            targetId: string | null;
+            surface: string | null;
+            outcome: string;
+            /** @description The event's detail_json, or null. */
+            detail: {
+                [key: string]: unknown;
+            } | null;
         };
-        AuditEventList: {
+        AuditEventPage: {
             items: components["schemas"]["AuditEventSummary"][];
+            /** Format: int64 */
+            total: number;
+            page: number;
+            size: number;
+            offset: number;
+            limit: number;
         };
         MediaVariantLink: {
             url: string;
@@ -1698,6 +1906,8 @@ export interface components {
          *     visibility `public` only).
          */
         Sort: string;
+        /** @description Comma-separated; the only value is `refs`. */
+        IncludeRefs: string;
         /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
         CsrfHeader: string;
     };
@@ -1937,6 +2147,33 @@ export interface operations {
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
             415: components["responses"]["Error415"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    listAssignablePrincipals: {
+        parameters: {
+            query: {
+                contentType: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Assignable principals */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignablePrincipalList"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2435,6 +2672,9 @@ export interface operations {
                  *     visibility `public` only).
                  */
                 sort?: components["parameters"]["Sort"];
+                publishRequested?: boolean;
+                /** @description Comma-separated; the only value is `refs`. */
+                include?: components["parameters"]["IncludeRefs"];
             };
             header?: never;
             path: {
@@ -2499,7 +2739,10 @@ export interface operations {
     };
     getWorkEntry: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Comma-separated; the only value is `refs`. */
+                include?: components["parameters"]["IncludeRefs"];
+            };
             header?: never;
             path: {
                 id: components["parameters"]["Id"];
@@ -2620,6 +2863,103 @@ export interface operations {
             404: components["responses"]["Error404"];
             409: components["responses"]["Error409"];
             422: components["responses"]["Error422"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    batchPatchEntries: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated entries in item order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntryList"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            415: components["responses"]["Error415"];
+            422: components["responses"]["Error422"];
+            428: components["responses"]["Error428"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    requestPublish: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Entry with an open publish request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    cancelPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Entry without a publish request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };
@@ -3037,9 +3377,20 @@ export interface operations {
     listAudit: {
         parameters: {
             query?: {
-                /** @description Exact audit action, for example `LOGIN_SUCCESS`. */
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                from?: string;
+                to?: string;
+                /** @description Username of the actor. */
+                actor?: string;
+                /** @description Exact action, for example `entry.publish`; a value ending with `.` is a prefix. */
                 action?: string;
+                category?: string;
+                targetType?: string;
                 targetId?: string;
+                outcome?: string;
             };
             header?: never;
             path?: never;
@@ -3047,18 +3398,45 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Audit events */
+            /** @description One page of audit events */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditEventList"];
+                    "application/json": components["schemas"]["AuditEventPage"];
                 };
             };
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    getAuditEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audit event */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventDetail"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };

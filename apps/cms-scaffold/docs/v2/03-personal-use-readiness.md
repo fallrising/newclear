@@ -35,7 +35,7 @@
 ## 交付順序與完成定義
 
 1. **P0：資料安全底線。** 真實 DB 回滾／競爭、表單 typed values／清空／衝突。全部必要指令與結果寫入本元件 `.team/`，不以 agent 宣稱代替證據。
-2. **通用 CMS 工作流。** 依 BW1a→BW1b→BW1c→W1，之後按相簿需要進 W2；新類型毋須重寫 CRUD 骨架。現階段不承諾「完全免程式配置」。
+2. **通用 CMS 工作流。** 依 BW1a→BW1b→BW1c→W1→BW2，之後按相簿需要進 W2；新類型毋須重寫 CRUD 骨架。現階段不承諾「完全免程式配置」。
 3. **個人部署驗收。** 先寫独立施工圖，涵蓋管理員與權限初始化、seed 控制、HTTPS／cookie／origin、DB 不對外、靜態檔案服務、備份排程、離線一致性與還原、失敗升級回滾。完成且實测才能標個人生產可用。
 
 P0 通過時可標「本地可靠性修復已驗證」，不能標「所有 v2 完成」或「production-ready」。沒有執行的閘門必須是 skipped 並列原因。
@@ -70,4 +70,12 @@ PATCH 缺少或 null 版本回 428，舊版本仍回 409；422 列出全部欄�
 
 ## W1 本地驗收
 
-[W1 交付](../../.team/reports/W1-DELIVERY.md)：300 前端、27 mock E2E、226 Java、lint/typecheck/build/bundle/npm ci 通過；五個畫面 axe 無 serious／critical，桌面與手機截圖無阻擋性瀏覽器問題。W1 尚未提交／合併，正式使用的操作驗收門檻不變。媒體／關聯欄位暫為唯讀，未知型別保留原值；選擇器於 W2。
+[W1 交付](../../.team/reports/W1-DELIVERY.md)：300 前端、27 mock E2E、226 Java、lint/typecheck/build/bundle/npm ci 通過；五個畫面 axe 無 serious／critical，桌面與手機截圖無阻擋性瀏覽器問題。W1 已於 PR #229 合併，Java／PostgreSQL／web CI 通過；正式使用的操作驗收門檻不變。媒體／關聯欄位暫為唯讀，未知型別保留原值；選擇器於 W2。
+
+## BW2 本地驗收與界線
+
+[BW2交付](../../.team/reports/BW2-DELIVERY.md)：254 Java、120 PostgreSQL案例、300前端、27mock E2E通過，並通過lint/typecheck/build/bundle與契約生成。PostgreSQL數字來自完整輪108個不變案例＋修正測試比較後強制實跑12個identity案例；舊失敗日誌保留，沒有把失敗的完整命令改寫為exit0。10,000筆store p95為86／80／19ms。
+
+新增審計分頁／詳情、請求發布、可指派使用者、原子批次PATCH與安全關聯摘要。批次保留P0的CAS與交易；既有身份事件補齊狀態／審計原子性，名稱、密碼與session規則不變。發布請求的實際變更會提高version，舊客戶端應採用回傳的version。
+
+本波未提交／合併；不新增依賴、不部署。W2選擇器與自訂視圖、W4治理畫面尚未實作。測試使用實際PostgreSQL store／服務；BW4仍須完整應用啟動與DataSource/store選用（BQ-13）驗證，不能因此宣稱正式運行或重啟持久性已達生產驗收。備份還原、seed／升級／媒體索引盤點等既有運維門檻仍適用。

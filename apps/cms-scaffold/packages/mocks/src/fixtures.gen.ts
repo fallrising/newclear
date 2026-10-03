@@ -7343,7 +7343,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:01:00Z",
-    "updatedAt": "2026-09-20T00:01:00Z"
+    "updatedAt": "2026-09-20T00:01:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000002",
@@ -7361,7 +7363,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:02:00Z",
-    "updatedAt": "2026-09-20T00:02:00Z"
+    "updatedAt": "2026-09-20T00:02:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000003",
@@ -7379,7 +7383,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:03:00Z",
-    "updatedAt": "2026-09-20T00:03:00Z"
+    "updatedAt": "2026-09-20T00:03:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000004",
@@ -7397,7 +7403,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:04:00Z",
-    "updatedAt": "2026-09-20T00:04:00Z"
+    "updatedAt": "2026-09-20T00:04:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000005",
@@ -7414,7 +7422,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:05:00Z",
-    "updatedAt": "2026-09-20T00:05:00Z"
+    "updatedAt": "2026-09-20T00:05:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000006",
@@ -7431,7 +7441,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:06:00Z",
-    "updatedAt": "2026-09-20T00:06:00Z"
+    "updatedAt": "2026-09-20T00:06:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000007",
@@ -7448,7 +7460,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:07:00Z",
-    "updatedAt": "2026-09-20T00:07:00Z"
+    "updatedAt": "2026-09-20T00:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000008",
@@ -7464,7 +7478,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:08:00Z"
+    "updatedAt": "2026-09-20T00:08:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000009",
@@ -7482,7 +7498,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:09:00Z"
+    "updatedAt": "2026-09-20T00:09:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000010",
@@ -7499,7 +7517,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:10:00Z"
+    "updatedAt": "2026-09-20T00:10:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000011",
@@ -7515,7 +7535,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:11:00Z",
-    "updatedAt": "2026-09-20T00:11:00Z"
+    "updatedAt": "2026-09-20T00:11:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000012",
@@ -7533,7 +7555,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:12:00Z",
-    "updatedAt": "2026-09-20T00:12:00Z"
+    "updatedAt": "2026-09-20T00:12:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000013",
@@ -7551,7 +7575,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:13:00Z",
-    "updatedAt": "2026-09-20T00:13:00Z"
+    "updatedAt": "2026-09-20T00:13:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000014",
@@ -7569,7 +7595,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:14:00Z",
-    "updatedAt": "2026-09-20T00:14:00Z"
+    "updatedAt": "2026-09-20T00:14:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000015",
@@ -7587,7 +7615,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:15:00Z"
+    "updatedAt": "2026-09-20T00:15:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000016",
@@ -7606,7 +7636,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:16:00Z",
-    "updatedAt": "2026-09-20T00:16:00Z"
+    "updatedAt": "2026-09-20T00:16:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000017",
@@ -7623,7 +7655,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:17:00Z",
-    "updatedAt": "2026-09-20T00:17:00Z"
+    "updatedAt": "2026-09-20T00:17:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000018",
@@ -7640,7 +7674,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:18:00Z",
-    "updatedAt": "2026-09-20T00:18:00Z"
+    "updatedAt": "2026-09-20T00:18:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000019",
@@ -7658,7 +7694,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:19:00Z",
-    "updatedAt": "2026-09-20T00:19:00Z"
+    "updatedAt": "2026-09-20T00:19:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000020",
@@ -7675,7 +7713,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:20:00Z",
-    "updatedAt": "2026-09-20T00:20:00Z"
+    "updatedAt": "2026-09-20T00:20:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000021",
@@ -7692,7 +7732,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:21:00Z",
-    "updatedAt": "2026-09-20T00:21:00Z"
+    "updatedAt": "2026-09-20T00:21:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000022",
@@ -7713,7 +7755,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:22:00Z",
-    "updatedAt": "2026-09-20T00:22:00Z"
+    "updatedAt": "2026-09-20T00:22:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000023",
@@ -7734,7 +7778,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:23:00Z"
+    "updatedAt": "2026-09-20T00:23:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000024",
@@ -7751,7 +7797,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:24:00Z",
-    "updatedAt": "2026-09-20T00:24:00Z"
+    "updatedAt": "2026-09-20T00:24:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000025",
@@ -7768,7 +7816,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:25:00Z",
-    "updatedAt": "2026-09-20T00:25:00Z"
+    "updatedAt": "2026-09-20T00:25:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000026",
@@ -7785,7 +7835,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:26:00Z"
+    "updatedAt": "2026-09-20T00:26:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000027",
@@ -7802,7 +7854,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:27:00Z",
-    "updatedAt": "2026-09-20T00:27:00Z"
+    "updatedAt": "2026-09-20T00:27:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000028",
@@ -7819,7 +7873,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:28:00Z",
-    "updatedAt": "2026-09-20T00:28:00Z"
+    "updatedAt": "2026-09-20T00:28:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000029",
@@ -7836,7 +7892,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:29:00Z",
-    "updatedAt": "2026-09-20T00:29:00Z"
+    "updatedAt": "2026-09-20T00:29:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000030",
@@ -7854,7 +7912,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:30:00Z"
+    "updatedAt": "2026-09-20T00:30:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000031",
@@ -7871,7 +7931,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:31:00Z"
+    "updatedAt": "2026-09-20T00:31:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000032",
@@ -7888,7 +7950,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:32:00Z"
+    "updatedAt": "2026-09-20T00:32:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000033",
@@ -7905,7 +7969,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:33:00Z"
+    "updatedAt": "2026-09-20T00:33:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000034",
@@ -7922,7 +7988,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:34:00Z"
+    "updatedAt": "2026-09-20T00:34:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000035",
@@ -7947,7 +8015,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:35:00Z"
+    "updatedAt": "2026-09-20T00:35:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000036",
@@ -7968,7 +8038,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:36:00Z",
-    "updatedAt": "2026-09-20T00:36:00Z"
+    "updatedAt": "2026-09-20T00:36:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000037",
@@ -7985,7 +8057,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": true,
     "publishedAt": "2026-09-20T00:37:00Z",
-    "updatedAt": "2026-09-20T01:07:00Z"
+    "updatedAt": "2026-09-20T01:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   }
 ];
 

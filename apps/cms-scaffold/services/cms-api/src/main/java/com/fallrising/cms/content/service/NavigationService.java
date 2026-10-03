@@ -6,7 +6,9 @@ import com.fallrising.cms.content.store.ContentStore;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.Surface;
+import com.fallrising.cms.identity.service.AuditLog;
 import com.fallrising.cms.identity.service.AuthorizationService;
+import com.fallrising.cms.platform.TransactionRunner;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -19,10 +21,15 @@ public class NavigationService {
 
     private final ContentStore store;
     private final AuthorizationService authorization;
+    private final TransactionRunner transactions;
+    private final AuditLog audit;
 
-    public NavigationService(ContentStore store, AuthorizationService authorization) {
+    public NavigationService(ContentStore store, AuthorizationService authorization, TransactionRunner transactions,
+            AuditLog audit) {
         this.store = store;
         this.authorization = authorization;
+        this.transactions = transactions;
+        this.audit = audit;
     }
 
     public NavigationRecord getWork(Principal principal, Surface surface, String menuKey) {
@@ -62,7 +69,11 @@ public class NavigationService {
                 current.document(),
                 principal == null ? current.updatedBy() : principal.id(),
                 now);
-        store.upsertNavigation(next);
+        transactions.run(() -> {
+            store.upsertNavigation(next);
+            audit.record(principal, surface, "SETTINGS", "navigation.publish", "navigation", current.id(), AuditLog.OK,
+                    Map.of("menuKey", menuKey));
+        });
         return next;
     }
 

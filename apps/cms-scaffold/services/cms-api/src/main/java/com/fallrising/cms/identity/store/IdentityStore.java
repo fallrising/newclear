@@ -1,6 +1,8 @@
 package com.fallrising.cms.identity.store;
 
 import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.domain.AuditPage;
+import com.fallrising.cms.identity.domain.AuditQuery;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -58,6 +60,11 @@ public interface IdentityStore {
     void insertAudit(AuditEvent event);
 
     List<AuditEvent> listAudits(String action, UUID targetId);
+
+    /** Audit search with paging (02 §4.6, B-07). */
+    AuditPage queryAudits(AuditQuery query);
+
+    Optional<AuditEvent> findAudit(UUID id);
 
     long countUsableAdmins();
 

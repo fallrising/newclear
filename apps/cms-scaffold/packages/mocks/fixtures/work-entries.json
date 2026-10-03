@@ -15,7 +15,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:01:00Z",
-    "updatedAt": "2026-09-20T00:01:00Z"
+    "updatedAt": "2026-09-20T00:01:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000002",
@@ -33,7 +35,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:02:00Z",
-    "updatedAt": "2026-09-20T00:02:00Z"
+    "updatedAt": "2026-09-20T00:02:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000003",
@@ -51,7 +55,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:03:00Z",
-    "updatedAt": "2026-09-20T00:03:00Z"
+    "updatedAt": "2026-09-20T00:03:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000004",
@@ -69,7 +75,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:04:00Z",
-    "updatedAt": "2026-09-20T00:04:00Z"
+    "updatedAt": "2026-09-20T00:04:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000005",
@@ -86,7 +94,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:05:00Z",
-    "updatedAt": "2026-09-20T00:05:00Z"
+    "updatedAt": "2026-09-20T00:05:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000006",
@@ -103,7 +113,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:06:00Z",
-    "updatedAt": "2026-09-20T00:06:00Z"
+    "updatedAt": "2026-09-20T00:06:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000007",
@@ -120,7 +132,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:07:00Z",
-    "updatedAt": "2026-09-20T00:07:00Z"
+    "updatedAt": "2026-09-20T00:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000008",
@@ -136,7 +150,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:08:00Z"
+    "updatedAt": "2026-09-20T00:08:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000009",
@@ -154,7 +170,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:09:00Z"
+    "updatedAt": "2026-09-20T00:09:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000010",
@@ -171,7 +189,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:10:00Z"
+    "updatedAt": "2026-09-20T00:10:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000011",
@@ -187,7 +207,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:11:00Z",
-    "updatedAt": "2026-09-20T00:11:00Z"
+    "updatedAt": "2026-09-20T00:11:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000012",
@@ -205,7 +227,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:12:00Z",
-    "updatedAt": "2026-09-20T00:12:00Z"
+    "updatedAt": "2026-09-20T00:12:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000013",
@@ -223,7 +247,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:13:00Z",
-    "updatedAt": "2026-09-20T00:13:00Z"
+    "updatedAt": "2026-09-20T00:13:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000014",
@@ -241,7 +267,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:14:00Z",
-    "updatedAt": "2026-09-20T00:14:00Z"
+    "updatedAt": "2026-09-20T00:14:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000015",
@@ -259,7 +287,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:15:00Z"
+    "updatedAt": "2026-09-20T00:15:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000016",
@@ -278,7 +308,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:16:00Z",
-    "updatedAt": "2026-09-20T00:16:00Z"
+    "updatedAt": "2026-09-20T00:16:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000017",
@@ -295,7 +327,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:17:00Z",
-    "updatedAt": "2026-09-20T00:17:00Z"
+    "updatedAt": "2026-09-20T00:17:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000018",
@@ -312,7 +346,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:18:00Z",
-    "updatedAt": "2026-09-20T00:18:00Z"
+    "updatedAt": "2026-09-20T00:18:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000019",
@@ -330,7 +366,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:19:00Z",
-    "updatedAt": "2026-09-20T00:19:00Z"
+    "updatedAt": "2026-09-20T00:19:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000020",
@@ -347,7 +385,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:20:00Z",
-    "updatedAt": "2026-09-20T00:20:00Z"
+    "updatedAt": "2026-09-20T00:20:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000021",
@@ -364,7 +404,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:21:00Z",
-    "updatedAt": "2026-09-20T00:21:00Z"
+    "updatedAt": "2026-09-20T00:21:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000022",
@@ -385,7 +427,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:22:00Z",
-    "updatedAt": "2026-09-20T00:22:00Z"
+    "updatedAt": "2026-09-20T00:22:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000023",
@@ -406,7 +450,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:23:00Z"
+    "updatedAt": "2026-09-20T00:23:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000024",
@@ -423,7 +469,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:24:00Z",
-    "updatedAt": "2026-09-20T00:24:00Z"
+    "updatedAt": "2026-09-20T00:24:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000025",
@@ -440,7 +488,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:25:00Z",
-    "updatedAt": "2026-09-20T00:25:00Z"
+    "updatedAt": "2026-09-20T00:25:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000026",
@@ -457,7 +507,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:26:00Z"
+    "updatedAt": "2026-09-20T00:26:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000027",
@@ -474,7 +526,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:27:00Z",
-    "updatedAt": "2026-09-20T00:27:00Z"
+    "updatedAt": "2026-09-20T00:27:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000028",
@@ -491,7 +545,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:28:00Z",
-    "updatedAt": "2026-09-20T00:28:00Z"
+    "updatedAt": "2026-09-20T00:28:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000029",
@@ -508,7 +564,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:29:00Z",
-    "updatedAt": "2026-09-20T00:29:00Z"
+    "updatedAt": "2026-09-20T00:29:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000030",
@@ -526,7 +584,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:30:00Z"
+    "updatedAt": "2026-09-20T00:30:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000031",
@@ -543,7 +603,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:31:00Z"
+    "updatedAt": "2026-09-20T00:31:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000032",
@@ -560,7 +622,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:32:00Z"
+    "updatedAt": "2026-09-20T00:32:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000033",
@@ -577,7 +641,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:33:00Z"
+    "updatedAt": "2026-09-20T00:33:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000034",
@@ -594,7 +660,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:34:00Z"
+    "updatedAt": "2026-09-20T00:34:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000035",
@@ -619,7 +687,9 @@
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:35:00Z"
+    "updatedAt": "2026-09-20T00:35:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000036",
@@ -640,7 +710,9 @@
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:36:00Z",
-    "updatedAt": "2026-09-20T00:36:00Z"
+    "updatedAt": "2026-09-20T00:36:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000037",
@@ -657,6 +729,8 @@
     },
     "dirty": true,
     "publishedAt": "2026-09-20T00:37:00Z",
-    "updatedAt": "2026-09-20T01:07:00Z"
+    "updatedAt": "2026-09-20T01:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   }
 ]

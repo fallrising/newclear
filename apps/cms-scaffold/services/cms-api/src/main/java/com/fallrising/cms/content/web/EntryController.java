@@ -31,6 +31,8 @@ public class EntryController {
 
     public record EntryWriteBody(String slug, Map<String, Object> payload, Integer version) {}
 
+    public record BatchPatchBody(List<EntryService.BatchItem> items) {}
+
     private final EntryService entries;
     private final ContentStore store;
 
@@ -57,8 +59,11 @@ public class EntryController {
         IdentityRequest identity = work(request, CmsAction.READ_DRAFT, typeKey);
         EntryService.ListResult result = entries.listWork(
                 identity.principal(), identity.surface(), typeKey, request.getParameterMap());
+        boolean refs = includeRefs(request);
+        Map<UUID, Map<String, Object>> summaries = refs
+                ? entries.refSummaries(identity.principal(), identity.surface(), result.page().items(), result.fields()) : Map.of();
         List<Map<String, Object>> items = result.page().items().stream()
-                .map(entry -> ContentProjection.work(entry, result.type()))
+                .map(entry -> withRefs(ContentProjection.work(entry, result.type()), entry.id(), summaries, refs))
                 .toList();
         return ContentProjection.page(items, result);
     }
@@ -78,7 +83,30 @@ public class EntryController {
     public Map<String, Object> get(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
         EntryRecord entry = entries.getWork(identity.principal(), identity.surface(), id);
-        return workJson(entry);
+        boolean refs = includeRefs(request);
+        if (!refs) return workJson(entry);
+        ContentTypeRecord type = store.findTypeByKey(entry.contentTypeKey()).orElseThrow(com.fallrising.cms.content.ContentException::typeNotFound);
+        return withRefs(ContentProjection.work(entry, type), entry.id(),
+                entries.refSummaries(identity.principal(), identity.surface(), List.of(entry), store.fieldsOf(type.id())), true);
+    }
+
+    @PostMapping("/entries:batch-patch")
+    public Map<String, Object> batchPatch(@RequestBody(required = false) BatchPatchBody body, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        List<EntryRecord> updated = entries.batchPatch(identity.principal(), identity.surface(), body == null ? null : body.items());
+        return Map.of("items", updated.stream().map(this::workJson).toList());
+    }
+
+    @PostMapping("/entries/{id}/publish-request")
+    public Map<String, Object> requestPublish(@PathVariable UUID id, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        return workJson(entries.requestPublish(identity.principal(), identity.surface(), id));
+    }
+
+    @DeleteMapping("/entries/{id}/publish-request")
+    public Map<String, Object> cancelPublishRequest(@PathVariable UUID id, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        return workJson(entries.cancelPublishRequest(identity.principal(), identity.surface(), id));
     }
 
     @PatchMapping("/entries/{id}")
@@ -144,6 +172,26 @@ public class EntryController {
     public Map<String, Object> preview(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
         return workJson(entries.getWork(identity.principal(), identity.surface(), id));
+    }
+
+    private static boolean includeRefs(HttpServletRequest request) {
+        String[] values = request.getParameterValues("include");
+        if (values == null || values.length == 0) return false;
+        if (values.length > 1) throw com.fallrising.cms.content.ContentException.invalidParameter("include must not repeat");
+        boolean refs = false;
+        for (String value : values[0].split(",")) {
+            value = value.trim();
+            if (value.isEmpty()) continue;
+            if (!"refs".equals(value)) throw com.fallrising.cms.content.ContentException.invalidParameter("include: unknown value " + value);
+            refs = true;
+        }
+        return refs;
+    }
+
+    private static Map<String, Object> withRefs(Map<String, Object> json, UUID id,
+            Map<UUID, Map<String, Object>> summaries, boolean included) {
+        if (included) json.put("refs", summaries.getOrDefault(id, Map.of()));
+        return json;
     }
 
     private static IdentityRequest work(HttpServletRequest request, CmsAction action, String typeKey) {

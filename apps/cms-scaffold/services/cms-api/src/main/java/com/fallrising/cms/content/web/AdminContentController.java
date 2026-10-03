@@ -10,9 +10,10 @@ import com.fallrising.cms.content.store.ContentStore;
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Surface;
-import com.fallrising.cms.identity.store.IdentityStore;
+import com.fallrising.cms.identity.service.AuditLog;
 import com.fallrising.cms.identity.web.AuthController;
 import com.fallrising.cms.identity.web.IdentityRequest;
+import com.fallrising.cms.platform.TransactionRunner;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +35,8 @@ import java.util.UUID;
 @RequestMapping("/api/v1/admin")
 public class AdminContentController {
 
+    private static final String SCHEMA = "SCHEMA";
+
     public record FieldBody(String key, String type, Boolean required, Boolean indexed, String refTarget, List<String> enumValues) {}
 
     public record TypeBody(
@@ -45,20 +47,23 @@ public class AdminContentController {
     private final ContentStore store;
     private final NavigationService navigation;
     private final EntryService entries;
-    private final IdentityStore identityStore;
     private final com.fallrising.cms.identity.service.AuthorizationService authorization;
+    private final TransactionRunner transactions;
+    private final AuditLog audit;
 
     public AdminContentController(
             ContentStore store,
             NavigationService navigation,
             EntryService entries,
-            IdentityStore identityStore,
-            com.fallrising.cms.identity.service.AuthorizationService authorization) {
+            com.fallrising.cms.identity.service.AuthorizationService authorization,
+            TransactionRunner transactions,
+            AuditLog audit) {
         this.store = store;
         this.navigation = navigation;
         this.entries = entries;
-        this.identityStore = identityStore;
         this.authorization = authorization;
+        this.transactions = transactions;
+        this.audit = audit;
     }
 
     @GetMapping("/content-types")
@@ -70,7 +75,7 @@ public class AdminContentController {
     @PostMapping("/content-types")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> createType(@RequestBody TypeBody body, HttpServletRequest request) {
-        manageTypes(request);
+        IdentityRequest identity = manageTypes(request);
         if (body.key() == null || !body.key().matches("^[a-z][a-z0-9_]{1,62}$")) {
             throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Invalid type key");
         }
@@ -92,10 +97,10 @@ public class AdminContentController {
                 List.of(),
                 now,
                 now);
-        store.insertType(type);
-        int order = 0;
-        if (body.fields() != null) {
-            for (FieldBody field : body.fields()) {
+        transactions.run(() -> {
+            store.insertType(type);
+            int order = 0;
+            for (FieldBody field : body.fields() == null ? List.<FieldBody>of() : body.fields()) {
                 store.insertField(new FieldRecord(
                         UUID.randomUUID(),
                         type.id(),
@@ -112,25 +117,31 @@ public class AdminContentController {
                         true,
                         "media-ref".equals(field.type())));
             }
-        }
+            audit.record(identity.principal(), identity.surface(), SCHEMA, "type.create", "content_type", type.id(),
+                    AuditLog.OK, null);
+        });
         return typeJson(type);
     }
 
     @PostMapping("/content-types/{typeKey}/disable")
     public Map<String, Object> disable(@PathVariable String typeKey, HttpServletRequest request) {
-        manageTypes(request);
-        ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::typeNotFound);
-        ContentTypeRecord updated = type.withEnabled(false, Instant.now());
-        store.updateType(updated);
-        return typeJson(updated);
+        return setEnabled(typeKey, false, request);
     }
 
     @PostMapping("/content-types/{typeKey}/enable")
     public Map<String, Object> enable(@PathVariable String typeKey, HttpServletRequest request) {
-        manageTypes(request);
+        return setEnabled(typeKey, true, request);
+    }
+
+    private Map<String, Object> setEnabled(String typeKey, boolean enabled, HttpServletRequest request) {
+        IdentityRequest identity = manageTypes(request);
         ContentTypeRecord type = store.findTypeByKey(typeKey).orElseThrow(ContentException::typeNotFound);
-        ContentTypeRecord updated = type.withEnabled(true, Instant.now());
-        store.updateType(updated);
+        ContentTypeRecord updated = type.withEnabled(enabled, Instant.now());
+        transactions.run(() -> {
+            store.updateType(updated);
+            audit.record(identity.principal(), identity.surface(), SCHEMA, enabled ? "type.enable" : "type.disable",
+                    "content_type", type.id(), AuditLog.OK, null);
+        });
         return typeJson(updated);
     }
 
@@ -160,30 +171,10 @@ public class AdminContentController {
         entries.purge(identity.principal(), identity.surface(), id);
     }
 
-    @GetMapping("/audit")
-    public Map<String, Object> audit(
-            @RequestParam(required = false) String action,
-            @RequestParam(required = false) UUID targetId,
-            HttpServletRequest request) {
-        IdentityRequest identity = adminSurface(request);
-        authorization.require(identity.principal(), CmsAction.READ_AUDIT, null, null, identity.surface());
-        List<Map<String, Object>> items = identityStore.listAudits(action, targetId).stream()
-                .map(event -> {
-                    Map<String, Object> json = new LinkedHashMap<>();
-                    json.put("action", event.action());
-                    json.put("targetType", event.targetType());
-                    json.put("targetId", event.targetId() == null ? null : event.targetId().toString());
-                    json.put("outcome", event.outcome());
-                    json.put("at", event.at());
-                    return json;
-                })
-                .toList();
-        return Map.of("items", items);
-    }
-
-    private void manageTypes(HttpServletRequest request) {
+    private IdentityRequest manageTypes(HttpServletRequest request) {
         IdentityRequest identity = AuthController.current(request);
         authorization.require(identity.principal(), CmsAction.MANAGE_TYPES, null, null, identity.surface());
+        return identity;
     }
 
     private static IdentityRequest adminSurface(HttpServletRequest request) {

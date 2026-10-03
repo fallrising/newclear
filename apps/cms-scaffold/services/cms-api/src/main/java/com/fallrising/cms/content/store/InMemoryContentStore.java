@@ -21,6 +21,9 @@ import com.fallrising.cms.content.query.SortKey;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -128,6 +131,16 @@ public class InMemoryContentStore implements ContentStore {
     @Override
     public Optional<EntryRecord> findEntry(UUID id) {
         return Optional.ofNullable(entries.get(id));
+    }
+
+    @Override
+    public Map<UUID, EntryRecord> findEntries(Collection<UUID> ids) {
+        Map<UUID, EntryRecord> found = new LinkedHashMap<>();
+        for (UUID id : ids) {
+            EntryRecord entry = entries.get(id);
+            if (entry != null) found.put(id, entry);
+        }
+        return found;
     }
 
     @Override
@@ -267,6 +280,7 @@ public class InMemoryContentStore implements ContentStore {
         if (!e.contentTypeId().equals(query.typeId()) || e.deleted()) return false;
         IndexScope scope = query.scope();
         if (scope == IndexScope.WORK) {
+            if (query.publishRequested() && e.publishRequestedAt() == null) return false;
             if (!query.states().contains(e.publicationState().wire())) return false;
         } else {
             if (e.publicationState() != PublicationState.PUBLISHED || e.publishedPayload() == null) return false;

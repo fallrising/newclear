@@ -14,6 +14,8 @@ import com.fallrising.cms.identity.domain.RoleCode;
 import com.fallrising.cms.identity.domain.SessionRecord;
 import com.fallrising.cms.identity.store.IdentityStore;
 import com.fallrising.cms.identity.web.IdentityRequest;
+import com.fallrising.cms.platform.TransactionRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -31,13 +33,21 @@ public class AuthService {
     private final PasswordHasher passwordHasher;
     private final IdentityProperties properties;
     private final AuthorizationService authorizationService;
+    private final TransactionRunner transactions;
 
     public AuthService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties,
             AuthorizationService authorizationService) {
+        this(store, passwordHasher, properties, authorizationService, TransactionRunner.withoutDatabase());
+    }
+
+    @Autowired
+    public AuthService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties,
+            AuthorizationService authorizationService, TransactionRunner transactions) {
         this.store = store;
         this.passwordHasher = passwordHasher;
         this.properties = properties;
         this.authorizationService = authorizationService;
+        this.transactions = transactions;
     }
 
     public LoginResult login(String username, String password, IdentityRequest request) {
@@ -51,40 +61,46 @@ public class AuthService {
         boolean matches = passwordHasher.matches(password == null ? "" : password, hash);
 
         if (principal == null || credential == null || !matches) {
-            if (principal != null && credential != null && principal.status() != PrincipalStatus.DISABLED) {
-                registerFailure(principal, now);
-            }
-            audit(principal == null ? null : principal.id(), "LOGIN_FAILURE", request, "denied", null);
+            // Commit the denial evidence before throwing; an audit failure rolls its counter update back.
+            transactions.independently(() -> {
+                if (principal != null && credential != null && principal.status() != PrincipalStatus.DISABLED) {
+                    registerFailure(principal, now);
+                }
+                audit(principal == null ? null : principal.id(), "LOGIN_FAILURE", request, "denied", null);
+            });
             throw IdentityException.invalidCredentials();
         }
 
         if (principal.status() == PrincipalStatus.DISABLED) {
-            audit(principal.id(), "LOGIN_FAILURE", request, "denied", "{\"reason\":\"disabled\"}");
+            transactions.independently(() -> audit(principal.id(), "LOGIN_FAILURE", request, "denied", "{\"reason\":\"disabled\"}"));
             throw IdentityException.accountDisabled();
         }
         if (isLocked(principal, now)) {
-            audit(principal.id(), "LOGIN_FAILURE", request, "denied", "{\"reason\":\"locked\"}");
+            transactions.independently(() -> audit(principal.id(), "LOGIN_FAILURE", request, "denied", "{\"reason\":\"locked\"}"));
             throw IdentityException.accountLocked();
         }
 
         Principal unlocked = principal.withLoginSuccess(now);
-        store.updatePrincipal(unlocked);
-        store.revokeAllForPrincipal(unlocked.id(), now, null);
-
         String token = SessionTokens.randomToken();
         SessionRecord session = new SessionRecord(UUID.randomUUID(), unlocked.id(), SessionTokens.sha256(token), now,
                 now.plus(properties.getSessionAbsolute()), now, null, request.surface().wire(), truncate(request.ip()),
                 truncate(request.userAgent()));
-        store.insertSession(session);
-        audit(unlocked.id(), "LOGIN_SUCCESS", request, "ok", null);
-        return new LoginResult(unlocked, token, SessionTokens.randomToken());
+        return transactions.inTransaction(() -> {
+            store.updatePrincipal(unlocked);
+            store.revokeAllForPrincipal(unlocked.id(), now, null);
+            store.insertSession(session);
+            audit(unlocked.id(), "LOGIN_SUCCESS", request, "ok", null);
+            return new LoginResult(unlocked, token, SessionTokens.randomToken());
+        });
     }
 
     public void logout(IdentityRequest request) {
         if (request.session() == null) throw IdentityException.unauthenticated();
         Instant now = Instant.now();
-        store.revokeSession(request.session().id(), now);
-        audit(request.principal().id(), "LOGOUT", request, "ok", null);
+        transactions.run(() -> {
+            store.revokeSession(request.session().id(), now);
+            audit(request.principal().id(), "LOGOUT", request, "ok", null);
+        });
     }
 
     public MeResult me(IdentityRequest request) {
@@ -110,9 +126,12 @@ public class AuthService {
         Credential credential = store.findPasswordCredential(principal.id()).orElseThrow(IdentityException::unauthenticated);
         if (!passwordHasher.matches(currentPassword == null ? "" : currentPassword, credential.secretHash())) throw IdentityException.invalidCredentials();
         validateNewPassword(principal.username(), newPassword);
-        store.upsertPasswordCredential(principal.id(), passwordHasher.hash(newPassword), passwordHasher.algo());
-        store.revokeAllForPrincipal(principal.id(), Instant.now(), null);
-        audit(principal.id(), "PASSWORD_CHANGED", request, "ok", null);
+        String hash = passwordHasher.hash(newPassword);
+        transactions.run(() -> {
+            store.upsertPasswordCredential(principal.id(), hash, passwordHasher.algo());
+            store.revokeAllForPrincipal(principal.id(), Instant.now(), null);
+            audit(principal.id(), "PASSWORD_CHANGED", request, "ok", null);
+        });
     }
 
     public void validateNewPassword(String username, String newPassword) {

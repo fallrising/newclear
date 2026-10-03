@@ -127,6 +127,8 @@ export const workHandlers = [
       payload,
       dirty: false,
       publishedAt: null,
+      publishRequestedAt: null,
+      publishRequestedBy: null,
       updatedAt: now,
     };
     db.workEntries.push(entry);

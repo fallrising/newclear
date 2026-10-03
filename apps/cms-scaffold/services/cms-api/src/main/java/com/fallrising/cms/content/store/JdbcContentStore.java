@@ -31,6 +31,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -213,6 +214,18 @@ public class JdbcContentStore implements ContentStore {
     }
 
     @Override
+    public Map<UUID, EntryRecord> findEntries(Collection<UUID> ids) {
+        if (ids.isEmpty()) return Map.of();
+        String placeholders = String.join(", ", java.util.Collections.nCopies(ids.size(), "?"));
+        List<EntryRecord> rows = jdbc.query("SELECT e.*, t.type_key FROM cms_entry e"
+                + " JOIN cms_content_type t ON t.id = e.content_type_id WHERE e.id IN (" + placeholders + ")",
+                entryMapper(), ids.toArray());
+        Map<UUID, EntryRecord> found = new LinkedHashMap<>();
+        rows.forEach(entry -> found.put(entry.id(), entry));
+        return found;
+    }
+
+    @Override
     public Optional<EntryRecord> findBySlug(UUID typeId, String slug) {
         return one(jdbc.query(
                 """
@@ -284,8 +297,8 @@ public class JdbcContentStore implements ContentStore {
                 """
                 INSERT INTO cms_entry
                   (id, content_type_id, slug, publication_state, version, payload, published_payload,
-                   published_at, archived_at, deleted_at, created_by, updated_by, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, CAST(? AS jsonb), CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, ?)
+                   published_at, archived_at, deleted_at, created_by, updated_by, created_at, updated_at, publish_requested_at, publish_requested_by)
+                VALUES (?, ?, ?, ?, ?, CAST(? AS jsonb), CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 entry.id(),
                 entry.contentTypeId(),
@@ -300,7 +313,9 @@ public class JdbcContentStore implements ContentStore {
                 entry.createdBy(),
                 entry.updatedBy(),
                 ts(entry.createdAt()),
-                ts(entry.updatedAt()));
+                ts(entry.updatedAt()),
+                ts(entry.publishRequestedAt()),
+                entry.publishRequestedBy());
     }
 
     @Override
@@ -317,7 +332,7 @@ public class JdbcContentStore implements ContentStore {
                 """
                 UPDATE cms_entry SET slug = ?, publication_state = ?, version = ?, payload = CAST(? AS jsonb),
                   published_payload = CAST(? AS jsonb), published_at = ?, archived_at = ?, deleted_at = ?,
-                  updated_by = ?, updated_at = ?
+                  updated_by = ?, updated_at = ?, publish_requested_at = ?, publish_requested_by = ?
                 WHERE id = ? AND version = ?
                 """,
                 entry.slug(),
@@ -330,6 +345,8 @@ public class JdbcContentStore implements ContentStore {
                 ts(entry.deletedAt()),
                 entry.updatedBy(),
                 ts(entry.updatedAt()),
+                ts(entry.publishRequestedAt()),
+                entry.publishRequestedBy(),
                 entry.id(),
                 entry.version() - 1);
         if (changed != 1) {
@@ -508,6 +525,7 @@ public class JdbcContentStore implements ContentStore {
         StringBuilder sql = new StringBuilder("e.content_type_id = ? AND e.deleted_at IS NULL");
         args.add(query.typeId());
         if (query.scope() == IndexScope.WORK) {
+            if (query.publishRequested()) sql.append(" AND e.publish_requested_at IS NOT NULL");
             if (query.states().isEmpty()) {
                 sql.append(" AND FALSE");
             } else {
@@ -678,7 +696,9 @@ public class JdbcContentStore implements ContentStore {
                 rs.getObject("created_by", UUID.class),
                 rs.getObject("updated_by", UUID.class),
                 instant(rs, "created_at"),
-                instant(rs, "updated_at"));
+                instant(rs, "updated_at"),
+                instant(rs, "publish_requested_at"),
+                rs.getObject("publish_requested_by", UUID.class));
     }
 
     private RowMapper<RevisionRecord> revisionMapper() {

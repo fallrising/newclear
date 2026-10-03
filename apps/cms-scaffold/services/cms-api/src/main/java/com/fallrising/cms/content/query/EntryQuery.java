@@ -35,7 +35,14 @@ public record EntryQuery(
         List<String> requiredRefs,
         SortKey sort,
         int page,
-        int size) {
+        int size,
+        boolean publishRequested) {
+
+    public EntryQuery(UUID typeId, IndexScope scope, List<String> states, String titleField, String q,
+            List<FieldFilter> filters, List<RefFilter> refs, AccessFilter access, String visibilityField,
+            List<String> requiredRefs, SortKey sort, int page, int size) {
+        this(typeId, scope, states, titleField, q, filters, refs, access, visibilityField, requiredRefs, sort, page, size, false);
+    }
 
     public EntryQuery {
         states = List.copyOf(states);

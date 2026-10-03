@@ -1,0 +1,71 @@
+{
+  "command": "./gradlew test integrationTest --no-daemon --no-parallel --console=plain",
+  "exitCode": 1,
+  "suites": {
+    "com.fallrising.cms.contract.JdbcMediaStoreContractTests": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.JdbcContentStoreContractTests": {
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.IdentityAuditAtomicWriteTests": {
+      "tests": 10,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.JdbcIdentityStoreContractTests": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.EntryAtomicWriteTests": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.ListQueryPerformanceTests": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.AuditAtomicWriteTests": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.Bw2AtomicWriteTests": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.EntryIndexBackfillTests": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.JdbcIdentityStoreIntegrationTests": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "performance": [
+    "BW1b perf (10000 entries): work list p95 86 ms, public list p95 80 ms, patch p95 19 ms"
+  ],
+  "sourceManifest": "bw2-full-suite-source-manifest.json",
+  "logSha256": "bc0770adb2972b6e4f3ffef76fbe52300a18a9cba23eb43fb87ecf6b30719ca8"
+}

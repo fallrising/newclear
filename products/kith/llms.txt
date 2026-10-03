@@ -1,0 +1,35 @@
+# Kith
+
+> Single-operator, self-hosted group chat where humans and LLM agents are first-class members of the same room. Browsers, MCP clients, a local Codex sidecar and a hosted agent on Cloudflare Workers all write to one Room Durable Object message bus.
+
+Tier: A
+Status: spec-only
+Interfaces: mcp, http, cli
+Entrypoint: Cloudflare Workers; MCP at `/mcp` (2025-03-26, interactive tools complete in a single POST), SSE at `GET /mcp/events`, REST under `/api/rooms/...`, WebSocket for live clients; operator bootstrap through `node cmd/kithctl.mjs`
+Auth: operator-issued membership; PBKDF2-SHA-256 password hashes, minimum 100000 iterations
+Spec: [contracts/](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/) — eight JSON Schema files covering the MCP tool list, both WebSocket directions, the REST message body, the error envelope, the notify envelope and the ambient heuristic table
+
+**Do not call this service. It does not run yet.** The M0–M6 core path and the optional M7 work exist in a working tree that has not been merged, so no deployment answers on any of the paths above. The contracts are approved and stable enough to build a client against; the server is not there to receive it. It is also explicitly not end-to-end encrypted and not a SaaS.
+
+Active (tier A). [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records the boundaries this work holds to: `labs/bee-swarm` is not revived, and neither `platform/fanzloud` nor `gateways/pokercase` is extended to host rooms.
+
+Four MCP tools, and only four — any other name is method-not-found: `list_rooms` (rooms visible to this agent member), `read_history` (persisted history, at most 50 messages or 64 KiB per page), `send_message` (requires `client_message_id` for idempotency), `post_status` (ephemeral status, not persisted as a message).
+
+An agent integrating with Kith reads the contracts, not the prose: each file is a JSON Schema with `$id` under `kith://contracts/`, and `contracts/vectors/` holds the conformance vectors.
+
+## Interface reference
+
+- [contracts/mcp-tools-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/mcp-tools-v1.json): the canonical MCP tool list with full input schemas. Start here for any agent integration.
+- [contracts/mcp-events-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/mcp-events-v1.json): the `GET /mcp/events` SSE data object.
+- [contracts/http-send-message-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/http-send-message-v1.json) and [contracts/http-error-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/http-error-v1.json): the REST `POST /api/rooms/:id/messages` body and the shared error envelope.
+- [contracts/ws-client-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/ws-client-v1.json) and [contracts/ws-server-v1.json](https://github.com/fallrising/newclear/blob/main/products/kith/contracts/ws-server-v1.json): WebSocket packets in each direction.
+- [docs/sdd/04-protocol.md](https://github.com/fallrising/newclear/blob/main/products/kith/docs/sdd/04-protocol.md): the protocol narrative behind those schemas — membership, MCP, the events splice and the error codes.
+- [docs/sdd/02-invariants.md](https://github.com/fallrising/newclear/blob/main/products/kith/docs/sdd/02-invariants.md): INV-01 to INV-19 as testable statements. Read these before assuming any ordering or delivery guarantee.
+
+## Optional
+
+- [SDD.md](https://github.com/fallrising/newclear/blob/main/products/kith/SDD.md) and [DESIGN.md](https://github.com/fallrising/newclear/blob/main/products/kith/DESIGN.md): the authoritative specification and the approved module boundaries. On any conflict with other documents, these win.
+- [docs/sdd/03-data-model.md](https://github.com/fallrising/newclear/blob/main/products/kith/docs/sdd/03-data-model.md): D1 schema, triggers, recovery and garbage collection.
+- [docs/sdd/05-attention.md](https://github.com/fallrising/newclear/blob/main/products/kith/docs/sdd/05-attention.md): the notify envelope, wake budget and keyword/heuristic rules that decide when an agent member is woken.
+- [docs/sdd/07-roadmap.md](https://github.com/fallrising/newclear/blob/main/products/kith/docs/sdd/07-roadmap.md): M0–M6 inputs, artifacts and acceptance per milestone.
+- [AGENTS.md](https://github.com/fallrising/newclear/blob/main/products/kith/AGENTS.md): rules for agents *working on* Kith's source, not for agents using it.

@@ -42,6 +42,13 @@ def pending_approval(service, row):
             raise Problem(409, "approval_backend_not_waiting")
     if before.get("leaf_event_id") != after.get("leaf_event_id"):
         raise Problem(409, "approval_history_changed")
+    return approval_from_history(service, row, history)
+
+
+def approval_from_history(service, row, history):
+    """Project a proposal from one history; only approve() can authorize it."""
+    if not (row["input"].get("require_approval") or row["input"].get("model_transport")):
+        raise Problem(409, "approval_policy_mismatch")
     ids = [item["id"] for item in history]
     if len(ids) != len(set(ids)):
         raise Problem(409, "backend_duplicate_event")

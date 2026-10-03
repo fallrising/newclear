@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -33,6 +33,12 @@ let runState: string;
 let cancelKeys: string[];
 let cancelLostResponse: boolean;
 let retryPayload: Record<string, unknown> | null;
+let retryKeys: string[];
+let retryAccepted: boolean;
+let retryLostResponse: boolean;
+let retryStatus: number;
+let retryWait: Promise<void> | undefined;
+let externalRun: Partial<Run> | null;
 let usageConfigured: boolean;
 let downloadStatus: number;
 let taskQueries: URLSearchParams[];
@@ -51,6 +57,12 @@ beforeEach(() => {
   cancelKeys = [];
   cancelLostResponse = false;
   retryPayload = null;
+  retryKeys = [];
+  retryAccepted = false;
+  retryLostResponse = false;
+  retryStatus = 202;
+  retryWait = undefined;
+  externalRun = null;
   usageConfigured = false;
   downloadStatus = 200;
   taskQueries = [];
@@ -142,9 +154,15 @@ beforeEach(() => {
         return Response.json({ error: 'not_found' }, { status: 404 });
       if (path === '/api/v1/tasks/task-1/runs' && method === 'POST') {
         retryPayload = JSON.parse(String(options.body));
+        retryKeys.push((options.headers as Record<string, string>)['Idempotency-Key']);
+        if (retryWait) await retryWait;
+        if (retryLostResponse && retryKeys.length === 1) throw new TypeError('lost retry response');
+        if (retryStatus !== 202)
+          return Response.json({ error: 'state_conflict' }, { status: retryStatus });
+        retryAccepted = true;
         return Response.json({ id: 'run-2' }, { status: 202 });
       }
-      if (path === '/api/v1/runs/run-1/usage')
+      if (/^\/api\/v1\/runs\/[^/]+\/usage$/.test(path))
         return Response.json(
           usageConfigured
             ? {
@@ -202,9 +220,21 @@ beforeEach(() => {
           event_floor: 1,
           result,
         };
-        const runs = retryPayload
-          ? [{ ...run, id: 'run-2', attempt_no: 2, state: 'queued', result: null }, run]
-          : [run];
+        const runs = externalRun
+          ? [{ ...run, ...externalRun }, run]
+          : retryAccepted
+            ? [
+                {
+                  ...run,
+                  id: 'run-2',
+                  attempt_no: 2,
+                  state: 'queued',
+                  result: null,
+                  goal: retryPayload!.goal,
+                },
+                run,
+              ]
+            : [run];
         return Response.json({ task: tasks[0], runs });
       }
       throw new Error(`Unexpected request: ${method} ${path}`);
@@ -381,7 +411,202 @@ it('re-runs a finished task with the latest attempt inputs', async () => {
     }),
   );
   expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
-  expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull();
+  await waitFor(() => expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull());
+});
+
+async function openRetryEditor(user: ReturnType<typeof userEvent.setup>) {
+  runState = 'failed';
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '調整目標後重新執行' }));
+  return screen.getByRole('textbox', { name: '新的工作目標' });
+}
+async function refreshTask() {
+  await act(async () => {
+    await clients[0].refetchQueries({ queryKey: ['task', 'task-1'] });
+  });
+}
+
+it('prefills the retry editor and cancelling never submits a command', async () => {
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  expect(editor).toHaveValue('Add a regression check');
+  await user.clear(editor);
+  await user.type(editor, 'Discard this draft');
+  await user.click(screen.getByRole('button', { name: '取消修改' }));
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  expect(retryKeys).toHaveLength(0);
+  await user.click(screen.getByRole('button', { name: '調整目標後重新執行' }));
+  expect(screen.getByRole('textbox', { name: '新的工作目標' })).toHaveValue(
+    'Add a regression check',
+  );
+});
+
+it.each(['', ' \n\t ', '😀'.repeat(20001)])(
+  'rejects an invalid retry goal before sending a request (%#)',
+  async (goal) => {
+    const user = userEvent.setup();
+    const editor = await openRetryEditor(user);
+    fireEvent.change(editor, { target: { value: goal } });
+    await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/工作目標|20000/);
+    expect(editor).toHaveValue(goal);
+    expect(retryKeys).toHaveLength(0);
+  },
+);
+
+it('preserves raw Unicode and multiline retry input and shows immutable historical goals as text', async () => {
+  result = downloadableResult('+original diff');
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const goal = '  新的目標 😀\n<img src=x onerror=alert(1)>\n保留空白  ';
+  fireEvent.change(editor, { target: { value: goal } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  await waitFor(() =>
+    expect(retryPayload).toEqual({
+      goal,
+      base_sha: '7bb80d00d03d93a2d392185adba65588c5fe2462',
+      profile_revision: 'profile-1',
+      expected_state_version: 1,
+    }),
+  );
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(screen.getByRole('region', { name: '本次工作目標' }).textContent).toContain(goal);
+  expect(document.querySelector('img')).toBeNull();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(screen.getByRole('region', { name: '本次工作目標' })).toHaveTextContent(
+    'Add a regression check',
+  );
+  expect(screen.getByRole('region', { name: '本次工作目標' })).not.toHaveTextContent('新的目標');
+  expect(screen.getByLabelText('檔案差異')).toHaveTextContent('+original diff');
+  expect(lastPayload.goal).toBe('Add a regression check');
+});
+
+it('accepts 20000 Unicode code points even when they occupy 40000 UTF-16 code units', async () => {
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const goal = '😀'.repeat(20000);
+  fireEvent.change(editor, { target: { value: goal } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  await waitFor(() => expect(retryPayload?.goal).toBe(goal));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('disables editing, cancel, and competing retries while a goal retry is pending', async () => {
+  let complete!: () => void;
+  retryWait = new Promise<void>((resolve) => {
+    complete = resolve;
+  });
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const submit = screen.getByRole('button', { name: '以新目標重新執行' });
+  const unchanged = screen.getByRole('button', { name: '重新執行' });
+  await user.click(submit);
+  expect(editor).toBeDisabled();
+  expect(submit).toBeDisabled();
+  expect(unchanged).toBeDisabled();
+  expect(screen.getByRole('button', { name: '取消修改' })).toBeDisabled();
+  await user.click(unchanged);
+  expect(retryKeys).toHaveLength(1);
+  await act(async () => complete());
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('disables the editor opener while an unchanged retry is pending', async () => {
+  let complete!: () => void;
+  retryWait = new Promise<void>((resolve) => {
+    complete = resolve;
+  });
+  const user = userEvent.setup();
+  await openRetryEditor(user);
+  await user.click(screen.getByRole('button', { name: '取消修改' }));
+  await user.click(screen.getByRole('button', { name: '重新執行' }));
+  expect(screen.getByRole('button', { name: '調整目標後重新執行' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '重新執行' })).toBeDisabled();
+  await act(async () => complete());
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('retains a retry draft after a lost response and reuses its command key for identical content', async () => {
+  retryLostResponse = true;
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  fireEvent.change(editor, { target: { value: 'Recover this goal' } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('重新送出相同內容可安全重試');
+  expect(editor).toHaveValue('Recover this goal');
+  await refreshTask();
+  expect(editor).toHaveValue('Recover this goal');
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(retryKeys).toHaveLength(2);
+  expect(retryKeys[0]).toBe(retryKeys[1]);
+});
+
+it('uses a new command key when the operator changes a rejected retry draft', async () => {
+  retryStatus = 409;
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  fireEvent.change(editor, { target: { value: 'First goal' } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('執行狀態已改變');
+  expect(editor).toHaveValue('First goal');
+  fireEvent.change(editor, { target: { value: 'Revised goal' } });
+  retryStatus = 202;
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(retryKeys).toHaveLength(2);
+  expect(retryKeys[0]).not.toBe(retryKeys[1]);
+});
+
+it('keeps draft during same-attempt refresh, starts from latest while viewing history, and resets on a newer attempt', async () => {
+  externalRun = {
+    id: 'run-2',
+    attempt_no: 2,
+    goal: 'Latest terminal goal',
+    state: 'failed',
+    state_version: 7,
+  };
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  expect(editor).toHaveValue('Latest terminal goal');
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(screen.getByRole('region', { name: '本次工作目標' })).toHaveTextContent(
+    'Add a regression check',
+  );
+  expect(editor).toHaveValue('Latest terminal goal');
+  fireEvent.change(editor, { target: { value: 'In-progress draft' } });
+  externalRun = { ...externalRun, state_version: 8, cleanup_state: 'confirmed' };
+  await refreshTask();
+  expect(editor).toHaveValue('In-progress draft');
+  externalRun = {
+    id: 'run-3',
+    attempt_no: 3,
+    goal: 'New latest goal',
+    state: 'failed',
+    state_version: 9,
+    profile_revision: 'profile-3',
+    base_sha: 'a'.repeat(40),
+  };
+  await refreshTask();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await user.click(screen.getByRole('button', { name: '調整目標後重新執行' }));
+  expect(screen.getByRole('textbox', { name: '新的工作目標' })).toHaveValue('New latest goal');
+  retryStatus = 409;
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('執行狀態已改變');
+  expect(retryPayload).toEqual({
+    goal: 'New latest goal',
+    base_sha: 'a'.repeat(40),
+    profile_revision: 'profile-3',
+    expected_state_version: 9,
+  });
+  externalRun = { ...externalRun, id: 'run-4', attempt_no: 4, state: 'queued' };
+  await refreshTask();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await waitFor(() => expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull());
 });
 
 it('explains a missing task link and returns to the list', async () => {

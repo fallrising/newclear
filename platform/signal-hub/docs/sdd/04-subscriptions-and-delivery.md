@@ -17,7 +17,7 @@ subscriptions:
     mode: immediate              # immediate | digest
     start: now                   # now | earliest_hot；預設 now，不補送歷史
   - id: phone-daily
-    filter: { severity_min: notice }
+    filter: { types: ["release.deploy.*", "inspection.check.*"], severity_min: notice }
     channel:
       kind: ntfy
       url: https://ntfy.example.invalid/signalhub-daily
@@ -29,6 +29,8 @@ subscriptions:
 - webhook 目標必須在設定的允許清單內（預設只允許 tailnet 主機），防止 SSRF。
 - 新訂閱預設從建立當下開始，不補送歷史；`earliest_hot` 需明確指定。
 - 訂閱的 filter 不能匹配該訂閱自己產生的投遞失敗事件（`signalhub.delivery.*` 的 `subject` 等於自己），避免迴圈。
+
+M0 固定 webhook 為 immediate；ntfy 可 immediate 或 daily digest。digest 的時間窗、允許清單與簽章 bytes 規則見 [M0 契約](../../contracts/README.md)。
 
 ## 2. 投遞狀態機
 

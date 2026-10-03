@@ -68,10 +68,10 @@ rules:
 
 - 連續 `for_buckets` 個已結束的桶成立 → 發出 `signalhub.rule.threshold.crossed`。
 - 之後連續 `for_buckets` 個桶不成立 → 發出 `signalhub.rule.threshold.recovered`。
-- 事件 `source` 為 `urn:signalhub:rules:<rule_id>`；`id` 為 `<rule_id>:<version>:<group_key>:<bucket_start>:<crossed|recovered>`，重算時不會產生重複事件。
+- 事件 `source` 為 `urn:signalhub:rules:<rule_id>`；`id` 為 `rule:<sha256>`；sha256 對 `[rule_id,version,group_key,bucket_start,state]` 的 JCS UTF-8 bytes 計算，state 為 crossed 或 recovered，重算時不會產生重複事件。
 - 門檻事件走正常 ingest 路徑，可以被訂閱，決策系統也可以訂閱它們。
 
-**防止迴圈：** 規則的 `filter` 不能匹配 `signalhub.rule.*` 類型的事件。載入時檢查，違反則拒絕。
+**防止迴圈：** 規則的 `filter` 不能匹配 `signalhub.rule.*` 類型的事件。載入時檢查，違反則拒絕；M0 要求明列 types 並排除整個保留前綴，不靠其他欄位例外放行，見 [契約](../../contracts/README.md)。
 
 ## 7. 驗收
 

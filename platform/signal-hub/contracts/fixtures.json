@@ -1,0 +1,1305 @@
+[
+  {
+    "name": "event-minimal-valid",
+    "schema": "event",
+    "valid": true,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-extensions-valid",
+    "schema": "event",
+    "valid": true,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-002",
+      "source": "urn:example:inspection",
+      "type": "inspection.check.passed",
+      "time": "2026-10-03T10:01:00Z",
+      "severity": "info",
+      "summary": "Synthetic check passed",
+      "sampletag": "fixture",
+      "isretry": false,
+      "attempt": 2
+    }
+  },
+  {
+    "name": "event-object-extension-invalid",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-003",
+      "source": "urn:example:release",
+      "type": "release.deploy.started",
+      "time": "2026-10-03T10:02:00Z",
+      "custommeta": {
+        "key": "value"
+      }
+    }
+  },
+  {
+    "name": "event-time-missing-invalid",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-004",
+      "source": "urn:example:release",
+      "type": "release.deploy.started"
+    }
+  },
+  {
+    "name": "event-data-array-invalid",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-005",
+      "source": "urn:example:release",
+      "type": "release.deploy.started",
+      "time": "2026-10-03T10:03:00Z",
+      "data": [
+        "not",
+        "an",
+        "object"
+      ]
+    }
+  },
+  {
+    "name": "event-specversion-invalid",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "2.0",
+      "id": "evt-006",
+      "source": "urn:example:release",
+      "type": "release.deploy.started",
+      "time": "2026-10-03T10:04:00Z"
+    }
+  },
+  {
+    "name": "sources-basic-valid",
+    "schema": "sources",
+    "valid": true,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "sources-retention-valid",
+    "schema": "sources",
+    "valid": true,
+    "instance": {
+      "sources": [
+        {
+          "name": "inspection-runner",
+          "source_prefix": "urn:example:inspection",
+          "allowed_types": [
+            "inspection.check.passed",
+            "inspection.check.failed"
+          ],
+          "expected_interval": "24h",
+          "retention_days": 30,
+          "token_ref": "file:/run/secrets/example-inspection.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "sources-name-missing-invalid",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "sources-prefix-missing-invalid",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "sources-types-not-array-invalid",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": "release.deploy.*",
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "sources-token-ref-missing-invalid",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-count-valid",
+    "schema": "rules",
+    "valid": true,
+    "instance": {
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-sum-group-valid",
+    "schema": "rules",
+    "valid": true,
+    "instance": {
+      "rules": [
+        {
+          "id": "release-duration",
+          "version": 2,
+          "title": "Release duration",
+          "filter": {
+            "types": [
+              "release.deploy.succeeded"
+            ]
+          },
+          "aggregation": {
+            "fn": "sum",
+            "field": "data.duration_ms"
+          },
+          "bucket": "1d",
+          "group_by": [
+            "source",
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-three-group-fields-invalid",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "too-many-groups",
+          "version": 1,
+          "title": "Too many groups",
+          "filter": {
+            "types": [
+              "release.deploy.*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "source",
+            "type",
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-noncount-field-missing-invalid",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "sum-without-field",
+          "version": 1,
+          "title": "Missing field",
+          "filter": {
+            "types": [
+              "release.deploy.succeeded"
+            ]
+          },
+          "aggregation": {
+            "fn": "sum"
+          },
+          "bucket": "1h"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-invalid-bucket-invalid",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "bad-bucket",
+          "version": 1,
+          "title": "Bad bucket",
+          "filter": {
+            "types": [
+              "release.deploy.succeeded"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "30m"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-invalid-aggregation-invalid",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "bad-aggregation",
+          "version": 1,
+          "title": "Bad aggregation",
+          "filter": {
+            "types": [
+              "release.deploy.succeeded"
+            ]
+          },
+          "aggregation": {
+            "fn": "median",
+            "field": "data.duration_ms"
+          },
+          "bucket": "1h"
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-webhook-valid",
+    "schema": "subscriptions",
+    "valid": true,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-ntfy-digest-valid",
+    "schema": "subscriptions",
+    "valid": true,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "daily-notice",
+          "filter": {
+            "severity_min": "notice",
+            "types": [
+              "release.deploy.*"
+            ]
+          },
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic",
+            "token_ref": "file:/run/secrets/example-ntfy.token"
+          },
+          "mode": "digest",
+          "digest": {
+            "every": "24h",
+            "at": "08:30",
+            "timezone": "Etc/UTC",
+            "skip_empty": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-webhook-secret-ref-missing-invalid",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "hook-no-secret",
+          "filter": {},
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events"
+          },
+          "mode": "immediate"
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-ntfy-token-ref-missing-invalid",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "ntfy-no-token",
+          "filter": {},
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic"
+          },
+          "mode": "immediate"
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-digest-config-missing-invalid",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "digest-no-settings",
+          "filter": {},
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic",
+            "token_ref": "file:/run/secrets/example-ntfy.token"
+          },
+          "mode": "digest"
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-channel-kind-invalid",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "unsupported-channel",
+          "filter": {},
+          "channel": {
+            "kind": "email",
+            "url": "https://mail.example.invalid/inbox"
+          },
+          "mode": "immediate"
+        }
+      ]
+    }
+  },
+  {
+    "name": "event-invalid-summary-24",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "summary": "two\nlines"
+    }
+  },
+  {
+    "name": "event-invalid-source-25",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "bad space",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-invalid-time-26",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-02-30T00:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-invalid-type-27",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "Release.done",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-invalid-id-28",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-invalid-severity-29",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "severity": "fatal"
+    }
+  },
+  {
+    "name": "event-invalid-data_base64-30",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "data_base64": "eA=="
+    }
+  },
+  {
+    "name": "event-invalid-seq-31",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "seq": 1
+    }
+  },
+  {
+    "name": "event-invalid-custom-32",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "custom": 1.5
+    }
+  },
+  {
+    "name": "event-invalid-custom-33",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "custom": 2147483648
+    }
+  },
+  {
+    "name": "event-null-optional",
+    "schema": "event",
+    "valid": true,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "subject": null,
+      "custom": null,
+      "dataschema": "https://schema.example.invalid/event"
+    }
+  },
+  {
+    "name": "event-internal-type",
+    "schema": "event",
+    "valid": true,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "signalhub.source.silent",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "sources-duplicate-id",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        },
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rules-duplicate-id",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        },
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscriptions-duplicate-id",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        },
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ]
+    }
+  },
+  {
+    "name": "source-reserved-type",
+    "schema": "sources",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "signalhub.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rule-implicit-loop",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {},
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "rule-explicit-loop",
+    "schema": "rules",
+    "valid": false,
+    "instance": {
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "signalhub.rule.*"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "subscription-self-loop",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {},
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ]
+    }
+  },
+  {
+    "name": "webhook-digest-undefined",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "digest",
+          "start": "now",
+          "digest": {
+            "every": "24h",
+            "at": "08:30",
+            "timezone": "Etc/UTC",
+            "skip_empty": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "digest-bad-timezone",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "daily-notice",
+          "filter": {
+            "severity_min": "notice",
+            "types": [
+              "release.deploy.*"
+            ]
+          },
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic",
+            "token_ref": "file:/run/secrets/example-ntfy.token"
+          },
+          "mode": "digest",
+          "digest": {
+            "every": "24h",
+            "at": "08:30",
+            "timezone": "No/SuchZone",
+            "skip_empty": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "filter-valid",
+    "schema": "filter",
+    "valid": true,
+    "instance": {
+      "types": [
+        "release.deploy.*"
+      ],
+      "data": {
+        "a.b.c": false
+      }
+    }
+  },
+  {
+    "name": "filter-too-deep",
+    "schema": "filter",
+    "valid": false,
+    "instance": {
+      "data": {
+        "a.b.c.d": 1
+      }
+    }
+  },
+  {
+    "name": "filter-empty-array",
+    "schema": "filter",
+    "valid": false,
+    "instance": {
+      "types": []
+    }
+  },
+  {
+    "name": "config-valid",
+    "schema": "config",
+    "valid": true,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ],
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ],
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ],
+      "webhook_allowlist": [
+        "https://receiver.example.invalid/v1/events"
+      ]
+    }
+  },
+  {
+    "name": "config-webhook-unlisted",
+    "schema": "config",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ],
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ],
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ],
+      "webhook_allowlist": []
+    }
+  },
+  {
+    "name": "config-inline-secret",
+    "schema": "config",
+    "valid": false,
+    "instance": {
+      "sources": [
+        {
+          "name": "release-pipeline",
+          "source_prefix": "urn:example:release",
+          "allowed_types": [
+            "release.deploy.*"
+          ],
+          "token_ref": "file:/run/secrets/example-release.token"
+        }
+      ],
+      "rules": [
+        {
+          "id": "inspection-failures",
+          "version": 1,
+          "title": "Inspection failures",
+          "filter": {
+            "types": [
+              "inspection.check.failed"
+            ],
+            "sources": [
+              "urn:example:inspection*"
+            ]
+          },
+          "aggregation": {
+            "fn": "count",
+            "field": ""
+          },
+          "bucket": "1h",
+          "group_by": [
+            "subject"
+          ]
+        }
+      ],
+      "subscriptions": [
+        {
+          "id": "release-hook",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ],
+      "webhook_allowlist": [
+        "https://receiver.example.invalid/v1/events"
+      ],
+      "secret": "never-allowed"
+    }
+  },
+  {
+    "name": "event-strict-51",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "test.size.checked\n",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      }
+    }
+  },
+  {
+    "name": "event-strict-52",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "summary": "hello\n"
+    }
+  },
+  {
+    "name": "event-strict-53",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "custom\n": "value"
+    }
+  },
+  {
+    "name": "event-strict-54",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "custom": 2.0
+    }
+  },
+  {
+    "name": "subscription-id-newline",
+    "schema": "subscriptions",
+    "valid": false,
+    "instance": {
+      "subscriptions": [
+        {
+          "id": "release-hook\n",
+          "filter": {
+            "types": [
+              "release.deploy.failed"
+            ]
+          },
+          "channel": {
+            "kind": "webhook",
+            "url": "https://receiver.example.invalid/v1/events",
+            "secret_ref": "file:/run/secrets/example-webhook.secret"
+          },
+          "mode": "immediate",
+          "start": "now"
+        }
+      ]
+    }
+  },
+  {
+    "name": "causation-56",
+    "schema": "event",
+    "valid": true,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "causationid": "urn:example:source%23fragment#id%25suffix"
+    }
+  },
+  {
+    "name": "causation-57",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "causationid": "missing-delimiter"
+    }
+  },
+  {
+    "name": "causation-58",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "causationid": "#"
+    }
+  },
+  {
+    "name": "causation-59",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "causationid": "urn:example:source#id#extra"
+    }
+  },
+  {
+    "name": "causation-60",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "evt-001",
+      "source": "urn:example:release",
+      "type": "release.deploy.succeeded",
+      "time": "2026-10-03T10:00:00Z",
+      "data": {
+        "version": "v1"
+      },
+      "causationid": "urn:example:source#id%zz"
+    }
+  }
+]

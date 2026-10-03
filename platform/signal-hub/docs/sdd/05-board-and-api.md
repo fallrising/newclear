@@ -25,7 +25,7 @@
 
 ## 3. 查詢 API
 
-所有查詢 API 都需要 owner token。時間參數為 RFC 3339；列表 API 用 `cursor` 分頁，單頁最多 200 筆。
+查詢 API 接受 owner 或唯讀 token；重放與重載只接受 owner。healthz／readyz 在 tailnet 內免 token，僅回傳狀態。時間參數為 RFC 3339，範圍 `[from,to)`；列表 API 用 `cursor` 分頁，預設100、單頁最多200筆。每個 endpoint 的欄位、錯誤與回應以 [OpenAPI](../../contracts/openapi.json) 為 M0 機械契約。
 
 | 方法 | 路徑 | 說明 |
 | --- | --- | --- |

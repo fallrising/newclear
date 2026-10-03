@@ -57,7 +57,7 @@ export async function startFixture() {
       type:index%3===0?'release.deploy.failed':'release.deploy.succeeded',
       time:new Date(now-index*1000).toISOString(),subject:'api-service',
       severity:index%3===0?'error':'info',summary:'Browser fixture '+String(index).padStart(3,'0'),
-      ...(index<2?{correlationid:'browser-chain'}:{}),
+      ...(index<3?{correlationid:'browser-chain'}:{}),
       ...(index===0?{originurl:'javascript:alert(1)'}:{originurl:'https://example.invalid/run/'+index}),
       data:{duration_ms:120+index,content:'<img src=x onerror=alert(1)>'},
     }));

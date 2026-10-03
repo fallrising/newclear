@@ -94,8 +94,9 @@ test('detail keeps raw JSON inert, rejects unsafe origins, and navigates related
   const raw = JSON.parse(await detail.locator('.json-block').innerText());
   expect(raw.id).toBe('browser-0');
   expect(raw.data.content).toBe('<img src=x onerror=alert(1)>');
-  await expect(detail.locator('.related-list li')).toHaveCount(1);
-  await detail.locator('.related-list button').click();
+  await expect(detail.locator('.related-list li')).toHaveCount(2);
+  await expect(detail.locator('.related-list li > div > p')).toHaveText(['Browser fixture 002', 'Browser fixture 001']);
+  await detail.locator('.related-list li').filter({ hasText: 'Browser fixture 001' }).getByRole('button').click();
   await expect(detail.locator('.detail-summary')).toHaveText('Browser fixture 001');
   expect(new URL(page.url()).searchParams.get('event')).toBe('2');
   await expect(detail.getByRole('link', { name: '開啟原系統' })).toHaveAttribute('href', 'https://example.invalid/run/1');

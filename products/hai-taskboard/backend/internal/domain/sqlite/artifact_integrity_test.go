@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"io"
+	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -16,17 +18,32 @@ import (
 )
 
 func TestCompleteWorkItem_RejectsPostPublicationArtifactTamper(t *testing.T) {
-	for _, name := range []string{"candidate-delete", "candidate-replace", "evidence-delete", "evidence-replace"} {
+	t.Run("intact-control", func(t *testing.T) {
+		fixture, complete, _ := integrityQAFixture(t)
+		before := integrityDurableCounts(t, fixture)
+		outcome, err := fixture.application.CompleteWorkItem(t.Context(), verticalOperator, complete)
+		mustVerticalOutcome(t, outcome, err)
+		item, err := fixture.store.LoadWorkItem(t.Context(), verticalProject, verticalWorkItem)
+		after := integrityDurableCounts(t, fixture)
+		if err != nil || item.Phase() != domain.PhaseDone || item.Version() != 6 || after[0] != before[0]+1 || after[1] != before[1]+1 {
+			t.Fatalf("intact completion did not persist Done/proof/consumption: phase=%s version=%d counts=%v err=%v", item.Phase(), item.Version(), after, err)
+		}
+	})
+	for _, name := range []string{"candidate-delete", "candidate-replace", "candidate-length", "evidence-delete", "evidence-replace", "evidence-length"} {
 		t.Run(name, func(t *testing.T) {
 			fixture, complete, report := integrityQAFixture(t)
 			before := integrityDurableCounts(t, fixture)
 			digest := complete.Subject.CandidateDigest()
-			if name == "evidence-delete" || name == "evidence-replace" {
+			reason := domain.CodeCandidateUnavailable
+			if strings.HasPrefix(name, "evidence-") {
 				digest = report
+				reason = domain.CodeEvidenceUnavailable
 			}
 			fixture.artifacts.mu.Lock()
 			if name == "candidate-delete" || name == "evidence-delete" {
 				delete(fixture.artifacts.objects, digest)
+			} else if strings.HasSuffix(name, "-length") {
+				fixture.artifacts.objects[digest] = append(fixture.artifacts.objects[digest], '!')
 			} else {
 				fixture.artifacts.objects[digest] = bytes.Repeat([]byte("x"), len(fixture.artifacts.objects[digest]))
 			}
@@ -34,6 +51,8 @@ func TestCompleteWorkItem_RejectsPostPublicationArtifactTamper(t *testing.T) {
 			fixture.artifacts.ResetOpenStats()
 			if _, err := fixture.application.CompleteWorkItem(t.Context(), verticalOperator, complete); err == nil {
 				t.Error("completion accepted tampered published material")
+			} else {
+				assertIntegrityRejection(t, err, reason)
 			}
 			assertIntegrityUnchanged(t, fixture, before)
 		})
@@ -79,6 +98,20 @@ func TestCompletionMaterial_BoundedCollectionsRejectOverflow(t *testing.T) {
 			})
 			if _, ok := errors.AsType[domain.StorageCorruptionError](err); !ok {
 				t.Fatalf("overflow was silently truncated: %v", err)
+			}
+			assertIntegrityUnchanged(t, fixture, before)
+			// Exactly the requested number of rows must be returned, not rejected or
+			// silently dropped. This fixture contains two records of this collection.
+			var material port.CompletionMaterial
+			err = fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+				var err error
+				material, err = tx.LoadCompletionMaterial(t.Context(), port.CompletionMaterialQuery{ProjectID: verticalProject, WorkItemID: verticalWorkItem,
+					CandidateID: complete.Subject.CandidateID(), RunID: verticalRun, SubjectDigest: complete.Subject.Digest(), GraphRevisionDigest: fixture.graphDigest, MaximumRecords: 2})
+				return err
+			})
+			counts := map[string]int{"candidate": len(material.CandidateArtifacts), "evidence": len(material.Evidence), "review": len(material.Reviews), "approval": len(material.Approvals), "requirement": len(material.RequiredACRevisions)}
+			if err != nil || counts[collection] != 2 {
+				t.Fatalf("exact row limit rejected or lost data: counts=%v err=%v", counts, err)
 			}
 			assertIntegrityUnchanged(t, fixture, before)
 		})
@@ -155,6 +188,137 @@ func TestCompleteWorkItem_RejectsMaterialSnapshotChange(t *testing.T) {
 			}
 		})
 	}
+	for _, name := range []string{"evidence", "review", "approval"} {
+		t.Run(name, func(t *testing.T) {
+			fixture, complete, _ := integrityQAFixture(t)
+			before := integrityDurableCounts(t, fixture)
+			subjectMaterial := loadVerticalSubjectMaterial(t, fixture.store, complete.Subject.Digest())
+			tracked := &integrityArtifactReader{delegate: fixture.artifacts, unit: fixture.unit}
+			tracked.afterClose = sync.OnceFunc(func() {
+				if err := fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+					switch name {
+					case "evidence":
+						record := subjectMaterial.Evidence[0]
+						record.ID, record.Verdict = "changed-evidence", "Failed"
+						return tx.StoreEvidence(t.Context(), record)
+					case "review":
+						record := subjectMaterial.Reviews[0]
+						record.ID, record.Verdict, record.CreatedAtNS = "changed-review", "Rejected", record.CreatedAtNS+1
+						return tx.StoreReview(t.Context(), record)
+					case "approval":
+						record := subjectMaterial.Approvals[0]
+						record.ID, record.ExpiresAtNS = "changed-approval", fixedClockTime.UnixNano()
+						return tx.StoreApproval(t.Context(), record)
+					}
+					return nil
+				}); err != nil {
+					t.Fatal(err)
+				}
+			})
+			fixture.application = integrityService(t, fixture, tracked)
+			if _, err := fixture.application.CompleteWorkItem(t.Context(), verticalOperator, complete); err == nil {
+				t.Fatal("subject-relevant record added during verification was accepted")
+			} else {
+				assertVerticalCommandCode(t, err, command.CodeStaleSubject)
+			}
+			assertIntegrityUnchanged(t, fixture, before)
+		})
+	}
+	for _, name := range []string{"locator-length", "candidate-availability", "report-availability"} {
+		t.Run(name+"-hostile-port", func(t *testing.T) {
+			fixture, complete, _ := integrityQAFixture(t)
+			before := integrityDurableCounts(t, fixture)
+			// SQLite metadata is immutable (proved separately below). Model an
+			// untrusted persistence adapter returning changed metadata only on the
+			// final read; do not weaken a trigger or manufacture a durable mutation.
+			unit := &hostileIntegrityUnit{delegate: fixture.unit, change: func(material *port.CompletionMaterial) {
+				switch name {
+				case "locator-length":
+					material.CandidateArtifacts[0].ByteLength++
+				case "candidate-availability":
+					material.CandidateArtifacts[0].Availability = "Missing"
+					material.CandidateAvailable = false
+				case "report-availability":
+					material.Artifacts[0].Availability = "Quarantined"
+				}
+			}}
+			tracked := &integrityArtifactReader{delegate: fixture.artifacts, unit: fixture.unit, afterClose: sync.OnceFunc(func() { unit.armed = true })}
+			application, err := service.New(unit, fixture.clock, &verticalIDs{counts: map[port.IDKind]uint64{port.IDAuditGroup: 100}}, verticalExecutor{}, tracked, &verticalProjection{}, service.Config{
+				Operator: verticalOperator, IdempotencyTTL: time.Hour, Specification: verticalSpecification{}, Completion: fixture.policy})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := application.CompleteWorkItem(t.Context(), verticalOperator, complete); err == nil {
+				t.Fatal("changed locator/availability port snapshot was accepted")
+			} else {
+				assertVerticalCommandCode(t, err, command.CodeStaleSubject)
+			}
+			assertIntegrityUnchanged(t, fixture, before)
+		})
+	}
+}
+
+func TestArtifactMetadata_ImmutableLocatorAndAvailability(t *testing.T) {
+	fixture, complete, _ := integrityQAFixture(t)
+	digest := complete.Subject.CandidateDigest()
+	var before port.Artifact
+	if err := fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+		var err error
+		before, err = tx.(port.AuthorityTransaction).LoadArtifact(t.Context(), digest)
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range []string{"UPDATE artifacts SET byte_length=byte_length+1 WHERE digest=?", "UPDATE artifacts SET availability='Missing' WHERE digest=?"} {
+		if _, err := fixture.store.db.ExecContext(t.Context(), statement, digest.String()); err == nil || !strings.Contains(err.Error(), "immutable") {
+			t.Fatalf("immutable metadata update did not reject: %v", err)
+		}
+	}
+	if err := fixture.store.Within(t.Context(), func(tx port.Transaction) error {
+		after, err := tx.(port.AuthorityTransaction).LoadArtifact(t.Context(), digest)
+		if err == nil && after != before {
+			t.Fatal("rejected metadata update changed locator/availability")
+		}
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func assertIntegrityRejection(t *testing.T, err error, reason domain.RejectionCode) {
+	t.Helper()
+	assertVerticalCommandCode(t, err, command.CodeDoneGateUnsatisfied)
+	failure, ok := errors.AsType[*command.Error](err)
+	if !ok || !slices.Contains(failure.Reasons, reason) {
+		t.Fatalf("material rejection does not name %s: %#v", reason, err)
+	}
+}
+
+type hostileIntegrityUnit struct {
+	delegate *verticalTrackingUnit
+	armed    bool
+	change   func(*port.CompletionMaterial)
+}
+
+func (unit *hostileIntegrityUnit) Within(ctx context.Context, operation func(port.Transaction) error) error {
+	return unit.delegate.Within(ctx, func(tx port.Transaction) error {
+		return operation(hostileIntegrityTransaction{Transaction: tx, unit: unit})
+	})
+}
+
+type hostileIntegrityTransaction struct {
+	port.Transaction
+	unit *hostileIntegrityUnit
+}
+
+func (tx hostileIntegrityTransaction) LoadCompletionMaterial(ctx context.Context, query port.CompletionMaterialQuery) (port.CompletionMaterial, error) {
+	material, err := tx.Transaction.LoadCompletionMaterial(ctx, query)
+	if err == nil && tx.unit.armed {
+		material.CandidateArtifacts = slices.Clone(material.CandidateArtifacts)
+		material.Artifacts = slices.Clone(material.Artifacts)
+		tx.unit.change(&material)
+	}
+	return material, err
 }
 
 func TestCompleteWorkItem_RechecksAllCandidateBindingsAndProjectScope(t *testing.T) {

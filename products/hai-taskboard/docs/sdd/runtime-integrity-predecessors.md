@@ -1,6 +1,6 @@
 # Mini-SDD: Runtime integrity predecessors
 
-Status: **Candidate; requires independent review and orchestrator acceptance**.
+Status: **Bounded H04/H05 implementation accepted by T-126 and orchestrator evidence gate (2026-10-04)**.
 Parents: `../SDD.md` HAI-AUTH-001..004, HAI-DOMAIN-005, HAI-DONE-001..004,
 HAI-EXEC-001..006 and `persistent-fake-runtime.md` HAI-RUNTIME-101..104.
 This contract authorizes no implementation or acceptance by itself.
@@ -59,19 +59,22 @@ object reads are suitable byte boundaries; completion must actually use that bou
 
 ## Durable oracles and ownership
 
-Names below are Candidate until final source, execution evidence and review are accepted. Future
+Names below pass the retained integrated and independent gates for this bounded slice. Future
 admission oracles remain Proposed/NotRun in the admission contract. Each negative
 completion checks persisted QA phase, zero new CompletionRecord/consumption/audit/projection rows;
 dispatch checks no Run/outbox or phase change. Results may record a canonical rejection.
 
 | Oracle | Durable fixture and negative case | Child scope |
 | --- | --- | --- |
-| `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch` | Real SQLite/application ingress; unsupported scenario is rejected before polling/claim, while registered scenario still runs once | T-121 reproduction; a separately routed repair if Red reproduces |
+| `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch` | Real SQLite/application ingress; unsupported scenario is rejected before polling/claim, while registered scenario still runs once | T-121 retained Red; T-124 accepted repair |
 | `TestCompleteWorkItem_RejectsPostPublicationArtifactTamper` | Legal published QA subject; delete candidate object, corrupt candidate bytes, delete report, corrupt report, or change byte length after publication; each cannot complete; intact control completes | T-122 completion service, bounded persistence material read and tests |
 | `TestCompleteWorkItem_MaterialVerificationOutsideWriteTransaction` | Instrument object opens/reads and real Store; none inside writer transaction; unauthorized and exact replay open none | T-122 |
-| `TestCompleteWorkItem_RejectsMaterialSnapshotChange` | Pause after byte verification; commit a version, binding/locator, availability or subject-relevant change; final transaction rejects stale preflight | T-122 |
+| `TestCompleteWorkItem_RejectsMaterialSnapshotChange` | Pause after byte verification; lawfully commit version/binding changes or append subject-relevant Evidence/Review/Approval records; final transaction rejects stale preflight. SQLite locator/availability are immutable: prove UPDATE rejection separately and reject hostile persistence-port snapshot changes | T-122/T-125 |
+| `TestCompleteWorkItem_MaterialObjectBudgets` | Public completion commands accept exact 10 MiB/object, 50 MiB total, 1024 distinct objects and zero bytes; overflow rejects within read/open budgets without durable mutation | T-125 |
+| `TestArtifactMetadata_ImmutableLocatorAndAvailability` | Real SQLite rejects locator/availability UPDATE and retains original metadata | T-125 |
+| `TestCompletionMaterial_BoundedCollectionsRejectOverflow` | Real SQLite rejects overflow and returns every row at the exact configured limit for all five collections | T-122/T-125 |
 
-Existing regression references, inspected but not rerun by this design task:
+Regression references rerun by integrated full/race gates:
 `TestVerticalAuthority_ArtifactVerificationOutsideWriteTransaction`,
 `TestDispatchRun_UsesConstructionTimeExecutorDeclarationOutsideTransaction`,
 `TestCommand_AuthenticatedPrincipalIsSoleActor`, `TestCommand_IdempotencySameRequestAndConflict`,

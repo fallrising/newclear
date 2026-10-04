@@ -210,14 +210,14 @@ unavailable and conservatively represented, as specified in `sdd/persistent-fake
 The workflow covers native backend and fixture-UI gates. It supplies no missing browser, import,
 restore or real-provider acceptance evidence.
 
-## Admission and integrity predecessors (T-0163 candidate)
+## Admission and integrity predecessors (T-0163 bounded acceptance)
 
 | Clause | Oracle or contract | Status |
 | --- | --- | --- |
-| HAI-ADMISSION-001..008 | `sdd/accepted-spec-admission.md` proposal/head/provenance/activation/read-set/input/migration contract; seven durable child oracle groups | Candidate design; H06..H09 Specified/NotRun |
-| HAI-INTEGRITY-001 | `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch`, `TestDispatchRun_RejectsUnsupportedScenarioWithoutMutation`, `TestFakeAdapter_DeclaresRegisteredScenariosWithoutAliases` | Candidate; original T-121 Red retained |
-| HAI-INTEGRITY-002..005 | `TestCompleteWorkItem_RejectsPostPublicationArtifactTamper`, `TestCompleteWorkItem_MaterialVerificationOutsideWriteTransaction`, `TestCompleteWorkItem_RejectsMaterialSnapshotChange`, `TestCompleteWorkItem_RechecksAllCandidateBindingsAndProjectScope`; existing response-loss replay | Candidate; original artifact Red retained |
-| HAI-INTEGRITY-006 | existing persistent restart/worker-failure/no-redispatch and full/race regressions | Candidate regression gate |
+| HAI-ADMISSION-001..008 | `sdd/accepted-spec-admission.md` proposal/head/provenance/activation/read-set/input/migration contract; seven durable child oracle groups | Accepted H01 design (T-126); H06..H09 Specified/NotRun |
+| HAI-INTEGRITY-001 | `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch`, `TestDispatchRun_RejectsUnsupportedScenarioWithoutMutation`, `TestFakeAdapter_DeclaresRegisteredScenariosWithoutAliases` | Passing bounded (T-124/T-126); original T-121 Red retained |
+| HAI-INTEGRITY-002..005 | `TestCompleteWorkItem_RejectsPostPublicationArtifactTamper`, `TestCompleteWorkItem_MaterialVerificationOutsideWriteTransaction`, `TestCompleteWorkItem_RejectsMaterialSnapshotChange`, `TestCompleteWorkItem_RechecksAllCandidateBindingsAndProjectScope`, `TestCompleteWorkItem_MaterialObjectBudgets`, `TestArtifactMetadata_ImmutableLocatorAndAvailability`, `TestCompletionMaterial_BoundedCollectionsRejectOverflow`; existing response-loss replay | Passing bounded (T-122/T-125/T-126); original artifact Red retained |
+| HAI-INTEGRITY-006 | existing persistent restart/worker-failure/no-redispatch and full/race regressions | Passing bounded full/race regression gate |
 
 AC-06 has only the bounded new-completion corruption rejection predecessor in this slice.
 Persisted Missing/Quarantined disposition, repair, restore and full AC-06 remain NotRun.

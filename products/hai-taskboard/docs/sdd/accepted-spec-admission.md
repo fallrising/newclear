@@ -1,6 +1,6 @@
 # Mini-SDD: Accepted specification admission
 
-Status: **Candidate; requires independent review and orchestrator acceptance**.
+Status: **H01 design accepted by T-126 and orchestrator evidence gate (2026-10-04)**.
 Parents: `../SDD.md` HAI-AUTH-001..006, HAI-STATE-001, HAI-DONE-004 and HAI-RECON-001..007;
 ADR-001/004/005; `reconciliation.md` and `domain-and-gates.md`.
 All new records, commands, ports and oracles below are **Proposed**. H01 is this predecessor
@@ -125,5 +125,5 @@ Source anchors inspected: `service/service.go`, `service/policy.go`, `command/ty
 `reconcile/{graph,impact,reuse}.go`. Existing pure tests
 `TestImpactPlan_UsesOldAndNewReverseClosure`, `TestImpactActivation_RejectsStalePlan` and
 `TestReuseFingerprint_RecipeEnvironmentAndBaseMatter` do not prove durable admission.
-No implementation, execution evidence, accepted contract status or H06..H09 completion follows
-from this design pass.
+Acceptance covers this H01 contract only. New durable records, commands and oracle execution
+remain Proposed/NotRun; no H06..H09 implementation or completion follows.

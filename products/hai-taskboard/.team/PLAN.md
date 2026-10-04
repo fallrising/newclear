@@ -618,10 +618,10 @@ continues, with no merge/release/deployment. Baseline code candidate: 8f40f3e2.
 
 | ID | Goal | Scope | Status |
 | --- | --- | --- | --- |
-| T-120 | Accepted-spec/admission executable contract and integrity oracle contract | two new mini-SDDs and report | Candidate; root ACKs integrity requirements |
+| T-120 | Accepted-spec/admission executable contract and integrity oracle contract | two new mini-SDDs and report | Accepted H01 design only (T-126) |
 | T-121 | Reachable unsupported-scenario Red reproduction | new runtime test and report | Retained Red; repaired runtime Green passes |
-| T-122 | Post-publication artifact corruption Red reproduction and minimal Green | completion service, bounded material metadata ports/store/tests and report | Integrated Candidate; focused/full/race Green |
-| T-123 | Independent combined contract/code/evidence review | report-only exact candidate bundle | In review |
+| T-122 | Post-publication artifact corruption Red reproduction and minimal Green | completion service, bounded material metadata ports/store/tests and report | Accepted bounded implementation with T-125 coverage and T-126 |
+| T-123 | Independent combined contract/code/evidence review | report-only exact candidate bundle | Historical REWORK preserved |
 
 Root will inspect every diff and rerun focused/full/race/vet/build plus shared frontend gates.
 Behavior repairs must retain auth-before-read, exact replay, no artifact I/O inside the write
@@ -630,3 +630,34 @@ transaction, current-subject recheck and claimed-run no-redispatch. Historical f
 T-120 root disposition: HAI-INTEGRITY-001..006 inspected and ACKed before Green. H01 remains Candidate pending independent review. T-122 scope explicitly includes complete Candidate artifact metadata and narrow synthetic completion fixture corrections; no schema or transaction method signature changes. T-124 is root-owned scenario declaration/admission repair following T-121 Red; shared service/fixture changes follow T-122 integration.
 
 T-124 scenario repair Candidate: trusted cloned registered scenario declarations, construction-time validation and pre-mutation admission. Eleven new named oracles have unique source definitions. Root focused and native runtime regression passed; shared digest-pinned offline Go container gate and native web gate exited 0. Twelve-file code manifest SHA-256: `a3453d70bafb90827d33ae24d56076e7662e6a3438e7f740841139b83356f3d3`. Independent T-123 remains pending; this checkpoint authorizes no acceptance claim. Initial Claude attempt failed sandbox DNS (EAI_AGAIN); raw result is retained and the same read-only review was rerouted with network permission. Final PR-head CI remains pending.
+
+Independent Claude Opus 5.5 T-123 returned REWORK on Candidate `0464c270` (same reviewed source manifest). No blocking production defect found; medium oracle gaps and missing budget evidence block acceptance. Raw report is retained, not rewritten. T-125 routes only missing tamper/snapshot/capacity tests; root supplies omitted constant/helper/doc context and routes fresh T-126 review after integrated gates. Candidate PR is still Draft.
+
+T-123 low-finding dispositions for fresh review: F4 eligibility predicate duplication is a future maintenance risk; the domain rejects any matched nonpassing/stale/unavailable report, so no unverified report can authorize Done today. F5 MaximumRecords is trusted internal configuration fixed at 1024 for completion; over-capacity remains fail-closed, with taxonomy refinement deferred to capacity work. F6 coverage-only rework does not manufacture Red for already-existing guards; original behavior-change Red is retained. F7 requires an exact-row-limit positive control in T-125. Root supplies the full maxRunArtifactBytes/artifactStorageKey definitions and documentation to T-126.
+
+
+### Final local acceptance, 2026-10-04
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-124 | Trusted Fake scenario admission repair after T-121 Red | cloned declarations, service guard, focused oracles | Accepted with T-126 |
+| T-125 | Close T-123 tamper/snapshot/budget coverage gaps | two test files; no production edit | Accepted with T-126 |
+| T-126 | Fresh independent combined evidence review | report and private semantic/hash checks | Accepted; unconditional PASS |
+
+The orchestrator read every integrated diff and exact report, recomputed the thirteen-file code
+manifest `4ffdf0533130fdb0a5bb1f20aa1f39382efb372de164ad829356cae77b5cb077`, and confirmed
+all six production files are unchanged from Claude-reviewed candidate `0464c270`.
+T-126 report `ae2c0599640a65ce3e220b2ac83b4c5dcf3ed5a3718441ca76c1bf469126f0bb` passed all
+required dimensions and independently executed the focused SQLite/service/integration suite.
+Root integrated pinned offline full/race gate exited 0; log SHA-256
+`4447d5fffb5d8d170baef5f7a5bf25c71f002777e47650662eecbfd81edbb483`. Unchanged web full gate
+also exited 0, including eight tests. Root gate details and retained diagnostic hashes are in
+`.team/reports/T-0163-gate.md`; earlier PARTIAL/REWORK reports remain byte-for-byte historical.
+
+This accepts H01 design and bounded H04/H05 implementation only. Actual candidate PR run
+37186686929 passed both jobs at `0464c270`; the final pushed head must pass its own PR run before
+delivery, recorded in desk T-0163's report. No accepted-head/import/activation runtime,
+Missing/Quarantined disposition, restore, live UI, resume, provider or broader G1 acceptance follows.
+The next durable admission child begins with the checksummed migration oracle; it requires a
+separate bounded assignment. The adapter's preallocated map-to-slice collection retains the
+existing convention and one allocation before sorting; no unnecessary style refactor was added.

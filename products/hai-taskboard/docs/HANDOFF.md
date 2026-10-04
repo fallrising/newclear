@@ -156,15 +156,17 @@ Desk T-0163 covers H01 executable admission design and the H04/H05 predecessor r
 `accepted-spec-admission.md` separates proposals, first acceptance, current heads, Git provenance,
 transactional activation and versioned dispatch inputs. Durable H06..H09 remains Specified/NotRun.
 `runtime-integrity-predecessors.md` requires trusted scenario rejection before dispatch and bounded
-completion byte checks outside writer locks with final metadata/subject rechecks. This candidate
-awaits final combined independent review and orchestrator gates; PLAN owns acceptance.
+completion byte checks outside writer locks with final metadata/subject rechecks. T-126 independently
+passed the combined design, code, tests and evidence; the orchestrator accepted
+this bounded slice after integrated full/race/vet/build and web gates. PLAN records exact hashes.
 Historical scenario/artifact Red and fixture diagnostics remain retained. No restore, live UI,
 quarantine/repair of corrupt bytes, real provider or broader G1 acceptance follows.
 
 ## Safe next action
 
-Finish T-0163's combined review and actual Draft PR checks. After its bounded delivery, use the
-H06..H09 child contracts for separately assigned durable admission work; T-050 backup/restore and
+Confirm the latest pushed PR head passes both backend/web jobs, independently of the recorded
+local acceptance. For the next separately assigned durable admission slice, use the H06..H09 child
+contracts; T-050 backup/restore and
 live UI remain separate scopes. The 37-item remaining-work roadmap is desk T-0157's report.
 No merge, deployment or real provider is authorized by this handoff.
 

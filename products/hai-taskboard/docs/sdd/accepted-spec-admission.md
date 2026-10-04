@@ -3,8 +3,10 @@
 Status: **H01 design accepted by T-126 and orchestrator evidence gate (2026-10-04)**.
 Parents: `../SDD.md` HAI-AUTH-001..006, HAI-STATE-001, HAI-DONE-004 and HAI-RECON-001..007;
 ADR-001/004/005; `reconciliation.md` and `domain-and-gates.md`.
-All new records, commands, ports and oracles below are **Proposed**. H01 is this predecessor
-design; H06..H09 remain **Specified/NotRun**. This document implements no admission workflow.
+H01 is this accepted predecessor design. The ordered runner and separately assigned V2
+storage/migration child are accepted in `ordered-migrations.md` and
+`acceptance-persistence-schema.md`. Commands, ports and admission workflow oracles remain
+**Proposed/NotRun**; full H06..H09 remains **Specified/NotRun**.
 
 ## Existing boundary and ownership
 
@@ -107,7 +109,9 @@ audit remains authority, with no Markdown synchronization or event-sourced recon
 
 ## Durable oracle contract and child scopes
 
-Every oracle here is **Proposed/NotRun**, even where pure-kernel tests already exist. Each child
+The migration oracle has bounded runner/V2 storage evidence in the separate mini-SDDs; it does
+not prove operator acceptance. All other oracles here remain **Proposed/NotRun**, even where
+pure-kernel tests already exist. Each child
 must receive a separate bounded assignment and write its named Red test before production behavior.
 
 | Oracle | Required positive/negative durable assertion | Child scope |
@@ -125,5 +129,7 @@ Source anchors inspected: `service/service.go`, `service/policy.go`, `command/ty
 `reconcile/{graph,impact,reuse}.go`. Existing pure tests
 `TestImpactPlan_UsesOldAndNewReverseClosure`, `TestImpactActivation_RejectsStalePlan` and
 `TestReuseFingerprint_RecipeEnvironmentAndBaseMatter` do not prove durable admission.
-Acceptance covers this H01 contract only. New durable records, commands and oracle execution
-remain Proposed/NotRun; no H06..H09 implementation or completion follows.
+Acceptance of this document covers the H01 contract only. Separately accepted V2 tables are
+storage capability, with durable outer plan identity distinct from the existing kernel plan digest.
+Canonical verification, commands, ports and full admission oracle execution remain Proposed/NotRun;
+no full H06..H09 implementation or completion follows.

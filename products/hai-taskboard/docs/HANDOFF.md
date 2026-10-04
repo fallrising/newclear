@@ -2,12 +2,12 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-10-03
+Updated: 2026-10-04
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/persistent-outbox`
+- Branch: `agent/hai-taskboard/decision-attention`
 - Worktree: task-scoped checkout; verify actual Git state.
 - Current delivery base: `newclear/main@e2c901304570428a5c78744e274739206dbf3387`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
@@ -150,11 +150,23 @@ PR #238 remains Draft. This does not connect the fixture UI, admit specification
 restore. The earlier branch references describe historical checkpoints and do not override this
 continuation. Check the latest PR head's checks separately from this implementation checkpoint.
 
+## Admission/integrity continuation
+
+Desk T-0163 covers H01 executable admission design and the H04/H05 predecessor repairs.
+`accepted-spec-admission.md` separates proposals, first acceptance, current heads, Git provenance,
+transactional activation and versioned dispatch inputs. Durable H06..H09 remains Specified/NotRun.
+`runtime-integrity-predecessors.md` requires trusted scenario rejection before dispatch and bounded
+completion byte checks outside writer locks with final metadata/subject rechecks. This candidate
+awaits final combined independent review and orchestrator gates; PLAN owns acceptance.
+Historical scenario/artifact Red and fixture diagnostics remain retained. No restore, live UI,
+quarantine/repair of corrupt bytes, real provider or broader G1 acceptance follows.
+
 ## Safe next action
 
-With the bounded CI slice accepted, T-050 reconciliation/restore/handoff is the next bounded
-component scope after the accepted T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
-start T-050, merge, deploy, add an importer or enable a real provider.
+Finish T-0163's combined review and actual Draft PR checks. After its bounded delivery, use the
+H06..H09 child contracts for separately assigned durable admission work; T-050 backup/restore and
+live UI remain separate scopes. The 37-item remaining-work roadmap is desk T-0157's report.
+No merge, deployment or real provider is authorized by this handoff.
 
 ## Restore invariant
 

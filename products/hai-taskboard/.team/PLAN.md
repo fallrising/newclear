@@ -605,3 +605,28 @@ report remain historical evidence; neither was rewritten into a pass.
 This accepts only HAI-CI-001. The PR remains Draft; no merge, T-050, Decision/Attention/import,
 browser, restore or broader G1 acceptance follows. Later documentation commits must pass their
 own PR checks before handoff; this record identifies the validated implementation candidate.
+
+## Admission/integrity predecessor continuation (2026-10-04)
+
+The owner requested continued development after the remaining-work inventory. This bounded
+continuation delivers the executable accepted-spec/admission contract and reproduces the
+unsupported local Fake scenario/material-integrity risks before any justified minimal repair.
+It does not implement accepted-head/import/activation, restore, live UI or Proposed features.
+Root owns routing, integration, review and acceptance; writers use isolated worktrees.
+Current branch remains agent/hai-taskboard/decision-attention; existing Draft delivery authorization
+continues, with no merge/release/deployment. Baseline code candidate: 8f40f3e2.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-120 | Accepted-spec/admission executable contract and integrity oracle contract | two new mini-SDDs and report | Candidate; root ACKs integrity requirements |
+| T-121 | Reachable unsupported-scenario Red reproduction | new runtime test and report | Retained Red; repaired runtime Green passes |
+| T-122 | Post-publication artifact corruption Red reproduction and minimal Green | completion service, bounded material metadata ports/store/tests and report | Integrated Candidate; focused/full/race Green |
+| T-123 | Independent combined contract/code/evidence review | report-only exact candidate bundle | In review |
+
+Root will inspect every diff and rerun focused/full/race/vet/build plus shared frontend gates.
+Behavior repairs must retain auth-before-read, exact replay, no artifact I/O inside the write
+transaction, current-subject recheck and claimed-run no-redispatch. Historical failures remain.
+
+T-120 root disposition: HAI-INTEGRITY-001..006 inspected and ACKed before Green. H01 remains Candidate pending independent review. T-122 scope explicitly includes complete Candidate artifact metadata and narrow synthetic completion fixture corrections; no schema or transaction method signature changes. T-124 is root-owned scenario declaration/admission repair following T-121 Red; shared service/fixture changes follow T-122 integration.
+
+T-124 scenario repair Candidate: trusted cloned registered scenario declarations, construction-time validation and pre-mutation admission. Eleven new named oracles have unique source definitions. Root focused and native runtime regression passed; shared digest-pinned offline Go container gate and native web gate exited 0. Twelve-file code manifest SHA-256: `a3453d70bafb90827d33ae24d56076e7662e6a3438e7f740841139b83356f3d3`. Independent T-123 remains pending; this checkpoint authorizes no acceptance claim. Initial Claude attempt failed sandbox DNS (EAI_AGAIN); raw result is retained and the same read-only review was rerouted with network permission. Final PR-head CI remains pending.

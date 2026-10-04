@@ -209,3 +209,17 @@ unavailable and conservatively represented, as specified in `sdd/persistent-fake
 
 The workflow covers native backend and fixture-UI gates. It supplies no missing browser, import,
 restore or real-provider acceptance evidence.
+
+## Admission and integrity predecessors (T-0163 candidate)
+
+| Clause | Oracle or contract | Status |
+| --- | --- | --- |
+| HAI-ADMISSION-001..008 | `sdd/accepted-spec-admission.md` proposal/head/provenance/activation/read-set/input/migration contract; seven durable child oracle groups | Candidate design; H06..H09 Specified/NotRun |
+| HAI-INTEGRITY-001 | `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch`, `TestDispatchRun_RejectsUnsupportedScenarioWithoutMutation`, `TestFakeAdapter_DeclaresRegisteredScenariosWithoutAliases` | Candidate; original T-121 Red retained |
+| HAI-INTEGRITY-002..005 | `TestCompleteWorkItem_RejectsPostPublicationArtifactTamper`, `TestCompleteWorkItem_MaterialVerificationOutsideWriteTransaction`, `TestCompleteWorkItem_RejectsMaterialSnapshotChange`, `TestCompleteWorkItem_RechecksAllCandidateBindingsAndProjectScope`; existing response-loss replay | Candidate; original artifact Red retained |
+| HAI-INTEGRITY-006 | existing persistent restart/worker-failure/no-redispatch and full/race regressions | Candidate regression gate |
+
+AC-06 has only the bounded new-completion corruption rejection predecessor in this slice.
+Persisted Missing/Quarantined disposition, repair, restore and full AC-06 remain NotRun.
+Unsupported dispatch rejection does not implement resume or AC-19. No accepted-head authority,
+current graph importer, browser or broader G1 coverage is inferred.

@@ -228,7 +228,7 @@ func TestDispatchRun_UsesConstructionTimeExecutorDeclarationOutsideTransaction(t
 	_, store := readyFixture(t)
 	executor := &trackingExecutor{
 		declaration: port.ExecutorDeclaration{
-			AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack"},
+			AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack"}, Scenarios: []string{"success"},
 		},
 		inTransaction:   func() bool { return store.withinActive },
 		panicAfterFirst: true,
@@ -705,7 +705,10 @@ func (artifactStub) Put(context.Context, io.Reader) (domain.Digest, uint64, erro
 	return domain.HashString("artifact"), 1, nil
 }
 
-func (artifactStub) Open(context.Context, domain.Digest) (io.ReadCloser, error) {
+func (artifactStub) Open(_ context.Context, digest domain.Digest) (io.ReadCloser, error) {
+	if digest == domain.HashString("candidate") {
+		return io.NopCloser(strings.NewReader("candidate")), nil
+	}
 	return io.NopCloser(strings.NewReader("artifact")), nil
 }
 
@@ -725,7 +728,7 @@ func (sink *projectionStub) PublishCommitted(_ context.Context, projection port.
 func testService(t *testing.T, store *memoryUnit, specification specificationPolicy) *Service {
 	t.Helper()
 	return testServiceWithExecutor(t, store, specification, executorStub{declaration: port.ExecutorDeclaration{
-		AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack"},
+		AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack"}, Scenarios: []string{"success"},
 	}})
 }
 
@@ -801,10 +804,11 @@ func completionFixture(t *testing.T) (*Service, *memoryUnit, domain.CompletionSu
 		Run:              port.Run{ID: subject.RunID(), ProjectID: projectID, WorkItemID: workItemID, InputDigest: subject.RunInputDigest(), AdapterID: "fake/v1", AdapterVersion: "1", ScenarioID: "success", Attempt: 1, DesiredAction: "Dispatch", DispatchState: "Acknowledged", ObservedState: "Succeeded", ReconciliationState: "None", SideEffectOutcome: "Confirmed", CreatedAtNS: 1},
 		CandidatePresent: true, CandidateAvailable: true, RunPresent: true,
 		RequiredACRevisions: []port.ACRequirement{requirement}, GraphRevisionDigest: subject.GraphRevisionDigest(),
-		Evidence:  []port.Evidence{{ID: "evidence-1", ProjectID: projectID, SubjectDigest: subject.Digest(), ACID: "AC-1", ACRevisionDigest: requirement.RevisionDigest, Verdict: "Passed", Applicability: "Current", Availability: "Present", VerifierClass: "independent", VerifierActor: "verifier", VerifierRole: "independent-run", RecipeDigest: domain.HashString("recipe"), EnvironmentDigest: domain.HashString("environment"), ArtifactDigest: domain.HashString("artifact")}},
-		Reviews:   []port.Review{{ID: "review-1", ProjectID: projectID, SubjectDigest: subject.Digest(), Verdict: "Approved", Reviewer: "reviewer", Independent: true, CreatedAtNS: 1}},
-		Approvals: []port.Approval{{ID: "approval-1", ProjectID: projectID, SubjectDigest: subject.Digest(), CommandKind: "CompleteWorkItem", Actor: operator, ExpiresAtNS: fixedTime().Add(time.Hour).UnixNano()}},
-		Artifacts: []port.Artifact{{Digest: domain.HashString("artifact"), MediaType: "text/plain", ByteLength: 1, StorageKey: "objects/artifact", Availability: "Present"}},
+		Evidence:           []port.Evidence{{ID: "evidence-1", ProjectID: projectID, SubjectDigest: subject.Digest(), ACID: "AC-1", ACRevisionDigest: requirement.RevisionDigest, Verdict: "Passed", Applicability: "Current", Availability: "Present", VerifierClass: "independent", VerifierActor: "verifier", VerifierRole: "independent-run", RecipeDigest: domain.HashString("recipe"), EnvironmentDigest: domain.HashString("environment"), ArtifactDigest: domain.HashString("artifact")}},
+		Reviews:            []port.Review{{ID: "review-1", ProjectID: projectID, SubjectDigest: subject.Digest(), Verdict: "Approved", Reviewer: "reviewer", Independent: true, CreatedAtNS: 1}},
+		Approvals:          []port.Approval{{ID: "approval-1", ProjectID: projectID, SubjectDigest: subject.Digest(), CommandKind: "CompleteWorkItem", Actor: operator, ExpiresAtNS: fixedTime().Add(time.Hour).UnixNano()}},
+		Artifacts:          []port.Artifact{{Digest: domain.HashString("artifact"), MediaType: "text/plain", ByteLength: 8, StorageKey: "sha256:" + domain.HashString("artifact").String(), Availability: "Present"}},
+		CandidateArtifacts: []port.Artifact{{Digest: domain.HashString("candidate"), MediaType: "text/plain", ByteLength: 9, StorageKey: "sha256:" + domain.HashString("candidate").String(), Availability: "Present"}},
 	}
 	store.state.projects[projectID] = port.Project{ID: projectID, Name: "project", Repository: "repo", Ref: "main", Version: 1}
 	store.state.workItems[itemKey(projectID, workItemID)] = item
@@ -938,6 +942,7 @@ func cloneMaterial(material port.CompletionMaterial) port.CompletionMaterial {
 	material.Reviews = slices.Clone(material.Reviews)
 	material.Approvals = slices.Clone(material.Approvals)
 	material.Artifacts = slices.Clone(material.Artifacts)
+	material.CandidateArtifacts = slices.Clone(material.CandidateArtifacts)
 	return material
 }
 

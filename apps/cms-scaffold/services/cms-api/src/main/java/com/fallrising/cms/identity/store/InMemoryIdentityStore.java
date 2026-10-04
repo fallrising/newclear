@@ -4,6 +4,7 @@ import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
 import com.fallrising.cms.identity.domain.AuditPage;
 import com.fallrising.cms.identity.domain.AuditQuery;
+import com.fallrising.cms.identity.domain.AuditRetention;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -36,6 +37,7 @@ public class InMemoryIdentityStore implements IdentityStore {
     private final ConcurrentHashMap<UUID, SessionRecord> sessionsById = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<AuditEvent> audits = new CopyOnWriteArrayList<>();
     private final Object adminGuard = new Object();
+    private volatile AuditRetention auditRetention = new AuditRetention(AuditRetention.DEFAULT_DAYS, Instant.now(), null);
 
     @Override
     public Optional<Principal> findPrincipalById(UUID id) {
@@ -215,6 +217,23 @@ public class InMemoryIdentityStore implements IdentityStore {
     @Override
     public Optional<AuditEvent> findAudit(UUID id) {
         return audits.stream().filter(e -> e.id().equals(id)).findFirst();
+    }
+
+    @Override
+    public AuditRetention auditRetention() {
+        return auditRetention;
+    }
+
+    @Override
+    public void updateAuditRetention(AuditRetention retention) {
+        auditRetention = retention;
+    }
+
+    @Override
+    public int deleteAuditsBefore(Instant cutoff) {
+        List<AuditEvent> expired = audits.stream().filter(event -> event.at().isBefore(cutoff)).toList();
+        audits.removeAll(expired);
+        return expired.size();
     }
 
     @Override

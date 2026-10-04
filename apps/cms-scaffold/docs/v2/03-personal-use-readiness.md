@@ -1,6 +1,6 @@
 # 個人使用驗收與介面參考
 
-日期：2026-10-03。範圍：單人、單站、小量內容，允許維護停機，但不能以資料遺失換取簡化。這份文件是本次文件先行的產品邊界；[P0](waves/P0.md) 是可實作的第一個修復波，後續能力沿原 v2 路線圖。
+日期：2026-10-04。範圍：單人、單站、小量內容，允許維護停機，但不能以資料遺失換取簡化。這份文件是本次文件先行的產品邊界；[P0](waves/P0.md) 是可實作的第一個修復波，後續能力沿原 v2 路線圖。
 
 ## 目前證據與缺口
 
@@ -10,6 +10,7 @@
 | 測試 | BW0 記憶體／PostgreSQL store 契約、OpenAPI 回應驗證、CI | P0 已新增服務層故障回滾／競爭測試並重新執行；正式部署驗收仍待完成 |
 | 前端 | W0 tokens、shadcn 元件、Query、MSW、三面 app | P0 表單值安全已本地驗證；W1 完整 schema 編輯器已本地驗證；W2選擇器與媒體／自訂視圖已本地驗證，已於PR #245通過CI並合併 |
 | 擴充 | 類型註冊 API、共用 Entry 寫入、自訂 React 視圖 | BW1a 能力／metadata 已本地驗證；動態導覽已於 W1 本地驗證；後續模型治理仍待實作 |
+| 應用持久性 | BW4已驗證完整Spring Boot使用JDBC，內容／設定／session跨context重啟保存；發布與設定audit失敗回滾 | 備份還原、媒體檔案與真實部署操作驗收仍待完成 |
 | 操作維護 | 本機 Compose、DB/media volume、prod cookie 設定 | 正式初始化、HTTPS、備份還原演練、升級回滾 |
 
 過去對封存版本的「沒有 CI／只有 Identity 的整合測試」觀察不能套用到此基準。規格中的 DOC_READY 只是設計可施工；VERIFIED、測試通過與真實生產可用是三個不同主張。
@@ -88,6 +89,12 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 
 ## BW3 驗收與界線
 
-[BW3交付](../../.team/reports/BW3-DELIVERY.md)已LOCAL_VERIFIED：Front會員通用列表／單筆／草稿建立、本人資料與關聯保護、安全投影、每分鐘5次限制，以及appointment_request種子。建立沿既有交易與審計；真PostgreSQL故障注入證明entry/index/ref/media/audit一起回滾。JSONB predicate種子比較修正避免重複授權，不清除既有資料。
+[BW3交付](../../.team/reports/BW3-DELIVERY.md)已VERIFIED（PR #252）：Front會員通用列表／單筆／草稿建立、本人資料與關聯保護、安全投影、每分鐘5次限制，以及appointment_request種子。建立沿既有交易與審計；真PostgreSQL故障注入證明entry/index/ref/media/audit一起回滾。JSONB predicate種子比較修正避免重複授權，不清除既有資料。
 
-279 Java／125 PostgreSQL／395前端／39 mock E2E，以及lint/typecheck/build/bundle/npmci/bootJar/codegen通過。完整Java初次的測試fixture可見性錯誤已修正後全套重跑，舊失敗保留。萬筆store p95工作65ms／公開74ms／更新19ms。待遠端CI及合併；沒有依賴／migration／UI變更。會員UI仍在W3b，診所審批仍在BW6；下一個後端任務建議BW4應用／DataSource wiring、審計保留、安全與效能。單實例limiter不是分散式配額；既有正式使用操作門檻不變，未部署。
+279 Java／125 PostgreSQL／395前端／39 mock E2E，以及lint/typecheck/build/bundle/npmci/bootJar/codegen通過。完整Java初次的測試fixture可見性錯誤已修正後全套重跑，舊失敗保留。萬筆store p95工作65ms／公開74ms／更新19ms。[遠端CI及合併已核對](../../.team/reports/BW3-PUBLICATION.md)；沒有依賴／migration／UI變更。會員UI仍在W3b，診所審批仍在BW6；下一個後端任務建議BW4應用／DataSource wiring、審計保留、安全與效能。單實例limiter不是分散式配額；既有正式使用操作門檻不變，未部署。
+
+## BW4 驗收與界線
+
+[BW4交付](../../.team/reports/BW4-DELIVERY.md)已LOCAL_VERIFIED：審計保留90天預設、30／90／365選擇、延後每日清理及Admin設定API；三個store在有DataSource時選用JDBC。完整應用Testcontainers測試證明真實DB審計失敗會回滾發布與設定更新，並在关闭／重新建立應用context後讀回內容／設定／session／索引／revision／audit。這補齊BQ-12／BQ-13工程證據；先前各波指出的完整應用wiring缺口以本段為最新狀態。
+
+完整293 Java／133 PostgreSQL／395前端／39 mock E2E與lint/typecheck/build/bundle/npmci/codegen/bootJar通過。三次10,000筆量測均達標，見[效能紀錄](perf-records.md)。首次E2E38/39因ERR_NETWORK_CHANGED載入失敗，序列重跑39/39通過，舊trace保留。待遠端CI與合併；沒有新增依賴，唯一migration為V9。Admin設定UI留W4；下一個後端任務BW5處理錯誤回應、管理輸入及公開關聯／媒體查詢。正式初始化、備份還原與升級回滾仍須獨立驗收，沒有部署。

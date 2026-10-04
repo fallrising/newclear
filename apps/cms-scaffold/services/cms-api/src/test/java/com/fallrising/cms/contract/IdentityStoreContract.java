@@ -3,6 +3,7 @@ package com.fallrising.cms.contract;
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
 import com.fallrising.cms.identity.domain.AuditQuery;
+import com.fallrising.cms.identity.domain.AuditRetention;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.PrincipalRoleAssignment;
@@ -250,6 +251,32 @@ public abstract class IdentityStoreContract {
         assertThat(huge.offset()).isEqualTo(214748364600L);
         assertThat(store.queryAudits(huge).items()).isEmpty();
         assertThat(store.queryAudits(huge).total()).isEqualTo(3);
+    }
+
+    @Test
+    void BW4_auditRetentionDefaultsToNinetyDaysAndRoundTrips() {
+        AuditRetention initial = store.auditRetention();
+        assertThat(initial.days()).isEqualTo(90);
+        assertThat(initial.updatedAt()).isNotNull();
+        assertThat(initial.updatedBy()).isNull();
+        Principal anna = principal("anna");
+        store.insertPrincipal(anna);
+        store.updateAuditRetention(new AuditRetention(30, T0.plusSeconds(5), anna.id()));
+        assertThat(store.auditRetention()).isEqualTo(new AuditRetention(30, T0.plusSeconds(5), anna.id()));
+        store.updateAuditRetention(new AuditRetention(365, T0.plusSeconds(6), null));
+        assertThat(store.auditRetention()).isEqualTo(new AuditRetention(365, T0.plusSeconds(6), null));
+    }
+
+    @Test
+    void BW4_deleteAuditsBeforeRemovesOnlyOlderEvents() {
+        AuditEvent old = audit("LOGIN_SUCCESS", UUID.randomUUID(), T0.minusSeconds(1));
+        AuditEvent edge = audit("LOGIN_SUCCESS", UUID.randomUUID(), T0);
+        AuditEvent fresh = audit("LOGOUT", UUID.randomUUID(), T0.plusSeconds(1));
+        List.of(old, edge, fresh).forEach(store::insertAudit);
+        assertThat(store.deleteAuditsBefore(T0)).isEqualTo(1);
+        assertThat(store.listAudits(null, null)).extracting(AuditEvent::id).containsExactly(fresh.id(), edge.id());
+        assertThat(store.findAudit(old.id())).isEmpty();
+        assertThat(store.deleteAuditsBefore(T0)).isZero();
     }
 
     protected static Principal principal(String username) {

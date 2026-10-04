@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.9.0
+  version: 0.10.0
   license:
     name: Proprietary
 servers:
@@ -1288,6 +1288,57 @@ paths:
         "403": { $ref: "#/components/responses/Error403" }
         "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/admin/settings/audit:
+    get:
+      operationId: getAuditSettings
+      tags: [Admin]
+      description: |
+        Audit retention (surface-admin §7.2). Requires `manage_settings` (Admin surface). Events older than
+        `retentionDays` are deleted by a job that runs one hour after startup and then every 24 hours.
+        Errors:
+        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+          denied `manage_settings`).
+        - 403 FORBIDDEN: caller lacks `manage_settings` (also written as denied).
+      responses:
+        "200":
+          description: Current audit retention
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditSettings" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "500": { $ref: "#/components/responses/Error500" }
+    patch:
+      operationId: patchAuditSettings
+      tags: [Admin]
+      description: |
+        Changes the retention. A change writes `settings.retention_updated` (category SETTINGS, targetType
+        `settings`, detail `{from, to}`); sending the current value changes nothing and writes no event. A shorter
+        retention takes effect at the next purge run; nothing is deleted immediately.
+        Errors:
+        - 400 VALIDATION_FAILED: body is not a JSON object, or has a property other than `retentionDays`.
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getAuditSettings.
+        - 422 FIELD_VALIDATION: `error.fields[0].field` is `retentionDays`, code REQUIRED (missing or null),
+          WRONG_TYPE (not an integer) or NOT_IN_ENUM (not 30, 90 or 365).
+      parameters:
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuditSettingsPatchRequest" }
+      responses:
+        "200":
+          description: Updated audit retention
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditSettings" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "500": { $ref: "#/components/responses/Error500" }
   /api/v1/me/content-types/{typeKey}/entries:
     get:
       operationId: listMyEntries
@@ -1797,7 +1848,7 @@ components:
       properties:
         field:
           type: string
-          description: Path of the input, `payload.<fieldKey>`.
+          description: Path of the input, `payload.<fieldKey>`, or the property name of a settings request.
           example: payload.title
         code: { $ref: "#/components/schemas/FieldErrorCode" }
         message:
@@ -1806,7 +1857,7 @@ components:
     FieldErrorCode:
       type: string
       description: |
-        Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
+        Why a field is invalid. REQUIRED (publish, member create, or a missing setting), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
         markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
         REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
       enum:
@@ -2628,6 +2679,28 @@ components:
           nullable: true
           additionalProperties: true
           description: The event's detail_json, or null.
+    AuditSettings:
+      type: object
+      additionalProperties: false
+      required: [retentionDays, allowedDays, updatedAt, updatedBy]
+      properties:
+        retentionDays: { type: integer, enum: [30, 90, 365] }
+        allowedDays:
+          type: array
+          items: { type: integer }
+          description: Always `[30, 90, 365]`.
+        updatedAt: { type: string, format: date-time }
+        updatedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: Principal who last changed the retention; null while it is the default.
+    AuditSettingsPatchRequest:
+      type: object
+      additionalProperties: false
+      required: [retentionDays]
+      properties:
+        retentionDays: { type: integer, enum: [30, 90, 365] }
     AuditEventPage:
       type: object
       additionalProperties: false

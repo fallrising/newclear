@@ -387,3 +387,5 @@ BW0 施工細節見 `waves/BW0.md`。
 
 - 本 repo：`services/cms-api/src/main/java/com/fallrising/cms/**`、`src/main/resources/db/migration/V1～V4`、`openapi.yaml`、`.github/workflows/cms-scaffold-ci.yml`
 - 規格：`docs/specs/kernel-content.md`、`kernel-identity.md`、`kernel-media.md`、`surface-*.md`
+
+**BW4 增量實作（2026-10-04）：** 依BW4 §0補入90天預設審計保留設定與延後清理、V9，以及完整應用DataSource選用JDBC。專項PostgreSQL測試已證明發布與設定的真實審計外鍵失敗會回滾，且重新建立應用context可讀回內容／設定／session／索引／revision／audit；不等於部署或備份還原驗收。三次萬筆store量測工作74/70/74ms、公開71/75/77ms、更新18/17/19ms，全部達標，BQ-05維持現有索引表。最終完整驗收與發布狀態見BW4波次及交付報告。

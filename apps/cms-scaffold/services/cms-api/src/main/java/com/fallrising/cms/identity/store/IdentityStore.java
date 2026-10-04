@@ -3,6 +3,7 @@ package com.fallrising.cms.identity.store;
 import com.fallrising.cms.identity.domain.AuditEvent;
 import com.fallrising.cms.identity.domain.AuditPage;
 import com.fallrising.cms.identity.domain.AuditQuery;
+import com.fallrising.cms.identity.domain.AuditRetention;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -65,6 +66,14 @@ public interface IdentityStore {
     AuditPage queryAudits(AuditQuery query);
 
     Optional<AuditEvent> findAudit(UUID id);
+
+    /** The singleton setting defaults to 90 days with no updating principal. */
+    AuditRetention auditRetention();
+
+    void updateAuditRetention(AuditRetention retention);
+
+    /** Deletes events strictly before cutoff, retaining events at the boundary. */
+    int deleteAuditsBefore(Instant cutoff);
 
     long countUsableAdmins();
 

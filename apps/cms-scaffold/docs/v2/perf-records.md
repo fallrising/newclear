@@ -12,3 +12,9 @@
 | 2026-09-25 | BW4 細化預演（第 1 次） | Linux 容器、4 核、PostgreSQL 16.13、JDK 21 | 41 ms | 41 ms | 8 ms | 4 | 達標 |
 | 2026-09-25 | BW4 細化預演（第 2 次） | 同上 | 41 ms | 38 ms | 8 ms | 4 | 達標 |
 | 2026-09-25 | BW4 細化預演（第 3 次） | 同上 | 43 ms | 42 ms | 9 ms | 4 | 達標 |
+
+| 2026-10-04 | BW4 實作（第 1 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 74 ms | 71 ms | 18 ms | 4（內容查詢） | 達標 |
+| 2026-10-04 | BW4 實作（第 2 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 70 ms | 75 ms | 17 ms | 4（內容查詢） | 達標 |
+| 2026-10-04 | BW4 實作（第 3 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 74 ms | 77 ms | 19 ms | 4（內容查詢） | 達標 |
+
+BW4實作三次皆強制重跑原本10,000筆測試，門檻不變。[原始數字與指令](../../.team/evidence/bw4-performance.json)由[量測腳本](../../.team/evidence/bw4-perf-run.py)保留。queryEntries每次實測2句SQL；列表內容store呼叫另有findTypeByKey/fieldsOf，合計4句，且不隨頁面筆數增加，由ListQueryCountTests固定。這裡沿BW1b量測內容查詢，不把store層時間當成HTTP端到端延遲。

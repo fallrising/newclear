@@ -4,6 +4,7 @@ import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
 import com.fallrising.cms.identity.domain.AuditPage;
 import com.fallrising.cms.identity.domain.AuditQuery;
+import com.fallrising.cms.identity.domain.AuditRetention;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -283,6 +284,24 @@ public class JdbcIdentityStore implements IdentityStore {
     @Override
     public Optional<AuditEvent> findAudit(UUID id) {
         return jdbc.query("SELECT * FROM cms_audit_event WHERE id = ?", auditMapper(), id).stream().findFirst();
+    }
+
+    @Override
+    public AuditRetention auditRetention() {
+        return jdbc.queryForObject("SELECT retention_days, updated_at, updated_by FROM cms_audit_settings WHERE id = 1",
+                (rs, n) -> new AuditRetention(rs.getInt("retention_days"), instant(rs, "updated_at"),
+                        rs.getObject("updated_by", UUID.class)));
+    }
+
+    @Override
+    public void updateAuditRetention(AuditRetention retention) {
+        jdbc.update("UPDATE cms_audit_settings SET retention_days = ?, updated_at = ?, updated_by = ? WHERE id = 1",
+                retention.days(), ts(retention.updatedAt()), retention.updatedBy());
+    }
+
+    @Override
+    public int deleteAuditsBefore(Instant cutoff) {
+        return jdbc.update("DELETE FROM cms_audit_event WHERE at < ?", ts(cutoff));
     }
 
     @Override

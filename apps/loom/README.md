@@ -46,6 +46,8 @@ npm run tauri -- dev
 
 Keep API keys in the environment, not vault documents or version control. Real provider calls are separate from offline tests.
 
+For **OpenCode Go**, use `LOOM_AI_PROVIDER=opencode`, `OPENCODE_API_KEY`, and explicit `LOOM_AI_MODEL` / `LOOM_AI_PROTOCOL` settings. The default gateway is Go's `/zen/go/v1`; protocol choices are `chat-completions`, `responses`, and `messages`. The [OpenCode integration guide](docs/opencode-provider.md) includes private-file launch instructions, model/protocol selection and an opt-in live probe. Invalid settings appear in the AI panel and block sending. See [verification results and remaining live acceptance](docs/opencode-verification.md).
+
 ## Verify
 
 ```sh

@@ -17,6 +17,7 @@ pub enum ProviderKind {
     Anthropic,
     OpenAi,
     DeepSeek,
+    OpenCode,
 }
 
 impl ProviderKind {
@@ -26,17 +27,19 @@ impl ProviderKind {
             Self::Anthropic => "anthropic",
             Self::OpenAi => "openai",
             Self::DeepSeek => "deepseek",
+            Self::OpenCode => "opencode",
         }
     }
 
-    /// Parse the value of `LOOM_AI_PROVIDER`. Falls back to None if
-    /// unrecognized; the caller picks the default.
+    /// Parse `LOOM_AI_PROVIDER`; the resolver rejects unrecognized explicit
+    /// values and supplies defaults only when the variable is absent.
     #[must_use]
     pub fn parse(raw: &str) -> Option<Self> {
         match raw.trim().to_ascii_lowercase().as_str() {
             "anthropic" | "claude" => Some(Self::Anthropic),
             "openai" | "gpt" => Some(Self::OpenAi),
             "deepseek" => Some(Self::DeepSeek),
+            "opencode" => Some(Self::OpenCode),
             _ => None,
         }
     }
@@ -48,6 +51,7 @@ impl ProviderKind {
             Self::Anthropic => "ANTHROPIC_API_KEY",
             Self::OpenAi => "OPENAI_API_KEY",
             Self::DeepSeek => "DEEPSEEK_API_KEY",
+            Self::OpenCode => "OPENCODE_API_KEY",
         }
     }
 
@@ -58,6 +62,7 @@ impl ProviderKind {
             Self::Anthropic => "claude-sonnet-4-6",
             Self::OpenAi => "gpt-4o-mini",
             Self::DeepSeek => "deepseek-chat",
+            Self::OpenCode => "",
         }
     }
 }

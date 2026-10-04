@@ -9,9 +9,13 @@ use parking_lot::Mutex;
 use tokio_util::sync::CancellationToken;
 
 use super::client::{CompletionRequest, Streamer};
+use super::config::{AiSettings, WireProtocol};
 use super::error::{AiError, AiResult};
-use super::provider::{PinnedContext, Provider, ProviderConfig, ProviderKind, StreamEvent, Usage};
-use super::providers::{AnthropicProvider, OpenAiProvider};
+use super::provider::{
+    CompletionInput, PinnedContext, PreparedRequest, Provider, ProviderConfig, ProviderKind,
+    StreamEvent, Usage,
+};
+use super::providers::{AnthropicProvider, OpenAiProvider, ResponsesProvider};
 
 pub type AiRequestId = String;
 
@@ -66,12 +70,11 @@ pub struct AiStatus {
     /// frontend reads this to produce a friendly empty-state message
     /// without hard-coding per-provider strings.
     pub key_env: String,
+    pub protocol: Option<String>,
+    pub base_url: Option<String>,
+    pub configuration_error: Option<String>,
 }
 
-const PROVIDER_ENV: &str = "LOOM_AI_PROVIDER";
-const MODEL_ENV: &str = "LOOM_AI_MODEL";
-const DEFAULT_MAX_TOKENS: u32 = 2048;
-const MAX_TOKENS_ENV: &str = "LOOM_AI_MAX_TOKENS";
 const SYSTEM_PROMPT: &str = "\
 You are an assistant embedded inside Loom — an AI-native workspace whose \
 plain-text markdown documents live next to live PTY terminals on a \
@@ -82,6 +85,8 @@ prose for analysis. Don't repeat the user's document back to them.";
 
 pub struct AiService {
     inflight: Mutex<HashMap<AiRequestId, CancellationToken>>,
+    settings: Option<AiSettings>,
+    session_id: String,
 }
 
 impl AiService {
@@ -89,22 +94,47 @@ impl AiService {
     pub fn new() -> Self {
         Self {
             inflight: Mutex::new(HashMap::new()),
+            settings: None,
+            session_id: uuid::Uuid::now_v7().to_string(),
         }
     }
 
-    pub fn status() -> AiStatus {
-        let kind = active_provider_kind();
-        let key_env = kind.api_key_env();
-        let key_present = std::env::var(key_env)
-            .map(|v| !v.trim().is_empty())
-            .unwrap_or(false);
-        let model = std::env::var(MODEL_ENV).unwrap_or_else(|_| kind.default_model().into());
-        AiStatus {
-            provider: kind.as_str().into(),
-            model,
-            key_present,
-            key_env: key_env.into(),
+    /// Use already validated settings, without reading global environment.
+    #[must_use]
+    pub fn with_settings(settings: AiSettings) -> Self {
+        Self {
+            settings: Some(settings),
+            ..Self::new()
         }
+    }
+
+    #[must_use]
+    pub fn status() -> AiStatus {
+        Self::status_for(AiSettings::from_env())
+    }
+
+    #[must_use]
+    pub fn current_status(&self) -> AiStatus {
+        Self::status_for(self.resolve_settings())
+    }
+
+    fn status_for(settings: AiResult<AiSettings>) -> AiStatus {
+        match settings {
+            Ok(settings) => settings.status(),
+            Err(error) => AiStatus {
+                provider: "unconfigured".into(),
+                model: String::new(),
+                key_present: false,
+                key_env: String::new(),
+                protocol: None,
+                base_url: None,
+                configuration_error: Some(error.to_string()),
+            },
+        }
+    }
+
+    fn resolve_settings(&self) -> AiResult<AiSettings> {
+        self.settings.clone().map_or_else(AiSettings::from_env, Ok)
     }
 
     pub fn cancel(&self, request_id: &str) -> bool {
@@ -130,7 +160,7 @@ impl AiService {
     where
         F: FnMut(AiChunk) + Send + 'static,
     {
-        let (cfg, provider) = Self::build_call()?;
+        let (cfg, provider) = self.build_call()?;
         let cancel = CancellationToken::new();
         self.inflight
             .lock()
@@ -170,32 +200,60 @@ impl AiService {
         }
     }
 
-    fn build_call() -> AiResult<(ProviderConfig, Box<dyn Provider>)> {
-        let kind = active_provider_kind();
-        let key_env = kind.api_key_env();
-        let api_key = std::env::var(key_env)
-            .map(|v| v.trim().to_string())
-            .ok()
-            .filter(|v| !v.is_empty())
-            .ok_or(AiError::MissingApiKey)?;
-        let model = std::env::var(MODEL_ENV).unwrap_or_else(|_| kind.default_model().into());
-        let max_tokens = std::env::var(MAX_TOKENS_ENV)
-            .ok()
-            .and_then(|v| v.parse::<u32>().ok())
-            .filter(|n| *n > 0)
-            .unwrap_or(DEFAULT_MAX_TOKENS);
+    fn build_call(&self) -> AiResult<(ProviderConfig, Box<dyn Provider>)> {
+        let settings = self.resolve_settings()?;
+        let api_key = settings.api_key.ok_or(AiError::MissingApiKey)?;
         let cfg = ProviderConfig {
             api_key,
-            model,
+            model: settings.model,
             system_prompt: SYSTEM_PROMPT.into(),
-            max_tokens,
+            max_tokens: settings.max_tokens,
         };
-        let provider: Box<dyn Provider> = match kind {
-            ProviderKind::Anthropic => Box::new(AnthropicProvider),
-            ProviderKind::OpenAi => Box::new(OpenAiProvider::openai()),
-            ProviderKind::DeepSeek => Box::new(OpenAiProvider::deepseek()),
+        let inner: Box<dyn Provider> = match settings.protocol {
+            WireProtocol::Messages => Box::new(AnthropicProvider),
+            WireProtocol::ChatCompletions => Box::new(OpenAiProvider::openai()),
+            WireProtocol::Responses => Box::new(ResponsesProvider),
         };
-        Ok((cfg, provider))
+        let provider = ConfiguredProvider {
+            inner,
+            kind: settings.provider,
+            url: format!("{}/{}", settings.base_url, settings.protocol.operation()),
+            session_id: self.session_id.clone(),
+        };
+        Ok((cfg, Box::new(provider)))
+    }
+}
+
+/// Keep wire-format adapters unchanged; configured routing and gateway identity
+/// are orthogonal to authentication/body/parser semantics.
+struct ConfiguredProvider {
+    inner: Box<dyn Provider>,
+    kind: ProviderKind,
+    url: String,
+    session_id: String,
+}
+
+impl Provider for ConfiguredProvider {
+    fn kind(&self) -> ProviderKind {
+        self.kind
+    }
+
+    fn prepare(&self, cfg: &ProviderConfig, input: &CompletionInput) -> PreparedRequest {
+        let mut request = self.inner.prepare(cfg, input);
+        request.url.clone_from(&self.url);
+        if self.kind == ProviderKind::OpenCode {
+            request
+                .headers
+                .push(("user-agent".into(), "loom/0.1.0".into()));
+            request
+                .headers
+                .push(("x-opencode-session".into(), self.session_id.clone()));
+        }
+        request
+    }
+
+    fn parse_event(&self, data: &str) -> AiResult<Vec<StreamEvent>> {
+        self.inner.parse_event(data)
     }
 }
 
@@ -205,12 +263,24 @@ impl Default for AiService {
     }
 }
 
-fn active_provider_kind() -> ProviderKind {
-    std::env::var(PROVIDER_ENV)
-        .ok()
-        .and_then(|raw| ProviderKind::parse(&raw))
-        .unwrap_or(ProviderKind::Anthropic)
-}
-
 /// Wrap an `Arc<AiService>` so Tauri's `manage` can store it.
 pub type SharedAi = Arc<AiService>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invalid_configuration_status_disables_sending_without_echoing_input() {
+        let settings = AiSettings::resolve(|name| {
+            (name == "LOOM_AI_BASE_URL").then(|| "https://secret-user:secret-key@gateway/v1".into())
+        });
+        let status = AiService::status_for(settings);
+        assert!(!status.key_present);
+        assert!(status.protocol.is_none());
+        assert!(status.base_url.is_none());
+        let error = status.configuration_error.unwrap();
+        assert!(error.contains("LOOM_AI_BASE_URL"));
+        assert!(!error.contains("secret"));
+    }
+}

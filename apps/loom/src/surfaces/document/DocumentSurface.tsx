@@ -7,6 +7,7 @@ import type { ContextSource } from "../canvas/edges";
 import * as ipc from "../../ipc";
 
 import * as ai from "./ai_ipc";
+import { aiSetupProblem } from "./ai_settings";
 import * as doc from "./doc_ipc";
 import { createEditor, type EditorHandle } from "./editor";
 import { readRunIn } from "./frontmatter";
@@ -223,7 +224,7 @@ export function DocumentSurface({
   }, []);
 
   const submitAiPrompt = async () => {
-    if (!aiStatus?.key_present || !aiPrompt.trim() || aiBusyRef.current) return;
+    if (aiSetupProblem(aiStatus) || !aiPrompt.trim() || aiBusyRef.current) return;
     aiBusyRef.current = true;
     setAiBusy(true);
     let requestedId: string | null = null;
@@ -514,14 +515,11 @@ export function DocumentSurface({
       </div>
       {aiOpen && (
         <div className="loom-ai-panel">
-          {!aiStatus?.key_present ? (
-            <div className="loom-ai-empty">
-              <strong>{aiStatus?.key_env ?? "API key"} not set.</strong>{" "}
-              <code>export {aiStatus?.key_env ?? "API_KEY"}=…</code> in your
-              shell rc, then relaunch Loom. Switch providers via{" "}
-              <code>LOOM_AI_PROVIDER=anthropic|openai|deepseek</code>.
+          {aiSetupProblem(aiStatus) ? (
+            <div className="loom-ai-empty" role="alert">
+              {aiSetupProblem(aiStatus)}
             </div>
-          ) : (
+          ) : aiStatus && (
             <>
               <div className="loom-ai-context">
                 provider: <code>{aiStatus.provider}</code> · model:{" "}

@@ -6,7 +6,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 export interface AiStatus {
-  /// Active provider — "anthropic", "openai", or "deepseek".
+  /// Active provider, including the configurable OpenCode gateway.
   provider: string;
   /// Model id (provider default if LOOM_AI_MODEL is unset).
   model: string;
@@ -15,6 +15,9 @@ export interface AiStatus {
   /// Name of the env var that holds the key. Surfaces in the empty-
   /// state message so the user sees the right variable.
   key_env: string;
+  protocol?: string | null;
+  base_url?: string | null;
+  configuration_error?: string | null;
 }
 
 export interface AiUsage {

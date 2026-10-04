@@ -121,7 +121,7 @@ def _identity(info):
 
 
 class _Session:
-    def __init__(self, root, uid, gid, action):
+    def __init__(self, root, uid, gid, action, *, require_eru=True):
         self.root, self.uid, self.gid, self.action = root, uid, gid, action
         self.dirs, self.reads = {}, {}
         self.rootfd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
@@ -130,7 +130,8 @@ class _Session:
             self._directory(self.rootfd)
             for path in ('etc', 'etc/eru', 'etc/ssh', 'proc', 'proc/sys',
                          'proc/sys/kernel', 'proc/sys/kernel/random'):
-                self.directory(path)
+                if path != 'etc/eru' or require_eru:
+                    self.directory(path)
             self.check()
         except BaseException:
             self.close()

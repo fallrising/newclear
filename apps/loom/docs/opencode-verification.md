@@ -1,6 +1,6 @@
 # OpenCode integration verification
 
-Verified on 2026-10-04 against the implementation of [the provider specification](opencode-provider.md). Rust checks ran in Linux Docker with Rust 1.88; frontend and helper checks ran on Linux. No real provider request was made: account access and live model compatibility remain unverified until a private Go key is available.
+Verified on 2026-10-04 against the implementation of [the provider specification](opencode-provider.md). Rust checks ran in Linux Docker with Rust 1.88; frontend and helper checks ran on Linux. A subsequent single live request through the actual `AiService` passed for OpenCode Go with `glm-5.3-flash` and the Chat Completions protocol on source revision `67baa2ee`.
 
 | Check | Result |
 |---|---|
@@ -22,8 +22,10 @@ A browser smoke against the production build with mocked Tauri IPC passed three 
 
 Configuration and protocol workers used separate worktrees; a third model independently reviewed their final changes, the frontend behavior and the private-file helper. Behavioral regressions were observed failing before the implementation and passing afterward.
 
-## Remaining acceptance
+## Live acceptance and remaining limits
 
-The opt-in `ai_smoke` example uses the same service as Tauri, one synthetic coding prompt, no document context, a 256-token output cap and a 45-second timeout without retry. Follow the [private-file launch instructions](opencode-provider.md#example-and-secret-handling) when a Go key is configured. A successful probe will verify that selected account/model/protocol combination only; it will not establish all-model support.
+The opt-in `ai_smoke` example uses the same service as Tauri, one synthetic coding prompt, no document context, a 256-token output cap and a 45-second timeout without retry. After validating the explicitly supplied private key file, the probe made one request to `https://opencode.ai/zen/go/v1/chat/completions` using `glm-5.3-flash`. It exited successfully after observing nonempty text and exactly one terminal completion event. Neither the key nor the response text was recorded. The model/protocol pairing was checked against the [official Go endpoint table](https://opencode.ai/docs/go/#endpoints).
 
-Windows/macOS acceptance and full native GUI verification for this change remain deferred. Offline Linux success does not establish live API access or those platform results.
+This verifies the selected account/model/protocol combination only; live Responses, Messages and other models remain unverified. Follow the [private-file launch instructions](opencode-provider.md#example-and-secret-handling) for an intentional future probe.
+
+Windows/macOS acceptance and full native GUI verification for this change remain deferred. The Linux service probe does not establish those platform results.

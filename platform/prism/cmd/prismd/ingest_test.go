@@ -114,7 +114,7 @@ func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
 			defer cancel()
 			result := make(chan error, 1)
 			go func() {
-				result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+				result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), backend)
 			}()
 			waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 			postRuntimeLog(t, cfg, "http")
@@ -178,7 +178,7 @@ func TestIngestRuntimeDeadlineCancelsSPIWrite(t *testing.T) {
 	defer cancel()
 	result := make(chan error, 1)
 	go func() {
-		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), wrapped)
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), wrapped)
 	}()
 	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 	postRuntimeLog(t, cfg, "stalled")
@@ -291,7 +291,7 @@ func TestIngestRuntimeUsesTLSOnBothTransports(t *testing.T) {
 	defer cancel()
 	result := make(chan error, 1)
 	go func() {
-		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), backend)
 	}()
 	client := &http.Client{Timeout: time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12}}}
 	defer client.CloseIdleConnections()
@@ -384,7 +384,7 @@ func TestRunServiceClosesBackendAfterWriteCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 	store := &blockingLogs{LogStore: backend.Logs(), started: make(chan struct{}), stopped: make(chan struct{})}
-	wrapped := &closeOrderBackend{logBackend: logBackend{Backend: backend, store: store}, stopped: store.stopped}
+	wrapped := &closeOrderBackend{Backend: backend, store: store, stopped: store.stopped}
 	name := fmt.Sprintf("runtime-close-order-%d", driverSequence.Add(1))
 	spi.Register(name, fixedBackendDriver{name: name, backend: wrapped})
 	cfg.Storage.Driver = name
@@ -392,7 +392,7 @@ func TestRunServiceClosesBackendAfterWriteCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	result := make(chan error, 1)
-	go func() { result <- runService(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil))) }()
+	go func() { result <- runService(ctx, cfg, slog.New(slog.DiscardHandler)) }()
 	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 	postRuntimeLog(t, cfg, "stalled")
 	select {
@@ -526,7 +526,7 @@ func TestRemoteWriteRuntimePreservesAuthenticationAndNormalization(t *testing.T)
 	defer cancel()
 	result := make(chan error, 1)
 	go func() {
-		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), backend)
 	}()
 	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 	client := &http.Client{Timeout: time.Second}
@@ -585,7 +585,7 @@ func TestRemoteWriteRuntimeIsAbsentInOtherRoles(t *testing.T) {
 			defer cancel()
 			result := make(chan error, 1)
 			go func() {
-				result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+				result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), backend)
 			}()
 			waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 			postRuntimeWrite(t, cfg, &http.Client{Timeout: time.Second}, "http", http.StatusNotFound)
@@ -624,7 +624,7 @@ func TestRemoteWriteSlowBodyDoesNotBlockOTLPAndCancelsAtShutdown(t *testing.T) {
 	}()
 	go func() {
 		defer close(runtimeDone)
-		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.DiscardHandler), prometheus.NewRegistry(), backend)
 	}()
 	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 	dialCtx, stopDial := context.WithTimeout(context.Background(), time.Second)

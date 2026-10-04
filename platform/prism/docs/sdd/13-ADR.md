@@ -240,3 +240,18 @@ HTTP endpoint 為 `/prom/api/v1/write`，僅接受 snappy block 與 v1 protobuf�
 
 詳見 [P1-05 規格](../specs/p1-05-remote-write.md) 與
 [remote_write v1](https://prometheus.io/docs/specs/prw/remote_write_spec/)。
+
+## ADR-013：Go 1.27 維護基準與單一版本來源
+
+**狀態**：2026-10-04 明確授權的 Go 升級決策。
+
+**決策**：以 `go.mod` 的 `go 1.27.1` 同時宣告最低 toolchain 與 Go 1.27
+語言基準；Prism 兩個 CI job 使用 `go-version-file` 讀同一檔案，並以
+`GOTOOLCHAIN=local` 驗證所安裝版本。lint 工具更新為支援此版本的
+v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協議不變。
+
+**理由與後果**：Go 1.23 已超出官方支援窗口。先前 P1-05 的 Go 1.27
+試跑是可行性證據；本次重新驗證提高 go directive 後的實際語言／runtime
+基準。歷史驗證不改寫，現行操作指引與 SDD 建置版本同步。舊 compiler
+關閉自動切換時應清楚拒絕；不承諾未量測的效能收益，不包含系統全域
+安裝、容器部署或下一功能。詳見 [升級契約](../specs/go-1.27-upgrade.md)。

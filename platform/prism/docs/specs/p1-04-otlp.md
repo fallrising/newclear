@@ -1,5 +1,8 @@
 # P1-04 — OTLP reception and daemon wiring
 
+The Go 1.23 references below record this milestone's original acceptance baseline.
+The current build baseline is defined by the [Go 1.27 upgrade](go-1.27-upgrade.md).
+
 ## Goal and boundary
 
 Accept OTLP metrics, logs and traces over gRPC and HTTP into the existing bounded

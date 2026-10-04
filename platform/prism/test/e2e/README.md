@@ -9,10 +9,10 @@ production drivers, deployment or process-memory limits.
 From the Prism module directory, install the pinned tool outside the module:
 
 ```sh
-GOTOOLCHAIN=go1.23.12 GOBIN=/tmp/prism-telemetrygen-v0.116.0 \
+GOTOOLCHAIN=go1.27.1 GOBIN=/tmp/prism-telemetrygen-v0.116.0 \
   go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen@v0.116.0
 OTLP_TELEMETRYGEN_BINARY=/tmp/prism-telemetrygen-v0.116.0/telemetrygen \
-  GOTOOLCHAIN=go1.23.12 GOFLAGS=-mod=readonly \
+  GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly \
   go test -tags=integration -race -count=1 -v -run TestTelemetrygen ./test/e2e
 ```
 
@@ -26,7 +26,7 @@ credential, checks configuration, base health/metrics, HTTP authentication for
 all signals, a real gRPC export, and bounded SIGTERM exit without key disclosure:
 
 ```sh
-GOTOOLCHAIN=go1.23.12 GOFLAGS=-mod=readonly go build -o /tmp/prism-otlp-prismd ./cmd/prismd
+GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly go build -o /tmp/prism-otlp-prismd ./cmd/prismd
 python3 scripts/smoke-otlp.py --prismd /tmp/prism-otlp-prismd \
   --telemetrygen /tmp/prism-telemetrygen-v0.116.0/telemetrygen
 ```
@@ -42,7 +42,7 @@ this module. The Linux amd64 archive SHA256 is
 
 ```sh
 PROMETHEUS_BINARY=/tmp/prism-prometheus-2.53.0/prometheus \
-  GOTOOLCHAIN=go1.23.12 GOFLAGS=-mod=readonly \
+  GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly \
   go test -tags=integration -race -count=1 -v -run TestPrometheusRemoteWrite ./test/e2e
 ```
 

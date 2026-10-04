@@ -116,7 +116,7 @@ HTTP 狀態碼對映：`bad_data`→400、`unavailable`→503、`not_found`→40
 `/api/v1/status/buildinfo` 必須回：
 
 ```json
-{"status":"success","data":{"version":"2.53.0","revision":"prism-<ver>","branch":"","buildUser":"prism","buildDate":"","goVersion":"go1.23"}}
+{"status":"success","data":{"version":"2.53.0","revision":"prism-<ver>","branch":"","buildUser":"prism","buildDate":"","goVersion":"go1.27.1"}}
 ```
 
 **`version` 必須宣告成一個 Grafana 認得的 Prometheus 版本號**，否則 Grafana 會關閉部分功能。此為刻意的相容性謊報，須在 ADR 記錄。

@@ -207,7 +207,7 @@ func populateRepresentativeSeries(t *testing.T, registry *Registry, definition D
 
 func metricNamesWithPrefix(body, prefix string) map[string]bool {
 	result := make(map[string]bool)
-	for _, line := range strings.Split(body, "\n") {
+	for line := range strings.SplitSeq(body, "\n") {
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line, prefix) {
 			continue

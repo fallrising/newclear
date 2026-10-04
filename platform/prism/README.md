@@ -40,6 +40,8 @@ remain unimplemented; this is not yet a complete APM service.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
 The Go module is `github.com/fallrising/newclear/platform/prism`.
+The supported baseline is Go 1.27.1; CI reads that minimum directly from
+`go.mod`. See the [upgrade contract](docs/specs/go-1.27-upgrade.md).
 
 ## Constraints
 
@@ -61,7 +63,7 @@ go build ./...
 
 `make lint` checks formatting and runs `go vet`; `make test` runs the suite with
 `-race`. The repository-root [Prism CI](../../.github/workflows/prism-ci.yml)
-also runs `golangci-lint` v2.12.2 as a separate job.
+also runs `golangci-lint` v2.14.0 as a separate job.
 
 New Go code is reviewed against the version-specific
 [JetBrains Modern Go Guidelines](https://github.com/JetBrains/go-modern-guidelines),

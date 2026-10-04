@@ -264,3 +264,12 @@ v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協�
 **理由與後果**：避免壓縮與共享 stream metadata 放大、租戶偽造及取消後資源累积。新增兩個 request-size receive buffers，預設 logical budget 1000 MiB，並非RSS限制。全數接收回204；語意 partial 回400且有效資料可能已入列；committed internal failure回500仍可能重送重複。
 
 **替代方案**：複用OTLP容量gate會改變既有協定背壓；直接無預檢JSONdecode會在拒絕前配置不受元素限制的物件。範圍、狀態碼與實測驗收見 [P1-06 contract](../specs/p1-06-loki-push.md)。
+
+
+## ADR-015：PromQL adapter 的 SPI series 生命週期
+
+- **狀態**：P1-07 實作決策；驗收依 [里程碑規格](../specs/p1-07-promql-adapter.md)。
+- **原因**：SDD14 §7 的 SPI Series 只在下一次 Next 前有效；Prometheus v0.53.0 storage.Series 允許稍後或重複取得樣本迭代器。SDD06 的零拷貝薄包裝示意不能直接滿足兩者。
+- **決策**：列舉時複製完整 labels 身分，呈現時隱藏內部保留標籤。每次樣本 Iterator 以可信 tenant 與相等 matcher 重新 Select，再比對完整 labelset，排除多餘 labels 及 absent/empty 的誤配。保持該 SPI set 未前進直到樣本讀完；耗盡、錯誤或 Querier.Close 關閉且只關一次。設定有限的 series、rows、sets 與 metadata 預算，所有重開與 Seek 工作都計量。
+- **取捨**：不改公共 SPI、不收集整份樣本結果，但增加選取次數；SPI 沒有跨呼叫快照，因此不宣稱與並行寫入隔離。既有 memory driver 的內部 materialization 不由 adapter 消除，也不能以 adapter 上限宣稱整個程序 RSS 有界。生命週期測試必須使用會在 Next 回收 Series 緩衝區的 fake backend。
+- **相容性邊界**：SDD02 §2.3 的 v1 float/classic-histogram 契約優先於「所有上游 testdata」的概括句。官方 corpus 的 native-histogram 相依案例需逐例列出原因，其餘相容案例必須真的經過 memory SPI 與 adapter。P1-08 才接 HTTP、query router 與完整 AST/output 政策。

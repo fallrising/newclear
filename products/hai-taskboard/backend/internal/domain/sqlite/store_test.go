@@ -1104,7 +1104,7 @@ func (source *verticalIDs) Next(kind port.IDKind) (string, error) {
 type verticalExecutor struct{}
 
 func (verticalExecutor) Declaration() port.ExecutorDeclaration {
-	return port.ExecutorDeclaration{AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack", "heartbeat", "lookup", "cancel_ack", "durable_checkpoint"}}
+	return port.ExecutorDeclaration{AdapterID: "fake/v1", AdapterVersion: "1", Scenarios: []string{"vertical"}, Capabilities: []string{"start_ack", "heartbeat", "lookup", "cancel_ack", "durable_checkpoint"}}
 }
 
 type verticalSpecification struct{}

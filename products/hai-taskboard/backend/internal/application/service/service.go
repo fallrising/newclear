@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/command"
@@ -134,8 +135,8 @@ func (service *Service) DispatchRun(ctx context.Context, principal domain.ActorI
 	return service.execute(ctx, principal, value.Metadata, command.DispatchRunOperation, value.ProjectID, request, digest,
 		func(ctx context.Context, tx port.Transaction, now time.Time) (mutation, error) {
 			declaration := service.executorDeclaration
-			if declaration.AdapterID != value.AdapterID || value.RetryOfRunID != "" {
-				return mutation{}, command.NewError(command.CodeLifecycleRejected, "executor declaration or retry is not available", false, nil, nil)
+			if declaration.AdapterID != value.AdapterID || value.RetryOfRunID != "" || !slices.Contains(declaration.Scenarios, value.ScenarioID) {
+				return mutation{}, command.NewError(command.CodeLifecycleRejected, "executor, scenario or retry is not available", false, nil, nil)
 			}
 			material, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID})
 			if err != nil {
@@ -179,14 +180,28 @@ func (service *Service) CompleteWorkItem(ctx context.Context, principal domain.A
 	if err != nil {
 		return failureOutcome(value.Metadata, invalidRequest(err))
 	}
+	if replayed, found, err := service.replayBeforeExternalIO(ctx, principal, value.Metadata, command.CompleteWorkItemOperation, value.ProjectID, digest); found {
+		return replayed, err
+	}
+	snapshot, err := service.completionSnapshot(ctx, value)
+	if err != nil {
+		return service.commandFailure(value.Metadata, err)
+	}
+	verificationErr := service.verifyCompletionMaterial(ctx, value, snapshot)
 	return service.execute(ctx, principal, value.Metadata, command.CompleteWorkItemOperation, value.ProjectID, request, digest,
 		func(ctx context.Context, tx port.Transaction, now time.Time) (mutation, error) {
-			material, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{
-				ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, CandidateID: value.Subject.CandidateID(),
-				RunID: value.Subject.RunID(), SubjectDigest: value.Subject.Digest(), GraphRevisionDigest: value.Subject.GraphRevisionDigest(),
-			})
+			material, err := tx.LoadCompletionMaterial(ctx, completionQuery(value))
 			if err != nil {
 				return mutation{}, err
+			}
+			if material.WorkItem.Version() != value.ExpectedVersion {
+				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
+			}
+			if !sameCompletionMaterial(snapshot, material) {
+				return mutation{}, command.NewError(command.CodeStaleSubject, "completion material changed during verification", false, []domain.RejectionCode{domain.CodeSubjectStale}, nil)
+			}
+			if verificationErr != nil {
+				return mutation{}, verificationErr
 			}
 			input, selected, err := service.completionInput(principal, value, material, now)
 			if err != nil {
@@ -223,8 +238,25 @@ func (service *Service) CompleteWorkItem(ctx context.Context, principal domain.A
 }
 
 func validExecutorDeclaration(declaration port.ExecutorDeclaration) bool {
-	if declaration.AdapterID != "fake/v1" || declaration.AdapterVersion == "" {
+	if declaration.AdapterID != "fake/v1" || declaration.AdapterVersion == "" || len(declaration.Scenarios) == 0 {
 		return false
+	}
+	scenarios := make(map[string]struct{}, len(declaration.Scenarios))
+	for _, scenario := range declaration.Scenarios {
+		if scenario == "" || len(scenario) > 128 {
+			return false
+		}
+		for _, character := range scenario {
+			if character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' ||
+				character >= '0' && character <= '9' || strings.ContainsRune("._-", character) {
+				continue
+			}
+			return false
+		}
+		if _, duplicate := scenarios[scenario]; duplicate {
+			return false
+		}
+		scenarios[scenario] = struct{}{}
 	}
 	capabilities := make(map[string]struct{}, len(declaration.Capabilities))
 	for _, capability := range declaration.Capabilities {

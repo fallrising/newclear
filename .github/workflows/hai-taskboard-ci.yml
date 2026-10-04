@@ -1,0 +1,57 @@
+name: HAI Taskboard CI
+
+on:
+  pull_request:
+    paths:
+      - products/hai-taskboard/**
+      - .github/workflows/hai-taskboard-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - products/hai-taskboard/**
+      - .github/workflows/hai-taskboard-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hai-taskboard-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: golang:1.27.1-bookworm@sha256:648f440f42a0958804efb24df176f806f9d353b41f1c0627f666428e40310f6b
+    defaults:
+      run:
+        shell: bash
+        working-directory: products/hai-taskboard
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Backend gates
+        run: bash scripts/check-backend.sh
+
+  web:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e
+    defaults:
+      run:
+        shell: bash
+        working-directory: products/hai-taskboard
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate pins and bootstrap exact pnpm
+        run: |
+          bash scripts/check-ci-pins.sh web-runtime
+          npm install --global --ignore-scripts --no-package-lock pnpm@11.25.0
+      - name: Web gates
+        run: bash scripts/check-web.sh

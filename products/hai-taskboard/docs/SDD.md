@@ -357,8 +357,8 @@ Exact pins, compatibility exceptions and container/CI contracts are in `docs/rep
 - Traceability preserves all source criteria AC-01 through AC-54 and names the minimum P0-A G1 test
   subset. A NotRun row is visible debt, never passing evidence.
 
-The only remaining G0 action is an independent re-review of these repaired artifacts. No production
-behavior may begin until that gate accepts the design set.
+The G0 re-review was accepted by T-011 and the design adoption by T-010, as recorded in
+`.team/PLAN.md`. Subsequent bounded acceptance does not imply G1 or G2 acceptance.
 
 ## 15. References
 

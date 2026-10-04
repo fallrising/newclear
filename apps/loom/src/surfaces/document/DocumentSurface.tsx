@@ -16,12 +16,14 @@ import { STRINGS, CSS } from "./config";
 import { DocumentLifecycle, DocumentReadGate } from "./lifecycle";
 import { collectContext } from "./ai_lifecycle";
 import { AiRequestLifecycle } from "./ai_request_lifecycle";
+import { DocumentCloseLifecycle, type ClosePrompt } from "./close_lifecycle";
 
 interface DocumentSurfaceProps {
   /// Vault-relative or absolute path to open.
   path: string;
-  /// Notify the parent (App) when the user closes the document.
+  /// Approved removal only; bypass the canvas request guard.
   onClose: () => void;
+  registerCloseGuard?: (requestClose: () => void) => () => void;
   /// First step of D-6's execution-target resolution chain (minimal):
   /// the currently-active terminal session, if any. Without `run_in`
   /// frontmatter or a `triggers` edge, this is the implicit target.
@@ -45,6 +47,7 @@ type ConflictState =
 export function DocumentSurface({
   path,
   onClose,
+  registerCloseGuard,
   activeTerminalId,
   onRunInChange,
   pinnedContextSources,
@@ -115,6 +118,22 @@ export function DocumentSurface({
   const [dirty, setDirty] = useState(false);
   const [conflict, setConflict] = useState<ConflictState>({ kind: "none" });
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [closePrompt, setClosePrompt] = useState<ClosePrompt | null>(null);
+  const closeLifetimeRef = useRef<DocumentCloseLifecycle | null>(null);
+  // Replacing the rendered path revokes old decisions before passive cleanup.
+  const closeOwnerRef = useRef({ path });
+  if (closeOwnerRef.current.path !== path) closeOwnerRef.current = { path };
+  const closeOwner = closeOwnerRef.current;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const saveRef = useRef<() => Promise<boolean>>(async () => false);
+  const pendingSaveActionsRef = useRef(new Set<object>());
+  const pendingCreateActionsRef = useRef(new Set<object>());
+  const cancelCloseRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (closePrompt) cancelCloseRef.current?.focus();
+  }, [closePrompt !== null]);
 
   // AI panel
   const [aiOpen, setAiOpen] = useState(false);
@@ -122,6 +141,7 @@ export function DocumentSurface({
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiRequestId, setAiRequestId] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const aiBusyRef = useRef(false);
   const aiLifetimeRef = useRef<{
     requests: AiRequestLifecycle;
     ready: Promise<void>;
@@ -193,6 +213,7 @@ export function DocumentSurface({
     let alive = true;
     let off: (() => void) | undefined;
     setAiBusy(false);
+    aiBusyRef.current = false;
     setAiRequestId(null);
     const deliver = (ev: ai.AiEvent) => {
       if (!alive) return;
@@ -211,6 +232,7 @@ export function DocumentSurface({
       }
     };
     const requests = new AiRequestLifecycle(ai.aiCancel, deliver, (state) => {
+      aiBusyRef.current = state.busy;
       setAiBusy(state.busy);
       setAiRequestId(state.requestId);
     }, (error, operation) => {
@@ -257,7 +279,11 @@ export function DocumentSurface({
     if (!editorRef.current || !buffer.path || statusRef.current !== "ready" || buffer.creating) return false;
     const generation = documentGenerationRef.current;
     const revision = buffer.revision;
+    const request = {};
+    pendingSaveActionsRef.current.add(request);
     readGateRef.current.invalidate();
+    setSaving(true);
+    setError(null);
     try {
       const outcome = await buffer.save(() => {
         if (!editorRef.current) throw new Error("Document editor was closed before save");
@@ -281,8 +307,12 @@ export function DocumentSurface({
       setError(String(e));
       flash(`save error: ${String(e)}`);
       return false;
+    } finally {
+      pendingSaveActionsRef.current.delete(request);
+      if (documentGenerationRef.current === generation) setSaving(pendingSaveActionsRef.current.size > 0);
     }
   };
+  saveRef.current = save;
 
   const mountEditor = (content: string) => {
     const host = hostRef.current;
@@ -364,6 +394,24 @@ export function DocumentSurface({
   useEffect(() => {
     let disposed = false;
     documentGenerationRef.current++;
+    const closeLifetime = new DocumentCloseLifecycle(
+      () => ({
+        generation: documentGenerationRef.current,
+        revision: buffer.revision,
+        version: buffer.version,
+        dirty: buffer.dirty,
+        busy: buffer.creating || buffer.saving || pendingSaveActionsRef.current.size > 0
+          || pendingCreateActionsRef.current.size > 0 || aiBusyRef.current || statusRef.current === "loading",
+        canSave: statusRef.current === "ready" && !!editorRef.current && !!buffer.path,
+      }),
+      () => saveRef.current(),
+      () => onCloseRef.current(),
+      setClosePrompt,
+      () => closeOwnerRef.current === closeOwner,
+    );
+    closeLifetimeRef.current = closeLifetime;
+    setClosePrompt(null);
+    setSaving(false);
     setStatus("loading");
     setCreating(false);
     setError(null);
@@ -404,6 +452,10 @@ export function DocumentSurface({
 
     return () => {
       disposed = true;
+      closeLifetime.dispose();
+      pendingSaveActionsRef.current.clear();
+      pendingCreateActionsRef.current.clear();
+      if (closeLifetimeRef.current === closeLifetime) closeLifetimeRef.current = null;
       documentGenerationRef.current++;
       readGateRef.current.invalidate();
       buffer.close();
@@ -413,6 +465,12 @@ export function DocumentSurface({
       backendStateQueueRef.current = backendStateQueueRef.current.then(() => doc.docClose(closedPath)).catch(() => undefined);
     };
   }, [path]);
+
+  useEffect(() => {
+    const lifetime = closeLifetimeRef.current;
+    if (!lifetime || !registerCloseGuard) return;
+    return registerCloseGuard(() => lifetime.request());
+  }, [path, registerCloseGuard]);
 
   // Listen for pty:io batches: append to the active capture block if
   // the batch is from the session ▶ targeted. No feeds_output_to gate —
@@ -507,8 +565,10 @@ export function DocumentSurface({
   };
 
   const createDocument = async () => {
-    if (buffer.creating || statusRef.current !== "missing") return;
+    if (buffer.creating || pendingCreateActionsRef.current.size > 0 || statusRef.current !== "missing") return;
     const generation = documentGenerationRef.current;
+    const request = {};
+    pendingCreateActionsRef.current.add(request);
     readGateRef.current.invalidate();
     setCreating(true);
     setError(null);
@@ -528,6 +588,7 @@ export function DocumentSurface({
       if (generation !== documentGenerationRef.current) return;
       setError(buffer.createError ?? String(e));
     } finally {
+      pendingCreateActionsRef.current.delete(request);
       if (generation === documentGenerationRef.current) setCreating(buffer.creating);
     }
   };
@@ -540,7 +601,9 @@ export function DocumentSurface({
   };
 
   return (
-    <div className="document-surface">
+    <div className="document-surface" onKeyDown={(event) => {
+      if (event.key === "Delete" || event.key === "Backspace") event.stopPropagation();
+    }}>
       <div className="document-header">
         <strong>{path}</strong>
         {dirty && <span className="document-dirty">●</span>}
@@ -553,9 +616,25 @@ export function DocumentSurface({
         >
           🤖 ask AI
         </button>
-        <button onClick={onClose}>close</button>
+        <button onClick={() => closeLifetimeRef.current?.request()}>close</button>
         {toast && <span className="document-toast">{toast}</span>}
       </div>
+      {closePrompt && (
+        <div className={`${CSS.conflictBanner} nodrag nowheel`} role="alertdialog" aria-label={`Close document ${path}`}>
+          <div>
+            <strong>Close document?</strong>
+            <p role="status" aria-live="polite">{closePrompt.message}</p>
+            {error && <p role="alert">{error}</p>}
+          </div>
+          <div className="document-conflict-actions">
+            <button onClick={() => void closeLifetimeRef.current?.saveAndClose()}
+              disabled={closePrompt.saving || saving || creating || aiBusy || status !== "ready"}
+              aria-busy={closePrompt.saving}>Save and close</button>
+            <button onClick={() => closeLifetimeRef.current?.discard()}>Discard changes</button>
+            <button ref={cancelCloseRef} onClick={() => closeLifetimeRef.current?.cancel()}>Cancel</button>
+          </div>
+        </div>
+      )}
       {aiOpen && (
         <div className="loom-ai-panel">
           {aiSetupProblem(aiStatus) ? (

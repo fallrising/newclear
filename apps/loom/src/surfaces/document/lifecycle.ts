@@ -7,7 +7,8 @@ export class DocumentLifecycle {
   hash = "";
   dirty = false;
   version = 0;
-  saving = false;
+  private readonly pendingSaves = new Set<object>();
+  get saving() { return this.pendingSaves.size > 0; }
   creating = false;
   createError: string | null = null;
   private createRequest: object | null = null;
@@ -18,7 +19,7 @@ export class DocumentLifecycle {
   load(snapshot: DocSnapshot) {
     this.epoch++;
     this.clearCreate();
-    this.saving = false;
+    this.pendingSaves.clear();
     this.open = true;
     this.path = snapshot.path;
     this.hash = snapshot.on_disk_hash;
@@ -35,13 +36,13 @@ export class DocumentLifecycle {
   missing(path: string) {
     this.load({ path, content: "", on_disk_hash: "" });
   }
-  close() { this.open = false; this.epoch++; this.clearCreate(); this.saving = false; }
+  close() { this.open = false; this.epoch++; this.clearCreate(); this.pendingSaves.clear(); }
   invalidate(): boolean {
     // Reload and watcher invalidation cannot release an IPC still in flight.
     // Closing/replacing the entire document lifetime uses close/load instead.
     if (this.creating) return false;
     this.epoch++;
-    this.saving = false;
+    this.pendingSaves.clear();
     this.clearCreate();
     return true;
   }
@@ -81,15 +82,15 @@ export class DocumentLifecycle {
   keep(observedHash: string) { this.acceptedHash = observedHash; }
   save(content: () => string, write: (path: string, content: string, hash: string | null) => Promise<WriteOutcome>): Promise<WriteOutcome> {
     const requestedEpoch = this.epoch;
+    const request = {};
+    this.pendingSaves.add(request);
     const operation = this.queue.then(async () => {
-      if (!this.open || this.epoch !== requestedEpoch) throw new Error("Document closed or reloaded before queued save");
-      const savedVersion = this.version;
-      const expected = this.acceptedHash ?? this.hash;
-      // One confirmation authorizes one attempt against those observed bytes.
-      // It never authorizes skipping optimistic concurrency altogether.
-      this.acceptedHash = null;
-      this.saving = true;
       try {
+        if (!this.open || this.epoch !== requestedEpoch) throw new Error("Document closed or reloaded before queued save");
+        const savedVersion = this.version;
+        const expected = this.acceptedHash ?? this.hash;
+        // One confirmation authorizes one attempt against those observed bytes.
+        this.acceptedHash = null;
         const outcome = await write(this.path, content(), expected);
         if (outcome.kind === "written" && this.open && this.epoch === requestedEpoch) {
           this.hash = outcome.new_hash;
@@ -97,7 +98,7 @@ export class DocumentLifecycle {
         }
         return outcome;
       } finally {
-        if (this.epoch === requestedEpoch) this.saving = false;
+        this.pendingSaves.delete(request);
       }
     });
     this.queue = operation.catch(() => undefined);

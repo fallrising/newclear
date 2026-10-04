@@ -14,6 +14,7 @@ import {
   type Node,
   type NodeChange,
   type NodeTypes,
+  type OnBeforeDelete,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -241,8 +242,22 @@ function CanvasInner({
     }
   }, []);
 
-  // Both Close and React Flow keyboard deletion pass through this path.
+  // Registrations are runtime-only. Each entry owns its cleanup, including
+  // when the same callback is registered again during a lifetime transition.
+  const closeGuardsRef = useRef(new Map<string, { requestClose: () => void }>());
+  const registerCloseGuard = useCallback((id: string, requestClose: () => void) => {
+    const entry = { requestClose };
+    closeGuardsRef.current.set(id, entry);
+    return () => {
+      if (closeGuardsRef.current.get(id) === entry) closeGuardsRef.current.delete(id);
+    };
+  }, []);
+
+  // Approved document Close bypasses the request guard. Non-document removal
+  // shares this cleanup, with nodesRef preventing duplicate terminal cleanup.
   const removeNode = useCallback((id: string) => {
+    if (!nodesRef.current.some((node) => node.id === id)) return;
+    closeGuardsRef.current.delete(id);
     const plan = removalPlan(nodesRef.current, [id]);
     nodesRef.current = nodesRef.current.filter((n) => n.id !== id);
     plan.sessions.forEach((sid) => { void killTerminal(sid); });
@@ -258,6 +273,28 @@ function CanvasInner({
     [removeNode],
   );
   const closeDocument = removeNode;
+
+  const requestNodeRemoval = useCallback((id: string) => {
+    const node = nodesRef.current.find((current) => current.id === id);
+    if (node?.type === "document") {
+      // Missing registration fails closed: the editor may still be mounting.
+      closeGuardsRef.current.get(id)?.requestClose();
+    } else if (node) {
+      removeNode(id);
+    }
+  }, [removeNode]);
+
+  const onBeforeDelete = useCallback<OnBeforeDelete>(async ({ nodes: requestedNodes, edges: requestedEdges }) => {
+    const documents = new Set(requestedNodes.filter((node) => node.type === "document").map((node) => node.id));
+    documents.forEach(requestNodeRemoval);
+    // React Flow emits incident edge removals BEFORE node removals. Keep both
+    // under the document's approved-close path, even if it approved instantly.
+    // Edges independently selected without that document remain deletable.
+    return {
+      nodes: requestedNodes.filter((node) => !documents.has(node.id)),
+      edges: requestedEdges.filter((edge) => !documents.has(edge.source) && !documents.has(edge.target)),
+    };
+  }, [requestNodeRemoval]);
 
   /// Rename a terminal (live) or tombstone. The optional name is used by
   /// the D-6 chain step 1: a document's `run_in: <name>` frontmatter
@@ -498,6 +535,7 @@ function CanvasInner({
                 feedingTerminalIds: [],
                 pinnedContextSources: [],
                 onClose: () => closeDocument(s.id),
+                registerCloseGuard: (requestClose: () => void) => registerCloseGuard(s.id, requestClose),
                 onRunInChange: (name: string | null) =>
                   onRunInChange(s.id, name),
               },
@@ -699,6 +737,7 @@ function CanvasInner({
           feedingTerminalIds: feedersForRef.current(nodeId),
           pinnedContextSources: contextSourcesForRef.current(nodeId),
           onClose: () => closeDocument(nodeId),
+          registerCloseGuard: (requestClose: () => void) => registerCloseGuard(nodeId, requestClose),
           onRunInChange: (name: string | null) =>
             onRunInChange(nodeId, name),
         },
@@ -706,7 +745,7 @@ function CanvasInner({
       },
     ]);
     onConsumedAdd();
-  }, [hydrated, addDocumentAt, closeDocument, onConsumedAdd]);
+  }, [hydrated, addDocumentAt, closeDocument, registerCloseGuard, onConsumedAdd]);
 
   // Whenever the D-6 resolution might have changed (active terminal,
   // edges, or terminal set), push the freshly-resolved triggersTarget
@@ -779,10 +818,10 @@ function CanvasInner({
   }, [triggersTargetFor, feedersFor, contextSourcesFor, runInMap, nodes]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
-    changes.forEach((change) => { if (change.type === "remove") removeNode(change.id); });
+    changes.forEach((change) => { if (change.type === "remove") requestNodeRemoval(change.id); });
     const otherChanges = changes.filter((change) => change.type !== "remove");
     setNodes((nds) => applyNodeChanges(otherChanges, nds));
-  }, [removeNode]);
+  }, [requestNodeRemoval]);
 
   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
     setEdges((eds) => applyEdgeChanges(changes, eds));
@@ -837,6 +876,7 @@ function CanvasInner({
         nodes={nodes}
         edges={edges}
         nodeTypes={NODE_TYPES}
+        onBeforeDelete={onBeforeDelete}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -844,9 +884,8 @@ function CanvasInner({
         maxZoom={2}
         fitView={false}
         proOptions={{ hideAttribution: true }}
-        // Backspace deletes selected edges — same UX as the rest of the
-        // app, and harmless inside the editor since CodeMirror swallows
-        // keys before they bubble.
+        // DocumentNode keeps editor and prompt keystrokes inside its body;
+        // canvas deletion requests otherwise pass through onBeforeDelete.
         deleteKeyCode={["Backspace", "Delete"]}
         nodesConnectable
         elementsSelectable

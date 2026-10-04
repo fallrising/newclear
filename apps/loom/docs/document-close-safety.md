@@ -1,10 +1,10 @@
 # Unsaved document close protection
 
-Status: specification before implementation, 2026-10-04.
+Status: implemented, 2026-10-04. This specification was committed before implementation; see [verification](document-close-safety-verification.md).
 
 ## Scope and behavior
 
-The existing document Close button and canvas Delete/Backspace node removal currently destroy an editor without checking unsaved changes. SQLite history does not store those buffers. This repair protects document-node removal; native application/window quit, browser reload and crash recovery are separate work and must not be claimed as covered.
+Previously, the document Close button and canvas Delete/Backspace node removal destroyed an editor without checking unsaved changes. SQLite history does not store those buffers. This repair protects document-node removal; native application/window quit, browser reload and crash recovery are separate work and must not be claimed as covered.
 
 - Clean idle documents close directly. Dirty documents show an inline accessible confirmation with **Save and close**, **Discard changes**, and **Cancel**. Repeated close/delete requests do not stack prompts or duplicate writes. Closing the prompt does not change the buffer, node, connected edges, or `run_in` mapping.
 - Save and close uses the existing serialized optimistic save operation, including its hash/Keep rules. Remove the node only when save succeeded and the same document lifetime is still current, no newer edits occurred during the action, the current buffer is clean, and no creation/save/AI operation is pending. Any I/O failure, conflict, missing target, or newer edit keeps the document and shows persistent feedback. Do not silently overwrite or recreate a missing file to close it.

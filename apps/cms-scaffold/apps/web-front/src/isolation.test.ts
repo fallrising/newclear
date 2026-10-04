@@ -30,13 +30,28 @@ describe("Front isolation", () => {
 
   it("AC-08 web-front source never names a work endpoint or a draft parameter", () => {
     const offenders = sources(SRC).filter((file) =>
-      /\/api\/v1\/(entries|preview|principals|roles|admin)|publicationState|previewToken|includeDraft|read_draft/.test(readFileSync(file, "utf8")),
+      /\/api\/v1\/(entries|preview|principals|roles|admin)|previewToken|includeDraft|read_draft/.test(readFileSync(file, "utf8")),
     );
     expect(offenders).toEqual([]);
   });
 
-  it("AC-09 PublicEntry has no draft fields (checked by typecheck)", () => {
+  it("AC08_publicEntryStillHasNoPublicationState", () => {
     expect(draftFieldsAreNotTyped).toBeTypeOf("function");
+  });
+
+  it("AC08_onlyMemberModuleReadsMemberPublicationState", () => {
+    const member = join(SRC, "member.ts");
+    expect(sources(SRC).filter((file) => file !== member && /\bpublicationState\b/.test(readFileSync(file, "utf8")))).toEqual([]);
+    expect(readFileSync(member, "utf8").match(/entry\.publicationState/g)).toHaveLength(1);
+  });
+
+  it("AC08_bundleGuardOnlyExemptsMemberPublicationState", () => {
+    const script = readFileSync(join(SRC, "../../../scripts/check-bundles.mjs"), "utf8");
+    expect(script).toContain(String.raw`/\/api\/v1\/(entries|content-types|preview|principals|roles|admin|media\/)/`);
+    expect(script).toContain("/seed-(admin|editor|operator|member)/");
+    expect(script).toContain("/setupWorker|mockServiceWorker|mock-csrf-token/");
+    expect(script).toContain("/previewToken|includeDraft|includeUnpublished|revisionId|read_draft/");
+    expect(script).not.toContain("/publicationState|previewToken|includeDraft|includeUnpublished|revisionId|read_draft/");
   });
 
   it("AC-14 no second UI kit and no lightbox library; the lightbox is the @cms/ui Dialog", () => {

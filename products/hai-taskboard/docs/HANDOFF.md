@@ -7,9 +7,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/migration-integrity`
+- Branch: `agent/hai-taskboard/v2-persistence`
 - Worktree: task-scoped checkout; verify actual Git state.
-- Current delivery base: merged `newclear/main@5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`
+- Current delivery base: verified Draft PR #274 head `b2ccf47066a3729d37d053271db16fb566c9b1ed` (unmerged predecessor)
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
   boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
@@ -170,16 +170,26 @@ writer lock. All pending SQL/history/version and fresh ledger creation share one
 `ordered-migrations.md` defines the named real-SQLite oracles; T-130 retains lawful Red and final
 focused Green. Independent T-131 returned unconditional PASS; root accepted the exact runner
 after full/race/vet/build and web gates. PLAN and T-0184-gate bind the source and raw evidence.
-Production registry is V1 only; actual proposal/head/activation tables and H06..H09 admission
-remain NotRun. Tests of future-step mechanics use synthetic SQL only.
+At the predecessor #274 checkpoint the registry was V1 only, with synthetic future-step tests.
+The separately accepted V2 child below supersedes that registry status; H06..H09 admission
+commands and current-head authority remain Specified/NotRun.
+
+## V2 persistence schema acceptance
+
+Root ACKed `sdd/acceptance-persistence-schema.md` HAI-V2-001..007 after independent design
+preflight. T-141 implements eleven empty scoped STRICT tables and migration-only tests; no
+accepted data is inferred from historical fixtures. Durable outer plan identity and kernel identity
+are separate. T-142 returned unconditional native PASS; root accepted storage/migration after
+full backend/race/web gates. Seven oracles and exact source hashes are bound in T-0189-gate.
+No import, first acceptance, activation, head read authority or current-input command is implemented.
 
 ## Safe next action
 
-Deliver the accepted runner in a new Draft PR and verify its exact pushed-head CI; final delivery
-evidence belongs to desk T-0184. The subsequent V2 schema/authority child requires its own bounded
-assignment and accepted contract; backup/restore and live UI remain separate scopes. The 37-item
-roadmap is retained in the private project ledger. No new PR merge or deployment follows from
-this handoff.
+Deliver the accepted V2 persistence child through exact stacked Draft PR CI and desk review.
+The next implementation child needs a separate bounded Git proposal/provenance import assignment.
+The runner predecessor #274 remains Draft/unmerged; do not assume merge. Import/admission commands and accepted-input authority wiring
+require later separate assignments; backup/restore and live UI remain separate scopes. No PR merge
+or deployment follows from this handoff.
 
 ## Restore invariant
 

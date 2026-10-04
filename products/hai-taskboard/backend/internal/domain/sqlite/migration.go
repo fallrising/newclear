@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"database/sql"
+	_ "embed"
 	"errors"
 	"fmt"
 	"strings"
@@ -18,8 +19,18 @@ type migrationStep struct {
 	checksum string
 }
 
+//go:embed migrations/0002_acceptance.sql
+var v2Migration string
+
 func migrate(conn *sql.Conn, ctx context.Context, appliedAtNS int64) error {
-	return runMigrations(conn, ctx, []migrationStep{{1, v1Migration, "57d96955d3351de47b1a81696398cf9ddb843394eb5c004c6f79841117c7745c"}}, appliedAtNS)
+	return runMigrations(conn, ctx, compiledMigrations(), appliedAtNS)
+}
+
+func compiledMigrations() []migrationStep {
+	return []migrationStep{
+		{1, v1Migration, "57d96955d3351de47b1a81696398cf9ddb843394eb5c004c6f79841117c7745c"},
+		{2, v2Migration, "5fbac05b24ba8bccedafb2857ff45934c88612e1ee6f550d12e4576fd2ea0b48"},
+	}
 }
 
 func validateMigrationRegistry(registry []migrationStep) error {

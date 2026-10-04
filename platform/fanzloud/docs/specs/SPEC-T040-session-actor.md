@@ -17,14 +17,15 @@ risk: high
 
 Coordinate small independently accepted prerequisites for TD §4.7/16.3. This is a blocked design
 roadmap, not one implementable mixed-atomicity CU. Only [SPEC-T040A](SPEC-T040A-command-decision.md)
-has a complete, independently accepted design contract and finite future machine oracles. [ADR-0007](../adr/ADR-0007-session-actor-contract.md)
+has a complete, independently accepted design contract and implemented pure runtime with all
+11 named machine oracles passing; see [A runtime acceptance](../acceptance/T040A.acceptance.md). [ADR-0007](../adr/ADR-0007-session-actor-contract.md)
 is draft; all later production units require their own complete specifications before Ready.
 
 # Source-Backed Current Versus Proposed Boundaries
 
 | Current source / accepted contract | Proposed owner and missing guarantee |
 |---|---|
-| domain `id.rs`: CommandId exists; no ActorRef/envelope/command | A: typed pure command intent and exact identity |
+| domain `command.rs`: accepted typed pure v1 decision and exact canonical identity | A complete; durable dispatch/receipt/authority remain downstream |
 | domain `event.rs`/`reducer.rs`: schema1, cancel legal only Running | B: versioned WaitingApproval withdrawal, preserve exact v1 behavior |
 | event-store `sqlite.rs`: application0x43425831, exact schema2; append has no token/receipt | C/D/F: managed identity, lease authorization and atomic receipt+events |
 | Existing append/save and replay/load check identity on fresh operation connections | C: all old mutation handles must reject managed identity, including post-upgrade calls |
@@ -92,6 +93,7 @@ authorized by this roadmap. Applicable numeric policies/codecs belong to the blo
 
 Future clause-test matrix and exact commands must be written per child before Ready; parent
 acceptance requires all child runtime acceptances plus restart/lease-loss/duplicate-key/cancel/
-approval-race/outcome-unknown composition tests and retained P0 regressions. None ran here.
-This draft's evidence is documentation/link/name/dependency and diff audits only; design acceptance
-is separate from implementation/runtime/parent acceptance. Root owns TD/traceability/status projection.
+approval-race/outcome-unknown composition tests and retained P0 regressions. The parent actor
+composition tests remain unimplemented and unrun. A's runtime acceptance includes the retained
+workspace/P0 regressions but does not accept the parent. This draft's proposed contracts retain
+documentation/link/name/dependency and diff evidence only; root owns TD/traceability/status projection.

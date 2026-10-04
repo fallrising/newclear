@@ -1,14 +1,14 @@
 # Development Handoff
 
-Date: 2026-10-04
+Date: 2026-10-05
 
 ## Current Goal
 
 T030A/B monorepo recovery and T030D snapshot save are Accepted and merged. T030C public
 snapshot load and T030 A/B/C/D composition are now independently Accepted after test-first
 implementation and full gates. T040 actor work is now decomposed: T040A's pure v1 command
-contract is Ready after independent design review. Parent T040 and the later B–I seeds remain
-Blocked; the next bounded implementation candidate is T040A.
+planner is implemented and independently runtime Accepted. Parent T040 and the later B–I seeds
+remain Blocked; the next candidate is B's separate versioned-withdrawal contract design.
 Preserve the T020 schema, recovered A/B contracts and private single-operator P0 boundary.
 
 ## Repository State
@@ -75,25 +75,27 @@ proves no history validity. Global structural key scanning is outside the prefix
 total latency/process-memory guarantee is added. The automated rustdoc/spec drift checker
 remains a documented tooling gap; current projections received explicit independent review.
 
-## Actor Design and First Ready Prerequisite
+## Pure Command Decision Runtime Accepted
 
-[T040A design acceptance](acceptance/T040A-design.acceptance.md) accepts the pure v1 command
-contract under [SPEC-T040A](specs/SPEC-T040A-command-decision.md). It specifies StartTurn,
-ResolveApproval and CancelTurn across all nine existing states plus empty state; exact bounded
-request identity; deterministic rejection precedence; and zero/one proposed existing v1 event.
-No actor, database mutation, authorization or backend action is implemented by this design.
+[T040A runtime acceptance](acceptance/T040A.acceptance.md) accepts the immutable E0 planner under
+[SPEC-T040A](specs/SPEC-T040A-command-decision.md). StartTurn, ResolveApproval and CancelTurn
+cover all nine existing states plus empty state, exact bounded canonical request identity,
+deterministic rejection precedence and zero/one proposed existing v1 event. WaitingApproval
+cancel explicitly requires a versioned amendment; matching Cancelling cancel emits no event.
+No actor, database mutation, authorization or backend action is performed by this planner.
 
-GPT-6.1 Sol drafted the contract, GPT-6 Astra independently reviewed source alignment and
-readiness, and root inspected all documents and mapped nine clauses to 11 future test names.
-The co-reachable precedence wording and in-crate sequence-overflow test ownership were clarified
-before acceptance. Runtime tests/skeletons remain future; existing source/dependency/historical
-acceptance artifacts are unchanged. The broader automated rustdoc/spec drift checker is still absent.
+GPT-6.1 Sol implemented all 11 named oracles after a compiling behavior-failure RED checkpoint;
+GPT-6 Astra independently accepted the runtime and ran a separate 5,760-case model. Root reran
+41 domain checks (including doctests), 306 workspace tests, 10 Node tests, formatting, Clippy,
+build, dependency and diff gates. An initial workspace attempt hit sandbox socket restrictions;
+the approved rerun passed. Historical design/T010/T020 acceptance, old domain tests and production
+reducer behavior are preserved. The broader automated rustdoc/spec drift checker remains absent.
 
-[T040](tasks/T040.task.md) and [SPEC-T040](specs/SPEC-T040-session-actor.md) define blocked
+[T040](tasks/T040.task.md) and [SPEC-T040](specs/SPEC-T040-session-actor.md) retain blocked
 versioned-withdrawal, managed-store, lease, receipt, startup, dispatch and effect prerequisites.
-[ADR-0007](adr/ADR-0007-session-actor-contract.md) remains draft, not an accepted schema/clock/
-recovery contract. Later rows require their own full task/spec, named machine oracles and review;
-E2/E3 effects must be decomposed separately. A does not depend on those proposed mechanisms.
+[ADR-0007](adr/ADR-0007-session-actor-contract.md) remains draft. Later rows require their own
+full task/spec, named machine oracles and review; E2/E3 effects must be decomposed separately.
+A's acceptance adds no downstream schema/clock/recovery guarantee.
 
 ## Historical Upstream Acceptance
 
@@ -446,11 +448,10 @@ subsequently passed a fresh Cursor Agent acceptance review with no blocker.
 
 ## Next Work
 
-1. Implement Ready T040A against its accepted A01–A09 pure command contract: generate compiling
-   RED skeletons for all named oracles before production, retain T010/T020 semantics and finish
-   with fresh runtime acceptance. This design delivery does not start that implementation.
-   Parent T040 and B–I stay Blocked on their own contracts/dependencies; P0 persistence and
-   external execution remain separate work.
+1. Scope a separate T040B versioned-withdrawal design task, with exact compatibility, IDs,
+   event decoding and cache semantics before implementation. T040A is runtime Accepted; parent
+   T040 and B–I stay Blocked on their own contracts/dependencies. P0 persistence and external
+   execution remain separate work; this delivery does not start a later child.
 2. Preserve the Accepted P0 boundary; P1 work must not add a dependency on live P0 provider
    availability. T030R local acceptance does not merge historical source PR #3/#4.
 3. Run a T007 live smoke only in a private environment with all nine administrator variables, the

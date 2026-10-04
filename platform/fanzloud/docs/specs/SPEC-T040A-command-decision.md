@@ -1,7 +1,7 @@
 ---
 id: SPEC-T040A
 title: Pure version-1 session command decision
-status: ready
+status: verified
 contract_unit: CU-SES-03
 module: codebox-domain
 milestone: P1
@@ -18,7 +18,8 @@ risk: medium
 
 Define the first independently implementable actor prerequisite using only accepted T010 types
 and T020 version-1 reducer behavior. [Independent design acceptance](../acceptance/T040A-design.acceptance.md)
-makes this specification Ready for test-first implementation; no runtime acceptance is granted.
+preceded test-first implementation; separate [runtime acceptance](../acceptance/T040A.acceptance.md)
+now accepts this pure command prerequisite.
 All A01–A09 requirements trace to the cited TD/T020 clauses; exact command representation,
 precedence, codec and test partitions are reversible `[NEW-SPEC]` local derivations.
 
@@ -86,9 +87,8 @@ impl CommandPlan {
 }
 ```
 
-These are accepted design signatures, not implemented APIs. `CommandId` already exists; the remaining command types and
-function do not exist in the current source. Read-only output getters add no independent I/O
-boundary. This CU has no public raw-byte/JSON parser or canonical-byte import constructor.
+These signatures are implemented in [command.rs](../../crates/codebox-domain/src/command.rs)
+and exported by codebox-domain. Read-only output getters add no independent I/O boundary. This CU has no public raw-byte/JSON parser or canonical-byte import constructor.
 
 # Inputs and Outputs
 
@@ -222,10 +222,11 @@ Trace: TD §§2.3(INV-010)/4.4/6.6/8.5(F); `[NEW-SPEC]`.
 
 # Test Specification and Clause Matrix
 
-These exact future tests must first compile and fail for behavior before production implementation.
-No skeleton or runtime test was written or run in this documentation milestone.
+All exact named oracles first compiled and failed substantive assertions before implementation.
+They now pass in the integration target and the in-crate overflow unit module; the separate
+runtime acceptance records their executed evidence and retained historical design boundary.
 
-| Clauses | Exact future machine name | Concrete oracle |
+| Clauses | Exact machine name | Concrete oracle |
 |---|---|---|
 | A01/A09 | `command_v1_inputs_are_closed_typed_and_authority_free` | Compile-fail ID confusion; inspect exact enums/fields and absence of parser/I/O/secret/path/execution APIs; nil remains T010-rejected |
 | A02 | `command_v1_canonical_bytes_cover_every_field` | Independent exact byte fixtures for all commands, both expected tags, decisions/reasons; mutate each field individually and assert distinct bytes, excluding nonexistent owner/token |
@@ -251,10 +252,10 @@ regression is claimed by this prerequisite. Trace: TD §§11.1–11.4.
 
 # Acceptance Evidence
 
-Accepted for design only. Current verification consists of document/source/traceability review,
-local-link and dependency checks, nine-clause/11-name/27-cell mapping validation, preservation
-of 105 source/dependency/historical-acceptance files, and `git diff --check`. Exact evidence is in
-the design acceptance report. All proposed Rust tests and these implementation gates remain future:
+Runtime Accepted. The [runtime report](../acceptance/T040A.acceptance.md) records the actual
+RED/GREEN checkpoint, 41 passing domain checks, 306 passing workspace tests, 10 Node tests,
+independent 5,760-case model, complete clause review and preservation checks. The historical
+design report remains unchanged. These implementation commands were executed successfully:
 
 ```bash
 cargo test --offline --locked -p codebox-domain --all-features --test command_decision_v1
@@ -271,6 +272,6 @@ named tests above and existing SPEC-T020 behavior. No high-risk gap remains insi
 E0 proposal. Parent actor gaps remain in [SPEC-T040](SPEC-T040-session-actor.md).
 Archetype A is total, deterministic, replay-idempotent and property-testable; immutable inputs
 prove E0. F/B/C/D/E resource, authorization, persistent concurrency and effect guarantees are
-explicitly outside this CU. T040A is Ready after independent design acceptance. The project-wide
-automated rustdoc/spec drift checker remains a known tooling gap; future runtime acceptance must
-inspect the actual API/contract projection explicitly and must not claim unavailable automation.
+explicitly outside this CU. T040A has independent runtime acceptance. The project-wide automated
+rustdoc/spec drift checker remains a known tooling gap; the actual API/contract projection was
+reviewed explicitly, without claiming unavailable automation.

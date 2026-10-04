@@ -2,13 +2,27 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW1c](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW1c.openapi.yaml](../contracts/BW1c.openapi.yaml) ・ 前一波：[BW1b](BW1b.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-03，[PR #225](https://github.com/fallrising/newclear/pull/225) 已合併，遠端四項 CI 通過）
 日期：2026-09-25  
 讀者：實作 BW1c 的 agent。只讀本檔、`contracts/BW1c.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW1b 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04 完成後，`./gradlew :services:cms-api:test` 依序是 187、194 個測試，每次唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；T04 後 `integrationTest` 67 個全綠，但用的是本機 PostgreSQL 16.13，不是 Testcontainers。各「測試先行」卡的預期紅燈清單也是實際跑出來的。
 
 ---
+
+## 0. 本次增量施工契約（2026-10-03，先文件後開發）
+
+本節優先於下方歷史 patch、測試數與 PR 步驟。BW1b 已 `LOCAL_VERIFIED`（202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E），前置 BW1a／BW1b 仍未提交／合併。使用者授權依路線圖繼續本地開發；不提交、推送、合併或部署。BW1a 快照保持不變，另保存 BW1b 完成快照與 SHA256 manifest 作為本波唯一差異基準。
+
+- **增量修改與 P0。** 保留 EntryService 的 `writeTransaction`、CAS、版本遞增、purge、revision／audit／refs／attachments／雙 scope 索引原子性。現行 publish 寫入會遞增版本；乾淨已發布內容的重複 publish 保持 no-op。下方「publish 不改版本」與固定版本值已過時，測試必須讀回實際版本。`revert` 仍驗證回復 payload；舊值不清理、不重寫，下一次真正 create／patch／publish／revert 寫入套用新規則。
+- **驗證契約。** 依 §4.3 收集所有錯誤；保留 payload 保留字順序，其後依 fieldsOf 順序，每個 key 最多一個錯誤，metadata 即使含保留字也不重複。null／空白只在 publish 必填檢查，其餘跳過；未知 payload key 與未知型別沿用既有行為。保留首項 ref 類錯誤頂層代碼。
+- **明確的規則收緊。** BW1b 保留小數的讀取／索引／回填；BW1c 依既有 §4.2／§4.3 規格拒絕新寫入的小數 int，保留 NUMERIC 索引，不能改回 BIGINT 或截斷舊值。既有舊資料可讀，patch 合併後若仍非法回 422，應由使用者改正；加上舊值讀取、被拒寫入且資料不變的回歸。小寫 canonical ref／principal-ref 是本波明定的新寫入規則；BW1b 目前查詢已能識別大寫 UUID，舊文的「列表只認小寫」不再作為理由。
+- **428 順序。** 保留既有認證、surface、entry 存在、狀態、update 權限順序，之後判斷 version 缺值／null（428）、不相等（409），再驗證合併 payload。所有既有成功 PATCH 消費者／測試帶目前版本；保留未登入／無權限優先與拒寫不變的斷言。
+- **公開媒體。** list、id、slug 公開讀取皆在不可解析／不可公開時保留 key 並回 null，不能回原始 ID 或 object。原 null 不呼叫解析；可讀媒體仍展開。保留 P0 的工作／發布媒體隔離。媒體逐項查詢仍是 BQ-11，本波不改 store 或批次化。
+- **前端同期整合。** 取消 §2.1／§9 前端紅燈例外：產生 BW1c schema，匯出 FieldError／FieldErrorCode／EntryPatchRequest，patch client 要求版本，transport 保留 fields；同步 MSW 的 428、欄位錯誤與公開 media null。必要修正既有 consumer／fixture，P0 編輯保留輸入／衝突／pending 行為不可退化。完整 W1 欄位錯誤 UI 仍在後續波次，不重新設計 UI、不新增依賴。
+- **追加允許路徑。** 原 §3 外，允許 `services/cms-api/src/test/**` 與 `src/integrationTest/**` 的必要版本／新驗證規則相容適配及 BW1c 回歸（不得移除 P0／BW1a／BW1b 斷言）；`packages/api/src/**`、`packages/mocks/src/**`、必要 mocks fixtures；`apps/web-{back,front,admin}/src/**` 僅既有寫入相容與回歸；`.team/**`、本文件、根 README、v2 README、個人使用驗收文件。stores／migrations／依賴 manifests／lockfiles 不改。
+- **有界分工。** T-401：驗證器與 FieldError 型別／單元測試；T-402：錯誤信封、EntryService／公開投影／runtime OpenAPI、API 與 PostgreSQL 相容回歸；T-403：前端 client/schema/MSW 相容與回歸。各自隔離工作樹，不遞迴派工；由主代理審查指定檔案並整合。
+- **測試與驗收。** 單元純規則＋MockMvc 跨邊界先 Red→Green，補 PostgreSQL 舊值可讀／拒寫不變、版本 CAS／rollback 回歸。generated code 不手寫測試先行，以 codegen freshness 驗證。最後主代理執行 `./gradlew test integrationTest bootJar --no-daemon --no-parallel --no-build-cache --rerun-tasks --console=plain`、`npm run lint`、`npm run typecheck`、`npm test`、`npm run build`、`npm run test:bundle`、`npm run e2e:mock`，以及 OpenAPI 相等、diff／task/report 契約檢查。報告實際數字與 p95，不沿用歷史 194／67，不放寬既有門檻。全部通過才標 `LOCAL_VERIFIED`；不跑真 API E2E 或部署。
 
 ## 1. 範圍
 
@@ -1394,22 +1408,21 @@ class EntryWriteRulesApiTests {
 
 ---
 
-## 9. 交付檢查表
+## 9. 本次交付檢查表（取代歷史預演數字）
 
-- [ ] T01～T05 全部完成。
-- [ ] `./gradlew test` 全綠（預期 194 個＝BW1b 的 180＋本波 14）。
-- [ ] `./gradlew integrationTest` 全綠（67 個，本波沒有新增）；本機沒有 Docker 時勾「只在 CI 跑過」並附連結（02 BQ-09）。
-- [ ] `npm ci && npm run lint && npm run typecheck && npm test && npm run build` 全綠；或只有 §2.1 所說的 codegen 新鮮度／fixture 型別失敗，並已在 PR 說明列出（01 Q-10）。
-- [ ] `cmp docs/v2/contracts/BW1c.openapi.yaml services/cms-api/src/main/resources/openapi/openapi.yaml` 沒有輸出。
-- [ ] `grep -rn "orElse(raw)" services/cms-api/src/main` 沒有輸出。
-- [ ] B-06：`PayloadValidatorTests`、`EntryWriteRulesApiTests.B06_*` 綠。
-- [ ] B-13：`EntryWriteRulesApiTests.B13_*` 綠。
-- [ ] G-07：`EntryWriteRulesApiTests.G07_*` 綠。
-- [ ] 428：`EntryWriteRulesApiTests.BW1c_*` 綠。
-- [ ] `gradle.lockfile` 沒有變動。
-- [ ] 沒有秘密或密碼。
-- [ ] `docs/v2/README.md` 的 BW1c 狀態已改成 `VERIFIED`。
-- [ ] PR 說明列出 §4.2 的三項破壞性變更與規則收緊，以及實際跑過的指令與結果。
+- [x] §0／T01～T05 的本地實作與驗收完成；T-401～T-404 有界任務與報告通過驗證。
+- [x] `./gradlew test integrationTest bootJar --no-daemon --no-parallel --no-build-cache --rerun-tasks --console=plain`：226 單元／API＋93 PostgreSQL，零失敗／錯誤／略過。
+- [x] `npm run lint`、`npm run typecheck`、`npm test`（179）、`npm run build`、`npm run test:bundle`、`npm run e2e:mock`（17）全綠。沿用已安裝依賴，不需重新 npm ci。
+- [x] `cmp docs/v2/contracts/BW1c.openapi.yaml services/cms-api/src/main/resources/openapi/openapi.yaml` 相等；後端 `orElse(raw)` 無匹配。
+- [x] B-06／BD-08：15 validator＋7 API 測試中的欄位錯誤、順序、ref 頂層代碼與 required 規則綠。
+- [x] B-13／G-07／428：API＋projection 回歸綠；認證、權限、版本衝突先後不退化。
+- [x] PostgreSQL 舊小數可讀／拒寫不變／可修正、no-op publish 與既有 P0 CAS／回滾／媒體測試綠。
+- [x] 10,000 筆 p95 工作75／公開77／更新22ms，保留150／100／80ms 門檻與 content SQL 計數。
+- [x] 27 個依賴／migration／store／index 檔案相對 BW1b 未變；304 個 gate 源碼雜湊一致；原 BW1a 快照保留。
+- [x] 文件／相對連結／diff／task/report 驗證完成；新增公開報告不含機器身份、秘密或密碼。
+- [x] 路線圖標 `LOCAL_VERIFIED`，交付報告列出三項契約變更與實際指令：[BW1c 交付](../../../.team/reports/BW1c-DELIVERY.md)。
+
+使用者未授權本波 commit、push、PR、merge 或部署，故本次沒有執行；不冒稱 `VERIFIED` 或正式生產可用。真 API 瀏覽器旅程與備份還原／部署演練仍在後續範圍。
 
 ---
 

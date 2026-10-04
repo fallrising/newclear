@@ -1,0 +1,13 @@
+{
+  "name": "media",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "dimensions": {
+    "viewport": 390,
+    "width": 390,
+    "title": "媒體庫 · CMS 作業台"
+  },
+  "errors": []
+}

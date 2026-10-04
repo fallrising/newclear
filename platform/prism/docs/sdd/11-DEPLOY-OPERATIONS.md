@@ -39,10 +39,14 @@ tenancy:
 auth:
   allow_anonymous_read: true  # 單機自用預設開啟；對外必須關閉
   jwt_secret_file: /etc/prism/secrets/jwt
+  ingest_api_key_file: /etc/prism/secrets/ingest_api_key # ingest 必填，至少 32 bytes；不得共用 JWT
 
 ingest:
   max_request_bytes: 16MiB
-  queue_depth: 64
+  queue_depth: 4              # 每訊號三條優先佇列；runtime 單租戶、每訊號兩名 worker
+  otlp:
+    max_recv_msg_size: 4MiB
+    max_concurrent_requests: 16 # HTTP/gRPC 共用即時拒絕的解碼閘門
   batch:
     metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
     logs:    {max_items: 5000,  max_bytes: 8MiB, flush_interval: 1s}
@@ -50,7 +54,7 @@ ingest:
   clock_skew_policy: clamp
   max_past: 1h
   max_future: 5m
-  memory_limit: 1GiB
+  memory_limit: 1GiB          # 驗證 logical queue + receive budget；非 RSS 硬上限
 
 limits:                       # 見 04-DATA-MODEL.md §5，此處為全域預設
   max_active_series_per_tenant: 500000

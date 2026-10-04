@@ -23,6 +23,7 @@ class Worker:
         self.db = db
         self.owner = uuid4()
         self.connector = connector
+        self.tool_config = os.environ.get("TOOL_BROKER_MOCK_CONFIG")
         self.model_proxy = None
         if connector is not None and os.environ.get("MODEL_PROXY_CONFIG"):
             from .model_policy import Policy

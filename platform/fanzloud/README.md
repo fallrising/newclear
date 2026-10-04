@@ -3,7 +3,7 @@
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
 
 
-[![CI](https://github.com/fallrising/fanzloud/actions/workflows/ci.yml/badge.svg)](https://github.com/fallrising/fanzloud/actions/workflows/ci.yml)
+[![Fanzloud CI](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml/badge.svg)](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml)
 
 Codebox is a provider-neutral cloud coding agent platform written in Rust. It is designed to run
 coding work in isolated per-session sandboxes and expose the workflow through a web interface.
@@ -21,13 +21,30 @@ the provider-managed environment and never runs beside the local credential dire
 
 ## Current status
 
-The full T001–T007 personal-BYOS path and the T010 domain foundation are accepted. The deterministic
-Linux end-to-end test covers the browser, HTTP and WebSocket APIs, session runtime, trusted Codex
-runner, and a fake provider process. The credential-gated live operator smoke has not been run.
+The T001–T007 personal-BYOS path and T010/T020 domain foundations have historical acceptance.
+The deterministic Linux end-to-end test covers the browser, HTTP and WebSocket APIs, session
+runtime, trusted Codex runner, and a fake provider process. The credential-gated live operator
+smoke has not been run.
 
-P1 remains a target architecture. Native agents, durable event storage, local sandbox execution,
-multi-user authentication, and the `node-agent`/`boxd` runtime are not implemented yet. The next
-documented task is T020, the append-only domain event contract.
+T030A atomic SQLite append and T030B bounded ordered replay have been recovered locally from
+archived Fanzloud commit `0a47dcd`. Their upstream acceptance reports are retained as historical
+evidence; this monorepo integration is locally verified and independently accepted under
+[T030R](docs/tasks/T030R.task.md) and [ACCEPT-T030R](docs/acceptance/T030R.acceptance.md).
+Recovery merged in [PR #242](https://github.com/fallrising/newclear/pull/242) at `1f555f61`.
+Hosted Fanzloud CI passed on the recovery branch
+([run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)) and merged main
+([run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720)).
+The portfolio context above remains the public investment summary; this is not a deployment or
+production-readiness claim.
+
+T030D now has an [accepted snapshot design](docs/specs/SPEC-T030D-sqlite-snapshot-save.md) and
+[accepted ADR](docs/adr/ADR-0005-snapshot-cache-contract.md), with fresh independent review.
+It defines persisted-prefix verification, explicit equal-sequence arbitration and atomic schema
+evolution, preserving full event/store integrity while bounding disposable cache values. This first bounded cache does not accelerate initial reducer replay. T030D snapshot
+save is Ready for implementation; T030C snapshot load and the T030 parent remain blocked.
+Snapshot runtime is unimplemented. Native agents, local sandbox execution,
+multi-user authentication and the `node-agent`/`boxd` runtime remain future tasks. The recovered
+P1 store is not wired into the P0 process-lifetime session runtime.
 
 See [the development handoff](docs/HANDOFF.md) and
 [traceability matrix](docs/traceability.md) for the exact implementation and acceptance state.
@@ -63,7 +80,8 @@ authority.
 | `apps/control-plane` | Implemented | Private HTTP API, replay-then-live WebSocket, and embedded operator page |
 | `crates/codebox-session-runtime` | Implemented | One process-lifetime session, one active turn, ordered events, cancel, and recovery |
 | `crates/codebox-agent-codex` | Implemented | Credential scope, device login, pinned Cloud adapter, ledgers, lifecycle, and diff retrieval |
-| `crates/codebox-domain` | Implemented | Strong identifiers, paths, sequences, and base errors |
+| `crates/codebox-domain` | Implemented | Strong identifiers, paths, sequences, versioned events, and deterministic reducer |
+| `crates/codebox-event-store` | Recovered; locally accepted | Private SQLite atomic append and bounded ordered replay |
 | `apps/node-agent` | Scaffold | Future host sandbox controller |
 | `apps/boxd` | Scaffold | Future in-sandbox process and filesystem service |
 | `apps/codebox-cli` | Scaffold | Future command-line client |
@@ -88,22 +106,24 @@ cargo install cargo-deny --version 0.19.4 --locked
 
 ## Build and test
 
-Run the CI validation plus the repository's local diff check:
+The active monorepo workflow is [Fanzloud CI](../../.github/workflows/fanzloud-ci.yml).
+The component-local `.github/workflows/ci.yml` is retained upstream configuration and is not
+a root GitHub Actions workflow. Run the CI validation plus the local diff check:
 
 ```bash
 node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo test --workspace --all-targets --all-features
-cargo build --workspace --bins --all-features
-cargo deny check
+cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+cargo test --locked --workspace --all-targets --all-features
+cargo build --locked --workspace --bins --all-features
+cargo deny --locked check
 git diff --check
 ```
 
 The focused deterministic P0 acceptance test is:
 
 ```bash
-cargo test -p codebox-control-plane --test p0_subscription_e2e \
+cargo test --locked -p codebox-control-plane --test p0_subscription_e2e \
   --all-features -- --exact \
   p0_subscription_e2e_fake_codex_reaches_final_diff
 ```

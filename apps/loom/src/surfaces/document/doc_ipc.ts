@@ -9,6 +9,8 @@ import type { Origin } from "../../contracts/Origin";
 const USER: Origin = { kind: "user" };
 
 export interface DocSnapshot {
+  /// Canonical absolute identity supplied by doc_read (runtime DTO).
+  path: string;
   content: string;
   on_disk_hash: string;
 }

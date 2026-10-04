@@ -1,5 +1,7 @@
 # B1 Acceptance Mapping (03-acceptance §B1)
 
+> Historical track snapshot. Counts, manual checks and deferred items below describe that delivery stage, not current acceptance. See [current reliability status and requirements](../docs/reliability.md).
+
 Each criterion is satisfied by one or more concrete tests. Run
 `cargo test -p loom-core` to execute all of them.
 

@@ -69,7 +69,9 @@
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |
 | [`labs/eru-vps-mvp`](labs/eru-vps-mvp/) | Project Eru 四機 VPS MVP 實驗 | A |
+| [`labs/openmmo-lab`](labs/openmmo-lab/) | 固定版本 MMORPG 試跑工具與驗收 runbook（runtime 待驗） | A |
 | [`labs/mithril-research`](labs/mithril-research/) | Mithril Redis Cluster proxy：固定版本研究與驗證設計（runtime 待驗） | A |
+| [`labs/zircon-godot`](labs/zircon-godot/) | 傳奇 3 Godot/C# fork 的固定版本研究、SDD 與分階段學習實驗（runtime 未驗證） | A |
 | [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
 
 ### 外部參考

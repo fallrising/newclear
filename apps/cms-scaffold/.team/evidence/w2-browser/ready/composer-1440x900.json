@@ -1,0 +1,13 @@
+{
+  "name": "composer",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "dimensions": {
+    "viewport": 1440,
+    "width": 1440,
+    "title": "相簿編排 · CMS 作業台"
+  },
+  "errors": []
+}

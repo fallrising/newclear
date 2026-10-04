@@ -1,5 +1,7 @@
 # 單人使用版：mock 預算與故障驗收
 
+本文件與原始 JSON 記錄 2026-10-03 切片；2026-10-04 與最新主線整合，原始測試數量與未執行項保留當時範圍。
+
 目前先完成本機 mock 的控制流程。真 API、可信帳單與硬金額上限延後；它們不作為單人 mock 切片的完成條件。此選擇不將合成 credits、公開價目 preview 或 mock token counters 升格為帳單。`cost_status: unknown`、`amount_decimal: null`、`hard_money_limit_supported: false` 保持原樣。
 
 ## 控制範圍
@@ -18,6 +20,6 @@
 
 ## 完成範圍與後續
 
-本輪只驗收單人 mock 的請求／額度與故障語意。M3 整體仍為 In progress；完整 AT-07（包含 artifact XSS）及跨切片整合尚未結束。既有隔離／網路 KVM 證據保留歷史範圍，本輪沒有重新執行 KVM。
+本輪只驗收單人 mock 的請求／額度與故障語意。M3 整體仍為 In progress；完整 AT-07 及跨切片整合尚未結束。後續 [安全 diff 下載](M3-RESULT-DOWNLOAD.md) 已有瀏覽器注入驗收，不能把本文件的歷史範圍當作尚無該證據。既有隔離／網路 KVM 證據保留歷史範圍，本輪沒有重新執行 KVM。
 
 M4 的結果封存、export、backup／GC 與部署手冊仍未開始。沒有付費 provider、可信計費保證或 24 小時停留驗收；Agent Computer 的可見桌面是獨立實驗，不因本輪 mock 結果而變成已實作。

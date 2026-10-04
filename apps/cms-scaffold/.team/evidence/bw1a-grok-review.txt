@@ -1,0 +1,23 @@
+BW1a, dropped onto the P0 tree as specified, can widen public media reads, drop P0 write atomicity, and lose field metadata.
+
+### Stale BW0 edits vs P0-DATA
+BW1a §2.1 bases every diff on post-BW0 files. §3 whole-file-replaces `PublicVisibility`, `ContentTypeRecord`, `FieldRecord`, `ContentTypeSeed`, and `openapi.yaml`, and edits `EntryService`, `MediaService`, both stores, and `ContentStoreContract`. P0-DATA already requires one transaction for the entry, refs, attachments, revision, and audit, plus store compare-and-set and `409 VERSION_CONFLICT`. §5 says transaction boundaries do not change; a BW0-context hunk can still delete that code when the context no longer matches.
+
+Tests: force the attachment write to fail after the entry write and assert no partial entry, refs, revision, or audit on PostgreSQL. Two same-version patch and publish calls: one wins, the other is `409`, and the payload and version stay unchanged. Run both on the in-memory store and JDBC.
+
+### Public bytes (§5.2, P0 media snapshot)
+`PublicVisibility.visibility` returns `"public"` when the type is null, `visibilityField` is null, the payload is null, the field is missing, or the value is blank. `gettable` is then true. `MediaService` passes `findTypeByKey(...).orElse(null)` into that check. The shown allow-condition is: field `enabled` and `publicBytes`, `gettable`, and `publishedRefsOk`. A null `publishedPayload` therefore passes the visibility gate. A disabled or missing type is not consulted. §4.2 reads payload visibility only when `visibilityField` is set, so a published photo, page, milestone, vet, or clinic profile that stored `visibility=private` becomes listable, and its published media becomes gettable.
+
+That condition does not compare `attachment.mediaId` to `publishedPayload[field]`. P0 requires that exact match: draft B stays private while published A remains public, and the swap happens only on publish or revert in the same transaction.
+
+Tests: with the type enabled, public bytes for published A succeed and draft B fail; after publish they swap; revert serves only A. Repeat for private, unlisted, blank, and null. A disabled type, a null `publishedPayload`, and an unknown type key all deny bytes. A private album stays off the public list; unlisted stays gettable by id. Run on PostgreSQL.
+
+### V5 metadata (§4.5, §4.1, §4.6)
+V5 adds six `cms_field` columns: `label`, `group_key`, `listable`, `filterable`, `enum_labels`, `placeholder`. §3 calls for seven metadata fields. §4.1 also adds `helpText`, `order`, and `visibility`, which this `ALTER` does not create. §4.6 keeps old constructors that default the new fields to null, false, or empty, and §3 does not change `DemoContentSeed`. A later full-row write from those constructors clears `visibilityField` and labels. If JDBC does not read `visibility_field` back, §5.2 treats every type as public.
+
+Tests: after V5 and two startups, every persisted metadata column exists; `GET /content-types/album` still has `visibilityField=visibility`, label `標題`, `enumLabels`, `helpText`, `order`, and `visibility`. A private album stays non-indexable on JDBC.
+
+### Public order (§4.2, §5.2)
+A null `sortField` sorts by `publishedAt`, then `updatedAt`. A set `sortField` accepts only JSON numbers; string numbers sort last. `type.sortField()` is not null-safe.
+
+Tests: string `"10"` sorts with the missing numbers; equal sort keys follow `updatedAt`; null `publishedAt` is last.

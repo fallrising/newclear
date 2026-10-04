@@ -31,7 +31,7 @@ function Profile() {
 }
 
 export function ClinicHome() {
-  const vets = useQuery(publicQueries.entries(api.public, "vet"));
+  const vets = useQuery(publicQueries.allEntries(api.public, "vet"));
   return (
     <>
       <Profile />

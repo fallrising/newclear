@@ -6,11 +6,9 @@
 //! as soon as the session is alive; subscribers come and go via the
 //! `PtyManager` (B1.5) without affecting this layer.
 //!
-//! Encoding: PTY output is UTF-8-lossy-decoded per `read()` chunk. Multibyte
-//! sequences that span a chunk boundary are replaced with U+FFFD on the
-//! first chunk and silently garbled on the second. This is acceptable for
-//! ANSI-heavy terminal output (ANSI is pure ASCII); a partial-sequence
-//! decoder is a known future improvement and does not affect P0 correctness.
+//! Encoding: retain incomplete UTF-8 sequences across reads. Malformed
+//! sequences are replaced with U+FFFD; an incomplete final sequence is
+//! replaced once when the reader closes.
 
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -266,11 +264,61 @@ fn spawn_blocking_reader(
     });
 }
 
+/// Lossy UTF-8 decoding with the same result regardless of read boundaries.
+/// Only an incomplete trailing sequence (at most three bytes) is retained.
+#[derive(Default)]
+struct Utf8Decoder {
+    pending: Vec<u8>,
+}
+
+impl Utf8Decoder {
+    fn push(&mut self, bytes: &[u8]) -> String {
+        self.pending.extend_from_slice(bytes);
+        let mut text = String::new();
+        let mut consumed = 0;
+        while consumed < self.pending.len() {
+            match std::str::from_utf8(&self.pending[consumed..]) {
+                Ok(valid) => {
+                    text.push_str(valid);
+                    consumed = self.pending.len();
+                }
+                Err(error) => {
+                    let valid_end = consumed + error.valid_up_to();
+                    text.push_str(
+                        std::str::from_utf8(&self.pending[consumed..valid_end])
+                            .expect("valid_up_to identifies a UTF-8 prefix"),
+                    );
+                    consumed = valid_end;
+                    if let Some(invalid_len) = error.error_len() {
+                        text.push('\u{fffd}');
+                        consumed += invalid_len;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        self.pending.drain(..consumed);
+        text
+    }
+
+    fn finish(self) -> String {
+        String::from_utf8_lossy(&self.pending).into_owned()
+    }
+}
+
 fn spawn_async_pusher(mut rx: mpsc::Receiver<Vec<u8>>, ring: Arc<RingBuffer>) {
     tokio::spawn(async move {
+        let mut decoder = Utf8Decoder::default();
         while let Some(bytes) = rx.recv().await {
-            let text = String::from_utf8_lossy(&bytes).into_owned();
-            ring.push(text);
+            let text = decoder.push(&bytes);
+            if !text.is_empty() {
+                ring.push(text);
+            }
+        }
+        let tail = decoder.finish();
+        if !tail.is_empty() {
+            ring.push(tail);
         }
     });
 }
@@ -292,4 +340,87 @@ fn spawn_child_waiter(
         // before exit landed — that's fine, no one cares about the code.
         let _ = state_tx.send(LocalState::Exited { code });
     });
+}
+
+#[cfg(test)]
+mod stream_tests {
+    use super::*;
+    use std::time::Duration;
+
+    async fn captured(chunks: Vec<Vec<u8>>) -> String {
+        let ring = Arc::new(RingBuffer::new(100));
+        let (tx, rx) = mpsc::channel(100);
+        spawn_async_pusher(rx, ring.clone());
+        for chunk in chunks {
+            tx.send(chunk).await.unwrap();
+        }
+        // A final ASCII marker lets us wait for the queue without depending
+        // on how many frames the decoder emits for incomplete characters.
+        tx.send(b"END".to_vec()).await.unwrap();
+        drop(tx);
+        tokio::time::timeout(Duration::from_secs(1), async {
+            loop {
+                let text: String = ring.snapshot().into_iter().map(|f| f.text).collect();
+                if text.ends_with("END") {
+                    return text.strip_suffix("END").unwrap().to_string();
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap()
+    }
+
+    #[tokio::test]
+    async fn utf8_survives_every_pty_read_split() {
+        let text = "ASCII 中文 😀 café\x1b[0m";
+        for split in 0..=text.len() {
+            assert_eq!(
+                captured(vec![
+                    text.as_bytes()[..split].to_vec(),
+                    text.as_bytes()[split..].to_vec()
+                ])
+                .await,
+                text,
+                "split {split}"
+            );
+        }
+        assert_eq!(
+            captured(text.as_bytes().iter().map(|&b| vec![b]).collect()).await,
+            text
+        );
+    }
+
+    #[tokio::test]
+    async fn malformed_pty_bytes_have_chunk_independent_replacements() {
+        let bytes = b"a\xff\xe4\xb8\xad\xf0\x9fZ\x80";
+        let expected = String::from_utf8_lossy(bytes);
+        for split in 0..=bytes.len() {
+            assert_eq!(
+                captured(vec![bytes[..split].to_vec(), bytes[split..].to_vec()]).await,
+                expected,
+                "split {split}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn incomplete_pty_character_is_flushed_at_eof() {
+        let ring = Arc::new(RingBuffer::new(10));
+        let (tx, rx) = mpsc::channel(10);
+        spawn_async_pusher(rx, ring.clone());
+        tx.send(b"ok\xf0\x9f".to_vec()).await.unwrap();
+        drop(tx);
+        tokio::time::timeout(Duration::from_secs(1), async {
+            loop {
+                let text: String = ring.snapshot().into_iter().map(|f| f.text).collect();
+                if text == "ok\u{fffd}" {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("pending bytes replaced once when reader closes");
+    }
 }

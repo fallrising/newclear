@@ -1,0 +1,2372 @@
+{
+  "openapi": "3.1.1",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Signal Hub M0 API Contract",
+    "version": "0.1.0",
+    "description": "Contract only, with no runtime in M0. Future service is tailnet-only. Source tokens ingest; owner/read-only tokens query; owner alone may replay or reload. Events are append-only, delivery is at-least-once, configuration is git-managed. Alertmanager adapter is planned for M6."
+  },
+  "paths": {
+    "/v1/events": {
+      "post": {
+        "operationId": "ingestEvents",
+        "summary": "Ingest a single CloudEvent or independent batch members",
+        "description": "Source bearer only; authorize source_prefix and allowed_types per event. Unauthorized type, external signalhub.* type, or reserved urn:signalhub:sources: source URI is forbidden (403). New events return 202 only after SQLite commit; identical source + id and RFC 8785 canonical content return 200 with original seq and duplicate:true; differing content returns 409 without changing the original. data is at most 16384 UTF-8 bytes after RFC 8785 serialization. Batch must be a JSON array of 1–100 members; member validation is deliberately not applied to the outer request schema. After envelope/authentication validation batch always returns 200 with results in request order, including member failures. Outer malformed JSON/envelope or auth errors return 4xx; individual invalid_event/forbidden/event_conflict/payload_too_large/unavailable failures belong in results. Each successful member has committed before its result is returned. Content-Type must select a supported media type. Entire HTTP request body is limited to 4 MiB, including whitespace and envelope attributes; oversized bodies return 413 payload_too_large. JSON nesting beyond 64 levels returns 400 invalid_json.",
+        "security": [
+          {
+            "sourceBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/cloudevents+json": {
+              "schema": {
+                "$ref": "./schemas/event.schema.json"
+              }
+            },
+            "application/cloudevents-batch+json": {
+              "schema": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 100,
+                "items": {},
+                "description": "Validate CloudEvents separately, preserving independent member outcomes."
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Single new event committed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptedEvent"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Single identical duplicate, or per-member results for a valid batch envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DuplicateEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/BatchResults"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Event content conflicts with an existing source + id (event_conflict), or delivery is not in DLQ (not_replayable).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported request Content-Type (unsupported_media_type).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listEvents",
+        "summary": "EventPage",
+        "description": "Append-only hot events ordered by event.time descending then seq descending. Type permits a single terminal * wildcard; source is exact. q matches only type, subject and summary, not data. Filters combine with AND. Omitted time bounds query retained hot data. Cursor preserves this sort and the filter set.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/from"
+          },
+          {
+            "$ref": "#/components/parameters/to"
+          },
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uri-reference"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[a-z0-9]+(?:\\.[a-z0-9]+)*(?:\\.\\*|\\*)?(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "severity_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "debug",
+                "info",
+                "notice",
+                "warning",
+                "error",
+                "critical"
+              ]
+            }
+          },
+          {
+            "name": "subject_prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correlationid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/events/{seq}": {
+      "get": {
+        "operationId": "getEvent",
+        "summary": "EventDetail",
+        "description": "Fetch a hot event and its correlation/causation chain. A purged event returns not_found; this API does not import archives.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist in the hot database or active configuration (not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "seq",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/v1/adapters/alertmanager": {
+      "post": {
+        "operationId": "ingestAlertmanager",
+        "summary": "Alertmanager v4 adapter",
+        "x-signalhub-milestone": "M1",
+        "x-signalhub-implementation": "runtime",
+        "description": "Local mapping is part of M1; real producer integration is M6. Source bearer is scoped to urn:signalhub:alertmanager:<receiver> and allowed alertmanager.alert.* types. Each alerts array member maps to a CloudEvent per SDD 01; firing uses startsAt, resolved uses endsAt, and stable id is fingerprint:startsAt:status. Results use the zero-based alerts array index and independent ingest semantics. Duplicate notifications retain the original seq. Invalid webhook envelope returns 400; authorization failure returns 401/403. Entire HTTP request body is limited to 4 MiB, including whitespace and envelope attributes; oversized bodies return 413 payload_too_large. JSON nesting beyond 64 levels returns 400 invalid_json.",
+        "security": [
+          {
+            "sourceBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertmanagerV4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One independent ingest result for each alert; committed successes only.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdapterResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported request Content-Type (unsupported_media_type).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metrics/{rule_id}": {
+      "get": {
+        "operationId": "listMetricRollups",
+        "summary": "MetricPage",
+        "description": "Retained rollup time series, including version boundaries and partial buckets. group is an exact serialized group_key. Results ordered by bucket_start ascending, rule_version ascending, then group_key ascending. cursor/limit follow the common list contract. recomputable_from is the earliest currently hot event time, or null without hot events.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist in the hot database or active configuration (not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "$ref": "#/components/parameters/from"
+          },
+          {
+            "$ref": "#/components/parameters/to"
+          },
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/sources": {
+      "get": {
+        "operationId": "listSources",
+        "summary": "SourcePage",
+        "description": "Configured source freshness, ordered by name ascending. Attribution uses the authenticated configured source name; committed new events and identical duplicates refresh receipt time. Before its first attributed delivery status is never. Missing interval disables age checks; otherwise late means age > interval and silent means age > twice interval. Source reads evaluate current state. No token_ref, token hash or token value is returned. Pagination defaults to 100, maximum 200; cursors bind the active configuration, while freshness remains live between pages. See docs/source-freshness.md for transitions, restart and M1 migration semantics.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ]
+      }
+    },
+    "/v1/subscriptions": {
+      "get": {
+        "operationId": "listSubscriptions",
+        "summary": "SubscriptionPage",
+        "description": "Read-only subscription delivery summaries ordered by id ascending; no channel credentials or secret references are returned. list uses the common cursor/limit pagination contract.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ]
+      }
+    },
+    "/v1/deliveries": {
+      "get": {
+        "operationId": "listDeliveries",
+        "summary": "DeliveryPage",
+        "description": "Delivery state and the most recent attempt summary, ordered by delivery_id ascending. Attempts never expose recipient response bodies. list uses the common cursor/limit pagination contract.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscription",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "inflight",
+                "succeeded",
+                "dlq"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ]
+      }
+    },
+    "/v1/deliveries/{delivery_id}:replay": {
+      "post": {
+        "operationId": "replayDelivery",
+        "summary": "Replay a DLQ delivery with an audit reason",
+        "description": "Owner only. Only DLQ deliveries may be replayed. Commit transition to pending and audit reason before returning 202. Retain the original stable delivery_id. Nonblank reason required; malformed JSON returns invalid_json and missing/blank reason returns invalid_reason.",
+        "security": [
+          {
+            "ownerBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "delivery_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Replay scheduled after persistent transition and audit write.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist in the hot database or active configuration (not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Event content conflicts with an existing source + id (event_conflict), or delivery is not in DLQ (not_replayable).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported request Content-Type (unsupported_media_type).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/config:reload": {
+      "post": {
+        "operationId": "reloadConfig",
+        "summary": "Atomically reload git-managed configuration",
+        "description": "Owner only. No request body; reread the configured sources/rules/subscriptions files and validate the complete configuration. Reject invalid configuration with invalid_config (400), keep the old effective configuration, and emit signalhub.config.rejected. Success emits signalhub.config.reloaded and writes audit_log. This does not edit configuration or expose metadata endpoints.",
+        "security": [
+          {
+            "ownerBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All configuration validated and atomically activated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigReloaded"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "health",
+        "summary": "Tailnet liveness probe",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Process is alive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Live"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readiness",
+        "summary": "Tailnet readiness probe",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Required local configuration and database are ready.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ready"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Not ready; tailnet probe discloses no internal error detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "const": "not_ready"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/self": {
+      "get": {
+        "operationId": "getSelfObservation",
+        "summary": "SelfObservation",
+        "description": "Read-only self-observation: process-lifetime ingest/error counters, duplicate/conflict counters, subscription pending/inflight/DLQ counts, rule last successful computation, last archive result, database size and free disk bytes. Null timestamps/results mean no observation yet.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorDetail": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "invalid_json",
+              "invalid_event",
+              "invalid_batch",
+              "invalid_query",
+              "invalid_reason",
+              "invalid_config",
+              "payload_too_large",
+              "unauthenticated",
+              "forbidden",
+              "event_conflict",
+              "not_found",
+              "not_replayable",
+              "unavailable",
+              "unsupported_media_type"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "AcceptedEvent": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "seq"
+        ],
+        "additionalProperties": false
+      },
+      "DuplicateEvent": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duplicate": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "seq",
+          "duplicate"
+        ],
+        "additionalProperties": false
+      },
+      "IngestResult": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 202
+              },
+              "seq": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "seq"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 200
+              },
+              "seq": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "duplicate": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "seq",
+              "duplicate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 400
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "invalid_event"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 403
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "forbidden"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 409
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "event_conflict"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 413
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "payload_too_large"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "status": {
+                "type": "integer",
+                "const": 503
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "unavailable"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "index",
+              "status",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "BatchResults": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngestResult"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "additionalProperties": false
+      },
+      "AdapterResults": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngestResult"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "additionalProperties": false
+      },
+      "StoredEvent": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clock_skew": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "./schemas/event.schema.json"
+          }
+        },
+        "required": [
+          "seq",
+          "received_at",
+          "clock_skew",
+          "event"
+        ],
+        "additionalProperties": false
+      },
+      "EventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StoredEvent"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "EventDetail": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/StoredEvent"
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StoredEvent"
+            }
+          }
+        },
+        "required": [
+          "item",
+          "related"
+        ],
+        "additionalProperties": false,
+        "description": "Related events share correlationid or are directly referenced by causationid. Excludes item; deduplicated by seq and ordered by event.time then seq ascending. A missing/archived causation target is omitted."
+      },
+      "Rollup": {
+        "type": "object",
+        "properties": {
+          "rule_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "bucket_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "group_key": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "computed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "rule_version",
+          "bucket_start",
+          "group_key",
+          "value",
+          "sample_count",
+          "partial",
+          "computed_at"
+        ],
+        "additionalProperties": false,
+        "description": "group_key is the stable serialized grouping key; null value means no aggregate value (for example an empty avg bucket), not zero."
+      },
+      "MetricPage": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recomputable_from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_computed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rollup"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rule_id",
+          "recomputable_from",
+          "last_computed_at",
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "SourceFreshness": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_prefix": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "expected_interval": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[1-9][0-9]*(s|m|h|d)(?![\\s\\S])"
+          },
+          "last_received_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_event_time": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "late",
+              "silent",
+              "never"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "source_prefix",
+          "expected_interval",
+          "last_received_at",
+          "last_event_time",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "A runtime view, not a sources configuration wrapper. Times are null before the first event; expected_interval null disables freshness checks. For a seen source with checks disabled, status is fresh. Thresholds use last_received_at: late > interval, silent > 2 × interval."
+      },
+      "SourcePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceFreshness"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "DeliveryCounts": {
+        "type": "object",
+        "properties": {
+          "pending": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inflight": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "succeeded": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dlq": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "pending",
+          "inflight",
+          "succeeded",
+          "dlq"
+        ],
+        "additionalProperties": false
+      },
+      "SubscriptionStatus": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "immediate",
+              "digest"
+            ]
+          },
+          "channel_kind": {
+            "type": "string",
+            "enum": [
+              "webhook",
+              "ntfy"
+            ]
+          },
+          "counts": {
+            "$ref": "#/components/schemas/DeliveryCounts"
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "channel_kind",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "SubscriptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionStatus"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "DeliveryAttempt": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "http_status": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 100,
+            "maximum": 599
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "at",
+          "http_status",
+          "duration_ms",
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "error is a short failure summary; response body and credentials are never included. http_status is null for transport failures."
+      },
+      "Delivery": {
+        "type": "object",
+        "properties": {
+          "delivery_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subscription_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "inflight",
+              "succeeded",
+              "dlq"
+            ]
+          },
+          "event_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "window_start": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "last_attempt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryAttempt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_attempt_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "subscription_id",
+          "state",
+          "event_seq",
+          "window_start",
+          "attempt_count",
+          "last_attempt",
+          "next_attempt_at"
+        ],
+        "additionalProperties": false,
+        "description": "For immediate delivery event_seq is set and window_start null; for digest event_seq is null and window_start set. delivery_id stays unchanged through retries and replay."
+      },
+      "DeliveryPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Delivery"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "ReplayRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false,
+        "description": "A nonblank reason is required and recorded in audit_log."
+      },
+      "ReplayAccepted": {
+        "type": "object",
+        "properties": {
+          "delivery_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "string",
+            "const": "pending"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "ConfigReloaded": {
+        "type": "object",
+        "properties": {
+          "reloaded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "reloaded_at"
+        ],
+        "additionalProperties": false
+      },
+      "Live": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Ready": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ready"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "IngestCounters": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accepted": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duplicates": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "conflicts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "invalid_json",
+                    "invalid_event",
+                    "invalid_batch",
+                    "invalid_query",
+                    "invalid_reason",
+                    "invalid_config",
+                    "payload_too_large",
+                    "unauthenticated",
+                    "forbidden",
+                    "event_conflict",
+                    "not_found",
+                    "not_replayable",
+                    "unavailable",
+                    "unsupported_media_type"
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "code",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "total",
+          "accepted",
+          "duplicates",
+          "conflicts",
+          "errors"
+        ],
+        "additionalProperties": false,
+        "description": "Counters since process start. total counts per-event ingest attempts; accepted excludes duplicates. Batch members each count once; malformed request envelopes count in errors but have no event attempt."
+      },
+      "SelfSubscription": {
+        "type": "object",
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pending": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inflight": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dlq": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "subscription_id",
+          "pending",
+          "inflight",
+          "dlq"
+        ],
+        "additionalProperties": false
+      },
+      "SelfRule": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_success_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "rule_id",
+          "last_success_at"
+        ],
+        "additionalProperties": false
+      },
+      "ArchiveResult": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "at",
+          "status",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "SelfObservation": {
+        "type": "object",
+        "properties": {
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ingest": {
+            "$ref": "#/components/schemas/IngestCounters"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelfSubscription"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelfRule"
+            }
+          },
+          "last_archive": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ArchiveResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "database_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "disk_available_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "observed_at",
+          "ingest",
+          "subscriptions",
+          "rules",
+          "last_archive",
+          "database_bytes",
+          "disk_available_bytes"
+        ],
+        "additionalProperties": false
+      },
+      "AlertmanagerAlert": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "firing",
+              "resolved"
+            ]
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "annotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generatorURL": {
+            "type": "string",
+            "format": "uri"
+          },
+          "fingerprint": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "status",
+          "labels",
+          "annotations",
+          "startsAt",
+          "endsAt",
+          "generatorURL",
+          "fingerprint"
+        ],
+        "additionalProperties": false
+      },
+      "AlertmanagerV4": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "4"
+          },
+          "groupKey": {
+            "type": "string"
+          },
+          "receiver": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "firing",
+              "resolved"
+            ]
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertmanagerAlert"
+            },
+            "maxItems": 100
+          },
+          "groupLabels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "commonLabels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "commonAnnotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "externalURL": {
+            "type": "string",
+            "format": "uri"
+          },
+          "truncatedAlerts": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "version",
+          "groupKey",
+          "receiver",
+          "status",
+          "alerts"
+        ],
+        "additionalProperties": true,
+        "description": "M1 local Alertmanager webhook v4 mapping; up to 100 alerts, including an empty heartbeat. Real producer integration is M6."
+      }
+    },
+    "parameters": {
+      "cursor": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Opaque cursor issued for the same endpoint and filters. Invalid or mismatched cursors return invalid_query."
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 100
+        },
+        "description": "Maximum items on a page; defaults to 100."
+      },
+      "from": {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Inclusive lower bound on event time (or bucket_start for metrics). Omission leaves this bound open."
+      },
+      "to": {
+        "name": "to",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Exclusive upper bound on event time (or bucket_start for metrics). If both bounds are present, from must be earlier than to."
+      }
+    },
+    "securitySchemes": {
+      "sourceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Registered producer token; restricts source_prefix and allowed_types, denies signalhub.*; no query/replay/reload rights."
+      },
+      "ownerBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Owner token for query, replay and configuration reload."
+      },
+      "readOnlyBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Read-only query token for an AI agent or decision system; no ingest/replay/reload."
+      }
+    }
+  }
+}

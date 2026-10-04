@@ -160,6 +160,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/principals/assignable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Principals that entries of `contentType` can be assigned to (G-04): active, not deleted, holding
+         *     `update` on the type on the Back surface (predicates ignored). The caller needs `update` on the type
+         *     on its own surface. `q` is a case-insensitive substring of username or displayName. Order:
+         *     displayName, then username; at most 20. Only `id` and `displayName` are returned.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `contentType` missing, unknown or disabled.
+         *     - 403 FORBIDDEN: caller lacks `update` on the type.
+         */
+        get: operations["listAssignablePrincipals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/principals/{id}": {
         parameters: {
             query?: never;
@@ -343,7 +368,9 @@ export interface paths {
          *     `[back, admin]` otherwise.
          *     Errors:
          *     - 400 VALIDATION_FAILED: unknown role, unknown action, unknown surface, duplicate
-         *       permission, malformed predicate, or an empty list for the anonymous role.
+         *       permission, malformed predicate, a predicate without `contentType`, a predicate whose field is
+         *       not an enabled string, enum, ref or principal-ref field with index rows in that type (02 §4.1),
+         *       or an empty list for the anonymous role.
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          */
@@ -379,15 +406,25 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Published entries only. Entries whose `visibility` payload value is `unlisted` or
-         *     `private` are omitted. Not paginated in this version (`offset` is 0 and `limit`
-         *     equals the item count).
-         *     Relation filter: a query parameter named `ref.<fieldKey>` with an entry UUID value keeps
-         *     entries whose `<fieldKey>` references that entry. When several are given, one of them
-         *     is applied.
+         * @description Published copies only (02 §4.1). Omitted: entries not published, deleted entries, entries whose
+         *     published value of the type's visibilityField is present and not `public`, entries whose
+         *     `publicRequiresPublishedRefs` field points to an entry that is missing, deleted, unpublished or
+         *     `private`, and entries outside the caller's predicate grants. Search, filters and sort read the
+         *     published copy.
+         *     Default order: the type's sortField ascending when set, otherwise `-publishedAt`. Ties: updatedAt
+         *     descending, then id text ascending. Entries without a value for the sort key come last.
+         *     Field filters: `filter.<fieldKey>=<value>` on a field with
+         *     `filterable=true`, index rows and visibility `public`; datetime fields take
+         *     `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive) as ISO-8601 with offset.
+         *     Relation filters: `ref.<fieldKey>=<entry uuid>` on a public ref field; may repeat, all must match.
+         *     They read the relations of the working copy (02 BQ-10).
+         *     Other query parameters are ignored.
          *     Errors:
          *     - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
-         *     - 400 VALIDATION_FAILED: a `ref.<fieldKey>` value is not a UUID.
+         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; `sort` names a key that is not sortable;
+         *       a filter names a field that is not filterable or has a value of the wrong kind; a
+         *       `ref.<fieldKey>` is not a public ref field or its value is not a UUID; a parameter other than
+         *       `ref.<fieldKey>` is repeated.
          *     - 403 FORBIDDEN: caller may not read_published this type.
          *     - 404 ENTRY_NOT_FOUND: type does not exist or is disabled.
          */
@@ -412,7 +449,7 @@ export interface paths {
          *     - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
          *     - 403 FORBIDDEN: caller may not read_published this type or this entry.
          *     - 404 ENTRY_NOT_FOUND: type missing or disabled; entry missing, deleted, not published,
-         *       `private`, of another type, or referencing an unpublished required relation.
+         *       `private` in the type's visibilityField, of another type, or referencing an unpublished required relation.
          */
         get: operations["getPublicEntry"];
         put?: never;
@@ -515,14 +552,24 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Work copies, newest `updatedAt` first. Not paginated in this version (`offset` is 0 and
-         *     `limit` equals the item count). Without `state` all three states are returned.
-         *     Relation filter: `ref.<fieldKey>=<uuid>` as in listPublicEntries.
+         * @description Work copies (02 §4.1). Default order `-updatedAt`; ties by updatedAt descending, then id text
+         *     ascending. Without `state` the states are `draft,published` (archived entries need
+         *     `state=archived`). Search, filters and sort read the working copy.
+         *     The caller needs `read_draft` when the states include draft or archived, otherwise `read_published`.
+         *     When every matching grant carries a predicate, only entries whose working copy satisfies at least
+         *     one predicate are listed; `total` counts only those.
+         *     Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
+         *     datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
+         *     Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
+         *     `publishRequested=true` keeps only entries with an open publish request (G-03); false leaves the list unfiltered.
+         *     `include=refs` adds `refs` to every item (G-10): two more store reads per page, not per item.
+         *     Other query parameters are ignored.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: a `ref.<fieldKey>` value is not a UUID.
+         *     - 400 VALIDATION_FAILED: `include` other than `refs`; `publishRequested` other than true or false; `page` or `size` out of range; unknown `state` value; `sort` names a key
+         *       that is not sortable; a filter names a field that is not filterable or has a value of the wrong
+         *       kind; a `ref.<fieldKey>` value is not a UUID; a parameter other than `ref.<fieldKey>` is repeated.
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
-         *     - 403 FORBIDDEN: caller lacks `read_draft` (or `read_published` when `state=published`)
-         *       on this type, or holds only a predicate-scoped grant (B-10).
+         *     - 403 FORBIDDEN: caller has no grant of the needed action on this type.
          *     - 404 CONTENT_TYPE_NOT_FOUND: type does not exist.
          */
         get: operations["listWorkEntries"];
@@ -536,8 +583,9 @@ export interface paths {
          *     - 409 TYPE_DISABLED: type is disabled.
          *     - 409 SINGLETON_EXISTS: singleton type already has an entry.
          *     - 409 SLUG_CONFLICT: slug already used in this type.
-         *     - 422 FIELD_VALIDATION: reserved key, wrong value type, or unknown enum value.
-         *     - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+         *     - 422: the payload is invalid. `error.fields` lists every invalid key (see `FieldError`);
+         *       `error.code` is the first field's code when it is REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE or
+         *       PRINCIPAL_REF_UNRESOLVED, otherwise FIELD_VALIDATION; `error.message` is a summary.
          */
         post: operations["createEntry"];
         delete?: never;
@@ -554,7 +602,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Errors:
+         * @description `include=refs` adds `refs` (G-10).
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `include` other than `refs`.
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
          *     - 403 FORBIDDEN: caller may not read this entry.
          *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -572,16 +622,19 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * @description Merges `payload` keys into the work copy; a key with value null is stored as null.
-         *     When `version` is present it must equal the current version.
-         *     Errors:
-         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         * @description Merges `payload` keys into the work copy. A key whose value is null clears the field: the key is
+         *     stored with value null and is not validated (G-07). A blank string is stored as sent and, like null,
+         *     counts as empty (only REQUIRED at publish applies). Keys not sent keep their values.
+         *     `version` is required and must equal the current version.
+         *     Errors (checked in this order):
+         *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
          *     - 404 ENTRY_NOT_FOUND: entry missing.
          *     - 409 INVALID_STATE_TRANSITION: entry is archived or soft-deleted.
+         *     - 403 FORBIDDEN: caller lacks `update` on this entry.
+         *     - 428 VERSION_REQUIRED: `version` is missing or null.
          *     - 409 VERSION_CONFLICT: `version` does not match.
          *     - 409 SLUG_CONFLICT: slug already used in this type.
-         *     - 422 FIELD_VALIDATION, REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE,
-         *       PRINCIPAL_REF_UNRESOLVED: as createEntry.
+         *     - 422 with `error.fields`: as createEntry, for the merged payload.
          */
         patch: operations["patchEntry"];
         trace?: never;
@@ -596,18 +649,81 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Publishing a published entry without changes returns it unchanged.
+         * @description Publishing a published entry without changes and without an open request returns it unchanged.
+         *     If its working payload is clean but a request remains open, clear the request with a version increment
+         *     and entry.publish_request_cancel audit; do not create a revision or an entry.publish event.
          *     Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `publish`).
          *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
          *     - 409 INVALID_STATE_TRANSITION: entry is archived.
          *     - 409 TYPE_DISABLED: type is disabled.
          *     - 422 SLUG_REQUIRED: slug policy `required` and slug empty.
-         *     - 422 FIELD_VALIDATION: a required field is empty or a value is invalid.
-         *     - 422 REF_TARGET_NOT_FOUND, REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED: bad reference.
+         *     - 422 with `error.fields`: a required field is empty (REQUIRED) or a value is invalid, as createEntry.
          */
         post: operations["publishEntry"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entries:batch-patch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Patches 1 to 100 entries atomically (G-09). Each item gets the checks of patchEntry, in item order.
+         *     The first failing check that is not a field error stops the batch with that error; its message starts
+         *     with `items[<i>]: `. Otherwise all field errors of all items are returned together as one 422 with
+         *     paths `items[<i>].payload.<fieldKey>`. Nothing is written unless every item passes; then all items
+         *     are written in one transaction. `slug` cannot be changed here. No audit event (as patchEntry).
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `items` empty or longer than 100; an item without `id`; an id repeated.
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN; 404 ENTRY_NOT_FOUND; 409 INVALID_STATE_TRANSITION, VERSION_CONFLICT;
+         *       428 VERSION_REQUIRED: as patchEntry, for the first failing item.
+         *     - 422 with `error.fields`: as patchEntry, for all items.
+         */
+        post: operations["batchPatchEntries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entries/{id}/publish-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Asks for the entry to be published (G-03). Needs `update`. The entry must be a draft, or published
+         *     with unpublished changes (`dirty`). An open request is returned unchanged. Creating a request increments
+         *     `version` and changes `updatedAt`, using compare-and-set. Publish, unpublish, archive and restore clear
+         *     the request. Audit: `entry.publish_request`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+         *     - 409 INVALID_STATE_TRANSITION: archived, or published without changes.
+         */
+        post: operations["requestPublish"];
+        /**
+         * @description Withdraws the open publish request. Needs `update`. Without a request the entry is returned
+         *     unchanged. Clearing an existing request increments `version` and changes `updatedAt`, using compare-and-set.
+         *     Audit: `entry.publish_request_cancel`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+         */
+        delete: operations["cancelPublishRequest"];
         options?: never;
         head?: never;
         patch?: never;
@@ -885,12 +1001,103 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Newest first. Not paginated in this version.
+         * @description Audit search (02 §4.6, B-07). Order: `at` descending, then id text ascending. Blank parameters mean
+         *     no condition; other parameters are ignored. `actor` is a username; an unknown username gives an
+         *     empty page. `action` matches exactly, or as a prefix when the value ends with `.` (for example
+         *     `entry.`). `from` is inclusive and `to` exclusive.
          *     Errors:
-         *     - 403 SURFACE_FORBIDDEN: called from the Front or Back surface.
-         *     - 403 FORBIDDEN: caller lacks `read_audit`.
+         *     - 400 VALIDATION_FAILED: `page` or `size` out of range; `from`, `to` or `targetId` malformed; a
+         *       parameter repeated.
+         *     - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+         *       denied `read_audit`).
+         *     - 403 FORBIDDEN: caller lacks `read_audit` (also written as denied).
          */
         get: operations["listAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One audit event with its `detail`.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listAudit.
+         *     - 404 AUDIT_EVENT_NOT_FOUND: no event with this id.
+         */
+        get: operations["getAuditEvent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/content-types/{typeKey}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The caller's entries of a type that has an ownerField (02 §4.5, G-08): entries whose ownerField equals
+         *     the caller's id, in draft or published state, with the public fields of the working copy. Front surface
+         *     only. Paging, sorting, q, filter.* and ref.* follow listWorkEntries (default `-updatedAt`).
+         *     state and publishRequested are syntax-checked but do not change the fixed draft/published owner list.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `page`, `size`, `sort` or a filter as listWorkEntries.
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+         */
+        get: operations["listMyEntries"];
+        put?: never;
+        /**
+         * @description Creates a draft owned by the caller (02 §4.5). Front surface only; needs `create` on the type. The
+         *     ownerField is set to the caller (a client value is replaced). A ref field whose target type has an
+         *     ownerField must point to an entry the caller owns. At most 5 requests per member per minute. Audit:
+         *     `entry.create`.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `publicationState` present in the body, including null.
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 403 FORBIDDEN: caller lacks `create` on the type.
+         *     - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+         *     - 422 with `error.fields`: payload invalid as createEntry, or a ref to an entry the caller does not own
+         *       (`REF_TARGET_NOT_FOUND`).
+         *     - 429 RATE_LIMITED: more than 5 requests in the last minute.
+         */
+        post: operations["createMyEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/entries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One of the caller's entries. Front surface only.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 403 FORBIDDEN: the entry belongs to someone else (surface-front AC-11; not hidden as 404).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted, or its type is disabled or has no ownerField.
+         */
+        get: operations["getMyEntry"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1051,7 +1258,7 @@ export interface components {
          * @description Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1065,8 +1272,27 @@ export interface components {
                 contentType?: string;
                 /** @description Present on FORBIDDEN and SURFACE_FORBIDDEN. */
                 surface?: string;
+                /** @description Present on 422 payload validation errors; every invalid key, in validation order. */
+                fields?: components["schemas"]["FieldError"][];
             };
         };
+        FieldError: {
+            /**
+             * @description Path of the input, `payload.<fieldKey>`.
+             * @example payload.title
+             */
+            field: string;
+            code: components["schemas"]["FieldErrorCode"];
+            /** @description English developer message. Not for display. */
+            message: string;
+        };
+        /**
+         * @description Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
+         *     markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+         *     REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+         * @enum {string}
+         */
+        FieldErrorCode: "REQUIRED" | "RESERVED_KEY" | "WRONG_TYPE" | "TOO_LONG" | "INVALID_DATETIME" | "NOT_IN_ENUM" | "INVALID_UUID" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED";
         Health: {
             /** @example UP */
             status: string;
@@ -1107,20 +1333,46 @@ export interface components {
             back: boolean;
             admin: boolean;
         };
+        TypeCapability: {
+            key: string;
+            /** @description Subset of read_published, read_draft, create, update, publish, unpublish, delete, archive, in that order. */
+            actions: components["schemas"]["CmsAction"][];
+            /** @description True when some listed action is granted only with a predicate; the caller must still expect 403 on some entries. */
+            scoped: boolean;
+        };
+        /**
+         * @description What the caller may do on the surface of this request (G-01). Only enabled types with at least one action
+         *     are listed, in type key order. Surface hard-deny rules are already applied.
+         */
+        Capabilities: {
+            surface: components["schemas"]["Surface"];
+            types: components["schemas"]["TypeCapability"][];
+            /** @description Subset of manage_media, manage_types, manage_principals, manage_settings, read_audit, in that order. */
+            global: components["schemas"]["CmsAction"][];
+        };
         Me: {
             principal: components["schemas"]["MePrincipal"];
             roles: components["schemas"]["RoleAssignment"][];
             surfaces: components["schemas"]["SurfaceFlags"];
+            capabilities: components["schemas"]["Capabilities"];
         };
         LoginResponse: {
             principal: components["schemas"]["MePrincipal"];
             roles: components["schemas"]["RoleAssignment"][];
             surfaces: components["schemas"]["SurfaceFlags"];
+            capabilities: components["schemas"]["Capabilities"];
             csrfToken: string;
         };
         PasswordChangeRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        AssignablePrincipalList: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                displayName: string;
+            }[];
         };
         Principal: {
             /** Format: uuid */
@@ -1225,8 +1477,8 @@ export interface components {
             items: components["schemas"]["PublicContentType"][];
         };
         /**
-         * @description Published copy. Only public fields are present. A readable `media-ref` value is
-         *     replaced by a MediaAsset object; any other `media-ref` value is returned as stored (B-13).
+         * @description Published copy. Only public fields are present. A `media-ref` value is replaced by a MediaAsset
+         *     object when the media is publicly readable, and by null otherwise; the stored id is never returned (B-13).
          */
         PublicEntry: {
             /** Format: uuid */
@@ -1241,28 +1493,64 @@ export interface components {
         };
         PublicEntryPage: {
             items: components["schemas"]["PublicEntry"][];
+            /**
+             * Format: int64
+             * @description Number of matching entries on all pages.
+             */
             total: number;
+            page: number;
+            size: number;
+            /** @description (page - 1) * size. Kept for v1 clients. */
             offset: number;
+            /** @description Equals size. Kept for v1 clients. */
             limit: number;
         };
         /** @description Navigation document. The seeded menus use an items array of objects with label and href. */
         NavigationDocument: {
             [key: string]: unknown;
         };
+        /** @description Field schema for Back (02 §4.7). Disabled fields and visibility internal are not listed. */
         WorkField: {
             key: string;
             type: string;
+            /** @description zh-Hant display name. Null means the client derives a label from the key. */
+            label: string | null;
+            helpText: string | null;
             required: boolean;
-            refTarget: string | null;
+            /** @description main, media, relations, settings, or a custom key. Null means main. */
+            group: string | null;
+            /**
+             * Format: int32
+             * @description Form order (ascending).
+             */
+            order: number;
+            listable: boolean;
+            filterable: boolean;
             enumValues: string[];
+            /** @description Enum value to zh-Hant display name. Empty when no labels are set. */
+            enumLabels: {
+                [key: string]: string;
+            };
+            refTarget: string | null;
+            placeholder: string | null;
+            /** @enum {string} */
+            visibility: "public" | "back" | "internal";
         };
         WorkContentType: {
             key: string;
             displayName: string;
             pluralDisplayName: string;
             titleField: string;
+            /** @description Field that orders public lists ascending. Null means publishedAt descending. */
+            sortField: string | null;
+            /** @description Enum field with public, unlisted or private. Null means every published entry is public. */
+            visibilityField: string | null;
+            /** @description principal-ref field naming the owning member. */
+            ownerField: string | null;
             /** @enum {string} */
             slugPolicy: "required" | "optional" | "none";
+            singleton: boolean;
+            previewable: boolean;
             fields: components["schemas"]["WorkField"][];
         };
         WorkContentTypeList: {
@@ -1276,7 +1564,7 @@ export interface components {
             publicationState: components["schemas"]["PublicationState"];
             /** Format: int32 */
             version: number;
-            /** @description Value of payload.title (not titleField; see B-03, fixed in BW1). */
+            /** @description Value of payload[titleField] of the entry's type (G-11). */
             title: string | null;
             payload: components["schemas"]["EntryPayload"];
             /** @description True when published and the work copy differs from the published copy. */
@@ -1285,11 +1573,89 @@ export interface components {
             publishedAt: string | null;
             /** Format: date-time */
             updatedAt: string;
+            /**
+             * Format: date-time
+             * @description When an open publish request was made (G-03); null without one.
+             */
+            publishRequestedAt: string | null;
+            /**
+             * Format: uuid
+             * @description Principal who made the open publish request.
+             */
+            publishRequestedBy: string | null;
+            /** @description Present only with `include=refs` (G-10); one key per ref field that holds an entry id. */
+            refs?: {
+                [key: string]: components["schemas"]["RefSummary"];
+            };
+        };
+        BatchPatchRequest: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: int32 */
+                version: number;
+                payload?: components["schemas"]["EntryPayload"] | null;
+            }[];
+        };
+        WorkEntryList: {
+            items: components["schemas"]["WorkEntry"][];
+        };
+        /**
+         * @description Target of a ref field. Readable (caller has read_draft on the target): id, contentType, title,
+         *     publicationState. Not readable: id and restricted=true. Missing or soft-deleted: id and missing=true.
+         */
+        RefSummary: {
+            /** Format: uuid */
+            id: string;
+            contentType?: string;
+            title?: string | null;
+            publicationState?: components["schemas"]["PublicationState"];
+            restricted?: boolean;
+            missing?: boolean;
+        };
+        /**
+         * @description The caller's entry (02 §4.5): enabled public fields of the working copy; title is null unless its field
+         *     is enabled and public. Media-ref values expanded as in
+         *     PublicEntry (null when not publicly readable).
+         */
+        MemberEntry: {
+            /** Format: uuid */
+            id: string;
+            contentType: string;
+            publicationState: components["schemas"]["PublicationState"];
+            title: string | null;
+            payload: components["schemas"]["EntryPayload"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        MemberEntryPage: {
+            items: components["schemas"]["MemberEntry"][];
+            /** Format: int64 */
+            total: number;
+            page: number;
+            size: number;
+            offset: number;
+            limit: number;
+        };
+        MemberCreateRequest: {
+            payload: components["schemas"]["EntryPayload"];
+            /** @description Must be absent; any present value, including null, is 400 VALIDATION_FAILED. */
+            publicationState?: string;
         };
         WorkEntryPage: {
             items: components["schemas"]["WorkEntry"][];
+            /**
+             * Format: int64
+             * @description Number of matching entries on all pages.
+             */
             total: number;
+            page: number;
+            size: number;
+            /** @description (page - 1) * size. Kept for v1 clients. */
             offset: number;
+            /** @description Equals size. Kept for v1 clients. */
             limit: number;
         };
         EntryWriteRequest: {
@@ -1297,9 +1663,20 @@ export interface components {
             payload?: components["schemas"]["EntryPayload"] | null;
             /**
              * Format: int32
-             * @description Optimistic lock for PATCH; ignored on create.
+             * @description Ignored on create.
              */
             version?: number | null;
+        };
+        EntryPatchRequest: {
+            /** @description Omitted or null keeps the current slug. */
+            slug?: string | null;
+            /** @description Keys to merge; a null value clears that field (G-07). */
+            payload?: components["schemas"]["EntryPayload"] | null;
+            /**
+             * Format: int32
+             * @description Current version of the entry (optimistic lock). Missing or null is 428 VERSION_REQUIRED.
+             */
+            version: number;
         };
         Revision: {
             /** Format: int32 */
@@ -1312,20 +1689,50 @@ export interface components {
         RevisionList: {
             items: components["schemas"]["Revision"][];
         };
+        /** @description Field schema for Admin. Lists every field, including disabled and internal ones. */
         AdminField: {
             key: string;
             type: string;
+            /** @description zh-Hant display name. Null means the client derives a label from the key. */
+            label: string | null;
+            helpText: string | null;
             required: boolean;
-            indexed: boolean;
+            /** @description main, media, relations, settings, or a custom key. Null means main. */
+            group: string | null;
+            /**
+             * Format: int32
+             * @description Form order (ascending).
+             */
+            order: number;
+            listable: boolean;
+            filterable: boolean;
+            enumValues: string[];
+            /** @description Enum value to zh-Hant display name. Empty when no labels are set. */
+            enumLabels: {
+                [key: string]: string;
+            };
             refTarget: string | null;
+            placeholder: string | null;
+            /** @enum {string} */
+            visibility: "public" | "back" | "internal";
+            indexed: boolean;
+            enabled: boolean;
         };
         AdminContentType: {
             key: string;
             displayName: string;
             pluralDisplayName: string;
             titleField: string;
+            /** @description Field that orders public lists ascending. Null means publishedAt descending. */
+            sortField: string | null;
+            /** @description Enum field with public, unlisted or private. Null means every published entry is public. */
+            visibilityField: string | null;
+            /** @description principal-ref field naming the owning member. */
+            ownerField: string | null;
             /** @enum {string} */
             slugPolicy: "required" | "optional" | "none";
+            singleton: boolean;
+            previewable: boolean;
             enabled: boolean;
             fields: components["schemas"]["AdminField"][];
         };
@@ -1365,17 +1772,58 @@ export interface components {
         NavigationPatchRequest: {
             document?: components["schemas"]["NavigationDocument"] | null;
         };
+        AuditActor: {
+            /** Format: uuid */
+            id: string;
+            /** @description Null when the principal no longer exists. */
+            username: string | null;
+            displayName: string | null;
+        };
         AuditEventSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            at: string;
+            /** @description Null for events without an actor (anonymous login attempts, seeding). */
+            actor: components["schemas"]["AuditActor"] | null;
+            /** @description AUTH, CONTENT, SCHEMA, SETTINGS, MEDIA or GOVERNANCE. */
+            category: string;
+            /** @description For example `entry.publish`, `type.create`, `LOGIN_SUCCESS`, or a denied governance action such as `manage_types`. */
             action: string;
             targetType: string | null;
             /** Format: uuid */
             targetId: string | null;
+            surface: string | null;
+            /** @description ok or denied. */
             outcome: string;
+        };
+        /** @description AuditEventSummary plus detail. */
+        AuditEventDetail: {
+            /** Format: uuid */
+            id: string;
             /** Format: date-time */
             at: string;
+            actor: components["schemas"]["AuditActor"] | null;
+            category: string;
+            action: string;
+            targetType: string | null;
+            /** Format: uuid */
+            targetId: string | null;
+            surface: string | null;
+            outcome: string;
+            /** @description The event's detail_json, or null. */
+            detail: {
+                [key: string]: unknown;
+            } | null;
         };
-        AuditEventList: {
+        AuditEventPage: {
             items: components["schemas"]["AuditEventSummary"][];
+            /** Format: int64 */
+            total: number;
+            page: number;
+            size: number;
+            offset: number;
+            limit: number;
         };
         MediaVariantLink: {
             url: string;
@@ -1511,6 +1959,24 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
+        /** @description Precondition required (VERSION_REQUIRED). */
+        Error428: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description Too many requests (RATE_LIMITED). */
+        Error429: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
         /** @description INTERNAL_ERROR. */
         Error500: {
             headers: {
@@ -1529,10 +1995,22 @@ export interface components {
         RoleCode: string;
         RevisionNo: number;
         Variant: "original" | "thumbnail" | "web";
-        /** @description Case-insensitive substring of the payload `title` value. */
+        /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
         Q: string;
-        /** @description Comma-separated publication states, for example `draft,published`. */
+        /** @description Comma-separated subset of `draft`, `published`, `archived`. Default `draft,published`. */
         State: string;
+        /** @description 1-based page number. Default 1. */
+        Page: number;
+        /** @description Page size. Default 20, maximum 100. */
+        Size: number;
+        /**
+         * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+         *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+         *     visibility `public` only).
+         */
+        Sort: string;
+        /** @description Comma-separated; the only value is `refs`. */
+        IncludeRefs: string;
         /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
         CsrfHeader: string;
     };
@@ -1772,6 +2250,33 @@ export interface operations {
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
             415: components["responses"]["Error415"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    listAssignablePrincipals: {
+        parameters: {
+            query: {
+                contentType: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Assignable principals */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignablePrincipalList"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2090,8 +2595,18 @@ export interface operations {
     listPublicEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive substring of the payload `title` value. */
+                /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
                 q?: components["parameters"]["Q"];
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
             };
             header?: never;
             path: {
@@ -2246,10 +2761,23 @@ export interface operations {
     listWorkEntries: {
         parameters: {
             query?: {
-                /** @description Case-insensitive substring of the payload `title` value. */
+                /** @description Case-insensitive literal substring of the titleField value; blank means no search. */
                 q?: components["parameters"]["Q"];
-                /** @description Comma-separated publication states, for example `draft,published`. */
+                /** @description Comma-separated subset of `draft`, `published`, `archived`. Default `draft,published`. */
                 state?: components["parameters"]["State"];
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
+                publishRequested?: boolean;
+                /** @description Comma-separated; the only value is `refs`. */
+                include?: components["parameters"]["IncludeRefs"];
             };
             header?: never;
             path: {
@@ -2314,7 +2842,10 @@ export interface operations {
     };
     getWorkEntry: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Comma-separated; the only value is `refs`. */
+                include?: components["parameters"]["IncludeRefs"];
+            };
             header?: never;
             path: {
                 id: components["parameters"]["Id"];
@@ -2382,7 +2913,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EntryWriteRequest"];
+                "application/json": components["schemas"]["EntryPatchRequest"];
             };
         };
         responses: {
@@ -2402,6 +2933,7 @@ export interface operations {
             409: components["responses"]["Error409"];
             415: components["responses"]["Error415"];
             422: components["responses"]["Error422"];
+            428: components["responses"]["Error428"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2434,6 +2966,103 @@ export interface operations {
             404: components["responses"]["Error404"];
             409: components["responses"]["Error409"];
             422: components["responses"]["Error422"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    batchPatchEntries: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated entries in item order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntryList"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            415: components["responses"]["Error415"];
+            422: components["responses"]["Error422"];
+            428: components["responses"]["Error428"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    requestPublish: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Entry with an open publish request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    cancelPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Entry without a publish request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2851,9 +3480,20 @@ export interface operations {
     listAudit: {
         parameters: {
             query?: {
-                /** @description Exact audit action, for example `LOGIN_SUCCESS`. */
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                from?: string;
+                to?: string;
+                /** @description Username of the actor. */
+                actor?: string;
+                /** @description Exact action, for example `entry.publish`; a value ending with `.` is a prefix. */
                 action?: string;
+                category?: string;
+                targetType?: string;
                 targetId?: string;
+                outcome?: string;
             };
             header?: never;
             path?: never;
@@ -2861,18 +3501,147 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Audit events */
+            /** @description One page of audit events */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditEventList"];
+                    "application/json": components["schemas"]["AuditEventPage"];
                 };
             };
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    getAuditEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audit event */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventDetail"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    listMyEntries: {
+        parameters: {
+            query?: {
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
+            };
+            header?: never;
+            path: {
+                typeKey: components["parameters"]["TypeKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The caller's entries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntryPage"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    createMyEntry: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                typeKey: components["parameters"]["TypeKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            415: components["responses"]["Error415"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    getMyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The caller's entry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };

@@ -1,6 +1,8 @@
 package com.fallrising.cms.identity.service;
 
 import com.fallrising.cms.identity.IdentityException;
+import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.domain.Capabilities;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -12,9 +14,11 @@ import com.fallrising.cms.identity.store.IdentityStore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +28,19 @@ import java.util.UUID;
 @Service
 public class AuthorizationService {
 
+    /** Per-content-type actions reported by capabilities(), in this order. */
+    public static final List<CmsAction> TYPE_ACTIONS = List.of(
+            CmsAction.READ_PUBLISHED, CmsAction.READ_DRAFT, CmsAction.CREATE, CmsAction.UPDATE,
+            CmsAction.PUBLISH, CmsAction.UNPUBLISH, CmsAction.DELETE, CmsAction.ARCHIVE);
+
+    /** Global actions reported by capabilities(), in this order. */
+    public static final List<CmsAction> GLOBAL_ACTIONS = List.of(
+            CmsAction.MANAGE_MEDIA, CmsAction.MANAGE_TYPES, CmsAction.MANAGE_PRINCIPALS,
+            CmsAction.MANAGE_SETTINGS, CmsAction.READ_AUDIT);
+
+    static final String GRANT_CACHE_PREFIX = AuthorizationService.class.getName() + ".grants:";
+    private static final String ROLE_CACHE_PREFIX = AuthorizationService.class.getName() + ".roles:";
+
     public enum DecisionKind { ALLOW, FORBIDDEN, SURFACE_FORBIDDEN }
     public record Decision(DecisionKind kind, CmsAction action, String contentType, Surface surface) {
         public boolean allowed() { return kind == DecisionKind.ALLOW; }
@@ -31,16 +48,33 @@ public class AuthorizationService {
 
     private final IdentityStore store;
     private final ObjectMapper objectMapper;
+    private final com.fallrising.cms.platform.TransactionRunner transactions;
 
     public AuthorizationService(IdentityStore store, ObjectMapper objectMapper) {
-        this.store = store;
-        this.objectMapper = objectMapper;
+        this(store, objectMapper, com.fallrising.cms.platform.TransactionRunner.withoutDatabase());
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
+    public AuthorizationService(IdentityStore store, ObjectMapper objectMapper,
+            com.fallrising.cms.platform.TransactionRunner transactions) {
+        this.store = store;
+        this.objectMapper = objectMapper;
+        this.transactions = transactions;
+    }
+
+    /**
+     * Throws SURFACE_FORBIDDEN or FORBIDDEN unless allowed. A denied governance action (CmsAction.GOVERNANCE) is also
+     * written to the audit log with outcome "denied" (02 §4.6).
+     */
     public void require(Principal principal, CmsAction action, String contentType, Map<String, Object> entry, Surface surface) {
         Decision decision = allow(principal, action, contentType, entry, surface);
-        if (decision.kind() == DecisionKind.SURFACE_FORBIDDEN) throw IdentityException.surfaceForbidden(action.wire(), contentType, surface.wire());
-        if (decision.kind() == DecisionKind.FORBIDDEN) throw IdentityException.forbidden(action.wire(), contentType, surface.wire());
+        if (!decision.allowed() && CmsAction.GOVERNANCE.contains(action)) {
+            transactions.independently(() -> store.insertAudit(new AuditEvent(UUID.randomUUID(), Instant.now(), principal == null ? null : principal.id(),
+                    "GOVERNANCE", action.wire(), null, null, decision.surface().wire(), "denied",
+                    null, "{\"reason\":\"" + decision.kind().name() + "\"}")));
+        }
+        if (decision.kind() == DecisionKind.SURFACE_FORBIDDEN) throw IdentityException.surfaceForbidden(action.wire(), contentType, decision.surface().wire());
+        if (decision.kind() == DecisionKind.FORBIDDEN) throw IdentityException.forbidden(action.wire(), contentType, decision.surface().wire());
     }
 
     public Decision allow(Principal principal, CmsAction action, String contentType, Map<String, Object> entry, Surface surface) {
@@ -61,6 +95,80 @@ public class AuthorizationService {
             if (matchesGrant(grant, action, contentType, resolved)) return true;
         }
         return false;
+    }
+
+    /**
+     * Authorization of a list query (02 §4.1 "授權如何下推到 SQL"). Hard-deny sets apply first and throw
+     * SURFACE_FORBIDDEN. Grants are matched ignoring predicates: none → FORBIDDEN; any grant without a predicate →
+     * unrestricted; otherwise one clause per compilable fieldEquals predicate, with $currentPrincipalId replaced by
+     * the caller's id. A predicate on $currentPrincipalId yields no clause for an anonymous caller, and a malformed
+     * predicate yields no clause, matching allow(), which rejects both.
+     */
+    public ListAccess listAccess(Principal principal, CmsAction action, String contentType, Surface surface) {
+        Surface resolved = surface == null ? Surface.FRONT : surface;
+        if (hardDenied(resolved, action)) throw IdentityException.surfaceForbidden(action.wire(), contentType, resolved.wire());
+        List<Grant> matching = collectGrants(principal).stream().filter(g -> matchesGrant(g, action, contentType, resolved)).toList();
+        if (matching.isEmpty()) throw IdentityException.forbidden(action.wire(), contentType, resolved.wire());
+        List<ListAccess.Clause> clauses = new ArrayList<>();
+        for (Grant grant : matching) {
+            String json = grant.permission.predicateJson();
+            if (json == null || json.isBlank()) return ListAccess.all();
+            FieldEqualsPredicate predicate = FieldEqualsPredicate.parse(objectMapper, json);
+            if (predicate == null) continue;
+            String value = predicate.value();
+            if (FieldEqualsPredicate.CURRENT_PRINCIPAL.equals(value)) {
+                if (principal == null) continue;
+                value = principal.id().toString();
+            }
+            ListAccess.Clause clause = new ListAccess.Clause(predicate.field(), value);
+            if (!clauses.contains(clause)) clauses.add(clause);
+        }
+        return new ListAccess(false, List.copyOf(clauses));
+    }
+
+    /** Result of listAccess: unrestricted, or entries whose field equals the value of at least one clause. */
+    public record ListAccess(boolean unrestricted, List<Clause> anyOf) {
+        public record Clause(String field, String value) {}
+
+        static ListAccess all() {
+            return new ListAccess(true, List.of());
+        }
+    }
+
+    /**
+     * Capabilities of the principal on the surface (02 §4.2). Hard-deny sets are applied first; an action is listed
+     * when at least one grant matches it ignoring predicates; scoped is true when every matching grant of some listed
+     * action carries a predicate.
+     */
+    public Capabilities capabilities(Principal principal, Surface surface, List<String> enabledTypeKeys) {
+        Surface resolved = surface == null ? Surface.FRONT : surface;
+        List<Grant> grants = collectGrants(principal);
+        List<Capabilities.TypeCapability> types = new ArrayList<>();
+        for (String typeKey : enabledTypeKeys) {
+            List<String> actions = new ArrayList<>();
+            boolean scoped = false;
+            for (CmsAction action : TYPE_ACTIONS) {
+                if (hardDenied(resolved, action)) continue;
+                List<Grant> matching = grants.stream().filter(g -> matchesGrant(g, action, typeKey, resolved)).toList();
+                if (matching.isEmpty()) continue;
+                actions.add(action.wire());
+                if (matching.stream().allMatch(g -> g.permission.predicateJson() != null && !g.permission.predicateJson().isBlank())) {
+                    scoped = true;
+                }
+            }
+            if (!actions.isEmpty()) types.add(new Capabilities.TypeCapability(typeKey, List.copyOf(actions), scoped));
+        }
+        List<String> global = new ArrayList<>();
+        for (CmsAction action : GLOBAL_ACTIONS) {
+            if (hardDenied(resolved, action)) continue;
+            if (grants.stream().anyMatch(g -> matchesGrant(g, action, null, resolved))) global.add(action.wire());
+        }
+        return new Capabilities(resolved.wire(), List.copyOf(types), List.copyOf(global));
+    }
+
+    private static boolean hardDenied(Surface surface, CmsAction action) {
+        return (surface == Surface.FRONT && CmsAction.FRONT_HARD_DENY.contains(action))
+                || (surface == Surface.BACK && CmsAction.BACK_HARD_DENY.contains(action));
     }
 
     private boolean matches(Grant grant, Principal principal, CmsAction action, String contentType, Map<String, Object> entry, Surface surface) {
@@ -100,16 +208,48 @@ public class AuthorizationService {
         }
     }
 
+    /**
+     * Grants of the principal plus anonymous grants. Inside an HTTP request the result is cached as a request
+     * attribute, so one request reads roles and permissions from the store once per principal (B-12).
+     * Outside a request (seeders, unit tests) nothing is cached.
+     */
+    @SuppressWarnings("unchecked")
     private List<Grant> collectGrants(Principal principal) {
+        RequestAttributes request = RequestContextHolder.getRequestAttributes();
+        String key = GRANT_CACHE_PREFIX + (principal == null ? "anonymous" : principal.id());
+        if (request != null) {
+            Object cached = request.getAttribute(key, RequestAttributes.SCOPE_REQUEST);
+            if (cached != null) return (List<Grant>) cached;
+        }
+        List<Grant> grants = loadGrants(principal);
+        if (request != null) request.setAttribute(key, grants, RequestAttributes.SCOPE_REQUEST);
+        return grants;
+    }
+
+    /** Shares role assignments with AuthService's me projection for this request only. */
+    @SuppressWarnings("unchecked")
+    List<PrincipalRoleAssignment> rolesOf(UUID principalId) {
+        RequestAttributes request = RequestContextHolder.getRequestAttributes();
+        String key = ROLE_CACHE_PREFIX + principalId;
+        if (request != null) {
+            Object cached = request.getAttribute(key, RequestAttributes.SCOPE_REQUEST);
+            if (cached != null) return (List<PrincipalRoleAssignment>) cached;
+        }
+        List<PrincipalRoleAssignment> roles = List.copyOf(store.rolesOf(principalId));
+        if (request != null) request.setAttribute(key, roles, RequestAttributes.SCOPE_REQUEST);
+        return roles;
+    }
+
+    private List<Grant> loadGrants(Principal principal) {
         List<Grant> grants = new ArrayList<>();
         Optional<Role> anonymous = store.findRoleByCode(RoleCode.ANONYMOUS.wire());
         anonymous.ifPresent(role -> store.permissionsOfRole(role.id()).forEach(permission -> grants.add(new Grant(RoleCode.ANONYMOUS.wire(), Set.of(), permission))));
-        if (principal == null) return grants;
-        for (PrincipalRoleAssignment assignment : store.rolesOf(principal.id())) {
-            Set<String> allowlist = new HashSet<>(assignment.contentTypeCodes());
+        if (principal == null) return List.copyOf(grants);
+        for (PrincipalRoleAssignment assignment : rolesOf(principal.id())) {
+            Set<String> allowlist = Set.copyOf(assignment.contentTypeCodes());
             for (Permission permission : store.permissionsOfRole(assignment.roleId())) grants.add(new Grant(assignment.roleCode(), allowlist, permission));
         }
-        return grants;
+        return List.copyOf(grants);
     }
 
     public List<Map<String, Object>> effectivePermissions(UUID principalId) {

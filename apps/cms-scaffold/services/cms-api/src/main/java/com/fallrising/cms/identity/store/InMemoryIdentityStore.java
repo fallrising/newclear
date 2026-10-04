@@ -2,6 +2,8 @@ package com.fallrising.cms.identity.store;
 
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.domain.AuditPage;
+import com.fallrising.cms.identity.domain.AuditQuery;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -191,6 +193,28 @@ public class InMemoryIdentityStore implements IdentityStore {
                 .filter(event -> targetId == null || targetId.equals(event.targetId()))
                 .sorted(Comparator.comparing(AuditEvent::at).reversed())
                 .toList();
+    }
+
+    @Override
+    public AuditPage queryAudits(AuditQuery query) {
+        List<AuditEvent> matching = audits.stream()
+                .filter(e -> query.from() == null || !e.at().isBefore(query.from()))
+                .filter(e -> query.to() == null || e.at().isBefore(query.to()))
+                .filter(e -> query.actorId() == null || query.actorId().equals(e.actorPrincipalId()))
+                .filter(e -> query.action() == null
+                        || (query.actionPrefix() ? e.action().startsWith(query.action()) : query.action().equals(e.action())))
+                .filter(e -> query.category() == null || query.category().equals(e.category()))
+                .filter(e -> query.targetType() == null || query.targetType().equals(e.targetType()))
+                .filter(e -> query.targetId() == null || query.targetId().equals(e.targetId()))
+                .filter(e -> query.outcome() == null || query.outcome().equals(e.outcome()))
+                .sorted(Comparator.comparing(AuditEvent::at).reversed().thenComparing(e -> e.id().toString()))
+                .toList();
+        return new AuditPage(matching.stream().skip(query.offset()).limit(query.size()).toList(), matching.size());
+    }
+
+    @Override
+    public Optional<AuditEvent> findAudit(UUID id) {
+        return audits.stream().filter(e -> e.id().equals(id)).findFirst();
     }
 
     @Override

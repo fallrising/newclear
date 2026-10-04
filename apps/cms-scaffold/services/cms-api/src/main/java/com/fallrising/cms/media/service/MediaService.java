@@ -9,7 +9,9 @@ import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.Surface;
+import com.fallrising.cms.identity.service.AuditLog;
 import com.fallrising.cms.identity.service.AuthorizationService;
+import com.fallrising.cms.platform.TransactionRunner;
 import com.fallrising.cms.media.ImageVariants;
 import com.fallrising.cms.media.MediaException;
 import com.fallrising.cms.media.domain.MediaAsset;
@@ -40,13 +42,23 @@ public class MediaService {
     private final MediaObjectStore objects;
     private final ContentStore content;
     private final AuthorizationService authorization;
+    private final TransactionRunner transactions;
+    private final AuditLog audit;
 
-    public MediaService(
-            MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization) {
+    /** Compatibility constructor for existing manually assembled test services. */
+    public MediaService(MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization) {
+        this(store, objects, content, authorization, TransactionRunner.withoutDatabase(), null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public MediaService(MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization,
+            TransactionRunner transactions, AuditLog audit) {
         this.store = store;
         this.objects = objects;
         this.content = content;
         this.authorization = authorization;
+        this.transactions = transactions;
+        this.audit = audit;
     }
 
     public MediaAsset upload(
@@ -151,7 +163,10 @@ public class MediaService {
                 current.createdAt(),
                 now,
                 current.variants());
-        store.update(deleted);
+        transactions.run(() -> {
+            store.update(deleted);
+            if (audit != null) audit.record(principal, surface, "MEDIA", "media.delete", "media", id, AuditLog.OK, null);
+        });
         return deleted;
     }
 
@@ -169,10 +184,16 @@ public class MediaService {
             if (entry.isEmpty() || entry.get().deleted() || entry.get().publicationState() != PublicationState.PUBLISHED) {
                 continue;
             }
+            if (content.findTypeByKey(entry.get().contentTypeKey()).filter(type -> type.enabled()).isEmpty()
+                    || entry.get().publishedPayload() == null
+                    || !mediaId.equals(parseMediaId(entry.get().publishedPayload().get(attachment.fieldKey())))) {
+                continue;
+            }
             boolean allowedField = content.fieldsOf(entry.get().contentTypeId()).stream()
-                    .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && f.publicBytes() && f.enabled());
+                    .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && "media-ref".equals(f.fieldType()) && f.publicBytes() && f.enabled());
             if (allowedField
-                    && PublicVisibility.gettable(entry.get().publishedPayload())
+                    && PublicVisibility.gettable(
+                            content.findTypeByKey(entry.get().contentTypeKey()).orElse(null), entry.get().publishedPayload())
                     && publishedRefsOk(entry.get())) {
                 return true;
             }
@@ -251,7 +272,8 @@ public class MediaService {
                 if (target == null
                         || target.deleted()
                         || target.publicationState() != PublicationState.PUBLISHED
-                        || !PublicVisibility.gettable(target.publishedPayload())) {
+                        || !PublicVisibility.gettable(
+                                content.findTypeByKey(target.contentTypeKey()).orElse(null), target.publishedPayload())) {
                     return false;
                 }
             } catch (IllegalArgumentException e) {

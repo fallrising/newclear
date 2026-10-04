@@ -92,8 +92,8 @@ class WaveEAcceptanceTests {
                             .header("X-CSRF-Token", op.csrf)
                             .cookie(op.sessionCookie(), op.csrfCookie())
                             .content("""
-                                    {"payload":{"title":"R%d"}}
-                                    """.formatted(i)))
+                                    {"version":%d,"payload":{"title":"R%d"}}
+                                    """.formatted(currentVersion(op, id), i)))
                     .andExpect(status().isOk());
             mockMvc.perform(post("/api/v1/entries/" + id + "/publish")
                             .header("Origin", BACK)
@@ -139,17 +139,25 @@ class WaveEAcceptanceTests {
                         .cookie(admin.sessionCookie(), admin.csrfCookie()))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/v1/admin/audit")
-                        .param("action", "ENTRY_PURGED")
+                        .param("action", "entry.purge")
                         .param("targetId", id)
                         .header("Origin", ADMIN)
                         .cookie(admin.sessionCookie()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.items[0].action").value("ENTRY_PURGED"));
+                .andExpect(jsonPath("$.items[0].action").value("entry.purge"));
         mockMvc.perform(get("/api/v1/admin/audit")
                         .header("Origin", BACK)
                         .cookie(op.sessionCookie()))
                 .andExpect(status().isForbidden());
+    }
+
+    private int currentVersion(Session session, String id) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/entries/" + id)
+                        .header("Origin", BACK).cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(result.getResponse().getContentAsString()).get("version").asInt();
     }
 
     private String createAlbum(Session session, String slug, String title) throws Exception {

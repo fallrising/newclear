@@ -2,6 +2,8 @@ package com.fallrising.cms.identity.store;
 
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.domain.AuditPage;
+import com.fallrising.cms.identity.domain.AuditQuery;
 import com.fallrising.cms.identity.domain.Credential;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
@@ -247,6 +249,40 @@ public class JdbcIdentityStore implements IdentityStore {
         }
         sql.append(" ORDER BY at DESC");
         return jdbc.query(sql.toString(), auditMapper(), args.toArray());
+    }
+
+    @Override
+    public AuditPage queryAudits(AuditQuery query) {
+        StringBuilder where = new StringBuilder(" WHERE 1=1");
+        List<Object> args = new ArrayList<>();
+        if (query.from() != null) { where.append(" AND at >= ?"); args.add(ts(query.from())); }
+        if (query.to() != null) { where.append(" AND at < ?"); args.add(ts(query.to())); }
+        if (query.actorId() != null) { where.append(" AND actor_principal_id = ?"); args.add(query.actorId()); }
+        if (query.action() != null) {
+            if (query.actionPrefix()) {
+                where.append(" AND action LIKE ? ESCAPE '\\'");
+                args.add(query.action().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%");
+            } else {
+                where.append(" AND action = ?");
+                args.add(query.action());
+            }
+        }
+        if (query.category() != null) { where.append(" AND category = ?"); args.add(query.category()); }
+        if (query.targetType() != null) { where.append(" AND target_type = ?"); args.add(query.targetType()); }
+        if (query.targetId() != null) { where.append(" AND target_id = ?"); args.add(query.targetId()); }
+        if (query.outcome() != null) { where.append(" AND outcome = ?"); args.add(query.outcome()); }
+        Long total = jdbc.queryForObject("SELECT COUNT(*) FROM cms_audit_event" + where, Long.class, args.toArray());
+        List<Object> pageArgs = new ArrayList<>(args);
+        pageArgs.add(query.size());
+        pageArgs.add(query.offset());
+        List<AuditEvent> items = jdbc.query("SELECT * FROM cms_audit_event" + where
+                + " ORDER BY at DESC, id::text COLLATE \"C\" ASC LIMIT ? OFFSET ?", auditMapper(), pageArgs.toArray());
+        return new AuditPage(items, total == null ? 0 : total);
+    }
+
+    @Override
+    public Optional<AuditEvent> findAudit(UUID id) {
+        return jdbc.query("SELECT * FROM cms_audit_event WHERE id = ?", auditMapper(), id).stream().findFirst();
     }
 
     @Override

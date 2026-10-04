@@ -243,6 +243,9 @@ class PatchFlowTests(unittest.TestCase):
             'exit_code': 0,
         })
         candidate['independent_runner_verification']['artifact_sha256'] = sha(b'newer')
+        candidate['independent_runner_verification']['steps'].append({
+            'name': 'compatibility-from-v0.1.5', 'exit_code': 0,
+        })
         validation_file = self.project / 'patches/core-v0.2.0-lock-context.validation.json'
         atomic_json(validation_file, candidate)
         with patch('core_patch.artifact', return_value=(b'newer', sha(b'newer'))):

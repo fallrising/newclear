@@ -1,0 +1,428 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"math"
+	"math/big"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/fallrising/newclear/platform/prism/internal/config"
+	"github.com/fallrising/newclear/platform/prism/internal/ingest"
+	"github.com/fallrising/newclear/platform/prism/internal/ingest/limits"
+	"github.com/fallrising/newclear/platform/prism/pkg/spi"
+	"github.com/fallrising/newclear/platform/prism/pkg/utm"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/plog/plogotlp"
+	"go.uber.org/goleak"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+)
+
+func TestMain(tests *testing.M) { goleak.VerifyTestMain(tests) }
+
+func runtimeConfig(t *testing.T) *config.Config {
+	t.Helper()
+	cfg, err := config.LoadWithEnvironment(context.Background(), filepath.Join("..", "..", "internal", "config", "testdata", "prismd.yaml"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.Server.HTTPListen = availableAddress(t)
+	cfg.Server.GRPCListen = availableAddress(t)
+	return cfg
+}
+
+func TestPipelineOptionsPreservesConfiguration(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Ingest.QueueDepth = 7
+	cfg.Ingest.Batch.Metrics = config.BatchSignalConfig{MaxItems: 123, MaxBytes: 456789, FlushInterval: config.Duration(13 * time.Second)}
+	cfg.Ingest.Batch.Logs = config.BatchSignalConfig{MaxItems: 234, MaxBytes: 567890, FlushInterval: config.Duration(14 * time.Second)}
+	cfg.Ingest.Batch.Traces = config.BatchSignalConfig{MaxItems: 345, MaxBytes: 678901, FlushInterval: config.Duration(15 * time.Second)}
+	cfg.Ingest.ClockSkewPolicy = "drop"
+	cfg.Ingest.MaxPast = config.Duration(17 * time.Minute)
+	cfg.Ingest.MaxFuture = config.Duration(19 * time.Minute)
+	cfg.Limits.MaxActiveSeriesPerTenant = 321
+	cfg.Limits.MaxLogLineBytes = 6543
+	cfg.Limits.CardinalityAlarmThreshold = 789
+	cfg.Limits.AutoDropHighCardinality = true
+	options := pipelineOptions(cfg)
+	if options.MaxTenants != 1 || options.MaxInputBytes != int(cfg.Ingest.MaxRequestBytes) {
+		t.Fatal("identity or input capacity was not mapped")
+	}
+	for _, pair := range []struct {
+		source config.BatchSignalConfig
+		target ingest.BatchOptions
+	}{{cfg.Ingest.Batch.Metrics, options.Metrics}, {cfg.Ingest.Batch.Logs, options.Logs}, {cfg.Ingest.Batch.Traces, options.Traces}} {
+		if pair.target.MaxItems != pair.source.MaxItems || pair.target.MaxBytes != int(pair.source.MaxBytes) || pair.target.FlushInterval != pair.source.FlushInterval.Std() || pair.target.QueueDepth != 7 || pair.target.Workers != 2 {
+			t.Fatalf("batch config lost: %+v", pair)
+		}
+	}
+	if string(options.Normalize.ClockSkewPolicy) != "drop" || options.Normalize.MaxPast != 17*time.Minute || options.Normalize.MaxFuture != 19*time.Minute {
+		t.Fatal("normalization config lost")
+	}
+	settings, err := limits.Resolve(options.Limits.Global, limits.Overrides{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.MaxActiveSeriesPerTenant != 321 || settings.MaxLogLineBytes != 6543 || settings.CardinalityAlarmThreshold != 789 || !settings.AutoDropHighCardinality {
+		t.Fatal("limits config lost")
+	}
+	// Pointer overrides own a snapshot rather than retaining mutable config.
+	cfg.Limits.MaxActiveSeriesPerTenant = 999
+	again, err := limits.Resolve(options.Limits.Global, limits.Overrides{})
+	if err != nil || !reflect.DeepEqual(settings, again) {
+		t.Fatal("runtime options alias config")
+	}
+}
+
+func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
+	for _, mode := range []string{"all-in-one", "ingest"} {
+		t.Run(mode, func(t *testing.T) {
+			cfg := runtimeConfig(t)
+			cfg.Server.Mode = mode
+			cfg.Ingest.Batch.Logs.FlushInterval = config.Duration(time.Hour)
+			backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = backend.Close() }()
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			result := make(chan error, 1)
+			go func() {
+				result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+			}()
+			waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+			postRuntimeLog(t, cfg, "http")
+			connection, err := grpc.NewClient(cfg.Server.GRPCListen, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			if err != nil {
+				t.Fatal(err)
+			}
+			logs := plog.NewLogs()
+			resource := logs.ResourceLogs().AppendEmpty()
+			resource.Resource().Attributes().PutStr("service.name", "runtime")
+			resource.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty().Body().SetStr("grpc")
+			requestCtx, stop := context.WithTimeout(metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+string(cfg.Auth.IngestAPIKey)), time.Second)
+			_, err = plogotlp.NewGRPCClient(connection).Export(requestCtx, plogotlp.NewExportRequestFromLogs(logs))
+			stop()
+			_ = connection.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := runtimeLogBodies(t, backend); len(got) != 0 {
+				t.Fatalf("unflushed bucket already written: %v", got)
+			}
+			cancel()
+			select {
+			case err := <-result:
+				if err != nil {
+					t.Fatal(err)
+				}
+			case <-time.After(2 * time.Second):
+				t.Fatal("runtime shutdown hung")
+			}
+			if got := runtimeLogBodies(t, backend); !reflect.DeepEqual(got, []string{"http", "grpc"}) {
+				t.Fatalf("accepted data discarded on parent cancel: %v", got)
+			}
+		})
+	}
+}
+
+func TestIngestRuntimeDeadlineCancelsSPIWrite(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Server.Mode = "ingest"
+	cfg.Server.ShutdownTimeout = config.Duration(30 * time.Millisecond)
+	cfg.Ingest.Batch.Logs.MaxItems = 1
+	backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = backend.Close() }()
+	store := &blockingLogs{LogStore: backend.Logs(), started: make(chan struct{}), stopped: make(chan struct{})}
+	wrapped := logBackend{Backend: backend, store: store}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() {
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), wrapped)
+	}()
+	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+	postRuntimeLog(t, cfg, "stalled")
+	select {
+	case <-store.started:
+	case <-time.After(time.Second):
+		t.Fatal("SPI write did not start")
+	}
+	cancel()
+	select {
+	case err := <-result:
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("shutdown error=%v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("stalled SPI write hung shutdown")
+	}
+	select {
+	case <-store.stopped:
+	case <-time.After(time.Second):
+		t.Fatal("SPI write context was not cancelled")
+	}
+}
+
+type logBackend struct {
+	spi.Backend
+	store spi.LogStore
+}
+
+func (b logBackend) Logs() spi.LogStore { return b.store }
+
+type blockingLogs struct {
+	spi.LogStore
+	started, stopped chan struct{}
+}
+
+func (s *blockingLogs) Write(ctx context.Context, _ []utm.LogRecord) error {
+	close(s.started)
+	<-ctx.Done()
+	close(s.stopped)
+	return spi.Wrap(spi.ErrTimeout, "", "logs.Write", ctx.Err())
+}
+
+func postRuntimeLog(t *testing.T, cfg *config.Config, body string) {
+	t.Helper()
+	logs := plog.NewLogs()
+	resource := logs.ResourceLogs().AppendEmpty()
+	resource.Resource().Attributes().PutStr("service.name", "runtime")
+	resource.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty().Body().SetStr(body)
+	content, err := plogotlp.NewExportRequestFromLogs(logs).MarshalJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://"+cfg.Server.HTTPListen+"/v1/logs", bytes.NewReader(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+string(cfg.Auth.IngestAPIKey))
+	client := &http.Client{Timeout: time.Second}
+	defer client.CloseIdleConnections()
+	response, err := client.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	data, err := io.ReadAll(io.LimitReader(response.Body, 4096))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != 200 || strings.Contains(string(data), "rejected") {
+		t.Fatalf("export status=%d body=%s", response.StatusCode, data)
+	}
+}
+func runtimeLogBodies(t *testing.T, backend spi.Backend) []string {
+	t.Helper()
+	matcher, err := spi.NewMatcher(spi.MatchEqual, "service", "runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	iterator, err := backend.Logs().Search(context.Background(), spi.LogQuery{Tenant: "default", Selectors: []spi.Matcher{matcher}, Start: 0, End: math.MaxInt64, Direction: spi.Forward, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = iterator.Close() }()
+	var bodies []string
+	for iterator.Next() {
+		bodies = append(bodies, iterator.At().Body)
+	}
+	if err := iterator.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return bodies
+}
+
+func TestIngestRuntimeUsesTLSOnBothTransports(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Server.Mode = "ingest"
+	certificate, key, pool := runtimeCertificate(t)
+	cfg.Server.TLSCertFile = certificate
+	cfg.Server.TLSKeyFile = key
+	backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = backend.Close() }()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() {
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+	}()
+	client := &http.Client{Timeout: time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12}}}
+	defer client.CloseIdleConnections()
+	ticker := time.NewTicker(time.Millisecond)
+	defer ticker.Stop()
+	deadline := time.NewTimer(2 * time.Second)
+	defer deadline.Stop()
+	for {
+		request, requestErr := http.NewRequestWithContext(context.Background(), http.MethodGet, "https://"+cfg.Server.HTTPListen+"/-/healthy", nil)
+		if requestErr != nil {
+			t.Fatal(requestErr)
+		}
+		response, requestErr := client.Do(request)
+		if requestErr == nil {
+			_, _ = io.Copy(io.Discard, response.Body)
+			_ = response.Body.Close()
+			if response.StatusCode == 200 {
+				break
+			}
+		}
+		select {
+		case <-ticker.C:
+		case <-deadline.C:
+			t.Fatal("HTTPS never ready")
+		}
+	}
+	connection, err := grpc.NewClient(cfg.Server.GRPCListen, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12})))
+	if err != nil {
+		t.Fatal(err)
+	}
+	requestCtx, stop := context.WithTimeout(metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+string(cfg.Auth.IngestAPIKey)), time.Second)
+	_, err = plogotlp.NewGRPCClient(connection).Export(requestCtx, plogotlp.NewExportRequest())
+	stop()
+	_ = connection.Close()
+	if err != nil {
+		t.Fatalf("authenticated TLS gRPC export failed: %v", err)
+	}
+	cancel()
+	select {
+	case err := <-result:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("TLS runtime hung shutdown")
+	}
+}
+
+func runtimeCertificate(t *testing.T) (string, string, *x509.CertPool) {
+	t.Helper()
+	public, private, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	template := &x509.Certificate{SerialNumber: big.NewInt(1), NotBefore: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC), NotAfter: time.Date(2100, 1, 1, 0, 0, 0, 0, time.UTC), IPAddresses: []net.IP{net.ParseIP("127.0.0.1")}, KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}}
+	der, err := x509.CreateCertificate(rand.Reader, template, template, public, private)
+	if err != nil {
+		t.Fatal(err)
+	}
+	privateDER, err := x509.MarshalPKCS8PrivateKey(private)
+	if err != nil {
+		t.Fatal(err)
+	}
+	certificate := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+	key := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: privateDER})
+	directory := t.TempDir()
+	certPath := filepath.Join(directory, "cert.pem")
+	keyPath := filepath.Join(directory, "key.pem")
+	if err := os.WriteFile(certPath, certificate, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(keyPath, key, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(certificate) {
+		t.Fatal("invalid test certificate")
+	}
+	return certPath, keyPath, pool
+}
+
+func TestRunServiceClosesBackendAfterWriteCancellation(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Server.Mode = "ingest"
+	cfg.Server.ShutdownTimeout = config.Duration(20 * time.Millisecond)
+	cfg.Ingest.Batch.Logs.MaxItems = 1
+	backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := &blockingLogs{LogStore: backend.Logs(), started: make(chan struct{}), stopped: make(chan struct{})}
+	wrapped := &closeOrderBackend{logBackend: logBackend{Backend: backend, store: store}, stopped: store.stopped}
+	name := fmt.Sprintf("runtime-close-order-%d", driverSequence.Add(1))
+	spi.Register(name, fixedBackendDriver{name: name, backend: wrapped})
+	cfg.Storage.Driver = name
+	cfg.Storage.DSN = "test"
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() { result <- runService(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil))) }()
+	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+	postRuntimeLog(t, cfg, "stalled")
+	select {
+	case <-store.started:
+	case <-time.After(time.Second):
+		t.Fatal("write not started")
+	}
+	cancel()
+	select {
+	case err := <-result:
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("error=%v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("shutdown hung")
+	}
+	if !wrapped.closed.Load() || wrapped.closedEarly.Load() {
+		t.Fatal("backend closed before pipeline write termination")
+	}
+}
+
+var driverSequence atomic.Uint64
+
+type fixedBackendDriver struct {
+	name    string
+	backend spi.Backend
+}
+
+func (d fixedBackendDriver) Name() string { return d.name }
+func (d fixedBackendDriver) Open(context.Context, spi.Config) (spi.Backend, error) {
+	return d.backend, nil
+}
+
+type closeOrderBackend struct {
+	logBackend
+	stopped             <-chan struct{}
+	closed, closedEarly atomic.Bool
+}
+
+func (b *closeOrderBackend) Close() error {
+	select {
+	case <-b.stopped:
+	default:
+		b.closedEarly.Store(true)
+	}
+	b.closed.Store(true)
+	return b.Backend.Close()
+}

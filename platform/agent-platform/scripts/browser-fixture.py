@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """AT-03 fixture against real PostgreSQL/API; never installed as product endpoints."""
 
+import hashlib
 import json
 import os
 import secrets
@@ -62,7 +63,7 @@ def main():
                 "tasks.create",
                 uuid4().hex,
                 task,
-                lambda conn, command: store.create_task(conn, operator, task, command),
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
             )["body"]
             output.parent.mkdir(exist_ok=True)
             output.write_text(
@@ -88,6 +89,181 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action == "search":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+                other = store.create_project(
+                    conn,
+                    ProjectInput(
+                        name="Search other project",
+                        canonical_repo="https://example.invalid/search/other",
+                    ),
+                )["body"]
+            targets = []
+            for index in range(32):
+                task = TaskInput(
+                    title=f"History Needle {index:02d}",
+                    goal="Find this history entry",
+                    project_id=template["project_id"],
+                    profile_revision=template["profile_revision"],
+                    base_sha="a" * 40,
+                )
+                created = store.command(
+                    operator,
+                    "tasks.create",
+                    uuid4().hex,
+                    task,
+                    lambda conn, command, task=task: store.create_task(
+                        conn, operator, task, command
+                    ),
+                )["body"]
+                targets.append(str(created["task"]["id"]))
+                with db.transaction() as conn:
+                    conn.execute(
+                        "UPDATE jobs SET status='done' WHERE run_id=%s", (created["run"]["id"],)
+                    )
+                    conn.execute(
+                        "UPDATE runs SET state='failed' WHERE id=%s", (created["run"]["id"],)
+                    )
+            task = TaskInput(
+                title="Different project",
+                goal="Unicode goal 你好 %_",
+                project_id=other["id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
+            )["body"]
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE jobs SET status='done' WHERE run_id=%s", (created["run"]["id"],)
+                )
+            print(
+                json.dumps(
+                    {
+                        "project_id": str(template["project_id"]),
+                        "other_project_id": str(other["id"]),
+                        "tasks": targets,
+                        "other_task": str(created["task"]["id"]),
+                    }
+                )
+            )
+        elif action == "retry":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            goal = 'Original goal\n<img src=x onerror="window.__goalExecuted=1"> 你好'
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+            task = TaskInput(
+                title="Editable retry browser fixture",
+                goal=goal,
+                project_id=template["project_id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
+            )["body"]
+            run_id = created["run"]["id"]
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE runs SET state='failed',result=%s WHERE id=%s",
+                    (
+                        Jsonb(
+                            {
+                                "summary": "Original attempt result remains available",
+                                "verification": {"status": "failed", "reason": "browser fixture"},
+                            }
+                        ),
+                        run_id,
+                    ),
+                )
+                conn.execute("UPDATE jobs SET status='done' WHERE run_id=%s", (run_id,))
+            print(json.dumps({"task_id": created["task"]["id"], "run_id": run_id, "goal": goal}))
+        elif action == "security":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            payload = (
+                "<script>window.__diffExecuted=1</script>"
+                '<img src=x onerror="window.__diffExecuted=2">你好🐈'
+            )
+            patch = "diff --git a/note.txt b/note.txt\n+" + payload + "\r\n"
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+            task = TaskInput(
+                title="Safe diff browser fixture",
+                goal="Security boundary",
+                project_id=template["project_id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
+            )["body"]
+            run_id = created["run"]["id"]
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE runs SET result=%s WHERE id=%s",
+                    (
+                        Jsonb(
+                            {
+                                "summary": payload,
+                                "diff": patch,
+                                "diff_bytes": len(patch.encode()),
+                                "diff_sha256": hashlib.sha256(patch.encode()).hexdigest(),
+                                "base_sha": "a" * 40,
+                                "verification": {"status": "unknown", "reason": "browser fixture"},
+                            }
+                        ),
+                        run_id,
+                    ),
+                )
+                event(
+                    conn,
+                    run_id,
+                    "message.created",
+                    {"role": "assistant", "content": payload},
+                    source="security-fixture",
+                    source_id="one",
+                )
+                conn.execute("UPDATE jobs SET status='done' WHERE run_id=%s", (run_id,))
+            print(json.dumps({"run_id": run_id, "payload": payload, "diff": patch}))
         elif action == "produce":
             value = json.loads(output.read_text())
             run_id = UUID(value["run_id"])

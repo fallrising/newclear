@@ -5,12 +5,17 @@ export type { components, operations, paths };
 
 type S = components["schemas"];
 
+export type FieldError = S["FieldError"];
+export type FieldErrorCode = S["FieldErrorCode"];
+export type EntryPatchRequest = S["EntryPatchRequest"];
 export type ErrorCode = S["ErrorCode"];
 export type ErrorEnvelope = S["ErrorEnvelope"];
 export type Surface = S["Surface"];
 export type CmsAction = S["CmsAction"];
 export type PublicationState = S["PublicationState"];
 export type Me = S["Me"];
+export type Capabilities = S["Capabilities"];
+export type TypeCapability = S["TypeCapability"];
 export type LoginResponse = S["LoginResponse"];
 export type CsrfToken = S["CsrfToken"];
 export type Principal = S["Principal"];
@@ -31,3 +36,9 @@ export type AdminContentTypeList = S["AdminContentTypeList"];
 export type MediaAsset = S["MediaAsset"];
 export type MediaAssetList = S["MediaAssetList"];
 export type MediaQuota = S["MediaQuota"];
+
+export type WorkEntryList = S["WorkEntryList"];
+export type RefSummary = S["RefSummary"];
+export type BatchPatchRequest = S["BatchPatchRequest"];
+export type Revision = S["Revision"];
+export type RevisionList = S["RevisionList"];

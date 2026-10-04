@@ -92,6 +92,7 @@ class RuntimeClient:
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
                 "model_transport": getattr(self, "model_transport", False),
+                "tool_transport": run.get("tool_transport", False),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),
                 "verification": run.get(
                     "verification",
@@ -147,3 +148,22 @@ class RuntimeClient:
             f"/v1/runs/{run['id']}/model",
             {"generation": run["generation"], "action": action, **data},
         )
+
+    def tool(self, run, action, **data):
+        # Tool control must not inherit the 120-second prepare/result timeout.
+        try:
+            status, result = self.lease_http.request(
+                "POST",
+                f"/v1/runs/{run['id']}/tool",
+                {
+                    "generation": run["generation"],
+                    "binding_id": str(run["sandbox_id"]),
+                    "action": action,
+                    **data,
+                },
+            )
+        except ProbeError:
+            raise Problem(503, "tool_connector_unavailable_or_uncertain") from None
+        if status != 200:
+            raise Problem(409, "tool_connector_operation_unconfirmed")
+        return result

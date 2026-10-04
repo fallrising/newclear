@@ -73,6 +73,11 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
+OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scoped to
+`labs/openviking-context/**` and its own workflow. Its native gate is
+`make -C labs/openviking-context check`: stdlib offline contracts and a synthetic demo.
+It does not install OpenViking, call models, or validate live-server behavior.
+
 ## Steps
 
 1. Add this specification and make the root README identify root workflows as canonical.

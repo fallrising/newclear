@@ -36,13 +36,13 @@ import {
   CANVAS_VERSION,
   hydrate,
   materializeEdge,
-  readCanvasSidecar,
   serializeEdges,
   serializeNodes,
-  writeCanvasSidecar,
   type HydratedDocumentSpec,
   type HydratedTerminalSpec,
 } from "./persistence";
+
+import { CanvasStorage, removalPlan, withoutKeys } from "./lifecycle";
 
 /// Stable node-types map. react-flow requires referential stability.
 const NODE_TYPES: NodeTypes = {
@@ -115,6 +115,14 @@ function CanvasInner({
   // effect bails until then so we don't immediately overwrite the
   // sidecar with an empty canvas on first frame.
   const [hydrated, setHydrated] = useState(false);
+  const storageRef = useRef(new CanvasStorage());
+  const [readError, setReadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [cleanupErrors, setCleanupErrors] = useState<Map<string, string>>(() => new Map());
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [saveAttempt, setSaveAttempt] = useState(0);
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
   // docNodeId → `run_in:` frontmatter value. Updated by DocumentSurface
   // via onRunInChange; consumed by the synthetic-edges effect below to
   // materialize D-6 step 1's triggers edge.
@@ -211,43 +219,32 @@ function CanvasInner({
     [edges, nodes],
   );
 
-  const removeNode = useCallback((id: string) => {
-    setNodes((prev) => prev.filter((n) => n.id !== id));
-    setEdges((prev) => prev.filter((e) => e.source !== id && e.target !== id));
-  }, []);
-
   const killTerminal = useCallback(async (sid: SessionId) => {
     try {
       await ipc.killPty(sid);
-    } catch {
-      /* ignore — node will be removed anyway */
+      setCleanupErrors((prev) => withoutKeys(prev, [sid]));
+    } catch (e) {
+      setCleanupErrors((prev) => new Map(prev).set(sid, String(e)));
     }
   }, []);
 
-  const closeTerminal = useCallback(
-    (sid: SessionId, nodeId: string) => {
-      void killTerminal(sid);
-      setTerminals((prev) => {
-        const next = new Map(prev);
-        next.delete(sid);
-        return next;
-      });
-      removeNode(nodeId);
-    },
-    [killTerminal, removeNode],
-  );
+  // Both Close and React Flow keyboard deletion pass through this path.
+  const removeNode = useCallback((id: string) => {
+    const plan = removalPlan(nodesRef.current, [id]);
+    nodesRef.current = nodesRef.current.filter((n) => n.id !== id);
+    plan.sessions.forEach((sid) => { void killTerminal(sid); });
+    setTerminals((prev) => withoutKeys(prev, plan.sessions));
+    setDocuments((prev) => withoutKeys(prev, plan.documents));
+    setRunInMap((prev) => withoutKeys(prev, [id]));
+    setNodes((prev) => prev.filter((n) => n.id !== id));
+    setEdges((prev) => prev.filter((e) => e.source !== id && e.target !== id));
+  }, [killTerminal]);
 
-  const closeDocument = useCallback(
-    (nodeId: string) => {
-      setDocuments((prev) => {
-        const next = new Map(prev);
-        next.delete(nodeId);
-        return next;
-      });
-      removeNode(nodeId);
-    },
+  const closeTerminal = useCallback(
+    (_sid: SessionId, nodeId: string) => removeNode(nodeId),
     [removeNode],
   );
+  const closeDocument = removeNode;
 
   /// Rename a terminal (live) or tombstone. The optional name is used by
   /// the D-6 chain step 1: a document's `run_in: <name>` frontmatter
@@ -279,6 +276,7 @@ function CanvasInner({
   /// session's cwd/cmd/shell. Any edges pointing at the tombstone are
   /// rewritten to point at the new session — so a doc that was wired to
   /// the dead terminal keeps working.
+  const pendingRestartsRef = useRef(new Set<string>());
   const restartTombstone = useCallback(
     async (
       tombNodeId: string,
@@ -289,6 +287,8 @@ function CanvasInner({
         name?: string | null;
       },
     ) => {
+      if (pendingRestartsRef.current.has(tombNodeId)) return;
+      pendingRestartsRef.current.add(tombNodeId);
       try {
         const newSid = await ipc.spawnPty({
           cwd: was.cwd,
@@ -297,6 +297,10 @@ function CanvasInner({
           cols: 120,
           rows: 30,
         });
+        if (!nodesRef.current.some((node) => node.id === tombNodeId)) {
+          await killTerminal(newSid);
+          return;
+        }
         const newNodeId = `t-${newSid}`;
         setTerminals((prev) => {
           const next = new Map(prev);
@@ -310,8 +314,8 @@ function CanvasInner({
               ...n,
               id: newNodeId,
               type: "terminal",
-              style: NODE_SIZE.terminal,
               data: {
+                sidecarGroup: n.data.sidecarGroup,
                 sessionId: newSid,
                 // Carry the spawn config forward so persistence and a
                 // future re-kill produce another tombstone with the
@@ -340,6 +344,8 @@ function CanvasInner({
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error("restart failed", e);
+      } finally {
+        pendingRestartsRef.current.delete(tombNodeId);
       }
     },
     [closeTerminal, killTerminal, renameTerminal],
@@ -418,8 +424,8 @@ function CanvasInner({
             return {
               ...n,
               type: "tombstone",
-              style: NODE_SIZE.tombstone,
               data: {
+                sidecarGroup: n.data.sidecarGroup,
                 reason:
                   ev.exit_code === null || ev.exit_code === 0
                     ? "exited"
@@ -444,62 +450,70 @@ function CanvasInner({
 
   // On mount: load the canvas sidecar and rehydrate nodes + edges.
   // Terminals come back as tombstones (their session_id was ephemeral);
-  // documents come back as-is. Edges keep their kind. Runs once.
+  // documents come back as-is. Edges keep their kind. Retry rereads only after failure.
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const sidecar = await readCanvasSidecar();
-      if (cancelled) return;
-      if (!sidecar) {
-        setHydrated(true);
-        return;
-      }
-      const { nodes: nodeSpecs, edges: edgeSpecs } = hydrate(sidecar);
-      const restoredNodes: Node[] = nodeSpecs.map((spec) => {
-        if (spec.kind === "document") {
-          const s = spec as HydratedDocumentSpec;
+      setHydrated(false);
+      setReadError(null);
+      try {
+        const sidecar = await storageRef.current.load();
+        if (cancelled) return;
+        if (!sidecar) {
+          setHydrated(true);
+          return;
+        }
+        const { nodes: nodeSpecs, edges: edgeSpecs } = hydrate(sidecar);
+        const restoredNodes: Node[] = nodeSpecs.map((spec) => {
+          if (spec.kind === "document") {
+            const s = spec as HydratedDocumentSpec;
+            return {
+              id: s.id,
+              type: "document",
+              position: s.position,
+              data: {
+                path: s.path,
+                sidecarGroup: s.group,
+                triggersTarget: null,
+                feedingTerminalIds: [],
+                pinnedContextSources: [],
+                onClose: () => closeDocument(s.id),
+                onRunInChange: (name: string | null) =>
+                  onRunInChange(s.id, name),
+              },
+              style: { width: s.width, height: s.height },
+            };
+          }
+          const s = spec as HydratedTerminalSpec;
           return {
             id: s.id,
-            type: "document",
+            type: "tombstone",
             position: s.position,
             data: {
-              path: s.path,
-              triggersTarget: null,
-              feedingTerminalIds: [],
-              pinnedContextSources: [],
-              onClose: () => closeDocument(s.id),
-              onRunInChange: (name: string | null) =>
-                onRunInChange(s.id, name),
+              sidecarGroup: s.group,
+              reason: s.reason,
+              was: s.was,
+              // No exit code persisted; restart uses the saved `was`.
+              onRestart: () => void restartRef.current(s.id, s.was),
+              onDismiss: () => removeNodeRef.current(s.id),
             },
-            style: NODE_SIZE.document,
+            style: { width: s.width, height: s.height },
           };
-        }
-        const s = spec as HydratedTerminalSpec;
-        return {
-          id: s.id,
-          type: "tombstone",
-          position: s.position,
-          data: {
-            reason: s.reason,
-            was: s.was,
-            // No exit code persisted; restart uses the saved `was`.
-            onRestart: () => void restartRef.current(s.id, s.was),
-            onDismiss: () => removeNodeRef.current(s.id),
-          },
-          style: NODE_SIZE.tombstone,
-        };
-      });
-      setNodes(restoredNodes);
-      setEdges(edgeSpecs.map(materializeEdge));
-      setHydrated(true);
+        });
+        setNodes(restoredNodes);
+        setEdges(edgeSpecs.map(materializeEdge));
+        setHydrated(true);
+      } catch (e) {
+        if (!cancelled) setReadError(`Canvas could not be opened: ${String(e)}. Original file preserved; autosave disabled.`);
+      }
     })();
     return () => {
       cancelled = true;
     };
     // closeDocument is stable through useCallback; restartRef/removeNodeRef
-    // are refs. Load runs exactly once on mount.
+    // are refs. Retry is explicit and remains blocked until a successful read.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadAttempt]);
 
   // Debounced save: whenever nodes or edges change after hydration,
   // serialize and write back to `.loom/canvas.json`. 500 ms is short
@@ -514,13 +528,13 @@ function CanvasInner({
         nodes: serializeNodes(nodes),
         edges: serializeEdges(edges),
       };
-      void writeCanvasSidecar(payload).catch((e) => {
-        // eslint-disable-next-line no-console
-        console.warn("canvas.json save failed", e);
-      });
+      void storageRef.current.save(payload).then(
+        () => setSaveError(null),
+        (e) => setSaveError(`Canvas save failed: ${String(e)}`),
+      );
     }, 500);
     return () => window.clearTimeout(handle);
-  }, [hydrated, nodes, edges]);
+  }, [hydrated, nodes, edges, saveAttempt]);
 
   // D-6 step 1: materialize each `run_in: <name>` from a document's
   // frontmatter as a synthetic `triggers` edge from the document node
@@ -547,7 +561,7 @@ function CanvasInner({
       }
       const synthetic: Edge[] = [];
       runInMap.forEach((name, docId) => {
-        if (!name) return;
+        if (!name || !nodes.some((n) => n.id === docId && n.type === "document")) return;
         const targetId = nameToNodeId.get(name);
         if (!targetId) return;
         const styling = edgeStyleFor("triggers");
@@ -607,8 +621,9 @@ function CanvasInner({
 
   // Spawn a new terminal node when the App signals.
   useEffect(() => {
-    if (!addTerminalAt) return;
+    if (!hydrated || !addTerminalAt) return;
     let cancelled = false;
+    let spawnedId: SessionId | null = null;
     void (async () => {
       try {
         const cwd = await ipc.homeDir();
@@ -619,10 +634,12 @@ function CanvasInner({
           cols: 120,
           rows: 30,
         });
-        if (cancelled) return;
+        spawnedId = sid;
+        if (cancelled) { await killTerminal(sid); return; }
         // Pull the resolved cwd/cmd/shell so persistence has the durable
         // values (the backend defaulted shell from $SHELL).
         const meta = await ipc.sessionMeta(sid);
+        if (cancelled) { await killTerminal(sid); return; }
         const nodeId = `t-${sid}`;
         setTerminals((prev) => {
           const next = new Map(prev);
@@ -652,6 +669,7 @@ function CanvasInner({
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error("spawnPty failed", e);
+        if (spawnedId) await killTerminal(spawnedId);
       } finally {
         onConsumedAdd();
       }
@@ -659,11 +677,11 @@ function CanvasInner({
     return () => {
       cancelled = true;
     };
-  }, [addTerminalAt, closeTerminal, killTerminal, onConsumedAdd, renameTerminal]);
+  }, [hydrated, addTerminalAt, closeTerminal, killTerminal, onConsumedAdd, renameTerminal]);
 
   // Add a document node when the App signals.
   useEffect(() => {
-    if (!addDocumentAt) return;
+    if (!hydrated || !addDocumentAt) return;
     const { x, y, path } = addDocumentAt;
     const nodeId = `d-${path}-${Date.now()}`;
     setDocuments((prev) => {
@@ -690,7 +708,7 @@ function CanvasInner({
       },
     ]);
     onConsumedAdd();
-  }, [addDocumentAt, closeDocument, onConsumedAdd]);
+  }, [hydrated, addDocumentAt, closeDocument, onConsumedAdd]);
 
   // Whenever the D-6 resolution might have changed (active terminal,
   // edges, or terminal set), push the freshly-resolved triggersTarget
@@ -763,8 +781,10 @@ function CanvasInner({
   }, [triggersTargetFor, feedersFor, contextSourcesFor, runInMap, nodes]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
-    setNodes((nds) => applyNodeChanges(changes, nds));
-  }, []);
+    changes.forEach((change) => { if (change.type === "remove") removeNode(change.id); });
+    const otherChanges = changes.filter((change) => change.type !== "remove");
+    setNodes((nds) => applyNodeChanges(otherChanges, nds));
+  }, [removeNode]);
 
   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
     setEdges((eds) => applyEdgeChanges(changes, eds));
@@ -800,6 +820,17 @@ function CanvasInner({
 
   return (
     <div className={CSS.canvasRoot}>
+      {cleanupErrors.size > 0 && <div role="alert" style={{ position: "absolute", zIndex: 21, bottom: 16, left: 16, background: "#402020", padding: 12 }}>
+        {Array.from(cleanupErrors, ([sid, message]) => <div key={sid}>
+          Terminal cleanup failed: {message} <button onClick={() => void killTerminal(sid)}>retry cleanup</button>
+        </div>)}
+      </div>}
+      {readError && <div role="alert" style={{ position: "absolute", zIndex: 20, top: 16, left: 16, background: "#402020", padding: 12 }}>
+        {readError} <button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>retry read</button>
+      </div>}
+      {saveError && <div role="alert" style={{ position: "absolute", zIndex: 20, top: 16, left: 16, background: "#402020", padding: 12 }}>
+        {saveError} <button onClick={() => setSaveAttempt((attempt) => attempt + 1)}>retry save</button>
+      </div>}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -823,7 +854,7 @@ function CanvasInner({
         <MiniMap pannable zoomable />
         <Controls showInteractive={false} />
       </ReactFlow>
-      {nodes.length === 0 && (
+      {hydrated && nodes.length === 0 && (
         <div className="canvas-empty">
           <span>
             Empty canvas — use "+ terminal" or "+ document" in the header to drop

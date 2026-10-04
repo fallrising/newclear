@@ -1,0 +1,7 @@
+{
+  "apps/web-back/src/pages/view-common.tsx": "bfb679bea166e3d0a3c59643499ce934259cc676eaf103a6f903c88f251a82f5",
+  "apps/web-back/src/pages/composer.tsx": "f70c523392d0d69e0a0435375f13accfc662f7bf5e67d963442c7d2024fec35f",
+  "apps/web-back/src/pages/board.tsx": "66174b4a10cce8588f4f328c136f0e459624af6f6a0af8f8e7f576068385175c",
+  "apps/web-back/src/views.test.tsx": "ab05928a16c232f7b2b0cdece0edc27b92f1074374124a831bb7bb668b4316af",
+  "e2e-mock/back-w2.spec.ts": "4de334014b93cc667d13b11d3e00988f72a0c4c0ac59a2d0e7efb567ec7ec87f"
+}

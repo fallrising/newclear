@@ -31,6 +31,7 @@
 | --- | --- | --- | --- |
 | `knowledge-base` | 未知 | — | 唯一 canonical knowledge store；停止擴張 schema。寫入邊界見下方「知識、文件與個人筆記」。 |
 | `newclear/platform/ice-maker` | 未知 | A | 唯一 ingestion/compiler；產生真實成果，不再新增 pipeline abstraction。 |
+| `newclear/platform/prism` | 未知 | A | 2026-10-03 恢復投入；依既有 SDD 逐項開發可插拔觀測相容層。現況與缺口見 [README](platform/prism/README.md)；不是部署或可用產品宣告。 |
 | `kernel/personal/pif` | 在用 | — | 仍在開發，尚未確認為可用產品。 |
 | `kernel/personal/clouddrive` | 未知 | — | read-only-first；只用供應商授權且受支援的 surface，不走帳密型 reverse-engineered API。 |
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
@@ -41,7 +42,9 @@
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
 | `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
 | `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |
+| `newclear/labs/openmmo-lab` | 未知 | A | 個人非商業 MMORPG 試跑；固定上游版本、獨立 checkout、小世界與雙人驗收，後續再評估 agent／上游 PR。見 [README](labs/openmmo-lab/README.md)。 |
 | `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |
+| `newclear/labs/zircon-godot` | 未知 | A | 本次投入限固定版本研究、學習實驗 SDD 與起步路線；不匯入上游源碼／素材，不宣稱已可玩或營運，後續執行另行安排。見 [README](labs/zircon-godot/README.md)。 |
 | `newclear/products/hai-taskboard` | 未知 | A | Human–AI delivery control plane（Work Graph／Fake-core）；私人項目帳本格式的未來消費者，不取代帳本本身。 |
 | `newclear/labs/eru-vps-mvp` | 未知 | A | live VPS MVP 實驗；實機變更另行授權。 |
 | `kernel/infra/pvehost` | 未知 | — | Proxmox 宿主機分階段操作包，由人以 root 手動執行；不是自動化控制面。 |
@@ -73,7 +76,6 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
 | `newclear/platform/fanzloud` | 未知 | C | 不投資 cloud execution layer。archive source 的 open PR #3/#4 保存決策待決。 |
-| `newclear/platform/prism` | 未知 | C | Phase 0 SDD。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |

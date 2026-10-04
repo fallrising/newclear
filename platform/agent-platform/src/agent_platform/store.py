@@ -1,15 +1,15 @@
 """Atomic commands, queue admission and durable event sequence allocation."""
 
-import base64
 import hashlib
 import json
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from psycopg.types.json import Jsonb
 
 from .auth import audit
 from .domain import TERMINAL, Problem, capabilities
+from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
 def json_value(value):
@@ -110,6 +110,8 @@ class Store:
         return {"status": 201, "body": row}
 
     def create_profile(self, conn, data):
+        if data.mock_tools and data.backend != "openhands":
+            raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
         profile = data.profile_id or uuid4()
@@ -160,6 +162,7 @@ class Store:
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
+                        "mock_tools": data.mock_tools,
                     }
                 ),
                 Jsonb(
@@ -295,26 +298,30 @@ class Store:
             ).fetchall()
             return [{**row, "capabilities": capabilities(row["backend"])} for row in rows]
 
-    def tasks(self, cursor=None, limit=30):
-        args = []
-        where = ""
+    def tasks(self, cursor=None, limit=30, *, q="", project_id=None, state=None):
+        q = q.strip()
+        scope = scope_key(q, project_id, state)
+        args, clauses = [], []
         if cursor:
-            try:
-                stamp, identifier = json.loads(
-                    base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4))
-                )
-                stamp, identifier = datetime.fromisoformat(stamp), UUID(identifier)
-                if stamp.tzinfo is None:
-                    raise ValueError()
-            except (ValueError, TypeError, UnicodeDecodeError):
-                raise Problem(422, "invalid_cursor") from None
-            where = "WHERE (t.created_at,t.id)<(%s,%s)"
-            args = [stamp, identifier]
+            stamp, identifier = decode_cursor(cursor, scope)
+            clauses.append("(t.created_at,t.id)<(%s,%s)")
+            args.extend((stamp, identifier))
+        if q:
+            clauses.append("(t.title ILIKE %s ESCAPE '!' OR r.goal ILIKE %s ESCAPE '!')")
+            pattern = literal_pattern(q)
+            args.extend((pattern, pattern))
+        if project_id:
+            clauses.append("t.project_id=%s")
+            args.append(project_id)
+        if state:
+            clauses.append("r.state=%s")
+            args.append(state)
+        where = "WHERE " + " AND ".join(clauses) if clauses else ""
         with self.db.transaction() as conn:
             rows = conn.execute(
                 "SELECT t.*,p.name AS project_name,r.id AS run_id,r.state,r.attempt_no "
                 "FROM tasks t JOIN projects p ON p.id=t.project_id "
-                "JOIN LATERAL (SELECT id,state,attempt_no FROM runs WHERE task_id=t.id "
+                "JOIN LATERAL (SELECT id,state,attempt_no,goal FROM runs WHERE task_id=t.id "
                 "ORDER BY attempt_no DESC LIMIT 1) r ON true "
                 + where
                 + " ORDER BY t.created_at DESC,t.id DESC LIMIT %s",
@@ -322,15 +329,7 @@ class Store:
             ).fetchall()
         more = len(rows) > limit
         rows = rows[:limit]
-        next_cursor = None
-        if more:
-            next_cursor = (
-                base64.urlsafe_b64encode(
-                    json.dumps([rows[-1]["created_at"].isoformat(), str(rows[-1]["id"])]).encode()
-                )
-                .decode()
-                .rstrip("=")
-            )
+        next_cursor = encode_cursor(rows[-1], scope) if more else None
         return {"items": rows, "next_cursor": next_cursor}
 
     def task(self, task_id):

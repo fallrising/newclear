@@ -1,5 +1,9 @@
 # Traceability
 
+Existing accepted rows retain historical upstream evidence. Recovered T030A/B acceptance is
+source-history evidence; current monorepo recovery is tracked separately as T030R below.
+Old hosted runs do not prove execution of the new root workflow.
+
 | Requirement / Invariant | CU | Specification / Decision | Test or check | Code / Configuration | Evidence | Status |
 |---|---|---|---|---|---|---|
 | T000 Cargo workspace and CI baseline | N/A — ADR-0001 infrastructure exception | T000 task §Outcome | T000 machine acceptance | `Cargo.toml`, `.github/workflows/ci.yml` | Local suite at `76f72b3`; [hosted CI run 30260756940](https://github.com/fallrising/fanzloud/actions/runs/30260756940) passed on `f9f3e2d` | Accepted |
@@ -12,6 +16,8 @@
 | T010 strong IDs, paths, and base errors | CU-FS-00 | SPEC-T010; TD §16.1 | T010 acceptance suite | `crates/codebox-domain/**` | Local checks passed; hosted [CI run 30262687153](https://github.com/fallrising/fanzloud/actions/runs/30262687153) passed on `aa56b75`; fresh Claude acceptance review found no blockers | Accepted |
 | T020 versioned event schema and deterministic session reducer; INV-003/INV-004 | CU-PROTO-01 | SPEC-T020; TD §§4.2, 4.4–4.5, 16.2 | Exact serde fixtures, legal/illegal transition matrix, stream/sequence/version/identity checks, replay determinism, and E0 snapshots | `crates/codebox-domain/src/{event,reducer}.rs`; `tests/events_reducer.rs` | 1 reducer unit + 16 T020 integration tests, retained T010/workspace gates, fresh Cursor acceptance, and [hosted run 30523996895](https://github.com/fallrising/fanzloud/actions/runs/30523996895) passed; ACCEPT-T020 | Accepted |
 | T020 durable/ephemeral runtime-event separation; P7 | CU-PROTO-03 | SPEC-T020; TD §§4.4, 11.3 | `runtime_event_kind_classification_is_total`; `regression_ephemeral_not_persisted` | `crates/codebox-domain/src/event.rs` | Total classifier and named P7 regression passed locally and in [hosted run 30523996895](https://github.com/fallrising/fanzloud/actions/runs/30523996895); fresh Cursor acceptance; ACCEPT-T020 | Accepted |
+| T030A SQLite initialization and atomic expected-sequence append; INV-003 | CU-EVT-01 | SPEC-T030A; TD §§4.4–4.6, 16.2 | 6 unit + 17 append/codec/concurrency/rollback/restart/cancel/busy/path/schema tests | `crates/codebox-event-store/**`; workspace member and lockfile | Focused suite, 219-test workspace, 10-test Node suite, Clippy/build/fmt/deny/diff, fresh contract/security reviews, and [hosted run 30554757181](https://github.com/fallrising/fanzloud/actions/runs/30554757181) passed; ACCEPT-T030A | Accepted |
+| T030B bounded ordered SQLite replay after sequence; INV-003 | CU-EVT-02 | SPEC-T030B; TD §§4.4–4.6, 8.5–8.7 | 2 T030B unit + 19 replay/limit/order/isolation/restart/model/corruption/snapshot/busy/cancel/E0 tests; retained 23 T030A tests | `crates/codebox-event-store/src/{lib,error,codec,sqlite}.rs`; `tests/sqlite_replay.rs` | Focused 44-test event-store, 240-test workspace, Clippy/build/fmt/deny/diff, fresh reviews, and [hosted run 31325149204](https://github.com/fallrising/fanzloud/actions/runs/31325149204) passed; ACCEPT-T030B | Accepted |
 | T002A credential scope lease and isolation | CU-AUTH-P0-02 | SPEC-T002A; ADR-0002 | T002A scope, permission, concurrency, and P14 suite | `crates/codebox-agent-codex/**` | 1 unit + 12 contract/security tests, focused/workspace Clippy, workspace tests/build, cargo-deny, and fresh Claude acceptance passed | Accepted |
 | T002B Codex device-login lifecycle | CU-AUTH-P0-01 | SPEC-T002B; pinned `0.145.0` fixtures | T002B lifecycle, parser, process, and recovery suite | `crates/codebox-agent-codex/**` | 22 T002B tests plus focused/workspace gates, dependency policy, P14, and fresh Claude acceptance passed | Accepted |
 | T002 Codex login broker parent | CU-AUTH-P0-01, CU-AUTH-P0-02 | SPEC-T002; ADR-0002 | Combined T002A/T002B and P14 gates | `crates/codebox-agent-codex/**` | Both child tasks, combined local gates, P14, and fresh composition review passed | Accepted |
@@ -26,3 +32,25 @@
 | T005 P0 session/API/stream parent | CU-SES-P0-01, CU-API-P0-01, CU-API-P0-02 | SPEC-T005; ADR-0004 | All child suites plus two exact private operator API/stream composition regressions | Child code above | T005A/T005B/T005C Accepted; 176 workspace tests and all gates passed; fresh review returned COMPOSITION ACCEPTED; hosted CI run 30382918115 passed; ACCEPT-T005 | Accepted |
 | T006 private single-page operator flow | CU-WEB-P0-01 | SPEC-T006; ADR-0002; ADR-0004 | 12 static-route, browser-controller, security, reconnect, and schedule-model tests | `apps/control-plane/{src,web}/**`; `.github/workflows/ci.yml` | 2 Rust + 10 Node tests, 20× browser/concurrency/reconnect stress, 178 workspace tests, all gates, fresh review `T006 ACCEPTED`, hosted CI run 30423184446; ACCEPT-T006 | Accepted |
 | T004 Codex Cloud orchestrator parent | T004 P0 CUs | SPEC-T004; ADR-0003; child specifications | All child acceptances plus combined P14/P15/workspace gates | Accepted T004A/T004A1/T004B/T004C boundaries | All child reports, combined gates, exact P14/P15, and fresh Cursor Agent composition review passed; ACCEPT-T004 | Accepted |
+| T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; recovery PR #242 merged at1f555f61; hosted root branch37148404076 and main37148875720 passed | Accepted; merged |
+
+
+## Accepted Snapshot Design — Unimplemented
+
+These rows record accepted design traceability, not executable runtime evidence. Current A/B runtime
+remains version1. Recovery merged [PR #242](https://github.com/fallrising/newclear/pull/242) at
+`1f555f61`; hosted [branch run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)
+and [main run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720) passed.
+Historical upstream acceptance rows above are retained unchanged.
+
+| Requirement | Spec/ADR | Clauses | Planned machine evidence | Implementation / acceptance |
+|---|---|---|---|---|
+| CU-EVT-04/INV-003/INV-004 bounded value and persisted provenance | [SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md), [ADR-0005](adr/ADR-0005-snapshot-cache-contract.md) | S01–S04 | value bounds, canonical codec, durable-head CAS, fabricated-projection rejection, full-field prefix verification | Unimplemented; all test names/oracles in spec; unrun |
+| CU-EVT-04 equal-head concurrency/monotonicity/retry/crash | SPEC-T030D | S05–S08 | identical/different contenders, regression, rollback, busy/worker/cancellation/lost reply and crash restart | Unimplemented; planned/unrun |
+| CU-EVT-03 discardable cache/E0/persisted trust | SPEC-T030D | S09–S10 | absent/stale/corrupt/unsupported **values** as misses; structural lookup-key/schema/index/physical damage as store errors; pinned view, corrupt prefix/suffix, replayed projection without restore | Unimplemented; T030C spec/acceptance still required |
+| CU-EVT-01/02 compatibility; strict schema identity | SPEC-T030D | S11–S13 | schema spoof, nullable ANY cache value corruption with successful open/A/B, enabled event CHECK/type/NOT NULL integrity rejection, exact new/v1→v2, concurrent open, migration fault/crash, A/B preservation, legacy fresh-open downgrade rejection | Design accepted; no schema code changed |
+| Security/observability/acceptance boundary | SPEC-T030D | S14–S16 | bounded allocation/path/error canaries, state model, independent design/runtime gates, accepted T020/P0 regressions | Unimplemented; [design accepted](acceptance/T030D-design.acceptance.md) |
+
+T030D is **Ready** after independent design acceptance; T030C and parent T030 remain **blocked**.
+The 32 planned tests have explicit D/C ownership in SPEC-T030D; D acceptance does not require
+public load implementation. No design or hosted recovery run accepts snapshot runtime or parent composition.

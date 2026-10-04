@@ -249,6 +249,8 @@ Front 屬於「讀」的 surface，但 `/me` 的建立需要 `create`：`FRONT_H
 
 **BW2 細化後補充：** `category` 的值、每個動作的 `detail`、被拒治理操作的記法（動作名是治理 action，例如 `manage_types`，`outcome=denied`）見 `waves/BW2.md` §4.3。既有的 `ENTRY_PURGED`、`PERMISSION_CHANGED` 改為上表的 `entry.purge`、`role.permissions_update`（舊列不改）；另外新增 `entry.publish_request_cancel`。`action` 參數以 `.` 結尾時才是前綴。施工細節見 `waves/BW2.md` §4.3、§4.4、§5.3、§5.4。
 
+**BW2 增量實作補充（2026-10-03）：** 依 `waves/BW2.md` §0 保留 P0 的 CAS／交易，請求發布實際設定或取消也遞增 version，重複操作保持原樣。乾淨已發布工作副本仍有請求時，publish 只取消請求並寫取消審計，不另建 revision。現有 identity 事件保持名稱與資料，但其狀態／credential／session 寫入補入同一交易；登入拒絕計數與事件先提交才回原拒絕。JDBC 服務層故障注入納入本波（entry、batch、type、navigation、media、role、identity），不再以「未測試回滾」驗收；BW4 的完整應用程式啟動／store選用（BQ-13）仍是獨立門檻，不能由手動組裝的 store 測試推論正式運行已就緒。
+
 ### 4.7 類型與欄位的輸出（G-05、G-06）
 
 `GET /content-types/{key}` 與 `/admin/content-types` 對每個欄位輸出：`key`、`type`、`label`、`helpText`、`required`、`group`、`order`、`listable`、`filterable`、`enumValues`、`enumLabels`、`refTarget`、`placeholder`、`visibility`。類型層級輸出：`titleField`、`sortField`、`visibilityField`、`ownerField`、`slugPolicy`、`singleton`、`previewable`。

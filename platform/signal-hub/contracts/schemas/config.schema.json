@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signalhub.example.invalid/contracts/config.schema.json",
+  "type": "object",
+  "properties": {
+    "sources": {
+      "$ref": "sources.schema.json#/properties/sources"
+    },
+    "rules": {
+      "$ref": "rules.schema.json#/properties/rules"
+    },
+    "subscriptions": {
+      "$ref": "subscriptions.schema.json#/properties/subscriptions"
+    },
+    "webhook_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://[^/?#@]+(?:/[^#]*)?(?![\\s\\S])"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "sources",
+    "rules",
+    "subscriptions",
+    "webhook_allowlist"
+  ],
+  "additionalProperties": false
+}

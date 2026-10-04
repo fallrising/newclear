@@ -4,8 +4,8 @@ Date: 2026-10-04
 
 ## Current Goal
 
-Local T030A/B monorepo recovery is Accepted. The next work is to resolve the T030D
-snapshot-save TD-GAP before any snapshot persistence implementation.
+T030A/B monorepo recovery is Accepted and merged. The T030D design passed fresh-context independent
+acceptance after the R1 corruption-policy repair; next is test-first snapshot-save implementation.
 Preserve the T020 schema, recovered A/B contracts and private single-operator P0 boundary.
 
 ## Repository State
@@ -20,7 +20,35 @@ wired into P0. P0 session replay remains process-lifetime rather than crash-dura
 
 `T030R` is Accepted: current integrated-tree gates and an independent fresh-context
 GPT-6 Astra review passed, as recorded in `ACCEPT-T030R`. The new root Fanzloud workflow
-has not run hosted; the nested upstream workflow is retained only as historical configuration.
+passed hosted on the recovery branch
+([run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)) and merged main
+([run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720)).
+Recovery [PR #242](https://github.com/fallrising/newclear/pull/242) merged at `1f555f61`; the nested
+upstream workflow is retained only as historical configuration.
+
+## Snapshot Design Accepted — Runtime Unimplemented
+
+[ADR-0005](adr/ADR-0005-snapshot-cache-contract.md),
+[SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md) and the
+[design acceptance](acceptance/T030D-design.acceptance.md) accept S01–S16: current
+durable-head saves, prefix verification against persisted events, explicit first-committed equal
+bytes, idempotent identical retries, monotonic caches, E1 old/complete crash visibility, no automatic
+unknown-completion retry, and one strict additive schema1→2 transition. Private domain projection
+fields stay private; cache bytes never restore/import reducer state.
+
+The NEW-SPEC 96-byte codec and 4096-event prefix budget favor bounded correctness. Load may verify
+an older S<=4096 behind a larger head; streams beyond the save cap retain ordinary A/B paging.
+This initial cache does not accelerate reducer startup and can hold the writer lock for a complete
+bounded-prefix replay. No cleanup/general migration/mixed-version rollout is included. Snapshot seq/version/body use nullable ANY storage with fixed SQL/codec gates, so value corruption
+remains discardable and does not block valid A/B event access. Full CHECK-enabled event integrity
+is preserved; cache lookup-key/schema/index/physical corruption fails closed. Legacy processes must quiesce before schema upgrade.
+
+Every clause maps to planned test names and concrete oracles, including concurrency, faults,
+restart, security and A/B/P0 regressions. **No snapshot tests or runtime behavior are implemented or
+run.** T030D is Ready for implementation; T030C and the T030 parent remain blocked. The 32-name
+matrix assigns D save/codec/schema and raw-SQL observations first, then C public-load assertions.
+D acceptance does not require C implementation. T030C still needs its own E0 spec
+and acceptance, and parent composition still needs all four accepted children.
 
 ## Historical Upstream Acceptance
 
@@ -373,8 +401,9 @@ subsequently passed a fresh Cursor Agent acceptance review with no blocker.
 
 ## Next Work
 
-1. Resolve the T030D snapshot-save TD-GAP through TD/ADR/specification review before
-   T030C/D implementation; do not infer what `expected_seq` compares or permit blind retry.
+1. Execute Ready T030D against accepted ADR-0005/SPEC-T030D: generate its owned compiling
+   fixed-failure skeletons before save/codec/schema implementation. Preserve C-owned public-load
+   tests as future work until D runtime acceptance; T030C and parent remain blocked.
 2. Preserve the Accepted P0 boundary; P1 work must not add a dependency on live P0 provider
    availability. T030R local acceptance does not merge historical source PR #3/#4.
 3. Run a T007 live smoke only in a private environment with all nine administrator variables, the
@@ -489,7 +518,8 @@ workspace, build, and dependency-policy gates on `a4ecbf8`; `ACCEPT-T030B` recor
 240 workspace Rust tests, 10 Node tests, formatting, Clippy with warnings denied, binary
 build, dependency policy, diff check and root workflow validation all passed. The orchestrator
 independently checked source identity and preservation; a fresh GPT-6 Astra review accepted
-the bounded recovery with no blocking findings. Hosted root CI has not run and live provider
+the bounded recovery with no blocking findings. Recovery subsequently merged PR #242 at
+`1f555f61`; hosted root branch run37148404076 and merged-main run37148875720 passed. Live provider
 smoke remains outside recovery scope.
 
 TD §0.3 automatic rustdoc/spec drift checking is an existing gap: neither historical nor new

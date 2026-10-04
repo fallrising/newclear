@@ -30,11 +30,19 @@ T030A atomic SQLite append and T030B bounded ordered replay have been recovered 
 archived Fanzloud commit `0a47dcd`. Their upstream acceptance reports are retained as historical
 evidence; this monorepo integration is locally verified and independently accepted under
 [T030R](docs/tasks/T030R.task.md) and [ACCEPT-T030R](docs/acceptance/T030R.acceptance.md).
-The new root Fanzloud workflow has not run hosted. The portfolio context above remains the
-public investment summary; this local recovery is not a deployment or production-readiness claim.
+Recovery merged in [PR #242](https://github.com/fallrising/newclear/pull/242) at `1f555f61`.
+Hosted Fanzloud CI passed on the recovery branch
+([run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)) and merged main
+([run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720)).
+The portfolio context above remains the public investment summary; this is not a deployment or
+production-readiness claim.
 
-T030D snapshot save remains blocked on its concurrency, retry and crash-visibility TD-GAP;
-T030C snapshot load and the T030 parent remain blocked. Native agents, local sandbox execution,
+T030D now has an [accepted snapshot design](docs/specs/SPEC-T030D-sqlite-snapshot-save.md) and
+[accepted ADR](docs/adr/ADR-0005-snapshot-cache-contract.md), with fresh independent review.
+It defines persisted-prefix verification, explicit equal-sequence arbitration and atomic schema
+evolution, preserving full event/store integrity while bounding disposable cache values. This first bounded cache does not accelerate initial reducer replay. T030D snapshot
+save is Ready for implementation; T030C snapshot load and the T030 parent remain blocked.
+Snapshot runtime is unimplemented. Native agents, local sandbox execution,
 multi-user authentication and the `node-agent`/`boxd` runtime remain future tasks. The recovered
 P1 store is not wired into the P0 process-lifetime session runtime.
 

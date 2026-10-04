@@ -551,6 +551,25 @@ pub trait EventStore: Send + Sync {
 
 Snapshots are caches, not sources of truth.
 
+### Accepted snapshot contract — ADR-0005
+
+[ADR-0005](adr/ADR-0005-snapshot-cache-contract.md) and
+[SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md) define the missing CU-EVT-04 semantics:
+E1 save compares the durable event head with expected sequence; candidate sequence equals that
+head. Equal-sequence identical bytes are idempotent, different bytes conflict, and committed
+cache sequence never regresses. Both save and usable load verify the bounded durable prefix
+through the accepted reducer; typed/private projection shape alone proves no persisted provenance.
+The 96-byte codec and 4096-event prefix cap are accepted NEW-SPEC tradeoffs and do not accelerate
+initial replay. The sole schema transition is exact v1 to v2 (unchanged events plus snapshots),
+with locked identity rechecks and atomic DDL/version; legacy processes must quiesce for upgrade.
+Only cache seq/version/body use nullable ANY storage with fixed SQL/codec gates; the structural
+BLOB key and authoritative event constraints retain full enabled integrity validation. Cache
+value corruption is discardable; key/schema/index/physical or durable-event damage fails closed.
+
+This is an accepted **design amendment**, not runtime acceptance. CU-EVT-04 is E1 and T030D
+is Ready for implementation; CU-EVT-03/T030 remain blocked pending their implementation gates.
+The current accepted A/B runtime still uses version1. Historical acceptance is unchanged.
+
 ## 4.7 Session actor
 
 Each session is a single-writer actor.
@@ -1596,7 +1615,7 @@ This is the initial P1 contract inventory. The LLM MAY add CUs when a public bou
 | CU-EVT-01 | Event append with expected seq | event-store | E | E1 | INV-003, INV-004 |
 | CU-EVT-02 | Event replay after seq | event-store | D | E0 | INV-003 |
 | CU-EVT-03 | Snapshot cache load | event-store | B | E0 | INV-003 |
-| CU-EVT-04 | Snapshot cache save | event-store | E | TBD — T030D TD-GAP | INV-003 |
+| CU-EVT-04 | Snapshot cache save | event-store | E | E1 — ADR-0005 | INV-003 |
 | CU-CTX-01 | Build provider request | context-engine | A | E0 | INV-007, INV-008, INV-011 |
 | CU-AGT-01 | Native `run_turn` | agent-native | C+E | E3 | INV-002–INV-006 |
 | CU-SES-01 | Session subscribe/replay/live | session-runtime | D | E0 | INV-003, INV-012 |
@@ -1667,6 +1686,8 @@ flowchart TD
     T020 --> T030A[SQLite Event Append]
     T030A --> T030B[Event Replay]
     T030A --> T030D[Snapshot Save]
+    T030B --> T030D
+    T020 --> T030D
     T030D --> T030C[Snapshot Load]
     T030B --> T030[SQLite Event Store Parent]
     T030C --> T030
@@ -1733,7 +1754,7 @@ flowchart TD
 | T030A | SQLite initialization and atomic event append | T020 | conflict, rollback, duplicate-ID, and restart tests |
 | T030B | SQLite event replay after sequence | T030A | empty/one/many/limit/order/corruption tests |
 | T030C | SQLite snapshot cache load | T030D | absent/present/stale/corrupt/restart tests |
-| T030D | SQLite snapshot cache save | T030A | Blocked on snapshot atomicity/conflict/retry TD-GAP |
+| T030D | SQLite snapshot cache save | T020,T030A,T030B | Ready: accepted ADR-0005/SPEC-T030D design; runtime unimplemented |
 | T030 | SQLite event-store coordination parent (acceptance pending children) | T030A,T030B,T030C,T030D | all child acceptances plus append/replay/snapshot composition |
 | T040 | Single-writer session actor | T020 | concurrent turn rejected; approval and restart behavior |
 | T050 | Versioned node and boxd protocols | T010 | codec and version-handshake tests |

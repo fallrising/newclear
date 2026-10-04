@@ -149,3 +149,16 @@ Continue after replacement facts. Deliver fixed network-and-access-ready read-on
 ### Network prerequisite acceptance decision
 
 Accepted T-231 and T-232 after source/diff/hash inspection and independent temporary-file evidence. Four late publication drift cases were reproduced and fixed with retained directory descriptors and final exact entries. Root50, worker62, independent72+13 and full679 tests passed; workflow/compileall/team/scope/privacy gates passed. T-233 accepts this readonly slice only, keeping full closeout PARTIAL and formal remaining12. No stage, live fence or network acceptance; no mutation capability or real host operations.
+
+## Fresh network access configuration plan (2026-10-04)
+
+Continue current-stage prerequisites into a deterministic four-host configuration renderer and immutable private plan lifecycle. Bind current admission and replacement identities, explicit private controller/interface and a canonical public core client key. Fixed management-port policy, pinned known_hosts and staged restricted authorized-key content only; no runtime/service installation, remote calls or stage acceptance.
+
+- T-234: isolated renderer, safe prepare/inspect lifecycle and fake/local tests.
+- T-235: independent frozen-candidate policy/publication/trust review and adversarial tests.
+- Root: document-first contract, CLI, diff/hash review, full native gates, authorized Git delivery and task sync.
+- Required: rederive payload instead of trusting its hash, preserve current admission/freshness/pending checks and complete publication identity across writes. No generic lock bypass; formal remaining12 unchanged.
+
+### Network access plan acceptance decision
+
+Accepted T-234 and T-235 after frozen hash/source/diff review and independent policy/publication regressions. Root reproduced a post-publication raw-byte pin gap; independent RED confirmed whitespace-only tampering could return success, and the publisher-returned digest fix passed. Root30, worker60, independent79 and full705 tests passed; compileall and original workflow validation passed. T-236 accepts this bounded renderer/immutable-plan slice and keeps overall closeout PARTIAL, with formal remaining12. No real network change, current trust update, pending change, stage acceptance or runtime compatibility claim.

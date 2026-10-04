@@ -119,7 +119,9 @@ local document adapter and a resumable batch entry point.
   during a read.
 - FR-3: Route each PDF page independently: preserve usable native text when
   present; otherwise rasterize only that page and OCR it. Mixed PDFs may
-  therefore contain both `pdf-text` and `ocr` chunks.
+  therefore contain both `pdf-text` and `ocr` chunks. Request Poppler layout
+  order before whitespace normalization so syntax-highlighted code delimiters
+  remain adjacent to their original arguments and statements.
 - FR-4: Decode each long screenshot under explicit pixel and memory limits,
   derive a vertical tile height that satisfies both the configured height and
   per-tile pixel ceilings, split it into bounded overlapping vertical tiles,
@@ -144,8 +146,12 @@ local document adapter and a resumable batch entry point.
   and missing delimiters still fail closed. Executable/version metadata keeps
   the original strict matcher; this heuristic is not a secret-free guarantee.
 - FR-7: Cache successful extraction by source hash, extractor configuration
-  digest, tool versions, and language tuple. A retry may reuse only a fully
-  validated cache record with matching immutable inputs.
+  digest, tool versions, PDF extractor semantics version, and language tuple.
+  The PDF evidence/cache key and outer production-toolchain binding both include
+  that version; `production-pdf-v3` layout output cannot reuse v2 results.
+  A retry may reuse only a fully validated cache record with matching immutable
+  inputs. Existing completed uploads remain immutable; a quality rerun uses a
+  fresh operator-owned state directory and retains the earlier run's evidence.
 - FR-8: Add `knowledge batch --manifest <path> --input-root <path>`. Process
   items in canonical path order, isolate item failures, checkpoint atomically,
   and return non-zero unless every item is `processed` or `duplicate`.

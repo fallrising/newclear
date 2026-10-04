@@ -85,3 +85,19 @@ Authenticated board reads use `/api/v1/projects/{project_id}/board`; durable eve
 project events: replay explicitly requests a fresh snapshot instead of leaking other projects.
 Snapshot evidence coverage is conservative (`effective_satisfied=false`, `covered_ac_count=0`):
 current-policy evidence evaluation is unavailable here, not proof that no evidence exists.
+
+## Component verification gates
+
+From `products/hai-taskboard`, use the same entry points as root CI:
+
+```sh
+bash scripts/check-ci-pins.sh
+bash scripts/check-backend.sh
+bash scripts/check-web.sh
+```
+
+Use Go 1.27.1 with a working C compiler for the mandatory race suite, Node 24.20.0 and pnpm
+11.25.0. The scripts reject version drift before dependency installation; the backend keeps
+`GOTOOLCHAIN=local` and enables CGO. The web gate uses the existing lockfile and disables install
+lifecycle scripts. Dependency downloads require network access unless the caches are populated.
+The gates cover the current backend and fixture UI, not browser E2E, backup/restore or G1 acceptance.

@@ -17,12 +17,13 @@ use std::sync::Arc;
 
 use tauri::{Manager, State};
 
-use crate::pty::{LocalState, PtyError, PtyManager, SpawnConfig};
+use crate::pty::SpawnConfig;
+use crate::session_store::{SessionHistory, SessionRuntime};
 use loom_contracts::{Origin, SessionId, SessionMeta, StreamId};
 
 /// State stashed by `run()` and pulled into every command.
 pub struct AppState {
-    pub pty: Arc<PtyManager>,
+    pub pty: Arc<SessionRuntime>,
 }
 
 // pty_spawn and pty_subscribe are `async fn` so Tauri awaits them on the
@@ -49,40 +50,31 @@ pub async fn pty_spawn(
         cols: cols.unwrap_or(120),
         rows: rows.unwrap_or(30),
     };
-    state
-        .pty
-        .spawn(&origin, config)
-        .map_err(|e: PtyError| e.to_string())
+    state.pty.spawn(&origin, config).await
 }
 
 #[tauri::command]
-pub fn pty_kill(
+pub async fn pty_kill(
     state: State<'_, AppState>,
     origin: Origin,
     session_id: SessionId,
 ) -> Result<(), String> {
-    state
-        .pty
-        .kill(&origin, &session_id)
-        .map_err(|e| e.to_string())
+    state.pty.kill(&origin, &session_id).await
 }
 
 #[tauri::command]
-pub fn pty_resize(
+pub async fn pty_resize(
     state: State<'_, AppState>,
     origin: Origin,
     session_id: SessionId,
     cols: u16,
     rows: u16,
 ) -> Result<(), String> {
-    state
-        .pty
-        .resize(&origin, &session_id, cols, rows)
-        .map_err(|e| e.to_string())
+    state.pty.resize(&origin, &session_id, cols, rows).await
 }
 
 #[tauri::command]
-pub fn pty_write_stdin(
+pub async fn pty_write_stdin(
     state: State<'_, AppState>,
     origin: Origin,
     session_id: SessionId,
@@ -91,7 +83,7 @@ pub fn pty_write_stdin(
     state
         .pty
         .write_stdin(&origin, &session_id, data.as_bytes())
-        .map_err(|e| e.to_string())
+        .await
 }
 
 #[tauri::command]
@@ -99,12 +91,12 @@ pub async fn pty_subscribe(
     state: State<'_, AppState>,
     session_id: SessionId,
 ) -> Result<StreamId, String> {
-    state.pty.subscribe(&session_id).map_err(|e| e.to_string())
+    state.pty.subscribe(&session_id).await
 }
 
 #[tauri::command]
-pub fn pty_detach(state: State<'_, AppState>, session_id: SessionId) -> Result<(), String> {
-    state.pty.detach(&session_id).map_err(|e| e.to_string())
+pub async fn pty_detach(state: State<'_, AppState>, session_id: SessionId) -> Result<(), String> {
+    state.pty.detach(&session_id).await
 }
 
 #[tauri::command]
@@ -118,24 +110,38 @@ pub fn home_dir() -> String {
     std::env::var("HOME").unwrap_or_else(|_| "/".into())
 }
 
-/// Returns metadata for a session if it exists. The vertical slice's UI
-/// uses this to pull live cwd/cmd/state for the header. Persistence is
-/// not consulted here; this is purely the in-memory manager view.
+/// Live and historical metadata share the runtime's ordered snapshot.
 #[tauri::command]
-pub fn pty_session_meta(state: State<'_, AppState>, session_id: SessionId) -> Option<SessionMeta> {
-    let pty = state.pty.get_session(&session_id)?;
-    let info = pty.spawn_info().clone();
-    Some(SessionMeta {
-        id: session_id,
-        cwd: info.cwd.to_string_lossy().into_owned(),
-        cmd: info.cmd,
-        shell: info.shell,
-        state: match pty.local_state() {
-            LocalState::Running => loom_contracts::SessionState::Active,
-            LocalState::Exited { code } => loom_contracts::SessionState::Exited { code },
-        },
-        last_activity_ms: 0,
-    })
+pub async fn pty_session_meta(
+    state: State<'_, AppState>,
+    session_id: SessionId,
+) -> Result<Option<SessionMeta>, String> {
+    Ok(state.pty.meta(&session_id).await)
+}
+
+#[tauri::command]
+pub async fn session_history(state: State<'_, AppState>) -> Result<SessionHistory, String> {
+    Ok(state.pty.history().await)
+}
+
+#[tauri::command]
+pub async fn session_restart(
+    state: State<'_, AppState>,
+    origin: Origin,
+    session_id: SessionId,
+    cols: Option<u16>,
+    rows: Option<u16>,
+) -> Result<SessionId, String> {
+    state.pty.restart(&origin, &session_id, cols, rows).await
+}
+
+#[tauri::command]
+pub async fn session_forget(
+    state: State<'_, AppState>,
+    origin: Origin,
+    session_id: SessionId,
+) -> Result<(), String> {
+    state.pty.forget(&origin, &session_id).await
 }
 
 const DEFAULT_SCROLLBACK_CHARS: u32 = 8_000;

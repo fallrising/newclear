@@ -33,7 +33,7 @@ class ProductionExtractionError(ValueError):
 
 EXTRACTOR_VERSION = "production-raster-ocr-v1"
 METHOD = "ocr-tesseract-tsv"
-PDF_EXTRACTOR_VERSION = "production-pdf-v2"
+PDF_EXTRACTOR_VERSION = "production-pdf-v3"
 PDF_TEXT_METHOD = "pdf-text"
 PDF_OCR_METHOD = "ocr"
 MIN_USEFUL_PDF_TEXT_BYTES = 20
@@ -1055,7 +1055,7 @@ def extract_pdf(source: bytes, descriptor: SourceDescriptor, *, config: Mapping[
             for page in range(1, page_count + 1):
                 page_arg = str(page)
                 native = _native_pdf_text(_run_pdf_tool(
-                    [str(text_tool), "-enc", "UTF-8", "-eol", "unix", "-nopgbrk",
+                    [str(text_tool), "-enc", "UTF-8", "-eol", "unix", "-nopgbrk", "-layout",
                      "-f", page_arg, "-l", page_arg, str(pdf_path), "-"],
                     timeout_seconds=limits["timeout_seconds"], maximum=limits["max_ocr_output_bytes"],
                     runner=runner, process_factory=process_factory, kill_group=kill_group,

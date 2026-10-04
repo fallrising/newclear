@@ -2,12 +2,12 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-10-03
+Updated: 2026-10-04
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/persistent-outbox`
+- Branch: `agent/hai-taskboard/decision-attention`
 - Worktree: task-scoped checkout; verify actual Git state.
 - Current delivery base: `newclear/main@e2c901304570428a5c78744e274739206dbf3387`
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
@@ -120,8 +120,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
   orchestrator evidence gate passed configuration attacks, descriptor lifecycle, two-start process
   restart, exact tests, full tests, race, build and offline module inventory without a required
   failure or skip.
-- Automatic persistent outbox/worker polling, root CI execution, restore/backup and broader evidence
-  remain NotRun; T-047's deterministic manually driven vertical integration does not imply them.
+- At the T-094 checkpoint, automatic worker polling and root CI were still NotRun. The later
+  T-099 persistent-runtime checkpoint below supersedes polling status; bounded CI is now tracked
+  by T-110/T-113/T-112. Restore/backup and broader evidence remain NotRun. T-047 alone does not imply them.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
 - The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
   remain immutable process evidence; later repairs and acceptance do not rewrite them.
@@ -138,11 +139,36 @@ Native Go 1.27.1 full/race/vet/build and Node 24.20.0/pnpm 11.25.0 format/lint/8
 Docker/browser/root CI are separate evidence; no broader acceptance is implied. Specification
 admission remains fail-closed, verified coverage is unavailable, and global project event gaps reset.
 
+## CI continuation checkpoint
+
+HAI-CI-001 on `agent/hai-taskboard/decision-attention` is accepted for candidate
+`8f45a951d6f5285d833a51fe452eda708a86ceeb`: shared backend/web gate scripts plus the root
+workflow passed both jobs in [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+T-112 independently passed the repaired implementation; PLAN records the report hash and
+orchestrator acceptance. The original T-111 REWORK and failed predecessor run remain preserved.
+PR #238 remains Draft. This does not connect the fixture UI, admit specifications or implement
+restore. The earlier branch references describe historical checkpoints and do not override this
+continuation. Check the latest PR head's checks separately from this implementation checkpoint.
+
+## Admission/integrity continuation
+
+Desk T-0163 covers H01 executable admission design and the H04/H05 predecessor repairs.
+`accepted-spec-admission.md` separates proposals, first acceptance, current heads, Git provenance,
+transactional activation and versioned dispatch inputs. Durable H06..H09 remains Specified/NotRun.
+`runtime-integrity-predecessors.md` requires trusted scenario rejection before dispatch and bounded
+completion byte checks outside writer locks with final metadata/subject rechecks. T-126 independently
+passed the combined design, code, tests and evidence; the orchestrator accepted
+this bounded slice after integrated full/race/vet/build and web gates. PLAN records exact hashes.
+Historical scenario/artifact Red and fixture diagnostics remain retained. No restore, live UI,
+quarantine/repair of corrupt bytes, real provider or broader G1 acceptance follows.
+
 ## Safe next action
 
-T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
-T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
-start T-050, merge, deploy, add an importer or enable a real provider.
+Confirm the latest pushed PR head passes both backend/web jobs, independently of the recorded
+local acceptance. For the next separately assigned durable admission slice, use the H06..H09 child
+contracts; T-050 backup/restore and
+live UI remain separate scopes. The 37-item remaining-work roadmap is desk T-0157's report.
+No merge, deployment or real provider is authorized by this handoff.
 
 ## Restore invariant
 

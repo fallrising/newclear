@@ -1,8 +1,10 @@
-# 接續入口更新 — 2026-10-04
+# 接續入口更新 — 2026-10-05
 
-先核對最新 GitHub main、PR 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md) 開頭和 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。目前 M4 的有界成果封存切片提供 DB 內不可變 JSON 與工作台下載；legacy results 不回填。下一段建議為 explicit GitHub export，backup/restore/GC 與部署仍未完成。是否認領下一段以當前 owner 指示與 task 為準。
+先核對最新 GitHub main、PR、CI 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md)、[GITHUB-EXPORT.md](GITHUB-EXPORT.md) 與 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。M4 本切片提供固定封存的 explicit GitHub export：preview → operator approval → separate worker → create-only branch/Draft PR；未知遠端結果只讀查核，不重送 mutation。預設停用，live smoke 未執行，不讀取環境既有 key。
 
-Billing 仍延後；現在繼續使用 mock，不要求 API key，也不讀取環境中既有 credential。M3/M4 整體未驗收，不以文件或 mock 測試代替真實模型／KVM／production 證據。#206 已合併於 `2cda120b`，本切片已納入。下面保留舊 prompt 作歷史，不能照舊的 recovery blocker、版本或測試數字重新開始工作。
+本次分支整合 main 的 #279 M3 mock 整合驗收與 #270 成果封存依賴。是否合併以最新 GitHub 為準；本輪只交付 Draft PR，不推論 merge/deploy。下一段建議 backup/restore/GC，以當前 owner 指示與 task 為準。
+
+Billing 仍延後，費用 unknown，模型繼續本機 mock。M3/M4 整體未完成；沒有以 fake GitHub／文件代替 live/KVM/provider/production 證據。下面保留舊 prompt 作歷史，不能照過期 recovery blocker 或測試數字重啟已完成工作。
 
 ---
 

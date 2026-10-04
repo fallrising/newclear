@@ -7,6 +7,7 @@ import os
 import secrets
 import sys
 import time
+from contextlib import ExitStack
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -35,8 +36,12 @@ def main():
         migrate(url)
     db = Database(url)
     db.open()
+    resources = ExitStack()
     try:
         if action == "serve":
+            from browser_export_fixture import start_fake
+
+            github = resources.enter_context(start_fake())
             with db.transaction() as conn:
                 conn.execute("TRUNCATE operators,projects,agent_profile_revisions CASCADE")
             password = secrets.token_urlsafe(32)
@@ -73,6 +78,12 @@ def main():
                         "password": password,
                         "task_id": value["task"]["id"],
                         "run_id": value["run"]["id"],
+                        "export_fixture": {
+                            "url": github.url,
+                            "repo": github.repo,
+                            "base_branch": github.base_branch,
+                            "base_sha": github.base_sha,
+                        },
                     }
                 )
             )
@@ -80,7 +91,11 @@ def main():
             uvicorn.run(
                 create_app(
                     Settings(
-                        url, origin="http://127.0.0.1:18600", insecure_local=True, stream_seconds=1
+                        url,
+                        origin="http://127.0.0.1:18600",
+                        insecure_local=True,
+                        stream_seconds=1,
+                        export_targets=({"repo": github.repo, "base_branch": github.base_branch},),
                     ),
                     db,
                     web_dist=Path(__file__).resolve().parents[1] / "web/dist",
@@ -89,6 +104,10 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action.startswith("export"):
+            from browser_export_fixture import export_action
+
+            export_action(action, db, output)
         elif action == "search":
             value = json.loads(output.read_text())
             store = Store(db)
@@ -363,20 +382,26 @@ def main():
                 conn.execute("UPDATE runs SET cleanup_state='confirmed' WHERE id=%s", (run_id,))
                 conn.execute("UPDATE jobs SET status='done' WHERE id=%s", (claim["job_id"],))
         elif action == "counts":
+            run_id = json.loads(output.read_text())["run_id"]
             with db.transaction() as conn:
                 print(
                     json.dumps(
                         conn.execute(
                             "SELECT (SELECT count(*) FROM adapter_operations WHERE "
-                            "kind='agent.prompt') AS prompts,(SELECT count(*) FROM "
-                            "adapter_operations WHERE kind='sandbox.allocate') AS "
-                            "allocations,(SELECT count(*) FROM run_events WHERE "
-                            "source='fake-burst') AS events"
+                            "run_id=%s AND kind='agent.prompt') AS prompts,"
+                            "(SELECT count(*) FROM adapter_operations WHERE run_id=%s "
+                            "AND kind='sandbox.allocate') AS allocations,"
+                            "(SELECT count(*) FROM run_events WHERE run_id=%s "
+                            "AND source='fake-burst') AS events",
+                            (run_id, run_id, run_id),
                         ).fetchone()
                     )
                 )
     finally:
-        db.close()
+        try:
+            resources.close()
+        finally:
+            db.close()
 
 
 if __name__ == "__main__":

@@ -56,6 +56,34 @@ export type Artifact = {
   mime: string;
   created_at: string;
 };
+export type ExportTarget = { repo: string; base_branch: string };
+export type ExportPreview = {
+  run_id: string;
+  artifact_id: string;
+  artifact_sha256: string;
+  target_repo: string;
+  base_branch: string;
+  base_sha: string;
+  branch: string;
+  approval_digest: string;
+  verification_status: string;
+  diff: string;
+  files: string[];
+};
+export type ExportOperation = {
+  id: string;
+  run_id: string;
+  artifact_id: string;
+  artifact_sha256: string;
+  target_repo: string;
+  base_branch: string;
+  base_sha: string;
+  branch: string;
+  state: 'queued' | 'exporting' | 'succeeded' | 'failed' | 'uncertain';
+  reason: string | null;
+  pr_url: string | null;
+  created_at: string;
+};
 export type Usage = {
   configured: boolean;
   guest_connected: boolean;

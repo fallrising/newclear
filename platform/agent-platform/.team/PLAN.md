@@ -117,3 +117,24 @@ Review checkpoint: T-014 returned PARTIAL with P1 finalizing-before-result recov
 Root rework verification: 45 unit + 439 PostgreSQL/platform tests passed on Python 3.12.15, Ruff 135 files; 71 web tests/typecheck/format/build and 8 real Chromium/API/PostgreSQL cases passed. Existing lifecycle assertions were not weakened. Final baseline fast-forward to c5fe7385 included reference docs/images only; executable source hashes stayed fixed. Evidence file records the initial failures, red/green and final source/log hashes. Billing and full M3/M4 remain deferred/unfinished as documented.
 
 Final local evidence-gate decision: accept T-013 implementation after rework and T-015 independent review. T-014 initial PARTIAL remains historical evidence. No required findings remain; 15 source hashes and 14 log hashes independently match. Commit/push and Draft PR authorized; exact-head hosted checks required before delivery handoff. No merge/release/deploy of this new slice.
+
+## Explicit GitHub export — 2026-10-04
+
+- Objective: implement docs/GITHUB-EXPORT.md on current main plus the archive prerequisite; new Draft PR, no live export/merge/deploy.
+- T-016 transport worker: strict text patch preparation and bounded GitHub HTTP; isolated worktree, no source overlap.
+- T-017 backend worker: approval/DB/API/config/independent worker orchestration and behavior tests; isolated worktree. Depends on T-016 interfaces fixed in task.
+- Root: UI, browser acceptance/fixtures, docs, integration, native gates and task ledger.
+- T-018 independent review after integration: authority, unknown-effect/restart, patch/transport security, verification truth and scope.
+- Gates: real PostgreSQL focused tests; make platform-check; make web-check; make browser-test; team validator; diff check; source/evidence integrity; GitHub CI. Failed attempts retained, no unrelated baseline weakening.
+- Acceptance: implementation and root gates passed; final independent evidence review below.
+
+- T-016 provisional acceptance: root inspected patch/client and independently ran all 21 focused tests successfully. Initial root sandbox bind failure retained separately; escalated synthetic loopback rerun passed. Final acceptance awaits integrated independent review.
+
+- T-017 provisional acceptance: 41 focused PostgreSQL/API/fake HTTP tests passed in worker and independent reviewer. Root reviewed ownership/intent/approval/identity paths.
+- T-018 identified malformed remote tree type/mode and PR state container values raising raw TypeError. Rework required; routed to T-019, not accepted as complete.
+
+Prepublication main advanced to a0de08a4 in unrelated components. Root merged it on the delivery branch; agent-platform and applicable instructions are identical to the tested base. Verification source hashes remain unchanged.
+
+Final local evidence-gate decision — 2026-10-05: ACCEPT T-016 transport, T-017 backend after T-019 rework, and T-018 independent review. Root inspected every scoped integration diff and actual verification output; all required behavior items map to API/worker/patch/UI/real-browser tests. Final root gates: 45 unit + 549 PostgreSQL/platform tests, Ruff 150 files; 78 UI tests/typecheck/format/build; 10 Chromium/API/PostgreSQL/fake-GitHub flows. Independent reviewer verified 21 transport, 45 backend and 7 UI tests, 4,935 deterministic patch cases, all 22 source hashes and 23 log hashes. No unresolved findings. All four task/report contracts, public artifact/link checks and git diff --check pass. Earlier failures remain in evidence.
+
+The accepted scope is explicit export with synthetic GitHub acceptance, not live activation or full M4. Commit/push and Draft PR are authorized; hosted CI at the delivered head remains root's final external gate and will be recorded on the PR and task report. No merge, deployment, real credential access, KVM or paid provider operation. Backup/restore/GC remains proposed next work.

@@ -78,6 +78,8 @@ beforeEach(() => {
     vi.fn(async (input: string, options: RequestInit = {}) => {
       const path = input.split('?')[0];
       const method = options.method ?? 'GET';
+      if (path === '/api/v1/export-targets' || path.endsWith('/exports'))
+        return Response.json({ items: [] });
       if (path === '/api/v1/session') {
         if (method === 'POST') authenticated = true;
         if (method === 'DELETE') {

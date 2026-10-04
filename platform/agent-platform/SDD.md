@@ -227,7 +227,7 @@ Runtime connector 維持持久 operation ledger；sandboxd 若不提供 allocati
 | `resource_reservations` | sandbox_id UNIQUE、cpu、memory_bytes、disk_bytes、released_at；cleanup 確認後才歸還 |
 | `artifacts` | id、run_id、kind、object_key、sha256、size、mime、base_sha、head_sha、created_at |
 | `usage_entries` | run_id、provider_request_id UNIQUE、input_tokens、output_tokens、amount_decimal、currency、price_revision、status（reserved/estimated/final/unknown） |
-| `export_operations` | id、run_id、artifact_hash、target_repo、branch、approval_id、state、remote_ref；idempotency key 唯一 |
+| `export_operations`（本切片為 `github_exports`） | id、run_id、artifact_hash、target_repo、branch、approval_id、state、remote_ref；idempotency key 唯一 |
 | `audit_events` | actor、action、target、request_id、decision、created_at；不存 credential |
 
 `run_events.seq` 由每 run counter 在 transaction 中分配，不用 COUNT；UI 只依 seq 排序。先 commit event，再通知 live consumers。重播事件只更新 projection，不能再次送 prompt、執行工具、付款或建立 PR。
@@ -313,7 +313,7 @@ stateDiagram-v2
 | `POST /api/v1/approvals/{id}/decision` | approve／deny；綁 action digest + generation；逾期／已決策回 409 |
 | `GET /api/v1/runs/{id}/events?after_seq=N` | durable SSE replay → live；支援 Last-Event-ID |
 | `GET /api/v1/runs/{id}/artifacts` | list，download 另驗證 session 與 object ownership |
-| `POST /api/v1/runs/{id}/exports` | 授權範圍內將固定 artifact 匯出到明確 GitHub repo／branch；M4 |
+| `POST /api/v1/runs/{id}/exports` | 授權固定 archive/hash/target/base/branch，建立 durable export；另有 preview/list/reconcile，見 GitHub export 契約 |
 | `GET /api/v1/runtime`、`GET /api/v1/usage` | 實際容量與逐 run 用量；不得回傳秘密值 |
 
 所有 mutation 要求 CSRF protection；建立／action／message／export 另要求 `Idempotency-Key`。同 key 同 payload 回相同結果；不同 payload 回 `409 idempotency_conflict`。狀態 mutation 帶 `expected_state_version`，不符回 `409 state_conflict`。無效輸入 422、容量政策上限 429、暫時無 runtime 503；排隊中容量不足是正常狀態，不當成已啟動。
@@ -347,6 +347,8 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 - Proxy 對每 request 先 reserve 可計算上界，再 settle；沒有可信價格／token 上界時，禁用「硬金額上限」選項，改提供 request/token/time 上限並明示成本只是估算。未知帳單狀態不視為零。
 - Repository checkout credential 為唯讀、repo-scoped、短效。可寫 GitHub credential 只給 export worker；agent 不可自行 push 或建立 PR。
 - Export 綁定 run、artifact hash、target repo、branch 與 approval。Base SHA 漂移／衝突需重新檢查；不強制 push、不自動 merge。遠端結果不明時先查 branch／PR marker，不盲目重建。
+
+M4 [GitHub 匯出切片](docs/GITHUB-EXPORT.md)使用獨立 `export-worker`、公開 target allowlist 和專屬私有 token file。固定成果 diff 經 operator 預覽後明確授權，API 只排 durable operation；每次遠端 mutation 先提交 intent，uncertain／重啟僅作唯讀查核。僅支援有界 regular UTF-8 text patch，來源分支需符合原 base SHA，沒有 force update、merge 或 repository code execution。
 
 目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md)、[AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 與 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新、合成 fixture credits 的保守預留／結算及 cutoff 工具／VM 收尾。Guest 通道與 fixture credits 均需明確啟用；後者只驗證固定本機 fixture 的合成計量，不是真實 provider tokenizer 或帳單。`amount_decimal` 保持 null，沒有可信真實金額硬上限。工作台已有唯讀用量，並標明不是帳單。付費呼叫仍未做；預定真接口是 OpenCode Go Chat Completions，key 尚未配置。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
 
@@ -451,7 +453,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
 | M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。單人版本已決定延後真實計費／硬金額上限，不作目前 gate，費用保持 unknown；完整 AT-07/11 跨切片驗收待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
-| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 結果封存／authenticated download 切片；任意 artifacts、export、backup/GC、部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md) |
+| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；任意 artifacts、backup/GC、部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
 

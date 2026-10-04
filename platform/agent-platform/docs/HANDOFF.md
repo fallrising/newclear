@@ -1,14 +1,16 @@
-# 現行接續入口 — 2026-10-04
+# 現行接續入口 — 2026-10-05
 
-M4 第一個切片加入 PostgreSQL 不可變成果封存：新 run 的結果與封存 bytes 在同一交易保存，再完成 terminal transition；工作台可下載所選 run 的 JSON。歷史 attempts、重試與 VM 清理不改寫封存，舊結果不自動回填。故障不虛構成功；詳見 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md) 與 [證據](evidence/result-archive.json)。是否已合併以 GitHub 最新 main／PR 為準。
+M4 本切片加入明確授權的 GitHub 成果匯出：工作台以所選 run 的不可變封存預覽來源 commit、雜湊、目的地、新分支與實際 diff，再由 operator 授權建立分支／Draft PR。新 migration 015 保存操作；獨立 export-worker 持有自己的私有憑證。預設未設定目的地即停用，沒有自動匯出、force push、merge 或部署。契約、支援格式、故障行為與設定見 [GITHUB-EXPORT.md](GITHUB-EXPORT.md)。
 
-現有已合併能力包括安全 diff 下載、搜尋／篩選與 URL 導覽、修改目標後重跑、tool broker／正常 Worker mock 整合與真實 KVM 驗收（#240），以及程序崩潰恢復。M3 單人 mock 驗收 [#206](https://github.com/fallrising/newclear/pull/206) 已合併於 `2cda120b`，本切片已納入最新主線。
+遠端寫入前保存 intent；重送沿用同一操作，失聯／重啟不盲目再寫。若 PR 建立後回應遺失，可用唯讀查核找回原 PR；沒有完整證據則保留 uncertain。來源分支已改變時拒絕套用舊結果。舊 attempts 與封存仍可下載，詳見 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。
 
-M0–M2 Passed；M3 In progress；M4 In progress。下一段是 explicit GitHub export，其後 backup/restore/GC 與單節點部署驗收；任意 workspace artifacts、外部 object store 重試、完整 AT-09/12/13 與 M4 MVP gate 尚未完成。真實計費與硬金額上限延後，費用保持 unknown。模型仍以本機 mock 開發，不要求現在提供 key。完整 M3 安全／模型整合、真實自然語言 coding 與 release 前長任務驗收也不能因本次切片視為通過。
+本分支基準整合最新 main 的 M3 跨切片驗收（#279、`c247028e`）及成果封存依賴 #270（`8db4e365`）；是否已合併一律以 GitHub 現況為準。沒有合併 #270 或本次新 PR 的授權，開發交付不代表部署已執行。單人 mock #206 已合併，沒有重新做那個切片。
 
-升級前 drain active runs、備份 DB 並套 migration 014，再更新 API／Worker；archive 與結果同 DB，下載 API 不存取 VM 或 guest filesystem。現行配置不需新增服務／dependency。這是開發交付，不代表部署已執行。
+M0–M2 Passed；M3/M4 In progress。模型維持本機 mock，真實計費與硬金額上限延後、金額 unknown。下一段建議 backup/restore/GC；任意 workspace artifacts、live GitHub opt-in、單節點部署、完整 M4 MVP gate、真實自然語言 coding 與 release 前長任務仍未完成。此切片不使用現有憑證、付費模型或新 KVM。
 
-以下是歷史施工紀錄；其中舊停止點不可取代本節及最新 GitHub 證據。
+升級前 drain／備份 DB，再套 migration 014/015；API 僅設定公開 allowlist，獨立 export-worker 使用自己的 private config/token file。沒有新 runtime dependency。本次本機驗證通過 45 個單元、549 個平台、78 個前端及 10 個 Chromium 流程，獨立審查無未解決問題；雜湊、先前失敗與限制見 [公開摘要](evidence/github-export.json)。GitHub CI 以交付 PR 的實際 head 為準。
+
+以下為歷史施工紀錄；舊停止點不可取代本節及最新 GitHub 證據。
 
 ---
 

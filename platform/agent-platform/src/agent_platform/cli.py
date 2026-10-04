@@ -36,6 +36,9 @@ def main():
     api.add_argument("--web-dist", type=Path)
     worker = commands.add_parser("worker")
     worker.add_argument("--once", action="store_true")
+    export = commands.add_parser("export-worker")
+    export.add_argument("--config", type=Path, required=True)
+    export.add_argument("--once", action="store_true")
     rehearse = commands.add_parser("rehearse-mock")
     rehearse.add_argument("--directory", type=Path, required=True)
     rehearse.add_argument("--goal", required=True)
@@ -113,6 +116,16 @@ def main():
                 len(catalog["repositories"]),
                 "repository revisions",
             )
+        elif args.command == "export-worker":
+            from .export_worker import from_private_config
+
+            runner = from_private_config(db, args.config)
+            if args.once:
+                runner.run_once()
+            else:
+                while True:
+                    runner.run_once()
+                    time.sleep(1)
         elif args.command == "worker":
             runner = Worker(db, RuntimeClient.from_env())
             if args.once:

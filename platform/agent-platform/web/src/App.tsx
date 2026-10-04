@@ -1,6 +1,7 @@
 import { refreshUsage, UsagePanel } from './Usage';
 import { RunControls } from './RunControls';
 import { Approvals } from './Approvals';
+import { ExportPanel } from './ExportPanel';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -865,6 +866,7 @@ function ResultArchive({ run }: { run: Run }) {
             <p className="muted mono">
               {artifact.size} bytes · SHA-256: {artifact.sha256}
             </p>
+            <ExportPanel key={`${artifact.id}:${artifact.sha256}`} artifact={artifact} />
           </div>
         ))
       )}

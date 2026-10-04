@@ -29,6 +29,7 @@ from .domain import (
     RetryInput,
     TaskInput,
 )
+from .export_service import ApprovalInput, ExportService, PreviewInput, ReconcileInput
 from .result_archive import list_archives, read_archive
 from .result_download import DOWNLOAD_CSP, diff_bytes
 from .store import Store, json_value
@@ -46,6 +47,7 @@ def create_app(settings=None, db=None, web_dist=None):
     db = db or Database(settings.database_url)
     auth, store = Auth(db, settings), Store(db)
     authenticated = Depends(auth.require)
+    exports = ExportService(db, settings.export_targets)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -242,6 +244,53 @@ def create_app(settings=None, db=None, web_dist=None):
                 "Content-Disposition": f'attachment; filename="run-{run_id}-result.json"',
                 "Content-Security-Policy": DOWNLOAD_CSP,
             },
+        )
+
+    @app.get("/api/v1/export-targets")
+    def export_targets(session=authenticated):
+        return {"items": settings.export_targets}
+
+    @app.post("/api/v1/runs/{run_id}/exports/preview")
+    def export_preview(run_id: UUID, data: PreviewInput, session=authenticated):
+        return exports.preview(run_id, data)
+
+    @app.post("/api/v1/runs/{run_id}/exports", status_code=202)
+    def export_approve(
+        run_id: UUID,
+        data: ApprovalInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"runs/{run_id}/exports.create",
+                idempotency_key,
+                data,
+                lambda conn, _: exports.approve(conn, session["operator_id"], run_id, data),
+            )
+        )
+
+    @app.get("/api/v1/runs/{run_id}/exports")
+    def export_list(run_id: UUID, session=authenticated):
+        return exports.list(run_id)
+
+    @app.post("/api/v1/runs/{run_id}/exports/{operation_id}/reconcile", status_code=202)
+    def export_reconcile(
+        run_id: UUID,
+        operation_id: UUID,
+        data: ReconcileInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"runs/{run_id}/exports/{operation_id}/reconcile",
+                idempotency_key,
+                data,
+                lambda conn, _: exports.reconcile(conn, run_id, operation_id),
+            )
         )
 
     @app.get("/api/v1/runs/{run_id}/approvals")

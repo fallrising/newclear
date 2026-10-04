@@ -5,7 +5,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-10-04）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存與下載，以及需明確授權的 GitHub export（預設停用、fake GitHub 驗收）；backup/GC、部署與整體 MVP gate 仍未完成。**
+**目前狀態（2026-10-05）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存與下載，以及需明確授權的 GitHub export（預設停用、fake GitHub 驗收）；本輪新增離線 DB 備份／空庫還原與手動封存保留清理；事件／審計 retention、VM state、部署與整體 MVP gate 仍未完成。**
 
 模型開發仍用本機 mock，現在不需要 API key。單人版本延後真實計費與硬金額上限，用量金額保持 unknown。已納入 [M3 跨切片 mock 驗收](docs/M3-INTEGRATED-ACCEPTANCE.md)；真實模型自然語言 coding、完整 M3 與 release 前長任務驗收仍未完成。詳見 [GitHub 匯出](docs/GITHUB-EXPORT.md)、[成果封存](docs/RESULT-ARCHIVE.md) 與 [最新交接](docs/HANDOFF.md)。
 
@@ -66,3 +66,5 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake／真實 runtime adapters、私有 connector 與 React 工作台。啟動與測試見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
 
 M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修改驗收，並顯示事件與 diff。它尚不解讀自然語言工作目標、不呼叫付費 provider；專案測試未設定。啟動與能力限制見 [M2](docs/M2.md)。
+
+離線維護工具及操作邊界見 [備份與封存保留](docs/BACKUP-RETENTION.md)。它只在 operator 明確執行時動作；封存清理先預覽、再以 digest 確認，不清理 active/recovery 或 export 引用的成果。

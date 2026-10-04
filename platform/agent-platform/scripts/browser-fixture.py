@@ -231,6 +231,32 @@ def main():
             ):
                 raise AssertionError("archive fixture did not finish and clean up")
             print(json.dumps({"task_id": created["task"]["id"], "run": run}, default=str))
+        elif action == "archive-prune":
+            from agent_platform.archive_retention import apply, preview
+
+            run_id = UUID(sys.argv[2])
+            with db.transaction() as conn:
+                owned = conn.execute(
+                    "SELECT a.id FROM result_archives a JOIN runs r ON r.id=a.run_id "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s "
+                    "AND t.title='Immutable archive browser fixture' "
+                    "AND r.state='succeeded' AND r.cleanup_state='confirmed'",
+                    (run_id,),
+                ).fetchone()
+                if owned is None:
+                    raise AssertionError("not an owned completed archive fixture")
+                # Fixture-only clock ageing; no lifecycle/ownership/retention guard is bypassed.
+                conn.execute("ALTER TABLE result_archives DISABLE TRIGGER result_archive_immutable")
+                conn.execute(
+                    "UPDATE result_archives SET created_at=now()-interval '31 days' WHERE id=%s",
+                    (owned["id"],),
+                )
+                conn.execute("ALTER TABLE result_archives ENABLE TRIGGER result_archive_immutable")
+            plan = preview(db, retention_days=30, limit=100)
+            if [item["id"] for item in plan["candidates"]] != [str(owned["id"])]:
+                raise AssertionError("retention selected unexpected fixture archives")
+            receipt = apply(db, plan, approval_digest=plan["approval_digest"])
+            print(json.dumps({"plan": plan, "receipt": receipt}))
         elif action == "retry":
             value = json.loads(output.read_text())
             store = Store(db)

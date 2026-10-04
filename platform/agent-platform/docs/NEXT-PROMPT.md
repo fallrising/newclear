@@ -1,10 +1,10 @@
 # 接續入口更新 — 2026-10-05
 
-先核對最新 GitHub main、PR、CI 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md)、[GITHUB-EXPORT.md](GITHUB-EXPORT.md) 與 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。M4 本切片提供固定封存的 explicit GitHub export：preview → operator approval → separate worker → create-only branch/Draft PR；未知遠端結果只讀查核，不重送 mutation。預設停用，live smoke 未執行，不讀取環境既有 key。
+先核對最新 GitHub main、PR、CI 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md) 與 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。本切片提供 offline PostgreSQL backup/verify/empty-target restore 與 manual archive payload retention；不還原 running VM，不清除事件／審計／原始 diff，不自動 resume 或 replay。
 
-本次分支整合 main 的 #279 M3 mock 整合驗收與 #270 成果封存依賴。是否合併以最新 GitHub 為準；本輪只交付 Draft PR，不推論 merge/deploy。下一段建議 backup/restore/GC，以當前 owner 指示與 task 為準。
+分支含 PR282/270 prerequisite；是否合併以 GitHub 現況為準。本輪只交付 Draft PR，不推論 merge/deploy 或實際資料操作。下一段建議單節點部署操作手冊與隔離演練，需依 owner 選定範圍才接手。M3/M4 整體仍未完成；billing 延後，費用unknown，模型維持本機mock，不索取或使用existing key。
 
-Billing 仍延後，費用 unknown，模型繼續本機 mock。M3/M4 整體未完成；沒有以 fake GitHub／文件代替 live/KVM/provider/production 證據。下面保留舊 prompt 作歷史，不能照過期 recovery blocker 或測試數字重啟已完成工作。
+本輪本機驗證為45 unit +666 platform、80 web、11 browser，完整hash與review入口見 [evidence/backup-retention.json](evidence/backup-retention.json)。交付PR的exact-head CI另外記於PR與任務報告。舊 prompt 保留作歷史，不能依舊 recovery blocker 或測試數字重做已完成工作。
 
 ---
 

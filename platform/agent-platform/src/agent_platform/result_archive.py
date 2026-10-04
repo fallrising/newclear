@@ -11,7 +11,7 @@ from .result_download import diff_bytes
 ARCHIVE_LIMIT = 1024 * 1024
 SCHEMA_VERSION = "result-archive-v1"
 MIME = "application/json"
-METADATA = "id,run_id,kind,sha256,size,mime,created_at"
+METADATA = "id,run_id,kind,sha256,size,mime,created_at,pruned_at"
 RESULT_TEXT = {"execution_mode", "summary", "workspace_value"}
 VERIFICATION_TEXT = {"status", "name", "reason", "revision", "contract_sha256", "diff_sha256"}
 CHECK_TEXT = {"id", "status", "reason", "output_sha256"}
@@ -167,9 +167,12 @@ def read_archive(db, run_id, artifact_id):
         ).fetchone()
     if row is None:
         raise Problem(404, "artifact_not_found")
+    if row["pruned_at"] is not None:
+        raise Problem(410, "artifact_expired")
     payload = row["payload"]
     if (
-        not 0 < len(payload) <= ARCHIVE_LIMIT
+        payload is None
+        or not 0 < len(payload) <= ARCHIVE_LIMIT
         or row["size"] != len(payload)
         or row["sha256"] != hashlib.sha256(payload).hexdigest()
         or row["mime"] != MIME

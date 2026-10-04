@@ -5,6 +5,7 @@ import json
 from contextlib import nullcontext
 from uuid import UUID, uuid4
 
+from psycopg.errors import CheckViolation
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .config import export_targets
@@ -125,24 +126,29 @@ class ExportService:
             or data.approved is not True
         ):
             raise Problem(409, "export_approval_changed")
-        row = conn.execute(
-            f"INSERT INTO github_exports(id,run_id,artifact_id,artifact_sha256,target_repo,"
-            f"base_branch,base_sha,branch,approval_digest,created_by) "
-            f"VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
-            f"ON CONFLICT(approval_digest) DO NOTHING RETURNING {FIELDS}",
-            (
-                uuid4(),
-                run_id,
-                data.artifact_id,
-                data.artifact_sha256,
-                data.target_repo,
-                data.base_branch,
-                data.base_sha,
-                data.branch,
-                data.approval_digest,
-                operator,
-            ),
-        ).fetchone()
+        try:
+            row = conn.execute(
+                f"INSERT INTO github_exports(id,run_id,artifact_id,artifact_sha256,target_repo,"
+                f"base_branch,base_sha,branch,approval_digest,created_by) "
+                f"VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                f"ON CONFLICT(approval_digest) DO NOTHING RETURNING {FIELDS}",
+                (
+                    uuid4(),
+                    run_id,
+                    data.artifact_id,
+                    data.artifact_sha256,
+                    data.target_repo,
+                    data.base_branch,
+                    data.base_sha,
+                    data.branch,
+                    data.approval_digest,
+                    operator,
+                ),
+            ).fetchone()
+        except CheckViolation as exc:
+            if exc.diag.constraint_name == "github_export_archive_available":
+                raise Problem(410, "artifact_expired") from None
+            raise
         if row is None:
             row = conn.execute(
                 f"SELECT {FIELDS} FROM github_exports WHERE approval_digest=%s",

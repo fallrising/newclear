@@ -1,16 +1,14 @@
 # 現行接續入口 — 2026-10-05
 
-M4 本切片加入明確授權的 GitHub 成果匯出：工作台以所選 run 的不可變封存預覽來源 commit、雜湊、目的地、新分支與實際 diff，再由 operator 授權建立分支／Draft PR。新 migration 015 保存操作；獨立 export-worker 持有自己的私有憑證。預設未設定目的地即停用，沒有自動匯出、force push、merge 或部署。契約、支援格式、故障行為與設定見 [GITHUB-EXPORT.md](GITHUB-EXPORT.md)。
+M4 本切片加入 operator 離線備份／驗證／空 DB 還原，以及先預覽、明確批准才執行的封存 payload 清理。設計與操作命令見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。沒有排程或預設自動清理，實際資料操作未執行。Native PostgreSQL 工具備份 DB-resident archives/history，不含 VM、connector journal/fences 或 private credential files；還原後 runtime 保持 drain，需重新登入。
 
-遠端寫入前保存 intent；重送沿用同一操作，失聯／重啟不盲目再寫。若 PR 建立後回應遺失，可用唯讀查核找回原 PR；沒有完整證據則保留 uncertain。來源分支已改變時拒絕套用舊結果。舊 attempts 與封存仍可下載，詳見 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。
+Migration016 保留 archive 原 id/hash/size 等 metadata，以不可復活的 tombstone 記錄已清理副本。最少 30 天、每批至多 100，保護 active/interrupted、未完成 job、未知 binding、未釋放 reservation，以及所有 export 引用。摘要／原始 diff、events/messages/audit 不刪除；已清理下載回410，workbench 顯示到期且不提供新匯出。這不是所有任務內容的刪除功能。
 
-本分支基準整合最新 main 的 M3 跨切片驗收（#279、`c247028e`）及成果封存依賴 #270（`8db4e365`）；是否已合併一律以 GitHub 現況為準。沒有合併 #270 或本次新 PR 的授權，開發交付不代表部署已執行。單人 mock #206 已合併，沒有重新做那個切片。
+本分支包含尚待審查的 [GitHub 匯出 PR282](https://github.com/fallrising/newclear/pull/282) 與其成果封存 PR270 依賴，再整合 latest main。是否合併以最新 GitHub 為準；本輪交付新的 Draft PR，沒有合併、部署或 live export。匯出功能仍預設停用，模型維持本機 mock，billing 延後、金額 unknown。
 
-M0–M2 Passed；M3/M4 In progress。模型維持本機 mock，真實計費與硬金額上限延後、金額 unknown。下一段建議 backup/restore/GC；任意 workspace artifacts、live GitHub opt-in、單節點部署、完整 M4 MVP gate、真實自然語言 coding 與 release 前長任務仍未完成。此切片不使用現有憑證、付費模型或新 KVM。
+M0–M2 Passed；M3/M4 In progress。本切片已通過 45 unit + 666 PostgreSQL/platform tests、Ruff162 files、80 web tests/typecheck/format/build，以及11個真 Chromium/API/PostgreSQL情境；備份原生往返38項與獨立review證據見 [evidence/backup-retention.json](evidence/backup-retention.json)。以下歷史數字不代表本輪驗證。下一段建議單節點部署操作手冊與隔離環境演練，實際部署需另有範圍。事件／審計 retention、stale VM cleanup、任意 artifacts、live GitHub opt-in、完整 MVP gate、真實自然語言 coding 及 release 前長任務仍未完成。
 
-升級前 drain／備份 DB，再套 migration 014/015；API 僅設定公開 allowlist，獨立 export-worker 使用自己的 private config/token file。沒有新 runtime dependency。本次本機驗證通過 45 個單元、549 個平台、78 個前端及 10 個 Chromium 流程，獨立審查無未解決問題；雜湊、先前失敗與限制見 [公開摘要](evidence/github-export.json)。GitHub CI 以交付 PR 的實際 head 為準。
-
-以下為歷史施工紀錄；舊停止點不可取代本節及最新 GitHub 證據。
+升級前先用現行版本 native DB 備份並停寫/drain，再套用016與同步API/worker。新備份工具只接受當前完整 migration manifest，不能拿它跳過版本核對。私有操作檔與 native PostgreSQL client prerequisites 見契約。以下歷史施工紀錄不取代本節與最新GitHub證據。
 
 ---
 

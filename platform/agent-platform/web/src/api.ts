@@ -48,6 +48,7 @@ export type Run = {
   } | null;
 };
 export type Artifact = {
+  pruned_at?: string | null;
   id: string;
   run_id: string;
   kind: string;

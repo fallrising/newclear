@@ -44,6 +44,7 @@ let downloadStatus: number;
 let archiveStatus: number;
 let archiveRuns: string[];
 let archiveDownloadStatus: number;
+let archivePrunedAt: string | null;
 let taskQueries: URLSearchParams[];
 let paginateTasks: boolean;
 const clients: QueryClient[] = [];
@@ -71,6 +72,7 @@ beforeEach(() => {
   archiveStatus = 200;
   archiveRuns = [];
   archiveDownloadStatus = 200;
+  archivePrunedAt = null;
   taskQueries = [];
   paginateTasks = false;
   vi.stubGlobal(
@@ -226,6 +228,7 @@ beforeEach(() => {
                       size: 321,
                       mime: 'application/json',
                       created_at: '2026-10-04T00:00:00Z',
+                      pruned_at: archivePrunedAt,
                     },
                   ]
                 : [],
@@ -959,4 +962,48 @@ it('rejects failed archive downloads and uses the fixed selected run path after 
   } finally {
     click.mockRestore();
   }
+});
+
+it('shows retained archive identity after expiry without download or new export controls', async () => {
+  archiveRuns = ['run-1'];
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  result = {
+    summary: 'Original result remains',
+    verification: { status: 'unknown', reason: 'not configured' },
+  };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const archive = await screen.findByRole('region', { name: '成果封存' });
+  expect(
+    await within(archive).findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。'),
+  ).toBeVisible();
+  expect(archive).toHaveTextContent('321 bytes');
+  expect(archive).toHaveTextContent('b'.repeat(64));
+  expect(within(archive).queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(within(archive).queryByRole('region', { name: 'GitHub 匯出' })).toBeNull();
+  expect(screen.getByText('Original result remains')).toBeVisible();
+});
+
+it('refreshes archive availability after an expired download without creating a file', async () => {
+  archiveRuns = ['run-1'];
+  const create = vi.fn(() => 'blob:must-not-create');
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+    },
+  );
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const button = await screen.findByRole('button', { name: '下載封存結果' });
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  archiveDownloadStatus = 410;
+  await user.click(button);
+  expect(await screen.findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(create).not.toHaveBeenCalled();
 });

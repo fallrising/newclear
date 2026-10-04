@@ -223,3 +223,14 @@ AC-06 has only the bounded new-completion corruption rejection predecessor in th
 Persisted Missing/Quarantined disposition, repair, restore and full AC-06 remain NotRun.
 Unsupported dispatch rejection does not implement resume or AC-19. No accepted-head authority,
 current graph importer, browser or broader G1 coverage is inferred.
+
+
+## Ordered migration prerequisite (bounded acceptance)
+
+| Clause | Executable oracle | Status |
+| --- | --- | --- |
+| HAI-MIGRATION-001..006 | `TestAdmission_MigrationPreservesV1AndRejectsUnknownSchema`, `TestMigrationRunner_RegistryAndHistoryValidation`, `TestMigrationRunner_AtomicUpgradeRollbackAndRestart`, `TestMigrationRunner_ConcurrentStartup`, `TestMigrationRunner_CancellationReleasesWriter` | T-130 lawful Red/focused Green; T-131 independent PASS and root full/race/web gate; accepted bounded |
+
+This is the runner subset of HAI-ADMISSION-008 only. No deployed V2 schema, accepted heads,
+proposal/import/activation, process-kill/COMMIT I/O fault or backup/restore evidence is claimed.
+The broader H01 migration oracle remains NotRun for V2-specific criteria.

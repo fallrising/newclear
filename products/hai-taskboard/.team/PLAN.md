@@ -661,3 +661,43 @@ Missing/Quarantined disposition, restore, live UI, resume, provider or broader G
 The next durable admission child begins with the checksummed migration oracle; it requires a
 separate bounded assignment. The adapter's preallocated map-to-slice collection retains the
 existing convention and one allocation before sorting; no unnecessary style refactor was added.
+
+
+## Ordered migration prerequisite continuation (2026-10-04)
+
+PR #238 is merged at `5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`. Continue on
+`agent/hai-taskboard/migration-integrity` from that merged baseline. This bounded H06 prerequisite
+adds the ordered checksummed runner and startup history integrity only. Production registry remains
+V1; actual proposal/accepted-head/activation tables and authority, API, restore and live UI remain
+NotRun. Source-of-truth contract: `docs/sdd/ordered-migrations.md`, ACKed by root before code.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-130 | V1-preserving ordered migration runner and lawful Red/Green tests | sqlite store/private runner/new tests, report | Accepted bounded with T-131 and root gates |
+| T-131 | Independent history/rollback/concurrency/source/evidence review | report/private checks only | Accepted; unconditional native PASS |
+
+Root owns PLAN/contracts, routing, registry allocation, diff integration and acceptance. One isolated
+writer; reviewer session is separate. Required evidence: literal V1 SHA, real SQLite public reopen
+Red, bounded whole-history checks, schema-version consistency, atomic pending-step rollback/restart,
+concurrent startup, cancellation and existing full/race/vet/build/web gates, validators and actual
+new Draft PR-head CI. Every historical failure remains; no acceptance follows from worker DONE.
+
+### Ordered runner local acceptance
+
+Root inspected all three source/test files and the Store diff, verified unchanged V1 against the
+merged baseline, and accepted HAI-MIGRATION-001..006 after fresh native T-131 PASS. Four-file
+manifest SHA-256: `65ba92dc45ed4863e4ce99eceaee05c37d6c99a31b7a4b9643017f969b5cd598`.
+T-131 report: `8090a268acfb8b6306210d2ff71f986d105aba8099b76efd879c16d09c59a30b`.
+T-130 PARTIAL remains unchanged: `ed42c600874e4c6cd6b3c139cc2034c5a3e4173f9ea9779e30d877aaf535f01b`.
+Root backend full/race/vet/build and web gates exited 0; T-131 independently executed migration,
+SQLite authority/Done/replay tests and bound all receipts. `.team/reports/T-0184-gate.md` maps
+required local dimensions. No blocking or new low defect remains. Actual pushed-head PR CI is
+still a delivery check, recorded in desk T-0184 before review handoff; no new PR merge follows.
+
+T-132 was an optional second-model static review. Automatic approval review rejected transmitting
+its source/raw-log payload to Claude before process creation because the exact payload/destination,
+including possible local metadata, lacked specific authorization. No workaround was attempted;
+T-132 stays PARTIAL/not executed and contributes no evidence. The independent native T-131 review
+satisfies the required review dimension. Original Red, compiler/PATH/cache diagnostics and rejection
+are retained rather than rewritten. Production registry is V1; real V2/head/import/activation and
+broader H06..H09 remain NotRun. Commit-I/O/process-kill and physical-schema attestation are unclaimed.

@@ -178,3 +178,11 @@ Implement a bounded fixed-command SSH adapter and standard-library host compare-
 ### SSH staging acceptance decision
 
 Accepted T-240/241 and independent T-242 after source/diff/hash review and regression evidence. Claim-directory replacement was reproduced for both empty/nonempty replacements and fixed before acceptance; UTF8 boundary rejection was also corrected. Root60 tests (10.397s), independent57 (0.479s), full811 (318.087s), compileall and original workflow gates passed. T-243 retains overall PARTIAL and twelve formal tasks. Existing safe-directory preparation is the next explicit prerequisite, followed by activation/bootstrap/generation and live validation. No actual SSH/VPS operation occurred.
+
+## Durable directory preparation (2026-10-04)
+
+Continue merged SSH staging at 6a343e8 (current baseline includes unrelated main updates). Bridge absent bare-OS directory to safe staging directory through separate authorization, immutable intent, single dispatch and observation-only recovery. T-244 host helper, T-245 contract/coordinator/transport, T-246 independent review use isolated worktrees; root owns integration, docs and acceptance. No live operations, execute CLI, activation or generation changes. Gates and frozen APIs in directory milestone; overall PARTIAL/remaining12 preserved.
+
+### Directory preparation acceptance decision
+
+Accepted T-244/245 and independent T-246 after source/diff/frozen-hash review. Root57 tests (21.787s), independent79 (107.028s) and full893 (316.562s) passed. The full/independent gates used an earlier source-drift test; a final test-only correction to the actual source SHA field was independently and root reverified (root1/1.235s); production sources unchanged. Compileall, original workflow and team/privacy gates passed. T-247 retains overall PARTIAL/remaining12. Next: network activation and post-activation observations, then bootstrap/probes and generation acceptance; no live operation performed.

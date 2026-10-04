@@ -1,5 +1,7 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。
+
 2026-10-04 後續：[replacement 裸 OS facts](M3-FRESH-REPLACEMENT-FACTS-2026-10-04.md) 新增四機 OOB key／receipt 綁定的唯讀採樣、immutable private observation 與離線重驗。只用 synthetic／fake transport 測試；不等於 network／完整 residue／stage acceptance，ERU-015 與正式剩餘 12 項不變。
 
 2026-10-03 後續：[四機 fresh 人工 receipt 驗證](M3-FRESH-REIMAGE-RECEIPTS-2026-10-03.md) 實作獨立 core／worker 證據契約與唯讀 assessment；不代表重灌已執行或 stage accepted。ERU-015 仍進行中，正式剩餘 12 項。

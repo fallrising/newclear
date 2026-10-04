@@ -914,8 +914,32 @@ def main():
     network_admission.add_argument('--sha256', required=True, help='Expected execution digest')
     network_admission.add_argument('--input', required=True, help='Private network-stage prerequisite request')
     network_admission.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    access_prepare = sub.add_parser('prepare-fresh-network-access', help='Save an immutable four-host network configuration plan without applying it')
+    access_prepare.add_argument('--run', required=True, help='Prepared execution ID')
+    access_prepare.add_argument('--sha256', required=True, help='Expected execution digest')
+    access_prepare.add_argument('--input', required=True, help='Private network-access request')
+    access_prepare.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    access_prepare.add_argument('--plan-id', required=True, help='New immutable network-access plan ID')
+    access_inspect = sub.add_parser('inspect-fresh-network-access', help='Revalidate saved network-access payload and current prerequisites offline')
+    access_inspect.add_argument('--plan', required=True, help='Network-access plan ID')
+    access_inspect.add_argument('--sha256', required=True, help='Expected network-access plan digest')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command in ('prepare-fresh-network-access', 'inspect-fresh-network-access'):
+        from fresh_network_access_ops import prepare_network_access, inspect_network_access
+        try:
+            if args.command == 'prepare-fresh-network-access':
+                result = prepare_network_access(
+                    PROJECT, args.run, args.sha256, args.input, args.input_sha256, args.plan_id)
+            else:
+                result = inspect_network_access(PROJECT, args.plan, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network access plan rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count', 'file_count',
+                  'stage', 'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed', 'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command == 'inspect-fresh-network-admission':
         from fresh_network_admission_ops import inspect_network_admission
         try:

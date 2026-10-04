@@ -182,6 +182,56 @@ describe("@cms/api transport", () => {
     expect(calls.slice(1).every((c) => c.headers.get("X-CSRF-Token") === "t")).toBe(true);
   });
 
+  it("W4 admin reads use the BW5 paths; audit parameters are sent only when set", async () => {
+    const calls = stubFetch(() => json(200, { items: [], total: 0, page: 1, size: 20, offset: 0, limit: 20 }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.admin.audit({ page: 2, size: 50, actor: "", action: "entry.", targetId: "00000000-0000-4000-8000-000000000001", outcome: undefined });
+    await api.admin.audit();
+    await api.admin.roles();
+    await api.admin.rolePermissions("editor");
+    await api.admin.effectivePermissions("p1");
+    await api.admin.auditSettings();
+    expect(calls.map((c) => `${c.method} ${c.url.replace("http://api.test", "")}`)).toEqual([
+      "GET /api/v1/admin/audit?page=2&size=50&action=entry.&targetId=00000000-0000-4000-8000-000000000001",
+      "GET /api/v1/admin/audit",
+      "GET /api/v1/roles",
+      "GET /api/v1/roles/editor/permissions",
+      "GET /api/v1/principals/p1/effective-permissions",
+      "GET /api/v1/admin/settings/audit",
+    ]);
+  });
+
+  it("W4 admin writes are CSRF-protected and send the BW5 bodies", async () => {
+    const calls = stubFetch((call) => {
+      if (call.url.endsWith("/auth/csrf")) return json(200, { csrfToken: "t" });
+      if (call.method === "PUT" || call.url.endsWith("/purge")) return new Response(null, { status: 204 });
+      return json(200, { temporaryPassword: "x", retentionDays: 30 });
+    });
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.admin.createPrincipal({ username: "clinic.op", displayName: null, email: null });
+    await api.admin.replacePrincipalRoles("p1", [{ code: "operator", contentTypeCodes: ["visit"] }]);
+    await api.admin.replaceRolePermissions("editor", [{ action: "publish", contentTypeCode: "album" }]);
+    await api.admin.patchPrincipal("p1", { status: "active" });
+    await api.admin.disablePrincipal("p1");
+    await api.admin.unlockPrincipal("p1");
+    await api.admin.resetPassword("p1");
+    await api.admin.purgeEntry("e1");
+    await api.admin.patchAuditSettings(30);
+    const writes = calls.filter((c) => !c.url.endsWith("/auth/csrf"));
+    expect(writes.map((c) => `${c.method} ${c.url.replace("http://api.test", "")} ${c.body ?? ""}`)).toEqual([
+      'POST /api/v1/principals {"username":"clinic.op","displayName":null,"email":null}',
+      'PUT /api/v1/principals/p1/roles [{"code":"operator","contentTypeCodes":["visit"]}]',
+      'PUT /api/v1/roles/editor/permissions [{"action":"publish","contentTypeCode":"album"}]',
+      'PATCH /api/v1/principals/p1 {"status":"active"}',
+      "POST /api/v1/principals/p1/disable ",
+      "POST /api/v1/principals/p1/unlock ",
+      "POST /api/v1/principals/p1/password {}",
+      "POST /api/v1/admin/entries/e1/purge ",
+      'PATCH /api/v1/admin/settings/audit {"retentionDays":30}',
+    ]);
+    expect(writes.every((c) => c.headers.get("X-CSRF-Token") === "t")).toBe(true);
+  });
+
   it("AC-08 the Front client only reaches /api/v1/public and /api/v1/auth", async () => {
     const calls = stubFetch((call) =>
       call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) : json(200, { items: [], total: 0, offset: 0, limit: 0 }),

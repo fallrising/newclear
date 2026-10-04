@@ -1,0 +1,14 @@
+{
+  "baseline": "a0de08a41eaf3fdc7c56e4ae86b819b705b0ce87",
+  "oldTestCount": 6,
+  "replacementMapping": {
+    "T-AC-01 governance-only": "shell.test.tsx T-AC-01 (no fields/board/clinic; emergency inspector now explicitly W4-approved)",
+    "T-AC-02 non-admin APIs": "shell.test.tsx AC-A (four governed routes, no non-auth requests)",
+    "S-02 no seed leakage": "shell.test.tsx S-02",
+    "C-17 anonymous next": "shell.test.tsx C-17",
+    "E-01 type enable/disable": "types.test.tsx V2-AC-16 and AC-B (adds required confirmation)",
+    "F-05 principals/title": "principals.test.tsx list and document.title"
+  },
+  "approvedSpecification": "W4 T10 removes App.test.tsx after replacement tests; T21 replaces governance.tsx with feature pages",
+  "verification": "Root inspected original full files and replacement assertions before removal; full suite required before acceptance; original Git files and external snapshot retained"
+}

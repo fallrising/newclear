@@ -3,11 +3,11 @@
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
-可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）、三個 demo pack。
+可重複使用的 CMS kernel：一個 Java API、三個操作面（Front / Back / Admin）。相簿、寵物診所與專案管理是驗證共用內容、發布、媒體與權限能力的三個 demo pack；本項目是通用 CMS。
 
 權威總綱：[`docs/sdd/00-overview.md`](docs/sdd/00-overview.md)。  
 實作波次：[`docs/specs/90-synthesis.md`](docs/specs/90-synthesis.md) §11。  
-v2（BW0／W0／P0／BW1a／BW1b／BW1c／W1／BW2／W2／BW3 已合併；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
+v2（後端 BW0～BW5、P0、前端 W0～W3／W3b 已合併；前後端 SDD 與路線圖）：[`docs/v2/`](docs/v2/README.md)。
 
 目前已合併 **Wave E＋Back 自訂視圖＋v2 BW0／W0＋P0＋BW1a／BW1b／BW1c／W1／BW2／W2／BW3**：後端 OpenAPI／store 契約測試、前端共用套件／MSW／新殼已存在；Back 另有相簿編排、當日行程、issue 看板。後續模型與編輯器功能仍依 v2 波次開發。
 
@@ -24,6 +24,8 @@ BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-P
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 
 W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；已於[PR #245](https://github.com/fallrising/newclear/pull/245)通過遠端CI並合併，沒有部署。BW3會員API已於[PR #252](https://github.com/fallrising/newclear/pull/252)通過CI並合併，詳見 [BW3交付證據](.team/reports/BW3-DELIVERY.md)：本人資料讀取、草稿建立、限流及原子審計；279 Java／125 PostgreSQL／395前端／39 mock E2E通過，[發布證據](.team/reports/BW3-PUBLICATION.md)。BW4後端硬化已完成本地驗證：[審計保留、JDBC接線與重啟／回滾證據](.team/reports/BW4-DELIVERY.md)。293 Java／133 PostgreSQL／395前端／39 mock E2E及三次萬筆效能量測通過，已於 PR #258 通過遠端 CI 並合併。
+
+W3 公開面與 W3b 會員區已分別於 PR #273／#281 合併；[W3b 發布證據](.team/reports/W3b-PUBLICATION.md)。W4 共用治理台已本地驗證：內容類型啟停、帳號與角色權限、審計／保留期限、媒體用量、緊急條目處理。624 前端／68 mock E2E 與必要本地閘門通過，待必要 CI 與合併；[W4 交付證據](.team/reports/W4-DELIVERY.md)。本波不含視覺化內容模型編輯器或自訂角色 CRUD，下一波為 W5 前端硬化，未部署。
 
 ## 需求
 

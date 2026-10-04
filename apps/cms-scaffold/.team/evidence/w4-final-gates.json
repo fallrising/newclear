@@ -1,0 +1,51 @@
+[
+  {
+    "name": "codegen",
+    "command": "npm run gen -w @cms/api",
+    "exitCode": 0,
+    "seconds": 0.82,
+    "log": "w4-codegen.log"
+  },
+  {
+    "name": "fixture-gen",
+    "command": "node packages/mocks/scripts/gen-fixtures.mjs --check",
+    "exitCode": 0,
+    "seconds": 0.05,
+    "log": "w4-fixture-gen.log"
+  },
+  {
+    "name": "lint",
+    "command": "npm run lint",
+    "exitCode": 0,
+    "seconds": 12.21,
+    "log": "w4-lint.log"
+  },
+  {
+    "name": "typecheck",
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "seconds": 33.44,
+    "log": "w4-typecheck.log"
+  },
+  {
+    "name": "tests",
+    "command": "npm test",
+    "exitCode": 0,
+    "seconds": 127.93,
+    "log": "w4-tests.log"
+  },
+  {
+    "name": "build",
+    "command": "npm run build",
+    "exitCode": 0,
+    "seconds": 15.58,
+    "log": "w4-build.log"
+  },
+  {
+    "name": "bundle",
+    "command": "npm run test:bundle",
+    "exitCode": 0,
+    "seconds": 0.15,
+    "log": "w4-bundle.log"
+  }
+]

@@ -55,7 +55,16 @@ export function requireWork(): Me | Response {
   return user;
 }
 
-/** Admin surface rules: signed in, Admin surface, admin role. */
+/** Governance rules (BW5): signed in, Admin surface, and the global action in the caller's capabilities. */
+export function requireGovernance(action: CmsAction): Me | Response {
+  const user = currentUser();
+  if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");
+  if (getState().surface !== "admin") return apiError(403, "SURFACE_FORBIDDEN", "Admin surface required");
+  if (!canGlobal(user, action)) return apiError(403, "FORBIDDEN", `Missing permission ${action}`);
+  return user;
+}
+
+/** Admin surface rules: signed in, Admin surface, admin role (purge). */
 export function requireAdmin(): Me | Response {
   const user = currentUser();
   if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");

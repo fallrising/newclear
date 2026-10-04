@@ -170,3 +170,11 @@ Continue merged network plans into a durable per-execution/per-host staging jour
 ### Network staging acceptance decision
 
 Accepted T-237 and T-238 after source/diff/frozen-hash review, real temporary-file concurrency evidence and independent regressions. Observation expiry after final IO, late recovery-loser poisoning and final pending drift were reproduced before correction. Root13, worker66, independent96 and full751 tests passed; original workflow validation and compileall passed. T-239 accepts this coordinator slice only and retains overall PARTIAL/remaining12. T-238 received a bounded extension from32 to48 calls within the same45-minute/scope limit to reproduce and reverify actual blockers. No production adapter, remote activation or stage acceptance was introduced.
+
+## Fixed SSH staging transport and host helper (2026-10-04)
+
+Implement a bounded fixed-command SSH adapter and standard-library host compare-and-stage helper for the existing coordinator. T-240 owns only host helper/tests, T-241 owns only transport/tests, T-242 independently reviews both; each writes in an isolated worktree with frozen wire/API inputs and no recursive delegation. Root owns docs, cross-component synthetic integration, full gates, acceptance and authorized delivery. No live SSH/VPS, execute CLI, directory preparation, activation or stage acceptance; formal remaining12 unchanged.
+
+### SSH staging acceptance decision
+
+Accepted T-240/241 and independent T-242 after source/diff/hash review and regression evidence. Claim-directory replacement was reproduced for both empty/nonempty replacements and fixed before acceptance; UTF8 boundary rejection was also corrected. Root60 tests (10.397s), independent57 (0.479s), full811 (318.087s), compileall and original workflow gates passed. T-243 retains overall PARTIAL and twelve formal tasks. Existing safe-directory preparation is the next explicit prerequisite, followed by activation/bootstrap/generation and live validation. No actual SSH/VPS operation occurred.

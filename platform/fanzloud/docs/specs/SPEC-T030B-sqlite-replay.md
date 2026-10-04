@@ -95,10 +95,20 @@ The bounded row projection classifies fields as follows:
 | `stream_id` | BLOB, exactly 16 bytes, decoded non-nil `SessionId` equal to requested stream | `StreamId` |
 | `seq` | BLOB, exactly 8 bytes, decodes to the next contiguous `EventSeq` | `Sequence` |
 | `schema_version` | INTEGER in `u16`, then exactly version 1 | `SchemaVersion` |
-| `occurred_at` | TEXT represented as 1–64 bytes, valid UTF-8 and RFC3339 | `Timestamp` |
+| `occurred_at` | TEXT represented as 1–64 bytes, valid UTF-8; existing valid RFC3339 or exact canonical extended-year UTC writer output under ADR-0006 | `Timestamp` |
 | `causation_id` | NULL or BLOB of exactly 16 bytes | `CausationId` |
 | `correlation_id` | BLOB, exactly 16 bytes | `CorrelationId` |
 | `payload` | BLOB of at most 65,536 bytes, valid strict version-1 JSON | `Payload` |
+
+# Timestamp Compatibility Clarification
+
+[ADR-0006](../adr/ADR-0006-canonical-extended-timestamps.md) repairs the accepted writer/reader
+roundtrip for the full T020 Chrono range. Preserve strict RFC3339 parsing first. On its failure,
+accept fallback parsing only when the existing Nanos/UTC-Z encoder reproduces the stored text
+exactly; a generic relaxed parser is insufficient. The 1–64-byte/UTF-8/type gates, exact timestamp
+preservation and bounded Timestamp error remain. No stored format, schema, dependency or public
+signature changes; historical B acceptance stays historical. The ADR is independently accepted for design; its focused regression must run RED before
+codec implementation. Runtime evidence is recorded with T030C and parent composition.
 
 # Success Postconditions
 

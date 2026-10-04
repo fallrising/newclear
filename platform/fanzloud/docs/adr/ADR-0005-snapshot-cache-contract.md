@@ -101,6 +101,10 @@ the parent still requires all four child acceptances and composition review.
 
 The preceding review records the design decision at its acceptance point. T030D save/codec/schema
 runtime is now separately accepted in [ACCEPT-T030D](../acceptance/T030D.acceptance.md).
-Its 29 D-owned/shared-D names are implemented; C-owned public load assertions remain deferred.
+Its 29 D-owned/shared-D names are implemented. C-owned public load assertions subsequently
+passed separate [C runtime acceptance](../acceptance/T030C.acceptance.md), followed by
+[parent composition acceptance](../acceptance/T030.acceptance.md).
+[ADR-0006](ADR-0006-canonical-extended-timestamps.md) separately records the canonical extended-year
+reader repair found by C extrema testing; schema, encoding and domain trust remain unchanged.
 Save's structural lookup-key check uses a metadata-only scan with constant application allocation;
 the 4096-event cap bounds durable-prefix decoding, not the number of existing cache keys inspected.

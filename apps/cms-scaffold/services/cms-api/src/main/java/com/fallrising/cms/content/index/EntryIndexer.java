@@ -18,7 +18,7 @@ import java.util.TreeSet;
  * Computes the cms_entry_index rows of an entry (02 §3.2). Pure: the content stores and the V7 backfill both use it,
  * so every store indexes identically.
  *
- * <p>Indexed fields: enabled fields with indexed=true, plus the type's titleField, sortField, visibilityField,
+ * <p>Indexed fields: enabled indexed fields and all enabled ref/principal-ref fields, plus the type's titleField, sortField, visibilityField,
  * ownerField and every field in publicRequiresPublishedRefs. Value kind by field type:
  * string and markdown → string; enum → enum; int → int (JSON numbers only, preserved as exact decimal);
  * boolean → bool (JSON booleans only); datetime → datetime (ISO-8601 instant or offset date-time);
@@ -33,7 +33,7 @@ public final class EntryIndexer {
     public static Set<String> indexedKeys(ContentTypeRecord type, List<FieldRecord> fields) {
         Set<String> wanted = new TreeSet<>();
         for (FieldRecord field : fields) {
-            if (field.enabled() && field.indexed()) wanted.add(field.fieldKey());
+            if (field.enabled() && (field.indexed() || "ref".equals(kind(field.fieldType())))) wanted.add(field.fieldKey());
         }
         addIfPresent(wanted, type.titleField());
         addIfPresent(wanted, type.sortField());

@@ -638,7 +638,7 @@ function TaskWorkspace({ taskId, onClose }: { taskId: string; onClose: () => voi
         </label>
       </div>
       {terminal.includes(latest.state) && (
-        <RetryRun taskId={taskId} latest={latest} onCreated={setRunId} />
+        <RetryRun key={`retry-${latest.id}`} taskId={taskId} latest={latest} onCreated={setRunId} />
       )}
       <RunActivity key={run.id} run={run} />
     </>
@@ -656,11 +656,13 @@ function RetryRun({
 }) {
   const cache = useQueryClient();
   const command = useRef(new PendingCommand());
+  const [editing, setEditing] = useState(false);
+  const [goal, setGoal] = useState(latest.goal);
+  const [validation, setValidation] = useState('');
   const retry = useMutation({
-    // Same goal, commit and profile revision as the latest attempt.
-    mutationFn: () =>
+    mutationFn: (nextGoal: string) =>
       command.current.send<Run>(`/tasks/${encodeURIComponent(taskId)}/runs`, {
-        goal: latest.goal,
+        goal: nextGoal,
         base_sha: latest.base_sha,
         profile_revision: latest.profile_revision,
         expected_state_version: latest.state_version,
@@ -673,18 +675,97 @@ function RetryRun({
     },
     onError: () => void cache.invalidateQueries({ queryKey: ['task', taskId] }),
   });
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (retry.isPending) return;
+    if (!goal.trim()) {
+      setValidation('請輸入工作目標，不能只有空白。');
+      return;
+    }
+    if ([...goal].length > 20000) {
+      setValidation('工作目標最多 20000 個字元。');
+      return;
+    }
+    setValidation('');
+    retry.mutate(goal);
+  }
   return (
     <div className="retry-bar">
       <p className="muted">
-        以相同目標、commit 與 Agent 設定重新執行，會建立第 {latest.attempt_no + 1} 次執行紀錄。
+        重新執行會沿用最新第 {latest.attempt_no} 次的工作目標、commit 與 Agent 設定，並建立第{' '}
+        {latest.attempt_no + 1} 次紀錄。
       </p>
-      <button onClick={() => retry.mutate()} disabled={retry.isPending}>
-        {retry.isPending ? '送出中…' : '重新執行'}
-      </button>
+      <div className="run-actions">
+        <button onClick={() => retry.mutate(latest.goal)} disabled={retry.isPending}>
+          重新執行
+        </button>
+        {!editing && (
+          <button
+            className="quiet"
+            disabled={retry.isPending}
+            onClick={() => {
+              setGoal(latest.goal);
+              setValidation('');
+              retry.reset();
+              setEditing(true);
+            }}
+          >
+            調整目標後重新執行
+          </button>
+        )}
+      </div>
+      {editing && (
+        <form className="retry-editor" onSubmit={submit}>
+          <p className="muted" id="retry-goal-hint">
+            從最新的第 {latest.attempt_no} 次工作目標開始修改，沿用該次 commit 與 Agent 設定。
+            先前的執行紀錄會保留。工作目標最多 20000 個字元。
+          </p>
+          <label>
+            新的工作目標
+            <textarea
+              rows={6}
+              value={goal}
+              disabled={retry.isPending}
+              aria-describedby="retry-goal-hint retry-goal-validation"
+              aria-invalid={Boolean(validation)}
+              autoFocus
+              onChange={(event) => {
+                setGoal(event.target.value);
+                setValidation('');
+              }}
+            />
+          </label>
+          {validation && (
+            <p id="retry-goal-validation" className="error" role="alert">
+              {validation}
+            </p>
+          )}
+          <div className="run-actions">
+            <button type="submit" disabled={retry.isPending}>
+              以新目標重新執行
+            </button>
+            <button
+              type="button"
+              className="quiet"
+              disabled={retry.isPending}
+              onClick={() => {
+                setEditing(false);
+                setGoal(latest.goal);
+                setValidation('');
+                retry.reset();
+              }}
+            >
+              取消修改
+            </button>
+          </div>
+        </form>
+      )}
+      {retry.isPending && <p role="status">正在建立新的執行紀錄…</p>}
       <ErrorNotice error={retry.error} />
     </div>
   );
 }
+
 function DiffDownload({ run }: { run: Run }) {
   const download = useMutation({
     mutationFn: async () => {
@@ -821,6 +902,10 @@ function RunActivity({ run }: { run: Run }) {
             ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
             : '模擬環境 · 排程驗證'}
       </p>
+      <section className="run-goal" aria-label="本次工作目標">
+        <h3>本次工作目標</h3>
+        <p>{run.goal}</p>
+      </section>
       <UsagePanel runId={run.id} />
       <RunControls run={run} />
       {run.require_approval && <Approvals run={run} />}

@@ -13,7 +13,7 @@ class OpenApiResponseValidatorSelfTests {
 
     static final String ENTRY = """
             {"id":"6f1c2f2e-3a52-4c55-9d0e-1f4f0a3b9c11","contentType":"album","slug":"a","publicationState":"draft",
-             "version":1,"title":"A","payload":{"title":"A"},"dirty":false,"publishedAt":null,
+             "version":1,"title":"A","payload":{"title":"A"},"publishRequestedAt": null, "publishRequestedBy": null, "dirty":false,"publishedAt":null,
              "updatedAt":"2026-09-25T00:00:00Z"%s}
             """;
 

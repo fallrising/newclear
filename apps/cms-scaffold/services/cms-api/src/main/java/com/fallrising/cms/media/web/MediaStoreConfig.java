@@ -6,8 +6,7 @@ import com.fallrising.cms.media.store.LocalDiskMediaObjectStore;
 import com.fallrising.cms.media.store.MediaObjectStore;
 import com.fallrising.cms.media.store.MediaStore;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,15 +21,10 @@ public class MediaStoreConfig {
         return new LocalDiskMediaObjectStore(Path.of(root));
     }
 
+    /** Resolve after auto-configuration; tests without a DataSource retain the in-memory store. */
     @Bean
-    @ConditionalOnBean(DataSource.class)
-    MediaStore jdbcMediaStore(DataSource dataSource) {
-        return new JdbcMediaStore(dataSource);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(MediaStore.class)
-    MediaStore inMemoryMediaStore() {
-        return new InMemoryMediaStore();
+    MediaStore mediaStore(ObjectProvider<DataSource> dataSource) {
+        DataSource ds = dataSource.getIfAvailable();
+        return ds != null ? new JdbcMediaStore(ds) : new InMemoryMediaStore();
     }
 }

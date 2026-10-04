@@ -756,6 +756,51 @@ public abstract class ContentStoreContract {
         assertThat(publicSlugs(publicQuery(photo).requiredRefs(List.of("album")))).containsExactly("loose", "in-unlisted", "in-open");
     }
 
+    // ---- BW5: public ref filters follow the published copy (02 BQ-10) ----
+
+    @Test
+    void BQ10_publishedQueryFiltersRefsByThePublishedCopy() {
+        ContentTypeRecord album = insertType("album", field("title", "string"));
+        ContentTypeRecord photo = insertType(type("photo", "title"), field("title", "string"), field("album", "ref"));
+        EntryRecord a1 = entry(album, "a1", PublicationState.PUBLISHED, Map.of("title", "A1"), t(1));
+        EntryRecord a2 = entry(album, "a2", PublicationState.PUBLISHED, Map.of("title", "A2"), t(2));
+        EntryRecord moved = new EntryRecord(UUID.randomUUID(), photo.id(), "photo", "moved", PublicationState.PUBLISHED, 2,
+                Map.of("title", "M", "album", a2.id().toString()), Map.of("title", "M", "album", a1.id().toString()),
+                t(3), null, null, null, null, T0, t(4));
+        EntryRecord stays = entry(photo, "stays", PublicationState.PUBLISHED, Map.of("title", "S", "album", a1.id().toString()), t(5));
+        EntryRecord draft = entry(photo, "draft", PublicationState.DRAFT, Map.of("title", "D", "album", a1.id().toString()), t(6));
+        List.of(a1, a2, moved, stays, draft).forEach(store::insertEntry);
+        store.replaceRefs(moved.id(), List.of(new EntryRefRecord(moved.id(), "album", a2.id(), "entry", 0)));
+        store.replaceRefs(stays.id(), List.of(new EntryRefRecord(stays.id(), "album", a1.id(), "entry", 0)));
+        store.replaceRefs(draft.id(), List.of(new EntryRefRecord(draft.id(), "album", a1.id(), "entry", 0)));
+
+        assertThat(publicSlugs(publicQuery(photo).refs(List.of(new RefFilter("album", a1.id())))))
+                .containsExactlyInAnyOrder("stays", "moved");
+        assertThat(publicSlugs(publicQuery(photo).refs(List.of(new RefFilter("album", a2.id()))))).isEmpty();
+        assertThat(workSlugs(query(photo).refs(List.of(new RefFilter("album", a2.id()))))).containsExactly("moved");
+    }
+
+    @Test
+    void BQ10_unindexedPrincipalRefsUsePublishedRowsAndDisabledRefsAreAbsent() {
+        ContentTypeRecord note = insertType("note", field("title", "string"), field("reviewer", "principal-ref"));
+        store.insertField(new FieldRecord(UUID.randomUUID(), note.id(), "disabledRef", "ref", false, false, false,
+                "public", 2, null, "restrict", List.of(), false, false));
+        UUID oldOwner = UUID.randomUUID();
+        UUID newOwner = UUID.randomUUID();
+        EntryRecord changed = published(entry(note, "changed", PublicationState.PUBLISHED,
+                Map.of("title", "T", "reviewer", newOwner.toString(), "disabledRef", newOwner.toString()), t(1)),
+                Map.of("title", "T", "reviewer", oldOwner.toString(), "disabledRef", oldOwner.toString()));
+        store.insertEntry(changed);
+        store.replaceRefs(changed.id(), List.of(new EntryRefRecord(changed.id(), "reviewer", newOwner, "principal", 0)));
+
+        assertThat(publicSlugs(publicQuery(note).refs(List.of(new RefFilter("reviewer", oldOwner)))))
+                .containsExactly("changed");
+        assertThat(publicSlugs(publicQuery(note).refs(List.of(new RefFilter("reviewer", newOwner))))).isEmpty();
+        assertThat(workSlugs(query(note).refs(List.of(new RefFilter("reviewer", newOwner)))))
+                .containsExactly("changed");
+        assertThat(store.indexRowsOf(changed.id())).noneMatch(row -> row.fieldKey().equals("disabledRef"));
+    }
+
     // ---- BW1b: authorization pushdown (B-10) ----
 
     @Test
@@ -796,6 +841,37 @@ public abstract class ContentStoreContract {
 
     protected static Instant t(int seconds) {
         return T0.plusSeconds(seconds);
+    }
+
+    @Test
+    void G03_publishRequestsRoundTripClearAndFilterOnlyWorkQueries() {
+        ContentTypeRecord album = insertType("album");
+        UUID actor = UUID.randomUUID();
+        EntryRecord requested = entry(album, "requested", PublicationState.PUBLISHED, Map.of("title", "requested"), t(1))
+                .withPublishRequest(t(2), actor);
+        EntryRecord plain = entry(album, "plain", PublicationState.PUBLISHED, Map.of("title", "plain"), t(3));
+        store.insertEntry(requested); store.insertEntry(plain);
+        assertThat(store.findEntry(requested.id())).contains(requested);
+        assertThat(store.queryEntries(query(album).publishRequested(true).build()).items()).containsExactly(requested);
+        assertThat(store.queryEntries(query(album).publishRequested(false).build()).total()).isEqualTo(2);
+        assertThat(store.queryEntries(publicQuery(album).publishRequested(true).build()).total()).isEqualTo(2);
+        EntryRecord cleared = new EntryRecord(requested.id(), requested.contentTypeId(), requested.contentTypeKey(), requested.slug(),
+                requested.publicationState(), requested.version() + 1, requested.payload(), requested.publishedPayload(), requested.publishedAt(),
+                requested.archivedAt(), requested.deletedAt(), requested.createdBy(), requested.updatedBy(), requested.createdAt(), t(4));
+        store.updateEntry(cleared);
+        assertThat(store.findEntry(requested.id())).contains(cleared);
+        assertThat(store.queryEntries(query(album).publishRequested(true).build()).items()).isEmpty();
+    }
+
+    @Test
+    void G10_findEntriesReadsDistinctTargetsIncludingDeletedAndOmitsMissing() {
+        ContentTypeRecord album = insertType("album");
+        EntryRecord a = entry(album, "a", PublicationState.DRAFT, Map.of("title", "a"), t(1));
+        EntryRecord b = deleted(entry(album, "b", PublicationState.DRAFT, Map.of("title", "b"), t(2)), t(3));
+        store.insertEntry(a); store.insertEntry(b);
+        assertThat(store.findEntries(List.of(a.id(), b.id(), a.id(), UUID.randomUUID())))
+                .containsOnlyKeys(a.id(), b.id()).containsEntry(a.id(), a).containsEntry(b.id(), b);
+        assertThat(store.findEntries(List.of())).isEmpty();
     }
 
     protected static ContentTypeRecord type(String key) {
@@ -919,6 +995,7 @@ public abstract class ContentStoreContract {
         private SortKey sort = SortKey.system("updatedAt", true);
         private int page = 1;
         private int size = 100;
+        private boolean publishRequested;
 
         QueryBuilder(ContentTypeRecord type, IndexScope scope) {
             this.type = type;
@@ -937,10 +1014,11 @@ public abstract class ContentStoreContract {
         QueryBuilder sort(SortKey v) { sort = v; return this; }
         QueryBuilder page(int v) { page = v; return this; }
         QueryBuilder size(int v) { size = v; return this; }
+        QueryBuilder publishRequested(boolean v) { publishRequested = v; return this; }
 
         EntryQuery build() {
             return new EntryQuery(type.id(), scope, states, titleField, q, filters, refs, access, visibilityField,
-                    requiredRefs, sort, page, size);
+                    requiredRefs, sort, page, size, publishRequested);
         }
     }
 }

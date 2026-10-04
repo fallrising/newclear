@@ -73,6 +73,11 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
+OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scoped to
+`labs/openviking-context/**` and its own workflow. Its native gate is
+`make -C labs/openviking-context check`: stdlib offline contracts and a synthetic demo.
+It does not install OpenViking, call models, or validate live-server behavior.
+
 ## Steps
 
 1. Add this specification and make the root README identify root workflows as canonical.
@@ -85,3 +90,11 @@ All listed workflows use `permissions.contents: read`. None introduce deploy, pu
 - Static assertions for triggers, path filters, permissions, concurrency, timeouts, and forbidden release/deploy/publish or credential use
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`
+
+## pg-jev router lab
+
+`.github/workflows/pg-jev-router-ci.yml` is scoped to `labs/pg-jev-router/**` and itself.
+It runs `make check` and `make integration`: PostgreSQL 16, PL/Python and pinned
+pg-jev 0.2.1 against a deterministic loopback provider. The disposable container
+runs with `--network none`; build-time public dependencies require network.
+No secrets, paid model calls, host volumes, image publishing or deployment.

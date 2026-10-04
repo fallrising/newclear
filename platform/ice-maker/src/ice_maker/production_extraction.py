@@ -24,6 +24,7 @@ import warnings
 from typing import Any, Callable, Mapping, Sequence
 
 from .document_batch import CODE_MAXIMA, CONFIG_SCHEMA, SourceDescriptor
+from .text_assignment_safety import contains_sensitive_assignment
 
 
 class ProductionExtractionError(ValueError):
@@ -54,7 +55,7 @@ def _safe_text(value: Any, *, limit: int = _MAX_WORD_TEXT) -> str:
     if not isinstance(value, str):
         raise ProductionExtractionError("unsafe OCR text")
     normalized = unicodedata.normalize("NFKC", " ".join(value.split()))
-    if not normalized or len(normalized) > limit or _SECRET.search(normalized):
+    if not normalized or len(normalized) > limit or contains_sensitive_assignment(normalized):
         raise ProductionExtractionError("unsafe OCR text")
     for char in normalized:
         code = ord(char)

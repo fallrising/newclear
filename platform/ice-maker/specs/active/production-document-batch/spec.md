@@ -23,6 +23,7 @@ allowed_paths:
   - src/ice_maker/knowledge_cli.py
   - src/ice_maker/knowledge_index.py
   - src/ice_maker/production_extraction.py
+  - src/ice_maker/text_assignment_safety.py
   - src/ice_maker/document_service.py
   - src/ice_maker/study_cli.py
   - src/ice_maker/study_export.py
@@ -30,6 +31,7 @@ allowed_paths:
   - tests/test_document_batch.py
   - tests/test_document_ingestion_doctor.py
   - tests/test_production_extraction.py
+  - tests/test_text_assignment_safety.py
   - tests/test_production_ingestion_e2e.py
   - tests/test_knowledge_index.py
   - tests/test_document_service.py
@@ -133,6 +135,14 @@ local document adapter and a resumable batch entry point.
   applying secret and character-safety checks, reject secret-like output before
   proposal, and bind every chunk to the immutable source hash plus exact
   page/region/method/confidence evidence.
+  Distinguish credential values from two bounded code observations: a
+  token-suffixed member method assigned an identifier-only function header,
+  and a bare lowercase `token` assigned a nullary identifier-only member call
+  terminated by `;` or `,`. Check every other assignment, including method
+  bodies and later declarations. Literal values, credential aliases assigned
+  values/calls, qualified bare-token targets, arguments, composed expressions,
+  and missing delimiters still fail closed. Executable/version metadata keeps
+  the original strict matcher; this heuristic is not a secret-free guarantee.
 - FR-7: Cache successful extraction by source hash, extractor configuration
   digest, tool versions, and language tuple. A retry may reuse only a fully
   validated cache record with matching immutable inputs.
@@ -287,6 +297,14 @@ Given multiple valid documents whose combined index contains more than 10,000 ch
 When the operator searches the local FTS5 index
 Then search validates and returns bounded cited results
 And the separate 1,000,000-chunk whole-index ceiling remains enforced.
+
+Scenario: Preserve lexical code without admitting credential assignments
+Given native PDF text with a token-suffixed member function declaration and
+bare lexer token variables assigned complete nullary member calls
+When extraction and immutable index validation inspect the same normalized text
+Then the bounded code and its source/page/region/method identity are retained
+And literal credential assignments, ambiguous expressions, unsafe Unicode,
+nested assignments and qualified credential targets still fail before indexing.
 
 Scenario: Serialize concurrent shared-index publication
 Given two service workers that open the same local FTS5 index concurrently

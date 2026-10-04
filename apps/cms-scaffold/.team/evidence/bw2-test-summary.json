@@ -1,0 +1,136 @@
+{
+  "java": {
+    "tests": 254,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "tests": 120,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgresSuites": {
+    "com.fallrising.cms.contract.JdbcMediaStoreContractTests": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.JdbcContentStoreContractTests": {
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.IdentityAuditAtomicWriteTests": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.JdbcIdentityStoreContractTests": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.EntryAtomicWriteTests": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.ListQueryPerformanceTests": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.AuditAtomicWriteTests": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.Bw2AtomicWriteTests": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.contract.EntryIndexBackfillTests": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.fallrising.cms.JdbcIdentityStoreIntegrationTests": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "postgresVerification": "Full118 run:108 non-identity cases passed; original identity10 had6 byte-array fixture comparison failures. Only that test source changed, and final independent12-case rerun passed. Latest evidence per class totals120 unique passed tests; not a claim that the historical full command exited0.",
+  "sourceChangesSinceFullRun": [
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/IdentityAuditAtomicWriteTests.java"
+  ],
+  "sourceFiles": 384,
+  "protectedFiles": 171,
+  "frontendTotal": 300,
+  "frontend": {
+    "api": 30,
+    "auth": 43,
+    "fields": 49,
+    "mocks": 59,
+    "ui": 17,
+    "admin": 7,
+    "back": 86,
+    "front": 9
+  },
+  "mockE2E": {
+    "tests": 27,
+    "passed": 27,
+    "durationSeconds": 54.8
+  },
+  "performance": {
+    "rows": 10000,
+    "workListP95ms": 86,
+    "publicListP95ms": 80,
+    "patchP95ms": 19
+  },
+  "checks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "bundle": "passed",
+    "npmCi": "passed",
+    "apiFreshness30": "passed",
+    "openapiByteEquality": "passed",
+    "bootJar": "passed",
+    "documentation": "passed",
+    "independentReview": "passed"
+  },
+  "logs": {
+    "bw2-api-final.log": "7ff20096d781cf30434bb7a0656db4484c04eef3624a63c556212507a5f6fa48",
+    "bw2-bootjar.log": "d8c7ed2b91673d0920d13c41089c0c4500ec578611c9aa79a21202f2887ad6be",
+    "bw2-build.log": "1c9e5744775a4fcb64e4f9e15c5399ba79cd10d183480d0965fe4f63502e652f",
+    "bw2-bundle.log": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "bw2-codegen.log": "a0de7c24f3118d7eb17281b9ee975ed34bfe597b3405243e70097930bd922861",
+    "bw2-doc-validation-initial.log": "ab44588ad4c15cd378d764da02263107f9a1a46ec75eca608673ce64c593d489",
+    "bw2-doc-validation.log": "a4d78273902d0cfad40cd3abe5a0c880d28514b2139d4de0061e8df890efd619",
+    "bw2-e2e.log": "0ca50a8a50c288b57676c2f8df7809c0391239f647b47b2a844c32373753176c",
+    "bw2-identity-postgres-cached.log": "ed81ae3cdbf129fd9a6837a89c8c627ad5e471b1a7bf5afd7541f6daaa6059af",
+    "bw2-identity-postgres-final.log": "0f7af0ddd480c2e38c3e7df3f9d2c96175a6ec6e9521a9b0a5f81aee64b81017",
+    "bw2-java-postgres-final.log": "bc0770adb2972b6e4f3ffef76fbe52300a18a9cba23eb43fb87ecf6b30719ca8",
+    "bw2-java-test-first.log": "891433f002703b37b85009b699f730f313fb51ff3cea7c0cbc5d47066ff15a8c",
+    "bw2-lint.log": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "bw2-npm-ci.log": "a85647c37504dbd55ffa1c219e18e7235ce49d4c08e3976ac9730748f8795024",
+    "bw2-postgres-first.log": "99190d4bf64201e00564c31bb816b0ea8cf51055371d679309bf1085cd106f72",
+    "bw2-typecheck-fixtures.log": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "bw2-typecheck-red.log": "31f7b6784473da1140d657107f381df6e79fd1b5ee548306e62c5275ed6c7fb8",
+    "bw2-web-test.log": "35837940c80b8a93cd80bc45df78180bdd92aaa992cffb42cff7dff923944f3d"
+  }
+}

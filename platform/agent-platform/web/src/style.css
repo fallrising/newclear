@@ -345,6 +345,16 @@ p {
   border-bottom: 1px solid #e1e6ef;
   background: #fafbfe;
 }
+.retry-editor {
+  width: 100%;
+}
+.retry-bar .run-actions {
+  margin: 0;
+}
+.run-goal p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .retry-bar p,
 .retry-bar .error {
   margin: 0;

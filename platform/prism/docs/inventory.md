@@ -1,8 +1,9 @@
 # Prism implementation inventory
 
-Reviewed 2026-10-03 against newclear `82cd9d8159b31cdd852f333a219132dc614e5d66`.
-The later main snapshot `1e4bd8e` has no changes to Prism, its instructions or its
-portfolio row. Development resumed on 2026-10-03. Product usage remains unknown.
+Current development baseline: Go 1.27.1, with P1-06 starting from
+newclear `267b12d78b3304d12bb589639650628b22987e95` after the Go upgrade.
+The P1-05 source completed at `6deaabcc583f96b543c55f82b7922cfe772e2831`. Historical verification below
+retains its original versions and scope. Product usage remains unknown.
 
 ## Code and contract coverage
 
@@ -14,17 +15,21 @@ portfolio row. Development resumed on 2026-10-03. Product usage remains unknown.
 | P0-04 | `drivers/memory`, three stores and concurrency tests | Reference memory backend, not persistent production storage. |
 | P0-05 | `pkg/spi/conformance`, deterministic fixtures and memory test | Memory passes supported capabilities; this does not verify future drivers or native pushdown. |
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
-| P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | Acceptance names `deploy/prismd.yaml`, but only `internal/config/testdata/prismd.yaml` exists. Deployment artifacts are scheduled P1-11. |
-| P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | All role entrypoints currently start the same base HTTP routes. |
-| P0-09 | ADR-001 through ADR-010 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
+| P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; query/ruler/console retain base HTTP routes. |
+| P0-09 | ADR-001 through ADR-013 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
-| P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | No receiver/pipeline calls the normalizer yet. |
-| P1-02 | Verified standalone [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Full module gates pass below; runtime/config/receiver/telemetry wiring remains P1-03 and later. |
+| P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
+| P1-02 | [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Used by P1-03 and P1-04 runtime; complete tenant override configuration and registered telemetry remain outstanding. |
+| P1-03 | [`internal/ingest`](../internal/ingest/README.md): bounded tenant registry, atomic reservation, normalization/limits, three priority lanes per signal, owned batches and SPI writers | P1-04 connects config/daemon/OTLP; registered pipeline telemetry is still unconnected. |
+| P1-04 | `internal/compat/otlp`, configured single-tenant HTTP/gRPC runtime, original-unit accounting, bounded decode/admission and lifecycle tests | Full multi-tenant identity, native query APIs and production storage remain later work. |
+| P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms, query APIs and full multi-tenant control plane remain later work. |
+| P1-06 | `internal/compat/lokiapi`, bounded authenticated JSON/gzip push, structured metadata, runtime and real Vector acceptance | Protobuf push and Loki query/ready remain future milestones. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
-the deployment-config and daemon telemetry gaps above remain visible.
+the daemon telemetry gap and unimplemented production deployment remain visible.
 
 ## Baseline verification
 
@@ -72,49 +77,220 @@ do not establish a whole-process memory budget. The earlier HTTP smoke remains
 applicable: this standalone package is not imported by the daemon and changes no
 runtime wiring. No additional complete-stack smoke or E2E result is implied.
 
-## Next integration boundary
+## Integrated P1-03 verification
 
-P1-03 adds the bounded pipeline/batcher after P1-02. Its integration must cover:
+The reviewed package snapshot was integrated without changing its ten source,
+test and package-document identities. Fresh checks ran on Linux amd64 with
+`GOTOOLCHAIN=go1.23.12` and `GOFLAGS=-mod=readonly`; Go/module dependencies and the
+public SPI remain unchanged.
 
-- Resolve tenant overrides before normalization. The current normalizer already
-  truncates attributes to its effective maximum and applies a fixed high-cardinality
-  denylist; a downstream limiter cannot restore removed input.
-- Define an explicit translation for normalization report actions/reasons to the
-  registered telemetry domains. Current `drop`, `rename`, and `clamp` keys differ
-  from registry `drop_label`, `sanitize_name`, and `clamp_time`.
-- Own a bounded collection of tenant limiters and their configuration lifecycle.
-  A bounded per-tenant instance is not a global tenant bound.
-- Consume byte-rate retry information, rejection reports and bounded cardinality
-  observations. HTTP/gRPC error mapping belongs to receivers; alert delivery is
-  part of the later alerting phase.
-- Preserve trace truncation information across batches. Already persisted spans
-  cannot be mutated retroactively by a standalone limits package.
+| Exact command (from `platform/prism`) | Observed result |
+| --- | --- |
+| `GOTOOLCHAIN=go1.23.12 make lint test` | Formatting/vet pass; all 14 packages pass `-race -count=1`, including ingest (1.615s) and batcher (2.987s). |
+| `GOTOOLCHAIN=go1.23.12 scripts/check-dependencies.sh` | PASS. |
+| `GOTOOLCHAIN=go1.23.12 scripts/test-dependency-guard.sh` | All five deliberate prohibited-import cases detected; PASS. |
+| `GOTOOLCHAIN=go1.23.12 go build ./...` | Exit 0. |
+| `GOTOOLCHAIN=go1.23.12 golangci-lint run ./...` (CI-pinned v2.12.2) | `0 issues.`, exit 0. |
 
-The existing config type exposes only four limits settings. Complete YAML/env/
-control-plane configurability requires synchronized type/default/validation/SDD/
-deployment changes; a package options API alone does not provide it.
+Independent review reran focused ingest race/vet and 20 repetitions of pipeline,
+reservation and worker concurrency tests on the final unchanged snapshot. These
+cover full-queue/mixed-priority atomic admission, delta replay without consuming
+rejected byte quota, cancellation commit, tenant lifecycle and overrides,
+expansion-product bounds, nested ownership and metadata capacity, finite retry,
+concurrent admission/Close, deadline cancellation, and parent-cancel shutdown.
+Both new packages run goroutine-leak checks. A transient-contention test flake
+was corrected with retries restricted to admission-busy errors; intentional
+queue/rate/tenant rejection tests require their precise causes.
+
+These package/memory-backend tests do not establish HTTP/gRPC receiver wiring or
+complete-stack behavior. No new daemon smoke is implied: runtime entrypoints and
+configuration remain unchanged. The baseline HTTP smoke above retains only its
+original scope.
+
+## Integrated P1-04 verification
+
+On Linux amd64, the integrated snapshot passed the following commands with
+`GOTOOLCHAIN=go1.23.12` and `GOFLAGS=-mod=readonly`. Go/module versions and SPI
+interfaces are unchanged. The external generator is telemetrygen v0.116.0,
+installed separately from the module.
+
+| Command | Observed result |
+| --- | --- |
+| `make lint test` | Formatting/vet pass; all 16 packages pass `-race -count=1`, including receiver, ingest, runtime and security. Long-lived packages use goleak. |
+| `scripts/check-dependencies.sh` | PASS. |
+| `scripts/test-dependency-guard.sh` | All five prohibited-import cases detected; PASS. |
+| `go build ./...` | Exit 0. |
+| CI-pinned golangci-lint v2.12.2 `run ./...` | 0 issues. |
+| Pinned lint `run --build-tags=integration ./test/e2e` | 0 issues. |
+| `OTLP_TELEMETRYGEN_BINARY=/tmp/prism-telemetrygen-v0.116.0/telemetrygen go test -tags=integration -race -count=1 -v ./test/e2e` | Both transports persist 1 metric, 1 log, 1 trace/2 spans after buffered shutdown flush; another tenant sees no data. |
+| `go test -race -count=1 ./test/security` | 18 authentication/tenant-selector rejection cases plus real pipeline/SPI proof that reserved tenant labels cannot override authenticated identity; PASS. |
+| `go build -o /tmp/prism-otlp-prismd ./cmd/prismd` then `python3 scripts/smoke-otlp.py --prismd /tmp/prism-otlp-prismd --telemetrygen /tmp/prism-telemetrygen-v0.116.0/telemetrygen` | Config-check, health, metrics, HTTP authentication on all signals, gRPC export and SIGTERM exit 0; PASS. |
+
+Independent review checks the frozen implementation, focused race/vet and repeated
+receiver/accounting/cancellation regressions. Coverage includes shared predecode
+capacity, bounded nesting/compression, exact wire-byte metering, unsupported
+encoding, original-point partial counts, delta baselines, metadata warnings,
+auth/tenant isolation, current and deprecated OTLP scope representations,
+full-success responses, retry hints, cancellation and orderly/forced shutdown.
+Bounded protobuf and JSON fuzz targets supplement deterministic wire regressions.
+The [receiver README](../internal/compat/otlp/README.md) describes the protocol
+limits and native gRPC error boundary.
+
+An initial full-suite invocation used a test-tool variable with a `PRISM_` prefix;
+strict config validation correctly rejected it. The harness now uses the separate
+`OTLP_TELEMETRYGEN_BINARY` name; the config validator was not relaxed. A pre-existing
+batcher fixture was made deterministic by retrying only admission-lock contention,
+while retaining its intended oversize assertion. Historical failures and initial
+partial reviews remain in delivery evidence. The security check covers this
+milestone; it does not establish future Phase 5 security acceptance.
+
+## Integrated P1-05 verification
+
+The integrated 2026-10-04 snapshot was tested on Linux amd64 with
+`GOTOOLCHAIN=go1.23.12 GOFLAGS=-mod=readonly`. Module versions, public SPI,
+drivers and root CI workflows are unchanged. The receiver and runtime workers
+used isolated worktrees; the orchestrator integrated their frozen files by hash.
+
+| Command | Observed result |
+| --- | --- |
+| `make lint test` | Formatting/vet pass; all 17 packages pass race tests, including promapi, ingest, runtime and security; long-lived packages use goleak. |
+| `scripts/check-dependencies.sh` and `scripts/test-dependency-guard.sh` | Direction guard and all five prohibited-import cases pass. |
+| `go build ./...` | Exit 0. |
+| Pinned golangci-lint v2.12.2 `run ./...` and `run --build-tags=integration ./test/e2e` | Both report 0 issues. |
+| `PROMETHEUS_BINARY=/tmp/prism-prometheus-2.53.0/prometheus OTLP_TELEMETRYGEN_BINARY=/tmp/prism-telemetrygen-v0.116.0/telemetrygen go test -tags=integration -race -count=1 -v ./test/e2e` | Real Prometheus scrape/WAL/remote-write persists up=1 and fixture=42.5; another tenant is empty. Existing telemetrygen HTTP/gRPC three-signal persistence and shutdown regressions pass. |
+| `go test -race -count=1 -v ./test/security` | Existing OTLP checks and six remote-write credential/selector rejection cases pass; rejected requests create no tenant state; parsed reserved labels cannot override stored identity. |
+| `go build -o /tmp/prism-p1-05-prismd ./cmd/prismd` then `python3 scripts/smoke-otlp.py --prismd /tmp/prism-p1-05-prismd --telemetrygen /tmp/prism-telemetrygen-v0.116.0/telemetrygen` | Actual daemon config/health/metrics/OTLP plus remote-write authentication, empty-v1 admission and v2 rejection pass; SIGTERM exits 0. |
+| `go test ./internal/compat/promapi -run '^$' -fuzz '^FuzzWriteParser$' -fuzztime=10s -parallel=2` | Worker parser fuzz passes 85,705 executions in 11.054s; deterministic cases cover schema/count/packed and unpacked fields, Snappy expansion and unknown fields. |
+
+The [P1-05 contract](specs/p1-05-remote-write.md) and
+[receiver README](../internal/compat/promapi/README.md) explain original-byte
+accounting, nonretryable partial 400, fixed diagnostics, one-slot admission and
+cancellation cleanup before permit release. Narrow legacy normalizer changes add
+cancellation checks and a byte cap; its old decode helper still lacks schema
+preflight and is not used by network receivers. Initial receiver-absent and
+501/404 red tests, budget-boundary failures and intermediate lint/fixture failures
+were retained and resolved before these final checks. No validator was weakened.
+
+## Go 1.27 maintenance verification — 2026-10-04
+
+The [upgrade contract](specs/go-1.27-upgrade.md) moves the active module, CI and
+development instructions to Go 1.27.1 with golangci-lint v2.14.0. All runtime
+dependency versions and go.sum remain unchanged. Earlier commands above are
+historical evidence, not commands for the current minimum toolchain.
+
+Local verification on the final upgrade source passed:
+
+- `GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly make lint test`: format, vet,
+  race and leak checks across all 17 packages.
+- Dependency guard and all five negative fixtures; `go build ./...`;
+  `go mod verify`; unchanged module versions and go.sum.
+- golangci-lint v2.14.0 for normal and integration builds: zero issues.
+- Real Prometheus 2.53.0 remote_write and telemetrygen v0.116.0 OTLP clients,
+  tenant isolation, security tests and executable daemon smoke/SIGTERM.
+- `CGO_ENABLED=0` daemon build and build metadata, config check, and explicit
+  minimum-version rejection with an older compiler and `GOTOOLCHAIN=local`.
+- Twenty race-enabled cancellation/close/shutdown repetitions across ingest
+  and server packages. A failing incomplete-body fixture was corrected to
+  wait for server-side connection closure while retaining its keep-alive
+  request and shutdown assertions; no sleep or leak exclusion was added.
+
+Raising the language directive enabled additional lint checks. Necessary
+corrections preserve reflection traversal, error classification and owned
+concurrent work; enabled checks and public SPI interfaces are unchanged.
+The existing SDD22 container recipe is updated, but no Dockerfile or deployment
+is implemented by this maintenance change.
+
+## P1-06 verification
+
+Final local verification uses Go 1.27.1 with `GOFLAGS=-mod=readonly`:
+
+| Command / scope | Observed result |
+| --- | --- |
+| `make lint test` | Format/vet/race/goleak pass across 18 packages. |
+| `scripts/check-dependencies.sh`, `scripts/test-dependency-guard.sh`, `go build ./...` | Dependency direction and all five negative fixtures pass; build exits 0. |
+| golangci-lint v2.14.0 normal and integration builds | Both report zero issues. |
+| `go test -tags=integration -race -count=1 -v ./test/e2e` with the documented three binaries | Real Vector 0.45.0 none/gzip JSON modes each persist two exact bodies, resource/trace/span metadata and no records for another tenant. Prometheus 2.53.0 and telemetrygen 0.116.0 acceptance remains green. |
+| `go test -race -count=1 -v ./test/security` | Six Loki credential/selector rejection cases preserve zero tenant state; parsed reserved labels cannot replace Resource.Tenant. Existing OTLP/remote_write security cases pass. |
+| Built daemon plus `scripts/smoke-otlp.py` | Configuration/health/metrics, OTLP, remote_write and nonempty authenticated Loki push pass; SIGTERM exits 0. |
+| `go mod verify`, baseline module list and module-file comparison | All modules verified; dependency versions, go.mod and go.sum unchanged. |
+
+The [P1-06 contract](specs/p1-06-loki-push.md) and
+[receiver README](../internal/compat/lokiapi/README.md) define strict JSON shape,
+gzip integrity, token and projected-allocation caps, original-byte charging,
+fixed diagnostics and callback ownership. Runtime tests also cover TLS, both
+ingest roles, route exclusion from non-ingest roles, independent receive slots,
+client disconnection, forced shutdown and backend-close ordering. Decoder fuzz,
+malformed-body/duplicate/UTF8/metadata/partial-commit and cancellation tests cover
+the protocol boundary. Initial missing-route and budget red tests, lint findings
+and an incorrect metric-style tenant-label expectation in log tests were retained
+and resolved; tests now assert the existing Resource.Tenant log contract and the
+absence of attacker-supplied reserved labels. No validator was weakened.
+
+## Current integration boundary
+
+P1-04 through P1-06 connect the existing atomic pipeline to authenticated OTLP,
+remote_write v1 and Loki JSON/gzip push in the all-in-one and ingest roles. The [receiver design](specs/p1-04-otlp.md) and
+[ADR-011](sdd/13-ADR.md#adr-011phase-1-otlp-寫入使用單租戶-file-backed-bearer)
+record the initial single-tenant identity contract and original-unit partial
+counts. The [pipeline contract](../internal/ingest/README.md) retains P1-03's
+byte-admission cancellation point, delta replay guarantees, tenant lifecycle,
+owned payloads, metadata capacity, finite retry and at-least-once writes.
+
+Runtime capacity differs from standalone package defaults: one tenant, depth-4
+priority queues, two workers per signal, 16 OTLP receiver slots and one separate
+remote_write slot and one separate Loki slot.
+Configuration validates a conservative logical budget before startup, including
+compressed/decompressed receive buffers and serialized admission (1000 MiB at
+defaults). This is not
+an RSS limit: decoded protobuf/pdata, allocator/transient/state costs and memory-backend
+retention remain additional. The standalone package's 5,808 MiB conservative
+default allowance documented in P1-03 remains unchanged; daemon wiring does not
+use that multi-tenant default.
+
+Remaining integration work includes:
+
+- Register/populate pipeline self-telemetry and translate bounded diagnostics to
+  registry domains; package reports do not deliver alerts.
+- Complete multi-tenant API-key/mTLS identity and live reload. Strict ingest
+  currently fails closed, and headers cannot select another tenant.
+- Expose the complete limits policy through configuration/control-plane APIs;
+  only the four existing limits fields are wired in this milestone.
+- Preserve trace truncation information across batches; already persisted spans
+  cannot be retroactively changed by the limits package.
+- Establish process-memory/soak evidence with a bounded persistent backend;
+  logical configuration arithmetic is insufficient to claim production capacity.
 
 ## Remaining phases
 
-P1-04–06 supply OTLP, remote-write and Loki receivers; P1-07–08 the PromQL adapter
+P1-06 completes the Loki JSON receiver. Next are P1-07–08, the PromQL adapter
 and API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
-security and operations. The directories for compatibility, differential,
-PromQL, E2E, security and soak acceptance mostly remain placeholders.
+security and operations. Differential, PromQL and soak acceptance remain future work. Existing E2E and
+security checks cover the implemented ingest protocols and their trust boundaries.
 
 No external-driver conformance, Grafana datasource acceptance, complete-stack
 E2E, production soak, deployment or production-readiness claim follows from the
-local package checks. Follow the [SDD task order](sdd/12-IMPLEMENTATION-PHASES.md).
+focused ingest checks. Follow the [SDD task order](sdd/12-IMPLEMENTATION-PHASES.md).
 
 ## Go style reference
 
-This delivery also consults [JetBrains Modern Go Guidelines](https://github.com/JetBrains/go-modern-guidelines),
+This section records the initial Go 1.23 adoption; the current baseline is noted below.
+
+That delivery also consulted [JetBrains Modern Go Guidelines](https://github.com/JetBrains/go-modern-guidelines),
 using its `use-modern-go` CLI v0.1.1 to resolve this component's `go.mod` (Go 1.23).
 The inspected upstream checkout is `155dc7ca10da5e1f6c841503086957b1b37f5815`.
 Review applies supported idioms such as integer range, `min`/`max`, `maps.Clone`,
 `slices.Clone`/`Contains`/`SortFunc`, and `strings.Clone`; it preserves behavior and
 context-cancellation checks where a shorthand would change them. The existing
-`modernize` linter remains enabled. No Go language-version upgrade is included.
+`modernize` linter remains enabled. No Go language-version upgrade was included in that initial adoption.
 
 The guideline CLI may require a newer toolchain to run; its own toolchain does
-not change Prism's language target. Final module checks use CI's Go 1.23.12.
+not change Prism's language target. At that checkpoint, final module checks used CI's Go 1.23.12.
+
+### Current Go style baseline
+
+The 2026-10-04 upgrade uses the same pinned Modern Go Guidelines CLI v0.1.1
+with `list --go-version 1.27`; its full version-filtered list was reviewed.
+Previous Go 1.23 references above describe the original adoption. Existing JSON
+protocol behavior is preserved; upgrading the compiler does not authorize a
+JSON v2 migration or an unrelated style rewrite.

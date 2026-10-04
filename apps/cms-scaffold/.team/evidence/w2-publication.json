@@ -1,0 +1,54 @@
+{
+  "headRefOid": "42b5bd8a76019516159bb51ec5b0bd55603ac45f",
+  "mergeCommit": {
+    "oid": "06a07864d6e7ff021cf1afe1eccc7e5205f9f896"
+  },
+  "mergedAt": "2026-10-03T19:59:48Z",
+  "number": 245,
+  "state": "MERGED",
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-03T19:56:48Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/37149694986/job/111280726195",
+      "name": "java",
+      "startedAt": "2026-10-03T19:56:11Z",
+      "status": "COMPLETED",
+      "workflowName": "CMS Scaffold CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-03T19:56:18Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/37149694980/job/111280725968",
+      "name": "trailer",
+      "startedAt": "2026-10-03T19:56:11Z",
+      "status": "COMPLETED",
+      "workflowName": "Desk trailer reminder"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-03T19:56:49Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/37149694986/job/111280726171",
+      "name": "java-integration",
+      "startedAt": "2026-10-03T19:56:12Z",
+      "status": "COMPLETED",
+      "workflowName": "CMS Scaffold CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-03T19:59:18Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/37149694986/job/111280726045",
+      "name": "web",
+      "startedAt": "2026-10-03T19:56:11Z",
+      "status": "COMPLETED",
+      "workflowName": "CMS Scaffold CI"
+    }
+  ],
+  "url": "https://github.com/fallrising/newclear/pull/245",
+  "remoteMain": "06a07864d6e7ff021cf1afe1eccc7e5205f9f896",
+  "remoteCmsMatchesAcceptedSource": true
+}

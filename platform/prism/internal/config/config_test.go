@@ -246,9 +246,10 @@ func loadFixture(t *testing.T) string {
 	}
 	result := string(content)
 	replacements := map[string]string{
-		"jwt_secret_file: secrets/jwt":   "jwt_secret_file: " + fixturePath(t, "secrets/jwt"),
-		"path: rules":                    "path: " + fixturePath(t, "rules"),
-		"config_path: alertmanager.yaml": "config_path: " + fixturePath(t, "alertmanager.yaml"),
+		"ingest_api_key_file: secrets/ingest_api_key": "ingest_api_key_file: " + fixturePath(t, "secrets/ingest_api_key"),
+		"jwt_secret_file: secrets/jwt":                "jwt_secret_file: " + fixturePath(t, "secrets/jwt"),
+		"path: rules":                                 "path: " + fixturePath(t, "rules"),
+		"config_path: alertmanager.yaml":              "config_path: " + fixturePath(t, "alertmanager.yaml"),
 	}
 	for old, replacement := range replacements {
 		result = strings.Replace(result, old, replacement, 1)

@@ -8,12 +8,11 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 )
 
-func intPtr(value int) *int { return &value }
 func point(metric, value string) utm.MetricPoint {
 	return utm.MetricPoint{Name: metric, Labels: labels.FromStrings("id", value)}
 }
 func TestMetrics_ExistingSeriesContinuesAtCapacity(t *testing.T) {
-	limiter, err := New("tenant-a", Options{Tenant: Overrides{MaxActiveSeriesPerTenant: intPtr(2)}})
+	limiter, err := New("tenant-a", Options{Tenant: Overrides{MaxActiveSeriesPerTenant: new(2)}})
 	if err != nil {
 		t.Fatal(err)
 	}

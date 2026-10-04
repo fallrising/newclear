@@ -13,11 +13,14 @@ export interface PublicListParams {
 export interface WorkListParams extends PublicListParams {
   /** Comma-separated publication states; omitted means draft,published. */
   state?: string;
+  publishRequested?: boolean;
+  include?: "refs";
 }
 
 export const keys = {
   auth: {
     me: () => ["auth", "me"] as const,
+    expired: () => ["auth", "expired"] as const,
   },
   public: {
     all: () => ["public"] as const,
@@ -37,6 +40,14 @@ export const keys = {
     list: (type: string, params: WorkListParams = {}) => ["entries", "list", type, params] as const,
     allEntries: (type: string, params: WorkListParams = {}) => ["entries", "list", type, "all", params] as const,
     detail: (id: string) => ["entries", "detail", id] as const,
+    preview: (id: string) => ["entries", "preview", id] as const,
+    revisions: (id: string) => ["entries", "revisions", id] as const,
+  },
+  media: {
+    all: () => ["media"] as const,
+    list: () => ["media", "list"] as const,
+    quota: () => ["media", "quota"] as const,
+    detail: (id: string) => ["media", "detail", id] as const,
   },
   admin: {
     types: () => ["admin", "types"] as const,

@@ -1,0 +1,35 @@
+{
+  "status": "PARTIAL",
+  "sourceFiles": 403,
+  "changesAfterFullFrontendGate": [
+    "apps/web-back/src/pages/board.tsx",
+    "e2e-mock/back-w2.spec.ts",
+    "packages/fields/src/pickers.tsx",
+    "packages/mocks/src/handlers/work.ts",
+    "packages/mocks/src/w2-safeguards.test.ts"
+  ],
+  "protectedFiles": 231,
+  "preservedSnapshots": {
+    "cms-bw1b-baseline": 412,
+    "cms-bw1c-baseline": 449,
+    "cms-w1-baseline": 468,
+    "cms-bw2-baseline": 566,
+    "cms-w2-baseline": 602
+  },
+  "originalIntegrationFilesPreserved": 468,
+  "frontendFullGateTests": 380,
+  "frontendLatestPerPackageTests": 394,
+  "mockTestsFinal": 92,
+  "e2eSelectedPassed": 37,
+  "e2eDeferredDragCases": 2,
+  "browserCaptures": 8,
+  "browserErrors": 0,
+  "runtimeOpenApiEqualsBw2": true,
+  "npmAudit": {
+    "exitCode": 1,
+    "inheritedDevTransitiveHigh": 1,
+    "package": "brace-expansion",
+    "lockUnchanged": true
+  },
+  "javaAndPostgresEvidence": "Unchanged source; reuse successful BW2 CI 37146275424, not rerun in W2."
+}

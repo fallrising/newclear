@@ -1,6 +1,22 @@
 # 接續開發交接：ERU VPS MVP
 
-2026-10-03 接手核對與修正見 [本機驗收矩陣](LOCAL-CLOSEOUT-2026-10-03.md)：ERU-013 的 manifest 發布／獨立建置守護已納入本輪修補；上游已有 v0.1.7，[候選 patch／雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md) 已通過兩次隔離 byte-identical build 與有界 metadata／wire compatibility，狀態 verified-not-deployed。ERU-015 已有 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，destructive executor 仍未實作，不能宣稱五項本機收尾全部完成。下列歷史部署與測試數保留日期語境；正式剩餘仍為 12 項，本輪沒有 VPS mutation。
+2026-10-04 後續：[network file-staging協調器](M3-FRESH-NETWORK-STAGING-2026-10-04.md) 綁定當次計畫／授權，先durable intent再單次adapter dispatch，回應遺失只讀reconcile；本輪fake adapter驗證，不啟用設定或接受stage。正式剩餘12不變。
+
+2026-10-04 後續：[fresh network-access設定計畫](M3-FRESH-NETWORK-ACCESS-PLAN-2026-10-04.md) 產生四機固定firewall／pinned known_hosts／staged core key內容，保存immutable private plan並離線重導出；重核當次admission與身份。尚未套用設定或驗收network stage，正式剩餘12不變。
+
+2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。
+
+2026-10-04 後續：[replacement 裸 OS facts](M3-FRESH-REPLACEMENT-FACTS-2026-10-04.md) 新增四機 OOB key／receipt 綁定的唯讀採樣、immutable private observation 與離線重驗。只用 synthetic／fake transport 測試；不等於 network／完整 residue／stage acceptance，ERU-015 與正式剩餘 12 項不變。
+
+2026-10-03 後續：[四機 fresh 人工 receipt 驗證](M3-FRESH-REIMAGE-RECEIPTS-2026-10-03.md) 實作獨立 core／worker 證據契約與唯讀 assessment；不代表重灌已執行或 stage accepted。ERU-015 仍進行中，正式剩餘 12 項。
+
+2026-10-03 後續：[唯讀 fresh baseline observation](M3-FRESH-OBSERVATION-2026-10-03.md) 接續四機／etcd／ERU metadata 基線及 schema-v2 host evidence 重導出；本輪只用 fake／contract tests，未做 VPS 操作。這不是 fresh stage acceptance，正式剩餘仍為 12 項。
+
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
+2026-10-03 接手核對與修正見 [本機驗收矩陣](LOCAL-CLOSEOUT-2026-10-03.md)：ERU-013 的 manifest 發布／獨立建置守護已納入本輪修補；上游已有 v0.1.7，[候選 patch／雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md) 已通過兩次隔離 byte-identical build 與有界 metadata／wire compatibility，狀態 verified-not-deployed。ERU-015 已有 [fresh executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已接續 [fake simulation store／coordinator](M3-FRESH-SIMULATION-2026-10-03.md) 實作；destructive executor、全域 barrier／bootstrap／generation acceptance 仍未完成，不能宣稱五項本機收尾全部完成。下列歷史部署與測試數保留日期語境；正式剩餘仍為 12 項，本輪沒有 VPS mutation。
 
 歷史快照：2026-09-27（版本狀態以文首 2026-10-03 核對為準）。固定剩餘任務編號以 TASKS.md 為準：仍為 12 項（近期 1、後續 11）；ERU-001～006 已完成，ERU-007 的正式 V11 小流量 run 進行中。依 owner 指示先完成本機開發，再統一進行其他 VPS E2E。ERU-009 已新增 ERU-012 managed stateless app 的離線 hash-bound drain planner（10 個 fake tests）、多 app staged executor／唯讀 recovery、partial cleanup fresh exact-ID plan／child journal reconciliation 與 `labctl` 操作入口；executor 先 fence、全部 replacement readiness 完成後才 exact-ID cleanup，只有完整 empty-worker audit 才開一般重裝 gate。ERU-009 有 26 個 drain fake tests；共享 `AppRevisionCleanup` 會在每次 exact-ID remove 後及最後 readiness probe 後比對全群 workload identity，reconcile 入口也會共用 `ClusterLock`，避免與 execute 並行覆寫 journal。identity drift 會停在 `needs_review`。ERU-010 已新增 partial cleanup 的 fresh exact-ID subset plan，以及重新驗證原 private desired specs、依最新 snapshot 逐 app 重用 ERU-012、全部 exact/HTTP-ready 才完成的 replacement wrapper；30 個 worker-loss fake tests 通過，沒有連 VPS。ERU-012 本機 desired-state 功能已齊待 E2E；planner／executor／adapter／cleanup 有 54 個離線測試。ERU-013 provenance／版本 guard 已合併，v0.1.5 patch 已以 Go 1.27.1 重驗；另對 unreleased upstream master `e9b48c1` 完成 forward-compatibility tests／兩次一致 build，尚無新 stable tag、未建立 manifest；ERU-014 已有 worker-only install、core access preparation、fenced registration／smoke／safe-resume、hash-bound inventory／generation commit 與跨階段 snapshot/recovery coordinator；safe AddNode patch 已完成 Go 1.27.1 雙環境建置，仍 verified-not-deployed。跨階段鏈結核對 predecessor journal hashes／target identity，恢復器只呼叫第一個不確定 stage 的既有唯讀 reconciler；generation commit 還會重核本機 hashes。ERU-015 現新增單次 Profile A 全群 fresh 的 private review-only planner，綁定四台精確 provider／volume scope、現行 inventory／generation、controller/source locks、外部 materials、新 etcd token 與 ERU-012 specs；它只有 `plan-fresh-rebuild`，沒有 executor，V01–V04／V08 均未執行。上述本機執行器／planner 仍為 fake fixture 驗證，未讀寫真實 private data；ERU-009、ERU-010、ERU-013、ERU-014、ERU-015 仍進行中；整體 E2E 依 owner 指示排在本機開發之後，任務數未減。每完成正式任務須更新清單並回報編號與剩餘數。
 

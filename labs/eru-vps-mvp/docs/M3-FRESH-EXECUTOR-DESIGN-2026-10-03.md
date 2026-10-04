@@ -1,6 +1,14 @@
 # ERU-015 fresh executor：執行與恢復設計
 
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
 日期：2026-10-03。來源基線：`1e4bd8e43bd5fe30cb536e91479e44c9d2beb303`。本文是後續實作契約草案；本次只做 source/contract review，沒有建立執行器、執行 stage、讀取真實 private 資料或操作主機。ERU-015／V08 仍未完成，[SDD](SDD.md) 的驗收不變。
+
+## 後續本機實作進度
+
+[Simulation journal／receipt coordinator](M3-FRESH-SIMULATION-2026-10-03.md) 已接續本設計進行本機實作：immutable record store、stage-level fake actions、no-replay 與 observation-only recovery。這不代表下列 production stages 已實作；實際 host receipts、全域 pending barrier、bootstrap、V01–V04／residue probes 與 generation commit/seal 都仍待完成。本文原始設計及其完整驗收標準保留。
 
 ## 已固定的範圍
 

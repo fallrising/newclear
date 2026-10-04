@@ -39,10 +39,14 @@ tenancy:
 auth:
   allow_anonymous_read: true  # 單機自用預設開啟；對外必須關閉
   jwt_secret_file: /etc/prism/secrets/jwt
+  ingest_api_key_file: /etc/prism/secrets/ingest_api_key # ingest 必填，至少 32 bytes；不得共用 JWT
 
 ingest:
-  max_request_bytes: 16MiB
-  queue_depth: 64
+  max_request_bytes: 16MiB   # OTLP 與 remote_write 的 wire／解壓後上限
+  queue_depth: 4              # 每訊號三條優先佇列；runtime 單租戶、每訊號兩名 worker
+  otlp:
+    max_recv_msg_size: 4MiB
+    max_concurrent_requests: 16 # HTTP/gRPC 共用即時拒絕的解碼閘門
   batch:
     metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
     logs:    {max_items: 5000,  max_bytes: 8MiB, flush_interval: 1s}
@@ -50,7 +54,7 @@ ingest:
   clock_skew_policy: clamp
   max_past: 1h
   max_future: 5m
-  memory_limit: 1GiB
+  memory_limit: 1GiB          # 預設 OTLP + remote_write logical budget 968MiB；非 RSS 硬上限
 
 limits:                       # 見 04-DATA-MODEL.md §5，此處為全域預設
   max_active_series_per_tenant: 500000
@@ -89,7 +93,26 @@ telemetry:
   log_format: json
 ```
 
-### 1.1 配置驗證
+### 1.1 P1-05 寫入容量與生命週期
+
+`all-in-one`／`ingest` 角色在同一 HTTP listener 接收 OTLP 的三條 `/v1/*`
+路由與 `POST /prom/api/v1/write`；remote_write 重用 file-backed bearer、
+`tenancy.default_tenant` 與 HTTP TLS，OTLP gRPC 繼續使用獨立 listener。
+其他角色不掛載 remote_write。關閉時先停止兩個 receiver 的新工作，再完成
+HTTP／gRPC shutdown、pipeline drain，最後由 daemon 關閉 backend。
+
+remote_write 有獨立的固定單請求閘門，因此預算必須加入
+`2 * ingest.max_request_bytes`（壓縮與解壓 buffer）；不共用 OTLP 解碼閘門。
+邏輯預算為
+`(3 + 3 * queue_depth + 2) * sum(batch.*.max_bytes)` 加
+`2 * max(max_request_bytes, otlp.max_recv_msg_size) * otlp.max_concurrent_requests`
+加一份序列化 admission request 與兩份 remote_write receive buffer。
+預設從 936 MiB 增加至 **968 MiB**，仍小於 `memory_limit: 1GiB`。
+config-check 允許預算恰好等於 limit，超出一 byte 即拒絕。
+這個預算不包含 decoded protobuf／pdata、正規化及狀態配置、allocator
+與 memory backend 的資料保留，不能視為 RSS 上限。
+
+### 1.2 配置驗證
 
 `prismd --config-check` 必須：
 - 驗證全部欄位型別與範圍

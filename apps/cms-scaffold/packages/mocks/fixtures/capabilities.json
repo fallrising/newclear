@@ -2329,74 +2329,8 @@
     },
     "admin": {
       "surface": "admin",
-      "types": [
-        {
-          "key": "album",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "clinic_profile",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "milestone",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "note",
-          "actions": [
-            "read_published",
-            "read_draft",
-            "create",
-            "update",
-            "publish",
-            "unpublish",
-            "delete",
-            "archive"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "page",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "photo",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "project",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "vet",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        }
-      ],
-      "global": [
-        "manage_media"
-      ]
+      "types": [],
+      "global": []
     }
   }
 }

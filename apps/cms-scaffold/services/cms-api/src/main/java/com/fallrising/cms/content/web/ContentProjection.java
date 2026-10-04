@@ -5,6 +5,7 @@ import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.service.EntryService;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,26 @@ final class ContentProjection {
         json.put("title", title(entry.payload(), type == null ? null : type.titleField()));
         json.put("payload", entry.payloadCopy());
         json.put("dirty", entry.dirty());
+        json.put("publishRequestedAt", entry.publishRequestedAt());
+        json.put("publishRequestedBy", entry.publishRequestedBy() == null ? null : entry.publishRequestedBy().toString());
         json.put("publishedAt", entry.publishedAt());
         json.put("updatedAt", entry.updatedAt());
         return json;
+    }
+
+    /** Enabled public media-ref values from one page's selected payload scope. */
+    static List<Object> mediaRefs(List<Map<String, Object>> payloads, List<FieldRecord> fields) {
+        List<Object> values = new ArrayList<>();
+        for (Map<String, Object> payload : payloads) {
+            if (payload == null) continue;
+            for (FieldRecord field : fields) {
+                Object value = payload.get(field.fieldKey());
+                if (value != null && field.enabled() && "public".equals(field.visibility()) && "media-ref".equals(field.fieldType())) {
+                    values.add(value);
+                }
+            }
+        }
+        return values;
     }
 
     static Map<String, Object> published(
@@ -54,6 +72,31 @@ final class ContentProjection {
         json.put("title", title(source, type.titleField()));
         json.put("payload", payload);
         json.put("publishedAt", entry.publishedAt());
+        return json;
+    }
+
+    /** Member work copy: enabled public fields only, including a safely projected title. */
+    static Map<String, Object> member(EntryRecord entry, ContentTypeRecord type, List<FieldRecord> fields,
+            java.util.function.Function<Object, Object> mediaExpander) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        Map<String, Object> source = entry.payload() == null ? Map.of() : entry.payload();
+        for (FieldRecord field : fields) {
+            if (field.enabled() && "public".equals(field.visibility()) && source.containsKey(field.fieldKey())) {
+                Object value = source.get(field.fieldKey());
+                if ("media-ref".equals(field.fieldType()) && value != null) {
+                    value = mediaExpander == null ? null : mediaExpander.apply(value);
+                }
+                payload.put(field.fieldKey(), value);
+            }
+        }
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("id", entry.id().toString());
+        json.put("contentType", entry.contentTypeKey());
+        json.put("publicationState", entry.publicationState().wire());
+        json.put("title", title(payload, type.titleField()));
+        json.put("payload", payload);
+        json.put("createdAt", entry.createdAt());
+        json.put("updatedAt", entry.updatedAt());
         return json;
     }
 

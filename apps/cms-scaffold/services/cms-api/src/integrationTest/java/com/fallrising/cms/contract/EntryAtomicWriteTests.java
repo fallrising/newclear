@@ -273,7 +273,7 @@ class EntryAtomicWriteTests {
         assertThat(store.revisionsOf(entry.id())).isEmpty();
         assertThat(store.refsTo(cover)).isEmpty();
         assertThat(media.attachmentsOfMedia(cover)).isEmpty();
-        assertThat(auditStore.listAudits("ENTRY_PURGED", entry.id())).hasSize(1);
+        assertThat(auditStore.listAudits("entry.purge", entry.id())).hasSize(1);
     }
 
     @Test

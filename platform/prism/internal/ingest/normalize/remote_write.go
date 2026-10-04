@@ -13,8 +13,12 @@ import (
 
 const remoteWriteVersion = "0.1.0"
 
+const remoteWriteDecodeBytes = 16 << 20
+
 // DecodeRemoteWrite validates the v1 wire headers, decodes snappy, and
-// unmarshals a Prometheus remote_write request.
+// unmarshals a Prometheus remote_write request under a fixed byte limit.
+// This legacy package helper does not perform schema/count preflight and is not
+// suitable for untrusted network input. Receivers must use schema-aware decoding.
 func DecodeRemoteWrite(body []byte, contentEncoding, contentType, version string) (*prompb.WriteRequest, error) {
 	if version != remoteWriteVersion {
 		return nil, fmt.Errorf("unsupported Prometheus remote_write version %q: only %s is supported", version, remoteWriteVersion)
@@ -25,6 +29,16 @@ func DecodeRemoteWrite(body []byte, contentEncoding, contentType, version string
 	mediaType, _, _ := strings.Cut(contentType, ";")
 	if !strings.EqualFold(strings.TrimSpace(mediaType), "application/x-protobuf") {
 		return nil, fmt.Errorf("unsupported remote_write content type %q: want application/x-protobuf", contentType)
+	}
+	if len(body) > remoteWriteDecodeBytes {
+		return nil, fmt.Errorf("remote_write compressed payload exceeds byte limit")
+	}
+	decodedLen, err := snappy.DecodedLen(body)
+	if err != nil {
+		return nil, fmt.Errorf("decode remote_write snappy payload: %w", err)
+	}
+	if decodedLen > remoteWriteDecodeBytes {
+		return nil, fmt.Errorf("remote_write decoded payload exceeds byte limit")
 	}
 	decoded, err := snappy.Decode(nil, body)
 	if err != nil {
@@ -45,12 +59,18 @@ func (n *Normalizer) NormalizeRemoteWrite(ctx context.Context, request *prompb.W
 		Points:   make([]utm.MetricPoint, 0),
 		Metadata: make([]utm.MetricMetadata, 0),
 	}
+	if err := ctx.Err(); err != nil {
+		return MetricBatch{}, report, fmt.Errorf("normalize remote_write: %w", err)
+	}
 	if request == nil {
 		return batch, report, nil
 	}
 
 	metadataTypes := make(map[string]utm.MetricType, len(request.Metadata))
 	for _, input := range request.Metadata {
+		if err := ctx.Err(); err != nil {
+			return MetricBatch{}, report, fmt.Errorf("normalize remote_write: %w", err)
+		}
 		name := utm.SanitizeMetricName(validUTF8(input.MetricFamilyName))
 		if name != input.MetricFamilyName {
 			report.normalized("rename")
@@ -93,6 +113,9 @@ func (n *Normalizer) NormalizeRemoteWrite(ctx context.Context, request *prompb.W
 			metricType = metadataType
 		}
 		for sampleIndex, sample := range series.Samples {
+			if err := ctx.Err(); err != nil {
+				return MetricBatch{}, report, fmt.Errorf("normalize remote_write: %w", err)
+			}
 			timestamp, ok := n.normalizeMetricTimestamp(sample.Timestamp, receivedAt, &report)
 			if !ok {
 				continue

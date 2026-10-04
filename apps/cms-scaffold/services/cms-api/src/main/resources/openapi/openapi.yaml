@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.7.0
+  version: 0.11.0
   license:
     name: Proprietary
 servers:
@@ -38,6 +38,7 @@ tags:
   - name: Content
   - name: Media
   - name: Admin
+  - name: Member
 paths:
   /actuator/health:
     get:
@@ -183,7 +184,9 @@ paths:
         the server generates one and returns it once.
         Errors:
         - 400 VALIDATION_FAILED: username does not match `^[a-z0-9._-]{3,32}$`, username is taken,
-          or the temporary password is shorter than 12 characters or equals the username.
+          `displayName` is longer than 80, `email` is longer than 254 or already used by another
+          principal (case-insensitive), or the temporary password is shorter than 12 characters or
+          equals the username.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
@@ -203,14 +206,39 @@ paths:
         "403": { $ref: "#/components/responses/Error403" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/principals/assignable:
+    get:
+      operationId: listAssignablePrincipals
+      tags: [Principals]
+      description: |
+        Principals that entries of `contentType` can be assigned to (G-04): active, not deleted, holding
+        `update` on the type on the Back surface (predicates ignored). The caller needs `update` on the type
+        on its own surface. `q` is a case-insensitive substring of username or displayName. Order:
+        displayName, then username; at most 20. Only `id` and `displayName` are returned.
+        Errors:
+        - 400 VALIDATION_FAILED: `contentType` missing, unknown or disabled.
+        - 403 FORBIDDEN: caller lacks `update` on the type.
+      parameters:
+        - { in: query, name: contentType, required: true, schema: { type: string } }
+        - { in: query, name: q, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: Assignable principals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssignablePrincipalList" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}:
     get:
       operationId: getPrincipal
       tags: [Principals]
       description: |
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id (message `not found`; see BQ-06).
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -222,6 +250,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
     patch:
       operationId: patchPrincipal
@@ -229,9 +258,11 @@ paths:
       description: |
         Null or absent properties keep their current value.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, or `status` is not a PrincipalStatus.
+        - 400 VALIDATION_FAILED: `status` is not a PrincipalStatus, `displayName` is longer than 80,
+          or `email` is longer than 254 or used by another principal (case-insensitive).
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -249,6 +280,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/disable:
@@ -258,9 +290,9 @@ paths:
       description: |
         Revokes every session of the principal.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id.
         - 403 LAST_ADMIN: the principal is the last active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -273,6 +305,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/unlock:
     post:
@@ -280,9 +313,9 @@ paths:
       tags: [Principals]
       description: |
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id.
         - 403 ACCOUNT_DISABLED: a disabled principal cannot be unlocked.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -295,6 +328,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/roles:
     put:
@@ -303,10 +337,11 @@ paths:
       description: |
         Replaces all role assignments. `editor` and `operator` need a non-empty `contentTypeCodes`.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, missing or duplicate role code,
-          unknown role, or editor/operator without an allowlist.
+        - 400 VALIDATION_FAILED: missing or duplicate role code, unknown role, or editor/operator
+          without an allowlist.
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -322,6 +357,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/password:
@@ -332,9 +368,9 @@ paths:
         Sets a temporary password and revokes every session of the principal. When the body or
         `temporaryPassword` is omitted the server generates one. The password is returned once.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, or the password is shorter than
-          12 characters or equals the username.
+        - 400 VALIDATION_FAILED: the password is shorter than 12 characters or equals the username.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -352,6 +388,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/effective-permissions:
@@ -359,10 +396,10 @@ paths:
       operationId: effectivePermissions
       tags: [Principals]
       description: |
-        Lists anonymous grants plus the grants of every role of the principal. An unknown id
-        returns only the anonymous grants.
+        Lists anonymous grants plus the grants of every role of the principal.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -374,6 +411,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/roles:
     get:
@@ -423,7 +461,7 @@ paths:
         - 400 VALIDATION_FAILED: unknown role, unknown action, unknown surface, duplicate
           permission, malformed predicate, a predicate without `contentType`, a predicate whose field is
           not an enabled string, enum, ref or principal-ref field with index rows in that type (02 §4.1),
-          or an empty list for the anonymous role.
+          `contentTypeCode` longer than 64, or an empty list for the anonymous role.
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
       parameters:
@@ -472,7 +510,7 @@ paths:
         `filterable=true`, index rows and visibility `public`; datetime fields take
         `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive) as ISO-8601 with offset.
         Relation filters: `ref.<fieldKey>=<entry uuid>` on a public ref field; may repeat, all must match.
-        They read the relations of the working copy (02 BQ-10).
+        They read the relations of the published copy (02 BQ-10, BW5).
         Other query parameters are ignored.
         Errors:
         - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
@@ -614,9 +652,11 @@ paths:
         Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
         datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
         Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
+        `publishRequested=true` keeps only entries with an open publish request (G-03); false leaves the list unfiltered.
+        `include=refs` adds `refs` to every item (G-10): two more store reads per page, not per item.
         Other query parameters are ignored.
         Errors:
-        - 400 VALIDATION_FAILED: `page` or `size` out of range; unknown `state` value; `sort` names a key
+        - 400 VALIDATION_FAILED: `include` other than `refs`; `publishRequested` other than true or false; `page` or `size` out of range; unknown `state` value; `sort` names a key
           that is not sortable; a filter names a field that is not filterable or has a value of the wrong
           kind; a `ref.<fieldKey>` value is not a UUID; a parameter other than `ref.<fieldKey>` is repeated.
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
@@ -629,6 +669,11 @@ paths:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
         - $ref: "#/components/parameters/Sort"
+        - in: query
+          name: publishRequested
+          required: false
+          schema: { type: boolean }
+        - $ref: "#/components/parameters/IncludeRefs"
       responses:
         "200":
           description: Work entries including drafts
@@ -682,12 +727,15 @@ paths:
       operationId: getWorkEntry
       tags: [Content]
       description: |
+        `include=refs` adds `refs` (G-10).
         Errors:
+        - 400 VALIDATION_FAILED: `include` other than `refs`.
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
         - 403 FORBIDDEN: caller may not read this entry.
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
       parameters:
         - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/IncludeRefs"
       responses:
         "200":
           description: Work copy
@@ -763,7 +811,9 @@ paths:
       operationId: publishEntry
       tags: [Content]
       description: |
-        Publishing a published entry without changes returns it unchanged.
+        Publishing a published entry without changes and without an open request returns it unchanged.
+        If its working payload is clean but a request remains open, clear the request with a version increment
+        and entry.publish_request_cancel audit; do not create a revision or an entry.publish event.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `publish`).
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -786,6 +836,95 @@ paths:
         "404": { $ref: "#/components/responses/Error404" }
         "409": { $ref: "#/components/responses/Error409" }
         "422": { $ref: "#/components/responses/Error422" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/entries:batch-patch:
+    post:
+      operationId: batchPatchEntries
+      tags: [Content]
+      description: |
+        Patches 1 to 100 entries atomically (G-09). Each item gets the checks of patchEntry, in item order.
+        The first failing check that is not a field error stops the batch with that error; its message starts
+        with `items[<i>]: `. Otherwise all field errors of all items are returned together as one 422 with
+        paths `items[<i>].payload.<fieldKey>`. Nothing is written unless every item passes; then all items
+        are written in one transaction. `slug` cannot be changed here. No audit event (as patchEntry).
+        Errors:
+        - 400 VALIDATION_FAILED: `items` empty or longer than 100; an item without `id`; an id repeated.
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN; 404 ENTRY_NOT_FOUND; 409 INVALID_STATE_TRANSITION, VERSION_CONFLICT;
+          428 VERSION_REQUIRED: as patchEntry, for the first failing item.
+        - 422 with `error.fields`: as patchEntry, for all items.
+      parameters:
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BatchPatchRequest" }
+      responses:
+        "200":
+          description: Updated entries in item order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntryList" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "409": { $ref: "#/components/responses/Error409" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "428": { $ref: "#/components/responses/Error428" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/entries/{id}/publish-request:
+    post:
+      operationId: requestPublish
+      tags: [Content]
+      description: |
+        Asks for the entry to be published (G-03). Needs `update`. The entry must be a draft, or published
+        with unpublished changes (`dirty`). An open request is returned unchanged. Creating a request increments
+        `version` and changes `updatedAt`, using compare-and-set. Publish, unpublish, archive and restore clear
+        the request. Audit: `entry.publish_request`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+        - 409 INVALID_STATE_TRANSITION: archived, or published without changes.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/CsrfHeader"
+      responses:
+        "200":
+          description: Entry with an open publish request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "409": { $ref: "#/components/responses/Error409" }
+        "500": { $ref: "#/components/responses/Error500" }
+    delete:
+      operationId: cancelPublishRequest
+      tags: [Content]
+      description: |
+        Withdraws the open publish request. Needs `update`. Without a request the entry is returned
+        unchanged. Clearing an existing request increments `version` and changes `updatedAt`, using compare-and-set.
+        Audit: `entry.publish_request_cancel`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/CsrfHeader"
+      responses:
+        "200":
+          description: Entry without a publish request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/entries/{id}/unpublish:
     post:
@@ -948,7 +1087,13 @@ paths:
       description: |
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as adminListContentTypes.
-        - 422 FIELD_VALIDATION: key does not match `^[a-z][a-z0-9_]{1,62}$` or already exists.
+        - 422 FIELD_VALIDATION: every invalid input in `error.fields`, in body order (02 BQ-08):
+          `key` REQUIRED, INVALID_FORMAT (not `^[a-z][a-z0-9_]{1,62}$`) or DUPLICATE (type exists);
+          `displayName`, `pluralDisplayName` TOO_LONG (over 80); `titleField` TOO_LONG (over 63);
+          `slugPolicy` NOT_IN_ENUM; `fields[i]` REQUIRED (null item); `fields[i].key` REQUIRED, TOO_LONG
+          (over 63) or DUPLICATE (repeats an earlier field); `fields[i].type` NOT_IN_ENUM (not string,
+          markdown, int, boolean, datetime, enum, ref, principal-ref or media-ref); `fields[i].refTarget`
+          TOO_LONG (over 63). Nothing is written.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
       requestBody:
@@ -1104,29 +1249,203 @@ paths:
       operationId: listAudit
       tags: [Admin]
       description: |
-        Newest first. Not paginated in this version.
+        Audit search (02 §4.6, B-07). Order: `at` descending, then id text ascending. Blank parameters mean
+        no condition; other parameters are ignored. `actor` is a username; an unknown username gives an
+        empty page. `action` matches exactly, or as a prefix when the value ends with `.` (for example
+        `entry.`). `from` is inclusive and `to` exclusive.
         Errors:
-        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface.
-        - 403 FORBIDDEN: caller lacks `read_audit`.
+        - 400 VALIDATION_FAILED: `page` or `size` out of range; `from`, `to` or `targetId` malformed; a
+          parameter repeated.
+        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+          denied `read_audit`).
+        - 403 FORBIDDEN: caller lacks `read_audit` (also written as denied).
       parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - { in: query, name: from, required: false, schema: { type: string, format: date-time } }
+        - { in: query, name: to, required: false, schema: { type: string, format: date-time } }
+        - { in: query, name: actor, required: false, description: Username of the actor., schema: { type: string } }
         - in: query
           name: action
           required: false
-          description: Exact audit action, for example `LOGIN_SUCCESS`.
+          description: Exact action, for example `entry.publish`; a value ending with `.` is a prefix.
           schema: { type: string }
-        - in: query
-          name: targetId
-          required: false
-          schema: { type: string, format: uuid }
+        - { in: query, name: category, required: false, schema: { type: string } }
+        - { in: query, name: targetType, required: false, schema: { type: string } }
+        - { in: query, name: targetId, required: false, schema: { type: string, format: uuid } }
+        - { in: query, name: outcome, required: false, schema: { type: string } }
       responses:
         "200":
-          description: Audit events
+          description: One page of audit events
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/AuditEventList" }
+              schema: { $ref: "#/components/schemas/AuditEventPage" }
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/admin/audit/{id}:
+    get:
+      operationId: getAuditEvent
+      tags: [Admin]
+      description: |
+        One audit event with its `detail`.
+        Errors:
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listAudit.
+        - 404 AUDIT_EVENT_NOT_FOUND: no event with this id.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Audit event
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditEventDetail" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/admin/settings/audit:
+    get:
+      operationId: getAuditSettings
+      tags: [Admin]
+      description: |
+        Audit retention (surface-admin §7.2). Requires `manage_settings` (Admin surface). Events older than
+        `retentionDays` are deleted by a job that runs one hour after startup and then every 24 hours.
+        Errors:
+        - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+          denied `manage_settings`).
+        - 403 FORBIDDEN: caller lacks `manage_settings` (also written as denied).
+      responses:
+        "200":
+          description: Current audit retention
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditSettings" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "500": { $ref: "#/components/responses/Error500" }
+    patch:
+      operationId: patchAuditSettings
+      tags: [Admin]
+      description: |
+        Changes the retention. A change writes `settings.retention_updated` (category SETTINGS, targetType
+        `settings`, detail `{from, to}`); sending the current value changes nothing and writes no event. A shorter
+        retention takes effect at the next purge run; nothing is deleted immediately.
+        Errors:
+        - 400 VALIDATION_FAILED: body is not a JSON object, or has a property other than `retentionDays`.
+        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getAuditSettings.
+        - 422 FIELD_VALIDATION: `error.fields[0].field` is `retentionDays`, code REQUIRED (missing or null),
+          WRONG_TYPE (not an integer) or NOT_IN_ENUM (not 30, 90 or 365).
+      parameters:
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuditSettingsPatchRequest" }
+      responses:
+        "200":
+          description: Updated audit retention
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditSettings" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/me/content-types/{typeKey}/entries:
+    get:
+      operationId: listMyEntries
+      tags: [Member]
+      description: |
+        The caller's entries of a type that has an ownerField (02 §4.5, G-08): entries whose ownerField equals
+        the caller's id, in draft or published state, with the public fields of the working copy. Front surface
+        only. Paging, sorting, q, filter.* and ref.* follow listWorkEntries (default `-updatedAt`).
+        state and publishRequested are syntax-checked but do not change the fixed draft/published owner list.
+        Errors:
+        - 400 VALIDATION_FAILED: `page`, `size`, `sort` or a filter as listWorkEntries.
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Sort"
+      responses:
+        "200":
+          description: The caller's entries
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntryPage" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "500": { $ref: "#/components/responses/Error500" }
+    post:
+      operationId: createMyEntry
+      tags: [Member]
+      description: |
+        Creates a draft owned by the caller (02 §4.5). Front surface only; needs `create` on the type. The
+        ownerField is set to the caller (a client value is replaced). A ref field whose target type has an
+        ownerField must point to an entry the caller owns. At most 5 requests per member per minute. Audit:
+        `entry.create`.
+        Errors:
+        - 400 VALIDATION_FAILED: `publicationState` present in the body, including null.
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 403 FORBIDDEN: caller lacks `create` on the type.
+        - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+        - 422 with `error.fields`: payload invalid as createEntry, or a ref to an entry the caller does not own
+          (`REF_TARGET_NOT_FOUND`).
+        - 429 RATE_LIMITED: more than 5 requests in the last minute.
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MemberCreateRequest" }
+      responses:
+        "201":
+          description: Created draft
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "429": { $ref: "#/components/responses/Error429" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/me/entries/{id}:
+    get:
+      operationId: getMyEntry
+      tags: [Member]
+      description: |
+        One of the caller's entries. Front surface only.
+        Errors:
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 403 FORBIDDEN: the entry belongs to someone else (surface-front AC-11; not hidden as 404).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted, or its type is disabled or has no ownerField.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: The caller's entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/media:
     get:
@@ -1155,9 +1474,9 @@ paths:
         Errors:
         - 400 VALIDATION_FAILED: the `file` part is missing.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 409 quota_exceeded: library or per-principal quota would be exceeded.
-        - 413 file_too_large: file is larger than the configured maximum.
-        - 415 unsupported_media_type: empty file or not an allowed type.
+        - 409 MEDIA_QUOTA_EXCEEDED: library or per-principal quota would be exceeded.
+        - 413 MEDIA_FILE_TOO_LARGE: file is larger than the configured maximum.
+        - 415 MEDIA_UNSUPPORTED_TYPE: empty file or not an allowed type.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
       requestBody:
@@ -1202,7 +1521,7 @@ paths:
         Returns deleted media metadata as well.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 404 not_found: media does not exist.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -1222,7 +1541,7 @@ paths:
       description: |
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 404 not_found: media does not exist.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -1242,9 +1561,9 @@ paths:
         Errors:
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
         - 403 FORBIDDEN: caller may not read this media.
-        - 404 not_found: media does not exist.
-        - 404 variant_not_available: variant is not original, thumbnail or web, or was not generated.
-        - 410 gone: media is soft-deleted.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
+        - 404 MEDIA_VARIANT_NOT_AVAILABLE: variant is not original, thumbnail or web, or was not generated.
+        - 410 MEDIA_GONE: media is soft-deleted.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/Variant"
@@ -1273,7 +1592,7 @@ paths:
       security: []
       description: |
         Errors:
-        - 404 not_found: media missing, deleted, or not attached to a published public entry field.
+        - 404 MEDIA_NOT_FOUND: media missing, deleted, or not attached to a published public entry field.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -1292,7 +1611,7 @@ paths:
       security: []
       description: |
         Errors:
-        - 404 not_found: media not publicly readable, or the variant is unknown or missing.
+        - 404 MEDIA_NOT_FOUND: media not publicly readable, or the variant is unknown or missing.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/Variant"
@@ -1383,6 +1702,12 @@ components:
         type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
         visibility `public` only).
       schema: { type: string }
+    IncludeRefs:
+      in: query
+      name: include
+      required: false
+      description: Comma-separated; the only value is `refs`.
+      schema: { type: string }
     CsrfHeader:
       in: header
       name: X-CSRF-Token
@@ -1421,7 +1746,7 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Error413:
-      description: Payload too large (file_too_large).
+      description: Payload too large (MEDIA_FILE_TOO_LARGE).
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
@@ -1437,6 +1762,11 @@ components:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Error428:
       description: Precondition required (VERSION_REQUIRED).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    Error429:
+      description: Too many requests (RATE_LIMITED).
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
@@ -1457,7 +1787,7 @@ components:
     ErrorCode:
       type: string
       description: |
-        Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
+        Every `error.code` the API can return. Media codes were lowercase until BW5 (BQ-07).
       enum:
         - UNAUTHENTICATED
         - INVALID_CREDENTIALS
@@ -1472,6 +1802,8 @@ components:
         - ENTRY_NOT_FOUND
         - CONTENT_TYPE_NOT_FOUND
         - NAVIGATION_NOT_FOUND
+        - AUDIT_EVENT_NOT_FOUND
+        - PRINCIPAL_NOT_FOUND
         - AUDIENCE_PARAM_REJECTED
         - INVALID_STATE_TRANSITION
         - SLUG_CONFLICT
@@ -1486,15 +1818,16 @@ components:
         - REF_TARGET_NOT_FOUND
         - REF_TARGET_WRONG_TYPE
         - PRINCIPAL_REF_UNRESOLVED
-        - not_found
-        - variant_not_available
-        - unsupported_media_type
-        - quota_exceeded
-        - file_too_large
-        - gone
+        - MEDIA_NOT_FOUND
+        - MEDIA_VARIANT_NOT_AVAILABLE
+        - MEDIA_UNSUPPORTED_TYPE
+        - MEDIA_QUOTA_EXCEEDED
+        - MEDIA_FILE_TOO_LARGE
+        - MEDIA_GONE
         - ROUTE_NOT_FOUND
         - METHOD_NOT_ALLOWED
         - MEDIA_TYPE_NOT_SUPPORTED
+        - RATE_LIMITED
         - INTERNAL_ERROR
     ErrorEnvelope:
       type: object
@@ -1525,7 +1858,7 @@ components:
             fields:
               type: array
               minItems: 1
-              description: Present on 422 payload validation errors; every invalid key, in validation order.
+              description: Present on 422 payload, content-type or settings validation errors; every invalid key, in validation order.
               items: { $ref: "#/components/schemas/FieldError" }
     FieldError:
       type: object
@@ -1534,7 +1867,7 @@ components:
       properties:
         field:
           type: string
-          description: Path of the input, `payload.<fieldKey>`.
+          description: Input path (`payload.<fieldKey>`), a settings property, or a content-type body path such as `fields[0].key`.
           example: payload.title
         code: { $ref: "#/components/schemas/FieldErrorCode" }
         message:
@@ -1543,9 +1876,11 @@ components:
     FieldErrorCode:
       type: string
       description: |
-        Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
-        markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
-        REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+        Why a field is invalid. REQUIRED (publish, member create, or missing content-type/settings input), RESERVED_KEY, WRONG_TYPE,
+        TOO_LONG (the endpoint-specific Unicode code-point limit; payload string 1,000 or markdown 100,000),
+        INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+        REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED, INVALID_FORMAT (a value that must match a pattern), DUPLICATE
+        (a key that already exists or repeats in the request).
       enum:
         - REQUIRED
         - RESERVED_KEY
@@ -1557,6 +1892,8 @@ components:
         - REF_TARGET_NOT_FOUND
         - REF_TARGET_WRONG_TYPE
         - PRINCIPAL_REF_UNRESOLVED
+        - INVALID_FORMAT
+        - DUPLICATE
     Health:
       type: object
       additionalProperties: true
@@ -1692,6 +2029,21 @@ components:
       properties:
         currentPassword: { type: string }
         newPassword: { type: string, minLength: 12 }
+    AssignablePrincipalList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, displayName]
+            properties:
+              id: { type: string, format: uuid }
+              displayName: { type: string }
     Principal:
       type: object
       additionalProperties: false
@@ -1985,7 +2337,8 @@ components:
     WorkEntry:
       type: object
       additionalProperties: false
-      required: [id, contentType, slug, publicationState, version, title, payload, dirty, publishedAt, updatedAt]
+      required: [id, contentType, slug, publicationState, version, title, payload, dirty, publishedAt, updatedAt,
+        publishRequestedAt, publishRequestedBy]
       properties:
         id: { type: string, format: uuid }
         contentType: { type: string }
@@ -2002,6 +2355,97 @@ components:
           description: True when published and the work copy differs from the published copy.
         publishedAt: { type: string, format: date-time, nullable: true }
         updatedAt: { type: string, format: date-time }
+        publishRequestedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When an open publish request was made (G-03); null without one.
+        publishRequestedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: Principal who made the open publish request.
+        refs:
+          type: object
+          description: Present only with `include=refs` (G-10); one key per ref field that holds an entry id.
+          additionalProperties: { $ref: "#/components/schemas/RefSummary" }
+    BatchPatchRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required: [id, version]
+            properties:
+              id: { type: string, format: uuid }
+              version: { type: integer, format: int32 }
+              payload:
+                allOf:
+                  - $ref: "#/components/schemas/EntryPayload"
+                nullable: true
+    WorkEntryList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/WorkEntry" }
+    RefSummary:
+      type: object
+      additionalProperties: false
+      required: [id]
+      description: |
+        Target of a ref field. Readable (caller has read_draft on the target): id, contentType, title,
+        publicationState. Not readable: id and restricted=true. Missing or soft-deleted: id and missing=true.
+      properties:
+        id: { type: string, format: uuid }
+        contentType: { type: string }
+        title: { type: string, nullable: true }
+        publicationState: { $ref: "#/components/schemas/PublicationState" }
+        restricted: { type: boolean }
+        missing: { type: boolean }
+    MemberEntry:
+      type: object
+      additionalProperties: false
+      required: [id, contentType, publicationState, title, payload, createdAt, updatedAt]
+      description: |
+        The caller's entry (02 §4.5): enabled public fields of the working copy; title is null unless its field
+        is enabled and public. Media-ref values expanded as in
+        PublicEntry (null when not publicly readable).
+      properties:
+        id: { type: string, format: uuid }
+        contentType: { type: string }
+        publicationState: { $ref: "#/components/schemas/PublicationState" }
+        title: { type: string, nullable: true }
+        payload: { $ref: "#/components/schemas/EntryPayload" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MemberEntryPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, size, offset, limit]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/MemberEntry" }
+        total: { type: integer, format: int64 }
+        page: { type: integer, minimum: 1 }
+        size: { type: integer, minimum: 1, maximum: 100 }
+        offset: { type: integer }
+        limit: { type: integer }
+    MemberCreateRequest:
+      type: object
+      required: [payload]
+      properties:
+        payload: { $ref: "#/components/schemas/EntryPayload" }
+        publicationState:
+          type: string
+          description: Must be absent; any present value, including null, is 400 VALIDATION_FAILED.
     WorkEntryPage:
       type: object
       additionalProperties: false
@@ -2200,24 +2644,99 @@ components:
           allOf:
             - $ref: "#/components/schemas/NavigationDocument"
           nullable: true
+    AuditActor:
+      type: object
+      additionalProperties: false
+      required: [id, username, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        username:
+          type: string
+          nullable: true
+          description: Null when the principal no longer exists.
+        displayName: { type: string, nullable: true }
     AuditEventSummary:
       type: object
       additionalProperties: false
-      required: [action, targetType, targetId, outcome, at]
+      required: [id, at, actor, category, action, targetType, targetId, surface, outcome]
       properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        actor:
+          allOf:
+            - $ref: "#/components/schemas/AuditActor"
+          nullable: true
+          description: Null for events without an actor (anonymous login attempts, seeding).
+        category:
+          type: string
+          description: AUTH, CONTENT, SCHEMA, SETTINGS, MEDIA or GOVERNANCE.
+        action:
+          type: string
+          description: For example `entry.publish`, `type.create`, `LOGIN_SUCCESS`, or a denied governance action such as `manage_types`.
+        targetType: { type: string, nullable: true }
+        targetId: { type: string, format: uuid, nullable: true }
+        surface: { type: string, nullable: true }
+        outcome:
+          type: string
+          description: ok or denied.
+    AuditEventDetail:
+      type: object
+      additionalProperties: false
+      description: AuditEventSummary plus detail.
+      required: [id, at, actor, category, action, targetType, targetId, surface, outcome, detail]
+      properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        actor:
+          allOf:
+            - $ref: "#/components/schemas/AuditActor"
+          nullable: true
+        category: { type: string }
         action: { type: string }
         targetType: { type: string, nullable: true }
         targetId: { type: string, format: uuid, nullable: true }
+        surface: { type: string, nullable: true }
         outcome: { type: string }
-        at: { type: string, format: date-time }
-    AuditEventList:
+        detail:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: The event's detail_json, or null.
+    AuditSettings:
       type: object
       additionalProperties: false
-      required: [items]
+      required: [retentionDays, allowedDays, updatedAt, updatedBy]
+      properties:
+        retentionDays: { type: integer, enum: [30, 90, 365] }
+        allowedDays:
+          type: array
+          items: { type: integer }
+          description: Always `[30, 90, 365]`.
+        updatedAt: { type: string, format: date-time }
+        updatedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: Principal who last changed the retention; null while it is the default.
+    AuditSettingsPatchRequest:
+      type: object
+      additionalProperties: false
+      required: [retentionDays]
+      properties:
+        retentionDays: { type: integer, enum: [30, 90, 365] }
+    AuditEventPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, size, offset, limit]
       properties:
         items:
           type: array
           items: { $ref: "#/components/schemas/AuditEventSummary" }
+        total: { type: integer, format: int64 }
+        page: { type: integer, minimum: 1 }
+        size: { type: integer, minimum: 1, maximum: 100 }
+        offset: { type: integer }
+        limit: { type: integer }
     MediaVariantLink:
       type: object
       additionalProperties: false

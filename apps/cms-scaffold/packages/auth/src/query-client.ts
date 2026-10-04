@@ -8,8 +8,8 @@ export function shouldRetry(failureCount: number, error: unknown): boolean {
 }
 
 /**
- * QueryClient used by all three apps. A 401 from any query or mutation (session expired) marks the
- * session anonymous; RequireSurface then redirects to the login page with the current path (C-17).
+ * A 401 from a query or mutation while signed in marks expiry without clearing the last user.
+ * RequireSurface navigates through the router so unsaved changes can block leaving (W1-FM09).
  */
 export function createAppQueryClient(): QueryClient {
   const client: QueryClient = new QueryClient({
@@ -22,7 +22,7 @@ export function createAppQueryClient(): QueryClient {
   });
   function onUnauthorized(error: unknown) {
     if (isApiError(error) && error.status === 401 && client.getQueryData(keys.auth.me())) {
-      client.setQueryData(keys.auth.me(), null);
+      client.setQueryData(keys.auth.expired(), true);
     }
   }
   return client;

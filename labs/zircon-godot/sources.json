@@ -1,0 +1,257 @@
+{
+  "repository": "https://github.com/iamcheyan/Zircon-Godot",
+  "commit": "e383d4a020c46acce37a845eae5cc84a867ecffc",
+  "review_date": "2026-10-04",
+  "timezone": "Asia/Singapore",
+  "review_type": "architecture-focused static review; not exhaustive line-by-line audit",
+  "runtime_validation": "skipped: no dotnet/Godot executables or game runtime assets",
+  "root_license_observation": "No root LICENSE or COPYING found in fixed recursive tree; third-party font license files exist; not a legal determination",
+  "files": [
+    {
+      "path": "BotRunner/BotRunner.csproj",
+      "blob_sha": "7f15d398feecf65cb1391df6ecab40ff4d816662",
+      "bytes": 337,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "BotRunner/Program.cs",
+      "blob_sha": "35251f76cadfa28f82dd309109490a779d4a27c8",
+      "bytes": 1454,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Formats/LibraryCache.cs",
+      "blob_sha": "c71b61c2e2ebe34e0263cce4d6138e04f28042d6",
+      "bytes": 2017,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Formats/MapReader.cs",
+      "blob_sha": "1fc4843d9741033073cc5114ffbef256f3bffc21",
+      "bytes": 4037,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Formats/ZlReader.cs",
+      "blob_sha": "24ddd08347ddd603e6c06f90735ef07521720177",
+      "bytes": 27074,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "GodotClient/Network/DatabaseLoader.cs",
+      "blob_sha": "91f0a79708c64c869934568bfe8c27c1ab93d043",
+      "bytes": 4273,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Network/NetworkManager.cs",
+      "blob_sha": "6cf51c267e7408452e82364b9fdab8d03307c2bf",
+      "bytes": 4088,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Network/ServerConnection.cs",
+      "blob_sha": "f920fa32965a76c627f07cff1dc91d6944e73549",
+      "bytes": 59053,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "GodotClient/Network/SinglePlayerLauncher.cs",
+      "blob_sha": "f7f94e495ee08a47c00f41d122e7e059446aea24",
+      "bytes": 10399,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Scripts/DataLayer.cs",
+      "blob_sha": "aaefe422977c798f0a50ffeb4bb40fadb825c298",
+      "bytes": 20808,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "GodotClient/Scripts/GameScene.cs",
+      "blob_sha": "ff917a7f0af57655f2acf662a10ca5a163d45d1b",
+      "bytes": 574130,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "GodotClient/Scripts/LoginScene.cs",
+      "blob_sha": "342ea4658a9de98d5035d5917f8f6447d4d962c7",
+      "bytes": 46459,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Scripts/MagicEffectTable.cs",
+      "blob_sha": "518406866da96e2563896151f9f704080379b69f",
+      "bytes": 9784,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/Scripts/MapView.cs",
+      "blob_sha": "46effab8ba239e5f56220a79183d73b852a7a36d",
+      "bytes": 16577,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "GodotClient/ZirconClient.csproj",
+      "blob_sha": "a49b86dff5d20a02edc02e5d146a13988bccb329",
+      "bytes": 459,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "GodotClient/project.godot",
+      "blob_sha": "010154af72cd24823719f3252f6126258fdf3c9c",
+      "bytes": 852,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "LibraryCore/LibraryCore.csproj",
+      "blob_sha": "4340f62396308527391c023e4c9da435a64ff59d",
+      "bytes": 131,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "LibraryCore/MirDB/DBCollection.cs",
+      "blob_sha": "0ff2ee65cadca3a8b63c077dad8fe188e9aadb30",
+      "bytes": 6853,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "LibraryCore/MirDB/Session.cs",
+      "blob_sha": "b7c25c249e39258d3fdcfb45b309039a880bb59e",
+      "bytes": 22188,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "LibraryCore/Network/BaseConnection.cs",
+      "blob_sha": "46657f5e46e450503a35c5a6428cb43c7ffc09f9",
+      "bytes": 13840,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "LibraryCore/Network/ClientPackets.cs",
+      "blob_sha": "b630587cfb04e7d0b9b676f79374c31296fb32bc",
+      "bytes": 22670,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "LibraryCore/Network/GeneralPackets.cs",
+      "blob_sha": "34029448bad402ce62a73929ccf1e4fcbd4f5be7",
+      "bytes": 664,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "LibraryCore/Network/Packet.cs",
+      "blob_sha": "78c6069fd53260b1d216d88929a842bf34540417",
+      "bytes": 18529,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "LibraryCore/Network/ServerPackets.cs",
+      "blob_sha": "b86b6c09c5ad99be20007e3b30249dcc657a2b18",
+      "bytes": 43413,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "README.md",
+      "blob_sha": "236165b5b45addb2d0092b83334d491736fea783",
+      "bytes": 5924,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerCore/Program.cs",
+      "blob_sha": "244a088183789480f6591db9c7101e60a8fe357e",
+      "bytes": 2316,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerCore/ServerCore.csproj",
+      "blob_sha": "c22de3198d53a231664bbe57bf6ff619c094f611",
+      "bytes": 808,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerLibrary/Envir/Config.cs",
+      "blob_sha": "c7b5e86c0a097382025c9d1d0cf8ebaa882ba431",
+      "bytes": 11192,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerLibrary/Envir/SConnection.cs",
+      "blob_sha": "d8cf2162df04c04005fd7653942c801e556fffca",
+      "bytes": 49383,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "ServerLibrary/Envir/SEnvir.cs",
+      "blob_sha": "9f5222039f10e518ce21d5ad7844176e1b87ea3e",
+      "bytes": 168454,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "ServerLibrary/Models/Map.cs",
+      "blob_sha": "7fd9a6708199731bb18b525624e514ad473dad89",
+      "bytes": 25935,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerLibrary/Models/Monsters/OmaMage.cs",
+      "blob_sha": "021e35d9c3e51a0974393231b84e9cf22a9e3afd",
+      "bytes": 706,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "ServerLibrary/Models/PlayerObject.cs",
+      "blob_sha": "3d83f9db4518be777ef47e374aacb4db16401024",
+      "bytes": 675554,
+      "review_scope": "retrieved and indexed; selected architectural symbols inspected"
+    },
+    {
+      "path": "ServerLibrary/ServerLibrary.csproj",
+      "blob_sha": "dfaf3365a482e52acd60674aac538701911b6971",
+      "bytes": 276,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "Tests/GroundLootChecks/GroundLootChecks.csproj",
+      "blob_sha": "a6e0a4cd10d9c2fff5bfef5843b0c7442bd28db4",
+      "bytes": 749,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "Tests/GroundLootChecks/README.md",
+      "blob_sha": "45f9abaf6c05dbfef16d50d188a9167cb56dc201",
+      "bytes": 6928,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "docs/DATA_MODEL.md",
+      "blob_sha": "782749dcac1f4760186cb88dbb7b7a16aa479a14",
+      "bytes": 9846,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "docs/MAGIC_FULL_AUDIT.md",
+      "blob_sha": "687b1cf8ad3ac6ad3daabcc450dd2d4e8957bc53",
+      "bytes": 4067,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "docs/NETWORKING.md",
+      "blob_sha": "1af5749c8e55b03ca653eb61f9166d36854da3ae",
+      "bytes": 8424,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "docs/SERVER_RUNTIME.md",
+      "blob_sha": "60519d53e8a17d339a950da1aef87db7551fb3f9",
+      "bytes": 9643,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    },
+    {
+      "path": "docs/UPSTREAM_SYNC_POLICY.md",
+      "blob_sha": "8841a9c8e07681aa2ea74a17a6cd5342d8b1fe88",
+      "bytes": 3995,
+      "review_scope": "retrieved; project configuration/documentation or focused source review"
+    }
+  ]
+}

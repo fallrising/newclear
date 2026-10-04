@@ -640,7 +640,7 @@ paths:
         Field filters: `filter.<fieldKey>=<value>` on a field with `filterable=true` and index rows;
         datetime fields take `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive).
         Relation filters: `ref.<fieldKey>=<entry uuid>`; may repeat, all must match.
-        `publishRequested=true` keeps only entries with an open publish request (G-03).
+        `publishRequested=true` keeps only entries with an open publish request (G-03); false leaves the list unfiltered.
         `include=refs` adds `refs` to every item (G-10): two more store reads per page, not per item.
         Other query parameters are ignored.
         Errors:
@@ -799,7 +799,9 @@ paths:
       operationId: publishEntry
       tags: [Content]
       description: |
-        Publishing a published entry without changes returns it unchanged.
+        Publishing a published entry without changes and without an open request returns it unchanged.
+        If its working payload is clean but a request remains open, clear the request with a version increment
+        and entry.publish_request_cancel audit; do not create a revision or an entry.publish event.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `publish`).
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -866,8 +868,9 @@ paths:
       tags: [Content]
       description: |
         Asks for the entry to be published (G-03). Needs `update`. The entry must be a draft, or published
-        with unpublished changes (`dirty`). An open request is returned unchanged. `version` and `updatedAt`
-        do not change. Publish, unpublish, archive and restore clear the request. Audit: `entry.publish_request`.
+        with unpublished changes (`dirty`). An open request is returned unchanged. Creating a request increments
+        `version` and changes `updatedAt`, using compare-and-set. Publish, unpublish, archive and restore clear
+        the request. Audit: `entry.publish_request`.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -892,7 +895,8 @@ paths:
       tags: [Content]
       description: |
         Withdraws the open publish request. Needs `update`. Without a request the entry is returned
-        unchanged. Audit: `entry.publish_request_cancel`.
+        unchanged. Clearing an existing request increments `version` and changes `updatedAt`, using compare-and-set.
+        Audit: `entry.publish_request_cancel`.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getWorkEntry (action `update`).
         - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted.
@@ -1291,7 +1295,8 @@ paths:
       description: |
         The caller's entries of a type that has an ownerField (02 §4.5, G-08): entries whose ownerField equals
         the caller's id, in draft or published state, with the public fields of the working copy. Front surface
-        only. Paging and sorting as listWorkEntries (default `-updatedAt`); `state` is rejected as unknown.
+        only. Paging, sorting, q, filter.* and ref.* follow listWorkEntries (default `-updatedAt`).
+        state and publishRequested are syntax-checked but do not change the fixed draft/published owner list.
         Errors:
         - 400 VALIDATION_FAILED: `page`, `size`, `sort` or a filter as listWorkEntries.
         - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
@@ -1321,7 +1326,7 @@ paths:
         ownerField must point to an entry the caller owns. At most 5 requests per member per minute. Audit:
         `entry.create`.
         Errors:
-        - 400 VALIDATION_FAILED: `publicationState` present in the body.
+        - 400 VALIDATION_FAILED: `publicationState` present in the body, including null.
         - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
         - 403 FORBIDDEN: caller lacks `create` on the type.
         - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
@@ -2335,7 +2340,8 @@ components:
       additionalProperties: false
       required: [id, contentType, publicationState, title, payload, createdAt, updatedAt]
       description: |
-        The caller's entry (02 §4.5): public fields of the working copy; media-ref values expanded as in
+        The caller's entry (02 §4.5): enabled public fields of the working copy; title is null unless its field
+        is enabled and public. Media-ref values expanded as in
         PublicEntry (null when not publicly readable).
       properties:
         id: { type: string, format: uuid }
@@ -2365,7 +2371,7 @@ components:
         payload: { $ref: "#/components/schemas/EntryPayload" }
         publicationState:
           type: string
-          description: Must be absent; present is 400 VALIDATION_FAILED.
+          description: Must be absent; any present value, including null, is 400 VALIDATION_FAILED.
     WorkEntryPage:
       type: object
       additionalProperties: false

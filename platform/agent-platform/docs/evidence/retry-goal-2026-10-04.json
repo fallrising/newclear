@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-04",
+  "base_commit": "532e5874c9e426a18a8535cfc3766b0286e7fe7b",
+  "feature": "edit latest terminal goal to create a new attempt while preserving historical goals and results",
+  "mode": "local PostgreSQL/API and Chromium; new attempt queued, no runtime allocation or prompt",
+  "environments": {
+    "browser_api_python": "3.13.5",
+    "node": "24.18.0"
+  },
+  "checks": {
+    "frontend": 68,
+    "targeted_frontend": 38,
+    "browser": 7,
+    "skipped": 0
+  },
+  "commands": [
+    "make web-check",
+    "make browser-test",
+    "ruff check scripts/browser-fixture.py",
+    "ruff format --check scripts/browser-fixture.py",
+    "git diff --check",
+    "team contract validators",
+    "independent review"
+  ],
+  "red_green": [
+    "Before implementation: 10 new App failures, 27 baseline passes.",
+    "Intermediate checks exposed a duplicate sibling React key; namespaced retry key fixes stale editor after a new attempt.",
+    "Initial TypeScript check rejected unsupported RTL exact options; corrected without changing string-name match semantics.",
+    "Final targeted38/frontend68/browser7 pass."
+  ],
+  "log_sha256": {
+    "frontend_red": "a53bddc1d125b393a6c9f2a5e1fa7aadefe45103ea23a3b3e882f2734df0ad53",
+    "initial_implementation": "7cb8d5e584e41e4b1458dccad21c2db01af38239636bab4f9142e9a10587134d",
+    "key_collision_regression": "968003a2aaf852b151bd108b69ab123a6a076c8a1228710cef8d54b47d206dc4",
+    "initial_type_check": "3d00493059bf64d863cff1c7171d13bf98de79d87930b179a80b6e6aa59190e5",
+    "targeted_green": "c94f87a282a2b8d5a044016da5a3647aa5c200ed8ba5a549d00790b4529d6364",
+    "worker_check": "bd19e7daaab1010419f464b0c620560bbace7ea3278321b1d5ac6ac7de499bdc",
+    "worker_build": "1803087e26292c89817a2d91d2467506a10133c5314a43161dfcc02d2df9db47",
+    "web_check": "428cacd239733adc77a5364dd7dc2f5272e24d26bd0891c67fa6a22902da01b6",
+    "browser_test": "752aec6af2afc65f1632bfbef40eca842413842f2265797f5dc583741f62c160"
+  },
+  "limitations": [
+    "Only the goal is edited; latest base SHA/profile revision and existing API state-version checks remain.",
+    "API retains existing outer-whitespace normalization and request byte-size limit.",
+    "Drafts are local to the current editor; a different latest attempt resets them.",
+    "No backend API/schema/dependency changes; local backend suite not rerun for this slice.",
+    "No live VM/provider/billing/deployment or full-M3 acceptance claim."
+  ],
+  "review": "Independent T-010 DONE accepted: no required corrections; all nine hashes and final counts verified.",
+  "tested_base_commit": "c4b1ad6562492d12bbf1decafe3c5c7be29fe1ce",
+  "base_update": "Fast-forward to latest main; git diff --quiet confirms no agent-platform files changed since tested base. Existing verification applies to identical component contents."
+}

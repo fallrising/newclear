@@ -75,6 +75,9 @@ impl Provider for OpenAiProvider {
                 )));
             }
         };
+        if let Some(error) = parsed.error {
+            return Err(AiError::Stream(error.message));
+        }
         let mut out = Vec::new();
         for choice in parsed.choices {
             if let Some(content) = choice.delta.and_then(|d| d.content) {
@@ -100,9 +103,16 @@ impl Provider for OpenAiProvider {
 #[derive(Deserialize)]
 struct ChunkPayload {
     #[serde(default)]
+    error: Option<ErrorPayload>,
+    #[serde(default)]
     choices: Vec<Choice>,
     #[serde(default)]
     usage: Option<OpenAiUsage>,
+}
+
+#[derive(Deserialize)]
+struct ErrorPayload {
+    message: String,
 }
 
 #[derive(Deserialize)]

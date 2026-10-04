@@ -129,9 +129,9 @@ func runConfiguredMode(
 	}
 	switch configuration.Server.Mode {
 	case "all-in-one":
-		return runAllInOne(ctx, configuration, logger, registry)
+		return runAllInOne(ctx, configuration, logger, registry, backend)
 	case "ingest":
-		return runIngest(ctx, configuration, logger, registry)
+		return runIngest(ctx, configuration, logger, registry, backend)
 	case "query":
 		return runQuery(ctx, configuration, logger, registry)
 	case "ruler":
@@ -143,12 +143,8 @@ func runConfiguredMode(
 	}
 }
 
-func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
-}
-
-func runIngest(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
+func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend) error {
+	return runIngest(ctx, configuration, logger, registry, backend)
 }
 
 func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {

@@ -10,9 +10,9 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: ApiErrorCode;
   readonly requestId: string | undefined;
-  readonly fields: FieldError[] | undefined;
+  readonly fields: FieldError[];
 
-  constructor(status: number, code: ApiErrorCode, message: string, requestId?: string, fields?: FieldError[]) {
+  constructor(status: number, code: ApiErrorCode, message: string, requestId?: string, fields: FieldError[] = []) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -37,7 +37,7 @@ export function errorFromBody(status: number, body: unknown): ApiError {
       const rawFields = envelope.error?.fields;
       const fields = Array.isArray(rawFields) && rawFields.every((field) => field && typeof field === "object" &&
         typeof field.field === "string" && typeof field.code === "string" && typeof field.message === "string")
-        ? rawFields as FieldError[] : undefined;
+        ? rawFields as FieldError[] : [];
       return new ApiError(status, code as ErrorCode, message, requestId, fields);
     }
   }

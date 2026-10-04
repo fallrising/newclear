@@ -1,7 +1,7 @@
 // Generates src/fixtures.gen.ts from fixtures/*.json. Each fixture gets an OpenAPI type annotation,
 // so `npm run typecheck` fails when a fixture no longer matches the contract (01 §11.3).
 // Fixtures project docs/v2/contracts/fixtures onto the currently implemented contract.
-// Later-wave fields (for example publishRequestedAt) must not leak into BW1a responses.
+// BW2 work entries include nullable publish-request metadata; public entries keep their public shape.
 import { readFileSync, writeFileSync } from "node:fs";
 
 const FIXTURES = [
@@ -15,6 +15,7 @@ const FIXTURES = [
   ["public-entries.json", "publicEntries", 'S["PublicEntry"][]'],
   ["media-assets.json", "mediaAssets", 'S["MediaAssetList"]'],
   ["media-quota.json", "mediaQuota", 'S["MediaQuota"]'],
+  ["revisions.json", "revisions", 'Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]>'],
 ];
 
 function render() {

@@ -2334,74 +2334,8 @@ export const capabilities: Record<string, Record<S["Surface"], S["Capabilities"]
     },
     "admin": {
       "surface": "admin",
-      "types": [
-        {
-          "key": "album",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "clinic_profile",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "milestone",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "note",
-          "actions": [
-            "read_published",
-            "read_draft",
-            "create",
-            "update",
-            "publish",
-            "unpublish",
-            "delete",
-            "archive"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "page",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "photo",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "project",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        },
-        {
-          "key": "vet",
-          "actions": [
-            "read_published"
-          ],
-          "scoped": false
-        }
-      ],
-      "global": [
-        "manage_media"
-      ]
+      "types": [],
+      "global": []
     }
   }
 };
@@ -3544,11 +3478,18 @@ export const principals: S["PrincipalList"] = {
       "displayName": "Projects operator",
       "email": null,
       "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator",
+      "email": null,
+      "status": "active"
     }
   ],
   "page": 0,
   "size": 9,
-  "total": 9
+  "total": 10
 };
 
 export const workContentTypes: S["WorkContentTypeList"] = {
@@ -4849,6 +4790,202 @@ export const workContentTypes: S["WorkContentTypeList"] = {
           "required": false,
           "group": "settings",
           "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        }
+      ]
+    },
+    {
+      "key": "note",
+      "displayName": "Note",
+      "pluralDisplayName": "Notes",
+      "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
+      "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "label": "標題",
+          "helpText": null,
+          "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "label": "內文",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "category",
+          "type": "enum",
+          "label": "分類",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "idea",
+            "todo",
+            "reference"
+          ],
+          "enumLabels": {
+            "idea": "點子",
+            "todo": "待辦",
+            "reference": "參考"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "color",
+          "type": "enum",
+          "label": "顏色",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+          ],
+          "enumLabels": {
+            "red": "紅",
+            "orange": "橙",
+            "yellow": "黃",
+            "green": "綠",
+            "blue": "藍",
+            "purple": "紫"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "priority",
+          "type": "int",
+          "label": "優先順序",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "pinned",
+          "type": "boolean",
+          "label": "置頂",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "dueAt",
+          "type": "datetime",
+          "label": "到期時間",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "related",
+          "type": "ref",
+          "label": "相關筆記",
+          "helpText": null,
+          "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "note",
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "attachment",
+          "type": "media-ref",
+          "label": "附件",
+          "helpText": null,
+          "required": false,
+          "group": "media",
+          "order": 8,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public"
+        },
+        {
+          "key": "location",
+          "type": "geo",
+          "label": "位置",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 9,
           "listable": false,
           "filterable": false,
           "enumValues": [],
@@ -6727,6 +6864,223 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
           "enabled": true
         }
       ]
+    },
+    {
+      "key": "note",
+      "displayName": "Note",
+      "pluralDisplayName": "Notes",
+      "titleField": "title",
+      "sortField": null,
+      "visibilityField": null,
+      "ownerField": null,
+      "slugPolicy": "optional",
+      "singleton": false,
+      "previewable": true,
+      "enabled": true,
+      "fields": [
+        {
+          "key": "title",
+          "type": "string",
+          "label": "標題",
+          "helpText": null,
+          "required": true,
+          "group": "main",
+          "order": 0,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "body",
+          "type": "markdown",
+          "label": "內文",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 1,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "category",
+          "type": "enum",
+          "label": "分類",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 2,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [
+            "idea",
+            "todo",
+            "reference"
+          ],
+          "enumLabels": {
+            "idea": "點子",
+            "todo": "待辦",
+            "reference": "參考"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "color",
+          "type": "enum",
+          "label": "顏色",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 3,
+          "listable": true,
+          "filterable": false,
+          "enumValues": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+          ],
+          "enumLabels": {
+            "red": "紅",
+            "orange": "橙",
+            "yellow": "黃",
+            "green": "綠",
+            "blue": "藍",
+            "purple": "紫"
+          },
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "priority",
+          "type": "int",
+          "label": "優先順序",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 4,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "pinned",
+          "type": "boolean",
+          "label": "置頂",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 5,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "dueAt",
+          "type": "datetime",
+          "label": "到期時間",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 6,
+          "listable": true,
+          "filterable": true,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": true,
+          "enabled": true
+        },
+        {
+          "key": "related",
+          "type": "ref",
+          "label": "相關筆記",
+          "helpText": null,
+          "required": false,
+          "group": "relations",
+          "order": 7,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": "note",
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "attachment",
+          "type": "media-ref",
+          "label": "附件",
+          "helpText": null,
+          "required": false,
+          "group": "media",
+          "order": 8,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        },
+        {
+          "key": "location",
+          "type": "geo",
+          "label": "位置",
+          "helpText": null,
+          "required": false,
+          "group": "main",
+          "order": 9,
+          "listable": false,
+          "filterable": false,
+          "enumValues": [],
+          "enumLabels": {},
+          "refTarget": null,
+          "placeholder": null,
+          "visibility": "public",
+          "indexed": false,
+          "enabled": true
+        }
+      ]
     }
   ]
 };
@@ -6989,7 +7343,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:01:00Z",
-    "updatedAt": "2026-09-20T00:01:00Z"
+    "updatedAt": "2026-09-20T00:01:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000002",
@@ -7007,7 +7363,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:02:00Z",
-    "updatedAt": "2026-09-20T00:02:00Z"
+    "updatedAt": "2026-09-20T00:02:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000003",
@@ -7025,7 +7383,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:03:00Z",
-    "updatedAt": "2026-09-20T00:03:00Z"
+    "updatedAt": "2026-09-20T00:03:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000004",
@@ -7043,7 +7403,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:04:00Z",
-    "updatedAt": "2026-09-20T00:04:00Z"
+    "updatedAt": "2026-09-20T00:04:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000005",
@@ -7060,7 +7422,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:05:00Z",
-    "updatedAt": "2026-09-20T00:05:00Z"
+    "updatedAt": "2026-09-20T00:05:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000006",
@@ -7077,7 +7441,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:06:00Z",
-    "updatedAt": "2026-09-20T00:06:00Z"
+    "updatedAt": "2026-09-20T00:06:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000007",
@@ -7094,7 +7460,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:07:00Z",
-    "updatedAt": "2026-09-20T00:07:00Z"
+    "updatedAt": "2026-09-20T00:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000008",
@@ -7110,7 +7478,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:08:00Z"
+    "updatedAt": "2026-09-20T00:08:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000009",
@@ -7128,7 +7498,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:09:00Z"
+    "updatedAt": "2026-09-20T00:09:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000010",
@@ -7145,7 +7517,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:10:00Z"
+    "updatedAt": "2026-09-20T00:10:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000011",
@@ -7161,7 +7535,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:11:00Z",
-    "updatedAt": "2026-09-20T00:11:00Z"
+    "updatedAt": "2026-09-20T00:11:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000012",
@@ -7179,7 +7555,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:12:00Z",
-    "updatedAt": "2026-09-20T00:12:00Z"
+    "updatedAt": "2026-09-20T00:12:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000013",
@@ -7197,7 +7575,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:13:00Z",
-    "updatedAt": "2026-09-20T00:13:00Z"
+    "updatedAt": "2026-09-20T00:13:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000014",
@@ -7215,7 +7595,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:14:00Z",
-    "updatedAt": "2026-09-20T00:14:00Z"
+    "updatedAt": "2026-09-20T00:14:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000015",
@@ -7233,7 +7615,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:15:00Z"
+    "updatedAt": "2026-09-20T00:15:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000016",
@@ -7252,7 +7636,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:16:00Z",
-    "updatedAt": "2026-09-20T00:16:00Z"
+    "updatedAt": "2026-09-20T00:16:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000017",
@@ -7269,7 +7655,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:17:00Z",
-    "updatedAt": "2026-09-20T00:17:00Z"
+    "updatedAt": "2026-09-20T00:17:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000018",
@@ -7286,7 +7674,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:18:00Z",
-    "updatedAt": "2026-09-20T00:18:00Z"
+    "updatedAt": "2026-09-20T00:18:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000019",
@@ -7304,7 +7694,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:19:00Z",
-    "updatedAt": "2026-09-20T00:19:00Z"
+    "updatedAt": "2026-09-20T00:19:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000020",
@@ -7321,7 +7713,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:20:00Z",
-    "updatedAt": "2026-09-20T00:20:00Z"
+    "updatedAt": "2026-09-20T00:20:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000021",
@@ -7338,7 +7732,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:21:00Z",
-    "updatedAt": "2026-09-20T00:21:00Z"
+    "updatedAt": "2026-09-20T00:21:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000022",
@@ -7359,7 +7755,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:22:00Z",
-    "updatedAt": "2026-09-20T00:22:00Z"
+    "updatedAt": "2026-09-20T00:22:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000023",
@@ -7380,7 +7778,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:23:00Z"
+    "updatedAt": "2026-09-20T00:23:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000024",
@@ -7397,7 +7797,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:24:00Z",
-    "updatedAt": "2026-09-20T00:24:00Z"
+    "updatedAt": "2026-09-20T00:24:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000025",
@@ -7414,7 +7816,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:25:00Z",
-    "updatedAt": "2026-09-20T00:25:00Z"
+    "updatedAt": "2026-09-20T00:25:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000026",
@@ -7431,7 +7835,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:26:00Z"
+    "updatedAt": "2026-09-20T00:26:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000027",
@@ -7448,7 +7854,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:27:00Z",
-    "updatedAt": "2026-09-20T00:27:00Z"
+    "updatedAt": "2026-09-20T00:27:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000028",
@@ -7465,7 +7873,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:28:00Z",
-    "updatedAt": "2026-09-20T00:28:00Z"
+    "updatedAt": "2026-09-20T00:28:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000029",
@@ -7482,7 +7892,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": "2026-09-20T00:29:00Z",
-    "updatedAt": "2026-09-20T00:29:00Z"
+    "updatedAt": "2026-09-20T00:29:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000030",
@@ -7500,7 +7912,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:30:00Z"
+    "updatedAt": "2026-09-20T00:30:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000031",
@@ -7517,7 +7931,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:31:00Z"
+    "updatedAt": "2026-09-20T00:31:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000032",
@@ -7534,7 +7950,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:32:00Z"
+    "updatedAt": "2026-09-20T00:32:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000033",
@@ -7551,7 +7969,9 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:33:00Z"
+    "updatedAt": "2026-09-20T00:33:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   },
   {
     "id": "30000000-0000-4000-8000-000000000034",
@@ -7568,7 +7988,78 @@ export const workEntries: S["WorkEntry"][] = [
     },
     "dirty": false,
     "publishedAt": null,
-    "updatedAt": "2026-09-20T00:34:00Z"
+    "updatedAt": "2026-09-20T00:34:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000035",
+    "contentType": "note",
+    "slug": "buy-film",
+    "publicationState": "draft",
+    "version": 1,
+    "title": "Buy film",
+    "payload": {
+      "title": "Buy film",
+      "body": "Portra 400, **two** rolls.",
+      "category": "todo",
+      "color": "yellow",
+      "priority": 2,
+      "pinned": true,
+      "dueAt": "2026-10-01T09:30:00Z",
+      "attachment": "20000000-0000-4000-8000-000000000001",
+      "location": {
+        "lat": 25.03,
+        "lng": 121.56
+      }
+    },
+    "dirty": false,
+    "publishedAt": null,
+    "updatedAt": "2026-09-20T00:35:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000036",
+    "contentType": "note",
+    "slug": "lens-notes",
+    "publicationState": "published",
+    "version": 2,
+    "title": "Lens notes",
+    "payload": {
+      "title": "Lens notes",
+      "body": "Prime lenses only.",
+      "category": "reference",
+      "color": "blue",
+      "priority": 1,
+      "pinned": false,
+      "related": "30000000-0000-4000-8000-000000000035",
+      "attachment": "20000000-0000-4000-8000-000000000002"
+    },
+    "dirty": false,
+    "publishedAt": "2026-09-20T00:36:00Z",
+    "updatedAt": "2026-09-20T00:36:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000037",
+    "contentType": "note",
+    "slug": "spring-ideas",
+    "publicationState": "published",
+    "version": 3,
+    "title": "Ideas for spring",
+    "payload": {
+      "title": "Ideas for spring",
+      "body": "Harbour at dawn.",
+      "category": "idea",
+      "color": "green"
+    },
+    "dirty": true,
+    "publishedAt": "2026-09-20T00:37:00Z",
+    "updatedAt": "2026-09-20T01:07:00Z",
+    "publishRequestedAt": null,
+    "publishRequestedBy": null
   }
 ];
 
@@ -8275,4 +8766,20 @@ export const mediaQuota: S["MediaQuota"] = {
   "maxFiles": 2000,
   "maxLibraryBytes": 1073741824,
   "maxFileBytes": 15728640
+};
+
+export const revisions: Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]> = {
+  "30000000-0000-4000-8000-000000000037": [
+    {
+      "revisionNo": 1,
+      "slug": "spring-ideas",
+      "publishedAt": "2026-09-20T00:37:00Z",
+      "payload": {
+        "title": "Ideas for spring",
+        "body": "Harbour at night.",
+        "category": "idea",
+        "color": "green"
+      }
+    }
+  ]
 };

@@ -1,16 +1,56 @@
 # Development Handoff
 
-Date: 2026-07-30
+Date: 2026-10-04
 
 ## Current Goal
 
-Begin T030 spec-first over the Accepted T020 versioned-event and deterministic-reducer boundary.
-Preserve the Accepted private, single-operator P0 and its provider-managed repository-execution
-boundary.
+T030A/B monorepo recovery is Accepted and merged. T030D snapshot-save runtime is now Accepted
+following test-first implementation, full gates and independent review. Next is the T030C load
+specification and its own review; public load is not implemented.
+Preserve the T020 schema, recovered A/B contracts and private single-operator P0 boundary.
 
 ## Repository State
 
-Branch: `agent/t020-events-reducer`
+Recovery base: newclear `7bafbf56`. Source: archived Fanzloud `0a47dcd`, including the
+stacked T030A/T030B work. The recovered production source, tests, Cargo manifest/lockfile,
+TD decomposition and historical contract artifacts match that source.
+
+The sole descriptive TD deviation clarifies that the T030 parent awaits its children;
+its graph and contracts are unchanged. The recovered store is a P1 library and is not
+wired into P0. P0 session replay remains process-lifetime rather than crash-durable.
+
+`T030R` is Accepted: current integrated-tree gates and an independent fresh-context
+GPT-6 Astra review passed, as recorded in `ACCEPT-T030R`. The new root Fanzloud workflow
+passed hosted on the recovery branch
+([run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)) and merged main
+([run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720)).
+Recovery [PR #242](https://github.com/fallrising/newclear/pull/242) merged at `1f555f61`; the nested
+upstream workflow is retained only as historical configuration.
+
+## Snapshot Save Runtime Accepted
+
+[T030D runtime acceptance](acceptance/T030D.acceptance.md) records the implemented 96-byte cache,
+current-head CAS, complete persisted-prefix verification, equal-sequence arbitration, monotonic
+save, atomic v1-to-v2 schema upgrade and failure/concurrency evidence. The immutable reducer and
+authoritative event history remain unchanged. Replay pins identity and its page in one read-only
+transaction so a concurrent additive upgrade cannot produce a false corruption report.
+
+The event-prefix save budget remains 4096 events, read at most 256 per page. Structural cache-key
+validation may additionally scan all cache keys with constant application allocation. This cache does not accelerate
+initial reducer replay. Nullable ANY cache values remain separately validated; full enabled event
+integrity and structural-key/schema checks remain fail-closed. Legacy processes must quiesce
+before upgrade; there is no automatic downgrade, cleanup or mixed-version rollout protocol.
+
+All 29 D/D-shared named tests are implemented; the three C-only names and public-load assertions
+in shared rows remain deferred. T030C still needs its own E0 specification, implementation and
+acceptance. Parent T030 remains blocked. The P1 store is still separate from P0 sessions, and real
+provider smoke remains unrun. Historical design and A/B acceptance reports are preserved.
+
+## Historical Upstream Acceptance
+
+The following status and test counts describe original upstream evidence, not new integration
+results. Historical acceptance reports and original test-first skeleton failures are retained
+unchanged. T030A/B historical acceptance does not accept T030R or the T030 parent.
 
 T001, T010, T002A, T002B, T002, T003, T004A, T004A1, T004B, T004C, the T004 coordination
 parent, T005A, T005B, T005C, the T005 coordination parent, T006, and T007 are Accepted. The
@@ -22,7 +62,18 @@ T020 is Accepted. A fresh read-only Cursor Agent review returned
 `T020 IMPLEMENTATION ACCEPTED`, hosted GitHub Actions run 30523996895 passed implementation commit
 `375c3b6`, and `ACCEPT-T020` records the clause-level decision.
 
-## Accepted Baseline
+T030 was decomposed into T030A append (E1), T030B replay (E0), T030C snapshot load (E0), and T030D
+snapshot save (blocked TD-GAP) because TD §9.3 forbids mixing atomicity models. T030A is Accepted:
+fresh contract and security reviews passed, hosted GitHub Actions run 30554757181 passed
+implementation commit `16b468b`, and `ACCEPT-T030A` records the decision.
+
+T030B is Accepted and `SPEC-T030B` is Verified. The fixed-failure skeleton preceded
+production; 2 T030B unit and 19 replay integration/property/concurrency/corruption/E0 tests pass.
+The event-store focused suite has 44 tests and the Rust workspace has 240 tests. Fresh Grok design
+and Cursor implementation reviews returned accepted. Hosted GitHub Actions run 31325149204 passed
+implementation commit `a4ecbf8`; `ACCEPT-T030B` records the decision.
+
+## Historical Accepted Baseline
 
 ### T001 and T010
 
@@ -268,6 +319,53 @@ review returned `COMPOSITION ACCEPTED`, and the parent is Accepted.
   `T020 IMPLEMENTATION ACCEPTED`, and hosted run 30523996895 passed implementation commit
   `375c3b6`. `ACCEPT-T020` records the final decision.
 
+### T030 decomposition and T030A — atomic SQLite append
+
+- A fresh read-only design review rejected the undivided T030 seed and accepted the T030A–T030D
+  decomposition. `CU-EVT-03` snapshot load and `CU-EVT-04` snapshot save were added to the CU
+  inventory; T030D records unresolved save conflict/retry/crash semantics instead of inventing
+  them.
+- Added `codebox-event-store` with a private mode-`0600` SQLite file inside a canonical,
+  process-owned private directory, fixed application/schema identity, WAL, FULL sync, and bounded
+  busy wait.
+- Added E1 expected-sequence append under `BEGIN IMMEDIATE`, contiguous full-`u64` big-endian
+  sequence keys, globally unique event IDs, exact version-1 envelope codec, and redacted typed
+  errors.
+- Added exact schema-drift rejection, transaction rollback, duplicate existing ID, two-writer
+  conflict, restart durability, busy timeout, cancelled-future reconciliation, path permission,
+  and payload/error redaction evidence.
+- The compiling fixed-failure skeleton preceded production implementation. The focused suite has
+  6 unit and 17 integration/property/concurrency/fault/security tests.
+- A fresh contract review first blocked missing executable evidence for defensive payload bounds and
+  foreign-owner policy. Both were repaired; the rerun returned `CONTRACT ACCEPTED`, and a separate
+  Grok transaction/security review returned `SECURITY ACCEPTED`.
+- The 219-test Rust workspace, 10-test Node suite, formatting, workspace Clippy/build,
+  dependency-policy, and diff checks pass locally. Hosted run 30554757181 passed implementation
+  commit `16b468b`; `ACCEPT-T030A` records the final accepted decision.
+
+### T030B — bounded ordered SQLite replay
+
+- Added the exact TD §4.6 `load_after(stream, after, limit)` boundary with a 1–256 page limit
+  checked before database access.
+- Uses one read-only SQLite connection and one fixed parameterized statement snapshot. Concurrent
+  append commits are fully visible or invisible to the statement; `LIMIT` may end within an
+  already committed batch and no uncommitted row is visible.
+- Conditionally projects exact-width identifiers/sequences, 1–64-byte timestamps, and at most
+  65,536-byte payloads before copying variable bodies into Rust.
+- Rechecks supported schema, requested stream, and contiguous `after + 1` ordering and returns only
+  bounded typed/redacted limit, corruption, busy, storage, or worker errors.
+- The fixed-failure skeleton preceded production. Two T030B unit tests and 19 replay
+  integration/property/concurrency/corruption/E0 tests pass; all 23 T030A tests remain green.
+- The 240-test Rust workspace, Clippy, build, formatting, dependency-policy, and diff checks pass.
+  Node is unavailable in the local shell; the unchanged 10-test P0 Node suite passed on accepted
+  base `0ddba62` and remains required in hosted CI.
+- The initial fresh Grok design review blocked three snapshot, allocation-bound, and error-evidence
+  gaps. Repairs were accepted on rerun. A fresh Cursor implementation review returned
+  `T030B IMPLEMENTATION ACCEPTED`.
+- Hosted run 31325149204 passed the pinned Node, formatting, Clippy, 240-test Rust workspace, build,
+  and dependency-policy gates on implementation commit `a4ecbf8`. `ACCEPT-T030B` records the
+  accepted decision.
+
 ## Verified Pinned Cloud Surface
 
 The official `rust-v0.145.0` source and local pinned CLI help establish:
@@ -299,10 +397,11 @@ subsequently passed a fresh Cursor Agent acceptance review with no blocker.
 
 ## Next Work
 
-1. Materialize T030 event-store append/replay spec-first; persistence,
-   transaction, restart, and replay paging remain explicitly outside T020.
+1. Specify and independently review T030C public snapshot load against accepted ADR-0005 and
+   implemented T030D. Preserve pinned E0 reads, cache-value/history-error distinctions, the
+   4096-prefix bound and private reducer trust. T030C and parent remain blocked until their own gates.
 2. Preserve the Accepted P0 boundary; P1 work must not add a dependency on live P0 provider
-   availability.
+   availability. T030R local acceptance does not merge historical source PR #3/#4.
 3. Run a T007 live smoke only in a private environment with all nine administrator variables, the
    exact pinned Codex CLI `0.145.0`, a supported browser, and an operator-authored low-risk prompt.
    The 2026-07-30 audit found all nine variables absent, Codex CLI `0.146.0`, and no supported
@@ -321,7 +420,7 @@ regressions and all combined gates then passed; a fresh review returned `COMPOSI
 
 Do not re-run T001/T010/T002 acceptance work unless their relevant files or behavior change.
 
-## Validation Evidence
+## Historical Validation Evidence
 
 The accepted T006 tree passed:
 
@@ -366,3 +465,60 @@ git diff --check
 All listed T020 commands passed locally. The fresh read-only Cursor Agent review returned
 `T020 IMPLEMENTATION ACCEPTED`, and hosted GitHub Actions run 30523996895 passed implementation
 commit `375c3b6`. `ACCEPT-T020` records the accepted decision.
+
+For the Accepted T030A tree, the local 2026-07-30 evidence is:
+
+```text
+node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs
+  10 tests passed
+cargo test -p codebox-event-store --all-features
+  6 unit + 17 integration/property/concurrency/fault/security tests passed
+cargo test --workspace --all-targets --all-features
+  219 tests passed
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo build --workspace --bins --all-features
+cargo deny check
+  advisories ok, bans ok, licenses ok, sources ok
+git diff --check
+```
+
+All listed T030A commands pass locally. Fresh contract and security reviews returned accepted,
+hosted GitHub Actions run 30554757181 passed implementation commit `16b468b`, and
+`ACCEPT-T030A` records the accepted decision.
+
+For the Accepted T030B tree, the 2026-08-09 acceptance record contains:
+
+```text
+cargo test -p codebox-event-store --all-features
+  8 unit + 17 retained append + 19 replay tests passed
+cargo test --workspace --all-targets --all-features
+  240 tests passed
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo build --workspace --bins --all-features
+cargo deny check
+  advisories ok, bans ok, licenses ok, sources ok
+git diff --check
+```
+
+All listed T030B Rust and repository commands pass locally. The host has no Node executable; no
+Web/JavaScript file changed, the 10-test Node P0 suite passed on accepted base `0ddba62`, and the
+pinned Node gate remained required in hosted CI. Fresh design and implementation reviews returned
+accepted. Hosted run 31325149204 passed the pinned Node/web, formatting, Clippy, 240-test Rust
+workspace, build, and dependency-policy gates on `a4ecbf8`; `ACCEPT-T030B` records the decision.
+
+## Current Recovery Verification
+
+`ACCEPT-T030R` records current local acceptance on 2026-10-04: 44 event-store tests,
+240 workspace Rust tests, 10 Node tests, formatting, Clippy with warnings denied, binary
+build, dependency policy, diff check and root workflow validation all passed. The orchestrator
+independently checked source identity and preservation; a fresh GPT-6 Astra review accepted
+the bounded recovery with no blocking findings. Recovery subsequently merged PR #242 at
+`1f555f61`; hosted root branch run37148404076 and merged-main run37148875720 passed. Live provider
+smoke remains outside recovery scope.
+
+TD §0.3 automatic rustdoc/spec drift checking is an existing gap: neither historical nor new
+CI implements the required generator or signature/error/contract-section comparison. Recovery
+preserves the existing rustdoc and explicitly records this limitation; it does not claim full
+project-wide documentation automation compliance.

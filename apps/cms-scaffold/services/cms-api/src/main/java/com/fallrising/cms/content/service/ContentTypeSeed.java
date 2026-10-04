@@ -127,6 +127,12 @@ public class ContentTypeSeed {
                 field("status", "enum", false, true, null, List.of("planned", "reached", "missed"))
                         .label("狀態", labels("planned", "已規劃", "reached", "已達成", "missed", "未達成")),
                 field("sortOrder", "int", false, true, null, List.of()).label("排序")));
+        type("appointment_request", "Appointment request", "Appointment requests", "reason", "none", false, List.of(), null, null,
+                "ownerPrincipalId", List.of(
+                        field("pet", "ref", true, false, "pet", List.of()).label("寵物"),
+                        field("preferredAt", "datetime", true, true, null, List.of()).label("希望時間"),
+                        field("reason", "string", true, false, null, List.of()).label("原因"),
+                        field("ownerPrincipalId", "principal-ref", false, true, null, List.of()).label("會員帳號")));
         store.markMediaRefsPublic();
         if (store.findNavigation("front.primary").isEmpty()) {
             Instant now = Instant.now();

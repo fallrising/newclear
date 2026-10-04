@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-03",
+  "scope": "single-operator local mock request and synthetic fixture budget acceptance",
+  "status": "passed",
+  "baseline_commit": "4a75ad41508ab37800a4ab2ac2d16013de8cc2a0",
+  "changes": {
+    "runtime_code_changed": false,
+    "new_test_methods": 1,
+    "strengthened_existing_test_methods": 3,
+    "dependencies_changed": false,
+    "migrations_changed": false
+  },
+  "environment": {
+    "python": "3.12",
+    "python_image": "python@sha256:e91fec3d1ac69f04e4eddcd29c327e630ce34658cf31075bfa7e8b0e052bafea",
+    "postgres_image": "postgres@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
+    "dependencies": "existing requirements.lock, pip --require-hashes",
+    "source_mount": "read-only",
+    "ruff_cache": "task-owned temporary directory",
+    "postgres_cleanup_confirmed": true
+  },
+  "checks": [
+    {
+      "command": "make platform-check",
+      "status": "passed",
+      "ruff_lint": "passed",
+      "ruff_format": "passed",
+      "unit_tests": 45,
+      "postgres_http_tests": 214,
+      "skipped_tests": 0,
+      "log_sha256": "47af86c89e5df1f85349f16209c55bcad09bbaad6283128220474a3bfc711ae1"
+    },
+    {
+      "command": "python scripts/test-postgres.py python -m unittest -v <four targeted regressions>",
+      "status": "passed",
+      "tests": 4,
+      "log_sha256": "db568931e54ddb5571003592bab53595953d5be3d718a8b70d8ed20b7ae224ca"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "regressions": [
+    {
+      "test": "test_guest_model.MockTransportTests.test_concurrent_mock_requests_dispatch_only_admitted_slots",
+      "evidence": "Eight barrier-synchronized contenders; cap two; exactly two upstream dispatches, six cap denials, two durable final ledger rows."
+    },
+    {
+      "test": "test_guest_model.MockTransportTests.test_invalid_usage_retains_uncertain_request_and_pinned_model",
+      "evidence": "Malformed mock usage stays unknown across proxy reconstruction/token renewal; replay is refused; unknown consumes a slot; new requests cannot exceed pinned cap/model."
+    },
+    {
+      "test": "test_model_proxy.ModelProxyTests.test_fixture_unknown_usage_keeps_full_reservation_and_blocks_next_request",
+      "evidence": "HTTP 429 retains complete synthetic credit reservation across proxy reconstruction/token renewal; no replay or extra dispatch."
+    },
+    {
+      "test": "test_model_proxy.ModelProxyTests.test_real_http_proxy_process_preserves_request_ledger_across_restart",
+      "evidence": "Two separate HTTP proxy subprocesses share the SQL ledger; both repeated ID and fresh ID are rejected after restart at exhausted cap."
+    }
+  ],
+  "existing_fault_and_security_regressions": {
+    "status": "passed as part of platform-check",
+    "coverage": [
+      "SIGKILL before dispatch and after response/settlement; no automatic redispatch",
+      "generation/token rotation does not reset budget",
+      "durable model/tool cutoff retains resource reservation until stop proof",
+      "nested secret canaries and bounded result rejection",
+      "egress policy mismatch and private-network override rejection"
+    ],
+    "limits": "Real SQL and HTTP with fake runtime records and local mock; not fresh MicroVM or network enforcement evidence."
+  },
+  "cost": {
+    "cost_status": "unknown",
+    "amount_decimal": null,
+    "hard_money_limit_supported": false,
+    "mock_or_fixture_usage_is_provider_bill": false,
+    "trusted_provider_billing": "deferred for single-operator release"
+  },
+  "milestones": {
+    "single_operator_mock_slice": "passed",
+    "M3": "In progress",
+    "M4": "Not started"
+  },
+  "not_run": [
+    {
+      "check": "fresh KVM isolation/egress/stop proof",
+      "reason": "Outside this local mock slice; separate host authorization required."
+    },
+    {
+      "check": "paid API and provider invoice reconciliation",
+      "reason": "Deferred by operator; no key or paid calls used."
+    },
+    {
+      "check": "complete AT-07 artifact XSS/integration and AT-11 cross-slice integration",
+      "reason": "Not established by backend mock regressions; broader milestone remains in progress."
+    },
+    {
+      "check": "web/browser E2E, M4 export/backup/GC, 24-hour VM dwell",
+      "reason": "Outside this test/documentation-only slice; no frontend or runtime change."
+    }
+  ],
+  "verification_attempts": [
+    {
+      "stage": "native make preflight",
+      "result": "failed: make/compiler unavailable",
+      "resolution": "used pinned Python3.12 build-tool container; no host package installation"
+    },
+    {
+      "stage": "first container platform-check",
+      "result": "failed: Ruff cache attempted read-only source mount",
+      "resolution": "task-owned writable RUFF_CACHE_DIR"
+    },
+    {
+      "stage": "second container platform-check",
+      "result": "failed: one changed assertion needed Ruff formatting",
+      "resolution": "formatted affected test file; final entire platform-check passed"
+    }
+  ],
+  "review": {
+    "independent_review": "no blocking findings",
+    "report": ".team/reports/T-002.md",
+    "orchestrator_rechecked_diff": true
+  },
+  "source_sha256": {
+    "tests_platform/test_guest_model.py": "0ecc0ea8dc327c9e028bdcdad964b914b7199db7326cb8fd036cd1fc78a53f0c",
+    "tests_platform/test_model_proxy.py": "170a24bcb259a0f18781f278fbff436932c96d2d0ec76ab54de081cf24d3075a",
+    "src/agent_platform/model_proxy.py": "59acd6bae39fe799eeefe4a76868f45fc8c9ac6fffacc6c03d60a0d8511588fb",
+    "src/agent_platform/model_policy.py": "b46bfedb751708b89b23b7bb761dd16729845f8e9351fe40981c7e6124016616",
+    "src/agent_platform/model_worker.py": "1c568f96e0887b84b4639d2f48bf23eb29043901316b84a8d27c61d13a1b6f7b",
+    "requirements.lock": "b2824e40e107f9153ebc5cf82052ace155b218a6f2b25d2fb3358f52023f5baa"
+  }
+}

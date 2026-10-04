@@ -1,6 +1,6 @@
 module github.com/fallrising/newclear/platform/prism
 
-go 1.23.0
+go 1.27.1
 
 require (
 	github.com/golang/snappy v0.0.4

@@ -31,7 +31,9 @@ func (c *Config) Validate(ctx context.Context) error {
 		validateControlplane(c.Controlplane),
 		validateTenancy(c.Tenancy),
 		validateAuth(ctx, c.Auth),
+		c.validateIngestIdentity(ctx),
 		validateIngest(c.Ingest),
+		c.validateIngestBudget(),
 		validateLimits(c.Limits),
 		validateQuery(c.Query),
 		validateRules(ctx, c.Rules),
@@ -180,7 +182,7 @@ func validateIngest(ingest IngestConfig) error {
 }
 
 func validateLimits(limits LimitsConfig) error {
-	if limits.MaxActiveSeriesPerTenant <= 0 || limits.MaxLogLineBytes <= 0 || limits.CardinalityAlarmThreshold <= 0 {
+	if limits.MaxActiveSeriesPerTenant <= 0 || limits.MaxLogLineBytes <= 0 || limits.MaxLogLineBytes > 1<<30 || limits.CardinalityAlarmThreshold <= 0 {
 		return fmt.Errorf("limits numeric values must be positive")
 	}
 	return nil
@@ -339,6 +341,7 @@ func resolveRelativePaths(config *Config, configPath string) {
 	}
 	base := filepath.Dir(configPath)
 	config.Auth.JWTSecretFile = resolveRelativePath(base, config.Auth.JWTSecretFile)
+	config.Auth.IngestAPIKeyFile = resolveRelativePath(base, config.Auth.IngestAPIKeyFile)
 	config.Rules.Path = resolveRelativePath(base, config.Rules.Path)
 	config.Notify.ConfigPath = resolveRelativePath(base, config.Notify.ConfigPath)
 	config.Server.TLSCertFile = resolveRelativePath(base, config.Server.TLSCertFile)

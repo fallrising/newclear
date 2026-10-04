@@ -1,8 +1,24 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-04 後續：[network file-staging協調器](M3-FRESH-NETWORK-STAGING-2026-10-04.md) 綁定當次計畫／授權，先durable intent再單次adapter dispatch，回應遺失只讀reconcile；本輪fake adapter驗證，不啟用設定或接受stage。正式剩餘12不變。
+
+2026-10-04 後續：[fresh network-access設定計畫](M3-FRESH-NETWORK-ACCESS-PLAN-2026-10-04.md) 產生四機固定firewall／pinned known_hosts／staged core key內容，保存immutable private plan並離線重導出；重核當次admission與身份。尚未套用設定或驗收network stage，正式剩餘12不變。
+
+2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。
+
+2026-10-04 後續：[replacement 裸 OS facts](M3-FRESH-REPLACEMENT-FACTS-2026-10-04.md) 新增四機 OOB key／receipt 綁定的唯讀採樣、immutable private observation 與離線重驗。只用 synthetic／fake transport 測試；不等於 network／完整 residue／stage acceptance，ERU-015 與正式剩餘 12 項不變。
+
+2026-10-03 後續：[四機 fresh 人工 receipt 驗證](M3-FRESH-REIMAGE-RECEIPTS-2026-10-03.md) 實作獨立 core／worker 證據契約與唯讀 assessment；不代表重灌已執行或 stage accepted。ERU-015 仍進行中，正式剩餘 12 項。
+
+2026-10-03 後續：[唯讀 fresh baseline observation](M3-FRESH-OBSERVATION-2026-10-03.md) 接續四機／etcd／ERU metadata 基線及 schema-v2 host evidence 重導出；本輪只用 fake／contract tests，未做 VPS 操作。這不是 fresh stage acceptance，正式剩餘仍為 12 項。
+
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
 本檔 guard 修補的歷史基線為 `82cd9d8`，沿用固定 18 項任務；完成 6、剩餘 12（近期 1、後續 11）。本機測試不替代 VPS 驗收。本輪僅修正版本驗證工具及整理證據，沒有部署、重裝、故障注入或讀寫真實 private 資料。
 
-後續 v0.1.7 候選驗證見 [雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md)（已通過雙次隔離建置與有界 compatibility）；ERU-015 已補 [executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，仍缺實作。下列 429／438 tests 為 guard 修補當時的已驗證快照，不替代候選 patch 的新版測試結果。
+後續 v0.1.7 候選驗證見 [雙次建置紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md)（已通過雙次隔離建置與有界 compatibility）；ERU-015 已補 [executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已接續 [本機 simulation](M3-FRESH-SIMULATION-2026-10-03.md)，仍缺 production executor。下列 429／438 tests 為 guard 修補當時的已驗證快照，不替代候選 patch 的新版測試結果。
 
 ## 各項本機證據
 
@@ -12,7 +28,7 @@
 | ERU-010 | 失聯 metadata 精確清理、quota／identity 守護、fresh subset recovery、重驗 desired specs 的 replacement wrapper | `test_worker_loss*.py`：30 tests | 外部 fence、失聯與 replacement 實機演練；node remove/resume、自動 quota repair、持續維持副本數不屬目前契約 |
 | ERU-013 | release provenance、版本轉移、獨立建置與不可覆寫 manifest 守護；v0.1.7 雙次 byte-identical build、有界 compatibility 與 validation manifest 已通過 | `test_core_release`、`test_core_publish`、`test_core_update`、`test_validate_core_patch` | upgrade／rollback／interruption VPS 驗收及 plugin／live runtime 相容性 |
 | ERU-014 | install→access→registration→smoke→resume→generation 六階段及唯讀 recovery；拒絕錯誤 core artifact 和 stale predecessor | `test_reimage_host.py`：4 tests；`test_labctl.py`：87 tests（含其他 labctl 功能） | safe AddNode patch 受控部署、人工 OS reimage receipt 與整體 E2E；不能以元件重裝代替 OS 重灌 |
-| ERU-015 | immutable、hash-bound、Profile A review planner；所有 execution stages 仍為未實作 | `test_fresh_rebuild.py`：16 tests | destructive executor／完整 bootstrap 仍缺程式，之後才是三個獨立 fresh generations、V01–V04／V08、residue 與 RTO |
+| ERU-015 | Profile A review planner、simulation journal／coordinator、pending barrier、execution preparation／inspection、唯讀 baseline collector、四機人工receipt assessment、replacement裸OS facts、當次network stage前置證據檢查、固定network-access設定計畫及network file-staging協調器（fake adapter驗證） | `test_fresh*.py` | production stage dispatch／external fencing／完整bootstrap／generation commit與seal仍缺程式；之後才是三個獨立fresh generations、V01–V04／V08、residue與RTO |
 
 ERU-009／010／014 的上述有限本機流程已具備，仍保持整項「進行中」。ERU-013 不因 guard 修正而取得跨版本驗收；ERU-015 不能標成「本機完成、只待 E2E」。歷史文件的較小 suite 數是當時快照，不是本輪測試數。
 

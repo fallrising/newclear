@@ -179,3 +179,88 @@
 **後果**：
 - 使用者必須額外部署 Grafana。`deploy/docker-compose.yml` 預設包含它以降低摩擦。
 - 產品的「一體感」較弱。Phase 6 可用 Apache-2.0 的 Perses 元件補上，不需要 fork Grafana。
+
+## ADR-011：Phase 1 OTLP 寫入使用單租戶 file-backed bearer
+
+**狀態**：P1-04 實作決策，2026-10-03。
+
+**背景**：P1-03 的 tenant context 只接受可信身分。完整 API-key store、mTLS
+租戶映射及控制平面尚未實作；直接信任客戶端租戶 header 會繞過隔離。
+
+**決策**：P1-04 先支援 `tenancy.mode: single`，寫入一律驗證
+`auth.ingest_api_key_file` 載入的獨立 bearer key，且只允許設定的 default tenant。
+`X-Scope-OrgID`、`X-Prism-Tenant` 若出現，必須單一且等於該租戶；跨租戶或
+互相衝突的 selector 不能覆蓋 key 身分。這明確限縮 `02` §0.1 的通用解析順序：
+在完整認證映射實作前，不提供任意 header 選租戶，也不提供 mTLS 身分認證。
+`all-in-one`／`ingest` 在缺少有效 key 或設定 strict tenancy 時拒絕啟動與
+config-check。其他角色仍不需要 ingest key。JWT secret 不重用為寫入 key。
+
+**結果**：可驗收真實三訊號接收且不引入匿名寫入。部署需自行管理與輪替 key；
+本次不提供 live reload、多租戶 key store 或部署。TLS certificate 設定同時套用
+HTTP 與 gRPC；明文只適合本機測試或可信網路。key 不進 log、錯誤或序列化設定。
+
+**計數**：OTLP 部分失敗以原始 datapoint/log/span 為單位。若一個 metric point
+展開出的任一 UTM child 被拒絕，原始 point 計一次 rejected；其他 child 可能已被
+接受，客戶端不得因 partial success 重送整批。delta baseline、metadata 不支援與
+可恢復正規化警告不可冒充資料點拒絕數。詳見 [P1-04 設計](../specs/p1-04-otlp.md)
+及 [OTLP 規範](https://opentelemetry.io/docs/specs/otlp/)。
+
+**容量**：daemon 使用一租戶、每 lane queue depth 4 的預設，與保留相容性的
+pipeline package defaults 分開。`ingest.memory_limit` 驗證邏輯 payload 與接收
+buffer 預算；它不是硬性 RSS 上限，不包含 memory backend 無界資料保留。
+
+**gRPC 早期限流**：固定版本 grpc-go 的 tap abort 不保留 status details，因此解碼前
+的 receiver 容量不足回 `Unavailable`，讓 OTLP 客戶端使用標準 backoff 重試。
+pipeline 佇列／rate limit 仍在正常 unary handler 回 `ResourceExhausted` 加
+`RetryInfo`，符合 `02` §1.1 的佇列滿契約。使用標準 MethodDesc 及 bounded raw
+request，避免依賴不受支援的 stream descriptor flags；協定錯誤在 handler
+分類，原生 framing/compression 錯誤保留函式庫行為。
+
+
+## ADR-012：remote_write v1 的有界接收與部分拒絕
+
+**狀態**：P1-05 實作決策，2026-10-04。
+
+**決策**：remote_write 使用 ADR-011 同一個 file-backed bearer 與固定 tenant。
+HTTP endpoint 為 `/prom/api/v1/write`，僅接受 snappy block 與 v1 protobuf。
+解壓配置大小和 protobuf 元素在生成 decoder 配置 slice 前驗證；每個 receiver
+固定一個非阻塞 slot，從 body read 持有至 normalize/submit 完成。Stop 拒絕新工作，
+既有 HTTP drain 與 pipeline 關閉順序不變。
+
+**回應**：成功入列回空 204；入列前容量/速率拒絕回 429 與 Retry-After。
+任何 sample 部分拒絕回不重試的 400，成功部分可能已保存，不能將整批當成尚未提交。
+此行為遵循 remote_write v1；metadata/native histogram 等既有非致命 mapping
+警告用限量且不含使用者字串的日誌呈現。保留 raw decompressed bytes 做 byte admission。
+
+**容量與範圍**：在 P1-04 logical budget 上加入兩個 max_request_bytes buffer，
+預設共 968 MiB，並非 RSS 保證。單 slot 選擇偏保守，仍可由 client batching 使用；
+不增加設定或依賴。不引入自動重載、多租戶控制面、查詢 API、遠端寫入 v2、WAL
+或部署。此切片不使用跨請求 buffer pool，避免保留最大請求記憶體及敏感資料；
+各請求資源在結束時釋放，與 SDD05 的 pool 建議相比採用更明確的保留上限。
+
+詳見 [P1-05 規格](../specs/p1-05-remote-write.md) 與
+[remote_write v1](https://prometheus.io/docs/specs/prw/remote_write_spec/)。
+
+## ADR-013：Go 1.27 維護基準與單一版本來源
+
+**狀態**：2026-10-04 明確授權的 Go 升級決策。
+
+**決策**：以 `go.mod` 的 `go 1.27.1` 同時宣告最低 toolchain 與 Go 1.27
+語言基準；Prism 兩個 CI job 使用 `go-version-file` 讀同一檔案，並以
+`GOTOOLCHAIN=local` 驗證所安裝版本。lint 工具更新為支援此版本的
+v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協議不變。
+
+**理由與後果**：Go 1.23 已超出官方支援窗口。先前 P1-05 的 Go 1.27
+試跑是可行性證據；本次重新驗證提高 go directive 後的實際語言／runtime
+基準。歷史驗證不改寫，現行操作指引與 SDD 建置版本同步。舊 compiler
+關閉自動切換時應清楚拒絕；不承諾未量測的效能收益，不包含系統全域
+安裝、容器部署或下一功能。詳見 [升級契約](../specs/go-1.27-upgrade.md)。
+
+
+## ADR-014：Phase 1 Loki JSON push 使用獨立受限接收器
+
+**決策**：沿用固定單租戶 file-backed bearer 與既有 pipeline，支援 JSON／gzip，protobuf push 留在 Phase 2。原始解壓 JSON 長度用於 byte admission；token/schema/duplicate/depth/element 與展開工作量預檢先於 materialization。接收器採獨立單一 slot，取消 callback 完成後才釋放。
+
+**理由與後果**：避免壓縮與共享 stream metadata 放大、租戶偽造及取消後資源累积。新增兩個 request-size receive buffers，預設 logical budget 1000 MiB，並非RSS限制。全數接收回204；語意 partial 回400且有效資料可能已入列；committed internal failure回500仍可能重送重複。
+
+**替代方案**：複用OTLP容量gate會改變既有協定背壓；直接無預檢JSONdecode會在拒絕前配置不受元素限制的物件。範圍、狀態碼與實測驗收見 [P1-06 contract](../specs/p1-06-loki-push.md)。

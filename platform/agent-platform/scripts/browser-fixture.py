@@ -162,6 +162,49 @@ def main():
                     }
                 )
             )
+        elif action == "retry":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            goal = 'Original goal\n<img src=x onerror="window.__goalExecuted=1"> 你好'
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+            task = TaskInput(
+                title="Editable retry browser fixture",
+                goal=goal,
+                project_id=template["project_id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command, task=task: store.create_task(conn, operator, task, command),
+            )["body"]
+            run_id = created["run"]["id"]
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE runs SET state='failed',result=%s WHERE id=%s",
+                    (
+                        Jsonb(
+                            {
+                                "summary": "Original attempt result remains available",
+                                "verification": {"status": "failed", "reason": "browser fixture"},
+                            }
+                        ),
+                        run_id,
+                    ),
+                )
+                conn.execute("UPDATE jobs SET status='done' WHERE run_id=%s", (run_id,))
+            print(json.dumps({"task_id": created["task"]["id"], "run_id": run_id, "goal": goal}))
         elif action == "security":
             value = json.loads(output.read_text())
             store = Store(db)

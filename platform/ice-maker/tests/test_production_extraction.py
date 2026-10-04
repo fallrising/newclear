@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 import warnings
+from unittest import mock
 
 from ice_maker.document_batch import BatchItem, CODE_MAXIMA, CONFIG_SCHEMA, SourceDescriptor
 from ice_maker.production_extraction import (
@@ -267,10 +268,23 @@ class ProductionExtractionTests(unittest.TestCase):
             with self.assertRaises(ProductionExtractionError):
                 decode_image(PNG, limits={"max_decoded_pixels": 1000, "max_image_dimension": 100}, decoder=lambda raw, r=response: r)
         with self.assertRaises(ProductionExtractionError): decode_image(PNG, expected_sha256="0" * 64, decoder=lambda raw: ("png", 1, 1, "RGB", object()))
-        with self.assertRaisesRegex(ProductionExtractionError, "image codec unavailable"): decode_image(PNG)
+        with mock.patch.dict("sys.modules", {"PIL": None}):
+            with self.assertRaisesRegex(ProductionExtractionError, "image codec unavailable"):
+                decode_image(PNG)
         with self.assertRaises(ProductionExtractionError): decode_image(PNG, decoder=lambda raw: (_ for _ in ()).throw(RuntimeError("bomb")))
         with self.assertRaises(ProductionExtractionError):
             decode_image(PNG, decoder=lambda raw: (warnings.warn("bomb"), ("png", 1, 1, "RGB", object()))[1])
+
+    def test_default_decoder_rejects_invalid_png_with_or_without_pillow(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            expected = "image codec unavailable"
+        else:
+            self.assertIsNotNone(Image)
+            expected = "image decode failed"
+        with self.assertRaisesRegex(ProductionExtractionError, expected):
+            decode_image(PNG)
 
     def test_red_tiler_complete_and_bounded(self):
         self.assertEqual(tile_image(5, 4, 10, 2), (Tile(0, 0, 5, 4),))

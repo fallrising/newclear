@@ -35,6 +35,21 @@ export LOOM_AI_PROTOCOL=chat-completions
 
 For another model, use the protocol shown for it in Go's endpoint table. Keys live outside repositories in a private environment file or secret injection; never in Markdown, canvas, SQLite, screenshots or PRs. Loom does not automatically search the home directory for credentials. A controlled launch/smoke helper may explicitly read a selected environment file without evaluating shell code or printing its value.
 
+The Linux/macOS development helper accepts a UTF-8 regular file owned by the current user with mode `600`. The file contains only `OPENCODE_API_KEY='your-key'` (plain, single-quoted or double-quoted value; no shell expansion or `export`). Keep it outside the repository, for example `~/.config/loom/opencode.env`. After setting the non-secret variables above, launch with:
+
+```sh
+python3 scripts/with_ai_env.py --env-file "$HOME/.config/loom/opencode.env" -- npm run tauri -- dev
+```
+
+The helper only injects the key into its child environment. It does not alter shell profiles, store the key in Loom, or automatically forward it to a test machine. For the bounded live probe, build the example first (no provider call during build), then launch explicitly:
+
+```sh
+cargo build --locked -p loom-core --example ai_smoke
+python3 scripts/with_ai_env.py --env-file "$HOME/.config/loom/opencode.env" -- target/debug/examples/ai_smoke
+```
+
+The probe caps output at 256 tokens and runtime at 45 seconds, makes one request without automatic retry, and records only success/failure rather than returned text. Run it only when intending to use the provider account. Offline helper checks: `python3 -m unittest discover -s scripts -p test_ai_env.py -v`.
+
 ## Verification and limits
 
 Write failing regressions first. Test configuration defaults/overrides/rejections, exact prepared requests, auth/client/session headers, all protocol streaming/error/usage/end conditions and cancellation using loopback HTTP. Run the full Rust workspace, fmt, contract Clippy/drift, frontend tests/typechecks/build. Independently review before staged PR delivery. Frozen sources/dependencies remain unchanged.

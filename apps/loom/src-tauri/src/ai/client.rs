@@ -39,13 +39,31 @@ impl Streamer {
         req: CompletionInput,
         cancel_token: tokio_util::sync::CancellationToken,
         request_id: String,
+        on_event: E,
+    ) -> AiResult<Usage>
+    where
+        E: FnMut(StreamEvent),
+    {
+        self.stream_inner(req, cancel_token, request_id, on_event)
+            .await
+            .map_err(|error| error.redact(&self.cfg.api_key))
+    }
+
+    async fn stream_inner<E>(
+        &self,
+        req: CompletionInput,
+        cancel_token: tokio_util::sync::CancellationToken,
+        request_id: String,
         mut on_event: E,
     ) -> AiResult<Usage>
     where
         E: FnMut(StreamEvent),
     {
         let prepared = self.provider.prepare(&self.cfg, &req);
-        let client = reqwest::Client::builder().build()?;
+        // Custom auth headers must never be forwarded to redirect targets.
+        let client = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()?;
         let mut builder = client.post(&prepared.url).json(&prepared.body);
         for (k, v) in prepared.headers {
             builder = builder.header(k, v);

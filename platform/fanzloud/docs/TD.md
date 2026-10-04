@@ -588,6 +588,16 @@ Rules:
 - Every external side effect follows intent/start/result recording.
 - The actor holds a lease with a fencing token, even in a single-node P1 deployment.
 
+Current delivery: [T040A](tasks/T040A.task.md) is Ready for a pure E0 command-decision
+prerequisite under [SPEC-T040A](specs/SPEC-T040A-command-decision.md). It proposes existing v1
+events without I/O, authorization, receipts, leases or backend execution. Existing v1
+WaitingApproval cancellation remains unsupported; no approval denial is synthesized.
+[T040](tasks/T040.task.md) is a Blocked coordination parent. Its later versioned amendment,
+managed-store, lease, receipt, startup, mailbox and external-effect rows are proposed blocked
+seeds in [SPEC-T040](specs/SPEC-T040-session-actor.md). [ADR-0007](adr/ADR-0007-session-actor-contract.md)
+remains a draft direction: exact schema/clock/recovery semantics are not accepted by A's design.
+P0 remains its separately accepted process-lifetime protocol.
+
 ## 4.8 Side-effect ledger
 
 Event history alone is insufficient to prevent duplicate side effects. Every tool call MUST have a durable ledger record:
@@ -1624,6 +1634,13 @@ This is the initial P1 contract inventory. The LLM MAY add CUs when a public bou
 | CU-AGT-01 | Native `run_turn` | agent-native | C+E | E3 | INV-002–INV-006 |
 | CU-SES-01 | Session subscribe/replay/live | session-runtime | D | E0 | INV-003, INV-012 |
 | CU-SES-02 | Session command dispatch | session-runtime | E | E1 | INV-003, INV-004 |
+| CU-SES-03 | Pure v1 session command decision (T040A design accepted; runtime pending) | domain | A | E0 | INV-003, INV-004 |
+| CU-PROTO-04 | Proposed versioned approval withdrawal; Blocked T040B | domain | A | E0 | INV-003, INV-004, INV-010 |
+| CU-SES-04 | Proposed managed-store construction; Blocked T040C | event-store | B+E | E1 | Exact schema and old-handle rejection |
+| CU-SES-05 | Proposed managed lease mutation; Blocked T040D | event-store | E | E1 | Monotonic fencing and trusted clock |
+| CU-SES-06 | Proposed command receipt observation; Blocked T040E | event-store | B | E0 | Immutable command outcome, fail-closed corruption |
+| CU-SES-07 | Proposed fenced command/receipt commit; Blocked T040F | event-store | E | E1 | INV-003, INV-004, INV-010 |
+| CU-SES-08 | Proposed pinned startup observation; Blocked T040G | event-store | B | E0 | Authoritative contiguous replay |
 | CU-API-01 | Create session/start turn endpoints | control-plane | F | E2 | HTTP idempotency |
 | CU-API-02 | WebSocket stream | control-plane | D+F | E0 | Replay order and redaction |
 | CU-ART-01 | Artifact put | artifact-store | C | E1 | INV-007, INV-011 |
@@ -1695,7 +1712,41 @@ flowchart TD
     T030D --> T030C[Snapshot Load]
     T030B --> T030[SQLite Event Store Parent]
     T030C --> T030
-    T020 --> T040[Session Actor]
+    T010 --> T040A[Pure v1 Command Decision: Ready]
+    T020 --> T040A
+    T040A --> T040B[Versioned Withdrawal: Blocked Seed]
+    T020 --> T040B
+    T030 --> T040C[Managed Store: Blocked Seed]
+    T040B --> T040C
+    T040C --> T040D[Lease: Blocked Seed]
+    T040C --> T040E[Receipt Read: Blocked Seed]
+    T040A --> T040E
+    T040A --> T040F[Fenced Receipt Commit: Blocked Seed]
+    T040B --> T040F
+    T040C --> T040F
+    T040D --> T040F
+    T040E --> T040F
+    T040B --> T040G[Pinned Startup: Blocked Seed]
+    T040C --> T040G
+    T040A --> T040H[Serialized Dispatch: Blocked Seed]
+    T040B --> T040H
+    T040C --> T040H
+    T040D --> T040H
+    T040E --> T040H
+    T040F --> T040H
+    T040G --> T040H
+    T040H --> T040I[Effect Coordination: Blocked Seed]
+    T110 --> T040I
+    T180 --> T040I
+    T040A --> T040[Session Actor Parent: Blocked]
+    T040B --> T040
+    T040C --> T040
+    T040D --> T040
+    T040E --> T040
+    T040F --> T040
+    T040G --> T040
+    T040H --> T040
+    T040I --> T040
 
     T010 --> T050[Node Protocol]
     T050 --> T060[node-agent Skeleton]
@@ -1760,7 +1811,8 @@ flowchart TD
 | T030C | SQLite snapshot cache load | T030D | Accepted: pinned E0 load, verified projection, misses/errors, bounds and restart |
 | T030D | SQLite snapshot cache save | T020,T030A,T030B | Accepted: verified save/codec/schema-v2 runtime; public load remains T030C |
 | T030 | SQLite event-store coordination parent | T030A,T030B,T030C,T030D | Accepted: all children plus append/replay/save/load restart and failure composition |
-| T040 | Single-writer session actor | T020 | concurrent turn rejected; approval and restart behavior |
+| T040A | Pure v1 session command decision | T010,T020 | Ready: accepted A01–A09 design, 11 future test names; no runtime implementation |
+| T040 | Session actor coordination parent | T040A–T040I | Blocked: only A Ready; B–I proposed blocked seeds requiring full contracts; see T040 task |
 | T050 | Versioned node and boxd protocols | T010 | codec and version-handshake tests |
 | T060 | Authenticated restricted node-agent skeleton | T050 | control plane has no runtime socket |
 | T070 | boxd framing and heartbeat skeleton | T050 | protocol conformance |
@@ -1852,6 +1904,10 @@ pub async fn dispatch(
     command: CommandEnvelope<SessionCommand>,
 ) -> Result<CommandReceipt, DispatchError>;
 ```
+
+CU-SES-02 remains the future durable dispatch boundary, owned by blocked T040H. The separate
+CU-SES-03 pure planner is not an implementation of this API. Its first Ready contract is
+SPEC-T040A; all missing receipt/fencing/recovery semantics remain owned blockers in SPEC-T040.
 
 Required contract:
 

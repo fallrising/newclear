@@ -152,7 +152,9 @@ class FixtureConnector(Connector):
         self.client.calls["result"] += 1
         return {
             "execution_mode": "cocoon-fixture",
-            "diff_sha256": "f" * 64,
+            "diff_sha256": hashlib.sha256(b"fixed fixture").hexdigest(),
+            "diff_bytes": len(b"fixed fixture"),
+            "base_sha": row["input"]["base_sha"],
             "verification": {"status": "passed"},
             "diff": "fixed fixture",
         }

@@ -5,7 +5,9 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-09-27）：M0–M2 已驗收。M3 已有 recovery、cancel、approval、pause、guest 隔離、固定節點 egress、本機模型通道與唯讀用量畫面。模型預設是本機 mock，不需要 API key。以後要換真接口時，暫定用 OpenCode Go 裡走 Chat Completions 的模型，位址是 `https://opencode.ai/zen/go/v1/chat/completions`；key 只放 0600 檔，現在不要申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。完整 AT-07／AT-11、硬金額上限、M4 與 24 小時停留都還沒做。**
+**目前狀態（2026-10-04）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 的第一個切片加入不可變成果封存與下載，GitHub export、backup/GC、部署與整體 MVP gate 仍未完成。**
+
+模型開發仍用本機 mock，現在不需要 API key。單人版本延後真實計費與硬金額上限，用量金額保持 unknown。真實模型自然語言 coding、完整 M3 跨切片驗收及 release 前長任務驗收仍未完成。詳見 [成果封存](docs/RESULT-ARCHIVE.md) 與 [最新交接](docs/HANDOFF.md)。
 
 產品範本選定 **OpenHands Agent Canvas**。2026-09-21 比較了 OpenHands、OpenClaw、Dify、Flowise；選擇依據是與「常駐伺服器、多 agent、Web 工作台」的適配度，不宣稱 OpenHands 的 GitHub 星數最多。
 
@@ -20,6 +22,7 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 ## 文件入口
 
 - [Agent Computer 實驗](docs/AGENT-COMPUTER.md)：目標效果、能力缺口、控制／觀看契約、分階段計劃與最終驗收。
+- [成果封存](docs/RESULT-ARCHIVE.md)：固定 run 的來源、diff 與驗證紀錄，VM 清理後仍可下載。
 - [最新交接](docs/HANDOFF.md)：停止點、升級方式、測試資產與下一步。
 - [新視窗接續 prompt](docs/NEXT-PROMPT.md)：每個切片完成時更新的接續指示。
 - [M3 guest model transport](docs/M3-GUEST-MODEL.md)：啟用設定、SDK tool-call、credential 更新、cutoff 與真實 KVM 證據。

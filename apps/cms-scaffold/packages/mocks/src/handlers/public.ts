@@ -104,6 +104,6 @@ export const publicHandlers = [
   }),
 
   http.get("*/api/v1/public/media/:id/file/:variant", ({ params }) =>
-    publicMediaIds().has(String(params.id)) ? png() : apiError(404, "not_found", "Media not found"),
+    publicMediaIds().has(String(params.id)) ? png() : apiError(404, "MEDIA_NOT_FOUND", "Media not found"),
   ),
 ];

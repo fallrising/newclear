@@ -108,6 +108,40 @@ public abstract class MediaStoreContract {
         assertThat(store.quota()).isEqualTo(new MediaStore.Quota(15_728_640L, 2_147_483_648L, 10_000, 2_000));
     }
 
+    @Test
+    void BQ11_findAllReturnsKnownMediaWithVariantsIncludingDeleted() {
+        MediaAsset a = asset(UUID.randomUUID(), "available", null, T0);
+        MediaAsset b = asset(UUID.randomUUID(), "deleted", T0.plusSeconds(1), T0);
+        MediaAsset c = asset(UUID.randomUUID(), "available", null, T0);
+        List.of(a, b, c).forEach(store::insert);
+        MediaVariant thumb = variant(a.id(), "thumbnail", "image/jpeg", 10, 320, 240);
+        store.insertVariant(thumb);
+
+        List<MediaAsset> found = store.findAll(List.of(a.id(), b.id(), UUID.randomUUID(), a.id()));
+        assertThat(found).extracting(MediaAsset::id).containsExactlyInAnyOrder(a.id(), b.id());
+        MediaAsset foundA = found.stream().filter(m -> m.id().equals(a.id())).findFirst().orElseThrow();
+        assertThat(foundA).usingRecursiveComparison().ignoringFields("variants").isEqualTo(a);
+        assertThat(foundA.variants()).containsExactly(thumb);
+        assertThat(store.findAll(List.of())).isEmpty();
+    }
+
+    @Test
+    void BQ11_attachmentsOfManyMedia() {
+        MediaAsset a = asset(UUID.randomUUID(), "available", null, T0);
+        MediaAsset b = asset(UUID.randomUUID(), "available", null, T0);
+        MediaAsset c = asset(UUID.randomUUID(), "available", null, T0);
+        List.of(a, b, c).forEach(store::insert);
+        UUID entry = UUID.randomUUID();
+        store.replaceAttachments(entry, List.of(
+                new MediaAttachment(a.id(), entry, "cover", T0), new MediaAttachment(b.id(), entry, "media", T0)));
+        store.replaceAttachments(UUID.randomUUID(), List.of(new MediaAttachment(c.id(), UUID.randomUUID(), "cover", T0)));
+
+        assertThat(store.attachmentsOfMedia(List.of(a.id(), b.id()))).containsExactlyInAnyOrder(
+                new MediaAttachment(a.id(), entry, "cover", T0), new MediaAttachment(b.id(), entry, "media", T0));
+        assertThat(store.attachmentsOfMedia(List.of())).isEmpty();
+    }
+
+
     protected static MediaAsset asset(UUID owner, String status, Instant deletedAt, Instant createdAt) {
         return new MediaAsset(UUID.randomUUID(), owner, "Title", "Alt", "shot.png", "image/png", 100, 150, 640, 480,
                 "a".repeat(64), status, deletedAt, createdAt, createdAt, List.of());

@@ -389,3 +389,5 @@ BW0 施工細節見 `waves/BW0.md`。
 - 規格：`docs/specs/kernel-content.md`、`kernel-identity.md`、`kernel-media.md`、`surface-*.md`
 
 **BW4 增量實作（2026-10-04）：** 依BW4 §0補入90天預設審計保留設定與延後清理、V9，以及完整應用DataSource選用JDBC。專項PostgreSQL測試已證明發布與設定的真實審計外鍵失敗會回滾，且重新建立應用context可讀回內容／設定／session／索引／revision／audit；不等於部署或備份還原驗收。三次萬筆store量測工作74/70/74ms、公開71/75/77ms、更新18/17/19ms，全部達標，BQ-05維持現有索引表。最終完整驗收與發布狀態見BW4波次及交付報告。
+
+**BW5 增量實作範圍（2026-10-04）：** 依 BW5 §0 關閉 BQ-06／07／08／10／11；保留先前媒體已發布值比對與授權／交易修正。既有 W2 的上傳錯誤提示與 MSW 在同波改用大寫代碼，不保留前端失敗例外。VARCHAR 長度按 Unicode code point 驗證。完整結果見 BW5 波次與交付證據；並發 duplicate-email 限制仍依原決定保留。

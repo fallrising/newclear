@@ -305,8 +305,14 @@ public class InMemoryContentStore implements ContentStore {
             if (!matches(row(e.id(), scope, filter.fieldKey()), filter)) return false;
         }
         for (RefFilter ref : query.refs()) {
-            boolean found = refs.getOrDefault(e.id(), List.of()).stream()
-                    .anyMatch(r -> ref.fieldKey().equals(r.fieldKey()) && ref.targetId().equals(r.toId()));
+            boolean found;
+            if (scope == IndexScope.PUBLISHED) {
+                IndexRow row = row(e.id(), scope, ref.fieldKey());
+                found = row != null && ref.targetId().toString().equals(row.stringValue());
+            } else {
+                found = refs.getOrDefault(e.id(), List.of()).stream()
+                        .anyMatch(r -> ref.fieldKey().equals(r.fieldKey()) && ref.targetId().equals(r.toId()));
+            }
             if (!found) return false;
         }
         AccessFilter access = query.access();

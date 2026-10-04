@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.10.0
+  version: 0.11.0
   license:
     name: Proprietary
 servers:
@@ -184,7 +184,9 @@ paths:
         the server generates one and returns it once.
         Errors:
         - 400 VALIDATION_FAILED: username does not match `^[a-z0-9._-]{3,32}$`, username is taken,
-          or the temporary password is shorter than 12 characters or equals the username.
+          `displayName` is longer than 80, `email` is longer than 254 or already used by another
+          principal (case-insensitive), or the temporary password is shorter than 12 characters or
+          equals the username.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
@@ -235,8 +237,8 @@ paths:
       tags: [Principals]
       description: |
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id (message `not found`; see BQ-06).
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -248,6 +250,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
     patch:
       operationId: patchPrincipal
@@ -255,9 +258,11 @@ paths:
       description: |
         Null or absent properties keep their current value.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, or `status` is not a PrincipalStatus.
+        - 400 VALIDATION_FAILED: `status` is not a PrincipalStatus, `displayName` is longer than 80,
+          or `email` is longer than 254 or used by another principal (case-insensitive).
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -275,6 +280,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/disable:
@@ -284,9 +290,9 @@ paths:
       description: |
         Revokes every session of the principal.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id.
         - 403 LAST_ADMIN: the principal is the last active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -299,6 +305,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/unlock:
     post:
@@ -306,9 +313,9 @@ paths:
       tags: [Principals]
       description: |
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id.
         - 403 ACCOUNT_DISABLED: a disabled principal cannot be unlocked.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -321,6 +328,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/roles:
     put:
@@ -329,10 +337,11 @@ paths:
       description: |
         Replaces all role assignments. `editor` and `operator` need a non-empty `contentTypeCodes`.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, missing or duplicate role code,
-          unknown role, or editor/operator without an allowlist.
+        - 400 VALIDATION_FAILED: missing or duplicate role code, unknown role, or editor/operator
+          without an allowlist.
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -348,6 +357,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/password:
@@ -358,9 +368,9 @@ paths:
         Sets a temporary password and revokes every session of the principal. When the body or
         `temporaryPassword` is omitted the server generates one. The password is returned once.
         Errors:
-        - 400 VALIDATION_FAILED: no principal with this id, or the password is shorter than
-          12 characters or equals the username.
+        - 400 VALIDATION_FAILED: the password is shorter than 12 characters or equals the username.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -378,6 +388,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "415": { $ref: "#/components/responses/Error415" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/principals/{id}/effective-permissions:
@@ -385,10 +396,10 @@ paths:
       operationId: effectivePermissions
       tags: [Principals]
       description: |
-        Lists anonymous grants plus the grants of every role of the principal. An unknown id
-        returns only the anonymous grants.
+        Lists anonymous grants plus the grants of every role of the principal.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -400,6 +411,7 @@ paths:
         "400": { $ref: "#/components/responses/Error400" }
         "401": { $ref: "#/components/responses/Error401" }
         "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
   /api/v1/roles:
     get:
@@ -449,7 +461,7 @@ paths:
         - 400 VALIDATION_FAILED: unknown role, unknown action, unknown surface, duplicate
           permission, malformed predicate, a predicate without `contentType`, a predicate whose field is
           not an enabled string, enum, ref or principal-ref field with index rows in that type (02 §4.1),
-          or an empty list for the anonymous role.
+          `contentTypeCode` longer than 64, or an empty list for the anonymous role.
         - 403 LAST_ADMIN: the change would leave no active admin.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
       parameters:
@@ -498,7 +510,7 @@ paths:
         `filterable=true`, index rows and visibility `public`; datetime fields take
         `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive) as ISO-8601 with offset.
         Relation filters: `ref.<fieldKey>=<entry uuid>` on a public ref field; may repeat, all must match.
-        They read the relations of the working copy (02 BQ-10).
+        They read the relations of the published copy (02 BQ-10, BW5).
         Other query parameters are ignored.
         Errors:
         - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
@@ -1075,7 +1087,13 @@ paths:
       description: |
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as adminListContentTypes.
-        - 422 FIELD_VALIDATION: key does not match `^[a-z][a-z0-9_]{1,62}$` or already exists.
+        - 422 FIELD_VALIDATION: every invalid input in `error.fields`, in body order (02 BQ-08):
+          `key` REQUIRED, INVALID_FORMAT (not `^[a-z][a-z0-9_]{1,62}$`) or DUPLICATE (type exists);
+          `displayName`, `pluralDisplayName` TOO_LONG (over 80); `titleField` TOO_LONG (over 63);
+          `slugPolicy` NOT_IN_ENUM; `fields[i]` REQUIRED (null item); `fields[i].key` REQUIRED, TOO_LONG
+          (over 63) or DUPLICATE (repeats an earlier field); `fields[i].type` NOT_IN_ENUM (not string,
+          markdown, int, boolean, datetime, enum, ref, principal-ref or media-ref); `fields[i].refTarget`
+          TOO_LONG (over 63). Nothing is written.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
       requestBody:
@@ -1456,9 +1474,9 @@ paths:
         Errors:
         - 400 VALIDATION_FAILED: the `file` part is missing.
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 409 quota_exceeded: library or per-principal quota would be exceeded.
-        - 413 file_too_large: file is larger than the configured maximum.
-        - 415 unsupported_media_type: empty file or not an allowed type.
+        - 409 MEDIA_QUOTA_EXCEEDED: library or per-principal quota would be exceeded.
+        - 413 MEDIA_FILE_TOO_LARGE: file is larger than the configured maximum.
+        - 415 MEDIA_UNSUPPORTED_TYPE: empty file or not an allowed type.
       parameters:
         - $ref: "#/components/parameters/CsrfHeader"
       requestBody:
@@ -1503,7 +1521,7 @@ paths:
         Returns deleted media metadata as well.
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 404 not_found: media does not exist.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -1523,7 +1541,7 @@ paths:
       description: |
         Errors:
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-        - 404 not_found: media does not exist.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -1543,9 +1561,9 @@ paths:
         Errors:
         - 403 SURFACE_FORBIDDEN: called from the Front surface.
         - 403 FORBIDDEN: caller may not read this media.
-        - 404 not_found: media does not exist.
-        - 404 variant_not_available: variant is not original, thumbnail or web, or was not generated.
-        - 410 gone: media is soft-deleted.
+        - 404 MEDIA_NOT_FOUND: media does not exist.
+        - 404 MEDIA_VARIANT_NOT_AVAILABLE: variant is not original, thumbnail or web, or was not generated.
+        - 410 MEDIA_GONE: media is soft-deleted.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/Variant"
@@ -1574,7 +1592,7 @@ paths:
       security: []
       description: |
         Errors:
-        - 404 not_found: media missing, deleted, or not attached to a published public entry field.
+        - 404 MEDIA_NOT_FOUND: media missing, deleted, or not attached to a published public entry field.
       parameters:
         - $ref: "#/components/parameters/Id"
       responses:
@@ -1593,7 +1611,7 @@ paths:
       security: []
       description: |
         Errors:
-        - 404 not_found: media not publicly readable, or the variant is unknown or missing.
+        - 404 MEDIA_NOT_FOUND: media not publicly readable, or the variant is unknown or missing.
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/Variant"
@@ -1728,7 +1746,7 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Error413:
-      description: Payload too large (file_too_large).
+      description: Payload too large (MEDIA_FILE_TOO_LARGE).
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
@@ -1769,7 +1787,7 @@ components:
     ErrorCode:
       type: string
       description: |
-        Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
+        Every `error.code` the API can return. Media codes were lowercase until BW5 (BQ-07).
       enum:
         - UNAUTHENTICATED
         - INVALID_CREDENTIALS
@@ -1785,6 +1803,7 @@ components:
         - CONTENT_TYPE_NOT_FOUND
         - NAVIGATION_NOT_FOUND
         - AUDIT_EVENT_NOT_FOUND
+        - PRINCIPAL_NOT_FOUND
         - AUDIENCE_PARAM_REJECTED
         - INVALID_STATE_TRANSITION
         - SLUG_CONFLICT
@@ -1799,12 +1818,12 @@ components:
         - REF_TARGET_NOT_FOUND
         - REF_TARGET_WRONG_TYPE
         - PRINCIPAL_REF_UNRESOLVED
-        - not_found
-        - variant_not_available
-        - unsupported_media_type
-        - quota_exceeded
-        - file_too_large
-        - gone
+        - MEDIA_NOT_FOUND
+        - MEDIA_VARIANT_NOT_AVAILABLE
+        - MEDIA_UNSUPPORTED_TYPE
+        - MEDIA_QUOTA_EXCEEDED
+        - MEDIA_FILE_TOO_LARGE
+        - MEDIA_GONE
         - ROUTE_NOT_FOUND
         - METHOD_NOT_ALLOWED
         - MEDIA_TYPE_NOT_SUPPORTED
@@ -1839,7 +1858,7 @@ components:
             fields:
               type: array
               minItems: 1
-              description: Present on 422 payload validation errors; every invalid key, in validation order.
+              description: Present on 422 payload, content-type or settings validation errors; every invalid key, in validation order.
               items: { $ref: "#/components/schemas/FieldError" }
     FieldError:
       type: object
@@ -1848,7 +1867,7 @@ components:
       properties:
         field:
           type: string
-          description: Path of the input, `payload.<fieldKey>`, or the property name of a settings request.
+          description: Input path (`payload.<fieldKey>`), a settings property, or a content-type body path such as `fields[0].key`.
           example: payload.title
         code: { $ref: "#/components/schemas/FieldErrorCode" }
         message:
@@ -1857,9 +1876,11 @@ components:
     FieldErrorCode:
       type: string
       description: |
-        Why a field is invalid. REQUIRED (publish, member create, or a missing setting), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
-        markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
-        REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+        Why a field is invalid. REQUIRED (publish, member create, or missing content-type/settings input), RESERVED_KEY, WRONG_TYPE,
+        TOO_LONG (the endpoint-specific Unicode code-point limit; payload string 1,000 or markdown 100,000),
+        INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+        REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED, INVALID_FORMAT (a value that must match a pattern), DUPLICATE
+        (a key that already exists or repeats in the request).
       enum:
         - REQUIRED
         - RESERVED_KEY
@@ -1871,6 +1892,8 @@ components:
         - REF_TARGET_NOT_FOUND
         - REF_TARGET_WRONG_TYPE
         - PRINCIPAL_REF_UNRESOLVED
+        - INVALID_FORMAT
+        - DUPLICATE
     Health:
       type: object
       additionalProperties: true

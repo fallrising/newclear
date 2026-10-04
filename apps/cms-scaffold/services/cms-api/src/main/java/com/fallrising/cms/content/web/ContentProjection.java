@@ -5,6 +5,7 @@ import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.service.EntryService;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,21 @@ final class ContentProjection {
         json.put("publishedAt", entry.publishedAt());
         json.put("updatedAt", entry.updatedAt());
         return json;
+    }
+
+    /** Enabled public media-ref values from one page's selected payload scope. */
+    static List<Object> mediaRefs(List<Map<String, Object>> payloads, List<FieldRecord> fields) {
+        List<Object> values = new ArrayList<>();
+        for (Map<String, Object> payload : payloads) {
+            if (payload == null) continue;
+            for (FieldRecord field : fields) {
+                Object value = payload.get(field.fieldKey());
+                if (value != null && field.enabled() && "public".equals(field.visibility()) && "media-ref".equals(field.fieldType())) {
+                    values.add(value);
+                }
+            }
+        }
+        return values;
     }
 
     static Map<String, Object> published(

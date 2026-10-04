@@ -1,6 +1,7 @@
 package com.fallrising.cms.content.web;
 
 import com.fallrising.cms.content.ContentException;
+import com.fallrising.cms.content.domain.EntryRecord;
 import com.fallrising.cms.content.service.MeService;
 import com.fallrising.cms.identity.web.AuthController;
 import com.fallrising.cms.identity.web.IdentityRequest;
@@ -19,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 /** Member endpoints (02 §4.5). Front surface only; see MeService. */
 @RestController
@@ -37,8 +39,10 @@ public class MeController {
     public Map<String, Object> list(@PathVariable String typeKey, HttpServletRequest request) {
         IdentityRequest identity = AuthController.current(request);
         MeService.MeList result = me.list(identity.principal(), identity.surface(), typeKey, request.getParameterMap());
+        Function<Object, Object> expander = media.publicExpander(ContentProjection.mediaRefs(
+                result.page().items().stream().map(EntryRecord::payload).toList(), result.fields()));
         List<Map<String, Object>> items = result.page().items().stream()
-                .map(e -> ContentProjection.member(e, result.type(), result.fields(), this::expandMedia))
+                .map(e -> ContentProjection.member(e, result.type(), result.fields(), expander))
                 .toList();
         Map<String, Object> json = new LinkedHashMap<>();
         json.put("items", items);

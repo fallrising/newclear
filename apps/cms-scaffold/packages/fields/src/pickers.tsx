@@ -247,9 +247,9 @@ function LibraryTab({ selected, onSelect }: { selected: string; onSelect: (asset
 
 function uploadError(error: unknown, limit: string | null): string {
   if (!isApiError(error)) return fieldsCopy["fields.media.error.failed"];
-  if (error.code === "file_too_large") return limit ? fill(fieldsCopy["fields.media.error.tooLarge"], { size: limit }) : fieldsCopy["fields.media.error.failed"];
-  if (error.code === "unsupported_media_type") return fieldsCopy["fields.media.error.type"];
-  if (error.code === "quota_exceeded") return fieldsCopy["fields.media.error.quota"];
+  if (error.code === "MEDIA_FILE_TOO_LARGE") return limit ? fill(fieldsCopy["fields.media.error.tooLarge"], { size: limit }) : fieldsCopy["fields.media.error.failed"];
+  if (error.code === "MEDIA_UNSUPPORTED_TYPE") return fieldsCopy["fields.media.error.type"];
+  if (error.code === "MEDIA_QUOTA_EXCEEDED") return fieldsCopy["fields.media.error.quota"];
   if (error.status === 403) return fieldsCopy["fields.media.error.forbidden"];
   return fieldsCopy["fields.media.error.failed"];
 }

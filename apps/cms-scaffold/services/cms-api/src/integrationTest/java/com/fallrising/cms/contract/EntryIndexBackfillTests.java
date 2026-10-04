@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** V7 rebuilds cms_entry_index for entries written before BW1b (02 §3.2). */
+/** V7 rebuilds cms_entry_index for entries written before BW1b (02 §3.2); V10 adds rows of ref fields (02 BQ-10). */
 class EntryIndexBackfillTests {
 
     @Test
@@ -57,5 +57,34 @@ class EntryIndexBackfillTests {
                 new IndexRow(fraction, "rank", IndexScope.WORK, "int", null, new java.math.BigDecimal("1.5"), null, null));
         assertThat(store.indexRowsOf(draft)).containsExactly(
                 new IndexRow(draft, "title", IndexScope.WORK, "string", "Draft", null, null, null));
+    }
+
+    @Test
+    void BQ10_v10IndexesRefFieldsOfExistingEntries() {
+        DataSource dataSource = PostgresFixture.emptyDataSource();
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").target("9").load().migrate();
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        UUID type = UUID.randomUUID();
+        UUID entry = UUID.randomUUID();
+        UUID oldAlbum = UUID.randomUUID();
+        UUID newAlbum = UUID.randomUUID();
+        jdbc.update("INSERT INTO cms_content_type (id, type_key, display_name, plural_display_name, title_field) "
+                + "VALUES (?, 'photo', 'Photo', 'Photos', 'title')", type);
+        jdbc.update("INSERT INTO cms_field (id, content_type_id, field_key, field_type, indexed) VALUES (?, ?, 'title', 'string', false)",
+                UUID.randomUUID(), type);
+        jdbc.update("INSERT INTO cms_field (id, content_type_id, field_key, field_type, indexed) VALUES (?, ?, 'album', 'ref', false)",
+                UUID.randomUUID(), type);
+        jdbc.update("INSERT INTO cms_entry (id, content_type_id, slug, publication_state, payload, published_payload) "
+                + "VALUES (?, ?, 'a', 'published', CAST(? AS jsonb), CAST(? AS jsonb))", entry, type,
+                "{\"title\":\"T\",\"album\":\"" + newAlbum + "\"}", "{\"title\":\"T\",\"album\":\"" + oldAlbum + "\"}");
+
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
+
+        JdbcContentStore store = new JdbcContentStore(dataSource, new ObjectMapper());
+        assertThat(store.indexRowsOf(entry)).containsExactly(
+                new IndexRow(entry, "album", IndexScope.PUBLISHED, "ref", oldAlbum.toString(), null, null, null),
+                new IndexRow(entry, "title", IndexScope.PUBLISHED, "string", "T", null, null, null),
+                new IndexRow(entry, "album", IndexScope.WORK, "ref", newAlbum.toString(), null, null, null),
+                new IndexRow(entry, "title", IndexScope.WORK, "string", "T", null, null, null));
     }
 }

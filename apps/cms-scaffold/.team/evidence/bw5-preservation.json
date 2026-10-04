@@ -1,0 +1,13 @@
+{
+  "snapshots": {
+    "cms-bw1b-baseline": 412,
+    "cms-bw1c-baseline": 449,
+    "cms-w1-baseline": 468,
+    "cms-bw2-baseline": 566,
+    "cms-w2-baseline": 602,
+    "cms-bw3-baseline": 710,
+    "cms-bw4-baseline": 732,
+    "cms-bw5-baseline": 762
+  },
+  "originalFilesPreserved": 468
+}

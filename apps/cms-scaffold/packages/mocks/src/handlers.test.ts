@@ -696,9 +696,9 @@ describe("@cms/mocks BW2 behaviour (W2)", () => {
     expect((await client().work.mediaList()).items).toHaveLength(7);
     await expect(client().work.media(library.items[0].id)).resolves.toMatchObject({ title: "Softbox" });
     expect((await raw(library.items[0].variants.thumbnail!.url)).status).toBe(410);
-    await expect(client().work.upload(new File(["x"], "notes.txt", { type: "text/plain" }))).rejects.toMatchObject({ status: 415, code: "unsupported_media_type" });
+    await expect(client().work.upload(new File(["x"], "notes.txt", { type: "text/plain" }))).rejects.toMatchObject({ status: 415, code: "MEDIA_UNSUPPORTED_TYPE" });
     const big = new File([new Uint8Array(15 * 1024 * 1024 + 1)], "big.png", { type: "image/png" });
-    await expect(client().work.upload(big)).rejects.toMatchObject({ status: 413, code: "file_too_large" });
+    await expect(client().work.upload(big)).rejects.toMatchObject({ status: 413, code: "MEDIA_FILE_TOO_LARGE" });
     const uploaded = await client().work.upload(new File(["png"], "dock.png", { type: "image/png" }));
     expect((await client().work.mediaList()).items[0]).toMatchObject({ id: uploaded.id, title: "dock.png" });
     setUser("seed-member-clinic");

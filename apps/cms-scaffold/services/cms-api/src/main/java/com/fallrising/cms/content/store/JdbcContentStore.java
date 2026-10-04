@@ -591,9 +591,18 @@ public class JdbcContentStore implements ContentStore {
             sql.append(")");
         }
         for (RefFilter ref : query.refs()) {
-            sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_ref rf WHERE rf.from_entry_id = e.id AND rf.field_key = ? AND rf.to_id = ?)");
-            args.add(ref.fieldKey());
-            args.add(ref.targetId());
+            if (query.scope() == IndexScope.PUBLISHED) {
+                // The published copy's relation (02 BQ-10); cms_entry_ref holds the working copy's.
+                sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_index rf WHERE rf.entry_id = e.id AND rf.scope = ?"
+                        + " AND rf.field_key = ? AND rf.value_string = ?)");
+                args.add(scope);
+                args.add(ref.fieldKey());
+                args.add(ref.targetId().toString());
+            } else {
+                sql.append(" AND EXISTS (SELECT 1 FROM cms_entry_ref rf WHERE rf.from_entry_id = e.id AND rf.field_key = ? AND rf.to_id = ?)");
+                args.add(ref.fieldKey());
+                args.add(ref.targetId());
+            }
         }
         AccessFilter access = query.access();
         if (!access.unrestricted()) {

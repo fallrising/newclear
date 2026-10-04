@@ -97,7 +97,7 @@ public class PrincipalAdminService {
 
     public Principal get(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        return store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        return store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
     }
 
     public CreatedPrincipal create(IdentityRequest request, String username, String displayName, String email, String temporaryPassword) {
@@ -105,6 +105,7 @@ public class PrincipalAdminService {
         String normalized = username == null ? "" : username.toLowerCase(Locale.ROOT);
         if (!USERNAME.matcher(normalized).matches()) throw IdentityException.validation("username must match [a-z0-9._-]{3,32}");
         if (store.findPrincipalByUsername(normalized).isPresent()) throw IdentityException.validation("username is taken");
+        validateProfile(null, displayName, email);
         String password = temporaryPassword;
         if (password == null || password.isBlank()) password = SessionTokens.randomToken() + "Aa1";
         authService.validateNewPassword(normalized, password);
@@ -123,7 +124,8 @@ public class PrincipalAdminService {
 
     public Principal patch(IdentityRequest request, UUID id, String displayName, String email, String status) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
+        validateProfile(id, displayName, email);
         Instant now = Instant.now();
         PrincipalStatus nextStatus = status == null ? current.status() : parseStatus(status);
         Principal updated = current.withProfile(displayName == null ? current.displayName() : displayName,
@@ -143,7 +145,7 @@ public class PrincipalAdminService {
 
     public Principal disable(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         return transactions.inTransaction(() -> {
             Principal updated = store.updatePrincipalKeepingUsableAdmin(current.withStatus(PrincipalStatus.DISABLED, Instant.now()));
             store.revokeAllForPrincipal(id, Instant.now(), null);
@@ -154,7 +156,7 @@ public class PrincipalAdminService {
 
     public Principal unlock(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         if (current.status() == PrincipalStatus.DISABLED) throw IdentityException.accountDisabled();
         Principal updated = current.withLock(0, null, PrincipalStatus.ACTIVE, Instant.now());
         return transactions.inTransaction(() -> store.updatePrincipal(updated));
@@ -162,7 +164,7 @@ public class PrincipalAdminService {
 
     public void replaceRoles(IdentityRequest request, UUID id, List<RoleAssignmentInput> inputs) {
         authService.requireManagePrincipals(request);
-        store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         if (inputs == null) throw IdentityException.validation("roles are required");
         Set<String> seen = new HashSet<>();
         List<PrincipalRoleAssignment> assignments = new ArrayList<>();
@@ -184,7 +186,7 @@ public class PrincipalAdminService {
 
     public String setPassword(IdentityRequest request, UUID id, String temporaryPassword) {
         authService.requireManagePrincipals(request);
-        Principal principal = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal principal = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         String password = temporaryPassword;
         if (password == null || password.isBlank()) password = SessionTokens.randomToken() + "Aa1";
         authService.validateNewPassword(principal.username(), password);
@@ -220,6 +222,9 @@ public class PrincipalAdminService {
             try { action = CmsAction.fromWire(p.action()); } catch (IllegalArgumentException e) { throw IdentityException.validation(e.getMessage()); }
             List<String> surfaces = p.allowedSurfaces() == null || p.allowedSurfaces().isEmpty() ? defaultSurfaces(action.wire()) : p.allowedSurfaces().stream().distinct().toList();
             if (surfaces.stream().anyMatch(s -> !SURFACES.contains(s))) throw IdentityException.validation("unknown surface");
+            if (p.contentTypeCode() != null && p.contentTypeCode().codePointCount(0, p.contentTypeCode().length()) > 64) {
+                throw IdentityException.validation("contentTypeCode must be at most 64 characters");
+            }
             validatePredicate(p.predicateJson());
             String predicateProblem = PredicateIndexCheck.problem(objectMapper, contentTypes, p.contentTypeCode(), p.predicateJson());
             if (predicateProblem != null) throw IdentityException.validation(predicateProblem);
@@ -236,7 +241,22 @@ public class PrincipalAdminService {
 
     public List<java.util.Map<String, Object>> effective(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
+        store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         return authorizationService.effectivePermissions(id);
+    }
+
+    /** Database column limits count Unicode code points; another principal's email is case-insensitively unique. */
+    private void validateProfile(UUID self, String displayName, String email) {
+        if (displayName != null && displayName.codePointCount(0, displayName.length()) > 80) {
+            throw IdentityException.validation("displayName must be at most 80 characters");
+        }
+        if (email == null) return;
+        if (email.codePointCount(0, email.length()) > 254) {
+            throw IdentityException.validation("email must be at most 254 characters");
+        }
+        boolean taken = store.listPrincipals().stream()
+                .anyMatch(p -> !p.id().equals(self) && p.email() != null && p.email().equalsIgnoreCase(email));
+        if (taken) throw IdentityException.validation("email is taken");
     }
 
     private void validatePredicate(String predicateJson) {

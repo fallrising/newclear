@@ -756,6 +756,51 @@ public abstract class ContentStoreContract {
         assertThat(publicSlugs(publicQuery(photo).requiredRefs(List.of("album")))).containsExactly("loose", "in-unlisted", "in-open");
     }
 
+    // ---- BW5: public ref filters follow the published copy (02 BQ-10) ----
+
+    @Test
+    void BQ10_publishedQueryFiltersRefsByThePublishedCopy() {
+        ContentTypeRecord album = insertType("album", field("title", "string"));
+        ContentTypeRecord photo = insertType(type("photo", "title"), field("title", "string"), field("album", "ref"));
+        EntryRecord a1 = entry(album, "a1", PublicationState.PUBLISHED, Map.of("title", "A1"), t(1));
+        EntryRecord a2 = entry(album, "a2", PublicationState.PUBLISHED, Map.of("title", "A2"), t(2));
+        EntryRecord moved = new EntryRecord(UUID.randomUUID(), photo.id(), "photo", "moved", PublicationState.PUBLISHED, 2,
+                Map.of("title", "M", "album", a2.id().toString()), Map.of("title", "M", "album", a1.id().toString()),
+                t(3), null, null, null, null, T0, t(4));
+        EntryRecord stays = entry(photo, "stays", PublicationState.PUBLISHED, Map.of("title", "S", "album", a1.id().toString()), t(5));
+        EntryRecord draft = entry(photo, "draft", PublicationState.DRAFT, Map.of("title", "D", "album", a1.id().toString()), t(6));
+        List.of(a1, a2, moved, stays, draft).forEach(store::insertEntry);
+        store.replaceRefs(moved.id(), List.of(new EntryRefRecord(moved.id(), "album", a2.id(), "entry", 0)));
+        store.replaceRefs(stays.id(), List.of(new EntryRefRecord(stays.id(), "album", a1.id(), "entry", 0)));
+        store.replaceRefs(draft.id(), List.of(new EntryRefRecord(draft.id(), "album", a1.id(), "entry", 0)));
+
+        assertThat(publicSlugs(publicQuery(photo).refs(List.of(new RefFilter("album", a1.id())))))
+                .containsExactlyInAnyOrder("stays", "moved");
+        assertThat(publicSlugs(publicQuery(photo).refs(List.of(new RefFilter("album", a2.id()))))).isEmpty();
+        assertThat(workSlugs(query(photo).refs(List.of(new RefFilter("album", a2.id()))))).containsExactly("moved");
+    }
+
+    @Test
+    void BQ10_unindexedPrincipalRefsUsePublishedRowsAndDisabledRefsAreAbsent() {
+        ContentTypeRecord note = insertType("note", field("title", "string"), field("reviewer", "principal-ref"));
+        store.insertField(new FieldRecord(UUID.randomUUID(), note.id(), "disabledRef", "ref", false, false, false,
+                "public", 2, null, "restrict", List.of(), false, false));
+        UUID oldOwner = UUID.randomUUID();
+        UUID newOwner = UUID.randomUUID();
+        EntryRecord changed = published(entry(note, "changed", PublicationState.PUBLISHED,
+                Map.of("title", "T", "reviewer", newOwner.toString(), "disabledRef", newOwner.toString()), t(1)),
+                Map.of("title", "T", "reviewer", oldOwner.toString(), "disabledRef", oldOwner.toString()));
+        store.insertEntry(changed);
+        store.replaceRefs(changed.id(), List.of(new EntryRefRecord(changed.id(), "reviewer", newOwner, "principal", 0)));
+
+        assertThat(publicSlugs(publicQuery(note).refs(List.of(new RefFilter("reviewer", oldOwner)))))
+                .containsExactly("changed");
+        assertThat(publicSlugs(publicQuery(note).refs(List.of(new RefFilter("reviewer", newOwner))))).isEmpty();
+        assertThat(workSlugs(query(note).refs(List.of(new RefFilter("reviewer", newOwner)))))
+                .containsExactly("changed");
+        assertThat(store.indexRowsOf(changed.id())).noneMatch(row -> row.fieldKey().equals("disabledRef"));
+    }
+
     // ---- BW1b: authorization pushdown (B-10) ----
 
     @Test

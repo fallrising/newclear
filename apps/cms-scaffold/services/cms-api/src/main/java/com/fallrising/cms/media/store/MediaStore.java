@@ -4,6 +4,7 @@ import com.fallrising.cms.media.domain.MediaAsset;
 import com.fallrising.cms.media.domain.MediaAttachment;
 import com.fallrising.cms.media.domain.MediaVariant;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,9 @@ public interface MediaStore {
     void insert(MediaAsset asset);
 
     Optional<MediaAsset> find(UUID id);
+
+    /** Known media, including deleted assets and their variants; duplicate and unknown IDs are skipped. */
+    List<MediaAsset> findAll(Collection<UUID> ids);
 
     List<MediaAsset> listAvailable();
 
@@ -25,6 +29,9 @@ public interface MediaStore {
     void replaceAttachments(UUID entryId, List<MediaAttachment> attachments);
 
     List<MediaAttachment> attachmentsOfMedia(UUID mediaId);
+
+    /** Attachments for the requested media in one bounded operation. */
+    List<MediaAttachment> attachmentsOfMedia(Collection<UUID> mediaIds);
 
     long countFiles();
 

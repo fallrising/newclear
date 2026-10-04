@@ -131,8 +131,9 @@ describe("MediaPicker (media-ref)", () => {
       ...api.work,
       upload: async (file: File) => {
         sent.push(file.name);
-        if (file.name === "notes.txt") throw new ApiError(415, "unsupported_media_type", "Unsupported media type");
-        if (file.name === "full.png") throw new ApiError(409, "quota_exceeded", "Quota exceeded");
+        if (file.name === "notes.txt") throw new ApiError(415, "MEDIA_UNSUPPORTED_TYPE", "Unsupported media type");
+        if (file.name === "server-large.png") throw new ApiError(413, "MEDIA_FILE_TOO_LARGE", "File too large");
+        if (file.name === "full.png") throw new ApiError(409, "MEDIA_QUOTA_EXCEEDED", "Quota exceeded");
         db.media.unshift(uploaded);
         return uploaded;
       },
@@ -147,11 +148,13 @@ describe("MediaPicker (media-ref)", () => {
     expect(sent).toEqual([]);
     fireEvent.change(input, { target: { files: [new File(["txt"], "notes.txt", { type: "text/plain" })] } });
     await waitFor(() => expect(screen.getByTestId("media-upload-error")).toHaveTextContent("只接受 JPEG、PNG、GIF 或 PDF。"));
+    fireEvent.change(input, { target: { files: [new File(["png"], "server-large.png", { type: "image/png" })] } });
+    await waitFor(() => expect(screen.getByTestId("media-upload-error")).toHaveTextContent("檔案太大，上限是 15 MB。"));
     fireEvent.change(input, { target: { files: [new File(["png"], "full.png", { type: "image/png" })] } });
     await waitFor(() => expect(screen.getByTestId("media-upload-error")).toHaveTextContent("媒體庫的空間已滿，請先移除不用的檔案。"));
     fireEvent.change(input, { target: { files: [new File(["png"], "dock.png", { type: "image/png" })] } });
     await waitFor(() => expect(screen.queryByTestId("media-picker")).not.toBeInTheDocument());
-    expect(sent).toEqual(["notes.txt", "full.png", "dock.png"]);
+    expect(sent).toEqual(["notes.txt", "server-large.png", "full.png", "dock.png"]);
     expect(await screen.findByText("已上傳「dock.png」")).toBeInTheDocument();
     expect(screen.getByTestId("value-attachment")).toHaveTextContent(uploaded.id);
     expect(within(screen.getByTestId("field-attachment-picker")).getByText("dock.png")).toBeInTheDocument();

@@ -302,7 +302,7 @@ export const workHandlers = [
     const user = requireMedia();
     if (user instanceof Response) return user;
     const asset = db.media.find((media) => media.id === params.id);
-    if (!asset) return apiError(404, "not_found", "Media not found");
+    if (!asset) return apiError(404, "MEDIA_NOT_FOUND", "Media not found");
     if (!db.deletedMedia.includes(asset.id)) db.deletedMedia.push(asset.id);
     return new HttpResponse(null, { status: 204 });
   }),
@@ -312,7 +312,7 @@ export const workHandlers = [
     if (user instanceof Response) return user;
     if (!canGlobal(user, "manage_media")) return forbidden("manage_media", "media");
     const asset = db.media.find((media) => media.id === params.id);
-    return asset ? HttpResponse.json<MediaAsset>(asset) : apiError(404, "not_found", "Media not found");
+    return asset ? HttpResponse.json<MediaAsset>(asset) : apiError(404, "MEDIA_NOT_FOUND", "Media not found");
   }),
 
   http.post("*/api/v1/media", async ({ request }) => {
@@ -321,10 +321,10 @@ export const workHandlers = [
     const form = await request.formData();
     const file = form.get("file");
     if (!(file instanceof File)) return apiError(400, "VALIDATION_FAILED", "file part is required");
-    if (file.size === 0 || !/^(image\/(jpeg|png|gif)|application\/pdf)$/.test(file.type)) return apiError(415, "unsupported_media_type", "Unsupported media type");
-    if (file.size > mediaQuota.maxFileBytes) return apiError(413, "file_too_large", "File is larger than the configured maximum");
+    if (file.size === 0 || !/^(image\/(jpeg|png|gif)|application\/pdf)$/.test(file.type)) return apiError(415, "MEDIA_UNSUPPORTED_TYPE", "Unsupported media type");
+    if (file.size > mediaQuota.maxFileBytes) return apiError(413, "MEDIA_FILE_TOO_LARGE", "File is larger than the configured maximum");
     const stored = db.media;
-    if (stored.length + 1 > mediaQuota.maxFiles || stored.reduce((sum, asset) => sum + Object.values(asset.variants).reduce((bytes, variant) => bytes + (variant?.byteSize ?? 0), 0), 0) + file.size * (file.type.startsWith("image/") ? 3 : 1) > mediaQuota.maxLibraryBytes) return apiError(409, "quota_exceeded", "Quota exceeded");
+    if (stored.length + 1 > mediaQuota.maxFiles || stored.reduce((sum, asset) => sum + Object.values(asset.variants).reduce((bytes, variant) => bytes + (variant?.byteSize ?? 0), 0), 0) + file.size * (file.type.startsWith("image/") ? 3 : 1) > mediaQuota.maxLibraryBytes) return apiError(409, "MEDIA_QUOTA_EXCEEDED", "Quota exceeded");
     const id = crypto.randomUUID();
     const title = String(form.get("title") || file.name);
     const image = file.type.startsWith("image/");
@@ -354,7 +354,7 @@ export const workHandlers = [
     const user = requireWork();
     if (user instanceof Response) return user;
     const id = String(params.id);
-    if (!db.media.some((asset) => asset.id === id)) return apiError(404, "not_found", "Media not found");
+    if (!db.media.some((asset) => asset.id === id)) return apiError(404, "MEDIA_NOT_FOUND", "Media not found");
     const readable = canGlobal(user, "manage_media") || db.workEntries.some((entry) => {
       if (!can(user, "read_draft", entry.contentType)) return false;
       // The backend retains the current published attachment while work edits change media.
@@ -366,6 +366,6 @@ export const workHandlers = [
         field.type === "media-ref" && (mediaId(entry.payload[field.key]) === id || mediaId(published?.[field.key]) === id));
     });
     if (!readable) return forbidden("manage_media", "media");
-    return db.deletedMedia.includes(id) ? apiError(410, "gone", "Media was deleted") : png();
+    return db.deletedMedia.includes(id) ? apiError(410, "MEDIA_GONE", "Media was deleted") : png();
   }),
 ];

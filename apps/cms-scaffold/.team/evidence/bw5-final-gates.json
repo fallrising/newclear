@@ -1,0 +1,28 @@
+{
+  "backendCommand": [
+    "./gradlew",
+    "test",
+    "integrationTest",
+    "bootJar",
+    "--rerun-tasks",
+    "--no-daemon",
+    "--no-parallel",
+    "--console=plain"
+  ],
+  "backendExitCode": 0,
+  "junit": {
+    "test": {
+      "tests": 339,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "integrationTest": {
+      "tests": 140,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "mockE2eExitCode": 0
+}

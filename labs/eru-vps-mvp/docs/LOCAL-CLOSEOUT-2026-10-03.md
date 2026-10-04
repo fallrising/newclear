@@ -1,5 +1,7 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-04 後續：[network file-staging協調器](M3-FRESH-NETWORK-STAGING-2026-10-04.md) 綁定當次計畫／授權，先durable intent再單次adapter dispatch，回應遺失只讀reconcile；本輪fake adapter驗證，不啟用設定或接受stage。正式剩餘12不變。
+
 2026-10-04 後續：[fresh network-access設定計畫](M3-FRESH-NETWORK-ACCESS-PLAN-2026-10-04.md) 產生四機固定firewall／pinned known_hosts／staged core key內容，保存immutable private plan並離線重導出；重核當次admission與身份。尚未套用設定或驗收network stage，正式剩餘12不變。
 
 2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。
@@ -26,7 +28,7 @@
 | ERU-010 | 失聯 metadata 精確清理、quota／identity 守護、fresh subset recovery、重驗 desired specs 的 replacement wrapper | `test_worker_loss*.py`：30 tests | 外部 fence、失聯與 replacement 實機演練；node remove/resume、自動 quota repair、持續維持副本數不屬目前契約 |
 | ERU-013 | release provenance、版本轉移、獨立建置與不可覆寫 manifest 守護；v0.1.7 雙次 byte-identical build、有界 compatibility 與 validation manifest 已通過 | `test_core_release`、`test_core_publish`、`test_core_update`、`test_validate_core_patch` | upgrade／rollback／interruption VPS 驗收及 plugin／live runtime 相容性 |
 | ERU-014 | install→access→registration→smoke→resume→generation 六階段及唯讀 recovery；拒絕錯誤 core artifact 和 stale predecessor | `test_reimage_host.py`：4 tests；`test_labctl.py`：87 tests（含其他 labctl 功能） | safe AddNode patch 受控部署、人工 OS reimage receipt 與整體 E2E；不能以元件重裝代替 OS 重灌 |
-| ERU-015 | Profile A review planner、simulation journal／coordinator、pending barrier、execution preparation／inspection、唯讀 baseline collector、四機人工receipt assessment、replacement裸OS facts、當次network stage前置證據檢查及固定network-access設定計畫 | `test_fresh*.py` | production stage dispatch／external fencing／完整bootstrap／generation commit與seal仍缺程式；之後才是三個獨立fresh generations、V01–V04／V08、residue與RTO |
+| ERU-015 | Profile A review planner、simulation journal／coordinator、pending barrier、execution preparation／inspection、唯讀 baseline collector、四機人工receipt assessment、replacement裸OS facts、當次network stage前置證據檢查、固定network-access設定計畫及network file-staging協調器（fake adapter驗證） | `test_fresh*.py` | production stage dispatch／external fencing／完整bootstrap／generation commit與seal仍缺程式；之後才是三個獨立fresh generations、V01–V04／V08、residue與RTO |
 
 ERU-009／010／014 的上述有限本機流程已具備，仍保持整項「進行中」。ERU-013 不因 guard 修正而取得跨版本驗收；ERU-015 不能標成「本機完成、只待 E2E」。歷史文件的較小 suite 數是當時快照，不是本輪測試數。
 

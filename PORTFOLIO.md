@@ -46,6 +46,7 @@
 | `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |
 | `newclear/labs/zircon-godot` | 未知 | A | 本次投入限固定版本研究、學習實驗 SDD 與起步路線；不匯入上游源碼／素材，不宣稱已可玩或營運，後續執行另行安排。見 [README](labs/zircon-godot/README.md)。 |
 | `newclear/products/hai-taskboard` | 未知 | A | Human–AI delivery control plane（Work Graph／Fake-core）；私人項目帳本格式的未來消費者，不取代帳本本身。 |
+| `newclear/labs/pg-jev-router` | 未知 | A | 本次投入限獨立語意判斷 lab：固定 pg-jev、合成 provider、分類／攔截／分流與 CI；正式模型品質、平台接線與部署另行驗收。見 [README](labs/pg-jev-router/README.md)。 |
 | `newclear/labs/eru-vps-mvp` | 未知 | A | live VPS MVP 實驗；實機變更另行授權。 |
 | `kernel/infra/pvehost` | 未知 | — | Proxmox 宿主機分階段操作包，由人以 root 手動執行；不是自動化控制面。 |
 

@@ -3,7 +3,6 @@ package spi
 import (
 	"context"
 	"errors"
-	"io"
 	"log/slog"
 	"maps"
 	"reflect"
@@ -140,7 +139,7 @@ func TestOpen(t *testing.T) {
 	}
 
 	wantClock := fixedClock{now: time.Unix(123, 0)}
-	wantLogger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	wantLogger := slog.New(slog.DiscardHandler)
 	_, err = Open(ctx, "capture", Config{Clock: wantClock, Logger: wantLogger})
 	if err != nil {
 		t.Fatalf("Open() with explicit defaults returned %v", err)

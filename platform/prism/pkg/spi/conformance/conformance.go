@@ -414,9 +414,7 @@ func runConcurrentAccess(t *testing.T, backend spi.Backend, opts Options) {
 	errorsCh := make(chan error, 600)
 	var waitGroup sync.WaitGroup
 	for worker := range 100 {
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
+		waitGroup.Go(func() {
 			switch worker % 3 {
 			case 0:
 				if backend.Metrics() == nil {
@@ -502,7 +500,7 @@ func runConcurrentAccess(t *testing.T, backend spi.Backend, opts Options) {
 					}
 				}
 			}
-		}()
+		})
 	}
 	waitGroup.Wait()
 	close(errorsCh)

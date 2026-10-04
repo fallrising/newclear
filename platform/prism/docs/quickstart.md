@@ -6,9 +6,14 @@ public and intended only for loopback development.
 
 ## Prerequisites
 
-Go 1.23+, a C compiler for race tests, and Bash. Python 3 is needed for the daemon
+Go 1.27.1, a C compiler for race tests, and Bash. Python 3 is needed for the daemon
 smoke probe. Run commands from `platform/prism`; initial module/tool downloads
-require network access. No module dependency or language upgrade is needed.
+require network access. Install Go 1.27.1 or select it with
+`export GOTOOLCHAIN=go1.27.1`; use `export GOFLAGS=-mod=readonly` to keep dependency
+files unchanged. `go version` should report `go1.27.1`. CI installs the version
+from `go.mod` and disables automatic switching with `GOTOOLCHAIN=local`.
+Go 1.23 is no longer a supported build baseline; see the
+[upgrade contract](specs/go-1.27-upgrade.md).
 
 ## Verify the source
 

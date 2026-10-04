@@ -1,8 +1,9 @@
 # Prism implementation inventory
 
-P1-05 review baseline: newclear `9c9622968338064e153d4e2b0886ce06b94df8f8`,
-including the merged P1-02, P1-03 and P1-04 milestones. Historical verification below
-retains its original scope. Product usage remains unknown.
+Current maintenance baseline: Go 1.27.1 on the completed P1-05 source,
+newclear `6deaabcc583f96b543c55f82b7922cfe772e2831`. The P1-05 review originally
+started at `9c9622968338064e153d4e2b0886ce06b94df8f8`. Historical verification below
+retains its original versions and scope. Product usage remains unknown.
 
 ## Code and contract coverage
 
@@ -16,7 +17,7 @@ retains its original scope. Product usage remains unknown.
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
 | P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
 | P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; query/ruler/console retain base HTTP routes. |
-| P0-09 | ADR-001 through ADR-012 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-09 | ADR-001 through ADR-013 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
 | P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
@@ -169,6 +170,35 @@ preflight and is not used by network receivers. Initial receiver-absent and
 501/404 red tests, budget-boundary failures and intermediate lint/fixture failures
 were retained and resolved before these final checks. No validator was weakened.
 
+## Go 1.27 maintenance verification — 2026-10-04
+
+The [upgrade contract](specs/go-1.27-upgrade.md) moves the active module, CI and
+development instructions to Go 1.27.1 with golangci-lint v2.14.0. All runtime
+dependency versions and go.sum remain unchanged. Earlier commands above are
+historical evidence, not commands for the current minimum toolchain.
+
+Local verification on the final upgrade source passed:
+
+- `GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly make lint test`: format, vet,
+  race and leak checks across all 17 packages.
+- Dependency guard and all five negative fixtures; `go build ./...`;
+  `go mod verify`; unchanged module versions and go.sum.
+- golangci-lint v2.14.0 for normal and integration builds: zero issues.
+- Real Prometheus 2.53.0 remote_write and telemetrygen v0.116.0 OTLP clients,
+  tenant isolation, security tests and executable daemon smoke/SIGTERM.
+- `CGO_ENABLED=0` daemon build and build metadata, config check, and explicit
+  minimum-version rejection with an older compiler and `GOTOOLCHAIN=local`.
+- Twenty race-enabled cancellation/close/shutdown repetitions across ingest
+  and server packages. A failing incomplete-body fixture was corrected to
+  wait for server-side connection closure while retaining its keep-alive
+  request and shutdown assertions; no sleep or leak exclusion was added.
+
+Raising the language directive enabled additional lint checks. Necessary
+corrections preserve reflection traversal, error classification and owned
+concurrent work; enabled checks and public SPI interfaces are unchanged.
+The existing SDD22 container recipe is updated, but no Dockerfile or deployment
+is implemented by this maintenance change.
+
 ## Current integration boundary
 
 P1-04 and P1-05 connect the existing atomic pipeline to authenticated OTLP and
@@ -217,13 +247,23 @@ focused ingest checks. Follow the [SDD task order](sdd/12-IMPLEMENTATION-PHASES.
 
 ## Go style reference
 
-This delivery also consults [JetBrains Modern Go Guidelines](https://github.com/JetBrains/go-modern-guidelines),
+This section records the initial Go 1.23 adoption; the current baseline is noted below.
+
+That delivery also consulted [JetBrains Modern Go Guidelines](https://github.com/JetBrains/go-modern-guidelines),
 using its `use-modern-go` CLI v0.1.1 to resolve this component's `go.mod` (Go 1.23).
 The inspected upstream checkout is `155dc7ca10da5e1f6c841503086957b1b37f5815`.
 Review applies supported idioms such as integer range, `min`/`max`, `maps.Clone`,
 `slices.Clone`/`Contains`/`SortFunc`, and `strings.Clone`; it preserves behavior and
 context-cancellation checks where a shorthand would change them. The existing
-`modernize` linter remains enabled. No Go language-version upgrade is included.
+`modernize` linter remains enabled. No Go language-version upgrade was included in that initial adoption.
 
 The guideline CLI may require a newer toolchain to run; its own toolchain does
-not change Prism's language target. Final module checks use CI's Go 1.23.12.
+not change Prism's language target. At that checkpoint, final module checks used CI's Go 1.23.12.
+
+### Current Go style baseline
+
+The 2026-10-04 upgrade uses the same pinned Modern Go Guidelines CLI v0.1.1
+with `list --go-version 1.27`; its full version-filtered list was reviewed.
+Previous Go 1.23 references above describe the original adoption. Existing JSON
+protocol behavior is preserved; upgrading the compiler does not authorize a
+JSON v2 migration or an unrelated style rewrite.

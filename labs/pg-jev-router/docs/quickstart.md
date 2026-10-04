@@ -25,7 +25,7 @@ make integration
 
 成功判準：unit suite 與 integration suite 都為 OK；`CACHE` 顯示第二次不增加 request，`BATCH` 顯示九列使用少於九次請求；九案 action/route 符合 fixture。CI 使用同一命令。
 
-本次編輯環境無 Docker，這條本機命令為 skipped；真正執行結果以 [evidence](evidence.md) 及 PR 的 hosted CI run 為準。不要把 `make check` 說成擴充套件已跑過。
+本次編輯環境無 Docker，這條本機命令為 skipped；hosted CI 已完整通過，確切 run 與結果見 [evidence](evidence.md)。不要把 `make check` 說成擴充套件已跑過。
 
 ## 3. SQL 與程式入口
 

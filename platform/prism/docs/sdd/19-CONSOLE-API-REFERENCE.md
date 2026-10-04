@@ -376,7 +376,7 @@ If-None-Match: "sha256:abc..."
 ### `GET /status`（viewer）
 
 ```json
-{"version":"0.1.0","git_commit":"abc123","go_version":"go1.23.6",
+{"version":"0.1.0","git_commit":"abc123","go_version":"go1.27.1",
  "uptime_seconds":86400,"mode":"all-in-one",
  "driver":"clickhouse",
  "capabilities":{ /* 完整的 spi.Capabilities JSON */ },

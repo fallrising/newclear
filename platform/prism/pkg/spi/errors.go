@@ -58,8 +58,7 @@ func Classify(err error) ErrClass {
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return ErrTimeout
 	}
-	var classified *Error
-	if errors.As(err, &classified) {
+	if classified, ok := errors.AsType[*Error](err); ok {
 		return classified.Class
 	}
 	return ErrInternal

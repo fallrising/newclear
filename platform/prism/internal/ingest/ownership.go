@@ -29,8 +29,8 @@ func (f *footprint) value(v reflect.Value) bool {
 	case reflect.Pointer:
 		return f.add(8, 1) && (v.IsNil() || f.value(v.Elem()))
 	case reflect.Struct:
-		for i := range v.NumField() {
-			if !f.value(v.Field(i)) {
+		for _, field := range v.Fields() {
+			if !f.value(field) {
 				return false
 			}
 		}

@@ -661,3 +661,100 @@ Missing/Quarantined disposition, restore, live UI, resume, provider or broader G
 The next durable admission child begins with the checksummed migration oracle; it requires a
 separate bounded assignment. The adapter's preallocated map-to-slice collection retains the
 existing convention and one allocation before sorting; no unnecessary style refactor was added.
+
+
+## Ordered migration prerequisite continuation (2026-10-04)
+
+PR #238 is merged at `5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`. Continue on
+`agent/hai-taskboard/migration-integrity` from that merged baseline. This bounded H06 prerequisite
+adds the ordered checksummed runner and startup history integrity only. Production registry remains
+V1; actual proposal/accepted-head/activation tables and authority, API, restore and live UI remain
+NotRun. Source-of-truth contract: `docs/sdd/ordered-migrations.md`, ACKed by root before code.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-130 | V1-preserving ordered migration runner and lawful Red/Green tests | sqlite store/private runner/new tests, report | Accepted bounded with T-131 and root gates |
+| T-131 | Independent history/rollback/concurrency/source/evidence review | report/private checks only | Accepted; unconditional native PASS |
+
+Root owns PLAN/contracts, routing, registry allocation, diff integration and acceptance. One isolated
+writer; reviewer session is separate. Required evidence: literal V1 SHA, real SQLite public reopen
+Red, bounded whole-history checks, schema-version consistency, atomic pending-step rollback/restart,
+concurrent startup, cancellation and existing full/race/vet/build/web gates, validators and actual
+new Draft PR-head CI. Every historical failure remains; no acceptance follows from worker DONE.
+
+### Ordered runner local acceptance
+
+Root inspected all three source/test files and the Store diff, verified unchanged V1 against the
+merged baseline, and accepted HAI-MIGRATION-001..006 after fresh native T-131 PASS. Four-file
+manifest SHA-256: `65ba92dc45ed4863e4ce99eceaee05c37d6c99a31b7a4b9643017f969b5cd598`.
+T-131 report: `8090a268acfb8b6306210d2ff71f986d105aba8099b76efd879c16d09c59a30b`.
+T-130 PARTIAL remains unchanged: `ed42c600874e4c6cd6b3c139cc2034c5a3e4173f9ea9779e30d877aaf535f01b`.
+Root backend full/race/vet/build and web gates exited 0; T-131 independently executed migration,
+SQLite authority/Done/replay tests and bound all receipts. `.team/reports/T-0184-gate.md` maps
+required local dimensions. No blocking or new low defect remains. Actual pushed-head PR CI is
+still a delivery check, recorded in desk T-0184 before review handoff; no new PR merge follows.
+
+T-132 was an optional second-model static review. Automatic approval review rejected transmitting
+its source/raw-log payload to Claude before process creation because the exact payload/destination,
+including possible local metadata, lacked specific authorization. No workaround was attempted;
+T-132 stays PARTIAL/not executed and contributes no evidence. The independent native T-131 review
+satisfies the required review dimension. Original Red, compiler/PATH/cache diagnostics and rejection
+are retained rather than rewritten. Production registry is V1; real V2/head/import/activation and
+broader H06..H09 remain NotRun. Commit-I/O/process-kill and physical-schema attestation are unclaimed.
+
+## V2 persistence schema continuation (2026-10-04)
+
+Desk T-0189 scopes the next H06 schema-only child after owner continue. Baseline is verified
+PR #274 head b2ccf47066a3729d37d053271db16fb566c9b1ed; #274 remains Draft/unmerged.
+New branch agent/hai-taskboard/v2-persistence; delivery is stacked Draft PR with explicit runner
+predecessor dependency, no merge authorization. Root owns ACK, routing/integration/review/acceptance.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-140 | Exact V2 schema/constraints/no-backfill/oracle contract | new mini-SDD/report | Accepted bounded design after T-142 preflight and root ACK |
+
+V2 proposal/provenance, accepted revisions/heads/current requirements, plans/activation decisions
+are persistence storage only in this child. Import/accept/activation commands and readiness/dispatch
+current-head wiring remain NotRun. Frozen V1 bytes, existing application/API/runtime/deps unchanged.
+Require lawful baseline Red, V1 preservation, actual V2 atomic upgrade/restart and scope/immutability
+controls, fresh native independent semantic review, root full/race/web gates and exact PR-head CI.
+
+T-140 exact schema contract SHA-256 `76a4bf5b6e1c2b34521d7b4715fba766995ce93790449a06eac584dd99de8720`
+inspected fully by root and independently by T-142. Root ACKs HAI-V2-001..007 on 2026-10-04
+before source/test implementation: eleven empty STRICT tables, exact scoped/deferred FKs and
+immutable PK/UQ duplicate guards; separate durable plan_digest and existing kernel_plan_digest.
+All alternate UQs are PK supersets, so no fictitious independent collision oracle is required.
+This accepts design only, not code or admission commands. T-141 Ready with its exact SQLite
+scope and existing-test version adaptations; T-142 final review waits frozen candidate/root gates.
+Root's initial hash-binding attempt rejected a superseded design hash while the last semantic
+clarification landed; no file integrated on that attempt. The final stable hash above was verified.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-141 | Actual V2 schema migration and lawful Red/Green constraints | new SQL/new tests/private registry and explicit existing migration fixtures | Accepted bounded with T-142 and root gates |
+| T-142 | Independent exact schema/source/semantic evidence review | report/private checks only | Accepted; unconditional native PASS |
+
+### V2 local acceptance, 2026-10-05
+
+Root accepts HAI-V2-001..007 storage/migration only after inspecting the full four-file diff,
+all SQL/tests and T-142 unconditional native PASS. Frozen six-file manifest SHA-256
+`5b027bf6d2df11bd4428c1911f9aa67d258bc28a34f254ee73f35060a66adb69`; unchanged V1/Store
+verified against baseline. T-142 report `b1f49cabe2e1556d1aaf5541d6046618c33bf0d641b7c8bf9527585830ff73e5`
+is accepted. T-141 PARTIAL remains byte-for-byte, retaining lawful Red. Root full backend/race/vet/build
+and web gates exited 0; T-142 independently executed 30 tests and 259 subtests with no failures/skips.
+T-0189-gate maps each required local dimension; exact pushed-head CI remains a subsequent delivery check.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-143 | Lightweight independent manifest/oracle inventory | isolated report/private artifact only | Accepted inventory only; no semantic-test claim |
+
+T-143 report `e3907d5ae3305783169afa83939895b2267c8ca5f6b0bbe08e799d0727e1fd28` confirms
+six hashes, seven unique named oracles and retained predecessor cases; it does not substitute
+for T-142 native review. Strong Codex handled design/SQL/review; Luna handled bounded inventory.
+Root status-only documentation updates preserve frozen reviewed semantic contract and historical reports.
+The superseded design binding rejection and initial documentation path error remain private diagnostics;
+corrected bindings/edits were rerun successfully. Root corrected its own T-142 envelope ROLE
+metadata after validator rejection; the independent-review assignment was unchanged, and all
+task/report validators then passed. No new defect or required local skip remains.
+No import/firstaccept/activation command, auth/CAS, canonical codec, head read consumer, restore,
+live UI, process-kill or COMMIT I/O guarantee follows. Parent #274 remains Draft/unmerged.

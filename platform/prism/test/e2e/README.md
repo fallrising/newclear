@@ -54,7 +54,8 @@ listeners, storage and temporary files are closed by the test. There is no Prism
 query endpoint involved: verification uses the existing SPI.
 
 To run all external clients, set `PROMETHEUS_BINARY`,
-`OTLP_TELEMETRYGEN_BINARY` and `VECTOR_BINARY`, then omit `-run`. An explicitly selected gate fails
+`OTLP_TELEMETRYGEN_BINARY`, `VECTOR_BINARY`, `PROMTOOL_BINARY` and
+`PRISMD_BINARY`, then omit `-run`. An explicitly selected gate fails
 when its binary is missing; it does not silently skip. The daemon smoke above
 also probes remote_write authentication, empty v1 admission and v2 rejection.
 
@@ -71,3 +72,24 @@ VECTOR_BINARY=/tmp/prism-vector-0.45.0/vector-x86_64-unknown-linux-gnu/bin/vecto
 The actual Vector Loki sink sends two finite stdin events for each compression mode, `none` and `gzip`. The test checks JSON wire encoding, stored bodies, resource/trace/span metadata, trusted tenant isolation and process exit. Snappy implies protobuf in Vector and is outside this JSON milestone; configuring `encoding.codec` alone does not select JSON wire transport. Healthcheck is disabled because Loki query/ready compatibility is a later milestone. The test uses public local credentials and does not start a deployed collector. Missing VECTOR_BINARY is a failure when the integration suite is selected.
 
 The daemon smoke also probes Loki authentication and a nonempty JSON push through the real executable, followed by clean SIGTERM. Persistence assertions belong to the SPI integration test.
+
+## Real promtool HTTP queries
+
+Use `promtool` from the same verified Prometheus v2.53.0 archive described above.
+Build the daemon and run the actual client against an ephemeral all-in-one process:
+
+```sh
+GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly go build -o /tmp/prism-query-prismd ./cmd/prismd
+PRISMD_BINARY=/tmp/prism-query-prismd \
+  PROMTOOL_BINARY=/tmp/prism-prometheus-2.53.0/promtool \
+  GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly \
+  go test -tags=integration -race -count=1 -v -run TestPromtoolHTTPQuery ./test/e2e
+```
+
+The test writes an authenticated OTLP gauge, waits for asynchronous persistence,
+and checks value 42.5 through real promtool instant and range queries. It also
+checks authentication, reserved-label rejection, labels/series/metadata/buildinfo,
+query self-telemetry and clean SIGTERM exit. Credentials are public test fixtures;
+listeners, child processes and temporary files are local and bounded. Missing
+executables fail the selected gate instead of skipping it. This is not Grafana
+datasource, production driver or deployment acceptance.

@@ -1,7 +1,7 @@
 # Prism implementation inventory
 
-Current development baseline: Go 1.27.1, with P1-07 starting from
-newclear `c5fe7385d7021cc071c5dc793437a911044aa380` after P1-06.
+Current development baseline: Go 1.27.1, with P1-08 starting from
+newclear `c247028e71cf2947c4c4d90eee06200594fc41a5` after P1-07.
 The P1-05 source completed at `6deaabcc583f96b543c55f82b7922cfe772e2831`. Historical verification below
 retains its original versions and scope. Product usage remains unknown.
 
@@ -16,17 +16,18 @@ retains its original versions and scope. Product usage remains unknown.
 | P0-05 | `pkg/spi/conformance`, deterministic fixtures and memory test | Memory passes supported capabilities; this does not verify future drivers or native pushdown. |
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
 | P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
-| P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; query/ruler/console retain base HTTP routes. |
-| P0-09 | ADR-001 through ADR-015 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; P1-08 adds query routes; ruler/console retain base HTTP routes. |
+| P0-09 | ADR-001 through ADR-017 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
-| P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
+| P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | P1-08 registers Prism collectors and connects query telemetry; pipeline event counters remain unconnected. |
 | P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
 | P1-02 | [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Used by P1-03 and P1-04 runtime; complete tenant override configuration and registered telemetry remain outstanding. |
 | P1-03 | [`internal/ingest`](../internal/ingest/README.md): bounded tenant registry, atomic reservation, normalization/limits, three priority lanes per signal, owned batches and SPI writers | P1-04 connects config/daemon/OTLP; registered pipeline telemetry is still unconnected. |
 | P1-04 | `internal/compat/otlp`, configured single-tenant HTTP/gRPC runtime, original-unit accounting, bounded decode/admission and lifecycle tests | Full multi-tenant identity, native query APIs and production storage remain later work. |
-| P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms, query APIs and full multi-tenant control plane remain later work. |
+| P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms and full multi-tenant control plane remain later work. |
 | P1-06 | `internal/compat/lokiapi`, bounded authenticated JSON/gzip push, structured metadata, runtime and real Vector acceptance | Protobuf push and Loki query/ready remain future milestones. |
-| P1-07 | `internal/query/promqladapter`, bounded tenant-scoped streaming lifetime bridge and official float corpus through memory SPI | P1-08 HTTP/router/output policy, native histograms and other drivers remain later work. |
+| P1-07 | `internal/query/promqladapter`, bounded tenant-scoped streaming lifetime bridge and official float corpus through memory SPI | Native histograms and other drivers remain later work. |
+| P1-08 | `internal/compat/promapi/query*`, query/all-in-one runtime, bounded native/fallback APIs, real promtool gate | Rules/alerts/remote_read, native histograms and multi-tenant control plane remain later work. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -263,6 +264,50 @@ The Apache corpus retains upstream bytes, including three whitespace defects in
 `subquery.test`; only that immutable fixture has a documented whitespace
 exception, guarded by source identity checks.
 
+## P1-08 verified HTTP slice
+
+The [HTTP contract](specs/p1-08-prometheus-http.md) and
+[handler guide](../internal/compat/promapi/QUERY.md) describe seven bounded read
+APIs in query and all-in-one modes. Ingest mode retains its existing routes.
+The fixed configured tenant is checked before storage access; supplied invalid
+credentials never become anonymous reads. Native dispatch requires both the
+capability and optional SPI interface; forced fallback and string results use
+the pinned Prometheus engine. Reserved-label AST checks and output filtering,
+inner selector windows, bounded catalog scans, result/JSON preflight, and
+cancellation/Close ownership have regression coverage.
+
+Fresh Go 1.27.1 checks with `GOFLAGS=-mod=readonly` after the warning and
+slow-POST fixes passed all eleven gates:
+
+- `make lint test`: vet/format and 20 race-enabled packages, including goleak
+  checks for the HTTP handler and daemon.
+- Both dependency scripts, including all five negative fixtures, and
+  `go build ./...` passed.
+- golangci-lint v2.14.0 returned zero issues for normal and integration scopes.
+- The unchanged official float corpus passed 579 supported directives and
+  6,296 actual engine queries; security and `go mod verify` passed.
+- `go test -tags=integration -race -count=1 -v ./test/e2e` used the built daemon
+  and real promtool 2.53.0 for instant/range value 42.5, catalog/auth/telemetry
+  and clean SIGTERM, and retained real Prometheus remote_write, Vector
+  none/gzip and telemetrygen HTTP/gRPC three-signal checks.
+- The built-daemon smoke passed config-check, health/metrics, authenticated
+  ingress and SIGTERM exit zero.
+
+The metric-name existence probe now reads backend warnings before Close,
+enforces cumulative count/byte caps across selectors, and emits one sanitized
+warning. Regression tests cover empty and matching sets, exact and excess
+warning limits, secret suppression and iterator/Close classification. Slow POST
+cancellation joins its callback before sending the timeout response.
+
+Only finite logical resources are bounded here; backend allocations, engine
+memory and memory-driver retention are not RSS guarantees. Shutdown waits for
+active handlers before closing the borrowed backend, so a backend that ignores
+context cancellation can delay final shutdown indefinitely. ADR-017 documents
+signed numeric timestamp rounding and the possible 1 ms upstream tie difference;
+legacy `SecFloatToMilli` remains unchanged. Native histograms, multi-tenant
+identity control plane, Grafana, persistent-driver/soak acceptance and deployment
+remain outside this slice.
+
 ## Current integration boundary
 
 P1-04 through P1-06 connect the existing atomic pipeline to authenticated OTLP,
@@ -286,10 +331,10 @@ use that multi-tenant default.
 
 Remaining integration work includes:
 
-- Register/populate pipeline self-telemetry and translate bounded diagnostics to
+- Populate pipeline self-telemetry from ingestion events and translate bounded diagnostics to
   registry domains; package reports do not deliver alerts.
-- Complete multi-tenant API-key/mTLS identity and live reload. Strict ingest
-  currently fails closed, and headers cannot select another tenant.
+- Complete multi-tenant API-key/mTLS identity and live reload. Strict ingest and query
+  currently fail closed, and headers cannot select another tenant.
 - Expose the complete limits policy through configuration/control-plane APIs;
   only the four existing limits fields are wired in this milestone.
 - Preserve trace truncation information across batches; already persisted spans
@@ -299,8 +344,8 @@ Remaining integration work includes:
 
 ## Remaining phases
 
-P1-07 completes the float PromQL storage adapter. Next is P1-08, the query
-API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
+P1-07 completes the float PromQL storage adapter and P1-08 adds the HTTP
+query API. Next is P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
 security and operations. Differential and soak acceptance remain future work. Official float PromQL
 corpus checks cover the memory adapter; existing E2E and security checks cover

@@ -223,3 +223,26 @@ AC-06 has only the bounded new-completion corruption rejection predecessor in th
 Persisted Missing/Quarantined disposition, repair, restore and full AC-06 remain NotRun.
 Unsupported dispatch rejection does not implement resume or AC-19. No accepted-head authority,
 current graph importer, browser or broader G1 coverage is inferred.
+
+
+## Ordered migration prerequisite (bounded acceptance)
+
+| Clause | Executable oracle | Status |
+| --- | --- | --- |
+| HAI-MIGRATION-001..006 | `TestAdmission_MigrationPreservesV1AndRejectsUnknownSchema`, `TestMigrationRunner_RegistryAndHistoryValidation`, `TestMigrationRunner_AtomicUpgradeRollbackAndRestart`, `TestMigrationRunner_ConcurrentStartup`, `TestMigrationRunner_CancellationReleasesWriter` | T-130 lawful Red/focused Green; T-131 independent PASS and root full/race/web gate; accepted bounded |
+
+This predecessor checkpoint is the runner subset of HAI-ADMISSION-008 only. It did not supply
+V2 schema, accepted heads, proposal/import/activation, process-kill/COMMIT I/O fault or
+backup/restore evidence.
+The subsequent V2 storage child below supplies actual V2-specific migration criteria; durable
+admission commands and broader H06..H09 acceptance remain Specified/NotRun.
+
+## V2 persistence schema child (bounded acceptance)
+
+| Clause | Named oracle | Status |
+| --- | --- | --- |
+| HAI-V2-001..007 | `TestAcceptanceSchema_FreshUpgradeAndReopen`, `TestAcceptanceSchema_V1UpgradePreservesHistoryAndLeavesHeadsEmpty`, `TestAcceptanceSchema_RejectsUnknownAndOldBinary`, `TestAcceptanceSchema_ActualV2RollbackRestart`, `TestAcceptanceSchema_ActualV2CancelAndConcurrent`, `TestAcceptanceSchema_ScopedRelationsAndHeadSwap`, `TestAcceptanceSchema_ImmutableHistoryAndReplacement` | T-140 root ACK before code; T-141 lawful Red/Green; T-142 native PASS; root full/race/web gates; passing bounded T-0189-gate |
+
+This child proves storage/migration boundaries only; SQL fixture writes do not prove operator
+acceptance. HAI-ADMISSION-001..008 canonical verification, auth/CAS, complete mapping, import,
+activation and current accepted-input consumers remain Specified/NotRun. No G1 inference follows.

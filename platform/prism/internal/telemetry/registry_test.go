@@ -252,6 +252,7 @@ func expectedDefinitions() map[string]expectedDefinition {
 		"prism_query_fallback_total":                    {MetricTypeCounter, []string{"signal", "reason"}},
 		"prism_query_concurrent":                        {MetricTypeGauge, nil},
 		"prism_query_rejected_total":                    {MetricTypeCounter, []string{"reason"}},
+		"prism_query_adjustments_total":                 {MetricTypeCounter, []string{"action"}},
 		"prism_query_samples_scanned_total":             {MetricTypeCounter, []string{"api"}},
 		"prism_logql_parse_errors_total":                {MetricTypeCounter, []string{"kind"}},
 		"prism_logql_unsupported_total":                 {MetricTypeCounter, []string{"feature"}},

@@ -7,9 +7,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/decision-attention`
+- Branch: `agent/hai-taskboard/v2-persistence`
 - Worktree: task-scoped checkout; verify actual Git state.
-- Current delivery base: `newclear/main@e2c901304570428a5c78744e274739206dbf3387`
+- Current delivery base: verified Draft PR #274 head `b2ccf47066a3729d37d053271db16fb566c9b1ed` (unmerged predecessor)
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
   boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
@@ -146,7 +146,7 @@ HAI-CI-001 on `agent/hai-taskboard/decision-attention` is accepted for candidate
 workflow passed both jobs in [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
 T-112 independently passed the repaired implementation; PLAN records the report hash and
 orchestrator acceptance. The original T-111 REWORK and failed predecessor run remain preserved.
-PR #238 remains Draft. This does not connect the fixture UI, admit specifications or implement
+PR #238 was merged on 2026-10-04 at `5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`. This does not connect the fixture UI, admit specifications or implement
 restore. The earlier branch references describe historical checkpoints and do not override this
 continuation. Check the latest PR head's checks separately from this implementation checkpoint.
 
@@ -162,13 +162,34 @@ this bounded slice after integrated full/race/vet/build and web gates. PLAN reco
 Historical scenario/artifact Red and fixture diagnostics remain retained. No restore, live UI,
 quarantine/repair of corrupt bytes, real provider or broader G1 acceptance follows.
 
+## Ordered migration prerequisite acceptance
+
+The bounded H06 prerequisite implements a private ordered runner, preserving frozen V1 SQL and
+Identity. Startup inspects bounded whole migration history and instance schema state under the
+writer lock. All pending SQL/history/version and fresh ledger creation share one transaction.
+`ordered-migrations.md` defines the named real-SQLite oracles; T-130 retains lawful Red and final
+focused Green. Independent T-131 returned unconditional PASS; root accepted the exact runner
+after full/race/vet/build and web gates. PLAN and T-0184-gate bind the source and raw evidence.
+At the predecessor #274 checkpoint the registry was V1 only, with synthetic future-step tests.
+The separately accepted V2 child below supersedes that registry status; H06..H09 admission
+commands and current-head authority remain Specified/NotRun.
+
+## V2 persistence schema acceptance
+
+Root ACKed `sdd/acceptance-persistence-schema.md` HAI-V2-001..007 after independent design
+preflight. T-141 implements eleven empty scoped STRICT tables and migration-only tests; no
+accepted data is inferred from historical fixtures. Durable outer plan identity and kernel identity
+are separate. T-142 returned unconditional native PASS; root accepted storage/migration after
+full backend/race/web gates. Seven oracles and exact source hashes are bound in T-0189-gate.
+No import, first acceptance, activation, head read authority or current-input command is implemented.
+
 ## Safe next action
 
-Confirm the latest pushed PR head passes both backend/web jobs, independently of the recorded
-local acceptance. For the next separately assigned durable admission slice, use the H06..H09 child
-contracts; T-050 backup/restore and
-live UI remain separate scopes. The 37-item remaining-work roadmap is desk T-0157's report.
-No merge, deployment or real provider is authorized by this handoff.
+Deliver the accepted V2 persistence child through exact stacked Draft PR CI and desk review.
+The next implementation child needs a separate bounded Git proposal/provenance import assignment.
+The runner predecessor #274 remains Draft/unmerged; do not assume merge. Import/admission commands and accepted-input authority wiring
+require later separate assignments; backup/restore and live UI remain separate scopes. No PR merge
+or deployment follows from this handoff.
 
 ## Restore invariant
 

@@ -12,7 +12,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
+	"github.com/fallrising/newclear/platform/prism/internal/secret"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 )
 
@@ -32,6 +34,7 @@ func (c *Config) Validate(ctx context.Context) error {
 		validateTenancy(c.Tenancy),
 		validateAuth(ctx, c.Auth),
 		c.validateIngestIdentity(ctx),
+		c.validateQueryIdentity(ctx),
 		validateIngest(c.Ingest),
 		c.validateIngestBudget(),
 		validateLimits(c.Limits),
@@ -49,6 +52,45 @@ func (c *Config) Validate(ctx context.Context) error {
 		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
+}
+
+func (c *Config) validateQueryIdentity(ctx context.Context) error {
+	if c.Server.Mode != "query" && c.Server.Mode != "all-in-one" {
+		return nil
+	}
+	if c.Tenancy.Mode != "single" {
+		return fmt.Errorf("query requires single tenancy; strict tenancy is not implemented")
+	}
+	if len(c.Tenancy.DefaultTenant) > 2048 || strings.TrimSpace(c.Tenancy.DefaultTenant) != c.Tenancy.DefaultTenant {
+		return fmt.Errorf("tenancy.default_tenant exceeds query identity capacity")
+	}
+	if c.Server.Mode == "all-in-one" {
+		// Ingest already loaded and validated the same credential.
+		return nil
+	}
+	if c.Auth.IngestAPIKeyFile == "" {
+		if !c.Auth.AllowAnonymousRead {
+			return fmt.Errorf("auth.ingest_api_key_file is required when anonymous query reads are disabled")
+		}
+		return nil
+	}
+	key, err := readBounded(ctx, c.Auth.IngestAPIKeyFile, maxIngestKeyBytes)
+	if err != nil {
+		return fmt.Errorf("read auth.ingest_api_key_file: %w", err)
+	}
+	value := strings.TrimSpace(string(key))
+	if len(value) < 32 || strings.IndexFunc(value, unicode.IsSpace) >= 0 {
+		return fmt.Errorf("auth.ingest_api_key_file must contain a bearer credential of at least 32 bytes without internal whitespace")
+	}
+	jwt, err := readBounded(ctx, c.Auth.JWTSecretFile, maxAuxiliaryFileBytes)
+	if err != nil {
+		return fmt.Errorf("read auth.jwt_secret_file: %w", err)
+	}
+	if value == strings.TrimSpace(string(jwt)) {
+		return fmt.Errorf("auth.ingest_api_key_file must use a credential distinct from auth.jwt_secret_file")
+	}
+	c.Auth.IngestAPIKey = secret.String(strings.Clone(value))
+	return nil
 }
 
 func validateServer(server ServerConfig) error {

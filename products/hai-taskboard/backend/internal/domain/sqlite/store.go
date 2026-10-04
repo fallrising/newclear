@@ -1273,45 +1273,6 @@ func configure(conn *sql.Conn, ctx context.Context) error {
 	return nil
 }
 
-func migrate(conn *sql.Conn, ctx context.Context, appliedAtNS int64) error {
-	if _, err := conn.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (
-version INTEGER PRIMARY KEY CHECK(version > 0), checksum TEXT NOT NULL UNIQUE, applied_at_ns INTEGER NOT NULL)`); err != nil {
-		return normalizeError(err)
-	}
-	checksum := migrationChecksum()
-	var applied string
-	err := conn.QueryRowContext(ctx, "SELECT checksum FROM schema_migrations WHERE version = ?", migrationVersion).Scan(&applied)
-	if err == nil {
-		if applied != checksum {
-			return fmt.Errorf("schema migration checksum mismatch")
-		}
-		return nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "BEGIN IMMEDIATE"); err != nil {
-		return normalizeError(err)
-	}
-	committed := false
-	defer func() {
-		if !committed {
-			_, _ = conn.ExecContext(context.Background(), "ROLLBACK")
-		}
-	}()
-	if _, err := conn.ExecContext(ctx, v1Migration); err != nil {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "INSERT INTO schema_migrations (version, checksum, applied_at_ns) VALUES (?, ?, ?)", migrationVersion, checksum, appliedAtNS); err != nil {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "COMMIT"); err != nil {
-		return normalizeError(err)
-	}
-	committed = true
-	return nil
-}
-
 func assertEngine(conn *sql.Conn, ctx context.Context) error {
 	var version string
 	if err := conn.QueryRowContext(ctx, "SELECT sqlite_version()").Scan(&version); err != nil {

@@ -98,8 +98,8 @@ func TestIngestCapacityValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if budget != 968<<20 {
-		t.Fatalf("default logical budget =%d want968MiB", budget)
+	if budget != 1000<<20 {
+		t.Fatalf("default logical budget =%d want1000MiB", budget)
 	}
 	cfg.Ingest.MemoryLimit = ByteSize(budget)
 	if err := cfg.Validate(context.Background()); err != nil {
@@ -156,7 +156,7 @@ func TestMaximumLogicalBudgetCannotOverflow(t *testing.T) {
 	cfg.Ingest.Batch.Logs.MaxBytes = 1 << 30
 	cfg.Ingest.Batch.Traces.MaxBytes = 1 << 30
 	budget, err := cfg.Ingest.LogicalBudget()
-	if err != nil || budget != 11282<<30 {
+	if err != nil || budget != 11284<<30 {
 		t.Fatalf("maximum budget=%d error=%v", budget, err)
 	}
 }
@@ -168,10 +168,10 @@ func TestCombinedReceiveBudgetBoundaries(t *testing.T) {
 		concurrency             int
 		want                    int64
 	}{
-		{"default", 16 << 20, 4 << 20, 16, 968 << 20},
-		{"HTTP larger", 17 << 20, 4 << 20, 16, 1003 << 20},
-		{"gRPC larger", 16 << 20, 32 << 20, 16, 1480 << 20},
-		{"one OTLP slot", 16 << 20, 4 << 20, 1, 488 << 20},
+		{"default", 16 << 20, 4 << 20, 16, 1000 << 20},
+		{"HTTP larger", 17 << 20, 4 << 20, 16, 1037 << 20},
+		{"gRPC larger", 16 << 20, 32 << 20, 16, 1512 << 20},
+		{"one OTLP slot", 16 << 20, 4 << 20, 1, 520 << 20},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			cfg := loadValid(t)

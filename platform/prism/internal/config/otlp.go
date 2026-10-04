@@ -50,7 +50,7 @@ func (c *Config) validateIngestIdentity(ctx context.Context) error {
 }
 
 // LogicalBudget bounds queued/buffered/in-flight payloads and receiver buffers.
-// It excludes allocator, decoded protobuf/pdata, normalization/state, and backend storage
+// It excludes allocator, decoded protocol objects, normalization/state, and backend storage
 // and therefore does not provide a process RSS guarantee.
 func (i IngestConfig) LogicalBudget() (int64, error) {
 	// Check finite ranges before arithmetic or conversion to machine-sized ints.
@@ -73,8 +73,11 @@ func (i IngestConfig) LogicalBudget() (int64, error) {
 	// Remote write owns one slot with compressed and decompressed buffers,
 	// independent of the existing OTLP gate.
 	remoteWriteReceive := 2 * int64(i.MaxRequestBytes)
+	// Loki push owns another independent slot, with compressed and decompressed
+	// buffers bounded by the same request limit.
+	lokiReceive := 2 * int64(i.MaxRequestBytes)
 	// Admission serializes one owned request while decoding may continue.
-	return queues + receive + remoteWriteReceive + int64(i.MaxRequestBytes), nil
+	return queues + receive + remoteWriteReceive + lokiReceive + int64(i.MaxRequestBytes), nil
 }
 
 func (c *Config) validateIngestBudget() error {

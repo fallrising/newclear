@@ -1,6 +1,6 @@
 # Prism development quickstart
 
-This exercises authenticated OTLP and remote_write ingestion with the memory backend. Compatible
+This exercises authenticated OTLP, remote_write and Loki JSON ingestion with the memory backend. Compatible
 query APIs and production storage are later milestones. Fixture credentials are
 public and intended only for loopback development.
 
@@ -26,7 +26,7 @@ go build ./...
 
 See [inventory](inventory.md) for observed results and the remaining acceptance
 boundaries. The separate [external-client gate](../test/e2e/README.md) uses a
-pinned telemetrygen and Prometheus and checks actual memory contents through SPI.
+pinned telemetrygen, Prometheus and Vector and checks actual memory contents through SPI.
 
 ## Check configuration and start
 
@@ -114,6 +114,14 @@ against `ingest.memory_limit`; this is not a process RSS ceiling. Decoded pdata,
 allocator overhead, transient normalization and state, and backend retention are
 additional costs. Do not treat the memory backend as durable production storage.
 
-Loki push, query APIs, full multi-tenant authentication, registered
+Loki protobuf push, query APIs, full multi-tenant authentication, registered
 pipeline telemetry, live reload and deployment remain later work. Follow the
 [SDD task order](sdd/12-IMPLEMENTATION-PHASES.md).
+
+## Loki JSON push
+
+Send JSON to `POST /loki/api/v1/push` on the same HTTP listener, with `Content-Type: application/json`, the same bearer key and optional gzip. Each entry uses a timestamp string, line string and optional flat string metadata. Client tenant selectors must match the configured tenant.
+
+For Vector's Loki sink set `compression = "none"` or `"gzip"`; its default snappy mode sends protobuf, which this milestone does not support. See the [real Vector acceptance](../test/e2e/README.md#real-vector-loki-json-push) for the pinned binary and executable gate. Loki query/ready APIs are not implemented, so disable the sink healthcheck for this ingest-only test.
+
+204 acknowledges asynchronous admission. A partial 400 can leave valid records persisted; retrying an unexpected committed 500 can duplicate them. Byte/element/projected-expansion capacity failures are 413; receiver or pipeline backpressure 429 and stopped 503 include Retry-After. The separate Loki receive slot raises the default logical queue/buffer budget to 1000 MiB, not a hard RSS limit. Details and trust/cancellation boundaries are in the [P1-06 contract](specs/p1-06-loki-push.md).

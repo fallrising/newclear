@@ -1,4 +1,4 @@
-# P1-04 config reference. Later-phase drivers/control-plane remain unavailable.
+# P1-05 config reference. Later-phase drivers/control-plane remain unavailable.
 server:
   http_listen: ":9090"
   grpc_listen: ":4317"
@@ -36,7 +36,7 @@ auth:
   ingest_api_key_file: /etc/prism/secrets/ingest_api_key # ingest 必填，至少 32 bytes；不得共用 JWT
 
 ingest:
-  max_request_bytes: 16MiB
+  max_request_bytes: 16MiB   # OTLP 與 remote_write 的 wire／解壓後上限
   queue_depth: 4              # 每訊號三條優先佇列；runtime 單租戶、每訊號兩名 worker
   otlp:
     max_recv_msg_size: 4MiB
@@ -48,7 +48,7 @@ ingest:
   clock_skew_policy: clamp
   max_past: 1h
   max_future: 5m
-  memory_limit: 1GiB          # 驗證 logical queue + receive budget；非 RSS 硬上限
+  memory_limit: 1GiB          # 預設 OTLP + remote_write logical budget 968MiB；非 RSS 硬上限
 
 limits:                       # 見 04-DATA-MODEL.md §5，此處為全域預設
   max_active_series_per_tenant: 500000

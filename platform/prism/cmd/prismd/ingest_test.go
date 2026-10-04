@@ -29,7 +29,9 @@ import (
 	"github.com/fallrising/newclear/platform/prism/internal/ingest/limits"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 	"github.com/fallrising/newclear/platform/prism/pkg/utm"
+	"github.com/golang/snappy"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/prometheus/prompb"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/plog/plogotlp"
 	"go.uber.org/goleak"
@@ -101,6 +103,7 @@ func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
 			cfg := runtimeConfig(t)
 			cfg.Server.Mode = mode
 			cfg.Ingest.Batch.Logs.FlushInterval = config.Duration(time.Hour)
+			cfg.Ingest.Batch.Metrics.FlushInterval = config.Duration(time.Hour)
 			backend, err := spi.Open(context.Background(), "memory", spi.Config{})
 			if err != nil {
 				t.Fatal(err)
@@ -114,6 +117,7 @@ func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
 			}()
 			waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
 			postRuntimeLog(t, cfg, "http")
+			postRuntimeWrite(t, cfg, &http.Client{Timeout: time.Second}, "http", http.StatusNoContent)
 			connection, err := grpc.NewClient(cfg.Server.GRPCListen, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
 				t.Fatal(err)
@@ -129,6 +133,9 @@ func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if got := runtimeMetricValues(t, backend, "default"); len(got) != 0 {
+				t.Fatalf("unflushed metric bucket already written: %v", got)
+			}
 			if got := runtimeLogBodies(t, backend); len(got) != 0 {
 				t.Fatalf("unflushed bucket already written: %v", got)
 			}
@@ -140,6 +147,12 @@ func TestIngestRuntimeFlushesAcceptedQueueOnParentCancel(t *testing.T) {
 				}
 			case <-time.After(2 * time.Second):
 				t.Fatal("runtime shutdown hung")
+			}
+			if got := runtimeMetricValues(t, backend, "default"); !reflect.DeepEqual(got, []float64{42}) {
+				t.Fatalf("accepted remote_write discarded on parent cancel: %v", got)
+			}
+			if got := runtimeMetricValues(t, backend, "other"); len(got) != 0 {
+				t.Fatalf("remote_write crossed tenant boundary: %v", got)
 			}
 			if got := runtimeLogBodies(t, backend); !reflect.DeepEqual(got, []string{"http", "grpc"}) {
 				t.Fatalf("accepted data discarded on parent cancel: %v", got)
@@ -304,6 +317,7 @@ func TestIngestRuntimeUsesTLSOnBothTransports(t *testing.T) {
 			t.Fatal("HTTPS never ready")
 		}
 	}
+	postRuntimeWrite(t, cfg, client, "https", http.StatusNoContent)
 	connection, err := grpc.NewClient(cfg.Server.GRPCListen, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12})))
 	if err != nil {
 		t.Fatal(err)
@@ -425,4 +439,234 @@ func (b *closeOrderBackend) Close() error {
 	}
 	b.closed.Store(true)
 	return b.Backend.Close()
+}
+
+func runtimeWriteRequest(t *testing.T, cfg *config.Config, scheme string) *http.Request {
+	t.Helper()
+	write := prompb.WriteRequest{Timeseries: []prompb.TimeSeries{{
+		Labels:  []prompb.Label{{Name: "__name__", Value: "runtime_remote_write"}, {Name: "job", Value: "runtime"}},
+		Samples: []prompb.Sample{{Value: 42, Timestamp: utm.TimeToMilli(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC))}},
+	}}}
+	wire, err := write.Marshal()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	t.Cleanup(cancel)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, scheme+"://"+cfg.Server.HTTPListen+"/prom/api/v1/write", bytes.NewReader(snappy.Encode(nil, wire)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Authorization", "Bearer "+string(cfg.Auth.IngestAPIKey))
+	request.Header.Set("Content-Type", "application/x-protobuf")
+	request.Header.Set("Content-Encoding", "snappy")
+	request.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
+	return request
+}
+
+func postRuntimeWrite(t *testing.T, cfg *config.Config, client *http.Client, scheme string, wantStatus int) {
+	t.Helper()
+	t.Cleanup(client.CloseIdleConnections)
+	response, err := client.Do(runtimeWriteRequest(t, cfg, scheme))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	body, err := io.ReadAll(io.LimitReader(response.Body, 4096))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != wantStatus || (wantStatus == http.StatusNoContent && len(body) != 0) {
+		t.Fatalf("remote_write status=%d body=%q want=%d", response.StatusCode, body, wantStatus)
+	}
+}
+
+func runtimeMetricValues(t *testing.T, backend spi.Backend, tenant string) []float64 {
+	t.Helper()
+	matcher, err := spi.NewMatcher(spi.MatchEqual, utm.LabelName, "runtime_remote_write")
+	if err != nil {
+		t.Fatal(err)
+	}
+	series, err := backend.Metrics().Select(context.Background(), spi.SeriesQuery{Tenant: tenant, Matchers: []spi.Matcher{matcher}, Start: 0, End: math.MaxInt64})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = series.Close() }()
+	var values []float64
+	for series.Next() {
+		if series.At().Labels().Get(utm.LabelTenant) != tenant {
+			t.Fatal("stored metric lost authenticated tenant")
+		}
+		samples := series.At().Samples()
+		for samples.Next() {
+			_, value := samples.At()
+			values = append(values, value)
+		}
+		if err := samples.Err(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := series.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return values
+}
+
+func TestRemoteWriteRuntimePreservesAuthenticationAndNormalization(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Server.Mode = "ingest"
+	cfg.Ingest.ClockSkewPolicy = "drop"
+	backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = backend.Close() }()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() {
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+	}()
+	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+	client := &http.Client{Timeout: time.Second}
+	defer client.CloseIdleConnections()
+	for _, test := range []struct {
+		name   string
+		mutate func(*http.Request)
+		status int
+	}{
+		{"wrong method", func(r *http.Request) { r.Method = http.MethodGet }, http.StatusMethodNotAllowed},
+		{"missing bearer", func(r *http.Request) { r.Header.Del("Authorization") }, http.StatusUnauthorized},
+		{"duplicate bearer", func(r *http.Request) { r.Header.Add("Authorization", r.Header.Get("Authorization")) }, http.StatusUnauthorized},
+		{"other tenant", func(r *http.Request) { r.Header.Set("X-Prism-Tenant", "other") }, http.StatusBadRequest},
+		{"configured clock skew drop", func(*http.Request) {}, http.StatusBadRequest},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			request := runtimeWriteRequest(t, cfg, "http")
+			test.mutate(request)
+			response, err := client.Do(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = response.Body.Close() }()
+			_, _ = io.Copy(io.Discard, response.Body)
+			if response.StatusCode != test.status {
+				t.Fatalf("remote_write status=%d want=%d", response.StatusCode, test.status)
+			}
+		})
+	}
+	cancel()
+	select {
+	case err := <-result:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("runtime shutdown hung")
+	}
+	if got := runtimeMetricValues(t, backend, "default"); len(got) != 0 {
+		t.Fatalf("rejected remote_write persisted: %v", got)
+	}
+}
+
+func TestRemoteWriteRuntimeIsAbsentInOtherRoles(t *testing.T) {
+	for _, mode := range []string{"query", "ruler", "console"} {
+		t.Run(mode, func(t *testing.T) {
+			cfg := runtimeConfig(t)
+			cfg.Server.Mode = mode
+			cfg.Auth.IngestAPIKeyFile = ""
+			backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = backend.Close() }()
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			result := make(chan error, 1)
+			go func() {
+				result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+			}()
+			waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+			postRuntimeWrite(t, cfg, &http.Client{Timeout: time.Second}, "http", http.StatusNotFound)
+			cancel()
+			select {
+			case err := <-result:
+				if err != nil {
+					t.Fatal(err)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("runtime shutdown hung")
+			}
+		})
+	}
+}
+
+func TestRemoteWriteSlowBodyDoesNotBlockOTLPAndCancelsAtShutdown(t *testing.T) {
+	cfg := runtimeConfig(t)
+	cfg.Server.Mode = "ingest"
+	cfg.Server.ShutdownTimeout = config.Duration(30 * time.Millisecond)
+	backend, err := spi.Open(context.Background(), "memory", spi.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = backend.Close() }()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() {
+		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
+	}()
+	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
+	dialCtx, stopDial := context.WithTimeout(context.Background(), time.Second)
+	defer stopDial()
+	var dialer net.Dialer
+	connection, err := dialer.DialContext(dialCtx, "tcp", cfg.Server.HTTPListen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = connection.Close() }()
+	_, err = fmt.Fprintf(connection, "POST /prom/api/v1/write HTTP/1.1\r\nHost: %s\r\nContent-Type: application/x-protobuf\r\nContent-Encoding: snappy\r\nX-Prometheus-Remote-Write-Version: 0.1.0\r\nAuthorization: Bearer %s\r\nContent-Length: 4096\r\n\r\n%c", cfg.Server.HTTPListen, string(cfg.Auth.IngestAPIKey), byte(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &http.Client{Timeout: time.Second}
+	defer client.CloseIdleConnections()
+	ticker := time.NewTicker(time.Millisecond)
+	defer ticker.Stop()
+	deadline := time.NewTimer(time.Second)
+	defer deadline.Stop()
+	for {
+		response, err := client.Do(runtimeWriteRequest(t, cfg, "http"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, _ = io.Copy(io.Discard, response.Body)
+		_ = response.Body.Close()
+		if response.StatusCode == http.StatusTooManyRequests {
+			if response.Header.Get("Retry-After") == "" {
+				t.Fatal("remote_write gate omitted retry delay")
+			}
+			break
+		}
+		if response.StatusCode != http.StatusNoContent {
+			t.Fatalf("unexpected remote_write status before gate: %d", response.StatusCode)
+		}
+		select {
+		case <-ticker.C:
+		case <-deadline.C:
+			t.Fatal("slow remote_write did not hold its receive slot")
+		}
+	}
+	// The remote_write slot is independent of OTLP's gate and both routes share
+	// the same listener. Shutdown must cancel this stalled HTTP body before drain.
+	postRuntimeLog(t, cfg, "while-remote-write-stalled")
+	cancel()
+	select {
+	case err := <-result:
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("shutdown error=%v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("slow remote_write body hung shutdown")
+	}
 }

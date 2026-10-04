@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 import type { SessionId } from "../../contracts/SessionId";
+import type { WindowCloseParticipant } from "../document/window_participant";
 import { DocumentSurface } from "../document";
 
 import { CSS, NODE_SIZE } from "./config";
@@ -28,6 +29,7 @@ export interface DocumentNodeData {
   runInMatched: boolean;
   /// Approved removal; the document owns the close decision.
   onClose: () => void;
+  registerWindowCloseParticipant?: (participant: WindowCloseParticipant) => () => void;
   registerCloseGuard?: (requestClose: () => void) => () => void;
   /// Forwarded to DocumentSurface so the canvas can materialize a
   /// synthetic triggers edge per D-6 step 1.
@@ -79,6 +81,7 @@ export function DocumentNode({ data, width, height }: NodeProps) {
           path={d.path}
           onClose={d.onClose}
           registerCloseGuard={d.registerCloseGuard}
+          registerWindowCloseParticipant={d.registerWindowCloseParticipant}
           activeTerminalId={d.triggersTarget}
           onRunInChange={d.onRunInChange}
           pinnedContextSources={d.pinnedContextSources}

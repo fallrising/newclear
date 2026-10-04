@@ -17,6 +17,18 @@ import { DocumentLifecycle, DocumentReadGate } from "./lifecycle";
 import { collectContext } from "./ai_lifecycle";
 import { AiRequestLifecycle } from "./ai_request_lifecycle";
 import { DocumentCloseLifecycle, type ClosePrompt } from "./close_lifecycle";
+import type { WindowCloseParticipant } from "./window_participant";
+
+let nextDocumentLifetime = 0;
+function documentOwner(path: string) {
+  const owner = {
+    path, id: ++nextDocumentLifetime, attached: true,
+    ref: (_node: HTMLDivElement | null) => {},
+  };
+  // Ref detach runs during unmount, before passive registration cleanup.
+  owner.ref = (node) => { owner.attached = node !== null; };
+  return owner;
+}
 
 interface DocumentSurfaceProps {
   /// Vault-relative or absolute path to open.
@@ -24,6 +36,7 @@ interface DocumentSurfaceProps {
   /// Approved removal only; bypass the canvas request guard.
   onClose: () => void;
   registerCloseGuard?: (requestClose: () => void) => () => void;
+  registerWindowCloseParticipant?: (participant: WindowCloseParticipant) => () => void;
   /// First step of D-6's execution-target resolution chain (minimal):
   /// the currently-active terminal session, if any. Without `run_in`
   /// frontmatter or a `triggers` edge, this is the implicit target.
@@ -48,6 +61,7 @@ export function DocumentSurface({
   path,
   onClose,
   registerCloseGuard,
+  registerWindowCloseParticipant,
   activeTerminalId,
   onRunInChange,
   pinnedContextSources,
@@ -117,19 +131,30 @@ export function DocumentSurface({
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [conflict, setConflict] = useState<ConflictState>({ kind: "none" });
+  const conflictRef = useRef<ConflictState>(conflict);
+  const updateConflict = (next: ConflictState) => {
+    conflictRef.current = next;
+    setConflict(next);
+  };
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [closePrompt, setClosePrompt] = useState<ClosePrompt | null>(null);
   const closeLifetimeRef = useRef<DocumentCloseLifecycle | null>(null);
   // Replacing the rendered path revokes old decisions before passive cleanup.
-  const closeOwnerRef = useRef({ path });
-  if (closeOwnerRef.current.path !== path) closeOwnerRef.current = { path };
+  const closeOwnerRef = useRef<ReturnType<typeof documentOwner> | null>(null);
+  if (!closeOwnerRef.current || closeOwnerRef.current.path !== path) closeOwnerRef.current = documentOwner(path);
   const closeOwner = closeOwnerRef.current;
+  const windowRegistrationRef = useRef({ register: registerWindowCloseParticipant });
+  if (windowRegistrationRef.current.register !== registerWindowCloseParticipant) {
+    windowRegistrationRef.current = { register: registerWindowCloseParticipant };
+  }
+  const windowRegistration = windowRegistrationRef.current;
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const saveRef = useRef<() => Promise<boolean>>(async () => false);
   const pendingSaveActionsRef = useRef(new Set<object>());
   const pendingCreateActionsRef = useRef(new Set<object>());
+  const saveAckFailedRef = useRef(false);
   const cancelCloseRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (closePrompt) cancelCloseRef.current?.focus();
@@ -284,6 +309,7 @@ export function DocumentSurface({
     readGateRef.current.invalidate();
     setSaving(true);
     setError(null);
+    let written = false;
     try {
       const outcome = await buffer.save(() => {
         if (!editorRef.current) throw new Error("Document editor was closed before save");
@@ -292,18 +318,21 @@ export function DocumentSurface({
       if (documentGenerationRef.current !== generation || buffer.revision !== revision) return outcome.kind === "written";
       readGateRef.current.invalidate();
       if (outcome.kind === "conflict") {
-        setConflict({ kind: "pending", lastSeenHash: outcome.current_disk_hash });
+        updateConflict({ kind: "pending", lastSeenHash: outcome.current_disk_hash });
         flash("Save blocked: on-disk hash drifted");
         return false;
       }
+      written = true;
       setDirty(buffer.dirty);
-      setConflict({ kind: "none" });
+      updateConflict({ kind: "none" });
       await syncBackend({ path: buffer.path, content: "", on_disk_hash: outcome.new_hash });
       if (generation !== documentGenerationRef.current) return true;
+      saveAckFailedRef.current = false;
       flash(buffer.dirty ? "saved earlier version — newer edits remain unsaved" : "saved");
       return true;
     } catch (e) {
       if (documentGenerationRef.current !== generation || buffer.revision !== revision) return false;
+      if (written) saveAckFailedRef.current = true;
       setError(String(e));
       flash(`save error: ${String(e)}`);
       return false;
@@ -379,21 +408,25 @@ export function DocumentSurface({
 
   const applySnapshot = async (snapshot: doc.DocSnapshot) => {
     buffer.load(snapshot);
+    const generation = documentGenerationRef.current;
+    const revision = buffer.revision;
     if (editorRef.current) editorRef.current.replaceDoc(snapshot.content);
     else mountEditor(snapshot.content);
     setCreating(false);
     setError(null);
     reportRunIn(snapshot.content);
     setDirty(false);
-    setConflict({ kind: "none" });
+    updateConflict({ kind: "none" });
     setStatus("ready");
     await syncBackend(snapshot);
+    if (generation === documentGenerationRef.current && revision === buffer.revision) saveAckFailedRef.current = false;
   };
 
   // Mount the editor once content is loaded.
   useEffect(() => {
     let disposed = false;
     documentGenerationRef.current++;
+    saveAckFailedRef.current = false;
     const closeLifetime = new DocumentCloseLifecycle(
       () => ({
         generation: documentGenerationRef.current,
@@ -407,7 +440,7 @@ export function DocumentSurface({
       () => saveRef.current(),
       () => onCloseRef.current(),
       setClosePrompt,
-      () => closeOwnerRef.current === closeOwner,
+      () => closeOwnerRef.current === closeOwner && closeOwner.attached,
     );
     closeLifetimeRef.current = closeLifetime;
     setClosePrompt(null);
@@ -416,7 +449,7 @@ export function DocumentSurface({
     setCreating(false);
     setError(null);
     setDirty(false);
-    setConflict({ kind: "none" });
+    updateConflict({ kind: "none" });
     void (async () => {
       try {
         let snap: doc.DocSnapshot;
@@ -472,6 +505,37 @@ export function DocumentSurface({
     return registerCloseGuard(() => lifetime.request());
   }, [path, registerCloseGuard]);
 
+  useEffect(() => {
+    if (!registerWindowCloseParticipant) return;
+    let active = true;
+    const current = () => active && closeOwner.attached && closeOwnerRef.current === closeOwner
+      && windowRegistrationRef.current === windowRegistration;
+    const snapshot: WindowCloseParticipant["snapshot"] = () => {
+      if (!current() || statusRef.current === "loading" || statusRef.current === "error") return null;
+      return {
+        revision: `${closeOwner.id}:${documentGenerationRef.current}:${buffer.revision}:${buffer.version}`,
+        // A failed acknowledgement still needs an ordinary save retry, even
+        // when the submitted bytes have already reached disk.
+        dirty: buffer.dirty || saveAckFailedRef.current,
+        busy: buffer.creating || buffer.saving || pendingSaveActionsRef.current.size > 0
+          || pendingCreateActionsRef.current.size > 0 || aiBusyRef.current,
+        canSave: statusRef.current === "ready" && !!editorRef.current && !!buffer.path && !buffer.creating
+          && conflictRef.current.kind !== "pending",
+      };
+    };
+    const participant: WindowCloseParticipant = {
+      snapshot,
+      save: async () => {
+        const before = snapshot();
+        if (!before || before.busy || !before.canSave) return false;
+        const saved = await saveRef.current();
+        return current() && saved;
+      },
+    };
+    const unregister = registerWindowCloseParticipant(participant);
+    return () => { active = false; unregister(); };
+  }, [path, registerWindowCloseParticipant]);
+
   // Listen for pty:io batches: append to the active capture block if
   // the batch is from the session ▶ targeted. No feeds_output_to gate —
   // that edge belongs to the Pin path, not live capture.
@@ -526,7 +590,7 @@ export function DocumentSurface({
           if (buffer.version !== version && !buffer.dirty) return;
           if (buffer.dirty) {
             if (fresh.on_disk_hash !== buffer.hash) {
-              setConflict({ kind: "pending", lastSeenHash: fresh.on_disk_hash });
+              updateConflict({ kind: "pending", lastSeenHash: fresh.on_disk_hash });
             }
           } else {
             await applySnapshot(fresh);
@@ -580,7 +644,7 @@ export function DocumentSurface({
       mountEditor(snapshot.content);
       reportRunIn(editorRef.current?.view.state.doc.toString() ?? snapshot.content);
       setDirty(buffer.dirty);
-      setConflict({ kind: "none" });
+      updateConflict({ kind: "none" });
       statusRef.current = "ready";
       setStatus("ready");
       await syncBackend(snapshot);
@@ -596,12 +660,12 @@ export function DocumentSurface({
   const keepEditing = () => {
     if (conflict.kind !== "pending") return;
     buffer.keep(conflict.lastSeenHash);
-    setConflict({ kind: "none" });
+    updateConflict({ kind: "none" });
     flash("keeping edits — next save checks the confirmed disk version");
   };
 
   return (
-    <div className="document-surface" onKeyDown={(event) => {
+    <div ref={closeOwner.ref} className="document-surface" onKeyDown={(event) => {
       if (event.key === "Delete" || event.key === "Backspace") event.stopPropagation();
     }}>
       <div className="document-header">

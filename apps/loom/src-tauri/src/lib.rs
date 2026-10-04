@@ -17,6 +17,7 @@ pub mod ai;
 
 // V (vertical slice): Tauri shell wiring B1/B2 to a real window.
 pub mod ipc;
+pub mod window_close;
 
 // B3 appends `pub mod mcp;` and `pub mod gate;`.
 // D1 appends `pub mod plugin;`.
@@ -43,6 +44,7 @@ pub fn run() {
 
     let shutdown_handle = tokio_handle.clone();
     let app = tauri::Builder::default()
+        .on_window_event(window_close::on_window_event)
         .setup(move |app| {
             use tauri::Manager;
             // FsWatcher::start spawns tokio tasks; setup runs on Tauri's
@@ -93,6 +95,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            window_close::window_close_approved,
             ipc::commands::pty_spawn,
             ipc::commands::pty_kill,
             ipc::commands::pty_resize,

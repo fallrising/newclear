@@ -14,7 +14,8 @@ import { readRunIn } from "./frontmatter";
 import { blockKey } from "./runnable_block";
 import { STRINGS, CSS } from "./config";
 import { DocumentLifecycle, DocumentReadGate, createMissingDocument } from "./lifecycle";
-import { AiEventGate, collectContext } from "./ai_lifecycle";
+import { collectContext } from "./ai_lifecycle";
+import { AiRequestLifecycle } from "./ai_request_lifecycle";
 
 interface DocumentSurfaceProps {
   /// Vault-relative or absolute path to open.
@@ -112,11 +113,11 @@ export function DocumentSurface({
   const [aiStatus, setAiStatus] = useState<ai.AiStatus | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiRequestId, setAiRequestId] = useState<string | null>(null);
-  const aiGateRef = useRef(new AiEventGate());
-  const aiBusyRef = useRef(false);
-  const aiAliveRef = useRef(true);
   const [aiBusy, setAiBusy] = useState(false);
-  const aiListenerReadyRef = useRef<Promise<void> | null>(null);
+  const aiLifetimeRef = useRef<{
+    requests: AiRequestLifecycle;
+    ready: Promise<void>;
+  } | null>(null);
 
   // Fetched bodies of incoming context_for edges. Re-fetched whenever the
   // canvas-resolved set of pinned doc paths changes. Source = relative
@@ -179,13 +180,12 @@ export function DocumentSurface({
     })();
   }, []);
 
-  const aiDeliverRef = useRef<(event: ai.AiEvent) => void>(() => undefined);
-
   // Listen for streamed AI chunks targeted at *our* in-flight request.
   useEffect(() => {
     let alive = true;
     let off: (() => void) | undefined;
-    aiAliveRef.current = true;
+    setAiBusy(false);
+    setAiRequestId(null);
     const deliver = (ev: ai.AiEvent) => {
       if (!alive) return;
       switch (ev.kind) {
@@ -201,66 +201,47 @@ export function DocumentSurface({
         case "error": editorRef.current?.insertAtCursor(`\n\n_(AI error: ${ev.message})_\n\n`); break;
         case "cancelled": editorRef.current?.insertAtCursor("\n\n_(cancelled)_\n\n"); break;
       }
-      if (ev.kind === "done" || ev.kind === "error" || ev.kind === "cancelled") {
-        aiBusyRef.current = false;
-        setAiBusy(false);
-        setAiRequestId(null);
-      }
     };
-    aiDeliverRef.current = deliver;
+    const requests = new AiRequestLifecycle(ai.aiCancel, deliver, (state) => {
+      setAiBusy(state.busy);
+      setAiRequestId(state.requestId);
+    }, (error, operation) => {
+      flash(`AI ${operation} failed: ${String(error)}`);
+    });
     const ready = (async () => {
-      const unlisten = await ai.onAiEvent((ev) => aiGateRef.current.accept(ev, deliver));
+      const unlisten = await ai.onAiEvent((ev) => requests.accept(ev));
       if (!alive) { unlisten(); throw new Error("AI listener disposed"); }
       off = unlisten;
     })();
-    aiListenerReadyRef.current = ready;
+    const lifetime = { requests, ready };
+    aiLifetimeRef.current = lifetime;
     void ready.catch(() => { /* submission surfaces listener failure */ });
     return () => {
       alive = false;
+      requests.close();
       off?.();
-      aiGateRef.current.reset();
-      aiAliveRef.current = false;
+      if (aiLifetimeRef.current === lifetime) aiLifetimeRef.current = null;
     };
-  }, []);
+  }, [path]);
 
   const submitAiPrompt = async () => {
-    if (aiSetupProblem(aiStatus) || !aiPrompt.trim() || aiBusyRef.current) return;
-    aiBusyRef.current = true;
-    setAiBusy(true);
-    let requestedId: string | null = null;
-    try {
-      const ready = aiListenerReadyRef.current;
-      if (!ready) throw new Error("AI listener is not ready");
-      await ready;
-      const context = await collectContext(pinnedContextSources ?? [], doc.docRead, ipc.ptyScrollback);
-      if (!aiAliveRef.current) return;
-      setPinnedContextBodies(context);
-      const docText = editorRef.current?.view.state.doc.toString() ?? "";
-      aiGateRef.current.begin();
-      const id = await ai.aiAsk(aiPrompt, docText || null, context);
-      requestedId = id;
-      if (!aiAliveRef.current) { await ai.aiCancel(id); return; }
-      setAiRequestId(id);
-      aiGateRef.current.activate(id, aiDeliverRef.current);
-      setAiPrompt("");
-    } catch (e) {
-      if (requestedId) void ai.aiCancel(requestedId).catch(() => undefined);
-      if (!aiAliveRef.current) return;
-      aiGateRef.current.reset();
-      aiBusyRef.current = false;
-      setAiBusy(false);
-      setAiRequestId(null);
-      flash(`AI request failed: ${String(e)}`);
-    }
+    if (aiSetupProblem(aiStatus) || !aiPrompt.trim()) return;
+    const lifetime = aiLifetimeRef.current;
+    if (!lifetime) return;
+    await lifetime.requests.submit(
+      lifetime.ready,
+      () => collectContext(pinnedContextSources ?? [], doc.docRead, ipc.ptyScrollback),
+      (context) => {
+        setPinnedContextBodies(context);
+        const docText = editorRef.current?.view.state.doc.toString() ?? "";
+        return ai.aiAsk(aiPrompt, docText || null, context);
+      },
+      () => setAiPrompt(""),
+    );
   };
 
   const cancelAi = async () => {
-    if (!aiRequestId) return;
-    try {
-      await ai.aiCancel(aiRequestId);
-    } catch {
-      /* ignore */
-    }
+    await aiLifetimeRef.current?.requests.cancel();
   };
 
   // Save through the backend. Returns true iff bytes hit disk.

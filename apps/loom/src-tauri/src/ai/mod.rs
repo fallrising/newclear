@@ -24,4 +24,4 @@ pub mod providers;
 pub mod service;
 
 pub use error::{AiError, AiResult};
-pub use service::{AiChunk, AiRequestId, AiService, AiStatus};
+pub use service::{AdmittedAiRequest, AiChunk, AiRequestId, AiService, AiStatus};

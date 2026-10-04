@@ -177,6 +177,17 @@ class WorkerToolsTests(PlatformFixture):
         self.assertNotIn("private-secret", json.dumps(run))
         self.assertNotIn(self.upstream.secret, json.dumps(run))
 
+    def test_hardlinked_secret_never_allocates_or_dispatches(self):
+        self.profile_tools()
+        os.link(self.secret_file, self.root / "secret-alias")
+        run = self.execute()
+        self.assertEqual(run["reason"], "tool_mock_config_invalid")
+        self.assertEqual(self.runtime.allocations, [])
+        self.assertEqual(self.upstream.calls, [])
+        self.assertEqual(self.scalar("SELECT count(*) FROM tool_broker_runs"), 0)
+        self.assertNotIn(self.upstream.secret, json.dumps(run))
+        self.assertNotIn(str(self.secret_file), json.dumps(run))
+
     def test_repository_and_commit_mismatch_fail_before_provisioning(self):
         self.profile_tools()
         for key, value in (("commit", "a" * 40), ("owner", "other")):

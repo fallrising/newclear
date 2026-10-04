@@ -900,8 +900,33 @@ def main():
     fresh_receipts.add_argument('--run', required=True, help='Prepared execution ID')
     fresh_receipts.add_argument('--sha256', required=True, help='Expected execution digest')
     fresh_receipts.add_argument('--input', required=True, help='Private four-host receipt request')
+    replacement_collect = sub.add_parser('collect-fresh-replacement-facts', help='Read four bare replacement hosts and save immutable private facts')
+    replacement_collect.add_argument('--run', required=True, help='Prepared execution ID')
+    replacement_collect.add_argument('--sha256', required=True, help='Expected execution digest')
+    replacement_collect.add_argument('--input', required=True, help='Private replacement observation request')
+    replacement_collect.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    replacement_collect.add_argument('--observation-id', required=True, help='New immutable observation ID')
+    replacement_inspect = sub.add_parser('inspect-fresh-replacement-facts', help='Revalidate saved replacement facts offline without accepting a stage')
+    replacement_inspect.add_argument('--observation', required=True, help='Replacement observation ID')
+    replacement_inspect.add_argument('--sha256', required=True, help='Expected observation digest')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command in ('collect-fresh-replacement-facts', 'inspect-fresh-replacement-facts'):
+        from fresh_replacement_ops import collect_replacement_facts, inspect_replacement_facts
+        try:
+            if args.command == 'collect-fresh-replacement-facts':
+                result = collect_replacement_facts(
+                    PROJECT, args.run, args.sha256, args.input, args.input_sha256,
+                    args.observation_id)
+            else:
+                result = inspect_replacement_facts(PROJECT, args.observation, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh replacement observation rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command == 'inspect-fresh-reimage-receipts':
         from fresh_reimage_receipt_ops import inspect_receipts
         try:

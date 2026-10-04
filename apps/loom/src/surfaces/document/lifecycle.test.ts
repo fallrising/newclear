@@ -13,6 +13,13 @@ function opened() {
   return state;
 }
 describe("document lifetime", () => {
+  it("owns pending saves synchronously before their queued write begins", async () => {
+    const state = opened(); const disk = deferred<WriteOutcome>();
+    const saving = state.save(() => "content", () => disk.promise);
+    expect(state.saving).toBe(true);
+    disk.resolve({ kind: "written", new_hash: "new" }); await saving;
+    expect(state.saving).toBe(false);
+  });
   it("uses canonical IPC snapshot identity for relative-path watcher events", () => {
     expect(opened().path).toBe("/vault/notes.md");
   });

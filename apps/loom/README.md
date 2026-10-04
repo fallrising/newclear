@@ -50,6 +50,8 @@ For **OpenCode Go**, use `LOOM_AI_PROVIDER=opencode`, `OPENCODE_API_KEY`, and ex
 
 Creating or recreating a missing document never replaces an existing destination. A collision keeps your unsaved edits and offers retry or explicit reload; edits typed while creation is pending remain dirty. See the [creation safety specification](docs/document-create-safety.md) and [verification](docs/document-create-safety-verification.md).
 
+Document Close and canvas Delete/Backspace now ask before discarding unsaved edits. Choose Save and close, Discard changes, or Cancel; failed saves, conflicts and newer edits keep the document open. Pending confirmations preserve canvas connections. See the [close protection specification](docs/document-close-safety.md) and [verification](docs/document-close-safety-verification.md). This protection covers document nodes, not quitting the application or crash recovery.
+
 Closing a document requests cancellation of its active AI work, including a request ID returned after close. Explicit Cancel failures remain visible and retryable. The [AI request lifecycle specification](docs/ai-request-lifecycle.md) and [verification results](docs/ai-request-lifecycle-verification.md) describe cancellation ordering, dropped-request cleanup and remaining acceptance limits.
 
 ## Verify

@@ -32,4 +32,25 @@ Old hosted runs do not prove execution of the new root workflow.
 | T005 P0 session/API/stream parent | CU-SES-P0-01, CU-API-P0-01, CU-API-P0-02 | SPEC-T005; ADR-0004 | All child suites plus two exact private operator API/stream composition regressions | Child code above | T005A/T005B/T005C Accepted; 176 workspace tests and all gates passed; fresh review returned COMPOSITION ACCEPTED; hosted CI run 30382918115 passed; ACCEPT-T005 | Accepted |
 | T006 private single-page operator flow | CU-WEB-P0-01 | SPEC-T006; ADR-0002; ADR-0004 | 12 static-route, browser-controller, security, reconnect, and schedule-model tests | `apps/control-plane/{src,web}/**`; `.github/workflows/ci.yml` | 2 Rust + 10 Node tests, 20× browser/concurrency/reconnect stress, 178 workspace tests, all gates, fresh review `T006 ACCEPTED`, hosted CI run 30423184446; ACCEPT-T006 | Accepted |
 | T004 Codex Cloud orchestrator parent | T004 P0 CUs | SPEC-T004; ADR-0003; child specifications | All child acceptances plus combined P14/P15/workspace gates | Accepted T004A/T004A1/T004B/T004C boundaries | All child reports, combined gates, exact P14/P15, and fresh Cursor Agent composition review passed; ACCEPT-T004 | Accepted |
-| T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; no hosted root run | Accepted locally |
+| T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; recovery PR #242 merged at1f555f61; hosted root branch37148404076 and main37148875720 passed | Accepted; merged |
+
+
+## Accepted Snapshot Design — Unimplemented
+
+These rows record accepted design traceability, not executable runtime evidence. Current A/B runtime
+remains version1. Recovery merged [PR #242](https://github.com/fallrising/newclear/pull/242) at
+`1f555f61`; hosted [branch run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)
+and [main run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720) passed.
+Historical upstream acceptance rows above are retained unchanged.
+
+| Requirement | Spec/ADR | Clauses | Planned machine evidence | Implementation / acceptance |
+|---|---|---|---|---|
+| CU-EVT-04/INV-003/INV-004 bounded value and persisted provenance | [SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md), [ADR-0005](adr/ADR-0005-snapshot-cache-contract.md) | S01–S04 | value bounds, canonical codec, durable-head CAS, fabricated-projection rejection, full-field prefix verification | Unimplemented; all test names/oracles in spec; unrun |
+| CU-EVT-04 equal-head concurrency/monotonicity/retry/crash | SPEC-T030D | S05–S08 | identical/different contenders, regression, rollback, busy/worker/cancellation/lost reply and crash restart | Unimplemented; planned/unrun |
+| CU-EVT-03 discardable cache/E0/persisted trust | SPEC-T030D | S09–S10 | absent/stale/corrupt/unsupported **values** as misses; structural lookup-key/schema/index/physical damage as store errors; pinned view, corrupt prefix/suffix, replayed projection without restore | Unimplemented; T030C spec/acceptance still required |
+| CU-EVT-01/02 compatibility; strict schema identity | SPEC-T030D | S11–S13 | schema spoof, nullable ANY cache value corruption with successful open/A/B, enabled event CHECK/type/NOT NULL integrity rejection, exact new/v1→v2, concurrent open, migration fault/crash, A/B preservation, legacy fresh-open downgrade rejection | Design accepted; no schema code changed |
+| Security/observability/acceptance boundary | SPEC-T030D | S14–S16 | bounded allocation/path/error canaries, state model, independent design/runtime gates, accepted T020/P0 regressions | Unimplemented; [design accepted](acceptance/T030D-design.acceptance.md) |
+
+T030D is **Ready** after independent design acceptance; T030C and parent T030 remain **blocked**.
+The 32 planned tests have explicit D/C ownership in SPEC-T030D; D acceptance does not require
+public load implementation. No design or hosted recovery run accepts snapshot runtime or parent composition.

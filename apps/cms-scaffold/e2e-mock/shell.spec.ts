@@ -13,8 +13,9 @@ test.describe("W0 shell pages", () => {
   });
 
   test("V2-AC-01 Admin: cards have border and radius, the accent bar is drawn", async ({ page }) => {
-    await page.goto(`${ADMIN}/types?mockUser=seed-admin`);
-    await expect(page.getByTestId("type-album")).toBeVisible();
+    // W4 type list is a table; the overview retains the summary cards.
+    await page.goto(`${ADMIN}/?mockUser=seed-admin`);
+    await expect(page.getByTestId("overview-types")).toBeVisible();
     expect(await computed(page, "[data-slot=card]", "border-top-width")).toBe("1px");
     expect(await computed(page, "[data-slot=card]", "border-top-left-radius")).toBe("12px");
     expect(await computed(page, "[data-testid=admin-accent]", "background-color")).toBe("rgb(138, 63, 252)");

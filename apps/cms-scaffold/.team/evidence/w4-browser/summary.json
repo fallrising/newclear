@@ -1,0 +1,203 @@
+{
+  "captures": 14,
+  "blocking": 0,
+  "scope": "Visual smoke only; Appendix A 25 functional/a11y E2E remain W5",
+  "results": [
+    {
+      "name": "overview",
+      "file": "overview-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "type-detail",
+      "file": "type-detail-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "disable-confirmation",
+      "file": "disable-confirmation-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "permissions",
+      "file": "permissions-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "new-principal",
+      "file": "new-principal-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "audit",
+      "file": "audit-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "inspector",
+      "file": "inspector-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "overview",
+      "file": "overview-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "type-detail",
+      "file": "type-detail-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "disable-confirmation",
+      "file": "disable-confirmation-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "permissions",
+      "file": "permissions-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "new-principal",
+      "file": "new-principal-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "audit",
+      "file": "audit-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "name": "inspector",
+      "file": "inspector-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "dimensions": {
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "errors": [],
+      "overflow": false
+    }
+  ]
+}

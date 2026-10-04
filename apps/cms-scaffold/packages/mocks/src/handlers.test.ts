@@ -706,3 +706,165 @@ describe("@cms/mocks BW2 behaviour (W2)", () => {
     await expect(client().work.mediaList()).rejects.toMatchObject({ status: 403 });
   });
 });
+
+describe("@cms/mocks W4 governance", () => {
+  const ADMIN_ID = "10000000-0000-4000-8000-000000000001";
+  const OPERATOR_ALBUM = "10000000-0000-4000-8000-000000000003";
+  const MISSING = "10000000-0000-4000-8000-00000000ffff";
+
+  beforeEach(() => {
+    setUser("seed-admin");
+    setSurface("admin");
+  });
+
+  it("W4 governance actions need the Admin surface and the capability (BW5)", async () => {
+    setSurface("back");
+    await expect(client().admin.roles()).rejects.toMatchObject({ status: 403, code: "SURFACE_FORBIDDEN" });
+    setSurface("admin");
+    setUser("seed-operator-album");
+    await expect(client().admin.audit()).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+    await expect(client().admin.auditSettings()).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+    setUser(null);
+    await expect(client().admin.principals()).rejects.toMatchObject({ status: 401 });
+  });
+
+  it("principals: create returns the temporary password once; bad or taken usernames are 400; unknown ids 404 PRINCIPAL_NOT_FOUND", async () => {
+    const created = await client().admin.createPrincipal({ username: "clinic.op", displayName: "Clinic desk" });
+    expect(created).toMatchObject({ username: "clinic.op", displayName: "Clinic desk", status: "active", email: null });
+    expect(created.temporaryPassword).toMatch(/^mock-temporary-password-\d+$/);
+    await expect(client().admin.principal(created.id)).resolves.not.toHaveProperty("temporaryPassword");
+    await expect(client().admin.createPrincipal({ username: "clinic.op" })).rejects.toMatchObject({ status: 400, code: "VALIDATION_FAILED" });
+    await expect(client().admin.createPrincipal({ username: "No" })).rejects.toMatchObject({ status: 400 });
+    for (const call of [client().admin.principal(MISSING), client().admin.disablePrincipal(MISSING), client().admin.effectivePermissions(MISSING)]) {
+      await expect(call).rejects.toMatchObject({ status: 404, code: "PRINCIPAL_NOT_FOUND" });
+    }
+  });
+
+  it("roles: editor and operator need types; LAST_ADMIN guards disable, status and roles", async () => {
+    await expect(client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "editor", contentTypeCodes: [] }])).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "nope" }])).rejects.toMatchObject({ status: 400 });
+    await client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "editor", contentTypeCodes: ["album"] }]);
+    expect(db.principalRoles[OPERATOR_ALBUM]).toEqual([{ code: "editor", contentTypeCodes: ["album"] }]);
+    await expect(client().admin.disablePrincipal(ADMIN_ID)).rejects.toMatchObject({ status: 403, code: "LAST_ADMIN" });
+    await expect(client().admin.patchPrincipal(ADMIN_ID, { status: "disabled" })).rejects.toMatchObject({ code: "LAST_ADMIN" });
+    await expect(client().admin.replacePrincipalRoles(ADMIN_ID, [])).rejects.toMatchObject({ code: "LAST_ADMIN" });
+    expect(db.principals.find((p) => p.id === ADMIN_ID)!.status).toBe("active");
+  });
+
+  it("status: disable, unlock (not when disabled: 403 ACCOUNT_DISABLED), patch back to active; reset password", async () => {
+    await expect(client().admin.disablePrincipal(OPERATOR_ALBUM)).resolves.toMatchObject({ status: "disabled" });
+    await expect(client().admin.unlockPrincipal(OPERATOR_ALBUM)).rejects.toMatchObject({ status: 403, code: "ACCOUNT_DISABLED" });
+    await expect(client().admin.patchPrincipal(OPERATOR_ALBUM, { status: "active" })).resolves.toMatchObject({ status: "active" });
+    await expect(client().admin.resetPassword(OPERATOR_ALBUM)).resolves.toMatchObject({ temporaryPassword: expect.stringMatching(/^mock-temporary-password-/) });
+  });
+
+  it("effective permissions: anonymous grants plus every role with its allowlist", async () => {
+    const items = (await client().admin.effectivePermissions(OPERATOR_ALBUM)).items;
+    expect(new Set(items.map((i) => i.role))).toEqual(new Set(["anonymous", "operator"]));
+    expect(items.find((i) => i.role === "operator" && i.action === "publish")).toEqual({
+      role: "operator", action: "publish", contentType: "", allowedSurfaces: ["back", "admin"], allowlist: ["album", "photo"],
+    });
+  });
+
+  it("role permissions: replace the whole list, keep ids of unchanged grants, default surfaces, reject duplicates and an empty anonymous list", async () => {
+    const before = (await client().admin.rolePermissions("editor")).items;
+    await client().admin.replaceRolePermissions("editor", [
+      { action: "read_published", contentTypeCode: null },
+      { action: "read_audit" },
+    ]);
+    const after = (await client().admin.rolePermissions("editor")).items;
+    expect(after[0].id).toBe(before[0].id);
+    expect(after[1]).toMatchObject({ action: "read_audit", contentTypeCode: null, allowedSurfaces: ["admin"] });
+    await expect(client().admin.replaceRolePermissions("editor", [{ action: "create" }, { action: "create" }])).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.replaceRolePermissions("anonymous", [])).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.rolePermissions("nope")).rejects.toMatchObject({ status: 400, code: "VALIDATION_FAILED" });
+  });
+
+  it("audit: newest first, exact and prefix actions, [from, to), paging, detail only on the single event", async () => {
+    const all = await client().admin.audit();
+    expect(all.total).toBe(12);
+    expect(all.items[0]).toMatchObject({ action: "type.disable" });
+    expect(all.items[0]).not.toHaveProperty("detail");
+    expect((await client().admin.audit({ action: "entry." })).total).toBe(5);
+    expect((await client().admin.audit({ action: "entry.publish" })).total).toBe(3);
+    expect((await client().admin.audit({ from: "2026-09-26T00:50:00Z", to: "2026-09-26T01:12:00Z" })).items.map((e) => e.action)).toEqual(["ROLE_ASSIGNED", "manage_types"]);
+    expect((await client().admin.audit({ actor: "nobody" })).total).toBe(0);
+    const page2 = await client().admin.audit({ page: 2, size: 5 });
+    expect(page2).toMatchObject({ page: 2, size: 5, offset: 5, limit: 5 });
+    expect(page2.items).toHaveLength(5);
+    await expect(client().admin.audit({ size: 101 })).rejects.toMatchObject({ status: 400 });
+    const event = await client().admin.auditEvent(all.items[5].id);
+    expect(event.detail).toEqual({ from: 30, to: 90 });
+    await expect(client().admin.auditEvent("70000000-0000-4000-8000-00000000ffff")).rejects.toMatchObject({ status: 404, code: "AUDIT_EVENT_NOT_FOUND" });
+  });
+
+  it("audit settings: 30/90/365 only (422 FIELD_VALIDATION with the field), the same value changes nothing", async () => {
+    await expect(client().admin.auditSettings()).resolves.toMatchObject({ retentionDays: 90, updatedBy: null });
+    await expect(client().admin.patchAuditSettings(90)).resolves.toMatchObject({ updatedBy: null });
+    await expect(client().admin.patchAuditSettings(30)).resolves.toMatchObject({ retentionDays: 30, updatedBy: ADMIN_ID });
+    const response = await raw("/api/v1/admin/settings/audit", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": "mock-csrf-token" },
+      body: JSON.stringify({ retentionDays: 45 }),
+    });
+    expect(response.status).toBe(422);
+    expect((await response.json()).error).toMatchObject({ code: "FIELD_VALIDATION", fields: [{ field: "retentionDays", code: "NOT_IN_ENUM" }] });
+  });
+
+  it("purge: admin role only, 409 REF_CONSTRAINT while referenced, 404 when missing; gone from both lists", async () => {
+    const studio = db.workEntries.find((e) => e.slug === "private-studio")!.id;
+    await expect(client().admin.purgeEntry(studio)).rejects.toMatchObject({ status: 409, code: "REF_CONSTRAINT" });
+    const coast = db.workEntries.find((e) => e.slug === "coast-harbour")!.id;
+    await client().admin.purgeEntry(coast);
+    expect(db.workEntries.some((e) => e.id === coast)).toBe(false);
+    expect(db.publicEntries.some((e) => e.id === coast)).toBe(false);
+    await expect(client().admin.purgeEntry(coast)).rejects.toMatchObject({ status: 404, code: "ENTRY_NOT_FOUND" });
+    setUser("seed-operator-album");
+    await expect(client().admin.purgeEntry(studio)).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+  });
+
+  it("?mock=empty empties the type, principal and audit lists", async () => {
+    setScenario("empty");
+    expect((await client().admin.types()).items).toEqual([]);
+    expect((await client().admin.principals()).total).toBe(0);
+    expect((await client().admin.audit()).total).toBe(0);
+  });
+});
+
+
+describe("W4 runtime integration regressions", () => {
+  beforeEach(() => {
+    setUser("seed-admin");
+    setSurface("admin");
+  });
+
+  it("resetMocks repeats generated principal, password and permission identities", async () => {
+    const exercise = async () => {
+      const principal = await client().admin.createPrincipal({ username: "repeat.user" });
+      const password = await client().admin.resetPassword(principal.id);
+      await client().admin.replaceRolePermissions("editor", [{ action: "read_audit" }]);
+      return { principal, password, permissions: await client().admin.rolePermissions("editor") };
+    };
+    const first = await exercise();
+    resetMocks();
+    setUser("seed-admin");
+    setSurface("admin");
+    expect(await exercise()).toEqual(first);
+  });
+
+  it("profile values preserve supplied text and null email patches leave it unchanged", async () => {
+    const created = await client().admin.createPrincipal({ username: "profile.user", displayName: "  Profile  ", email: "  user@example.test  " });
+    expect(created).toMatchObject({ displayName: "  Profile  ", email: "  user@example.test  " });
+    await expect(client().admin.patchPrincipal(created.id, { email: null })).resolves.toMatchObject({ email: "  user@example.test  " });
+    await expect(client().admin.patchPrincipal(created.id, { email: "" })).resolves.toMatchObject({ email: "" });
+  });
+
+  it("profile limits count Unicode code points and validate email on both create and patch", async () => {
+    const created = await client().admin.createPrincipal({ username: "unicode.user", displayName: "😀".repeat(80), email: "😀".repeat(254) });
+    await expect(client().admin.patchPrincipal(created.id, { displayName: "😀".repeat(80), email: "😀".repeat(254) })).resolves.toMatchObject({ id: created.id });
+    await expect(client().admin.createPrincipal({ username: "long.name", displayName: "😀".repeat(81) })).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.createPrincipal({ username: "long.email", email: "x".repeat(255) })).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.patchPrincipal(created.id, { email: "x".repeat(255) })).rejects.toMatchObject({ status: 400 });
+    await expect(client().admin.principal(created.id)).resolves.toMatchObject({ email: "😀".repeat(254) });
+  });
+});

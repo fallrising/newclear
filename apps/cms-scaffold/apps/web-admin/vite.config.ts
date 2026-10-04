@@ -9,5 +9,6 @@ export default defineConfig(({ mode }) => ({
   publicDir: mode === "mock" ? "../../packages/mocks/public" : "public",
   server: { port: 5175, strictPort: true, host: true },
   preview: { port: 5175, strictPort: true, host: true },
-  test: { environment: "jsdom", setupFiles: "./src/test-setup.ts" },
+  // Dates in tests use a fixed zone, as in web-back.
+  test: { environment: "jsdom", setupFiles: "./src/test-setup.ts", env: { TZ: "Asia/Taipei" } },
 }));

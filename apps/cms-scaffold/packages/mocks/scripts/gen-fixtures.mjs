@@ -17,6 +17,11 @@ const FIXTURES = [
   ["media-quota.json", "mediaQuota", 'S["MediaQuota"]'],
   ["member-entries.json", "memberEntries", 'MemberFixture'],
   ["revisions.json", "revisions", 'Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]>'],
+  // W4: governance data. Role grants mirror SeedService; audit events carry their detail (the list strips it).
+  ["roles.json", "roles", 'S["RoleList"]'],
+  ["role-permissions.json", "rolePermissions", 'Record<string, S["Permission"][]>'],
+  ["audit-events.json", "auditEvents", 'S["AuditEventDetail"][]'],
+  ["audit-settings.json", "auditSettings", 'S["AuditSettings"]'],
 ];
 
 function render() {

@@ -1,0 +1,11 @@
+1de7093b5d5d8d96c900d9297b68a00111ef3496ff768502a662f9ab6a7b39b5  apps/web-admin/src/logic.test.ts
+e97a6083ec0963256d620b2ed4939c38782858eaab3e8f0c8c0c0366e5525081  apps/web-admin/src/shell.test.tsx
+111b2dc4a0ca9fdfcced487a19484a9da228e51697b2bffadd3b3d9be718f485  apps/web-admin/src/types.test.tsx
+5be0cd83c5a74fc6da698a76f4414f55120bb2370aa589f4fedbab8a990b6745  apps/web-admin/src/roles.test.tsx
+95728b87fcfb8aeced49b05c28a9622b258fb1f94eb200f2477231844b7a5d26  apps/web-admin/src/principals.test.tsx
+30d803cd898bb8e39eba3226644351c7896ca00f91a45839d923089115b4c170  apps/web-admin/src/audit.test.tsx
+ecadf77de11b729380af7f3161176a722fa37305ebb961cabc5efa6528cff9fc  apps/web-admin/src/settings.test.tsx
+a7fbd9f2adcd6ffb892796d71e8a511bd7f35799039b6211bc4446fb15e9a9d1  apps/web-admin/src/entries.test.tsx
+8c16b9879535b14ec9c2dd4bb01a0da70f29e00e6d41a34a90cec40eaf6b888f  apps/web-admin/src/test-setup.ts
+d94e03384d51a12e5706fda95fdbb51a924bb05187e84cbead96c91ba367ee31  apps/web-admin/src/test-utils.tsx
+312181151c8679a8b3b60b3e3fe306a1d5fd19b4137d592581edebeab9af7a01  apps/web-admin/vite.config.ts

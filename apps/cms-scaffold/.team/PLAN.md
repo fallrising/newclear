@@ -1,23 +1,26 @@
-# CMS W3b — LOCAL_VERIFIED
+# W4 Admin governance delivery
 
-Objective: deliver Front member dashboard, owned appointment detail/create, safe login return and clinic member controls. Docs first: W3b §0 updates merged W3/BW5 integration. Owner standing authorization covers commit/push/PR/required CI/merge/remote verification; no release/deployment/dependencies.
+Status: LOCAL_VERIFIED; required remote CI and merge pending. Baseline: W3b merge a0de08a41eaf3fdc7c56e4ae86b819b705b0ce87.
 
-Baseline: main c247028e; CMS matches W3 #273. Existing worktrees/snapshots preserved; full source baseline outside worktree.
+## Objective and scope
+Deliver W4 common CMS governance per docs/v2/waves/W4.md §0–§9. Preserve generic kernel, three surfaces and all accepted P0–W3b work. No dependencies/backend/contracts/Front/Back changes, no deployment.
 
-## Bounded routing
-- T-931 Codex high: API + member mocks and scoped contract tests; isolated cms-w3b-api.
-- T-932 Codex high: Front member production + Vitest acceptance and minimal affected regression updates; isolated cms-w3b-front; waits for T-931 frozen API patch.
-- Root: docs, integration, eight Playwright tests, responsive evidence, full native gates, publication.
-- T-933 smaller Codex independent review after integrated candidate, read-only sources and report only.
+## Team and dependencies
+- T-941: GPT-6.1 Sol high, API/mock; isolated scope/worktree. Freeze shared API before UI final validation.
+- T-942: GPT-6.1 Sol high, Admin UI/tests; isolated scope/worktree. Root supplies frozen shared API/mock/UI primitives read-only.
+- T-943: GPT-6 Luna medium, independent spec/evidence inventory, read-only source and own report. Root additionally reviews permission/mutation semantics.
+- Root: docs, Checkbox/Progress primitives, shell E2E adaptation, bounded integration, diff review, verification, Git delivery.
 
-Workers may not delegate or publish. API and Front writable scopes disjoint; root only integrates frozen reviewed files. No runtime dependencies, backend or contract edits.
+## Acceptance gates
+Relevant Red/Green records; complete frontend lint/typecheck/test/build/bundle; runtime codegen/fixture freshness; existing 68 mock E2E; Java unit and required remote integration CI; exact source and protected baseline hashes; task/report validators. Appendix A new W4 E2E remains W5, explicitly not claimed. No inferred passes.
 
-## Gates
-- TDD: focused intended red then scoped green; preserve W3 regressions.
-- Contract/runtime member operation/schema equality; fixture byte equality and owner isolation.
-- npm ci, codegen freshness, lint, typecheck, all workspace tests, build, bundle, all mock E2E (expected 68), Java tests; PostgreSQL required CI.
-- Desktop/390px member states, axe serious/critical zero, no overflow; safe next, session expiry, duplicate prevention, payload allowlist, no visible identifiers.
-- Evidence gate maps each scope and check; independent review then exact-head required CI and merge.
+## Delivery
+Review worker actual diffs and logs before accept. Apply evidence gate. LOCAL_VERIFIED only after local gates; commit/push/PR under owner standing authorization; wait required CI/review, merge without bypass, verify remote, update handoff. No fabricated private ledger ID.
 
-## Acceptance
-LOCAL_VERIFIED. T-931 and T-932 accepted after frozen diff/hash review; independent T-933 source/evidence review passed. Root gates: npm ci/codegen/lint/typecheck/546 tests/build/bundle,339 Java FROM-CACHE,68 E2E,20 browser captures and preservation all passed. No unresolved source or local verification blocker. Required remote CI/exact-head merge/remote verification still pending; no deployment or production readiness claim.
+## Decisions
+Documentation first: W4 §0 resolves old W2 overwrite/codegen/E2E instructions. W3b publication receipt synchronized without revising historical evidence. Snapshot of current CMS and hashes of prior snapshots created before implementation.
+
+## Root acceptance checkpoint
+T-941/T-942 accepted after actual diff/log review; generated fixture and shell/audit/entries root corrections are documented in W4 §0 and regressions. Native gates:624 frontend,68 mock E2E,339 Java FROM-CACHE,14 visual captures,883 protected files/10 snapshots/468 original files. No source change after passing native gates. T-943 independently reviewed the final source and evidence; DONE accepted. Required remote publication closure follows. Source corrections owned by root: canonical UUID, current principal retention, keyed resource route state, duplicate fixture uniqueness; all had intended Red then Green. Initial visual entrance-animation capture stabilized without product edits. Original six tests migrated under explicit W4 T10/T21; automatic approval concern was resolved by actual file/coverage inspection and preserved Git/snapshot originals. No permission pending.
+
+Final staged diff check found two new-file blank lines at EOF that the unstaged check did not inspect; both were removed with no semantic change. Final source hashes were refreshed and staged diff check rerun.

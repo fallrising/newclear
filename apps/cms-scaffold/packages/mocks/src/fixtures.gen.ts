@@ -5005,202 +5005,6 @@ export const workContentTypes: S["WorkContentTypeList"] = {
           "visibility": "public"
         }
       ]
-    },
-    {
-      "key": "note",
-      "displayName": "Note",
-      "pluralDisplayName": "Notes",
-      "titleField": "title",
-      "sortField": null,
-      "visibilityField": null,
-      "ownerField": null,
-      "slugPolicy": "optional",
-      "singleton": false,
-      "previewable": true,
-      "fields": [
-        {
-          "key": "title",
-          "type": "string",
-          "label": "標題",
-          "helpText": null,
-          "required": true,
-          "group": "main",
-          "order": 0,
-          "listable": true,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "body",
-          "type": "markdown",
-          "label": "內文",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 1,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "category",
-          "type": "enum",
-          "label": "分類",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 2,
-          "listable": true,
-          "filterable": true,
-          "enumValues": [
-            "idea",
-            "todo",
-            "reference"
-          ],
-          "enumLabels": {
-            "idea": "點子",
-            "todo": "待辦",
-            "reference": "參考"
-          },
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "color",
-          "type": "enum",
-          "label": "顏色",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 3,
-          "listable": true,
-          "filterable": false,
-          "enumValues": [
-            "red",
-            "orange",
-            "yellow",
-            "green",
-            "blue",
-            "purple"
-          ],
-          "enumLabels": {
-            "red": "紅",
-            "orange": "橙",
-            "yellow": "黃",
-            "green": "綠",
-            "blue": "藍",
-            "purple": "紫"
-          },
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "priority",
-          "type": "int",
-          "label": "優先順序",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 4,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "pinned",
-          "type": "boolean",
-          "label": "置頂",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 5,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "dueAt",
-          "type": "datetime",
-          "label": "到期時間",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 6,
-          "listable": true,
-          "filterable": true,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "related",
-          "type": "ref",
-          "label": "相關筆記",
-          "helpText": null,
-          "required": false,
-          "group": "relations",
-          "order": 7,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": "note",
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "attachment",
-          "type": "media-ref",
-          "label": "附件",
-          "helpText": null,
-          "required": false,
-          "group": "media",
-          "order": 8,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        },
-        {
-          "key": "location",
-          "type": "geo",
-          "label": "位置",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 9,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public"
-        }
-      ]
     }
   ]
 };
@@ -6654,223 +6458,6 @@ export const adminContentTypes: S["AdminContentTypeList"] = {
           "placeholder": null,
           "visibility": "public",
           "indexed": true,
-          "enabled": true
-        }
-      ]
-    },
-    {
-      "key": "note",
-      "displayName": "Note",
-      "pluralDisplayName": "Notes",
-      "titleField": "title",
-      "sortField": null,
-      "visibilityField": null,
-      "ownerField": null,
-      "slugPolicy": "optional",
-      "singleton": false,
-      "previewable": true,
-      "enabled": true,
-      "fields": [
-        {
-          "key": "title",
-          "type": "string",
-          "label": "標題",
-          "helpText": null,
-          "required": true,
-          "group": "main",
-          "order": 0,
-          "listable": true,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": true,
-          "enabled": true
-        },
-        {
-          "key": "body",
-          "type": "markdown",
-          "label": "內文",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 1,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "category",
-          "type": "enum",
-          "label": "分類",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 2,
-          "listable": true,
-          "filterable": true,
-          "enumValues": [
-            "idea",
-            "todo",
-            "reference"
-          ],
-          "enumLabels": {
-            "idea": "點子",
-            "todo": "待辦",
-            "reference": "參考"
-          },
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": true,
-          "enabled": true
-        },
-        {
-          "key": "color",
-          "type": "enum",
-          "label": "顏色",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 3,
-          "listable": true,
-          "filterable": false,
-          "enumValues": [
-            "red",
-            "orange",
-            "yellow",
-            "green",
-            "blue",
-            "purple"
-          ],
-          "enumLabels": {
-            "red": "紅",
-            "orange": "橙",
-            "yellow": "黃",
-            "green": "綠",
-            "blue": "藍",
-            "purple": "紫"
-          },
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "priority",
-          "type": "int",
-          "label": "優先順序",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 4,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "pinned",
-          "type": "boolean",
-          "label": "置頂",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 5,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "dueAt",
-          "type": "datetime",
-          "label": "到期時間",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 6,
-          "listable": true,
-          "filterable": true,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": true,
-          "enabled": true
-        },
-        {
-          "key": "related",
-          "type": "ref",
-          "label": "相關筆記",
-          "helpText": null,
-          "required": false,
-          "group": "relations",
-          "order": 7,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": "note",
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "attachment",
-          "type": "media-ref",
-          "label": "附件",
-          "helpText": null,
-          "required": false,
-          "group": "media",
-          "order": 8,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
-          "enabled": true
-        },
-        {
-          "key": "location",
-          "type": "geo",
-          "label": "位置",
-          "helpText": null,
-          "required": false,
-          "group": "main",
-          "order": 9,
-          "listable": false,
-          "filterable": false,
-          "enumValues": [],
-          "enumLabels": {},
-          "refTarget": null,
-          "placeholder": null,
-          "visibility": "public",
-          "indexed": false,
           "enabled": true
         }
       ]
@@ -8955,4 +8542,723 @@ export const revisions: Record<string, (S["Revision"] & { payload: S["EntryPaylo
       }
     }
   ]
+};
+
+export const roles: S["RoleList"] = {
+  "items": [
+    {
+      "code": "admin",
+      "displayName": "Admin",
+      "system": true
+    },
+    {
+      "code": "anonymous",
+      "displayName": "Anonymous",
+      "system": true
+    },
+    {
+      "code": "editor",
+      "displayName": "Editor",
+      "system": true
+    },
+    {
+      "code": "member",
+      "displayName": "Member",
+      "system": true
+    },
+    {
+      "code": "operator",
+      "displayName": "Operator",
+      "system": true
+    }
+  ]
+};
+
+export const rolePermissions: Record<string, S["Permission"][]> = {
+  "admin": [
+    {
+      "id": "60000000-0000-4000-8000-000000000001",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000002",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000003",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000004",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000005",
+      "action": "publish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000006",
+      "action": "unpublish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000007",
+      "action": "delete",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000008",
+      "action": "archive",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000009",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000010",
+      "action": "manage_types",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000011",
+      "action": "manage_principals",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000012",
+      "action": "manage_settings",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000013",
+      "action": "read_audit",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    }
+  ],
+  "anonymous": [
+    {
+      "id": "60000000-0000-4000-8000-000000000014",
+      "action": "read_published",
+      "contentTypeCode": "album",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000015",
+      "action": "read_published",
+      "contentTypeCode": "photo",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000016",
+      "action": "read_published",
+      "contentTypeCode": "page",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000017",
+      "action": "read_published",
+      "contentTypeCode": "project",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000018",
+      "action": "read_published",
+      "contentTypeCode": "milestone",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000019",
+      "action": "read_published",
+      "contentTypeCode": "vet",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000020",
+      "action": "read_published",
+      "contentTypeCode": "clinic_profile",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "editor": [
+    {
+      "id": "60000000-0000-4000-8000-000000000021",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000022",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000023",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000024",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000025",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "member": [
+    {
+      "id": "60000000-0000-4000-8000-000000000026",
+      "action": "read_published",
+      "contentTypeCode": "album",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000027",
+      "action": "read_published",
+      "contentTypeCode": "photo",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000028",
+      "action": "read_published",
+      "contentTypeCode": "page",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000029",
+      "action": "read_published",
+      "contentTypeCode": "project",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000030",
+      "action": "read_published",
+      "contentTypeCode": "milestone",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000031",
+      "action": "read_published",
+      "contentTypeCode": "vet",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000032",
+      "action": "read_published",
+      "contentTypeCode": "clinic_profile",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000033",
+      "action": "read_published",
+      "contentTypeCode": "pet",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000034",
+      "action": "read_published",
+      "contentTypeCode": "visit",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000035",
+      "action": "read_published",
+      "contentTypeCode": "owner",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "operator": [
+    {
+      "id": "60000000-0000-4000-8000-000000000036",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000037",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000038",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000039",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000040",
+      "action": "publish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000041",
+      "action": "unpublish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000042",
+      "action": "delete",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000043",
+      "action": "archive",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000044",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    }
+  ]
+};
+
+export const auditEvents: S["AuditEventDetail"][] = [
+  {
+    "id": "70000000-0000-4000-8000-000000000012",
+    "at": "2026-09-26T01:12:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "SCHEMA",
+    "action": "type.disable",
+    "targetType": "content_type",
+    "targetId": "50000000-0000-4000-8000-000000000008",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000011",
+    "at": "2026-09-26T00:55:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "ROLE_ASSIGNED",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000006",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000010",
+    "at": "2026-09-26T00:50:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "GOVERNANCE",
+    "action": "manage_types",
+    "targetType": null,
+    "targetId": null,
+    "surface": "back",
+    "outcome": "denied",
+    "detail": {
+      "reason": "SURFACE_FORBIDDEN"
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000009",
+    "at": "2026-09-26T00:40:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "LOGIN_SUCCESS",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000001",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000008",
+    "at": "2026-09-25T09:30:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "role.permissions_update",
+    "targetType": "role",
+    "targetId": "40000000-0000-4000-8000-000000000003",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": {
+      "roleCode": "editor",
+      "permissions": 5
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000007",
+    "at": "2026-09-25T08:00:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "SETTINGS",
+    "action": "settings.retention_updated",
+    "targetType": "settings",
+    "targetId": null,
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": {
+      "from": 30,
+      "to": 90
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000006",
+    "at": "2026-09-24T10:00:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "seed-admin",
+      "displayName": "Platform admin"
+    },
+    "category": "AUTH",
+    "action": "PRINCIPAL_CREATED",
+    "targetType": "principal",
+    "targetId": "10000000-0000-4000-8000-000000000010",
+    "surface": "admin",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000005",
+    "at": "2026-09-20T00:37:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000036",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000004",
+    "at": "2026-09-20T00:37:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000037",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000003",
+    "at": "2026-09-20T00:01:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.publish",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000001",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": {
+      "revisionNo": 1
+    }
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000002",
+    "at": "2026-09-20T00:01:00Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "username": "seed-operator-album",
+      "displayName": "Album operator"
+    },
+    "category": "CONTENT",
+    "action": "entry.create",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000001",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": null
+  },
+  {
+    "id": "70000000-0000-4000-8000-000000000001",
+    "at": "2026-09-20T00:00:30Z",
+    "actor": {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "username": "seed-editor-album",
+      "displayName": "Album editor"
+    },
+    "category": "CONTENT",
+    "action": "entry.create",
+    "targetType": "entry",
+    "targetId": "30000000-0000-4000-8000-000000000002",
+    "surface": "back",
+    "outcome": "ok",
+    "detail": null
+  }
+];
+
+export const auditSettings: S["AuditSettings"] = {
+  "retentionDays": 90,
+  "allowedDays": [
+    30,
+    90,
+    365
+  ],
+  "updatedAt": "2026-09-01T00:00:00Z",
+  "updatedBy": null
 };

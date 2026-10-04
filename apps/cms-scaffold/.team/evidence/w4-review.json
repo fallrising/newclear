@@ -1,0 +1,123 @@
+{
+  "status": "DONE",
+  "phase": "final_independent_review",
+  "task": "T-943",
+  "sourceReadOnly": true,
+  "baseline": {
+    "artifact": "$BASELINE_MANIFEST",
+    "hashedPaths": 918
+  },
+  "actualMockE2eInventory": {
+    "command": "npm run e2e:mock -- --list",
+    "tests": 68,
+    "files": 5,
+    "matchesW4Section0": true
+  },
+  "specInventory": {
+    "w4AcceptanceTable": "docs/v2/waves/W4.md §1.1",
+    "nonGoals": "docs/v2/waves/W4.md §1.2",
+    "integratedGates": "docs/v2/waves/W4.md §0 and §9",
+    "newAppendixATests": 25,
+    "appendixATestsDeferredTo": "W5"
+  },
+  "concreteIntegrationRisks": [
+    "Existing full-list role permission replacement must preserve retained predicate/surface fields; verified in integrated payload builder and regression tests.",
+    "BW5 exposes no custom-role CRUD or role-membership-list operation; W4 UI correctly omits these capabilities.",
+    "Mock db and fixture changes must preserve W3b member entries and route/data isolation; final preservation manifests confirm the protected baseline.",
+    "W4 front-end confirmations do not claim backend confirmPhrase or self-guard behavior."
+  ],
+  "pending": [],
+  "initialFindingsResolved": [
+    "Canonical UUID targetId validation added; malformed UUID-shaped input covered by safety test.",
+    "Current linked principal retained separately from 50 active choices and search filter; regression covers disabled current account after 55 active accounts.",
+    "Permission route corrected to /api/v1/roles/{code}/permissions; PermissionInput only requires action, and retained grants preserve optional values."
+  ],
+  "reviewedEvidence": {
+    "admin": {
+      "evidence": ".team/evidence/w4-admin-integrated.log",
+      "files": 10,
+      "tests": 68,
+      "status": "passed"
+    },
+    "safetyRed": {
+      "evidence": ".team/evidence/w4-safety-red-confirmed.log",
+      "intendedFailures": 6,
+      "status": "confirmed"
+    },
+    "safetyGreen": {
+      "evidence": ".team/evidence/w4-safety-green.log",
+      "tests": 6,
+      "status": "passed"
+    },
+    "apiMocks": {
+      "evidence": ".team/evidence/w4-api-green.log",
+      "apiTests": 43,
+      "mockTests": 124,
+      "status": "passed"
+    },
+    "scope": {
+      "status": "reviewed_in_scope",
+      "dependencyLockBackendFrontBackFieldsChanges": false
+    },
+    "workspaceTests": {
+      "evidence": ".team/evidence/w4-tests.log",
+      "counts": [
+        43,
+        43,
+        61,
+        125,
+        19,
+        68,
+        133,
+        132
+      ],
+      "total": 624,
+      "status": "passed"
+    },
+    "nativeGates": {
+      "evidence": ".team/evidence/w4-final-gates.json",
+      "gates": [
+        "codegen",
+        "fixture-gen",
+        "lint",
+        "typecheck",
+        "tests",
+        "build",
+        "bundle"
+      ],
+      "status": "passed"
+    },
+    "java": {
+      "evidence": ".team/evidence/w4-java.log",
+      "tests": 339,
+      "execution": "FROM-CACHE; backend unchanged",
+      "status": "passed"
+    },
+    "mockE2E": {
+      "evidence": ".team/evidence/w4-e2e.log",
+      "tests": 68,
+      "status": "passed"
+    },
+    "baselinePreservation": {
+      "evidence": ".team/evidence/w4-verification-summary.json and manifests",
+      "protectedPaths": 883,
+      "preservedSnapshots": 10,
+      "originalFiles": 468,
+      "finalSourceFiles": 482,
+      "status": "passed"
+    },
+    "browserVisual": {
+      "evidence": ".team/evidence/w4-browser/summary.json and .team/evidence/w4-visual-review.json",
+      "captures": 14,
+      "blocking": 0,
+      "reviewedCaptures": 8,
+      "status": "passed"
+    }
+  },
+  "reportValidation": {
+    "command": "python3 \"$TEAMCTL\" validate-report .team/reports/T-943.md",
+    "status": "passed"
+  },
+  "sourceLevelConclusion": "No uncovered W4 source omission confirmed in reviewed integrated candidate.",
+  "ownerFollowUp": "Remote CI/review/merge/remote verification remains root publication workflow, outside bounded T-943 source/evidence review."
+}

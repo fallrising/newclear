@@ -17,6 +17,26 @@ export interface WorkListParams extends PublicListParams {
   include?: "refs";
 }
 
+/** GET /admin/audit parameters (BW2 §4.4). Blank values are left out of the request. */
+export interface AuditQuery {
+  /** 1-based; the API default is 1. */
+  page?: number;
+  /** 1–100; the API default is 20. */
+  size?: number;
+  /** ISO-8601 with offset, inclusive. */
+  from?: string;
+  /** ISO-8601 with offset, exclusive. */
+  to?: string;
+  /** Username of the actor. */
+  actor?: string;
+  /** Exact action; a value ending with "." is a prefix, for example "entry.". */
+  action?: string;
+  category?: string;
+  targetType?: string;
+  targetId?: string;
+  outcome?: string;
+}
+
 export const keys = {
   auth: {
     me: () => ["auth", "me"] as const,
@@ -51,6 +71,16 @@ export const keys = {
   },
   admin: {
     types: () => ["admin", "types"] as const,
+    /** Prefix of every principal key: invalidating it refreshes the list and the details. */
     principals: () => ["admin", "principals"] as const,
+    principal: (id: string) => ["admin", "principals", id] as const,
+    effectivePermissions: (id: string) => ["admin", "principals", id, "effective"] as const,
+    roles: () => ["admin", "roles"] as const,
+    rolePermissions: (code: string) => ["admin", "roles", code, "permissions"] as const,
+    /** Prefix of every audit key. */
+    auditAll: () => ["admin", "audit"] as const,
+    audit: (query: AuditQuery) => ["admin", "audit", "list", query] as const,
+    auditEvent: (id: string) => ["admin", "audit", "event", id] as const,
+    auditSettings: () => ["admin", "settings", "audit"] as const,
   },
 };

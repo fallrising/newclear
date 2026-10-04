@@ -1,8 +1,9 @@
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { RequireSurface, useSession } from "@cms/auth";
 import { AppFrame, PageHeader } from "@cms/ui";
 import { copy } from "./copy";
-import { ADMIN_NAV } from "./nav";
+import { roleLabel } from "./labels";
+import { navFor } from "./nav";
 
 function Forbidden() {
   return (
@@ -15,16 +16,18 @@ function Forbidden() {
 
 function Frame() {
   const session = useSession();
+  const { pathname } = useLocation();
   const me = session.me!;
   return (
     <AppFrame
       product="admin"
       productName={copy["app.name"]}
-      nav={ADMIN_NAV}
-      account={{ displayName: me.principal.displayName, detail: me.roles.map((r) => r.code).join(", ") }}
+      nav={navFor(me)}
+      account={{ displayName: me.principal.displayName, detail: me.roles.map((r) => roleLabel(r.code)).join("、") }}
       onSignOut={() => void session.signOut()}
     >
-      <Outlet />
+      {/* Resource navigation must forget confirmations and one-time passwords; query-only changes retain page state. */}
+      <Outlet key={`${me.principal.id}:${pathname}`} />
     </AppFrame>
   );
 }

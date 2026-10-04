@@ -1,6 +1,6 @@
 # Native workspace acceptance
 
-Status: acceptance specification, 2026-10-05. This slice verifies the existing desktop workspace after window-close protection; it does not add crash recovery or restart the deferred feature roadmap. The starting runtime is commit `363cecf98fcb2a6543edfb15aa2ae15f75065423` (window-close implementation PR #288).
+Status: six Linux native scenarios passed on 2026-10-05; see [verification and remaining limits](workspace-acceptance-verification.md). This slice verifies the existing desktop workspace after window-close protection; it does not add crash recovery or restart the deferred feature roadmap. The starting runtime is commit `363cecf98fcb2a6543edfb15aa2ae15f75065423` (window-close implementation PR #288).
 
 ## Required Linux scenarios
 

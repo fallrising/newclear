@@ -171,6 +171,7 @@ class Case:
         wait(lambda: self.http("GET", "/status"), "driver ready")
         self.session = self.http("POST", "/session", {"capabilities": {"alwaysMatch": {
             "tauri:options": {"application": str(self.args.binary)}}}})["sessionId"]
+        self.http("POST", f"/session/{self.session}/window/rect", {"width": 1800, "height": 1000})
         wait(lambda: self.js("return !!document.querySelector('.cm-content')"), "document UI ready")
         wait(lambda: str(self.vault) in self.js("return document.querySelector('.app-header').textContent"), "owned vault selected")
         self.fit()
@@ -200,8 +201,34 @@ class Case:
         # still travels through native WebDriver keyboard events, never editor state.
         wait(lambda: self.js("const e=document.querySelector(arguments[0]);if(!e||e.disabled||!e.getClientRects().length)return false;e.focus();return document.activeElement===e;", [selector]), "focus rendered control " + selector)
 
+    def geometry(self):
+        # Read only public DOM geometry; never reach into React/CodeMirror state.
+        return self.js("""const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}};
+            const info=e=>({rect:rect(e),offset:[e.offsetWidth,e.offsetHeight],visibility:getComputedStyle(e).visibility,display:getComputedStyle(e).display});
+            const container=document.querySelector('.react-flow');const viewport=document.querySelector('.react-flow__viewport');
+            return {window:{w:innerWidth,h:innerHeight,dpr:devicePixelRatio},container:container&&info(container),transform:viewport&&getComputedStyle(viewport).transform,
+                nodes:[...document.querySelectorAll('.react-flow__node')].map(e=>({id:e.dataset.id,...info(e),handles:[...e.querySelectorAll('.react-flow__handle')].map(h=>({id:h.dataset.handleid,kind:h.className,...info(h)}))})),
+                edges:[...document.querySelectorAll('.react-flow__edge')].map(e=>({id:e.dataset.id,label:e.getAttribute('aria-label'),path:e.querySelector('path')?.getAttribute('d')}))};""")
+
     def fit(self):
+        def measured():
+            g = self.geometry()
+            return g["container"] and g["container"]["rect"]["w"] > 0 and g["container"]["rect"]["h"] > 0 and g["nodes"] and all(
+                n["visibility"] == "visible" and n["rect"]["w"] > 0 and n["rect"]["h"] > 0 and n["handles"] and all(
+                    h["rect"]["w"] > 0 and h["rect"]["h"] > 0 for h in n["handles"]) for n in g["nodes"])
+        wait(measured, "canvas nodes and handles have visible geometry")
         self.click('.react-flow__controls-fitview')
+        previous = None
+        identical = 0
+        def settled():
+            nonlocal previous, identical
+            g = self.geometry()
+            signature = json.dumps({"transform": g["transform"], "nodes": g["nodes"]}, sort_keys=True)
+            identical = identical + 1 if signature == previous else 0
+            previous = signature
+            return identical >= 3
+        wait(settled, "fit-view geometry settled")
+        self.facts.setdefault("fit_geometry", []).append(self.geometry())
 
     def editor(self, node="doc"):
         return self.js("return [...document.querySelector(arguments[0]).querySelectorAll('.cm-line')].map(e=>e.textContent).join('\\n')", [self.selector(node)])
@@ -213,7 +240,9 @@ class Case:
         self.http("POST", f"/session/{self.session}/actions", {"actions": [{"type": "key", "id": "editor-keyboard", "actions": [
             {"type": "keyDown", "value": "\ue009"}, {"type": "keyDown", "value": "a"},
             {"type": "keyUp", "value": "a"}, {"type": "keyUp", "value": "\ue009"}]}]})
-        self.http("POST", f"/session/{self.session}/element/{element}/value", {"text": text})
+        # WebKit's contenteditable /value path drops literal LF bytes. Send
+        # genuine Enter key events while retaining the exact expected buffer.
+        self.http("POST", f"/session/{self.session}/element/{element}/value", {"text": text.replace("\n", "\ue007")})
         wait(lambda: self.editor(node) == text, "editor contains replacement")
 
     def dirty(self, node="doc"):
@@ -229,12 +258,15 @@ class Case:
         return self.js("return [...document.querySelectorAll(arguments[0])].map(e=>e.dataset.id)", [f".react-flow__node-{kind}"])
 
     def sid(self, node):
-        return self.js("return document.querySelector(arguments[0]+' .sid').textContent", [self.selector(node)])
+        # A native driver connection can reset while a freshly spawned terminal
+        # renders. Retry only this read; button/key mutations are never replayed.
+        return wait(lambda: self.js("const e=document.querySelector(arguments[0]+' .sid');return e&&e.textContent;", [self.selector(node)]), "visible terminal session ID")
 
     def terminal(self, name):
         prior = self.nodes()
         self.button("+ terminal")
         node = wait(lambda: next((n for n in self.nodes() if n not in prior), None), "new terminal")
+        wait(lambda: self.js("const e=document.querySelector(arguments[0]+' .xterm-screen');return e&&e.offsetWidth>0&&e.offsetHeight>0&&!!document.querySelector(arguments[0]+' .xterm-helper-textarea');", [self.selector(node)]), "terminal UI measured and ready")
         self.fit()
         self.click(self.selector(node) + " .loom-name-button")
         self.keys(self.selector(node) + " .loom-name-input", name + "\ue007")
@@ -281,6 +313,7 @@ class Case:
         try:
             if not self.session:
                 raise RuntimeError("No active UI session; see before-close diagnostics")
+            self.facts[label + "_geometry"] = self.geometry()
             self.facts[label + "_terminal_dom_rows"] = self.js("return [...document.querySelectorAll('.react-flow__node-terminal')].map(e=>({node:e.dataset.id,rows:[...e.querySelectorAll('.xterm-rows>div')].map(r=>r.textContent)}))")
             (self.root / f"{label}.html").write_text(self.js("return document.documentElement.outerHTML"))
             png = self.http("GET", f"/session/{self.session}/screenshot")

@@ -22,7 +22,7 @@ pub enum DatabasePathErrorKind {
 
 /// The bounded event-store operation associated with a storage failure.
 ///
-/// Contracts: `CU-EVT-01`, `CU-EVT-02`. SQL text and database paths are never represented.
+/// Contracts: `CU-EVT-01` through `CU-EVT-04`. SQL text and database paths are never represented.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum StorageOperation {
     Open,
@@ -55,7 +55,7 @@ pub enum StorageErrorKind {
 
 /// The bounded stage at which persisted store structure was inconsistent.
 ///
-/// Contracts: `CU-EVT-01`, `CU-EVT-02`. It carries no malformed bytes or SQL diagnostics.
+/// Contracts: `CU-EVT-01` through `CU-EVT-04`. It carries no malformed bytes or SQL diagnostics.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CorruptStoreStage {
     Schema,
@@ -71,7 +71,7 @@ pub enum CorruptStoreStage {
 
 /// A checked failure from the SQLite event-store boundaries.
 ///
-/// Contracts: `CU-EVT-01`, `CU-EVT-02`. Every variant gives a caller action without exposing
+/// Contracts: `CU-EVT-01` through `CU-EVT-04`. Every variant gives a caller action without exposing
 /// paths, SQL, payloads, or SQLite diagnostic text.
 #[derive(Clone, Debug, Error, Eq, PartialEq)]
 pub enum EventStoreError {

@@ -6,14 +6,16 @@ use uuid::Uuid;
 
 use crate::{EventStoreError, InvalidSnapshotReason, SnapshotCacheReason};
 
-/// Fixed canonical snapshot body size (CU-EVT-04).
+/// Fixed canonical snapshot body size (CU-EVT-03/CU-EVT-04).
 pub const MAX_SNAPSHOT_BYTES: usize = 96;
-/// Maximum durable prefix verified while saving (CU-EVT-04).
+/// Maximum cache sequence verified by save/load (CU-EVT-03/CU-EVT-04), not an event-head cap.
 pub const MAX_SNAPSHOT_PREFIX_EVENTS: u64 = 4096;
 
 /// A private projection wrapper. Construction validates bounds, not persisted provenance.
 ///
-/// Contract: CU-EVT-04. Save independently replays durable history. This value provides no
+/// Contracts: CU-EVT-03/CU-EVT-04. Save and usable load independently replay durable history.
+/// Public construction proves bounds only, while load returns its freshly replayed projection.
+/// This value provides no
 /// reducer restoration capability. Debug omits all identifiers, timestamps and content.
 #[derive(Clone, Eq, PartialEq)]
 pub struct SessionSnapshot {

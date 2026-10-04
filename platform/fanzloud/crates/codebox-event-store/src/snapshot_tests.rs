@@ -2010,7 +2010,9 @@ fn snapshot_design_and_runtime_acceptance_are_distinct() {
             || task.contains("status: accepted")
     );
     let library = include_str!("sqlite.rs");
-    assert!(!library.contains("pub async fn load_snapshot"));
+    assert!(library.contains("pub async fn load_snapshot"));
+    let c_design = include_str!("../../../docs/acceptance/T030C-design.acceptance.md");
+    assert!(c_design.contains("decision: accepted"));
     assert!(!include_str!("../../codebox-domain/src/reducer.rs").contains("pub fn restore"));
 }
 

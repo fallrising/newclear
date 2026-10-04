@@ -142,11 +142,22 @@ pub(crate) fn decode_event(raw: RawStoredEvent) -> Result<DomainEventEnvelope, E
     if schema_version != DOMAIN_EVENT_SCHEMA_V1 {
         return Err(corrupt(CorruptStoreStage::SchemaVersion));
     }
+    // ADR-0006: preserve legacy strict RFC3339 acceptance. On failure, admit only the
+    // existing writer's exact signed-year UTC representation, never generic relaxed input.
     let occurred_at = DateTime::parse_from_rfc3339(&raw.occurred_at)
+        .map(|timestamp| timestamp.with_timezone(&Utc))
+        .or_else(|original| {
+            DateTime::parse_from_str(&raw.occurred_at, "%+")
+                .map(|timestamp| timestamp.with_timezone(&Utc))
+                .ok()
+                .filter(|timestamp| {
+                    timestamp.to_rfc3339_opts(SecondsFormat::Nanos, true) == raw.occurred_at
+                })
+                .ok_or(original)
+        })
         .map_err(|_| EventStoreError::CorruptStore {
             stage: CorruptStoreStage::Timestamp,
-        })?
-        .with_timezone(&Utc);
+        })?;
     let causation_id = raw
         .causation_id
         .as_deref()

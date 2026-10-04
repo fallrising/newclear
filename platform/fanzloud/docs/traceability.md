@@ -35,7 +35,7 @@ Old hosted runs do not prove execution of the new root workflow.
 | T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; recovery PR #242 merged at1f555f61; hosted root branch37148404076 and main37148875720 passed | Accepted; merged |
 
 
-## Snapshot Save Runtime Accepted — Public Load Deferred
+## Snapshot Save, Load and Store Composition Accepted
 
 The historical design and A/B reports above are preserved. Current D runtime evidence is in
 [ACCEPT-T030D](acceptance/T030D.acceptance.md); schema-aware regressions retain append/replay
@@ -46,10 +46,15 @@ and three C-only names; D acceptance does not assert public-load coverage.
 |---|---|---|---|---|
 | CU-EVT-04 bounded value and persisted provenance | SPEC-T030D / ADR-0005 | S01–S04 | Value/codec/head tests; legal fabricated candidate rejection; full-field equality; bounded persisted-prefix replay | Accepted D |
 | CU-EVT-04 concurrency, monotonicity, E1 and retry | SPEC-T030D | S05–S08 | Concurrent same-head savers and append orders; rollback, busy/worker faults, cancellation, lost reply and subprocess crashes | Accepted D |
-| CU-EVT-03 discardable cache and E0 load | SPEC-T030D; future SPEC-T030C | S09–S10 | D observes raw SQL visibility only; public load, verified returned projection and suffix continuation are deferred | Blocked C |
+| CU-EVT-03 discardable cache and E0 load | SPEC-T030C / ADR-0005 | C01–C12; D S09–S10 | 19 substantive public-load oracles: pinned pages, verified projection, bounds, miss/error precedence, caller-owned continuation, E0 faults/restart and model; ACCEPT-T030C | Accepted C |
 | CU-EVT-01/02 compatibility and strict schema | SPEC-T030D | S11–S13 | Exact new/v1 upgrade, identity/integrity faults, nullable malformed values, concurrent opens, upgrade crashes, pinned replay across upgrade, retained full-u64 A/B tests and baseline v1 executable rejection | Accepted D |
-| Security, observability and acceptance | SPEC-T030D | S14–S16 | Gated body/metadata, bounded redacted diagnostics, private paths, generated multi-stream schedules, RED before code, full gates and independent review | Accepted D; C portions deferred |
+| Security, observability and acceptance | SPEC-T030D | S14–S16 | Gated body/metadata, bounded redacted diagnostics, private paths, generated multi-stream schedules, RED before code, full gates and independent review | Accepted D; C evidence in separate report |
+| Canonical extended-year timestamp compatibility | ADR-0006; SPEC-T030B/C | C06 and bounded event decoder | Targeted behavior RED before strict-first/exact-canonical repair; full extrema/leap/legacy/malformed append/replay/save/load/reopen matrix | Accepted C/parent repair |
+| Complete one-schema event store | T030 task; accepted A/B/C/D | CU-EVT-01–04 | Three public composition tests cover restart, cache misses/history authority and failures/independent streams; ACCEPT-T030 | Accepted parent |
 
-T030D is **Accepted**. T030C and parent T030 remain **blocked** on their own specification,
-implementation and composition gates. Snapshot save is a P1 library capability; P0 session
-persistence, native agents and real-provider live acceptance are not implied.
+T030A/B/C/D and parent T030 are **Accepted**. [C runtime](acceptance/T030C.acceptance.md) and
+[parent composition](acceptance/T030.acceptance.md) record current 99 store / 295 workspace /
+10 Node tests, complete gates and independent review. Historical reports remain unchanged.
+The adapter is a P1 library capability; P0 session persistence, startup acceleration, native
+agents and real-provider live acceptance are not implied. Automated rustdoc/spec drift tooling
+remains a gap; current source/document projections were reviewed explicitly.

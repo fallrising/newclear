@@ -567,8 +567,11 @@ BLOB key and authoritative event constraints retain full enabled integrity valid
 value corruption is discardable; key/schema/index/physical or durable-event damage fails closed.
 
 The design amendment is accepted; separate [T030D runtime acceptance](acceptance/T030D.acceptance.md)
-now accepts CU-EVT-04 E1 save and the narrow schema-v2 transition. CU-EVT-03/T030 remain blocked
-pending their own specification/implementation/composition gates. Historical A/B acceptance is
+accepts CU-EVT-04 E1 save and the narrow schema-v2 transition. Separate
+[T030C runtime acceptance](acceptance/T030C.acceptance.md) accepts CU-EVT-03 E0 verified load, and
+[T030 composition acceptance](acceptance/T030.acceptance.md) accepts the complete adapter.
+[ADR-0006](adr/ADR-0006-canonical-extended-timestamps.md) repairs canonical extended-year event
+readback compatibility without a schema or format change. Historical A/B acceptance is
 unchanged; schema-aware regression tests preserve their behavior on the current v2 store.
 
 ## 4.7 Session actor
@@ -1754,9 +1757,9 @@ flowchart TD
 | T020 | Versioned events and deterministic reducer | T010 | property replay determinism and seq rules |
 | T030A | SQLite initialization and atomic event append | T020 | conflict, rollback, duplicate-ID, and restart tests |
 | T030B | SQLite event replay after sequence | T030A | empty/one/many/limit/order/corruption tests |
-| T030C | SQLite snapshot cache load | T030D | absent/present/stale/corrupt/restart tests |
+| T030C | SQLite snapshot cache load | T030D | Accepted: pinned E0 load, verified projection, misses/errors, bounds and restart |
 | T030D | SQLite snapshot cache save | T020,T030A,T030B | Accepted: verified save/codec/schema-v2 runtime; public load remains T030C |
-| T030 | SQLite event-store coordination parent (acceptance pending children) | T030A,T030B,T030C,T030D | all child acceptances plus append/replay/snapshot composition |
+| T030 | SQLite event-store coordination parent | T030A,T030B,T030C,T030D | Accepted: all children plus append/replay/save/load restart and failure composition |
 | T040 | Single-writer session actor | T020 | concurrent turn rejected; approval and restart behavior |
 | T050 | Versioned node and boxd protocols | T010 | codec and version-handshake tests |
 | T060 | Authenticated restricted node-agent skeleton | T050 | control plane has no runtime socket |

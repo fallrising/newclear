@@ -59,6 +59,31 @@ final class ContentProjection {
         return json;
     }
 
+    /** Member work copy: enabled public fields only, including a safely projected title. */
+    static Map<String, Object> member(EntryRecord entry, ContentTypeRecord type, List<FieldRecord> fields,
+            java.util.function.Function<Object, Object> mediaExpander) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        Map<String, Object> source = entry.payload() == null ? Map.of() : entry.payload();
+        for (FieldRecord field : fields) {
+            if (field.enabled() && "public".equals(field.visibility()) && source.containsKey(field.fieldKey())) {
+                Object value = source.get(field.fieldKey());
+                if ("media-ref".equals(field.fieldType()) && value != null) {
+                    value = mediaExpander == null ? null : mediaExpander.apply(value);
+                }
+                payload.put(field.fieldKey(), value);
+            }
+        }
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("id", entry.id().toString());
+        json.put("contentType", entry.contentTypeKey());
+        json.put("publicationState", entry.publicationState().wire());
+        json.put("title", title(payload, type.titleField()));
+        json.put("payload", payload);
+        json.put("createdAt", entry.createdAt());
+        json.put("updatedAt", entry.updatedAt());
+        return json;
+    }
+
     /**
      * Type schema for Back and Admin (02 §4.7). admin=true adds enabled, and per field indexed and enabled,
      * and includes internal and disabled fields; admin=false omits internal and disabled fields.

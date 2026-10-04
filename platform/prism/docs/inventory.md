@@ -1,7 +1,7 @@
 # Prism implementation inventory
 
-P1-04 review baseline: newclear `c12d510daea7401ed0f70bf38377fe4e3578202a`,
-including the merged P1-02 and P1-03 milestones. Historical verification below
+P1-05 review baseline: newclear `9c9622968338064e153d4e2b0886ce06b94df8f8`,
+including the merged P1-02, P1-03 and P1-04 milestones. Historical verification below
 retains its original scope. Product usage remains unknown.
 
 ## Code and contract coverage
@@ -16,13 +16,14 @@ retains its original scope. Product usage remains unknown.
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
 | P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
 | P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; query/ruler/console retain base HTTP routes. |
-| P0-09 | ADR-001 through ADR-011 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-09 | ADR-001 through ADR-012 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
 | P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
 | P1-02 | [`internal/ingest/limits`](../internal/ingest/limits/README.md): tenant overrides, label/cardinality/record/span quotas, byte admission and bounded reports | Used by P1-03 and P1-04 runtime; complete tenant override configuration and registered telemetry remain outstanding. |
 | P1-03 | [`internal/ingest`](../internal/ingest/README.md): bounded tenant registry, atomic reservation, normalization/limits, three priority lanes per signal, owned batches and SPI writers | P1-04 connects config/daemon/OTLP; registered pipeline telemetry is still unconnected. |
 | P1-04 | `internal/compat/otlp`, configured single-tenant HTTP/gRPC runtime, original-unit accounting, bounded decode/admission and lifecycle tests | Full multi-tenant identity, native query APIs and production storage remain later work. |
+| P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms, query APIs and full multi-tenant control plane remain later work. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -141,10 +142,37 @@ while retaining its intended oversize assertion. Historical failures and initial
 partial reviews remain in delivery evidence. The security check covers this
 milestone; it does not establish future Phase 5 security acceptance.
 
+## Integrated P1-05 verification
+
+The integrated 2026-10-04 snapshot was tested on Linux amd64 with
+`GOTOOLCHAIN=go1.23.12 GOFLAGS=-mod=readonly`. Module versions, public SPI,
+drivers and root CI workflows are unchanged. The receiver and runtime workers
+used isolated worktrees; the orchestrator integrated their frozen files by hash.
+
+| Command | Observed result |
+| --- | --- |
+| `make lint test` | Formatting/vet pass; all 17 packages pass race tests, including promapi, ingest, runtime and security; long-lived packages use goleak. |
+| `scripts/check-dependencies.sh` and `scripts/test-dependency-guard.sh` | Direction guard and all five prohibited-import cases pass. |
+| `go build ./...` | Exit 0. |
+| Pinned golangci-lint v2.12.2 `run ./...` and `run --build-tags=integration ./test/e2e` | Both report 0 issues. |
+| `PROMETHEUS_BINARY=/tmp/prism-prometheus-2.53.0/prometheus OTLP_TELEMETRYGEN_BINARY=/tmp/prism-telemetrygen-v0.116.0/telemetrygen go test -tags=integration -race -count=1 -v ./test/e2e` | Real Prometheus scrape/WAL/remote-write persists up=1 and fixture=42.5; another tenant is empty. Existing telemetrygen HTTP/gRPC three-signal persistence and shutdown regressions pass. |
+| `go test -race -count=1 -v ./test/security` | Existing OTLP checks and six remote-write credential/selector rejection cases pass; rejected requests create no tenant state; parsed reserved labels cannot override stored identity. |
+| `go build -o /tmp/prism-p1-05-prismd ./cmd/prismd` then `python3 scripts/smoke-otlp.py --prismd /tmp/prism-p1-05-prismd --telemetrygen /tmp/prism-telemetrygen-v0.116.0/telemetrygen` | Actual daemon config/health/metrics/OTLP plus remote-write authentication, empty-v1 admission and v2 rejection pass; SIGTERM exits 0. |
+| `go test ./internal/compat/promapi -run '^$' -fuzz '^FuzzWriteParser$' -fuzztime=10s -parallel=2` | Worker parser fuzz passes 85,705 executions in 11.054s; deterministic cases cover schema/count/packed and unpacked fields, Snappy expansion and unknown fields. |
+
+The [P1-05 contract](specs/p1-05-remote-write.md) and
+[receiver README](../internal/compat/promapi/README.md) explain original-byte
+accounting, nonretryable partial 400, fixed diagnostics, one-slot admission and
+cancellation cleanup before permit release. Narrow legacy normalizer changes add
+cancellation checks and a byte cap; its old decode helper still lacks schema
+preflight and is not used by network receivers. Initial receiver-absent and
+501/404 red tests, budget-boundary failures and intermediate lint/fixture failures
+were retained and resolved before these final checks. No validator was weakened.
+
 ## Current integration boundary
 
-P1-04 connects the existing atomic pipeline to authenticated OTLP in the
-all-in-one and ingest roles. The [receiver design](specs/p1-04-otlp.md) and
+P1-04 and P1-05 connect the existing atomic pipeline to authenticated OTLP and
+remote_write v1 in the all-in-one and ingest roles. The [receiver design](specs/p1-04-otlp.md) and
 [ADR-011](sdd/13-ADR.md#adr-011phase-1-otlp-寫入使用單租戶-file-backed-bearer)
 record the initial single-tenant identity contract and original-unit partial
 counts. The [pipeline contract](../internal/ingest/README.md) retains P1-03's
@@ -152,11 +180,12 @@ byte-admission cancellation point, delta replay guarantees, tenant lifecycle,
 owned payloads, metadata capacity, finite retry and at-least-once writes.
 
 Runtime capacity differs from standalone package defaults: one tenant, depth-4
-priority queues, two workers per signal and 16 concurrent receiver requests.
+priority queues, two workers per signal, 16 OTLP receiver slots and one separate
+remote_write slot.
 Configuration validates a conservative logical budget before startup, including
-compressed/decompressed receive buffers and serialized admission (936 MiB at
+compressed/decompressed receive buffers and serialized admission (968 MiB at
 defaults). This is not
-an RSS limit: decoded pdata, allocator/transient/state costs and memory-backend
+an RSS limit: decoded protobuf/pdata, allocator/transient/state costs and memory-backend
 retention remain additional. The standalone package's 5,808 MiB conservative
 default allowance documented in P1-03 remains unchanged; daemon wiring does not
 use that multi-tenant default.
@@ -176,7 +205,7 @@ Remaining integration work includes:
 
 ## Remaining phases
 
-P1-05–06 supply remote-write and Loki receivers; P1-07–08 the PromQL adapter
+P1-06 supplies the Loki receiver; P1-07–08 the PromQL adapter
 and API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
 security and operations. The directories for compatibility, differential,

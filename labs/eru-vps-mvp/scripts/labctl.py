@@ -909,8 +909,25 @@ def main():
     replacement_inspect = sub.add_parser('inspect-fresh-replacement-facts', help='Revalidate saved replacement facts offline without accepting a stage')
     replacement_inspect.add_argument('--observation', required=True, help='Replacement observation ID')
     replacement_inspect.add_argument('--sha256', required=True, help='Expected observation digest')
+    network_admission = sub.add_parser('inspect-fresh-network-admission', help='Inspect current scoped prerequisites without admitting or executing a network stage')
+    network_admission.add_argument('--run', required=True, help='Prepared execution ID')
+    network_admission.add_argument('--sha256', required=True, help='Expected execution digest')
+    network_admission.add_argument('--input', required=True, help='Private network-stage prerequisite request')
+    network_admission.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'inspect-fresh-network-admission':
+        from fresh_network_admission_ops import inspect_network_admission
+        try:
+            result = inspect_network_admission(
+                PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network admission inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count', 'stage',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed', 'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command in ('collect-fresh-replacement-facts', 'inspect-fresh-replacement-facts'):
         from fresh_replacement_ops import collect_replacement_facts, inspect_replacement_facts
         try:

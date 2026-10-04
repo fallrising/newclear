@@ -1,6 +1,6 @@
 # Prism development quickstart
 
-This exercises authenticated OTLP ingestion with the memory backend. Compatible
+This exercises authenticated OTLP and remote_write ingestion with the memory backend. Compatible
 query APIs and production storage are later milestones. Fixture credentials are
 public and intended only for loopback development.
 
@@ -21,7 +21,7 @@ go build ./...
 
 See [inventory](inventory.md) for observed results and the remaining acceptance
 boundaries. The separate [external-client gate](../test/e2e/README.md) uses a
-pinned telemetrygen and checks actual memory contents through SPI.
+pinned telemetrygen and Prometheus and checks actual memory contents through SPI.
 
 ## Check configuration and start
 
@@ -74,6 +74,33 @@ Ctrl-C or SIGTERM stops new receiver work, drains requests and queued writes
 within one deadline, then closes storage. Set `PRISM_SERVER_HTTP_LISTEN` and
 `PRISM_SERVER_GRPC_LISTEN` to unused loopback ports if the defaults are busy.
 
+## Prometheus remote_write
+
+Configure Prometheus to write to the existing HTTP listener. Use an absolute
+credential-file path readable by the Prometheus process; the file must contain
+the same ingest key configured in Prism. The key is not part of this YAML:
+
+```yaml
+remote_write:
+  - url: http://127.0.0.1:9090/prom/api/v1/write
+    authorization:
+      credentials_file: /absolute/path/to/ingest-key
+    queue_config:
+      min_shards: 1
+      max_shards: 1
+      retry_on_http_429: true
+```
+
+Use a different local web port for Prometheus (for example
+`--web.listen-address=127.0.0.1:9091`) so its default port does not collide with
+Prism. Prometheus sends snappy block-compressed v1 protobuf automatically. v2 is
+not supported. A 204 acknowledges asynchronous admission; overload before
+admission returns 429 with Retry-After. A nonretryable 400 can mean some valid
+samples were accepted while others were rejected. Native histograms remain
+unsupported and are dropped with sampled diagnostics. See the
+[P1-05 contract](specs/p1-05-remote-write.md) and the
+[real sender test](../test/e2e/README.md#real-prometheus-remote_write).
+
 ## Resource and integration boundaries
 
 Daemon queues use smaller defaults than the standalone pipeline package. The
@@ -82,6 +109,6 @@ against `ingest.memory_limit`; this is not a process RSS ceiling. Decoded pdata,
 allocator overhead, transient normalization and state, and backend retention are
 additional costs. Do not treat the memory backend as durable production storage.
 
-Remote-write, Loki push, query APIs, full multi-tenant authentication, registered
+Loki push, query APIs, full multi-tenant authentication, registered
 pipeline telemetry, live reload and deployment remain later work. Follow the
 [SDD task order](sdd/12-IMPLEMENTATION-PHASES.md).

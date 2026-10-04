@@ -136,3 +136,16 @@ Continue after merged four-host receipt assessment. Add a fixed read-only probe 
 ### Replacement facts acceptance decision
 
 Accepted T-228 and T-229 after source/diff/hash review and independent adversarial checks. Two deterministic stale-return regressions were fixed before acceptance; deployed proxy unit markers were added. Root43, worker67, independent86 and full643 tests passed. Original workflow, compileall and team/scope/privacy gates passed. T-230 accepts only this facts slice, keeping overall closeout PARTIAL and formal remaining12. No VPS, stage acceptance, trust/inventory or generation change.
+
+## Fresh network-stage prerequisite inspection (2026-10-04)
+
+Continue after replacement facts. Deliver fixed network-and-access-ready read-only gate linking exact existing pending, replacement observation, fresh scoped owner/fence attestations and independently readable old-host isolation proofs. Historical preparation cannot renew live authority. No transport, storage mutation, admission capability or stage acceptance is added.
+
+- T-231: bounded isolated strict contract and private read-only assessment with synthetic regression tests.
+- T-232: independent frozen-candidate review and adversarial tests; no recursive delegation.
+- Root: document-first frozen scope, CLI, full native checks/evidence gate and authorized Git delivery.
+- Gate: require actual exact pending, current refs/source/root and final-time checks; preserve original reservation, old baseline and legacy validators. Formal remaining12 unchanged.
+
+### Network prerequisite acceptance decision
+
+Accepted T-231 and T-232 after source/diff/hash inspection and independent temporary-file evidence. Four late publication drift cases were reproduced and fixed with retained directory descriptors and final exact entries. Root50, worker62, independent72+13 and full679 tests passed; workflow/compileall/team/scope/privacy gates passed. T-233 accepts this readonly slice only, keeping full closeout PARTIAL and formal remaining12. No stage, live fence or network acceptance; no mutation capability or real host operations.

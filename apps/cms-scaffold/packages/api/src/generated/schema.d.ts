@@ -1043,6 +1043,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/content-types/{typeKey}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The caller's entries of a type that has an ownerField (02 §4.5, G-08): entries whose ownerField equals
+         *     the caller's id, in draft or published state, with the public fields of the working copy. Front surface
+         *     only. Paging, sorting, q, filter.* and ref.* follow listWorkEntries (default `-updatedAt`).
+         *     state and publishRequested are syntax-checked but do not change the fixed draft/published owner list.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `page`, `size`, `sort` or a filter as listWorkEntries.
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+         */
+        get: operations["listMyEntries"];
+        put?: never;
+        /**
+         * @description Creates a draft owned by the caller (02 §4.5). Front surface only; needs `create` on the type. The
+         *     ownerField is set to the caller (a client value is replaced). A ref field whose target type has an
+         *     ownerField must point to an entry the caller owns. At most 5 requests per member per minute. Audit:
+         *     `entry.create`.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: `publicationState` present in the body, including null.
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 403 FORBIDDEN: caller lacks `create` on the type.
+         *     - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+         *     - 422 with `error.fields`: payload invalid as createEntry, or a ref to an entry the caller does not own
+         *       (`REF_TARGET_NOT_FOUND`).
+         *     - 429 RATE_LIMITED: more than 5 requests in the last minute.
+         */
+        post: operations["createMyEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/entries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One of the caller's entries. Front surface only.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+         *     - 403 FORBIDDEN: the entry belongs to someone else (surface-front AC-11; not hidden as 404).
+         *     - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted, or its type is disabled or has no ownerField.
+         */
+        get: operations["getMyEntry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/media": {
         parameters: {
             query?: never;
@@ -1195,7 +1258,7 @@ export interface components {
          * @description Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1550,6 +1613,37 @@ export interface components {
             restricted?: boolean;
             missing?: boolean;
         };
+        /**
+         * @description The caller's entry (02 §4.5): enabled public fields of the working copy; title is null unless its field
+         *     is enabled and public. Media-ref values expanded as in
+         *     PublicEntry (null when not publicly readable).
+         */
+        MemberEntry: {
+            /** Format: uuid */
+            id: string;
+            contentType: string;
+            publicationState: components["schemas"]["PublicationState"];
+            title: string | null;
+            payload: components["schemas"]["EntryPayload"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        MemberEntryPage: {
+            items: components["schemas"]["MemberEntry"][];
+            /** Format: int64 */
+            total: number;
+            page: number;
+            size: number;
+            offset: number;
+            limit: number;
+        };
+        MemberCreateRequest: {
+            payload: components["schemas"]["EntryPayload"];
+            /** @description Must be absent; any present value, including null, is 400 VALIDATION_FAILED. */
+            publicationState?: string;
+        };
         WorkEntryPage: {
             items: components["schemas"]["WorkEntry"][];
             /**
@@ -1867,6 +1961,15 @@ export interface components {
         };
         /** @description Precondition required (VERSION_REQUIRED). */
         Error428: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description Too many requests (RATE_LIMITED). */
+        Error429: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3431,6 +3534,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditEventDetail"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    listMyEntries: {
+        parameters: {
+            query?: {
+                /** @description 1-based page number. Default 1. */
+                page?: components["parameters"]["Page"];
+                /** @description Page size. Default 20, maximum 100. */
+                size?: components["parameters"]["Size"];
+                /**
+                 * @description One sort key, `-` prefix for descending: `updatedAt`, `createdAt`, `publishedAt`, `title` (the
+                 *     type's titleField), or an enabled field with index rows whose type is not ref (in public lists,
+                 *     visibility `public` only).
+                 */
+                sort?: components["parameters"]["Sort"];
+            };
+            header?: never;
+            path: {
+                typeKey: components["parameters"]["TypeKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The caller's entries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntryPage"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    createMyEntry: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path: {
+                typeKey: components["parameters"]["TypeKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntry"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            415: components["responses"]["Error415"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    getMyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The caller's entry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberEntry"];
                 };
             };
             400: components["responses"]["Error400"];

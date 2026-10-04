@@ -82,6 +82,35 @@ def main():
                         if response.status != 200:
                             raise RuntimeError("authenticated export failed")
                         json.loads(response.read(4096))
+                # A Snappy block containing only the zero decoded-size varint
+                # is an empty remote_write v1 protobuf request.
+                write_headers = {
+                    "Content-Type": "application/x-protobuf",
+                    "Content-Encoding": "snappy",
+                    "X-Prometheus-Remote-Write-Version": "0.1.0",
+                }
+                request = urllib.request.Request(endpoint + "/prom/api/v1/write", data=b"\x00", headers=write_headers, method="POST")
+                try:
+                    urllib.request.urlopen(request, timeout=2).close()
+                except urllib.error.HTTPError as error:
+                    with error:
+                        if error.code != 401:
+                            raise RuntimeError("unauthenticated remote_write did not return 401") from error
+                else:
+                    raise RuntimeError("unauthenticated remote_write accepted")
+                request.add_header("Authorization", "Bearer " + key)
+                with urllib.request.urlopen(request, timeout=2) as response:
+                    if response.status != 204 or response.read(4096):
+                        raise RuntimeError("authenticated remote_write did not return empty 204")
+                request.add_header("X-Prometheus-Remote-Write-Version", "2.0.0")
+                try:
+                    urllib.request.urlopen(request, timeout=2).close()
+                except urllib.error.HTTPError as error:
+                    with error:
+                        if error.code != 400:
+                            raise RuntimeError("remote_write v2 did not return 400") from error
+                else:
+                    raise RuntimeError("remote_write v2 accepted")
                 # The separate integration test asserts persistence using SPI;
                 # this probe establishes the actual daemon's gRPC wiring.
                 command = [str(args.telemetrygen.resolve()), "traces", "--traces", "1", "--workers", "1", "--otlp-insecure", "--otlp-endpoint", f"127.0.0.1:{grpc_port}", "--otlp-header", f'authorization="Bearer {key}"']
@@ -96,7 +125,7 @@ def main():
                 log.seek(0)
                 if key in log.read():
                     raise RuntimeError("daemon leaked ingest credential")
-                print(f"PASS config-check, health, metrics, HTTP three-signal auth, gRPC export; SIGTERM exit 0 in {elapsed:.3f}s")
+                print(f"PASS config-check, health, metrics, HTTP three-signal auth, gRPC export, remote_write auth/v1/v2; SIGTERM exit 0 in {elapsed:.3f}s")
             finally:
                 if process.poll() is None:
                     process.kill()

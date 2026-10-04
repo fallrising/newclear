@@ -215,3 +215,28 @@ pipeline 佇列／rate limit 仍在正常 unary handler 回 `ResourceExhausted` 
 `RetryInfo`，符合 `02` §1.1 的佇列滿契約。使用標準 MethodDesc 及 bounded raw
 request，避免依賴不受支援的 stream descriptor flags；協定錯誤在 handler
 分類，原生 framing/compression 錯誤保留函式庫行為。
+
+
+## ADR-012：remote_write v1 的有界接收與部分拒絕
+
+**狀態**：P1-05 實作決策，2026-10-04。
+
+**決策**：remote_write 使用 ADR-011 同一個 file-backed bearer 與固定 tenant。
+HTTP endpoint 為 `/prom/api/v1/write`，僅接受 snappy block 與 v1 protobuf。
+解壓配置大小和 protobuf 元素在生成 decoder 配置 slice 前驗證；每個 receiver
+固定一個非阻塞 slot，從 body read 持有至 normalize/submit 完成。Stop 拒絕新工作，
+既有 HTTP drain 與 pipeline 關閉順序不變。
+
+**回應**：成功入列回空 204；入列前容量/速率拒絕回 429 與 Retry-After。
+任何 sample 部分拒絕回不重試的 400，成功部分可能已保存，不能將整批當成尚未提交。
+此行為遵循 remote_write v1；metadata/native histogram 等既有非致命 mapping
+警告用限量且不含使用者字串的日誌呈現。保留 raw decompressed bytes 做 byte admission。
+
+**容量與範圍**：在 P1-04 logical budget 上加入兩個 max_request_bytes buffer，
+預設共 968 MiB，並非 RSS 保證。單 slot 選擇偏保守，仍可由 client batching 使用；
+不增加設定或依賴。不引入自動重載、多租戶控制面、查詢 API、遠端寫入 v2、WAL
+或部署。此切片不使用跨請求 buffer pool，避免保留最大請求記憶體及敏感資料；
+各請求資源在結束時釋放，與 SDD05 的 pool 建議相比採用更明確的保留上限。
+
+詳見 [P1-05 規格](../specs/p1-05-remote-write.md) 與
+[remote_write v1](https://prometheus.io/docs/specs/prw/remote_write_spec/)。

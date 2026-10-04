@@ -72,6 +72,10 @@ public class ContentException extends CmsApiException {
         return new ContentException(ErrorCode.VALIDATION_FAILED, message);
     }
 
+    public static ContentException rateLimited() {
+        return new ContentException(ErrorCode.RATE_LIMITED, "Too many requests; try again in a minute");
+    }
+
     public static ContentException typeDisabled() {
         return new ContentException(ErrorCode.TYPE_DISABLED, "Content type is disabled");
     }

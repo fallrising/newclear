@@ -23,7 +23,7 @@ BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-P
 
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 
-W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；狀態LOCAL_VERIFIED，遠端CI／合併另行核對，沒有部署。
+W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；已於[PR #245](https://github.com/fallrising/newclear/pull/245)通過遠端CI並合併，沒有部署。BW3會員API已完成本地整合與驗收，詳見 [BW3交付證據](.team/reports/BW3-DELIVERY.md)：本人資料讀取、草稿建立、限流及原子審計；279 Java／125 PostgreSQL／395前端／39 mock E2E通過，待必要遠端CI與合併。
 
 ## 需求
 

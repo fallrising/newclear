@@ -25,7 +25,7 @@ info:
     - 405 `METHOD_NOT_ALLOWED` when the path exists but the HTTP method does not.
     - 415 `MEDIA_TYPE_NOT_SUPPORTED` when a JSON operation receives another Content-Type.
     - 500 `INTERNAL_ERROR` for any unexpected server failure.
-  version: 0.8.0
+  version: 0.9.0
   license:
     name: Proprietary
 servers:
@@ -38,6 +38,7 @@ tags:
   - name: Content
   - name: Media
   - name: Admin
+  - name: Member
 paths:
   /actuator/health:
     get:
@@ -1287,6 +1288,96 @@ paths:
         "403": { $ref: "#/components/responses/Error403" }
         "404": { $ref: "#/components/responses/Error404" }
         "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/me/content-types/{typeKey}/entries:
+    get:
+      operationId: listMyEntries
+      tags: [Member]
+      description: |
+        The caller's entries of a type that has an ownerField (02 §4.5, G-08): entries whose ownerField equals
+        the caller's id, in draft or published state, with the public fields of the working copy. Front surface
+        only. Paging, sorting, q, filter.* and ref.* follow listWorkEntries (default `-updatedAt`).
+        state and publishRequested are syntax-checked but do not change the fixed draft/published owner list.
+        Errors:
+        - 400 VALIDATION_FAILED: `page`, `size`, `sort` or a filter as listWorkEntries.
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Sort"
+      responses:
+        "200":
+          description: The caller's entries
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntryPage" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "500": { $ref: "#/components/responses/Error500" }
+    post:
+      operationId: createMyEntry
+      tags: [Member]
+      description: |
+        Creates a draft owned by the caller (02 §4.5). Front surface only; needs `create` on the type. The
+        ownerField is set to the caller (a client value is replaced). A ref field whose target type has an
+        ownerField must point to an entry the caller owns. At most 5 requests per member per minute. Audit:
+        `entry.create`.
+        Errors:
+        - 400 VALIDATION_FAILED: `publicationState` present in the body, including null.
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 403 FORBIDDEN: caller lacks `create` on the type.
+        - 404 CONTENT_TYPE_NOT_FOUND: type missing, disabled, or without ownerField.
+        - 422 with `error.fields`: payload invalid as createEntry, or a ref to an entry the caller does not own
+          (`REF_TARGET_NOT_FOUND`).
+        - 429 RATE_LIMITED: more than 5 requests in the last minute.
+      parameters:
+        - $ref: "#/components/parameters/TypeKey"
+        - $ref: "#/components/parameters/CsrfHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MemberCreateRequest" }
+      responses:
+        "201":
+          description: Created draft
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "415": { $ref: "#/components/responses/Error415" }
+        "422": { $ref: "#/components/responses/Error422" }
+        "429": { $ref: "#/components/responses/Error429" }
+        "500": { $ref: "#/components/responses/Error500" }
+  /api/v1/me/entries/{id}:
+    get:
+      operationId: getMyEntry
+      tags: [Member]
+      description: |
+        One of the caller's entries. Front surface only.
+        Errors:
+        - 403 SURFACE_FORBIDDEN: called from the Back or Admin surface.
+        - 403 FORBIDDEN: the entry belongs to someone else (surface-front AC-11; not hidden as 404).
+        - 404 ENTRY_NOT_FOUND: entry missing or soft-deleted, or its type is disabled or has no ownerField.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: The caller's entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberEntry" }
+        "400": { $ref: "#/components/responses/Error400" }
+        "401": { $ref: "#/components/responses/Error401" }
+        "403": { $ref: "#/components/responses/Error403" }
+        "404": { $ref: "#/components/responses/Error404" }
+        "500": { $ref: "#/components/responses/Error500" }
   /api/v1/media:
     get:
       operationId: listMedia
@@ -1605,6 +1696,11 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    Error429:
+      description: Too many requests (RATE_LIMITED).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Error500:
       description: INTERNAL_ERROR.
       content:
@@ -1661,6 +1757,7 @@ components:
         - ROUTE_NOT_FOUND
         - METHOD_NOT_ALLOWED
         - MEDIA_TYPE_NOT_SUPPORTED
+        - RATE_LIMITED
         - INTERNAL_ERROR
     ErrorEnvelope:
       type: object
@@ -2238,6 +2335,43 @@ components:
         publicationState: { $ref: "#/components/schemas/PublicationState" }
         restricted: { type: boolean }
         missing: { type: boolean }
+    MemberEntry:
+      type: object
+      additionalProperties: false
+      required: [id, contentType, publicationState, title, payload, createdAt, updatedAt]
+      description: |
+        The caller's entry (02 §4.5): enabled public fields of the working copy; title is null unless its field
+        is enabled and public. Media-ref values expanded as in
+        PublicEntry (null when not publicly readable).
+      properties:
+        id: { type: string, format: uuid }
+        contentType: { type: string }
+        publicationState: { $ref: "#/components/schemas/PublicationState" }
+        title: { type: string, nullable: true }
+        payload: { $ref: "#/components/schemas/EntryPayload" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MemberEntryPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, size, offset, limit]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/MemberEntry" }
+        total: { type: integer, format: int64 }
+        page: { type: integer, minimum: 1 }
+        size: { type: integer, minimum: 1, maximum: 100 }
+        offset: { type: integer }
+        limit: { type: integer }
+    MemberCreateRequest:
+      type: object
+      required: [payload]
+      properties:
+        payload: { $ref: "#/components/schemas/EntryPayload" }
+        publicationState:
+          type: string
+          description: Must be absent; any present value, including null, is 400 VALIDATION_FAILED.
     WorkEntryPage:
       type: object
       additionalProperties: false

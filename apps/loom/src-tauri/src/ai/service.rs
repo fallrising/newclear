@@ -84,7 +84,7 @@ Prefer fenced code blocks for commands the user would run; use plain \
 prose for analysis. Don't repeat the user's document back to them.";
 
 pub struct AiService {
-    inflight: Mutex<HashMap<AiRequestId, CancellationToken>>,
+    inflight: Inflight,
     settings: Option<AiSettings>,
     session_id: String,
 }
@@ -93,7 +93,7 @@ impl AiService {
     #[must_use]
     pub fn new() -> Self {
         Self {
-            inflight: Mutex::new(HashMap::new()),
+            inflight: Arc::new(Mutex::new(HashMap::new())),
             settings: None,
             session_id: uuid::Uuid::now_v7().to_string(),
         }
@@ -138,65 +138,58 @@ impl AiService {
     }
 
     pub fn cancel(&self, request_id: &str) -> bool {
-        if let Some(tok) = self.inflight.lock().remove(request_id) {
-            tok.cancel();
+        if let Some(token) = self.inflight.lock().get(request_id) {
+            // Retain ownership until the execution is dropped or finishes. A
+            // cancelled execution must still exclude duplicate admissions.
+            token.cancel();
             true
         } else {
             false
         }
     }
 
-    /// Start a streaming completion. The `emit_chunk` callback is
-    /// invoked from this task's runtime with each event in the order
-    /// they should be observed by the frontend.
-    pub async fn run<F>(
+    /// Register before handing work to a runtime or returning its ID to IPC.
+    /// Dropping this value (or its run future) releases the registration.
+    pub fn admit(&self, request_id: AiRequestId) -> AiResult<AdmittedAiRequest> {
+        let cancel = Arc::new(CancellationToken::new());
+        {
+            let mut inflight = self.inflight.lock();
+            if inflight.contains_key(&request_id) {
+                return Err(AiError::DuplicateRequest(request_id));
+            }
+            inflight.insert(request_id.clone(), cancel.clone());
+        }
+        let registration = Registration {
+            inflight: self.inflight.clone(),
+            request_id,
+            cancel,
+        };
+        Ok(AdmittedAiRequest {
+            registration,
+            // Snapshot settings now, but preserve configuration errors as run
+            // results so IPC continues to emit its single error terminal.
+            call: self.build_call(),
+        })
+    }
+
+    /// Start a streaming completion. Admission happens at future creation,
+    /// while execution and callbacks begin when the future is polled.
+    pub fn run<F>(
         &self,
         request_id: AiRequestId,
         prompt: String,
         context_doc: Option<String>,
         pinned_context: Vec<PinnedContext>,
-        mut emit_chunk: F,
-    ) -> AiResult<()>
+        emit_chunk: F,
+    ) -> impl std::future::Future<Output = AiResult<()>> + Send + 'static
     where
         F: FnMut(AiChunk) + Send + 'static,
     {
-        let (cfg, provider) = self.build_call()?;
-        let cancel = CancellationToken::new();
-        self.inflight
-            .lock()
-            .insert(request_id.clone(), cancel.clone());
-
-        emit_chunk(AiChunk::Started {
-            request_id: request_id.clone(),
-        });
-
-        let streamer = Streamer::new(cfg, provider);
-        let req = CompletionRequest {
-            prompt,
-            context_doc,
-            pinned_context,
-        };
-        let req_id_for_callback = request_id.clone();
-        let result = streamer
-            .stream(req, cancel, request_id.clone(), move |ev| match ev {
-                StreamEvent::TextDelta(text) => emit_chunk(AiChunk::Text {
-                    request_id: req_id_for_callback.clone(),
-                    delta: text,
-                }),
-                StreamEvent::Usage(u) => emit_chunk(AiChunk::Done {
-                    request_id: req_id_for_callback.clone(),
-                    usage: u.into(),
-                }),
-                StreamEvent::StreamDone => {}
-            })
-            .await;
-
-        self.inflight.lock().remove(&request_id);
-
-        match result {
-            Ok(_) => Ok(()),
-            Err(AiError::Cancelled(_)) => Err(AiError::Cancelled(request_id)),
-            Err(e) => Err(e),
+        let admitted = self.admit(request_id);
+        async move {
+            admitted?
+                .run(prompt, context_doc, pinned_context, emit_chunk)
+                .await
         }
     }
 
@@ -221,6 +214,114 @@ impl AiService {
             session_id: self.session_id.clone(),
         };
         Ok((cfg, Box::new(provider)))
+    }
+}
+
+type Inflight = Arc<Mutex<HashMap<AiRequestId, Arc<CancellationToken>>>>;
+
+struct Registration {
+    inflight: Inflight,
+    request_id: AiRequestId,
+    cancel: Arc<CancellationToken>,
+}
+
+impl Registration {
+    fn complete(&self) -> bool {
+        let mut inflight = self.inflight.lock();
+        // Serialize cancellation with committing success. Release the lock
+        // before the callback, which may cancel or admit another request.
+        if self.cancel.is_cancelled() {
+            return false;
+        }
+        if inflight
+            .get(&self.request_id)
+            .is_some_and(|token| Arc::ptr_eq(token, &self.cancel))
+        {
+            inflight.remove(&self.request_id);
+        }
+        true
+    }
+}
+
+impl Drop for Registration {
+    fn drop(&mut self) {
+        let mut inflight = self.inflight.lock();
+        // Only this execution can release its slot, even if an ID is reused.
+        if inflight
+            .get(&self.request_id)
+            .is_some_and(|token| Arc::ptr_eq(token, &self.cancel))
+        {
+            inflight.remove(&self.request_id);
+        }
+    }
+}
+
+/// An owned, synchronously registered execution. It is intentionally not
+/// cloneable: exactly one execution owns cancellation and cleanup for its ID.
+#[must_use = "dropping an admitted request releases its cancellation registration"]
+pub struct AdmittedAiRequest {
+    registration: Registration,
+    call: AiResult<(ProviderConfig, Box<dyn Provider>)>,
+}
+
+impl AdmittedAiRequest {
+    /// Consume admission into a future that keeps registration alive through
+    /// completion, cancellation, or task abortion (including before polling).
+    pub async fn run<F>(
+        self,
+        prompt: String,
+        context_doc: Option<String>,
+        pinned_context: Vec<PinnedContext>,
+        mut emit_chunk: F,
+    ) -> AiResult<()>
+    where
+        F: FnMut(AiChunk) + Send + 'static,
+    {
+        let request_id = self.registration.request_id.clone();
+        let cancel = self.registration.cancel.as_ref().clone();
+        if cancel.is_cancelled() {
+            return Err(AiError::Cancelled(request_id));
+        }
+        let (cfg, provider) = self.call?;
+        emit_chunk(AiChunk::Started {
+            request_id: request_id.clone(),
+        });
+        let streamer = Streamer::new(cfg, provider);
+        let req = CompletionRequest {
+            prompt,
+            context_doc,
+            pinned_context,
+        };
+        let req_id_for_callback = request_id.clone();
+        let registration = &self.registration;
+        let result = streamer
+            .stream(
+                req,
+                cancel.clone(),
+                request_id.clone(),
+                move |ev| match ev {
+                    StreamEvent::TextDelta(text) => emit_chunk(AiChunk::Text {
+                        request_id: req_id_for_callback.clone(),
+                        delta: text,
+                    }),
+                    StreamEvent::Usage(u) => {
+                        if registration.complete() {
+                            emit_chunk(AiChunk::Done {
+                                request_id: req_id_for_callback.clone(),
+                                usage: u.into(),
+                            });
+                        }
+                    }
+                    StreamEvent::StreamDone => {}
+                },
+            )
+            .await;
+        match result {
+            Ok(_) if cancel.is_cancelled() => Err(AiError::Cancelled(request_id)),
+            Ok(_) => Ok(()),
+            Err(AiError::Cancelled(_)) => Err(AiError::Cancelled(request_id)),
+            Err(e) => Err(e),
+        }
     }
 }
 

@@ -33,15 +33,18 @@ pub async fn ai_ask(
     pinned_context: Option<Vec<PinnedContext>>,
 ) -> Result<AiRequestId, String> {
     let request_id = format!("ai-{}", uuid::Uuid::now_v7());
-    let svc = state.svc.clone();
+    let admitted = state
+        .svc
+        .admit(request_id.clone())
+        .map_err(|e| e.to_string())?;
     let app_handle = app.clone();
     let req_for_task = request_id.clone();
     let pinned = pinned_context.unwrap_or_default();
     tokio::spawn(async move {
         let app_for_emit = app_handle.clone();
         let req_for_terminal = req_for_task.clone();
-        let result = svc
-            .run(req_for_task, prompt, context_doc, pinned, move |chunk| {
+        let result = admitted
+            .run(prompt, context_doc, pinned, move |chunk| {
                 if let Err(e) = app_for_emit.emit(AI_EVENT, &chunk) {
                     tracing::warn!(error = %e, "ai chunk emit failed");
                 }

@@ -20,6 +20,9 @@ pub enum AiError {
     #[error("request {0} was cancelled")]
     Cancelled(String),
 
+    #[error("request {0} is already active")]
+    DuplicateRequest(String),
+
     #[error("request {0} not found")]
     UnknownRequest(String),
 }
@@ -36,6 +39,7 @@ impl Clone for AiError {
             },
             Self::Stream(s) => Self::Stream(s.clone()),
             Self::Cancelled(s) => Self::Cancelled(s.clone()),
+            Self::DuplicateRequest(s) => Self::DuplicateRequest(s.clone()),
             Self::UnknownRequest(s) => Self::UnknownRequest(s.clone()),
         }
     }

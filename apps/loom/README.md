@@ -12,7 +12,7 @@ Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal 
 | Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding and shared node cleanup have regression tests; full desktop restart/Run/Pin acceptance remains separate |
 | Documents | CodeMirror, disk reads/writes, hash conflicts, runnable Run and local output Pin | Versioned/serialized saves and canonical event identity tested; cross-process CAS is not provided |
 | Canvas | Nodes, three edge kinds, sidecar persistence, named `run_in` routing | Invalid/unsupported sidecars block autosave with recovery feedback; no LOD or formal stress acceptance |
-| AI | Anthropic/OpenAI/DeepSeek streaming, connected context sources | UTF-8/framing/EOF/cancellation and send-time context/event ordering tested offline; live providers unverified |
+| AI | Anthropic/OpenAI/DeepSeek adapters, configurable OpenCode Go, three streaming protocols, connected context sources | One Go `glm-5.3-flash` Chat Completions request verified live; other live model/protocol combinations and native GUI remain unverified |
 | Session storage | Per-vault SQLite wired to desktop startup and PTY lifecycle; explicit history Restart/Forget and visible storage fallback | Metadata only; no PTY output, unsaved editor buffer, or process reattachment |
 | Future capabilities | Design/contract material | MCP host, capability/approval gate, plugin runtime and inbox remain unimplemented |
 
@@ -47,6 +47,8 @@ npm run tauri -- dev
 Keep API keys in the environment, not vault documents or version control. Real provider calls are separate from offline tests.
 
 For **OpenCode Go**, use `LOOM_AI_PROVIDER=opencode`, `OPENCODE_API_KEY`, and explicit `LOOM_AI_MODEL` / `LOOM_AI_PROTOCOL` settings. The default gateway is Go's `/zen/go/v1`; protocol choices are `chat-completions`, `responses`, and `messages`. The [OpenCode integration guide](docs/opencode-provider.md) includes private-file launch instructions, model/protocol selection and an opt-in live probe. Invalid settings appear in the AI panel and block sending. See [verification results and remaining live acceptance](docs/opencode-verification.md).
+
+Closing a document requests cancellation of its active AI work, including a request ID returned after close. Explicit Cancel failures remain visible and retryable. The [AI request lifecycle specification](docs/ai-request-lifecycle.md) and [verification results](docs/ai-request-lifecycle-verification.md) describe cancellation ordering, dropped-request cleanup and remaining acceptance limits.
 
 ## Verify
 

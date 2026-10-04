@@ -204,3 +204,13 @@ Continue merged activation coordinator. T-252 GPT-6 Astra owns host helper/runne
 ### Fixed firewall adapter acceptance decision
 
 Accepted T-252 GPT-6 Astra host helper, T-253 GPT-6.1 Sol pinned transport and T-254 GPT-6 Sol independent review after full source/diff/hash inspection. Root integration1/28.989s, independent final61/3.244s and frozen full1006/810.247s passed. Compileall, original workflow, task/report and public scope/privacy/whitespace gates passed. T-255 accepts this local implementation slice only: overall PARTIAL/remaining12 unchanged. No live operation or CLI. Next: effective keys/network probes, bootstrap/generation/evidence renewal, plus live nft normalization and persistence evidence; explicit authorization still required for actual VPS operations.
+
+## ERU-015 network stage mainline (2026-10-04)
+
+Deliver the complete manual-console setup plus current fixed-probe network-and-access-ready local workflow, continuing the accepted helpers. Contract: [network milestone](../docs/M3-FRESH-NETWORK-READY-2026-10-04.md). T-256 GPT-6.1 Sol owns contracts/coordinator; T-257 GPT-6 Astra owns fixed read-only probe adapter; T-258 GPT-6 Sol independently reviews. Each isolated worktree has disjoint writes, bounded budget and no delegation. Root owns CLI, integration, docs, actual full/native checks, evidence gate, authorized PR/CI/merge and desk sync. Network receipt never releases pending or commits generation; missing meaningful live-shaped probes block acceptance. No real private/VPS/SSH/kernel operations. Overall PARTIAL/remaining12; next full workflow empty-control-plane/bootstrap.
+
+T-256 receives an explicit60→80cumulative top-level call /60→80active-minute extension only for the same manual-intent-before-host-helper ordering correction and revised tests/report. Root80-call task budget is not reset. Full acceptance still requires all current predecessor chains; no bootstrap/live authority added.
+
+### Network mainline acceptance
+
+Accepted T-256/257 and independent T-258 after root source/diff/hash inspection and necessary auth/profile/ordering corrections. Root full1035/890.950s, actual bundled dualstack integration+focused23/86.246s, independentfinal1/79.209s passed; original native validator/compileall/task/report/privacy/whitespace passed. T-259 accepts only the complete local manual-console network-stage route; overall PARTIAL/remaining12. Root adjusted supplied-render synthetic fixture identities, independently reverified. Initial OOB admin access, live transport/kernel semantics/persistence and15min renewal remain explicit. Next mainline empty-control-plane/bootstrap, then generation commit/seal/barrier completion.

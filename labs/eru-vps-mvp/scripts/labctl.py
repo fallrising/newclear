@@ -927,8 +927,49 @@ def main():
     staging_inspect.add_argument('--run', required=True, help='Prepared execution ID')
     staging_inspect.add_argument('--host-index', required=True, type=int, choices=range(4), help='Fixed host ordinal 0 through 3')
     staging_inspect.add_argument('--sha256', required=True, help='Expected staging intent digest')
+    ready_prepare = sub.add_parser('prepare-fresh-network-ready', help='Save the authorized console setup intent after current four-host prerequisites pass')
+    ready_prepare.add_argument('--plan', required=True, help='Immutable network-access plan ID')
+    ready_prepare.add_argument('--sha256', required=True, help='Expected network-access plan digest')
+    ready_prepare.add_argument('--authorization', required=True, help='Private console setup authorization')
+    ready_prepare.add_argument('--authorization-sha256', required=True, help='Expected raw authorization digest')
+    ready_prepare.add_argument('--input', required=True, help='Private exact console setup profile')
+    ready_prepare.add_argument('--input-sha256', required=True, help='Expected raw setup profile digest')
+    ready_record = sub.add_parser('record-fresh-network-ready', help='Record the owner console receipt bound to the saved setup intent; no remote calls')
+    ready_record.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_record.add_argument('--intent-sha256', required=True, help='Expected console setup intent digest')
+    ready_record.add_argument('--receipt', required=True, help='Private owner console receipt')
+    ready_record.add_argument('--receipt-sha256', required=True, help='Expected raw owner receipt digest')
+    ready_accept = sub.add_parser('accept-fresh-network-ready', help='Collect current read-only remote probes and save the verified network stage receipt')
+    ready_accept.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_accept.add_argument('--manual-receipt-sha256', required=True, help='Expected recorded console receipt digest')
+    ready_inspect = sub.add_parser('inspect-fresh-network-ready', help='Revalidate the saved network stage and current local bindings without remote calls')
+    ready_inspect.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_inspect.add_argument('--receipt-sha256', required=True, help='Expected network stage receipt digest')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command in ('prepare-fresh-network-ready', 'record-fresh-network-ready',
+                        'accept-fresh-network-ready', 'inspect-fresh-network-ready'):
+        from fresh_network_ready_ops import (prepare_network_manual_setup,
+            record_network_manual_setup, accept_network_ready, inspect_network_ready)
+        try:
+            if args.command == 'prepare-fresh-network-ready':
+                result = prepare_network_manual_setup(PROJECT, args.plan, args.sha256,
+                    args.authorization, args.authorization_sha256, args.input, args.input_sha256)
+            elif args.command == 'record-fresh-network-ready':
+                result = record_network_manual_setup(PROJECT, args.run, args.intent_sha256,
+                    args.receipt, args.receipt_sha256)
+            elif args.command == 'accept-fresh-network-ready':
+                result = accept_network_ready(PROJECT, args.run, args.manual_receipt_sha256)
+            else:
+                result = inspect_network_ready(PROJECT, args.run, args.receipt_sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network readiness rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'intent_sha256', 'manual_receipt_sha256',
+                  'receipt_sha256', 'evidence_sha256', 'host_count', 'stage', 'next_stage',
+                  'stage_accepted', 'generation_changed', 'remote_mutation_performed',
+                  'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command == 'inspect-fresh-network-staging':
         from fresh_network_staging_ops import inspect_network_staging
         try:

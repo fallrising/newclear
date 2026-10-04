@@ -1,5 +1,11 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-04 最終主線本機驗收：完整1,035項／890.950秒、root focused23項／86.246秒及獨立final整合1項／79.209秒通過；原CI validator／compileall／team／privacy／whitespace通過。見 [T-259 evidence gate](../.team/reports/T-259.md)。network-and-access-ready的manual-console+fixed-probe路徑可產生immutable receipt；整體PARTIAL／正式剩餘12保留，下一主線empty-control-plane/bootstrap及generation。
+
+
+2026-10-04 主線續作：[network-and-access-ready 完整本機流程](M3-FRESH-NETWORK-READY-2026-10-04.md) 已串接人工 console intent／receipt、現行四機 directory/staging/firewall、有效 core→worker publickey 認證、IPv4／IPv6 公網隔離及 immutable stage receipt。prepare／record 先於 host helpers，accept 才要求完整前置；保留 controller admin key，setup raw SHA 綁定授權。root focused 23 項／86.246 秒通過，完整驗證與最終 evidence gate 另記於本輪報告。此路徑有初始 OOB admin management/trust 前置，沒有自動從不可連線空白 OS 安裝 VPN。整體 PARTIAL、正式完成 6／剩餘 12不變；下一主線 empty-control-plane／bootstrap，再接 generation commit/seal。
+
+
 2026-10-04 固定 firewall adapter 本機驗收：最終完整 1,006 項／810.247 秒、獨立 61 項／3.244 秒通過；見 [T-255 evidence gate](../.team/reports/T-255.md)。多模型實作與獨立審查完成，本輪限 synthetic roots／fake nft。下一本機入口為有效金鑰與網路探測，再接 bootstrap／generation；live nft normalization／persistence、正式剩餘 12 及整體 PARTIAL 保留。
 
 2026-10-04 續作：[固定 firewall host helper 與 SSH adapter](M3-FRESH-FIREWALL-ADAPTER-2026-10-04.md) 接 durable remote intent、create-only table、當次 staging／identity 重驗與 pinned transport。多模型有界實作／獨立審查；本輪僅 temp-root／fake nft 驗證，整體 PARTIAL、正式剩餘 12 不變。

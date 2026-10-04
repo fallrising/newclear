@@ -1043,6 +1043,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/settings/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Audit retention (surface-admin §7.2). Requires `manage_settings` (Admin surface). Events older than
+         *     `retentionDays` are deleted by a job that runs one hour after startup and then every 24 hours.
+         *     Errors:
+         *     - 403 SURFACE_FORBIDDEN: called from the Front or Back surface (also written to the audit log as a
+         *       denied `manage_settings`).
+         *     - 403 FORBIDDEN: caller lacks `manage_settings` (also written as denied).
+         */
+        get: operations["getAuditSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description Changes the retention. A change writes `settings.retention_updated` (category SETTINGS, targetType
+         *     `settings`, detail `{from, to}`); sending the current value changes nothing and writes no event. A shorter
+         *     retention takes effect at the next purge run; nothing is deleted immediately.
+         *     Errors:
+         *     - 400 VALIDATION_FAILED: body is not a JSON object, or has a property other than `retentionDays`.
+         *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as getAuditSettings.
+         *     - 422 FIELD_VALIDATION: `error.fields[0].field` is `retentionDays`, code REQUIRED (missing or null),
+         *       WRONG_TYPE (not an integer) or NOT_IN_ENUM (not 30, 90 or 365).
+         */
+        patch: operations["patchAuditSettings"];
+        trace?: never;
+    };
     "/api/v1/me/content-types/{typeKey}/entries": {
         parameters: {
             query?: never;
@@ -1278,7 +1312,7 @@ export interface components {
         };
         FieldError: {
             /**
-             * @description Path of the input, `payload.<fieldKey>`.
+             * @description Path of the input, `payload.<fieldKey>`, or the property name of a settings request.
              * @example payload.title
              */
             field: string;
@@ -1287,7 +1321,7 @@ export interface components {
             message: string;
         };
         /**
-         * @description Why a field is invalid. REQUIRED (publish only), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
+         * @description Why a field is invalid. REQUIRED (publish, member create, or a missing setting), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
          *     markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
          *     REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
          * @enum {string}
@@ -1815,6 +1849,23 @@ export interface components {
             detail: {
                 [key: string]: unknown;
             } | null;
+        };
+        AuditSettings: {
+            /** @enum {integer} */
+            retentionDays: 30 | 90 | 365;
+            /** @description Always `[30, 90, 365]`. */
+            allowedDays: number[];
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * Format: uuid
+             * @description Principal who last changed the retention; null while it is the default.
+             */
+            updatedBy: string | null;
+        };
+        AuditSettingsPatchRequest: {
+            /** @enum {integer} */
+            retentionDays: 30 | 90 | 365;
         };
         AuditEventPage: {
             items: components["schemas"]["AuditEventSummary"][];
@@ -3540,6 +3591,62 @@ export interface operations {
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
             404: components["responses"]["Error404"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    getAuditSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current audit retention */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditSettings"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            500: components["responses"]["Error500"];
+        };
+    };
+    patchAuditSettings: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when the request carries the cms_session cookie; must equal the cms_csrf cookie. */
+                "X-CSRF-Token"?: components["parameters"]["CsrfHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuditSettingsPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated audit retention */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditSettings"];
+                };
+            };
+            400: components["responses"]["Error400"];
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            415: components["responses"]["Error415"];
+            422: components["responses"]["Error422"];
             500: components["responses"]["Error500"];
         };
     };

@@ -17,7 +17,7 @@
 
 ## 本次個人使用補強（2026-10-03）
 
-目前工程來源為 `newclear/apps/cms-scaffold`；封存的獨立倉庫不再代表最新進度。[P0 資料可靠性](waves/P0.md) 已合併；BW1a／BW1b／BW1c 已依序合併（PR #223／#224／#225），W1 已於 PR #229 合併，BW2 已於 PR #235 通過完整 CI 並合併；另見 [個人使用驗收與介面參考](03-personal-use-readiness.md)。W2已於PR #245通過完整CI並合併，395前端／39 mock E2E通過；[發布證據](../../.team/reports/W2-PUBLICATION.md)。BW3會員API已本地驗證，279 Java／125 PostgreSQL／395前端／39 mock E2E通過，待必要遠端CI與合併；[交付證據](../../.team/reports/BW3-DELIVERY.md)。P0 文件先定義範圍後開始實作，不把尚未實作的模型管理／能力導覽列為現成功能。
+目前工程來源為 `newclear/apps/cms-scaffold`；封存的獨立倉庫不再代表最新進度。[P0 資料可靠性](waves/P0.md) 已合併；BW1a／BW1b／BW1c 已依序合併（PR #223／#224／#225），W1 已於 PR #229 合併，BW2 已於 PR #235 通過完整 CI 並合併；另見 [個人使用驗收與介面參考](03-personal-use-readiness.md)。W2已於PR #245通過完整CI並合併，395前端／39 mock E2E通過；[發布證據](../../.team/reports/W2-PUBLICATION.md)。BW3會員API已於PR #252通過CI並合併，279 Java／125 PostgreSQL／395前端／39 mock E2E通過；[交付證據](../../.team/reports/BW3-DELIVERY.md)。BW4已通過本地293 Java／133 PostgreSQL／395前端／39 mock E2E及三次效能量測，待必要遠端CI與合併；[交付證據](../../.team/reports/BW4-DELIVERY.md)。P0 文件先定義範圍後開始實作，不把尚未實作的模型管理／能力導覽列為現成功能。
 
 ## 已定案的方向
 
@@ -66,10 +66,10 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | W2 | VERIFIED（PR #245） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
 | W3 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
 | W4 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W4.md](waves/W4.md) | C-19 |
-| BW3 | LOCAL_VERIFIED | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
+| BW3 | VERIFIED（PR #252） | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
 | W3b | DOC_READY | [01 §7.1](01-frontend-sdd.md#71-frontappsweb-front)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3b.md](waves/W3b.md) | G-08、C-11；surface-front AC-10～13 |
 | W5 | DOC_READY | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
-| BW4 | DOC_READY | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
+| BW4 | LOCAL_VERIFIED | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | DOC_READY | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 | BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |

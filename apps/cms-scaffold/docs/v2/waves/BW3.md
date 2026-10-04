@@ -2,7 +2,7 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW3](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW3.openapi.yaml](../contracts/BW3.openapi.yaml) ・ 前一波：[BW2](BW2.md)
 
-狀態：**LOCAL_VERIFIED**（2026-10-04；279 Java／125 PostgreSQL／395前端／39 mock E2E，待必要遠端CI與合併）
+狀態：**VERIFIED**（2026-10-04；PR #252 遠端CI通過並合併）
 
 [增量交付與驗收證據](../../../.team/reports/BW3-DELIVERY.md)；下方2026-09-25預演數字為歷史紀錄。
 日期：2026-09-25  

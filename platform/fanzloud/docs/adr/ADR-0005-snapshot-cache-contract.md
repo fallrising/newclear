@@ -96,3 +96,11 @@ the initial R1 rejection and accepted repair. T030D is Ready for test-first impl
 The matrix separates D save/codec/schema evidence from dependent C public-load evidence;
 D acceptance never requires implementing C first. T030C still needs its own E0 spec, test skeletons, implementation and acceptance;
 the parent still requires all four child acceptances and composition review.
+
+## Subsequent Runtime Evidence
+
+The preceding review records the design decision at its acceptance point. T030D save/codec/schema
+runtime is now separately accepted in [ACCEPT-T030D](../acceptance/T030D.acceptance.md).
+Its 29 D-owned/shared-D names are implemented; C-owned public load assertions remain deferred.
+Save's structural lookup-key check uses a metadata-only scan with constant application allocation;
+the 4096-event cap bounds durable-prefix decoding, not the number of existing cache keys inspected.

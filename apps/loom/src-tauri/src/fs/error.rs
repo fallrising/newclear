@@ -14,6 +14,9 @@ pub enum FsError {
     #[error("document {0:?} not found in vault")]
     NotFound(PathBuf),
 
+    #[error("document {0:?} already exists; reload from disk to inspect it before saving")]
+    AlreadyExists(PathBuf),
+
     #[error("write to {path:?} rejected: on-disk content changed since the caller last read it")]
     Conflict {
         path: PathBuf,

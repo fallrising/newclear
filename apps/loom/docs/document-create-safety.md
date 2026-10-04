@@ -1,6 +1,6 @@
 # Missing document creation safety
 
-Status: specification before implementation (2026-10-04).
+Status: implemented on Linux (2026-10-04); the specification preceded implementation. See [verification and limits](document-create-safety-verification.md).
 
 ## Problem
 
@@ -9,7 +9,7 @@ The missing-file action currently sends `doc_write` without an expected hash. A 
 ## Required behavior
 
 - Create empty file and recreate with current edits are create-only operations. If any destination entry exists at publication time, including a racing creator, fail without replacing it. A preliminary existence check followed by overwrite is insufficient.
-- Publish fully written bytes using a same-directory temporary file and an atomic no-replace operation (for example a hard link). Sync the temporary file first, remove temporary names after success/failure, and best-effort sync the directory. If the filesystem cannot support this operation, report failure; never fall back to overwrite or expose a partially written destination.
+- Publish fully written bytes using a same-directory temporary file and an atomic no-replace operation (for example a hard link). Sync the temporary file first, attempt removal of temporary names after success/failure, and best-effort sync the directory. Cleanup errors are logged; if removal fails after publication, do not misreport the successful creation as failed. If the filesystem cannot support this operation, report failure; never fall back to overwrite or expose a partially written destination.
 - Preserve existing trusted-vault path and symlink checks. These remain preflight checks, not protection against hostile concurrent ancestor replacement. Existing normal saves and explicit hash-confirmed Keep semantics remain unchanged; no frozen contracts/schema change.
 - Add nonfrozen `doc_create({ origin, path, content })` IPC, returning the same snapshot shape as `doc_read` (`path`, `content`, `on_disk_hash`) on success. The snapshot describes exactly the submitted bytes and their resolved identity; do not re-read disk to acknowledge creation. The backend API is `create_document(origin, path, content: &str) -> DocumentSnapshot`. Errors are surfaced as existing IPC string errors with actionable destination-exists wording.
 - Register self-write suppression for a successful publication and remove failed-attempt suppression. Update editor tracking only on successful creation. Failure must preserve the original destination and tracked dirty state.

@@ -109,6 +109,7 @@ pub fn run() {
             ipc::doc_commands::vault_root,
             ipc::doc_commands::doc_read,
             ipc::doc_commands::doc_write,
+            ipc::doc_commands::doc_create,
             ipc::doc_commands::doc_open,
             ipc::doc_commands::doc_close,
             ipc::doc_commands::doc_mark_dirty,

@@ -13,7 +13,7 @@ import { createEditor, type EditorHandle } from "./editor";
 import { readRunIn } from "./frontmatter";
 import { blockKey } from "./runnable_block";
 import { STRINGS, CSS } from "./config";
-import { DocumentLifecycle, DocumentReadGate, createMissingDocument } from "./lifecycle";
+import { DocumentLifecycle, DocumentReadGate } from "./lifecycle";
 import { collectContext } from "./ai_lifecycle";
 import { AiRequestLifecycle } from "./ai_request_lifecycle";
 
@@ -89,20 +89,28 @@ export function DocumentSurface({
   const documentGenerationRef = useRef(0);
   const backendStateQueueRef = useRef<Promise<unknown>>(Promise.resolve());
   const syncBackend = (snapshot?: doc.DocSnapshot) => {
+    const generation = documentGenerationRef.current;
+    const documentPath = snapshot?.path ?? buffer.path;
+    const current = () => generation === documentGenerationRef.current && buffer.path === documentPath;
     const operation = backendStateQueueRef.current.then(async () => {
+      if (!current()) return;
       if (snapshot) await doc.docOpen(snapshot.path, snapshot.on_disk_hash);
-      if (!buffer.path) return;
-      if (buffer.dirty) await doc.docMarkDirty(buffer.path);
-      else await doc.docMarkClean(buffer.path);
+      if (!current() || !documentPath) return;
+      if (buffer.dirty) await doc.docMarkDirty(documentPath);
+      else await doc.docMarkClean(documentPath);
     });
-    backendStateQueueRef.current = operation.catch((e) => flash(`document state error: ${String(e)}`));
+    backendStateQueueRef.current = operation.catch((e) => {
+      if (current()) flash(`document state error: ${String(e)}`);
+    });
     return operation;
   };
-  const [loadGeneration, setLoadGeneration] = useState(0);
 
   const [status, setStatus] = useState<
     "loading" | "missing" | "ready" | "error"
   >("loading");
+  const statusRef = useRef(status);
+  statusRef.current = status;
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [conflict, setConflict] = useState<ConflictState>({ kind: "none" });
@@ -246,7 +254,7 @@ export function DocumentSurface({
 
   // Save through the backend. Returns true iff bytes hit disk.
   const save = async (): Promise<boolean> => {
-    if (!editorRef.current || !buffer.path) return false;
+    if (!editorRef.current || !buffer.path || statusRef.current !== "ready" || buffer.creating) return false;
     const generation = documentGenerationRef.current;
     const revision = buffer.revision;
     readGateRef.current.invalidate();
@@ -265,6 +273,7 @@ export function DocumentSurface({
       setDirty(buffer.dirty);
       setConflict({ kind: "none" });
       await syncBackend({ path: buffer.path, content: "", on_disk_hash: outcome.new_hash });
+      if (generation !== documentGenerationRef.current) return true;
       flash(buffer.dirty ? "saved earlier version — newer edits remain unsaved" : "saved");
       return true;
     } catch (e) {
@@ -275,9 +284,75 @@ export function DocumentSurface({
     }
   };
 
+  const mountEditor = (content: string) => {
+    const host = hostRef.current;
+    if (!host || editorRef.current) return;
+    const handle = createEditor({
+      parent: host,
+      initialContent: content,
+      onChange: (next) => {
+        const wasDirty = buffer.dirty;
+        buffer.edit();
+        setDirty(true);
+        if (!wasDirty) void syncBackend();
+        // Cheap re-parse: only the first ~200 bytes matter for
+        // frontmatter; readRunIn bails fast when no fence is present.
+        reportRunIn(next);
+      },
+      onSave: () => {
+        void save();
+      },
+      onRun: (req) => {
+        const target = activeTerminalRef.current;
+        if (!target) {
+          flash("no active terminal — click 'spawn shell' first");
+          return;
+        }
+        // TDD §8 step 4: post-▶ output flows into the clicked block's
+        // output section automatically. No edge required — the routing
+        // is "this block, this run, this terminal." `feeds_output_to`
+        // is reserved for the Pin-snapshot path (step 5, future).
+        const key = blockKey(req.body);
+        activeCaptureRef.current = { bodyKey: key, sessionId: target };
+        editorRef.current?.clearOutput(key);
+        // Shell line-discipline expects CR (\r) to mean "submit a
+        // command." Map every \n in the body to \r, append a final
+        // \r so the last (and possibly only) line runs, and prepend
+        // `cd <cwd>\r` when the block specified one (Min-D-6 B).
+        //
+        // Single-quoting the cwd lets the user pass paths with shell
+        // metacharacters safely; embedded single quotes are escaped
+        // using the standard `'\''` idiom.
+        const cdPrefix = req.cwd
+          ? `cd '${req.cwd.replace(/'/g, "'\\''")}'\r`
+          : "";
+        const payload = cdPrefix + req.body.replace(/\n/g, "\r") + "\r";
+        ipc.writeStdin(target, payload).then(
+          () => {
+            const preview = req.body.split("\n", 1)[0]?.slice(0, 60) ?? "";
+            const where = req.cwd ? ` @ ${req.cwd}` : "";
+            flash(`▶ injected → ${target}${where}: ${preview}`);
+          },
+          (e) => flash(`inject failed: ${String(e)}`),
+        );
+      },
+      onRefClick: (hit) => {
+        flash(
+          hit.id
+            ? `[[${hit.file}#^${hit.id}]] — link resolution lands in C4`
+            : `[[${hit.file}]] — link resolution lands in C4`,
+        );
+      },
+    });
+    editorRef.current = handle;
+  };
+
   const applySnapshot = async (snapshot: doc.DocSnapshot) => {
     buffer.load(snapshot);
-    editorRef.current?.replaceDoc(snapshot.content);
+    if (editorRef.current) editorRef.current.replaceDoc(snapshot.content);
+    else mountEditor(snapshot.content);
+    setCreating(false);
+    setError(null);
     reportRunIn(snapshot.content);
     setDirty(false);
     setConflict({ kind: "none" });
@@ -289,6 +364,11 @@ export function DocumentSurface({
   useEffect(() => {
     let disposed = false;
     documentGenerationRef.current++;
+    setStatus("loading");
+    setCreating(false);
+    setError(null);
+    setDirty(false);
+    setConflict({ kind: "none" });
     void (async () => {
       try {
         let snap: doc.DocSnapshot;
@@ -297,7 +377,9 @@ export function DocumentSurface({
         } catch (e) {
           // Treat "not found" as a chance to create a new file.
           const msg = String(e);
+          if (disposed) return;
           if (msg.toLowerCase().includes("not found")) {
+            buffer.missing(path);
             setStatus("missing");
             return;
           }
@@ -311,66 +393,10 @@ export function DocumentSurface({
         // Report the initial run_in before the user has touched anything.
         reportRunIn(snap.content);
 
-        const handle = createEditor({
-          parent: host,
-          initialContent: snap.content,
-          onChange: (next) => {
-            const wasDirty = buffer.dirty;
-            buffer.edit();
-            setDirty(true);
-            if (!wasDirty) void syncBackend();
-            // Cheap re-parse: only the first ~200 bytes matter for
-            // frontmatter; readRunIn bails fast when no fence is present.
-            reportRunIn(next);
-          },
-          onSave: () => {
-            void save();
-          },
-          onRun: (req) => {
-            const target = activeTerminalRef.current;
-            if (!target) {
-              flash("no active terminal — click 'spawn shell' first");
-              return;
-            }
-            // TDD §8 step 4: post-▶ output flows into the clicked block's
-            // output section automatically. No edge required — the routing
-            // is "this block, this run, this terminal." `feeds_output_to`
-            // is reserved for the Pin-snapshot path (step 5, future).
-            const key = blockKey(req.body);
-            activeCaptureRef.current = { bodyKey: key, sessionId: target };
-            editorRef.current?.clearOutput(key);
-            // Shell line-discipline expects CR (\r) to mean "submit a
-            // command." Map every \n in the body to \r, append a final
-            // \r so the last (and possibly only) line runs, and prepend
-            // `cd <cwd>\r` when the block specified one (Min-D-6 B).
-            //
-            // Single-quoting the cwd lets the user pass paths with shell
-            // metacharacters safely; embedded single quotes are escaped
-            // using the standard `'\''` idiom.
-            const cdPrefix = req.cwd
-              ? `cd '${req.cwd.replace(/'/g, "'\\''")}'\r`
-              : "";
-            const payload = cdPrefix + req.body.replace(/\n/g, "\r") + "\r";
-            ipc.writeStdin(target, payload).then(
-              () => {
-                const preview = req.body.split("\n", 1)[0]?.slice(0, 60) ?? "";
-                const where = req.cwd ? ` @ ${req.cwd}` : "";
-                flash(`▶ injected → ${target}${where}: ${preview}`);
-              },
-              (e) => flash(`inject failed: ${String(e)}`),
-            );
-          },
-          onRefClick: (hit) => {
-            flash(
-              hit.id
-                ? `[[${hit.file}#^${hit.id}]] — link resolution lands in C4`
-                : `[[${hit.file}]] — link resolution lands in C4`,
-            );
-          },
-        });
-        editorRef.current = handle;
+        mountEditor(snap.content);
         setStatus("ready");
       } catch (e) {
+        if (disposed) return;
         setStatus("error");
         setError(String(e));
       }
@@ -386,7 +412,7 @@ export function DocumentSurface({
       const closedPath = buffer.path || path;
       backendStateQueueRef.current = backendStateQueueRef.current.then(() => doc.docClose(closedPath)).catch(() => undefined);
     };
-  }, [path, loadGeneration]);
+  }, [path]);
 
   // Listen for pty:io batches: append to the active capture block if
   // the batch is from the session ▶ targeted. No feeds_output_to gate —
@@ -423,14 +449,18 @@ export function DocumentSurface({
       const unlisten = await ipc.onLoomEvent(async (ev: LoomEvent) => {
         if (ev.kind !== "fs_changed") return;
         if (ev.path !== buffer.path) return;
+        if (!alive || buffer.creating) return;
         const c: FsChangeKind = ev.change;
         if (c.kind === "deleted") {
           readGateRef.current.invalidate();
           documentGenerationRef.current++;
           buffer.invalidate();
+          setCreating(false);
+          setError(null);
           setStatus("missing");
           return;
         }
+        if (statusRef.current === "missing" || buffer.creating) return;
         try {
           const version = buffer.version;
           const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path));
@@ -460,13 +490,45 @@ export function DocumentSurface({
   }, [path]);
 
   const reloadFromDisk = async () => {
+    const generation = documentGenerationRef.current;
+    if (!buffer.invalidate()) return;
+    setCreating(false);
     try {
       const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path || path));
-      if (!fresh) return;
+      if (!fresh || generation !== documentGenerationRef.current) return;
       await applySnapshot(fresh);
+      if (generation !== documentGenerationRef.current) return;
       flash("reloaded — your edits are gone");
     } catch (e) {
+      if (generation !== documentGenerationRef.current) return;
+      setError(String(e));
       flash(`reload failed: ${String(e)}`);
+    }
+  };
+
+  const createDocument = async () => {
+    if (buffer.creating || statusRef.current !== "missing") return;
+    const generation = documentGenerationRef.current;
+    readGateRef.current.invalidate();
+    setCreating(true);
+    setError(null);
+    try {
+      const snapshot = await buffer.create(editorRef.current?.view.state.doc.toString() ?? "", doc.docCreate);
+      if (!snapshot || generation !== documentGenerationRef.current) return;
+      // The acknowledgement is exactly the submitted version. Keep the live
+      // editor (including anything typed while pending), and never re-read.
+      mountEditor(snapshot.content);
+      reportRunIn(editorRef.current?.view.state.doc.toString() ?? snapshot.content);
+      setDirty(buffer.dirty);
+      setConflict({ kind: "none" });
+      statusRef.current = "ready";
+      setStatus("ready");
+      await syncBackend(snapshot);
+    } catch (e) {
+      if (generation !== documentGenerationRef.current) return;
+      setError(buffer.createError ?? String(e));
+    } finally {
+      if (generation === documentGenerationRef.current) setCreating(buffer.creating);
     }
   };
 
@@ -482,7 +544,7 @@ export function DocumentSurface({
       <div className="document-header">
         <strong>{path}</strong>
         {dirty && <span className="document-dirty">●</span>}
-        <button onClick={() => void save()}>
+        <button onClick={() => void save()} disabled={status !== "ready" || creating}>
           save
         </button>
         <button
@@ -571,38 +633,13 @@ export function DocumentSurface({
           <p>
             <code>{path}</code> doesn't exist yet.
           </p>
-          <button
-            onClick={async () => {
-              const generation = documentGenerationRef.current;
-              try {
-                const editor = editorRef.current;
-                const savedVersion = buffer.version;
-                const fresh = await readGateRef.current.read(() => createMissingDocument(
-                  buffer.path || path,
-                  editor?.view.state.doc.toString() ?? "",
-                  doc.docWrite,
-                  doc.docRead,
-                ));
-                if (!fresh || generation !== documentGenerationRef.current) return;
-                if (editorRef.current) {
-                  if (buffer.version === savedVersion) await applySnapshot(fresh);
-                  else {
-                    // Typing during recreate is newer than the saved bytes.
-                    buffer.recreated(fresh, savedVersion);
-                    await syncBackend(fresh);
-                    setStatus("ready");
-                  }
-                } else { setStatus("loading"); setLoadGeneration((value) => value + 1); }
-
-              } catch (e) {
-                if (generation !== documentGenerationRef.current) return;
-                setError(String(e));
-                flash(`create failed: ${String(e)}`);
-              }
-            }}
-          >
-            {editorRef.current ? "recreate with current edits" : "create empty file"}
+          <button onClick={() => void createDocument()} disabled={creating} aria-busy={creating}>
+            {creating ? "creating…" : error ? "retry creation" : editorRef.current ? "recreate with current edits" : "create empty file"}
           </button>
+          <button onClick={() => void reloadFromDisk()} disabled={creating}>
+            reload from disk (discard edits)
+          </button>
+          {error && <p className="document-error" role="alert">{error}</p>}
         </div>
       )}
       {status === "error" && (

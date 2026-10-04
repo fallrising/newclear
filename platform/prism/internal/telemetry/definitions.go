@@ -107,6 +107,7 @@ var metricDefinitions = []metricDefinition{
 	counter("prism_query_fallback_total", "Number of queries routed through fallback execution.", CardinalityQuery, "signal", "reason"),
 	gauge("prism_query_concurrent", "Number of queries currently executing.", CardinalityQuery),
 	counter("prism_query_rejected_total", "Number of queries rejected by resource protection.", CardinalityQuery, "reason"),
+	counter("prism_query_adjustments_total", "Number of query time clamps and result truncations.", CardinalityQuery, "action"),
 	counter("prism_query_samples_scanned_total", "Number of samples scanned by query execution.", CardinalityQuery, "api"),
 	counter("prism_logql_parse_errors_total", "Number of LogQL parse errors.", CardinalityQuery, "kind"),
 	counter("prism_logql_unsupported_total", "Number of attempted uses of unsupported LogQL features.", CardinalityQuery, "feature"),

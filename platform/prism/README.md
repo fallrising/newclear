@@ -15,14 +15,15 @@ metrics/logs/traces over HTTP and gRPC to the all-in-one and ingest daemon roles
 P1-05 adds authenticated Prometheus remote_write v1 on the same HTTP listener.
 P1-06 adds bounded Loki JSON/gzip push with structured metadata.
 P1-07 adds a bounded, tenant-scoped PromQL storage adapter with memory-backed
-official float corpus verification.
+official float corpus verification. P1-08 exposes bounded Prometheus HTTP queries,
+labels, series, metadata and build information in query/all-in-one roles.
 The initial runtime supports a single configured tenant and file-backed bearer
-key. Compatible query APIs, production drivers, alerting, agent and console
+key. Loki/Jaeger query APIs, production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
 
 ## Start here
 
-- [Development quickstart](docs/quickstart.md): tests and authenticated local OTLP/remote_write/Loki ingestion.
+- [Development quickstart](docs/quickstart.md): tests and authenticated local ingestion and Prometheus queries.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,
   known gaps, and the next integration boundary.
 - [SDD](docs/sdd/README.md) and [task sequence](docs/sdd/12-IMPLEMENTATION-PHASES.md).
@@ -38,11 +39,12 @@ remain unimplemented; this is not yet a complete APM service.
 - [`internal/ingest/limits`](internal/ingest/limits/README.md): verified per-tenant
   quotas, bounded cardinality tracking, record limits and byte admission.
 - `internal/compat/otlp`: bounded HTTP/gRPC receivers and protocol-native responses.
-- `internal/compat/promapi`: bounded snappy/protobuf remote_write v1 receiver.
+- `internal/compat/promapi`: bounded remote_write v1 receiver and
+  [Prometheus query API](internal/compat/promapi/QUERY.md).
 - `internal/compat/lokiapi`: authenticated JSON/gzip Loki push with bounded decoding.
 - `internal/query/promqladapter`: SPI-to-Prometheus query storage and iterator ownership.
 - `test/promqltest`: pinned official float corpus, direct memory fixtures and upstream comparison logic.
-- `cmd/prismd`: health/metrics plus OTLP, remote_write and Loki JSON push in ingest roles; `prism-agent` and `prismctl` remain placeholders.
+- `cmd/prismd`: health/metrics, ingestion and role-aware Prometheus query routes; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
 The Go module is `github.com/fallrising/newclear/platform/prism`.
@@ -92,5 +94,5 @@ Vector acceptance checks actual stored log bodies and metadata. Protobuf push
 and Loki query/ready APIs remain future milestones.
 
 The [P1-07 contract](docs/specs/p1-07-promql-adapter.md) describes the storage
-adapter and [corpus gate](test/promqltest/README.md). HTTP query endpoints remain
-P1-08. Native histogram cases are explicitly outside the v1 float-only SPI.
+adapter and [corpus gate](test/promqltest/README.md). The [P1-08 contract](docs/specs/p1-08-prometheus-http.md) adds the HTTP layer
+and real promtool acceptance. Native histogram cases are explicitly outside the v1 float-only SPI.

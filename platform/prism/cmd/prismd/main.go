@@ -15,8 +15,10 @@ import (
 	"syscall"
 
 	_ "github.com/fallrising/newclear/platform/prism/drivers/memory"
+	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
 	prismserver "github.com/fallrising/newclear/platform/prism/internal/server"
+	"github.com/fallrising/newclear/platform/prism/internal/telemetry"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -127,13 +129,21 @@ func runConfiguredMode(
 	if err := backend.Ping(ctx); err != nil {
 		return fmt.Errorf("ping storage backend: %w", err)
 	}
+	var metrics *telemetry.Registry
+	if configuration.Telemetry.SelfMonitor {
+		var err error
+		metrics, err = telemetry.Register(registry)
+		if err != nil {
+			return fmt.Errorf("register self-telemetry: %w", err)
+		}
+	}
 	switch configuration.Server.Mode {
 	case "all-in-one":
-		return runAllInOne(ctx, configuration, logger, registry, backend)
+		return runAllInOne(ctx, configuration, logger, registry, backend, metrics)
 	case "ingest":
-		return runIngest(ctx, configuration, logger, registry, backend)
+		return runIngest(ctx, configuration, logger, registry, backend, metrics)
 	case "query":
-		return runQuery(ctx, configuration, logger, registry)
+		return runQuery(ctx, configuration, logger, registry, backend, metrics)
 	case "ruler":
 		return runRuler(ctx, configuration, logger, registry)
 	case "console":
@@ -143,12 +153,42 @@ func runConfiguredMode(
 	}
 }
 
-func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend) error {
-	return runIngest(ctx, configuration, logger, registry, backend)
+func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) error {
+	return runIngest(ctx, configuration, logger, registry, backend, metrics)
 }
 
-func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
+func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) error {
+	if err := configuration.Validate(ctx); err != nil {
+		return fmt.Errorf("validate query runtime: %w", err)
+	}
+	handler, err := promapi.NewQueryHandler(backend, promapi.QueryOptions{
+		Tenant: configuration.Tenancy.DefaultTenant, APIKey: configuration.Auth.IngestAPIKey,
+		AllowAnonymousRead: configuration.Auth.AllowAnonymousRead, Config: configuration.Query,
+		Telemetry: metrics, Logger: logger, Clock: spi.SystemClock,
+	})
+	if err != nil {
+		return fmt.Errorf("create query handler: %w", err)
+	}
+	server, err := prismserver.New(prismserver.Options{
+		Address: configuration.Server.HTTPListen, ShutdownTimeout: configuration.Server.ShutdownTimeout.Std(),
+		TLSCertFile: configuration.Server.TLSCertFile, TLSKeyFile: configuration.Server.TLSKeyFile,
+		Gatherer: registry, Handler: handler.HTTPHandler(), Logger: logger,
+		StopReceiving: handler.Stop,
+		Drain:         func(shutdown context.Context) error { return handler.Close(context.WithoutCancel(shutdown)) },
+	})
+	if err != nil {
+		handler.Stop()
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), configuration.Server.ShutdownTimeout.Std())
+		defer cancel()
+		return errors.Join(fmt.Errorf("create query server: %w", err), handler.Close(shutdown))
+	}
+	logger.InfoContext(ctx, "HTTP server starting", "component", "server", "address", configuration.Server.HTTPListen, "driver", configuration.Storage.Driver, "mode", configuration.Server.Mode)
+	err = server.Run(ctx)
+	logger.InfoContext(ctx, "HTTP server stopped", "component", "server")
+	if err != nil {
+		return fmt.Errorf("serve HTTP: %w", err)
+	}
+	return nil
 }
 
 func runRuler(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {

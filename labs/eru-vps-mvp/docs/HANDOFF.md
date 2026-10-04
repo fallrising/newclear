@@ -1,5 +1,7 @@
 # 接續開發交接：ERU VPS MVP
 
+2026-10-04 後續：[replacement 裸 OS facts](M3-FRESH-REPLACEMENT-FACTS-2026-10-04.md) 新增四機 OOB key／receipt 綁定的唯讀採樣、immutable private observation 與離線重驗。只用 synthetic／fake transport 測試；不等於 network／完整 residue／stage acceptance，ERU-015 與正式剩餘 12 項不變。
+
 2026-10-03 後續：[四機 fresh 人工 receipt 驗證](M3-FRESH-REIMAGE-RECEIPTS-2026-10-03.md) 實作獨立 core／worker 證據契約與唯讀 assessment；不代表重灌已執行或 stage accepted。ERU-015 仍進行中，正式剩餘 12 項。
 
 2026-10-03 後續：[唯讀 fresh baseline observation](M3-FRESH-OBSERVATION-2026-10-03.md) 接續四機／etcd／ERU metadata 基線及 schema-v2 host evidence 重導出；本輪只用 fake／contract tests，未做 VPS 操作。這不是 fresh stage acceptance，正式剩餘仍為 12 項。

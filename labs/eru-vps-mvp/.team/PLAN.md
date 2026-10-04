@@ -121,3 +121,18 @@ Continue at merged c12d510. The approved fresh design requires a dedicated core-
 ### Four-host receipt acceptance decision
 
 Accepted T-225 and T-226 after frozen hashes, source/diff inspection and independent tests. Root44, worker124, independent138+4 and full614 tests passed; original CI validation, compileall and task/report/scope/privacy gates passed. No existing single-worker validator was changed and independent tests retain its core rejection. T-227 accepts the assessment slice only and remains PARTIAL for the full executor. No live actions, renewed authority, stage acceptance or formal task-count change.
+
+## Fresh replacement-host observation (2026-10-04)
+
+Continue after merged four-host receipt assessment. Add a fixed read-only probe for bare replacement OS identity, OS release, architecture and bounded known ERU/etcd path presence; no Docker/containerd/ERU runtime or Tailscale command prerequisite. Explicit request endpoints and canonical public keys must bind the exact reviewed receipt assessment; keys must match console-attested Ed25519 fingerprints before any transport. Old inventory/trust remains unchanged.
+
+- T-228 owns isolated protocol, immutable private observation collection/loading and synthetic tests.
+- T-229 independently reviews the transport/trust/provenance/pending boundary and final CLI with adversarial fixtures.
+- Root owns document-first scope, CLI, source/diff review, full native checks, evidence gate, authorized Git delivery and ledger synchronization.
+- Dedicated observation only: append immutable evidence under a new area, never obtain mutation admission or weaken ClusterLock. Exact stable pending binding is permitted for read-only facts; malformed/foreign/drifting pending blocks before any probe/publication. Claim IDs once before transport; failures retain claims and stop markers.
+- Revalidate current receipt assessment/raw refs, source/input/private root and endpoint hash before/after. Offline inspection rederives saved fixed-probe facts, does not call SSH or write. Facts are fresh within15minutes, collection bounded360seconds.
+- Facts match all four new machine/boot/OS/key identities before/after; reject known old-state markers and wrong architecture. Known-marker absence is not complete filesystem/runtime/network/residue/fence acceptance. Formal remaining12 unchanged.
+
+### Replacement facts acceptance decision
+
+Accepted T-228 and T-229 after source/diff/hash review and independent adversarial checks. Two deterministic stale-return regressions were fixed before acceptance; deployed proxy unit markers were added. Root43, worker67, independent86 and full643 tests passed. Original workflow, compileall and team/scope/privacy gates passed. T-230 accepts only this facts slice, keeping overall closeout PARTIAL and formal remaining12. No VPS, stage acceptance, trust/inventory or generation change.

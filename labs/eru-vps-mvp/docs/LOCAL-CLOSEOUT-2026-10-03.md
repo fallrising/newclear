@@ -1,5 +1,9 @@
 # ERU 本機收尾：驗收範圍與缺口
 
+2026-10-04 固定 firewall adapter 本機驗收：最終完整 1,006 項／810.247 秒、獨立 61 項／3.244 秒通過；見 [T-255 evidence gate](../.team/reports/T-255.md)。多模型實作與獨立審查完成，本輪限 synthetic roots／fake nft。下一本機入口為有效金鑰與網路探測，再接 bootstrap／generation；live nft normalization／persistence、正式剩餘 12 及整體 PARTIAL 保留。
+
+2026-10-04 續作：[固定 firewall host helper 與 SSH adapter](M3-FRESH-FIREWALL-ADAPTER-2026-10-04.md) 接 durable remote intent、create-only table、當次 staging／identity 重驗與 pinned transport。多模型有界實作／獨立審查；本輪僅 temp-root／fake nft 驗證，整體 PARTIAL、正式剩餘 12 不變。
+
 2026-10-04 防火牆本機驗收：最終版本完整 944 項／832.977 秒、獨立 50 項／601.983 秒通過；見 [T-251 evidence gate](../.team/reports/T-251.md)。整體仍為 PARTIAL，正式剩餘 12 項。下一步為固定 kernel adapter 與輸出相容性證據，再接有效金鑰、網路探測、bootstrap／generation；尚未操作實機。
 
 2026-10-04 續作：[firewall activation coordinator](M3-FRESH-FIREWALL-ACTIVATION-2026-10-04.md) 綁完整四機staging receipts、獨立當次授權及durableintent，驗證專用table規則、失回應只讀恢復。本輪只用fakeadapter；productionkernel adapter、keys／tunnel／可達性仍未完成。正式剩餘12及整體PARTIAL不變。

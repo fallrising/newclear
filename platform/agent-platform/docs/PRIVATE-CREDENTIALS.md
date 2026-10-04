@@ -1,6 +1,6 @@
 # Private credential files for the mock tool Worker
 
-Status: implementation and acceptance pending. This slice hardens the existing normal Worker `secret_file` integration; it does not introduce live providers, a credential service, automatic document distribution or production activation.
+Status: implemented and verified with synthetic credentials on 2026-10-04. This slice hardens the existing normal Worker `secret_file` integration; it does not introduce live providers, a credential service, automatic document distribution or production activation.
 
 ## Boundary and compatibility
 
@@ -28,3 +28,11 @@ A same-UID or root adversary can access broker memory and alter owned files; des
 ## Operator layout
 
 A system-service deployment may keep private policy under `/etc/agent-credentials/private/` and versioned values under `/var/lib/agent-credentials/secrets/<opaque-id>/<revision>`, with private broker-owned parent directories. These are conventions, not paths created by this change. The current connector/Worker mock setup continues to use disposable private directories; no existing host key is discovered or migrated. See [normal Worker setup](WORKER-TOOLS.md) and [KVM acceptance](WORKER-TOOLS-KVM.md).
+
+## Observed acceptance
+
+The original loader accepted hardlink, ancestor-symlink and relative-secret fixtures; the new loader rejects them. All 34 focused reader tests, four independent real ACL/descriptor probes, 19 SQL Worker tests and the combined native suite (45 unit / 416 platform tests, lint and format) passed. Invalid hardlinked credentials produce the fixed error before allocation, grant creation or upstream dispatch.
+
+The normal Worker real-KVM matrix passed all five scenarios. Normal and disabled flows poll SDK events through `finished`/`caught_up`; normal requires three approvals and three acknowledged operations. Cancelled and uncertain outcomes do not deliver or retry; partial stop proof retains capacity until complete evidence arrives. Final VM/claim/reservation/CPU scope and Worker/connector process counts are zero; the owned node service was stopped. Known synthetic tokens were absent from the twelve observed trace/log/report files; this is not arbitrary DLP proof.
+
+Earlier test-environment startup failures and the failed allocation's retained reservation are recorded separately. The failed attempt used native offline reconciliation before restarting; it is not a passing cleanup result. The final five-case run required no operator recovery. See [sanitized evidence](evidence/private-credentials.json) for source hashes, outcomes and limitations. This acceptance does not certify every requirement of a future shared credential service.

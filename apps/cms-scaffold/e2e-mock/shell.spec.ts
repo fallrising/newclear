@@ -53,7 +53,7 @@ test.describe("W0 shell pages", () => {
     await page.getByLabel("帳號").fill("seed-member-clinic");
     await page.getByLabel("密碼").fill("any-password");
     await page.getByTestId("login-submit").click();
-    await expect(page).toHaveURL(`${FRONT}/`);
+    await expect(page).toHaveURL(`${FRONT}/clinic/me`);
   });
 
   test("S-02 Back and Admin login forms start empty", async ({ page }) => {

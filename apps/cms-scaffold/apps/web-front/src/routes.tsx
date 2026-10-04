@@ -1,3 +1,6 @@
+import { MemberGate } from "./member-auth";
+import { MemberHome, AppointmentDetail } from "./pages/member";
+import { AppointmentNew } from "./pages/appointment-new";
 import type { RouteObject } from "react-router";
 import { DefaultSkeleton } from "@cms/ui";
 import { SiteShell } from "./shell";
@@ -28,6 +31,9 @@ export const routes: RouteObject[] = [
           { path: "/clinic", lazy: async () => ({ Component: (await import("./home")).ClinicHome }) },
           { path: "/clinic/vets", lazy: async () => ({ Component: (await import("./pages/clinic")).VetList }) },
           { path: "/clinic/vets/:slug", lazy: async () => ({ Component: (await import("./pages/clinic")).VetPage }) },
+          { path: "/clinic/me", element: <MemberGate><MemberHome /></MemberGate> },
+          { path: "/clinic/appointments/new", element: <MemberGate><AppointmentNew /></MemberGate> },
+          { path: "/clinic/appointments/:id", element: <MemberGate><AppointmentDetail /></MemberGate> },
           { path: "/clinic/*", element: <NotFoundPublic /> },
         ],
       },

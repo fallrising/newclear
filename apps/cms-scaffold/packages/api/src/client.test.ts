@@ -190,7 +190,7 @@ describe("@cms/api transport", () => {
     await api.public.entries("album");
     await api.public.entries("photo", { ref: { album: "a-1" } });
     await api.auth.logout().catch(() => undefined);
-    expect(Object.keys(api).sort()).toEqual(["auth", "public", "url"]);
+    expect(Object.keys(api).sort()).toEqual(["auth", "member", "public", "url"]);
     for (const call of calls) {
       expect(new URL(call.url).pathname).toMatch(/^\/api\/v1\/(public|auth)\//);
     }

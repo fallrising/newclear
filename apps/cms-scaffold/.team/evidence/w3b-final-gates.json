@@ -1,0 +1,51 @@
+[
+  {
+    "name": "codegen",
+    "command": "npm run gen -w @cms/api",
+    "exitCode": 0,
+    "seconds": 0.85,
+    "log": "w3b-codegen.log"
+  },
+  {
+    "name": "fixture-gen",
+    "command": "npm run gen -w @cms/mocks -- --check",
+    "exitCode": 0,
+    "seconds": 0.16,
+    "log": "w3b-fixture-gen.log"
+  },
+  {
+    "name": "lint",
+    "command": "npm run lint",
+    "exitCode": 0,
+    "seconds": 12.0,
+    "log": "w3b-lint.log"
+  },
+  {
+    "name": "typecheck",
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "seconds": 34.72,
+    "log": "w3b-typecheck.log"
+  },
+  {
+    "name": "tests",
+    "command": "npm test",
+    "exitCode": 0,
+    "seconds": 91.83,
+    "log": "w3b-tests.log"
+  },
+  {
+    "name": "build",
+    "command": "npm run build",
+    "exitCode": 0,
+    "seconds": 15.28,
+    "log": "w3b-build.log"
+  },
+  {
+    "name": "bundle",
+    "command": "npm run test:bundle",
+    "exitCode": 0,
+    "seconds": 0.14,
+    "log": "w3b-bundle.log"
+  }
+]

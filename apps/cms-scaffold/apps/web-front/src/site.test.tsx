@@ -29,10 +29,10 @@ describe("Front shell, selector and routes (W3)", () => {
     expect(screen.getByTestId("site-nav")).toHaveAttribute("aria-label", "網站導覽");
   });
 
-  it("C-11 the site header has no 登入 link (no member area before W3b, 01 §9 G-08)", async () => {
+  it("C-11 the clinic header has the member login entry", async () => {
     renderRoute("/clinic");
     expect(await screen.findAllByTestId("vet-card")).toHaveLength(2);
-    expect(within(screen.getByRole("banner")).queryByRole("link", { name: "登入" })).not.toBeInTheDocument();
+    expect(await within(screen.getByRole("banner")).findByRole("link", { name: "登入" })).toHaveAttribute("href", "/login?next=/clinic/me");
     expect(within(screen.getByTestId("site-nav")).getAllByRole("link").map((a) => a.textContent)).toEqual(["首頁", "獸醫"]);
   });
 
@@ -89,14 +89,14 @@ describe("Front shell, selector and routes (W3)", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/"));
   });
 
-  it("S-01 AC-13 login ignores an external next and lands on /; the login page is noindex", async () => {
+  it("S-01 AC-13 login ignores an external next and lands on /clinic/me; the login page is noindex", async () => {
     const { router } = renderRoute("/login?next=https%3A%2F%2Fevil.example%2Fsteal");
     fireEvent.change(await screen.findByLabelText("帳號"), { target: { value: "seed-member-clinic" } });
     fireEvent.change(screen.getByLabelText("密碼"), { target: { value: "pw" } });
     expect(meta("robots")).toBe("noindex,nofollow");
     fireEvent.click(screen.getByTestId("login-submit"));
-    await waitFor(() => expect(router.state.location.pathname).toBe("/"));
-    expect(await screen.findByRole("heading", { level: 1, name: "CMS Scaffold" })).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe("/clinic/me"));
+    expect(await screen.findByRole("heading", { level: 1, name: "我的資料" })).toBeInTheDocument();
   });
 
   it.each(["/", "/album", "/album/albums/coast-light-2026", "/clinic", "/projects/cms-scaffold"])(

@@ -1,0 +1,138 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "sourceFiles": 431,
+  "protectedFiles": 396,
+  "java": {
+    "tests": 339,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "tests": 140,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": 395,
+  "backendCommand": [
+    "./gradlew",
+    "test",
+    "integrationTest",
+    "bootJar",
+    "--rerun-tasks",
+    "--no-daemon",
+    "--no-parallel",
+    "--console=plain"
+  ],
+  "backendExitCode": 0,
+  "performance": [
+    {
+      "run": 1,
+      "exitCode": 0,
+      "command": [
+        "./gradlew",
+        ":services:cms-api:integrationTest",
+        "--tests",
+        "*ListQueryPerformanceTests",
+        "--rerun-tasks",
+        "--no-daemon",
+        "--no-parallel",
+        "--console=plain"
+      ],
+      "logSha256": "dc1bb065bf27e1d50deb0ec9ca7b7cf3dc64775f71653258c50f7228b3c9bc4d",
+      "junit": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "measurements": [
+        "BW1b perf (10000 entries): work list p95 109 ms, public list p95 89 ms, patch p95 35 ms"
+      ],
+      "p95Milliseconds": {
+        "work": 109,
+        "public": 89,
+        "patch": 35
+      }
+    },
+    {
+      "run": 2,
+      "exitCode": 0,
+      "command": [
+        "./gradlew",
+        ":services:cms-api:integrationTest",
+        "--tests",
+        "*ListQueryPerformanceTests",
+        "--rerun-tasks",
+        "--no-daemon",
+        "--no-parallel",
+        "--console=plain"
+      ],
+      "logSha256": "32b584c550e81a7b5bade158a0ce06bb9de07c2b279a863728b8fbb084173c87",
+      "junit": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "measurements": [
+        "BW1b perf (10000 entries): work list p95 74 ms, public list p95 74 ms, patch p95 20 ms"
+      ],
+      "p95Milliseconds": {
+        "work": 74,
+        "public": 74,
+        "patch": 20
+      }
+    },
+    {
+      "run": 3,
+      "exitCode": 0,
+      "command": [
+        "./gradlew",
+        ":services:cms-api:integrationTest",
+        "--tests",
+        "*ListQueryPerformanceTests",
+        "--rerun-tasks",
+        "--no-daemon",
+        "--no-parallel",
+        "--console=plain"
+      ],
+      "logSha256": "da213917671ac358b8a8370804e7b9168b937377d477b06f1037a7d96113dd52",
+      "junit": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "measurements": [
+        "BW1b perf (10000 entries): work list p95 79 ms, public list p95 75 ms, patch p95 18 ms"
+      ],
+      "p95Milliseconds": {
+        "work": 79,
+        "public": 75,
+        "patch": 18
+      }
+    }
+  ],
+  "preservation": {
+    "snapshots": {
+      "cms-bw1b-baseline": 412,
+      "cms-bw1c-baseline": 449,
+      "cms-w1-baseline": 468,
+      "cms-bw2-baseline": 566,
+      "cms-w2-baseline": 602,
+      "cms-bw3-baseline": 710,
+      "cms-bw4-baseline": 732,
+      "cms-bw5-baseline": 762
+    },
+    "originalFilesPreserved": 468
+  },
+  "sourceStable": true,
+  "runtimeOpenApiEqualsBw5": true,
+  "publication": "Pending remote CI and exact-head merge.",
+  "mockE2e": 39,
+  "mockE2eExitCode": 0,
+  "mockE2eExcluded": 0,
+  "independentReview": "T-913 DONE"
+}

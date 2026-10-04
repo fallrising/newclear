@@ -95,6 +95,12 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 
 ## BW4 驗收與界線
 
-[BW4交付](../../.team/reports/BW4-DELIVERY.md)已LOCAL_VERIFIED：審計保留90天預設、30／90／365選擇、延後每日清理及Admin設定API；三個store在有DataSource時選用JDBC。完整應用Testcontainers測試證明真實DB審計失敗會回滾發布與設定更新，並在关闭／重新建立應用context後讀回內容／設定／session／索引／revision／audit。這補齊BQ-12／BQ-13工程證據；先前各波指出的完整應用wiring缺口以本段為最新狀態。
+[BW4交付](../../.team/reports/BW4-DELIVERY.md)已 VERIFIED（PR #258）：審計保留90天預設、30／90／365選擇、延後每日清理及Admin設定API；三個store在有DataSource時選用JDBC。完整應用Testcontainers測試證明真實DB審計失敗會回滾發布與設定更新，並在关闭／重新建立應用context後讀回內容／設定／session／索引／revision／audit。這補齊BQ-12／BQ-13工程證據；先前各波指出的完整應用wiring缺口以本段為最新狀態。
 
 完整293 Java／133 PostgreSQL／395前端／39 mock E2E與lint/typecheck/build/bundle/npmci/codegen/bootJar通過。三次10,000筆量測均達標，見[效能紀錄](perf-records.md)。首次E2E38/39因ERR_NETWORK_CHANGED載入失敗，序列重跑39/39通過，舊trace保留。待遠端CI與合併；沒有新增依賴，唯一migration為V9。Admin設定UI留W4；下一個後端任務BW5處理錯誤回應、管理輸入及公開關聯／媒體查詢。正式初始化、備份還原與升級回滾仍須獨立驗收，沒有部署。
+
+## BW5 驗收與界線
+
+[BW5 交付](../../.team/reports/BW5-DELIVERY.md)已 LOCAL_VERIFIED：公開 ref 篩選現依已發布副本，V10 補齊既有 ref／principal-ref 索引；先前 BQ-10 的限制由本段更新。公開／會員列表以整頁批次解析媒體，同時保留工作替換媒體尚未發布不得公開等安全條件；先前 BQ-11 逐項解析限制已補齊。帳號 404、大寫媒體錯誤碼、管理輸入驗證及 W2 消費端已同步。
+
+339 Java／140 PostgreSQL／395 前端／39 mock E2E、三次萬筆效能與獨立審查通過。等待必要遠端 CI／合併；沒有部署。並發重複 email 的資料庫唯一限制競態仍按原施工圖接受；V10 重建索引的備份／維護與真實 API 瀏覽器驗收仍屬運維門檻。下一個功能波建議 W3 公開相簿／診所／專案畫面，先核對完整施工圖與現況。

@@ -23,7 +23,7 @@ BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-P
 
 個人正式使用狀態與門檻見 [個人使用驗收](docs/v2/03-personal-use-readiness.md)；有測試程式碼不等於本環境已通過驗收。
 
-W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；已於[PR #245](https://github.com/fallrising/newclear/pull/245)通過遠端CI並合併，沒有部署。BW3會員API已於[PR #252](https://github.com/fallrising/newclear/pull/252)通過CI並合併，詳見 [BW3交付證據](.team/reports/BW3-DELIVERY.md)：本人資料讀取、草稿建立、限流及原子審計；279 Java／125 PostgreSQL／395前端／39 mock E2E通過，[發布證據](.team/reports/BW3-PUBLICATION.md)。BW4後端硬化已完成本地驗證：[審計保留、JDBC接線與重啟／回滾證據](.team/reports/BW4-DELIVERY.md)。293 Java／133 PostgreSQL／395前端／39 mock E2E及三次萬筆效能量測通過，待必要遠端CI與合併。
+W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；已於[PR #245](https://github.com/fallrising/newclear/pull/245)通過遠端CI並合併，沒有部署。BW3會員API已於[PR #252](https://github.com/fallrising/newclear/pull/252)通過CI並合併，詳見 [BW3交付證據](.team/reports/BW3-DELIVERY.md)：本人資料讀取、草稿建立、限流及原子審計；279 Java／125 PostgreSQL／395前端／39 mock E2E通過，[發布證據](.team/reports/BW3-PUBLICATION.md)。BW4後端硬化已完成本地驗證：[審計保留、JDBC接線與重啟／回滾證據](.team/reports/BW4-DELIVERY.md)。293 Java／133 PostgreSQL／395前端／39 mock E2E及三次萬筆效能量測通過，已於 PR #258 通過遠端 CI 並合併。
 
 ## 需求
 
@@ -121,3 +121,5 @@ Demo 種子（無密碼、無 demo 專用表）：
 - 專案：公開 `cms-scaffold`、private `internal-ops`、draft `draft-lab`；issue 對匿名 403
 
 既有資料庫升級應保留 volume 並由 Flyway 執行新增 migration；先備份 PostgreSQL 與媒體並驗證可還原。`docker compose down -v` 會刪除資料卷，只可用於明確可丟棄的 demo 資料，不能當成正式資料的升級方式。
+
+BW5 開放問題收尾已完成本地驗收：帳號 404、媒體錯誤碼與既有 W2 同步、管理輸入驗證、公開關聯依已發布副本篩選、公開／會員整頁媒體解析。339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能與獨立審查通過；[交付證據](.team/reports/BW5-DELIVERY.md)。待必要遠端 CI 與合併，未部署。

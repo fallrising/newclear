@@ -18,3 +18,11 @@
 | 2026-10-04 | BW4 實作（第 3 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 74 ms | 77 ms | 19 ms | 4（內容查詢） | 達標 |
 
 BW4實作三次皆強制重跑原本10,000筆測試，門檻不變。[原始數字與指令](../../.team/evidence/bw4-performance.json)由[量測腳本](../../.team/evidence/bw4-perf-run.py)保留。queryEntries每次實測2句SQL；列表內容store呼叫另有findTypeByKey/fieldsOf，合計4句，且不隨頁面筆數增加，由ListQueryCountTests固定。這裡沿BW1b量測內容查詢，不把store層時間當成HTTP端到端延遲。
+
+| 日期 | 量測者 | 環境 | 工作列表 p95 | 公開列表 p95 | PATCH p95 | 列表 SQL 數 | 結果 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10-04 | BW5 實作（第 1 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 109 ms | 89 ms | 35 ms | 2（queryEntries） | 達標 |
+| 2026-10-04 | BW5 實作（第 2 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 74 ms | 74 ms | 20 ms | 2（queryEntries） | 達標 |
+| 2026-10-04 | BW5 實作（第 3 次） | Linux、4 核、PostgreSQL 16.15、JDK 25.0.4.1 | 79 ms | 75 ms | 18 ms | 2（queryEntries） | 達標 |
+
+BW5 三次強制重跑原始 10,000 筆內容 store 測試，門檻不變；[數字與指令](../../.team/evidence/bw5-performance.json)、[腳本](../../.team/evidence/bw5-perf-run.py)。此表不是完整 HTTP 或含媒體頁面的延遲。BQ-11 另由真實 PostgreSQL 測試確認媒體與變體固定 2 次查詢、附著 1 次，空集合 0 次；公開／會員 API 測試確認 1 筆與 3 筆時 store 呼叫數一致且實際展開縮圖。

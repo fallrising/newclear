@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/v1/public")
@@ -62,8 +63,10 @@ public class PublicContentController {
     public Map<String, Object> list(@PathVariable String typeKey, HttpServletRequest request) {
         rejectAudienceParams(request);
         EntryService.ListResult result = entries.publicList(principal(request), typeKey, request.getParameterMap());
+        Function<Object, Object> expander = media.publicExpander(ContentProjection.mediaRefs(
+                result.page().items().stream().map(EntryRecord::publishedPayload).toList(), result.fields()));
         List<Map<String, Object>> items = result.page().items().stream()
-                .map(e -> ContentProjection.published(e, result.type(), result.fields(), this::expandMedia))
+                .map(e -> ContentProjection.published(e, result.type(), result.fields(), expander))
                 .toList();
         return ContentProjection.page(items, result);
     }

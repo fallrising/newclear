@@ -2,9 +2,9 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW4](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW4.openapi.yaml](../contracts/BW4.openapi.yaml) ・ 前一波：[BW3](BW3.md) ・ 量測紀錄：[perf-records.md](../perf-records.md)
 
-狀態：**LOCAL_VERIFIED**（2026-10-04；293 Java／133 PostgreSQL／395前端／39 mock E2E及三次效能量測，待必要遠端CI與合併）
+狀態：**VERIFIED**（2026-10-04；293 Java／133 PostgreSQL／395前端／39 mock E2E及三次效能量測，已於 PR #258 通過遠端 CI 並合併）
 
-[增量交付與驗收證據](../../../.team/reports/BW4-DELIVERY.md)；下方預演與歷史施工片段依§0覆寫。
+[增量交付與驗收證據](../../../.team/reports/BW4-DELIVERY.md)、[遠端發布核對](../../../.team/reports/BW4-PUBLICATION.md)；下方預演與歷史施工片段依§0覆寫。
 日期：2026-09-25  
 讀者：實作 BW4 的 agent。只讀本檔、`contracts/BW4.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 

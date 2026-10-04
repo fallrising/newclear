@@ -150,7 +150,9 @@ export interface paths {
          *     the server generates one and returns it once.
          *     Errors:
          *     - 400 VALIDATION_FAILED: username does not match `^[a-z0-9._-]{3,32}$`, username is taken,
-         *       or the temporary password is shorter than 12 characters or equals the username.
+         *       `displayName` is longer than 80, `email` is longer than 254 or already used by another
+         *       principal (case-insensitive), or the temporary password is shorter than 12 characters or
+         *       equals the username.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          */
         post: operations["createPrincipal"];
@@ -194,8 +196,8 @@ export interface paths {
         };
         /**
          * @description Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id (message `not found`; see BQ-06).
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         get: operations["getPrincipal"];
         put?: never;
@@ -206,9 +208,11 @@ export interface paths {
         /**
          * @description Null or absent properties keep their current value.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id, or `status` is not a PrincipalStatus.
+         *     - 400 VALIDATION_FAILED: `status` is not a PrincipalStatus, `displayName` is longer than 80,
+         *       or `email` is longer than 254 or used by another principal (case-insensitive).
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         patch: operations["patchPrincipal"];
         trace?: never;
@@ -225,9 +229,9 @@ export interface paths {
         /**
          * @description Revokes every session of the principal.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id.
          *     - 403 LAST_ADMIN: the principal is the last active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         post: operations["disablePrincipal"];
         delete?: never;
@@ -247,9 +251,9 @@ export interface paths {
         put?: never;
         /**
          * @description Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id.
          *     - 403 ACCOUNT_DISABLED: a disabled principal cannot be unlocked.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         post: operations["unlockPrincipal"];
         delete?: never;
@@ -269,10 +273,11 @@ export interface paths {
         /**
          * @description Replaces all role assignments. `editor` and `operator` need a non-empty `contentTypeCodes`.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id, missing or duplicate role code,
-         *       unknown role, or editor/operator without an allowlist.
+         *     - 400 VALIDATION_FAILED: missing or duplicate role code, unknown role, or editor/operator
+         *       without an allowlist.
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         put: operations["replacePrincipalRoles"];
         post?: never;
@@ -295,9 +300,9 @@ export interface paths {
          * @description Sets a temporary password and revokes every session of the principal. When the body or
          *     `temporaryPassword` is omitted the server generates one. The password is returned once.
          *     Errors:
-         *     - 400 VALIDATION_FAILED: no principal with this id, or the password is shorter than
-         *       12 characters or equals the username.
+         *     - 400 VALIDATION_FAILED: the password is shorter than 12 characters or equals the username.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         post: operations["setPrincipalPassword"];
         delete?: never;
@@ -314,10 +319,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Lists anonymous grants plus the grants of every role of the principal. An unknown id
-         *     returns only the anonymous grants.
+         * @description Lists anonymous grants plus the grants of every role of the principal.
          *     Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+         *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
          */
         get: operations["effectivePermissions"];
         put?: never;
@@ -370,7 +375,7 @@ export interface paths {
          *     - 400 VALIDATION_FAILED: unknown role, unknown action, unknown surface, duplicate
          *       permission, malformed predicate, a predicate without `contentType`, a predicate whose field is
          *       not an enabled string, enum, ref or principal-ref field with index rows in that type (02 §4.1),
-         *       or an empty list for the anonymous role.
+         *       `contentTypeCode` longer than 64, or an empty list for the anonymous role.
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          */
@@ -417,7 +422,7 @@ export interface paths {
          *     `filterable=true`, index rows and visibility `public`; datetime fields take
          *     `filter.<fieldKey>.from` (inclusive) and `filter.<fieldKey>.to` (exclusive) as ISO-8601 with offset.
          *     Relation filters: `ref.<fieldKey>=<entry uuid>` on a public ref field; may repeat, all must match.
-         *     They read the relations of the working copy (02 BQ-10).
+         *     They read the relations of the published copy (02 BQ-10, BW5).
          *     Other query parameters are ignored.
          *     Errors:
          *     - 400 AUDIENCE_PARAM_REJECTED: `state`, `includeDraft` or `asOf` is present.
@@ -874,7 +879,13 @@ export interface paths {
         /**
          * @description Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as adminListContentTypes.
-         *     - 422 FIELD_VALIDATION: key does not match `^[a-z][a-z0-9_]{1,62}$` or already exists.
+         *     - 422 FIELD_VALIDATION: every invalid input in `error.fields`, in body order (02 BQ-08):
+         *       `key` REQUIRED, INVALID_FORMAT (not `^[a-z][a-z0-9_]{1,62}$`) or DUPLICATE (type exists);
+         *       `displayName`, `pluralDisplayName` TOO_LONG (over 80); `titleField` TOO_LONG (over 63);
+         *       `slugPolicy` NOT_IN_ENUM; `fields[i]` REQUIRED (null item); `fields[i].key` REQUIRED, TOO_LONG
+         *       (over 63) or DUPLICATE (repeats an earlier field); `fields[i].type` NOT_IN_ENUM (not string,
+         *       markdown, int, boolean, datetime, enum, ref, principal-ref or media-ref); `fields[i].refTarget`
+         *       TOO_LONG (over 63). Nothing is written.
          */
         post: operations["adminCreateContentType"];
         delete?: never;
@@ -1161,9 +1172,9 @@ export interface paths {
          *     Errors:
          *     - 400 VALIDATION_FAILED: the `file` part is missing.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-         *     - 409 quota_exceeded: library or per-principal quota would be exceeded.
-         *     - 413 file_too_large: file is larger than the configured maximum.
-         *     - 415 unsupported_media_type: empty file or not an allowed type.
+         *     - 409 MEDIA_QUOTA_EXCEEDED: library or per-principal quota would be exceeded.
+         *     - 413 MEDIA_FILE_TOO_LARGE: file is larger than the configured maximum.
+         *     - 415 MEDIA_UNSUPPORTED_TYPE: empty file or not an allowed type.
          */
         post: operations["uploadMedia"];
         delete?: never;
@@ -1203,7 +1214,7 @@ export interface paths {
          * @description Returns deleted media metadata as well.
          *     Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-         *     - 404 not_found: media does not exist.
+         *     - 404 MEDIA_NOT_FOUND: media does not exist.
          */
         get: operations["getMedia"];
         put?: never;
@@ -1211,7 +1222,7 @@ export interface paths {
         /**
          * @description Errors:
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listMedia.
-         *     - 404 not_found: media does not exist.
+         *     - 404 MEDIA_NOT_FOUND: media does not exist.
          */
         delete: operations["softDeleteMedia"];
         options?: never;
@@ -1231,9 +1242,9 @@ export interface paths {
          *     Errors:
          *     - 403 SURFACE_FORBIDDEN: called from the Front surface.
          *     - 403 FORBIDDEN: caller may not read this media.
-         *     - 404 not_found: media does not exist.
-         *     - 404 variant_not_available: variant is not original, thumbnail or web, or was not generated.
-         *     - 410 gone: media is soft-deleted.
+         *     - 404 MEDIA_NOT_FOUND: media does not exist.
+         *     - 404 MEDIA_VARIANT_NOT_AVAILABLE: variant is not original, thumbnail or web, or was not generated.
+         *     - 410 MEDIA_GONE: media is soft-deleted.
          */
         get: operations["privateMediaFile"];
         put?: never;
@@ -1253,7 +1264,7 @@ export interface paths {
         };
         /**
          * @description Errors:
-         *     - 404 not_found: media missing, deleted, or not attached to a published public entry field.
+         *     - 404 MEDIA_NOT_FOUND: media missing, deleted, or not attached to a published public entry field.
          */
         get: operations["publicMediaMeta"];
         put?: never;
@@ -1273,7 +1284,7 @@ export interface paths {
         };
         /**
          * @description Errors:
-         *     - 404 not_found: media not publicly readable, or the variant is unknown or missing.
+         *     - 404 MEDIA_NOT_FOUND: media not publicly readable, or the variant is unknown or missing.
          */
         get: operations["publicMediaFile"];
         put?: never;
@@ -1289,10 +1300,10 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * @description Every `error.code` the API can return. Media codes are lowercase for compatibility (BQ-07).
+         * @description Every `error.code` the API can return. Media codes were lowercase until BW5 (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "not_found" | "variant_not_available" | "unsupported_media_type" | "quota_exceeded" | "file_too_large" | "gone" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "PRINCIPAL_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "MEDIA_NOT_FOUND" | "MEDIA_VARIANT_NOT_AVAILABLE" | "MEDIA_UNSUPPORTED_TYPE" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_FILE_TOO_LARGE" | "MEDIA_GONE" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1306,13 +1317,13 @@ export interface components {
                 contentType?: string;
                 /** @description Present on FORBIDDEN and SURFACE_FORBIDDEN. */
                 surface?: string;
-                /** @description Present on 422 payload validation errors; every invalid key, in validation order. */
+                /** @description Present on 422 payload, content-type or settings validation errors; every invalid key, in validation order. */
                 fields?: components["schemas"]["FieldError"][];
             };
         };
         FieldError: {
             /**
-             * @description Path of the input, `payload.<fieldKey>`, or the property name of a settings request.
+             * @description Input path (`payload.<fieldKey>`), a settings property, or a content-type body path such as `fields[0].key`.
              * @example payload.title
              */
             field: string;
@@ -1321,12 +1332,14 @@ export interface components {
             message: string;
         };
         /**
-         * @description Why a field is invalid. REQUIRED (publish, member create, or a missing setting), RESERVED_KEY, WRONG_TYPE, TOO_LONG (string over 1,000 or
-         *     markdown over 100,000 code points), INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
-         *     REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED.
+         * @description Why a field is invalid. REQUIRED (publish, member create, or missing content-type/settings input), RESERVED_KEY, WRONG_TYPE,
+         *     TOO_LONG (the endpoint-specific Unicode code-point limit; payload string 1,000 or markdown 100,000),
+         *     INVALID_DATETIME, NOT_IN_ENUM, INVALID_UUID, REF_TARGET_NOT_FOUND,
+         *     REF_TARGET_WRONG_TYPE, PRINCIPAL_REF_UNRESOLVED, INVALID_FORMAT (a value that must match a pattern), DUPLICATE
+         *     (a key that already exists or repeats in the request).
          * @enum {string}
          */
-        FieldErrorCode: "REQUIRED" | "RESERVED_KEY" | "WRONG_TYPE" | "TOO_LONG" | "INVALID_DATETIME" | "NOT_IN_ENUM" | "INVALID_UUID" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED";
+        FieldErrorCode: "REQUIRED" | "RESERVED_KEY" | "WRONG_TYPE" | "TOO_LONG" | "INVALID_DATETIME" | "NOT_IN_ENUM" | "INVALID_UUID" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "INVALID_FORMAT" | "DUPLICATE";
         Health: {
             /** @example UP */
             status: string;
@@ -1983,7 +1996,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
-        /** @description Payload too large (file_too_large). */
+        /** @description Payload too large (MEDIA_FILE_TOO_LARGE). */
         Error413: {
             headers: {
                 [name: string]: unknown;
@@ -2354,6 +2367,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2387,6 +2401,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             415: components["responses"]["Error415"];
             500: components["responses"]["Error500"];
         };
@@ -2417,6 +2432,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2446,6 +2462,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };
@@ -2477,6 +2494,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             415: components["responses"]["Error415"];
             500: components["responses"]["Error500"];
         };
@@ -2511,6 +2529,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             415: components["responses"]["Error415"];
             500: components["responses"]["Error500"];
         };
@@ -2538,6 +2557,7 @@ export interface operations {
             400: components["responses"]["Error400"];
             401: components["responses"]["Error401"];
             403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
             500: components["responses"]["Error500"];
         };
     };

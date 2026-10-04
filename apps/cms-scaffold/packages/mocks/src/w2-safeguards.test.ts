@@ -141,7 +141,7 @@ describe("W2 preserves BW2 safeguards", () => {
     const limit = fixtures.mediaQuota.maxFiles;
     fixtures.mediaQuota.maxFiles = db.media.length;
     try {
-      await expect(api().work.upload(new File(["png"], "full.png", { type: "image/png" }))).rejects.toMatchObject({ status: 409, code: "quota_exceeded" });
+      await expect(api().work.upload(new File(["png"], "full.png", { type: "image/png" }))).rejects.toMatchObject({ status: 409, code: "MEDIA_QUOTA_EXCEEDED" });
       expect(db.media).toEqual(before);
     } finally { fixtures.mediaQuota.maxFiles = limit; }
   });

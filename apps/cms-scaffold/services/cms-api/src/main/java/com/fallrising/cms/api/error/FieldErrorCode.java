@@ -11,7 +11,9 @@ public enum FieldErrorCode {
     INVALID_UUID,
     REF_TARGET_NOT_FOUND,
     REF_TARGET_WRONG_TYPE,
-    PRINCIPAL_REF_UNRESOLVED;
+    PRINCIPAL_REF_UNRESOLVED,
+    INVALID_FORMAT,
+    DUPLICATE;
 
     public String wire() {
         return name();

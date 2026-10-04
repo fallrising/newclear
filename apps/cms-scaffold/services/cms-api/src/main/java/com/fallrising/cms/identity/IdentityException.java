@@ -72,6 +72,10 @@ public class IdentityException extends CmsApiException {
                 "admin");
     }
 
+    public static IdentityException principalNotFound() {
+        return new IdentityException(ErrorCode.PRINCIPAL_NOT_FOUND, "Principal not found", null, null, null);
+    }
+
     public static IdentityException auditNotFound() {
         return new IdentityException(ErrorCode.AUDIT_EVENT_NOT_FOUND, "Audit event not found", null, null, null);
     }

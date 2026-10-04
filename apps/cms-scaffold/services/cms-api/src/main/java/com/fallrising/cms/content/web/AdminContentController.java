@@ -1,6 +1,7 @@
 package com.fallrising.cms.content.web;
 
-import com.fallrising.cms.api.error.ErrorCode;
+import com.fallrising.cms.api.error.FieldError;
+import com.fallrising.cms.api.error.FieldErrorCode;
 import com.fallrising.cms.content.ContentException;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
@@ -26,6 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,8 @@ import java.util.UUID;
 public class AdminContentController {
 
     private static final String SCHEMA = "SCHEMA";
+    private static final Set<String> FIELD_TYPES =
+            Set.of("string", "markdown", "int", "boolean", "datetime", "enum", "ref", "principal-ref", "media-ref");
 
     public record FieldBody(String key, String type, Boolean required, Boolean indexed, String refTarget, List<String> enumValues) {}
 
@@ -76,12 +82,8 @@ public class AdminContentController {
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> createType(@RequestBody TypeBody body, HttpServletRequest request) {
         IdentityRequest identity = manageTypes(request);
-        if (body.key() == null || !body.key().matches("^[a-z][a-z0-9_]{1,62}$")) {
-            throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Invalid type key");
-        }
-        if (store.findTypeByKey(body.key()).isPresent()) {
-            throw ContentException.validation(ErrorCode.FIELD_VALIDATION, "Type already exists");
-        }
+        List<FieldError> errors = validateType(body);
+        if (!errors.isEmpty()) throw ContentException.fieldErrors(errors);
         Instant now = Instant.now();
         ContentTypeRecord type = new ContentTypeRecord(
                 UUID.randomUUID(),
@@ -121,6 +123,55 @@ public class AdminContentController {
                     AuditLog.OK, null);
         });
         return typeJson(type);
+    }
+
+    /**
+     * 02 BQ-08: everything the database would reject (column lengths, the slug_policy CHECK, the unique type key and
+     * field keys), plus unknown field types. All problems are returned together, in body order.
+     */
+    private List<FieldError> validateType(TypeBody body) {
+        List<FieldError> errors = new ArrayList<>();
+        if (body.key() == null || body.key().isBlank()) {
+            errors.add(new FieldError("key", FieldErrorCode.REQUIRED, "key is required"));
+        } else if (!body.key().matches("^[a-z][a-z0-9_]{1,62}$")) {
+            errors.add(new FieldError("key", FieldErrorCode.INVALID_FORMAT, "key must match ^[a-z][a-z0-9_]{1,62}$"));
+        } else if (store.findTypeByKey(body.key()).isPresent()) {
+            errors.add(new FieldError("key", FieldErrorCode.DUPLICATE, "a content type with this key exists"));
+        }
+        maxLength(errors, "displayName", body.displayName(), 80);
+        maxLength(errors, "pluralDisplayName", body.pluralDisplayName(), 80);
+        maxLength(errors, "titleField", body.titleField(), 63);
+        if (body.slugPolicy() != null && !List.of("required", "optional", "none").contains(body.slugPolicy())) {
+            errors.add(new FieldError("slugPolicy", FieldErrorCode.NOT_IN_ENUM, "slugPolicy must be required, optional or none"));
+        }
+        List<FieldBody> fields = body.fields() == null ? List.of() : body.fields();
+        Set<String> keys = new HashSet<>();
+        for (int i = 0; i < fields.size(); i++) {
+            FieldBody field = fields.get(i);
+            String path = "fields[" + i + "]";
+            if (field == null) {
+                errors.add(new FieldError(path, FieldErrorCode.REQUIRED, path + " must be an object"));
+                continue;
+            }
+            if (field.key() == null || field.key().isBlank()) {
+                errors.add(new FieldError(path + ".key", FieldErrorCode.REQUIRED, path + ".key is required"));
+            } else if (field.key().codePointCount(0, field.key().length()) > 63) {
+                errors.add(new FieldError(path + ".key", FieldErrorCode.TOO_LONG, path + ".key is longer than 63"));
+            } else if (!keys.add(field.key())) {
+                errors.add(new FieldError(path + ".key", FieldErrorCode.DUPLICATE, path + ".key repeats an earlier field"));
+            }
+            if (field.type() != null && !FIELD_TYPES.contains(field.type())) {
+                errors.add(new FieldError(path + ".type", FieldErrorCode.NOT_IN_ENUM, path + ".type is not a field type"));
+            }
+            maxLength(errors, path + ".refTarget", field.refTarget(), 63);
+        }
+        return errors;
+    }
+
+    private static void maxLength(List<FieldError> errors, String path, String value, int max) {
+        if (value != null && value.codePointCount(0, value.length()) > max) {
+            errors.add(new FieldError(path, FieldErrorCode.TOO_LONG, path + " is longer than " + max));
+        }
     }
 
     @PostMapping("/content-types/{typeKey}/disable")

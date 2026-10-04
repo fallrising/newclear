@@ -45,11 +45,24 @@ export async function resizePty(
   await invoke("pty_resize", { origin: USER, sessionId, cols, rows });
 }
 
+// The terminal and document Run both submit through this boundary. Keep one
+// native write in flight per session so separately scheduled IPC calls cannot
+// reorder keystrokes or let a Run payload overtake them.
+const stdinTails = new Map<SessionId, Promise<void>>();
+
 export async function writeStdin(
   sessionId: SessionId,
   data: string,
 ): Promise<void> {
-  await invoke("pty_write_stdin", { origin: USER, sessionId, data });
+  const previous = stdinTails.get(sessionId);
+  const submit = () => invoke<void>("pty_write_stdin", { origin: USER, sessionId, data });
+  const current = previous ? previous.then(submit) : submit();
+  const tail = current.then(
+    () => { if (stdinTails.get(sessionId) === tail) stdinTails.delete(sessionId); },
+    () => { if (stdinTails.get(sessionId) === tail) stdinTails.delete(sessionId); },
+  );
+  stdinTails.set(sessionId, tail);
+  await current;
 }
 
 export async function subscribe(sessionId: SessionId): Promise<StreamId> {

@@ -6,6 +6,25 @@
 
 ---
 
+## 0. 2026-10-04 整合基準與執行補充
+
+本波已由 owner 指示繼續；以 main c247028e 為基準，CMS tree 等同 W3 PR #273。W3、BW3、BW5 均 VERIFIED。本節優先於下文舊環境、檔案與計數描述；產品範圍與驗收要求不變。
+
+- 環境沿用 Node 24.18 / npm 11.16 / JDK 25；不改依賴與 lock。
+- `createFrontClient` 現有型別為 `FrontClient`，新增 member client 使用既有 transport / generated operations。keys 若只由 public entry 擴充，須保留現有 keys 全部；不新增第二個 API subpath。
+- 既有 `packages/api/src/client.test.ts` 的 Front client key 白名單新增合法 `member`；保留工作面 API 禁止驗收。
+- mock fixture generated exports 如需整合，准改 `packages/mocks/src/fixtures.gen.ts`（既有生成器產物）及既有必要生成登錄；不得改其他 fixture。
+- 既有 Front 登入測試與公開 mock E2E 的 W3 fallback `/` 在本波改為 `/clinic/me`，准更新受影響既有 assertions；其他公開驗收保留。
+- root 擁有 `.team/PLAN.md`、tasks/reports/evidence、W3 發布收據、W3b 文件與 roadmap；workers 在隔離 worktree 只寫各自清單。
+- 既有 mock E2E baseline 為 60，新增本波 8 個後預期 68；W5 舊 47/92 數字是施工圖估計，後續以實際已合併 test inventory 累加，不刪減既有測試湊舊數字。
+- UI 使用既有 Clinic 主題與元件，驗證桌面及 390px。禁止 member cache 在使用者登出／切換後露出前一位會員資料，沿用 auth 的 query cache 清理並加回歸。
+- API/mock 對未知已登入會員不得回傳固定 A owner 的 create response；只有 fixture 定义合法 case 回固定 response。跨 owner／未知 pet 必須拒絕。
+- generic detail 若回傳自己的非 `appointment_request` entry，預約頁顯示 NotFound；提交後離開表單／登出，晚到的成功結果不得重新填入 member cache 或導頁。
+- 既有 `pages/logout.tsx` 只清 auth，准修改為先取消／移除 member queries 再清 auth，並回歸 logout → B 登入不洩漏 A cache。
+- 原 §9 的 source grep 需排除 tests（isolation tests 本來就包含被禁 regex）；production 與 bundle guard 完整保留。
+- 狀態先 IN_PROGRESS，再 LOCAL_VERIFIED；必要遠端 CI 與合併後才 VERIFIED。整合前先核對 runtime OpenAPI 的 member schema/operations 與 BW5，禁止 Front 相容分支。
+
+
 ## 1. 範圍
 
 ### 1.1 解決的 ID
@@ -43,7 +62,7 @@
 | --- | --- | --- |
 | W3 | `VERIFIED` | `SiteShell`、`SiteHeader`、`FrontTitle`、`PublicBoundary`、SEO、Clinic 公開頁與既有路由 |
 | BW3 | `VERIFIED` | `/api/v1/me/**` 的 owner isolation、建立與 429 |
-| BW5 | `DOC_READY`，實作整合前須 `VERIFIED` | `BW5.openapi.yaml` 0.11.0、最終錯誤碼與 `MemberEntry*` schema |
+| BW5 | `VERIFIED`（PR #267） | `BW5.openapi.yaml` 0.11.0、最終錯誤碼與 `MemberEntry*` schema |
 | W0 | `VERIFIED` | `SessionProvider`、`safeReturnTo`、CSRF retry、MSW scenario、copy 規則 |
 
 若 W3 尚未完成，不得以 W2 的舊 Front 頁面猜測整合點。若後端實際 `openapi.yaml` 與 BW5 member operations 不同，停止整合並回報，不在 Front 做相容分支。
@@ -767,28 +786,28 @@ W3 的 `ClinicProfile` 下方加入單一 CTA：
 ## 9. 交付檢查表
 
 - [ ] W3b-T01～T12 全部完成，每張卡的驗證都跑過。
-- [ ] fixture valid 且完全一致：
+- [x] fixture valid 且完全一致：
 
 ```bash
 python3 -m json.tool docs/v2/contracts/fixtures/member-entries.json >/dev/null
 cmp docs/v2/contracts/fixtures/member-entries.json packages/mocks/fixtures/member-entries.json
 ```
 
-- [ ] member operations 只使用 BW5 的 `/api/v1/me/**`；source 沒有 member write 的工作面路徑：
+- [x] member operations 只使用 BW5 的 `/api/v1/me/**`；source 沒有 member write 的工作面路徑：
 
 ```bash
 ! rg -n '/api/v1/(entries|content-types|preview|admin)' apps/web-front/src
 ! rg -n '@cms/api/member' apps/web-front packages/api
 ```
 
-- [ ] AC-08 bundle/source integration：`scripts/check-bundles.mjs` 的第二條 `FRONT_ONLY` regex 精確從 §4.7 舊值改為新值；第一條 work API regex 與兩條 `EVERY_APP` regex 原封不動。`isolation.test.ts` 保留 `PublicEntry.publicationState` 的 `@ts-expect-error`，並證明 production runtime access 只有 `member.ts` 一次。
-- [ ] production datetime 沒有 fixture hard-code：
+- [x] AC-08 bundle/source integration：`scripts/check-bundles.mjs` 的第二條 `FRONT_ONLY` regex 精確從 §4.7 舊值改為新值；第一條 work API regex 與兩條 `EVERY_APP` regex 原封不動。`isolation.test.ts` 保留 `PublicEntry.publicationState` 的 `@ts-expect-error`，並證明 production runtime access 只有 `member.ts` 一次。
+- [x] production datetime 沒有 fixture hard-code：
 
 ```bash
 ! rg -n '2026-10-01' apps/web-front/src --glob '!*.test.*'
 ```
 
-- [ ] 前端完整閘門：
+- [x] 前端完整閘門：
 
 ```bash
 npm ci
@@ -801,11 +820,17 @@ npm run e2e:mock
 ```
 
 - [ ] 後端 regression：`./gradlew test` 全綠；`./gradlew integrationTest` 由 CI 執行。
-- [ ] V2-AC-14：`front-w3b.spec.ts` 精確 8 個 Playwright tests 全綠；其中第 7 個 test 的 8 個 axe 狀態 critical／serious 都是 0。
-- [ ] V2-AC-15：Vitest 與 Playwright 都證明 member 畫面沒有工程詞、raw state、field key、UUID。
-- [ ] W5 integration 記錄 W3b 的 8 個 tests 已納入 47-test pre-materialization baseline，且列入 92-test final rerun。
-- [ ] G-08、C-11、AC-10～13 的 §1.1 測試名稱都出現在 verbose output。
-- [ ] `package-lock.json` 沒有變動；沒有新增 dependency。
-- [ ] 沒有秘密、密碼或真實個資；fixture 是虛構 deterministic 資料。
+- [x] V2-AC-14：`front-w3b.spec.ts` 精確 8 個 Playwright tests 全綠；其中第 7 個 test 的 8 個 axe 狀態 critical／serious 都是 0。
+- [x] V2-AC-15：Vitest 與 Playwright 都證明 member 畫面沒有工程詞、raw state、field key、UUID。
+- [x] W5 integration 記錄 W3b 的 8 個 tests 已納入 47-test pre-materialization baseline，且列入 92-test final rerun。
+- [x] G-08、C-11、AC-10～13 的 §1.1 測試名稱都出現在 verbose output。
+- [x] `package-lock.json` 沒有變動；沒有新增 dependency。
+- [x] 沒有秘密、密碼或真實個資；fixture 是虛構 deterministic 資料。
 - [ ] `docs/v2/README.md` 的 W3b 狀態只改成 `VERIFIED`；相對連結有效。
 - [ ] PR 說明列出實際指令、測試數量、任何只由 CI 執行的檢查。
+
+## 10. 本地交付檢查點 — LOCAL_VERIFIED
+
+2026-10-04：546 前端（41 API／43 auth／61 fields／111 mocks／18 UI／7 Admin／133 Back／132 Front）、68 mock E2E、339 Java 結果 FROM-CACHE 全綠；npm ci、codegen、lint、typecheck、build、bundle 與 fixture 一致性通過。八項 W3b E2E 含桌面／手機各八種 axe 狀態，critical／serious 為零。20 張瀏覽器畫面、獨立審查與來源保留驗證通過。
+
+驗收：[W3b-DELIVERY](../../../.team/reports/W3b-DELIVERY.md)。此提交前檢查點尚待 GitHub java／java-integration／web 必要 CI、合併與遠端核對；屆時由 PR／交接發布收據關閉 VERIFIED。W5 延續實際 68 項已交付 E2E 基準，不採舊規劃 47／92 固定數字。沒有部署。

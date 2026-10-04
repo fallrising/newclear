@@ -1,0 +1,98 @@
+{
+  "w3b-browser/1440-pets-empty.png": {
+    "sha256": "ac1f0fc7907f8e3de6be8da7e2dd9b3e58f899b102d7a465643c1d38cfcfc7c8",
+    "bytes": 60430
+  },
+  "w3b-browser/390-new.png": {
+    "sha256": "aef3686152450af97b7de8924588ad84246620f3089bd8e1ddb8a49e8ec1a73a",
+    "bytes": 29766
+  },
+  "w3b-browser/1440-dashboard.png": {
+    "sha256": "00de4c07bf2927841bd9a7a62eabeedaadc15a2cffa35973ec9dcfa88948fc31",
+    "bytes": 52023
+  },
+  "w3b-browser/1440-appointments-empty.png": {
+    "sha256": "5cc9d452aedc98b1df784b81b79b3112201ca29a8179033fcbeb8daf9583effc",
+    "bytes": 41229
+  },
+  "w3b-browser/390-pets-empty.png": {
+    "sha256": "689666a5c1560c4e901b7670497e59744de012a30c3cfb3009db4d124f7c108f",
+    "bytes": 52890
+  },
+  "w3b-browser/1440-member-menu.png": {
+    "sha256": "5ad6bc9dc87f26e04055835b682b7db142179a01365ecf0b82c7bc67f9d9855e",
+    "bytes": 55175
+  },
+  "w3b-browser/390-appointments-empty.png": {
+    "sha256": "425756f9d3ca61727b8a205431d387b54d9582d76bc7755862adaefd4481934e",
+    "bytes": 35823
+  },
+  "w3b-browser/1440-forbidden.png": {
+    "sha256": "b8dc6408be1c26129ce912309be7b6118a7bf6874ae6863f301eb719251ad12e",
+    "bytes": 26029
+  },
+  "w3b-browser/390-detail.png": {
+    "sha256": "1639b3e7b47573b8a3e1ff01da3388fd661c08d6b951344918d3930a447e9428",
+    "bytes": 30320
+  },
+  "w3b-browser/390-dashboard.png": {
+    "sha256": "193f82eb28eb139cf176d62cd6f9b37ef992d5098686a05fd98b04b068efe241",
+    "bytes": 46076
+  },
+  "w3b-browser/1440-detail.png": {
+    "sha256": "41c6f10f7395447b564c8e0060ec1d457008b8d8c7f3bd9b46256f2c17f14210",
+    "bytes": 36529
+  },
+  "w3b-browser/1440-validation.png": {
+    "sha256": "1c830877ee787ecc033d02f4fcf1a2698cd353328c7ca4192ebf7906b519db30",
+    "bytes": 43536
+  },
+  "w3b-browser/390-forbidden.png": {
+    "sha256": "affbd3ccae9437e9b65bcaa6edff20d6883397b9c32c2370c45c2ac475d4fc0c",
+    "bytes": 21063
+  },
+  "w3b-browser/390-validation.png": {
+    "sha256": "ede0832849da0a2d09cd75dd5576128c5a9bb055830255888e221ee898e4fe38",
+    "bytes": 37015
+  },
+  "w3b-browser/390-member-menu.png": {
+    "sha256": "1394e66db987ea8a83454b3fdf6c158cdfadb918ed9b84359bc6d6e960e92e37",
+    "bytes": 49728
+  },
+  "w3b-browser/summary.json": {
+    "sha256": "46479ad937ecedd8b034849048ed0b6527f79b6d128eb756c7d30ed587c1ded9",
+    "bytes": 8113
+  },
+  "w3b-browser/1440-rate-limited.png": {
+    "sha256": "e911bd2829557b1c997180cc325b690fa2ad12e7ad347423f3a33d878393da42",
+    "bytes": 42824
+  },
+  "w3b-browser/1440-new.png": {
+    "sha256": "42ca9deb9882bda71495a77da0b682aa98809081098ac68d8d6b83b3486a8925",
+    "bytes": 35757
+  },
+  "w3b-browser/390-rate-limited.png": {
+    "sha256": "c19855972f1b04e125c37c1c2e51d8afee0c6ce771fbe8932d8f8e75357fe9cd",
+    "bytes": 37090
+  },
+  "w3b-browser/runner-dashboard/1440x900.json": {
+    "sha256": "cea845043bc5128d873366dacac966cb53748ac0efc44b35d45b700449ab6f61",
+    "bytes": 647
+  },
+  "w3b-browser/runner-dashboard/390x900.json": {
+    "sha256": "f733f19c5d9570b22a3cd8c4231ca7ae12e1904dc68b2659345aa1be567d3ef6",
+    "bytes": 764
+  },
+  "w3b-browser/runner-dashboard/390x900.png": {
+    "sha256": "9ff5a87e1fd2e04692de34cbbc8e4da69d3ef8ef500ee94a9fd49f7ed507d8a1",
+    "bytes": 46944
+  },
+  "w3b-browser/runner-dashboard/summary.json": {
+    "sha256": "f5605e58330a3d5362e442131e045b9b7943537615e559967326cb402dec869e",
+    "bytes": 523
+  },
+  "w3b-browser/runner-dashboard/1440x900.png": {
+    "sha256": "9d5c7ee6c103af54f1ea968c6f0018d9b6e7f635f9429d10e9dee3964a2a7f67",
+    "bytes": 52946
+  }
+}

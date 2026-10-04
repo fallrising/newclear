@@ -15,6 +15,7 @@ const FIXTURES = [
   ["public-entries.json", "publicEntries", 'S["PublicEntry"][]'],
   ["media-assets.json", "mediaAssets", 'S["MediaAssetList"]'],
   ["media-quota.json", "mediaQuota", 'S["MediaQuota"]'],
+  ["member-entries.json", "memberEntries", 'MemberFixture'],
   ["revisions.json", "revisions", 'Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]>'],
 ];
 
@@ -24,6 +25,17 @@ function render() {
     'import type { components } from "@cms/api";',
     "",
     'type S = components["schemas"];',
+    '',
+    'type MemberFixture = {',
+    '  schemaVersion: number; clock: string;',
+    '  members: { principal: S["MePrincipal"]; pets: S["MemberEntry"][]; appointmentRequests: S["MemberEntry"][] }[];',
+    '  crossOwnerForbidden: { actorUsername: string; targetEntryId: string; targetOwnerUsername: string; operation: string; expectedStatus: number; expectedErrorCode: S["ErrorCode"]; mustNotContain: string[] };',
+    '  createCases: {',
+    '    valid: { actorUsername: string; request: S["MemberCreateRequest"]; response: S["MemberEntry"] };',
+    '    foreignPet: { actorUsername: string; request: S["MemberCreateRequest"]; expectedStatus: number; expectedErrorCode: S["ErrorCode"]; expectedField: string };',
+    '  };',
+    '};',
+
   ];
   for (const [file, name, type] of FIXTURES) {
     const data = JSON.parse(readFileSync(new URL(`../fixtures/${file}`, import.meta.url), "utf8"));

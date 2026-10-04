@@ -18,9 +18,12 @@ function LogoutBody() {
     void api.auth
       .logout()
       .catch(() => undefined)
-      .finally(() => {
+      .finally(async () => {
         if (!active) return;
+        await queryClient.cancelQueries({ queryKey: ["member"] });
+        queryClient.removeQueries({ queryKey: ["member"] });
         queryClient.setQueryData(keys.auth.me(), null);
+        queryClient.setQueryData(keys.auth.expired(), false);
         navigate("/", { replace: true });
       });
     return () => {

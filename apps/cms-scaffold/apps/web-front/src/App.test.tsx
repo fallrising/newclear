@@ -59,13 +59,13 @@ describe("CMS Front", () => {
     expect(screen.queryByTestId("empty-published")).not.toBeInTheDocument();
   });
 
-  it("S-01 AC-13 login ignores an external next and lands on /", async () => {
+  it("S-01 AC-13 login ignores an external next and lands on /clinic/me", async () => {
     const { router } = renderRoute("/login?next=https%3A%2F%2Fevil.example%2Fsteal");
     fireEvent.change(await screen.findByLabelText("帳號"), { target: { value: "seed-member-clinic" } });
     fireEvent.change(screen.getByLabelText("密碼"), { target: { value: "pw" } });
     fireEvent.click(screen.getByTestId("login-submit"));
-    await waitFor(() => expect(router.state.location.pathname).toBe("/"));
-    expect(await screen.findByRole("heading", { level: 1, name: "CMS Scaffold" })).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe("/clinic/me"));
+    expect(await screen.findByRole("heading", { level: 1, name: "我的資料" })).toBeInTheDocument();
   });
 
   it("AC-08 web-front source imports @cms/api only through @cms/api/public", () => {

@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { Link, Navigate, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { publicQueries } from "@cms/api/public";
-import { Card, CardContent, CardHeader, CardTitle } from "@cms/ui";
+import { Skeleton, Card, CardContent, CardHeader, CardTitle } from "@cms/ui";
 import { api } from "./api";
 import { CARDS } from "./cards";
+import { useMemberSession } from "./member-auth";
 import { copy, type CopyKey } from "./copy";
 import { MarkdownBody } from "./markdown";
 import { text } from "./media";
@@ -60,8 +61,17 @@ function InfoCard({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** F-S4: the clinic_profile singleton — name, intro (Markdown), address, telephone, hours. */
+function ClinicAppointmentCta() {
+  const auth = useMemberSession();
+  if (auth.isPending) return <Skeleton aria-hidden className="mb-10 h-10 w-40" />;
+  return <Link data-testid="clinic-appointment-cta" className="mb-10 inline-block underline" to={auth.data ? "/clinic/appointments/new" : "/login?next=/clinic/appointments/new"}>{copy[auth.data ? "member.menu.new" : "member.cta.login"]}</Link>;
+}
 function ClinicProfile({ type }: { type: string }) {
+  return <><ClinicProfileBody type={type} /><ClinicAppointmentCta /></>;
+}
+
+/** F-S4: the clinic_profile singleton — name, intro (Markdown), address, telephone, hours. */
+function ClinicProfileBody({ type }: { type: string }) {
   const profile = useQuery(publicQueries.entries(api.public, type, { size: 1 }));
   if (profile.isPending) return <HeroSkeleton />;
   const fallbackTitle = <FrontTitle documentTitle={null}>{copy["clinic.fallbackTitle"]}</FrontTitle>;

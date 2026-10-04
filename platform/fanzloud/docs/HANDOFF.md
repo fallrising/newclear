@@ -4,8 +4,9 @@ Date: 2026-10-04
 
 ## Current Goal
 
-T030A/B monorepo recovery is Accepted and merged. The T030D design passed fresh-context independent
-acceptance after the R1 corruption-policy repair; next is test-first snapshot-save implementation.
+T030A/B monorepo recovery is Accepted and merged. T030D snapshot-save runtime is now Accepted
+following test-first implementation, full gates and independent review. Next is the T030C load
+specification and its own review; public load is not implemented.
 Preserve the T020 schema, recovered A/B contracts and private single-operator P0 boundary.
 
 ## Repository State
@@ -26,29 +27,24 @@ passed hosted on the recovery branch
 Recovery [PR #242](https://github.com/fallrising/newclear/pull/242) merged at `1f555f61`; the nested
 upstream workflow is retained only as historical configuration.
 
-## Snapshot Design Accepted — Runtime Unimplemented
+## Snapshot Save Runtime Accepted
 
-[ADR-0005](adr/ADR-0005-snapshot-cache-contract.md),
-[SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md) and the
-[design acceptance](acceptance/T030D-design.acceptance.md) accept S01–S16: current
-durable-head saves, prefix verification against persisted events, explicit first-committed equal
-bytes, idempotent identical retries, monotonic caches, E1 old/complete crash visibility, no automatic
-unknown-completion retry, and one strict additive schema1→2 transition. Private domain projection
-fields stay private; cache bytes never restore/import reducer state.
+[T030D runtime acceptance](acceptance/T030D.acceptance.md) records the implemented 96-byte cache,
+current-head CAS, complete persisted-prefix verification, equal-sequence arbitration, monotonic
+save, atomic v1-to-v2 schema upgrade and failure/concurrency evidence. The immutable reducer and
+authoritative event history remain unchanged. Replay pins identity and its page in one read-only
+transaction so a concurrent additive upgrade cannot produce a false corruption report.
 
-The NEW-SPEC 96-byte codec and 4096-event prefix budget favor bounded correctness. Load may verify
-an older S<=4096 behind a larger head; streams beyond the save cap retain ordinary A/B paging.
-This initial cache does not accelerate reducer startup and can hold the writer lock for a complete
-bounded-prefix replay. No cleanup/general migration/mixed-version rollout is included. Snapshot seq/version/body use nullable ANY storage with fixed SQL/codec gates, so value corruption
-remains discardable and does not block valid A/B event access. Full CHECK-enabled event integrity
-is preserved; cache lookup-key/schema/index/physical corruption fails closed. Legacy processes must quiesce before schema upgrade.
+The event-prefix save budget remains 4096 events, read at most 256 per page. Structural cache-key
+validation may additionally scan all cache keys with constant application allocation. This cache does not accelerate
+initial reducer replay. Nullable ANY cache values remain separately validated; full enabled event
+integrity and structural-key/schema checks remain fail-closed. Legacy processes must quiesce
+before upgrade; there is no automatic downgrade, cleanup or mixed-version rollout protocol.
 
-Every clause maps to planned test names and concrete oracles, including concurrency, faults,
-restart, security and A/B/P0 regressions. **No snapshot tests or runtime behavior are implemented or
-run.** T030D is Ready for implementation; T030C and the T030 parent remain blocked. The 32-name
-matrix assigns D save/codec/schema and raw-SQL observations first, then C public-load assertions.
-D acceptance does not require C implementation. T030C still needs its own E0 spec
-and acceptance, and parent composition still needs all four accepted children.
+All 29 D/D-shared named tests are implemented; the three C-only names and public-load assertions
+in shared rows remain deferred. T030C still needs its own E0 specification, implementation and
+acceptance. Parent T030 remains blocked. The P1 store is still separate from P0 sessions, and real
+provider smoke remains unrun. Historical design and A/B acceptance reports are preserved.
 
 ## Historical Upstream Acceptance
 
@@ -401,9 +397,9 @@ subsequently passed a fresh Cursor Agent acceptance review with no blocker.
 
 ## Next Work
 
-1. Execute Ready T030D against accepted ADR-0005/SPEC-T030D: generate its owned compiling
-   fixed-failure skeletons before save/codec/schema implementation. Preserve C-owned public-load
-   tests as future work until D runtime acceptance; T030C and parent remain blocked.
+1. Specify and independently review T030C public snapshot load against accepted ADR-0005 and
+   implemented T030D. Preserve pinned E0 reads, cache-value/history-error distinctions, the
+   4096-prefix bound and private reducer trust. T030C and parent remain blocked until their own gates.
 2. Preserve the Accepted P0 boundary; P1 work must not add a dependency on live P0 provider
    availability. T030R local acceptance does not merge historical source PR #3/#4.
 3. Run a T007 live smoke only in a private environment with all nine administrator variables, the

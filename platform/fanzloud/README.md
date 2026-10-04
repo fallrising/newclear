@@ -5,8 +5,8 @@
 
 [![Fanzloud CI](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml/badge.svg)](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml)
 
-Codebox is a provider-neutral cloud coding agent platform written in Rust. It is designed to run
-coding work in isolated per-session sandboxes and expose the workflow through a web interface.
+Codebox is a private Codex Cloud task control plane written in Rust. Its longer-term design
+adds provider-neutral agents and isolated per-session sandboxes; those runtimes are not implemented.
 
 The currently implemented milestone is the accepted **P0 personal BYOS** slice: a private,
 single-operator web control layer for the operator's own ChatGPT/Codex subscription. Codebox uses a
@@ -37,12 +37,14 @@ Hosted Fanzloud CI passed on the recovery branch
 The portfolio context above remains the public investment summary; this is not a deployment or
 production-readiness claim.
 
-T030D now has an [accepted snapshot design](docs/specs/SPEC-T030D-sqlite-snapshot-save.md) and
+T030D now has an [accepted snapshot-save implementation](docs/acceptance/T030D.acceptance.md)
+against the [snapshot design](docs/specs/SPEC-T030D-sqlite-snapshot-save.md) and
 [accepted ADR](docs/adr/ADR-0005-snapshot-cache-contract.md), with fresh independent review.
 It defines persisted-prefix verification, explicit equal-sequence arbitration and atomic schema
 evolution, preserving full event/store integrity while bounding disposable cache values. This first bounded cache does not accelerate initial reducer replay. T030D snapshot
-save is Ready for implementation; T030C snapshot load and the T030 parent remain blocked.
-Snapshot runtime is unimplemented. Native agents, local sandbox execution,
+save and exact v1-to-v2 schema upgrade are implemented and independently accepted.
+T030C public snapshot load still needs its own specification and implementation; the T030 parent
+remains blocked. Native agents, local sandbox execution,
 multi-user authentication and the `node-agent`/`boxd` runtime remain future tasks. The recovered
 P1 store is not wired into the P0 process-lifetime session runtime.
 
@@ -69,7 +71,9 @@ Codex Cloud managed environment
 ```
 
 The browser cannot select an executable, credential path, environment, branch, repository, or
-apply operation. The trusted runner supports only the reviewed version, login, submit, status,
+apply operation. Cancel stops local work or monitoring and does not guarantee provider-task
+termination. Unknown-submission reconciliation is available through the API; the browser page
+does not yet expose those recovery controls. The trusted runner supports only the reviewed version, login, submit, status,
 list, and diff command surfaces. Local `codex exec` and `codex cloud apply` are outside the P0
 authority.
 
@@ -81,7 +85,7 @@ authority.
 | `crates/codebox-session-runtime` | Implemented | One process-lifetime session, one active turn, ordered events, cancel, and recovery |
 | `crates/codebox-agent-codex` | Implemented | Credential scope, device login, pinned Cloud adapter, ledgers, lifecycle, and diff retrieval |
 | `crates/codebox-domain` | Implemented | Strong identifiers, paths, sequences, versioned events, and deterministic reducer |
-| `crates/codebox-event-store` | Recovered; locally accepted | Private SQLite atomic append and bounded ordered replay |
+| `crates/codebox-event-store` | Accepted through T030D | Private SQLite atomic append, bounded replay and verified snapshot save; public snapshot load pending |
 | `apps/node-agent` | Scaffold | Future host sandbox controller |
 | `apps/boxd` | Scaffold | Future in-sandbox process and filesystem service |
 | `apps/codebox-cli` | Scaffold | Future command-line client |

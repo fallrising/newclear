@@ -35,22 +35,21 @@ Old hosted runs do not prove execution of the new root workflow.
 | T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; recovery PR #242 merged at1f555f61; hosted root branch37148404076 and main37148875720 passed | Accepted; merged |
 
 
-## Accepted Snapshot Design — Unimplemented
+## Snapshot Save Runtime Accepted — Public Load Deferred
 
-These rows record accepted design traceability, not executable runtime evidence. Current A/B runtime
-remains version1. Recovery merged [PR #242](https://github.com/fallrising/newclear/pull/242) at
-`1f555f61`; hosted [branch run 37148404076](https://github.com/fallrising/newclear/actions/runs/37148404076)
-and [main run 37148875720](https://github.com/fallrising/newclear/actions/runs/37148875720) passed.
-Historical upstream acceptance rows above are retained unchanged.
+The historical design and A/B reports above are preserved. Current D runtime evidence is in
+[ACCEPT-T030D](acceptance/T030D.acceptance.md); schema-aware regressions retain append/replay
+behavior with the new exact v2 schema. The matrix in SPEC-T030D assigns 29 D/D-shared test names
+and three C-only names; D acceptance does not assert public-load coverage.
 
-| Requirement | Spec/ADR | Clauses | Planned machine evidence | Implementation / acceptance |
+| Requirement | Spec/ADR | Clauses | Runtime evidence | State |
 |---|---|---|---|---|
-| CU-EVT-04/INV-003/INV-004 bounded value and persisted provenance | [SPEC-T030D](specs/SPEC-T030D-sqlite-snapshot-save.md), [ADR-0005](adr/ADR-0005-snapshot-cache-contract.md) | S01–S04 | value bounds, canonical codec, durable-head CAS, fabricated-projection rejection, full-field prefix verification | Unimplemented; all test names/oracles in spec; unrun |
-| CU-EVT-04 equal-head concurrency/monotonicity/retry/crash | SPEC-T030D | S05–S08 | identical/different contenders, regression, rollback, busy/worker/cancellation/lost reply and crash restart | Unimplemented; planned/unrun |
-| CU-EVT-03 discardable cache/E0/persisted trust | SPEC-T030D | S09–S10 | absent/stale/corrupt/unsupported **values** as misses; structural lookup-key/schema/index/physical damage as store errors; pinned view, corrupt prefix/suffix, replayed projection without restore | Unimplemented; T030C spec/acceptance still required |
-| CU-EVT-01/02 compatibility; strict schema identity | SPEC-T030D | S11–S13 | schema spoof, nullable ANY cache value corruption with successful open/A/B, enabled event CHECK/type/NOT NULL integrity rejection, exact new/v1→v2, concurrent open, migration fault/crash, A/B preservation, legacy fresh-open downgrade rejection | Design accepted; no schema code changed |
-| Security/observability/acceptance boundary | SPEC-T030D | S14–S16 | bounded allocation/path/error canaries, state model, independent design/runtime gates, accepted T020/P0 regressions | Unimplemented; [design accepted](acceptance/T030D-design.acceptance.md) |
+| CU-EVT-04 bounded value and persisted provenance | SPEC-T030D / ADR-0005 | S01–S04 | Value/codec/head tests; legal fabricated candidate rejection; full-field equality; bounded persisted-prefix replay | Accepted D |
+| CU-EVT-04 concurrency, monotonicity, E1 and retry | SPEC-T030D | S05–S08 | Concurrent same-head savers and append orders; rollback, busy/worker faults, cancellation, lost reply and subprocess crashes | Accepted D |
+| CU-EVT-03 discardable cache and E0 load | SPEC-T030D; future SPEC-T030C | S09–S10 | D observes raw SQL visibility only; public load, verified returned projection and suffix continuation are deferred | Blocked C |
+| CU-EVT-01/02 compatibility and strict schema | SPEC-T030D | S11–S13 | Exact new/v1 upgrade, identity/integrity faults, nullable malformed values, concurrent opens, upgrade crashes, pinned replay across upgrade, retained full-u64 A/B tests and baseline v1 executable rejection | Accepted D |
+| Security, observability and acceptance | SPEC-T030D | S14–S16 | Gated body/metadata, bounded redacted diagnostics, private paths, generated multi-stream schedules, RED before code, full gates and independent review | Accepted D; C portions deferred |
 
-T030D is **Ready** after independent design acceptance; T030C and parent T030 remain **blocked**.
-The 32 planned tests have explicit D/C ownership in SPEC-T030D; D acceptance does not require
-public load implementation. No design or hosted recovery run accepts snapshot runtime or parent composition.
+T030D is **Accepted**. T030C and parent T030 remain **blocked** on their own specification,
+implementation and composition gates. Snapshot save is a P1 library capability; P0 session
+persistence, native agents and real-provider live acceptance are not implied.

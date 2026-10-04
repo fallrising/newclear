@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use codebox_domain::{
     DOMAIN_EVENT_SCHEMA_V1, DomainEventEnvelope, EventSeq, NewDomainEvent, SessionId,
+    SessionReducer, SessionReducerError,
 };
 use rusqlite::{
     Connection, OpenFlags, OptionalExtension, Transaction, TransactionBehavior, params,
@@ -17,8 +18,13 @@ use crate::codec::{
     EncodedNewEvent, bounded_raw_event_from_row, decode_event, decode_sequence, encode_new,
     raw_event_from_row, sequence_bytes,
 };
-use crate::path::{cleanup_new_database, validate_and_prepare};
-use crate::{CorruptStoreStage, EventStoreError, StorageErrorKind, StorageOperation};
+use crate::path::validate_and_prepare;
+use crate::snapshot::{encode as encode_snapshot, validate_body, validate_sequence};
+use crate::{
+    CorruptStoreStage, EventStoreError, InvalidEventHistoryReason, InvalidSnapshotReason,
+    SessionSnapshot, SnapshotCacheReason, SnapshotConflictReason, StorageErrorKind,
+    StorageOperation,
+};
 
 /// Maximum semantic events accepted in one atomic append.
 ///
@@ -41,7 +47,7 @@ pub const MAX_REPLAY_EVENTS: usize = 256;
 pub const SQLITE_BUSY_TIMEOUT: Duration = Duration::from_secs(5);
 
 const APPLICATION_ID: u32 = 0x4342_5831;
-const DATABASE_SCHEMA_VERSION: u32 = 1;
+const DATABASE_SCHEMA_VERSION: u32 = 2;
 pub(crate) const MAX_STORED_TIMESTAMP_BYTES: usize = 64;
 const EVENTS_SCHEMA_SQL: &str = "CREATE TABLE events (
                     event_id BLOB NOT NULL PRIMARY KEY
@@ -92,7 +98,8 @@ type EventIdSource = Arc<dyn Fn() -> Uuid + Send + Sync>;
 /// The private P1 SQLite event-store adapter.
 ///
 /// Contracts: `CU-EVT-01`, `CU-EVT-02`. T030A provides atomic append and T030B provides bounded
-/// replay; snapshots are added by T030C–T030D. Debug output never reveals the administrator
+/// replay; CU-EVT-04 provides verified snapshot save. Public snapshot load remains T030C.
+/// Debug output never reveals the administrator
 /// database path.
 #[derive(Clone)]
 pub struct SqliteEventStore {
@@ -110,7 +117,7 @@ impl fmt::Debug for SqliteEventStore {
 }
 
 impl SqliteEventStore {
-    /// Opens or initializes one private version-1 SQLite event database.
+    /// Opens or atomically upgrades one private version-2 SQLite event database.
     ///
     /// Contract: `CU-EVT-01`. The path is validated as an administrator-owned private local file;
     /// incompatible or corrupt schema state fails closed with a typed redacted error.
@@ -124,15 +131,8 @@ impl SqliteEventStore {
     ) -> Result<Self, EventStoreError> {
         let validated = task::spawn_blocking(move || {
             let validated = validate_and_prepare(database_path)?;
-            match initialize_database(&validated.path) {
-                Ok(()) => Ok(validated.path),
-                Err(error) => {
-                    if validated.created {
-                        cleanup_new_database(&validated.path);
-                    }
-                    Err(error)
-                }
-            }
+            initialize_database(&validated.path)?;
+            Ok::<_, EventStoreError>(validated.path)
         })
         .await
         .map_err(|_| EventStoreError::WorkerUnavailable)??;
@@ -158,6 +158,32 @@ impl SqliteEventStore {
 
         task::spawn_blocking(move || {
             append_prepared(&database_path, stream, expected_seq, prepared)
+        })
+        .await
+        .map_err(|_| EventStoreError::WorkerUnavailable)?
+    }
+
+    /// Saves one current-head cache after replaying its complete persisted prefix.
+    ///
+    /// Contract: CU-EVT-04 (E1). Changing saves commit one whole row; identical retries verify
+    /// history without rewriting. Dropping this future does not cancel the blocking worker.
+    /// Unknown completion requires explicit same-input reconciliation; there is no internal retry.
+    pub async fn save_snapshot(
+        &self,
+        snapshot: SessionSnapshot,
+        expected_seq: EventSeq,
+    ) -> Result<(), EventStoreError> {
+        validate_snapshot_input(&snapshot, expected_seq)?;
+        let path = Arc::clone(&self.database_path);
+        task::spawn_blocking(move || {
+            #[cfg(test)]
+            {
+                save_with_hook(&path, snapshot, expected_seq, |_| Ok(()))
+            }
+            #[cfg(not(test))]
+            {
+                save_transaction(&path, snapshot, expected_seq)
+            }
         })
         .await
         .map_err(|_| EventStoreError::WorkerUnavailable)?
@@ -264,6 +290,7 @@ fn append_prepared(
     let transaction = connection
         .transaction_with_behavior(TransactionBehavior::Immediate)
         .map_err(|error| map_sqlite(error, StorageOperation::Begin))?;
+    validate_identity(&transaction, false)?;
     let actual = read_high_water(&transaction, stream)?;
     if actual != expected_seq {
         return Err(EventStoreError::SequenceConflict {
@@ -299,8 +326,43 @@ fn load_page(
     after: EventSeq,
     limit: usize,
 ) -> Result<Vec<DomainEventEnvelope>, EventStoreError> {
-    let connection = open_read_connection(database_path)?;
-    let mut statement = connection
+    #[cfg(test)]
+    {
+        load_page_with_hook(database_path, stream, after, limit, || Ok(()))
+    }
+    #[cfg(not(test))]
+    {
+        load_page_transaction(database_path, stream, after, limit)
+    }
+}
+#[cfg(test)]
+fn load_page_with_hook(
+    database_path: &Path,
+    stream: SessionId,
+    after: EventSeq,
+    limit: usize,
+    hook: impl Fn() -> Result<(), EventStoreError>,
+) -> Result<Vec<DomainEventEnvelope>, EventStoreError> {
+    load_page_transaction(database_path, stream, after, limit, &hook)
+}
+fn load_page_transaction(
+    database_path: &Path,
+    stream: SessionId,
+    after: EventSeq,
+    limit: usize,
+    #[cfg(test)] hook: &impl Fn() -> Result<(), EventStoreError>,
+) -> Result<Vec<DomainEventEnvelope>, EventStoreError> {
+    let mut connection = open_read_connection(database_path)?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| map_sqlite(error, StorageOperation::Begin))?;
+    identity_transaction(
+        &transaction,
+        false,
+        #[cfg(test)]
+        hook,
+    )?;
+    let mut statement = transaction
         .prepare(REPLAY_QUERY)
         .map_err(|error| map_sqlite(error, StorageOperation::Replay))?;
     let query_limit = i64::try_from(limit).map_err(|_| EventStoreError::InvalidReplayLimit {
@@ -351,57 +413,320 @@ fn load_page(
     Ok(page)
 }
 
-fn initialize_database(path: &Path) -> Result<(), EventStoreError> {
-    let connection = open_connection(path)?;
-    let application_id = pragma_u32(&connection, "application_id")?;
-    let user_version = pragma_u32(&connection, "user_version")?;
-    let object_count: u32 = connection
-        .query_row(
-            "SELECT COUNT(*) FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%'",
-            [],
-            |row| row.get(0),
-        )
-        .map_err(|error| map_sqlite(error, StorageOperation::Initialize))?;
-
-    if application_id == 0 && user_version == 0 && object_count == 0 {
-        connection
-            .execute_batch(
-                "
-                BEGIN IMMEDIATE;
-                CREATE TABLE events (
-                    event_id BLOB NOT NULL PRIMARY KEY
-                        CHECK (typeof(event_id) = 'blob' AND length(event_id) = 16),
-                    stream_id BLOB NOT NULL
-                        CHECK (typeof(stream_id) = 'blob' AND length(stream_id) = 16),
-                    seq BLOB NOT NULL
-                        CHECK (typeof(seq) = 'blob' AND length(seq) = 8),
-                    schema_version INTEGER NOT NULL
-                        CHECK (schema_version BETWEEN 0 AND 65535),
-                    occurred_at TEXT NOT NULL,
-                    causation_id BLOB
-                        CHECK (causation_id IS NULL OR
-                               (typeof(causation_id) = 'blob' AND length(causation_id) = 16)),
-                    correlation_id BLOB NOT NULL
-                        CHECK (typeof(correlation_id) = 'blob' AND length(correlation_id) = 16),
-                    payload BLOB NOT NULL,
-                    UNIQUE (stream_id, seq)
-                ) STRICT, WITHOUT ROWID;
-                PRAGMA application_id = 1128421425;
-                PRAGMA user_version = 1;
-                COMMIT;
-                ",
-            )
-            .map_err(|error| map_sqlite(error, StorageOperation::Initialize))?;
-    } else if application_id != APPLICATION_ID || user_version != DATABASE_SCHEMA_VERSION {
-        return Err(EventStoreError::UnsupportedDatabaseSchema {
-            expected_application_id: APPLICATION_ID,
-            actual_application_id: application_id,
-            expected_user_version: DATABASE_SCHEMA_VERSION,
-            actual_user_version: user_version,
+fn validate_snapshot_input(
+    snapshot: &SessionSnapshot,
+    expected: EventSeq,
+) -> Result<(), EventStoreError> {
+    validate_sequence(snapshot.projection().last_seq().value())?;
+    if snapshot.projection().last_seq() != expected {
+        return Err(EventStoreError::InvalidSnapshot {
+            reason: InvalidSnapshotReason::ExpectedSequenceMismatch,
         });
     }
+    Ok(())
+}
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum SavePoint {
+    Locked,
+    Page(usize),
+    Verified,
+    Written,
+    Committed,
+}
+#[cfg(test)]
+fn save_with_hook(
+    path: &Path,
+    snapshot: SessionSnapshot,
+    expected: EventSeq,
+    hook: impl Fn(SavePoint) -> Result<(), EventStoreError>,
+) -> Result<(), EventStoreError> {
+    save_transaction(path, snapshot, expected, &hook)
+}
+macro_rules! at_test_point {
+    ($hook:ident, $point:expr) => {
+        #[cfg(test)]
+        {
+            $hook($point)?;
+        }
+    };
+}
+fn save_transaction(
+    path: &Path,
+    snapshot: SessionSnapshot,
+    expected: EventSeq,
+    #[cfg(test)] hook: &impl Fn(SavePoint) -> Result<(), EventStoreError>,
+) -> Result<(), EventStoreError> {
+    validate_snapshot_input(&snapshot, expected)?;
+    let mut connection = open_connection(path)?;
+    let transaction = connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|error| map_sqlite(error, StorageOperation::Begin))?;
+    validate_identity(&transaction, true)?;
+    validate_snapshot_keys(&transaction)?;
+    at_test_point!(hook, SavePoint::Locked);
+    let stream = snapshot.projection().session_id();
+    let actual = read_high_water(&transaction, stream)?;
+    if actual != expected {
+        return Err(EventStoreError::SequenceConflict { expected, actual });
+    }
+    let projection = verify_prefix(
+        &transaction,
+        stream,
+        actual,
+        #[cfg(test)]
+        hook,
+    )?;
+    if projection != *snapshot.projection() {
+        return Err(EventStoreError::SnapshotHistoryMismatch { seq: actual });
+    }
+    at_test_point!(hook, SavePoint::Verified);
+    let body = encode_snapshot(&snapshot);
+    if let Some((stored, previous)) = read_snapshot_row(&transaction, stream)? {
+        if stored > expected {
+            return Err(EventStoreError::SnapshotConflict {
+                candidate_seq: expected,
+                stored_seq: stored,
+                reason: SnapshotConflictReason::Regression,
+            });
+        }
+        if stored == expected {
+            if previous != body {
+                return Err(EventStoreError::SnapshotConflict {
+                    candidate_seq: expected,
+                    stored_seq: stored,
+                    reason: SnapshotConflictReason::DifferentContent,
+                });
+            }
+            // Drop explicitly owns rollback of the admitted transaction, with no row write.
+            return Ok(());
+        }
+    }
+    transaction.execute("INSERT INTO snapshots(stream_id, seq, codec_version, body) VALUES (?1, ?2, 1, ?3) ON CONFLICT(stream_id) DO UPDATE SET seq=excluded.seq, codec_version=excluded.codec_version, body=excluded.body",
+        params![stream.as_uuid().as_bytes().as_slice(), sequence_bytes(expected).as_slice(), body.as_slice()])
+        .map_err(|error| map_sqlite(error, StorageOperation::SnapshotWrite))?;
+    at_test_point!(hook, SavePoint::Written);
+    transaction
+        .commit()
+        .map_err(|error| map_sqlite(error, StorageOperation::Commit))?;
+    at_test_point!(hook, SavePoint::Committed);
+    Ok(())
+}
+const SNAPSHOT_QUERY: &str = "SELECT
+    CASE WHEN typeof(seq) = 'blob' AND length(seq) = 8 THEN seq END,
+    CASE WHEN typeof(codec_version) = 'integer' AND codec_version BETWEEN 0 AND 65535 THEN codec_version END,
+    CASE WHEN typeof(body) = 'blob' AND length(body) = 96 THEN body END
+    FROM snapshots WHERE stream_id = ?1";
+fn validate_snapshot_keys(connection: &Connection) -> Result<(), EventStoreError> {
+    let invalid: bool = connection.query_row(
+        "SELECT EXISTS(SELECT 1 FROM snapshots WHERE stream_id IS NULL OR typeof(stream_id) != 'blob' OR length(stream_id) != 16)", [], |row| row.get(0))
+        .map_err(|error| map_sqlite(error, StorageOperation::SnapshotRead))?;
+    if invalid {
+        return schema_corrupt();
+    }
+    Ok(())
+}
+fn read_snapshot_row(
+    connection: &Connection,
+    stream: SessionId,
+) -> Result<Option<(EventSeq, [u8; 96])>, EventStoreError> {
+    let row = connection
+        .query_row(
+            SNAPSHOT_QUERY,
+            params![stream.as_uuid().as_bytes().as_slice()],
+            |row| {
+                Ok((
+                    row.get::<_, Option<Vec<u8>>>(0)?,
+                    row.get::<_, Option<i64>>(1)?,
+                    row.get::<_, Option<Vec<u8>>>(2)?,
+                ))
+            },
+        )
+        .optional()
+        .map_err(|error| map_sqlite(error, StorageOperation::SnapshotRead))?;
+    let Some((seq, version, body)) = row else {
+        return Ok(None);
+    };
+    let invalid = |reason| EventStoreError::InvalidSnapshotCache { reason };
+    let seq = seq.ok_or_else(|| invalid(SnapshotCacheReason::Type))?;
+    let version = version.ok_or_else(|| invalid(SnapshotCacheReason::Type))?;
+    let body = body.ok_or_else(|| invalid(SnapshotCacheReason::Width))?;
+    if version != 1 {
+        return Err(invalid(SnapshotCacheReason::Version));
+    }
+    validate_body(&body, stream.as_uuid().as_bytes(), &seq).map_err(invalid)?;
+    let stored = decode_sequence(&seq).map_err(|_| invalid(SnapshotCacheReason::Sequence))?;
+    let body = body
+        .try_into()
+        .map_err(|_| invalid(SnapshotCacheReason::Width))?;
+    Ok(Some((stored, body)))
+}
+fn verify_prefix(
+    connection: &Connection,
+    stream: SessionId,
+    target: EventSeq,
+    #[cfg(test)] hook: &impl Fn(SavePoint) -> Result<(), EventStoreError>,
+) -> Result<codebox_domain::SessionProjection, EventStoreError> {
+    validate_sequence(target.value())?;
+    let mut reducer = SessionReducer::new(stream);
+    let mut verified = 0u64;
+    while verified < target.value() {
+        let limit = (target.value() - verified).min(MAX_REPLAY_EVENTS as u64);
+        let mut statement = connection
+            .prepare(REPLAY_QUERY)
+            .map_err(|error| map_sqlite(error, StorageOperation::SnapshotVerify))?;
+        let mut rows = statement
+            .query(params![
+                stream.as_uuid().as_bytes().as_slice(),
+                sequence_bytes(EventSeq::new(verified)).as_slice(),
+                limit as i64,
+                MAX_STORED_TIMESTAMP_BYTES as i64,
+                MAX_EVENT_PAYLOAD_BYTES as i64
+            ])
+            .map_err(|error| map_sqlite(error, StorageOperation::SnapshotVerify))?;
+        let mut page = 0;
+        while let Some(row) = rows
+            .next()
+            .map_err(|error| map_sqlite(error, StorageOperation::SnapshotVerify))?
+        {
+            let envelope = decode_event(bounded_raw_event_from_row(row)?)?;
+            let next = verified
+                .checked_add(1)
+                .filter(|seq| *seq <= target.value())
+                .ok_or(EventStoreError::CorruptStore {
+                    stage: CorruptStoreStage::Sequence,
+                })?;
+            if envelope.stream_id != stream {
+                return Err(EventStoreError::CorruptStore {
+                    stage: CorruptStoreStage::StreamId,
+                });
+            }
+            if envelope.seq.value() != next {
+                return Err(EventStoreError::CorruptStore {
+                    stage: CorruptStoreStage::Sequence,
+                });
+            }
+            reducer =
+                reducer
+                    .apply(&envelope)
+                    .map_err(|error| EventStoreError::InvalidEventHistory {
+                        seq: envelope.seq,
+                        reason: history_reason(error),
+                    })?;
+            verified = next;
+            page += 1;
+        }
+        if page == 0 {
+            return Err(EventStoreError::CorruptStore {
+                stage: CorruptStoreStage::Sequence,
+            });
+        }
+        at_test_point!(hook, SavePoint::Page(page));
+    }
+    reducer
+        .projection()
+        .cloned()
+        .ok_or(EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Sequence,
+        })
+}
+fn history_reason(error: SessionReducerError) -> InvalidEventHistoryReason {
+    match error {
+        SessionReducerError::WrongStream { .. } => InvalidEventHistoryReason::WrongStream,
+        SessionReducerError::UnexpectedSequence { .. } => InvalidEventHistoryReason::Sequence,
+        SessionReducerError::UnsupportedSchemaVersion { .. } => {
+            InvalidEventHistoryReason::SchemaVersion
+        }
+        SessionReducerError::SessionNotCreated { .. } => InvalidEventHistoryReason::MissingCreation,
+        SessionReducerError::InvalidTransition { .. } => InvalidEventHistoryReason::Transition,
+        SessionReducerError::ActiveTurnMismatch { .. } => InvalidEventHistoryReason::TurnIdentity,
+        SessionReducerError::PendingApprovalMismatch { .. } => {
+            InvalidEventHistoryReason::ApprovalIdentity
+        }
+        SessionReducerError::SequenceOverflow { .. } => InvalidEventHistoryReason::Overflow,
+    }
+}
 
-    validate_schema(&connection)
+const SNAPSHOTS_SCHEMA_SQL: &str = "CREATE TABLE snapshots (
+    stream_id BLOB NOT NULL PRIMARY KEY
+        CHECK (typeof(stream_id) = 'blob' AND length(stream_id) = 16),
+    seq ANY,
+    codec_version ANY,
+    body ANY
+) STRICT, WITHOUT ROWID";
+
+fn initialize_database(path: &Path) -> Result<(), EventStoreError> {
+    #[cfg(test)]
+    {
+        initialize_with_hook(path, |_| Ok(()))
+    }
+    #[cfg(not(test))]
+    {
+        initialize_transaction(path)
+    }
+}
+
+#[cfg(test)]
+fn initialize_with_hook(
+    path: &Path,
+    hook: impl Fn(SchemaPoint) -> Result<(), EventStoreError>,
+) -> Result<(), EventStoreError> {
+    initialize_transaction(path, &hook)
+}
+fn initialize_transaction(
+    path: &Path,
+    #[cfg(test)] hook: &impl Fn(SchemaPoint) -> Result<(), EventStoreError>,
+) -> Result<(), EventStoreError> {
+    let mut connection = open_connection(path)?;
+    let transaction = connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|error| map_sqlite(error, StorageOperation::Begin))?;
+    let application_id = pragma_u32(&transaction, "application_id")?;
+    let version = pragma_u32(&transaction, "user_version")?;
+    let count: u32 = transaction
+        .query_row("SELECT COUNT(*) FROM sqlite_schema", [], |row| row.get(0))
+        .map_err(|error| map_sqlite(error, StorageOperation::Initialize))?;
+    if application_id == 0 && version == 0 && count == 0 {
+        transaction
+            .execute_batch(EVENTS_SCHEMA_SQL)
+            .map_err(|error| map_sqlite(error, StorageOperation::Initialize))?;
+        at_test_point!(hook, SchemaPoint::Events);
+        transaction
+            .execute_batch(SNAPSHOTS_SCHEMA_SQL)
+            .map_err(|error| map_sqlite(error, StorageOperation::SchemaUpgrade))?;
+        at_test_point!(hook, SchemaPoint::Snapshots);
+        transaction
+            .execute_batch("PRAGMA application_id = 1128421425; PRAGMA user_version = 2;")
+            .map_err(|error| map_sqlite(error, StorageOperation::SchemaUpgrade))?;
+    } else {
+        validate_identity(&transaction, false)?;
+        validate_integrity(&transaction)?;
+        if version == 1 {
+            transaction
+                .execute_batch(SNAPSHOTS_SCHEMA_SQL)
+                .map_err(|error| map_sqlite(error, StorageOperation::SchemaUpgrade))?;
+            at_test_point!(hook, SchemaPoint::Snapshots);
+            transaction
+                .execute_batch("PRAGMA user_version = 2;")
+                .map_err(|error| map_sqlite(error, StorageOperation::SchemaUpgrade))?;
+        }
+    }
+    at_test_point!(hook, SchemaPoint::Version);
+    validate_identity(&transaction, true)?;
+    validate_integrity(&transaction)?;
+    transaction
+        .commit()
+        .map_err(|error| map_sqlite(error, StorageOperation::Commit))?;
+    at_test_point!(hook, SchemaPoint::Committed);
+    Ok(())
+}
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum SchemaPoint {
+    Events,
+    Snapshots,
+    Version,
+    Committed,
 }
 
 fn open_connection(path: &Path) -> Result<Connection, EventStoreError> {
@@ -435,28 +760,173 @@ fn open_read_connection(path: &Path) -> Result<Connection, EventStoreError> {
     Ok(connection)
 }
 
-fn validate_schema(connection: &Connection) -> Result<(), EventStoreError> {
+fn validate_integrity(connection: &Connection) -> Result<(), EventStoreError> {
     let integrity: String = connection
         .query_row("PRAGMA integrity_check(1)", [], |row| row.get(0))
         .map_err(|error| map_sqlite(error, StorageOperation::Initialize))?;
     if integrity != "ok" {
-        return Err(EventStoreError::CorruptStore {
-            stage: CorruptStoreStage::Schema,
+        return schema_corrupt();
+    }
+    Ok(())
+}
+fn schema_corrupt<T>() -> Result<T, EventStoreError> {
+    Err(EventStoreError::CorruptStore {
+        stage: CorruptStoreStage::Schema,
+    })
+}
+fn validate_identity(connection: &Connection, snapshot: bool) -> Result<(), EventStoreError> {
+    identity_transaction(
+        connection,
+        snapshot,
+        #[cfg(test)]
+        &|| Ok(()),
+    )
+}
+fn identity_transaction(
+    connection: &Connection,
+    snapshot: bool,
+    #[cfg(test)] hook: &impl Fn() -> Result<(), EventStoreError>,
+) -> Result<(), EventStoreError> {
+    let app = pragma_u32(connection, "application_id")?;
+    let version = pragma_u32(connection, "user_version")?;
+    #[cfg(test)]
+    hook()?;
+    if app != APPLICATION_ID || !(version == 2 || (!snapshot && version == 1)) {
+        return Err(EventStoreError::UnsupportedDatabaseSchema {
+            expected_application_id: APPLICATION_ID,
+            actual_application_id: app,
+            expected_user_version: DATABASE_SCHEMA_VERSION,
+            actual_user_version: version,
         });
     }
-    let schema_sql: String = connection
-        .query_row(
-            "SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = 'events'",
-            [],
-            |row| row.get(0),
-        )
+    let mut statement = connection
+        .prepare("SELECT type, name, tbl_name, sql FROM sqlite_schema ORDER BY name")
         .map_err(|_| EventStoreError::CorruptStore {
             stage: CorruptStoreStage::Schema,
         })?;
-    if schema_sql != EVENTS_SCHEMA_SQL {
-        return Err(EventStoreError::CorruptStore {
+    let mut rows = statement
+        .query([])
+        .map_err(|_| EventStoreError::CorruptStore {
             stage: CorruptStoreStage::Schema,
-        });
+        })?;
+    let mut count = 0;
+    while let Some(row) = rows.next().map_err(|_| EventStoreError::CorruptStore {
+        stage: CorruptStoreStage::Schema,
+    })? {
+        let kind: String = row.get(0).map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+        let name: String = row.get(1).map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+        let table: String = row.get(2).map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+        let sql: Option<String> = row.get(3).map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+        let valid = match name.as_str() {
+            "events" => {
+                kind == "table" && table == "events" && sql.as_deref() == Some(EVENTS_SCHEMA_SQL)
+            }
+            "snapshots" if version == 2 => {
+                kind == "table"
+                    && table == "snapshots"
+                    && sql.as_deref() == Some(SNAPSHOTS_SCHEMA_SQL)
+            }
+            "sqlite_autoindex_events_2" => kind == "index" && table == "events" && sql.is_none(),
+            _ => false,
+        };
+        if !valid {
+            return schema_corrupt();
+        }
+        count += 1;
+    }
+    if count != if version == 2 { 3 } else { 2 } {
+        return schema_corrupt();
+    }
+    validate_indexes(
+        connection,
+        "events",
+        &[
+            ("sqlite_autoindex_events_2", "u", &["stream_id", "seq"]),
+            ("sqlite_autoindex_events_1", "pk", &["event_id"]),
+        ],
+    )?;
+    if version == 2 {
+        validate_indexes(
+            connection,
+            "snapshots",
+            &[("sqlite_autoindex_snapshots_1", "pk", &["stream_id"])],
+        )?;
+    }
+    Ok(())
+}
+fn validate_indexes(
+    connection: &Connection,
+    table: &str,
+    expected: &[(&str, &str, &[&str])],
+) -> Result<(), EventStoreError> {
+    let query = match table {
+        "events" => "PRAGMA index_list(events)",
+        "snapshots" => "PRAGMA index_list(snapshots)",
+        _ => return schema_corrupt(),
+    };
+    let mut statement = connection
+        .prepare(query)
+        .map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+    let entries = statement
+        .query_map([], |row| {
+            Ok((
+                row.get::<_, String>(1)?,
+                row.get::<_, i64>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, i64>(4)?,
+            ))
+        })
+        .map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+    let mut count = 0;
+    for entry in entries {
+        let (name, unique, origin, partial) = entry.map_err(|_| EventStoreError::CorruptStore {
+            stage: CorruptStoreStage::Schema,
+        })?;
+        let Some((_, _, columns)) = expected
+            .iter()
+            .find(|(n, o, _)| *n == name && *o == origin && unique == 1 && partial == 0)
+        else {
+            return schema_corrupt();
+        };
+        let query = match name.as_str() {
+            "sqlite_autoindex_events_1" => "PRAGMA index_info(sqlite_autoindex_events_1)",
+            "sqlite_autoindex_events_2" => "PRAGMA index_info(sqlite_autoindex_events_2)",
+            "sqlite_autoindex_snapshots_1" => "PRAGMA index_info(sqlite_autoindex_snapshots_1)",
+            _ => return schema_corrupt(),
+        };
+        let mut info = connection
+            .prepare(query)
+            .map_err(|_| EventStoreError::CorruptStore {
+                stage: CorruptStoreStage::Schema,
+            })?;
+        let actual = info
+            .query_map([], |row| row.get::<_, String>(2))
+            .map_err(|_| EventStoreError::CorruptStore {
+                stage: CorruptStoreStage::Schema,
+            })?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|_| EventStoreError::CorruptStore {
+                stage: CorruptStoreStage::Schema,
+            })?;
+        if actual.iter().map(String::as_str).collect::<Vec<_>>() != *columns {
+            return schema_corrupt();
+        }
+        count += 1;
+    }
+    if count != expected.len() {
+        return schema_corrupt();
     }
     Ok(())
 }
@@ -485,12 +955,12 @@ fn read_high_water(
 ) -> Result<EventSeq, EventStoreError> {
     let encoded: Option<Vec<u8>> = transaction
         .query_row(
-            "SELECT seq FROM events WHERE stream_id = ?1 ORDER BY seq DESC LIMIT 1",
+            "SELECT CASE WHEN typeof(seq) = 'blob' AND length(seq) = 8 THEN seq END FROM events WHERE stream_id = ?1 ORDER BY seq DESC LIMIT 1",
             params![stream.as_uuid().as_bytes().as_slice()],
             |row| row.get(0),
         )
         .optional()
-        .map_err(|error| map_sqlite(error, StorageOperation::ReadHighWater))?;
+        .map_err(|error| match error { rusqlite::Error::InvalidColumnType(..) => EventStoreError::CorruptStore { stage: CorruptStoreStage::Sequence }, _ => map_sqlite(error, StorageOperation::ReadHighWater) })?;
     encoded
         .as_deref()
         .map(decode_sequence)
@@ -736,3 +1206,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "snapshot_tests.rs"]
+mod snapshot_tests;

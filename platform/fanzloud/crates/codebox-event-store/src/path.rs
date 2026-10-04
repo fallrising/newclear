@@ -1,12 +1,11 @@
 use std::fs::{self, OpenOptions};
 use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::{DatabasePathErrorKind, EventStoreError};
 
 pub(crate) struct ValidatedDatabasePath {
     pub(crate) path: PathBuf,
-    pub(crate) created: bool,
 }
 
 pub(crate) fn validate_and_prepare(
@@ -64,36 +63,45 @@ pub(crate) fn validate_and_prepare(
             ) {
                 return invalid(reason);
             }
-            Ok(ValidatedDatabasePath {
-                path,
-                created: false,
-            })
+            Ok(ValidatedDatabasePath { path })
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            OpenOptions::new()
+            match OpenOptions::new()
                 .read(true)
                 .write(true)
                 .create_new(true)
                 .mode(0o600)
                 .open(&path)
-                .map_err(|_| EventStoreError::InvalidDatabasePath {
-                    reason: DatabasePathErrorKind::CreateFailed,
-                })?;
-            Ok(ValidatedDatabasePath {
-                path,
-                created: true,
-            })
+            {
+                Ok(_) => {}
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+                    let metadata = fs::symlink_metadata(&path).map_err(|_| {
+                        EventStoreError::InvalidDatabasePath {
+                            reason: DatabasePathErrorKind::CreateFailed,
+                        }
+                    })?;
+                    if metadata.file_type().is_symlink() {
+                        return invalid(DatabasePathErrorKind::TargetSymlink);
+                    }
+                    if !metadata.file_type().is_file() {
+                        return invalid(DatabasePathErrorKind::TargetNotRegular);
+                    }
+                    if let Some(reason) = owner_mode_error(
+                        metadata.uid(),
+                        metadata.mode(),
+                        effective_uid,
+                        DatabasePathErrorKind::TargetWrongOwner,
+                        DatabasePathErrorKind::TargetOpenPermissions,
+                    ) {
+                        return invalid(reason);
+                    }
+                    return Ok(ValidatedDatabasePath { path });
+                }
+                Err(_) => return invalid(DatabasePathErrorKind::CreateFailed),
+            }
+            Ok(ValidatedDatabasePath { path })
         }
         Err(_) => invalid(DatabasePathErrorKind::CreateFailed),
-    }
-}
-
-pub(crate) fn cleanup_new_database(path: &Path) {
-    let _ = fs::remove_file(path);
-    for suffix in ["-wal", "-shm", "-journal"] {
-        let mut sidecar = path.as_os_str().to_os_string();
-        sidecar.push(suffix);
-        let _ = fs::remove_file(PathBuf::from(sidecar));
     }
 }
 

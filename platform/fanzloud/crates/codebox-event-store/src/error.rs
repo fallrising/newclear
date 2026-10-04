@@ -35,6 +35,10 @@ pub enum StorageOperation {
     VerifyInserted,
     Commit,
     Replay,
+    SnapshotRead,
+    SnapshotWrite,
+    SnapshotVerify,
+    SchemaUpgrade,
 }
 
 /// A safe classification of a SQLite/storage failure.
@@ -116,6 +120,62 @@ pub enum EventStoreError {
         operation: StorageOperation,
         kind: StorageErrorKind,
     },
+    #[error("snapshot admission is invalid")]
+    InvalidSnapshot { reason: InvalidSnapshotReason },
+    #[error("snapshot prefix exceeds the verification budget")]
+    SnapshotPrefixTooLarge { max: u64, actual: u64 },
+    #[error("snapshot differs from durable history")]
+    SnapshotHistoryMismatch { seq: EventSeq },
+    #[error("durable history cannot be reduced")]
+    InvalidEventHistory {
+        seq: EventSeq,
+        reason: InvalidEventHistoryReason,
+    },
+    #[error("snapshot cache conflicts with immutable stored content")]
+    SnapshotConflict {
+        candidate_seq: EventSeq,
+        stored_seq: EventSeq,
+        reason: SnapshotConflictReason,
+    },
+    #[error("stored snapshot cache value is invalid")]
+    InvalidSnapshotCache { reason: SnapshotCacheReason },
     #[error("blocking SQLite worker could not be joined")]
     WorkerUnavailable,
+}
+
+/// Checked snapshot admission failure (CU-EVT-04).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InvalidSnapshotReason {
+    Empty,
+    ExpectedSequenceMismatch,
+}
+/// Bounded cache value failure; identifiers and bytes are never included.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SnapshotCacheReason {
+    Type,
+    Width,
+    Version,
+    Identity,
+    Sequence,
+    Status,
+    Option,
+    Timestamp,
+}
+/// Immutable-cache arbitration failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SnapshotConflictReason {
+    DifferentContent,
+    Regression,
+}
+/// Safe projection of a reducer failure without its identity payloads.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InvalidEventHistoryReason {
+    WrongStream,
+    Sequence,
+    SchemaVersion,
+    MissingCreation,
+    Transition,
+    TurnIdentity,
+    ApprovalIdentity,
+    Overflow,
 }

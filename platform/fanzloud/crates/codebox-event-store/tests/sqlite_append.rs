@@ -408,7 +408,7 @@ async fn initialized_database_has_fixed_identity_and_private_mode() {
         .expect("journal mode");
 
     assert_eq!(application_id, 0x4342_5831);
-    assert_eq!(user_version, 1);
+    assert_eq!(user_version, 2);
     assert_eq!(journal_mode, "wal");
     assert_eq!(
         std::fs::metadata(&path)
@@ -457,7 +457,7 @@ async fn database_schema_drift_fails_closed() {
 }
 
 #[tokio::test]
-async fn mid_transaction_failure_rolls_back_entire_batch() {
+async fn schema_drift_fault_trigger_is_rejected_before_append() {
     let root = private_root();
     let path = database_path(&root);
     let store = SqliteEventStore::open(path.clone())
@@ -488,7 +488,9 @@ async fn mid_transaction_failure_rolls_back_entire_batch() {
                 ],
             )
             .await,
-        Err(EventStoreError::Storage { .. })
+        Err(EventStoreError::CorruptStore {
+            stage: codebox_event_store::CorruptStoreStage::Schema
+        })
     ));
     assert_eq!(row_count(&path), 0);
 }

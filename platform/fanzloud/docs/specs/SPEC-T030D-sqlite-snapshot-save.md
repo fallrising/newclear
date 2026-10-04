@@ -1,7 +1,7 @@
 ---
 id: SPEC-T030D
 title: SQLite snapshot cache save and dependent load trust boundary
-status: ready
+status: verified
 contract_units: [CU-EVT-04, CU-EVT-03]
 module: codebox-event-store
 milestone: P1
@@ -16,11 +16,11 @@ risk: high
 
 # Intent
 
-Define the accepted snapshot design for subsequent test-first implementation. This specification
-and [ADR-0005](../adr/ADR-0005-snapshot-cache-contract.md) passed fresh-context independent design
-review after the R1 integrity-policy repair. T030D is Ready for implementation; T030C and the T030
-parent remain blocked. All test names below are planned, unimplemented and unrun. Accepted A/B
-behavior remains the runtime baseline; schema version 2 is designed but not implemented.
+Specify the snapshot cache contract. The D-owned save/value/schema boundary is implemented and
+verified in [runtime acceptance](../acceptance/T030D.acceptance.md), following accepted design
+review and compiling RED skeletons. T030C public load and its portions of shared assertions remain
+planned; T030C and the T030 parent remain blocked. The current store uses schema version2 while
+preserving A/B append/replay behavior. Verified status applies to the D-owned boundary only.
 
 # Responsibility
 
@@ -36,7 +36,8 @@ a general migration framework, cache repair/deletion, encryption, or P0 durable 
 
 # Public Boundary
 
-Accepted design signatures, **not implemented**:
+Implemented save/value signatures, with the dependent `load_snapshot` signature shown only as
+the **unimplemented T030C design boundary**:
 
 ```rust
 pub const MAX_SNAPSHOT_BYTES: usize = 96;
@@ -302,6 +303,10 @@ Append/replay/history remain the sources of truth.
 
 # Non-Guarantees
 
+Save also checks all existing cache lookup keys through a fixed metadata-only SQL query.
+This uses constant application allocation but may scan all cache keys; the 4096 bound applies
+to event-prefix decoding, not this structural-key scan.
+
 This correctness-first v1 cache replays its complete prefix to verify provenance. It holds the writer lock while verifying up to 4096 events, so competing append latency can
 exceed lock timeout and return Busy; the five-second timeout bounds lock waiting, not transaction
 duration. At the maximum, one page may hold 256×65,536 bytes (16 MiB) of payload plus bounded
@@ -356,7 +361,7 @@ partial state; statement failure must roll back the transaction (S07/S09/S12).
 
 # Failure Modes and Error Contract
 
-Accepted design additions; no variants are implemented here. Validation precedes DB access; after that,
+The D-owned variants are implemented; load dispositions remain T030C requirements. Validation precedes DB access; after that,
 identity check → lock/head CAS → durable-prefix decode/reduce → existing-row arbitration → write/commit.
 
 | Failure | Typed error/disposition | Caller action |
@@ -395,10 +400,12 @@ Timestamps/identifiers remain data rather than authentication, actor leases, or 
 
 # Test Specification
 
-**All entries are planned/unimplemented/unrun.** Future names are exact machine-acceptance names;
-the oracles, not their mere existence, are acceptance requirements. Each clause maps below.
+**D-owned assertions are implemented and verified; C-owned assertions remain planned.**
+The 29 D/D-shared names execute in the save suite; three C-only names and C portions of the ten
+shared rows await T030C. Runtime acceptance records the precise evidence boundary. Names alone
+do not establish coverage; the concrete oracles below remain normative.
 
-| Clause | Layer / future executable test | Concrete oracle | Acceptance owner |
+| Clause | Layer / executable test | Concrete oracle | Acceptance owner |
 |---|---|---|---|
 | S01 | contract `snapshot_value_bounds_precede_database_access` | Delete database; seq4097 projection from public reducer fails before I/O; private pure sequence-policy helper rejects0 without domain forger; raw zero cache misses;1 and4096 encode; full-u64 A/B replay unaffected | D then C |
 | S01/S02 | unit `snapshot_codec_is_exact_canonical_96_bytes` | All nine statuses/options/timestamp extrema including valid leap seconds round-trip to exact layout; unknown status/tag/nil ID/extra bytes fail | D |
@@ -482,7 +489,7 @@ Schema spoof, allocation gates, typed-projection provenance, private paths and d
 Retain all accepted T010/T020/A/B behavior and `regression_ephemeral_not_persisted`, 10 Node P0 tests,
 private P0 fake-provider E2E, Rust workspace fmt/clippy/test/build, locked cargo-deny and diff checks.
 Update old initialization-version assertions only through the accepted schema transition; keep
-historical acceptance unchanged. Future implementation commands from component root, **not run for this design**:
+historical acceptance unchanged. Runtime gates from component root, executed for T030D; exact results are in runtime acceptance:
 
 ```bash
 cargo test --locked -p codebox-event-store --all-features
@@ -498,23 +505,23 @@ git diff --check
 
 # Acceptance Evidence
 
-Independent design acceptance is recorded in
-[T030D design review](../acceptance/T030D-design.acceptance.md). Documentation checks and scratch
-SQLite experiments establish design feasibility only; the 32 future machine tests remain unrun.
-No runtime snapshot acceptance exists.
+The historical [design review](../acceptance/T030D-design.acceptance.md) remains unchanged.
+Separate [runtime acceptance](../acceptance/T030D.acceptance.md) records compiling RED, substantive
+D-owned tests, regression gates, independent review and residual limitations. C-only and shared C
+assertions are not claimed as runtime evidence.
 
 # Traceability
 
 CU-EVT-04 → S01–S08/S11–S16 (E1); dependent CU-EVT-03 → S02/S04/S09–S16 (E0).
 TD §§4.4–4.6/INV-003/INV-004 → history remains authoritative; accepted T020/A/B → strict codec and
-private projection preserved. [Traceability](../traceability.md) records accepted-design/unimplemented state.
+private projection preserved. [Traceability](../traceability.md) distinguishes accepted D runtime from deferred C load.
 
 # TD Gaps
 
 The prior snapshot concurrency/failure gap is resolved by accepted ADR-0005 and this design.
 The initial independent review rejected global CHECK suppression; R1 was repaired with nullable
 ANY cache values, full enabled integrity validation and an explicit value/structural corruption
-partition. No unresolved high-risk design gap remains. Runtime acceptance, T030C specification
+partition. No unresolved high-risk design gap remains. D runtime is separately accepted; T030C specification
 and parent composition remain separate gates; new implementation discoveries must become an ADR
 or concrete TD-GAP rather than improvised behavior.
 
@@ -531,4 +538,4 @@ or concrete TD-GAP rather than improvised behavior.
 | B: allocation, cleanup, cancellation? | 96-byte gates, bounded total work, read E0; no unsafe unlink of shared new DB; worker may finish S02/S08/S12/S14 |
 | All: preconditions/error precedence? | Type/checked table, S01/S03 then schema/head/history/old-row/write; bounded error enums |
 | All: observability/side effects/non-guarantees? | Typed phase/outcome, no secret logs/new ledger, correctness-first full replay and explicit cap S08/S14/S15 |
-| All: contract proof/readiness? | Every S clause maps to names/oracles, all planned/unrun; accepted design permits D Ready only |
+| All: contract proof/readiness? | Every S clause maps to names/oracles; D runtime separately accepted, C assertions and parent composition deferred |

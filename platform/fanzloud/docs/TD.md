@@ -566,9 +566,10 @@ Only cache seq/version/body use nullable ANY storage with fixed SQL/codec gates;
 BLOB key and authoritative event constraints retain full enabled integrity validation. Cache
 value corruption is discardable; key/schema/index/physical or durable-event damage fails closed.
 
-This is an accepted **design amendment**, not runtime acceptance. CU-EVT-04 is E1 and T030D
-is Ready for implementation; CU-EVT-03/T030 remain blocked pending their implementation gates.
-The current accepted A/B runtime still uses version1. Historical acceptance is unchanged.
+The design amendment is accepted; separate [T030D runtime acceptance](acceptance/T030D.acceptance.md)
+now accepts CU-EVT-04 E1 save and the narrow schema-v2 transition. CU-EVT-03/T030 remain blocked
+pending their own specification/implementation/composition gates. Historical A/B acceptance is
+unchanged; schema-aware regression tests preserve their behavior on the current v2 store.
 
 ## 4.7 Session actor
 
@@ -1754,7 +1755,7 @@ flowchart TD
 | T030A | SQLite initialization and atomic event append | T020 | conflict, rollback, duplicate-ID, and restart tests |
 | T030B | SQLite event replay after sequence | T030A | empty/one/many/limit/order/corruption tests |
 | T030C | SQLite snapshot cache load | T030D | absent/present/stale/corrupt/restart tests |
-| T030D | SQLite snapshot cache save | T020,T030A,T030B | Ready: accepted ADR-0005/SPEC-T030D design; runtime unimplemented |
+| T030D | SQLite snapshot cache save | T020,T030A,T030B | Accepted: verified save/codec/schema-v2 runtime; public load remains T030C |
 | T030 | SQLite event-store coordination parent (acceptance pending children) | T030A,T030B,T030C,T030D | all child acceptances plus append/replay/snapshot composition |
 | T040 | Single-writer session actor | T020 | concurrent turn rejected; approval and restart behavior |
 | T050 | Versioned node and boxd protocols | T010 | codec and version-handshake tests |

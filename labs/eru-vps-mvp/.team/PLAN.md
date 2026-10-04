@@ -162,3 +162,11 @@ Continue current-stage prerequisites into a deterministic four-host configuratio
 ### Network access plan acceptance decision
 
 Accepted T-234 and T-235 after frozen hash/source/diff review and independent policy/publication regressions. Root reproduced a post-publication raw-byte pin gap; independent RED confirmed whitespace-only tampering could return success, and the publisher-returned digest fix passed. Root30, worker60, independent79 and full705 tests passed; compileall and original workflow validation passed. T-236 accepts this bounded renderer/immutable-plan slice and keeps overall closeout PARTIAL, with formal remaining12. No real network change, current trust update, pending change, stage acceptance or runtime compatibility claim.
+
+## Network file staging coordinator (2026-10-04)
+
+Continue merged network plans into a durable per-execution/per-host staging journal, single-dispatch coordinator and observation-only reconciliation. Fixed two-file host payloads only; no activation, production SSH adapter, execute CLI, current trust/generation change or stage acceptance. T-237 implements in an isolated worktree; T-238 independently reviews and adds adversarial regressions; root owns contract, CLI inspection, integration, native tests, evidence gate and authorized Git delivery. Same slot cannot be replayed via a new plan ID; every dispatch requires a durable intent and freshly revalidated plan/auth/pending/publications. Formal remaining12 unchanged.
+
+### Network staging acceptance decision
+
+Accepted T-237 and T-238 after source/diff/frozen-hash review, real temporary-file concurrency evidence and independent regressions. Observation expiry after final IO, late recovery-loser poisoning and final pending drift were reproduced before correction. Root13, worker66, independent96 and full751 tests passed; original workflow validation and compileall passed. T-239 accepts this coordinator slice only and retains overall PARTIAL/remaining12. T-238 received a bounded extension from32 to48 calls within the same45-minute/scope limit to reproduce and reverify actual blockers. No production adapter, remote activation or stage acceptance was introduced.

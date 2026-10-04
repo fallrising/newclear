@@ -1,5 +1,7 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-04 後續：[network file-staging協調器](M3-FRESH-NETWORK-STAGING-2026-10-04.md) 綁定當次計畫／授權，先durable intent再單次adapter dispatch，回應遺失只讀reconcile；本輪fake adapter驗證，不啟用設定或接受stage。正式剩餘12不變。
+
 2026-10-04 後續：[fresh network-access設定計畫](M3-FRESH-NETWORK-ACCESS-PLAN-2026-10-04.md) 產生四機固定firewall／pinned known_hosts／staged core key內容，保存immutable private plan並離線重導出；重核當次admission與身份。尚未套用設定或驗收network stage，正式剩餘12不變。
 
 2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。

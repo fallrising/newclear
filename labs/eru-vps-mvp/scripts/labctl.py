@@ -923,8 +923,23 @@ def main():
     access_inspect = sub.add_parser('inspect-fresh-network-access', help='Revalidate saved network-access payload and current prerequisites offline')
     access_inspect.add_argument('--plan', required=True, help='Network-access plan ID')
     access_inspect.add_argument('--sha256', required=True, help='Expected network-access plan digest')
+    staging_inspect = sub.add_parser('inspect-fresh-network-staging', help='Inspect a bound network file-staging intent and receipt without transport')
+    staging_inspect.add_argument('--run', required=True, help='Prepared execution ID')
+    staging_inspect.add_argument('--host-index', required=True, type=int, choices=range(4), help='Fixed host ordinal 0 through 3')
+    staging_inspect.add_argument('--sha256', required=True, help='Expected staging intent digest')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'inspect-fresh-network-staging':
+        from fresh_network_staging_ops import inspect_network_staging
+        try:
+            result = inspect_network_staging(PROJECT, args.run, args.host_index, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network staging inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'host_index', 'intent_sha256', 'receipt_sha256',
+                  'file_count', 'dispatch_attempted', 'stage_accepted', 'generation_changed',
+                  'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command in ('prepare-fresh-network-access', 'inspect-fresh-network-access'):
         from fresh_network_access_ops import prepare_network_access, inspect_network_access
         try:

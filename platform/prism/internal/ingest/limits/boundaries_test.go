@@ -18,10 +18,6 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 )
 
-func int64Ptr(value int64) *int64    { return &value }
-func boolPtr(value bool) *bool       { return &value }
-func stringPtr(value string) *string { return &value }
-
 var testNow = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
 
 func newLimiter(t *testing.T, options Options) *Limiter {
@@ -60,8 +56,8 @@ func TestResolve_DefaultsEveryTenantOverride(t *testing.T) {
 	if defaults.MaxLabelNameLength != 128 || defaults.MaxLabelValueLength != 2048 || defaults.MaxLabelsPerSeries != 40 || defaults.MaxActiveSeriesPerTenant != 500000 || defaults.MaxSeriesPerMetricName != 50000 || defaults.MaxLogLineBytes != 256<<10 || defaults.MaxAttrsPerRecord != 128 || defaults.MaxSpansPerTrace != 20000 || defaults.CardinalityAlarmThreshold != 10000 || defaults.AutoDropHighCardinality || defaults.IngestRateBytesPerSec != 0 {
 		t.Fatalf("wrong SDD defaults: %+v", defaults)
 	}
-	override := Overrides{MaxLabelNameLength: intPtr(1), MaxLabelValueLength: intPtr(2), MaxLabelsPerSeries: intPtr(3), MaxActiveSeriesPerTenant: intPtr(4), MaxSeriesPerMetricName: intPtr(5), MaxLogLineBytes: intPtr(6), MaxAttrsPerRecord: intPtr(7), MaxSpansPerTrace: intPtr(8), IngestRateBytesPerSec: int64Ptr(9), IngestBurstBytes: int64Ptr(10), CardinalityAlarmThreshold: intPtr(11), AutoDropHighCardinality: boolPtr(false), DeniedLabelPattern: stringPtr("^custom$")}
-	got, err := Resolve(Overrides{MaxLabelNameLength: intPtr(99), AutoDropHighCardinality: boolPtr(true)}, override)
+	override := Overrides{MaxLabelNameLength: new(1), MaxLabelValueLength: new(2), MaxLabelsPerSeries: new(3), MaxActiveSeriesPerTenant: new(4), MaxSeriesPerMetricName: new(5), MaxLogLineBytes: new(6), MaxAttrsPerRecord: new(7), MaxSpansPerTrace: new(8), IngestRateBytesPerSec: new(int64(9)), IngestBurstBytes: new(int64(10)), CardinalityAlarmThreshold: new(11), AutoDropHighCardinality: new(false), DeniedLabelPattern: new("^custom$")}
+	got, err := Resolve(Overrides{MaxLabelNameLength: new(99), AutoDropHighCardinality: new(true)}, override)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,13 +65,13 @@ func TestResolve_DefaultsEveryTenantOverride(t *testing.T) {
 	if got != want {
 		t.Fatalf("resolve=%+v want=%+v", got, want)
 	}
-	limiter := newLimiter(t, Options{Tenant: Overrides{MaxActiveSeriesPerTenant: intPtr(2)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{MaxActiveSeriesPerTenant: new(2)}})
 	effective := limiter.Settings()
 	effective.MaxActiveSeriesPerTenant = 100
 	if limiter.Settings().MaxActiveSeriesPerTenant != 2 {
 		t.Fatal("settings exposed mutation")
 	}
-	for _, options := range []Options{{Tenant: Overrides{MaxAttrsPerRecord: intPtr(0)}}, {Tenant: Overrides{IngestRateBytesPerSec: int64Ptr(-1)}}, {Tenant: Overrides{DeniedLabelPattern: stringPtr("[")}}, {MaxRecords: -1}, {TraceTTL: -1}} {
+	for _, options := range []Options{{Tenant: Overrides{MaxAttrsPerRecord: new(0)}}, {Tenant: Overrides{IngestRateBytesPerSec: new(int64(-1))}}, {Tenant: Overrides{DeniedLabelPattern: new("[")}}, {MaxRecords: -1}, {TraceTTL: -1}} {
 		if _, err := New("tenant-a", options); spi.Classify(err) != spi.ErrBadRequest {
 			t.Fatalf("invalid options accepted: %+v err=%v", options, err)
 		}
@@ -86,7 +82,7 @@ func TestResolve_DefaultsEveryTenantOverride(t *testing.T) {
 }
 
 func TestMetrics_LabelLimitsUTF8CollisionsAndIdentity(t *testing.T) {
-	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelNameLength: intPtr(3), MaxLabelValueLength: intPtr(4)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelNameLength: new(3), MaxLabelValueLength: new(4)}})
 	input := utm.MetricPoint{Name: "m", Labels: labels.FromStrings("abcdef", "ééé", "abcxyz", "loses", "keep", "界界")}
 	got, report := metricBatch(t, limiter, input)
 	if len(got) != 1 || got[0].Labels.Get("abc") != "éé" || got[0].Labels.Get("kee") != "界" || got[0].Labels.Get(utm.LabelName) != "m" || report.Warnings["label_collision"] != 1 || report.Normalized["truncate"] != 6 || report.Normalized["drop_label"] != 1 {
@@ -115,7 +111,7 @@ func TestMetrics_LabelLimitsUTF8CollisionsAndIdentity(t *testing.T) {
 }
 
 func TestMetrics_LabelCountIncludesSystemAndCollisionDoesNotBypass(t *testing.T) {
-	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelsPerSeries: intPtr(3), MaxLabelNameLength: intPtr(1)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelsPerSeries: new(3), MaxLabelNameLength: new(1)}})
 	got, _ := metricBatch(t, limiter, point("m", "v"))
 	if len(got) != 1 {
 		t.Fatal("boundary rejected")
@@ -127,7 +123,7 @@ func TestMetrics_LabelCountIncludesSystemAndCollisionDoesNotBypass(t *testing.T)
 }
 
 func TestFinalTruncatedNameCannotBecomeDeniedLabel(t *testing.T) {
-	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelNameLength: intPtr(10)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLabelNameLength: new(10)}})
 	got, report := metricBatch(t, limiter, utm.MetricPoint{Name: "m", Labels: labels.FromStrings("request_id_extra", "value", "url_full", "url")})
 	if len(got) != 1 || got[0].Labels.Has("request_id") || got[0].Labels.Has("url_full") || report.Normalized["drop_label"] != 2 {
 		t.Fatalf("metric deny bypass: %+v %+v", got, report)
@@ -143,7 +139,7 @@ func TestFinalTruncatedNameCannotBecomeDeniedLabel(t *testing.T) {
 
 func TestMetrics_PerMetricCapHourlySlidingExpiryAndTenantIsolation(t *testing.T) {
 	now := testNow
-	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{MaxActiveSeriesPerTenant: intPtr(2), MaxSeriesPerMetricName: intPtr(1)}})
+	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{MaxActiveSeriesPerTenant: new(2), MaxSeriesPerMetricName: new(1)}})
 	got, _ := metricBatch(t, limiter, point("m", "a"), point("n", "a"))
 	if len(got) != 2 {
 		t.Fatal("metric name not in identity")
@@ -167,7 +163,7 @@ func TestMetrics_PerMetricCapHourlySlidingExpiryAndTenantIsolation(t *testing.T)
 	if len(got) != 1 {
 		t.Fatal("expired capacity not released")
 	}
-	other := newLimiter(t, Options{Tenant: Overrides{MaxActiveSeriesPerTenant: intPtr(1)}})
+	other := newLimiter(t, Options{Tenant: Overrides{MaxActiveSeriesPerTenant: new(1)}})
 	got, _ = metricBatch(t, other, point("m", "b"))
 	if len(got) != 1 {
 		t.Fatal("tenant state shared")
@@ -180,7 +176,7 @@ func TestMetrics_PerMetricCapHourlySlidingExpiryAndTenantIsolation(t *testing.T)
 
 func TestHighCardinality_PerValueExpiryAutoDropAndCapacityAtomicity(t *testing.T) {
 	now := testNow
-	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{CardinalityAlarmThreshold: intPtr(2), AutoDropHighCardinality: boolPtr(true)}})
+	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{CardinalityAlarmThreshold: new(2), AutoDropHighCardinality: new(true)}})
 	metricBatch(t, limiter, point("m", "a"))
 	now = now.Add(time.Minute)
 	metricBatch(t, limiter, point("m", "b"))
@@ -217,7 +213,7 @@ func TestHighCardinality_PerValueExpiryAutoDropAndCapacityAtomicity(t *testing.T
 }
 
 func TestLogs_TruncationAttrsMarkersAndOwnership(t *testing.T) {
-	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLogLineBytes: intPtr(4), MaxAttrsPerRecord: intPtr(2)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{MaxLogLineBytes: new(4), MaxAttrsPerRecord: new(2)}})
 	input := utm.LogRecord{Body: "ééé", Labels: labels.FromStrings("user_id", "u"), Attrs: map[string]string{"z": "z", "a": "a"}, Resource: &utm.Resource{Attrs: map[string]string{"z": "z", "b": "b", "a": "a"}}}
 	output, report, err := limiter.Logs(context.Background(), []utm.LogRecord{input})
 	if err != nil || len(output) != 1 {
@@ -238,7 +234,7 @@ func TestLogs_TruncationAttrsMarkersAndOwnership(t *testing.T) {
 	if err != nil || gotLogs[0].Body != boundary || gotLogs[0].Attrs[truncationMarker] != "" || len(gotLogs[1].Body) != len(boundary) || gotLogs[1].Attrs[truncationMarker] != "true" {
 		t.Fatal("default log boundary")
 	}
-	one := newLimiter(t, Options{Tenant: Overrides{MaxAttrsPerRecord: intPtr(1), MaxLogLineBytes: intPtr(1)}})
+	one := newLimiter(t, Options{Tenant: Overrides{MaxAttrsPerRecord: new(1), MaxLogLineBytes: new(1)}})
 	marked, _, _ := one.Logs(context.Background(), []utm.LogRecord{{Body: "xx", Attrs: map[string]string{"a": "a"}}})
 	if len(marked[0].Attrs) != 1 || marked[0].Attrs[truncationMarker] != "true" {
 		t.Fatal("marker lost at cap one")
@@ -247,7 +243,7 @@ func TestLogs_TruncationAttrsMarkersAndOwnership(t *testing.T) {
 
 func TestSpans_DedupOverflowMarkersBoundedTrackersAndExpiry(t *testing.T) {
 	now := testNow
-	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, MaxTraces: 1, Tenant: Overrides{MaxSpansPerTrace: intPtr(2), MaxAttrsPerRecord: intPtr(1)}})
+	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, MaxTraces: 1, Tenant: Overrides{MaxSpansPerTrace: new(2), MaxAttrsPerRecord: new(1)}})
 	first := testSpan(1, 1)
 	first.Attrs = map[string]string{"a": "a", "b": "b"}
 	first.Events = []utm.SpanEvent{{Attrs: map[string]string{"b": "b", "a": "a"}}}
@@ -283,7 +279,7 @@ func TestSpans_DedupOverflowMarkersBoundedTrackersAndExpiry(t *testing.T) {
 
 func TestAllowBytes_NonblockingClassificationRefillAndRollbackClock(t *testing.T) {
 	now := testNow
-	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{IngestRateBytesPerSec: int64Ptr(10), IngestBurstBytes: int64Ptr(20)}})
+	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{IngestRateBytesPerSec: new(int64(10)), IngestBurstBytes: new(int64(20))}})
 	_, _, err := limiter.AllowBytes(context.Background(), 20)
 	if err != nil {
 		t.Fatal(err)
@@ -318,7 +314,7 @@ func TestAllowBytes_NonblockingClassificationRefillAndRollbackClock(t *testing.T
 }
 
 func TestBoundedReportsAndRecordElements(t *testing.T) {
-	limiter := newLimiter(t, Options{MaxReportEvents: 1, Tenant: Overrides{MaxSeriesPerMetricName: intPtr(1)}})
+	limiter := newLimiter(t, Options{MaxReportEvents: 1, Tenant: Overrides{MaxSeriesPerMetricName: new(1)}})
 	metricBatch(t, limiter, point("m", "a"), point("n", "a"))
 	_, report := metricBatch(t, limiter, point("m", "b"), point("n", "b"))
 	if len(report.Alarms) != 1 || report.EventOverflow != 1 {
@@ -383,9 +379,7 @@ func TestCancellationOwnershipAndConcurrentAccess(t *testing.T) {
 	}
 	var group sync.WaitGroup
 	for worker := range 16 {
-		group.Add(1)
-		go func() {
-			defer group.Done()
+		group.Go(func() {
 			for iteration := range 20 {
 				value := fmt.Sprint(worker, iteration)
 				metricBatch(t, limiter, point("parallel", value))
@@ -405,7 +399,7 @@ func TestCancellationOwnershipAndConcurrentAccess(t *testing.T) {
 					t.Error(err)
 				}
 			}
-		}()
+		})
 	}
 	group.Wait()
 }
@@ -493,12 +487,12 @@ func TestSpans_AggregateIdentityCapacityAndExpiry(t *testing.T) {
 	}
 }
 func TestAllowBytes_ExactNumericCapacity(t *testing.T) {
-	for _, override := range []Overrides{{IngestRateBytesPerSec: int64Ptr(math.MaxInt64)}, {IngestRateBytesPerSec: int64Ptr(1), IngestBurstBytes: int64Ptr(math.MaxInt64)}} {
+	for _, override := range []Overrides{{IngestRateBytesPerSec: new(int64(math.MaxInt64))}, {IngestRateBytesPerSec: new(int64(1)), IngestBurstBytes: new(int64(math.MaxInt64))}} {
 		if _, err := New("tenant-a", Options{Tenant: override}); spi.Classify(err) != spi.ErrBadRequest {
 			t.Fatal("imprecise float configuration accepted")
 		}
 	}
-	limiter := newLimiter(t, Options{Tenant: Overrides{IngestRateBytesPerSec: int64Ptr(1), IngestBurstBytes: int64Ptr(1 << 53)}})
+	limiter := newLimiter(t, Options{Tenant: Overrides{IngestRateBytesPerSec: new(int64(1)), IngestBurstBytes: new(int64(1 << 53))}})
 	_, _, err := limiter.AllowBytes(context.Background(), (1<<53)-1)
 	if err != nil {
 		t.Fatal(err)
@@ -515,7 +509,7 @@ func TestAllowBytes_ExactNumericCapacity(t *testing.T) {
 
 func TestAllowBytes_ZeroOriginClockRefills(t *testing.T) {
 	now := time.Time{}
-	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{IngestRateBytesPerSec: int64Ptr(1)}})
+	limiter := newLimiter(t, Options{Now: func() time.Time { return now }, Tenant: Overrides{IngestRateBytesPerSec: new(int64(1))}})
 	_, _, err := limiter.AllowBytes(context.Background(), 1)
 	if err != nil {
 		t.Fatal(err)

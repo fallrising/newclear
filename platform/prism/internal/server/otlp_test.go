@@ -177,6 +177,12 @@ func TestDualShutdownInterruptsIncompleteHTTPBody(t *testing.T) {
 	if server.httpServer.ReadTimeout <= 0 {
 		t.Fatal("HTTP body has no finite read deadline")
 	}
+	connectionClosed := make(chan struct{})
+	server.httpServer.ConnState = func(_ net.Conn, state http.ConnState) {
+		if state == http.StateClosed {
+			close(connectionClosed)
+		}
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	result := make(chan error, 1)
@@ -185,7 +191,15 @@ func TestDualShutdownInterruptsIncompleteHTTPBody(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = connection.Close() }()
+	t.Cleanup(func() {
+		cancel()
+		_ = connection.Close()
+		select {
+		case <-connectionClosed:
+		case <-time.After(time.Second):
+			t.Error("HTTP connection did not finish closing")
+		}
+	})
 	_, err = io.WriteString(connection, "POST /v1/logs HTTP/1.1\r\nHost: localhost\r\nContent-Length: 100\r\n\r\nx")
 	if err != nil {
 		t.Fatal(err)

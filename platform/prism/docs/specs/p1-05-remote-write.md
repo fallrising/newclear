@@ -1,5 +1,8 @@
 # P1-05: Prometheus remote_write v1
 
+The Go 1.23 references below record this milestone's original acceptance baseline.
+The current build baseline is defined by the [Go 1.27 upgrade](go-1.27-upgrade.md).
+
 ## Goal and scope
 
 Receive real Prometheus remote_write v1 at `POST /prom/api/v1/write`, normalize through the existing mapping, and admit to the existing bounded metrics pipeline. P1-04 supplies authenticated ingest identity, HTTP/TLS listeners and shutdown. Keep Go 1.23, module graph and public SPI unchanged. Query APIs, remote_write v2, persistent storage, deployment and full multi-tenant control-plane auth are outside this milestone.

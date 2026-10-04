@@ -13,13 +13,14 @@ behind a public Go storage SPI.
 bounded asynchronous pipeline are implemented. P1-04 connects authenticated OTLP
 metrics/logs/traces over HTTP and gRPC to the all-in-one and ingest daemon roles.
 P1-05 adds authenticated Prometheus remote_write v1 on the same HTTP listener.
+P1-06 adds bounded Loki JSON/gzip push with structured metadata.
 The initial runtime supports a single configured tenant and file-backed bearer
 key. Compatible query APIs, production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
 
 ## Start here
 
-- [Development quickstart](docs/quickstart.md): tests and authenticated local OTLP/remote_write ingestion.
+- [Development quickstart](docs/quickstart.md): tests and authenticated local OTLP/remote_write/Loki ingestion.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,
   known gaps, and the next integration boundary.
 - [SDD](docs/sdd/README.md) and [task sequence](docs/sdd/12-IMPLEMENTATION-PHASES.md).
@@ -36,7 +37,8 @@ remain unimplemented; this is not yet a complete APM service.
   quotas, bounded cardinality tracking, record limits and byte admission.
 - `internal/compat/otlp`: bounded HTTP/gRPC receivers and protocol-native responses.
 - `internal/compat/promapi`: bounded snappy/protobuf remote_write v1 receiver.
-- `cmd/prismd`: health/metrics plus OTLP and remote_write in ingest roles; `prism-agent` and `prismctl` remain placeholders.
+- `internal/compat/lokiapi`: authenticated JSON/gzip Loki push with bounded decoding.
+- `cmd/prismd`: health/metrics plus OTLP, remote_write and Loki JSON push in ingest roles; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
 The Go module is `github.com/fallrising/newclear/platform/prism`.
@@ -80,3 +82,7 @@ memory backend has unbounded retention.
 The [P1-05 contract](docs/specs/p1-05-remote-write.md) defines remote_write headers,
 finite decode work, trusted identity and retry behavior. Its external-client test
 runs real Prometheus and verifies persisted samples and isolation through SPI.
+
+The [P1-06 contract](docs/specs/p1-06-loki-push.md) adds Loki JSON/gzip push;
+Vector acceptance checks actual stored log bodies and metadata. Protobuf push
+and Loki query/ready APIs remain future milestones.

@@ -77,3 +77,55 @@ func TestNormalizeLokiJSONRejectsMalformedInput(t *testing.T) {
 		t.Fatalf("records/report = %#v/%#v", got, report)
 	}
 }
+
+func TestNormalizeLokiJSONCanceledEmptyStreams(t *testing.T) {
+	t.Parallel()
+	n := testNormalizer(t, Options{})
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	if _, _, err := n.NormalizeLokiJSON(ctx, []byte(`{"streams":[{"stream":{},"values":[]}]}`), fixedNow); err == nil {
+		t.Fatal("canceled empty-stream request accepted")
+	}
+}
+
+// Cancellation begins after decode and the first empty stream, exercising the
+// outer stream loop independently from the entry loop and the initial check.
+type lokiCancelContext struct {
+	context.Context
+	calls int
+}
+
+func (c *lokiCancelContext) Err() error {
+	c.calls++
+	if c.calls >= 3 {
+		return context.Canceled
+	}
+	return nil
+}
+func TestNormalizeLokiJSONCancellationBetweenEmptyStreams(t *testing.T) {
+	t.Parallel()
+	n := testNormalizer(t, Options{})
+	ctx := &lokiCancelContext{Context: t.Context()}
+	if _, _, err := n.NormalizeLokiJSON(ctx, []byte(`{"streams":[{"stream":{},"values":[]},{"stream":{},"values":[]}]}`), fixedNow); err == nil {
+		t.Fatal("cancellation between empty streams ignored")
+	}
+}
+func TestNormalizeLokiJSONSharedAttributesCapPreservesMetadata(t *testing.T) {
+	t.Parallel()
+	n := testNormalizer(t, Options{MaxAttrsPerRecord: 2})
+	wire := []byte(`{"streams":[{"stream":{"a_uuid":"stream-a","b_uuid":"stream-b","c_uuid":"stream-c"},"values":[["1","one",{"a_uuid":"override","aa":"metadata"}],["1","two"]]}]}`)
+	records, report, err := n.NormalizeLokiJSON(t.Context(), wire, fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(records) != 2 || len(records[0].Attrs) != 2 || records[0].Attrs["a_uuid"] != "override" || records[0].Attrs["aa"] != "metadata" || records[1].Attrs["a_uuid"] != "stream-a" || records[1].Attrs["b_uuid"] != "stream-b" {
+		t.Fatalf("capped metadata mapping=%#v", records)
+	}
+	if report.Warnings["attributes_truncated"] != 2 {
+		t.Fatalf("truncation diagnostics=%#v", report)
+	}
+	records[0].Attrs["a_uuid"] = "mutated"
+	if records[1].Attrs["a_uuid"] != "stream-a" {
+		t.Fatal("shared attrs alias records")
+	}
+}

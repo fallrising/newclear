@@ -1,8 +1,8 @@
 # Prism implementation inventory
 
-Current maintenance baseline: Go 1.27.1 on the completed P1-05 source,
-newclear `6deaabcc583f96b543c55f82b7922cfe772e2831`. The P1-05 review originally
-started at `9c9622968338064e153d4e2b0886ce06b94df8f8`. Historical verification below
+Current development baseline: Go 1.27.1, with P1-06 starting from
+newclear `267b12d78b3304d12bb589639650628b22987e95` after the Go upgrade.
+The P1-05 source completed at `6deaabcc583f96b543c55f82b7922cfe772e2831`. Historical verification below
 retains its original versions and scope. Product usage remains unknown.
 
 ## Code and contract coverage
@@ -25,6 +25,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P1-03 | [`internal/ingest`](../internal/ingest/README.md): bounded tenant registry, atomic reservation, normalization/limits, three priority lanes per signal, owned batches and SPI writers | P1-04 connects config/daemon/OTLP; registered pipeline telemetry is still unconnected. |
 | P1-04 | `internal/compat/otlp`, configured single-tenant HTTP/gRPC runtime, original-unit accounting, bounded decode/admission and lifecycle tests | Full multi-tenant identity, native query APIs and production storage remain later work. |
 | P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms, query APIs and full multi-tenant control plane remain later work. |
+| P1-06 | `internal/compat/lokiapi`, bounded authenticated JSON/gzip push, structured metadata, runtime and real Vector acceptance | Protobuf push and Loki query/ready remain future milestones. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -199,10 +200,36 @@ concurrent work; enabled checks and public SPI interfaces are unchanged.
 The existing SDD22 container recipe is updated, but no Dockerfile or deployment
 is implemented by this maintenance change.
 
+## P1-06 verification
+
+Final local verification uses Go 1.27.1 with `GOFLAGS=-mod=readonly`:
+
+| Command / scope | Observed result |
+| --- | --- |
+| `make lint test` | Format/vet/race/goleak pass across 18 packages. |
+| `scripts/check-dependencies.sh`, `scripts/test-dependency-guard.sh`, `go build ./...` | Dependency direction and all five negative fixtures pass; build exits 0. |
+| golangci-lint v2.14.0 normal and integration builds | Both report zero issues. |
+| `go test -tags=integration -race -count=1 -v ./test/e2e` with the documented three binaries | Real Vector 0.45.0 none/gzip JSON modes each persist two exact bodies, resource/trace/span metadata and no records for another tenant. Prometheus 2.53.0 and telemetrygen 0.116.0 acceptance remains green. |
+| `go test -race -count=1 -v ./test/security` | Six Loki credential/selector rejection cases preserve zero tenant state; parsed reserved labels cannot replace Resource.Tenant. Existing OTLP/remote_write security cases pass. |
+| Built daemon plus `scripts/smoke-otlp.py` | Configuration/health/metrics, OTLP, remote_write and nonempty authenticated Loki push pass; SIGTERM exits 0. |
+| `go mod verify`, baseline module list and module-file comparison | All modules verified; dependency versions, go.mod and go.sum unchanged. |
+
+The [P1-06 contract](specs/p1-06-loki-push.md) and
+[receiver README](../internal/compat/lokiapi/README.md) define strict JSON shape,
+gzip integrity, token and projected-allocation caps, original-byte charging,
+fixed diagnostics and callback ownership. Runtime tests also cover TLS, both
+ingest roles, route exclusion from non-ingest roles, independent receive slots,
+client disconnection, forced shutdown and backend-close ordering. Decoder fuzz,
+malformed-body/duplicate/UTF8/metadata/partial-commit and cancellation tests cover
+the protocol boundary. Initial missing-route and budget red tests, lint findings
+and an incorrect metric-style tenant-label expectation in log tests were retained
+and resolved; tests now assert the existing Resource.Tenant log contract and the
+absence of attacker-supplied reserved labels. No validator was weakened.
+
 ## Current integration boundary
 
-P1-04 and P1-05 connect the existing atomic pipeline to authenticated OTLP and
-remote_write v1 in the all-in-one and ingest roles. The [receiver design](specs/p1-04-otlp.md) and
+P1-04 through P1-06 connect the existing atomic pipeline to authenticated OTLP,
+remote_write v1 and Loki JSON/gzip push in the all-in-one and ingest roles. The [receiver design](specs/p1-04-otlp.md) and
 [ADR-011](sdd/13-ADR.md#adr-011phase-1-otlp-寫入使用單租戶-file-backed-bearer)
 record the initial single-tenant identity contract and original-unit partial
 counts. The [pipeline contract](../internal/ingest/README.md) retains P1-03's
@@ -211,9 +238,9 @@ owned payloads, metadata capacity, finite retry and at-least-once writes.
 
 Runtime capacity differs from standalone package defaults: one tenant, depth-4
 priority queues, two workers per signal, 16 OTLP receiver slots and one separate
-remote_write slot.
+remote_write slot and one separate Loki slot.
 Configuration validates a conservative logical budget before startup, including
-compressed/decompressed receive buffers and serialized admission (968 MiB at
+compressed/decompressed receive buffers and serialized admission (1000 MiB at
 defaults). This is not
 an RSS limit: decoded protobuf/pdata, allocator/transient/state costs and memory-backend
 retention remain additional. The standalone package's 5,808 MiB conservative
@@ -235,11 +262,11 @@ Remaining integration work includes:
 
 ## Remaining phases
 
-P1-06 supplies the Loki receiver; P1-07–08 the PromQL adapter
+P1-06 completes the Loki JSON receiver. Next are P1-07–08, the PromQL adapter
 and API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
-security and operations. The directories for compatibility, differential,
-PromQL, E2E, security and soak acceptance mostly remain placeholders.
+security and operations. Differential, PromQL and soak acceptance remain future work. Existing E2E and
+security checks cover the implemented ingest protocols and their trust boundaries.
 
 No external-driver conformance, Grafana datasource acceptance, complete-stack
 E2E, production soak, deployment or production-readiness claim follows from the

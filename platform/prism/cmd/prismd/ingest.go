@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/fallrising/newclear/platform/prism/internal/compat/lokiapi"
 	"github.com/fallrising/newclear/platform/prism/internal/compat/otlp"
 	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
@@ -77,17 +78,25 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 	if err != nil {
 		return fmt.Errorf("create OTLP receiver: %w", err)
 	}
+	defer receiver.Stop()
 	writeReceiver, err := promapi.NewWriteReceiver(pipeline, promapi.WriteOptions{Tenant: c.Tenancy.DefaultTenant, APIKey: c.Auth.IngestAPIKey, MaxRequestBytes: int(c.Ingest.MaxRequestBytes), Normalize: pipelineOptions(c).Normalize, Logger: logger})
 	if err != nil {
-		receiver.Stop()
 		return fmt.Errorf("create remote_write receiver: %w", err)
 	}
+	defer writeReceiver.Stop()
+	pushReceiver, err := lokiapi.NewPushReceiver(pipeline, lokiapi.PushOptions{Tenant: c.Tenancy.DefaultTenant, APIKey: c.Auth.IngestAPIKey, MaxRequestBytes: int(c.Ingest.MaxRequestBytes), Normalize: pipelineOptions(c).Normalize, Logger: logger})
+	if err != nil {
+		return fmt.Errorf("create Loki push receiver: %w", err)
+	}
+	defer pushReceiver.Stop()
 	mux := http.NewServeMux()
 	mux.Handle("/prom/api/v1/write", writeReceiver.HTTPHandler())
+	mux.Handle("/loki/api/v1/push", pushReceiver.HTTPHandler())
 	mux.Handle("/", receiver.HTTPHandler())
 	stopReceiving := func() {
 		receiver.Stop()
 		writeReceiver.Stop()
+		pushReceiver.Stop()
 	}
 	//nolint:contextcheck // gRPC supplies per-RPC contexts; construction must not bind requests to daemon cancellation.
 	grpcServer := receiver.NewGRPCServer(grpcOptions...)

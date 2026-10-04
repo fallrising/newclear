@@ -111,6 +111,20 @@ def main():
                             raise RuntimeError("remote_write v2 did not return 400") from error
                 else:
                     raise RuntimeError("remote_write v2 accepted")
+                loki_payload = json.dumps({"streams": [{"stream": {"service": "smoke"}, "values": [[str(time.time_ns()), "loki-smoke", {"source": "daemon-smoke"}]]}]}).encode()
+                request = urllib.request.Request(endpoint + "/loki/api/v1/push", data=loki_payload, headers={"Content-Type": "application/json"}, method="POST")
+                try:
+                    urllib.request.urlopen(request, timeout=2).close()
+                except urllib.error.HTTPError as error:
+                    with error:
+                        if error.code != 401:
+                            raise RuntimeError("unauthenticated Loki push did not return 401") from error
+                else:
+                    raise RuntimeError("unauthenticated Loki push accepted")
+                request.add_header("Authorization", "Bearer " + key)
+                with urllib.request.urlopen(request, timeout=2) as response:
+                    if response.status != 204 or response.read(4096):
+                        raise RuntimeError("authenticated Loki push did not return empty 204")
                 # The separate integration test asserts persistence using SPI;
                 # this probe establishes the actual daemon's gRPC wiring.
                 command = [str(args.telemetrygen.resolve()), "traces", "--traces", "1", "--workers", "1", "--otlp-insecure", "--otlp-endpoint", f"127.0.0.1:{grpc_port}", "--otlp-header", f'authorization="Bearer {key}"']
@@ -125,7 +139,7 @@ def main():
                 log.seek(0)
                 if key in log.read():
                     raise RuntimeError("daemon leaked ingest credential")
-                print(f"PASS config-check, health, metrics, HTTP three-signal auth, gRPC export, remote_write auth/v1/v2; SIGTERM exit 0 in {elapsed:.3f}s")
+                print(f"PASS config-check, health, metrics, HTTP three-signal auth, gRPC export, remote_write auth/v1/v2, Loki JSON auth/push; SIGTERM exit 0 in {elapsed:.3f}s")
             finally:
                 if process.poll() is None:
                     process.kill()

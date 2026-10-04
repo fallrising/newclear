@@ -255,3 +255,12 @@ v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協�
 基準。歷史驗證不改寫，現行操作指引與 SDD 建置版本同步。舊 compiler
 關閉自動切換時應清楚拒絕；不承諾未量測的效能收益，不包含系統全域
 安裝、容器部署或下一功能。詳見 [升級契約](../specs/go-1.27-upgrade.md)。
+
+
+## ADR-014：Phase 1 Loki JSON push 使用獨立受限接收器
+
+**決策**：沿用固定單租戶 file-backed bearer 與既有 pipeline，支援 JSON／gzip，protobuf push 留在 Phase 2。原始解壓 JSON 長度用於 byte admission；token/schema/duplicate/depth/element 與展開工作量預檢先於 materialization。接收器採獨立單一 slot，取消 callback 完成後才釋放。
+
+**理由與後果**：避免壓縮與共享 stream metadata 放大、租戶偽造及取消後資源累积。新增兩個 request-size receive buffers，預設 logical budget 1000 MiB，並非RSS限制。全數接收回204；語意 partial 回400且有效資料可能已入列；committed internal failure回500仍可能重送重複。
+
+**替代方案**：複用OTLP容量gate會改變既有協定背壓；直接無預檢JSONdecode會在拒絕前配置不受元素限制的物件。範圍、狀態碼與實測驗收見 [P1-06 contract](../specs/p1-06-loki-push.md)。

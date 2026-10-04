@@ -65,8 +65,8 @@ func TestIngestStrictTenancyFailsClosed(t *testing.T) {
 		t.Fatalf("error=%v", err)
 	}
 	cfg.Server.Mode = "query"
-	if err := cfg.Validate(context.Background()); err != nil {
-		t.Fatal(err)
+	if err := cfg.Validate(context.Background()); err == nil || !strings.Contains(err.Error(), "strict tenancy") {
+		t.Fatalf("query strict tenancy error=%v", err)
 	}
 }
 

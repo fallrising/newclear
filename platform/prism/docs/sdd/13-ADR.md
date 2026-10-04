@@ -273,3 +273,17 @@ v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協�
 - **決策**：列舉時複製完整 labels 身分，呈現時隱藏內部保留標籤。每次樣本 Iterator 以可信 tenant 與相等 matcher 重新 Select，再比對完整 labelset，排除多餘 labels 及 absent/empty 的誤配。保持該 SPI set 未前進直到樣本讀完；耗盡、錯誤或 Querier.Close 關閉且只關一次。設定有限的 series、rows、sets 與 metadata 預算，所有重開與 Seek 工作都計量。
 - **取捨**：不改公共 SPI、不收集整份樣本結果，但增加選取次數；SPI 沒有跨呼叫快照，因此不宣稱與並行寫入隔離。既有 memory driver 的內部 materialization 不由 adapter 消除，也不能以 adapter 上限宣稱整個程序 RSS 有界。生命週期測試必須使用會在 Next 回收 Series 緩衝區的 fake backend。
 - **相容性邊界**：SDD02 §2.3 的 v1 float/classic-histogram 契約優先於「所有上游 testdata」的概括句。官方 corpus 的 native-histogram 相依案例需逐例列出原因，其餘相容案例必須真的經過 memory SPI 與 adapter。P1-08 才接 HTTP、query router 與完整 AST/output 政策。
+
+
+## ADR-016：P1-08 HTTP 查詢的可信單租戶边界
+
+- **決策**：P1-08 沿用現有single-tenant runtime，以default_tenant固定storage身分；tenantheader只可驗證相同身分，不授權切換。allow_anonymous_read允許無credential讀取固定tenant，否則沿用既有APIkey；提供錯誤credential不得當匿名忽略。strict模式未有control-plane身分映射，明確拒絕啟動。
+- **原因**：SDD02通用header優先序尚缺可信授權映射，直接接受header會使未授權租戶可讀。現有memory與寫入runtime契約先維持安全的一致邊界。完整多租戶與mTLS身分映射屬後續控制平面。
+- **查詢邊界**：P1-08補齊HTTP labels中的__name__並在AST／output防守reservedlabels；保留P1-07串流reselect與float-only限制。限流、時間範圍、回應容量、路由觀測及shutdown依 [P1-08 contract](../specs/p1-08-prometheus-http.md)。
+
+
+## ADR-017：Prometheus HTTP numeric timestamp parser 校正
+
+- **問題**：既有ParsePromTime沿用SDD14的SecFloatToMilli逐字公式，負秒數有1ms偏移且NaN／Inf／溢位無錯誤，與SDD02 Unixseconds相容契約衝突。P1-08獨立審查以實際redtest確認。
+- **決策**：只校正ParsePromTime numeric branch：拒絕非有限／超出可表示int64毫秒範圍的秒數，正負都四捨五入到毫秒（half away from zero）。RFC3339原行為保留，公共識別字及legacy SecFloatToMilli helper與它的直接測試不变；parser舊負數測試從-999改為正確-1000。SDD14示意parser不再覆蓋本ADR的輸入驗證與負數校正。
+- **後果**：HTTP維持集中UTM換算；畸形與溢位時間不再被轉成有效範圍，沒有新增依賴。極大浮點Unixseconds仍受float64毫秒精度限制，無微／奈秒精度保證。與Prometheus2.53的Modf浮點分段捨入在tie可差1ms，例如-1.2345本parser為-1235ms、上游因浮點fraction為-1234ms；此處保留明確對稱捨入契約，不宣稱tie逐位相同。

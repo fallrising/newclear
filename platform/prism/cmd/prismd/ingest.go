@@ -16,6 +16,7 @@ import (
 	"github.com/fallrising/newclear/platform/prism/internal/ingest/limits"
 	"github.com/fallrising/newclear/platform/prism/internal/ingest/normalize"
 	prismserver "github.com/fallrising/newclear/platform/prism/internal/server"
+	"github.com/fallrising/newclear/platform/prism/internal/telemetry"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
@@ -46,7 +47,7 @@ func pipelineOptions(c *config.Config) ingest.Options {
 	return options
 }
 
-func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend) (result error) {
+func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) (result error) {
 	// Direct runtime callers receive the same fail-closed checks as config-check.
 	if err := c.Validate(ctx); err != nil {
 		return fmt.Errorf("validate ingest runtime: %w", err)
@@ -89,22 +90,48 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 		return fmt.Errorf("create Loki push receiver: %w", err)
 	}
 	defer pushReceiver.Stop()
+	var queryHandler *promapi.QueryHandler
+	if c.Server.Mode == "all-in-one" {
+		queryHandler, err = promapi.NewQueryHandler(backend, promapi.QueryOptions{
+			Tenant: c.Tenancy.DefaultTenant, APIKey: c.Auth.IngestAPIKey,
+			AllowAnonymousRead: c.Auth.AllowAnonymousRead, Config: c.Query,
+			Telemetry: metrics, Logger: logger, Clock: spi.SystemClock,
+		})
+		if err != nil {
+			return fmt.Errorf("create query handler: %w", err)
+		}
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/prom/api/v1/write", writeReceiver.HTTPHandler())
+	if queryHandler != nil {
+		mux.Handle("/prom/api/v1/", queryHandler.HTTPHandler())
+	}
 	mux.Handle("/loki/api/v1/push", pushReceiver.HTTPHandler())
 	mux.Handle("/", receiver.HTTPHandler())
 	stopReceiving := func() {
 		receiver.Stop()
 		writeReceiver.Stop()
 		pushReceiver.Stop()
+		if queryHandler != nil {
+			queryHandler.Stop()
+		}
+	}
+	drain := func(shutdown context.Context) error {
+		var queryErr error
+		if queryHandler != nil {
+			queryErr = queryHandler.Close(context.WithoutCancel(shutdown))
+		}
+		return errors.Join(queryErr, pipeline.Close(shutdown))
 	}
 	//nolint:contextcheck // gRPC supplies per-RPC contexts; construction must not bind requests to daemon cancellation.
 	grpcServer := receiver.NewGRPCServer(grpcOptions...)
-	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: mux, Logger: logger, StopReceiving: stopReceiving, Drain: pipeline.Close})
+	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: mux, Logger: logger, StopReceiving: stopReceiving, Drain: drain})
 	if err != nil {
 		stopReceiving()
 		grpcServer.Stop()
-		return fmt.Errorf("create ingest server: %w", err)
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.Server.ShutdownTimeout.Std())
+		defer cancel()
+		return errors.Join(fmt.Errorf("create ingest server: %w", err), drain(shutdown))
 	}
 	logger.InfoContext(ctx, "ingest servers starting", "component", "ingest", "http_address", c.Server.HTTPListen, "grpc_address", c.Server.GRPCListen, "mode", c.Server.Mode)
 	result = server.Run(ctx)

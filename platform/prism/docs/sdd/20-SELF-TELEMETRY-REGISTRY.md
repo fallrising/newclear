@@ -58,6 +58,7 @@ Prism 自己的指標、日誌欄位與 webhook payload 都是**對外契約**�
 | `prism_query_fallback_total` | counter | `signal`,`reason` | `reason`: `no_native_support`/`forced`/`partial_pushdown` |
 | `prism_query_concurrent` | gauge | — | 目前執行中 |
 | `prism_query_rejected_total` | counter | `reason` | `reason`: `too_many_points`/`range_too_long`/`concurrency`/`timeout`/`too_large` |
+| `prism_query_adjustments_total` | counter | `action` | P1-08: `clamp_time`/`truncate_results`; exactly two series, no tenant/query labels |
 | `prism_query_samples_scanned_total` | counter | `api` | PromQL 引擎回報 |
 | `prism_logql_parse_errors_total` | counter | `kind` | `kind`: `syntax`/`semantic`/`unsupported` |
 | `prism_logql_unsupported_total` | counter | `feature` | 使用者實際用到哪些不支援的語法——**產品決策的重要輸入** |

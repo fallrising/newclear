@@ -33,7 +33,7 @@ The fixture models SDK/VM behavior deterministically. These tests do not prove r
 ## Operator setup for local mocks
 
 1. Keep the connector's existing `tool_transport_fixture: true` switch restricted to a disposable mock test configuration. Its sealed deny-all guest policy and transport attestation remain mandatory.
-2. On the trusted Worker host, create a mode-0600 secret file and mode-0600 JSON configuration for the loopback mock service. Set `TOOL_BROKER_MOCK_CONFIG` to that configuration path when starting the normal Worker. The API and guest do not need this secret.
+2. On the trusted Worker host, create a mode-0600 secret file and mode-0600 JSON configuration for the loopback mock service, each inside an effective-UID-owned mode-0700 directory. Use absolute paths without symlinks, hardlinks or dot components; ancestors must be trusted and not group/other writable (root-owned sticky temporary ancestors are allowed). See [private credential files](PRIVATE-CREDENTIALS.md) for descriptor checks, ACL handling and UID limits. Set `TOOL_BROKER_MOCK_CONFIG` to that configuration path when starting the normal Worker. The API and guest do not need this secret.
 3. Through the authenticated profile API, create a new revision with `backend: "openhands"` and `mock_tools: true`; use that revision for a new run whose repository and base commit match the configured policy. Existing profile revisions remain unchanged.
 4. Inspect the run's terminal state and cleanup state independently. A tool failure is not a successful result. An interrupted run with unknown cleanup continues to occupy capacity; request cancellation so the existing reconciler can verify release.
 
@@ -48,7 +48,7 @@ The private JSON configuration requires every field below and rejects extras. Re
   "origin": "http://127.0.0.1:18090",
   "credential_origin": "http://127.0.0.1:18090",
   "credential_path_prefix": "/repos/example/project",
-  "secret_file": "/run/agent-platform/mock-tool-secret",
+  "secret_file": "/run/agent-platform/private/mock-tool-secret",
   "repository_id": 123,
   "owner": "example",
   "repository": "project",

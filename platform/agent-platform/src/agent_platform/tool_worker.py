@@ -5,8 +5,8 @@ import time
 from dataclasses import fields
 from uuid import UUID
 
-from .connector_journal import private_file
 from .domain import Problem
+from .private_config import read_private_text
 from .store import event
 from .tool_broker.broker import Broker
 from .tool_broker.policy import Policy
@@ -24,10 +24,7 @@ def read_policy(path):
         return value
 
     try:
-        config = private_file(path)
-        if config.stat().st_size > 65536:
-            raise ValueError()
-        value = json.loads(config.read_text(), object_pairs_hook=unique)
+        value = json.loads(read_private_text(path, max_bytes=65536), object_pairs_hook=unique)
         expected = {field.name for field in fields(Policy)} - {"secret"} | {"secret_file"}
         if type(value) is not dict or set(value) != expected:
             raise ValueError()
@@ -42,10 +39,7 @@ def read_policy(path):
             value[key] = tuple(value[key])
         if type(value["secret_file"]) is not str:
             raise ValueError()
-        secret = private_file(value.pop("secret_file"))
-        if secret.stat().st_size > 4096:
-            raise ValueError()
-        value["secret"] = secret.read_text().strip()
+        value["secret"] = read_private_text(value.pop("secret_file"), max_bytes=4096).strip()
         policy = Policy(**value)
         policy.bind(policy.repository_path)
         return policy

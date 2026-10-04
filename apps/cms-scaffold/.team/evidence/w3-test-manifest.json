@@ -1,0 +1,15 @@
+{
+  "apps/web-front/src/App.test.tsx": "4fb71f4caa7922fd0286821f65fa5e44f6772392d914e8106fb1ae52349e9df7",
+  "apps/web-front/src/isolation.test.ts": "2d6c114f277c92b462d3fc6aae855d3e35367db04c525bafef835d24202431c1",
+  "apps/web-front/src/site.test.tsx": "ecd9abc11f5a6a195ac92e92493f723d2e875717a106cdfd9de9bfef04e7128b",
+  "apps/web-front/src/states.test.tsx": "bb0e8f000e1483e111f5335161ac0369549b76b246f7e554e4b73a4042439d34",
+  "apps/web-front/src/album.test.tsx": "aca8b1cac1eb6a20368d4c1f10ac978ac5462dab1b294c043dd7ec184e25a742",
+  "apps/web-front/src/clinic.test.tsx": "5a8fa8952526de7db7c9984bc3dfa3886cb0d039680eabc012778257a02bb046",
+  "apps/web-front/src/projects.test.tsx": "835264e3b7fd76ad52f3087fe09425ca06a53a276e58bbf2662bd9ea051619c4",
+  "apps/web-front/src/seo.test.tsx": "6cd93dd3235c0bdf597e2edbbde7794bb9fc09a2df33df2b47b763ba1bc0adf8",
+  "apps/web-front/src/test-utils.tsx": "937b5fcbe706d34c2246ea04e3865bc57d967f59876f35b80e260099cac8eeed",
+  "apps/web-front/src/test-setup.ts": "afa818521d256b905ba360209c7bcfa65882557bf12a50a4db8a04e7dab74bb9",
+  "apps/web-front/vite.config.ts": "06b8a9499421b6203b932c4e35cb1357675dcfb675394c337e303ac5275c81de",
+  "e2e-mock/front-w3.spec.ts": "38af1cd9cc7c690520eb1f28f48c555b09628aa4a4fb4568dd2eb1042c72f4a2",
+  "e2e-mock/shell.spec.ts": "bbff6bec23ac428f5d57c981c4aa134ff44dc8fd7b26aa6fc2f45536670fec1c"
+}

@@ -64,13 +64,13 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | W1 | VERIFIED（PR #229） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W1.md](waves/W1.md) | C-04～C-07、U-01、U-02、U-04 |
 | BW2 | VERIFIED（PR #235） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW2.md](waves/BW2.md) | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | VERIFIED（PR #245） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
-| W3 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
+| W3 | LOCAL_VERIFIED | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
 | W4 | DOC_READY | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W4.md](waves/W4.md) | C-19 |
 | BW3 | VERIFIED（PR #252） | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
 | W3b | DOC_READY | [01 §7.1](01-frontend-sdd.md#71-frontappsweb-front)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3b.md](waves/W3b.md) | G-08、C-11；surface-front AC-10～13 |
 | W5 | DOC_READY | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
 | BW4 | VERIFIED（PR #258） | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
-| BW5 | LOCAL_VERIFIED | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
+| BW5 | VERIFIED（PR #267） | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 | BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
@@ -100,4 +100,6 @@ BW0～BW5、W0～W5 的細化已完成；BW6／W6 尚待細化。若施工時發
 | [back-board-mobile.png](assets/v1/back-board-mobile.png) | 手機版導覽折成三行（U-03） |
 | [admin-types.png](assets/v1/admin-types.png) | Admin 類型列表：Card 與 Button 樣式都沒生成（F-01） |
 
-BW5 已通過 339 Java／140 PostgreSQL／395 前端／39 mock E2E、三次萬筆量測與獨立審查；[交付證據](../../.team/reports/BW5-DELIVERY.md)。待必要遠端 CI 與合併；尚未部署。下一個建議功能波為 W3 Front 公開面。
+BW5 已通過 339 Java／140 PostgreSQL／395 前端／39 mock E2E、三次萬筆量測與獨立審查；[交付證據](../../.team/reports/BW5-DELIVERY.md)。已於 PR #267 通過必要 CI 並合併；[發布證據](../../.team/reports/BW5-PUBLICATION.md)。尚未部署。W3 Front 公開面開發中。
+
+W3 主要公開頁功能及本地 339 Java／473 前端／60 mock E2E 已通過，並有 15 份 responsive 畫面證據；Front 的直接 Markdown 依賴已經明確授權、宣告並通過乾淨安裝與追加 119 項測試；W3 為 LOCAL_VERIFIED，待必要遠端 CI 與合併，沒有部署。[進度與待辦](../../.team/reports/W3-DELIVERY.md)。

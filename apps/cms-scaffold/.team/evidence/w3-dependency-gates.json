@@ -1,0 +1,42 @@
+[
+  {
+    "command": "npm ci",
+    "exitCode": 0,
+    "log": "w3-dependency-ci.log"
+  },
+  {
+    "command": "npm ls react-markdown",
+    "exitCode": 0,
+    "log": "w3-dependency-ls.log"
+  },
+  {
+    "command": "npm run gen -w @cms/api",
+    "exitCode": 0,
+    "log": "w3-dependency-gen.log"
+  },
+  {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "log": "w3-dependency-lint.log"
+  },
+  {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "log": "w3-dependency-typecheck.log"
+  },
+  {
+    "command": "npm test -w @cms/api -w @cms/web-front",
+    "exitCode": 0,
+    "log": "w3-dependency-tests.log"
+  },
+  {
+    "command": "npm run build",
+    "exitCode": 0,
+    "log": "w3-dependency-build.log"
+  },
+  {
+    "command": "npm run test:bundle",
+    "exitCode": 0,
+    "log": "w3-dependency-bundle.log"
+  }
+]

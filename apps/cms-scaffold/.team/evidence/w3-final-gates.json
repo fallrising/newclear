@@ -1,0 +1,46 @@
+[
+  {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "log": "w3-final-lint.log"
+  },
+  {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "log": "w3-final-typecheck.log"
+  },
+  {
+    "command": "npm test -w @cms/web-front",
+    "exitCode": 0,
+    "log": "w3-final-front-tests.log"
+  },
+  {
+    "command": "npm run build",
+    "exitCode": 0,
+    "log": "w3-final-build.log"
+  },
+  {
+    "command": "npm run test:bundle",
+    "exitCode": 0,
+    "log": "w3-final-bundle.log"
+  },
+  {
+    "command": "npm run e2e:mock",
+    "exitCode": 0,
+    "passed": 60,
+    "excluded": 0,
+    "log": "w3-e2e.log"
+  },
+  {
+    "command": "npm run build -w @cms/web-front",
+    "exitCode": 0,
+    "log": "w3-favicon-build.log",
+    "reason": "after local inline favicon correction"
+  },
+  {
+    "command": "npm run test:bundle",
+    "exitCode": 0,
+    "log": "w3-favicon-bundle.log",
+    "reason": "after local inline favicon correction"
+  }
+]

@@ -122,4 +122,6 @@ Demo 種子（無密碼、無 demo 專用表）：
 
 既有資料庫升級應保留 volume 並由 Flyway 執行新增 migration；先備份 PostgreSQL 與媒體並驗證可還原。`docker compose down -v` 會刪除資料卷，只可用於明確可丟棄的 demo 資料，不能當成正式資料的升級方式。
 
-BW5 開放問題收尾已完成本地驗收：帳號 404、媒體錯誤碼與既有 W2 同步、管理輸入驗證、公開關聯依已發布副本篩選、公開／會員整頁媒體解析。339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能與獨立審查通過；[交付證據](.team/reports/BW5-DELIVERY.md)。待必要遠端 CI 與合併，未部署。
+BW5 開放問題收尾已於 PR #267 合併：帳號 404、媒體錯誤碼與既有 W2 同步、管理輸入驗證、公開關聯依已發布副本篩選、公開／會員整頁媒體解析。339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能與獨立審查通過；[交付證據](.team/reports/BW5-DELIVERY.md)。必要遠端 CI 與遠端結果已核對，未部署。
+
+W3 公開面已完成本地驗收：相簿／相片燈箱、診所／獸醫、專案／里程碑，並補手機導覽、安全 Markdown、SEO 與載入／空／錯誤狀態。339 Java／473 前端／60 mock E2E 通過；Front 直接依賴宣告後另通過乾淨安裝及 119 項 API／Front 回歸。[交付與驗收證據](.team/reports/W3-DELIVERY.md)。待必要遠端 CI 與合併，未部署。

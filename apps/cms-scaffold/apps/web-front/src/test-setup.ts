@@ -9,5 +9,10 @@ beforeEach(() => {
   resetMocks();
   setSurface("front");
 });
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  if (typeof document === "undefined") return;
+  document.head.querySelectorAll('meta[name], meta[property], link[rel="canonical"]').forEach((node) => node.remove());
+  document.title = "";
+});
 afterAll(() => server.close());

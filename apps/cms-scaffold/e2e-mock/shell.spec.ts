@@ -26,7 +26,7 @@ test.describe("W0 shell pages", () => {
     await expect(page.getByText("Coast Light 2026")).toBeVisible();
     expect(await computed(page, "[data-site=album]", "background-color")).toBe("rgb(17, 17, 17)");
     expect(await computed(page, "h1", "font-size")).toBe("32px");
-    await expect(page).toHaveTitle("相簿 · 相簿");
+    await expect(page).toHaveTitle("相簿");
   });
 
   for (const [name, url] of [

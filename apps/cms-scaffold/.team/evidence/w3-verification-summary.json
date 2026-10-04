@@ -1,0 +1,45 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "java": {
+    "tests": 339,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontendWorkspaceCounts": [
+    32,
+    43,
+    61,
+    92,
+    18,
+    7,
+    133,
+    87
+  ],
+  "frontendTests": 473,
+  "protectedFiles": 377,
+  "sourceFiles": 439,
+  "runtimeOpenApiEqualsBw5": true,
+  "fixturesPreservedFromBw5": true,
+  "preExistingFixtureDifferences": [
+    "admin-content-types.json",
+    "capabilities.json",
+    "principals.json",
+    "work-content-types.json",
+    "work-entries.json"
+  ],
+  "publication": "Owner authorized dependency declared; pending required remote CI and publication; not deployed.",
+  "e2ePassed": 60,
+  "e2eExcluded": 0,
+  "browserCaptures": 15,
+  "browserBlockingFindings": 0,
+  "dependencyDeclaration": "owner authorized, react-markdown10.1.0 directly declared and clean-install verified",
+  "postDependencyTests": 119,
+  "dependencyLockedGraphUnchanged": true,
+  "npmAudit": {
+    "exitCode": 1,
+    "inheritedHigh": 1,
+    "package": "brace-expansion",
+    "requiredGate": false
+  }
+}

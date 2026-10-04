@@ -18,8 +18,9 @@ risk: high
 
 Specify the snapshot cache contract. The D-owned save/value/schema boundary is implemented and
 verified in [runtime acceptance](../acceptance/T030D.acceptance.md), following accepted design
-review and compiling RED skeletons. T030C public load and its portions of shared assertions remain
-planned; T030C and the T030 parent remain blocked. The current store uses schema version2 while
+review and compiling RED skeletons. T030C public load and its shared assertions are separately
+verified by [C runtime acceptance](../acceptance/T030C.acceptance.md); the
+[parent composition](../acceptance/T030.acceptance.md) is also Accepted. The store uses schema version2 while
 preserving A/B append/replay behavior. Verified status applies to the D-owned boundary only.
 
 # Responsibility
@@ -36,8 +37,8 @@ a general migration framework, cache repair/deletion, encryption, or P0 durable 
 
 # Public Boundary
 
-Implemented save/value signatures, with the dependent `load_snapshot` signature shown only as
-the **unimplemented T030C design boundary**:
+Implemented save/value signatures, with dependent `load_snapshot` owned and separately
+implemented/accepted by [SPEC-T030C](SPEC-T030C-sqlite-snapshot-load.md):
 
 ```rust
 pub const MAX_SNAPSHOT_BYTES: usize = 96;
@@ -60,7 +61,7 @@ fields; it does **not** establish persisted provenance. Callers can reduce inven
 a perfectly legal projection. Only the durable-history check below establishes store-relative
 truth. Load constructs the returned snapshot from its freshly replayed reducer projection,
 never from decoded cache fields. No domain constructor, setter, serde derive or reducer restore
-operation is added. T030C will project these load clauses into its own specification before code.
+operation is added. T030C projected these load clauses into its own specification before code.
 
 # Inputs and Outputs
 
@@ -400,9 +401,9 @@ Timestamps/identifiers remain data rather than authentication, actor leases, or 
 
 # Test Specification
 
-**D-owned assertions are implemented and verified; C-owned assertions remain planned.**
+**D-owned and C-owned assertions are implemented and separately verified.**
 The 29 D/D-shared names execute in the save suite; three C-only names and C portions of the ten
-shared rows await T030C. Runtime acceptance records the precise evidence boundary. Names alone
+shared rows execute in T030C. Separate runtime reports record each evidence boundary. Names alone
 do not establish coverage; the concrete oracles below remain normative.
 
 | Clause | Layer / executable test | Concrete oracle | Acceptance owner |
@@ -514,16 +515,16 @@ assertions are not claimed as runtime evidence.
 
 CU-EVT-04 → S01–S08/S11–S16 (E1); dependent CU-EVT-03 → S02/S04/S09–S16 (E0).
 TD §§4.4–4.6/INV-003/INV-004 → history remains authoritative; accepted T020/A/B → strict codec and
-private projection preserved. [Traceability](../traceability.md) distinguishes accepted D runtime from deferred C load.
+private projection preserved. [Traceability](../traceability.md) distinguishes separate D and C runtime evidence.
 
 # TD Gaps
 
 The prior snapshot concurrency/failure gap is resolved by accepted ADR-0005 and this design.
 The initial independent review rejected global CHECK suppression; R1 was repaired with nullable
 ANY cache values, full enabled integrity validation and an explicit value/structural corruption
-partition. No unresolved high-risk design gap remains. D runtime is separately accepted; T030C specification
-and parent composition remain separate gates; new implementation discoveries must become an ADR
-or concrete TD-GAP rather than improvised behavior.
+partition. No unresolved high-risk design gap remains. D runtime, T030C runtime and parent
+composition passed separate gates. The C extrema discovery was resolved by accepted ADR-0006
+before codec repair; new discoveries must become an ADR or concrete TD-GAP rather than improvised behavior.
 
 # Self-Check
 
@@ -538,4 +539,4 @@ or concrete TD-GAP rather than improvised behavior.
 | B: allocation, cleanup, cancellation? | 96-byte gates, bounded total work, read E0; no unsafe unlink of shared new DB; worker may finish S02/S08/S12/S14 |
 | All: preconditions/error precedence? | Type/checked table, S01/S03 then schema/head/history/old-row/write; bounded error enums |
 | All: observability/side effects/non-guarantees? | Typed phase/outcome, no secret logs/new ledger, correctness-first full replay and explicit cap S08/S14/S15 |
-| All: contract proof/readiness? | Every S clause maps to names/oracles; D runtime separately accepted, C assertions and parent composition deferred |
+| All: contract proof/readiness? | Every S clause maps to names/oracles; D and C runtime plus parent composition separately accepted |

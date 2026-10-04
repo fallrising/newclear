@@ -26,7 +26,9 @@ export interface DocumentNodeData {
   /// state to the user so they know when to rename a terminal.
   runInName: string | null;
   runInMatched: boolean;
+  /// Approved removal; the document owns the close decision.
   onClose: () => void;
+  registerCloseGuard?: (requestClose: () => void) => () => void;
   /// Forwarded to DocumentSurface so the canvas can materialize a
   /// synthetic triggers edge per D-6 step 1.
   onRunInChange?: (name: string | null) => void;
@@ -65,10 +67,18 @@ export function DocumentNode({ data, width, height }: NodeProps) {
       </div>
       {/* `nodrag nowheel` so editor input, selection, and scrolling go
           to CodeMirror instead of the canvas drag layer. */}
-      <div className={`${CSS.nodeBody} nodrag nowheel`}>
+      <div
+        className={`${CSS.nodeBody} nodrag nowheel`}
+        onKeyDown={(event) => {
+          // Includes prompt buttons, which React Flow does not treat as inputs.
+          // Preserve normal editor/control behavior while preventing deletion.
+          if (event.key === "Backspace" || event.key === "Delete") event.stopPropagation();
+        }}
+      >
         <DocumentSurface
           path={d.path}
           onClose={d.onClose}
+          registerCloseGuard={d.registerCloseGuard}
           activeTerminalId={d.triggersTarget}
           onRunInChange={d.onRunInChange}
           pinnedContextSources={d.pinnedContextSources}

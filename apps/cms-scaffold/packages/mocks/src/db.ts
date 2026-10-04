@@ -7,6 +7,7 @@ type S = components["schemas"];
 export type RevisionRow = S["Revision"] & { payload: S["EntryPayload"] };
 
 export interface MockDb {
+  memberEntries: typeof fixtures.memberEntries;
   workEntries: S["WorkEntry"][];
   publicEntries: S["PublicEntry"][];
   adminTypes: S["AdminContentType"][];
@@ -29,6 +30,7 @@ function seedRevisions(): Record<string, RevisionRow[]> {
 
 function fresh(): MockDb {
   return structuredClone({
+    memberEntries: fixtures.memberEntries,
     workEntries: fixtures.workEntries,
     publicEntries: fixtures.publicEntries,
     adminTypes: fixtures.adminContentTypes.items,

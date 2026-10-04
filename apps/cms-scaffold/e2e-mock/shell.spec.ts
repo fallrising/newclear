@@ -26,7 +26,7 @@ test.describe("W0 shell pages", () => {
     await expect(page.getByText("Coast Light 2026")).toBeVisible();
     expect(await computed(page, "[data-site=album]", "background-color")).toBe("rgb(17, 17, 17)");
     expect(await computed(page, "h1", "font-size")).toBe("32px");
-    await expect(page).toHaveTitle("相簿 · 相簿");
+    await expect(page).toHaveTitle("相簿");
   });
 
   for (const [name, url] of [
@@ -53,7 +53,7 @@ test.describe("W0 shell pages", () => {
     await page.getByLabel("帳號").fill("seed-member-clinic");
     await page.getByLabel("密碼").fill("any-password");
     await page.getByTestId("login-submit").click();
-    await expect(page).toHaveURL(`${FRONT}/`);
+    await expect(page).toHaveURL(`${FRONT}/clinic/me`);
   });
 
   test("S-02 Back and Admin login forms start empty", async ({ page }) => {

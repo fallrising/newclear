@@ -4,9 +4,9 @@ Date: 2026-10-04
 
 ## Current Goal
 
-T030A/B monorepo recovery is Accepted and merged. T030D snapshot-save runtime is now Accepted
-following test-first implementation, full gates and independent review. Next is the T030C load
-specification and its own review; public load is not implemented.
+T030A/B monorepo recovery and T030D snapshot save are Accepted and merged. T030C public
+snapshot load and T030 A/B/C/D composition are now independently Accepted after test-first
+implementation and full gates. The next proposed boundary is T040 session-actor design.
 Preserve the T020 schema, recovered A/B contracts and private single-operator P0 boundary.
 
 ## Repository State
@@ -15,7 +15,7 @@ Recovery base: newclear `7bafbf56`. Source: archived Fanzloud `0a47dcd`, includi
 stacked T030A/T030B work. The recovered production source, tests, Cargo manifest/lockfile,
 TD decomposition and historical contract artifacts match that source.
 
-The sole descriptive TD deviation clarifies that the T030 parent awaits its children;
+At recovery, the sole descriptive TD deviation clarified that T030 awaited its children;
 its graph and contracts are unchanged. The recovered store is a P1 library and is not
 wired into P0. P0 session replay remains process-lifetime rather than crash-durable.
 
@@ -41,10 +41,37 @@ initial reducer replay. Nullable ANY cache values remain separately validated; f
 integrity and structural-key/schema checks remain fail-closed. Legacy processes must quiesce
 before upgrade; there is no automatic downgrade, cleanup or mixed-version rollout protocol.
 
-All 29 D/D-shared named tests are implemented; the three C-only names and public-load assertions
-in shared rows remain deferred. T030C still needs its own E0 specification, implementation and
-acceptance. Parent T030 remains blocked. The P1 store is still separate from P0 sessions, and real
-provider smoke remains unrun. Historical design and A/B acceptance reports are preserved.
+All 29 D/D-shared named tests are implemented. Their historical D report claims only D-owned
+assertions; C-only and shared public-load assertions now have separate acceptance below. The P1
+store is still separate from P0 sessions, and real-provider smoke remains unrun. Historical
+design and A/B/D acceptance reports are preserved.
+
+## Snapshot Load and Store Composition Accepted
+
+[T030C](acceptance/T030C.acceptance.md) implements public read-only `load_snapshot` using one
+pinned transaction for exact schema/key/head/cache validation and all verification pages.
+Only malformed disposable cache values become misses; observed store/history faults remain
+typed errors. Eligible cache sequences up to 4096 remain usable behind a larger full-u64 head.
+Canonical 96-byte comparison returns a freshly reduced projection without domain import/restore.
+
+GPT-6.1 Sol implemented the accepted design, GPT-6 Astra independently reviewed design and the
+timestamp amendment, and GPT-6 Sol independently accepted runtime and
+[T030 composition](acceptance/T030.acceptance.md). The orchestrator reran 99 store tests,
+295 workspace tests, 10 Node tests, domain tests, separate fake-provider P0 E2E, formatting,
+Clippy, build, dependency and diff checks; all passed. The runtime reviewer separately reran
+the 99 store tests. Real SQLite Busy, cancellation, subprocess interruption and multi-page
+concurrency have concrete public oracles; synthetic Io/Full faults are labeled as such.
+
+The extrema oracle exposed an inherited canonical extended-year timestamp readback defect.
+Append rolls back this error before COMMIT. Independently accepted
+[ADR-0006](adr/ADR-0006-canonical-extended-timestamps.md) preceded the targeted RED regression
+and minimal strict-RFC3339-first/exact-canonical fallback repair. No schema, encoding,
+dependency or domain API changed; previous accepted RFC3339 forms remain valid.
+
+Full-prefix verification does not accelerate startup; Some proves no suffix validity and None
+proves no history validity. Global structural key scanning is outside the prefix cap, and no
+total latency/process-memory guarantee is added. The automated rustdoc/spec drift checker
+remains a documented tooling gap; current projections received explicit independent review.
 
 ## Historical Upstream Acceptance
 
@@ -397,9 +424,9 @@ subsequently passed a fresh Cursor Agent acceptance review with no blocker.
 
 ## Next Work
 
-1. Specify and independently review T030C public snapshot load against accepted ADR-0005 and
-   implemented T030D. Preserve pinned E0 reads, cache-value/history-error distinctions, the
-   4096-prefix bound and private reducer trust. T030C and parent remain blocked until their own gates.
+1. Propose T040 session-actor design against the Accepted T030 adapter and TD §4.7. Specify
+   ownership, command ordering, recovery and failure semantics before implementation. This
+   delivery stops at T030 acceptance; it does not start actors, P0 persistence or a new provider.
 2. Preserve the Accepted P0 boundary; P1 work must not add a dependency on live P0 provider
    availability. T030R local acceptance does not merge historical source PR #3/#4.
 3. Run a T007 live smoke only in a private environment with all nine administrator variables, the

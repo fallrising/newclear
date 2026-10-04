@@ -125,3 +125,21 @@ Send JSON to `POST /loki/api/v1/push` on the same HTTP listener, with `Content-T
 For Vector's Loki sink set `compression = "none"` or `"gzip"`; its default snappy mode sends protobuf, which this milestone does not support. See the [real Vector acceptance](../test/e2e/README.md#real-vector-loki-json-push) for the pinned binary and executable gate. Loki query/ready APIs are not implemented, so disable the sink healthcheck for this ingest-only test.
 
 204 acknowledges asynchronous admission. A partial 400 can leave valid records persisted; retrying an unexpected committed 500 can duplicate them. Byte/element/projected-expansion capacity failures are 413; receiver or pipeline backpressure 429 and stopped 503 include Retry-After. The separate Loki receive slot raises the default logical queue/buffer budget to 1000 MiB, not a hard RSS limit. Details and trust/cancellation boundaries are in the [P1-06 contract](specs/p1-06-loki-push.md).
+
+
+## PromQL storage verification
+
+The P1-07 adapter can be tested directly against memory SPI without a running
+daemon. It does not yet add HTTP query endpoints.
+
+```sh
+go test -race -count=1 ./internal/query/promqladapter
+go test -race -count=1 ./test/promqltest -driver=memory
+go test -race -count=1 ./test/security
+```
+
+See the [corpus README](../test/promqltest/README.md) for exact upstream fixture
+provenance, executed float cases and native-histogram exclusions. Traditional
+`_bucket` histograms are included. The adapter's streaming bridge reopens an
+exact series when samples are requested; it preserves SPI ownership but adds
+storage work and cannot promise snapshot isolation across those calls.

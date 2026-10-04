@@ -2,7 +2,7 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW5](../02-backend-sdd.md#7-後端波次)、[§8](../02-backend-sdd.md#8-開放問題) ・ 契約：[contracts/BW5.openapi.yaml](../contracts/BW5.openapi.yaml) ・ 前一波：[BW4](BW4.md)
 
-狀態：**LOCAL_VERIFIED**（2026-10-04；339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能及獨立審查通過；待必要遠端 CI 與合併）
+狀態：**VERIFIED**（2026-10-04；PR #267 必要 CI 通過並合併，遠端核對完成；339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能及獨立審查通過）
 
 [本次交付與驗收證據](../../../.team/reports/BW5-DELIVERY.md)；歷史施工片段與測試數依 §0 覆寫。
 日期：2026-09-26  
@@ -16,7 +16,7 @@
 
 ## 0. 本次整合準則（2026-10-04，實作前）
 
-本節優先於歷史程式片段、路徑限制、測試數與前端延後規則。BW4 已在 PR #258 合併，來源與遠端 CMS 完全一致；本波從其後的 main 建立隔離工作目錄。狀態：**LOCAL_VERIFIED**。
+本節優先於歷史程式片段、路徑限制、測試數與前端延後規則。BW4 已在 PR #258 合併，來源與遠端 CMS 完全一致；本波從其後的 main 建立隔離工作目錄。狀態：**VERIFIED**；[發布證據](../../../.team/reports/BW5-PUBLICATION.md)。
 
 - 目標仍為 BQ-06／07／08／10／11；保留 P0、BW1～BW4、W1／W2 的交易、授權、版本、稽核與媒體公開安全修正。採增量修改，不以歷史整檔覆蓋。
 - BQ-11 必須保留現行額外條件：附著 entry 的類型啟用、publishedPayload 存在且該欄位仍指向所請求的媒體、欄位是啟用的 media-ref 且 publicBytes。不得因批次解析洩漏尚未發布的替換媒體。保留 required-ref 目標公開檢查。公開與會員列表都必須驗證固定呼叫數與實際展開結果。

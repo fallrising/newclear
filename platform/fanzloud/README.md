@@ -43,8 +43,10 @@ against the [snapshot design](docs/specs/SPEC-T030D-sqlite-snapshot-save.md) and
 It defines persisted-prefix verification, explicit equal-sequence arbitration and atomic schema
 evolution, preserving full event/store integrity while bounding disposable cache values. This first bounded cache does not accelerate initial reducer replay. T030D snapshot
 save and exact v1-to-v2 schema upgrade are implemented and independently accepted.
-T030C public snapshot load still needs its own specification and implementation; the T030 parent
-remains blocked. Native agents, local sandbox execution,
+T030C public snapshot load and [T030 A/B/C/D composition](docs/acceptance/T030.acceptance.md)
+are independently accepted. Load validates a cache against one pinned durable prefix and returns
+a freshly reduced projection; malformed cache values are misses, while observed store/history
+errors remain typed failures. Native agents, local sandbox execution,
 multi-user authentication and the `node-agent`/`boxd` runtime remain future tasks. The recovered
 P1 store is not wired into the P0 process-lifetime session runtime.
 
@@ -85,7 +87,7 @@ authority.
 | `crates/codebox-session-runtime` | Implemented | One process-lifetime session, one active turn, ordered events, cancel, and recovery |
 | `crates/codebox-agent-codex` | Implemented | Credential scope, device login, pinned Cloud adapter, ledgers, lifecycle, and diff retrieval |
 | `crates/codebox-domain` | Implemented | Strong identifiers, paths, sequences, versioned events, and deterministic reducer |
-| `crates/codebox-event-store` | Accepted through T030D | Private SQLite atomic append, bounded replay and verified snapshot save; public snapshot load pending |
+| `crates/codebox-event-store` | T030 Accepted | Private SQLite atomic append, bounded replay, verified snapshot save/load and restart composition |
 | `apps/node-agent` | Scaffold | Future host sandbox controller |
 | `apps/boxd` | Scaffold | Future in-sandbox process and filesystem service |
 | `apps/codebox-cli` | Scaffold | Future command-line client |

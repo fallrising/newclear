@@ -98,13 +98,15 @@ type EventIdSource = Arc<dyn Fn() -> Uuid + Send + Sync>;
 /// The private P1 SQLite event-store adapter.
 ///
 /// Contracts: `CU-EVT-01`, `CU-EVT-02`. T030A provides atomic append and T030B provides bounded
-/// replay; CU-EVT-04 provides verified snapshot save. Public snapshot load remains T030C.
+/// replay; CU-EVT-04 provides verified snapshot save and CU-EVT-03 provides E0 verified load.
 /// Debug output never reveals the administrator
 /// database path.
 #[derive(Clone)]
 pub struct SqliteEventStore {
     database_path: Arc<PathBuf>,
     event_id_source: EventIdSource,
+    #[cfg(test)]
+    load_hook: Option<LoadHook>,
 }
 
 impl fmt::Debug for SqliteEventStore {
@@ -140,6 +142,8 @@ impl SqliteEventStore {
         Ok(Self {
             database_path: Arc::new(validated),
             event_id_source,
+            #[cfg(test)]
+            load_hook: None,
         })
     }
 
@@ -189,6 +193,38 @@ impl SqliteEventStore {
         .map_err(|_| EventStoreError::WorkerUnavailable)?
     }
 
+    /// Loads a disposable cache only after verifying its complete persisted prefix.
+    ///
+    /// Contract: `CU-EVT-03`, SPEC-T030C C01–C11 (E0). One read-only transaction pins identity,
+    /// head, cache and at most 4096 events in pages of at most 256. Only malformed cache values
+    /// become a miss; observed store/history damage remains a typed error. The returned wrapper
+    /// contains freshly reduced state, never restored bytes. A stale cache proves no suffix
+    /// validity and supplies no reducer; continuation requires caller-owned validated replay.
+    /// Dropping this future does not stop its blocking reader, which cannot mutate application
+    /// state. There is no internal retry, repair, migration, file recreation or total deadline.
+    pub async fn load_snapshot(
+        &self,
+        stream: SessionId,
+    ) -> Result<Option<SessionSnapshot>, EventStoreError> {
+        let path = Arc::clone(&self.database_path);
+        #[cfg(test)]
+        let hook = self.load_hook.clone();
+        let worker = task::spawn_blocking(move || {
+            let result = load_snapshot_transaction(
+                &path,
+                stream,
+                #[cfg(test)]
+                hook.as_ref(),
+            );
+            #[cfg(test)]
+            if let Some(hook) = hook {
+                hook(LoadPoint::Finished)?;
+            }
+            result
+        });
+        await_replay_worker(worker).await
+    }
+
     /// Loads one bounded, immutable page of committed events after `after`.
     ///
     /// Contract: `CU-EVT-02`. Success contains only `stream`, in contiguous ascending sequence
@@ -214,6 +250,70 @@ impl SqliteEventStore {
         let worker = task::spawn_blocking(move || load_page(&database_path, stream, after, limit));
         await_replay_worker(worker).await
     }
+}
+
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum LoadPoint {
+    BeforeOpen,
+    Pinned,
+    Cache,
+    Page(usize),
+    Verified,
+    Finished,
+}
+#[cfg(test)]
+type LoadHook = Arc<dyn Fn(LoadPoint) -> Result<(), EventStoreError> + Send + Sync>;
+
+fn load_snapshot_transaction(
+    path: &Path,
+    stream: SessionId,
+    #[cfg(test)] hook: Option<&LoadHook>,
+) -> Result<Option<SessionSnapshot>, EventStoreError> {
+    #[cfg(test)]
+    let observe = |point| match hook {
+        Some(hook) => hook(point),
+        None => Ok(()),
+    };
+    #[cfg(test)]
+    observe(LoadPoint::BeforeOpen)?;
+    let mut connection = open_read_connection(path)?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| map_sqlite(error, StorageOperation::Begin))?;
+    validate_identity(&transaction, true)?;
+    validate_snapshot_keys(&transaction)?;
+    #[cfg(test)]
+    observe(LoadPoint::Pinned)?;
+    let head = read_high_water(&transaction, stream)?;
+    let cached = match read_snapshot_row(&transaction, stream) {
+        Err(EventStoreError::InvalidSnapshotCache { .. }) => None,
+        other => other?,
+    };
+    #[cfg(test)]
+    observe(LoadPoint::Cache)?;
+    let Some((seq, body)) = cached else {
+        return Ok(None);
+    };
+    if seq > head {
+        return Ok(None);
+    }
+    let projection = verify_prefix(
+        &transaction,
+        stream,
+        seq,
+        #[cfg(test)]
+        &|point| {
+            if let SavePoint::Page(count) = point {
+                observe(LoadPoint::Page(count))?;
+            }
+            Ok(())
+        },
+    )?;
+    let snapshot = SessionSnapshot::from_projection(projection)?;
+    #[cfg(test)]
+    observe(LoadPoint::Verified)?;
+    Ok((encode_snapshot(&snapshot) == body).then_some(snapshot))
 }
 
 async fn await_replay_worker<T>(
@@ -1210,3 +1310,7 @@ mod tests {
 #[cfg(test)]
 #[path = "snapshot_tests.rs"]
 mod snapshot_tests;
+
+#[cfg(test)]
+#[path = "snapshot_load_tests.rs"]
+mod snapshot_load_tests;

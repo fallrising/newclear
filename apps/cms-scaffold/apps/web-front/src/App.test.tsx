@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { setScenario } from "@cms/mocks";
 import { describe, expect, it } from "vitest";
 import { recordRequests, renderRoute } from "./test-utils";
@@ -18,8 +18,8 @@ function sources(dir: string): string[] {
 describe("CMS Front", () => {
   it("T-FO-01 an unpublished album URL shows the not-found state without draft fields", async () => {
     renderRoute("/album/albums/private-studio");
-    expect(await screen.findByRole("heading", { level: 1, name: "找不到相簿" })).toBeInTheDocument();
-    expect(screen.getByText("這本相簿不存在或尚未發布。")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "找不到這個頁面" })).toBeInTheDocument();
+    expect(screen.getByText("可能不存在，或尚未公開。")).toBeInTheDocument();
     expect(screen.queryByText(/Studio \(unpublished\)|publicationState|draft/i)).not.toBeInTheDocument();
   });
 
@@ -28,13 +28,14 @@ describe("CMS Front", () => {
     renderRoute("/album");
     expect(await screen.findByText("Coast Light 2026")).toBeInTheDocument();
     expect(paths.length).toBeGreaterThan(0);
-    expect(paths.every((p) => p.startsWith("/api/v1/public/"))).toBe(true);
+    expect(paths.every((p) => p.path.startsWith("/api/v1/public/"))).toBe(true);
   });
 
   it("T-FO-03 an unlisted album is not listed but its slug is readable", async () => {
     renderRoute("/album");
     expect(await screen.findByText("Coast Light 2026")).toBeInTheDocument();
     expect(screen.queryByText("Unlisted proof")).not.toBeInTheDocument();
+    cleanup();
     renderRoute("/album/albums/unlisted-proof");
     expect(await screen.findByRole("heading", { level: 1, name: "Unlisted proof" })).toBeInTheDocument();
   });
@@ -48,23 +49,23 @@ describe("CMS Front", () => {
   it("C-02 an empty list shows the empty copy once loaded", async () => {
     setScenario("empty");
     renderRoute("/projects");
-    expect(await screen.findByTestId("empty-state")).toHaveTextContent("還沒有公開專案");
+    expect(await screen.findByTestId("empty-published")).toHaveTextContent("還沒有公開專案");
   });
 
   it("C-03 a 500 on a list shows the error with retry, not the empty state", async () => {
     setScenario("error500");
     renderRoute("/clinic");
-    expect(await screen.findAllByTestId("query-error")).not.toHaveLength(0);
-    expect(screen.queryByTestId("empty-state")).not.toBeInTheDocument();
+    expect(await screen.findAllByTestId("error-public")).not.toHaveLength(0);
+    expect(screen.queryByTestId("empty-published")).not.toBeInTheDocument();
   });
 
-  it("S-01 AC-13 login ignores an external next and lands on /", async () => {
+  it("S-01 AC-13 login ignores an external next and lands on /clinic/me", async () => {
     const { router } = renderRoute("/login?next=https%3A%2F%2Fevil.example%2Fsteal");
     fireEvent.change(await screen.findByLabelText("帳號"), { target: { value: "seed-member-clinic" } });
     fireEvent.change(screen.getByLabelText("密碼"), { target: { value: "pw" } });
     fireEvent.click(screen.getByTestId("login-submit"));
-    await waitFor(() => expect(router.state.location.pathname).toBe("/"));
-    expect(await screen.findByRole("heading", { level: 1, name: "CMS Scaffold" })).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe("/clinic/me"));
+    expect(await screen.findByRole("heading", { level: 1, name: "我的資料" })).toBeInTheDocument();
   });
 
   it("AC-08 web-front source imports @cms/api only through @cms/api/public", () => {

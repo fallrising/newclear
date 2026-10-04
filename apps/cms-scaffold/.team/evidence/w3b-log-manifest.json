@@ -1,0 +1,198 @@
+{
+  "w3b-tests.log": {
+    "sha256": "2a3042935e566373120453a8735bae82f32142b37a7b9e22e7122ff740a54b1e",
+    "bytes": 3097
+  },
+  "T-932-auth-interim.log": {
+    "sha256": "6114238a31d0a5902eb9ea222749550080b657a3586fe4162fbc02bce54076eb",
+    "bytes": 2053
+  },
+  "T-932-tests-final2.log": {
+    "sha256": "cc092562aea0e2778e2231103197aa73c21e1b997d08f88d610fc56c5cdec5f4",
+    "bytes": 17422
+  },
+  "w3b-browser.log": {
+    "sha256": "73eceee99bfd7b5d318db4eaf2c70f301285e1495c0720e8a6b50c291f7b21d0",
+    "bytes": 1193
+  },
+  "w3b-codegen.log": {
+    "sha256": "a9e21726c7a5da7284b4a4f4b7db7c908f60f21e954cd2a9d45ca877435f340e",
+    "bytes": 274
+  },
+  "w3b-java.log": {
+    "sha256": "38053e92aba8d3af40ff9de56633e1ef2e3887a786cea47c817ec5b511318973",
+    "bytes": 1192
+  },
+  "T-932-lint-initial.log": {
+    "sha256": "2e040670702036008919039628fc7a1061045344aa5cae71c387c6d707a1c4da",
+    "bytes": 22
+  },
+  "w3b-e2e-red.log": {
+    "sha256": "4c09490ab8163a2dff10ec8101423af4a1773480890a4bc54e83011ee2a42b9f",
+    "bytes": 3827
+  },
+  "T-932-frozen-validation.log": {
+    "sha256": "1f520ef6657dd871e89ffa5731d33bd184c141b7d7fad9d9ca9cc6b5bfd97d07",
+    "bytes": 690
+  },
+  "T-932-green-2.log": {
+    "sha256": "5518111cdf6f76123a87b42513817ff7ecbf6561eec8d07dd06cdd5445004deb",
+    "bytes": 31177
+  },
+  "T-932-tests-final3.log": {
+    "sha256": "3f74a26e62321063b467830dc5d1806e7dbc70158a0668b0a488bcd96c2ae260",
+    "bytes": 17564
+  },
+  "w3b-theme-red.log": {
+    "sha256": "a2664c7879ed6bb54d8c398befa81ace537f3be5c70fba1b46aa4dfb47139021",
+    "bytes": 3576
+  },
+  "T-932-build-final.log": {
+    "sha256": "093901d552adc88bfebcf4ab7af6b05003a2d70b4dd60263247a1a5c83212d24",
+    "bytes": 1226
+  },
+  "w3b-ci-install.log": {
+    "sha256": "87cad944fa0e8213a34bd482a620acfdef9105879865ac60c6afc0589c7292e2",
+    "bytes": 655
+  },
+  "T-932-report-validation.log": {
+    "sha256": "36afe3ee66e7081761f9d78108c7374b89386821a30cf6f30a2a49aada4f621a",
+    "bytes": 58
+  },
+  "T-932-tests-final.log": {
+    "sha256": "fd2af6b2b8271ca5f4d7a759afbc40f3620a7041bb55709545a0e1d57ef8bb68",
+    "bytes": 17424
+  },
+  "T-932-tests.log": {
+    "sha256": "0d87470510f866ce571c4b93ddc07441bcdc1a7623b5891f863cb86e841c2a5b",
+    "bytes": 42558
+  },
+  "T-932-lint-final.log": {
+    "sha256": "2e040670702036008919039628fc7a1061045344aa5cae71c387c6d707a1c4da",
+    "bytes": 22
+  },
+  "T-932-diff-check.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "T-932-red.log": {
+    "sha256": "89e0f57233dd798d1757218c10180a22b11993627b1b95d3772956ca736bbfb9",
+    "bytes": 692045
+  },
+  "T-932-install.log": {
+    "sha256": "87cad944fa0e8213a34bd482a620acfdef9105879865ac60c6afc0589c7292e2",
+    "bytes": 655
+  },
+  "w3b-fixture-gen.log": {
+    "sha256": "95825059af21aa4963032eae043a336842ce59eeec6b70a16693463e4c057647",
+    "bytes": 65
+  },
+  "w3b-member-e2e.log": {
+    "sha256": "97fc7c0e1116c48e847e2bcaa0a9a18c0e8ae0eff844a1d71803487bf6cf1a67",
+    "bytes": 1941
+  },
+  "w3b-build.log": {
+    "sha256": "8d960796bb9cbda0e5e43028c1716336d12a8b46600a71bb864bd23e711bab7a",
+    "bytes": 6252
+  },
+  "w3b-e2e-first.log": {
+    "sha256": "37b5d293907fcf92f1483ef2d5968cd5a56c8d5365e954e9ac7eae228bdbab1f",
+    "bytes": 4403
+  },
+  "T-932-lint.log": {
+    "sha256": "2e040670702036008919039628fc7a1061045344aa5cae71c387c6d707a1c4da",
+    "bytes": 22
+  },
+  "T-932-typecheck-final.log": {
+    "sha256": "8fa1cf5506304e8abac55868e7f1a136c9b1dde57a3981a382da4c21ea129a6f",
+    "bytes": 29
+  },
+  "w3b-lint.log": {
+    "sha256": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "bytes": 306
+  },
+  "T-932-diff-check-final.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "T-932-build.log": {
+    "sha256": "2d00b38299d300e3c7f27b15e422018829aa71207eb60043a1192b6f95f1f634",
+    "bytes": 1226
+  },
+  "T-932-typecheck.log": {
+    "sha256": "8fa1cf5506304e8abac55868e7f1a136c9b1dde57a3981a382da4c21ea129a6f",
+    "bytes": 29
+  },
+  "w3b-bundle.log": {
+    "sha256": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "bytes": 100
+  },
+  "w3b-browser-runner-environment-failure.log": {
+    "sha256": "73cb5fbd36953857ca293f273e5977933a70da99e0401d8905239a3f357e7ef9",
+    "bytes": 7558
+  },
+  "w3b-typecheck.log": {
+    "sha256": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "bytes": 372
+  },
+  "T-932-green-1.log": {
+    "sha256": "7754c422a6062705c5c3acb30b9d196b357f52c124ab8451f1177e834bf6f7ad",
+    "bytes": 66380
+  },
+  "w3b-browser-runner.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "w3b-e2e.log": {
+    "sha256": "3936bf738656c4c892395dcfddbf0f568e47e357e8367058996e60ade33229f5",
+    "bytes": 10810
+  },
+  "T-932-typecheck-initial.log": {
+    "sha256": "fd75ac8db14a0fc3efb1c5b222467f6f6386a80688246e9b6f9b7f0a4b33cb1b",
+    "bytes": 1091
+  },
+  "w3b/T-931-contract.log": {
+    "sha256": "62e2588051d9de33464bcac05cf5a5331752e9093f508cae17cc1f0a544ef142",
+    "bytes": 128
+  },
+  "w3b/T-931-report-validation.log": {
+    "sha256": "28459f4467592365f3216a5ba2c48aab731b590170846f8e773e9a4a71b3481f",
+    "bytes": 58
+  },
+  "w3b/T-931-mocks-tests.log": {
+    "sha256": "e17dd1e883a970822d2bb7f21b5f1399fbdd7f5c20a100ee66636c5adbb49601",
+    "bytes": 15642
+  },
+  "w3b/T-931-api-typecheck.log": {
+    "sha256": "3ab19a21fad9d1942a583a726bd1d64111dec10bf4b57acb843a39541ea8beba",
+    "bytes": 579
+  },
+  "w3b/T-931-npm-ci.log": {
+    "sha256": "87cad944fa0e8213a34bd482a620acfdef9105879865ac60c6afc0589c7292e2",
+    "bytes": 655
+  },
+  "w3b/T-931-tests.log": {
+    "sha256": "94eb2c01e26b2353054de93d5c42d36389be153a5415b55fe2ba5feb4e8dae98",
+    "bytes": 20401
+  },
+  "w3b/T-931-lint.log": {
+    "sha256": "0ca91c362ed0e9c55bd69456fce0c2dddb51a9eee50949f0c47b6d3a3b2a4a03",
+    "bytes": 76
+  },
+  "w3b/T-931-api-green.log": {
+    "sha256": "2b5e7bdbbc826c4467a9b47311d5a5c2bb6d22e1f8dec96174d3973baef71662",
+    "bytes": 1281
+  },
+  "w3b/T-931-typecheck.log": {
+    "sha256": "cf1213bcc61bcaea9560cab18e765d078c2e5495bfdb71e9930a55f83743f60c",
+    "bytes": 90
+  },
+  "w3b/T-931-red.log": {
+    "sha256": "5e66d72c0216b1153264f6b38ea7bfb25ce3e21d1bd00719d23d2c23dc1f23c8",
+    "bytes": 22876
+  },
+  "w3b/T-931-first-full.log": {
+    "sha256": "330ed671804ae68b40764881933f7c62bfd816750f4453a1a0b6aac757bdf980",
+    "bytes": 31401
+  }
+}

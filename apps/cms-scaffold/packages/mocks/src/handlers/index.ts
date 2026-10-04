@@ -1,6 +1,7 @@
 import { adminHandlers } from "./admin";
 import { authHandlers } from "./auth";
 import { commonHandlers, fallbackHandlers } from "./common";
+import { memberHandlers } from "./member";
 import { publicHandlers } from "./public";
 import { workHandlers } from "./work";
 
@@ -9,6 +10,7 @@ export const handlers = [
   ...commonHandlers,
   ...authHandlers,
   ...publicHandlers,
+  ...memberHandlers,
   ...adminHandlers,
   ...workHandlers,
   ...fallbackHandlers,

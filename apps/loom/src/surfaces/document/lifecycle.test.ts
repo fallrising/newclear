@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DocumentLifecycle, DocumentReadGate, createMissingDocument } from "./lifecycle";
+import { DocumentLifecycle, DocumentReadGate } from "./lifecycle";
 import type { DocSnapshot, WriteOutcome } from "./doc_ipc";
 
 function deferred<T>() {
@@ -13,6 +13,13 @@ function opened() {
   return state;
 }
 describe("document lifetime", () => {
+  it("owns pending saves synchronously before their queued write begins", async () => {
+    const state = opened(); const disk = deferred<WriteOutcome>();
+    const saving = state.save(() => "content", () => disk.promise);
+    expect(state.saving).toBe(true);
+    disk.resolve({ kind: "written", new_hash: "new" }); await saving;
+    expect(state.saving).toBe(false);
+  });
   it("uses canonical IPC snapshot identity for relative-path watcher events", () => {
     expect(opened().path).toBe("/vault/notes.md");
   });
@@ -97,19 +104,6 @@ describe("document lifetime", () => {
     gate.invalidate(); pending.resolve(current);
     expect(await reading).toBeNull();
   });
-  it("recreates a deleted dirty document with its current buffer and preserves other documents", async () => {
-    const other = opened(); other.edit();
-    const target = opened(); target.edit();
-    const write = vi.fn(async (_path: string, _content: string, _hash: string | null): Promise<WriteOutcome> => ({ kind: "written", new_hash: "recreated" }));
-    const read = vi.fn(async (path: string) => ({ path, content: "unsaved target", on_disk_hash: "recreated" }));
-    const snapshot = await createMissingDocument(target.path, "unsaved target", write, read);
-    target.load(snapshot);
-    expect(write).toHaveBeenCalledWith(target.path, "unsaved target", null);
-    expect(target.dirty).toBe(false);
-    expect(other.dirty).toBe(true);
-    expect(other.hash).toBe("h1");
-    expect(read).toHaveBeenCalledTimes(1);
-  });
   it("preserves typing during explicit recreation and saves against the created hash", async () => {
     const state = opened(); state.edit(); const savedVersion = state.version;
     state.edit();
@@ -142,5 +136,102 @@ describe("document lifetime", () => {
     const reading = gate.read(() => disk); gate.invalidate(); reject(new Error("obsolete failure"));
     expect(await reading).toBeNull();
     await expect(gate.read(async () => { throw new Error("current failure"); })).rejects.toThrow("current failure");
+  });
+});
+
+
+describe("create-only document lifetime", () => {
+  const snapshot = { path: "/vault/notes.md", content: "submitted", on_disk_hash: "created" };
+  it("creates only once while pending and acknowledges the submitted snapshot", async () => {
+    const state = opened(); state.edit();
+    const disk = deferred<DocSnapshot>();
+    const create = vi.fn(() => disk.promise);
+    const first = state.create("submitted", create);
+    expect(state.creating).toBe(true);
+    expect(await state.create("duplicate", create)).toBeNull();
+    expect(create.mock.calls).toEqual([[state.path, "submitted"]]);
+    disk.resolve(snapshot);
+    expect(await first).toEqual(snapshot);
+    expect(state.creating).toBe(false);
+    expect(state.hash).toBe("created");
+    expect(state.dirty).toBe(false);
+  });
+  it("retains newer edits and uses the submitted hash for the next save", async () => {
+    const state = opened(); state.edit();
+    const disk = deferred<DocSnapshot>();
+    const creating = state.create("submitted", () => disk.promise);
+    state.edit(); disk.resolve(snapshot); await creating;
+    expect(state.dirty).toBe(true);
+    const write = vi.fn().mockResolvedValue({ kind: "written", new_hash: "next" });
+    await state.save(() => "typed while creating", write);
+    expect(write).toHaveBeenCalledWith(state.path, "typed while creating", "created");
+  });
+  it("preserves failed dirty buffers, keeps an inline error, and permits retry", async () => {
+    const state = opened(); state.edit();
+    const create = vi.fn().mockRejectedValueOnce("Destination already exists; reload from disk").mockResolvedValue(snapshot);
+    await expect(state.create("submitted", create)).rejects.toEqual("Destination already exists; reload from disk");
+    expect(state.createError).toBe("Destination already exists; reload from disk");
+    expect(state.creating).toBe(false);
+    expect(state.dirty).toBe(true);
+    expect(state.hash).toBe("h1");
+    expect(await state.create("submitted", create)).toEqual(snapshot);
+    expect(state.createError).toBeNull();
+  });
+  it("creates an initially missing document and enables subsequent saves", async () => {
+    const state = new DocumentLifecycle(); state.missing("notes.md");
+    expect(await state.create("", async () => ({ ...snapshot, content: "" }))).toEqual({ ...snapshot, content: "" });
+    state.edit();
+    const write = vi.fn().mockResolvedValue({ kind: "written", new_hash: "next" });
+    await state.save(() => "new edit", write);
+    expect(write).toHaveBeenCalledWith(snapshot.path, "new edit", "created");
+  });
+  it("never changes another document's dirty buffer", async () => {
+    const other = opened(); other.edit(); const state = opened();
+    await state.create("submitted", async () => snapshot);
+    expect(other.dirty).toBe(true); expect(other.hash).toBe("h1");
+  });
+  it("keeps the duplicate gate during a pending create when reload is requested", async () => {
+    const state = opened(); const disk = deferred<DocSnapshot>();
+    const create = vi.fn(() => disk.promise);
+    const pending = state.create("submitted", create);
+    expect(state.invalidate()).toBe(false);
+    expect(state.creating).toBe(true);
+    expect(await state.create("second request", create)).toBeNull();
+    expect(create).toHaveBeenCalledTimes(1);
+    disk.resolve(snapshot); await pending;
+    expect(state.invalidate()).toBe(true);
+  });
+  it("clears invalidated save ownership after deletion and permits the next lifetime to save", async () => {
+    const state = opened(); state.edit(); const disk = deferred<WriteOutcome>();
+    const pending = state.save(() => "before deletion", () => disk.promise);
+    await Promise.resolve(); expect(state.saving).toBe(true);
+    state.invalidate(); expect(state.saving).toBe(false);
+    state.load({ ...snapshot, on_disk_hash: "reloaded" }); state.edit();
+    const write = vi.fn().mockResolvedValue({ kind: "written", new_hash: "newer" });
+    const newer = state.save(() => "after reload", write);
+    disk.resolve({ kind: "written", new_hash: "obsolete" }); await pending; await newer;
+    expect(state.hash).toBe("newer"); expect(state.saving).toBe(false);
+    expect(write).toHaveBeenCalledWith(state.path, "after reload", "reloaded");
+  });
+  it("ignores completion and finalizers from a closed and reopened lifetime", async () => {
+    const state = opened(); const disk = deferred<DocSnapshot>();
+    const old = state.create("old", () => disk.promise);
+    state.close(); state.missing("new.md"); state.edit();
+    const newerDisk = deferred<DocSnapshot>();
+    const current = state.create("new", () => newerDisk.promise);
+    disk.resolve(snapshot);
+    expect(await old).toBeNull();
+    expect(state.path).toBe("new.md"); expect(state.dirty).toBe(true);
+    expect(state.creating).toBe(true);
+    newerDisk.resolve({ ...snapshot, path: "/vault/new.md", content: "new" }); await current;
+    expect(state.creating).toBe(false); expect(state.path).toBe("/vault/new.md");
+  });
+  it("ignores obsolete errors after explicit reload and clears current error", async () => {
+    const state = opened(); let reject!: (reason: string) => void;
+    const old = state.create("old", () => new Promise<DocSnapshot>((_resolve, failed) => { reject = failed; }));
+    state.load({ ...snapshot, on_disk_hash: "external" });
+    reject("obsolete failure"); expect(await old).toBeNull();
+    expect(state.createError).toBeNull(); expect(state.hash).toBe("external");
+    expect(state.dirty).toBe(false); expect(state.creating).toBe(false);
   });
 });

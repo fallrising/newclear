@@ -84,6 +84,24 @@ pub fn doc_read(state: State<'_, DocAppState>, path: String) -> Result<DocSnapsh
 }
 
 #[tauri::command]
+pub fn doc_create(
+    state: State<'_, DocAppState>,
+    origin: Origin,
+    path: String,
+    content: String,
+) -> Result<DocSnapshotDto, String> {
+    state
+        .svc
+        .create_document(&origin, Path::new(&path), &content)
+        .map(|snap| DocSnapshotDto {
+            path: snap.path.to_string_lossy().into_owned(),
+            content: snap.content,
+            on_disk_hash: snap.on_disk_hash,
+        })
+        .map_err(fs_err_string)
+}
+
+#[tauri::command]
 pub fn doc_write(
     state: State<'_, DocAppState>,
     origin: Origin,

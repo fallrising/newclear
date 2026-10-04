@@ -170,3 +170,29 @@ Continue merged network plans into a durable per-execution/per-host staging jour
 ### Network staging acceptance decision
 
 Accepted T-237 and T-238 after source/diff/frozen-hash review, real temporary-file concurrency evidence and independent regressions. Observation expiry after final IO, late recovery-loser poisoning and final pending drift were reproduced before correction. Root13, worker66, independent96 and full751 tests passed; original workflow validation and compileall passed. T-239 accepts this coordinator slice only and retains overall PARTIAL/remaining12. T-238 received a bounded extension from32 to48 calls within the same45-minute/scope limit to reproduce and reverify actual blockers. No production adapter, remote activation or stage acceptance was introduced.
+
+## Fixed SSH staging transport and host helper (2026-10-04)
+
+Implement a bounded fixed-command SSH adapter and standard-library host compare-and-stage helper for the existing coordinator. T-240 owns only host helper/tests, T-241 owns only transport/tests, T-242 independently reviews both; each writes in an isolated worktree with frozen wire/API inputs and no recursive delegation. Root owns docs, cross-component synthetic integration, full gates, acceptance and authorized delivery. No live SSH/VPS, execute CLI, directory preparation, activation or stage acceptance; formal remaining12 unchanged.
+
+### SSH staging acceptance decision
+
+Accepted T-240/241 and independent T-242 after source/diff/hash review and regression evidence. Claim-directory replacement was reproduced for both empty/nonempty replacements and fixed before acceptance; UTF8 boundary rejection was also corrected. Root60 tests (10.397s), independent57 (0.479s), full811 (318.087s), compileall and original workflow gates passed. T-243 retains overall PARTIAL and twelve formal tasks. Existing safe-directory preparation is the next explicit prerequisite, followed by activation/bootstrap/generation and live validation. No actual SSH/VPS operation occurred.
+
+## Durable directory preparation (2026-10-04)
+
+Continue merged SSH staging at 6a343e8 (current baseline includes unrelated main updates). Bridge absent bare-OS directory to safe staging directory through separate authorization, immutable intent, single dispatch and observation-only recovery. T-244 host helper, T-245 contract/coordinator/transport, T-246 independent review use isolated worktrees; root owns integration, docs and acceptance. No live operations, execute CLI, activation or generation changes. Gates and frozen APIs in directory milestone; overall PARTIAL/remaining12 preserved.
+
+### Directory preparation acceptance decision
+
+Accepted T-244/245 and independent T-246 after source/diff/frozen-hash review. Root57 tests (21.787s), independent79 (107.028s) and full893 (316.562s) passed. The full/independent gates used an earlier source-drift test; a final test-only correction to the actual source SHA field was independently and root reverified (root1/1.235s); production sources unchanged. Compileall, original workflow and team/privacy gates passed. T-247 retains overall PARTIAL/remaining12. Next: network activation and post-activation observations, then bootstrap/probes and generation acceptance; no live operation performed.
+
+## Dedicated firewall activation coordinator (2026-10-04)
+
+Continue after directory bridge with injected-adapter firewall-only activation and exact nft observation semantics. T-248 contract/policy; T-249 coordinator bound to all four complete staging receipts; T-250 independent review. Root owns plan/integration/docs/fullgates/Git. No kernel/SSH adapter, keys/tunnel/reachability/CLI/live operation or fullstage acceptance. Full contract in firewall milestone; overall PARTIAL/remaining12 preserved.
+
+T-250 receives a bounded40→48call extension only to finish the existing50-test frozen-candidate gate and report; scope and45-minute limit remain unchanged. ERU-specific CI timeout10→20minutes accommodates actual multi-minute safety suites without reducing checks or changing permissions; independently reviewed.
+
+### Firewall activation acceptance decision
+
+Accepted T-248/T-249 and independent T-250 after actual source/diff/hash review. Root integration1/36.011s used early policy; final frozen full944/832.977s and independent50/601.983s passed, covering the defensive-copy correction. Compileall, original workflow, task/report/privacy/scope gates passed. T-251 accepts this injected-adapter slice only; overall PARTIAL and formal remaining12 stay unchanged. ERU-only timeout20minutes retains all tests. Next: reviewed fixed kernel adapter and live-normalization fixtures, effective keys/network probes, bootstrap/generation/evidence renewal; no live operation performed.

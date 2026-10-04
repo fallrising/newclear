@@ -1,0 +1,9 @@
+# surface-front §4.6: the three sites are indexable; login, logout and the member area are not.
+User-agent: *
+Allow: /album
+Allow: /clinic
+Allow: /projects
+Disallow: /login
+Disallow: /logout
+Disallow: /clinic/me
+Disallow: /clinic/appointments

@@ -22,7 +22,7 @@ use parking_lot::Mutex;
 
 use loom_contracts::Origin;
 
-use super::atomic_write::atomic_write;
+use super::atomic_write::{atomic_create, atomic_write};
 use super::echo_guard::EchoGuard;
 use super::error::{FsError, FsResult};
 
@@ -63,6 +63,8 @@ pub struct DocumentService {
     vault_root: PathBuf,
     echo_guard: Arc<EchoGuard>,
     editors: Arc<Mutex<HashMap<PathBuf, EditorState>>>,
+    // Serialize publications and echo registration across service clones.
+    publication: Arc<Mutex<()>>,
 }
 
 impl DocumentService {
@@ -77,6 +79,7 @@ impl DocumentService {
             vault_root,
             echo_guard,
             editors: Arc::new(Mutex::new(HashMap::new())),
+            publication: Arc::new(Mutex::new(())),
         }
     }
 
@@ -122,6 +125,7 @@ impl DocumentService {
         content: &[u8],
         expected_hash: Option<&str>,
     ) -> FsResult<WriteOutcome> {
+        let _publication = self.publication.lock();
         let abs = self.resolve_path(path)?;
         tracing::info!(?origin, path = ?abs, len = content.len(), "write_document");
 
@@ -159,6 +163,40 @@ impl DocumentService {
         let new_hash = hash_hex(content);
         self.update_editor_after_save(&abs, &new_hash);
         Ok(WriteOutcome::Written { new_hash })
+    }
+
+    /// Create a missing document without replacing any destination entry.
+    /// Acknowledge the submitted bytes directly: a later external write must
+    /// never become the version the editor believes it just published.
+    pub fn create_document(
+        &self,
+        origin: &Origin,
+        path: &Path,
+        content: &str,
+    ) -> FsResult<DocumentSnapshot> {
+        let _publication = self.publication.lock();
+        let abs = self.resolve_path(path)?;
+        tracing::info!(?origin, path = ?abs, len = content.len(), "create_document");
+        // Avoid disturbing a successful prior create's echo registration.
+        // This is only a preflight; hard_link below closes the creation race.
+        match std::fs::symlink_metadata(&abs) {
+            Ok(_) => return Err(FsError::AlreadyExists(abs)),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(source) => return Err(FsError::Io { path: abs, source }),
+        }
+        self.echo_guard
+            .register_self_write(&abs, content.as_bytes());
+        if let Err(error) = atomic_create(&abs, content.as_bytes()) {
+            self.echo_guard.forget(&abs);
+            return Err(error);
+        }
+        let on_disk_hash = hash_hex(content.as_bytes());
+        self.update_editor_after_save(&abs, &on_disk_hash);
+        Ok(DocumentSnapshot {
+            path: abs,
+            content: content.to_owned(),
+            on_disk_hash,
+        })
     }
 
     // ── editor state ──────────────────────────────────────────────────

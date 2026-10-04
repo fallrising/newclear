@@ -14,6 +14,8 @@ bounded asynchronous pipeline are implemented. P1-04 connects authenticated OTLP
 metrics/logs/traces over HTTP and gRPC to the all-in-one and ingest daemon roles.
 P1-05 adds authenticated Prometheus remote_write v1 on the same HTTP listener.
 P1-06 adds bounded Loki JSON/gzip push with structured metadata.
+P1-07 adds a bounded, tenant-scoped PromQL storage adapter with memory-backed
+official float corpus verification.
 The initial runtime supports a single configured tenant and file-backed bearer
 key. Compatible query APIs, production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
@@ -38,6 +40,8 @@ remain unimplemented; this is not yet a complete APM service.
 - `internal/compat/otlp`: bounded HTTP/gRPC receivers and protocol-native responses.
 - `internal/compat/promapi`: bounded snappy/protobuf remote_write v1 receiver.
 - `internal/compat/lokiapi`: authenticated JSON/gzip Loki push with bounded decoding.
+- `internal/query/promqladapter`: SPI-to-Prometheus query storage and iterator ownership.
+- `test/promqltest`: pinned official float corpus, direct memory fixtures and upstream comparison logic.
 - `cmd/prismd`: health/metrics plus OTLP, remote_write and Loki JSON push in ingest roles; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
@@ -86,3 +90,7 @@ runs real Prometheus and verifies persisted samples and isolation through SPI.
 The [P1-06 contract](docs/specs/p1-06-loki-push.md) adds Loki JSON/gzip push;
 Vector acceptance checks actual stored log bodies and metadata. Protobuf push
 and Loki query/ready APIs remain future milestones.
+
+The [P1-07 contract](docs/specs/p1-07-promql-adapter.md) describes the storage
+adapter and [corpus gate](test/promqltest/README.md). HTTP query endpoints remain
+P1-08. Native histogram cases are explicitly outside the v1 float-only SPI.

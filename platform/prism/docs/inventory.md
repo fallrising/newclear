@@ -1,7 +1,7 @@
 # Prism implementation inventory
 
-Current development baseline: Go 1.27.1, with P1-06 starting from
-newclear `267b12d78b3304d12bb589639650628b22987e95` after the Go upgrade.
+Current development baseline: Go 1.27.1, with P1-07 starting from
+newclear `c5fe7385d7021cc071c5dc793437a911044aa380` after P1-06.
 The P1-05 source completed at `6deaabcc583f96b543c55f82b7922cfe772e2831`. Historical verification below
 retains its original versions and scope. Product usage remains unknown.
 
@@ -17,7 +17,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
 | P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
 | P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; query/ruler/console retain base HTTP routes. |
-| P0-09 | ADR-001 through ADR-013 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-09 | ADR-001 through ADR-015 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | `prismd.newRuntimeRegistry` registers Go/process collectors only; Prism self-telemetry is not connected. |
 | P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
@@ -26,6 +26,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P1-04 | `internal/compat/otlp`, configured single-tenant HTTP/gRPC runtime, original-unit accounting, bounded decode/admission and lifecycle tests | Full multi-tenant identity, native query APIs and production storage remain later work. |
 | P1-05 | `internal/compat/promapi`, bounded snappy/protobuf v1 receiver, authenticated runtime routing and combined capacity validation | v2, native histograms, query APIs and full multi-tenant control plane remain later work. |
 | P1-06 | `internal/compat/lokiapi`, bounded authenticated JSON/gzip push, structured metadata, runtime and real Vector acceptance | Protobuf push and Loki query/ready remain future milestones. |
+| P1-07 | `internal/query/promqladapter`, bounded tenant-scoped streaming lifetime bridge and official float corpus through memory SPI | P1-08 HTTP/router/output policy, native histograms and other drivers remain later work. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -226,6 +227,42 @@ and an incorrect metric-style tenant-label expectation in log tests were retaine
 and resolved; tests now assert the existing Resource.Tenant log contract and the
 absence of attacker-supplied reserved labels. No validator was weakened.
 
+## P1-07 verification
+
+The [adapter contract](specs/p1-07-promql-adapter.md) records the lifetime bridge
+required by SPI's borrowed series and Prometheus's retained series. Labels are
+copied, samples are streamed through exact-series reselection, and querier
+limits cover cumulative scan/reopen work and owned metadata. This increases
+selection calls and does not promise a snapshot across concurrent writes or a
+backend/process RSS bound. The public SPI and drivers are unchanged.
+
+Official v0.53.0 input inventory: 12 files, 768 eval directives. 579 are
+float-compatible; 189 explicitly depend on unsupported native histograms.
+The Apache-2.0 core harness is adapted to write fixtures directly into memory
+SPI while retaining upstream result comparison and instant/range/@ expansion.
+This avoids importing an ISC-licensed diagnostic dependency from the original
+test harness. The final integrated Go 1.27.1 checks passed:
+
+- `make lint test`: 20 packages with race/goleak, vet and formatting.
+- Dependency guard and all five negative fixtures; `go build ./...`.
+- golangci-lint 2.14.0: zero issues.
+- `go test -race -count=1 -v ./test/promqltest -driver=memory`: all 579 supported
+  directives passed, expanding to 6,296 actual engine queries, 78 SPI writes,
+  47,497 loaded fixture rows and 29,908 Select calls.
+- `go test -race -count=1 -v ./test/security`: real engine trusted-tenant,
+  nested selector, reserved label and existing ingest regressions passed.
+- `go mod verify` and unchanged full selected module-version graph. Only 11
+  existing-version indirect requirements and 13 checksum lines were activated.
+
+Focused matcher, forward-Seek and float-fixture fuzzing passed. The terminal
+Seek cancellation bug found by review/fuzzing and native vet's mistaken
+io.Seeker heuristic were corrected; no analyzer was disabled. A timestamp type
+alias preserves the exact Prometheus interface with a compile-time assertion.
+Final review also found and corrected EOF-only warning propagation across retained series; cumulative warnings remain bounded and known warnings survive reopening.
+The Apache corpus retains upstream bytes, including three whitespace defects in
+`subquery.test`; only that immutable fixture has a documented whitespace
+exception, guarded by source identity checks.
+
 ## Current integration boundary
 
 P1-04 through P1-06 connect the existing atomic pipeline to authenticated OTLP,
@@ -262,11 +299,12 @@ Remaining integration work includes:
 
 ## Remaining phases
 
-P1-06 completes the Loki JSON receiver. Next are P1-07–08, the PromQL adapter
-and API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
+P1-07 completes the float PromQL storage adapter. Next is P1-08, the query
+API; P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
-security and operations. Differential, PromQL and soak acceptance remain future work. Existing E2E and
-security checks cover the implemented ingest protocols and their trust boundaries.
+security and operations. Differential and soak acceptance remain future work. Official float PromQL
+corpus checks cover the memory adapter; existing E2E and security checks cover
+implemented ingestion and the adapter trust boundaries.
 
 No external-driver conformance, Grafana datasource acceptance, complete-stack
 E2E, production soak, deployment or production-readiness claim follows from the

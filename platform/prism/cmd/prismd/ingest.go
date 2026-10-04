@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/fallrising/newclear/platform/prism/internal/compat/otlp"
+	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
 	"github.com/fallrising/newclear/platform/prism/internal/ingest"
 	"github.com/fallrising/newclear/platform/prism/internal/ingest/limits"
@@ -75,16 +77,28 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 	if err != nil {
 		return fmt.Errorf("create OTLP receiver: %w", err)
 	}
-	//nolint:contextcheck // gRPC supplies per-RPC contexts; construction must not bind requests to daemon cancellation.
-	grpcServer := receiver.NewGRPCServer(grpcOptions...)
-	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: receiver.HTTPHandler(), Logger: logger, StopReceiving: receiver.Stop, Drain: pipeline.Close})
+	writeReceiver, err := promapi.NewWriteReceiver(pipeline, promapi.WriteOptions{Tenant: c.Tenancy.DefaultTenant, APIKey: c.Auth.IngestAPIKey, MaxRequestBytes: int(c.Ingest.MaxRequestBytes), Normalize: pipelineOptions(c).Normalize, Logger: logger})
 	if err != nil {
 		receiver.Stop()
+		return fmt.Errorf("create remote_write receiver: %w", err)
+	}
+	mux := http.NewServeMux()
+	mux.Handle("/prom/api/v1/write", writeReceiver.HTTPHandler())
+	mux.Handle("/", receiver.HTTPHandler())
+	stopReceiving := func() {
+		receiver.Stop()
+		writeReceiver.Stop()
+	}
+	//nolint:contextcheck // gRPC supplies per-RPC contexts; construction must not bind requests to daemon cancellation.
+	grpcServer := receiver.NewGRPCServer(grpcOptions...)
+	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: mux, Logger: logger, StopReceiving: stopReceiving, Drain: pipeline.Close})
+	if err != nil {
+		stopReceiving()
 		grpcServer.Stop()
 		return fmt.Errorf("create ingest server: %w", err)
 	}
-	logger.InfoContext(ctx, "OTLP servers starting", "component", "ingest", "http_address", c.Server.HTTPListen, "grpc_address", c.Server.GRPCListen, "mode", c.Server.Mode)
+	logger.InfoContext(ctx, "ingest servers starting", "component", "ingest", "http_address", c.Server.HTTPListen, "grpc_address", c.Server.GRPCListen, "mode", c.Server.Mode)
 	result = server.Run(ctx)
-	logger.InfoContext(ctx, "OTLP servers stopped", "component", "ingest")
+	logger.InfoContext(ctx, "ingest servers stopped", "component", "ingest")
 	return result
 }

@@ -15,6 +15,12 @@ Use a real Tauri binary, WebKitGTK, WebDriver, a desktop display/window manager 
 
 A scenario may be split into smaller cases for reliable cleanup and diagnostics. Record exactly which cases run; do not infer full platform or feature completion from the count. A failing test oracle must be corrected with evidence, separately from a product regression. Product behavior changes require a failing regression before the repair.
 
+## Terminal input ordering repair
+
+Native acceptance reproduced correctly ordered browser key events arriving at the shell with adjacent characters swapped. The terminal UI currently submits independent asynchronous writes for successive input events. The repair must preserve call order for every frontend `writeStdin` payload within one session, including keyboard input and document Run; submit the next native write only after the preceding write settles. Different sessions must remain independent. Return each call's own success/failure, keep subsequent writes usable after a rejection, and release idle queue state. Do not change frozen IPC shapes or claim ordering for external callers bypassing this frontend boundary.
+
+Before implementation, add deterministic regressions that hold native write acknowledgements, prove a second same-session call cannot overtake the first, and cover cross-session independence, rejection recovery and idle cleanup behavior. Re-run the native rapid-input case without throttling, then the full workspace acceptance suite and frontend gates. This is a local correctness repair discovered by the acceptance slice, not a new terminal feature.
+
 ## Harness and evidence
 
 Use Python standard-library WebDriver HTTP orchestration with test-only system tools; introduce no application dependency or frozen-contract/schema changes. The harness must require an explicit existing application binary, use a newly created temporary vault under an explicit test directory, and never delete or overwrite a caller's existing vault. Provider credentials must not be passed to the app. Test-only driver processes and servers must be cleaned up; retained fixture/evidence paths must be printed. Prefer observable conditions to fixed sleeps, include bounded timeouts, and exit nonzero if any required case fails.

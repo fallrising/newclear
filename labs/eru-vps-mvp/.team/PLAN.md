@@ -196,3 +196,11 @@ T-250 receives a bounded40→48call extension only to finish the existing50-test
 ### Firewall activation acceptance decision
 
 Accepted T-248/T-249 and independent T-250 after actual source/diff/hash review. Root integration1/36.011s used early policy; final frozen full944/832.977s and independent50/601.983s passed, covering the defensive-copy correction. Compileall, original workflow, task/report/privacy/scope gates passed. T-251 accepts this injected-adapter slice only; overall PARTIAL and formal remaining12 stay unchanged. ERU-only timeout20minutes retains all tests. Next: reviewed fixed kernel adapter and live-normalization fixtures, effective keys/network probes, bootstrap/generation/evidence renewal; no live operation performed.
+
+## Fixed firewall adapter with multiple models (2026-10-04)
+
+Continue merged activation coordinator. T-252 GPT-6 Astra owns host helper/runner; T-253 GPT-6.1 Sol owns pinned SSH bundle/adapter; T-254 GPT-6 Sol owns independent tests/review. Frozen contract in firewall-adapter milestone. Isolated worktrees, disjoint scopes, no nested delegation. Root owns integration, gates, acceptance and authorized Git/desk delivery. Synthetic temp-root/fake-nft tests only; no real kernel/SSH/private/VPS operation. Overall PARTIAL/remaining12.
+
+### Fixed firewall adapter acceptance decision
+
+Accepted T-252 GPT-6 Astra host helper, T-253 GPT-6.1 Sol pinned transport and T-254 GPT-6 Sol independent review after full source/diff/hash inspection. Root integration1/28.989s, independent final61/3.244s and frozen full1006/810.247s passed. Compileall, original workflow, task/report and public scope/privacy/whitespace gates passed. T-255 accepts this local implementation slice only: overall PARTIAL/remaining12 unchanged. No live operation or CLI. Next: effective keys/network probes, bootstrap/generation/evidence renewal, plus live nft normalization and persistence evidence; explicit authorization still required for actual VPS operations.

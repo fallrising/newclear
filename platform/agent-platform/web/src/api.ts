@@ -47,6 +47,15 @@ export type Run = {
     };
   } | null;
 };
+export type Artifact = {
+  id: string;
+  run_id: string;
+  kind: string;
+  sha256: string;
+  size: number;
+  mime: string;
+  created_at: string;
+};
 export type Usage = {
   configured: boolean;
   guest_connected: boolean;

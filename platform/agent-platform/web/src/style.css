@@ -699,3 +699,12 @@ form .muted {
 .task-filters button {
   align-self: end;
 }
+
+.archive {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line, #dde1e6);
+  padding-top: 1rem;
+}
+.archive .mono {
+  overflow-wrap: anywhere;
+}

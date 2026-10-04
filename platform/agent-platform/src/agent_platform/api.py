@@ -29,6 +29,7 @@ from .domain import (
     RetryInput,
     TaskInput,
 )
+from .result_archive import list_archives, read_archive
 from .result_download import DOWNLOAD_CSP, diff_bytes
 from .store import Store, json_value
 from .task_query import TaskState
@@ -224,6 +225,21 @@ def create_app(settings=None, db=None, web_dist=None):
             media_type="text/plain; charset=utf-8",
             headers={
                 "Content-Disposition": f'attachment; filename="run-{run_id}.diff"',
+                "Content-Security-Policy": DOWNLOAD_CSP,
+            },
+        )
+
+    @app.get("/api/v1/runs/{run_id}/artifacts")
+    def artifacts(run_id: UUID, session=authenticated):
+        return list_archives(db, run_id)
+
+    @app.get("/api/v1/runs/{run_id}/artifacts/{artifact_id}")
+    def artifact(run_id: UUID, artifact_id: UUID, session=authenticated):
+        return Response(
+            content=read_archive(db, run_id, artifact_id),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f'attachment; filename="run-{run_id}-result.json"',
                 "Content-Security-Policy": DOWNLOAD_CSP,
             },
         )

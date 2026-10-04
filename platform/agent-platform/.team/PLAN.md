@@ -103,3 +103,17 @@ Evidence gate: only the single-operator mock slice is accepted. Real provider bi
 
 Documentation and task/report contracts: orchestrator validated both tasks/reports, checked new public artifacts for private context, validated local links and git diff --check. Independent follow-up confirmed all evidence source hashes and boundaries. Accepted single-operator mock slice after codex-evidence-gate audit; full milestone completion is not claimed. Commit/push and Draft PR only; no merge/release/deploy.
 
+
+## Immutable result archive — 2026-10-04
+
+Objective: preserve bounded immutable result/verification bytes before success, retrieve after runtime cleanup and across retries. Backend task T-013 owns new DB archive + worker/API integration; root owns UI/browser/docs and integration; T-014 independently reviews final diff. Parallel writers use isolated worktrees with disjoint paths. No changes to concurrent credential-reader/tool configuration scope.
+
+Gates: meaningful focused red/green; root platform-check, web-check, browser-test; read-only independent review; task/report validators, diff/hygiene, fixed-head PR CI. Billing, live provider/KVM, GitHub export, arbitrary files, backup/GC and deployment excluded. The new slice ends at reviewed Draft PR, not whole M4 acceptance.
+
+Acceptance checkpoint: implementation integrated; root native/web/browser gates passed after the rework recorded below. Final independent follow-up and publication checks are recorded separately.
+
+Review checkpoint: T-014 returned PARTIAL with P1 finalizing-before-result recovery regression reproduced by full platform gate (one failure, one cancellation error). Backend rework required; final acceptance withheld. T-015 will independently review the correction and final evidence; historical T-014 report retained.
+
+Root rework verification: 45 unit + 439 PostgreSQL/platform tests passed on Python 3.12.15, Ruff 135 files; 71 web tests/typecheck/format/build and 8 real Chromium/API/PostgreSQL cases passed. Existing lifecycle assertions were not weakened. Final baseline fast-forward to c5fe7385 included reference docs/images only; executable source hashes stayed fixed. Evidence file records the initial failures, red/green and final source/log hashes. Billing and full M3/M4 remain deferred/unfinished as documented.
+
+Final local evidence-gate decision: accept T-013 implementation after rework and T-015 independent review. T-014 initial PARTIAL remains historical evidence. No required findings remain; 15 source hashes and 14 log hashes independently match. Commit/push and Draft PR authorized; exact-head hosted checks required before delivery handoff. No merge/release/deploy of this new slice.

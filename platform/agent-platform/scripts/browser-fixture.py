@@ -162,6 +162,56 @@ def main():
                     }
                 )
             )
+        elif action == "archive":
+            value = json.loads(output.read_text())
+            store = Store(db)
+            with db.transaction() as conn:
+                operator = conn.execute(
+                    "SELECT id FROM operators WHERE username=%s", (value["username"],)
+                ).fetchone()["id"]
+                template = conn.execute(
+                    "SELECT t.project_id,r.profile_revision FROM runs r "
+                    "JOIN tasks t ON t.id=r.task_id WHERE r.id=%s",
+                    (value["run_id"],),
+                ).fetchone()
+            goal = (
+                "FILE note.txt\nTEXT archive fixture\n"
+                "<script>window.__archiveExecuted=1</script>你好🐈"
+            )
+            task = TaskInput(
+                title="Immutable archive browser fixture",
+                goal=goal,
+                project_id=template["project_id"],
+                profile_revision=template["profile_revision"],
+                base_sha="a" * 40,
+            )
+            created = store.command(
+                operator,
+                "tasks.create",
+                uuid4().hex,
+                task,
+                lambda conn, command: store.create_task(conn, operator, task, command),
+            )["body"]
+            # Prioritize only this test-owned job; the normal Worker owns all lifecycle writes.
+            with db.transaction() as conn:
+                conn.execute(
+                    "UPDATE jobs SET available_at=now()-interval '1 day' WHERE run_id=%s",
+                    (created["run"]["id"],),
+                )
+            worker = Worker(db)
+            claim = worker.claim()
+            if str(claim["run_id"]) != created["run"]["id"]:
+                raise AssertionError("archive fixture claimed another run")
+            worker.execute(claim)
+            run = store.run(created["run"]["id"])
+            if (
+                run["state"] != "succeeded"
+                or run["cleanup_state"] != "confirmed"
+                or run["result"]["execution_mode"] != "local-mock"
+                or not run["result"].get("diff")
+            ):
+                raise AssertionError("archive fixture did not finish and clean up")
+            print(json.dumps({"task_id": created["task"]["id"], "run": run}, default=str))
         elif action == "retry":
             value = json.loads(output.read_text())
             store = Store(db)

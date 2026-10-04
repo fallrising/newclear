@@ -1,3 +1,11 @@
+# 接續入口更新 — 2026-10-04
+
+先核對最新 GitHub main、PR 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md) 開頭和 [RESULT-ARCHIVE.md](RESULT-ARCHIVE.md)。目前 M4 的有界成果封存切片提供 DB 內不可變 JSON 與工作台下載；legacy results 不回填。下一段建議為 explicit GitHub export，backup/restore/GC 與部署仍未完成。是否認領下一段以當前 owner 指示與 task 為準。
+
+Billing 仍延後；現在繼續使用 mock，不要求 API key，也不讀取環境中既有 credential。M3/M4 整體未驗收，不以文件或 mock 測試代替真實模型／KVM／production 證據。#206 已合併於 `2cda120b`，本切片已納入。下面保留舊 prompt 作歷史，不能照舊的 recovery blocker、版本或測試數字重新開始工作。
+
+---
+
 # 新視窗接續開發 prompt
 
 此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `<kvm-host>` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/ed25519"
@@ -611,9 +612,18 @@ func TestRemoteWriteSlowBodyDoesNotBlockOTLPAndCancelsAtShutdown(t *testing.T) {
 	}
 	defer func() { _ = backend.Close() }()
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	result := make(chan error, 1)
+	runtimeDone := make(chan struct{})
+	defer func() {
+		cancel()
+		select {
+		case <-runtimeDone:
+		case <-time.After(time.Second):
+			t.Error("runtime cleanup did not complete")
+		}
+	}()
 	go func() {
+		defer close(runtimeDone)
 		result <- runConfiguredMode(ctx, cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), prometheus.NewRegistry(), backend)
 	}()
 	waitForEndpoint(t, "http://"+cfg.Server.HTTPListen+"/-/healthy", "ok\n")
@@ -625,37 +635,43 @@ func TestRemoteWriteSlowBodyDoesNotBlockOTLPAndCancelsAtShutdown(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = connection.Close() }()
-	_, err = fmt.Fprintf(connection, "POST /prom/api/v1/write HTTP/1.1\r\nHost: %s\r\nContent-Type: application/x-protobuf\r\nContent-Encoding: snappy\r\nX-Prometheus-Remote-Write-Version: 0.1.0\r\nAuthorization: Bearer %s\r\nContent-Length: 4096\r\n\r\n%c", cfg.Server.HTTPListen, string(cfg.Auth.IngestAPIKey), byte(0))
+	_, err = fmt.Fprintf(connection, "POST /prom/api/v1/write HTTP/1.1\r\nHost: %s\r\nContent-Type: application/x-protobuf\r\nContent-Encoding: snappy\r\nX-Prometheus-Remote-Write-Version: 0.1.0\r\nAuthorization: Bearer %s\r\nContent-Length: 4096\r\nExpect: 100-continue\r\nConnection: close\r\n\r\n", cfg.Server.HTTPListen, string(cfg.Auth.IngestAPIKey))
 	if err != nil {
+		t.Fatal(err)
+	}
+	// The server sends 100 Continue only when the receiver reads the body,
+	// after acquiring its slot. Sending headers alone does not prove admission.
+	readDeadline, _ := dialCtx.Deadline()
+	if err := connection.SetReadDeadline(readDeadline); err != nil {
+		t.Fatal(err)
+	}
+	continued, err := http.ReadResponse(bufio.NewReader(connection), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = continued.Body.Close()
+	if continued.StatusCode != http.StatusContinue {
+		t.Fatalf("slow remote_write admission status=%d want=100", continued.StatusCode)
+	}
+	// This fixture owns one request and intentionally keeps its body incomplete.
+	// Connection: close also avoids net/http's unread keep-alive body drain and
+	// deferred TCP reset-avoidance cleanup after forced cancellation.
+	if _, err := connection.Write([]byte{0}); err != nil {
 		t.Fatal(err)
 	}
 	client := &http.Client{Timeout: time.Second}
 	defer client.CloseIdleConnections()
-	ticker := time.NewTicker(time.Millisecond)
-	defer ticker.Stop()
-	deadline := time.NewTimer(time.Second)
-	defer deadline.Stop()
-	for {
-		response, err := client.Do(runtimeWriteRequest(t, cfg, "http"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		_, _ = io.Copy(io.Discard, response.Body)
-		_ = response.Body.Close()
-		if response.StatusCode == http.StatusTooManyRequests {
-			if response.Header.Get("Retry-After") == "" {
-				t.Fatal("remote_write gate omitted retry delay")
-			}
-			break
-		}
-		if response.StatusCode != http.StatusNoContent {
-			t.Fatalf("unexpected remote_write status before gate: %d", response.StatusCode)
-		}
-		select {
-		case <-ticker.C:
-		case <-deadline.C:
-			t.Fatal("slow remote_write did not hold its receive slot")
-		}
+	response, err := client.Do(runtimeWriteRequest(t, cfg, "http"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = io.Copy(io.Discard, response.Body)
+	_ = response.Body.Close()
+	if response.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("remote_write gate status=%d want=429", response.StatusCode)
+	}
+	if response.Header.Get("Retry-After") == "" {
+		t.Fatal("remote_write gate omitted retry delay")
 	}
 	// The remote_write slot is independent of OTLP's gate and both routes share
 	// the same listener. Shutdown must cancel this stalled HTTP body before drain.

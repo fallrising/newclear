@@ -13,12 +13,14 @@ Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal 
 | Documents | CodeMirror, disk reads/writes, hash conflicts, runnable Run and local output Pin | Versioned/serialized saves and canonical event identity tested; cross-process CAS is not provided |
 | Canvas | Nodes, three edge kinds, sidecar persistence, named `run_in` routing | Invalid/unsupported sidecars block autosave with recovery feedback; no LOD or formal stress acceptance |
 | AI | Anthropic/OpenAI/DeepSeek streaming, connected context sources | UTF-8/framing/EOF/cancellation and send-time context/event ordering tested offline; live providers unverified |
-| Session storage | SQLite session/recovery library with tests | Desktop startup does not instantiate it; canvas restores terminal restart metadata as tombstones |
+| Session storage | Per-vault SQLite wired to desktop startup and PTY lifecycle; explicit history Restart/Forget and visible storage fallback | Metadata only; no PTY output, unsaved editor buffer, or process reattachment |
 | Future capabilities | Design/contract material | MCP host, capability/approval gate, plugin runtime and inbox remain unimplemented |
 
 `feeds_output_to` edges can be drawn/stored, but do not drive the existing local Run/Pin capture. Frozen schema documents describe architecture and supported contract shapes, not proof that every shape is handled by the UI.
 
 The [reliability specification](docs/reliability.md) records the audited gaps and repair acceptance criteria. Historical `plans/*-acceptance.md` files retain their original evidence and are not current all-green declarations.
+
+The [session recovery specification](docs/session-recovery.md) describes the history panel. Restart explicitly reruns the saved command in a new terminal; opening the app never reruns it automatically. Canvas layout remains in `.loom/canvas.json`, and Markdown remains in files. If storage is unavailable or another instance owns the session database, the panel warns that current history is in memory only.
 
 ## Run
 
@@ -57,7 +59,7 @@ npm run build
 
 The 2026-10-03 baseline had 37 passing contract tests, 35 passing frontend parser tests, successful typechecks/frontend build, and **72 passing / 1 failing core tests** (Linux self-write rename echo). This is historical baseline evidence, not the result for subsequent repairs. A frontend build is not desktop end-to-end verification.
 
-The [2026-10-04 repair verification](docs/verification-2026-10-04.md) records 140 passing Rust tests, 75 passing frontend tests, five mocked-IPC browser flows and a native Linux startup smoke, with remaining acceptance gaps. Monorepo automation is defined in [Loom CI](../../.github/workflows/loom-ci.yml); the nested `.github/workflows/ci.yml` is a historical standalone-repository workflow and is not discovered by GitHub in this layout.
+The [2026-10-04 repair verification](docs/verification-2026-10-04.md) records the earlier reliability slice. The subsequent [session recovery verification](docs/session-recovery-verification.md) records 156 passing Rust tests, 99 frontend tests, ten mocked-IPC browser flows and native Linux boot/recovery/corruption checks, with remaining acceptance gaps. Monorepo automation is defined in [Loom CI](../../.github/workflows/loom-ci.yml); the nested `.github/workflows/ci.yml` is a historical standalone-repository workflow and is not discovered by GitHub in this layout.
 
 ## Layout
 

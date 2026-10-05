@@ -168,3 +168,24 @@ Final root checks: make platform-check passed45 unit +666 PostgreSQL/platform te
 This accepts the bounded offline backup/manual archive-retention slice only. Full M3/M4, live recovery/exports, deployment, billing and broader cleanup remain outside it. Commit/push and Draft PR are authorized; exact delivered-head CI remains the final external gate, recorded on that PR and its task report. No merge or live data operation.
 
 Task contracts retain unchecked input checklists as required by the task validator; completed acceptance is recorded in this plan and DONE reports. An attempted checklist-status rewrite was rejected by that validator and reverted; all six final task/report validations pass.
+
+
+## Single-node manual and isolated rehearsal — 2026-10-06
+
+Objective and boundaries: docs/SINGLE-NODE.md. Start at merged main bf6909e4. Root owns manual, Makefile, docs/evidence, all acceptance and publication. T-023 owns only a new rehearsal wrapper and real-process integration test in an isolated worktree. T-024 will independently review the frozen diff and evidence. No new production behavior/dependencies/schema; fake/mock control plane, all databases and processes task-owned.
+
+Required gates: repeatable deployment-rehearsal; root platform-check, web-check, browser-test; independent review; task/report validators, diff/public hygiene; exact PR and main CI. User explicitly authorized commit/push/PR/merge and stopping here. No real deployment, provider, product GitHub export, KVM or entire-MVP claim. Acceptance pending.
+
+T-024 early manual review found that anonymous GET /session is not a DB health probe: Auth.lookup bypasses the DB without a session token. Root corrected the table and explained separate DB readiness/authenticated read/task-transition checks. No product code change. Root web80/typecheck/format/build and browser11 passed.
+
+T-024 second manual finding: pasted Bash commands could continue after private-config creation or source failure and operate using an older environment. Root grouped setup/maintenance/start commands in fail-closed subshells, explicitly unsets DATABASE_URL before loading settings, and checks it exists. Restore API/worker instructions explicitly load restore.env. Harmless failure-marker regression is retained by reviewer.
+
+Root inspected reviewer harmless shell red/green logs and helper: all four actual updated manual blocks stop before later commands on existing/unsafe config or missing restore config/URL. Docker Compose config parsed with synthetic credentials. T-023 first native rehearsal exposed an unsafe group-writable intermediate scratch ancestor created by root; root changed its owned writer directories to0700, preserving product backup validation.
+
+T-023 implementation integrated after root read of both new files/report and exact verification of3source/9log hashes. Worker focused7 and hostile-environment wrapper pass. Source baseline fast-forwarded to4cd12c24; component/instructions unchanged. Root Python3.12 container initially lacked Docker access because outer socket GID differs from the container; read-only stat identified989, corrected only test-container supplementary group. Failed environment logs retained; full native/actual-dist gates now running.
+
+Final local evidence-gate decision: ACCEPT T-023 and T-024 for the bounded single-node runbook/rehearsal. Every contract item maps to the actual CLI/TCP/worker/restart/native-restore checks, private-config shell failure checks, scoped review and final root gates. No production runtime, migration or dependency change. All8 source and23 retained-log hashes independently match; earlier red/setup failures and both corrected manual findings remain visible in evidence.
+
+Root final verification: Python3.12.15 platform-check45unit+673platform, Ruff164; web80/typecheck/format/build; browser11; real-built-dist and default Makefile rehearsal7 each. Reviewer-requested focused7 additionally executed in the primary channel after two sub-agent escalation waits; the independent reviewer audited exact output/JSON/hashes, with attribution explicit and no gate waived. Team contracts and source/docs/diff hygiene pass.
+
+User explicitly authorized source commit/push/PR/merge and stopping after this slice. Hosted PR/main CI and task-ledger closeout remain publication gates, recorded on GitHub and the delivery report. No live deployment/provider/export/KVM or full-MVP completion claim.

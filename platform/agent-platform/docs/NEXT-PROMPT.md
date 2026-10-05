@@ -1,10 +1,10 @@
-# 接續入口更新 — 2026-10-05
+# 接續入口更新 — 2026-10-06
 
-先核對最新 GitHub main、PR、CI 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md) 與 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。本切片提供 offline PostgreSQL backup/verify/empty-target restore 與 manual archive payload retention；不還原 running VM，不清除事件／審計／原始 diff，不自動 resume 或 replay。
+本輪停止於單節點操作手冊與隔離演練的提交／PR 合併收尾；使用者要求告一段落。後續 session 先核對最新 main、PR/CI、任務帳本與使用者的新指示，再讀 [HANDOFF.md](HANDOFF.md)、[SINGLE-NODE.md](SINGLE-NODE.md) 及 [evidence/single-node.json](evidence/single-node.json)，不自動認領下一功能。
 
-分支含 PR282/270 prerequisite；是否合併以 GitHub 現況為準。本輪只交付 Draft PR，不推論 merge/deploy 或實際資料操作。下一段建議單節點部署操作手冊與隔離演練，需依 owner 選定範圍才接手。M3/M4 整體仍未完成；billing 延後，費用unknown，模型維持本機mock，不索取或使用existing key。
+PR293 已合併前置成果封存／GitHub export／備份保留（含 PR270/282）。單節點演練是新建合成 PostgreSQL、真 HTTP／獨立 CLI 程序與 native backup/restore，不是實際主機/TLS/systemd/KVM 部署。真模型、live export 與整體 MVP gate 尚未完成；模型維持 mock，billing 延後、金額 unknown，不索取現有 key。
 
-本輪本機驗證為45 unit +666 platform、80 web、11 browser，完整hash與review入口見 [evidence/backup-retention.json](evidence/backup-retention.json)。交付PR的exact-head CI另外記於PR與任務報告。舊 prompt 保留作歷史，不能依舊 recovery blocker 或測試數字重做已完成工作。
+以下舊 prompt 僅保留歷史，其中舊 recovery blocker、只交 Draft PR 或等待更大階段才測試的指示都不是本輪停止點。開始任何新工作仍以最新授權、source 和任務範圍為準。
 
 ---
 

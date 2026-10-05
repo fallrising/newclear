@@ -1,14 +1,14 @@
-# 現行接續入口 — 2026-10-05
+# 現行停止點 — 2026-10-06
 
-M4 本切片加入 operator 離線備份／驗證／空 DB 還原，以及先預覽、明確批准才執行的封存 payload 清理。設計與操作命令見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。沒有排程或預設自動清理，實際資料操作未執行。Native PostgreSQL 工具備份 DB-resident archives/history，不含 VM、connector journal/fences 或 private credential files；還原後 runtime 保持 drain，需重新登入。
+本輪完成單節點操作手冊與隔離 control-plane 演練，範圍與重跑入口見 [SINGLE-NODE.md](SINGLE-NODE.md)。涵蓋同版 API／獨立 worker／Web build、初次設定、觀測、停寫/drain、native backup／空 DB restore、升級／回滾與故障排查。模型維持 local mock，billing 延後、金額 unknown；沒有實際主機部署或真 provider／GitHub export／KVM 操作。
 
-Migration016 保留 archive 原 id/hash/size 等 metadata，以不可復活的 tombstone 記錄已清理副本。最少 30 天、每批至多 100，保護 active/interrupted、未完成 job、未知 binding、未釋放 reservation，以及所有 export 引用。摘要／原始 diff、events/messages/audit 不刪除；已清理下載回410，workbench 顯示到期且不提供新匯出。這不是所有任務內容的刪除功能。
+前置成果封存、GitHub export 與備份／保留已隨 [PR293](https://github.com/fallrising/newclear/pull/293) 合併，包含 PR270/282，基準 main 為 `bf6909e4cd318e03e5957eab6b6c0f47acc6f81c`。這一輪收尾要求是完成本片、提交並合併，再停止；本輪 PR 與最新 CI 以 GitHub 和交付報告為準，不能用文件存在推定已合併。
 
-本分支包含尚待審查的 [GitHub 匯出 PR282](https://github.com/fallrising/newclear/pull/282) 與其成果封存 PR270 依賴，再整合 latest main。是否合併以最新 GitHub 為準；本輪交付新的 Draft PR，沒有合併、部署或 live export。匯出功能仍預設停用，模型維持本機 mock，billing 延後、金額 unknown。
+演練只用新建合成資料庫與 owned processes，驗證真 TCP API／CLI worker、成果及重啟持久性、原生 DB 備份還原、舊 session 失效／新登入、archive hash 與 runtime drain。CLI migrate/bootstrap/API/worker 使用實際子程序；backup native transport 在測試中注入自有 PostgreSQL client container，產品 CLI 仍要求本機安裝同 major clients。精確命令、結果、來源／log hashes 見 [single-node evidence](evidence/single-node.json)。既有備份／保留行為見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。
 
-M0–M2 Passed；M3/M4 In progress。本切片已通過 45 unit + 666 PostgreSQL/platform tests、Ruff162 files、80 web tests/typecheck/format/build，以及11個真 Chromium/API/PostgreSQL情境；備份原生往返38項與獨立review證據見 [evidence/backup-retention.json](evidence/backup-retention.json)。以下歷史數字不代表本輪驗證。下一段建議單節點部署操作手冊與隔離環境演練，實際部署需另有範圍。事件／審計 retention、stale VM cleanup、任意 artifacts、live GitHub opt-in、完整 MVP gate、真實自然語言 coding 及 release 前長任務仍未完成。
+本輪本機 gates：Python3.12.15 下45 unit +673 PostgreSQL/platform tests、Ruff164 files；80 Web tests/typecheck/format/build；11 Chromium/API/PostgreSQL 情境；實際 Web build 與預設 Makefile 兩種隔離演練入口均通過。獨立 review 與公開來源/log hashes 見 evidence。
 
-升級前先用現行版本 native DB 備份並停寫/drain，再套用016與同步API/worker。新備份工具只接受當前完整 migration manifest，不能拿它跳過版本核對。私有操作檔與 native PostgreSQL client prerequisites 見契約。以下歷史施工紀錄不取代本節與最新GitHub證據。
+M0–M2 Passed；M3/M4 整體仍 In progress。TLS／service-manager 安裝、實際 runtime 部署、stale VM cleanup、整體 MVP gate、真自然語言 coding／live export 與 release 前長任務仍需另外選定範圍。使用者要求在這一片告一段落，接手先核對最新任務與明確指示，不自動開下一片，也不把計費或真 key 當作這輪完成條件。
 
 ---
 

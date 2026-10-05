@@ -5,7 +5,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-10-05）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存與下載，以及需明確授權的 GitHub export（預設停用、fake GitHub 驗收）；本輪新增離線 DB 備份／空庫還原與手動封存保留清理；事件／審計 retention、VM state、部署與整體 MVP gate 仍未完成。**
+**目前狀態（2026-10-06）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存與下載，以及需明確授權的 GitHub export（預設停用、fake GitHub 驗收）；離線 DB 備份／空庫還原與手動封存保留清理也已合併；本輪補齊單節點操作手冊與隔離 control-plane 演練；事件／審計 retention、VM state、實際主機部署與整體 MVP gate 仍未完成。**
 
 模型開發仍用本機 mock，現在不需要 API key。單人版本延後真實計費與硬金額上限，用量金額保持 unknown。已納入 [M3 跨切片 mock 驗收](docs/M3-INTEGRATED-ACCEPTANCE.md)；真實模型自然語言 coding、完整 M3 與 release 前長任務驗收仍未完成。詳見 [GitHub 匯出](docs/GITHUB-EXPORT.md)、[成果封存](docs/RESULT-ARCHIVE.md) 與 [最新交接](docs/HANDOFF.md)。
 
@@ -20,6 +20,8 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 **目前是 Proposed 設計，不是已可啟動的功能。** Headless browser／CDP smoke 只是前置能力，不能取代完整桌面與真實 Agent 操作驗收。實驗使用獨立的 AC 階段與驗收 ID，不更改既有 M0–M4 的狀態；不在本次啟動 VM、接入真實模型、變更主機或部署。下一階段須另行授權。
 
 ## 文件入口
+
+- [單節點操作手冊](docs/SINGLE-NODE.md)：安裝、啟停、觀測、備份還原、升級回滾與隔離演練。
 
 - [Agent Computer 實驗](docs/AGENT-COMPUTER.md)：目標效果、能力缺口、控制／觀看契約、分階段計劃與最終驗收。
 - [GitHub 匯出](docs/GITHUB-EXPORT.md)：檢視固定成果後授權新分支／Draft PR；獨立 worker、故障查核與設定。
@@ -63,7 +65,7 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 
 ## 開始開發
 
-目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake／真實 runtime adapters、私有 connector 與 React 工作台。啟動與測試見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
+目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake／真實 runtime adapters、私有 connector 與 React 工作台。現行操作見 [單節點手冊](docs/SINGLE-NODE.md)，M1 歷史驗收見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
 
 M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修改驗收，並顯示事件與 diff。它尚不解讀自然語言工作目標、不呼叫付費 provider；專案測試未設定。啟動與能力限制見 [M2](docs/M2.md)。
 

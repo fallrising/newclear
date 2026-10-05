@@ -1,3 +1,17 @@
+# 現行接續入口 — 2026-10-05
+
+M4 本切片加入 operator 離線備份／驗證／空 DB 還原，以及先預覽、明確批准才執行的封存 payload 清理。設計與操作命令見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。沒有排程或預設自動清理，實際資料操作未執行。Native PostgreSQL 工具備份 DB-resident archives/history，不含 VM、connector journal/fences 或 private credential files；還原後 runtime 保持 drain，需重新登入。
+
+Migration016 保留 archive 原 id/hash/size 等 metadata，以不可復活的 tombstone 記錄已清理副本。最少 30 天、每批至多 100，保護 active/interrupted、未完成 job、未知 binding、未釋放 reservation，以及所有 export 引用。摘要／原始 diff、events/messages/audit 不刪除；已清理下載回410，workbench 顯示到期且不提供新匯出。這不是所有任務內容的刪除功能。
+
+本分支包含尚待審查的 [GitHub 匯出 PR282](https://github.com/fallrising/newclear/pull/282) 與其成果封存 PR270 依賴，再整合 latest main。是否合併以最新 GitHub 為準；本輪交付新的 Draft PR，沒有合併、部署或 live export。匯出功能仍預設停用，模型維持本機 mock，billing 延後、金額 unknown。
+
+M0–M2 Passed；M3/M4 In progress。本切片已通過 45 unit + 666 PostgreSQL/platform tests、Ruff162 files、80 web tests/typecheck/format/build，以及11個真 Chromium/API/PostgreSQL情境；備份原生往返38項與獨立review證據見 [evidence/backup-retention.json](evidence/backup-retention.json)。以下歷史數字不代表本輪驗證。下一段建議單節點部署操作手冊與隔離環境演練，實際部署需另有範圍。事件／審計 retention、stale VM cleanup、任意 artifacts、live GitHub opt-in、完整 MVP gate、真實自然語言 coding 及 release 前長任務仍未完成。
+
+升級前先用現行版本 native DB 備份並停寫/drain，再套用016與同步API/worker。新備份工具只接受當前完整 migration manifest，不能拿它跳過版本核對。私有操作檔與 native PostgreSQL client prerequisites 見契約。以下歷史施工紀錄不取代本節與最新GitHub證據。
+
+---
+
 # 開發接續紀錄 — 2026-09-24
 
 > 2026-09-26：本機 `hrv` 與 SSH 的四台 disposable 都沒有 `<tmp>/apm3-*`、`<tmp>/apm2-20260922` 或 sandboxd journal。使用者說明舊 controller 已重灌。那筆 `allocate=started` 無法再對帳，下一輪 KVM 使用新的 state directory。新主機先選 `<disposable-04>`（hostname `<kvm-host>`，Debian 13）。

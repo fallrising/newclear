@@ -15,6 +15,7 @@ from psycopg.types.json import Jsonb
 
 from .adapters import FakeAgentBackend, FakeSandboxProvider
 from .domain import TERMINAL, Problem
+from .result_archive import persist_archive
 from .store import event
 
 
@@ -274,20 +275,22 @@ class Worker:
                 "summary": content,
                 "diff": diff,
                 "diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
+                "diff_bytes": len(diff.encode("utf-8")),
+                "base_sha": run["base_sha"],
                 "verification": {
                     "status": "passed" if passed else "failed",
                     "name": "m2_fixture_workspace_assertion",
                     "reason": "Local mock rehearsal; repository tests are not configured.",
                 },
             }
+            persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(conn, run["id"], "run.result_saved", result)
             self.state(conn, run, "finalizing")
-        with self.owned(claim) as (conn, run):
             self.state(
                 conn,
                 run,
-                "succeeded" if run["result"]["verification"]["status"] == "passed" else "failed",
+                "succeeded" if result["verification"]["status"] == "passed" else "failed",
             )
         with self.owned(claim) as (conn, run):
             self.sandbox.release(conn, run, f"{run['id']}:release")
@@ -352,6 +355,7 @@ class Worker:
                     "reason": "M1 deterministic fixture does not execute code or model calls",
                 },
             }
+            persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(conn, run["id"], "run.result_saved", result)
             self.state(conn, run, "succeeded")

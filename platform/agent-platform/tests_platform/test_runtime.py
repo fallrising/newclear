@@ -159,7 +159,6 @@ class RuntimeTests(PlatformFixture):
                     "prompt": {"accepted": True},
                     "result": {
                         "execution_mode": "cocoon-fixture",
-                        "diff_sha256": "a" * 64,
                         "verification": {"status": "passed"},
                     },
                     "release": {"observed_state": "stopped", "proof": {"claim_absent": True}},

@@ -699,3 +699,47 @@ form .muted {
 .task-filters button {
   align-self: end;
 }
+
+.archive {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line, #dde1e6);
+  padding-top: 1rem;
+}
+.archive .mono {
+  overflow-wrap: anywhere;
+}
+
+.export-panel {
+  border-top: 1px solid var(--line, #dde1e6);
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+.export-panel label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.export-panel select {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.35rem;
+}
+.export-preview {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line, #dde1e6);
+  border-radius: 8px;
+}
+.export-preview dd {
+  margin: 0.25rem 0 0.75rem;
+  overflow-wrap: anywhere;
+}
+.export-history {
+  list-style: none;
+  padding: 0;
+}
+.export-history > li {
+  border-top: 1px solid var(--line, #dde1e6);
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  overflow-wrap: anywhere;
+}

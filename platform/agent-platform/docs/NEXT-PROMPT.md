@@ -1,3 +1,13 @@
+# 接續入口更新 — 2026-10-05
+
+先核對最新 GitHub main、PR、CI 與私人任務帳本，再讀 [HANDOFF.md](HANDOFF.md) 與 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。本切片提供 offline PostgreSQL backup/verify/empty-target restore 與 manual archive payload retention；不還原 running VM，不清除事件／審計／原始 diff，不自動 resume 或 replay。
+
+分支含 PR282/270 prerequisite；是否合併以 GitHub 現況為準。本輪只交付 Draft PR，不推論 merge/deploy 或實際資料操作。下一段建議單節點部署操作手冊與隔離演練，需依 owner 選定範圍才接手。M3/M4 整體仍未完成；billing 延後，費用unknown，模型維持本機mock，不索取或使用existing key。
+
+本輪本機驗證為45 unit +666 platform、80 web、11 browser，完整hash與review入口見 [evidence/backup-retention.json](evidence/backup-retention.json)。交付PR的exact-head CI另外記於PR與任務報告。舊 prompt 保留作歷史，不能依舊 recovery blocker 或測試數字重做已完成工作。
+
+---
+
 # 新視窗接續開發 prompt
 
 此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `<kvm-host>` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。

@@ -41,6 +41,10 @@ let retryWait: Promise<void> | undefined;
 let externalRun: Partial<Run> | null;
 let usageConfigured: boolean;
 let downloadStatus: number;
+let archiveStatus: number;
+let archiveRuns: string[];
+let archiveDownloadStatus: number;
+let archivePrunedAt: string | null;
 let taskQueries: URLSearchParams[];
 let paginateTasks: boolean;
 const clients: QueryClient[] = [];
@@ -65,6 +69,10 @@ beforeEach(() => {
   externalRun = null;
   usageConfigured = false;
   downloadStatus = 200;
+  archiveStatus = 200;
+  archiveRuns = [];
+  archiveDownloadStatus = 200;
+  archivePrunedAt = null;
   taskQueries = [];
   paginateTasks = false;
   vi.stubGlobal(
@@ -72,6 +80,8 @@ beforeEach(() => {
     vi.fn(async (input: string, options: RequestInit = {}) => {
       const path = input.split('?')[0];
       const method = options.method ?? 'GET';
+      if (path === '/api/v1/export-targets' || path.endsWith('/exports'))
+        return Response.json({ items: [] });
       if (path === '/api/v1/session') {
         if (method === 'POST') authenticated = true;
         if (method === 'DELETE') {
@@ -198,6 +208,33 @@ beforeEach(() => {
                 fixture_credits_uncertain: null,
               },
         );
+      const archives = path.match(/^\/api\/v1\/runs\/([^/]+)\/artifacts(?:\/([^/]+))?$/);
+      if (archives) {
+        if (archives[2]) {
+          expect(options.credentials).toBe('same-origin');
+          return archiveDownloadStatus === 200
+            ? new Response('{"schema":"result-archive-v1"}')
+            : Response.json({ error: 'artifact_invalid' }, { status: archiveDownloadStatus });
+        }
+        return archiveStatus === 200
+          ? Response.json({
+              items: archiveRuns.includes(archives[1])
+                ? [
+                    {
+                      id: 'archive-' + archives[1],
+                      run_id: archives[1],
+                      kind: 'result',
+                      sha256: 'b'.repeat(64),
+                      size: 321,
+                      mime: 'application/json',
+                      created_at: '2026-10-04T00:00:00Z',
+                      pruned_at: archivePrunedAt,
+                    },
+                  ]
+                : [],
+            })
+          : Response.json({ error: 'archive_unavailable' }, { status: archiveStatus });
+      }
       if (path === '/api/v1/runs/run-1/result.diff') {
         expect(options.credentials).toBe('same-origin');
         return downloadStatus === 200
@@ -860,4 +897,113 @@ it('rejects an invalid link before API calls and clears only its owned filters',
   ).toBeNull();
   expect(window.location.search).toBe('?view=keep');
   expect(window.location.hash).toBe('#missing');
+});
+
+it('shows only the selected historical run archive, including when its result projection is absent', async () => {
+  archiveRuns = ['run-1'];
+  runState = 'succeeded';
+  externalRun = { id: 'run-2', attempt_no: 2, state: 'queued', result: null };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('本次執行尚無封存結果。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(await screen.findByRole('button', { name: '下載封存結果' })).toBeEnabled();
+  expect(screen.getByRole('region', { name: '成果封存' })).toHaveTextContent('321 bytes');
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-2');
+  expect(await screen.findByText('本次執行尚無封存結果。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+});
+
+it('recovers an archive list error without presenting it as an empty archive', async () => {
+  archiveStatus = 503;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('無法載入封存結果。')).toBeVisible();
+  expect(screen.queryByText('本次執行尚無封存結果。')).toBeNull();
+  archiveStatus = 200;
+  archiveRuns = ['run-1'];
+  await user.click(screen.getByRole('button', { name: '重新載入封存' }));
+  expect(await screen.findByRole('button', { name: '下載封存結果' })).toBeEnabled();
+});
+
+it('rejects failed archive downloads and uses the fixed selected run path after retry', async () => {
+  archiveRuns = ['run-1'];
+  archiveDownloadStatus = 409;
+  const create = vi.fn(() => 'blob:archive');
+  const revoke = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+      static revokeObjectURL = revoke;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  try {
+    const user = userEvent.setup();
+    mount();
+    await login(user);
+    await fillTask(user);
+    await user.click(await screen.findByRole('button', { name: '下載封存結果' }));
+    expect(await screen.findByText('封存下載失敗，請確認登入狀態後重試。')).toBeVisible();
+    expect(create).not.toHaveBeenCalled();
+    archiveDownloadStatus = 200;
+    await user.click(screen.getByRole('button', { name: '下載封存結果' }));
+    await waitFor(() => expect(click).toHaveBeenCalledOnce());
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith('/api/v1/runs/run-1/artifacts/archive-run-1', {
+      credentials: 'same-origin',
+    });
+    await waitFor(() => expect(revoke).toHaveBeenCalledWith('blob:archive'), { timeout: 2000 });
+  } finally {
+    click.mockRestore();
+  }
+});
+
+it('shows retained archive identity after expiry without download or new export controls', async () => {
+  archiveRuns = ['run-1'];
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  result = {
+    summary: 'Original result remains',
+    verification: { status: 'unknown', reason: 'not configured' },
+  };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const archive = await screen.findByRole('region', { name: '成果封存' });
+  expect(
+    await within(archive).findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。'),
+  ).toBeVisible();
+  expect(archive).toHaveTextContent('321 bytes');
+  expect(archive).toHaveTextContent('b'.repeat(64));
+  expect(within(archive).queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(within(archive).queryByRole('region', { name: 'GitHub 匯出' })).toBeNull();
+  expect(screen.getByText('Original result remains')).toBeVisible();
+});
+
+it('refreshes archive availability after an expired download without creating a file', async () => {
+  archiveRuns = ['run-1'];
+  const create = vi.fn(() => 'blob:must-not-create');
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+    },
+  );
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const button = await screen.findByRole('button', { name: '下載封存結果' });
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  archiveDownloadStatus = 410;
+  await user.click(button);
+  expect(await screen.findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(create).not.toHaveBeenCalled();
 });

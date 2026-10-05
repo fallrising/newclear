@@ -1,5 +1,6 @@
 """Local HTTP boundary doubles; no VM, SDK process, or external service."""
 
+import hashlib
 import json
 import threading
 from datetime import UTC, datetime, timedelta
@@ -68,7 +69,9 @@ class Runtime(HTTPFixture):
         self.phase = "absent"
         self.result = {
             "execution_mode": "cocoon-fixture",
-            "diff_sha256": "f" * 64,
+            "diff_sha256": hashlib.sha256(b"fixture result").hexdigest(),
+            "diff_bytes": len(b"fixture result"),
+            "base_sha": base_sha,
             "verification": {"status": "passed"},
             "diff": "fixture result",
         }

@@ -1,6 +1,7 @@
 """Read-only current stage prerequisite review; no admission or mutation capability."""
 from datetime import datetime, timezone
 import os
+import fresh_run_authority as authority
 
 from fresh_execution import exact, identifier, sha256, timestamp
 from fresh_execution_ops import AREA as EXECUTION_AREA, PrivateFiles, _record, _review
@@ -15,7 +16,8 @@ import pending_generation
 
 
 def _time(now):
-    value = now or datetime.now(timezone.utc)
+    value = now() if callable(now) else now
+    value = value or datetime.now(timezone.utc)
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError('network prerequisite time requires timezone')
     return value.astimezone(timezone.utc)
@@ -56,7 +58,7 @@ class _Publications:
             os.close(directory)
 
 
-def _load(files, publications, run_id, execution_sha, input_file, input_sha, pending, now, source_state):
+def _load(files, publications, run_id, execution_sha, input_file, input_sha, pending, now, source_state, historical_at=None):
     document, path, digest = files.json(str(input_file))
     if digest != input_sha:
         raise ValueError('network prerequisite request bytes changed')
@@ -90,13 +92,16 @@ def _load(files, publications, run_id, execution_sha, input_file, input_sha, pen
     if (document['replacement_observation']['path'] != REPLACEMENT_AREA + '/' + observation_id + '/observation.json'
             or observation['run_id'] != run_id or observation['execution_sha256'] != execution_sha):
         raise ValueError('network prerequisite replacement scope changed')
+    replacement_time = authority.event_time(observation['completed_at'], now)
+    if authority.active() is not None and authority.active().binding['plan_id'] is None:
+        replacement_time = now
     reviewed = inspect_replacement_facts(files.project, observation_id, replacement['sha256'],
-                                         now=now, source_state=source_state)
+                                         now=replacement_time, source_state=source_state)
     if reviewed['status'] != 'observed' or reviewed['execution_sha256'] != execution_sha:
         raise ValueError('network prerequisite replacement assessment blocked')
     # Keep all replacement and receipt raw references pinned in the outer reader.
     request, receipts, _ = _context(files, run_id, execution_sha, observation['input']['path'],
-        observation['input']['sha256'], now, source_state, pending)
+        observation['input']['sha256'], replacement_time, source_state, pending)
     receipt_request = files.binding(request['receipt_request'])
     actions = [files.binding(row['action']) for row in receipt_request['hosts']]
     authorization = files.binding(document['owner_authorization'])
@@ -105,7 +110,8 @@ def _load(files, publications, run_id, execution_sha, input_file, input_sha, pen
     isolation = files.binding(fence['isolation'])
     validate(document, authorization, fence, isolation, execution=execution,
              execution_sha=execution_sha, pending_sha=pending['sha256'], replacement=observation,
-             baseline=baseline, now=now)
+             baseline=baseline, now=(authority.event_time(historical_at, now)
+                                     if historical_at is not None else now))
     for host in isolation['old_hosts']:
         ref = host['proof']
         raw, relative, digest = files.read(ref['path'])

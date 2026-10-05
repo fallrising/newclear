@@ -106,3 +106,7 @@ cd <operator-home>/test/codex/newclear-eru-delivery
 soak TODO 所列 24h observer 已自然結束並完成回收，不需停止或重啟；之後只唯讀讀取最新 journal／runtime／配額／健康。三次重裝的計次只能取 complete run 與 `worker-component-revisions.json`；初次因節點陣列順序而失敗的 run 保留 failed，沒有追認成 PASS。HTTP canaries 用其原 run 的精確 cleanup plan 清理；不 prune、不全群 reset、不刪 controller lock。
 
 新程式、inventory、core revision 或 health evidence 會改變 plan bindings；使用新 plan，不複用失敗計畫。B 的 flock 只涵蓋同一 private 目錄的合作程序，操作期間維持 B 為唯一 mutation writer。
+
+## 2026-10-05 fresh-run mainline
+
+[Milestone and input contracts](M3-FRESH-RUN-MAINLINE-2026-10-05.md) add the public fresh-run start/next/status/recover entry, exact owned pending lock and explicit per-action owner renewal. Historical integrity is separate from current readiness; no automatic owner approval, expiry/release, bootstrap or generation commit. The approved mainline avoids optional tooling/UI/VM work. Overall PARTIAL and formal completed6/outstanding12 remain until the actual task DoDs have evidence. Full final delivery checks and independent evidence are recorded in .team/reports/T-263.md. Next bounded mainline is empty-control-plane/bootstrap, replay/resources/residue, generation commit/seal/barrier completion and the local DoD audit before any live operation package.

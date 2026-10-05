@@ -5,6 +5,7 @@ or writer-fence evidence is renewed. A successful assessment admits no stage.
 """
 from datetime import datetime, timezone
 import os
+import fresh_run_authority as authority
 import subprocess
 
 from fresh_execution import exact, identifier, sha256, timestamp
@@ -40,6 +41,7 @@ def _pending_matches(pending, record, execution_sha, identity):
             and reservation['private_identity'] == identity)
 
 
+@authority.operation
 def inspect_receipts(project, run_id, execution_sha, input_file, *, now=None, source_state=None):
     """Assess all four receipts locally; never write, connect, reserve or accept."""
     identifier(run_id)
@@ -49,7 +51,7 @@ def inspect_receipts(project, run_id, execution_sha, input_file, *, now=None, so
             'remote_mutation_performed': False, 'generation_changed': False}
     files = None
     try:
-        current = now or datetime.now(timezone.utc)
+        current = authority.current_time(now)
         if current.tzinfo is None or current.utcoffset() is None:
             raise ValueError('fresh receipt current time requires timezone')
         current = current.astimezone(timezone.utc)

@@ -1,6 +1,7 @@
 """Immutable local network-access plans; never dispatch or accept a stage."""
 from datetime import datetime, timedelta, timezone
 import os
+import fresh_run_authority as authority
 
 from fresh_execution import exact, identifier, sha256, timestamp
 from fresh_execution_ops import PrivateFiles
@@ -18,7 +19,8 @@ AREA = 'private/operations/fresh-rebuild/network-access-plans'
 
 
 def _time(now):
-    value = now or datetime.now(timezone.utc)
+    value = now() if callable(now) else now
+    value = value or datetime.now(timezone.utc)
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError('network access time requires timezone')
     return value.astimezone(timezone.utc)
@@ -34,7 +36,7 @@ def _summary(plan_id, execution_sha=None):
 
 
 def _context(files, publications, run_id, execution_sha, input_file, input_sha,
-             pending, current, source_state):
+             pending, current, source_state, historical_at=None):
     document, path, digest = files.json(str(input_file))
     if digest != input_sha:
         raise ValueError('network access request bytes changed')
@@ -43,7 +45,7 @@ def _context(files, publications, run_id, execution_sha, input_file, input_sha,
     files.binding(document['admission_request'])
     ref = document['admission_request']
     values = _load(files, publications, run_id, execution_sha, ref['path'], ref['sha256'],
-                   pending, current, source_state)
+                   pending, current, source_state, historical_at=historical_at)
     admission, _, _, _, _, _, _, replacement_request, receipts, admission_ref, _, _, _ = values
     assessment = {'schema_version': 1, 'operation': 'fresh-network-prerequisites-assessment',
                   'input': admission_ref, 'request': admission}
@@ -65,25 +67,32 @@ def _record(files, document, ref, rendered, plan_id, run_id, execution_sha, crea
 
 
 def _fresh(record, values, pending, current):
+    validation_time = current
+    if authority.active() is not None:
+        authority.active().scope(record)
+        authority.check_current()
+        validation_time = authority.event_time(record['created_at'], current)
     created = timestamp(record['created_at'])
-    if not created <= current or current - created > timedelta(minutes=15):
+    if not created <= validation_time or validation_time - created > timedelta(minutes=15):
         raise ValueError('network access plan is future or expired')
     (document, authorization, fence, isolation, execution, baseline, replacement,
      request, receipts, _, plan, receipt_request, actions) = values
     # This clock check runs after the final filesystem and publication checks.
     validate(document, authorization, fence, isolation, execution=execution,
              execution_sha=record['execution_sha256'], pending_sha=pending['sha256'],
-             replacement=replacement['observation'], baseline=baseline, now=current)
-    validate_observation(replacement, request, receipts, replacement['observation']['id'], current)
+             replacement=replacement['observation'], baseline=baseline, now=validation_time)
+    validate_observation(replacement, request, receipts, replacement['observation']['id'],
+                         authority.event_time(replacement['observation']['completed_at'], validation_time))
     validate_receipts(receipt_request, actions, receipts, plan=plan,
                       execution={'execution': execution, 'sha256': record['execution_sha256']},
-                      baseline=baseline, now=current)
+                      baseline=baseline, now=validation_time)
 
 
 def _success(base, digest):
     return {**base, 'status': 'planned', 'sha256': digest, 'host_count': 4, 'file_count': 8}
 
 
+@authority.operation
 def prepare_network_access(project, run_id, execution_sha, input_file, input_sha, plan_id,
                            *, now=None, source_state=None):
     identifier(run_id)
@@ -153,6 +162,7 @@ def prepare_network_access(project, run_id, execution_sha, input_file, input_sha
             files.close()
 
 
+@authority.operation
 def inspect_network_access(project, plan_id, expected_sha, *, now=None, source_state=None):
     identifier(plan_id)
     sha256(expected_sha)
@@ -177,8 +187,8 @@ def inspect_network_access(project, plan_id, expected_sha, *, now=None, source_s
         files.binding(record['input'])
         args = (files, publications, run_id, execution_sha, record['input']['path'],
                 record['input']['sha256'], pending)
-        _context(*args, current, source_state)
-        document, ref, rendered, values = _context(*args, _time(now), source_state)
+        _context(*args, current, source_state, historical_at=record['created_at'])
+        document, ref, rendered, values = _context(*args, _time(now), source_state, historical_at=record['created_at'])
         rebuilt = _record(files, document, ref, rendered, plan_id, run_id, execution_sha, record['created_at'])
         if plan_digest(rebuilt) != expected_sha:
             raise ValueError('network access plan is not the current deterministic derivation')

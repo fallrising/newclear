@@ -101,3 +101,7 @@
 | 2026-09-24 | ERU-006 完成 host network 私網 HTTP、公網 v4/v6 隔離、core 管理埠阻擋、CNI DNS／HTTPS 與獨立 reconcile；無新增、拆分或取消任務 | 6 | 12（近期 1、後續 11） |
 
 相關紀錄：[Soak 時間與查詢命令](TODO-SOAK-2026-09-23.md)、[core 中斷驗證與限制](M2-CRASH-RECOVERY-2026-09-23.md)、[原始驗收契約](SDD.md)。
+
+## 2026-10-05 主線接續
+
+本輪依進度審查決議，集中串接 [fresh-run 入口／owned admission／短期續期與歷史完整性](M3-FRESH-RUN-MAINLINE-2026-10-05.md)，銜接既有四機 network-ready 流程。此為 ERU-015 主線中的一個本機里程碑，不新增、拆分或減少正式任務。驗證與交付以 .team/reports/T-263.md 為準；整體仍 PARTIAL，完成6／剩餘12。接續 empty-control-plane/bootstrap、replay/resources/residue、generation commit/seal/barrier completion；五項本機 DoD 仍需逐項勾稽，之後才形成實機驗收包。v0.1.7 既有兩次獨立 build 保留，未部署。

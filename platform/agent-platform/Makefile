@@ -1,6 +1,6 @@
 OUTPUT ?= .artifacts/docker-smoke
 
-.PHONY: check test lint format preflight docker-smoke platform-test platform-check web-check browser-test
+.PHONY: check test lint format preflight docker-smoke platform-test platform-check web-check browser-test deployment-rehearsal
 
 check: lint test
 
@@ -40,3 +40,6 @@ browser-test:
 	else \
 		python scripts/test-postgres.py npm --prefix web run test:e2e; \
 	fi
+
+deployment-rehearsal:
+	python scripts/single-node-rehearsal.py

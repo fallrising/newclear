@@ -2,14 +2,14 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-10-04
+Updated: 2026-10-06
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/v2-persistence`
+- Branch: `agent/hai-taskboard/proposal-import`
 - Worktree: task-scoped checkout; verify actual Git state.
-- Current delivery base: verified Draft PR #274 head `b2ccf47066a3729d37d053271db16fb566c9b1ed` (unmerged predecessor)
+- Current delivery base: merged main `e58840115bc93deceaf3cde053159d0ee2cc799e`; PR #274 merged at `2bd12620234e0c6e9954d3bc3738c0de21f4f65f`, then PR #284 merged at this base.
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
   boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
@@ -181,15 +181,26 @@ preflight. T-141 implements eleven empty scoped STRICT tables and migration-only
 accepted data is inferred from historical fixtures. Durable outer plan identity and kernel identity
 are separate. T-142 returned unconditional native PASS; root accepted storage/migration after
 full backend/race/web gates. Seven oracles and exact source hashes are bound in T-0189-gate.
-No import, first acceptance, activation, head read authority or current-input command is implemented.
+The V2 child itself added no import, first acceptance, activation, head read authority or current-input command.
+
+## Immutable proposal foundation acceptance
+
+T-150's exact mini-SDD was root-ACKed before lawful compilable-stub semantic Red. T-151 adds
+only `internal/specification` and `internal/gitobject`: strict manifests, separate provenance
+and normative graph identities, canonical re-read, immutable object/hash verification and
+bounded sterile local Git reads. T-152 returned unconditional native semantic PASS; T-153
+completed independent hash/oracle inventory. Root accepted the exact candidate after fresh
+native full tests/vet/build, pinned full/race/vet/build on Git 2.39.5, native Git 2.47.3 real-object
+cases and web gates. Seven author groups ran 212 tests/subtests and independent review ran 65,
+with no final required skip. PLAN and T-0197-gate bind the hashes and retained diagnostics.
 
 ## Safe next action
 
-Deliver the accepted V2 persistence child through exact stacked Draft PR CI and desk review.
-The next implementation child needs a separate bounded Git proposal/provenance import assignment.
-The runner predecessor #274 remains Draft/unmerged; do not assume merge. Import/admission commands and accepted-input authority wiring
-require later separate assignments; backup/restore and live UI remain separate scopes. No PR merge
-or deployment follows from this handoff.
+The delivery stop is a Draft PR with successful checks for its exact pushed head and review
+publication. PR metadata and the delivery record carry the actual commit/check result; local
+green does not substitute for CI. Do not merge this PR or start another child automatically.
+Durable proposal commands, first acceptance, activation, current-head consumers, backup/restore,
+UI and providers require later assignments. No runtime or API exposes this foundation yet.
 
 ## Restore invariant
 

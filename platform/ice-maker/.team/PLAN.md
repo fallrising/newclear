@@ -83,6 +83,15 @@ inferred from that merge.
 
 ## Decisions and discoveries
 
+- 2026-10-03: The first owner-selected real-document attempt stopped at runtime
+  preflight. A RED regression reproduced incorrect Poppler detection caused by
+  using `--version`; the minimal `-v` fix passes ten doctor tests. The real host
+  remains unsupported (Docker/service extras absent, root operator), and the
+  existing service startup refuses it. No corpus ingestion or cited candidate
+  is claimed. Full validation and a clean-base comparison retain the same five
+  failing/erroring tests and five environment skips. See
+  `docs/verification/first-real-result.md` and its machine-readable evidence.
+
 - 2026-09-04: ACCEPT T-043 after rebuilding source revision `832ce5d...`,
   preserving the prior private state, and starting a fresh isolated loopback
   service. The same 10 files completed from an empty cache in about 546 seconds
@@ -810,3 +819,42 @@ The orchestrator reviews every task diff and report, reruns its verification,
 records `ACCEPT`, `REWORK`, or `REASSIGN`, and only then integrates the task.
 Each phase receives a repository-wide gate, a `phase(N): ...` commit, a push with
 remote SHA confirmation, and an update to the same pull request.
+
+## 2026-10-04: T-0061 real-document continuation
+
+The owner-selected English PDF completed the existing upload, native extraction,
+private provenance/index, and readable-result journey at code revision
+`0038175b9a82a98c02fb9b64688cae243e9f2ad3`, based on main
+`c5fe7385d7021cc071c5dc793437a911044aa380`. All 81 physical pages were non-empty
+native-text pages; OCR was not needed. Independent normalized page comparisons,
+immutable cache/progress/index bindings, repeated readable responses, and a real
+identical re-upload passed. Twelve rendered original pages were reviewed across
+sections, including code punctuation and paragraph order. Source identities,
+original bytes, and full derived text remain in private evidence.
+
+The real pilot exposed lexical `token` false positives and syntax-highlighted
+PDF code-order defects. RED regressions preceded the narrow text-only guard and
+Poppler `-layout` fixes; executable metadata remains strict. PDF extractor v3 is
+bound into both PDF and outer batch caches. Re-extraction uses a fresh private
+state/index so old and new immutable chunks cannot be mixed.
+
+Verification: the lexical-control RED ran eight tests with six expected errors;
+the ordering/cache RED had three expected failures; 81 focused tests, ten doctor
+tests, three synthetic controls, policy checks, both living SDD validators, and
+all 11 immutable SDD source hashes passed. The committed PR checkout passed all
+317 tests without failures, errors, or skips, and all 15 recorded checks exited
+zero. The clean main baseline ran 303 tests with one reproduced Pillow-absence
+test assumption failure and no errors or skips; the PR explicitly simulates the
+missing-codec condition rather than assuming Pillow is absent.
+
+The measured host doctor is `host-capable` (exit 1); the pinned container supplies
+the parser/service stack. A non-root operator and non-root parser run under a
+rootful Docker daemon with AppArmor, seccomp, cgroup limits, network-disabled
+parsing, and a read-only container root. Status is `LOCAL_DEV` usable. Ten existing
+knowledge proposals generated cited, unpromoted candidates with 33 reviewed
+supporting anchors. A private candidate Draft PR has been created for owner
+review; all candidates remain unpromoted. Human promotion,
+rootless production evidence, formal OCR/body/table quality thresholds, and the
+representative 100-document benchmark remain open. No merge or deployment was
+performed. See `docs/verification/first-real-result.md` for the current acceptance
+and preserved historical attempt.

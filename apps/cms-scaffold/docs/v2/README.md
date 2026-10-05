@@ -109,3 +109,5 @@ W3 已於 PR #273 通過必要 CI 並合併；[發布證據](../../.team/reports
 W4 共用 Admin 治理已完成本地驗收：624 前端／68 mock E2E、339 Java 快取結果、14 張桌面／手機擷取與來源保留核對；已於 PR #289 通過必要遠端 CI 並合併；[發布證據](../../.team/reports/W4-PUBLICATION.md)。[交付證據](../../.team/reports/W4-DELIVERY.md)。W4 附錄新 E2E 與完整前端硬化仍在 W5，不代表整個 v2 已完成。
 
 W5 前端硬化持續驗收中：三面bundle已達固定預算；診所loading與當前route平行module載入的F修補已通過Front147回歸，完整效能量測進行中。品質／視覺／真API及CI全部通過前維持IN_PROGRESS；見[W5](waves/W5.md)與[團隊計畫](../../.team/PLAN.md)。
+
+W5 最新驗收：Front效能25/25、mock93連續三次、axe60/hardening11及canonical70初建與只比較均通過，PR #300保持draft。Real第二次10通過／2失敗／2未執行，依§5.6保留失敗與完整ownedcleanup，等待[具體修訂G](../../.team/reports/W5-REAL-AMENDMENT.md)；尚未合併或部署。

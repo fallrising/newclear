@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T17:50:18.063Z",
+  "gitCommit": "e9c5b202e37deb758bc756f9d9812ad1038277a5",
+  "dirty": false,
+  "node": "v24.18.0",
+  "chromium": "153.0.8010.12",
+  "command": "test:visual",
+  "artifact": ".team/evidence/w5-canonical-comparison.json",
+  "result": "passed",
+  "recordId": "W5-VISUAL-20261005-02",
+  "os": "Ubuntu 24.04.5 LTS",
+  "desktopCases": 52,
+  "mobileCases": 15,
+  "stateCases": 3,
+  "threshold": 0.2,
+  "maxDiffPixelRatio": 0.001,
+  "hashManifest": ".team/evidence/w5-canonical-initial-hashes.sha256",
+  "authorization": "comparison only",
+  "notes": "Noto TC font aliases resolve to TC face; exact 70 expected baselines; CI37350721874 comparison70passed; same70baselinehashes; original producerID01 preserved inraw"
+}

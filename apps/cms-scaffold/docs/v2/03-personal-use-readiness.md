@@ -119,3 +119,5 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 ## W5 進行中（2026-10-05）
 
 W4 已於 PR #289 通過必要 CI 並合併，[發布證據](../../.team/reports/W4-PUBLICATION.md)關閉上述本地檢查點。W5 已完成三面入口拆分與 deferred provider 修正，新增完整品質／效能量測和一次性真 API runner；本地原完整643前端測試、bundle、axe60與修訂後hardening11通過。Owner核准F後的Front147回歸亦通過，但完整25次效能修補驗證仍在執行；93 mock連續三次、canonical70視覺、real14及必要遠端CI尚未完成，W5維持IN_PROGRESS。失敗量測及修正依据保留於[W5施工圖](waves/W5.md)與[團隊計畫](../../.team/PLAN.md)。未部署，不據此宣稱正式可用。
+
+W5 後續已通過完整25Vitals、93mock三次、60axe、11hardening與70canonical視覺比較；PR #300保存進度。真實API目前10/14，兩項失敗另有兩項串行未執行，不能宣稱完成。所有本次測試資源已清理；[修訂G](../../.team/reports/W5-REAL-AMENDMENT.md)等待授權後才能調整固定realassertions。

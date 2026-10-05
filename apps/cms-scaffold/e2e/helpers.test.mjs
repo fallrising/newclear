@@ -5,6 +5,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { seedPassword, waitForHttp } from "./helpers.ts";
+import { request } from "@playwright/test";
 import { prepareOwnedMember } from "./prepare-owned.ts";
 
 const savedEnv = { ...process.env };
@@ -87,4 +88,17 @@ test("existing owned Mochi is not duplicated, wrong binding and API denial fail 
     await assert.rejects(prepareOwnedMember("cms-w5-e2e-123-0123456789abcdef", fakeSetup({ existing: true, foreign: true }).factory), /different principal/);
     await assert.rejects(prepareOwnedMember("cms-w5-e2e-123-0123456789abcdef", fakeSetup({ denied: true }).factory), /creation failed \(403\)/);
   } finally { restore(); }
+});
+
+test("default API factory retains Playwright request receiver", async () => {
+  const original = request.newContext; const h = fakeSetup();
+  process.env.CMS_E2E_PASSWORD = "private-secret";
+  try {
+    request.newContext = async function (options) {
+      assert.ok(this === request, "Playwright APIRequest.newContext requires its receiver");
+      return h.factory(options);
+    };
+    await prepareOwnedMember("cms-w5-e2e-123-0123456789abcdef");
+    assert.equal(h.calls.filter((c) => "disposed" in c).length, 2);
+  } finally { request.newContext = original; restore(); }
 });

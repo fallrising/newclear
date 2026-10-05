@@ -94,9 +94,15 @@ mock e2e 每次 repetition 一列；W5 前置 suite 是 47 個（W0～W2 的 39�
 
 | W5-VISUAL-20261005-01 | 2026-10-05T17:39:14.238Z | 24f40f2734cb5d4c2aff00a367609d28d341b9cb | yes | Ubuntu 24.04.5 LTS | 153.0.8010.12 | 52 | 15 | 0.2 | 0.001 | .team/evidence/w5-canonical-initial-hashes.sha256 | npm run test:visual | .team/evidence/w5-canonical-initial-visual.json | passed | W5 initial canonical CI authoring; owner A–D approved 2026-10-05; Noto TC font aliases resolve to TC face; exact 70 expected baselines; CI37349357513 artifact11361114634 verified70 SHA256; root reviewed all70 in7 contact sheets plus full-size clinic/mobile roles/confirmation; no blocking defect |
 
+| W5-VISUAL-20261005-02 | 2026-10-05T17:50:18.063Z | e9c5b202e37deb758bc756f9d9812ad1038277a5 | no | Ubuntu 24.04.5 LTS | 153.0.8010.12 | 52 | 15 | 0.2 | 0.001 | .team/evidence/w5-canonical-initial-hashes.sha256 | npm run test:visual | .team/evidence/w5-canonical-comparison.json | passed | comparison only; Noto TC font aliases resolve to TC face; exact 70 expected baselines; CI37350721874 comparison70passed; same70baselinehashes; original producerID01 preserved inraw |
+
 ## Real API e2e
 
 每個 attempt 都追加；成功與失敗都保留。`stack` 寫 API／PostgreSQL／三 app 的版本或 image，不寫憑證。
 
 | record id | measured at (UTC) | commit | dirty | attempt | OS | JDK | Docker / Compose | stack | passed / total | duration s | command | artifact / redacted logs | result | failure class / notes |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
+
+| W5-REAL-20261005-01 | 2026-10-05T17:42:17.207Z | d84738eb728190494145866bf6b0648305105701 | yes | 1 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-1942395-769b7e022bc9d437 | 0 / 14 | 93.557 | npm run e2e | test-results/frontend/real-e2e-logs/001/real-e2e.json | failed | tests; Isolated disposable project; owned cleanup and redacted attempt logs. |
+
+| W5-REAL-20261005-02 | 2026-10-05T17:47:22.833Z | 2b6babf860210cd62cd202fe6b18613bf35c872b | yes | 2 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-1946377-913c0c36e39cc6cc | 10 / 14 | 74.867 | npm run e2e | test-results/frontend/real-e2e-logs/002/real-e2e.json | failed | tests; Isolated disposable project; owned cleanup and redacted attempt logs. |

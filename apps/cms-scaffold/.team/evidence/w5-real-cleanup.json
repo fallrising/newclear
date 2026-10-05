@@ -1,0 +1,20 @@
+[
+  {
+    "attempt": 1,
+    "project": "cms-w5-e2e-1942395-769b7e022bc9d437",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "73f0be9d64d2cc3fb33f44a74fdcc89a0c46a1006f02b83d2c6bbfae2e8643f3"
+  },
+  {
+    "attempt": 2,
+    "project": "cms-w5-e2e-1946377-913c0c36e39cc6cc",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "26c1f61c3afb9430e99ce6897e057f407c470e8cb70011857fd8f8eebc9a0cd7"
+  }
+]

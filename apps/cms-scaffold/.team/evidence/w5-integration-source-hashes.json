@@ -34,10 +34,10 @@
     "apps/web-front/src/shell.tsx": "286c639af4be26e4166174021b8dc59d01643d63b0777aa07a34c3a7bb064a5a",
     "apps/web-front/src/states.tsx": "2e84150579dee74000083439c0db984b874715089b3b65119bcf3505038b06a3",
     "apps/web-front/vite.config.ts": "d293bcd849caba484750351c39c6da5fe630e4bb088110170c4339ee9579feb0",
-    "docs/v2/03-personal-use-readiness.md": "84c37c1b8f53e5fa78de6e5d6e1afdc229eca9271b6cdb3706e716da4d6c1d88",
-    "docs/v2/README.md": "bc4da4426a2529f8d69152a6a368a0c513e657f0c3a393bb4262e1c82abd35af",
-    "docs/v2/frontend-records.md": "be8f943562fa21757461d57c7e74fe092dd690b349176c245cecbd4e2b4c1ce1",
-    "docs/v2/waves/W5.md": "7e92cd6bf9cda95fc857e6f2c3a6c2dc0338db7d0ba326cc9acc8eae7185e24d",
+    "docs/v2/03-personal-use-readiness.md": "56f6e955fbcbde13793123e84c27cddddcc3ac5e3f64ac0702871b7be207360c",
+    "docs/v2/README.md": "85622f33f07344768c888597877329ef93389998dd6574e3d7c5a5f545ebff85",
+    "docs/v2/frontend-records.md": "96c624d4e5951e1d09dd3322c68a36346ddaf930c0317281b42e33a3c865e4e5",
+    "docs/v2/waves/W5.md": "c9a5761f285bdeb5df59aa1099413130b0170bf10e2213c917c8920540abc5c6",
     "e2e-mock/admin-w4.spec.ts": "3df997f133bdcf7e8705433f0172ee945d2e5368ad39f44903cb2ca0930bf881",
     "e2e-quality/axe-w5.spec.ts": "861dced9612458cb3a5259bc78f02023db00859946db71b192768973c0a24288",
     "e2e-quality/hardening-w5.spec.ts": "b69d0822a782e1105d29c695f6e3de692de80e52d14dfa4c74ab4ee37b59b438",
@@ -53,9 +53,9 @@
     "e2e/compose.e2e.yaml": "7d07e9b127687eed2cf37c1af50b4dac38b886ae8d1426c6a6681b9736fdff3d",
     "e2e/front.spec.ts": "d4383ec38e058b988d34dbcc1f9c07bf91dce349644d8723827c80976c2e6835",
     "e2e/global-setup.ts": "4e2d86f4bc1efa51ac89b5df18953f2c0e93ff0b7524a2186843fefb453454cc",
-    "e2e/helpers.test.mjs": "773d75e6b95b6fb64a1d6defaf8b84d4ec7676798d318a07f85158692406843f",
+    "e2e/helpers.test.mjs": "36b28b1d719ea2844a4de23ed6e7666c848b16eac1dac38a970350fbf7f486fa",
     "e2e/helpers.ts": "aed1224a23c111c9445ee6019d7fe5dc99f4f5beb03d7fc8ec761ad833de92bb",
-    "e2e/prepare-owned.ts": "2c804e8ca72924a78ad688288348284153801ebd06eeccbca240860eecdc1683",
+    "e2e/prepare-owned.ts": "89e67841892bc28b45456a60c7e021748a49258f61fbf9dacf01a9e3baf86677",
     "e2e/redaction.d.mts": "43e8696e4b657ab9426f2a9bfb302199c15692aadd88b31a9156fb72a190bce5",
     "e2e/redaction.mjs": "912d410016d32e791808096376e27792cc5fa7cd32fdc0a7e7bb05895c543095",
     "e2e/run.sh": "a8869e4a2c2b8f7a295e460f2254fb8a4564c85e9ed582d43e64a4730202be05",
@@ -82,7 +82,9 @@
     "e2e-quality/hardening-w5.spec.ts": "OwnerapprovedE sourcealignment; Adminsuffix perW4; browser11/11",
     "e2e-mock/admin-w4.spec.ts": "OwnerapprovedE currentversion; focusedbrowser1/1",
     "playwright.vitals.config.ts": "Specownsmanualtrace; disableconflictingautotrace",
-    "T958": "Six files integrated verbatim by frozen SHA256; root147Front+25Vitals+bundle pass"
+    "T958": "Six files integrated verbatim by frozen SHA256; root147Front+25Vitals+bundle pass",
+    "e2e/prepare-owned.ts": "Bound default request factory; original real001 failed prejourneys; regression24/lint/typespass, real002then10passed/2failed/2notrun",
+    "e2e/helpers.test.mjs": "Defaultfactory receiver regression, booleanassertion avoidsserializing Playwrightobject"
   },
   "historicalWorkerManifests": "Retained immutable as original handoffs; this manifest describes integrated source."
 }

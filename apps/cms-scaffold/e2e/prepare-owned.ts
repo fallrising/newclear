@@ -5,7 +5,7 @@ type Entry = { title: string; payload: Record<string, unknown> };
 type ContextFactory = typeof request.newContext;
 
 /** W5 §0.2: API preparation exclusively for the runner's disposable project. */
-export async function prepareOwnedMember(project: string | undefined, createContext: ContextFactory = request.newContext): Promise<void> {
+export async function prepareOwnedMember(project: string | undefined, createContext: ContextFactory = (options) => request.newContext(options)): Promise<void> {
   if (!project || !/^cms-w5-e2e-\d+-[0-9a-f]{16}$/.test(project)) throw new Error("Member fixture setup requires the runner-owned disposable project marker");
   for (const origin of [API, BACK, FRONT]) {
     if (!["localhost", "127.0.0.1"].includes(new URL(origin).hostname)) throw new Error("Disposable setup refuses a non-local API or app origin");

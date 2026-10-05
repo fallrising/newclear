@@ -20,7 +20,11 @@ Implemented actual route/module boundaries and deferred UI/provider loading; cor
 - Initial canonical qualityCI axe60/hardening11/visual70; exact70SHA256 plus rootall-page review; `.team/evidence/w5-canonical-review.json` — passed
 - Three serial finalmock runs93/93each, zero skipped/flaky; `w5-mock-final-{1,2,3}.json` — passed
 - Initial remoteCMS CI java/java-integration/weballpass, run37349357448; finalF source independently reviewed T959, no blocker — passed
-- Canonical comparison-onlyCI and isolatedreal14 withcleanup not yet complete — skipped
+- Canonical comparison-onlyCI37350721874:70passed and unchanged70hashes; `w5-canonical-comparison.json` — passed
+- Real001 setupfailure andreal00210passed/2failed/2notrun retained; `w5-real-attempt{1,2}.json`; assertion repair awaitsG — failed
+- Exactruntimecleanup ofbothownedstacks/privatefiles verified; `w5-real-cleanup.json` — passed
+- API factory receiver repair:24runner/helpercontracts, lint/types; scoped original-source Red retained — passed
+- Real14acceptance and G owner amendment pending; no merge — skipped
 
 - Root `npm run measure:vitals -- --reporter=list,json`25/25; clinic median2316ms/max2324ms/CLS0, all five targets pass; `w5-F1-vitals.json` — passed
 - Root final bundle85206/130889/136589 and isolation; `w5-F-root-bundle.json` — passed

@@ -1,8 +1,8 @@
 # Prism development quickstart
 
 This exercises authenticated OTLP, remote_write and Loki JSON ingestion plus
-Prometheus HTTP queries with the memory backend. Production storage remains a
-later milestone. Fixture credentials are
+Prometheus HTTP queries with the memory backend. ClickHouse migrations/writes can be tested separately through the Go SPI;
+production queries and daemon integration remain P1-10. Fixture credentials are
 public and intended only for loopback development.
 
 ## Prerequisites
@@ -183,3 +183,19 @@ See the [HTTP contract](specs/p1-08-prometheus-http.md) for limits and the
 [real promtool gate](../test/e2e/README.md#real-promtool-http-queries) for an
 actual write followed by instant/range queries. Rules, alerts, remote_read and
 native histogram results remain outside this milestone.
+
+## ClickHouse write-path verification
+
+The daemon examples above continue to use memory. P1-09 supplies a registered
+ClickHouse Go driver for migrations and three-signal writes; read APIs are
+Unsupported. Run the disposable local database gate separately:
+
+```sh
+python3 drivers/clickhouse/run-integration.py
+```
+
+Docker socket access, Python3 and network access for the pinned official image
+are required. The runner owns its temporary loopback fixture and cleanup; it
+does not deploy Prism. See the [driver README](../drivers/clickhouse/README.md)
+for credential files, native options, write bounds, async acknowledgement and
+metadata retention limitations.

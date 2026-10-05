@@ -1,7 +1,7 @@
 # Prism implementation inventory
 
-Current development baseline: Go 1.27.1, with P1-08 starting from
-newclear `c247028e71cf2947c4c4d90eee06200594fc41a5` after P1-07.
+Current development baseline: Go 1.27.1. P1-09 was implemented from
+newclear `c7d709be5475324e8f954f256671a3d4e13e2917` after merged P1-08 PR290.
 The P1-05 source completed at `6deaabcc583f96b543c55f82b7922cfe772e2831`. Historical verification below
 retains its original versions and scope. Product usage remains unknown.
 
@@ -17,7 +17,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P0-06 | `scripts/check-dependencies.sh` and deliberate violation tests | Wired into root Prism CI. |
 | P0-07 | `internal/config` loader, env overrides, validation and security-warning tests | P1-04 adds `deploy/prismd.yaml` as a configuration example; the deployment stack remains P1-11. |
 | P0-08 | `cmd/prismd`, `internal/server`, lifecycle and leak tests | P1-04 adds OTLP to all-in-one/ingest; P1-08 adds query routes; ruler/console retain base HTTP routes. |
-| P0-09 | ADR-001 through ADR-017 and clean-room declaration | Preserve decisions as later features are connected. |
+| P0-09 | ADR-001 through ADR-018 and clean-room declaration | Preserve decisions as later features are connected. |
 | P0-10 | `internal/secret`, formatting and serialization redaction tests | Future secret-bearing config types still need integration coverage. |
 | P0-11 | `internal/telemetry`, definition/exposition/cardinality-budget tests | P1-08 registers Prism collectors and connects query telemetry; pipeline event counters remain unconnected. |
 | P1-01 | `internal/ingest/normalize`, golden fixtures, delta state machine and fuzz seeds | Used by the runtime pipeline; P1-04 adds positional source-unit accounting. |
@@ -28,6 +28,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P1-06 | `internal/compat/lokiapi`, bounded authenticated JSON/gzip push, structured metadata, runtime and real Vector acceptance | Protobuf push and Loki query/ready remain future milestones. |
 | P1-07 | `internal/query/promqladapter`, bounded tenant-scoped streaming lifetime bridge and official float corpus through memory SPI | Native histograms and other drivers remain later work. |
 | P1-08 | `internal/compat/promapi/query*`, query/all-in-one runtime, bounded native/fallback APIs, real promtool gate | Rules/alerts/remote_read, native histograms and multi-tenant control plane remain later work. |
+| P1-09 | Native ClickHouse registration/lifecycle, eight migrations and metrics/logs/traces writes; test-only SQL readback | Production query implementations and daemon wiring remain P1-10. Full conformance and deployment are not claimed. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -308,6 +309,43 @@ legacy `SecFloatToMilli` remains unchanged. Native histograms, multi-tenant
 identity control plane, Grafana, persistent-driver/soak acceptance and deployment
 remain outside this slice.
 
+## Integrated P1-09 verification
+
+Executed on Linux amd64 with Go 1.27.1 and readonly modules against the corrected
+ClickHouse write implementation. Historical checkpoints above retain their original
+results. The public SPI, other drivers and root workflows are unchanged.
+
+| Exact command (from `platform/prism`) | Observed result |
+| --- | --- |
+| `GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly make lint test` | Formatting/vet and race suite passed in all 21 packages, including ClickHouse with goleak checks. |
+| `scripts/check-dependencies.sh` and `scripts/test-dependency-guard.sh` | PASS; all five negative fixtures detected. |
+| `go build ./...` and `go mod verify` | Both exit 0; all downloaded modules verified. |
+| Pinned golangci-lint 2.14.0 `run --allow-serial-runners ./...` and `run --allow-serial-runners --build-tags=integration ./...` | Both `0 issues.` |
+| `go test -race -count=1 -v ./test/promqltest -driver=memory` | Existing supported float PromQL corpus passed; native-histogram exclusions remain documented in P1-07. |
+| `go test -race -count=1 -v ./test/security` | PASS. |
+| `go test -tags=integration -race -count=1 -v ./test/e2e` with real Prometheus/promtool 2.53.0, Vector 0.45.0 and telemetrygen 0.116.0 | PASS through the existing memory daemon: remote_write, Loki none/gzip, OTLP HTTP/gRPC and Prometheus queries. |
+| `python3 scripts/smoke-otlp.py --prismd <built binary> --telemetrygen <real client>` | Config/health/metrics/ingress smoke passed; SIGTERM exit 0. |
+| `GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly python3 drivers/clickhouse/run-integration.py` | Pinned disposable ClickHouse 24.8.14.39: all 15 selected top-level tests and their subtests passed with race detection; own fixture cleaned. |
+| Compiled graph from `go list -deps -test -json ./...`, original module licences and native client origin | 45 module/version/licence-file digests verified; [provenance inventory](dependencies-clickhouse.md) records actual notices including MIT-0. |
+
+The real database tests cover eight exact template checksums, migration replay and
+TTL reconciliation, drift rejection, exact three-signal/resource/Nested persistence,
+tenant isolation and local/pending dependencies. Audit-driven regressions cover
+all-zero IDs, UTF-8 metric identities, canonical materialized `labels_str`, UTC
+retention boundaries that survive `OPTIMIZE FINAL`, all eight existing TTL sources
+rejected before any TTL ALTER, configured INSERT server limits and fail-closed
+column-order drift. Explicitly selected integration tests fail without a valid
+native loopback fixture. The native adapter preserves deadlines and confirms the
+server's physical column names before appending telemetry.
+
+Default async query settings and a successful server async flush were observed;
+this does not guarantee durability at acknowledgement. Writes remain nontransactional
+and have no automatic retry. DDL retains the client timeout while the upstream
+client derives its protocol server limit; controlled scans/INSERTs use an explicit
+SQL cap. Drain other writers before retention changes. Metric series metadata has
+no TTL (`Retention.Enforced=false`); production reads/runtime wiring and background
+dependency reconciliation remain outside P1-09.
+
 ## Current integration boundary
 
 P1-04 through P1-06 connect the existing atomic pipeline to authenticated OTLP,
@@ -345,7 +383,7 @@ Remaining integration work includes:
 ## Remaining phases
 
 P1-07 completes the float PromQL storage adapter and P1-08 adds the HTTP
-query API. Next is P1-09–10 ClickHouse; P1-11 deployment. Phase 2 adds LogQL and alerting;
+query API. P1-09 adds ClickHouse migrations/writes; next is P1-10 ClickHouse queries, then P1-11 deployment. Phase 2 adds LogQL and alerting;
 Phase 3 APM and alternate-driver proof; Phase 4 the agent; Phase 5 control plane,
 security and operations. Differential and soak acceptance remain future work. Official float PromQL
 corpus checks cover the memory adapter; existing E2E and security checks cover

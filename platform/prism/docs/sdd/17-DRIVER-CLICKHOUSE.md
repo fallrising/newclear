@@ -2,6 +2,10 @@
 
 位置：`drivers/clickhouse`。Schema DDL 見 `04-DATA-MODEL.md` §6，本文件補完**每個 SPI 方法的查詢實作**。
 
+## P1-09 實作範圍
+
+P1-09 完成單節點 native factory、schema migrations 与三種 Store writes；§4–§8 的 production queries 與 Phase3 定時補算仍為後續設計。非空 cluster 目前明確回 Unsupported，不假稱 replicated tables 已完成。Capabilities 只宣告實際範圍；optional query interfaces 不實作、mandatory reads 回 classified Unsupported，Retention.Enforced=false（series metadata 無 TTL）。依 [ADR-018](13-ADR.md#adr-018p1-09-clickhouse-write-only-driver-與現行-spi-適配) 與 [milestone contract](../specs/p1-09-clickhouse-write.md) 使用現行 executable SPI；後面的完整能力表描述完成後目標。
+
 ## 1. DSN 與 Options
 
 ```
@@ -82,7 +86,7 @@ clickhouse.Settings{
 1. `metric_series`：僅寫該批次中**首次出現**的 fingerprint（驅動內維護一個 LRU，容量 `100_000`，避免每次都寫）。
 2. `metric_samples`：全部樣本。
 
-fingerprint 由中間層計算（`utm.Fingerprint`），驅動不重算——保證跨驅動一致。
+現行 `MetricPoint` SPI 沒有 fingerprint 欄位；P1-09 使用唯一既有 `utm.Fingerprint` 對 complete sorted labels（含 metric、trusted tenant）取得 identity，不引入另一算法或公開欄位（ADR-018）。Cache 命中而 first/last_seen 延伸時仍需寫 metadata，時間保留 DateTime64(3) 精度。
 
 ### 3.3 日誌寫入
 

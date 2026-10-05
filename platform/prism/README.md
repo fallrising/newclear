@@ -17,8 +17,10 @@ P1-06 adds bounded Loki JSON/gzip push with structured metadata.
 P1-07 adds a bounded, tenant-scoped PromQL storage adapter with memory-backed
 official float corpus verification. P1-08 exposes bounded Prometheus HTTP queries,
 labels, series, metadata and build information in query/all-in-one roles.
+P1-09 adds ClickHouse schema migrations and three Store writes through the Go SPI.
+ClickHouse query methods remain Unsupported and daemon selection remains memory.
 The initial runtime supports a single configured tenant and file-backed bearer
-key. Loki/Jaeger query APIs, production drivers, alerting, agent and console
+key. Loki/Jaeger query APIs, complete production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
 
 ## Start here
@@ -32,6 +34,7 @@ remain unimplemented; this is not yet a complete APM service.
 
 - `pkg/utm` and `pkg/spi`: telemetry model and storage contracts.
 - `drivers/memory`: the implemented reference backend.
+- [`drivers/clickhouse`](drivers/clickhouse/README.md): migrated native three-signal writes; production queries remain P1-10.
 - `internal/config`, `secret`, `server`, `telemetry`: supporting packages.
 - `internal/ingest/normalize`: protocol-to-UTM normalization and bounded delta state.
 - [`internal/ingest`](internal/ingest/README.md): bounded pipeline,
@@ -96,3 +99,8 @@ and Loki query/ready APIs remain future milestones.
 The [P1-07 contract](docs/specs/p1-07-promql-adapter.md) describes the storage
 adapter and [corpus gate](test/promqltest/README.md). The [P1-08 contract](docs/specs/p1-08-prometheus-http.md) adds the HTTP layer
 and real promtool acceptance. Native histogram cases are explicitly outside the v1 float-only SPI.
+
+The [P1-09 contract](docs/specs/p1-09-clickhouse-write.md) defines bounded native
+ClickHouse writes, schema drift rejection and honest async/retention limits. Its
+[local database gate](drivers/clickhouse/README.md#real-database-verification) checks
+actual persisted fields and tenant isolation independently of production queries.

@@ -758,3 +758,85 @@ metadata after validator rejection; the independent-review assignment was unchan
 task/report validators then passed. No new defect or required local skip remains.
 No import/firstaccept/activation command, auth/CAS, canonical codec, head read consumer, restore,
 live UI, process-kill or COMMIT I/O guarantee follows. Parent #274 remains Draft/unmerged.
+
+## Immutable proposal import core continuation (2026-10-05)
+
+Owner requested merge and continued development. #274 merged 2bd12620234e0c6e9954d3bc3738c0de21f4f65f;
+#284 merged e58840115bc93deceaf3cde053159d0ee2cc799e. New baseline is that merged main, branch
+agent/hai-taskboard/proposal-import; the assigned task was claimed before component edits.
+This child implements only trusted local immutable Git reads and strict canonical proposal/manifest core.
+Durable application command/persistence, acceptance/activation/head consumers/API/runtime remain separate.
+Root alone owns exact contract ACK, routing, integration and accept/rework; no new PR merge.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-150 | Exact immutable Git reader/canonical proposal contract | new mini-SDD/report only | Design accepted after independent preflight and root exact ACK |
+| T-151 | ACKed pure proposal core and trusted local Git adapter | two new isolated packages/tests/report | Accepted locally after exact-source root gates and independent PASS |
+| T-152 | Independent native semantic source/evidence review | report/private checks | Unconditional native semantic PASS; exact final source reviewed |
+| T-153 | Lightweight hash/oracle inventory | isolated report/private artifact | Inventory accepted; 16 hashes and seven unique groups verified |
+
+### Import contract root ACK, 2026-10-05
+
+Root fully inspected HAI-IMPORT-001..007 and accepts the exact mini-SDD SHA-256
+`3c5742f0bbc7fccc24d6a270d1be7b21075db05c11f0855450a31b210cc73317` after T-152's
+independent design preflight found no blocking ambiguity. T-150 report SHA-256:
+`7dab5849ab3e69053aa42bcb75f8f729fbd77482846db535890bab3ad1b26676`.
+Only new specification/gitobject packages are permitted. Separate proposal provenance and normative
+graph hashes, strict canonical re-read, direct ref capture, sterile object facade, explicit bounded
+config/environment/object traversal, and seven uniquely owned oracle groups are frozen before Go.
+Git 2.47.3 native and Git 2.39.5 in the existing Go 1.27.1 image were actually observed; version
+availability alone is not fixture acceptance. T-151 must first preserve compilable stub and lawful
+positive semantic failure, then wait for root Red ACK. No implementation acceptance follows here.
+Root's fresh web gate passed all eight tests and format/lint/TypeScript/build; its input hashes and
+raw receipt are retained. Initial sandbox setup failures remain diagnostics, never semantic Red.
+
+Root Red ACK: both new packages compile, and root's fresh focused rerun exits 1 with exactly six
+positive semantic failures at `unavailable: not_implemented`: fake SHA1/SHA256 import and real
+SHA1/SHA256 loose/packed Git capture. Independent literal object hashes and lawful author/committer
+commit fixtures were inspected. Root raw Red SHA-256:
+`84e276df422a70a293c42a4960a627586d735353ada8a48f96ed6e9915de5b3f`;
+frozen four-file stub/test manifest SHA-256:
+`809c7e21c700a3b82c296e9b86a3a3933da5a0273cc03dc4818ce36213125c93`.
+The first adapter fixture failed Git fsck for missing author headers; it was corrected before this
+ACK and remains a diagnostic, not Red evidence. T-151 may now replace stubs with ACKed behavior;
+the original positive oracle assertions must remain. No final acceptance is claimed.
+
+Pre-adapter clarification ACK: the private readObject seam is a snapshot receiver so each Reader
+can retain its own cloned trusted executable/configuration. A private runBatch helper receives
+that executable for process tests, with no public injection or global registry. Public API,
+limits, fixed argv and environment are unchanged. Updated contract SHA-256:
+`aca6aee46caec6a62342ef1cb93f312ad4bd3c6b04d77af8eb7b8be61eb25479`.
+The initial design/report hashes above and Red snapshot remain preserved history.
+
+Root ACKed an additional private deadline test seam: public Reader.Open retains fixed 30s;
+a private open(ctx, ref, duration) shares the same bounded capture implementation so actual
+inventory deadline cleanup can be tested deterministically. No public configurable timeout
+or process injection is introduced. T-150 original report is retained privately; its new public
+copy normalizes private CLI paths only and records its original hash.
+
+### Import core local acceptance, 2026-10-06
+
+Root accepts only HAI-IMPORT-001..007 as a trusted-call foundation. T-151's fifteen Go files
+are frozen at source-inventory SHA-256
+`57c3e5762585c2a726e5d1931372263645c8719a692bbe4141506bf7b306a568`;
+code plus lifecycle-updated SDD manifest SHA-256
+`d629c2355ff37c2c180fa6ddb31ba5683ad78160fcc6ec1693efd6e416324d5b`.
+The SDD lifecycle update changes no contract semantics. Original Red positive assertions and
+fixtures remain unchanged; new adversarial controls extend their seven owned groups.
+
+Root inspected every new source/test file and documentation diff, reran native full tests/vet/build
+on Go 1.27.1/Git 2.47.3 and the unchanged shared full/race/vet/build gate in the pinned Go image
+with Git 2.39.5. The pinned focused suite ran all seven groups/212 tests and subtests without skip.
+Fresh web gates passed, and all web inputs were rehashed unchanged. Host race setup lacked a C
+compiler; race actually passed in the pinned environment. The native sandbox socket denial was
+rerun successfully with approved execution. These diagnostics and intermediate Red/failures remain
+retained; no missing compiler or malformed fixture is counted as semantic Red.
+
+Strong independent T-152 returned unconditional PASS after 212 native and 65 separately authored
+checks, including final-Close cancellation with and without cleanup failure. Root required that
+repair preserve cancellation even when cleanup fails. T-153 independently confirmed hashes, scope
+and oracle inventory only. Root reviewed and integrated both reports and the final T-151 report.
+No existing source, SQL, Store, migration, dependency or workflow bytes changed.
+`reports/T-0197-gate.md` binds the local receipts and report hashes. Local acceptance does not claim
+PR CI: delivery still requires the exact pushed head's Draft PR checks and review publication.
+No new PR merge, release, deployment or next implementation child is authorized by this acceptance.

@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, lazy, Suspense, useContext, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
-import { Button, cn, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, TitleSuffixContext, useDocumentTitle } from "@cms/ui";
-import { useMemberSession } from "./member-auth";
+import { Button, cn, TitleSuffixContext, useDocumentTitle } from "@cms/ui";
+import { useMemberSession } from "./member-session";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, Skeleton } from "@cms/ui";
 import { copy } from "./copy";
 import { SITES, type SiteDefinition, type SiteKey } from "./sites";
+
+const MobileNav = lazy(() => import("./mobile-nav").then((m) => ({ default: m.MobileNav })));
 
 const SiteContext = createContext<SiteDefinition | null>(null);
 
@@ -24,7 +26,7 @@ export function SkipLink() {
   );
 }
 
-function NavLinks({ site, onNavigate, vertical }: { site: SiteDefinition; onNavigate?: () => void; vertical: boolean }) {
+export function NavLinks({ site, onNavigate, vertical }: { site: SiteDefinition; onNavigate?: () => void; vertical: boolean }) {
   return (
     <ul className={cn("flex gap-6", vertical && "flex-col gap-4")}>
       {site.nav.map((item) => (
@@ -71,16 +73,19 @@ export function MemberMenu({ displayName }: { displayName: string }) {
 }
 function ClinicAccount() {
   const auth = useMemberSession();
-  if (auth.isPending) return <Skeleton aria-hidden className="h-9 w-20" />;
-  if (auth.isError) return null;
-  return auth.data ? <MemberMenu displayName={auth.data.principal.displayName} /> : <Link data-testid="member-login" to="/login?next=/clinic/me" className="underline">
-    {copy["member.login"]}
-  </Link>;
+  return (
+    <div className="flex h-9 w-40 shrink-0 items-center justify-end" data-testid="clinic-account-slot">
+      {auth.isPending ? <Skeleton aria-hidden className="h-9 w-20" /> : auth.isError ? null :
+        auth.data ? <MemberMenu displayName={auth.data.principal.displayName} /> :
+          <Link data-testid="member-login" to="/login?next=/clinic/me" className="underline">{copy["member.login"]}</Link>}
+    </div>
+  );
 }
 
 /** SiteHeader (01 §2.2): brand + navigation; below 768px the navigation moves into a Sheet (surface-front §6.1). */
 function SiteHeader({ site }: { site: SiteDefinition }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   return (
     <header className="border-b">
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4">
@@ -91,23 +96,14 @@ function SiteHeader({ site }: { site: SiteDefinition }) {
           <NavLinks site={site} vertical={false} />
         </nav>
         {site.key === "clinic" ? <ClinicAccount /> : null}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="md:hidden" aria-label={copy["nav.open"]} data-testid="site-nav-open">
-              {copy["nav.menu"]}
-            </Button>
-          </SheetTrigger>
-          {/* The sheet is portalled out of the site root, so it repeats the scheme. No text-front-body here:
-              tailwind-merge (cn) would read it as a colour and drop text-foreground (W3 §2.3). */}
-          <SheetContent side="right" data-scheme={site.scheme} aria-describedby={undefined} className="bg-page text-foreground">
-            <SheetHeader>
-              <SheetTitle>{site.name}</SheetTitle>
-            </SheetHeader>
-            <nav aria-label={copy["nav.label"]} className="px-4 text-front-body" data-testid="site-nav-sheet">
-              <NavLinks site={site} vertical onNavigate={() => setOpen(false)} />
-            </nav>
-          </SheetContent>
-        </Sheet>
+        <Button ref={triggerRef} variant="outline" className="md:hidden" aria-label={copy["nav.open"]}
+          aria-haspopup="dialog" aria-expanded={open} aria-controls="site-nav-dialog"
+          data-testid="site-nav-open" onClick={() => setOpen(true)}>
+          {copy["nav.menu"]}
+        </Button>
+        {open ? <Suspense fallback={null}>
+          <MobileNav site={site} open={open} onOpenChange={setOpen} triggerRef={triggerRef} />
+        </Suspense> : null}
       </div>
     </header>
   );

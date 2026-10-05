@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router";
-import { Alert, AlertDescription, AlertTitle, Button, EmptyState, fill, Skeleton, TitleSuffixContext, type QueryLike } from "@cms/ui";
+import { Alert, AlertDescription, AlertTitle, Button, Card, CardContent, CardHeader, CardTitle, EmptyState, fill, Skeleton, TitleSuffixContext, type QueryLike } from "@cms/ui";
 import { copy } from "./copy";
 import { usePageMeta } from "./seo";
 import { FrontTitle, SkipLink, useSite } from "./shell";
@@ -33,6 +33,45 @@ export function GridSkeleton({ square = false }: { square?: boolean }) {
             <Skeleton className={square ? "aspect-square w-full" : "aspect-[4/3] w-full"} />
             <Skeleton className="h-6 w-2/3" />
           </div>
+        ))}
+      </div>
+    </Loading>
+  );
+}
+
+/** Clinic profile: title, one-line intro and the existing three contact cards. */
+export function ClinicProfileSkeleton() {
+  return (
+    <Loading>
+      <section className="mb-10" data-testid="clinic-profile-loading" aria-busy="true">
+        <div className="mb-6"><Skeleton className="h-10 w-1/2" /></div>
+        <Skeleton className="mb-6 h-[26px] w-2/3" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Card key={i} className="gap-2">
+              <CardHeader><CardTitle><Skeleton className="h-4 w-20" /></CardTitle></CardHeader>
+              <CardContent><Skeleton className="h-[26px] w-2/3" /></CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+    </Loading>
+  );
+}
+
+/** Vets without photos use compact text cards, rather than a square media placeholder. */
+export function VetGridSkeleton() {
+  return (
+    <Loading>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <Card key={i} className="h-full gap-4 overflow-hidden">
+            <CardContent className="flex flex-col gap-2">
+              <Skeleton className="h-[30px] w-2/3" />
+              <div className="flex h-[26px] items-center"><Skeleton className="h-[22px] w-12" /></div>
+              <Skeleton className="h-[26px] w-2/3" />
+            </CardContent>
+          </Card>
         ))}
       </div>
     </Loading>

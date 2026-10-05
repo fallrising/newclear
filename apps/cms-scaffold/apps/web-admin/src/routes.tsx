@@ -2,7 +2,6 @@ import type { RouteObject } from "react-router";
 import { DefaultSkeleton } from "@cms/ui";
 import { Allow } from "./gate";
 import { canGlobal, canSettings, hasAdminRole } from "./nav";
-import { AdminShell } from "./shell";
 
 
 export const routes: RouteObject[] = [
@@ -11,7 +10,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: "/login", lazy: async () => ({ Component: (await import("./pages/login")).AdminLoginPage }) },
       {
-        element: <AdminShell />,
+        lazy: async () => ({ Component: (await import("./shell")).AdminShell }),
         children: [
           { path: "/", lazy: async () => ({ Component: (await import("./pages/overview")).OverviewPage }) },
           {

@@ -5,7 +5,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@cms/ui
 import { api } from "../api";
 import { copy } from "../copy";
 import { APPOINTMENT_TYPE, appointmentStatus, formatMemberDate, MEMBER_LIST_SIZE, memberText, PET_TYPE, petTitle } from "../member";
-import { useMemberUnauthorized } from "../member-auth";
+import { useMemberUnauthorized } from "../member-session";
 import { Crumbs } from "../parts";
 import { usePageMeta } from "../seo";
 import { FrontTitle } from "../shell";

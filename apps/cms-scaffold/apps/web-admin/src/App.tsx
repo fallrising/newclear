@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { createAppQueryClient, SessionProvider } from "@cms/auth";
-import { Toaster } from "@cms/ui";
 import { api } from "./api";
 import { routes } from "./routes";
+
+const DeferredToaster = lazy(() => import("./deferred-toaster"));
 
 export default function App() {
   const [queryClient] = useState(createAppQueryClient);
@@ -13,7 +14,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <SessionProvider auth={api.auth}>
         <RouterProvider router={router} />
-        <Toaster />
+        <Suspense fallback={null}><DeferredToaster /></Suspense>
       </SessionProvider>
     </QueryClientProvider>
   );

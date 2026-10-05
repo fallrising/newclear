@@ -115,3 +115,7 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 本項目是共用 CMS kernel，三個 demo 並非各自獨立產品。W3b #281 已通過必要 CI 並合併；W4 共用 Admin 本地 `LOCAL_VERIFIED`，待必要 CI 與合併。[W4 交付證據](../../.team/reports/W4-DELIVERY.md)：類型檢視／啟停、系統角色權限、帳號建立與生命週期、稽核篩選、保留期限、媒體用量與緊急條目處理。自訂內容模型的畫面編輯器、自訂角色 CRUD、BW6 後端確認與自身保護並未完成。
 
 624 前端／68 mock E2E、339 Java 快取結果與 14 份桌面／手機視覺 smoke 已通過；包含六項治理邊界 Red→Green。既有快照與原始工作保留。W4 附錄完整新 E2E／無障礙、效能與真實 API 介面驗收由 W5 承接；正式初始化、備份／升級回滾與部署門檻不變。
+
+## W5 進行中（2026-10-05）
+
+W4 已於 PR #289 通過必要 CI 並合併，[發布證據](../../.team/reports/W4-PUBLICATION.md)關閉上述本地檢查點。W5 已完成三面入口拆分與 deferred provider 修正，新增完整品質／效能量測和一次性真 API runner；本地原完整643前端測試、bundle、axe60與修訂後hardening11通過。Owner核准F後的Front147回歸亦通過，但完整25次效能修補驗證仍在執行；93 mock連續三次、canonical70視覺、real14及必要遠端CI尚未完成，W5維持IN_PROGRESS。失敗量測及修正依据保留於[W5施工圖](waves/W5.md)與[團隊計畫](../../.team/PLAN.md)。未部署，不據此宣稱正式可用。

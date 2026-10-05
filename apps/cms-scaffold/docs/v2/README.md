@@ -65,10 +65,10 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | BW2 | VERIFIED（PR #235） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW2.md](waves/BW2.md) | B-07、B-11（部分）；G-03、G-04、G-09、G-10 |
 | W2 | VERIFIED（PR #245） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W2.md](waves/W2.md) | C-08～C-10、U-03 |
 | W3 | VERIFIED（PR #273） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3.md](waves/W3.md) | C-01～C-03、C-11、C-13、C-14、U-05 |
-| W4 | LOCAL_VERIFIED | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W4.md](waves/W4.md) | C-19 |
+| W4 | VERIFIED（PR #289） | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W4.md](waves/W4.md) | C-19 |
 | BW3 | VERIFIED（PR #252） | [02 §4.5](02-backend-sdd.md#45-會員g-08)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW3.md](waves/BW3.md) | B-11；G-08 |
 | W3b | VERIFIED（PR #281） | [01 §7.1](01-frontend-sdd.md#71-frontappsweb-front)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W3b.md](waves/W3b.md) | G-08、C-11；surface-front AC-10～13 |
-| W5 | DOC_READY | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
+| W5 | IN_PROGRESS | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
 | BW4 | VERIFIED（PR #258） | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | VERIFIED（PR #267） | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 | BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
@@ -106,4 +106,6 @@ W3 公開頁已通過本地 339 Java／473 前端／60 mock E2E，15 份 respons
 
 W3 已於 PR #273 通過必要 CI 並合併；[發布證據](../../.team/reports/W3-PUBLICATION.md)。W3b 會員區已通過本地 546 前端／68 mock E2E、339 Java 快取結果、20 張響應式畫面及獨立審查；依施工圖 §0 保留 W3 / BW5 成果，已於 PR #281 通過必要 CI 並合併。[交付證據](../../.team/reports/W3b-DELIVERY.md) 為歷史本地檢查點；[發布證據](../../.team/reports/W3b-PUBLICATION.md) 關閉狀態。
 
-W4 共用 Admin 治理已完成本地驗收：624 前端／68 mock E2E、339 Java 快取結果、14 張桌面／手機擷取與來源保留核對；待必要遠端 CI 與合併。[交付證據](../../.team/reports/W4-DELIVERY.md)。W4 附錄新 E2E 與完整前端硬化仍在 W5，不代表整個 v2 已完成。
+W4 共用 Admin 治理已完成本地驗收：624 前端／68 mock E2E、339 Java 快取結果、14 張桌面／手機擷取與來源保留核對；已於 PR #289 通過必要遠端 CI 並合併；[發布證據](../../.team/reports/W4-PUBLICATION.md)。[交付證據](../../.team/reports/W4-DELIVERY.md)。W4 附錄新 E2E 與完整前端硬化仍在 W5，不代表整個 v2 已完成。
+
+W5 前端硬化持續驗收中：三面bundle已達固定預算；診所loading與當前route平行module載入的F修補已通過Front147回歸，完整效能量測進行中。品質／視覺／真API及CI全部通過前維持IN_PROGRESS；見[W5](waves/W5.md)與[團隊計畫](../../.team/PLAN.md)。

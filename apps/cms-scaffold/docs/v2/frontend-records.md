@@ -79,12 +79,20 @@ mock e2e 每次 repetition 一列；W5 前置 suite 是 47 個（W0～W2 的 39�
 
 | W5-MOCK-20261005-01 | 2026-10-05T16:49:24.973Z | 3b7be596e32920268036d4eb91361972f52bc8ba | yes | 1 | 1.63.0 | Google Chrome for Testing 153.0.8010.12 | 92 / 93 | 60 / 60 | 0 | 0 | npm run e2e:mock | test-results/frontend/mock-1.json | failed | Initial attempt:92/93; deferred W4 memberlink hardcodedversion1 conflicts with approved packagedcurrentversion2. Existing68 journeys pass. E amendment approved; no retries. |
 
+| W5-MOCK-20261005-02 | 2026-10-05T17:29:02.211Z | 3b7be596e32920268036d4eb91361972f52bc8ba | yes | 1 | 1.63.0 | 153.0.8010.12 | 93 / 93 | 60 / 60 | 0 | 0 | npm run e2e:mock | test-results/frontend/mock-final-1-results.json | passed | Final F frozen product source; serial run 1 of3; final axe60 confirmed by CI37349357513 on d84738eb; first2runs began before same source commit; no product changes between runs |
+
+| W5-MOCK-20261005-03 | 2026-10-05T17:33:15.624Z | 3b7be596e32920268036d4eb91361972f52bc8ba | yes | 2 | 1.63.0 | 153.0.8010.12 | 93 / 93 | 60 / 60 | 0 | 0 | npm run e2e:mock | test-results/frontend/mock-final-2-results.json | passed | Final F frozen product source; serial run 2 of3; final axe60 confirmed by CI37349357513 on d84738eb; first2runs began before same source commit; no product changes between runs |
+
+| W5-MOCK-20261005-04 | 2026-10-05T17:37:28.672Z | d84738eb728190494145866bf6b0648305105701 | no | 3 | 1.63.0 | 153.0.8010.12 | 93 / 93 | 60 / 60 | 0 | 0 | npm run e2e:mock | test-results/frontend/mock-final-3-results.json | passed | Final F frozen product source; serial run 3 of3; final axe60 confirmed by CI37349357513 on d84738eb; first2runs began before same source commit; no product changes between runs |
+
 ## Visual baseline
 
 一組 Linux Chromium baseline 一列；W5 初始組固定 70 張（52 desktop＋15 mobile＋3 state），hash manifest 必須列出每張 PNG 的 SHA-256。更新既有 baseline 時，備註必須附 UX owner 授權依據。
 
 | record id | measured at (UTC) | commit | dirty | OS | Chromium version | desktop cases | mobile cases | threshold | max diff ratio | hash manifest | command | artifact | result | authorization / notes |
 | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |
+
+| W5-VISUAL-20261005-01 | 2026-10-05T17:39:14.238Z | 24f40f2734cb5d4c2aff00a367609d28d341b9cb | yes | Ubuntu 24.04.5 LTS | 153.0.8010.12 | 52 | 15 | 0.2 | 0.001 | .team/evidence/w5-canonical-initial-hashes.sha256 | npm run test:visual | .team/evidence/w5-canonical-initial-visual.json | passed | W5 initial canonical CI authoring; owner A–D approved 2026-10-05; Noto TC font aliases resolve to TC face; exact 70 expected baselines; CI37349357513 artifact11361114634 verified70 SHA256; root reviewed all70 in7 contact sheets plus full-size clinic/mobile roles/confirmation; no blocking defect |
 
 ## Real API e2e
 

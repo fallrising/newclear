@@ -1,0 +1,140 @@
+{
+  "kind": "read-only reviewer follow-up; current mock server; no product or baseline changes",
+  "results": [
+    {
+      "width": 390,
+      "viewport": 390,
+      "scroll": 390,
+      "header": 390,
+      "items": [
+        {
+          "text": "診所",
+          "x": 16,
+          "width": 44,
+          "right": 60
+        },
+        {
+          "text": "首頁",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "獸醫",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "登入",
+          "x": 106,
+          "width": 160,
+          "right": 266
+        },
+        {
+          "text": "登入",
+          "x": 234,
+          "width": 32,
+          "right": 266
+        },
+        {
+          "text": "選單",
+          "x": 312,
+          "width": 62,
+          "right": 374
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 375,
+      "viewport": 375,
+      "scroll": 375,
+      "header": 375,
+      "items": [
+        {
+          "text": "診所",
+          "x": 16,
+          "width": 44,
+          "right": 60
+        },
+        {
+          "text": "首頁",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "獸醫",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "登入",
+          "x": 98.5,
+          "width": 160,
+          "right": 258.5
+        },
+        {
+          "text": "登入",
+          "x": 226.5,
+          "width": 32,
+          "right": 258.5
+        },
+        {
+          "text": "選單",
+          "x": 297,
+          "width": 62,
+          "right": 359
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 320,
+      "viewport": 320,
+      "scroll": 320,
+      "header": 320,
+      "items": [
+        {
+          "text": "診所",
+          "x": 16,
+          "width": 34,
+          "right": 50
+        },
+        {
+          "text": "首頁",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "獸醫",
+          "x": 0,
+          "width": 0,
+          "right": 0
+        },
+        {
+          "text": "登入",
+          "x": 66,
+          "width": 160,
+          "right": 226
+        },
+        {
+          "text": "登入",
+          "x": 194,
+          "width": 32,
+          "right": 226
+        },
+        {
+          "text": "選單",
+          "x": 242,
+          "width": 62,
+          "right": 304
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

@@ -2,7 +2,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-Generic CMS Front/Back/Admin W5 hardening remains in acceptance. W4 is merged in PR #289. Owner-approved A–F repairs preserve the shared CMS architecture, existing API/fixtures, fixed budgets and previous wave behavior. There is no W5 publication, deployment or production-readiness claim at this checkpoint.
+Generic CMS Front/Back/Admin W5 hardening remains in acceptance. W4 is merged in PR #289. Owner-approved A–F repairs preserve the shared CMS architecture, existing API/fixtures, fixed budgets and previous wave behavior. Draft PR #300 is published for approved initial canonical authoring; no merge, deployment or production-readiness claim.
 
 Implemented actual route/module boundaries and deferred UI/provider loading; corrected Back FieldsProvider coverage for media/composer/schedule; kept Front query client scoped to App lifetime. Added fixed gzip entry measurement, validated append-only record output, quality/Vitals harnesses, canonical visual CI and an isolated real API runner. F fixes clinic pending profile/vet/account/appointment geometry and starts only currently matched route modules concurrently using stable promises. No runtime dependency, lockfile, backend or data contract change.
 
@@ -17,7 +17,10 @@ Implemented actual route/module boundaries and deferred UI/provider loading; cor
 - E-aligned hardening11/11 and memberlink focused1/1; `w5-root-hardening-E2.log`, `w5-root-memberlink-E.log` — passed
 - Axe negative control detected unlabeled button; visual independent10pxredoutline control exited1 with39200differentpixels, proving rejection; `w5-axe-negative-control.json`, `w5-visual-negative-control.json` — passed
 - Historical prescribed bundle/provider, hardening7/11 and10/11, mock92/93, initial trace-owner failure and complete25Vitals clinicCLS/LCP failure remain in archived evidence and append-only rows — failed
-- Final quality, mock93×3, canonical70PNG authoring/review/comparison, isolatedreal14, final independent review and remoteCI not yet complete — skipped
+- Initial canonical qualityCI axe60/hardening11/visual70; exact70SHA256 plus rootall-page review; `.team/evidence/w5-canonical-review.json` — passed
+- Three serial finalmock runs93/93each, zero skipped/flaky; `w5-mock-final-{1,2,3}.json` — passed
+- Initial remoteCMS CI java/java-integration/weballpass, run37349357448; finalF source independently reviewed T959, no blocker — passed
+- Canonical comparison-onlyCI and isolatedreal14 withcleanup not yet complete — skipped
 
 - Root `npm run measure:vitals -- --reporter=list,json`25/25; clinic median2316ms/max2324ms/CLS0, all five targets pass; `w5-F1-vitals.json` — passed
 - Root final bundle85206/130889/136589 and isolation; `w5-F-root-bundle.json` — passed

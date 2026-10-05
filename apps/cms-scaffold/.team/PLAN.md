@@ -37,3 +37,6 @@ Root reviewed and SHA256-verified the six T958 files, copied only that scope and
 
 ## F iteration1 accepted for remaining W5 gates
 Root Front147/lint/type, productionbuild, isolation andfixedbundle pass. Complete25Vitals exit0:album median2208/max2332/CLSmax0.009015448;clinic2316/2324/0;projects2208/2232/0;BackCLS0.003442703;Admin0.007282745. Evidence w5-F1-vitals-raw.json andnormalized w5-F1-vitals.json; appendedVitals06–10 andbundle16–18. No secondFrepair required. Mock93×3 active; T959 Luna independently reviewsF/E source. ApprovedC draftPRauthoring remainsneeded forcanonical70; no merge beforeallgates.
+
+## Canonical initial baseline accepted; real attempt active
+DraftPR300 head d84738eb published underapprovedC. Initial CMS CI37349357448 java/java-integration/webpass; quality37349357513 axe60,hardening11,visual70pass oncanonicalUbuntu24.04.5/Chromium153.0.8010.12. Rootverified70artifacthashes andreviewedallscreens; baselineimported unchanged. Three serialfinalmockruns93/93each pass,ledgerMock02–04/Visual01 appended. T959independentreview hasno blocker; rootactual390/375/320widths show nooverflow/pageerrors,closing speculative320risk. Realattempt001uniqueownedstackbuilding; no successinferred. Nextcommitonlybaseline/evidence/docs thencomparison-onlyCI; nomergeuntilreal14cleanupandfinalevidencegate.

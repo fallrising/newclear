@@ -51,9 +51,10 @@ multi-user authentication and the `node-agent`/`boxd` runtime remain future task
 P1 store is not wired into the P0 process-lifetime session runtime.
 
 Actor work is now decomposed. [T040A command decision](docs/specs/SPEC-T040A-command-decision.md)
-is Ready after independent design review, with three typed commands, a complete v1 state matrix
-and 11 future test oracles. It is not implemented. Parent T040 and all later storage/lease/
-receipt/recovery/effect seeds remain Blocked; ADR-0007 remains a draft direction.
+is implemented and [runtime Accepted](docs/acceptance/T040A.acceptance.md): three typed commands,
+a complete v1 state matrix, bounded canonical identity and immutable zero/one-event proposals.
+All 11 named oracles pass. Parent T040 and the later storage/lease/receipt/recovery/effect seeds
+remain Blocked; ADR-0007 remains a draft direction.
 
 See [the development handoff](docs/HANDOFF.md) and
 [traceability matrix](docs/traceability.md) for the exact implementation and acceptance state.

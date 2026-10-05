@@ -60,15 +60,16 @@ agents and real-provider live acceptance are not implied. Automated rustdoc/spec
 remains a gap; current source/document projections were reviewed explicitly.
 
 
-## T040 Actor Decomposition — T040A Design Only
+## T040 Actor Decomposition — T040A Pure Runtime Accepted
 
 | Requirement | Contract / artifact | Evidence | State |
 |---|---|---|---|
-| First actor prerequisite, exact v1 behavior | CU-SES-03 / SPEC-T040A A01–A09 | Nine clauses, 11 named future oracles, all 27 state/command cells plus three empty cases, bounded 77/96-byte request identity; fresh source-grounded design review | T040A Ready; runtime not implemented |
-| Preserve current v1 and P0 boundaries | SPEC-T020 / accepted T030 / SPEC-T040 | No v1 withdrawal reinterpretation, snapshot restore or P0 protocol replacement; source/dependency/historical acceptance hashes unchanged | Preserved |
+| First actor prerequisite, exact v1 behavior | CU-SES-03 / SPEC-T040A A01–A09 | [Runtime acceptance](acceptance/T040A.acceptance.md): all 11 named oracles, 41 domain checks, independent 5,760-case model; all 27 state/command cells plus three empty cases, 77/96-byte identity, immutable E0 and exact metadata | T040A Accepted |
+| Preserve current v1 and P0 boundaries | SPEC-T020 / accepted T030 / SPEC-T040 | No v1 withdrawal reinterpretation, snapshot restore or P0 protocol replacement; production reducer/dependency/historical acceptance hashes unchanged; only domain command API/tests and a private cfg(test) reducer seam added | Preserved |
 | Parent task and future safety contracts | T040 task / SPEC-T040 / draft ADR-0007 | Proposed B–I seeds own version/schema/lease/receipt/commit/startup/mailbox/audit/effect gaps; separate E0/E1/effect-specific atomicity | Parent and B–I Blocked; ADR draft |
 
-[T040A design acceptance](acceptance/T040A-design.acceptance.md) does not accept command runtime,
-managed storage, lease/clock guarantees or external execution. Later full tasks/specifications
+[T040A design acceptance](acceptance/T040A-design.acceptance.md) is preserved as historical design-only
+evidence; separate [runtime acceptance](acceptance/T040A.acceptance.md) accepts only CU-SES-03.
+Managed storage, lease/clock guarantees and external execution remain absent. Later full tasks/specifications
 must resolve their owned gaps before Ready. Project-wide automatic rustdoc/spec drift tooling
 remains a gap; this milestone's explicit document/source review does not claim that automation.

@@ -9,16 +9,17 @@ date: 2026-10-04
 
 Accepted [T020](../specs/SPEC-T020-events-reducer.md) supplies a pure v1 reducer.
 Accepted [T030](../acceptance/T030.acceptance.md) supplies exact schema-v2 append/replay/cache
-operations, with no receipts, leases or actor. `CommandId` already exists; command envelopes,
-ActorRef and P1 actor ports do not. Current `P0SessionRuntime` is provider-specific and
+operations, with no receipts, leases or actor. Accepted T040A now supplies typed command envelopes,
+ActorRef labels and a pure v1 planner; P1 actor ports remain absent. Current `P0SessionRuntime` is provider-specific and
 process-lifetime; its protocol/credential boundary cannot establish P1 crash durability.
 TD §§4.7/16.3 require more prerequisites than the current T040→T020 seed edge records.
 
 # Proposed Decision
 
-Only [T040A](../specs/SPEC-T040A-command-decision.md) is a complete first Ready candidate:
-pure v1 intent decision, accepted T010/T020 dependencies and no architecture change. Its own
-fresh design acceptance may unlock implementation independently of the blocked roadmap below.
+[T040A](../specs/SPEC-T040A-command-decision.md) is independently
+[runtime Accepted](../acceptance/T040A.acceptance.md): pure v1 intent decision, accepted
+T010/T020 dependencies and no architecture change. Its acceptance does not accept this draft
+or unlock implementation of the blocked roadmap below.
 
 1. Preserve exact v1 events/reducer behavior. WaitingApproval cancellation requires a separately
    specified versioned withdrawal event/reducer amendment; do not fabricate ApprovalResolved,
@@ -60,5 +61,5 @@ E0 observation/decision, E1 schema/lease/receipt/dispatch and effect-specific E2
 Unfenced existing append, process-local deduplication, automatic uncertain-effect replay and
 synthetic approval denial do not satisfy TD invariants. No approved invariant is weakened.
 This ADR is a direction proposal, not accepted schema/clock/recovery semantics or runtime evidence.
-Root must project any accepted amendment into TD before affected production work; worker does
-not edit TD, historical acceptance, source or dependency manifests in this milestone.
+Root must project any accepted amendment into TD before affected production work; future workers
+must remain inside their separately assigned scope and preserve historical acceptance.

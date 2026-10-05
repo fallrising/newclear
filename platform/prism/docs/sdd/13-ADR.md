@@ -287,3 +287,17 @@ v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協�
 - **問題**：既有ParsePromTime沿用SDD14的SecFloatToMilli逐字公式，負秒數有1ms偏移且NaN／Inf／溢位無錯誤，與SDD02 Unixseconds相容契約衝突。P1-08獨立審查以實際redtest確認。
 - **決策**：只校正ParsePromTime numeric branch：拒絕非有限／超出可表示int64毫秒範圍的秒數，正負都四捨五入到毫秒（half away from zero）。RFC3339原行為保留，公共識別字及legacy SecFloatToMilli helper與它的直接測試不变；parser舊負數測試從-999改為正確-1000。SDD14示意parser不再覆蓋本ADR的輸入驗證與負數校正。
 - **後果**：HTTP維持集中UTM換算；畸形與溢位時間不再被轉成有效範圍，沒有新增依賴。極大浮點Unixseconds仍受float64毫秒精度限制，無微／奈秒精度保證。與Prometheus2.53的Modf浮點分段捨入在tie可差1ms，例如-1.2345本parser為-1235ms、上游因浮點fraction為-1234ms；此處保留明確對稱捨入契約，不宣稱tie逐位相同。
+
+## ADR-018：P1-09 ClickHouse write-only driver 與現行 SPI 適配
+
+2026-10-05，owner 已批准 P1-09 與官方 clickhouse-go/v2 v2.48.0 的必要依賴。以現行可執行 SPI 為契約，不改公開識別字。MetricPoint 沒有 fingerprint 欄位，ClickHouse writer 使用既有 utm.Fingerprint 對完整 sorted labels（含 metric 與 trusted tenant）計算；不另定 hash。series cache 在 seen 範圍延伸時仍寫 metadata，避免 first_seen/last_seen 因 cache 命中而失真。
+
+本輪只有遷移、三訊號寫入與保守 capabilities；所有 production reads classified Unsupported、未實作 optional interfaces，不宣稱 full conformance。非空 cluster classified Unsupported，replicated deployments 另行驗證後才支持。Log/span schema 補存完整 Resource，span 另存 TraceState 與 link attrs；既有 SPI 不能表示的狀態不以改接口解決。
+
+所有 batch/history/cache/concurrency 有有限 bounds，ctx 與 Close 保護 native client 的生命週期。遷移 receipt 同步完成；預設 async telemetry ack 不是持久化保證，部分多表成功不能回滾，不自動 retry。checksum 對渲染前 SQL，TTL 改動另外冪等 reconcile。Local dependency join 包含 tenant+trace+span，未解 parent 寫 pending_links；Phase3 定時補算与 graph query 不在本輪。詳見 [P1-09 specification](../specs/p1-09-clickhouse-write.md)。
+
+P1-09 真 ClickHouse 24.8.14.39 驗證發現 trace_index 的 groupUniqArrayArray 回傳 Array(String)，不相容原 Array(LowCardinality(String)) storage type；改為 Array(String)，保持聚合語義。Series first_seen/last_seen 使用 DateTime64(3) 保留毫秒；metadata 無 TTL 與 samples 的 retention 分開明示，Retention.Enforced=false。Server max_execution_time 預設55秒，driver operation timeout包含5秒overhead並涵蓋admission。所有schema timestamp受最弱DateTime預聚合範圍1970到2106限制，預I/O拒絕非法值。
+
+獨立審查確認四項邊界後，P1-09 契約要求全零 ID 按 UTM helper 拒絕、metric label 名稱與值先驗 UTF-8、migration008 使用 canonical MATERIALIZED labels_str。ClickHouse24.8 TTL expression 不接受 DateTime64，而 DateTime 加 retention 可溢位導致提前刪除；因此明確使用 UTC TTL，寫入前驗證 TTL source 加有效 retention 仍小於2106上限，Migrate 在任何 TTL ALTER 前先驗全部八表既有最大來源時間。變更 retention 前須停排其他 backend/process writer，避免舊設定跨過 MAX 到 ALTER 的檢查窗口；不靜默縮短 retention、不改公開 SPI 或原 hash。span start 使用 max(trace,RED,1day)，end/events 只受原始範圍限制。
+
+官方2.48.0 client 會按 ctx deadline 覆寫 protocol max_execution_time。P1-09 保留完整 deadline/cancellation，受控 migration scan 與 INSERT 額外以 SQL SETTINGS 強制設定上限。Native batch 無 column-list 才能保留此 SETTINGS，所以準備後必須核對返回的 column count/name 與原固定 INSERT list 完全相同，任何 schema 漂移關閉 batch 並 fail closed，不按猜測欄序寫資料。DDL 保留 client max_execution_time+5 秒限時；其 protocol server 上限由上游 deadline 規則決定，不宣稱與 scan/INSERT 設定逐值相同。

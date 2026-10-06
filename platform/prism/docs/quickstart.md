@@ -1,8 +1,7 @@
 # Prism development quickstart
 
 This exercises authenticated OTLP, remote_write and Loki JSON ingestion plus
-Prometheus HTTP queries with the memory backend. ClickHouse migrations/writes can be tested separately through the Go SPI;
-production queries and daemon integration remain P1-10. Fixture credentials are
+Prometheus HTTP queries with either memory or ClickHouse storage. Fixture credentials are
 public and intended only for loopback development.
 
 ## Prerequisites
@@ -39,9 +38,9 @@ go build -o /tmp/prism-dev-prismd ./cmd/prismd
 
 Expected config output: `prismd: configuration valid`. The fixture uses `memory`
 and loopback HTTP/gRPC listeners. `deploy/prismd.yaml` is an administrator-facing
-configuration example, not a deployment or an implemented ClickHouse stack.
-The default storage selection still requires an explicitly selected implemented
-driver; currently that is memory, which retains data without a storage-size cap.
+configuration example. Select `memory` or `clickhouse` explicitly. Memory retains
+data without a storage-size cap; ClickHouse needs an existing database and applies
+the configured retention and query bounds.
 
 The `all-in-one` and `ingest` roles require an independent
 `auth.ingest_api_key_file` containing at least 32 bytes. The file is read with a
@@ -184,11 +183,24 @@ See the [HTTP contract](specs/p1-08-prometheus-http.md) for limits and the
 actual write followed by instant/range queries. Rules, alerts, remote_read and
 native histogram results remain outside this milestone.
 
-## ClickHouse write-path verification
+## ClickHouse storage
 
-The daemon examples above continue to use memory. P1-09 supplies a registered
-ClickHouse Go driver for migrations and three-signal writes; read APIs are
-Unsupported. Run the disposable local database gate separately:
+Set `storage.driver: clickhouse` in a copy of the daemon configuration. Put the
+native DSN in a regular credential file and set `storage.dsn_file` to its path;
+relative paths resolve from the configuration directory. The file is limited to
+4 KiB and must not be a symlink, FIFO or device. `storage.dsn` and `storage.dsn_file`
+are mutually exclusive; inline DSNs are redacted when configuration is formatted
+or serialized. The target database must already exist. Startup opens the driver
+and applies migrations before accepting ingestion or queries; `--config-check`
+validates configuration without contacting ClickHouse.
+
+The four `storage.retention` settings govern the matching driver retention options.
+Conflicting duplicate options fail validation, and `storage.split` is rejected
+because this runtime uses one backend. Query timeout must exceed the driver's
+server execution cap. See [driver options](../drivers/clickhouse/README.md#configuration)
+for scan, result, memory, execution and connection bounds.
+
+Run the disposable local database gate:
 
 ```sh
 python3 drivers/clickhouse/run-integration.py
@@ -197,5 +209,7 @@ python3 drivers/clickhouse/run-integration.py
 Docker socket access, Python3 and network access for the pinned official image
 are required. The runner owns its temporary loopback fixture and cleanup; it
 does not deploy Prism. See the [driver README](../drivers/clickhouse/README.md)
-for credential files, native options, write bounds, async acknowledgement and
-metadata retention limitations.
+for read contracts, credential files, write bounds, acknowledgement and retention
+limitations. The gate covers writes, supported SPI conformance, supported float
+PromQL and the actual daemon ingestion→ClickHouse→PromQL chain. The optional
+Grafana/compose deployment stack belongs to P1-11.

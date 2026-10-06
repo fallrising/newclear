@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"container/list"
 	"context"
+	"math"
 	"strconv"
 	"unicode/utf8"
 
@@ -74,20 +75,24 @@ func (s *metricStore) Write(ctx context.Context, points []utm.MetricPoint) error
 			if err := checkContext(ctx); err != nil {
 				return err
 			}
+			name := point.Name
+			if name == "" {
+				name = point.Labels.Get(utm.LabelName)
+			}
 			if point.Histogram != nil || point.Exemplar != nil {
 				return writeInputError(spi.ErrUnsupported, "metrics.write")
 			}
-			if point.Name == "" || !validMilli(point.TS) || !retentionSafe(timestampMilli(point.TS), s.host.retentionDays(spi.SignalMetrics)) || point.Type > utm.TypeSummary {
+			if name == "" || !validMilli(point.TS) || !retentionSafe(timestampMilli(point.TS), s.host.retentionDays(spi.SignalMetrics)) || point.Type > utm.TypeSummary {
 				return writeInputError(spi.ErrBadRequest, "metrics.write")
 			}
-			if point.Labels.Get(utm.LabelName) != point.Name || point.Labels.Get(utm.LabelTenant) == "" {
+			if point.Labels.Get(utm.LabelName) != name || point.Labels.Get(utm.LabelTenant) == "" {
 				return writeInputError(spi.ErrBadRequest, "metrics.write")
 			}
 			tenant := point.Labels.Get(utm.LabelTenant)
 			if !validLabels(point.Labels, tenant) {
 				return writeInputError(spi.ErrBadRequest, "metrics.write")
 			}
-			if !budget.add(17) || !budget.labels(point.Labels, tenant) || !budget.strings(point.Name) {
+			if !budget.add(17) || !budget.labels(point.Labels, tenant) || !budget.strings(name) {
 				return writeInputError(spi.ErrTooLarge, "metrics.write")
 			}
 			if !validMetricLabelUTF8(point.Labels) {
@@ -103,9 +108,9 @@ func (s *metricStore) Write(ctx context.Context, points []utm.MetricPoint) error
 				entry.first = min(entry.first, point.TS)
 				entry.last = max(entry.last, point.TS)
 			} else {
-				series[identity] = &metricSeries{identity: identity, fingerprint: fingerprint, tenant: tenant, name: point.Name, labels: labelsMap(point.Labels), first: point.TS, last: point.TS, size: len(identity)}
+				series[identity] = &metricSeries{identity: identity, fingerprint: fingerprint, tenant: tenant, name: name, labels: labelsMap(point.Labels), first: point.TS, last: point.TS, size: len(identity)}
 			}
-			rows = append(rows, []any{timestampMilli(point.TS), fingerprint, tenant, point.Name, point.Value})
+			rows = append(rows, []any{timestampMilli(point.TS), fingerprint, tenant, name, point.Value, math.Float64bits(point.Value)})
 		}
 		select {
 		case s.gate <- struct{}{}:
@@ -132,7 +137,7 @@ func (s *metricStore) Write(ctx context.Context, points []utm.MetricPoint) error
 		if err := sendRows(ctx, conn, "INSERT INTO metric_series (fingerprint,tenant,metric,labels,first_seen,last_seen)", metadata); err != nil {
 			return err
 		}
-		if err := sendRows(ctx, conn, "INSERT INTO metric_samples (ts,fingerprint,tenant,metric,value)", rows); err != nil {
+		if err := sendRows(ctx, conn, "INSERT INTO metric_samples (ts,fingerprint,tenant,metric,value,value_bits)", rows); err != nil {
 			return err
 		}
 		for _, item := range series {
@@ -167,14 +172,4 @@ func (s *metricStore) admit(item *metricSeries) {
 	s.entries[item.identity] = s.lru.PushFront(&cachedSeries{identity: item.identity, fingerprint: item.fingerprint, first: item.first, last: item.last, size: item.size})
 	s.byHash[item.fingerprint] = item.identity
 	s.bytes += item.size
-}
-
-func (s *metricStore) Select(ctx context.Context, _ spi.SeriesQuery) (spi.SeriesSet, error) {
-	return nil, unsupported(ctx, s.host, "metrics.select")
-}
-func (s *metricStore) LabelNames(ctx context.Context, _ spi.LabelQuery) ([]string, error) {
-	return nil, unsupported(ctx, s.host, "metrics.label_names")
-}
-func (s *metricStore) LabelValues(ctx context.Context, _ string, _ spi.LabelQuery) ([]string, error) {
-	return nil, unsupported(ctx, s.host, "metrics.label_values")
 }

@@ -2,14 +2,23 @@ package clickhouse
 
 import (
 	"context"
+	"errors"
+	"math"
 
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 	"github.com/fallrising/newclear/platform/prism/pkg/utm"
 )
 
-type logStore struct{ host writeHost }
+type logStore struct {
+	host   writeHost
+	gate   chan struct{}
+	seq    uint64
+	seeded bool
+}
 
-func newLogStore(host writeHost) spi.LogStore { return &logStore{host: host} }
+func newLogStore(host writeHost) spi.LogStore {
+	return &logStore{host: host, gate: make(chan struct{}, 1)}
+}
 
 func (s *logStore) Write(ctx context.Context, records []utm.LogRecord) error {
 	return s.host.run(ctx, "logs.write", func(ctx context.Context) error {
@@ -36,16 +45,50 @@ func (s *logStore) Write(ctx context.Context, records []utm.LogRecord) error {
 				r.Severity.String(), r.SeverityText, r.Body, r.TraceID, r.SpanID, labelsMap(r.Labels), r.Attrs,
 				res.Attrs, res.ServiceInstance, res.ServiceVersion, res.Namespace})
 		}
-		return sendRows(ctx, s.host.connection(), "INSERT INTO logs (ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace)", rows)
+		select {
+		case s.gate <- struct{}{}:
+			defer func() { <-s.gate }()
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		if !s.seeded {
+			if err := s.seed(ctx); err != nil {
+				return err
+			}
+		}
+		if uint64(len(rows)) > math.MaxUint64-s.seq {
+			return writeInputError(spi.ErrTooLarge, "logs.write")
+		}
+		for i := range rows {
+			s.seq++
+			rows[i] = append(rows[i], s.seq)
+		}
+		return sendRows(ctx, s.host.connection(), "INSERT INTO logs (ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq)", rows)
 	})
 }
 
-func (s *logStore) Search(ctx context.Context, _ spi.LogQuery) (spi.LogIterator, error) {
-	return nil, unsupported(ctx, s.host, "logs.search")
-}
-func (s *logStore) LabelNames(ctx context.Context, _ spi.LabelQuery) ([]string, error) {
-	return nil, unsupported(ctx, s.host, "logs.label_names")
-}
-func (s *logStore) LabelValues(ctx context.Context, _ string, _ spi.LabelQuery) ([]string, error) {
-	return nil, unsupported(ctx, s.host, "logs.label_values")
+func (s *logStore) seed(ctx context.Context) (result error) {
+	var opts options
+	if b, ok := s.host.(*backend); ok {
+		opts = b.opts
+	}
+	rows, err := s.host.connection().Query(ctx, "SELECT max(write_seq) FROM logs LIMIT 1"+querySettings(opts))
+	if err != nil {
+		return err
+	}
+	defer func() { result = errors.Join(result, rows.Close()) }()
+	if !rows.Next() {
+		return errors.New("missing log sequence seed")
+	}
+	if err := rows.Scan(&s.seq); err != nil {
+		return err
+	}
+	if rows.Next() {
+		return errors.New("duplicate log sequence seed")
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	s.seeded = true
+	return nil
 }

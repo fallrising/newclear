@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 	"testing"
@@ -55,6 +56,36 @@ func TestMetricWriteCacheExtentAndFailure(t *testing.T) {
 	}
 	if conn.closed != len(conn.queries) {
 		t.Fatalf("batch close count=%d prepare=%d", conn.closed, len(conn.queries))
+	}
+}
+
+func TestMetricWriteDerivesEmptyNameFromTrustedNameLabel(t *testing.T) {
+	conn := &writeTestConn{}
+	store := newMetricStore(&writeTestHost{conn})
+	point := metricPoint("a", 1000)
+	point.Name = ""
+	if err := store.Write(t.Context(), []utm.MetricPoint{point}); err != nil {
+		t.Fatal(err)
+	}
+	if point.Name != "" || len(writeTestRows(conn, "metric_samples")) != 1 {
+		t.Fatalf("caller mutated or sample lost: point=%+v", point)
+	}
+	bad := point
+	bad.Labels = labels.FromStrings("__tenant__", "a")
+	requireClass(t, store.Write(t.Context(), []utm.MetricPoint{bad}), spi.ErrBadRequest)
+}
+
+func TestMetricWritePersistsFloatBitsForFirstNegativeZero(t *testing.T) {
+	conn := &writeTestConn{}
+	store := newMetricStore(&writeTestHost{conn})
+	point := metricPoint("a", 0)
+	point.Value = math.Float64frombits(1 << 63)
+	if err := store.Write(t.Context(), []utm.MetricPoint{point}); err != nil {
+		t.Fatal(err)
+	}
+	rows := writeTestRows(conn, "metric_samples")
+	if len(rows) != 1 || len(rows[0]) != 6 || rows[0][5] != uint64(1)<<63 {
+		t.Fatalf("first negative-zero bits not written: %#v", rows)
 	}
 }
 

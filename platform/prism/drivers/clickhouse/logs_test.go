@@ -26,8 +26,30 @@ func TestLogPreservesResourceAndRejectsConflictingTenant(t *testing.T) {
 		t.Fatal(err)
 	}
 	rows := writeTestRows(conn, "logs")
-	if len(rows) != 1 || len(rows[0]) != 18 || rows[0][8] != "" || rows[0][9] != "hello" || rows[0][14].(map[string]string)["zone"] != "z" || rows[0][15] != "inst" || rows[0][16] != "v1" || rows[0][17] != "ns" {
+	if len(rows) != 1 || len(rows[0]) != 19 || rows[0][8] != "" || rows[0][9] != "hello" || rows[0][14].(map[string]string)["zone"] != "z" || rows[0][15] != "inst" || rows[0][16] != "v1" || rows[0][17] != "ns" || rows[0][18] != uint64(1) {
 		t.Fatalf("unexpected log row: %v", rows)
+	}
+}
+
+func TestLogSequenceDoesNotReuseAfterFailedSendWithOneConnection(t *testing.T) {
+	conn := &writeTestConn{failSend: "INSERT INTO logs"}
+	b := newBackend(conn, options{maxOpen: 1, logDays: 14, timeout: time.Second})
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
+	record := utm.LogRecord{Resource: &utm.Resource{Tenant: "a"}, TS: 1, ObservedTS: 1}
+	if err := b.Logs().Write(t.Context(), []utm.LogRecord{record}); err == nil {
+		t.Fatal("expected first send failure")
+	}
+	conn.failSend = ""
+	if err := b.Logs().Write(t.Context(), []utm.LogRecord{record}); err != nil {
+		t.Fatal(err)
+	}
+	rows := writeTestRows(conn, "logs")
+	if len(rows) != 1 || rows[0][18] != uint64(2) {
+		t.Fatalf("failed send sequence reused: %v", rows)
 	}
 }
 

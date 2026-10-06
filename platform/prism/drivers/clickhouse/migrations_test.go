@@ -17,7 +17,7 @@ func TestEmbeddedMigrationsAndRendering(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ms) != 8 {
+	if len(ms) != 10 {
 		t.Fatalf("count=%d", len(ms))
 	}
 	for _, m := range ms {
@@ -197,13 +197,13 @@ func TestMigrationReceiptsAndTTL(t *testing.T) {
 			}
 		}
 		if strings.HasPrefix(q, "SELECT version, name, checksum FROM prism_schema_migrations") {
-			historyBounded = strings.Contains(q, "LIMIT 9 SETTINGS max_execution_time = 55, max_result_rows = 9")
+			historyBounded = strings.Contains(q, "LIMIT 11 SETTINGS max_execution_time = 55, max_result_rows = 11")
 		}
 	}
 	if !historyBounded {
 		t.Fatal("migration history query lacks server time/row cap")
 	}
-	if receipts != 8 {
+	if receipts != 10 {
 		t.Fatalf("receipts=%d", receipts)
 	}
 	conn.queries = nil
@@ -233,7 +233,7 @@ func TestMigrationReceiptsAndTTL(t *testing.T) {
 		t.Fatalf("checksum drift: %v", err)
 	}
 	conn.rows[0].checksum = ms[0].checksum
-	conn.rows = append(conn.rows, migrationRow{9, "future", "checksum"})
+	conn.rows = append(conn.rows, migrationRow{11, "future", "checksum"})
 	if err := b.migrate(t.Context()); !errors.Is(err, errDrift) {
 		t.Fatalf("future version: %v", err)
 	}

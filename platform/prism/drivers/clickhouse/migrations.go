@@ -28,7 +28,7 @@ func loadMigrations() ([]migration, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(entries) != 8 {
+	if len(entries) != 10 {
 		return nil, errDrift
 	}
 	result := make([]migration, 0, len(entries))
@@ -68,11 +68,11 @@ func (b *backend) migrate(ctx context.Context) error {
 	if err := b.conn.Exec(ddlCtx, "CREATE TABLE IF NOT EXISTS prism_schema_migrations (version UInt32, name String, applied_at DateTime DEFAULT now(), checksum String) ENGINE = MergeTree ORDER BY version"); err != nil {
 		return err
 	}
-	rows, err := b.conn.Query(ddlCtx, fmt.Sprintf("SELECT version, name, checksum FROM prism_schema_migrations ORDER BY version LIMIT 9 SETTINGS max_execution_time = %d, max_result_rows = 9", maxExec))
+	rows, err := b.conn.Query(ddlCtx, fmt.Sprintf("SELECT version, name, checksum FROM prism_schema_migrations ORDER BY version LIMIT 11 SETTINGS max_execution_time = %d, max_result_rows = 11", maxExec))
 	if err != nil {
 		return err
 	}
-	seen := make(map[uint32]bool, 8)
+	seen := make(map[uint32]bool, len(migrations))
 	for rows.Next() {
 		var version uint32
 		var name, checksum string
@@ -80,7 +80,7 @@ func (b *backend) migrate(ctx context.Context) error {
 			_ = rows.Close()
 			return err
 		}
-		if version == 0 || version > 8 || seen[version] {
+		if version == 0 || int(version) > len(migrations) || seen[version] {
 			_ = rows.Close()
 			return errDrift
 		}
@@ -98,11 +98,11 @@ func (b *backend) migrate(ctx context.Context) error {
 	if err := rows.Close(); err != nil {
 		return err
 	}
-	if len(seen) > 8 {
+	if len(seen) > len(migrations) {
 		return errDrift
 	}
 	var gap bool
-	for v := uint32(1); v <= 8; v++ {
+	for v := uint32(1); int(v) <= len(migrations); v++ {
 		if !seen[v] {
 			gap = true
 		} else if gap {

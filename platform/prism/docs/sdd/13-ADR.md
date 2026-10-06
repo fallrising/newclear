@@ -301,3 +301,26 @@ P1-09 真 ClickHouse 24.8.14.39 驗證發現 trace_index 的 groupUniqArrayArray
 獨立審查確認四項邊界後，P1-09 契約要求全零 ID 按 UTM helper 拒絕、metric label 名稱與值先驗 UTF-8、migration008 使用 canonical MATERIALIZED labels_str。ClickHouse24.8 TTL expression 不接受 DateTime64，而 DateTime 加 retention 可溢位導致提前刪除；因此明確使用 UTC TTL，寫入前驗證 TTL source 加有效 retention 仍小於2106上限，Migrate 在任何 TTL ALTER 前先驗全部八表既有最大來源時間。變更 retention 前須停排其他 backend/process writer，避免舊設定跨過 MAX 到 ALTER 的檢查窗口；不靜默縮短 retention、不改公開 SPI 或原 hash。span start 使用 max(trace,RED,1day)，end/events 只受原始範圍限制。
 
 官方2.48.0 client 會按 ctx deadline 覆寫 protocol max_execution_time。P1-09 保留完整 deadline/cancellation，受控 migration scan 與 INSERT 額外以 SQL SETTINGS 強制設定上限。Native batch 無 column-list 才能保留此 SETTINGS，所以準備後必須核對返回的 column count/name 與原固定 INSERT list 完全相同，任何 schema 漂移關閉 batch 並 fail closed，不按猜測欄序寫資料。DDL 保留 client max_execution_time+5 秒限時；其 protocol server 上限由上游 deadline 規則決定，不宣稱與 scan/INSERT 設定逐值相同。
+
+
+## ADR-019：P1-10 mandatory query 與現有 SPI 語義適配
+
+狀態：設計已確認，2026-10-06；驗證結果以inventory為準。
+
+SDD17早期SQL不是現有SPI的逐字實作。P1-10只實作mandatoryreads：PromQL仍走既有回退引擎；optionalmetricmetadata/delete/nativequery、NativeLogQuerier、RED/Dependencies仍不宣告。完整labels.Compare排序使用無分隔符歧義的sortedlabeltuples；不能因008的labels_str存在就承諾所有合法value的字典序。跨monthmetadata先合併完整identity；catalog使用實際sample存在，避免metadata無TTL或extent窗口hole造成幽靈series。
+
+Metrics時間inclusive毫秒，logs/traces依現有半開奈秒契約；missinglabel等於空字串做matcher，但catalog只有真正有鍵才回該值。LogSearch只下推selectors/time/sort，未實作filters/stages/fields/agg能力false且不得在補算前limit。Trace duration用完整trace的root最大duration，root存在但duration0仍不fallback；無root才用最大span。FindTraceIDs時間/其他filter決定matching spans的start/end；GetTrace index最大時間是span start，必須包含末筆及late span。
+
+新增009只加logs.write_seq UInt64 DEFAULT0，保留001–008checksums。MergeTree physicalpart/offset會隨merge改變，無法提供持久writeorder，因此新單一writer的logwrites在同一operation lease內以context-aware gate序列化：首次有界查max(write_seq)，先檢查overflow再保留sequence；失敗／lost reply也不重用。Log INSERT用async_insert=0，確保成功後可查，drained writer重新開啟時可seed；metrics/traces保持原asyncack限制。排序為ts方向、write_seq升序。舊row預設0只能用確定性內容次序，不能重建原本未存的歷史writeorder；獨立process writers需外部序列化，不承諾global同時order。這是schema加法與logack語義的必要改變，不擴張deployment／協調系統。
+
+所有iterator持有admission/context/nativeRows lease直到EOF/Close/error/cancel；Backend.Close取消且等待callbacks/rowsdrain後closeclient一次。Server/local scan/resultlogicalbytes有明確上限，overflow回TooLarge，沒有成功截斷。這些上限不是RSS／soak保證。ConfigDSN使用既有secret.String/file引用，storage.retention唯一來源傳到driver，非空split本期failclosed，server execution timeout小於query timeout；只啟用現有daemonSPI接線。詳見`docs/specs/p1-10-clickhouse-query.md`及SDD11／17當期邊界。
+
+現有metricconformance以__name__識別series且多個points沒有冗餘Name，memory也接受。P1-10需將Name空時由validated非空__name__推導localcopy；非空Name仍requireexactmatch，兩者空／矛盾beforeIO拒絕。這是既有executablecontract適配，不修改SPI、不包裝conformancefactory、不放寬tenant/UTF8／time／payloadvalidation，也不改P109歷史spec。
+
+真實24.8.14.39 probe確認，pinned native client的time.Time query argument會失去DateTime64邊界所需的毫秒／奈秒精度。讀取條件改綁Unix整數，再用fromUnixTimestamp64Milli／Nano轉回server時間型別，保持現有inclusive／half-open契約，writer仍使用UTM時間轉換。Metadata map identity使用排序後的key/value tuples，避免Go map編碼順序導致同一series被誤判為collision。
+
+GetTrace直接讀tenant+trace_id的spans，保留既有bloom及server scan cap；不以derived trace_index存在或extent當完整性前提，避免index lag／最後或late span漏查。先讀index縮小掃描屬未來效能選項，未驗證的大量掃描可能fail closed，不宣稱production latency／soak。
+
+完整corpus雖579／189／6296通過，原fuzz seed抓到單點／批首-0在既有Float64 Gorilla codec落庫變+0；raw reinterpretAsUInt64亦確認已失bit，reader不能恢復。批准新增010的UInt64 value_bits DEFAULT reinterpretAsUInt64(value)，writer顯式寫math.Float64bits、reader以math.Float64frombits重建，不改SPI／原codec／既有001–008。新UInt64持久路徑已在私人實庫probe確認signed-zero可保留；最終fullpackage還須重跑。舊row可讀，已丟失的歷史signed-zero不可重建。這是mandatory float fidelity必要加欄，不增加依賴或擴張native histogram範圍。
+
+ADR-019 follow-up (P1-10 D010/D011): Independent frozen-source review reproduced caller-context memory-cap bypass and a trace default-value discrepancy. Read SQL now fixes the validated memory cap. The existing SPI/memory reference governs nonpositive trace limits and exact empty-service selection; positive requested limits remain after full filters/order, and backend safety caps still fail closed. These changes preserve interfaces, dependencies and other drivers.

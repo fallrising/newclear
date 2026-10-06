@@ -214,13 +214,27 @@ func TestClickHouseMigrations(t *testing.T) {
 	if err := rows.Err(); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(versions, []uint32{1, 2, 3, 4, 5, 6, 7, 8}) {
+	if !reflect.DeepEqual(versions, []uint32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}) {
 		t.Fatalf("migration versions: %v", versions)
+	}
+	var sequenceType, sequenceDefaultKind, sequenceDefault string
+	if err := f.reader.QueryRow(f.ctx, "SELECT type, default_kind, default_expression FROM system.columns WHERE database=? AND table='logs' AND name='write_seq'", f.db).Scan(&sequenceType, &sequenceDefaultKind, &sequenceDefault); err != nil {
+		t.Fatal(err)
+	}
+	if sequenceType != "UInt64" || sequenceDefaultKind != "DEFAULT" || sequenceDefault != "0" {
+		t.Fatalf("additive log sequence column type=%q default=%q expression=%q", sequenceType, sequenceDefaultKind, sequenceDefault)
+	}
+	var valueBitsType, valueBitsDefaultKind, valueBitsDefault string
+	if err := f.reader.QueryRow(f.ctx, "SELECT type, default_kind, default_expression FROM system.columns WHERE database=? AND table='metric_samples' AND name='value_bits'", f.db).Scan(&valueBitsType, &valueBitsDefaultKind, &valueBitsDefault); err != nil {
+		t.Fatal(err)
+	}
+	if valueBitsType != "UInt64" || valueBitsDefaultKind != "DEFAULT" || valueBitsDefault != "reinterpretAsUInt64(value)" {
+		t.Fatalf("additive metric bits column type=%q default=%q expression=%q", valueBitsType, valueBitsDefaultKind, valueBitsDefault)
 	}
 	if err := b.Migrate(f.ctx); err != nil {
 		t.Fatal("idempotent Migrate:", err)
 	}
-	if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 8 {
+	if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 10 {
 		t.Fatalf("repeat migration receipts = %d", n)
 	}
 	if err := b.Close(); err != nil {
@@ -230,7 +244,7 @@ func TestClickHouseMigrations(t *testing.T) {
 	if err := changed.Migrate(f.ctx); err != nil {
 		t.Fatal("TTL reconciliation:", err)
 	}
-	if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 8 {
+	if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 10 {
 		t.Fatalf("TTL reconciliation changed receipts: %d", n)
 	}
 	var ddl string
@@ -272,7 +286,7 @@ func TestClickHouseMigrationDrift(t *testing.T) {
 			if before != after {
 				t.Fatal("drift changed DDL or TTL")
 			}
-			if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 9 {
+			if n := f.count("SELECT count() FROM prism_schema_migrations"); n != 11 {
 				t.Fatalf("drift emitted receipt: %d", n)
 			}
 		})
@@ -283,7 +297,7 @@ func TestClickHouseWrites(t *testing.T) {
 	f := newFixture(t)
 	b := f.migrated(map[string]string{"async_insert": "0"})
 	metricLabels := labels.FromStrings("__name__", "requests_total", "__tenant__", "tenant-a", "job", "api")
-	base := utm.TimeToMilli(time.Date(2026, 10, 5, 12, 0, 0, 123000000, time.UTC))
+	base := utm.TimeToMilli(time.Now().UTC().Add(-time.Minute).Truncate(time.Millisecond))
 	points := []utm.MetricPoint{{Name: "requests_total", Labels: metricLabels, TS: base, Value: 1.25, Type: utm.TypeCounter}, {Name: "requests_total", Labels: metricLabels, TS: base + 4, Value: 2.5, Type: utm.TypeCounter}}
 	if err := b.Metrics().Write(f.ctx, points); err != nil {
 		t.Fatal("metrics write:", err)
@@ -646,7 +660,7 @@ func TestClickHouseReorderedLogColumnsFailClosed(t *testing.T) {
 	}
 }
 
-func TestClickHouseUnsupportedReads(t *testing.T) {
+func TestClickHouseMandatoryEmptyReadsAndOptionalCapabilities(t *testing.T) {
 	f := newFixture(t)
 	b := f.migrated(map[string]string{"async_insert": "0"})
 	if err := b.Capabilities().Validate(); err != nil {
@@ -671,34 +685,82 @@ func TestClickHouseUnsupportedReads(t *testing.T) {
 	if _, ok := b.Traces().(spi.DependencyQuerier); ok {
 		t.Fatal("optional dependency interface exposed")
 	}
-	checks := []error{}
-	_, err := b.Metrics().Select(f.ctx, spi.SeriesQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Metrics().LabelNames(f.ctx, spi.LabelQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Metrics().LabelValues(f.ctx, "job", spi.LabelQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Logs().Search(f.ctx, spi.LogQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Logs().LabelNames(f.ctx, spi.LabelQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Logs().LabelValues(f.ctx, "job", spi.LabelQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Traces().GetTrace(f.ctx, "tenant-a", "trace")
-	checks = append(checks, err)
-	_, err = b.Traces().FindTraceIDs(f.ctx, spi.TraceQuery{Tenant: "tenant-a"})
-	checks = append(checks, err)
-	_, err = b.Traces().Services(f.ctx, "tenant-a", spi.TimeRange{})
-	checks = append(checks, err)
-	_, err = b.Traces().Operations(f.ctx, "tenant-a", "api", "server", spi.TimeRange{})
-	checks = append(checks, err)
+	if _, ok := b.Traces().(spi.SpanAggregator); ok {
+		t.Fatal("optional RED interface exposed")
+	}
+	metricMatcher, err := spi.NewMatcher(spi.MatchEqual, utm.LabelName, "absent_metric")
+	if err != nil {
+		t.Fatal(err)
+	}
+	metricQuery := spi.SeriesQuery{Tenant: "tenant-a", Matchers: []spi.Matcher{metricMatcher}, Start: 0, End: 1}
+	metricSet, err := b.Metrics().Select(f.ctx, metricQuery)
+	if err != nil || metricSet == nil {
+		t.Fatalf("empty metric Select: %v", err)
+	}
+	if metricSet.Next() || metricSet.Err() != nil {
+		t.Fatal("empty metric Select yielded a series or error")
+	}
+	if err := metricSet.Close(); err != nil {
+		t.Fatal(err)
+	}
+	labelQuery := spi.LabelQuery{Tenant: "tenant-a", Matchers: []spi.Matcher{metricMatcher}, Start: 0, End: 1, Limit: 10}
+	metricNames, err := b.Metrics().LabelNames(f.ctx, labelQuery)
+	if err != nil || len(metricNames) != 0 {
+		t.Fatalf("empty metric LabelNames=%v err=%v", metricNames, err)
+	}
+	metricValues, err := b.Metrics().LabelValues(f.ctx, "job", labelQuery)
+	if err != nil || len(metricValues) != 0 {
+		t.Fatalf("empty metric LabelValues=%v err=%v", metricValues, err)
+	}
+	logMatcher, err := spi.NewMatcher(spi.MatchEqual, "job", "absent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	logQuery := spi.LogQuery{Tenant: "tenant-a", Selectors: []spi.Matcher{logMatcher}, Start: 0, End: 1, Limit: 10}
+	logSet, err := b.Logs().Search(f.ctx, logQuery)
+	if err != nil || logSet == nil {
+		t.Fatalf("empty log Search: %v", err)
+	}
+	if logSet.Next() || logSet.Err() != nil {
+		t.Fatal("empty log Search yielded a record or error")
+	}
+	if err := logSet.Close(); err != nil {
+		t.Fatal(err)
+	}
+	logLabelQuery := spi.LabelQuery{Tenant: "tenant-a", Matchers: []spi.Matcher{logMatcher}, Start: 0, End: 1, Limit: 10}
+	logNames, err := b.Logs().LabelNames(f.ctx, logLabelQuery)
+	if err != nil || len(logNames) != 0 {
+		t.Fatalf("empty log LabelNames=%v err=%v", logNames, err)
+	}
+	logValues, err := b.Logs().LabelValues(f.ctx, "job", logLabelQuery)
+	if err != nil || len(logValues) != 0 {
+		t.Fatalf("empty log LabelValues=%v err=%v", logValues, err)
+	}
+	traceSet, err := b.Traces().GetTrace(f.ctx, "tenant-a", "0123456789abcdef0123456789abcdef")
+	if err != nil || traceSet == nil {
+		t.Fatalf("empty GetTrace: %v", err)
+	}
+	if traceSet.Next() || traceSet.Err() != nil {
+		t.Fatal("empty GetTrace yielded a span or error")
+	}
+	if err := traceSet.Close(); err != nil {
+		t.Fatal(err)
+	}
+	IDs, err := b.Traces().FindTraceIDs(f.ctx, spi.TraceQuery{Tenant: "tenant-a", Service: "absent", Start: 0, End: 1, Limit: 10})
+	if err != nil || len(IDs) != 0 {
+		t.Fatalf("empty FindTraceIDs=%v err=%v", IDs, err)
+	}
+	timeRange := spi.TimeRange{Start: 0, End: 1}
+	services, err := b.Traces().Services(f.ctx, "tenant-a", timeRange)
+	if err != nil || len(services) != 0 {
+		t.Fatalf("empty Services=%v err=%v", services, err)
+	}
+	operations, err := b.Traces().Operations(f.ctx, "tenant-a", "api", "server", timeRange)
+	if err != nil || len(operations) != 0 {
+		t.Fatalf("empty Operations=%v err=%v", operations, err)
+	}
 	if err := f.ctx.Err(); err != nil {
 		t.Fatalf("fixture context canceled before read checks: %v", err)
-	}
-	for i, err := range checks {
-		if spi.Classify(err) != spi.ErrUnsupported {
-			t.Fatalf("read %d: expected Unsupported, got %v", i, err)
-		}
 	}
 }
 

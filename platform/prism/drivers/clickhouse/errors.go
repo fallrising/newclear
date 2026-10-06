@@ -41,7 +41,7 @@ func classifiedError(op string, err error) error {
 			class = spi.ErrUnavailable
 		case 159:
 			class = spi.ErrTimeout
-		case 241, 158, 307:
+		case 241, 158, 307, 396:
 			class = spi.ErrTooLarge
 		case 202:
 			class = spi.ErrThrottled

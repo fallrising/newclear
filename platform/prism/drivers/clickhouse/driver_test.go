@@ -61,14 +61,15 @@ func (c *fakeBoundedConn) Query(_ context.Context, sql string, _ ...any) (chdriv
 
 func TestBoundedNativeBatchMatchesSixFixedWriterColumns(t *testing.T) {
 	for _, tc := range []struct{ table, cols string }{
-		{"logs", "ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace"},
+		{"logs", "ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq"},
 		{"spans", "ts,tenant,trace_id,span_id,parent_id,service,name,kind,duration_ns,status_code,status_msg,host,env,attrs,res_attrs,trace_state,service_instance,service_version,namespace,cluster,events.ts,events.name,events.attrs,links.trace_id,links.span_id,links.attrs"},
 		{"metric_series", "fingerprint,tenant,metric,labels,first_seen,last_seen"},
 		{"metric_samples", "ts,fingerprint,tenant,metric,value"},
+		{"metric_samples", "ts,fingerprint,tenant,metric,value,value_bits"},
 		{"service_deps_1h", "hour,tenant,parent,child,calls,errors"},
 		{"pending_links", "ts,tenant,trace_id,parent_span_id,child_service,is_error"},
 	} {
-		t.Run(tc.table, func(t *testing.T) {
+		t.Run(tc.table+"/"+tc.cols, func(t *testing.T) {
 			names := strings.Split(tc.cols, ",")
 			batch := &fakeBoundedBatch{}
 			for _, name := range names {
@@ -83,7 +84,11 @@ func TestBoundedNativeBatchMatchesSixFixedWriterColumns(t *testing.T) {
 			if err != nil || got != batch {
 				t.Fatalf("PrepareBatch result=%v, err=%v", got, err)
 			}
-			if conn.query != "INSERT INTO "+tc.table+" SETTINGS max_execution_time = 7" || conn.ctx != ctx || len(conn.opts) != 1 {
+			wantSQL := "INSERT INTO " + tc.table + " SETTINGS max_execution_time = 7"
+			if tc.table == "logs" {
+				wantSQL += ", async_insert = 0"
+			}
+			if conn.query != wantSQL || conn.ctx != ctx || len(conn.opts) != 1 {
 				t.Fatalf("native prepare changed query/context/options: query=%q options=%d", conn.query, len(conn.opts))
 			}
 			var nativeOpts chdriver.PrepareBatchOptions

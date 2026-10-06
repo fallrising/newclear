@@ -7,9 +7,12 @@ import (
 	"net"
 	"net/http"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 )
 
 func TestConfigCheck(t *testing.T) {
@@ -27,6 +30,25 @@ func TestConfigCheck(t *testing.T) {
 	}
 	if stderr.Len() != 0 {
 		t.Fatalf("stderr = %q, want empty", stderr.String())
+	}
+}
+
+func TestClickHouseConfigCheckWithoutConnection(t *testing.T) {
+	t.Setenv("PRISM_STORAGE_DRIVER", "clickhouse")
+	t.Setenv("PRISM_STORAGE_DSN", "clickhouse://prism:disposable-pass@127.0.0.1:1/prism")
+	path, err := filepath.Abs(filepath.Join("..", "..", "internal", "config", "testdata", "prismd.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	if code := run(t.Context(), []string{"--config", path, "--config-check"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("config-check code = %d, stderr = %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "configuration valid") || strings.Contains(stderr.String(), "disposable-pass") {
+		t.Fatalf("config-check output = %q; stderr = %q", stdout.String(), stderr.String())
+	}
+	if !slices.Contains(spi.Drivers(), "clickhouse") || !slices.Contains(spi.Drivers(), "memory") {
+		t.Fatalf("registered drivers = %v", spi.Drivers())
 	}
 }
 

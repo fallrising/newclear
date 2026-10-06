@@ -125,16 +125,3 @@ func (s *traceStore) Write(ctx context.Context, spans []utm.Span) error {
 		return sendRows(ctx, conn, "INSERT INTO pending_links (ts,tenant,trace_id,parent_span_id,child_service,is_error)", pending)
 	})
 }
-
-func (s *traceStore) GetTrace(ctx context.Context, _, _ string) (spi.SpanIterator, error) {
-	return nil, unsupported(ctx, s.host, "traces.get_trace")
-}
-func (s *traceStore) FindTraceIDs(ctx context.Context, _ spi.TraceQuery) ([]spi.TraceIDWithTime, error) {
-	return nil, unsupported(ctx, s.host, "traces.find_trace_ids")
-}
-func (s *traceStore) Services(ctx context.Context, _ string, _ spi.TimeRange) ([]string, error) {
-	return nil, unsupported(ctx, s.host, "traces.services")
-}
-func (s *traceStore) Operations(ctx context.Context, _, _, _ string, _ spi.TimeRange) ([]spi.Operation, error) {
-	return nil, unsupported(ctx, s.host, "traces.operations")
-}

@@ -83,3 +83,41 @@ func TestConfiguredMaxExecutionTimeIsAvailableToMigrationPreflight(t *testing.T)
 		t.Fatalf("configured max_execution_time was lost: option=%d, native=%v", opts.maxExec, opts.native.Settings["max_execution_time"])
 	}
 }
+
+func TestNativeQueryReadAndByteCaps(t *testing.T) {
+	for _, tc := range []struct{ key, value string }{
+		{"max_rows_to_read", "0"},
+		{"max_result_bytes", "1099511627777"},
+	} {
+		_, err := parseOptions(t.Context(), spi.Config{DSN: "clickhouse://localhost:9000/prism", Options: map[string]string{tc.key: tc.value}})
+		if spi.Classify(err) != spi.ErrBadRequest {
+			t.Fatalf("%s=%s: %v", tc.key, tc.value, err)
+		}
+	}
+	opts, err := parseOptions(t.Context(), spi.Config{DSN: "clickhouse://localhost:9000/prism"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opts.maxRowsRead != 5_000_000 || opts.maxResultBytes != 64<<20 || opts.native.Settings["read_overflow_mode"] != "throw" || opts.native.Settings["result_overflow_mode"] != "throw" {
+		t.Fatalf("read bounds missing: %+v", opts)
+	}
+}
+
+func TestConfiguredMemoryCapIsExplicitInReadSQL(t *testing.T) {
+	opts, err := parseOptions(t.Context(), spi.Config{
+		DSN:     "clickhouse://localhost:9000/prism",
+		Options: map[string]string{"max_memory_usage": "10000000"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opts.native.Settings["max_memory_usage"] != 10_000_000 {
+		t.Fatalf("validated native memory cap missing: %v", opts.native.Settings["max_memory_usage"])
+	}
+	if !strings.Contains(querySettings(opts), "max_memory_usage = 10000000") {
+		t.Fatalf("read SQL omits configured memory cap: %s", querySettings(opts))
+	}
+	if !strings.Contains(querySettings(options{}), "max_memory_usage = 1000000000") {
+		t.Fatalf("read SQL omits bounded default memory cap: %s", querySettings(options{}))
+	}
+}

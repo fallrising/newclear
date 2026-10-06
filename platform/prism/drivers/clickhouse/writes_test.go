@@ -64,8 +64,24 @@ func (c *writeTestConn) PrepareBatch(_ context.Context, query string, _ ...chdri
 }
 func (c *writeTestConn) Exec(context.Context, string, ...any) error { panic("unexpected Exec") }
 func (c *writeTestConn) Query(context.Context, string, ...any) (chdriver.Rows, error) {
-	panic("unexpected Query")
+	return &fakeSequenceRows{}, nil
 }
+
+type fakeSequenceRows struct {
+	chdriver.Rows
+	done bool
+}
+
+func (r *fakeSequenceRows) Next() bool {
+	if r.done {
+		return false
+	}
+	r.done = true
+	return true
+}
+func (*fakeSequenceRows) Scan(dest ...any) error    { *dest[0].(*uint64) = 0; return nil }
+func (*fakeSequenceRows) Close() error              { return nil }
+func (*fakeSequenceRows) Err() error                { return nil }
 func (c *writeTestConn) Ping(context.Context) error { return nil }
 func (c *writeTestConn) Close() error               { return nil }
 

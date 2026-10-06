@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
-import { Skeleton } from "../components/ui/skeleton";
 import { uiCopy } from "../copy";
 
 /** The part of a TanStack Query result that QueryBoundary reads (kept structural so @cms/ui does not depend on @cms/api). */
@@ -32,9 +31,9 @@ function statusOf(error: unknown): number | undefined {
 export function DefaultSkeleton() {
   return (
     <div className="flex flex-col gap-3" data-testid="query-loading" aria-busy="true" aria-label={uiCopy["ui.loading"]}>
-      <Skeleton className="h-6 w-1/3" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-2/3" />
+      <div data-slot="skeleton" className="animate-pulse rounded-md bg-accent h-6 w-1/3" />
+      <div data-slot="skeleton" className="animate-pulse rounded-md bg-accent h-4 w-full" />
+      <div data-slot="skeleton" className="animate-pulse rounded-md bg-accent h-4 w-2/3" />
     </div>
   );
 }

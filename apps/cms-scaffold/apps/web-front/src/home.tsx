@@ -5,7 +5,7 @@ import { publicQueries } from "@cms/api/public";
 import { Skeleton, Card, CardContent, CardHeader, CardTitle } from "@cms/ui";
 import { api } from "./api";
 import { CARDS } from "./cards";
-import { useMemberSession } from "./member-auth";
+import { useMemberSession } from "./member-session";
 import { copy, type CopyKey } from "./copy";
 import { MarkdownBody } from "./markdown";
 import { text } from "./media";
@@ -13,7 +13,7 @@ import { Crumbs, type Crumb } from "./parts";
 import { usePageMeta } from "./seo";
 import { FrontTitle } from "./shell";
 import { SITES, type GridSpec, type SectionSpec, type SiteKey } from "./sites";
-import { EmptyPublished, ErrorPublic, GridSkeleton, HeroSkeleton, ListPager, pageSearch, PublicBoundary, readPage } from "./states";
+import { EmptyPublished, ErrorPublic, GridSkeleton, HeroSkeleton, ClinicProfileSkeleton, VetGridSkeleton, ListPager, pageSearch, PublicBoundary, readPage } from "./states";
 
 type HeroSpec = Extract<SectionSpec, { section: "Hero" }>;
 
@@ -63,8 +63,12 @@ function InfoCard({ title, children }: { title: string; children: ReactNode }) {
 
 function ClinicAppointmentCta() {
   const auth = useMemberSession();
-  if (auth.isPending) return <Skeleton aria-hidden className="mb-10 h-10 w-40" />;
-  return <Link data-testid="clinic-appointment-cta" className="mb-10 inline-block underline" to={auth.data ? "/clinic/appointments/new" : "/login?next=/clinic/appointments/new"}>{copy[auth.data ? "member.menu.new" : "member.cta.login"]}</Link>;
+  return (
+    <div className="mb-10 flex h-[26px] items-center" data-testid="clinic-appointment-slot">
+      {auth.isPending ? <Skeleton aria-hidden className="h-[26px] w-40" /> :
+        <Link data-testid="clinic-appointment-cta" className="inline-block underline" to={auth.data ? "/clinic/appointments/new" : "/login?next=/clinic/appointments/new"}>{copy[auth.data ? "member.menu.new" : "member.cta.login"]}</Link>}
+    </div>
+  );
 }
 function ClinicProfile({ type }: { type: string }) {
   return <><ClinicProfileBody type={type} /><ClinicAppointmentCta /></>;
@@ -73,7 +77,7 @@ function ClinicProfile({ type }: { type: string }) {
 /** F-S4: the clinic_profile singleton — name, intro (Markdown), address, telephone, hours. */
 function ClinicProfileBody({ type }: { type: string }) {
   const profile = useQuery(publicQueries.entries(api.public, type, { size: 1 }));
-  if (profile.isPending) return <HeroSkeleton />;
+  if (profile.isPending) return <ClinicProfileSkeleton />;
   const fallbackTitle = <FrontTitle documentTitle={null}>{copy["clinic.fallbackTitle"]}</FrontTitle>;
   if (profile.isError) {
     return (
@@ -140,7 +144,7 @@ export function CollectionGrid({ grid, heading }: { grid: GridSpec; heading: boo
       <PublicBoundary
         query={query}
         level="section"
-        skeleton={<GridSkeleton square={grid.card === "vet"} />}
+        skeleton={grid.card === "vet" ? <VetGridSkeleton /> : <GridSkeleton />}
         isEmpty={(data) => data.total === 0}
         empty={<EmptyPublished title={copy[grid.empty]} description={grid.emptyBody ? copy[grid.emptyBody] : undefined} />}
       >

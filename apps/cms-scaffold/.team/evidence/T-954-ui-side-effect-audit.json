@@ -1,0 +1,201 @@
+[
+  {
+    "path": "packages/ui/src/components/ui/alert.tsx",
+    "topLevel": [
+      "const alertVariants = cva(\n  \"relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current\",\n  {\n    variants: {\n      variant: {\n        default: \"bg-card text-card-foreground\",\n        destructive:\n          \"bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n    },\n  }\n)"
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/card.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/components/ui/separator.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/textarea.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/components/ui/select.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/tabs.tsx",
+    "topLevel": [
+      "\"use client\"",
+      "const tabsListVariants = cva(\n  \"group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none\",\n  {\n    variants: {\n      variant: {\n        default: \"bg-muted\",\n        line: \"gap-1 bg-transparent\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n    },\n  }\n)"
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/popover.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/dropdown-menu.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/input.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/components/ui/switch.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/radio-group.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/calendar.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/checkbox.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/table.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/breadcrumb.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/components/ui/alert-dialog.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/label.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/dialog.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/skeleton.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/components/ui/progress.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/sheet.tsx",
+    "topLevel": [
+      "\"use client\""
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/button.tsx",
+    "topLevel": [
+      "const buttonVariants = cva(\n  \"inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n  {\n    variants: {\n      variant: {\n        default: \"bg-primary text-primary-foreground hover:bg-primary/90\",\n        destructive:\n          \"bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40\",\n        outline:\n          \"border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50\",\n        secondary:\n          \"bg-secondary text-secondary-foreground hover:bg-secondary/80\",\n        ghost:\n          \"hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50\",\n        link: \"text-primary underline-offset-4 hover:underline\",\n      },\n      size: {\n        default: \"h-9 px-4 py-2 has-[>svg]:px-3\",\n        xs: \"h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3\",\n        sm: \"h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5\",\n        lg: \"h-10 rounded-md px-6 has-[>svg]:px-4\",\n        icon: \"size-9\",\n        \"icon-xs\": \"size-6 rounded-md [&_svg:not([class*='size-'])]:size-3\",\n        \"icon-sm\": \"size-8\",\n        \"icon-lg\": \"size-10\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n      size: \"default\",\n    },\n  }\n)"
+    ]
+  },
+  {
+    "path": "packages/ui/src/components/ui/badge.tsx",
+    "topLevel": [
+      "const badgeVariants = cva(\n  \"inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3\",\n  {\n    variants: {\n      variant: {\n        default: \"bg-primary text-primary-foreground [a&]:hover:bg-primary/90\",\n        secondary:\n          \"bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90\",\n        destructive:\n          \"bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90\",\n        outline:\n          \"border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground\",\n        ghost: \"[a&]:hover:bg-accent [a&]:hover:text-accent-foreground\",\n        link: \"text-primary underline-offset-4 [a&]:hover:underline\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n    },\n  }\n)"
+    ]
+  },
+  {
+    "path": "packages/ui/src/lib/utils.ts",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/index.ts",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/copy.ts",
+    "topLevel": [
+      "export const uiCopy = {\n  \"ui.status.requested\": \"等待發布\",\n  \"ui.skipLink\": \"跳到主要內容\",\n  \"ui.nav.open\": \"開啟選單\",\n  \"ui.nav.label\": \"主要導覽\",\n  \"ui.account.menu\": \"帳號選單\",\n  \"ui.account.signOut\": \"登出\",\n  \"ui.actions.more\": \"更多動作\",\n  \"ui.error.title\": \"無法載入\",\n  \"ui.error.body\": \"請稍後再試。\",\n  \"ui.error.retry\": \"重試\",\n  \"ui.loading\": \"載入中\",\n  \"ui.status.draft\": \"草稿\",\n  \"ui.status.published\": \"已發布\",\n  \"ui.status.archived\": \"已封存\",\n  \"ui.status.dirty\": \"有未發布的變更\",\n  \"ui.index.search\": \"搜尋標題\",\n  \"ui.index.sort\": \"排序\",\n  \"ui.index.clear\": \"清除篩選\",\n  \"ui.index.filterAll\": \"{label}：全部\",\n  \"ui.pagination.total\": \"共 {total} 筆\",\n  \"ui.pagination.page\": \"第 {page} / {pages} 頁\",\n  \"ui.pagination.previous\": \"上一頁\",\n  \"ui.pagination.next\": \"下一頁\",\n  \"ui.pagination.size\": \"每頁筆數\",\n  \"ui.save.title\": \"未儲存的變更\",\n  \"ui.save.save\": \"儲存\",\n  \"ui.save.saving\": \"儲存中…\",\n  \"ui.save.discard\": \"捨棄\",\n  \"ui.leave.title\": \"離開這個頁面？\",\n  \"ui.leave.body\": \"你有未儲存的變更，離開後會遺失。\",\n  \"ui.leave.stay\": \"留在此頁\",\n  \"ui.leave.leave\": \"捨棄並離開\",\n} as const;"
+    ]
+  },
+  {
+    "path": "packages/ui/src/patterns/index-filters.tsx",
+    "topLevel": [
+      "const ANY = \"__any__\";"
+    ]
+  },
+  {
+    "path": "packages/ui/src/patterns/query-boundary.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/toaster.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/status-badge.tsx",
+    "topLevel": [
+      "const TONE: Record<PublicationStateValue, string> = {\n  draft: \"bg-surface-subdued text-foreground border-border\",\n  published: \"bg-success-bg text-success border-transparent\",\n  archived: \"bg-surface-subdued text-subdued border-border\",\n};"
+    ]
+  },
+  {
+    "path": "packages/ui/src/patterns/empty-state.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/page-header.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/resource-layout.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/contextual-save-bar.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/app-frame.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/index-table.tsx",
+    "topLevel": []
+  },
+  {
+    "path": "packages/ui/src/patterns/index-pagination.tsx",
+    "topLevel": [
+      "export const PAGE_SIZES = [20, 50, 100] as const;"
+    ]
+  },
+  {
+    "path": "packages/ui/src/patterns/document-title.ts",
+    "topLevel": [
+      "export const TitleSuffixContext = createContext<string>(\"\");"
+    ]
+  }
+]

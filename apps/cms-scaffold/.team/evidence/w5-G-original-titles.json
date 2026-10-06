@@ -1,0 +1,16 @@
+[
+  "W5 real Front selector and three public sites",
+  "W5 real Front album wall uses web image and dimensions",
+  "W5 real Front draft is NotFoundPublic without engineering copy",
+  "W5 real Front clinic vets hide draft",
+  "W5 real Front projects hide private and expose milestones",
+  "W5 real Front member login opens owned dashboard",
+  "W5 real Back album operator opens index and editor",
+  "W5 real Back album composer loads ordered photos",
+  "W5 real Back clinic schedule uses local date",
+  "W5 real Back projects board changes no publication state",
+  "W5 real Back member is forbidden",
+  "W5 real Admin overview types and principals",
+  "W5 real Admin audit list and detail",
+  "W5 real Admin operator is forbidden"
+]

@@ -71,5 +71,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: npm run test:bundle
+      - run: npm run measure:bundle
+      - run: node --test scripts/record-frontend.test.mjs e2e/runner.test.mjs e2e/helpers.test.mjs
+      - run: npx eslint e2e playwright.config.ts
+      - run: npx tsc --noEmit --allowImportingTsExtensions --target es2022 --module esnext --moduleResolution bundler --esModuleInterop --skipLibCheck --types node e2e/*.ts playwright.config.ts
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e:mock

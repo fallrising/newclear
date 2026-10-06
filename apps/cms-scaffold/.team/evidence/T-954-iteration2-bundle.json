@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T16:19:50.118Z",
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "dirty": true,
+  "node": "v24.18.0",
+  "chromium": null,
+  "command": "measure:bundle",
+  "artifact": "bundle.json",
+  "result": "failed",
+  "apps": [
+    {
+      "recordId": "W5-BUNDLE-20261005-01",
+      "app": "front",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-CoJd3jPl.js",
+          "gzipBytes": 123501
+        }
+      ],
+      "total": 123501,
+      "limit": 92160,
+      "delta": 31341,
+      "notes": ""
+    },
+    {
+      "recordId": "W5-BUNDLE-20261005-02",
+      "app": "back",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-BYYTzGm8.js",
+          "gzipBytes": 130894
+        }
+      ],
+      "total": 130894,
+      "limit": 163840,
+      "delta": -32946,
+      "notes": ""
+    },
+    {
+      "recordId": "W5-BUNDLE-20261005-03",
+      "app": "admin",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-BX78LGwe.js",
+          "gzipBytes": 136589
+        }
+      ],
+      "total": 136589,
+      "limit": 163840,
+      "delta": -27251,
+      "notes": ""
+    }
+  ]
+}

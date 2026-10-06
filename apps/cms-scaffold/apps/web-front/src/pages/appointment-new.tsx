@@ -6,7 +6,7 @@ import { Alert, AlertDescription, Button, Card, CardContent, Input, Label, Selec
 import { api } from "../api";
 import { copy, type CopyKey } from "../copy";
 import { currentLocalMinute, localDateTimeToIso, MEMBER_LIST_SIZE, PET_TYPE } from "../member";
-import { useMemberUnauthorized } from "../member-auth";
+import { useMemberUnauthorized } from "../member-session";
 import { Crumbs } from "../parts";
 import { usePageMeta } from "../seo";
 import { FrontTitle } from "../shell";

@@ -25,7 +25,7 @@ BW1 三波 PR 的遠端 CI 與合併記錄見 [發布證據](.team/reports/BW1-P
 
 W2 已完成本地整合與驗收：媒體／關聯選擇器、預覽／修訂還原、請求發布、媒體庫，以及相簿與看板拖放。395前端測試、完整39 mock E2E、lint/typecheck/build/bundle與桌面／手機瀏覽器檢查通過。詳見 [W2交付證據](.team/reports/W2-DELIVERY.md)；已於[PR #245](https://github.com/fallrising/newclear/pull/245)通過遠端CI並合併，沒有部署。BW3會員API已於[PR #252](https://github.com/fallrising/newclear/pull/252)通過CI並合併，詳見 [BW3交付證據](.team/reports/BW3-DELIVERY.md)：本人資料讀取、草稿建立、限流及原子審計；279 Java／125 PostgreSQL／395前端／39 mock E2E通過，[發布證據](.team/reports/BW3-PUBLICATION.md)。BW4後端硬化已完成本地驗證：[審計保留、JDBC接線與重啟／回滾證據](.team/reports/BW4-DELIVERY.md)。293 Java／133 PostgreSQL／395前端／39 mock E2E及三次萬筆效能量測通過，已於 PR #258 通過遠端 CI 並合併。
 
-W3 公開面與 W3b 會員區已分別於 PR #273／#281 合併；[W3b 發布證據](.team/reports/W3b-PUBLICATION.md)。W4 共用治理台已本地驗證：內容類型啟停、帳號與角色權限、審計／保留期限、媒體用量、緊急條目處理。624 前端／68 mock E2E 與必要本地閘門通過，待必要 CI 與合併；[W4 交付證據](.team/reports/W4-DELIVERY.md)。本波不含視覺化內容模型編輯器或自訂角色 CRUD，下一波為 W5 前端硬化，未部署。
+W3 公開面與 W3b 會員區已分別於 PR #273／#281 合併；[W3b 發布證據](.team/reports/W3b-PUBLICATION.md)。W4 共用治理台已本地驗證：內容類型啟停、帳號與角色權限、審計／保留期限、媒體用量、緊急條目處理。624 前端／68 mock E2E 與必要本地閘門通過，已於 PR #289 通過必要 CI 並合併；[W4 交付證據](.team/reports/W4-DELIVERY.md)。本波不含視覺化內容模型編輯器或自訂角色 CRUD，W5前端硬化全部本地验收完成，最終real14/14；VERIFIED隨PR #300通過必要CI／審查並合併生效，未部署。
 
 ## 需求
 
@@ -127,3 +127,5 @@ Demo 種子（無密碼、無 demo 專用表）：
 BW5 開放問題收尾已於 PR #267 合併：帳號 404、媒體錯誤碼與既有 W2 同步、管理輸入驗證、公開關聯依已發布副本篩選、公開／會員整頁媒體解析。339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能與獨立審查通過；[交付證據](.team/reports/BW5-DELIVERY.md)。必要遠端 CI 與遠端結果已核對，未部署。
 
 W3 公開面已完成本地驗收：相簿／相片燈箱、診所／獸醫、專案／里程碑，並補手機導覽、安全 Markdown、SEO 與載入／空／錯誤狀態。339 Java／473 前端／60 mock E2E 通過；Front 直接依賴宣告後另通過乾淨安裝及 119 項 API／Front 回歸。[交付與驗收證據](.team/reports/W3-DELIVERY.md)。待必要遠端 CI 與合併，未部署。
+
+W4 共用 Admin 治理已於 [PR #289](https://github.com/fallrising/newclear/pull/289) 合併；W5前端硬化本地驗收完成，648前端、93mock×3、25Vitals、60axe、11hardening、70canonical與real14均通過；[W5交付證據](.team/reports/W5-DELIVERY.md)。正式VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過必要CI／審查並合併生效。下一步BW6/W6先文件細化；沒有部署。

@@ -1,0 +1,948 @@
+[
+  {
+    "from": {
+      "x": 473.796875,
+      "y": 352,
+      "width": 170.796875,
+      "height": 76
+    },
+    "to": {
+      "x": 665.59375,
+      "y": 317,
+      "width": 188.796875,
+      "height": 160
+    },
+    "checkpoints": [
+      {
+        "phase": "before-readiness",
+        "listboxes": 1,
+        "bodyPointerEvents": "none",
+        "overlays": 0,
+        "events": []
+      },
+      {
+        "phase": "ready-hit-card",
+        "hitCard": "6a509428-47fa-4693-acda-ed95665ce6d3",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 0,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          }
+        ]
+      },
+      {
+        "phase": "after-activation-motion",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 1,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointerdown",
+            "buttons": 1,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 562.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 565.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 568.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 571.1953125,
+            "y": 372,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          }
+        ]
+      },
+      {
+        "phase": "drag-active",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 1,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointerdown",
+            "buttons": 1,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 562.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 565.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 568.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 571.1953125,
+            "y": 372,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          }
+        ]
+      },
+      {
+        "phase": "over-destination",
+        "hitCard": "6a509428-47fa-4693-acda-ed95665ce6d3",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 1,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointerdown",
+            "buttons": 1,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 562.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 565.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 568.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 571.1953125,
+            "y": 372,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 583.7817993164062,
+            "y": 373.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 596.3682250976562,
+            "y": 375.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 608.9547119140625,
+            "y": 377,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 621.5411376953125,
+            "y": 378.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 634.1276245117188,
+            "y": 380.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 646.7140502929688,
+            "y": 382,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 659.300537109375,
+            "y": 383.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 671.886962890625,
+            "y": 385.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 684.4734497070312,
+            "y": 387,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 697.0598754882812,
+            "y": 388.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 709.6463623046875,
+            "y": 390.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 722.2327880859375,
+            "y": 392,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 734.8192749023438,
+            "y": 393.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 747.4057006835938,
+            "y": 395.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 759.9921875,
+            "y": 397,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          }
+        ]
+      },
+      {
+        "phase": "released",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 1,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointerdown",
+            "buttons": 1,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 562.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 565.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 568.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 571.1953125,
+            "y": 372,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 583.7817993164062,
+            "y": 373.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 596.3682250976562,
+            "y": 375.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 608.9547119140625,
+            "y": 377,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 621.5411376953125,
+            "y": 378.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 634.1276245117188,
+            "y": 380.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 646.7140502929688,
+            "y": 382,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 659.300537109375,
+            "y": 383.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 671.886962890625,
+            "y": 385.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 684.4734497070312,
+            "y": 387,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 697.0598754882812,
+            "y": 388.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 709.6463623046875,
+            "y": 390.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 722.2327880859375,
+            "y": 392,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 734.8192749023438,
+            "y": 393.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 747.4057006835938,
+            "y": 395.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 759.9921875,
+            "y": 397,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointerup",
+            "buttons": 0,
+            "x": 759.9921875,
+            "y": 397,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          }
+        ]
+      },
+      {
+        "phase": "patch-and-destination-confirmed",
+        "listboxes": 0,
+        "bodyPointerEvents": "auto",
+        "overlays": 1,
+        "events": [
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1900024414062,
+            "y": 390,
+            "tag": "DIV",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 0,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointerdown",
+            "buttons": 1,
+            "x": 559.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 562.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 565.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 568.1953125,
+            "y": 372,
+            "tag": "A",
+            "testId": null,
+            "card": "6a509428-47fa-4693-acda-ed95665ce6d3",
+            "bodyPointerEvents": "auto",
+            "overlays": 0
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 571.1953125,
+            "y": 372,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 583.7817993164062,
+            "y": 373.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 596.3682250976562,
+            "y": 375.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 608.9547119140625,
+            "y": 377,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 621.5411376953125,
+            "y": 378.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 634.1276245117188,
+            "y": 380.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 646.7140502929688,
+            "y": 382,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 659.300537109375,
+            "y": 383.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 671.886962890625,
+            "y": 385.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 684.4734497070312,
+            "y": 387,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 697.0598754882812,
+            "y": 388.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 709.6463623046875,
+            "y": 390.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 722.2327880859375,
+            "y": 392,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 734.8192749023438,
+            "y": 393.6666564941406,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 747.4057006835938,
+            "y": 395.3333435058594,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointermove",
+            "buttons": 1,
+            "x": 759.9921875,
+            "y": 397,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          },
+          {
+            "type": "pointerup",
+            "buttons": 0,
+            "x": 759.9921875,
+            "y": 397,
+            "tag": "DIV",
+            "testId": null,
+            "bodyPointerEvents": "auto",
+            "overlays": 1
+          }
+        ]
+      }
+    ],
+    "mutations": [
+      {
+        "method": "PATCH",
+        "path": "/api/v1/entries/6a509428-47fa-4693-acda-ed95665ce6d3",
+        "body": {
+          "version": 1,
+          "payload": {
+            "status": "in_progress"
+          }
+        }
+      }
+    ]
+  }
+]

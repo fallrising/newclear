@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T17:28:29.957Z",
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "dirty": true,
+  "node": "v24.18.0",
+  "chromium": null,
+  "command": "measure:bundle",
+  "artifact": ".team/evidence/w5-F-root-bundle.json",
+  "result": "passed",
+  "apps": [
+    {
+      "recordId": "W5-BUNDLE-20261005-16",
+      "app": "front",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-BcMa9IIP.js",
+          "gzipBytes": 85206
+        }
+      ],
+      "total": 85206,
+      "limit": 92160,
+      "delta": -6954,
+      "notes": "Root integrated F iteration1; unchanged fixed budgets"
+    },
+    {
+      "recordId": "W5-BUNDLE-20261005-17",
+      "app": "back",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-BEIjGULj.js",
+          "gzipBytes": 130889
+        }
+      ],
+      "total": 130889,
+      "limit": 163840,
+      "delta": -32951,
+      "notes": "Root integrated F iteration1; unchanged fixed budgets"
+    },
+    {
+      "recordId": "W5-BUNDLE-20261005-18",
+      "app": "admin",
+      "roots": [
+        "index.html"
+      ],
+      "closureKeys": [
+        "index.html"
+      ],
+      "files": [
+        {
+          "file": "assets/index-hV5q7jbb.js",
+          "gzipBytes": 136589
+        }
+      ],
+      "total": 136589,
+      "limit": 163840,
+      "delta": -27251,
+      "notes": "Root integrated F iteration1; unchanged fixed budgets"
+    }
+  ]
+}

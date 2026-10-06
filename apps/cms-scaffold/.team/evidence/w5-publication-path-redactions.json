@@ -1,0 +1,65 @@
+[
+  {
+    "published": ".team/evidence/w5-hardening-results.json",
+    "localOriginal": "test-results/frontend/pre-publication-originals/w5-hardening-results.json",
+    "originalSha256": "81277985ae99d905482dc1f3795d4dd54060fc7d4ff32602d371b28f79ae4997",
+    "publishedSha256": "5ec19cce0a305fe67535a7e67844c33df083edc586cdf8a9d9b39fc9d67bed88",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/evidence/w5-hardening-E2-results.json",
+    "localOriginal": "test-results/frontend/pre-publication-originals/w5-hardening-E2-results.json",
+    "originalSha256": "865313fc7eada353294d5800e30c099490ff1cd1cb98472b9f8ee3b890de222c",
+    "publishedSha256": "d7e999ed1858c826fe71bb33ba8b01c164eead3fbe2f5ee0812d8d7d6e52934d",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/evidence/w5-initial-vitals-results.json",
+    "localOriginal": "test-results/frontend/pre-publication-originals/w5-initial-vitals-results.json",
+    "originalSha256": "3d93d75c590bcfd260529d3ad6b37451224181a6fcb9140bfd23b5df68ec9824",
+    "publishedSha256": "454b0252c57acaf37e83712a342c5263cf3ed11623e1952958c3900947ed6853",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/evidence/w5-axe-results.json",
+    "localOriginal": "test-results/frontend/pre-publication-originals/w5-axe-results.json",
+    "originalSha256": "88001d7a243ed7a570879bd1d97dec75932d3984ea297ee4872e248c1645d58d",
+    "publishedSha256": "e1de83cebe6f459336049e254e510e2a281c449c989e3e1722665d6260b32aa5",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/evidence/w5-hardening-E-results.json",
+    "localOriginal": "test-results/frontend/pre-publication-originals/w5-hardening-E-results.json",
+    "originalSha256": "dd6bfa9f410e5e067c5651c0d24114e5108db10bf90b08770348a57016860dd7",
+    "publishedSha256": "199ba304292e92a7753f2172871c45147303688a2e32d695c3c81917608964d9",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/reports/T-954.md",
+    "localOriginal": "test-results/frontend/pre-publication-originals/T-954.md",
+    "originalSha256": "5b04ccba9b0fda674e59bbf8851eeb97451e5944de08f70cf9d93f92e9ba32e5",
+    "publishedSha256": "5462fb3452b13b1fa31ceba4cb84790f1aadcc320c2b7ef0850fc293bb4b1a19",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/reports/T-955.md",
+    "localOriginal": "test-results/frontend/pre-publication-originals/T-955.md",
+    "originalSha256": "036f10a3bd4a0c84def1174f65177d528bafaf1a784cc97218de2b4b06662def",
+    "publishedSha256": "7a07be25de7c4653d4061f966e059b8296200f7398a9ddf9c33d5accff852d0c",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/reports/T-958.md",
+    "localOriginal": "test-results/frontend/pre-publication-originals/T-958.md",
+    "originalSha256": "f82c940a82bffbd23e2d9007fcaad6e6686c0253954117b81025e142ff9b5aa4",
+    "publishedSha256": "0f15cd0146501015d1208698c2b75c828b0eb75b8c0d700d3edcf4de7d9f5d20",
+    "change": "Only absolute local path prefixes replaced with descriptive placeholders; original outcomes and source hashes preserved."
+  },
+  {
+    "published": ".team/reports/T-958.md",
+    "localOriginal": "test-results/frontend/pre-publication-originals/T-958-final.md",
+    "originalSha256": "3030dd2dbf37bb85970f042a8ca6413d5415fcce6f5803afe3c867d3b87b6e37",
+    "publishedSha256": "831a770f8cab106f668593a38f505a0487f0f7f7d478c8fdf750bf0283fdbe27",
+    "change": "Final T958 report: local path prefixes only; previous report version retained."
+  }
+]

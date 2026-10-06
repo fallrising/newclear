@@ -115,3 +115,9 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 本項目是共用 CMS kernel，三個 demo 並非各自獨立產品。W3b #281 已通過必要 CI 並合併；W4 共用 Admin 本地 `LOCAL_VERIFIED`，待必要 CI 與合併。[W4 交付證據](../../.team/reports/W4-DELIVERY.md)：類型檢視／啟停、系統角色權限、帳號建立與生命週期、稽核篩選、保留期限、媒體用量與緊急條目處理。自訂內容模型的畫面編輯器、自訂角色 CRUD、BW6 後端確認與自身保護並未完成。
 
 624 前端／68 mock E2E、339 Java 快取結果與 14 份桌面／手機視覺 smoke 已通過；包含六項治理邊界 Red→Green。既有快照與原始工作保留。W4 附錄完整新 E2E／無障礙、效能與真實 API 介面驗收由 W5 承接；正式初始化、備份／升級回滾與部署門檻不變。
+
+## W5 驗收完成與發布界線（2026-10-06）
+
+W4已於PR #289合併。W5完成三面入口拆分、deferred provider完整consumer覆蓋、clinic loading穩定化、目前route平行模組載入，以及品質／效能／隔離real runner。648前端、93mock連續三次、25Vitals、60axe、11hardening和70canonical比較均通過；G只修real審計／owned資料準備與board操作時機，最終real14/14、零skipped/flaky，四次ownedstack已全部清理。原失敗與G1遺失附件限制保留。[交付證據](../../.team/reports/W5-DELIVERY.md)與[施工圖](waves/W5.md)可查驗。
+
+VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過最新head必要CI／審查並合併生效，實際發布狀態以PR為準。未部署，不據此宣稱正式可用；正式初始化、備份還原、升級回滾仍為獨立操作驗收。通用CMS的下一波BW6/W6先細化媒體搜尋分頁、治理資訊／自身保護及demo預約權限，不在本次擴張實作。

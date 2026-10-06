@@ -1,0 +1,11 @@
+{
+  "historicalEvidence": "w5-provider-regression.json",
+  "artifactAvailability": {
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/test-failed-1.png": false,
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/trace.zip": false,
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/error-context.md": false
+  },
+  "compactLog": ".team/evidence/w5-focused-app.log",
+  "compactLogAvailable": true,
+  "note": "Original screenshot/trace hashes document observations at the prior stop. Subsequent Playwright runs replaced their ephemeral output directory before archival; do not claim those original files remain available. Current successful browser/provider regressions are separately retained."
+}

@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T17:02:56.847Z",
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "dirty": true,
+  "node": "v24.18.0",
+  "chromium": "153.0.8010.12",
+  "command": "measure:vitals",
+  "artifact": "test-results/frontend/vitals.json",
+  "result": "failed",
+  "samples": [
+    {
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "run": 1,
+      "lcpMs": null,
+      "cls": 0.007282745361328125
+    },
+    {
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "run": 2,
+      "lcpMs": null,
+      "cls": 0.007282745361328125
+    },
+    {
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "run": 3,
+      "lcpMs": null,
+      "cls": 0.007282745361328125
+    },
+    {
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "run": 4,
+      "lcpMs": null,
+      "cls": 0.007282745361328125
+    },
+    {
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "run": 5,
+      "lcpMs": null,
+      "cls": 0.001693853759765625
+    },
+    {
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "run": 1,
+      "lcpMs": null,
+      "cls": 0.003442703247070312
+    },
+    {
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "run": 2,
+      "lcpMs": null,
+      "cls": 0.003442703247070312
+    },
+    {
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "run": 3,
+      "lcpMs": null,
+      "cls": 0.003442703247070312
+    },
+    {
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "run": 4,
+      "lcpMs": null,
+      "cls": 0.003442703247070312
+    },
+    {
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "run": 5,
+      "lcpMs": null,
+      "cls": 0.003442703247070312
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "run": 1,
+      "lcpMs": 2580,
+      "cls": 0.009015447998046875
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "run": 2,
+      "lcpMs": 2468,
+      "cls": 0.007528125000000001
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "run": 3,
+      "lcpMs": 2420,
+      "cls": 0.007528125000000001
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "run": 4,
+      "lcpMs": 3076,
+      "cls": 0.009015447998046875
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "run": 5,
+      "lcpMs": 2428,
+      "cls": 0.009015447998046875
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "run": 1,
+      "lcpMs": 2492,
+      "cls": 0.09149483032226563
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "run": 2,
+      "lcpMs": 2484,
+      "cls": 0.09149483032226563
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "run": 3,
+      "lcpMs": 2648,
+      "cls": 0.09149483032226563
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "run": 4,
+      "lcpMs": 3188,
+      "cls": 0.09149483032226563
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "run": 5,
+      "lcpMs": 2472,
+      "cls": 0.09149483032226563
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "run": 1,
+      "lcpMs": 2452,
+      "cls": 0
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "run": 2,
+      "lcpMs": 2464,
+      "cls": 0
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "run": 3,
+      "lcpMs": 2476,
+      "cls": 0
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "run": 4,
+      "lcpMs": 2492,
+      "cls": 0
+    },
+    {
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "run": 5,
+      "lcpMs": 2500,
+      "cls": 0
+    }
+  ],
+  "summaries": [
+    {
+      "recordId": "W5-VITALS-20261005-01",
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/album",
+      "viewport": "1280x800",
+      "networkCpu": "150ms/1.6Mbps/750Kbps/4x",
+      "runs": 5,
+      "medianLcpMs": 2468,
+      "maxLcpMs": 3076,
+      "medianCls": 0.009015447998046875,
+      "maxCls": 0.009015447998046875,
+      "limits": "LCP median <= 2500ms; max <= 3125ms; CLS median/max <= 0.05",
+      "routeLog": "test-results/frontend/vitals-routes/1791219525180-1897777",
+      "notes": "normal production dist; strict route interception; one warm-up per target"
+    },
+    {
+      "recordId": "W5-VITALS-20261005-02",
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/clinic",
+      "viewport": "1280x800",
+      "networkCpu": "150ms/1.6Mbps/750Kbps/4x",
+      "runs": 5,
+      "medianLcpMs": 2492,
+      "maxLcpMs": 3188,
+      "medianCls": 0.09149483032226563,
+      "maxCls": 0.09149483032226563,
+      "limits": "LCP median <= 2500ms; max <= 3125ms; CLS median/max <= 0.05",
+      "routeLog": "test-results/frontend/vitals-routes/1791219525180-1897777",
+      "notes": "normal production dist; strict route interception; one warm-up per target"
+    },
+    {
+      "recordId": "W5-VITALS-20261005-03",
+      "surface": "front",
+      "url": "http://127.0.0.1:4173/projects",
+      "viewport": "1280x800",
+      "networkCpu": "150ms/1.6Mbps/750Kbps/4x",
+      "runs": 5,
+      "medianLcpMs": 2476,
+      "maxLcpMs": 2500,
+      "medianCls": 0,
+      "maxCls": 0,
+      "limits": "LCP median <= 2500ms; max <= 3125ms; CLS median/max <= 0.05",
+      "routeLog": "test-results/frontend/vitals-routes/1791219525180-1897777",
+      "notes": "normal production dist; strict route interception; one warm-up per target"
+    },
+    {
+      "recordId": "W5-VITALS-20261005-04",
+      "surface": "back",
+      "url": "http://127.0.0.1:4174/",
+      "viewport": "1280x800",
+      "networkCpu": "150ms/1.6Mbps/750Kbps/4x",
+      "runs": 5,
+      "medianLcpMs": null,
+      "maxLcpMs": null,
+      "medianCls": 0.003442703247070312,
+      "maxCls": 0.003442703247070312,
+      "limits": "CLS median/max <= 0.1",
+      "routeLog": "test-results/frontend/vitals-routes/1791219525180-1897777",
+      "notes": "normal production dist; strict route interception; one warm-up per target"
+    },
+    {
+      "recordId": "W5-VITALS-20261005-05",
+      "surface": "admin",
+      "url": "http://127.0.0.1:4175/",
+      "viewport": "1280x800",
+      "networkCpu": "150ms/1.6Mbps/750Kbps/4x",
+      "runs": 5,
+      "medianLcpMs": null,
+      "maxLcpMs": null,
+      "medianCls": 0.007282745361328125,
+      "maxCls": 0.007282745361328125,
+      "limits": "CLS median/max <= 0.1",
+      "routeLog": "test-results/frontend/vitals-routes/1791219525180-1897777",
+      "notes": "normal production dist; strict route interception; one warm-up per target"
+    }
+  ]
+}

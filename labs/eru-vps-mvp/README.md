@@ -36,7 +36,7 @@
 
 此專案是有界限的實驗：不新增另一套常駐 fleet control plane。對既有 OneVPS／OneFleet 的整合只定義邊界；Eru 與既有 runtime 不同時管理同一個應用。真實 inventory、IP、SSH key、快照及 provider state 放在私有操作目錄，不提交到公開 monorepo。
 
-已新增 `scripts/labctl.py`，提供 plan／execute／status／reconcile，詳見操作器文件。SDD 其餘 bootstrap、應用 desired-state、worker／全群重灌、backup／restore 命令仍是待實作契約；沒有供應商重灌程式或全群 reset。
+已新增 `scripts/labctl.py`，提供 plan／execute／status／reconcile，詳見操作器文件。fresh-run 已接入 network 與 fresh bootstrap 本機主線；完整全群 fresh 的應用重播／generation completion 與正式實機驗收仍待完成，沒有供應商重灌程式或全群 reset。
 
 新 controller 接手前可先用 `python3 scripts/controller_preflight.py` 做純本機版本／私有輸入檢查；結果寫入忽略的 `private/controller-preflight/`。[範圍與接手步驟](docs/M3-CONTROLLER-PREFLIGHT-2026-09-23.md)。
 
@@ -61,3 +61,10 @@ python3 scripts/smoke-lab.py
 ```
 
 首次部署使用 `scripts/deploy-lab.py --apply`，已於本次批准後完成。此工具依賴本機 private preflight、已驗證 host public keys 與現有可信 SSH 設定；尚不能在新 controller 上直接 bootstrap。現有完整環境的同版本重複 apply 已通過一次驗收，請見 [操作手冊的 Debian 路徑](docs/RUNBOOK.md)。
+
+## Fresh-run 本機主線
+
+已接續 [fresh-run owned admission／續期](docs/M3-FRESH-RUN-MAINLINE-2026-10-05.md) 與 [fresh bootstrap](docs/M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md)：`labctl fresh-run next` 接受固定 bootstrap 操作，`recover` 僅觀察 uncertain intent，`status` 只核對歷史完整性。每步需要私有 hash-bound request、有效 current renewal 與 operation authorization；普通 mutation 在 pending 期間仍被擋住。此為本機 synthetic 驗證路徑，正式 VPS、應用重播與 generation completion 尚未完成；完成6／剩餘12不變。
+
+
+2026-10-06 本機 bootstrap 主線驗收：完整離線 1,133 項／2723.389 秒、root focused60項及獨立最終49項通過，見 [T-267 evidence gate](.team/reports/T-267.md)。現有 fresh-run 可完成22個固定 bootstrap 步驟；驗證使用 synthetic transport／temp roots，整體 PARTIAL、正式完成6／剩12。下一主線為 apps replay/resources/residue 與 generation completion；遠端交付結果記於 desk T-0075。

@@ -1,5 +1,7 @@
 # 接續開發交接：ERU VPS MVP
 
+2026-10-06 續作：[fresh bootstrap 主線](M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md) 接入既有 `labctl fresh-run next/recover/status`，從已驗證 network history 與當次 renewal/probes 執行 fresh etcd、empty-control-plane、safe core 與三個 agent 的 install/start/register/up。22 個固定步驟分別持久化，lost reply 僅觀察恢復；stage receipt 不釋放 pending 或提交 generation。最終完整離線 1,133 項／2723.389 秒、root focused60項／16.610秒及獨立最終49項／10.123秒通過；本機驗收見 [T-267 evidence gate](../.team/reports/T-267.md)，遠端 CI／合併結果另記 desk T-0075；整體 PARTIAL、正式完成6／剩餘12不變。PR #298 已合併，v0.1.7 兩次既有 build 保留。下一主線 apps-replayed/resources/residue、generation commit/seal/barrier completion 與後續實機驗收。
+
 2026-10-04 最終主線本機驗收：完整1,035項／890.950秒、root focused23項／86.246秒及獨立final整合1項／79.209秒通過；原CI validator／compileall／team／privacy／whitespace通過。見 [T-259 evidence gate](../.team/reports/T-259.md)。network-and-access-ready的manual-console+fixed-probe路徑可產生immutable receipt；整體PARTIAL／正式剩餘12保留，下一主線empty-control-plane/bootstrap及generation。
 
 

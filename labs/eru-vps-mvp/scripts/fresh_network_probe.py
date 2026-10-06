@@ -15,6 +15,22 @@ ERROR = 'network readiness probes rejected'
 SERVICES = ('etcd.service', 'eru-core.service', 'eru-agent.service')
 
 
+def service_expectations(expected=None):
+    """Explicit bootstrap phase; the default retains stopped-network semantics."""
+    if expected is None:
+        return [{unit: 'stopped' for unit in SERVICES} for _ in range(4)]
+    if type(expected) is not list or len(expected) != 4:
+        raise ValueError(ERROR)
+    for index, row in enumerate(expected):
+        exact(row, SERVICES)
+        if any(type(state) is not str or state not in ('active', 'stopped') for state in row.values()):
+            raise ValueError(ERROR)
+        forbidden = ('eru-agent.service',) if index == 0 else ('etcd.service', 'eru-core.service')
+        if any(row[unit] != 'stopped' for unit in forbidden):
+            raise ValueError(ERROR)
+    return copy.deepcopy(expected)
+
+
 def firewall_action(render, index):
     plan = {'id': 'probe', 'run_id': 'probe', 'execution_sha256': '0' * 64, 'render': render}
     return firewall.action(plan, '0' * 64, {'sha256': '0' * 64}, index, '0' * 64, '0' * 64)
@@ -100,7 +116,7 @@ def controller_record(host):
             'authentication': 'ssh', 'trust': 'pinned'}
 
 
-def validate_host(value, render, setup, index):
+def validate_host(value, render, setup, index, *, expected_services=None):
     exact(value, {'host', 'private_interface', 'private_ipv4', 'global_ipv6', 'services',
                   'effective_access', 'current_files', 'firewall_ruleset'})
     host = render['hosts'][index]
@@ -110,7 +126,12 @@ def validate_host(value, render, setup, index):
             or value['global_ipv6'] != ([setup['hosts'][index]['public_ipv6']] if setup['hosts'][index]['public_ipv6'] else [])):
         raise ValueError(ERROR)
     exact(value['services'], SERVICES)
-    if any(v not in ('inactive', 'absent') for v in value['services'].values()):
+    expected = {unit: 'stopped' for unit in SERVICES} if expected_services is None else expected_services
+    phases = [{unit: 'stopped' for unit in SERVICES} for _ in range(4)]
+    phases[index] = expected
+    expected = service_expectations(phases)[index]
+    if any(value['services'][unit] not in (('active',) if state == 'active' else ('inactive', 'absent'))
+           for unit, state in expected.items()):
         raise ValueError(ERROR)
     expected_files = [{k: f[k] for k in ('path', 'sha256')} |
                       {'uid': 0, 'gid': 0, 'mode': '0600', 'nlink': 1, 'kind': 'regular'} for f in host['files']]
@@ -125,9 +146,10 @@ def validate_host(value, render, setup, index):
     firewall.validate_ruleset(value['firewall_ruleset'], firewall_action(render, index))
 
 
-def validate_network_evidence(value, render, now, *, setup=None):
+def validate_network_evidence(value, render, now, *, setup=None, expected_services=None):
     try:
         setup = validate_setup(setup, render)
+        phases = service_expectations(expected_services)
         firewall._bounded(value)
         exact(value, {'schema_version', 'operation', 'observed_at', 'render_sha256', 'setup_sha256',
                       'hosts', 'core_worker_ssh', 'controller_private_ssh', 'public_denials'})
@@ -139,7 +161,7 @@ def validate_network_evidence(value, render, now, *, setup=None):
         if type(value['hosts']) is not list or len(value['hosts']) != 4:
             raise ValueError(ERROR)
         for i, row in enumerate(value['hosts']):
-            validate_host(row, render, setup, i)
+            validate_host(row, render, setup, i, expected_services=phases[i])
         if value['core_worker_ssh'] != [auth_record(render, setup, i) for i in range(1, 4)]:
             raise ValueError(ERROR)
         if value['controller_private_ssh'] != [controller_record(h) for h in render['hosts']]:
@@ -158,9 +180,10 @@ def validate_network_evidence(value, render, now, *, setup=None):
         raise ValueError(ERROR) from None
 
 
-def collect_network_evidence(render, host_keys, *, setup=None, transport=None, runner=None, now=None):
+def collect_network_evidence(render, host_keys, *, setup=None, transport=None, runner=None, now=None, expected_services=None):
     from fresh_network_probe_ssh import collect
-    return collect(render, host_keys, setup=setup, transport=transport, runner=runner, now=now)
+    return collect(render, host_keys, setup=setup, transport=transport, runner=runner, now=now,
+                   expected_services=expected_services)
 
 
 def public_targets(render, setup):

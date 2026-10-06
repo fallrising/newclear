@@ -76,7 +76,10 @@ def _safe(info, directory=False):
 
 class PrivateFiles:
     """Pinned trusted private root; descendants are descriptor-relative no-follow."""
-    def __init__(self, project):
+    def __init__(self, project, *, max_bytes=MAX_BYTES):
+        if type(max_bytes) is not int or not 0 < max_bytes <= 128 * 1024 * 1024:
+            raise ValueError('execution input limit is invalid')
+        self.max_bytes = max_bytes
         self.project = Path(project).absolute()
         self.path = self.project / 'private'
         self.fd = os.open(self.path, os.O_RDONLY | os.O_DIRECTORY)
@@ -143,13 +146,13 @@ class PrivateFiles:
             try:
                 before = os.fstat(fd)
                 _safe(before)
-                if before.st_size > MAX_BYTES:
+                if before.st_size > self.max_bytes:
                     raise ValueError('execution input too large')
                 with os.fdopen(fd, 'rb', closefd=False) as stream:
-                    raw = stream.read(MAX_BYTES + 1)
+                    raw = stream.read(self.max_bytes + 1)
                 after = os.fstat(fd)
                 current = os.stat(parts[-1], dir_fd=parent, follow_symlinks=False)
-                if (len(raw) != before.st_size or len(raw) > MAX_BYTES
+                if (len(raw) != before.st_size or len(raw) > self.max_bytes
                         or _identity(current) != _identity(after)
                         or before.st_mtime_ns != after.st_mtime_ns
                         or before.st_ctime_ns != after.st_ctime_ns):
@@ -204,7 +207,7 @@ class PrivateFiles:
             run = os.open(run_id, DIR_FLAGS, dir_fd=parent)
             try:
                 raw = json.dumps(envelope, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
-                if len(raw) > MAX_BYTES:
+                if len(raw) > self.max_bytes:
                     raise ValueError('execution envelope too large')
                 fd = os.open('.execution.tmp', os.O_CREAT | os.O_EXCL | os.O_WRONLY
                              | os.O_NOFOLLOW, 0o600, dir_fd=run)

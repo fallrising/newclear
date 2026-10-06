@@ -2,7 +2,9 @@ STATUS: PARTIAL
 
 ## Summary
 
-Proposal G is pending owner approval. All production F/native/performance, mock93×3 and canonical70 initial/comparison gates pass. Real attempt001 failed in the unbound Playwright API factory before journeys; the receiver-only tool repair now passes24 contracts/lint/types. Real attempt002 passes10, fails2, and serial mode leaves2 not run. Both disposable stacks were cleaned; no shared resources or backend/fixtures were changed.
+Current result: approved G completed within2/2attempts; real00414/14 and allownedcleanup verified. See [W5 final local delivery](W5-DELIVERY.md). The PARTIAL status and failed verification entries below preserve the original proposal checkpoint rather than claiming unresolved G approval.
+
+Owner explicitly approved proposal G on 2026-10-06. The original proposal and failed-attempt evidence below are historical; W5§0.5 and PLAN now record the active implementation boundaries. All production F/native/performance, mock93×3 and canonical70 initial/comparison gates pass. Real attempt001 failed in the unbound Playwright API factory before journeys; the receiver-only tool repair now passes24 contracts/lint/types. Real attempt002 passes10, fails2, and serial mode leaves2 not run. Both disposable stacks were cleaned; no shared resources or backend/fixtures were changed.
 
 W5 §5.6 requires:「失敗 attempt 先追加 real 表後停止；不得在 W5 自行修改 spec assertion 或產品碼，也不得記成 skipped。」Therefore no real journey assertion or product repair has been applied after attempt002. Proposal G specifically amends this restriction for the two new harness cases below; production changes remain excluded.
 
@@ -15,7 +17,7 @@ W5 §5.6 requires:「失敗 attempt 先追加 real 表後停止；不得在 W5 �
 - Admin audit first row is latest LOGIN_SUCCESS; UI correctly shows null-detail state. OpenAPI AuditEventDetail.detail is nullable (2700–2702); AuthService passes null for successful login; product renders `audit-detail-none`. New harness unconditionally expects `audit-detail-json` — failed
 - Board selecting CMS Scaffold then mouse drag yields no PATCH, card staysready; current source matches existing mock drag steps. Real differs by preceding RadixSelect interaction. Pointer hit/actionability/render timing is a hypothesis, not a confirmed product defect — failed
 - Both attempt cleanup logs remove5ownedcontainers/2volumes/network; no ownedresource remains, private directories deleted — passed
-- G has not been implemented; no success inferred for remainingreal14 — skipped
+- At proposal time G was not implemented; historical remainingreal14 had no success evidence — skipped
 
 ## Documentation
 
@@ -28,4 +30,4 @@ Proposed G, maximum2 diagnostic/repair real attempts after approval:
 
 ## Risks and Follow-ups
 
-Owner approval is required because G changes the exact Admin#2 blueprint assertion and real setup scope. Sourcefix/canonical/evidence work already authorized may be saved while G remains pending. No permission is being requested again for commit/push/PR/merge, and this pause is from W5§5.6, not automatic approval review.
+Owner approval for the exact Admin#2 assertion and owned setup scope was received on 2026-10-06. Root may now execute the approved bounded G harness correction and final acceptance; product changes remain excluded. No permission is being requested again for commit/push/PR/merge, and this pause is from W5§5.6, not automatic approval review.

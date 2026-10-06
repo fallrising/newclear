@@ -1,38 +1,31 @@
-STATUS: PARTIAL
+STATUS: DONE
 
 ## Summary
 
-Generic CMS Front/Back/Admin W5 hardening remains in acceptance. W4 is merged in PR #289. Owner-approved A–F repairs preserve the shared CMS architecture, existing API/fixtures, fixed budgets and previous wave behavior. Draft PR #300 is published for approved initial canonical authoring; no merge, deployment or production-readiness claim.
+Generic CMS Front/Back/Admin W5 implementation and local acceptance are complete. Owner-approved A–G retain the reusable CMS architecture, fixed budgets, API/fixtures and security assertions. PR #300 carries this wave; VERIFIED takes effect only when that PR is merged after its current-head CI/review gate. Publication receipt and remote result are synchronized in the session handoff after merge. No deployment or production-readiness claim.
 
-Implemented actual route/module boundaries and deferred UI/provider loading; corrected Back FieldsProvider coverage for media/composer/schedule; kept Front query client scoped to App lifetime. Added fixed gzip entry measurement, validated append-only record output, quality/Vitals harnesses, canonical visual CI and an isolated real API runner. F fixes clinic pending profile/vet/account/appointment geometry and starts only currently matched route modules concurrently using stable promises. No runtime dependency, lockfile, backend or data contract change.
+W5 implements actual route/module boundaries, deferred UI/provider loading with complete Back consumer coverage, App-lifetime Front query cache, fixed gzip measurement and append-only recording, 25-sample production Vitals, 60 axe/11 hardening/70 canonical visual coverage, and an owned disposable real API runner. F stabilizes clinic loading geometry and starts only matched route modules concurrently. G corrects only real Admin nullable audit/owned nonempty-event coverage and board operation timing; no additional product/dependency/backend/seed/snapshot change.
 
 ## Verification
 
-- Root pre-F `npm run lint`, `npm run typecheck`, `npm test` (643), `npm run build`, `npm run test:bundle`, `npm run measure:bundle`; `.team/evidence/w5-native-*.log`, `w5-final-measure.log` — passed
-- Root F Front lint/typecheck and147 tests in16files; `.team/evidence/w5-F-root-{lint,types,tests}.log` — passed
-- T958 worker fullbuild/isolation and entry budgets85206/92160,130889/163840,136589/163840; immutable source manifest and logs copied to `.team/evidence/T-958-*`; root full25 measurement passed — passed
-- Actual-App Back provider browser4/4 and independent cold unit5/5; all8media-card assertions preserved — passed
-- Root recorder/measurer27 and harness52 contracts plus harness lint/types; visible logs `.team/evidence/w5-root-tool-contracts.log`, `w5-root-harness-contracts.log`, `w5-E-final-*.log` — passed
-- Pre-F accessibility60 scans, critical/serious0; moderate findings retained in `w5-axe.json` — passed
-- E-aligned hardening11/11 and memberlink focused1/1; `w5-root-hardening-E2.log`, `w5-root-memberlink-E.log` — passed
-- Axe negative control detected unlabeled button; visual independent10pxredoutline control exited1 with39200differentpixels, proving rejection; `w5-axe-negative-control.json`, `w5-visual-negative-control.json` — passed
-- Historical prescribed bundle/provider, hardening7/11 and10/11, mock92/93, initial trace-owner failure and complete25Vitals clinicCLS/LCP failure remain in archived evidence and append-only rows — failed
-- Initial canonical qualityCI axe60/hardening11/visual70; exact70SHA256 plus rootall-page review; `.team/evidence/w5-canonical-review.json` — passed
-- Three serial finalmock runs93/93each, zero skipped/flaky; `w5-mock-final-{1,2,3}.json` — passed
-- Initial remoteCMS CI java/java-integration/weballpass, run37349357448; finalF source independently reviewed T959, no blocker — passed
-- Canonical comparison-onlyCI37350721874:70passed and unchanged70hashes; `w5-canonical-comparison.json` — passed
-- Real001 setupfailure andreal00210passed/2failed/2notrun retained; `w5-real-attempt{1,2}.json`; assertion repair awaitsG — failed
-- Exactruntimecleanup ofbothownedstacks/privatefiles verified; `w5-real-cleanup.json` — passed
-- API factory receiver repair:24runner/helpercontracts, lint/types; scoped original-source Red retained — passed
-- Real14acceptance and G owner amendment pending; no merge — skipped
+- Product/native acceptance: exact saved head35bc6634 remote CMS CI37352247308 passes Java/java-integration, frontend648, lint/typecheck/build/bundle/isolation and mock93; visible `.team/evidence/w5-head-cms-ci.log`. G608-file product/contract/quality freeze unchanged, so this evidence remains applicable — passed
+- Root Front147 and fixed entry gzip85206/92160,130889/163840,136589/163840; `.team/evidence/w5-F-root-*` and existing native/tool logs — passed
+- Complete25 production Vitals, clinic median2316/max2324ms/CLS0, all five targets within original limits; `.team/evidence/w5-F1-vitals.json` and rows VITALS-20261005-06–10 — passed
+- Three clean finalmock93/93 runs, zero flaky/skipped; `.team/evidence/w5-mock-final-{1,2,3}.json`, rows MOCK-20261005-02–04 — passed
+- Canonical quality60axe/11hardening/70visual initial+comparison, all70 reviewed/hash-verified, latest saved-head qualityCI37352247281 SUCCESS; `.team/evidence/w5-head-quality-ci.log`, `w5-canonical-{review,comparison}.json` — passed
+- G focused Red→Green and root `node --test e2e/helpers.test.mjs e2e/runner.test.mjs`:31/31; exact logs `T-960-red.log`, `w5-G-contracts.log`; final harness ESLint/types exit0, actual list14; `.team/evidence/w5-G-final-preservation.json`, `w5-G-list.log` — passed
+- Full final `npm run e2e` real004 (G2/2), exit0,14/14,0unexpected/serial-notrun/flaky; `.team/evidence/w5-real-attempt4.json`, `w5-G-attempt4-summary.json`, row REAL-20261006-04 — passed
+- Real004 diagnostics show early Selectlistbox1/bodypointer-eventsnone before readiness, then0/auto and card hit; actual mouse activates overlay, drops into destination, sole PATCH status=in_progress. `.team/evidence/w5-G-board-diagnosis.json`; no product defect inferred — passed
+- All four real attempts' owned containers/volumes/networks absent and private directories removed; `.team/evidence/w5-real-cleanup.json`. Real003 failure12passed/1failed/1serial-notrun, and its lost timeout attachment, are preserved explicitly in W5§0.5.1/summary/row REAL-20261006-03 — passed
+- Historical bundle/provider, hardening, mock, Vitals, real001–003 failures and limitations are retained in [pre-G report](W5-DELIVERY-PRE-G.md), original reports/raw artifacts and append-only rows; final corrections have passing evidence — passed
+- Protected product/contract/quality/Vitals608 files and all14titles/order unchanged by G; original motion, solePATCH/payload/destination/no-publication and existing RBAC/member isolation assertions retained; `.team/evidence/w5-G-final-preservation.json` — passed
 
-- Root `npm run measure:vitals -- --reporter=list,json`25/25; clinic median2316ms/max2324ms/CLS0, all five targets pass; `w5-F1-vitals.json` — passed
-- Root final bundle85206/130889/136589 and isolation; `w5-F-root-bundle.json` — passed
+- Independent T961 actual diff/source/artifact review, no scope/security blocker; report validated and root evidence gate accepted all local checks — passed
 
 ## Documentation
 
-W5 §§0.1–0.4 record owner A–F amendments before dependent changes. Original checkpoint and T951–T958 reports remain historical; this report consolidates current acceptance. PLAN, roadmap, README and readiness reflect IN_PROGRESS. Historical ledger rows and worker hashes are retained; new measurements will be appended with unique record IDs.
+W5§§0.1–0.5.1 record owner-approved A–G, two G attempts, diagnosed timing and the G1 attachment limitation. PLAN and T960/T961 track scoped implementation, independent review and root acceptance. Frontend records only append REAL-20261006-03/04; earlier rows and immutable worker evidence remain. The roadmap and readiness describe generic CMS acceptance with PR-linked publication state. BW6/W6 remain DRAFT and require separate document refinement before implementation.
 
 ## Risks and Follow-ups
 
-Finish all explicit W5 gates before VERIFIED or merge. Initial canonical baseline needs the approved draft-PR CI authoring cycle and human/agent visual review before its second commit and comparison run. Real runner must prove14/14 and owned cleanup; no shared project cleanup. Initial provider failure PNG/trace were overwritten before archival; retained hashes/context/log and the correction are disclosed in `w5-provider-artifact-status.json`. This limitation is not represented as retained original artifacts.
+Root must wait for all necessary current PR-head CI and required review before merge, verify remote ancestry/CMS-tree equality, then synchronize the publication receipt and handoff. Saved-head CI supports unchanged product evidence but cannot replace current-head CI. G budget2/2 consumed with final14/14; no further diagnostic repair. Initial provider artifacts were overwritten before archival as already disclosed; G1 pointer attachment was lost, while final immediate checkpoints are retained. Deployment, formal initialization, backup/restore and upgrade/rollback remain separate milestones. Next functional planning is BW6/W6 media search/pagination, governance query/safety metadata and clinic appointment permissions; all demos remain packs of a reusable CMS.

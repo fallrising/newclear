@@ -116,8 +116,8 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 
 624 前端／68 mock E2E、339 Java 快取結果與 14 份桌面／手機視覺 smoke 已通過；包含六項治理邊界 Red→Green。既有快照與原始工作保留。W4 附錄完整新 E2E／無障礙、效能與真實 API 介面驗收由 W5 承接；正式初始化、備份／升級回滾與部署門檻不變。
 
-## W5 進行中（2026-10-05）
+## W5 驗收完成與發布界線（2026-10-06）
 
-W4 已於 PR #289 通過必要 CI 並合併，[發布證據](../../.team/reports/W4-PUBLICATION.md)關閉上述本地檢查點。W5 已完成三面入口拆分與 deferred provider 修正，新增完整品質／效能量測和一次性真 API runner；本地原完整643前端測試、bundle、axe60與修訂後hardening11通過。Owner核准F後的Front147回歸亦通過，但完整25次效能修補驗證仍在執行；93 mock連續三次、canonical70視覺、real14及必要遠端CI尚未完成，W5維持IN_PROGRESS。失敗量測及修正依据保留於[W5施工圖](waves/W5.md)與[團隊計畫](../../.team/PLAN.md)。未部署，不據此宣稱正式可用。
+W4已於PR #289合併。W5完成三面入口拆分、deferred provider完整consumer覆蓋、clinic loading穩定化、目前route平行模組載入，以及品質／效能／隔離real runner。648前端、93mock連續三次、25Vitals、60axe、11hardening和70canonical比較均通過；G只修real審計／owned資料準備與board操作時機，最終real14/14、零skipped/flaky，四次ownedstack已全部清理。原失敗與G1遺失附件限制保留。[交付證據](../../.team/reports/W5-DELIVERY.md)與[施工圖](waves/W5.md)可查驗。
 
-W5 後續已通過完整25Vitals、93mock三次、60axe、11hardening與70canonical視覺比較；PR #300保存進度。真實API目前10/14，兩項失敗另有兩項串行未執行，不能宣稱完成。所有本次測試資源已清理；[修訂G](../../.team/reports/W5-REAL-AMENDMENT.md)等待授權後才能調整固定realassertions。
+VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過最新head必要CI／審查並合併生效，實際發布狀態以PR為準。未部署，不據此宣稱正式可用；正式初始化、備份還原、升級回滾仍為獨立操作驗收。通用CMS的下一波BW6/W6先細化媒體搜尋分頁、治理資訊／自身保護及demo預約權限，不在本次擴張實作。

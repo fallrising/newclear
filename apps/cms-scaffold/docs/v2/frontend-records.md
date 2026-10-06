@@ -106,3 +106,7 @@ mock e2e 每次 repetition 一列；W5 前置 suite 是 47 個（W0～W2 的 39�
 | W5-REAL-20261005-01 | 2026-10-05T17:42:17.207Z | d84738eb728190494145866bf6b0648305105701 | yes | 1 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-1942395-769b7e022bc9d437 | 0 / 14 | 93.557 | npm run e2e | test-results/frontend/real-e2e-logs/001/real-e2e.json | failed | tests; Isolated disposable project; owned cleanup and redacted attempt logs. |
 
 | W5-REAL-20261005-02 | 2026-10-05T17:47:22.833Z | 2b6babf860210cd62cd202fe6b18613bf35c872b | yes | 2 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-1946377-913c0c36e39cc6cc | 10 / 14 | 74.867 | npm run e2e | test-results/frontend/real-e2e-logs/002/real-e2e.json | failed | tests; Isolated disposable project; owned cleanup and redacted attempt logs. |
+
+| W5-REAL-20261006-03 | 2026-10-06T12:30:36.752Z | 35bc6634debcdd58643b608ed9704b4db6eeaa6e | yes | 3 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-2051694-3e943f0111a67954 | 12 / 14 | 65.744 | npm run e2e | test-results/frontend/real-e2e-logs/003/real-e2e.json | failed | tests; Isolated disposable project; owned cleanup and redacted attempt logs. |
+
+| W5-REAL-20261006-04 | 2026-10-06T12:36:14.423Z | 35bc6634debcdd58643b608ed9704b4db6eeaa6e | yes | 4 | linux | openjdk 25.0.4.1 2026-08-18 LTS | 5.6.0 | cms-w5-e2e-2055853-91e5311cf64123c1 | 14 / 14 | 38.073 | npm run e2e | test-results/frontend/real-e2e-logs/004/real-e2e.json | passed | none; Isolated disposable project; owned cleanup and redacted attempt logs. |

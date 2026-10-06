@@ -1,6 +1,10 @@
 package cluster
 
-import "testing"
+import (
+	"fmt"
+	"slices"
+	"testing"
+)
 
 func TestOwnerStable(t *testing.T) {
 	r := New("http://n1:8080", []string{"http://n1:8080", "http://n2:8080", "http://n3:8080"})
@@ -82,6 +86,55 @@ func TestEpochStableForSameAliveSet(t *testing.T) {
 	e3 := r.Epoch()
 	if e3 == e1 {
 		t.Fatal("epoch should change when alive set changes")
+	}
+}
+
+func ringWithMembership(nodes []string) (*Ring, *Membership) {
+	r := New(nodes[0], nodes)
+	m := NewMembership(r.Self, r.Nodes, MembershipConfig{FailThreshold: 1})
+	r.Membership = m
+	return r, m
+}
+
+func queueNames(n int) []string {
+	out := make([]string, n)
+	for i := range out {
+		out[i] = fmt.Sprintf("q-%d", i)
+	}
+	return out
+}
+
+var fiveNodes = []string{"http://n1:8080", "http://n2:8080", "http://n3:8080", "http://n4:8080", "http://n5:8080"}
+
+func TestNodeFailurePromotesExistingReplica(t *testing.T) {
+	for _, victim := range fiveNodes {
+		r, m := ringWithMembership(fiveNodes)
+		before := map[string][]string{}
+		for _, q := range queueNames(500) {
+			before[q] = r.Replicas(q, 2)
+		}
+		m.SetAlive(victim, false)
+		for q, replicas := range before {
+			if owner := r.Owner(q); !slices.Contains(replicas, owner) {
+				t.Fatalf("victim %s: queue %s moved to %s, which held no copy (replicas %v)", victim, q, owner, replicas)
+			}
+		}
+	}
+}
+
+func TestNodeFailureKeepsSurvivingOwners(t *testing.T) {
+	for _, victim := range fiveNodes {
+		r, m := ringWithMembership(fiveNodes)
+		before := map[string]string{}
+		for _, q := range queueNames(500) {
+			before[q] = r.Owner(q)
+		}
+		m.SetAlive(victim, false)
+		for q, owner := range before {
+			if owner != victim && r.Owner(q) != owner {
+				t.Fatalf("victim %s: queue %s moved from live owner %s to %s", victim, q, owner, r.Owner(q))
+			}
+		}
 	}
 }
 

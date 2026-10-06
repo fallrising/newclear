@@ -239,7 +239,7 @@ HTTP spans are exported via OTLP/HTTP when the endpoint is set.
 
 ### Multi-node sharding
 
-Each queue is owned by one node (FNV hash of the name). Non-owners reverse-proxy the request.
+Each queue is owned by one node, chosen by rendezvous hashing of the queue name over live nodes. Non-owners reverse-proxy the request.
 
 ```bash
 # node1
@@ -266,7 +266,7 @@ Primary enqueues locally, then sync-replicates to the next N−1 nodes on the ri
 
 **List queues** aggregates across peers and counts **primary-owned** queues only (avoids double-counting replicas). Use `?local=1` for this node only.
 
-**Failover (v1.1+):** peers are probed on an interval; after `CLARKQ_CLUSTER_FAIL_THRESHOLD` failures a node is marked dead and **removed from the hash ring**. Ownership moves to remaining live nodes automatically (best if `REPLICATION_FACTOR≥2` so the new owner already has copies).
+**Failover (v1.1+):** peers are probed on an interval; after `CLARKQ_CLUSTER_FAIL_THRESHOLD` failures a node is marked dead and **removed from ownership**. Only the queues the dead node owned move, each to its next-ranked node — which is its existing replica when `REPLICATION_FACTOR≥2`. Queues owned by live nodes do not move.
 
 **Durable outbox + catch-up (v1.2):** failed/async replication is written to a JSON outbox on disk and retried after restart. A background catch-up loop pulls/merges missing message IDs across the replica set and has the primary push gaps to recovering replicas.
 

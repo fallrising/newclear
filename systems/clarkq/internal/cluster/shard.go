@@ -1,10 +1,12 @@
 package cluster
 
 import (
+	"cmp"
 	"hash/fnv"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -16,7 +18,7 @@ const (
 	CatchUpHeader    = "X-ClarkQ-CatchUp"
 )
 
-// Ring maps queue names to owner nodes via consistent hashing (FNV of name).
+// Ring maps queue names to owner nodes via rendezvous (highest-random-weight) hashing.
 // When Membership is attached, only *alive* nodes participate in ownership.
 type Ring struct {
 	Self       string   // this node's advertise URL (normalized, no trailing slash)
@@ -70,17 +72,43 @@ func (r *Ring) activeNodes() []string {
 
 // Owner returns the node base URL that owns queueName among active nodes.
 func (r *Ring) Owner(queueName string) string {
-	nodes := r.activeNodes()
-	if len(nodes) == 0 {
+	ranked := r.rankedNodes(queueName)
+	if len(ranked) == 0 {
 		return ""
 	}
-	if len(nodes) == 1 {
-		return nodes[0]
-	}
-	h := fnv.New32a()
+	return ranked[0]
+}
+
+// rankedNodes orders active nodes by rendezvous score for queueName, highest first.
+// Removing a node only moves the queues it ranked first, and each moves to its
+// next-ranked node — the replica that already holds a copy.
+func (r *Ring) rankedNodes(queueName string) []string {
+	nodes := slices.Clone(r.activeNodes())
+	slices.SortFunc(nodes, func(a, b string) int {
+		if c := cmp.Compare(rendezvousScore(b, queueName), rendezvousScore(a, queueName)); c != 0 {
+			return c
+		}
+		return strings.Compare(a, b)
+	})
+	return nodes
+}
+
+func rendezvousScore(node, queueName string) uint64 {
+	h := fnv.New64a()
+	_, _ = h.Write([]byte(node))
+	_, _ = h.Write([]byte{0})
 	_, _ = h.Write([]byte(queueName))
-	idx := int(h.Sum32() % uint32(len(nodes)))
-	return nodes[idx]
+	return mix64(h.Sum64())
+}
+
+// mix64 is the splitmix64 finalizer; raw FNV scores of similar names cluster badly.
+func mix64(x uint64) uint64 {
+	x ^= x >> 30
+	x *= 0xbf58476d1ce4e5b9
+	x ^= x >> 27
+	x *= 0x94d049bb133111eb
+	x ^= x >> 31
+	return x
 }
 
 // IsLocal reports whether this node owns the queue (among alive set).
@@ -91,37 +119,14 @@ func (r *Ring) IsLocal(queueName string) bool {
 	return r.Owner(queueName) == r.Self
 }
 
-// ownerIndex returns the index of the primary owner in the active node list.
-func (r *Ring) ownerIndex(queueName string) int {
-	nodes := r.activeNodes()
-	owner := r.Owner(queueName)
-	for i, n := range nodes {
-		if n == owner {
-			return i
-		}
-	}
-	return 0
-}
-
 // Replicas returns up to factor nodes responsible for queueName (primary first),
 // chosen from the alive set so failover promotes the next live node.
 func (r *Ring) Replicas(queueName string, factor int) []string {
-	nodes := r.activeNodes()
-	if len(nodes) == 0 {
+	ranked := r.rankedNodes(queueName)
+	if len(ranked) == 0 {
 		return nil
 	}
-	if factor < 1 {
-		factor = 1
-	}
-	if factor > len(nodes) {
-		factor = len(nodes)
-	}
-	start := r.ownerIndex(queueName)
-	out := make([]string, 0, factor)
-	for i := 0; i < factor; i++ {
-		out = append(out, nodes[(start+i)%len(nodes)])
-	}
-	return out
+	return ranked[:min(max(factor, 1), len(ranked))]
 }
 
 // IsReplica reports whether this node is among the replica set for the queue.

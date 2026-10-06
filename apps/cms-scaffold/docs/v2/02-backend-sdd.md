@@ -374,6 +374,7 @@ BW0 施工細節見 `waves/BW0.md`。
 | BQ-11 | 公開列表的每一筆 entry，其 `media-ref` 值都由 `MediaService.resolvePublic` 各自查詢媒體 store（媒體、variants、attachments 與其 entry），查詢數隨筆數增加，§5.4 的「與筆數無關」因此只對 content store 成立（BW1b 細化時發現）。選項：A. BW1c 修 B-13 時一起改成整頁批次解析；B. 維持。 | A |
 | BQ-12 | 狀態變更與審計在同一個交易（BD-09），但沒有測試證明「審計寫入失敗時狀態變更也回滾」：`./gradlew test` 用 in-memory store（沒有交易），`integrationTest` 的 store 契約只測單一 store（BW2 細化時發現，waves/BW2.md §7.8）。選項：A. BW4 新增一個 `integrationTest`，以 PostgreSQL 啟動應用並讓審計寫入失敗（例如 actor 指向不存在的 principal，違反外鍵），檢查 entry 沒有改變；B. 維持。 | A |
 | BQ-13 | 三個 `*StoreConfig` 以 `@ConditionalOnBean(DataSource.class)` 選 JDBC store，但這個條件在一般 `@Configuration` 上會先於 Spring Boot 定義 `DataSource` 被判斷，所以有資料庫時仍然用 in-memory store，正式環境的資料重啟就消失（BW4 細化寫 BQ-12 的測試時發現）。選項：A. BW4 修正（在 bean 方法內以 `ObjectProvider<DataSource>` 判斷），並以應用程式層級的 `integrationTest` 驗證；B. BW0 修正（要改 BW0～BW4 施工圖的測試數）。 | A（owner 已決定，2026-09-25） |
+| BQ-14 | BW6 Q-26 要求 clinic operator 對 appointment_request 只有 read_draft/update、不給 publish；現有 operator 通配 grants × assignment allowlist 會一併授與 publish，新增精確 read/update grants 不能覆蓋它；額外 editor 也帶 create，第六個角色又被 Q-21=B 排除。完整來源、可審查方案與影響見 [BW6 開工盤點](bw6-refinement.md#bq-14q-26-的授權粒度衝突)。選項：A. 新增通用 assignment 每類型 action 上限並保留舊行為／舊 PUT 上限；B. 明列 operator grants 並另定 persisted/custom grants 升級政策；C. 暫緩 Q-26 並修訂 BW6/W6 範圍。 | B（owner 已批准，2026-10-06；標準種子精確匹配轉換、客製資料保留並回報未套用、未來類型明確 grants；完整政策見盤點） |
 
 **Owner 決定（2026-09-25）：** BQ-03 預設 90 天（surface-admin §7.2），可選 30／90／365；BQ-06、07、08、10、11 選 A，在 BW5 做（§7）；BQ-12 選 A，在 BW4 做。
 
@@ -391,3 +392,5 @@ BW0 施工細節見 `waves/BW0.md`。
 **BW4 增量實作（2026-10-04）：** 依BW4 §0補入90天預設審計保留設定與延後清理、V9，以及完整應用DataSource選用JDBC。專項PostgreSQL測試已證明發布與設定的真實審計外鍵失敗會回滾，且重新建立應用context可讀回內容／設定／session／索引／revision／audit；不等於部署或備份還原驗收。三次萬筆store量測工作74/70/74ms、公開71/75/77ms、更新18/17/19ms，全部達標，BQ-05維持現有索引表。最終完整驗收與發布狀態見BW4波次及交付報告。
 
 **BW5 增量實作範圍（2026-10-04）：** 依 BW5 §0 關閉 BQ-06／07／08／10／11；保留先前媒體已發布值比對與授權／交易修正。既有 W2 的上傳錯誤提示與 MSW 在同波改用大寫代碼，不保留前端失敗例外。VARCHAR 長度按 Unicode code point 驗證。完整結果見 BW5 波次與交付證據；並發 duplicate-email 限制仍依原決定保留。
+
+**BW6 細化（2026-10-06）：** BQ-14 B已批准，八題施工細節見 [waves/BW6.md](waves/BW6.md) §4～§8、完整契約及兩份附錄。DOC_READY隨文件PR合併；30卡實作仍未開始，不以文件驗證取代產品驗收。

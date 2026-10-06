@@ -1,6 +1,6 @@
 # Native workspace acceptance
 
-Status: acceptance specification, 2026-10-05. This slice verifies the existing desktop workspace after window-close protection; it does not add crash recovery or restart the deferred feature roadmap. The starting runtime is commit `363cecf98fcb2a6543edfb15aa2ae15f75065423` (window-close implementation PR #288).
+Status: six Linux native scenarios passed on 2026-10-05; see [verification and remaining limits](workspace-acceptance-verification.md). This slice verifies the existing desktop workspace after window-close protection; it does not add crash recovery or restart the deferred feature roadmap. The starting runtime is commit `363cecf98fcb2a6543edfb15aa2ae15f75065423` (window-close implementation PR #288).
 
 ## Required Linux scenarios
 
@@ -14,6 +14,12 @@ Use a real Tauri binary, WebKitGTK, WebDriver, a desktop display/window manager 
 6. **Terminal removal and fallback:** closing a terminal terminates its child, removes incident routing edges, and leaves the remaining terminal usable. Run with no named override follows the remaining active terminal and does not target the removed session.
 
 A scenario may be split into smaller cases for reliable cleanup and diagnostics. Record exactly which cases run; do not infer full platform or feature completion from the count. A failing test oracle must be corrected with evidence, separately from a product regression. Product behavior changes require a failing regression before the repair.
+
+## Terminal input ordering repair
+
+Native acceptance reproduced correctly ordered browser key events arriving at the shell with adjacent characters swapped. The terminal UI currently submits independent asynchronous writes for successive input events. The repair must preserve call order for every frontend `writeStdin` payload within one session, including keyboard input and document Run; submit the next native write only after the preceding write settles. Different sessions must remain independent. Return each call's own success/failure, keep subsequent writes usable after a rejection, and release idle queue state. Do not change frozen IPC shapes or claim ordering for external callers bypassing this frontend boundary.
+
+Before implementation, add deterministic regressions that hold native write acknowledgements, prove a second same-session call cannot overtake the first, and cover cross-session independence, rejection recovery and idle cleanup behavior. Re-run the native rapid-input case without throttling, then the full workspace acceptance suite and frontend gates. This is a local correctness repair discovered by the acceptance slice, not a new terminal feature.
 
 ## Harness and evidence
 

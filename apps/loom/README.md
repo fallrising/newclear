@@ -9,7 +9,7 @@ Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal 
 | Area | Implemented | Remaining limitation |
 |---|---|---|
 | Contracts | Rust types, generated TypeScript, fixtures/origin tests | Live AI IPC uses separate Rust/TS DTOs rather than the frozen generated AI shape |
-| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding and shared node cleanup have regression tests; full desktop restart/Run/Pin acceptance remains separate |
+| Terminals | Real PTY, output batching/ring, detach/reattach, restart tombstones | Incremental Unicode decoding and shared node cleanup have regression tests; six Linux native workspace scenarios passed; Windows/macOS remain unverified |
 | Documents | CodeMirror, disk reads/writes, hash conflicts, runnable Run and local output Pin | Versioned/serialized saves, canonical event identity and create-only missing-file recovery tested; normal saves do not provide cross-process CAS |
 | Canvas | Nodes, three edge kinds, sidecar persistence, named `run_in` routing | Invalid/unsupported sidecars block autosave with recovery feedback; no LOD or formal stress acceptance |
 | AI | Anthropic/OpenAI/DeepSeek adapters, configurable OpenCode Go, three streaming protocols, connected context sources | One Go `glm-5.3-flash` Chat Completions request verified live; other live model/protocol combinations and native GUI remain unverified |
@@ -22,7 +22,7 @@ The [reliability specification](docs/reliability.md) records the audited gaps an
 
 The [session recovery specification](docs/session-recovery.md) describes the history panel. Restart explicitly reruns the saved command in a new terminal; opening the app never reruns it automatically. Canvas layout remains in `.loom/canvas.json`, and Markdown remains in files. If storage is unavailable or another instance owns the session database, the panel warns that current history is in memory only.
 
-The [current development and acceptance inventory](docs/development-status.md) separates remaining native workspace acceptance, Windows/macOS validation and potential follow-up capabilities.
+The [current development and acceptance inventory](docs/development-status.md) records the [six-scenario Linux workspace acceptance](docs/workspace-acceptance-verification.md), Windows/macOS validation and potential follow-up capabilities. The [platform setup guide](docs/native-platform-acceptance.md) explains Windows testing in a Proxmox VM.
 
 ## Run
 

@@ -833,7 +833,7 @@ Owner 指示「按建議」：Q-17 選 A（轉後端窗口；2026-10-03 起由 B
 | Q-20 | surface-admin §4.4、§5.1、AC-B 要求類型列表顯示 `pack`、`entryCount`、`publishedCount`，停用確認文案含「目前 published = {n}」，並可設定 `defaultVisibility`、`surfaces`；BW5 的 `AdminContentType` 沒有這些欄位，也只有 `enable`／`disable` 兩個寫入端點。 | **A**：後端在 `AdminContentType` 加 `pack`（nullable）、`entryCount`、`publishedCount`（不含軟刪），前端補欄位與確認文案；`defaultVisibility`、`surfaces` 另案。**B**：維持；W4 的列表與確認文案不含數量。 | **A**（計數對「停用會影響多少已發布內容」很重要，後端成本低）。W4 依 B |
 | Q-21 | surface-admin §4.4 與流程 B（§6.3、AC-D）要求建立、複製（Clone）、改名、刪除自訂角色（例如 `clinic_operator`），角色另有 `surfaces[]`；BW5 只有 `GET /roles` 與 `GET`／`PUT /roles/{code}/permissions`。 | **A**：後端新增 `POST /roles`（`{code, displayName, cloneFrom?}`）、`PATCH /roles/{code}`、`DELETE /roles/{code}`（系統角色 409），前端補 `/roles/new` 與複製。**B**：v2 只用 5 個系統角色；「只給診所」以帳號的類型範圍（`contentTypeCodes`）達成。 | **B**（系統角色＋帳號類型範圍已能表達三個 demo）。W4 依 B |
 | Q-22 | surface-admin §4.4、§6.5、AC-F、AC-G 要求依帳號的媒體用量、調整配額（`PATCH /settings/media`）、媒體硬刪（`DELETE /media/{id}?mode=hard`）、`/settings/storage`、`/settings/security`；BW5 只有 `GET /media/quota`（整個媒體庫）。 | **A**：後端新增 `GET /admin/media/usage`（`byPrincipal`）、`PATCH /admin/settings/media`、`POST /admin/media/{id}/purge`，前端補 `/media/:id` 與設定頁。**B**：v2 只顯示整體用量。 | **B**（v2 範圍）；配額調整需要時再選 A。W4 依 B |
-| Q-23 | `Principal` 沒有角色與 `lastLoginAt`，`GET /principals` 也不能依角色篩選：帳號列表無法顯示角色、總覽無法警示「只剩 1 位管理員」、會員連結對話框無法只列會員（只能列出全部啟用中的帳號）。 | **A**：後端在 `Principal` 加 `roles: string[]` 與 `lastLoginAt`（nullable），`GET /principals` 加 `role` 參數。**B**：維持；對話框以說明文字提醒只連結會員。 | **A**（會員連結選錯人的風險最高）。W4 依 B |
+| Q-23 | HTTP `Principal` 投影尚未輸出角色與 `lastLoginAt`（domain／DB已有最後登入時間），`GET /principals` 也不能依角色篩選：帳號列表無法顯示角色、總覽無法警示「只剩 1 位管理員」、會員連結對話框無法只列會員（只能列出全部啟用中的帳號）。 | **A**：後端在 `Principal` 加 `roles: string[]` 與 `lastLoginAt`（nullable），`GET /principals` 加 `role` 參數。**B**：維持；對話框以說明文字提醒只連結會員。 | **A**（會員連結選錯人的風險最高）。W4 依 B |
 | Q-24 | `PatchPrincipalRequest` 的 `null` 代表「不變」，沒有清除電子郵件的寫法。 | **A**：後端約定空字串代表清除（寫進契約 description）。**B**：維持；畫面提示「目前無法清除電子郵件」。 | **A**。W4 依 B |
 | Q-25 | surface-admin §8 的後端閘門（`confirmPhrase`／`confirmId`、`SELF_DEMOTION_FORBIDDEN`、`SELF_DISABLE_FORBIDDEN`）在 BW5 沒有：`purgeEntry` 不需要確認欄位，自己停用自己、移除自己的管理員角色只有在變成「沒有管理員」時才被 `LAST_ADMIN` 擋下。 | **A**：後端補上確認欄位與兩個 `SELF_*` 檢查（403），前端改送確認欄位。**B**：只在前端擋（W4 已做：輸入名稱才能確認；自己的帳號沒有停用與移除管理員角色的控件）。 | **A**（防止直接呼叫 API 的誤操作）。W4 依 B |
 
@@ -843,7 +843,9 @@ Owner 指示「按建議」：Q-17 選 A（轉後端窗口；2026-10-03 起由 B
 
 | ID | 問題 | 選項 | 建議 |
 | --- | --- | --- | --- |
-| Q-26 | BW3 的種子只給 member 建立 `appointment_request` 的權限；`seed-operator-clinic` 的類型範圍是 `clinic_profile`、`owner`、`pet`、`vet`、`visit`（`services/cms-api/src/main/java/com/fallrising/cms/identity/service/SeedService.java` 第 77 行），沒有 `appointment_request`。會員送出的預約申請只有 admin 能在 Back 讀到，surface-front §3.5「Operator 在 Back 把請求變成 `visit`」做不到；前端的 MSW fixture（`work-content-types.json`、`capabilities.json`）也沒有這個類型。 | **A**：後端種子把 `appointment_request` 加進 `seed-operator-clinic` 的類型範圍（`read_draft`、`update`；不給 `publish`），前端 fixture 加入類型與能力，Back 側欄出現「預約申請」；**B**：維持，只有 admin 看得到。 | **A**（否則會員預約在作業面沒有人接） |
+| Q-26 | BW3 的種子只給 member 建立 `appointment_request` 的權限；`seed-operator-clinic` 的類型範圍是 `clinic_profile`、`owner`、`pet`、`vet`、`visit`（`services/cms-api/src/main/java/com/fallrising/cms/identity/service/SeedService.java` 第 81 行），沒有 `appointment_request`。會員送出的預約申請只有 admin 能在 Back 讀到，surface-front §3.5「Operator 在 Back 把請求變成 `visit`」做不到；Back 的 MSW 作業型別／能力 fixture（`work-content-types.json`、`capabilities.json`）尚未包含這個類型；Front member fixture已有預約申請。 | **A**：後端種子把 `appointment_request` 加進 `seed-operator-clinic` 的類型範圍（`read_draft`、`update`；不給 `publish`），前端 fixture 加入類型與能力，Back 側欄出現「預約申請」；**B**：維持，只有 admin 看得到。 | **A**（否則會員預約在作業面沒有人接） |
+
+**BW6 細化（2026-10-06）：** 上述八題的後端契約、資料保留與測試施工細節見 [waves/BW6.md](waves/BW6.md) §4～§8；Q-26 授權粒度依已批准 BQ-14 B，前端畫面仍留 W6。
 
 ## 14. 參考來源
 

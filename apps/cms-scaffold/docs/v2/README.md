@@ -1,6 +1,6 @@
 # CMS Scaffold v2
 
-狀態：**BW0／W0 已實作；其餘波次依下表區分施工圖與實作狀態**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。00／01／02 保留架構與決策，BW0～BW5、W0～W5 已細化成 `waves/` 施工圖；BW6／W6 仍為 DRAFT；實作者依路線圖逐波施工，不從框架文件自行補設計。
+狀態：**BW0／W0 已實作；其餘波次依下表區分施工圖與實作狀態**。Owner 於 2026-09-25 決定重啟本專案，登記在 [PORTFOLIO.md](../../../../PORTFOLIO.md)。00／01／02 保留架構與決策，BW0～BW5、W0～W5 已細化成 `waves/` 施工圖；BW6已完成施工圖（本波文件PR合併生效），W6仍為DRAFT；實作者依路線圖逐波施工，不從框架文件自行補設計。
 
 | 文件 | 內容 |
 | --- | --- |
@@ -71,7 +71,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | W5 | VERIFIED（PR #300 合併生效） | [01 §10](01-frontend-sdd.md#10-非功能需求)、[§12](01-frontend-sdd.md#12-實作波次給-llm-agent) | [waves/W5.md](waves/W5.md) | 剩餘 P2、效能、V2-AC-01～16 總驗收 |
 | BW4 | VERIFIED（PR #258） | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | VERIFIED（PR #267） | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
-| BW6 | DRAFT | [02 §7](02-backend-sdd.md#7-後端波次) | — | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
+| BW6 | DOC_READY（本波文件PR合併生效） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW6.md](waves/BW6.md) | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
 本地交付另用 `LOCAL_VERIFIED`：整合檢查已通過，但未提交／合併，不能等同正式 `VERIFIED`。
@@ -80,7 +80,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 
 ## 細化
 
-BW0～BW5、W0～W5 的細化已完成；BW6／W6 尚待細化。若施工時發現新矛盾，需要重開某一波的施工圖，**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做。本次細化：<波次>」。Agent 只修改該波的 `waves/<波次>.md`、契約／fixture 與必要的框架連結；一波仍只進一個 PR。
+BW0～BW5、W0～W5 的細化已完成；BW6已完成本波細化；W6尚待細化。若施工時發現新矛盾，需要重開某一波的施工圖，**一個波次開一個新窗口**，把 [REFINE-PROMPT.md](REFINE-PROMPT.md) 的網址交給 agent，說「讀這個檔案，照做。本次細化：<波次>」。Agent 只修改該波的 `waves/<波次>.md`、契約／fixture 與必要的框架連結；一波仍只進一個 PR。
 
 施工圖的標準：能力較弱的 agent 只讀施工圖就能實作，不需要做任何設計決定。細化時若發現框架本身有矛盾，agent 會新增開放問題並停下來問。
 
@@ -110,4 +110,4 @@ W4 共用 Admin 治理已完成本地驗收：624 前端／68 mock E2E、339 Jav
 
 W5 前端硬化已完成本地验收：648前端、93mock連續三次、25Vitals、60axe、11hardening與70canonical比較通過；批准G後真實API最終14/14與四次ownedcleanup核對完成，歷史失敗保留。[交付證據](../../.team/reports/W5-DELIVERY.md)及[團隊計畫](../../.team/PLAN.md)列出來源與限制。VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過必要最新head CI／審查並合併生效，發布實況以PR為準。未部署，不宣稱正式生產可用。
 
-下一個功能規劃是BW6/W6：媒體搜尋與分頁、治理資訊及危險操作自身保護、診所demo預約權限；仍需先依REFINE-PROMPT細化施工圖。這是通用CMS，診所／相簿／專案均為demo packs；本次交付不擴張新里程碑授權。
+下一個功能規劃是BW6/W6：媒體搜尋與分頁、治理資訊及危險操作自身保護、診所demo預約權限；BW6施工細節見[施工圖](waves/BW6.md)，BQ-14 B已於2026-10-06批准；W6仍先依REFINE-PROMPT細化。剩餘實作／驗證卡為BW6 30＋W6暫估22～28＝52～58，口徑見[剩餘工作](bw6-remaining-work.md)。這是通用CMS，診所／相簿／專案均為demo packs；本次交付不擴張新里程碑授權。

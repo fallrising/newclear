@@ -6,6 +6,8 @@ a generation. Keep reviewed directory/staging journal protections aligned.
 import copy
 from datetime import datetime, timezone
 import os
+import fresh_run_authority as authority
+import fresh_network_firewall as contract
 
 from fresh_execution import exact, identifier, sha256
 from fresh_execution_ops import PrivateFiles
@@ -27,7 +29,8 @@ class _ReceiptCollision(ValueError):
 
 
 def _time(now):
-    value = now or datetime.now(timezone.utc)
+    value = now() if callable(now) else now
+    value = value or datetime.now(timezone.utc)
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError('firewall activation time requires timezone')
     return value.astimezone(timezone.utc)
@@ -88,7 +91,7 @@ class _Session:
         self.files.binding(record['input'])
         document, ref, rendered, values = access._context(self.files, self.publications,
             run, execution, record['input']['path'], record['input']['sha256'],
-            self.pending, _time(self.now), self.source_state)
+            self.pending, _time(self.now), self.source_state, historical_at=record['created_at'])
         rebuilt = access._record(self.files, document, ref, rendered, plan_id, run, execution,
                                   record['created_at'])
         if plan_digest(rebuilt) != digest:
@@ -123,12 +126,13 @@ class _Session:
         self.staging_binding = binding
         return self.staging_slots
 
-    def context(self, plan_id, digest, authorization_ref, index):
+    def context(self, plan_id, digest, authorization_ref, index, historical=None):
         plan = self.plan(plan_id, digest)
         envelope, receipt = self.staged(plan, digest)[index]
         expected = action(plan, digest, self.pending, index, envelope['sha256'], receipt['sha256'])
         auth = self.files.binding(authorization_ref)
-        authorization(auth, expected, _time(self.now))
+        authorization(auth, expected, authority.event_time(historical, _time(self.now))
+                      if historical is not None else _time(self.now))
         return expected, auth
 
     def check_run(self, run, allow_missing=False):
@@ -178,14 +182,17 @@ class _Session:
         a, ref = intent['action'], intent['authorization']
         if binding is not None and binding != (a['plan_id'], a['plan_sha256'], ref):
             raise ValueError('firewall activation slot belongs to another plan or authorization')
-        expected, auth = self.context(a['plan_id'], a['plan_sha256'], ref, index)
+        expected, auth = self.context(a['plan_id'], a['plan_sha256'], ref, index, historical=intent['created_at'])
         if expected['run_id'] != run:
             raise ValueError('firewall activation execution slot mismatch')
         predecessor = self.predecessor(expected)
-        validate_intent(intent, expected, ref, predecessor, self.files.identity, _time(self.now))
-        authorization(auth, expected, access.timestamp(intent['created_at']))
-        if receipt is not None:
-            validate_receipt(receipt['receipt'], intent, digest, _time(self.now))
+        if access.timestamp(self.staging_slots[index][1]['receipt']['created_at']) > access.timestamp(intent['created_at']):
+            raise ValueError('firewall intent precedes staging completion')
+        if any(r is not None and access.timestamp(r['receipt']['created_at']) > access.timestamp(intent['created_at'])
+               for _, r, a, _, _, _ in self.loaded if a['host_index'] < index):
+            raise ValueError('predecessor receipt follows intent')
+        authority.validate_slot(contract, intent, receipt['receipt'] if receipt else None, digest,
+                                expected, ref, predecessor, self.files.identity, auth, _time(self.now))
         self.loaded.append((envelope, receipt, expected, ref, predecessor, auth))
         return envelope, receipt
 
@@ -204,7 +211,7 @@ class _Session:
         # Rebuild actual staging derivation, authority and raw publication checks
         # at each dispatch/receipt boundary, never trusting adapter assertions.
         self.staging.final(self.staging_slots[a['host_index']][0])
-        expected, auth = self.context(a['plan_id'], a['plan_sha256'], ref, a['host_index'])
+        expected, auth = self.context(a['plan_id'], a['plan_sha256'], ref, a['host_index'], historical=intent['created_at'])
         predecessor = self.predecessor(expected)
         self.plan(a['plan_id'], a['plan_sha256'])
         self.files.recheck()
@@ -221,20 +228,17 @@ class _Session:
         for plan, values in self.staging.plans:
             access._fresh(plan, values, self.pending, current)
         for loaded, receipt, prior_action, prior_ref, prior_digest, prior_auth in self.staging.loaded:
-            staging.authorization(prior_auth, prior_action, current)
-            staging.validate_intent(loaded['intent'], prior_action, prior_ref, prior_digest,
-                                    self.files.identity, current)
             if receipt is None:
                 raise ValueError('firewall staging receipt disappeared')
-            staging.validate_receipt(receipt['receipt'], loaded['intent'], loaded['sha256'], current)
-        authorization(auth, expected, current)
-        validate_intent(intent, expected, ref, predecessor, self.files.identity, current)
+            authority.validate_slot(staging.contract, loaded['intent'], receipt['receipt'], loaded['sha256'],
+                                    prior_action, prior_ref, prior_digest, self.files.identity, prior_auth, current)
+        authority.validate_slot(contract, intent, None, envelope['sha256'], expected, ref,
+                                predecessor, self.files.identity, auth, current)
         for loaded, receipt, prior_action, prior_ref, prior_digest, prior_auth in self.loaded:
-            authorization(prior_auth, prior_action, current)
-            validate_intent(loaded['intent'], prior_action, prior_ref, prior_digest,
-                            self.files.identity, current)
-            if receipt is not None:
-                validate_receipt(receipt['receipt'], loaded['intent'], loaded['sha256'], current)
+            authority.validate_slot(contract, loaded['intent'], receipt['receipt'] if receipt else None,
+                                    loaded['sha256'], prior_action, prior_ref, prior_digest,
+                                    self.files.identity, prior_auth, current)
+        authority.check_current()
 
     def publish(self, directory, run, index, name, envelope):
         raw = _publish(self.files, directory, name, envelope)
@@ -293,6 +297,7 @@ def _receipt(session, directory, envelope, observed, recovered):
     return result
 
 
+@authority.operation
 def activate_network_firewall(project, plan_id, expected_sha, authorization_file, authorization_sha,
                         host_index, adapter, *, now=None, source_state=None):
     identifier(plan_id)
@@ -317,7 +322,7 @@ def activate_network_firewall(project, plan_id, expected_sha, authorization_file
             envelope, receipt = session.validate_slot(run, index, binding=(plan_id, expected_sha, ref))
             session.final(envelope)
             if receipt is not None:
-                validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], _time(now))
+                validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], authority.event_time(receipt['receipt']['created_at'], _time(now)))
             return _success(base, envelope, receipt)
         predecessor = session.predecessor(expected)
         try:
@@ -373,6 +378,7 @@ def activate_network_firewall(project, plan_id, expected_sha, authorization_file
             session.close()
 
 
+@authority.operation
 def inspect_network_firewall(project, run_id, host_index, expected_intent_sha, *, now=None, source_state=None):
     identifier(run_id)
     sha256(expected_intent_sha)
@@ -383,7 +389,7 @@ def inspect_network_firewall(project, run_id, host_index, expected_intent_sha, *
         envelope, receipt = session.validate_slot(run_id, index, expected_intent_sha)
         session.final(envelope)
         if receipt is not None:
-            validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], _time(now))
+            validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], authority.event_time(receipt['receipt']['created_at'], _time(now)))
         return _success(base, envelope, receipt)
     except ERRORS:
         return base
@@ -392,6 +398,7 @@ def inspect_network_firewall(project, run_id, host_index, expected_intent_sha, *
             session.close()
 
 
+@authority.operation
 def reconcile_network_firewall(project, run_id, host_index, expected_intent_sha, observer,
                             *, now=None, source_state=None):
     identifier(run_id)
@@ -403,7 +410,7 @@ def reconcile_network_firewall(project, run_id, host_index, expected_intent_sha,
         envelope, receipt = session.validate_slot(run_id, index, expected_intent_sha)
         session.final(envelope)
         if receipt is not None:
-            validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], _time(now))
+            validate_receipt(receipt['receipt'], envelope['intent'], envelope['sha256'], authority.event_time(receipt['receipt']['created_at'], _time(now)))
             return _success(base, envelope, receipt)
         intent = envelope['intent']
         try:

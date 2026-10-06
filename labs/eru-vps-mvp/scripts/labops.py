@@ -61,6 +61,11 @@ class ClusterLock:
         if (actual.st_dev, actual.st_ino) != (expected.st_dev, expected.st_ino):
             raise RuntimeError('controller private root changed')
 
+    def _admit(self):
+        """Ordinary mutations reject every persistent pending path."""
+        from pending_generation import assert_no_pending
+        assert_no_pending(self.private_fd)
+
     def __enter__(self):
         if self.thread_lock_acquired:
             raise RuntimeError('controller lock context is already active')
@@ -89,8 +94,7 @@ class ClusterLock:
                 raise RuntimeError('unsafe controller lock file')
             fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             self.check_private_root()
-            from pending_generation import assert_no_pending
-            assert_no_pending(self.private_fd)
+            self._admit()
             self.check_private_root()
             os.environ[LOCK_ENV] = str(self.fd)
             return self

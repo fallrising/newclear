@@ -4,13 +4,15 @@ No console mutation is automated. All remote activity is fixed readonly collecti
 """
 import copy
 import os
+import fresh_run_authority as authority
 
 from fresh_execution import exact, identifier, sha256, timestamp
 import fresh_network_access_ops as access
 import fresh_network_directory_ops as directory_ops
 import fresh_network_firewall_ops as firewall_ops
 from fresh_network_staging import fresh
-from fresh_network_ready import OPERATION, authorization, manual_actions, validate_manual_receipt, validate_setup
+from fresh_network_ready import OPERATION, authorization, manual_actions, validate_setup
+validate_manual_receipt = authority.validate_manual
 from fresh_network_admission_ops import _pending
 from fresh_observation_ops import _publish
 from fresh_rebuild import plan_digest
@@ -128,24 +130,32 @@ class _Session:
     def manual_receipt(self, run, wanted=None):
         envelope = self.load(MANUAL_RECEIPT_AREA, run, 'receipt.json', 'receipt')
         record = envelope['receipt']
+        extra = {'manual_authorizations'} if record.get('schema_version') == 2 else set()
         exact(record, {'schema_version', 'operation', 'intent_sha256', 'input',
-                       'owner_receipt', 'created_at', 'private_identity'})
+                       'owner_receipt', 'created_at', 'private_identity'} | extra)
+        if extra:
+            if authority.active() is None or type(record['manual_authorizations']) is not list:
+                raise ValueError('renewed manual receipt requires explicit run validation')
+            for ref in record['manual_authorizations']:
+                self.files.binding(ref)
+            authority.active().manual_refs = record['manual_authorizations']
         if (wanted is not None and envelope['sha256'] != wanted):
             raise ValueError('manual receipt digest differs')
         intent = self.manual_intent(run, record['intent_sha256'])
         owner = self.files.binding(record['input'])
-        if (type(record['schema_version']) is not int or record['schema_version'] != 1
+        if (type(record['schema_version']) is not int or record['schema_version'] not in (1, 2)
                 or record['operation'] != OPERATION + '-record'
                 or owner != record['owner_receipt'] or record['private_identity'] != self.files.identity):
             raise ValueError('manual receipt publication binding invalid')
-        validate_manual_receipt(owner, intent['intent'], intent['sha256'], access._time(self.now))
-        created = fresh(record['created_at'], access._time(self.now))
+        validate_manual_receipt(owner, intent['intent'], intent['sha256'],
+                                authority.event_time(record['created_at'], access._time(self.now)))
+        created = fresh(record['created_at'], authority.event_time(record['created_at'], access._time(self.now)))
         if any(timestamp(row['completed_at']) > created for row in owner['hosts']):
             raise ValueError('manual receipt recording precedes console completion')
         self.manual = envelope
         return envelope
 
-    def final(self, evidence=None):
+    def final(self, evidence=None, recorded_at=None):
         if self.directory is not None:
             self.directory.final(self.last_directory)
             self.firewall.final(self.last_firewall)
@@ -171,19 +181,25 @@ class _Session:
                     contract = firewall_ops
                 else:
                     contract = firewall_ops.staging
-                contract.authorization(auth, action, current)
-                contract.validate_intent(env['intent'], action, ref, predecessor, self.files.identity, current)
-                contract.validate_receipt(receipt['receipt'], env['intent'], env['sha256'], current)
+                authority.validate_slot(contract.contract, env['intent'], receipt['receipt'], env['sha256'],
+                                        action, ref, predecessor, self.files.identity, auth, current)
         if self.intent is not None:
-            fresh(self.intent['intent']['created_at'], current)
-            authorization(self.auth, self.intent['intent'], current)
+            intent_time = authority.event_time(self.intent['intent']['created_at'], current)
+            fresh(self.intent['intent']['created_at'], intent_time)
+            authorization(self.auth, self.intent['intent'], intent_time)
         if self.manual is not None:
-            fresh(self.manual['receipt']['created_at'], current)
+            manual_time = authority.event_time(self.manual['receipt']['created_at'], current)
+            fresh(self.manual['receipt']['created_at'], manual_time)
             validate_manual_receipt(self.manual['receipt']['owner_receipt'],
-                                    self.intent['intent'], self.intent['sha256'], current)
+                                    self.intent['intent'], self.intent['sha256'], manual_time)
+        authority.check_current()
+        current = access._time(self.now)
         if evidence is not None:
             from fresh_network_probe import validate_network_evidence
-            validate_network_evidence(evidence, self.plan['render'], current,
+            probe_time = current
+            if authority.active() is not None and authority.active().historical and recorded_at is not None:
+                probe_time = authority.event_time(recorded_at, current)
+            validate_network_evidence(evidence, self.plan['render'], probe_time,
                                       setup=self.intent['intent']['setup'])
             if any(timestamp(row['completed_at']) > timestamp(evidence['observed_at'])
                    for row in self.manual['receipt']['owner_receipt']['hosts']):
@@ -220,6 +236,7 @@ class _Session:
                 os.close(fd)
 
 
+@authority.operation
 def prepare_network_manual_setup(project, plan_id, plan_sha, authorization_file, authorization_sha,
                                  input_file, input_sha, *, now=None, source_state=None):
     identifier(plan_id)
@@ -256,6 +273,7 @@ def prepare_network_manual_setup(project, plan_id, plan_sha, authorization_file,
             session.close()
 
 
+@authority.operation
 def record_network_manual_setup(project, run_id, expected_intent_sha, receipt_file, receipt_sha,
                                 *, now=None, source_state=None):
     identifier(run_id)
@@ -271,6 +289,9 @@ def record_network_manual_setup(project, run_id, expected_intent_sha, receipt_fi
         record = {'schema_version': 1, 'operation': OPERATION + '-record',
                   'intent_sha256': intent['sha256'], 'input': ref, 'owner_receipt': owner,
                   'created_at': access._time(now).isoformat(), 'private_identity': session.files.identity}
+        if authority.active() is not None:
+            record['schema_version'] = 2
+            record['manual_authorizations'] = authority.active().document['manual_authorizations']
         envelope = {'receipt': record, 'sha256': plan_digest(record)}
         session.manual = envelope
         session.final()
@@ -308,10 +329,15 @@ def _accepted(session, run, expected=None):
             or record['next_stage'] != 'empty-control-plane'
             or expected is not None and envelope['sha256'] != expected):
         raise ValueError('network acceptance publication binding invalid')
-    created = fresh(record['created_at'], access._time(session.now))
+    created = fresh(record['created_at'], authority.event_time(record['created_at'], access._time(session.now)))
+    if (timestamp(session.manual['receipt']['created_at']) > created
+            or any(timestamp(receipt['receipt']['created_at']) > timestamp(record['evidence']['observed_at'])
+                   for s in (session.directory, session.firewall, session.firewall.staging)
+                   for _, receipt, _, _, _, _ in s.loaded)):
+        raise ValueError('network acceptance precedes required completion')
     if timestamp(record['evidence']['observed_at']) > created:
         raise ValueError('network acceptance precedes probes')
-    session.final(record['evidence'])
+    session.final(record['evidence'], recorded_at=record['created_at'])
     return envelope
 
 
@@ -320,6 +346,7 @@ def _success(base, envelope):
             'host_count': 4, 'stage_accepted': True, 'next_stage': 'empty-control-plane'}
 
 
+@authority.operation
 def accept_network_ready(project, run_id, expected_manual_receipt_sha, collector=None,
                          *, now=None, source_state=None):
     identifier(run_id)
@@ -364,6 +391,7 @@ def accept_network_ready(project, run_id, expected_manual_receipt_sha, collector
             session.close()
 
 
+@authority.operation
 def inspect_network_ready(project, run_id, expected_receipt_sha, *, now=None, source_state=None):
     identifier(run_id)
     sha256(expected_receipt_sha)

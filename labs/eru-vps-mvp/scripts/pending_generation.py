@@ -70,11 +70,14 @@ def _check_directory(private_fd, pending_fd):
         raise RuntimeError('pending generation directory changed')
 
 
-def reserve(project, bindings):
+def reserve(project, bindings, *, verify=None):
     """Reserve durably under ordinary ClusterLock; return the record digest.
 
     Binding hashes are provenance, not validation of their underlying evidence.
-    No caller may interpret this helper as permission to operate a live cluster.
+    An optional verify(lock) callback revalidates current underlying evidence
+    while holding the ordinary lock and returns the exact complete bindings.
+    Callback failure or disagreement prevents publication. The default remains
+    provenance-only; this helper never grants live cluster permission.
     Failed publication retains the pending path; another generation cannot skip it.
     """
     from labops import ClusterLock
@@ -82,6 +85,11 @@ def reserve(project, bindings):
     with ClusterLock(project) as lock:
         private_fd = lock.private_fd
         _private(os.fstat(private_fd), directory=True)
+        if verify is not None:
+            checked = _bindings(verify(lock))
+            if checked != bindings:
+                raise RuntimeError('checked reservation bindings changed')
+        lock.check_private_root()
         value = {'schema': 1, 'operation': 'fresh-generation-reservation',
                  'bindings': bindings, 'private_identity': _identity(os.fstat(private_fd))}
         raw = json.dumps(value, sort_keys=True, separators=(',', ':')).encode()
@@ -196,7 +204,9 @@ def inspect(project):
                 _check_directory(private_fd, pending_fd)
                 check_root()
                 return {'status': 'pending', 'blocked': True,
-                        'reservation': value, 'sha256': hashlib.sha256(raw).hexdigest()}
+                        'reservation': value, 'sha256': hashlib.sha256(raw).hexdigest(),
+                        'pending_identity': _identity(os.fstat(pending_fd)),
+                        'record_identity': _identity(current)}
             finally:
                 os.close(pending_fd)
         except (OSError, ValueError, RuntimeError, RecursionError):

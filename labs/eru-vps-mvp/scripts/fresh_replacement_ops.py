@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 import hashlib
 import os
+import fresh_run_authority as authority
 import subprocess
 
 from fresh_execution import exact, identifier, sha256
@@ -19,7 +20,8 @@ ERRORS = (OSError, ValueError, RuntimeError, KeyError, TypeError, IndexError,
 
 
 def _time(now):
-    value = now or datetime.now(timezone.utc)
+    value = now() if callable(now) else now
+    value = value or datetime.now(timezone.utc)
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError('replacement time requires timezone')
     return value.astimezone(timezone.utc)
@@ -74,6 +76,7 @@ def _directory_check(files, observation_id, directory, complete=False):
         os.close(current)
 
 
+@authority.operation
 def collect_replacement_facts(project, run_id, execution_sha, input_file, input_sha,
                               observation_id, *, reader=None, now=None, source_state=None):
     identifier(run_id)
@@ -101,6 +104,7 @@ def collect_replacement_facts(project, run_id, execution_sha, input_file, input_
         for host, receipt in zip(request['hosts'], receipts):
             _context(*args, _time(now), source_state, pending)
             _directory_check(files, observation_id, directory)
+            authority.check_current()
             raw = transport(host, source, host['public_key'])
             if type(raw) is not bytes or len(raw) > HOST_LIMIT:
                 raise ValueError('replacement transport result invalid or oversized')
@@ -109,6 +113,7 @@ def collect_replacement_facts(project, run_id, execution_sha, input_file, input_
             captures.append({**host, 'script_sha256': hashlib.sha256(source.encode()).hexdigest(), 'outputs': outputs})
             _context(*args, _time(now), source_state, pending)
             _directory_check(files, observation_id, directory)
+        authority.check_current()
         completed = _time(now)
         _context(*args, completed, source_state, pending)
         record = {'schema_version': 1, 'operation': 'fresh-replacement-observation',

@@ -945,8 +945,37 @@ def main():
     ready_inspect = sub.add_parser('inspect-fresh-network-ready', help='Revalidate the saved network stage and current local bindings without remote calls')
     ready_inspect.add_argument('--run', required=True, help='Prepared execution ID')
     ready_inspect.add_argument('--receipt-sha256', required=True, help='Expected network stage receipt digest')
+    fresh_run = sub.add_parser('fresh-run', help='Start, advance or observe one exact owned fresh run')
+    run_commands = fresh_run.add_subparsers(dest='run_command', required=True)
+    run_start = run_commands.add_parser('start', help='Validate execution and reserve generation once')
+    run_start.add_argument('--plan', required=True)
+    run_start.add_argument('--sha256', required=True, help='Expected review digest')
+    run_start.add_argument('--input', required=True)
+    run_start.add_argument('--run-id', required=True)
+    for name in ('next', 'status', 'recover'):
+        command = run_commands.add_parser(name)
+        command.add_argument('--run', required=True)
+        command.add_argument('--sha256', required=True, help='Expected execution digest')
+        if name != 'status':
+            command.add_argument('--input', required=name == 'next')
+            command.add_argument('--input-sha256', required=name == 'next')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'fresh-run':
+        import fresh_run_ops as fresh_run_api
+        try:
+            if args.run_command == 'start':
+                result = fresh_run_api.start_run(PROJECT, args.plan, args.sha256, args.input, args.run_id)
+            elif args.run_command == 'next':
+                result = fresh_run_api.next_step(PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+            elif args.run_command == 'status':
+                result = fresh_run_api.status_run(PROJECT, args.run, args.sha256)
+            else:
+                result = fresh_run_api.recover_run(PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+        except (ValueError, RuntimeError, OSError, TypeError, subprocess.SubprocessError):
+            result = {'status': 'blocked', 'generation_changed': False, 'stage_accepted': False}
+        print(json.dumps(fresh_run_api.public_summary(result), indent=2))
+        return
     if args.command in ('prepare-fresh-network-ready', 'record-fresh-network-ready',
                         'accept-fresh-network-ready', 'inspect-fresh-network-ready'):
         from fresh_network_ready_ops import (prepare_network_manual_setup,

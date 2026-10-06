@@ -23,7 +23,7 @@ const CONN_TOKEN_BASE: usize = 2;
 /// Per-worker mio/epoll reactor: only ready FDs are driven (O(ready), not O(conns)).
 pub async fn run(
     ctx: WorkerContext,
-    mut request_rx: mpsc::Receiver<ShardRequest>,
+    mut request_rx: mpsc::UnboundedReceiver<ShardRequest>,
     shard_range: std::ops::Range<usize>,
     mut shutdown_rx: broadcast::Receiver<()>,
 ) {
@@ -532,7 +532,7 @@ fn harvest_async_waiters(
 }
 
 fn drain_shard_requests(
-    rx: &mut mpsc::Receiver<ShardRequest>,
+    rx: &mut mpsc::UnboundedReceiver<ShardRequest>,
     shard_client: &crate::runtime::router::ShardClient,
     worker_id: usize,
     shards: &Rc<RefCell<Vec<Shard>>>,

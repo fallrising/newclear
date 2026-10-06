@@ -87,7 +87,7 @@ pub type ReactorWake = Arc<dyn Fn() + Send + Sync>;
 
 #[derive(Clone)]
 pub struct ShardClient {
-    senders: Arc<Vec<mpsc::Sender<ShardRequest>>>,
+    senders: Arc<Vec<mpsc::UnboundedSender<ShardRequest>>>,
     shard_map: Arc<ShardMap>,
     /// Per-worker wake hooks — set once each reactor starts (lock-free reads).
     wakers: Arc<Vec<OnceLock<ReactorWake>>>,
@@ -96,7 +96,10 @@ pub struct ShardClient {
 }
 
 impl ShardClient {
-    pub fn new(senders: Arc<Vec<mpsc::Sender<ShardRequest>>>, shard_map: Arc<ShardMap>) -> Self {
+    pub fn new(
+        senders: Arc<Vec<mpsc::UnboundedSender<ShardRequest>>>,
+        shard_map: Arc<ShardMap>,
+    ) -> Self {
         let n = senders.len();
         let mut wakers = Vec::with_capacity(n);
         let mut wake_pending = Vec::with_capacity(n);
@@ -153,8 +156,10 @@ impl ShardClient {
             reply: tx,
             origin_worker,
         };
-        let sender = &self.senders[worker];
-        let _ = sender.try_send(req);
+        // Unbounded: in-flight requests are already capped per connection by
+        // `pipeline_cap` (the connection stops reading). Send fails only if the
+        // owner worker has exited; the dropped reply then surfaces as an error.
+        let _ = self.senders[worker].send(req);
         // First enqueue since last clear_wake → wake the owner reactor once.
         self.wake(worker);
         rx

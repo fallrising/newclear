@@ -1,7 +1,7 @@
-"""One bounded fresh run entry; fixed network operations and observation recovery.
+"""One bounded fresh run entry; fixed network/bootstrap steps and observation recovery.
 
 Every next call runs one exact reviewed operation under owned admission. This
-driver does not release pending or install/bootstrap/commit a cluster generation.
+driver never releases pending or commits an accepted cluster generation.
 """
 import copy
 from datetime import datetime, timezone
@@ -18,6 +18,12 @@ import pending_generation
 
 # Wire input cannot select a module, command, transport or Python callable.
 OPERATIONS = {
+    'prepare_bootstrap': ('fresh_bootstrap_ops',
+        ('plan_id', 'plan_sha', 'network_receipt_sha', 'input_file', 'input_sha'), None),
+    'execute_bootstrap': ('fresh_bootstrap_ops',
+        ('run_id', 'bootstrap_sha', 'step_index', 'authorization_file', 'authorization_sha'), 'adapter'),
+    'reconcile_bootstrap': ('fresh_bootstrap_ops',
+        ('run_id', 'step_index', 'expected_intent_sha'), 'observer'),
     'inspect_receipts': ('fresh_reimage_receipt_ops',
         ('run_id', 'execution_sha', 'input_file'), None),
     'collect_replacement_facts': ('fresh_replacement_ops',
@@ -53,6 +59,8 @@ PUBLIC_FIELDS = frozenset({
     'integrity_verified', 'current_authority_verified', 'current_network_ready',
     'historical_integrity', 'pending_present', 'uncertain', 'journal_receipt_count',
     'execution_integrity_verified', 'journal_integrity_verified',
+    'bootstrap_sha256', 'step_index', 'step_count', 'stage', 'worker_count', 'completed_step_count',
+    'v01_elapsed_seconds',
 })
 
 
@@ -179,6 +187,25 @@ def _request(files, input_file, input_sha, run, execution_sha, pending, *, recov
 
 
 def _adapter(project, step, parameters):
+    if step in ('execute_bootstrap', 'reconcile_bootstrap'):
+        from fresh_bootstrap_ops import AREA as BOOTSTRAP
+        from fresh_bootstrap_ssh import SSHBootstrapAdapter
+        files = PrivateFiles(project, max_bytes=128 * 1024 * 1024)
+        try:
+            envelope, _, _ = files.json(BOOTSTRAP + '/' + parameters['run_id'] + '/plan.json')
+            exact(envelope, {'plan', 'sha256'})
+            if (plan_digest(envelope['plan']) != envelope['sha256']
+                    or envelope['plan']['run_id'] != parameters['run_id']
+                    or step == 'execute_bootstrap' and envelope['sha256'] != parameters['bootstrap_sha']):
+                raise ValueError('bootstrap transport plan binding differs')
+            rendered = envelope['plan']['network_render']
+            by_ip = dict(line.split(' ', 1) for line in rendered['controller_known_hosts'].splitlines())
+            keys = {host['alias']: by_ip[host['ip']] for host in rendered['hosts']}
+            files.recheck()
+        finally:
+            files.close()
+        adapter = SSHBootstrapAdapter(keys)
+        return ObservationOnly(adapter.observe) if step in RECOVERY else adapter
     if step == 'collect_replacement_facts':
         return None
     if step == 'accept_network_ready':
@@ -261,6 +288,10 @@ def next_step(project, run_id, execution_sha, input_file, input_sha, *,
                         adapter = _adapter(project, step, parameters)
                     if adapter is not None:
                         kwargs[injection] = adapter
+                if step in ('execute_bootstrap', 'reconcile_bootstrap'):
+                    collector = (adapters or {}).get('bootstrap_network_collector')
+                    if collector is not None:
+                        kwargs['collector'] = collector
                 result = function(project, **kwargs)
                 files.recheck()
                 lock.check_pending()
@@ -337,6 +368,28 @@ def status_run(project, run_id, execution_sha, *, now=None, source_state=None):
             result.update(status='network-history-verified', historical_integrity=True,
                           integrity_verified=True, journal_integrity_verified=True,
                           receipt_sha256=receipt['sha256'], next_stage='empty-control-plane')
+        from fresh_bootstrap_ops import AREA as BOOTSTRAP, inspect_bootstrap
+        bootstrap_files = PrivateFiles(project, max_bytes=128 * 1024 * 1024)
+        try:
+            try:
+                bootstrap, _, _ = bootstrap_files.json(BOOTSTRAP + '/' + run_id + '/plan.json')
+            except FileNotFoundError:
+                pass
+            else:
+                exact(bootstrap, {'plan', 'sha256'})
+                historical = inspect_bootstrap(project, run_id, bootstrap['sha256'],
+                                                now=now, source_state=source_state)
+                if not historical.get('historical_integrity'):
+                    return base
+                result.update(status='uncertain' if historical['uncertain'] else 'bootstrap-history-verified',
+                              historical_integrity=True, integrity_verified=True,
+                              journal_integrity_verified=True, bootstrap_sha256=bootstrap['sha256'],
+                              completed_step_count=historical['journal_receipt_count'],
+                              journal_receipt_count=completed + historical['journal_receipt_count'],
+                              uncertain=historical['uncertain'], next_stage=historical['next_stage'])
+            bootstrap_files.recheck()
+        finally:
+            bootstrap_files.close()
         files.recheck()
         if pending_generation.inspect(project) != pending:
             return base

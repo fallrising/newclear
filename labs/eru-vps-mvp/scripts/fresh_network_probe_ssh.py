@@ -12,7 +12,7 @@ import shlex
 from fresh_observation import CAPTURE_SOURCE, capture, decode, public_key
 from fresh_observation_ops import SSHReader
 from fresh_network_probe import (ERROR, SERVICES, auth_record, controller_record, public_targets,
-                                 validate_host, validate_network_evidence, validate_setup)
+                                 validate_host, validate_network_evidence, validate_setup, service_expectations)
 from fresh_network_directory import HOST_FIELDS
 from fresh_rebuild import plan_digest
 import fresh_network_staging_host as support
@@ -148,17 +148,27 @@ def observe_host(request, *, root='/', uid=0, gid=0, runner=None, now=None, user
         if global6 != wanted6:
             raise ValueError('unreviewed public IPv6')
         services = {}
+        phase = request.get('expected_services', {unit: 'stopped' for unit in ('etcd.service', 'eru-core.service', 'eru-agent.service')})
+        support._exact(phase, {'etcd.service', 'eru-core.service', 'eru-agent.service'})
+        forbidden = ('eru-agent.service',) if index == 0 else ('etcd.service', 'eru-core.service')
+        if (any(type(state) is not str or state not in ('active', 'stopped') for state in phase.values())
+                or any(phase[unit] != 'stopped' for unit in forbidden)):
+            raise ValueError('unsupported service phase')
         for unit in ('etcd.service', 'eru-core.service', 'eru-agent.service'):
             text = _output(runner, ['/usr/bin/systemctl', 'show', '--property=LoadState,ActiveState,SubState', unit]).decode()
             fields = dict(line.split('=', 1) for line in text.strip().splitlines())
-            if (set(fields) != {'LoadState', 'ActiveState', 'SubState'} or fields['ActiveState'] != 'inactive'
-                    or fields['SubState'] != 'dead' or fields['LoadState'] not in ('loaded', 'not-found')):
-                raise ValueError('service not stopped')
-            services[unit] = 'absent' if fields['LoadState'] == 'not-found' else 'inactive'
-        # Detect containerized ERU services even when no matching systemd unit exists.
+            active = phase[unit] == 'active'
+            if (set(fields) != {'LoadState', 'ActiveState', 'SubState'}
+                    or fields['ActiveState'] != ('active' if active else 'inactive')
+                    or fields['SubState'] != ('running' if active else 'dead')
+                    or fields['LoadState'] not in (('loaded',) if active else ('loaded', 'not-found'))):
+                raise ValueError('service differs from bootstrap phase')
+            services[unit] = 'active' if active else ('absent' if fields['LoadState'] == 'not-found' else 'inactive')
+        # A foreign unmanaged ERU process cannot hide behind an absent unit.
         tasks = _output(runner, ['/usr/bin/ps', '-eo', 'comm='])
-        if set(tasks.decode().split()) & {'etcd', 'eru-core', 'eru-agent'}:
-            raise ValueError('ERU task is running')
+        wanted = {unit.removesuffix('.service') for unit, state in phase.items() if state == 'active'}
+        if set(tasks.decode().split()) & {'etcd', 'eru-core', 'eru-agent'} != wanted:
+            raise ValueError('ERU tasks differ from bootstrap phase')
         rules = _json(runner, ['/usr/sbin/nft', '-j', '-n', '-a', 'list', 'table', 'inet', 'eru_fresh_access'])
         authentications = []
         if index == 0:
@@ -274,11 +284,12 @@ with socket.socket(family, socket.SOCK_STREAM) as s:
 '''
 
 
-def build_program(render, setup, index):
+def build_program(render, setup, index, *, expected_services=None):
     setup = validate_setup(setup, render)
     if type(index) is not int or not 0 <= index < 4:
         raise ValueError(ERROR)
-    request = {'render': render, 'setup': setup, 'host_index': index}
+    request = {'render': render, 'setup': setup, 'host_index': index,
+               'expected_services': service_expectations(expected_services)[index]}
     helper = Path(__file__).with_name('fresh_network_staging_host.py').read_bytes()
     return ("import base64, sys, types\nsupport = types.ModuleType('support')\n"
             "exec(compile(base64.b64decode(" + repr(base64.b64encode(helper).decode())
@@ -286,9 +297,10 @@ def build_program(render, setup, index):
             + '\nhost_main(' + repr(base64.b64encode(json.dumps(request).encode()).decode()) + ')\n')
 
 
-def collect(render, host_keys, *, setup=None, transport=None, runner=None, now=None):
+def collect(render, host_keys, *, setup=None, transport=None, runner=None, now=None, expected_services=None):
     try:
         setup = validate_setup(setup, render)
+        phases = service_expectations(expected_services)
         render, host_keys = copy.deepcopy(render), copy.deepcopy(host_keys)
         if type(host_keys) is not dict or set(host_keys) != {h['alias'] for h in render['hosts']}:
             raise ValueError(ERROR)
@@ -301,10 +313,10 @@ def collect(render, host_keys, *, setup=None, transport=None, runner=None, now=N
         hosts, auth, private = [], [], []
         for index, host in enumerate(render['hosts']):
             _route(runner, host['ip'], render['controller_ip'], render['private_interface'])
-            raw = transport({k: host[k] for k in HOST_FIELDS}, build_program(render, setup, index), host_keys[host['alias']])
+            raw = transport({k: host[k] for k in HOST_FIELDS}, build_program(render, setup, index, expected_services=phases), host_keys[host['alias']])
             reply = support._decode(raw)
             support._exact(reply, {'observation', 'core_worker_ssh'})
-            validate_host(reply['observation'], render, setup, index)
+            validate_host(reply['observation'], render, setup, index, expected_services=phases[index])
             expected_auth = [auth_record(render, setup, i) for i in range(1, 4)] if index == 0 else []
             if reply['core_worker_ssh'] != expected_auth:
                 raise ValueError(ERROR)
@@ -325,6 +337,6 @@ def collect(render, host_keys, *, setup=None, transport=None, runner=None, now=N
         evidence = {'schema_version': 1, 'operation': 'fresh-network-ready-probes', 'observed_at': started.isoformat(),
             'render_sha256': plan_digest(render), 'setup_sha256': plan_digest(setup), 'hosts': hosts,
             'core_worker_ssh': auth, 'controller_private_ssh': private, 'public_denials': denials}
-        return validate_network_evidence(evidence, render, now or datetime.now(timezone.utc), setup=setup)
+        return validate_network_evidence(evidence, render, now or datetime.now(timezone.utc), setup=setup, expected_services=phases)
     except Exception:
         raise ValueError(ERROR) from None

@@ -71,6 +71,14 @@ class _Step:
             raise ValueError('renewal plan hash differs')
 
     def operation_authority(self):
+        if self.operation == 'execute_bootstrap':
+            import fresh_bootstrap as contract
+            ref = {'path': self.target['authorization_file'], 'sha256': self.target['authorization_sha']}
+            auth = self.files.binding(ref)
+            expected = {key: self.binding[key] for key in
+                        ('plan_id', 'plan_sha256', 'execution_sha256', 'pending_sha256')}
+            expected.update(bootstrap_sha256=self.target['bootstrap_sha'], step_index=self.target['step_index'])
+            return contract.authorization, auth, expected
         modules = {'prepare_network_directory': 'fresh_network_directory',
                    'stage_network_files': 'fresh_network_staging',
                    'activate_network_firewall': 'fresh_network_firewall',
@@ -366,8 +374,15 @@ def validate_manual(value, intent, digest, current):
 def inspect_history(project, run_id, execution_sha, expected_receipt_sha, *, now=None, source_state=None):
     """Read-only full accepted-chain integrity, never current network eligibility."""
     from fresh_network_ready_ops import MANUAL_AREA, inspect_network_ready
-    if active() is not None:
-        raise ValueError('nested historical inspection forbidden')
+    owner = active()
+    if owner is not None:
+        if (owner.historical or not owner.entered
+                or owner.operation not in {'prepare_bootstrap', 'execute_bootstrap', 'reconcile_bootstrap'}
+                or Path(project).absolute() != owner.files.project
+                or owner.binding['run_id'] != run_id
+                or owner.binding['execution_sha256'] != execution_sha):
+            raise ValueError('nested historical inspection forbidden')
+        owner.check()
     target = {'run_id': run_id, 'expected_receipt_sha': expected_receipt_sha}
     step = _Step(project, 'inspect_network_ready', target, now, source_state)
     step.historical = True
@@ -380,6 +395,11 @@ def inspect_history(project, run_id, execution_sha, expected_receipt_sha, *, now
             raise ValueError('historical run binding differs')
         step.binding = {'run_id': run_id, 'execution_sha256': execution_sha,
                         'plan_id': record['plan_id'], 'plan_sha256': record['plan_sha256']}
+        if owner is not None and (step.pending != owner.pending
+                or step.files.identity != owner.files.identity
+                or record['plan_id'] != owner.binding['plan_id']
+                or record['plan_sha256'] != owner.binding['plan_sha256']):
+            raise ValueError('nested historical binding differs from current bootstrap')
         token = _ACTIVE.set(step)
         result = inspect_network_ready(project, run_id, expected_receipt_sha, now=now, source_state=source_state)
         step.check()
@@ -390,3 +410,5 @@ def inspect_history(project, run_id, execution_sha, expected_receipt_sha, *, now
         if token is not None:
             _ACTIVE.reset(token)
         step.files.close()
+        if owner is not None:
+            owner.check()

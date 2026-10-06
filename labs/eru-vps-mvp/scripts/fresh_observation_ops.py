@@ -47,8 +47,7 @@ class SSHReader:
 
 def _publish(files, directory, name, value):
     raw = _raw(value)
-    from fresh_execution_ops import MAX_BYTES
-    if len(raw) > MAX_BYTES:
+    if len(raw) > files.max_bytes:
         raise ValueError('observation record too large')
     temporary = '.' + name + '.tmp'
     fd = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW,

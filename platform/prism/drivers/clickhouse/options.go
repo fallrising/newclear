@@ -16,14 +16,18 @@ import (
 )
 
 type options struct {
-	native     *clickhouse.Options
-	metricDays int
-	logDays    int
-	traceDays  int
-	redDays    int
-	maxOpen    int
-	maxExec    int
-	timeout    time.Duration
+	native         *clickhouse.Options
+	metricDays     int
+	logDays        int
+	traceDays      int
+	redDays        int
+	maxOpen        int
+	maxExec        int
+	maxMem         int
+	maxRowsRead    int
+	maxResultBytes int
+	maxResultRows  int
+	timeout        time.Duration
 }
 
 func parseOptions(ctx context.Context, cfg spi.Config) (options, error) {
@@ -53,7 +57,7 @@ func parseOptions(ctx context.Context, cfg spi.Config) (options, error) {
 			}
 		}
 	}
-	allowed := map[string]bool{"cluster": true, "max_execution_time": true, "max_memory_usage": true, "max_result_rows": true, "async_insert": true, "max_open_conns": true, "retention_metrics_days": true, "retention_logs_days": true, "retention_traces_days": true, "retention_red_days": true, "password_file": true, "username_file": true}
+	allowed := map[string]bool{"cluster": true, "max_execution_time": true, "max_memory_usage": true, "max_result_rows": true, "max_rows_to_read": true, "max_result_bytes": true, "async_insert": true, "max_open_conns": true, "retention_metrics_days": true, "retention_logs_days": true, "retention_traces_days": true, "retention_red_days": true, "password_file": true, "username_file": true}
 	for k := range cfg.Options {
 		if !allowed[k] {
 			return out, inputError("Open", "unknown ClickHouse option")
@@ -109,12 +113,18 @@ func parseOptions(ctx context.Context, cfg spi.Config) (options, error) {
 	if err != nil {
 		return out, err
 	}
-	maxMem, err := positiveOption(cfg, "max_memory_usage", 1_000_000_000, 1<<50)
+	out.maxMem, err = positiveOption(cfg, "max_memory_usage", 1_000_000_000, 1<<50)
 	if err != nil {
 		return out, err
 	}
-	maxRows, err := positiveOption(cfg, "max_result_rows", 5_000_000, 1<<30)
+	out.maxResultRows, err = positiveOption(cfg, "max_result_rows", 5_000_000, 1<<30)
 	if err != nil {
+		return out, err
+	}
+	if out.maxRowsRead, err = positiveOption(cfg, "max_rows_to_read", 5_000_000, 1<<30); err != nil {
+		return out, err
+	}
+	if out.maxResultBytes, err = positiveOption(cfg, "max_result_bytes", 64<<20, 1<<40); err != nil {
 		return out, err
 	}
 	async := 1
@@ -131,8 +141,12 @@ func parseOptions(ctx context.Context, cfg spi.Config) (options, error) {
 		out.native.Settings = clickhouse.Settings{}
 	}
 	out.native.Settings["max_execution_time"] = out.maxExec
-	out.native.Settings["max_memory_usage"] = maxMem
-	out.native.Settings["max_result_rows"] = maxRows
+	out.native.Settings["max_memory_usage"] = out.maxMem
+	out.native.Settings["max_result_rows"] = out.maxResultRows
+	out.native.Settings["max_rows_to_read"] = out.maxRowsRead
+	out.native.Settings["max_result_bytes"] = out.maxResultBytes
+	out.native.Settings["read_overflow_mode"] = "throw"
+	out.native.Settings["result_overflow_mode"] = "throw"
 	out.native.Settings["async_insert"] = async
 	out.native.Settings["wait_for_async_insert"] = 0
 	out.native.Settings["async_insert_max_data_size"] = 10_485_760

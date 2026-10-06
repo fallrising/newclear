@@ -14,6 +14,7 @@ import (
 	"strings"
 	"syscall"
 
+	_ "github.com/fallrising/newclear/platform/prism/drivers/clickhouse"
 	_ "github.com/fallrising/newclear/platform/prism/drivers/memory"
 	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
@@ -97,9 +98,13 @@ func runService(ctx context.Context, configuration *config.Config, logger *slog.
 	if err != nil {
 		return err
 	}
+	storageOptions, err := configuration.StorageOptions()
+	if err != nil {
+		return fmt.Errorf("prepare storage options: %w", err)
+	}
 	backend, err := spi.Open(ctx, configuration.Storage.Driver, spi.Config{
-		DSN:        configuration.Storage.DSN,
-		Options:    maps.Clone(configuration.Storage.Options),
+		DSN:        string(configuration.Storage.DSN),
+		Options:    maps.Clone(storageOptions),
 		Logger:     logger,
 		Registerer: registry,
 		Clock:      spi.SystemClock,

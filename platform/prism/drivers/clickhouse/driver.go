@@ -62,13 +62,15 @@ func (c boundedNativeConnection) PrepareBatch(ctx context.Context, query string,
 	}
 	var table string
 	switch query {
-	case "INSERT INTO logs (ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace)":
+	case "INSERT INTO logs (ts,observed_ts,tenant,cluster,host,service,env,severity,severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq)":
 		table = "logs"
 	case "INSERT INTO spans (ts,tenant,trace_id,span_id,parent_id,service,name,kind,duration_ns,status_code,status_msg,host,env,attrs,res_attrs,trace_state,service_instance,service_version,namespace,cluster,events.ts,events.name,events.attrs,links.trace_id,links.span_id,links.attrs)":
 		table = "spans"
 	case "INSERT INTO metric_series (fingerprint,tenant,metric,labels,first_seen,last_seen)":
 		table = "metric_series"
 	case "INSERT INTO metric_samples (ts,fingerprint,tenant,metric,value)":
+		table = "metric_samples"
+	case "INSERT INTO metric_samples (ts,fingerprint,tenant,metric,value,value_bits)":
 		table = "metric_samples"
 	case "INSERT INTO service_deps_1h (hour,tenant,parent,child,calls,errors)":
 		table = "service_deps_1h"
@@ -79,7 +81,11 @@ func (c boundedNativeConnection) PrepareBatch(ctx context.Context, query string,
 	}
 	_, columns, _ := strings.Cut(query, " (")
 	want := strings.Split(strings.TrimSuffix(columns, ")"), ",")
-	batch, err := c.connection.PrepareBatch(ctx, fmt.Sprintf("INSERT INTO %s SETTINGS max_execution_time = %d", table, c.maxExec), opts...)
+	settings := fmt.Sprintf("INSERT INTO %s SETTINGS max_execution_time = %d", table, c.maxExec)
+	if table == "logs" {
+		settings += ", async_insert = 0"
+	}
+	batch, err := c.connection.PrepareBatch(ctx, settings, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +118,7 @@ type backend struct {
 	migrateSem chan struct{}
 	closeOnce  sync.Once
 	closeErr   error
+	leases     map[*readLease]struct{}
 }
 
 func newBackend(conn connection, opts options) *backend {
@@ -120,7 +127,7 @@ func newBackend(conn connection, opts options) *backend {
 	if limit <= 0 {
 		limit = 1
 	}
-	b := &backend{conn: conn, opts: opts, closing: closing, cancel: cancel, sem: make(chan struct{}, limit), migrateSem: make(chan struct{}, 1)}
+	b := &backend{conn: conn, opts: opts, closing: closing, cancel: cancel, sem: make(chan struct{}, limit), migrateSem: make(chan struct{}, 1), leases: make(map[*readLease]struct{})}
 	b.metrics = newMetricStore(b)
 	b.logs = newLogStore(b)
 	b.traces = newTraceStore(b)
@@ -145,6 +152,7 @@ func (b *backend) Logs() spi.LogStore       { return b.logs }
 func (b *backend) Traces() spi.TraceStore   { return b.traces }
 func (b *backend) Capabilities() spi.Capabilities {
 	return spi.Capabilities{Driver: driverName, Version: "1", Signals: []spi.Signal{spi.SignalMetrics, spi.SignalLogs, spi.SignalTraces}, OutOfOrderWindow: -1,
+		Traces:    spi.TraceCaps{TagFilter: true, DurationFilter: true, SpanKindFilter: true},
 		Retention: spi.RetentionCaps{PerSignal: true, Enforced: false}}
 }
 
@@ -203,7 +211,14 @@ func (b *backend) Close() error {
 		b.mu.Lock()
 		b.closed = true
 		b.cancel()
+		leases := make([]*readLease, 0, len(b.leases))
+		for lease := range b.leases {
+			leases = append(leases, lease)
+		}
 		b.mu.Unlock()
+		for _, lease := range leases {
+			_ = lease.Close()
+		}
 		b.wg.Wait()
 		b.closeErr = classifiedError("Close", b.conn.Close())
 	})

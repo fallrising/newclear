@@ -2,6 +2,7 @@ package promqltest
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"testing"
@@ -30,6 +31,7 @@ func TestMain(main *testing.M) { goleak.VerifyTestMain(main) }
 type fixtureStorage struct {
 	backend   spi.Backend
 	queryable storage.Queryable
+	cleanup   func() error
 	selects   int
 	writes    int
 	rows      int
@@ -37,6 +39,12 @@ type fixtureStorage struct {
 
 func newFixtureStorage(t *testing.T) *fixtureStorage {
 	t.Helper()
+	if *corpusDriver == "clickhouse" {
+		if openClickHouseFixture == nil {
+			t.Fatal("clickhouse corpus requires the integration build tag")
+		}
+		return openClickHouseFixture(t)
+	}
 	backend, err := spi.Open(t.Context(), "memory", spi.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +57,17 @@ func newFixtureStorage(t *testing.T) *fixtureStorage {
 func (s *fixtureStorage) Querier(start, end int64) (storage.Querier, error) {
 	return s.queryable.Querier(start, end)
 }
-func (s *fixtureStorage) Close() error { return s.backend.Close() }
+func (s *fixtureStorage) Close() error {
+	closeErr := s.backend.Close()
+	if s.cleanup != nil {
+		closeErr = errors.Join(closeErr, s.cleanup())
+		s.cleanup = nil
+	}
+	return closeErr
+}
+
+var openClickHouseFixture func(*testing.T) *fixtureStorage
+
 func (s *fixtureStorage) Appender(ctx context.Context) *fixtureAppender {
 	return &fixtureAppender{ctx: ctx, fixture: s}
 }
@@ -98,8 +116,11 @@ func (a *fixtureAppender) Commit() error {
 	if len(a.points) == 0 {
 		return nil
 	}
-	if err := a.fixture.backend.Metrics().Write(a.ctx, a.points); err != nil {
-		return err
+	const batchSize = 5000
+	for start := 0; start < len(a.points); start += batchSize {
+		if err := a.fixture.backend.Metrics().Write(a.ctx, a.points[start:min(start+batchSize, len(a.points))]); err != nil {
+			return err
+		}
 	}
 	a.fixture.writes++
 	a.fixture.rows += len(a.points)
@@ -108,8 +129,8 @@ func (a *fixtureAppender) Commit() error {
 }
 
 func TestOfficialFloatCorpus(t *testing.T) {
-	if *corpusDriver != "memory" {
-		t.Fatalf("unsupported corpus driver %q; only memory is implemented", *corpusDriver)
+	if *corpusDriver != "memory" && *corpusDriver != "clickhouse" {
+		t.Fatalf("unsupported corpus driver %q", *corpusDriver)
 	}
 	previous := parser.EnableExperimentalFunctions
 	parser.EnableExperimentalFunctions = true

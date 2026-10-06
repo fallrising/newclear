@@ -39,11 +39,14 @@ type ServerConfig struct {
 }
 
 type StorageConfig struct {
-	Driver    string                   `yaml:"driver"`
-	DSN       string                   `yaml:"dsn"`
-	Options   map[string]string        `yaml:"options"`
-	Retention RetentionConfig          `yaml:"retention"`
-	Split     map[string]StorageTarget `yaml:"split"`
+	Driver        string                   `yaml:"driver"`
+	DSN           secret.String            `yaml:"dsn"`
+	DSNFile       string                   `yaml:"dsn_file"`
+	Options       map[string]string        `yaml:"options"`
+	Retention     RetentionConfig          `yaml:"retention"`
+	Split         map[string]StorageTarget `yaml:"split"`
+	dsnFileLoaded bool
+	loadedDSN     secret.String
 }
 
 type StorageTarget struct {

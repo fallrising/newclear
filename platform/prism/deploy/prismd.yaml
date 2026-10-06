@@ -8,16 +8,21 @@ server:
 
 storage:
   driver: clickhouse          # ★ 換底層只需改這一行
-  dsn: "clickhouse://prism:${CH_PASSWORD}@127.0.0.1:9000/prism"
+  dsn_file: /etc/prism/secrets/clickhouse_dsn  # regular file; database must already exist
   options:
     cluster: ""
     async_insert: "1"
+    max_execution_time: "55"      # query.timeout must be greater
+    max_rows_to_read: "5000000"
+    max_result_rows: "5000000"
+    max_result_bytes: "67108864"
   retention:
     metrics_days: 30
     logs_days: 14
     traces_days: 7
     red_days: 90
-  # 多後端組合：不同 signal 走不同驅動（Phase 5）
+  # Memory smoke: set driver: memory, remove dsn_file, retain this retention block.
+  # 多後端組合（Phase 5；目前非空 split 會被 config-check 拒絕）
   # split:
   #   metrics: {driver: vmvl,       dsn: "..."}
   #   logs:    {driver: vmvl,       dsn: "..."}

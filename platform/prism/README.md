@@ -18,7 +18,8 @@ P1-07 adds a bounded, tenant-scoped PromQL storage adapter with memory-backed
 official float corpus verification. P1-08 exposes bounded Prometheus HTTP queries,
 labels, series, metadata and build information in query/all-in-one roles.
 P1-09 adds ClickHouse schema migrations and three Store writes through the Go SPI.
-ClickHouse query methods remain Unsupported and daemon selection remains memory.
+P1-10 connects ClickHouse metric, log and trace reads to that SPI and enables
+daemon storage selection, including ingestion followed by PromQL queries.
 The initial runtime supports a single configured tenant and file-backed bearer
 key. Loki/Jaeger query APIs, complete production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
@@ -34,7 +35,7 @@ remain unimplemented; this is not yet a complete APM service.
 
 - `pkg/utm` and `pkg/spi`: telemetry model and storage contracts.
 - `drivers/memory`: the implemented reference backend.
-- [`drivers/clickhouse`](drivers/clickhouse/README.md): migrated native three-signal writes; production queries remain P1-10.
+- [`drivers/clickhouse`](drivers/clickhouse/README.md): migrated native three-signal writes, bounded reads and daemon selection.
 - `internal/config`, `secret`, `server`, `telemetry`: supporting packages.
 - `internal/ingest/normalize`: protocol-to-UTM normalization and bounded delta state.
 - [`internal/ingest`](internal/ingest/README.md): bounded pipeline,
@@ -104,3 +105,9 @@ The [P1-09 contract](docs/specs/p1-09-clickhouse-write.md) defines bounded nativ
 ClickHouse writes, schema drift rejection and honest async/retention limits. Its
 [local database gate](drivers/clickhouse/README.md#real-database-verification) checks
 actual persisted fields and tenant isolation independently of production queries.
+
+The [P1-10 contract](docs/specs/p1-10-clickhouse-query.md) adds tenant-scoped reads,
+iterator ownership, scan/result limits and the same supported float PromQL corpus
+against real ClickHouse. Optional native query, metadata, delete, dependency and
+RED stores remain absent. See the [quickstart](docs/quickstart.md#clickhouse-storage)
+for file-backed credentials and the local database gate.

@@ -14,7 +14,7 @@ func TestClassifiedErrorRedactsServerText(t *testing.T) {
 	tests := []struct {
 		code  int32
 		class spi.ErrClass
-	}{{210, spi.ErrUnavailable}, {159, spi.ErrTimeout}, {241, spi.ErrTooLarge}, {202, spi.ErrThrottled}, {62, spi.ErrInternal}}
+	}{{210, spi.ErrUnavailable}, {159, spi.ErrTimeout}, {241, spi.ErrTooLarge}, {396, spi.ErrTooLarge}, {202, spi.ErrThrottled}, {62, spi.ErrInternal}}
 	for _, tt := range tests {
 		err := classifiedError("Write", &clickhouse.Exception{Code: tt.code, Message: "password=private"})
 		if spi.Classify(err) != tt.class {

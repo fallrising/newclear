@@ -14,16 +14,23 @@ server:
 
 storage:
   driver: clickhouse          # ★ 換底層只需改這一行
-  dsn: "clickhouse://prism:${CH_PASSWORD}@127.0.0.1:9000/prism"
+  dsn: ""                    # 與dsn_file二選一，DSN視為credential
+  dsn_file: /etc/prism/secrets/clickhouse_dsn
   options:
     cluster: ""
-    async_insert: "1"
+    async_insert: "1"          # metrics/traces；logs為穩定write_seq採同步INSERT
+    max_execution_time: "55"  # 必須小於query.timeout
+    max_memory_usage: "1000000000"
+    max_result_rows: "5000000"
+    max_rows_to_read: "5000000"
+    max_result_bytes: "67108864"
+    max_open_conns: "10"
   retention:
     metrics_days: 30
     logs_days: 14
     traces_days: 7
     red_days: 90
-  # 多後端組合：不同 signal 走不同驅動（Phase 5）
+  # 多後端組合尚未實作；本期非空split會被config-check拒絕（後續階段）
   # split:
   #   metrics: {driver: vmvl,       dsn: "..."}
   #   logs:    {driver: vmvl,       dsn: "..."}
@@ -123,6 +130,25 @@ config-check 允許預算恰好等於 limit，超出一 byte 即拒絕。
 - 不連線任何後端就完成上述檢查，退出碼 0/1
 
 CI 與部署腳本必須先跑 `--config-check`。
+
+### 1.3 P1-10 ClickHouse 設定接線
+
+Daemon註冊memory與ClickHouse；選storage.driver=clickhouse後沿既有SPI Open→Migrate/Ping→ingest/query→drain→Close。Database須預先存在，單一writer／migrator；cluster非空與split非空不支援，config-check fail closed。此設定接線不提供compose/Grafana部署。
+
+StorageConfig.DSN使用既有secret.String，格式化／JSON／YAML去敏；dsn／dsn_file二選一。dsn_file與username_file／password_file只讀有界regularfiles（最多4KiB），拒絕symlink/FIFO/device，相對路徑依config位置。DSN inline／environment可設定但不得輸出；file與inline credentials來源衝突拒絕。設定驗證不需要連ClickHouse。
+
+storage.retention四個天數是daemon唯一權威（1–36500），轉成driver retention_*_days；options內另給同名retention鍵會被拒絕，避免忽略配置。query.timeout必須大於max_execution_time（預設60s>55s）。Driver context仍可被caller提早取消；原P109UTC／TTLoverflowguard維持。
+
+| Driver option | 預設 | 支援範圍 |
+| --- | --- | --- |
+| max_execution_time | 55 seconds | 1–3600 |
+| max_memory_usage | 1,000,000,000 bytes | 正值，≤2^50 |
+| max_result_rows | 5,000,000 | 正值，≤2^30 |
+| max_rows_to_read | 5,000,000 | 正值，≤2^30 |
+| max_result_bytes | 64MiB | 正值，≤2^40 |
+| max_open_conns | 10 | 1–1000 |
+
+Server scan/result設定以throw超限，nativeSQL顯式executioncap；driver累計logicaldecodedrows/bytes並回TooLarge，沒有成功截斷。Iterator持有lease到EOF/Close/取消／錯誤，Backend.Close取消並drain後closeclient一次。Logicalbytes不是processRSS／soak保證。Metrics/traces asyncack、多表非transaction及metadata無TTL限制保留；logs同步INSERT供持久write_seq與drainedrestartseeding。
 
 ## 2. 部署形態
 

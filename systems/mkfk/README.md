@@ -5,7 +5,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M5 已驗證；M6 進行中（consumer group 狀態機已完成，coordinator／HTTP／SDK 未完成）；M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller，以及 durable idempotent producer、HTTP adapter、Go client 與 ledger CLI；目前仍沒有可啟動的 broker server、consumer groups、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M6 已驗證；M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller、durable idempotent producer、durable consumer groups（generation fence、round-robin、owner-checked atomic offset commits、coordinator failover）、HTTP adapters、Go producer／consumer client 與 ledger CLI；目前仍沒有可啟動的 broker server、peer transport、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 
@@ -105,6 +105,20 @@ M4 的 test-only operation identity 不負責 producer 去重；M5 透過下列 
 - `cmd/mkfkctl`：OpenProducer 與 produce 指令；outbound ledger 先以 temp write → file sync → rename → directory sync 保存 pending，成功後才持久更新 next sequence。新 invocation 會先恢復未解決 batch。
 
 M5 的 HTTP handler 是可嵌入 partition actor 的 public boundary，但尚無 `cmd/mkfk` broker 把 client/peer listeners、所有 partitions 與 lifecycle 接成常駐服務；該整合與 consumer groups 分別屬於 M7 與 M6。這裡的冪等只涵蓋同 producer/partition/epoch/sequence 的 transport retry，不是跨 partition transaction 或外部 side-effect exactly-once。
+
+## M6 consumer groups 與 durable offsets
+
+- `internal/group`：`__mkfk_groups/0` 上的 GROUP command（ADR-010）、只由 committed entries 推導的狀態機、deterministic round-robin、session／rebalance timers、每個新 coordinator term 的 BEGIN_REBALANCE，以及帶 quorum HW 證明、apply 時再驗 generation／ownership 的 all-or-nothing CommitOffsets。
+- `group.Service`：以單一 goroutine 擁有 coordinator，提供 6 個 group 操作；GET offsets 先完成 Raft read barrier。M7 之前只驅動 RF1 groups partition（無 peer transport）。
+- `internal/transport`：`/v1/groups/{group}/…` 6 個 endpoint 與 `GET /v1/fetch`，錯誤碼與 outcome 對應 03 §1，回應以 M0 JSON schema 驗證。
+- `pkg/client`：`GroupConsumer` 的 join → sync → fetch → process → commit；stale generation 立即停止並不提交其結果，unknown commit 以相同 request_id 重送，重新分配後從 committed next offset 繼續。這是 at-least-once：process 後、commit 前 crash 的 records 會被重新處理。
+
+```bash
+make test-model        # M3/M4/M6 seeded model suites
+make test-integration  # real WAL, child processes, M6 demo
+```
+
+M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執行：3 partitions、2 members 後加入第 3 位、kill 一個 process 後未 commit 的 member 與 coordinator，並列出 generation／assignment 與被重新處理的 records。
 
 ## 範圍提示
 

@@ -38,9 +38,10 @@ type AppendResult struct {
 }
 
 type LocalRecord struct {
-	Offset uint64
-	Key    []byte
-	Value  []byte
+	Offset          uint64
+	Key             []byte
+	Value           []byte
+	AppendTimestamp uint64
 }
 
 type RecoveryEvent struct {

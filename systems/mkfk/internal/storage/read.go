@@ -129,6 +129,10 @@ func (partition *PartitionLog) readRecordsLocked(offset, limit uint64, maxBytes 
 			if err != nil {
 				return nil, offset, stats, err
 			}
+			timestamp, err := parseCanonicalUint64(payload.AppendTimestamp)
+			if err != nil {
+				return nil, offset, stats, err
+			}
 			if baseOffset >= limit {
 				return result, nextOffset, stats, nil
 			}
@@ -151,6 +155,8 @@ func (partition *PartitionLog) readRecordsLocked(offset, limit uint64, maxBytes 
 					Offset: recordOffset,
 					Key:    cloneNullableBytes(record.Key),
 					Value:  append([]byte{}, record.Value...),
+
+					AppendTimestamp: timestamp,
 				})
 				usedBytes += recordBytes
 				nextOffset = recordOffset + 1

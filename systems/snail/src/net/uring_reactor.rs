@@ -426,7 +426,7 @@ fn stream_from_fd(fd: RawFd) -> io::Result<TcpStream> {
 /// Run the completion reactor until shutdown. Returns Err only if ring setup fails.
 pub async fn run(
     ctx: WorkerContext,
-    mut request_rx: mpsc::Receiver<ShardRequest>,
+    mut request_rx: mpsc::UnboundedReceiver<ShardRequest>,
     shard_range: std::ops::Range<usize>,
     mut shutdown_rx: broadcast::Receiver<()>,
 ) -> io::Result<()> {
@@ -717,7 +717,7 @@ fn harvest_and_queue(
 }
 
 fn drain_shards(
-    rx: &mut mpsc::Receiver<ShardRequest>,
+    rx: &mut mpsc::UnboundedReceiver<ShardRequest>,
     ctx: &WorkerContext,
     range: &std::ops::Range<usize>,
     conns: &mut [Option<Connection>],

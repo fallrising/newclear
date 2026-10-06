@@ -9,7 +9,7 @@ use tokio::sync::{broadcast, mpsc};
 
 pub async fn accept_loop(
     ctx: WorkerContext,
-    request_rx: mpsc::Receiver<ShardRequest>,
+    request_rx: mpsc::UnboundedReceiver<ShardRequest>,
     shard_range: std::ops::Range<usize>,
     shutdown_rx: broadcast::Receiver<()>,
 ) {

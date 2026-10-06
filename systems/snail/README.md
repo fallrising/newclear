@@ -53,7 +53,7 @@ Kernel SO_REUSEPORT → Worker × N (pin to core)
 ```
 
 - **thread-per-core share-nothing**：每 shard 獨占一 worker，熱路徑零鎖
-- **跨 shard**：MPSC channel + oneshot scatter-gather，backpressure 逐級傳導
+- **跨 shard**：unbounded MPSC channel + oneshot scatter-gather；背壓由連線層負責：等待回覆的指令達 `pipeline_cap` 時暫停讀取該連線，跨 shard 請求不會因佇列滿而被丟棄
 - **Pipeline**：FIFO 保序，本地/遠端命令可並發完成、按序回覆
 - **Telemetry**：`INFO STATS` 暴露全局與 per-shard commands / keys / expires / memory
 

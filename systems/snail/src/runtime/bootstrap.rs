@@ -23,7 +23,7 @@ pub async fn start(config: Arc<Config>) -> Result<ShutdownHandle, ServerError> {
     let mut receivers = Vec::with_capacity(config.workers);
 
     for _ in 0..config.workers {
-        let (tx, rx) = mpsc::channel(config.channel_cap);
+        let (tx, rx) = mpsc::unbounded_channel();
         senders.push(tx);
         receivers.push(rx);
     }

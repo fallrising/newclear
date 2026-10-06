@@ -5,7 +5,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M5 已驗證；M6–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller，以及 durable idempotent producer、HTTP adapter、Go client 與 ledger CLI；目前仍沒有可啟動的 broker server、consumer groups、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M5 已驗證；M6 進行中（consumer group 狀態機已完成，coordinator／HTTP／SDK 未完成）；M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller，以及 durable idempotent producer、HTTP adapter、Go client 與 ledger CLI；目前仍沒有可啟動的 broker server、consumer groups、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
 
 ## 從這裡開始
 

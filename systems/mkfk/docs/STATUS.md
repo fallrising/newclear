@@ -10,7 +10,7 @@ Last updated: 2026-09-16
 | M3 per-partition Raft | VERIFIED | `docs/evidence/m3-af2d7d1-raft.json`; RP-01–RP-07, ReadIndex, RF1/RF3, model, and three-process restart tests pass |
 | M4 ISR / HW / ack gate | VERIFIED | `docs/evidence/m4-dc75958-isr-hw.json`; RP-08–RP-11, RP-06 regression, bounded waiters, 100×1,000-event invariants, and RF1 recovery pass |
 | M5 idempotent producer | VERIFIED | `docs/evidence/m5-002e6cd-producer.json`; PR-01–PR-07 and relevant OP-01/OP-04 pass across RF1 restart, RF3 failover, HTTP, SDK, and CLI ledger tests |
-| M6 consumer groups | NOT_STARTED | Request/schema contracts only |
+| M6 consumer groups | IN_PROGRESS | ADR-010 GROUP payload v1, `internal/group` state machine and round-robin; state-level tests for CG-01/02/03/04/07 pass. Coordinator, failover (CG-05/06), HTTP, SDK loop and evidence pending |
 | M7 integrated failure evidence | NOT_STARTED | No broker or cluster harness exists |
 
 `VERIFIED` means the milestone's declared acceptance commands completed successfully with recorded evidence. Compilable contracts do not imply that a broker can start or that later safety properties are implemented.

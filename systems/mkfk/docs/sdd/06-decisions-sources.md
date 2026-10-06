@@ -85,6 +85,12 @@ Status: accepted；完整決策見 [ADR-007](../adr/007-m0-toolchain-platform.md
 
 M0 固定 Go 1.27.1；durability 的最低驗收環境為 Linux 5.10+ 與本機 ext4/XFS，且必須提供 file/directory fsync、同 filesystem atomic rename 與 advisory lock。tmpfs 可跑非 durability unit tests，但不能作持久性證據；其他 filesystem 需另附平台驗證。JSON Schema validator 僅作 test dependency，production contract 維持標準庫實作。
 
+### ADR-010 — GROUP payload v1 與 consumer group state machine
+
+Status: accepted；完整決策見 [ADR-010](../adr/010-group-payload-v1.md)。
+
+GROUP entry 以 `command` 欄位命名（沿用已釘的 WAL golden，取代 CSR §11.8 範例的 `type`），共七種 command。JOIN／LEAVE／REMOVE_MEMBERS／BEGIN_REBALANCE 在同一筆 entry 內推進 generation，舊 generation 的 commit 在 apply 當下即失效。SET_ASSIGNMENT 不攜帶 assignment，replay 時由排序後 round-robin 重算。COMMIT_OFFSETS 攜帶提案前取得的 quorum-confirmed HW，apply 時重驗 generation、STABLE、ownership 與 `existing <= offset <= HW`，全成或全敗。GET offsets 以 query 參數編碼。
+
 ## 4. 來源目錄
 
 來源主要用來校驗概念；本案具體數字、格式、HTTP endpoints、milestones、測試 IDs 都是原創設計，不是來源的既成實作。

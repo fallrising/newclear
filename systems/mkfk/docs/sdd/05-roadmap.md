@@ -131,7 +131,7 @@ X1 的 prerequisite 還包含新的 transaction SDD 和驗收；不能只補三�
 
 ## 11. Planned command contract
 
-下列命令是未來應建立的介面，**目前檔案／targets 尚不存在**：
+下列命令是 milestone 應建立的介面；M0–M6 的 targets 已存在於 `Makefile`，M7 的 targets **尚不存在**：
 
 | Milestone 起 | Component working directory command | 必須執行的工作 |
 | --- | --- | --- |

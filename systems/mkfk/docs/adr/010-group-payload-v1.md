@@ -28,10 +28,19 @@ The state machine (`internal/group`) is a pure function of committed entries:
 
 `GET /v1/groups/{group}/offsets` encodes the partitions to read as query parameters, per the endpoint table in `docs/sdd/03-protocol-clients.md` §2. The schema's request body for that GET is not used.
 
+## HTTP mapping (2026-10-07)
+
+- `GET /v1/groups/{group}/offsets` takes one `partition=<topic>/<id>` query parameter per partition (1–32, no repeats, user topics only). Unknown parameters are rejected. A partition with no commit returns `"offset": null`.
+- `GET /v1/fetch` carries the `fetchRequest` fields as query parameters with the same names and bounds; numbers must be canonical decimals. The schema's request body for that GET is not used either.
+- A heartbeat from a member of an older generation is a `200` with `rebalance_required: true` and the generation to sync, using the schema's `rebalance_required` field instead of a `REBALANCE_IN_PROGRESS` error. A non-member still gets `ILLEGAL_GENERATION` and must rejoin.
+- `leave` reports `removed: true` only when this request removed a current member; a retry after removal reports `false`.
+- Rejected group commands answer `outcome: not_applied` (the entry applied but changed nothing); heartbeat and offset reads answer `not_applicable`; a proposal that lost leadership before applying is `REQUEST_TIMEOUT` with `outcome: unknown`.
+
 ## Consequences
 
 - Rebalance-deadline removal and coordinator failover are durable entries the coordinator proposes itself (`REMOVE_MEMBERS`, `BEGIN_REBALANCE`), never client requests.
 - Until brokers talk to each other (M7), the high-watermark proof comes from an injected source in-process. This is a stated limitation, not a weaker rule.
+- Until M7, `group.Service` serves only an RF1 groups partition. Offset reads still pass through a Raft read barrier, but on RF1 no deposed coordinator can exist, so the barrier's fencing is only exercised by the Raft ReadIndex tests; RF3 coordinator failover is exercised in-process by the coordinator tests.
 - Heartbeat `last_seen` stays volatile in the coordinator term, as `03-protocol-clients.md` §6.1 allows.
 
 ## Rejected alternatives

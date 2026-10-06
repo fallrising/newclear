@@ -1,0 +1,97 @@
+{
+  "milestone": "M6",
+  "status": "VERIFIED",
+  "date": "2026-10-07",
+  "source_commit": "8b99818",
+  "evidence_scope": "M6 part 3 tree based on source_commit (main with M6 parts 1 and 2 merged); this manifest is committed with that change",
+  "toolchain": {
+    "go": "go1.27.1 linux/amd64",
+    "os": "Linux 6.1.0-18-amd64, Debian 12, 4 vCPU, 8 GiB RAM",
+    "filesystem_probe": "ext4",
+    "profiles": [
+      "pure GROUP state machine and round-robin assignment",
+      "coordinator on deterministic in-memory RF1 and RF3 Raft with isolation and failover",
+      "seeded RF3 group model: 100 seeds x 300 events",
+      "real formatted RF1 data directory (__mkfk_groups/0 plus three events partitions) behind the HTTP handlers and the Go consumer SDK, with full close/reopen restarts"
+    ]
+  },
+  "commands": [
+    {"command": "make fmt-check", "exit_code": 0, "result": "all Go files formatted"},
+    {"command": "make vet", "exit_code": 0, "result": "go vet ./... passed"},
+    {"command": "make test", "exit_code": 0, "result": "all packages passed, M0-M5 regressions included"},
+    {"command": "make test-race", "exit_code": 0, "result": "all packages passed under the race detector"},
+    {"command": "make test-model", "exit_code": 0, "result": "TestM3DeterministicModel100Seeds1000Events, TestM4RandomizedISRAndGateInvariants and TestM6GroupModel100Seeds300Events all ran and passed"},
+    {"command": "make test-integration", "exit_code": 0, "result": "M1 SIGKILL, M3 three-process, M4 RF1 recovery, M5 CLI ledger and six M6 real-WAL SDK tests including the demo all ran and passed"}
+  ],
+  "gate_contract": "test-model and test-integration run named tests through scripts/run-named-tests.sh, which fails if any named test did not run and pass, and keeps full verbose output (including failing seed and event history) in .test-output/",
+  "seeds": {
+    "TestM6GroupModel100Seeds300Events": "seeds 0-99, math/rand per seed, 300 events each",
+    "TestM3DeterministicModel100Seeds1000Events": "seeds 0-99 (M3 regression)",
+    "real_wal_tests": "no randomness; manual clock starting at 1700000000"
+  },
+  "fault_schedule": {
+    "group_model": "per event: join 10%, leave 5%, revoke/sync all 20%, commit 30% (25% name the previous generation, 25% a random non-owner or non-member), clock advance 1-3 s with 25% of heartbeats skipped then CheckTimers 15%, high-watermark growth 15%, coordinator failover 5% (isolate leader, accept one commit on it, elect the next node, heal)",
+    "group_model_totals_100_seeds": {
+      "commits_committed": 1336,
+      "commits_rejected_illegal_generation": 2442,
+      "commits_rejected_other": 3696,
+      "commits_outcome_unknown": 1304,
+      "coordinator_failovers": 1397,
+      "sum_of_final_generations": 3642
+    },
+    "sdk_real_wal": [
+      "rebalance between process and commit (another member joins inside the Process callback)",
+      "CommitOffsets delivered but its reply lost",
+      "session expiry of a live consumer, with and without a commit of unknown outcome",
+      "member killed after Process and before CommitOffsets",
+      "close and reopen of the whole RF1 node including the coordinator"
+    ]
+  },
+  "acceptance": {
+    "CG-01": "1/2/3/5 members with out-of-order joins get the deterministic sorted round-robin; extra members get empty assignments; the group model checks every STABLE generation owns each partition exactly once",
+    "CG-02": "two groups on the same topic keep independent assignments and offsets",
+    "CG-03": "join, leave, session timeout and rebalance-deadline removal each start a new durable generation; assignments are visible only after SET_ASSIGNMENT applies; an expired SDK consumer gets ErrStaleGeneration, rejoins and resumes",
+    "CG-04": "old-generation, non-owner and apply-time-raced commits are rejected without writing; the SDK consumer whose generation changes mid-batch returns ErrStaleGeneration, commits nothing, and the new owner reprocesses; the group model found no successful commit naming a generation other than the one it applied in",
+    "CG-05": "on the real WAL, records processed before a crash and not committed are processed again by the next owner (2 of 15 demo records twice); committed next offsets survive restart and consumers resume from them, not from offset 0",
+    "CG-06": "on the real WAL, restarting the node keeps committed offsets for all partitions, the recovered coordinator starts generation g+1 before serving, an old-session commit gets ILLEGAL_GENERATION and generations are never reused (demo generations 2,3,4,5); RF3 failover and isolated-old-leader sequences pass in-memory, and no commit accepted by a deposed coordinator succeeded in 1,397 model failovers",
+    "CG-07": "offsets above the quorum HW, regressions and a multi-partition batch with one bad entry are rejected with no partial commit; the model checks committed offsets never decrease or exceed HW",
+    "OP-01": "malformed group and fetch requests (unknown or duplicate keys, non-canonical decimals, missing fields, unsafe group IDs, internal topics, wrong methods, repeated or unknown query parameters, oversized bodies) are rejected before the backend, and every success and error response validates against api/schemas/v1.json"
+  },
+  "demo": {
+    "test": "TestM6DemoRebalanceCrashAndCoordinatorRestart",
+    "transcript": [
+      "two members: generation=2 STABLE c1:[0 2] c2:[1]",
+      "third member joined: generation=3 STABLE c1:[0] c2:[1] c3:[2]",
+      "c1 processed events/0 offsets 2..3 and was killed before committing",
+      "c1 session expired: generation=4 STABLE c2:[0 2] c3:[1]",
+      "coordinator killed and recovered from its WAL",
+      "after coordinator restart: generation=5 STABLE c2:[0 2] c3:[1]",
+      "15 records, 17 process calls: events/0 offsets 2 and 3 processed twice (at-least-once), all partitions committed at next offset 5"
+    ]
+  },
+  "mutation_checks": {
+    "killed": [
+      "consumer resumes from offset 0 instead of the committed offset",
+      "unknown-outcome commit is not retried with the same request",
+      "fenced consumer keeps its session instead of rejoining",
+      "ILLEGAL_GENERATION mapped to HTTP 200",
+      "fetch query accepts non-canonical numbers",
+      "offsets query accepts repeated partitions",
+      "GROUP apply ignores the commit's generation (caught by the group model)",
+      "fetched records lose their append timestamp",
+      "pending commit from a fenced generation is resent after rejoin (regression test fails without the fix)"
+    ],
+    "survived": [
+      "skipping the read barrier before GET offsets: on RF1 no deposed coordinator can exist, so the barrier's fencing is only covered by the Raft ReadIndex tests until M7 adds peers"
+    ]
+  },
+  "output_location": "This scrubbed manifest. Full verbose logs are written to .test-output/ by the gates and are not committed; no payloads or credentials are recorded.",
+  "limitations": [
+    "There is still no cmd/mkfk broker or peer transport. group.Service serves an RF1 groups partition only; RF3 coordinator failover is verified in-process on in-memory Raft.",
+    "The coordinator's high-watermark proof comes from an injected in-process source (the RF1 data leader's HW in the real-WAL tests).",
+    "Real-WAL restarts close and reopen the data directory in-process; storage-level SIGKILL durability remains covered by the M1 child-process test.",
+    "Delivery is at-least-once. Generation fencing rejects stale commits but cannot undo side effects a stale worker already performed.",
+    "Heartbeat last_seen is volatile per coordinator term; a new coordinator gives every member a full session."
+  ],
+  "next_task": "M7: three-broker isolated Compose profile, peer transport, fault harness, OP-01-OP-06, benchmark baseline and portfolio write-up."
+}

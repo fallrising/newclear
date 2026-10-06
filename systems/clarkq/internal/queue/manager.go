@@ -9,20 +9,33 @@ import (
 	"github.com/fallrising/newclear/systems/clarkq/internal/crypto"
 )
 
+// DefaultRemovedTTL is how long a removed message ID is remembered. A node that
+// rejoins after being down longer than this can reintroduce messages consumed meanwhile.
+const DefaultRemovedTTL = time.Hour
+
 type Manager struct {
-	mu        sync.RWMutex
-	queues    map[string]*Queue
-	maxQueues int
-	maxDepth  int
-	maxBytes  int
+	mu         sync.RWMutex
+	queues     map[string]*Queue
+	maxQueues  int
+	maxDepth   int
+	maxBytes   int
+	removedTTL time.Duration
 }
 
 func NewManager(maxQueues, maxDepth, maxBytes int) *Manager {
 	return &Manager{
-		queues:    make(map[string]*Queue),
-		maxQueues: maxQueues,
-		maxDepth:  maxDepth,
-		maxBytes:  maxBytes,
+		queues:     make(map[string]*Queue),
+		maxQueues:  maxQueues,
+		maxDepth:   maxDepth,
+		maxBytes:   maxBytes,
+		removedTTL: DefaultRemovedTTL,
+	}
+}
+
+// SetRemovedTTL changes how long removed IDs are remembered. Call before use.
+func (m *Manager) SetRemovedTTL(ttl time.Duration) {
+	if ttl > 0 {
+		m.removedTTL = ttl
 	}
 }
 
@@ -58,21 +71,64 @@ func (m *Manager) Enqueue(name string, input EnqueueInput) (Message, error) {
 }
 
 // RestoreMessage re-inserts a previously persisted message (WAL / snapshot / replica).
-func (m *Manager) RestoreMessage(msg Message) error {
+// It skips IDs already queued or removed and reports whether the message was added.
+func (m *Manager) RestoreMessage(msg Message) (bool, error) {
 	if !ValidName(msg.Queue) {
-		return ErrInvalidName
+		return false, ErrInvalidName
 	}
 	if msg.Body == "" {
-		return ErrEmptyBody
+		return false, ErrEmptyBody
 	}
 	if len(msg.Body) > m.maxBytes {
-		return ErrMessageTooLarge
+		return false, ErrMessageTooLarge
 	}
 	q, err := m.getOrCreate(msg.Queue)
 	if err != nil {
-		return err
+		return false, err
 	}
-	return q.push(cloneMessage(msg))
+	return q.restore(cloneMessage(msg))
+}
+
+// MarkAllUnconfirmed flags every queued message as loaded from disk and not yet
+// confirmed by peers. Call once after restoring persisted state at startup.
+func (m *Manager) MarkAllUnconfirmed() {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, q := range m.queues {
+		q.markAllUnconfirmed()
+	}
+}
+
+// UnconfirmedIDs returns the IDs in the queue still awaiting peer confirmation.
+func (m *Manager) UnconfirmedIDs(name string) map[string]struct{} {
+	m.mu.RLock()
+	q, ok := m.queues[name]
+	m.mu.RUnlock()
+	if !ok {
+		return nil
+	}
+	return q.unconfirmedIDs()
+}
+
+// ConfirmAll marks every message in the queue as confirmed by peers.
+func (m *Manager) ConfirmAll(name string) {
+	m.mu.RLock()
+	q, ok := m.queues[name]
+	m.mu.RUnlock()
+	if ok {
+		q.confirmAll()
+	}
+}
+
+// RemovedIDs returns IDs recently removed from the queue (consumed, deleted or cleared).
+func (m *Manager) RemovedIDs(name string) []string {
+	m.mu.RLock()
+	q, ok := m.queues[name]
+	m.mu.RUnlock()
+	if !ok {
+		return nil
+	}
+	return q.removedIDs()
 }
 
 // RemoveByID removes a message by ID from the named queue (replica sync / compensation).
@@ -189,8 +245,9 @@ func (m *Manager) PushFront(name string, msg Message) error {
 	return q.pushFront(cloneMessage(msg))
 }
 
-// MergeMessages inserts messages missing by ID (catch-up). Preserves FIFO of existing;
-// new messages are appended in the order provided. Returns the messages actually added.
+// MergeMessages inserts messages missing by ID (catch-up), skipping IDs this node
+// already removed. Preserves FIFO of existing; new messages are appended in the
+// order provided. Returns the messages actually added.
 func (m *Manager) MergeMessages(name string, msgs []Message) (added []Message, err error) {
 	if !ValidName(name) {
 		return nil, ErrInvalidName
@@ -199,17 +256,14 @@ func (m *Manager) MergeMessages(name string, msgs []Message) (added []Message, e
 		if msg.ID == "" || msg.Body == "" {
 			continue
 		}
-		if len(msg.Body) > m.maxBytes {
-			return added, ErrMessageTooLarge
-		}
-		if m.HasMessage(name, msg.ID) {
-			continue
-		}
 		msg.Queue = name
-		if err := m.RestoreMessage(msg); err != nil {
+		ok, err := m.RestoreMessage(msg)
+		if err != nil {
 			return added, err
 		}
-		added = append(added, msg)
+		if ok {
+			added = append(added, msg)
+		}
 	}
 	return added, nil
 }
@@ -332,7 +386,7 @@ func (m *Manager) ImportSnapshot(data map[string][]Message) error {
 				cloned[i].Queue = name
 			}
 		}
-		q := newQueue(name, m.maxDepth)
+		q := newQueue(name, m.maxDepth, m.removedTTL)
 		q.replaceMessages(cloned)
 		restored[name] = q
 	}
@@ -365,7 +419,7 @@ func (m *Manager) getOrCreate(name string) (*Queue, error) {
 		return nil, ErrQueueLimit
 	}
 
-	q := newQueue(name, m.maxDepth)
+	q := newQueue(name, m.maxDepth, m.removedTTL)
 	m.queues[name] = q
 	return q, nil
 }

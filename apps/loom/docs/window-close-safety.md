@@ -1,6 +1,6 @@
 # Native window close protection
 
-Status: specification before implementation, 2026-10-05.
+Status: implemented and verified on Linux, 2026-10-05. See [verification evidence and platform limits](window-close-safety-verification.md).
 
 ## Scope
 

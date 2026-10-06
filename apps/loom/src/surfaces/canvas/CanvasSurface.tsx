@@ -44,6 +44,10 @@ import {
   type HydratedTerminalSpec,
 } from "./persistence";
 
+import { WindowCloseCoordinator, type WindowCloseState } from "./window_close";
+import { approveWindowClose, onWindowCloseRequested } from "./window_close_ipc";
+import type { WindowCloseParticipant } from "../document/window_participant";
+
 import { CanvasStorage, removalPlan, withoutKeys } from "./lifecycle";
 import { SessionHistory } from "./SessionHistory";
 import { appendHistoryNode, withObservedExit, type AttachmentOptions } from "./recoveryCanvas";
@@ -137,6 +141,100 @@ function CanvasInner({
   }, []);
   const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
+  const edgesRef = useRef(edges);
+  edgesRef.current = edges;
+  const canvasOperationsRef = useRef(0);
+  const pendingAddsRef = useRef(false);
+  pendingAddsRef.current = !!addDocumentAt || !!addTerminalAt;
+  const saveTimerRef = useRef<number | null>(null);
+  const [windowClose, setWindowClose] = useState<WindowCloseState>({ phase: "idle", error: null });
+  const [windowListenerError, setWindowListenerError] = useState<string | null>(null);
+  const [listenerAttempt, setListenerAttempt] = useState(0);
+  const promptRef = useRef<HTMLDivElement>(null);
+  const coordinatorRef = useRef<WindowCloseCoordinator | null>(null);
+  if (!coordinatorRef.current) coordinatorRef.current = new WindowCloseCoordinator({
+    expected: () => !hydratedRef.current || canvasOperationsRef.current > 0 || pendingAddsRef.current
+      ? null : nodesRef.current.filter((node) => node.type === "document").map((node) => node.id),
+    flush: async () => {
+      // A failed hydration must preserve the unread original sidecar. Discard
+      // can still exit; no guessed/empty canvas is ever written over that file.
+      if (!hydratedRef.current) return;
+      if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+      await storageRef.current.save({ version: CANVAS_VERSION,
+        nodes: serializeNodes(nodesRef.current), edges: serializeEdges(edgesRef.current) });
+    },
+    approve: approveWindowClose,
+    changed: setWindowClose,
+  });
+  const coordinator = coordinatorRef.current;
+  const workspaceBlocked = useCallback(() => coordinator.state.phase !== "idle", [coordinator]);
+  const registerWindowCloseParticipant = useCallback((id: string, participant: WindowCloseParticipant) =>
+    coordinator.register(id, participant), [coordinator]);
+
+  useEffect(() => {
+    coordinator.activate();
+    return () => coordinator.dispose();
+  }, [coordinator]);
+  useEffect(() => {
+    let alive = true;
+    let unlisten: (() => void) | undefined;
+    void onWindowCloseRequested(() => { if (alive) void coordinator.request(); }).then((off) => {
+      if (alive) { unlisten = off; setWindowListenerError(null); } else off();
+    }, (error) => { if (alive) setWindowListenerError(`Window close listener failed: ${String(error)}. Native close remains blocked.`); });
+    return () => { alive = false; unlisten?.(); };
+  }, [coordinator, listenerAttempt]);
+
+  // Capture on document also covers the App header and an editor that retained
+  // focus. Reading controller state makes the final freeze synchronous, before
+  // React renders disabled controls or native destruction resolves.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const intercept = (event: Event) => {
+      if (!workspaceBlocked()) return;
+      const prompt = promptRef.current;
+      const key = event as KeyboardEvent;
+      if (key.type === "keydown" && key.key === "Escape" && coordinator.state.phase !== "committing") {
+        event.preventDefault(); event.stopImmediatePropagation(); coordinator.cancel(); return;
+      }
+      if (coordinator.state.phase !== "committing" && prompt?.contains(event.target as globalThis.Node)) {
+        if (key.type === "keydown" && key.key === "Tab") {
+          const buttons = Array.from(prompt.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          const next = (index + (key.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+          event.preventDefault(); buttons[next]?.focus();
+        }
+        return;
+      }
+      event.preventDefault(); event.stopImmediatePropagation();
+      prompt?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus();
+    };
+    const events = ["pointerdown", "mousedown", "click", "dblclick", "keydown", "keyup", "beforeinput", "input", "paste", "cut", "drop", "wheel"];
+    events.forEach((event) => document.addEventListener(event, intercept, { capture: true, passive: false }));
+    return () => events.forEach((event) => document.removeEventListener(event, intercept, true));
+  }, [coordinator, workspaceBlocked]);
+  const windowPromptOpen = windowClose.phase !== "idle";
+  useEffect(() => {
+    if (!windowPromptOpen || typeof document === "undefined" || !promptRef.current) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const hidden: Array<{ element: HTMLElement; inert: boolean }> = [];
+    // Hide nested document prompts from accessibility and make every sibling,
+    // including the App header, inert while this one modal owns the decision.
+    let branch: HTMLElement = promptRef.current;
+    while (branch.parentElement) {
+      for (const sibling of Array.from(branch.parentElement.children)) {
+        if (sibling !== branch && sibling instanceof HTMLElement) {
+          hidden.push({ element: sibling, inert: sibling.inert }); sibling.inert = true;
+        }
+      }
+      branch = branch.parentElement;
+      if (branch === document.body) break;
+    }
+    promptRef.current.querySelector<HTMLButtonElement>("[data-window-cancel]")?.focus();
+    return () => {
+      hidden.forEach(({ element, inert }) => { element.inert = inert; });
+      previousFocus?.focus();
+    };
+  }, [windowPromptOpen]);
   // docNodeId → `run_in:` frontmatter value. Updated by DocumentSurface
   // via onRunInChange; consumed by the synthetic-edges effect below to
   // materialize D-6 step 1's triggers edge.
@@ -256,6 +354,9 @@ function CanvasInner({
   // Approved document Close bypasses the request guard. Non-document removal
   // shares this cleanup, with nodesRef preventing duplicate terminal cleanup.
   const removeNode = useCallback((id: string) => {
+    // A document close approved before the window prompt may finish now.
+    // Honour it: its lifecycle has already relinquished ownership. Window
+    // Save all detects the resulting membership change before native dispatch.
     if (!nodesRef.current.some((node) => node.id === id)) return;
     closeGuardsRef.current.delete(id);
     const plan = removalPlan(nodesRef.current, [id]);
@@ -275,6 +376,7 @@ function CanvasInner({
   const closeDocument = removeNode;
 
   const requestNodeRemoval = useCallback((id: string) => {
+    if (workspaceBlocked()) return;
     const node = nodesRef.current.find((current) => current.id === id);
     if (node?.type === "document") {
       // Missing registration fails closed: the editor may still be mounting.
@@ -285,6 +387,7 @@ function CanvasInner({
   }, [removeNode]);
 
   const onBeforeDelete = useCallback<OnBeforeDelete>(async ({ nodes: requestedNodes, edges: requestedEdges }) => {
+    if (workspaceBlocked()) return false;
     const documents = new Set(requestedNodes.filter((node) => node.type === "document").map((node) => node.id));
     documents.forEach(requestNodeRemoval);
     // React Flow emits incident edge removals BEFORE node removals. Keep both
@@ -302,6 +405,7 @@ function CanvasInner({
   /// matching name.
   const renameTerminal = useCallback(
     (nodeId: string, name: string | null) => {
+      if (workspaceBlocked()) return;
       setNodes((prev) =>
         prev.map((n) => {
           if (n.id !== nodeId) return n;
@@ -338,12 +442,13 @@ function CanvasInner({
         name?: string | null;
       },
     ) => {
-      if (!mountedRef.current || !hydratedRef.current || pendingRestartsRef.current.has(tombNodeId)) return;
+      if (workspaceBlocked() || !mountedRef.current || !hydratedRef.current || pendingRestartsRef.current.has(tombNodeId)) return;
       const currentNode = nodesRef.current.find((node) => node.id === tombNodeId);
       if (!currentNode || currentNode.type !== "tombstone") return;
       // Read the current name/config instead of a pre-rename callback snapshot.
       was = currentNode.data.was as typeof was;
       pendingRestartsRef.current.add(tombNodeId);
+      canvasOperationsRef.current++;
       setSpawnError(null);
       let spawnedId: SessionId | null = null;
       try {
@@ -371,13 +476,14 @@ function CanvasInner({
         if (mountedRef.current) setSpawnError(`Restart failed: ${String(e)}. The saved node is unchanged; try Restart again.`);
       } finally {
         pendingRestartsRef.current.delete(tombNodeId);
+        canvasOperationsRef.current--;
       }
     },
     [],
   );
 
   const attachSession = useCallback((meta: SessionMeta, options: AttachmentOptions = {}) => {
-    if (!mountedRef.current || !hydratedRef.current) return false;
+    if (workspaceBlocked() || !mountedRef.current || !hydratedRef.current) return false;
     if (options.replaceNodeId && !nodesRef.current.some((node) => node.id === options.replaceNodeId)) return false;
     meta = withObservedExit(meta, observedExitsRef.current);
     const position = options.position ?? pickNextPosition(nodesRef.current.length);
@@ -536,6 +642,7 @@ function CanvasInner({
                 pinnedContextSources: [],
                 onClose: () => closeDocument(s.id),
                 registerCloseGuard: (requestClose: () => void) => registerCloseGuard(s.id, requestClose),
+                registerWindowCloseParticipant: (participant: WindowCloseParticipant) => registerWindowCloseParticipant(s.id, participant),
                 onRunInChange: (name: string | null) =>
                   onRunInChange(s.id, name),
               },
@@ -591,6 +698,7 @@ function CanvasInner({
         (e) => setSaveError(`Canvas save failed: ${String(e)}`),
       );
     }, 500);
+    saveTimerRef.current = handle;
     return () => window.clearTimeout(handle);
   }, [hydrated, nodes, edges, saveAttempt]);
 
@@ -679,7 +787,8 @@ function CanvasInner({
 
   // Spawn a new terminal node when the App signals.
   useEffect(() => {
-    if (!hydrated || !addTerminalAt) return;
+    if (!hydrated || !addTerminalAt || workspaceBlocked()) return;
+    canvasOperationsRef.current++;
     let cancelled = false;
     let spawnedId: SessionId | null = null;
     void (async () => {
@@ -707,17 +816,18 @@ function CanvasInner({
         if (!cancelled) setSpawnError(`Terminal could not be started: ${String(e)}. Try adding a terminal again.`);
         if (spawnedId) await cleanupUnattachedSession(spawnedId, ipc.killPty);
       } finally {
+        canvasOperationsRef.current--;
         if (!cancelled) onConsumedAdd();
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [hydrated, addTerminalAt, onConsumedAdd]);
+  }, [hydrated, addTerminalAt, onConsumedAdd, windowClose.phase, workspaceBlocked]);
 
   // Add a document node when the App signals.
   useEffect(() => {
-    if (!hydrated || !addDocumentAt) return;
+    if (!hydrated || !addDocumentAt || workspaceBlocked()) return;
     const { x, y, path } = addDocumentAt;
     const nodeId = `d-${path}-${Date.now()}`;
     setDocuments((prev) => {
@@ -738,6 +848,7 @@ function CanvasInner({
           pinnedContextSources: contextSourcesForRef.current(nodeId),
           onClose: () => closeDocument(nodeId),
           registerCloseGuard: (requestClose: () => void) => registerCloseGuard(nodeId, requestClose),
+          registerWindowCloseParticipant: (participant: WindowCloseParticipant) => registerWindowCloseParticipant(nodeId, participant),
           onRunInChange: (name: string | null) =>
             onRunInChange(nodeId, name),
         },
@@ -745,7 +856,7 @@ function CanvasInner({
       },
     ]);
     onConsumedAdd();
-  }, [hydrated, addDocumentAt, closeDocument, registerCloseGuard, onConsumedAdd]);
+  }, [hydrated, addDocumentAt, closeDocument, registerCloseGuard, onConsumedAdd, windowClose.phase, workspaceBlocked]);
 
   // Whenever the D-6 resolution might have changed (active terminal,
   // edges, or terminal set), push the freshly-resolved triggersTarget
@@ -818,18 +929,20 @@ function CanvasInner({
   }, [triggersTargetFor, feedersFor, contextSourcesFor, runInMap, nodes]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
+    if (workspaceBlocked()) return;
     changes.forEach((change) => { if (change.type === "remove") requestNodeRemoval(change.id); });
     const otherChanges = changes.filter((change) => change.type !== "remove");
     setNodes((nds) => applyNodeChanges(otherChanges, nds));
   }, [requestNodeRemoval]);
 
   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    if (workspaceBlocked()) return;
     setEdges((eds) => applyEdgeChanges(changes, eds));
   }, []);
 
   const onConnect = useCallback(
     (conn: Connection) => {
-      if (!conn.source || !conn.target || conn.source === conn.target) return;
+      if (workspaceBlocked() || !conn.source || !conn.target || conn.source === conn.target) return;
       const sourceNode = nodes.find((n) => n.id === conn.source);
       const targetNode = nodes.find((n) => n.id === conn.target);
       const kind = inferKindFromHandles(
@@ -857,7 +970,21 @@ function CanvasInner({
 
   return (
     <div className={CSS.canvasRoot}>
-      <SessionHistory canvasReady={hydrated} onRestarted={attachSession} />
+      <SessionHistory canvasReady={hydrated && windowClose.phase === "idle"} onRestarted={attachSession} />
+      {windowListenerError && <div role="alert" style={{ position: "absolute", zIndex: 22, top: 60, left: 16, background: "#402020", padding: 12 }}>
+        {windowListenerError} <button onClick={() => setListenerAttempt((attempt) => attempt + 1)}>Retry window close listener</button>
+      </div>}
+      {windowClose.phase !== "idle" && <div ref={promptRef} role="dialog" aria-modal={true} aria-labelledby="window-close-title"
+        style={{ position: "fixed", inset: 0, zIndex: 10000, background: "#111e", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
+        <h2 id="window-close-title">Close Loom?</h2>
+        <p>Save changes to all open documents before exiting?</p>
+        {windowClose.error && <p role="alert">{windowClose.error}</p>}
+        {windowClose.phase === "saving" && <p role="status">Finishing saves… Cancel keeps the window open; submitted writes may finish.</p>}
+        {windowClose.phase === "committing" && <p role="status">Closing window…</p>}
+        <button disabled={windowClose.phase !== "prompt"} onClick={() => void coordinator.saveAll()}>Save all and exit</button>
+        <button disabled={windowClose.phase !== "prompt"} onClick={() => void coordinator.discard()}>Discard and exit</button>
+        <button data-window-cancel disabled={windowClose.phase === "committing"} onClick={() => coordinator.cancel()}>Cancel</button>
+      </div>}
       {spawnError && <div role="alert" style={{ position: "absolute", zIndex: 21, bottom: 80, left: 16, background: "#402020", padding: 12 }}>
         {spawnError} <button onClick={() => setSpawnError(null)}>Dismiss</button>
       </div>}

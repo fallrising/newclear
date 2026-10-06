@@ -22,6 +22,8 @@ The [reliability specification](docs/reliability.md) records the audited gaps an
 
 The [session recovery specification](docs/session-recovery.md) describes the history panel. Restart explicitly reruns the saved command in a new terminal; opening the app never reruns it automatically. Canvas layout remains in `.loom/canvas.json`, and Markdown remains in files. If storage is unavailable or another instance owns the session database, the panel warns that current history is in memory only.
 
+The [current development and acceptance inventory](docs/development-status.md) separates remaining native workspace acceptance, Windows/macOS validation and potential follow-up capabilities.
+
 ## Run
 
 Prerequisites: Node.js 20+ (a current supported release), Rust **1.88** as pinned in `rust-toolchain.toml`, and Tauri desktop native dependencies. On Debian/Ubuntu these include `pkg-config`, GTK 3 and WebKitGTK 4.1 development libraries (`libgtk-3-dev`, `libwebkit2gtk-4.1-dev`), `libayatana-appindicator3-dev`, `librsvg2-dev`, and `patchelf`. A graphical desktop session is needed to open the app.
@@ -50,7 +52,7 @@ For **OpenCode Go**, use `LOOM_AI_PROVIDER=opencode`, `OPENCODE_API_KEY`, and ex
 
 Creating or recreating a missing document never replaces an existing destination. A collision keeps your unsaved edits and offers retry or explicit reload; edits typed while creation is pending remain dirty. See the [creation safety specification](docs/document-create-safety.md) and [verification](docs/document-create-safety-verification.md).
 
-Document Close and canvas Delete/Backspace now ask before discarding unsaved edits. Choose Save and close, Discard changes, or Cancel; failed saves, conflicts and newer edits keep the document open. Pending confirmations preserve canvas connections. See the [close protection specification](docs/document-close-safety.md) and [verification](docs/document-close-safety-verification.md). This protection covers document nodes, not quitting the application or crash recovery.
+Document Close and canvas Delete/Backspace now ask before discarding unsaved edits. Choose Save and close, Discard changes, or Cancel; failed saves, conflicts and newer edits keep the document open. Pending confirmations preserve canvas connections. See the [close protection specification](docs/document-close-safety.md) and [verification](docs/document-close-safety-verification.md). Normal main-window close also protects all open documents with Save all and exit, Discard and exit, or Cancel. See the [window-close specification](docs/window-close-safety.md) and [verification](docs/window-close-safety-verification.md), including five real Linux native scenarios in Docker. Neither guard provides crash recovery or force-kill protection.
 
 Closing a document requests cancellation of its active AI work, including a request ID returned after close. Explicit Cancel failures remain visible and retryable. The [AI request lifecycle specification](docs/ai-request-lifecycle.md) and [verification results](docs/ai-request-lifecycle-verification.md) describe cancellation ordering, dropped-request cleanup and remaining acceptance limits.
 

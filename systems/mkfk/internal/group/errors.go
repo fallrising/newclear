@@ -17,6 +17,8 @@ const (
 	CodeUnknownTopic        ErrorCode = "UNKNOWN_TOPIC_OR_PARTITION"
 	CodeInvalidRequest      ErrorCode = "INVALID_REQUEST"
 	CodeRequestConflict     ErrorCode = "REQUEST_CONFLICT"
+	CodeNotCoordinator      ErrorCode = "NOT_COORDINATOR"
+	CodeDependencyFailed    ErrorCode = "DEPENDENCY_UNAVAILABLE"
 )
 
 type Error struct {

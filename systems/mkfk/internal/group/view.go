@@ -46,6 +46,21 @@ func (s *State) CommittedOffset(groupID string, partition TopicPartition) (uint6
 	return offset, ok
 }
 
+// UnsyncedMembers lists members that have not revoked for the current generation.
+func (s *State) UnsyncedMembers(groupID string) []string {
+	group, exists := s.groups[groupID]
+	if !exists {
+		return nil
+	}
+	var unsynced []string
+	for _, id := range group.memberIDs() {
+		if !group.members[id].synced {
+			unsynced = append(unsynced, id)
+		}
+	}
+	return unsynced
+}
+
 // Groups lists group IDs in sorted order, for coordinator failover handling.
 func (s *State) Groups() []string {
 	ids := make([]string, 0, len(s.groups))

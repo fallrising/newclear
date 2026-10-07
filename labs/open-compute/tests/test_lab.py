@@ -1,18 +1,22 @@
 """Offline harness contracts. These tests do not certify the upstream runtime."""
 
 import hashlib
+from contextlib import redirect_stdout
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import io
 import os
+import signal
 from pathlib import Path
 import socket
+import socketserver
 import sys
 import tempfile
 import threading
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import lab
@@ -45,8 +49,91 @@ class PinTests(unittest.TestCase):
             with self.assertRaisesRegex(lab.LabError, "non-symlink"):
                 lab.verify_binary(file, {"bytes": 1, "sha256": "x"})
 
+    def test_initial_artifact_url_requires_https_and_no_userinfo(self):
+        for repository in ("http://github.com/elliothux/open-compute",
+                           "https://user:password@github.com/elliothux/open-compute"):
+            lock = json.loads((lab.HERE / "upstream.lock.json").read_text())
+            lock["repository"] = repository
+            lock["artifact"]["url"] = repository + "/releases/download/" + lock["release"] + "/" + lock["artifact"]["name"]
+            with self.subTest(repository=repository), self.assertRaisesRegex(lab.LabError, "HTTPS"):
+                lab.validate_lock(lock)
+
+    def test_partial_collision_preserves_preexisting_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory)
+            partial = cache / "binary.partial-collision"
+            partial.write_bytes(b"preserve-existing")
+            response = Mock(status=200)
+            opener = Mock()
+            opener.open.return_value.__enter__ = Mock(return_value=response)
+            opener.open.return_value.__exit__ = Mock(return_value=False)
+            artifact = {"name": "binary", "url": "https://github.com/example/binary",
+                        "bytes": 3, "sha256": hashlib.sha256(b"abc").hexdigest()}
+            with patch("lab.urllib.request.build_opener", return_value=opener):
+                with self.assertRaises(FileExistsError):
+                    lab.download_binary(cache, artifact, "collision")
+            self.assertEqual(partial.read_bytes(), b"preserve-existing")
+
+    def test_download_total_deadline_covers_response_headers_and_restores_alarm(self):
+        with tempfile.TemporaryDirectory() as directory:
+            opener = Mock()
+            opener.open.side_effect = lambda *_args, **_kwargs: time.sleep(1)
+            artifact = {"name": "binary", "url": "https://github.com/example/binary",
+                        "bytes": 3, "sha256": hashlib.sha256(b"abc").hexdigest()}
+            previous = signal.getsignal(signal.SIGALRM)
+            started = time.monotonic()
+            with patch("lab.urllib.request.build_opener", return_value=opener), patch("lab.DOWNLOAD_TOTAL_TIMEOUT", 0.05):
+                with self.assertRaisesRegex(lab.LabError, "total deadline"):
+                    lab.download_binary(Path(directory), artifact, "deadline")
+            self.assertLess(time.monotonic() - started, 0.5)
+            self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
+            self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+
 
 class OwnershipTests(unittest.TestCase):
+    def test_artifact_paths_cannot_write_or_recreate_a_refused_scope(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            scope = home / ".open-compute"
+            scope.mkdir()
+            sentinel = scope / "existing-data"
+            sentinel.write_text("preserve-existing")
+            alias = home / "alias"
+            alias.symlink_to(scope, target_is_directory=True)
+            variants = [(home / "cache", scope / "report"), (scope / "cache", home / "report"),
+                        (home / "cache", alias / "report")]
+            original = sorted(str(path.relative_to(home)) for path in home.rglob("*"))
+            for cache, output in variants:
+                stdout = io.StringIO()
+                args = SimpleNamespace(port=8787, cache=str(cache), output=str(output))
+                with self.subTest(cache=cache, output=output), \
+                     patch("lab.pwd.getpwuid", return_value=SimpleNamespace(pw_dir=str(home))), \
+                     patch("lab.source_commit", return_value=None), patch("lab.download_binary") as download, \
+                     patch("lab.Process") as spawn, redirect_stdout(stdout):
+                    self.assertEqual(lab.integration(args), 1)
+                    download.assert_not_called()
+                    spawn.assert_not_called()
+                report = json.loads(stdout.getvalue())
+                self.assertFalse(report["evidence_file_written"])
+                self.assertEqual(report["result"], "failed")
+                self.assertEqual(sentinel.read_text(), "preserve-existing")
+                self.assertEqual(sorted(str(path.relative_to(home)) for path in home.rglob("*")), original)
+
+    def test_existing_output_and_output_containing_cache_are_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "existing-output"
+            output.mkdir()
+            sentinel = output / "report.json"
+            sentinel.write_text("preserve-existing")
+            with self.assertRaisesRegex(lab.LabError, "already exists"):
+                lab.validate_artifact_paths(root / "scope", root / "cache", output)
+            self.assertEqual(sentinel.read_text(), "preserve-existing")
+            new_output = root / "new-output"
+            with self.assertRaisesRegex(lab.LabError, "contain"):
+                lab.validate_artifact_paths(root / "scope", new_output / "cache", new_output)
+            self.assertFalse(new_output.exists())
+
     def test_root_rejected_before_home_or_port(self):
         with patch("lab.platform.system", return_value="Linux"), \
              patch("lab.platform.machine", return_value="x86_64"), \
@@ -168,6 +255,37 @@ class HTTPTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(lab.LabError):
                 lab.ArtifactRedirects().redirect_request(None, None, 302, "", {}, url)
 
+    def test_total_deadline_interrupts_trickling_headers_and_body(self):
+        for phase in ("headers", "body"):
+            class Handler(socketserver.BaseRequestHandler):
+                def handle(self):
+                    self.request.recv(4096)
+                    try:
+                        if phase == "headers":
+                            self.request.sendall(b"HTTP/1.1 200 OK\r\nX-Slow: ")
+                        else:
+                            self.request.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\nConnection: close\r\n\r\n")
+                        for _ in range(30):
+                            self.request.sendall(b" ")
+                            time.sleep(0.03)  # Always faster than inactivity timeout.
+                    except OSError:
+                        pass
+            class Server(socketserver.ThreadingTCPServer):
+                daemon_threads = True
+            server = Server(("127.0.0.1", 0), Handler)
+            thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.02}, daemon=True)
+            thread.start()
+            started = time.monotonic()
+            try:
+                with self.subTest(phase=phase), patch("lab.HTTP_TOTAL_TIMEOUT", 0.15):
+                    with self.assertRaisesRegex(lab.LabError, "total deadline"):
+                        lab.LocalHTTP(server.server_address[1]).request("GET", "/probe")
+                    self.assertLess(time.monotonic() - started, 0.8)
+            finally:
+                server.shutdown()
+                thread.join(timeout=2)
+                server.server_close()
+
 
 class WorkflowTests(unittest.TestCase):
     def test_terminal_failure_does_not_wait_until_timeout(self):
@@ -195,6 +313,61 @@ class WorkflowTests(unittest.TestCase):
 
 
 class DiagnosticsAndProcessTests(unittest.TestCase):
+    def test_namespace_mismatch_refuses_before_spawn(self):
+        with patch("lab.proc_namespace_supported", return_value=False), patch("lab.subprocess.Popen") as spawn:
+            with self.assertRaisesRegex(lab.LabError, "PID namespace"):
+                lab.Process(["never-run"])
+            spawn.assert_not_called()
+
+    def test_missing_process_is_gone_but_unreadable_or_malformed_is_unknown(self):
+        with patch.object(Path, "read_text", side_effect=FileNotFoundError):
+            self.assertIsNone(lab.process_info(123))
+            self.assertFalse(lab.same_process({"pid": 123, "start_ticks": 45}))
+        for failure in (PermissionError("denied"), OSError("I/O failure")):
+            with self.subTest(failure=type(failure).__name__), patch.object(Path, "read_text", side_effect=failure):
+                with self.assertRaises(lab.ProcessObservationError):
+                    lab.process_info(123)
+        with patch.object(Path, "read_text", return_value="malformed"):
+            with self.assertRaises(lab.ProcessObservationError):
+                lab.process_info(123)
+
+    def test_monitor_failure_is_propagated_to_foreground(self):
+        process = lab.Process.__new__(lab.Process)
+        process.done = Mock()
+        process.done.wait.return_value = False
+        process.observation_error = None
+        process.snapshot = Mock(side_effect=lab.ProcessObservationError("unreadable process"))
+        process._monitor()
+        with self.assertRaisesRegex(lab.ProcessObservationError, "unreadable"):
+            process.live()
+
+    def test_unknown_identity_is_never_signaled(self):
+        process = lab.Process.__new__(lab.Process)
+        process.observation_error = None
+        with patch("lab.same_process", side_effect=lab.ProcessObservationError("unknown")), patch("lab.os.kill") as kill:
+            process.signal_owned({"pid": 123, "start_ticks": 45}, 15)
+            kill.assert_not_called()
+            self.assertEqual(process.observation_error, "unknown")
+
+    def test_incomplete_reader_cannot_be_called_clean(self):
+        process = lab.Process.__new__(lab.Process)
+        process.done, process.monitor, process.reader = Mock(), Mock(), Mock()
+        process.monitor.is_alive.return_value = False
+        process.reader.is_alive.return_value = True
+        process.observation_error = None
+        process.finish_threads()
+        with self.assertRaisesRegex(lab.ProcessObservationError, "did not finish"):
+            process.live()
+
+    def test_reader_error_cannot_be_called_clean(self):
+        process = lab.Process.__new__(lab.Process)
+        process.process = Mock()
+        process.process.stdout.read1.side_effect = OSError("read failed")
+        process.observation_error = None
+        process._read()
+        with self.assertRaisesRegex(lab.ProcessObservationError, "output read failed"):
+            process.live()
+
     def test_redaction_and_final_secret_scan(self):
         redactor = lab.Redactor()
         redactor.secrets = ["specific-test-secret"]

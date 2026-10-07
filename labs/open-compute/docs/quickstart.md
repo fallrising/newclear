@@ -3,7 +3,7 @@
 This is the single operator path for the experiment in [SDD.md](SDD.md). It
 downloads the original **v0.2.4 Linux x64** release, verifies its pinned size and
 SHA256, and exercises a synthetic Worker, D1 database, and Workflow. The harness
-uses Python's standard library and requires Python 3.10 or newer plus Git.
+uses Python's standard library and requires Python 3.10 or newer, Git, and make.
 
 ## 1. Check the harness
 
@@ -37,7 +37,9 @@ make -C labs/open-compute preflight
 
 Preflight does not start a runtime. It checks the platform, real non-root
 identity, home ownership, scope absence, and availability of port 8787 on
-`127.0.0.1`. Use `python3 labs/open-compute/lab.py preflight --port 8877` to test
+`127.0.0.1`. It also requires the process PID namespace to match the readable
+`/proc` namespace so child identities can be verified safely. Use
+`python3 labs/open-compute/lab.py preflight --port 8877` to test
 a different unprivileged loopback port.
 
 ## 3. Run the real experiment
@@ -61,7 +63,11 @@ python3 labs/open-compute/lab.py integration \
   --output /tmp/open-compute-lab-evidence-first-run
 ```
 
-The report directory must be new. Each invocation creates its own empty user
+The report directory must be new. Cache and output paths must be outside the
+runtime scope, and the output directory cannot contain the cache. Unsafe or
+already-existing output paths are rejected before download/start; their failure
+report is printed only to stdout and never written into the refused path.
+Each invocation creates its own empty user
 scope and marker, starts `ocd --no-update-check run` in the foreground, and asks
 the running daemon to create exactly one lab instance. Management requests use
 the generated deployer token in memory, over loopback. Worker routing comes
@@ -96,6 +102,11 @@ Do not upload the scope, database directory, raw configuration, keys, or tokens.
 If cleanup was refused, use the report's process identities and the local scope
 ownership marker to investigate within the disposable environment; the harness
 does not adopt an old run on retry.
+
+HTTP operations have a total wall-clock deadline across headers and body, in
+addition to the socket inactivity timeout. Unknown process identities, unreadable
+process metadata, or incomplete log draining fail cleanup verification; they are
+never interpreted as proof that a process exited.
 
 The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs these
 same commands on a fresh non-root runner and retains only the sanitized report

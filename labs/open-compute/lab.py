@@ -2,6 +2,7 @@
 """Bounded black-box probe for the pinned open-compute release (Python stdlib)."""
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import http.client
 import json
@@ -26,6 +27,8 @@ from urllib.parse import urlsplit
 HERE = Path(__file__).resolve().parent
 BODY_LIMIT = 1024 * 1024
 LOG_LIMIT = 32 * 1024
+HTTP_TOTAL_TIMEOUT = 20.0
+DOWNLOAD_TOTAL_TIMEOUT = 300.0
 INSTANCE = "lab"
 WORKER = "m1-worker"
 FLOW = "m1-flow"
@@ -34,6 +37,10 @@ MARKER = ".open-compute-lab-owner"
 
 class LabError(Exception):
     """An experiment gate failed; never silently convert this into a skip."""
+
+
+class ProcessObservationError(LabError):
+    """Process ownership/exits cannot be established from the available evidence."""
 
 
 def require(condition, message):
@@ -66,7 +73,10 @@ def validate_lock(lock):
     expected = (lock["repository"] + "/releases/download/" + lock["release"] +
                 "/" + artifact["name"])
     require(artifact["url"] == expected, "artifact URL must match pinned repository and release")
-    require(urlsplit(expected).hostname == "github.com", "artifact source must be GitHub")
+    parsed = urlsplit(expected)
+    require(parsed.scheme == "https" and parsed.hostname == "github.com" and
+            not parsed.username and not parsed.password and not parsed.query and not parsed.fragment,
+            "artifact source must be an uncredentialed GitHub HTTPS URL")
     require(artifact["os"] == "Linux" and artifact["architecture"] == "x86_64",
             "M1 supports only Linux x64")
     require(0 < artifact["bytes"] < 512 * 1024 * 1024, "invalid artifact size bound")
@@ -100,6 +110,18 @@ def exclusive_file(path, contents, mode=0o600):
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
     with os.fdopen(fd, "wb") as stream:
         stream.write(contents)
+
+
+def validate_artifact_paths(scope, cache, output):
+    """Keep reports/cache outside both the lexical and resolved runtime scope."""
+    roots = {scope.absolute(), scope.resolve()}
+    cache_path, output_path = cache.resolve(), output.resolve()
+    for path, label in ((cache_path, "cache"), (output_path, "output")):
+        require(not any(path.is_relative_to(root) for root in roots),
+                label + " must not be inside the runtime scope")
+    require(not os.path.lexists(output), "output directory already exists; a new directory is required")
+    require(not cache_path.is_relative_to(output_path), "output directory cannot contain the runtime cache")
+    return cache_path, output_path
 
 
 def file_identity(path):
@@ -153,6 +175,24 @@ class ArtifactRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+@contextmanager
+def download_deadline():
+    # M1 is a sequential Linux CLI. SIGALRM also interrupts urllib header reads
+    # and DNS calls before an HTTP response/socket has been handed to the caller.
+    require(threading.current_thread() is threading.main_thread(), "download requires the main thread")
+    require(signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0), "an existing alarm prevents a bounded download")
+    previous = signal.getsignal(signal.SIGALRM)
+    def expired(_signum, _frame):
+        raise LabError("artifact download total deadline exceeded")
+    signal.signal(signal.SIGALRM, expired)
+    signal.setitimer(signal.ITIMER_REAL, DOWNLOAD_TOTAL_TIMEOUT)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+
+
 def download_binary(cache, artifact, run_id):
     cache.mkdir(mode=0o700, parents=True, exist_ok=True)
     require(not cache.is_symlink() and cache.stat().st_uid == os.geteuid(), "cache must be owned")
@@ -162,28 +202,31 @@ def download_binary(cache, artifact, run_id):
         require(os.access(destination, os.X_OK), "cached artifact is not executable")
         return destination
     temporary = cache / (artifact["name"] + ".partial-" + run_id)
-    deadline = time.monotonic() + 300
+    created_identity = None
     total = 0
     try:
         request = urllib.request.Request(artifact["url"], headers={"User-Agent": "open-compute-lab/1"})
-        with urllib.request.build_opener(ArtifactRedirects()).open(request, timeout=30) as response:
-            require(response.status == 200, "artifact download did not return HTTP 200")
-            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
-            with os.fdopen(fd, "wb") as stream:
-                while True:
-                    require(time.monotonic() < deadline, "artifact download deadline exceeded")
-                    chunk = response.read(64 * 1024)
-                    if not chunk:
-                        break
-                    total += len(chunk)
-                    require(total <= artifact["bytes"], "artifact exceeds pinned size")
-                    stream.write(chunk)
+        with download_deadline():
+            with urllib.request.build_opener(ArtifactRedirects()).open(request, timeout=30) as response:
+                require(response.status == 200, "artifact download did not return HTTP 200")
+                fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+                with os.fdopen(fd, "wb") as stream:
+                    info = os.fstat(stream.fileno())
+                    created_identity = {"device": info.st_dev, "inode": info.st_ino}
+                    while True:
+                        chunk = response.read(64 * 1024)
+                        if not chunk:
+                            break
+                        total += len(chunk)
+                        require(total <= artifact["bytes"], "artifact exceeds pinned size")
+                        stream.write(chunk)
         verify_binary(temporary, artifact)
         temporary.chmod(0o700)
         os.link(temporary, destination)  # Do not overwrite an existing cache entry.
         return destination
     finally:
-        if temporary.exists():
+        if created_identity is not None and os.path.lexists(temporary):
+            require(file_identity(temporary) == created_identity, "partial artifact identity changed; cleanup refused")
             temporary.unlink()
 
 
@@ -197,11 +240,17 @@ def proc_namespace_supported():
 def process_info(pid):
     try:
         text = Path(f"/proc/{pid}/stat").read_text()
+    except (FileNotFoundError, ProcessLookupError):
+        return None
+    except OSError as exc:
+        raise ProcessObservationError("process identity is unreadable") from exc
+    try:
+        require(int(text.split(" ", 1)[0]) == int(pid), "process PID record mismatch")
         fields = text[text.rindex(")") + 2:].split()
         return {"pid": int(pid), "state": fields[0], "ppid": int(fields[1]),
                 "pgid": int(fields[2]), "start_ticks": int(fields[19])}
-    except (OSError, ValueError, IndexError):
-        return None
+    except (LabError, ValueError, IndexError) as exc:
+        raise ProcessObservationError("process identity record is malformed") from exc
 
 
 def same_process(identity):
@@ -220,30 +269,47 @@ class Process:
         require(proc_namespace_supported(), "the current PID namespace cannot be safely observed through /proc")
         self.process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT, start_new_session=True)
-        self.identity = process_info(self.process.pid)
-        if self.identity is None:
+        try:
+            self.identity = process_info(self.process.pid)
+            if self.identity is None:
+                raise ProcessObservationError("cannot identify newly spawned process")
+        except ProcessObservationError:
+            # The unreaped direct Popen child cannot have its PID reused. Stop it,
+            # but propagate unknown ownership so no scope deletion is claimed.
             self.process.terminate()
-            self.process.wait(timeout=5)
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+                self.process.wait(timeout=2)
             self.process.stdout.close()
-            raise LabError("cannot identify owned process")
+            raise
         self.known = {self.process.pid: self.identity}
         self.tail = bytearray()
         self.lock = threading.Lock()
         self.done = threading.Event()
+        self.observation_error = None
         self.reader = threading.Thread(target=self._read, daemon=True)
         self.monitor = threading.Thread(target=self._monitor, daemon=True)
         self.reader.start()
         self.monitor.start()
 
     def _read(self):
-        while chunk := self.process.stdout.read1(4096):
-            with self.lock:
-                self.tail.extend(chunk)
-                del self.tail[:-LOG_LIMIT]
+        try:
+            while chunk := self.process.stdout.read1(4096):
+                with self.lock:
+                    self.tail.extend(chunk)
+                    del self.tail[:-LOG_LIMIT]
+        except Exception:
+            self.observation_error = "process output read failed"
 
     def snapshot(self):
         table = {}
-        for entry in Path("/proc").iterdir():
+        try:
+            entries = list(Path("/proc").iterdir())
+        except OSError as exc:
+            raise ProcessObservationError("process table is unreadable") from exc
+        for entry in entries:
             if entry.name.isdecimal():
                 info = process_info(int(entry.name))
                 if info:
@@ -262,19 +328,38 @@ class Process:
                     self.known[pid] = table[pid]
 
     def _monitor(self):
-        while not self.done.wait(0.05):
-            self.snapshot()
+        try:
+            while not self.done.wait(0.05):
+                self.snapshot()
+        except Exception as exc:
+            self.observation_error = str(exc)
 
     def text(self):
         with self.lock:
             return bytes(self.tail).decode(errors="replace")
 
-    def live(self):
+    def live(self, strict=True):
+        if strict and self.observation_error:
+            raise ProcessObservationError(self.observation_error)
         with self.lock:
-            return [identity.copy() for identity in self.known.values() if same_process(identity)]
+            identities = [identity.copy() for identity in self.known.values()]
+        found = []
+        for identity in identities:
+            try:
+                if same_process(identity):
+                    found.append(identity)
+            except ProcessObservationError as exc:
+                self.observation_error = str(exc)
+                if strict:
+                    raise
+                found.append(identity)  # Unknown is not evidence of exit.
+        return found
 
-    def children(self):
-        self.snapshot()
+    def children(self, refresh=True):
+        if refresh:
+            if self.observation_error:
+                raise ProcessObservationError(self.observation_error)
+            self.snapshot()
         with self.lock:
             return [public_process(item) for pid, item in self.known.items() if pid != self.process.pid]
 
@@ -282,40 +367,52 @@ class Process:
         self.done.set()
         self.monitor.join(timeout=2)
         self.reader.join(timeout=2)
+        if self.monitor.is_alive() or self.reader.is_alive():
+            self.observation_error = "process observation/output drain did not finish"
         if not self.reader.is_alive():
             self.process.stdout.close()
 
     def stop(self, grace=30):
-        self.snapshot()
+        try:
+            self.snapshot()
+        except (LabError, OSError) as exc:
+            self.observation_error = str(exc)
         was_running = self.process.poll() is None
-        if was_running and same_process(self.identity):
-            os.kill(self.process.pid, signal.SIGTERM)
+        if was_running:
+            self.signal_owned(self.identity, signal.SIGTERM)
         deadline = time.monotonic() + grace
         while time.monotonic() < deadline:
             self.process.poll()  # Reap our direct child, then check its former descendants.
-            if not self.live():
+            if not self.live(strict=False):
                 break
             time.sleep(0.05)
-        forced = bool(self.live())
+        forced = bool(self.live(strict=False))
         if forced:
             # Each signal is gated by the originally observed PID + start time.
-            for identity in self.live():
-                if same_process(identity):
-                    try:
-                        os.kill(identity["pid"], signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
+            for identity in self.live(strict=False):
+                self.signal_owned(identity, signal.SIGKILL)
             try:
                 self.process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 pass
             deadline = time.monotonic() + 5
-            while self.live() and time.monotonic() < deadline:
+            while self.live(strict=False) and time.monotonic() < deadline:
                 time.sleep(0.05)
         self.finish_threads()
         return {"was_running": was_running, "signal": "SIGTERM", "forced": forced,
-                "exit_code": self.process.poll(), "all_owned_exited": not self.live(),
-                "children": self.children()}
+                "exit_code": self.process.poll(),
+                "all_owned_exited": not self.live(strict=False) and not self.observation_error,
+                "observation_error": self.observation_error,
+                "children": self.children(refresh=False)}
+
+    def signal_owned(self, identity, sig):
+        try:
+            if same_process(identity):
+                os.kill(identity["pid"], sig)
+        except ProcessLookupError:
+            pass
+        except (ProcessObservationError, OSError) as exc:
+            self.observation_error = str(exc)
 
 
 def command(argv, timeout=30):
@@ -329,8 +426,10 @@ def command(argv, timeout=30):
     except subprocess.TimeoutExpired as exc:
         raise LabError("CLI command deadline exceeded") from exc
     finally:
-        if child.live():
-            child.stop(grace=2)
+        if child.live(strict=False) or child.observation_error:
+            stopped = child.stop(grace=2)
+            if not stopped["all_owned_exited"]:
+                raise ProcessObservationError("CLI process cleanup cannot be verified")
         else:
             child.finish_threads()
 
@@ -351,17 +450,43 @@ class LocalHTTP:
         if body is not None and not isinstance(body, bytes):
             body = json.dumps(body, separators=(",", ":")).encode()
         require(body is None or len(body) <= BODY_LIMIT, "request exceeds body bound")
-        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        deadline = time.monotonic() + HTTP_TOTAL_TIMEOUT
+        expired = threading.Event()
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=min(10, HTTP_TOTAL_TIMEOUT))
+        timer = None
         try:
+            # Numeric loopback connect is itself bounded. The watchdog then spans
+            # request writes, slow response headers, and slow response bodies.
+            connection.connect()
+            stream_socket = connection.sock
+            def expire():
+                expired.set()
+                try:
+                    stream_socket.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+                stream_socket.close()
+            remaining = deadline - time.monotonic()
+            require(remaining > 0, "HTTP total deadline exceeded")
+            timer = threading.Timer(remaining, expire)
+            timer.daemon = True
+            timer.start()
             connection.request(method, path, body, headers)
             response = connection.getresponse()
             raw = response.read(BODY_LIMIT + 1)
+            require(not expired.is_set() and time.monotonic() < deadline, "HTTP total deadline exceeded")
             require(len(raw) <= BODY_LIMIT, "response exceeds body bound")
             require(not 300 <= response.status < 400, "management/Worker redirects are refused")
             require(200 <= response.status < 300,
                     f"HTTP {response.status} for {method} {path}: " + raw.decode(errors="replace")[:2048])
             return json.loads(raw) if raw else None
+        except (OSError, http.client.HTTPException) as exc:
+            if expired.is_set() or time.monotonic() >= deadline:
+                raise LabError("HTTP total deadline exceeded") from exc
+            raise
         finally:
+            if timer is not None:
+                timer.cancel()
             connection.close()
 
     def v4(self, method, path, body=None, content_type="application/json"):
@@ -489,19 +614,27 @@ def integration(args):
     scope = None
     daemon = None
     daemons = []
+    cleanup_unknown = False
+    output = Path(args.output) if args.output else HERE / ".lab-runs" / run_id
+    cache = Path(args.cache)
+    output_allowed = False
+    scope_hint = None
     old_handlers = {}
     def interrupted(signum, _frame):
         raise LabError("harness interrupted by signal " + str(signum))
     for sig in (signal.SIGINT, signal.SIGTERM):
         old_handlers[sig] = signal.signal(sig, interrupted)
     try:
+        scope_hint = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".open-compute"
+        cache, output = validate_artifact_paths(scope_hint, cache, output)
+        output_allowed = True
         scope_path = preflight(args.port)
         report["acceptance"]["AC-02"] = "passed"
         report["phase"] = "artifact"
         lock = json.loads((HERE / "upstream.lock.json").read_text())
         validate_lock(lock)
         report["upstream"] = lock
-        binary = download_binary(Path(args.cache).resolve(), lock["artifact"], run_id)
+        binary = download_binary(cache, lock["artifact"], run_id)
         version = command([str(binary), "--version"]).strip()
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
@@ -597,7 +730,10 @@ def integration(args):
                               "before_callback_count": before["callback_count"],
                               "before_nonce_sha256": hashlib.sha256(before["step_nonce"].encode()).hexdigest()}
         state_before = state_identity(scope_path, data, config)
-        require(daemon.children(), "no supervised runtime child was observed")
+        daemon.children()  # Refresh the descendant graph before proving liveness.
+        live_children = [public_process(child) for child in daemon.live() if child["pid"] != daemon.process.pid]
+        require(live_children, "no live supervised runtime child was observed")
+        report["live_children_before_restart"] = live_children
         report["phase"] = "daemon_restart"
         report["daemon_before"] = public_process(daemon.identity)
         stopped = daemon.stop()
@@ -632,11 +768,12 @@ def integration(args):
         report["result"] = "passed"
     except Exception as exc:
         report["error"] = redactor.clean(str(exc))
+        cleanup_unknown = isinstance(exc, ProcessObservationError)
     finally:
         try:
-            clean = True
+            clean = not cleanup_unknown
             for item in daemons:
-                if item.live():
+                if item.live(strict=False) or item.observation_error:
                     shutdown = item.stop()
                     if item is daemon:
                         report["final_shutdown"] = shutdown
@@ -648,7 +785,7 @@ def integration(args):
                         clean = False
                 if item.text() and report["result"] != "passed":
                     report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
-            require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed")
+            require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
             if scope is not None and scope.identity is not None:
                 scope.remove(processes_stopped=True)
                 report["scope_removed"] = True
@@ -661,11 +798,24 @@ def integration(args):
             report["cleanup_error"] = redactor.clean(str(exc))
         for sig, handler in old_handlers.items():
             signal.signal(sig, handler)
+    report["evidence_file_written"] = False
+    if output_allowed:
+        try:
+            # Revalidate after cleanup. A refused path must never be used even
+            # for diagnostics; failure still has the bounded stdout report.
+            validate_artifact_paths(scope_hint, cache, output)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.mkdir(mode=0o700)
+            report["evidence_file_written"] = True
+            encoded = redactor.check_report(report)
+            exclusive_file(output / "report.json", encoded.encode())
+        except Exception as exc:
+            if report["result"] == "passed":
+                report["phase"] = "evidence"
+            report["result"] = "failed"
+            report["evidence_file_written"] = False
+            report["evidence_write_error"] = redactor.clean(str(exc))
     encoded = redactor.check_report(report)
-    output = Path(args.output) if args.output else HERE / ".lab-runs" / run_id
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.mkdir(mode=0o700)
-    exclusive_file(output / "report.json", encoded.encode())
     print(encoded, end="", flush=True)
     return 0 if report["result"] == "passed" else 1
 

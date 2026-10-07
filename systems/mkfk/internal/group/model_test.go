@@ -118,7 +118,7 @@ func (m *groupModel) commit(node uint32, member string, generation uint64) Ticke
 	ticket, out, err := m.coords[node].CommitOffsets("g", protocol.CommitOffsetsRequest{
 		MemberID: member, Generation: protocol.DecimalUint64(generation), RequestID: m.requestID(),
 		Offsets: []protocol.OffsetCommit{{Topic: "events", Partition: partition, Offset: protocol.DecimalUint64(offset)}},
-	}, m.now)
+	}, m.hw, m.now)
 	m.handle(m.t, node, out, nil)
 	if err == nil {
 		m.commits[ticket] = generation

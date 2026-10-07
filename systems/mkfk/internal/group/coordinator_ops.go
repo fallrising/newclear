@@ -90,16 +90,17 @@ func (c *Coordinator) Leave(groupID string, request protocol.LeaveGroupRequest, 
 	return ticket, c.take(), err
 }
 
-// CommitOffsets obtains a quorum-confirmed high watermark for every partition
-// before proposing; generation and ownership are re-checked when it applies.
-func (c *Coordinator) CommitOffsets(groupID string, request protocol.CommitOffsetsRequest, now time.Time) (Ticket, Output, error) {
+// CommitOffsets checks every offset against a quorum-confirmed high watermark
+// from proofs before proposing; generation and ownership are re-checked when
+// it applies. HW only grows, so a proof obtained earlier is a safe bound.
+func (c *Coordinator) CommitOffsets(groupID string, request protocol.CommitOffsetsRequest, proofs HighWatermarkSource, now time.Time) (Ticket, Output, error) {
 	c.now = now
 	if err := c.ready(request.Validate()); err != nil {
 		return Ticket{}, Output{}, err
 	}
 	offsets := make([]storage.GroupOffset, 0, len(request.Offsets))
 	for _, entry := range request.Offsets {
-		hw, err := c.config.HighWatermarks.HighWatermark(entry.Topic, entry.Partition)
+		hw, err := proofs.HighWatermark(entry.Topic, entry.Partition)
 		if err != nil {
 			return Ticket{}, Output{}, groupError(CodeDependencyFailed, "no committed high watermark for %s/%d: %v", entry.Topic, entry.Partition, err)
 		}

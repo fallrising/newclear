@@ -24,7 +24,6 @@ type CoordinatorConfig struct {
 	State            Config
 	SessionTimeout   time.Duration
 	RebalanceTimeout time.Duration
-	HighWatermarks   HighWatermarkSource
 }
 
 // Coordinator drives the __mkfk_groups Raft partition. It is a single-owner
@@ -60,9 +59,6 @@ func NewCoordinator(node *raft.Node, config CoordinatorConfig) (*Coordinator, er
 	if node == nil {
 		return nil, errors.New("Raft node is required")
 	}
-	if config.HighWatermarks == nil {
-		return nil, errors.New("high watermark source is required")
-	}
 	if config.SessionTimeout == 0 {
 		config.SessionTimeout = DefaultSessionTimeout
 	}
@@ -92,10 +88,11 @@ func (c *Coordinator) Serving() bool { return c.serving }
 func (c *Coordinator) HandleReady(ready raft.Ready, now time.Time) (Output, error) {
 	c.now = now
 	c.out.Messages = append(c.out.Messages, ready.Messages...)
-	if err := c.apply(ready); err != nil {
-		return c.take(), err
+	err := c.apply(ready)
+	if err == nil {
+		err = c.maybeStartFailover()
 	}
-	return c.take(), c.maybeStartFailover()
+	return c.take(), err
 }
 
 func (c *Coordinator) apply(ready raft.Ready) error {

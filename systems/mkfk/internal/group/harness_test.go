@@ -145,8 +145,7 @@ func (cluster *groupCluster) start(t *testing.T, id uint32) {
 		t.Fatal(err)
 	}
 	coordinator, err := NewCoordinator(node, CoordinatorConfig{
-		State:          Config{Partitions: func(topic string) (uint32, bool) { count, ok := testTopics[topic]; return count, ok }},
-		HighWatermarks: cluster.hw,
+		State: Config{Partitions: func(topic string) (uint32, bool) { count, ok := testTopics[topic]; return count, ok }},
 	})
 	if err != nil {
 		t.Fatal(err)

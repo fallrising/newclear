@@ -14,7 +14,8 @@ import (
 func (c *Coordinator) CheckTimers(now time.Time) (Output, error) {
 	c.now = now
 	if !c.serving {
-		return c.take(), c.maybeStartFailover()
+		err := c.maybeStartFailover()
+		return c.take(), err
 	}
 	for _, groupID := range c.state.Groups() {
 		view, _ := c.state.Group(groupID)

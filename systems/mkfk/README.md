@@ -109,7 +109,7 @@ M5 的 HTTP handler 是可嵌入 partition actor 的 public boundary，但尚無
 ## M6 consumer groups 與 durable offsets
 
 - `internal/group`：`__mkfk_groups/0` 上的 GROUP command（ADR-010）、只由 committed entries 推導的狀態機、deterministic round-robin、session／rebalance timers、每個新 coordinator term 的 BEGIN_REBALANCE，以及帶 quorum HW 證明、apply 時再驗 generation／ownership 的 all-or-nothing CommitOffsets。
-- `group.Service`：以單一 goroutine 擁有 coordinator，提供 6 個 group 操作；GET offsets 先完成 Raft read barrier。M7 之前只驅動 RF1 groups partition（無 peer transport）。
+- `group.Service`：以單一 goroutine 擁有 coordinator，提供 6 個 group 操作；GET offsets 先完成 Raft read barrier。M7 起跑在 `internal/partition` actor 上，支援 RF1／RF3 groups partition，HW 證明由 data leader 在 read barrier 後提供（ADR-010 M7 段）。
 - `internal/transport`：`/v1/groups/{group}/…` 6 個 endpoint 與 `GET /v1/fetch`，錯誤碼與 outcome 對應 03 §1，回應以 M0 JSON schema 驗證。
 - `pkg/client`：`GroupConsumer` 的 join → sync → fetch → process → commit；stale generation 立即停止並不提交其結果，unknown commit 以相同 request_id 重送，重新分配後從 committed next offset 繼續。這是 at-least-once：process 後、commit 前 crash 的 records 會被重新處理。
 

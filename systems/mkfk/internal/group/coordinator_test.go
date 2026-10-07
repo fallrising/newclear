@@ -47,7 +47,7 @@ func (cluster *groupCluster) commit(t *testing.T, id uint32, group, member, requ
 	ticket, out, err := cluster.coords[id].CommitOffsets(group, protocol.CommitOffsetsRequest{
 		MemberID: member, Generation: protocol.DecimalUint64(generation), RequestID: requestID,
 		Offsets: []protocol.OffsetCommit{{Topic: "events", Partition: partition, Offset: protocol.DecimalUint64(offset)}},
-	}, cluster.now)
+	}, cluster.hw, cluster.now)
 	cluster.handle(t, id, out, err)
 	return ticket
 }
@@ -233,7 +233,7 @@ func TestCommitWithoutHighWatermarkProofIsUnavailable(t *testing.T) {
 	_, _, err := cluster.coords[1].CommitOffsets("g", protocol.CommitOffsetsRequest{
 		MemberID: "m1", Generation: protocol.DecimalUint64(generation), RequestID: "c",
 		Offsets: []protocol.OffsetCommit{{Topic: "events", Partition: 0, Offset: 1}},
-	}, cluster.now)
+	}, cluster.hw, cluster.now)
 	if !IsCode(err, CodeDependencyFailed) {
 		t.Fatalf("commit without HW proof: %v", err)
 	}

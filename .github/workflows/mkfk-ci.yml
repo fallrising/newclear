@@ -1,0 +1,79 @@
+name: mkfk CI
+
+on:
+  pull_request:
+    paths:
+      - systems/mkfk/**
+      - .github/workflows/mkfk-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - systems/mkfk/**
+      - .github/workflows/mkfk-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mkfk-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: systems/mkfk
+
+jobs:
+  gates:
+    name: Format, vet, unit, race, model, integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: systems/mkfk/go.mod
+          cache-dependency-path: systems/mkfk/go.sum
+      - run: make fmt-check vet
+      - run: make test
+      - run: make test-race
+      - run: make test-model
+      - run: make test-integration
+
+  chaos:
+    name: Chaos profile (short)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: systems/mkfk/go.mod
+          cache-dependency-path: systems/mkfk/go.sum
+      - run: make test-chaos CHAOS_PROFILE=short
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mkfk-chaos
+          path: systems/mkfk/.test-output/
+          retention-days: 14
+
+  demo:
+    name: Three-broker Compose demo (local image, no registry)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: systems/mkfk/go.mod
+          cache-dependency-path: systems/mkfk/go.sum
+      - run: make demo
+      - if: always()
+        run: make demo-down DELETE_DATA=1

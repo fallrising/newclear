@@ -40,8 +40,14 @@ The state machine (`internal/group`) is a pure function of committed entries:
 
 - Rebalance-deadline removal and coordinator failover are durable entries the coordinator proposes itself (`REMOVE_MEMBERS`, `BEGIN_REBALANCE`), never client requests.
 - Until brokers talk to each other (M7), the high-watermark proof comes from an injected source in-process. This is a stated limitation, not a weaker rule.
-- Until M7, `group.Service` serves only an RF1 groups partition. Offset reads still pass through a Raft read barrier, but on RF1 no deposed coordinator can exist, so the barrier's fencing is only exercised by the Raft ReadIndex tests; RF3 coordinator failover is exercised in-process by the coordinator tests.
+- Until M7, `group.Service` served only an RF1 groups partition. Offset reads still pass through a Raft read barrier, but on RF1 no deposed coordinator can exist, so the barrier's fencing is only exercised by the Raft ReadIndex tests; RF3 coordinator failover is exercised in-process by the coordinator tests.
 - Heartbeat `last_seen` stays volatile in the coordinator term, as `03-protocol-clients.md` §6.1 allows.
+
+## M7 runtime (2026-10-07)
+
+- `group.Service` runs on a `partition.Actor` (one goroutine per Raft partition) and serves RF1 or RF3 `__mkfk_groups/0`. Proposals complete when their entry applies; a deadline or leadership loss after the append is `ErrOutcomeUnknown`. Offset reads still pass a Raft read barrier; a deposed coordinator now fails that barrier with `DEPENDENCY_FAILED` (or `NOT_COORDINATOR` once it learns the new term) instead of answering from its last applied state.
+- The high-watermark proof comes from the data partition's leader: it completes a current-term ReadIndex barrier, then returns the HW it serves (`replication.Controller.ConfirmedHighWatermark`). A deposed data leader cannot produce one.
+- The Service collects proofs before entering the coordinator actor and passes them to `Coordinator.CommitOffsets`, so the coordinator never blocks on another partition. HW only grows, so an earlier proof is a safe upper bound for `offset <= high_watermark`. The GROUP payload and apply rules are unchanged.
 
 ## Rejected alternatives
 

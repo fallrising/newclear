@@ -11,6 +11,6 @@ Last updated: 2026-10-07
 | M4 ISR / HW / ack gate | VERIFIED | `docs/evidence/m4-dc75958-isr-hw.json`; RP-08–RP-11, RP-06 regression, bounded waiters, 100×1,000-event invariants, and RF1 recovery pass |
 | M5 idempotent producer | VERIFIED | `docs/evidence/m5-002e6cd-producer.json`; PR-01–PR-07 and relevant OP-01/OP-04 pass across RF1 restart, RF3 failover, HTTP, SDK, and CLI ledger tests |
 | M6 consumer groups | VERIFIED | `docs/evidence/m6-8b99818-groups.json`; CG-01–CG-07 pass on in-memory RF1/RF3 Raft and on a real RF1 WAL behind the HTTP handlers and SDK consumer, plus a 100-seed group model and the rebalance/crash/coordinator-restart demo |
-| M7 integrated failure evidence | NOT_STARTED | No broker or cluster harness exists |
+| M7 integrated failure evidence | IN_PROGRESS | Partition actor runtime, RF3 `group.Service`, and data-leader HW proofs exist with in-process RF3 tests; no broker process, peer transport, Compose profile, chaos harness, or benchmark yet |
 
 `VERIFIED` means the milestone's declared acceptance commands completed successfully with recorded evidence. Compilable contracts do not imply that a broker can start or that later safety properties are implemented.

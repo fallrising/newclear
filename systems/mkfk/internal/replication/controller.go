@@ -452,15 +452,39 @@ func (controller *Controller) BeginFetch(context string) (raft.Ready, error) {
 	return ready, nil
 }
 
+// CancelFetch releases a read barrier whose caller gave up waiting.
+func (controller *Controller) CancelFetch(context string) {
+	delete(controller.pendingReads, context)
+	delete(controller.readBarriers, context)
+	controller.node.CancelRead(context)
+}
+
 func (controller *Controller) Fetch(context string, offset uint64, maxBytes int) ([]storage.LocalRecord, uint64, uint64, storage.ReadStats, error) {
+	if err := controller.consumeBarrier(context); err != nil {
+		return nil, offset, controller.highWatermark, storage.ReadStats{}, err
+	}
+	records, next, stats, err := controller.log.ReadRecords(offset, controller.highWatermark, maxBytes)
+	return records, next, controller.highWatermark, stats, err
+}
+
+// ConfirmedHighWatermark consumes a completed read barrier and returns the
+// HW it proves: this leader still served the barrier's term after a
+// current-term majority confirmed it. A deposed leader gets ErrReadBarrier.
+func (controller *Controller) ConfirmedHighWatermark(context string) (uint64, error) {
+	if err := controller.consumeBarrier(context); err != nil {
+		return 0, err
+	}
+	return controller.highWatermark, nil
+}
+
+func (controller *Controller) consumeBarrier(context string) error {
 	barrier, ok := controller.readBarriers[context]
 	delete(controller.readBarriers, context)
 	snapshot := controller.node.Snapshot()
 	if !ok || snapshot.Role != raft.Leader || !snapshot.LeaderReady || barrier.term != snapshot.Term || snapshot.LastApplied < barrier.index {
-		return nil, offset, controller.highWatermark, storage.ReadStats{}, ErrReadBarrier
+		return ErrReadBarrier
 	}
-	records, next, stats, err := controller.log.ReadRecords(offset, controller.highWatermark, maxBytes)
-	return records, next, controller.highWatermark, stats, err
+	return nil
 }
 
 func (controller *Controller) HighWatermark() uint64 { return controller.highWatermark }

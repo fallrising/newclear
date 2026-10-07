@@ -4,155 +4,217 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/adapters"
+	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
 )
+
+const DefaultRequestTimeout = 5 * time.Second
 
 // ErrOutcomeUnknown means a proposal was appended but leadership changed
 // before it applied: it may or may not be committed.
 var ErrOutcomeUnknown = errors.New("group command outcome is unknown")
 
-var errPeersUnsupported = errors.New("the groups partition needs a peer transport, which arrives in M7")
+// ProofSource returns a quorum-confirmed high watermark for a data
+// partition, obtained from that partition's current leader.
+type ProofSource interface {
+	HighWatermark(ctx context.Context, topic string, partition uint32) (uint64, error)
+}
 
-// Service owns one Coordinator on a single goroutine and serves it to
-// concurrent callers. Until brokers talk to each other (M7) it drives an RF1
-// __mkfk_groups partition: every proposal commits and applies locally.
+type ServiceConfig struct {
+	Node           *raft.Node
+	Coordinator    CoordinatorConfig
+	Proofs         ProofSource
+	Clock          adapters.Clock
+	TickClock      adapters.Clock
+	Sender         partition.Sender
+	TickInterval   time.Duration
+	RequestTimeout time.Duration
+}
+
+// Service runs the __mkfk_groups partition's Coordinator on a partition
+// actor and serves it to concurrent callers. Proposals complete when their
+// entry applies; reads pass a Raft read barrier first. An RF1 node is
+// elected at start; an RF3 node takes part in elections through its ticks.
 type Service struct {
+	actor       *partition.Actor
 	coordinator *Coordinator
 	node        *raft.Node
 	clock       adapters.Clock
-	calls       chan func()
-	stop        chan struct{}
-	stopped     chan struct{}
-	readSeq     uint64
+	proofs      ProofSource
+	timeout     time.Duration
+
+	// Actor goroutine only.
+	waiters map[Ticket]chan Completion
 }
 
-// NewService elects the RF1 node, which runs the failover rebalance for
-// groups recovered from the log, and starts the actor.
-func NewService(node *raft.Node, config CoordinatorConfig, clock adapters.Clock) (*Service, error) {
-	if clock == nil {
-		return nil, errors.New("clock is required")
+func NewService(config ServiceConfig) (*Service, error) {
+	if config.Clock == nil || config.Proofs == nil {
+		return nil, errors.New("clock and proof source are required")
 	}
-	if node != nil && node.Snapshot().Quorum != 1 {
-		return nil, errPeersUnsupported
+	if config.RequestTimeout == 0 {
+		config.RequestTimeout = DefaultRequestTimeout
 	}
-	coordinator, err := NewCoordinator(node, config)
+	coordinator, err := NewCoordinator(config.Node, config.Coordinator)
 	if err != nil {
 		return nil, err
 	}
 	service := &Service{
-		coordinator: coordinator, node: node, clock: clock,
-		calls: make(chan func()), stop: make(chan struct{}), stopped: make(chan struct{}),
+		coordinator: coordinator, node: config.Node, clock: config.Clock, proofs: config.Proofs,
+		timeout: config.RequestTimeout, waiters: make(map[Ticket]chan Completion),
 	}
-	ready, err := node.Campaign()
+	service.actor, err = partition.New(partition.Config{
+		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
+		TickInterval: config.TickInterval,
+	}, service)
 	if err != nil {
 		return nil, err
 	}
-	if err := service.settle(coordinator.HandleReady(ready, clock.Now())); err != nil {
+	service.actor.Start()
+	if config.Node.Snapshot().Quorum > 1 {
+		return service, nil
+	}
+	if err := service.actor.Campaign(context.Background()); err != nil {
+		service.Close()
 		return nil, err
 	}
-	if !coordinator.Serving() {
-		return nil, fmt.Errorf("RF1 coordinator is not serving after election: %+v", node.Snapshot())
+	var serving bool
+	_ = service.actor.Do(context.Background(), func() error { serving = coordinator.Serving(); return nil })
+	if !serving {
+		service.Close()
+		return nil, fmt.Errorf("RF1 coordinator is not serving after election: %+v", config.Node.Snapshot())
 	}
-	go service.run()
 	return service, nil
 }
 
-func (s *Service) run() {
-	defer close(s.stopped)
-	for {
-		select {
-		case call := <-s.calls:
-			call()
-		case <-s.stop:
-			return
-		}
-	}
-}
+func (s *Service) Actor() *partition.Actor { return s.actor }
 
 // Close stops the actor. The caller owns and closes the underlying log.
-func (s *Service) Close() {
-	close(s.stop)
-	<-s.stopped
+func (s *Service) Close() { s.actor.Close() }
+
+// HandleReady implements partition.Handler.
+func (s *Service) HandleReady(ready raft.Ready, now time.Time) ([]raft.Message, error) {
+	out, err := s.coordinator.HandleReady(ready, now)
+	s.dispatch(out.Completions)
+	return out.Messages, err
 }
 
-// do runs call on the actor goroutine.
-func (s *Service) do(ctx context.Context, call func()) error {
-	done := make(chan struct{})
-	select {
-	case s.calls <- func() { call(); close(done) }:
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-s.stopped:
-		return errors.New("group service is closed")
-	}
-	<-done
-	return nil
+// Tick implements partition.Handler: session and rebalance timers run on
+// every tick while this node serves.
+func (s *Service) Tick(now time.Time) ([]raft.Message, error) {
+	out, err := s.coordinator.CheckTimers(now)
+	s.dispatch(out.Completions)
+	return out.Messages, err
 }
 
-// CheckTimers expires lapsed sessions and rebalance deadlines at clock.Now().
+// CheckTimers expires lapsed sessions and rebalance deadlines now.
 func (s *Service) CheckTimers(ctx context.Context) error {
-	var err error
-	if callErr := s.do(ctx, func() {
-		err = s.settle(s.coordinator.CheckTimers(s.clock.Now()))
-	}); callErr != nil {
-		return callErr
-	}
-	return err
+	return s.actor.Do(ctx, func() error {
+		out, err := s.coordinator.CheckTimers(s.clock.Now())
+		s.emit(out)
+		return err
+	})
+}
+
+// Serving reports whether this node is the serving coordinator.
+func (s *Service) Serving(ctx context.Context) (bool, error) {
+	var serving bool
+	err := s.actor.Do(ctx, func() error { serving = s.coordinator.Serving(); return nil })
+	return serving, err
 }
 
 // View returns a copy of one group's committed state.
 func (s *Service) View(ctx context.Context, groupID string) (View, bool, error) {
 	var view View
 	var exists bool
-	err := s.do(ctx, func() { view, exists = s.coordinator.State().Group(groupID) })
+	err := s.actor.Do(ctx, func() error {
+		view, exists = s.coordinator.State().Group(groupID)
+		return nil
+	})
 	return view, exists, err
 }
 
-func (s *Service) settle(out Output, err error) error {
-	if err != nil {
-		return err
-	}
-	if len(out.Messages) > 0 {
-		return errPeersUnsupported
-	}
-	return nil
+// emit sends messages and settles completions produced on the actor.
+func (s *Service) emit(out Output) {
+	s.actor.Send(out.Messages)
+	s.dispatch(out.Completions)
 }
 
-// await settles a proposal; on RF1 its completion is in the same Output.
-func (s *Service) await(ticket Ticket, out Output, err error) (Result, error) {
-	if err := s.settle(out, err); err != nil {
+func (s *Service) dispatch(completions []Completion) {
+	for _, completion := range completions {
+		ticket := Ticket{Index: completion.Index, RequestID: completion.RequestID}
+		if wait, ok := s.waiters[ticket]; ok {
+			delete(s.waiters, ticket)
+			wait <- completion
+		}
+	}
+}
+
+type proposeCall func(now time.Time) (Ticket, Output, error)
+
+// propose runs a client proposal and waits until its entry applies. A
+// deadline or leadership loss after the append leaves the outcome unknown.
+func (s *Service) propose(ctx context.Context, call proposeCall) (Result, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+	wait := make(chan Completion, 1)
+	var ticket Ticket
+	err := s.actor.Do(ctx, func() error {
+		var out Output
+		var err error
+		ticket, out, err = call(s.clock.Now())
+		if err == nil {
+			s.waiters[ticket] = wait
+		}
+		s.emit(out)
+		return err
+	})
+	if err != nil {
 		return Result{}, err
 	}
-	for _, completion := range out.Completions {
-		if completion.Index != ticket.Index || completion.RequestID != ticket.RequestID {
-			continue
-		}
-		if completion.Unknown {
-			return Result{}, ErrOutcomeUnknown
-		}
-		return completion.Result, completion.Result.Err
+	select {
+	case completion := <-wait:
+		return outcome(completion)
+	case <-s.actor.Done():
+		return Result{}, ErrOutcomeUnknown
+	case <-ctx.Done():
 	}
-	return Result{}, ErrOutcomeUnknown
+	_ = s.actor.Do(context.Background(), func() error {
+		delete(s.waiters, ticket)
+		return nil
+	})
+	select {
+	case completion := <-wait:
+		return outcome(completion)
+	default:
+		return Result{}, ErrOutcomeUnknown
+	}
 }
 
-// readBarrier confirms leadership for a linearizable read: the read index
-// must be applied on this node before state is read.
-func (s *Service) readBarrier() error {
-	s.readSeq++
-	context := fmt.Sprintf("group-read-%d", s.readSeq)
-	ready, err := s.node.RequestRead(context)
-	if err != nil {
-		return err
+func outcome(completion Completion) (Result, error) {
+	if completion.Unknown {
+		return Result{}, ErrOutcomeUnknown
 	}
-	if err := s.settle(s.coordinator.HandleReady(ready, s.clock.Now())); err != nil {
-		return err
-	}
-	for _, read := range ready.ReadStates {
-		if read.Context == context && s.node.Snapshot().LastApplied >= read.Index {
-			return nil
-		}
-	}
-	return groupError(CodeDependencyFailed, "read barrier %s did not complete", context)
+	return completion.Result, completion.Result.Err
 }
+
+// read runs onConfirmed after a Raft read barrier proves this node still
+// leads a current-term majority. A deposed coordinator never reads.
+func (s *Service) read(ctx context.Context, onConfirmed func() error) error {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+	err := s.actor.Read(ctx, partition.ReadBarrier{
+		Begin:     s.node.RequestRead,
+		Confirmed: func(string) error { return onConfirmed() },
+		Cancel:    s.node.CancelRead,
+	})
+	switch {
+	case errors.Is(err, partition.ErrReadTimeout), errors.Is(err, partition.ErrReadCapacity):
+		return groupError(CodeDependencyFailed, "read barrier did not complete: %v", err)
+	}
+	return err
+}
+
+var _ partition.Handler = (*Service)(nil)

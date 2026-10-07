@@ -254,6 +254,12 @@ func (node *Node) RequestRead(context string) (Ready, error) {
 	return ready, nil
 }
 
+// CancelRead forgets a read request that its caller abandoned, so an
+// unreachable quorum cannot grow the pending-read set without bound.
+func (node *Node) CancelRead(context string) {
+	delete(node.pendingReads, context)
+}
+
 func (node *Node) startElection() (Ready, error) {
 	if node.term == math.MaxInt64 {
 		return Ready{}, errors.New("raft term overflow")

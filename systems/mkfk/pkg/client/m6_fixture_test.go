@@ -107,10 +107,12 @@ func (broker *m6Broker) open() {
 		t.Fatal(err)
 	}
 	node := broker.newNode("__mkfk_groups/0", broker.groups)
-	service, err := group.NewService(node, group.CoordinatorConfig{
-		State:          group.Config{Partitions: func(topic string) (uint32, bool) { return m6Partitions, topic == "events" }},
-		HighWatermarks: broker,
-	}, broker.clock)
+	service, err := group.NewService(group.ServiceConfig{
+		Node: node, Proofs: broker, Clock: broker.clock, TickClock: testkit.NewManualClock(time.Unix(0, 0)),
+		Coordinator: group.CoordinatorConfig{
+			State: group.Config{Partitions: func(topic string) (uint32, bool) { return m6Partitions, topic == "events" }},
+		},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +192,7 @@ func (broker *m6Broker) produce(partition uint32, values ...string) {
 }
 
 // HighWatermark is the coordinator's quorum-confirmed HW proof (RF1 leader).
-func (broker *m6Broker) HighWatermark(topic string, partition uint32) (uint64, error) {
+func (broker *m6Broker) HighWatermark(_ context.Context, topic string, partition uint32) (uint64, error) {
 	if topic != "events" || partition >= m6Partitions {
 		return 0, transport.ErrUnknownPartition
 	}

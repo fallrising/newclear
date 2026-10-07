@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/protocol"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
 	"github.com/fallrising/newclear/systems/mkfk/internal/replication"
@@ -71,6 +72,9 @@ func writeFetchError(response http.ResponseWriter, requestID string, err error) 
 	case errors.Is(err, storage.ErrOffsetOutOfRange):
 		status, apiError.Code = http.StatusConflict, "OFFSET_OUT_OF_RANGE"
 		apiError.Message = "The offset is beyond the committed high watermark."
+	case errors.Is(err, partition.ErrStorage), errors.Is(err, partition.ErrFailed):
+		apiError.Code, apiError.Retryable = "STORAGE_ERROR", true
+		apiError.Message = "The partition stopped serving after a storage failure."
 	case errors.Is(err, ErrUnknownPartition):
 		status, apiError.Code = http.StatusNotFound, "UNKNOWN_TOPIC_OR_PARTITION"
 		apiError.Message = "The topic partition does not exist."
@@ -81,7 +85,7 @@ func writeFetchError(response http.ResponseWriter, requestID string, err error) 
 	case errors.Is(err, raft.ErrLeaderNotReady), errors.Is(err, replication.ErrReadBarrier):
 		apiError.Code, apiError.Retryable = "NOT_READY", true
 		apiError.Message = "The leader has not completed its read barrier."
-	case errors.Is(err, replication.ErrBackpressure):
+	case errors.Is(err, replication.ErrBackpressure), errors.Is(err, partition.ErrBusy):
 		status, apiError.Code, apiError.Retryable = http.StatusTooManyRequests, "RESOURCE_EXHAUSTED", true
 		apiError.Message = "The partition read capacity is exhausted."
 	default:

@@ -23,16 +23,19 @@ type RecordLog interface {
 }
 
 type DataConfig struct {
-	Topic          string
-	Partition      uint32
-	Node           *raft.Node
-	Log            RecordLog
-	Replication    replication.Config
-	Producer       producer.Config
-	Clock          adapters.Clock
-	TickClock      adapters.Clock
-	Sender         Sender
-	OnRoleChange   func(raft.RoleChange)
+	Topic         string
+	Partition     uint32
+	Node          *raft.Node
+	Log           RecordLog
+	Replication   replication.Config
+	Producer      producer.Config
+	Clock         adapters.Clock
+	TickClock     adapters.Clock
+	Sender        Sender
+	OnRoleChange  func(raft.RoleChange)
+	StorageFailed func() bool
+	// OnISRShrink, when set, observes followers evicted from the ISR.
+	OnISRShrink    func(evicted []uint32, observations []replication.PeerObservation)
 	TickInterval   time.Duration
 	ProduceTimeout time.Duration
 	ReadTimeout    time.Duration
@@ -49,6 +52,7 @@ type Data struct {
 	clock          adapters.Clock
 	produceTimeout time.Duration
 	readTimeout    time.Duration
+	onISRShrink    func([]uint32, []replication.PeerObservation)
 
 	// Actor goroutine only.
 	waiters map[string][]chan producer.Completion
@@ -76,12 +80,13 @@ func NewData(config DataConfig) (*Data, error) {
 	}
 	data := &Data{
 		node: config.Node, log: config.Log, controller: controller, producer: partition, clock: config.Clock,
-		produceTimeout: config.ProduceTimeout, readTimeout: config.ReadTimeout,
+		produceTimeout: config.ProduceTimeout, readTimeout: config.ReadTimeout, onISRShrink: config.OnISRShrink,
 		waiters: make(map[string][]chan producer.Completion),
 	}
 	data.actor, err = New(Config{
 		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
 		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange,
+		StorageFailed: config.StorageFailed,
 	}, data)
 	if err != nil {
 		return nil, err
@@ -103,7 +108,9 @@ func (d *Data) HandleReady(ready raft.Ready, now time.Time) ([]raft.Message, err
 
 // Tick implements Handler: ISR freshness is evaluated on every tick.
 func (d *Data) Tick(now time.Time) ([]raft.Message, error) {
-	d.controller.AdvanceTime(now)
+	if evicted := d.controller.AdvanceTime(now); len(evicted) > 0 && d.onISRShrink != nil {
+		d.onISRShrink(evicted, d.controller.PeerObservations())
+	}
 	return nil, nil
 }
 

@@ -186,7 +186,7 @@ func (c *testCluster) metadata(t *testing.T) (protocol.MetadataResponseData, boo
 		}
 		request, _ := http.NewRequest(http.MethodGet, "http://"+c.broker(id).ClientAddr+"/v1/metadata", nil)
 		request.Header.Set("X-Request-ID", "metadata")
-		response, err := http.DefaultClient.Do(request)
+		response, err := probeClient.Do(request)
 		if err != nil {
 			continue
 		}

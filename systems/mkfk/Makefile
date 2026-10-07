@@ -2,7 +2,7 @@ GO ?= go
 GOFMT ?= gofmt
 GO_FILES := $(shell find . -name '*.go' -type f | sort)
 
-.PHONY: fmt-check vet test test-race test-model test-integration
+.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos
 
 TEST_LOG_DIR ?= $(CURDIR)/.test-output
 
@@ -17,7 +17,14 @@ INTEGRATION_TESTS := TestM1ST03DurableAfterSIGKILL TestM3ThreeProcessFailoverAnd
 	TestM6SDKRetriesUnknownCommitWithTheSameRequest TestM6CG03SDKRejoinsAfterItsSessionExpired TestM6SDKDropsUnknownCommitFromAFencedGeneration \
 	TestM6DemoRebalanceCrashAndCoordinatorRestart \
 	TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload \
-	TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
+	TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets \
+	TestM7OP03FloodSlowClientsAndFetchStormStayBounded TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity \
+	TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+
+# The chaos profile (OP-05) is `full` (28 seeded faults) unless CHAOS_PROFILE=short;
+# CHAOS_SEED replays a schedule. The scrubbed run summary lands in chaos-report.json.
+CHAOS_PROFILE ?= full
+CHAOS_SEED ?=
 
 fmt-check:
 	@files="$$($(GOFMT) -l $(GO_FILES))"; test -z "$$files" || (echo "Go files need formatting:" >&2; echo "$$files" >&2; exit 1)
@@ -36,3 +43,12 @@ test-model:
 
 test-integration:
 	MKFK_TEST_LOG=$(TEST_LOG_DIR)/integration.log GO=$(GO) ./scripts/run-named-tests.sh "$(INTEGRATION_PACKAGES)" $(INTEGRATION_TESTS)
+
+test-model-extended:
+	MKFK_MODEL_SEEDS=1000 MKFK_MODEL_EVENTS=10000 MKFK_TEST_LOG=$(TEST_LOG_DIR)/model-extended.log GO="$(GO)" GOFLAGS="-timeout=120m" \
+		./scripts/run-named-tests.sh "$(MODEL_PACKAGES)" $(MODEL_TESTS)
+
+test-chaos:
+	MKFK_CHAOS_PROFILE=$(CHAOS_PROFILE) MKFK_CHAOS_SEED=$(CHAOS_SEED) MKFK_CHAOS_REPORT=$(TEST_LOG_DIR)/chaos-report.json \
+		MKFK_TEST_LOG=$(TEST_LOG_DIR)/chaos.log GO="$(GO)" GOFLAGS="-timeout=30m" \
+		./scripts/run-named-tests.sh "./cmd/mkfk" TestM7ChaosOP05RotatingCrashesPartitionsAndPauses

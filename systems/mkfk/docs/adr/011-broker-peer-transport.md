@@ -37,6 +37,12 @@ The topology may list non-loopback listener addresses (an isolated Compose netwo
 
 `NOT_LEADER` and `NOT_COORDINATOR` errors carry `details.leader_id` and `leader_term` when the broker knows the leader. `GET /v1/metadata` reports the leaders the answering broker observes. The Go `ClusterTransport` routes each call to the cached leader (or coordinator), follows a hint or moves to the next broker on a routing error and retries at once (those answers are `not_applied`), and on a connection error moves the route but returns the error, because its outcome is unknown and the caller resends the identical request.
 
+### Additions in M7 part 3
+
+- `mkfk serve --peer-bind ADDR` binds the peer listener at ADDR while peers keep dialing the topology's `peer_addr`. The chaos harness places a fault proxy on `peer_addr` this way. The bind policy applies to ADDR.
+- Storage failures fail closed. When a write or sync failure quarantines a partition's log, its actor stops serving. The request that hit the failure answers `STORAGE_ERROR` with `outcome: unknown`, because the frame may survive recovery, and the OP-03 sync-failure test shows that it can. Later requests answer `STORAGE_ERROR` with `outcome: not_applied`, and `readyz` turns false.
+- `/metrics` adds `mkfk_goroutines`, and the broker logs every ISR shrink with the follower's durable match, catch-up target, and last success times (SDD §13).
+
 ## Consequences
 
 - Peers are trusted: anyone who can reach a peer listener can join Raft traffic. Loopback-only or an isolated network is a hard requirement until X4.

@@ -163,6 +163,7 @@ func TestM7DeposedDataLeaderCannotProveHighWatermarkOrFetch(t *testing.T) {
 	cluster := newDataCluster(t)
 	cluster.elect(t, 1)
 	first := cluster.produce(t, 1, "a", "v0")
+	partitiontest.Converged(t, cluster.data[1].Actor(), cluster.data[2].Actor(), cluster.data[3].Actor())
 	cluster.network.Isolate(1)
 	cluster.elect(t, 2)
 	cluster.produce(t, 2, "b", "v1", "v2")

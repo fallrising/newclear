@@ -13,6 +13,7 @@ import (
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
 	"github.com/fallrising/newclear/systems/mkfk/internal/storage"
+	"github.com/fallrising/newclear/systems/mkfk/internal/testkit"
 )
 
 var replicationIdentity = raft.Identity{ClusterID: "m4-test", ConfigHash: "topology-v1", GroupID: "events/0"}
@@ -302,7 +303,8 @@ func TestM4MinISRAdmissionRejectsBeforeAppend(t *testing.T) {
 }
 
 func TestM4RandomizedISRAndGateInvariants(t *testing.T) {
-	for seed := int64(0); seed < 100; seed++ {
+	seeds, events := testkit.ModelProfile(100, 1000)
+	for seed := int64(0); seed < int64(seeds); seed++ {
 		seed := seed
 		t.Run(fmt.Sprintf("seed-%03d", seed), func(t *testing.T) {
 			cluster := newReplicationCluster(t, 2, Config{})
@@ -313,7 +315,7 @@ func TestM4RandomizedISRAndGateInvariants(t *testing.T) {
 			requests := make([]string, 0)
 			observed := make(map[string]randomizedGateObservation)
 			model := randomizedSafetyState{}
-			for event := 0; event < 1000; event++ {
+			for event := 0; event < events; event++ {
 				cluster.now = start.Add(time.Duration(event) * 10 * time.Millisecond)
 				action := random.Intn(256)
 				switch {
@@ -497,7 +499,7 @@ func (log *replicationLog) ReadEntries(from uint64, maxBytes int) ([]storage.Fra
 			return nil, err
 		}
 		if len(result) == 0 && len(encoded) > maxBytes {
-			return nil, errors.New("budget too small")
+			return nil, &storage.ReadBudgetTooSmallError{RequiredBytes: len(encoded)}
 		}
 		if used+len(encoded) > maxBytes {
 			break

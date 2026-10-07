@@ -59,12 +59,12 @@ func (r *Registry) Deliver(message raft.Message) bool {
 	return actor != nil && actor.Deliver(message)
 }
 
-// Outbox is a broker's Sender: one bounded FIFO link per peer, so a slow or
+// Outbox is a broker's Sender: one bounded link per peer, so a slow or
 // partitioned peer delays only its own link. Responses are delivered back to
 // the local registry. A full link drops the message; Raft retransmits.
 type Outbox struct {
 	local   *Registry
-	links   map[uint32]chan raft.Message
+	links   map[uint32]*link
 	remotes map[uint32]Remote
 	timeout time.Duration
 	ctx     context.Context
@@ -88,7 +88,7 @@ func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout ti
 		return nil, errors.New("link queue and timeout must be positive")
 	}
 	outbox := &Outbox{
-		local: local, links: make(map[uint32]chan raft.Message), remotes: make(map[uint32]Remote),
+		local: local, links: make(map[uint32]*link), remotes: make(map[uint32]Remote),
 		timeout: timeout,
 	}
 	outbox.ctx, outbox.cancel = context.WithCancel(context.Background())
@@ -97,7 +97,7 @@ func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout ti
 			return nil, errors.New("remote is required")
 		}
 		outbox.remotes[peer] = remote
-		outbox.links[peer] = make(chan raft.Message, queue)
+		outbox.links[peer] = newLink(queue)
 	}
 	for peer := range outbox.links {
 		outbox.wg.Add(1)
@@ -108,13 +108,7 @@ func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout ti
 
 func (o *Outbox) Send(message raft.Message) {
 	link, known := o.links[message.To]
-	if !known {
-		o.dropped.Add(1)
-		return
-	}
-	select {
-	case link <- message:
-	default:
+	if !known || !link.push(message) {
 		o.dropped.Add(1)
 	}
 }
@@ -137,7 +131,13 @@ func (o *Outbox) run(peer uint32) {
 		select {
 		case <-o.ctx.Done():
 			return
-		case message := <-link:
+		case <-link.ready:
+		}
+		for {
+			message, ok := link.pop()
+			if !ok || o.ctx.Err() != nil {
+				break
+			}
 			o.call(remote, message)
 		}
 	}

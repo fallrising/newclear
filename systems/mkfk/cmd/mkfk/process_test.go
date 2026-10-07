@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"testing"
@@ -84,6 +85,8 @@ type testCluster struct {
 	path     string
 	manifest config.ClusterManifest
 	procs    map[uint32]*brokerProcess
+	// peerBinds, when set, moves each peer listener behind a fault proxy.
+	peerBinds map[uint32]string
 }
 
 // newTestCluster writes a topology of size brokers on free loopback ports,
@@ -174,24 +177,59 @@ func spawn(t *testing.T, arguments ...string) *brokerProcess {
 
 func (c *testCluster) start(id uint32) *brokerProcess {
 	c.t.Helper()
-	proc := spawn(c.t, "--data-dir", c.dataDir(id), "--node-id", fmt.Sprint(id), "--cluster-json", c.path, "--shutdown-timeout", "3s")
+	arguments := []string{"--data-dir", c.dataDir(id), "--node-id", fmt.Sprint(id), "--cluster-json", c.path, "--shutdown-timeout", "3s"}
+	if bind, ok := c.peerBinds[id]; ok {
+		arguments = append(arguments, "--peer-bind", bind)
+	}
+	proc := spawn(c.t, arguments...)
 	c.procs[id] = proc
 	return proc
 }
 
 func (c *testCluster) waitReady(id uint32) {
 	c.t.Helper()
-	eventually(c.t, fmt.Sprintf("broker %d readyz", id), 20*time.Second, func() bool {
+	deadline := time.Now().Add(20 * time.Second)
+	for {
 		if err, exited := c.procs[id].exited(0); exited {
 			c.t.Fatalf("broker %d exited: %v\n%s", id, err, c.procs[id].stderr.String())
 		}
-		status, _ := c.admin(id, "/readyz")
-		return status == http.StatusOK
-	})
+		if status, _ := c.admin(id, "/readyz"); status == http.StatusOK {
+			return
+		}
+		if time.Now().After(deadline) {
+			_, metrics := c.admin(id, "/metrics")
+			_ = c.procs[id].cmd.Process.Signal(syscall.SIGQUIT) // Go prints every goroutine's stack
+			_, _ = c.procs[id].exited(3 * time.Second)
+			c.t.Fatalf("broker %d not ready after 20s\nmetrics:\n%s\nlog tail without role changes:\n%s", id, metrics, tail(withoutRoleChanges(c.procs[id].stderr.String()), 400))
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
 }
 
+func withoutRoleChanges(text string) string {
+	var kept []string
+	for _, line := range strings.Split(text, "\n") {
+		if !strings.Contains(line, `"msg":"role change"`) {
+			kept = append(kept, line)
+		}
+	}
+	return strings.Join(kept, "\n")
+}
+
+func tail(text string, lines int) string {
+	all := strings.Split(strings.TrimRight(text, "\n"), "\n")
+	if len(all) > lines {
+		all = all[len(all)-lines:]
+	}
+	return strings.Join(all, "\n")
+}
+
+// probeClient bounds every harness probe, so a paused broker cannot hang
+// the test.
+var probeClient = &http.Client{Timeout: 2 * time.Second}
+
 func (c *testCluster) admin(id uint32, path string) (int, string) {
-	response, err := http.Get("http://" + c.broker(id).AdminAddr + path)
+	response, err := probeClient.Get("http://" + c.broker(id).AdminAddr + path)
 	if err != nil {
 		return 0, ""
 	}

@@ -485,6 +485,14 @@ func (partition *PartitionLog) Close() error {
 	return errors.Join(closeErrors...)
 }
 
+// RecoveryRequired reports whether an I/O failure quarantined the log: it
+// refuses writes until a restart recovers it.
+func (partition *PartitionLog) RecoveryRequired() bool {
+	partition.mu.Lock()
+	defer partition.mu.Unlock()
+	return partition.recoveryRequired
+}
+
 func (partition *PartitionLog) requireWritable() error {
 	if partition.closed {
 		return errors.New("partition is closed")

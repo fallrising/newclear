@@ -1,0 +1,692 @@
+#!/usr/bin/env python3
+"""Bounded black-box probe for the pinned open-compute release (Python stdlib)."""
+
+import argparse
+import hashlib
+import http.client
+import json
+import os
+from pathlib import Path
+import platform
+import pwd
+import re
+import secrets
+import shutil
+import signal
+import socket
+import stat
+import subprocess
+import sys
+import threading
+import time
+import urllib.request
+from urllib.parse import urlsplit
+
+
+HERE = Path(__file__).resolve().parent
+BODY_LIMIT = 1024 * 1024
+LOG_LIMIT = 32 * 1024
+INSTANCE = "lab"
+WORKER = "m1-worker"
+FLOW = "m1-flow"
+MARKER = ".open-compute-lab-owner"
+
+
+class LabError(Exception):
+    """An experiment gate failed; never silently convert this into a skip."""
+
+
+def require(condition, message):
+    if not condition:
+        raise LabError(message)
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify_binary(path, artifact):
+    info = path.lstat()
+    require(stat.S_ISREG(info.st_mode), "artifact must be a regular non-symlink file")
+    require(info.st_size == artifact["bytes"], "artifact size does not match lock")
+    digest = sha256_file(path)
+    require(digest == artifact["sha256"], "artifact SHA256 does not match lock")
+    return digest
+
+
+def validate_lock(lock):
+    require(lock.get("schema_version") == 1, "unsupported lock schema")
+    require(re.fullmatch(r"[0-9a-f]{40}", lock["source_commit"]), "invalid source pin")
+    artifact = lock["artifact"]
+    require(re.fullmatch(r"[0-9a-f]{64}", artifact["sha256"]), "invalid artifact pin")
+    expected = (lock["repository"] + "/releases/download/" + lock["release"] +
+                "/" + artifact["name"])
+    require(artifact["url"] == expected, "artifact URL must match pinned repository and release")
+    require(urlsplit(expected).hostname == "github.com", "artifact source must be GitHub")
+    require(artifact["os"] == "Linux" and artifact["architecture"] == "x86_64",
+            "M1 supports only Linux x64")
+    require(0 < artifact["bytes"] < 512 * 1024 * 1024, "invalid artifact size bound")
+
+
+def preflight(port):
+    require(platform.system() == "Linux" and platform.machine() == "x86_64",
+            "M1 requires Linux x86_64")
+    require(os.geteuid() != 0 and os.getuid() == os.geteuid(),
+            "original runtime requires a real non-root account; no guard bypass is supported")
+    home = Path(pwd.getpwuid(os.getuid()).pw_dir)
+    require(home.is_absolute() and home.is_dir(), "passwd home must be an existing absolute directory")
+    require(home.resolve() == home, "passwd home must not resolve through a symlink")
+    require(home.stat().st_uid == os.geteuid() and os.access(home, os.W_OK | os.X_OK),
+            "passwd home must be writable and owned by the current account")
+    scope = home / ".open-compute"
+    require(not os.path.lexists(scope), "existing scope refused; use a fresh disposable account")
+    require(1024 <= port <= 65535, "port must be between 1024 and 65535")
+    require(not any(name.startswith("OPEN_COMPUTE_TEST_") for name in os.environ),
+            "upstream test-only environment overrides are not supported")
+    try:
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", port))
+    except OSError as exc:
+        raise LabError("loopback port is unavailable") from exc
+    require(proc_namespace_supported(), "the current PID namespace cannot be safely observed through /proc")
+    return scope
+
+
+def exclusive_file(path, contents, mode=0o600):
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
+    with os.fdopen(fd, "wb") as stream:
+        stream.write(contents)
+
+
+def file_identity(path):
+    info = path.lstat()
+    require(not stat.S_ISLNK(info.st_mode), "owned state cannot be a symlink")
+    return {"device": info.st_dev, "inode": info.st_ino}
+
+
+class OwnedScope:
+    def __init__(self, path, port):
+        self.path, self.port = path, port
+        self.marker = secrets.token_hex(32)
+        self.identity = None
+
+    def create(self):
+        # mkdir is exclusive, including when the target is a dangling symlink.
+        self.path.mkdir(mode=0o700)
+        self.identity = file_identity(self.path)
+        exclusive_file(self.path / MARKER, self.marker.encode())
+        keys = self.path / "keys"
+        keys.mkdir(mode=0o700)
+        token = secrets.token_hex(32)
+        exclusive_file(keys / "admin.token", (token + "\n").encode())
+        manifest = ('instances = []\n\n[server]\n'
+                    f'public_bind = "127.0.0.1:{self.port}"\n'
+                    'admin_auth = { file = "./keys/admin.token" }\n')
+        exclusive_file(self.path / "ocd.toml", manifest.encode())
+        return token
+
+    def check_owner(self):
+        require(self.identity is not None, "scope was not created by this invocation")
+        require(file_identity(self.path) == self.identity, "scope identity changed; cleanup refused")
+        marker = self.path / MARKER
+        require(stat.S_ISREG(marker.lstat().st_mode), "ownership marker changed; cleanup refused")
+        require(marker.read_text() == self.marker, "ownership marker does not match; cleanup refused")
+        require(self.path.stat().st_uid == os.geteuid(), "scope owner changed; cleanup refused")
+
+    def remove(self, processes_stopped):
+        require(processes_stopped, "live owned processes prevent scope removal")
+        self.check_owner()
+        require(shutil.rmtree.avoids_symlink_attacks, "safe directory cleanup is unavailable")
+        shutil.rmtree(self.path)
+
+
+class ArtifactRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        parsed = urlsplit(newurl)
+        require(parsed.scheme == "https" and parsed.hostname in {
+            "github.com", "release-assets.githubusercontent.com"
+        }, "artifact redirect left the allowed HTTPS release origins")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def download_binary(cache, artifact, run_id):
+    cache.mkdir(mode=0o700, parents=True, exist_ok=True)
+    require(not cache.is_symlink() and cache.stat().st_uid == os.geteuid(), "cache must be owned")
+    destination = cache / artifact["name"]
+    if os.path.lexists(destination):
+        verify_binary(destination, artifact)
+        require(os.access(destination, os.X_OK), "cached artifact is not executable")
+        return destination
+    temporary = cache / (artifact["name"] + ".partial-" + run_id)
+    deadline = time.monotonic() + 300
+    total = 0
+    try:
+        request = urllib.request.Request(artifact["url"], headers={"User-Agent": "open-compute-lab/1"})
+        with urllib.request.build_opener(ArtifactRedirects()).open(request, timeout=30) as response:
+            require(response.status == 200, "artifact download did not return HTTP 200")
+            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+            with os.fdopen(fd, "wb") as stream:
+                while True:
+                    require(time.monotonic() < deadline, "artifact download deadline exceeded")
+                    chunk = response.read(64 * 1024)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    require(total <= artifact["bytes"], "artifact exceeds pinned size")
+                    stream.write(chunk)
+        verify_binary(temporary, artifact)
+        temporary.chmod(0o700)
+        os.link(temporary, destination)  # Do not overwrite an existing cache entry.
+        return destination
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def proc_namespace_supported():
+    try:
+        return os.readlink("/proc/self") == str(os.getpid())
+    except OSError:
+        return False
+
+
+def process_info(pid):
+    try:
+        text = Path(f"/proc/{pid}/stat").read_text()
+        fields = text[text.rindex(")") + 2:].split()
+        return {"pid": int(pid), "state": fields[0], "ppid": int(fields[1]),
+                "pgid": int(fields[2]), "start_ticks": int(fields[19])}
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def same_process(identity):
+    current = process_info(identity["pid"])
+    return current is not None and current["start_ticks"] == identity["start_ticks"] and current["state"] != "Z"
+
+
+def public_process(identity):
+    return {key: identity[key] for key in ("pid", "pgid", "start_ticks")}
+
+
+class Process:
+    """Own one process and observed descendants, including separate workerd groups."""
+
+    def __init__(self, argv):
+        require(proc_namespace_supported(), "the current PID namespace cannot be safely observed through /proc")
+        self.process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT, start_new_session=True)
+        self.identity = process_info(self.process.pid)
+        if self.identity is None:
+            self.process.terminate()
+            self.process.wait(timeout=5)
+            self.process.stdout.close()
+            raise LabError("cannot identify owned process")
+        self.known = {self.process.pid: self.identity}
+        self.tail = bytearray()
+        self.lock = threading.Lock()
+        self.done = threading.Event()
+        self.reader = threading.Thread(target=self._read, daemon=True)
+        self.monitor = threading.Thread(target=self._monitor, daemon=True)
+        self.reader.start()
+        self.monitor.start()
+
+    def _read(self):
+        while chunk := self.process.stdout.read1(4096):
+            with self.lock:
+                self.tail.extend(chunk)
+                del self.tail[:-LOG_LIMIT]
+
+    def snapshot(self):
+        table = {}
+        for entry in Path("/proc").iterdir():
+            if entry.name.isdecimal():
+                info = process_info(int(entry.name))
+                if info:
+                    table[info["pid"]] = info
+        with self.lock:
+            parents = {pid for pid, identity in self.known.items()
+                       if pid in table and table[pid]["start_ticks"] == identity["start_ticks"]}
+            while True:
+                children = {pid for pid, info in table.items() if info["ppid"] in parents}
+                added = children - parents
+                if not added:
+                    break
+                parents.update(added)
+            for pid in parents:
+                if pid not in self.known:
+                    self.known[pid] = table[pid]
+
+    def _monitor(self):
+        while not self.done.wait(0.05):
+            self.snapshot()
+
+    def text(self):
+        with self.lock:
+            return bytes(self.tail).decode(errors="replace")
+
+    def live(self):
+        with self.lock:
+            return [identity.copy() for identity in self.known.values() if same_process(identity)]
+
+    def children(self):
+        self.snapshot()
+        with self.lock:
+            return [public_process(item) for pid, item in self.known.items() if pid != self.process.pid]
+
+    def finish_threads(self):
+        self.done.set()
+        self.monitor.join(timeout=2)
+        self.reader.join(timeout=2)
+        if not self.reader.is_alive():
+            self.process.stdout.close()
+
+    def stop(self, grace=30):
+        self.snapshot()
+        was_running = self.process.poll() is None
+        if was_running and same_process(self.identity):
+            os.kill(self.process.pid, signal.SIGTERM)
+        deadline = time.monotonic() + grace
+        while time.monotonic() < deadline:
+            self.process.poll()  # Reap our direct child, then check its former descendants.
+            if not self.live():
+                break
+            time.sleep(0.05)
+        forced = bool(self.live())
+        if forced:
+            # Each signal is gated by the originally observed PID + start time.
+            for identity in self.live():
+                if same_process(identity):
+                    try:
+                        os.kill(identity["pid"], signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+            deadline = time.monotonic() + 5
+            while self.live() and time.monotonic() < deadline:
+                time.sleep(0.05)
+        self.finish_threads()
+        return {"was_running": was_running, "signal": "SIGTERM", "forced": forced,
+                "exit_code": self.process.poll(), "all_owned_exited": not self.live(),
+                "children": self.children()}
+
+
+def command(argv, timeout=30):
+    child = Process(argv)
+    try:
+        child.process.wait(timeout=timeout)
+        child.finish_threads()
+        require(child.process.returncode == 0, "CLI command failed: " + child.text()[-4096:])
+        require(not child.live(), "CLI command left a live descendant")
+        return child.text()
+    except subprocess.TimeoutExpired as exc:
+        raise LabError("CLI command deadline exceeded") from exc
+    finally:
+        if child.live():
+            child.stop(grace=2)
+        else:
+            child.finish_threads()
+
+
+class LocalHTTP:
+    def __init__(self, port, token=None):
+        self.port, self.token = port, token
+
+    def request(self, method, path, body=None, content_type="application/json", host=None):
+        require(path.startswith("/") and not path.startswith("//") and "\r" not in path and "\n" not in path,
+                "invalid local request path")
+        headers = {"Content-Type": content_type}
+        if host is not None:
+            headers["Host"] = host
+        elif self.token:
+            require(path.startswith("/client/v4/"), "credential is restricted to management API")
+            headers["Authorization"] = "Bearer " + self.token
+        if body is not None and not isinstance(body, bytes):
+            body = json.dumps(body, separators=(",", ":")).encode()
+        require(body is None or len(body) <= BODY_LIMIT, "request exceeds body bound")
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        try:
+            connection.request(method, path, body, headers)
+            response = connection.getresponse()
+            raw = response.read(BODY_LIMIT + 1)
+            require(len(raw) <= BODY_LIMIT, "response exceeds body bound")
+            require(not 300 <= response.status < 400, "management/Worker redirects are refused")
+            require(200 <= response.status < 300,
+                    f"HTTP {response.status} for {method} {path}: " + raw.decode(errors="replace")[:2048])
+            return json.loads(raw) if raw else None
+        finally:
+            connection.close()
+
+    def v4(self, method, path, body=None, content_type="application/json"):
+        envelope = self.request(method, "/client/v4" + path, body, content_type)
+        require(isinstance(envelope, dict) and envelope.get("success") is True,
+                "v4 request did not return success")
+        return envelope.get("result")
+
+
+def worker_host(endpoint, port):
+    require(endpoint.get("kind") == "local_origin" and endpoint.get("scope") == "local_machine",
+            "Worker endpoint must be a local origin")
+    parsed = urlsplit(endpoint["url"])
+    require(parsed.scheme == "http" and parsed.port == port and parsed.path in ("", "/") and
+            not parsed.username and not parsed.password and not parsed.query and not parsed.fragment,
+            "Worker endpoint must use the configured local HTTP port")
+    require(re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]{0,240}[a-z0-9])?\.localhost", parsed.hostname or ""),
+            "unexpected Worker routing hostname")
+    return parsed.netloc
+
+
+def multipart(database_id):
+    boundary = "oc-lab-" + secrets.token_hex(16)
+    metadata = {
+        "main_module": "index.js", "compatibility_date": "2026-09-08",
+        "bindings": [{"type": "d1", "name": "DB", "id": database_id},
+                     {"type": "workflow", "name": "FLOW", "workflow_name": FLOW,
+                      "class_name": "LabFlow"}],
+        "exports": {"LabFlow": {"type": "workflow", "name": FLOW}}
+    }
+    source = (HERE / "fixtures/worker.js").read_bytes()
+    require(len(source) < 32 * 1024, "fixture exceeds upload bound")
+    parts = []
+    for name, kind, payload in [("metadata", "application/json", json.dumps(metadata).encode()),
+                                ("index.js", "application/javascript+module", source)]:
+        parts.append((f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"; '
+                      f'filename="{name}"\r\nContent-Type: {kind}\r\n\r\n').encode() + payload + b"\r\n")
+    return b"".join(parts) + f"--{boundary}--\r\n".encode(), "multipart/form-data; boundary=" + boundary
+
+
+def poll(probe, predicate, timeout, phase):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        value = probe()
+        if predicate(value):
+            return value
+        time.sleep(0.25)
+    raise LabError(phase + " deadline exceeded")
+
+
+def wait_workflow(api, path, target, timeout=60):
+    def probe():
+        result = api.v4("GET", path)
+        status = result.get("status")
+        if status in {"errored", "terminated", "paused", "rollingBack", "waitingForPause"}:
+            raise LabError("Workflow entered " + str(status) + ": " + json.dumps(result.get("error"))[:2048])
+        if target == "waiting" and status == "complete":
+            raise LabError("Workflow completed before its required event wait")
+        return result
+    return poll(probe, lambda value: value.get("status") == target, timeout, "Workflow " + target)
+
+
+def assert_resume(before, retained, after, output, job_id):
+    require(before["callback_count"] == 1 and isinstance(before["step_nonce"], str) and before["step_nonce"],
+            "first committed callback must have counter=1 and a nonce")
+    require(retained == before, "D1 row changed across restart before approval")
+    require(after["id"] == job_id and after["callback_count"] == 1,
+            "committed Workflow callback ran again or job identity changed")
+    require(after["step_nonce"] == before["step_nonce"], "persisted callback nonce changed")
+    require(after["completed"] == 1 and output == {"jobId": job_id, "nonce": before["step_nonce"]},
+            "Workflow output/completion did not preserve the committed step result")
+
+
+class Redactor:
+    def __init__(self):
+        self.secrets = []
+
+    def clean(self, text):
+        for secret in sorted(self.secrets, key=len, reverse=True):
+            if secret:
+                text = text.replace(secret, "[redacted]")
+        lines = []
+        for line in text.splitlines():
+            if re.search(r"authorization|bearer |(?:token|secret|master.key|private.key)\s*[:=]", line, re.I):
+                lines.append("[sensitive diagnostic line removed]")
+            else:
+                # Runtime output is untrusted. Strip path and credential-shaped
+                # strings in diagnostics; structured release hashes are separate.
+                line = re.sub(r"/(?:home|root|workspace|tmp|var)/[^\s\"']+", "[local-path]", line)
+                line = re.sub(r"[A-Za-z0-9_+/=-]{40,}", "[long-value]", line)
+                lines.append(line)
+        return "\n".join(lines)[-4096:]
+
+    def check_report(self, report):
+        encoded = json.dumps(report, indent=2, sort_keys=True)
+        require(not any(secret and secret in encoded for secret in self.secrets), "report failed secret scan")
+        require(len(encoded.encode()) < 128 * 1024, "report exceeds evidence bound")
+        return encoded + "\n"
+
+
+def state_identity(scope, data, config):
+    return {"scope": file_identity(scope), "data": file_identity(data),
+            "control_db": file_identity(data / "control.sqlite"),
+            "scheduler_db": file_identity(data / "scheduler.sqlite"),
+            "config_sha256": sha256_file(config)}
+
+
+def source_commit():
+    try:
+        value = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=HERE,
+                                        stderr=subprocess.DEVNULL, timeout=5).decode().strip()
+        return value if re.fullmatch(r"[0-9a-f]{40}", value) else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def integration(args):
+    run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
+    report = {"schema_version": 1, "run_id": run_id, "command": "make integration",
+              "harness_commit": source_commit(), "result": "failed", "phase": "preflight",
+              "environment": {"os": platform.system(), "architecture": platform.machine(),
+                              "euid": os.geteuid(), "python": platform.python_version()},
+              "acceptance": {f"AC-{n:02}": "not_run" for n in range(1, 9)}}
+    redactor = Redactor()
+    scope = None
+    daemon = None
+    daemons = []
+    old_handlers = {}
+    def interrupted(signum, _frame):
+        raise LabError("harness interrupted by signal " + str(signum))
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        old_handlers[sig] = signal.signal(sig, interrupted)
+    try:
+        scope_path = preflight(args.port)
+        report["acceptance"]["AC-02"] = "passed"
+        report["phase"] = "artifact"
+        lock = json.loads((HERE / "upstream.lock.json").read_text())
+        validate_lock(lock)
+        report["upstream"] = lock
+        binary = download_binary(Path(args.cache).resolve(), lock["artifact"], run_id)
+        version = command([str(binary), "--version"]).strip()
+        require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
+        report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
+        report["acceptance"]["AC-01"] = "passed"
+        scope = OwnedScope(scope_path, args.port)
+        redactor.secrets.append(scope.create())
+        config = scope_path / "instances" / INSTANCE / "compute.toml"
+        data = config.parent / "data"
+
+        def cli(*arguments, timeout=30):
+            return command([str(binary), "--no-update-check", *arguments], timeout)
+
+        def start():
+            process = Process([str(binary), "--no-update-check", "run"])
+            daemons.append(process)
+            unauthenticated = LocalHTTP(args.port)
+            def ready():
+                require(process.process.poll() is None, "daemon exited during startup: " + process.text())
+                if not (scope_path / "run/control.sock").is_socket():
+                    return False
+                try:
+                    unauthenticated.request("GET", "/health/live")
+                    return True
+                except (OSError, http.client.HTTPException):
+                    return False
+            poll(ready, bool, 60, "daemon bootstrap")
+            return process
+
+        def running_instance():
+            records = json.loads(cli("instances", "--json"))["instances"]
+            require(len(records) == 1 and records[0]["name"] == INSTANCE and records[0]["state"] == "running",
+                    "expected exactly one running lab instance")
+            return records[0]["instance_id"]
+
+        report["phase"] = "bootstrap"
+        daemon = start()
+        cli("--config", str(config), "instance", "setup", "--name", INSTANCE,
+            "--data-dir", str(data), "--yes", timeout=90)
+        instance_id = running_instance()
+        for name in ("deployer.token", "read-only.token", "master.key"):
+            secret_file = data / "keys" / name
+            require(stat.S_ISREG(secret_file.lstat().st_mode) and secret_file.stat().st_mode & 0o077 == 0,
+                    "generated secret must be owner-only")
+            secret_bytes = secret_file.read_bytes()
+            require(len(secret_bytes) <= 4096, "secret file exceeds bound")
+            redactor.secrets.extend([secret_bytes.hex(), secret_bytes.decode(errors="replace").strip()])
+        token = (data / "keys/deployer.token").read_text().strip()
+        api = LocalHTTP(args.port, token)
+        accounts = api.v4("GET", "/accounts")
+        require(len(accounts) == 1, "expected exactly one API account")
+        account = accounts[0]["id"]
+        require(re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", account), "invalid discovered account id")
+        base = "/accounts/" + account
+        report["instance"] = {"instance_id": instance_id, "account_id": account, "name": INSTANCE}
+        report["phase"] = "deployment"
+        database = api.v4("POST", base + "/d1/database", {"name": "lab-db"})
+        database_id = database["uuid"]
+        require(re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", database_id), "invalid database id")
+        api.v4("POST", base + "/d1/database/" + database_id + "/query", {
+            "sql": "CREATE TABLE jobs (id TEXT PRIMARY KEY, payload TEXT NOT NULL, callback_count INTEGER NOT NULL DEFAULT 0, step_nonce TEXT, completed INTEGER NOT NULL DEFAULT 0)",
+            "params": []})
+        upload, content_type = multipart(database_id)
+        api.v4("PUT", base + "/workers/scripts/" + WORKER, upload, content_type)
+        endpoints = api.v4("GET", base + "/open-compute/workers/" + WORKER + "/endpoints")
+        local_endpoints = [endpoint for endpoint in endpoints if endpoint.get("kind") == "local_origin"]
+        require(len(local_endpoints) == 1, "expected one local Worker endpoint")
+        host = worker_host(local_endpoints[0], args.port)
+        worker = LocalHTTP(args.port)
+        health = worker.request("GET", "/health", host=host)
+        require(health == {"fixture": "open-compute-m1", "ok": True}, "deployed Worker did not answer")
+        job_id = "job-" + run_id.lower()
+        submission = {"id": job_id, "payload": "synthetic-m1"}
+        first = worker.request("POST", "/jobs", submission, host=host)
+        second = worker.request("POST", "/jobs", submission, host=host)
+        require(first == second and second["row_count"] == 1 and second["job"]["id"] == job_id,
+                "duplicate submission did not retain one identical logical row")
+        report["acceptance"].update({"AC-03": "passed", "AC-04": "passed"})
+        report["duplicate_submission"] = {"requests": 2, "row_count": second["row_count"]}
+        report["phase"] = "durable_wait"
+        workflow_id = "flow-" + run_id.lower()
+        workflow_path = base + "/workflows/" + FLOW + "/instances/" + workflow_id
+        creation = api.v4("POST", base + "/workflows/" + FLOW + "/instances",
+                          {"instance_id": workflow_id, "params": {"jobId": job_id}})
+        require(creation["id"] == workflow_id, "Workflow identity changed during creation")
+        waiting = wait_workflow(api, workflow_path, "waiting")
+        before = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+        require(before["callback_count"] == 1 and isinstance(before["step_nonce"], str) and before["step_nonce"],
+                "waiting Workflow has no single committed callback")
+        require(any(step.get("name") == "instrumented-callback" and step.get("success") is True
+                    for step in waiting.get("steps", [])), "first step was not publicly committed")
+        report["acceptance"]["AC-05"] = "passed"
+        report["workflow"] = {"id": workflow_id, "before_status": waiting["status"],
+                              "before_callback_count": before["callback_count"],
+                              "before_nonce_sha256": hashlib.sha256(before["step_nonce"].encode()).hexdigest()}
+        state_before = state_identity(scope_path, data, config)
+        require(daemon.children(), "no supervised runtime child was observed")
+        report["phase"] = "daemon_restart"
+        report["daemon_before"] = public_process(daemon.identity)
+        stopped = daemon.stop()
+        report["first_shutdown"] = stopped
+        require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
+                stopped["exit_code"] == 0, "original daemon did not exit gracefully with all owned children")
+        scope.check_owner()
+        daemon = start()
+        poll(lambda: json.loads(cli("instances", "--json"))["instances"],
+             lambda rows: len(rows) == 1 and rows[0]["state"] == "running", 60, "instance restart")
+        require(running_instance() == instance_id, "instance identity changed across daemon restart")
+        report["daemon_after"] = public_process(daemon.identity)
+        require(report["daemon_after"] != report["daemon_before"], "daemon process identity did not change")
+        state_after = state_identity(scope_path, data, config)
+        require(state_before == state_after, "scope/data/database/config identity changed across restart")
+        report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
+        report["acceptance"]["AC-06"] = "passed"
+        report["phase"] = "resume"
+        retained = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+        require(retained == before, "D1 state did not survive daemon restart")
+        wait_workflow(api, workflow_path, "waiting")
+        event = api.v4("POST", workflow_path + "/events/approval", {"approved": True})
+        require(event["instanceId"] == workflow_id, "approval targeted a different Workflow")
+        complete = wait_workflow(api, workflow_path, "complete")
+        after = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+        assert_resume(before, retained, after, complete.get("output"), job_id)
+        report["workflow"].update({"after_status": complete["status"], "after_callback_count": after["callback_count"],
+                                   "after_nonce_sha256": hashlib.sha256(after["step_nonce"].encode()).hexdigest(),
+                                   "same_id": True, "nonce_unchanged": True, "completed": after["completed"]})
+        report["acceptance"]["AC-07"] = "passed"
+        report["phase"] = "cleanup"
+        report["result"] = "passed"
+    except Exception as exc:
+        report["error"] = redactor.clean(str(exc))
+    finally:
+        try:
+            clean = True
+            for item in daemons:
+                if item.live():
+                    shutdown = item.stop()
+                    if item is daemon:
+                        report["final_shutdown"] = shutdown
+                    clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
+                else:
+                    item.process.poll()
+                    item.finish_threads()
+                    if item is daemon and report["result"] == "passed":
+                        clean = False
+                if item.text() and report["result"] != "passed":
+                    report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
+            require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed")
+            if scope is not None and scope.identity is not None:
+                scope.remove(processes_stopped=True)
+                report["scope_removed"] = True
+            if report["result"] == "passed":
+                report["acceptance"]["AC-08"] = "passed"
+                require(all(value == "passed" for value in report["acceptance"].values()), "acceptance coverage incomplete")
+                report["phase"] = "complete"
+        except (LabError, OSError) as exc:
+            report["result"] = "failed"
+            report["cleanup_error"] = redactor.clean(str(exc))
+        for sig, handler in old_handlers.items():
+            signal.signal(sig, handler)
+    encoded = redactor.check_report(report)
+    output = Path(args.output) if args.output else HERE / ".lab-runs" / run_id
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.mkdir(mode=0o700)
+    exclusive_file(output / "report.json", encoded.encode())
+    print(encoded, end="", flush=True)
+    return 0 if report["result"] == "passed" else 1
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("preflight", "integration"))
+    parser.add_argument("--port", type=int, default=8787)
+    parser.add_argument("--cache", default=str(HERE / ".lab-cache"))
+    parser.add_argument("--output", help="new directory for sanitized report.json; must not exist")
+    args = parser.parse_args()
+    if args.command == "preflight":
+        try:
+            preflight(args.port)
+            print(json.dumps({"result": "passed", "runtime_started": False}))
+            return 0
+        except (LabError, OSError) as exc:
+            print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
+            return 1
+    return integration(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

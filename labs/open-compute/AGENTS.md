@@ -12,7 +12,8 @@ precede implementation changes; keep acceptance IDs traceable to evidence.
   Do not patch upstream, impersonate a non-root user, or use upstream test-only
   environment overrides to make a black-box test pass.
 - M1 uses Linux x64, a non-root account, a fresh owned scope, loopback listeners,
-  and the checked-in synthetic Worker. Never reuse or erase an existing scope.
+  and the checked-in synthetic Worker. Never adopt or erase a scope that existed
+  before this invocation; restart only the scope created by the current run.
 - Keep harness dependencies in Python's standard library. A new dependency
   needs a concrete missing capability and an accompanying SDD decision.
 - Keep subprocesses, network calls, response sizes, logs, and polling bounded.

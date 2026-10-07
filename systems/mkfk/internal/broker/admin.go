@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fallrising/newclear/systems/mkfk/internal/adapters"
 	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/protocol"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
@@ -42,6 +43,12 @@ func (b *Broker) metricsText(ctx context.Context) string {
 	}
 	fmt.Fprintf(&out, "mkfk_ready %d\n", ready)
 	fmt.Fprintf(&out, "mkfk_goroutines %d\n", runtime.NumGoroutine())
+	if cpu, rss, ok := processUsage(); ok {
+		fmt.Fprintf(&out, "mkfk_process_cpu_seconds_total %.2f\nmkfk_process_resident_bytes %d\n", cpu, rss)
+	}
+	syncs := adapters.ReadSyncStats()
+	fmt.Fprintf(&out, "mkfk_fsync_total %d\nmkfk_fsync_seconds_total %.6f\nmkfk_fsync_max_seconds %.6f\n",
+		syncs.Count, syncs.Total.Seconds(), syncs.Max.Seconds())
 	for _, key := range b.sortedReplicaKeys() {
 		r := b.replicas[key]
 		var metrics partition.Metrics
@@ -68,7 +75,18 @@ func (b *Broker) metricsText(ctx context.Context) string {
 		gauge("inbox_dropped_total", metrics.InboxDropped)
 		gauge("peer_messages_rejected_total", metrics.RejectedPeerMsg)
 		gauge("failed", boolMetric(metrics.Failed))
+		var logBytes int64
+		anchors := 0
+		for _, segment := range r.log.Segments() {
+			logBytes += segment.SizeBytes
+			anchors += segment.AnchorCount
+		}
+		gauge("wal_bytes", logBytes)
+		gauge("index_anchors", anchors)
 		if r.data != nil {
+			gauge("fetches_total", metrics.Fetches)
+			gauge("fetch_seek_comparisons_total", metrics.FetchSeek)
+			gauge("fetch_scanned_bytes_total", metrics.FetchScanBytes)
 			gauge("log_end_offset", metrics.LogEndOffset)
 			gauge("high_watermark", metrics.HighWatermark)
 			gauge("isr_size", metrics.ISRSize)

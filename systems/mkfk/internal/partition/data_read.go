@@ -16,10 +16,13 @@ import (
 func (d *Data) Fetch(ctx context.Context, request protocol.FetchRequest) (protocol.FetchResponseData, error) {
 	var response protocol.FetchResponseData
 	err := d.read(ctx, func(readContext string) error {
-		records, next, hw, _, err := d.controller.Fetch(readContext, uint64(request.Offset), int(request.MaxBytes))
+		records, next, hw, stats, err := d.controller.Fetch(readContext, uint64(request.Offset), int(request.MaxBytes))
 		if err != nil {
 			return err
 		}
+		d.fetches++
+		d.fetchSeek += uint64(stats.SegmentComparisons + stats.IndexComparisons)
+		d.fetchScanBytes += uint64(stats.ScannedBytes)
 		response = protocol.FetchResponseData{
 			Records: storageRecords(records), NextOffset: protocol.DecimalUint64(next),
 			HighWatermark: protocol.DecimalUint64(hw), LogEndOffset: protocol.DecimalUint64(d.log.LEO()),

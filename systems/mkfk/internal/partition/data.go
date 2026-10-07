@@ -55,7 +55,8 @@ type Data struct {
 	onISRShrink    func([]uint32, []replication.PeerObservation)
 
 	// Actor goroutine only.
-	waiters map[string][]chan producer.Completion
+	waiters                            map[string][]chan producer.Completion
+	fetches, fetchSeek, fetchScanBytes uint64
 }
 
 func NewData(config DataConfig) (*Data, error) {

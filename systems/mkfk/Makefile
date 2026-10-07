@@ -2,7 +2,7 @@ GO ?= go
 GOFMT ?= gofmt
 GO_FILES := $(shell find . -name '*.go' -type f | sort)
 
-.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos image demo demo-down
+.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos image demo demo-down bench
 
 TEST_LOG_DIR ?= $(CURDIR)/.test-output
 
@@ -31,6 +31,10 @@ CHAOS_SEED ?=
 DOCKER ?= docker
 COMPOSE_PROJECT ?= mkfk-demo
 IMAGE_CONTEXT := $(CURDIR)/.build/image
+
+# make bench runs the 04-validation §5 matrix on local loopback brokers. For
+# brokers on three hosts, add BENCH_ARGS="--ssh-hosts a,b,c --ssh-ips x,y,z".
+BENCH_ARGS ?=
 
 fmt-check:
 	@files="$$($(GOFMT) -l $(GO_FILES))"; test -z "$$files" || (echo "Go files need formatting:" >&2; echo "$$files" >&2; exit 1)
@@ -70,3 +74,8 @@ demo: image
 
 demo-down:
 	$(DOCKER) compose -p $(COMPOSE_PROJECT) -f deploy/compose.yaml down $(if $(DELETE_DATA),--volumes,)
+
+bench:
+	mkdir -p .build && $(GO) build -trimpath -o .build/mkfk ./cmd/mkfk
+	$(GO) run ./cmd/mkfkbench --mkfk .build/mkfk --out $(TEST_LOG_DIR)/bench \
+		--commit "$$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" $(BENCH_ARGS)

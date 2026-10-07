@@ -44,3 +44,27 @@ func TestM7CompletedHistoryIsEvictedSoWritesNeverStop(t *testing.T) {
 		t.Fatalf("awaiting an evicted operation = %+v, %v", results, err)
 	}
 }
+
+// A pending operation is never evicted to make room: its gate still needs
+// the operation to release its reservation when the entry commits.
+func TestM7PendingOperationIsNeverEvictedFromHistory(t *testing.T) {
+	t.Parallel()
+	cluster := newReplicationCluster(t, 2, Config{MaxPendingOperations: 1, MaxOperationHistory: 1, MaxGateHistory: 1})
+	leader := cluster.elect(t, 1)
+	_, ready, _, err := leader.ProposeData("done", "done", 1, []storage.DataRecord{{Value: []byte("data")}}, cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drainMatching(t, func(raft.Message) bool { return true }, 200)
+	done, _ := leader.Gate("done")
+	if _, _, _, err := leader.ProposeData("pending", "pending", 1, []storage.DataRecord{{Value: []byte("data")}}, cluster.now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := leader.AwaitExistingData("done", "await-done", done.Index, done.BaseOffset, done.LastOffset, done.Term, 4); !errors.Is(err, ErrBackpressure) {
+		t.Fatalf("history full of pending work admitted another operation: %v", err)
+	}
+	if leader.operations["pending"] == nil {
+		t.Fatal("a pending operation was evicted from history")
+	}
+}

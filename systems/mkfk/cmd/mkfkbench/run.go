@@ -91,7 +91,7 @@ func runConfig(l launcher, c benchConfig, w workload, repeats, runBase int) (con
 			return result, err
 		}
 	}
-	recovery, err := waitServing(probe, l, c, 5*time.Minute)
+	recovery, err := waitServing(probe, l, c, 20*time.Minute)
 	if err != nil {
 		return result, err
 	}

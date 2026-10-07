@@ -17,9 +17,13 @@ func summary(result report) string {
 	out.WriteString("\n| Config | records/s | MiB/s | produce p50/p95/p99 ms | fetch records/s | fetch p99 ms | leader CPU % | max RSS MiB | fsync mean ms | seek comparisons/fetch | restart s |\n")
 	out.WriteString("| --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
 	for _, config := range result.Results {
-		if config.Error != "" {
+		if len(config.Runs) == 0 {
 			fmt.Fprintf(&out, "| %s | failed: %s | | | | | | | | | |\n", config.Config.name(), config.Error)
 			continue
+		}
+		restart := fmt.Sprintf("%.2f", config.RecoverySeconds)
+		if config.Error != "" {
+			restart = "> limit"
 		}
 		median := func(value func(runResult) float64) float64 {
 			values := make([]float64, 0, len(config.Runs))
@@ -39,7 +43,7 @@ func summary(result report) string {
 			}
 			return best
 		}
-		fmt.Fprintf(&out, "| %s | %.0f | %.2f | %.1f / %.1f / %.1f | %.0f | %.1f | %.0f | %.0f | %.2f | %.1f | %.2f |\n",
+		fmt.Fprintf(&out, "| %s | %.0f | %.2f | %.1f / %.1f / %.1f | %.0f | %.1f | %.0f | %.0f | %.2f | %.1f | %s |\n",
 			config.Config.name(),
 			median(func(r runResult) float64 { return r.Measurement.RecordsPerSec }),
 			median(func(r runResult) float64 { return r.Measurement.BytesPerSec / (1 << 20) }),
@@ -54,7 +58,7 @@ func summary(result report) string {
 			}),
 			median(func(r runResult) float64 { return maxBroker(r, func(b brokerUsage) float64 { return b.FsyncMeanMS }) }),
 			median(func(r runResult) float64 { return r.ReadBack.ComparisonsPerOp }),
-			config.RecoverySeconds)
+			restart)
 	}
 	out.WriteString("\nLimitations:\n")
 	for _, limitation := range result.Limitations {

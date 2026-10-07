@@ -5,7 +5,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M6 已驗證；M7 進行中。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller、durable idempotent producer、durable consumer groups，以及可啟動的 `mkfk` broker（三個 listener、peer HTTP/JSON transport、RF3 failover）。目前仍沒有 Compose profile、chaos harness、benchmark、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M7 已驗證——核心功能已驗收，未 production-hardened。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller、durable idempotent producer、durable consumer groups、可啟動的三 listener `mkfk` broker（peer HTTP/JSON transport）、seeded chaos 驗收、三 broker Compose 實驗與 benchmark baseline。沒有 TLS／認證、transactions、retention、動態 membership 或 Kafka client 相容性（X1–X4）。精確狀態見 [implementation status](docs/STATUS.md)；需求對照見 [traceability](docs/traceability.md)；架構與故障結果見 [architecture](docs/architecture.md)。
 
 ## 從這裡開始
 
@@ -120,7 +120,7 @@ make test-integration  # real WAL, child processes, M6 demo
 
 M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執行：3 partitions、2 members 後加入第 3 位、kill 一個 process 後未 commit 的 member 與 coordinator，並列出 generation／assignment 與被重新處理的 records。
 
-## M7 broker process（進行中）
+## M7 整合故障驗證與交付
 
 - `internal/partition`：每個 partition replica 一個 actor goroutine，處理 Step／Tick／proposal／read barrier；每個 peer 一條有界 FIFO link。
 - `cmd/mkfk`：`format` 顯式初始化空目錄；`serve` 依 SDD §12.1 啟動 peer、client、admin 三個 listener（`/healthz`、`/readyz`、`/metrics`），SIGTERM 有界排空後釋放 lock。非 loopback 位址需 `--allow-insecure-bind`（[ADR-011](docs/adr/011-broker-peer-transport.md)）。
@@ -130,6 +130,7 @@ M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執
 - `make test-chaos`：三個 broker process、三個冪等 producer、兩個 consumer group，在 seeded 排程下輪流 SIGKILL leader／follower／coordinator、SIGSTOP、切斷或拖慢 peer link（經測試用 proxy 與 `--peer-bind`），結束後以 history oracle 檢查已確認資料不遺失不重複、副本一致、assignment 不重疊、committed offset 不倒退（`CHAOS_PROFILE=short|full`、`CHAOS_SEED=` 可重播）。`make test-model-extended` 跑 1,000 seeds × 10,000 events。
 
 - `make demo`：以 `FROM scratch` 的本地 image（不拉 registry，UID 65532、唯讀 rootfs、drop 全部 capability）啟動三 broker Compose 實驗（獨立 project、named volumes、私有 bridge network，只在 host loopback 公開 client／admin port），依序展示 produce／consume、回覆遺失重送、kill leader 與 catch-up、rebalance、coordinator 重啟後從 committed offsets 續讀。若該 project 已有 volume 會拒絕執行；`make demo-down` 只停止本次實驗，加 `DELETE_DATA=1` 才刪 volume。
+- `make bench`：依 04-validation §5 跑 RF1／RF3（min_isr 1、2）× batch 1／100 × 1／3 partitions，每組預熱 10 秒、量測 60 秒、重複 3 次，另量冷重啟到可服務的時間；輸出原始 `results.json` 與 `summary.md`。預設在本機 loopback 起 broker；`BENCH_ARGS="--ssh-hosts … --ssh-ips …"` 改在三台主機上跑。baseline 見 [docs/benchmarks/m7-baseline.md](docs/benchmarks/m7-baseline.md)，數字只描述該設計在該硬體上的表現，不是承諾。
 - CI：根目錄 `.github/workflows/mkfk-ci.yml`（path-scoped、`contents: read`、SHA-pinned actions）跑 gates、`test-chaos` short profile 與 Compose demo。
 
 ```bash

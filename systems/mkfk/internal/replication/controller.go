@@ -188,7 +188,7 @@ func NewController(node *raft.Node, log RecordLog, config Config, now time.Time)
 		controller.resetLeaderTerm(snapshot, now)
 	}
 	recovered := node.RecoveredApplied()
-	controller.recoveredApplied = cloneFrames(recovered)
+	controller.recoveredApplied = recovered
 	if _, err := controller.apply(recovered); err != nil {
 		return nil, err
 	}
@@ -539,7 +539,7 @@ func (controller *Controller) PendingFetches() int {
 // exactly once so another deterministic state machine can replay the same
 // durable entries.
 func (controller *Controller) RecoveredApplied() []storage.Frame {
-	result := cloneFrames(controller.recoveredApplied)
+	result := controller.recoveredApplied
 	controller.recoveredApplied = nil
 	return result
 }

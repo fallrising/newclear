@@ -46,7 +46,15 @@ func main() {
 	ips := flag.String("ssh-ips", "", "the hosts' private-network IPs for broker listeners")
 	remoteDir := flag.String("ssh-dir", "mkfk-bench", "remote working directory")
 	sshCommand := flag.String("ssh-command", "ssh -o BatchMode=yes", "ssh command and options used to reach the hosts")
+	summarize := flag.String("summarize", "", "re-render summary.md from an existing results.json and exit")
 	flag.Parse()
+	if *summarize != "" {
+		if err := resummarize(*summarize); err != nil {
+			fmt.Fprintln(os.Stderr, "summarize failed:", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if *binary == "" {
 		fmt.Fprintln(os.Stderr, "--mkfk is required")
 		os.Exit(2)
@@ -111,6 +119,18 @@ func run(binary, out, commit string, warmup, duration time.Duration, repeats, re
 		}
 	}
 	return nil
+}
+
+func resummarize(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var result report
+	if err := json.Unmarshal(data, &result); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(filepath.Dir(path), "summary.md"), []byte(summary(result)), 0o644)
 }
 
 func write(out string, result report) error {

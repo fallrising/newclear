@@ -105,8 +105,10 @@ func (node *Node) Snapshot() Snapshot {
 	}
 }
 
+// RecoveredApplied hands the replayed committed prefix to its one consumer
+// and forgets it; recovery never holds more than one copy.
 func (node *Node) RecoveredApplied() []storage.Frame {
-	result := cloneFrames(node.recoveredApplied)
+	result := node.recoveredApplied
 	node.recoveredApplied = nil
 	return result
 }

@@ -1,0 +1,2230 @@
+{
+  "started": "2026-10-07T15:09:08Z",
+  "commit": "12aa275",
+  "go": "go1.27.1",
+  "launcher": "three hosts on a private network, one broker each; the client runs on the node-3 host",
+  "machines": {
+    "node-1": "4 vCPU, 7.8 GiB RAM, Intel(R) Xeon(R) Platinum 8260 CPU @ 2.40GHz, kernel 6.1.0-18-amd64, ext4 on disk reported as rotational",
+    "node-2": "2 vCPU, 1.9 GiB RAM, Intel(R) Xeon(R) Platinum 8336C CPU @ 2.30GHz, kernel 6.1.0-18-amd64, ext4 on disk reported as rotational",
+    "node-3": "4 vCPU, 3.8 GiB RAM, Intel(R) Xeon(R) Platinum 8260 CPU @ 2.40GHz, kernel 6.1.0-40-amd64, ext4 on disk reported as rotational"
+  },
+  "warmup": "10s",
+  "measure": "1m0s",
+  "repeats": 3,
+  "results": [
+    {
+      "config": {
+        "replication_factor": 1,
+        "min_isr": 1,
+        "batch_records": 1,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 10170,
+            "produce_records_per_sec": 169.5,
+            "produce_bytes_per_sec": 173568,
+            "produce_latency": {
+              "count": 10170,
+              "p50_ms": 23.172,
+              "p95_ms": 27.631,
+              "p99_ms": 29.231,
+              "max_ms": 99.412
+            },
+            "produce_errors": {},
+            "fetched_records": 12091,
+            "fetch_records_per_sec": 11573.483635660321,
+            "fetch_latency": {
+              "count": 13,
+              "p50_ms": 86.247,
+              "p95_ms": 88.106,
+              "p99_ms": 88.106,
+              "max_ms": 89.76
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 24.86666666666667,
+              "rss_bytes": 25583616,
+              "fsyncs": 50852,
+              "fsync_mean_ms": 1.0313252182805002,
+              "fsync_max_ms_process_lifetime": 74.782,
+              "wal_bytes_events": 20636636,
+              "index_anchors_events": 4031
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 13,
+            "segment_and_index_comparisons_per_fetch": 13,
+            "scanned_wal_bytes_per_fetch": 1590526.3846153845
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 9255,
+            "produce_records_per_sec": 154.25,
+            "produce_bytes_per_sec": 157952,
+            "produce_latency": {
+              "count": 9255,
+              "p50_ms": 25.338,
+              "p95_ms": 30.246,
+              "p99_ms": 31.988,
+              "max_ms": 76.832
+            },
+            "produce_errors": {},
+            "fetched_records": 23133,
+            "fetch_records_per_sec": 11744.58393064436,
+            "fetch_latency": {
+              "count": 24,
+              "p50_ms": 84.86,
+              "p95_ms": 87.958,
+              "p99_ms": 88.142,
+              "max_ms": 88.945
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 27.133333333333333,
+              "rss_bytes": 29032448,
+              "fsyncs": 46275,
+              "fsync_mean_ms": 1.1011581847649918,
+              "fsync_max_ms_process_lifetime": 74.782,
+              "wal_bytes_events": 39492656,
+              "index_anchors_events": 7712
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 24,
+            "segment_and_index_comparisons_per_fetch": 13.958333333333334,
+            "scanned_wal_bytes_per_fetch": 1648767.9166666667
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 8774,
+            "produce_records_per_sec": 146.23333333333332,
+            "produce_bytes_per_sec": 149742.93333333332,
+            "produce_latency": {
+              "count": 8774,
+              "p50_ms": 27.183,
+              "p95_ms": 31.737,
+              "p99_ms": 33.715,
+              "max_ms": 57.119
+            },
+            "produce_errors": {},
+            "fetched_records": 33575,
+            "fetch_records_per_sec": 11926.563258969121,
+            "fetch_latency": {
+              "count": 34,
+              "p50_ms": 83.487,
+              "p95_ms": 86.811,
+              "p99_ms": 87.8,
+              "max_ms": 89.172
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 30.466666666666665,
+              "rss_bytes": 31453184,
+              "fsyncs": 43870,
+              "fsync_mean_ms": 1.1247571005242765,
+              "fsync_max_ms_process_lifetime": 74.782,
+              "wal_bytes_events": 57323876,
+              "index_anchors_events": 11193
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 34,
+            "segment_and_index_comparisons_per_fetch": 14.352941176470589,
+            "scanned_wal_bytes_per_fetch": 1689338.5
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 5.210656973,
+      "wal_bytes_per_replica_at_restart": 57323910
+    },
+    {
+      "config": {
+        "replication_factor": 1,
+        "min_isr": 1,
+        "batch_records": 1,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 13596,
+            "produce_records_per_sec": 226.6,
+            "produce_bytes_per_sec": 232038.4,
+            "produce_latency": {
+              "count": 13596,
+              "p50_ms": 53.174,
+              "p95_ms": 58.489,
+              "p99_ms": 60.214,
+              "max_ms": 114.806
+            },
+            "produce_errors": {},
+            "fetched_records": 16092,
+            "fetch_records_per_sec": 22671.637961950208,
+            "fetch_latency": {
+              "count": 18,
+              "p50_ms": 127.776,
+              "p95_ms": 141.894,
+              "p99_ms": 141.894,
+              "max_ms": 144.951
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 32.916666666666664,
+              "rss_bytes": 34226176,
+              "fsyncs": 67983,
+              "fsync_mean_ms": 2.158921318564935,
+              "fsync_max_ms_process_lifetime": 78.82300000000001,
+              "wal_bytes_events": 27454668,
+              "index_anchors_events": 5365
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 18,
+            "segment_and_index_comparisons_per_fetch": 11.722222222222221,
+            "scanned_wal_bytes_per_fetch": 1528261.1666666667
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 12786,
+            "produce_records_per_sec": 213.1,
+            "produce_bytes_per_sec": 218214.4,
+            "produce_latency": {
+              "count": 12786,
+              "p50_ms": 57.255,
+              "p95_ms": 61.856,
+              "p99_ms": 68.96,
+              "max_ms": 87.029
+            },
+            "produce_errors": {},
+            "fetched_records": 31278,
+            "fetch_records_per_sec": 22378.052620221413,
+            "fetch_latency": {
+              "count": 33,
+              "p50_ms": 131.522,
+              "p95_ms": 147.123,
+              "p99_ms": 148.522,
+              "max_ms": 150.149
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 37.916666666666664,
+              "rss_bytes": 40935424,
+              "fsyncs": 63933,
+              "fsync_mean_ms": 2.2520507093363364,
+              "fsync_max_ms_process_lifetime": 78.82300000000001,
+              "wal_bytes_events": 53367300,
+              "index_anchors_events": 10428
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 33,
+            "segment_and_index_comparisons_per_fetch": 12.848484848484848,
+            "scanned_wal_bytes_per_fetch": 1620431.2121212122
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 12281,
+            "produce_records_per_sec": 204.68333333333334,
+            "produce_bytes_per_sec": 209595.73333333334,
+            "produce_latency": {
+              "count": 12281,
+              "p50_ms": 59.212,
+              "p95_ms": 64.195,
+              "p99_ms": 69.053,
+              "max_ms": 105.798
+            },
+            "produce_errors": {},
+            "fetched_records": 45822,
+            "fetch_records_per_sec": 23124.990674013035,
+            "fetch_latency": {
+              "count": 48,
+              "p50_ms": 127.038,
+              "p95_ms": 143.081,
+              "p99_ms": 147.181,
+              "max_ms": 153.107
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 40.91666666666667,
+              "rss_bytes": 46735360,
+              "fsyncs": 61411,
+              "fsync_mean_ms": 2.3221312794124827,
+              "fsync_max_ms_process_lifetime": 78.82300000000001,
+              "wal_bytes_events": 78197304,
+              "index_anchors_events": 15276
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 48,
+            "segment_and_index_comparisons_per_fetch": 13.375,
+            "scanned_wal_bytes_per_fetch": 1632369.6666666667
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 6.882377148,
+      "wal_bytes_per_replica_at_restart": 78197406
+    },
+    {
+      "config": {
+        "replication_factor": 1,
+        "min_isr": 1,
+        "batch_records": 100,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 382500,
+            "produce_records_per_sec": 6375,
+            "produce_bytes_per_sec": 6528000,
+            "produce_latency": {
+              "count": 3825,
+              "p50_ms": 62.672,
+              "p95_ms": 65.765,
+              "p99_ms": 67.718,
+              "max_ms": 72.294
+            },
+            "produce_errors": {},
+            "fetched_records": 445400,
+            "fetch_records_per_sec": 17377.266865379443,
+            "fetch_latency": {
+              "count": 446,
+              "p50_ms": 57.475,
+              "p95_ms": 61.3,
+              "p99_ms": 63.025,
+              "max_ms": 64.576
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 136.88333333333335,
+              "rss_bytes": 23609344,
+              "fsyncs": 19165,
+              "fsync_mean_ms": 0.80697740673102,
+              "fsync_max_ms_process_lifetime": 5.401999999999999,
+              "wal_bytes_events": 627594976,
+              "index_anchors_events": 4454
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 446,
+            "segment_and_index_comparisons_per_fetch": 11.771300448430493,
+            "scanned_wal_bytes_per_fetch": 1547751.7578475336
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 385400,
+            "produce_records_per_sec": 6423.333333333333,
+            "produce_bytes_per_sec": 6577493.333333333,
+            "produce_latency": {
+              "count": 3854,
+              "p50_ms": 62.121,
+              "p95_ms": 66.265,
+              "p99_ms": 68.911,
+              "max_ms": 81.899
+            },
+            "produce_errors": {},
+            "fetched_records": 894800,
+            "fetch_records_per_sec": 17562.52169163777,
+            "fetch_latency": {
+              "count": 895,
+              "p50_ms": 56.854,
+              "p95_ms": 60.829,
+              "p99_ms": 63.03,
+              "max_ms": 68.784
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 140.73333333333332,
+              "rss_bytes": 29319168,
+              "fsyncs": 19310,
+              "fsync_mean_ms": 0.7978346970481616,
+              "fsync_max_ms_process_lifetime": 5.904000000000001,
+              "wal_bytes_events": 1260827310,
+              "index_anchors_events": 8948
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 895,
+            "segment_and_index_comparisons_per_fetch": 12.555307262569832,
+            "scanned_wal_bytes_per_fetch": 1549493.2033519554
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 389600,
+            "produce_records_per_sec": 6493.333333333333,
+            "produce_bytes_per_sec": 6649173.333333333,
+            "produce_latency": {
+              "count": 3896,
+              "p50_ms": 61.504,
+              "p95_ms": 65.181,
+              "p99_ms": 67.026,
+              "max_ms": 72.239
+            },
+            "produce_errors": {},
+            "fetched_records": 1349500,
+            "fetch_records_per_sec": 17598.85423336473,
+            "fetch_latency": {
+              "count": 1350,
+              "p50_ms": 56.714,
+              "p95_ms": 60.684,
+              "p99_ms": 62.852,
+              "max_ms": 69.667
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 139.83333333333331,
+              "rss_bytes": 35090432,
+              "fsyncs": 19520,
+              "fsync_mean_ms": 0.800620030737705,
+              "fsync_max_ms_process_lifetime": 5.904000000000001,
+              "wal_bytes_events": 1901531210,
+              "index_anchors_events": 13495
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 1350,
+            "segment_and_index_comparisons_per_fetch": 13.01925925925926,
+            "scanned_wal_bytes_per_fetch": 1549342.8933333333
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 85.998230947,
+      "wal_bytes_per_replica_at_restart": 1901531244
+    },
+    {
+      "config": {
+        "replication_factor": 1,
+        "min_isr": 1,
+        "batch_records": 100,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 755200,
+            "produce_records_per_sec": 12586.666666666666,
+            "produce_bytes_per_sec": 12888746.666666666,
+            "produce_latency": {
+              "count": 7552,
+              "p50_ms": 94.507,
+              "p95_ms": 107.931,
+              "p99_ms": 114.163,
+              "max_ms": 145.307
+            },
+            "produce_errors": {},
+            "fetched_records": 880000,
+            "fetch_records_per_sec": 35802.68084778307,
+            "fetch_latency": {
+              "count": 881,
+              "p50_ms": 83.488,
+              "p95_ms": 95.178,
+              "p99_ms": 102.502,
+              "max_ms": 110.039
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 289.06666666666666,
+              "rss_bytes": 44457984,
+              "fsyncs": 37850,
+              "fsync_mean_ms": 0.998628322324967,
+              "fsync_max_ms_process_lifetime": 17.31,
+              "wal_bytes_events": 1239970394,
+              "index_anchors_events": 8800
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 881,
+            "segment_and_index_comparisons_per_fetch": 11.216799091940976,
+            "scanned_wal_bytes_per_fetch": 1547880.973893303
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 748900,
+            "produce_records_per_sec": 12481.666666666666,
+            "produce_bytes_per_sec": 12781226.666666666,
+            "produce_latency": {
+              "count": 7489,
+              "p50_ms": 95.387,
+              "p95_ms": 109.981,
+              "p99_ms": 116.762,
+              "max_ms": 128.933
+            },
+            "produce_errors": {},
+            "fetched_records": 1752200,
+            "fetch_records_per_sec": 35552.340384213676,
+            "fetch_latency": {
+              "count": 1753,
+              "p50_ms": 84.333,
+              "p95_ms": 96.806,
+              "p99_ms": 102.369,
+              "max_ms": 110.326
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 296.48333333333335,
+              "rss_bytes": 53334016,
+              "fsyncs": 37525,
+              "fsync_mean_ms": 1.0143454763491007,
+              "fsync_max_ms_process_lifetime": 17.83,
+              "wal_bytes_events": 2468953354,
+              "index_anchors_events": 17522
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 1753,
+            "segment_and_index_comparisons_per_fetch": 12.059897318881916,
+            "scanned_wal_bytes_per_fetch": 1549079.2892184826
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 745900,
+            "produce_records_per_sec": 12431.666666666666,
+            "produce_bytes_per_sec": 12730026.666666666,
+            "produce_latency": {
+              "count": 7459,
+              "p50_ms": 95.751,
+              "p95_ms": 111.157,
+              "p99_ms": 117.891,
+              "max_ms": 129.988
+            },
+            "produce_errors": {},
+            "fetched_records": 2624000,
+            "fetch_records_per_sec": 36428.52813847775,
+            "fetch_latency": {
+              "count": 2626,
+              "p50_ms": 82.078,
+              "p95_ms": 96.277,
+              "p99_ms": 102.328,
+              "max_ms": 109.641
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 299.15,
+              "rss_bytes": 64073728,
+              "fsyncs": 37371,
+              "fsync_mean_ms": 1.0406697171603645,
+              "fsync_max_ms_process_lifetime": 17.83,
+              "wal_bytes_events": 3697372690,
+              "index_anchors_events": 26240
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 2626,
+            "segment_and_index_comparisons_per_fetch": 12.529702970297029,
+            "scanned_wal_bytes_per_fetch": 1548730.4386900228
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 167.10352001,
+      "wal_bytes_per_replica_at_restart": 3697372792
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 1,
+        "batch_records": 1,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 9560,
+            "produce_records_per_sec": 159.33333333333334,
+            "produce_bytes_per_sec": 163157.33333333334,
+            "produce_latency": {
+              "count": 9560,
+              "p50_ms": 25.059,
+              "p95_ms": 30.851,
+              "p99_ms": 33.992,
+              "max_ms": 109.551
+            },
+            "produce_errors": {},
+            "fetched_records": 11441,
+            "fetch_records_per_sec": 11353.143832688467,
+            "fetch_latency": {
+              "count": 12,
+              "p50_ms": 87.748,
+              "p95_ms": 89.65,
+              "p99_ms": 89.65,
+              "max_ms": 91.32
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 78.13333333333334,
+              "rss_bytes": 23896064,
+              "fsyncs": 47794,
+              "fsync_mean_ms": 0.7816325689417081,
+              "fsync_max_ms_process_lifetime": 79.884,
+              "wal_bytes_events": 19526436,
+              "index_anchors_events": 3814
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 37.95000000000001,
+              "rss_bytes": 20488192,
+              "fsyncs": 47205,
+              "fsync_mean_ms": 0.6707641987077639,
+              "fsync_max_ms_process_lifetime": 9.25,
+              "wal_bytes_events": 19526436,
+              "index_anchors_events": 3814
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 40.6,
+              "rss_bytes": 20459520,
+              "fsyncs": 46429,
+              "fsync_mean_ms": 0.7651599431389864,
+              "fsync_max_ms_process_lifetime": 15.121,
+              "wal_bytes_events": 19526436,
+              "index_anchors_events": 3814
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 12,
+            "segment_and_index_comparisons_per_fetch": 13,
+            "scanned_wal_bytes_per_fetch": 1630411.25
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 8492,
+            "produce_records_per_sec": 141.53333333333333,
+            "produce_bytes_per_sec": 144930.13333333333,
+            "produce_latency": {
+              "count": 8492,
+              "p50_ms": 28.334,
+              "p95_ms": 33.475,
+              "p99_ms": 36.436,
+              "max_ms": 51.727
+            },
+            "produce_errors": {},
+            "fetched_records": 21349,
+            "fetch_records_per_sec": 11274.61582558543,
+            "fetch_latency": {
+              "count": 22,
+              "p50_ms": 87.794,
+              "p95_ms": 91.566,
+              "p99_ms": 93.496,
+              "max_ms": 97.26
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 78.88333333333334,
+              "rss_bytes": 27193344,
+              "fsyncs": 42463,
+              "fsync_mean_ms": 0.8042351929915458,
+              "fsync_max_ms_process_lifetime": 79.884,
+              "wal_bytes_events": 36445584,
+              "index_anchors_events": 7117
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 42.333333333333336,
+              "rss_bytes": 21245952,
+              "fsyncs": 41939,
+              "fsync_mean_ms": 0.7108419370991202,
+              "fsync_max_ms_process_lifetime": 39.251,
+              "wal_bytes_events": 36445584,
+              "index_anchors_events": 7117
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 46.85,
+              "rss_bytes": 22315008,
+              "fsyncs": 41462,
+              "fsync_mean_ms": 0.7924945733442668,
+              "fsync_max_ms_process_lifetime": 24.926000000000002,
+              "wal_bytes_events": 36445584,
+              "index_anchors_events": 7117
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 22,
+            "segment_and_index_comparisons_per_fetch": 13.772727272727273,
+            "scanned_wal_bytes_per_fetch": 1659919.7727272727
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 8102,
+            "produce_records_per_sec": 135.03333333333333,
+            "produce_bytes_per_sec": 138274.13333333333,
+            "produce_latency": {
+              "count": 8102,
+              "p50_ms": 29.612,
+              "p95_ms": 35.061,
+              "p99_ms": 38.132,
+              "max_ms": 48.547
+            },
+            "produce_errors": {},
+            "fetched_records": 30821,
+            "fetch_records_per_sec": 11689.183880774033,
+            "fetch_latency": {
+              "count": 31,
+              "p50_ms": 85.636,
+              "p95_ms": 88.147,
+              "p99_ms": 88.255,
+              "max_ms": 89.055
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 78.71666666666667,
+              "rss_bytes": 27947008,
+              "fsyncs": 40511,
+              "fsync_mean_ms": 0.8151312976722371,
+              "fsync_max_ms_process_lifetime": 79.884,
+              "wal_bytes_events": 52620044,
+              "index_anchors_events": 10275
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 43.58333333333332,
+              "rss_bytes": 22147072,
+              "fsyncs": 39981,
+              "fsync_mean_ms": 0.705306420549761,
+              "fsync_max_ms_process_lifetime": 39.251,
+              "wal_bytes_events": 52620044,
+              "index_anchors_events": 10275
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 46.56666666666667,
+              "rss_bytes": 25018368,
+              "fsyncs": 39496,
+              "fsync_mean_ms": 0.8035715262305042,
+              "fsync_max_ms_process_lifetime": 24.926000000000002,
+              "wal_bytes_events": 52620044,
+              "index_anchors_events": 10275
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 31,
+            "segment_and_index_comparisons_per_fetch": 14.451612903225806,
+            "scanned_wal_bytes_per_fetch": 1700755.8709677418
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 4.568881345,
+      "wal_bytes_per_replica_at_restart": 52620112
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 1,
+        "batch_records": 1,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 12901,
+            "produce_records_per_sec": 215.01666666666668,
+            "produce_bytes_per_sec": 220177.06666666668,
+            "produce_latency": {
+              "count": 12901,
+              "p50_ms": 56.344,
+              "p95_ms": 71.108,
+              "p99_ms": 79.287,
+              "max_ms": 129.196
+            },
+            "produce_errors": {},
+            "fetched_records": 15292,
+            "fetch_records_per_sec": 21346.0483343687,
+            "fetch_latency": {
+              "count": 18,
+              "p50_ms": 141.077,
+              "p95_ms": 148.218,
+              "p99_ms": 148.218,
+              "max_ms": 149.357
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 91.86666666666666,
+              "rss_bytes": 34340864,
+              "fsyncs": 64387,
+              "fsync_mean_ms": 2.062697501048348,
+              "fsync_max_ms_process_lifetime": 54.807,
+              "wal_bytes_events": 26089068,
+              "index_anchors_events": 5098
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 36.93333333333332,
+              "rss_bytes": 20340736,
+              "fsyncs": 58597,
+              "fsync_mean_ms": 1.7632301141696676,
+              "fsync_max_ms_process_lifetime": 78.107,
+              "wal_bytes_events": 26087361,
+              "index_anchors_events": 5098
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 55,
+              "rss_bytes": 21729280,
+              "fsyncs": 62038,
+              "fsync_mean_ms": 1.6914722266997648,
+              "fsync_max_ms_process_lifetime": 130.005,
+              "wal_bytes_events": 26089068,
+              "index_anchors_events": 5098
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 18,
+            "segment_and_index_comparisons_per_fetch": 11.777777777777779,
+            "scanned_wal_bytes_per_fetch": 1452394.5555555555
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 12057,
+            "produce_records_per_sec": 200.95,
+            "produce_bytes_per_sec": 205772.8,
+            "produce_latency": {
+              "count": 12057,
+              "p50_ms": 59.783,
+              "p95_ms": 75.664,
+              "p99_ms": 83.733,
+              "max_ms": 114.743
+            },
+            "produce_errors": {},
+            "fetched_records": 29581,
+            "fetch_records_per_sec": 22043.47387523033,
+            "fetch_latency": {
+              "count": 30,
+              "p50_ms": 135.853,
+              "p95_ms": 147.484,
+              "p99_ms": 148.5,
+              "max_ms": 149.359
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 112.16666666666669,
+              "rss_bytes": 47472640,
+              "fsyncs": 60208,
+              "fsync_mean_ms": 2.044907587031623,
+              "fsync_max_ms_process_lifetime": 54.807,
+              "wal_bytes_events": 50469243,
+              "index_anchors_events": 9862
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 39.483333333333334,
+              "rss_bytes": 24715264,
+              "fsyncs": 56383,
+              "fsync_mean_ms": 1.6544184594647326,
+              "fsync_max_ms_process_lifetime": 78.107,
+              "wal_bytes_events": 50467536,
+              "index_anchors_events": 9861
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 53.8,
+              "rss_bytes": 23400448,
+              "fsyncs": 58135,
+              "fsync_mean_ms": 1.700751440612368,
+              "fsync_max_ms_process_lifetime": 130.005,
+              "wal_bytes_events": 50469243,
+              "index_anchors_events": 9862
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 30,
+            "segment_and_index_comparisons_per_fetch": 12.666666666666666,
+            "scanned_wal_bytes_per_fetch": 1685360.3
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 11715,
+            "produce_records_per_sec": 195.25,
+            "produce_bytes_per_sec": 199936,
+            "produce_latency": {
+              "count": 11715,
+              "p50_ms": 60.935,
+              "p95_ms": 77.158,
+              "p99_ms": 85.532,
+              "max_ms": 125.059
+            },
+            "produce_errors": {},
+            "fetched_records": 43368,
+            "fetch_records_per_sec": 21625.99118733579,
+            "fetch_latency": {
+              "count": 45,
+              "p50_ms": 137.253,
+              "p95_ms": 154.302,
+              "p99_ms": 159.059,
+              "max_ms": 161.887
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 114.56666666666668,
+              "rss_bytes": 50307072,
+              "fsyncs": 58494,
+              "fsync_mean_ms": 2.074223014326256,
+              "fsync_max_ms_process_lifetime": 56.694,
+              "wal_bytes_events": 74005872,
+              "index_anchors_events": 14458
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 38.550000000000004,
+              "rss_bytes": 26103808,
+              "fsyncs": 54766,
+              "fsync_mean_ms": 1.735274915093306,
+              "fsync_max_ms_process_lifetime": 78.107,
+              "wal_bytes_events": 74004164,
+              "index_anchors_events": 14458
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 51.216666666666676,
+              "rss_bytes": 25530368,
+              "fsyncs": 56111,
+              "fsync_mean_ms": 1.8510722674698363,
+              "fsync_max_ms_process_lifetime": 130.005,
+              "wal_bytes_events": 74005872,
+              "index_anchors_events": 14458
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 45,
+            "segment_and_index_comparisons_per_fetch": 13.4,
+            "scanned_wal_bytes_per_fetch": 1647747.6666666667
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 6.5529468269999995,
+      "wal_bytes_per_replica_at_restart": 74006110
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 1,
+        "batch_records": 100,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 150500,
+            "produce_records_per_sec": 2508.3333333333335,
+            "produce_bytes_per_sec": 2568533.3333333335,
+            "produce_latency": {
+              "count": 1505,
+              "p50_ms": 159.557,
+              "p95_ms": 199.082,
+              "p99_ms": 216.061,
+              "max_ms": 235.227
+            },
+            "produce_errors": {},
+            "fetched_records": 176200,
+            "fetch_records_per_sec": 16271.158864696441,
+            "fetch_latency": {
+              "count": 177,
+              "p50_ms": 61.32,
+              "p95_ms": 65.067,
+              "p99_ms": 66.653,
+              "max_ms": 68.624
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 157.35,
+              "rss_bytes": 30969856,
+              "fsyncs": 7486,
+              "fsync_mean_ms": 0.8542600854929201,
+              "fsync_max_ms_process_lifetime": 4.915,
+              "wal_bytes_events": 248275570,
+              "index_anchors_events": 1762
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 101.2,
+              "rss_bytes": 26361856,
+              "fsyncs": 6434,
+              "fsync_mean_ms": 0.7206882188374262,
+              "fsync_max_ms_process_lifetime": 5.484,
+              "wal_bytes_events": 248134664,
+              "index_anchors_events": 1761
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 117.33333333333334,
+              "rss_bytes": 20168704,
+              "fsyncs": 6321,
+              "fsync_mean_ms": 0.8628707482993198,
+              "fsync_max_ms_process_lifetime": 25.062,
+              "wal_bytes_events": 248134664,
+              "index_anchors_events": 1761
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 177,
+            "segment_and_index_comparisons_per_fetch": 10.847457627118644,
+            "scanned_wal_bytes_per_fetch": 1542791.627118644
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 151200,
+            "produce_records_per_sec": 2520,
+            "produce_bytes_per_sec": 2580480,
+            "produce_latency": {
+              "count": 1512,
+              "p50_ms": 158.628,
+              "p95_ms": 198.504,
+              "p99_ms": 220.086,
+              "max_ms": 240.156
+            },
+            "produce_errors": {},
+            "fetched_records": 352600,
+            "fetch_records_per_sec": 16385.221474476042,
+            "fetch_latency": {
+              "count": 353,
+              "p50_ms": 60.907,
+              "p95_ms": 64.62,
+              "p99_ms": 67.463,
+              "max_ms": 75.117
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 161.4833333333333,
+              "rss_bytes": 31887360,
+              "fsyncs": 7516,
+              "fsync_mean_ms": 0.857176024481107,
+              "fsync_max_ms_process_lifetime": 4.915,
+              "wal_bytes_events": 496834030,
+              "index_anchors_events": 3526
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 101.20000000000002,
+              "rss_bytes": 22786048,
+              "fsyncs": 6543,
+              "fsync_mean_ms": 0.7309121198227113,
+              "fsync_max_ms_process_lifetime": 18.152,
+              "wal_bytes_events": 496552218,
+              "index_anchors_events": 3524
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 118.26666666666665,
+              "rss_bytes": 21553152,
+              "fsyncs": 6413,
+              "fsync_mean_ms": 0.8382105099017618,
+              "fsync_max_ms_process_lifetime": 25.062,
+              "wal_bytes_events": 496552218,
+              "index_anchors_events": 3524
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 353,
+            "segment_and_index_comparisons_per_fetch": 11.478753541076488,
+            "scanned_wal_bytes_per_fetch": 1547965.9801699717
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 151100,
+            "produce_records_per_sec": 2518.3333333333335,
+            "produce_bytes_per_sec": 2578773.3333333335,
+            "produce_latency": {
+              "count": 1511,
+              "p50_ms": 159.472,
+              "p95_ms": 196.72,
+              "p99_ms": 213.113,
+              "max_ms": 237.366
+            },
+            "produce_errors": {},
+            "fetched_records": 528800,
+            "fetch_records_per_sec": 16699.017738257582,
+            "fetch_latency": {
+              "count": 529,
+              "p50_ms": 59.813,
+              "p95_ms": 63.583,
+              "p99_ms": 67.348,
+              "max_ms": 69.942
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 165.66666666666663,
+              "rss_bytes": 33214464,
+              "fsyncs": 7525,
+              "fsync_mean_ms": 0.8405401993355485,
+              "fsync_max_ms_process_lifetime": 10.713000000000001,
+              "wal_bytes_events": 744969772,
+              "index_anchors_events": 5287
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 100.81666666666668,
+              "rss_bytes": 24809472,
+              "fsyncs": 6488,
+              "fsync_mean_ms": 0.7466598335388411,
+              "fsync_max_ms_process_lifetime": 18.152,
+              "wal_bytes_events": 744969772,
+              "index_anchors_events": 5287
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 117.4666666666667,
+              "rss_bytes": 24936448,
+              "fsyncs": 6434,
+              "fsync_mean_ms": 0.8759519738887159,
+              "fsync_max_ms_process_lifetime": 25.062,
+              "wal_bytes_events": 744969772,
+              "index_anchors_events": 5287
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 529,
+            "segment_and_index_comparisons_per_fetch": 11.992438563327033,
+            "scanned_wal_bytes_per_fetch": 1549164.5576559547
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 35.214040595,
+      "wal_bytes_per_replica_at_restart": 745110746
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 1,
+        "batch_records": 100,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 228100,
+            "produce_records_per_sec": 3801.6666666666665,
+            "produce_bytes_per_sec": 3892906.6666666665,
+            "produce_latency": {
+              "count": 2281,
+              "p50_ms": 318.003,
+              "p95_ms": 403.104,
+              "p99_ms": 436.295,
+              "max_ms": 495.54
+            },
+            "produce_errors": {},
+            "fetched_records": 267800,
+            "fetch_records_per_sec": 33353.87687204821,
+            "fetch_latency": {
+              "count": 269,
+              "p50_ms": 88.344,
+              "p95_ms": 97.46,
+              "p99_ms": 100.567,
+              "max_ms": 102.876
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 325.01666666666665,
+              "rss_bytes": 55062528,
+              "fsyncs": 11385,
+              "fsync_mean_ms": 1.0995912165129555,
+              "fsync_max_ms_process_lifetime": 15.241,
+              "wal_bytes_events": 377344184,
+              "index_anchors_events": 2678
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 162.7333333333333,
+              "rss_bytes": 27279360,
+              "fsyncs": 9971,
+              "fsync_mean_ms": 1.3989775348510682,
+              "fsync_max_ms_process_lifetime": 33.286,
+              "wal_bytes_events": 377344184,
+              "index_anchors_events": 2678
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 236.25,
+              "rss_bytes": 28246016,
+              "fsyncs": 10669,
+              "fsync_mean_ms": 1.013056425156997,
+              "fsync_max_ms_process_lifetime": 12.012,
+              "wal_bytes_events": 377344184,
+              "index_anchors_events": 2678
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 269,
+            "segment_and_index_comparisons_per_fetch": 10.431226765799256,
+            "scanned_wal_bytes_per_fetch": 1542091.0223048327
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 225700,
+            "produce_records_per_sec": 3761.6666666666665,
+            "produce_bytes_per_sec": 3851946.6666666665,
+            "produce_latency": {
+              "count": 2257,
+              "p50_ms": 318.877,
+              "p95_ms": 408.345,
+              "p99_ms": 442.925,
+              "max_ms": 492.823
+            },
+            "produce_errors": {},
+            "fetched_records": 531000,
+            "fetch_records_per_sec": 34048.537371526596,
+            "fetch_latency": {
+              "count": 533,
+              "p50_ms": 85.176,
+              "p95_ms": 96.17,
+              "p99_ms": 99.955,
+              "max_ms": 103.061
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 328.8833333333333,
+              "rss_bytes": 59035648,
+              "fsyncs": 11262,
+              "fsync_mean_ms": 1.1309072100870186,
+              "fsync_max_ms_process_lifetime": 15.241,
+              "wal_bytes_events": 748209282,
+              "index_anchors_events": 5310
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 163.91666666666666,
+              "rss_bytes": 28200960,
+              "fsyncs": 9853,
+              "fsync_mean_ms": 1.3936355424743732,
+              "fsync_max_ms_process_lifetime": 33.286,
+              "wal_bytes_events": 748068376,
+              "index_anchors_events": 5309
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 235.04999999999993,
+              "rss_bytes": 31313920,
+              "fsyncs": 10516,
+              "fsync_mean_ms": 1.0091533853176111,
+              "fsync_max_ms_process_lifetime": 15.620000000000001,
+              "wal_bytes_events": 748209282,
+              "index_anchors_events": 5310
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 533,
+            "segment_and_index_comparisons_per_fetch": 10.831144465290807,
+            "scanned_wal_bytes_per_fetch": 1543877.30206379
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 215000,
+            "produce_records_per_sec": 3583.3333333333335,
+            "produce_bytes_per_sec": 3669333.3333333335,
+            "produce_latency": {
+              "count": 2150,
+              "p50_ms": 337.907,
+              "p95_ms": 417.696,
+              "p99_ms": 456.192,
+              "max_ms": 555.28
+            },
+            "produce_errors": {},
+            "fetched_records": 781700,
+            "fetch_records_per_sec": 33892.95442296229,
+            "fetch_latency": {
+              "count": 783,
+              "p50_ms": 85.848,
+              "p95_ms": 97.125,
+              "p99_ms": 102.442,
+              "max_ms": 107.514
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 332.45000000000005,
+              "rss_bytes": 66854912,
+              "fsyncs": 10725,
+              "fsync_mean_ms": 1.1522319813519817,
+              "fsync_max_ms_process_lifetime": 17.76,
+              "wal_bytes_events": 1101320546,
+              "index_anchors_events": 7816
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 163.53333333333333,
+              "rss_bytes": 30466048,
+              "fsyncs": 9691,
+              "fsync_mean_ms": 1.4730800742957382,
+              "fsync_max_ms_process_lifetime": 33.286,
+              "wal_bytes_events": 1101461452,
+              "index_anchors_events": 7817
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 236.20000000000007,
+              "rss_bytes": 28246016,
+              "fsyncs": 10109,
+              "fsync_mean_ms": 0.9912740132555146,
+              "fsync_max_ms_process_lifetime": 16.444,
+              "wal_bytes_events": 1101461452,
+              "index_anchors_events": 7817
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 783,
+            "segment_and_index_comparisons_per_fetch": 11.217113665389528,
+            "scanned_wal_bytes_per_fetch": 1547081.9157088122
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 52.899273918,
+      "wal_bytes_per_replica_at_restart": 1101461724
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 2,
+        "batch_records": 1,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 9611,
+            "produce_records_per_sec": 160.18333333333334,
+            "produce_bytes_per_sec": 164027.73333333334,
+            "produce_latency": {
+              "count": 9611,
+              "p50_ms": 24.964,
+              "p95_ms": 30.805,
+              "p99_ms": 33.785,
+              "max_ms": 59.541
+            },
+            "produce_errors": {},
+            "fetched_records": 11512,
+            "fetch_records_per_sec": 11296.457302540803,
+            "fetch_latency": {
+              "count": 12,
+              "p50_ms": 88.1,
+              "p95_ms": 91.174,
+              "p99_ms": 91.174,
+              "max_ms": 91.186
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 77.43333333333332,
+              "rss_bytes": 29491200,
+              "fsyncs": 48046,
+              "fsync_mean_ms": 0.7792562127960705,
+              "fsync_max_ms_process_lifetime": 85.784,
+              "wal_bytes_events": 19647704,
+              "index_anchors_events": 3838
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 36.833333333333336,
+              "rss_bytes": 20512768,
+              "fsyncs": 47171,
+              "fsync_mean_ms": 0.6955190477199974,
+              "fsync_max_ms_process_lifetime": 21.339,
+              "wal_bytes_events": 19647704,
+              "index_anchors_events": 3838
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 40.61666666666667,
+              "rss_bytes": 20123648,
+              "fsyncs": 46640,
+              "fsync_mean_ms": 0.7639686106346484,
+              "fsync_max_ms_process_lifetime": 16.858999999999998,
+              "wal_bytes_events": 19647704,
+              "index_anchors_events": 3838
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 12,
+            "segment_and_index_comparisons_per_fetch": 12.916666666666666,
+            "scanned_wal_bytes_per_fetch": 1640516.9166666667
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 8444,
+            "produce_records_per_sec": 140.73333333333332,
+            "produce_bytes_per_sec": 144110.93333333332,
+            "produce_latency": {
+              "count": 8444,
+              "p50_ms": 28.462,
+              "p95_ms": 33.954,
+              "p99_ms": 37.106,
+              "max_ms": 48.651
+            },
+            "produce_errors": {},
+            "fetched_records": 21403,
+            "fetch_records_per_sec": 11376.633088026218,
+            "fetch_latency": {
+              "count": 22,
+              "p50_ms": 87.424,
+              "p95_ms": 90.86,
+              "p99_ms": 90.989,
+              "max_ms": 91.663
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 77.36666666666666,
+              "rss_bytes": 32587776,
+              "fsyncs": 42218,
+              "fsync_mean_ms": 0.8160512103841966,
+              "fsync_max_ms_process_lifetime": 85.784,
+              "wal_bytes_events": 36537816,
+              "index_anchors_events": 7135
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 41.8,
+              "rss_bytes": 19980288,
+              "fsyncs": 41723,
+              "fsync_mean_ms": 0.71701819140522,
+              "fsync_max_ms_process_lifetime": 21.339,
+              "wal_bytes_events": 36537816,
+              "index_anchors_events": 7135
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 46.31666666666667,
+              "rss_bytes": 21880832,
+              "fsyncs": 41100,
+              "fsync_mean_ms": 0.8091967639902676,
+              "fsync_max_ms_process_lifetime": 25.107999999999997,
+              "wal_bytes_events": 36537816,
+              "index_anchors_events": 7135
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 22,
+            "segment_and_index_comparisons_per_fetch": 13.772727272727273,
+            "scanned_wal_bytes_per_fetch": 1664112.1363636365
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 8197,
+            "produce_records_per_sec": 136.61666666666667,
+            "produce_bytes_per_sec": 139895.46666666667,
+            "produce_latency": {
+              "count": 8197,
+              "p50_ms": 29.38,
+              "p95_ms": 35.052,
+              "p99_ms": 37.944,
+              "max_ms": 49.226
+            },
+            "produce_errors": {},
+            "fetched_records": 30978,
+            "fetch_records_per_sec": 11624.658701410848,
+            "fetch_latency": {
+              "count": 31,
+              "p50_ms": 85.322,
+              "p95_ms": 88.561,
+              "p99_ms": 89.862,
+              "max_ms": 106.566
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 75.94999999999999,
+              "rss_bytes": 32808960,
+              "fsyncs": 40982,
+              "fsync_mean_ms": 0.8243036943048164,
+              "fsync_max_ms_process_lifetime": 85.784,
+              "wal_bytes_events": 52888200,
+              "index_anchors_events": 10327
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 42.716666666666676,
+              "rss_bytes": 24682496,
+              "fsyncs": 40301,
+              "fsync_mean_ms": 0.7269163296196122,
+              "fsync_max_ms_process_lifetime": 31.691999999999997,
+              "wal_bytes_events": 52888200,
+              "index_anchors_events": 10327
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 45.48333333333334,
+              "rss_bytes": 23322624,
+              "fsyncs": 39857,
+              "fsync_mean_ms": 0.8207987053717039,
+              "fsync_max_ms_process_lifetime": 25.107999999999997,
+              "wal_bytes_events": 52888200,
+              "index_anchors_events": 10327
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 31,
+            "segment_and_index_comparisons_per_fetch": 14.451612903225806,
+            "scanned_wal_bytes_per_fetch": 1709406.064516129
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 4.506080395,
+      "wal_bytes_per_replica_at_restart": 52888268
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 2,
+        "batch_records": 1,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 1,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 13022,
+            "produce_records_per_sec": 217.03333333333333,
+            "produce_bytes_per_sec": 222242.13333333333,
+            "produce_latency": {
+              "count": 13022,
+              "p50_ms": 55.762,
+              "p95_ms": 70.609,
+              "p99_ms": 78.849,
+              "max_ms": 155.082
+            },
+            "produce_errors": {},
+            "fetched_records": 15414,
+            "fetch_records_per_sec": 21443.829602304995,
+            "fetch_latency": {
+              "count": 18,
+              "p50_ms": 132.535,
+              "p95_ms": 152.33,
+              "p99_ms": 152.33,
+              "max_ms": 153.589
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 89.96666666666667,
+              "rss_bytes": 35594240,
+              "fsyncs": 64908,
+              "fsync_mean_ms": 2.0600145590682195,
+              "fsync_max_ms_process_lifetime": 59.922000000000004,
+              "wal_bytes_events": 26297322,
+              "index_anchors_events": 5139
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 36.05,
+              "rss_bytes": 21295104,
+              "fsyncs": 58528,
+              "fsync_mean_ms": 1.8066451612903225,
+              "fsync_max_ms_process_lifetime": 57.461,
+              "wal_bytes_events": 26297322,
+              "index_anchors_events": 5139
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 53.85,
+              "rss_bytes": 20242432,
+              "fsyncs": 61831,
+              "fsync_mean_ms": 1.7418660380715176,
+              "fsync_max_ms_process_lifetime": 84.882,
+              "wal_bytes_events": 26297322,
+              "index_anchors_events": 5139
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 18,
+            "segment_and_index_comparisons_per_fetch": 11.61111111111111,
+            "scanned_wal_bytes_per_fetch": 1463964.2222222222
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 12221,
+            "produce_records_per_sec": 203.68333333333334,
+            "produce_bytes_per_sec": 208571.73333333334,
+            "produce_latency": {
+              "count": 12221,
+              "p50_ms": 59.054,
+              "p95_ms": 74.91,
+              "p99_ms": 85.57,
+              "max_ms": 142.013
+            },
+            "produce_errors": {},
+            "fetched_records": 29919,
+            "fetch_records_per_sec": 21408.721586737764,
+            "fetch_latency": {
+              "count": 31,
+              "p50_ms": 137.238,
+              "p95_ms": 153.241,
+              "p99_ms": 154.294,
+              "max_ms": 155.681
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 108.93333333333331,
+              "rss_bytes": 48877568,
+              "fsyncs": 60999,
+              "fsync_mean_ms": 2.044284578435712,
+              "fsync_max_ms_process_lifetime": 63.038,
+              "wal_bytes_events": 51046219,
+              "index_anchors_events": 9974
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 38.18333333333332,
+              "rss_bytes": 25640960,
+              "fsyncs": 56453,
+              "fsync_mean_ms": 1.7339598781287087,
+              "fsync_max_ms_process_lifetime": 57.461,
+              "wal_bytes_events": 51046219,
+              "index_anchors_events": 9974
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 52.45,
+              "rss_bytes": 22605824,
+              "fsyncs": 58442,
+              "fsync_mean_ms": 1.7716978542828785,
+              "fsync_max_ms_process_lifetime": 84.882,
+              "wal_bytes_events": 51046219,
+              "index_anchors_events": 9974
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 31,
+            "segment_and_index_comparisons_per_fetch": 12.64516129032258,
+            "scanned_wal_bytes_per_fetch": 1649826.2258064516
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 11506,
+            "produce_records_per_sec": 191.76666666666668,
+            "produce_bytes_per_sec": 196369.06666666668,
+            "produce_latency": {
+              "count": 11506,
+              "p50_ms": 62,
+              "p95_ms": 78.083,
+              "p99_ms": 86.487,
+              "max_ms": 150.606
+            },
+            "produce_errors": {},
+            "fetched_records": 43495,
+            "fetch_records_per_sec": 22091.970912173623,
+            "fetch_latency": {
+              "count": 45,
+              "p50_ms": 132.67,
+              "p95_ms": 145.114,
+              "p99_ms": 159.88,
+              "max_ms": 161.012
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 112.78333333333336,
+              "rss_bytes": 62078976,
+              "fsyncs": 57480,
+              "fsync_mean_ms": 2.123555567153792,
+              "fsync_max_ms_process_lifetime": 75.214,
+              "wal_bytes_events": 74222788,
+              "index_anchors_events": 14501
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 39.31666666666668,
+              "rss_bytes": 26402816,
+              "fsyncs": 54379,
+              "fsync_mean_ms": 1.7830523179904,
+              "fsync_max_ms_process_lifetime": 57.531,
+              "wal_bytes_events": 74222788,
+              "index_anchors_events": 14501
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 52.949999999999996,
+              "rss_bytes": 24477696,
+              "fsyncs": 55718,
+              "fsync_mean_ms": 1.7662051760651847,
+              "fsync_max_ms_process_lifetime": 84.882,
+              "wal_bytes_events": 74222788,
+              "index_anchors_events": 14501
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 45,
+            "segment_and_index_comparisons_per_fetch": 13.311111111111112,
+            "scanned_wal_bytes_per_fetch": 1652606
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 7.419044559,
+      "wal_bytes_per_replica_at_restart": 74223060
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 2,
+        "batch_records": 100,
+        "partitions": 1
+      },
+      "workload": {
+        "partitions": 1,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 152100,
+            "produce_records_per_sec": 2535,
+            "produce_bytes_per_sec": 2595840,
+            "produce_latency": {
+              "count": 1521,
+              "p50_ms": 157.27,
+              "p95_ms": 196.995,
+              "p99_ms": 209.23,
+              "max_ms": 232.872
+            },
+            "produce_errors": {},
+            "fetched_records": 177700,
+            "fetch_records_per_sec": 16078.006128296254,
+            "fetch_latency": {
+              "count": 178,
+              "p50_ms": 61.853,
+              "p95_ms": 66.666,
+              "p99_ms": 69.85,
+              "max_ms": 83.362
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 156.56666666666666,
+              "rss_bytes": 30928896,
+              "fsyncs": 7563,
+              "fsync_mean_ms": 0.845349464498215,
+              "fsync_max_ms_process_lifetime": 10.471,
+              "wal_bytes_events": 250389160,
+              "index_anchors_events": 1777
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 100.78333333333335,
+              "rss_bytes": 18714624,
+              "fsyncs": 6514,
+              "fsync_mean_ms": 0.7497643536997237,
+              "fsync_max_ms_process_lifetime": 8.422,
+              "wal_bytes_events": 250389160,
+              "index_anchors_events": 1777
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 117.08333333333333,
+              "rss_bytes": 19484672,
+              "fsyncs": 6451,
+              "fsync_mean_ms": 0.8648246783444428,
+              "fsync_max_ms_process_lifetime": 4.728000000000001,
+              "wal_bytes_events": 250389160,
+              "index_anchors_events": 1777
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 178,
+            "segment_and_index_comparisons_per_fetch": 10.859550561797754,
+            "scanned_wal_bytes_per_fetch": 1546789.9662921347
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 153300,
+            "produce_records_per_sec": 2555,
+            "produce_bytes_per_sec": 2616320,
+            "produce_latency": {
+              "count": 1533,
+              "p50_ms": 157.08,
+              "p95_ms": 195.672,
+              "p99_ms": 209.571,
+              "max_ms": 233.33
+            },
+            "produce_errors": {},
+            "fetched_records": 356500,
+            "fetch_records_per_sec": 16471.57268019091,
+            "fetch_latency": {
+              "count": 357,
+              "p50_ms": 60.654,
+              "p95_ms": 64.077,
+              "p99_ms": 66.169,
+              "max_ms": 68.904
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 161.21666666666664,
+              "rss_bytes": 31522816,
+              "fsyncs": 7615,
+              "fsync_mean_ms": 0.8546357189757059,
+              "fsync_max_ms_process_lifetime": 13.118,
+              "wal_bytes_events": 502329364,
+              "index_anchors_events": 3565
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 100.45000000000002,
+              "rss_bytes": 18505728,
+              "fsyncs": 6593,
+              "fsync_mean_ms": 0.7792954648870014,
+              "fsync_max_ms_process_lifetime": 8.422,
+              "wal_bytes_events": 502047552,
+              "index_anchors_events": 3563
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 119.41666666666669,
+              "rss_bytes": 21213184,
+              "fsyncs": 6505,
+              "fsync_mean_ms": 0.8404813220599539,
+              "fsync_max_ms_process_lifetime": 12.469,
+              "wal_bytes_events": 502047552,
+              "index_anchors_events": 3563
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 357,
+            "segment_and_index_comparisons_per_fetch": 11.481792717086835,
+            "scanned_wal_bytes_per_fetch": 1547593.6862745099
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 152700,
+            "produce_records_per_sec": 2545,
+            "produce_bytes_per_sec": 2606080,
+            "produce_latency": {
+              "count": 1527,
+              "p50_ms": 157.884,
+              "p95_ms": 196.399,
+              "p99_ms": 210.689,
+              "max_ms": 235.518
+            },
+            "produce_errors": {},
+            "fetched_records": 534500,
+            "fetch_records_per_sec": 16773.422020131802,
+            "fetch_latency": {
+              "count": 535,
+              "p50_ms": 59.536,
+              "p95_ms": 63.582,
+              "p99_ms": 65.696,
+              "max_ms": 67.727
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 164.71666666666673,
+              "rss_bytes": 32104448,
+              "fsyncs": 7570,
+              "fsync_mean_ms": 0.8448137384412155,
+              "fsync_max_ms_process_lifetime": 13.118,
+              "wal_bytes_events": 753142320,
+              "index_anchors_events": 5345
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 100.90000000000003,
+              "rss_bytes": 20819968,
+              "fsyncs": 6543,
+              "fsync_mean_ms": 0.7617394161699524,
+              "fsync_max_ms_process_lifetime": 8.422,
+              "wal_bytes_events": 753001414,
+              "index_anchors_events": 5344
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 119.11666666666666,
+              "rss_bytes": 19390464,
+              "fsyncs": 6364,
+              "fsync_mean_ms": 0.8472430861093652,
+              "fsync_max_ms_process_lifetime": 14.14,
+              "wal_bytes_events": 753142320,
+              "index_anchors_events": 5345
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 535,
+            "segment_and_index_comparisons_per_fetch": 11.977570093457944,
+            "scanned_wal_bytes_per_fetch": 1548383.413084112
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 35.88391064,
+      "wal_bytes_per_replica_at_restart": 753142388
+    },
+    {
+      "config": {
+        "replication_factor": 3,
+        "min_isr": 2,
+        "batch_records": 100,
+        "partitions": 3
+      },
+      "workload": {
+        "partitions": 3,
+        "batch_records": 100,
+        "record_bytes": 1024,
+        "producers_per_partition": 4
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "measurement": {
+            "produced_records": 236100,
+            "produce_records_per_sec": 3935,
+            "produce_bytes_per_sec": 4029440,
+            "produce_latency": {
+              "count": 2361,
+              "p50_ms": 307.466,
+              "p95_ms": 385.952,
+              "p99_ms": 414.782,
+              "max_ms": 510.105
+            },
+            "produce_errors": {},
+            "fetched_records": 275400,
+            "fetch_records_per_sec": 33937.48642934928,
+            "fetch_latency": {
+              "count": 277,
+              "p50_ms": 86.033,
+              "p95_ms": 96.42,
+              "p99_ms": 99.108,
+              "max_ms": 107.99
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 326.01666666666665,
+              "rss_bytes": 54734848,
+              "fsyncs": 11772,
+              "fsync_mean_ms": 1.0743693510023786,
+              "fsync_max_ms_process_lifetime": 14.675,
+              "wal_bytes_events": 388052964,
+              "index_anchors_events": 2754
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 164.1,
+              "rss_bytes": 31363072,
+              "fsyncs": 10178,
+              "fsync_mean_ms": 1.3547774611908037,
+              "fsync_max_ms_process_lifetime": 17.832,
+              "wal_bytes_events": 388052964,
+              "index_anchors_events": 2754
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 237.95000000000002,
+              "rss_bytes": 32522240,
+              "fsyncs": 10889,
+              "fsync_mean_ms": 0.9749153273946184,
+              "fsync_max_ms_process_lifetime": 11.108,
+              "wal_bytes_events": 388052964,
+              "index_anchors_events": 2754
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 277,
+            "segment_and_index_comparisons_per_fetch": 10.425992779783394,
+            "scanned_wal_bytes_per_fetch": 1540283.418772563
+          }
+        },
+        {
+          "repeat": 2,
+          "measurement": {
+            "produced_records": 227300,
+            "produce_records_per_sec": 3788.3333333333335,
+            "produce_bytes_per_sec": 3879253.3333333335,
+            "produce_latency": {
+              "count": 2273,
+              "p50_ms": 320.473,
+              "p95_ms": 401.44,
+              "p99_ms": 441.972,
+              "max_ms": 478.274
+            },
+            "produce_errors": {},
+            "fetched_records": 542200,
+            "fetch_records_per_sec": 33877.38087926477,
+            "fetch_latency": {
+              "count": 543,
+              "p50_ms": 85.93,
+              "p95_ms": 97.698,
+              "p99_ms": 101.848,
+              "max_ms": 113.251
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 329.90000000000015,
+              "rss_bytes": 60542976,
+              "fsyncs": 11345,
+              "fsync_mean_ms": 1.0665920669898634,
+              "fsync_max_ms_process_lifetime": 17.732999999999997,
+              "wal_bytes_events": 763990754,
+              "index_anchors_events": 5422
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 164.49999999999997,
+              "rss_bytes": 31182848,
+              "fsyncs": 10018,
+              "fsync_mean_ms": 1.363146236773807,
+              "fsync_max_ms_process_lifetime": 17.832,
+              "wal_bytes_events": 763990754,
+              "index_anchors_events": 5422
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 237.04999999999993,
+              "rss_bytes": 22835200,
+              "fsyncs": 10618,
+              "fsync_mean_ms": 0.9762045582972312,
+              "fsync_max_ms_process_lifetime": 13.186,
+              "wal_bytes_events": 763990754,
+              "index_anchors_events": 5422
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 543,
+            "segment_and_index_comparisons_per_fetch": 10.878453038674033,
+            "scanned_wal_bytes_per_fetch": 1547103.3848987108
+          }
+        },
+        {
+          "repeat": 3,
+          "measurement": {
+            "produced_records": 216600,
+            "produce_records_per_sec": 3610,
+            "produce_bytes_per_sec": 3696640,
+            "produce_latency": {
+              "count": 2166,
+              "p50_ms": 333.631,
+              "p95_ms": 421.112,
+              "p99_ms": 460.309,
+              "max_ms": 544.538
+            },
+            "produce_errors": {},
+            "fetched_records": 795200,
+            "fetch_records_per_sec": 34520.60776333117,
+            "fetch_latency": {
+              "count": 797,
+              "p50_ms": 84.115,
+              "p95_ms": 97.111,
+              "p99_ms": 102.424,
+              "max_ms": 108.596
+            }
+          },
+          "brokers_during_produce_window": [
+            {
+              "broker": "node-1",
+              "cpu_percent_of_one_core": 333.6833333333332,
+              "rss_bytes": 64684032,
+              "fsyncs": 10812,
+              "fsync_mean_ms": 1.1083573806881242,
+              "fsync_max_ms_process_lifetime": 17.732999999999997,
+              "wal_bytes_events": 1120483762,
+              "index_anchors_events": 7952
+            },
+            {
+              "broker": "node-2",
+              "cpu_percent_of_one_core": 164.13333333333335,
+              "rss_bytes": 35299328,
+              "fsyncs": 9688,
+              "fsync_mean_ms": 1.338681461601982,
+              "fsync_max_ms_process_lifetime": 17.832,
+              "wal_bytes_events": 1120483762,
+              "index_anchors_events": 7952
+            },
+            {
+              "broker": "node-3",
+              "cpu_percent_of_one_core": 236.58333333333331,
+              "rss_bytes": 24342528,
+              "fsyncs": 10183,
+              "fsync_mean_ms": 0.9701739173131689,
+              "fsync_max_ms_process_lifetime": 13.186,
+              "wal_bytes_events": 1120483762,
+              "index_anchors_events": 7952
+            }
+          ],
+          "read_back_index_seek": {
+            "fetches": 797,
+            "segment_and_index_comparisons_per_fetch": 11.212045169385194,
+            "scanned_wal_bytes_per_fetch": 1546248.5959849434
+          }
+        }
+      ],
+      "cold_restart_to_serving_seconds": 54.025561288,
+      "wal_bytes_per_replica_at_restart": 1120484102
+    }
+  ],
+  "limitations": [
+    "one closed-loop request per producer: throughput is latency-bound, not a saturation ceiling",
+    "every acknowledged batch waits for acks=all and per-append fsync; no group commit or pipelined client",
+    "fsync max is the process lifetime maximum, not per window",
+    "three configurations (rf3-isr1-b100-p3, rf3-isr2-b1-p1, rf3-isr2-b1-p3) were rerun on the same broker commit after transient ssh connection resets to the test hosts aborted their first attempt"
+  ]
+}

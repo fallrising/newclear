@@ -18,6 +18,9 @@ type Metrics struct {
 	InboxDropped    uint64
 	RejectedPeerMsg uint64
 	Failed          bool
+	Fetches         uint64
+	FetchSeek       uint64 // segment plus sparse-index comparisons
+	FetchScanBytes  uint64 // WAL bytes scanned to serve fetches
 }
 
 func (a *Actor) metrics() Metrics {
@@ -40,6 +43,7 @@ func (d *Data) Metrics(ctx context.Context) (Metrics, error) {
 		metrics.HighWatermark = d.controller.HighWatermark()
 		metrics.ISRSize = len(d.controller.ISR())
 		metrics.PendingOps, metrics.PendingBytes = d.controller.PendingUsage()
+		metrics.Fetches, metrics.FetchSeek, metrics.FetchScanBytes = d.fetches, d.fetchSeek, d.fetchScanBytes
 		return nil
 	})
 	return metrics, err

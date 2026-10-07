@@ -2,7 +2,7 @@
 
 [回主 SDD](../../SDD.md)
 
-所有 milestone 目前均為 **NOT_STARTED**。本次只建立 SDD baseline。M0–M7 是有 dependency 的交付順序，不是時間估算；教學頁的預估時數不作為本工程的交付承諾。
+本文件建立時所有 milestone 均為 NOT_STARTED；目前狀態以 [STATUS](../STATUS.md) 為準。M0–M7 是有 dependency 的交付順序，不是時間估算；教學頁的預估時數不作為本工程的交付承諾。
 
 ## 1. Dependency map
 
@@ -131,7 +131,7 @@ X1 的 prerequisite 還包含新的 transaction SDD 和驗收；不能只補三�
 
 ## 11. Planned command contract
 
-下列命令是 milestone 應建立的介面；M0–M6 的 targets 已存在於 `Makefile`，M7 的 targets **尚不存在**：
+下列命令是 milestone 應建立的介面；M0–M7 的 targets 皆已存在於 `Makefile`（M7 另加可選的 `test-model-extended` 與 `image`）：
 
 | Milestone 起 | Component working directory command | 必須執行的工作 |
 | --- | --- | --- |

@@ -49,6 +49,12 @@ type dataCluster struct {
 // test drives elections explicitly and every other step is message-driven.
 func newDataCluster(t *testing.T) *dataCluster {
 	t.Helper()
+	return newDataClusterWith(t, replication.Config{})
+}
+
+// newDataClusterWith applies replication caps on top of the RF3 defaults.
+func newDataClusterWith(t *testing.T, caps replication.Config) *dataCluster {
+	t.Helper()
 	clock := testkit.NewManualClock(time.Unix(1700000000, 0))
 	cluster := &dataCluster{network: partitiontest.NewNetwork(t, voters...), data: map[uint32]*partition.Data{}}
 	for _, id := range voters {
@@ -73,8 +79,11 @@ func newDataCluster(t *testing.T) *dataCluster {
 		}
 		data, err := partition.NewData(partition.DataConfig{
 			Topic: "events", Partition: 0, Node: node, Log: log,
-			Replication: replication.Config{NodeID: id, Voters: voters, MinISR: 2},
-			Clock:       clock, TickClock: testkit.NewManualClock(time.Unix(0, 0)),
+			Replication: replication.Config{
+				NodeID: id, Voters: voters, MinISR: 2, MaxPendingOperations: caps.MaxPendingOperations,
+				MaxOperationHistory: caps.MaxOperationHistory, MaxGateHistory: caps.MaxGateHistory,
+			},
+			Clock: clock, TickClock: testkit.NewManualClock(time.Unix(0, 0)),
 			Sender: cluster.network.Sender(id), ProduceTimeout: 300 * time.Millisecond,
 		})
 		if err != nil {

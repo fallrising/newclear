@@ -155,6 +155,8 @@ type Controller struct {
 	pendingBytes      int64
 	recoveredApplied  []storage.Frame
 	marks             []appendMark
+	operationOrder    []string
+	gateOrder         []string
 	marksFloor        uint64
 }
 
@@ -308,7 +310,7 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 		results, err := controller.retry(existing, requestID)
 		return existing.index, raft.Ready{LeaderReady: controller.leaderReady}, results, err
 	}
-	if len(controller.operations) >= controller.config.MaxOperationHistory || len(controller.gates) >= controller.config.MaxGateHistory {
+	if !controller.roomForOperation() || !controller.roomForGate() {
 		return 0, raft.Ready{}, nil, ErrBackpressure
 	}
 	if controller.role != raft.Leader {
@@ -339,8 +341,10 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 		bytes: reserved, pendingGate: requestID,
 	}
 	controller.operations[operationID] = operation
+	controller.operationOrder = append(controller.operationOrder, operationID)
 	controller.pendingOperations++
 	controller.pendingBytes += reserved
+	controller.gateOrder = append(controller.gateOrder, requestID)
 	controller.gates[requestID] = &gate{result: GateResult{
 		RequestID: requestID, OperationID: operationID, Index: index,
 		BaseOffset: operation.baseOffset, LastOffset: operation.lastOffset,
@@ -356,7 +360,7 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 func (controller *Controller) AwaitExistingData(operationID, requestID string, index, baseOffset, lastOffset, entryTerm uint64, bytes int64) ([]GateResult, error) {
 	existingOperation := controller.operations[operationID]
 	if existingOperation == nil {
-		if len(controller.operations) >= controller.config.MaxOperationHistory {
+		if !controller.roomForOperation() {
 			return nil, ErrBackpressure
 		}
 		entry, err := controller.node.Entry(index)
@@ -372,6 +376,7 @@ func (controller *Controller) AwaitExistingData(operationID, requestID string, i
 			entryTerm: entryTerm, bytes: bytes,
 		}
 		controller.operations[operationID] = existingOperation
+		controller.operationOrder = append(controller.operationOrder, operationID)
 	} else if existingOperation.index != index || existingOperation.baseOffset != baseOffset || existingOperation.lastOffset != lastOffset || existingOperation.entryTerm != entryTerm || existingOperation.bytes != bytes {
 		return nil, errors.New("operation identity refers to different DATA metadata")
 	}
@@ -393,7 +398,7 @@ func (controller *Controller) retry(operation *operation, requestID string) ([]G
 	if existing := controller.gates[requestID]; existing != nil {
 		return []GateResult{cloneGateResult(existing.result)}, nil
 	}
-	if len(controller.gates) >= controller.config.MaxGateHistory {
+	if !controller.roomForGate() {
 		return nil, ErrBackpressure
 	}
 	if operation.pendingGate != "" {
@@ -416,6 +421,7 @@ func (controller *Controller) retry(operation *operation, requestID string) ([]G
 	operation.pendingGate = requestID
 	controller.pendingOperations++
 	controller.pendingBytes += operation.bytes
+	controller.gateOrder = append(controller.gateOrder, requestID)
 	controller.gates[requestID] = &gate{result: GateResult{
 		RequestID: requestID, OperationID: operation.id, Index: operation.index,
 		BaseOffset: operation.baseOffset, LastOffset: operation.lastOffset,

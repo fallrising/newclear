@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -40,6 +41,7 @@ func (b *Broker) metricsText(ctx context.Context) string {
 		ready = 1
 	}
 	fmt.Fprintf(&out, "mkfk_ready %d\n", ready)
+	fmt.Fprintf(&out, "mkfk_goroutines %d\n", runtime.NumGoroutine())
 	for _, key := range b.sortedReplicaKeys() {
 		r := b.replicas[key]
 		var metrics partition.Metrics

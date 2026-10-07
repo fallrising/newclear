@@ -12,8 +12,10 @@ import (
 )
 
 const (
-	MaxAppendEntries = 128
-	MaxAppendBytes   = storage.MaxWALFrameBytes
+	MaxAppendEntries    = 128
+	MaxInflightAppends  = 64
+	MaxPipelinedAppends = 8
+	MaxAppendBytes      = storage.MaxWALFrameBytes
 )
 
 type Role string

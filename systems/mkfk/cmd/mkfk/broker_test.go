@@ -131,6 +131,7 @@ type writer struct {
 	batches    int
 }
 
+// openWriter opens a producer whose ID ends in label, one hex digit.
 func openWriter(t *testing.T, transport *client.ClusterTransport, partition uint32, label string) *writer {
 	t.Helper()
 	w := &writer{transport: transport, partition: partition, producerID: "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5" + label}

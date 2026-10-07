@@ -73,6 +73,11 @@ func newServiceCluster(t *testing.T) *serviceCluster {
 	return cluster
 }
 
+func (c *serviceCluster) converge(t *testing.T) {
+	t.Helper()
+	partitiontest.Converged(t, c.services[1].Actor(), c.services[2].Actor(), c.services[3].Actor())
+}
+
 func (c *serviceCluster) elect(t *testing.T, id uint32) *Service {
 	t.Helper()
 	service := c.services[id]
@@ -131,6 +136,7 @@ func TestM7RF3CoordinatorFailoverKeepsOffsetsAndFencesOldGeneration(t *testing.T
 	if err := commitOffset(first, "m1", "commit-1", generation, 5); err != nil {
 		t.Fatalf("commit on first coordinator: %v", err)
 	}
+	cluster.converge(t)
 	cluster.network.Isolate(1)
 	second := cluster.elect(t, 2)
 	if err := commitOffset(second, "m1", "commit-2", generation, 6); !IsCode(err, CodeIllegalGeneration) {
@@ -165,6 +171,7 @@ func TestM7DeposedCoordinatorOffsetReadIsRejectedByReadBarrier(t *testing.T) {
 	if err := commitOffset(first, "m1", "commit-1", generation, 5); err != nil {
 		t.Fatal(err)
 	}
+	cluster.converge(t)
 	cluster.network.Isolate(1)
 	second := cluster.elect(t, 2)
 	next := stabilizeMember(t, second, "m1", "")

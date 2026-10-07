@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/storage"
+	"github.com/fallrising/newclear/systems/mkfk/internal/testkit"
 )
 
 var testIdentity = Identity{ClusterID: "raft-test", ConfigHash: "config-v1", GroupID: "events/0"}
@@ -383,12 +384,13 @@ func TestM3InjectedElectionTimeoutRange(t *testing.T) {
 }
 
 func TestM3DeterministicModel100Seeds1000Events(t *testing.T) {
-	for seed := int64(0); seed < 100; seed++ {
+	seeds, events := testkit.ModelProfile(100, 1000)
+	for seed := int64(0); seed < int64(seeds); seed++ {
 		seed := seed
 		t.Run(fmt.Sprintf("seed-%03d", seed), func(t *testing.T) {
 			cluster := newMemoryCluster(t)
 			random := rand.New(rand.NewSource(seed))
-			for event := 0; event < 1000; event++ {
+			for event := 0; event < events; event++ {
 				id := uint32(random.Intn(3) + 1)
 				switch random.Intn(7) {
 				case 0:
@@ -494,7 +496,7 @@ func (log *memoryLog) ReadEntries(from uint64, maxBytes int) ([]storage.Frame, e
 			return nil, err
 		}
 		if len(result) == 0 && len(encoded) > maxBytes {
-			return nil, errors.New("budget too small")
+			return nil, &storage.ReadBudgetTooSmallError{RequiredBytes: len(encoded)}
 		}
 		if used+len(encoded) > maxBytes {
 			break

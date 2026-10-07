@@ -82,9 +82,11 @@ func runFormat(arguments []string) error {
 
 func runServe(arguments []string, stderr io.Writer) error {
 	var allowInsecure bool
+	var peerBind string
 	var shutdownTimeout time.Duration
 	node, topology, err := parseNodeFlags("serve", arguments, func(flags *flag.FlagSet) {
 		flags.BoolVar(&allowInsecure, "allow-insecure-bind", false, "allow non-loopback listeners without TLS or authentication")
+		flags.StringVar(&peerBind, "peer-bind", "", "bind the peer listener here instead of the topology's peer_addr")
 		flags.DurationVar(&shutdownTimeout, "shutdown-timeout", defaultShutdownTimeout, "bound on draining in-flight requests")
 	})
 	if err != nil {
@@ -93,7 +95,7 @@ func runServe(arguments []string, stderr io.Writer) error {
 	logger := slog.New(slog.NewJSONHandler(stderr, nil))
 	b, err := broker.Open(broker.Config{
 		Topology: topology, NodeID: uint32(node.nodeID), DataDir: node.dataDir,
-		AllowInsecureBind: allowInsecure, Logger: logger,
+		AllowInsecureBind: allowInsecure, PeerBind: peerBind, Logger: logger,
 	})
 	if err != nil {
 		return err

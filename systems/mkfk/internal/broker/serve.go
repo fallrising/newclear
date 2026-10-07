@@ -30,12 +30,16 @@ func (b *Broker) Start() error {
 	if err != nil {
 		return err
 	}
+	peerBind := b.self.PeerAddr
+	if b.config.PeerBind != "" {
+		peerBind = b.config.PeerBind
+	}
 	for _, listener := range []struct {
 		name    string
 		address string
 		handler http.Handler
 	}{
-		{"peer", b.self.PeerAddr, peerServer},
+		{"peer", peerBind, peerServer},
 		{"client", b.self.ClientAddr, clientMux},
 		{"admin", b.self.AdminAddr, b.adminMux()},
 	} {

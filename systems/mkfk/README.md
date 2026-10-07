@@ -127,6 +127,8 @@ M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執
 - Peer RPC 為 HTTP/JSON（`/peer/v1/request-vote`、`append-entries`、`read-barrier`、`high-watermark`），reply 在 response body。
 - `pkg/client.ClusterTransport` 依 NOT_LEADER／NOT_COORDINATOR 的 leader hint 路由到 partition leader 或 coordinator。
 
+- `make test-chaos`：三個 broker process、三個冪等 producer、兩個 consumer group，在 seeded 排程下輪流 SIGKILL leader／follower／coordinator、SIGSTOP、切斷或拖慢 peer link（經測試用 proxy 與 `--peer-bind`），結束後以 history oracle 檢查已確認資料不遺失不重複、副本一致、assignment 不重疊、committed offset 不倒退（`CHAOS_PROFILE=short|full`、`CHAOS_SEED=` 可重播）。`make test-model-extended` 跑 1,000 seeds × 10,000 events。
+
 ```bash
 mkfk format --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json
 mkfk serve  --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json

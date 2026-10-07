@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/group"
+	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/protocol"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
 )
@@ -174,6 +175,18 @@ func writeGroupError(call groupCall, err error) {
 		writeError(call.response, status, call.requestID, protocol.APIError{
 			Code: string(groupErr.Code), Message: groupErr.Message, Retryable: groupRetryable[groupErr.Code], Outcome: outcome,
 			Details: hintDetails(err),
+		})
+	case errors.Is(err, partition.ErrStorage), errors.Is(err, partition.ErrFailed):
+		if errors.Is(err, partition.ErrStorage) && call.mutating {
+			outcome = protocol.OutcomeUnknown
+		}
+		writeError(call.response, http.StatusServiceUnavailable, call.requestID, protocol.APIError{
+			Code: "STORAGE_ERROR", Message: "The coordinator stopped serving after a storage failure.", Retryable: true, Outcome: outcome,
+		})
+	case errors.Is(err, partition.ErrBusy):
+		writeError(call.response, http.StatusTooManyRequests, call.requestID, protocol.APIError{
+			Code: "RESOURCE_EXHAUSTED", Message: "The coordinator did not accept the request in time.", Retryable: true,
+			Outcome: protocol.OutcomeNotApplied,
 		})
 	case errors.Is(err, group.ErrOutcomeUnknown):
 		writeUnknownTimeout(call.response, call.requestID, "The group command outcome is unknown; retry the identical request.")

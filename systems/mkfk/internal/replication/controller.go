@@ -154,6 +154,8 @@ type Controller struct {
 	pendingOperations int
 	pendingBytes      int64
 	recoveredApplied  []storage.Frame
+	marks             []appendMark
+	marksFloor        uint64
 }
 
 func NewController(node *raft.Node, log RecordLog, config Config, now time.Time) (*Controller, error) {
@@ -223,6 +225,7 @@ func (controller *Controller) HandleReady(ready raft.Ready, now time.Time) ([]Ga
 	snapshot = controller.node.Snapshot()
 	if snapshot.Role == raft.Leader && snapshot.Term == controller.term {
 		controller.durableMatch[controller.config.NodeID] = snapshot.LastLogIndex
+		controller.markAppended(snapshot.LastLogIndex, now)
 		for _, observation := range controller.peers {
 			if observation.InSync && observation.CatchupTarget < snapshot.LastLogIndex {
 				observation.CatchupTarget = snapshot.LastLogIndex
@@ -250,8 +253,11 @@ func (controller *Controller) HandleReady(ready raft.Ready, now time.Time) ([]Ga
 			observation.InSync = true
 			controller.isr[ack.PeerID] = struct{}{}
 			observation.CatchupTarget = snapshot.LastLogIndex
+		} else if at := controller.caughtUpAsOf(ack.MatchIndex); observation.InSync && at.After(observation.LastCaughtUpAt) {
+			observation.LastCaughtUpAt = at
 		}
 	}
+	controller.pruneMarks()
 	for _, read := range ready.ReadStates {
 		if _, pending := controller.pendingReads[read.Context]; pending && snapshot.Role == raft.Leader && snapshot.Term == controller.term {
 			delete(controller.pendingReads, read.Context)
@@ -541,6 +547,7 @@ func (controller *Controller) resetLeaderTerm(snapshot raft.Snapshot, now time.T
 	controller.readBarriers = make(map[string]readBarrier)
 	controller.pendingReads = make(map[string]struct{})
 	controller.peers = make(map[uint32]*PeerObservation)
+	controller.marks, controller.marksFloor = nil, 0
 	for _, voter := range controller.config.Voters {
 		if voter != controller.config.NodeID {
 			controller.peers[voter] = &PeerObservation{

@@ -125,3 +125,21 @@ func Eventually(t *testing.T, what string, condition func() bool) {
 		time.Sleep(5 * time.Millisecond)
 	}
 }
+
+// Converged waits until every actor holds the same last log index. Tests
+// that drive elections by hand call it before cutting a node off, so the
+// remaining majority can elect any of its members.
+func Converged(t *testing.T, actors ...*partition.Actor) {
+	t.Helper()
+	Eventually(t, "replicas to converge", func() bool {
+		var last uint64
+		for index, actor := range actors {
+			snapshot, err := actor.Snapshot(context.Background())
+			if err != nil || index > 0 && snapshot.LastLogIndex != last {
+				return false
+			}
+			last = snapshot.LastLogIndex
+		}
+		return true
+	})
+}

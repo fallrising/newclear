@@ -18,6 +18,7 @@ import (
 	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/peer"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
+	"github.com/fallrising/newclear/systems/mkfk/internal/replication"
 	"github.com/fallrising/newclear/systems/mkfk/internal/storage"
 )
 
@@ -28,9 +29,12 @@ type Config struct {
 	NodeID            uint32
 	DataDir           string
 	AllowInsecureBind bool
-	Clock             adapters.Clock
-	Random            adapters.RandomSource
-	Logger            *slog.Logger
+	// PeerBind, when set, is where the peer listener binds instead of the
+	// topology's peer_addr, e.g. behind a fault-injecting proxy that owns it.
+	PeerBind string
+	Clock    adapters.Clock
+	Random   adapters.RandomSource
+	Logger   *slog.Logger
 }
 
 // replica is one local partition replica.
@@ -80,7 +84,12 @@ func Open(cfg Config) (*Broker, error) {
 	if !ok {
 		return nil, fmt.Errorf("node %d is not in the cluster topology", cfg.NodeID)
 	}
-	if exposed := self.NonLoopbackListeners(); len(exposed) > 0 {
+	exposed := self.NonLoopbackListeners()
+	if cfg.PeerBind != "" {
+		bind := config.Broker{ClientAddr: self.ClientAddr, PeerAddr: cfg.PeerBind, AdminAddr: self.AdminAddr}
+		exposed = bind.NonLoopbackListeners()
+	}
+	if len(exposed) > 0 {
 		if !cfg.AllowInsecureBind {
 			return nil, fmt.Errorf("listeners %v are not loopback; pass --allow-insecure-bind only on an isolated network", exposed)
 		}
@@ -165,7 +174,8 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	if topic == groupsTopic {
 		b.groups, err = group.NewService(group.ServiceConfig{
 			Node: node, Proofs: proofSource{b}, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			Coordinator: group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
+			StorageFailed: log.RecoveryRequired,
+			Coordinator:   group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
 		})
 		if err != nil {
 			return err
@@ -174,6 +184,7 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	} else {
 		r.data, err = partition.NewData(partition.DataConfig{
 			Topic: topic, Partition: spec.ID, Node: node, Log: log, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
+			StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
 			Replication: replicationConfig(b.self.ID, spec),
 		})
 		if err != nil {
@@ -189,6 +200,18 @@ func (b *Broker) roleLogger(topic string, id uint32) func(raft.RoleChange) {
 	return func(change raft.RoleChange) {
 		b.logger.Info("role change", "topic", topic, "partition", id, "term", change.Term,
 			"from", string(change.From), "to", string(change.To), "leader", change.LeaderID)
+	}
+}
+
+func (b *Broker) isrLogger(topic string, id uint32) func([]uint32, []replication.PeerObservation) {
+	return func(evicted []uint32, observations []replication.PeerObservation) {
+		for _, peer := range observations {
+			if contains(evicted, peer.PeerID) {
+				b.logger.Warn("isr shrink", "topic", topic, "partition", id, "peer", peer.PeerID, "term", peer.Term,
+					"durable_match", peer.DurableMatchIndex, "catchup_target", peer.CatchupTarget,
+					"last_success", peer.LastSuccessAt.Format(time.RFC3339Nano), "last_caught_up", peer.LastCaughtUpAt.Format(time.RFC3339Nano))
+			}
+		}
 	}
 }
 

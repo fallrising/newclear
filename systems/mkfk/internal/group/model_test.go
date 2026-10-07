@@ -8,11 +8,7 @@ import (
 	"time"
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/protocol"
-)
-
-const (
-	modelSeeds  = 100
-	modelEvents = 300
+	"github.com/fallrising/newclear/systems/mkfk/internal/testkit"
 )
 
 // groupModel drives one seeded schedule of client commands, session
@@ -34,7 +30,8 @@ type groupModel struct {
 
 func TestM6GroupModel100Seeds300Events(t *testing.T) {
 	t.Parallel()
-	for seed := int64(0); seed < modelSeeds; seed++ {
+	modelSeeds, modelEvents := testkit.ModelProfile(100, 300)
+	for seed := int64(0); seed < int64(modelSeeds); seed++ {
 		seed := seed
 		t.Run(fmt.Sprintf("seed-%03d", seed), func(t *testing.T) {
 			t.Parallel()

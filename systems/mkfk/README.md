@@ -129,6 +129,9 @@ M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執
 
 - `make test-chaos`：三個 broker process、三個冪等 producer、兩個 consumer group，在 seeded 排程下輪流 SIGKILL leader／follower／coordinator、SIGSTOP、切斷或拖慢 peer link（經測試用 proxy 與 `--peer-bind`），結束後以 history oracle 檢查已確認資料不遺失不重複、副本一致、assignment 不重疊、committed offset 不倒退（`CHAOS_PROFILE=short|full`、`CHAOS_SEED=` 可重播）。`make test-model-extended` 跑 1,000 seeds × 10,000 events。
 
+- `make demo`：以 `FROM scratch` 的本地 image（不拉 registry，UID 65532、唯讀 rootfs、drop 全部 capability）啟動三 broker Compose 實驗（獨立 project、named volumes、私有 bridge network，只在 host loopback 公開 client／admin port），依序展示 produce／consume、回覆遺失重送、kill leader 與 catch-up、rebalance、coordinator 重啟後從 committed offsets 續讀。若該 project 已有 volume 會拒絕執行；`make demo-down` 只停止本次實驗，加 `DELETE_DATA=1` 才刪 volume。
+- CI：根目錄 `.github/workflows/mkfk-ci.yml`（path-scoped、`contents: read`、SHA-pinned actions）跑 gates、`test-chaos` short profile 與 Compose demo。
+
 ```bash
 mkfk format --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json
 mkfk serve  --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json

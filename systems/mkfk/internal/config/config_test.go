@@ -89,6 +89,26 @@ func TestManifestReportsNonLoopbackListenersForBindPolicy(t *testing.T) {
 	}
 }
 
+// The Compose topology names container addresses on a private network; it
+// must parse, and every listener is non-loopback so serve requires the
+// explicit --allow-insecure-bind used in deploy/compose.yaml.
+func TestComposeManifestNeedsInsecureBindOptIn(t *testing.T) {
+	t.Parallel()
+	data, err := os.ReadFile(filepath.Join("..", "..", "configs", "compose-cluster.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := ParseClusterManifest(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, broker := range manifest.Brokers {
+		if len(broker.NonLoopbackListeners()) != 3 {
+			t.Fatalf("broker %d exposes %v", broker.ID, broker.NonLoopbackListeners())
+		}
+	}
+}
+
 func TestResourceLimits(t *testing.T) {
 	t.Parallel()
 	limits := DefaultResourceLimits()

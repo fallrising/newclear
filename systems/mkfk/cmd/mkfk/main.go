@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -34,7 +35,7 @@ func run(arguments []string, stderr io.Writer) error {
 	}
 	switch arguments[0] {
 	case "format":
-		return runFormat(arguments[1:])
+		return runFormat(arguments[1:], stderr)
 	case "serve":
 		return runServe(arguments[1:], stderr)
 	default:
@@ -70,12 +71,22 @@ func parseNodeFlags(name string, arguments []string, extra func(*flag.FlagSet)) 
 	return node, topology, nil
 }
 
-// runFormat initializes an empty data directory. An existing manifest is
-// never overwritten.
-func runFormat(arguments []string) error {
+// runFormat initializes an empty data directory. A directory that already
+// holds a storage manifest is only verified against this node and topology
+// (SDD §6.3), never overwritten, so a deployment can run format on every
+// start.
+func runFormat(arguments []string, stderr io.Writer) error {
 	node, topology, err := parseNodeFlags("format", arguments, nil)
 	if err != nil {
 		return err
+	}
+	if _, err := os.Stat(filepath.Join(node.dataDir, "manifest.json")); err == nil {
+		dataDir, err := storage.OpenDataDir(node.dataDir, uint32(node.nodeID), topology)
+		if err != nil {
+			return fmt.Errorf("existing data directory does not match: %w", err)
+		}
+		_, _ = fmt.Fprintln(stderr, "mkfk: data directory already formatted; node and topology verified")
+		return dataDir.Close()
 	}
 	return storage.FormatDataDir(node.dataDir, uint32(node.nodeID), topology)
 }

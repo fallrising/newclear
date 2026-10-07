@@ -2,7 +2,7 @@ GO ?= go
 GOFMT ?= gofmt
 GO_FILES := $(shell find . -name '*.go' -type f | sort)
 
-.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos
+.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos image demo demo-down
 
 TEST_LOG_DIR ?= $(CURDIR)/.test-output
 
@@ -25,6 +25,12 @@ INTEGRATION_TESTS := TestM1ST03DurableAfterSIGKILL TestM3ThreeProcessFailoverAnd
 # CHAOS_SEED replays a schedule. The scrubbed run summary lands in chaos-report.json.
 CHAOS_PROFILE ?= full
 CHAOS_SEED ?=
+
+# The Compose experiment (make demo) uses its own project, network, and named
+# volumes; demo-down keeps the volumes unless DELETE_DATA=1.
+DOCKER ?= docker
+COMPOSE_PROJECT ?= mkfk-demo
+IMAGE_CONTEXT := $(CURDIR)/.build/image
 
 fmt-check:
 	@files="$$($(GOFMT) -l $(GO_FILES))"; test -z "$$files" || (echo "Go files need formatting:" >&2; echo "$$files" >&2; exit 1)
@@ -52,3 +58,15 @@ test-chaos:
 	MKFK_CHAOS_PROFILE=$(CHAOS_PROFILE) MKFK_CHAOS_SEED=$(CHAOS_SEED) MKFK_CHAOS_REPORT=$(TEST_LOG_DIR)/chaos-report.json \
 		MKFK_TEST_LOG=$(TEST_LOG_DIR)/chaos.log GO="$(GO)" GOFLAGS="-timeout=30m" \
 		./scripts/run-named-tests.sh "./cmd/mkfk" TestM7ChaosOP05RotatingCrashesPartitionsAndPauses
+
+image:
+	rm -rf $(IMAGE_CONTEXT) && mkdir -p $(IMAGE_CONTEXT)/data
+	CGO_ENABLED=0 GOOS=linux $(GO) build -trimpath -o $(IMAGE_CONTEXT)/mkfk ./cmd/mkfk
+	cp configs/compose-cluster.json $(IMAGE_CONTEXT)/cluster.json
+	$(DOCKER) build -q -t mkfk:local -f deploy/Dockerfile $(IMAGE_CONTEXT)
+
+demo: image
+	GO="$(GO)" DOCKER="$(DOCKER)" COMPOSE_PROJECT=$(COMPOSE_PROJECT) ./scripts/demo.sh
+
+demo-down:
+	$(DOCKER) compose -p $(COMPOSE_PROJECT) -f deploy/compose.yaml down $(if $(DELETE_DATA),--volumes,)

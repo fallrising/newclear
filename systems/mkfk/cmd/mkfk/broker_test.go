@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,6 +62,12 @@ func TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData(t *testing
 			t.Fatalf("%s: exited=%v err=%v stderr=%s", name, exited, err, proc.stderr.String())
 		}
 		t.Logf("%s: %s", name, strings.TrimSpace(proc.stderr.String()))
+	}
+	if err := run([]string{"format", "--data-dir", cluster.dataDir(1), "--node-id", "1", "--cluster-json", cluster.path}, io.Discard); err != nil {
+		t.Fatalf("re-format of a matching data dir must only verify it: %v", err)
+	}
+	if err := run([]string{"format", "--data-dir", cluster.dataDir(1), "--node-id", "1", "--cluster-json", changed}, io.Discard); err == nil {
+		t.Fatal("re-format with changed topology bytes was accepted")
 	}
 	cluster.start(1)
 	cluster.waitReady(1)

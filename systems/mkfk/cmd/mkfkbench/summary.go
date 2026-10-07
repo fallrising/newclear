@@ -17,6 +17,10 @@ func summary(result report) string {
 	out.WriteString("\n| Config | records/s | MiB/s | produce p50/p95/p99 ms | fetch records/s | fetch p99 ms | leader CPU % | max RSS MiB | fsync mean ms | seek comparisons/fetch | restart s |\n")
 	out.WriteString("| --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
 	for _, config := range result.Results {
+		if config.Error != "" {
+			fmt.Fprintf(&out, "| %s | failed: %s | | | | | | | | | |\n", config.Config.name(), config.Error)
+			continue
+		}
 		median := func(value func(runResult) float64) float64 {
 			values := make([]float64, 0, len(config.Runs))
 			for _, run := range config.Runs {

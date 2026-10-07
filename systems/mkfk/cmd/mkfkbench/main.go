@@ -100,9 +100,11 @@ func run(binary, out, commit string, warmup, duration time.Duration, repeats, re
 		logf("%s: starting", c.name())
 		configResult, err := runConfig(l, c, w, repeats, index*100)
 		if err != nil {
-			return err
+			configResult.Error = err.Error()
+			logf("%s: failed: %v", c.name(), err)
+		} else {
+			logf("%s: cold restart served again in %.2fs", c.name(), configResult.RecoverySeconds)
 		}
-		logf("%s: cold restart served again in %.2fs", c.name(), configResult.RecoverySeconds)
 		result.Results = append(result.Results, configResult)
 		if err := write(out, result); err != nil {
 			return err

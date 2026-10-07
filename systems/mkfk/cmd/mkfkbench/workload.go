@@ -151,6 +151,9 @@ func produceLoop(transport *client.ClusterTransport, partition uint32, producerI
 			if inWindow {
 				measured.failure(err)
 			}
+			if time.Since(windowEnd) > 30*time.Second {
+				return fmt.Errorf("producer %s could not resolve batch %d: %w", producerID, batch, err)
+			}
 			time.Sleep(20 * time.Millisecond)
 		}
 	}

@@ -39,6 +39,7 @@ type configResult struct {
 	Runs            []runResult `json:"runs"`
 	RecoverySeconds float64     `json:"cold_restart_to_serving_seconds"`
 	RecoveredWAL    int64       `json:"wal_bytes_per_replica_at_restart"`
+	Error           string      `json:"error,omitempty"`
 }
 
 // runConfig formats a fresh cluster, runs the repeats, then stops every

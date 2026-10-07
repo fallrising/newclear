@@ -98,3 +98,14 @@ It runs `make check` and `make integration`: PostgreSQL 16, PL/Python and pinned
 pg-jev 0.2.1 against a deterministic loopback provider. The disposable container
 runs with `--network none`; build-time public dependencies require network.
 No secrets, paid model calls, host volumes, image publishing or deployment.
+
+## open-compute runtime lab
+
+`.github/workflows/open-compute-ci.yml` is scoped to `labs/open-compute/**` and
+itself. It runs `make check` for the Python standard-library harness and
+`make integration` on a fresh non-root Linux x64 runner. The integration gate
+verifies the pinned original release, creates only a new owned scope, deploys a
+trusted synthetic Worker, and checks D1 plus a durable Workflow through a normal
+daemon restart. It does not accept existing scope data or use production
+credentials, machine service installation, deployment, or release publishing.
+Only a bounded sanitized report may be retained as a short-lived artifact.

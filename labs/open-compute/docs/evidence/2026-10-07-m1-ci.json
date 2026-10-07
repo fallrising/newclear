@@ -1,0 +1,163 @@
+{
+  "acceptance": {
+    "AC-01": "passed",
+    "AC-02": "passed",
+    "AC-03": "passed",
+    "AC-04": "passed",
+    "AC-05": "passed",
+    "AC-06": "passed",
+    "AC-07": "passed",
+    "AC-08": "passed"
+  },
+  "command": "make integration",
+  "daemon_after": {
+    "pgid": 2567,
+    "pid": 2567,
+    "start_ticks": 12774
+  },
+  "daemon_before": {
+    "pgid": 2500,
+    "pid": 2500,
+    "start_ticks": 10715
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.12.3"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2651,
+        "pid": 2651,
+        "start_ticks": 13010
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "first_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2530,
+        "pid": 2530,
+        "start_ticks": 11180
+      },
+      {
+        "pgid": 2535,
+        "pid": 2535,
+        "start_ticks": 11187
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "harness_commit": "92816c4457e0691cdc29434b0c1716865f2af279",
+  "instance": {
+    "account_id": "01a1172176cb75aca2f25d7754b45243",
+    "instance_id": "01a1172176cb75aca2f25d7754b45243",
+    "name": "lab"
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 2535,
+      "pid": 2535,
+      "start_ticks": 11187
+    }
+  ],
+  "phase": "complete",
+  "result": "passed",
+  "run_id": "20261007T161024Z-b71e0e43",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "schema_version": 1,
+  "scope_removed": true,
+  "state_identity": {
+    "after": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 2049,
+        "inode": 9183759
+      },
+      "data": {
+        "device": 2049,
+        "inode": 9183739
+      },
+      "scheduler_db": {
+        "device": 2049,
+        "inode": 9183762
+      },
+      "scope": {
+        "device": 2049,
+        "inode": 9183589
+      }
+    },
+    "before": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 2049,
+        "inode": 9183759
+      },
+      "data": {
+        "device": 2049,
+        "inode": 9183739
+      },
+      "scheduler_db": {
+        "device": 2049,
+        "inode": 9183762
+      },
+      "scope": {
+        "device": 2049,
+        "inode": 9183589
+      }
+    },
+    "same": true
+  },
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "d6f22242f48eb4a8e618ce0cb82d08c3a17a11716e1d14573a8c6f9e7e5f6a82",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "d6f22242f48eb4a8e618ce0cb82d08c3a17a11716e1d14573a8c6f9e7e5f6a82",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261007t161024z-b71e0e43",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

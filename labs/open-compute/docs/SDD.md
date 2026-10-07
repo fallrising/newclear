@@ -1,7 +1,7 @@
 # SDD: a reproducible private Workers runtime lab
 
-Status: M1 design baseline; implementation and runtime evidence follow this
-commit. Created: 2026-10-07. Scope: `labs/open-compute`.
+Status: M1 implemented; executed results and their limits are recorded in
+[STATUS.md](STATUS.md). Created: 2026-10-07. Scope: `labs/open-compute`.
 
 ## 1. Problem and outcome
 
@@ -53,7 +53,7 @@ restore, SIGKILL recovery, or an upgrade/rollback procedure.
 | workerd source | `e98a3e8433979356047a202d3e0d1b0e2e2c4b8c` |
 
 These release metadata values are the expected identities, not evidence of a
-successful local run. `upstream.lock.json` will encode the machine-readable
+successful local run. `upstream.lock.json` encodes the machine-readable
 download contract. The harness checks bytes and SHA256 before execution, also
 when a previously downloaded file exists. A mismatch fails closed. Version text
 alone is not sufficient identity. Downloading the asset requires internet

@@ -10,12 +10,14 @@ MODEL_PACKAGES := ./internal/raft ./internal/replication ./internal/group
 MODEL_TESTS := TestM3DeterministicModel100Seeds1000Events TestM4RandomizedISRAndGateInvariants \
 	TestM6GroupModel100Seeds300Events
 
-INTEGRATION_PACKAGES := ./internal/storage ./internal/raft ./internal/replication ./cmd/mkfkctl ./pkg/client
+INTEGRATION_PACKAGES := ./internal/storage ./internal/raft ./internal/replication ./cmd/mkfkctl ./pkg/client ./cmd/mkfk
 INTEGRATION_TESTS := TestM1ST03DurableAfterSIGKILL TestM3ThreeProcessFailoverAndRestartDriver \
 	TestM4RF1PersistentHWRecoveryAndCommittedFetch TestM5PR07CLIResumesDurablePendingBatchBeforeNewInput \
 	TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork \
 	TestM6SDKRetriesUnknownCommitWithTheSameRequest TestM6CG03SDKRejoinsAfterItsSessionExpired TestM6SDKDropsUnknownCommitFromAFencedGeneration \
-	TestM6DemoRebalanceCrashAndCoordinatorRestart
+	TestM6DemoRebalanceCrashAndCoordinatorRestart \
+	TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload \
+	TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
 
 fmt-check:
 	@files="$$($(GOFMT) -l $(GO_FILES))"; test -z "$$files" || (echo "Go files need formatting:" >&2; echo "$$files" >&2; exit 1)

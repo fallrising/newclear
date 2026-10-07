@@ -32,6 +32,7 @@ type DataConfig struct {
 	Clock          adapters.Clock
 	TickClock      adapters.Clock
 	Sender         Sender
+	OnRoleChange   func(raft.RoleChange)
 	TickInterval   time.Duration
 	ProduceTimeout time.Duration
 	ReadTimeout    time.Duration
@@ -80,7 +81,7 @@ func NewData(config DataConfig) (*Data, error) {
 	}
 	data.actor, err = New(Config{
 		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
-		TickInterval: config.TickInterval,
+		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange,
 	}, data)
 	if err != nil {
 		return nil, err

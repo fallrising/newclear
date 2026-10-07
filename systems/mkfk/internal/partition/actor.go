@@ -48,6 +48,8 @@ type Config struct {
 	TickInterval    time.Duration
 	InboxSize       int
 	MaxPendingReads int
+	// OnRoleChange, when set, observes role changes on the actor goroutine.
+	OnRoleChange func(raft.RoleChange)
 }
 
 type Actor struct {
@@ -58,6 +60,7 @@ type Actor struct {
 	sender   Sender
 	tick     time.Duration
 	maxReads int
+	onRole   func(raft.RoleChange)
 	calls    chan func()
 	inbox    chan raft.Message
 	stop     chan struct{}
@@ -98,7 +101,7 @@ func New(config Config, handler Handler) (*Actor, error) {
 	}
 	return &Actor{
 		node: config.Node, handler: handler, clock: config.Clock, ticks: config.TickClock, sender: config.Sender,
-		tick: config.TickInterval, maxReads: config.MaxPendingReads,
+		tick: config.TickInterval, maxReads: config.MaxPendingReads, onRole: config.OnRoleChange,
 		calls: make(chan func()), inbox: make(chan raft.Message, config.InboxSize),
 		stop: make(chan struct{}), done: make(chan struct{}), reads: make(map[string]func(error)),
 	}, nil
@@ -275,6 +278,11 @@ func (a *Actor) handle(ready raft.Ready) ([]raft.Message, error) {
 		return messages, err
 	}
 	a.resolveReads(ready)
+	if a.onRole != nil {
+		for _, change := range ready.RoleChanges {
+			a.onRole(change)
+		}
+	}
 	return messages, nil
 }
 

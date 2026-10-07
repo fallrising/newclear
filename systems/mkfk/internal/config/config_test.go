@@ -56,6 +56,39 @@ func TestManifestRejectsDuplicateUnknownAndUnsafeInput(t *testing.T) {
 	}
 }
 
+// A manifest may name non-loopback listeners (isolated Compose network,
+// private benchmark network); binding them is the broker's opt-in decision.
+func TestManifestReportsNonLoopbackListenersForBindPolicy(t *testing.T) {
+	t.Parallel()
+	base, err := os.ReadFile(filepath.Join("..", "..", "configs", "dev-cluster.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := ParseClusterManifest(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	broker, ok := manifest.Broker(1)
+	if !ok || len(broker.NonLoopbackListeners()) != 0 {
+		t.Fatalf("dev broker 1 = %+v exposed=%v", broker, broker.NonLoopbackListeners())
+	}
+	exposed := strings.Replace(string(base), `"peer_addr": "127.0.0.1:19093"`, `"peer_addr": "172.30.0.11:19093"`, 1)
+	manifest, err = ParseClusterManifest([]byte(exposed))
+	if err != nil {
+		t.Fatal(err)
+	}
+	broker, _ = manifest.Broker(1)
+	if got := broker.NonLoopbackListeners(); len(got) != 1 || got[0] != "172.30.0.11:19093" {
+		t.Fatalf("non-loopback listeners = %v", got)
+	}
+	if _, ok := manifest.Broker(9); ok {
+		t.Fatal("unknown broker was found")
+	}
+	if _, err := ParseClusterManifest([]byte(strings.Replace(string(base), `"127.0.0.1:19093"`, `"broker1:19093"`, 1))); err == nil {
+		t.Fatal("a host name listener was accepted; listeners must be IP:port")
+	}
+}
+
 func TestResourceLimits(t *testing.T) {
 	t.Parallel()
 	limits := DefaultResourceLimits()

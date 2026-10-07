@@ -129,14 +129,26 @@ func newSSHLauncher(hosts, ips, command []string, dir, binary string) (*sshLaunc
 	return l, nil
 }
 
+// ssh runs script on a host. ssh exits 255 only when the connection
+// itself failed, before the script ran, so that case is retried. Errors
+// name the node, never the host.
 func (l *sshLauncher) ssh(id uint32, stdin []byte, script string) (string, error) {
-	command := l.remote(id, script)
-	command.Stdin = bytes.NewReader(stdin)
-	output, err := command.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("node-%d: %v: %s", id, err, output)
+	var err error
+	for attempt := 0; attempt < 5; attempt++ {
+		command := l.remote(id, script)
+		command.Stdin = bytes.NewReader(stdin)
+		var output []byte
+		output, err = command.CombinedOutput()
+		if err == nil {
+			return strings.TrimSpace(string(output)), nil
+		}
+		var exit *exec.ExitError
+		if !errors.As(err, &exit) || exit.ExitCode() != 255 {
+			return "", fmt.Errorf("node-%d: script failed: %v", id, err)
+		}
+		time.Sleep(time.Duration(attempt+1) * time.Second)
 	}
-	return strings.TrimSpace(string(output)), nil
+	return "", fmt.Errorf("node-%d: ssh connection kept failing: %v", id, err)
 }
 
 func (l *sshLauncher) addresses(id uint32) endpoints {

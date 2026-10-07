@@ -185,10 +185,14 @@ func writeMappedError(response http.ResponseWriter, requestID string, err error)
 		return
 	}
 	switch {
+	case errors.Is(err, ErrUnknownPartition):
+		writeError(response, http.StatusNotFound, requestID, protocol.APIError{
+			Code: "UNKNOWN_TOPIC_OR_PARTITION", Message: "The topic partition does not exist.", Outcome: protocol.OutcomeNotApplied,
+		})
 	case errors.Is(err, raft.ErrNotLeader):
 		writeError(response, http.StatusConflict, requestID, protocol.APIError{
 			Code: "NOT_LEADER", Message: "This broker is not the partition leader.", Retryable: true,
-			Outcome: protocol.OutcomeNotApplied,
+			Outcome: protocol.OutcomeNotApplied, Details: hintDetails(err),
 		})
 	case errors.Is(err, raft.ErrLeaderNotReady):
 		writeError(response, http.StatusServiceUnavailable, requestID, protocol.APIError{

@@ -30,6 +30,7 @@ type ServiceConfig struct {
 	Clock          adapters.Clock
 	TickClock      adapters.Clock
 	Sender         partition.Sender
+	OnRoleChange   func(raft.RoleChange)
 	TickInterval   time.Duration
 	RequestTimeout time.Duration
 }
@@ -67,7 +68,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 	}
 	service.actor, err = partition.New(partition.Config{
 		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
-		TickInterval: config.TickInterval,
+		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange,
 	}, service)
 	if err != nil {
 		return nil, err

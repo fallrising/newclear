@@ -77,6 +77,7 @@ func writeFetchError(response http.ResponseWriter, requestID string, err error) 
 	case errors.Is(err, raft.ErrNotLeader):
 		status, apiError.Code, apiError.Retryable = http.StatusConflict, "NOT_LEADER", true
 		apiError.Message = "This broker is not the partition leader."
+		apiError.Details = hintDetails(err)
 	case errors.Is(err, raft.ErrLeaderNotReady), errors.Is(err, replication.ErrReadBarrier):
 		apiError.Code, apiError.Retryable = "NOT_READY", true
 		apiError.Message = "The leader has not completed its read barrier."

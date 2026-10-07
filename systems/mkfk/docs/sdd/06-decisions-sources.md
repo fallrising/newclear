@@ -91,6 +91,12 @@ Status: accepted；完整決策見 [ADR-010](../adr/010-group-payload-v1.md)。
 
 GROUP entry 以 `command` 欄位命名（沿用已釘的 WAL golden，取代 CSR §11.8 範例的 `type`），共七種 command。JOIN／LEAVE／REMOVE_MEMBERS／BEGIN_REBALANCE 在同一筆 entry 內推進 generation，舊 generation 的 commit 在 apply 當下即失效。SET_ASSIGNMENT 不攜帶 assignment，replay 時由排序後 round-robin 重算。COMMIT_OFFSETS 攜帶提案前取得的 quorum-confirmed HW，apply 時重驗 generation、STABLE、ownership 與 `existing <= offset <= HW`，全成或全敗。GET offsets 以 query 參數編碼。
 
+### ADR-011 — Broker process、peer HTTP/JSON transport 與 bind policy
+
+Status: accepted；完整決策見 [ADR-011](../adr/011-broker-peer-transport.md)。
+
+`mkfk serve` 依 §12.1 啟動，`format` 須顯式執行。Peer RPC 每個 request 一次 HTTP POST，reply 放在 response body；新增只在 leader read barrier 後回答的 `/peer/v1/high-watermark`。Manifest 可列非 loopback 位址，但 broker 必須有 `--allow-insecure-bind` 才 bind。NOT_LEADER／NOT_COORDINATOR 帶 leader hint，Go `ClusterTransport` 依 hint 路由。
+
 ## 4. 來源目錄
 
 來源主要用來校驗概念；本案具體數字、格式、HTTP endpoints、milestones、測試 IDs 都是原創設計，不是來源的既成實作。

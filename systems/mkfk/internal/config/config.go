@@ -94,9 +94,6 @@ func (m ClusterManifest) Validate() error {
 			if err != nil {
 				return fmt.Errorf("broker %d %s address: %w", broker.ID, listener, err)
 			}
-			if !address.Addr().IsLoopback() {
-				return fmt.Errorf("broker %d %s listener is not loopback", broker.ID, listener)
-			}
 			if _, exists := addresses[address]; exists {
 				return fmt.Errorf("listener address %s is reused", address)
 			}
@@ -167,6 +164,28 @@ func (m ClusterManifest) Validate() error {
 		}
 	}
 	return nil
+}
+
+// Broker returns the broker with the given ID.
+func (m ClusterManifest) Broker(id uint32) (Broker, bool) {
+	for _, broker := range m.Brokers {
+		if broker.ID == id {
+			return broker, true
+		}
+	}
+	return Broker{}, false
+}
+
+// NonLoopbackListeners lists the broker's listener addresses that are not
+// loopback. A broker binds them only with an explicit insecure-bind opt-in.
+func (b Broker) NonLoopbackListeners() []string {
+	var exposed []string
+	for _, raw := range []string{b.ClientAddr, b.PeerAddr, b.AdminAddr} {
+		if address, err := netip.ParseAddrPort(raw); err != nil || !address.Addr().IsLoopback() {
+			exposed = append(exposed, raw)
+		}
+	}
+	return exposed
 }
 
 func TopologyDigest(exactBytes []byte) string {

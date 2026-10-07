@@ -173,13 +173,14 @@ func writeGroupError(call groupCall, err error) {
 		}
 		writeError(call.response, status, call.requestID, protocol.APIError{
 			Code: string(groupErr.Code), Message: groupErr.Message, Retryable: groupRetryable[groupErr.Code], Outcome: outcome,
+			Details: hintDetails(err),
 		})
 	case errors.Is(err, group.ErrOutcomeUnknown):
 		writeUnknownTimeout(call.response, call.requestID, "The group command outcome is unknown; retry the identical request.")
 	case errors.Is(err, raft.ErrNotLeader), errors.Is(err, raft.ErrLeaderNotReady):
 		writeError(call.response, http.StatusConflict, call.requestID, protocol.APIError{
 			Code: string(group.CodeNotCoordinator), Message: "This broker is not the serving group coordinator.",
-			Retryable: true, Outcome: outcome,
+			Retryable: true, Outcome: outcome, Details: hintDetails(err),
 		})
 	default:
 		if call.mutating {

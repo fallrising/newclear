@@ -157,9 +157,16 @@ func (node *Node) Step(message Message) (Ready, error) {
 		return Ready{}, err
 	}
 	if message.Term > node.term {
+		// A higher-term vote request moves this node to that term but does
+		// not reset its election timer unless the vote is granted: a stale
+		// candidate must not keep up-to-date nodes from ever campaigning.
+		elapsed := node.electionElapsed
 		change, err := node.becomeFollower(message.Term, 0)
 		if err != nil {
 			return Ready{}, err
+		}
+		if message.Kind == MessageRequestVote {
+			node.electionElapsed = elapsed
 		}
 		if change != nil {
 			ready.RoleChanges = append(ready.RoleChanges, *change)

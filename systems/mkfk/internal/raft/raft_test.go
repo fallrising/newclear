@@ -443,6 +443,7 @@ type memoryLog struct {
 	state         storage.HardState
 	events        []string
 	failHardState bool
+	framesRead    int
 }
 
 func newMemoryLog() *memoryLog { return &memoryLog{} }
@@ -491,6 +492,7 @@ func (log *memoryLog) ReadEntries(from uint64, maxBytes int) ([]storage.Frame, e
 	used := 0
 	for index := from; index <= uint64(len(log.frames)); index++ {
 		frame := log.frames[index-1]
+		log.framesRead++
 		encoded, err := storage.EncodeFrame(frame)
 		if err != nil {
 			return nil, err

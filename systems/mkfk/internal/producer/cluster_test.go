@@ -149,7 +149,7 @@ func (log *producerMemoryLog) ReadEntries(from uint64, maxBytes int) ([]storage.
 			return nil, err
 		}
 		if len(result) == 0 && len(encoded) > maxBytes {
-			return nil, errors.New("budget too small")
+			return nil, &storage.ReadBudgetTooSmallError{RequiredBytes: len(encoded)}
 		}
 		if used+len(encoded) > maxBytes {
 			break

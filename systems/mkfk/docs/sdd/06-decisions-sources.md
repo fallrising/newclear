@@ -97,11 +97,11 @@ Status: accepted；完整決策見 [ADR-011](../adr/011-broker-peer-transport.md
 
 `mkfk serve` 依 §12.1 啟動，`format` 須顯式執行。Peer RPC 每個 request 一次 HTTP POST，reply 放在 response body；新增只在 leader read barrier 後回答的 `/peer/v1/high-watermark`。Manifest 可列非 loopback 位址，但 broker 必須有 `--allow-insecure-bind` 才 bind。NOT_LEADER／NOT_COORDINATOR 帶 leader hint，Go `ClusterTransport` 依 hint 路由。
 
-### ADR-012 — Replication flow control 與 ISR catch-up 時間點
+### ADR-012 — Replication flow control、ISR catch-up 時間點與恢復 liveness
 
 Status: accepted；完整決策見 [ADR-012](../adr/012-replication-flow-control-isr-catchup.md)。
 
-M7 OP-03 flood 揭露三個問題：重疊 AppendEntries 塞滿 peer link、leader sent-RPC 表在丟包時無界成長、ISR target 在每個 Ready 被拉到最新 index 導致落後一個 RTT 的健康 follower 被逐出。改為：link 以較新的 plain AppendEntries 取代佇列中的舊者；proposal 只在未回覆的 append 少於 8 時送出；每 peer 只記 64 個未回覆 RPC；follower 回報 `matched` 時視為在 leader 寫入 `matched+1` 的時刻已追上。RP-08／RP-11 語意不變，captured-A ack 規則不變。
+M7 OP-03 flood 揭露三個問題：重疊 AppendEntries 塞滿 peer link、leader sent-RPC 表在丟包時無界成長、ISR target 在每個 Ready 被拉到最新 index 導致落後一個 RTT 的健康 follower 被逐出。改為：link 以較新的 plain AppendEntries 取代佇列中的舊者；proposal 只在未回覆的 append 少於 8 時送出；每 peer 只記 64 個未回覆 RPC；follower 回報 `matched` 時視為在 leader 寫入 `matched+1` 的時刻已追上。RP-08／RP-11 語意不變，captured-A ack 規則不變。Chaos 排程另揭露：被拒的高 term RequestVote 不再重設 election timer（stale candidate 曾讓 partition 永遠選不出 leader），以及重啟 replay 由每 entry 讀 4 MiB 改為批次線性讀取。
 
 ## 4. 來源目錄
 

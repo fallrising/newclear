@@ -35,7 +35,7 @@ admin listener ──► /healthz /readyz /metrics
 
 After each schedule the oracle checks that acknowledged batches are present once and in order, that committed replicas are identical, that both consumer groups processed every record, that assignments never overlap within a generation, and that committed offsets never go back. The full 28-fault profile passed on five seeds.
 
-Testing found five defects in earlier milestones. Each is fixed with a regression test and a mutation check:
+The chaos schedule and load tests found five defects in earlier milestones. Each is fixed with a regression test and a mutation check:
 
 1. On RF3, a new coordinator never started serving: the failover rebalance's messages were never sent (M6).
 2. The leader's sent-RPC table grew without bound under message loss (M3).
@@ -45,13 +45,19 @@ Testing found five defects in earlier milestones. Each is fixed with a regressio
 
 ## Performance baseline
 
-See [benchmarks/m7-baseline.md](benchmarks/m7-baseline.md) for the configuration matrix, the machines, and the raw results. The numbers describe this design on that hardware, not a target:
+The [M7 baseline](benchmarks/m7-baseline.md) ran on three small cloud VMs over a private network, with 1 KiB records, four closed-loop producers per partition, and `acks=all`. The numbers describe this design on that hardware; they are not a target.
 
-- Every proposal syncs the WAL, and every commit advance rewrites the hard state with two more syncs. All of it runs on the partition's single actor and there is no group commit, so single-record throughput per partition is bounded by fsync latency and is low.
-- Batches of 100 records amortize that cost, and throughput then becomes CPU-bound on JSON and base64 encoding of the WAL payload.
-- Read-back throughput is far higher than write throughput because reads use the sparse index and need no new syncs.
+- **Single-record batches: 140–215 records/s, p50 25–60 ms.** Every proposal syncs the WAL, and every commit advance rewrites the hard state with two more syncs. All of it runs on the partition's single actor and there is no group commit, so fsync latency bounds throughput. Replication (RF3) adds little at this rate.
+- **Batches of 100: 6.4k–12.5k records/s on RF1, 2.5k–3.8k on RF3.** Batching amortizes the syncs. The leader then becomes CPU-bound (140–330% of a core) on JSON and base64 encoding of the WAL payload, and RF3 pays for that work again on every follower.
+- **Read-back: 11k–36k records/s.** Fetches use the sparse index (11–14 segment and index comparisons per fetch) and need no new syncs.
+- **Cold restart grows with the log.** It takes 5–7 s for small logs and 35–167 s for 0.5–1.4 GiB per partition. Recovery replays and re-validates the whole committed prefix and holds it in memory once, because there are no snapshots. Those logs exceed the SDD's 1 GiB per-partition soft cap (§12.2), which the broker does not enforce.
 
-Changing these trade-offs (group commit, a binary payload, lazy commit-index persistence) belongs to the X3 track.
+The benchmark found two defects, both fixed with regression tests and mutation checks:
+
+1. The replication controller's operation history never shrank. After about 4,096 writes a partition refused every new write until restart.
+2. Recovery kept up to three copies of the replayed prefix. Restarting the largest single-partition log took more than 5 minutes, and now takes 86 s.
+
+Group commit, a binary payload, lazy commit-index persistence, and snapshots belong to the X2/X3 tracks.
 
 ## Not claimed
 

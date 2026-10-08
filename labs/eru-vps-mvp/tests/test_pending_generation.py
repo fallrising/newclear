@@ -222,8 +222,8 @@ class PendingGenerationTests(unittest.TestCase):
 
     def test_root_replacement_during_admission_is_rejected(self):
         real_check = pending.assert_no_pending
-        def replace(fd):
-            real_check(fd)
+        def replace(fd, **kwargs):
+            real_check(fd, **kwargs)
             self.private.rename(self.project / 'old-private')
             self.private.mkdir(mode=0o700)
         with mock.patch.object(pending, 'assert_no_pending', side_effect=replace):
@@ -276,8 +276,8 @@ class PendingGenerationTests(unittest.TestCase):
 
     def test_inspect_root_drift_without_pending_is_invalid(self):
         real_check = pending.assert_no_pending
-        def replace(fd):
-            real_check(fd)
+        def replace(fd, **kwargs):
+            real_check(fd, **kwargs)
             self.private.rename(self.project / 'old-private')
             self.private.mkdir(mode=0o700)
         with mock.patch.object(pending, 'assert_no_pending', side_effect=replace):

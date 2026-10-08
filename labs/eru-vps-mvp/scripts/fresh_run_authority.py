@@ -50,6 +50,7 @@ class _Step:
         self.operation, self.target = operation, target
         self.now, self.source_state = now, source_state
         self.entered = self.used = False
+        self._generation_proof_depth = 0
         self.historical = False
         self.pending = pending_generation.inspect(project)
         if self.pending['status'] != 'pending':
@@ -71,13 +72,17 @@ class _Step:
             raise ValueError('renewal plan hash differs')
 
     def operation_authority(self):
-        if self.operation == 'execute_bootstrap':
-            import fresh_bootstrap as contract
+        if self.operation in ('execute_bootstrap', 'execute_replay'):
+            import importlib
+            module = 'fresh_bootstrap' if self.operation == 'execute_bootstrap' else 'fresh_replay'
+            contract = importlib.import_module(module)
             ref = {'path': self.target['authorization_file'], 'sha256': self.target['authorization_sha']}
             auth = self.files.binding(ref)
             expected = {key: self.binding[key] for key in
                         ('plan_id', 'plan_sha256', 'execution_sha256', 'pending_sha256')}
-            expected.update(bootstrap_sha256=self.target['bootstrap_sha'], step_index=self.target['step_index'])
+            digest_key = 'bootstrap' if self.operation == 'execute_bootstrap' else 'replay'
+            expected.update({digest_key + '_sha256': self.target[digest_key + '_sha'],
+                             'step_index': self.target['step_index']})
             return contract.authorization, auth, expected
         modules = {'prepare_network_directory': 'fresh_network_directory',
                    'stage_network_files': 'fresh_network_staging',
@@ -108,14 +113,44 @@ class _Step:
         return contract.authorization, auth, expected
 
     def check(self):
-        if pending_generation.inspect(self.files.project) != self.pending:
+        if self.operation == 'finalize_generation' and not self.historical:
+            # Deep proof verification calls only historical readers, whose
+            # nested checks still validate the current renewal and fence.
+            # Avoid re-entering the same proof through bootstrap readers.
+            if self._generation_proof_depth:
+                return self._check_inputs(skip_lock=True)
+            self._generation_proof_depth += 1
+            try:
+                from fresh_generation_ops import verified_history
+                with verified_history(self.files.project, self.binding['run_id'],
+                        self.target['generation_sha'], self.pending,
+                        now=self.now, source_state=self.source_state) as proof:
+                    if proof['original_pending'] != self.pending:
+                        raise ValueError('generation proof belongs to another reservation')
+                    return self._check_inputs()
+            finally:
+                self._generation_proof_depth -= 1
+        return self._check_inputs()
+
+    def _check_inputs(self, *, skip_lock=False):
+        if self.operation == 'finalize_generation' and not self.historical:
+            # Completion changes admission, not the immutable original claim.
+            # The surrounding deep proof validates the completion and prefix.
+            observed = pending_generation._inspect_reservation(self.files.project, allow_completion=True)
+            if observed['status'] == 'absent':
+                observed = pending_generation._inspect_reservation(self.files.project,
+                    allow_completion=True, directory='generation-history/' + self.pending['sha256'] + '/pending-generation')
+        else:
+            observed = pending_generation.inspect(self.files.project)
+        if observed != self.pending:
             raise ValueError('renewal pending changed')
         self.files.recheck()
         if not self.historical:
             from fresh_run_lock import FreshRunLock
             if not isinstance(self.lock, FreshRunLock):
                 raise ValueError('current renewal requires owned run lock')
-            self.lock.check_pending()
+            if not skip_lock:
+                self.lock.check_pending()
             if self.lock.project.absolute() != self.files.project or self.lock._expected != json.dumps(
                     self.pending, sort_keys=True, separators=(',', ':'), allow_nan=False):
                 raise ValueError('renewal lock reservation differs')
@@ -376,8 +411,12 @@ def inspect_history(project, run_id, execution_sha, expected_receipt_sha, *, now
     from fresh_network_ready_ops import MANUAL_AREA, inspect_network_ready
     owner = active()
     if owner is not None:
-        if (owner.historical or not owner.entered
-                or owner.operation not in {'prepare_bootstrap', 'execute_bootstrap', 'reconcile_bootstrap'}
+        proof_reader = (owner.operation == 'finalize_generation'
+                        and owner._generation_proof_depth > 0)
+        if (owner.historical or (not owner.entered and not proof_reader)
+                or owner.operation not in {'prepare_bootstrap', 'execute_bootstrap', 'reconcile_bootstrap',
+                    'prepare_replay', 'execute_replay', 'reconcile_replay',
+                    'prepare_generation', 'finalize_generation'}
                 or Path(project).absolute() != owner.files.project
                 or owner.binding['run_id'] != run_id
                 or owner.binding['execution_sha256'] != execution_sha):

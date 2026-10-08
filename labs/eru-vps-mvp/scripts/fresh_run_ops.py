@@ -1,9 +1,11 @@
 """One bounded fresh run entry; fixed network/bootstrap steps and observation recovery.
 
-Every next call runs one exact reviewed operation under owned admission. This
-driver never releases pending or commits an accepted cluster generation.
+Every next call runs one exact reviewed operation under owned admission.
+Generation finalization is a separately reviewed local operation after all
+acceptance gates; ordinary steps cannot advance generation or release pending.
 """
 import copy
+from contextlib import contextmanager, ExitStack
 from datetime import datetime, timezone
 import importlib
 import os
@@ -18,6 +20,16 @@ import pending_generation
 
 # Wire input cannot select a module, command, transport or Python callable.
 OPERATIONS = {
+    'prepare_replay': ('fresh_replay_ops',
+        ('run_id', 'bootstrap_sha', 'bootstrap_receipt_sha'), None),
+    'execute_replay': ('fresh_replay_ops',
+        ('run_id', 'replay_sha', 'step_index', 'authorization_file', 'authorization_sha'), 'adapter'),
+    'reconcile_replay': ('fresh_replay_ops',
+        ('run_id', 'step_index', 'expected_intent_sha'), 'observer'),
+    'prepare_generation': ('fresh_generation_ops',
+        ('run_id', 'replay_sha', 'input_file', 'input_sha'), None),
+    'finalize_generation': ('fresh_generation_ops',
+        ('run_id', 'generation_sha'), None),
     'prepare_bootstrap': ('fresh_bootstrap_ops',
         ('plan_id', 'plan_sha', 'network_receipt_sha', 'input_file', 'input_sha'), None),
     'execute_bootstrap': ('fresh_bootstrap_ops',
@@ -61,6 +73,9 @@ PUBLIC_FIELDS = frozenset({
     'execution_integrity_verified', 'journal_integrity_verified',
     'bootstrap_sha256', 'step_index', 'step_count', 'stage', 'worker_count', 'completed_step_count',
     'v01_elapsed_seconds',
+    'replay_sha256', 'generation_sha256', 'evidence_index_sha256',
+    'accepted_run_sha256', 'barrier_completed', 'prefix_length',
+    'generation_committed',
 })
 
 
@@ -187,6 +202,25 @@ def _request(files, input_file, input_sha, run, execution_sha, pending, *, recov
 
 
 def _adapter(project, step, parameters):
+    if step in ('execute_replay', 'reconcile_replay'):
+        from fresh_replay_ops import AREA as REPLAY
+        from fresh_replay_ssh import SSHReplayAdapter
+        files = PrivateFiles(project, max_bytes=128 * 1024 * 1024)
+        try:
+            envelope, _, _ = files.json(REPLAY + '/' + parameters['run_id'] + '/plan.json')
+            exact(envelope, {'plan', 'sha256'})
+            if (plan_digest(envelope['plan']) != envelope['sha256']
+                    or envelope['plan']['run_id'] != parameters['run_id']
+                    or step == 'execute_replay' and envelope['sha256'] != parameters['replay_sha']):
+                raise ValueError('replay transport plan binding differs')
+            rendered = envelope['plan']['network_render']
+            by_ip = dict(line.split(' ', 1) for line in rendered['controller_known_hosts'].splitlines())
+            keys = {host['alias']: by_ip[host['ip']] for host in rendered['hosts']}
+            files.recheck()
+        finally:
+            files.close()
+        adapter = SSHReplayAdapter(keys)
+        return ObservationOnly(adapter.observe) if step in RECOVERY else adapter
     if step in ('execute_bootstrap', 'reconcile_bootstrap'):
         from fresh_bootstrap_ops import AREA as BOOTSTRAP
         from fresh_bootstrap_ssh import SSHBootstrapAdapter
@@ -257,6 +291,40 @@ class ObservationOnly:
         self.observe = observe
 
 
+@contextmanager
+def _generation_history(project, run, execution_sha, now, source_state):
+    """Use old current-state bytes only inside a deeply verified local proof.
+
+    No snapshot is supplied by the caller. The generation reader checks the
+    immutable index, raw evidence closure, exact reservation and physical write
+    prefix before exposing its derived historical view.
+    """
+    from fresh_generation_ops import AREA, verified_history
+    files = PrivateFiles(project, max_bytes=128 * 1024 * 1024)
+    try:
+        try:
+            envelope, _, _ = files.json(AREA + '/' + run + '/intent.json')
+        except FileNotFoundError:
+            yield None
+            return
+        exact(envelope, {'intent', 'sha256'})
+        digest = envelope['sha256']
+        sha256(digest)
+        if plan_digest(envelope['intent']) != digest:
+            raise ValueError('generation intent digest differs')
+        files.recheck()
+        with verified_history(project, run, digest, None, now=now,
+                              source_state=source_state) as proof:
+            original = proof['original_pending']['reservation']['bindings']
+            if (original['run_id'] != run or original['execution_sha256'] != execution_sha
+                    or proof['generation_sha256'] != digest):
+                raise ValueError('generation history belongs to another execution')
+            yield proof
+            files.recheck()
+    finally:
+        files.close()
+
+
 def next_step(project, run_id, execution_sha, input_file, input_sha, *,
               now=None, source_state=None, adapters=None, recovery=False):
     """Run one named step; repeated writers use their original no-replay journal."""
@@ -266,16 +334,24 @@ def next_step(project, run_id, execution_sha, input_file, input_sha, *,
     base = _summary(run_id)
     files = None
     try:
-        pending = pending_generation.inspect(project)
-        if pending['status'] != 'pending':
-            return base
-        with FreshRunLock(project, pending) as lock:
+        with ExitStack() as stack:
+            proof = stack.enter_context(_generation_history(
+                project, run_id, execution_sha, now, source_state))
+            if proof and proof.get('retired'):
+                return base
+            pending = proof['original_pending'] if proof else pending_generation.inspect(project)
+            if pending['status'] != 'pending':
+                return base
+            lock = stack.enter_context(FreshRunLock(project, pending))
             files = PrivateFiles(project)
             record = _execution(files, run_id, execution_sha, now, source_state)
             if not _pending_matches(pending, record, execution_sha, files.identity):
                 return base
             request = _request(files, input_file, input_sha, run_id, execution_sha, pending, recovery=recovery)
             step, parameters = request['step'], copy.deepcopy(request['parameters'])
+            if proof and (step != 'finalize_generation'
+                          or parameters['generation_sha'] != proof['generation_sha256']):
+                return base
             module_name, _, injection = OPERATIONS[step]
             from fresh_run_authority import current_step
             with current_step(project, request['renewal'], operation=step, target=parameters,
@@ -290,6 +366,10 @@ def next_step(project, run_id, execution_sha, input_file, input_sha, *,
                         kwargs[injection] = adapter
                 if step in ('execute_bootstrap', 'reconcile_bootstrap'):
                     collector = (adapters or {}).get('bootstrap_network_collector')
+                    if collector is not None:
+                        kwargs['collector'] = collector
+                if step in ('execute_replay', 'reconcile_replay'):
+                    collector = (adapters or {}).get('replay_network_collector')
                     if collector is not None:
                         kwargs['collector'] = collector
                 result = function(project, **kwargs)
@@ -337,6 +417,31 @@ def _network_state(files, run):
 
 
 def status_run(project, run_id, execution_sha, *, now=None, source_state=None):
+    """Observe historical progress and exact local prefixes without mutation."""
+    identifier(run_id)
+    sha256(execution_sha)
+    base = dict(_summary(run_id), dispatch_attempted=False, remote_mutation_performed=False)
+    try:
+        with _generation_history(project, run_id, execution_sha, now, source_state) as proof:
+            if proof is None:
+                return _status_pending(project, run_id, execution_sha, now=now,
+                                       source_state=source_state)
+            complete = proof['status'] == 'completed'
+            return {**base, 'status': 'completed' if complete else 'generation-' + proof['status'],
+                    'execution_sha256': execution_sha,
+                    'pending_sha256': proof['original_pending']['sha256'],
+                    'generation_sha256': proof['generation_sha256'],
+                    'prefix_length': proof['prefix_length'],
+                    'historical_integrity': True, 'integrity_verified': True,
+                    'execution_integrity_verified': True, 'journal_integrity_verified': True,
+                    'generation_committed': complete, 'barrier_completed': complete,
+                    'pending_present': not complete, 'uncertain': False,
+                    'next_stage': None if complete else 'generation-accepted'}
+    except ERRORS:
+        return base
+
+
+def _status_pending(project, run_id, execution_sha, *, now=None, source_state=None):
     """Read historical integrity; this never claims current authority/readiness."""
     identifier(run_id)
     sha256(execution_sha)
@@ -390,6 +495,28 @@ def status_run(project, run_id, execution_sha, *, now=None, source_state=None):
             bootstrap_files.recheck()
         finally:
             bootstrap_files.close()
+        from fresh_replay_ops import AREA as REPLAY, inspect_replay
+        replay_files = PrivateFiles(project, max_bytes=128 * 1024 * 1024)
+        try:
+            try:
+                replay, _, _ = replay_files.json(REPLAY + '/' + run_id + '/plan.json')
+            except FileNotFoundError:
+                pass
+            else:
+                exact(replay, {'plan', 'sha256'})
+                historical = inspect_replay(project, run_id, replay['sha256'],
+                                            now=now, source_state=source_state)
+                if not historical.get('historical_integrity'):
+                    return base
+                result.update(status='uncertain' if historical['uncertain'] else 'replay-history-verified',
+                              historical_integrity=True, integrity_verified=True,
+                              journal_integrity_verified=True, replay_sha256=replay['sha256'],
+                              completed_step_count=historical['journal_receipt_count'],
+                              journal_receipt_count=result['journal_receipt_count'] + historical['journal_receipt_count'],
+                              uncertain=historical['uncertain'], next_stage=historical['next_stage'])
+            replay_files.recheck()
+        finally:
+            replay_files.close()
         files.recheck()
         if pending_generation.inspect(project) != pending:
             return base

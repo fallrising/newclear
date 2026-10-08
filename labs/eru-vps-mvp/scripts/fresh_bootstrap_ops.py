@@ -162,7 +162,16 @@ class _Session:
             target_token_sha256=policy['target_token_sha256'], prior_token_sha256=policy['prior_token_sha256'],
             safe_core={'selection': selection, 'binary_base64': base64.b64encode(binary).decode()},
             core_key_path=setup['core_key']['path'], capacities=document['capacities'])
-        dependencies = [{'path': path, 'sha256': digest} for path, digest in sorted(self.files.seen.items())
+        # The proved before-view supplies these logical bytes without adding
+        # them to the physical read cache. Bind them explicitly in either view.
+        from fresh_generation import PATHS
+        dependency_hashes = dict(self.files.seen)
+        for path in PATHS:
+            _, relative, digest = self.files.read(path)
+            if relative != path or (path in dependency_hashes and dependency_hashes[path] != digest):
+                raise ValueError('bootstrap canonical dependency differs')
+            dependency_hashes[path] = digest
+        dependencies = [{'path': path, 'sha256': digest} for path, digest in sorted(dependency_hashes.items())
                         if not path.startswith(AREA + '/')]
         return {'schema_version': 1, 'operation': 'fresh-bootstrap-plan', 'run_id': run,
                 'plan_id': plan_id, 'plan_sha256': plan_sha, 'network_receipt_sha256': receipt_sha,

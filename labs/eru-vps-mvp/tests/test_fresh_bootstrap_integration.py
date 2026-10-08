@@ -30,7 +30,9 @@ from test_fresh_run_authority_integration import renewal
 
 
 class BootstrapMainlineTests(unittest.TestCase):
-    def test_public_mainline_lost_reply_renewal_status_and_no_replay(self):
+    def assert_public_mainline_lost_reply_renewal_status_and_no_replay(self):
+        # Called once by the full completion journey. Keep every original
+        # bootstrap assertion while avoiding duplicate costly end-to-end setup.
         lock = json.loads((Path(bootstrap.__file__).resolve().parents[1] / 'artifacts.amd64.lock.json').read_text())
         names = {'etcd-io/etcd': ['etcd', 'etcdctl', 'etcdutl'], 'projecteru2/cli': ['eru-cli'],
                  'projecteru2/resource-extend': ['resource-storage'], 'projecteru2/agent': ['eru-agent'],

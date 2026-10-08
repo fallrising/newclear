@@ -46,6 +46,7 @@ class FreshRunLock(ClusterLock):
         super().__init__(project)
         self.project = Path(project)
         self._expected = _snapshot(expected_pending)
+        self._completion = None
 
     def __enter__(self):
         if LOCK_ENV in os.environ:
@@ -58,6 +59,22 @@ class FreshRunLock(ClusterLock):
     def check_pending(self):
         """Fail closed on record, raw bytes, path or pinned backing-root drift."""
         self.check_private_root()
+        if self._completion is not None:
+            from fresh_run_authority import active
+            owner = active()
+            # The driver checks the lock after the operation decorator has
+            # cleared entered. Re-enter the exact owner's current proof, which
+            # calls this lock again at positive depth and checks completion.
+            if (owner is not None and owner.operation == 'finalize_generation'
+                    and not owner.historical and not owner.entered
+                    and owner.lock is self and owner._generation_proof_depth == 0):
+                return owner.check()
+            from fresh_generation_ops import verify_completed
+            run, digest, now, source_state = self._completion
+            proof = verify_completed(self.project, run, private_fd=self.private_fd, now=now, source_state=source_state)
+            if (proof['generation_sha256'] != digest or _snapshot(proof['original_pending']) != self._expected):
+                raise RuntimeError('owned completion changed')
+            return
         actual = pending.inspect(self.project)
         if json.dumps(actual, sort_keys=True, separators=(',', ':'), allow_nan=False) != self._expected:
             raise RuntimeError('owned pending reservation changed')
@@ -65,6 +82,16 @@ class FreshRunLock(ClusterLock):
         if pending._identity(os.fstat(self.private_fd)) != expected['reservation']['private_identity']:
             raise RuntimeError('controller private root changed')
         self.check_private_root()
+
+    def accept_completion(self, run_id, generation_sha, *, now=None, source_state=None):
+        """Switch exit validation only after the exact completion deeply verifies."""
+        from fresh_generation_ops import verify_completed
+        self.check_private_root()
+        proof = verify_completed(self.project, run_id, private_fd=self.private_fd,now=now,source_state=source_state)
+        if proof['generation_sha256'] != generation_sha or _snapshot(proof['original_pending']) != self._expected:
+            raise RuntimeError('completion does not own this reservation')
+        self._completion = (run_id,generation_sha,now,source_state)
+        self.check_pending()
 
     def __exit__(self, *exc):
         try:

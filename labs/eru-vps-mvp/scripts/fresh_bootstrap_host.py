@@ -609,7 +609,7 @@ def validate_evidence(action, observation, *, before=False):
                     capacity = _decode(capacity.encode(), LIMIT)
                 normalized = {'node': name, 'podname': node.get('podname'), 'endpoint': node.get('endpoint'),
                     'resource_capacity': capacity, 'labels': node.get('labels'),
-                    'available': node.get('available'), 'bypass': node.get('bypass')}
+                    'available': node.get('available', False), 'bypass': node.get('bypass', False)}
                 if any(normalized[k] != w[k] for k in ('podname', 'endpoint', 'resource_capacity', 'labels')) or any(type(normalized[k]) is not bool for k in ('available', 'bypass')):
                     raise ValueError(ERROR)
                 facts['workers'].append(normalized)

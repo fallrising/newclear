@@ -139,6 +139,15 @@ class PrivateFiles:
                 os.close(fd)
 
     def read(self, value):
+        # A deeply verified generation-history context supplies only the
+        # canonical sealed before snapshots; ordinary reads stay strict.
+        from fresh_generation import historical_read
+        historical = historical_read(self, value)
+        if historical is not None:
+            if len(historical[0]) > self.max_bytes:
+                raise ValueError('execution historical input too large')
+            self.check()
+            return historical
         parts = self.parts(value)
         parent = self.directory(parts[:-1])
         try:

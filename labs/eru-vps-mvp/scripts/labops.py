@@ -62,9 +62,12 @@ class ClusterLock:
             raise RuntimeError('controller private root changed')
 
     def _admit(self):
-        """Ordinary mutations reject every persistent pending path."""
-        from pending_generation import assert_no_pending
-        assert_no_pending(self.private_fd)
+        """Admit after full completion proof and durable historical retention."""
+        from pending_generation import assert_no_pending, retire_completed
+        assert_no_pending(self.private_fd, project=self.path.parent.parent)
+        self.check_private_root()
+        retire_completed(self.path.parent.parent, self.private_fd)
+        self.check_private_root()
 
     def __enter__(self):
         if self.thread_lock_acquired:

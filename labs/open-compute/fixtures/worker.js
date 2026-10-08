@@ -2,7 +2,7 @@ import { WorkflowEntrypoint } from "cloudflare:workers";
 
 const ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
 
-async function body(request) {
+async function jsonBody(request) {
   if (!request.body) throw new Error("body required");
   const reader = request.body.getReader();
   const chunks = [];
@@ -24,7 +24,11 @@ async function body(request) {
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  const input = JSON.parse(new TextDecoder().decode(bytes));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+async function body(request) {
+  const input = await jsonBody(request);
   if (!input || typeof input !== "object" || Array.isArray(input) ||
       Object.keys(input).sort().join(",") !== "id,payload" ||
       typeof input.id !== "string" || !ID.test(input.id) || typeof input.payload !== "string" ||
@@ -46,6 +50,41 @@ export default {
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/health") {
       return Response.json({ fixture: "open-compute-m1", ok: true });
+    }
+    if (request.method === "PUT" && url.pathname === "/r2/sentinel" && env.BUCKET) {
+      let input;
+      try {
+        input = await jsonBody(request);
+        if (!input || typeof input !== "object" || Array.isArray(input) ||
+            Object.keys(input).sort().join(",") !== "bytes,nonce" ||
+            typeof input.nonce !== "string" || !/^[a-f0-9]{32}$/.test(input.nonce) ||
+            !Array.isArray(input.bytes) || input.bytes.length < 1 || input.bytes.length > 128 ||
+            !input.bytes.every(value => Number.isInteger(value) && value >= 0 && value <= 255)) {
+          throw new Error("invalid sentinel");
+        }
+      } catch { return Response.json({ error: "invalid sentinel" }, { status: 400 }); }
+      const written = await env.BUCKET.put("restore/sentinel.bin", new Uint8Array(input.bytes), {
+        httpMetadata: {
+          contentType: "application/octet-stream",
+          cacheControl: "private, max-age=60",
+          contentDisposition: 'attachment; filename="sentinel.bin"'
+        },
+        customMetadata: { purpose: "cold-restore", nonce: input.nonce }
+      });
+      return Response.json({ key: written.key, size: written.size, etag: written.etag, version: written.version });
+    }
+    if (request.method === "GET" && url.pathname === "/r2/sentinel" && env.BUCKET) {
+      const object = await env.BUCKET.get("restore/sentinel.bin");
+      if (!object) return Response.json({ error: "missing sentinel" }, { status: 404 });
+      if (object.size < 1 || object.size > 128) throw new Error("sentinel exceeds fixture bound");
+      const headers = new Headers();
+      object.writeHttpMetadata(headers);
+      return Response.json({
+        key: object.key, size: object.size, etag: object.etag, httpEtag: object.httpEtag,
+        version: object.version, uploaded: object.uploaded.toISOString(),
+        httpMetadata: object.httpMetadata, customMetadata: object.customMetadata,
+        headers: Object.fromEntries(headers), bytes: [...new Uint8Array(await object.arrayBuffer())]
+      });
     }
     if (request.method === "POST" && url.pathname === "/jobs") {
       let input;

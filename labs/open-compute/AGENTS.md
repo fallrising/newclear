@@ -7,6 +7,8 @@ Follow the repository-wide instructions and the scope of the current task.
 This component evaluates a pinned upstream runtime with a small first-party
 operational harness. Read `docs/SDD.md` before editing. Changes to the contract
 precede implementation changes; keep acceptance IDs traceable to evidence.
+For complete Local cold restore, also read `docs/SDD-M2.md`; its baseline must
+be committed before M2 implementation.
 
 - Use the original release artifact and verify its SHA256 before execution.
   Do not patch upstream, impersonate a non-root user, or use upstream test-only
@@ -22,13 +24,17 @@ precede implementation changes; keep acceptance IDs traceable to evidence.
   behavior. Record command, source identity, result, and environment limitations.
 - A normal daemon restart is not a crash test, complete backup restore, HA,
   universal Cloudflare compatibility, or an untrusted-code security boundary.
+- M2 restores only the complete backup of this invocation's synthetic scope,
+  after verified quiescence and actual source removal. Preserve the documented
+  same-runner/path/UID boundary; never reseed missing state or upload backups.
 - Keep public documentation self-contained and free of private infrastructure
   identifiers. Describe host authority, workload authority, and runtime contracts
   abstractly.
 
 ## Verification and evidence
 
-The implementation supplies `make check` for local offline checks and
-`make integration` for the real non-root runtime. Link the current evidence from
+The implementation supplies `make check` for local offline checks,
+`make integration` for the M1 real-runtime restart, and `make integration-restore`
+for the M2 real-runtime cold restore. Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.

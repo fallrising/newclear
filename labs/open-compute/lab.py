@@ -2,7 +2,7 @@
 """Bounded black-box probe for the pinned open-compute release (Python stdlib)."""
 
 import argparse
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import hashlib
 import http.client
 import json
@@ -29,9 +29,15 @@ BODY_LIMIT = 1024 * 1024
 LOG_LIMIT = 32 * 1024
 HTTP_TOTAL_TIMEOUT = 20.0
 DOWNLOAD_TOTAL_TIMEOUT = 300.0
+RECOVERY_TOTAL_TIMEOUT = 120.0
 INSTANCE = "lab"
 WORKER = "m1-worker"
 FLOW = "m1-flow"
+BUCKET = "lab-bucket"
+R2_KEY = "restore/sentinel.bin"
+R2_HTTP_METADATA = {"contentType": "application/octet-stream",
+                    "cacheControl": "private, max-age=60",
+                    "contentDisposition": 'attachment; filename="sentinel.bin"'}
 MARKER = ".open-compute-lab-owner"
 
 
@@ -188,6 +194,25 @@ def download_deadline():
     signal.setitimer(signal.ITIMER_REAL, DOWNLOAD_TOTAL_TIMEOUT)
     try:
         yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+
+
+@contextmanager
+def recovery_deadline():
+    """One budget spans stop, local I/O, restored startup and read-only checks."""
+    require(threading.current_thread() is threading.main_thread(), "recovery requires the main thread")
+    require(signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0), "an existing alarm prevents bounded recovery")
+    previous = signal.getsignal(signal.SIGALRM)
+    deadline = time.monotonic() + RECOVERY_TOTAL_TIMEOUT
+    def expired(_signum, _frame):
+        raise LabError("cold recovery total deadline exceeded")
+    signal.signal(signal.SIGALRM, expired)
+    signal.setitimer(signal.ITIMER_REAL, RECOVERY_TOTAL_TIMEOUT)
+    try:
+        yield deadline
+        require(time.monotonic() < deadline, "cold recovery total deadline exceeded")
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, previous)
@@ -496,6 +521,18 @@ class LocalHTTP:
         return envelope.get("result")
 
 
+class ReadOnlyHTTP(LocalHTTP):
+    """The recovery comparison phase cannot repair missing resources."""
+    def __init__(self, port, token=None):
+        super().__init__(port, token)
+        self.read_requests = 0
+
+    def request(self, method, path, body=None, content_type="application/json", host=None):
+        require(method == "GET" and body is None, "restored readback prohibits HTTP writes")
+        self.read_requests += 1
+        return super().request(method, path, body, content_type, host)
+
+
 def worker_host(endpoint, port):
     require(endpoint.get("kind") == "local_origin" and endpoint.get("scope") == "local_machine",
             "Worker endpoint must be a local origin")
@@ -508,7 +545,7 @@ def worker_host(endpoint, port):
     return parsed.netloc
 
 
-def multipart(database_id):
+def multipart(database_id, with_r2=False):
     boundary = "oc-lab-" + secrets.token_hex(16)
     metadata = {
         "main_module": "index.js", "compatibility_date": "2026-09-08",
@@ -517,6 +554,8 @@ def multipart(database_id):
                       "class_name": "LabFlow"}],
         "exports": {"LabFlow": {"type": "workflow", "name": FLOW}}
     }
+    if with_r2:
+        metadata["bindings"].append({"type": "r2_bucket", "name": "BUCKET", "bucket_name": BUCKET})
     source = (HERE / "fixtures/worker.js").read_bytes()
     require(len(source) < 32 * 1024, "fixture exceeds upload bound")
     parts = []
@@ -558,6 +597,93 @@ def assert_resume(before, retained, after, output, job_id):
     require(after["step_nonce"] == before["step_nonce"], "persisted callback nonce changed")
     require(after["completed"] == 1 and output == {"jobId": job_id, "nonce": before["step_nonce"]},
             "Workflow output/completion did not preserve the committed step result")
+
+
+def deployment_observation(api, base, database_id):
+    """Read the immutable code/runtime/binding projection, without altering it."""
+    path = base + "/workers/scripts/" + WORKER
+    deployments = api.v4("GET", path + "/deployments")["deployments"]
+    require(len(deployments) == 1, "expected one original Worker deployment")
+    deployment = deployments[0]
+    require(len(deployment["versions"]) == 1 and deployment["versions"][0]["percentage"] == 100,
+            "expected one fully active Worker version")
+    version_id = deployment["versions"][0]["version_id"]
+    require(isinstance(version_id, str) and re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", version_id),
+            "invalid discovered Worker version")
+    version = api.v4("GET", path + "/versions/" + version_id)
+    require(version["id"] == version_id, "Worker version lookup changed identity")
+    resources = version["resources"]
+    bindings = sorted(resources["bindings"], key=lambda binding: binding["name"])
+    expected = sorted([
+        {"type": "d1", "name": "DB", "database_id": database_id},
+        {"type": "r2_bucket", "name": "BUCKET", "bucket_name": BUCKET},
+        {"type": "workflow", "name": "FLOW", "workflow_name": FLOW, "class_name": "LabFlow"}
+    ], key=lambda binding: binding["name"])
+    require(bindings == expected, "deployed D1/R2/Workflow bindings disagree with fixture resources")
+    etag = resources["script"]["etag"]
+    require(isinstance(etag, str) and re.fullmatch(r"[0-9a-f]{64}", etag), "invalid Worker code digest")
+    return {"deployment_id": deployment["id"], "version_id": version_id,
+            "script_etag": etag, "runtime": resources["script_runtime"], "bindings": bindings}
+
+
+def assert_r2(observation, payload, nonce):
+    require(observation.get("key") == R2_KEY, "R2 object key changed")
+    values = observation.get("bytes")
+    require(isinstance(values, list) and all(type(value) is int and 0 <= value <= 255 for value in values),
+            "R2 body is not a byte array")
+    require(bytes(values) == payload and observation.get("size") == len(payload), "R2 bytes or size changed")
+    require(observation.get("httpMetadata") == R2_HTTP_METADATA, "R2 HTTP metadata changed")
+    require(observation.get("customMetadata") == {"purpose": "cold-restore", "nonce": nonce},
+            "R2 custom metadata changed")
+    require(observation.get("headers") == {"content-type": R2_HTTP_METADATA["contentType"],
+            "cache-control": R2_HTTP_METADATA["cacheControl"],
+            "content-disposition": R2_HTTP_METADATA["contentDisposition"]}, "R2 metadata header projection changed")
+    for field in ("etag", "httpEtag", "version", "uploaded"):
+        require(isinstance(observation.get(field), str) and 0 < len(observation[field]) <= 200,
+                "R2 persisted identity is missing or unbounded")
+    require(observation["httpEtag"] == '"' + observation["etag"] + '"', "R2 HTTP etag disagrees")
+
+
+def public_backup_summary(summary):
+    """Do not let private inventory or helper diagnostics enter evidence."""
+    allowed = {"source_root", "staging_root", "restored_root", "locks_acquired", "archive_verified",
+               "source_verified", "source_absent", "data_absent", "restored_verified", "entry_count",
+               "file_count", "total_bytes", "inventory_sha256", "private_removed", "staging_removed"}
+    require(isinstance(summary, dict) and not set(summary) - allowed, "backup evidence contains an unexpected field")
+    for key, value in summary.items():
+        if key.endswith("_root"):
+            require(isinstance(value, dict) and set(value) == {"device", "inode"} and
+                    all(type(item) is int and item >= 0 for item in value.values()), "invalid root identity evidence")
+        elif key == "inventory_sha256":
+            require(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value), "invalid inventory digest evidence")
+        elif key in {"entry_count", "file_count", "total_bytes"}:
+            require(type(value) is int and value >= 0, "invalid inventory count evidence")
+        else:
+            require(type(value) is bool, "invalid backup gate evidence")
+    return summary
+
+
+def cleanup_scope(scope, restore, original_identity=None, restored_identity=None):
+    """Only recover() can remove the original M2 source, never final cleanup."""
+    if scope is None or scope.identity is None:
+        return {}
+    if restore and (restored_identity is None or scope.identity != restored_identity):
+        scope.check_owner()
+        return {"source_preserved": scope.identity == original_identity,
+                "scope_preserved": True, "scope_removed": False}
+    require(not restore or restored_identity != original_identity, "original source cannot be removed by final cleanup")
+    if restore:
+        from cold_backup import CLEANUP_SECONDS, absent, cleanup_deadline
+        # This 30-second final cleanup is separate from the original Workflow
+        # recovery budget. Private package cleanup follows with its own timer.
+        deadline = time.monotonic() + CLEANUP_SECONDS
+        with cleanup_deadline():
+            scope.remove(processes_stopped=True)
+            require(absent(scope.path), "restored scope cleanup did not finish")
+            require(time.monotonic() < deadline, "restored scope cleanup deadline exceeded")
+    else:
+        scope.remove(processes_stopped=True)
+    return {"scope_removed": True}
 
 
 class Redactor:
@@ -603,18 +729,26 @@ def source_commit():
         return None
 
 
-def integration(args):
+def integration(args, restore=False):
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
-    report = {"schema_version": 1, "run_id": run_id, "command": "make integration",
+    command_name = "make integration-restore" if restore else "make integration"
+    report = {"schema_version": 1, "run_id": run_id, "command": command_name,
               "harness_commit": source_commit(), "result": "failed", "phase": "preflight",
               "environment": {"os": platform.system(), "architecture": platform.machine(),
                               "euid": os.geteuid(), "python": platform.python_version()},
-              "acceptance": {f"AC-{n:02}": "not_run" for n in range(1, 9)}}
+              "acceptance": ({f"M2-{n:02}": "not_run" for n in range(1, 10)} if restore else
+                             {f"AC-{n:02}": "not_run" for n in range(1, 9)})}
+    if restore:
+        report.update({"scenario": "same-path-cold-restore", "cold_restore": {},
+                       "limitations": {"same_runner": True, "same_path": True, "same_uid": True,
+                                       "fresh_machine_tested": False, "version_migration_tested": False}})
     redactor = Redactor()
     scope = None
     daemon = None
     daemons = []
     cleanup_unknown = False
+    cold_restore = None
+    original_scope_identity = restored_scope_identity = None
     output = Path(args.output) if args.output else HERE / ".lab-runs" / run_id
     cache = Path(args.cache)
     output_allowed = False
@@ -629,7 +763,8 @@ def integration(args):
         cache, output = validate_artifact_paths(scope_hint, cache, output)
         output_allowed = True
         scope_path = preflight(args.port)
-        report["acceptance"]["AC-02"] = "passed"
+        if not restore:
+            report["acceptance"]["AC-02"] = "passed"
         report["phase"] = "artifact"
         lock = json.loads((HERE / "upstream.lock.json").read_text())
         validate_lock(lock)
@@ -638,9 +773,10 @@ def integration(args):
         version = command([str(binary), "--version"]).strip()
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
-        report["acceptance"]["AC-01"] = "passed"
+        report["acceptance"]["M2-01" if restore else "AC-01"] = "passed"
         scope = OwnedScope(scope_path, args.port)
         redactor.secrets.append(scope.create())
+        original_scope_identity = dict(scope.identity)
         config = scope_path / "instances" / INSTANCE / "compute.toml"
         data = config.parent / "data"
 
@@ -696,7 +832,11 @@ def integration(args):
         api.v4("POST", base + "/d1/database/" + database_id + "/query", {
             "sql": "CREATE TABLE jobs (id TEXT PRIMARY KEY, payload TEXT NOT NULL, callback_count INTEGER NOT NULL DEFAULT 0, step_nonce TEXT, completed INTEGER NOT NULL DEFAULT 0)",
             "params": []})
-        upload, content_type = multipart(database_id)
+        if restore:
+            bucket = api.v4("POST", base + "/r2/buckets", {"name": BUCKET})
+            require(bucket["name"] == BUCKET and bucket["jurisdiction"] == "default" and
+                    bucket["storage_class"] == "Standard", "unexpected R2 bucket configuration")
+        upload, content_type = multipart(database_id, with_r2=restore)
         api.v4("PUT", base + "/workers/scripts/" + WORKER, upload, content_type)
         endpoints = api.v4("GET", base + "/open-compute/workers/" + WORKER + "/endpoints")
         local_endpoints = [endpoint for endpoint in endpoints if endpoint.get("kind") == "local_origin"]
@@ -711,11 +851,22 @@ def integration(args):
         second = worker.request("POST", "/jobs", submission, host=host)
         require(first == second and second["row_count"] == 1 and second["job"]["id"] == job_id,
                 "duplicate submission did not retain one identical logical row")
-        report["acceptance"].update({"AC-03": "passed", "AC-04": "passed"})
+        if not restore:
+            report["acceptance"].update({"AC-03": "passed", "AC-04": "passed"})
         report["duplicate_submission"] = {"requests": 2, "row_count": second["row_count"]}
+        if restore:
+            r2_payload = bytes([0, 255, 13, 10]) + secrets.token_bytes(60)
+            r2_nonce = secrets.token_hex(16)
+            worker.request("PUT", "/r2/sentinel", {"bytes": list(r2_payload), "nonce": r2_nonce}, host=host)
+            r2_before = worker.request("GET", "/r2/sentinel", host=host)
+            assert_r2(r2_before, r2_payload, r2_nonce)
+            deployment_before = deployment_observation(api, base, database_id)
+            report["r2"] = {"key": R2_KEY, "size": len(r2_payload),
+                            "content_sha256": hashlib.sha256(r2_payload).hexdigest()}
         report["phase"] = "durable_wait"
         workflow_id = "flow-" + run_id.lower()
         workflow_path = base + "/workflows/" + FLOW + "/instances/" + workflow_id
+        workflow_deadline = time.monotonic() + 300
         creation = api.v4("POST", base + "/workflows/" + FLOW + "/instances",
                           {"instance_id": workflow_id, "params": {"jobId": job_id}})
         require(creation["id"] == workflow_id, "Workflow identity changed during creation")
@@ -725,7 +876,7 @@ def integration(args):
                 "waiting Workflow has no single committed callback")
         require(any(step.get("name") == "instrumented-callback" and step.get("success") is True
                     for step in waiting.get("steps", [])), "first step was not publicly committed")
-        report["acceptance"]["AC-05"] = "passed"
+        report["acceptance"]["M2-02" if restore else "AC-05"] = "passed"
         report["workflow"] = {"id": workflow_id, "before_status": waiting["status"],
                               "before_callback_count": before["callback_count"],
                               "before_nonce_sha256": hashlib.sha256(before["step_nonce"].encode()).hexdigest()}
@@ -734,36 +885,97 @@ def integration(args):
         live_children = [public_process(child) for child in daemon.live() if child["pid"] != daemon.process.pid]
         require(live_children, "no live supervised runtime child was observed")
         report["live_children_before_restart"] = live_children
-        report["phase"] = "daemon_restart"
-        report["daemon_before"] = public_process(daemon.identity)
-        stopped = daemon.stop()
-        report["first_shutdown"] = stopped
-        require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
-                stopped["exit_code"] == 0, "original daemon did not exit gracefully with all owned children")
-        scope.check_owner()
-        daemon = start()
-        poll(lambda: json.loads(cli("instances", "--json"))["instances"],
-             lambda rows: len(rows) == 1 and rows[0]["state"] == "running", 60, "instance restart")
-        require(running_instance() == instance_id, "instance identity changed across daemon restart")
-        report["daemon_after"] = public_process(daemon.identity)
-        require(report["daemon_after"] != report["daemon_before"], "daemon process identity did not change")
-        state_after = state_identity(scope_path, data, config)
-        require(state_before == state_after, "scope/data/database/config identity changed across restart")
-        report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
-        report["acceptance"]["AC-06"] = "passed"
+        report["phase"] = "cold_shutdown" if restore else "daemon_restart"
+        with recovery_deadline() if restore else nullcontext(None) as deadline:
+            report["daemon_before"] = public_process(daemon.identity)
+            stopped = daemon.stop()
+            report["first_shutdown"] = stopped
+            require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
+                    stopped["exit_code"] == 0, "original daemon did not exit gracefully with all owned children")
+            scope.check_owner()
+            if restore:
+                from cold_backup import ColdRestore
+                def progress(event, summary):
+                    nonlocal restored_scope_identity
+                    gates = {"locked": "M2-03", "backup_verified": "M2-04",
+                             "source_removed": "M2-05", "restored": "M2-06"}
+                    require(event in gates, "unknown cold restore progress event")
+                    report["cold_restore"].update(public_backup_summary(summary))
+                    if event == "backup_verified":
+                        require(summary.get("archive_verified") is True and summary.get("source_verified") is True,
+                                "source deletion requires verified backup and source comparison")
+                    if event == "restored":
+                        restored_root = summary.get("restored_root")
+                        require(summary.get("restored_verified") is True and restored_root == scope.identity and
+                                restored_root != original_scope_identity, "restored ownership transfer is unverified")
+                        restored_scope_identity = dict(restored_root)
+                    report["acceptance"][gates[event]] = "passed"
+                    report["phase"] = "cold_" + event
+                cold_restore = ColdRestore(scope, cache, output, deadline, progress)
+                report["cold_restore"].update(public_backup_summary(cold_restore.recover()))
+                require(all(report["acceptance"]["M2-" + str(number).zfill(2)] == "passed"
+                            for number in range(3, 7)), "cold restore gates incomplete; runtime spawn refused")
+                require(report["cold_restore"].get("source_absent") is True and
+                        report["cold_restore"].get("data_absent") is True and
+                        report["cold_restore"].get("restored_verified") is True,
+                        "cold restore lacks deletion or pre-spawn verification")
+                report["phase"] = "restored_startup"
+            daemon = start()
+            poll(lambda: json.loads(cli("instances", "--json"))["instances"],
+                 lambda rows: len(rows) == 1 and rows[0]["state"] == "running", 60, "instance restart")
+            require(running_instance() == instance_id, "instance identity changed across daemon restart")
+            report["daemon_after"] = public_process(daemon.identity)
+            require(report["daemon_after"] != report["daemon_before"], "daemon process identity did not change")
+            if restore:
+                # Read credentials from the restored files. Old observed state
+                # is used only for assertions, never to reconstruct authority.
+                restored_token = (data / "keys/deployer.token").read_text().strip()
+                api = ReadOnlyHTTP(args.port, restored_token)
+                worker = ReadOnlyHTTP(args.port)
+                restored_accounts = api.v4("GET", "/accounts")
+                require(len(restored_accounts) == 1 and restored_accounts[0]["id"] == account,
+                        "account identity changed across cold restore")
+                report["phase"] = "restored_readback"
+                deployment_after = deployment_observation(api, base, database_id)
+                require(deployment_after == deployment_before, "deployment, code or bindings changed across restore")
+                r2_after = worker.request("GET", "/r2/sentinel", host=host)
+                assert_r2(r2_after, r2_payload, r2_nonce)
+                require(r2_after == r2_before, "R2 object identity or metadata changed across restore")
+                report["deployment"] = {"deployment_id": deployment_before["deployment_id"],
+                                        "version_id": deployment_before["version_id"],
+                                        "script_etag": deployment_before["script_etag"],
+                                        "code_runtime_bindings_unchanged": True}
+                report["r2"].update({"bytes_unchanged": True, "metadata_unchanged": True,
+                                      "etag_version_uploaded_unchanged": True})
+            else:
+                state_after = state_identity(scope_path, data, config)
+                require(state_before == state_after, "scope/data/database/config identity changed across restart")
+                report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
+                report["acceptance"]["AC-06"] = "passed"
+            retained = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+            require(retained == before, "D1 state did not survive daemon restart")
+            wait_workflow(api, workflow_path, "waiting")
+            if restore:
+                report["readback"] = {"instance_account_database_unchanged": True, "d1_row_unchanged": True,
+                                      "original_workflow_waiting": True, "read_only_http_enforced": True,
+                                      "read_requests": api.read_requests + worker.read_requests}
+                report["acceptance"]["M2-07"] = "passed"
         report["phase"] = "resume"
-        retained = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
-        require(retained == before, "D1 state did not survive daemon restart")
-        wait_workflow(api, workflow_path, "waiting")
+        if restore:
+            api = LocalHTTP(args.port, restored_token)
+        require(not restore or time.monotonic() < workflow_deadline - HTTP_TOTAL_TIMEOUT,
+                "original Workflow deadline leaves no approval margin")
         event = api.v4("POST", workflow_path + "/events/approval", {"approved": True})
         require(event["instanceId"] == workflow_id, "approval targeted a different Workflow")
-        complete = wait_workflow(api, workflow_path, "complete")
+        complete = wait_workflow(api, workflow_path, "complete",
+                                 timeout=min(60, workflow_deadline - time.monotonic()) if restore else 60)
+        require(not restore or time.monotonic() < workflow_deadline, "original Workflow wall-clock deadline exceeded")
         after = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
         assert_resume(before, retained, after, complete.get("output"), job_id)
         report["workflow"].update({"after_status": complete["status"], "after_callback_count": after["callback_count"],
                                    "after_nonce_sha256": hashlib.sha256(after["step_nonce"].encode()).hexdigest(),
                                    "same_id": True, "nonce_unchanged": True, "completed": after["completed"]})
-        report["acceptance"]["AC-07"] = "passed"
+        report["acceptance"]["M2-08" if restore else "AC-07"] = "passed"
         report["phase"] = "cleanup"
         report["result"] = "passed"
     except Exception as exc:
@@ -786,14 +998,16 @@ def integration(args):
                 if item.text() and report["result"] != "passed":
                     report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
             require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
-            if scope is not None and scope.identity is not None:
-                scope.remove(processes_stopped=True)
-                report["scope_removed"] = True
+            report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity))
+            if cold_restore is not None:
+                report["cold_restore"].update(public_backup_summary(cold_restore.cleanup(processes_stopped=True)))
+                require(report["cold_restore"].get("private_removed") is True and
+                        report["cold_restore"].get("staging_removed") is True, "private recovery cleanup incomplete")
             if report["result"] == "passed":
-                report["acceptance"]["AC-08"] = "passed"
+                report["acceptance"]["M2-09" if restore else "AC-08"] = "passed"
                 require(all(value == "passed" for value in report["acceptance"].values()), "acceptance coverage incomplete")
                 report["phase"] = "complete"
-        except (LabError, OSError) as exc:
+        except Exception as exc:
             report["result"] = "failed"
             report["cleanup_error"] = redactor.clean(str(exc))
         for sig, handler in old_handlers.items():
@@ -822,7 +1036,7 @@ def integration(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("preflight", "integration"))
+    parser.add_argument("command", choices=("preflight", "integration", "integration-restore"))
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--cache", default=str(HERE / ".lab-cache"))
     parser.add_argument("--output", help="new directory for sanitized report.json; must not exist")
@@ -835,7 +1049,7 @@ def main():
         except (LabError, OSError) as exc:
             print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
             return 1
-    return integration(args)
+    return integration(args, restore=args.command == "integration-restore")
 
 
 if __name__ == "__main__":

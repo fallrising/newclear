@@ -29,7 +29,7 @@ and their limits are recorded in [the status document](docs/STATUS.md).
 
 | Added in M2 | Evidence boundary |
 | --- | --- |
-| Complete owned state, configuration, keys and Local object backup | Tests this fixed fixture; excludes only enumerated runtime/cache/lock paths |
+| Complete owned state, configuration, keys and Local object backup | Tests this fixed fixture; excludes only enumerated transient paths and binary-derived OCR assets |
 | Quiescence, package integrity and actual source removal | A saved snapshot reference or an old data-directory fallback cannot pass |
 | Fresh directory tree and new daemon at the original path and UID | Same disposable runner; cross-host, OS and arbitrary path relocation remain unverified |
 | Original deployment/version/bindings and D1 state recovered | Restore cannot setup, redeploy, recreate resources or reseed data |

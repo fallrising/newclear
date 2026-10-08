@@ -106,9 +106,10 @@ The harness normally stops the actual daemon and verifies its children exited.
 It obtains exclusive source locks, saves the **complete persistent scope and
 instance authority**, and independently verifies the package against the cold
 source. This includes configuration, keys, database state, Local object marker,
-Worker bytes and R2 payloads. Only the exact transient paths listed in SDD-M2
-are excluded. Upstream's Local `ocd backup restore` does not implement this
-operation; M2 tests the documented operator cold-directory procedure.
+Worker bytes and R2 payloads. Only the exact transient paths and binary-derived
+OCR asset subtree listed in SDD-M2 are excluded. Upstream's Local `ocd backup
+restore` does not implement this operation; M2 tests the documented operator
+cold-directory procedure.
 
 After verification, M2 **actually removes its own source scope**, checks the
 source and data paths are absent, and restores only from the saved package into

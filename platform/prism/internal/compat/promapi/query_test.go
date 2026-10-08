@@ -3,12 +3,16 @@ package promapi
 import (
 	"bufio"
 	"context"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
+	"maps"
 	"math"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -378,5 +382,216 @@ func TestQueryMalformedParameters(t *testing.T) {
 		if w.Code != 400 || !strings.Contains(w.Body.String(), `"errorType":"bad_data"`) {
 			t.Errorf("%s: %d %s", r.URL.String(), w.Code, w.Body.String())
 		}
+	}
+}
+
+// Storage-free expressions use the pinned engine even on a native-capable store.
+func TestStorageFreeQueryEvaluation(t *testing.T) {
+	now := time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC)
+	for _, backendCase := range []struct {
+		capability, nativeInterface bool
+	}{{false, false}, {false, true}, {true, false}, {true, true}} {
+		for _, tc := range []struct {
+			name, expr, stamp, resultType, value string
+			rangeQuery                           bool
+		}{
+			{"historical scalar", "1+1", "4", "scalar", "2", false},
+			{"other historical arithmetic", "(3*7)-2", "-123.5", "scalar", "19", false},
+			{"historical vector", "vector(2)", "4", "vector", "2", false},
+			{"historical time", "time()", "4", "scalar", "4", false},
+			{"historical vector time", "vector(time())", "4", "vector", "4", false},
+			{"historical subquery", "max_over_time(vector(2)[5m:1m])", "4", "vector", "2", false},
+			{"historical string", `"hello"`, "4", "string", "hello", false},
+			{"current scalar", "1+1", fmt.Sprint(now.Unix()), "scalar", "2", false},
+			{"current vector", "vector(2)", fmt.Sprint(now.Unix()), "vector", "2", false},
+			{"current string", `"hello"`, fmt.Sprint(now.Unix()), "string", "hello", false},
+			{"current range", "vector(2)", fmt.Sprint(now.Unix()), "matrix", "2", true},
+		} {
+			for _, method := range []string{http.MethodGet, http.MethodPost} {
+				t.Run(fmt.Sprintf("capability=%v/interface=%v/%s/%s", backendCase.capability, backendCase.nativeInterface, tc.name, method), func(t *testing.T) {
+					store := &contractNativeStore{contractStore: &contractStore{}}
+					var metrics spi.MetricStore = store.contractStore
+					if backendCase.nativeInterface {
+						metrics = store
+					}
+					key := secret.String(strings.Repeat("k", 32))
+					h, err := NewQueryHandler(queryBackend{store: metrics, caps: spi.Capabilities{Metrics: spi.MetricCaps{NativePromQL: backendCase.capability}}}, QueryOptions{Tenant: "trusted", APIKey: key, Config: config.Default().Query, Clock: fixedQueryClock{now}})
+					if err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() { _ = h.Close(t.Context()) })
+					path := "/prom/api/v1/query"
+					values := url.Values{"query": {tc.expr}, "time": {tc.stamp}}
+					if tc.rangeQuery {
+						path += "_range"
+						values = url.Values{"query": {tc.expr}, "start": {fmt.Sprint(now.Add(-time.Minute).Unix())}, "end": {tc.stamp}, "step": {"1m"}}
+					}
+					var body io.Reader
+					if method == http.MethodGet {
+						path += "?" + values.Encode()
+					} else {
+						body = strings.NewReader(values.Encode())
+					}
+					r := httptest.NewRequestWithContext(t.Context(), method, path, body)
+					r.Header.Set("Authorization", "Bearer "+string(key))
+					if method == http.MethodPost {
+						r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+					}
+					w := httptest.NewRecorder()
+					h.HTTPHandler().ServeHTTP(w, r)
+					if w.Code != http.StatusOK {
+						t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+					}
+					var envelope struct {
+						Status string `json:"status"`
+						Data   struct {
+							ResultType string         `json:"resultType"`
+							Result     jsontext.Value `json:"result"`
+						} `json:"data"`
+					}
+					if err := json.Unmarshal(w.Body.Bytes(), &envelope); err != nil {
+						t.Fatal(err)
+					}
+					if envelope.Status != "success" || envelope.Data.ResultType != tc.resultType {
+						t.Fatalf("unexpected result %s", w.Body.String())
+					}
+					if tc.rangeQuery {
+						want := fmt.Sprintf(`"values":[[%s,"2"],[%s,"2"]]`, fmt.Sprint(now.Add(-time.Minute).Unix()), tc.stamp)
+						if !strings.Contains(string(envelope.Data.Result), want) {
+							t.Fatalf("range result=%s want=%s", envelope.Data.Result, want)
+						}
+					} else {
+						want := fmt.Sprintf(`[%s,%q]`, tc.stamp, tc.value)
+						if !strings.Contains(string(envelope.Data.Result), want) {
+							t.Fatalf("result=%s want=%s", envelope.Data.Result, want)
+						}
+					}
+					if store.selectCalls.Load() != 0 || store.instantCalls.Load() != 0 || store.rangeCalls.Load() != 0 {
+						t.Fatalf("storage-free dispatch Select=%d instant=%d range=%d", store.selectCalls.Load(), store.instantCalls.Load(), store.rangeCalls.Load())
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestStorageFreeExceptionPreservesRejections(t *testing.T) {
+	now := time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC)
+	key := secret.String(strings.Repeat("k", 32))
+	for _, tc := range []struct {
+		name, expr   string
+		extra        url.Values
+		auth, tenant string
+		code         int
+	}{
+		{"historical selector", "up", nil, "valid", "", 400},
+		{"historical selector with current at", fmt.Sprintf("up @ %d", now.Unix()), nil, "valid", "", 400},
+		{"historical nested scalar selector", "scalar(up)", nil, "valid", "", 400},
+		{"historical matrix selector", "rate(up[5m])", nil, "valid", "", 400},
+		{"historical nested selector", "max_over_time(up[5m:1m])", nil, "valid", "", 400},
+		{"historical range", "vector(1)", url.Values{"start": {"4"}, "end": {"5"}, "step": {"1"}}, "valid", "", 400},
+		{"future constant", "1+1", url.Values{"time": {fmt.Sprint(now.Add(6 * time.Minute).Unix())}}, "valid", "", 400},
+		{"old subquery at", "max_over_time(vector(1)[5m:1m] @ 4)", nil, "valid", "", 400},
+		{"future subquery at", fmt.Sprintf("max_over_time(vector(1)[5m:1m] @ %d)", now.Add(6*time.Minute).Unix()), nil, "valid", "", 400},
+		{"subquery offset", "max_over_time(vector(1)[5m:1m] offset 31d)", nil, "valid", "", 400},
+		{"subquery range", "max_over_time(vector(1)[31d:1h])", nil, "valid", "", 400},
+		{"subquery work", "max_over_time(vector(1)[1h:1ms])", nil, "valid", "", 400},
+		{"selector offset", "up offset 31d", url.Values{"time": {fmt.Sprint(now.Unix())}}, "valid", "", 400},
+		{"negative selector offset", "up offset -31d", url.Values{"time": {fmt.Sprint(now.Unix())}}, "valid", "", 400},
+		{"reserved selector", `up{__tenant__="other"}`, nil, "valid", "", 400},
+		{"reserved pure grouping", "sum by (__tenant__) (vector(1))", nil, "valid", "", 400},
+		{"reserved pure matching", "vector(1) + on(__tenant__) vector(2)", nil, "valid", "", 400},
+		{"reserved pure label destination", `label_replace(vector(1),"__tenant__","x","job",".*")`, nil, "valid", "", 400},
+		{"reserved pure label source", `label_join(vector(1),"safe",",","__tenant__")`, nil, "valid", "", 400},
+		{"reserved pure count destination", `count_values("__tenant__",vector(1))`, nil, "valid", "", 400},
+		{"deep pure AST", strings.Repeat("(", 129) + "1" + strings.Repeat(")", 129), nil, "valid", "", 400},
+		{"malformed AST", "1+", nil, "valid", "", 400},
+		{"nonfinite time", "1", url.Values{"time": {"NaN"}}, "valid", "", 400},
+		{"duplicate time", "1", url.Values{"time": {"4", "5"}}, "valid", "", 400},
+		{"timeout broadening", "1", url.Values{"timeout": {"1h"}}, "valid", "", 400},
+		{"invalid limit", "1", url.Values{"limit": {"-1"}}, "valid", "", 400},
+		{"anonymous historical", "1+1", nil, "", "", 401},
+		{"invalid auth historical", "1+1", nil, "invalid", "", 401},
+		{"wrong tenant historical", "1+1", nil, "valid", "other", 403},
+	} {
+		for _, method := range []string{http.MethodGet, http.MethodPost} {
+			t.Run(tc.name+"/"+method, func(t *testing.T) {
+				store := &contractNativeStore{contractStore: &contractStore{}}
+				h, err := NewQueryHandler(queryBackend{store: store, caps: spi.Capabilities{Metrics: spi.MetricCaps{NativePromQL: true}}}, QueryOptions{Tenant: "trusted", APIKey: key, Config: config.Default().Query, Clock: fixedQueryClock{now}})
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() { _ = h.Close(t.Context()) })
+				values := url.Values{"query": {tc.expr}, "time": {"4"}}
+				path := "/prom/api/v1/query"
+				if tc.extra.Has("start") {
+					values.Del("time")
+					path += "_range"
+				}
+				maps.Copy(values, tc.extra)
+				var body io.Reader
+				if method == http.MethodGet {
+					path += "?" + values.Encode()
+				} else {
+					body = strings.NewReader(values.Encode())
+				}
+				r := httptest.NewRequestWithContext(t.Context(), method, path, body)
+				if method == http.MethodPost {
+					r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+				}
+				if tc.auth == "valid" {
+					r.Header.Set("Authorization", "Bearer "+string(key))
+				} else if tc.auth != "" {
+					r.Header.Set("Authorization", "Bearer "+strings.Repeat("x", 32))
+				}
+				if tc.tenant != "" {
+					r.Header.Set("X-Prism-Tenant", tc.tenant)
+				}
+				w := httptest.NewRecorder()
+				h.HTTPHandler().ServeHTTP(w, r)
+				if w.Code != tc.code || w.Header().Get("X-Prism-Error-Class") == "" {
+					t.Fatalf("status=%d want=%d body=%s", w.Code, tc.code, w.Body.String())
+				}
+				if store.selectCalls.Load() != 0 || store.instantCalls.Load() != 0 || store.rangeCalls.Load() != 0 {
+					t.Fatal("rejected query dispatched storage")
+				}
+			})
+		}
+	}
+}
+
+func TestStorageFreeQuerySampleAndCancellationBounds(t *testing.T) {
+	for _, tc := range []struct {
+		name, expr string
+		cancel     bool
+		code       int
+	}{
+		{"sample cap", `label_replace(vector(1),"job","a","","") or label_replace(vector(2),"job","b","","")`, false, 422},
+		{"canceled historical", "vector(1)", true, 503},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			store := &contractNativeStore{contractStore: &contractStore{}}
+			cfg := config.Default().Query
+			cfg.MaxSamples = 1
+			h, err := NewQueryHandler(queryBackend{store: store, caps: spi.Capabilities{Metrics: spi.MetricCaps{NativePromQL: true}}}, QueryOptions{Tenant: "trusted", AllowAnonymousRead: true, Config: cfg})
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() { _ = h.Close(t.Context()) })
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+			if tc.cancel {
+				cancel()
+			}
+			r := httptest.NewRequestWithContext(ctx, http.MethodGet, "/prom/api/v1/query?query="+url.QueryEscape(tc.expr)+"&time=4", nil)
+			w := httptest.NewRecorder()
+			h.HTTPHandler().ServeHTTP(w, r)
+			if w.Code != tc.code {
+				t.Fatalf("status=%d want=%d body=%s", w.Code, tc.code, w.Body.String())
+			}
+			if store.selectCalls.Load() != 0 || store.instantCalls.Load() != 0 || store.rangeCalls.Load() != 0 {
+				t.Fatal("storage-free query dispatched storage")
+			}
+		})
 	}
 }

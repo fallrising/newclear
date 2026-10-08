@@ -550,9 +550,13 @@ func (h *QueryHandler) query(ctx context.Context, kind string, v url.Values) (an
 	if end.Before(start) || end.After(now.Add(time.Duration(h.config.LookbackDelta))) {
 		return nil, nil, qerr(spi.ErrBadRequest)
 	}
+	hasSelectors, err := inspectQueryAST(parsed, now, time.Duration(h.config.MaxLookback), time.Duration(h.config.LookbackDelta))
+	if err != nil {
+		return nil, nil, qerr(spi.ErrBadRequest)
+	}
 	var warnings []string
 	floor := now.Add(-time.Duration(h.config.MaxLookback))
-	if start.Before(floor) {
+	if start.Before(floor) && (kind != "query" || hasSelectors) {
 		if end.Before(floor) {
 			return nil, nil, qerr(spi.ErrBadRequest)
 		}
@@ -588,7 +592,7 @@ func (h *QueryHandler) query(ctx context.Context, kind string, v url.Values) (an
 	if e != nil {
 		return nil, nil, qerr(spi.ErrBadRequest)
 	}
-	earliest, latest, err := validateQueryAST(parsed, start, end, now, time.Duration(h.config.MaxLookback), time.Duration(h.config.LookbackDelta))
+	earliest, latest, err := queryASTTimeRange(parsed, start, end, now, time.Duration(h.config.MaxLookback), time.Duration(h.config.LookbackDelta), hasSelectors)
 	if err != nil {
 		return nil, nil, qerr(spi.ErrBadRequest)
 	}
@@ -597,7 +601,7 @@ func (h *QueryHandler) query(ctx context.Context, kind string, v url.Values) (an
 	}
 	caps := h.backend.Capabilities()
 	native, ok := h.store.(spi.NativeMetricQuerier)
-	useNative := caps.Metrics.NativePromQL && ok && !h.config.ForceFallback && parsed.Type() != parser.ValueTypeString
+	useNative := hasSelectors && caps.Metrics.NativePromQL && ok && !h.config.ForceFallback && parsed.Type() != parser.ValueTypeString
 	if !useNative {
 		if latest.Sub(earliest) > time.Duration(h.config.Fallback.MaxRange) {
 			return nil, nil, qerr(spi.ErrTooLarge)

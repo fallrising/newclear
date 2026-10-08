@@ -42,7 +42,7 @@
 | P1-08 | `internal/compat/promapi`：query/query_range/series/labels/label values/metadata/buildinfo | P1-07 | `internal/compat/promapi/**` | 回應信封與狀態碼符合 `02` §2；`promtool query` 可用 |
 | P1-09 | `drivers/clickhouse`：schema 遷移 + 三種 Store 寫入（**規格見 `17-DRIVER-CLICKHOUSE.md` §1–§3、§10**） | P0-03 | `drivers/clickhouse/**` | 寫入路徑 conformance 測項綠；遷移冪等且 checksum 漂移會擋啟動 |
 | P1-10 | `drivers/clickhouse`：查詢實作（**SQL 模板見 `17` §4–§7、錯誤映射見 §9**） | P1-09 | `drivers/clickhouse/**` | `conformance.Run` 全綠；`promqltest` 全綠；`C-MET-05`（空值匹配）特別驗證 |
-| P1-11 | `deploy/` 全部產物（**逐字內容見 `22-DEPLOY-ARTIFACTS.md`**）：compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile | P1-08,P1-10 | `deploy/**`、`Makefile` | `docker compose up --wait` 成功；Grafana Prometheus datasource health 綠；`make deps-check` 通過 |
+| P1-11 | Phase 1 部署產物與核心鏈路 E2E（`22`、當期 P1-11 spec）：Compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile、最小 lifecycle 接線 | P1-08,P1-10 | `deploy/**`、`Makefile`、`cmd/prismd/**`、`internal/server/**`、有界 E2E scripts/tests、D011 限定的四個 promapi query 檔、相關 docs | image build/config-check/up --wait/deps-check；Grafana Prometheus health/實際 query；真實三訊號入庫、PromQL、重啟持久性、owned cleanup；雙驅動既有 conformance/corpus及凍結來源獨立審查 |
 
 **Phase 1 出口條件**：E2E-01 與 E2E-02（僅 Prometheus datasource）通過；`conformance` 與 `promqltest` 在 `memory` + `clickhouse` 雙驅動全綠。
 

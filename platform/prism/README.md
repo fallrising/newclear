@@ -20,6 +20,10 @@ labels, series, metadata and build information in query/all-in-one roles.
 P1-09 adds ClickHouse schema migrations and three Store writes through the Go SPI.
 P1-10 connects ClickHouse metric, log and trace reads to that SPI and enables
 daemon storage selection, including ingestion followed by PromQL queries.
+P1-11 adds the local three-service deployment artifacts, bounded native healthcheck/
+readiness and an owned Compose E2E gate through real Grafana Prometheus queries.
+Storage-free instant PromQL expressions may use historical evaluation times after
+bounded AST validation; data selectors retain the existing lookback restrictions.
 The initial runtime supports a single configured tenant and file-backed bearer
 key. Loki/Jaeger query APIs, complete production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
@@ -27,6 +31,7 @@ remain unimplemented; this is not yet a complete APM service.
 ## Start here
 
 - [Development quickstart](docs/quickstart.md): tests and authenticated local ingestion and Prometheus queries.
+- [Phase 1 deployment](deploy/README.md): pinned local Compose stack and owned E2E prerequisites.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,
   known gaps, and the next integration boundary.
 - [SDD](docs/sdd/README.md) and [task sequence](docs/sdd/12-IMPLEMENTATION-PHASES.md).
@@ -48,7 +53,7 @@ remain unimplemented; this is not yet a complete APM service.
 - `internal/compat/lokiapi`: authenticated JSON/gzip Loki push with bounded decoding.
 - `internal/query/promqladapter`: SPI-to-Prometheus query storage and iterator ownership.
 - `test/promqltest`: pinned official float corpus, direct memory fixtures and upstream comparison logic.
-- `cmd/prismd`: health/metrics, ingestion and role-aware Prometheus query routes; `prism-agent` and `prismctl` remain placeholders.
+- `cmd/prismd`: version/healthcheck, health/readiness/metrics, ingestion and role-aware Prometheus query routes; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
 
 The Go module is `github.com/fallrising/newclear/platform/prism`.
@@ -111,3 +116,10 @@ iterator ownership, scan/result limits and the same supported float PromQL corpu
 against real ClickHouse. Optional native query, metadata, delete, dependency and
 RED stores remain absent. See the [quickstart](docs/quickstart.md#clickhouse-storage)
 for file-backed credentials and the local database gate.
+
+The [P1-11 contract](docs/specs/p1-11-deploy-e2e.md) defines pinned local deployment,
+actual Grafana datasource/panel queries, observable stored-data persistence across
+restarts, and guarded cleanup. See the [owned E2E gate](test/e2e/README.md#phase-1-owned-compose-stack)
+for explicit local socket, unique prebuilt image and verified external clients.
+Loki/Jaeger/Alertmanager datasource definitions remain inactive API references;
+this acceptance does not establish production capacity or crash durability.

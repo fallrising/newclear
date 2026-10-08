@@ -125,7 +125,7 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 	}
 	//nolint:contextcheck // gRPC supplies per-RPC contexts; construction must not bind requests to daemon cancellation.
 	grpcServer := receiver.NewGRPCServer(grpcOptions...)
-	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: mux, Logger: logger, StopReceiving: stopReceiving, Drain: drain})
+	server, err := prismserver.New(prismserver.Options{Address: c.Server.HTTPListen, GRPCAddress: c.Server.GRPCListen, GRPCServer: grpcServer, ShutdownTimeout: c.Server.ShutdownTimeout.Std(), TLSCertFile: c.Server.TLSCertFile, TLSKeyFile: c.Server.TLSKeyFile, Gatherer: registry, Handler: mux, Logger: logger, StopReceiving: stopReceiving, Drain: drain, Ready: notifyReady, Stopping: notifyStopping})
 	if err != nil {
 		stopReceiving()
 		grpcServer.Stop()

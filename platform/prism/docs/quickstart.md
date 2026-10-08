@@ -212,4 +212,45 @@ does not deploy Prism. See the [driver README](../drivers/clickhouse/README.md)
 for read contracts, credential files, write bounds, acknowledgement and retention
 limitations. The gate covers writes, supported SPI conformance, supported float
 PromQL and the actual daemon ingestion→ClickHouse→PromQL chain. The optional
-Grafana/compose deployment stack belongs to P1-11.
+[P1-11 local deployment](../deploy/README.md) has a separate owned Compose E2E gate.
+
+
+## Phase 1 local Compose E2E
+
+The [deployment README](../deploy/README.md) describes the five required secret
+files, official Linux amd64 image pins and local stack. Build a unique
+`prism/prismd:prism-e2e-<unique>` image from the module root using
+`deploy/Dockerfile.prismd`; keep TLS verification and the configured proxy when
+building. Managed builds can pass the combined CA bundle as optional BuildKit
+secret `id=prism_ca`, which is never copied into image layers.
+
+With verified Compose and external-client binaries available, run:
+
+```sh
+OTLP_TELEMETRYGEN_BINARY=/path/to/telemetrygen \
+PROMETHEUS_BINARY=/path/to/prometheus \
+VECTOR_BINARY=/path/to/vector \
+GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly \
+make e2e E2E_ARGS='--docker-host unix:///var/run/docker.sock --compose-binary /path/to/compose --no-build --image prism/prismd:prism-e2e-UNIQUE --artifact-dir /path/to/private/evidence'
+```
+
+The runner validates final configuration in the image, starts one labelled local
+Compose project, then requires real-client ingestion, ClickHouse rows, PromQL
+values, Grafana metrics datasource health/query and a provisioned metric panel.
+It verifies visible data survives graceful daemon and ClickHouse restart, then
+removes only confirmed owned containers/volumes/network and disposable credentials.
+Failures remain failures and bounded redacted evidence is retained. Raw Docker
+container environment and serialized credentials are excluded from evidence.
+
+Only Prometheus query API acceptance is implemented. Logs/traces storage checks
+do not establish Loki/Jaeger query compatibility; full alerting/agent/control-plane
+and production deployment remain later work. Keep the documented async ack,
+retention and process-memory limitations when interpreting results.
+
+Storage-free instant queries such as `1+1` or `vector(time())` may use a historical
+top-level evaluation time. They run in the pinned PromQL engine without native
+storage dispatch, including when the backend advertises native query support.
+This permits Grafana's constant datasource health probe. Data selectors (including
+`up @ <current-time>` at a historical evaluation time), historical range queries,
+future-time, modifier, complexity, authentication, tenant and resource limits
+retain their existing restrictions; the global lookback is unchanged.

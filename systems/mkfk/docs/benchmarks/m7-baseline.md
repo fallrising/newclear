@@ -4,6 +4,8 @@ The 04-validation §5 matrix ran on three small cloud VMs, one broker per VM, ov
 
 These numbers describe this design on this hardware. They are not a target, and they are not comparable with other systems. See [architecture](../architecture.md) for what bounds them.
 
+The same matrix on a second environment with slower fsync is in [m7-environment-b](m7-environment-b.md).
+
 Reproduce: `make bench` (local loopback brokers), or `make bench BENCH_ARGS="--ssh-hosts a,b,c --ssh-ips x,y,z --ssh-command '…'"` for three hosts; `go run ./cmd/mkfkbench --summarize <results.json>` re-renders this table.
 
 Commit `12aa275`, go1.27.1, three hosts on a private network, one broker each; the client runs on the node-3 host. Warm-up 10s, measured 1m0s, 3 repeats; medians shown.

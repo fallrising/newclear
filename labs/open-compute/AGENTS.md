@@ -33,7 +33,8 @@ be committed before M2 implementation.
 
 ## Verification and evidence
 
-The implementation supplies `make check` for local offline checks and
-`make integration` for the real non-root runtime. Link the current evidence from
+The implementation supplies `make check` for local offline checks,
+`make integration` for the M1 real-runtime restart, and `make integration-restore`
+for the M2 real-runtime cold restore. Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.

@@ -1,6 +1,20 @@
 # Status and evidence
 
-Updated: 2026-10-07.
+Updated: 2026-10-08.
+
+## M2 execution status
+
+The [complete Local cold restore contract](SDD-M2.md) was independently reviewed
+and committed before implementation in
+[`7cfa106`](https://github.com/fallrising/newclear/commit/7cfa106d89f59333f18d0fbda9876af3001360d6).
+M2 implementation and its real-runtime gate are in progress. No M2 runtime
+success is claimed here until the verified CI evidence is recorded.
+
+The environment contract is a fresh directory tree and new daemon on the same
+disposable non-root runner, at the original scope path and UID. It tests recovery
+after actual source removal, including D1, Local/R2 bytes and metadata, existing
+deployments/bindings and the original waiting Workflow. Cross-host, OS, UID and
+arbitrary path portability are separate, unverified gates.
 
 ## M1 result
 
@@ -76,7 +90,7 @@ no upstream guard was changed. Both native tests executed and passed on the
 real CI runner. The reported runtime success is from that runner, not a local
 mock or a deployment on an operator's physical server.
 
-## Unverified beyond M1
+## What M1 did not establish
 
 No hosted Cloudflare comparison, general API parity, arbitrary-code isolation,
 resource-limit stress, performance claim, multi-node/HA behavior, unclean crash,
@@ -84,7 +98,6 @@ full cold backup/restore, upgrade/rollback, production deployment, or host adapt
 is established by this milestone. A committed Workflow step surviving normal
 restart does not imply exactly-once external side effects.
 
-The next useful evidence gate is a full cold backup and restore in a fresh
-environment, including configuration, required keys and object payloads. That
-would establish a stronger portability boundary before designing a host adapter;
-it is a proposed follow-up, not part of the completed M1.
+M2 takes up the complete cold-backup question through its separately committed
+SDD and evidence gate above. It does not retroactively change the scope of this
+completed M1 run or establish a host adapter.

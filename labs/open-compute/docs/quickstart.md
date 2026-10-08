@@ -1,6 +1,7 @@
-# Run the M1 runtime experiment
+# Run the runtime experiments
 
-This is the single operator path for the experiment in [SDD.md](SDD.md). It
+This is the single operator path for M1 in [SDD.md](SDD.md) and the M2 cold
+restore experiment in [SDD-M2.md](SDD-M2.md). It
 downloads the original **v0.2.4 Linux x64** release, verifies its pinned size and
 SHA256, and exercises a synthetic Worker, D1 database, and Workflow. The harness
 uses Python's standard library and requires Python 3.10 or newer, Git, and make.
@@ -42,7 +43,7 @@ identity, home ownership, scope absence, and availability of port 8787 on
 `python3 labs/open-compute/lab.py preflight --port 8877` to test
 a different unprivileged loopback port.
 
-## 3. Run the real experiment
+## 3. Run the normal-restart experiment (M1)
 
 ```sh
 make -C labs/open-compute integration
@@ -87,6 +88,60 @@ only after AC-01 through AC-08 and final cleanup succeed. It records the harness
 commit, release/artifact identity, process identities, state identity, and
 counter/nonce comparisons. It does not contain credentials or raw configuration.
 
+## 4. Run the complete cold-restore experiment (M2)
+
+After M1 has removed its owned scope, run:
+
+```sh
+make -C labs/open-compute integration-restore
+```
+
+M2 accepts the same `LAB_ARGS`, `--port`, `--cache` and new `--output` directory
+options. It creates a separate source instance, deploys the trusted Worker with
+D1, R2 and Workflow bindings, and writes one small binary R2 object with HTTP and
+custom metadata. It captures the original deployment/version/code digest and
+bindings, then waits for the original Workflow's committed event wait.
+
+The harness normally stops the actual daemon and verifies its children exited.
+It obtains exclusive source locks, saves the **complete persistent scope and
+instance authority**, and independently verifies the package against the cold
+source. This includes configuration, keys, database state, Local object marker,
+Worker bytes and R2 payloads. Only the exact transient paths listed in SDD-M2
+are excluded. Upstream's Local `ocd backup restore` does not implement this
+operation; M2 tests the documented operator cold-directory procedure.
+
+After verification, M2 **actually removes its own source scope**, checks the
+source and data paths are absent, and restores only from the saved package into
+a pre-created empty staging directory with a different root identity. It verifies
+every restored persistent file before installing the new tree at the original
+scope path without overwriting an existing destination. It starts a new original
+daemon using the recovered configuration and keys. It never runs setup, deploys
+again, creates replacement resources or reseeds data during restore.
+
+Recovery first uses an HTTP client restricted to GET requests. The original
+instance/account/database, deployment/version/bindings, D1 row, and R2 bytes,
+metadata, etag/version/uploaded timestamp must agree with the source observations.
+The same Workflow must still be waiting. Only then does the harness submit its
+approval event and require `complete`, counter 1 and an unchanged step nonce.
+
+Shutdown, backup, extraction, restored startup and read-only checks share a
+120-second budget. The Workflow's original five-minute timeout continues to
+elapse; restore never resets it. Archive size, member count, paths and individual
+files also have fixed bounds. This is a small fixture experiment, not a general
+backup program for arbitrary instances or native extension state.
+
+Secret-bearing backup data and its full inventory exist only in a private
+temporary directory for this invocation, under `RUNNER_TEMP` when provided.
+The package and staging directory are removed during verified cleanup. The
+sanitized M2 report is separate from M1, uses acceptance IDs M2-01 through M2-09,
+and records aggregate backup checks, source absence, fresh root identity,
+readback comparisons, Workflow completion and cleanup. It contains no backup
+paths, raw inventory, credentials, key hashes or R2 payload bytes.
+
+M2 deliberately keeps the **same runner, absolute scope path and UID**, while
+using a fresh directory tree and daemon process. A pass does not establish
+cross-host recovery, another OS/UID/path, power-loss consistency or upgrades.
+
 ## Cleanup and a failed run
 
 Normal completion stops all owned processes and removes only the scope created
@@ -94,6 +149,23 @@ by that invocation, after checking its marker and identity. The downloaded
 binary and sanitized report remain. If normal shutdown requires forced cleanup,
 the integration fails even when cleanup eventually succeeds. A changed marker,
 changed scope identity, or surviving process prevents deletion.
+
+M2 has an additional failure rule: final cleanup stops the runtime but **never
+deletes a still-present original source scope**, including an early setup,
+seeding or backup verification failure. Only the recovery operation can remove
+that source, immediately after its complete package/source verification gates.
+If a later package recheck fails, an earlier successful check cannot authorize
+source deletion through cleanup. The report records
+`source_preserved: true`. Private partial backup/staging data can still be
+removed after checking ownership. Final cleanup cannot bypass the
+verify-before-delete gate; it can remove the successfully transferred fresh
+scope after process exit. Use a new disposable environment for the next run;
+an existing preserved scope is never adopted by a retry.
+
+M2 final deletion of its restored scope and removal of its private backup/staging
+each have a separate 30-second total deadline, run sequentially after owned
+process exit. These cleanup budgets do not extend the earlier 120-second
+recovery budget or reset the Workflow's persisted five-minute event timeout.
 
 For failures, inspect `phase`, `error`, `cleanup_error` when present, acceptance
 results, and bounded sanitized diagnostics in the report. A nonzero exit is a
@@ -108,16 +180,19 @@ addition to the socket inactivity timeout. Unknown process identities, unreadabl
 process metadata, or incomplete log draining fail cleanup verification; they are
 never interpreted as proof that a process exited.
 
-The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs these
-same commands on a fresh non-root runner and retains only the sanitized report
-for seven days. Its job log also contains the report. Local success is not
+The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs M1 and
+then M2 on a fresh non-root runner, requiring each invocation to clean its scope.
+It retains only the two explicitly selected sanitized report files for seven
+days. Its job log also contains the reports. No backup directory or inventory
+is selected for upload, including failed runs. Local success is not
 assumed from offline tests; the exact delivered evidence is linked in STATUS.
 
 ## What this result means
 
-This is a normal daemon restart of one committed synthetic workflow. It does
-not prove crash recovery, full backup/restore, upgrade safety, HA, general
-exactly-once effects, performance, all Workers API compatibility, or isolation
-for hostile tenant code. Only this trusted fixture is submitted, and it makes no
+M1 is a normal daemon restart of one committed synthetic workflow. M2 separately
+tests complete Local cold restore after source removal on the same runner/path/UID.
+Neither establishes cross-host recovery, power-loss consistency, upgrade safety,
+HA, general exactly-once effects, performance, all Workers API compatibility, or
+isolation for hostile tenant code. Only this trusted fixture is submitted, and it makes no
 outbound application requests. Upstream Worker fetch can reach host-routable
 networks; loopback ingress alone does not change that boundary.

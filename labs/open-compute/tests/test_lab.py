@@ -1,6 +1,7 @@
 """Offline harness contracts. These tests do not certify the upstream runtime."""
 
 import hashlib
+import copy
 from contextlib import redirect_stdout
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -20,6 +21,159 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import lab
+import cold_backup
+
+
+class ColdRecoveryHarnessTests(unittest.TestCase):
+    def test_restored_scope_cleanup_interrupts_blocking_remove(self):
+        with tempfile.TemporaryDirectory() as directory:
+            scope = lab.OwnedScope(Path(directory) / "restored", 8787)
+            scope.create()
+            restored = dict(scope.identity)
+            original = {"device": restored["device"], "inode": restored["inode"] + 1}
+            previous = signal.getsignal(signal.SIGALRM)
+            started = time.monotonic()
+            with patch.object(scope, "remove", side_effect=lambda **_: time.sleep(1)), \
+                 patch("cold_backup.CLEANUP_SECONDS", 0.03):
+                with self.assertRaises(cold_backup.CleanupDeadline):
+                    lab.cleanup_scope(scope, True, original, restored)
+            self.assertLess(time.monotonic() - started, 0.5)
+            self.assertTrue(scope.path.is_dir())
+            self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
+            self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+
+    def _source_for_archive(self, root):
+        scope = lab.OwnedScope(root / "scope", 8787)
+        scope.create()
+        for relative in cold_backup.REQUIRED_FILES | set(cold_backup.LOCKS) | {
+                cold_backup.DATA + "/d1/original/data.sqlite",
+                cold_backup.DATA + "/objects/objects/original/object.ocobj"}:
+            path = scope.path / relative
+            if path.exists():
+                continue
+            pending, parent = [], path.parent
+            while parent != scope.path and not parent.exists():
+                pending.append(parent)
+                parent = parent.parent
+            for parent in reversed(pending):
+                parent.mkdir(mode=0o700)
+            lab.exclusive_file(path, b"synthetic-authority-" + relative.encode())
+        return scope
+
+    def test_later_package_corruption_cannot_delete_source_through_finally(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"RUNNER_TEMP": directory}):
+            root = Path(directory)
+            scope = self._source_for_archive(root)
+            original_identity = dict(scope.identity)
+            original_config = (scope.path / "ocd.toml").read_bytes()
+            events = []
+            def progress(event, _summary):
+                events.append(event)
+                if event == "backup_verified":
+                    package = recovery.private.path / "payload.ocb"
+                    package.write_bytes(package.read_bytes()[:-1])
+            recovery = cold_backup.ColdRestore(scope, root / "cache", root / "report",
+                                               time.monotonic() + 30, progress)
+            with patch.object(scope, "remove", wraps=scope.remove) as remove:
+                try:
+                    with self.assertRaises(cold_backup.BackupError):
+                        recovery.recover()
+                finally:
+                    outcome = lab.cleanup_scope(scope, True, original_identity, None)
+                    cleanup = recovery.cleanup(processes_stopped=True)
+                remove.assert_not_called()
+            self.assertIn("backup_verified", events)
+            self.assertNotIn("source_removed", events)
+            self.assertTrue(outcome["source_preserved"])
+            self.assertFalse(outcome["scope_removed"])
+            self.assertTrue(all(cleanup.values()))
+            self.assertEqual(scope.identity, original_identity)
+            self.assertEqual((scope.path / "ocd.toml").read_bytes(), original_config)
+
+    def test_finally_can_remove_only_transferred_restored_identity(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"RUNNER_TEMP": directory}):
+            root = Path(directory)
+            scope = self._source_for_archive(root)
+            original_identity = dict(scope.identity)
+            recovery = cold_backup.ColdRestore(scope, root / "cache", root / "report",
+                                               time.monotonic() + 30, lambda *_: None)
+            recovered = recovery.recover()
+            self.assertNotEqual(recovered["restored_root"], original_identity)
+            preserved = lab.cleanup_scope(scope, True, original_identity, {"device": 0, "inode": 0})
+            self.assertTrue(preserved["scope_preserved"])
+            self.assertFalse(preserved["source_preserved"])
+            self.assertTrue(scope.path.is_dir())
+            cleaned = lab.cleanup_scope(scope, True, original_identity, recovered["restored_root"])
+            self.assertTrue(cleaned["scope_removed"])
+            self.assertFalse(scope.path.exists())
+            self.assertTrue(all(recovery.cleanup(True).values()))
+
+    def test_readback_write_rejected_before_network(self):
+        client = lab.ReadOnlyHTTP(8787, "synthetic-token")
+        with patch.object(lab.LocalHTTP, "request", return_value={"ok": True}) as request:
+            for method in ("POST", "PUT", "PATCH", "DELETE"):
+                with self.subTest(method=method), self.assertRaisesRegex(lab.LabError, "prohibits"):
+                    client.request(method, "/client/v4/accounts/test", {})
+            request.assert_not_called()
+            self.assertEqual(client.request("GET", "/health"), {"ok": True})
+            self.assertEqual(client.read_requests, 1)
+
+    def test_recovery_budget_interrupts_and_restores_alarm(self):
+        previous = signal.getsignal(signal.SIGALRM)
+        started = time.monotonic()
+        with patch("lab.RECOVERY_TOTAL_TIMEOUT", 0.05):
+            with self.assertRaisesRegex(lab.LabError, "total deadline"):
+                with lab.recovery_deadline():
+                    time.sleep(1)
+        self.assertLess(time.monotonic() - started, 0.5)
+        self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
+        self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+
+    def test_private_backup_details_cannot_enter_public_summary(self):
+        for detail in ({"manifest": []}, {"master_key_sha256": "a" * 64},
+                       {"backup_path": "/private/synthetic"}, {"source_root": {"path": "/private"}}):
+            with self.subTest(detail=detail), self.assertRaises(lab.LabError):
+                lab.public_backup_summary(detail)
+
+    def test_r2_byte_or_metadata_loss_fails_readback(self):
+        payload, nonce = b"\x00\xff\r\n", "a" * 32
+        observation = {"key": lab.R2_KEY, "bytes": list(payload), "size": len(payload),
+                       "httpMetadata": lab.R2_HTTP_METADATA,
+                       "customMetadata": {"purpose": "cold-restore", "nonce": nonce},
+                       "headers": {"content-type": "application/octet-stream", "cache-control": "private, max-age=60",
+                                   "content-disposition": 'attachment; filename="sentinel.bin"'},
+                       "etag": "synthetic-etag", "httpEtag": '"synthetic-etag"', "version": "original",
+                       "uploaded": "2026-10-08T00:00:00.000Z"}
+        lab.assert_r2(observation, payload, nonce)
+        for change in ({"bytes": [0, 255, 13, True]}, {"httpMetadata": {}}, {"customMetadata": {}},
+                       {"headers": {}}, {"version": ""}):
+            broken = copy.deepcopy(observation)
+            broken.update(change)
+            with self.subTest(change=change), self.assertRaises(lab.LabError):
+                lab.assert_r2(broken, payload, nonce)
+
+    def test_m2_bootstrap_failure_preserves_created_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            scope = home / ".open-compute"
+            binary = home / "synthetic-binary"
+            binary.write_bytes(b"not executed")
+            args = SimpleNamespace(port=8787, cache=str(home / "cache"), output=str(home / "evidence"))
+            stdout = io.StringIO()
+            with patch("lab.pwd.getpwuid", return_value=SimpleNamespace(pw_dir=str(home))), \
+                 patch("lab.source_commit", return_value=None), patch("lab.preflight", return_value=scope), \
+                 patch("lab.download_binary", return_value=binary), patch("lab.command", return_value="ocd 0.2.4"), \
+                 patch("lab.Process", side_effect=lab.LabError("synthetic bootstrap failure")), \
+                 patch.object(lab.OwnedScope, "remove") as remove, redirect_stdout(stdout):
+                self.assertEqual(lab.integration(args, restore=True), 1)
+                remove.assert_not_called()
+            report = json.loads(stdout.getvalue())
+            self.assertTrue(report["source_preserved"])
+            self.assertFalse(report["scope_removed"])
+            self.assertEqual(report["acceptance"]["M2-04"], "not_run")
+            self.assertTrue((scope / "ocd.toml").is_file())
+            self.assertTrue((scope / "keys/admin.token").is_file())
+            self.assertEqual((home / "evidence/report.json").read_text(), stdout.getvalue())
 
 
 class PinTests(unittest.TestCase):

@@ -36,6 +36,21 @@ func realMain() int {
 }
 
 func run(ctx context.Context, arguments []string, stdout, stderr io.Writer) int {
+	if len(arguments) > 0 {
+		switch arguments[0] {
+		case "version":
+			if len(arguments) != 1 {
+				writef(stderr, "prismd version: unexpected arguments\n")
+				return 2
+			}
+			if !writef(stdout, "prismd %s (%s)\n", version, revision) {
+				return 1
+			}
+			return 0
+		case "healthcheck":
+			return runHealthcheck(ctx, arguments[1:], stderr)
+		}
+	}
 	flags := flag.NewFlagSet("prismd", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	configPath := flags.String("config", config.DefaultPath, "path to prismd YAML configuration")
@@ -87,6 +102,11 @@ func run(ctx context.Context, arguments []string, stdout, stderr io.Writer) int 
 	}
 	return 0
 }
+
+var (
+	version  = "dev"
+	revision = "unknown"
+)
 
 func writef(writer io.Writer, format string, arguments ...any) bool {
 	_, err := fmt.Fprintf(writer, format, arguments...)
@@ -180,6 +200,7 @@ func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Lo
 		Gatherer: registry, Handler: handler.HTTPHandler(), Logger: logger,
 		StopReceiving: handler.Stop,
 		Drain:         func(shutdown context.Context) error { return handler.Close(context.WithoutCancel(shutdown)) },
+		Ready:         notifyReady, Stopping: notifyStopping,
 	})
 	if err != nil {
 		handler.Stop()
@@ -217,6 +238,8 @@ func runHTTPServer(
 		TLSKeyFile:      configuration.Server.TLSKeyFile,
 		Gatherer:        registry,
 		Logger:          logger,
+		Ready:           notifyReady,
+		Stopping:        notifyStopping,
 	})
 	if err != nil {
 		return fmt.Errorf("create HTTP server: %w", err)

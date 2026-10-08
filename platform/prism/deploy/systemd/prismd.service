@@ -1,0 +1,49 @@
+[Unit]
+Description=Prism observability server
+Documentation=https://github.com/fallrising/newclear/tree/main/platform/prism
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=prism
+Group=prism
+ExecStart=/usr/local/bin/prismd --config /etc/prism/prismd.yaml
+Restart=always
+RestartSec=5s
+TimeoutStopSec=45s
+KillSignal=SIGTERM
+
+Environment=GOMEMLIMIT=1200MiB
+
+# 加固
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/prism
+StateDirectory=prism
+
+# 資源
+MemoryMax=1500M
+TasksMax=4096
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

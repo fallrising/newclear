@@ -1,0 +1,45 @@
+# Future-phase reference only: prism-agent is not executable in Phase 1.
+# CAP_DAC_READ_SEARCH can read any host file; prefer scoped groups when possible.
+[Unit]
+Description=Prism telemetry agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=prism-agent
+Group=prism-agent
+# 讀取 /var/log 需要；若只讀特定目錄可改用 SupplementaryGroups
+SupplementaryGroups=adm systemd-journal
+ExecStart=/usr/local/bin/prism-agent --config /etc/prism/agent.yaml
+Restart=always
+RestartSec=5s
+TimeoutStopSec=30s
+
+Environment=GOMEMLIMIT=200MiB
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+AmbientCapabilities=CAP_DAC_READ_SEARCH
+ReadWritePaths=/var/lib/prism-agent
+StateDirectory=prism-agent
+
+MemoryMax=256M
+CPUQuota=20%
+TasksMax=512
+LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target

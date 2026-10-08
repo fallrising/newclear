@@ -152,50 +152,28 @@ Server scan/result設定以throw超限，nativeSQL顯式executioncap；driver累
 
 ## 2. 部署形態
 
-### 2.1 單機 all-in-one（v1 預設，2C4G VPS）
+### 2.1 Phase 1 本機 all-in-one
 
-```yaml
-# deploy/docker-compose.yml
-services:
-  prismd:
-    image: prism/prismd:${VERSION}
-    ports: ["9090:9090", "4317:4317"]
-    volumes:
-      - ./prismd.yaml:/etc/prism/prismd.yaml:ro
-      - ./rules:/etc/prism/rules:ro
-      - ./secrets:/etc/prism/secrets:ro
-    depends_on: [clickhouse, postgres]
-    deploy: {resources: {limits: {memory: 1500M}}}
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.8-alpine
-    volumes: ["ch-data:/var/lib/clickhouse", "./clickhouse-config.xml:/etc/clickhouse-server/config.d/prism.xml:ro"]
-    ulimits: {nofile: {soft: 262144, hard: 262144}}
-    deploy: {resources: {limits: {memory: 2G}}}
-  postgres:
-    image: postgres:16-alpine
-    volumes: ["pg-data:/var/lib/postgresql/data"]
-    deploy: {resources: {limits: {memory: 256M}}}
-  grafana:
-    image: grafana/grafana-oss:12.0.0
-    ports: ["3000:3000"]
-    volumes: ["./grafana/provisioning:/etc/grafana/provisioning:ro"]
-    deploy: {resources: {limits: {memory: 256M}}}
-```
+可執行設定以 [Compose](../../deploy/docker-compose.yml)、
+[部署 README](../../deploy/README.md) 與 [P1-11 規格](../specs/p1-11-deploy-e2e.md)
+為準。當期只啟動 prismd、ClickHouse 24.8.14.39 和 Grafana OSS 12.0.0，
+所有映像固定 Linux amd64 digest；不啟動尚未實作的 PostgreSQL 控制平面。
+HTTP/gRPC/Grafana ports 只公開到 loopback，測試用 ephemeral binds。
 
-`clickhouse-config.xml` 必須調低預設記憶體（單機關鍵）：
+既有驗證需要五個 regular secret files：clickhouse_password、clickhouse_dsn、
+ingest_api_key、grafana_password、jwt_secret，並需要既有 rules 目錄與有效的
+phase1-notify.yaml。此 notify/rules 只滿足配置契約，沒有啟動告警或外部通知。
+不要降低 config validation。正式秘密須使用精確 UID/group/ACL 權限；一次性
+E2E 產生的 test-only credentials 放在 private temporary root，容器只讀。
 
-```xml
-<clickhouse>
-  <max_server_memory_usage_to_ram_ratio>0.5</max_server_memory_usage_to_ram_ratio>
-  <mark_cache_size>268435456</mark_cache_size>
-  <uncompressed_cache_size>0</uncompressed_cache_size>
-  <background_pool_size>4</background_pool_size>
-  <max_concurrent_queries>16</max_concurrent_queries>
-  <logger><level>warning</level></logger>
-</clickhouse>
-```
+`/-/healthy` 表示 HTTP 活性；`/-/ready` 在 backend migration/ping 與所有
+listener 成功取得後才變綠，停止接收與 drain 前轉紅。它不是連續儲存或磁碟
+監控。容器用 `prismd healthcheck`；systemd reference 使用 bounded stdlib
+Unix datagram READY=1/STOPPING=1，尚未安裝主機服務。
 
-不調這些，ClickHouse 預設會吃掉大部分記憶體，在 4G 機器上必然 OOM。
+ClickHouse XML 提供單機 memory/query bounds，不據此承諾 2C4G 容量、無 OOM
+或 production soak。既有 metrics/traces async ack 不是 durable disk 保證；
+本輪持久性證明先等待已知資料實際可查，再重啟，未驗證 unflushed crash durability。
 
 ### 2.2 極省資源形態（1C2G）
 

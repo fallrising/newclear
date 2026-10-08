@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -30,6 +31,78 @@ func TestConfigCheck(t *testing.T) {
 	}
 	if stderr.Len() != 0 {
 		t.Fatalf("stderr = %q, want empty", stderr.String())
+	}
+}
+
+func TestVersionAndHealthcheckBeforeConfiguration(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := run(t.Context(), []string{"version"}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "dev") || !strings.Contains(stdout.String(), "unknown") {
+		t.Fatalf("version code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, "ok\n") }))
+	defer server.Close()
+	stdout.Reset()
+	stderr.Reset()
+	if code := run(t.Context(), []string{"healthcheck", "--url", server.URL}, &stdout, &stderr); code != 0 {
+		t.Fatalf("healthcheck code=%d stderr=%q", code, stderr.String())
+	}
+	for _, endpoint := range []string{"ftp://example.test", "http://user:secret@example.test", "http://127.0.0.1:1"} {
+		stderr.Reset()
+		if code := run(t.Context(), []string{"healthcheck", "--url", endpoint, "--timeout", "50ms"}, &stdout, &stderr); code == 0 || strings.Contains(stderr.String(), "secret") {
+			t.Fatalf("endpoint=%q code=%d stderr=%q", endpoint, code, stderr.String())
+		}
+	}
+}
+
+func TestHealthcheckRejectsUnhealthyAndOversizedResponse(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oversized" {
+			_, _ = io.WriteString(w, strings.Repeat("x", maxHealthBody+1))
+			return
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+	for _, path := range []string{"/unhealthy", "/oversized"} {
+		if err := healthcheck(t.Context(), server.URL+path, time.Second); err == nil {
+			t.Fatalf("%s accepted", path)
+		}
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	if err := healthcheck(ctx, server.URL+"/oversized", time.Second); err == nil {
+		t.Fatal("canceled healthcheck accepted")
+	}
+}
+
+func TestHealthcheckDeadlineRedirectAndCredentialRedaction(t *testing.T) {
+	redirected := make(chan struct{}, 1)
+	target := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { redirected <- struct{}{} }))
+	defer target.Close()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/slow":
+			<-r.Context().Done()
+		case "/redirect":
+			http.Redirect(w, r, target.URL, http.StatusFound)
+		}
+	}))
+	defer server.Close()
+	if err := healthcheck(t.Context(), server.URL+"/slow", 25*time.Millisecond); err == nil || !strings.Contains(err.Error(), "deadline") {
+		t.Fatalf("slow healthcheck error=%v", err)
+	}
+	if err := healthcheck(t.Context(), server.URL+"/redirect", time.Second); err == nil || !strings.Contains(err.Error(), "302") {
+		t.Fatalf("redirect healthcheck error=%v", err)
+	}
+	select {
+	case <-redirected:
+		t.Fatal("healthcheck followed redirect")
+	default:
+	}
+	const credential = "query-secret-never-log" //nolint:gosec // Public regression marker, never an actual credential.
+	var stdout, stderr bytes.Buffer
+	if code := run(t.Context(), []string{"healthcheck", "--url", server.URL + "/redirect?token=" + credential}, &stdout, &stderr); code == 0 || strings.Contains(stderr.String(), credential) {
+		t.Fatalf("credential leak code=%d stderr=%q", code, stderr.String())
 	}
 }
 

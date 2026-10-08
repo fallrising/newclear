@@ -1,6 +1,14 @@
 # 22 — 部署產物（完整檔案內容）
 
-本文件的每個檔案都必須原樣建立在 `deploy/` 下。CI 的 `E2E` 測試直接使用它們，因此它們是**可執行的規格**，不是範例。
+當期可執行產物依 [P1-11 規格](../specs/p1-11-deploy-e2e.md) 與 repository 檔案同步。
+預設 Compose 只啟動 Phase 1 的 prismd、ClickHouse、Grafana；官方映像固定 Linux
+amd64 digest。下面 full-product 的 agent、alertmanager/rules 及後期 dashboard panels
+是 inactive reference，不表示 runtime 已實作。四個 datasource provision 中，只有
+Prometheus health/query 是 Phase 1 驗收；其他 API 明確未實作。
+
+本機有界 E2E gate 使用這些產物並清理 owned project；root workflows 沒有新增
+Compose job，不能把 native Go CI 當作實際棧驗證。實際命令與 prerequisite 見
+[部署 README](../../deploy/README.md) 和 [E2E README](../../test/e2e/README.md)。
 
 ## 1. `deploy/docker-compose.yml`
 
@@ -8,107 +16,103 @@
 name: prism
 
 services:
-  prismd:
-    image: prism/prismd:${PRISM_VERSION:-dev}
-    build: {context: .., dockerfile: deploy/Dockerfile.prismd}
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:9090:9090"   # HTTP：相容 API + Console
-      - "0.0.0.0:4317:4317"     # OTLP gRPC
-    volumes:
-      - ./prismd.yaml:/etc/prism/prismd.yaml:ro
-      - ./rules:/etc/prism/rules:ro
-      - ./alertmanager.yaml:/etc/prism/alertmanager.yaml:ro
-      - ./secrets:/etc/prism/secrets:ro
-    environment:
-      PRISM_STORAGE_DSN: "clickhouse://prism:${CH_PASSWORD:?set CH_PASSWORD}@clickhouse:9000/prism"
-      PRISM_CONTROLPLANE_POSTGRES_DSN: "postgres://prism:${PG_PASSWORD:?set PG_PASSWORD}@postgres:5432/prism?sslmode=disable"
-      GOMEMLIMIT: "1200MiB"
-    depends_on:
-      clickhouse: {condition: service_healthy}
-      postgres:   {condition: service_healthy}
-    healthcheck:
-      test: ["CMD", "/prismd", "healthcheck", "--url", "http://127.0.0.1:9090/-/ready"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 30s
-    deploy:
-      resources:
-        limits: {memory: 1500M}
-    security_opt: ["no-new-privileges:true"]
-    read_only: true
-    tmpfs: ["/tmp"]
-
   clickhouse:
-    image: clickhouse/clickhouse-server:24.8-alpine
+    image: docker.io/clickhouse/clickhouse-server:24.8.14.39@sha256:b002e56ed5c16e224c312527f6fcba7e77216fec5d7a88a7828f59efc614feb5
+    platform: linux/amd64
     restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: prism
+      CLICKHOUSE_USER: prism
+      CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_password
     volumes:
       - ch-data:/var/lib/clickhouse
       - ./clickhouse/prism.xml:/etc/clickhouse-server/config.d/prism.xml:ro
       - ./clickhouse/users.xml:/etc/clickhouse-server/users.d/prism.xml:ro
-    environment:
-      CLICKHOUSE_DB: prism
-      CLICKHOUSE_USER: prism
-      CLICKHOUSE_PASSWORD: ${CH_PASSWORD:?set CH_PASSWORD}
+      - ${PRISM_SECRETS_DIR:-./secrets}/clickhouse_password:/run/secrets/clickhouse_password:ro
     ulimits:
       nofile: {soft: 262144, hard: 262144}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8123/ping"]
+      test: [CMD, wget, -qO-, http://127.0.0.1:8123/ping]
       interval: 10s
       timeout: 3s
       retries: 10
       start_period: 40s
     deploy:
       resources:
-        limits: {memory: 2G}
+        limits: {memory: 2G, pids: 4096}
+    security_opt: [no-new-privileges:true]
 
-  postgres:
-    image: postgres:16-alpine
+  prismd:
+    image: prism/prismd:${PRISM_VERSION:-dev}
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.prismd
+      args:
+        VERSION: ${PRISM_VERSION:-dev}
+        REVISION: ${PRISM_REVISION:-unknown}
     restart: unless-stopped
-    volumes: [pg-data:/var/lib/postgresql/data]
+    ports:
+      - "127.0.0.1:${PRISM_HTTP_PORT:-9090}:9090"
+      - "127.0.0.1:${PRISM_GRPC_PORT:-4317}:4317"
+    volumes:
+      - ./prismd.yaml:/etc/prism/prismd.yaml:ro
+      - ./rules:/etc/prism/rules:ro
+      - ./phase1-notify.yaml:/etc/prism/phase1-notify.yaml:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/clickhouse_dsn:/etc/prism/secrets/clickhouse_dsn:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/ingest_api_key:/etc/prism/secrets/ingest_api_key:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/jwt_secret:/etc/prism/secrets/jwt_secret:ro
     environment:
-      POSTGRES_DB: prism
-      POSTGRES_USER: prism
-      POSTGRES_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD}
+      GOMEMLIMIT: 1200MiB
+    depends_on:
+      clickhouse: {condition: service_healthy}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U prism -d prism"]
+      test: [CMD, /prismd, healthcheck, --url, http://127.0.0.1:9090/-/ready]
       interval: 10s
       timeout: 3s
       retries: 5
+      start_period: 30s
     deploy:
       resources:
-        limits: {memory: 256M}
+        limits: {memory: 1500M, pids: 4096}
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
 
   grafana:
-    image: grafana/grafana-oss:12.0.0
+    image: docker.io/grafana/grafana-oss:12.0.0@sha256:884f0f140669a5b9dccee1baece011a3fa5dd1951f1ba158b03de8ad1d178380
+    platform: linux/amd64
     restart: unless-stopped
-    ports: ["127.0.0.1:3000:3000"]
+    ports:
+      - "127.0.0.1:${GRAFANA_HTTP_PORT:-3000}:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/grafana_password:/run/secrets/grafana_password:ro
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?set GRAFANA_PASSWORD}
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_password
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
-      GF_FEATURE_TOGGLES_ENABLE: "traceToLogsV2"
-    depends_on: [prismd]
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      PRISM_DATASOURCE_TOKEN: ${PRISM_DATASOURCE_TOKEN:?set PRISM_DATASOURCE_TOKEN}
+    depends_on:
+      prismd: {condition: service_healthy}
     deploy:
       resources:
-        limits: {memory: 256M}
+        limits: {memory: 256M, pids: 1024}
+    security_opt: [no-new-privileges:true]
 
 volumes:
   ch-data:
-  pg-data:
   grafana-data:
 ```
 
-`${VAR:?message}` 的形式讓未設定密碼時 `docker compose up` 直接失敗，而不是用預設密碼起來——刻意的。
+`${PRISM_DATASOURCE_TOKEN:?message}` 拒絕缺少 Grafana bearer；其他 credential 是固定 regular file mounts，必須先通過實際容器 config-check。正式秘密的 container UID/ACL 要明確配置，不可把一次性 fixture 的可讀權限套用到正式環境。
 
 ## 2. `deploy/clickhouse/prism.xml`
 
-單機 4 GB 記憶體下的必要調校。**不調這些，ClickHouse 會 OOM。**
+當期單機 memory/query bounds；是否滿足負載需求仍需容量與 soak 實測。
 
 ```xml
 <clickhouse>
@@ -117,7 +121,7 @@ volumes:
     <uncompressed_cache_size>0</uncompressed_cache_size>
     <index_mark_cache_size>67108864</index_mark_cache_size>
 
-    <background_pool_size>4</background_pool_size>
+    <background_pool_size>16</background_pool_size>
     <background_schedule_pool_size>4</background_schedule_pool_size>
     <background_merges_mutations_concurrency_ratio>2</background_merges_mutations_concurrency_ratio>
 
@@ -183,6 +187,7 @@ datasources:
     url: http://prismd:9090/prom
     isDefault: true
     jsonData:
+      httpHeaderName1: Authorization
       httpMethod: POST
       timeInterval: 15s
       prometheusType: Prometheus
@@ -191,6 +196,8 @@ datasources:
         - name: trace_id
           datasourceUid: prism-traces
     editable: false
+    secureJsonData:
+      httpHeaderValue1: 'Bearer $PRISM_DATASOURCE_TOKEN'
 
   - name: Prism-Logs
     uid: prism-logs
@@ -205,7 +212,7 @@ datasources:
         - name: TraceID
           matcherType: label
           matcherRegex: trace_id
-          url: '${__value.raw}'
+          url: '$${__value.raw}'
           datasourceUid: prism-traces
         # 相容：body 中內嵌 trace_id 的情形
         - name: TraceIDInline
@@ -288,7 +295,7 @@ providers:
 ```ini
 [Unit]
 Description=Prism observability server
-Documentation=https://github.com/OWNER/prism
+Documentation=https://github.com/fallrising/newclear/tree/main/platform/prism
 After=network-online.target
 Wants=network-online.target
 
@@ -297,7 +304,6 @@ Type=notify
 User=prism
 Group=prism
 ExecStart=/usr/local/bin/prismd --config /etc/prism/prismd.yaml
-ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5s
 TimeoutStopSec=45s
@@ -343,6 +349,8 @@ WantedBy=multi-user.target
 ## 7. `deploy/systemd/prism-agent.service`
 
 ```ini
+# Future-phase reference only: prism-agent is not executable in Phase 1.
+# CAP_DAC_READ_SEARCH can read any host file; prefer scoped groups when possible.
 [Unit]
 Description=Prism telemetry agent
 After=network-online.target
@@ -355,7 +363,6 @@ Group=prism-agent
 # 讀取 /var/log 需要；若只讀特定目錄可改用 SupplementaryGroups
 SupplementaryGroups=adm systemd-journal
 ExecStart=/usr/local/bin/prism-agent --config /etc/prism/agent.yaml
-ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5s
 TimeoutStopSec=30s
@@ -679,74 +686,103 @@ groups:
 ## 11. `deploy/Dockerfile.prismd`
 
 ```dockerfile
-FROM golang:1.27.1-alpine AS build
+FROM docker.io/library/golang:1.27.1-alpine@sha256:cd9a32216aee5667f957a62d13a10032a63fd58e14b3f3d9cc8c2122f501e95e AS build
 WORKDIR /src
-RUN apk add --no-cache git ca-certificates
+ENV GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly CGO_ENABLED=0
 COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
+# The optional secret is a session CA bundle for managed build networks.
+RUN --mount=type=secret,id=prism_ca,required=false \
+    if [ -s /run/secrets/prism_ca ]; then \
+      SSL_CERT_FILE=/run/secrets/prism_ca go mod download; \
+    else \
+      go mod download; \
+    fi
+COPY cmd/ ./cmd/
+COPY drivers/ ./drivers/
+COPY internal/ ./internal/
+COPY pkg/ ./pkg/
 ARG VERSION=dev
 ARG REVISION=unknown
-RUN CGO_ENABLED=0 go build -trimpath \
-    -ldflags "-s -w -X main.version=${VERSION} -X main.revision=${REVISION}" \
-    -o /out/prismd ./cmd/prismd
+RUN --mount=type=secret,id=prism_ca,required=false \
+    if [ -s /run/secrets/prism_ca ]; then export SSL_CERT_FILE=/run/secrets/prism_ca; fi; \
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION} -X main.revision=${REVISION}" \
+      -o /out/prismd ./cmd/prismd
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:52dcfbabb7457ea47c82f6e13af8c8a4a1d9f7b0145142b3ecab20f2b888411d
 COPY --from=build /out/prismd /prismd
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 USER nonroot:nonroot
 EXPOSE 9090 4317
 ENTRYPOINT ["/prismd"]
 CMD ["--config", "/etc/prism/prismd.yaml"]
 ```
 
-`CGO_ENABLED=0` + distroless 讓映像 < 30 MB 且無 shell。代價是 journald 輸入需要純 Go 實作（`08` §3.3 已註明可讀 `/var/log/journal`）——agent 的映像若需要 cgo 版 sd-journal，另建一個非 distroless 的 Dockerfile。
+`CGO_ENABLED=0` + nonroot distroless 不提供 shell；映像大小以實際 build/image inspect 為準。代價是 journald 輸入需要純 Go 實作（`08` §3.3 已註明可讀 `/var/log/journal`）——agent 的映像若需要 cgo 版 sd-journal，另建一個非 distroless 的 Dockerfile。
 
 ## 12. `Makefile`（關鍵目標）
 
 ```makefile
-VERSION  ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+GO ?= go
+PYTHON ?= python3
+E2E_ARGS ?=
+VERSION ?= dev
 REVISION ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
-DRIVERS  ?= memory clickhouse vmvl
 
-.PHONY: build lint test conformance promql differential e2e deps-check ci
+export GOFLAGS ?= -mod=readonly
+
+.PHONY: build lint test deps-check conformance promql e2e ci
 
 build:
-	go build -trimpath -ldflags "-X main.version=$(VERSION) -X main.revision=$(REVISION)" \
-		-o bin/ ./cmd/...
+	@mkdir -p bin
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags '-X main.version=$(VERSION) -X main.revision=$(REVISION)' -o bin/prismd ./cmd/prismd
 
 lint:
-	golangci-lint run ./...
-	go vet ./...
-
-deps-check:
-	@! go list -deps ./pkg/...            | grep -E '/(internal|drivers)/' || (echo "FAIL: pkg depends on internal/drivers"; exit 1)
-	@! go list -deps ./drivers/...        | grep -E '/internal/'           || (echo "FAIL: drivers depend on internal"; exit 1)
-	@! go list -deps ./internal/compat/...| grep -E '/drivers/'            || (echo "FAIL: compat depends on drivers"; exit 1)
-	@! go list -deps ./...                | grep -E 'grafana/(loki|tempo|grafana)' || (echo "FAIL: AGPL dependency"; exit 1)
-	@echo "deps-check OK"
+	@test -z "$$(find . -type f -name '*.go' -not -path './vendor/*' -exec gofmt -l {} +)" || \
+		(echo "Go files need formatting; run gofmt"; exit 1)
+	$(GO) vet ./...
 
 test:
-	go test -race -count=1 ./...
+	$(GO) test -race -count=1 ./...
+
+deps-check:
+	GO=$(GO) bash scripts/check-dependencies.sh
+	GO=$(GO) bash scripts/test-dependency-guard.sh
 
 conformance:
-	@for d in $(DRIVERS); do echo "== conformance: $$d"; \
-		go test -race -count=1 ./test/conformance -driver=$$d || exit 1; done
+	$(GO) test -race -count=1 ./pkg/spi/conformance ./drivers/memory
+	$(PYTHON) drivers/clickhouse/run-integration.py
 
 promql:
-	@for d in $(DRIVERS); do echo "== promqltest: $$d"; \
-		go test -count=1 ./test/promqltest -driver=$$d || exit 1; done
-
-differential:
-	@for d in clickhouse vmvl; do echo "== differential: $$d"; \
-		go test -count=1 ./test/differential -driver=$$d || exit 1; done
+	$(GO) test -race -count=1 ./test/promqltest
+	$(PYTHON) drivers/clickhouse/run-integration.py
 
 e2e:
-	docker compose -f deploy/docker-compose.yml up -d --wait
-	go test -count=1 -tags=e2e ./test/e2e/...
-	docker compose -f deploy/docker-compose.yml down -v
+ifeq ($(strip $(E2E_ARGS)),)
+	@echo "Usage: make e2e E2E_ARGS='--docker-host unix:///path/to/docker.sock --image prism/prismd:<unique-local-tag> --no-build [--compose-binary /path/to/docker-compose]'" >&2
+	@exit 2
+else
+	$(PYTHON) scripts/compose-e2e.py $(E2E_ARGS)
+endif
 
-ci: lint deps-check test conformance promql differential
+ci: deps-check lint test conformance promql
 ```
 
 `deps-check` 是整個架構承諾的機械化執行者。它必須在 `ci` 目標中、在測試之前執行——架構違規應該比測試失敗更早被發現。
+
+
+## 13. Phase 1 配置與一次性 fixture
+
+[deploy/prismd.yaml](../../deploy/prismd.yaml) 使用既有 ClickHouse/auth_file 配置。
+[phase1-notify.yaml](../../deploy/phase1-notify.yaml) 和 rules 目錄滿足原有 validation；
+JWT 不可省略，沒有放寬 config parser。五個 secret files 及 loopback/ephemeral ports
+依 deployment README 的固定命名。Docker context 使用
+[Dockerfile-specific exclusion](../../deploy/Dockerfile.prismd.dockerignore)，不包含
+private .team、secrets、tests 或文檔；optional build CA secret 只存在 network RUN。
+
+[Compose runner](../../scripts/compose-e2e.py) 要求 explicit local Unix socket 和唯一
+accepted prebuilt image，保留 registry/proxy 設定。所有 project resources 有 ownership
+labels，preflight collision/inspection fail closed；cleanup 後確認 container/volume/network
+全部不存在。成功和失敗證據在保存前去敏，不輸出 Docker Env 或完整 config。
+
+Metrics/traces 保留 async_insert=1/wait_for_async_insert=0；ack 不表示落盤。
+E2E 先觀測已知數值可查，再驗證 graceful daemon/ClickHouse restart 的資料持久性。
+未驗證 production capacity、unflushed crash durability 或後期 datasource links。

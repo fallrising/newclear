@@ -15,9 +15,20 @@ import (
 // validateQueryAST preflights arithmetic and names before using the pinned
 // Prometheus engine's selector-reach calculation. It never clamps inner syntax.
 func validateQueryAST(expr parser.Expr, start, end, now time.Time, maxLookback, lookback time.Duration) (time.Time, time.Time, error) {
+	hasSelectors, err := inspectQueryAST(expr, now, maxLookback, lookback)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	return queryASTTimeRange(expr, start, end, now, maxLookback, lookback, hasSelectors)
+}
+
+// inspectQueryAST records storage selectors in the existing bounded validation
+// walk, including selectors nested within functions and subqueries.
+func inspectQueryAST(expr parser.Expr, now time.Time, maxLookback, lookback time.Duration) (bool, error) {
 	floor := now.Add(-maxLookback)
 	ceiling := now.Add(lookback)
 	nodes := 0
+	hasSelectors := false
 	var visit func(parser.Node, int, time.Duration, bool) error
 	visit = func(node parser.Node, depth int, reach time.Duration, matrix bool) error {
 		nodes++
@@ -83,6 +94,7 @@ func validateQueryAST(expr parser.Expr, start, end, now time.Time, maxLookback, 
 				return err
 			}
 		case *parser.MatrixSelector:
+			hasSelectors = true
 			if n.Range <= 0 || n.Range > maxLookback {
 				return errors.New("range too large")
 			}
@@ -93,6 +105,7 @@ func validateQueryAST(expr parser.Expr, start, end, now time.Time, maxLookback, 
 			}
 			matrix = true
 		case *parser.VectorSelector:
+			hasSelectors = true
 			if absDuration(n.OriginalOffset) > maxLookback {
 				return errors.New("offset too large")
 			}
@@ -130,8 +143,18 @@ func validateQueryAST(expr parser.Expr, start, end, now time.Time, maxLookback, 
 		return nil
 	}
 	if err := visit(expr, 0, 0, false); err != nil {
-		return time.Time{}, time.Time{}, err
+		return false, err
 	}
+	return hasSelectors, nil
+}
+
+// queryASTTimeRange requires an AST already validated by inspectQueryAST.
+func queryASTTimeRange(expr parser.Expr, start, end, now time.Time, maxLookback, lookback time.Duration, hasSelectors bool) (time.Time, time.Time, error) {
+	if !hasSelectors {
+		return start, end, nil
+	}
+	floor := now.Add(-maxLookback)
+	ceiling := now.Add(lookback)
 	prepared := promql.PreprocessExpr(expr, start, end)
 	lo, hi := promql.FindMinMaxTime(&parser.EvalStmt{Expr: prepared, Start: start, End: end, LookbackDelta: lookback})
 	if lo == 0 && hi == 0 {

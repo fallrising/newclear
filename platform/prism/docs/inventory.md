@@ -33,6 +33,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P1-08 | `internal/compat/promapi/query*`, query/all-in-one runtime, bounded native/fallback APIs, real promtool gate | Rules/alerts/remote_read, native histograms and multi-tenant control plane remain later work. |
 | P1-09 | Native ClickHouse registration/lifecycle, eight migrations and metrics/logs/traces writes; test-only SQL readback | Production query implementations and daemon wiring remain P1-10. Full conformance and deployment are not claimed. |
 | P1-10 | Mandatory ClickHouse SPI reads, additive migrations 009/010, bounded iterators/catalogs, daemon selection and isolated real-database test factories | Optional native/metadata/delete/RED/dependency queries, compose/Grafana and deployment remain later scope. Verification is recorded below. |
+| P1-11 | Phase 1 three-service pinned Compose, nonroot daemon build, four datasource definitions, five dashboards, healthcheck/version/readiness/systemd notifications and owned E2E runner | Root local build, complete actual Compose ingestion/Grafana health/query/panel, same-container restarts and exact cleanup pass; historical failures and current limits are recorded below. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -487,3 +488,122 @@ with `list --go-version 1.27`; its full version-filtered list was reviewed.
 Previous Go 1.23 references above describe the original adoption. Existing JSON
 protocol behavior is preserved; upgrading the compiler does not authorize a
 JSON v2 migration or an unrelated style rewrite.
+
+
+## P1-11 root checkpoint — 2026-10-07 (not complete)
+
+Go remains1.27.1 and clickhouse-go/v2 v2.48.0; no dependencies or public SPI
+changed. The current deployment uses pinned Linux amd64 images and the existing
+ClickHouse backend contract. Phase1 supports Prometheus datasource queries;
+LogQL/Jaeger/alertmanager APIs and later dashboard panels remain inactive.
+
+Fresh root `python3 drivers/clickhouse/run-integration.py` completed in
+444.198 seconds, exit0. It runs real ClickHouse24.8.14.39 conformance, all12
+PromQL corpus files with579 supported evaluations/6296 engine queries and
+seven float round-trip seeds, then builds the actual daemon and verifies the
+ClickHouse ingestion→PromQL core chain. All189 original native-histogram
+exclusions and9 optional-capability conformance skips remain unchanged;
+no mandatory check is skipped. Its exact owned fixture was removed.
+
+Memory conformance/corpus, native race/goleak/vet/security/dependency guards,
+normal/integration lint, readonly module verification, and the four actual
+external-client integration tests have root evidence. Current compiled45module
+versions and licence-file bytes match the approved graph. These are component
+gates; they do not establish the complete Grafana stack's acceptance.
+
+Root Compose attempt3 reaches healthy services and verifies telemetrygen's
+three signals through both HTTP/gRPC, actual Prometheus remote_write, Vector
+JSON push, native stored rows and direct PromQL/auth/catalog assertions.
+Grafana's actual Prometheus datasource health then returns400 because its
+fixed v12.0.0 probe uses `1+1` at Unix4. Its subsequent datasource query,
+dashboard panel and restart assertions did not run. The minimal no-storage
+instant-query scope exception awaits explicit approval; query code is unchanged.
+All owned attempt3 resources and generated secrets were removed.
+
+Earlier full real-database attempts failed during host ENOSPC; the tmpfs attempt
+observed a complete float subtest pass but did not establish whole-suite/core
+chain success because evidence writing failed. Those failures remain recorded;
+the fresh successful root run above supplies the complete current component
+gate. The earlier P1-10 promtool shutdown failure still has unknown cause; its
+subsequent pass does not prove that residual intermittent risk has disappeared.
+The current P1-11 has no complete frozen-source Astra review or merged delivery.
+
+
+The root follow-up Compose run on2026-10-07 also confirms Grafana's live
+`plugins.preinstall_disabled=true`, absence of all four suggested apps and
+provisioning of four datasource definitions. Its health400 remains an overall
+failure, with panel and restart checks unexecuted. A fresh standalone Buildx
+build succeeds in45.662seconds, exit0; its actual nonroot image's version,
+Go1.27.1/clickhouse-go2.48.0/CGO0 buildinfo and exported filesystem were verified.
+The first verification wrapper misclassified Docker29's lowercase exact absence;
+its failure remains and the strict corrected wrapper passes.
+
+Root supplemented the native ClickHouse runner's container cleanup: the fixed
+image declares an anonymous data volume. Exact mount/unmount fixture-ID events
+and absence of all container references establish ownership before removal;
+the fresh run's volume absence is verified. No broad volume/cache pruning was
+used. Older unidentified resources remain preserved. These are component
+checkpoint results, not complete Grafana E2E or approved query semantics.
+
+
+## P1-11 final local acceptance — 2026-10-08
+
+This dated result supersedes the preceding incomplete checkpoints without
+rewriting their failures. The approved query exception uses the existing bounded
+AST to identify storage-free expressions: only instant queries may bypass the
+historical outer evaluation-time floor, and no storage-free expression dispatches
+to a native storage querier. Data selectors, historical range/future/modifier,
+authentication, tenant and resource bounds remain unchanged. GET/POST regressions
+include arithmetic, vector/time/string, native-capability spies and rejection
+cases. The original historical400 and mistaken native dispatch produced meaningful
+Red before the implementation; final race/goleak and security checks pass.
+
+A fresh pinned-image build passes with Go1.27.1, clickhouse-go/v2 v2.48.0,
+CGO_ENABLED=0, nonroot execution and verified exported filesystem. The complete
+`make e2e E2E_ARGS='…'` gate passes configuration validation, healthy services,
+telemetrygen HTTP/gRPC three-signal storage, actual Prometheus remote_write and
+Vector JSON push, native fields, PromQL/auth/catalog, Grafana datasource health,
+42.5 proxy query and a real provisioned panel query. Both graceful daemon and
+ClickHouse restarts retain the exact container and named-volume identities and
+query-visible42.5 data. All owned containers, named volumes, network and generated
+secrets are absent after cleanup. This is API-level evidence, not browser coverage.
+
+The first new complete-stack attempt passed its main data/Grafana test but failed
+at the unsupported Compose2.40.3 `start --wait`. The runner now uses supported
+health-waiting `up --no-recreate --no-deps --no-build --pull never`, retains the
+90second command bound and rejects identity/volume changes. The regression first
+failed on the old route; root reran all Python runner/cleanup tests and the
+whole actual Compose gate after correction. A second actual run exposed stale
+ephemeral endpoints after same-container restart; an isolated Docker probe
+confirmed port reassignment. The runner now re-reads current loopback endpoints
+after each restart. No persistence assertion or timeout was waived.
+
+Fresh root `make lint test`, `make deps-check`, normal/integration pinned lint and
+vet, module verification, Go/CGO0 builds, four official-client integration tests
+and daemon smoke pass. Memory and real ClickHouse conformance plus all12 corpus
+files retain579 float evaluations,6296 engine queries,189 original native
+histogram exclusions and7 round-trip seeds. The real database gate also passes
+C-MET-05, cancellation/Close/tenant/time/sort/scan/result/error contracts and the
+actual daemon core chain. Its9 optional-capability skips are explicit, not
+mandatory passes. Root verifies its exact fixture container and associated
+anonymous volume were removed; older unidentified resources remain untouched.
+
+The module graph,45 compiled/test-module licence records and162 protected inputs
+remain unchanged; all12 SDD22 artifact blocks match repository files. Earlier
+ENOSPC, startup/configuration/health failures and the P1-10 unexplained first
+promtool SIGTERM failure remain historical evidence. This acceptance does not
+establish production capacity, arbitrary crash durability, Loki/Jaeger/alerting
+query compatibility, release or production deployment.
+
+
+### D016 independent-review correction
+
+Independent frozen-source review found that invalid Docker endpoint or missing
+Docker executable errors could leave generated secrets before the cleanup guard.
+Main-level regressions reproduced that failure before correction. The runner now
+guards fixture initialization and removes partial secrets on pre-start errors,
+while retaining ownership-gated cleanup for started resources. Root reran the
+Python runner/cleanup contracts and the complete actual Compose gate after the
+fix; both passed, including both persistence restarts and exact cleanup. Earlier
+review and failure evidence remain retained; corrected source/docs are frozen
+for independent follow-up review.

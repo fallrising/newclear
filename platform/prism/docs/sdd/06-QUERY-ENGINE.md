@@ -19,8 +19,8 @@ type Router struct {
 
 | 請求 | 條件 | 路徑 |
 |---|---|---|
-| PromQL instant/range | `caps.Metrics.NativePromQL == true` 且後端實作 `NativeMetricQuerier` | **下推**：整條 PromQL 字串交給後端 |
-| PromQL instant/range | 否則 | **回退**：`promql.Engine` + `promqladapter` 讀 `Select` |
+| PromQL instant/range | 含 storage selector，`caps.Metrics.NativePromQL == true` 且後端實作 `NativeMetricQuerier` | **下推**：整條 PromQL 字串交給後端 |
+| PromQL instant/range | 否則 | **回退**：`promql.Engine`；需要資料時透過 `promqladapter` 讀 `Select`，無 storage selector 時不呼叫儲存 |
 | `/series`、`/labels`、`/label/*/values` | 一律 | 直接呼叫 Tier-1 原語 |
 | LogQL | `caps.Logs.NativeLogQuery == true` | **下推**：`LogQuery` IR 交給 `NativeLogQuerier` |
 | LogQL | 否則 | **混合**：可下推部分給 `Search`，其餘中間層串流補算 |
@@ -120,7 +120,8 @@ internal/query/tracequery/
 
 ### 5.1 時間範圍
 
-- `query.max_lookback`（預設 30 天）：起點早於此則夾到邊界並回 warning。
+- `query.max_lookback`（預設 30 天）：起點早於此則夾到邊界並回 warning；完整落在界線前的資料查詢會拒絕。
+- P1-11 [D011](../specs/p1-11-deploy-e2e.md#d011--approved-storage-free-instant-historical-evaluation) 核准例外：bounded AST 完全沒有 vector/matrix storage selector 的 instant expression 可使用歷史頂層評估時間。所有無儲存 expression 都在本地引擎求值，不派送 native storage query。資料查詢（含歷史頂層時間搭配 current `@`）、range、future、修飾子、安全與資源限制維持。
 - `query.max_range`（預設 7 天）+ `step` 檢查：`(end-start)/step > query.max_points`（預設 11_000，與 Grafana 面板寬度同量級）時回 `400` 並提示加大 step。**這一條能擋掉九成的意外全表掃描。**
 
 ### 5.2 併發與超時

@@ -1,0 +1,10 @@
+# Validation-only Phase 1 routes. Alert evaluation and dispatch arrive later.
+route:
+  receiver: default
+  routes:
+    - receiver: watchdog
+      matchers: ['alertname="PrismWatchdog"']
+receivers:
+  - name: default
+  - name: watchdog
+  - name: ops-fallback

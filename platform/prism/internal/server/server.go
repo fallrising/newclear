@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
@@ -32,6 +33,8 @@ type Options struct {
 	GRPCServer      *grpc.Server
 	StopReceiving   func()
 	Drain           func(context.Context) error
+	Ready           func() error
+	Stopping        func() error
 	ShutdownTimeout time.Duration
 	TLSCertFile     string
 	TLSKeyFile      string
@@ -51,6 +54,9 @@ type Server struct {
 	grpcServer      *grpc.Server
 	stopReceiving   func()
 	drain           func(context.Context) error
+	ready           *atomic.Bool
+	onReady         func() error
+	onStopping      func() error
 }
 
 // New constructs a server. It does not bind a listener or start goroutines.
@@ -82,9 +88,22 @@ func New(options Options) (*Server, error) {
 		options.Logger = slog.Default()
 	}
 
+	ready := &atomic.Bool{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /-/healthy", healthy)
 	mux.HandleFunc("/-/healthy", methodNotAllowed(http.MethodGet, http.MethodHead))
+	mux.HandleFunc("GET /-/ready", func(response http.ResponseWriter, _ *http.Request) {
+		response.Header().Set("Cache-Control", "no-store")
+		response.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		if !ready.Load() {
+			response.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = response.Write([]byte("not ready\n"))
+			return
+		}
+		response.WriteHeader(http.StatusOK)
+		_, _ = response.Write([]byte("ok\n"))
+	})
+	mux.HandleFunc("/-/ready", methodNotAllowed(http.MethodGet, http.MethodHead))
 	mux.Handle("GET /metrics", promhttp.HandlerFor(options.Gatherer, promhttp.HandlerOpts{EnableOpenMetrics: true}))
 	mux.HandleFunc("/metrics", methodNotAllowed(http.MethodGet, http.MethodHead))
 	if options.Handler != nil {
@@ -97,6 +116,9 @@ func New(options Options) (*Server, error) {
 		grpcServer:      options.GRPCServer,
 		stopReceiving:   options.StopReceiving,
 		drain:           options.Drain,
+		onReady:         options.Ready,
+		onStopping:      options.Stopping,
+		ready:           ready,
 		shutdownTimeout: options.ShutdownTimeout,
 		tlsCertFile:     options.TLSCertFile,
 		tlsKeyFile:      options.TLSKeyFile,
@@ -166,6 +188,15 @@ func (s *Server) ServeListeners(ctx context.Context, listener, grpcListener net.
 	if grpcListener != nil {
 		defer func() { _ = grpcListener.Close() }()
 	}
+	if err := ctx.Err(); err != nil {
+		return errors.Join(err, s.drainAfterStartupFailure(ctx))
+	}
+	if s.onReady != nil {
+		if err := s.onReady(); err != nil {
+			return errors.Join(fmt.Errorf("notify ready: %w", err), s.drainAfterStartupFailure(ctx))
+		}
+	}
+	s.ready.Store(true)
 	requests, cancelRequests := context.WithCancel(context.WithoutCancel(ctx))
 	defer cancelRequests()
 	s.httpServer.BaseContext = func(net.Listener) context.Context { return requests }
@@ -185,6 +216,14 @@ func (s *Server) ServeListeners(ctx context.Context, listener, grpcListener net.
 		remaining--
 	case <-ctx.Done():
 	}
+	s.ready.Store(false)
+	var notifyErr error
+	if s.onStopping != nil {
+		notifyErr = s.onStopping()
+		if notifyErr != nil {
+			notifyErr = fmt.Errorf("notify stopping: %w", notifyErr)
+		}
+	}
 	if s.stopReceiving != nil {
 		s.stopReceiving()
 	}
@@ -198,7 +237,7 @@ func (s *Server) ServeListeners(ctx context.Context, listener, grpcListener net.
 	if s.drain != nil {
 		drainErr = s.drain(shutdown)
 	}
-	return errors.Join(serveErr, shutdownErr, drainErr)
+	return errors.Join(serveErr, notifyErr, shutdownErr, drainErr)
 }
 
 func (s *Server) serveGRPC(listener net.Listener, result chan<- error) {

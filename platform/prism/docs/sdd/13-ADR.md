@@ -324,3 +324,37 @@ GetTrace直接讀tenant+trace_id的spans，保留既有bloom及server scan cap�
 完整corpus雖579／189／6296通過，原fuzz seed抓到單點／批首-0在既有Float64 Gorilla codec落庫變+0；raw reinterpretAsUInt64亦確認已失bit，reader不能恢復。批准新增010的UInt64 value_bits DEFAULT reinterpretAsUInt64(value)，writer顯式寫math.Float64bits、reader以math.Float64frombits重建，不改SPI／原codec／既有001–008。新UInt64持久路徑已在私人實庫probe確認signed-zero可保留；最終fullpackage還須重跑。舊row可讀，已丟失的歷史signed-zero不可重建。這是mandatory float fidelity必要加欄，不增加依賴或擴張native histogram範圍。
 
 ADR-019 follow-up (P1-10 D010/D011): Independent frozen-source review reproduced caller-context memory-cap bypass and a trace default-value discrepancy. Read SQL now fixes the validated memory cap. The existing SPI/memory reference governs nonpositive trace limits and exact empty-service selection; positive requested limits remain after full filters/order, and backend safety caps still fail closed. These changes preserve interfaces, dependencies and other drivers.
+
+
+## ADR-020：P1-11 Phase 1 部署與實際 E2E 邊界
+
+當期部署只啟動既有 prismd、ClickHouse、Grafana，以固定 Linux amd64 官方映像、
+file-backed daemon/ClickHouse/admin 秘密與 Grafana bearer header 接線。保留既有
+JWT/rules/notify validation；未實作的 alerting/agent/control-plane 產物明確為
+inactive reference。SDD22 的完整產品 draft 按當期 spec 調整，不據此增加 runtime。
+
+只增加 internal daemon/server 的 version、shell-free bounded healthcheck、listener
+與 backend startup 後的 readiness，以及 stdlib sd_notify。不改公共 SPI、driver、
+module dependencies、root workflows 或 Go 1.27.1。Compose fixtures 使用唯一
+project/image、ownership labels、local Unix socket、fail-closed inspection 與 bounded
+去敏 evidence；不改 global Docker context/auth/proxy，不執行 production deployment。
+
+驗收包含真實 ingestion→ClickHouse→PromQL/Grafana、已 provision metric panel、
+認證拒絕與可見資料跨 graceful daemon/ClickHouse restart 的持久性。Metrics/traces
+保持 async acknowledgement；沒有 unflushed crash durability 保證。四個 datasource
+provision 不代表 Loki/Jaeger/Alertmanager APIs 已存在。完整來源凍結後由 Astra
+獨立審查，root 最終 checks 與 CI 才決定是否完成。詳見 [P1-11 spec](../specs/p1-11-deploy-e2e.md)。
+
+ADR-020 query refinement: a bounded AST with no vector or matrix storage selector
+may use a historical top-level instant evaluation time. Every storage-free
+expression uses the pinned engine without NativeMetricQuerier dispatch. This
+resolves the fixed Grafana health probe without a literal expression/time special
+case or global lookback change. Data selectors, range/future/modifier bounds,
+authentication, tenancy, complexity and resource limits remain mandatory.
+
+ADR-020 restart refinement: pinned Compose2.40.3 has no `start --wait`. The owned
+runner uses health-waiting `up` with no recreate, no dependencies, no build and
+no pull, and requires identical container and named-volume identities before
+post-restart data assertions. Docker may reassign ephemeral host ports for the
+same container; the runner re-reads strict loopback endpoints after each restart.
+A recreated fixture cannot establish persistence.

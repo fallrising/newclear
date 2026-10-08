@@ -157,6 +157,12 @@ regular-file bytes, 4 MiB manifest bytes, 512 UTF-8 bytes per relative path and
 The writer compares the saved inventory and all copied bytes against the
 quiescent source and verifies the completed backup package independently.
 Source removal is forbidden until the complete package passes this verification.
+That gate also applies to failure cleanup: if verification has not succeeded,
+stop owned processes but preserve the original source scope and report the
+failed experiment. A generic `finally` cleanup must not delete that source.
+Private backup/staging temporaries can still be cleaned by their own ownership
+checks. Once the verified restore has transferred ownership, its fresh scope
+is eligible for normal final cleanup.
 Checksums detect corruption in this owned local backup; they are not a signature
 or an authenticity claim about arbitrary third-party archives.
 

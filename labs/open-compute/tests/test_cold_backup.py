@@ -108,6 +108,51 @@ class ColdBackupTests(unittest.TestCase):
         self.assertEqual(self.recovery.cleanup(True), {"private_removed": True, "staging_removed": True})
         self.scope.remove(True)
 
+    def test_exact_ocr_assets_are_omitted_from_a_real_cold_roundtrip(self):
+        derived = cb.DATA + "/tessdata/" + "1" * 64
+        model = self.write(derived + "/chi_sim.traineddata", b"synthetic-embedded-model")
+        os.link(model, model.parent / "zho.traineddata")
+        self.assertEqual(model.stat().st_nlink, 2)
+        persistent = {
+            "tessdata/business.txt": b"top-level-persistent-data",
+            cb.DATA + "/objects/objects/tessdata/object.ocobj": b"object-named-tessdata",
+        }
+        for path, contents in persistent.items():
+            self.write(path, contents)
+        source_identity = dict(self.scope.identity)
+        before = self.recovery.inventory(self.scope.path)
+        paths = {entry["path"] for entry in before["entries"]}
+        excluded = cb.DATA + "/tessdata"
+        self.assertFalse(any(path == excluded or path.startswith(excluded + "/") for path in paths))
+        self.assertTrue(set(persistent) <= paths)
+
+        recovered = self.recovery.recover()
+        self.assertEqual(self.removals, [True])
+        self.assertTrue(recovered["source_absent"] and recovered["data_absent"])
+        self.assertNotEqual(self.scope.identity, source_identity)
+        self.assertFalse((self.scope.path / excluded).exists())
+        self.assertEqual(self.recovery.inventory(self.scope.path), before)
+        for path, contents in persistent.items():
+            self.assertEqual((self.scope.path / path).read_bytes(), contents)
+            self.assertEqual((self.scope.path / path).stat().st_nlink, 1)
+        self.assertTrue(all(self.recovery.cleanup(True).values()))
+        self.scope.remove(True)
+
+    def test_tessdata_basename_elsewhere_does_not_allow_hardlinks(self):
+        for directory in ("tessdata", cb.DATA + "/objects/objects/tessdata"):
+            with self.subTest(directory=directory):
+                model = self.write(directory + "/chi_sim.traineddata", b"persistent-data")
+                alias = model.parent / "zho.traineddata"
+                os.link(model, alias)
+                with self.assertRaisesRegex(cb.BackupError, "hard-linked"):
+                    self.recovery.recover()
+                self.assert_source_preserved()
+                self.assertTrue(all(self.recovery.cleanup(True).values()))
+                alias.unlink()
+                model.unlink()
+                self.recovery = cb.ColdRestore(self.scope, self.root / "cache", self.root / "report",
+                                              time.monotonic() + 30, lambda *_: None)
+
     def test_corrupt_truncated_and_extra_payload_preserve_source(self):
         for mutation in (lambda p: p.write_bytes(p.read_bytes()[:-1]),
                          lambda p: p.write_bytes(p.read_bytes() + b"extra"),

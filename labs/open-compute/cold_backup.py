@@ -32,7 +32,7 @@ MAX_ARCHIVE = 288 * 1024 * 1024
 CHUNK = 1024 * 1024
 CLEANUP_SECONDS = 30
 EXCLUDED_DIRS = frozenset(("cache", "tmp", "run", DATA + "/cache",
-                           DATA + "/tmp", DATA + "/runtime"))
+                           DATA + "/tmp", DATA + "/runtime", DATA + "/tessdata"))
 EXCLUDED_FILES = frozenset(("ocd.lock", MARKER, DATA + "/platform.lock",
                             DATA + "/objects/backend.lock"))
 LOCKS = ("ocd.lock", DATA + "/platform.lock", DATA + "/objects/backend.lock")

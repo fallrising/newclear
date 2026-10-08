@@ -126,7 +126,7 @@ directory outside the source, restore staging, output and artifact cache. It
 contains the complete payload and a machine-readable inventory. Paths in the
 inventory are canonical, relative to the scope root, with unique entries and
 explicit file/directory types. Files record byte length and SHA256; directories
-record modes. Runtime-only exclusions must be an explicit path table, rooted at
+record modes. Runtime-only and binary-derived asset exclusions must be an explicit path table, rooted at
 the scope or the one known instance data directory. Matching arbitrary basename,
 suffix or recursive glob is prohibited: an R2 payload may have such a name.
 The harness's own source ownership marker is excluded from runtime authority.
@@ -138,6 +138,7 @@ The fixed exclusion table for this instance is:
 | Scope | `cache`, `tmp`, `run` | Those subtrees only |
 | Scope | `ocd.lock`, `.open-compute-lab-owner` | Those files only |
 | `instances/lab/data` | `cache`, `tmp`, `runtime` | Those subtrees only |
+| `instances/lab/data` | `tessdata` | This binary-derived OCR asset subtree only |
 | `instances/lab/data` | `platform.lock`, `objects/backend.lock` | Those files only |
 
 No other path is excluded. In particular, preserve object marker/payload/multipart
@@ -146,7 +147,19 @@ extensions; it is not a generic production backup policy. Upstream also uses
 `runtime/extensions` for extension provider working directories, which this lab
 does not create. See [restored layout construction][layout] and [lock behavior][locks].
 
-Only regular files and directories are accepted outside the listed transient
+The first real M2 run stopped at a hard-linked file before source removal.
+Inspection of the pinned source establishes that every instance startup
+[constructs the parser service][parser-startup], which [materializes][parser-backend]
+the [embedded OCR models and hard-linked language aliases][tessdata] under this
+exact `tessdata` root. Model bytes, sizes and hashes are fixed in the binary;
+startup recreates and verifies missing assets. This subtree is reproducible
+runtime input, not database, object or Workflow authority. The failed run did
+not report individual file paths, so this attribution is source-derived.
+The precise exclusion preserves the rejection of hard links in persistent
+authority; it does not introduce a general hard-link import policy. A successful
+restored startup must regenerate these assets from the same pinned binary.
+
+Only regular files and directories are accepted outside the listed excluded
 paths. Symlinks, hard links, sockets, devices, FIFOs, path traversal, duplicate
 entries, unexpected UID/modes and unbounded inventory/payloads fail closed.
 Archive entries cannot nominate new exclusions or filesystem destinations.
@@ -265,6 +278,9 @@ partial-write tests must prove cleanup cannot remove a foreign partial/staging
 path. At least one valid round trip must demonstrate actual source removal,
 fresh regular files, complete metadata/byte verification and no external source
 dependency. These tests validate the helper and harness, not upstream recovery.
+The exact binary-derived OCR subtree may contain hard-linked aliases and must be
+omitted from the backup; the same basename elsewhere remains persistent, and
+hard links outside this exact subtree must still fail before source removal.
 
 The real non-root CI path must exercise the complete sequence and all M2 gates.
 Both M1 and M2 run against the original binary. Review focuses on archive
@@ -300,6 +316,7 @@ These are implementation/design inputs, not test results.
 - [Instance registry and scope][registry], [instance setup][setup], [data directories][data]
 - [Local filesystem validation][local-fs]
 - [R2 API][r2-api] and [portable R2 fixture][r2-fixture]
+- [Parser startup][parser-startup], [parser backend][parser-backend], and [embedded OCR assets][tessdata]
 
 [backup]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/apps/website/src/content/docs/docs/ocd/backup.md
 [retention]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/docs/references/runbooks/backup-and-retention.md
@@ -314,3 +331,6 @@ These are implementation/design inputs, not test results.
 [local-fs]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/crates/artifacts/src/local/fs_ops.rs
 [r2-api]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/crates/service/src/cloudflare_v4/r2.rs
 [r2-fixture]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/test/conformance/fixtures/r2/portable-bucket/src/index.ts
+[parser-startup]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/crates/service/src/run/startup.rs#L477
+[parser-backend]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/crates/service/src/document_parser_backend.rs#L166
+[tessdata]: https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/crates/document-parser/src/tessdata.rs

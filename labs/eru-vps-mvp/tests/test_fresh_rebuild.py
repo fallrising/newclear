@@ -333,7 +333,10 @@ class FreshRebuildPlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'lock bindings'):
             self.save('lock-drift')
 
-    def test_series_chain_requires_verified_immediate_accepted_predecessor(self):
+    @patch('fresh_generation_ops.verify_accepted_lineage')
+    def test_series_metadata_requires_immediate_accepted_predecessor(self, verify_lineage):
+        # This test isolates campaign metadata checks. Full sealed lineage is
+        # required by production and covered by completion guard/integration.
         first = self.save('previous-run')[0]
         acceptance_path = 'private/operations/fresh-rebuild/accepted-runs/previous-run.json'
         acceptance = {

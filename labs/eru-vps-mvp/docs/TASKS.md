@@ -1,5 +1,35 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-08 本機驗收：ERU-009／010／013／014／015 均為「本機完成、待 E2E」。完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過，多模型有界實作與獨立審查通過；具體版本／命令／歷史失敗見 [T-271](../.team/reports/T-271.md)。GitHub 最終版本 CI／合併／遠端核對與 desk 同步另記 PR／帳本，全部通過後才完成本輪交付。正式完成6／剩餘12（9進行中、3待做）不變；live 操作包保持 [UNEXECUTED](E2E-OPERATIONS-2026-10-06.md)。下列較早紀錄保留歷史日期，五項 local DoD 不抵銷 live DoD。
+
+## 2026-10-08 五項本機驗收映射
+
+| 本機任務 | 本機狀態與完整離線證據 | 待 E2E 的正式條件 |
+| --- | --- | --- |
+| ERU-009 | 本機完成、待 E2E；bounded drain／cleanup／readonly recovery、original entrypoint 與實際 Name binding，native `test_worker_drain*`／`test_app_cleanup` 通過。 | 真 CLI/API/job 及 nonempty drain→重裝→恢復。 |
+| ERU-010 | 本機完成、待 E2E；loss／partial cleanup／replacement、containerd ID=Name／明確分開的 generic Name parser 與 no replay，native `test_worker_loss*` 通過。 | provider fence、失聯／quota／HTTP 與180秒候選驗收。 |
+| ERU-013 | 本機完成、待 E2E；provenance/version guards、native `test_core_release*`／`test_core_update*` 通過；[既有兩次隔離 v0.1.7 build](M3-CORE-V017-VALIDATION-2026-10-03.md) 保留、不重建。 | verified-not-deployed，upgrade／rollback／interruption 與 plugin/runtime。 |
+| ERU-014 | 本機完成、待 E2E；既有六階段 workflow/generation/resume，native `test_reimage*`／`test_labctl`／`test_recovery` 通過。 | safe patch 部署、人工 OS/volume 重灌及完整 live 鏈。 |
+| ERU-015 | 本機完成、待 E2E；唯一 public CLI 通過 network／22步 bootstrap／按計畫展開的 replay（本輪兩個 app fixture為59步）／raw acceptance／generation prefix recovery／completion／retirement／普通第二次 consumer／retained lineage。 | 三個不同 generation 的 fresh、V01–V04/V08、residue/RTO 與真 CLI/runtime。 |
+
+full09 log SHA256 `08ff99ffac01dd96cf22caea99d98696f82b7190e990996c528bc6ad19e04b07`，native09 manifest SHA256 `ab0da4d1a14aadf7acebff735a4fa093f44b4f847aba99acce86668ce33750bb`。[完整本機矩陣](LOCAL-CLOSEOUT-2026-10-06.md) 保留原基線與當輪實測；[批准設計](M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 保留 scope／timing／current authority 的驗收界線。此輪沒有真實 VPS／SSH／nft／kernel／provider、release/deploy 或破壞性操作。
+
+## 歷史進度（保留原文，以前述最新驗收為準）
+
+2026-10-07 開發續作：[fresh completion 主線](M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 已接入既有 driver 的 replay、raw resource/residue acceptance、本機 generation commit/seal/completion 與普通 controller admission。多模型有界實作及獨立反例審查保留版本和原始證據；目前完整 native 測試仍在執行，CLI omitted-false 後續修正與最終版本 GitHub CI／合併尚待。最新五項本機 DoD 映射見 [2026-10-06 矩陣及 10-07 更新](LOCAL-CLOSEOUT-2026-10-06.md)，live 操作包 [UNEXECUTED](E2E-OPERATIONS-2026-10-06.md)。正式完成6／剩餘12不變；下列較早的缺口及測試數保留歷史日期。
+
+## 2026-10-07 五項本機驗收映射
+
+此表只核對本次 local DoD。最終完整 native／CLI 與 exact-head CI gate 尚待，source 與 focused tests 不能單獨作整體驗收；逐版本結果以 [T-271 evidence gate](../.team/reports/T-271.md) 為準。正式任務仍進行中，live DoD 見 [操作包](E2E-OPERATIONS-2026-10-06.md)。
+
+| 本機任務 | 本機實作及必要證據 | 尚待驗收 |
+| --- | --- | --- |
+| ERU-009 | bounded drain／exact-ID cleanup／readonly recovery 已具備；`test_worker_drain*` 與 `test_app_cleanup` 納入完整 native gate。 | 最終完整離線 gate；真 CLI/API/job 及 drain→重裝→恢復 E2E。 |
+| ERU-010 | bounded loss／partial cleanup／replacement 已具備；`test_worker_loss*`、shared opaque-ID regression 納入 native gate。 | 最終完整離線 gate；provider fence、失聯／quota／HTTP 與180秒候選 E2E。 |
+| ERU-013 | provenance／version guard 及 [既有兩次隔離 v0.1.7 build](M3-CORE-V017-VALIDATION-2026-10-03.md) 已具備；`test_core_release*`／`test_core_update*` 納入 native gate，不重建。 | 最終完整離線 gate；verified-not-deployed，upgrade／rollback／interruption 與 plugin/runtime E2E。 |
+| ERU-014 | worker-only install／core access／register／smoke／resume／generation 的六階段有限 workflow 已具備；`test_reimage*`／`test_labctl`／`test_recovery` 納入 native gate。 | 最終完整離線 gate；safe patch 部署、人工 OS/volume 重灌及完整 live 鏈。 |
+| ERU-015 | fresh-run public CLI 串接 network／22步 bootstrap／59步 replay／raw acceptance／generation prefix recovery／completion／retirement／普通第二次 consumer 與 retained lineage；`test_fresh_completion_integration` 及其他 fresh native tests。 | 唯一完整 CLI journey 與最終 native gate；三個不同 generation 的 V01–V04/V08／residue／RTO E2E。 |
+
 2026-10-06 續作：[fresh bootstrap 主線](M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md) 接入既有 `labctl fresh-run next/recover/status`，從已驗證 network history 與當次 renewal/probes 執行 fresh etcd、empty-control-plane、safe core 與三個 agent 的 install/start/register/up。22 個固定步驟分別持久化，lost reply 僅觀察恢復；stage receipt 不釋放 pending 或提交 generation。最終完整離線 1,133 項／2723.389 秒、root focused60項／16.610秒及獨立最終49項／10.123秒通過；本機驗收見 [T-267 evidence gate](../.team/reports/T-267.md)，遠端 CI／合併結果另記 desk T-0075；整體 PARTIAL、正式完成6／剩餘12不變。PR #298 已合併，v0.1.7 兩次既有 build 保留。下一主線 apps-replayed/resources/residue、generation commit/seal/barrier completion 與後續實機驗收。
 
 2026-10-04 最終主線本機驗收：完整1,035項／890.950秒、root focused23項／86.246秒及獨立final整合1項／79.209秒通過；原CI validator／compileall／team／privacy／whitespace通過。見 [T-259 evidence gate](../.team/reports/T-259.md)。network-and-access-ready的manual-console+fixed-probe路徑可產生immutable receipt；整體PARTIAL／正式剩餘12保留，下一主線empty-control-plane/bootstrap及generation。

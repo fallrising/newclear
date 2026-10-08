@@ -74,7 +74,13 @@ class FakeRunner:
         if argv[0] == '/usr/local/bin/eru-cli' and argv[-2:] == ('pod', 'list'):
             return render.canonical(self.pods or None)
         if argv[0] == '/usr/local/bin/eru-cli' and argv[-3:] == ('pod', 'nodes', 'eru'):
-            return render.canonical(self.nodes or None)
+            nodes = copy.deepcopy(self.nodes)
+            for node in nodes:
+                node['resource_capacity'] = render.canonical(node['resource_capacity']).decode()
+                for key in ('available', 'bypass'):
+                    if node[key] is False:
+                        node.pop(key)
+            return render.canonical(nodes)
         self.writes.append(argv)
         if self.before_write:
             self.before_write(argv)

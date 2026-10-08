@@ -469,7 +469,13 @@ class ProcessTests(unittest.TestCase):
             pid = int(pidfile.read_text())
             for _ in range(100):
                 state = Path('/proc') / str(pid) / 'stat'
-                if not state.exists() or state.read_text().split()[2] == 'Z':
+                if not state.exists():
+                    break
+                try:
+                    process_state = state.read_text()
+                except FileNotFoundError:
+                    break
+                if process_state.split()[2] == 'Z':
                     break
                 time.sleep(0.01)
             else:

@@ -1,5 +1,7 @@
 # Eru VPS MVP
 
+2026-10-08 本機完成、待 E2E：完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過。五項 local DoD、正式剩餘12與 live 界線見 [TASKS](docs/TASKS.md)／[handoff](docs/HANDOFF.md)；最終 CI／合併事實另記 PR／帳本。
+
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
@@ -36,7 +38,7 @@
 
 此專案是有界限的實驗：不新增另一套常駐 fleet control plane。對既有 OneVPS／OneFleet 的整合只定義邊界；Eru 與既有 runtime 不同時管理同一個應用。真實 inventory、IP、SSH key、快照及 provider state 放在私有操作目錄，不提交到公開 monorepo。
 
-已新增 `scripts/labctl.py`，提供 plan／execute／status／reconcile，詳見操作器文件。fresh-run 已接入 network 與 fresh bootstrap 本機主線；完整全群 fresh 的應用重播／generation completion 與正式實機驗收仍待完成，沒有供應商重灌程式或全群 reset。
+已新增 `scripts/labctl.py`，提供 plan／execute／status／reconcile，詳見操作器文件。fresh-run 在既有 network／bootstrap 後新增 [replay、resource/residue acceptance 與 generation completion](docs/M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 固定操作；完整最終版本 native 已通過，GitHub gate 尚待；正式實機驗收保持 UNEXECUTED。最新範圍與證據見 [本機矩陣](docs/LOCAL-CLOSEOUT-2026-10-06.md)。
 
 新 controller 接手前可先用 `python3 scripts/controller_preflight.py` 做純本機版本／私有輸入檢查；結果寫入忽略的 `private/controller-preflight/`。[範圍與接手步驟](docs/M3-CONTROLLER-PREFLIGHT-2026-09-23.md)。
 
@@ -64,7 +66,9 @@ python3 scripts/smoke-lab.py
 
 ## Fresh-run 本機主線
 
-已接續 [fresh-run owned admission／續期](docs/M3-FRESH-RUN-MAINLINE-2026-10-05.md) 與 [fresh bootstrap](docs/M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md)：`labctl fresh-run next` 接受固定 bootstrap 操作，`recover` 僅觀察 uncertain intent，`status` 只核對歷史完整性。每步需要私有 hash-bound request、有效 current renewal 與 operation authorization；普通 mutation 在 pending 期間仍被擋住。此為本機 synthetic 驗證路徑，正式 VPS、應用重播與 generation completion 尚未完成；完成6／剩餘12不變。
+目前續作的 [replay／generation completion 契約](docs/M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 定義 `prepare_replay`、`execute_replay`、唯讀 `reconcile_replay`、`prepare_generation` 及明確 `finalize_generation`；原有公開 `fresh-run next/recover/status` 沿用 exact request／renewal 邊界。完整本機 acceptance、pending retirement 與下一個普通 consumer 的證據以 [root evidence gate](.team/reports/T-271.md) 為準；在該 gate 完成前不把已寫好的程式當作完成主線。另見 [本機 DoD 核對](docs/LOCAL-CLOSEOUT-2026-10-06.md) 及 [未執行 E2E 操作包](docs/E2E-OPERATIONS-2026-10-06.md)。
+
+已接續 [fresh-run owned admission／續期](docs/M3-FRESH-RUN-MAINLINE-2026-10-05.md) 與 [fresh bootstrap](docs/M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md)：`labctl fresh-run next` 接受固定 bootstrap 操作，`recover` 僅觀察 uncertain intent，`status` 只核對歷史完整性。每步需要私有 hash-bound request、有效 current renewal 與 operation authorization；普通 mutation 在 pending 期間仍被擋住。本機 synthetic 路徑已完成應用重播與 generation completion；正式 VPS 驗收尚未完成，完成6／剩餘12不變。
 
 
 2026-10-06 本機 bootstrap 主線驗收：完整離線 1,133 項／2723.389 秒、root focused60項及獨立最終49項通過，見 [T-267 evidence gate](.team/reports/T-267.md)。現有 fresh-run 可完成22個固定 bootstrap 步驟；驗證使用 synthetic transport／temp roots，整體 PARTIAL、正式完成6／剩12。下一主線為 apps replay/resources/residue 與 generation completion；遠端交付結果記於 desk T-0075。

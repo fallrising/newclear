@@ -19,7 +19,9 @@ SPEC_FIELDS = {'schema_version', 'name', 'image', 'node', 'replicas', 'entrypoin
 QUANTITY = re.compile(r'^[1-9][0-9]*(?:[KMGT]i?B?|B)$')
 IMAGE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$')
 NAME = re.compile(r'^[a-z][a-z0-9-]{0,39}$')
-ENTRYPOINT = re.compile(r'^[a-z][a-z0-9_-]{0,31}$')
+# Core v0.1.5 parses the final two Name components as entry/instance.
+# An underscore inside entry would change the stored app/deploy index.
+ENTRYPOINT = re.compile(r'^[a-z][a-z0-9-]{0,31}$')
 
 
 def canonical_bytes(value):
@@ -29,6 +31,30 @@ def canonical_bytes(value):
 
 def sha256(value):
     return hashlib.sha256(value).hexdigest()
+
+
+def workload_name(row):
+    """Parse core's app_entry_instance name separately from its runtime ID."""
+    value = row.get('name', row.get('id'))
+    if (not isinstance(value, str) or not value or len(value) > 512
+            or any(ord(char) < 32 for char in value)):
+        return None
+    parts = value.lstrip('/').rsplit('_', 2)
+    if len(parts) != 3 or any(not part or '/' in part for part in parts):
+        return None
+    return tuple(parts)
+
+
+def revision_matches(row, appname, entrypoint=None):
+    # Older normalized adapters supplied the display name in id and omitted
+    # name. Preserve that input contract; an explicit name always takes priority.
+    if 'name' not in row:
+        value = row.get('id')
+        prefix = appname + '_' + (entrypoint + '_' if entrypoint is not None else '')
+        return isinstance(value, str) and value.startswith(prefix)
+    identity = workload_name(row)
+    return (identity is not None and identity[0] == appname
+            and (entrypoint is None or identity[1] == entrypoint))
 
 
 def snapshot_binding(snapshot):
@@ -49,7 +75,7 @@ def snapshot_binding(snapshot):
         row_fields = {
             'pods': ({'name'}, {'name', 'row_sha256'}),
             'nodes': ({'name', 'available', 'row_sha256'},),
-            'workloads': ({'id', 'nodename', 'labels'},),
+            'workloads': ({'id', 'nodename', 'labels'}, {'id', 'name', 'nodename', 'labels'}),
         }
         for key, accepted_shapes in row_fields.items():
             if key not in snapshot:
@@ -65,6 +91,8 @@ def snapshot_binding(snapshot):
                          or not re.fullmatch(r'[0-9a-f]{64}', row['row_sha256']))):
                     raise ValueError('invalid normalized snapshot row digest')
                 if key == 'workloads':
+                    if 'name' in row and workload_name(row) is None:
+                        raise ValueError('invalid normalized workload name')
                     labels = row['labels']
                     if (not isinstance(labels, dict)
                             or set(labels) - {'owner', 'logical_app', 'spec_sha256'}):
@@ -100,6 +128,8 @@ def snapshot_binding(snapshot):
                     'labels': {label: labels[label] for label in
                                ('owner', 'logical_app', 'spec_sha256') if label in labels},
                 }
+                if 'name' in row:
+                    item['name'] = row['name']
             normalized.append(item)
         result[key] = sorted(normalized, key=canonical_bytes)
     return result
@@ -233,7 +263,6 @@ def build_plan(document, snapshot):
     current = []
     prior = []
     ids = set()
-    prefix = appname + '_'
     for row in snapshot['workloads']:
         if not isinstance(row, dict) or not isinstance(row.get('id'), str):
             blockers.append('workload snapshot contains a malformed row')
@@ -245,7 +274,7 @@ def build_plan(document, snapshot):
         ids.add(wid)
         labels = row.get('labels') if isinstance(row.get('labels'), dict) else {}
         claims_logical = labels.get('logical_app') == spec['name']
-        claims_release = wid.startswith(prefix)
+        claims_release = revision_matches(row, appname)
         if claims_release and (labels.get('owner') != OWNER or not claims_logical
                                or labels.get('spec_sha256') != spec_hash):
             blockers.append('deterministic release name is occupied by unverified ownership: ' + wid)
@@ -261,7 +290,7 @@ def build_plan(document, snapshot):
             continue
         item = {'id': wid, 'node': row.get('nodename'), 'spec_sha256': observed_hash}
         if observed_hash == spec_hash:
-            if not wid.startswith(prefix):
+            if not revision_matches(row, appname, spec['entrypoint']):
                 blockers.append('current digest is attached to an unexpected Eru app name: ' + wid)
             if row.get('nodename') != spec['node']:
                 blockers.append('current revision is placed on a different node: ' + wid)

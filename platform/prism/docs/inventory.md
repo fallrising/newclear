@@ -34,6 +34,7 @@ retains its original versions and scope. Product usage remains unknown.
 | P1-09 | Native ClickHouse registration/lifecycle, eight migrations and metrics/logs/traces writes; test-only SQL readback | Production query implementations and daemon wiring remain P1-10. Full conformance and deployment are not claimed. |
 | P1-10 | Mandatory ClickHouse SPI reads, additive migrations 009/010, bounded iterators/catalogs, daemon selection and isolated real-database test factories | Optional native/metadata/delete/RED/dependency queries, compose/Grafana and deployment remain later scope. Verification is recorded below. |
 | P1-11 | Phase 1 three-service pinned Compose, nonroot daemon build, four datasource definitions, five dashboards, healthcheck/version/readiness/systemd notifications and owned E2E runner | Root local build, complete actual Compose ingestion/Grafana health/query/panel, same-container restarts and exact cleanup pass; historical failures and current limits are recorded below. |
+| P2-01 | Clean-room LogQL lexer/parser, existing flat SPI IR, five semantic constraints, structured unsupported recognition and bounded parser/fuzz tests | Intermediate IR only; line/field regex compilation/LiteralHint, execution and Loki query HTTP routing remain P2-02/03/04. |
 
 The old README/portfolio description “Phase 0 SDD” omitted the implemented P1-01
 normalizer. The opposite claim, “Phase 0 fully accepted”, would also be inaccurate:
@@ -607,3 +608,53 @@ Python runner/cleanup contracts and the complete actual Compose gate after the
 fix; both passed, including both persistence restarts and exact cleanup. Earlier
 review and failure evidence remain retained; corrected source/docs are frozen
 for independent follow-up review.
+
+## Integrated P2-01 verification
+
+The standalone clean-room parser follows source baseline
+`6a01bd31ad36c60c69838e2a915953a80c9b6d23`, after the merged Phase 1 delivery.
+Fresh root checks ran on Linux amd64 on 2026-10-09 with
+`GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly`; modules, public SPI, existing runtime,
+drivers and deployment artifacts are unchanged.
+
+| Command from `platform/prism` | Observed result |
+| --- | --- |
+| `make lint test` | Formatting/vet and all 22 package race suites pass, including PromQL corpus, SPI conformance and security. |
+| `make deps-check` | Dependency directions and all five deliberate prohibited-import regressions pass. |
+| `go mod verify` | All modules verified. |
+| `go build ./...` | Exit 0. |
+| Pinned golangci-lint v2.14.0 `run --allow-serial-runners` | 0 issues. |
+| Same lint `run --allow-serial-runners --build-tags=integration` | 0 issues. |
+| `go vet -tags=integration ./...` | Exit 0. |
+| `go test -race -count=1 -v ./internal/query/logql ./test/security` | Parser and security suites pass. |
+| `go test ./internal/query/logql -run '^$' -fuzz '^FuzzParse$' -fuzztime=60s -parallel=2` | PASS; 240900 executions. |
+| Independent 14-case root Go overlay, `go test -race -count=1 -v -run '^TestRootIndependentBoundaries$' ./internal/query/logql` | Exact maximum duration, overflow, fractional K, underflow, reserved labels and unsupported/malformed precedence pass; product files unchanged. |
+
+Tests cover all supported productions, the four range functions and seven vector
+aggregations with grouping placement, all five semantic constraints, unsupported
+argument structures and malformed neighbors, rune positions/UTF-8/escapes,
+reserved labels, numeric bounds, cancellation and zero IR on errors. The input
+ceilings are 64 KiB, 16,384 tokens, 1,024 collection terms, 128 nesting levels and 4,096
+bytes per decoded regex. Selector regexes compile only after that limit; line
+and field regexes remain uncompiled intermediate IR. Float64 field values use
+normal rounding; duration nanoseconds and K cannot silently truncate.
+
+Meaningful red/green evidence includes invalid empty-compatible selectors,
+quoted punctuation mistaken for operators, unknown-rune diagnostic disclosure,
+and unsupported parsers followed by field filters. Root independent diff review
+found the last two defects; regressions and corrected frozen source were rerun
+through all necessary checks. Earlier lint/import and test-fixture mistakes are
+retained in the local evidence; they do not count as behavioral red or final
+acceptance. Fuzz execution counts are observations, not throughput guarantees.
+
+All 383 Prism source/document hashes were frozen for independent review, with 369
+protected baseline files, unchanged selected modules, 45 compiled-module license
+proofs and 12 deployment-artifact mirrors checked separately. Contributor
+clean-room signatures are individual. Public user documentation only resolves
+unsupported argument shapes; no Loki implementation/tests or upstream fixtures
+were read/copied. See the [P2-01 contract](specs/p2-01-logql-parser.md).
+
+This package is not wired to HTTP or a backend. P2-02 compilation/LiteralHint,
+P2-03 execution/aggregation and P2-04 Loki query APIs/parity remain later work.
+No new database, Compose, Loki API parity, production capacity or deployment
+acceptance is claimed; existing Phase 1 evidence above retains its original scope.

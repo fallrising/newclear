@@ -28,6 +28,9 @@
 | 簽署人 | 身分 | 簽署日期 | 簽署範圍 |
 | --- | --- | --- | --- |
 | OpenAI Codex | P0-09 文件實作 agent | 2026-09-05 | ADR-004 決策與本 clean-room 聲明；尚未實作 LogQL lexer、parser 或 executor |
+| OpenAI Codex | P2-01 orchestrator | 2026-10-09 | LogQL parser design, independent source/evidence review and integration; no Loki source or tests read |
+| OpenAI Codex Astra | gpt-6-astra high；P2-01 獨立審查 agent（T-922） | 2026-10-09 | 本 agent 個別 clean-room preflight 與後續另行指派的 P2-01 LogQL parser 獨立審查；本次任務未閱讀、複製、翻譯或改寫 Loki 原始碼、測試碼或其衍生實作；僅依允許來源工作；簽署時尚未閱讀 P2-01 parser 實作或 fixtures |
+| Sol / gpt-6.1-sol | T-921 P2-01 lexer/parser 與獨立測試 worker | 2026-10-09 | 僅依 Prism SDD、已核准 spec、SPI 與獨立案例實作 bounded lexer/parser；未閱讀 Loki 原始碼、測試碼或衍生 fixtures；不含 compiler/executor/runtime |
 
 ## 後續簽署要求
 

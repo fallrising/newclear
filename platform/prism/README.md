@@ -24,6 +24,9 @@ P1-11 adds the local three-service deployment artifacts, bounded native healthch
 readiness and an owned Compose E2E gate through real Grafana Prometheus queries.
 Storage-free instant PromQL expressions may use historical evaluation times after
 bounded AST validation; data selectors retain the existing lookback restrictions.
+P2-01 adds a bounded clean-room LogQL lexer/parser that produces intermediate SPI
+IR; line/field regex compilation, execution and Loki HTTP query routing remain
+later work.
 The initial runtime supports a single configured tenant and file-backed bearer
 key. Loki/Jaeger query APIs, complete production drivers, alerting, agent and console
 remain unimplemented; this is not yet a complete APM service.
@@ -52,6 +55,7 @@ remain unimplemented; this is not yet a complete APM service.
   [Prometheus query API](internal/compat/promapi/QUERY.md).
 - `internal/compat/lokiapi`: authenticated JSON/gzip Loki push with bounded decoding.
 - `internal/query/promqladapter`: SPI-to-Prometheus query storage and iterator ownership.
+- `internal/query/logql`: bounded clean-room lexer/parser; [P2-01 contract](docs/specs/p2-01-logql-parser.md).
 - `test/promqltest`: pinned official float corpus, direct memory fixtures and upstream comparison logic.
 - `cmd/prismd`: version/healthcheck, health/readiness/metrics, ingestion and role-aware Prometheus query routes; `prism-agent` and `prismctl` remain placeholders.
 - `docs/sdd`: implementation contracts; `docs/adr`: architecture decisions.
@@ -123,3 +127,8 @@ restarts, and guarded cleanup. See the [owned E2E gate](test/e2e/README.md#phase
 for explicit local socket, unique prebuilt image and verified external clients.
 Loki/Jaeger/Alertmanager datasource definitions remain inactive API references;
 this acceptance does not establish production capacity or crash durability.
+
+The [P2-01 contract](docs/specs/p2-01-logql-parser.md) covers flat LogQL IR,
+classified syntax/semantic/unsupported errors, structural input bounds and
+cancellation. Focused race tests and `FuzzParse` exercise this standalone parser;
+it does not enable Loki query endpoints or execute returned IR.

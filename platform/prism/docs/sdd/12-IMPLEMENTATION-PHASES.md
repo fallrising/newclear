@@ -52,7 +52,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4 的測試矩陣全綠；不支援語法回「不支援」而非「語法錯誤」 |
+| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4.1 的 parser 驗收全綠（完整矩陣依 P2-01/02/03/04 分期）；有效但不支援的語法回「不支援」，格式錯誤仍回「語法錯誤」 |
 | P2-02 | `internal/query/logql/compile.go`：正則預編譯 + `LiteralHint` 抽取（**演算法見 `16` §3.4**） | P2-01 | 同上 | `FuzzLiteralHint` 通過；8 個種子語料全綠 |
 | P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | 16 種 `PushdownPlan` 組合結果一致；100 萬行 + limit=100 的讀取量斷言通過 |
 | P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | Grafana Loki datasource health 綠；Explore 可查與自動完成 |

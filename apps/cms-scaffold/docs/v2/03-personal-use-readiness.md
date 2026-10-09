@@ -121,3 +121,12 @@ Java／PostgreSQL未在W2本地重跑：229项受保護來源／依賴不變，�
 W4已於PR #289合併。W5完成三面入口拆分、deferred provider完整consumer覆蓋、clinic loading穩定化、目前route平行模組載入，以及品質／效能／隔離real runner。648前端、93mock連續三次、25Vitals、60axe、11hardening和70canonical比較均通過；G只修real審計／owned資料準備與board操作時機，最終real14/14、零skipped/flaky，四次ownedstack已全部清理。原失敗與G1遺失附件限制保留。[交付證據](../../.team/reports/W5-DELIVERY.md)與[施工圖](waves/W5.md)可查驗。
 
 VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過最新head必要CI／審查並合併生效，實際發布狀態以PR為準。未部署，不據此宣稱正式可用；正式初始化、備份還原、升級回滾仍為獨立操作驗收。通用CMS的下一波BW6/W6先細化媒體搜尋分頁、治理資訊／自身保護及demo預約權限，不在本次擴張實作。
+
+
+## 個人／內部正式使用優先施工圖（2026-10-08）
+
+Owner指定先完成正式運行、正式帳號／Q25、DB＋媒體一致備份還原、升級回復、基本維運及正式設定驗收，額外功能後移。新[PP1施工圖](waves/PP1.md)目前DRAFT，環境決策與逐卡規格尚待封板；不代表已實作或正式可用。BW6保持DOC_READY，PP1只取Q25必要子集，不能將整個BW6標VERIFIED。52～58張為完整v2功能估計，不是此次正式使用的全部先決條件。未授權部署。
+
+2026-10-09 owner接受PP1建議預設：全新庫／無demo帳號內容、獨立日常帳號、四個同site HTTPS origin、RPO24h／RTO4h、每日停寫備份與每日7＋每週4份保留。同日owner追加「先在本地跑」，本地隔離環境成為先行實作與驗收目標；正式主機／URL／真正離機位置／通知管道留在正式環境門檻，不再阻擋本地子波。各子波分別完成施工圖、審查、必要CI與合併後才實作；[owner操作分工](contracts/PP1-owner-operations.md)。PP1整體尚未完成，未部署。
+
+本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，12張S/M卡；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。

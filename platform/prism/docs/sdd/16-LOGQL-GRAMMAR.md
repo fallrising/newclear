@@ -87,7 +87,7 @@ parse error at line 1, col 15: syntax error: unexpected IDENTIFIER, expecting ST
 - `line` / `col` 從 1 起算，`col` 以 rune 計（非 byte），讓中文字元的位置正確。
 - 錯誤型別分三類，全部走 HTTP 400 + Loki 的錯誤信封：
   - 語法錯誤：`parse error at line L, col C: <details>`
-  - 語義錯誤：直接是規則訊息（如 §1.1 的三條）
+  - 語義錯誤：直接是規則訊息（如 §1.1 的五條）
   - 不支援：`<feature> is not supported in this version`
 - 錯誤回應信封（Loki 格式，非 Prometheus 格式）：純文字 body，`Content-Type: text/plain`，HTTP 400。**這是 Loki 與 Prometheus 的一個不一致之處，必須照抄。**
 
@@ -102,7 +102,8 @@ parse error at line 1, col 15: syntax error: unexpected IDENTIFIER, expecting ST
 | `lexer.go` | 手寫 scanner。輸出 `Token{Kind, Lit, Line, Col}` |
 | `token.go` | Token 種類常數與字串化（用於錯誤訊息） |
 | `parser.go` | 遞迴下降。輸出 `spi.LogQuery` |
-| `compile.go` | 正則預編譯、`LiteralHint` 抽取、duration/bytes 解析 |
+| `literals.go` | P2-01 parser 所需的 number/duration/bytes 字面值轉換 |
+| `compile.go` | P2-02 正則預編譯與 `LiteralHint` 抽取 |
 | `exec.go` | 中間層補算執行器 |
 | `agg.go` | 範圍與向量聚合 |
 | `errors.go` | 三類錯誤的建構與格式化 |
@@ -228,7 +229,7 @@ for each record from iterator:
 |---|---|
 | 正向 | §1 文法的每條產生式至少一個測試 |
 | 負向（語法） | 每種語法錯誤有測試，驗證 line/col 正確 |
-| 負向（語義） | §1.1 三條約束各有測試 |
+| 負向（語義） | §1.1 五條約束各有測試 |
 | 不支援 | §1.2 每一列有測試，驗證錯誤訊息完全相符 |
 | 抽取 | §3.4 的 property test + 8 個種子語料 |
 | 執行 | 每種 `PushdownPlan` 組合（2^4 = 16 種）對同一資料產生相同結果 |
@@ -237,3 +238,7 @@ for each record from iterator:
 | 相容性 | 對照表：同一查詢送給真實 Loki 與 Prism，結果集合相同（人工執行，記錄於 `test/compat/logql-parity.md`） |
 
 最後一項是 clean-room 實作的驗證方式：**比對行為，不看原始碼**。
+
+### 4.1 分期驗收邊界
+
+P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03；真實 Loki API 行為對照須待 P2-04 HTTP 整合。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。

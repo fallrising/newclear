@@ -47,8 +47,8 @@ func (b *Broker) metricsText(ctx context.Context) string {
 		fmt.Fprintf(&out, "mkfk_process_cpu_seconds_total %.2f\nmkfk_process_resident_bytes %d\n", cpu, rss)
 	}
 	syncs := adapters.ReadSyncStats()
-	fmt.Fprintf(&out, "mkfk_fsync_total %d\nmkfk_fsync_seconds_total %.6f\nmkfk_fsync_max_seconds %.6f\n",
-		syncs.Count, syncs.Total.Seconds(), syncs.Max.Seconds())
+	fmt.Fprintf(&out, "mkfk_fsync_total %d\nmkfk_fsync_slow_total %d\nmkfk_fsync_seconds_total %.6f\nmkfk_fsync_max_seconds %.6f\n",
+		syncs.Count, syncs.Slow, syncs.Total.Seconds(), syncs.Max.Seconds())
 	for _, key := range b.sortedReplicaKeys() {
 		r := b.replicas[key]
 		var metrics partition.Metrics
@@ -73,6 +73,8 @@ func (b *Broker) metricsText(ctx context.Context) string {
 		gauge("last_applied", snapshot.LastApplied)
 		gauge("pending_reads", metrics.PendingReads)
 		gauge("inbox_dropped_total", metrics.InboxDropped)
+		gauge("actor_stall_total", metrics.Stalls)
+		gauge("actor_stall_max_seconds", fmt.Sprintf("%.6f", metrics.StallMax.Seconds()))
 		gauge("peer_messages_rejected_total", metrics.RejectedPeerMsg)
 		gauge("failed", boolMetric(metrics.Failed))
 		var logBytes int64

@@ -2,6 +2,7 @@ package partition
 
 import (
 	"context"
+	"time"
 
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
 )
@@ -17,6 +18,8 @@ type Metrics struct {
 	PendingReads    int
 	InboxDropped    uint64
 	RejectedPeerMsg uint64
+	Stalls          uint64        // calls, steps, and ticks that held the actor >= StallThreshold
+	StallMax        time.Duration // longest such hold since start
 	Failed          bool
 	Fetches         uint64
 	FetchSeek       uint64 // segment plus sparse-index comparisons
@@ -27,6 +30,7 @@ func (a *Actor) metrics() Metrics {
 	return Metrics{
 		Snapshot: a.node.Snapshot(), PendingReads: len(a.reads),
 		InboxDropped: a.dropped.Load(), RejectedPeerMsg: a.rejected.Load(), Failed: a.failed.Load(),
+		Stalls: a.stalls.Load(), StallMax: time.Duration(a.stallMax.Load()),
 	}
 }
 
@@ -52,7 +56,8 @@ func (d *Data) Metrics(ctx context.Context) (Metrics, error) {
 // Metrics reads the actor-level counters of any partition.
 func (a *Actor) Metrics(ctx context.Context) (Metrics, error) {
 	if a.failed.Load() {
-		return Metrics{Failed: true, InboxDropped: a.dropped.Load(), RejectedPeerMsg: a.rejected.Load()}, nil
+		return Metrics{Failed: true, InboxDropped: a.dropped.Load(), RejectedPeerMsg: a.rejected.Load(),
+			Stalls: a.stalls.Load(), StallMax: time.Duration(a.stallMax.Load())}, nil
 	}
 	var metrics Metrics
 	err := a.Do(ctx, func() error {

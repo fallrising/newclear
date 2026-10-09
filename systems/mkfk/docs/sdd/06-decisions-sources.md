@@ -103,6 +103,12 @@ Status: accepted；完整決策見 [ADR-012](../adr/012-replication-flow-control
 
 M7 OP-03 flood 揭露三個問題：重疊 AppendEntries 塞滿 peer link、leader sent-RPC 表在丟包時無界成長、ISR target 在每個 Ready 被拉到最新 index 導致落後一個 RTT 的健康 follower 被逐出。改為：link 以較新的 plain AppendEntries 取代佇列中的舊者；proposal 只在未回覆的 append 少於 8 時送出；每 peer 只記 64 個未回覆 RPC；follower 回報 `matched` 時視為在 leader 寫入 `matched+1` 的時刻已追上。RP-08／RP-11 語意不變，captured-A ack 規則不變。Chaos 排程另揭露：被拒的高 term RequestVote 不再重設 election timer（stale candidate 曾讓 partition 永遠選不出 leader），以及重啟 replay 由每 entry 讀 4 MiB 改為批次線性讀取。
 
+### ADR-013 — fsync 在 partition actor 上：先可觀測，結構選項待定
+
+Status: proposed（可觀測性已實作；結構選項未決）；完整內容見 [ADR-013](../adr/013-fsync-on-the-partition-actor.md)。
+
+每個 acknowledged batch 每副本 5 次 sync：WAL 1、sparse index 重寫 2、commit 推進時 hard state 2。新增慢 sync（≥500 ms）與 actor 單次佔用（≥500 ms）的 log 與 metrics，不改行為。待決選項：只在 anchor 改變時重寫 index（5→約 3 次 sync，推薦先做）、延遲持久化 commit index、group commit、tick 與儲存分離、調長 election timeout；後三者屬 X2 或部署參數。
+
 ## 4. 來源目錄
 
 來源主要用來校驗概念；本案具體數字、格式、HTTP endpoints、milestones、測試 IDs 都是原創設計，不是來源的既成實作。

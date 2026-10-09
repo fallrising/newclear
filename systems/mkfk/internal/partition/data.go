@@ -33,6 +33,7 @@ type DataConfig struct {
 	TickClock     adapters.Clock
 	Sender        Sender
 	OnRoleChange  func(raft.RoleChange)
+	OnStall       func(kind string, held time.Duration)
 	StorageFailed func() bool
 	// OnISRShrink, when set, observes followers evicted from the ISR.
 	OnISRShrink    func(evicted []uint32, observations []replication.PeerObservation)
@@ -86,7 +87,7 @@ func NewData(config DataConfig) (*Data, error) {
 	}
 	data.actor, err = New(Config{
 		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
-		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange,
+		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange, OnStall: config.OnStall,
 		StorageFailed: config.StorageFailed,
 	}, data)
 	if err != nil {

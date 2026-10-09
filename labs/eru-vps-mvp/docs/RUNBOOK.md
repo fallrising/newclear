@@ -199,3 +199,8 @@ V10 先停止應用管理 mutation，待 in-flight deploy 完成，停止 core�
 依 [etcd runtime reconfiguration](https://etcd.io/docs/v3.6/op-guide/runtime-configuration/) 先確認健康 quorum，隔離故障成員並移除其 member ID；新主機以 learner 加入，用回傳 membership 與 `initial-cluster-state: existing` 啟動，追上後 promote，檢查健康再做下一個變更。新主機不可攜帶已移除 member 的舊 data-dir。若 quorum 已失去，停止此流程，走完整 snapshot restore。
 
 上游模板固定 `initial-cluster-state: new`；本案需要 membership overlay／受控 fork 才能自動做這段。Profile A → B 的初期路徑仍選 fresh rebuild。
+
+
+### ERU-016 本機格式／計畫切片（2026-10-09，本機驗證通過）
+
+[格式與 CLI 契約](M3-METADATA-BACKUP-LOCAL-2026-10-09.md) 定義離線完整性校驗與 review-only 還原計畫。本機 checksum 通過不能代替本節要求的外部 encrypted 備份回讀、etcdutl/bbolt 檢查、隔離舊控制面、還原、worker／plugin／HTTP 對帳及 RPO／RTO 實測。此切片沒有 execute 命令；計畫列出的所有實機 gate 均為 UNEXECUTED，不能提交給既有一般 executor。

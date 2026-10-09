@@ -72,3 +72,8 @@ python3 scripts/smoke-lab.py
 
 
 2026-10-06 本機 bootstrap 主線驗收：完整離線 1,133 項／2723.389 秒、root focused60項及獨立最終49項通過，見 [T-267 evidence gate](.team/reports/T-267.md)。現有 fresh-run 可完成22個固定 bootstrap 步驟；驗證使用 synthetic transport／temp roots，整體 PARTIAL、正式完成6／剩12。下一主線為 apps replay/resources/residue 與 generation completion；遠端交付結果記於 desk T-0075。
+
+
+## Metadata 備份本機切片
+
+ERU-016 已完成本機實作與驗證： [本機備份格式與不可執行還原計畫](docs/M3-METADATA-BACKUP-LOCAL-2026-10-09.md)。此功能檢查操作者提供的私有檔案之精確 bytes 與 checksum；不取得 snapshot、不驗證 bbolt、不連線或還原 etcd。完整原生 1,284 項／20,949.108 秒／OK／exit 0 與 candidate02 獨立審查已通過，見 [本機驗收](.team/reports/T-297.md)。遠端 CI／合併仍待，實機 V10 保持 UNEXECUTED。

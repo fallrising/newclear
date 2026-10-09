@@ -170,12 +170,12 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 		}
 		sender = r.outbox
 	}
-	onRole := b.roleLogger(topic, spec.ID)
+	onRole, onStall := b.roleLogger(topic, spec.ID), b.stallLogger(topic, spec.ID)
 	if topic == groupsTopic {
 		b.groups, err = group.NewService(group.ServiceConfig{
 			Node: node, Proofs: proofSource{b}, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			StorageFailed: log.RecoveryRequired,
-			Coordinator:   group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
+			OnStall: onStall, StorageFailed: log.RecoveryRequired,
+			Coordinator: group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
 		})
 		if err != nil {
 			return err
@@ -184,7 +184,7 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	} else {
 		r.data, err = partition.NewData(partition.DataConfig{
 			Topic: topic, Partition: spec.ID, Node: node, Log: log, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
+			OnStall: onStall, StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
 			Replication: replicationConfig(b.self.ID, spec),
 		})
 		if err != nil {
@@ -200,6 +200,13 @@ func (b *Broker) roleLogger(topic string, id uint32) func(raft.RoleChange) {
 	return func(change raft.RoleChange) {
 		b.logger.Info("role change", "topic", topic, "partition", id, "term", change.Term,
 			"from", string(change.From), "to", string(change.To), "leader", change.LeaderID)
+	}
+}
+
+func (b *Broker) stallLogger(topic string, id uint32) func(string, time.Duration) {
+	return func(kind string, held time.Duration) {
+		b.logger.Warn("actor stall", "topic", topic, "partition", id, "kind", kind,
+			"held_ms", held.Milliseconds(), "threshold_ms", partition.StallThreshold.Milliseconds())
 	}
 }
 

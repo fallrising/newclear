@@ -43,6 +43,7 @@ var voters = []uint32{1, 2, 3}
 type dataCluster struct {
 	network *partitiontest.Network
 	data    map[uint32]*partition.Data
+	clock   *testkit.ManualClock
 }
 
 // newDataCluster runs events/0 on three real WALs. Ticks never fire: the
@@ -56,7 +57,7 @@ func newDataCluster(t *testing.T) *dataCluster {
 func newDataClusterWith(t *testing.T, caps replication.Config) *dataCluster {
 	t.Helper()
 	clock := testkit.NewManualClock(time.Unix(1700000000, 0))
-	cluster := &dataCluster{network: partitiontest.NewNetwork(t, voters...), data: map[uint32]*partition.Data{}}
+	cluster := &dataCluster{network: partitiontest.NewNetwork(t, voters...), data: map[uint32]*partition.Data{}, clock: clock}
 	for _, id := range voters {
 		root := filepath.Join(t.TempDir(), fmt.Sprintf("node-%d", id))
 		if err := storage.FormatDataDir(root, id, []byte(rf3Topology)); err != nil {

@@ -18,6 +18,10 @@ import (
 const (
 	DefaultInboxSize       = 1024
 	DefaultMaxPendingReads = 256
+	// StallThreshold is how long one call, step, or tick may hold the actor
+	// before it counts as a stall. Ticks and peer steps wait behind it, so a
+	// stall near the election timeout can cost leadership.
+	StallThreshold = 500 * time.Millisecond
 )
 
 var (
@@ -53,6 +57,9 @@ type Config struct {
 	MaxPendingReads int
 	// OnRoleChange, when set, observes role changes on the actor goroutine.
 	OnRoleChange func(raft.RoleChange)
+	// OnStall, when set, observes each call, step, or tick that held the
+	// actor for at least StallThreshold, on the actor goroutine.
+	OnStall func(kind string, held time.Duration)
 	// StorageFailed, when set, reports a quarantined log. The actor then
 	// stops serving instead of retrying writes against it.
 	StorageFailed func() bool
@@ -67,6 +74,7 @@ type Actor struct {
 	tick     time.Duration
 	maxReads int
 	onRole   func(raft.RoleChange)
+	onStall  func(string, time.Duration)
 	storage  func() bool
 	calls    chan func()
 	inbox    chan raft.Message
@@ -77,6 +85,8 @@ type Actor struct {
 	failed   atomic.Bool
 	dropped  atomic.Uint64
 	rejected atomic.Uint64
+	stalls   atomic.Uint64
+	stallMax atomic.Int64
 	cause    atomic.Value
 
 	// Actor goroutine only.
@@ -108,7 +118,7 @@ func New(config Config, handler Handler) (*Actor, error) {
 	}
 	return &Actor{
 		node: config.Node, handler: handler, clock: config.Clock, ticks: config.TickClock, sender: config.Sender,
-		tick: config.TickInterval, maxReads: config.MaxPendingReads, onRole: config.OnRoleChange, storage: config.StorageFailed,
+		tick: config.TickInterval, maxReads: config.MaxPendingReads, onRole: config.OnRoleChange, onStall: config.OnStall, storage: config.StorageFailed,
 		calls: make(chan func()), inbox: make(chan raft.Message, config.InboxSize),
 		stop: make(chan struct{}), done: make(chan struct{}), reads: make(map[string]func(error)),
 	}, nil
@@ -151,15 +161,38 @@ func (a *Actor) run() {
 		case <-a.stop:
 			return
 		case call := <-a.calls:
+			started := a.clock.Now()
 			call()
+			a.observeHold("call", started)
 		case message := <-a.inbox:
 			if !a.failed.Load() {
+				started := a.clock.Now()
 				a.step(message, nil)
+				a.observeHold("step", started)
 			}
 		case <-timer.C():
 			timer.Reset(a.tick)
+			started := a.clock.Now()
 			a.onTick()
+			a.observeHold("tick", started)
 		}
+	}
+}
+
+func (a *Actor) observeHold(kind string, started time.Time) {
+	held := a.clock.Now().Sub(started)
+	if held < StallThreshold {
+		return
+	}
+	a.stalls.Add(1)
+	for {
+		current := a.stallMax.Load()
+		if int64(held) <= current || a.stallMax.CompareAndSwap(current, int64(held)) {
+			break
+		}
+	}
+	if a.onStall != nil {
+		a.onStall(kind, held)
 	}
 }
 

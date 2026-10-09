@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fallrising/newclear/systems/mkfk/internal/adapters"
 	"github.com/fallrising/newclear/systems/mkfk/internal/broker"
 	"github.com/fallrising/newclear/systems/mkfk/internal/storage"
 )
@@ -104,6 +105,9 @@ func runServe(arguments []string, stderr io.Writer) error {
 		return err
 	}
 	logger := slog.New(slog.NewJSONHandler(stderr, nil))
+	adapters.ObserveSlowSyncs(func(took time.Duration) {
+		logger.Warn("slow fsync", "took_ms", took.Milliseconds(), "threshold_ms", adapters.SlowSyncThreshold.Milliseconds())
+	})
 	b, err := broker.Open(broker.Config{
 		Topology: topology, NodeID: uint32(node.nodeID), DataDir: node.dataDir,
 		AllowInsecureBind: allowInsecure, PeerBind: peerBind, Logger: logger,

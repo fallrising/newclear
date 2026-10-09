@@ -1,6 +1,6 @@
 # PP1a 本地 prod runtime 施工圖
 
-2026-10-09。**基線DOC_READY已由PR324合併；本次loopback修訂只有文件PR獨立審查、必要CI並合併後才可實作。PP1a實作與本地驗收仍未完成。**
+2026-10-09。**DOC_READY：PR #324、#326 已合併。14卡產品實作與本地 runtime 驗收完成；獨立最終審查及本實作 PR 必要 CI／合併／main 回讀完成後，才生效為 VERIFIED（僅 local scope）。**
 來源main `6a01bd31ad36c60c69838e2a915953a80c9b6d23`。本波是[PP1六項總計畫](PP1.md)的第一個有界子波，不代表個人正式使用或整個BW6完成。
 
 ## 1 範圍
@@ -159,7 +159,7 @@ docker --host unix:///var/run/docker.sock run --rm --network "$WEB_NETWORK" --sh
 
 `forward.mjs` exports `resolveTarget(runRoot,deps)`、`createForwarder(target,deps)`；CLI只接受`--run-root <root>`。使用與prepare相同本機socket固定Docker argv，拒絕remote DOCKER_HOST/context，讀runroot0700、receipt0600regular/nlink1、祖先無symlink。receipt須local-isolated/PREPARED、project與runId嚴格匹配、nodeimage完整ID。固定inspect `<project>-ingress-1`；恰一runningcontainer、project/service=ingress labels、Image等於receipt.images.node，無任何有效publishedports、無privileged/hostnetwork，network恰`<project>_web`。inspect該network要求internal/projectlabel/name/ID一致；container IPv4為有效RFC1918地址，network.Containers內相同fullcontainerID的IPv4Address必一致。endpoint固定該IP:8443，無使用者hostname/port或任意command選項。錯誤只固定PP1_LOCAL_FORWARD_INPUT_INVALID／PP1_LOCAL_FORWARD_TARGET_INVALID，不輸出inspect或原始例外。
 
-`createForwarder`回net.Server；CLI恰listen127.0.0.1:8443。每accepted socket建立一次fixedtarget連線，雙向pipe保留TLSbytes/backpressure；不解TLS、不讀secret／CAkey、不重試。最多64同時連線、30秒idle timeout；任一端error/close/timeout銷毀配對端，upstream失效不崩server。SIGINT/SIGTERM關閉listener與activepairs後結束；啟動失敗只PP1_LOCAL_FORWARD_START_FAILED。只有固定listening/stopped狀態可輸出，不記流量。入口container被recreate/換IP時先停forwarder再重新resolve/啟動；不自動跟隨未知endpoint。API單獨restart不改ingress endpoint。
+`createForwarder`回net.Server，附`stop(): Promise<void>`供有界關閉listener及activepairs；CLI恰listen127.0.0.1:8443。每accepted socket建立一次fixedtarget連線，雙向pipe保留TLSbytes/backpressure；不解TLS、不讀secret／CAkey、不重試。最多64同時連線、30秒idle timeout；任一端error／abrupt close／timeout銷毀配對端；正常upstream EOF保留client queued bytes drain後才結束，upstream失效不崩server。SIGINT/SIGTERM關閉listener與activepairs後結束；啟動失敗只PP1_LOCAL_FORWARD_START_FAILED。只有固定listening/stopped狀態可輸出，不記流量。入口container被recreate/換IP時先停forwarder再重新resolve/啟動；不自動跟隨未知endpoint。API單獨restart不改ingress endpoint。
 
 測試deps允許fake command runner、connect與clock／timeout（非CLI；CLI固定30000ms），loopback測試可由test對回傳server.listen(0,127.0.0.1)取得臨時port；產品CLI不提供bind/port override。tests驗證陌生project/image/noninternal/多network/非RFC1918/remote socket/ symlink／ports宣告及實際published值全部拒絕；真loopbackecho binarybytes雙向與backpressure、upstream拒絕不重試/下一連線可用、clientabort/idle/兩端結束cleanup，秘密canary不log。
 
@@ -218,12 +218,27 @@ verify需比對三containers HostConfig.PortBindings為空、NetworkSettings.Por
 
 ## 9 交付檢查表
 
-- [ ] 文件逐卡獨立review及五卡walk、relative links/diff/OAS既有契約不變；文件PR必要CI合併才DOC_READY。
-- [ ] T01～12及T09a/09b實作、Red/Green證據、無秘密、source/built artifact tuple可回讀。
-- [ ] `./gradlew test --no-daemon --no-parallel`、`./gradlew integrationTest --no-daemon --no-parallel`。
-- [ ] `npm test`、`npm run lint`、`npm run typecheck`、`npm run build`、`npm run test:bundle`、`npm run measure:bundle`。
-- [ ] 既有CI tooling tests、e2e lint/types、`npm run e2e:mock`、quality必要CI照既有workflow；新增`npx eslint e2e-pp1-local playwright.pp1-local.config.ts`與同既有flags的tsc。
-- [ ] §5.3真本地prod/HTTPS/noports/no-demo／restart驗證；失敗/未跑分列，不用工具probe或CI mock冒充。
+- [x] 文件逐卡獨立review及五卡walk、relative links/diff/OAS既有契約不變；文件PR必要CI合併才DOC_READY。
+- [x] T01～11及T09a/09b實作；T12發布gate待下列最後一項完成。Red/Green證據、無秘密、source/built artifact tuple可回讀。
+- [x] `./gradlew test --no-daemon --no-parallel`、`./gradlew integrationTest --no-daemon --no-parallel`。
+- [x] `npm test`、`npm run lint`、`npm run typecheck`、`npm run build`、`npm run test:bundle`、`npm run measure:bundle`。
+- [x] 本地既有CI tooling tests、e2e lint/types、`npm run e2e:mock`、quality必要CI仍屬下列發布gate；新增`npx eslint e2e-pp1-local playwright.pp1-local.config.ts`與同既有flags的tsc。
+- [x] §5.3真本地prod/HTTPS/noports/no-demo／restart驗證；失敗/未跑分列，不用工具probe或CI mock冒充。
 - [ ] 實作PR独立review/必要CI正常合併、遠端main回讀，才PP1a VERIFIED（local scope）。PP1整體與正式可用仍未完成。
 
 外部來源查閱2026-10-09：[Spring Boot3.5 EnvironmentPostProcessor](https://docs.spring.io/spring-boot/3.5/api/java/org/springframework/boot/env/EnvironmentPostProcessor.html)（context前hook/註冊）；[Boot3.5 configtree](https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html)（secret檔配置）；[Node24.18 HTTPS](https://nodejs.org/download/release/v24.18.0/docs/api/https.html)（TLSserver）；[Chromium Linux cert management](https://chromium.googlesource.com/chromium/src/+/master/docs/linux/cert_management.md)（NSS trust）。本地container信任機制另有真probe；上述文件不替代產品驗證。
+
+## 10 本次實作驗收紀錄（2026-10-09）
+
+文件基線PR #324 merge `4d23bab39561ab238153c194bc0882685bdb8383`；loopback修訂PR #326 merge `72bd64c0ce2aa511b78c4cff4129ec3e1b6f4bd6`，兩次文件PR及其main必要CI皆通過。
+
+- Java：`./gradlew test integrationTest :services:cms-api:bootJar --no-daemon --no-parallel`，399 unit＋140 PostgreSQL integration，失敗／skip 0。
+- Web：`npm test`既有648測試通過；新增工具最終`node --test scripts/local/*.test.mjs` 66/66。lint／typecheck／三面build／bundle tests及measure、CI tooling 48＋quality tooling56通過。
+- Mock E2E 93/93；新harness lint／types通過。最終owned實例Chromium：untrusted 1/1、trusted 4/4，無skip／retry／ignoreHTTPS。
+- 真prod API／PG16：CA＋SNI經主機127.0.0.1:8443 health UP；三container零publishedports、兩internal網路；12types／5roles／10migrations，identity／grants／sessions／內容／媒體／導覽皆0。
+- 重啟同API container後，image／jar／base、container／network IDs、DB counts一致，TLS health仍UP。SIGINT停止前景relay後exit0，127.0.0.1:8443拒絕連線；未建立全機daemon。
+- 原始碼基線72bd64c0加`worktreeDirty=true`實測；jar SHA256 `90ed5257fba9865d3b5f6edc7dcea7091c9ba69a3d9ee8ec4b8ab4dc8a60211c`，API image `sha256:dca3142f3d0fe7b77c3dd6229299b3438d838a229ab5b3d52d93dcf890afa599`。本PR保存對應產品來源；不以基線commit冒充未提交程式。
+
+保留的失敗及處理：原Docker internal-only port mapping雖有宣告卻無實際binding，localhost驗收正確失敗；先合併#326設計才新增loopback relay。初次jar檔名錯誤、mock host缺OS libs／唯讀cache／fixture mount、migration數誤用8、Front被動login無API請求，均修正後重驗；未把失敗或probe稱通過。監聽證據初次誤認process名應為node，實際MainThread，改按PID的完整cmdline核對。歷史log、Red/Green、前後receipt與source hashes保留本波協作報告。
+
+帳號登入／Q25、備份與空白還原、upgrade／ops及完整旅程仍未完成；本波只驗登入頁呈現與未認證拒絕，不聲稱可使用正式帳號。正式host、憑證、offsite及通知另待實際環境驗收。T12最終審查及PR／CI／main回讀狀態由本實作PR和本波交接記錄追溯。

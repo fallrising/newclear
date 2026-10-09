@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -50,13 +49,13 @@ public class SeedService {
     private final IdentityStore store;
     private final PasswordHasher passwordHasher;
     private final IdentityProperties properties;
-    private final Environment environment;
+    private final DemoSeedPolicy demoSeedPolicy;
 
-    public SeedService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties, Environment environment) {
+    public SeedService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties, DemoSeedPolicy demoSeedPolicy) {
         this.store = store;
         this.passwordHasher = passwordHasher;
         this.properties = properties;
-        this.environment = environment;
+        this.demoSeedPolicy = demoSeedPolicy;
     }
 
     @Order(0)
@@ -64,12 +63,7 @@ public class SeedService {
     public void onReady() { seed(); }
 
     public void seed() {
-        boolean prod = List.of(environment.getActiveProfiles()).contains("prod");
-        if (prod && !properties.isSeedEnabled()) { ensureRoles(); return; }
-        if (prod && properties.isSeedEnabled() && properties.seedPasswordFor("seed-admin") == null) {
-            throw new IllegalStateException("CMS_SEED_ENABLED requires CMS_SEED_PASSWORD or per-user seed password in prod");
-        }
-        if (!properties.isSeedEnabled()) { ensureRoles(); return; }
+        if (!demoSeedPolicy.enabled()) { ensureRoles(); return; }
         ensureRoles();
         ensurePermissions();
         Map<String, String> generated = new LinkedHashMap<>();

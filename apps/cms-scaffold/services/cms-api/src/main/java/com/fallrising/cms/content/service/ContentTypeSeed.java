@@ -4,6 +4,7 @@ import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.NavigationRecord;
 import com.fallrising.cms.content.store.ContentStore;
+import com.fallrising.cms.identity.service.DemoSeedPolicy;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -26,9 +27,11 @@ import java.util.stream.Collectors;
 public class ContentTypeSeed {
 
     private final ContentStore store;
+    private final DemoSeedPolicy demoSeedPolicy;
 
-    public ContentTypeSeed(ContentStore store) {
+    public ContentTypeSeed(ContentStore store, DemoSeedPolicy demoSeedPolicy) {
         this.store = store;
+        this.demoSeedPolicy = demoSeedPolicy;
     }
 
     @Order(100)
@@ -134,7 +137,7 @@ public class ContentTypeSeed {
                         field("reason", "string", true, false, null, List.of()).label("原因"),
                         field("ownerPrincipalId", "principal-ref", false, true, null, List.of()).label("會員帳號")));
         store.markMediaRefsPublic();
-        if (store.findNavigation("front.primary").isEmpty()) {
+        if (demoSeedPolicy.enabled() && store.findNavigation("front.primary").isEmpty()) {
             Instant now = Instant.now();
             store.upsertNavigation(new NavigationRecord(
                     UUID.randomUUID(),

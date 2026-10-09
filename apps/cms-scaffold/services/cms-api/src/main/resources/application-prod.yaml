@@ -1,4 +1,8 @@
 cms:
+  runtime:
+    production-required: true
+    site-domain: ${CMS_SITE_DOMAIN:}
+    api-origin: ${CMS_API_ORIGIN:}
   identity:
     seed-enabled: false
     cookie-secure: true

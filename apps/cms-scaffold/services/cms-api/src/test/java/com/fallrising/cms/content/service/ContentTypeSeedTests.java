@@ -3,6 +3,9 @@ package com.fallrising.cms.content.service;
 import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.store.InMemoryContentStore;
+import com.fallrising.cms.identity.IdentityProperties;
+import com.fallrising.cms.identity.service.DemoSeedPolicy;
+import org.springframework.mock.env.MockEnvironment;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -19,7 +22,7 @@ class ContentTypeSeedTests {
     @Test
     void B03_seedSetsTypeSettings() {
         InMemoryContentStore store = new InMemoryContentStore();
-        new ContentTypeSeed(store).seed();
+        new ContentTypeSeed(store, devPolicy()).seed();
         assertThat(settings(store, "album")).containsExactly(null, "visibility", null);
         assertThat(settings(store, "project")).containsExactly(null, "visibility", null);
         assertThat(settings(store, "photo")).containsExactly("sortOrder", null, null);
@@ -34,7 +37,7 @@ class ContentTypeSeedTests {
     @Test
     void B05_seedWritesFieldMetadata() {
         InMemoryContentStore store = new InMemoryContentStore();
-        new ContentTypeSeed(store).seed();
+        new ContentTypeSeed(store, devPolicy()).seed();
         FieldRecord visibility = field(store, "album", "visibility");
         assertThat(visibility.label()).isEqualTo("可見性");
         assertThat(visibility.groupKey()).isEqualTo("settings");
@@ -66,7 +69,7 @@ class ContentTypeSeedTests {
                 "public", 0, null, "restrict", List.of(), true, false);
         store.insertField(title);
 
-        ContentTypeSeed seed = new ContentTypeSeed(store);
+        ContentTypeSeed seed = new ContentTypeSeed(store, devPolicy());
         seed.seed();
         assertThat(settings(store, "album")).containsExactly(null, "visibility", null);
         assertThat(field(store, "album", "title").label()).isEqualTo("標題");
@@ -81,13 +84,17 @@ class ContentTypeSeedTests {
     @Test
     void B03_seedIsIdempotent() {
         InMemoryContentStore store = new InMemoryContentStore();
-        ContentTypeSeed seed = new ContentTypeSeed(store);
+        ContentTypeSeed seed = new ContentTypeSeed(store, devPolicy());
         seed.seed();
         List<ContentTypeRecord> types = store.listTypes();
         List<List<FieldRecord>> fields = types.stream().map(t -> store.fieldsOf(t.id())).toList();
         seed.seed();
         assertThat(store.listTypes()).isEqualTo(types);
         assertThat(store.listTypes().stream().map(t -> store.fieldsOf(t.id())).toList()).isEqualTo(fields);
+    }
+
+    private static DemoSeedPolicy devPolicy() {
+        return new DemoSeedPolicy(new IdentityProperties(), new MockEnvironment());
     }
 
     private static List<String> settings(InMemoryContentStore store, String key) {

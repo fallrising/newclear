@@ -5,6 +5,7 @@ import com.fallrising.cms.content.store.ContentStore;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.Surface;
 import com.fallrising.cms.identity.store.IdentityStore;
+import com.fallrising.cms.identity.service.DemoSeedPolicy;
 import com.fallrising.cms.media.service.MediaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +34,14 @@ public class DemoContentSeed {
     private final EntryService entries;
     private final MediaService media;
     private final IdentityStore identity;
+    private final DemoSeedPolicy demoSeedPolicy;
 
-    public DemoContentSeed(ContentStore store, EntryService entries, MediaService media, IdentityStore identity) {
+    public DemoContentSeed(ContentStore store, EntryService entries, MediaService media, IdentityStore identity, DemoSeedPolicy demoSeedPolicy) {
         this.store = store;
         this.entries = entries;
         this.media = media;
         this.identity = identity;
+        this.demoSeedPolicy = demoSeedPolicy;
     }
 
     @Order(200)
@@ -48,6 +51,7 @@ public class DemoContentSeed {
     }
 
     public void seed() {
+        if (!demoSeedPolicy.enabled()) return;
         if (identity.findPrincipalByUsername("seed-operator-album").isEmpty()) {
             return;
         }

@@ -1,6 +1,6 @@
-# 跨 worker 批次化量測（2026-10-08／09）
+# 歷史跨 worker 批次化量測（2026-10-08／09）
 
-批次化降低跨 worker 傳遞的部分 CPU 成本，但本輪沒有證明吞吐全面改善。首輪矩陣的 c50 四 worker／單 worker 比只有 1.22／1.28；c500 達 1.71／2.04，四 worker SET 的兩輪平均比原版低 12.5%。後續交錯比較的吞吐差距有正有負，尚未穩定重現該幅度。原 4 vCPU 私網環境尚未重跑，不能據此宣稱效能驗收完成，也不足以決定預設 workers。
+批次化降低跨 worker 傳遞的部分 CPU 成本，但本輪沒有證明吞吐全面改善。首輪矩陣的 c50 四 worker／單 worker 比只有 1.22／1.28；c500 達 1.71／2.04，四 worker SET 的兩輪平均比原版低 12.5%。後續交錯比較的吞吐差距有正有負，尚未穩定重現該幅度。原 4 vCPU 私網環境在這些量測中沒有重跑，當時的效能驗收未完成，也不足以決定預設 workers。後續已採[規格明確的可替換環境](benchmark-reproducibility.md)，不再等待原主機資訊；[新的完整矩陣](benchmark-fixture-results-20261009.md)仍有數值門檻未達標。
 
 ## 環境與方法
 
@@ -103,8 +103,10 @@ SET 的配對 CPU 變化為 −7.73%、+0.96%、−0.31%、+2.14%，並非一致
 
 原版 7,299 samples、新版 6,257 samples，均無 lost samples。kernel symbols 受限，部分 userspace addresses 未解析，frame-pointer callchain 也不足以可靠歸因；上表只能描述已命名方法的 self sample 比例，不能證明完整跨 worker 成本下降多少。`try_harvest` 的一部分成本移至 `LocalReply::try_recv`，不可只看它自身的下降。
 
-本次採樣沒有把空 `flush` 掃描辨識為主要熱點，因此未據此加入額外 pending flag 或改變 flush／drain 配額。批次化架構與 CPU／延遲改善已有證據；吞吐與原私網的驗收缺口仍須正面處理。
+本次採樣沒有把空 `flush` 掃描辨識為主要熱點，因此未據此加入額外 pending flag 或改變 flush／drain 配額。批次化架構與 CPU／延遲改善已有證據；本歷史量測的吞吐與環境限制仍需保留；最新替代環境與數值驗收見下節。
 
 ## 本輪續作規程
 
 測試資源可替換，後續以已記錄規格的替代fixture進行驗收；不再以尋回原測試機為前提。新的完整32項交錯矩陣依[先行規程](benchmark-reproducibility.md)執行，維持吞吐與CPU效率標準。前述資料與限制保留為歷史；新結果將獨立發布。
+
+新的完整交錯矩陣已執行，結果與限制見[替代fixture結果](benchmark-fixture-results-20261009.md)及其32項CSV；舊結果不刪除、不混入新的方法平均。

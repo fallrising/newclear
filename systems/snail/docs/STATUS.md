@@ -1,6 +1,6 @@
 # rudis 開發狀態
 
-> 最後更新：2026-10-09
+> 最後更新：2026-10-10
 
 本輪限定跨 worker 傳遞的批次化與必要回歸修正。M2/M3 的容量實驗仍保留歷史狀態，未在本輪重新驗收。
 
@@ -18,7 +18,7 @@
 - 請求／回覆按 worker 分批；每個 message 至多 256 項，每次 inbox drain 至多 16 個 message。key 熱路徑使用 origin 本地 generational reply slot；多 key helper 的最終本地結果仍使用 oneshot。
 - 修正 mio 的 spurious readability：沒有讀到資料的 WouldBlock 不代表 EOF。關閉 broadcast 會喚醒 reactor；io_uring 在下一次等待前檢查關閉完成。
 - 新增兩 worker／四 shard 的混合 pipeline 回歸：64 個已填入的 key、384 個回覆逐一驗證，包含一般 GET／SET、PING、失敗 SET NX 與 MGET，並確認四個 shard 都有處理請求。`cargo test --locked --release`：最終 mio **45 passed**；實際 io_uring **45 passed**，無 fallback，包含 overload、FIFO、斷線後重連與空閒 multi-key helper 進度。先前首輪批次版本的四個 socket 回歸另有 mio 連跑 20 輪、**80 passed** 的記錄。
-- 完整前後數據、方法與環境限制見 [跨 worker 量測](benchmark-cross-shard.md)。原 4 vCPU 私網環境尚未重跑，效能驗收未完成。
+- 歷史前後數據保留於[跨 worker 量測](benchmark-cross-shard.md)。後續採可替換且規格明確的環境，[先行規程](benchmark-reproducibility.md)及[新的32項交錯結果](benchmark-fixture-results-20261009.md)已完成；不再等待原測試機資訊。c50 SET／GET scaling為1.137／1.184，未達1.5；c500為1.713／1.851。四worker CPU/request相對原版下降9.63–12.65%，但仍是單worker的1.62–2.07倍，效能驗收未完成。
 - 後續交錯 SET 比較共四對：首輪批次版 CPU/request 每對都較低，均值約降 9.5%；吞吐差距有正有負，均值約 −0.9%，未穩定重現首輪順序量測的 −12.5%。兩種暖機方法分開記錄。
 - 單獨嘗試省掉遠端 GET／SET 的重複 routing，但 SET CPU 效果不一致、GET 兩對較差，未通過保留標準，已撤回四處實驗 source 修改。最終 runtime 與首輪批次版相同；新增測試、20 項交錯數據及實驗結果說明保留，預設 workers 未改。
 

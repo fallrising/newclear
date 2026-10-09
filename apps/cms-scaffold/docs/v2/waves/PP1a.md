@@ -1,6 +1,6 @@
 # PP1a 本地 prod runtime 施工圖
 
-2026-10-09。**DOC_READY：PR #324、#326 已合併。14卡產品實作與本地 runtime 驗收完成；獨立最終審查及本實作 PR 必要 CI／合併／main 回讀完成後，才生效為 VERIFIED（僅 local scope）。**
+2026-10-09。**VERIFIED（僅 local scope）：文件 PR #324／#326、實作 PR #327 已合併；必要 PR／main CI、獨立審查、本地 runtime 與來源回讀皆通過。**
 來源main `6a01bd31ad36c60c69838e2a915953a80c9b6d23`。本波是[PP1六項總計畫](PP1.md)的第一個有界子波，不代表個人正式使用或整個BW6完成。
 
 ## 1 範圍
@@ -219,12 +219,12 @@ verify需比對三containers HostConfig.PortBindings為空、NetworkSettings.Por
 ## 9 交付檢查表
 
 - [x] 文件逐卡獨立review及五卡walk、relative links/diff/OAS既有契約不變；文件PR必要CI合併才DOC_READY。
-- [x] T01～11及T09a/09b實作；T12發布gate待下列最後一項完成。Red/Green證據、無秘密、source/built artifact tuple可回讀。
+- [x] T01～11及T09a/09b實作；T12發布gate已完成。Red/Green證據、無秘密、source/built artifact tuple可回讀。
 - [x] `./gradlew test --no-daemon --no-parallel`、`./gradlew integrationTest --no-daemon --no-parallel`。
 - [x] `npm test`、`npm run lint`、`npm run typecheck`、`npm run build`、`npm run test:bundle`、`npm run measure:bundle`。
 - [x] 本地既有CI tooling tests、e2e lint/types、`npm run e2e:mock`、quality必要CI仍屬下列發布gate；新增`npx eslint e2e-pp1-local playwright.pp1-local.config.ts`與同既有flags的tsc。
 - [x] §5.3真本地prod/HTTPS/noports/no-demo／restart驗證；失敗/未跑分列，不用工具probe或CI mock冒充。
-- [ ] 實作PR独立review/必要CI正常合併、遠端main回讀，才PP1a VERIFIED（local scope）。PP1整體與正式可用仍未完成。
+- [x] 實作PR #327独立review/必要CI正常合併、遠端main回讀，PP1a VERIFIED（local scope）。PP1整體與正式可用仍未完成。
 
 外部來源查閱2026-10-09：[Spring Boot3.5 EnvironmentPostProcessor](https://docs.spring.io/spring-boot/3.5/api/java/org/springframework/boot/env/EnvironmentPostProcessor.html)（context前hook/註冊）；[Boot3.5 configtree](https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html)（secret檔配置）；[Node24.18 HTTPS](https://nodejs.org/download/release/v24.18.0/docs/api/https.html)（TLSserver）；[Chromium Linux cert management](https://chromium.googlesource.com/chromium/src/+/master/docs/linux/cert_management.md)（NSS trust）。本地container信任機制另有真probe；上述文件不替代產品驗證。
 
@@ -241,4 +241,4 @@ verify需比對三containers HostConfig.PortBindings為空、NetworkSettings.Por
 
 保留的失敗及處理：原Docker internal-only port mapping雖有宣告卻無實際binding，localhost驗收正確失敗；先合併#326設計才新增loopback relay。初次jar檔名錯誤、mock host缺OS libs／唯讀cache／fixture mount、migration數誤用8、Front被動login無API請求，均修正後重驗；未把失敗或probe稱通過。監聽證據初次誤認process名應為node，實際MainThread，改按PID的完整cmdline核對。歷史log、Red/Green、前後receipt與source hashes保留本波協作報告。
 
-帳號登入／Q25、備份與空白還原、upgrade／ops及完整旅程仍未完成；本波只驗登入頁呈現與未認證拒絕，不聲稱可使用正式帳號。正式host、憑證、offsite及通知另待實際環境驗收。T12最終審查及PR／CI／main回讀狀態由本實作PR和本波交接記錄追溯。
+帳號登入／Q25、備份與空白還原、upgrade／ops及完整旅程仍未完成；本波只驗登入頁呈現與未認證拒絕，不聲稱可使用正式帳號。正式host、憑證、offsite及通知另待實際環境驗收。T12已完成：實作commit `7d8782815921d06770b23f6bea82498feace9342`，PR #327 merge `343c825cbace9b6c5dbbfc6d52486831ba395dd4`；5項PR checks及main CMS CI 37927027738／quality 37927027623皆通過，28個實測來源檔案與合併內容雜湊一致。

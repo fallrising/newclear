@@ -152,7 +152,7 @@ RPO24h／RTO4h、每日停寫與每日7＋每週4份保留已批准；維護時�
 
 ## 6 任務依賴與待封板工作卡
 
-最新可施工邊界依[PP1a](PP1a.md)：runtime與no-demo 14卡（含loopback修訂T09a/09b），文件PR #324／#326已合併DOC_READY；實作與本地runtime验收完成，待實作PR必要CI／審查／合併回讀才VERIFIED local scope。PP1b接帳號/Q25及本地maintenanceguard（包括已驗證可連的PGbridge）；PP1c接一致備份/空白還原；PP1d接升級故障/排程/維運/完整旅程。各波≤30卡，後續精確卡片仍DRAFT，下一波先細化再施工。原24張候選與新adapter工作量超過30，不壓成單波；以下總體工作組是依賴圖，不是首波白名單。
+最新可施工邊界依[PP1a](PP1a.md)：runtime與no-demo 14卡（含loopback修訂T09a/09b），文件PR #324／#326已合併DOC_READY；實作 PR #327 已合併，必要 PR／main CI、獨立審查與本地runtime验收通過，VERIFIED local scope。[PP1b](PP1b.md)以29張有界卡接帳號/Q25及本地maintenanceguard（獨立文件審查通過，必要CI及本文件PR正常合併後DOC_READY生效）；PP1c接一致備份/空白還原；PP1d接升級故障/排程/維運/完整旅程。各波≤30卡，後續精確卡片仍DRAFT，下一波先細化再施工。原24張候選與新adapter工作量超過30，不壓成單波；以下總體工作組是依賴圖，不是首波白名單。
 
 
 施工順序嚴格為 runtime → accounts/Q25 → backup/restore → upgrade recovery → operations → formal-settings acceptance。文件／純測試設計可並行；共享source writer依序整合。下列是**工作拆分草案**，不是可領取實作卡；精確逐檔白名單、方法簽名／CLI參數、fixtures與S/M行數仍須依owner環境答案補齊。未封板卡不得派給worker實作。
@@ -174,7 +174,7 @@ RPO24h／RTO4h、每日停寫與每日7＋每週4份保留已批准；維護時�
 | P13 正式設定旅程 | P1～P12 | prod下登入/寫入/隔離/重啟/恢復斷線 | 正式命名帳號、seed=false、HTTPS、真DB+media；全流程證據。 |
 | P14 整合／交付 | P13 | 新契約與client不同步、未跑項目當passed | 原生gates、獨立審查、PR必要CI／merge／遠端核對；正式主機驗收保持另列。 |
 
-目前候選卡包括[帳號六卡](../contracts/PP1-accounts.md)、[Q25六卡](../contracts/PP1-governance.md)及[恢復內核十二卡](../contracts/PP1-recovery.md)，共24卡；恢復CLI已從盤點卡拆開。這不是完整PP1卡數，runtime／host adapters／排程通知／真實演練與最後驗收仍須細化，不能宣稱整體≤30卡。每組拆 Red/Green 至≤400行手寫卡；完成細化後才提供精確卡數。如果實際超過30卡，按 [REFINE-PROMPT](../REFINE-PROMPT.md) §9 集中提拆波，不壓成大型任務來假合規。52～58張v2功能卡不是本波完整工作量或上線前置。
+原帳號六卡與Q25六卡已由[PP1b的29卡](PP1b.md)細分取代（bootstrap/recover核心10、local guard7、Q25 10、journey1、交付1）；[恢復內核十二卡](../contracts/PP1-recovery.md)仍為PP1c候選。PP1b host recover成功依賴PP1c完整匹配且已驗證的rollback backup，缺verifier時必須exit6且零mutation；不形成「先恢復才做備份」的循環。各子波≤30張且每卡≤400行手寫（含tests），超出即再拆，不削弱必要驗證。52～58張v2功能卡不是本次上線的全部前置。
 
 ## 7 測試規格與證據分層
 

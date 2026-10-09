@@ -1,0 +1,22 @@
+[
+  {
+    "case": "trusted",
+    "exitCode": 0,
+    "pass": true
+  },
+  {
+    "case": "untrusted",
+    "exitCode": 1,
+    "pass": true
+  },
+  {
+    "case": "invalid",
+    "exitCode": 1,
+    "pass": true
+  },
+  {
+    "case": "runtime",
+    "exitCode": 0,
+    "pass": true
+  }
+]

@@ -46,6 +46,7 @@ public class PrincipalAdminService {
     private final ContentTypeDirectory contentTypes;
     private final TransactionRunner transactions;
     private final AuditLog auditLog;
+    private final GovernanceDenialAudit denialAudit;
 
     public PrincipalAdminService(IdentityStore store, PasswordHasher passwordHasher, AuthService authService,
             AuthorizationService authorizationService, ObjectMapper objectMapper, ContentTypeDirectory contentTypes) {
@@ -65,6 +66,7 @@ public class PrincipalAdminService {
         this.contentTypes = contentTypes;
         this.transactions = transactions;
         this.auditLog = auditLog;
+        this.denialAudit = new GovernanceDenialAudit(transactions, auditLog);
     }
 
     public List<Principal> list(IdentityRequest request) { authService.requireManagePrincipals(request); return store.listPrincipals(); }
@@ -133,24 +135,30 @@ public class PrincipalAdminService {
         if (nextStatus != current.status()) updated = updated.withStatus(nextStatus, now);
         boolean removesUsableAdmin = current.status() == PrincipalStatus.ACTIVE && nextStatus != PrincipalStatus.ACTIVE;
         Principal next = updated;
-        return transactions.inTransaction(() -> {
-            Principal saved = removesUsableAdmin ? store.updatePrincipalKeepingUsableAdmin(next) : store.updatePrincipal(next);
-            if (nextStatus == PrincipalStatus.DISABLED && current.status() != PrincipalStatus.DISABLED) {
-                store.revokeAllForPrincipal(id, now, null);
-                audit(request, "PRINCIPAL_DISABLED", id);
-            }
-            return saved;
+        return denialAudit.execute(request.principal(), request.surface(), "AUTH", "PRINCIPAL_DISABLED", "principal", id, () -> {
+            if (nextStatus == PrincipalStatus.DISABLED && id.equals(request.principal().id())) throw IdentityException.selfDisable();
+            return transactions.inTransaction(() -> {
+                Principal saved = removesUsableAdmin ? store.updatePrincipalKeepingUsableAdmin(next) : store.updatePrincipal(next);
+                if (nextStatus == PrincipalStatus.DISABLED && current.status() != PrincipalStatus.DISABLED) {
+                    store.revokeAllForPrincipal(id, now, null);
+                    audit(request, "PRINCIPAL_DISABLED", id);
+                }
+                return saved;
+            });
         });
     }
 
     public Principal disable(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
         Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
-        return transactions.inTransaction(() -> {
-            Principal updated = store.updatePrincipalKeepingUsableAdmin(current.withStatus(PrincipalStatus.DISABLED, Instant.now()));
-            store.revokeAllForPrincipal(id, Instant.now(), null);
-            audit(request, "PRINCIPAL_DISABLED", id);
-            return updated;
+        return denialAudit.execute(request.principal(), request.surface(), "AUTH", "PRINCIPAL_DISABLED", "principal", id, () -> {
+            if (id.equals(request.principal().id())) throw IdentityException.selfDisable();
+            return transactions.inTransaction(() -> {
+                Principal updated = store.updatePrincipalKeepingUsableAdmin(current.withStatus(PrincipalStatus.DISABLED, Instant.now()));
+                store.revokeAllForPrincipal(id, Instant.now(), null);
+                audit(request, "PRINCIPAL_DISABLED", id);
+                return updated;
+            });
         });
     }
 
@@ -178,9 +186,18 @@ public class PrincipalAdminService {
             }
             assignments.add(new PrincipalRoleAssignment(id, role.id(), role.code(), allowlist));
         }
-        transactions.run(() -> {
-            store.replacePrincipalRolesKeepingUsableAdmin(id, assignments);
-            audit(request, "ROLE_ASSIGNED", id);
+        denialAudit.execute(request.principal(), request.surface(), "AUTH", "ROLE_ASSIGNED", "principal", id, () -> {
+            transactions.run(() -> store.maintenanceTransaction(() -> {
+                if (id.equals(request.principal().id())
+                        && store.rolesOf(id).stream().anyMatch(a -> RoleCode.ADMIN.wire().equals(a.roleCode()))
+                        && assignments.stream().noneMatch(a -> RoleCode.ADMIN.wire().equals(a.roleCode()))) {
+                    throw IdentityException.selfDemotion();
+                }
+                store.replacePrincipalRolesKeepingUsableAdmin(id, assignments);
+                audit(request, "ROLE_ASSIGNED", id);
+                return null;
+            }));
+            return null;
         });
     }
 
@@ -232,10 +249,13 @@ public class PrincipalAdminService {
             if (!seen.add(key)) throw IdentityException.validation("duplicate permission");
             next.add(new Permission(UUID.randomUUID(), role.id(), action.wire(), p.contentTypeCode(), p.predicateJson(), surfaces, now));
         }
-        transactions.run(() -> {
-            store.replaceRolePermissionsKeepingUsableAdmin(role.id(), next);
-            auditLog.record(request.principal(), request.surface(), "AUTH", "role.permissions_update", "role", role.id(),
-                    AuditLog.OK, java.util.Map.of("roleCode", role.code(), "permissions", next.size()));
+        denialAudit.execute(request.principal(), request.surface(), "AUTH", "role.permissions_update", "role", role.id(), () -> {
+            transactions.run(() -> {
+                store.replaceRolePermissionsKeepingUsableAdmin(role.id(), next);
+                auditLog.record(request.principal(), request.surface(), "AUTH", "role.permissions_update", "role", role.id(),
+                        AuditLog.OK, java.util.Map.of("roleCode", role.code(), "permissions", next.size()));
+            });
+            return null;
         });
     }
 

@@ -135,8 +135,7 @@ public class AuthService {
     }
 
     public void validateNewPassword(String username, String newPassword) {
-        if (newPassword == null || newPassword.length() < 12) throw IdentityException.validation("Password must be at least 12 characters");
-        if (username != null && newPassword.equalsIgnoreCase(username)) throw IdentityException.validation("Password must not equal username");
+        com.fallrising.cms.identity.crypto.PasswordPolicy.validate(username, newPassword);
     }
 
     public void requireManagePrincipals(IdentityRequest request) {

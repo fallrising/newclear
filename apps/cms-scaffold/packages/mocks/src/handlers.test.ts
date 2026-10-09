@@ -717,6 +717,62 @@ describe("@cms/mocks W4 governance", () => {
     setSurface("admin");
   });
 
+  it("PP1FM05 SELF protection remains with a second admin and preserves validation precedence", async () => {
+    db.principalRoles[OPERATOR_ALBUM] = [{ code: "admin", contentTypeCodes: [] }];
+    const before = structuredClone({ principals: db.principals, roles: db.principalRoles });
+    await expect(client().admin.disablePrincipal(ADMIN_ID)).rejects.toMatchObject({ code: "SELF_DISABLE_FORBIDDEN" });
+    await expect(client().admin.patchPrincipal(ADMIN_ID, { status: "disabled" })).rejects.toMatchObject({ code: "SELF_DISABLE_FORBIDDEN" });
+    await expect(client().admin.replacePrincipalRoles(ADMIN_ID, [])).rejects.toMatchObject({ code: "SELF_DEMOTION_FORBIDDEN" });
+    await expect(client().admin.replacePrincipalRoles(ADMIN_ID, [{ code: "unknown" }])).rejects.toMatchObject({ status: 400 });
+    expect({ principals: db.principals, roles: db.principalRoles }).toEqual(before);
+    await expect(client().auth.me()).resolves.toMatchObject({ principal: { id: ADMIN_ID } });
+    await client().admin.replacePrincipalRoles(ADMIN_ID, [{ code: "admin" }]);
+  });
+
+  it("PP1FM05 nonself LAST_ADMIN remains protected", async () => {
+    db.principals.find((principal) => principal.id === ADMIN_ID)!.status = "locked";
+    db.principalRoles[OPERATOR_ALBUM] = [{ code: "admin", contentTypeCodes: [] }];
+    const before = structuredClone({ principals: db.principals, roles: db.principalRoles });
+    await expect(client().admin.disablePrincipal(OPERATOR_ALBUM)).rejects.toMatchObject({ code: "LAST_ADMIN" });
+    await expect(client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [])).rejects.toMatchObject({ code: "LAST_ADMIN" });
+    expect({ principals: db.principals, roles: db.principalRoles }).toEqual(before);
+  });
+
+  it("PP1FM06 mock purge checks raw confirmation after authorization and lookup but before references", async () => {
+    const entry = db.workEntries.find((item) => item.slug === "private-studio")!;
+    const before = structuredClone({ work: db.workEntries, published: db.publicEntries });
+    for (const body of [undefined, {}, { confirmPhrase: "delete", confirmId: entry.id },
+      { confirmPhrase: "DELETE ", confirmId: entry.id }, { confirmPhrase: "DELETE", confirmId: `${entry.id} ` },
+      { confirmPhrase: "DELETE", confirmId: "" }]) {
+      const response = await raw(`/api/v1/admin/entries/${entry.id}/purge`, { method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": "mock-csrf-token" }, body: JSON.stringify(body) });
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({ error: { code: "CONFIRMATION_REQUIRED" } });
+    }
+    await expect(client().admin.purgeEntry(entry.id, { confirmPhrase: "DELETE", confirmId: entry.slug! }))
+      .rejects.toMatchObject({ code: "REF_CONSTRAINT" });
+    expect({ work: db.workEntries, published: db.publicEntries }).toEqual(before);
+    await expect(client().admin.purgeEntry(MISSING)).rejects.toMatchObject({ status: 404 });
+    setSurface("back");
+    await expect(client().admin.purgeEntry(MISSING)).rejects.toMatchObject({ code: "SURFACE_FORBIDDEN" });
+    setSurface("admin"); setUser("seed-member-clinic");
+    await expect(client().admin.purgeEntry(MISSING)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    setUser(null);
+    await expect(client().admin.purgeEntry(MISSING)).rejects.toMatchObject({ status: 401 });
+  });
+
+  it.each([null, ""])("PP1FM06 empty slug %s requires UUID and unknown confirmation keys are ignored", async (slug) => {
+    const entry = db.workEntries.find((item) => item.slug === "coast-harbour")!;
+    entry.slug = slug;
+    await expect(client().admin.purgeEntry(entry.id, { confirmPhrase: "DELETE", confirmId: "" }))
+      .rejects.toMatchObject({ code: "CONFIRMATION_REQUIRED" });
+    const response = await raw(`/api/v1/admin/entries/${entry.id}/purge`, { method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": "mock-csrf-token" },
+      body: JSON.stringify({ confirmPhrase: "DELETE", confirmId: entry.id, ignored: true }) });
+    expect(response.status).toBe(204);
+    expect(db.workEntries.some((item) => item.id === entry.id)).toBe(false);
+  });
+
   it("W4 governance actions need the Admin surface and the capability (BW5)", async () => {
     setSurface("back");
     await expect(client().admin.roles()).rejects.toMatchObject({ status: 403, code: "SURFACE_FORBIDDEN" });
@@ -740,14 +796,14 @@ describe("@cms/mocks W4 governance", () => {
     }
   });
 
-  it("roles: editor and operator need types; LAST_ADMIN guards disable, status and roles", async () => {
+  it("roles: editor and operator need types; SELF guards disable, status and roles", async () => {
     await expect(client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "editor", contentTypeCodes: [] }])).rejects.toMatchObject({ status: 400 });
     await expect(client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "nope" }])).rejects.toMatchObject({ status: 400 });
     await client().admin.replacePrincipalRoles(OPERATOR_ALBUM, [{ code: "editor", contentTypeCodes: ["album"] }]);
     expect(db.principalRoles[OPERATOR_ALBUM]).toEqual([{ code: "editor", contentTypeCodes: ["album"] }]);
-    await expect(client().admin.disablePrincipal(ADMIN_ID)).rejects.toMatchObject({ status: 403, code: "LAST_ADMIN" });
-    await expect(client().admin.patchPrincipal(ADMIN_ID, { status: "disabled" })).rejects.toMatchObject({ code: "LAST_ADMIN" });
-    await expect(client().admin.replacePrincipalRoles(ADMIN_ID, [])).rejects.toMatchObject({ code: "LAST_ADMIN" });
+    await expect(client().admin.disablePrincipal(ADMIN_ID)).rejects.toMatchObject({ status: 403, code: "SELF_DISABLE_FORBIDDEN" });
+    await expect(client().admin.patchPrincipal(ADMIN_ID, { status: "disabled" })).rejects.toMatchObject({ code: "SELF_DISABLE_FORBIDDEN" });
+    await expect(client().admin.replacePrincipalRoles(ADMIN_ID, [])).rejects.toMatchObject({ code: "SELF_DEMOTION_FORBIDDEN" });
     expect(db.principals.find((p) => p.id === ADMIN_ID)!.status).toBe("active");
   });
 
@@ -813,9 +869,9 @@ describe("@cms/mocks W4 governance", () => {
 
   it("purge: admin role only, 409 REF_CONSTRAINT while referenced, 404 when missing; gone from both lists", async () => {
     const studio = db.workEntries.find((e) => e.slug === "private-studio")!.id;
-    await expect(client().admin.purgeEntry(studio)).rejects.toMatchObject({ status: 409, code: "REF_CONSTRAINT" });
+    await expect(client().admin.purgeEntry(studio, { confirmPhrase: "DELETE", confirmId: studio })).rejects.toMatchObject({ status: 409, code: "REF_CONSTRAINT" });
     const coast = db.workEntries.find((e) => e.slug === "coast-harbour")!.id;
-    await client().admin.purgeEntry(coast);
+    await client().admin.purgeEntry(coast, { confirmPhrase: "DELETE", confirmId: coast });
     expect(db.workEntries.some((e) => e.id === coast)).toBe(false);
     expect(db.publicEntries.some((e) => e.id === coast)).toBe(false);
     await expect(client().admin.purgeEntry(coast)).rejects.toMatchObject({ status: 404, code: "ENTRY_NOT_FOUND" });

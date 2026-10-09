@@ -20,6 +20,8 @@ import com.fallrising.cms.content.query.ListQueryParser;
 import com.fallrising.cms.content.store.ContentStore;
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.service.AuditLog;
+import com.fallrising.cms.identity.service.GovernanceDenialAudit;
+import com.fallrising.cms.platform.TransactionRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fallrising.cms.identity.domain.CmsAction;
@@ -53,24 +55,32 @@ public class EntryService {
     private final MediaService mediaService;
     private final PayloadValidator payloadValidator;
     private final AuditLog audit;
+    private final GovernanceDenialAudit denialAudit;
 
     public EntryService(ContentStore store, AuthorizationService authorization, IdentityStore identityStore, MediaService mediaService) {
         this(store, authorization, identityStore, mediaService, new AuditLog(identityStore, new ObjectMapper()));
     }
 
-    @Autowired
     public EntryService(
             ContentStore store,
             AuthorizationService authorization,
             IdentityStore identityStore,
             MediaService mediaService,
             AuditLog audit) {
+        this(store, authorization, identityStore, mediaService, audit,
+                new GovernanceDenialAudit(TransactionRunner.withoutDatabase(), audit));
+    }
+
+    @Autowired
+    public EntryService(ContentStore store, AuthorizationService authorization, IdentityStore identityStore,
+            MediaService mediaService, AuditLog audit, GovernanceDenialAudit denialAudit) {
         this.store = store;
         this.authorization = authorization;
         this.identityStore = identityStore;
         this.mediaService = mediaService;
         this.payloadValidator = new PayloadValidator(store, identityStore);
         this.audit = audit;
+        this.denialAudit = denialAudit;
     }
 
     public ContentTypeRecord requireType(String typeKey) {
@@ -457,25 +467,27 @@ public class EntryService {
         });
     }
 
-    public void purge(Principal principal, Surface surface, UUID id) {
-        store.writeTransaction(() -> {
+    public void purge(Principal principal, Surface surface, UUID id, String confirmPhrase, String confirmId) {
+        if (principal == null) throw IdentityException.unauthenticated();
+        denialAudit.execute(principal, surface, "CONTENT", "entry.purge", "entry", id, () -> store.writeTransaction(() -> {
             if (surface != Surface.ADMIN) {
                 throw IdentityException.surfaceForbidden(CmsAction.DELETE.wire(), null, surface == null ? null : surface.wire());
             }
-            if (principal == null
-                    || identityStore.rolesOf(principal.id()).stream()
-                            .noneMatch(role -> RoleCode.ADMIN.wire().equals(role.roleCode()))) {
+            if (identityStore.rolesOf(principal.id()).stream().noneMatch(role -> RoleCode.ADMIN.wire().equals(role.roleCode()))) {
                 throw IdentityException.forbidden(CmsAction.DELETE.wire(), null, surface.wire());
             }
             EntryRecord current = store.findEntry(id).orElseThrow(ContentException::notFound);
-            if (!store.refsTo(id).isEmpty()) {
-                throw ContentException.refConstraint();
+            boolean targetMatches = id.toString().equals(confirmId)
+                    || (current.slug() != null && !current.slug().isEmpty() && current.slug().equals(confirmId));
+            if (!"DELETE".equals(confirmPhrase) || !targetMatches) {
+                throw ContentException.validation(ErrorCode.CONFIRMATION_REQUIRED, "Purge confirmation does not match");
             }
+            if (!store.refsTo(id).isEmpty()) throw ContentException.refConstraint();
             store.hardDeleteEntry(id, current.version());
             mediaService.replaceAttachments(id, List.of());
             record(principal, surface, "entry.purge", current, null);
             return null;
-        });
+        }));
     }
 
     public EntryRecord publicGet(Principal principal, String typeKey, UUID id, String slug) {

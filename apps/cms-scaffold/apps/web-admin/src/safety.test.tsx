@@ -1,11 +1,36 @@
-import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { keys } from "@cms/api";
 import { db, setUser } from "@cms/mocks";
 import { describe, expect, it } from "vitest";
 import { readAuditFilters, toAuditQuery } from "./pages/audit";
+import { ConfirmDialog } from "./confirm";
 import { IDS, openMoreActions, recordRequests, renderRoute, writes } from "./test-utils";
 
 describe("W4 reviewed governance boundaries", () => {
+  it("PP1FM07_nonPurgeConsumersRemainCompatible", () => {
+    let confirmed = false;
+    render(
+      <ConfirmDialog
+        open
+        title="停用帳號？"
+        description="資料仍會保留。"
+        confirmLabel="停用"
+        phrase="seed-operator-album"
+        destructive
+        pending={false}
+        onConfirm={() => { confirmed = true; }}
+        onCancel={() => undefined}
+      />,
+    );
+    const dialog = screen.getByTestId("confirm-dialog");
+    fireEvent.change(within(dialog).getByTestId("confirm-input"), { target: { value: " seed-operator-album " } });
+    expect(within(dialog).getByTestId("confirm-submit")).toBeEnabled();
+    fireEvent.click(within(dialog).getByTestId("confirm-submit"));
+    expect(confirmed).toBe(true);
+    expect(within(dialog).queryByTestId("confirm-word")).not.toBeInTheDocument();
+    expect(within(dialog).queryByTestId("confirm-acknowledgement")).not.toBeInTheDocument();
+  });
+
   it("drops malformed UUID-shaped target filters before requesting the audit API", () => {
     for (const id of ["-".repeat(36), "a".repeat(36), "0000000-00000-0000-0000-000000000000"]) {
       expect(toAuditQuery(readAuditFilters(new URLSearchParams({ targetId: id }))).targetId).toBeUndefined();

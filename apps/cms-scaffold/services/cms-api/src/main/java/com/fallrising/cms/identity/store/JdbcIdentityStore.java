@@ -30,6 +30,46 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class JdbcIdentityStore implements IdentityStore {
+    @Override
+    public boolean hasIdentityDataIncludingDeleted() {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS(SELECT 1 FROM cms_principal)
+                 OR EXISTS(SELECT 1 FROM cms_credential)
+                 OR EXISTS(SELECT 1 FROM cms_principal_role)
+                 OR EXISTS(SELECT 1 FROM cms_permission)
+                 OR EXISTS(SELECT 1 FROM cms_session)
+                 OR EXISTS(SELECT 1 FROM cms_audit_event)
+                """, Boolean.class));
+    }
+
+    @Override
+    public boolean hasMaintenanceOperation(UUID operationId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS(SELECT 1 FROM cms_audit_event
+                 WHERE category = 'AUTH'
+                   AND action IN ('PRODUCTION_ADMIN_INITIALIZED', 'PRODUCTION_ADMIN_RECOVERED')
+                   AND detail_json ->> 'operationId' = ?)
+                """, Boolean.class, operationId.toString()));
+    }
+
+    @Override
+    public <T> T maintenanceTransaction(java.util.function.Supplier<T> attempt) {
+        try {
+            return tx.execute(status -> {
+                jdbc.execute("SET LOCAL lock_timeout='5s'");
+                acquireAdminGuard();
+                return attempt.get();
+            });
+        } catch (org.springframework.dao.DataAccessException failure) {
+            for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+                if (cause instanceof SQLException sql && "55P03".equals(sql.getSQLState()))
+                    throw new com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.Failure(
+                            com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.FailureCode.MAINTENANCE_BUSY);
+            }
+            throw new com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.Failure(
+                    com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.FailureCode.MAINTENANCE_INTERNAL_ERROR);
+        }
+    }
 
     private static final long ADMIN_GUARD_KEY = 0x434d5341444d494eL;
 

@@ -1,6 +1,6 @@
 # PP1a 本地 prod runtime 施工圖
 
-2026-10-09。**DOC_READY 候選：只有本文件PR完成獨立審查、必要CI並合併後生效；尚未實作。**
+2026-10-09。**基線DOC_READY已由PR324合併；本次loopback修訂只有文件PR獨立審查、必要CI並合併後才可實作。PP1a實作與本地驗收仍未完成。**
 來源main `6a01bd31ad36c60c69838e2a915953a80c9b6d23`。本波是[PP1六項總計畫](PP1.md)的第一個有界子波，不代表個人正式使用或整個BW6完成。
 
 ## 1 範圍
@@ -13,7 +13,7 @@ Owner已批准先在本地跑。先把真正API以prod啟動、三面dist透過�
 
 W5實作與BW6文件已合併。Node24.18.0、JDK25、Docker Engine、Compose、OpenSSL現有工具可用；測試不安裝app runtime dependency。所有操作於新`cms-pp1-local-<32 lowercase hex>` project；拒絕既有同名資源，不接既有DB/media。
 
-四origin固定為`https://{front,back,admin,api}.cms.test:8443`。TLS SAN恰四名；私有CA只放本run與拋棄browser容器。Compose只publish入口`127.0.0.1:8443:8443`；API內部8080、PostgreSQL內部5432。API資料卷與DB資料卷均為新project-owned named volumes。服務restart=no，避免本波維護時另有manager啟writer；自動restart在PP1d驗收。
+四origin固定為`https://{front,back,admin,api}.cms.test:8443`。TLS SAN恰四名；私有CA只放本run與拋棄browser容器。三個Compose服務都不publish host ports；主機上既有Node24的有界TCP forwarder只listen `127.0.0.1:8443`，轉送原始TLS至已核對owned ingress的web bridge IP:8443；API內部8080、PostgreSQL內部5432。兩個Docker網路保持internal，不授予入口outbound網路。API資料卷與DB資料卷均為新project-owned named volumes。服務restart=no，避免本波維護時另有manager啟writer；自動restart在PP1d驗收。
 
 本機已觀察Docker29.1.3、Compose5.6、Node24.18、JDK25.0.4.1。主機→新PG私有bridge可達、無PortBindings的可行性probe通過；容器NSSDB信任probe通過（不信任與錯名仍拒絕）。這些不是CMS產品測試。無權限或磁碟不足時保留原資料、停止該次執行，不清理其他資源。
 
@@ -34,6 +34,7 @@ W5實作與BW6文件已合併。Node24.18.0、JDK25、Docker Engine、Compose、
 | test `identity/maintenance/ProductionSeedSeparationTests.java` | 新增，prod/dev/舊actor回歸 | T03 |
 | test `content/service/ContentTypeSeedTests.java`；`services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/MemberPostgresTests.java` | 修改，已核對的ContentTypeSeed constructor callers注入dev-enabled policy | T04 |
 | `scripts/local/ingress.mjs`、`ingress.test.mjs` | 新增，固定四host static/API工具與node tests | T05/06/07 |
+| `scripts/local/forward.mjs`、`forward.test.mjs` | 新增，僅本機loopback的raw TLS轉送與有界tests | T09a/09b |
 | `scripts/local/prepare.mjs`、`prepare.test.mjs` | 新增，建立新私有run、秘密／TLS／config／compose env | T08/09 |
 | `compose.pp1-local.yaml` | 新增，完全獨立於dev compose | T09 |
 | `docker/pp1-api.Dockerfile` | 新增，以本機已建jar及既有JRE local reference建立本地測試image | T09 |
@@ -71,7 +72,7 @@ prod yaml補`cms.runtime.production-required: true`、site-domain=`${CMS_SITE_DO
 
 run root=`local/pp1/<runId>`，runId恰32lowerhex，新建wx/mkdir exclusive。prepare CLI：
 `node scripts/local/prepare.mjs --run-id <id> --api-image <image-id> --node-image <image-id> --postgres-image <image-id>`。
-每flag恰一次，image-id均`sha256:`加64hex且已存在本地Docker daemon，禁止pull。prepare對三個ID建立全新run-scoped本地reference `cms-pp1-local-<runId>-api:verified`、`-node:verified`、`-postgres:verified`；任何同名reference已存在即拒絕，不覆寫tag。使用固定argv `docker image tag <checked-id> <new-reference>`後inspect確認reference仍resolve至同ID；這些只新增本地引用，不是release tag、不推registry。Compose用reference且每service `pull_policy: never`；啟動與verify都比對container.Image完整ID等於receipt.images，不能只比tag。receipt另含imageRefs三個reference。所有命令用spawn/execFile固定argv、shell=false；Docker只接受本機socket，拒絕遠端DOCKER_HOST/context。compose executable由`CMS_DOCKER_COMPOSE`絕對路徑或`docker compose`選取，記實際版本；不改Docker_CONFIG／credentials／HOME。
+每flag恰一次，image-id均`sha256:`加64hex且已存在本地Docker daemon，禁止pull。prepare對三個ID建立全新run-scoped本地reference `cms-pp1-local-<runId>-api:verified`、`-node:verified`、`-postgres:verified`；任何同名reference已存在即拒絕，不覆寫tag。使用固定argv `docker image tag <checked-id> <new-reference>`後inspect確認reference仍resolve至同ID；這些只新增本地引用，不是release tag、不推registry。Compose用reference且每service `pull_policy: never`；啟動與verify都比對container.Image完整ID等於receipt.images，不能只比tag。receipt另含imageRefs三個reference。所有工具命令用spawn/execFile固定argv、shell=false；Docker只接受本機socket，拒絕遠端DOCKER_HOST/context。compose executable由`CMS_DOCKER_COMPOSE`絕對路徑或`docker compose`選取，記實際版本；不改Docker_CONFIG／credentials／HOME。
 
 prepare在寫檔前檢查repo根與三面dist存在、project沒有既有container/network/volume、8443未占用。檔案/祖先不准symlink；root0700、secret/key/config0600。已有run直接exit3，失敗留下private partial檔但不啟服務、不改既有資料。
 
@@ -85,7 +86,7 @@ TLS OpenSSL fixed argv產生RSA2048 CA+leaf，SHA256，days2，SAN精確四名�
 
 ### 5.1 ingress
 
-`loadConfig(path)`嚴格parse／檔案regular，`createIngress(config)`回`https.Server`；CLI=`node scripts/local/ingress.mjs --config /config/ingress.json`。listen0.0.0.0:8443僅容器內，Compose限制hostloopback。TLS至少1.2。Host須`<known-name>:8443`且TLS SNI與Host name一致；未知或錯配421。
+`loadConfig(path)`嚴格parse／檔案regular，`createIngress(config)`回`https.Server`；CLI=`node scripts/local/ingress.mjs --config /config/ingress.json`。listen0.0.0.0:8443僅容器內；主機forwarder固定loopback，Compose不publish。TLS至少1.2。Host須`<known-name>:8443`且TLS SNI與Host name一致；未知或錯配421。
 
 三靜態面GET/HEAD；其他405。先對rawpath去query後decode一次，拒絕decode錯誤400、NUL、backslash、任何`.`/`..`segment、symlink或逃出dist；拒絕400/403。只regularfile；`.html`text/html、`.js`text/javascript、`.css`text/css、`.json`application/json、`.svg`image/svg+xml、`.png`image/png、`.ico`image/x-icon、`.woff2`font/woff2，其餘application/octet-stream；加nosniff。missing asset或帶extension404；extensionless且Accept含text/html時才SPA index fallback。HEAD與GET同status/headers無body。HTML no-store，其餘public,max-age=3600。禁止directory listing；不掛media。
 
@@ -95,9 +96,9 @@ API host僅`/api/v1/`前綴與精確`/actuator/health`轉至固定upstream。其
 
 全新獨立`compose.pp1-local.yaml`；不能`-f compose.yaml -f ...`合併。services恰postgres/cms-api/ingress；兩個internal bridge`web`與`data`，postgres只data、API兩者、ingress只web且四DNSaliases。postgres image用已核對run-scoped reference（pull_policy: never），DBcms/usercms_local，POSTGRES_PASSWORD_FILE=/run/secrets/spring.datasource.password。API image用已核對run-scoped reference（pull_policy: never）、SPRING_PROFILES_ACTIVE=prod、required=true、site-domain/origins明示、JDBC=`jdbc:postgresql://postgres:5432/cms`、usernamecms_local、configtree=/run/secrets/，seedfalse/securetrue，media卷/data/media。只讀secret file掛載，不用envpassword；不log renderedsecret。postgres/API health沿既有pg_isready/curl；API依postgreshealthy，ingress依APIhealthy。
 
-ingress使用已驗證可執行host Node24.18 binary的既有Linux工具image（本機為既有Playwright工具image，不pull）；prepare要求process.version=v24.18.0，記process.execPath/sha256，唯讀掛至/opt/pp1-node，command固定/opt/pp1-node /tool/ingress.mjs；readonly掛script、config、leafcert/key及三dist。無docker socket、privileged或hostnetwork。三services restart=no；本波先設json-file max-size=10m/max-file=3限制測試產物，但正式輪替故障驗收留PP1d。Compose預期資源帶project label；所有命令帶`--project-name <receipt.project> --env-file <root>/compose.env -f compose.pp1-local.yaml`，CLI中沒有密碼。
+ingress使用已驗證可執行host Node24.18 binary的既有Linux工具image（本機為既有Playwright工具image，不pull）；prepare要求process.version=v24.18.0，記process.execPath/sha256，唯讀掛至/opt/pp1-node，command固定/opt/pp1-node /tool/ingress.mjs；readonly掛script、config、leafcert/key及三dist。無docker socket、privileged或hostnetwork。三services restart=no；本波先設json-file max-size=10m/max-file=3限制測試產物，但正式輪替故障驗收留PP1d。Compose預期資源帶project label；啟動／restart的Compose也必用命令層`env -u DOCKER_CONTEXT -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH DOCKER_HOST=unix:///var/run/docker.sock`，不可依賴CLI目前context；不改全機設定。所有命令帶`--project-name <receipt.project> --env-file <root>/compose.env -f compose.pp1-local.yaml`，CLI中沒有密碼。
 
-`docker/pp1-api.Dockerfile`只ARG BASE_IMAGE（既有含JRE25/curl的本地API image reference，build前後核對其完整ID，不pull）FROM它，WORKDIR/app，COPY services/cms-api/build/libs/*.jar /app/app.jar，EXPOSE8080與ENTRYPOINT java -jar。健康檢查不用假設新base含curl：沿現有API image有curl作BASE_IMAGE並確認JRE25。本波固定沿現有API runtime image為BASE_IMAGE（含JRE25/curl），覆蓋app.jar；不改base package或安裝curl。build後記新imageID、jarSHA與baseID。正式rebuild供應链與base更新留後續正式runtime規格，不能聲稱已封存正式release。
+`docker/pp1-api.Dockerfile`只ARG BASE_IMAGE（既有含JRE25/curl的本地API image完整sha256 ID，build前後核對其完整ID，不pull）FROM它，WORKDIR/app，COPY services/cms-api/build/libs/*.jar /app/app.jar，EXPOSE8080與ENTRYPOINT java -jar。健康檢查不用假設新base含curl：沿現有API image有curl作BASE_IMAGE並確認JRE25。本波固定沿現有API runtime image為BASE_IMAGE（含JRE25/curl），覆蓋app.jar；不改base package或安裝curl。Dockerfile用PP1_SOURCE_COMMIT／PP1_JAR_SHA256與唯一BASE_IMAGE參數寫org.cms.pp1.source-commit／jar-sha256／base-image labels；BASE_IMAGE必完整sha256 ID，同一值直接用於FROM與base-image label，沒有第二份base ID輸入；prepare要求source等於HEAD、jarSHA等於本工作樹唯一bootJar、base是本機Linuximage。receipt與artifacts保存apiBuild，verify比對labels且對owned API固定exec sha256sum /app/app.jar核對實際jar；ingressscript也記hash並核对。dirty=true仍明示未提交建置，不宣稱HEAD已包含dirty內容。build後記新imageID、jarSHA與baseID。正式rebuild供應链與base更新留後續正式runtime規格，不能聲稱已封存正式release。
 
 API正常Flyway migrate全新庫，再seed catalog/roles；無principal/permission/session/entry/media/navigation，允許catalog。bootstrap未做，匿名受限端點應拒絕且Admin可見登入畫面；不能靠demo登入驗收。PP1b fresh-init的raw identity freshness可接受catalog已存在；不得沿用早期「所有content catalog也空」的host草案限制來誤認衝突。
 
@@ -109,15 +110,19 @@ API正常Flyway migrate全新庫，再seed catalog/roles；無principal/permissi
 ./gradlew :services:cms-api:bootJar --no-daemon --no-parallel
 VITE_API_BASE=https://api.cms.test:8443 npm run build
 # 以現有含JRE25/curl API runtime image建立本次jar；不pull
-# docker build --pull=false --build-arg BASE_IMAGE=<verified-local-image-reference> -f docker/pp1-api.Dockerfile -t <owned-local-tag> .
+# 既有 .dockerignore 排除 **/build，使用只含 Dockerfile 與本次 bootJar 的最小 context：
+# set -o pipefail
+# tar -cf - docker/pp1-api.Dockerfile services/cms-api/build/libs/<matching-bootJar>.jar | docker --host unix:///var/run/docker.sock build --pull=false --build-arg BASE_IMAGE=<verified-full-local-image-id> --build-arg PP1_SOURCE_COMMIT=<source-head> --build-arg PP1_JAR_SHA256=<matching-jar-sha256> -f docker/pp1-api.Dockerfile -t <owned-local-tag> -
 node --test scripts/local/*.test.mjs
 # prepare CLI見§4.3，接著由root對owned project啟動
-# <compose> --project-name <project> --env-file <root>/compose.env -f compose.pp1-local.yaml up -d
+# env -u DOCKER_CONTEXT -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH DOCKER_HOST=unix:///var/run/docker.sock <compose> --project-name <project> --env-file <root>/compose.env -f compose.pp1-local.yaml up -d
+# 另一個前景terminal啟動，結束以SIGINT/SIGTERM；不建立全機daemon：
+# node scripts/local/forward.mjs --run-root <root>
 node scripts/local/verify.mjs --run-root <root>
 # browser驗收使用下文trusted及untrusted兩次Docker命令；不可直接在未隔離host執行npm script
 ```
 
-`verify.mjs`exports `verify(runRoot, deps)`、CLI只有--run-root。讀receipt核對projectlabel/imageIDs/network IDs/ports：DB/API PortBindings為空，ingress恰IPv4loopback8443；無unknownservice、extra mount或network，所有APIenv符合配置，秘密只mountpath。用owned PG固定psql SQL核對`cms_principal`/`cms_credential`/`cms_permission`/`cms_session`/`cms_entry`/`cms_media`/`cms_navigation_menu`各count(*)=0、`cms_content_type`=12、`cms_role`=5，`flyway_schema_history WHERE NOT success` count(*)=0，不以輸出空字串當0。驗health UP，secretcanary不出dockerlogs（只記boolean，失敗不輸出命中行）。receipt包含所有bool、source/image/dists、環境local-isolated；任何錯誤非零，不自動stop/delete。重啟API後再跑同驗證，資料／schema數不變。
+`verify.mjs`exports `verify(runRoot, deps)`、CLI只有--run-root。讀receipt核對projectlabel/imageIDs/network IDs/ports：DB/API/ingress PortBindings為空，三者皆無有效NetworkSettings.Ports；另外必由主機loopback8443以本run CA/SNI驗health成功；無unknownservice、extra mount或network，所有APIenv符合配置，秘密只mountpath。用owned PG固定psql SQL核對`cms_principal`/`cms_credential`/`cms_permission`/`cms_session`/`cms_entry`/`cms_media`/`cms_navigation_menu`各count(*)=0、`cms_content_type`=12、`cms_role`=5，`flyway_schema_history`總數10（8SQL＋JavaV7/V10），`WHERE NOT success` count(*)=0，不以輸出空字串當0。驗health UP，secretcanary不出dockerlogs（只記boolean，失敗不輸出命中行）。receipt包含所有bool、source/image/dists、環境local-isolated；任何錯誤非零，不自動stop/delete。重啟API後再跑同驗證，資料／schema數不變。
 
 browser config獨立，不import W5 globalSetup（其localhost/demo假設不適用）。workers1/retries0、trace/video off、忽略HTTPS=false。`CMS_PP1_RUN_ROOT`由runner/operator設定，只讀ownedreceipt，container內固定mount位置不暴露host秘密。browser連web network、以DockerDNS四aliases訪問；scopedcertutil導入CA後執行。無信任單獨context/process先驗ERR_CERT_AUTHORITY_INVALID；錯SAN以NodeTLS client明示ca但servername=wrong.cms.test必拒絕。正式browsercase三面shell/deeplink200且JS/CSS MIME正確、missing asset404、ApihealthUP、API請求origin精確且沒有localhost8080。前端可能因無資料／未登入顯示拒絕，屬預期；不得新建demo帳號消除該狀態。
 
@@ -127,7 +132,7 @@ Browser啟動契約：由root先verify讀出owned web network ID；`CMS_PP1_RUN_
 # NODE_BIN, BROWSER_IMAGE, WEB_NETWORK, RUN_ROOT, NSS_TOOLS, CHROMIUM_DIR已從私有盤點核對
 # PWD為本次component；未信任case用同一命令但移除certutil兩步且CMS_PP1_TLS_MODE=untrusted
 # trusted與untrusted必各執行一次，不以skip計成功。
-docker run --rm --network "$WEB_NETWORK" --shm-size 256m \
+docker --host unix:///var/run/docker.sock run --rm --network "$WEB_NETWORK" --shm-size 256m \
   --mount "type=bind,src=$NODE_BIN,dst=/opt/pp1-node,readonly" \
   --mount "type=bind,src=$PWD/node_modules,dst=/work/node_modules,readonly" \
   --mount "type=bind,src=$PWD/e2e-pp1-local,dst=/work/e2e-pp1-local,readonly" \
@@ -148,9 +153,21 @@ docker run --rm --network "$WEB_NETWORK" --shm-size 256m \
 
 本波不覆蓋登入cookie發放，但Nodeproxy fixture必驗Set-Cookie原值；真正Secure/HttpOnly/SameSite＋CSRF三面登入於PP1b執行。CORS真API：允許三origin OPTIONS回精確ACAO/credentials；未知origin不得回ACAO，直接受限Admin路徑無session回401/403（不可200）。無Origin公開health正常；不是用X-CMS-Surface偽裝。
 
+### 5.4 Docker internal network 的loopback修訂
+
+真Docker29.1.3實跑：容器只接internal network時，即使HostConfig.PortBindings宣告127.0.0.1:8443，NetworkSettings.Ports仍是null，主機連線ECONNREFUSED；ownedbridgeIP可連、scopedbrowser4/4成功。不能只檢查宣告或改掉internal安全邊界。修訂移除compose ports，使用既有Node stdlib在主機做有界rawTCP轉送，沒有新runtime dependency、hostnetwork、daemon/firewall/globaltrust改動。正式環境入口仍待獨立驗收。
+
+`forward.mjs` exports `resolveTarget(runRoot,deps)`、`createForwarder(target,deps)`；CLI只接受`--run-root <root>`。使用與prepare相同本機socket固定Docker argv，拒絕remote DOCKER_HOST/context，讀runroot0700、receipt0600regular/nlink1、祖先無symlink。receipt須local-isolated/PREPARED、project與runId嚴格匹配、nodeimage完整ID。固定inspect `<project>-ingress-1`；恰一runningcontainer、project/service=ingress labels、Image等於receipt.images.node，無任何有效publishedports、無privileged/hostnetwork，network恰`<project>_web`。inspect該network要求internal/projectlabel/name/ID一致；container IPv4為有效RFC1918地址，network.Containers內相同fullcontainerID的IPv4Address必一致。endpoint固定該IP:8443，無使用者hostname/port或任意command選項。錯誤只固定PP1_LOCAL_FORWARD_INPUT_INVALID／PP1_LOCAL_FORWARD_TARGET_INVALID，不輸出inspect或原始例外。
+
+`createForwarder`回net.Server；CLI恰listen127.0.0.1:8443。每accepted socket建立一次fixedtarget連線，雙向pipe保留TLSbytes/backpressure；不解TLS、不讀secret／CAkey、不重試。最多64同時連線、30秒idle timeout；任一端error/close/timeout銷毀配對端，upstream失效不崩server。SIGINT/SIGTERM關閉listener與activepairs後結束；啟動失敗只PP1_LOCAL_FORWARD_START_FAILED。只有固定listening/stopped狀態可輸出，不記流量。入口container被recreate/換IP時先停forwarder再重新resolve/啟動；不自動跟隨未知endpoint。API單獨restart不改ingress endpoint。
+
+測試deps允許fake command runner、connect與clock／timeout（非CLI；CLI固定30000ms），loopback測試可由test對回傳server.listen(0,127.0.0.1)取得臨時port；產品CLI不提供bind/port override。tests驗證陌生project/image/noninternal/多network/非RFC1918/remote socket/ symlink／ports宣告及實際published值全部拒絕；真loopbackecho binarybytes雙向與backpressure、upstream拒絕不重試/下一連線可用、clientabort/idle/兩端結束cleanup，秘密canary不log。
+
+verify需比對三containers HostConfig.PortBindings為空、NetworkSettings.Ports所有值null或空，並仍透過127.0.0.1:8443＋明示CA/servername=api.cms.test取得healthUP；不能以直連bridgeIP替代此acceptance。browser仍只連ownedwebnetwork，信任模式不變。驗收先forwarder→verify→兩browsermodes→同APIcontainerrestart→healthready→verify，停forwarder後loopback8443必不再可連。紀錄forwarderPID/實際fixedlisten、socketclosed與before/afterreceipt；本波不自動背景常駐。沒有能力監管主機process時留PARTIAL，不改外網隔離換綠燈。
+
 ## 6 任務卡
 
-依次T01→T02，T03→T04；T05→T06→T07；T08→T09；上述完成→T10→T11→T12。平行worker只有Java與Node disjoint paths；root整合Compose/真環境與全部檢查。每張含handwritten tests≤400行，超過即拆卡並更新文件，不壓缩程式湊額度。
+依次T01→T02，T03→T04；T05→T06→T07；T08→T09；T09→T09a→T09b；上述完成→T10→T11→T12。平行worker只有Java與Node disjoint paths；root整合Compose/真環境與全部檢查。每張含handwritten tests≤400行，超過即拆卡並更新文件，不壓缩程式湊額度。
 
 | 卡／大小 | 目標、輸入與步驟 | 完成條件／驗證 | ID |
 | --- | --- | --- | --- |
@@ -162,9 +179,11 @@ docker run --rm --network "$WEB_NETWORK" --shm-size 256m \
 | PP1a-T06 M250 | static/SNI/Host/path/MIME/fallback/HEAD，依§5.1 | 同命令static subset綠 | AC01/FM03/04 |
 | PP1a-T07 M250 | fixedupstream/body/header/timeout/no retry，依T06 | ingress全部綠，secretcanary無log | AC01/FM05 |
 | PP1a-T08 M280 | prepare tests＋scaffold，舊run/resource/symlink/flag/image/private/TLSfail Red，fakecommands不冒充Docker驗收 | `node --test scripts/local/prepare.test.mjs`行為Red | AC01/FM06 |
-| PP1a-T09 M380 | prepare/TLS/receipt/standalone compose/Dockerfile，依T08，建立新owned實例 | 同T08全綠；compose config解析並驗ports，秘密不輸出 | AC01/FM06 |
+| PP1a-T09 M380 | prepare/TLS/receipt/standalone compose/Dockerfile，依T08，建立新owned實例 | 同T08全綠；compose config解析且三services皆無ports映射，秘密不輸出 | AC01/FM06 |
+| PP1a-T09a M250 | 依§5.4新增forward tests與importable scaffold；owned endpoint／loopback／socket lifecycle的Red | `node --test scripts/local/forward.test.mjs`行為Red，非importerror | AC01/FM06/07 |
+| PP1a-T09b M230 | 實作fixedlocal Docker endpoint lookup及rawTLS relay，不新增依賴或外網 | 同T09a全綠，真loopback TLS health通過；verify必驗所有containers實際零publishedports | AC01/FM06/07 |
 | PP1a-T10 M320 | verify tests＋scaffold＋browsercases，wrongports/seedleak/image差異/health故障Red | `node --test scripts/local/verify.test.mjs`行為Red；`npx playwright test --config playwright.pp1-local.config.ts --list`可列 | AC01/02/FM07 |
-| PP1a-T11 M350 | verify實作/套件scripts、真prod Compose與scoped browser、restart後回讀 | §5.3真命令與browser全綠，DB/API零ports、demo rows0 | AC01/02/FM07 |
+| PP1a-T11 M350 | verify實作/套件scripts、真prod Compose與scoped browser、restart後回讀 | §5.3/5.4真命令與browser全綠，三container零publishedports且hostloopback TLS可連、demo rows0 | AC01/02/FM07 |
 | PP1a-T12 S120 | 全diff/文件/原生gates/独立review/PR/CI/main回讀 | §9全滿足；無formal claim | 全scope |
 
 ## 7 測試規格
@@ -177,8 +196,9 @@ docker run --rm --network "$WEB_NETWORK" --shm-size 256m \
 | ingress.test.mjs `PP1aFM04_staticIsolation` | 每面index唯一canary、assets存在/缺失、deepAcceptHTML、nonHTML無fallback、HEAD/POST、encoded traversal/symlink/其他面/媒體path，不可讀出secretcanary。 |
 | ingress.test.mjs `PP1aFM05_proxyPreservesAuth` | fakeAPI回原SetCookie，收Authorization/Content-Type/X-CMS-Surface/X-Request-Id/Origin/Cookie/CSRF及binarybody；精確相等、hopheader不傳、502/504、write只一次、斷線與alreadyheaders不崩server；不記secret。 |
 | prepare.test.mjs `PP1aFM06_ownedFreshPrivateInputs` | tempdirs/fakeDocker；flags/既有project/image缺/非本機daemon/unsafe paths/TLSfail；零啟服務、秘密模式、receipt不含secret、拒絕symlink與舊run。 |
+| forward.test.mjs `PP1aFM06_loopbackOnlyOwnedTarget` | node:test，fakeDocker＋loopbackTCP；§5.4列出的ownedtarget負例與bytes/lifecycle驗證，不碰真Docker。 |
 | verify.test.mjs `PP1aFM07_denyFalseRuntimeSuccess` | fake固定inspect/SQL/health；逐一wrongport/image/label/network/seedrow/sqlerror/emptyoutput/secretlog拒絕，不刪卷。 |
-| runtime.spec.ts `PP1aFM07_realProdRuntime` | 真ownedPG/API/dist，TLS有效，三面shell/deeplink/asset、四origin/CORS、health、未認證拒絕、restart後readonlyverify；error console與pageerror需零非預期，無login主張。 |
+| runtime.spec.ts `PP1aFM07_realProdRuntime` | 真ownedPG/API/dist，TLS有效，三面shell/deeplink/asset、四origin/CORS、health、未認證拒絕、restart後readonlyverify；Front登入頁本身不送API，另開既有/album列表驗builtclient；新庫預期401/403及既有未提供favicon.ico的404列為精確已知例外（不忽略其他asset錯誤）；error console與pageerror需零非預期，無login主張。 |
 
 測試fixture密碼只random/private temporary；Nodepuretest不需Docker，真runtime在root有界local驗證單独執行，不塞進npm test。Browser定位role/name或data-testid；既有login表單依現行copy讀測試，不能新增產品copy。
 
@@ -192,14 +212,14 @@ docker run --rm --network "$WEB_NETWORK" --shm-size 256m \
 | PP1a-FM04 | path/面别/媒體/缺asset→400/403/404，不讀secret，不以HTML掩飾asset404 | ingress/T05/06 |
 | PP1a-FM05 | proxy下游失效→502/504，無重試；未登入/錯origin仍拒絕 | ingress/T05/07及runtime/T11 |
 | PP1a-FM06 | 非新project/secretpermissions/工具不在本機→prepare拒絕，不動舊資料 | prepare/T08/09 |
-| PP1a-FM07 | DBports/seedleak/health/database失敗/重啟資料變動→驗收失敗留卷 | verify/runtime/T10/11 |
+| PP1a-FM07 | 任一container publishedports／主機loopback TLS失敗／seedleak／health／database失敗／重啟資料變動→驗收失敗留卷 | verify/runtime/T10/11 |
 
 版本衝突、purge確認與SELF權限屬PP1b既有Q25契約，PP1a未新增寫入API所以不重做其FM；不可因此把BW6安全斷言刪掉。
 
 ## 9 交付檢查表
 
 - [ ] 文件逐卡獨立review及五卡walk、relative links/diff/OAS既有契約不變；文件PR必要CI合併才DOC_READY。
-- [ ] T01～12實作、Red/Green證據、無秘密、source/built artifact tuple可回讀。
+- [ ] T01～12及T09a/09b實作、Red/Green證據、無秘密、source/built artifact tuple可回讀。
 - [ ] `./gradlew test --no-daemon --no-parallel`、`./gradlew integrationTest --no-daemon --no-parallel`。
 - [ ] `npm test`、`npm run lint`、`npm run typecheck`、`npm run build`、`npm run test:bundle`、`npm run measure:bundle`。
 - [ ] 既有CI tooling tests、e2e lint/types、`npm run e2e:mock`、quality必要CI照既有workflow；新增`npx eslint e2e-pp1-local playwright.pp1-local.config.ts`與同既有flags的tsc。

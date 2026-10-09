@@ -152,7 +152,7 @@ RPO24h／RTO4h、每日停寫與每日7＋每週4份保留已批准；維護時�
 
 ## 6 任務依賴與待封板工作卡
 
-最新可施工邊界依[PP1a](PP1a.md)：runtime與no-demo 12卡，只有其文件PR合併後DOC_READY。PP1b接帳號/Q25及本地maintenanceguard（包括已驗證可連的PGbridge）；PP1c接一致備份/空白還原；PP1d接升級故障/排程/維運/完整旅程。各波≤30卡，後續精確卡片仍DRAFT，下一波先細化再施工。原24張候選與新adapter工作量超過30，不壓成單波；以下總體工作組是依賴圖，不是首波白名單。
+最新可施工邊界依[PP1a](PP1a.md)：runtime與no-demo 14卡（含loopback修訂T09a/09b），只有其文件PR合併後DOC_READY。PP1b接帳號/Q25及本地maintenanceguard（包括已驗證可連的PGbridge）；PP1c接一致備份/空白還原；PP1d接升級故障/排程/維運/完整旅程。各波≤30卡，後續精確卡片仍DRAFT，下一波先細化再施工。原24張候選與新adapter工作量超過30，不壓成單波；以下總體工作組是依賴圖，不是首波白名單。
 
 
 施工順序嚴格為 runtime → accounts/Q25 → backup/restore → upgrade recovery → operations → formal-settings acceptance。文件／純測試設計可並行；共享source writer依序整合。下列是**工作拆分草案**，不是可領取實作卡；精確逐檔白名單、方法簽名／CLI參數、fixtures與S/M行數仍須依owner環境答案補齊。未封板卡不得派給worker實作。

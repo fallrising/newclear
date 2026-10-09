@@ -104,3 +104,7 @@ SET 的配對 CPU 變化為 −7.73%、+0.96%、−0.31%、+2.14%，並非一致
 原版 7,299 samples、新版 6,257 samples，均無 lost samples。kernel symbols 受限，部分 userspace addresses 未解析，frame-pointer callchain 也不足以可靠歸因；上表只能描述已命名方法的 self sample 比例，不能證明完整跨 worker 成本下降多少。`try_harvest` 的一部分成本移至 `LocalReply::try_recv`，不可只看它自身的下降。
 
 本次採樣沒有把空 `flush` 掃描辨識為主要熱點，因此未據此加入額外 pending flag 或改變 flush／drain 配額。批次化架構與 CPU／延遲改善已有證據；吞吐與原私網的驗收缺口仍須正面處理。
+
+## 本輪續作規程
+
+測試資源可替換，後續以已記錄規格的替代fixture進行驗收；不再以尋回原測試機為前提。新的完整32項交錯矩陣依[先行規程](benchmark-reproducibility.md)執行，維持吞吐與CPU效率標準。前述資料與限制保留為歷史；新結果將獨立發布。

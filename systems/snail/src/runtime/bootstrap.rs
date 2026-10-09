@@ -6,7 +6,7 @@ use tokio::sync::{broadcast, mpsc};
 
 use crate::config::Config;
 use crate::error::ServerError;
-use crate::runtime::router::{ShardClient, ShardMap};
+use crate::runtime::router::{ShardMap, ShardTransport};
 use crate::runtime::shutdown::ShutdownHandle;
 use crate::runtime::worker;
 use crate::telemetry::ServerInfo;
@@ -29,7 +29,7 @@ pub async fn start(config: Arc<Config>) -> Result<ShutdownHandle, ServerError> {
     }
 
     let senders_arc = Arc::new(senders);
-    let shard_client = ShardClient::new(senders_arc, shard_map.clone());
+    let shard_client = ShardTransport::new(senders_arc, shard_map.clone());
 
     let mut workers = Vec::new();
     for worker_id in 0..config.workers {
@@ -52,6 +52,7 @@ pub async fn start(config: Arc<Config>) -> Result<ShutdownHandle, ServerError> {
     Ok(ShutdownHandle {
         workers,
         shutdown_tx,
+        shard_transport: shard_client,
         conn_count,
         deadline_secs: config.shutdown_deadline_secs,
     })

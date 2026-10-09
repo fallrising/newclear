@@ -22,7 +22,7 @@ use crate::net::outbuf::OutBuf;
 use crate::protocol::encoder;
 use crate::protocol::frame::Reply;
 use crate::protocol::parser::Parser;
-use crate::runtime::router::{ShardClient, ShardMap};
+use crate::runtime::router::{ReplyReceiver, ShardClient, ShardMap};
 use crate::storage::shard::Shard;
 use crate::telemetry::ServerInfo;
 
@@ -41,7 +41,7 @@ pub struct ConnContext {
 
 struct ReplySlot {
     ready: Option<Reply>,
-    pending: Option<oneshot::Receiver<Reply>>,
+    pending: Option<ReplyReceiver>,
 }
 
 enum ConnState {
@@ -71,7 +71,7 @@ pub struct Connection {
     /// Last registered mio interest (for reregister elision).
     registered: Interest,
     pub token: Token,
-    /// Cached: any ReplySlot waiting on a oneshot (cross-shard).
+    /// Cached: any ReplySlot waiting on a local reply slot or helper task.
     async_wait: bool,
     /// In reactor's async_waiters list (avoid duplicate entries).
     pub in_async_list: bool,
@@ -82,12 +82,7 @@ pub struct Connection {
 }
 
 impl Connection {
-    pub fn new(
-        stream: TcpStream,
-        ctx: ConnContext,
-        pool: Rc<BufferPool>,
-        token: Token,
-    ) -> Self {
+    pub fn new(stream: TcpStream, ctx: ConnContext, pool: Rc<BufferPool>, token: Token) -> Self {
         let _ = stream.set_nodelay(true);
         let dispatcher = Dispatcher {
             worker_id: ctx.worker_id,
@@ -377,7 +372,7 @@ impl Connection {
         DriveResult::Pending
     }
 
-    /// Opportunistically poll pending oneshots (cross-shard replies).
+    /// Opportunistically poll pending local reply slots.
     pub fn poll_async(&mut self) -> bool {
         self.try_harvest()
     }
@@ -425,7 +420,7 @@ impl Connection {
         self.out_buf.flush_to(&mut self.stream)
     }
 
-    /// Ok(true) = read data, Ok(false) = EOF.
+    /// Ok(true) = connection remains open (including WouldBlock), Ok(false) = EOF.
     fn try_read(&mut self, shards: &mut [Shard]) -> io::Result<bool> {
         if self.read_buf.capacity() == 0 {
             self.read_buf = self.pool.get(self.ctx.config.read_buf_init);
@@ -465,7 +460,9 @@ impl Connection {
         }
 
         self.maybe_return_read_buf();
-        Ok(read_any)
+        // Readiness may be spurious: WouldBlock before reading any bytes is
+        // still an open connection. Only the zero-byte read above signals EOF.
+        Ok(true)
     }
 
     fn maybe_return_read_buf(&mut self) {
@@ -512,7 +509,7 @@ impl Connection {
     }
 
     #[inline]
-    fn push_async(&mut self, rx: oneshot::Receiver<Reply>) {
+    fn push_async(&mut self, rx: ReplyReceiver) {
         self.pending.push_back(ReplySlot {
             ready: None,
             pending: Some(rx),
@@ -540,7 +537,10 @@ impl Connection {
                 }
             }
 
-            match self.parser.next_frame(&mut self.read_buf, &self.ctx.config)? {
+            match self
+                .parser
+                .next_frame(&mut self.read_buf, &self.ctx.config)?
+            {
                 Some(frame) => {
                     let cmd = match parse(&frame) {
                         Ok(c) => c,
@@ -567,13 +567,7 @@ impl Connection {
     }
 
     #[inline]
-    fn apply_hot_get(
-        &mut self,
-        key: Bytes,
-        shards: &mut [Shard],
-        now: u64,
-        single_shard: bool,
-    ) {
+    fn apply_hot_get(&mut self, key: Bytes, shards: &mut [Shard], now: u64, single_shard: bool) {
         if single_shard {
             let reply = string::apply_get(&mut shards[0], &key, now);
             self.encode_hot(&reply);
@@ -582,11 +576,10 @@ impl Connection {
         let shard_id = self.ctx.shard_map.shard_of(&key);
         if self.ctx.shard_map.owner_of(shard_id) != self.ctx.worker_id {
             self.dispatcher.now_ms = now;
-            match self.dispatcher.dispatch_on(
-                Command::Get(key),
-                shards,
-                self.ctx.local_shard_base,
-            ) {
+            match self
+                .dispatcher
+                .dispatch_on(Command::Get(key), shards, self.ctx.local_shard_base)
+            {
                 crate::command::dispatcher::DispatchResult::Immediate(r) => {
                     self.encode_hot(&r);
                 }
@@ -613,14 +606,7 @@ impl Connection {
     ) {
         let opts = SetOptions::default();
         if single_shard {
-            let reply = string::apply_set(
-                &mut shards[0],
-                key,
-                val,
-                opts,
-                now,
-                &self.ctx.config,
-            );
+            let reply = string::apply_set(&mut shards[0], key, val, opts, now, &self.ctx.config);
             self.encode_hot(&reply);
             return;
         }
@@ -643,14 +629,7 @@ impl Connection {
         }
         let idx = shard_id.saturating_sub(self.ctx.local_shard_base);
         let idx = idx.min(shards.len().saturating_sub(1));
-        let reply = string::apply_set(
-            &mut shards[idx],
-            key,
-            val,
-            opts,
-            now,
-            &self.ctx.config,
-        );
+        let reply = string::apply_set(&mut shards[idx], key, val, opts, now, &self.ctx.config);
         self.encode_hot(&reply);
     }
 
@@ -707,14 +686,8 @@ impl Connection {
             }
             Command::Set(k, v, opts) if opts == SetOptions::default() => {
                 if single_shard {
-                    let reply = string::apply_set(
-                        &mut shards[0],
-                        k,
-                        v,
-                        opts,
-                        now,
-                        &self.ctx.config,
-                    );
+                    let reply =
+                        string::apply_set(&mut shards[0], k, v, opts, now, &self.ctx.config);
                     if self.pending.is_empty() {
                         self.encode_hot(&reply);
                         return None;
@@ -738,14 +711,7 @@ impl Connection {
                 }
                 let idx = shard_id.saturating_sub(self.ctx.local_shard_base);
                 let idx = idx.min(shards.len().saturating_sub(1));
-                let reply = string::apply_set(
-                    &mut shards[idx],
-                    k,
-                    v,
-                    opts,
-                    now,
-                    &self.ctx.config,
-                );
+                let reply = string::apply_set(&mut shards[idx], k, v, opts, now, &self.ctx.config);
                 if self.pending.is_empty() {
                     self.encode_hot(&reply);
                     None
@@ -912,7 +878,7 @@ fn try_parse_hot_get_set(buf: &mut BytesMut) -> HotParse {
     let _ = buf.split_to(key_start);
     let key = buf.split_to(key_len).freeze();
     buf.advance(2); // key CRLF
-    // Now buf starts at '$' of value
+                    // Now buf starts at '$' of value
     let val_hdr_total = 1 + val_hdr; // '$' + len line
     let _ = buf.split_to(val_hdr_total);
     let val = buf.split_to(val_len).freeze();
@@ -945,4 +911,54 @@ fn parse_len_line(buf: &[u8]) -> Option<(usize, usize)> {
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::runtime::router::ShardTransport;
+
+    #[test]
+    fn spurious_readability_keeps_healthy_connection_open() {
+        let listener = std::net::TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        // Keep the peer open without sending bytes: readable is a spurious hint.
+        let _peer = std::net::TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (stream, _) = listener.accept().unwrap();
+        stream.set_nonblocking(true).unwrap();
+
+        let config = Rc::new(Config {
+            workers: 1,
+            shards: 1,
+            ..Config::default()
+        });
+        let conn_count = Arc::new(AtomicUsize::new(1));
+        let info = Rc::new(ServerInfo::new(&config, conn_count.clone()));
+        let shards = Rc::new(RefCell::new(vec![Shard::new(0, 1, info.shard_stats(0))]));
+        let shard_map = Arc::new(ShardMap::new(1, 1, 1));
+        let (sender, _inbox) = tokio::sync::mpsc::unbounded_channel();
+        let ctx = ConnContext {
+            worker_id: 0,
+            config,
+            shard_map: shard_map.clone(),
+            shard_client: ShardTransport::new(Arc::new(vec![sender]), shard_map).local(0),
+            local_shards: shards.clone(),
+            local_shard_base: 0,
+            info,
+            conn_count,
+            now_ms: Rc::new(RefCell::new(0)),
+        };
+        let mut conn = Connection::new(
+            TcpStream::from_std(stream),
+            ctx,
+            Rc::new(BufferPool::default()),
+            Token(2),
+        );
+        assert!(
+            matches!(
+                conn.drive(true, false, shards.borrow_mut().as_mut_slice(), false),
+                DriveResult::Pending
+            ),
+            "WouldBlock without any bytes is not EOF"
+        );
+    }
 }

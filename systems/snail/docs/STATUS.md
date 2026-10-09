@@ -1,6 +1,8 @@
 # rudis 開發狀態
 
-> 最後更新：2026-07-30
+> 最後更新：2026-10-09
+
+本輪限定跨 worker 傳遞的批次化與必要回歸修正。M2/M3 的容量實驗仍保留歷史狀態，未在本輪重新驗收。
 
 ## 里程碑進度
 
@@ -11,7 +13,28 @@
 | **M2 承壓層** | 🟡 進行中 | **C100K hold PASS**；單機峰值抬升 |
 | **M3 極限** | 🟡 進行中 | completion io_uring；C1M 腳本待實跑 |
 
-## C10K（預設 mio）
+## 跨 worker 批次化（2026-10-09）
+
+- 請求／回覆按 worker 分批；每個 message 至多 256 項，每次 inbox drain 至多 16 個 message。key 熱路徑使用 origin 本地 generational reply slot；多 key helper 的最終本地結果仍使用 oneshot。
+- 修正 mio 的 spurious readability：沒有讀到資料的 WouldBlock 不代表 EOF。關閉 broadcast 會喚醒 reactor；io_uring 在下一次等待前檢查關閉完成。
+- `cargo test --locked --release`：mio **44 passed**；實際 io_uring **44 passed**，無 fallback，包含 overload、FIFO、斷線後重連與空閒 multi-key helper 進度。新增 socket 回歸在 mio 連跑 20 輪，**80 passed**。
+- 完整前後數據、方法與環境限制見 [跨 worker 量測](benchmark-cross-shard.md)。原 4 vCPU 私網環境尚未重跑，效能驗收未完成。
+
+## 舊多 worker 基準的更正
+
+[PR #303](https://github.com/fallrising/newclear/pull/303) 已更正早期比較：Tailscale 的 userspace WireGuard 在兩端約各消耗 180% CPU，可能先限制網路／client；未使用 `-r` 的 redis-benchmark 只測一個 key，會集中到一個 shard。兩種結果都不能用來判斷隨機 key 的多 worker 效率。
+
+2026-10-06 改用私網、隨機 1M keys、client 4 threads、每項 10M requests、各兩輪的歷史數據如下；它與本輪替代主機的絕對吞吐不可直接比較。
+
+| workers | c50 SET / GET（M req/s） | c500 SET / GET（M req/s） | server CPU |
+|---|---|---|---|
+| 1 | 1.05 / 1.14 | 1.05 / 1.08 | 約 100% |
+| 2 | 0.85 / 0.90 | 0.96 / 0.99 | 未記錄 |
+| 4 | 0.87 / 0.98 | 1.12 / 1.17 | 約 360% |
+
+該次 perf 為 `send_to` 8.8%、`try_harvest` 8.4%，加上 oneshot／mpsc 操作；這是批次化的起因，不是新版的量測結果。
+
+## 歷史 C10K（2026-07-30，預設 mio）
 
 | 閘道 | 結果 |
 |---|---|
@@ -21,7 +44,7 @@
 | Peak 64×P32 | 資訊；**~2.08M req/s** |
 | Stress 10K×P16 | 資訊；**~0.36–0.45M req/s** |
 
-## `RUDIS_IO_URING=1`
+## 歷史 `RUDIS_IO_URING=1`（2026-07-30）
 
 - AcceptMulti + eventfd + always-in-flight Recv/Send；ring 32K
 - Send 期間可並行 Recv（out_buf freeze segs）
@@ -29,13 +52,12 @@
 - Peak 與 mio 持平：256×P16 ~1.17M；**64×P32 ~2.08M**
 - 10K×P16：~0.45M（優於同輪 mio）；尚未達 ~2M@10K / p99&lt;5ms
 
-## 本輪峰值優化
+## 歷史峰值優化（2026-07-30）
 
 - 單 shard 熱路徑跳過 key hash / owner 查詢
 - process_input 一次取 now；uring Recv∥Send + CQ burst drain
 
-## 下一步（告一段落後）
+## 待驗證
 
-1. 抬 10K 全活躍吞吐與 p99（provided buffers / 更省 per-conn 開銷）
-2. 實跑並壓穩 C1M hold
-3. 無鎖 cross-shard；多 w gate 噪音
+1. 在原 4 vCPU 私網環境重跑隨機 key 前後比較，依吞吐與 CPU/request 決定 workers 預設值。
+2. C10K 全活躍吞吐／p99 與 C1M hold 保留為未完成的歷史實驗；本輪未重跑，也未據此宣稱通過。

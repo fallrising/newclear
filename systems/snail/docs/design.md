@@ -41,12 +41,25 @@
 ### 併發模型：thread-per-core share-nothing（方案 B）
 
 - 每個 Shard 被恰好一個 worker 獨占，**零鎖**
-- 本地命令走 fast path；跨 shard 走 MPSC + oneshot
+- 本地命令走 fast path；跨 shard 按目標 worker 批次送出，回覆按 origin worker 批次返回
 - 每 worker 一個 tokio current-thread runtime
 
 ### 傳輸：RESP2 over 裸 TCP（非 HTTP）
 
 相容 redis-cli 生態；天然支持 pipeline。
+
+### 跨 worker 批次協定
+
+Bootstrap 只在線程間傳遞 `ShardTransport`（Send + Sync）；各 worker 在自己的線程建立 `ShardClient`。同一 worker 的連線與多 key helper 共享本地請求／回覆緩衝區。
+
+- 請求依 destination worker 分組；回覆依 origin worker 分組。每個 channel message 最多 256 項，每次 inbox drain 最多讀取 16 個 message，之後讓 socket 工作繼續。滿批即送，未滿批在每輪 reactor 與任何阻塞等待前送出。
+- key 命令的請求攜帶 origin 本地 reply slot ID（index + generation），不建立逐請求的跨線程 oneshot。owner 同步 apply 後回傳 ID + Reply；origin 將結果填入本地 slot，連線依既有 FIFO queue 編碼。
+- receiver 完成或丟棄時回收 slot，generation 遞增；延遲到達的舊回覆不會填入新連線／請求的 slot。generation 溢位時停用該 slot。丟棄 receiver 不取消已接受的寫入。
+- 多 key helper 的每次遠端 await 使用同一種本地 slot Future；只有 helper 的最終本地結果保留 oneshot。reactor yield 後先送出 helper 新產生的請求，再等待 I/O。跨 shard 多 key 操作仍不提供全局原子性。
+- 清除 wake flag 後才 drain inbox，避免 enqueue 與清旗標互相錯過；若 drain 用完配額，自行重新喚醒以繼續處理剩餘 message。worker exit 的 Closed message 排在其已送出的回覆後，origin 對尚未完成的 slot 回報 shard unavailable。
+- 關閉 broadcast 另行喚醒所有已註冊 reactor，不受 inbox wake flag 合併限制。io_uring 在進入下一次 completion wait 前檢查連線是否已清空，避免消耗關閉 wake 後再次睡眠。
+
+MPSC 仍不設總佇列容量；批次上限控制 message 大小與每次 drain 工作量，並非記憶體配額。連線在 `pipeline_cap`／output buffer 背壓下暫停新的 socket read，已讀入的一批 frames 不受嚴格的逐 frame cap；這個 admission 行為延續既有實作。
 
 ## 設計不變量（Invariants）
 

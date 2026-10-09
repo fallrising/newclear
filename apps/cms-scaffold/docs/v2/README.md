@@ -72,7 +72,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | BW4 | VERIFIED（PR #258） | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | VERIFIED（PR #267） | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 | BW6 | DOC_READY（本波文件PR合併生效） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW6.md](waves/BW6.md) | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
-| PP1a | DOC_READY（本波文件PR合併生效） | [個人使用驗收](03-personal-use-readiness.md) | [waves/PP1a.md](waves/PP1a.md) | 本地prod／HTTPS／靜態工具／DB不對外／no-demo；非正式環境可用 |
+| PP1a | 本地驗收通過，待本實作PR交付gate | [個人使用驗收](03-personal-use-readiness.md) | [waves/PP1a.md](waves/PP1a.md) | 本地prod／HTTPS／靜態工具／DB不對外／no-demo；非正式環境可用 |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
 本地交付另用 `LOCAL_VERIFIED`：整合檢查已通過，但未提交／合併，不能等同正式 `VERIFIED`。
@@ -120,4 +120,4 @@ Owner指定先完成正式運行、正式帳號／Q25、DB＋媒體一致備份�
 
 2026-10-09 owner接受PP1建議預設：全新庫／無demo帳號內容、獨立日常帳號、四個同site HTTPS origin、RPO24h／RTO4h、每日停寫備份與每日7＋每週4份保留。同日owner追加「先在本地跑」，本地隔離環境成為先行實作與驗收目標；正式主機／URL／真正離機位置／通知管道留在正式環境門檻，不再阻擋本地子波。各子波分別完成施工圖、審查、必要CI與合併後才實作；[owner操作分工](contracts/PP1-owner-operations.md)。PP1整體尚未完成，未部署。
 
-本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，14張S/M卡（含loopback修訂T09a/09b，修訂文件PR合併生效）；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。
+本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，14張S/M卡（文件PR #324／#326已合併；實作與本地驗收完成，待實作PR審查／必要CI／合併回讀才VERIFIED local scope）；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。

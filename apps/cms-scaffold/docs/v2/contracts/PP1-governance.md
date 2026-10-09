@@ -6,6 +6,8 @@
 
 權威仍為[BW6 identity](BW6-identity.md) §3.3/3.4/4/7 R25-A/B/P；Java public signatures、constructor相容橋接、denial白名單、transaction順序、locked nonself service fixture全部沿用。原BW6-T17～19可抽取Q25，**不依賴T13/14的Q23投影**。PrincipalGovernanceApiTests只加Q25 cases，不加入roles/lastLoginAt列表要求。
 
+SELF降權的「目前有admin」不可在共同鎖外先讀。Q02依B06/B07完成的IdentityStore.maintenanceTransaction：輸入驗證後，denial helper包住整個attempt；attempt先取得既有ADMIN_GUARD_KEY／memory adminGuard，再讀roles、判SELF、replacement及successaudit，同一DS交易。SELF先於last-admin檢查，denial在attempt交易退出後獨立寫入。沿用既有primitive，不新增store介面；unit受控交錯與Q05實際PostgreSQL latch測試證明等待鎖期間新增admin仍會SELF403、零角色/session mutation且恰一denial。
+
 [PP1.openapi.yaml](PP1.openapi.yaml)以基準runtime全檔為底，52 paths／原operations全部保留；只加入PurgeEntryRequest、三個ErrorCode、purge POST契約以及三個SELF operation描述。PatchPrincipalRequest.email與Principal/CreatedPrincipal schema完全不變，沒有Q24/Q23。所有4xx/5xx沿既有原生契約使用共用Error<status>引用，包括purge400的Error400；確認錯誤code與範例在主施工圖§4.2。三個ErrorCode枚舉在Q02即同步，其他OAS增量留Q04。以x-pp1-source-sha256核對基準，實作時移除此extension；若runtime已前進，逐項保留增量，不盲目覆蓋。根validator須逐物件比對其餘operation/schema與來源相等。
 
 client新增 `export type PurgeEntryRequest = S["PurgeEntryRequest"]`，`purgeEntry(id: string, body?: PurgeEntryRequest): Promise<void>`；只送caller給的body。missing body保留讓server400；不能client自動填DELETE或id。

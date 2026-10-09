@@ -123,4 +123,4 @@ Owner指定先完成正式運行、正式帳號／Q25、DB＋媒體一致備份�
 
 本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，14張S/M卡（文件PR #324／#326已合併；實作 PR #327 已合併，必要 PR／main CI與本地驗收通過，VERIFIED local scope）；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。
 
-下一子波[PP1b施工圖](waves/PP1b.md)細化本地帳號初始化、受控維護與Q25最小介面，30張有界卡。獨立文件審查已通過，必要CI及本文件PR正常合併後DOC_READY生效；不是產品完成。管理員恢復核心與缺備份拒絕可先驗，真host恢復成功必須等PP1c匹配的DB＋media完整備份驗證，沒有mini-backup捷徑。
+下一子波[PP1b施工圖](waves/PP1b.md)細化本地帳號初始化、受控維護與Q25最小介面，父里程碑31張有界卡，分為帳號／維護19卡與治理／旅程／交付12卡兩子波，各≤30。獨立文件審查已通過，必要CI及本文件PR正常合併後DOC_READY生效；不是產品完成。管理員恢復核心與缺備份拒絕可先驗，真host恢復成功必須等PP1c匹配的DB＋media完整備份驗證，沒有mini-backup捷徑。

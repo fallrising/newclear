@@ -6,6 +6,8 @@ These numbers describe this design on this hardware. They are not a target, and 
 
 The same matrix on a second environment with slower fsync is in [m7-environment-b](m7-environment-b.md).
 
+These numbers predate [ADR-013](../adr/013-fsync-on-the-partition-actor.md) option 1, which cut single-record batches from five syncs to about 3.5 ([before/after](adr-013-index-rewrite.md)).
+
 Reproduce: `make bench` (local loopback brokers), or `make bench BENCH_ARGS="--ssh-hosts a,b,c --ssh-ips x,y,z --ssh-command '…'"` for three hosts; `go run ./cmd/mkfkbench --summarize <results.json>` re-renders this table.
 
 Commit `12aa275`, go1.27.1, three hosts on a private network, one broker each; the client runs on the node-3 host. Warm-up 10s, measured 1m0s, 3 repeats; medians shown.

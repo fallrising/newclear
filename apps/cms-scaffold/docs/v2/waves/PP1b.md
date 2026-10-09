@@ -122,7 +122,7 @@ success Result例（合成ID，不含profile/password/hash）：
 
 PurgeBody Java record兩String無@NotBlank；required=false；unknownkey忽略；confirmation onlyJSON，不接headers。no/{}body/missingkey/wrongword/target→CONFIRMATION_REQUIRED400；word必须rawDELETE、confirmId为canonicalUUID或targetnonemptyslug exact。malformedJSON/pathUUID400 VALIDATION_FAILED、nonJSON415 MEDIA_TYPE_NOT_SUPPORTED，target404 ENTRY_NOT_FOUND；CSRFfilter403 CSRF_FAILED仍先於service，均非businessdenialaudit。合法body例`{"confirmPhrase":"DELETE","confirmId":"10000000-0000-0000-0000-000000000009"}`；錯phrase固定message不回raw文本。SELF/CONFIRMATIONcode加ErrorCode/OAS枚舉，其他schema/email/projection與52paths不變。
 
-無新DDL／migration／回填。V2 usernameUNIQUE含softdeleted仍沿原DB；fresh判rawstate不是filteredlist。maintenance同adminadvisorykey/sameDStx；success mutation+audit一起commit，白名單businessdenial在attempt tx退出後REQUIRES_NEW恰一次。memory維護rollbacksnapshot只限maintenance，不宣稱普通memory通用rollback。
+無新DDL／migration／回填。V2 usernameUNIQUE含softdeleted仍沿原DB；fresh判rawstate不是filteredlist。maintenance同adminadvisorykey/sameDStx；success mutation+audit一起commit，白名單businessdenial在attempt tx退出後REQUIRES_NEW恰一次。memory維護rollbacksnapshot只限maintenance，不宣稱普通memory通用rollback。 Q02 roles操作也明確使用此既有guarded primitive，確保目前角色讀取與replacement同鎖；這個有界caller不把所有memory操作宣稱為通用交易。Q02最終Green須等B06/B07；Q03/Q04的獨立purge檢查可先執行，整波仍須全部依賴通過。
 
 ### 4.3 前端型別與CSRF
 
@@ -194,7 +194,7 @@ errors.ts新code先LAST_ADMIN/generic403；existingselfbutton/rolelock與GETdeta
 
 ## 6 任務卡
 
-順序編號PP1b-T01–T30；B/G/Q/E/D保留語義標籤，引用卡號以語義label為準。每張含tests手寫S≤150/M≤400，B03為group別名，代表B03a/B03b兩張串行卡；原B03依賴須等兩張完成。數字為設計估算不是實測diff；generatedartifact另列，不省測試湊上限。超限停止交root拆，不delegate。Red保存named行為失敗；必要signaturethrow scaffold可編譯，但缺class編譯錯誤不能算Red。所有指令在component root；本施工圖中的產品命令**未執行**。
+順序編號PP1b-T01–T31；B/G/Q/E/D保留語義標籤，引用卡號以語義label為準。每張含tests手寫S≤150/M≤400，B03與G04為group別名，各代表a/b兩張串行卡；原group依賴須等兩張完成。PP1b父里程碑共31卡，拆成PP1b-A帳號／維護19卡（B11＋G8）與PP1b-Q治理／旅程／交付12卡（Q10＋E1＋D1），各子波≤30。兩者保留原語義label、路徑與验收；獨立Q測試可先行，Q02最終Green依B06/B07，E01依G07，D01才可接受整個PP1b。PP1b-A完成記錄是中間gate，不能宣稱父里程碑VERIFIED。數字為設計估算不是實測diff；generatedartifact另列，不省測試湊上限。超限停止交root拆，不delegate。Red保存named行為失敗；必要signaturethrow scaffold可編譯，但缺class編譯錯誤不能算Red。所有指令在component root；本施工圖中的產品命令**未執行**。
 
 <a id="b01"></a>
 
@@ -483,31 +483,42 @@ node --test scripts/local/maintenance-guard.test.mjs
 - **預估大小**：M（280手寫行，含tests；上限400）。
 
 <a id="g04"></a>
+<a id="g04a"></a>
 
-### PP1b-T15：G04 quiescence Green
+### PP1b-T15：G04a private lease/live PG core Green
 
-- **目標**：quiescence Green，交付下列可觀察行為。
-- **輸入**：guard.mjs/test；依G03；精確完整檔名依§3同卡標籤，不使用表外路徑。
+- **目標**：私人metadata與live quiescence核心；acquire/finish仍拒絕scaffold。
+- **輸入**：`scripts/local/maintenance-guard.mjs`及`maintenance-guard.test.mjs`；依G03；僅原G04白名單。
 - **步驟**：
-  1. exclusivecommonlock＋O_EXCLop reservation，atomicprivatephasejournal；不TTLcleanup/forceunlock。
-  2. fixedAPI-ID stop/inspect restart=no，全containers/PGclientbackend枚舉與live reassert；backendpin不可重綁。
-  3. fail/signal/unknown保持停止/lock；missingPP1cbackup failclosed不mini backup；boundedcommandtime。
-- **完成條件**：O_EXCL、fixed stop/API ID/noautoRestart、全部containers/PGsessions、reassert漂移fail，crash保留lock、noforceunlock；timeout bounded。；Red卡保留意圖失敗，Green卡對應namedcase轉綠。
-- **驗證**：
-
-```sh
-node --test scripts/local/maintenance-guard.test.mjs
-```
-
+  1. private FS/schema/atomic phase，lease必需connection tuple；unknownkey/mode/uid/hardlink/symlink拒絕。
+  2. 每次fresh stopped inspector、initial JDBC destination不漂移；PG PRE_CONNECTION恰0，BOUND恰1完整pid/epoch/db/role/address/appname，bind僅一次。
+  3. 固定assert/bind-backend/inspect helper CLI與bounded commands；不提供endpoint/command override。
+- **完成條件**：metadata/live/backend/helper named cases Green；acquire/probe/finish全套仍Red並保留，不宣稱G04完成。
+- **驗證**：`node --test --test-name-pattern='metadata|live|backend|helper' scripts/local/maintenance-guard.test.mjs`；G04b必全檔跑。
 - **對應 ID**：PP1-AC02、PP1-FM04。
-- **預估大小**：M（350手寫行，含tests；上限400）。
+- **預估大小**：M（320手寫行含tests；上限400）。
+
+<a id="g04b"></a>
+
+### PP1b-T16：G04b reservation/probe/restore Green
+
+- **目標**：完成原G04完整lease及失敗保留契約。
+- **輸入**：同guard.mjs/test兩檔；依G04a；串行共用檔案，無新增source路徑。
+- **步驟**：
+  1. exclusive commonlock、O_EXCL operation reservation與immutable target；exact API-ID stop、freshness SQL。
+  2. fresh inspector capability只轉固定create probe，inspect fullID/owned tuple，再start/wait/logs，finally只移除已核身的本次ID，隨後fresh reinspection；每command有界。
+  3. 非0/signal/UNKNOWN保持停止與lock；有效commitreceipt且exit0才sameAPI start/health並release；recover缺PP1c verifier先拒絕，無mini backup、TTL或forceunlock。
+- **完成條件**：原G04全部assertions與guard/target全檔Green；probe cleanup失敗留lock，--rm不當timeout證據；不將mock當G07實測。
+- **驗證**：`node --test scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-target.test.mjs`。
+- **對應 ID**：PP1-AC02、PP1-FM04。
+- **預估大小**：M（350手寫行含tests；上限400）。
 
 <a id="g05"></a>
 
-### PP1b-T16：G05 TTY bridge Red
+### PP1b-T17：G05 TTY bridge Red
 
 - **目標**：TTY bridge Red，交付下列可觀察行為。
-- **輸入**：`scripts/local/maintenance.mjs`scaffold／`maintenance.test.mjs`新；main `identity/maintenance/LocalMaintenanceGuard.java`scaffold；unit CommandTests；依G04/B10；精確完整檔名依§3同卡標籤，不使用表外路徑。
+- **輸入**：`scripts/local/maintenance.mjs`scaffold／`maintenance.test.mjs`新；main `identity/maintenance/LocalMaintenanceGuard.java`scaffold；unit CommandTests；依G04b/B10；精確完整檔名依§3同卡標籤，不使用表外路徑。
 - **步驟**：
   1. wrapper與LocalMaintenanceGuard先有scaffold，fakecommand/TTY/environment capture。
   2. 測Java前stop、DB前attach/zero、binduniqueconnection後fullassert/validate、samelease/target；新增1合法＋1偽backend負例。
@@ -525,7 +536,7 @@ node --test scripts/local/maintenance.test.mjs
 
 <a id="g06"></a>
 
-### PP1b-T17：G06 bridge Green
+### PP1b-T18：G06 bridge Green
 
 - **目標**：bridge Green，交付下列可觀察行為。
 - **輸入**：maintenance.mjs／LocalMaintenanceGuard／config＋wrappertest；依G05；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -546,7 +557,7 @@ node --test scripts/local/maintenance.test.mjs
 
 <a id="g07"></a>
 
-### PP1b-T18：G07 account verifier/guard實測
+### PP1b-T19：G07 account verifier/guard實測
 
 - **目標**：account verifier/guard實測，交付下列可觀察行為。
 - **輸入**：`scripts/local/verify-accounts.mjs`／`verify-accounts.test.mjs`新；`e2e-pp1-local/accounts.spec.ts`新的setup前置小段；依G06/B08；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -567,7 +578,7 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q01"></a>
 
-### PP1b-T19：Q01 SELF Red
+### PP1b-T20：Q01 SELF Red
 
 - **目標**：SELF Red，交付下列可觀察行為。
 - **輸入**：unit `PrincipalGovernanceApiTests.java`新增；依PP1a；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -587,15 +598,15 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q02"></a>
 
-### PP1b-T20：Q02 SELF/helper Green
+### PP1b-T21：Q02 SELF/helper Green
 
 - **目標**：SELF/helper Green，交付下列可觀察行為。
-- **輸入**：main `identity/service/GovernanceDenialAudit.java`新、PrincipalAdminService／IdentityException／api/error/ErrorCode；unit PrincipalGovernanceApiTests／IdentityAuthTests／IdentityHardeningTests；runtime `services/cms-api/src/main/resources/openapi/openapi.yaml`僅三ErrorCode枚舉；依Q01；精確完整檔名依§3同卡標籤，不使用表外路徑。
+- **輸入**：main `identity/service/GovernanceDenialAudit.java`新、PrincipalAdminService／IdentityException／api/error/ErrorCode；unit PrincipalGovernanceApiTests／IdentityAuthTests／IdentityHardeningTests；runtime `services/cms-api/src/main/resources/openapi/openapi.yaml`僅三ErrorCode枚舉；依Q01及B06/B07；精確完整檔名依§3同卡標籤，不使用表外路徑。
 - **步驟**：
   1. 新增三ErrorCode/factories與GovernanceDenialAudit sameTransactionRunner/AuditLog，不新建第二AuditLog；同步runtimeOAS的三枚舉（由Q04前移），讓既有MockMvc即時OAS驗證保持啟用。
-  2. PrincipalAdminService先授權/target/inputs，再SELF-before-lastadminwrapper；6/8ctor相容，無Q23投影。
+  2. PrincipalAdminService先授權/target/inputs；roles路徑在B04–B07既有maintenanceTransaction取得同ADMIN_GUARD_KEY／memory adminGuard後，才重讀目前admin assignment、判SELF、replace與successaudit。SELF判斷必先於last-admin判斷；denial wrapper在此transaction外，6/8ctor相容，無Q23投影。
   3. denial白名單一次reason、unexpected不二記；同步舊auth/hardeningSELF期望，不移除securityassertions。
-- **完成條件**：SELF先guard、validation先SELF、denial一次、unexpected不添denial、成功仍ok；不改Q23返回投影。；Red卡保留意圖失敗，Green卡對應namedcase轉綠。
+- **完成條件**：SELF先last-admin判斷、roles讀取與mutation同guard、validation先SELF、denial一次、unexpected不添denial、成功仍ok；不改Q23返回投影。；Red卡保留意圖失敗，Green卡對應namedcase轉綠。
 - **驗證**：
 
 ```sh
@@ -607,7 +618,7 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q03"></a>
 
-### PP1b-T21：Q03 purge Red
+### PP1b-T22：Q03 purge Red
 
 - **目標**：purge Red，交付下列可觀察行為。
 - **輸入**：unit `EntryPurgeConfirmationApiTests.java`新；依Q02；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -627,7 +638,7 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q04"></a>
 
-### PP1b-T22：Q04 purge/OAS Green
+### PP1b-T23：Q04 purge/OAS Green
 
 - **目標**：purge/OAS Green，交付下列可觀察行為。
 - **輸入**：main content/service/EntryService、content/web/AdminContentController；unit新purgetest／WaveEAcceptanceTests；PG contract/EntryAtomicWriteTests既有合法caller；`services/cms-api/src/main/resources/openapi/openapi.yaml`；依Q03；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -647,7 +658,7 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q05"></a>
 
-### PP1b-T23：Q05 PG denial/fault
+### PP1b-T24：Q05 PG denial/fault
 
 - **目標**：PG denial/fault，交付下列可觀察行為。
 - **輸入**：PG `contract/IdentityAuditAtomicWriteTests.java`、`EntryAtomicWriteTests.java`；依Q04；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -667,7 +678,7 @@ node scripts/local/verify-accounts.mjs --run-root <owned-run-root> --stage initi
 
 <a id="q06"></a>
 
-### PP1b-T24：Q06 client/mock Red
+### PP1b-T25：Q06 client/mock Red
 
 - **目標**：client/mock Red，交付下列可觀察行為。
 - **輸入**：`packages/api/src/client.test.ts`、`packages/mocks/src/handlers.test.ts`；依Q04；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -688,7 +699,7 @@ npm test --workspace @cms/mocks -- src/handlers.test.ts
 
 <a id="q07"></a>
 
-### PP1b-T25：Q07 client/mock Green
+### PP1b-T26：Q07 client/mock Green
 
 - **目標**：client/mock Green，交付下列可觀察行為。
 - **輸入**：`packages/api/src/{schema,admin,core}.ts`、`generated/schema.d.ts`生成；`packages/mocks/src/handlers/admin.ts`；上述tests；依Q06；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -711,7 +722,7 @@ npm run typecheck --workspace @cms/api
 
 <a id="q08"></a>
 
-### PP1b-T26：Q08 dialog/Inspector Red
+### PP1b-T27：Q08 dialog/Inspector Red
 
 - **目標**：dialog/Inspector Red，交付下列可觀察行為。
 - **輸入**：`apps/web-admin/src/confirm.test.tsx`新、`entries.test.tsx`、`principals.test.tsx`、`safety.test.tsx`；依Q07；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -731,7 +742,7 @@ npm test --workspace @cms/web-admin -- src/confirm.test.tsx src/entries.test.tsx
 
 <a id="q09"></a>
 
-### PP1b-T27：Q09 dialog Green
+### PP1b-T28：Q09 dialog Green
 
 - **目標**：dialog Green，交付下列可觀察行為。
 - **輸入**：`apps/web-admin/src/confirm.tsx`、`copy.ts`；confirmtest必要修正；依Q08；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -752,7 +763,7 @@ npm test --workspace @cms/web-admin -- src/safety.test.tsx -t PP1FM07_nonPurgeCo
 
 <a id="q10"></a>
 
-### PP1b-T28：Q10 Inspector/error Green
+### PP1b-T29：Q10 Inspector/error Green
 
 - **目標**：Inspector/error Green，交付下列可觀察行為。
 - **輸入**：`apps/web-admin/src/pages/entries.tsx`、`errors.ts`、entries/principals/safetytests；依Q09；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -773,7 +784,7 @@ npm run typecheck
 
 <a id="e01"></a>
 
-### PP1b-T29：E01 localjourney acceptance
+### PP1b-T30：E01 localjourney acceptance
 
 - **目標**：localjourney acceptance，交付下列可觀察行為。
 - **輸入**：`e2e-pp1-local/accounts.spec.ts`完成、`playwright.pp1-local.config.ts`必要testmatch擴展；依G07/Q05/Q10；精確完整檔名依§3同卡標籤，不使用表外路徑。
@@ -793,10 +804,10 @@ CMS_PP1_SUITE=accounts CMS_PP1_TLS_MODE=trusted npm run e2e:pp1-local -- account
 
 <a id="d01"></a>
 
-### PP1b-T30：D01 rootdoc/review
+### PP1b-T31：D01 rootdoc/review
 
 - **目標**：rootdoc/review，交付下列可觀察行為。
-- **輸入**：`docs/v2/waves/PP1b.md`新、`contracts/PP1-accounts.md`／`PP1-governance.md`、`waves/PP1.md`；依以上29卡；精確完整檔名依§3同卡標籤，不使用表外路徑。
+- **輸入**：`docs/v2/waves/PP1b.md`新、`contracts/PP1-accounts.md`／`PP1-governance.md`、`waves/PP1.md`；依以上30卡；精確完整檔名依§3同卡標籤，不使用表外路徑。
 - **步驟**：
   1. root逐張mapfailure/test/diff，同步三附約/主PP1狀態；本波implementationPR需approvedDOC_READY先合併。
   2. 完整原生gates/CI與獨立review，不因localbrowserpass跳過；compaction/provider未知統計記private不公開。
@@ -868,6 +879,7 @@ G07真正localguard負向run每case新ownedproject或同一未commit狀態、fix
 | PP1FM05_nonSelfLastAdminGuardStillHolds；same＋JdbcIdentityStoreIntegrationTests回歸 | nonself最後usableadmin、adminpermissionmatrix變更＋race | LAST_ADMIN403／count語義和同鎖不變，沒有新LAST_ADMIN_FORBIDDEN |
 | PP1FM06_purgeRequiresRawWordAndTarget；EntryPurgeConfirmationApiTests | existingentry slug=purge-page；no/{}body/missingvalue、delete/DELETE空白、id大小寫、emptyslug/emptyid、unknownkey | wrong確認400 CONFIRMATION_REQUIRED＋denial1；正canonicalUUID或slug204；unknownkey不替確認 |
 | PP1FM06_purgeGateOrderIsStable；same | anonymous、Back、nonadmin、missingentry、referenced、faultCAS、malformedJSON/pathUUID/nonJSON | 401/403/403/404/409/409/400/415優先序精確；404/JSON/input不businessdenialaudit；role不是grantshortcut |
+| PP1FM05_selfRoleCheckUsesSharedGuard；unit PrincipalGovernanceApiTests及PG IdentityAuditAtomicWriteTests | actor起初只有manage_principals非admin；另一管理員在其取得共同guard前賦予admin，使用latch而非sleep | 取得guard後重讀admin，SELF403，roles/session不變、denial恰1；同鎖內不容許交錯角色寫入 |
 | PP1FM06_successAuditFaultRollsBackAndDenialSurvivesAmbientRollback；PG兩atomictests | EntryService6參sameds；successaudit先insert後throw、outerambientrollback；denialaudit自身insert後throw | success全rollback、denial獨立新conn恰1；denial自身fault500/0partialaudit、mutation0；unexpected不補denial |
 
 ApiFixture也逐一保留wrongOrigin/noCSRF/noGrant原securitycases。refs/CAS rejection不得刪dependencies；legalpurge更新WaveE/PG callers携帶DELETE/id，沒有3參bypass。PGsnapshot包含principal/status/roles/sessions與entry/revision/ref/index/mediaattachment/audit；測count外亦比較ID和值。
@@ -938,7 +950,7 @@ config新增**test-only** CMS_PP1_SUITE=runtime|accounts（default runtime；unk
 
 以下為產品交付檢查表，目前一律未勾；由root根據實際證據更新。施工圖審查通過與文件PR合併僅使DOC_READY生效，不代表產品VERIFIED。
 
-- [ ] PP1a VERIFIED與本PP1b DOC_READY前置已由root回讀已合併main；30carddiff各≤400且獨立review通過。
+- [ ] PP1a VERIFIED與本PP1b DOC_READY前置已由root回讀已合併main；31carddiff各≤400且獨立review通過。
 - [ ] B/G/Q focused Red意圖與Green結果有compactevidence；regularJUnit不需Docker，PGcontract真PostgreSQL、sameDS/fault/race通過。
 - [ ] localadapter真正停寫/epochpin/ownedmedia負例已觀察；沒有以receipt/mock/PP1aprobe替代、沒有DBports/hostnetwork/docker.sock掛app。
 - [ ] fresh-init trueTTY／initializedverifier／normalprodrestart／distinctoperator／explicitpublicgrant／Q25/reset scopedTLS真browser旅程有觀察結果，privatecredential無trace/log。
@@ -950,3 +962,5 @@ config新增**test-only** CMS_PP1_SUITE=runtime|accounts（default runtime；unk
 查閱2026-10-09：backend網路/epoch序列化官方來源與精確SQL見[帳號附約§10.3](../contracts/PP1-accounts.md)。外部查證不是產品runtime證據。
 
 2026-10-09施工校正：既有MockMvc會即時驗證runtimeOAS，所以三個已批准ErrorCode枚舉前移Q02；purge400沿原生共用Error400引用，HTTP行為不變。原B03實作估算超400，拆B03a/B03b而不省斷言，總30卡；原來源白名單與產品範圍不擴。此校正經獨立文件審查、必要CI並正常合併後才生效，未完成產品驗收。
+
+2026-10-09獨立實作審查校正：SELF角色讀取移入已批准共同guard；local helper跨process的initial connection加入嚴格lease schema；probe lifecycle以exact create/inspect/start/wait/logs/remove實證。G04估算含必要負向tests超400，拆a/b，父里程碑31卡分為19／12兩個有界子波，不放寬每波30／每卡400。這些校正在獨立文件審查、必要CI與正常合併後生效；實作尚未完成。

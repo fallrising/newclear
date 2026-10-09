@@ -93,6 +93,8 @@ Index entry：`base_offset:uint64, file_position:uint64, log_index:uint64`，共
 
 複雜度為 `O(log S + log I + K)`：S 為 segment 數、I 為該段 anchor 數、K 為局部掃描工作量。含 control-only 區段時必須利用 segment 的 DATA 範圍資訊跳過無關 segment；不能宣稱所有情況都只需一次 disk seek。M2 要量測掃描 bytes/frames，不只量 wall-clock。
 
+append 只在新增 anchor 或上次 index 寫入失敗時重寫 `.idx`（ADR-013）；crash 可能留下 anchor 較少的舊 index，啟動時與 WAL 推得的 anchors 比對不符即重建。
+
 Index 不存在、CRC/version 不符、offset 不合理或指向錯誤 frame 時，從 WAL 重建。不得為滿足 index 損壞而修改資料。normal reads 不在每次請求重建 index。
 
 Index 可以涵蓋尚未提交尾端，但 Fetch 必須以 HW 限制可見性；發生合法 truncate 後重建受影響 anchors。

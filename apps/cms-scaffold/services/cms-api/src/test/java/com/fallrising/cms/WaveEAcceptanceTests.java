@@ -134,6 +134,8 @@ class WaveEAcceptanceTests {
 
         Session admin = login("seed-admin", ADMIN);
         mockMvc.perform(post("/api/v1/admin/entries/" + id + "/purge")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"confirmPhrase\":\"DELETE\",\"confirmId\":\"" + id + "\"}")
                         .header("Origin", ADMIN)
                         .header("X-CSRF-Token", admin.csrf)
                         .cookie(admin.sessionCookie(), admin.csrfCookie()))

@@ -22,10 +22,72 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryIdentityStore implements IdentityStore {
+    @Override
+    public boolean hasIdentityDataIncludingDeleted() {
+        synchronized (adminGuard) {
+            return !principals.isEmpty() || !credentials.isEmpty() || !audits.isEmpty()
+                    || !sessionsById.isEmpty() || !sessionsByHash.isEmpty()
+                    || principalRoles.values().stream().anyMatch(values -> !values.isEmpty())
+                    || permissions.values().stream().anyMatch(values -> !values.isEmpty());
+        }
+    }
+
+    @Override
+    public boolean hasMaintenanceOperation(UUID operationId) {
+        synchronized (adminGuard) {
+            var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            for (var event : audits) {
+                if (!"AUTH".equals(event.category()) || !List.of("PRODUCTION_ADMIN_INITIALIZED", "PRODUCTION_ADMIN_RECOVERED").contains(event.action())
+                        || event.detailJson() == null) continue;
+                try {
+                    var id = mapper.readTree(event.detailJson()).path("operationId");
+                    if (id.isTextual() && operationId.toString().equals(id.textValue())) return true;
+                } catch (Exception ignored) {
+                    throw new com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.Failure(
+                            com.fallrising.cms.identity.maintenance.IdentityMaintenanceCommand.FailureCode.MAINTENANCE_INTERNAL_ERROR);
+                }
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public <T> T maintenanceTransaction(java.util.function.Supplier<T> attempt) {
+        synchronized (adminGuard) {
+            var oldPrincipals = new HashMap<>(principals); var oldUsernames = new HashMap<>(usernameIndex);
+            var oldCredentials = new HashMap<>(credentials); var oldRoles = new HashMap<>(roles);
+            var oldAssignments = new HashMap<UUID, List<PrincipalRoleAssignment>>();
+            principalRoles.forEach((id, values) -> oldAssignments.put(id, new ArrayList<>(values.stream().map(a ->
+                    new PrincipalRoleAssignment(a.principalId(), a.roleId(), a.roleCode(), List.copyOf(a.contentTypeCodes()))).toList())));
+            var oldPermissions = new HashMap<UUID, List<Permission>>();
+            permissions.forEach((id, values) -> oldPermissions.put(id, new ArrayList<>(values.stream().map(p -> new Permission(p.id(), p.roleId(),
+                    p.action(), p.contentTypeCode(), p.predicateJson(), List.copyOf(p.allowedSurfaces()), p.createdAt())).toList())));
+            var oldSessionsById = copySessions(sessionsById); var oldSessionsByHash = copySessions(sessionsByHash);
+            var oldAudits = new ArrayList<>(audits);
+            try { return attempt.get(); }
+            catch (RuntimeException | Error failure) {
+                restore(principals, oldPrincipals); restore(usernameIndex, oldUsernames); restore(credentials, oldCredentials);
+                restore(roles, oldRoles); restore(principalRoles, oldAssignments); restore(permissions, oldPermissions);
+                restore(sessionsById, oldSessionsById); restore(sessionsByHash, oldSessionsByHash);
+                audits.clear(); audits.addAll(oldAudits);
+                throw failure;
+            }
+        }
+    }
+
+    private static <K, V> void restore(Map<K, V> target, Map<K, V> previous) { target.clear(); target.putAll(previous); }
+    private static <K> Map<K, SessionRecord> copySessions(Map<K, SessionRecord> source) {
+        var copy = new HashMap<K, SessionRecord>();
+        source.forEach((key, s) -> copy.put(key, new SessionRecord(s.id(), s.principalId(), s.tokenHash().clone(), s.createdAt(),
+                s.expiresAt(), s.lastSeenAt(), s.revokedAt(), s.createdSurface(), s.ip(), s.userAgent())));
+        return copy;
+    }
 
     private final ConcurrentHashMap<UUID, Principal> principals = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, UUID> usernameIndex = new ConcurrentHashMap<>();

@@ -64,6 +64,16 @@ public class IdentityException extends CmsApiException {
                 surface);
     }
 
+    public static IdentityException selfDisable() {
+        return new IdentityException(ErrorCode.SELF_DISABLE_FORBIDDEN, "You cannot disable yourself.",
+                "manage_principals", null, "admin");
+    }
+
+    public static IdentityException selfDemotion() {
+        return new IdentityException(ErrorCode.SELF_DEMOTION_FORBIDDEN, "You cannot remove your own admin role.",
+                "manage_principals", null, "admin");
+    }
+
     public static IdentityException lastAdmin() {
         return new IdentityException(ErrorCode.LAST_ADMIN,
                 "Cannot disable the last active admin",

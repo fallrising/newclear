@@ -119,11 +119,11 @@ class IdentityHardeningTests {
         IdentityRequest request = adminRequest(principal);
 
         assertThatThrownBy(() -> admin.patch(request, principal.id(), null, null, "disabled"))
-                .isInstanceOf(IdentityException.class);
+                .isInstanceOfSatisfying(IdentityException.class, e -> assertThat(e.code().wire()).isEqualTo("SELF_DISABLE_FORBIDDEN"));
         assertThat(store.findPrincipalById(principal.id()).orElseThrow().status()).isEqualTo(PrincipalStatus.ACTIVE);
 
         assertThatThrownBy(() -> admin.replaceRoles(request, principal.id(), List.of()))
-                .isInstanceOf(IdentityException.class);
+                .isInstanceOfSatisfying(IdentityException.class, e -> assertThat(e.code().wire()).isEqualTo("SELF_DEMOTION_FORBIDDEN"));
         assertThat(store.rolesOf(principal.id())).extracting(PrincipalRoleAssignment::roleCode).contains("admin");
 
         assertThatThrownBy(() -> admin.replaceRolePermissions(request, "admin", List.of(

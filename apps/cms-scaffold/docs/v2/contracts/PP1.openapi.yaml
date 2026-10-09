@@ -1676,16 +1676,7 @@ paths:
         '204':
           description: Hard deleted with audit
         '400':
-          description: Missing or incorrect confirmation, or malformed request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
-              example:
-                error:
-                  code: CONFIRMATION_REQUIRED
-                  message: Explicit deletion confirmation is required.
-                requestId: 00000000-0000-4000-8000-000000000001
+          $ref: '#/components/responses/Error400'
         '401':
           $ref: '#/components/responses/Error401'
         '403':

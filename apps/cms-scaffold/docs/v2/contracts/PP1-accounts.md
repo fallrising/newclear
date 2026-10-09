@@ -181,7 +181,7 @@ recover非idempotent mutation：每次新人工恢復都有新operationId與audi
 
 ## 8 有界卡路由
 
-原六張A01–A06卡由[PP1b §6](../waves/PP1b.md#6-任務卡)的B01–B10／G01–G07取代；不得照舊卡重作PP1a seed或略過local guard。B01先建立command/config/guard/console/service可編譯signatures；B02密碼；B03routing/context；B04/B05fresh狀態與fault/race Red；B06/B07兩store Green；B08bootstrap；B09/B10recoverycore；G01–G07獨立local adapter與驗收。每卡含test S≤150/M≤400，超限由root重新拆卡，不減斷言。core fakeguard不得稱host停止驗收。
+原六張A01–A06卡由[PP1b §6](../waves/PP1b.md#6-任務卡)的B01–B10／G01–G07取代；不得照舊卡重作PP1a seed或略過local guard。B01先建立command/config/guard/console/service可編譯signatures；B02密碼；B03a context／B03b routing-command兩張串行（原B03group）；B04/B05fresh狀態與fault/race Red；B06/B07兩store Green；B08bootstrap；B09/B10recoverycore；G01–G07獨立local adapter與驗收。每卡含test S≤150/M≤400，超限由root重新拆卡，不減斷言。core fakeguard不得稱host停止驗收。
 
 ## 9 fixtures、FM與證據要求
 

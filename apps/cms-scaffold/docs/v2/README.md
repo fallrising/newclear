@@ -72,6 +72,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | BW4 | VERIFIED（PR #258） | [02 §5.4](02-backend-sdd.md#54-效能目標本機postgresql-16單類型-10000-筆)、[§7](02-backend-sdd.md#7-後端波次) | [waves/BW4.md](waves/BW4.md) | 效能紀錄、審計保留、surface 拒絕矩陣 |
 | BW5 | VERIFIED（PR #267） | [02 §7](02-backend-sdd.md#7-後端波次)、[§8](02-backend-sdd.md#8-開放問題) | [waves/BW5.md](waves/BW5.md) | BQ-06、07、08、10、11（owner 2026-09-25 選 A） |
 | BW6 | DOC_READY（本波文件PR合併生效） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW6.md](waves/BW6.md) | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
+| PP1a | DOC_READY（本波文件PR合併生效） | [個人使用驗收](03-personal-use-readiness.md) | [waves/PP1a.md](waves/PP1a.md) | 本地prod／HTTPS／靜態工具／DB不對外／no-demo；非正式環境可用 |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
 本地交付另用 `LOCAL_VERIFIED`：整合檢查已通過，但未提交／合併，不能等同正式 `VERIFIED`。
@@ -111,3 +112,12 @@ W4 共用 Admin 治理已完成本地驗收：624 前端／68 mock E2E、339 Jav
 W5 前端硬化已完成本地验收：648前端、93mock連續三次、25Vitals、60axe、11hardening與70canonical比較通過；批准G後真實API最終14/14與四次ownedcleanup核對完成，歷史失敗保留。[交付證據](../../.team/reports/W5-DELIVERY.md)及[團隊計畫](../../.team/PLAN.md)列出來源與限制。VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過必要最新head CI／審查並合併生效，發布實況以PR為準。未部署，不宣稱正式生產可用。
 
 下一個功能規劃是BW6/W6：媒體搜尋與分頁、治理資訊及危險操作自身保護、診所demo預約權限；BW6施工細節見[施工圖](waves/BW6.md)，BQ-14 B已於2026-10-06批准；W6仍先依REFINE-PROMPT細化。剩餘實作／驗證卡為BW6 30＋W6暫估22～28＝52～58，口徑見[剩餘工作](bw6-remaining-work.md)。這是通用CMS，診所／相簿／專案均為demo packs；本次交付不擴張新里程碑授權。
+
+
+## 個人／內部正式使用優先施工圖（2026-10-08）
+
+Owner指定先完成正式運行、正式帳號／Q25、DB＋媒體一致備份還原、升級回復、基本維運及正式設定驗收，額外功能後移。新[PP1施工圖](waves/PP1.md)目前DRAFT，環境決策與逐卡規格尚待封板；不代表已實作或正式可用。BW6保持DOC_READY，PP1只取Q25必要子集，不能將整個BW6標VERIFIED。52～58張為完整v2功能估計，不是此次正式使用的全部先決條件。未授權部署。
+
+2026-10-09 owner接受PP1建議預設：全新庫／無demo帳號內容、獨立日常帳號、四個同site HTTPS origin、RPO24h／RTO4h、每日停寫備份與每日7＋每週4份保留。同日owner追加「先在本地跑」，本地隔離環境成為先行實作與驗收目標；正式主機／URL／真正離機位置／通知管道留在正式環境門檻，不再阻擋本地子波。各子波分別完成施工圖、審查、必要CI與合併後才實作；[owner操作分工](contracts/PP1-owner-operations.md)。PP1整體尚未完成，未部署。
+
+本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，12張S/M卡；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。

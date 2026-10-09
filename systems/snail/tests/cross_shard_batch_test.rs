@@ -14,6 +14,10 @@ struct Server {
 
 impl Server {
     fn start() -> Self {
+        Self::start_with(4, 4)
+    }
+
+    fn start_with(workers: usize, shards: usize) -> Self {
         let listener = TcpListener::bind(("127.0.0.1", 0)).expect("reserve ephemeral port");
         let port = listener.local_addr().expect("listener address").port();
         drop(listener);
@@ -22,9 +26,9 @@ impl Server {
                 "--port",
                 &port.to_string(),
                 "--workers",
-                "4",
+                &workers.to_string(),
                 "--shards",
-                "4",
+                &shards.to_string(),
             ])
             .spawn()
             .expect("start rudis");
@@ -272,6 +276,57 @@ fn batched_same_key_operations_and_immediate_replies_remain_fifo() {
             Reply::Bulk(value.into_bytes()),
         );
         append(&mut pipeline, &mut expected, &["PING"], pong());
+    }
+    client.send(&pipeline);
+    client.expect(&expected);
+    assert_shard_spread(&mut client);
+}
+
+#[test]
+fn mixed_pipeline_remains_fifo_with_multiple_shards_per_worker() {
+    let server = Server::start_with(2, 4);
+    let mut client = server.connect();
+    let keys = keys();
+    for key in &keys {
+        client.send(&command(&["SET", key, key]));
+        client.expect(&[ok()]);
+    }
+
+    let mut pipeline = Vec::new();
+    let mut expected = Vec::new();
+    for (index, key) in keys.iter().enumerate() {
+        let other = &keys[(index + 1) % keys.len()];
+        append(&mut pipeline, &mut expected, &["PING"], pong());
+        // Every successful write repeats the prefilled value, so helper reads
+        // do not depend on ordering against later writes in this pipeline.
+        append(&mut pipeline, &mut expected, &["SET", key, key], ok());
+        append(
+            &mut pipeline,
+            &mut expected,
+            &["GET", key],
+            Reply::Bulk(key.as_bytes().to_vec()),
+        );
+        append(
+            &mut pipeline,
+            &mut expected,
+            &["SET", key, "must-not-replace", "NX"],
+            Reply::Null,
+        );
+        append(
+            &mut pipeline,
+            &mut expected,
+            &["GET", key],
+            Reply::Bulk(key.as_bytes().to_vec()),
+        );
+        append(
+            &mut pipeline,
+            &mut expected,
+            &["MGET", key, other],
+            Reply::Array(vec![
+                Reply::Bulk(key.as_bytes().to_vec()),
+                Reply::Bulk(other.as_bytes().to_vec()),
+            ]),
+        );
     }
     client.send(&pipeline);
     client.expect(&expected);

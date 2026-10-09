@@ -1,10 +1,10 @@
 # 跨 worker 批次化量測（2026-10-08／09）
 
-批次化降低跨 worker 傳遞的部分 CPU 成本，但本輪沒有證明吞吐全面改善。c50 的四 worker／單 worker 比只有 1.22／1.28；c500 達 1.71／2.04，但四 worker SET 比原版慢 12.5%。原 4 vCPU 私網環境尚未重跑，不能據此宣稱效能驗收完成，也不足以決定預設 workers。
+批次化降低跨 worker 傳遞的部分 CPU 成本，但本輪沒有證明吞吐全面改善。首輪矩陣的 c50 四 worker／單 worker 比只有 1.22／1.28；c500 達 1.71／2.04，四 worker SET 的兩輪平均比原版低 12.5%。後續交錯比較的吞吐差距有正有負，尚未穩定重現該幅度。原 4 vCPU 私網環境尚未重跑，不能據此宣稱效能驗收完成，也不足以決定預設 workers。
 
 ## 環境與方法
 
-- 原版為 `c4777a38774e1275d1212fe2c2a6297b0734f894` 的 Snail；新版為本次批次化實作。兩者 Cargo.lock 與 release 編譯設定相同，Rust 1.88、jemalloc。
+- 原版為 `c4777a38774e1275d1212fe2c2a6297b0734f894` 的 Snail；首輪批次版為 `66ba3f36d139d2309f0c78590a35396d263ca8db`。兩者 Cargo.lock 與 release 編譯設定相同，Rust 1.88、jemalloc。
 - 兩台不同 VPS，AMD EPYC 7443P，各 6 vCPU；server 容器以 `--cpuset-cpus 0-3` 限制可用 CPU，client 4 threads。限制 affinity 不等於獨占 4 vCPU VM，不能消除 host 的干擾。
 - Linux 6.12.43；Docker host networking；直接 Ethernet 路徑，無 Tailscale。該路徑使用公開介面，**不是原基準指定的私網**，RAM／CPU／網路環境也不同。
 - `RUDIS_IO_URING=0`；workers／shards 分別為 1／1、4／4。每次重啟後先以隨機 key 做 1M SET 暖機，再依 c50、c500 順序，各跑 SET／GET 兩輪。每項 10M requests、1M keyspace、P32，兩輪 seed 分別 101、102。
@@ -32,7 +32,7 @@ redis-benchmark -h "$SERVER_IP" -p "$PORT" --threads 4 \
 
 server 在相同 CPU affinity 與網路設定下分別啟動原版／新版：`--bind "$SERVER_IP" --port "$PORT" --workers 1 --shards 1` 與 `--workers 4 --shards 4`。暖機使用上述 client 參數中的 c50、SET、1M requests、seed 0。不要將單 key 或 VPN 路徑結果混入此矩陣。
 
-## 完整前後結果
+## 首輪完整前後結果
 
 [32 項逐輪數據 CSV](benchmark-cross-shard-20261009.csv) 保留每輪吞吐、CPU seconds、CPU/request 與平均／最小／p50／p95／p99／最大延遲。下表為兩輪算術平均，吞吐單位 M req/s；CPU/request 單位 μs。
 
@@ -55,6 +55,40 @@ server 在相同 CPU affinity 與網路設定下分別啟動原版／新版：`-
 CPU seconds 取 server process 的 `/proc/<pid>/stat` user＋system ticks 差，再除以 10M 算 CPU/request。CSV 的 CPU percent 以兩次採樣的 wall time 計算；此視窗含 SSH／client 容器啟動與收尾，不能直接當成負載期間利用率，更不能與舊私網的約 360% 等同。
 
 每項 redis-benchmark 都以 exit 0 完成並輸出 CSV。新版 stderr 保存的警告是無法 fetch server CONFIG（既有命令支援限制）；原版未保留對稱的 stderr 檔案。這不是獨立的每請求錯誤計數，不能把完整 CSV 等同於已稽核零協定錯誤。
+
+## 後續交錯比較：原版與首輪批次版
+
+使用相同的兩個不可變 release 執行檔，在相同替代主機、網路、affinity、四 worker／四 shard、c500、P32、client 4 threads 下跑 ABBA 及 BAAB；A 為原版，B 為首輪批次版。每項重啟 server，以 c50、seed 0 做 **10M 隨機 SET 暖機**，再量測 10M SET；同一對使用相同 seed 101 或 102。較完整的暖機減少首次填入 key 的差異，因此這組資料與首輪 1M 暖機矩陣分開解讀，不替代原私網驗收。
+
+[20 項交錯量測 CSV](benchmark-paired-20261009.csv) 的 `batching-reference` 八列保存這組逐輪數據；其餘列是下節已撤回的 routing 實驗，兩者分開計算。
+
+四對配對結果（B 相對 A）：
+
+| 順序／seed | 吞吐變化 | CPU/request 變化 | p99 變化 |
+|---|---|---|---|
+| ABBA／101 | +6.30% | −7.53% | −25.04% |
+| ABBA／102 | −11.49% | −2.70% | +8.25% |
+| BAAB／101 | −3.22% | −11.96% | −8.31% |
+| BAAB／102 | +6.30% | −15.80% | −32.34% |
+
+各版四次的算術平均：原版 1.241M req/s、2.494μs/request、p99 28.811ms；首輪批次版 1.231M、2.257μs、p99 24.487ms。吞吐均值差約 −0.86%，CPU/request 約 −9.50%。CPU 成本在四對都較低；吞吐效果則跨過零，不能把首輪 −12.46% 當作已證明的因果退步。這仍是共享 VM 上的小樣本，沒有穩健信賴區間。
+
+八次測量與暖機均 exit 0，雙方 stderr 都只保留既有的 CONFIG fetch 警告。CPU 採樣仍包含 SSH／client 容器啟停視窗，沒有獨立的逐請求錯誤稽核。後續優化必須與首輪批次版單獨比較，不能把兩種暖機方法或版本混成一個平均。
+
+## 未保留的 routing 實驗
+
+在首輪批次版上，單獨將 `apply_hot_get`／`apply_hot_set` 及 `try_local_fast` 的遠端 plain GET／default SET 四條分支改為直接以已計算的 shard ID 呼叫現有 `ShardClient::send_to`，再 `push_async`。假設是省掉 Dispatcher 再次查詢 routing 的成本；沒有改 batch 配額、buffer layout、local／optioned／helper 行為。實驗執行檔 SHA256 為 `f7e64f6e08a7abc7d4fd480d032795ce323b352fb1bd87365efd29ff3ac3970d`。
+
+與首輪批次版在上述 10M 暖機方法下比較：SET 跑 ABBA＋BAAB 共四對，GET 跑 ABBA 共兩對；均為四 worker／四 shard、c500。下表是兩版本各自算術平均的變化，實驗版相對首輪批次版：
+
+| 命令／配對數 | 吞吐變化 | CPU/request 變化 | p99 變化 |
+|---|---|---|---|
+| SET／4 | +2.40% | −1.38% | −2.91% |
+| GET／2 | −10.46% | +5.76% | +33.29% |
+
+SET 的配對 CPU 變化為 −7.73%、+0.96%、−0.31%、+2.14%，並非一致改善；GET 兩對的 CPU 都較高且吞吐較低。這不構成可靠的因果診斷，但已不足以通過「CPU 成本可重現改善、吞吐與 p99 無傷害」的保留標準，因此**四處 source 修改已撤回**。實驗止於此，c50／單 worker 控制組未執行。
+
+實驗的完整測試曾在 mio 與實際 io_uring 各 45 項通過；新增兩 worker／四 shard 的混合 pipeline 覆蓋保留，效能實驗未進入最終 runtime。逐輪 CSV、雙方暖機／測量 stderr 與 server log 均保存。routing 實驗另外記錄 server 各 thread CPU ticks 及 affinity CPU 的 host steal 視窗；CSV 的空 steal 欄位表示早期原版比較未採樣，不代表零。共享主機干擾與採樣視窗限制仍適用，GET 樣本只有兩對，未估穩健信賴區間。
 
 ## 獨立 perf 採樣
 

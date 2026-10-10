@@ -11,7 +11,7 @@ Spec: none applicable — the interface is the Redis wire protocol. The command 
 
 The directory is `systems/snail`; the project calls itself `rudis`. Both names refer to this server.
 
-Dormant (tier C), kept for its benchmark history. [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records that [labs/mithril-research](https://github.com/fallrising/newclear/blob/main/labs/mithril-research/) will not revive it: the open milestones below stay open. Treat this as a finished experiment with a working subset, not as work in progress.
+Tier C (dormant) in the portfolio catalog, where [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records that it is kept for its benchmark history and that [labs/mithril-research](https://github.com/fallrising/newclear/blob/main/labs/mithril-research/) will not revive it. Tier records the owner's investment decision, not whether code is changing: [docs/STATUS.md](https://github.com/fallrising/newclear/blob/main/systems/snail/docs/STATUS.md) is the live record, dated per update, and is where work such as performance diagnostics shows up.
 
 `partial` means the protocol and the M1 command set work, and scale milestones are still open: M0 skeleton and M1 full semantics with multi-core are done with the C10K gate passing; M2 (C100K hold) and M3 (C1M, io_uring behind `RUDIS_IO_URING=1`) are in progress. Treat the command coverage as real and the upper connection limits as unproven.
 

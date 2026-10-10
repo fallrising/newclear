@@ -9,7 +9,9 @@ Entrypoint: HTTP listener on `:8080`; API base path `/api/v1`; admin UI at `/ui/
 Auth: none by default. When configured, every `/api/*` route requires an API key (`X-API-Key`, or `Authorization: Bearer`) and/or a JWT bearer token; `/health` and `/metrics` stay public. JWT `scope`/`roles` claims carry a per-queue ACL in the form `queue:name:action`.
 Spec: none — no OpenAPI document exists. The endpoint table in the README is the contract.
 
-Dormant (tier C) but released and working: v1.5.1 runs as documented. Nobody is developing it, and [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records the standing boundary that no cluster features will be added — the clustering that exists stays, it does not grow. Use it as it is or not at all.
+Tier C (dormant) in the portfolio catalog; v1.5.1 is the latest release and runs as documented. [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md) records the standing boundary that no cluster features will be added — the clustering that exists may be fixed but does not grow. Tier records the owner's investment decision, not whether code is changing: check [PROGRESS.md](https://github.com/fallrising/newclear/blob/main/systems/clarkq/PROGRESS.md) and the CHANGELOG's Unreleased section for the current state, which can include cluster correctness fixes that are on `main` but not in any release.
+
+In a cluster, consumed message IDs are remembered for `CLARKQ_REMOVED_TTL` (default `1h`) so a rejoining node cannot bring them back. A node that was down longer than that must rejoin with an empty data dir, or already-consumed messages can reappear; the README's cluster section has the details.
 
 Use it for short-lived buffering, job handoff between services, worker pools and local development. Queue names match `[a-zA-Z0-9_-]`, 1–64 characters, case-sensitive, and are created lazily on first write.
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-This monorepo holds 32 components (excluding `refs/` and root `docs/`). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
+This monorepo holds 36 components (excluding `refs/` and root `docs/`). Their external interfaces are HTTP APIs, CLIs, wire protocols, MCP servers, desktop apps and specification packs. Machine-readable contracts already exist for some of them, but under five unrelated paths: `platform/dim-gate/docs/openapi.json`, `products/kith/contracts/*.json`, `systems/ojbquay/proto/`, `systems/mkfk/api/schemas/`, `specs/fleet/schemas/`. An agent that wants to know what a project can do before using it has no single entry point, and the root `README.md` catalog names technologies rather than interfaces.
 
 OpenAPI cannot serve as that entry point: roughly a third of the projects expose no HTTP surface at all. `AGENTS.md` cannot either — by its own specification it carries instructions for agents *working on* a project, not a description of the interface its consumers call.
 
@@ -33,7 +33,9 @@ A project capability file additionally requires, in the prose block between the 
 | `Auth` | what a caller must present, or `none` |
 | `Spec` | repository path of the machine-readable contract, or `none` with the reason |
 
-`Tier` and `Status` answer different questions and both are needed. `Tier` is the owner's investment and documentation decision from [portfolio-doc-tiers.md](../portfolio-doc-tiers.md); `Status` is whether the code runs. A released, working, dormant component is `Tier: C` and `Status: production`, and an agent needs both facts: it can call the thing, and nobody is maintaining it. Declaring only one produces the "looks runnable" rot the tier policy exists to prevent, in the other direction — an agent reading `production` alone will treat a dormant component as supported.
+`Tier` and `Status` answer different questions and both are needed. `Tier` is the owner's investment and documentation decision from [portfolio-doc-tiers.md](../portfolio-doc-tiers.md); `Status` is whether the code runs. A released, working, dormant component is `Tier: C` and `Status: production`, and an agent needs both facts: it can call the thing, and the owner is not investing in it. Declaring only one produces the "looks runnable" rot the tier policy exists to prevent, in the other direction — an agent reading `production` alone will treat a dormant component as supported.
+
+Neither key says whether code is currently changing, and a capability file must not claim that either way. "Nobody is developing it" and "finished experiment" are the first sentences to go stale: within a week of the pilot, two tier-C components had merged substantive fixes. A capability file states the tier, the standing boundaries recorded in `PORTFOLIO.md`, and links the component's own dated status document as the live source.
 
 `Status` is not optional either. Several projects here are approved specifications with no runnable code, and an agent that cannot tell those apart from shipped services will call something that does not exist.
 
@@ -41,7 +43,7 @@ The validator cross-checks `Tier` against the README catalog, so the two cannot 
 
 ### Relation to the documentation tier policy
 
-An `llms.txt` is not a quickstart, a tutorial or a how-to, so the tier policy's prohibitions do not reach it: a `C` or `D` component may have one, and should. For a dormant component it is the cheapest honest way to say *this exists, here is its surface, nobody is maintaining it, here is what replaced it* — which is close to what the policy already asks a `C` README to say, in a form an agent can act on. The prose block of a `C` or `D` file should carry the dormancy facts and any successor named in [PORTFOLIO.md](../../PORTFOLIO.md), and must not acquire new how-to material to compensate.
+An `llms.txt` is not a quickstart, a tutorial or a how-to, so the tier policy's prohibitions do not reach it: a `C` or `D` component may have one, and should. For a dormant component it is the cheapest honest way to say *this exists, here is its surface, the owner is not investing in it, here is what replaced it* — which is close to what the policy already asks a `C` README to say, in a form an agent can act on. The prose block of a `C` or `D` file should carry the dormancy facts and any successor named in [PORTFOLIO.md](../../PORTFOLIO.md), and must not acquire new how-to material to compensate.
 
 Prose after those lines should state what the project is for and what it is not for. Absolute `https://github.com/fallrising/newclear/blob/main/...` URLs are used in links so that a file stays resolvable when an agent fetches it on its own.
 

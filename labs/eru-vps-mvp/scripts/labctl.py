@@ -756,8 +756,12 @@ class Operator:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == 'metadata-backup':
+        from metadata_backup import cli
+        raise SystemExit(cli(PROJECT, sys.argv[2:]))
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
+    sub.add_parser('metadata-backup', help='Offline metadata integrity and review-only restore plans')
     plan = sub.add_parser('plan', help='Read live state and write a private, hash-bound plan')
     plan.add_argument('--operation', required=True, choices=['reapply', 'smoke', 'cleanup', 'rebuild-node', 'canary-start'])
     plan.add_argument('--node', choices=['worker-2', 'worker-3', 'worker-4'])

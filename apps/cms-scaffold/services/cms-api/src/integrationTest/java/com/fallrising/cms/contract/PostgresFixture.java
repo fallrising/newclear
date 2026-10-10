@@ -6,7 +6,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.sql.DataSource;
 
-/** One PostgreSQL 16 container for all store contract tests; every call returns a freshly migrated schema. */
+/** One PostgreSQL 16 container for all store contract tests; every call returns a fresh schema. */
 final class PostgresFixture {
 
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -17,13 +17,20 @@ final class PostgresFixture {
 
     private PostgresFixture() {}
 
+    /** An empty schema migrated to the latest version. */
     static DataSource cleanDataSource() {
+        DataSource dataSource = emptyDataSource();
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
+        return dataSource;
+    }
+
+    /** An empty schema without any migration applied (for migration tests such as EntryIndexBackfillTests). */
+    static DataSource emptyDataSource() {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setURL(POSTGRES.getJdbcUrl());
         dataSource.setUser(POSTGRES.getUsername());
         dataSource.setPassword(POSTGRES.getPassword());
         Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").cleanDisabled(false).load().clean();
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
         return dataSource;
     }
 }

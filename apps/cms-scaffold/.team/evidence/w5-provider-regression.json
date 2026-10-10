@@ -1,0 +1,14 @@
+{
+  "command": "CI=true npm run e2e:mock -- --grep 'notes-only operator|at 390px the navigation|Back media library'",
+  "passed": 2,
+  "failed": 1,
+  "failedCase": "Back media library",
+  "observedApplicationError": "FieldsProvider is missing",
+  "cause": "Prescribed T02 leaves MediaThumb outside FieldsProvider",
+  "artifacts": {
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/test-failed-1.png": "b4145c89bb267f9480af09508a88a165f336c5c91e75d6d4e526f00924986e1d",
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/trace.zip": "0e3074634e854f80d4c1d487647d68e552b3464e9a5e3b3fefb214492db30996",
+    "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/error-context.md": "b319ff04321d35ad54c55265ff32e8c8be174ed19f61fc4fada582ff10c9b361"
+  },
+  "retry": 0
+}

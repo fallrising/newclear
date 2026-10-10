@@ -11,6 +11,7 @@ from .connector_recovery import stopped
 from .domain import TERMINAL, Problem
 from .model_worker import ModelSession, cutoff_reason
 from .recovery import quarantine
+from .result_archive import persist_archive
 from .store import event
 
 
@@ -52,11 +53,14 @@ def heartbeat(worker, claim):
 def execute_real(worker, claim):
     client = worker.connector
     model = ModelSession(worker, claim) if worker.model_proxy else None
+    tools = None
+    archive_pending = False
 
     def snapshot():
         with worker.owned(claim) as (conn, run):
             context = conn.execute(
                 "SELECT p.canonical_repo,a.template_digest,a.limits AS profile_limits,"
+                "a.tool_policy AS profile_tools,"
                 "b.provider_handle FROM tasks t "
                 "JOIN projects p ON p.id=t.project_id JOIN agent_profile_revisions a ON a.id=%s "
                 "JOIN sandbox_bindings b ON b.id=%s WHERE t.id=%s",
@@ -65,6 +69,7 @@ def execute_real(worker, claim):
             return {
                 **run,
                 **context,
+                "tool_transport": context["profile_tools"].get("mock_tools", False) is True,
                 "verification": context["profile_limits"].get(
                     "verification",
                     {"mode": "fixture-m2", "revision": "profile-checks-v1", "checks": []},
@@ -74,7 +79,7 @@ def execute_real(worker, claim):
     def ensure_live(run, lost):
         if lost.is_set():
             raise Problem(409, "worker_lease_lost")
-        if run["deadline"] <= datetime.now(UTC):
+        if not archive_pending and run["deadline"] <= datetime.now(UTC):
             raise Problem(409, "run_deadline_expired")
 
     def state(conn, run, value, reason=None):
@@ -82,9 +87,23 @@ def execute_real(worker, claim):
             worker.state(conn, run, value, reason)
 
     def save_result(result):
+        # Include transaction commit in the guarded region: commit failure must
+        # not fall through to model/tool cancellation and destroy the only result.
+        try:
+            persist_result(result)
+        except Exception as exc:
+            if isinstance(exc, Problem) and exc.code in {
+                "worker_lease_lost",
+                "worker_generation_stale",
+            }:
+                raise
+            raise Problem(409, "artifact_persist_failed") from None
+
+    def persist_result(result):
         with worker.owned(claim) as (conn, run):
             if run["state"] in TERMINAL:
                 return
+            persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(
                 conn,
@@ -92,7 +111,7 @@ def execute_real(worker, claim):
                 "run.result_saved",
                 {
                     "execution_mode": result["execution_mode"],
-                    "diff_sha256": result["diff_sha256"],
+                    "diff_sha256": result.get("diff_sha256"),
                     "verification": result["verification"],
                 },
                 source="connector",
@@ -152,19 +171,37 @@ def execute_real(worker, claim):
     with heartbeat(worker, claim) as lost:
         try:
             run = snapshot()
+            # A DB outage can prevent even the quarantine reason from committing.
+            # Finalizing is already durable before the result fetch, so a resultless
+            # recovery from that phase must protect the existing workspace too.
+            archive_pending = run["result"] is None and (
+                run["reason"] == "artifact_persist_failed"
+                or (
+                    claim.get("recovery")
+                    and (run["interrupted_from"] or run["state"]) == "finalizing"
+                )
+            )
+            if run["tool_transport"]:
+                from .tool_worker import ToolLifecycle
+
+                tools = ToolLifecycle(worker, claim)
             client.fence(run)
             if run["state"] == "cancelling":
                 from .cancellation import execute_cancel
 
+                if tools:
+                    tools.close()
                 execute_cancel(worker, claim, run)
                 return
             if run["control_action"]:
                 from .controls import execute_control
 
+                if tools:
+                    tools.close()
                 execute_control(worker, claim, run)
                 return
             reason = cutoff_reason(worker, run["id"])
-            if reason:
+            if reason and not archive_pending:
                 stop_model(run, reason)
                 return
             observed = client.inspect(run) if claim.get("recovery") else {"phase": "absent"}
@@ -173,6 +210,16 @@ def execute_real(worker, claim):
 
                 record_applied(worker, claim, receipt)
             phase = observed["phase"]
+            retrieve_pending = (
+                archive_pending
+                and claim.get("recovery")
+                and run["reason"] != "artifact_persist_failed"
+                and phase == "running"
+            )
+            if archive_pending and phase not in {"result", "stopped"} and not retrieve_pending:
+                # A failed archive is a completed-result recovery, never authority
+                # to restart work or to destroy its sole unarchived workspace.
+                raise Problem(409, "artifact_persist_failed")
             if claim.get("recovery"):
                 with worker.owned(claim) as (conn, current):
                     conn.execute("UPDATE runs SET reconciled_at=now() WHERE id=%s", (run["id"],))
@@ -182,9 +229,35 @@ def execute_real(worker, claim):
                         "runtime.reconciled",
                         {"phase": phase, "generation": run["generation"]},
                     )
+            if retrieve_pending:
+                # The worker can die after durable finalizing but before fetching
+                # the result. Inspect attests the existing instance; only retrieve
+                # from the same binding/conversation, without restarting any work.
+                ensure_live(run, lost)
+                if (
+                    run["provider_handle"] != observed["allocation"]["handle"]
+                    or run["backend_ref"] != observed["prepared"]["ref"]
+                ):
+                    raise Problem(409, "recovery_binding_mismatch")
+                if tools:
+                    tools.recovered_result()
+                    tools.close()
+                # Connector result independently requires a finished conversation.
+                save_result(client.operation(run, "result"))
+                archive_pending = False
+                run = snapshot()
+                if lost.is_set():
+                    raise Problem(409, "worker_lease_lost")
+                cleaned(client.operation(run, "release"))
+                return
             if phase == "stopped":
+                if tools:
+                    tools.close()
                 if observed.get("result"):
+                    if tools:
+                        tools.recovered_result()
                     save_result(observed["result"])
+                    archive_pending = False
                 with worker.owned(claim) as (conn, current):
                     if current["state"] not in TERMINAL:
                         state(conn, current, "failed", "runtime_stopped_before_result")
@@ -194,9 +267,20 @@ def execute_real(worker, claim):
                 # A terminal run can only finish cleaning its existing, attested instance.
                 if phase != "result":
                     raise Problem(409, "terminal_runtime_state_mismatch")
+                if tools:
+                    tools.recovered_result()
+                    tools.close()
                 cleaned(client.operation(run, "release"))
                 return
             ensure_live(run, lost)
+            if tools:
+                if claim.get("recovery"):
+                    if phase != "result":
+                        raise Problem(409, "tool_recovery_unconfirmed")
+                    tools.recovered_result()
+                    tools.close()
+                else:
+                    tools.configure(run)
             if phase == "absent":
                 if (
                     run["backend_ref"]
@@ -244,6 +328,8 @@ def execute_real(worker, claim):
                 state(conn, current, "finalizing" if phase == "result" else "running")
             run = snapshot()
             ensure_live(run, lost)
+            if tools and phase != "result":
+                tools.start(run)
             if model and phase != "result":
                 model.step(run)
             if phase in {"absent", "allocated", "prepared"}:
@@ -269,9 +355,12 @@ def execute_real(worker, claim):
                                 "UPDATE runs SET backend_cursor=%s WHERE id=%s",
                                 (item["cursor"], run["id"]),
                             )
-                        if events["state"] == "finished" and events["caught_up"]:
+                    if events["state"] == "finished" and events["caught_up"]:
+                        if tools:
+                            tools.finish()
+                        with worker.owned(claim) as (conn, current):
                             state(conn, current, "finalizing")
-                            break
+                        break
                     if events["state"] == "waiting_for_confirmation" and events["caught_up"]:
                         from .approvals import handle_approval
 
@@ -282,6 +371,8 @@ def execute_real(worker, claim):
                     elif events["state"] == "running":
                         with worker.owned(claim) as (conn, current):
                             state(conn, current, "running")
+                        if tools:
+                            tools.step(snapshot())
                     if events["state"] in {"error", "stuck", "paused"}:
                         raise Problem(409, "backend_stopped_without_completion")
                     time.sleep(0.3)
@@ -290,12 +381,25 @@ def execute_real(worker, claim):
             save_result(
                 observed["result"] if phase == "result" else client.operation(run, "result")
             )
+            archive_pending = False
             run = snapshot()
             if lost.is_set():
                 raise Problem(409, "worker_lease_lost")
             cleaned(client.operation(run, "release"))
         except Exception as exc:
             reason = exc.code if isinstance(exc, Problem) else "runtime_operation_uncertain"
+            if reason == "artifact_persist_failed" or archive_pending:
+                try:
+                    quarantine(worker, claim, "artifact_persist_failed")
+                except Exception:
+                    # Expired ownership/database loss follows existing reconciliation.
+                    pass
+                return
+            if tools:
+                try:
+                    tools.close()
+                except Exception:
+                    pass
             if model:
                 try:
                     # Lease/state validation excludes stale owners after user control.
@@ -309,8 +413,21 @@ def execute_real(worker, claim):
                     return
                 except Exception:
                     pass
+            if tools:
+                try:
+                    stop_model(snapshot(), reason)
+                    return
+                except Exception:
+                    pass
             try:
                 quarantine(worker, claim, reason)
             except Exception:
                 # Lost DB/ownership is reconciled by the next worker; TTL bounds VM lifetime.
                 pass
+        finally:
+            if tools:
+                try:
+                    tools.close()
+                except Exception:
+                    # Lost authority is reconciled by the next owner; never rebind.
+                    pass

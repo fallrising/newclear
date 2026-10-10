@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Experimental addendum：2026-10-02，Agent Computer（AC）設計提案；見 §2.4，未實作、未執行實機驗收。
+- Experimental addendum：2026-10-03，Agent Computer（AC）設計提案 AC-design-0.3；見 §2.4，未實作、未執行實機驗收。
 - Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
@@ -63,6 +63,8 @@ M0–M4 的 coding MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、�
 2026-10-02 依 owner 指示，另立受限的 desktop computer-use 實驗，以 CocoonBox 參考畫面的功能效果為目標；詳細方案與 AC 驗收唯一入口為 [docs/AGENT-COMPUTER.md](docs/AGENT-COMPUTER.md)。本次只交付文件，並不授權安裝、VM 啟動、模型呼叫、網路變更或部署。
 
 範圍是單 operator、單 Linux/KVM worker：外部 MCP client 驅動 guest 的可見 Chromium／桌面工具，工作台同步顯示同一個桌面、工具事件與控制權；區分 Disconnect、Save now／Checkpoint、Hibernate／Restore、Branch 與 Release。先證明同一環境的觀看／控制，再驗證生命週期；headless CDP smoke、靜態 UI 或 shell 代寫 GUI 結果都不算完成。
+
+2026-10-03 的追加截圖分析見 AC §1.1–1.3，開源元件評估見 §3.1。中央 `view only` 與工具歷史截圖分開呈現，兩者須可追溯至同一 computer 與各自時間；人工接管是待驗收能力。第一輪一台 computer、一個 active writer、一種外部 client；guest agent、多 client adapter 與多 agent 協作另行規劃。保留 Cocoon 底座，候選桌面／viewer 元件未被認定已相容，也不因來源有程式碼就視為全部採開源授權。
 
 這是 §2.3 之外的獨立實驗，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
 
@@ -166,7 +168,7 @@ flowchart TB
 - Web：React + TypeScript + Vite；query cache 管 server state，SSE 管事件增量。
 - API／worker／connector：Python + FastAPI，便於接 OpenHands 與 sandbox Python SDK；獨立程序／權限，即使共用 package。
 - Persistence：PostgreSQL、SQL migrations；durable job 用 `FOR UPDATE SKIP LOCKED` 與明確 lease。
-- Artifacts：MVP 可使用不在 Web root 的本機目錄，加 authenticated download API；保留 S3-compatible adapter 邊界。
+- Artifacts：M4 首個切片使用 PostgreSQL `result_archives` 保存不可變、最大 1 MiB 的結果 JSON（diff 上限 256 KiB），與 result／terminal state 原子提交；authenticated download 只讀保存 bytes。任意檔案、Web root 外的 object store 與 S3-compatible adapter 後續另做，見 [成果封存](docs/RESULT-ARCHIVE.md)。
 - Run runtime：Linux/KVM、Cocoon、sandboxd、固定 digest 的 guest template；Agent Server 在 guest 中以獨立非 root 控制帳號執行；terminal 經固定 launcher 降至另一個工具帳號，SDK 控制 workspace 與 repository 分離。實作與權限驗收見 [M3 guest isolation](docs/M3-GUEST-ISOLATION.md)。
 - Deployment：控制面容器／服務與 host-level sandboxd 分離；不把 `/dev/kvm` 或 Docker socket 暴露給 Web／agent。
 - Exact versions、lockfiles、image digests、SDK schema hash 與 release compatibility matrix 在 M0 產出並於 M1 固定，不使用 `latest` 當可重現部署契約。
@@ -225,7 +227,7 @@ Runtime connector 維持持久 operation ledger；sandboxd 若不提供 allocati
 | `resource_reservations` | sandbox_id UNIQUE、cpu、memory_bytes、disk_bytes、released_at；cleanup 確認後才歸還 |
 | `artifacts` | id、run_id、kind、object_key、sha256、size、mime、base_sha、head_sha、created_at |
 | `usage_entries` | run_id、provider_request_id UNIQUE、input_tokens、output_tokens、amount_decimal、currency、price_revision、status（reserved/estimated/final/unknown） |
-| `export_operations` | id、run_id、artifact_hash、target_repo、branch、approval_id、state、remote_ref；idempotency key 唯一 |
+| `export_operations`（本切片為 `github_exports`） | id、run_id、artifact_hash、target_repo、branch、approval_id、state、remote_ref；idempotency key 唯一 |
 | `audit_events` | actor、action、target、request_id、decision、created_at；不存 credential |
 
 `run_events.seq` 由每 run counter 在 transaction 中分配，不用 COUNT；UI 只依 seq 排序。先 commit event，再通知 live consumers。重播事件只更新 projection，不能再次送 prompt、執行工具、付款或建立 PR。
@@ -289,7 +291,7 @@ stateDiagram-v2
 | Node 不可達 | observed 狀態標 unknown，保留 reservations；不假裝已刪除、不立即在另一節點重跑 |
 | DB 不可用 | 拒絕新任務／新審批；worker 停新 admission；已在 guest 執行的操作由有界 deadline 與 connector 收尾 |
 | Model 429／5xx | 有界 backoff；串流已產生內容但結果不明，不在無支援 idempotency 時自動重送整個 turn |
-| Artifact upload 失敗 | 留在 finalizing 重試最多 2 分鐘；失敗標 `artifact_persist_failed` 並保留 sandbox 進 recovery queue |
+| Artifact persistence 失敗 | 現有 DB archive 切片交易 rollback，不標 succeeded；real runtime 以 `artifact_persist_failed` 保留 sandbox／reservation 進 recovery queue。獨立 object store 的 finalizing 重試最多 2 分鐘留待其 adapter 實作 |
 | Cleanup 失敗 | 終態 run 保留 cleanup_pending，retry／告警；容量不提前釋放 |
 | Cancel timeout | 顯示 cancelling，connector 停 backend；15 秒未止則要求停止 VM。node 不可達時保持 unknown／cancelling |
 
@@ -311,7 +313,7 @@ stateDiagram-v2
 | `POST /api/v1/approvals/{id}/decision` | approve／deny；綁 action digest + generation；逾期／已決策回 409 |
 | `GET /api/v1/runs/{id}/events?after_seq=N` | durable SSE replay → live；支援 Last-Event-ID |
 | `GET /api/v1/runs/{id}/artifacts` | list，download 另驗證 session 與 object ownership |
-| `POST /api/v1/runs/{id}/exports` | 授權範圍內將固定 artifact 匯出到明確 GitHub repo／branch；M4 |
+| `POST /api/v1/runs/{id}/exports` | 授權固定 archive/hash/target/base/branch，建立 durable export；另有 preview/list/reconcile，見 GitHub export 契約 |
 | `GET /api/v1/runtime`、`GET /api/v1/usage` | 實際容量與逐 run 用量；不得回傳秘密值 |
 
 所有 mutation 要求 CSRF protection；建立／action／message／export 另要求 `Idempotency-Key`。同 key 同 payload 回相同結果；不同 payload 回 `409 idempotency_conflict`。狀態 mutation 帶 `expected_state_version`，不符回 `409 state_conflict`。無效輸入 422、容量政策上限 429、暫時無 runtime 503；排隊中容量不足是正常狀態，不當成已啟動。
@@ -346,6 +348,8 @@ Repo 內容、agent 輸出、工具回傳一律視為資料，不得修改平台
 - Repository checkout credential 為唯讀、repo-scoped、短效。可寫 GitHub credential 只給 export worker；agent 不可自行 push 或建立 PR。
 - Export 綁定 run、artifact hash、target repo、branch 與 approval。Base SHA 漂移／衝突需重新檢查；不強制 push、不自動 merge。遠端結果不明時先查 branch／PR marker，不盲目重建。
 
+M4 [GitHub 匯出切片](docs/GITHUB-EXPORT.md)使用獨立 `export-worker`、公開 target allowlist 和專屬私有 token file。固定成果 diff 經 operator 預覽後明確授權，API 只排 durable operation；每次遠端 mutation 先提交 intent，uncertain／重啟僅作唯讀查核。僅支援有界 regular UTF-8 text patch，來源分支需符合原 base SHA，沒有 force update、merge 或 repository code execution。
+
 目前 [AT-11-A 控制端 model proxy](docs/M3-MODEL-PROXY.md)、[AT-11-B guest transport](docs/M3-GUEST-MODEL.md) 與 [AT-11-C1 fixture budget](docs/M3-FIXTURE-BUDGET.md) 已提供短效 run token、live generation／lease 檢查、durable request count reservation、guest mailbox／固定 SDK tool-call、token 更新、合成 fixture credits 的保守預留／結算及 cutoff 工具／VM 收尾。Guest 通道與 fixture credits 均需明確啟用；後者只驗證固定本機 fixture 的合成計量，不是真實 provider tokenizer 或帳單。`amount_decimal` 保持 null，沒有可信真實金額硬上限。工作台已有唯讀用量，並標明不是帳單。付費呼叫仍未做；預定真接口是 OpenCode Go Chat Completions，key 尚未配置。Unknown dispatch 不重送，停止證據不足仍保留 reservation。
 
 [AT-11-C2a 公開費率演練](docs/M3-PUBLISHED-PRICE-PREVIEW.md)另以固定官方模型規格／公開價目在同一 fixture 通道驗收美元上界預留與估算結算。它仍不呼叫 provider，不聲稱 fixture counters 是 provider 帳單；真實 `amount_decimal` 及硬金額上限保持關閉。
@@ -379,8 +383,8 @@ Approval 內容保存 normalized action、參數 hash、有效期限與 policy r
 | Control API | 測試負載下非串流讀 API p95 < 500 ms，不含上游 provider latency |
 | UI 事件 | DB commit 到連線中瀏覽器顯示 p95 < 1 秒 |
 | Terminal output | 單 tool 最大 10 MiB，超過截斷並標記；run 日誌上限 100 MiB |
-| Artifacts | 單 artifact 100 MiB、每 run 1 GiB；超過拒絕並回清楚原因 |
-| Retention | 事件／artifact 預設 30 天；active／interrupted recovery 工作不由一般 GC 刪除；audit 預設 90 天 |
+| Artifacts | 現有結果 JSON archive 每 run 一份、1 MiB，diff 256 KiB；未來任意 artifact 目標單檔 100 MiB／每 run 1 GiB，目前未實作 |
+| Retention | 手動 archive payload GC 至少 30 天、每批最多 100；active／interrupted／未確認 cleanup／export 引用均保護，metadata/原始 diff 保留。事件 30 天／audit 90 天仍為未實作目標 |
 
 Capacity 計算使用 configured reservations 與 observed 使用量中較保守的結果。CPU 可設明確超賣政策，RAM 初版不超賣；VM、golden template 與 warm pool 都占資源。UI 分別顯示 queue wait、provision、agent execution 與 cleanup 時間，不能用上游 warm-claim 毫秒數宣稱整體任務已就緒。
 
@@ -401,7 +405,8 @@ MVP 不使用 Kubernetes；日後多節點保留相同 API 與 run identity，�
 
 - 升級前 drain 新 admission，完成／取消 active runs，保存 artifacts 與 DB；以版本化 migration 更新控制面。
 - Cocoon snapshot、guest image 與 OpenHands conversation serialization 分別有版本；沒有證據前不跨版本 resume。sandbox 上游部署文件有舊 state 不直接重用的限制，因此初版採 drain + fresh runtime state 的升級方式。
-- 備份 DB、artifact store 與加密 secret metadata；master key 另管。Backup restore 必須測試，DB 備份不是 running VM 備份。
+- 本切片提供離線 native PostgreSQL logical backup／verify／空 DB restore；包含 DB-resident archives/history，排除 ephemeral access tokens/session 與 maintenance identity，恢復後所有 node 保持 drain。只接受可信 operator 備份，checksum 不是來源認證。詳見 [備份與保留契約](docs/BACKUP-RETENTION.md)。
+- Private credential files、master key、connector journal/fences、VM state 與未來外部 artifact store 必須另管；本 CLI 不備份或重建它們。DB restore 不是 running VM restore，不重設 generation 或重派未知操作。
 - Cleanup 以 sandbox_binding 對帳，未知 VM 不任意刪除；僅平台明確擁有且符合終態／retention 規則的資源可回收。
 - 重啟與 node loss 的診斷頁提供 observed 時間、最後 cursor、lease deadline、cleanup reason；不提供直接 root terminal。
 
@@ -448,8 +453,8 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M0 | OpenHands × Cocoon 相容性 spike、版本／schema fixtures、最小 guest template | REST/WS relay、readiness、cancel、serialized resume、TTL/cleanup 與 egress 實測；給每項 pass/unsupported/fail | Passed：固定單節點／none-lane KVM；證據與限制見 [KVM 驗收](docs/KVM-VALIDATION.md) |
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
-| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。可信金額及完整 AT-07/11 待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
-| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | Not started |
+| M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。單人版本已決定延後真實計費／硬金額上限，不作目前 gate，費用保持 unknown；完整 AT-07/11 跨切片驗收待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
+| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；離線 DB 備份／空庫還原、手動 archive payload retention 見 [備份與保留](docs/BACKUP-RETENTION.md)。單節點操作手冊與隔離 control-plane 演練見 [SINGLE-NODE](docs/SINGLE-NODE.md)；任意 artifacts、事件／審計 retention、stale VM cleanup、實際主機部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
 

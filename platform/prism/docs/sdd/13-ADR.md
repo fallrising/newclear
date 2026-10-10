@@ -179,3 +179,182 @@
 **後果**：
 - 使用者必須額外部署 Grafana。`deploy/docker-compose.yml` 預設包含它以降低摩擦。
 - 產品的「一體感」較弱。Phase 6 可用 Apache-2.0 的 Perses 元件補上，不需要 fork Grafana。
+
+## ADR-011：Phase 1 OTLP 寫入使用單租戶 file-backed bearer
+
+**狀態**：P1-04 實作決策，2026-10-03。
+
+**背景**：P1-03 的 tenant context 只接受可信身分。完整 API-key store、mTLS
+租戶映射及控制平面尚未實作；直接信任客戶端租戶 header 會繞過隔離。
+
+**決策**：P1-04 先支援 `tenancy.mode: single`，寫入一律驗證
+`auth.ingest_api_key_file` 載入的獨立 bearer key，且只允許設定的 default tenant。
+`X-Scope-OrgID`、`X-Prism-Tenant` 若出現，必須單一且等於該租戶；跨租戶或
+互相衝突的 selector 不能覆蓋 key 身分。這明確限縮 `02` §0.1 的通用解析順序：
+在完整認證映射實作前，不提供任意 header 選租戶，也不提供 mTLS 身分認證。
+`all-in-one`／`ingest` 在缺少有效 key 或設定 strict tenancy 時拒絕啟動與
+config-check。其他角色仍不需要 ingest key。JWT secret 不重用為寫入 key。
+
+**結果**：可驗收真實三訊號接收且不引入匿名寫入。部署需自行管理與輪替 key；
+本次不提供 live reload、多租戶 key store 或部署。TLS certificate 設定同時套用
+HTTP 與 gRPC；明文只適合本機測試或可信網路。key 不進 log、錯誤或序列化設定。
+
+**計數**：OTLP 部分失敗以原始 datapoint/log/span 為單位。若一個 metric point
+展開出的任一 UTM child 被拒絕，原始 point 計一次 rejected；其他 child 可能已被
+接受，客戶端不得因 partial success 重送整批。delta baseline、metadata 不支援與
+可恢復正規化警告不可冒充資料點拒絕數。詳見 [P1-04 設計](../specs/p1-04-otlp.md)
+及 [OTLP 規範](https://opentelemetry.io/docs/specs/otlp/)。
+
+**容量**：daemon 使用一租戶、每 lane queue depth 4 的預設，與保留相容性的
+pipeline package defaults 分開。`ingest.memory_limit` 驗證邏輯 payload 與接收
+buffer 預算；它不是硬性 RSS 上限，不包含 memory backend 無界資料保留。
+
+**gRPC 早期限流**：固定版本 grpc-go 的 tap abort 不保留 status details，因此解碼前
+的 receiver 容量不足回 `Unavailable`，讓 OTLP 客戶端使用標準 backoff 重試。
+pipeline 佇列／rate limit 仍在正常 unary handler 回 `ResourceExhausted` 加
+`RetryInfo`，符合 `02` §1.1 的佇列滿契約。使用標準 MethodDesc 及 bounded raw
+request，避免依賴不受支援的 stream descriptor flags；協定錯誤在 handler
+分類，原生 framing/compression 錯誤保留函式庫行為。
+
+
+## ADR-012：remote_write v1 的有界接收與部分拒絕
+
+**狀態**：P1-05 實作決策，2026-10-04。
+
+**決策**：remote_write 使用 ADR-011 同一個 file-backed bearer 與固定 tenant。
+HTTP endpoint 為 `/prom/api/v1/write`，僅接受 snappy block 與 v1 protobuf。
+解壓配置大小和 protobuf 元素在生成 decoder 配置 slice 前驗證；每個 receiver
+固定一個非阻塞 slot，從 body read 持有至 normalize/submit 完成。Stop 拒絕新工作，
+既有 HTTP drain 與 pipeline 關閉順序不變。
+
+**回應**：成功入列回空 204；入列前容量/速率拒絕回 429 與 Retry-After。
+任何 sample 部分拒絕回不重試的 400，成功部分可能已保存，不能將整批當成尚未提交。
+此行為遵循 remote_write v1；metadata/native histogram 等既有非致命 mapping
+警告用限量且不含使用者字串的日誌呈現。保留 raw decompressed bytes 做 byte admission。
+
+**容量與範圍**：在 P1-04 logical budget 上加入兩個 max_request_bytes buffer，
+預設共 968 MiB，並非 RSS 保證。單 slot 選擇偏保守，仍可由 client batching 使用；
+不增加設定或依賴。不引入自動重載、多租戶控制面、查詢 API、遠端寫入 v2、WAL
+或部署。此切片不使用跨請求 buffer pool，避免保留最大請求記憶體及敏感資料；
+各請求資源在結束時釋放，與 SDD05 的 pool 建議相比採用更明確的保留上限。
+
+詳見 [P1-05 規格](../specs/p1-05-remote-write.md) 與
+[remote_write v1](https://prometheus.io/docs/specs/prw/remote_write_spec/)。
+
+## ADR-013：Go 1.27 維護基準與單一版本來源
+
+**狀態**：2026-10-04 明確授權的 Go 升級決策。
+
+**決策**：以 `go.mod` 的 `go 1.27.1` 同時宣告最低 toolchain 與 Go 1.27
+語言基準；Prism 兩個 CI job 使用 `go-version-file` 讀同一檔案，並以
+`GOTOOLCHAIN=local` 驗證所安裝版本。lint 工具更新為支援此版本的
+v2.14.0，保留啟用的檢查。既有 require/replace、go.sum、SPI 與協議不變。
+
+**理由與後果**：Go 1.23 已超出官方支援窗口。先前 P1-05 的 Go 1.27
+試跑是可行性證據；本次重新驗證提高 go directive 後的實際語言／runtime
+基準。歷史驗證不改寫，現行操作指引與 SDD 建置版本同步。舊 compiler
+關閉自動切換時應清楚拒絕；不承諾未量測的效能收益，不包含系統全域
+安裝、容器部署或下一功能。詳見 [升級契約](../specs/go-1.27-upgrade.md)。
+
+
+## ADR-014：Phase 1 Loki JSON push 使用獨立受限接收器
+
+**決策**：沿用固定單租戶 file-backed bearer 與既有 pipeline，支援 JSON／gzip，protobuf push 留在 Phase 2。原始解壓 JSON 長度用於 byte admission；token/schema/duplicate/depth/element 與展開工作量預檢先於 materialization。接收器採獨立單一 slot，取消 callback 完成後才釋放。
+
+**理由與後果**：避免壓縮與共享 stream metadata 放大、租戶偽造及取消後資源累积。新增兩個 request-size receive buffers，預設 logical budget 1000 MiB，並非RSS限制。全數接收回204；語意 partial 回400且有效資料可能已入列；committed internal failure回500仍可能重送重複。
+
+**替代方案**：複用OTLP容量gate會改變既有協定背壓；直接無預檢JSONdecode會在拒絕前配置不受元素限制的物件。範圍、狀態碼與實測驗收見 [P1-06 contract](../specs/p1-06-loki-push.md)。
+
+
+## ADR-015：PromQL adapter 的 SPI series 生命週期
+
+- **狀態**：P1-07 實作決策；驗收依 [里程碑規格](../specs/p1-07-promql-adapter.md)。
+- **原因**：SDD14 §7 的 SPI Series 只在下一次 Next 前有效；Prometheus v0.53.0 storage.Series 允許稍後或重複取得樣本迭代器。SDD06 的零拷貝薄包裝示意不能直接滿足兩者。
+- **決策**：列舉時複製完整 labels 身分，呈現時隱藏內部保留標籤。每次樣本 Iterator 以可信 tenant 與相等 matcher 重新 Select，再比對完整 labelset，排除多餘 labels 及 absent/empty 的誤配。保持該 SPI set 未前進直到樣本讀完；耗盡、錯誤或 Querier.Close 關閉且只關一次。設定有限的 series、rows、sets 與 metadata 預算，所有重開與 Seek 工作都計量。
+- **取捨**：不改公共 SPI、不收集整份樣本結果，但增加選取次數；SPI 沒有跨呼叫快照，因此不宣稱與並行寫入隔離。既有 memory driver 的內部 materialization 不由 adapter 消除，也不能以 adapter 上限宣稱整個程序 RSS 有界。生命週期測試必須使用會在 Next 回收 Series 緩衝區的 fake backend。
+- **相容性邊界**：SDD02 §2.3 的 v1 float/classic-histogram 契約優先於「所有上游 testdata」的概括句。官方 corpus 的 native-histogram 相依案例需逐例列出原因，其餘相容案例必須真的經過 memory SPI 與 adapter。P1-08 才接 HTTP、query router 與完整 AST/output 政策。
+
+
+## ADR-016：P1-08 HTTP 查詢的可信單租戶边界
+
+- **決策**：P1-08 沿用現有single-tenant runtime，以default_tenant固定storage身分；tenantheader只可驗證相同身分，不授權切換。allow_anonymous_read允許無credential讀取固定tenant，否則沿用既有APIkey；提供錯誤credential不得當匿名忽略。strict模式未有control-plane身分映射，明確拒絕啟動。
+- **原因**：SDD02通用header優先序尚缺可信授權映射，直接接受header會使未授權租戶可讀。現有memory與寫入runtime契約先維持安全的一致邊界。完整多租戶與mTLS身分映射屬後續控制平面。
+- **查詢邊界**：P1-08補齊HTTP labels中的__name__並在AST／output防守reservedlabels；保留P1-07串流reselect與float-only限制。限流、時間範圍、回應容量、路由觀測及shutdown依 [P1-08 contract](../specs/p1-08-prometheus-http.md)。
+
+
+## ADR-017：Prometheus HTTP numeric timestamp parser 校正
+
+- **問題**：既有ParsePromTime沿用SDD14的SecFloatToMilli逐字公式，負秒數有1ms偏移且NaN／Inf／溢位無錯誤，與SDD02 Unixseconds相容契約衝突。P1-08獨立審查以實際redtest確認。
+- **決策**：只校正ParsePromTime numeric branch：拒絕非有限／超出可表示int64毫秒範圍的秒數，正負都四捨五入到毫秒（half away from zero）。RFC3339原行為保留，公共識別字及legacy SecFloatToMilli helper與它的直接測試不变；parser舊負數測試從-999改為正確-1000。SDD14示意parser不再覆蓋本ADR的輸入驗證與負數校正。
+- **後果**：HTTP維持集中UTM換算；畸形與溢位時間不再被轉成有效範圍，沒有新增依賴。極大浮點Unixseconds仍受float64毫秒精度限制，無微／奈秒精度保證。與Prometheus2.53的Modf浮點分段捨入在tie可差1ms，例如-1.2345本parser為-1235ms、上游因浮點fraction為-1234ms；此處保留明確對稱捨入契約，不宣稱tie逐位相同。
+
+## ADR-018：P1-09 ClickHouse write-only driver 與現行 SPI 適配
+
+2026-10-05，owner 已批准 P1-09 與官方 clickhouse-go/v2 v2.48.0 的必要依賴。以現行可執行 SPI 為契約，不改公開識別字。MetricPoint 沒有 fingerprint 欄位，ClickHouse writer 使用既有 utm.Fingerprint 對完整 sorted labels（含 metric 與 trusted tenant）計算；不另定 hash。series cache 在 seen 範圍延伸時仍寫 metadata，避免 first_seen/last_seen 因 cache 命中而失真。
+
+本輪只有遷移、三訊號寫入與保守 capabilities；所有 production reads classified Unsupported、未實作 optional interfaces，不宣稱 full conformance。非空 cluster classified Unsupported，replicated deployments 另行驗證後才支持。Log/span schema 補存完整 Resource，span 另存 TraceState 與 link attrs；既有 SPI 不能表示的狀態不以改接口解決。
+
+所有 batch/history/cache/concurrency 有有限 bounds，ctx 與 Close 保護 native client 的生命週期。遷移 receipt 同步完成；預設 async telemetry ack 不是持久化保證，部分多表成功不能回滾，不自動 retry。checksum 對渲染前 SQL，TTL 改動另外冪等 reconcile。Local dependency join 包含 tenant+trace+span，未解 parent 寫 pending_links；Phase3 定時補算与 graph query 不在本輪。詳見 [P1-09 specification](../specs/p1-09-clickhouse-write.md)。
+
+P1-09 真 ClickHouse 24.8.14.39 驗證發現 trace_index 的 groupUniqArrayArray 回傳 Array(String)，不相容原 Array(LowCardinality(String)) storage type；改為 Array(String)，保持聚合語義。Series first_seen/last_seen 使用 DateTime64(3) 保留毫秒；metadata 無 TTL 與 samples 的 retention 分開明示，Retention.Enforced=false。Server max_execution_time 預設55秒，driver operation timeout包含5秒overhead並涵蓋admission。所有schema timestamp受最弱DateTime預聚合範圍1970到2106限制，預I/O拒絕非法值。
+
+獨立審查確認四項邊界後，P1-09 契約要求全零 ID 按 UTM helper 拒絕、metric label 名稱與值先驗 UTF-8、migration008 使用 canonical MATERIALIZED labels_str。ClickHouse24.8 TTL expression 不接受 DateTime64，而 DateTime 加 retention 可溢位導致提前刪除；因此明確使用 UTC TTL，寫入前驗證 TTL source 加有效 retention 仍小於2106上限，Migrate 在任何 TTL ALTER 前先驗全部八表既有最大來源時間。變更 retention 前須停排其他 backend/process writer，避免舊設定跨過 MAX 到 ALTER 的檢查窗口；不靜默縮短 retention、不改公開 SPI 或原 hash。span start 使用 max(trace,RED,1day)，end/events 只受原始範圍限制。
+
+官方2.48.0 client 會按 ctx deadline 覆寫 protocol max_execution_time。P1-09 保留完整 deadline/cancellation，受控 migration scan 與 INSERT 額外以 SQL SETTINGS 強制設定上限。Native batch 無 column-list 才能保留此 SETTINGS，所以準備後必須核對返回的 column count/name 與原固定 INSERT list 完全相同，任何 schema 漂移關閉 batch 並 fail closed，不按猜測欄序寫資料。DDL 保留 client max_execution_time+5 秒限時；其 protocol server 上限由上游 deadline 規則決定，不宣稱與 scan/INSERT 設定逐值相同。
+
+
+## ADR-019：P1-10 mandatory query 與現有 SPI 語義適配
+
+狀態：設計已確認，2026-10-06；驗證結果以inventory為準。
+
+SDD17早期SQL不是現有SPI的逐字實作。P1-10只實作mandatoryreads：PromQL仍走既有回退引擎；optionalmetricmetadata/delete/nativequery、NativeLogQuerier、RED/Dependencies仍不宣告。完整labels.Compare排序使用無分隔符歧義的sortedlabeltuples；不能因008的labels_str存在就承諾所有合法value的字典序。跨monthmetadata先合併完整identity；catalog使用實際sample存在，避免metadata無TTL或extent窗口hole造成幽靈series。
+
+Metrics時間inclusive毫秒，logs/traces依現有半開奈秒契約；missinglabel等於空字串做matcher，但catalog只有真正有鍵才回該值。LogSearch只下推selectors/time/sort，未實作filters/stages/fields/agg能力false且不得在補算前limit。Trace duration用完整trace的root最大duration，root存在但duration0仍不fallback；無root才用最大span。FindTraceIDs時間/其他filter決定matching spans的start/end；GetTrace index最大時間是span start，必須包含末筆及late span。
+
+新增009只加logs.write_seq UInt64 DEFAULT0，保留001–008checksums。MergeTree physicalpart/offset會隨merge改變，無法提供持久writeorder，因此新單一writer的logwrites在同一operation lease內以context-aware gate序列化：首次有界查max(write_seq)，先檢查overflow再保留sequence；失敗／lost reply也不重用。Log INSERT用async_insert=0，確保成功後可查，drained writer重新開啟時可seed；metrics/traces保持原asyncack限制。排序為ts方向、write_seq升序。舊row預設0只能用確定性內容次序，不能重建原本未存的歷史writeorder；獨立process writers需外部序列化，不承諾global同時order。這是schema加法與logack語義的必要改變，不擴張deployment／協調系統。
+
+所有iterator持有admission/context/nativeRows lease直到EOF/Close/error/cancel；Backend.Close取消且等待callbacks/rowsdrain後closeclient一次。Server/local scan/resultlogicalbytes有明確上限，overflow回TooLarge，沒有成功截斷。這些上限不是RSS／soak保證。ConfigDSN使用既有secret.String/file引用，storage.retention唯一來源傳到driver，非空split本期failclosed，server execution timeout小於query timeout；只啟用現有daemonSPI接線。詳見`docs/specs/p1-10-clickhouse-query.md`及SDD11／17當期邊界。
+
+現有metricconformance以__name__識別series且多個points沒有冗餘Name，memory也接受。P1-10需將Name空時由validated非空__name__推導localcopy；非空Name仍requireexactmatch，兩者空／矛盾beforeIO拒絕。這是既有executablecontract適配，不修改SPI、不包裝conformancefactory、不放寬tenant/UTF8／time／payloadvalidation，也不改P109歷史spec。
+
+真實24.8.14.39 probe確認，pinned native client的time.Time query argument會失去DateTime64邊界所需的毫秒／奈秒精度。讀取條件改綁Unix整數，再用fromUnixTimestamp64Milli／Nano轉回server時間型別，保持現有inclusive／half-open契約，writer仍使用UTM時間轉換。Metadata map identity使用排序後的key/value tuples，避免Go map編碼順序導致同一series被誤判為collision。
+
+GetTrace直接讀tenant+trace_id的spans，保留既有bloom及server scan cap；不以derived trace_index存在或extent當完整性前提，避免index lag／最後或late span漏查。先讀index縮小掃描屬未來效能選項，未驗證的大量掃描可能fail closed，不宣稱production latency／soak。
+
+完整corpus雖579／189／6296通過，原fuzz seed抓到單點／批首-0在既有Float64 Gorilla codec落庫變+0；raw reinterpretAsUInt64亦確認已失bit，reader不能恢復。批准新增010的UInt64 value_bits DEFAULT reinterpretAsUInt64(value)，writer顯式寫math.Float64bits、reader以math.Float64frombits重建，不改SPI／原codec／既有001–008。新UInt64持久路徑已在私人實庫probe確認signed-zero可保留；最終fullpackage還須重跑。舊row可讀，已丟失的歷史signed-zero不可重建。這是mandatory float fidelity必要加欄，不增加依賴或擴張native histogram範圍。
+
+ADR-019 follow-up (P1-10 D010/D011): Independent frozen-source review reproduced caller-context memory-cap bypass and a trace default-value discrepancy. Read SQL now fixes the validated memory cap. The existing SPI/memory reference governs nonpositive trace limits and exact empty-service selection; positive requested limits remain after full filters/order, and backend safety caps still fail closed. These changes preserve interfaces, dependencies and other drivers.
+
+
+## ADR-020：P1-11 Phase 1 部署與實際 E2E 邊界
+
+當期部署只啟動既有 prismd、ClickHouse、Grafana，以固定 Linux amd64 官方映像、
+file-backed daemon/ClickHouse/admin 秘密與 Grafana bearer header 接線。保留既有
+JWT/rules/notify validation；未實作的 alerting/agent/control-plane 產物明確為
+inactive reference。SDD22 的完整產品 draft 按當期 spec 調整，不據此增加 runtime。
+
+只增加 internal daemon/server 的 version、shell-free bounded healthcheck、listener
+與 backend startup 後的 readiness，以及 stdlib sd_notify。不改公共 SPI、driver、
+module dependencies、root workflows 或 Go 1.27.1。Compose fixtures 使用唯一
+project/image、ownership labels、local Unix socket、fail-closed inspection 與 bounded
+去敏 evidence；不改 global Docker context/auth/proxy，不執行 production deployment。
+
+驗收包含真實 ingestion→ClickHouse→PromQL/Grafana、已 provision metric panel、
+認證拒絕與可見資料跨 graceful daemon/ClickHouse restart 的持久性。Metrics/traces
+保持 async acknowledgement；沒有 unflushed crash durability 保證。四個 datasource
+provision 不代表 Loki/Jaeger/Alertmanager APIs 已存在。完整來源凍結後由 Astra
+獨立審查，root 最終 checks 與 CI 才決定是否完成。詳見 [P1-11 spec](../specs/p1-11-deploy-e2e.md)。
+
+ADR-020 query refinement: a bounded AST with no vector or matrix storage selector
+may use a historical top-level instant evaluation time. Every storage-free
+expression uses the pinned engine without NativeMetricQuerier dispatch. This
+resolves the fixed Grafana health probe without a literal expression/time special
+case or global lookback change. Data selectors, range/future/modifier bounds,
+authentication, tenancy, complexity and resource limits remain mandatory.
+
+ADR-020 restart refinement: pinned Compose2.40.3 has no `start --wait`. The owned
+runner uses health-waiting `up` with no recreate, no dependencies, no build and
+no pull, and requires identical container and named-volume identities before
+post-restart data assertions. Docker may reassign ephemeral host ports for the
+same container; the runner re-reads strict loopback endpoints after each restart.
+A recreated fixture cannot establish persistence.

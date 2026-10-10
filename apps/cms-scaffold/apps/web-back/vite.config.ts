@@ -5,9 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
+  build: { manifest: true },
   // `--mode mock` serves the MSW worker script from @cms/mocks; production builds never contain it.
   publicDir: mode === "mock" ? "../../packages/mocks/public" : "public",
   server: { port: 5174, strictPort: true, host: true },
   preview: { port: 5174, strictPort: true, host: true },
-  test: { environment: "jsdom", setupFiles: "./src/test-setup.ts" },
+  test: { env: { TZ: "Asia/Taipei" }, environment: "jsdom", setupFiles: "./src/test-setup.ts" },
 }));

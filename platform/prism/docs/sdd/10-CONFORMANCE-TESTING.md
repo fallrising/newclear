@@ -179,6 +179,16 @@ go list -deps ./... | grep -E 'grafana/(loki|tempo|grafana)' && exit 1
 | `E2E-08` | `prismd` 重啟後告警 `for` 計時不重置 |
 | `E2E-09` | 後端停機 5 分鐘 → agent WAL 緩衝 → 恢復後資料完整 |
 
+P1-11 的當期驗收依 [Phase 1 規格](../specs/p1-11-deploy-e2e.md)：
+E2E-01 以真實 telemetrygen（HTTP/gRPC）、Prometheus remote_write 與 Vector
+寫入容器 daemon；指標經 PromQL 查值，日誌及追蹤經實庫查持久欄位。
+Loki/Jaeger 查詢 API 尚未實作，不能把 raw storage 驗證記作相容 API 通過。
+E2E-02 provision 四個 datasource，只要求 Prometheus 的實際 health、帶認證的
+`/api/ds/query` 與已 provision 指標面板回傳已知資料；其餘三個 API 留待後續階段。
+已查到的資料須跨 daemon graceful restart 與 ClickHouse restart 保留；最終清理
+只移除本次 project/ownership label 確認的容器、volumes 及 network。
+上述完整產品 E2E-03–09 保留原目標，本輪不宣稱完成。
+
 `E2E-07` 是整個 SDD 的最終驗收：**它直接測的就是「底層可換」這個核心主張。**
 
 ## 6. 安全測試

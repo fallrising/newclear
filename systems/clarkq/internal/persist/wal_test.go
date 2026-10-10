@@ -144,3 +144,41 @@ func TestWALWithPeriodicStyleCompact(t *testing.T) {
 	}
 	_ = e2.Stop()
 }
+
+func TestWALReplayRemovesDequeuedIDNotHead(t *testing.T) {
+	walPath := filepath.Join(t.TempDir(), "replica.wal")
+
+	m := queue.NewManager(10, 100, 1024)
+	e := NewEngine(m, EngineConfig{WALPath: walPath})
+	if err := e.Load(); err != nil {
+		t.Fatal(err)
+	}
+	var ids []string
+	for _, body := range []string{"head", "tail"} {
+		msg, err := m.Enqueue("q", queue.EnqueueInput{Body: body})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := e.RecordEnqueue(msg); err != nil {
+			t.Fatal(err)
+		}
+		ids = append(ids, msg.ID)
+	}
+	// A replica removes a non-head message when the owner's dequeue arrives.
+	if err := e.RecordDequeue("q", ids[1]); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.Stop(); err != nil {
+		t.Fatal(err)
+	}
+
+	m2 := queue.NewManager(10, 100, 1024)
+	e2 := NewEngine(m2, EngineConfig{WALPath: walPath})
+	if err := e2.Load(); err != nil {
+		t.Fatal(err)
+	}
+	defer e2.Stop()
+	if !m2.HasMessage("q", ids[0]) {
+		t.Fatal("replay removed the head instead of the dequeued message")
+	}
+}

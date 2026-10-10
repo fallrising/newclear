@@ -7,17 +7,36 @@ import type { ContextSource } from "../canvas/edges";
 import * as ipc from "../../ipc";
 
 import * as ai from "./ai_ipc";
+import { aiSetupProblem } from "./ai_settings";
 import * as doc from "./doc_ipc";
 import { createEditor, type EditorHandle } from "./editor";
 import { readRunIn } from "./frontmatter";
 import { blockKey } from "./runnable_block";
 import { STRINGS, CSS } from "./config";
+import { DocumentLifecycle, DocumentReadGate } from "./lifecycle";
+import { collectContext } from "./ai_lifecycle";
+import { AiRequestLifecycle } from "./ai_request_lifecycle";
+import { DocumentCloseLifecycle, type ClosePrompt } from "./close_lifecycle";
+import type { WindowCloseParticipant } from "./window_participant";
+
+let nextDocumentLifetime = 0;
+function documentOwner(path: string) {
+  const owner = {
+    path, id: ++nextDocumentLifetime, attached: true,
+    ref: (_node: HTMLDivElement | null) => {},
+  };
+  // Ref detach runs during unmount, before passive registration cleanup.
+  owner.ref = (node) => { owner.attached = node !== null; };
+  return owner;
+}
 
 interface DocumentSurfaceProps {
   /// Vault-relative or absolute path to open.
   path: string;
-  /// Notify the parent (App) when the user closes the document.
+  /// Approved removal only; bypass the canvas request guard.
   onClose: () => void;
+  registerCloseGuard?: (requestClose: () => void) => () => void;
+  registerWindowCloseParticipant?: (participant: WindowCloseParticipant) => () => void;
   /// First step of D-6's execution-target resolution chain (minimal):
   /// the currently-active terminal session, if any. Without `run_in`
   /// frontmatter or a `triggers` edge, this is the implicit target.
@@ -30,8 +49,7 @@ interface DocumentSurfaceProps {
   /// Sources (docs and/or terminal scrollbacks) whose content should be
   /// pinned into the AI prompt, derived from incoming `context_for`
   /// edges on the canvas. Docs are fetched via `doc_read`; terminals via
-  /// `pty_scrollback`. The panel ships the assembled set as cached
-  /// context blocks.
+  /// `pty_scrollback`. The panel refreshes all requested sources at send.
   pinnedContextSources?: ContextSource[];
 }
 
@@ -42,6 +60,8 @@ type ConflictState =
 export function DocumentSurface({
   path,
   onClose,
+  registerCloseGuard,
+  registerWindowCloseParticipant,
   activeTerminalId,
   onRunInChange,
   pinnedContextSources,
@@ -80,26 +100,77 @@ export function DocumentSurface({
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<EditorHandle | null>(null);
-  const dirtyRef = useRef(false);
-  const onDiskHashRef = useRef<string>("");
+  const lifecycleRef = useRef(new DocumentLifecycle());
+  const buffer = lifecycleRef.current;
+  const readGateRef = useRef(new DocumentReadGate());
+  const documentGenerationRef = useRef(0);
+  const backendStateQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+  const syncBackend = (snapshot?: doc.DocSnapshot) => {
+    const generation = documentGenerationRef.current;
+    const documentPath = snapshot?.path ?? buffer.path;
+    const current = () => generation === documentGenerationRef.current && buffer.path === documentPath;
+    const operation = backendStateQueueRef.current.then(async () => {
+      if (!current()) return;
+      if (snapshot) await doc.docOpen(snapshot.path, snapshot.on_disk_hash);
+      if (!current() || !documentPath) return;
+      if (buffer.dirty) await doc.docMarkDirty(documentPath);
+      else await doc.docMarkClean(documentPath);
+    });
+    backendStateQueueRef.current = operation.catch((e) => {
+      if (current()) flash(`document state error: ${String(e)}`);
+    });
+    return operation;
+  };
 
   const [status, setStatus] = useState<
     "loading" | "missing" | "ready" | "error"
   >("loading");
+  const statusRef = useRef(status);
+  statusRef.current = status;
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [conflict, setConflict] = useState<ConflictState>({ kind: "none" });
+  const conflictRef = useRef<ConflictState>(conflict);
+  const updateConflict = (next: ConflictState) => {
+    conflictRef.current = next;
+    setConflict(next);
+  };
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [closePrompt, setClosePrompt] = useState<ClosePrompt | null>(null);
+  const closeLifetimeRef = useRef<DocumentCloseLifecycle | null>(null);
+  // Replacing the rendered path revokes old decisions before passive cleanup.
+  const closeOwnerRef = useRef<ReturnType<typeof documentOwner> | null>(null);
+  if (!closeOwnerRef.current || closeOwnerRef.current.path !== path) closeOwnerRef.current = documentOwner(path);
+  const closeOwner = closeOwnerRef.current;
+  const windowRegistrationRef = useRef({ register: registerWindowCloseParticipant });
+  if (windowRegistrationRef.current.register !== registerWindowCloseParticipant) {
+    windowRegistrationRef.current = { register: registerWindowCloseParticipant };
+  }
+  const windowRegistration = windowRegistrationRef.current;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const saveRef = useRef<() => Promise<boolean>>(async () => false);
+  const pendingSaveActionsRef = useRef(new Set<object>());
+  const pendingCreateActionsRef = useRef(new Set<object>());
+  const saveAckFailedRef = useRef(false);
+  const cancelCloseRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (closePrompt) cancelCloseRef.current?.focus();
+  }, [closePrompt !== null]);
 
   // AI panel
   const [aiOpen, setAiOpen] = useState(false);
   const [aiStatus, setAiStatus] = useState<ai.AiStatus | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiRequestId, setAiRequestId] = useState<string | null>(null);
-  const aiRequestIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    aiRequestIdRef.current = aiRequestId;
-  }, [aiRequestId]);
+  const [aiBusy, setAiBusy] = useState(false);
+  const aiBusyRef = useRef(false);
+  const aiLifetimeRef = useRef<{
+    requests: AiRequestLifecycle;
+    ready: Promise<void>;
+  } | null>(null);
 
   // Fetched bodies of incoming context_for edges. Re-fetched whenever the
   // canvas-resolved set of pinned doc paths changes. Source = relative
@@ -166,112 +237,219 @@ export function DocumentSurface({
   useEffect(() => {
     let alive = true;
     let off: (() => void) | undefined;
-    void (async () => {
-      const unlisten = await ai.onAiEvent((ev) => {
-        if (ev.request_id !== aiRequestIdRef.current) return;
-        switch (ev.kind) {
-          case "started":
-            // Open a quoted scaffold the streamer can pile into. The
-            // cursor lands at the line below `> 🤖`, ready to receive
-            // text chunks.
-            editorRef.current?.insertAtCursor("\n\n> 🤖 ");
-            break;
-          case "text":
-            // Insert raw delta. Newlines become `\n` continuations of
-            // the quoted block; users can clean up after.
-            editorRef.current?.insertAtCursor(
-              ev.delta.replace(/\n/g, "\n> "),
-            );
-            break;
-          case "done":
-            editorRef.current?.insertAtCursor(
-              `\n\n_(input ${ev.usage.input_tokens}, output ${ev.usage.output_tokens}` +
-                (ev.usage.cache_read_input_tokens > 0
-                  ? `, cache hit ${ev.usage.cache_read_input_tokens}`
-                  : "") +
-                `)_\n\n`,
-            );
-            setAiRequestId(null);
-            flash("AI done");
-            break;
-          case "error":
-            editorRef.current?.insertAtCursor(
-              `\n\n_(AI error: ${ev.message})_\n\n`,
-            );
-            setAiRequestId(null);
-            break;
-          case "cancelled":
-            editorRef.current?.insertAtCursor("\n\n_(cancelled)_\n\n");
-            setAiRequestId(null);
-            break;
-        }
-      });
-      if (!alive) {
-        unlisten();
-        return;
+    setAiBusy(false);
+    aiBusyRef.current = false;
+    setAiRequestId(null);
+    const deliver = (ev: ai.AiEvent) => {
+      if (!alive) return;
+      switch (ev.kind) {
+        case "started": editorRef.current?.insertAtCursor("\n\n> 🤖 "); break;
+        case "text": editorRef.current?.insertAtCursor(ev.delta.replace(/\n/g, "\n> ")); break;
+        case "done":
+          editorRef.current?.insertAtCursor(
+            `\n\n_(input ${ev.usage.input_tokens}, output ${ev.usage.output_tokens}` +
+            (ev.usage.cache_read_input_tokens > 0 ? `, cache hit ${ev.usage.cache_read_input_tokens}` : "") + `)_\n\n`,
+          );
+          flash("AI done");
+          break;
+        case "error": editorRef.current?.insertAtCursor(`\n\n_(AI error: ${ev.message})_\n\n`); break;
+        case "cancelled": editorRef.current?.insertAtCursor("\n\n_(cancelled)_\n\n"); break;
       }
+    };
+    const requests = new AiRequestLifecycle(ai.aiCancel, deliver, (state) => {
+      aiBusyRef.current = state.busy;
+      setAiBusy(state.busy);
+      setAiRequestId(state.requestId);
+    }, (error, operation) => {
+      flash(`AI ${operation} failed: ${String(error)}`);
+    });
+    const ready = (async () => {
+      const unlisten = await ai.onAiEvent((ev) => requests.accept(ev));
+      if (!alive) { unlisten(); throw new Error("AI listener disposed"); }
       off = unlisten;
     })();
+    const lifetime = { requests, ready };
+    aiLifetimeRef.current = lifetime;
+    void ready.catch(() => { /* submission surfaces listener failure */ });
     return () => {
       alive = false;
+      requests.close();
       off?.();
+      if (aiLifetimeRef.current === lifetime) aiLifetimeRef.current = null;
     };
-  }, []);
+  }, [path]);
 
   const submitAiPrompt = async () => {
-    if (!aiStatus?.key_present) return;
-    if (!aiPrompt.trim()) return;
-    if (aiRequestId) return;
-    try {
-      const view = editorRef.current?.view;
-      const docText = view ? view.state.doc.toString() : "";
-      const id = await ai.aiAsk(aiPrompt, docText || null, pinnedContextBodies);
-      setAiRequestId(id);
-      setAiPrompt("");
-    } catch (e) {
-      flash(`AI request failed: ${String(e)}`);
-    }
+    if (aiSetupProblem(aiStatus) || !aiPrompt.trim()) return;
+    const lifetime = aiLifetimeRef.current;
+    if (!lifetime) return;
+    await lifetime.requests.submit(
+      lifetime.ready,
+      () => collectContext(pinnedContextSources ?? [], doc.docRead, ipc.ptyScrollback),
+      (context) => {
+        setPinnedContextBodies(context);
+        const docText = editorRef.current?.view.state.doc.toString() ?? "";
+        return ai.aiAsk(aiPrompt, docText || null, context);
+      },
+      () => setAiPrompt(""),
+    );
   };
 
   const cancelAi = async () => {
-    if (!aiRequestId) return;
-    try {
-      await ai.aiCancel(aiRequestId);
-    } catch {
-      /* ignore */
-    }
+    await aiLifetimeRef.current?.requests.cancel();
   };
 
   // Save through the backend. Returns true iff bytes hit disk.
-  const save = async (force = false): Promise<boolean> => {
-    const view = editorRef.current?.view;
-    if (!view) return false;
-    const content = view.state.doc.toString();
-    const expected = force ? null : onDiskHashRef.current || null;
+  const save = async (): Promise<boolean> => {
+    if (!editorRef.current || !buffer.path || statusRef.current !== "ready" || buffer.creating) return false;
+    const generation = documentGenerationRef.current;
+    const revision = buffer.revision;
+    const request = {};
+    pendingSaveActionsRef.current.add(request);
+    readGateRef.current.invalidate();
+    setSaving(true);
+    setError(null);
+    let written = false;
     try {
-      const outcome = await doc.docWrite(path, content, expected);
+      const outcome = await buffer.save(() => {
+        if (!editorRef.current) throw new Error("Document editor was closed before save");
+        return editorRef.current.view.state.doc.toString();
+      }, doc.docWrite);
+      if (documentGenerationRef.current !== generation || buffer.revision !== revision) return outcome.kind === "written";
+      readGateRef.current.invalidate();
       if (outcome.kind === "conflict") {
-        setConflict({ kind: "pending", lastSeenHash: outcome.current_disk_hash });
+        updateConflict({ kind: "pending", lastSeenHash: outcome.current_disk_hash });
         flash("Save blocked: on-disk hash drifted");
         return false;
       }
-      onDiskHashRef.current = outcome.new_hash;
-      dirtyRef.current = false;
-      setDirty(false);
-      setConflict({ kind: "none" });
-      void doc.docMarkClean(path);
-      flash("saved");
+      written = true;
+      setDirty(buffer.dirty);
+      updateConflict({ kind: "none" });
+      await syncBackend({ path: buffer.path, content: "", on_disk_hash: outcome.new_hash });
+      if (generation !== documentGenerationRef.current) return true;
+      saveAckFailedRef.current = false;
+      flash(buffer.dirty ? "saved earlier version — newer edits remain unsaved" : "saved");
       return true;
     } catch (e) {
+      if (documentGenerationRef.current !== generation || buffer.revision !== revision) return false;
+      if (written) saveAckFailedRef.current = true;
       setError(String(e));
       flash(`save error: ${String(e)}`);
       return false;
+    } finally {
+      pendingSaveActionsRef.current.delete(request);
+      if (documentGenerationRef.current === generation) setSaving(pendingSaveActionsRef.current.size > 0);
     }
+  };
+  saveRef.current = save;
+
+  const mountEditor = (content: string) => {
+    const host = hostRef.current;
+    if (!host || editorRef.current) return;
+    const handle = createEditor({
+      parent: host,
+      initialContent: content,
+      onChange: (next) => {
+        const wasDirty = buffer.dirty;
+        buffer.edit();
+        setDirty(true);
+        if (!wasDirty) void syncBackend();
+        // Cheap re-parse: only the first ~200 bytes matter for
+        // frontmatter; readRunIn bails fast when no fence is present.
+        reportRunIn(next);
+      },
+      onSave: () => {
+        void save();
+      },
+      onRun: (req) => {
+        const target = activeTerminalRef.current;
+        if (!target) {
+          flash("no active terminal — click 'spawn shell' first");
+          return;
+        }
+        // TDD §8 step 4: post-▶ output flows into the clicked block's
+        // output section automatically. No edge required — the routing
+        // is "this block, this run, this terminal." `feeds_output_to`
+        // is reserved for the Pin-snapshot path (step 5, future).
+        const key = blockKey(req.body);
+        activeCaptureRef.current = { bodyKey: key, sessionId: target };
+        editorRef.current?.clearOutput(key);
+        // Shell line-discipline expects CR (\r) to mean "submit a
+        // command." Map every \n in the body to \r, append a final
+        // \r so the last (and possibly only) line runs, and prepend
+        // `cd <cwd>\r` when the block specified one (Min-D-6 B).
+        //
+        // Single-quoting the cwd lets the user pass paths with shell
+        // metacharacters safely; embedded single quotes are escaped
+        // using the standard `'\''` idiom.
+        const cdPrefix = req.cwd
+          ? `cd '${req.cwd.replace(/'/g, "'\\''")}'\r`
+          : "";
+        const payload = cdPrefix + req.body.replace(/\n/g, "\r") + "\r";
+        ipc.writeStdin(target, payload).then(
+          () => {
+            const preview = req.body.split("\n", 1)[0]?.slice(0, 60) ?? "";
+            const where = req.cwd ? ` @ ${req.cwd}` : "";
+            flash(`▶ injected → ${target}${where}: ${preview}`);
+          },
+          (e) => flash(`inject failed: ${String(e)}`),
+        );
+      },
+      onRefClick: (hit) => {
+        flash(
+          hit.id
+            ? `[[${hit.file}#^${hit.id}]] — link resolution lands in C4`
+            : `[[${hit.file}]] — link resolution lands in C4`,
+        );
+      },
+    });
+    editorRef.current = handle;
+  };
+
+  const applySnapshot = async (snapshot: doc.DocSnapshot) => {
+    buffer.load(snapshot);
+    const generation = documentGenerationRef.current;
+    const revision = buffer.revision;
+    if (editorRef.current) editorRef.current.replaceDoc(snapshot.content);
+    else mountEditor(snapshot.content);
+    setCreating(false);
+    setError(null);
+    reportRunIn(snapshot.content);
+    setDirty(false);
+    updateConflict({ kind: "none" });
+    setStatus("ready");
+    await syncBackend(snapshot);
+    if (generation === documentGenerationRef.current && revision === buffer.revision) saveAckFailedRef.current = false;
   };
 
   // Mount the editor once content is loaded.
   useEffect(() => {
     let disposed = false;
+    documentGenerationRef.current++;
+    saveAckFailedRef.current = false;
+    const closeLifetime = new DocumentCloseLifecycle(
+      () => ({
+        generation: documentGenerationRef.current,
+        revision: buffer.revision,
+        version: buffer.version,
+        dirty: buffer.dirty,
+        busy: buffer.creating || buffer.saving || pendingSaveActionsRef.current.size > 0
+          || pendingCreateActionsRef.current.size > 0 || aiBusyRef.current || statusRef.current === "loading",
+        canSave: statusRef.current === "ready" && !!editorRef.current && !!buffer.path,
+      }),
+      () => saveRef.current(),
+      () => onCloseRef.current(),
+      setClosePrompt,
+      () => closeOwnerRef.current === closeOwner && closeOwner.attached,
+    );
+    closeLifetimeRef.current = closeLifetime;
+    setClosePrompt(null);
+    setSaving(false);
+    setStatus("loading");
+    setCreating(false);
+    setError(null);
+    setDirty(false);
+    updateConflict({ kind: "none" });
     void (async () => {
       try {
         let snap: doc.DocSnapshot;
@@ -280,7 +458,9 @@ export function DocumentSurface({
         } catch (e) {
           // Treat "not found" as a chance to create a new file.
           const msg = String(e);
+          if (disposed) return;
           if (msg.toLowerCase().includes("not found")) {
+            buffer.missing(path);
             setStatus("missing");
             return;
           }
@@ -289,72 +469,15 @@ export function DocumentSurface({
         if (disposed) return;
         const host = hostRef.current;
         if (!host) return;
-        onDiskHashRef.current = snap.on_disk_hash;
-        void doc.docOpen(path, snap.on_disk_hash);
+        buffer.load(snap);
+        void syncBackend(snap);
         // Report the initial run_in before the user has touched anything.
         reportRunIn(snap.content);
 
-        const handle = createEditor({
-          parent: host,
-          initialContent: snap.content,
-          onChange: (next) => {
-            if (!dirtyRef.current) {
-              dirtyRef.current = true;
-              setDirty(true);
-              void doc.docMarkDirty(path);
-            }
-            // Cheap re-parse: only the first ~200 bytes matter for
-            // frontmatter; readRunIn bails fast when no fence is present.
-            reportRunIn(next);
-          },
-          onSave: () => {
-            void save();
-          },
-          onRun: (req) => {
-            const target = activeTerminalRef.current;
-            if (!target) {
-              flash("no active terminal — click 'spawn shell' first");
-              return;
-            }
-            // TDD §8 step 4: post-▶ output flows into the clicked block's
-            // output section automatically. No edge required — the routing
-            // is "this block, this run, this terminal." `feeds_output_to`
-            // is reserved for the Pin-snapshot path (step 5, future).
-            const key = blockKey(req.body);
-            activeCaptureRef.current = { bodyKey: key, sessionId: target };
-            editorRef.current?.clearOutput(key);
-            // Shell line-discipline expects CR (\r) to mean "submit a
-            // command." Map every \n in the body to \r, append a final
-            // \r so the last (and possibly only) line runs, and prepend
-            // `cd <cwd>\r` when the block specified one (Min-D-6 B).
-            //
-            // Single-quoting the cwd lets the user pass paths with shell
-            // metacharacters safely; embedded single quotes are escaped
-            // using the standard `'\''` idiom.
-            const cdPrefix = req.cwd
-              ? `cd '${req.cwd.replace(/'/g, "'\\''")}'\r`
-              : "";
-            const payload = cdPrefix + req.body.replace(/\n/g, "\r") + "\r";
-            ipc.writeStdin(target, payload).then(
-              () => {
-                const preview = req.body.split("\n", 1)[0]?.slice(0, 60) ?? "";
-                const where = req.cwd ? ` @ ${req.cwd}` : "";
-                flash(`▶ injected → ${target}${where}: ${preview}`);
-              },
-              (e) => flash(`inject failed: ${String(e)}`),
-            );
-          },
-          onRefClick: (hit) => {
-            flash(
-              hit.id
-                ? `[[${hit.file}#^${hit.id}]] — link resolution lands in C4`
-                : `[[${hit.file}]] — link resolution lands in C4`,
-            );
-          },
-        });
-        editorRef.current = handle;
+        mountEditor(snap.content);
         setStatus("ready");
       } catch (e) {
+        if (disposed) return;
         setStatus("error");
         setError(String(e));
       }
@@ -362,11 +485,56 @@ export function DocumentSurface({
 
     return () => {
       disposed = true;
+      closeLifetime.dispose();
+      pendingSaveActionsRef.current.clear();
+      pendingCreateActionsRef.current.clear();
+      if (closeLifetimeRef.current === closeLifetime) closeLifetimeRef.current = null;
+      documentGenerationRef.current++;
+      readGateRef.current.invalidate();
+      buffer.close();
       editorRef.current?.destroy();
       editorRef.current = null;
-      void doc.docClose(path);
+      const closedPath = buffer.path || path;
+      backendStateQueueRef.current = backendStateQueueRef.current.then(() => doc.docClose(closedPath)).catch(() => undefined);
     };
   }, [path]);
+
+  useEffect(() => {
+    const lifetime = closeLifetimeRef.current;
+    if (!lifetime || !registerCloseGuard) return;
+    return registerCloseGuard(() => lifetime.request());
+  }, [path, registerCloseGuard]);
+
+  useEffect(() => {
+    if (!registerWindowCloseParticipant) return;
+    let active = true;
+    const current = () => active && closeOwner.attached && closeOwnerRef.current === closeOwner
+      && windowRegistrationRef.current === windowRegistration;
+    const snapshot: WindowCloseParticipant["snapshot"] = () => {
+      if (!current() || statusRef.current === "loading" || statusRef.current === "error") return null;
+      return {
+        revision: `${closeOwner.id}:${documentGenerationRef.current}:${buffer.revision}:${buffer.version}`,
+        // A failed acknowledgement still needs an ordinary save retry, even
+        // when the submitted bytes have already reached disk.
+        dirty: buffer.dirty || saveAckFailedRef.current,
+        busy: buffer.creating || buffer.saving || pendingSaveActionsRef.current.size > 0
+          || pendingCreateActionsRef.current.size > 0 || aiBusyRef.current,
+        canSave: statusRef.current === "ready" && !!editorRef.current && !!buffer.path && !buffer.creating
+          && conflictRef.current.kind !== "pending",
+      };
+    };
+    const participant: WindowCloseParticipant = {
+      snapshot,
+      save: async () => {
+        const before = snapshot();
+        if (!before || before.busy || !before.canSave) return false;
+        const saved = await saveRef.current();
+        return current() && saved;
+      },
+    };
+    const unregister = registerWindowCloseParticipant(participant);
+    return () => { active = false; unregister(); };
+  }, [path, registerWindowCloseParticipant]);
 
   // Listen for pty:io batches: append to the active capture block if
   // the batch is from the session ▶ targeted. No feeds_output_to gate —
@@ -402,30 +570,34 @@ export function DocumentSurface({
     void (async () => {
       const unlisten = await ipc.onLoomEvent(async (ev: LoomEvent) => {
         if (ev.kind !== "fs_changed") return;
-        if (ev.path !== path) return;
+        if (ev.path !== buffer.path) return;
+        if (!alive || buffer.creating) return;
         const c: FsChangeKind = ev.change;
         if (c.kind === "deleted") {
+          readGateRef.current.invalidate();
+          documentGenerationRef.current++;
+          buffer.invalidate();
+          setCreating(false);
+          setError(null);
           setStatus("missing");
           return;
         }
-        // For Created / Modified / Renamed: re-check conflict.
-        const status = await doc.docCheckConflict(path);
-        if (status === "conflict") {
-          setConflict({
-            kind: "pending",
-            lastSeenHash: onDiskHashRef.current,
-          });
-        } else if (status === "no_conflict" && !dirtyRef.current) {
-          // Editor was clean: silently reload bytes.
-          try {
-            const fresh = await doc.docRead(path);
-            onDiskHashRef.current = fresh.on_disk_hash;
-            editorRef.current?.replaceDoc(fresh.content);
+        if (statusRef.current === "missing" || buffer.creating) return;
+        try {
+          const version = buffer.version;
+          const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path));
+          if (!alive || !fresh || buffer.saving) return;
+          if (buffer.version !== version && !buffer.dirty) return;
+          if (buffer.dirty) {
+            if (fresh.on_disk_hash !== buffer.hash) {
+              updateConflict({ kind: "pending", lastSeenHash: fresh.on_disk_hash });
+            }
+          } else {
+            await applySnapshot(fresh);
             flash("reloaded from disk");
-          } catch (e) {
-            flash(`reload failed: ${String(e)}`);
           }
-        }
+        } catch (e) { if (alive) flash(`reload failed: ${String(e)}`); }
+
       });
       if (!alive) {
         unlisten();
@@ -440,34 +612,66 @@ export function DocumentSurface({
   }, [path]);
 
   const reloadFromDisk = async () => {
+    const generation = documentGenerationRef.current;
+    if (!buffer.invalidate()) return;
+    setCreating(false);
     try {
-      const fresh = await doc.docRead(path);
-      onDiskHashRef.current = fresh.on_disk_hash;
-      editorRef.current?.replaceDoc(fresh.content);
-      dirtyRef.current = false;
-      setDirty(false);
-      setConflict({ kind: "none" });
-      void doc.docMarkClean(path);
+      const fresh = await readGateRef.current.read(() => doc.docRead(buffer.path || path));
+      if (!fresh || generation !== documentGenerationRef.current) return;
+      await applySnapshot(fresh);
+      if (generation !== documentGenerationRef.current) return;
       flash("reloaded — your edits are gone");
     } catch (e) {
+      if (generation !== documentGenerationRef.current) return;
+      setError(String(e));
       flash(`reload failed: ${String(e)}`);
     }
   };
 
+  const createDocument = async () => {
+    if (buffer.creating || pendingCreateActionsRef.current.size > 0 || statusRef.current !== "missing") return;
+    const generation = documentGenerationRef.current;
+    const request = {};
+    pendingCreateActionsRef.current.add(request);
+    readGateRef.current.invalidate();
+    setCreating(true);
+    setError(null);
+    try {
+      const snapshot = await buffer.create(editorRef.current?.view.state.doc.toString() ?? "", doc.docCreate);
+      if (!snapshot || generation !== documentGenerationRef.current) return;
+      // The acknowledgement is exactly the submitted version. Keep the live
+      // editor (including anything typed while pending), and never re-read.
+      mountEditor(snapshot.content);
+      reportRunIn(editorRef.current?.view.state.doc.toString() ?? snapshot.content);
+      setDirty(buffer.dirty);
+      updateConflict({ kind: "none" });
+      statusRef.current = "ready";
+      setStatus("ready");
+      await syncBackend(snapshot);
+    } catch (e) {
+      if (generation !== documentGenerationRef.current) return;
+      setError(buffer.createError ?? String(e));
+    } finally {
+      pendingCreateActionsRef.current.delete(request);
+      if (generation === documentGenerationRef.current) setCreating(buffer.creating);
+    }
+  };
+
   const keepEditing = () => {
-    // The user accepted that their next save will overwrite on-disk bytes.
-    // We clear the conflict banner but keep `dirty` true; next save uses
-    // `force=true` so the optimistic-concurrency check is skipped.
-    setConflict({ kind: "none" });
-    flash("keeping unsaved edits — next save will overwrite disk");
+    if (conflict.kind !== "pending") return;
+    buffer.keep(conflict.lastSeenHash);
+    updateConflict({ kind: "none" });
+    flash("keeping edits — next save checks the confirmed disk version");
   };
 
   return (
-    <div className="document-surface">
+    <div ref={closeOwner.ref} className="document-surface" onKeyDown={(event) => {
+      if (event.key === "Delete" || event.key === "Backspace") event.stopPropagation();
+    }}>
       <div className="document-header">
         <strong>{path}</strong>
         {dirty && <span className="document-dirty">●</span>}
-        <button onClick={() => void save(conflict.kind === "pending")}>
+        <button onClick={() => void save()} disabled={status !== "ready" || creating}>
           save
         </button>
         <button
@@ -476,19 +680,32 @@ export function DocumentSurface({
         >
           🤖 ask AI
         </button>
-        <button onClick={onClose}>close</button>
+        <button onClick={() => closeLifetimeRef.current?.request()}>close</button>
         {toast && <span className="document-toast">{toast}</span>}
       </div>
+      {closePrompt && (
+        <div className={`${CSS.conflictBanner} nodrag nowheel`} role="alertdialog" aria-label={`Close document ${path}`}>
+          <div>
+            <strong>Close document?</strong>
+            <p role="status" aria-live="polite">{closePrompt.message}</p>
+            {error && <p role="alert">{error}</p>}
+          </div>
+          <div className="document-conflict-actions">
+            <button onClick={() => void closeLifetimeRef.current?.saveAndClose()}
+              disabled={closePrompt.saving || saving || creating || aiBusy || status !== "ready"}
+              aria-busy={closePrompt.saving}>Save and close</button>
+            <button onClick={() => closeLifetimeRef.current?.discard()}>Discard changes</button>
+            <button ref={cancelCloseRef} onClick={() => closeLifetimeRef.current?.cancel()}>Cancel</button>
+          </div>
+        </div>
+      )}
       {aiOpen && (
         <div className="loom-ai-panel">
-          {!aiStatus?.key_present ? (
-            <div className="loom-ai-empty">
-              <strong>{aiStatus?.key_env ?? "API key"} not set.</strong>{" "}
-              <code>export {aiStatus?.key_env ?? "API_KEY"}=…</code> in your
-              shell rc, then relaunch Loom. Switch providers via{" "}
-              <code>LOOM_AI_PROVIDER=anthropic|openai|deepseek</code>.
+          {aiSetupProblem(aiStatus) ? (
+            <div className="loom-ai-empty" role="alert">
+              {aiSetupProblem(aiStatus)}
             </div>
-          ) : (
+          ) : aiStatus && (
             <>
               <div className="loom-ai-context">
                 provider: <code>{aiStatus.provider}</code> · model:{" "}
@@ -500,7 +717,7 @@ export function DocumentSurface({
               </div>
               {pinnedContextBodies.length > 0 && (
                 <div className="loom-ai-pinned">
-                  pinned context:{" "}
+                  pinned context preview (refreshed at send):{" "}
                   {pinnedContextBodies.map((pc, idx) => (
                     <span key={pc.source} className="loom-ai-pinned-chip">
                       <code>{pc.source}</code>{" "}
@@ -521,7 +738,7 @@ export function DocumentSurface({
                     void submitAiPrompt();
                   }
                 }}
-                disabled={aiRequestId !== null}
+                disabled={aiBusy}
                 rows={3}
               />
               <div className="loom-ai-actions">
@@ -530,7 +747,7 @@ export function DocumentSurface({
                 ) : (
                   <button
                     onClick={() => void submitAiPrompt()}
-                    disabled={!aiPrompt.trim()}
+                    disabled={!aiPrompt.trim() || aiBusy}
                   >
                     send (⌘↵)
                   </button>
@@ -559,25 +776,13 @@ export function DocumentSurface({
           <p>
             <code>{path}</code> doesn't exist yet.
           </p>
-          <button
-            onClick={async () => {
-              try {
-                await doc.docWrite(path, "", null);
-                const fresh = await doc.docRead(path);
-                onDiskHashRef.current = fresh.on_disk_hash;
-                void doc.docOpen(path, fresh.on_disk_hash);
-                setStatus("loading");
-                // Re-trigger the load effect by changing a key would be
-                // cleaner, but a soft refresh works for v1: replace the
-                // mount target's child and re-create the editor.
-                window.location.reload();
-              } catch (e) {
-                setError(String(e));
-              }
-            }}
-          >
-            create empty file
+          <button onClick={() => void createDocument()} disabled={creating} aria-busy={creating}>
+            {creating ? "creating…" : error ? "retry creation" : editorRef.current ? "recreate with current edits" : "create empty file"}
           </button>
+          <button onClick={() => void reloadFromDisk()} disabled={creating}>
+            reload from disk (discard edits)
+          </button>
+          {error && <p className="document-error" role="alert">{error}</p>}
         </div>
       )}
       {status === "error" && (

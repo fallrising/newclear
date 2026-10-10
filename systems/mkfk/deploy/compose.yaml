@@ -1,0 +1,65 @@
+# Isolated three-broker experiment (M7). Brokers talk on a private bridge
+# network with fixed addresses from configs/compose-cluster.json; only the
+# client and admin listeners are published, and only on host loopback.
+# Data lives in this project's named volumes; `make demo-down` keeps them
+# unless DELETE_DATA=1.
+
+x-mkfk: &mkfk
+  image: mkfk:local
+  user: "65532:65532"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: "no"
+  stop_grace_period: 15s
+
+x-format: &format
+  <<: *mkfk
+  network_mode: none
+
+services:
+  format-1:
+    <<: *format
+    command: [format, --data-dir, /data/node, --node-id, "1", --cluster-json, /etc/mkfk/cluster.json]
+    volumes: [data-1:/data]
+  format-2:
+    <<: *format
+    command: [format, --data-dir, /data/node, --node-id, "2", --cluster-json, /etc/mkfk/cluster.json]
+    volumes: [data-2:/data]
+  format-3:
+    <<: *format
+    command: [format, --data-dir, /data/node, --node-id, "3", --cluster-json, /etc/mkfk/cluster.json]
+    volumes: [data-3:/data]
+
+  broker-1:
+    <<: *mkfk
+    command: [serve, --data-dir, /data/node, --node-id, "1", --cluster-json, /etc/mkfk/cluster.json, --allow-insecure-bind]
+    depends_on: {format-1: {condition: service_completed_successfully}}
+    volumes: [data-1:/data]
+    networks: {mkfk: {ipv4_address: 172.29.71.11}}
+    ports: ["127.0.0.1:19091:19091", "127.0.0.1:19291:19291"]
+  broker-2:
+    <<: *mkfk
+    command: [serve, --data-dir, /data/node, --node-id, "2", --cluster-json, /etc/mkfk/cluster.json, --allow-insecure-bind]
+    depends_on: {format-2: {condition: service_completed_successfully}}
+    volumes: [data-2:/data]
+    networks: {mkfk: {ipv4_address: 172.29.71.12}}
+    ports: ["127.0.0.1:19092:19092", "127.0.0.1:19292:19292"]
+  broker-3:
+    <<: *mkfk
+    command: [serve, --data-dir, /data/node, --node-id, "3", --cluster-json, /etc/mkfk/cluster.json, --allow-insecure-bind]
+    depends_on: {format-3: {condition: service_completed_successfully}}
+    volumes: [data-3:/data]
+    networks: {mkfk: {ipv4_address: 172.29.71.13}}
+    ports: ["127.0.0.1:19093:19093", "127.0.0.1:19293:19293"]
+
+networks:
+  mkfk:
+    driver: bridge
+    ipam:
+      config: [{subnet: 172.29.71.0/24}]
+
+volumes:
+  data-1:
+  data-2:
+  data-3:

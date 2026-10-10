@@ -13,6 +13,14 @@ type peerProgress struct {
 	nextIndex  uint64
 	matchIndex uint64
 	latestRPC  uint64
+	// inflight lists unanswered AppendEntries RPC IDs, oldest first. A lost
+	// message is forgotten once MaxInflightAppends newer ones are out, so the
+	// leader's sent-RPC table stays bounded while peers drop messages.
+	inflight []uint64
+	// unanswered counts appends sent since this peer last replied. Proposals
+	// stop adding appends at MaxPipelinedAppends; heartbeats and read
+	// barriers still go out, and any reply reopens the pipeline.
+	unanswered int
 }
 
 type sentAppend struct {
@@ -97,8 +105,10 @@ func (node *Node) Snapshot() Snapshot {
 	}
 }
 
+// RecoveredApplied hands the replayed committed prefix to its one consumer
+// and forgets it; recovery never holds more than one copy.
 func (node *Node) RecoveredApplied() []storage.Frame {
-	result := cloneFrames(node.recoveredApplied)
+	result := node.recoveredApplied
 	node.recoveredApplied = nil
 	return result
 }
@@ -149,9 +159,16 @@ func (node *Node) Step(message Message) (Ready, error) {
 		return Ready{}, err
 	}
 	if message.Term > node.term {
+		// A higher-term vote request moves this node to that term but does
+		// not reset its election timer unless the vote is granted: a stale
+		// candidate must not keep up-to-date nodes from ever campaigning.
+		elapsed := node.electionElapsed
 		change, err := node.becomeFollower(message.Term, 0)
 		if err != nil {
 			return Ready{}, err
+		}
+		if message.Kind == MessageRequestVote {
+			node.electionElapsed = elapsed
 		}
 		if change != nil {
 			ready.RoleChanges = append(ready.RoleChanges, *change)
@@ -252,6 +269,12 @@ func (node *Node) RequestRead(context string) (Ready, error) {
 	}
 	ready.Messages = messages
 	return ready, nil
+}
+
+// CancelRead forgets a read request that its caller abandoned, so an
+// unreachable quorum cannot grow the pending-read set without bound.
+func (node *Node) CancelRead(context string) {
+	delete(node.pendingReads, context)
 }
 
 func (node *Node) startElection() (Ready, error) {
@@ -385,7 +408,7 @@ func (node *Node) proposeFrame(frame storage.Frame) (Ready, error) {
 		return Ready{}, err
 	}
 	ready.Applied = append(ready.Applied, applied...)
-	messages, err := node.broadcastAppend("")
+	messages, err := node.pipelineAppend()
 	if err != nil {
 		return Ready{}, err
 	}
@@ -466,8 +489,16 @@ func (node *Node) termAt(index uint64) (uint64, error) {
 	return node.log.Term(index)
 }
 
+// singleReadBudget keeps a one-entry read from decoding a whole 4 MiB
+// window; a larger frame is re-read with its exact size.
+const singleReadBudget = 4 << 10
+
 func (node *Node) readOne(index uint64) (storage.Frame, error) {
-	entries, err := node.log.ReadEntries(index, storage.MaxWALFrameBytes)
+	entries, err := node.log.ReadEntries(index, singleReadBudget)
+	var tooSmall *storage.ReadBudgetTooSmallError
+	if errors.As(err, &tooSmall) {
+		entries, err = node.log.ReadEntries(index, tooSmall.RequiredBytes)
+	}
 	if err != nil {
 		return storage.Frame{}, err
 	}
@@ -477,17 +508,31 @@ func (node *Node) readOne(index uint64) (storage.Frame, error) {
 	return entries[0], nil
 }
 
+// readRange reads [from, through] in budget-sized batches, so replaying a
+// long committed prefix decodes each frame once.
 func (node *Node) readRange(from, through uint64) ([]storage.Frame, error) {
 	if from > through {
 		return nil, nil
 	}
 	result := make([]storage.Frame, 0, through-from+1)
-	for index := from; index <= through; index++ {
-		frame, err := node.readOne(index)
+	for next := from; next <= through; {
+		entries, err := node.log.ReadEntries(next, storage.MaxWALFrameBytes)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, frame)
+		if len(entries) == 0 {
+			return nil, fmt.Errorf("log index %d is missing", next)
+		}
+		for _, frame := range entries {
+			if frame.LogIndex != next {
+				return nil, fmt.Errorf("log index %d is missing", next)
+			}
+			if next > through {
+				break
+			}
+			result = append(result, frame)
+			next++
+		}
 	}
 	return result, nil
 }

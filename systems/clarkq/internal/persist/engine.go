@@ -90,21 +90,24 @@ func (e *Engine) applyRecord(rec WALRecord) error {
 		if rec.Message.Queue == "" {
 			rec.Message.Queue = rec.Queue
 		}
-		return e.manager.RestoreMessage(*rec.Message)
+		_, err := e.manager.RestoreMessage(*rec.Message)
+		return err
 	case opDequeue:
-		msg, err := e.manager.Dequeue(rec.Queue)
-		if err != nil {
-			// Empty/missing after snapshot is acceptable for partially compacted logs.
-			if errors.Is(err, queue.ErrQueueEmpty) || errors.Is(err, queue.ErrQueueNotFound) {
+		// Replicas merge catch-up copies in arrival order, so the head is not
+		// necessarily the message that was dequeued; remove by ID when known.
+		if rec.MessageID != "" {
+			_, err := e.manager.RemoveByID(rec.Queue, rec.MessageID)
+			if errors.Is(err, queue.ErrQueueNotFound) {
 				return nil
 			}
 			return err
 		}
-		if rec.MessageID != "" && msg.ID != rec.MessageID {
-			// Best-effort: state diverged; keep going after log.
-			slog.Warn("wal dequeue id mismatch", "want", rec.MessageID, "got", msg.ID, "queue", rec.Queue)
+		_, err := e.manager.Dequeue(rec.Queue)
+		// Empty/missing after snapshot is acceptable for partially compacted logs.
+		if errors.Is(err, queue.ErrQueueEmpty) || errors.Is(err, queue.ErrQueueNotFound) {
+			return nil
 		}
-		return nil
+		return err
 	case opClear:
 		_, err := e.manager.Clear(rec.Queue)
 		if errors.Is(err, queue.ErrQueueNotFound) {

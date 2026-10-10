@@ -12,6 +12,7 @@ import (
 	"time"
 
 	_ "github.com/fallrising/newclear/platform/prism/drivers/memory"
+	"github.com/fallrising/newclear/platform/prism/internal/secret"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 )
 
@@ -61,8 +62,6 @@ func TestEnvironmentOverrides(t *testing.T) {
 		"PRISM_INGEST_MAX_REQUEST_BYTES=32MiB",
 		"PRISM_QUERY_TIMEOUT=45s",
 		"PRISM_STORAGE_OPTIONS_ASYNC_INSERT=0",
-		"PRISM_STORAGE_SPLIT_METRICS_DRIVER=memory",
-		"PRISM_STORAGE_SPLIT_METRICS_DSN=",
 	})
 	if err != nil {
 		t.Fatalf("LoadContext() error = %v", err)
@@ -73,8 +72,15 @@ func TestEnvironmentOverrides(t *testing.T) {
 	if configuration.Ingest.MaxRequestBytes != ByteSize(32<<20) || configuration.Query.Timeout.Std() != 45*time.Second {
 		t.Fatalf("typed environment overrides were not applied")
 	}
-	if configuration.Storage.Options["async_insert"] != "0" || configuration.Storage.Split["metrics"].Driver != "memory" {
+	if configuration.Storage.Options["async_insert"] != "0" {
 		t.Fatalf("map environment overrides were not applied: %#v", configuration.Storage)
+	}
+	_, err = LoadWithEnvironment(context.Background(), filepath.Join("testdata", "prismd.yaml"), []string{
+		"PRISM_STORAGE_SPLIT_METRICS_DRIVER=memory",
+		"PRISM_STORAGE_SPLIT_METRICS_DSN=",
+	})
+	if err == nil || !strings.Contains(err.Error(), "storage.split is not supported") {
+		t.Fatalf("storage.split override error = %v, want fail closed", err)
 	}
 }
 
@@ -213,7 +219,7 @@ func TestValidationDoesNotOpenBackend(t *testing.T) {
 	registerNeverOpen.Do(func() { spi.Register(driverName, neverOpenDriver{}) })
 	configuration := loadValid(t)
 	configuration.Storage.Driver = driverName
-	configuration.Storage.DSN = "validated-without-connection"
+	configuration.Storage.DSN = secret.String("validated-without-connection")
 	if err := configuration.Validate(context.Background()); err != nil {
 		t.Fatalf("Validate() error = %v", err)
 	}
@@ -246,9 +252,10 @@ func loadFixture(t *testing.T) string {
 	}
 	result := string(content)
 	replacements := map[string]string{
-		"jwt_secret_file: secrets/jwt":   "jwt_secret_file: " + fixturePath(t, "secrets/jwt"),
-		"path: rules":                    "path: " + fixturePath(t, "rules"),
-		"config_path: alertmanager.yaml": "config_path: " + fixturePath(t, "alertmanager.yaml"),
+		"ingest_api_key_file: secrets/ingest_api_key": "ingest_api_key_file: " + fixturePath(t, "secrets/ingest_api_key"),
+		"jwt_secret_file: secrets/jwt":                "jwt_secret_file: " + fixturePath(t, "secrets/jwt"),
+		"path: rules":                                 "path: " + fixturePath(t, "rules"),
+		"config_path: alertmanager.yaml":              "config_path: " + fixturePath(t, "alertmanager.yaml"),
 	}
 	for old, replacement := range replacements {
 		result = strings.Replace(result, old, replacement, 1)

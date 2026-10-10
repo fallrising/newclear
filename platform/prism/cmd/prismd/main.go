@@ -14,9 +14,12 @@ import (
 	"strings"
 	"syscall"
 
+	_ "github.com/fallrising/newclear/platform/prism/drivers/clickhouse"
 	_ "github.com/fallrising/newclear/platform/prism/drivers/memory"
+	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
 	prismserver "github.com/fallrising/newclear/platform/prism/internal/server"
+	"github.com/fallrising/newclear/platform/prism/internal/telemetry"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -33,6 +36,21 @@ func realMain() int {
 }
 
 func run(ctx context.Context, arguments []string, stdout, stderr io.Writer) int {
+	if len(arguments) > 0 {
+		switch arguments[0] {
+		case "version":
+			if len(arguments) != 1 {
+				writef(stderr, "prismd version: unexpected arguments\n")
+				return 2
+			}
+			if !writef(stdout, "prismd %s (%s)\n", version, revision) {
+				return 1
+			}
+			return 0
+		case "healthcheck":
+			return runHealthcheck(ctx, arguments[1:], stderr)
+		}
+	}
 	flags := flag.NewFlagSet("prismd", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	configPath := flags.String("config", config.DefaultPath, "path to prismd YAML configuration")
@@ -85,6 +103,11 @@ func run(ctx context.Context, arguments []string, stdout, stderr io.Writer) int 
 	return 0
 }
 
+var (
+	version  = "dev"
+	revision = "unknown"
+)
+
 func writef(writer io.Writer, format string, arguments ...any) bool {
 	_, err := fmt.Fprintf(writer, format, arguments...)
 	return err == nil
@@ -95,9 +118,13 @@ func runService(ctx context.Context, configuration *config.Config, logger *slog.
 	if err != nil {
 		return err
 	}
+	storageOptions, err := configuration.StorageOptions()
+	if err != nil {
+		return fmt.Errorf("prepare storage options: %w", err)
+	}
 	backend, err := spi.Open(ctx, configuration.Storage.Driver, spi.Config{
-		DSN:        configuration.Storage.DSN,
-		Options:    maps.Clone(configuration.Storage.Options),
+		DSN:        string(configuration.Storage.DSN),
+		Options:    maps.Clone(storageOptions),
 		Logger:     logger,
 		Registerer: registry,
 		Clock:      spi.SystemClock,
@@ -127,13 +154,21 @@ func runConfiguredMode(
 	if err := backend.Ping(ctx); err != nil {
 		return fmt.Errorf("ping storage backend: %w", err)
 	}
+	var metrics *telemetry.Registry
+	if configuration.Telemetry.SelfMonitor {
+		var err error
+		metrics, err = telemetry.Register(registry)
+		if err != nil {
+			return fmt.Errorf("register self-telemetry: %w", err)
+		}
+	}
 	switch configuration.Server.Mode {
 	case "all-in-one":
-		return runAllInOne(ctx, configuration, logger, registry)
+		return runAllInOne(ctx, configuration, logger, registry, backend, metrics)
 	case "ingest":
-		return runIngest(ctx, configuration, logger, registry)
+		return runIngest(ctx, configuration, logger, registry, backend, metrics)
 	case "query":
-		return runQuery(ctx, configuration, logger, registry)
+		return runQuery(ctx, configuration, logger, registry, backend, metrics)
 	case "ruler":
 		return runRuler(ctx, configuration, logger, registry)
 	case "console":
@@ -143,16 +178,43 @@ func runConfiguredMode(
 	}
 }
 
-func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
+func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) error {
+	return runIngest(ctx, configuration, logger, registry, backend, metrics)
 }
 
-func runIngest(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
-}
-
-func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
-	return runHTTPServer(ctx, configuration, logger, registry)
+func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) error {
+	if err := configuration.Validate(ctx); err != nil {
+		return fmt.Errorf("validate query runtime: %w", err)
+	}
+	handler, err := promapi.NewQueryHandler(backend, promapi.QueryOptions{
+		Tenant: configuration.Tenancy.DefaultTenant, APIKey: configuration.Auth.IngestAPIKey,
+		AllowAnonymousRead: configuration.Auth.AllowAnonymousRead, Config: configuration.Query,
+		Telemetry: metrics, Logger: logger, Clock: spi.SystemClock,
+	})
+	if err != nil {
+		return fmt.Errorf("create query handler: %w", err)
+	}
+	server, err := prismserver.New(prismserver.Options{
+		Address: configuration.Server.HTTPListen, ShutdownTimeout: configuration.Server.ShutdownTimeout.Std(),
+		TLSCertFile: configuration.Server.TLSCertFile, TLSKeyFile: configuration.Server.TLSKeyFile,
+		Gatherer: registry, Handler: handler.HTTPHandler(), Logger: logger,
+		StopReceiving: handler.Stop,
+		Drain:         func(shutdown context.Context) error { return handler.Close(context.WithoutCancel(shutdown)) },
+		Ready:         notifyReady, Stopping: notifyStopping,
+	})
+	if err != nil {
+		handler.Stop()
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), configuration.Server.ShutdownTimeout.Std())
+		defer cancel()
+		return errors.Join(fmt.Errorf("create query server: %w", err), handler.Close(shutdown))
+	}
+	logger.InfoContext(ctx, "HTTP server starting", "component", "server", "address", configuration.Server.HTTPListen, "driver", configuration.Storage.Driver, "mode", configuration.Server.Mode)
+	err = server.Run(ctx)
+	logger.InfoContext(ctx, "HTTP server stopped", "component", "server")
+	if err != nil {
+		return fmt.Errorf("serve HTTP: %w", err)
+	}
+	return nil
 }
 
 func runRuler(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry) error {
@@ -176,6 +238,8 @@ func runHTTPServer(
 		TLSKeyFile:      configuration.Server.TLSKeyFile,
 		Gatherer:        registry,
 		Logger:          logger,
+		Ready:           notifyReady,
+		Stopping:        notifyStopping,
 	})
 	if err != nil {
 		return fmt.Errorf("create HTTP server: %w", err)

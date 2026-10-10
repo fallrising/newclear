@@ -1,0 +1,12 @@
+# Dockerfile-specific context exclusion; Dockerfile still COPYs only source dirs.
+.team
+.git
+docs
+test
+scripts
+deploy
+**/testdata
+**/*_test.go
+**/*.md
+**/*.py
+**/*.sh

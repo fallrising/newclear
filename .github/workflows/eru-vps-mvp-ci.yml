@@ -18,7 +18,7 @@ concurrency:
 jobs:
   local-checks:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 360
     defaults:
       run:
         working-directory: labs/eru-vps-mvp

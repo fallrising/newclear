@@ -84,6 +84,9 @@ type Config struct {
 	OutboxPath string
 	// CatchUpInterval is how often replica catch-up runs (default 5s; 0 uses default).
 	CatchUpInterval time.Duration
+	// RemovedTTL is how long consumed message IDs are remembered so catch-up cannot
+	// resurrect them (default 1h). Nodes down longer than this should rejoin empty.
+	RemovedTTL time.Duration
 	// WriteQuorum is min successful copies including primary (0 = majority of RF).
 	WriteQuorum int
 	// ReadQuorum is min replicas that must hold a message for linearizable peek/consume (0 = majority).
@@ -225,6 +228,11 @@ func applyEnv(cfg Config) Config {
 	if raw := os.Getenv("CLARKQ_CATCHUP_INTERVAL"); raw != "" {
 		if d, err := time.ParseDuration(raw); err == nil && d >= 0 {
 			cfg.CatchUpInterval = d
+		}
+	}
+	if raw := os.Getenv("CLARKQ_REMOVED_TTL"); raw != "" {
+		if d, err := time.ParseDuration(raw); err == nil && d > 0 {
+			cfg.RemovedTTL = d
 		}
 	}
 	if raw := os.Getenv("CLARKQ_WRITE_QUORUM"); raw != "" {

@@ -1,0 +1,108 @@
+{
+  "uid": "prism-agents",
+  "title": "Prism: agent fleet",
+  "description": "Future Phase 4 reference dashboard. Agent versions and fleet management are inactive.",
+  "tags": [
+    "prism"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Agent up",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prism-metrics"
+      },
+      "description": "Future Phase 4: prism-agent and fleet status are inactive.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "prism_agent_up",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 2,
+      "title": "WAL oldest age",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prism-metrics"
+      },
+      "description": "Future Phase 4: prism-agent WAL is inactive.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "prism_agent_wal_oldest_age_seconds",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 3,
+      "title": "Dropped WAL bytes",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prism-metrics"
+      },
+      "description": "Future Phase 4: prism-agent WAL is inactive.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (reason) (rate(prism_agent_wal_dropped_bytes_total[5m]))",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}

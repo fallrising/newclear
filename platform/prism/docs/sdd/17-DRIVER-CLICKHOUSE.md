@@ -2,6 +2,16 @@
 
 位置：`drivers/clickhouse`。Schema DDL 見 `04-DATA-MODEL.md` §6，本文件補完**每個 SPI 方法的查詢實作**。
 
+## 當期 P1-10 契約與後续設計
+
+P1-09提供單節點nativefactory、migration與三Storewrites。P1-10完成mandatoryqueries與最小daemon接線的當期設計，見[查詢契約](../specs/p1-10-clickhouse-query.md)與[ADR-019](13-ADR.md#adr-019p1-10-mandatory-query-與現有-spi-語義適配)；驗收只由inventory實測支持。非空cluster明確Unsupported，不聲稱replicated完成。Optionalmetricmetadata/delete/nativequery、NativeLogQuerier及P3RED/Dependencies仍不實作／宣告；Retention.Enforced=false（seriesmetadata無TTL）。後面fullcapabilitytable、groupArray／labels_str排序、logfilter/nativeaggregation與RED/dependencySQL是後续階段草稿，不取代現有SPI或当期spec。
+
+當期查詢必須以實際sample存在做catalog，跨monthmetadata合併避免join倍增；完整labels.Compare排序不能單用008分隔符labels_str。Metricsinclusive毫秒，logs/traces依現有半開奈秒；missing鍵與empty值的matcher等價，但catalog只回真正有鍵的值。LogSearch只下推selectors/time/sort且不在補算前limit；trace duration從整個trace取root最大duration，沒有root才maxspan，零durationroot仍有效；GetTrace包含late／末筆span。
+
+Streamingrowsiterator持lease至EOF/Close/error/cancel，server/localrows/bytes超限throw，沒有成功截斷。新增009logs.write_seq UInt64 DEFAULT0保存newwriter順序，按ts方向／write_seq ASC；context-aware序列化及reserve-before-send避免lostreply重用，logs用synchronousINSERT，metrics/traces保留async。舊seq0無法重建historicalwriteorder，只提供確定性次序；多processwriters需外部序列化。前八migrationbytes不變。
+
+新增010metric_samples.value_bits UInt64 DEFAULT reinterpretAsUInt64(value)：新writer存math.Float64bits，reader用math.Float64frombits，避免既有Gorilla在批首-0丟失符號位。Legacy rows可從原Float64讀，已失去的歷史位元不能恢復；不改既有codec／SPI／dependency版本。下方未來SQL若只用value欄，不代表當期bit-preserving reader。
+
 ## 1. DSN 與 Options
 
 ```
@@ -10,11 +20,13 @@ clickhouse://user:password@host:9000/database?secure=false&dial_timeout=5s
 
 | Option | 預設 | 說明 |
 |---|---|---|
-| `cluster` | `""` | 非空時 DDL 加 `ON CLUSTER`，引擎改用 `Replicated*` |
+| `cluster` | `""` | 當期非空回Unsupported；replicated為後续設計。 |
 | `max_execution_time` | `55` | 秒。必須 < `query.timeout`，讓 CH 先超時並回明確錯誤 |
 | `max_memory_usage` | `1000000000` | 單查詢記憶體上限（1 GB） |
-| `max_result_rows` | `5000000` | 超出回 `ErrTooLarge` |
-| `async_insert` | `1` | 見 `04` §6.6 |
+| `max_result_rows` | `5000000` | 正值≤2^30；超出回`ErrTooLarge`。 |
+| `max_rows_to_read` | `5000000` | 正值≤2^30；server scan cap。 |
+| `max_result_bytes` | `67108864` | 正值≤2^40；server／logical result cap。 |
+| `async_insert` | `1` | metrics/traces；logs為write_seq採同步INSERT。 |
 | `max_open_conns` | `10` | |
 | `retention_metrics_days` / `_logs_days` / `_traces_days` / `_red_days` | 30/14/7/90 | 寫入 DDL 的 TTL |
 
@@ -82,7 +94,7 @@ clickhouse.Settings{
 1. `metric_series`：僅寫該批次中**首次出現**的 fingerprint（驅動內維護一個 LRU，容量 `100_000`，避免每次都寫）。
 2. `metric_samples`：全部樣本。
 
-fingerprint 由中間層計算（`utm.Fingerprint`），驅動不重算——保證跨驅動一致。
+現行 `MetricPoint` SPI 沒有 fingerprint 欄位；P1-09 使用唯一既有 `utm.Fingerprint` 對 complete sorted labels（含 metric、trusted tenant）取得 identity，不引入另一算法或公開欄位（ADR-018）。Cache 命中而 first/last_seen 延伸時仍需寫 metadata，時間保留 DateTime64(3) 精度。
 
 ### 3.3 日誌寫入
 
@@ -433,6 +445,8 @@ GROUP BY hour, p.tenant, parent, child;
 006_service_deps.sql
 007_service_ops.sql
 008_labels_str.sql
+009_log_write_seq.sql        # P1-10加法式欄位；原001–008不改
+010_metric_value_bits.sql    # UInt64保留新write的完整float bits；legacy DEFAULT源於原value
 ```
 
 執行機制：
@@ -458,3 +472,5 @@ CREATE TABLE IF NOT EXISTS prism_schema_migrations (
 5. Jaeger `minDuration`/`maxDuration` 作用於 root span；無 root span 的 trace 用 max span duration 回退。
 6. 不支援 exemplar 與原生直方圖（Phase 6）。
 7. TTL 精度為天（`ttl_only_drop_parts = 1`）。
+
+P1-10 executable-contract clarification: `FindTraceIDs` 的非正 `Limit` 不要求結果截斷，空 service 作精確空字串匹配；positive limit 在完整 duration/filter/order 後按 trace 計，安全 scan/result caps 仍 fail closed。所有 read SQL 明確包含已驗證的 `max_memory_usage`，不由 native caller context 覆寫。SDD14 草案的額外前置條件不取代本期現有 SPI/memory 行為；裁決與實測見 P1-10 spec D010/D011。

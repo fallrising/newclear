@@ -124,8 +124,45 @@ class CoreReleaseTests(unittest.TestCase):
             self.release()
         record['steps'].append({'name': 'compatibility-from-v0.1.4',
                                 'argv': ['go', 'test', './compat'], 'exit_code': 0})
+        record['independent_runner_verification']['steps'].append({
+            'name': 'compatibility-from-v0.1.4', 'exit_code': 0,
+        })
         atomic_json(self.validation_path, record)
         self.assertIn('v0.1.4', self.release()['compatible_from_versions'])
+
+    def test_cross_version_requires_independent_successful_compatibility_evidence(self):
+        for independent_step in (None, {'name': 'compatibility-from-v0.1.4', 'exit_code': 1}):
+            with self.subTest(independent_step=independent_step):
+                record = self.manifest()
+                record['compatible_from_versions'].append('v0.1.4')
+                record['steps'].append({
+                    'name': 'compatibility-from-v0.1.4',
+                    'argv': ['go', 'test', './compat'], 'exit_code': 0,
+                })
+                if independent_step is not None:
+                    record['independent_runner_verification']['steps'].append(independent_step)
+                atomic_json(self.validation_path, record)
+                with self.assertRaisesRegex(ValueError, 'independent.*version-specific'):
+                    self.release()
+
+    def test_independent_steps_reject_malformed_or_ambiguous_records(self):
+        for extra in (None, {}, {'name': ['regression'], 'exit_code': 0},
+                      {'name': '', 'exit_code': 0}):
+            with self.subTest(extra=extra):
+                record = self.manifest()
+                record['independent_runner_verification']['steps'].append(extra)
+                atomic_json(self.validation_path, record)
+                with self.assertRaisesRegex(ValueError, 'independent.*malformed'):
+                    self.release()
+        for name in ('regression', 'compatibility-from-v0.1.4'):
+            with self.subTest(duplicate=name):
+                record = self.manifest()
+                record['independent_runner_verification']['steps'].extend([
+                    {'name': name, 'exit_code': 1}, {'name': name, 'exit_code': 0},
+                ])
+                atomic_json(self.validation_path, record)
+                with self.assertRaisesRegex(ValueError, 'independent.*unique'):
+                    self.release()
 
     def test_transition_distinguishes_reapply_patch_revision_upgrade_and_rollback(self):
         current = self.release()

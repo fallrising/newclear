@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, type ReactNode } from 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError, keys, type AuthApi, type Me } from "@cms/api/public";
 
-export type SessionStatus = "loading" | "anonymous" | "authenticated" | "error";
+export type SessionStatus = "loading" | "anonymous" | "authenticated" | "expired" | "error";
 
 export interface Session {
   status: SessionStatus;
@@ -22,24 +22,33 @@ export function SessionProvider({ auth, children }: { auth: AuthApi; children: R
       try {
         return await auth.me(signal);
       } catch (error) {
-        if (isApiError(error) && error.status === 401) return null;
+        if (isApiError(error) && error.status === 401) {
+          const previous = queryClient.getQueryData<Me | null>(keys.auth.me());
+          if (previous) {
+            queryClient.setQueryData(keys.auth.expired(), true);
+            return previous;
+          }
+          return null;
+        }
         throw error;
       }
     },
     staleTime: Infinity,
   });
+  const expired = useQuery({ queryKey: keys.auth.expired(), queryFn: () => false, initialData: false, staleTime: Infinity }).data;
   const signOut = useCallback(async () => {
     try {
       await auth.logout();
     } finally {
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "auth" });
       queryClient.setQueryData(keys.auth.me(), null);
+      queryClient.setQueryData(keys.auth.expired(), false);
     }
   }, [auth, queryClient]);
   const value = useMemo<Session>(() => {
-    const status: SessionStatus = query.isPending ? "loading" : query.isError ? "error" : query.data ? "authenticated" : "anonymous";
+    const status: SessionStatus = query.isPending ? "loading" : query.isError && !query.data ? "error" : !query.data ? "anonymous" : expired ? "expired" : "authenticated";
     return { status, me: query.data ?? null, retry: () => void query.refetch(), signOut };
-  }, [query, signOut]);
+  }, [query, expired, signOut]);
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

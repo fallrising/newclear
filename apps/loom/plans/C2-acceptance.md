@@ -1,5 +1,7 @@
 # C2 Acceptance Mapping (03-acceptance §C2)
 
+> Historical track snapshot. Counts, manual checks and deferred items below describe that delivery stage, not current acceptance. See [current reliability status and requirements](../docs/reliability.md).
+
 | # | Criterion | Where | Mode |
 |---|---|---|---|
 | **C2-1** | runnable block 雙模式 + ▶ + output section | `runnable_block.ts` StateField. `tauri dev` confirms ▶ + placeholder render. | `[manual]` (live verified) + parser unit tests |

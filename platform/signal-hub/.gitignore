@@ -1,0 +1,8 @@
+/signalhub
+*.db
+*.db-shm
+*.db-wal
+*.token
+/.local/
+__pycache__/
+*.pyc

@@ -18,6 +18,7 @@ from typing import Iterable, Mapping
 
 from .extraction import ExtractedChunk
 from .knowledge_store import load_taxonomy
+from .text_assignment_safety import contains_sensitive_assignment
 
 
 class IndexError(ValueError):
@@ -32,7 +33,6 @@ SCHEMA_VERSION = "knowledge-index.v1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _TEXT_REGION = re.compile(r"^text:(?:0|[1-9][0-9]{0,6}),0,[1-9][0-9]{0,5}$")
 _PIXEL_REGION = re.compile(r"^pixels:(?:0|[1-9][0-9]{0,5}),(?:0|[1-9][0-9]{0,5}),[1-9][0-9]{0,5},[1-9][0-9]{0,5}$")
-_SECRET = re.compile(r"(?i)(?:api[_-]?key|token|password|secret)\s*[:=]")
 _MAX_TEXT = 16_384
 _MAX_CHUNKS = 10_000
 _MAX_INDEX_CHUNKS = 1_000_000
@@ -115,7 +115,7 @@ def _safe_text(value: object, maximum: int, message: str) -> str:
     if not isinstance(value, str) or not value.strip() or len(value) > maximum:
         raise IndexError(message)
     normalized = unicodedata.normalize("NFKC", value)
-    if normalized != value or _SECRET.search(value):
+    if normalized != value or contains_sensitive_assignment(value):
         raise IndexError(message)
     for char in value:
         code = ord(char)

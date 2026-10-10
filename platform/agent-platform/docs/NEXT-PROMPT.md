@@ -1,3 +1,13 @@
+# 接續入口更新 — 2026-10-06
+
+本輪停止於單節點操作手冊與隔離演練的提交／PR 合併收尾；使用者要求告一段落。後續 session 先核對最新 main、PR/CI、任務帳本與使用者的新指示，再讀 [HANDOFF.md](HANDOFF.md)、[SINGLE-NODE.md](SINGLE-NODE.md) 及 [evidence/single-node.json](evidence/single-node.json)，不自動認領下一功能。
+
+PR293 已合併前置成果封存／GitHub export／備份保留（含 PR270/282）。單節點演練是新建合成 PostgreSQL、真 HTTP／獨立 CLI 程序與 native backup/restore，不是實際主機/TLS/systemd/KVM 部署。真模型、live export 與整體 MVP gate 尚未完成；模型維持 mock，billing 延後、金額 unknown，不索取現有 key。
+
+以下舊 prompt 僅保留歷史，其中舊 recovery blocker、只交 Draft PR 或等待更大階段才測試的指示都不是本輪停止點。開始任何新工作仍以最新授權、source 和任務範圍為準。
+
+---
+
 # 新視窗接續開發 prompt
 
 此 prompt 可交給任何 LLM coding agent。接手先讀 [HANDOFF.md](HANDOFF.md) 開頭的現行停止點、[SDD.md](../SDD.md) §15，再查 GitHub `main`。下面代碼塊裡 2026-09-24 的句子有過期指令：PR #82 已合併，KVM mock 已在 `<kvm-host>` 通過，不要再要求 recovery 之後才准開發，也不要向使用者索取 API key。

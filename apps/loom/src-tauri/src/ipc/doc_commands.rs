@@ -26,6 +26,7 @@ pub struct DocAppState {
 
 #[derive(serde::Serialize)]
 pub struct DocSnapshotDto {
+    pub path: String,
     pub content: String,
     pub on_disk_hash: String,
 }
@@ -75,6 +76,25 @@ pub fn doc_read(state: State<'_, DocAppState>, path: String) -> Result<DocSnapsh
         .svc
         .read_document(Path::new(&path))
         .map(|snap| DocSnapshotDto {
+            path: snap.path.to_string_lossy().into_owned(),
+            content: snap.content,
+            on_disk_hash: snap.on_disk_hash,
+        })
+        .map_err(fs_err_string)
+}
+
+#[tauri::command]
+pub fn doc_create(
+    state: State<'_, DocAppState>,
+    origin: Origin,
+    path: String,
+    content: String,
+) -> Result<DocSnapshotDto, String> {
+    state
+        .svc
+        .create_document(&origin, Path::new(&path), &content)
+        .map(|snap| DocSnapshotDto {
+            path: snap.path.to_string_lossy().into_owned(),
             content: snap.content,
             on_disk_hash: snap.on_disk_hash,
         })
@@ -140,7 +160,13 @@ const CANVAS_RELATIVE_PATH: &str = ".loom/canvas.json";
 
 #[tauri::command]
 pub fn canvas_read(state: State<'_, DocAppState>) -> Result<Option<String>, String> {
-    let path = state.vault_root.join(CANVAS_RELATIVE_PATH);
+    read_canvas(&state.svc)
+}
+
+fn read_canvas(svc: &DocumentService) -> Result<Option<String>, String> {
+    let path = svc
+        .resolve_path(Path::new(CANVAS_RELATIVE_PATH))
+        .map_err(fs_err_string)?;
     match std::fs::read_to_string(&path) {
         Ok(s) => Ok(Some(s)),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
@@ -150,7 +176,13 @@ pub fn canvas_read(state: State<'_, DocAppState>) -> Result<Option<String>, Stri
 
 #[tauri::command]
 pub fn canvas_write(state: State<'_, DocAppState>, content: String) -> Result<(), String> {
-    let path = state.vault_root.join(CANVAS_RELATIVE_PATH);
+    write_canvas(&state.svc, &content)
+}
+
+fn write_canvas(svc: &DocumentService, content: &str) -> Result<(), String> {
+    let path = svc
+        .resolve_path(Path::new(CANVAS_RELATIVE_PATH))
+        .map_err(fs_err_string)?;
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
             .map_err(|e| format!("create {}: {}", parent.display(), e))?;
@@ -160,4 +192,42 @@ pub fn canvas_write(state: State<'_, DocAppState>, content: String) -> Result<()
 
 fn fs_err_string(e: FsError) -> String {
     e.to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fs::EchoGuard;
+
+    #[test]
+    fn canvas_missing_and_regular_paths_roundtrip() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let svc = DocumentService::new(dir.path(), Arc::new(EchoGuard::new()));
+        assert_eq!(read_canvas(&svc).unwrap(), None);
+        write_canvas(&svc, "{\"version\":1}").unwrap();
+        assert_eq!(
+            read_canvas(&svc).unwrap().as_deref(),
+            Some("{\"version\":1}")
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn canvas_commands_reject_symlinked_directory_and_file() {
+        use std::os::unix::fs::symlink;
+        let dir = tempfile::TempDir::new().unwrap();
+        let outside = tempfile::TempDir::new().unwrap();
+        let svc = DocumentService::new(dir.path(), Arc::new(EchoGuard::new()));
+        let original = outside.path().join("canvas.json");
+        std::fs::write(&original, b"preserve").unwrap();
+        symlink(outside.path(), svc.vault_root().join(".loom")).unwrap();
+        assert!(read_canvas(&svc).is_err());
+        assert!(write_canvas(&svc, "clobber").is_err());
+        std::fs::remove_file(svc.vault_root().join(".loom")).unwrap();
+        std::fs::create_dir(svc.vault_root().join(".loom")).unwrap();
+        symlink(&original, svc.vault_root().join(".loom/canvas.json")).unwrap();
+        assert!(read_canvas(&svc).is_err());
+        assert!(write_canvas(&svc, "clobber").is_err());
+        assert_eq!(std::fs::read(&original).unwrap(), b"preserve");
+    }
 }

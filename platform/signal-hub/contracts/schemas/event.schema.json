@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signalhub.example.invalid/contracts/event.schema.json",
+  "type": "object",
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "source": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+(?![\\s\\S])"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "datacontenttype": {
+      "anyOf": [
+        {
+          "const": "application/json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "dataschema": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "data": {
+      "type": "object"
+    },
+    "severity": {
+      "anyOf": [
+        {
+          "enum": [
+            "debug",
+            "info",
+            "notice",
+            "warning",
+            "error",
+            "critical"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 280,
+          "pattern": "^[^\\r\\n]*(?![\\s\\S])"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "originurl": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "correlationid": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 128
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "causationid": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^(?:[^#%]|%25|%23)+#(?:[^#%]|%25|%23)+(?![\\s\\S])"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seq": false,
+    "receivedat": false,
+    "clockskew": false,
+    "restored": false
+  },
+  "required": [
+    "specversion",
+    "id",
+    "source",
+    "type",
+    "time"
+  ],
+  "additionalProperties": {
+    "anyOf": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "boolean"
+      },
+      {
+        "type": "integer",
+        "minimum": -2147483648,
+        "maximum": 2147483647
+      },
+      {
+        "type": "null"
+      }
+    ]
+  },
+  "propertyNames": {
+    "pattern": "^[a-z0-9]+(?![\\s\\S])"
+  }
+}

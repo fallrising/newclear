@@ -239,7 +239,7 @@ HTTP spans are exported via OTLP/HTTP when the endpoint is set.
 
 ### Multi-node sharding
 
-Each queue is owned by one node (FNV hash of the name). Non-owners reverse-proxy the request.
+Each queue is owned by one node, chosen by rendezvous hashing of the queue name over live nodes. Non-owners reverse-proxy the request.
 
 ```bash
 # node1
@@ -266,9 +266,11 @@ Primary enqueues locally, then sync-replicates to the next N−1 nodes on the ri
 
 **List queues** aggregates across peers and counts **primary-owned** queues only (avoids double-counting replicas). Use `?local=1` for this node only.
 
-**Failover (v1.1+):** peers are probed on an interval; after `CLARKQ_CLUSTER_FAIL_THRESHOLD` failures a node is marked dead and **removed from the hash ring**. Ownership moves to remaining live nodes automatically (best if `REPLICATION_FACTOR≥2` so the new owner already has copies).
+**Failover (v1.1+):** peers are probed on an interval; after `CLARKQ_CLUSTER_FAIL_THRESHOLD` failures a node is marked dead and **removed from ownership**. Only the queues the dead node owned move, each to its next-ranked node — which is its existing replica when `REPLICATION_FACTOR≥2`. Queues owned by live nodes do not move.
 
 **Durable outbox + catch-up (v1.2):** failed/async replication is written to a JSON outbox on disk and retried after restart. A background catch-up loop pulls/merges missing message IDs across the replica set and has the primary push gaps to recovering replicas.
+
+**Consumed messages stay consumed:** every node remembers the IDs it removed (consume, replica delete, clear) for `CLARKQ_REMOVED_TTL`, and catch-up or replica pushes never re-add them. Messages a node restores from its WAL/snapshot at startup stay unconfirmed until every live replica has answered a catch-up round; any of them a peer reports removed and no peer still holds is dropped, so a node that was down while its messages were consumed does not bring them back. Removed IDs are kept in memory only: if a node rejoins after the TTL, or the whole cluster restarts while one node is stale, those messages can return. Rejoin such a node with an empty data dir.
 
 **Write quorum + epoch fencing (v1.3):** sync writes need `WRITE_QUORUM` successes (default majority of RF) or roll back with `QUORUM_FAILED`. Peers stamp `X-ClarkQ-Epoch` derived from the alive set; mismatched epochs get `409 STALE_EPOCH` (catch-up bypasses). After membership flips, optional `OWNER_GRACE` rejects writes briefly to reduce flapping.
 
@@ -329,6 +331,7 @@ curl -H "X-API-Key: $KEY" http://localhost:8080/api/v1/cluster
 | `CLARKQ_OUTBOX_BACKOFF` | `500ms` | Outbox base backoff |
 | `CLARKQ_OUTBOX_PATH` | _(auto)_ | Durable outbox file; default `<snapshot>.outbox.json` if snapshot set |
 | `CLARKQ_CATCHUP_INTERVAL` | `5s` | Replica catch-up period (`0` uses default) |
+| `CLARKQ_REMOVED_TTL` | `1h` | How long consumed message IDs are remembered so catch-up cannot bring them back; a node down longer than this should rejoin with an empty data dir |
 | `CLARKQ_WRITE_QUORUM` | `0` (majority) | Min successful copies incl. primary |
 | `CLARKQ_READ_QUORUM` | `0` (majority) | Min replicas that must hold a message ID |
 | `CLARKQ_LINEARIZABLE_CONSUME` | `false` | Strong dequeue: read quorum + CAS pop + delete quorum |

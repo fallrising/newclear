@@ -1,0 +1,38 @@
+{
+  "task": "T-956",
+  "status": "PARTIAL",
+  "files": {
+    "e2e/admin.spec.ts": "88a4ee4be1a245041096793b6cc390897d5bee740e5142f3820e62544ef83283",
+    "e2e/back.spec.ts": "8be68cceb8b56d6eda66ec30ebb6e0971b67fd535c3195be32bf9fb0839a4d08",
+    "e2e/compose.e2e.yaml": "7d07e9b127687eed2cf37c1af50b4dac38b886ae8d1426c6a6681b9736fdff3d",
+    "e2e/front.spec.ts": "d4383ec38e058b988d34dbcc1f9c07bf91dce349644d8723827c80976c2e6835",
+    "e2e/global-setup.ts": "4e2d86f4bc1efa51ac89b5df18953f2c0e93ff0b7524a2186843fefb453454cc",
+    "e2e/helpers.test.mjs": "773d75e6b95b6fb64a1d6defaf8b84d4ec7676798d318a07f85158692406843f",
+    "e2e/helpers.ts": "aed1224a23c111c9445ee6019d7fe5dc99f4f5beb03d7fc8ec761ad833de92bb",
+    "e2e/prepare-owned.ts": "2c804e8ca72924a78ad688288348284153801ebd06eeccbca240860eecdc1683",
+    "e2e/redaction.d.mts": "43e8696e4b657ab9426f2a9bfb302199c15692aadd88b31a9156fb72a190bce5",
+    "e2e/redaction.mjs": "912d410016d32e791808096376e27792cc5fa7cd32fdc0a7e7bb05895c543095",
+    "e2e/run.sh": "a8869e4a2c2b8f7a295e460f2254fb8a4564c85e9ed582d43e64a4730202be05",
+    "e2e/runner.mjs": "707ee68bd8002cc2af0d28373b092165f19c1fbe1b0c7e9e3f7dfe261484bd10",
+    "e2e/runner.test.mjs": "6818d8531bf32807a77c03c04ade93a00f931a0e487d410237a509c9e96a30f0",
+    "playwright.config.ts": "740eebd0610959110633a223f35c7b241c2e223cd99d787686747d884253ce65"
+  },
+  "checks": {
+    "contracts": "23 passed, 0 failed, 0 skipped",
+    "eslint": "exit 0",
+    "focusedTypeScript": "exit 0",
+    "playwrightList": "14 tests in 3 files",
+    "shellSyntax": "exit 0",
+    "realJourneys": "not run; root coordinates isolated-stack acceptance"
+  },
+  "commands": [
+    "node --test e2e/runner.test.mjs e2e/helpers.test.mjs",
+    "npx eslint e2e playwright.config.ts",
+    "npx tsc --noEmit --target ES2022 --module nodenext --moduleResolution nodenext --esModuleInterop --skipLibCheck --allowImportingTsExtensions --types node e2e/*.ts playwright.config.ts",
+    "npx playwright test --config playwright.config.ts --list",
+    "bash -n e2e/run.sh"
+  ],
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "sourceManifestSha256": "667b3e04db79c2b56bdfe2cbb2587250b4b9ba7dda15b730a8a919b1a178eeb9",
+  "reportSha256": "d3dca42773cc4c36c3d1e611fb1d66d4451db82bbae41a44cd3b08f3ae113ca6"
+}

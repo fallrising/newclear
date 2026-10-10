@@ -23,7 +23,7 @@ export interface TerminalNodeData {
   exitCode?: number | null;
 }
 
-export function TerminalNode({ data }: NodeProps) {
+export function TerminalNode({ data, width, height }: NodeProps) {
   const d = data as unknown as TerminalNodeData;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<string>(d.name ?? "");
@@ -37,7 +37,7 @@ export function TerminalNode({ data }: NodeProps) {
   return (
     <div
       className={CSS.nodeFrame}
-      style={{ width: NODE_SIZE.terminal.width, height: NODE_SIZE.terminal.height }}
+      style={{ width: width ?? NODE_SIZE.terminal.width, height: height ?? NODE_SIZE.terminal.height }}
     >
       {/* Terminals receive `triggers` edges (left handle) and emit
           `feeds_output_to` edges (right handle). The top "context-out"

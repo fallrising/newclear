@@ -116,17 +116,29 @@ func (r *Report) normalized(action string) { r.Normalized[action]++ }
 func (r *Report) rejected(reason string)   { r.Rejected[reason]++ }
 func (r *Report) warning(reason string)    { r.Warnings[reason]++ }
 
-// MetricBatch contains normalized samples and their family metadata.
+// MetricOrigin relates a bounded contiguous output range to one original OTLP
+// point. Rejected excludes delta baselines consumed without an output sample.
+// This provenance is internal admission state and never stored in UTM or SPI.
+type MetricOrigin struct {
+	Start, End int
+	Rejected   bool
+}
+
+// MetricBatch contains normalized samples, family metadata and optional OTLP provenance.
 type MetricBatch struct {
-	Points   []utm.MetricPoint    `json:"points"`
-	Metadata []utm.MetricMetadata `json:"metadata"`
+	maxOrigins   int
+	activeOrigin int
+	Origins      []MetricOrigin       `json:"-"`
+	Points       []utm.MetricPoint    `json:"points"`
+	Metadata     []utm.MetricMetadata `json:"metadata"`
 }
 
 // Normalizer owns the bounded delta-to-cumulative state used by OTLP metrics.
 type Normalizer struct {
-	options      Options
-	delta        *deltaconv.Converter
-	logAllowlist map[string]struct{}
+	previewMetrics bool
+	options        Options
+	delta          *deltaconv.Converter
+	logAllowlist   map[string]struct{}
 }
 
 // New constructs a normalizer. Close must be called to stop the delta-state

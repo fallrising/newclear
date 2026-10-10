@@ -1,0 +1,16 @@
+{
+  "baseline": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "protectedFiles": 240,
+  "protectedScope": [
+    "services/**",
+    "kernel/**",
+    "docs/v2/contracts/**",
+    "existing e2e-mock/**",
+    "package-lock.json",
+    "existing waves excluding W5"
+  ],
+  "changedProtectedFiles": [],
+  "lockUnchanged": true,
+  "existingMockE2EUnchanged": true,
+  "note": "Current W5 A\u2013F scope; source compared byte-for-byte with W4 baseline before canonical draft PR."
+}

@@ -409,7 +409,7 @@ func decodeYAMLStruct(mapping map[string]any, output reflect.Value, path string)
 		if field.PkgPath != "" {
 			continue
 		}
-		name := strings.Split(field.Tag.Get("yaml"), ",")[0]
+		name, _, _ := strings.Cut(field.Tag.Get("yaml"), ",")
 		if name != "" && name != "-" {
 			fields[name] = index
 		}
@@ -448,7 +448,7 @@ func decodeYAMLMap(mapping map[string]any, output reflect.Value, path string) er
 
 func decodeYAMLScalar(input yamlScalar, output reflect.Value, path string) error {
 	if output.CanAddr() {
-		if unmarshaler, ok := output.Addr().Interface().(encoding.TextUnmarshaler); ok {
+		if unmarshaler, ok := reflect.TypeAssert[encoding.TextUnmarshaler](output.Addr()); ok {
 			if err := unmarshaler.UnmarshalText([]byte(input.value)); err != nil {
 				return fmt.Errorf("%s at line %d: %w", path, input.line, err)
 			}

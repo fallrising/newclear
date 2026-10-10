@@ -12,7 +12,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
+	"github.com/fallrising/newclear/platform/prism/internal/secret"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
 )
 
@@ -27,11 +29,14 @@ func (c *Config) Validate(ctx context.Context) error {
 	}
 	errs := []error{
 		validateServer(c.Server),
-		validateStorage(c.Storage),
+		c.validateStorage(ctx),
 		validateControlplane(c.Controlplane),
 		validateTenancy(c.Tenancy),
 		validateAuth(ctx, c.Auth),
+		c.validateIngestIdentity(ctx),
+		c.validateQueryIdentity(ctx),
 		validateIngest(c.Ingest),
+		c.validateIngestBudget(),
 		validateLimits(c.Limits),
 		validateQuery(c.Query),
 		validateRules(ctx, c.Rules),
@@ -47,6 +52,45 @@ func (c *Config) Validate(ctx context.Context) error {
 		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
+}
+
+func (c *Config) validateQueryIdentity(ctx context.Context) error {
+	if c.Server.Mode != "query" && c.Server.Mode != "all-in-one" {
+		return nil
+	}
+	if c.Tenancy.Mode != "single" {
+		return fmt.Errorf("query requires single tenancy; strict tenancy is not implemented")
+	}
+	if len(c.Tenancy.DefaultTenant) > 2048 || strings.TrimSpace(c.Tenancy.DefaultTenant) != c.Tenancy.DefaultTenant {
+		return fmt.Errorf("tenancy.default_tenant exceeds query identity capacity")
+	}
+	if c.Server.Mode == "all-in-one" {
+		// Ingest already loaded and validated the same credential.
+		return nil
+	}
+	if c.Auth.IngestAPIKeyFile == "" {
+		if !c.Auth.AllowAnonymousRead {
+			return fmt.Errorf("auth.ingest_api_key_file is required when anonymous query reads are disabled")
+		}
+		return nil
+	}
+	key, err := readBounded(ctx, c.Auth.IngestAPIKeyFile, maxIngestKeyBytes)
+	if err != nil {
+		return fmt.Errorf("read auth.ingest_api_key_file: %w", err)
+	}
+	value := strings.TrimSpace(string(key))
+	if len(value) < 32 || strings.IndexFunc(value, unicode.IsSpace) >= 0 {
+		return fmt.Errorf("auth.ingest_api_key_file must contain a bearer credential of at least 32 bytes without internal whitespace")
+	}
+	jwt, err := readBounded(ctx, c.Auth.JWTSecretFile, maxAuxiliaryFileBytes)
+	if err != nil {
+		return fmt.Errorf("read auth.jwt_secret_file: %w", err)
+	}
+	if value == strings.TrimSpace(string(jwt)) {
+		return fmt.Errorf("auth.ingest_api_key_file must use a credential distinct from auth.jwt_secret_file")
+	}
+	c.Auth.IngestAPIKey = secret.String(strings.Clone(value))
+	return nil
 }
 
 func validateServer(server ServerConfig) error {
@@ -87,13 +131,35 @@ func validateListen(field, address string) error {
 	return nil
 }
 
-func validateStorage(storage StorageConfig) error {
+func (c *Config) validateStorage(ctx context.Context) error {
+	storage := &c.Storage
 	var errs []error
-	if err := validateStorageTarget("storage", StorageTarget{Driver: storage.Driver, DSN: storage.DSN, Options: storage.Options}); err != nil {
+	if storage.DSNFile != "" && !storage.dsnFileLoaded {
+		if storage.DSN != "" {
+			errs = append(errs, fmt.Errorf("storage.dsn and storage.dsn_file are mutually exclusive"))
+		} else if value, err := readStorageDSNFile(ctx, storage.DSNFile); err != nil {
+			errs = append(errs, fmt.Errorf("storage.dsn_file is invalid: %w", err))
+		} else {
+			storage.DSN = secret.String(value)
+			storage.dsnFileLoaded = true
+			storage.loadedDSN = storage.DSN
+		}
+	}
+	if storage.DSNFile != "" && storage.dsnFileLoaded {
+		if storage.DSN != storage.loadedDSN {
+			errs = append(errs, fmt.Errorf("storage.dsn conflicts with loaded storage.dsn_file"))
+		} else if value, err := readStorageDSNFile(ctx, storage.DSNFile); err != nil || secret.String(value) != storage.loadedDSN {
+			errs = append(errs, fmt.Errorf("storage.dsn_file changed after load"))
+		}
+	}
+	if err := validateStorageTarget("storage", StorageTarget{Driver: storage.Driver, DSN: string(storage.DSN), Options: storage.Options}); err != nil {
 		errs = append(errs, err)
 	}
 	if storage.Retention.MetricsDays <= 0 || storage.Retention.LogsDays <= 0 || storage.Retention.TracesDays <= 0 || storage.Retention.REDDays <= 0 {
 		errs = append(errs, fmt.Errorf("storage.retention values must all be positive"))
+	}
+	if len(storage.Split) != 0 {
+		errs = append(errs, fmt.Errorf("storage.split is not supported"))
 	}
 	for signal, target := range storage.Split {
 		if !slices.Contains([]string{"metrics", "logs", "traces"}, signal) {
@@ -103,6 +169,9 @@ func validateStorage(storage StorageConfig) error {
 		if err := validateStorageTarget("storage.split."+signal, target); err != nil {
 			errs = append(errs, err)
 		}
+	}
+	if storage.Driver == "clickhouse" {
+		errs = append(errs, validateClickHouseStorage(ctx, *storage, c.Query))
 	}
 	return errors.Join(errs...)
 }
@@ -180,7 +249,7 @@ func validateIngest(ingest IngestConfig) error {
 }
 
 func validateLimits(limits LimitsConfig) error {
-	if limits.MaxActiveSeriesPerTenant <= 0 || limits.MaxLogLineBytes <= 0 || limits.CardinalityAlarmThreshold <= 0 {
+	if limits.MaxActiveSeriesPerTenant <= 0 || limits.MaxLogLineBytes <= 0 || limits.MaxLogLineBytes > 1<<30 || limits.CardinalityAlarmThreshold <= 0 {
 		return fmt.Errorf("limits numeric values must be positive")
 	}
 	return nil
@@ -339,6 +408,13 @@ func resolveRelativePaths(config *Config, configPath string) {
 	}
 	base := filepath.Dir(configPath)
 	config.Auth.JWTSecretFile = resolveRelativePath(base, config.Auth.JWTSecretFile)
+	config.Auth.IngestAPIKeyFile = resolveRelativePath(base, config.Auth.IngestAPIKeyFile)
+	config.Storage.DSNFile = resolveRelativePath(base, config.Storage.DSNFile)
+	for key, value := range config.Storage.Options {
+		if key == "password_file" || key == "username_file" {
+			config.Storage.Options[key] = resolveRelativePath(base, value)
+		}
+	}
 	config.Rules.Path = resolveRelativePath(base, config.Rules.Path)
 	config.Notify.ConfigPath = resolveRelativePath(base, config.Notify.ConfigPath)
 	config.Server.TLSCertFile = resolveRelativePath(base, config.Server.TLSCertFile)

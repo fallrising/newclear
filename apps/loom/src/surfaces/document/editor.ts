@@ -5,7 +5,7 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
-import { EditorState } from "@codemirror/state";
+import { Annotation, EditorState } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, keymap } from "@codemirror/view";
@@ -57,6 +57,11 @@ export interface EditorHandle {
   destroy: () => void;
 }
 
+export const externalReplacement = Annotation.define<boolean>();
+export function isLocalDocumentChange(transactions: readonly { docChanged: boolean; annotation: (type: typeof externalReplacement) => boolean | undefined }[]): boolean {
+  return transactions.some((tr) => tr.docChanged && !tr.annotation(externalReplacement));
+}
+
 export function createEditor(args: CreateEditorArgs): EditorHandle {
   const saveKey: Extension = keymap.of([
     {
@@ -70,7 +75,7 @@ export function createEditor(args: CreateEditorArgs): EditorHandle {
   ]);
 
   const changeListener = EditorView.updateListener.of((u) => {
-    if (u.docChanged) {
+    if (isLocalDocumentChange(u.transactions)) {
       args.onChange(u.state.doc.toString());
     }
   });
@@ -138,6 +143,7 @@ export function createEditor(args: CreateEditorArgs): EditorHandle {
     replaceDoc(content) {
       view.dispatch({
         changes: { from: 0, to: view.state.doc.length, insert: content },
+        annotations: externalReplacement.of(true),
       });
     },
     appendOutput(bodyKey, text) {

@@ -1,8 +1,76 @@
 # ERU VPS MVP：固定編號任務清單
 
+2026-10-08 本機驗收：ERU-009／010／013／014／015 均為「本機完成、待 E2E」。完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過，多模型有界實作與獨立審查通過；具體版本／命令／歷史失敗見 [T-271](../.team/reports/T-271.md)。GitHub 最終版本 CI／合併／遠端核對與 desk 同步另記 PR／帳本，全部通過後才完成本輪交付。正式完成6／剩餘12（9進行中、3待做）不變；live 操作包保持 [UNEXECUTED](E2E-OPERATIONS-2026-10-06.md)。下列較早紀錄保留歷史日期，五項 local DoD 不抵銷 live DoD。
+
+## 2026-10-08 五項本機驗收映射
+
+| 本機任務 | 本機狀態與完整離線證據 | 待 E2E 的正式條件 |
+| --- | --- | --- |
+| ERU-009 | 本機完成、待 E2E；bounded drain／cleanup／readonly recovery、original entrypoint 與實際 Name binding，native `test_worker_drain*`／`test_app_cleanup` 通過。 | 真 CLI/API/job 及 nonempty drain→重裝→恢復。 |
+| ERU-010 | 本機完成、待 E2E；loss／partial cleanup／replacement、containerd ID=Name／明確分開的 generic Name parser 與 no replay，native `test_worker_loss*` 通過。 | provider fence、失聯／quota／HTTP 與180秒候選驗收。 |
+| ERU-013 | 本機完成、待 E2E；provenance/version guards、native `test_core_release*`／`test_core_update*` 通過；[既有兩次隔離 v0.1.7 build](M3-CORE-V017-VALIDATION-2026-10-03.md) 保留、不重建。 | verified-not-deployed，upgrade／rollback／interruption 與 plugin/runtime。 |
+| ERU-014 | 本機完成、待 E2E；既有六階段 workflow/generation/resume，native `test_reimage*`／`test_labctl`／`test_recovery` 通過。 | safe patch 部署、人工 OS/volume 重灌及完整 live 鏈。 |
+| ERU-015 | 本機完成、待 E2E；唯一 public CLI 通過 network／22步 bootstrap／按計畫展開的 replay（本輪兩個 app fixture為59步）／raw acceptance／generation prefix recovery／completion／retirement／普通第二次 consumer／retained lineage。 | 三個不同 generation 的 fresh、V01–V04/V08、residue/RTO 與真 CLI/runtime。 |
+
+full09 log SHA256 `08ff99ffac01dd96cf22caea99d98696f82b7190e990996c528bc6ad19e04b07`，native09 manifest SHA256 `ab0da4d1a14aadf7acebff735a4fa093f44b4f847aba99acce86668ce33750bb`。[完整本機矩陣](LOCAL-CLOSEOUT-2026-10-06.md) 保留原基線與當輪實測；[批准設計](M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 保留 scope／timing／current authority 的驗收界線。此輪沒有真實 VPS／SSH／nft／kernel／provider、release/deploy 或破壞性操作。
+
+## 歷史進度（保留原文，以前述最新驗收為準）
+
+2026-10-07 開發續作：[fresh completion 主線](M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 已接入既有 driver 的 replay、raw resource/residue acceptance、本機 generation commit/seal/completion 與普通 controller admission。多模型有界實作及獨立反例審查保留版本和原始證據；目前完整 native 測試仍在執行，CLI omitted-false 後續修正與最終版本 GitHub CI／合併尚待。最新五項本機 DoD 映射見 [2026-10-06 矩陣及 10-07 更新](LOCAL-CLOSEOUT-2026-10-06.md)，live 操作包 [UNEXECUTED](E2E-OPERATIONS-2026-10-06.md)。正式完成6／剩餘12不變；下列較早的缺口及測試數保留歷史日期。
+
+## 2026-10-07 五項本機驗收映射
+
+此表只核對本次 local DoD。最終完整 native／CLI 與 exact-head CI gate 尚待，source 與 focused tests 不能單獨作整體驗收；逐版本結果以 [T-271 evidence gate](../.team/reports/T-271.md) 為準。正式任務仍進行中，live DoD 見 [操作包](E2E-OPERATIONS-2026-10-06.md)。
+
+| 本機任務 | 本機實作及必要證據 | 尚待驗收 |
+| --- | --- | --- |
+| ERU-009 | bounded drain／exact-ID cleanup／readonly recovery 已具備；`test_worker_drain*` 與 `test_app_cleanup` 納入完整 native gate。 | 最終完整離線 gate；真 CLI/API/job 及 drain→重裝→恢復 E2E。 |
+| ERU-010 | bounded loss／partial cleanup／replacement 已具備；`test_worker_loss*`、shared opaque-ID regression 納入 native gate。 | 最終完整離線 gate；provider fence、失聯／quota／HTTP 與180秒候選 E2E。 |
+| ERU-013 | provenance／version guard 及 [既有兩次隔離 v0.1.7 build](M3-CORE-V017-VALIDATION-2026-10-03.md) 已具備；`test_core_release*`／`test_core_update*` 納入 native gate，不重建。 | 最終完整離線 gate；verified-not-deployed，upgrade／rollback／interruption 與 plugin/runtime E2E。 |
+| ERU-014 | worker-only install／core access／register／smoke／resume／generation 的六階段有限 workflow 已具備；`test_reimage*`／`test_labctl`／`test_recovery` 納入 native gate。 | 最終完整離線 gate；safe patch 部署、人工 OS/volume 重灌及完整 live 鏈。 |
+| ERU-015 | fresh-run public CLI 串接 network／22步 bootstrap／59步 replay／raw acceptance／generation prefix recovery／completion／retirement／普通第二次 consumer 與 retained lineage；`test_fresh_completion_integration` 及其他 fresh native tests。 | 唯一完整 CLI journey 與最終 native gate；三個不同 generation 的 V01–V04/V08／residue／RTO E2E。 |
+
+2026-10-06 續作：[fresh bootstrap 主線](M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md) 接入既有 `labctl fresh-run next/recover/status`，從已驗證 network history 與當次 renewal/probes 執行 fresh etcd、empty-control-plane、safe core 與三個 agent 的 install/start/register/up。22 個固定步驟分別持久化，lost reply 僅觀察恢復；stage receipt 不釋放 pending 或提交 generation。最終完整離線 1,133 項／2723.389 秒、root focused60項／16.610秒及獨立最終49項／10.123秒通過；本機驗收見 [T-267 evidence gate](../.team/reports/T-267.md)，遠端 CI／合併結果另記 desk T-0075；整體 PARTIAL、正式完成6／剩餘12不變。PR #298 已合併，v0.1.7 兩次既有 build 保留。下一主線 apps-replayed/resources/residue、generation commit/seal/barrier completion 與後續實機驗收。
+
+2026-10-04 最終主線本機驗收：完整1,035項／890.950秒、root focused23項／86.246秒及獨立final整合1項／79.209秒通過；原CI validator／compileall／team／privacy／whitespace通過。見 [T-259 evidence gate](../.team/reports/T-259.md)。network-and-access-ready的manual-console+fixed-probe路徑可產生immutable receipt；整體PARTIAL／正式剩餘12保留，下一主線empty-control-plane/bootstrap及generation。
+
+
+2026-10-04 主線續作：[network-and-access-ready 完整本機流程](M3-FRESH-NETWORK-READY-2026-10-04.md) 已串接人工 console intent／receipt、現行四機 directory/staging/firewall、有效 core→worker publickey 認證、IPv4／IPv6 公網隔離及 immutable stage receipt。prepare／record 先於 host helpers，accept 才要求完整前置；保留 controller admin key，setup raw SHA 綁定授權。root focused 23 項／86.246 秒通過，完整驗證與最終 evidence gate 另記於本輪報告。此路徑有初始 OOB admin management/trust 前置，沒有自動從不可連線空白 OS 安裝 VPN。整體 PARTIAL、正式完成 6／剩餘 12不變；下一主線 empty-control-plane／bootstrap，再接 generation commit/seal。
+
+
+2026-10-04 固定 firewall adapter 本機驗收：最終完整 1,006 項／810.247 秒、獨立 61 項／3.244 秒通過；見 [T-255 evidence gate](../.team/reports/T-255.md)。多模型實作與獨立審查完成，本輪限 synthetic roots／fake nft。下一本機入口為有效金鑰與網路探測，再接 bootstrap／generation；live nft normalization／persistence、正式剩餘 12 及整體 PARTIAL 保留。
+
+2026-10-04 續作：[固定 firewall host helper 與 SSH adapter](M3-FRESH-FIREWALL-ADAPTER-2026-10-04.md) 接 durable remote intent、create-only table、當次 staging／identity 重驗與 pinned transport。多模型有界實作／獨立審查；本輪僅 temp-root／fake nft 驗證，整體 PARTIAL、正式剩餘 12 不變。
+
+2026-10-04 防火牆本機驗收：最終版本完整 944 項／832.977 秒、獨立 50 項／601.983 秒通過；見 [T-251 evidence gate](../.team/reports/T-251.md)。整體仍為 PARTIAL，正式剩餘 12 項。下一步為固定 kernel adapter 與輸出相容性證據，再接有效金鑰、網路探測、bootstrap／generation；尚未操作實機。
+
+2026-10-04 續作：[firewall activation coordinator](M3-FRESH-FIREWALL-ACTIVATION-2026-10-04.md) 綁完整四機staging receipts、獨立當次授權及durableintent，驗證專用table規則、失回應只讀恢復。本輪只用fakeadapter；productionkernel adapter、keys／tunnel／可達性仍未完成。正式剩餘12及整體PARTIAL不變。
+
+2026-10-04 續作：[durable directory preparation](M3-FRESH-DIRECTORY-PREPARATION-2026-10-04.md) 補裸OS到安全staging目錄的前置操作，獨立授權、持久intent、禁止採納／重播及只讀恢復；本輪限本機／fake transport驗證。整體PARTIAL、正式剩餘12不變。
+
+2026-10-04 後續：[固定SSH staging adapter與host helper](M3-FRESH-NETWORK-SSH-STAGING-2026-10-04.md) 加入OOB pinned transport、現場identity／path檢查及durable no-clobber發布；只以fake SSH／temp-root驗證。directory preparation、activation與實機驗收仍未完成，正式剩餘12不變。
+
+2026-10-04 後續：[network file-staging協調器](M3-FRESH-NETWORK-STAGING-2026-10-04.md) 綁定當次計畫／授權，先durable intent再單次adapter dispatch，回應遺失只讀reconcile；本輪fake adapter驗證，不啟用設定或接受stage。正式剩餘12不變。
+
+2026-10-04 後續：[fresh network-access設定計畫](M3-FRESH-NETWORK-ACCESS-PLAN-2026-10-04.md) 產生四機固定firewall／pinned known_hosts／staged core key內容，保存immutable private plan並離線重導出；重核當次admission與身份。尚未套用設定或驗收network stage，正式剩餘12不變。
+
+2026-10-04 後續：[network stage 唯讀前置檢查](M3-FRESH-NETWORK-ADMISSION-2026-10-04.md) 重驗精確pending、replacement facts與當次scope-bound authorization／fence／隔離proof。歷史preparation不刷新授權；檢查通過不授予mutation或stage acceptance。ERU-015與正式剩餘12項不變。
+
+2026-10-04 後續：[replacement 裸 OS facts](M3-FRESH-REPLACEMENT-FACTS-2026-10-04.md) 新增四機 OOB key／receipt 綁定的唯讀採樣、immutable private observation 與離線重驗。只用 synthetic／fake transport 測試；不等於 network／完整 residue／stage acceptance，ERU-015 與正式剩餘 12 項不變。
+
+2026-10-03 後續：[四機 fresh 人工 receipt 驗證](M3-FRESH-REIMAGE-RECEIPTS-2026-10-03.md) 實作獨立 core／worker 證據契約與唯讀 assessment；不代表重灌已執行或 stage accepted。ERU-015 仍進行中，正式剩餘 12 項。
+
+2026-10-03 後續：[唯讀 fresh baseline observation](M3-FRESH-OBSERVATION-2026-10-03.md) 接續四機／etcd／ERU metadata 基線及 schema-v2 host evidence 重導出；本輪只用 fake／contract tests，未做 VPS 操作。這不是 fresh stage acceptance，正式剩餘仍為 12 項。
+
+2026-10-03 後續：[execution envelope 準備與 pending inspection](M3-FRESH-EXECUTION-PREP-2026-10-03.md) 新增目前本機 bindings／evidence 重核、immutable preparation 及專用只讀分類；沒有 stage dispatch、自動 reservation、generation acceptance 或 barrier release，ERU-015 與正式剩餘數不變。
+
+2026-10-03 後續本機切片：[pending-generation admission barrier](M3-PENDING-GENERATION-2026-10-03.md) 已接續實作持久 reservation 與合作式 controller 入口攔截。它不涵蓋外部 writer fence，沒有 production fresh executor／barrier completion；下文較早的缺口與測試數保留歷史語境。
+
+2026-10-03 本機收尾核對：[驗收矩陣與缺口](LOCAL-CLOSEOUT-2026-10-03.md)。ERU-009／010／014 已具備有限本機流程；ERU-013 本輪修補 release provenance 守護，[v0.1.7 候選驗證](M3-CORE-V017-VALIDATION-2026-10-03.md) 已通過雙次隔離 build／有界 compatibility，仍缺跨版本實機驗收；ERU-015 已有 [executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md)，已有 [本機 simulation journal／coordinator](M3-FRESH-SIMULATION-2026-10-03.md)，production executor 仍未實作。不得將五項一律標成「本機完成、只待 E2E」。正式完成數與剩餘數不變。
+
 建立：2026-09-23。此清單從目前尚未完成的工作開始編號；首次部署、worker-4 元件重裝 3/3、恢復／patched reapply、背景觀測工具、資料回收分析及本機 SIGKILL 驗證已完成，不重複計入。
 
-**目前剩餘 12 項：近期收尾 1 項，後續驗證／擴充 11 項。此清單內完成 6 項。** 依 owner 指示先完成本機開發，再統一做正式 VPS E2E。ERU-010 已新增失聯 worker 的離線 review planner、live prepare、exact-ID dissociation executor、唯讀 recovery、partial fresh-subset cleanup 與 ERU-012 replacement wrapper，全部只用 fake tests，尚無實機演練；ERU-012 本機功能已齊待 E2E；ERU-013 的 v0.1.5 patch 已用 Go 1.27.1 重驗，另對 unreleased master commit 做 forward-compatibility probe；仍等下一個 stable tag 與正式跨版本 evidence；ERU-014 已有 preparation、worker-only install、registration 前 core known_hosts／nft access、fenced registration／smoke／resume、hash-bound inventory／generation commit，以及跨六 stages 的 snapshot/recovery coordinator；全部只用 fake tests 驗證，patch 仍未部署、整體 E2E 未完成，任務數不變。
+**目前剩餘 12 項：近期收尾 1 項，後續驗證／擴充 11 項。此清單內完成 6 項。** 依 owner 指示先完成本機開發，再統一做正式 VPS E2E。ERU-010 已新增失聯 worker 的離線 review planner、live prepare、exact-ID dissociation executor、唯讀 recovery、partial fresh-subset cleanup 與 ERU-012 replacement wrapper，全部只用 fake tests，尚無實機演練；ERU-012 本機功能已齊待 E2E；ERU-013 的 v0.1.5 patch 已用 Go 1.27.1 重驗，另對 unreleased master commit 做 forward-compatibility probe；v0.1.7 候選雙次 build／有界 compatibility 已通過，仍缺跨版本實機驗收；ERU-014 已有 preparation、worker-only install、registration 前 core known_hosts／nft access、fenced registration／smoke／resume、hash-bound inventory／generation commit，以及跨六 stages 的 snapshot/recovery coordinator；全部只用 fake tests 驗證，patch 仍未部署、整體 E2E 未完成，任務數不變。
 
 正式 E2E 待辦首項仍是 **ERU-007**（V11 小流量運行驗收），但暫緩到本機開發收尾後。ERU-006 已完成 worker host-network 私網 HTTP、公網 v4/v6 TCP/80 隔離、core 公網管理埠阻擋、容器 DNS A 查詢與 IPv4 HTTPS egress 驗收；實機結果及限制見 [ERU-006 紀錄](M3-NETWORK-ACCEPTANCE-PREP-2026-09-24.md)。近期 7 項完成仍不等於原 SDD 全部 V01–V11 或完整 HA 已通過。
 
@@ -36,9 +104,9 @@
 | ERU-010 | worker 非計畫失聯恢復（V07） | 進行中 | [本機 recovery 前置](M3-WORKER-LOSS-PREP-2026-09-27.md) 已綁定 incident detection 秒數／180 秒候選、外部 fence attestation digest、unavailable+bypassed target、exact ERU-012 stale workload IDs／quota digest 與明確健康 destination。live adapter 只讀 core 與健康 workers，不 SSH target；兩次 stable preflight 後的 executor 逐 ID journal／dissociate／exact reconcile，每次重核全群 workload identity 與健康 runtime，末端 quota 必須為零且沒有 `resource --fix`。partial run 可從全新雙 snapshot／fence／quota／完整 identity binding 建 fresh exact-ID subset plan，不重播舊 journal；stale IDs 全 absent 且 quota zero 後，replacement wrapper 重新驗證原 private specs，依序建立 fresh ERU-012 child plans，全部 exact replicas 與 HTTP-ready 才完成。30 個 worker-loss fake tests 通過。沒有連 VPS；仍須 V11 後有界演練、真實 CLI/API/job 語意與末端 evidence；不宣稱 provider fence 已驗證、自動 quota repair、lost node remove／resume 或持續維持副本數。 |
 | ERU-011 | 可重現 bootstrap 與新 controller 接手 | 進行中 | [本機接手前置檢查](M3-CONTROLLER-PREFLIGHT-2026-09-23.md) 已記錄 runner／OS package／artifact 與外部私有輸入、SSH alias 邊界；仍須從乾淨 controller 使用外部 inventory／keys 重現受控 bootstrap，不依賴目前 B 的暫存工具。乾淨 OS 實機驗收配合 ERU-014／015。 |
 | ERU-012 | 應用差異部署與真實無狀態服務 | 進行中 | 已有 v1 spec／digest planner、hash-bound executor、EruCLIAdapter 與 exact-ID cleanup plan／executor；沿用 labctl.Operator、固定 SSH aliases、雙階段 etcd/core/consistency preflight、digest image cache、bodyless worker probe，並在每次 remove 前驗新版 readiness、對照全群 workload identities，包含最後 readiness probe 後的核對。AppExecutor／AppRevisionCleanup 的 public reconcile 也在共用 `ClusterLock` 下讀寫 journal。容量 admission 交由 Eru resource plugin，v1 不含外部 traffic routing。planner／executor／adapter／cleanup 共 54 個離線測試。尚需真實 CLI/API/job 與 VPS E2E 驗證，故任務未完成。詳見 [離線前置](M3-APP-DESIRED-STATE-PREP-2026-09-25.md)。 |
-| ERU-013 | patch 發布與跨版本升級／回退 | 進行中 | [provenance／版本 guard](M3-CORE-RELEASE-PROVENANCE-2026-09-25.md) 與 [Go 1.27.1 隔離重驗](M3-GO127-REVALIDATION-2026-09-25.md) 已完成。另以 Go 1.27.1 對未發布的 upstream master `e9b48c12663f18e1356ee29f7ce2ac0963a8ae4d` 做 forward-compatibility probe：兩份 v0.1.5 patch 可套用，基線重現兩個 lock panic，patched regressions／calcium+store／locks tests／build 通過，兩次獨立 source build byte-identical。這不是新 release，不改 artifact lock／release manifest，也不部署；官方最新穩定版 v0.1.5（2026-09-09）與 repo 鎖定版本相同，master 雖領先 5 個 commit，尚無更新的 stable tag。尚無較新 stable tag 的正式 patch build／manifest，也未完成跨版本升級／回退／中斷驗證與最後 VPS E2E；任務維持進行中。詳見 [master candidate probe](M3-CORE-MASTER-CANDIDATE-2026-09-26.md)。 |
+| ERU-013 | patch 發布與跨版本升級／回退 | 進行中 | [provenance／版本 guard](M3-CORE-RELEASE-PROVENANCE-2026-09-25.md) 與 [Go 1.27.1 隔離重驗](M3-GO127-REVALIDATION-2026-09-25.md) 已完成。另以 Go 1.27.1 對未發布的 upstream master `e9b48c12663f18e1356ee29f7ce2ac0963a8ae4d` 做 forward-compatibility probe：兩份 v0.1.5 patch 可套用，基線重現兩個 lock panic，patched regressions／calcium+store／locks tests／build 通過，兩次獨立 source build byte-identical。這不是新 release，不改 artifact lock／release manifest，也不部署；2026-09-26 probe 當時最新穩定版為 v0.1.5。2026-10-03 已核對 v0.1.7 發布，精確候選來源與 patch 見 [v0.1.7 驗證紀錄](M3-CORE-V017-VALIDATION-2026-10-03.md)，雙次 byte-identical build／validation manifest 已通過；deployment locks 保留 v0.1.5。跨版本升級／回退／中斷驗證與最後 VPS E2E 仍未完成；任務維持進行中。詳見 [master candidate probe](M3-CORE-MASTER-CANDIDATE-2026-09-26.md)。 |
 | ERU-014 | 單 worker 人工 OS 重灌與重新納管 | 進行中 | Owner-reviewed intent／receipt、hash-bound preparation、replacement host verification、離線 worker plan、worker-only install、registration 前 core known_hosts／firewall source allowlist access preparation、fenced registration、fenced smoke 與 safe-resume executors／read-only reconcile 均以 fake operator 驗證。access stage 僅原子更新 target 的 host-key entries／Tailscale source IP，registration 與 smoke 需核對相同 access proof。registration 核對 running core SHA，AddNode 後維持 bypass=true 並等候 agent available；smoke 在 peer HTTP guards 下清理 target nginx；resume 透過 core SSH alias 單次執行 node up 並核對 available=true／bypass=false，成功停在 `resumed-awaiting-generation-commit`，generation 保持不變。其後的本機 stage 會重驗成功 resume、worker IP 與 OOB host key，將 target IP／core known_hosts／firewall render 寫回 private deployment plan，再把 cluster generation 加一；兩檔以 hash-bound journal／唯讀 reconcile 分段提交，可在精確 partial state 下明確續跑。fake-only 測試通過，未讀寫真實 private data。pinned core v0.1.5 Bypass-at-Add patch 已用 Go 1.27.1 雙環境建置；patch 仍 verified-not-deployed。跨階段 coordinator 核對 predecessor journal hashes／target identity，只選第一個未完成 stage；plan 僅產生下一步指引，recover executor 只呼叫單一既有唯讀 reconciler，stale snapshot 會停止。fake-only 測試通過，沒有連線 VPS 或讀寫真實 private data。仍缺 safe AddNode patch 受控部署與整體 E2E。provider API 不使用，OS reimage 與日常元件重裝分開驗收；見 [safe AddNode](M3-CORE-SAFE-NODE-ADD-2026-09-26.md)、[core access](M3-REIMAGE-WORKER-ACCESS-2026-09-26.md)、[registration](M3-REIMAGE-WORKER-REGISTER-2026-09-26.md)、[smoke](M3-REIMAGE-WORKER-SMOKE-2026-09-26.md)、[resume](M3-REIMAGE-WORKER-RESUME-2026-09-26.md)、[generation commit](M3-REIMAGE-WORKER-GENERATION-2026-09-26.md) 與 [跨階段 recovery](M3-REIMAGE-WORKER-RECOVERY-2026-09-26.md)。 |
-| ERU-015 | 全群 fresh 重建連續三次（V08） | 進行中 | [本機 review-only planner](M3-FRESH-REBUILD-PREP-2026-09-27.md) 已把單次 Profile A 的四台 owner intent、現行 inventory／generation、來源與 controller report、外部 secrets／console／evidence readiness、全新 etcd token 及 ERU-012 desired specs 綁定到 private immutable plan；公開輸出只有 counts／digests，沒有 executor、provider／SSH／VPS mutation，V01–V04／V08 都明列未執行。仍須另行設計／審閱 destructive executor、完成三個獨立新 generation 的實機重建，逐次證明 V01–V04、舊 node／workload／plugin capacity 無殘留並記錄 RTO。不得以 worker-4 元件重裝 3/3 代替；任務未完成。 |
+| ERU-015 | 全群 fresh 重建連續三次（V08） | 進行中 | [本機 review-only planner](M3-FRESH-REBUILD-PREP-2026-09-27.md) 已把單次 Profile A 的四台 owner intent、現行 inventory／generation、來源與 controller report、外部 secrets／console／evidence readiness、全新 etcd token 及 ERU-012 desired specs 綁定到 private immutable plan；公開輸出只有 counts／digests，沒有 executor、provider／SSH／VPS mutation，V01–V04／V08 都明列未執行。[destructive executor 設計](M3-FRESH-EXECUTOR-DESIGN-2026-10-03.md) 已提出十二階段、immutable receipts 與 recovery 契約；已新增 [fake simulation journal／coordinator](M3-FRESH-SIMULATION-2026-10-03.md)，僅驗證 stage chain／durability／no-replay；仍須實作 production executor／外部 writer fence 與 barrier completion／bootstrap、完成三個獨立新 generation 的實機重建，逐次證明 V01–V04、舊 node／workload／plugin capacity 無殘留並記錄 RTO。不得以 worker-4 元件重裝 3/3 代替；任務未完成。2026-10-06 當前本機主線已加入 [fresh-run](M3-FRESH-RUN-MAINLINE-2026-10-05.md) 的 network/renewal 與 [fresh bootstrap](M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md) 路徑，最終完整1133項與獨立49項通過，見 [T-267 evidence gate](../.team/reports/T-267.md)；上文無 executor 為初始 planner 語境，完整 replay/resources/residue/generation/barrier completion 與實機三次 fresh 仍缺。 |
 | ERU-016 | 控制 metadata 備份／還原（V10） | 待做 | 外部取得完整 etcd keyspace snapshot，校驗、保存與還原；隔離舊控制面，對帳 worker／workload／plugin 與 HTTP，記錄 RPO／RTO。不冒充應用 volume 還原。 |
 | ERU-017 | 三成員 etcd quorum 驗收（V09） | 待做 | Profile B 以獨立冷重建計畫安排；停止一個 etcd 服務後，其餘成員健康、新寫入／部署成功，恢復後一致。仍只有一個 core，完成本項也不宣稱整體 HA。 |
 | ERU-018 | 隔離環境的 VM／磁碟故障恢復邊界 | 待做 | 先定義有界故障矩陣與隔離環境，驗證檔案持久性、journal 與未知資料保護；明列涵蓋／未涵蓋的故障。現有程序 SIGKILL 測試不等於 VM 斷電或磁碟掉寫驗收。 |
@@ -65,3 +133,7 @@
 | 2026-09-24 | ERU-006 完成 host network 私網 HTTP、公網 v4/v6 隔離、core 管理埠阻擋、CNI DNS／HTTPS 與獨立 reconcile；無新增、拆分或取消任務 | 6 | 12（近期 1、後續 11） |
 
 相關紀錄：[Soak 時間與查詢命令](TODO-SOAK-2026-09-23.md)、[core 中斷驗證與限制](M2-CRASH-RECOVERY-2026-09-23.md)、[原始驗收契約](SDD.md)。
+
+## 2026-10-05 主線接續
+
+本輪依進度審查決議，集中串接 [fresh-run 入口／owned admission／短期續期與歷史完整性](M3-FRESH-RUN-MAINLINE-2026-10-05.md)，銜接既有四機 network-ready 流程。此為 ERU-015 主線中的一個本機里程碑，不新增、拆分或減少正式任務。驗證與交付以 .team/reports/T-263.md 為準；整體仍 PARTIAL，完成6／剩餘12。接續 empty-control-plane/bootstrap、replay/resources/residue、generation commit/seal/barrier completion；五項本機 DoD 仍需逐項勾稽，之後才形成實機驗收包。v0.1.7 既有兩次獨立 build 保留，未部署。

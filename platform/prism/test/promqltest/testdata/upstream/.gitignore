@@ -1,0 +1,2 @@
+# Official PromQL corpus fixtures are source data, not compiled test binaries.
+!*.test

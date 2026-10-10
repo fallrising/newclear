@@ -42,7 +42,7 @@
 | P1-08 | `internal/compat/promapi`：query/query_range/series/labels/label values/metadata/buildinfo | P1-07 | `internal/compat/promapi/**` | 回應信封與狀態碼符合 `02` §2；`promtool query` 可用 |
 | P1-09 | `drivers/clickhouse`：schema 遷移 + 三種 Store 寫入（**規格見 `17-DRIVER-CLICKHOUSE.md` §1–§3、§10**） | P0-03 | `drivers/clickhouse/**` | 寫入路徑 conformance 測項綠；遷移冪等且 checksum 漂移會擋啟動 |
 | P1-10 | `drivers/clickhouse`：查詢實作（**SQL 模板見 `17` §4–§7、錯誤映射見 §9**） | P1-09 | `drivers/clickhouse/**` | `conformance.Run` 全綠；`promqltest` 全綠；`C-MET-05`（空值匹配）特別驗證 |
-| P1-11 | `deploy/` 全部產物（**逐字內容見 `22-DEPLOY-ARTIFACTS.md`**）：compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile | P1-08,P1-10 | `deploy/**`、`Makefile` | `docker compose up --wait` 成功；Grafana Prometheus datasource health 綠；`make deps-check` 通過 |
+| P1-11 | Phase 1 部署產物與核心鏈路 E2E（`22`、當期 P1-11 spec）：Compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile、最小 lifecycle 接線 | P1-08,P1-10 | `deploy/**`、`Makefile`、`cmd/prismd/**`、`internal/server/**`、有界 E2E scripts/tests、D011 限定的四個 promapi query 檔、相關 docs | image build/config-check/up --wait/deps-check；Grafana Prometheus health/實際 query；真實三訊號入庫、PromQL、重啟持久性、owned cleanup；雙驅動既有 conformance/corpus及凍結來源獨立審查 |
 
 **Phase 1 出口條件**：E2E-01 與 E2E-02（僅 Prometheus datasource）通過；`conformance` 與 `promqltest` 在 `memory` + `clickhouse` 雙驅動全綠。
 
@@ -52,7 +52,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4 的測試矩陣全綠；不支援語法回「不支援」而非「語法錯誤」 |
+| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4.1 的 parser 驗收全綠（完整矩陣依 P2-01/02/03/04 分期）；有效但不支援的語法回「不支援」，格式錯誤仍回「語法錯誤」 |
 | P2-02 | `internal/query/logql/compile.go`：正則預編譯 + `LiteralHint` 抽取（**演算法見 `16` §3.4**） | P2-01 | 同上 | `FuzzLiteralHint` 通過；8 個種子語料全綠 |
 | P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | 16 種 `PushdownPlan` 組合結果一致；100 萬行 + limit=100 的讀取量斷言通過 |
 | P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | Grafana Loki datasource health 綠；Explore 可查與自動完成 |

@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 import uuid
 
-from app_desired import WORKERS, canonical_bytes, sha256, snapshot_binding
+from app_desired import WORKERS, canonical_bytes, sha256, snapshot_binding, workload_name
 from labops import ClusterLock, atomic_json
 from worker_loss import (_resource_usage, plan_digest as review_plan_digest)
 
@@ -54,7 +54,9 @@ def _workload_binding(snapshot):
     rows = _control_binding(snapshot).get('workloads')
     if (not isinstance(rows, list)
             or any(not isinstance(row, dict)
-                   or set(row) != {'id', 'nodename', 'labels'}
+                   or set(row) not in ({'id', 'nodename', 'labels'},
+                                       {'id', 'name', 'nodename', 'labels'})
+                   or 'name' in row and workload_name(row) is None
                    or not isinstance(row.get('id'), str) or not row['id']
                    for row in rows)
             or len({row['id'] for row in rows}) != len(rows)):

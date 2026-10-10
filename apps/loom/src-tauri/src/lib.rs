@@ -17,6 +17,7 @@ pub mod ai;
 
 // V (vertical slice): Tauri shell wiring B1/B2 to a real window.
 pub mod ipc;
+pub mod window_close;
 
 // B3 appends `pub mod mcp;` and `pub mod gate;`.
 // D1 appends `pub mod plugin;`.
@@ -41,7 +42,9 @@ pub fn run() {
     tauri::async_runtime::set(rt.handle().clone());
     std::mem::forget(rt);
 
-    tauri::Builder::default()
+    let shutdown_handle = tokio_handle.clone();
+    let app = tauri::Builder::default()
+        .on_window_event(window_close::on_window_event)
         .setup(move |app| {
             use tauri::Manager;
             // FsWatcher::start spawns tokio tasks; setup runs on Tauri's
@@ -53,14 +56,19 @@ pub fn run() {
             let handle = app.handle().clone();
             let batch_sink = Arc::new(ipc::TauriBatchSink::new(handle.clone()));
             let event_sink = Arc::new(ipc::TauriEventSink::new(handle.clone()));
-            let pty = Arc::new(pty::PtyManager::new(batch_sink, event_sink.clone()));
-            handle.manage(ipc::commands::AppState { pty });
 
             // C2 surface needs B2 wired up: a vault root, the document
             // service, and a watcher that pushes FsChanged to the same
             // event sink the frontend already listens on (`loom:event`).
             let vault_root = resolve_vault_root();
             ensure_vault_dir(&vault_root);
+            // Setup waits for ownership, storage open/fallback and recovery before
+            // commands can observe the managed session runtime.
+            let sessions = tokio_handle.block_on(session_store::SessionRuntime::open(
+                vault_root.clone(), batch_sink, event_sink.clone(),
+                Arc::new(ipc::sinks::TauriHistorySink::new(handle.clone())),
+            ));
+            handle.manage(ipc::commands::AppState { pty: sessions });
             let echo_guard = Arc::new(fs::EchoGuard::new());
             let doc_svc = Arc::new(fs::DocumentService::new(
                 vault_root.clone(),
@@ -87,6 +95,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            window_close::window_close_approved,
             ipc::commands::pty_spawn,
             ipc::commands::pty_kill,
             ipc::commands::pty_resize,
@@ -97,9 +106,13 @@ pub fn run() {
             ipc::commands::pty_session_meta,
             ipc::commands::pty_scrollback,
             ipc::commands::home_dir,
+            ipc::commands::session_history,
+            ipc::commands::session_restart,
+            ipc::commands::session_forget,
             ipc::doc_commands::vault_root,
             ipc::doc_commands::doc_read,
             ipc::doc_commands::doc_write,
+            ipc::doc_commands::doc_create,
             ipc::doc_commands::doc_open,
             ipc::doc_commands::doc_close,
             ipc::doc_commands::doc_mark_dirty,
@@ -111,8 +124,16 @@ pub fn run() {
             ipc::ai_commands::ai_ask,
             ipc::ai_commands::ai_cancel,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Loom");
+        .build(tauri::generate_context!())
+        .expect("error while building Loom");
+    app.run(move |handle, event| {
+        if matches!(event, tauri::RunEvent::Exit) {
+            use tauri::Manager;
+            if let Some(state) = handle.try_state::<ipc::commands::AppState>() {
+                shutdown_handle.block_on(state.pty.shutdown());
+            }
+        }
+    });
 }
 
 /// Wrap the watcher so we can `manage` it (Tauri requires `Send + Sync`).

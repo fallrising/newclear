@@ -1,0 +1,173 @@
+{
+  "acceptance": {
+    "M2-01": "passed",
+    "M2-02": "passed",
+    "M2-03": "passed",
+    "M2-04": "passed",
+    "M2-05": "passed",
+    "M2-06": "passed",
+    "M2-07": "passed",
+    "M2-08": "passed",
+    "M2-09": "passed"
+  },
+  "cold_restore": {
+    "archive_verified": true,
+    "data_absent": true,
+    "entry_count": 410,
+    "file_count": 134,
+    "inventory_sha256": "91742fad30b5057bf1b572d8aade5ec9693fca4e179c5d5651a71c5c04c7ba80",
+    "locks_acquired": true,
+    "private_removed": true,
+    "restored_root": {
+      "device": 66305,
+      "inode": 2431288
+    },
+    "restored_verified": true,
+    "source_absent": true,
+    "source_root": {
+      "device": 66305,
+      "inode": 2431129
+    },
+    "source_verified": true,
+    "staging_removed": true,
+    "staging_root": {
+      "device": 66305,
+      "inode": 2431288
+    },
+    "total_bytes": 13215704
+  },
+  "command": "make integration-restore",
+  "daemon_after": {
+    "pgid": 2528,
+    "pid": 2528,
+    "start_ticks": 8700
+  },
+  "daemon_before": {
+    "pgid": 2453,
+    "pid": 2453,
+    "start_ticks": 6665
+  },
+  "deployment": {
+    "code_runtime_bindings_unchanged": true,
+    "deployment_id": "01a119c6-5e50-71e4-a390-bd33f00c7364",
+    "script_etag": "aba9233a65264a62c216213f7ab03f13266652283060a23e1e8f6e868e73eda2",
+    "version_id": "01a119c6-5e35-73a9-ba07-89b09f2d40cc"
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.12.3"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2601,
+        "pid": 2601,
+        "start_ticks": 9012
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "first_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2487,
+        "pid": 2487,
+        "start_ticks": 7083
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "harness_commit": "cee57533b12d7c63491f548d0ad0049b851af004",
+  "instance": {
+    "account_id": "01a119c655477605b3335c3697625f4b",
+    "instance_id": "01a119c655477605b3335c3697625f4b",
+    "name": "lab"
+  },
+  "limitations": {
+    "fresh_machine_tested": false,
+    "same_path": true,
+    "same_runner": true,
+    "same_uid": true,
+    "version_migration_tested": false
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 2487,
+      "pid": 2487,
+      "start_ticks": 7083
+    }
+  ],
+  "phase": "complete",
+  "r2": {
+    "bytes_unchanged": true,
+    "content_sha256": "fb59355ec71a5ab5bb3f33240c69bd331cc0c6d8b9cf4b96304a24ab0dc1759d",
+    "etag_version_uploaded_unchanged": true,
+    "key": "restore/sentinel.bin",
+    "metadata_unchanged": true,
+    "size": 64
+  },
+  "readback": {
+    "d1_row_unchanged": true,
+    "instance_account_database_unchanged": true,
+    "original_workflow_waiting": true,
+    "read_only_http_enforced": true,
+    "read_requests": 6
+  },
+  "result": "passed",
+  "run_id": "20261008T042948Z-19a4afd7",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "scenario": "same-path-cold-restore",
+  "schema_version": 1,
+  "scope_removed": true,
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "600fa40d430c6fcc7baa2f589ae72290a61dff71ee7b24d8af7111811fbb4a51",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "600fa40d430c6fcc7baa2f589ae72290a61dff71ee7b24d8af7111811fbb4a51",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261008t042948z-19a4afd7",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

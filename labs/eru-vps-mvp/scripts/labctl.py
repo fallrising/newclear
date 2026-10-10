@@ -883,8 +883,215 @@ def main():
     loss_replace_execute.add_argument('--input', required=True, help='Original private worker-loss review input')
     loss_replace_recover = sub.add_parser('recover-worker-loss-replacement', help='Read-only replacement identity reconciliation; never redeploys')
     loss_replace_recover.add_argument('--run', required=True, help='Worker-loss replacement wrapper run ID')
+    fresh_prepare = sub.add_parser('prepare-fresh-execution', help='Validate private evidence and save a non-executable fresh execution envelope')
+    fresh_prepare.add_argument('--plan', required=True, help='Reviewed fresh plan ID')
+    fresh_prepare.add_argument('--sha256', required=True, help='Expected review-plan digest')
+    fresh_prepare.add_argument('--input', required=True, help='Private execution evidence request')
+    fresh_prepare.add_argument('--run-id', required=True, help='New immutable execution ID')
+    fresh_inspect = sub.add_parser('inspect-fresh-execution', help='Observe one exact execution and pending reservation without mutation or release')
+    fresh_inspect.add_argument('--run', required=True, help='Execution ID')
+    fresh_inspect.add_argument('--sha256', required=True, help='Expected execution digest')
+    fresh_collect = sub.add_parser('collect-fresh-baseline', help='Read four reviewed hosts and save immutable private baseline evidence')
+    fresh_collect.add_argument('--plan', required=True, help='Reviewed fresh plan ID')
+    fresh_collect.add_argument('--sha256', required=True, help='Expected review-plan digest')
+    fresh_collect.add_argument('--run-id', required=True, help='Target execution ID')
+    fresh_collect.add_argument('--observation-id', required=True, help='New immutable observation ID')
+    fresh_receipts = sub.add_parser('inspect-fresh-reimage-receipts', help='Validate four private manual-console receipts without executing or accepting a stage')
+    fresh_receipts.add_argument('--run', required=True, help='Prepared execution ID')
+    fresh_receipts.add_argument('--sha256', required=True, help='Expected execution digest')
+    fresh_receipts.add_argument('--input', required=True, help='Private four-host receipt request')
+    replacement_collect = sub.add_parser('collect-fresh-replacement-facts', help='Read four bare replacement hosts and save immutable private facts')
+    replacement_collect.add_argument('--run', required=True, help='Prepared execution ID')
+    replacement_collect.add_argument('--sha256', required=True, help='Expected execution digest')
+    replacement_collect.add_argument('--input', required=True, help='Private replacement observation request')
+    replacement_collect.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    replacement_collect.add_argument('--observation-id', required=True, help='New immutable observation ID')
+    replacement_inspect = sub.add_parser('inspect-fresh-replacement-facts', help='Revalidate saved replacement facts offline without accepting a stage')
+    replacement_inspect.add_argument('--observation', required=True, help='Replacement observation ID')
+    replacement_inspect.add_argument('--sha256', required=True, help='Expected observation digest')
+    network_admission = sub.add_parser('inspect-fresh-network-admission', help='Inspect current scoped prerequisites without admitting or executing a network stage')
+    network_admission.add_argument('--run', required=True, help='Prepared execution ID')
+    network_admission.add_argument('--sha256', required=True, help='Expected execution digest')
+    network_admission.add_argument('--input', required=True, help='Private network-stage prerequisite request')
+    network_admission.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    access_prepare = sub.add_parser('prepare-fresh-network-access', help='Save an immutable four-host network configuration plan without applying it')
+    access_prepare.add_argument('--run', required=True, help='Prepared execution ID')
+    access_prepare.add_argument('--sha256', required=True, help='Expected execution digest')
+    access_prepare.add_argument('--input', required=True, help='Private network-access request')
+    access_prepare.add_argument('--input-sha256', required=True, help='Expected raw request SHA-256')
+    access_prepare.add_argument('--plan-id', required=True, help='New immutable network-access plan ID')
+    access_inspect = sub.add_parser('inspect-fresh-network-access', help='Revalidate saved network-access payload and current prerequisites offline')
+    access_inspect.add_argument('--plan', required=True, help='Network-access plan ID')
+    access_inspect.add_argument('--sha256', required=True, help='Expected network-access plan digest')
+    staging_inspect = sub.add_parser('inspect-fresh-network-staging', help='Inspect a bound network file-staging intent and receipt without transport')
+    staging_inspect.add_argument('--run', required=True, help='Prepared execution ID')
+    staging_inspect.add_argument('--host-index', required=True, type=int, choices=range(4), help='Fixed host ordinal 0 through 3')
+    staging_inspect.add_argument('--sha256', required=True, help='Expected staging intent digest')
+    ready_prepare = sub.add_parser('prepare-fresh-network-ready', help='Save the authorized console setup intent after current four-host prerequisites pass')
+    ready_prepare.add_argument('--plan', required=True, help='Immutable network-access plan ID')
+    ready_prepare.add_argument('--sha256', required=True, help='Expected network-access plan digest')
+    ready_prepare.add_argument('--authorization', required=True, help='Private console setup authorization')
+    ready_prepare.add_argument('--authorization-sha256', required=True, help='Expected raw authorization digest')
+    ready_prepare.add_argument('--input', required=True, help='Private exact console setup profile')
+    ready_prepare.add_argument('--input-sha256', required=True, help='Expected raw setup profile digest')
+    ready_record = sub.add_parser('record-fresh-network-ready', help='Record the owner console receipt bound to the saved setup intent; no remote calls')
+    ready_record.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_record.add_argument('--intent-sha256', required=True, help='Expected console setup intent digest')
+    ready_record.add_argument('--receipt', required=True, help='Private owner console receipt')
+    ready_record.add_argument('--receipt-sha256', required=True, help='Expected raw owner receipt digest')
+    ready_accept = sub.add_parser('accept-fresh-network-ready', help='Collect current read-only remote probes and save the verified network stage receipt')
+    ready_accept.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_accept.add_argument('--manual-receipt-sha256', required=True, help='Expected recorded console receipt digest')
+    ready_inspect = sub.add_parser('inspect-fresh-network-ready', help='Revalidate the saved network stage and current local bindings without remote calls')
+    ready_inspect.add_argument('--run', required=True, help='Prepared execution ID')
+    ready_inspect.add_argument('--receipt-sha256', required=True, help='Expected network stage receipt digest')
+    fresh_run = sub.add_parser('fresh-run', help='Start, advance or observe one exact owned fresh run')
+    run_commands = fresh_run.add_subparsers(dest='run_command', required=True)
+    run_start = run_commands.add_parser('start', help='Validate execution and reserve generation once')
+    run_start.add_argument('--plan', required=True)
+    run_start.add_argument('--sha256', required=True, help='Expected review digest')
+    run_start.add_argument('--input', required=True)
+    run_start.add_argument('--run-id', required=True)
+    for name in ('next', 'status', 'recover'):
+        command = run_commands.add_parser(name)
+        command.add_argument('--run', required=True)
+        command.add_argument('--sha256', required=True, help='Expected execution digest')
+        if name != 'status':
+            command.add_argument('--input', required=name == 'next')
+            command.add_argument('--input-sha256', required=name == 'next')
     args = parser.parse_args()
     os.umask(0o077)
+    if args.command == 'fresh-run':
+        import fresh_run_ops as fresh_run_api
+        try:
+            if args.run_command == 'start':
+                result = fresh_run_api.start_run(PROJECT, args.plan, args.sha256, args.input, args.run_id)
+            elif args.run_command == 'next':
+                result = fresh_run_api.next_step(PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+            elif args.run_command == 'status':
+                result = fresh_run_api.status_run(PROJECT, args.run, args.sha256)
+            else:
+                result = fresh_run_api.recover_run(PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+        except (ValueError, RuntimeError, OSError, TypeError, subprocess.SubprocessError):
+            result = {'status': 'blocked', 'generation_changed': False, 'stage_accepted': False}
+        print(json.dumps(fresh_run_api.public_summary(result), indent=2))
+        return
+    if args.command in ('prepare-fresh-network-ready', 'record-fresh-network-ready',
+                        'accept-fresh-network-ready', 'inspect-fresh-network-ready'):
+        from fresh_network_ready_ops import (prepare_network_manual_setup,
+            record_network_manual_setup, accept_network_ready, inspect_network_ready)
+        try:
+            if args.command == 'prepare-fresh-network-ready':
+                result = prepare_network_manual_setup(PROJECT, args.plan, args.sha256,
+                    args.authorization, args.authorization_sha256, args.input, args.input_sha256)
+            elif args.command == 'record-fresh-network-ready':
+                result = record_network_manual_setup(PROJECT, args.run, args.intent_sha256,
+                    args.receipt, args.receipt_sha256)
+            elif args.command == 'accept-fresh-network-ready':
+                result = accept_network_ready(PROJECT, args.run, args.manual_receipt_sha256)
+            else:
+                result = inspect_network_ready(PROJECT, args.run, args.receipt_sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network readiness rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'intent_sha256', 'manual_receipt_sha256',
+                  'receipt_sha256', 'evidence_sha256', 'host_count', 'stage', 'next_stage',
+                  'stage_accepted', 'generation_changed', 'remote_mutation_performed',
+                  'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command == 'inspect-fresh-network-staging':
+        from fresh_network_staging_ops import inspect_network_staging
+        try:
+            result = inspect_network_staging(PROJECT, args.run, args.host_index, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network staging inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'host_index', 'intent_sha256', 'receipt_sha256',
+                  'file_count', 'dispatch_attempted', 'stage_accepted', 'generation_changed',
+                  'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command in ('prepare-fresh-network-access', 'inspect-fresh-network-access'):
+        from fresh_network_access_ops import prepare_network_access, inspect_network_access
+        try:
+            if args.command == 'prepare-fresh-network-access':
+                result = prepare_network_access(
+                    PROJECT, args.run, args.sha256, args.input, args.input_sha256, args.plan_id)
+            else:
+                result = inspect_network_access(PROJECT, args.plan, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network access plan rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count', 'file_count',
+                  'stage', 'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed', 'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command == 'inspect-fresh-network-admission':
+        from fresh_network_admission_ops import inspect_network_admission
+        try:
+            result = inspect_network_admission(
+                PROJECT, args.run, args.sha256, args.input, args.input_sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh network admission inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count', 'stage',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed', 'external_fence_verified')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command in ('collect-fresh-replacement-facts', 'inspect-fresh-replacement-facts'):
+        from fresh_replacement_ops import collect_replacement_facts, inspect_replacement_facts
+        try:
+            if args.command == 'collect-fresh-replacement-facts':
+                result = collect_replacement_facts(
+                    PROJECT, args.run, args.sha256, args.input, args.input_sha256,
+                    args.observation_id)
+            else:
+                result = inspect_replacement_facts(PROJECT, args.observation, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh replacement observation rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command == 'inspect-fresh-reimage-receipts':
+        from fresh_reimage_receipt_ops import inspect_receipts
+        try:
+            result = inspect_receipts(PROJECT, args.run, args.sha256, args.input)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh receipt inspection rejected; check private evidence') from None
+        fields = ('status', 'id', 'sha256', 'execution_sha256', 'host_count',
+                  'stage_accepted', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command == 'collect-fresh-baseline':
+        from fresh_observation_ops import collect_observation
+        try:
+            result, _refs = collect_observation(
+                PROJECT, args.plan, args.sha256, args.run_id, args.observation_id)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh observation rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'host_count', 'generation_before',
+                  'target_generation', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
+    if args.command in ('prepare-fresh-execution', 'inspect-fresh-execution'):
+        from fresh_execution_ops import prepare_execution, inspect_execution, public_summary
+        try:
+            if args.command == 'prepare-fresh-execution':
+                envelope, _path = prepare_execution(
+                    PROJECT, args.plan, args.sha256, args.input, args.run_id)
+                result = public_summary(envelope)
+            else:
+                result = inspect_execution(PROJECT, args.run, args.sha256)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+            raise SystemExit('fresh execution request rejected; check private inputs and evidence') from None
+        fields = ('status', 'id', 'sha256', 'host_count', 'generation_before',
+                  'target_generation', 'executable', 'remote_mutation_performed',
+                  'generation_changed')
+        print(json.dumps({key: result[key] for key in fields if key in result}, indent=2))
+        return
     if args.command == 'plan-fresh-rebuild':
         from fresh_rebuild_ops import save_review_plan
         envelope, path = save_review_plan(PROJECT, args.input, args.plan_id)

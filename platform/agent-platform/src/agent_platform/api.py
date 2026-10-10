@@ -29,7 +29,11 @@ from .domain import (
     RetryInput,
     TaskInput,
 )
+from .export_service import ApprovalInput, ExportService, PreviewInput, ReconcileInput
+from .result_archive import list_archives, read_archive
+from .result_download import DOWNLOAD_CSP, diff_bytes
 from .store import Store, json_value
+from .task_query import TaskState
 
 
 def command_response(result):
@@ -43,6 +47,7 @@ def create_app(settings=None, db=None, web_dist=None):
     db = db or Database(settings.database_url)
     auth, store = Auth(db, settings), Store(db)
     authenticated = Depends(auth.require)
+    exports = ExportService(db, settings.export_targets)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -100,10 +105,13 @@ def create_app(settings=None, db=None, web_dist=None):
         )
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; style-src 'self'; "
-            "connect-src 'self'; img-src 'self' data:; frame-ancestors "
-            "'none'; base-uri 'none'; object-src 'none'; form-action 'self'"
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            (
+                "default-src 'self'; script-src 'self'; style-src 'self'; "
+                "connect-src 'self'; img-src 'self' data:; frame-ancestors "
+                "'none'; base-uri 'none'; object-src 'none'; form-action 'self'"
+            ),
         )
         return response
 
@@ -163,9 +171,12 @@ def create_app(settings=None, db=None, web_dist=None):
     def tasks(
         cursor: str | None = Query(default=None, max_length=512),
         limit: int = Query(default=30, ge=1, le=100),
+        q: str = Query(default="", max_length=200, pattern=r"^[^\x00]*$"),
+        project_id: UUID | None = None,
+        state: TaskState | None = None,
         session=authenticated,
     ):
-        return store.tasks(cursor, limit)
+        return store.tasks(cursor, limit, q=q, project_id=project_id, state=state)
 
     @app.post("/api/v1/tasks", status_code=202)
     def task(
@@ -208,6 +219,79 @@ def create_app(settings=None, db=None, web_dist=None):
     @app.get("/api/v1/runs/{run_id}")
     def run(run_id: UUID, session=authenticated):
         return store.run(run_id)
+
+    @app.get("/api/v1/runs/{run_id}/result.diff")
+    def result_diff(run_id: UUID, session=authenticated):
+        return Response(
+            content=diff_bytes(store.run(run_id)),
+            media_type="text/plain; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="run-{run_id}.diff"',
+                "Content-Security-Policy": DOWNLOAD_CSP,
+            },
+        )
+
+    @app.get("/api/v1/runs/{run_id}/artifacts")
+    def artifacts(run_id: UUID, session=authenticated):
+        return list_archives(db, run_id)
+
+    @app.get("/api/v1/runs/{run_id}/artifacts/{artifact_id}")
+    def artifact(run_id: UUID, artifact_id: UUID, session=authenticated):
+        return Response(
+            content=read_archive(db, run_id, artifact_id),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f'attachment; filename="run-{run_id}-result.json"',
+                "Content-Security-Policy": DOWNLOAD_CSP,
+            },
+        )
+
+    @app.get("/api/v1/export-targets")
+    def export_targets(session=authenticated):
+        return {"items": settings.export_targets}
+
+    @app.post("/api/v1/runs/{run_id}/exports/preview")
+    def export_preview(run_id: UUID, data: PreviewInput, session=authenticated):
+        return exports.preview(run_id, data)
+
+    @app.post("/api/v1/runs/{run_id}/exports", status_code=202)
+    def export_approve(
+        run_id: UUID,
+        data: ApprovalInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"runs/{run_id}/exports.create",
+                idempotency_key,
+                data,
+                lambda conn, _: exports.approve(conn, session["operator_id"], run_id, data),
+            )
+        )
+
+    @app.get("/api/v1/runs/{run_id}/exports")
+    def export_list(run_id: UUID, session=authenticated):
+        return exports.list(run_id)
+
+    @app.post("/api/v1/runs/{run_id}/exports/{operation_id}/reconcile", status_code=202)
+    def export_reconcile(
+        run_id: UUID,
+        operation_id: UUID,
+        data: ReconcileInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        return command_response(
+            store.command(
+                session["operator_id"],
+                f"runs/{run_id}/exports/{operation_id}/reconcile",
+                idempotency_key,
+                data,
+                lambda conn, _: exports.reconcile(conn, run_id, operation_id),
+            )
+        )
 
     @app.get("/api/v1/runs/{run_id}/approvals")
     def approvals(run_id: UUID, session=authenticated):

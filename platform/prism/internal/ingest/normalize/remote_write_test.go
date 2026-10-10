@@ -2,6 +2,8 @@ package normalize
 
 import (
 	"context"
+	"encoding/binary"
+	"errors"
 	"strings"
 	"testing"
 
@@ -115,5 +117,53 @@ func TestInferRemoteMetricType(t *testing.T) {
 		if got := inferRemoteMetricType(name); got != want {
 			t.Errorf("inferRemoteMetricType(%q) = %v, want %v", name, got, want)
 		}
+	}
+}
+
+func TestRemoteWriteCancellationAtEveryWorkBoundary(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name  string
+		input *prompb.WriteRequest
+		after int
+	}{
+		{"empty", &prompb.WriteRequest{}, 0},
+		{"metadata", &prompb.WriteRequest{Metadata: []prompb.MetricMetadata{{MetricFamilyName: "first"}, {MetricFamilyName: "second"}}}, 1},
+		{"sample", &prompb.WriteRequest{Timeseries: []prompb.TimeSeries{{Labels: []prompb.Label{{Name: "__name__", Value: "fixture"}}, Samples: []prompb.Sample{{Timestamp: utm.TimeToMilli(fixedNow)}, {Timestamp: utm.TimeToMilli(fixedNow)}}}}}, 2},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			n := testNormalizer(t, Options{})
+			ctx := &cancelAfterChecks{Context: context.Background(), remaining: tc.after}
+			_, _, err := n.NormalizeRemoteWrite(ctx, tc.input, fixedNow)
+			if !errors.Is(err, context.Canceled) {
+				t.Fatalf("normalization cancellation=%v", err)
+			}
+		})
+	}
+}
+
+// A deterministic cancellation point exposes missing loop checks without timing
+// assumptions or scheduler-sensitive background cancellation.
+type cancelAfterChecks struct {
+	context.Context
+	remaining int
+}
+
+func (c *cancelAfterChecks) Err() error {
+	if c.remaining <= 0 {
+		return context.Canceled
+	}
+	c.remaining--
+	return nil
+}
+
+func TestDecodeRemoteWriteChecksDecodedLengthBeforeAllocation(t *testing.T) {
+	t.Parallel()
+	body := binary.AppendUvarint(nil, 16<<20+1)
+	_, err := DecodeRemoteWrite(body, "snappy", "application/x-protobuf", "0.1.0")
+	if err == nil || !strings.Contains(err.Error(), "exceeds") {
+		t.Fatalf("decoded length guard=%v", err)
 	}
 }

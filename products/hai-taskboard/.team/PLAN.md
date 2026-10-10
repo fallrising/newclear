@@ -548,3 +548,295 @@ execution. P0-A remains Fake-only.
 3. Read the latest accepted ADRs and `docs/HANDOFF.md`.
 4. Select only the next `Ready` task whose dependencies are accepted.
 5. Never infer acceptance from a worker report or prior chat.
+
+## Bounded CI continuation (2026-10-04)
+
+The owner authorized continuation through the missing HAI-CI-001 gate, independent review and a
+Draft PR. The HAI-CI-001 clause from `docs/sdd/decision-attention-ledger.md` is accepted as the
+normative contract; implementation acceptance is recorded below against the actual PR-run oracle.
+Other Decision/Attention/ledger clauses and T-050 remain outside this implementation.
+This adds backend and frontend CI only; absent browser/restore/import evidence remains NotRun.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-110 | Root path-scoped CI and shared backend/web gate entry points | T-099 | Accepted with T-113 repair and T-112 review | Orchestrator |
+| T-111 | Independent CI permission, pin and failure-path review | T-110 | Historical REWORK; B1 reproduced then repaired | Orchestrator |
+
+Orchestrator scope: this PLAN, worker contracts, `docs/reproducibility.md`,
+`docs/local-development.md`, `docs/HANDOFF.md`, `docs/traceability.md`, and the bounded
+HAI-CI-001 acceptance note in `docs/sdd/decision-attention-ledger.md`, plus the stale G0 status
+paragraph in `docs/SDD.md` (status correction only).
+Gates: task/report validators, shell syntax, actionlint, same native backend/full/race/vet/module/format
+and frontend frozen-install/format/lint/typecheck/unit/build commands, independent review, and an
+actual PR workflow run. Required failures stay visible; no G1, browser or production acceptance follows.
+Workers do not commit, push, delegate, change PLAN or widen the Fake-only product boundary.
+
+Independent T-111 review raised a probable container Git-ownership/build-stamping issue (B1),
+explicitly conditional on the actual backend CI result, and two non-blocking wording issues.
+The wording now distinguishes normative clause approval from implementation acceptance and marks
+the missing-workflow statement as historical. B1 is not treated as a reproduced defect. The
+original review remains preserved; PR #238 runs the unmodified backend gate to test that concern.
+
+T-111 B1 was reproduced by PR #238 run [37147306521](https://github.com/fallrising/newclear/actions/runs/37147306521)
+on candidate `0b445f690db2906924a00ff6d7bba66c18a0bafb`: full/race tests passed, but
+`go build ./...` failed obtaining VCS status (exit 128). Route T-113 to disable build stamping only
+for the compilation gate, followed by T-112 fresh independent review and a new actual PR run.
+T-111 is preserved byte-for-byte from the reviewer output. It has report-format incompatibilities
+(header before STATUS and malformed verification suffixes); validation failure is process metadata,
+not a replacement for its visible REWORK decision. The original failed gate remains visible.
+
+| ID | Goal | Dependency | Status | Acceptance owner |
+| --- | --- | --- | --- | --- |
+| T-113 | CI compile gate VCS-stamping repair | T-111 | Accepted by T-112 and orchestrator gate | Orchestrator |
+| T-112 | Fresh repaired CI evidence review | T-113 | Accepted; unconditional PASS | Orchestrator |
+
+2026-10-04 acceptance: candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb` passed actual
+PR #238 run [37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+Both digest-pinned backend and web jobs, including every required step, completed successfully.
+Actions tested merge `e8d18fcb7cf957b71f47d67fc36e59e2a2b34049` containing that exact head.
+Fresh independent T-112 report SHA-256
+`c16bd63785c19025ef63622fe1e6b4e77d5e54ad2737e7124a9bc828a29aafce` is accepted.
+The orchestrator inspected the candidate diff and authoritative run metadata, reran report
+validation, and confirmed T-111 remains unchanged at SHA-256
+`183a788e40095716be58e7350da7c39f663e3b2993d5c9c1ad95585fd93ae73f`.
+Local shell/actionlint/pin checks, four rejecting pin/runtime probes, native web gates and the
+pinned backend full/race gate also passed. The original failed PR run and malformed raw T-111
+report remain historical evidence; neither was rewritten into a pass.
+This accepts only HAI-CI-001. The PR remains Draft; no merge, T-050, Decision/Attention/import,
+browser, restore or broader G1 acceptance follows. Later documentation commits must pass their
+own PR checks before handoff; this record identifies the validated implementation candidate.
+
+## Admission/integrity predecessor continuation (2026-10-04)
+
+The owner requested continued development after the remaining-work inventory. This bounded
+continuation delivers the executable accepted-spec/admission contract and reproduces the
+unsupported local Fake scenario/material-integrity risks before any justified minimal repair.
+It does not implement accepted-head/import/activation, restore, live UI or Proposed features.
+Root owns routing, integration, review and acceptance; writers use isolated worktrees.
+Current branch remains agent/hai-taskboard/decision-attention; existing Draft delivery authorization
+continues, with no merge/release/deployment. Baseline code candidate: 8f40f3e2.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-120 | Accepted-spec/admission executable contract and integrity oracle contract | two new mini-SDDs and report | Accepted H01 design only (T-126) |
+| T-121 | Reachable unsupported-scenario Red reproduction | new runtime test and report | Retained Red; repaired runtime Green passes |
+| T-122 | Post-publication artifact corruption Red reproduction and minimal Green | completion service, bounded material metadata ports/store/tests and report | Accepted bounded implementation with T-125 coverage and T-126 |
+| T-123 | Independent combined contract/code/evidence review | report-only exact candidate bundle | Historical REWORK preserved |
+
+Root will inspect every diff and rerun focused/full/race/vet/build plus shared frontend gates.
+Behavior repairs must retain auth-before-read, exact replay, no artifact I/O inside the write
+transaction, current-subject recheck and claimed-run no-redispatch. Historical failures remain.
+
+T-120 root disposition: HAI-INTEGRITY-001..006 inspected and ACKed before Green. H01 remains Candidate pending independent review. T-122 scope explicitly includes complete Candidate artifact metadata and narrow synthetic completion fixture corrections; no schema or transaction method signature changes. T-124 is root-owned scenario declaration/admission repair following T-121 Red; shared service/fixture changes follow T-122 integration.
+
+T-124 scenario repair Candidate: trusted cloned registered scenario declarations, construction-time validation and pre-mutation admission. Eleven new named oracles have unique source definitions. Root focused and native runtime regression passed; shared digest-pinned offline Go container gate and native web gate exited 0. Twelve-file code manifest SHA-256: `a3453d70bafb90827d33ae24d56076e7662e6a3438e7f740841139b83356f3d3`. Independent T-123 remains pending; this checkpoint authorizes no acceptance claim. Initial Claude attempt failed sandbox DNS (EAI_AGAIN); raw result is retained and the same read-only review was rerouted with network permission. Final PR-head CI remains pending.
+
+Independent Claude Opus 5.5 T-123 returned REWORK on Candidate `0464c270` (same reviewed source manifest). No blocking production defect found; medium oracle gaps and missing budget evidence block acceptance. Raw report is retained, not rewritten. T-125 routes only missing tamper/snapshot/capacity tests; root supplies omitted constant/helper/doc context and routes fresh T-126 review after integrated gates. Candidate PR is still Draft.
+
+T-123 low-finding dispositions for fresh review: F4 eligibility predicate duplication is a future maintenance risk; the domain rejects any matched nonpassing/stale/unavailable report, so no unverified report can authorize Done today. F5 MaximumRecords is trusted internal configuration fixed at 1024 for completion; over-capacity remains fail-closed, with taxonomy refinement deferred to capacity work. F6 coverage-only rework does not manufacture Red for already-existing guards; original behavior-change Red is retained. F7 requires an exact-row-limit positive control in T-125. Root supplies the full maxRunArtifactBytes/artifactStorageKey definitions and documentation to T-126.
+
+
+### Final local acceptance, 2026-10-04
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-124 | Trusted Fake scenario admission repair after T-121 Red | cloned declarations, service guard, focused oracles | Accepted with T-126 |
+| T-125 | Close T-123 tamper/snapshot/budget coverage gaps | two test files; no production edit | Accepted with T-126 |
+| T-126 | Fresh independent combined evidence review | report and private semantic/hash checks | Accepted; unconditional PASS |
+
+The orchestrator read every integrated diff and exact report, recomputed the thirteen-file code
+manifest `4ffdf0533130fdb0a5bb1f20aa1f39382efb372de164ad829356cae77b5cb077`, and confirmed
+all six production files are unchanged from Claude-reviewed candidate `0464c270`.
+T-126 report `ae2c0599640a65ce3e220b2ac83b4c5dcf3ed5a3718441ca76c1bf469126f0bb` passed all
+required dimensions and independently executed the focused SQLite/service/integration suite.
+Root integrated pinned offline full/race gate exited 0; log SHA-256
+`4447d5fffb5d8d170baef5f7a5bf25c71f002777e47650662eecbfd81edbb483`. Unchanged web full gate
+also exited 0, including eight tests. Root gate details and retained diagnostic hashes are in
+`.team/reports/T-0163-gate.md`; earlier PARTIAL/REWORK reports remain byte-for-byte historical.
+
+This accepts H01 design and bounded H04/H05 implementation only. Actual candidate PR run
+37186686929 passed both jobs at `0464c270`; the final pushed head must pass its own PR run before
+delivery, recorded in desk T-0163's report. No accepted-head/import/activation runtime,
+Missing/Quarantined disposition, restore, live UI, resume, provider or broader G1 acceptance follows.
+The next durable admission child begins with the checksummed migration oracle; it requires a
+separate bounded assignment. The adapter's preallocated map-to-slice collection retains the
+existing convention and one allocation before sorting; no unnecessary style refactor was added.
+
+
+## Ordered migration prerequisite continuation (2026-10-04)
+
+PR #238 is merged at `5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`. Continue on
+`agent/hai-taskboard/migration-integrity` from that merged baseline. This bounded H06 prerequisite
+adds the ordered checksummed runner and startup history integrity only. Production registry remains
+V1; actual proposal/accepted-head/activation tables and authority, API, restore and live UI remain
+NotRun. Source-of-truth contract: `docs/sdd/ordered-migrations.md`, ACKed by root before code.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-130 | V1-preserving ordered migration runner and lawful Red/Green tests | sqlite store/private runner/new tests, report | Accepted bounded with T-131 and root gates |
+| T-131 | Independent history/rollback/concurrency/source/evidence review | report/private checks only | Accepted; unconditional native PASS |
+
+Root owns PLAN/contracts, routing, registry allocation, diff integration and acceptance. One isolated
+writer; reviewer session is separate. Required evidence: literal V1 SHA, real SQLite public reopen
+Red, bounded whole-history checks, schema-version consistency, atomic pending-step rollback/restart,
+concurrent startup, cancellation and existing full/race/vet/build/web gates, validators and actual
+new Draft PR-head CI. Every historical failure remains; no acceptance follows from worker DONE.
+
+### Ordered runner local acceptance
+
+Root inspected all three source/test files and the Store diff, verified unchanged V1 against the
+merged baseline, and accepted HAI-MIGRATION-001..006 after fresh native T-131 PASS. Four-file
+manifest SHA-256: `65ba92dc45ed4863e4ce99eceaee05c37d6c99a31b7a4b9643017f969b5cd598`.
+T-131 report: `8090a268acfb8b6306210d2ff71f986d105aba8099b76efd879c16d09c59a30b`.
+T-130 PARTIAL remains unchanged: `ed42c600874e4c6cd6b3c139cc2034c5a3e4173f9ea9779e30d877aaf535f01b`.
+Root backend full/race/vet/build and web gates exited 0; T-131 independently executed migration,
+SQLite authority/Done/replay tests and bound all receipts. `.team/reports/T-0184-gate.md` maps
+required local dimensions. No blocking or new low defect remains. Actual pushed-head PR CI is
+still a delivery check, recorded in desk T-0184 before review handoff; no new PR merge follows.
+
+T-132 was an optional second-model static review. Automatic approval review rejected transmitting
+its source/raw-log payload to Claude before process creation because the exact payload/destination,
+including possible local metadata, lacked specific authorization. No workaround was attempted;
+T-132 stays PARTIAL/not executed and contributes no evidence. The independent native T-131 review
+satisfies the required review dimension. Original Red, compiler/PATH/cache diagnostics and rejection
+are retained rather than rewritten. Production registry is V1; real V2/head/import/activation and
+broader H06..H09 remain NotRun. Commit-I/O/process-kill and physical-schema attestation are unclaimed.
+
+## V2 persistence schema continuation (2026-10-04)
+
+Desk T-0189 scopes the next H06 schema-only child after owner continue. Baseline is verified
+PR #274 head b2ccf47066a3729d37d053271db16fb566c9b1ed; #274 remains Draft/unmerged.
+New branch agent/hai-taskboard/v2-persistence; delivery is stacked Draft PR with explicit runner
+predecessor dependency, no merge authorization. Root owns ACK, routing/integration/review/acceptance.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-140 | Exact V2 schema/constraints/no-backfill/oracle contract | new mini-SDD/report | Accepted bounded design after T-142 preflight and root ACK |
+
+V2 proposal/provenance, accepted revisions/heads/current requirements, plans/activation decisions
+are persistence storage only in this child. Import/accept/activation commands and readiness/dispatch
+current-head wiring remain NotRun. Frozen V1 bytes, existing application/API/runtime/deps unchanged.
+Require lawful baseline Red, V1 preservation, actual V2 atomic upgrade/restart and scope/immutability
+controls, fresh native independent semantic review, root full/race/web gates and exact PR-head CI.
+
+T-140 exact schema contract SHA-256 `76a4bf5b6e1c2b34521d7b4715fba766995ce93790449a06eac584dd99de8720`
+inspected fully by root and independently by T-142. Root ACKs HAI-V2-001..007 on 2026-10-04
+before source/test implementation: eleven empty STRICT tables, exact scoped/deferred FKs and
+immutable PK/UQ duplicate guards; separate durable plan_digest and existing kernel_plan_digest.
+All alternate UQs are PK supersets, so no fictitious independent collision oracle is required.
+This accepts design only, not code or admission commands. T-141 Ready with its exact SQLite
+scope and existing-test version adaptations; T-142 final review waits frozen candidate/root gates.
+Root's initial hash-binding attempt rejected a superseded design hash while the last semantic
+clarification landed; no file integrated on that attempt. The final stable hash above was verified.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-141 | Actual V2 schema migration and lawful Red/Green constraints | new SQL/new tests/private registry and explicit existing migration fixtures | Accepted bounded with T-142 and root gates |
+| T-142 | Independent exact schema/source/semantic evidence review | report/private checks only | Accepted; unconditional native PASS |
+
+### V2 local acceptance, 2026-10-05
+
+Root accepts HAI-V2-001..007 storage/migration only after inspecting the full four-file diff,
+all SQL/tests and T-142 unconditional native PASS. Frozen six-file manifest SHA-256
+`5b027bf6d2df11bd4428c1911f9aa67d258bc28a34f254ee73f35060a66adb69`; unchanged V1/Store
+verified against baseline. T-142 report `b1f49cabe2e1556d1aaf5541d6046618c33bf0d641b7c8bf9527585830ff73e5`
+is accepted. T-141 PARTIAL remains byte-for-byte, retaining lawful Red. Root full backend/race/vet/build
+and web gates exited 0; T-142 independently executed 30 tests and 259 subtests with no failures/skips.
+T-0189-gate maps each required local dimension; exact pushed-head CI remains a subsequent delivery check.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-143 | Lightweight independent manifest/oracle inventory | isolated report/private artifact only | Accepted inventory only; no semantic-test claim |
+
+T-143 report `e3907d5ae3305783169afa83939895b2267c8ca5f6b0bbe08e799d0727e1fd28` confirms
+six hashes, seven unique named oracles and retained predecessor cases; it does not substitute
+for T-142 native review. Strong Codex handled design/SQL/review; Luna handled bounded inventory.
+Root status-only documentation updates preserve frozen reviewed semantic contract and historical reports.
+The superseded design binding rejection and initial documentation path error remain private diagnostics;
+corrected bindings/edits were rerun successfully. Root corrected its own T-142 envelope ROLE
+metadata after validator rejection; the independent-review assignment was unchanged, and all
+task/report validators then passed. No new defect or required local skip remains.
+No import/firstaccept/activation command, auth/CAS, canonical codec, head read consumer, restore,
+live UI, process-kill or COMMIT I/O guarantee follows. Parent #274 remains Draft/unmerged.
+
+## Immutable proposal import core continuation (2026-10-05)
+
+Owner requested merge and continued development. #274 merged 2bd12620234e0c6e9954d3bc3738c0de21f4f65f;
+#284 merged e58840115bc93deceaf3cde053159d0ee2cc799e. New baseline is that merged main, branch
+agent/hai-taskboard/proposal-import; the assigned task was claimed before component edits.
+This child implements only trusted local immutable Git reads and strict canonical proposal/manifest core.
+Durable application command/persistence, acceptance/activation/head consumers/API/runtime remain separate.
+Root alone owns exact contract ACK, routing, integration and accept/rework; no new PR merge.
+
+| ID | Goal | Scope | Status |
+| --- | --- | --- | --- |
+| T-150 | Exact immutable Git reader/canonical proposal contract | new mini-SDD/report only | Design accepted after independent preflight and root exact ACK |
+| T-151 | ACKed pure proposal core and trusted local Git adapter | two new isolated packages/tests/report | Accepted locally after exact-source root gates and independent PASS |
+| T-152 | Independent native semantic source/evidence review | report/private checks | Unconditional native semantic PASS; exact final source reviewed |
+| T-153 | Lightweight hash/oracle inventory | isolated report/private artifact | Inventory accepted; 16 hashes and seven unique groups verified |
+
+### Import contract root ACK, 2026-10-05
+
+Root fully inspected HAI-IMPORT-001..007 and accepts the exact mini-SDD SHA-256
+`3c5742f0bbc7fccc24d6a270d1be7b21075db05c11f0855450a31b210cc73317` after T-152's
+independent design preflight found no blocking ambiguity. T-150 report SHA-256:
+`7dab5849ab3e69053aa42bcb75f8f729fbd77482846db535890bab3ad1b26676`.
+Only new specification/gitobject packages are permitted. Separate proposal provenance and normative
+graph hashes, strict canonical re-read, direct ref capture, sterile object facade, explicit bounded
+config/environment/object traversal, and seven uniquely owned oracle groups are frozen before Go.
+Git 2.47.3 native and Git 2.39.5 in the existing Go 1.27.1 image were actually observed; version
+availability alone is not fixture acceptance. T-151 must first preserve compilable stub and lawful
+positive semantic failure, then wait for root Red ACK. No implementation acceptance follows here.
+Root's fresh web gate passed all eight tests and format/lint/TypeScript/build; its input hashes and
+raw receipt are retained. Initial sandbox setup failures remain diagnostics, never semantic Red.
+
+Root Red ACK: both new packages compile, and root's fresh focused rerun exits 1 with exactly six
+positive semantic failures at `unavailable: not_implemented`: fake SHA1/SHA256 import and real
+SHA1/SHA256 loose/packed Git capture. Independent literal object hashes and lawful author/committer
+commit fixtures were inspected. Root raw Red SHA-256:
+`84e276df422a70a293c42a4960a627586d735353ada8a48f96ed6e9915de5b3f`;
+frozen four-file stub/test manifest SHA-256:
+`809c7e21c700a3b82c296e9b86a3a3933da5a0273cc03dc4818ce36213125c93`.
+The first adapter fixture failed Git fsck for missing author headers; it was corrected before this
+ACK and remains a diagnostic, not Red evidence. T-151 may now replace stubs with ACKed behavior;
+the original positive oracle assertions must remain. No final acceptance is claimed.
+
+Pre-adapter clarification ACK: the private readObject seam is a snapshot receiver so each Reader
+can retain its own cloned trusted executable/configuration. A private runBatch helper receives
+that executable for process tests, with no public injection or global registry. Public API,
+limits, fixed argv and environment are unchanged. Updated contract SHA-256:
+`aca6aee46caec6a62342ef1cb93f312ad4bd3c6b04d77af8eb7b8be61eb25479`.
+The initial design/report hashes above and Red snapshot remain preserved history.
+
+Root ACKed an additional private deadline test seam: public Reader.Open retains fixed 30s;
+a private open(ctx, ref, duration) shares the same bounded capture implementation so actual
+inventory deadline cleanup can be tested deterministically. No public configurable timeout
+or process injection is introduced. T-150 original report is retained privately; its new public
+copy normalizes private CLI paths only and records its original hash.
+
+### Import core local acceptance, 2026-10-06
+
+Root accepts only HAI-IMPORT-001..007 as a trusted-call foundation. T-151's fifteen Go files
+are frozen at source-inventory SHA-256
+`57c3e5762585c2a726e5d1931372263645c8719a692bbe4141506bf7b306a568`;
+code plus lifecycle-updated SDD manifest SHA-256
+`d629c2355ff37c2c180fa6ddb31ba5683ad78160fcc6ec1693efd6e416324d5b`.
+The SDD lifecycle update changes no contract semantics. Original Red positive assertions and
+fixtures remain unchanged; new adversarial controls extend their seven owned groups.
+
+Root inspected every new source/test file and documentation diff, reran native full tests/vet/build
+on Go 1.27.1/Git 2.47.3 and the unchanged shared full/race/vet/build gate in the pinned Go image
+with Git 2.39.5. The pinned focused suite ran all seven groups/212 tests and subtests without skip.
+Fresh web gates passed, and all web inputs were rehashed unchanged. Host race setup lacked a C
+compiler; race actually passed in the pinned environment. The native sandbox socket denial was
+rerun successfully with approved execution. These diagnostics and intermediate Red/failures remain
+retained; no missing compiler or malformed fixture is counted as semantic Red.
+
+Strong independent T-152 returned unconditional PASS after 212 native and 65 separately authored
+checks, including final-Close cancellation with and without cleanup failure. Root required that
+repair preserve cancellation even when cleanup fails. T-153 independently confirmed hashes, scope
+and oracle inventory only. Root reviewed and integrated both reports and the final T-151 report.
+No existing source, SQL, Store, migration, dependency or workflow bytes changed.
+`reports/T-0197-gate.md` binds the local receipts and report hashes. Local acceptance does not claim
+PR CI: delivery still requires the exact pushed head's Draft PR checks and review publication.
+No new PR merge, release, deployment or next implementation child is authorized by this acceptance.

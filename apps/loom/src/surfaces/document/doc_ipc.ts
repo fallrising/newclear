@@ -9,6 +9,8 @@ import type { Origin } from "../../contracts/Origin";
 const USER: Origin = { kind: "user" };
 
 export interface DocSnapshot {
+  /// Canonical absolute identity supplied by doc_read/doc_create (runtime DTO).
+  path: string;
   content: string;
   on_disk_hash: string;
 }
@@ -25,6 +27,10 @@ export async function vaultRoot(): Promise<string> {
 
 export async function docRead(path: string): Promise<DocSnapshot> {
   return invoke<DocSnapshot>("doc_read", { path });
+}
+
+export async function docCreate(path: string, content: string): Promise<DocSnapshot> {
+  return invoke<DocSnapshot>("doc_create", { origin: USER, path, content });
 }
 
 export async function docWrite(

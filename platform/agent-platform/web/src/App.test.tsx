@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -33,10 +33,23 @@ let runState: string;
 let cancelKeys: string[];
 let cancelLostResponse: boolean;
 let retryPayload: Record<string, unknown> | null;
+let retryKeys: string[];
+let retryAccepted: boolean;
+let retryLostResponse: boolean;
+let retryStatus: number;
+let retryWait: Promise<void> | undefined;
+let externalRun: Partial<Run> | null;
 let usageConfigured: boolean;
+let downloadStatus: number;
+let archiveStatus: number;
+let archiveRuns: string[];
+let archiveDownloadStatus: number;
+let archivePrunedAt: string | null;
+let taskQueries: URLSearchParams[];
+let paginateTasks: boolean;
 const clients: QueryClient[] = [];
 beforeEach(() => {
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
   authenticated = false;
   tasks = [];
   lastPayload = {};
@@ -48,12 +61,27 @@ beforeEach(() => {
   cancelKeys = [];
   cancelLostResponse = false;
   retryPayload = null;
+  retryKeys = [];
+  retryAccepted = false;
+  retryLostResponse = false;
+  retryStatus = 202;
+  retryWait = undefined;
+  externalRun = null;
   usageConfigured = false;
+  downloadStatus = 200;
+  archiveStatus = 200;
+  archiveRuns = [];
+  archiveDownloadStatus = 200;
+  archivePrunedAt = null;
+  taskQueries = [];
+  paginateTasks = false;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit = {}) => {
       const path = input.split('?')[0];
       const method = options.method ?? 'GET';
+      if (path === '/api/v1/export-targets' || path.endsWith('/exports'))
+        return Response.json({ items: [] });
       if (path === '/api/v1/session') {
         if (method === 'POST') authenticated = true;
         if (method === 'DELETE') {
@@ -70,7 +98,7 @@ beforeEach(() => {
         return Response.json({
           items: [
             {
-              id: 'project-1',
+              id: '11111111-1111-4111-8111-111111111111',
               name: 'Newclear',
               canonical_repo: 'https://github.com/fallrising/newclear',
             },
@@ -112,7 +140,15 @@ beforeEach(() => {
         if (lostResponse && keys.length === 1) throw new TypeError('lost response');
         return Response.json({ task: tasks[0] }, { status: 202 });
       }
-      if (path === '/api/v1/tasks') return Response.json({ items: tasks, next_cursor: null });
+      if (path === '/api/v1/tasks') {
+        const query = new URL(input, 'http://localhost').searchParams;
+        taskQueries.push(query);
+        const items = query.get('q') === 'no matches' ? [] : tasks;
+        return Response.json({
+          items,
+          next_cursor: paginateTasks && !query.has('cursor') ? 'page-two' : null,
+        });
+      }
       if (path === '/api/v1/runs/run-1/actions' && method === 'POST') {
         cancelKeys.push((options.headers as Record<string, string>)['Idempotency-Key']);
         expect(JSON.parse(String(options.body))).toEqual({
@@ -128,9 +164,15 @@ beforeEach(() => {
         return Response.json({ error: 'not_found' }, { status: 404 });
       if (path === '/api/v1/tasks/task-1/runs' && method === 'POST') {
         retryPayload = JSON.parse(String(options.body));
+        retryKeys.push((options.headers as Record<string, string>)['Idempotency-Key']);
+        if (retryWait) await retryWait;
+        if (retryLostResponse && retryKeys.length === 1) throw new TypeError('lost retry response');
+        if (retryStatus !== 202)
+          return Response.json({ error: 'state_conflict' }, { status: retryStatus });
+        retryAccepted = true;
         return Response.json({ id: 'run-2' }, { status: 202 });
       }
-      if (path === '/api/v1/runs/run-1/usage')
+      if (/^\/api\/v1\/runs\/[^/]+\/usage$/.test(path))
         return Response.json(
           usageConfigured
             ? {
@@ -166,6 +208,39 @@ beforeEach(() => {
                 fixture_credits_uncertain: null,
               },
         );
+      const archives = path.match(/^\/api\/v1\/runs\/([^/]+)\/artifacts(?:\/([^/]+))?$/);
+      if (archives) {
+        if (archives[2]) {
+          expect(options.credentials).toBe('same-origin');
+          return archiveDownloadStatus === 200
+            ? new Response('{"schema":"result-archive-v1"}')
+            : Response.json({ error: 'artifact_invalid' }, { status: archiveDownloadStatus });
+        }
+        return archiveStatus === 200
+          ? Response.json({
+              items: archiveRuns.includes(archives[1])
+                ? [
+                    {
+                      id: 'archive-' + archives[1],
+                      run_id: archives[1],
+                      kind: 'result',
+                      sha256: 'b'.repeat(64),
+                      size: 321,
+                      mime: 'application/json',
+                      created_at: '2026-10-04T00:00:00Z',
+                      pruned_at: archivePrunedAt,
+                    },
+                  ]
+                : [],
+            })
+          : Response.json({ error: 'archive_unavailable' }, { status: archiveStatus });
+      }
+      if (path === '/api/v1/runs/run-1/result.diff') {
+        expect(options.credentials).toBe('same-origin');
+        return downloadStatus === 200
+          ? new Response(result?.diff ?? '', { headers: { 'Content-Type': 'text/plain' } })
+          : Response.json({ error: 'result_diff_invalid' }, { status: downloadStatus });
+      }
       if (path === '/api/v1/tasks/task-1') {
         const run: Run = {
           id: 'run-1',
@@ -182,9 +257,21 @@ beforeEach(() => {
           event_floor: 1,
           result,
         };
-        const runs = retryPayload
-          ? [{ ...run, id: 'run-2', attempt_no: 2, state: 'queued', result: null }, run]
-          : [run];
+        const runs = externalRun
+          ? [{ ...run, ...externalRun }, run]
+          : retryAccepted
+            ? [
+                {
+                  ...run,
+                  id: 'run-2',
+                  attempt_no: 2,
+                  state: 'queued',
+                  result: null,
+                  goal: retryPayload!.goal,
+                },
+                run,
+              ]
+            : [run];
         return Response.json({ task: tasks[0], runs });
       }
       throw new Error(`Unexpected request: ${method} ${path}`);
@@ -323,7 +410,9 @@ it('submits cancellation and keeps pending stop distinct from cancelled', async 
   await fillTask(user);
   await user.click(await screen.findByRole('button', { name: '取消' }));
   expect(await screen.findByText(/正在確認執行環境已停止/)).toBeVisible();
-  expect(screen.queryByText('已取消')).not.toBeInTheDocument();
+  expect(
+    within(screen.getByRole('region', { name: '任務工作台' })).queryByText('已取消'),
+  ).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: '取消' })).toBeDisabled();
   expect(cancelKeys).toHaveLength(1);
 });
@@ -359,7 +448,202 @@ it('re-runs a finished task with the latest attempt inputs', async () => {
     }),
   );
   expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
-  expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull();
+  await waitFor(() => expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull());
+});
+
+async function openRetryEditor(user: ReturnType<typeof userEvent.setup>) {
+  runState = 'failed';
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '調整目標後重新執行' }));
+  return screen.getByRole('textbox', { name: '新的工作目標' });
+}
+async function refreshTask() {
+  await act(async () => {
+    await clients[0].refetchQueries({ queryKey: ['task', 'task-1'] });
+  });
+}
+
+it('prefills the retry editor and cancelling never submits a command', async () => {
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  expect(editor).toHaveValue('Add a regression check');
+  await user.clear(editor);
+  await user.type(editor, 'Discard this draft');
+  await user.click(screen.getByRole('button', { name: '取消修改' }));
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  expect(retryKeys).toHaveLength(0);
+  await user.click(screen.getByRole('button', { name: '調整目標後重新執行' }));
+  expect(screen.getByRole('textbox', { name: '新的工作目標' })).toHaveValue(
+    'Add a regression check',
+  );
+});
+
+it.each(['', ' \n\t ', '😀'.repeat(20001)])(
+  'rejects an invalid retry goal before sending a request (%#)',
+  async (goal) => {
+    const user = userEvent.setup();
+    const editor = await openRetryEditor(user);
+    fireEvent.change(editor, { target: { value: goal } });
+    await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/工作目標|20000/);
+    expect(editor).toHaveValue(goal);
+    expect(retryKeys).toHaveLength(0);
+  },
+);
+
+it('preserves raw Unicode and multiline retry input and shows immutable historical goals as text', async () => {
+  result = downloadableResult('+original diff');
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const goal = '  新的目標 😀\n<img src=x onerror=alert(1)>\n保留空白  ';
+  fireEvent.change(editor, { target: { value: goal } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  await waitFor(() =>
+    expect(retryPayload).toEqual({
+      goal,
+      base_sha: '7bb80d00d03d93a2d392185adba65588c5fe2462',
+      profile_revision: 'profile-1',
+      expected_state_version: 1,
+    }),
+  );
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(screen.getByRole('region', { name: '本次工作目標' }).textContent).toContain(goal);
+  expect(document.querySelector('img')).toBeNull();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(screen.getByRole('region', { name: '本次工作目標' })).toHaveTextContent(
+    'Add a regression check',
+  );
+  expect(screen.getByRole('region', { name: '本次工作目標' })).not.toHaveTextContent('新的目標');
+  expect(screen.getByLabelText('檔案差異')).toHaveTextContent('+original diff');
+  expect(lastPayload.goal).toBe('Add a regression check');
+});
+
+it('accepts 20000 Unicode code points even when they occupy 40000 UTF-16 code units', async () => {
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const goal = '😀'.repeat(20000);
+  fireEvent.change(editor, { target: { value: goal } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  await waitFor(() => expect(retryPayload?.goal).toBe(goal));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('disables editing, cancel, and competing retries while a goal retry is pending', async () => {
+  let complete!: () => void;
+  retryWait = new Promise<void>((resolve) => {
+    complete = resolve;
+  });
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  const submit = screen.getByRole('button', { name: '以新目標重新執行' });
+  const unchanged = screen.getByRole('button', { name: '重新執行' });
+  await user.click(submit);
+  expect(editor).toBeDisabled();
+  expect(submit).toBeDisabled();
+  expect(unchanged).toBeDisabled();
+  expect(screen.getByRole('button', { name: '取消修改' })).toBeDisabled();
+  await user.click(unchanged);
+  expect(retryKeys).toHaveLength(1);
+  await act(async () => complete());
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('disables the editor opener while an unchanged retry is pending', async () => {
+  let complete!: () => void;
+  retryWait = new Promise<void>((resolve) => {
+    complete = resolve;
+  });
+  const user = userEvent.setup();
+  await openRetryEditor(user);
+  await user.click(screen.getByRole('button', { name: '取消修改' }));
+  await user.click(screen.getByRole('button', { name: '重新執行' }));
+  expect(screen.getByRole('button', { name: '調整目標後重新執行' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '重新執行' })).toBeDisabled();
+  await act(async () => complete());
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+});
+
+it('retains a retry draft after a lost response and reuses its command key for identical content', async () => {
+  retryLostResponse = true;
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  fireEvent.change(editor, { target: { value: 'Recover this goal' } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('重新送出相同內容可安全重試');
+  expect(editor).toHaveValue('Recover this goal');
+  await refreshTask();
+  expect(editor).toHaveValue('Recover this goal');
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(retryKeys).toHaveLength(2);
+  expect(retryKeys[0]).toBe(retryKeys[1]);
+});
+
+it('uses a new command key when the operator changes a rejected retry draft', async () => {
+  retryStatus = 409;
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  fireEvent.change(editor, { target: { value: 'First goal' } });
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('執行狀態已改變');
+  expect(editor).toHaveValue('First goal');
+  fireEvent.change(editor, { target: { value: 'Revised goal' } });
+  retryStatus = 202;
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('option', { name: /第 2 次/, selected: true })).toBeVisible();
+  expect(retryKeys).toHaveLength(2);
+  expect(retryKeys[0]).not.toBe(retryKeys[1]);
+});
+
+it('keeps draft during same-attempt refresh, starts from latest while viewing history, and resets on a newer attempt', async () => {
+  externalRun = {
+    id: 'run-2',
+    attempt_no: 2,
+    goal: 'Latest terminal goal',
+    state: 'failed',
+    state_version: 7,
+  };
+  const user = userEvent.setup();
+  const editor = await openRetryEditor(user);
+  expect(editor).toHaveValue('Latest terminal goal');
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(screen.getByRole('region', { name: '本次工作目標' })).toHaveTextContent(
+    'Add a regression check',
+  );
+  expect(editor).toHaveValue('Latest terminal goal');
+  fireEvent.change(editor, { target: { value: 'In-progress draft' } });
+  externalRun = { ...externalRun, state_version: 8, cleanup_state: 'confirmed' };
+  await refreshTask();
+  expect(editor).toHaveValue('In-progress draft');
+  externalRun = {
+    id: 'run-3',
+    attempt_no: 3,
+    goal: 'New latest goal',
+    state: 'failed',
+    state_version: 9,
+    profile_revision: 'profile-3',
+    base_sha: 'a'.repeat(40),
+  };
+  await refreshTask();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await user.click(screen.getByRole('button', { name: '調整目標後重新執行' }));
+  expect(screen.getByRole('textbox', { name: '新的工作目標' })).toHaveValue('New latest goal');
+  retryStatus = 409;
+  await user.click(screen.getByRole('button', { name: '以新目標重新執行' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('執行狀態已改變');
+  expect(retryPayload).toEqual({
+    goal: 'New latest goal',
+    base_sha: 'a'.repeat(40),
+    profile_revision: 'profile-3',
+    expected_state_version: 9,
+  });
+  externalRun = { ...externalRun, id: 'run-4', attempt_no: 4, state: 'queued' };
+  await refreshTask();
+  await waitFor(() => expect(screen.queryByRole('textbox', { name: '新的工作目標' })).toBeNull());
+  await waitFor(() => expect(screen.queryByRole('button', { name: '重新執行' })).toBeNull());
 });
 
 it('explains a missing task link and returns to the list', async () => {
@@ -391,4 +675,335 @@ it('offers tool approval only for a backend that supports it', async () => {
   await user.click(screen.getByRole('button', { name: 'Agent 設定' }));
   expect(await screen.findByLabelText(/工具審批/)).toBeDisabled();
   expect(screen.getByText('模擬環境不支援工具審批。')).toBeVisible();
+});
+
+function downloadableResult(diff = '') {
+  return {
+    summary: 'Saved diff',
+    verification: { status: 'unknown', reason: 'inspectable' },
+    base_sha: '7bb80d00d03d93a2d392185adba65588c5fe2462',
+    diff,
+    diff_bytes: new TextEncoder().encode(diff).length,
+    diff_sha256: 'a'.repeat(64),
+  };
+}
+it('downloads an empty saved diff and releases its object URL', async () => {
+  result = downloadableResult();
+  const create = vi.fn(() => 'blob:fixture');
+  const revoke = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+      static revokeObjectURL = revoke;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '下載 diff' }));
+  await waitFor(() => expect(create).toHaveBeenCalledOnce());
+  expect(click).toHaveBeenCalledOnce();
+  await waitFor(() => expect(revoke).toHaveBeenCalledWith('blob:fixture'), { timeout: 2000 });
+  click.mockRestore();
+});
+it('shows rejected downloads without creating a file', async () => {
+  result = downloadableResult('+你好');
+  downloadStatus = 409;
+  const create = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await user.click(await screen.findByRole('button', { name: '下載 diff' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('下載失敗');
+  expect(create).not.toHaveBeenCalled();
+  expect(click).not.toHaveBeenCalled();
+  click.mockRestore();
+});
+it.each([
+  { diff_bytes: -1 },
+  { diff_bytes: true },
+  { diff_bytes: 262145 },
+  { diff_bytes: 1 },
+  { diff_sha256: 'invalid' },
+  { base_sha: 'b'.repeat(40) },
+])('hides download for invalid metadata %j', async (invalid) => {
+  result = { ...downloadableResult(), ...invalid } as Run['result'];
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await screen.findByRole('heading', { name: '執行結果' });
+  expect(screen.queryByRole('button', { name: '下載 diff' })).toBeNull();
+});
+
+it('submits a literal search, combines project/state filters, and clears them', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  const search = await screen.findByRole('searchbox', { name: '搜尋任務' });
+  const count = taskQueries.length;
+  await user.type(search, '  你好 %_\\  ');
+  expect(taskQueries).toHaveLength(count);
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\'));
+  await user.selectOptions(
+    screen.getByLabelText('篩選專案'),
+    '11111111-1111-4111-8111-111111111111',
+  );
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'failed');
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('project_id')).toBe('11111111-1111-4111-8111-111111111111');
+    expect(taskQueries.at(-1)?.get('state')).toBe('failed');
+    expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\');
+  });
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  await waitFor(() => expect([...taskQueries.at(-1)!.keys()]).toEqual([]));
+  expect(search).toHaveValue('');
+  expect(screen.getByLabelText('篩選專案')).toHaveValue('');
+  expect(screen.getByLabelText('篩選狀態')).toHaveValue('');
+});
+it('keeps filters while paging and resets the cursor when filters change', async () => {
+  paginateTasks = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.type(await screen.findByRole('searchbox', { name: '搜尋任務' }), 'history');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('history'));
+  await user.click(screen.getByRole('button', { name: '較早的任務 →' }));
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('cursor')).toBe('page-two');
+    expect(taskQueries.at(-1)?.get('q')).toBe('history');
+  });
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'awaiting_approval');
+  await waitFor(() => {
+    expect(taskQueries.at(-1)?.get('state')).toBe('awaiting_approval');
+    expect(taskQueries.at(-1)?.has('cursor')).toBe(false);
+  });
+  expect(screen.queryByText(/第 2 頁/)).toBeNull();
+});
+it('explains empty filtered results and provides a clear action', async () => {
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.type(await screen.findByRole('searchbox', { name: '搜尋任務' }), 'no matches');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(await screen.findByText('沒有符合篩選條件的任務。')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(await screen.findByText(/還沒有任務/)).toBeVisible();
+});
+
+it('restores valid filter links after login without rewriting the URL', async () => {
+  const query = new URLSearchParams({
+    q: '  你好 %_\\ 😀  ',
+    project_id: 'ABCDEFAB-1234-4234-8234-ABCDEFABCDEF',
+    state: 'failed',
+    view: 'keep',
+  });
+  window.history.replaceState(null, '', `/?${query}#missing`);
+  const original = window.location.href;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await waitFor(() => expect(taskQueries.at(-1)?.get('q')).toBe('你好 %_\\ 😀'));
+  expect(taskQueries.at(-1)?.get('project_id')).toBe('abcdefab-1234-4234-8234-abcdefabcdef');
+  expect(taskQueries.at(-1)?.get('state')).toBe('failed');
+  expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('你好 %_\\ 😀');
+  expect(screen.getByLabelText('篩選專案')).toHaveValue('abcdefab-1234-4234-8234-abcdefabcdef');
+  expect(screen.getByRole('option', { selected: true, name: /專案名稱無法取得/ })).toBeVisible();
+  expect(window.location.href).toBe(original);
+  await user.click(screen.getByRole('button', { name: '專案' }));
+  await user.click(screen.getByRole('button', { name: '任務' }));
+  expect(await screen.findByRole('searchbox', { name: '搜尋任務' })).toHaveValue('你好 %_\\ 😀');
+  expect(window.location.hash).toBe('#missing');
+});
+
+it('keeps hash and unrelated parameters while pushing only changed normalized filters', async () => {
+  window.history.replaceState(null, '', '/?view=keep&view=second#missing');
+  const push = vi.spyOn(window.history, 'pushState');
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  const input = screen.getByRole('searchbox', { name: '搜尋任務' });
+  await user.type(input, '  history  ');
+  expect(push).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(push).toHaveBeenCalledTimes(1);
+  expect(new URLSearchParams(window.location.search).get('q')).toBe('history');
+  expect(window.location.hash).toBe('#missing');
+  await user.click(screen.getByRole('button', { name: '搜尋' }));
+  expect(push).toHaveBeenCalledTimes(1);
+  await user.selectOptions(screen.getByLabelText('篩選狀態'), 'failed');
+  expect(push).toHaveBeenCalledTimes(2);
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(push).toHaveBeenCalledTimes(3);
+  expect([...new URLSearchParams(window.location.search)]).toEqual([
+    ['view', 'keep'],
+    ['view', 'second'],
+  ]);
+  expect(window.location.hash).toBe('#missing');
+  push.mockRestore();
+});
+
+it('restores filters and resets pagination on back or forward navigation', async () => {
+  window.history.replaceState(null, '', '/?q=first&state=running&cursor=untrusted');
+  paginateTasks = true;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await user.click(screen.getByRole('button', { name: '較早的任務 →' }));
+  await waitFor(() => expect(taskQueries.at(-1)?.get('cursor')).toBe('page-two'));
+  await user.type(screen.getByRole('searchbox', { name: '搜尋任務' }), 'draft');
+  for (const state of ['failed', 'running']) {
+    act(() => {
+      window.history.replaceState(null, '', `/?q=restored&state=${state}&cursor=untrusted`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('restored');
+      expect(screen.getByLabelText('篩選狀態')).toHaveValue(state);
+      expect(taskQueries.at(-1)?.get('state')).toBe(state);
+      expect(taskQueries.at(-1)?.has('cursor')).toBe(false);
+    });
+    expect(screen.queryByText(/第 2 頁/)).toBeNull();
+  }
+});
+
+it('rejects an invalid link before API calls and clears only its owned filters', async () => {
+  window.history.replaceState(null, '', '/?q=one&q=two&state=failed&view=keep#missing');
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  expect(
+    await within(screen.getByRole('complementary', { name: '任務列表' })).findByRole('alert'),
+  ).toHaveTextContent('連結中的篩選條件無效');
+  expect(taskQueries.length).toBeGreaterThan(0);
+  expect(taskQueries.every((query) => query.size === 0)).toBe(true);
+  expect(screen.getByRole('searchbox', { name: '搜尋任務' })).toHaveValue('');
+  await user.click(screen.getByRole('button', { name: '清除篩選' }));
+  expect(
+    within(screen.getByRole('complementary', { name: '任務列表' })).queryByRole('alert'),
+  ).toBeNull();
+  expect(window.location.search).toBe('?view=keep');
+  expect(window.location.hash).toBe('#missing');
+});
+
+it('shows only the selected historical run archive, including when its result projection is absent', async () => {
+  archiveRuns = ['run-1'];
+  runState = 'succeeded';
+  externalRun = { id: 'run-2', attempt_no: 2, state: 'queued', result: null };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('本次執行尚無封存結果。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-1');
+  expect(await screen.findByRole('button', { name: '下載封存結果' })).toBeEnabled();
+  expect(screen.getByRole('region', { name: '成果封存' })).toHaveTextContent('321 bytes');
+  await user.selectOptions(screen.getByLabelText('執行紀錄'), 'run-2');
+  expect(await screen.findByText('本次執行尚無封存結果。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+});
+
+it('recovers an archive list error without presenting it as an empty archive', async () => {
+  archiveStatus = 503;
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  expect(await screen.findByText('無法載入封存結果。')).toBeVisible();
+  expect(screen.queryByText('本次執行尚無封存結果。')).toBeNull();
+  archiveStatus = 200;
+  archiveRuns = ['run-1'];
+  await user.click(screen.getByRole('button', { name: '重新載入封存' }));
+  expect(await screen.findByRole('button', { name: '下載封存結果' })).toBeEnabled();
+});
+
+it('rejects failed archive downloads and uses the fixed selected run path after retry', async () => {
+  archiveRuns = ['run-1'];
+  archiveDownloadStatus = 409;
+  const create = vi.fn(() => 'blob:archive');
+  const revoke = vi.fn();
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+      static revokeObjectURL = revoke;
+    },
+  );
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  try {
+    const user = userEvent.setup();
+    mount();
+    await login(user);
+    await fillTask(user);
+    await user.click(await screen.findByRole('button', { name: '下載封存結果' }));
+    expect(await screen.findByText('封存下載失敗，請確認登入狀態後重試。')).toBeVisible();
+    expect(create).not.toHaveBeenCalled();
+    archiveDownloadStatus = 200;
+    await user.click(screen.getByRole('button', { name: '下載封存結果' }));
+    await waitFor(() => expect(click).toHaveBeenCalledOnce());
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith('/api/v1/runs/run-1/artifacts/archive-run-1', {
+      credentials: 'same-origin',
+    });
+    await waitFor(() => expect(revoke).toHaveBeenCalledWith('blob:archive'), { timeout: 2000 });
+  } finally {
+    click.mockRestore();
+  }
+});
+
+it('shows retained archive identity after expiry without download or new export controls', async () => {
+  archiveRuns = ['run-1'];
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  result = {
+    summary: 'Original result remains',
+    verification: { status: 'unknown', reason: 'not configured' },
+  };
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const archive = await screen.findByRole('region', { name: '成果封存' });
+  expect(
+    await within(archive).findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。'),
+  ).toBeVisible();
+  expect(archive).toHaveTextContent('321 bytes');
+  expect(archive).toHaveTextContent('b'.repeat(64));
+  expect(within(archive).queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(within(archive).queryByRole('region', { name: 'GitHub 匯出' })).toBeNull();
+  expect(screen.getByText('Original result remains')).toBeVisible();
+});
+
+it('refreshes archive availability after an expired download without creating a file', async () => {
+  archiveRuns = ['run-1'];
+  const create = vi.fn(() => 'blob:must-not-create');
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+    },
+  );
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  const button = await screen.findByRole('button', { name: '下載封存結果' });
+  archivePrunedAt = '2026-11-05T00:00:00Z';
+  archiveDownloadStatus = 410;
+  await user.click(button);
+  expect(await screen.findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
+  expect(create).not.toHaveBeenCalled();
 });

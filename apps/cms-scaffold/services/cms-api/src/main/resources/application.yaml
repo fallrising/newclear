@@ -44,3 +44,6 @@ cms:
     argon2-iterations: 3
   media:
     root: ${CMS_MEDIA_ROOT:./data/media}
+  audit:
+    purge-initial-delay: PT1H
+    purge-interval: PT24H

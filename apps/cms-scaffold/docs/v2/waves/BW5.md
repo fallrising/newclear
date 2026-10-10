@@ -2,13 +2,31 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW5](../02-backend-sdd.md#7-後端波次)、[§8](../02-backend-sdd.md#8-開放問題) ・ 契約：[contracts/BW5.openapi.yaml](../contracts/BW5.openapi.yaml) ・ 前一波：[BW4](BW4.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-04；PR #267 必要 CI 通過並合併，遠端核對完成；339 Java／140 PostgreSQL／395 前端／39 mock E2E、三輪效能及獨立審查通過）
+
+[本次交付與驗收證據](../../../.team/reports/BW5-DELIVERY.md)；歷史施工片段與測試數依 §0 覆寫。
 日期：2026-09-26  
 讀者：實作 BW5 的 agent。只讀本檔、`contracts/BW5.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW4 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-26）。每張「測試先行」卡的預期紅燈、每張實作卡完成後的測試數，都是實際跑出來的（§6 各卡的完成條件）。最後 `./gradlew :services:cms-api:test` 239 個，唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 80 個全綠（本機 PostgreSQL 16.13，不是 Testcontainers）。
 
 > **Owner 決定（2026-09-25）：** [02 BQ-06、07、08、10、11](../02-backend-sdd.md#8-開放問題) 都選 A。它們原本建議的波次（BW1c、BW2）已經細化完成，改早期波次就得重做之後每一波的施工圖，所以 owner 決定集中成本波次，以 BW4 完成後為基準。
+
+---
+
+## 0. 本次整合準則（2026-10-04，實作前）
+
+本節優先於歷史程式片段、路徑限制、測試數與前端延後規則。BW4 已在 PR #258 合併，來源與遠端 CMS 完全一致；本波從其後的 main 建立隔離工作目錄。狀態：**VERIFIED**；[發布證據](../../../.team/reports/BW5-PUBLICATION.md)。
+
+- 目標仍為 BQ-06／07／08／10／11；保留 P0、BW1～BW4、W1／W2 的交易、授權、版本、稽核與媒體公開安全修正。採增量修改，不以歷史整檔覆蓋。
+- BQ-11 必須保留現行額外條件：附著 entry 的類型啟用、publishedPayload 存在且該欄位仍指向所請求的媒體、欄位是啟用的 media-ref 且 publicBytes。不得因批次解析洩漏尚未發布的替換媒體。保留 required-ref 目標公開檢查。公開與會員列表都必須驗證固定呼叫數與實際展開結果。
+- BQ-08 依 §4.3 一次回報問題並在寫入前拒絕；保留現有 transaction/audit 邊界與授權順序。VARCHAR 長度按 Unicode code point（與 PostgreSQL／既有 payload 驗證一致），不按 UTF-16 code unit 過度拒絕。接受 §1.2 明列的並發 duplicate-email 限制，不另改並發寫入政策。
+- W2 已存在：本波同步更新 packages/fields 媒體錯誤顯示、packages/mocks 媒體回應及對應測試，並重新產生 packages/api 型別。不得接受前端、codegen 或 CI 失敗；不改 UI 版型、不新增依賴。
+- OpenAPI 從目前 BW4 runtime 增量演進，再同步 BW5 契約；保留 BW3/BW4 的已整合 schema 與說明。歷史 enum／測試數不作硬編碼目標。
+- §3 之外允許本次 .team 計畫／任务／報告／精簡證據、README、v2 roadmap／readiness／backend SDD／perf-records／BW4 publication 狀態；允許上述前端精確檔案、相關既有測試更新與新增 BQ-11 會員／安全／JDBC 查詢數回歸。舊 migration、依賴、workflow、其他產品不改。
+- 根協調者負責 BQ-10、OpenAPI、前端消費端與整合；T-911 負責帳號／輸入驗證／錯誤碼；T-912 負責媒體批次解析；T-913 獨立審查。隔離工作目錄、禁止遞迴分工。
+- 驗收：各功能有聚焦 Red→Green；完整 Java／PostgreSQL、lint/typecheck/test/build/bundle、mock E2E、OpenAPI/codegen 一致性、既有拒絕矩陣與 SQL 數量回歸全部通過。資料查詢變更另執行原始萬筆資料效能量測，門檻不變；保存既有快照與髒工作目錄。E2E 在 Docker 工作結束後串行執行。
+- 完整本地驗收後記 LOCAL_VERIFIED，必要遠端 CI／審查通過且 exact-head 合併、遠端核對後為 VERIFIED。Owner 已授權本波 commit→push→PR→CI→merge；不部署、不宣稱生產可用。
 
 ---
 

@@ -2,14 +2,14 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-10-03
+Updated: 2026-10-06
 Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
 
 ## Current checkpoint
 
-- Branch: `agent/hai-taskboard/persistent-outbox`
+- Branch: `agent/hai-taskboard/proposal-import`
 - Worktree: task-scoped checkout; verify actual Git state.
-- Current delivery base: `newclear/main@e2c901304570428a5c78744e274739206dbf3387`
+- Current delivery base: merged main `e58840115bc93deceaf3cde053159d0ee2cc799e`; PR #274 merged at `2bd12620234e0c6e9954d3bc3738c0de21f4f65f`, then PR #284 merged at this base.
 - Phase: G0 plus the domain kernel, static web fixture shell, SQLite foundation, T-044/T-066
   application-command slice, T-045/T-069/T-075 deterministic Fake, T-046/T-078/T-080 HTTP/SSE
   boundary, T-047/T-087 vertical integration, T-090 pre-push authority repairs and the
@@ -120,8 +120,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
   orchestrator evidence gate passed configuration attacks, descriptor lifecycle, two-start process
   restart, exact tests, full tests, race, build and offline module inventory without a required
   failure or skip.
-- Automatic persistent outbox/worker polling, root CI execution, restore/backup and broader evidence
-  remain NotRun; T-047's deterministic manually driven vertical integration does not imply them.
+- At the T-094 checkpoint, automatic worker polling and root CI were still NotRun. The later
+  T-099 persistent-runtime checkpoint below supersedes polling status; bounded CI is now tracked
+  by T-110/T-113/T-112. Restore/backup and broader evidence remain NotRun. T-047 alone does not imply them.
 - Browser Playwright/contrast/zoom/coarse-pointer evidence is also NotRun.
 - The forward-only reviewer contract is accepted by T-013. Historical PASS/PARTIAL/FAIL reports
   remain immutable process evidence; later repairs and acceptance do not rewrite them.
@@ -138,11 +139,68 @@ Native Go 1.27.1 full/race/vet/build and Node 24.20.0/pnpm 11.25.0 format/lint/8
 Docker/browser/root CI are separate evidence; no broader acceptance is implied. Specification
 admission remains fail-closed, verified coverage is unavailable, and global project event gaps reset.
 
+## CI continuation checkpoint
+
+HAI-CI-001 on `agent/hai-taskboard/decision-attention` is accepted for candidate
+`8f45a951d6f5285d833a51fe452eda708a86ceeb`: shared backend/web gate scripts plus the root
+workflow passed both jobs in [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046).
+T-112 independently passed the repaired implementation; PLAN records the report hash and
+orchestrator acceptance. The original T-111 REWORK and failed predecessor run remain preserved.
+PR #238 was merged on 2026-10-04 at `5bb6cd1046ee8bd2c035b29b6418cac95e2ad629`. This does not connect the fixture UI, admit specifications or implement
+restore. The earlier branch references describe historical checkpoints and do not override this
+continuation. Check the latest PR head's checks separately from this implementation checkpoint.
+
+## Admission/integrity continuation
+
+Desk T-0163 covers H01 executable admission design and the H04/H05 predecessor repairs.
+`accepted-spec-admission.md` separates proposals, first acceptance, current heads, Git provenance,
+transactional activation and versioned dispatch inputs. Durable H06..H09 remains Specified/NotRun.
+`runtime-integrity-predecessors.md` requires trusted scenario rejection before dispatch and bounded
+completion byte checks outside writer locks with final metadata/subject rechecks. T-126 independently
+passed the combined design, code, tests and evidence; the orchestrator accepted
+this bounded slice after integrated full/race/vet/build and web gates. PLAN records exact hashes.
+Historical scenario/artifact Red and fixture diagnostics remain retained. No restore, live UI,
+quarantine/repair of corrupt bytes, real provider or broader G1 acceptance follows.
+
+## Ordered migration prerequisite acceptance
+
+The bounded H06 prerequisite implements a private ordered runner, preserving frozen V1 SQL and
+Identity. Startup inspects bounded whole migration history and instance schema state under the
+writer lock. All pending SQL/history/version and fresh ledger creation share one transaction.
+`ordered-migrations.md` defines the named real-SQLite oracles; T-130 retains lawful Red and final
+focused Green. Independent T-131 returned unconditional PASS; root accepted the exact runner
+after full/race/vet/build and web gates. PLAN and T-0184-gate bind the source and raw evidence.
+At the predecessor #274 checkpoint the registry was V1 only, with synthetic future-step tests.
+The separately accepted V2 child below supersedes that registry status; H06..H09 admission
+commands and current-head authority remain Specified/NotRun.
+
+## V2 persistence schema acceptance
+
+Root ACKed `sdd/acceptance-persistence-schema.md` HAI-V2-001..007 after independent design
+preflight. T-141 implements eleven empty scoped STRICT tables and migration-only tests; no
+accepted data is inferred from historical fixtures. Durable outer plan identity and kernel identity
+are separate. T-142 returned unconditional native PASS; root accepted storage/migration after
+full backend/race/web gates. Seven oracles and exact source hashes are bound in T-0189-gate.
+The V2 child itself added no import, first acceptance, activation, head read authority or current-input command.
+
+## Immutable proposal foundation acceptance
+
+T-150's exact mini-SDD was root-ACKed before lawful compilable-stub semantic Red. T-151 adds
+only `internal/specification` and `internal/gitobject`: strict manifests, separate provenance
+and normative graph identities, canonical re-read, immutable object/hash verification and
+bounded sterile local Git reads. T-152 returned unconditional native semantic PASS; T-153
+completed independent hash/oracle inventory. Root accepted the exact candidate after fresh
+native full tests/vet/build, pinned full/race/vet/build on Git 2.39.5, native Git 2.47.3 real-object
+cases and web gates. Seven author groups ran 212 tests/subtests and independent review ran 65,
+with no final required skip. PLAN and T-0197-gate bind the hashes and retained diagnostics.
+
 ## Safe next action
 
-T-050 reconciliation/restore/handoff is the next bounded component scope after this accepted
-T-040 runtime gap. Obtain its separate task authorization before starting; this delivery does not
-start T-050, merge, deploy, add an importer or enable a real provider.
+The delivery stop is a Draft PR with successful checks for its exact pushed head and review
+publication. PR metadata and the delivery record carry the actual commit/check result; local
+green does not substitute for CI. Do not merge this PR or start another child automatically.
+Durable proposal commands, first acceptance, activation, current-head consumers, backup/restore,
+UI and providers require later assignments. No runtime or API exposes this foundation yet.
 
 ## Restore invariant
 

@@ -207,7 +207,7 @@ func populateRepresentativeSeries(t *testing.T, registry *Registry, definition D
 
 func metricNamesWithPrefix(body, prefix string) map[string]bool {
 	result := make(map[string]bool)
-	for _, line := range strings.Split(body, "\n") {
+	for line := range strings.SplitSeq(body, "\n") {
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line, prefix) {
 			continue
@@ -252,6 +252,7 @@ func expectedDefinitions() map[string]expectedDefinition {
 		"prism_query_fallback_total":                    {MetricTypeCounter, []string{"signal", "reason"}},
 		"prism_query_concurrent":                        {MetricTypeGauge, nil},
 		"prism_query_rejected_total":                    {MetricTypeCounter, []string{"reason"}},
+		"prism_query_adjustments_total":                 {MetricTypeCounter, []string{"action"}},
 		"prism_query_samples_scanned_total":             {MetricTypeCounter, []string{"api"}},
 		"prism_logql_parse_errors_total":                {MetricTypeCounter, []string{"kind"}},
 		"prism_logql_unsupported_total":                 {MetricTypeCounter, []string{"feature"}},

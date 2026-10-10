@@ -14,6 +14,13 @@ requires Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`), Tesseract with configured
 languages, and Pillow, FastAPI, Uvicorn, and python-multipart. GPU absence is
 not a failure.
 
+The doctor probes Poppler with `-v` and Tesseract with `--version`. Poppler's
+`--version` is not a supported version probe and previously made installed PDF
+tools appear unavailable. A failed probe still reports that tool as unavailable.
+Tool availability alone does not clear the Docker, isolation, capacity, or
+runtime-package gates. An `unsupported` host must not be used to run this
+document service; retain the diagnostic and resume on a supported host.
+
 ## Measured host observation
 
 Observation date: 2026-09-03. This is dated evidence, not a hard-coded doctor
@@ -393,3 +400,84 @@ and page/text-range or original-image rectangle provenance. Knowledge proposals
 remain unpromoted. Exporting a reviewed subset to `doc_analysis_study` is a
 separate explicit approval and publication workflow; parsing never receives
 Git or GitHub capability.
+
+## Reviewed English PDF pilot (2026-10-04)
+
+The owner-selected English PDF completed the existing service journey at code
+revision `0038175b9a82a98c02fb9b64688cae243e9f2ad3`. Its 81 physical pages produced
+81 non-empty native-text chunks with no OCR fallback, 174,832 normalized
+characters, and 176,138 UTF-8 bytes. The local Markdown and escaped HTML results
+were 185,992 and 191,864 bytes, within their 256 KiB limits. All pages matched a
+separate bounded Poppler `-layout` reference after the existing normalization;
+source/page/text-range, cache, progress, and index bindings were validated.
+Repeated responses and an identical real re-upload preserved the same batch,
+result, and Markdown bytes. Twelve rendered original pages were reviewed across
+sections, including code, prose order, and suspected extraction anomalies.
+
+Two real defects were repaired through RED/GREEN regressions: the text guard
+misclassified bounded lexer code as credential assignments, and Poppler's
+default reading order displaced punctuation in syntax-highlighted code. Native
+PDF extraction now uses `-layout` before existing NFKC/whitespace normalization;
+it retains page-scoped provenance and strict parser isolation. This preserves
+token order for the reviewed sample, not code indentation or layout-perfect
+tables. Ten existing knowledge proposals produced cited, unpromoted candidates
+with 33 reviewed supporting anchors. A private candidate Draft PR has been
+created for owner review; all candidates remain unpromoted.
+The current local evidence and historical blocked attempt are recorded in
+[first-real-result.md](../verification/first-real-result.md).
+
+### Use a fresh state root for changed extraction semantics
+
+PDF extractor `production-pdf-v3` is part of both the PDF cache key and the outer
+`ProductionToolchain` digest. A v2 cache cannot satisfy a v3 binding. The immutable
+FTS5 index retains old chunks, however: using a prior data root for changed
+extraction may combine different text/chunk versions for the same source and
+make readable reconstruction ambiguous. Preserve the old state as private
+evidence, stop only the owned service containers as documented above, and
+re-ingest into a new private data root with a new index. Do not edit old chunk
+records, weaken identity validation, or call an old cache result a fresh run.
+
+Set `SOURCE`, `DATA`, and `EVIDENCE` to operator-controlled absolute private
+locations outside Git; `DATA` must be new, and `EVIDENCE` must be separate from
+it. Use a non-root operator with Docker access. These variable-based commands
+use the existing doctor, build, startup, and upload interfaces:
+
+```sh
+: "${SOURCE:?set the owner-selected PDF path}"
+: "${DATA:?set a new private data root}"
+: "${EVIDENCE:?set a separate private evidence directory}"
+install -d -m 0700 "$DATA" "$EVIDENCE"
+doctor_exit=0
+scripts/document-ingestion-doctor.sh --json > "$EVIDENCE/doctor.json" || doctor_exit=$?
+case "$doctor_exit" in 0|1) ;; *) exit "$doctor_exit" ;; esac
+scripts/build-document-service.sh > "$EVIDENCE/build.log" 2>&1
+scripts/run-document-service.sh "$DATA" 18080 > "$EVIDENCE/start.log" 2>&1
+curl --fail --silent --show-error http://127.0.0.1:18080/healthz > "$EVIDENCE/healthz.json"
+sha256sum "$SOURCE" > "$EVIDENCE/source.sha256"
+metadata=$(python3 - "$SOURCE" <<'PY'
+import json, pathlib, sys
+print(json.dumps([{"data_class": "restricted", "languages": ["eng"],
+                  "name": "owner-selected.pdf", "rights": "unconfirmed",
+                  "size": pathlib.Path(sys.argv[1]).stat().st_size}],
+                 sort_keys=True, separators=(",", ":")))
+PY
+)
+curl --fail-with-body --silent --show-error \
+  -F "files=@${SOURCE};filename=owner-selected.pdf" -F "metadata=$metadata" \
+  http://127.0.0.1:18080/api/batches > "$EVIDENCE/upload.json"
+```
+
+Doctor exit 1 is the measured `host-capable` path: the container supplies the
+missing host parser/service packages. Continue with the existing status and
+readable-result commands above after recording the private returned batch ID;
+retain source hash, tool versions, exact commands, output checks, and citations
+in private evidence. The sample used English OCR policy metadata; the image also
+contained `chi_tra`, `eng`, and `osd`, but no OCR was executed for this PDF.
+
+The reviewed runtime used a non-root operator and UID 1000 parser under a
+rootful Docker daemon. AppArmor, seccomp, cgroup limits, `--network none`, a
+read-only root, dropped capabilities, and `no-new-privileges` were observed.
+This supports `LOCAL_DEV` use for the reviewed sample. Rootless production
+evidence, representative 100-document capacity, and formal OCR/body/table
+quality thresholds remain separate gates; this pilot makes no
+`PRODUCTION_READY` or OCR-accuracy claim.

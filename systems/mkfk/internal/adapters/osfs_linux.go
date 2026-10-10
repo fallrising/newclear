@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"syscall"
+	"time"
 )
 
 // OSFileSystem is the Linux implementation used by the M1 storage adapter.
@@ -31,7 +32,7 @@ func (OSFileSystem) Open(path string, options OpenOptions) (DurableFile, error) 
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", path, err)
 	}
-	return os.NewFile(uintptr(fd), path), nil
+	return timedFile{os.NewFile(uintptr(fd), path)}, nil
 }
 
 func (OSFileSystem) CreateTemp(directory, pattern string) (DurableFile, string, error) {
@@ -44,7 +45,7 @@ func (OSFileSystem) CreateTemp(directory, pattern string) (DurableFile, string, 
 		_ = os.Remove(file.Name())
 		return nil, "", err
 	}
-	return file, file.Name(), nil
+	return timedFile{file}, file.Name(), nil
 }
 
 func (OSFileSystem) MkdirAll(path string, mode fs.FileMode) error {
@@ -68,7 +69,10 @@ func (OSFileSystem) SyncDir(path string) error {
 	if err != nil {
 		return err
 	}
-	if err := directory.Sync(); err != nil {
+	started := time.Now()
+	err = directory.Sync()
+	recordSync(started)
+	if err != nil {
 		_ = directory.Close()
 		return err
 	}

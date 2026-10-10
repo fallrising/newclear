@@ -13,8 +13,8 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
 | HAI-STATE-001..006 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | NotRun |
 | HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
-| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical subset (T-073/T-089); automatic polling and restore remain NotRun |
-| HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | NotRun |
+| HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical and persistent polling subsets (T-073/T-089/T-099); restore remains NotRun |
+| HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | Passing bounded pure kernel (T-024); durable import/activation remains NotRun |
 | HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
 | HAI-API-002..004 | SDD §8 | SSE gap/backpressure/reset/high-water tests | Passing bounded transport (T-081); T-089 binds durable response-loss/result projection, not an SSE end-to-end loop |
 | HAI-UX-001..006 | SDD §9 | component/a11y/keyboard/rejection/disconnect Playwright tests | NotRun |
@@ -200,3 +200,72 @@ later. They MUST NOT be reported as P0-A coverage.
 Native Go 1.27.1 and Node 24.20.0/pnpm 11.25.0 evidence does not substitute for unavailable
 container/browser/root-CI evidence. Global project-event gaps reset; current-policy coverage is
 unavailable and conservatively represented, as specified in `sdd/persistent-fake-runtime.md`.
+
+## Bounded CI gate
+
+| Clause | Executable oracle | Evidence | Status |
+| --- | --- | --- | --- |
+| HAI-CI-001 | root HAI workflow on a PR touching the component; `scripts/check-backend.sh`, `scripts/check-web.sh`, `scripts/check-ci-pins.sh` | T-110/T-113, fresh T-112 PASS; candidate `8f45a951d6f5285d833a51fe452eda708a86ceeb`, [PR run 37147865046](https://github.com/fallrising/newclear/actions/runs/37147865046); acceptance in PLAN | Passing bounded |
+
+The workflow covers native backend and fixture-UI gates. It supplies no missing browser, import,
+restore or real-provider acceptance evidence.
+
+## Admission and integrity predecessors (T-0163 bounded acceptance)
+
+| Clause | Oracle or contract | Status |
+| --- | --- | --- |
+| HAI-ADMISSION-001..008 | `sdd/accepted-spec-admission.md` proposal/head/provenance/activation/read-set/input/migration contract; seven durable child oracle groups | Accepted H01 design (T-126); H06..H09 Specified/NotRun |
+| HAI-INTEGRITY-001 | `TestRuntime_RejectsUnsupportedScenarioBeforeDispatch`, `TestDispatchRun_RejectsUnsupportedScenarioWithoutMutation`, `TestFakeAdapter_DeclaresRegisteredScenariosWithoutAliases` | Passing bounded (T-124/T-126); original T-121 Red retained |
+| HAI-INTEGRITY-002..005 | `TestCompleteWorkItem_RejectsPostPublicationArtifactTamper`, `TestCompleteWorkItem_MaterialVerificationOutsideWriteTransaction`, `TestCompleteWorkItem_RejectsMaterialSnapshotChange`, `TestCompleteWorkItem_RechecksAllCandidateBindingsAndProjectScope`, `TestCompleteWorkItem_MaterialObjectBudgets`, `TestArtifactMetadata_ImmutableLocatorAndAvailability`, `TestCompletionMaterial_BoundedCollectionsRejectOverflow`; existing response-loss replay | Passing bounded (T-122/T-125/T-126); original artifact Red retained |
+| HAI-INTEGRITY-006 | existing persistent restart/worker-failure/no-redispatch and full/race regressions | Passing bounded full/race regression gate |
+
+AC-06 has only the bounded new-completion corruption rejection predecessor in this slice.
+Persisted Missing/Quarantined disposition, repair, restore and full AC-06 remain NotRun.
+Unsupported dispatch rejection does not implement resume or AC-19. No accepted-head authority,
+current graph importer, browser or broader G1 coverage is inferred.
+
+
+## Ordered migration prerequisite (bounded acceptance)
+
+| Clause | Executable oracle | Status |
+| --- | --- | --- |
+| HAI-MIGRATION-001..006 | `TestAdmission_MigrationPreservesV1AndRejectsUnknownSchema`, `TestMigrationRunner_RegistryAndHistoryValidation`, `TestMigrationRunner_AtomicUpgradeRollbackAndRestart`, `TestMigrationRunner_ConcurrentStartup`, `TestMigrationRunner_CancellationReleasesWriter` | T-130 lawful Red/focused Green; T-131 independent PASS and root full/race/web gate; accepted bounded |
+
+This predecessor checkpoint is the runner subset of HAI-ADMISSION-008 only. It did not supply
+V2 schema, accepted heads, proposal/import/activation, process-kill/COMMIT I/O fault or
+backup/restore evidence.
+The subsequent V2 storage child below supplies actual V2-specific migration criteria; durable
+admission commands and broader H06..H09 acceptance remain Specified/NotRun.
+
+## V2 persistence schema child (bounded acceptance)
+
+| Clause | Named oracle | Status |
+| --- | --- | --- |
+| HAI-V2-001..007 | `TestAcceptanceSchema_FreshUpgradeAndReopen`, `TestAcceptanceSchema_V1UpgradePreservesHistoryAndLeavesHeadsEmpty`, `TestAcceptanceSchema_RejectsUnknownAndOldBinary`, `TestAcceptanceSchema_ActualV2RollbackRestart`, `TestAcceptanceSchema_ActualV2CancelAndConcurrent`, `TestAcceptanceSchema_ScopedRelationsAndHeadSwap`, `TestAcceptanceSchema_ImmutableHistoryAndReplacement` | T-140 root ACK before code; T-141 lawful Red/Green; T-142 native PASS; root full/race/web gates; passing bounded T-0189-gate |
+
+This child proves storage/migration boundaries only; SQL fixture writes do not prove operator
+acceptance. HAI-ADMISSION-001..008 canonical verification, auth/CAS, complete mapping, import,
+activation and current accepted-input consumers remain Specified/NotRun. No G1 inference follows.
+
+## Immutable proposal foundation (bounded child)
+
+| Clause | Named oracle | Status |
+| --- | --- | --- |
+| HAI-IMPORT-001..002,005 | `TestProposalCore_ImmutableCapture` | Passed: lawful Red, root native/pinned gates and independent review |
+| HAI-IMPORT-003 | `TestProposalCore_StrictManifest` | Passed: root gates and independent semantic review |
+| HAI-IMPORT-004 | `TestProposalCore_NormativeIdentity`, `TestProposalCore_CanonicalReadAndCopies` | Passed: root gates and independent semantic review |
+| HAI-IMPORT-005..006 | `TestGitReader_RealObjectsAndRefCapture`, `TestGitReader_Confinement` | Passed: SHA1/SHA256 loose/packed on Git 2.47.3 and 2.39.5 |
+| HAI-IMPORT-005..007 | `TestGitReader_BoundsAndCancellation` and core budget/cancellation subtests | Passed: root gates and independent semantic review |
+
+The exact `sdd/proposal-import-core.md` contract, preimplementation ACK and six runnable positive
+Red assertions are bound in PLAN. This child separates immutable proposal provenance from normative
+Graph revision and adds no durable command, acceptance or current-head authority. Full
+`TestAdmission_ProposalProvenanceAndCrashIsolation` remains Specified/NotRun: authentication,
+binding recheck, transaction/result/audit and crash isolation belong to the later command child.
+
+T-151 implements only the two new packages. Exact source and seven-group inventory are bound in
+PLAN and T-0197-gate; T-152 independently passed 212 native and 65 additional tests/subtests.
+T-153 confirms inventory without making a semantic acceptance claim. Pinned shared full/race/
+vet/build and fresh web gates passed. Failed fixture/setup/intermediate cancellation evidence is
+retained, and the original positive Red assertions were preserved. PR CI remains a separate
+exact-head delivery gate; this local coverage does not advance the broader durable admission status.

@@ -107,6 +107,7 @@ var metricDefinitions = []metricDefinition{
 	counter("prism_query_fallback_total", "Number of queries routed through fallback execution.", CardinalityQuery, "signal", "reason"),
 	gauge("prism_query_concurrent", "Number of queries currently executing.", CardinalityQuery),
 	counter("prism_query_rejected_total", "Number of queries rejected by resource protection.", CardinalityQuery, "reason"),
+	counter("prism_query_adjustments_total", "Number of query time clamps and result truncations.", CardinalityQuery, "action"),
 	counter("prism_query_samples_scanned_total", "Number of samples scanned by query execution.", CardinalityQuery, "api"),
 	counter("prism_logql_parse_errors_total", "Number of LogQL parse errors.", CardinalityQuery, "kind"),
 	counter("prism_logql_unsupported_total", "Number of attempted uses of unsupported LogQL features.", CardinalityQuery, "feature"),
@@ -194,7 +195,7 @@ func CardinalityBudgets() []CardinalityBudget {
 }
 
 func counter(name, help string, group CardinalityGroup, labels ...string) metricDefinition {
-	return metricDefinition{Definition: Definition{Name: name, Type: MetricTypeCounter, Labels: labels, Help: help, CardinalityGroup: group}}
+	return metricDefinition{Name: name, Type: MetricTypeCounter, Labels: labels, Help: help, CardinalityGroup: group}
 }
 
 func detailedCounter(name, help string, group CardinalityGroup, gate string, labels ...string) metricDefinition {
@@ -204,7 +205,7 @@ func detailedCounter(name, help string, group CardinalityGroup, gate string, lab
 }
 
 func gauge(name, help string, group CardinalityGroup, labels ...string) metricDefinition {
-	return metricDefinition{Definition: Definition{Name: name, Type: MetricTypeGauge, Labels: labels, Help: help, CardinalityGroup: group}}
+	return metricDefinition{Name: name, Type: MetricTypeGauge, Labels: labels, Help: help, CardinalityGroup: group}
 }
 
 func detailedGauge(name, help string, group CardinalityGroup, gate string, labels ...string) metricDefinition {
@@ -215,8 +216,8 @@ func detailedGauge(name, help string, group CardinalityGroup, gate string, label
 
 func histogram(name, help string, group CardinalityGroup, buckets bucketProfile, labels ...string) metricDefinition {
 	return metricDefinition{
-		Definition: Definition{Name: name, Type: MetricTypeHistogram, Labels: labels, Help: help, CardinalityGroup: group},
-		buckets:    buckets,
+		Name: name, Type: MetricTypeHistogram, Labels: labels, Help: help, CardinalityGroup: group,
+		buckets: buckets,
 	}
 }
 

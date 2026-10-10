@@ -1,6 +1,7 @@
 import { refreshUsage, UsagePanel } from './Usage';
 import { RunControls } from './RunControls';
 import { Approvals } from './Approvals';
+import { ExportPanel } from './ExportPanel';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -10,6 +11,7 @@ import {
   request,
   session,
   setCsrf,
+  type Artifact,
   type Profile,
   type Project,
   type Run,
@@ -20,21 +22,13 @@ import {
   type TaskDetail,
 } from './api';
 import { mergeEvents, readEvents } from './events';
+import {
+  readTaskLocation,
+  taskLocationHref,
+  taskStateNames as stateNames,
+  type TaskFilters,
+} from './taskLocation';
 
-const stateNames: Record<string, string> = {
-  queued: '排隊中',
-  provisioning: '準備環境',
-  running: '執行中',
-  finalizing: '保存結果',
-  succeeded: '已完成',
-  failed: '失敗',
-  interrupted: '需要處理',
-  paused: '已暫停',
-  resuming: '正在恢復',
-  cancelled: '已取消',
-  cancelling: '正在取消',
-  awaiting_approval: '等待審批',
-};
 function State({ state }: { state: string }) {
   return <span className={`state state-${state}`}>{stateNames[state] ?? state}</span>;
 }
@@ -273,7 +267,11 @@ function Workspace({ username, onLogout }: { username: string; onLogout: () => v
               />
             )}
             <div className="workbench">
-              <TaskList selected={selected} onSelect={choose} />
+              <TaskList
+                selected={selected}
+                onSelect={choose}
+                projects={projects.data?.items ?? []}
+              />
               <section className="detail" aria-label="任務工作台" ref={detail}>
                 {selected ? (
                   <TaskWorkspace
@@ -402,28 +400,136 @@ function TaskForm({
     </section>
   );
 }
-function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: string) => void }) {
-  // Cursors of the pages visited so far; the last entry is the current page.
+function TaskList({
+  selected,
+  onSelect,
+  projects,
+}: {
+  selected: string;
+  onSelect: (id: string) => void;
+  projects: Project[];
+}) {
+  const [location, setLocation] = useState(() => readTaskLocation(window.location.search));
+  const { filters, invalid } = location;
+  const [search, setSearch] = useState(filters.q);
   const [pages, setPages] = useState<(string | null)[]>([null]);
   const cursor = pages[pages.length - 1];
+  const filtered = Boolean(filters.q || filters.project_id || filters.state);
+  useEffect(() => {
+    function restore() {
+      const next = readTaskLocation(window.location.search);
+      setLocation(next);
+      setSearch(next.filters.q);
+      setPages([null]);
+    }
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
+  function apply(change: Partial<TaskFilters>) {
+    const next = { ...filters, ...change };
+    const current = readTaskLocation(window.location.search);
+    if (
+      current.invalid ||
+      next.q !== current.filters.q ||
+      next.project_id !== current.filters.project_id ||
+      next.state !== current.filters.state
+    ) {
+      window.history.pushState(null, '', taskLocationHref(window.location.href, next));
+    }
+    setPages([null]);
+    if ('q' in change) setSearch(next.q);
+    setLocation({ filters: next, invalid: false });
+  }
+  function clear() {
+    setSearch('');
+    apply({ q: '', project_id: '', state: '' });
+  }
   const tasks = useQuery({
-    queryKey: ['tasks', cursor],
-    queryFn: () =>
-      request<{ items: Task[]; next_cursor: string | null }>(
-        '/tasks' + (cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''),
-      ),
+    queryKey: ['tasks', filters, cursor],
+    queryFn: () => {
+      const query = new URLSearchParams();
+      for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+      if (cursor) query.set('cursor', cursor);
+      return request<{ items: Task[]; next_cursor: string | null }>(
+        '/tasks' + (query.size ? `?${query}` : ''),
+      );
+    },
     refetchInterval: 5000,
   });
   return (
     <aside className="task-list" aria-label="任務列表">
       <div className="list-heading">
-        <h2>最近任務{pages.length > 1 ? ` · 第 ${pages.length} 頁` : ''}</h2>
+        <h2>
+          {filtered ? '篩選結果' : '最近任務'}
+          {pages.length > 1 ? ` · 第 ${pages.length} 頁` : ''}
+        </h2>
         {pages.length > 1 && (
           <button className="quiet" onClick={() => setPages([null])}>
             回到最新
           </button>
         )}
       </div>
+      {invalid && (
+        <p className="notice" role="alert">
+          連結中的篩選條件無效，已顯示最近任務。請清除篩選後重新設定。
+        </p>
+      )}
+      <form
+        className="task-filters"
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          apply({ q: search.trim() });
+        }}
+      >
+        <label>
+          搜尋任務
+          <input
+            type="search"
+            value={search}
+            maxLength={200}
+            placeholder="任務名稱或執行目標"
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
+        <button type="submit" className="quiet">
+          搜尋
+        </button>
+        <label>
+          篩選專案
+          <select
+            value={filters.project_id}
+            onChange={(event) => apply({ project_id: event.target.value })}
+          >
+            <option value="">所有專案</option>
+            {filters.project_id &&
+              !projects.some((project) => project.id === filters.project_id) && (
+                <option value={filters.project_id}>專案名稱無法取得 · {filters.project_id}</option>
+              )}
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          篩選狀態
+          <select value={filters.state} onChange={(event) => apply({ state: event.target.value })}>
+            <option value="">所有狀態</option>
+            {Object.entries(stateNames).map(([state, name]) => (
+              <option key={state} value={state}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {(filtered || search || invalid) && (
+          <button type="button" className="quiet" onClick={clear}>
+            清除篩選
+          </button>
+        )}
+      </form>
       {tasks.isPending ? (
         <Empty>正在載入任務…</Empty>
       ) : tasks.isError ? (
@@ -435,9 +541,15 @@ function TaskList({ selected, onSelect }: { selected: string; onSelect: (id: str
         </>
       ) : tasks.data.items.length === 0 ? (
         <Empty>
-          還沒有任務。
-          <br />
-          從「建立任務」開始。
+          {filtered ? (
+            '沒有符合篩選條件的任務。'
+          ) : (
+            <>
+              還沒有任務。
+              <br />
+              從「建立任務」開始。
+            </>
+          )}
         </Empty>
       ) : (
         <ul>
@@ -528,7 +640,7 @@ function TaskWorkspace({ taskId, onClose }: { taskId: string; onClose: () => voi
         </label>
       </div>
       {terminal.includes(latest.state) && (
-        <RetryRun taskId={taskId} latest={latest} onCreated={setRunId} />
+        <RetryRun key={`retry-${latest.id}`} taskId={taskId} latest={latest} onCreated={setRunId} />
       )}
       <RunActivity key={run.id} run={run} />
     </>
@@ -546,11 +658,13 @@ function RetryRun({
 }) {
   const cache = useQueryClient();
   const command = useRef(new PendingCommand());
+  const [editing, setEditing] = useState(false);
+  const [goal, setGoal] = useState(latest.goal);
+  const [validation, setValidation] = useState('');
   const retry = useMutation({
-    // Same goal, commit and profile revision as the latest attempt.
-    mutationFn: () =>
+    mutationFn: (nextGoal: string) =>
       command.current.send<Run>(`/tasks/${encodeURIComponent(taskId)}/runs`, {
-        goal: latest.goal,
+        goal: nextGoal,
         base_sha: latest.base_sha,
         profile_revision: latest.profile_revision,
         expected_state_version: latest.state_version,
@@ -563,16 +677,217 @@ function RetryRun({
     },
     onError: () => void cache.invalidateQueries({ queryKey: ['task', taskId] }),
   });
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (retry.isPending) return;
+    if (!goal.trim()) {
+      setValidation('請輸入工作目標，不能只有空白。');
+      return;
+    }
+    if ([...goal].length > 20000) {
+      setValidation('工作目標最多 20000 個字元。');
+      return;
+    }
+    setValidation('');
+    retry.mutate(goal);
+  }
   return (
     <div className="retry-bar">
       <p className="muted">
-        以相同目標、commit 與 Agent 設定重新執行，會建立第 {latest.attempt_no + 1} 次執行紀錄。
+        重新執行會沿用最新第 {latest.attempt_no} 次的工作目標、commit 與 Agent 設定，並建立第{' '}
+        {latest.attempt_no + 1} 次紀錄。
       </p>
-      <button onClick={() => retry.mutate()} disabled={retry.isPending}>
-        {retry.isPending ? '送出中…' : '重新執行'}
-      </button>
+      <div className="run-actions">
+        <button onClick={() => retry.mutate(latest.goal)} disabled={retry.isPending}>
+          重新執行
+        </button>
+        {!editing && (
+          <button
+            className="quiet"
+            disabled={retry.isPending}
+            onClick={() => {
+              setGoal(latest.goal);
+              setValidation('');
+              retry.reset();
+              setEditing(true);
+            }}
+          >
+            調整目標後重新執行
+          </button>
+        )}
+      </div>
+      {editing && (
+        <form className="retry-editor" onSubmit={submit}>
+          <p className="muted" id="retry-goal-hint">
+            從最新的第 {latest.attempt_no} 次工作目標開始修改，沿用該次 commit 與 Agent 設定。
+            先前的執行紀錄會保留。工作目標最多 20000 個字元。
+          </p>
+          <label>
+            新的工作目標
+            <textarea
+              rows={6}
+              value={goal}
+              disabled={retry.isPending}
+              aria-describedby="retry-goal-hint retry-goal-validation"
+              aria-invalid={Boolean(validation)}
+              autoFocus
+              onChange={(event) => {
+                setGoal(event.target.value);
+                setValidation('');
+              }}
+            />
+          </label>
+          {validation && (
+            <p id="retry-goal-validation" className="error" role="alert">
+              {validation}
+            </p>
+          )}
+          <div className="run-actions">
+            <button type="submit" disabled={retry.isPending}>
+              以新目標重新執行
+            </button>
+            <button
+              type="button"
+              className="quiet"
+              disabled={retry.isPending}
+              onClick={() => {
+                setEditing(false);
+                setGoal(latest.goal);
+                setValidation('');
+                retry.reset();
+              }}
+            >
+              取消修改
+            </button>
+          </div>
+        </form>
+      )}
+      {retry.isPending && <p role="status">正在建立新的執行紀錄…</p>}
       <ErrorNotice error={retry.error} />
     </div>
+  );
+}
+
+function DiffDownload({ run }: { run: Run }) {
+  const download = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/v1/runs/${encodeURIComponent(run.id)}/result.diff`, {
+        credentials: 'same-origin',
+      });
+      if (!response.ok) throw new Error(`下載失敗（${response.status}），請重新載入結果後再試。`);
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `run-${run.id}.diff`;
+      document.body.append(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    },
+  });
+  const result = run.result;
+  if (
+    typeof result?.diff !== 'string' ||
+    !Number.isInteger(result.diff_bytes) ||
+    result.diff_bytes! < 0 ||
+    result.diff_bytes! > 256 * 1024 ||
+    new TextEncoder().encode(result.diff).length !== result.diff_bytes ||
+    !/^[a-f0-9]{64}$/.test(result.diff_sha256 ?? '') ||
+    !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(result.base_sha ?? '') ||
+    result.base_sha !== run.base_sha
+  )
+    return null;
+  return (
+    <>
+      <button onClick={() => download.mutate()} disabled={download.isPending}>
+        {download.isPending ? '下載中…' : '下載 diff'}
+      </button>
+      {download.isError && (
+        <p className="error" role="alert">
+          下載失敗，請確認登入狀態並重新載入結果後再試。
+        </p>
+      )}
+    </>
+  );
+}
+function ResultArchive({ run }: { run: Run }) {
+  const archives = useQuery({
+    queryKey: ['artifacts', run.id, run.state_version],
+    queryFn: ({ signal }) =>
+      request<{ items: Artifact[] }>(`/runs/${encodeURIComponent(run.id)}/artifacts`, { signal }),
+    refetchInterval: ['succeeded', 'failed', 'cancelled'].includes(run.state) ? false : 5000,
+  });
+  const download = useMutation({
+    mutationFn: async (artifactId: string) => {
+      const response = await fetch(
+        `/api/v1/runs/${encodeURIComponent(run.id)}/artifacts/${encodeURIComponent(artifactId)}`,
+        { credentials: 'same-origin' },
+      );
+      if (response.status === 410) throw new Error('artifact_expired');
+      if (!response.ok) throw new Error('archive_download_failed');
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `run-${run.id}-result.json`;
+      document.body.append(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    },
+    onError: (error) => {
+      if (error.message === 'artifact_expired') void archives.refetch();
+    },
+  });
+  return (
+    <section className="archive" aria-label="成果封存">
+      <h3>成果封存</h3>
+      {archives.isPending ? (
+        <p className="muted" role="status">
+          正在載入封存結果…
+        </p>
+      ) : archives.isError ? (
+        <>
+          <p className="error" role="alert">
+            無法載入封存結果。
+          </p>
+          <button onClick={() => void archives.refetch()}>重新載入封存</button>
+        </>
+      ) : archives.data.items.length === 0 ? (
+        <p className="muted">本次執行尚無封存結果。</p>
+      ) : (
+        archives.data.items.map((artifact) => (
+          <div key={artifact.id}>
+            <p className="muted">本次執行的目標、來源版本、檔案變更與驗證紀錄。</p>
+            {artifact.pruned_at ? (
+              <p className="muted">此封存已依保留期限清理；摘要與原始 diff 仍保留。</p>
+            ) : (
+              <button onClick={() => download.mutate(artifact.id)} disabled={download.isPending}>
+                {download.isPending ? '封存下載中…' : '下載封存結果'}
+              </button>
+            )}
+            <p className="muted mono">
+              {artifact.size} bytes · SHA-256: {artifact.sha256}
+            </p>
+            {!artifact.pruned_at && (
+              <ExportPanel key={`${artifact.id}:${artifact.sha256}`} artifact={artifact} />
+            )}
+          </div>
+        ))
+      )}
+      {download.isError && (
+        <p className="error" role="alert">
+          {download.error.message === 'artifact_expired'
+            ? '封存已到期，已更新可用狀態。'
+            : '封存下載失敗，請確認登入狀態後重試。'}
+        </p>
+      )}
+    </section>
   );
 }
 function RunActivity({ run }: { run: Run }) {
@@ -666,6 +981,10 @@ function RunActivity({ run }: { run: Run }) {
             ? 'OpenHands · 獨立 VM · 本機 mock，不需要 API key'
             : '模擬環境 · 排程驗證'}
       </p>
+      <section className="run-goal" aria-label="本次工作目標">
+        <h3>本次工作目標</h3>
+        <p>{run.goal}</p>
+      </section>
       <UsagePanel runId={run.id} />
       <RunControls run={run} />
       {run.require_approval && <Approvals run={run} />}
@@ -713,6 +1032,7 @@ function RunActivity({ run }: { run: Run }) {
         ))}
       </ol>
       {events.length === 0 && <p className="muted">正在讀取已保存的活動…</p>}
+      <ResultArchive key={run.id} run={run} />
       {run.result && (
         <section className="result">
           <h3>執行結果</h3>
@@ -735,6 +1055,7 @@ function RunActivity({ run }: { run: Run }) {
           {run.result.diff !== undefined && (
             <>
               <h3>檔案變更</h3>
+              <DiffDownload key={run.id} run={run} />
               <pre className="diff" aria-label="檔案差異">
                 {run.result.diff || '沒有檔案變更。'}
               </pre>

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, createCmsClient } from "./index";
+import { ApiError, createCmsClient, keys, workQueries } from "./index";
 import { createFrontClient } from "./public-entry";
 
 type Call = { url: string; method: string; headers: Headers; body: string | null };
@@ -150,6 +150,88 @@ describe("@cms/api transport", () => {
     ]);
   });
 
+  it("G-03 G-10 serializes publishRequested and include=refs (BW2 §4.4)", async () => {
+    const calls = stubFetch(() => json(200, { items: [], total: 0, page: 1, size: 20, offset: 0, limit: 20 }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.work.entries("visit", { publishRequested: true, include: "refs", sort: "scheduledAt" });
+    await api.work.entries("visit", { publishRequested: false });
+    expect([...new URL(calls[0].url).searchParams.entries()]).toEqual([
+      ["sort", "scheduledAt"],
+      ["publishRequested", "true"],
+      ["include", "refs"],
+    ]);
+    expect(new URL(calls[1].url).search).toBe("?publishRequested=false");
+  });
+
+  it("G-09 G-03 batchPatch, publish requests and revert are CSRF-protected writes on the BW2 paths", async () => {
+    const calls = stubFetch((call) => (call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) : json(200, call.url.includes("batch") ? { items: [entry] } : entry)));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    const batch = await api.work.batchPatch([{ id: entry.id, version: 1, payload: { sortOrder: 10 } }]);
+    await api.work.requestPublish(entry.id);
+    await api.work.cancelPublishRequest(entry.id);
+    await api.work.revert(entry.id, 2);
+    expect(batch.items).toHaveLength(1);
+    expect(calls.map((c) => `${c.method} ${new URL(c.url).pathname}`)).toEqual([
+      "GET /api/v1/auth/csrf",
+      "POST /api/v1/entries:batch-patch",
+      `POST /api/v1/entries/${entry.id}/publish-request`,
+      `DELETE /api/v1/entries/${entry.id}/publish-request`,
+      `POST /api/v1/entries/${entry.id}/revisions/2/revert`,
+    ]);
+    expect(JSON.parse(calls[1].body!)).toEqual({ items: [{ id: entry.id, version: 1, payload: { sortOrder: 10 } }] });
+    expect(calls.slice(1).every((c) => c.headers.get("X-CSRF-Token") === "t")).toBe(true);
+  });
+
+  it("W4 admin reads use the BW5 paths; audit parameters are sent only when set", async () => {
+    const calls = stubFetch(() => json(200, { items: [], total: 0, page: 1, size: 20, offset: 0, limit: 20 }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.admin.audit({ page: 2, size: 50, actor: "", action: "entry.", targetId: "00000000-0000-4000-8000-000000000001", outcome: undefined });
+    await api.admin.audit();
+    await api.admin.roles();
+    await api.admin.rolePermissions("editor");
+    await api.admin.effectivePermissions("p1");
+    await api.admin.auditSettings();
+    expect(calls.map((c) => `${c.method} ${c.url.replace("http://api.test", "")}`)).toEqual([
+      "GET /api/v1/admin/audit?page=2&size=50&action=entry.&targetId=00000000-0000-4000-8000-000000000001",
+      "GET /api/v1/admin/audit",
+      "GET /api/v1/roles",
+      "GET /api/v1/roles/editor/permissions",
+      "GET /api/v1/principals/p1/effective-permissions",
+      "GET /api/v1/admin/settings/audit",
+    ]);
+  });
+
+  it("W4 admin writes are CSRF-protected and send the BW5 bodies", async () => {
+    const calls = stubFetch((call) => {
+      if (call.url.endsWith("/auth/csrf")) return json(200, { csrfToken: "t" });
+      if (call.method === "PUT" || call.url.endsWith("/purge")) return new Response(null, { status: 204 });
+      return json(200, { temporaryPassword: "x", retentionDays: 30 });
+    });
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.admin.createPrincipal({ username: "clinic.op", displayName: null, email: null });
+    await api.admin.replacePrincipalRoles("p1", [{ code: "operator", contentTypeCodes: ["visit"] }]);
+    await api.admin.replaceRolePermissions("editor", [{ action: "publish", contentTypeCode: "album" }]);
+    await api.admin.patchPrincipal("p1", { status: "active" });
+    await api.admin.disablePrincipal("p1");
+    await api.admin.unlockPrincipal("p1");
+    await api.admin.resetPassword("p1");
+    await api.admin.purgeEntry("e1");
+    await api.admin.patchAuditSettings(30);
+    const writes = calls.filter((c) => !c.url.endsWith("/auth/csrf"));
+    expect(writes.map((c) => `${c.method} ${c.url.replace("http://api.test", "")} ${c.body ?? ""}`)).toEqual([
+      'POST /api/v1/principals {"username":"clinic.op","displayName":null,"email":null}',
+      'PUT /api/v1/principals/p1/roles [{"code":"operator","contentTypeCodes":["visit"]}]',
+      'PUT /api/v1/roles/editor/permissions [{"action":"publish","contentTypeCode":"album"}]',
+      'PATCH /api/v1/principals/p1 {"status":"active"}',
+      "POST /api/v1/principals/p1/disable ",
+      "POST /api/v1/principals/p1/unlock ",
+      "POST /api/v1/principals/p1/password {}",
+      "POST /api/v1/admin/entries/e1/purge ",
+      'PATCH /api/v1/admin/settings/audit {"retentionDays":30}',
+    ]);
+    expect(writes.every((c) => c.headers.get("X-CSRF-Token") === "t")).toBe(true);
+  });
+
   it("AC-08 the Front client only reaches /api/v1/public and /api/v1/auth", async () => {
     const calls = stubFetch((call) =>
       call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) : json(200, { items: [], total: 0, offset: 0, limit: 0 }),
@@ -158,7 +240,7 @@ describe("@cms/api transport", () => {
     await api.public.entries("album");
     await api.public.entries("photo", { ref: { album: "a-1" } });
     await api.auth.logout().catch(() => undefined);
-    expect(Object.keys(api).sort()).toEqual(["auth", "public", "url"]);
+    expect(Object.keys(api).sort()).toEqual(["auth", "member", "public", "url"]);
     for (const call of calls) {
       expect(new URL(call.url).pathname).toMatch(/^\/api\/v1\/(public|auth)\//);
     }
@@ -168,5 +250,58 @@ describe("@cms/api transport", () => {
     const api = createFrontClient({ baseUrl: "http://api.test/" });
     expect(api.url("/api/v1/public/media/m/file/web")).toBe("http://api.test/api/v1/public/media/m/file/web");
     expect(api.url("https://cdn.test/x.jpg")).toBe("https://cdn.test/x.jpg");
+  });
+});
+
+describe("BW1c field error transport", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("preserves ordered field errors and requestId from a failed write", async () => {
+    const fields = [{ field: "payload.title", code: "TOO_LONG", message: "title must be at most 1000 characters" }];
+    stubFetch((call) => call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) :
+      json(422, { error: { code: "FIELD_VALIDATION", message: "Invalid fields", fields }, requestId: "write-422" }));
+    await expect(createCmsClient({ baseUrl: "http://api.test" }).work.patch(entry.id, { version: 1, payload: {} }))
+      .rejects.toMatchObject({ status: 422, code: "FIELD_VALIDATION", fields, requestId: "write-422" });
+  });
+});
+
+
+describe("W1 work helpers", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("fetches media, restores and removes entries through typed existing routes", async () => {
+    const calls = stubFetch((call) => call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" }) :
+      call.method === "DELETE" ? new Response(null, { status: 204 }) : json(200, entry));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    await api.work.media("media-id");
+    await api.work.restore(entry.id);
+    await expect(api.work.remove(entry.id)).resolves.toBeUndefined();
+    expect(calls.map((call) => `${call.method} ${new URL(call.url).pathname}`)).toEqual([
+      "GET /api/v1/media/media-id", "GET /api/v1/auth/csrf",
+      `POST /api/v1/entries/${entry.id}/restore`, `DELETE /api/v1/entries/${entry.id}`,
+    ]);
+    expect(calls.slice(2).map((call) => call.headers.get("X-CSRF-Token"))).toEqual(["t", "t"]);
+  });
+
+  it("exposes distinct media and session-expiry cache keys", () => {
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    expect(workQueries.media(api.work, "m").queryKey).toEqual(keys.media.detail("m"));
+    expect(keys.media.detail("m")).not.toEqual(keys.entries.detail("m"));
+    expect(keys.auth.expired()).not.toEqual(keys.auth.me());
+  });
+
+  it("preserves AbortError for cancelled media reads", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    stubFetch(() => { throw new DOMException("Aborted", "AbortError"); });
+    await expect(createCmsClient({ baseUrl: "http://api.test" }).work.media("m", controller.signal))
+      .rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("returns an empty field-error list for ordinary and malformed error envelopes", async () => {
+    for (const fields of [undefined, [{ field: "payload.title", code: 1, message: "bad" }]]) {
+      stubFetch(() => json(404, { error: { code: "ENTRY_NOT_FOUND", message: "x", fields }, requestId: "r" }));
+      await expect(createCmsClient({ baseUrl: "http://api.test" }).work.entry("x"))
+        .rejects.toMatchObject({ fields: [], requestId: "r" });
+    }
   });
 });

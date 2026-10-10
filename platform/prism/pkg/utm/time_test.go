@@ -59,7 +59,15 @@ func TestParsePromTime(t *testing.T) {
 	}{
 		{name: "unix zero", input: "0", want: time.UnixMilli(0).UTC()},
 		{name: "unix fractional", input: "1.2345", want: time.UnixMilli(1_235).UTC()},
-		{name: "unix negative", input: "-1", want: time.UnixMilli(-999).UTC()},
+		{name: "unix negative", input: "-1", want: time.UnixMilli(-1000).UTC()},
+		{name: "negative fractional", input: "-1.2344", want: time.UnixMilli(-1234).UTC()},
+		{name: "negative half", input: "-0.0005", want: time.UnixMilli(-1).UTC()},
+		{name: "NaN", input: "NaN", wantErr: true},
+		{name: "positive infinity", input: "+Inf", wantErr: true},
+		{name: "negative infinity", input: "-Inf", wantErr: true},
+		{name: "positive overflow", input: "9223372036854776", wantErr: true},
+		{name: "negative overflow", input: "-9223372036854776", wantErr: true},
+		{name: "huge finite", input: "1e20", wantErr: true},
 		{name: "large unix", input: "253402300799", want: time.UnixMilli(253_402_300_799_000).UTC()},
 		{name: "RFC3339", input: "2025-03-04T05:06:07+02:00", want: time.Date(2025, 3, 4, 3, 6, 7, 0, time.UTC)},
 		{name: "RFC3339Nano", input: "2025-03-04T05:06:07.123456789Z", want: time.Date(2025, 3, 4, 5, 6, 7, 123_456_789, time.UTC)},
@@ -202,4 +210,35 @@ func TestFormatPromValue(t *testing.T) {
 			}
 		})
 	}
+}
+
+// FuzzParsePromTime checks the public parser's numeric domain and millisecond
+// round-trip, independently of the legacy direct conversion helper.
+func FuzzParsePromTime(f *testing.F) {
+	for _, s := range []string{"0", "-1.2345", "NaN", "+Inf", "-Inf", "1e20", "9223372036854776", "-9223372036854776", "2026-10-04T00:00:00Z"} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		if len(s) > 4096 {
+			return
+		}
+		got, err := ParsePromTime(s)
+		if err != nil {
+			return
+		}
+		if got.Location() != time.UTC {
+			t.Fatal("successful parse is not UTC")
+		}
+		if value, e := strconv.ParseFloat(s, 64); e == nil {
+			if math.IsNaN(value) || math.IsInf(value, 0) || math.Abs(value) >= float64(math.MaxInt64)/1000 {
+				t.Fatal("accepted out-of-domain numeric time")
+			}
+			if !MilliToTime(TimeToMilli(got)).Equal(got) {
+				t.Fatal("numeric timestamp loses millisecond identity")
+			}
+			if value < 0 && TimeToMilli(got) > 0 || value > 0 && TimeToMilli(got) < 0 {
+				t.Fatal("numeric timestamp changed sign")
+			}
+		}
+	})
 }

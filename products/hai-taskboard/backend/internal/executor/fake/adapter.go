@@ -55,8 +55,13 @@ func NewAdapter(capabilities []Capability, scenarios []Scenario, writer StagingW
 	for index, capability := range normalized {
 		declared[index] = string(capability)
 	}
+	scenarioIDs := make([]string, 0, len(registered))
+	for id := range registered {
+		scenarioIDs = append(scenarioIDs, id)
+	}
+	slices.Sort(scenarioIDs)
 	return &Adapter{
-		declaration: port.ExecutorDeclaration{AdapterID: AdapterID, AdapterVersion: AdapterVersion, Capabilities: declared},
+		declaration: port.ExecutorDeclaration{AdapterID: AdapterID, AdapterVersion: AdapterVersion, Capabilities: declared, Scenarios: scenarioIDs},
 		scenarios:   registered,
 		writer:      writer,
 	}, nil

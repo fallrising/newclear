@@ -10,31 +10,16 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/goleak"
+	"google.golang.org/grpc"
 )
 
-func TestMain(tests *testing.M) {
-	os.Exit(runTestMain(tests))
-}
-
-func runTestMain(tests *testing.M) int {
-	baseline := runtime.NumGoroutine()
-	exitCode := tests.Run()
-	if transport, ok := http.DefaultTransport.(*http.Transport); ok {
-		transport.CloseIdleConnections()
-	}
-	if exitCode == 0 && !goroutineCountReturnsTo(baseline) {
-		_, _ = fmt.Fprintf(os.Stderr, "goroutine leak: before=%d after=%d\n%s", baseline, runtime.NumGoroutine(), allGoroutineStacks())
-		return 1
-	}
-	return exitCode
-}
+func TestMain(tests *testing.M) { goleak.VerifyTestMain(tests) }
 
 func TestNew_Validation(t *testing.T) {
 	tests := []struct {
@@ -72,6 +57,8 @@ func TestBaseRoutes(t *testing.T) {
 		wantBody   string
 	}{
 		{name: "healthy", method: http.MethodGet, path: "/-/healthy", wantStatus: http.StatusOK, wantBody: "ok\n"},
+		{name: "not ready before serving", method: http.MethodGet, path: "/-/ready", wantStatus: http.StatusServiceUnavailable, wantBody: "not ready\n"},
+		{name: "ready method rejected", method: http.MethodPost, path: "/-/ready", wantStatus: http.StatusMethodNotAllowed},
 		{name: "metrics", method: http.MethodGet, path: "/metrics", wantStatus: http.StatusOK, wantBody: "prism_test_runtime_value 7"},
 		{name: "method rejected", method: http.MethodPost, path: "/-/healthy", wantStatus: http.StatusMethodNotAllowed},
 		{name: "unknown route", method: http.MethodGet, path: "/missing", wantStatus: http.StatusNotFound},
@@ -88,6 +75,84 @@ func TestBaseRoutes(t *testing.T) {
 				t.Fatalf("body = %q, want substring %q", response.Body.String(), test.wantBody)
 			}
 		})
+	}
+}
+
+func TestReadyLifecycleAndNotificationFailure(t *testing.T) {
+	var lc net.ListenConfig
+	listener, err := lc.Listen(t.Context(), "tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := make(chan struct{}, 1)
+	stopping := make(chan struct{}, 1)
+	s, err := New(Options{Address: listener.Addr().String(), ShutdownTimeout: time.Second,
+		Ready:    func() error { ready <- struct{}{}; return nil },
+		Stopping: func() error { stopping <- struct{}{}; return nil },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	result := make(chan error, 1)
+	go func() { result <- s.Serve(ctx, listener) }()
+	select {
+	case <-ready:
+	case <-time.After(time.Second):
+		t.Fatal("no ready notification")
+	}
+	waitForHealthy(t, "http://"+listener.Addr().String()+"/-/ready")
+	cancel()
+	select {
+	case <-stopping:
+	case <-time.After(time.Second):
+		t.Fatal("no stopping notification")
+	}
+	select {
+	case err := <-result:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("server did not stop")
+	}
+	response := httptest.NewRecorder()
+	s.httpServer.Handler.ServeHTTP(response, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/-/ready", nil))
+	if response.Code != http.StatusServiceUnavailable {
+		t.Fatalf("readiness after stop = %d", response.Code)
+	}
+
+	failed, err := New(Options{Address: "127.0.0.1:0", ShutdownTimeout: time.Second, Ready: func() error { return errors.New("notify failed") }, Stopping: func() error { t.Error("stopping sent after failed startup"); return nil }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := failed.Run(t.Context()); err == nil || !strings.Contains(err.Error(), "notify failed") {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if failed.ready.Load() {
+		t.Fatal("failed startup became ready")
+	}
+}
+
+func TestReadyRequiresAllConfiguredListeners(t *testing.T) {
+	occupied, err := (&net.ListenConfig{}).Listen(t.Context(), "tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = occupied.Close() }()
+	called := false
+	s, err := New(Options{Address: "127.0.0.1:0", GRPCAddress: occupied.Addr().String(),
+		GRPCServer: grpc.NewServer(), ShutdownTimeout: time.Second,
+		Ready: func() error { called = true; return nil },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Run(t.Context()); err == nil {
+		t.Fatal("occupied gRPC listener was accepted")
+	}
+	if called || s.ready.Load() {
+		t.Fatal("ready before gRPC listener acquisition")
 	}
 }
 
@@ -338,27 +403,4 @@ func waitForHealthy(t *testing.T, endpoint string) {
 			t.Fatalf("health endpoint %s did not become ready", endpoint)
 		}
 	}
-}
-
-func goroutineCountReturnsTo(want int) bool {
-	ticker := time.NewTicker(10 * time.Millisecond)
-	defer ticker.Stop()
-	timeout := time.NewTimer(time.Second)
-	defer timeout.Stop()
-	for {
-		if runtime.NumGoroutine() <= want {
-			return true
-		}
-		select {
-		case <-ticker.C:
-		case <-timeout.C:
-			return false
-		}
-	}
-}
-
-func allGoroutineStacks() string {
-	buffer := make([]byte, 1<<20)
-	length := runtime.Stack(buffer, true)
-	return string(buffer[:length])
 }

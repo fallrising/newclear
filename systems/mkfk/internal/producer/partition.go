@@ -202,7 +202,9 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 		pending.waiters[requestID] = true
 		if pending.gateRequestID == "" {
 			gateRequestID := partition.nextGateRequestID()
-			gateResults, retryErr := partition.replication.Retry(pending.operationID, gateRequestID)
+			gateResults, retryErr := partition.replication.AwaitExistingData(
+				pending.operationID, gateRequestID, pending.index, pending.baseOffset, pending.lastOffset, pending.entryTerm, pending.bytes,
+			)
 			if retryErr != nil {
 				delete(pending.waiters, requestID)
 				return ProduceResult{}, raft.Ready{}, nil, retryErr

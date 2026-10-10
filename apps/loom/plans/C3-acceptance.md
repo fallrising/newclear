@@ -1,5 +1,7 @@
 # C3 Acceptance Mapping (03-acceptance §C3)
 
+> Historical track snapshot. Counts, manual checks and deferred items below describe that delivery stage, not current acceptance. See [current reliability status and requirements](../docs/reliability.md).
+
 Run `tauri dev`, add a few nodes, draw edges. Acceptance is `[manual]`
 across the board — no Playwright pipeline yet.
 

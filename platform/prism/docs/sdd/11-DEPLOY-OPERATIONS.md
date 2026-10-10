@@ -14,16 +14,23 @@ server:
 
 storage:
   driver: clickhouse          # ★ 換底層只需改這一行
-  dsn: "clickhouse://prism:${CH_PASSWORD}@127.0.0.1:9000/prism"
+  dsn: ""                    # 與dsn_file二選一，DSN視為credential
+  dsn_file: /etc/prism/secrets/clickhouse_dsn
   options:
     cluster: ""
-    async_insert: "1"
+    async_insert: "1"          # metrics/traces；logs為穩定write_seq採同步INSERT
+    max_execution_time: "55"  # 必須小於query.timeout
+    max_memory_usage: "1000000000"
+    max_result_rows: "5000000"
+    max_rows_to_read: "5000000"
+    max_result_bytes: "67108864"
+    max_open_conns: "10"
   retention:
     metrics_days: 30
     logs_days: 14
     traces_days: 7
     red_days: 90
-  # 多後端組合：不同 signal 走不同驅動（Phase 5）
+  # 多後端組合尚未實作；本期非空split會被config-check拒絕（後續階段）
   # split:
   #   metrics: {driver: vmvl,       dsn: "..."}
   #   logs:    {driver: vmvl,       dsn: "..."}
@@ -39,10 +46,14 @@ tenancy:
 auth:
   allow_anonymous_read: true  # 單機自用預設開啟；對外必須關閉
   jwt_secret_file: /etc/prism/secrets/jwt
+  ingest_api_key_file: /etc/prism/secrets/ingest_api_key # ingest 必填，至少 32 bytes；不得共用 JWT
 
 ingest:
-  max_request_bytes: 16MiB
-  queue_depth: 64
+  max_request_bytes: 16MiB   # OTLP 與 remote_write 的 wire／解壓後上限
+  queue_depth: 4              # 每訊號三條優先佇列；runtime 單租戶、每訊號兩名 worker
+  otlp:
+    max_recv_msg_size: 4MiB
+    max_concurrent_requests: 16 # HTTP/gRPC 共用即時拒絕的解碼閘門
   batch:
     metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
     logs:    {max_items: 5000,  max_bytes: 8MiB, flush_interval: 1s}
@@ -50,7 +61,7 @@ ingest:
   clock_skew_policy: clamp
   max_past: 1h
   max_future: 5m
-  memory_limit: 1GiB
+  memory_limit: 1GiB          # 預設 OTLP + remote_write logical budget 968MiB；非 RSS 硬上限
 
 limits:                       # 見 04-DATA-MODEL.md §5，此處為全域預設
   max_active_series_per_tenant: 500000
@@ -89,7 +100,26 @@ telemetry:
   log_format: json
 ```
 
-### 1.1 配置驗證
+### 1.1 P1-05 寫入容量與生命週期
+
+`all-in-one`／`ingest` 角色在同一 HTTP listener 接收 OTLP 的三條 `/v1/*`
+路由與 `POST /prom/api/v1/write`；remote_write 重用 file-backed bearer、
+`tenancy.default_tenant` 與 HTTP TLS，OTLP gRPC 繼續使用獨立 listener。
+其他角色不掛載 remote_write。關閉時先停止兩個 receiver 的新工作，再完成
+HTTP／gRPC shutdown、pipeline drain，最後由 daemon 關閉 backend。
+
+remote_write 有獨立的固定單請求閘門，因此預算必須加入
+`2 * ingest.max_request_bytes`（壓縮與解壓 buffer）；不共用 OTLP 解碼閘門。
+邏輯預算為
+`(3 + 3 * queue_depth + 2) * sum(batch.*.max_bytes)` 加
+`2 * max(max_request_bytes, otlp.max_recv_msg_size) * otlp.max_concurrent_requests`
+加一份序列化 admission request 與兩份 remote_write receive buffer。
+預設從 936 MiB 增加至 **968 MiB**，仍小於 `memory_limit: 1GiB`。
+config-check 允許預算恰好等於 limit，超出一 byte 即拒絕。
+這個預算不包含 decoded protobuf／pdata、正規化及狀態配置、allocator
+與 memory backend 的資料保留，不能視為 RSS 上限。
+
+### 1.2 配置驗證
 
 `prismd --config-check` 必須：
 - 驗證全部欄位型別與範圍
@@ -101,52 +131,49 @@ telemetry:
 
 CI 與部署腳本必須先跑 `--config-check`。
 
+### 1.3 P1-10 ClickHouse 設定接線
+
+Daemon註冊memory與ClickHouse；選storage.driver=clickhouse後沿既有SPI Open→Migrate/Ping→ingest/query→drain→Close。Database須預先存在，單一writer／migrator；cluster非空與split非空不支援，config-check fail closed。此設定接線不提供compose/Grafana部署。
+
+StorageConfig.DSN使用既有secret.String，格式化／JSON／YAML去敏；dsn／dsn_file二選一。dsn_file與username_file／password_file只讀有界regularfiles（最多4KiB），拒絕symlink/FIFO/device，相對路徑依config位置。DSN inline／environment可設定但不得輸出；file與inline credentials來源衝突拒絕。設定驗證不需要連ClickHouse。
+
+storage.retention四個天數是daemon唯一權威（1–36500），轉成driver retention_*_days；options內另給同名retention鍵會被拒絕，避免忽略配置。query.timeout必須大於max_execution_time（預設60s>55s）。Driver context仍可被caller提早取消；原P109UTC／TTLoverflowguard維持。
+
+| Driver option | 預設 | 支援範圍 |
+| --- | --- | --- |
+| max_execution_time | 55 seconds | 1–3600 |
+| max_memory_usage | 1,000,000,000 bytes | 正值，≤2^50 |
+| max_result_rows | 5,000,000 | 正值，≤2^30 |
+| max_rows_to_read | 5,000,000 | 正值，≤2^30 |
+| max_result_bytes | 64MiB | 正值，≤2^40 |
+| max_open_conns | 10 | 1–1000 |
+
+Server scan/result設定以throw超限，nativeSQL顯式executioncap；driver累計logicaldecodedrows/bytes並回TooLarge，沒有成功截斷。Iterator持有lease到EOF/Close/取消／錯誤，Backend.Close取消並drain後closeclient一次。Logicalbytes不是processRSS／soak保證。Metrics/traces asyncack、多表非transaction及metadata無TTL限制保留；logs同步INSERT供持久write_seq與drainedrestartseeding。
+
 ## 2. 部署形態
 
-### 2.1 單機 all-in-one（v1 預設，2C4G VPS）
+### 2.1 Phase 1 本機 all-in-one
 
-```yaml
-# deploy/docker-compose.yml
-services:
-  prismd:
-    image: prism/prismd:${VERSION}
-    ports: ["9090:9090", "4317:4317"]
-    volumes:
-      - ./prismd.yaml:/etc/prism/prismd.yaml:ro
-      - ./rules:/etc/prism/rules:ro
-      - ./secrets:/etc/prism/secrets:ro
-    depends_on: [clickhouse, postgres]
-    deploy: {resources: {limits: {memory: 1500M}}}
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.8-alpine
-    volumes: ["ch-data:/var/lib/clickhouse", "./clickhouse-config.xml:/etc/clickhouse-server/config.d/prism.xml:ro"]
-    ulimits: {nofile: {soft: 262144, hard: 262144}}
-    deploy: {resources: {limits: {memory: 2G}}}
-  postgres:
-    image: postgres:16-alpine
-    volumes: ["pg-data:/var/lib/postgresql/data"]
-    deploy: {resources: {limits: {memory: 256M}}}
-  grafana:
-    image: grafana/grafana-oss:12.0.0
-    ports: ["3000:3000"]
-    volumes: ["./grafana/provisioning:/etc/grafana/provisioning:ro"]
-    deploy: {resources: {limits: {memory: 256M}}}
-```
+可執行設定以 [Compose](../../deploy/docker-compose.yml)、
+[部署 README](../../deploy/README.md) 與 [P1-11 規格](../specs/p1-11-deploy-e2e.md)
+為準。當期只啟動 prismd、ClickHouse 24.8.14.39 和 Grafana OSS 12.0.0，
+所有映像固定 Linux amd64 digest；不啟動尚未實作的 PostgreSQL 控制平面。
+HTTP/gRPC/Grafana ports 只公開到 loopback，測試用 ephemeral binds。
 
-`clickhouse-config.xml` 必須調低預設記憶體（單機關鍵）：
+既有驗證需要五個 regular secret files：clickhouse_password、clickhouse_dsn、
+ingest_api_key、grafana_password、jwt_secret，並需要既有 rules 目錄與有效的
+phase1-notify.yaml。此 notify/rules 只滿足配置契約，沒有啟動告警或外部通知。
+不要降低 config validation。正式秘密須使用精確 UID/group/ACL 權限；一次性
+E2E 產生的 test-only credentials 放在 private temporary root，容器只讀。
 
-```xml
-<clickhouse>
-  <max_server_memory_usage_to_ram_ratio>0.5</max_server_memory_usage_to_ram_ratio>
-  <mark_cache_size>268435456</mark_cache_size>
-  <uncompressed_cache_size>0</uncompressed_cache_size>
-  <background_pool_size>4</background_pool_size>
-  <max_concurrent_queries>16</max_concurrent_queries>
-  <logger><level>warning</level></logger>
-</clickhouse>
-```
+`/-/healthy` 表示 HTTP 活性；`/-/ready` 在 backend migration/ping 與所有
+listener 成功取得後才變綠，停止接收與 drain 前轉紅。它不是連續儲存或磁碟
+監控。容器用 `prismd healthcheck`；systemd reference 使用 bounded stdlib
+Unix datagram READY=1/STOPPING=1，尚未安裝主機服務。
 
-不調這些，ClickHouse 預設會吃掉大部分記憶體，在 4G 機器上必然 OOM。
+ClickHouse XML 提供單機 memory/query bounds，不據此承諾 2C4G 容量、無 OOM
+或 production soak。既有 metrics/traces async ack 不是 durable disk 保證；
+本輪持久性證明先等待已知資料實際可查，再重啟，未驗證 unflushed crash durability。
 
 ### 2.2 極省資源形態（1C2G）
 

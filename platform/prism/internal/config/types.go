@@ -1,7 +1,11 @@
 // Package config loads and validates prismd configuration.
 package config
 
-import "time"
+import (
+	"time"
+
+	"github.com/fallrising/newclear/platform/prism/internal/secret"
+)
 
 const DefaultPath = "/etc/prism/prismd.yaml"
 
@@ -35,11 +39,14 @@ type ServerConfig struct {
 }
 
 type StorageConfig struct {
-	Driver    string                   `yaml:"driver"`
-	DSN       string                   `yaml:"dsn"`
-	Options   map[string]string        `yaml:"options"`
-	Retention RetentionConfig          `yaml:"retention"`
-	Split     map[string]StorageTarget `yaml:"split"`
+	Driver        string                   `yaml:"driver"`
+	DSN           secret.String            `yaml:"dsn"`
+	DSNFile       string                   `yaml:"dsn_file"`
+	Options       map[string]string        `yaml:"options"`
+	Retention     RetentionConfig          `yaml:"retention"`
+	Split         map[string]StorageTarget `yaml:"split"`
+	dsnFileLoaded bool
+	loadedDSN     secret.String
 }
 
 type StorageTarget struct {
@@ -65,18 +72,26 @@ type TenancyConfig struct {
 }
 
 type AuthConfig struct {
-	AllowAnonymousRead bool   `yaml:"allow_anonymous_read"`
-	JWTSecretFile      string `yaml:"jwt_secret_file"`
+	AllowAnonymousRead bool          `yaml:"allow_anonymous_read"`
+	JWTSecretFile      string        `yaml:"jwt_secret_file"`
+	IngestAPIKeyFile   string        `yaml:"ingest_api_key_file"`
+	IngestAPIKey       secret.String `yaml:"-" json:"-"`
 }
 
 type IngestConfig struct {
 	MaxRequestBytes ByteSize    `yaml:"max_request_bytes"`
 	QueueDepth      int         `yaml:"queue_depth"`
+	OTLP            OTLPConfig  `yaml:"otlp"`
 	Batch           BatchConfig `yaml:"batch"`
 	ClockSkewPolicy string      `yaml:"clock_skew_policy"`
 	MaxPast         Duration    `yaml:"max_past"`
 	MaxFuture       Duration    `yaml:"max_future"`
 	MemoryLimit     ByteSize    `yaml:"memory_limit"`
+}
+
+type OTLPConfig struct {
+	MaxRecvMsgSize        ByteSize `yaml:"max_recv_msg_size"`
+	MaxConcurrentRequests int      `yaml:"max_concurrent_requests"`
 }
 
 type BatchConfig struct {
@@ -189,10 +204,12 @@ func Default() Config {
 		Auth: AuthConfig{ //nolint:gosec // This block contains a credential file path, not a credential.
 			AllowAnonymousRead: true,
 			JWTSecretFile:      "/etc/prism/secrets/jwt",
+			IngestAPIKeyFile:   "/etc/prism/secrets/ingest_api_key",
 		},
 		Ingest: IngestConfig{
 			MaxRequestBytes: ByteSize(16 << 20),
-			QueueDepth:      64,
+			QueueDepth:      4,
+			OTLP:            OTLPConfig{MaxRecvMsgSize: ByteSize(4 << 20), MaxConcurrentRequests: 16},
 			Batch: BatchConfig{
 				Metrics: BatchSignalConfig{MaxItems: 10_000, MaxBytes: defaultBatch.MaxBytes, FlushInterval: defaultBatch.FlushInterval},
 				Logs:    defaultBatch,

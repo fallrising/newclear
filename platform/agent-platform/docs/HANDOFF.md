@@ -1,8 +1,28 @@
+# 現行停止點 — 2026-10-06
+
+本輪完成單節點操作手冊與隔離 control-plane 演練，範圍與重跑入口見 [SINGLE-NODE.md](SINGLE-NODE.md)。涵蓋同版 API／獨立 worker／Web build、初次設定、觀測、停寫/drain、native backup／空 DB restore、升級／回滾與故障排查。模型維持 local mock，billing 延後、金額 unknown；沒有實際主機部署或真 provider／GitHub export／KVM 操作。
+
+前置成果封存、GitHub export 與備份／保留已隨 [PR293](https://github.com/fallrising/newclear/pull/293) 合併，包含 PR270/282，基準 main 為 `bf6909e4cd318e03e5957eab6b6c0f47acc6f81c`。這一輪收尾要求是完成本片、提交並合併，再停止；本輪 PR 與最新 CI 以 GitHub 和交付報告為準，不能用文件存在推定已合併。
+
+演練只用新建合成資料庫與 owned processes，驗證真 TCP API／CLI worker、成果及重啟持久性、原生 DB 備份還原、舊 session 失效／新登入、archive hash 與 runtime drain。CLI migrate/bootstrap/API/worker 使用實際子程序；backup native transport 在測試中注入自有 PostgreSQL client container，產品 CLI 仍要求本機安裝同 major clients。精確命令、結果、來源／log hashes 見 [single-node evidence](evidence/single-node.json)。既有備份／保留行為見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。
+
+本輪本機 gates：Python3.12.15 下45 unit +673 PostgreSQL/platform tests、Ruff164 files；80 Web tests/typecheck/format/build；11 Chromium/API/PostgreSQL 情境；實際 Web build 與預設 Makefile 兩種隔離演練入口均通過。獨立 review 與公開來源/log hashes 見 evidence。
+
+M0–M2 Passed；M3/M4 整體仍 In progress。TLS／service-manager 安裝、實際 runtime 部署、stale VM cleanup、整體 MVP gate、真自然語言 coding／live export 與 release 前長任務仍需另外選定範圍。使用者要求在這一片告一段落，接手先核對最新任務與明確指示，不自動開下一片，也不把計費或真 key 當作這輪完成條件。
+
+---
+
 # 開發接續紀錄 — 2026-09-24
 
 > 2026-09-26：本機 `hrv` 與 SSH 的四台 disposable 都沒有 `<tmp>/apm3-*`、`<tmp>/apm2-20260922` 或 sandboxd journal。使用者說明舊 controller 已重灌。那筆 `allocate=started` 無法再對帳，下一輪 KVM 使用新的 state directory。新主機先選 `<disposable-04>`（hostname `<kvm-host>`，Debian 13）。
 >
 > 2026-09-27：`<kvm-host>` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
+
+## 2026-10-03 單人 mock 續作（原始切片；2026-10-04 整合）
+
+本輪以單人使用為範圍：先驗收本機 mock 的 request cap、unknown 保守占用、token 輪替與 proxy 重啟後的額度持久性。真 API、可信帳單與硬金額上限延後，不作為這個切片的完成條件。費用繼續顯示 unknown；沒有付費呼叫或新增 KVM 驗收。詳細範圍及證據見 [單人 mock 驗收](M3-SINGLE-OPERATOR.md)。
+
+M3 整體仍為 In progress，完整 AT-07／AT-11 整合尚未結束；M4 尚未開始。後續已有 [diff 下載與瀏覽器注入驗收](M3-RESULT-DOWNLOAD.md) 及 [正常 Worker KVM 驗收](WORKER-TOOLS-KVM.md)；本段「沒有新增 KVM」僅指原始 mock 預算切片，不撤回後續證據。以下 2026-09-27 的 mock／真接口段落保留既有方向；更下方 2026-09-24 的施工日記不是目前停止指令。
 
 目前停止點：**先把整條流程用本機 mock 做完，再換成真 API。** 真接口暫定 [OpenCode Go](https://opencode.ai/docs/go) 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。這是 Go 訂閱的 key，不是 Zen 的按量 key。以後在 [opencode.ai/auth](https://opencode.ai/auth) 訂 Go 再建立 key，只放 0600 檔。現在沒有 key，也不要為了開發去申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。卡片可以出現在較長的使用者訊息裡，並同時寫入該檔與 `m2-result.txt`。一般 fake 任務仍不改 repository。目標含一張 FILE／TEXT 卡片時，同一個 worker 會把本機 mock 的寫檔結果存進 run，不開虛擬機、不呼叫 OpenCode Go。虛擬機裡的固定模型 `guest_fixture.py` 用同一張卡片。2026-09-27 在 `<kvm-host>` 用 `scripts/m2-card-kvm.py` 跑過一台真實 VM：目標是 `FILE note.txt` / `TEXT hello`，run succeeded，diff 含 `note.txt` 與 `m2-result.txt`，結束時 VM 與 claim 為零。fixture 驗收現在也核對卡片檔的內容；內容不符就不能通過。工作台會把這種本機 mock 結果標成「未開虛擬機」，並顯示 diff 與 SHA-256。硬金額上限與 24 小時停留都還沒做。
 

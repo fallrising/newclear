@@ -1,0 +1,98 @@
+[
+  {
+    "headRefOid": "64d675f8828f634f7b85967cf14b275353c5a071",
+    "mergeCommit": {
+      "oid": "7b29dceac92fb5e62490662f78b0f630d66423d0"
+    },
+    "mergedAt": "2026-10-03T16:43:03Z",
+    "number": 223,
+    "state": "MERGED",
+    "url": "https://github.com/fallrising/newclear/pull/223",
+    "checks": [
+      {
+        "name": "java",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137724759/job/111245555951"
+      },
+      {
+        "name": "trailer",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137724691/job/111245555617"
+      },
+      {
+        "name": "java-integration",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137724759/job/111245556009"
+      },
+      {
+        "name": "web",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137724759/job/111245555927"
+      }
+    ]
+  },
+  {
+    "headRefOid": "df191a73782ccdeb4ef946efa379a7439fccd2bf",
+    "mergeCommit": {
+      "oid": "a15e5504a2f61bc2907b40c2a6726a29ab4c61ab"
+    },
+    "mergedAt": "2026-10-03T16:46:08Z",
+    "number": 224,
+    "state": "MERGED",
+    "url": "https://github.com/fallrising/newclear/pull/224",
+    "checks": [
+      {
+        "name": "java",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137771662/job/111245697021"
+      },
+      {
+        "name": "trailer",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137771657/job/111245696930"
+      },
+      {
+        "name": "java-integration",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137771662/job/111245696835"
+      },
+      {
+        "name": "web",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137771662/job/111245697028"
+      }
+    ]
+  },
+  {
+    "headRefOid": "d22f598b2c770025a41c81dd631a1dbb908aa94a",
+    "mergeCommit": {
+      "oid": "d87f54d46c4789cd00c51c48cf034badbf52abe3"
+    },
+    "mergedAt": "2026-10-03T16:47:34Z",
+    "number": 225,
+    "state": "MERGED",
+    "url": "https://github.com/fallrising/newclear/pull/225",
+    "checks": [
+      {
+        "name": "java",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137819162/job/111245836091"
+      },
+      {
+        "name": "trailer",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137819138/job/111245835751"
+      },
+      {
+        "name": "java-integration",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137819162/job/111245836212"
+      },
+      {
+        "name": "web",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/fallrising/newclear/actions/runs/37137819162/job/111245836231"
+      }
+    ]
+  }
+]

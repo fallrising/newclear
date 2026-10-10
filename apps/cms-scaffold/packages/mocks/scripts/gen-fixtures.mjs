@@ -1,9 +1,11 @@
 // Generates src/fixtures.gen.ts from fixtures/*.json. Each fixture gets an OpenAPI type annotation,
 // so `npm run typecheck` fails when a fixture no longer matches the contract (01 §11.3).
-// The JSON files are byte-identical copies of apps/cms-scaffold/docs/v2/contracts/fixtures/*.json.
+// Fixtures project docs/v2/contracts/fixtures onto the currently implemented contract.
+// BW2 work entries include nullable publish-request metadata; public entries keep their public shape.
 import { readFileSync, writeFileSync } from "node:fs";
 
 const FIXTURES = [
+  ["capabilities.json", "capabilities", 'Record<string, Record<S["Surface"], S["Capabilities"]>>'],
   ["me.json", "me", 'Record<string, S["Me"]>'],
   ["principals.json", "principals", 'S["PrincipalList"]'],
   ["work-content-types.json", "workContentTypes", 'S["WorkContentTypeList"]'],
@@ -13,6 +15,13 @@ const FIXTURES = [
   ["public-entries.json", "publicEntries", 'S["PublicEntry"][]'],
   ["media-assets.json", "mediaAssets", 'S["MediaAssetList"]'],
   ["media-quota.json", "mediaQuota", 'S["MediaQuota"]'],
+  ["member-entries.json", "memberEntries", 'MemberFixture'],
+  ["revisions.json", "revisions", 'Record<string, (S["Revision"] & { payload: S["EntryPayload"] })[]>'],
+  // W4: governance data. Role grants mirror SeedService; audit events carry their detail (the list strips it).
+  ["roles.json", "roles", 'S["RoleList"]'],
+  ["role-permissions.json", "rolePermissions", 'Record<string, S["Permission"][]>'],
+  ["audit-events.json", "auditEvents", 'S["AuditEventDetail"][]'],
+  ["audit-settings.json", "auditSettings", 'S["AuditSettings"]'],
 ];
 
 function render() {
@@ -21,6 +30,17 @@ function render() {
     'import type { components } from "@cms/api";',
     "",
     'type S = components["schemas"];',
+    '',
+    'type MemberFixture = {',
+    '  schemaVersion: number; clock: string;',
+    '  members: { principal: S["MePrincipal"]; pets: S["MemberEntry"][]; appointmentRequests: S["MemberEntry"][] }[];',
+    '  crossOwnerForbidden: { actorUsername: string; targetEntryId: string; targetOwnerUsername: string; operation: string; expectedStatus: number; expectedErrorCode: S["ErrorCode"]; mustNotContain: string[] };',
+    '  createCases: {',
+    '    valid: { actorUsername: string; request: S["MemberCreateRequest"]; response: S["MemberEntry"] };',
+    '    foreignPet: { actorUsername: string; request: S["MemberCreateRequest"]; expectedStatus: number; expectedErrorCode: S["ErrorCode"]; expectedField: string };',
+    '  };',
+    '};',
+
   ];
   for (const [file, name, type] of FIXTURES) {
     const data = JSON.parse(readFileSync(new URL(`../fixtures/${file}`, import.meta.url), "utf8"));

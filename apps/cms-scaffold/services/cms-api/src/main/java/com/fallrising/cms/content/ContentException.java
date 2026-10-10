@@ -2,11 +2,37 @@ package com.fallrising.cms.content;
 
 import com.fallrising.cms.api.error.CmsApiException;
 import com.fallrising.cms.api.error.ErrorCode;
+import com.fallrising.cms.api.error.FieldError;
+import com.fallrising.cms.content.validation.PayloadValidator;
+
+import java.util.List;
 
 public class ContentException extends CmsApiException {
 
     public ContentException(ErrorCode code, String message) {
         super(code, message, null, null, null);
+    }
+
+    private ContentException(ErrorCode code, String message, List<FieldError> fields) {
+        super(code, message, null, null, null, fields);
+    }
+
+    public static ContentException fieldErrors(List<FieldError> fields) {
+        return new ContentException(PayloadValidator.topLevelCode(fields),
+                fields.size() + " invalid field(s); first: " + fields.getFirst().message(), fields);
+    }
+
+    public static ContentException inBatchItem(int index, CmsApiException failure) {
+        return new ContentException(failure.code(), "items[" + index + "]: " + failure.getMessage(),
+                failure.action(), failure.contentType(), failure.surface(), failure.fields());
+    }
+
+    private ContentException(ErrorCode code, String message, String action, String contentType, String surface, List<FieldError> fields) {
+        super(code, message, action, contentType, surface, fields);
+    }
+
+    public static ContentException versionRequired() {
+        return new ContentException(ErrorCode.VERSION_REQUIRED, "PATCH requires the entry version");
     }
 
     public static ContentException notFound() {
@@ -44,6 +70,10 @@ public class ContentException extends CmsApiException {
 
     public static ContentException invalidParameter(String message) {
         return new ContentException(ErrorCode.VALIDATION_FAILED, message);
+    }
+
+    public static ContentException rateLimited() {
+        return new ContentException(ErrorCode.RATE_LIMITED, "Too many requests; try again in a minute");
     }
 
     public static ContentException typeDisabled() {

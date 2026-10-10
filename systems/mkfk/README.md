@@ -5,7 +5,7 @@
 
 Kafka-inspired distributed log，透過實作理解分區儲存、複製、冪等生產與消費群組。
 
-**狀態：M0–M5 已驗證；M6–M7 尚未實作。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller，以及 durable idempotent producer、HTTP adapter、Go client 與 ledger CLI；目前仍沒有可啟動的 broker server、consumer groups、production-ready 保證或 Kafka client 相容性。精確狀態見 [implementation status](docs/STATUS.md)。
+**狀態：M0–M7 已驗證——核心功能已驗收，未 production-hardened。** 現有程式提供 segmented durable WAL、sparse-index read、RF1/RF3 per-partition Raft、ISR/HW/captured-ack controller、durable idempotent producer、durable consumer groups、可啟動的三 listener `mkfk` broker（peer HTTP/JSON transport）、seeded chaos 驗收、三 broker Compose 實驗與 benchmark baseline。沒有 TLS／認證、transactions、retention、動態 membership 或 Kafka client 相容性（X1–X4）。精確狀態見 [implementation status](docs/STATUS.md)；需求對照見 [traceability](docs/traceability.md)；架構與故障結果見 [architecture](docs/architecture.md)。
 
 ## 從這裡開始
 
@@ -43,7 +43,7 @@ make test
 make test-race
 ```
 
-目前仍刻意沒有 `cmd/mkfk` 或長時間執行的 broker process。M5 已加入 producer HTTP handler；其他 transport wiring 必須依後續 milestone 驗收順序加入。
+M0 時刻意沒有 `cmd/mkfk`；broker process 於 M7 加入（見下方 M7 段）。
 
 ## M1 durable storage
 
@@ -104,7 +104,39 @@ M4 的 test-only operation identity 不負責 producer 去重；M5 透過下列 
 - `pkg/client`：總 deadline、attempt cap、50 ms–1 s jitter backoff、固定 partition/identity/sequence retry，以及只接受 static allowlist 內 leader hint 的 HTTP transport。
 - `cmd/mkfkctl`：OpenProducer 與 produce 指令；outbound ledger 先以 temp write → file sync → rename → directory sync 保存 pending，成功後才持久更新 next sequence。新 invocation 會先恢復未解決 batch。
 
-M5 的 HTTP handler 是可嵌入 partition actor 的 public boundary，但尚無 `cmd/mkfk` broker 把 client/peer listeners、所有 partitions 與 lifecycle 接成常駐服務；該整合與 consumer groups 分別屬於 M7 與 M6。這裡的冪等只涵蓋同 producer/partition/epoch/sequence 的 transport retry，不是跨 partition transaction 或外部 side-effect exactly-once。
+M5 的 HTTP handler 是可嵌入 partition actor 的 public boundary；把 client/peer listeners、所有 partitions 與 lifecycle 接成常駐服務的 `cmd/mkfk` broker 於 M7 加入。這裡的冪等只涵蓋同 producer/partition/epoch/sequence 的 transport retry，不是跨 partition transaction 或外部 side-effect exactly-once。
+
+## M6 consumer groups 與 durable offsets
+
+- `internal/group`：`__mkfk_groups/0` 上的 GROUP command（ADR-010）、只由 committed entries 推導的狀態機、deterministic round-robin、session／rebalance timers、每個新 coordinator term 的 BEGIN_REBALANCE，以及帶 quorum HW 證明、apply 時再驗 generation／ownership 的 all-or-nothing CommitOffsets。
+- `group.Service`：以單一 goroutine 擁有 coordinator，提供 6 個 group 操作；GET offsets 先完成 Raft read barrier。M7 起跑在 `internal/partition` actor 上，支援 RF1／RF3 groups partition，HW 證明由 data leader 在 read barrier 後提供（ADR-010 M7 段）。
+- `internal/transport`：`/v1/groups/{group}/…` 6 個 endpoint 與 `GET /v1/fetch`，錯誤碼與 outcome 對應 03 §1，回應以 M0 JSON schema 驗證。
+- `pkg/client`：`GroupConsumer` 的 join → sync → fetch → process → commit；stale generation 立即停止並不提交其結果，unknown commit 以相同 request_id 重送，重新分配後從 committed next offset 繼續。這是 at-least-once：process 後、commit 前 crash 的 records 會被重新處理。
+
+```bash
+make test-model        # M3/M4/M6 seeded model suites
+make test-integration  # real WAL, child processes, M6 demo
+```
+
+M6 demo（`TestM6DemoRebalanceCrashAndCoordinatorRestart`）在真實 WAL 上執行：3 partitions、2 members 後加入第 3 位、kill 一個 process 後未 commit 的 member 與 coordinator，並列出 generation／assignment 與被重新處理的 records。
+
+## M7 整合故障驗證與交付
+
+- `internal/partition`：每個 partition replica 一個 actor goroutine，處理 Step／Tick／proposal／read barrier；每個 peer 一條有界 FIFO link。
+- `cmd/mkfk`：`format` 顯式初始化空目錄；`serve` 依 SDD §12.1 啟動 peer、client、admin 三個 listener（`/healthz`、`/readyz`、`/metrics`），SIGTERM 有界排空後釋放 lock。非 loopback 位址需 `--allow-insecure-bind`（[ADR-011](docs/adr/011-broker-peer-transport.md)）。
+- Peer RPC 為 HTTP/JSON（`/peer/v1/request-vote`、`append-entries`、`read-barrier`、`high-watermark`），reply 在 response body。
+- `pkg/client.ClusterTransport` 依 NOT_LEADER／NOT_COORDINATOR 的 leader hint 路由到 partition leader 或 coordinator。
+
+- `make test-chaos`：三個 broker process、三個冪等 producer、兩個 consumer group，在 seeded 排程下輪流 SIGKILL leader／follower／coordinator、SIGSTOP、切斷或拖慢 peer link（經測試用 proxy 與 `--peer-bind`），結束後以 history oracle 檢查已確認資料不遺失不重複、副本一致、assignment 不重疊、committed offset 不倒退（`CHAOS_PROFILE=short|full`、`CHAOS_SEED=` 可重播）。`make test-model-extended` 跑 1,000 seeds × 10,000 events。
+
+- `make demo`：以 `FROM scratch` 的本地 image（不拉 registry，UID 65532、唯讀 rootfs、drop 全部 capability）啟動三 broker Compose 實驗（獨立 project、named volumes、私有 bridge network，只在 host loopback 公開 client／admin port），依序展示 produce／consume、回覆遺失重送、kill leader 與 catch-up、rebalance、coordinator 重啟後從 committed offsets 續讀。若該 project 已有 volume 會拒絕執行；`make demo-down` 只停止本次實驗，加 `DELETE_DATA=1` 才刪 volume。
+- `make bench`：依 04-validation §5 跑 RF1／RF3（min_isr 1、2）× batch 1／100 × 1／3 partitions，每組預熱 10 秒、量測 60 秒、重複 3 次，另量冷重啟到可服務的時間；輸出原始 `results.json` 與 `summary.md`。預設在本機 loopback 起 broker；`BENCH_ARGS="--ssh-hosts … --ssh-ips …"` 改在三台主機上跑。baseline 見 [docs/benchmarks/m7-baseline.md](docs/benchmarks/m7-baseline.md)，數字只描述該設計在該硬體上的表現，不是承諾。
+- CI：根目錄 `.github/workflows/mkfk-ci.yml`（path-scoped、`contents: read`、SHA-pinned actions）跑 gates、`test-chaos` short profile 與 Compose demo。
+
+```bash
+mkfk format --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json
+mkfk serve  --data-dir data/1 --node-id 1 --cluster-json configs/dev-cluster.json
+```
 
 ## 範圍提示
 

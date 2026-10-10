@@ -1,6 +1,6 @@
 # clarkQ 開發進度
 
-> 最後更新：2026-07-30 · **v1.5.1** + 單機 demo + **多進程集群壓測 demo**  
+> 最後更新：2026-10-06 · **v1.5.1** + 單機 demo + **多進程集群壓測 demo** + 3 台 VM 實機集群驗證（見 CHANGELOG Unreleased）  
 > 倉庫：https://github.com/fallrising/newclear/systems/clarkq  
 > 標籤：`v1.0.0` … `v1.5.1`
 
@@ -59,6 +59,16 @@ cd demo/cluster && ./run-cluster-demo.sh    # 3 進程集群 6 場景
 - [x] `./run-stress.sh --docker` — soak 291/291、partition 恢復、netem 35/35 全綠
 - [x] 集群類型指標 + unit tests（`replication_errors_total` 等）
 - [x] `deploy/prometheus/alerts.yml` + scrape 示例
+
+### 本次驗證（2026-10-06，3 台 VM 實機）
+
+三台獨立 VM（同區域，經內網 VPN 互連），RF=2 sync + WAL，每台跑一個 systemd 服務。
+
+- [x] `demo/cluster` 場景 01/02/03/05/06/07 跨機執行 — 42 passed / 0 failed / 1 skipped
+- [x] 停任一節點 → 立即 drain 30 個 queue × 10 則 → 節點重新加入：輪流停三個節點皆 300/300、0 重複、0 FIFO 違反、0 個 404，重新加入後深度 0
+- [x] 全節點 SIGKILL → 重啟 → drain：300/300（WAL 復原）
+- [x] 修正前同場景重現：4 個 queue 回 404、160–190 則已消費訊息在節點重新加入後復活 → 已由 #297、#302 修正
+- [ ] 真實跨機房拓撲（本次三台在同一區域）
 
 ---
 

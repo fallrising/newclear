@@ -38,9 +38,10 @@ type AppendResult struct {
 }
 
 type LocalRecord struct {
-	Offset uint64
-	Key    []byte
-	Value  []byte
+	Offset          uint64
+	Key             []byte
+	Value           []byte
+	AppendTimestamp uint64
 }
 
 type RecoveryEvent struct {
@@ -286,7 +287,12 @@ func (partition *PartitionLog) appendEntriesLocked(entries []Frame) error {
 	partition.lastLogIndex = entries[len(entries)-1].LogIndex
 	partition.leo = nextLEO
 	for segment := range touched {
+		anchorsBefore := len(segment.anchors)
 		segment.rebuildDerived()
+		// Appends only add anchors, so an unchanged count means the index file is current.
+		if segment.indexHealthy && len(segment.anchors) == anchorsBefore {
+			continue
+		}
 		if err := partition.persistSegmentIndex(segment); err != nil {
 			segment.indexHealthy = false
 		} else {
@@ -482,6 +488,14 @@ func (partition *PartitionLog) Close() error {
 		onClose()
 	}
 	return errors.Join(closeErrors...)
+}
+
+// RecoveryRequired reports whether an I/O failure quarantined the log: it
+// refuses writes until a restart recovers it.
+func (partition *PartitionLog) RecoveryRequired() bool {
+	partition.mu.Lock()
+	defer partition.mu.Unlock()
+	return partition.recoveryRequired
 }
 
 func (partition *PartitionLog) requireWritable() error {

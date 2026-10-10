@@ -218,6 +218,8 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 		return Ready{LeaderReady: node.leaderReady}, nil
 	}
 	delete(node.sent, message.RPCID)
+	progress.forget(message.RPCID)
+	progress.unanswered = 0
 	response := message.AppendResp
 	ready := Ready{LeaderReady: node.leaderReady}
 	if !response.Success {
@@ -272,6 +274,33 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 	}
 	ready.LeaderReady = node.leaderReady
 	return ready, nil
+}
+
+func (progress *peerProgress) forget(rpcID uint64) {
+	for index, candidate := range progress.inflight {
+		if candidate == rpcID {
+			progress.inflight = append(progress.inflight[:index], progress.inflight[index+1:]...)
+			return
+		}
+	}
+}
+
+// pipelineAppend sends a new proposal to every peer whose pipeline is not
+// full. A saturated peer gets the entries with its next reply or heartbeat.
+func (node *Node) pipelineAppend() ([]Message, error) {
+	messages := make([]Message, 0, len(node.progress))
+	for _, voter := range node.config.Voters {
+		progress := node.progress[voter]
+		if voter == node.config.NodeID || progress != nil && progress.unanswered >= MaxPipelinedAppends {
+			continue
+		}
+		message, err := node.makeAppend(voter, "")
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, message)
+	}
+	return messages, nil
 }
 
 func (node *Node) broadcastAppend(readContext string) ([]Message, error) {
@@ -329,6 +358,12 @@ func (node *Node) makeAppend(peer uint32, readContext string) (Message, error) {
 		readContext: readContext, readIndex: readIndex,
 	}
 	progress.latestRPC = rpcID
+	progress.unanswered++
+	progress.inflight = append(progress.inflight, rpcID)
+	if len(progress.inflight) > MaxInflightAppends {
+		delete(node.sent, progress.inflight[0])
+		progress.inflight = progress.inflight[1:]
+	}
 	return Message{
 		Kind:     MessageAppendEntries,
 		Identity: node.config.Identity,

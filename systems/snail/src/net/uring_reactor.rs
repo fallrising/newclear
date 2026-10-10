@@ -18,7 +18,7 @@ use tracing::info;
 use crate::command::apply;
 use crate::net::buffer::BufferPool;
 use crate::net::connection::{ConnContext, Connection, DriveResult};
-use crate::runtime::router::ShardRequest;
+use crate::runtime::router::ShardBatch;
 use crate::runtime::worker::{current_ms, WorkerContext};
 use crate::storage::shard::Shard;
 
@@ -300,7 +300,10 @@ impl CompletionRing {
                     if res >= 0 {
                         new_fds.push(res);
                     } else if res != -libc::ECANCELED {
-                        tracing::warn!("accept multi error: {}", io::Error::from_raw_os_error(-res));
+                        tracing::warn!(
+                            "accept multi error: {}",
+                            io::Error::from_raw_os_error(-res)
+                        );
                     }
                     if !cqueue::more(cqe.flags()) {
                         self.accept_armed = false;
@@ -426,7 +429,7 @@ fn stream_from_fd(fd: RawFd) -> io::Result<TcpStream> {
 /// Run the completion reactor until shutdown. Returns Err only if ring setup fails.
 pub async fn run(
     ctx: WorkerContext,
-    mut request_rx: mpsc::Receiver<ShardRequest>,
+    mut request_rx: mpsc::UnboundedReceiver<ShardBatch>,
     shard_range: std::ops::Range<usize>,
     mut shutdown_rx: broadcast::Receiver<()>,
 ) -> io::Result<()> {
@@ -483,12 +486,12 @@ pub async fn run(
     );
 
     loop {
+        ctx.shard_client.flush();
         if last_time_refresh.elapsed() >= Duration::from_millis(1) {
             *ctx.now_ms.borrow_mut() = current_ms();
             last_time_refresh = Instant::now();
         }
 
-        ctx.shard_client.clear_wake(ctx.worker_id);
         drain_shards(
             &mut request_rx,
             &ctx,
@@ -554,6 +557,32 @@ pub async fn run(
             ring.flush_submissions(&mut conns, listener_fd, wake_fd, accepting);
         }
 
+        // Local helper tasks may enqueue their next shard operation only after a
+        // yield. Run them and flush before entering the blocking completion wait.
+        if !async_waiters.is_empty() {
+            tokio::task::yield_now().await;
+            ctx.shard_client.flush();
+            harvest_and_queue(&mut conns, &mut async_waiters, &mut ring);
+            ring.flush_submissions(&mut conns, listener_fd, wake_fd, accepting);
+        }
+        ctx.shard_client.flush();
+
+        // The shutdown wake may have been consumed on the previous turn. Exit
+        // after draining connections before waiting for another completion.
+        if !accepting {
+            let live = conns.iter().filter(|c| c.is_some()).count();
+            let timed_out = drain_deadline.map(|d| Instant::now() >= d).unwrap_or(false);
+            if live == 0 || timed_out {
+                tracing::info!(
+                    worker = ctx.worker_id,
+                    live,
+                    timed_out,
+                    "shutdown: uring worker exit"
+                );
+                return Ok(());
+            }
+        }
+
         // Burst: wait once, then keep draining/submitting while the CQ stays hot.
         if ring.has_waitable() && !ring.cq_ready() {
             let _ = ring.wait_cqe();
@@ -583,19 +612,10 @@ pub async fn run(
             }
 
             for fd in new_fds.drain(..) {
-                install_conn(
-                    fd,
-                    &mut conns,
-                    &mut free,
-                    &ctx,
-                    &conn_ctx,
-                    &pool,
-                    &mut ring,
-                );
+                install_conn(fd, &mut conns, &mut free, &ctx, &conn_ctx, &pool, &mut ring);
             }
 
             if woke {
-                ctx.shard_client.clear_wake(ctx.worker_id);
                 drain_shards(
                     &mut request_rx,
                     &ctx,
@@ -610,12 +630,10 @@ pub async fn run(
                 remove_conn(&mut conns, &mut free, idx);
             }
             harvest_and_queue(&mut conns, &mut async_waiters, &mut ring);
+            ctx.shard_client.flush();
             ring.flush_submissions(&mut conns, listener_fd, wake_fd, accepting);
 
-            if !ring.cq_ready()
-                && ring.pending_recv.is_empty()
-                && ring.pending_send.is_empty()
-            {
+            if !ring.cq_ready() && ring.pending_recv.is_empty() && ring.pending_send.is_empty() {
                 break;
             }
             if ring.has_waitable() && !ring.cq_ready() {
@@ -624,21 +642,7 @@ pub async fn run(
             }
         }
 
-        if !accepting {
-            let live = conns.iter().filter(|c| c.is_some()).count();
-            let timed_out = drain_deadline
-                .map(|d| Instant::now() >= d)
-                .unwrap_or(false);
-            if live == 0 || timed_out {
-                tracing::info!(
-                    worker = ctx.worker_id,
-                    live,
-                    timed_out,
-                    "shutdown: uring worker exit"
-                );
-                return Ok(());
-            }
-        }
+        ctx.shard_client.flush();
     }
 }
 
@@ -717,52 +721,20 @@ fn harvest_and_queue(
 }
 
 fn drain_shards(
-    rx: &mut mpsc::Receiver<ShardRequest>,
+    rx: &mut mpsc::UnboundedReceiver<ShardBatch>,
     ctx: &WorkerContext,
     range: &std::ops::Range<usize>,
     conns: &mut [Option<Connection>],
     async_waiters: &mut Vec<usize>,
     ring: &mut CompletionRing,
 ) {
-    let Ok(req0) = rx.try_recv() else {
-        return;
-    };
     let now = *ctx.now_ms.borrow();
     let mut guard = ctx.local_shards.borrow_mut();
-    let len = guard.len();
-    let mut wake_origins = [false; 64];
-    let mut wake_overflow: Vec<usize> = Vec::new();
-    let mut note_wake = |origin: usize| {
-        if origin == ctx.worker_id {
-            return;
-        }
-        if origin < wake_origins.len() {
-            wake_origins[origin] = true;
-        } else if !wake_overflow.contains(&origin) {
-            wake_overflow.push(origin);
-        }
-    };
-    let apply_one = |guard: &mut Vec<Shard>, req: ShardRequest, note_wake: &mut dyn FnMut(usize)| {
-        let origin = req.origin_worker;
-        let local_idx = req.shard_id.saturating_sub(range.start);
-        let shard = &mut guard[local_idx.min(len.saturating_sub(1))];
-        let reply = apply::apply(shard, req.cmd, now, &ctx.config, &ctx.info);
-        let _ = req.reply.send(reply);
-        note_wake(origin);
-    };
-    apply_one(&mut guard, req0, &mut note_wake);
-    while let Ok(req) = rx.try_recv() {
-        apply_one(&mut guard, req, &mut note_wake);
-    }
+    ctx.shard_client.drain(rx, |req| {
+        let shard = &mut guard[req.shard_id - range.start];
+        apply::apply(shard, req.cmd, now, &ctx.config, &ctx.info)
+    });
     drop(guard);
-    for (origin, flagged) in wake_origins.iter().enumerate() {
-        if *flagged {
-            ctx.shard_client.wake(origin);
-        }
-    }
-    for origin in wake_overflow {
-        ctx.shard_client.wake(origin);
-    }
     harvest_and_queue(conns, async_waiters, ring);
 }
 

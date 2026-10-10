@@ -1,0 +1,55 @@
+name: Open Compute lab CI
+
+on:
+  pull_request:
+    paths:
+      - 'labs/open-compute/**'
+      - '.github/workflows/open-compute-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'labs/open-compute/**'
+      - '.github/workflows/open-compute-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-compute-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  original-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Offline harness contracts
+        run: make -C labs/open-compute check
+      - name: Original non-root runtime integration
+        run: >-
+          make -C labs/open-compute integration
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-cache --output $RUNNER_TEMP/open-compute-evidence"
+      - name: Complete Local cold restore
+        run: >-
+          make -C labs/open-compute integration-restore
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-cache --output $RUNNER_TEMP/open-compute-restore-evidence"
+      - name: Sanitized evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Sanitized cold restore evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-restore-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-restore-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 7

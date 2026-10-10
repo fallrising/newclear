@@ -475,13 +475,14 @@ func (s *Server) handleInternalEnqueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	spanAttrs(r.Context(), attrOp("replicate_enqueue"), attrQueue(msg.Queue), attrMessageID(msg.ID))
-	// Idempotent: duplicate ID from retry is success.
-	if s.manager.HasMessage(msg.Queue, msg.ID) {
-		writeJSON(w, http.StatusCreated, map[string]string{"status": "ok", "id": msg.ID, "deduped": "true"})
+	// Idempotent: an ID already queued (retry) or already removed (consumed) is success.
+	added, err := s.manager.RestoreMessage(msg)
+	if err != nil {
+		s.writeError(w, err)
 		return
 	}
-	if err := s.manager.RestoreMessage(msg); err != nil {
-		s.writeError(w, err)
+	if !added {
+		writeJSON(w, http.StatusCreated, map[string]string{"status": "ok", "id": msg.ID, "deduped": "true"})
 		return
 	}
 	if s.engine != nil {

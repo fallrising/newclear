@@ -480,13 +480,15 @@ class WorkerLossReplacementExecutor:
                 move['replacement_state'] = 'ready'
                 move['replacement_workload_ids'] = list(child['observed_workload_ids'])
                 if child_plan['action'] == 'deploy_revision':
+                    rows = self.api.list_revision(move['appname'])
+                    valid, reason, ids = _safe_revision_rows(rows, {
+                        'appname': move['appname'], 'logical_app': move['logical_app'],
+                        'spec_sha256': move['spec_sha256'], 'spec': move['spec'],
+                    })
+                    if not valid or ids != sorted(child['observed_workload_ids']):
+                        raise ValueError(reason or 'replacement identity changed before binding')
                     journal['staged_revisions'] = sorted(
-                        journal['staged_revisions'] + [
-                        {'id': workload_id, 'nodename': move['spec']['node'],
-                         'labels': {'owner': OWNER,
-                                    'logical_app': move['logical_app'],
-                                    'spec_sha256': move['spec_sha256']}}
-                        for workload_id in child['observed_workload_ids']],
+                        journal['staged_revisions'] + _workload_binding({'workloads': rows}),
                         key=lambda row: row['id'])
                 self._save(path, journal)
                 self._live_check(journal)

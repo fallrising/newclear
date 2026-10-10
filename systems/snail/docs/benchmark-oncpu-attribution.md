@@ -15,7 +15,7 @@
 
 固定四 shards 可減少單 shard 快路徑混淆；1w/4shards 不是原1w/1shard產品驗收基準。這四項及較小 request 數的 smoke 分開保存，不與以前的矩陣或 client-placement cohort 混合。
 
-固定 binary SHA256：`560e697b7557eec5bc9372f7949362feaf8b9a8ac1a1b0ab5c2d62ca54763ecd`，ELF build-ID `f061075930e3d101f0721244275f10d604ce6a6e`。server/profiler image：`rust@sha256:af306cfa71d987911a781c37b59d7d67d934f49684058f96cf72079c3626bfe0`；client image：`redis@sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85`。perf6.1.187 binary SHA256：`09c2952fdd0a982d797978c35e590bb00bdc02dbfee9ec13fe50fadafb25c22f`；完整額外 tool-tree 檔案 hashes 保存在私有 preflight/method，不只核對主執行檔。
+固定 binary SHA256：`560e697b7557eec5bc9372f7949362feaf8b9a8ac1a1b0ab5c2d62ca54763ecd`，ELF build-ID `f061075930e3d101f0721244275f10d604ce6a6e`。server/profiler image：`rust@sha256:af306cfa71d987911a781c37b59d7d67d934f49684058f96cf72079c3626bfe0`；client image：`redis@sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85`。perf6.1.187 binary SHA256：`09c2952fdd0a982d797978c35e590bb00bdc02dbfee9ec13fe50fadafb25c22f`；完整額外 tool-tree 檔案 hashes 與 symlink 路徑／target／解析結果保存在私有 preflight/method。runtime links 必須指向 pinned tree 中已驗證的檔案；不只核對主執行檔。
 
 ## 採樣、視窗與 observer
 
@@ -27,7 +27,7 @@
 
 recorder 初始 disabled，FIFO enable/disable 必須有實際 ack 及穩定 recorder identity。此 perf 版本回傳 `ack\n\0`，保留原始 bytes並嚴格解析。用同一 server monotonic clock 保存控制前後時間及 server PID/starttime/cgroup、全部 thread identity、CPU ticks。CPU 快照包圍 enabled 區間，邊緣控制與快照開銷明列；client 容器啟動、benchmark、回收均可能位於此視窗，不能稱精確 workload-only。
 
-server CPU/request = process user+system ticks差 / CLK_TCK /10M。各 thread 自身 ticks 分開；PID 重用、thread 集合變動、負 ticks、錯誤時鐘或未確認 recorder 狀態均拒絕觀察。client 保留原 v2 live keeper、完整 cgroup與部分 Redis PID/thread、唯一 exit marker／CSV／final collection guards；不冒稱逐請求零錯誤。
+server CPU/request = process user+system ticks差 / CLK_TCK /10M。各 thread 自身 ticks 分開；暖機完成至 enable，以及 enable 至 disable，均核對完整 thread 集合與每個 starttime。PID 重用、thread 集合變動、負 ticks、錯誤時鐘或未確認 recorder 狀態均拒絕觀察。client 保留原 v2 live keeper、完整 cgroup與部分 Redis PID/thread、唯一 exit marker／CSV／final collection guards；不冒稱逐請求零錯誤。
 
 profiler 的新鮮 live-container cgroup CPU 記錄到 recorder 停止，包含啟動、keeper及錄製成本；之後 script/report 的整理另存。這個計數不是完整 observer 影響測量，沒有與無 profiler 的配對控制。profiled QPS/p99 僅為診斷背景，不能據此接受或拒絕產品吞吐；99Hz及8KiB stack 仍會擾動執行。
 

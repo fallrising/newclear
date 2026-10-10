@@ -1,0 +1,37 @@
+{
+  "name": "spring-pool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
+  "scripts": {
+    "typecheck": "tsc -p web/tsconfig.json --noEmit",
+    "format": "prettier --check web tests e2e scripts package.json contracts/openapi.json playwright.config.ts",
+    "format:write": "prettier --write web tests e2e scripts package.json contracts/openapi.json playwright.config.ts",
+    "lint": "npm run typecheck",
+    "test": "node --test tests/unit/*.test.mjs tests/config/*.test.mjs",
+    "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.mjs",
+    "test:e2e": "playwright test",
+    "build:api": "cd api && worker-build --release",
+    "build:web": "wrangler deploy --config web/wrangler.jsonc --dry-run --outdir ../dist/web",
+    "build": "npm run build:api && npm run build:web",
+    "dev": "wrangler dev --config web/wrangler.jsonc --config api/wrangler.toml",
+    "test:local": "node scripts/local-test.mjs",
+    "test:local:integration": "node scripts/local-test.mjs integration",
+    "test:local:e2e": "node scripts/local-test.mjs e2e",
+    "dev:tests": "node scripts/local-test.mjs serve",
+    "test:local:api": "node scripts/local-test.mjs api"
+  },
+  "dependencies": {
+    "hono": "4.13.12"
+  },
+  "devDependencies": {
+    "wrangler": "4.145.0",
+    "typescript": "7.0.2",
+    "@playwright/test": "1.63.0",
+    "@cloudflare/workers-types": "5.20260930.2",
+    "prettier": "3.8.3"
+  }
+}

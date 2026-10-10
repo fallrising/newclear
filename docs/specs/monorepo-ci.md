@@ -78,6 +78,8 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 | mkfk | `mkfk-ci.yml` | `systems/mkfk/**`, `.github/workflows/mkfk-ci.yml` | Go from `go.mod`: `make fmt-check vet test test-race test-model test-integration`; `make test-chaos CHAOS_PROFILE=short` with its output uploaded as an artifact; `make demo` (three-broker Compose on a locally built `FROM scratch` image, no registry pull, loopback-only ports) followed by `make demo-down DELETE_DATA=1` |
 
+| Spring Pool | `spring-pool-ci.yml` | `platform/spring-pool/**`, `.github/workflows/spring-pool-ci.yml` | Pinned Node/Rust; native validation/export tests, type/format/build, compiled Wasm + local workerd/D1 integration, three browser journeys; synthetic fixtures only, no Cloudflare token or deploy |
+
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
 OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scoped to

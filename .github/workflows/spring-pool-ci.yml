@@ -1,0 +1,67 @@
+name: Spring Pool CI
+
+on:
+  pull_request:
+    paths:
+      - platform/spring-pool/**
+      - .github/workflows/spring-pool-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - platform/spring-pool/**
+      - .github/workflows/spring-pool-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spring-pool-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: platform/spring-pool
+    env:
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: platform/spring-pool/package-lock.json
+      - name: Install pinned Rust and Wasm tools
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal --component rustfmt,clippy --target wasm32-unknown-unknown
+          rustup default 1.98.1
+          cargo install worker-build --version 0.8.7 --locked
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Native quality gates
+        run: |
+          cargo fmt --manifest-path api/Cargo.toml --check
+          cargo test --manifest-path api/Cargo.toml --locked
+          cargo clippy --manifest-path api/Cargo.toml --locked --all-targets -- -D warnings
+          npm run lint
+          npm run format
+          npm test
+          npm run build
+      - name: Real local Workers and browser journeys
+        run: npm run test:local
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: spring-pool-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            platform/spring-pool/artifacts/
+            platform/spring-pool/test-results/
+            platform/spring-pool/playwright-report/
+          if-no-files-found: warn
+          retention-days: 14

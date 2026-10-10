@@ -27,6 +27,8 @@
 
 recorder 初始 disabled，FIFO enable/disable 必須有實際 ack 及穩定 recorder identity。此 perf 版本回傳 `ack\n\0`，保留原始 bytes並嚴格解析。用同一 server monotonic clock 保存控制前後時間及 server PID/starttime/cgroup、全部 thread identity、CPU ticks。CPU 快照包圍 enabled 區間，邊緣控制與快照開銷明列；client 容器啟動、benchmark、回收均可能位於此視窗，不能稱精確 workload-only。
 
+recorder attach 不附帶 workload 子程序；disable 後，以同一 owned FIFO 送出 `stop`，保存相同格式的實際 ack、送出／回覆時間及真正 exit code。送出前核對 recorder PID/starttime/cgroup、容器 label、directory 與期限；正常 stop ack 後可以立即退出，不要求它繼續存活。等待 ack／退出均有期限，整個 profiler 命令另受540秒 timeout及3秒 kill-after限制。實際 exit 必須為0，不把 signal exit 換算成成功。首次100k smoke 使用 signal停止含 sleep 子程序的 recorder，回傳143而拒絕；該資料獨立保存，不納入正式 cohort。正常 FIFO stop 的合成探針已驗證，修正須另經審查及新的產品 smoke，才可執行正式量測。
+
 server CPU/request = process user+system ticks差 / CLK_TCK /10M。各 thread 自身 ticks 分開；暖機完成至 enable，以及 enable 至 disable，均核對完整 thread 集合與每個 starttime。PID 重用、thread 集合變動、負 ticks、錯誤時鐘或未確認 recorder 狀態均拒絕觀察。client 保留原 v2 live keeper、完整 cgroup與部分 Redis PID/thread、唯一 exit marker／CSV／final collection guards；不冒稱逐請求零錯誤。
 
 profiler 的新鮮 live-container cgroup CPU 記錄到 recorder 停止，包含啟動、keeper及錄製成本；之後 script/report 的整理另存。這個計數不是完整 observer 影響測量，沒有與無 profiler 的配對控制。profiled QPS/p99 僅為診斷背景，不能據此接受或拒絕產品吞吐；99Hz及8KiB stack 仍會擾動執行。

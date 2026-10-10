@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-09T15:12:28.921223+00:00",
+  "status": "OWNER_CHECKPOINT_DRAFT_REWORK",
+  "branch": "docs/cms-pp1c-local",
+  "base": "e3d0c3fbea02fa47cdd99a6b43914c1a8ad4fd1c",
+  "docReady": false,
+  "productImplemented": false,
+  "review": "T004 PARTIAL / REWORK; root REWORK",
+  "draftHashes": {
+    "PP1c.md": "a215a8382e7e72f3cbfb4fdc258629a5d24de001a1af79131fe20f9588a258bc",
+    "PP1-recovery.md": "1ec69daefc753f0d514f8b0783f5466e60e98b91098ba84fc3808f9bbd644170"
+  }
+}

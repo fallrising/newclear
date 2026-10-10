@@ -2,6 +2,8 @@
 
 `fallrising` 的公開技術作品集。這裡是這些專案的 canonical 位置——先前散落在數十個獨立 repository 的內容,已收斂至此。
 
+給 LLM agent 的入口是 [`llms.txt`](llms.txt)：一次 fetch 取得全部專案索引，各專案自己的 `llms.txt` 再宣告 status、介面型態、entrypoint、auth 與機器可讀契約的位置。格式與必填欄位見 [agent-facing capability files](docs/specs/llms-txt.md)。目前已有 capability file 的是 `systems/clarkq`、`products/kith`、`systems/snail`、`products/goku`，其餘專案仍只有 README。
+
 根目錄的 [GitHub Actions workflows](.github/workflows/) 是 monorepo 的 canonical CI entry points；component 目錄中保留的 workflow 是原始 repository 歷史，GitHub 不會將其當作 monorepo CI 執行。已接線 component 的範圍與驗證規則見 [Monorepo CI specification](docs/specs/monorepo-ci.md)。
 
 ## 怎麼讀這個倉庫

@@ -31,7 +31,7 @@ server 仍是 6-vCPU VM，Docker CPU affinity 0–3、直接 Ethernet、mio、4 
 
 client host `/proc/stat` 的 monotonic 視窗對齊呼叫期間，包含 instrumentation 開銷與其他程序。server 的 process/thread CPU 仍用量測前後快照，視窗包含 SSH 和 client 啟停開銷；CPU/request = user+system ticks 差 / CLK_TCK / 10M。不混用 host CPU、cgroup CPU 或部分 PID CPU。p99 取單一有效 SET CSV；數值必須有限且符合基本範圍。
 
-暖機及量測都保留原始 CSV、stderr、exit、cgroup/PID/thread/host 視窗；每次保留 server log/state、CPU 快照及 checkpoint。另存 protocol/runner/binary/image digest。任何非零 exit、無效 CSV、採樣或清除失敗均停止矩陣並保留失敗資料；不得偷偷替換失敗樣本。續跑採新 attempt，驗證既有 checkpoint 身分及所有 SHA256，完整八項結果另行審查後公開。
+暖機及量測都保留原始 CSV、stderr、exit、cgroup/PID/thread/host 視窗；每次保留 server log/state、CPU 快照及 checkpoint。另存 protocol/runner/binary/image digest。任何非零 exit、無效 CSV、採樣或清除失敗均停止矩陣並保留失敗資料；不得偷偷替換失敗樣本。controller 不會自動續跑或跳過樣本；中斷後先核對既有 checkpoint 身分及所有 SHA256，人工記錄哪些觀察完成，再以新 namespace／attempt 安排未完成部分。完整八項結果另行審查後公開。
 
 執行前檢查含停止容器的精確 namespace、port 和 firewall；有既存同名資源就拒絕。每個 mutation 前先記 attempted，timeout 仍可能已生效。每項與最終清除獨立處理 server、兩邊 client 容器及兩條精確 peer firewall rule，核對 absence 和 port；其他服務不在清除範圍。
 

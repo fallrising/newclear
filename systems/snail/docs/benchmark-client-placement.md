@@ -27,7 +27,7 @@ server 仍是 6-vCPU VM，Docker CPU affinity 0–3、直接 Ethernet、mio、4 
 
 ## CPU 視窗及證據
 
-兩邊使用同一個 remote Python controller 與容器 wrapper。wrapper 執行 benchmark 後記錄 exit marker，對 keeper 自身發送 SIGSTOP，讓容器與 cgroup 保持存在（不是 docker stop），讓 controller 讀取仍存在的 cgroup v2 `cpu.stat`，最後明確清除自身容器。完整 cgroup CPU 包含 benchmark、keeper 與啟動開銷，不能冒稱精確的單一 PID CPU。負載期間採樣 cgroup 內 Redis PID 與 thread 的 user/system ticks、comm、starttime；將消失、重用或未捕捉的 PID/thread 明列。這些部分視窗不能外推成完整程序成本。
+兩邊使用同一個 remote Python controller 與容器 wrapper。wrapper 執行 benchmark 後記錄唯一 exit marker，啟動一個有限時間的 sleep 子程序並 wait，保留 live keeper 與 cgroup。controller 以 cgroup、PID/starttime、父 PID、精確 sleep argv 和存活狀態確認完成階段，才讀 marker 與 cgroup v2 `cpu.stat`；收集後再核對 keeper／sleep 身分並明確清除自身容器。這不需要在負載期間反覆讀 Docker logs，也不依賴停止容器仍保留 cgroup。完整 cgroup CPU 包含 benchmark、keeper 與啟動開銷，不能冒稱精確的單一 PID CPU。負載期間採樣 cgroup 內 Redis PID 與 thread 的 user/system ticks、comm、starttime；將消失、重用或未捕捉的 PID/thread 明列。這些部分視窗不能外推成完整程序成本。
 
 client host `/proc/stat` 的 monotonic 視窗對齊呼叫期間，包含 instrumentation 開銷與其他程序。server 的 process/thread CPU 仍用量測前後快照，視窗包含 SSH 和 client 啟停開銷；CPU/request = user+system ticks 差 / CLK_TCK / 10M。不混用 host CPU、cgroup CPU 或部分 PID CPU。p99 取單一有效 SET CSV；數值必須有限且符合基本範圍。
 
@@ -37,6 +37,8 @@ client host `/proc/stat` 的 monotonic 視窗對齊呼叫期間，包含 instrum
 
 ## 預先解讀規則
 
-四對都需同時满足 B 相對 A：QPS ≥ +5%、p99 不更差、server CPU/request ≤ +5%，才支持這個固定 cell 有可重現的 client/path 限制。混合結果不支持這個預先規則，不能統計排除所有 client 影響，也不能斷言瓶頸在 server。四對沒有穩健信賴區間；CSV/exit 0 也不是獨立逐請求零錯誤稽核。
+四對都需同時满足 B 相對 A：QPS ≥ +5%、p99 不更差、server CPU/request ≤ +5%，才支持這個固定 cell 有可重現的 client/path 限制。混合結果不支持這個預先規則，不能統計排除所有 client 影響，也不能斷言瓶頸在 server。初版 keeper 對自身發送 SIGSTOP 的假設在第一個 100k smoke 不成立：benchmark exit 0 後 shell/container 亦退出，cgroup 計數消失。該 smoke 已中止，失敗資料另存且不計入八項正式觀察；採用上述有限 wait 修正後，必須先完成新的 smoke 與清除審查。
+
+四對沒有穩健信賴區間；CSV/exit 0 也不是獨立逐請求零錯誤稽核。
 
 無論結果如何，原有 workers4/1 ≥1.5 與接近單 worker CPU 成本的目标保持。取得支持結果後才規劃新的、另存的受控矩陣；未支持則根據實際 CPU/thread 證據選擇下一個有界診斷，不直接改 spin 次數或 worker 預設。

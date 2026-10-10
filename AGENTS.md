@@ -1,8 +1,8 @@
 # newclear — repository-wide agent instructions
 
-This file only covers **work tracking** across the whole repository. Engineering rules for a component live in
-that component's own `AGENTS.md` (for example `platform/edge-ops/AGENTS.md`, `products/kith/AGENTS.md`); follow the
-nearest one.
+This file covers **work tracking** and the few engineering rules shared by every component. Component-specific
+engineering rules live in that component's own `AGENTS.md`
+(for example `platform/edge-ops/AGENTS.md`, `products/kith/AGENTS.md`); follow the nearest one.
 
 ## Work is tracked in the owner's private ledger
 
@@ -27,3 +27,16 @@ private details into commits, pull requests or files here.
 
 `.team/PLAN.md` and `docs/HANDOFF.md` inside components are worker breakdowns and handoff notes, not investment
 decisions; their `.team/T-###` numbers are a different layer from the ledger's `T-####`.
+
+## Writing Go
+
+Before writing, modifying or refactoring Go code anywhere in this repository, use the shared
+[`use-modern-go`](.agents/skills/use-modern-go/SKILL.md) skill (JetBrains Modern Go Guidelines). Agents with skill
+support discover it in `.agents/skills/` or `.claude/skills/`. Other agents run it directly from the repository root
+and follow [`SKILL.md`](.agents/skills/use-modern-go/SKILL.md):
+
+```sh
+sh .agents/skills/use-modern-go/scripts/run-tool.sh list --file-path path/to/file.go
+```
+
+It reads the Go version from the nearest `go.mod`, so each module only gets idioms its version supports.

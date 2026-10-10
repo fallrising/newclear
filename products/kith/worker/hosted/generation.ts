@@ -240,7 +240,7 @@ export class HostedGeneration extends DurableObject<Env> {
         failedClass = "protocol";
         return;
       }
-      const res = await this.sendToRoom(job, truncateBody(text));
+      const res = await beforeHostedDeadline(() => this.sendToRoom(job, truncateBody(text)), execution.deadline);
       if (!res.ok) {
         if (res.status === 409) {
           await this.markGeneration(job.generation_id, "dropped");
@@ -297,13 +297,13 @@ export class HostedGeneration extends DurableObject<Env> {
       }
       // B-10: stream only while ff_drafts=on; otherwise the runtime's stream setting is ignored.
       const streaming = params.stream && flagOn(this.env.ff_drafts);
-      drafts = streaming ? new DraftThrottle((text) => this.broadcastDraft(job, text)) : null;
+      drafts = streaming ? new DraftThrottle((text) => this.broadcastDraft(job, text, execution)) : null;
       const addendum = view.system_prompt_addendum.trim();
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), this.remaining(execution));
       let result: NormalizedResult;
       try {
-        result = await adapter.complete(
+        result = await beforeHostedDeadline(() => adapter.complete(
           conn,
           {
             model: view.model,
@@ -316,10 +316,10 @@ export class HostedGeneration extends DurableObject<Env> {
           fetch,
           controller.signal,
           drafts ? (d) => drafts?.push(d.text) : undefined,
-        );
+        ), execution.deadline);
       } finally {
         clearTimeout(timer);
-        await drafts?.settle(); // every draft is delivered before the final event or the failure (FM-SYNC-14)
+        if (drafts) await beforeHostedDeadline(() => drafts!.settle(), execution.deadline);
       }
 
       // V2-INV-06: re-read the epoch after the model returns; a change during the call drops the reply.
@@ -335,7 +335,7 @@ export class HostedGeneration extends DurableObject<Env> {
         await this.markGeneration(job.generation_id, "dropped");
         return;
       }
-      const res = await this.sendToRoom(job, truncateBody(result.text));
+      const res = await beforeHostedDeadline(() => this.sendToRoom(job, truncateBody(result.text)), execution.deadline);
       if (!res.ok) {
         if (res.status === 409) {
           await this.markGeneration(job.generation_id, "dropped");
@@ -345,8 +345,12 @@ export class HostedGeneration extends DurableObject<Env> {
         }
       }
     } catch (err) {
-      const cls: LlmErrorClass = err instanceof LlmError ? err.errorClass : "unknown";
-      await drafts?.settle();
+      const cls: LlmErrorClass = err instanceof LlmError ? err.errorClass
+        : err instanceof DOMException && err.name === "TimeoutError" ? "timeout" : "unknown";
+      if (drafts) {
+        try { await beforeHostedDeadline(() => drafts!.settle(), execution.deadline); }
+        catch { /* expired or lost drafts never start more work */ }
+      }
       // No retry once a draft was shown: a second attempt would restart the visible text (03 §2.6 + B-10).
       if (err instanceof LlmError && RETRYABLE.has(cls) && RETRYABLE_HTTP.has(err.status ?? 0)
         && execution.attempt === 0 && !drafts?.sentAny && paidCallsEnabled(this.env)) {
@@ -462,10 +466,11 @@ export class HostedGeneration extends DurableObject<Env> {
   }
 
   /** B-10 frame through the Room; a lost draft never fails the generation. */
-  private async broadcastDraft(job: Job, text: string): Promise<void> {
+  private async broadcastDraft(job: Job, text: string, execution: Execution): Promise<void> {
+    if (this.remaining(execution) <= 0 || !paidCallsEnabled(this.env)) return;
     try {
       const stub = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${job.room_id}`)) as RoomReleaseStub;
-      await stub.postDraft(job.room_id, job.agent_id, job.generation_id, text);
+      await beforeHostedDeadline(() => stub.postDraft(job.room_id, job.agent_id, job.generation_id, text), execution.deadline);
     } catch {
       /* drafts are best effort */
     }
@@ -643,6 +648,20 @@ const RETRY_MAX_MS = 10_000;
 const RETRYABLE: ReadonlySet<LlmErrorClass> = new Set(["rate_limited", "overloaded"]);
 const RETRYABLE_HTTP = new Set([429, 503, 529]);
 const TRUNCATED_SUFFIX = "（已截斷）";
+
+/** Bound local waiting and refuse new work at the deadline. Already-started platform RPC may remain pending. */
+export async function beforeHostedDeadline<T>(run: () => Promise<T>, deadline: number, now: () => number = Date.now): Promise<T> {
+  const remaining = deadline - now();
+  if (!Number.isFinite(remaining) || remaining <= 0 || remaining > GENERATION_TIMEOUT_MS) {
+    throw new DOMException("hosted execution deadline reached", "TimeoutError");
+  }
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => reject(new DOMException("hosted execution deadline reached", "TimeoutError")), remaining);
+  });
+  try { return await Promise.race([run(), expired]); }
+  finally { clearTimeout(timer); }
+}
 
 /** 03 §2.5: over 8 KiB → cut on a code point boundary and append the suffix. */
 export function truncateBody(text: string): string {

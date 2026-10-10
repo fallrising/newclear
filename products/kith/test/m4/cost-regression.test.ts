@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../../worker/env.ts";
 import type { HostedGeneration, BeginInput, BeginResult } from "../../worker/hosted/generation.ts";
+import { beforeHostedDeadline, DraftThrottle } from "../../worker/hosted/generation.ts";
 import type { FetchLike } from "../../worker/hosted/llm.ts";
 
 type Rpc = { begin(input: BeginInput): Promise<BeginResult>; runScheduled(): Promise<void> };
@@ -94,6 +95,41 @@ beforeEach(async () => {
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
 describe("hosted generation cost safety integration", () => {
+  it("expired deadlines refuse a new operation before it starts", async () => {
+    const start = vi.fn(async () => "unexpected");
+    await expect(beforeHostedDeadline(start, Date.now() - 1)).rejects.toMatchObject({ name: "TimeoutError" });
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  it("a stalled operation stops local waiting at the original deadline", async () => {
+    vi.useFakeTimers();
+    const start = vi.fn(() => new Promise<never>(() => {}));
+    const waiting = beforeHostedDeadline(start, Date.now() + 1_000);
+    const assertion = expect(waiting).rejects.toMatchObject({ name: "TimeoutError" });
+    await vi.advanceTimersByTimeAsync(1_000);
+    await assertion;
+    expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it("queued draft sends do not multiply a stalled RPC after the deadline", async () => {
+    vi.useFakeTimers();
+    const deadline = Date.now() + 1_000;
+    const send = vi.fn(() => new Promise<never>(() => {}));
+    const drafts = new DraftThrottle(async () => {
+      if (Date.now() >= deadline) return;
+      try { await beforeHostedDeadline(send, deadline); }
+      catch { /* best-effort draft timeout */ }
+    });
+    drafts.push("a".repeat(64));
+    drafts.push("b".repeat(64));
+    drafts.push("c".repeat(64));
+    const settled = drafts.settle();
+    await vi.advanceTimersByTimeAsync(1_000);
+    await settled;
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(drafts.sentAny).toBe(true);
+  });
+
   it.each([false, true])("completed v2=%s is terminal and cannot spend again through duplicate alarm/begin", async (v2) => {
     const calls = mockProvider();
     const input = await seed(v2);

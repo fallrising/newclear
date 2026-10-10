@@ -46,3 +46,7 @@ server CPU seconds以process user+system ticks差計算；兩次快照視窗含S
 維持c50 SET、四worker／四shard、P32、四clientthreads、10Mrequests／10M暖機、相同batching binary及server；以ABBA＋BAAB共四對，交錯比較目前與另一個已記錄規格的client位置，並增加對齊的benchmark process／thread負載、host steal、路由／RTT視窗。先寫新規程並核對新client的硬體／路由／image和資源清除，再開始量測。這能檢查client／路徑敏感性；若有差異，也不能直接歸因於CPUsteal。新方法獨立保存，不與本矩陣合併。未取得明確證據前不調低spinbudget、不修改default或放寬驗收。
 
 診斷的預先判準：替代client在四對都提高吞吐至少5%、p99不較差、server CPU/request增加不超過5%，才支持此cell有可重現的client／路徑限制；混合結果未支持預先設定的四對皆提升至少5%的效果，不能排除所有client影響。這不是降低產品1.5倍門檻，也不能直接歸因於steal。
+
+## 後續記錄（2026-10-10）
+
+上述client-placement入口已按新規程完成：[八項獨立結果](benchmark-client-placement-results-20261010.md)。四對只有一對符合預先規則，未支持替換client的穩定改善；不混入本矩陣，不排除所有client影響。批次化code已於PR323正常合併，效能目標仍開放；下一個有界入口為固定shards數的1w/4w on-CPU成本歸因，尚未執行。

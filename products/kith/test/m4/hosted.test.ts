@@ -91,6 +91,9 @@ async function roomSend(
 
 async function resetStorage(): Promise<void> {
   await env.DB.batch([
+    env.DB.prepare("DELETE FROM agent_runtime_changes"),
+    env.DB.prepare("DELETE FROM agent_runtimes"),
+    env.DB.prepare("DELETE FROM provider_connections"),
     env.DB.prepare("DELETE FROM messages"),
     env.DB.prepare("DELETE FROM bot_tokens"),
     env.DB.prepare("DELETE FROM generations"),
@@ -234,8 +237,6 @@ describe("kith M4 hosted generation", () => {
     expect(started.ok).toBe(true);
     expect(await generationState(generationId)).toBe("dispatched");
 
-    await runHostedAlarm(generationId);
-
     await runInDurableObject(hostedStub(generationId), async (_instance: HostedGeneration, state) => {
       const job = await state.storage.get<Record<string, unknown>>("job");
       expect(job?.generation_id).toBe(generationId);
@@ -244,6 +245,15 @@ describe("kith M4 hosted generation", () => {
       expect(JSON.stringify(job)).not.toMatch(/bot_token|XAI_API_KEY|kith_bot_/i);
       const keys = await state.storage.list();
       expect([...keys.keys()].some((k) => /token/i.test(k))).toBe(false);
+    });
+
+    await runHostedAlarm(generationId);
+    await runInDurableObject(hostedStub(generationId), async (_instance: HostedGeneration, state) => {
+      expect(await state.storage.get("job")).toBeUndefined();
+      expect(await state.storage.get("fake_llm")).toBeUndefined();
+      const execution = await state.storage.get<{ phase: string; agent_id: string }>("execution");
+      expect(execution?.phase).toBe("terminal");
+      expect(execution?.agent_id).toBe(s.agentId);
     });
 
     const row = await env.DB.prepare(

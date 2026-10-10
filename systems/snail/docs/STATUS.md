@@ -61,5 +61,5 @@
 
 ## 待驗證
 
-1. 使用規格已記錄且可替換的 fixture，依吞吐、CPU/request 和 p99 繼續驗證多 worker 效率；原測試機 identity 不是前提。固定負載的 [client 位置診斷](benchmark-client-placement-results-20261010.md) 已完成八項：四對只有一對符合規則，替換client的穩定改善未獲支持。下一入口為固定shards4的1w/4w on-CPU成本歸因；先寫新方法，不直接改spin／預設，效能仍PARTIAL。
+1. 使用規格已記錄且可替換的 fixture，依吞吐、CPU/request 和 p99 繼續驗證多 worker 效率；原測試機 identity 不是前提。固定負載的 [client 位置診斷](benchmark-client-placement-results-20261010.md) 已完成八項：四對只有一對符合規則，替換client的穩定改善未獲支持。固定shards4的1w/4w [on-CPU規程](benchmark-oncpu-attribution.md)已先提交，兩次smoke及[停止證據](benchmark-oncpu-results-20261010.md)已保存：recorder收尾修正後exit0，但leaf coverage20/22=90.91%未達95%，正式四項未啟動、歸因inconclusive。下一入口僅離線核對同一pinned libc DSO/build-ID及匹配符號来源，另先寫規程並審查；不重取樣或直接改spin／預設，效能仍PARTIAL。
 2. C10K 全活躍吞吐／p99 與 C1M hold 保留為未完成的歷史實驗；本輪未重跑，也未據此宣稱通過。

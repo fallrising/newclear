@@ -60,3 +60,5 @@ profiler 的新鮮 live-container cgroup CPU 記錄到 recorder 停止，包含�
 先核對 stopped containers、精確 namespace、port、peer firewall rule 和遠端 profile directory；有既存同名資源就拒絕。每個 mutation 先保存 attempted及到期 lease，profiler 整個命令與子程序都有有限期限，所有信號／收集失敗獨立清除本次 server/client/profiler containers與單一 peer rule，核對 absence/port；不操作其他服務。
 
 每項 checkpoint綁定 controller/protocol/tool/binary/image及所有檔案 SHA256。profile directory exclusive建立，raw/copy失敗時仍保留遠端證據，精確 label清除容器而不刪資料。無自動續跑；接手先核對已完成 checkpoint及SHA，任何新方法須先另記規程與審查。本輪停止點是這兩對或明確無法取得品質後的證據審查、文件交付及可接手紀錄。
+
+執行結果：[smoke品質未通過與停止記錄](benchmark-oncpu-results-20261010.md)。正式四項未啟動，原效能驗收保持開放。

@@ -9,9 +9,18 @@ use tokio::task::LocalSet;
 
 use crate::config::Config;
 use crate::net::listener;
-use crate::runtime::router::{ShardClient, ShardMap, ShardRequest};
+use crate::runtime::router::{ShardBatch, ShardClient, ShardMap, ShardTransport};
 use crate::storage::shard::Shard;
 use crate::telemetry::ServerInfo;
+
+// Notify peers after the reactor drops its inbox, including during unwinding.
+struct WorkerExitWake(ShardTransport, usize);
+
+impl Drop for WorkerExitWake {
+    fn drop(&mut self) {
+        self.0.worker_exited(self.1);
+    }
+}
 
 pub struct WorkerContext {
     pub worker_id: usize,
@@ -28,8 +37,8 @@ pub fn spawn_worker(
     worker_id: usize,
     config: Arc<Config>,
     shard_map: Arc<ShardMap>,
-    shard_client: ShardClient,
-    request_rx: mpsc::UnboundedReceiver<ShardRequest>,
+    shard_client: ShardTransport,
+    request_rx: mpsc::UnboundedReceiver<ShardBatch>,
     conn_count: Arc<AtomicUsize>,
     hash_seed: u64,
     info: Arc<ServerInfo>,
@@ -78,13 +87,16 @@ async fn run_worker(
     worker_id: usize,
     config: Arc<Config>,
     shard_map: Arc<ShardMap>,
-    shard_client: ShardClient,
-    request_rx: mpsc::UnboundedReceiver<ShardRequest>,
+    shard_client: ShardTransport,
+    request_rx: mpsc::UnboundedReceiver<ShardBatch>,
     conn_count: Arc<AtomicUsize>,
     hash_seed: u64,
     info: Arc<ServerInfo>,
     shutdown_rx: broadcast::Receiver<()>,
 ) {
+    let transport = shard_client;
+    let _exit_wake = WorkerExitWake(transport.clone(), worker_id);
+    let shard_client = transport.local(worker_id);
     let range = shard_map.shards_for_worker(worker_id);
     let mut shards = Vec::new();
     for id in range.clone() {

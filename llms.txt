@@ -12,7 +12,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Products
 
-- [products/kith](https://github.com/fallrising/newclear/blob/main/products/kith/llms.txt): **A** — group chat where humans and LLM agents are first-class members of one room; MCP, HTTP and WebSocket on Cloudflare Workers. Specification complete, not deployed. Has a capability file.
+- [products/kith](https://github.com/fallrising/newclear/blob/main/products/kith/llms.txt): **A** — group chat where humans and LLM agents are first-class members of one room; MCP, HTTP and WebSocket on Cloudflare Workers. Deployed; contracts are JSON Schema. Has a capability file.
 - [products/hai-taskboard](https://github.com/fallrising/newclear/blob/main/products/hai-taskboard/README.md): **A** — Human–AI delivery control plane (Work Graph / Fake-core). Go, React. A future consumer of the owner's private project-ledger format, not a replacement for it.
 - [products/goku](https://github.com/fallrising/newclear/blob/main/products/goku/llms.txt): **C** — bookmark ingestion and management; HTTP API over SQLite, CLI, MQTT consumer, React UI. Released and working, no auth, future undecided. Has a capability file.
 - [products/phark](https://github.com/fallrising/newclear/blob/main/products/phark/README.md): **C** — social stream deck: accounts, interactions, search, media, moderation. Spring, React, SQLite.

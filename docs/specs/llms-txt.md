@@ -94,7 +94,7 @@ Scenario: A declared contract path is wrong
 
 Adoption is per project and deliberately incomplete. The validator checks the files that exist rather than demanding coverage, so a project gains a capability file when someone has reason to write one. Requiring `llms.txt` in every project directory is a separate decision, to be taken only after the format has survived contact with several project types.
 
-The pilot set is `systems/clarkq` (HTTP plus three SDKs), `products/kith` (MCP, HTTP and WebSocket, specification-only), `systems/snail` (wire protocol, nothing HTTP to describe) and `products/goku` (four interfaces, no project README). They were chosen because they fail differently; a format that holds for all four is likely to hold for the rest.
+The pilot set is `systems/clarkq` (HTTP plus three SDKs), `products/kith` (MCP, HTTP and WebSocket, with JSON Schema contracts), `systems/snail` (wire protocol, nothing HTTP to describe) and `products/goku` (four interfaces, no project README). They were chosen because they fail differently; a format that holds for all four is likely to hold for the rest.
 
 ## Non-normative notes
 

@@ -2,7 +2,7 @@
 
 > 最後更新：2026-10-10
 
-本輪限定跨 worker 傳遞的批次化與必要回歸修正。M2/M3 的容量實驗仍保留歷史狀態，未在本輪重新驗收。
+已審查的跨 worker 批次化代碼已在 [PR323](https://github.com/fallrising/newclear/pull/323) 合併；效能驗收仍未完成。本輪限定批次化、必要回歸修正與受控效能診斷。M2/M3 的容量實驗仍保留歷史狀態，未在本輪重新驗收。
 
 ## 里程碑進度
 
@@ -61,5 +61,5 @@
 
 ## 待驗證
 
-1. 在原 4 vCPU 私網環境重跑隨機 key 前後比較，依吞吐與 CPU/request 決定 workers 預設值。
+1. 使用規格已記錄且可替換的 fixture，依吞吐、CPU/request 和 p99 繼續驗證多 worker 效率；原測試機 identity 不是前提。固定負載的 [client 位置診斷](benchmark-client-placement-results-20261010.md) 已完成八項：四對只有一對符合規則，替換client的穩定改善未獲支持。下一入口為固定shards4的1w/4w on-CPU成本歸因；先寫新方法，不直接改spin／預設，效能仍PARTIAL。
 2. C10K 全活躍吞吐／p99 與 C1M hold 保留為未完成的歷史實驗；本輪未重跑，也未據此宣稱通過。

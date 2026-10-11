@@ -37,7 +37,7 @@ cargo run -- serve
    - **Import OAuth / session token** (personal subscription; no API key), or  
    - Add OpenAI-compatible `base_url` + API key (optional path).
 2. Open **Routes** → map a public model name to one or more targets.
-3. Optionally create a **gateway API Key**. If none exist, `/v1` is open (bootstrap).
+3. Create a **gateway API Key**. Inference and model-list endpoints require an enabled key by default, including when no keys exist or every key is disabled.
 4. Point clients at the proxy (see [docs/CLIENTS.md](./docs/CLIENTS.md)).
 
 ```bash
@@ -77,11 +77,16 @@ thinrouter refresh
 | `THINROUTER_PORT` / `--port` | Bind port |
 | `THINROUTER_DATA_DIR` / `--data-dir` | SQLite directory |
 | `THINROUTER_ADMIN_TOKEN` / `--admin-token` | Protect `/admin` (login UI + `x-admin-token` / cookie) |
+| `THINROUTER_ALLOW_KEYLESS_BOOTSTRAP` / `--allow-keyless-bootstrap` | Explicit local bootstrap; default off, exact loopback listener and zero total keys only |
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Encrypt connection API keys at rest |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |
 | `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` | Upstream egress proxy |
+
+For temporary keyless local setup, run `thinrouter serve --host 127.0.0.1 --allow-keyless-bootstrap` and omit both API credential headers. Creating a key closes bootstrap; disabled keys still count as configured. Invalid credentials always fail. Remove the flag to restore the default. Clients that require a credential should use a gateway key.
+
+Non-loopback listeners require a nonempty admin token and cannot enable keyless bootstrap. Use a protected admin session to create gateway keys before sending inference requests. Disabling all gateway keys stops subsequent inference admissions; already-issued provider calls can still consume resources. See [cost safety](docs/cost-safety.md) for the contract and remaining provider budget controls.
 
 ## Admin JSON API
 
@@ -114,6 +119,8 @@ curl -s http://127.0.0.1:20128/admin/api/routes \
 docker compose up --build -d
 # http://127.0.0.1:20128/admin
 ```
+
+Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration before starting Compose. The container binds a non-loopback address and requires that token; Compose publishes the port on host loopback by default. Log in to the admin UI, then create and supply a gateway API key.
 
 ## Design notes
 

@@ -23,10 +23,7 @@ pub fn router() -> Router<AppState> {
         .route("/admin/connections/new", post(connections_create))
         .route("/admin/connections/{id}/edit", get(connections_edit_page))
         .route("/admin/connections/{id}/update", post(connections_update))
-        .route(
-            "/admin/connections/{id}/delete",
-            post(connections_delete),
-        )
+        .route("/admin/connections/{id}/delete", post(connections_delete))
         .route("/admin/routes", get(routes_page))
         .route("/admin/routes/new", post(routes_create))
         .route("/admin/routes/{id}/edit", get(routes_edit_page))
@@ -39,11 +36,14 @@ pub fn router() -> Router<AppState> {
         .route("/admin/static/style.css", get(style_css))
 }
 
-/// True when admin token is unset, or header/cookie matches.
+/// Keyless admin setup is restricted to an exact loopback listener.
 pub fn admin_authorized(state: &AppState, headers: &HeaderMap) -> bool {
     let Some(token) = &state.cfg.admin_token else {
-        return true;
+        return state.cfg.loopback_listener();
     };
+    if token.trim().is_empty() {
+        return false;
+    }
     if let Some(v) = headers.get("x-admin-token").and_then(|v| v.to_str().ok()) {
         if v == token {
             return true;
@@ -62,7 +62,10 @@ pub fn admin_authorized(state: &AppState, headers: &HeaderMap) -> bool {
     false
 }
 
-#[allow(clippy::result_large_err)]
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 fn require_admin_page(state: &AppState, headers: &HeaderMap) -> Result<(), Response> {
     if admin_authorized(state, headers) {
         Ok(())
@@ -76,6 +79,10 @@ fn page(name: &str, ctx: minijinja::Value) -> AppResult<Html<String>> {
     Ok(Html(body))
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn login_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -107,10 +114,7 @@ struct LoginForm {
     token: String,
 }
 
-async fn login_submit(
-    State(state): State<AppState>,
-    Form(form): Form<LoginForm>,
-) -> Response {
+async fn login_submit(State(state): State<AppState>, Form(form): Form<LoginForm>) -> Response {
     let Some(expected) = &state.cfg.admin_token else {
         return Redirect::to("/admin").into_response();
     };
@@ -144,12 +148,19 @@ async fn logout() -> Response {
         .into_response()
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn dashboard(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
     require_admin_page(&state, &headers)?;
-    let stats = state.store.stats().map_err(|e| AppError::Internal(e).into_response())?;
+    let stats = state
+        .store
+        .stats()
+        .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "dashboard",
         context! {
@@ -163,6 +174,10 @@ async fn dashboard(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -222,6 +237,10 @@ fn parse_price(s: &Option<String>) -> Option<f64> {
         .and_then(|x| x.parse().ok())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_create(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -251,6 +270,10 @@ async fn connections_create(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_edit_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -293,6 +316,10 @@ async fn connections_edit_page(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_update(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -331,6 +358,10 @@ async fn connections_update(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -344,6 +375,10 @@ async fn connections_delete(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -433,6 +468,10 @@ fn collect_targets(form: &RouteForm) -> Vec<(String, Option<String>)> {
     out
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_create(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -455,6 +494,10 @@ async fn routes_create(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_edit_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -512,6 +555,10 @@ async fn routes_edit_page(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_update(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -543,6 +590,10 @@ async fn routes_update(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -556,6 +607,10 @@ async fn routes_delete(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -583,6 +638,10 @@ pub struct KeyForm {
     pub name: String,
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_create(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -615,6 +674,10 @@ async fn keys_create(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -628,6 +691,10 @@ async fn keys_delete(
     Ok(Redirect::to("/admin/keys").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn usage_page(
     State(state): State<AppState>,
     headers: HeaderMap,

@@ -70,10 +70,7 @@ fn cursor_checksum(machine_id: &str) -> String {
 }
 
 fn clean_token(token: &str) -> &str {
-    token
-        .split_once("::")
-        .map(|(_, t)| t)
-        .unwrap_or(token)
+    token.split_once("::").map(|(_, t)| t).unwrap_or(token)
 }
 
 pub fn build_cursor_headers(access_token: &str, machine_id: Option<&str>) -> Vec<(String, String)> {
@@ -103,10 +100,7 @@ pub fn build_cursor_headers(access_token: &str, machine_id: Option<&str>) -> Vec
         ("connect-protocol-version".into(), "1".into()),
         ("content-type".into(), "application/connect+proto".into()),
         ("user-agent".into(), "connect-es/1.6.1".into()),
-        (
-            "x-amzn-trace-id".into(),
-            format!("Root={}", Uuid::new_v4()),
-        ),
+        ("x-amzn-trace-id".into(), format!("Root={}", Uuid::new_v4())),
         ("x-client-key".into(), client_key),
         ("x-cursor-checksum".into(), checksum),
         ("x-cursor-client-version".into(), "3.12.17".into()),
@@ -118,10 +112,7 @@ pub fn build_cursor_headers(access_token: &str, machine_id: Option<&str>) -> Vec
         ("x-cursor-client-os".into(), os.into()),
         ("x-cursor-client-arch".into(), arch.into()),
         ("x-cursor-client-device-type".into(), "desktop".into()),
-        (
-            "x-cursor-config-version".into(),
-            Uuid::new_v4().to_string(),
-        ),
+        ("x-cursor-config-version".into(), Uuid::new_v4().to_string()),
         ("x-cursor-timezone".into(), "UTC".into()),
         ("x-ghost-mode".into(), "true".into()),
         ("x-request-id".into(), Uuid::new_v4().to_string()),
@@ -313,6 +304,8 @@ mod tests {
     #[test]
     fn headers_have_auth() {
         let h = build_cursor_headers("testtoken", Some("mid"));
-        assert!(h.iter().any(|(k, v)| k == "authorization" && v.contains("testtoken")));
+        assert!(h
+            .iter()
+            .any(|(k, v)| k == "authorization" && v.contains("testtoken")));
     }
 }

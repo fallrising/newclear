@@ -64,10 +64,7 @@ pub fn extract_model_and_stream(body: &Bytes) -> AppResult<(String, bool)> {
         .and_then(|m| m.as_str())
         .unwrap_or("")
         .to_string();
-    let stream = v
-        .get("stream")
-        .and_then(|s| s.as_bool())
-        .unwrap_or(false);
+    let stream = v.get("stream").and_then(|s| s.as_bool()).unwrap_or(false);
     if model.is_empty() {
         return Err(AppError::BadRequest("model is required".into()));
     }
@@ -303,7 +300,12 @@ async fn forward_chat_completions_inner(
         req = req.header(*k, *v);
     }
     // Codex ChatGPT accounts often need chatgpt-account-id header from import meta.
-    if let Some(meta) = target.connection.oauth.as_ref().and_then(|o| o.meta.as_deref()) {
+    if let Some(meta) = target
+        .connection
+        .oauth
+        .as_ref()
+        .and_then(|o| o.meta.as_deref())
+    {
         if let Ok(m) = serde_json::from_str::<serde_json::Value>(meta) {
             if let Some(aid) = m.get("account_id").and_then(|a| a.as_str()) {
                 if !aid.is_empty() {
@@ -313,8 +315,7 @@ async fn forward_chat_completions_inner(
         }
     }
     // OpenCode Go requires x-opencode-session for routing (see opencode.ai/docs/go).
-    if provider_key.as_deref() == Some("opencode")
-        && target.connection.base_url.contains("/zen/go")
+    if provider_key.as_deref() == Some("opencode") && target.connection.base_url.contains("/zen/go")
     {
         req = req
             .header("x-opencode-session", uuid::Uuid::new_v4().to_string())
@@ -397,11 +398,7 @@ fn force_json_stream_true(body: &Bytes) -> AppResult<Bytes> {
     Ok(Bytes::from(serde_json::to_vec(&v)?))
 }
 
-fn convert_upstream_to_chat(
-    bytes: Bytes,
-    kind: UpstreamBodyKind,
-    model: &str,
-) -> AppResult<Bytes> {
+fn convert_upstream_to_chat(bytes: Bytes, kind: UpstreamBodyKind, model: &str) -> AppResult<Bytes> {
     match kind {
         UpstreamBodyKind::OpenAiChat => Ok(bytes),
         UpstreamBodyKind::OpenAiResponses => responses::responses_body_to_chat(&bytes),
@@ -410,11 +407,13 @@ fn convert_upstream_to_chat(
     }
 }
 
-async fn resolve_agy_project(
-    state: &ProxyState,
-    target: &ResolvedTarget,
-) -> AppResult<String> {
-    if let Some(meta) = target.connection.oauth.as_ref().and_then(|o| o.meta.as_deref()) {
+async fn resolve_agy_project(state: &ProxyState, target: &ResolvedTarget) -> AppResult<String> {
+    if let Some(meta) = target
+        .connection
+        .oauth
+        .as_ref()
+        .and_then(|o| o.meta.as_deref())
+    {
         if let Ok(v) = serde_json::from_str::<Value>(meta) {
             if let Some(p) = v.get("project").and_then(|p| p.as_str()) {
                 if !p.is_empty() {
@@ -435,7 +434,9 @@ async fn resolve_agy_project(
         if let Some(obj) = meta_v.as_object_mut() {
             obj.insert("project".into(), Value::String(project.clone()));
         }
-        let _ = state.store.update_oauth_meta(&target.connection.id, &meta_v.to_string());
+        let _ = state
+            .store
+            .update_oauth_meta(&target.connection.id, &meta_v.to_string());
     }
     Ok(project)
 }
@@ -525,6 +526,10 @@ fn prepare_body(state: &ProxyState, body: Bytes) -> AppResult<Bytes> {
 ///
 /// `cancel_guard` is disarmed automatically before returning an SSE body so the stream
 /// is not aborted when the HTTP handler completes.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_chat_with_fallback(
     state: &ProxyState,
     public_model: &str,
@@ -733,6 +738,10 @@ pub async fn handle_chat_with_fallback(
 }
 
 /// Anthropic-native path: translate request → OpenAI forward → translate response.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_anthropic_messages(
     state: &ProxyState,
     public_model: &str,
@@ -840,6 +849,10 @@ pub async fn handle_anthropic_messages(
 }
 
 /// OpenAI Responses API path.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_responses(
     state: &ProxyState,
     public_model: &str,
@@ -887,11 +900,8 @@ pub async fn handle_responses(
                     let out = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
                         other => {
-                            let chat = convert_upstream_to_chat(
-                                bytes,
-                                other,
-                                &target.upstream_model,
-                            )?;
+                            let chat =
+                                convert_upstream_to_chat(bytes, other, &target.upstream_model)?;
                             responses::chat_to_responses(&chat, public_model)?
                         }
                     };

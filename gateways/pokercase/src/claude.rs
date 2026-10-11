@@ -41,7 +41,11 @@ pub fn openai_to_anthropic_request(body: &Bytes) -> AppResult<Bytes> {
                     "content": [{"type": "tool_result", "tool_use_id": m.get("tool_call_id").and_then(|t| t.as_str()).unwrap_or("tool"), "content": text}]
                 }));
             } else {
-                let anth_role = if role == "assistant" { "assistant" } else { "user" };
+                let anth_role = if role == "assistant" {
+                    "assistant"
+                } else {
+                    "user"
+                };
                 messages.push(json!({"role": anth_role, "content": text}));
             }
         }
@@ -92,10 +96,7 @@ pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
         .get("id")
         .and_then(|i| i.as_str())
         .unwrap_or("msg_unknown");
-    let model = v
-        .get("model")
-        .and_then(|m| m.as_str())
-        .unwrap_or("claude");
+    let model = v.get("model").and_then(|m| m.as_str()).unwrap_or("claude");
     let input_tokens = v
         .pointer("/usage/input_tokens")
         .and_then(|n| n.as_i64())
@@ -169,10 +170,7 @@ pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
         .ok_or_else(|| AppError::BadRequest("messages is required".into()))?;
 
     for m in anth_messages {
-        let role = m
-            .get("role")
-            .and_then(|r| r.as_str())
-            .unwrap_or("user");
+        let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
         let content = m.get("content").cloned().unwrap_or(Value::Null);
         let content_val = match content {
             Value::String(s) => Value::String(s),
@@ -200,10 +198,7 @@ pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
     if let Some(s) = obj.get("stop_sequences").and_then(|s| s.as_array()) {
         out_obj.insert("stop".into(), Value::Array(s.clone()));
     }
-    let stream = obj
-        .get("stream")
-        .and_then(|s| s.as_bool())
-        .unwrap_or(false);
+    let stream = obj.get("stream").and_then(|s| s.as_bool()).unwrap_or(false);
     out_obj.insert("stream".into(), Value::Bool(stream));
 
     // tools (basic pass-through shape conversion)
@@ -301,10 +296,7 @@ pub fn openai_to_anthropic(body: &Bytes, model: &str) -> AppResult<Bytes> {
 
 /// Convert a single OpenAI SSE `data: {...}` payload to Anthropic SSE events (may be multiple).
 /// Returns lines without trailing blank separator handling — caller joins with `\n\n`.
-pub fn openai_sse_chunk_to_anthropic(
-    data: &str,
-    state: &mut StreamTranslateState,
-) -> Vec<String> {
+pub fn openai_sse_chunk_to_anthropic(data: &str, state: &mut StreamTranslateState) -> Vec<String> {
     if data.trim() == "[DONE]" {
         let mut events = Vec::new();
         if !state.message_stop_sent {
@@ -316,10 +308,7 @@ pub fn openai_sse_chunk_to_anthropic(
                     "usage": {"output_tokens": state.output_tokens}
                 }),
             ));
-            events.push(sse_event(
-                "message_stop",
-                &json!({"type": "message_stop"}),
-            ));
+            events.push(sse_event("message_stop", &json!({"type": "message_stop"})));
             state.message_stop_sent = true;
         }
         return events;
@@ -367,7 +356,10 @@ pub fn openai_sse_chunk_to_anthropic(
         state.message_start_sent = true;
     }
 
-    if let Some(delta) = v.pointer("/choices/0/delta/content").and_then(|c| c.as_str()) {
+    if let Some(delta) = v
+        .pointer("/choices/0/delta/content")
+        .and_then(|c| c.as_str())
+    {
         if !delta.is_empty() {
             state.output_tokens += 1; // coarse
             events.push(sse_event(
@@ -429,10 +421,7 @@ pub fn extract_anthropic_model_stream(body: &Bytes) -> AppResult<(String, bool)>
         .and_then(|m| m.as_str())
         .unwrap_or("")
         .to_string();
-    let stream = v
-        .get("stream")
-        .and_then(|s| s.as_bool())
-        .unwrap_or(false);
+    let stream = v.get("stream").and_then(|s| s.as_bool()).unwrap_or(false);
     if model.is_empty() {
         return Err(AppError::BadRequest("model is required".into()));
     }

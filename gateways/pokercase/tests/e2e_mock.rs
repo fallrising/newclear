@@ -114,8 +114,27 @@ async fn e2e_nonstream_stream_anthropic_fallback() {
     let mut child = start_thinrouter(dir.path(), port).await;
     wait_health(port).await;
 
-    let client = reqwest::Client::new();
     let base = format!("http://127.0.0.1:{port}");
+    let key: Value = reqwest::Client::new()
+        .post(format!("{base}/admin/api/keys"))
+        .json(&json!({"name": "e2e-client"}))
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(
+        header::AUTHORIZATION,
+        format!("Bearer {}", key["secret"].as_str().unwrap())
+            .parse()
+            .unwrap(),
+    );
+    let client = reqwest::Client::builder()
+        .default_headers(headers)
+        .build()
+        .unwrap();
 
     let conn: Value = client
         .post(format!("{base}/admin/api/connections"))

@@ -3,9 +3,9 @@ mod agy;
 mod cancel;
 mod claude;
 mod config;
+mod cooldown;
 mod cursor_agent;
 mod cursor_proto;
-mod cooldown;
 mod error;
 mod http_client;
 mod local_import;
@@ -50,6 +50,13 @@ enum Commands {
         data_dir: Option<std::path::PathBuf>,
         #[arg(long, env = "THINROUTER_ADMIN_TOKEN")]
         admin_token: Option<String>,
+        /// Allow keyless inference only on loopback, before any gateway key exists.
+        #[arg(
+            long,
+            env = "THINROUTER_ALLOW_KEYLESS_BOOTSTRAP",
+            default_value_t = false
+        )]
+        allow_keyless_bootstrap: bool,
         #[arg(long, env = "THINROUTER_SECRETS_KEY")]
         secrets_key: Option<String>,
         #[arg(long, env = "THINROUTER_SSE_STALL_SECS", default_value_t = 90)]
@@ -112,12 +119,13 @@ async fn main() -> Result<()> {
             port,
             data_dir,
             admin_token,
+            allow_keyless_bootstrap,
             secrets_key,
             sse_stall_secs,
             token_saver,
             token_saver_max_chars,
         } => {
-            let cfg = AppConfig::new(
+            let mut cfg = AppConfig::new(
                 host,
                 port,
                 data_dir,
@@ -127,6 +135,7 @@ async fn main() -> Result<()> {
                 Some(token_saver),
                 Some(token_saver_max_chars),
             )?;
+            cfg.allow_keyless_bootstrap = allow_keyless_bootstrap;
             server::run(cfg).await
         }
         Commands::Doctor {
@@ -258,7 +267,10 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     );
     let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
     let conns = store.list_connections()?;
-    let oauth_n = conns.iter().filter(|c| c.auth_type == "oauth_import").count();
+    let oauth_n = conns
+        .iter()
+        .filter(|c| c.auth_type == "oauth_import")
+        .count();
     let routes = store.list_routes()?;
     let keys = store.list_api_keys()?;
     let cost = store.usage_cost_total()?;

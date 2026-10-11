@@ -22,7 +22,7 @@ Persistent state：currentTerm、votedFor、WAL；mkfk 另持久化 commit_index
 
 ## 3. Election
 
-Follower timeout 後進入 candidate：currentTerm+1、votedFor=self，先持久化再送 RequestVote。election timeout 預設在 600–1,200 ms 之間選取，heartbeat 100 ms；測試由固定 seed/fake clock 控制。
+Follower timeout 後進入 candidate：currentTerm+1、votedFor=self，先持久化再送 RequestVote。election timeout 預設在 600–1,200 ms 之間選取，heartbeat 100 ms；節點每次開始選舉或在新 term 成為 follower 時重新選取，逾時相同的兩個節點才不會一直同時參選而平票；測試由固定 seed/fake clock 控制。
 
 RequestVote 欄位：cluster_id、config_hash、partition_id、candidate_id、term、last_log_index、last_log_term。比對 log freshness 使用 `(last_log_term, last_log_index)` lexicographic ordering，不能改成 LEO 大小或 ISR membership。
 

@@ -109,6 +109,12 @@ Status: accepted（可觀測性與選項 1 已實作；選項 2–5 未決）；
 
 每個 acknowledged batch 每副本 5 次 sync：WAL 1、sparse index 重寫 2、commit 推進時 hard state 2。新增慢 sync（≥500 ms）與 actor 單次佔用（≥500 ms）的 log 與 metrics，不改行為。選項 1 已實作：append 只在新增 anchor 或上次 index 寫入失敗時重寫 index，單 record batch 降為約 3 次 sync；重啟時 stale index 與 WAL 推得的 anchors 不符即重建。待決選項：延遲持久化 commit index、group commit、tick 與儲存分離、調長 election timeout；後三者屬 X2 或部署參數。
 
+### Election timeout 每次選舉重新選取
+
+Status: accepted（已實作）。沒有獨立 ADR；不改持久狀態、ack／HW／ISR、epoch 或資料格式。
+
+原本每個 replica 在 process 啟動時選一次 election timeout（6–12 tick，7 個值），之後不變。leader 消失後，剩下兩個 voter 若選到同一個值，就在同一個 tick 一起成為 candidate、各投自己，之後每一輪都相同，直到第三個 voter 回來才選得出 leader；三 process 的 failover 測試因此在 2 CPU 上 30 次失敗 9 次。改為：節點每次開始選舉，或離開 candidate／leader、或在更高 term 成為 follower 時，由注入的 random source 重新選取；收到 heartbeat 不重選。`TestM7EqualElectionTimeoutsStillElectALeader` 以固定 seed 驗證。pre-vote 與 check-quorum 未處理。
+
 ## 4. 來源目錄
 
 來源主要用來校驗概念；本案具體數字、格式、HTTP endpoints、milestones、測試 IDs 都是原創設計，不是來源的既成實作。

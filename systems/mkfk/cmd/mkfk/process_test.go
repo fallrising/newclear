@@ -127,11 +127,27 @@ func newTestCluster(t *testing.T, size, partitions, replication int) *testCluste
 		}
 	}
 	t.Cleanup(func() {
+		if t.Failed() {
+			cluster.logBrokers()
+		}
 		for _, proc := range cluster.procs {
 			proc.kill()
 		}
 	})
 	return cluster
+}
+
+// logBrokers records every broker's metrics and log tail, so a failed run
+// shows what the brokers were doing.
+func (c *testCluster) logBrokers() {
+	for id := uint32(1); id <= uint32(len(c.manifest.Brokers)); id++ {
+		proc, started := c.procs[id]
+		if !started {
+			continue
+		}
+		_, metrics := c.admin(id, "/metrics")
+		c.t.Logf("broker %d metrics:\n%s\nbroker %d log tail:\n%s", id, metrics, id, tail(proc.stderr.String(), 200))
+	}
 }
 
 func freePorts(t *testing.T, count int) []string {
@@ -252,6 +268,23 @@ func eventually(t *testing.T, what string, timeout time.Duration, condition func
 	for !condition() {
 		if time.Now().After(deadline) {
 			t.Fatalf("timed out waiting for %s", what)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
+// succeeds retries attempt until it returns nil; a timeout reports the last
+// error.
+func succeeds(t *testing.T, what string, timeout time.Duration, attempt func() error) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for {
+		err := attempt()
+		if err == nil {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for %s: %v", what, err)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}

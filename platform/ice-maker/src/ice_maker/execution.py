@@ -285,6 +285,13 @@ def execute_argv(argv: Sequence[str], limits: ExecutionLimits, secrets: Sequence
             truncated = True
         if len(captured) > raw_limit:
             break
+    if not timed_out and not truncated:
+        # EOF only means the output pipe closed. A paid adapter can keep running;
+        # process termination must share the original collection deadline.
+        try:
+            process.wait(timeout=max(0, deadline - time.monotonic()))
+        except subprocess.TimeoutExpired:
+            timed_out = True
     if timed_out or truncated:
         try:
             os.killpg(process.pid, signal.SIGKILL)

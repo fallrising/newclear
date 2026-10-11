@@ -25,3 +25,7 @@ Keep the default configuration for chat without hosted inference. To enable paid
 Set `KITH_PAID_ENABLED=off` to stop subsequent attempts, including queued Alarm retries. Existing requests cannot be assumed unbilled or cancelled at the provider. Configuration changes require the operator's normal deployment process; this patch does not apply them to a running instance. Restoring flags alone cannot bypass mandatory limits. Do not restore the vulnerable execution code as a way to re-enable features.
 
 Account Budget Alerts are informational and do not cap usage. The owner must independently check deployed bindings/flags, Workers/DO/D1/KV/R2 usage, account alerts, provider budgets and current invoices. Rate limiting does not prevent Workers request charges, and application controls cannot guarantee a maximum invoice.
+
+## Offline verification
+
+E2E history fixtures that need more than 1,000 missed messages must seed bounded local D1 data with the existing isolated test persistence directory; production HTTP quotas remain enforced. Reconnect assertions wait for the selected room's initial catch-up, and hosted reply assertions distinguish the human trigger from the actual agent reply. Tests retain all pagination, gap-fill and placeholder assertions, use fake providers only, and never bypass admission controls or access remote D1.

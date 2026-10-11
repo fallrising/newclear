@@ -1,8 +1,13 @@
 import type { Page } from "@playwright/test";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
 import { test, expect } from "../fixtures/kith.ts";
 import { ACCOUNTS } from "../fixtures/accounts.ts";
 import { loginViaUi, openActor, sendViaComposer, uniqueText } from "../fixtures/actors.ts";
-import { note, shot } from "../harness/evidence.ts";
+import { note, saveFile, shot } from "../harness/evidence.ts";
+import { KITH_DIR, WRANGLER_BIN } from "../harness/paths.ts";
+import { redactText } from "../harness/redact.ts";
+import { wranglerEnv } from "../harness/server.ts";
 
 type Page_ = { messages: { seq: number }[]; has_more: boolean };
 
@@ -129,13 +134,27 @@ test(
     await expect(ben.page.getByTestId("message-row").filter({ hasText: "jump start" })).toBeVisible();
     await ben.context.setOffline(true);
     await expect(ben.page.getByTestId("room-offline-strip")).toBeVisible();
-    for (let i = 0; i <= 1000; i++) {
-      const r = await api.call("POST", "/api/rooms/" + roomId + "/messages", {
-        body: "jump " + i,
-        client_message_id: "e2e-jump-" + String(i).padStart(4, "0"),
-      });
-      expect(r.status).toBe(200);
-    }
+    // Pagination needs missed rows, not a burst through the production HTTP quota.
+    const runDir = process.env.KITH_E2E_RUN_DIR;
+    if (process.env.KITH_E2E_SETUP_OK !== "1" || !runDir) throw new Error("isolated E2E setup is required");
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(roomId)) throw new Error("invalid fixture room id");
+    const sql = `WITH RECURSIVE missed(i) AS (
+  VALUES (0) UNION ALL SELECT i + 1 FROM missed WHERE i < 1000
+)
+INSERT INTO messages
+  (id, room_id, seq, kind, thread_id, reply_to, sender_id, body,
+   mentions_json, generation_id, client_message_id, origin, created_at)
+SELECT 'e2e-jump-${roomId}-' || printf('%04d', i), '${roomId}', i + 1,
+       'message', NULL, NULL, 'm-ada', 'jump ' || i, '[]', NULL,
+       'e2e-jump-' || printf('%04d', i), 'local', '${new Date().toISOString()}'
+FROM missed;\n`;
+    const fixture = saveFile(info, "missed-messages.sql", sql);
+    const seeded = spawnSync(WRANGLER_BIN, [
+      "d1", "execute", "kith", "--local", "--persist-to", join(runDir, "state"),
+      "--file", join(runDir, fixture), "-y",
+    ], { cwd: KITH_DIR, env: wranglerEnv(), encoding: "utf8", timeout: 30_000 });
+    saveFile(info, "missed-messages.log", redactText((seeded.stdout ?? "") + (seeded.stderr ?? "") + (seeded.error?.message ?? "")));
+    expect(seeded.status, "bounded local D1 missed-message fixture").toBe(0);
     await ben.context.setOffline(false);
     await expect(ben.page.getByTestId("timeline-jumped")).toBeVisible({ timeout: 30_000 });
     await expect(ben.page.getByTestId("message-row").filter({ hasText: "jump 1000" })).toBeVisible();

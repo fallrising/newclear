@@ -46,6 +46,7 @@ type Node struct {
 	leaderID         uint32
 	commitIndex      uint64
 	lastApplied      uint64
+	electionTimeout  uint64
 	electionElapsed  uint64
 	heartbeatElapsed uint64
 	votes            map[uint32]bool
@@ -68,16 +69,17 @@ func NewNode(config Config, log DurableLog) (*Node, error) {
 	}
 	hardState := log.HardState()
 	node := &Node{
-		config:       config,
-		log:          log,
-		role:         Follower,
-		term:         hardState.CurrentTerm,
-		votedFor:     cloneVote(hardState.VotedFor),
-		commitIndex:  hardState.CommitIndex,
-		votes:        make(map[uint32]bool),
-		progress:     make(map[uint32]*peerProgress),
-		sent:         make(map[uint64]sentAppend),
-		pendingReads: make(map[string]*pendingRead),
+		config:          config,
+		log:             log,
+		role:            Follower,
+		electionTimeout: config.ElectionTimeoutTicks,
+		term:            hardState.CurrentTerm,
+		votedFor:        cloneVote(hardState.VotedFor),
+		commitIndex:     hardState.CommitIndex,
+		votes:           make(map[uint32]bool),
+		progress:        make(map[uint32]*peerProgress),
+		sent:            make(map[uint64]sentAppend),
+		pendingReads:    make(map[string]*pendingRead),
 	}
 	if hardState.CommitIndex > 0 {
 		applied, err := node.readRange(1, hardState.CommitIndex)
@@ -140,7 +142,7 @@ func (node *Node) Tick() (Ready, error) {
 		return ready, nil
 	}
 	node.electionElapsed++
-	if node.electionElapsed < node.config.ElectionTimeoutTicks {
+	if node.electionElapsed < node.electionTimeout {
 		return ready, nil
 	}
 	return node.startElection()
@@ -281,6 +283,9 @@ func (node *Node) startElection() (Ready, error) {
 	if node.term == math.MaxInt64 {
 		return Ready{}, errors.New("raft term overflow")
 	}
+	if err := node.drawElectionTimeout(); err != nil {
+		return Ready{}, err
+	}
 	previousRole := node.role
 	newTerm := node.term + 1
 	self := node.config.NodeID
@@ -371,6 +376,11 @@ func (node *Node) becomeFollower(term uint64, leaderID uint32) (*RoleChange, err
 	if term < node.term {
 		return nil, errors.New("cannot move to an older term")
 	}
+	if previousRole != Follower || term > node.term {
+		if err := node.drawElectionTimeout(); err != nil {
+			return nil, err
+		}
+	}
 	if term > node.term {
 		state := storage.HardState{CurrentTerm: term, CommitIndex: node.commitIndex}
 		if err := node.log.PersistHardState(state); err != nil {
@@ -387,6 +397,21 @@ func (node *Node) becomeFollower(term uint64, leaderID uint32) (*RoleChange, err
 		return nil, nil
 	}
 	return &RoleChange{From: previousRole, To: Follower, Term: node.term, LeaderID: leaderID}, nil
+}
+
+func (node *Node) drawElectionTimeout() error {
+	if node.config.NextElectionTimeout == nil {
+		return nil
+	}
+	ticks, err := node.config.NextElectionTimeout()
+	if err != nil {
+		return fmt.Errorf("draw election timeout: %w", err)
+	}
+	if ticks < 2 || ticks <= node.config.HeartbeatTicks {
+		return fmt.Errorf("drawn election timeout of %d ticks is not above the heartbeat", ticks)
+	}
+	node.electionTimeout = ticks
+	return nil
 }
 
 func (node *Node) clearLeaderState() {

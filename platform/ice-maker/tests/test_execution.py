@@ -162,6 +162,22 @@ class ExecutionContractTests(unittest.TestCase):
             execute_argv([f"/definitely-not-present/{secret}"], ExecutionLimits(2, 100), secrets=[secret])
         self.assertNotIn(secret, str(caught.exception))
 
+    def test_output_eof_does_not_remove_execution_deadline(self) -> None:
+        program = "import os,time; os.close(1); os.close(2); time.sleep(3)"
+        started = time.monotonic()
+        result = execute_argv([sys.executable, "-c", program], ExecutionLimits(1, 100))
+        self.assertTrue(result.timed_out, "EOF is not process termination")
+        self.assertEqual(result.exit_code, 124)
+        self.assertIn("[TIMEOUT]", result.output)
+        self.assertLess(time.monotonic() - started, 2.5)
+
+    def test_fast_output_eof_preserves_actual_exit_status(self) -> None:
+        program = "import os; os.close(1); os.close(2); raise SystemExit(7)"
+        result = execute_argv([sys.executable, "-c", program], ExecutionLimits(2, 100))
+        self.assertFalse(result.timed_out)
+        self.assertFalse(result.truncated)
+        self.assertEqual(result.exit_code, 7)
+
     def test_timeout_kills_process_group(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             marker = Path(temporary) / "child-survived"

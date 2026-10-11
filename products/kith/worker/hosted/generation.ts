@@ -136,14 +136,14 @@ export class HostedGeneration extends DurableObject<Env> {
     // Identity and terminal tombstones survive restarts; a repeated begin cannot reset attempts or bindings.
     const created = await this.ctx.storage.transaction(async (txn) => {
       if (await txn.get("execution") || await txn.get("job")) return false;
+      // Initialization can also be interrupted before its first RPC; commit cleanup with its identity.
+      await txn.setAlarm(execution.deadline);
       await txn.put({ execution, job });
       return true;
     });
     if (!created) return { ok: false, code: "generation_dropped", message: "generation already started" };
 
     try {
-      // A bounded watchdog also cleans initialization interrupted before the work alarm was installed.
-      await this.ctx.storage.setAlarm(execution.deadline);
       const handle = await this.resolveHandle(agentId, input.handle);
       if (!handle) return await this.rejectBegin(job, "not_found", "agent not found");
       job.handle = handle;
@@ -225,7 +225,6 @@ export class HostedGeneration extends DurableObject<Env> {
         .bind(job.generation_id)
         .run();
       if (transitioned.meta.changes !== 1) return;
-      await this.ctx.storage.setAlarm(execution.deadline);
       if (!(await this.reserve(job, execution)) || !paidCallsEnabled(this.env)) {
         await this.markGeneration(job.generation_id, "failed");
         return;
@@ -274,8 +273,6 @@ export class HostedGeneration extends DurableObject<Env> {
         .bind(job.generation_id)
         .run();
       if (execution.attempt === 0 && transitioned.meta.changes !== 1) return;
-      await this.ctx.storage.setAlarm(execution.deadline);
-
       const view = await loadAgentRuntime(this.env, job.agent_id);
       // RT-01.2: runtime changed (or connection vanished) since dispatch → drop, never persist.
       if (!view || view.runtime !== "hosted" || view.runtime_epoch !== job.v2.runtime_epoch) {
@@ -306,7 +303,7 @@ export class HostedGeneration extends DurableObject<Env> {
         result = await beforeHostedDeadline(() => adapter.complete(
           conn,
           {
-            model: view.model,
+            model: view.model!,
             system: addendum ? `${systemPrompt(job.handle)}\n\n${addendum}` : systemPrompt(job.handle),
             transcript: wrapTranscript(job.transcript),
             max_output_tokens: params.max_output_tokens,
@@ -404,7 +401,7 @@ export class HostedGeneration extends DurableObject<Env> {
       && row.state === (execution.attempt === 0 ? "dispatched" : "streaming");
   }
 
-  /** The claim is durable before fetch; interrupted running attempts never repeat an unknown paid result. */
+  /** Claim and watchdog commit together before external work; interrupted attempts never repeat a paid result. */
   private async claimExecution(): Promise<ClaimedJob | null> {
     const now = Date.now();
     return this.ctx.storage.transaction<ClaimedJob | null>(async (txn) => {
@@ -428,8 +425,18 @@ export class HostedGeneration extends DurableObject<Env> {
         || (execution.phase === "retry_wait" && execution.attempt !== 1)
         || (job.v2 && job.v2.attempt !== execution.attempt);
       const expired = invalid || now >= execution.deadline;
-      if (!expired && (execution.phase === "running" || execution.phase === "initializing" || now < execution.not_before)) return null;
+      if (!expired && (execution.phase === "running" || execution.phase === "initializing")) {
+        // The work alarm may have been consumed before a crash. Restore cleanup without replaying inference.
+        await txn.setAlarm(execution.deadline);
+        return null;
+      }
+      if (!expired && now < execution.not_before) {
+        await txn.setAlarm(execution.not_before);
+        return null;
+      }
       if (!expired && execution.phase !== "pending" && execution.phase !== "retry_wait") return null;
+      // A crash during the following D1 checks must still leave the original deadline watchdog scheduled.
+      if (!expired) await txn.setAlarm(execution.deadline);
       await txn.put("execution", { ...execution, phase: "running" });
       return { job, execution, expired };
     });

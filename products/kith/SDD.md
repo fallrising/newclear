@@ -1,5 +1,7 @@
 # kith — Software Design Document
 
+Cost safety supplement: [cost-safety.md](docs/cost-safety.md) defines explicit paid opt-in, persisted execution phases, quota reservation and bounded background work. It applies to existing hosted/ambient paths without changing INV-01–19.
+
 - Version: 0.1.0
 - Date: 2026-09-20
 - Status: M0–M6 in tree (rooms, agents, MCP, hosted mention, sidecar, ambient); M7 optional keyring (not E2EE; 不是端對端)

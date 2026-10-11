@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import { BODY_MAX_BYTES, FANOUT_CHUNK, STATUS_MAX_BYTES } from "../src/caps.ts";
+import { BODY_MAX_BYTES, FANOUT_CHUNK, MEMBERS_PER_ROOM, STATUS_MAX_BYTES } from "../src/caps.ts";
 import { chunks } from "../src/fanout.ts";
 import { tokenizeMentions } from "../src/mention.ts";
 import { consumeWake, rejectBody, rejectStatus } from "../src/reject.ts";
@@ -13,12 +13,16 @@ import {
 import { errorResponse } from "./errors.ts";
 import { extraKeys, parseObject, utf8Bytes } from "./json.ts";
 import { inc } from "./metrics.ts";
+import { paidLimits, reserveLedger, PAID_LEASE_MS, type PaidAttempt, type PaidLedger } from "./cost-controls.ts";
 
 const TRACE_MAX_BYTES = 2048;
 const TYPING_TTL_MS = 90_000;
 const AMBIENT_LOCK_TTL_MS = 120_000;
 const WAKE_WINDOW_MS = 60_000;
 const SEND_HTTP_KEYS = ["body", "client_message_id", "thread_id", "generation_id", "kind"] as const;
+export const WS_FRAME_MAX_BYTES = 16 * 1024;
+export const WS_MEMBER_FRAMES_PER_MINUTE = 120;
+export const WS_ROOM_FRAMES_PER_MINUTE = 1000;
 
 export type AmbientLock = {
   generation_id: string;
@@ -70,6 +74,123 @@ export class Room extends DurableObject<Env> {
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
+  }
+
+  /** Instance-wide accounting; every reservation is serialized before external work. */
+  async reservePaidAttempt(input: PaidAttempt): Promise<boolean> {
+    const caps = paidLimits(this.env);
+    if (!caps) return false;
+    return this.ctx.storage.transaction(async (tx) => {
+      const next = reserveLedger(await tx.get<PaidLedger>("paid_ledger"), input, caps, Date.now());
+      if (!next) return false;
+      await tx.put("paid_ledger", next);
+      return true;
+    });
+  }
+
+  async releasePaidAttempt(generationId: string): Promise<void> {
+    await this.ctx.storage.transaction(async (tx) => {
+      const ledger = await tx.get<PaidLedger>("paid_ledger");
+      if (!ledger) return;
+      delete ledger.leases[generationId];
+      await tx.put("paid_ledger", ledger);
+    });
+  }
+
+  /** All mention and ambient wakes share this admission gate. */
+  async admitHosted(generationId: string): Promise<{ ok: boolean; code?: string }> {
+    if (!generationId || generationId.length > 128) return { ok: false, code: "invalid_request" };
+    return this.ctx.storage.transaction(async (tx) => {
+      const now = Date.now();
+      const active = await tx.get<{ id: string; expires: number }>("hosted_active");
+      if (active && active.expires > now) {
+        return active.id === generationId ? { ok: true } : { ok: false, code: "hosted_busy" };
+      }
+      const stamps = ((await tx.get<number[]>("wake_budget")) ?? []).filter((ts) => now - ts < WAKE_WINDOW_MS);
+      if (!consumeWake(stamps.length).ok) return { ok: false, code: "wake_budget_exhausted" };
+      stamps.push(now);
+      await tx.put({ wake_budget: stamps, hosted_active: { id: generationId, expires: now + PAID_LEASE_MS } });
+      return { ok: true };
+    });
+  }
+
+  async releaseHosted(generationId: string): Promise<void> {
+    await this.ctx.storage.transaction(async (tx) => {
+      const active = await tx.get<{ id: string }>("hosted_active");
+      if (active?.id === generationId) await tx.delete("hosted_active");
+    });
+  }
+
+  async admitEventStream(streamId: string): Promise<{ ok: boolean; code?: string }> {
+    if (!streamId || streamId.length > 128) return { ok: false, code: "invalid_request" };
+    return this.ctx.storage.transaction(async (tx) => {
+      const now = Date.now();
+      const leases = (await tx.get<Record<string, number>>("event_streams")) ?? {};
+      for (const [id, expiry] of Object.entries(leases)) if (expiry <= now) delete leases[id];
+      if (!Object.hasOwn(leases, streamId) && Object.keys(leases).length >= 16) return { ok: false, code: "stream_limit" };
+      leases[streamId] = now + PAID_LEASE_MS;
+      await tx.put("event_streams", leases);
+      return { ok: true };
+    });
+  }
+
+  async releaseEventStream(streamId: string): Promise<void> {
+    await this.ctx.storage.transaction(async (tx) => {
+      const leases = (await tx.get<Record<string, number>>("event_streams")) ?? {};
+      delete leases[streamId];
+      await tx.put("event_streams", leases);
+    });
+  }
+
+  async gcCursor(): Promise<string> { return (await this.ctx.storage.get<string>("gc_cursor")) ?? ""; }
+  async advanceGcCursor(cursor: string): Promise<void> { await this.ctx.storage.put("gc_cursor", cursor); }
+
+  async admitApiRequest(client: string, login = false): Promise<boolean> {
+    if (!client || client.length > 128) return false;
+    const raw = login ? this.env.KITH_MAX_LOGIN_ATTEMPTS_PER_MINUTE : this.env.KITH_MAX_API_REQUESTS_PER_MINUTE;
+    const cap = raw === undefined ? (login ? 10 : 120) : /^[1-9][0-9]*$/.test(raw) ? Number(raw) : 0;
+    if (!Number.isSafeInteger(cap) || cap < 1 || cap > 1000) return false;
+    return this.ctx.storage.transaction(async (tx) => {
+      const minute = Math.floor(Date.now() / 60_000);
+      const storageKey = login ? "login_requests" : "api_requests";
+      const prior = await tx.get<{ minute: number; total: number; clients: Record<string, number> }>(storageKey);
+      const ledger = prior?.minute === minute ? prior : { minute, total: 0, clients: {} };
+      const key = `client:${client}`;
+      if (ledger.total >= 5000 || (ledger.clients[key] ?? 0) >= cap || (!Object.hasOwn(ledger.clients, key) && Object.keys(ledger.clients).length >= 512)) return false;
+      ledger.total++; ledger.clients[key] = (ledger.clients[key] ?? 0) + 1;
+      await tx.put(storageKey, ledger);
+      return true;
+    });
+  }
+
+  async claimTraceUpload(roomId: string, messageId: string, agentId: string): Promise<{ ok: boolean; stored: boolean; code?: string }> {
+    return this.ctx.blockConcurrencyWhile(async () => {
+    const row = await this.env.DB.prepare(`SELECT trace_full_state FROM messages WHERE id = ? AND room_id = ? AND sender_id = ? AND kind = 'trace'`)
+      .bind(messageId, roomId, agentId).first<{ trace_full_state: string | null }>();
+    if (!row || row.trace_full_state) return { ok: false, stored: row?.trace_full_state === "stored" };
+    const admitted = await this.ctx.storage.transaction(async (tx) => {
+      const day = new Date().toISOString().slice(0, 10);
+      const previous = await tx.get<{ day: string; total: number; agents: Record<string, number> }>("trace_quota");
+      const quota = previous?.day === day ? previous : { day, total: 0, agents: {} };
+      const key = `agent:${agentId}`;
+      if (quota.total >= 128 || (quota.agents[key] ?? 0) >= 32) return false;
+      quota.total++;
+      quota.agents[key] = (quota.agents[key] ?? 0) + 1;
+      await tx.put("trace_quota", quota);
+      return true;
+    });
+    if (!admitted) return { ok: false, stored: false, code: "trace_quota_exhausted" };
+    const claimed = await this.env.DB.prepare(`UPDATE messages SET trace_full_state = 'claimed' WHERE id = ? AND room_id = ? AND sender_id = ? AND kind = 'trace' AND trace_full_state IS NULL`)
+      .bind(messageId, roomId, agentId).run();
+    if (claimed.meta.changes === 1) return { ok: true, stored: false };
+    const after = await this.env.DB.prepare(`SELECT trace_full_state FROM messages WHERE id = ?`).bind(messageId).first<{ trace_full_state: string | null }>();
+    return { ok: false, stored: after?.trace_full_state === "stored" };
+    });
+  }
+
+  async completeTraceUpload(messageId: string): Promise<boolean> {
+    const result = await this.env.DB.prepare(`UPDATE messages SET trace_full_state = 'stored' WHERE id = ? AND kind = 'trace' AND trace_full_state = 'claimed'`).bind(messageId).run();
+    return result.meta.changes === 1;
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -215,7 +336,8 @@ export class Room extends DurableObject<Env> {
 
   async tryAcquireAmbient(roomId: string, agentId: string, generationId: string): Promise<AcquireAmbientResult> {
     await this.ctx.storage.put("room_id", roomId);
-    const existing = await this.ctx.storage.get<AmbientLock>("ambient_lock");
+    return this.ctx.storage.transaction(async (tx) => {
+    const existing = await tx.get<AmbientLock>("ambient_lock");
     if (existing && existing.expires_at > Date.now()) {
       return { ok: false };
     }
@@ -224,24 +346,27 @@ export class Room extends DurableObject<Env> {
       agent_id: agentId,
       expires_at: Date.now() + AMBIENT_LOCK_TTL_MS,
     };
-    await this.ctx.storage.put("ambient_lock", lock);
+    await tx.put("ambient_lock", lock);
     return { ok: true };
+    });
   }
 
   async consumeWakeBudget(): Promise<ConsumeWakeBudgetResult> {
+    return this.ctx.storage.transaction(async (tx) => {
     const now = Date.now();
-    const stamps = ((await this.ctx.storage.get<number[]>("wake_budget")) ?? []).filter(
+    const stamps = ((await tx.get<number[]>("wake_budget")) ?? []).filter(
       (ts) => now - ts < WAKE_WINDOW_MS,
     );
     const result = consumeWake(stamps.length);
     if (!result.ok) {
       inc("ambient_budget_exhausted");
-      await this.ctx.storage.put("wake_budget", stamps);
+      await tx.put("wake_budget", stamps);
       return { ok: false, code: "wake_budget_exhausted" };
     }
     stamps.push(now);
-    await this.ctx.storage.put("wake_budget", stamps);
+    await tx.put("wake_budget", stamps);
     return { ok: true };
+    });
   }
 
   async releaseAmbient(generationId: string): Promise<void> {
@@ -280,9 +405,35 @@ export class Room extends DurableObject<Env> {
     return { rejected: true, message: "broadcast only after INSERT success" };
   }
 
+  /** No timers or cross-object RPC: completed frame work remains compatible with WebSocket hibernation. */
+  private async admitWebSocketFrame(memberId: string): Promise<boolean> {
+    if (!memberId || memberId.length > 128) return false;
+    try {
+      return await this.ctx.storage.transaction(async (tx) => {
+        const minute = Math.floor(Date.now() / 60_000);
+        const prior = await tx.get<{ minute: number; total: number; members: Record<string, number> }>("ws_frames");
+        const ledger = prior?.minute === minute ? prior : { minute, total: 0, members: {} };
+        const key = `member:${memberId}`;
+        const previous = Object.hasOwn(ledger.members, key) ? ledger.members[key] : 0;
+        if (ledger.total >= WS_ROOM_FRAMES_PER_MINUTE || previous >= WS_MEMBER_FRAMES_PER_MINUTE
+          || (!Object.hasOwn(ledger.members, key) && Object.keys(ledger.members).length >= MEMBERS_PER_ROOM)) return false;
+        ledger.total++;
+        ledger.members[key] = previous + 1;
+        await tx.put("ws_frames", ledger);
+        return true;
+      });
+    } catch {
+      return false; // Unknown admission/storage results never authorize downstream work.
+    }
+  }
+
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    if (typeof message === "string" ? message.length > WS_FRAME_MAX_BYTES : message.byteLength > WS_FRAME_MAX_BYTES) {
+      this.sendError(ws, "payload_too_large");
+      return;
+    }
     const raw = typeof message === "string" ? message : new TextDecoder().decode(message);
-    if (utf8Bytes(raw) > BODY_MAX_BYTES) {
+    if (utf8Bytes(raw) > WS_FRAME_MAX_BYTES) {
       this.sendError(ws, "payload_too_large");
       return;
     }
@@ -293,20 +444,32 @@ export class Room extends DurableObject<Env> {
     }
     const attachment = (ws.deserializeAttachment?.() ?? {}) as { member_id?: string; room_id?: string };
     const memberId = attachment.member_id;
-    const roomId = attachment.room_id ?? (await this.ctx.storage.get<string>("room_id"));
+    const roomId = attachment.room_id;
     if (!memberId || !roomId) {
       this.sendError(ws, "unauthorized");
+      return;
+    }
+    const type = obj.type;
+    if (obj.v !== 1) {
+      this.sendError(ws, "invalid_request");
+      return;
+    }
+    // ACK has no side effect. It must not turn an unlimited frame stream into D1 membership reads.
+    if (type === "ack") {
+      if (extraKeys(obj, ACK_KEYS).length > 0) this.sendError(ws, "invalid_request");
+      return;
+    }
+    if (type !== "send" && type !== "status") {
+      this.sendError(ws, "invalid_request");
+      return;
+    }
+    if (!(await this.admitWebSocketFrame(memberId))) {
+      this.sendError(ws, "rate_limited");
       return;
     }
     const memberOk = await this.memberInRoom(roomId, memberId);
     if (!memberOk) {
       this.sendError(ws, "forbidden");
-      return;
-    }
-
-    const type = obj.type;
-    if (obj.v !== 1) {
-      this.sendError(ws, "invalid_request");
       return;
     }
     if (type === "send") {
@@ -331,12 +494,6 @@ export class Room extends DurableObject<Env> {
       }
       if (result.uniqueHit) {
         this.sendEvent(ws, result.row);
-      }
-      return;
-    }
-    if (type === "ack") {
-      if (extraKeys(obj, ACK_KEYS).length > 0) {
-        this.sendError(ws, "invalid_request");
       }
       return;
     }
@@ -375,6 +532,7 @@ export class Room extends DurableObject<Env> {
   }
 
   private acceptSocket(roomId: string, memberId: string): Response {
+    if (this.sockets().length >= 32) return errorResponse(429, "connection_limit", "room connection limit reached");
     const pair = new WebSocketPair();
     const client = pair[0];
     const server = pair[1];

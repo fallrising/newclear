@@ -1,6 +1,6 @@
 import { applyD1Migrations, runDurableObjectAlarm, runInDurableObject } from "cloudflare:test";
 import { env } from "cloudflare:workers";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { hashPassword } from "../../src/password.ts";
 import {
   INTERNAL_HEADER,
@@ -176,8 +176,9 @@ async function generationState(id: string): Promise<string | null> {
 }
 
 async function runHostedAlarm(generationId: string): Promise<void> {
-  const ran = await runDurableObjectAlarm(hostedStub(generationId));
-  if (!ran) await hostedRpc(generationId).runScheduled();
+  // Tests keep platform alarms in the future and await the actual handler through RPC.
+  // runDurableObjectAlarm can return while a concurrently started handler is still cleaning up.
+  await hostedRpc(generationId).runScheduled();
 }
 
 async function waitGeneration(
@@ -205,8 +206,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(Date.now() + 86_400_000);
   await resetStorage();
 });
+afterEach(() => vi.useRealTimers());
 
 describe("kith M4 hosted generation", () => {
   it("prompt marks UNTRUSTED_ROOM_TRANSCRIPT and hosted tool allowlist is empty", () => {
@@ -359,16 +363,16 @@ describe("kith M4 hosted generation", () => {
     const elapsed = await inbox.lastNotifyElapsedMs();
     expect(elapsed).toBeTypeOf("number");
     expect(elapsed!).toBeLessThan(20);
+    // The frozen, injectable clock checks the notify contract; it is not a host wall-time benchmark.
 
     const gen = await waitGeneration(s.roomId, s.agentId);
     expect(gen.agent_id).toBe(s.agentId);
     expect(gen.state === "dispatched" || gen.state === "streaming" || gen.state === "completed").toBe(true);
 
     const beforeAlarm = await messageCount(s.roomId, gen!.id);
-    if (beforeAlarm === 0) {
-      expect(await generationState(gen!.id)).toBe("dispatched");
-      await runHostedAlarm(gen!.id);
-    }
+    expect(beforeAlarm).toBe(0);
+    expect(await generationState(gen!.id)).toBe("dispatched");
+    await runHostedAlarm(gen!.id);
 
     const row = await env.DB.prepare(
       `SELECT sender_id, body, generation_id, kind FROM messages WHERE room_id = ? AND generation_id = ?`,

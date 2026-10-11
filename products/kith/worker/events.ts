@@ -18,7 +18,13 @@ type AppEnv = { Bindings: Env };
 
 type InboxRpc = {
   liveAfter(cursorSeq: number): Promise<InboxNotifyPayload[]>;
-  waitAfter(cursorSeq: number): Promise<InboxNotifyPayload[]>;
+  waitAfter(cursorSeq: number, waiterId?: string, timeoutMs?: number): Promise<InboxNotifyPayload[]>;
+  cancelWait(waiterId: string): Promise<void>;
+};
+
+type EventRoomRpc = {
+  admitEventStream(streamId: string): Promise<{ ok: boolean; code?: string }>;
+  releaseEventStream(streamId: string): Promise<void>;
 };
 
 type MessageCatchup = {
@@ -38,6 +44,9 @@ type MessageCatchup = {
 };
 
 const SSE_DATA_MAX = 64 * 1024;
+export const EVENT_STREAM_MAX_MS = 300_000;
+export const EVENT_CATCHUP_MAX_PAGES = 20;
+const EVENT_WAIT_MAX_MS = 30_000;
 
 function inboxStub(env: Env, roomId: string, memberId: string): InboxRpc {
   return env.INBOX.get(env.INBOX.idFromName(`${roomId}:${memberId}`)) as unknown as InboxRpc;
@@ -178,25 +187,49 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
   const lastEventId = numericOrNull(c.req.header("Last-Event-ID") ?? null);
   const initialCursor = lastEventId == null ? afterSeq : Math.max(afterSeq, lastEventId);
 
+  const streamId = crypto.randomUUID();
+  const room = c.env.ROOM.get(c.env.ROOM.idFromName(`room:${roomId}`)) as unknown as EventRoomRpc;
+  try {
+    if (!(await room.admitEventStream(streamId)).ok) return c.json(errorBody("event_stream_limit", "room event stream limit reached"), 429);
+  } catch {
+    return c.json(errorBody("not_ready", "event stream admission unavailable"), 503);
+  }
   const inbox = inboxStub(c.env, roomId, auth.member.id);
   const { readable, writable } = new TransformStream<Uint8Array>();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
-  const signal = c.req.raw.signal;
+  const requestSignal = c.req.raw.signal;
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const deadline = Date.now() + EVENT_STREAM_MAX_MS;
+  const stop = () => controller.abort();
+  const timer = setTimeout(stop, EVENT_STREAM_MAX_MS);
+  requestSignal.addEventListener("abort", stop, { once: true });
+  if (requestSignal.aborted) stop();
+  // Reader cancellation rejects writer.closed even when the original request signal stays live.
+  void writer.closed.catch(stop);
+  const stopped = new Promise<never>((_resolve, reject) => {
+    signal.addEventListener("abort", () => reject(new DOMException("event stream ended", "AbortError")), { once: true });
+  });
+  void stopped.catch(() => {}); // expiry during cleanup must never become an unhandled rejection
+  const bounded = async <T>(run: () => Promise<T>): Promise<T> => {
+    if (signal.aborted || Date.now() >= deadline) throw new DOMException("event stream ended", "AbortError");
+    // This bounds local waiting. An already-issued platform RPC can outlive the race.
+    return Promise.race([run(), stopped]);
+  };
 
   const write = async (chunk: string) => {
-    await writer.write(encoder.encode(chunk));
+    await bounded(() => writer.write(encoder.encode(chunk)));
   };
 
   const run = async () => {
-    // Heartbeat while the stream is open; waitAfter() blocks until data, so it cannot drive this.
-    const heartbeat = setInterval(() => void noteRunnerSeen(c.env, auth.member.id), RUNNER_SEEN_EVERY_MS);
+    let runnerSeenAt = Date.now();
     try {
-      await noteRunnerSeen(c.env, auth.member.id);
+      await bounded(() => noteRunnerSeen(c.env, auth.member.id));
       let cursor = initialCursor;
-      for (;;) {
+      for (let page = 0; page < EVENT_CATCHUP_MAX_PAGES; page++) {
         if (signal.aborted) break;
-        const result = await c.env.DB.prepare(
+        const result = await bounded(() => c.env.DB.prepare(
           `SELECT id, room_id, seq, kind, thread_id, reply_to, sender_id, body, mentions_json,
                   generation_id, client_message_id, origin, created_at
            FROM messages
@@ -204,12 +237,17 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
            ORDER BY seq ASC LIMIT 50`,
         )
           .bind(roomId, cursor)
-          .all<MessageCatchup>();
+          .all<MessageCatchup>());
         const rows = result.results ?? [];
         if (rows.length === 0) break;
         for (const row of rows) {
           await write(formatEvent("replay", row.seq, catchupPayload(row)));
           cursor = row.seq;
+        }
+        // Reconnect with the last emitted seq for the next bounded catch-up page group.
+        if (rows.length === 50 && page === EVENT_CATCHUP_MAX_PAGES - 1) {
+          await write(": catchup_limit\n\n");
+          return;
         }
       }
 
@@ -223,7 +261,7 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
           return true;
         }
         const bySeq = new Map(items.map((item) => [item.seq, item]));
-        const policy = spliced.events.length > 0 ? await loadWakePolicy(c.env, roomId, auth.member.id) : null;
+        const policy = spliced.events.length > 0 ? await bounded(() => loadWakePolicy(c.env, roomId, auth.member.id)) : null;
         for (const ev of spliced.events) {
           const item = bySeq.get(ev.seq);
           if (!item) continue;
@@ -233,14 +271,19 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
         return false;
       };
 
-      const snapshot = await inbox.liveAfter(cursor);
+      const snapshot = await bounded(() => inbox.liveAfter(cursor));
       if (await emitLive(snapshot)) {
-        await writer.close();
         return;
       }
 
       while (!signal.aborted) {
-        const more = await inbox.waitAfter(cursor);
+        if (Date.now() - runnerSeenAt >= RUNNER_SEEN_EVERY_MS) {
+          await bounded(() => noteRunnerSeen(c.env, auth.member.id));
+          runnerSeenAt = Date.now();
+        }
+        const remaining = deadline - Date.now();
+        if (remaining <= 0) break;
+        const more = await bounded(() => inbox.waitAfter(cursor, streamId, Math.min(EVENT_WAIT_MAX_MS, remaining)));
         if (signal.aborted) break;
         if (more.length === 0) continue;
         if (await emitLive(more)) break;
@@ -248,11 +291,34 @@ export async function handleMcpEvents(c: Context<AppEnv>): Promise<Response> {
     } catch {
       /* client gone or write failed */
     } finally {
-      clearInterval(heartbeat);
+      // Attempt cleanup for request abort, body cancellation, time limit, gaps and catch-up limits alike.
+      const cleanup = Promise.allSettled([
+        Promise.resolve().then(() => inbox.cancelWait(streamId)),
+        Promise.resolve().then(() => room.releaseEventStream(streamId)),
+      ]);
+      let cleanupTimer: ReturnType<typeof setTimeout> | undefined;
       try {
-        await writer.close();
+        await Promise.race([cleanup, new Promise<void>((resolve) => { cleanupTimer = setTimeout(resolve, 2_000); })]);
+      } finally { clearTimeout(cleanupTimer); }
+      let closeTimer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const closed = signal.aborted
+          ? writer.abort(new DOMException("event stream ended", "AbortError"))
+          : writer.close();
+        // Keep the original expiry active during graceful close; also bound an uncooperative stream sink.
+        await Promise.race([closed, new Promise<void>((resolve) => {
+          closeTimer = setTimeout(() => {
+            stop();
+            void writer.abort(new DOMException("event stream ended", "AbortError")).catch(() => {});
+            resolve();
+          }, Math.min(2_000, Math.max(0, deadline - Date.now())));
+        })]);
       } catch {
         /* already closed */
+      } finally {
+        clearTimeout(closeTimer);
+        clearTimeout(timer);
+        requestSignal.removeEventListener("abort", stop);
       }
     }
   };

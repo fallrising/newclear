@@ -86,6 +86,9 @@ function mockProvider(replies: Array<Response | Error> = []): { models: () => nu
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  // Prevent automatic platform alarms from racing explicitly awaited runScheduled fault injection.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(Date.now() + 86_400_000);
   await bindings.DB.batch([
     "agent_runtime_changes", "agent_runtimes", "provider_connections", "messages", "bot_tokens", "generations", "room_members", "rooms", "members",
   ].map((table) => bindings.DB.prepare(`DELETE FROM ${table}`)));
@@ -306,11 +309,15 @@ describe("hosted generation cost safety integration", () => {
     const input = await seed(true);
     await rpc(input.generation_id).begin(input);
     await runInDurableObject(hosted(input.generation_id), (instance: HostedGeneration) => {
+      let failOnce = true;
       const wrap = (statement: D1PreparedStatement, sql: string): D1PreparedStatement => new Proxy(statement, {
         get(target, property) {
           if (property === "bind") return (...args: unknown[]) => wrap(target.bind(...args), sql);
           if (property === "run") return async () => {
-            if (calls.chats() > 0 && sql.includes("UPDATE generations")) throw new Error("injected D1 unknown result");
+            if (failOnce && calls.chats() > 0 && sql.includes("SET input_tokens")) {
+              failOnce = false;
+              throw new Error("injected D1 unknown result after provider acceptance");
+            }
             return target.run();
           };
           const value = Reflect.get(target, property, target);
@@ -326,9 +333,10 @@ describe("hosted generation cost safety integration", () => {
         },
       });
     });
-    await expect(rpc(input.generation_id).runScheduled()).rejects.toThrow();
+    await rpc(input.generation_id).runScheduled();
     await rpc(input.generation_id).runScheduled();
     expect(calls.chats()).toBe(1);
+    expect(await generationState(input.generation_id)).toBe("failed");
     expect((await control(input.generation_id))?.phase).toBe("terminal");
   });
 

@@ -1074,9 +1074,9 @@ MVP 可用 `wrangler tail` + Cloudflare analytics。M7 再加獨立 metrics sink
 | Flag | 線上值 | 開啟於 |
 | --- | --- | --- |
 | `ff_mcp` | on | M3 |
-| `ff_hosted_agent` | on | M4 |
+| `ff_hosted_agent` | off (explicit paid opt-in; see cost-safety contract) | M4 |
 | `ff_sidecar` | off | M5（文件 + 二進位；Worker 側只需 MCP） |
-| `ff_ambient` | on | M6 |
+| `ff_ambient` | off (separate explicit opt-in) | M6 |
 
 4. **D1 migrations** 只追加；rollback = `wrangler rollback` 到上一 Worker version，**不**自動 DROP 欄。
 5. **Secrets：** `XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑證永不進 Worker secrets。

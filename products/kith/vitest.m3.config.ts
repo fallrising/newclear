@@ -9,7 +9,9 @@ export default defineConfig(async () => {
       cloudflareTest({
         wrangler: { configPath: "./wrangler.toml" },
         miniflare: {
-          bindings: { TEST_MIGRATIONS: migrations, ff_mcp: "on" },
+          bindings: { TEST_MIGRATIONS: migrations,
+            KITH_MAX_API_REQUESTS_PER_MINUTE: "1000",
+            KITH_MAX_LOGIN_ATTEMPTS_PER_MINUTE: "1000", ff_mcp: "on" },
         },
       }),
     ],

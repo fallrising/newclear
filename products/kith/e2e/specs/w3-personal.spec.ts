@@ -21,6 +21,14 @@ test(
     await shot(page, info, "01-limit-visible");
 
     await option.click();
+    await expect(input).toHaveValue("@codex ");
+    // The picker restores focus and selection in its next animation frame.
+    await input.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    await expect(input).toBeFocused();
+    await expect.poll(() => input.evaluate((el) => {
+      const textarea = el as HTMLTextAreaElement;
+      return [textarea.selectionStart, textarea.selectionEnd];
+    })).toEqual([7, 7]);
     await input.pressSequentially("修一下 bug " + rand);
     await input.press("Enter");
     const body = "@codex 修一下 bug " + rand;

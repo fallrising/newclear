@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { getCookie } from "hono/cookie";
 import { MEMBERS_PER_ROOM } from "../src/caps.ts";
 import { rejectMemberCount } from "../src/reject.ts";
@@ -37,7 +38,7 @@ import {
 import { errorBody } from "./errors.ts";
 import { asInt, extraKeys, parseObject } from "./json.ts";
 import { handleMcpEvents } from "./events.ts";
-import { gcAllRooms } from "./gc.ts";
+import { gcTraces } from "./gc.ts";
 import { HostedGeneration } from "./hosted/generation.ts";
 import { Inbox } from "./inbox.ts";
 import { handleMcpPost } from "./mcp.ts";
@@ -68,6 +69,22 @@ app.use("/api/*", async (c, next) => {
   return next();
 });
 
+app.use("/api/*", bodyLimit({ maxSize: 1024 * 1024 + 16 * 1024, onError: (c) => c.json(errorBody("payload_too_large", "API body too large"), 413) }));
+app.use("/mcp", bodyLimit({ maxSize: 1024 * 1024 + 16 * 1024, onError: (c) => c.json(errorBody("payload_too_large", "MCP body too large"), 413) }));
+app.use("*", async (c, next) => {
+  const path = new URL(c.req.url).pathname;
+  if (!path.startsWith("/api/") && path !== "/mcp" && path !== "/mcp/events") return next();
+  const accounting = c.env.ROOM.get(c.env.ROOM.idFromName("cost:global")) as DurableObjectStub & { admitApiRequest(client: string, login: boolean): Promise<boolean> };
+  const client = c.req.header("CF-Connecting-IP") ?? "unknown";
+  try {
+    if (!(await accounting.admitApiRequest(client, false)) || (path === "/api/auth/login" && !(await accounting.admitApiRequest(client, true)))) {
+      c.header("Retry-After", "60");
+      return c.json(errorBody("rate_limited", "application request quota exhausted"), 429);
+    }
+  } catch { return c.json(errorBody("not_ready", "request admission unavailable"), 503); }
+  return next();
+});
+
 app.get("/api/csrf", (c) => {
   const token = randomToken(32);
   setCsrfCookie(c, token);
@@ -84,6 +101,7 @@ app.post("/api/auth/login", async (c) => {
     .trim();
   const password = typeof obj.password === "string" ? obj.password : "";
   if (!handle || !password) return invalid(c, "handle and password required");
+  if (!HANDLE_RE.test(handle) || password.length > 1024) return invalid(c, "invalid credentials size");
 
   const member = await c.env.DB.prepare(
     `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password
@@ -804,7 +822,13 @@ app.notFound(async (c) => {
 export default {
   fetch: app.fetch.bind(app),
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(gcAllRooms(env.DB));
+    ctx.waitUntil((async () => {
+      const accounting = env.ROOM.get(env.ROOM.idFromName("cost:global")) as DurableObjectStub & {
+        gcCursor(): Promise<string>; advanceGcCursor(cursor: string): Promise<void>;
+      };
+      const result = await gcTraces(env.DB, { afterRoomId: await accounting.gcCursor(), tracesBucket: env.TRACES });
+      await accounting.advanceGcCursor(result.lastRoomId);
+    })());
   },
 };
 

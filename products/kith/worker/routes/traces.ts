@@ -37,7 +37,10 @@ export function mountTraceRoutes(app: Hono<AppEnv>): void {
     const full = typeof obj.full === "string" ? obj.full : null;
     if (full !== null && utf8Bytes(full) > TRACE_FULL_MAX_BYTES) return c.json(errorBody("payload_too_large", "full exceeds 1 MiB"), 400);
 
-    const stub = c.env.ROOM.get(c.env.ROOM.idFromName(`room:${roomId}`));
+    const stub = c.env.ROOM.get(c.env.ROOM.idFromName(`room:${roomId}`)) as DurableObjectStub & {
+      claimTraceUpload(roomId: string, messageId: string, agentId: string): Promise<{ ok: boolean; stored: boolean; code?: string }>;
+      completeTraceUpload(messageId: string): Promise<boolean>;
+    };
     const res = await stub.fetch(
       new Request(`${INTERNAL_ORIGIN}/rooms/${roomId}/send?room_id=${encodeURIComponent(roomId)}`, {
         method: "POST",
@@ -56,15 +59,23 @@ export function mountTraceRoutes(app: Hono<AppEnv>): void {
     const messageId = sent.message?.id ?? sent.id ?? "";
     const seq = sent.message?.seq ?? sent.seq ?? null;
     let fullStored = false;
+    let fullError: string | undefined;
     if (full !== null && c.env.TRACES && messageId) {
       try {
-        await c.env.TRACES.put(traceKey(roomId, messageId), full, { httpMetadata: { contentType: "text/plain; charset=utf-8" } });
-        fullStored = true;
+        const claim = await stub.claimTraceUpload(roomId, messageId, auth.member.id);
+        fullStored = claim.stored;
+        fullError = claim.code;
+        if (claim.ok) {
+          await c.env.TRACES.put(traceKey(roomId, messageId), full, {
+            httpMetadata: { contentType: "text/plain; charset=utf-8" }, onlyIf: { etagDoesNotMatch: "*" },
+          });
+          fullStored = await stub.completeTraceUpload(messageId);
+        }
       } catch {
         fullStored = false; // the summary is already in the room; the card shows "full text unavailable"
       }
     }
-    return c.json({ message_id: messageId, seq, full_stored: fullStored });
+    return c.json({ message_id: messageId, seq, full_stored: fullStored, ...(fullError ? { full_error: fullError } : {}) });
   });
 
   app.get("/api/rooms/:id/traces/:message_id", async (c) => {

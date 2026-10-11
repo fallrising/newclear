@@ -1,8 +1,7 @@
-use std::net::SocketAddr;
 use std::sync::atomic::AtomicU64;
 use std::sync::Arc;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use axum::body::Bytes;
 use axum::extract::{Request, State};
 use axum::http::{header, HeaderMap, StatusCode};
@@ -61,6 +60,7 @@ pub fn build_app(state: AppState) -> Router {
 }
 
 pub async fn run(cfg: AppConfig) -> Result<()> {
+    let addr = cfg.validate_listener()?;
     let store = Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
     let http = http_client::build_http_client()?;
 
@@ -80,20 +80,13 @@ pub async fn run(cfg: AppConfig) -> Result<()> {
 
     let app = build_app(state);
 
-    let addr: SocketAddr = cfg
-        .listen_addr()
-        .parse()
-        .with_context(|| format!("invalid listen addr {}", cfg.listen_addr()))?;
     info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
     info!("  proxy     : http://{addr}/v1/chat/completions");
     info!("  claude    : http://{addr}/v1/messages");
     info!("  responses : http://{addr}/v1/responses");
     info!("  admin     : http://{addr}/admin");
     if cfg.token_saver {
-        info!(
-            max_chars = cfg.token_saver_max_chars,
-            "token-saver enabled"
-        );
+        info!(max_chars = cfg.token_saver_max_chars, "token-saver enabled");
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
@@ -117,25 +110,18 @@ async fn require_api_key(
     request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
-    let key = extract_api_key(request.headers());
-    match key {
-        Some(k) if state.store.verify_api_key(&k)? => Ok(next.run(request).await),
-        Some(_) => Err(AppError::Unauthorized),
-        None => {
-            if state.store.verify_api_key("")? {
-                Ok(next.run(request).await)
-            } else {
-                Err(AppError::Unauthorized)
-            }
-        }
-    }
+    ensure_api_key(&state, request.headers())?;
+    Ok(next.run(request).await)
 }
 
 fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     if let Some(v) = headers.get(header::AUTHORIZATION) {
         if let Ok(s) = v.to_str() {
             let s = s.trim();
-            if let Some(rest) = s.strip_prefix("Bearer ").or_else(|| s.strip_prefix("bearer ")) {
+            if let Some(rest) = s
+                .strip_prefix("Bearer ")
+                .or_else(|| s.strip_prefix("bearer "))
+            {
                 return Some(rest.trim().to_string());
             }
         }
@@ -223,7 +209,12 @@ fn ensure_api_key(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
         Some(k) if state.store.verify_api_key(&k)? => Ok(()),
         Some(_) => Err(AppError::Unauthorized),
         None => {
-            if state.store.verify_api_key("")? {
+            if !headers.contains_key(header::AUTHORIZATION)
+                && !headers.contains_key("x-api-key")
+                && state.cfg.allow_keyless_bootstrap
+                && state.cfg.loopback_listener()
+                && !state.store.has_api_keys()?
+            {
                 Ok(())
             } else {
                 Err(AppError::Unauthorized)
@@ -232,10 +223,7 @@ fn ensure_api_key(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
     }
 }
 
-async fn list_models(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn list_models(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     ensure_api_key(&state, &headers)?;
     let mut data = Vec::new();
     for route in state.store.list_routes()? {

@@ -207,7 +207,10 @@ pub const ACTIVE: &[ProviderProfile] = &[
 
 /// Known aliases → canonical id for wishlist / future work (not active).
 pub const WISHLIST: &[(&str, &str)] = &[
-    ("github_copilot", "GitHub Copilot — OAuth + copilot-token exchange"),
+    (
+        "github_copilot",
+        "GitHub Copilot — OAuth + copilot-token exchange",
+    ),
     ("kiro", "Kiro free/subscription — custom executor"),
     ("gemini_cli", "Google Gemini CLI OAuth"),
     ("qwen", "Qwen / DashScope OAuth or API key"),
@@ -233,9 +236,9 @@ pub fn resolve(id_or_alias: &str) -> Option<&'static ProviderProfile> {
     if key.is_empty() {
         return None;
     }
-    ACTIVE.iter().find(|p| {
-        p.id == key || p.aliases.iter().any(|a| a.eq_ignore_ascii_case(&key))
-    })
+    ACTIVE
+        .iter()
+        .find(|p| p.id == key || p.aliases.iter().any(|a| a.eq_ignore_ascii_case(&key)))
 }
 
 pub fn default_base_url(id_or_alias: &str) -> &'static str {

@@ -23,10 +23,7 @@ pub fn router() -> Router<AppState> {
         .route("/admin/connections/new", post(connections_create))
         .route("/admin/connections/{id}/edit", get(connections_edit_page))
         .route("/admin/connections/{id}/update", post(connections_update))
-        .route(
-            "/admin/connections/{id}/delete",
-            post(connections_delete),
-        )
+        .route("/admin/connections/{id}/delete", post(connections_delete))
         .route("/admin/routes", get(routes_page))
         .route("/admin/routes/new", post(routes_create))
         .route("/admin/routes/{id}/edit", get(routes_edit_page))
@@ -39,11 +36,14 @@ pub fn router() -> Router<AppState> {
         .route("/admin/static/style.css", get(style_css))
 }
 
-/// True when admin token is unset, or header/cookie matches.
+/// Keyless admin setup is restricted to an exact loopback listener.
 pub fn admin_authorized(state: &AppState, headers: &HeaderMap) -> bool {
     let Some(token) = &state.cfg.admin_token else {
-        return true;
+        return state.cfg.loopback_listener();
     };
+    if token.trim().is_empty() {
+        return false;
+    }
     if let Some(v) = headers.get("x-admin-token").and_then(|v| v.to_str().ok()) {
         if v == token {
             return true;
@@ -107,10 +107,7 @@ struct LoginForm {
     token: String,
 }
 
-async fn login_submit(
-    State(state): State<AppState>,
-    Form(form): Form<LoginForm>,
-) -> Response {
+async fn login_submit(State(state): State<AppState>, Form(form): Form<LoginForm>) -> Response {
     let Some(expected) = &state.cfg.admin_token else {
         return Redirect::to("/admin").into_response();
     };
@@ -149,7 +146,10 @@ async fn dashboard(
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
     require_admin_page(&state, &headers)?;
-    let stats = state.store.stats().map_err(|e| AppError::Internal(e).into_response())?;
+    let stats = state
+        .store
+        .stats()
+        .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "dashboard",
         context! {

@@ -101,7 +101,11 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
                                 format!("{:<16}", c.name),
                                 Style::default().fg(Color::Green),
                             ),
-                            Span::raw(format!("  {}  {}", c.base_url, c.default_model.as_deref().unwrap_or("—"))),
+                            Span::raw(format!(
+                                "  {}  {}",
+                                c.base_url,
+                                c.default_model.as_deref().unwrap_or("—")
+                            )),
                         ]))
                     })
                     .collect(),
@@ -137,7 +141,9 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
                             "{}  model={}  status={}  {}ms  {}",
                             e.ts,
                             e.public_model.as_deref().unwrap_or("—"),
-                            e.status.map(|s| s.to_string()).unwrap_or_else(|| "—".into()),
+                            e.status
+                                .map(|s| s.to_string())
+                                .unwrap_or_else(|| "—".into()),
                             e.latency_ms.unwrap_or(0),
                             e.error.as_deref().unwrap_or("")
                         ))
@@ -145,13 +151,12 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
                     .collect(),
             };
 
-            let list = List::new(items).block(Block::default().borders(Borders::ALL).title(
-                match tab {
+            let list =
+                List::new(items).block(Block::default().borders(Borders::ALL).title(match tab {
                     Tab::Connections => " Connections ",
                     Tab::Routes => " Routes ",
                     Tab::Usage => " Recent usage ",
-                },
-            ));
+                }));
             f.render_widget(list, chunks[1]);
 
             let cost = stats

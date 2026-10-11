@@ -29,7 +29,11 @@ pub fn chat_to_responses_request(body: &Bytes) -> AppResult<Bytes> {
                 Value::String(s) => s.clone(),
                 Value::Array(blocks) => blocks
                     .iter()
-                    .filter_map(|b| b.get("text").and_then(|t| t.as_str()).map(|s| s.to_string()))
+                    .filter_map(|b| {
+                        b.get("text")
+                            .and_then(|t| t.as_str())
+                            .map(|s| s.to_string())
+                    })
                     .collect::<Vec<_>>()
                     .join("\n"),
                 other => other.to_string(),
@@ -98,10 +102,7 @@ pub fn responses_body_to_chat(body: &Bytes) -> AppResult<Bytes> {
         .get("id")
         .and_then(|i| i.as_str())
         .unwrap_or("chatcmpl-from-resp");
-    let model = v
-        .get("model")
-        .and_then(|m| m.as_str())
-        .unwrap_or("unknown");
+    let model = v.get("model").and_then(|m| m.as_str()).unwrap_or("unknown");
     let input_tokens = v
         .pointer("/usage/input_tokens")
         .and_then(|n| n.as_i64())
@@ -182,7 +183,10 @@ pub fn responses_to_chat(body: &Bytes) -> AppResult<Bytes> {
     if let Some(t) = obj.get("top_p") {
         o.insert("top_p".into(), t.clone());
     }
-    if let Some(mt) = obj.get("max_output_tokens").or_else(|| obj.get("max_tokens")) {
+    if let Some(mt) = obj
+        .get("max_output_tokens")
+        .or_else(|| obj.get("max_tokens"))
+    {
         o.insert("max_tokens".into(), mt.clone());
     }
     if let Some(tools) = obj.get("tools") {
@@ -193,10 +197,7 @@ pub fn responses_to_chat(body: &Bytes) -> AppResult<Bytes> {
 }
 
 fn input_item_to_message(item: &Value) -> Value {
-    let role = item
-        .get("role")
-        .and_then(|r| r.as_str())
-        .unwrap_or("user");
+    let role = item.get("role").and_then(|r| r.as_str()).unwrap_or("user");
     let ty = item.get("type").and_then(|t| t.as_str()).unwrap_or("");
 
     if ty == "function_call_output" || ty == "tool_result" {
@@ -303,10 +304,7 @@ pub fn extract_responses_model_stream(body: &Bytes) -> AppResult<(String, bool)>
         .and_then(|m| m.as_str())
         .unwrap_or("")
         .to_string();
-    let stream = v
-        .get("stream")
-        .and_then(|s| s.as_bool())
-        .unwrap_or(false);
+    let stream = v.get("stream").and_then(|s| s.as_bool()).unwrap_or(false);
     if model.is_empty() {
         return Err(AppError::BadRequest("model is required".into()));
     }
@@ -335,7 +333,10 @@ pub fn chat_sse_to_responses_events(data: &str, started: &mut bool) -> Vec<Strin
         ));
         *started = true;
     }
-    if let Some(delta) = v.pointer("/choices/0/delta/content").and_then(|c| c.as_str()) {
+    if let Some(delta) = v
+        .pointer("/choices/0/delta/content")
+        .and_then(|c| c.as_str())
+    {
         if !delta.is_empty() {
             events.push(sse(
                 "response.output_text.delta",

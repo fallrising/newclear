@@ -165,8 +165,8 @@ pub struct ResolvedTarget {
 
 impl Store {
     pub fn open(path: &Path, secrets_key: Option<String>) -> Result<Self> {
-        let conn = Connection::open(path)
-            .with_context(|| format!("open sqlite {}", path.display()))?;
+        let conn =
+            Connection::open(path).with_context(|| format!("open sqlite {}", path.display()))?;
         conn.execute_batch(
             "
             PRAGMA journal_mode = WAL;
@@ -834,16 +834,9 @@ impl Store {
         Ok(n > 0)
     }
 
-    /// Returns true if key is valid. Empty key store → allow (bootstrap mode).
+    /// Returns true only for an enabled key. Empty/disabled stores fail closed.
     pub fn verify_api_key(&self, raw: &str) -> Result<bool> {
         let conn = self.conn.lock().unwrap();
-        let count: i64 =
-            conn.query_row("SELECT COUNT(*) FROM api_keys WHERE enabled = 1", [], |r| {
-                r.get(0)
-            })?;
-        if count == 0 {
-            return Ok(true);
-        }
         let hash = hash_key(raw);
         let found: Option<i64> = conn
             .query_row(
@@ -853,6 +846,12 @@ impl Store {
             )
             .optional()?;
         Ok(found.is_some())
+    }
+
+    /// Disabled keys still close the explicit, local bootstrap exception.
+    pub fn has_api_keys(&self) -> Result<bool> {
+        let conn = self.conn.lock().unwrap();
+        Ok(conn.query_row("SELECT EXISTS(SELECT 1 FROM api_keys)", [], |r| r.get(0))?)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1028,4 +1027,48 @@ pub fn mask_secret(s: &str) -> String {
         return "****".into();
     }
     format!("{}…{}", &s[..4], &s[s.len() - 4..])
+}
+
+#[cfg(test)]
+mod auth_tests {
+    use super::*;
+
+    #[test]
+    fn empty_key_store_denies_paid_upstream_authorization() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("auth.db"), None).unwrap();
+        assert!(!store.verify_api_key("").unwrap());
+        assert!(!store.verify_api_key("invalid").unwrap());
+    }
+
+    #[test]
+    fn disabling_last_key_does_not_reopen_authorization() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("auth.db"), None).unwrap();
+        let (row, raw) = store.create_api_key("client").unwrap();
+        assert!(store.has_api_keys().unwrap());
+        assert!(store.verify_api_key(&raw).unwrap());
+        assert!(!store.verify_api_key("invalid").unwrap());
+        assert!(!store.verify_api_key("").unwrap());
+        assert!(store.set_api_key_enabled(&row.id, false).unwrap());
+        assert!(store.has_api_keys().unwrap());
+        assert!(!store.verify_api_key(&raw).unwrap());
+        assert!(!store.verify_api_key("invalid").unwrap());
+        assert!(!store.verify_api_key("").unwrap());
+        assert!(store.set_api_key_enabled(&row.id, true).unwrap());
+        assert!(store.verify_api_key(&raw).unwrap());
+    }
+
+    #[test]
+    fn bootstrap_counts_disabled_keys_as_configured() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("auth.db"), None).unwrap();
+        assert!(!store.has_api_keys().unwrap());
+        let (row, _) = store.create_api_key("client").unwrap();
+        assert!(store.set_api_key_enabled(&row.id, false).unwrap());
+        assert!(store.has_api_keys().unwrap());
+        assert!(store.delete_api_key(&row.id).unwrap());
+        assert!(!store.has_api_keys().unwrap());
+        assert!(!store.verify_api_key("").unwrap());
+    }
 }

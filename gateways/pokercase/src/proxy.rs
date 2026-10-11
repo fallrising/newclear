@@ -526,6 +526,10 @@ fn prepare_body(state: &ProxyState, body: Bytes) -> AppResult<Bytes> {
 ///
 /// `cancel_guard` is disarmed automatically before returning an SSE body so the stream
 /// is not aborted when the HTTP handler completes.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_chat_with_fallback(
     state: &ProxyState,
     public_model: &str,
@@ -734,6 +738,10 @@ pub async fn handle_chat_with_fallback(
 }
 
 /// Anthropic-native path: translate request → OpenAI forward → translate response.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_anthropic_messages(
     state: &ProxyState,
     public_model: &str,
@@ -841,6 +849,10 @@ pub async fn handle_anthropic_messages(
 }
 
 /// OpenAI Responses API path.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Preserve the existing proxy handler interface and explicit cancellation ownership across streaming responses"
+)]
 pub async fn handle_responses(
     state: &ProxyState,
     public_model: &str,

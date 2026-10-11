@@ -279,8 +279,6 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
         UpstreamFormat::OpenAiResponses => {
             if base.ends_with("/responses") {
                 base.to_string()
-            } else if base.ends_with("/v1") {
-                format!("{base}/responses")
             } else {
                 // codex stores full …/codex/responses
                 format!("{base}/responses")
@@ -294,8 +292,6 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
                 } else {
                     format!("{base}?beta=true")
                 }
-            } else if base.ends_with("/v1") {
-                format!("{base}/messages?beta=true")
             } else {
                 format!("{base}/messages?beta=true")
             }

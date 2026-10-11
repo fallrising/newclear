@@ -115,7 +115,7 @@ async fn refresh_claude(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client().map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://api.anthropic.com/v1/oauth/token")
         .header("content-type", "application/json")
@@ -155,7 +155,7 @@ async fn refresh_codex(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client().map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://auth.openai.com/oauth/token")
         .header("content-type", "application/json")
@@ -195,7 +195,7 @@ async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client().map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://auth.x.ai/oauth2/token")
         .header("content-type", "application/x-www-form-urlencoded")
@@ -297,7 +297,7 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
             "agy refresh needs THINROUTER_AGY_CLIENT_SECRET (see docs/PROVIDERS.md)".into(),
         )
     })?;
-    let client = crate::http_client::build_http_client().map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let body = format!(
         "grant_type=refresh_token&refresh_token={}&client_id={}&client_secret={}",
         urlencoding_minimal(refresh_token),

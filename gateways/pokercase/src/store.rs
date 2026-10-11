@@ -16,6 +16,22 @@ pub struct Store {
     secrets_key: Option<String>,
 }
 
+/// Column order shared by the connection SELECT statements and row decoder.
+type ConnectionSqlRow = (
+    String,
+    String,
+    String,
+    String,
+    Option<String>,
+    i64,
+    bool,
+    Option<f64>,
+    Option<f64>,
+    String,
+    String,
+    String,
+);
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OAuthCreds {
     pub provider: String,
@@ -342,22 +358,7 @@ impl Store {
         .map_err(Into::into)
     }
 
-    fn row_tuple(
-        row: &rusqlite::Row<'_>,
-    ) -> rusqlite::Result<(
-        String,
-        String,
-        String,
-        String,
-        Option<String>,
-        i64,
-        bool,
-        Option<f64>,
-        Option<f64>,
-        String,
-        String,
-        String,
-    )> {
+    fn row_tuple(row: &rusqlite::Row<'_>) -> rusqlite::Result<ConnectionSqlRow> {
         Ok((
             row.get::<_, String>(0)?,
             row.get::<_, String>(1)?,
@@ -382,7 +383,7 @@ impl Store {
                     input_price_per_m, output_price_per_m, auth_type, created_at, updated_at
              FROM connections ORDER BY priority ASC, name ASC",
         )?;
-        let rows = stmt.query_map([], |row| Self::row_tuple(row))?;
+        let rows = stmt.query_map([], Self::row_tuple)?;
         let mut out = Vec::new();
         for r in rows {
             let (id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua) = r?;
@@ -402,7 +403,7 @@ impl Store {
                         input_price_per_m, output_price_per_m, auth_type, created_at, updated_at
                  FROM connections WHERE id = ?1",
                 params![id],
-                |row| Self::row_tuple(row),
+                Self::row_tuple,
             )
             .optional()?;
         let Some((id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua)) = row else {
@@ -422,7 +423,7 @@ impl Store {
                         input_price_per_m, output_price_per_m, auth_type, created_at, updated_at
                  FROM connections WHERE name = ?1",
                 params![name],
-                |row| Self::row_tuple(row),
+                Self::row_tuple,
             )
             .optional()?;
         let Some((id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua)) = row else {

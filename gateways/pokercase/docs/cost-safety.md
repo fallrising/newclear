@@ -39,3 +39,9 @@ must cover empty/disabled stores, valid/invalid credentials, both endpoint path
 families, explicit loopback bootstrap, public bootstrap refusal, and unauthorized
 public admin key creation. Rejected inference requests must produce zero
 upstream calls; valid requests must still succeed.
+
+The component CI checks formatting, the complete test suite and Clippy with
+warnings denied. Existing stylistic warnings are corrected without changing
+provider behavior. Intentional handler return types and function arity may use
+documented, function-scoped lint allowances to preserve their interfaces; no
+component-wide lint suppression or skipped security checks are permitted.

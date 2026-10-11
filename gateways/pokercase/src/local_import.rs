@@ -22,16 +22,20 @@ fn home() -> PathBuf {
 
 /// Scan known agent credential paths and upsert oauth connections + simple routes.
 pub fn import_all_local(store: &Store, make_routes: bool) -> Result<Vec<ImportResult>> {
-    let mut out = Vec::new();
-    out.push(import_codex(store, make_routes));
-    out.push(import_claude(store, make_routes));
-    out.push(import_grok(store, make_routes));
-    out.push(import_cursor(store, make_routes));
-    out.push(import_opencode(store, make_routes));
-    out.push(import_agy(store, make_routes));
-    Ok(out)
+    Ok(vec![
+        import_codex(store, make_routes),
+        import_claude(store, make_routes),
+        import_grok(store, make_routes),
+        import_cursor(store, make_routes),
+        import_opencode(store, make_routes),
+        import_agy(store, make_routes),
+    ])
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep the existing import adapter's explicit credential and route fields aligned with Store::upsert_oauth_connection"
+)]
 fn upsert(
     store: &Store,
     name: &str,

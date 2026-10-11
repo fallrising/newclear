@@ -6,7 +6,7 @@ These numbers describe this design on this hardware. They are not a target, and 
 
 The same matrix on a second environment with slower fsync is in [m7-environment-b](m7-environment-b.md).
 
-These numbers predate [ADR-013](../adr/013-fsync-on-the-partition-actor.md) option 1, which cut single-record batches from five syncs to about 3.5 ([before/after](adr-013-index-rewrite.md)).
+These numbers predate [ADR-013](../adr/013-fsync-on-the-partition-actor.md) option 1, which cut single-record batches from five syncs to about 3.5 ([before/after](adr-013-index-rewrite.md)). The same matrix on these hosts with option 1 merged is in [adr-013-real-host](adr-013-real-host.md).
 
 Reproduce: `make bench` (local loopback brokers), or `make bench BENCH_ARGS="--ssh-hosts a,b,c --ssh-ips x,y,z --ssh-command '…'"` for three hosts; `go run ./cmd/mkfkbench --summarize <results.json>` re-renders this table.
 

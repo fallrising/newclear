@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite",
     "lint": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
-    "build": "npm run lint && vite build"
+    "test:timeline": "node --test test/timeline-anchor.test.mjs",
+    "build": "npm run test:timeline && npm run lint && vite build"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "5.3.0",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
+    "@tanstack/virtual-core": "3.17.11",
     "@types/markdown-it": "14.2.0",
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",

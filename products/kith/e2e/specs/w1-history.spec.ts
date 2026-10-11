@@ -21,6 +21,33 @@ async function expectLive(page: Page): Promise<void> {
   await expect(page.getByTestId("room-offline-strip")).toHaveCount(0);
 }
 
+async function settleTimeline(page: Page): Promise<void> {
+  await page.waitForFunction(() => document.fonts.status === "loaded", undefined, { timeout: 5000 });
+  await page.evaluate(async () => {
+    const timeline = document.querySelector<HTMLElement>('[data-testid="timeline"]')!;
+    const deadline = performance.now() + 5000;
+    let previous = "";
+    let stableFrames = 0;
+    while (stableFrames < 3) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const geometry = JSON.stringify([
+        timeline.scrollTop,
+        timeline.scrollHeight,
+        [...timeline.querySelectorAll<HTMLElement>('[data-testid="message-row"]')].map((row) => {
+          const box = row.getBoundingClientRect();
+          return [row.dataset.seq, row.parentElement?.dataset.index, box.top, box.height];
+        }),
+      ]);
+      const animating = timeline.getAnimations({ subtree: true }).some(
+        (animation) => animation.playState === "running" && animation.effect?.getComputedTiming().iterations !== Infinity,
+      );
+      stableFrames = !animating && geometry === previous ? stableFrames + 1 : 0;
+      previous = geometry;
+      if (performance.now() > deadline) throw new Error("timeline layout did not settle");
+    }
+  });
+}
+
 test(
   "E2E-W1-04 long rooms open at the latest page and page back to the start",
   { tag: ["@W1"] },
@@ -61,42 +88,77 @@ test(
     let loads = 0;
     let maxJump = 0;
     let maxRows = 0;
+    let oldestLoaded = p1.messages[0]!.seq;
+    const origin = new URL(page.url()).origin;
+    await settleTimeline(page);
     for (let i = 0; i < 30; i++) {
       if (await page.getByTestId("timeline-start").isVisible()) break;
-      const anchor = await page.evaluate(() => {
-        const t = document.querySelector('[data-testid="timeline"]')!.getBoundingClientRect().top;
-        const rows = [...document.querySelectorAll<HTMLElement>('[data-testid="message-row"]')];
-        const first = rows.find((r) => r.getBoundingClientRect().top >= t);
-        return first ? { seq: first.dataset.seq!, top: first.getBoundingClientRect().top } : null;
-      });
-      const firstSeq = await page.evaluate(() => {
-        const rows = [...document.querySelectorAll<HTMLElement>('[data-testid="message-row"]')];
-        return Math.min(...rows.map((r) => Number(r.dataset.seq)));
-      });
-      await tl.evaluate((el) => {
-        el.scrollTop = 150;
-      });
-      await page.waitForFunction(
-        (prev) => {
-          if (document.querySelector('[data-testid="timeline-start"]')) return true;
-          const rows = [...document.querySelectorAll<HTMLElement>('[data-testid="message-row"]')];
-          return Math.min(...rows.map((r) => Number(r.dataset.seq))) !== prev;
-        },
-        firstSeq,
-        { timeout: 5000 },
-      );
-      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))));
-      loads++;
-      if (anchor) {
-        const newTop = await page.evaluate(
-          (seq) => document.querySelector<HTMLElement>(`[data-testid="message-row"][data-seq="${seq}"]`)?.getBoundingClientRect().top ?? null,
-          anchor.seq,
+      const beforeSeq = oldestLoaded;
+      const olderPage = (url: URL): boolean => url.origin === origin && url.pathname === "/api/rooms/room-long/messages" &&
+        url.searchParams.get("order") === "desc" && url.searchParams.get("before_seq") === String(beforeSeq);
+      let release!: () => void;
+      const released = new Promise<void>((resolve) => { release = resolve; });
+      let held!: () => void;
+      const requestHeld = new Promise<void>((resolve) => { held = resolve; });
+      await page.route(olderPage, async (route) => {
+        held();
+        await released;
+        await route.continue();
+      }, { times: 1 });
+      try {
+        const requested = page.waitForRequest((request) => olderPage(new URL(request.url())), { timeout: 5000 });
+        await tl.evaluate((el) => { el.scrollTop = 150; });
+        await requested;
+        await requestHeld;
+        await settleTimeline(page);
+        const anchor = await page.evaluate(() => {
+          const timeline = document.querySelector<HTMLElement>('[data-testid="timeline"]')!;
+          const viewport = timeline.getBoundingClientRect();
+          const first = [...timeline.querySelectorAll<HTMLElement>('[data-testid="message-row"]')].find((row) => {
+            const box = row.getBoundingClientRect();
+            return box.top >= viewport.top && box.bottom <= viewport.bottom;
+          });
+          return first ? {
+            seq: first.dataset.seq!,
+            top: first.getBoundingClientRect().top - viewport.top,
+            index: Number(first.parentElement!.dataset.index),
+          } : null;
+        });
+        expect(anchor, "visible anchor after the deliberate scroll").not.toBeNull();
+        const response = page.waitForResponse((res) => olderPage(new URL(res.url())), { timeout: 5000 });
+        release();
+        const olderResponse = await response;
+        expect(olderResponse.status()).toBe(200);
+        const older = await olderResponse.json() as Page_;
+        expect(older.messages.map((message) => message.seq)).toEqual(seqRange(beforeSeq - 50, beforeSeq - 1));
+        await page.waitForFunction(
+          ({ seq, index }) => {
+            const row = document.querySelector<HTMLElement>(`[data-testid="message-row"][data-seq="${seq}"]`);
+            // Date dividers can add more items than the verified message count.
+            return row && Number(row.parentElement!.dataset.index) >= index;
+          },
+          { seq: anchor!.seq, index: anchor!.index + older.messages.length },
+          { timeout: 5000 },
         );
-        if (newTop !== null) {
-          const jump = Math.abs(newTop - anchor.top);
-          maxJump = Math.max(maxJump, jump);
-          expect(jump).toBeLessThanOrEqual(2);
+        await settleTimeline(page);
+        const newTop = await page.evaluate((seq) => {
+          const timeline = document.querySelector<HTMLElement>('[data-testid="timeline"]')!;
+          const row = timeline.querySelector<HTMLElement>(`[data-testid="message-row"][data-seq="${seq}"]`);
+          return row ? row.getBoundingClientRect().top - timeline.getBoundingClientRect().top : null;
+        }, anchor!.seq);
+        expect(newTop, "same anchor after the committed older page").not.toBeNull();
+        const jump = Math.abs(newTop! - anchor!.top);
+        maxJump = Math.max(maxJump, jump);
+        expect(jump).toBeLessThanOrEqual(2);
+        loads++;
+        oldestLoaded = older.messages[0]!.seq;
+        if (!older.has_more) {
+          await tl.evaluate((el) => { el.scrollTop = 0; });
+          await settleTimeline(page);
         }
+      } finally {
+        release();
+        await page.unroute(olderPage);
       }
       const rows = await page.getByTestId("message-row").count();
       maxRows = Math.max(maxRows, rows);

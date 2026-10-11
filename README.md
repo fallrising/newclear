@@ -48,6 +48,7 @@
 | --- | --- | --- | --- |
 | [`platform/fanzloud`](platform/fanzloud/) | Cloud coding-agent platform 與 BYOS control layer | Rust | C |
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
+| [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品、多帳號數位工作者：調用、訊息、持久會話與資源授權（SDD-only） | SQLite、可替換 CLI／SDK／API adapters（規劃） | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（SDD-only） | Go, SQLite, React（規劃） | A |

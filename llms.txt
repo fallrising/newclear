@@ -1,6 +1,6 @@
 # newclear
 
-> `fallrising`'s public technical portfolio: 36 components, many of them previously scattered across separate repositories and now canonical here. Products, gateways and systems software, platform services, desktop applications, tools, specifications and labs.
+> `fallrising`'s public technical portfolio: 37 components, many of them previously scattered across separate repositories and now canonical here. Products, gateways and systems software, platform services, desktop applications, tools, specifications and labs.
 
 This file is the single-fetch index. Each entry links to the component's own `llms.txt` where one exists, otherwise to its README, and carries the documentation tier from the root [README.md](https://github.com/fallrising/newclear/blob/main/README.md) catalog. A component's own capability file is the one to trust about it: it declares tier, status, interface kinds, entrypoint, auth and where the machine-readable contract lives. See [docs/specs/llms-txt.md](https://github.com/fallrising/newclear/blob/main/docs/specs/llms-txt.md) for the format.
 
@@ -29,6 +29,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 ## Platform
 
 - [platform/agent-platform](https://github.com/fallrising/newclear/blob/main/platform/agent-platform/README.md): **A** — self-hosted multi-agent web workbench modelled on OpenHands Agent Canvas, with Cocoon sandboxing. Not a deployment claim; deliberately separate from `fanzloud` and `kith`.
+- [platform/agent-workforce](https://github.com/fallrising/newclear/blob/main/platform/agent-workforce/README.md): **A** — specification for persistent digital workers across agent products, accounts and resources: native CLI/SDK/API routes, durable messaging, session bindings and recovery. SDD only; no runtime, account setup or deployment. Preserves Kith's quota gates and external work acceptance authority.
 - [platform/dim-gate](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/README.md): **A** — CMDB-centred enterprise operations self-service front end, as a demo. Specification baseline, not implemented; [docs/openapi.json](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/docs/openapi.json) is generated from Zod and verified in CI.
 - [platform/edge-ops](https://github.com/fallrising/newclear/blob/main/platform/edge-ops/README.md): **A** — Cloudflare and host-agent monitoring with controlled operations. SDD plus an M0 contract layer; no runtime, no live deployment, monitor-only by default.
 - [platform/signal-hub](https://github.com/fallrising/newclear/blob/main/platform/signal-hub/README.md): **A** — personal event hub: CloudEvents store, rule-generated metrics, subscription delivery. SDD only. It carries events, not decisions or actions.

@@ -1,6 +1,6 @@
 # Portfolio
 
-只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-09-28。
+只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-10-11。
 
 > **權威來源**：投入決策與工作追蹤（做不做、做到哪、下一步）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
 > 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
@@ -37,6 +37,7 @@
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
 | `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/platform/agent-workforce` | 未知 | A | 2026-10-11 本次投入限跨產品數位工作者 SDD：多帳號／權益／資源、原生調用、持久訊息／會話與恢復；重用 Kith 的聊天及可選執行後端，工作完成仍由外部工作系統決定。未實作、未配置帳號、未部署。見 [README](platform/agent-workforce/README.md)。 |
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
 | `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：只負責事件、規則生成指標與投遞；不執行動作、不承載決策（決策系統與執行器另立）。不擴充 edge-ops、dim-gate、hai-taskboard、PIF 的範圍。目前僅 SDD，部署另行授權。見 [README](platform/signal-hub/README.md)。 |
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
@@ -131,6 +132,8 @@ study repo 合併進去。
 `newclear/specs/fleet` 只作 public contract，不形成第二套 runtime。`kernel/infra/specs` 是歷史設計 corpus。
 
 ### Agent 與 LLM 工具
+
+`agent-workforce` 擁有跨產品的工作者／帳號／資源綁定、持久通信與調用協調；本次只到 SDD。Kith 的聊天／個人訂閱喚醒規則、Agent Platform 的隔離 Run、HAI Taskboard 的交付驗收各自保留；Workforce 只透過 adapter 與外部 references 接合，不另造工作完成權威。
 
 `kernel/agents/codex-team-superpowers` 是可驗證的 workflow canonical。`agent-platform`（自管 agent 工作台）、`kith`（人機群聊）、
 `fanzloud`（personal BYOS／Codex Cloud，休眠）責任分開。`pokercase` 不加入 agent orchestration。

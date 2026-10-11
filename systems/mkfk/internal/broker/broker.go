@@ -146,13 +146,15 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	}
 	r := &replica{topic: topic, partition: spec.ID, replicas: spec.Replicas, log: log}
 	b.replicas[peer.GroupID(topic, spec.ID)] = r
-	electionTicks, err := raft.RandomElectionTimeout(b.config.Random)
+	nextElectionTimeout := func() (uint64, error) { return raft.RandomElectionTimeout(b.config.Random) }
+	electionTicks, err := nextElectionTimeout()
 	if err != nil {
 		return err
 	}
 	node, err := raft.NewNode(raft.Config{
 		Identity: raft.Identity{ClusterID: b.manifest.ClusterID, ConfigHash: b.configHash, GroupID: peer.GroupID(topic, spec.ID)},
 		NodeID:   b.self.ID, Voters: spec.Replicas, ElectionTimeoutTicks: electionTicks, HeartbeatTicks: raft.DefaultHeartbeatTicks,
+		NextElectionTimeout: nextElectionTimeout,
 	}, log)
 	if err != nil {
 		return err

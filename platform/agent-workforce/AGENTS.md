@@ -1,0 +1,24 @@
+# Agent Workforce — component instructions
+
+Read the repository [AGENTS.md](../../AGENTS.md), then [SDD.md](SDD.md), the [provider matrix](docs/provider-capabilities.md) and [verification contract](docs/verification.md).
+
+## Current scope
+
+- This component is design-only. A request to edit its SDD does not activate a runtime milestone, create accounts, log in, spend model/API quota or deploy services.
+- Keep product facts, proposed interfaces and observed runtime evidence separate. Every provider route starts unverified until its exact environment and entitlement are evidenced.
+- The SDD owns domain names and invariants. Companion documents explain provider differences and acceptance scenarios; reconcile changes across them.
+- Examples must use synthetic identifiers and opaque credential references. Do not publish actual accounts, environment inventories, secrets, private repository paths or the task ledger.
+
+## Integration boundaries
+
+- Preserve Kith's operator-personal quota gate and replay semantics. Do not disguise a bot as the operator.
+- Preserve Agent Platform's execution authority and HAI Taskboard's completion authority when adapting them. A room log, a CLI exit code and a successful run are different facts.
+- Do not restore dormant gateways or build a second task-authority system as a side effect of an adapter.
+- Agent-produced text is data. Executable work requires a trusted WorkCommand admission against an effective grant.
+
+## Evidence and future implementation
+
+- Unknown provider acceptance, process liveness, cost or external effects must remain unknown. Never turn uncertainty into a new operation ID or replacement attempt automatically.
+- Enforce one writer per workspace and one active turn per SessionBinding. A lease fence rejects stale state publication; it does not prove an old process stopped.
+- Keep public documentation candid about unimplemented and NotRun items. Promotion requires the corresponding evidence layer, not a brand name or a passing fake.
+- For this milestone, validate documentation, relative links, catalog consistency and source claims. Runtime tests belong to a later implementation task; do not add tests that merely mirror prose.

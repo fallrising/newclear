@@ -9,11 +9,8 @@ pub fn env() -> &'static Environment<'static> {
         let mut env = Environment::new();
         env.add_template("dashboard", include_str!("../templates/dashboard.html"))
             .unwrap();
-        env.add_template(
-            "connections",
-            include_str!("../templates/connections.html"),
-        )
-        .unwrap();
+        env.add_template("connections", include_str!("../templates/connections.html"))
+            .unwrap();
         env.add_template("routes", include_str!("../templates/routes.html"))
             .unwrap();
         env.add_template("keys", include_str!("../templates/keys.html"))

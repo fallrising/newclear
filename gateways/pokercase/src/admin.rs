@@ -24,10 +24,7 @@ pub fn router() -> Router<AppState> {
                 .put(update_connection)
                 .delete(delete_connection),
         )
-        .route(
-            "/admin/api/connections/{id}/test",
-            post(test_connection),
-        )
+        .route("/admin/api/connections/{id}/test", post(test_connection))
         .route("/admin/api/routes", get(list_routes).post(create_route))
         .route(
             "/admin/api/routes/{id}",
@@ -45,7 +42,10 @@ pub fn router() -> Router<AppState> {
             post(import_oauth_connection),
         )
         .route("/admin/api/providers", get(list_providers))
-        .route("/admin/api/connections/oauth/refresh-all", post(refresh_all_oauth))
+        .route(
+            "/admin/api/connections/oauth/refresh-all",
+            post(refresh_all_oauth),
+        )
         .route(
             "/admin/api/connections/{id}/refresh",
             post(refresh_one_oauth),
@@ -60,10 +60,7 @@ fn check_admin(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
     }
 }
 
-async fn stats(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn stats(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(state.store.stats()?))
 }
@@ -250,10 +247,7 @@ fn default_strategy() -> String {
     "fallback".into()
 }
 
-async fn list_routes(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn list_routes(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.list_routes()? })))
 }
@@ -288,12 +282,10 @@ async fn create_route(
         .into_iter()
         .map(|t| (t.connection_id, t.model_override))
         .collect();
-    let row = state.store.upsert_route(
-        None,
-        input.public_model.trim(),
-        &input.strategy,
-        &targets,
-    )?;
+    let row =
+        state
+            .store
+            .upsert_route(None, input.public_model.trim(), &input.strategy, &targets)?;
     Ok((StatusCode::CREATED, Json(json!(row))))
 }
 
@@ -336,10 +328,7 @@ async fn delete_route(
     Ok(Json(json!({"ok": true})))
 }
 
-async fn list_keys(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn list_keys(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.list_api_keys()? })))
 }
@@ -407,18 +396,12 @@ async fn disable_key(
     Ok(Json(json!({"ok": true})))
 }
 
-async fn usage(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn usage(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.recent_usage(100)? })))
 }
 
-async fn usage_daily(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn usage_daily(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.usage_by_day(30)? })))
 }
@@ -431,10 +414,7 @@ async fn usage_export_csv(
     let csv = state.store.usage_csv(1000)?;
     Ok((
         [
-            (
-                axum::http::header::CONTENT_TYPE,
-                "text/csv; charset=utf-8",
-            ),
+            (axum::http::header::CONTENT_TYPE, "text/csv; charset=utf-8"),
             (
                 axum::http::header::CONTENT_DISPOSITION,
                 "attachment; filename=\"thinrouter-usage.csv\"",

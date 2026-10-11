@@ -29,7 +29,11 @@ pub fn needs_refresh(conn: &ConnectionRow, lead_secs: i64) -> bool {
     };
     // Support RFC3339 or unix ms / seconds as string numbers
     if let Ok(ms) = exp.parse::<i64>() {
-        let exp_ms = if ms > 1_000_000_000_000 { ms } else { ms * 1000 };
+        let exp_ms = if ms > 1_000_000_000_000 {
+            ms
+        } else {
+            ms * 1000
+        };
         let now = Utc::now().timestamp_millis();
         return exp_ms - now < lead_secs * 1000;
     }
@@ -111,8 +115,7 @@ async fn refresh_claude(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client()
-        .map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://api.anthropic.com/v1/oauth/token")
         .header("content-type", "application/json")
@@ -139,9 +142,9 @@ async fn refresh_claude(refresh_token: &str) -> AppResult<RefreshedTokens> {
     Ok(RefreshedTokens {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token,
-        expires_at: tok.expires_in.map(|s| {
-            (Utc::now() + Duration::seconds(s)).to_rfc3339()
-        }),
+        expires_at: tok
+            .expires_in
+            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
     })
 }
 
@@ -152,8 +155,7 @@ async fn refresh_codex(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client()
-        .map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://auth.openai.com/oauth/token")
         .header("content-type", "application/json")
@@ -180,9 +182,9 @@ async fn refresh_codex(refresh_token: &str) -> AppResult<RefreshedTokens> {
     Ok(RefreshedTokens {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token,
-        expires_at: tok.expires_in.map(|s| {
-            (Utc::now() + Duration::seconds(s)).to_rfc3339()
-        }),
+        expires_at: tok
+            .expires_in
+            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
     })
 }
 
@@ -193,8 +195,7 @@ async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
         refresh_token: Option<String>,
         expires_in: Option<i64>,
     }
-    let client = crate::http_client::build_http_client()
-        .map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://auth.x.ai/oauth2/token")
         .header("content-type", "application/x-www-form-urlencoded")
@@ -221,9 +222,9 @@ async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
     Ok(RefreshedTokens {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token,
-        expires_at: tok.expires_in.map(|s| {
-            (Utc::now() + Duration::seconds(s)).to_rfc3339()
-        }),
+        expires_at: tok
+            .expires_in
+            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
     })
 }
 
@@ -271,7 +272,9 @@ async fn refresh_cursor(refresh_token: &str) -> AppResult<RefreshedTokens> {
         access_token: tok.access_token,
         // Cursor often does not rotate refresh_token; keep old one.
         refresh_token: tok.refresh_token,
-        expires_at: tok.expires_in.map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
+        expires_at: tok
+            .expires_in
+            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
     })
 }
 
@@ -294,8 +297,7 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
             "agy refresh needs THINROUTER_AGY_CLIENT_SECRET (see docs/PROVIDERS.md)".into(),
         )
     })?;
-    let client = crate::http_client::build_http_client()
-        .map_err(|e| AppError::Internal(e))?;
+    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let body = format!(
         "grant_type=refresh_token&refresh_token={}&client_id={}&client_secret={}",
         urlencoding_minimal(refresh_token),
@@ -324,9 +326,9 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
     Ok(RefreshedTokens {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token,
-        expires_at: tok.expires_in.map(|s| {
-            (Utc::now() + Duration::seconds(s)).to_rfc3339()
-        }),
+        expires_at: tok
+            .expires_in
+            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
     })
 }
 

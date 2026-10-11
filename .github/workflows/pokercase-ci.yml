@@ -1,0 +1,36 @@
+name: Pokercase CI
+
+on:
+  pull_request:
+    paths: ["gateways/pokercase/**", ".github/workflows/pokercase-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["gateways/pokercase/**", ".github/workflows/pokercase-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pokercase-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: gateways/pokercase
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
+      - name: Check formatting
+        run: cargo +1.99.0 fmt --check
+      - name: Run offline provider tests
+        run: cargo +1.99.0 test --locked
+      - name: Run static analysis
+        run: cargo +1.99.0 clippy --locked --all-targets -- -D warnings

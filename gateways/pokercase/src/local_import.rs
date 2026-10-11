@@ -22,16 +22,20 @@ fn home() -> PathBuf {
 
 /// Scan known agent credential paths and upsert oauth connections + simple routes.
 pub fn import_all_local(store: &Store, make_routes: bool) -> Result<Vec<ImportResult>> {
-    let mut out = Vec::new();
-    out.push(import_codex(store, make_routes));
-    out.push(import_claude(store, make_routes));
-    out.push(import_grok(store, make_routes));
-    out.push(import_cursor(store, make_routes));
-    out.push(import_opencode(store, make_routes));
-    out.push(import_agy(store, make_routes));
-    Ok(out)
+    Ok(vec![
+        import_codex(store, make_routes),
+        import_claude(store, make_routes),
+        import_grok(store, make_routes),
+        import_cursor(store, make_routes),
+        import_opencode(store, make_routes),
+        import_agy(store, make_routes),
+    ])
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep the existing import adapter's explicit credential and route fields aligned with Store::upsert_oauth_connection"
+)]
 fn upsert(
     store: &Store,
     name: &str,
@@ -64,18 +68,17 @@ fn upsert(
         Ok(row) => {
             if make_routes {
                 let public = format!("rt-{}", profile.map(|p| p.id).unwrap_or(provider));
-                let _ = store.upsert_route(
-                    None,
-                    &public,
-                    "fallback",
-                    &[(row.id.clone(), None)],
-                );
+                let _ = store.upsert_route(None, &public, "fallback", &[(row.id.clone(), None)]);
             }
             ImportResult {
                 provider: provider.into(),
                 name: name.into(),
                 ok: true,
-                detail: format!("id={} model={}", &row.id[..8.min(row.id.len())], model.unwrap_or("-")),
+                detail: format!(
+                    "id={} model={}",
+                    &row.id[..8.min(row.id.len())],
+                    model.unwrap_or("-")
+                ),
             }
         }
         Err(e) => ImportResult {
@@ -115,9 +118,7 @@ fn import_codex(store: &Store, make_routes: bool) -> ImportResult {
         .pointer("/tokens/access_token")
         .and_then(|t| t.as_str())
         .unwrap_or("");
-    let refresh = v
-        .pointer("/tokens/refresh_token")
-        .and_then(|t| t.as_str());
+    let refresh = v.pointer("/tokens/refresh_token").and_then(|t| t.as_str());
     let account_id = v
         .pointer("/tokens/account_id")
         .and_then(|t| t.as_str())
@@ -273,7 +274,8 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
         }
     };
     let entry = v.as_object().and_then(|m| {
-        m.values().find(|v| v.get("key").and_then(|k| k.as_str()).is_some())
+        m.values()
+            .find(|v| v.get("key").and_then(|k| k.as_str()).is_some())
     });
     let Some(entry) = entry else {
         return ImportResult {
@@ -385,7 +387,10 @@ fn import_agy(store: &Store, make_routes: bool) -> ImportResult {
         }
     };
     let tok = &v["token"];
-    let access = tok.get("access_token").and_then(|t| t.as_str()).unwrap_or("");
+    let access = tok
+        .get("access_token")
+        .and_then(|t| t.as_str())
+        .unwrap_or("");
     let refresh = tok.get("refresh_token").and_then(|t| t.as_str());
     let exp = tok.get("expiry").and_then(|t| t.as_str());
     if access.is_empty() && refresh.unwrap_or("").is_empty() {
@@ -423,7 +428,11 @@ pub async fn refresh_all_oauth(store: &Store) -> Result<Vec<(String, bool, Strin
         if c.auth_type != "oauth_import" {
             continue;
         }
-        if c.oauth.as_ref().and_then(|o| o.refresh_token.as_ref()).is_none() {
+        if c.oauth
+            .as_ref()
+            .and_then(|o| o.refresh_token.as_ref())
+            .is_none()
+        {
             continue;
         }
         match oauth_refresh::refresh_connection(store, &c).await {

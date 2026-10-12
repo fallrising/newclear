@@ -1,6 +1,6 @@
 # Signal Hub — Software Design Document
 
-版本：0.1 + M0 契約釐清 · 日期：2026-10-03 · runtime 狀態見 docs/STATUS.md。
+版本：0.1 + M3 runtime 釐清 · 日期：2026-10-12 · runtime 狀態見 docs/STATUS.md。
 
 ## 1. 結論與理由
 
@@ -77,7 +77,7 @@ flowchart LR
 | 後端 | Go，單一 binary | 與 onefleet、goku、prism 同語言；週期工作與 HTTP 服務放同一個 process 最簡單 |
 | 儲存 | SQLite（WAL 模式） | 量級小；單檔易備份；不需另外維運資料庫 |
 | 前端 | React + TypeScript + Vite，建置後以 `go:embed` 內嵌 | 與 dim-gate、edge-ops 一致；部署只有一個檔案 |
-| 圖表 | 候選 Apache ECharts | 44.02 已評估；M3 前確認授權與 bundle 大小 |
+| 圖表 | 既有 React + SVG | M3 不新增 runtime dependency；圖表與精確值表共同提供趨勢與可讀數值 |
 | 設定 | YAML 檔，M1 先支援 strict JSON 子集；設定由 git 管理 | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
 | 部署 | OneFleet 管理的一個 workload（需另行授權） | 不另建部署機制 |
 

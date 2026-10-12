@@ -22,10 +22,11 @@ import (
 )
 
 var (
-	ErrConflict     = errors.New("event content conflicts with existing source and id")
-	ErrUnavailable  = errors.New("event database unavailable")
-	ErrNotFound     = errors.New("event not found")
-	ErrInvalidQuery = errors.New("invalid event query")
+	ErrConflict      = errors.New("event content conflicts with existing source and id")
+	ErrUnavailable   = errors.New("event database unavailable")
+	ErrNotFound      = errors.New("event not found")
+	ErrInvalidQuery  = errors.New("invalid event query")
+	ErrInvalidConfig = errors.New("invalid runtime configuration")
 )
 
 // BusyTimeout bounds SQLite lock waits. Context cancellation may shorten them.
@@ -36,6 +37,9 @@ var migration1 string
 
 //go:embed migrations/002_sources.sql
 var migration2 string
+
+//go:embed migrations/003_rules.sql
+var migration3 string
 
 type Store struct{ db *sql.DB }
 type Result struct {
@@ -123,7 +127,7 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err := tx.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return unavailable(err)
 	}
-	if version < 0 || version > 2 {
+	if version < 0 || version > 3 {
 		return unavailable(fmt.Errorf("unsupported schema version %d", version))
 	}
 	switch version {
@@ -142,7 +146,15 @@ func (s *Store) initialize(ctx context.Context) error {
 		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 2"); err != nil {
 			return unavailable(err)
 		}
+		fallthrough
 	case 2:
+		if _, err := tx.ExecContext(ctx, migration3); err != nil {
+			return unavailable(err)
+		}
+		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 3"); err != nil {
+			return unavailable(err)
+		}
+	case 3:
 	}
 	if err := tx.Commit(); err != nil {
 		return unavailable(err)

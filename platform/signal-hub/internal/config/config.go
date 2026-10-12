@@ -1,6 +1,5 @@
-// Package config loads the M1 executable subset of the M0 configuration.
-// Input is strict JSON (also a YAML 1.2 subset). YAML syntax and nonempty rules
-// or subscriptions are deliberately rejected until their runtime milestones.
+// Package config loads strict JSON source and rule configuration.
+// General YAML and nonempty subscriptions await their runtime milestones.
 package config
 
 import (
@@ -12,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/event"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 )
 
 type Source struct {
@@ -70,10 +70,20 @@ func Parse(raw []byte) (*Config, error) {
 		}
 		arrays[k] = a
 	}
-	if len(arrays["rules"]) != 0 || len(arrays["subscriptions"]) != 0 {
-		return nil, fmt.Errorf("M1 does not execute rules or subscriptions; both arrays must be empty")
+	if len(arrays["subscriptions"]) != 0 {
+		return nil, fmt.Errorf("subscriptions are not supported yet; the array must be empty")
 	}
 	c := &Config{Sources: []Source{}, Rules: []json.RawMessage{}, Subscriptions: []json.RawMessage{}, WebhookAllowlist: []string{}}
+	for _, entry := range arrays["rules"] {
+		body, err := json.Marshal(entry)
+		if err != nil {
+			return nil, fmt.Errorf("invalid rule JSON")
+		}
+		c.Rules = append(c.Rules, body)
+	}
+	if _, err := rules.Parse(c.Rules); err != nil {
+		return nil, fmt.Errorf("invalid rules: %w", err)
+	}
 	seen := map[string]bool{}
 	for _, entry := range arrays["sources"] {
 		row, ok := entry.(map[string]any)

@@ -3,6 +3,7 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
 
 export async function startFixture() {
   const directory = await mkdtemp(join(tmpdir(), 'signalhub-browser-'));
@@ -69,6 +70,18 @@ export async function startFixture() {
     async function touchWatch(){
       return api('/v1/events',{role:'watch',method:'POST',body:{specversion:'1.0',id:'watch-'+(++watchID),source:'urn:example:watch:checks',type:'inspection.check.passed',time:new Date().toISOString(),summary:'Watch heartbeat'}});
     }
-    return {base,tokens,api,touchWatch,stop};
+    async function configureRules(rules) {
+      config.rules=rules;
+      await writeFile(join(directory,'config.json'),JSON.stringify(config),{mode:0o600});
+      return api('/v1/config:reload',{role:'owner',method:'POST'});
+    }
+    function expireMetricHistory() {
+      // Synthetic retention fixture only: emulate an older event no longer in
+      // hot storage while retaining its already-computed rollups for AC-44.
+      const db=new DatabaseSync(join(directory,'events.db'));
+      try { db.prepare('DELETE FROM events WHERE source=? AND id=?').run('urn:example:demo:service','metric-history'); }
+      finally { db.close(); }
+    }
+    return {base,tokens,api,touchWatch,configureRules,expireMetricHistory,stop};
   }catch(error){await stop();throw error}
 }

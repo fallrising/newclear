@@ -31,6 +31,7 @@
 | --- | --- | --- |
 | GET | `/v1/events?from&to&source&type&severity_min&subject_prefix&correlationid&q&cursor&limit` | 查詢事件；`type` 支援結尾 `*` |
 | GET | `/v1/events/{seq}` | 單筆事件與它的關聯鏈 |
+| GET | `/v1/rules?cursor&limit` | 生效規則的安全定義，不含憑證；id 升序 |
 | GET | `/v1/metrics/{rule_id}?from&to&group` | rollup 時間序列，含版本與 `partial` 標記 |
 | GET | `/v1/sources` | 來源新鮮度 |
 | GET | `/v1/subscriptions`、`/v1/deliveries?subscription&state&cursor` | 投遞狀態 |

@@ -150,10 +150,11 @@ def main():
         assert actual.decode() == case['canonical'] and hashlib.sha256(actual).hexdigest() == case['sha256'], case['name']
     api = loads((ROOT/'openapi.json').read_text())
     def local_reference(uri):
-        allowed = {'./schemas/event.schema.json', (ROOT/'schemas/event.schema.json').as_uri()}
-        if uri not in allowed:
-            raise ValueError(f'nonlocal or unknown reference: {uri}')
-        return SCHEMAS['event']
+        for name, schema in SCHEMAS.items():
+            if uri in {f'./schemas/{name}.schema.json', f'schemas/{name}.schema.json',
+                       f'{name}.schema.json', (ROOT/f'schemas/{name}.schema.json').as_uri()}:
+                return schema
+        raise ValueError(f'nonlocal or unknown reference: {uri}')
     document = SchemaPath.from_dict(api, base_uri=(ROOT/'openapi.json').as_uri(),
                                    handlers={'<all_urls>': local_reference})
     OpenAPIV31SpecValidator(document).validate()

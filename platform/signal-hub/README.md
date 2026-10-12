@@ -1,10 +1,10 @@
 # Signal Hub
 
-> **Portfolio doc tier: A (active design)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [進度與阻擋](docs/STATUS.md)。
+> **Portfolio doc tier: A (active)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [進度與阻擋](docs/STATUS.md)。
 
-個人用的多來源事件中樞。M2 已有可在本機執行的 Go runtime、SQLite WAL、事件 ingest／查詢、token 授權、Alertmanager v4 adapter、唯讀事件看板與來源新鮮度。從[快速開始](docs/quickstart.md)建置並執行；runtime 邊界見 [M1 runtime 契約](docs/runtime.md)，目前進度以[狀態文件](docs/STATUS.md)為準。
+個人用的多來源事件中樞。M3 已有可在本機執行的 Go runtime、SQLite WAL、事件 ingest／查詢、token 授權、Alertmanager v4 adapter、唯讀事件看板、來源新鮮度、版本化規則指標及 SVG 圖表。從[快速開始](docs/quickstart.md)建置並執行；runtime 邊界見 [M1 runtime 契約](docs/runtime.md)，目前進度以[狀態文件](docs/STATUS.md)為準。
 
-規則與指標、訂閱和投遞、保留與封存及部署仍是後續目標。專案不替告警系統評估告警，也不判斷或執行應對動作；決策系統與執行器屬於其他元件。
+訂閱和投遞、保留與封存及部署仍是後續目標。專案不替告警系統評估告警，也不判斷或執行應對動作；決策系統與執行器屬於其他元件。
 
 ## 閱讀入口
 
@@ -18,10 +18,10 @@
 
 ## 責任邊界
 
-| 已提供的 M1–M2 能力 | 後續目標 |
+| 已提供的 M1–M3 能力 | 後續目標 |
 | --- | --- |
 | 接收、驗證、授權、去重並保存事件 | 保留清理、封存與還原 |
-| 按條件查詢事件、來源新鮮度 | 規則計算指標、門檻事件 |
+| 查詢事件、來源新鮮度、規則指標與門檻事件 | 真實生產者持續驗證 |
 | Alertmanager v4 webhook 轉換 | 訂閱、投遞、重試與 DLQ |
 | 同一 Go binary 提供唯讀時間線與詳情 UI | 部署與持續運作 |
 

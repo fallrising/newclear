@@ -61,6 +61,7 @@ jobs:
           /tmp/signalhub-contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
           /tmp/signalhub-contracts/bin/python contracts/check.py
           /tmp/signalhub-contracts/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
       - name: Real Go binary browser acceptance
         working-directory: platform/signal-hub/browser
         env:
@@ -72,3 +73,11 @@ jobs:
           test -x "$SIGNALHUB_CHROMIUM"
           "$SIGNALHUB_CHROMIUM" --version
           npm test
+      - name: Browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signal-hub-browser
+          path: platform/signal-hub/browser/test-results/
+          retention-days: 14
+          if-no-files-found: ignore

@@ -39,7 +39,7 @@
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
 | `newclear/platform/agent-workforce` | 未知 | A | 2026-10-11 本次投入限跨產品數位工作者 SDD：多帳號／權益／資源、原生調用、持久訊息／會話與恢復；重用 Kith 的聊天及可選執行後端，工作完成仍由外部工作系統決定。未實作、未配置帳號、未部署。見 [README](platform/agent-workforce/README.md)。 |
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
-| `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：只負責事件、規則生成指標與投遞；不執行動作、不承載決策（決策系統與執行器另立）。不擴充 edge-ops、dim-gate、hai-taskboard、PIF 的範圍。目前僅 SDD，部署另行授權。見 [README](platform/signal-hub/README.md)。 |
+| `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：已提供事件寫入、來源新鮮度、看板、規則指標與門檻事件；投遞與封存待後續里程碑。部署另行授權。見 [README](platform/signal-hub/README.md)。 |
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
 | `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
 | `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |

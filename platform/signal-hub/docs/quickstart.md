@@ -1,6 +1,6 @@
-# Quickstart — M2 本機事件中樞
+# Quickstart — M3 本機事件中樞
 
-M2 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。規則執行、投遞、封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
+M3 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。M3 已提供規則指標與圖表；投遞、封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
 以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
@@ -11,7 +11,7 @@ go build -o /tmp/signalhub ./cmd/signalhub
 mkdir -p .local
 ```
 
-用 Python 建立三個互不相同的 token 檔案和完整 M1 設定。權限由 `umask 077` 限制；token 不會印到終端機，也不會放進命令列參數。
+用 Python 建立三個互不相同的 token 檔案和初始設定。權限由 `umask 077` 限制；token 不會印到終端機，也不會放進命令列參數。
 
 ```sh
 python3 - <<'PY'
@@ -154,6 +154,7 @@ go vet ./...
 go build -o /tmp/signalhub ./cmd/signalhub
 /tmp/signalhub-checks/bin/python contracts/check.py
 /tmp/signalhub-checks/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
+/tmp/signalhub-checks/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
 ```
 
 `e2e_smoke.py` 使用本機合成憑證及暫存資料庫執行 HTTP／SQLite smoke test，不會部署服務或連接外部系統。契約檢查驗證 schemas、fixtures、vectors 與 OpenAPI；它不取代 runtime 測試。
@@ -167,3 +168,39 @@ npm ci
 npx playwright install --with-deps chromium
 SIGNALHUB_BINARY=/tmp/signalhub npm test
 ```
+
+## 加入第一條指標規則
+
+先完成上述啟動與事件寫入。以下修改本機 JSON 設定並由 owner 呼叫重載；token 不會印到輸出。看板的「指標趨勢」會顯示目前未結束的桶，之後每分鐘更新資料；按「重新查詢指標」取得最新結果。
+
+```sh
+python3 - <<'PYCODE'
+import json
+from pathlib import Path
+from urllib.request import Request, urlopen
+local = Path('.local')
+path = local / 'config.json'
+config = json.loads(path.read_text())
+config['rules'] = [{
+    'id': 'demo-count', 'version': 1, 'title': '示範事件數',
+    'filter': {'types': ['demo.event.*']},
+    'aggregation': {'fn': 'count'}, 'bucket': '1h',
+    'threshold': {'op': '>=', 'value': 3, 'for_buckets': 2, 'severity': 'warning'},
+}]
+path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n')
+headers = {'Authorization': 'Bearer ' + (local / 'owner.token').read_text().strip()}
+with urlopen(Request('http://127.0.0.1:8080/v1/config:reload', headers=headers, method='POST')) as response:
+    assert response.status == 200
+    print('configuration reloaded')
+PYCODE
+```
+
+變更規則內容時必須使用新 version；同版本內容不同會回400，舊設定仍生效。圖表的虛線／空心點表示 partial，垂直線表示版本分隔，資料表保留精確數字與空值。切換時間或分組可縮小結果；圖表載入全部分頁後才顯示。
+
+需要手動回填時先停止服務，再執行（日期換成所需的 UTC 起點）：
+
+```sh
+/tmp/signalhub rules backfill --config .local/config.json --db .local/events.db --rule demo-count --from 2026-10-01
+```
+
+此命令只重新計算已生效規則，不修改來源、規則版本或 token。自動回填仍以資料庫實際保留的最早事件為界；本階段尚未執行 retention cleanup。

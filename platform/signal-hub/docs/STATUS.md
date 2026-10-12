@@ -34,3 +34,5 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 - 200分組上限包含前桶保留的zero／null系列；新增分組可能進入`__other__`。圖表完整載入所選區间的全部分頁，大範圍／高基數會增加瀏覽器記憶體使用。舊版本bucket寬度變更時可能呈現離散點，精確資料仍可查表。
 - 尚無retention cleanup；recomputable_from是實際保留的最早事件，並非已套用90天政策。單次評估／回填最多1,000,000桶，超過時明確拒絕且不截斷。
 - readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、tailnet ACL、非root部署及持續運作。M4投遞、M5封存還原、M6真實來源／部署驗收各自獨立；部署仍需明確授權。
+
+首次M3遠端CI run38292215976的6個browser案例中5個通過；指標主流程斷言通過，但console404使最後檢查失敗。補上隨binary提供的favicon與Go資源回歸測試；CI另安裝Noto CJK測試字型以修正截圖缺字。最終瀏覽器結果與截圖驗收見[PR #349](https://github.com/fallrising/newclear/pull/349)及[PLAN](../.team/PLAN.md)，保留首次失敗紀錄。

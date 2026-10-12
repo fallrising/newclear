@@ -5,7 +5,8 @@ test('real metrics retain history, paginate, render versions and partial buckets
   const hub = await startFixture();
   const failures = [];
   page.on('pageerror', error => failures.push(error.message));
-  page.on('console', message => { if (message.type() === 'error') failures.push(message.text()); });
+  page.on('console', message => { if (message.type() === 'error') failures.push(message.text()+' '+message.location().url); });
+  page.on('response', response => { if (response.status() >= 400) failures.push('HTTP '+response.status()+' '+response.url()); });
   try {
     const now=Date.now();
     const makeEvent=(id,time,subject)=>({specversion:'1.0',id,source:'urn:example:demo:service',type:'release.deploy.succeeded',time:new Date(time).toISOString(),subject});

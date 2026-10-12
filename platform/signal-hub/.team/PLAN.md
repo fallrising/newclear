@@ -55,3 +55,11 @@ Root is applying codex-evidence-gate: worker assertions alone do not close gates
 Final integrated code passed `go test -race -count=1 ./...` (9 packages; store209.086s), `go vet ./...`, `test -z "$(gofmt -l .)"`, `go build -trimpath -o .local/run/signalhub-m3 ./cmd/signalhub`, contract checker (6 schemas/61 fixtures/15 webhook/5 canonical vectors), M1/M2 real HTTP smoke34 and M3 real HTTP39. Root independently ran `npm ci`, `npm run format:check`, `npm test` (17), `npm run build`, then verified rebuilt dist against the staged tree. Workflow actionlint1.7.7, task/report validators and `git diff --check` passed. Logs remain local evidence, with durable handoff pointers recorded separately.
 
 Remote browser gate will run6 scenarios (5 existing plus M3) against the real Go binary with sandbox enabled. Its screenshots must be inspected before final acceptance; supported runner evidence does not change T-303's local diagnostic outcome.
+
+## First remote candidate and bounded browser rework
+
+PR [349](https://github.com/fallrising/newclear/pull/349), implementation `fb86fe832428ece16bed01e3f243dfce7e16a186`. First CI [38292215976](https://github.com/fallrising/newclear/actions/runs/38292215976) passed all native/contract/HTTP checks and5 existing browser cases; M3 functional/chart/mobile/logout assertions passed but its strict console gate reported a404. Browser acceptance is not accepted on that run.
+
+The board declared no favicon. Add a bundled, hashed SVG using the existing signal mark, and a focused embed test that first failed for the missing declaration then passed for a served SVG. Keep strict console/pageerror checks and also capture failed response URLs. Screenshot review found missing CJK glyphs in the ephemeral CI runner; install its distro Noto CJK test fonts before browser execution. No application dependency or browser-sandbox policy changes. T-305 independently reviews this bounded follow-up; final CI and readable desktop/mobile screenshots are still required.
+
+T-305 scoped review accepted: independently verified embedded SVG (race test1.045s), strict browser checks and CI-only font prerequisites. The ignored generated SVG was explicitly force-added and verified tracked. First404 resource identity was not captured; its closure still requires the next complete strictbrowser pass.

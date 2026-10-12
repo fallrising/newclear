@@ -39,3 +39,5 @@ CI uses the Ubuntu 24.04 runner's preinstalled Google Chrome at
 AppArmor policy. The browser version is printed in the job log. This preserves
 Chromium sandboxing without changing host security policy; the local default
 continues to use Playwright's pinned Chromium download.
+
+M3 adds a real metric browser flow: active-rule reload, more than 200 retained rollups, two versions, partial/threshold markers, group selection, desktop/mobile layout and logout. Its isolated synthetic database fixture removes only its own historical event to emulate a future retention boundary; production retention is not claimed. API requests are not mocked. Console/page exceptions fail this test, and CI uploads screenshots for review.

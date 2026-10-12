@@ -18,6 +18,7 @@ import (
 	"github.com/fallrising/newclear/platform/signal-hub/internal/auth"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/config"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/httpapi"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
 	"github.com/fallrising/newclear/platform/signal-hub/web"
 )
@@ -49,6 +50,9 @@ func listenAddress(value string) (string, error) {
 }
 
 func run(ctx context.Context, args []string, output io.Writer) error {
+	if len(args) >= 2 && args[0] == "rules" && args[1] == "backfill" {
+		return backfill(ctx, args[2:], output)
+	}
 	flags := flag.NewFlagSet("signalhub", flag.ContinueOnError)
 	flags.SetOutput(output)
 	configPath := flags.String("config", "", "strict JSON configuration path (required)")
@@ -82,23 +86,31 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		return errors.New("database could not be opened or migrated")
 	}
 	defer db.Close()
-	if err := db.ConfigureSources(ctx, cfg.Sources, time.Now().UTC()); err != nil {
-		return errors.New("source configuration could not be initialized")
+	definitions, err := rules.Parse(cfg.Rules)
+	if err != nil {
+		return errors.New("rule configuration is invalid")
+	}
+	if err := db.ConfigureRuntime(ctx, cfg.Sources, definitions, time.Now().UTC(), false); err != nil {
+		return errors.New("source or rule configuration could not be initialized; verify rule versions")
 	}
 	if err := db.EvaluateSources(ctx, time.Now().UTC()); err != nil {
 		return errors.New("source freshness could not be initialized")
+	}
+	handler := httpapi.NewRuntime(db, credentials, httpapi.ReloadOptions{ConfigPath: *configPath, OwnerRef: *ownerRef, ReadOnlyRef: *readonlyRef})
+	if err := handler.EvaluateRules(ctx, time.Now().UTC()); err != nil {
+		fmt.Fprintln(output, "signalhub: rule evaluation failed; retrying each minute")
 	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return errors.New("could not bind requested interface")
 	}
 	server := &http.Server{
-		Handler:           web.Handler(httpapi.New(db, credentials)),
+		Handler:           web.Handler(handler),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
-		MaxHeaderBytes:    16 << 10,
+		MaxHeaderBytes:    128 << 10, // bounded escaped metric group keys from <=16 KiB event data
 	}
 	workerCtx, stopWorker := context.WithCancel(ctx)
 	workerDone := make(chan struct{})
@@ -106,13 +118,19 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		defer close(workerDone)
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
+		ruleTicker := time.NewTicker(time.Minute)
+		defer ruleTicker.Stop()
 		for {
 			select {
 			case <-workerCtx.Done():
 				return
 			case now := <-ticker.C:
-				if err := db.EvaluateSources(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
+				if err := handler.EvaluateSources(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
 					fmt.Fprintln(output, "signalhub: source freshness evaluation failed; retrying")
+				}
+			case now := <-ruleTicker.C:
+				if err := handler.EvaluateRules(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
+					fmt.Fprintln(output, "signalhub: rule evaluation failed; retrying each minute")
 				}
 			}
 		}

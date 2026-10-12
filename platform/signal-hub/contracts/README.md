@@ -28,7 +28,7 @@ python3 -m venv /tmp/signalhub-contracts
 
 ## M0 補足的決定
 
-以下決定把 SDD v0.1 的未定細節固定下來，供下一階段實作。保留期、圖表套件與部署仍未定。
+以下決定把 SDD v0.1 的未定細節固定下來，供下一階段實作。保留期與部署仍未定；M3 圖表使用既有 React/SVG。
 
 ### 事件與雜湊
 
@@ -72,4 +72,6 @@ checker 另以 RFC 4231 test case 1 核對 HMAC 已知答案。所有 keys、ID�
 
 ## 尚未驗證
 
-本 checker 不執行 ingest、SQLite、token 授權或持久化驗證。M1 另有 Go 測試及真實 binary HTTP／SQLite smoke；見 [quickstart](../docs/quickstart.md)。OpenAPI 尚含後續階段的路由，不能由文件通過推斷所有 endpoint 已實作。rule evaluator、dispatcher、來源新鮮度、一般 YAML loader、UI 與部署仍未驗收。
+本 checker 不執行 ingest、SQLite、token 授權或持久化驗證。M1 另有 Go 測試及真實 binary HTTP／SQLite smoke；見 [quickstart](../docs/quickstart.md)。OpenAPI 尚含後續階段的路由，不能由文件通過推斷所有 endpoint 已實作。M3 的 rule evaluator、來源新鮮度與 UI 由 runtime 測試驗證；dispatcher、一般 YAML loader、封存與部署仍未實作。
+
+M3 補充 `GET /v1/rules` 的安全規則列表；完整生效定義及 metric 查詢的契約由 OpenAPI 驗證。HTTP smoke 分為 M1–M2 `e2e_smoke.py` 與 M3 `e2e_rules.py`。

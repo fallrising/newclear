@@ -64,6 +64,21 @@ func hashJSON(v any) string {
 
 // ConfigureSources reconciles attribution scopes without guessing from event URIs.
 func (s *Store) ConfigureSources(ctx context.Context, sources []config.Source, now time.Time) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return unavailable(err)
+	}
+	defer tx.Rollback()
+	if err := configureSourcesTx(ctx, tx, sources, now); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return unavailable(err)
+	}
+	return nil
+}
+
+func configureSourcesTx(ctx context.Context, tx *sql.Tx, sources []config.Source, now time.Time) error {
 	seen := map[string]bool{}
 	for _, source := range sources {
 		if seen[source.Name] {
@@ -76,11 +91,6 @@ func (s *Store) ConfigureSources(ctx context.Context, sources []config.Source, n
 			}
 		}
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return unavailable(err)
-	}
-	defer tx.Rollback()
 	existing, err := loadSources(ctx, tx, false)
 	if err != nil {
 		return err
@@ -125,9 +135,6 @@ func (s *Store) ConfigureSources(ctx context.Context, sources []config.Source, n
 		if err != nil {
 			return unavailable(err)
 		}
-	}
-	if err = tx.Commit(); err != nil {
-		return unavailable(err)
 	}
 	return nil
 }

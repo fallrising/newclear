@@ -935,7 +935,7 @@
       "post": {
         "operationId": "reloadConfig",
         "summary": "Atomically reload git-managed configuration",
-        "description": "Owner only. No request body; reread the configured sources/rules/subscriptions files and validate the complete configuration. Reject invalid configuration with invalid_config (400), keep the old effective configuration, and emit signalhub.config.rejected. Success emits signalhub.config.reloaded and writes audit_log. This does not edit configuration or expose metadata endpoints.",
+        "description": "Owner only. No request body; reread the configured sources/rules/subscriptions files and validate the complete configuration. Reject invalid configuration with invalid_config (400), keep the old effective configuration, and emit signalhub.config.rejected. Success emits signalhub.config.reloaded and writes audit_log. This does not edit configuration or expose metadata endpoints. M3 executes source and rule reloads; nonempty subscriptions remain unsupported. Projection evaluation follows activation; an evaluation failure does not undo an accepted configuration.",
         "security": [
           {
             "ownerBearer": []
@@ -1117,6 +1117,81 @@
             }
           }
         }
+      }
+    },
+    "/v1/rules": {
+      "get": {
+        "operationId": "listRules",
+        "summary": "Active rule definitions",
+        "description": "Safe active rule definitions ordered by id. Owner or read-only token required. Cursor is bound to the active definition snapshot; retry from the first page after a reload.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ]
       }
     }
   },
@@ -2305,6 +2380,29 @@
         ],
         "additionalProperties": true,
         "description": "M1 local Alertmanager webhook v4 mapping; up to 100 alerts, including an empty heartbeat. Real producer integration is M6."
+      },
+      "RulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "./schemas/rules.schema.json#/properties/rules/items"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {

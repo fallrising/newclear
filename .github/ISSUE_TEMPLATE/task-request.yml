@@ -1,0 +1,71 @@
+name: Task request
+description: Request a scoped component outcome for manual triage.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Intake is not work authorization. Phase 1 enrolls only tools/codex-usage.
+        Existing private-ledger claims and Desk-Task trailers remain mandatory. Other components retain the private-ledger workflow.
+        This repository is public: omit private content/links, names/paths, hosts/IPs, domains, accounts, and credentials.
+        Use abstract private authorization references only.
+        Component selection does not apply a project label; the orchestrator triages manually.
+        After routing, link the component task directory in this issue. The issue stays open until owner acceptance.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the requested change.
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Select the exact repository component path; selection does not apply labels.
+      options:
+        - products/goku
+        - products/phark
+        - products/kith
+        - products/hai-taskboard
+        - gateways/pokercase
+        - systems/clarkq
+        - systems/snail
+        - systems/ojbquay
+        - systems/wotar
+        - systems/mkfk
+        - platform/fanzloud
+        - platform/agent-platform
+        - platform/agent-workforce
+        - platform/dim-gate
+        - platform/edge-ops
+        - platform/signal-hub
+        - platform/ice-maker
+        - platform/local-ocr-services
+        - platform/prism
+        - apps/loom
+        - apps/flowshot
+        - apps/cloudform
+        - apps/cms-scaffold
+        - tools/cc-quota
+        - tools/codex-usage
+        - tools/streaming-converter
+        - specs/fleet
+        - examples/bite-pi
+        - labs/bee-swarm
+        - labs/aweshore
+        - labs/eru-vps-mvp
+        - labs/open-compute
+        - labs/openmmo-lab
+        - labs/mithril-research
+        - labs/zircon-godot
+        - labs/pg-jev-router
+        - labs/browser-fingerprint
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected outcome
+      description: State the observable result and why it is needed; detailed scope follows in task.md.
+    validations:
+      required: true

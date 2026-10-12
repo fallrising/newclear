@@ -20,6 +20,21 @@
 **Commit trailer：** 2026-09-28 起，開發工作先在私人項目帳本開任務，每個 commit 帶 `Desk-Task: T-####` trailer；
 依賴更新 bot、mirror 與 owner 標記的 hotfix（帶 `Desk-Exempt: <原因>`）例外。沒有 trailer 的 commit 會在定期稽核中被列出。
 
+### Phase 1 issue-task pilot
+
+The public pilot is limited to [`tools/codex-usage`](tools/codex-usage/).
+[The contract](docs/work-tracking/README.md) keeps detailed tasks and reports beside the component, with a GitHub
+issue as their identity and queue. Existing private-ledger claims and `Desk-Task: T-####` trailers remain mandatory;
+the root orchestrator assigns pilot work serially. Assignees and draft PRs are visibility, not exclusive locks.
+Use `Refs #N`; merging delivers the change, and the issue stays open until the owner accepts and closes it.
+
+Start with the [task template](docs/work-tracking/task-template.md),
+[report template](docs/work-tracking/report-template.md), and [request form](.github/ISSUE_TEMPLATE/task-request.yml).
+The [versioned label manifest](docs/work-tracking/labels.json) describes manual triage; a form's component selection
+does not apply its project label or mark it ready. Sanitize public issues, PRs, files, and evidence; private
+authorization is recorded only through abstract references. See the contract's manual validation checklist.
+Phase 2 dispatch/claim automation and later migration phases are not implemented.
+
 ## 目錄
 
 ### 產品

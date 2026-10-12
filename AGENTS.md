@@ -28,6 +28,20 @@ private details into commits, pull requests or files here.
 `.team/PLAN.md` and `docs/HANDOFF.md` inside components are worker breakdowns and handoff notes, not investment
 decisions; their `.team/T-###` numbers are a different layer from the ledger's `T-####`.
 
+## Phase 1 issue-task pilot
+
+Only `tools/codex-usage` is enrolled in this repository's pilot. Follow
+[the issue-task contract](docs/work-tracking/README.md): an issue identifies the work; detailed scope and evidence
+live in `<component>/tasks/<issue-number>-<slug>/task.md` and `report.md`. Use `Refs #N` in PRs; a merge delivers
+the change, and the issue remains open until the owner accepts it and closes it.
+
+The existing published private-ledger `doing` claim, Scope/`touches`, and `Desk-Task: T-####` commit trailer remain
+mandatory. The root orchestrator assigns pilot work serially. An assignee or draft PR provides visibility,
+not an exclusive lock. `.team` files still bound workers; a worker's `DONE` report is evidence, not owner acceptance.
+Use abstract private-config authorization references; sanitize public files, issues, PRs, and evidence.
+Do not roll this out to other components or migrate private history. Dispatcher/concurrent-claim guarantees and
+later transitions require separate authorization.
+
 ## Writing Go
 
 Before writing, modifying or refactoring Go code anywhere in this repository, use the shared

@@ -39,8 +39,13 @@ The existing published private-ledger `doing` claim, Scope/`touches`, and `Desk-
 mandatory. The root orchestrator assigns pilot work serially. An assignee or draft PR provides visibility,
 not an exclusive lock. `.team` files still bound workers; a worker's `DONE` report is evidence, not owner acceptance.
 Use abstract private-config authorization references; sanitize public files, issues, PRs, and evidence.
-Do not roll this out to other components or migrate private history. Dispatcher/concurrent-claim guarantees and
-later transitions require separate authorization.
+Do not roll this out to other components or migrate private history. Phase 2 uses an explicitly invoked
+manual dispatcher and private control receipts under [the contract](docs/work-tracking/README.md#phase-2-manual-dispatch-and-claims).
+Before each triage metadata write, inspect the held singleton's exact current head and claim ID. Product edits
+also require a valid issue claim receipt, published private-ledger doing scope and bounded worker authority.
+Assignees/draft PRs alone do not grant exclusivity. Honor owner edits at work checkpoints; uncertain or denied
+claims grant no work. Keep private receipts/configuration abstract in public records. No broader enrollment,
+phase 3 migration, daemon, scheduling or deployment is authorized here.
 
 ## Writing Go
 

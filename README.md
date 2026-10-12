@@ -33,7 +33,11 @@ Start with the [task template](docs/work-tracking/task-template.md),
 The [versioned label manifest](docs/work-tracking/labels.json) describes manual triage; a form's component selection
 does not apply its project label or mark it ready. Sanitize public issues, PRs, files, and evidence; private
 authorization is recorded only through abstract references. See the contract's manual validation checklist.
-Phase 2 dispatch/claim automation and later migration phases are not implemented.
+Phase 2 extends the existing pilot with explicitly invoked manual dispatch and validated private control
+receipts; see [the bounded receipt gates](docs/work-tracking/README.md#phase-2-manual-dispatch-and-claims).
+Singleton and issue receipts supplement published tracking authority; assignment/draft PR are visibility only.
+Owner changes still govern work, and merge still awaits owner acceptance. Integration evidence and owner
+fixture judgment remain separate. Production enrollment is unchanged; later migration phases remain out of scope.
 
 ## 目錄
 

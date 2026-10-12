@@ -34,6 +34,19 @@ Out of scope：
 - **真實 Codex CLI/App Server 版本、目標帳號登入與 live schema 尚未在目標主機驗收。**
 - 先前對話中的完整 prototype 有 51 項離線測試通過；本 repo 收斂為較小的 maintainable seed，後續應以目標 CLI 實際 schema 補強 adapter，而不是把未驗證 schema 固化成事實。
 
+## Reporting evidence
+
+Offline unit tests and compilation verify the local seed; they do not verify the installed Codex CLI,
+account/workspace, live App Server schema, or a real snapshot. Report each command's actual result and
+keep hosted CI and independent review separate. Follow the
+[delivery report example](docs/quickstart.md#delivery-report-example); retain **offline-tested / live-unverified**
+until the [live acceptance gate](docs/quickstart.md#acceptance-gate) passes.
+
+For the [phase 1 issue-task pilot](../../docs/work-tracking/README.md), required pending checks keep a report
+`PARTIAL` or `BLOCKED`. Sanitize evidence before sharing; use abstract references for private configuration,
+without account data, private paths, or authorization contents. Merge delivers the change; the issue stays
+open until the owner records acceptance and closes it.
+
 ## Output contract
 
 ```json

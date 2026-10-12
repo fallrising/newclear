@@ -27,8 +27,8 @@ Why: The phase 1 pilot needs a usable documentation example of the new issue tas
 
 ## Definition of done
 
-- [ ] Both entry documents explain the requested outcome with accurate examples and working links.
-- [ ] Task/report record actual evidence, limitations and owner acceptance without duplicating GitHub lifecycle.
+- [x] Both entry documents explain the requested outcome with accurate examples and working links.
+- [x] Task/report record actual evidence, limitations and owner acceptance without duplicating GitHub lifecycle.
 - [ ] Local native checks, root scope review and independent review pass; hosted CI handled as specified below.
 - [ ] A draft PR becomes ready, merges normally and leaves this issue open for owner acceptance.
 
@@ -58,5 +58,5 @@ Authority source: Owner approved the phase 1 proposal on 2026-10-12; existing tr
 ## Decisions and handoff
 
 Owner decisions: Phase 1 only; final issue acceptance remains with owner.
-Delivery: Draft PR link will be filled after the initial task scaffold commit; use Refs #346. Report: [report.md](report.md).
+Delivery: https://github.com/fallrising/newclear/pull/347 (opened as draft after initial task scaffold); use Refs #346. Report: [report.md](report.md).
 Owner acceptance: Review both documentation changes and the final verification report, then close this issue if accepted. Merge alone is delivery.

@@ -1,10 +1,10 @@
-# Issue-task contract — phase 1
+# Issue-task contract — bounded phase 1 and phase 2
 
 This contract applies only to the `tools/codex-usage` pilot in this public repository.
 Other components retain their existing tracking rules. The published private-ledger `doing` claim,
 Scope/`touches`, and `Desk-Task: T-####` commit trailer remain mandatory during the pilot.
 The root orchestrator assigns work serially; an assignee or draft PR is not an exclusive lock.
-Phase 2 dispatch/concurrent-claim guarantees and later migrations are not implemented.
+Phase 2 adds explicitly invoked manual dispatch and receipt gates below; later migrations remain out of scope.
 
 ## Identity and files
 
@@ -66,6 +66,28 @@ Non-pilot issues are intake only: do not mark them `ready` under this contract o
 They continue through the existing private-ledger workflow until a separately authorized cutover; intake grants
 no work authorization.
 
+## Phase 2 manual dispatch and claims
+
+Manual intake remains limited to the existing pilot and uses the approved dispatcher through a private
+control location. Compare concrete issue/task outcomes before recording new, duplicate, split, or needs-owner
+decisions. Public decisions contain sanitized reasons and abstract private-config/evidence references only;
+do not copy private control policy, receipts, content, names, paths, links, or account details here.
+
+Before every authorized triage metadata write, the orchestrator inspects a held singleton receipt and
+matches its exact current head and claim ID. Historical receipts do not grant current authority. Before
+product edits, require an eligible issue claim receipt plus the independently published private-ledger
+doing claim, bounded scope and explicit action authority. Ready, assignment and draft PR alone do not lock
+work. Eligibility excludes blocked/needs-owner/duplicate, assignees, component mismatch and open/merged linked
+PRs. Canonical issue identities prevent case-alias claims; control storage must be private before writes.
+
+Issue/PR checks and control updates are not a cross-resource transaction. Honor owner changes and re-check
+snapshots at work checkpoints; the protocol coordinates cooperating callers, not malicious shared-credential
+actors. Release only a held generation with matching claim ID and expected head; no force/delete, takeover,
+automatic expiry, retry of uncertain mutations, daemon or scheduler. Denied/unknown outcomes grant no work.
+Integration evidence and owner fixture judgment are separate acceptance gates. Existing enrollment,
+Desk-Task trailers, Refs links and owner-only closure remain in force. No phase 3 migration, broader enrollment
+or deployment follows from phase 2.
+
 ## Public information boundary
 
 Sanitize repository files, issue bodies/comments, PR descriptions/comments, commits, and evidence before publishing.
@@ -92,5 +114,6 @@ Before publishing, the orchestrator checks:
 5. Files, issues, PRs, commits, and evidence obey the public information boundary.
 6. Changed paths match scope; `git diff --check` and JSON parsing pass; the owner acceptance gate remains open.
 
-These are manual contract checks. No new validator, workflow, runtime dependency, claim service, or history
-migration is introduced here. Later planning and migration phases require separate authorization.
+These are manual contract checks. Phase 2 adds bounded explicit coordination through the dispatcher;
+no new workflow, runtime dependency, automatic status ledger, or history migration is introduced.
+Later planning and migration phases require separate authorization.

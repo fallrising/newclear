@@ -21,7 +21,7 @@ Store methods: `ConfigureRuntime(ctx context.Context, sources []config.Source, d
 
 M2 baseline accepted: local real HTTP/SQLite smoke34 checks; unchanged main CI [38289184149](https://github.com/fallrising/newclear/actions/runs/38289184149) passed, including5 real Go/Chromium cases. Local browser diagnosis T-303 remains PARTIAL (sandbox launch failure); remote supported sandboxed Chrome supplies the product gate.
 
-T-302 scoped frontend result accepted after independent root npm install/format/17 tests/types/build. T-301 engine integrated and accepted after root final race/vet/build and real HTTP gates. T-304 independently reproduced all four original findings and verified their green closure; final review report is the evidence record. Local product gates passed; M3 remote Chromium and normal delivery remain required.
+T-302 scoped frontend result accepted after independent root npm install/format/17 tests/types/build. T-301 engine integrated and accepted after root final race/vet/build and real HTTP gates. T-304 independently reproduced all four original findings and verified their green closure; final review report is the evidence record. M3 product accepted at `e44afd8e595af46a1867b48aaef89a9f3db5032e`: full remote native/HTTP gates and6 real-browser cases passed in run38293396899. Normal delivery follows PR349 checks; final metadata does not change executable source.
 
 | Requirement | Evidence / final gate |
 | --- | --- |
@@ -48,13 +48,13 @@ Root is applying codex-evidence-gate: worker assertions alone do not close gates
 - Evicted/missing complete buckets are false for threshold predicates regardless of aggregate/comparator. They differ from explicitly materialized empty count/sum rows carrying zero. Their gaps must not strand crossed state.
 - Large group keys stay intact in rollups and stable IDs. Threshold event payloads always expose a SHA-256 selector, and raw keys only up to1024 bytes. Metric cursors use compact hashed selectors; HTTP request headers/target allow128KiB for escaped exact-group filters.
 - Reload activation is one source/rule/audit DB transaction followed by credential publication under the server lock. Projection errors after successful activation are retried; they do not report that the accepted config was rejected.
-- Root and workers use inherited built-in agents, not a verified multi-model run. Three worker launches, one review follow-up and one engine review-rework follow-up; provider request/token counts are unavailable and are not inferred from tool counts.
+- Root and workers use inherited built-in agents, not a verified multi-model run. Three worker launches and three follow-up assignments (independent review, engine rework, browser-gate review); provider request/token counts are unavailable and are not inferred from tool counts.
 
 ## Integrated local verification
 
 Final integrated code passed `go test -race -count=1 ./...` (9 packages; store209.086s), `go vet ./...`, `test -z "$(gofmt -l .)"`, `go build -trimpath -o .local/run/signalhub-m3 ./cmd/signalhub`, contract checker (6 schemas/61 fixtures/15 webhook/5 canonical vectors), M1/M2 real HTTP smoke34 and M3 real HTTP39. Root independently ran `npm ci`, `npm run format:check`, `npm test` (17), `npm run build`, then verified rebuilt dist against the staged tree. Workflow actionlint1.7.7, task/report validators and `git diff --check` passed. Logs remain local evidence, with durable handoff pointers recorded separately.
 
-Remote browser gate will run6 scenarios (5 existing plus M3) against the real Go binary with sandbox enabled. Its screenshots must be inspected before final acceptance; supported runner evidence does not change T-303's local diagnostic outcome.
+Remote browser gate ran6 scenarios (5 existing plus M3) against the real Go binary with sandbox enabled. Root inspected its desktop/mobile metric screenshots; supported runner evidence does not change T-303's local diagnostic outcome.
 
 ## First remote candidate and bounded browser rework
 
@@ -63,3 +63,13 @@ PR [349](https://github.com/fallrising/newclear/pull/349), implementation `fb86f
 The board declared no favicon. Add a bundled, hashed SVG using the existing signal mark, and a focused embed test that first failed for the missing declaration then passed for a served SVG. Keep strict console/pageerror checks and also capture failed response URLs. Screenshot review found missing CJK glyphs in the ephemeral CI runner; install its distro Noto CJK test fonts before browser execution. No application dependency or browser-sandbox policy changes. T-305 independently reviews this bounded follow-up; final CI and readable desktop/mobile screenshots are still required.
 
 T-305 scoped review accepted: independently verified embedded SVG (race test1.045s), strict browser checks and CI-only font prerequisites. The ignored generated SVG was explicitly force-added and verified tracked. First404 resource identity was not captured; its closure still requires the next complete strictbrowser pass.
+
+## Final product acceptance
+
+AC-20–26 and44/45 accepted on product `e44afd8e595af46a1867b48aaef89a9f3db5032e`. [CI38293396899](https://github.com/fallrising/newclear/actions/runs/38293396899) passed all gates:9 Go packages with race, vet/build/format,17 frontend tests/types/format/reproducible assets, contracts6/61/15/5, real HTTP34+39, and6 real Go/Chromium scenarios (21.6s, Chrome154.0.8037.97, sandbox enabled). All PR checks for that candidate passed.
+
+Root visually inspected `desktop-metrics.png` (1440×1000) and `mobile-metrics.png` (390×844): Chinese glyphs readable, group/time controls and metadata present, version/threshold/partial markers rendered, mobile layout within viewport. Exact values are available in the accessible table. The strict M3 browser scenario recorded zero console/page errors and zeroHTTP>=400 responses. This closes the first candidate's browser failure after the icon fix without suppressing errors; the original unidentified404 log remains preserved.
+
+Evidence gate accepts T-301/T-302/T-304/T-305 within their scopes. T-303 remains a truthful PARTIAL diagnostic; a successful supported remote browser run satisfies the product gate. No outstanding implementation finding or unrun product check remains for M3. Public CI artifacts retain screenshots14days; private development evidence preserves logs, original failures, review manifests and screenshots for handoff.
+
+This final record changes only acceptance metadata. [PR349](https://github.com/fallrising/newclear/pull/349) is the authoritative integration/merge result; final-head checks must pass before normal merge. Remote readback and task handoff are recorded in the owner ledger. M4–M6 remain follow-ups; no production deployment is claimed.

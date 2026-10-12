@@ -4,7 +4,7 @@
 
 ## 目前狀態
 
-M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR #198、#199、#200 合併。M3 現已實作規則指標、版本／回填、門檻事件、設定重載與圖表，交付檢查見本變更的 PR checks 與 [.team/PLAN](../.team/PLAN.md)。尚未部署或接入真實生產者。
+M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR #198、#199、#200 合併。M3 已實作並通過驗證：規則指標、版本／回填、門檻事件、設定重載與圖表。合併結果見 [PR #349](https://github.com/fallrising/newclear/pull/349)，驗收紀錄見 [.team/PLAN](../.team/PLAN.md)。尚未部署或接入真實生產者。
 
 | 項目 | 實作與驗證範圍 |
 | --- | --- |
@@ -17,6 +17,8 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | M4–M6 | 已拆出後續任務；投遞、封存／還原及真實來源／部署驗收未實作 |
 
 ## 驗證入口與證據
+
+M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](https://github.com/fallrising/newclear/actions/runs/38293396899)全部通過，含6個真正Go／Chromium案例（21.6秒）。桌面與390px手機指標截圖已目視確認中文、圖表標記與版面；嚴格console/pageerror/HTTP錯誤檢查為零。獨立review與browser補修複審皆通過。
 
 - 先於M3變更驗證原始M2：本機真實 HTTP／SQLite 的34個回應檢查通過；[未修改 main 的 CI run 38289184149](https://github.com/fallrising/newclear/actions/runs/38289184149) 通過 Go／frontend／contracts／HTTP 與5個真正 Go／Chromium案例。這修正了舊文件仍寫 M2 未合併的過期狀態。
 - `go test -race -count=1 ./...`、`go vet ./...`、`gofmt` 與 `go build -trimpath -o <binary> ./cmd/signalhub` 是9個Go package的必要 gate。聚合／版本／threshold／失敗隔離測試位於 `internal/rules` 和 `internal/store`，HTTP角色與配置驗證有各自focused tests。
@@ -36,3 +38,5 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 - readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、tailnet ACL、非root部署及持續運作。M4投遞、M5封存還原、M6真實來源／部署驗收各自獨立；部署仍需明確授權。
 
 首次M3遠端CI run38292215976的6個browser案例中5個通過；指標主流程斷言通過，但console404使最後檢查失敗。補上隨binary提供的favicon與Go資源回歸測試；CI另安裝Noto CJK測試字型以修正截圖缺字。最終瀏覽器結果與截圖驗收見[PR #349](https://github.com/fallrising/newclear/pull/349)及[PLAN](../.team/PLAN.md)，保留首次失敗紀錄。
+
+上述首次browser失敗已由CI38293396899的完整6/6通過結案；sandbox保持啟用。最後提交僅同步驗收紀錄，執行檔內容與已驗證產品版本相同。

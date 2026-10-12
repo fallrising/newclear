@@ -38,3 +38,27 @@ the PR ready for normal merge. Required skipped checks prevent DONE. Live CLI ve
 App Server schema, real snapshot, and usage comparison remain unverified and outside this documentation scope.
 This report records evidence rather than a second GitHub lifecycle. Merge delivers the change;
 the issue stays open until the owner records acceptance and closes it.
+
+## Orchestrator pre-merge checkpoint
+
+The preceding worker checkpoint is historical. Root reproduced all 17 offline tests and compilation,
+reviewed the four-file scope and public additions, and checked 18 relative links outside fenced examples.
+Independent review found no blocking issue. Sanitized evidence references are `root-public-native/offline-tests`,
+`root-public-compile/compile` and `root-public-pilot-docs2/docs`; these name retained logs and exit/hash receipts,
+not repository files or live account evidence.
+
+- Root offline tests, compilation and scoped public documentation review — passed
+- Independent diff/evidence review by a separate reviewer — passed
+- Hosted component CI on `620789c6523ca22a5150d620c78e4e93d64ba6e1`: [run 38247787573](https://github.com/fallrising/newclear/actions/runs/38247787573), test job success; trailer run 38247787774 also succeeded — passed
+
+This pre-merge report remains PARTIAL only for final report-commit checks and the delivery transition.
+The PR and issue carry the final head checks and merge receipt; local evidence does not imply live acceptance.
+
+### Pilot friction and handoff
+
+GitHub needs a branch diff before opening a draft PR, so this pilot committed the complete task scope and
+an honest pending report first, then opened the draft and added implementation/evidence. Assignment metadata
+was updated manually; it was not tested as an exclusive lock. A report committed inside its own delivery PR
+cannot truthfully contain that future merge receipt: this file is the pre-merge snapshot, while the linked PR
+and issue record the post-merge delivery evidence. Owner acceptance stays separate; only the owner closes
+the issue. No later phase starts from this delivery.

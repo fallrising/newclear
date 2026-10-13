@@ -1,6 +1,101 @@
 # Status and evidence
 
-Updated: 2026-10-08.
+Updated: 2026-10-13.
+
+## M3 result
+
+**Passed on the original open-compute v0.2.4 release.** A fresh non-root
+Linux runner observed the lifecycle-authorized runtime process generations in
+four fixed windows around a normal daemon restart. Both four-second read
+windows completed exactly eight validated GET requests. The original D1 row,
+waiting Workflow and persistent state survived; the same Workflow completed
+with callback counter 1 and an unchanged nonce. Both daemon shutdowns exited
+normally without forced termination, and the owned scope was removed.
+
+The [M3 contract](SDD-M3.md) defines these bounded observations. The original
+[sanitized report](evidence/2026-10-13-m3-ci.json) is preserved byte-for-byte;
+its SHA256 is
+`4dce0d7b24b31f99d6f1038dbed719393ef3b9fa745d14342a6dc62aff3eb3e0`.
+Historical M1/M2 evidence below remains unchanged. All three real experiments
+passed again in the same job, using Python 3.11 and the unchanged upstream pin.
+
+### M3 design and execution provenance
+
+| Item | Exact reference |
+| --- | --- |
+| Reviewed SDD committed before implementation | [`0cea629`](https://github.com/fallrising/newclear/commit/0cea629aaebd36f6ec3dfda75fc3b3f6fee57e4e) |
+| Lifecycle generation fix and nested deadline clarification | [`fb80148`](https://github.com/fallrising/newclear/commit/fb8014855f61c2cd7740b3df057dce3f98f0aeb5) |
+| Sampler dependency baseline | [`cd52145`](https://github.com/fallrising/newclear/commit/cd521452749638702d298eee69bcf650cba0a40a) |
+| Independently reviewed implementation including sampler rework | [`dc9e5ec`](https://github.com/fallrising/newclear/commit/dc9e5ecdabb690a2c1f9b9922d189cad7c0a61ce) |
+| CI checkout recorded by the harness | [`0855e2b`](https://github.com/fallrising/newclear/commit/0855e2b63329f0a78911e0f5bf2d3e9f03d956f8) |
+| Tested Git tree | `ac10829a1dc54d7e91c4b2397334847704dcd00e` |
+| Real-runtime CI | [Run 38377772191](https://github.com/fallrising/newclear/actions/runs/38377772191), [job 115230354252](https://github.com/fallrising/newclear/actions/runs/38377772191/job/115230354252) |
+| Harness run ID | `20261013T094036Z-e5d357ea` |
+| Runner | Ubuntu 24.04, Linux x86_64, EUID 1001, Python 3.11.17 |
+| Upstream identity | `v0.2.4` / source `73efa56a1b1ad51a4519b2253ffaa499cb29fb2d`; unchanged 195537392-byte asset and SHA256 in [the lock](../upstream.lock.json) |
+
+The recorded checkout is GitHub's synthetic merge of main `c0e2bf9` and the
+reviewed revision `dc9e5ec`. Its parents and complete tree were read back from
+GitHub and fetched locally; the tree is identical to `dc9e5ec`. Later evidence
+and documentation commits do not rewrite the report's tested source identity.
+
+### M3 verification ledger
+
+| Gate | Observed result |
+| --- | --- |
+| Independent review | Reviewed SDD, fresh lifecycle and sampler reviews, then a fresh final integration/CI review; all concrete blockers resolved before acceptance |
+| Offline contracts | **115 tests passed, no skips** in the root rerun and on the Python 3.11 CI runner |
+| Existing real-runtime gates | M1 AC-01 through AC-08 and M2-01 through M2-09 all passed in the same CI job |
+| M3-01: original runtime and trusted application | Exact original artifact verified on the fresh non-root runner; real Worker deployment, D1/Workflow and two submissions yielding one persisted row passed |
+| M3-02: owned identities, units and bounded acquisition | Lifecycle retains PID/start-time generations and revalidates parent edges; recorded page/tick units and bounded helper protocol passed, with meaningful negative tests in the 115-test suite |
+| M3-03: all four observation windows | Both idle windows had twelve valid scans; both read windows had sixteen valid scans and eight validated serial GETs; all attempted acquisitions succeeded |
+| M3-04: normal restart, completion and cleanup | Daemon identities changed from `3138/30276` to `3271/33157`; state and Workflow ID survived, counter remained 1 and nonce unchanged; both shutdowns exited gracefully with all observed owned processes gone and scope removed |
+| M3-05: bounded sanitized evidence and provenance | Strictly projected separate report written with exact source/artifact identity, workload, units, metrics, coverage and fixed limits; original report hash and historical evidence preserved |
+
+### Observed resources for this run
+
+| Window | Valid scans | Validated GETs | Peak sampled aggregate RSS (bytes) | Paired own CPU (seconds) |
+| --- | ---: | ---: | ---: | ---: |
+| Source idle, 3 seconds | 12 | 0 | 278769664 | 0.04 |
+| Source read probe, 4 seconds | 16 | 8 | 281382912 | 0.12 |
+| Restarted idle, 3 seconds | 12 | 0 | 145620992 | 0.05 |
+| Restarted read probe, 4 seconds | 16 | 8 | 149368832 | 0.15 |
+
+The runner reported 4096-byte pages and 100 clock ticks per second. All 56
+attempted scans were valid, with zero skipped scheduling slots. The largest
+observed acquisition gap was about 0.25005 seconds and the longest scan about
+0.03938 seconds. Each phase observed at most two live authorized processes.
+The report also records 12 or 16 missing observations per phase: lifecycle
+history retains an already-exited process generation, whose absence does not
+become an invented zero CPU contribution. CPU unpaired observations remain
+explicit (14 in each idle window and 18 in each read window).
+
+RSS can count shared pages repeatedly. Scans are sequential and can miss peaks
+or short-lived descendants; CPU includes only paired observations of the same
+generation within a phase and excludes unobserved intervals. Full-tree and
+between-sample coverage remain unknown. The harness and observer helpers,
+startup, shutdown, resume and cold backup are excluded. These single-run
+observations do not establish capacity, memory savings after restart, latency,
+saturation, full-lifetime CPU or tenant isolation.
+
+### Reproduce M3 and authoring limitations
+
+Follow the [quickstart](quickstart.md) on a fresh disposable non-root Linux x64
+account, then run:
+
+```sh
+make -C labs/open-compute check
+make -C labs/open-compute preflight
+make -C labs/open-compute integration-resources
+```
+
+The M3 authoring account was non-root Linux x64 with Python 3.13.5. Its runtime
+preflight passed without starting a daemon, but its persistent home was not used
+for the experiment. Local `make` was unavailable, so the exact Python unittest
+equivalent ran through the shared task launcher. Initial socket tests were
+denied by the authoring sandbox; the authorized loopback rerun passed all 115
+tests with no skips. Actual Python 3.11 execution and original-runtime results
+come from the fresh CI runner. No upstream guard was bypassed.
 
 ## M2 result
 
@@ -97,7 +192,7 @@ version migration, HA, capacity, general API parity and a host adapter remain
 unverified. The small backup size and successful Workflow completion are not
 performance measurements or exactly-once guarantees for external effects.
 
-The authoring environment remains UID 0 with a mismatched readable PID
+The historical M2 authoring environment was UID 0 with a mismatched readable PID
 namespace. It ran helper/contract tests only; it did not run the upstream daemon
 or bypass its non-root guard. The runtime result above comes from the real CI
 runner. The original M1 evidence below remains unchanged.
@@ -169,7 +264,7 @@ Integration requires a real non-root Linux x64 account with a fresh disposable
 passwd home and no existing `.open-compute` scope. The download requires access
 to GitHub release assets. All workload inputs are synthetic.
 
-The authoring container is UID 0 and exposes a different PID namespace through
+The historical M1 authoring container was UID 0 and exposed a different PID namespace through
 `/proc`. Its offline result was 29 tests: 27 passed and 2 native process tests
 explicitly skipped. The original runtime correctly refuses that environment;
 no upstream guard was changed. Both native tests executed and passed on the

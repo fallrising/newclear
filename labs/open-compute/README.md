@@ -14,6 +14,9 @@ operator lifecycle. M1 runs a real **Worker → D1 → Workflow event wait
 including a binary R2 object and the original waiting Workflow. A dedicated
 callback counter makes an unexpected replay visible. Actual executed results
 and their limits are recorded in [the status document](docs/STATUS.md).
+M3 adds four fixed idle/read windows around normal restart to observe the
+daemon and its discovered descendants' RSS and own CPU time. Its figures describe
+this synthetic workload and sampled coverage; they do not set a capacity limit.
 
 ## Current scope
 
@@ -36,6 +39,13 @@ and their limits are recorded in [the status document](docs/STATUS.md).
 | R2 bytes, metadata, etag, version and timestamp retained | Tests recovery of one binary object, not general R2 API parity |
 | Same waiting Workflow completes with counter 1 and unchanged nonce | Tests this committed step through cold restore, not external exactly-once effects |
 
+| Added in M3 | Evidence boundary |
+| --- | --- |
+| Four finite idle/read windows across normal restart | One trusted Worker/D1/Workflow fixture, sixteen serial GETs total |
+| PID/start-time generation tracking and bounded resource acquisition | Observed descendants only; short-lived or undiscovered processes may be missed |
+| Maximum sampled aggregate RSS and paired own CPU ticks | RSS can count shared pages repeatedly; scan peaks and CPU intervals have sampling gaps |
+| Separate sanitized resource report and real-runtime gate | Includes units, workload, scan counts/gaps and explicit coverage limits; no capacity or isolation claim |
+
 This is a bounded lab around upstream software. It does not accept arbitrary
 user code, provide a Linux command sandbox, or manage production hosts. The
 host, workload catalog, and runtime remain separate authorities; the SDD records
@@ -45,6 +55,7 @@ what a later adapter would need.
 
 - [M1 SDD and acceptance IDs](docs/SDD.md) — normal daemon restart contract.
 - [M2 SDD and acceptance IDs](docs/SDD-M2.md) — full cold backup and clean-state restore contract.
+- [M3 SDD and acceptance IDs](docs/SDD-M3.md) — bounded observed process-tree resources.
 - [Quickstart](docs/quickstart.md) — one reproducible operator path and prerequisites.
 - [Status and evidence](docs/STATUS.md) — actual commands, results and limitations.
 - [Upstream lock](upstream.lock.json) — release, source and binary checksum.
@@ -53,6 +64,7 @@ what a later adapter would need.
 make -C labs/open-compute check
 make -C labs/open-compute integration
 make -C labs/open-compute integration-restore
+make -C labs/open-compute integration-resources
 ```
 
 The integration command requires **Linux x64, a real non-root account, and a
@@ -72,7 +84,7 @@ See the [pinned security policy](https://github.com/elliothux/open-compute/blob/
 
 These experiments inform an adoption decision. Before operational use, evaluate
 the actual application's API subset, recovery on a different host, production
-backup retention, version upgrades, total process-tree resources, and appropriate
+backup retention, version upgrades, resources under the real application's load, and appropriate
 host/network isolation. Those are separate gates; an advertised idle-memory
 number is not a capacity plan. The lab's restore command is a synthetic
 experiment, not a general-purpose production backup utility.

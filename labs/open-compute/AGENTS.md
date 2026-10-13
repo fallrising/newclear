@@ -9,6 +9,8 @@ operational harness. Read `docs/SDD.md` before editing. Changes to the contract
 precede implementation changes; keep acceptance IDs traceable to evidence.
 For complete Local cold restore, also read `docs/SDD-M2.md`; its baseline must
 be committed before M2 implementation.
+For process-tree observations, also read `docs/SDD-M3.md`; keep its fixed workload,
+identity generation, sampling limits and sanitized schema traceable to evidence.
 
 - Use the original release artifact and verify its SHA256 before execution.
   Do not patch upstream, impersonate a non-root user, or use upstream test-only
@@ -27,6 +29,9 @@ be committed before M2 implementation.
 - M2 restores only the complete backup of this invocation's synthetic scope,
   after verified quiescence and actual source removal. Preserve the documented
   same-runner/path/UID boundary; never reseed missing state or upload backups.
+- M3 observes only the owned runtime's four fixed idle/read windows across normal
+  restart. Sampled aggregate RSS can count shared pages repeatedly; observed CPU
+  pairs omit missing intervals. Never label either as complete capacity evidence.
 - Keep public documentation self-contained and free of private infrastructure
   identifiers. Describe host authority, workload authority, and runtime contracts
   abstractly.
@@ -35,6 +40,7 @@ be committed before M2 implementation.
 
 The implementation supplies `make check` for local offline checks,
 `make integration` for the M1 real-runtime restart, and `make integration-restore`
-for the M2 real-runtime cold restore. Link the current evidence from
+for the M2 real-runtime cold restore, and `make integration-resources` for M3.
+Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.

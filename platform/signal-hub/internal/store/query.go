@@ -24,16 +24,17 @@ type Query struct {
 	Limit                                                      int
 }
 type cursor struct {
-	Version  int    `json:"v"`
-	Filters  string `json:"f"`
-	Snapshot int64  `json:"s"`
-	Time     string `json:"-"`
-	Seq      int64  `json:"n"`
+	Generation int64  `json:"g"`
+	Version    int    `json:"v"`
+	Filters    string `json:"f"`
+	Snapshot   int64  `json:"s"`
+	Time       string `json:"-"`
+	Seq        int64  `json:"n"`
 }
 
 var typePattern = regexp.MustCompile(`^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\.\*|\*)?$`)
 
-const selectEvent = "seq,received_at,clock_skew,raw_json"
+const selectEvent = "seq,received_at,clock_skew,raw_json,restored"
 
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", ErrInvalidQuery, fmt.Sprintf(format, args...))
@@ -122,6 +123,15 @@ func (s *Store) List(ctx context.Context, q Query) (Page, error) {
 	if err != nil {
 		return page, err
 	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return page, unavailable(err)
+	}
+	defer tx.Rollback()
+	var generation int64
+	if err := tx.QueryRowContext(ctx, "SELECT restore_generation FROM archive_state WHERE singleton=1").Scan(&generation); err != nil {
+		return page, unavailable(err)
+	}
 	filters := filterHash(q)
 	var position cursor
 	if q.Cursor != "" {
@@ -129,7 +139,10 @@ func (s *Store) List(ctx context.Context, q Query) (Page, error) {
 		if err != nil {
 			return page, err
 		}
-		err = s.db.QueryRowContext(ctx, "SELECT time FROM events WHERE seq = ?", position.Seq).Scan(&position.Time)
+		if position.Generation != generation {
+			return page, invalid("cursor restore generation changed")
+		}
+		err = tx.QueryRowContext(ctx, "SELECT time FROM events WHERE seq = ?", position.Seq).Scan(&position.Time)
 		if errors.Is(err, sql.ErrNoRows) {
 			return page, invalid("cursor position no longer exists")
 		}
@@ -140,8 +153,8 @@ func (s *Store) List(ctx context.Context, q Query) (Page, error) {
 			return page, unavailable(errors.New("invalid stored time key"))
 		}
 	} else {
-		position = cursor{Version: 1, Filters: filters}
-		if err := s.db.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM events").Scan(&position.Snapshot); err != nil {
+		position = cursor{Version: 1, Filters: filters, Generation: generation}
+		if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM event_identities").Scan(&position.Snapshot); err != nil {
 			return page, unavailable(err)
 		}
 	}
@@ -185,7 +198,7 @@ func (s *Store) List(ctx context.Context, q Query) (Page, error) {
 		args = append(args, position.Time, position.Time, position.Seq)
 	}
 	args = append(args, q.Limit+1)
-	rows, err := s.db.QueryContext(ctx, "SELECT "+selectEvent+",time FROM events WHERE "+strings.Join(clauses, " AND ")+" ORDER BY time DESC,seq DESC LIMIT ?", args...)
+	rows, err := tx.QueryContext(ctx, "SELECT "+selectEvent+",time FROM events WHERE "+strings.Join(clauses, " AND ")+" ORDER BY time DESC,seq DESC LIMIT ?", args...)
 	if err != nil {
 		return page, unavailable(err)
 	}
@@ -194,7 +207,7 @@ func (s *Store) List(ctx context.Context, q Query) (Page, error) {
 	for rows.Next() {
 		var item StoredEvent
 		var key string
-		if err := rows.Scan(&item.Seq, &item.ReceivedAt, &item.ClockSkew, &item.Event, &key); err != nil {
+		if err := rows.Scan(&item.Seq, &item.ReceivedAt, &item.ClockSkew, &item.Event, &item.Restored, &key); err != nil {
 			return page, unavailable(err)
 		}
 		if len(page.Items) == q.Limit {
@@ -219,7 +232,7 @@ func (s *Store) Detail(ctx context.Context, seq int64) (Detail, error) {
 		return detail, invalid("seq must be positive")
 	}
 	var correlation, causation string
-	err := s.db.QueryRowContext(ctx, "SELECT "+selectEvent+",correlationid,causationid FROM events WHERE seq = ?", seq).Scan(&detail.Item.Seq, &detail.Item.ReceivedAt, &detail.Item.ClockSkew, &detail.Item.Event, &correlation, &causation)
+	err := s.db.QueryRowContext(ctx, "SELECT "+selectEvent+",correlationid,causationid FROM events WHERE seq = ?", seq).Scan(&detail.Item.Seq, &detail.Item.ReceivedAt, &detail.Item.ClockSkew, &detail.Item.Event, &detail.Item.Restored, &correlation, &causation)
 	if errors.Is(err, sql.ErrNoRows) {
 		return detail, ErrNotFound
 	}
@@ -246,7 +259,7 @@ func (s *Store) Detail(ctx context.Context, seq int64) (Detail, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var item StoredEvent
-		if err := rows.Scan(&item.Seq, &item.ReceivedAt, &item.ClockSkew, &item.Event); err != nil {
+		if err := rows.Scan(&item.Seq, &item.ReceivedAt, &item.ClockSkew, &item.Event, &item.Restored); err != nil {
 			return detail, unavailable(err)
 		}
 		detail.Related = append(detail.Related, item)

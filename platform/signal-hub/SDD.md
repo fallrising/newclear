@@ -1,6 +1,6 @@
 # Signal Hub — Software Design Document
 
-版本：0.1 + M4 runtime 釐清 · 日期：2026-10-13 · runtime 狀態見 docs/STATUS.md。
+版本：0.1 + M5 archive/restore 釐清 · 日期：2026-10-13 · runtime 狀態見 docs/STATUS.md。
 
 ## 1. 結論與理由
 
@@ -117,3 +117,5 @@ M0 鎖定實際安裝並驗證過的契約檢查工具版本；Go／前端 runti
 - 自動執行任何動作
 - 取代 Alertmanager、Grafana 或日誌平台
 - 高可用、多副本
+
+M5 的不覆寫檔案、永久去重身分、復原與投影保護細節見 [M5 實作契約](docs/m5-design.md)；此連結不代替 STATUS 的驗證結果。

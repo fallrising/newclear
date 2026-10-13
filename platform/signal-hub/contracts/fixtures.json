@@ -1369,5 +1369,18 @@
         "https://ntfy.example.invalid/example-topic"
       ]
     }
+  },
+  {
+    "name": "event-rejects-restored-hub-metadata",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "restored-forgery",
+      "source": "urn:example:archive",
+      "type": "example.archive.event",
+      "time": "2026-01-01T00:00:00Z",
+      "restored": true
+    }
   }
 ]

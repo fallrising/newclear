@@ -285,9 +285,9 @@ func TestSourceM1MigrationDoesNotInventAttribution(t *testing.T) {
 	if _, err = old.Exec(migration1 + "PRAGMA user_version=1;"); err != nil {
 		t.Fatal(err)
 	}
-	legacy := &Store{db: old}
 	e := parsed(t, "legacy", sourceNow.Format(time.RFC3339Nano), nil)
-	if _, err = legacy.Ingest(ctx, e, sourceNow); err != nil {
+	// Seed the actual M1 schema without invoking the current-version writer.
+	if _, err = old.Exec(`INSERT INTO events(source,id,type,subject,time,received_at,severity,severity_rank,summary,originurl,correlationid,causationid,content_hash,raw_json,clock_skew) VALUES(?,?,?,'',?,?,'info',1,'','','','',?,?,0)`, attr(e, "source"), attr(e, "id"), attr(e, "type"), timeKey(e.Time), sourceNow.Format(time.RFC3339Nano), e.ContentHash[:], e.Raw); err != nil {
 		t.Fatal(err)
 	}
 	old.Close()

@@ -2,9 +2,9 @@
 
 > **Portfolio doc tier: A (active)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [進度與阻擋](docs/STATUS.md)。
 
-個人用的多來源事件中樞。M4 已有可在本機執行的 Go runtime、SQLite WAL、事件 ingest／查詢、token 授權、Alertmanager v4 adapter、唯讀事件看板、來源新鮮度、版本化規則指標、SVG 圖表，以及 webhook／ntfy 投遞、摘要、重試、DLQ 與 owner 重放。從[快速開始](docs/quickstart.md)建置並執行；runtime 邊界見 [runtime 契約](docs/runtime.md)，目前進度以[狀態文件](docs/STATUS.md)為準。
+個人用的多來源事件中樞。M5 已有可在本機執行的 Go runtime、SQLite WAL、事件 ingest／查詢、token 授權、Alertmanager v4 adapter、唯讀事件看板、來源新鮮度、版本化規則指標、SVG 圖表，以及 webhook／ntfy 投遞、摘要、重試、DLQ 與 owner 重放。從[快速開始](docs/quickstart.md)建置並執行；runtime 邊界見 [runtime 契約](docs/runtime.md)，目前進度以[狀態文件](docs/STATUS.md)為準。
 
-保留、封存、還原及部署仍是後續目標。專案不替告警系統評估告警，也不判斷或執行應對動作；決策系統與執行器屬於其他元件。
+M5 提供驗證後封存清除、可重複匯回、一致 SQLite 備份與隔離還原；自動維護需要明確指定目錄。真實來源與部署驗收留待 M6。專案不替告警系統評估告警，也不判斷或執行應對動作；決策系統與執行器屬於其他元件。
 
 ## 閱讀入口
 
@@ -18,9 +18,9 @@
 
 ## 責任邊界
 
-| 已提供的 M1–M4 能力 | 後續目標 |
+| 已提供的 M1–M5 能力 | 後續目標 |
 | --- | --- |
-| 接收、驗證、授權、去重並保存事件 | 保留清理、封存與還原 |
+| 接收、驗證、授權、永久去重、封存／匯回及一致備份／隔離還原 | 真實環境復原作業 |
 | 查詢事件、來源新鮮度、規則指標與門檻事件 | 真實生產者持續驗證 |
 | Alertmanager v4 webhook 轉換；webhook／ntfy 即時與摘要投遞 | 部署與持續運作 |
 | 同一 Go binary 提供看板、投遞狀態與理由必填 DLQ 重放 | 實際帳號／tailnet 驗收 |

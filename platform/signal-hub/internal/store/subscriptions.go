@@ -61,7 +61,7 @@ func configureSubscriptionsTx(ctx context.Context, tx *sql.Tx, definitions []del
 		return ErrInvalidConfig
 	}
 	var maximum int64
-	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM events").Scan(&maximum); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM event_identities").Scan(&maximum); err != nil {
 		return unavailable(err)
 	}
 	if _, err := tx.ExecContext(ctx, "UPDATE subscriptions SET active=0"); err != nil {
@@ -115,7 +115,7 @@ func configureSubscriptionsTx(ctx context.Context, tx *sql.Tx, definitions []del
 // choosing a window; anchoring it to wall time would lose later historical input.
 func earliestDigestStartTx(ctx context.Context, tx *sql.Tx, sub delivery.Subscription, maximum int64) (*int64, error) {
 	var raw []byte
-	err := tx.QueryRowContext(ctx, "SELECT raw_json FROM events WHERE seq<=? ORDER BY time,seq LIMIT 1", maximum).Scan(&raw)
+	err := tx.QueryRowContext(ctx, "SELECT raw_json FROM events WHERE restored=0 AND seq<=? ORDER BY time,seq LIMIT 1", maximum).Scan(&raw)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

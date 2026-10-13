@@ -1581,6 +1581,10 @@
           },
           "event": {
             "$ref": "./schemas/event.schema.json"
+          },
+          "restored": {
+            "type": "boolean",
+            "description": "Hub metadata: true when explicitly imported from a verified archive; never part of the CloudEvent or its content hash."
           }
         },
         "required": [

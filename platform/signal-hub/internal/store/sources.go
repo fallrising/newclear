@@ -135,6 +135,9 @@ func configureSourcesTx(ctx context.Context, tx *sql.Tx, sources []config.Source
 		if err != nil {
 			return unavailable(err)
 		}
+		if _, err = tx.ExecContext(ctx, "UPDATE sources_state SET retention_days=NULLIF(?,0),retention_policy_known=1 WHERE name=?", source.RetentionDays, source.Name); err != nil {
+			return unavailable(err)
+		}
 	}
 	return nil
 }
@@ -142,7 +145,7 @@ func configureSourcesTx(ctx context.Context, tx *sql.Tx, sources []config.Source
 // M1 did not reserve the internal URI namespace. Never reuse a generation
 // whose IDs were occupied by historical events before producer isolation existed.
 func unusedSourceGeneration(ctx context.Context, tx *sql.Tx, name string, generation int64) (int64, error) {
-	rows, err := tx.QueryContext(ctx, "SELECT id FROM events WHERE source=?", "urn:signalhub:sources:"+name)
+	rows, err := tx.QueryContext(ctx, "SELECT id FROM event_identities WHERE source=?", "urn:signalhub:sources:"+name)
 	if err != nil {
 		return 0, unavailable(err)
 	}

@@ -36,6 +36,7 @@ export interface StoredEvent {
   seq: number;
   received_at: string;
   clock_skew: boolean;
+  restored?: boolean;
   event: CloudEvent;
 }
 export interface Page<T> {

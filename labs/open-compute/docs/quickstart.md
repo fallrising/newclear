@@ -2,9 +2,11 @@
 
 This is the single operator path for M1 in [SDD.md](SDD.md) and the M2 cold
 restore experiment in [SDD-M2.md](SDD-M2.md). It
+also supplies the fixed resource observation scenario in [SDD-M3.md](SDD-M3.md).
+Each command
 downloads the original **v0.2.4 Linux x64** release, verifies its pinned size and
 SHA256, and exercises a synthetic Worker, D1 database, and Workflow. The harness
-uses Python's standard library and requires Python 3.10 or newer, Git, and make.
+uses Python's standard library and requires Python 3.11 or newer, Git, and make.
 
 ## 1. Check the harness
 
@@ -143,6 +145,45 @@ M2 deliberately keeps the **same runner, absolute scope path and UID**, while
 using a fresh directory tree and daemon process. A pass does not establish
 cross-host recovery, another OS/UID/path, power-loss consistency or upgrades.
 
+## 5. Observe the runtime process tree (M3)
+
+After the preceding invocation has removed its owned scope, run:
+
+```sh
+make -C labs/open-compute integration-resources
+```
+
+Its CLI equivalent is `python3 labs/open-compute/lab.py integration-resources`,
+with the same `--port`, `--cache` and new `--output` options. On this fresh
+synthetic scope, the existing Worker/D1/Workflow path reaches its committed wait.
+The harness then observes a three-second idle window and a four-second window
+of eight serial GETs alternating fixture health and the original job read.
+It normally restarts the daemon with the same data, verifies the original state,
+and repeats those two windows before approving the original Workflow.
+
+The resource helper reads only bounded numeric Linux stat records for lifecycle-
+authorized PID/start-time generations. The report has four phase summaries,
+page/tick conversion units, sampled aggregate RSS peaks, paired own CPU ticks,
+valid sample and request counts, actual acquisition gaps and fixed limitations.
+New, missing, reused and zombie generations remain explicit. A required unreadable
+record, malformed protocol, helper timeout, insufficient samples or slow probe
+fails M3 instead of turning a missing metric into zero. Helper processes and the
+harness are excluded from runtime metrics, and observer overhead is disclosed.
+
+RSS may count shared pages repeatedly; sequential scans are not atomic and may
+miss between-sample peaks or short-lived descendants. CPU counts only paired
+observations of the same generation within a phase, excluding unobserved final
+intervals and gaps. These measurements describe this small trusted workload;
+they do not measure saturation, whole-host resources, unique physical memory,
+complete lifetime CPU, startup/shutdown costs or production capacity.
+
+The scenario has a 300-second budget beginning before the first daemon spawn.
+Every probe is clamped to its phase deadline, and the original five-minute
+Workflow deadline still applies. M3 final cleanup has a separate 150-second
+budget with a 30-second owned-scope removal deadline. Any unknown ownership or
+incomplete runtime/helper cleanup prevents a successful report. The sanitized
+report uses M3-01 through M3-05; real executed results are linked from STATUS.
+
 ## Cleanup and a failed run
 
 Normal completion stops all owned processes and removes only the scope created
@@ -181,9 +222,10 @@ addition to the socket inactivity timeout. Unknown process identities, unreadabl
 process metadata, or incomplete log draining fail cleanup verification; they are
 never interpreted as proof that a process exited.
 
-The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs M1 and
-then M2 on a fresh non-root runner, requiring each invocation to clean its scope.
-It retains only the two explicitly selected sanitized report files for seven
+The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs M1,
+M2 and M3 sequentially on a fresh non-root runner, requiring each invocation to clean its scope.
+It selects Python 3.11 explicitly and installs no application packages.
+It retains only the three explicitly selected sanitized report files for seven
 days. Its job log also contains the reports. No backup directory or inventory
 is selected for upload, including failed runs. Local success is not
 assumed from offline tests; the exact delivered evidence is linked in STATUS.
@@ -197,3 +239,5 @@ HA, general exactly-once effects, performance, all Workers API compatibility, or
 isolation for hostile tenant code. Only this trusted fixture is submitted, and it makes no
 outbound application requests. Upstream Worker fetch can reach host-routable
 networks; loopback ingress alone does not change that boundary.
+M3 supplies bounded observations for four synthetic windows and preserves those
+functional assertions; its sampling limits do not establish capacity or tenant isolation.

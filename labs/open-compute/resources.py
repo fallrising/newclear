@@ -363,7 +363,14 @@ def project_phase(value):
         raise ResourceError("protocol_error")
     if value["status"] == "observed":
         required_probes = 8 if value["phase"].endswith("read_probe") else 0
-        if slots > SAMPLE_LIMIT or valid < 2 or not paired or value["probe_attempted"] != required_probes or value["probe_completed"] != required_probes:
+        if valid != attempted or slots > SAMPLE_LIMIT or valid < 2 or not paired or value["probe_attempted"] != required_probes or value["probe_completed"] != required_probes:
+            raise ResourceError("protocol_error")
+        # Every valid scan contains the live original root. Every record is
+        # exactly one paired or unpaired observation; the first root scan
+        # establishes a baseline rather than creating a CPU pair.
+        observations = value["cpu_pairs_observed"] + value["cpu_unpaired_observations"]
+        non_live = sum(value[k] for k in ("missing_observations", "reused_observations", "zombie_observations"))
+        if not (valid <= observations <= valid * IDENTITY_LIMIT) or value["cpu_unpaired_observations"] < 1 or non_live > valid * (IDENTITY_LIMIT - 1):
             raise ResourceError("protocol_error")
     return dict(value)
 

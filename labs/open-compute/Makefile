@@ -1,4 +1,4 @@
-.PHONY: check preflight integration integration-restore
+.PHONY: check preflight integration integration-restore integration-resources
 
 check:
 	PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
@@ -11,3 +11,6 @@ integration:
 
 integration-restore:
 	PYTHONDONTWRITEBYTECODE=1 python3 lab.py integration-restore $(LAB_ARGS)
+
+integration-resources:
+	PYTHONDONTWRITEBYTECODE=1 python3 lab.py integration-resources $(LAB_ARGS)

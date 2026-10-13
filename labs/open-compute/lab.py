@@ -2,7 +2,7 @@
 """Bounded black-box probe for the pinned open-compute release (Python stdlib)."""
 
 import argparse
-from contextlib import contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager, nullcontext
 import hashlib
 import http.client
 import json
@@ -525,7 +525,7 @@ class LocalHTTP:
     def __init__(self, port, token=None):
         self.port, self.token = port, token
 
-    def request(self, method, path, body=None, content_type="application/json", host=None):
+    def request(self, method, path, body=None, content_type="application/json", host=None, *, deadline=None):
         require(path.startswith("/") and not path.startswith("//") and "\r" not in path and "\n" not in path,
                 "invalid local request path")
         headers = {"Content-Type": content_type}
@@ -537,9 +537,12 @@ class LocalHTTP:
         if body is not None and not isinstance(body, bytes):
             body = json.dumps(body, separators=(",", ":")).encode()
         require(body is None or len(body) <= BODY_LIMIT, "request exceeds body bound")
-        deadline = time.monotonic() + HTTP_TOTAL_TIMEOUT
+        default_deadline = time.monotonic() + HTTP_TOTAL_TIMEOUT
+        deadline = min(default_deadline, deadline) if deadline is not None else default_deadline
+        remaining = deadline - time.monotonic()
+        require(remaining > 0, "HTTP total deadline exceeded")
         expired = threading.Event()
-        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=min(10, HTTP_TOTAL_TIMEOUT))
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=min(10, remaining))
         timer = None
         try:
             # Numeric loopback connect is itself bounded. The watchdog then spans
@@ -555,6 +558,7 @@ class LocalHTTP:
                 stream_socket.close()
             remaining = deadline - time.monotonic()
             require(remaining > 0, "HTTP total deadline exceeded")
+            stream_socket.settimeout(min(10, remaining))
             timer = threading.Timer(remaining, expire)
             timer.daemon = True
             timer.start()
@@ -725,7 +729,7 @@ def public_backup_summary(summary):
     return summary
 
 
-def cleanup_scope(scope, restore, original_identity=None, restored_identity=None):
+def cleanup_scope(scope, restore, original_identity=None, restored_identity=None, resources=False):
     """Only recover() can remove the original M2 source, never final cleanup."""
     if scope is None or scope.identity is None:
         return {}
@@ -743,6 +747,10 @@ def cleanup_scope(scope, restore, original_identity=None, restored_identity=None
             scope.remove(processes_stopped=True)
             require(absent(scope.path), "restored scope cleanup did not finish")
             require(time.monotonic() < deadline, "restored scope cleanup deadline exceeded")
+    elif resources:
+        with m3_deadline(30, "M3 scope cleanup"):
+            scope.remove(processes_stopped=True)
+            require(not os.path.lexists(scope.path), "M3 scope cleanup did not finish")
     else:
         scope.remove(processes_stopped=True)
     return {"scope_removed": True}
@@ -791,15 +799,112 @@ def source_commit():
         return None
 
 
-def integration(args, restore=False):
+@contextmanager
+def m3_deadline(seconds, phase):
+    """Nest finite main-thread budgets without pausing an existing alarm."""
+    require(threading.current_thread() is threading.main_thread(), "M3 requires the main thread")
+    require(seconds > 0, "M3 deadline must be positive")
+    previous = signal.getsignal(signal.SIGALRM)
+    started = time.monotonic()
+    remaining, interval = signal.getitimer(signal.ITIMER_REAL)
+    previous_end = started + remaining if remaining > 0 else None
+    own_end = started + seconds
+    deadline = min(own_end, previous_end) if previous_end is not None else own_end
+    previous_fired = False
+    def expired(signum, frame):
+        nonlocal previous_fired
+        if previous_end is not None and previous_end <= own_end and callable(previous):
+            previous_fired = True
+            previous(signum, frame)
+        raise LabError(phase + " total deadline exceeded")
+    signal.signal(signal.SIGALRM, expired)
+    signal.setitimer(signal.ITIMER_REAL, max(.000001, deadline - time.monotonic()))
+    try:
+        yield deadline
+        require(time.monotonic() < deadline, phase + " total deadline exceeded")
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+        if previous_end is not None:
+            remaining = previous_end - time.monotonic()
+            if remaining <= 0 and previous_fired:
+                # The inherited one-shot was already delivered by our handler.
+                # Re-arming it would deliver twice and interrupt outer restoration.
+                if interval > 0:
+                    signal.setitimer(signal.ITIMER_REAL, interval - (-remaining % interval), interval)
+            else:
+                signal.setitimer(signal.ITIMER_REAL, max(.000001, remaining), interval)
+
+
+def integration(args, restore=False, resources=False):
+    require(not (restore and resources), "M3 resources and M2 restore are separate scenarios")
+    if resources:
+        import resources as resource_tools
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
-    command_name = "make integration-restore" if restore else "make integration"
+    command_name = "make integration-resources" if resources else ("make integration-restore" if restore else "make integration")
     report = {"schema_version": 1, "run_id": run_id, "command": command_name,
               "harness_commit": source_commit(), "result": "failed", "phase": "preflight",
               "environment": {"os": platform.system(), "architecture": platform.machine(),
                               "euid": os.geteuid(), "python": platform.python_version()},
               "acceptance": ({f"M2-{n:02}": "not_run" for n in range(1, 10)} if restore else
                              {f"AC-{n:02}": "not_run" for n in range(1, 9)})}
+    functional_acceptance = report["acceptance"]
+    phases = {}
+    scenario_budget = ExitStack()
+    if resources:
+        report["functional_acceptance"] = functional_acceptance
+        report["acceptance"] = {f"M3-{n:02}": "not_run" for n in range(1, 6)}
+        report["scenario"] = "observed-process-tree-resources"
+
+    def project_observations():
+        if not resources:
+            return
+        projected = {}
+        for name, value in phases.items():
+            require(name in resource_tools.PHASE_NAMES, "invalid resource phase")
+            value = resource_tools.project_phase(value)
+            require(value["phase"] == name, "resource phase identity changed")
+            projected[name] = value
+        require(len(json.dumps(projected, indent=2, sort_keys=True, allow_nan=False).encode()) <= resource_tools.EXTENSION_LIMIT,
+                "resource partial evidence exceeds bound")
+        if set(projected) == set(resource_tools.PHASE_NAMES):
+            report["resources"] = resource_tools.resources_extension(projected)
+            report.pop("resource_phases", None)
+        elif projected:
+            report["resource_phases"] = projected
+
+    def observe(name):
+        report["phase"] = name
+        read = name.endswith("read_probe")
+        index = 0
+        def probe(deadline):
+            nonlocal index
+            if index % 2 == 0:
+                observed = worker.request("GET", "/health", host=host, deadline=deadline)
+                require(observed == {"fixture": "open-compute-m1", "ok": True} and observed["ok"] is True,
+                        "resource health probe changed")
+            else:
+                observed = worker.request("GET", "/jobs/" + job_id, host=host, deadline=deadline)
+                require(type(observed["row_count"]) is int and observed["row_count"] == 1 and
+                        json.dumps(observed["job"], sort_keys=True, allow_nan=False) == json.dumps(before, sort_keys=True, allow_nan=False),
+                        "resource job probe changed the original D1 row")
+            index += 1
+        try:
+            value = resource_tools.observe_phase(name, daemon.observed_identities,
+                                                duration_seconds=4 if read else 3,
+                                                probe=probe if read else None, probe_count=8 if read else 0)
+            value = resource_tools.project_phase(value)
+            require(value["phase"] == name and value["status"] == "observed" and index == (8 if read else 0),
+                    "required resource window was not observed")
+            phases[name] = value
+        except resource_tools.ResourceError as exc:
+            if exc.partial_summary is not None:
+                value = resource_tools.project_phase(exc.partial_summary)
+                require(value["phase"] == name, "resource partial phase identity changed")
+                phases[name] = value
+            raise
+        finally:
+            project_observations()
     if restore:
         report.update({"scenario": "same-path-cold-restore", "cold_restore": {},
                        "limitations": {"same_runner": True, "same_path": True, "same_uid": True,
@@ -826,7 +931,7 @@ def integration(args, restore=False):
         output_allowed = True
         scope_path = preflight(args.port)
         if not restore:
-            report["acceptance"]["AC-02"] = "passed"
+            functional_acceptance["AC-02"] = "passed"
         report["phase"] = "artifact"
         lock = json.loads((HERE / "upstream.lock.json").read_text())
         validate_lock(lock)
@@ -835,7 +940,7 @@ def integration(args, restore=False):
         version = command([str(binary), "--version"]).strip()
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
-        report["acceptance"]["M2-01" if restore else "AC-01"] = "passed"
+        functional_acceptance["M2-01" if restore else "AC-01"] = "passed"
         scope = OwnedScope(scope_path, args.port)
         redactor.secrets.append(scope.create())
         original_scope_identity = dict(scope.identity)
@@ -868,6 +973,8 @@ def integration(args, restore=False):
             return records[0]["instance_id"]
 
         report["phase"] = "bootstrap"
+        if resources:
+            scenario_budget.enter_context(m3_deadline(300, "M3 scenario"))
         daemon = start()
         cli("--config", str(config), "instance", "setup", "--name", INSTANCE,
             "--data-dir", str(data), "--yes", timeout=90)
@@ -914,7 +1021,7 @@ def integration(args, restore=False):
         require(first == second and second["row_count"] == 1 and second["job"]["id"] == job_id,
                 "duplicate submission did not retain one identical logical row")
         if not restore:
-            report["acceptance"].update({"AC-03": "passed", "AC-04": "passed"})
+            functional_acceptance.update({"AC-03": "passed", "AC-04": "passed"})
         report["duplicate_submission"] = {"requests": 2, "row_count": second["row_count"]}
         if restore:
             r2_payload = bytes([0, 255, 13, 10]) + secrets.token_bytes(60)
@@ -938,7 +1045,7 @@ def integration(args, restore=False):
                 "waiting Workflow has no single committed callback")
         require(any(step.get("name") == "instrumented-callback" and step.get("success") is True
                     for step in waiting.get("steps", [])), "first step was not publicly committed")
-        report["acceptance"]["M2-02" if restore else "AC-05"] = "passed"
+        functional_acceptance["M2-02" if restore else "AC-05"] = "passed"
         report["workflow"] = {"id": workflow_id, "before_status": waiting["status"],
                               "before_callback_count": before["callback_count"],
                               "before_nonce_sha256": hashlib.sha256(before["step_nonce"].encode()).hexdigest()}
@@ -947,6 +1054,10 @@ def integration(args, restore=False):
         live_children = [public_process(child) for child in daemon.live() if child["pid"] != daemon.process.pid]
         require(live_children, "no live supervised runtime child was observed")
         report["live_children_before_restart"] = live_children
+        if resources:
+            report["acceptance"]["M3-01"] = "passed"
+            observe("source_idle")
+            observe("source_read_probe")
         report["phase"] = "cold_shutdown" if restore else "daemon_restart"
         with recovery_deadline() if restore else nullcontext(None) as deadline:
             report["daemon_before"] = public_process(daemon.identity)
@@ -971,11 +1082,11 @@ def integration(args, restore=False):
                         require(summary.get("restored_verified") is True and restored_root == scope.identity and
                                 restored_root != original_scope_identity, "restored ownership transfer is unverified")
                         restored_scope_identity = dict(restored_root)
-                    report["acceptance"][gates[event]] = "passed"
+                    functional_acceptance[gates[event]] = "passed"
                     report["phase"] = "cold_" + event
                 cold_restore = ColdRestore(scope, cache, output, deadline, progress)
                 report["cold_restore"].update(public_backup_summary(cold_restore.recover()))
-                require(all(report["acceptance"]["M2-" + str(number).zfill(2)] == "passed"
+                require(all(functional_acceptance["M2-" + str(number).zfill(2)] == "passed"
                             for number in range(3, 7)), "cold restore gates incomplete; runtime spawn refused")
                 require(report["cold_restore"].get("source_absent") is True and
                         report["cold_restore"].get("data_absent") is True and
@@ -1013,7 +1124,7 @@ def integration(args, restore=False):
                 state_after = state_identity(scope_path, data, config)
                 require(state_before == state_after, "scope/data/database/config identity changed across restart")
                 report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
-                report["acceptance"]["AC-06"] = "passed"
+                functional_acceptance["AC-06"] = "passed"
             retained = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
             require(retained == before, "D1 state did not survive daemon restart")
             wait_workflow(api, workflow_path, "waiting")
@@ -1021,23 +1132,31 @@ def integration(args, restore=False):
                 report["readback"] = {"instance_account_database_unchanged": True, "d1_row_unchanged": True,
                                       "original_workflow_waiting": True, "read_only_http_enforced": True,
                                       "read_requests": api.read_requests + worker.read_requests}
-                report["acceptance"]["M2-07"] = "passed"
+                functional_acceptance["M2-07"] = "passed"
+        if resources:
+            observe("restarted_idle")
+            observe("restarted_read_probe")
+            # Every accepted phase passed copied identities, bounded acquisition,
+            # strict units/protocol projection and its exact workload checks.
+            resource_tools.project_resources(report["resources"])
+            report["acceptance"]["M3-02"] = "passed"
+            report["acceptance"]["M3-03"] = "passed"
         report["phase"] = "resume"
         if restore:
             api = LocalHTTP(args.port, restored_token)
-        require(not restore or time.monotonic() < workflow_deadline - HTTP_TOTAL_TIMEOUT,
+        require(not (restore or resources) or time.monotonic() < workflow_deadline - HTTP_TOTAL_TIMEOUT,
                 "original Workflow deadline leaves no approval margin")
         event = api.v4("POST", workflow_path + "/events/approval", {"approved": True})
         require(event["instanceId"] == workflow_id, "approval targeted a different Workflow")
         complete = wait_workflow(api, workflow_path, "complete",
-                                 timeout=min(60, workflow_deadline - time.monotonic()) if restore else 60)
-        require(not restore or time.monotonic() < workflow_deadline, "original Workflow wall-clock deadline exceeded")
+                                 timeout=min(60, workflow_deadline - time.monotonic()) if restore or resources else 60)
+        require(not (restore or resources) or time.monotonic() < workflow_deadline, "original Workflow wall-clock deadline exceeded")
         after = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
         assert_resume(before, retained, after, complete.get("output"), job_id)
         report["workflow"].update({"after_status": complete["status"], "after_callback_count": after["callback_count"],
                                    "after_nonce_sha256": hashlib.sha256(after["step_nonce"].encode()).hexdigest(),
                                    "same_id": True, "nonce_unchanged": True, "completed": after["completed"]})
-        report["acceptance"]["M2-08" if restore else "AC-07"] = "passed"
+        functional_acceptance["M2-08" if restore else "AC-07"] = "passed"
         report["phase"] = "cleanup"
         report["result"] = "passed"
     except Exception as exc:
@@ -1045,30 +1164,39 @@ def integration(args, restore=False):
         cleanup_unknown = isinstance(exc, ProcessObservationError)
     finally:
         try:
-            clean = not cleanup_unknown
-            for item in daemons:
-                if item.live(strict=False) or item.observation_error:
-                    shutdown = item.stop()
-                    if item is daemon:
-                        report["final_shutdown"] = shutdown
-                    clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
-                else:
-                    item.process.poll()
-                    item.finish_threads()
-                    if item is daemon and report["result"] == "passed":
-                        clean = False
-                if item.text() and report["result"] != "passed":
-                    report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
-            require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
-            report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity))
-            if cold_restore is not None:
-                report["cold_restore"].update(public_backup_summary(cold_restore.cleanup(processes_stopped=True)))
-                require(report["cold_restore"].get("private_removed") is True and
-                        report["cold_restore"].get("staging_removed") is True, "private recovery cleanup incomplete")
-            if report["result"] == "passed":
-                report["acceptance"]["M2-09" if restore else "AC-08"] = "passed"
-                require(all(value == "passed" for value in report["acceptance"].values()), "acceptance coverage incomplete")
-                report["phase"] = "complete"
+            scenario_budget.close()
+        except Exception as exc:
+            # Expiry must not bypass the separately bounded final cleanup.
+            report["result"] = "failed"
+            report["error"] = redactor.clean(str(exc))
+        try:
+            with m3_deadline(150, "M3 final cleanup") if resources else nullcontext():
+                clean = not cleanup_unknown
+                for item in daemons:
+                    if item.live(strict=False) or item.observation_error:
+                        shutdown = item.stop()
+                        if item is daemon:
+                            report["final_shutdown"] = shutdown
+                        clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
+                    else:
+                        item.process.poll()
+                        item.finish_threads()
+                        if item is daemon and report["result"] == "passed":
+                            clean = False
+                    if item.text() and report["result"] != "passed":
+                        report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
+                require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
+                report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity, resources=resources))
+                if cold_restore is not None:
+                    report["cold_restore"].update(public_backup_summary(cold_restore.cleanup(processes_stopped=True)))
+                    require(report["cold_restore"].get("private_removed") is True and
+                            report["cold_restore"].get("staging_removed") is True, "private recovery cleanup incomplete")
+                if report["result"] == "passed":
+                    functional_acceptance["M2-09" if restore else "AC-08"] = "passed"
+                    require(all(value == "passed" for value in functional_acceptance.values()), "acceptance coverage incomplete")
+                    if resources:
+                        report["acceptance"]["M3-04"] = "passed"
+                    report["phase"] = "complete"
         except Exception as exc:
             report["result"] = "failed"
             report["cleanup_error"] = redactor.clean(str(exc))
@@ -1083,6 +1211,13 @@ def integration(args, restore=False):
             output.parent.mkdir(parents=True, exist_ok=True)
             output.mkdir(mode=0o700)
             report["evidence_file_written"] = True
+            project_observations()
+            if resources and report["result"] == "passed":
+                # Scan the projected report before granting the report gate;
+                # a failed exclusive write revokes it below.
+                redactor.check_report(report)
+                report["acceptance"]["M3-05"] = "passed"
+                require(all(value == "passed" for value in report["acceptance"].values()), "M3 acceptance coverage incomplete")
             encoded = redactor.check_report(report)
             exclusive_file(output / "report.json", encoded.encode())
         except Exception as exc:
@@ -1091,6 +1226,9 @@ def integration(args, restore=False):
             report["result"] = "failed"
             report["evidence_file_written"] = False
             report["evidence_write_error"] = redactor.clean(str(exc))
+            if resources:
+                report["acceptance"]["M3-05"] = "not_run"
+    project_observations()
     encoded = redactor.check_report(report)
     print(encoded, end="", flush=True)
     return 0 if report["result"] == "passed" else 1
@@ -1098,7 +1236,7 @@ def integration(args, restore=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("preflight", "integration", "integration-restore"))
+    parser.add_argument("command", choices=("preflight", "integration", "integration-restore", "integration-resources"))
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--cache", default=str(HERE / ".lab-cache"))
     parser.add_argument("--output", help="new directory for sanitized report.json; must not exist")
@@ -1111,7 +1249,7 @@ def main():
         except (LabError, OSError) as exc:
             print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
             return 1
-    return integration(args, restore=args.command == "integration-restore")
+    return integration(args, restore=args.command == "integration-restore", resources=args.command == "integration-resources")
 
 
 if __name__ == "__main__":

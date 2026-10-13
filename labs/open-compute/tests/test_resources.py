@@ -178,6 +178,38 @@ class ReductionTests(unittest.TestCase):
         with self.assertRaises(resources.ResourceError):
             resources.project_resources(altered)
 
+    def test_success_cannot_conceal_invalid_attempt_but_skipped_slots_are_distinct(self):
+        acc = resources.PhaseAccumulator("source_idle", resources.resource_units())
+        acc.add_sample([record(cpu=1)], 0, .01)
+        acc.add_sample([record(cpu=6)], .25, .01)
+        valid = reduced_summary(acc, 1)
+        concealed_failure = dict(valid, samples_attempted=3, scheduled_slots=3)
+        with self.assertRaises(resources.ResourceError) as caught:
+            resources.project_phase(concealed_failure)
+        self.assertEqual(caught.exception.reason, "protocol_error")
+        # Scheduled slots that were never attempted remain explicit coverage
+        # gaps, separate from attempted acquisition failures.
+        skipped = dict(valid, scheduled_slots=4, skipped_slots=2)
+        self.assertEqual(resources.project_phase(skipped), skipped)
+        partial = dict(concealed_failure, status="failed", reason="stat_error")
+        self.assertEqual(resources.project_phase(partial), partial)
+
+    def test_success_rejects_impossible_combined_observation_counts(self):
+        acc = resources.PhaseAccumulator("source_idle", resources.resource_units())
+        acc.add_sample([record(cpu=1)], 0, .01)
+        acc.add_sample([record(cpu=6)], .25, .01)
+        valid = reduced_summary(acc, 1)
+        impossible = (
+            dict(valid, cpu_pairs_observed=512, cpu_unpaired_observations=513),
+            dict(valid, cpu_pairs_observed=2, cpu_unpaired_observations=0),
+            dict(valid, missing_observations=512, reused_observations=512),
+        )
+        for altered in impossible:
+            with self.subTest(altered=altered):
+                with self.assertRaises(resources.ResourceError) as caught:
+                    resources.project_phase(altered)
+                self.assertEqual(caught.exception.reason, "protocol_error")
+
 
 class AcquisitionTests(unittest.TestCase):
     def helper(self, script):

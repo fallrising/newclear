@@ -17,6 +17,7 @@ import (
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/auth"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/config"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/httpapi"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
@@ -49,7 +50,29 @@ func listenAddress(value string) (string, error) {
 	return net.JoinHostPort(ip.String(), strconv.Itoa(n)), nil
 }
 
+type runtimeOptions struct {
+	senderFactory    func([]delivery.Subscription, []string) (*delivery.Sender, error)
+	now              func() time.Time
+	deliveryInterval time.Duration
+}
+
 func run(ctx context.Context, args []string, output io.Writer) error {
+	return runWithOptions(ctx, args, output, runtimeOptions{})
+}
+
+// Options provide deterministic clocks and a pinned synthetic TLS receiver to
+// integration tests. The CLI always uses the production defaults.
+func runWithOptions(ctx context.Context, args []string, output io.Writer, options runtimeOptions) error {
+	if options.now == nil {
+		options.now = time.Now
+	}
+	if options.senderFactory == nil {
+		options.senderFactory = delivery.NewSender
+	}
+	if options.deliveryInterval == 0 {
+		options.deliveryInterval = time.Second
+	}
+
 	if len(args) >= 2 && args[0] == "rules" && args[1] == "backfill" {
 		return backfill(ctx, args[2:], output)
 	}
@@ -81,6 +104,14 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return errors.New("credential files are invalid, unavailable or duplicated")
 	}
+	subscriptions, err := delivery.Parse(cfg.Subscriptions, cfg.WebhookAllowlist)
+	if err != nil {
+		return errors.New("subscription configuration is invalid")
+	}
+	sender, err := options.senderFactory(subscriptions, cfg.WebhookAllowlist)
+	if err != nil {
+		return errors.New("delivery credentials or targets are invalid or unavailable")
+	}
 	db, err := store.Open(*dbPath)
 	if err != nil {
 		return errors.New("database could not be opened or migrated")
@@ -90,14 +121,14 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return errors.New("rule configuration is invalid")
 	}
-	if err := db.ConfigureRuntime(ctx, cfg.Sources, definitions, time.Now().UTC(), false); err != nil {
-		return errors.New("source or rule configuration could not be initialized; verify rule versions")
+	if err := db.ConfigureRuntime(ctx, cfg.Sources, definitions, options.now().UTC(), false, subscriptions); err != nil {
+		return errors.New("runtime configuration could not be initialized; verify rule versions and subscription identities")
 	}
-	if err := db.EvaluateSources(ctx, time.Now().UTC()); err != nil {
+	if err := db.EvaluateSources(ctx, options.now().UTC()); err != nil {
 		return errors.New("source freshness could not be initialized")
 	}
-	handler := httpapi.NewRuntime(db, credentials, httpapi.ReloadOptions{ConfigPath: *configPath, OwnerRef: *ownerRef, ReadOnlyRef: *readonlyRef})
-	if err := handler.EvaluateRules(ctx, time.Now().UTC()); err != nil {
+	handler := httpapi.NewRuntime(db, credentials, httpapi.ReloadOptions{ConfigPath: *configPath, OwnerRef: *ownerRef, ReadOnlyRef: *readonlyRef, Sender: sender, SenderFactory: options.senderFactory, Now: options.now})
+	if err := handler.EvaluateRules(ctx, options.now().UTC()); err != nil {
 		fmt.Fprintln(output, "signalhub: rule evaluation failed; retrying each minute")
 	}
 	listener, err := net.Listen("tcp", address)
@@ -124,18 +155,34 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 			select {
 			case <-workerCtx.Done():
 				return
-			case now := <-ticker.C:
-				if err := handler.EvaluateSources(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
+			case <-ticker.C:
+				if err := handler.EvaluateSources(workerCtx, options.now().UTC()); err != nil && workerCtx.Err() == nil {
 					fmt.Fprintln(output, "signalhub: source freshness evaluation failed; retrying")
 				}
-			case now := <-ruleTicker.C:
-				if err := handler.EvaluateRules(workerCtx, now.UTC()); err != nil && workerCtx.Err() == nil {
+			case <-ruleTicker.C:
+				if err := handler.EvaluateRules(workerCtx, options.now().UTC()); err != nil && workerCtx.Err() == nil {
 					fmt.Fprintln(output, "signalhub: rule evaluation failed; retrying each minute")
 				}
 			}
 		}
 	}()
-	defer func() { stopWorker(); <-workerDone }()
+	deliveryDone := make(chan struct{})
+	go func() {
+		defer close(deliveryDone)
+		ticker := time.NewTicker(options.deliveryInterval)
+		defer ticker.Stop()
+		for {
+			if err := handler.Dispatch(workerCtx, options.now().UTC(), "http://"+listener.Addr().String()); err != nil && workerCtx.Err() == nil {
+				fmt.Fprintln(output, "signalhub: delivery dispatch failed; retrying")
+			}
+			select {
+			case <-workerCtx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
+	defer func() { stopWorker(); <-workerDone; <-deliveryDone }()
 	result := make(chan error, 1)
 	go func() { result <- server.Serve(listener) }()
 	fmt.Fprintf(output, "signalhub listening on %s\n", listener.Addr())

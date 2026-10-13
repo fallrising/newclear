@@ -1,6 +1,6 @@
 # Quickstart — M3 本機事件中樞
 
-M3 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。M3 已提供規則指標與圖表；投遞、封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
+M4 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。已提供規則指標與圖表、webhook／ntfy、摘要、重試與DLQ重放；封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
 以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
@@ -155,6 +155,7 @@ go build -o /tmp/signalhub ./cmd/signalhub
 /tmp/signalhub-checks/bin/python contracts/check.py
 /tmp/signalhub-checks/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
 /tmp/signalhub-checks/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
+/tmp/signalhub-checks/bin/python scripts/e2e_delivery.py --binary /tmp/signalhub
 ```
 
 `e2e_smoke.py` 使用本機合成憑證及暫存資料庫執行 HTTP／SQLite smoke test，不會部署服務或連接外部系統。契約檢查驗證 schemas、fixtures、vectors 與 OpenAPI；它不取代 runtime 測試。
@@ -204,3 +205,17 @@ PYCODE
 ```
 
 此命令只重新計算已生效規則，不修改來源、規則版本或 token。自動回填仍以資料庫實際保留的最早事件為界；本階段尚未執行 retention cleanup。
+
+## 訂閱與投遞
+
+訂閱設定格式見 [SDD](sdd/04-subscriptions-and-delivery.md)。把 webhook／ntfy 的完整 HTTPS URL 加入 `webhook_allowlist`，使用各自的 `secret_ref`／`token_ref` 檔案，再以 owner 重載。正式目標的全部 DNS 位址必須在 tailnet 範圍且具有效 TLS 憑證；即使列入允許清單，loopback／LAN／公網／redirect 仍拒絕。這個範例不連接真實通知帳號。
+
+新訂閱預設 `start: now`；需補送現有事件才明寫 `earliest_hot`。設定身份固定，改 filter／channel kind／digest 排程請使用新 ID；目標 URL 與憑證可原子輪替。日摘要以指定 IANA 時区當地時間切窗，前20筆及總數會在排隊時固定；遲到事件不重写已排摘要。
+
+看板「投遞」可查看 counts、狀態／訂閱篩選、最近嘗試及分頁。DLQ 重放需 owner token 與理由，唯讀 token 會收到403；移除的訂閱先恢復相同設定才能重放。重試／重放保留原 delivery ID，接收端仍必須持久化去重。驗收真實本機 TLS 接收端（包括 SIGKILL／lease 復原）：
+
+```sh
+go test -race -v ./cmd/signalhub -run 'TestM4ReferenceReceiverVectors|TestM4RealServiceDeliveryRecovery' -count=1
+```
+
+上述測試使用獨立服務 process、合成 SQLite 事件與具固定憑證的接收端，僅測試內注入時鐘及該接收端的精確位址。正式 CLI 沒有停用 SSRF 或 TLS 驗證的選項。`e2e_delivery.py` 另啟動正式 binary 驗證 HTTP／OpenAPI，並確認 allowlisted loopback 仍未被連線。

@@ -41,6 +41,9 @@ var migration2 string
 //go:embed migrations/003_rules.sql
 var migration3 string
 
+//go:embed migrations/004_deliveries.sql
+var migration4 string
+
 type Store struct{ db *sql.DB }
 type Result struct {
 	Seq       int64
@@ -127,7 +130,7 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err := tx.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return unavailable(err)
 	}
-	if version < 0 || version > 3 {
+	if version < 0 || version > 4 {
 		return unavailable(fmt.Errorf("unsupported schema version %d", version))
 	}
 	switch version {
@@ -154,7 +157,15 @@ func (s *Store) initialize(ctx context.Context) error {
 		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 3"); err != nil {
 			return unavailable(err)
 		}
+		fallthrough
 	case 3:
+		if _, err := tx.ExecContext(ctx, migration4); err != nil {
+			return unavailable(err)
+		}
+		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 4"); err != nil {
+			return unavailable(err)
+		}
+	case 4:
 	}
 	if err := tx.Commit(); err != nil {
 		return unavailable(err)

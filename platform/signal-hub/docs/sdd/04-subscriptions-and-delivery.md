@@ -26,7 +26,7 @@ subscriptions:
     digest: { every: 24h, at: "08:30", timezone: Asia/Taipei, skip_empty: true }
 ```
 
-- webhook 目標必須在設定的允許清單內（預設只允許 tailnet 主機），防止 SSRF。
+- webhook 與 ntfy 目標都必須在設定的允許清單內（預設只允許 tailnet 主機），防止 SSRF。
 - 新訂閱預設從建立當下開始，不補送歷史；`earliest_hot` 需明確指定。
 - 訂閱的 filter 不能匹配該訂閱自己產生的投遞失敗事件（`signalhub.delivery.*` 的 `subject` 等於自己），避免迴圈。
 
@@ -107,3 +107,5 @@ pending ──claim──▶ inflight ──2xx──▶ succeeded
 - AC-35：webhook 目標不在允許清單時，設定載入失敗。
 - AC-36：摘要模式的空視窗在 `skip_empty: true` 時不送出。
 - AC-37：以 fixtures 模擬決策系統送回的六種事件，看板能依 `correlationid` 串成一條鏈。
+
+M4 的游標、設定身份、重放輪次、摘要遲到事件與 DNS/TLS 實作邊界見 [M4 實作契約](../m4-design.md)。

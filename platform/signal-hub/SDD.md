@@ -1,6 +1,6 @@
 # Signal Hub — Software Design Document
 
-版本：0.1 + M3 runtime 釐清 · 日期：2026-10-12 · runtime 狀態見 docs/STATUS.md。
+版本：0.1 + M4 runtime 釐清 · 日期：2026-10-13 · runtime 狀態見 docs/STATUS.md。
 
 ## 1. 結論與理由
 

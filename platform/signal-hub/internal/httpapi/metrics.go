@@ -17,16 +17,26 @@ import (
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/auth"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/config"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
 )
 
 // ReloadOptions selects the same local configuration and credential files used
 // at startup. Their paths and contents never appear in HTTP responses or events.
-type ReloadOptions struct{ ConfigPath, OwnerRef, ReadOnlyRef string }
+type ReloadOptions struct {
+	ConfigPath, OwnerRef, ReadOnlyRef string
+	Sender                            *delivery.Sender
+	SenderFactory                     func([]delivery.Subscription, []string) (*delivery.Sender, error)
+	Now                               func() time.Time
+}
 
 func NewRuntime(db *store.Store, credentials *auth.Authenticator, options ReloadOptions) *Server {
-	return &Server{db: db, auth: credentials, now: time.Now, reloadOptions: options}
+	now := options.Now
+	if now == nil {
+		now = time.Now
+	}
+	return &Server{db: db, auth: credentials, now: now, reloadOptions: options, sender: options.Sender}
 }
 
 func (s *Server) EvaluateSources(ctx context.Context, now time.Time) error {
@@ -74,7 +84,21 @@ func (s *Server) reload(w http.ResponseWriter, r *http.Request) {
 		reject()
 		return
 	}
-	if err := s.db.ConfigureRuntime(r.Context(), cfg.Sources, definitions, now, true); err != nil {
+	subscriptions, err := delivery.Parse(cfg.Subscriptions, cfg.WebhookAllowlist)
+	if err != nil {
+		reject()
+		return
+	}
+	factory := s.reloadOptions.SenderFactory
+	if factory == nil {
+		factory = delivery.NewSender
+	}
+	sender, err := factory(subscriptions, cfg.WebhookAllowlist)
+	if err != nil {
+		reject()
+		return
+	}
+	if err := s.db.ConfigureRuntime(r.Context(), cfg.Sources, definitions, now, true, subscriptions); err != nil {
 		if errors.Is(err, store.ErrInvalidConfig) {
 			reject()
 			return
@@ -83,6 +107,7 @@ func (s *Server) reload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.auth = credentials
+	s.sender = sender
 	// Evaluation is a projection after activation. Failure keeps the pending
 	// backfill for the next minute; it must not turn an accepted reload into 400.
 	_ = s.db.EvaluateRules(r.Context(), now)

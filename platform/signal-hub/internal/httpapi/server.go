@@ -16,6 +16,7 @@ import (
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/adapter"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/auth"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/event"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
 )
@@ -28,6 +29,7 @@ type Server struct {
 	auth          *auth.Authenticator
 	now           func() time.Time
 	reloadOptions ReloadOptions
+	sender        *delivery.Sender
 }
 
 func New(db *store.Store, credentials *auth.Authenticator) http.Handler {
@@ -84,9 +86,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ingest := r.Method == http.MethodPost && (path == "/v1/events" || path == "/v1/adapters/alertmanager")
-	query := r.Method == http.MethodGet && (path == "/v1/events" || path == "/v1/sources" || path == "/v1/rules" || strings.HasPrefix(path, "/v1/metrics/") || strings.HasPrefix(path, "/v1/events/"))
+	query := r.Method == http.MethodGet && (path == "/v1/subscriptions" || path == "/v1/deliveries" || path == "/v1/events" || path == "/v1/sources" || path == "/v1/rules" || strings.HasPrefix(path, "/v1/metrics/") || strings.HasPrefix(path, "/v1/events/"))
 	reload := r.Method == http.MethodPost && path == "/v1/config:reload"
-	if !ingest && !query && !reload {
+	replay := r.Method == http.MethodPost && strings.HasPrefix(path, "/v1/deliveries/") && strings.HasSuffix(path, ":replay")
+	if !ingest && !query && !reload && !replay {
 		fail(w, 404, "not_found", "route not found")
 		return
 	}
@@ -104,8 +107,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fail(w, 401, "unauthenticated", "valid bearer token required")
 		return
 	}
-	if (ingest && principal.Role != "source") || (query && principal.Role != "owner" && principal.Role != "readonly") || (reload && principal.Role != "owner") {
+	if (ingest && principal.Role != "source") || (query && principal.Role != "owner" && principal.Role != "readonly") || ((reload || replay) && principal.Role != "owner") {
 		fail(w, 403, "forbidden", "token role does not permit this operation")
+		return
+	}
+	if replay {
+		s.replay(w, r)
 		return
 	}
 	if reload {
@@ -207,6 +214,10 @@ func (s *Server) ingest(ctx context.Context, principal auth.Principal, body []by
 }
 
 func (s *Server) query(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/v1/subscriptions" || r.URL.Path == "/v1/deliveries" {
+		s.deliveryList(w, r)
+		return
+	}
 	if r.URL.Path == "/v1/rules" {
 		s.ruleList(w, r)
 		return

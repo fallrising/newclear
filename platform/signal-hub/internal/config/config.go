@@ -1,5 +1,4 @@
-// Package config loads strict JSON source and rule configuration.
-// General YAML and nonempty subscriptions await their runtime milestones.
+// Package config loads strict JSON source, rule and subscription configuration.
 package config
 
 import (
@@ -10,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/event"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 )
@@ -34,7 +34,6 @@ var namePattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 var typePattern = regexp.MustCompile(`^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+(\.\*)?$`)
 var intervalPattern = regexp.MustCompile(`^[1-9][0-9]*(s|m|h|d)$`)
 var tokenRefPattern = regexp.MustCompile(`^file:/[^\s]+$`)
-var webhookPattern = regexp.MustCompile(`^https://[^/?#@]+(/[^#]*)?$`)
 
 func ValidTokenRef(s string) bool { return tokenRefPattern.MatchString(s) }
 
@@ -70,9 +69,6 @@ func Parse(raw []byte) (*Config, error) {
 		}
 		arrays[k] = a
 	}
-	if len(arrays["subscriptions"]) != 0 {
-		return nil, fmt.Errorf("subscriptions are not supported yet; the array must be empty")
-	}
 	c := &Config{Sources: []Source{}, Rules: []json.RawMessage{}, Subscriptions: []json.RawMessage{}, WebhookAllowlist: []string{}}
 	for _, entry := range arrays["rules"] {
 		body, err := json.Marshal(entry)
@@ -103,7 +99,7 @@ func Parse(raw []byte) (*Config, error) {
 	seen = map[string]bool{}
 	for _, entry := range arrays["webhook_allowlist"] {
 		s, ok := entry.(string)
-		if !ok || !webhookPattern.MatchString(s) || !event.ValidURI(s, true) {
+		if !ok || !delivery.ValidURL(s) {
 			return nil, fmt.Errorf("invalid webhook allowlist URL")
 		}
 		if seen[s] {
@@ -111,6 +107,16 @@ func Parse(raw []byte) (*Config, error) {
 		}
 		seen[s] = true
 		c.WebhookAllowlist = append(c.WebhookAllowlist, s)
+	}
+	for _, entry := range arrays["subscriptions"] {
+		body, err := json.Marshal(entry)
+		if err != nil {
+			return nil, fmt.Errorf("invalid subscription JSON")
+		}
+		c.Subscriptions = append(c.Subscriptions, body)
+	}
+	if _, err := delivery.Parse(c.Subscriptions, c.WebhookAllowlist); err != nil {
+		return nil, fmt.Errorf("invalid subscriptions: %w", err)
 	}
 	return c, nil
 }

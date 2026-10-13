@@ -81,7 +81,7 @@ test('real delivery queries paginate, filter and replay with owner audit while r
     await expect(cards).toHaveCount(0);
     await expect(page.getByRole('heading',{name:'此條件沒有投遞'})).toBeVisible();
     await page.getByLabel('訂閱 ID',{exact:true}).fill('board-000');
-    await page.getByLabel('投遞狀態',{exact:true}).selectOption('dlq');
+    await page.getByRole('combobox',{name:'投遞狀態',exact:true}).selectOption('dlq');
     await expect(cards).toHaveCount(1);
     await expect(cards).toContainText('HTTP 400');
     await expect(cards).toContainText('Synthetic rejected <script>inert</script>');
@@ -108,7 +108,7 @@ test('real delivery queries paginate, filter and replay with owner audit while r
     await expect(cards).toHaveCount(0);
     await expect(page.locator('.delivery-subscriptions .source-card')).toHaveCount(0);
     await connect(page,hub,'owner');
-    await page.getByLabel('投遞狀態',{exact:true}).selectOption('dlq');
+    await page.getByRole('combobox',{name:'投遞狀態',exact:true}).selectOption('dlq');
     await expect(cards).toHaveCount(1);
     await cards.getByLabel('重放理由',{exact:true}).fill('Synthetic receiver fixed');
     const accepted=page.waitForResponse(response=>response.url().includes(':replay'));

@@ -55,3 +55,5 @@ M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](htt
 首次M3遠端CI run38292215976的6個browser案例中5個通過；指標主流程斷言通過，但console404使最後檢查失敗。補上隨binary提供的favicon與Go資源回歸測試；CI另安裝Noto CJK測試字型以修正截圖缺字。最終瀏覽器結果與截圖驗收見[PR #349](https://github.com/fallrising/newclear/pull/349)及[PLAN](../.team/PLAN.md)，保留首次失敗紀錄。
 
 上述首次browser失敗已由CI38293396899的完整6/6通過結案；sandbox保持啟用。最後提交僅同步驗收紀錄，執行檔內容與已驗證產品版本相同。
+
+M4首次CI38377908329：native gates全部通過，Chromium7/8（AC-37與原有6例通過）。投遞案例因implicit label locator超時；快照存在正確combobox無障礙名稱。兩處改為精確role/name，保留原斷言與timeout，待完整CI複驗。

@@ -16,14 +16,14 @@ Built-in workers inherit the session model; no external CLI provider dispatch or
 
 1. Published task authorization, dependency acceptance and no scope conflict: confirmed before edits.
 2. Design/contract: this plan and M4 contract precede implementation; exact public API already exists in M0 OpenAPI.
-3. Worker tests and bounded scope reviewed before integration: T-401/T-402 accepted at bounded scope with root inspection; T-403 implementation integrated, PARTIAL report preserved pending Chromium.
+3. Worker tests and bounded scope reviewed before integration: T-401/T-402 accepted at bounded scope with root inspection; T-403 implementation integrated, PARTIAL historical report preserved; Chromium verified at milestone gate.
 4. Root native regression and M4 real TLS receiver/service gates: passed (10 Go packages with race, vet/format/build, 26 frontend tests/types/build, contracts 6/63/15/5, HTTP 34+39+69, actionlint 1.7.7).
-5. Independent implementation review: passed; T-404 R1 reproduced and independently closed after native regression. Final evidence gate awaits mandatory Chromium/CI.
-6. Required PR CI, normal merge and remote readback: pending.
+5. Independent implementation review: passed; T-404 R1 reproduced and independently closed after native regression. M4 implementation evidence gate passed on CI38379149575 with 8/8 Chromium and inspected artifacts.
+6. Product CI passed at `10316c7948e9f6b8192915344dfbd9ad79827b3a`; [PR #351](https://github.com/fallrising/newclear/pull/351) is the normal merge/readback record. Final documentation commit repeats required CI before integration.
 
-Acceptance matrix and exact commands are in M4 contract. Historical M3 evidence remains in its reports and STATUS. No completion claim yet. Known local Chromium sandbox limitation persists; supported CI browser path remains mandatory. No production configuration, account, deployment or runtime dependency is authorized.
+Acceptance matrix and exact commands are in M4 contract. Historical M3 evidence remains in its reports and STATUS. Implementation AC-30–37 accepted; integration is recorded by PR #351. Local Chromium limitation is retained; the supported sandboxed CI browser path passed. No production configuration, account, deployment or runtime dependency is authorized.
 
-## Acceptance evidence map (pre-CI)
+## Acceptance evidence map (verified product)
 
 | Requirement | Visible evidence | Decision |
 | --- | --- | --- |
@@ -33,13 +33,21 @@ Acceptance matrix and exact commands are in M4 contract. Historical M3 evidence 
 | AC-34 HMAC/dedup | 15 fixed vectors + persistent reference receiver + original-byte signature tests | passed |
 | AC-35 SSRF | Exact URL both channels, DNS answer pin/mixed/rebinding, TLS hostname/roots, redirect and production loopback denial | passed |
 | AC-36 digest | empty/nonempty actual ntfy receipt; DST gap/fold, catch-up, first20/total, restart/late/start tests | local passed |
-| AC-37 chain/board | Six true producer events/HTTP detail chain fixture; two new browser cases | Chromium pending |
-| M1–M3 regression | final full Go race after R1 (store289.763s), original17+new9 frontend tests, HTTP34+39; old6 browser cases preserved | browser pending |
+| AC-37 chain/board | Six true producer events/HTTP detail chain fixture; two new browser cases | passed in CI38379149575 |
+| M1–M3 regression | final full Go race after R1 (store289.763s), original17+new9 frontend tests, HTTP34+39; old6 browser cases preserved | passed including old 6 browser cases |
 | Independent review | T-404 isolated snapshot; 4 independent adversarial probes and focused race pass after R1 fix | implementation accepted |
-| Publication | normal PR, required CI/review, remote main readback | pending |
+| Publication | [PR #351](https://github.com/fallrising/newclear/pull/351); normal required-check merge and remote readback | integration record on PR |
 
 Historical failures: intentional pre-implementation config/API/allowlist red tests; actual 400 wrongly retrying due error-summary classification (fixed and retested); initial browser fixture invalid source wildcard (corrected and real HTTP probe passed); local Chromium missing libnspr4.so (CI required, no bypass). T-403 remains PARTIAL as a historical worker report until milestone-level browser acceptance. No failures/skips are converted into passes without replacement evidence.
 
 Independent R1 closure: legal extreme-offset event timestamps exposed an invalid public digest boundary and a persisted cursor parse failure blocking immediate queues. Exact Unix-second cursors plus finite RFC3339 public/link formatting repair both; root red/green regressions and reviewer four-probe race verification passed. No contract validation was weakened. T-404 retains PARTIAL historical limitations; implementation review is accepted, milestone completion awaits Chromium and CI.
 
 CI38377908329: Go race/vet/build, frontend26/reproducible assets, contracts and HTTP passed; Chromium7/8. The delivery case timed out locating the implicit select label while its accessible snapshot exposes combobox “投遞狀態”. Corrected two selectors to exact role/name; no assertion or timeout change. T-405 independently accepted this correction; required full CI rerun remains pending.
+
+## Final M4 implementation acceptance
+
+Product `10316c7948e9f6b8192915344dfbd9ad79827b3a`, [CI38379149575](https://github.com/fallrising/newclear/actions/runs/38379149575): all required gates passed. Go race10packages (store236.166s), vet/format/build; frontend26tests/types/reproducible assets; contracts6/63/15/5; HTTP34+39+70; sandboxed Chromium8/8 (19.0s). HTTP poll counts can vary by one without changing assertions (local final34+39+69). The real subprocess/TLS test covers retry, DLQ/replay, ntfy/digest and SIGKILL/lease/dedup; all four independent R1 probes pass.
+
+Root visually inspected desktop delivery,390px mobile delivery and AC-37 correlation-chain PNGs: Chinese text, state badges, escaped attempt errors, reason field, action and readonly notice are readable; no visible overlap or horizontal overflow. Browser assertions establish role denial, owner audit, navigation, pagination, logout and empty browser storage; expected replay403 is explicitly scoped, unexpected console/pageerror/HTTP errors are zero. Native Playwright handles authenticated fixture capture; no claim of standalone CDP-runner or full accessibility audit is made.
+
+Evidence gate: accept T-401/T-402 bounded implementations, T-403 integration using successful CI replacement evidence, T-404 R1 closure and T-405 selector correction. Historical PARTIAL/failed records remain unchanged. AC-30–37 and M1–M3 regression are verified; no unresolved implementation blocker. Only normal publication/readback remains to establish integration, via PR351 and final delivery record; no M5/M6 or deployment acceptance is implied.

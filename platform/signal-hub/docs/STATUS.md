@@ -22,7 +22,9 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 
 2026-10-13 使用本輪自建暫存目錄與合成資料。`go test -race -count=1 ./cmd/signalhub` 通過（3.616秒），含真正服務 subprocess／SQLite／TLS 接收端：先建立 pending、inflight、DLQ，封存驗證清除後產生一致備份；停止來源服務，還原至全新 DB 並匯回 archive；原事件可查且帶 restored，原 seq 保留。pending／lease 到期工作續作，readonly 無法 replay、owner 附理由重放成功；持久化接收端只接受三個唯一 delivery ID，原 bytes/HMAC 與備份 SHA 不變。不是生產資料或正式通知帳號驗收。
 
-`scripts/e2e_archive.py --binary <binary>` 通過61個 HTTP/OpenAPI回應與17個CLI結果，獨立核對 gzip／SHA256／manifest／membership／精確清除、寫入與驗證失敗、遲到新part、200去重／409衝突、重複匯回期限／audit／cursor、規則回填與不重送歷史、live-WAL一致備份、隔離查詢／新事件／queue恢復。完整Go race、独立review及遠端Chromium/CI仍待完成，不宣稱里程碑已交付。
+`scripts/e2e_archive.py --binary <binary>` 通過61個 HTTP/OpenAPI回應與17個CLI結果，獨立核對 gzip／SHA256／manifest／membership／精確清除、寫入與驗證失敗、遲到新part、200去重／409衝突、重複匯回期限／audit／cursor、規則回填與不重送歷史、live-WAL一致備份、隔離查詢／新事件／queue恢復。整合版本 `d73f10ac100e22be9571582007bab84c7e8e216d` 的完整 `go test -race -count=1 ./...` 通過10個套件（store375.340秒）；vet、format、build、28個前端測試／types／format／build、6 schemas／64 fixtures／15 webhook／5 canonical向量，以及原有142個HTTP回應全部通過。browser fixture獨立probe也通過。獨立review及遠端Chromium/CI仍待完成；[PR #352](https://github.com/fallrising/newclear/pull/352) 尚未合併。
+
+首版[CI38395539540](https://github.com/fallrising/newclear/actions/runs/38395539540)通過10個race套件、28前端測試、contracts、203個HTTP回應／17個M5 CLI結果及9個sandboxed Chromium案例（24.7秒）。桌面與390px手機匯回詳情截圖已目視確認，沒有缺字或水平溢出，browser health無異常。但獨立[T-504](../.team/reports/T-504.md)的R1發現DB識別只查部分欄位會接受不完整／未支援schema，故首版未被接受。T-506加入寫入前read-only完整schema驗證，原始失敗與修正證據分開保存；獨立複驗與修正版完整gate仍進行中。
 
 ## M4 驗證結果
 

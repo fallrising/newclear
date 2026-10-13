@@ -47,15 +47,26 @@ func OpenExisting(path string) (*Store, error) {
 	if err != nil || info.Size() == 0 {
 		return nil, unavailable(errors.New("existing database is empty or unavailable"))
 	}
+	// A live WAL database must be read with mode=ro, not immutable=1: its
+	// committed schema may still be in WAL pages. No writer connection or
+	// journal configuration is opened until this complete preflight succeeds.
+	reader, err := backupReadDB(absolute, false)
+	if err != nil {
+		return nil, unavailable(err)
+	}
+	validationErr := backupSchema(context.Background(), reader)
+	closeErr := reader.Close()
+	if validationErr != nil {
+		return nil, unavailable(validationErr)
+	}
+	if closeErr != nil {
+		return nil, unavailable(closeErr)
+	}
 	db, err := backupDB(absolute, false)
 	if err != nil {
 		return nil, unavailable(err)
 	}
 	s := &Store{db: db}
-	if err := backupSchema(context.Background(), db); err != nil {
-		_ = db.Close()
-		return nil, unavailable(err)
-	}
 	if err := s.initialize(context.Background()); err != nil {
 		_ = db.Close()
 		return nil, err
@@ -353,16 +364,28 @@ func backupAbsent(path string, manifest bool) error {
 }
 
 func backupDB(path string, readonly bool) (*sql.DB, error) {
-	uri := &url.URL{Scheme: "file", Path: path}
+	if readonly {
+		return backupReadDB(path, true)
+	}
 	params := url.Values{}
 	params.Set("mode", "rw")
 	params.Add("_pragma", "busy_timeout(1000)")
 	params.Add("_pragma", "synchronous(FULL)")
-	if readonly {
-		params.Set("mode", "ro")
+	return backupConnect(path, params)
+}
+
+func backupReadDB(path string, immutable bool) (*sql.DB, error) {
+	params := url.Values{}
+	params.Set("mode", "ro")
+	params.Add("_pragma", "busy_timeout(1000)")
+	if immutable {
 		params.Set("immutable", "1")
 	}
-	uri.RawQuery = params.Encode()
+	return backupConnect(path, params)
+}
+
+func backupConnect(path string, params url.Values) (*sql.DB, error) {
+	uri := &url.URL{Scheme: "file", Path: path, RawQuery: params.Encode()}
 	db, err := sql.Open("sqlite", uri.String())
 	if err != nil {
 		return nil, err
@@ -404,20 +427,6 @@ func backupIntegrity(ctx context.Context, path string) error {
 		return err
 	}
 	return backupSchema(ctx, db)
-}
-
-// Maintenance only accepts an existing SignalHub application database. A valid
-// but unrelated SQLite file must never be implicitly initialized by a typo.
-func backupSchema(ctx context.Context, db *sql.DB) error {
-	var version int
-	if err := db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil || version < 1 {
-		return ErrInvalidBackup
-	}
-	rows, err := db.QueryContext(ctx, "SELECT seq,source,id,content_hash,raw_json FROM events LIMIT 0")
-	if err != nil {
-		return ErrInvalidBackup
-	}
-	return rows.Close()
 }
 
 func backupHash(ctx context.Context, file *os.File) (string, int64, error) {

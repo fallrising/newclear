@@ -55,7 +55,7 @@
 
 ## M5 封存、備份與隔離還原
 
-完整交易與驗收契約見 [M5 設計](m5-design.md)。本機 CLI 不啟動 HTTP；`--db` 必須指向既有 Signal Hub DB，遺失、空白、其他 SQLite 或 symlink 路徑會拒絕。讀写維護與服務共用 SQLite 鎖，可能短暫 busy；保留既有有限 timeout，失敗可稍後重試。
+完整交易與驗收契約見 [M5 設計](m5-design.md)。本機 CLI 不啟動 HTTP；`--db` 必須指向既有 Signal Hub DB，遺失、空白、其他 SQLite 或 symlink 路徑會拒絕。寫入前以 read-only、可讀 committed WAL 的連線核對版本對應的全部必要 schema；缺漏、修改必要物件或未知版本皆拒絕，完整 v1–v5 則可先升級再備份／還原。必要物件以內嵌 migration 在同一 SQLite engine 產生的定義比對，額外不取代必要物件的診斷表／索引／trigger 可共存；這是 schema 正確性檢查，不是檔案來源認證。restore 本身不遷移舊版本快照。讀写維護與服務共用 SQLite 鎖，可能短暫 busy；保留既有有限 timeout，失敗可稍後重試。
 
 ```sh
 signalhub archive run --db DB --archive-dir ARCHIVES

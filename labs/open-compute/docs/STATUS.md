@@ -2,6 +2,107 @@
 
 Updated: 2026-10-13.
 
+## M4 result
+
+**Passed on the original open-compute v0.2.4 release.** A fresh non-root Linux
+runner took three complete cold scope metadata snapshots under the existing
+runtime locks. Between snapshots it restarted with the same authority,
+confirmed sixteen fixed job IDs absent, submitted each twice with an identical
+128-byte ASCII payload, read all sixteen original rows after the second restart,
+and completed the original Workflow. Counter stayed 1 and nonce/Workflow ID
+were unchanged. All three daemon sessions exited normally with SIGTERM;
+observed owned generations exited and final owned scope removal succeeded.
+
+The [M4 contract](SDD-M4.md) defines this fixed experiment. Its original
+[sanitized report](evidence/2026-10-13-m4-ci.json) is preserved byte-for-byte;
+SHA256 `b0e68342bf8b0ed17103c26dbef8be85a594aabeb1b240a243cfe80b35b13966`.
+Historical M1/M2/M3 reports below remain unchanged. All three previous real
+scenarios passed in the same workflow, alongside 153 offline tests with no skips.
+
+### M4 design and execution provenance
+
+| Item | Exact reference |
+| --- | --- |
+| Reviewed SDD committed before implementation | [`525d053`](https://github.com/fallrising/newclear/commit/525d05301befcb87510ba71c91ff124379fe042d) |
+| Independently reviewed implementation | [`c76a422`](https://github.com/fallrising/newclear/commit/c76a422902a40a1bfd324daa5d4c4e713a980a25) |
+| Actual CI checkout | [`58ed591`](https://github.com/fallrising/newclear/commit/58ed5911b8a24ef57ccaceb44e9d0dec90f4307f) |
+| Tested Git tree | `be603af09a7c3810e0f758ef274dc7a8fcd6a51d` |
+| Real-runtime CI | [Run 38397480850](https://github.com/fallrising/newclear/actions/runs/38397480850), [M4 job 115296297028](https://github.com/fallrising/newclear/actions/runs/38397480850/job/115296297028) |
+| Harness run ID | `20261013T122806Z-3eb90b73` |
+| Runner | Ubuntu 24.04, Linux x86_64, EUID 1001, Python 3.11.17 |
+| Upstream identity | Original v0.2.4 / source `73efa56a1b1ad51a4519b2253ffaa499cb29fb2d`; unchanged 195537392-byte asset and SHA256 in [the lock](../upstream.lock.json) |
+
+The checkout is GitHub's synthetic merge of main `7e854f26` and the reviewed
+implementation `c76a4229`. Its parents and complete tree were read back and
+fetched; the tested tree is identical to the reviewed head. Later documentation
+commits do not become the original source of these measurements.
+
+### M4 verification ledger
+
+| Gate | Observed result |
+| --- | --- |
+| Independent review | Revised SDD accepted before code; scanner interruption findings reproduced/fixed/re-reviewed; fresh integrated source/CI/operator review accepted exact final hashes |
+| Offline contracts | **153 tests passed, no skips** locally and on the Python 3.11 CI runner; real alarm/threaded signal, FD/lock, metadata/limit, sparse/hardlink and strict evidence failures covered |
+| Existing real-runtime gates | M1 AC-01 through AC-08, M2-01 throughM2-09 and M3-01 throughM3-05 all passed in the same workflow |
+| M4-01: original runtime and trusted controls | Exact original artifact, fresh non-root scope, actual Worker/D1 deployment, original duplicate row and committed waiting Workflow established |
+| M4-02: complete bounded cold snapshots | Three complete locked snapshots, numeric units/groups/inode accounting and owned metadata checks passed; no partial scan became zero-valued success |
+| M4-03: fixed batch and retained state | 16 absence checks,32 completed submissions,16 original retained reads after the second same-data restart; all exact counts and signed deltas validated |
+| M4-04: completion and cleanup | Original Workflow completed with counter 1 and unchanged nonce; three distinct daemon generations, all SIGTERM exit 0 without force or observation error; owned scope removed |
+| M4-05: sanitized evidence | Strict full extension/group sums/deltas and bounded whole report passed; original artifact bytes/hash, source/tree/workload/environment and measurement limits retained |
+
+### Observed cold regular-file footprint
+
+| Cold checkpoint | Logical bytes | Reported allocated bytes | Regular paths / unique inodes | Observed hardlink aliases |
+| --- | ---: | ---: | ---: | ---: |
+| Original Workflow waiting | 227765344 | 228343808 | 245 /243 | 2 |
+| Fixed writes after first restart | 229213018 | 229797888 | 247 /245 | 2 |
+| Original completion after second restart | 230447700 | 231038976 | 249 /247 | 2 |
+
+The batch-stage endpoint difference was +1447674 logical bytes and+1454080
+reported allocated bytes. The restart/read/completion endpoint difference
+was +1234682 logical bytes and+1241088 reported allocated bytes. These differences
+include platform/background/restart effects; **they are not exclusively D1
+payload costs, a per-job ratio, a growth rate or capacity evidence**. The
+synthetic unique payload total was 2048 bytes; no scaling threshold was imposed.
+
+Each snapshot reported two hardlink aliases in the derived OCR group. In this
+run, that group's reported allocation stayed 8953856 bytes and scope-transient
+allocation stayed 204910592 bytes across all checkpoints. Those fixed group
+enums are path partitions, not inferred internal products. The observer did
+not inspect payloads or attribute transient files to a particular component.
+The three snapshots took about 0.0111–0.0115 seconds, each under its ten-second
+application budget; 552/563/574 entries were observed, including 307/316/325
+directories and zero sockets. Directory/socket blocks are excluded from byte
+figures. The 512-byte allocation unit means st_blocks, not a filesystem page size.
+
+Unlike M2 backup payload counts, M4 includes OCR and transient regular files;
+only the harness marker is excluded. It deduplicates observed `(device, inode)`
+aliases. Scans are sequential and require cooperating cold runtime locks;
+physical extents, reflinks/compression, same-device bind mounts, between-checkpoint
+peaks, free capacity, whole-host storage, retention/reclamation and long-term
+growth remain unknown. No host adapter or production adoption follows.
+
+### Reproduce M4 and authoring limitations
+
+Follow the [quickstart](quickstart.md) on a fresh disposable non-root Linux x64
+account, then run:
+
+```sh
+make -C labs/open-compute check
+make -C labs/open-compute preflight
+make -C labs/open-compute integration-storage
+```
+
+The authoring account used Python 3.13.5 and the shared disk-backed launcher.
+Root's final actual socket-enabled rerun passed 153 tests/no skips. Earlier
+sandbox socket denials and a test socket's inherited unsafe mode were retained;
+its fixture alone received explicit 0600 mode, without relaxing the scanner.
+Descriptor leaks under actual alarms/threaded signals were reproduced and fixed
+before acceptance. No runtime was started in the persistent authoring home;
+original runtime and Python 3.11 evidence come from the fresh CI runner.
+Application deadlines/narrow signal deferral do not promise interruption of
+uninterruptible kernel filesystem I/O.
+
 ## M3 result
 
 **Passed on the original open-compute v0.2.4 release.** A fresh non-root

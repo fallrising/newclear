@@ -11,6 +11,8 @@ For complete Local cold restore, also read `docs/SDD-M2.md`; its baseline must
 be committed before M2 implementation.
 For process-tree observations, also read `docs/SDD-M3.md`; keep its fixed workload,
 identity generation, sampling limits and sanitized schema traceable to evidence.
+For cold disk observations, read `docs/SDD-M4.md`; retain fixed D1 workload,
+cold locks, metadata accounting, bounded owner checks and strict projection.
 
 - Use the original release artifact and verify its SHA256 before execution.
   Do not patch upstream, impersonate a non-root user, or use upstream test-only
@@ -32,6 +34,10 @@ identity generation, sampling limits and sanitized schema traceable to evidence.
 - M3 observes only the owned runtime's four fixed idle/read windows across normal
   restart. Sampled aggregate RSS can count shared pages repeatedly; observed CPU
   pairs omit missing intervals. Never label either as complete capacity evidence.
+- M4 observes three cold regular-file metadata endpoints, including derived OCR
+  and transient content. Deduplicate observed inode aliases; distinguish logical
+  bytes from reported allocated blocks. Directory/socket blocks and physical
+  extent sharing are unknown; no capacity, growth-rate or per-row cost claim.
 - Keep public documentation self-contained and free of private infrastructure
   identifiers. Describe host authority, workload authority, and runtime contracts
   abstractly.
@@ -40,7 +46,8 @@ identity generation, sampling limits and sanitized schema traceable to evidence.
 
 The implementation supplies `make check` for local offline checks,
 `make integration` for the M1 real-runtime restart, and `make integration-restore`
-for the M2 real-runtime cold restore, and `make integration-resources` for M3.
+for the M2 real-runtime cold restore, `make integration-resources` for M3,
+and `make integration-storage` for M4 on a separate fresh runner.
 Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.

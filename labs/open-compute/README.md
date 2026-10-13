@@ -17,6 +17,9 @@ and their limits are recorded in [the status document](docs/STATUS.md).
 M3 adds four fixed idle/read windows around normal restart to observe the
 daemon and its discovered descendants' RSS and own CPU time. Its figures describe
 this synthetic workload and sampled coverage; they do not set a capacity limit.
+M4 adds three cold scope snapshots around sixteen fixed D1 jobs and the original
+Workflow completion. It includes generated OCR/transient files and separates
+logical sizes from allocated blocks, with observed hardlinks counted once.
 
 ## Current scope
 
@@ -46,6 +49,13 @@ this synthetic workload and sampled coverage; they do not set a capacity limit.
 | Maximum sampled aggregate RSS and paired own CPU ticks | RSS can count shared pages repeatedly; scan peaks and CPU intervals have sampling gaps |
 | Separate sanitized resource report and real-runtime gate | Includes units, workload, scan counts/gaps and explicit coverage limits; no capacity or isolation claim |
 
+| Added in M4 | Evidence boundary |
+| --- | --- |
+| Three cold scope metadata snapshots under existing runtime locks | Regular-file bytes only; includes OCR/transient content, excludes directory/socket blocks |
+| Sixteen fixed jobs, duplicate submissions and same-data readback | Signed endpoint changes mix writes, restarts and platform effects; no per-job attribution |
+| Logical bytes and st_blocks × 512, observed inode aliases deduplicated | Physical extent sharing, compression, peaks and long-term growth remain unknown |
+| Separate sanitized storage report and fresh CI job | Original Workflow/state/normal cleanup remain controls; no capacity/retention/adoption guarantee |
+
 This is a bounded lab around upstream software. It does not accept arbitrary
 user code, provide a Linux command sandbox, or manage production hosts. The
 host, workload catalog, and runtime remain separate authorities; the SDD records
@@ -56,6 +66,7 @@ what a later adapter would need.
 - [M1 SDD and acceptance IDs](docs/SDD.md) — normal daemon restart contract.
 - [M2 SDD and acceptance IDs](docs/SDD-M2.md) — full cold backup and clean-state restore contract.
 - [M3 SDD and acceptance IDs](docs/SDD-M3.md) — bounded observed process-tree resources.
+- [M4 SDD and acceptance IDs](docs/SDD-M4.md) — bounded cold disk footprint and fixed D1 writes.
 - [Quickstart](docs/quickstart.md) — one reproducible operator path and prerequisites.
 - [Status and evidence](docs/STATUS.md) — actual commands, results and limitations.
 - [Upstream lock](upstream.lock.json) — release, source and binary checksum.
@@ -65,6 +76,7 @@ make -C labs/open-compute check
 make -C labs/open-compute integration
 make -C labs/open-compute integration-restore
 make -C labs/open-compute integration-resources
+make -C labs/open-compute integration-storage
 ```
 
 The integration command requires **Linux x64, a real non-root account, and a

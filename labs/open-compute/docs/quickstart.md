@@ -24,9 +24,9 @@ actual tested commit, command results, and real CI evidence.
 ## 2. Choose a fresh non-root environment
 
 Use a disposable Linux x64 account with an owned writable passwd home, or the
-component's ephemeral GitHub Actions runner. The current authoring container
-runs as root; its real-runtime command is expected to **fail preflight**. This
-is an environment limitation, not passing runtime evidence.
+component's ephemeral GitHub Actions runner. A root account or mismatched PID
+namespace fails preflight. A successful preflight does not make a persistent
+operator home disposable; use a fresh account for the real experiment.
 
 The account must have no existing `~/.open-compute`, including a dangling
 symlink. The release resolves its user scope from the account database; setting

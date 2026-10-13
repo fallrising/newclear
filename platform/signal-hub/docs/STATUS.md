@@ -15,16 +15,18 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | API／重載 | owner／readonly 指標與規則查詢、分頁、owner 重載、失敗保留舊設定及憑證 |
 | 圖表 | 原生 React／SVG、時間／分組、版本分隔、partial、threshold、可操作的精確資料表 |
 | M4 | 訂閱、webhook／ntfy、摘要、重試、DLQ／重放與投遞看板已通過獨立審查及全部CI；整合紀錄見PR #351 |
-| M5 | 封存／匯回、一致備份與隔離還原已實作，完整 gate 與獨立審查進行中 |
+| M5 | AC-10–14封存／匯回、一致備份與隔離還原已通過完整gate及獨立審查；整合紀錄見PR #352 |
 | M6 | 真實來源／部署驗收未實作 |
 
-## M5 隔離還原演練（整合驗證中）
+## M5 隔離還原演練與驗收
 
 2026-10-13 使用本輪自建暫存目錄與合成資料。`go test -race -count=1 ./cmd/signalhub` 通過（3.616秒），含真正服務 subprocess／SQLite／TLS 接收端：先建立 pending、inflight、DLQ，封存驗證清除後產生一致備份；停止來源服務，還原至全新 DB 並匯回 archive；原事件可查且帶 restored，原 seq 保留。pending／lease 到期工作續作，readonly 無法 replay、owner 附理由重放成功；持久化接收端只接受三個唯一 delivery ID，原 bytes/HMAC 與備份 SHA 不變。不是生產資料或正式通知帳號驗收。
 
-`scripts/e2e_archive.py --binary <binary>` 通過61個 HTTP/OpenAPI回應與17個CLI結果，獨立核對 gzip／SHA256／manifest／membership／精確清除、寫入與驗證失敗、遲到新part、200去重／409衝突、重複匯回期限／audit／cursor、規則回填與不重送歷史、live-WAL一致備份、隔離查詢／新事件／queue恢復。整合版本 `d73f10ac100e22be9571582007bab84c7e8e216d` 的完整 `go test -race -count=1 ./...` 通過10個套件（store375.340秒）；vet、format、build、28個前端測試／types／format／build、6 schemas／64 fixtures／15 webhook／5 canonical向量，以及原有142個HTTP回應全部通過。browser fixture獨立probe也通過。獨立review及遠端Chromium/CI仍待完成；[PR #352](https://github.com/fallrising/newclear/pull/352) 尚未合併。
+`scripts/e2e_archive.py --binary <binary>` 通過61個 HTTP/OpenAPI回應與17個CLI結果，獨立核對 gzip／SHA256／manifest／membership／精確清除、寫入與驗證失敗、遲到新part、200去重／409衝突、重複匯回期限／audit／cursor、規則回填與不重送歷史、live-WAL一致備份、隔離查詢／新事件／queue恢復。整合版本 `d73f10ac100e22be9571582007bab84c7e8e216d` 的完整 `go test -race -count=1 ./...` 通過10個套件（store375.340秒）；vet、format、build、28個前端測試／types／format／build、6 schemas／64 fixtures／15 webhook／5 canonical向量，以及原有142個HTTP回應全部通過。browser fixture獨立probe也通過。該版本為首次整合候選；R1修正與最終產品驗證如下。
 
-首版[CI38395539540](https://github.com/fallrising/newclear/actions/runs/38395539540)通過10個race套件、28前端測試、contracts、203個HTTP回應／17個M5 CLI結果及9個sandboxed Chromium案例（24.7秒）。桌面與390px手機匯回詳情截圖已目視確認，沒有缺字或水平溢出，browser health無異常。但獨立[T-504](../.team/reports/T-504.md)的R1發現DB識別只查部分欄位會接受不完整／未支援schema，故首版未被接受。T-506加入寫入前read-only完整schema驗證，原始失敗與修正證據分開保存；獨立複驗與修正版完整gate仍進行中。
+首版[CI38395539540](https://github.com/fallrising/newclear/actions/runs/38395539540)通過10個race套件、28前端測試、contracts、203個HTTP回應／17個M5 CLI結果及9個sandboxed Chromium案例（24.7秒）。桌面與390px手機匯回詳情截圖已目視確認，沒有缺字或水平溢出，browser health無異常。但獨立[T-504](../.team/reports/T-504.md)的R1發現DB識別只查部分欄位會接受不完整／未支援schema，故首版未被接受。T-506加入寫入前read-only完整schema驗證，原始失敗與修正證據分開保存；[T-507](../.team/reports/T-507.md)已用原始七組探針獨立結案（race5.374秒），並通過備份／還原focused race9.088秒、vet與diff-check。
+
+最終產品 `e4d4cbca92096d2b8028246b6e6cdd61872e7324` 的[CI38397285845](https://github.com/fallrising/newclear/actions/runs/38397285845)全部通過：10個Go race套件（CI store439.695秒、本機356.341秒）、28前端測試／reproducible build、6schemas／64fixtures、203個HTTP回應（34+39+69+61；輪詢可多一次）、17個M5 CLI結果、9個真實Go／Chromium案例（23.5秒）。本機修正版也再次通過全部HTTP、vet/build與TLS隔離還原演練。完整AC映射見[驗收報告](../.team/reports/M5-acceptance.md)。最後文件提交保留相同執行程式；正常整合與最新CI狀態以[PR #352](https://github.com/fallrising/newclear/pull/352)為準。本輪不包含M6、異地備份或部署。
 
 ## M4 驗證結果
 

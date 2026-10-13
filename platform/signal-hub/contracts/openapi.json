@@ -927,6 +927,16 @@
                 }
               }
             }
+          },
+          "413": {
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -935,7 +945,7 @@
       "post": {
         "operationId": "reloadConfig",
         "summary": "Atomically reload git-managed configuration",
-        "description": "Owner only. No request body; reread the configured sources/rules/subscriptions files and validate the complete configuration. Reject invalid configuration with invalid_config (400), keep the old effective configuration, and emit signalhub.config.rejected. Success emits signalhub.config.reloaded and writes audit_log. This does not edit configuration or expose metadata endpoints. M3 executes source and rule reloads; nonempty subscriptions remain unsupported. Projection evaluation follows activation; an evaluation failure does not undo an accepted configuration.",
+        "description": "Owner only. Reload the same local strict JSON configuration and referenced credentials. Validate sources, rule versions, subscription identities, exact delivery URL allowlist and credentials before committing activation and switching authentication/senders. Rejection keeps the previous configuration and credentials active and records a rejected event. Takes no body or query parameters.",
         "security": [
           {
             "ownerBearer": []

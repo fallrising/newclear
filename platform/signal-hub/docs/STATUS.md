@@ -1,6 +1,6 @@
 # Signal Hub — STATUS
 
-公開技術進度快照，日期：2026-10-12。任務認領與 owner 驗收仍以 owner 帳本為準。
+公開技術進度快照，日期：2026-10-13。任務認領與 owner 驗收仍以 owner 帳本為準。
 
 ## 目前狀態
 
@@ -14,9 +14,24 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | 門檻事件 | complete buckets、連續 crossed／recovered、穩定ID、重算與重啟防重複、分組淘汰恢復 |
 | API／重載 | owner／readonly 指標與規則查詢、分頁、owner 重載、失敗保留舊設定及憑證 |
 | 圖表 | 原生 React／SVG、時間／分組、版本分隔、partial、threshold、可操作的精確資料表 |
-| M4–M6 | 已拆出後續任務；投遞、封存／還原及真實來源／部署驗收未實作 |
+| M4 | 訂閱、webhook／ntfy、摘要、重試、DLQ／重放已實作；獨立審查已通過，遠端CI待完成 |
+| M5–M6 | 封存／還原及真實來源／部署驗收未實作 |
 
-## 驗證入口與證據
+## M4 驗證進度
+
+R1修正後完整 `go test -race -count=1 ./...` 再次通過10個套件（store289.763秒）；vet、format、正式binary build、contracts及142個HTTP回應也重新通過。
+
+本機已完成 webhook／ntfy、daily digest、持久化 cursor／claim／attempt、12次重試上限、兩分鐘lease、DLQ事件與附理由owner重放。兩個channel共用HTTPS精確allowlist與DNS/IP/TLS防護；不新增runtime依賴。新增投遞看板保留M1–M3視圖。獨立審查已通過；遠端CI與合併尚待完成，不是部署或正式帳號驗收。
+
+- `go test -v ./cmd/signalhub -run TestM4RealServiceDeliveryRecovery -count=1`：實際service subprocess／SQLite與本機TLS接收端，500×3→200、400→DLQ→重放、ntfy／摘要、SIGKILL→lease到期→持久化接收端去重，全部通過。固定15個HMAC向量也由參考接收端驗證。時鐘與唯一測試接收端在Go測試內注入；正式CLI不提供繞過安全政策的選項。
+- `scripts/e2e_delivery.py`：69個正式binary HTTP／OpenAPI回應通過，涵蓋啟用起點、分頁、角色、理由／audit、拒絕重載保留舊憑證及實際未dial loopback。此腳本只推進合成資料的最後重試次數；完整12次狀態機另有focused測試。
+- M1／M2的34個與M3的39個真實HTTP回應全部通過；contracts為6schemas、63fixtures、15webhook向量、5canonical向量。
+- 前端format、26個unit tests（保留原17個）、TypeScript與build通過。兩個新增Chromium案例涵蓋六種決策／執行事件關聯鏈，以及101訂閱／105投遞、角色隔離與重放。HTTP／SQLite fixture probe通過；本機Chrome缺`libnspr4.so`，實際browser驗收保留為CI必要gate，未停用sandbox。
+- 初次服務整合測試發現HTTP400因non-nil error摘要被誤分類成連線重試；修正為以有效HTTP狀態判斷，新增400／301帶摘要回歸，真實服務DLQ／重放重新通過。未放寬驗證。
+
+- 獨立審查發現合法極端offset時間造成摘要cursor解析失敗與無效公開日期；已改用精確Unix秒持久化，公開邊界保持RFC3339有限年域，新增兩個原生回歸。四項獨立race probes及focused race全部通過，R1已結案，見[T-404](../.team/reports/T-404.md)。
+
+## M3 歷史驗證入口與證據
 
 M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](https://github.com/fallrising/newclear/actions/runs/38293396899)全部通過，含6個真正Go／Chromium案例（21.6秒）。桌面與390px手機指標截圖已目視確認中文、圖表標記與版面；嚴格console/pageerror/HTTP錯誤檢查為零。獨立review與browser補修複審皆通過。
 
@@ -32,10 +47,10 @@ M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](htt
 
 ## 限制與後續
 
-- [Quickstart](quickstart.md)、[runtime](runtime.md)、[M3實作契約](m3-design.md) 提供操作及精確語義。設定仍使用JSON子集；subscriptions必須為空。
+- [Quickstart](quickstart.md)、[runtime](runtime.md)、[M3實作契約](m3-design.md) 提供操作及精確語義。設定仍使用JSON子集；M4訂閱契約見 [M4設計](m4-design.md)。
 - 200分組上限包含前桶保留的zero／null系列；新增分組可能進入`__other__`。圖表完整載入所選區间的全部分頁，大範圍／高基數會增加瀏覽器記憶體使用。舊版本bucket寬度變更時可能呈現離散點，精確資料仍可查表。
 - 尚無retention cleanup；recomputable_from是實際保留的最早事件，並非已套用90天政策。單次評估／回填最多1,000,000桶，超過時明確拒絕且不截斷。
-- readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、tailnet ACL、非root部署及持續運作。M4投遞、M5封存還原、M6真實來源／部署驗收各自獨立；部署仍需明確授權。
+- readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、tailnet ACL、非root部署及持續運作。M5封存還原、M6真實來源／部署驗收各自獨立；部署仍需明確授權。
 
 首次M3遠端CI run38292215976的6個browser案例中5個通過；指標主流程斷言通過，但console404使最後檢查失敗。補上隨binary提供的favicon與Go資源回歸測試；CI另安裝Noto CJK測試字型以修正截圖缺字。最終瀏覽器結果與截圖驗收見[PR #349](https://github.com/fallrising/newclear/pull/349)及[PLAN](../.team/PLAN.md)，保留首次失敗紀錄。
 

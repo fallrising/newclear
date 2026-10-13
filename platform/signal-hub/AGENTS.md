@@ -4,7 +4,7 @@
 
 本檔只適用於 `platform/signal-hub/`。先讀 repository 的 README、PORTFOLIO、docs/taxonomy.md、docs/portfolio-doc-tiers.md、docs/specs/monorepo-ci.md，再完整閱讀本專案 SDD、docs/sdd/ 全部文件與 docs/STATUS.md。
 
-目前已有 M1–M3 runtime；實際交付證據以 docs/STATUS.md 為準。看到下一個里程碑，不代表取得實作、部署或主機變更的授權。使用者只要求設計時，停在設計 PR。
+目前已有 M1–M4 runtime；實際交付證據以 docs/STATUS.md 為準。看到下一個里程碑，不代表取得實作、部署或主機變更的授權。使用者只要求設計時，停在設計 PR。
 
 ## 不變量
 

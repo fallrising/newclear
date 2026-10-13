@@ -47,7 +47,7 @@ python3 -m venv /tmp/signalhub-contracts
 - sources.name、rules.id、subscriptions.id 在各自集合中唯一。token／secret 只允許 `file:/...` 參考，檢查器不開啟這些檔案。name/id 限1–64字元的小寫字母、數字與連字號，首字為字母。
 - 規則必須明列 types 並排除所有 `signalhub.rule.*`；不靠其他 filter 欄位證明安全。訂閱 types 若可能匹配 `signalhub.delivery.dlq`，其 subject_prefix 必須排除自己的 subscription id；不靠 data/source 條件例外放行。這是載入前保守的防迴圈政策。
 - webhook 先固定為 immediate；ntfy 支援 immediate 與 daily digest。digest 每24h以 IANA timezone 的當地 `at` 時間產生，window 是相鄰執行點間的半開區間；夏令時間不存在的當地時間順延到第一個有效時間，重複時間選第一次。delivery ID 內的 window_start 是起點 Unix 秒；查詢 API 的 window_start 欄位則使用 RFC3339 字串。其他週期或 webhook digest 需先擴充契約。
-- 完整設定的 `webhook_allowlist` 逐一列出完整 HTTPS URL，webhook URL 必須精確匹配。這只驗設定，尚不驗 DNS、redirect、tailnet 路由；M4 必須另驗實際 SSRF 防護。空清單不允許任何 webhook。
+- 完整設定的 `webhook_allowlist` 逐一列出完整 HTTPS URL，webhook 與 ntfy URL 必須精確匹配。這只驗設定，尚不驗 DNS、redirect、tailnet 路由；M4 必須另驗實際 SSRF 防護。空清單不允許任何 webhook。
 - 規則內容變更卻未增加 version，需要比較既有生效設定；M0 靜態 checker 沒有該歷史狀態，留給 M3 驗收。
 
 ### HTTP 與投遞
@@ -72,6 +72,8 @@ checker 另以 RFC 4231 test case 1 核對 HMAC 已知答案。所有 keys、ID�
 
 ## 尚未驗證
 
-本 checker 不執行 ingest、SQLite、token 授權或持久化驗證。M1 另有 Go 測試及真實 binary HTTP／SQLite smoke；見 [quickstart](../docs/quickstart.md)。OpenAPI 尚含後續階段的路由，不能由文件通過推斷所有 endpoint 已實作。M3 的 rule evaluator、來源新鮮度與 UI 由 runtime 測試驗證；dispatcher、一般 YAML loader、封存與部署仍未實作。
+本 checker 不執行 ingest、SQLite、token 授權或持久化驗證。M1 另有 Go 測試及真實 binary HTTP／SQLite smoke；見 [quickstart](../docs/quickstart.md)。OpenAPI 尚含後續階段的路由，不能由文件通過推斷所有 endpoint 已實作。M3 的 rule evaluator、來源新鮮度與 UI 由 runtime 測試驗證；一般 YAML loader、封存與部署仍未實作；M4 dispatcher 由 Go／真實服務測試驗證。
 
-M3 補充 `GET /v1/rules` 的安全規則列表；完整生效定義及 metric 查詢的契約由 OpenAPI 驗證。HTTP smoke 分為 M1–M2 `e2e_smoke.py` 與 M3 `e2e_rules.py`。
+M3 補充 `GET /v1/rules` 的安全規則列表；完整生效定義及 metric 查詢的契約由 OpenAPI 驗證。HTTP smoke 分為 M1–M2 `e2e_smoke.py`、M3 `e2e_rules.py` 與 M4 `e2e_delivery.py`。
+
+M4 的持久化、重放與 outbound IP/DNS/TLS 邊界見 [M4 契約](../docs/m4-design.md)。允許清單也適用 ntfy；不允許藉通知 channel 繞過相同的 SSRF 邊界。

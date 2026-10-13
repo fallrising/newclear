@@ -1928,3 +1928,132 @@ main {
 .metric-color-5 {
   background: #687e35;
 }
+
+/* Delivery status reuses the board's panels, source cards and form controls. */
+.delivery-board {
+  display: grid;
+  gap: 22px;
+  margin-bottom: 40px;
+}
+.delivery-subscriptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+  padding: 22px;
+}
+.delivery-subscriptions:empty,
+.delivery-list:empty {
+  display: none;
+}
+.delivery-subscriptions h3,
+.delivery-card h3 {
+  overflow-wrap: anywhere;
+}
+.delivery-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 22px;
+}
+.delivery-board .filters {
+  margin-bottom: 0;
+}
+.delivery-list {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+.delivery-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 20px;
+  font-size: 11px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.delivery-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+.delivery-card h3 {
+  font:
+    12px ui-monospace,
+    monospace;
+  line-height: 1.8;
+  min-width: 0;
+}
+.delivery-state {
+  flex-shrink: 0;
+  border-radius: 4px;
+  padding: 3px 9px;
+  background: #edf3e9;
+  color: #407964;
+  font-size: 10px;
+}
+.delivery-dlq {
+  background: #f9eae5;
+  color: #9a4940;
+}
+.delivery-pending,
+.delivery-inflight {
+  background: #fbf3df;
+  color: #86612f;
+}
+.delivery-error {
+  color: #9a4940;
+}
+.delivery-event {
+  text-decoration: underline;
+  color: var(--teal);
+  padding: 5px 0;
+}
+.delivery-replay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  margin-top: 15px;
+  padding-top: 15px;
+}
+.delivery-replay label {
+  flex: 1;
+  min-width: min(100%, 180px);
+}
+.delivery-replay .notice {
+  width: 100%;
+  margin: 0;
+}
+@media (max-width: 650px) {
+  .sidebar nav button {
+    font-size: 10px;
+    gap: 4px;
+  }
+  .sidebar nav button svg {
+    width: 14px;
+  }
+  .delivery-filters {
+    grid-template-columns: 1fr;
+  }
+  .delivery-list,
+  .delivery-filters,
+  .delivery-subscriptions {
+    padding: 16px;
+  }
+  .delivery-card {
+    padding: 15px;
+    font-size: 10px;
+  }
+  .delivery-card-heading {
+    flex-wrap: wrap;
+  }
+  .delivery-board .metrics-heading {
+    flex-wrap: wrap;
+    font-size: 10px;
+    line-height: 1.8;
+  }
+}

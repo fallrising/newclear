@@ -80,8 +80,8 @@ def semantic(name, document):
                         ZoneInfo(row['digest']['timezone'])
                     except (ZoneInfoNotFoundError, ValueError) as exc:
                         raise ValueError('unknown IANA timezone') from exc
-                if name == 'config' and row['channel']['kind'] == 'webhook' and row['channel']['url'] not in document['webhook_allowlist']:
-                    raise ValueError('webhook URL is not exactly allowlisted')
+                if name == 'config' and row['channel']['url'] not in document['webhook_allowlist']:
+                    raise ValueError('delivery URL is not exactly allowlisted')
 
 def validate(name, document):
     Draft202012Validator(SCHEMAS[name], registry=REGISTRY, format_checker=FORMATS).validate(document)

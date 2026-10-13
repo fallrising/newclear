@@ -11,13 +11,14 @@ import (
 	"time"
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/config"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/event"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/rules"
 )
 
-// ConfigureRuntime commits all source/rule changes and optional audit as one unit.
+// ConfigureRuntime commits all source/rule/subscription changes and optional audit as one unit.
 // Evaluation happens separately so an unavailable projection never swaps credentials halfway.
-func (s *Store) ConfigureRuntime(ctx context.Context, sources []config.Source, definitions []rules.Rule, now time.Time, audit bool) error {
+func (s *Store) ConfigureRuntime(ctx context.Context, sources []config.Source, definitions []rules.Rule, now time.Time, audit bool, subscriptions ...[]delivery.Subscription) error {
 	raw := make([]json.RawMessage, len(definitions))
 	for i, r := range definitions {
 		b, err := json.Marshal(r)
@@ -89,6 +90,14 @@ func (s *Store) ConfigureRuntime(ctx context.Context, sources []config.Source, d
 		backfill := !exists || !previous.active || previous.version != r.Version
 		if _, err := tx.ExecContext(ctx, `INSERT INTO rules_state(rule_id,version,active,needs_backfill) VALUES(?,?,1,1) ON CONFLICT(rule_id) DO UPDATE SET version=excluded.version,active=1,needs_backfill=CASE WHEN ? THEN 1 ELSE needs_backfill END,failures=CASE WHEN ? THEN 0 ELSE failures END,failure_emitted=CASE WHEN ? THEN 0 ELSE failure_emitted END`, r.ID, r.Version, backfill, backfill, backfill); err != nil {
 			return unavailable(err)
+		}
+	}
+	if len(subscriptions) > 1 {
+		return ErrInvalidConfig
+	}
+	if len(subscriptions) == 1 {
+		if err := configureSubscriptionsTx(ctx, tx, subscriptions[0], now); err != nil {
+			return err
 		}
 	}
 	if audit {

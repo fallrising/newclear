@@ -20,6 +20,7 @@ import {
 } from "./model";
 import type { EventDetail, Filters, Page, Source, StoredEvent } from "./model";
 import { Metrics } from "./MetricBoard";
+import { Deliveries } from "./DeliveryBoard";
 import "./style.css";
 
 type IconName =
@@ -1028,7 +1029,9 @@ function App() {
       ? "sources"
       : params.get("view") === "metrics"
         ? "metrics"
-        : "timeline";
+        : params.get("view") === "deliveries"
+          ? "deliveries"
+          : "timeline";
   const denied = useCallback((error: unknown) => {
     if (
       error instanceof APIError &&
@@ -1071,7 +1074,9 @@ function App() {
       ? "來源新鮮度"
       : view === "metrics"
         ? "指標趨勢"
-        : "事件時間線";
+        : view === "deliveries"
+          ? "投遞狀態"
+          : "事件時間線";
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -1113,14 +1118,21 @@ function App() {
             <Icon name="signal" />
             指標趨勢<span>03</span>
           </button>
+          <button
+            className={view === "deliveries" ? "active" : ""}
+            onClick={() => setView("deliveries")}
+          >
+            <Icon name="arrow" />
+            投遞狀態<span>04</span>
+          </button>
         </nav>
         <div className="sidebar-foot">
           <span className="readonly-tag">
             <Icon name="lock" size={13} />
-            唯讀看板
+            設定唯讀
           </span>
           <p>觀察訊號，追溯脈絡。</p>
-          <small>Signal Hub / M3</small>
+          <small>Signal Hub / M4</small>
         </div>
       </aside>
       <div className="main-shell">
@@ -1162,7 +1174,9 @@ function App() {
                       ? "SOURCE FRESHNESS"
                       : view === "metrics"
                         ? "METRIC TRENDS"
-                        : "EVENT TIMELINE"}
+                        : view === "deliveries"
+                          ? "DELIVERY STATUS"
+                          : "EVENT TIMELINE"}
                   </span>
                   <h1>
                     {title}
@@ -1173,10 +1187,12 @@ function App() {
                       ? "確認訊號是否持續抵達，辨別資料延遲與來源沉默。"
                       : view === "metrics"
                         ? "依版本與分組觀察事件趨勢，確認數值與計算狀態。"
-                        : "從每一筆事件，追溯跨來源的前因與後果。"}
+                        : view === "deliveries"
+                          ? "查看訂閱送達狀態、失敗嘗試與需要處理的 DLQ。"
+                          : "從每一筆事件，追溯跨來源的前因與後果。"}
                   </p>
                 </div>
-                {view !== "metrics" && (
+                {(view === "timeline" || view === "sources") && (
                   <div className="refresh-area">
                     <button
                       className="outline-button"
@@ -1256,6 +1272,13 @@ function App() {
                 </>
               ) : view === "sources" ? (
                 <Sources page={sources} />
+              ) : view === "deliveries" ? (
+                <Deliveries
+                  key={token}
+                  token={token}
+                  denied={denied}
+                  open={open}
+                />
               ) : (
                 <>
                   <FilterPanel params={params} navigate={navigate} timeOnly />
@@ -1266,7 +1289,7 @@ function App() {
           )}
           <footer className="main-footer">
             <span>Signal Hub</span>
-            <span>事件 append-only · 看板唯讀</span>
+            <span>事件 append-only · 設定唯讀</span>
           </footer>
         </main>
       </div>

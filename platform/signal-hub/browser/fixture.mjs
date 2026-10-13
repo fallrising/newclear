@@ -7,7 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 export async function startFixture() {
   const directory = await mkdtemp(join(tmpdir(), 'signalhub-browser-'));
-  const tokens = Object.fromEntries(['owner','reader','source','watch','never'].map(role => [role,randomBytes(32).toString('base64url')]));
+  const tokens = Object.fromEntries(['owner','reader','source','watch','never','decision','execution'].map(role => [role,randomBytes(32).toString('base64url')]));
   for (const [role,token] of Object.entries(tokens)) await writeFile(join(directory,role+'.token'),token,{mode:0o600});
   const ref=role=>'file:'+join(directory,role+'.token');
   const config={
@@ -75,6 +75,53 @@ export async function startFixture() {
       await writeFile(join(directory,'config.json'),JSON.stringify(config),{mode:0o600});
       return api('/v1/config:reload',{role:'owner',method:'POST'});
     }
+    async function configureDecisionSources() {
+      for (const role of ['decision','execution']) {
+        config.sources.push({name:role,source_prefix:'urn:example:'+role+':',allowed_types:role==='decision'?['decision.case.*','decision.proposal.*','decision.choice.*']:['execution.run.*'],token_ref:ref(role)});
+      }
+      await writeFile(join(directory,'config.json'),JSON.stringify(config),{mode:0o600});
+      return api('/v1/config:reload',{role:'owner',method:'POST'});
+    }
+    async function configureSubscriptions() {
+      // Synthetic unreachable receiver: no real notification account or service.
+      const url='https://recipient.example.invalid/signal';
+      await writeFile(join(directory,'webhook.secret'),'synthetic-browser-webhook-secret',{mode:0o600});
+      config.webhook_allowlist=[url];
+      config.subscriptions=Array.from({length:101},(_,index)=>({
+        id:'board-'+String(index).padStart(3,'0'),filter:{types:['release.delivery.synthetic']},
+        channel:{kind:'webhook',url,secret_ref:'file:'+join(directory,'webhook.secret')},mode:'immediate',start:'now',
+      }));
+      await writeFile(join(directory,'config.json'),JSON.stringify(config),{mode:0o600});
+      await api('/v1/config:reload',{role:'owner',method:'POST'});
+    }
+    function seedDeliveryHistory() {
+      // Synthetic historical states exercise the actual query/replay handlers.
+      // Dispatcher transport/retry integration is covered by the service suite.
+      const db=new DatabaseSync(join(directory,'events.db'));
+      try {
+        db.exec('PRAGMA busy_timeout=5000; BEGIN IMMEDIATE');
+        const insert=db.prepare(`INSERT INTO deliveries(delivery_id,subscription_id,event_seq,body,content_type,headers,state,attempt_count,cycle_attempts,next_attempt_at,next_attempt_key,lease_token,lease_until)
+          VALUES(?, 'board-000', ?, ?, 'application/cloudevents+json', '{}', ?, ?, ?, ?, ?, ?, ?)`);
+        const attempt=db.prepare('INSERT INTO delivery_attempts(delivery_id,attempt,at,http_status,duration_ms,error) VALUES(?,1,?, ?,17,?)');
+        const events=db.prepare('SELECT seq,raw_json FROM events WHERE source=? ORDER BY seq LIMIT 105').all('urn:example:demo:service');
+        for(const [index,event] of events.entries()) {
+          const id='board-000:'+event.seq;
+          const state=index===0?'dlq':index===1?'pending':index===2?'inflight':'succeeded';
+          const count=state==='pending'?0:1;
+          const future='2100-01-01T00:00:00Z';
+          const futureKey='02101-01-01T00:00:00.!';
+          insert.run(id,event.seq,event.raw_json,state,count,count,state==='pending'?future:null,state==='pending'?futureKey:null,state==='inflight'?'synthetic-lease':null,state==='inflight'?futureKey:null);
+          if(count)attempt.run(id,new Date(Date.now()-60_000).toISOString(),state==='dlq'?400:state==='succeeded'?200:null,state==='dlq'?'Synthetic rejected <script>inert</script>':null);
+        }
+        db.exec('COMMIT');
+      } catch(error) { db.exec('ROLLBACK'); throw error; }
+      finally { db.close(); }
+    }
+    function replayAudit(id) {
+      const db=new DatabaseSync(join(directory,'events.db'));
+      try { return db.prepare('SELECT actor,action,target,reason FROM audit_log WHERE target=? ORDER BY seq DESC').all(id); }
+      finally { db.close(); }
+    }
     function expireMetricHistory() {
       // Synthetic retention fixture only: emulate an older event no longer in
       // hot storage while retaining its already-computed rollups for AC-44.
@@ -82,6 +129,6 @@ export async function startFixture() {
       try { db.prepare('DELETE FROM events WHERE source=? AND id=?').run('urn:example:demo:service','metric-history'); }
       finally { db.close(); }
     }
-    return {base,tokens,api,touchWatch,configureRules,expireMetricHistory,stop};
+    return {base,tokens,api,touchWatch,configureRules,configureDecisionSources,configureSubscriptions,seedDeliveryHistory,replayAudit,expireMetricHistory,stop};
   }catch(error){await stop();throw error}
 }

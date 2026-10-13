@@ -1,12 +1,12 @@
-# M1–M3 runtime contract
+# M1–M4 runtime contract
 
-提供事件 HTTP API、SQLite WAL、本機 Alertmanager v4 adapter、來源新鮮度與內嵌 React 唯讀看板。M3 另提供規則、指標查詢與 owner 設定重載；M4–M6 尚未實作。
+提供事件 HTTP API、SQLite WAL、本機 Alertmanager v4 adapter、來源新鮮度與內嵌 React 唯讀看板。M3 另提供規則、指標查詢與 owner 設定重載；M4 提供訂閱投遞、摘要、DLQ 與重放；封存及部署仍屬後續里程碑。
 
 ## 啟動
 
 `signalhub -config <path> -db <path> -owner-token-ref file:/absolute/path [-readonly-token-ref file:/absolute/path] [-listen 127.0.0.1:8080]`
 
-- M1 設定接受 JSON（YAML 1.2 的子集），完整物件含 sources、rules、subscriptions、webhook_allowlist；不接受重複 key。rules 依 M0 schema 與防迴圈規則驗證；subscriptions 必須為空。一般 YAML 語法尚未提供。POST /v1/config:reload 重新載入同一份 JSON 設定及憑證，僅 owner 可呼叫。
+- M1 設定接受 JSON（YAML 1.2 的子集），完整物件含 sources、rules、subscriptions、webhook_allowlist；不接受重複 key。rules 依 M0 schema 與防迴圈規則驗證；subscriptions 依 M4 schema 與防迴圈規則驗證；webhook 和 ntfy 都要求精確 URL allowlist。一般 YAML 語法尚未提供。POST /v1/config:reload 重新載入同一份 JSON 設定及憑證，僅 owner 可呼叫。
 - source secret 由設定的 token_ref 載入；owner／readonly 由 CLI 的 file: 參考載入。Owner 必填，readonly 可省略。每個 token 至少32 bytes、只含 RFC 6750 bearer 字元（英數字與 -._~+/，尾端可帶 =），允許檔案結尾的一個 LF 或 CRLF；不 trim 其他空白。不同角色或來源不能共用 token。記憶體只保留 SHA-256，不保存到資料庫或日誌。
 - 預設 listen 僅 loopback，供本機開發；非 loopback 僅允許明確的 Tailscale IPv4/IPv6 位址。拒絕 wildcard、主機名、公網及一般 LAN 位址。這個範圍檢查不證明主機已加入指定 tailnet；M6 仍須驗證介面、ACL 與非 root 部署。
 - DB 是本機檔案，不接受 SQLite URI 或記憶體 DSN。使用 WAL、synchronous FULL、有限 busy timeout；啟動時套用版本化 migration，未知較新版本拒絕啟動。資料檔與目錄須由執行者限制權限，範例以 umask 077 建立。
@@ -26,7 +26,7 @@
 
 ## 範圍
 
-本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。M2 已實作 UI 與 source freshness evaluator，詳細持久化／升級語義見 [來源新鮮度契約](source-freshness.md)。尚無 retention cleanup、封存與投遞；retention_days 只驗證設定，尚未清除資料。
+本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。M2 已實作 UI 與 source freshness evaluator，詳細持久化／升級語義見 [來源新鮮度契約](source-freshness.md)。尚無 retention cleanup 與封存；retention_days 只驗證設定，尚未清除資料。
 
 ## M3 規則與指標
 
@@ -39,3 +39,15 @@
 手動回填：`signalhub rules backfill --config <path> --db <path> --rule <id> --from <RFC3339-or-UTC-date>`。此命令不啟動 HTTP，不改規則或憑證；所給設定必須與資料庫中生效的規則相同。建議停止服務後執行，避免與週期評估競爭 SQLite 鎖。單次最多1,000,000個桶；更大範圍在寫入前拒絕，不靜默截斷。保留清理尚未實作，因此 recomputable_from 表示目前資料庫中最早事件，不保證已套用90天保留期。
 
 門檻事件以完整分組鍵生成穩定ID，但事件data僅在分組鍵≤1024 UTF-8 bytes時附原鍵；所有事件都含group_key_sha256。完整分組仍可由metric查詢取得，避免合法大分組超出事件16 KiB限制。停機後從上次成功計算所在桶補算，不留下過期partial桶。
+
+## M4 訂閱與投遞
+
+詳細介面與安全邊界見 [M4 實作契約](m4-design.md)。啟動前完整載入訂閱憑證；重載時先驗證所有來源、規則、訂閱、允許清單與憑證，再原子啟用。訂閱 ID 的 filter、mode、start、digest 與 channel kind 固定，修改需新 ID；URL／secret reference 可在同一 ID 下輪替。移除的訂閱暫停，重加同一 ID 從持久化游標續作。
+
+每秒投影最多每訂閱200個事件或31個摘要窗，再有界地處理到期投遞。新訂閱預設不補送歷史，`earliest_hot` 明確啟用歷史掃描。webhook 保存原始事件 bytes；ntfy 即時與每日摘要的訊息在排隊時固定。摘要依事件時間、IANA 當地執行點切半開視窗；已物化摘要不因更遲到的事件改寫，空窗仍推進排程。摘要保留匹配總數和前20筆。
+
+投遞是 at-least-once。claim 在連線前提交，lease 為2分鐘；重啟要等 lease 到期才重送。2xx 成功；408／429／5xx／連線失敗以30秒起始的指數退避與抖動重試，最多12次、單次延後最多1小時；其他狀態（包含 redirect）進 DLQ。每次 DLQ episode 產生一個內部事件。接收端必須先驗簽與5分鐘時間窗，再按穩定 delivery ID 持久化去重，完成接受交易後才回2xx。
+
+`GET /v1/subscriptions` 與 `/v1/deliveries` 接受 owner／readonly，僅回安全狀態、counts 與最近嘗試摘要。`POST /v1/deliveries/{id}:replay` 只接受 owner 與 `application/json` 的非空白 `reason`，將 audit 與 pending 狀態同時提交。只有仍生效訂閱的 DLQ 可以重放；保留 ID、訊息與歷史次數，重設該輪12次上限。看板提供篩選、分頁、最近嘗試與理由必填重放；設定維持檔案管理。
+
+兩個 channel 都只允許精確列出的 HTTPS URL。每次 dial 重新解析 DNS，整組位址必須都在 Tailscale 範圍，再直接連線到核准 IP 並驗證原主機名 TLS。禁止 redirect、環境 proxy、連線重用與非 tailnet 位址；10秒逾時。不記錄接收端 body、原始 transport error、URL 或憑證。正式 binary 沒有 loopback outbound 例外；真正 TLS 接收端測試使用僅 Go 測試可注入的單一位址／port／憑證。這不證明實際 tailnet ACL 或部署安全，M6 仍另行驗收。

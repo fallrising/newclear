@@ -69,7 +69,7 @@ func (s *Store) QueueDeliveries(ctx context.Context, now time.Time, boardURL str
 		return err
 	}
 	var maximum int64
-	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM events").Scan(&maximum); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq),0) FROM event_identities").Scan(&maximum); err != nil {
 		return unavailable(err)
 	}
 	for _, state := range states {
@@ -99,7 +99,7 @@ func insertDeliveryTx(ctx context.Context, tx *sql.Tx, id, subscription string, 
 	return nil
 }
 func queueImmediateTx(ctx context.Context, tx *sql.Tx, state subscriptionState, maximum int64, now time.Time, boardURL string) error {
-	rows, err := tx.QueryContext(ctx, "SELECT seq,raw_json FROM events WHERE seq>? AND seq<=? ORDER BY seq LIMIT ?", state.scan, maximum, deliveryBatch)
+	rows, err := tx.QueryContext(ctx, "SELECT seq,raw_json FROM events WHERE restored=0 AND seq>? AND seq<=? ORDER BY seq LIMIT ?", state.scan, maximum, deliveryBatch)
 	if err != nil {
 		return unavailable(err)
 	}
@@ -161,7 +161,7 @@ func queueDigestTx(ctx context.Context, tx *sql.Tx, state subscriptionState, max
 		if end.After(now) {
 			break
 		}
-		rows, err := tx.QueryContext(ctx, "SELECT raw_json FROM events WHERE seq>? AND seq<=? AND time>=? AND time<? ORDER BY seq", state.activation, maximum, timeKey(start), timeKey(end))
+		rows, err := tx.QueryContext(ctx, "SELECT raw_json FROM events WHERE restored=0 AND seq>? AND seq<=? AND time>=? AND time<? ORDER BY seq", state.activation, maximum, timeKey(start), timeKey(end))
 		if err != nil {
 			return unavailable(err)
 		}

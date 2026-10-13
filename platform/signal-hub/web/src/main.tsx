@@ -1,3 +1,4 @@
+import { RestoredBadge, RestoredNotice } from "./EventProvenance";
 import { createRoot } from "react-dom/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
@@ -650,6 +651,7 @@ function EventRows({
                 <span>{formatTime(item.event.time).replace(" UTC", "")}</span>
                 <small>
                   #{item.seq}
+                  <RestoredBadge item={item} />
                   {item.clock_skew && (
                     <span
                       className="skew-mini"
@@ -918,6 +920,7 @@ function Detail({
             <p className="detail-summary">
               {detail.item.event.summary || "未提供摘要"}
             </p>
+            <RestoredNotice item={detail.item} />
             {detail.item.clock_skew && (
               <div className="notice warning">
                 <Icon name="warning" />
@@ -970,6 +973,7 @@ function Detail({
                       <div>
                         <small>
                           {item.event.time} · #{item.seq}
+                          <RestoredBadge item={item} />
                         </small>
                         <button onClick={() => open(item.seq)}>
                           {item.event.type}
@@ -1132,7 +1136,7 @@ function App() {
             設定唯讀
           </span>
           <p>觀察訊號，追溯脈絡。</p>
-          <small>Signal Hub / M4</small>
+          <small>Signal Hub / M5</small>
         </div>
       </aside>
       <div className="main-shell">

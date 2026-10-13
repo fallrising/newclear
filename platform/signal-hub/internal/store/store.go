@@ -44,6 +44,9 @@ var migration3 string
 //go:embed migrations/004_deliveries.sql
 var migration4 string
 
+//go:embed migrations/005_archives.sql
+var migration5 string
+
 type Store struct{ db *sql.DB }
 type Result struct {
 	Seq       int64
@@ -54,6 +57,7 @@ type StoredEvent struct {
 	ReceivedAt string          `json:"received_at"`
 	ClockSkew  bool            `json:"clock_skew"`
 	Event      json.RawMessage `json:"event"`
+	Restored   bool            `json:"restored,omitzero"`
 }
 type Page struct {
 	Items      []StoredEvent `json:"items"`
@@ -130,7 +134,7 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err := tx.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return unavailable(err)
 	}
-	if version < 0 || version > 4 {
+	if version < 0 || version > 5 {
 		return unavailable(fmt.Errorf("unsupported schema version %d", version))
 	}
 	switch version {
@@ -165,7 +169,15 @@ func (s *Store) initialize(ctx context.Context) error {
 		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 4"); err != nil {
 			return unavailable(err)
 		}
+		fallthrough
 	case 4:
+		if _, err := tx.ExecContext(ctx, migration5); err != nil {
+			return unavailable(err)
+		}
+		if _, err := tx.ExecContext(ctx, "PRAGMA user_version = 5"); err != nil {
+			return unavailable(err)
+		}
+	case 5:
 	}
 	if err := tx.Commit(); err != nil {
 		return unavailable(err)
@@ -292,7 +304,7 @@ func ingestTx(ctx context.Context, tx *sql.Tx, e *event.Event, received time.Tim
 	}
 	var seq int64
 	var hash []byte
-	err = tx.QueryRowContext(ctx, "SELECT seq, content_hash FROM events WHERE source = ? AND id = ?", attr(e, "source"), attr(e, "id")).Scan(&seq, &hash)
+	err = tx.QueryRowContext(ctx, "SELECT seq, content_hash FROM event_identities WHERE source = ? AND id = ?", attr(e, "source"), attr(e, "id")).Scan(&seq, &hash)
 	if err == nil {
 		if bytes.Equal(hash, e.ContentHash[:]) {
 			return Result{Seq: seq, Duplicate: true}, nil

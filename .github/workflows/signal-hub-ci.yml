@@ -63,6 +63,7 @@ jobs:
           /tmp/signalhub-contracts/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
           /tmp/signalhub-contracts/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
           /tmp/signalhub-contracts/bin/python scripts/e2e_delivery.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_archive.py --binary /tmp/signalhub
       - name: Real Go binary browser acceptance
         working-directory: platform/signal-hub/browser
         env:

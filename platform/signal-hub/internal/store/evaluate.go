@@ -113,6 +113,15 @@ func (s *Store) evaluateRule(ctx context.Context, r rules.Rule, manual string, n
 	if err := ctx.Err(); err != nil {
 		return unavailable(err)
 	}
+	// Missing archived inputs cannot be interpreted as zeroes. In particular,
+	// manual backfill and changed versions must not erase retained old rollups.
+	var missing bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM event_identities i WHERE i.time>=? AND i.time<? AND NOT EXISTS(SELECT 1 FROM events e WHERE e.seq=i.seq))`, timeKey(start), timeKey(current.Add(r.Duration()))).Scan(&missing); err != nil {
+		return unavailable(err)
+	}
+	if missing {
+		return unavailable(errors.New("import archived history before recomputation"))
+	}
 	// Disk-backed scratch stores values/distinct keys; Go memory is bounded to one event and 200 groups.
 	if _, err := tx.ExecContext(ctx, `CREATE TEMP TABLE IF NOT EXISTS metric_input(group_key TEXT NOT NULL,value_text TEXT,number REAL);
  CREATE TEMP TABLE IF NOT EXISTS metric_groups(group_key TEXT PRIMARY KEY);

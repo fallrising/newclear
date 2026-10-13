@@ -1,6 +1,6 @@
-# M1–M4 runtime contract
+# M1–M5 runtime contract
 
-提供事件 HTTP API、SQLite WAL、本機 Alertmanager v4 adapter、來源新鮮度與內嵌 React 唯讀看板。M3 另提供規則、指標查詢與 owner 設定重載；M4 提供訂閱投遞、摘要、DLQ 與重放；封存及部署仍屬後續里程碑。
+提供事件 HTTP API、SQLite WAL、本機 Alertmanager v4 adapter、來源新鮮度與內嵌 React 唯讀看板。M3 另提供規則、指標查詢與 owner 設定重載；M4 提供訂閱投遞、摘要、DLQ 與重放；M5 提供封存、匯回與一致備份／隔離還原；部署仍屬 M6。
 
 ## 啟動
 
@@ -26,7 +26,7 @@
 
 ## 範圍
 
-本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。M2 已實作 UI 與 source freshness evaluator，詳細持久化／升級語義見 [來源新鮮度契約](source-freshness.md)。尚無 retention cleanup 與封存；retention_days 只驗證設定，尚未清除資料。
+本機 Alertmanager 轉換與 AC-06 屬於 M1；M6 負責真實生產者設定、部署與連續運作驗證。M2 已實作 UI 與 source freshness evaluator，詳細持久化／升級語義見 [來源新鮮度契約](source-freshness.md)。M5 依已接受的 retention_days 進行驗證後封存清除；未指定維護目錄時不自動刪除資料。
 
 ## M3 規則與指標
 
@@ -36,7 +36,7 @@
 
 同一規則版本的內容雜湊持久保存；重用版本卻改內容會拒絕整份設定。來源與規則 DB 變更、成功 audit/event 在同一交易提交，之後在 HTTP 共用鎖內切換憑證；失敗時舊設定仍有效。重載後計算是另外的投影工作，失敗不撤销已接受的設定，後續 tick 會重試。設定重載不接收 body 或 query，錯誤不公開檔案路徑、token 或原始設定。
 
-手動回填：`signalhub rules backfill --config <path> --db <path> --rule <id> --from <RFC3339-or-UTC-date>`。此命令不啟動 HTTP，不改規則或憑證；所給設定必須與資料庫中生效的規則相同。建議停止服務後執行，避免與週期評估競爭 SQLite 鎖。單次最多1,000,000個桶；更大範圍在寫入前拒絕，不靜默截斷。保留清理尚未實作，因此 recomputable_from 表示目前資料庫中最早事件，不保證已套用90天保留期。
+手動回填：`signalhub rules backfill --config <path> --db <path> --rule <id> --from <RFC3339-or-UTC-date>`。此命令不啟動 HTTP，不改規則或憑證；所給設定必須與資料庫中生效的規則相同。建議停止服務後執行，避免與週期評估競爭 SQLite 鎖。單次最多1,000,000個桶；更大範圍在寫入前拒絕，不靜默截斷。recomputable_from 表示目前熱資料中最早事件。範圍包含已封存且未匯回的事件時，重算整筆交易拒絕並保留原 rollup；先匯回完整範圍再回填。
 
 門檻事件以完整分組鍵生成穩定ID，但事件data僅在分組鍵≤1024 UTF-8 bytes時附原鍵；所有事件都含group_key_sha256。完整分組仍可由metric查詢取得，避免合法大分組超出事件16 KiB限制。停機後從上次成功計算所在桶補算，不留下過期partial桶。
 
@@ -51,3 +51,28 @@
 `GET /v1/subscriptions` 與 `/v1/deliveries` 接受 owner／readonly，僅回安全狀態、counts 與最近嘗試摘要。`POST /v1/deliveries/{id}:replay` 只接受 owner 與 `application/json` 的非空白 `reason`，將 audit 與 pending 狀態同時提交。只有仍生效訂閱的 DLQ 可以重放；保留 ID、訊息與歷史次數，重設該輪12次上限。看板提供篩選、分頁、最近嘗試與理由必填重放；設定維持檔案管理。
 
 兩個 channel 都只允許精確列出的 HTTPS URL。每次 dial 重新解析 DNS，整組位址必須都在 Tailscale 範圍，再直接連線到核准 IP 並驗證原主機名 TLS。禁止 redirect、環境 proxy、連線重用與非 tailnet 位址；10秒逾時。不記錄接收端 body、原始 transport error、URL 或憑證。正式 binary 沒有 loopback outbound 例外；真正 TLS 接收端測試使用僅 Go 測試可注入的單一位址／port／憑證。這不證明實際 tailnet ACL 或部署安全，M6 仍另行驗收。
+
+
+## M5 封存、備份與隔離還原
+
+完整交易與驗收契約見 [M5 設計](m5-design.md)。本機 CLI 不啟動 HTTP；`--db` 必須指向既有 Signal Hub DB，遺失、空白、其他 SQLite 或 symlink 路徑會拒絕。讀写維護與服務共用 SQLite 鎖，可能短暫 busy；保留既有有限 timeout，失敗可稍後重試。
+
+```sh
+signalhub archive run --db DB --archive-dir ARCHIVES
+signalhub archive verify --db DB --archive-dir ARCHIVES --day 2026-01-01
+signalhub archive import --db DB --archive-dir ARCHIVES --day 2026-01-01 --reason 'isolated recovery drill' --retention-days 7
+signalhub backup --db DB --output NEW.sqlite
+signalhub restore --backup NEW.sqlite --db ISOLATED.sqlite --reason 'isolated recovery drill'
+```
+
+封存只處理已完整超出保留期的 UTC 日；來源預設90天，重疊前綴取最長政策。升級的既有來源在首次成功重新載入設定前，因無法證明先前接受的 retention，會暫緩清除。尚未掃描的立即訂閱、尚未物化的摘要（包括暫停者）及規則回填／補算窗也會保留。永久 identity 保留 source/id/hash/原 seq，即使熱事件已刪除，完全相同的重送仍回200與原 seq，異內容回409。
+
+檔案為 `events/YYYY/MM/DD.part-N.jsonl.gz`；每 part 最多1000筆／16 MiB 原始輸入。壓縮檔重新讀取、SHA-256、筆數與精確 membership 全部一致，才能在同一交易寫 manifest、成功事件並刪除對應熱資料。失敗回滾整次封存；檔案寫入後交易失敗留下的 orphan 不覆寫、不自動清理，重試改用新 part。遲到資料也建立新 part。失敗事件為有界 best-effort，DB 無法寫入時可能無法紀錄；CLI 仍回非零。run JSON 為 `{parts,events}`，verify 為 `{parts}`；無該日 manifest 時拒絕驗證。
+
+匯回僅接受此 DB 或其一致備份中已記錄的 manifest，整日驗證與插入原子提交；不是任意外部檔案匯入器。回應 `{imported,duplicates}`；重跑不重複插入、不延長既有還原期限，但會記錄 `archive.import` audit。預設熱保留7天，`restored:true` 是中樞 metadata，原 CloudEvent 不變。原 seq、received time、來源 freshness、subscription cursor、已排隊訊息、attempt、lease、DLQ 與 replay ID 保留。新訂閱與投遞掃描不重送 restored 歷史；規則評估及新版本回填仍包含已匯回熱資料。新增匯回資料會使舊 event query cursor 失效，請重新查詢；已物化 rollup 不隨封存刪除。
+
+備份以 SQLite `VACUUM INTO` 產生一致快照，檢查完整性、fsync、SHA-256 後以不覆寫方式發布快照及 `<snapshot>.manifest.json`。manifest 欄位：version=1、file（basename）、size_bytes、sha256、created_at。還原先驗 manifest／hash／SQLite，再複製至全新位置，在副本寫入 `backup.restore` audit。兩命令 JSON 回傳同一 manifest 形狀。reason 必須是非空白 UTF-8，最多4096 bytes。手動備份／還原的父目錄須已存在；路徑祖先不可為 symlink，目的檔或其 SQLite sidecar 已存在即拒絕。中斷留下不完整 pair 時不能使用，保留現有檔案並改用新輸出名稱重試。
+
+設定與憑證不在 DB 快照中；隔離演練須另建合成設定／憑證，複製需要的 archive 檔並改用獨立目錄。快照保留投遞狀態，因此啟動副本後會恢復到期工作與 lease 到期重試；演練不得指向真實通知帳號。restore 本身不啟動網路或覆寫既有 DB。
+
+服務另接受 `-archive-dir DIR`、`-backup-dir DIR`，明確提供者在啟動與每24小時執行；目錄以0700建立、每份備份用唯一名稱，單項失敗不抑制另一項。省略旗標時不自動執行。沒有 offsite 上傳、備份刪除政策、部署或實體斷電保證。

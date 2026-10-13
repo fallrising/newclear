@@ -70,3 +70,9 @@
 - AC-12：已封存日期的遲到事件寫成新 part，舊檔案內容不變。
 - AC-13：匯回封存日期後，事件可以被查詢；重複匯回不產生重複事件。
 - AC-14：從快照還原的演練在隔離環境完成，並記錄在 STATUS。
+
+## M5 實作釐清
+
+完整介面、復原程序與驗收矩陣見 [M5 實作契約](../m5-design.md)。永久事件身分保留原 seq／canonical hash，封存移除熱 payload 後 producer retry 仍去重／衝突；匯回使用原 seq 及獨立 restored metadata，不更改原始 CloudEvent。已物化投遞與 lease／DLQ／audit 保留；尚未掃描的訂閱與規則所需資料延後清除。restored 歷史不重新投遞，規則仍可依現有熱資料語義重算。
+
+自動封存／備份需啟動時明確給定目錄才啟用；備份產出一致 SQLite 與 hash manifest。隔離 restore 只接受新目的檔，不覆寫現有資料庫或備份。未完成的檔案組合不可當作成功備份，封存 orphan 只跳過、不覆寫或自動信任。

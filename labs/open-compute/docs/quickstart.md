@@ -184,6 +184,45 @@ budget with a 30-second owned-scope removal deadline. Any unknown ownership or
 incomplete runtime/helper cleanup prevents a successful report. The sanitized
 report uses M3-01 through M3-05; real executed results are linked from STATUS.
 
+## 6. Observe cold scope storage (M4)
+
+After the previous invocation has removed its scope, run:
+
+```sh
+make -C labs/open-compute integration-storage
+```
+
+The CLI equivalent is `python3 labs/open-compute/lab.py integration-storage`,
+with the same cache/output/port options. M4 uses the existing trusted fixture.
+After its original Workflow reaches a committed wait, it stops the daemon
+normally and takes a locked cold baseline. It restarts with the same authority,
+checks sixteen fixed job IDs are absent, and submits each twice with the same
+128-byte ASCII payload. After another normal shutdown it takes the written
+snapshot, restarts, and reads all sixteen original rows before approving the
+original Workflow. Completion retains the original counter and nonce. A third
+normal shutdown produces the final cold snapshot, then owned cleanup runs.
+
+Snapshots include all scope regular files except the harness ownership marker,
+including OCR assets and transient content omitted from M2 backup payloads.
+Six fixed path groups keep scope/data authority, Local objects, OCR and transient
+content distinct without publishing inventories. Logical bytes count st_size;
+allocated bytes count st_blocks × 512. Observed hardlink aliases count once per
+inode. Directory/socket counts remain separate; their allocated blocks do not
+enter byte totals. Same-device bind mounts, extent sharing/compression and
+physical storage are unknown. These sequential cold endpoints cannot supply
+peak usage, capacity, a growth rate, exclusively D1 effects or per-job costs.
+
+M4 has a 300-second scenario budget, ten seconds per metadata scan, a separate
+150-second cleanup budget and thirty seconds for owned scope removal. The
+original five-minute Workflow wait is never reset. Existing locks must be
+present and exclusively available; ownership, unsupported types, changed
+metadata, incomplete traversal or any fixed ceiling fails the experiment.
+No failed scan becomes zero-valued successful evidence. Application alarms do
+not guarantee interruption of uninterruptible kernel filesystem I/O.
+The separate strict storage report uses M4-01 through M4-05. Partial failed
+reports include only completed snapshots and observed operation counts, with
+no forged deltas. Real executed results and their exact source are in STATUS.
+
 ## Cleanup and a failed run
 
 Normal completion stops all owned processes and removes only the scope created
@@ -222,6 +261,11 @@ addition to the socket inactivity timeout. Unknown process identities, unreadabl
 process metadata, or incomplete log draining fail cleanup verification; they are
 never interpreted as proof that a process exited.
 
+M4 runs in a separate fresh non-root Python 3.11 CI job with a ten-minute job
+budget; only its explicitly selected sanitized report is uploaded for seven
+days. No filesystem inventory, raw stat, database, object, key or config is
+an artifact.
+
 The [scoped workflow](../../../.github/workflows/open-compute-ci.yml) runs M1,
 M2 and M3 sequentially on a fresh non-root runner, requiring each invocation to clean its scope.
 It selects Python 3.11 explicitly and installs no application packages.
@@ -241,3 +285,7 @@ outbound application requests. Upstream Worker fetch can reach host-routable
 networks; loopback ingress alone does not change that boundary.
 M3 supplies bounded observations for four synthetic windows and preserves those
 functional assertions; its sampling limits do not establish capacity or tenant isolation.
+
+M4 supplies bounded cold regular-file metadata endpoints for this fixed batch.
+Signed changes also include restart/platform/completion effects; they do not
+establish a long-term slope, reclaimability, storage quota or physical capacity.

@@ -2057,3 +2057,14 @@ main {
     line-height: 1.8;
   }
 }
+
+.restored-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--teal);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.restored-notice {
+  margin: 1rem 0;
+}

@@ -63,6 +63,7 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 // Options provide deterministic clocks and a pinned synthetic TLS receiver to
 // integration tests. The CLI always uses the production defaults.
 func runWithOptions(ctx context.Context, args []string, output io.Writer, options runtimeOptions) error {
+	output = &synchronizedOutput{writer: output}
 	if options.now == nil {
 		options.now = time.Now
 	}
@@ -73,6 +74,9 @@ func runWithOptions(ctx context.Context, args []string, output io.Writer, option
 		options.deliveryInterval = time.Second
 	}
 
+	if handled, err := maintenanceCommand(ctx, args, output, options.now().UTC()); handled {
+		return err
+	}
 	if len(args) >= 2 && args[0] == "rules" && args[1] == "backfill" {
 		return backfill(ctx, args[2:], output)
 	}
@@ -83,6 +87,8 @@ func runWithOptions(ctx context.Context, args []string, output io.Writer, option
 	ownerRef := flags.String("owner-token-ref", "", "owner file:/absolute/path (required)")
 	readonlyRef := flags.String("readonly-token-ref", "", "optional readonly file:/absolute/path")
 	bind := flags.String("listen", "127.0.0.1:8080", "explicit loopback or tailnet IP:port")
+	archiveDirectory := flags.String("archive-dir", "", "opt-in archive directory; runs at startup and daily")
+	backupDirectory := flags.String("backup-dir", "", "opt-in backup directory; runs at startup and daily")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -182,7 +188,18 @@ func runWithOptions(ctx context.Context, args []string, output io.Writer, option
 			}
 		}
 	}()
-	defer func() { stopWorker(); <-workerDone; <-deliveryDone }()
+	maintenanceDone := make(chan struct{})
+	if *archiveDirectory != "" || *backupDirectory != "" {
+		go func() {
+			defer close(maintenanceDone)
+			ticker := time.NewTicker(24 * time.Hour)
+			defer ticker.Stop()
+			maintenanceLoop(workerCtx, ticker.C, runtimeArchive(db, *archiveDirectory, options.now), runtimeBackup(db, *backupDirectory, options.now), output)
+		}()
+	} else {
+		close(maintenanceDone)
+	}
+	defer func() { stopWorker(); <-workerDone; <-deliveryDone; <-maintenanceDone }()
 	result := make(chan error, 1)
 	go func() { result <- server.Serve(listener) }()
 	fmt.Fprintf(output, "signalhub listening on %s\n", listener.Addr())

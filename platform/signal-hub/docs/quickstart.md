@@ -1,6 +1,6 @@
-# Quickstart — M3 本機事件中樞
+# Quickstart — M5 本機事件中樞
 
-M4 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。已提供規則指標與圖表、webhook／ntfy、摘要、重試與DLQ重放；封存與部署尚未實作；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
+M5 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。已提供規則指標與圖表、webhook／ntfy、摘要、重試與DLQ重放；另有封存／匯回與一致備份／隔離還原；部署尚未驗收；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
 以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
@@ -219,3 +219,18 @@ go test -race -v ./cmd/signalhub -run 'TestM4ReferenceReceiverVectors|TestM4Real
 ```
 
 上述測試使用獨立服務 process、合成 SQLite 事件與具固定憑證的接收端，僅測試內注入時鐘及該接收端的精確位址。正式 CLI 沒有停用 SSRF 或 TLS 驗證的選項。`e2e_delivery.py` 另啟動正式 binary 驗證 HTTP／OpenAPI，並確認 allowlisted loopback 仍未被連線。
+
+
+## M5 合成資料還原演練
+
+從 component 根目錄執行下列命令。腳本自己建立、清理暫存 DB、設定與合成憑證；不使用 quickstart 的既有資料或真實通知帳號。結果包含 manifest/hash/筆數／精確清除、遲到 part、匯回去重與 audit、live-WAL 備份、隔離還原後查詢／寫入／重放。TLS 接收端與 lease 到期恢復另由 Go subprocess 測試涵蓋。
+
+```sh
+go build -trimpath -o /tmp/signalhub ./cmd/signalhub
+python3 -m venv .local/contracts
+.local/contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
+.local/contracts/bin/python scripts/e2e_archive.py --binary /tmp/signalhub
+go test -v ./cmd/signalhub -run TestM5RealServiceArchiveBackupDeliveryRecovery -count=1
+```
+
+手動操作與故障復原步驟見 [runtime 的 M5 節](runtime.md#m5-封存備份與隔離還原)。啟動時不帶維護目錄旗標，就不會自動封存或備份。

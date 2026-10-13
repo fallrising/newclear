@@ -170,7 +170,7 @@ func internalEventTx(ctx context.Context, tx *sql.Tx, fields map[string]any, now
 	}
 	if immutableDuplicate {
 		var seq int64
-		err := tx.QueryRowContext(ctx, "SELECT seq FROM events WHERE source=? AND id=?", fields["source"], fields["id"]).Scan(&seq)
+		err := tx.QueryRowContext(ctx, "SELECT seq FROM event_identities WHERE source=? AND id=?", fields["source"], fields["id"]).Scan(&seq)
 		if err == nil {
 			return nil
 		}

@@ -474,14 +474,14 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
             spawn.assert_not_called()
 
     def test_missing_process_is_gone_but_unreadable_or_malformed_is_unknown(self):
-        with patch.object(Path, "read_text", side_effect=FileNotFoundError):
+        with patch.object(Path, "open", side_effect=FileNotFoundError):
             self.assertIsNone(lab.process_info(123))
             self.assertFalse(lab.same_process({"pid": 123, "start_ticks": 45}))
         for failure in (PermissionError("denied"), OSError("I/O failure")):
-            with self.subTest(failure=type(failure).__name__), patch.object(Path, "read_text", side_effect=failure):
+            with self.subTest(failure=type(failure).__name__), patch.object(Path, "open", side_effect=failure):
                 with self.assertRaises(lab.ProcessObservationError):
                     lab.process_info(123)
-        with patch.object(Path, "read_text", return_value="malformed"):
+        with patch.object(Path, "open", return_value=io.BytesIO(b"malformed")):
             with self.assertRaises(lab.ProcessObservationError):
                 lab.process_info(123)
 
@@ -521,6 +521,236 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
         process._read()
         with self.assertRaisesRegex(lab.ProcessObservationError, "output read failed"):
             process.live()
+
+    @staticmethod
+    def identity(pid, start, ppid=1, state="S"):
+        return {"pid": pid, "start_ticks": start, "ppid": ppid,
+                "pgid": pid, "state": state}
+
+    def owner(self):
+        root = self.identity(10, 100)
+        with patch("lab.proc_namespace_supported", return_value=True), \
+             patch("lab.subprocess.Popen", return_value=Mock(pid=10)), \
+             patch("lab.process_info", return_value=root), \
+             patch("lab.threading.Thread"):
+            return lab.Process(["test-owned-root"])
+
+    def proc_scan(self, table, read=None, entries=None):
+        from contextlib import ExitStack
+        stack = ExitStack()
+        paths = [Path("/proc") / str(pid) for pid in table] if entries is None else entries
+        stack.enter_context(patch.object(Path, "iterdir", return_value=iter(paths)))
+        scanner = Mock()
+        scanner.__enter__ = Mock(return_value=iter(paths))
+        scanner.__exit__ = Mock(return_value=False)
+        stack.enter_context(patch("lab.os.scandir", return_value=scanner))
+        stack.enter_context(patch("lab.process_info", side_effect=read or (lambda pid: table.get(pid))))
+        return stack
+
+    def test_reused_owned_pid_records_new_descendant_generation_and_grandchild(self):
+        owner = self.owner()
+        first = {10: owner.identity, 20: self.identity(20, 110, 10)}
+        with self.proc_scan(first):
+            owner.snapshot()
+        self.assertEqual([item["start_ticks"] for item in owner.children(False)], [110])
+        second = {10: owner.identity, 20: self.identity(20, 120, 10),
+                  30: self.identity(30, 130, 20)}
+        with self.proc_scan(second):
+            owner.snapshot()
+            live = owner.live()
+        self.assertEqual({(item["pid"], item["start_ticks"]) for item in live},
+                         {(10, 100), (20, 120), (30, 130)})
+        self.assertEqual(owner.observed_identities(),
+                         [{"pid": 10, "start_ticks": 100}, {"pid": 20, "start_ticks": 110},
+                          {"pid": 20, "start_ticks": 120}, {"pid": 30, "start_ticks": 130}])
+
+    def test_unrelated_reuse_is_not_adopted_or_signaled(self):
+        owner = self.owner()
+        with self.proc_scan({10: owner.identity, 20: self.identity(20, 110, 10)}):
+            owner.snapshot()
+        replacement = {10: owner.identity, 20: self.identity(20, 120, 999),
+                       30: self.identity(30, 130, 20)}
+        with self.proc_scan(replacement), patch("lab.os.kill") as kill:
+            owner.snapshot()
+            for item in owner.live():
+                owner.signal_owned(item, signal.SIGTERM)
+        self.assertEqual([call.args[0] for call in kill.call_args_list], [10])
+        self.assertEqual(owner.observed_identities(),
+                         [{"pid": 10, "start_ticks": 100}, {"pid": 20, "start_ticks": 110}])
+
+    def test_reparented_generation_remains_owned_and_can_have_children(self):
+        owner = self.owner()
+        with self.proc_scan({10: owner.identity, 20: self.identity(20, 110, 10)}):
+            owner.snapshot()
+        with self.proc_scan({20: self.identity(20, 110, 1), 30: self.identity(30, 130, 20)}):
+            owner.snapshot()
+            self.assertEqual({item["pid"] for item in owner.live()}, {20, 30})
+        self.assertEqual(len(owner.observed_identities()), 3)
+
+    def test_stale_parent_reuse_during_scan_fails_closed(self):
+        owner = self.owner()
+        table = {10: owner.identity, 20: self.identity(20, 110, 10)}
+        reads = {}
+        def read(pid):
+            reads[pid] = reads.get(pid, 0) + 1
+            if pid == 10 and reads[pid] > 1:
+                return self.identity(10, 105)
+            return table.get(pid)
+        with self.proc_scan(table, read):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+        self.assertEqual(len(owner.known), 1)
+        with self.assertRaises(lab.ProcessObservationError):
+            owner.observed_identities()
+
+    def test_candidate_generation_change_and_predating_parent_fail_closed(self):
+        for changed in (self.identity(20, 120, 10), self.identity(20, 110, 999), None):
+            with self.subTest(changed=changed):
+                owner = self.owner()
+                table = {10: owner.identity, 20: self.identity(20, 110, 10)}
+                reads = {}
+                def read(pid):
+                    reads[pid] = reads.get(pid, 0) + 1
+                    return changed if pid == 20 and reads[pid] > 1 else table.get(pid)
+                with self.proc_scan(table, read):
+                    with self.assertRaises(lab.ProcessObservationError):
+                        owner.snapshot()
+                self.assertEqual(len(owner.known), 1)
+        owner = self.owner()
+        with self.proc_scan({10: owner.identity, 20: self.identity(20, 90, 10)}):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+
+    def test_new_parent_is_revalidated_before_grandchild_admission(self):
+        owner = self.owner()
+        table = {10: owner.identity, 20: self.identity(20, 110, 10),
+                 30: self.identity(30, 120, 20)}
+        def read(pid):
+            if pid == 20 and len(owner.known) > 1:
+                return self.identity(20, 115, 999)
+            return table.get(pid)
+        with self.proc_scan(table, read):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+        self.assertFalse(any(item["pid"] == 30 for item in owner.known.values()))
+
+    def test_identity_snapshot_is_copied_root_first_without_proc_reads(self):
+        owner = self.owner()
+        with self.proc_scan({10: owner.identity, 20: self.identity(20, 110, 10)}):
+            owner.snapshot()
+        with patch("lab.process_info", side_effect=AssertionError("copy must not read proc")):
+            copied = owner.observed_identities()
+            copied[0]["pid"] = 999
+            copied.append({"pid": 998, "start_ticks": 1})
+            self.assertEqual(owner.observed_identities(),
+                             [{"pid": 10, "start_ticks": 100}, {"pid": 20, "start_ticks": 110}])
+        owner.observation_error = "unknown observation"
+        with self.assertRaisesRegex(lab.ProcessObservationError, "unknown"):
+            owner.observed_identities()
+
+    def test_scan_ceiling_counts_numeric_entries_before_stat_or_large_allocation(self):
+        owner = self.owner()
+        yielded = []
+        def entries():
+            yield Path("/proc/self")
+            for pid in range(1, 8200):
+                yielded.append(pid)
+                yield Path("/proc") / str(pid)
+        with self.proc_scan({}, entries=entries()), patch("lab.process_info") as read:
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+        self.assertEqual(len(yielded), 8193)
+        read.assert_not_called()
+        self.assertEqual(len(owner.known), 1)
+        with self.assertRaises(lab.ProcessObservationError):
+            owner.observed_identities()
+
+    def test_generation_ceiling_preserves_history_and_refuses_verified_exit(self):
+        owner = self.owner()
+        # Same PID with many exited generations must still consume the history bound.
+        for start in range(101, 1124):
+            owner.known[(20, start)] = self.identity(20, start, 10)
+        before = copy.deepcopy(owner.known)
+        with self.proc_scan({10: owner.identity, 30: self.identity(30, 1200, 10)}):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+        self.assertEqual(owner.known, before)
+        with self.assertRaises(lab.ProcessObservationError):
+            owner.live()
+
+    def test_exact_scan_and_generation_limits_are_accepted(self):
+        owner = self.owner()
+        entries = (Path("/proc") / str(pid) for pid in range(1, 8193))
+        with self.proc_scan({10: owner.identity}, entries=entries):
+            owner.snapshot()
+        for start in range(101, 1123):
+            owner.known[(20, start)] = self.identity(20, start, 10)
+        with self.proc_scan({10: owner.identity, 30: self.identity(30, 1200, 10)}):
+            owner.snapshot()
+        self.assertEqual(len(owner.observed_identities()), 1024)
+
+    def test_snapshot_proc_io_does_not_hold_copying_lock(self):
+        owner = self.owner()
+        table = {10: owner.identity, 20: self.identity(20, 110, 10)}
+        def read(pid):
+            self.assertTrue(owner.lock.acquire(blocking=False))
+            owner.lock.release()
+            return table.get(pid)
+        with self.proc_scan(table, read):
+            owner.snapshot()
+        self.assertEqual(len(owner.observed_identities()), 2)
+
+    def test_unreadable_scan_preserves_known_ownership_and_prevents_clean_stop(self):
+        owner = self.owner()
+        with self.proc_scan({10: owner.identity, 20: self.identity(20, 110, 10)}):
+            owner.snapshot()
+        before = copy.deepcopy(owner.known)
+        with self.proc_scan({}, entries=[Path("/proc/10")]), \
+             patch("lab.process_info", side_effect=lab.ProcessObservationError("unreadable")):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+            self.assertEqual(owner.known, before)
+            # Unknown identities remain candidates for cleanup; they are not
+            # silently represented as known exits.
+            self.assertEqual(len(owner.live(strict=False)), 2)
+        owner.process.poll.return_value = 0
+        with patch("lab.process_info", return_value=None), patch.object(owner, "finish_threads"):
+            result = owner.stop(grace=0)
+        self.assertFalse(result["all_owned_exited"])
+        self.assertEqual(owner.known, before)
+        with self.assertRaises(lab.ProcessObservationError):
+            owner.observed_identities()
+
+    def test_parent_change_on_final_revalidation_is_unknown(self):
+        owner = self.owner()
+        table = {10: owner.identity, 20: self.identity(20, 110, 10)}
+        reads = {}
+        def read(pid):
+            reads[pid] = reads.get(pid, 0) + 1
+            if pid == 10 and reads[pid] == 3:
+                return self.identity(10, 105)
+            return table.get(pid)
+        with self.proc_scan(table, read):
+            with self.assertRaises(lab.ProcessObservationError):
+                owner.snapshot()
+        self.assertEqual(len(owner.known), 1)
+
+    def test_stat_reader_requests_only_4097_bytes_and_rejects_oversize(self):
+        record = "123 (tricky ) process) S 1 123 " + "0 " * 16 + "45 0\n"
+        stream = io.BytesIO(record.encode())
+        with patch.object(Path, "open", return_value=stream):
+            self.assertEqual(lab.process_info(123)["start_ticks"], 45)
+        stream = io.BytesIO(record.encode().ljust(4096, b" "))
+        with patch.object(Path, "open", return_value=stream):
+            self.assertEqual(lab.process_info(123)["start_ticks"], 45)
+        stream = Mock()
+        stream.__enter__ = Mock(return_value=stream)
+        stream.__exit__ = Mock(return_value=False)
+        stream.read.return_value = b"x" * 4097
+        with patch.object(Path, "open", return_value=stream):
+            with self.assertRaises(lab.ProcessObservationError):
+                lab.process_info(123)
+        stream.read.assert_called_once_with(4097)
 
     def test_redaction_and_final_secret_scan(self):
         redactor = lab.Redactor()

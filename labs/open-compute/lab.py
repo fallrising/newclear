@@ -264,16 +264,22 @@ def proc_namespace_supported():
 
 def process_info(pid):
     try:
-        text = Path(f"/proc/{pid}/stat").read_text()
+        with Path(f"/proc/{pid}/stat").open("rb", buffering=0) as stream:
+            record = stream.read(4097)
     except (FileNotFoundError, ProcessLookupError):
         return None
     except OSError as exc:
         raise ProcessObservationError("process identity is unreadable") from exc
     try:
-        require(int(text.split(" ", 1)[0]) == int(pid), "process PID record mismatch")
-        fields = text[text.rindex(")") + 2:].split()
-        return {"pid": int(pid), "state": fields[0], "ppid": int(fields[1]),
-                "pgid": int(fields[2]), "start_ticks": int(fields[19])}
+        require(len(record) <= 4096, "process identity record exceeds limit")
+        require(int(record.split(b" ", 1)[0]) == int(pid), "process PID record mismatch")
+        fields = record[record.rindex(b")") + 2:].split()
+        info = {"pid": int(pid), "state": fields[0].decode("ascii"),
+                "ppid": int(fields[1]), "pgid": int(fields[2]), "start_ticks": int(fields[19])}
+        require(len(info["state"]) == 1 and info["pid"] > 0 and
+                all(info[key] >= 0 for key in ("ppid", "pgid", "start_ticks")),
+                "invalid process identity fields")
+        return info
     except (LabError, ValueError, IndexError) as exc:
         raise ProcessObservationError("process identity record is malformed") from exc
 
@@ -309,9 +315,10 @@ class Process:
                 self.process.wait(timeout=2)
             self.process.stdout.close()
             raise
-        self.known = {self.process.pid: self.identity}
+        self.known = {(self.identity["pid"], self.identity["start_ticks"]): self.identity}
         self.tail = bytearray()
         self.lock = threading.Lock()
+        self.scan_lock = threading.Lock()
         self.done = threading.Event()
         self.observation_error = None
         self.reader = threading.Thread(target=self._read, daemon=True)
@@ -329,28 +336,82 @@ class Process:
             self.observation_error = "process output read failed"
 
     def snapshot(self):
-        table = {}
+        # Serialize admissions, but never hold the copying/output lock across proc I/O.
+        with self.scan_lock:
+            try:
+                self._snapshot()
+            except (ProcessObservationError, OSError) as exc:
+                with self.lock:
+                    self.observation_error = str(exc)
+                raise ProcessObservationError(str(exc)) from exc
+
+    def _snapshot(self):
+        with self.lock:
+            if self.observation_error:
+                raise ProcessObservationError(self.observation_error)
+            known = dict(self.known)
+        if len(known) > 1024:
+            raise ProcessObservationError("process generation history exceeds limit")
+        # Path.iterdir/listdir allocates the whole directory before yielding on
+        # Python 3.11. scandir permits rejecting entry 8193 without that allocation.
+        pids = []
         try:
-            entries = list(Path("/proc").iterdir())
+            with os.scandir("/proc") as entries:
+                for entry in entries:
+                    if entry.name.isdecimal():
+                        if len(pids) == 8192:
+                            raise ProcessObservationError("process table exceeds limit")
+                        pids.append(int(entry.name))
         except OSError as exc:
             raise ProcessObservationError("process table is unreadable") from exc
-        for entry in entries:
-            if entry.name.isdecimal():
-                info = process_info(int(entry.name))
-                if info:
-                    table[info["pid"]] = info
+        table = {}
+        for pid in pids:
+            info = process_info(pid)
+            if info is not None:
+                table[pid] = info
+        parents = {info["pid"]: info for key, info in known.items()
+                   if info["pid"] in table and
+                   table[info["pid"]]["start_ticks"] == info["start_ticks"] and
+                   table[info["pid"]]["state"] != "Z"}
+        while True:
+            added = False
+            for pid, candidate in table.items():
+                key = (pid, candidate["start_ticks"])
+                if key in known or candidate["ppid"] not in parents:
+                    continue
+                if len(known) == 1024:
+                    raise ProcessObservationError("process generation history exceeds limit")
+                parent = parents[candidate["ppid"]]
+                # An earlier PPID alone does not grant ownership. Sandwich the
+                # edge with fresh generation reads, including newly admitted
+                # parents, so a reused parent cannot authorize a grandchild.
+                for _ in range(2):
+                    current_parent = process_info(parent["pid"])
+                    current_child = process_info(pid)
+                    if (current_parent is None or current_parent["state"] == "Z" or
+                            current_parent["start_ticks"] != parent["start_ticks"] or
+                            current_child is None or
+                            any(current_child[field] != candidate[field]
+                                for field in ("pid", "start_ticks", "ppid")) or
+                            current_child["start_ticks"] < current_parent["start_ticks"]):
+                        raise ProcessObservationError("process parent edge changed during observation")
+                with self.lock:
+                    self.known[key] = current_child
+                known[key] = current_child
+                if current_child["state"] != "Z":
+                    parents[pid] = current_child
+                added = True
+            if not added:
+                break
+
+    def observed_identities(self):
+        """Copy retained authorized generations for a read-only observer."""
         with self.lock:
-            parents = {pid for pid, identity in self.known.items()
-                       if pid in table and table[pid]["start_ticks"] == identity["start_ticks"]}
-            while True:
-                children = {pid for pid, info in table.items() if info["ppid"] in parents}
-                added = children - parents
-                if not added:
-                    break
-                parents.update(added)
-            for pid in parents:
-                if pid not in self.known:
-                    self.known[pid] = table[pid]
+            if self.observation_error:
+                raise ProcessObservationError(self.observation_error)
+            root = (self.identity["pid"], self.identity["start_ticks"])
+            identities = [self.identity] + [item for key, item in self.known.items() if key != root]
+            return [{"pid": item["pid"], "start_ticks": item["start_ticks"]} for item in identities]
 
     def _monitor(self):
         try:
@@ -386,7 +447,8 @@ class Process:
                 raise ProcessObservationError(self.observation_error)
             self.snapshot()
         with self.lock:
-            return [public_process(item) for pid, item in self.known.items() if pid != self.process.pid]
+            root = (self.identity["pid"], self.identity["start_ticks"])
+            return [public_process(item) for key, item in self.known.items() if key != root]
 
     def finish_threads(self):
         self.done.set()

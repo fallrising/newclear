@@ -81,3 +81,7 @@ M4 的持久化、重放與 outbound IP/DNS/TLS 邊界見 [M4 契約](../docs/m4
 ## M5 hub metadata
 
 `StoredEvent.restored` 是選用 boolean：匯回的熱事件為 true，普通事件可省略或 false；detail 與 related 使用相同 schema。它不屬於 CloudEvent，不參與 content hash，生產者送入 `restored` 仍被拒絕。checker 覆蓋缺省／true／false，以及 string／null／number 的反例。封存與備份 CLI 詳見 [M5 契約](../docs/m5-design.md)；沒有新增 HTTP 資料刪除或還原入口。
+
+## M6 接入準備
+
+[來源範例](../examples/sources/)與 `scripts/check_sources.py` 重用這裡的 schema／strict JSON／JCS 驗證；不新增事件 schema、不讀取 credential refs、不發送網路請求。真實服務的 mapping、202／200／409／403、來源沉默及還原由 `scripts/e2e_m6.py` 驗證。部署 worksheet 的離線 checker 只核對結構與一致性，不認證真實七天歷史或人工手機收件證據；完整條件見 [M6 設計](../docs/m6-design.md)。

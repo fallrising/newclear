@@ -75,4 +75,6 @@ signalhub restore --backup NEW.sqlite --db ISOLATED.sqlite --reason 'isolated re
 
 設定與憑證不在 DB 快照中；隔離演練須另建合成設定／憑證，複製需要的 archive 檔並改用獨立目錄。快照保留投遞狀態，因此啟動副本後會恢復到期工作與 lease 到期重試；演練不得指向真實通知帳號。restore 本身不啟動網路或覆寫既有 DB。
 
+隔離副本啟動前就必須完成出站隔離與設定替換。相同 subscription ID 的安全定義需保持一致；URL／credential refs 不在持久化安全定義中，可換成隔離目標而保留 cursor、訊息 bytes、attempt 與 lease。省略訂閱只會暫停，不能當成已驗證恢復投遞；細節見 [M6 部署／復原驗收](deployment-acceptance.md)。
+
 服務另接受 `-archive-dir DIR`、`-backup-dir DIR`，明確提供者在啟動與每24小時執行；目錄以0700建立、每份備份用唯一名稱，單項失敗不抑制另一項。省略旗標時不自動執行。沒有 offsite 上傳、備份刪除政策、部署或實體斷電保證。

@@ -1,6 +1,6 @@
 # Signal Hub — STATUS
 
-公開技術進度快照，日期：2026-10-13。任務認領與 owner 驗收仍以 owner 帳本為準。
+公開技術進度快照，日期：2026-10-14。任務認領與 owner 驗收仍以 owner 帳本為準。
 
 ## 目前狀態
 
@@ -16,7 +16,15 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | 圖表 | 原生 React／SVG、時間／分組、版本分隔、partial、threshold、可操作的精確資料表 |
 | M4 | 訂閱、webhook／ntfy、摘要、重試、DLQ／重放與投遞看板已通過獨立審查及全部CI；整合紀錄見PR #351 |
 | M5 | AC-10–14封存／匯回、一致備份與隔離還原已通過完整gate及獨立審查；整合紀錄見PR #352 |
-| M6 | 真實來源／部署驗收未實作 |
+| M6 | 準備包已通過獨立審查與完整CI（PR #357）：來源契約／離線工具、部署與復原 runbook、隔離驗證；真實接入／部署／完整驗收仍未完成 |
+
+## M6 準備驗證
+
+產品版本 `b9bb8d35103522aeded29085ebc7cc28701ee9d7` 的[CI38626701142](https://github.com/fallrising/newclear/actions/runs/38626701142)全部通過：10個Go race套件（store289.504秒）、28前端測試／可重建資產、6schemas／64fixtures、36來源與20部署離線測試、204個既有HTTP回應／17個CLI（投遞輪詢多一次）、新增76個M6 HTTP／2個CLI，以及10個真實Go／sandboxed Chromium案例（13.6秒）。M6桌面1440px及手機390px截圖已目視確認三來源資料與中文字型可讀；原始詳情、freshness、token清除、無水平溢出及嚴格browser health斷言均通過。完整映射見[M6準備驗收報告](../.team/reports/M6-preparation-acceptance.md)。正常整合及最終CI以[PR #357](https://github.com/fallrising/newclear/pull/357)為準。
+
+獨立T-610發現離線capture未拒絕部分非法Unicode／數值；補回歸後T-611用原始探針結案。首輪CI38625218512為9/10，M6 fixture以錯誤Content-Type取得415；只修正fixture至既有CloudEvents契約，T-612獨立複驗通過，完整CI已結案。原始失敗、本機Chromium路徑／函式庫失敗均保留，未放寬sandbox、斷言或timeout。
+
+本次只交付準備與隔離合成驗證，未操作真實主機、secret、生產者、停機或外部通知帳號。三來源連續七天、producer沉默後手機收件、hub停機五分鐘內獨立通知、前一日真實快照隔離還原四項均仍待明確授權與實際證據，不能由此報告替代。
 
 ## M5 隔離還原演練與驗收
 

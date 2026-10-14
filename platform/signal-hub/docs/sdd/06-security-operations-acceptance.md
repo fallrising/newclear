@@ -51,3 +51,5 @@ Secret（token、webhook secret、ntfy token）只以 `*_ref` 指向執行期檔
 - 從前一天的快照在隔離環境還原成功。
 
 **狀態要分開記錄：** 設計接受、PR 合併、功能驗收、部署、實際運行是不同的狀態，記在 [STATUS](../STATUS.md)。
+
+[M6 準備設計](../m6-design.md)與[部署驗收包](../deployment-acceptance.md)提供具體授權矩陣、失敗復原及證據欄位。離線驗證與本機合成演練只驗證準備包；不替代以上四項真實驗收，也不授權對主機、生產者、secret 或通知帳號操作。

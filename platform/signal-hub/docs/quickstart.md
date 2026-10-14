@@ -234,3 +234,22 @@ go test -v ./cmd/signalhub -run TestM5RealServiceArchiveBackupDeliveryRecovery -
 ```
 
 手動操作與故障復原步驟見 [runtime 的 M5 節](runtime.md#m5-封存備份與隔離還原)。啟動時不帶維護目錄旗標，就不會自動封存或備份。
+
+## M6 準備包的隔離驗證
+
+這些命令只建置／檢查準備包並啟動自己的合成 loopback 服務，不接入真實來源或通知。既有 Python 契約依賴不屬於 Go runtime；沿用鎖定版本。從 component 目錄執行：
+
+```sh
+python3 -m venv .local/run/contracts
+.local/run/contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
+go build -trimpath -o .local/run/signalhub ./cmd/signalhub
+.local/run/contracts/bin/python scripts/test_check_sources.py
+.local/run/contracts/bin/python scripts/check_sources.py
+python3 scripts/test_check_deployment.py
+python3 scripts/check_deployment.py
+.local/run/contracts/bin/python scripts/e2e_m6.py --binary .local/run/signalhub
+```
+
+HTTP 演練從 `examples/sources/` 讀取三來源範例，在本輪新建目錄產生合成憑證、設定與 SQLite；檢查原 seq、重送／衝突、來源權限、Alertmanager member 狀態、真實經過四秒以上的沉默／恢復，以及一致快照還原到新路徑。結束只清理這次自建的合成目錄。沒有真實通知、外部 monitor 或七天觀測；新產生的快照也不是前一天的真實快照。M5 的 archive／queue／lease／DLQ 恢復回歸仍須另外執行。
+
+完整 [來源接入說明](source-integration.md) 與 [部署／還原驗收包](deployment-acceptance.md) 列出尚待核准的具體操作；不要把範例設定或離線 checker 通過當成部署授權。

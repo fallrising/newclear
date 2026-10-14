@@ -10,8 +10,8 @@ Three inputs only: release pipelines, inspection jobs and Alertmanager webhook v
 
 | Input | Configured name | Scope | Delivery contract |
 | --- | --- | --- | --- |
-| Release | release | `urn:example:release:` / `deployment.*` | Persist one immutable envelope per pipeline run/attempt/outcome before send; retry identical bytes/id/time; a new outcome gets a new id. |
-| Inspection | inspection | `urn:example:inspection:` / `inspection.*` | One immutable envelope per completed scheduled run; include observed result without raw secrets/logs. Never regenerate time or id for a retry. |
+| Release | release | `urn:example:release:` / `release.deploy.*` | Persist one immutable envelope per pipeline run/attempt/outcome before send; retry identical bytes/id/time; a new outcome gets a new id. |
+| Inspection | inspection | `urn:example:inspection:` / `inspection.check.*` | One immutable envelope per completed scheduled run; include observed result without raw secrets/logs. Never regenerate time or id for a retry. |
 | Alertmanager | alertmanager | `urn:signalhub:alertmanager:example:` / `alertmanager.alert.*` | Receiver `example:primary`; existing mapping and identity remain unchanged. Inspect every batch member, including in HTTP200 responses. |
 
 Examples live in `examples/sources/`: `config.json`, `release.json`, `inspection.json`, `alertmanager-firing.json`, `alertmanager-resolved.json`. Credentials are distinct runtime file references, never values. Production substitutions require a private reviewed config; the examples are not production enrollment. `scripts/check_sources.py` validates examples and optional supplied captures offline using existing contract-check dependencies. It does not read token_ref files, send requests, rewrite payloads or hide conflicts. Tests cover cross-source scope, reserved types, mutable duplicate content and invalid batch members. Exact ingest mapping remains the Go runtime authority.

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "run_id": "example-run",
+  "access_policy_revision": "UNRESOLVED",
+  "hosts": [
+    {
+      "role": "H1",
+      "ssh_alias": "example-h1",
+      "machine_identity_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "tailnet_ipv4": "100.64.10.1",
+      "data_root": "/home/operator/mithril-h1/example-run",
+      "available_memory_mib": 8192,
+      "available_disk_mib": 20480,
+      "approved_ports": [
+        17001,
+        17002,
+        27001,
+        27002
+      ],
+      "occupied_ports": []
+    },
+    {
+      "role": "H2",
+      "ssh_alias": "example-h2",
+      "machine_identity_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "tailnet_ipv4": "100.64.10.2",
+      "data_root": "/home/operator/mithril-h2/example-run",
+      "available_memory_mib": 8192,
+      "available_disk_mib": 20480,
+      "approved_ports": [
+        17001,
+        17002,
+        27001,
+        27002
+      ],
+      "occupied_ports": []
+    },
+    {
+      "role": "H3",
+      "ssh_alias": "example-h3",
+      "machine_identity_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "tailnet_ipv4": "100.64.10.3",
+      "data_root": "/home/operator/mithril-h3/example-run",
+      "available_memory_mib": 8192,
+      "available_disk_mib": 20480,
+      "approved_ports": [
+        17001,
+        17002,
+        27001,
+        27002
+      ],
+      "occupied_ports": []
+    },
+    {
+      "role": "H4",
+      "ssh_alias": "example-h4",
+      "machine_identity_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "tailnet_ipv4": "100.64.10.4",
+      "data_root": "/home/operator/mithril-h4/example-run",
+      "available_memory_mib": 8192,
+      "available_disk_mib": 20480,
+      "approved_ports": [
+        17979
+      ],
+      "occupied_ports": []
+    }
+  ]
+}

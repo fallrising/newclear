@@ -1,5 +1,7 @@
 # 接續 Prompt：Mithril 四機實驗
 
+2026-10-15 接續狀態：P1a strict plan／synthetic lifecycle 已提供，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 與 [VALIDATION](VALIDATION.md)。完整 P1 仍缺 thin SSH executor／Compose/auth／purge；M1–M3 runtime 尚未驗收。接手先讀新增 P1 文件及 runtime.lock，不能把 local-fixture plan 或 demo 當作可執行實機批准。
+
 本 Prompt 是交接文件，不會因被閱讀就授權任何遠端操作。預設 mode 是 `plan-only`；Owner 明確選擇 `develop-only` 或批准精確實機變更計劃後，才可進入對應工作。文檔合併不是 runtime PASS。
 
 ---
@@ -40,7 +42,7 @@ labs/mithril-research/docs/EXECUTION_PROMPT.md
 
 ## 已知狀態與第一個動作
 
-Owner 已提供「四台測試機可用」資訊，不要再問有沒有機器。H1–H4 的真實映射、資源與安全邊界尚無本項目現場 evidence；也不能直接假設就是 Eru 那四台。
+2026-09-27 歷史起點：Owner 已提供「四台測試機可用」資訊，當時 H1–H4 映射與資源尚無現場 evidence。2026-10-15 已有私有唯讀 metadata／SSH／Tailscale transport 證據；接手先核對該記錄與本次授權，不能重複假設尚未盤點。有效服務存取政策、共享 workload 保留與回復入口仍須補齊；盤點不能授權 VPS 寫入。
 
 最先處理 MR-004 / P0：核對既有 inventory 是否有明確授權可供本次使用，列出唯讀盤點方法，確認 OS／架構、host identity、SSH、runtime、Tailscale、port、資源、保留服務與回復入口。未獲准遠端讀取時，先交付可由 Owner 執行的唯讀命令；已獲准時按核准目標執行，不重複詢問已知資料。
 
@@ -50,7 +52,7 @@ Owner 已提供「四台測試機可用」資訊，不要再問有沒有機器�
 
 `plan-only`：只讀 repository／已授權盤點，整理實機差異、變更清單、風險、回復及批准需求；不安裝或啟動服務。
 
-`develop-only`：另經 Owner 指定後，實作 P1 的最小 lifecycle harness、contract tests、版本鎖定與 root path-scoped CI；使用本機 disposable fixture，不連真實 VPS。介面是待實作契約，不能宣稱檔案已存在。
+`develop-only`：另經 Owner 指定後，續作 P1 尚缺工具。P1a 的 local-fixture core／contract tests／runtime lock／root CI 已存在；只可按其文件使用。後續 thin SSH／Compose/auth／purge 仍須有界開發，不以工具存在授權真實 VPS 寫入。
 
 `execute-approved`：必須已有核准的 H1–H4 身分、plan hash、ports、資源配額、保留清單、credentials 與回復邊界。只做批准的 P1–P3：固定 artifacts → 六實例及交叉副本 → 真實 backend health → Mithril → 小流量使用／SDK → down/up 與精確清理驗收。批准範圍內連續推進，不逐命令要求確認；身分漂移、共享服務異常或新風險才停止。
 

@@ -53,7 +53,8 @@ export async function startSourcesFixture() {
     const alert = await sample('alertmanager-firing.json');
     async function send(role, path, body, expected) {
       const response = await fetch(base + path, { method: 'POST', headers: {
-        Authorization: 'Bearer ' + tokens[role], 'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + tokens[role],
+        'Content-Type': path === '/v1/events' ? 'application/cloudevents+json' : 'application/json',
       }, body: JSON.stringify(body), signal: AbortSignal.timeout(15_000) });
       const result = await response.json();
       if (response.status !== expected) throw new Error('M6 seed HTTP ' + response.status);

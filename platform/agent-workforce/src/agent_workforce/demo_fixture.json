@@ -1,0 +1,310 @@
+{
+  "clock": 1000.0,
+  "records": {
+    "workers": {
+      "worker-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "role": "writer",
+        "lifecycle": "active"
+      },
+      "worker-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "role": "reviewer",
+        "lifecycle": "active"
+      }
+    },
+    "products": {
+      "product-example": {
+        "owner": "operator-example",
+        "revision": 1,
+        "harness": "fake",
+        "harness_version": "1"
+      }
+    },
+    "accounts": {
+      "account-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "product_id": "product-example",
+        "lifecycle": "active",
+        "concurrency_limit": 1
+      },
+      "account-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "product_id": "product-example",
+        "lifecycle": "active",
+        "concurrency_limit": 1
+      }
+    },
+    "entitlements": {
+      "entitlement-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "account_ref": "account-a",
+        "quota_pool_ref": "pool-shared",
+        "billing_class": "personal",
+        "actual_entitlement": "verified",
+        "expires_at": 2000.0,
+        "concurrency_limit": 2,
+        "quota_remaining": null
+      },
+      "entitlement-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "account_ref": "account-b",
+        "quota_pool_ref": "pool-shared",
+        "billing_class": "api",
+        "actual_entitlement": "verified",
+        "expires_at": 2000.0,
+        "concurrency_limit": 2,
+        "quota_remaining": null
+      }
+    },
+    "profiles": {
+      "profile-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "read_paths": [
+          "src",
+          "tests"
+        ],
+        "write_paths": [
+          "src"
+        ],
+        "timeout_seconds": 60,
+        "capabilities": [
+          "execute",
+          "review",
+          "rework"
+        ]
+      },
+      "profile-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "read_paths": [
+          "snapshot"
+        ],
+        "write_paths": [],
+        "timeout_seconds": 60,
+        "capabilities": [
+          "review"
+        ]
+      }
+    },
+    "resources": {
+      "workspace-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "kind": "workspace",
+        "read_paths": [
+          "src",
+          "tests"
+        ],
+        "write_paths": [
+          "src"
+        ],
+        "binding_key": "workspace-physical-a"
+      },
+      "workspace-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "kind": "workspace",
+        "read_paths": [
+          "snapshot"
+        ],
+        "write_paths": [],
+        "binding_key": "workspace-physical-b"
+      }
+    },
+    "jobs": {
+      "job-example": {
+        "owner": "operator-example",
+        "revision": 1,
+        "input_revision": 1,
+        "ac_revision": 1,
+        "revocation_epoch": 0,
+        "deadline": 1900.0,
+        "max_concurrency": 2,
+        "step_hops": {
+          "write-0": 0,
+          "write-1": 0,
+          "write-2": 0,
+          "review-0": 1
+        }
+      }
+    },
+    "routes": {
+      "route-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-a",
+        "product_id": "product-example",
+        "account_ref": "account-a",
+        "entitlement_ref": "entitlement-a",
+        "profile_id": "profile-a",
+        "model": "fake-model",
+        "harness_version": "1",
+        "runtime_status": "verified",
+        "policy_review": "supported_for_scope",
+        "evidence": {
+          "route_revision": 1,
+          "worker_revision": 1,
+          "account_revision": 1,
+          "entitlement_revision": 1,
+          "profile_revision": 1,
+          "harness_version": "1",
+          "model": "fake-model"
+        }
+      },
+      "route-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-b",
+        "product_id": "product-example",
+        "account_ref": "account-b",
+        "entitlement_ref": "entitlement-b",
+        "profile_id": "profile-b",
+        "model": "fake-model",
+        "harness_version": "1",
+        "runtime_status": "verified",
+        "policy_review": "supported_for_scope",
+        "evidence": {
+          "route_revision": 1,
+          "worker_revision": 1,
+          "account_revision": 1,
+          "entitlement_revision": 1,
+          "profile_revision": 1,
+          "harness_version": "1",
+          "model": "fake-model"
+        }
+      }
+    },
+    "sessions": {
+      "session-a": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-a",
+        "job_id": "job-example",
+        "route_id": "route-a",
+        "account_ref": "account-a",
+        "workspace_ref": "workspace-a",
+        "binding_key": "session-physical-a"
+      },
+      "session-b": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-b",
+        "job_id": "job-example",
+        "route_id": "route-b",
+        "account_ref": "account-b",
+        "workspace_ref": "workspace-b",
+        "binding_key": "session-physical-b"
+      },
+      "session-write-0": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-a",
+        "job_id": "job-example",
+        "route_id": "route-a",
+        "account_ref": "account-a",
+        "workspace_ref": "workspace-a",
+        "binding_key": "session-physical-write-0"
+      },
+      "session-write-1": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-a",
+        "job_id": "job-example",
+        "route_id": "route-a",
+        "account_ref": "account-a",
+        "workspace_ref": "workspace-a",
+        "binding_key": "session-physical-write-1"
+      },
+      "session-write-2": {
+        "owner": "operator-example",
+        "revision": 1,
+        "worker_id": "worker-a",
+        "job_id": "job-example",
+        "route_id": "route-a",
+        "account_ref": "account-a",
+        "workspace_ref": "workspace-a",
+        "binding_key": "session-physical-write-2"
+      }
+    }
+  },
+  "grant": {
+    "grant_id": "grant-example",
+    "revision": 1,
+    "issuer": "operator-example",
+    "job_id": "job-example",
+    "worker_id": "worker-a",
+    "route_ids": [
+      "route-a"
+    ],
+    "resource_scopes": {
+      "workspace-a": {
+        "read": [
+          "src",
+          "tests"
+        ],
+        "write": [
+          "src"
+        ]
+      }
+    },
+    "operations": [
+      "execute",
+      "rework"
+    ],
+    "allowed_steps": [
+      "write-0",
+      "write-1",
+      "write-2"
+    ],
+    "input_revision": 1,
+    "ac_revision": 1,
+    "expires_at": 1800.0,
+    "revocation_epoch": 0,
+    "revoked": false,
+    "max_turns": 2,
+    "max_messages": 3,
+    "max_hops": 1,
+    "allow_agent_trigger": false,
+    "allowed_callers": []
+  },
+  "request": {
+    "sender": "operator-example",
+    "origin": "operator",
+    "grant_id": "grant-example",
+    "job_id": "job-example",
+    "step_id": "write-0",
+    "input": {
+      "goal": "synthetic work"
+    },
+    "input_revision": 1,
+    "ac_revision": 1,
+    "worker_id": "worker-a",
+    "route_id": "route-a",
+    "route_revision": 1,
+    "worker_revision": 1,
+    "account_revision": 1,
+    "entitlement_revision": 1,
+    "profile_revision": 1,
+    "operation": "execute",
+    "resource_scopes": {
+      "workspace-a": {
+        "read": [
+          "src"
+        ],
+        "write": [
+          "src"
+        ]
+      }
+    },
+    "session_binding_id": "session-a",
+    "hop": 0
+  }
+}

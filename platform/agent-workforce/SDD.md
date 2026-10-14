@@ -1,7 +1,7 @@
 # Agent Workforce — Software Design Document
 
-- 版本：0.1；日期：2026-10-11。
-- 狀態：**Proposed / SDD-only**。本文件固定設計方向與驗收要求，沒有宣稱程式、接入、帳號配置或部署已完成。
+- 版本：0.2；M1 更新：2026-10-15（原設計：2026-10-11）。
+- 狀態：**M1 離線核心已實作；完整跨產品設計仍 Proposed**。[M1 契約](docs/m1.md) 記錄 Python/SQLite/fake 的實際範圍與延期項；真實 adapter、帳號配置及部署未完成。
 - 範圍：單一 owner 的跨產品、多帳號數位工作者；六類原生 agent 產品，以及可由 harness 使用的 DeepSeek API。
 - 讀者入口：[README](README.md)；供應商事實：[能力表](docs/provider-capabilities.md)；執行場景：[first-scenario](docs/first-scenario.md)；AC：[verification](docs/verification.md)。
 
@@ -24,7 +24,7 @@
 | 本次固定的框架 | 後續才執行的工作 |
 | --- | --- |
 | Worker／帳號／權益／資源／route 的關係 | 真實帳號清單、credential 與機器配置 |
-| 訊息與工作命令分離、durable inbox/outbox | 實作 controller、daemon、CLI/API adapters |
+| M1 訊息／命令分離、SQLite inbox/outbox、離線 controller/fake | daemon、原生 CLI/API adapters |
 | 會話綁定、上下文重建、恢復與停止 | 真 CLI/API smoke、故障注入、長時間運作 |
 | 兩個 native agents 的工程協作場景 | 實際工單、模型費用、branch／Draft PR 操作 |
 | 供應商文件查核與 route promotion gate | 帳號註冊、Cloudflare DNS／email、SaaS 接入 |
@@ -331,11 +331,11 @@ Operator 至少能看到：工作者可用／未驗證／暫停原因；排隊�
 | M4：API 與資源擴展 | OpenCode＋DeepSeek、可行時 SIWC、Cursor／agy／Grok routes；逐條promotion；email/SaaS binding | 已驗證的指定 route 與資源可加入同一框架 | 新買方案必定可用、任意訂閱可共享 |
 | M5：持久營運 | 明確時長 soak、backup/restore、撤權／退役、跨節點 auth／容量 | 實測條件下可持續運作與接手 | 未測負载的 SLA 或零失敗承諾 |
 
-每個階段由新的明確工作範圍啟動，不因本 SDD 存在就自動開發下一階段。語言、依賴和部署方式在有實作任務時固定。先在單機證明契約與真實收益，再以實測需要決定分散式 DB／多 controller；不先擴建集群。
+每個階段由新的明確工作範圍啟動，不因本 SDD 存在就自動開發下一階段。M1 語言已固定為 Python 3.11 標準庫、SQLite、單一可信 controller；實際離線切片見 docs/m1.md。後續依賴與部署方式另依實作範圍決定。先在單機證明契約與真實收益，再以實測需要決定分散式 DB／多 controller；不先擴建集群。
 
 ## 14. 驗收與尚待決定
 
-[Verification](docs/verification.md) 是 WF-AC-01～16 和各層測試 oracle 的唯一詳細清單；[第一場景](docs/first-scenario.md) 把要求對到完整工作。M0 只做 DOC 層核對；其餘層目前 NotRun。
+[Verification](docs/verification.md) 是 WF-AC-01～16 和各層測試 oracle 的唯一詳細清單；[第一場景](docs/first-scenario.md) 把要求對到完整工作。M0 歷史結果只涵蓋 DOC；M1 選定 FAKE 離線部分已實作並驗證，範圍及延期案例見 [M1 契約](docs/m1.md)。全部 NATIVE/API/LIVE/SOAK 仍為 NotRun。
 
 下一階段須固定：一張真實小工單；兩個 native routes 的實際帳號／版本／profile；可接受的訂閱使用模式與資料可見性；controller 所在受控節點與 credential boundary；job deadline／成本或 turn cap；Kith 接線能力；外部工作權威與交付授權。這些資料使用受控配置和工作指令，不補入公開帳號 inventory。
 

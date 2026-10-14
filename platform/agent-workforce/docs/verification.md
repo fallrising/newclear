@@ -1,6 +1,6 @@
 # 驗收與證據分層
 
-- 狀態：Proposed；本次僅 SDD，沒有 runtime 實作與通過聲稱。
+- 狀態：M1 選定 FAKE 離線部分已實作／驗證；完整 native/API/live/soak 仍 Proposed/NotRun。
 - 設計日期：2026-10-11。
 - 對應：[主 SDD](../SDD.md)、[第一場景](first-scenario.md)。
 
@@ -8,7 +8,7 @@
 
 每個驗收結果必須能回答：哪一版程式、哪個 route／帳號 entitlement、哪種環境、哪個輸入與候選成果、做了什麼、看到什麼，以及哪些部分仍未知。源碼中有 adapter、官方文件描述能力、CLI help 成功、假測試、真實呼叫、完整工作交付及長時間運作各是不同證據。
 
-本次已完成的 DOC 層結果記於 §4.1；FAKE、NATIVE、API、LIVE、SOAK 的全部案例仍為 `NotRun`。文件 QA 不提升任何 runtime 層結果。既有相鄰產品的歷史測試只可標為 source/reference evidence，不直接繼承成新整合的通過證明。
+歷史 DOC 層結果記於 §4.1。M1 選定 FAKE 離線部分的實作、測試／DB觀察與延期範圍見 [M1 契約](m1.md)；FAKE-06/09/11/14/15、完整FAKE-16與全部 NATIVE/API/LIVE/SOAK仍為 `NotRun`。文件 QA 或開發模型工具的使用不提升產品 runtime 層結果。既有相鄰產品的歷史測試只可標為 source/reference evidence，不直接繼承成新整合的通過證明。
 
 | 狀態 | 意義 |
 | --- | --- |
@@ -23,7 +23,7 @@
 
 ## 2. 驗收條件追溯
 
-所有 test ID 為預定驗收案例識別，不是已建立的測試函式或可執行命令。
+Test IDs 是完整設計的案例識別。M1 離線部分已對應 tests/test_m1.py、domain/admission、Store/fault 和 demo 測試；具名 scope 見 M1 契約，未實作部分不因同名案例而提升。
 
 | AC | 可驗證條件 | 第一場景對應 | 必要案例／層 |
 | --- | --- | --- | --- |
@@ -68,7 +68,7 @@ Native 與 API 的 verification 分開，auth／entitlement 也分開。一次 A
 | WF-T-DOC-03 | 對照 Kith 固定版本 INV-13／INV-19，審查 first-scenario 的 grant 與作者身份 | 無冒充 operator、無取消既有 quota gate、無 replay 觸發；不修改相鄰元件非目標 |
 | WF-T-DOC-04 | 檢查相對連結、Mermaid 結構、AC/test IDs、範圍、公開／私人資料界限 | 沒有私有 repo／帳號／host／credential path；無虛構可執行命令、已通過 runtime 或已上線聲稱 |
 
-DOC 層尚未實際執行的檢查不能打勾。Pure-SDD 本次不建立測試程式或 CLI scaffolding；後續實作再依 named case 建立 oracle。
+DOC 層尚未實際執行的檢查不能打勾。M0 Pure-SDD 未建立 runtime；M1 現在已有獨立合成 oracles、SQLite/fake call observations 和明示的延期部分。
 
 ### 4.1 M0 文件核對結果：2026-10-11
 
@@ -164,7 +164,7 @@ Raw transcript、provider events 與 private config 不直接公開。公開摘�
 
 ## 10. 交付 gate
 
-**文件交付**：DOC checks 有實際紀錄，主 SDD／場景／provider matrix／AC 一致；runtime 狀態保持 NotRun。這是本次目標。
+**文件交付**：DOC checks 有實際紀錄，主 SDD／場景／provider matrix／AC 一致；未執行的 runtime 狀態保持 NotRun。M0 歷史文件證據不覆蓋本次 M1 source changes。
 
 **Fake 實作交付**：所有本切片適用 FAKE 案例有重現資料，未涵蓋的 case 明列；不能宣稱真產品可用。
 
@@ -173,3 +173,7 @@ Raw transcript、provider events 與 private config 不直接公開。公開摘�
 **長時間運作交付**：固定 SOAK／restore gate 通過，另行記錄真實部署環境、運維與 rollback 證據。單次 smoke、CI 綠燈、歷史相鄰元件的 KVM 結果都不能代替。
 
 必要檢查的 Failed、Blocked、NotRun 或 Unknown 保持可見。不可修改 oracle、刪除失敗紀錄、清空去重狀態或放寬 scope／profile 來得到通過。
+
+## 11. M1 離線交付
+
+Python3.11.16 實際執行完整 component unittest suite；root獨立整合測試使用SQLite持久狀態、單獨reader、backend呼叫歷史及受控fault/clock。範圍為FAKE-01/02/03/04/05/07/08/10/12/13及FAKE-16普通重啟部分；對應API／oracles與延期清單在[M1契約](m1.md)。不同完整AC仍須通過本表要求的其餘層，不能把離線部分標為完整AC完成。候選source/test內容摘要保存在[m1-evidence.json](m1-evidence.json)；實際PR／CI固定合併來源，獨立審查及原始執行證據由交付流程保存。公開摘要只包含合成測試、必要版本／hash，不包含私有工作環境或帳號資料。

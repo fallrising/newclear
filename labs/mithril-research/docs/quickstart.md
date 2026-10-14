@@ -2,9 +2,9 @@
 
 ## 現在能做什麼
 
-閱讀 [四機使用計劃](FOUR-NODE-PLAN.md)，並以 [EXECUTION_PROMPT](EXECUTION_PROMPT.md) 接手 MR-004 / P0。Owner 已提供四台測試機，但主機映射與現場盤點尚未完成；本輪只做文檔和 GitHub 交付。
+先用 [P1a 本機入口](P1-LOCAL.md) 執行 strict plan 與明示 synthetic lifecycle；`make check` 是 Python stdlib 離線驗證。再讀 [四機使用計劃](FOUR-NODE-PLAN.md) 與 [EXECUTION_PROMPT](EXECUTION_PROMPT.md)。四台已有私有 SSH 唯讀 metadata；有效網路政策、實機批准與完整 runtime 驗收仍待。
 
-**這裡還沒有一鍵四機啟動包。** Compose、runtime lock、lifecycle CLI、auth templates 與 smoke harness 待 P1 實作；不能執行文件中尚不存在的 up/smoke/down 工具。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
+**這裡還沒有一鍵四機啟動包。** P1a 提供 [runtime lock](../runtime.lock.json) 和 local-fixture CLI；Compose/auth、thin SSH executor、purge 與 live smoke 仍待。Fixture 不執行遠端命令，其結果不能變成 Redis/Mithril PASS。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
 
 ## 正式接手順序
 
@@ -14,7 +14,9 @@
 
 上游提供容器、release binary 與 source build；只有 source build 要 Rust toolchain。**不把「本工作環境不能編譯」誤當成「四台不能安裝使用」。** 預編譯 artifact 必須核對來源、架構、commit 與 checksum/digest；不能只看顯示版本。[U01]
 
-## 固定來源建置參考（選用，尚未在本輪執行）
+## 固定來源建置參考
+
+2026-10-15 的隔離 builder 已執行固定來源 release/native/lint/fmt，精確環境與結果見 [native evidence](evidence/native-build-2026-10-15.json)。下列是 source build 步驟參考；不是四台的安裝指令，也不是當時原封不動執行的 shell transcript。
 
 這是隔離 builder 的參考，不是四台主機的安裝指令。前置是已配置 GitHub SSH／host key、git、可取得固定 Rust toolchain 與 dependencies。目錄已存在時先核對，不覆蓋；不要把上游 checkout 放進 newclear 受追蹤路徑。
 

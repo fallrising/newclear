@@ -116,3 +116,13 @@ trusted synthetic Worker, and checks D1 plus a durable Workflow through a normal
 daemon restart. It does not accept existing scope data or use production
 credentials, machine service installation, deployment, or release publishing.
 Only a bounded sanitized report may be retained as a short-lived artifact.
+
+## Mithril research local contracts
+
+`.github/workflows/mithril-research-ci.yml` is scoped to
+`labs/mithril-research/**` and itself. It runs `make check` with Python 3.11
+standard-library tests and `make demo` through the real CLI with synthetic data
+in a new private runner-temporary directory. Permissions
+are `contents: read`, checkout does not persist credentials, and the job has a
+five-minute timeout. It does not build upstream, run Redis/Mithril, connect SSH,
+use credentials, change VPS state, publish an image or perform deployment.

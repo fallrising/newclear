@@ -257,6 +257,41 @@ class SourceChecks(unittest.TestCase):
         (self.path / "release.json").write_text("[" * 65 + "0" + "]" * 65)
         self.reject("nesting exceeds")
 
+    def test_unpaired_surrogates_in_all_capture_strings_are_rejected(self):
+        for location in ("fingerprint", "ignored-value", "ignored-key"):
+            for invalid in ("\ud800", "\udfff"):
+                with self.subTest(location=location, codepoint=ord(invalid)):
+                    value = webhook()
+                    if location == "fingerprint":
+                        value["alerts"][0]["fingerprint"] = invalid
+                    elif location == "ignored-value":
+                        value["commonAnnotations"] = {"note": invalid}
+                    else:
+                        value["commonAnnotations"] = {invalid: "note"}
+                    self.write("alertmanager-firing", value)
+                    self.reject("Unicode")
+
+    def test_valid_surrogate_pair_is_scalar_unicode(self):
+        value = webhook()
+        value["alerts"][0]["fingerprint"] = "valid-\U0001f680"
+        value["commonAnnotations"] = {"\U0001f680": "\U0001f680"}
+        # json.dumps writes an escaped UTF-16 pair; strict decoding must accept it.
+        self.write("alertmanager-firing", value)
+        self.assertEqual(self.check()["new_identities"], 4)
+
+    def test_ignored_envelope_numbers_still_require_jcs_input(self):
+        for literal in ("9007199254740992", "-9007199254740992", "1e400"):
+            with self.subTest(literal=literal):
+                raw = json.dumps(webhook())[:-1] + ', "unused": ' + literal + '}'
+                (self.path / "alertmanager-firing.json").write_text(raw)
+                self.reject("JCS")
+
+    def test_safe_integer_boundaries_and_large_finite_floats(self):
+        value = webhook()
+        value["unused"] = [9007199254740991, -9007199254740991, 1e30, -1e30]
+        self.write("alertmanager-firing", value)
+        self.assertEqual(self.check()["new_identities"], 4)
+
     def test_failed_member_statuses_and_false_indices(self):
         for status in (400, 403, 409, 503):
             with self.subTest(status=status):

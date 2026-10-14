@@ -44,13 +44,26 @@ def read_capture(path):
         if isinstance(error, SourceError):
             raise
         raise SourceError("cannot read strict JSON capture") from None
-    def check_depth(value, depth=1):
+    def check_input(value, depth=1):
+        if isinstance(value, str):
+            try:
+                value.encode("utf-8")
+            except UnicodeError:
+                raise SourceError("invalid Unicode scalar string") from None
         if isinstance(value, (dict, list)):
             if depth > 64:
                 raise SourceError("JSON nesting exceeds 64 levels")
+            if isinstance(value, dict):
+                for key in value:
+                    check_input(key, depth)
             for item in value.values() if isinstance(value, dict) else value:
-                check_depth(item, depth + 1)
-    check_depth(document)
+                check_input(item, depth + 1)
+    check_input(document)
+    try:
+        # Runtime strict JSON also checks numbers in fields unused by mapping.
+        CONTRACT.rfc8785.dumps(document)
+    except ValueError:
+        raise SourceError("invalid JCS input: unsafe integer or nonfinite number") from None
     return document
 
 

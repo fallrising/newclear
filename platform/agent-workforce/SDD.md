@@ -1,7 +1,7 @@
 # Agent Workforce — Software Design Document
 
-- 版本：0.2；M1 更新：2026-10-15（原設計：2026-10-11）。
-- 狀態：**M1 離線核心已實作；完整跨產品設計仍 Proposed**。[M1 契約](docs/m1.md) 記錄 Python/SQLite/fake 的實際範圍與延期項；真實 adapter、帳號配置及部署未完成。
+- 版本：0.3；M2 切片更新：2026-10-15（原設計：2026-10-11）。
+- 狀態：**M1 核心與有界 M2 原生切片已實作；完整 M2 及跨產品設計仍待驗收**。[M1 契約](docs/m1.md) 記錄 Python/SQLite/fake 的實際範圍與延期項；[M2 契約](docs/m2.md) 記錄原生 adapter 的實作與未通過 gate；帳號配置及部署未完成。
 - 範圍：單一 owner 的跨產品、多帳號數位工作者；六類原生 agent 產品，以及可由 harness 使用的 DeepSeek API。
 - 讀者入口：[README](README.md)；供應商事實：[能力表](docs/provider-capabilities.md)；執行場景：[first-scenario](docs/first-scenario.md)；AC：[verification](docs/verification.md)。
 
@@ -335,7 +335,7 @@ Operator 至少能看到：工作者可用／未驗證／暫停原因；排隊�
 
 ## 14. 驗收與尚待決定
 
-[Verification](docs/verification.md) 是 WF-AC-01～16 和各層測試 oracle 的唯一詳細清單；[第一場景](docs/first-scenario.md) 把要求對到完整工作。M0 歷史結果只涵蓋 DOC；M1 選定 FAKE 離線部分已實作並驗證，範圍及延期案例見 [M1 契約](docs/m1.md)。全部 NATIVE/API/LIVE/SOAK 仍為 NotRun。
+[Verification](docs/verification.md) 是 WF-AC-01～16 和各層測試 oracle 的唯一詳細清單；[第一場景](docs/first-scenario.md) 把要求對到完整工作。M0 歷史結果只涵蓋 DOC；M1 選定 FAKE 離線部分已實作並驗證，範圍及延期案例見 [M1 契約](docs/m1.md)。M2 的逐 route NATIVE 結果與未通過 gate 見 [M2 契約](docs/m2.md)；API/LIVE/SOAK 仍為 NotRun。
 
 下一階段須固定：一張真實小工單；兩個 native routes 的實際帳號／版本／profile；可接受的訂閱使用模式與資料可見性；controller 所在受控節點與 credential boundary；job deadline／成本或 turn cap；Kith 接線能力；外部工作權威與交付授權。這些資料使用受控配置和工作指令，不補入公開帳號 inventory。
 

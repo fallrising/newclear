@@ -1,11 +1,11 @@
 # Agent Workforce
 
-> **Portfolio doc tier: A（M1 離線核心）** — 跨產品整合仍依里程碑驗證。
+> **Portfolio doc tier: A（M1 核心與有界 M2 原生切片）** — 跨產品整合仍依里程碑驗證。
 > [Quickstart](docs/quickstart.md) · [文件政策](../../docs/portfolio-doc-tiers.md) · [Portfolio](../../PORTFOLIO.md)
 
 Agent Workforce 的 M1 是可在本機執行的 Python 標準庫控制核心：可信 registry／grant admission、SQLite inbox/outbox 與命令去重、fake dispatch、有限預算、資源保留及普通重啟恢復。範圍與測試對應見 [M1 契約](docs/m1.md) 和 [驗收](docs/verification.md)。
 
-**狀態：M1 離線核心已實作並完成合成測試。** 完整產品的 native adapters、daemon、SaaS/API、artifact/review/publisher、ContextPack、backup/restore 與長時間運作仍未交付。用來開發程式的模型工具不構成本產品的原生 adapter 驗收。
+**狀態：M1 離線核心與有界 M2 adapter 切片已實作。** [M2 契約](docs/m2.md) 分列 Codex writer／Claude reviewer 的事件、程序、會話與逐 route 證據。完整後代程序停止尚無可靠證明，因此停止與原生 resume 驗收仍受阻，不能宣稱完整 M2 通過。Daemon、SaaS/API、完整 artifact/review/publisher、ContextPack、backup/restore 與長時間運作仍未交付。用來開發程式的模型工具不構成本產品的原生 adapter 驗收。
 
 從本目錄執行：
 
@@ -22,6 +22,7 @@ PYTHONPATH=src python3 -m agent_workforce demo --db var/demo.sqlite
 | --- | --- |
 | [Quickstart](docs/quickstart.md) | 本機測試、demo 與前置條件 |
 | [M1 契約](docs/m1.md) | API、交易邊界、恢復行為及延期項 |
+| [M2 契約](docs/m2.md) | 原生 profile、事件／程序證據、保守恢復及尚未通過的 gate |
 | [SDD](SDD.md) | 完整產品的身分、route、會話與里程碑設計 |
 | [能力表](docs/provider-capabilities.md) | 產品能力與各自的接入／驗收條件 |
 | [第一場景](docs/first-scenario.md) | 未來兩個原生 agent 的工程協作驗收 |

@@ -142,6 +142,9 @@ class Controller:
             if receipt.get("status") == "complete":
                 with self.store.transaction():
                     return self._complete(self.store.attempt(attempt_id), receipt, now)
+            if receipt.get("status") == "failed":
+                with self.store.transaction():
+                    return self._failed(self.store.attempt(attempt_id), receipt, now)
             if receipt.get("status") == "running" and attempt["state"] == "outcome_unknown":
                 return self.store.publish_attempt(attempt["attempt_id"], attempt["fence"], "running", now=now)
             if receipt.get("status") in ("stopped", "cancelled"):
@@ -325,6 +328,8 @@ class Controller:
                 return current
             if status == "complete":
                 return self._complete(current, receipt, now)
+            if status == "failed":
+                return self._failed(current, receipt, now)
         return self._mark_unknown(attempt, now)
 
     def _complete(self, attempt, receipt, now):
@@ -341,6 +346,20 @@ class Controller:
             )
         self._confirm(current, receipt, now, not_started=False)
         return self.store.attempt(attempt["attempt_id"])
+
+    def _failed(self, attempt, receipt, now):
+        """A definite native/tool failure is distinct from uncertain execution.
+
+        Failure alone supplies no stop/effects proof and releases no capacity.
+        """
+        current = attempt
+        if current["state"] == "dispatch_prepared":
+            current = self.store.publish_attempt(current["attempt_id"], current["fence"], "running", now=now)
+        if current["state"] in ("running", "outcome_unknown"):
+            current = self.store.publish_attempt(current["attempt_id"], current["fence"], "failed",
+                                                 now=now, result=receipt.get("result"))
+        self._confirm(current, receipt, now, not_started=False)
+        return self.store.attempt(current["attempt_id"])
 
     def _publish_stop(self, attempt, receipt, now):
         current = attempt

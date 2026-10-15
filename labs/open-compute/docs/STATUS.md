@@ -1,6 +1,93 @@
 # Status and evidence
 
-Updated: 2026-10-13.
+Updated: 2026-10-16 (operator date; CI timestamps below use UTC).
+
+## M5 result
+
+**Passed on the original open-compute v0.2.4 release.** At the original
+Workflow's publicly committed waiting checkpoint, a fresh non-root Linux runner
+sent generation-checked SIGKILL to the daemon first and its frozen live child.
+Both selected generations received their required signal and were observed
+nonlive. The daemon was actually reaped with return code -9, retained observed
+history was nonlive and both observer threads closed before a new daemon started.
+
+GET-only comparisons retained the original scope/config/data/control/scheduler
+identities, instance/account/D1 binding, deployment/version/runtime, D1 row and
+waiting Workflow. Only then was approval sent to the original Workflow. It
+completed with counter 1 and unchanged nonce/output. The restarted daemon exited
+normally on SIGTERM; all observed owned generations exited, owned scope removal
+and exclusive sanitized evidence writing succeeded.
+
+The [M5 contract](SDD-M5.md) and original
+[sanitized report](evidence/2026-10-16-m5-ci.json) preserve this exact experiment.
+Report SHA256: `d73fe0d8aae3832cfc58fd167191c7ceba16cb6b0b1a2cb65d3dd5c0d3c0eb5a`.
+Historical M1–M4 reports and the results below remain unchanged.
+
+### M5 design and execution provenance
+
+| Item | Exact reference |
+| --- | --- |
+| Reviewed SDD committed before code | [`3a6f08ed`](https://github.com/fallrising/newclear/commit/3a6f08ed9f7404e928004aebf202fc225fbc27dc) |
+| Reviewed implementation | [`4bcfec49`](https://github.com/fallrising/newclear/commit/4bcfec49) |
+| Independently reviewed direct-child reap correction | [`cff9b8cc`](https://github.com/fallrising/newclear/commit/cff9b8cc) |
+| Integrated candidate | [`7658237f`](https://github.com/fallrising/newclear/commit/7658237fa23ce78bc1b15ae4ab702176fb621108) |
+| Actual CI checkout | [`33cb32a9`](https://github.com/fallrising/newclear/commit/33cb32a90224d751197836082f5c51a3fa8a92a9) |
+| Tested complete Git tree | `523e7c65280ce6fe5a43a1ddd2b55e20ef1b3bdf` |
+| Actual runtime CI | [Run 38816939298](https://github.com/fallrising/newclear/actions/runs/38816939298), [M5 job 116703883935](https://github.com/fallrising/newclear/actions/runs/38816939298/job/116703883935) |
+| Harness run ID | `20261015T222504Z-92a457c6` |
+| M5 job window | 2026-10-15T22:24:59Z through 22:25:34Z |
+| Environment | Linux x86_64, EUID 1001, Python 3.11.17; Ubuntu 24.04 runner |
+| Upstream identity | Original v0.2.4/source `73efa56a1b1ad51a4519b2253ffaa499cb29fb2d`; unchanged 195537392-byte artifact/SHA256 in [the lock](../upstream.lock.json) |
+
+The checkout is GitHub's synthetic merge of main `f87a823d` and candidate
+`7658237f`. Its parents and complete tree were read back; that tree is identical
+to the candidate. Later documentation commits and validation reports do not
+become the original source of this observation.
+
+### M5 verification ledger
+
+| Gate | Observed result |
+| --- | --- |
+| Offline and independent review | Root and Python 3.11 CI each passed **189 tests, no skips**; actual separate-group SIGKILL, nested alarm, strict projection, GET-only, cleanup and reap-race failures covered; final source and raw evidence independently reviewed |
+| Existing regressions | All M1 AC-01–08, M2-01–09, M3-01–05 and M4-01–05 passed in the same workflow |
+| M5-01: original committed wait | Exact original pin/fresh non-root scope, trusted deployment, two submissions/one row and original publicly committed waiting Workflow |
+| M5-02: abrupt stimulus | Two attempted and two completed SIGKILL signals; daemon generation `2200/12230`, child `2233/12748`; both exited, actual root return -9, retained history nonlive and observers closed |
+| M5-03: original recovery | New daemon `2266/12832`; original authority/identity/deployment/D1 row/nonce and original waiting Workflow retained; six successful GET-only comparison requests before approval |
+| M5-04: completion and containment | Same original Workflow complete, counter remains 1, nonce digest/output unchanged; restarted daemon was running, SIGTERM exit0/no force/no observation error, all owned exits and scope removal verified |
+| M5-05: original sanitized evidence | Strict bounded crash/readback projection, exact artifact/source/environment, original report bytes/hash, cleanup and exclusive report write succeeded |
+
+Process pairs above are PID/start ticks, not reusable PID-only authority.
+The two observed targets had separate process groups; no PGID alone authorized a
+signal. The abrupt lifecycle operation reported 0.014293728 seconds within its
+ten-second bound. This excludes restart/recovery and is not an RTO or performance
+claim. The six GETs count only successfully completed comparison requests;
+startup/readiness probes and read-only CLI enumeration are outside that counter.
+M5 does not mark historical graceful-restart AC-06 passed for the crash stimulus.
+
+### Failures retained and authoring limits
+
+The [first real run 38687989780](https://github.com/fallrising/newclear/actions/runs/38687989780)
+failed M5 after both selected signals and observed exits: its earlier
+`Popen.poll()` was still None, but the helper checked -9 before another reap.
+No restart/readback/approval occurred and cleanup withheld scope removal. It
+remains a failed result. A deterministic pending-poll/nonlive regression and
+bounded reap correction were independently reviewed before this successful run.
+
+Independent source review also reproduced fresh identity I/O after an already
+fired watchdog; the corrected failure handler preserves only cached facts.
+Actual nested-alarm regressions verify the fix. Earlier sandbox socket denials
+remain recorded; root's full socket-enabled 189-test run passed on Python3.13.5.
+Original-runtime evidence and Python3.11 execution come from the fresh CI runner;
+no runtime was started in the persistent authoring home or patched to pass.
+
+Follow the [quickstart](quickstart.md) and run
+`make -C labs/open-compute integration-crash` on a fresh disposable non-root
+account. M5 keeps the same runner/path/UID, kernel and filesystem alive and tests
+one publicly committed wait with sequential observed-generation signals.
+Unobserved/escaped descendants, atomic whole-tree crash, power-loss/fsync
+ordering, arbitrary in-flight effects, external exactly-once behavior,
+portability, upgrades, hostile isolation and production adoption remain unknown.
+Application alarms cannot guarantee interruption of uninterruptible kernel I/O.
 
 ## M4 result
 

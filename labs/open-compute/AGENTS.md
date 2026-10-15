@@ -42,12 +42,19 @@ cold locks, metadata accounting, bounded owner checks and strict projection.
   identifiers. Describe host authority, workload authority, and runtime contracts
   abstractly.
 
+For checkpoint SIGKILL, read `docs/SDD-M5.md` before editing. Keep per-generation
+daemon-first signals separate from graceful shutdown, require the exact verified
+crash receipt before restart and GET-only original state before approval.
+Every frozen live target must itself receive SIGKILL; parent-loss disappearance
+is failure. Sequential observed generations do not prove power-loss durability.
+
 ## Verification and evidence
 
 The implementation supplies `make check` for local offline checks,
 `make integration` for the M1 real-runtime restart, and `make integration-restore`
 for the M2 real-runtime cold restore, `make integration-resources` for M3,
-and `make integration-storage` for M4 on a separate fresh runner.
+and `make integration-storage` for M4 on a separate fresh runner, plus
+`make integration-crash` for M5 on another fresh non-root runner.
 Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.

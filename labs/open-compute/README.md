@@ -21,6 +21,11 @@ M4 adds three cold scope snapshots around sixteen fixed D1 jobs and the original
 Workflow completion. It includes generated OCR/transient files and separates
 logical sizes from allocated blocks, with observed hardlinks counted once.
 
+M5 adds SIGKILL of the daemon and its observed owned live process generations
+at a publicly committed waiting checkpoint, then GET-only original state
+readback before original Workflow completion. The runner/kernel/filesystem
+remain alive; this tests one process interruption point with the same UID/path.
+
 ## Current scope
 
 | Included in M1 | Evidence boundary |
@@ -107,3 +112,21 @@ The harness, fixture and lab documentation use this repository's MIT license.
 Upstream open-compute is Apache-2.0 with its own notices. The lab downloads an
 original release for local execution; upstream source and binaries are not
 vendored here.
+
+## Checkpoint SIGKILL experiment (M5)
+
+The [M5 contract](docs/SDD-M5.md) is committed before implementation. Follow the
+[quickstart](docs/quickstart.md) on a fresh disposable non-root account and run
+`make -C labs/open-compute integration-crash`. Each frozen live generation must
+receive SIGKILL after immediate PID/start validation; the daemon is first so
+it cannot intentionally respawn a child. A vanished child before its required
+signal fails the stimulus. All retained observed generations must be nonlive
+and observers closed before a new original daemon may start over the same
+owned authority. GET-only deployment/binding, D1 row and waiting Workflow checks
+precede approval. Final shutdown remains normal SIGTERM.
+
+The separate bounded sanitized report records M5-01 through M5-05, exact signal
+receipts and original counter/nonce controls. Only actual execution linked from
+STATUS supports a pass. Sequential observed-generation termination does not
+establish atomic whole-tree crash, power loss, arbitrary in-flight replay,
+external exactly-once effects, unobserved descendant coverage or adoption.

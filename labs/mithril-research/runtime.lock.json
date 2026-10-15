@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "research_commit": "9959fe2e5cd466614dc20ef7b710befaaf1d746a",
+  "platform": "linux/amd64",
+  "redis_image": "redis:7.4.11@sha256:cd745595f143052dd6a743bc5651d3ce4b03979fe5c99c7fcfab73461f6f217b",
+  "mithril_binary_sha256": "f5f96aa53aa2808ef594b2ca816d04125b14661e94bdf14a3065e75d4caf4cc1",
+  "mithril_provenance": "source-build:9959fe2e5cd466614dc20ef7b710befaaf1d746a",
+  "builder_image": "rust@sha256:4e4a7e7939c17991ab35f2b8c2e67593980f771d28f6b1254b1850f860fd0c7f",
+  "rust_toolchain": "1.98.0",
+  "native_verification": "docs/evidence/native-build-2026-10-15.json"
+}

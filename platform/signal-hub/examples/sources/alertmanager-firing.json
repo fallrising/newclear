@@ -1,0 +1,29 @@
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=ExampleDiskSpace}",
+  "receiver": "example:primary",
+  "status": "firing",
+  "groupLabels": {"alertname": "ExampleDiskSpace"},
+  "commonLabels": {"alertname": "ExampleDiskSpace", "severity": "warning"},
+  "commonAnnotations": {"summary": "Synthetic disk space alert"},
+  "externalURL": "https://alertmanager.example.invalid",
+  "truncatedAlerts": 0,
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "ExampleDiskSpace",
+        "severity": "warning",
+        "instance": "node-example"
+      },
+      "annotations": {
+        "summary": "Synthetic disk space alert",
+        "description": "Synthetic immutable annotation for this alert episode"
+      },
+      "startsAt": "2026-10-14T10:00:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "https://prometheus.example.invalid/graph?g0.expr=example_disk_space",
+      "fingerprint": "0123456789abcdef"
+    }
+  ]
+}

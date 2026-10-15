@@ -2,7 +2,7 @@
 
 Scope: `fallrising/newclear/labs/mithril-research/`.
 
-先完整讀取 README、`upstream.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
+先完整讀取 README、`upstream.lock.json`、`runtime.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`、`docs/P1-CONTRACT.md`、`docs/P1-LOCAL.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
 
 ## 接手契約
 
@@ -17,4 +17,4 @@ Scope: `fallrising/newclear/labs/mithril-research/`.
 
 ## 下一輪入口
 
-MR-004 / P0：依四機計劃先盤點與映射，再確認 artifacts／網路／資源／回復與操作批准。預編譯 binary／容器不要求每台安裝 Rust；source/native checks 在隔離 builder。需要的 Compose、runtime lock、lifecycle CLI 與實機 evidence 尚未交付，不得宣稱已有可執行 up/smoke/down。
+MR-004 尚未完成。P1a 已提供 runtime lock 與僅 local-fixture 的 plan/up/status/smoke/down/reconcile/report；source/native checks 及證據在隔離 builder。完整 P1 的 Compose/auth、thin SSH executor、purge 與 P2/P3 實機驗收仍缺。後續先重核私有映射／資源／有效網路政策／回復與操作批准；不得把 synthetic lane、unkeyed plan hash 或 operator 宣告當作 live readiness／授權。

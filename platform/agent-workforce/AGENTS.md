@@ -4,7 +4,7 @@ Read the repository [AGENTS.md](../../AGENTS.md), then [SDD.md](SDD.md), the [pr
 
 ## Current scope
 
-- This component is design-only. A request to edit its SDD does not activate a runtime milestone, create accounts, log in, spend model/API quota or deploy services.
+- M1 is an offline Python 3.11 standard-library/SQLite control core with a fake backend. Scope and actual verification are recorded in docs/m1.md and docs/verification.md. Later native/API/live milestones require an explicit scoped request; reading the SDD does not create accounts, log in, spend quota or deploy services.
 - Keep product facts, proposed interfaces and observed runtime evidence separate. Every provider route starts unverified until its exact environment and entitlement are evidenced.
 - The SDD owns domain names and invariants. Companion documents explain provider differences and acceptance scenarios; reconcile changes across them.
 - Examples must use synthetic identifiers and opaque credential references. Do not publish actual accounts, environment inventories, secrets, private repository paths or the task ledger.
@@ -21,4 +21,4 @@ Read the repository [AGENTS.md](../../AGENTS.md), then [SDD.md](SDD.md), the [pr
 - Unknown provider acceptance, process liveness, cost or external effects must remain unknown. Never turn uncertainty into a new operation ID or replacement attempt automatically.
 - Enforce one writer per workspace and one active turn per SessionBinding. A lease fence rejects stale state publication; it does not prove an old process stopped.
 - Keep public documentation candid about unimplemented and NotRun items. Promotion requires the corresponding evidence layer, not a brand name or a passing fake.
-- For this milestone, validate documentation, relative links, catalog consistency and source claims. Runtime tests belong to a later implementation task; do not add tests that merely mirror prose.
+- For behavior changes use Red-Green-Refactor and tests that inspect durable state plus backend call counts. Use only stdlib Python and synthetic fixtures. Test: PYTHONPATH=src python3 -m unittest discover -s tests -v. Keep JSON bounded, SQL parameterized and source examples free of private configuration; public documentation must keep deferred gates explicit.

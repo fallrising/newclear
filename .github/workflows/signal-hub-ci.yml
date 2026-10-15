@@ -60,10 +60,17 @@ jobs:
           python3 -m venv /tmp/signalhub-contracts
           /tmp/signalhub-contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
           /tmp/signalhub-contracts/bin/python contracts/check.py
+          /tmp/signalhub-contracts/bin/python scripts/test_check_sources.py
+          /tmp/signalhub-contracts/bin/python scripts/check_sources.py
+          python3 scripts/test_check_deployment.py
+          python3 scripts/check_deployment.py
+          /tmp/signalhub-contracts/bin/python -c "import sys; sys.path.insert(0, 'contracts'); import check; check.validate('config', check.loads(open('deployment/config.example.json').read()))"
+          sh -n deployment/launch.sh
           /tmp/signalhub-contracts/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
           /tmp/signalhub-contracts/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
           /tmp/signalhub-contracts/bin/python scripts/e2e_delivery.py --binary /tmp/signalhub
           /tmp/signalhub-contracts/bin/python scripts/e2e_archive.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_m6.py --binary /tmp/signalhub
       - name: Real Go binary browser acceptance
         working-directory: platform/signal-hub/browser
         env:

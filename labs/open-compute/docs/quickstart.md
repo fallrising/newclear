@@ -223,6 +223,48 @@ The separate strict storage report uses M4-01 through M4-05. Partial failed
 reports include only completed snapshots and observed operation counts, with
 no forged deltas. Real executed results and their exact source are in STATUS.
 
+## 7. SIGKILL at the committed wait (M5)
+
+After the previous invocation has removed its scope, run:
+
+```sh
+make -C labs/open-compute integration-crash
+```
+
+The CLI equivalent is `python3 labs/open-compute/lab.py integration-crash`, with
+existing `--cache`, `--port` and a new `--output` directory. Read the
+[M5 contract](SDD-M5.md) first. It uses the unchanged original artifact and
+trusted Worker/D1/Workflow fixture on a fresh real non-root runner.
+
+After the original callback is publicly committed and the Workflow waiting,
+the harness freezes fresh live authorized process generations, requires a daemon
+and child, sends SIGKILL to the daemon first and then every frozen child after
+immediate PID/start validation. It does not kill by process name or PGID.
+A required child disappearing before its own signal fails, even if parent loss
+caused its exit. Root must exit by signal9; all retained observed history must
+be nonlive and observers closed before restart is permitted.
+
+The new daemon opens the same original scope/config/data/UID/path. GET-only
+health/account/deployment/version/D1/original waiting Workflow comparisons must
+pass before approval. No setup, redeploy, new Workflow, job submission or reseed
+repairs the recovered state. The original Workflow then completes with counter 1
+and unchanged nonce/output; the restarted daemon exits normally on SIGTERM.
+Owned cleanup and exclusive strict sanitized evidence writing precede success.
+
+M5 has a 300-second scenario budget, 10 seconds for abrupt termination, a separate
+150-second cleanup, 30-second owned removal and 10-second evidence write. The
+original Workflow cutoff is never reset. Its strict crash and readback receipt
+uses M5-01 through M5-05; failed projection/write/cleanup revokes success and
+retains bounded failure output. Required unknown ownership or exit prevents
+scope deletion and restart. Only the exact verified intentional crash owner is
+exempted from graceful shutdown requirements; unexpected final death fails.
+
+The separate fresh non-root Python3.11 CI job has a 10-minute limit and uploads
+only its explicit sanitized report for 7 days. Actual results, source/tree and
+original report hashes are linked from STATUS. Sequential process signals at
+one public committed checkpoint keep kernel/filesystem alive; no power-loss,
+in-flight step, atomic whole-tree or production recovery conclusion follows.
+
 ## Cleanup and a failed run
 
 Normal completion stops all owned processes and removes only the scope created
@@ -289,3 +331,7 @@ functional assertions; its sampling limits do not establish capacity or tenant i
 M4 supplies bounded cold regular-file metadata endpoints for this fixed batch.
 Signed changes also include restart/platform/completion effects; they do not
 establish a long-term slope, reclaimability, storage quota or physical capacity.
+
+M5 adds only checkpoint SIGKILL evidence for observed authorized generations.
+Power loss, in-flight effects, portability, upgrades and isolation remain
+separate gates even when all M5 assertions pass.

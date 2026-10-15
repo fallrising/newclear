@@ -366,8 +366,12 @@ def same_process(identity):
     return current is not None and current["start_ticks"] == identity["start_ticks"] and current["state"] != "Z"
 
 
-def public_process(identity):
-    return {key: identity[key] for key in ("pid", "pgid", "start_ticks")}
+def public_process(identity, strict=False):
+    value = {key: identity[key] for key in ("pid", "pgid", "start_ticks")}
+    if strict:
+        require(all(type(item) is int and item >= (0 if key == "start_ticks" else 1)
+                    for key, item in value.items()), "identity")
+    return value
 
 
 class Process:
@@ -688,6 +692,54 @@ class ReadOnlyHTTP(LocalHTTP):
         return super().request(method, path, body, content_type, host)
 
 
+class CrashReadOnlyHTTP(LocalHTTP):
+    """M5 recovery counts successful GETs and refuses writes before any I/O."""
+    def __init__(self, port, token=None, *, counter=None):
+        super().__init__(port, token)
+        # The management and Worker clients share one scenario-wide bound.
+        self._counter = [0] if counter is None else counter
+
+    @property
+    def read_requests(self):
+        return self._counter[0]
+
+    def request(self, method, path, body=None, content_type="application/json", host=None,
+                *, deadline=None, expected_status=None):
+        require(method == "GET" and body is None, "schema")
+        require(self.read_requests < 256, "schema")
+        value = super().request(method, path, body, content_type, host,
+                                deadline=deadline, expected_status=expected_status)
+        self._counter[0] += 1
+        return value
+
+
+def checkpoint_row(value, job_id, *, committed, completed=0):
+    """Strict fixed fixture row, including JSON integer types (bool is refused)."""
+    require(isinstance(value, dict) and set(value) == {"job", "row_count"} and
+            type(value["row_count"]) is int and value["row_count"] == 1, "schema")
+    row = value["job"]
+    require(isinstance(row, dict) and
+            set(row) == {"id", "payload", "callback_count", "step_nonce", "completed"} and
+            row["id"] == job_id and row["payload"] == "synthetic-m1" and
+            type(row["callback_count"]) is int and row["callback_count"] == int(committed) and
+            type(row["completed"]) is int and row["completed"] == completed, "schema")
+    require(isinstance(row["step_nonce"], str) and 0 < len(row["step_nonce"]) <= 256
+            if committed else row["step_nonce"] is None, "schema")
+    return json.dumps(row, sort_keys=True, allow_nan=False, separators=(",", ":"))
+
+
+def crash_state_identity(value):
+    require(isinstance(value, dict) and set(value) ==
+            {"scope", "data", "control_db", "scheduler_db", "config_sha256"}, "schema")
+    for key in ("scope", "data", "control_db", "scheduler_db"):
+        item = value[key]
+        require(isinstance(item, dict) and set(item) == {"device", "inode"} and
+                all(type(number) is int and number >= 0 for number in item.values()), "schema")
+    require(isinstance(value["config_sha256"], str) and
+            re.fullmatch(r"[0-9a-f]{64}", value["config_sha256"]), "schema")
+    return json.loads(json.dumps(value, allow_nan=False))
+
+
 def worker_host(endpoint, port):
     require(endpoint.get("kind") == "local_origin" and endpoint.get("scope") == "local_machine",
             "Worker endpoint must be a local origin")
@@ -754,7 +806,7 @@ def assert_resume(before, retained, after, output, job_id):
             "Workflow output/completion did not preserve the committed step result")
 
 
-def deployment_observation(api, base, database_id):
+def deployment_observation(api, base, database_id, with_r2=True):
     """Read the immutable code/runtime/binding projection, without altering it."""
     path = base + "/workers/scripts/" + WORKER
     deployments = api.v4("GET", path + "/deployments")["deployments"]
@@ -762,6 +814,9 @@ def deployment_observation(api, base, database_id):
     deployment = deployments[0]
     require(len(deployment["versions"]) == 1 and deployment["versions"][0]["percentage"] == 100,
             "expected one fully active Worker version")
+    if not with_r2:
+        require(isinstance(deployment["id"], str) and
+                re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", deployment["id"]), "schema")
     version_id = deployment["versions"][0]["version_id"]
     require(isinstance(version_id, str) and re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", version_id),
             "invalid discovered Worker version")
@@ -771,9 +826,11 @@ def deployment_observation(api, base, database_id):
     bindings = sorted(resources["bindings"], key=lambda binding: binding["name"])
     expected = sorted([
         {"type": "d1", "name": "DB", "database_id": database_id},
-        {"type": "r2_bucket", "name": "BUCKET", "bucket_name": BUCKET},
         {"type": "workflow", "name": "FLOW", "workflow_name": FLOW, "class_name": "LabFlow"}
     ], key=lambda binding: binding["name"])
+    if with_r2:
+        expected = sorted(expected + [{"type": "r2_bucket", "name": "BUCKET", "bucket_name": BUCKET}],
+                          key=lambda binding: binding["name"])
     require(bindings == expected, "deployed D1/R2/Workflow bindings disagree with fixture resources")
     etag = resources["script"]["etag"]
     require(isinstance(etag, str) and re.fullmatch(r"[0-9a-f]{64}", etag), "invalid Worker code digest")
@@ -818,7 +875,7 @@ def public_backup_summary(summary):
     return summary
 
 
-def cleanup_scope(scope, restore, original_identity=None, restored_identity=None, resources=False, storage=False):
+def cleanup_scope(scope, restore, original_identity=None, restored_identity=None, resources=False, storage=False, crash=False):
     """Only recover() can remove the original M2 source, never final cleanup."""
     if scope is None or scope.identity is None:
         return {}
@@ -836,10 +893,10 @@ def cleanup_scope(scope, restore, original_identity=None, restored_identity=None
             scope.remove(processes_stopped=True)
             require(absent(scope.path), "restored scope cleanup did not finish")
             require(time.monotonic() < deadline, "restored scope cleanup deadline exceeded")
-    elif resources or storage:
-        with m3_deadline(30, "M4 scope cleanup" if storage else "M3 scope cleanup"):
+    elif resources or storage or crash:
+        with m3_deadline(30, "M5 scope cleanup" if crash else "M4 scope cleanup" if storage else "M3 scope cleanup"):
             scope.remove(processes_stopped=True)
-            require(not os.path.lexists(scope.path), "M4 scope cleanup did not finish" if storage else "M3 scope cleanup did not finish")
+            require(not os.path.lexists(scope.path), "owned scope cleanup did not finish")
     else:
         scope.remove(processes_stopped=True)
     return {"scope_removed": True}
@@ -925,14 +982,16 @@ def m3_deadline(seconds, phase):
                 signal.setitimer(signal.ITIMER_REAL, max(.000001, remaining), interval)
 
 
-def integration(args, restore=False, resources=False, storage=False):
-    require(sum((restore, resources, storage)) <= 1, "M3 resources and M2 restore are separate scenarios")
+def integration(args, restore=False, resources=False, storage=False, crash=False):
+    require(sum((restore, resources, storage, crash)) <= 1, "M3 resources and M2 restore are separate scenarios")
     if resources:
         import resources as resource_tools
     if storage:
         import storage as storage_tools
+    if crash:
+        import crash as crash_tools
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
-    command_name = "make integration-storage" if storage else ("make integration-resources" if resources else ("make integration-restore" if restore else "make integration"))
+    command_name = "make integration-crash" if crash else "make integration-storage" if storage else ("make integration-resources" if resources else ("make integration-restore" if restore else "make integration"))
     report = {"schema_version": 1, "run_id": run_id, "command": command_name,
               "harness_commit": source_commit(), "result": "failed", "phase": "preflight",
               "environment": {"os": platform.system(), "architecture": platform.machine(),
@@ -944,6 +1003,8 @@ def integration(args, restore=False, resources=False, storage=False):
     snapshots = {}
     workload = storage_tools.initial_workload() if storage else None
     graceful_stops = set()
+    intentional_crash = None
+    read_counter = [0]
     scenario_deadline = None
     scenario_budget = ExitStack()
     if resources:
@@ -955,6 +1016,51 @@ def integration(args, restore=False, resources=False, storage=False):
         report["functional_acceptance"] = functional_acceptance
         report["acceptance"] = {f"M4-{n:02}": "not_run" for n in range(1, 6)}
         report["scenario"] = "cold-storage-footprint"
+
+    if crash:
+        # Historical graceful restart AC-06 has no meaning in this experiment.
+        functional_acceptance.pop("AC-06")
+        report["functional_acceptance"] = functional_acceptance
+        report["acceptance"] = {f"M5-{n:02}": "not_run" for n in range(1, 6)}
+        report["scenario"] = "checkpoint-sigkill"
+        report["crash"] = crash_tools.initial_crash()
+        report["readback"] = crash_tools.initial_readback()
+
+    def crash_error(exc):
+        if isinstance(exc, crash_tools.CrashError):
+            return exc.reason
+        text = str(exc)
+        if isinstance(exc, ProcessObservationError):
+            return "observer"
+        return "deadline" if "deadline" in text else (text if text in
+                {"ownership", "identity", "signal", "survivor", "observer", "schema"} else "schema")
+
+    def scenario_error(exc):
+        return crash_error(exc) if crash else (storage_error(exc) if storage else redactor.clean(str(exc)))
+
+    def project_crash_observations():
+        if not crash:
+            return
+        # Validate independently: corrupting one extension cannot erase the
+        # other extension's observed facts or break bounded stdout reporting.
+        for name, projector, initial, gate in (
+                ("crash", crash_tools.project_crash, crash_tools.initial_crash, "M5-02"),
+                ("readback", crash_tools.project_readback, crash_tools.initial_readback, "M5-03")):
+            try:
+                value = report[name]
+                projected = (projector(value, complete=report["acceptance"]["M5-03"] == "passed")
+                             if name == "readback" else projector(value))
+                if name == "crash" and projected["status"] == "verified":
+                    require({key: projected["targets"][0][key] for key in ("pid", "pgid", "start_ticks")} ==
+                            report.get("daemon_before"), "identity")
+                report[name] = projected
+            except Exception:
+                report[name] = initial()
+                report["result"] = "failed"
+                report["error"] = "schema"
+                report["evidence_file_written"] = False
+                report["acceptance"][gate] = "not_run"
+                report["acceptance"]["M5-05"] = "not_run"
 
     def storage_error(exc):
         if isinstance(exc, storage_tools.StorageError):
@@ -1087,7 +1193,7 @@ def integration(args, restore=False, resources=False, storage=False):
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
         functional_acceptance["M2-01" if restore else "AC-01"] = "passed"
-        scope = OwnedScope(scope_path, args.port, bounded_owner=True) if storage else OwnedScope(scope_path, args.port)
+        scope = OwnedScope(scope_path, args.port, bounded_owner=True) if storage or crash else OwnedScope(scope_path, args.port)
         redactor.secrets.append(scope.create())
         original_scope_identity = dict(scope.identity)
         config = scope_path / "instances" / INSTANCE / "compute.toml"
@@ -1100,7 +1206,7 @@ def integration(args, restore=False, resources=False, storage=False):
             process = Process([str(binary), "--no-update-check", "run"])
             daemons.append(process)
             unauthenticated = LocalHTTP(args.port)
-            if storage:
+            if storage or crash:
                 unauthenticated.scenario_deadline = scenario_deadline
             def ready():
                 require(process.process.poll() is None, "daemon exited during startup: " + process.text())
@@ -1121,9 +1227,9 @@ def integration(args, restore=False, resources=False, storage=False):
             return records[0]["instance_id"]
 
         report["phase"] = "bootstrap"
-        if resources or storage:
+        if resources or storage or crash:
             scenario_deadline = time.monotonic() + 300
-            scenario_budget.enter_context(m3_deadline(300, "M4 scenario" if storage else "M3 scenario"))
+            scenario_budget.enter_context(m3_deadline(300, "M5 scenario" if crash else "M4 scenario" if storage else "M3 scenario"))
         daemon = start()
         cli("--config", str(config), "instance", "setup", "--name", INSTANCE,
             "--data-dir", str(data), "--yes", timeout=90)
@@ -1137,7 +1243,7 @@ def integration(args, restore=False, resources=False, storage=False):
             redactor.secrets.extend([secret_bytes.hex(), secret_bytes.decode(errors="replace").strip()])
         token = (data / "keys/deployer.token").read_text().strip()
         api = LocalHTTP(args.port, token)
-        if storage:
+        if storage or crash:
             api.scenario_deadline = scenario_deadline
         accounts = api.v4("GET", "/accounts")
         require(len(accounts) == 1, "expected exactly one API account")
@@ -1163,7 +1269,7 @@ def integration(args, restore=False, resources=False, storage=False):
         require(len(local_endpoints) == 1, "expected one local Worker endpoint")
         host = worker_host(local_endpoints[0], args.port)
         worker = LocalHTTP(args.port)
-        if storage:
+        if storage or crash:
             worker.scenario_deadline = scenario_deadline
         health = worker.request("GET", "/health", host=host)
         require(health == {"fixture": "open-compute-m1", "ok": True}, "deployed Worker did not answer")
@@ -1177,6 +1283,10 @@ def integration(args, restore=False, resources=False, storage=False):
             functional_acceptance.update({"AC-03": "passed", "AC-04": "passed"})
         if storage:
             require(type(second["row_count"]) is int and second["row_count"] == 1, "schema")
+        if crash:
+            require(checkpoint_row(first, job_id, committed=False) ==
+                    checkpoint_row(second, job_id, committed=False), "schema")
+            deployment_before = deployment_observation(api, base, database_id, with_r2=False)
         report["duplicate_submission"] = {"requests": 2, "row_count": second["row_count"]}
         if restore:
             r2_payload = bytes([0, 255, 13, 10]) + secrets.token_bytes(60)
@@ -1191,6 +1301,8 @@ def integration(args, restore=False, resources=False, storage=False):
         workflow_id = "flow-" + run_id.lower()
         workflow_path = base + "/workflows/" + FLOW + "/instances/" + workflow_id
         workflow_deadline = time.monotonic() + 300
+        if crash:
+            api.scenario_deadline = worker.scenario_deadline = min(scenario_deadline, workflow_deadline)
         creation = api.v4("POST", base + "/workflows/" + FLOW + "/instances",
                           {"instance_id": workflow_id, "params": {"jobId": job_id}})
         require(creation["id"] == workflow_id, "Workflow identity changed during creation")
@@ -1198,6 +1310,9 @@ def integration(args, restore=False, resources=False, storage=False):
         before_observation = worker.request("GET", "/jobs/" + job_id, host=host)
         if storage:
             require(type(before_observation["row_count"]) is int and before_observation["row_count"] == 1, "schema")
+        if crash:
+            checkpoint_row(before_observation, job_id, committed=True)
+            require(waiting["status"] == "waiting", "schema")
         before = before_observation["job"]
         require(before["callback_count"] == 1 and isinstance(before["step_nonce"], str) and before["step_nonce"],
                 "waiting Workflow has no single committed callback")
@@ -1211,8 +1326,10 @@ def integration(args, restore=False, resources=False, storage=False):
             require(type(before["callback_count"]) is int and before["callback_count"] == 1 and
                     type(before["completed"]) is int and before["completed"] == 0, "schema")
         state_before = state_identity(scope_path, data, config)
+        if crash:
+            state_before = crash_state_identity(state_before)
         daemon.children()  # Refresh the descendant graph before proving liveness.
-        live_children = [public_process(child) for child in daemon.live() if child["pid"] != daemon.process.pid]
+        live_children = [public_process(child, strict=crash) for child in daemon.live() if child["pid"] != daemon.process.pid]
         require(live_children, "no live supervised runtime child was observed")
         report["live_children_before_restart"] = live_children
         if resources:
@@ -1221,17 +1338,37 @@ def integration(args, restore=False, resources=False, storage=False):
             observe("source_read_probe")
         if storage:
             report["acceptance"]["M4-01"] = "passed"
-        report["phase"] = "cold_shutdown" if restore else "daemon_restart"
+        if crash:
+            require(not daemon.observation_error, "observer")
+            report["acceptance"]["M5-01"] = "passed"
+        report["phase"] = "checkpoint_crash" if crash else "cold_shutdown" if restore else "daemon_restart"
         with recovery_deadline() if restore else nullcontext(None) as deadline:
-            report["daemon_before"] = public_process(daemon.identity)
-            if storage:
+            report["daemon_before"] = public_process(daemon.identity, strict=crash)
+            if crash:
+                try:
+                    with m3_deadline(min(10, scenario_deadline - time.monotonic()), "M5 crash") as crash_deadline:
+                        receipt = crash_tools.abrupt_shutdown(daemon, deadline=crash_deadline, read_identity=process_info)
+                        report["crash"] = receipt
+                        receipt = crash_tools.project_crash(receipt)
+                        require(receipt["status"] == "verified" and receipt["targets"] and
+                                {key: receipt["targets"][0][key] for key in ("pid", "pgid", "start_ticks")} ==
+                                report["daemon_before"], "identity")
+                        require(time.monotonic() < crash_deadline, "deadline")
+                    report["crash"] = receipt
+                    intentional_crash = daemon
+                    report["acceptance"]["M5-02"] = "passed"
+                except crash_tools.CrashError as exc:
+                    report["crash"] = exc.receipt
+                    raise
+            elif storage:
                 cold_checkpoint("cold_baseline")
                 stopped = report["storage_shutdowns"]["cold_baseline"]
             else:
                 stopped = daemon.stop()
-            report["first_shutdown"] = stopped
-            require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
-                    stopped["exit_code"] == 0, "original daemon did not exit gracefully with all owned children")
+            if not crash:
+                report["first_shutdown"] = stopped
+                require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
+                        stopped["exit_code"] == 0, "original daemon did not exit gracefully with all owned children")
             scope.check_owner()
             if restore:
                 from cold_backup import ColdRestore
@@ -1260,13 +1397,36 @@ def integration(args, restore=False, resources=False, storage=False):
                         report["cold_restore"].get("restored_verified") is True,
                         "cold restore lacks deletion or pre-spawn verification")
                 report["phase"] = "restored_startup"
+            if crash:
+                require(intentional_crash is daemon and report["acceptance"]["M5-02"] == "passed", "ownership")
             daemon = start()
             poll(lambda: json.loads(cli("instances", "--json"))["instances"],
                  lambda rows: len(rows) == 1 and rows[0]["state"] == "running", 60, "instance restart")
             require(running_instance() == instance_id, "instance identity changed across daemon restart")
-            report["daemon_after"] = public_process(daemon.identity)
+            report["daemon_after"] = public_process(daemon.identity, strict=crash)
             require(report["daemon_after"] != report["daemon_before"], "daemon process identity did not change")
-            if restore:
+            if crash:
+                report["phase"] = "crash_readback"
+                api = CrashReadOnlyHTTP(args.port, token, counter=read_counter)
+                worker = CrashReadOnlyHTTP(args.port, counter=read_counter)
+                api.scenario_deadline = worker.scenario_deadline = min(scenario_deadline, workflow_deadline)
+                report["readback"]["read_only_http_enforced"] = True
+                crash_health = worker.request("GET", "/health", host=host)
+                require(crash_health == {"fixture": "open-compute-m1", "ok": True} and
+                        crash_health["ok"] is True, "schema")
+                require(api.v4("GET", "/accounts") == accounts, "identity")
+                deployment_after = deployment_observation(api, base, database_id, with_r2=False)
+                require(deployment_after == deployment_before, "identity")
+                report["readback"]["instance_account_database_unchanged"] = True
+                state_after = crash_state_identity(state_identity(scope_path, data, config))
+                require(state_before == state_after, "identity")
+                report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
+                report["readback"]["state_identity_unchanged"] = True
+                report["deployment"] = {"deployment_id": deployment_before["deployment_id"],
+                                        "version_id": deployment_before["version_id"],
+                                        "script_etag": deployment_before["script_etag"],
+                                        "code_runtime_bindings_unchanged": True}
+            elif restore:
                 # Read credentials from the restored files. Old observed state
                 # is used only for assertions, never to reconstruct authority.
                 restored_token = (data / "keys/deployer.token").read_text().strip()
@@ -1287,19 +1447,30 @@ def integration(args, restore=False, resources=False, storage=False):
                                         "code_runtime_bindings_unchanged": True}
                 report["r2"].update({"bytes_unchanged": True, "metadata_unchanged": True,
                                       "etag_version_uploaded_unchanged": True})
-            else:
+            elif not crash:
                 state_after = state_identity(scope_path, data, config)
                 require(state_before == state_after, "scope/data/database/config identity changed across restart")
                 report["state_identity"] = {"before": state_before, "after": state_after, "same": True}
                 functional_acceptance["AC-06"] = "passed"
                 if storage:
                     require(api.v4("GET", "/accounts") == accounts, "schema")
-            retained = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+            retained_observation = worker.request("GET", "/jobs/" + job_id, host=host)
+            if crash:
+                require(checkpoint_row(retained_observation, job_id, committed=True) ==
+                        checkpoint_row(before_observation, job_id, committed=True), "schema")
+                report["readback"]["d1_row_unchanged"] = True
+            retained = retained_observation["job"]
             require(retained == before, "D1 state did not survive daemon restart")
             if storage:
                 require(json.dumps(retained, sort_keys=True, allow_nan=False) ==
                         json.dumps(before, sort_keys=True, allow_nan=False), "schema")
-            wait_workflow(api, workflow_path, "waiting")
+            retained_workflow = wait_workflow(api, workflow_path, "waiting")
+            if crash:
+                require(retained_workflow["status"] == "waiting", "schema")
+                report["readback"]["original_workflow_waiting"] = True
+                report["readback"]["read_requests"] = read_counter[0]
+                report["readback"] = crash_tools.project_readback(report["readback"], complete=True)
+                report["acceptance"]["M5-03"] = "passed"
             if restore:
                 report["readback"] = {"instance_account_database_unchanged": True, "d1_row_unchanged": True,
                                       "original_workflow_waiting": True, "read_only_http_enforced": True,
@@ -1355,19 +1526,24 @@ def integration(args, restore=False, resources=False, storage=False):
             report["acceptance"]["M3-02"] = "passed"
             report["acceptance"]["M3-03"] = "passed"
         report["phase"] = "resume"
-        if restore:
-            api = LocalHTTP(args.port, restored_token)
-        require(not (restore or resources or storage) or time.monotonic() < workflow_deadline - HTTP_TOTAL_TIMEOUT,
+        if restore or crash:
+            api = LocalHTTP(args.port, restored_token if restore else token)
+            if crash:
+                worker = LocalHTTP(args.port)
+        require(not (restore or resources or storage or crash) or time.monotonic() < workflow_deadline - HTTP_TOTAL_TIMEOUT,
                 "original Workflow deadline leaves no approval margin")
-        if storage:
+        if storage or crash:
             api.scenario_deadline = min(scenario_deadline, workflow_deadline)
             worker.scenario_deadline = min(scenario_deadline, workflow_deadline)
         event = api.v4("POST", workflow_path + "/events/approval", {"approved": True})
         require(event["instanceId"] == workflow_id, "approval targeted a different Workflow")
         complete = wait_workflow(api, workflow_path, "complete",
-                                 timeout=min(60, workflow_deadline - time.monotonic()) if restore or resources or storage else 60)
-        require(not (restore or resources or storage) or time.monotonic() < workflow_deadline, "original Workflow wall-clock deadline exceeded")
-        after = worker.request("GET", "/jobs/" + job_id, host=host)["job"]
+                                 timeout=min(60, workflow_deadline - time.monotonic()) if restore or resources or storage or crash else 60)
+        require(not (restore or resources or storage or crash) or time.monotonic() < workflow_deadline, "original Workflow wall-clock deadline exceeded")
+        after_observation = worker.request("GET", "/jobs/" + job_id, host=host)
+        if crash:
+            checkpoint_row(after_observation, job_id, committed=True, completed=1)
+        after = after_observation["job"]
         assert_resume(before, retained, after, complete.get("output"), job_id)
         if storage:
             require(type(after["callback_count"]) is int and type(after["completed"]) is int, "schema")
@@ -1382,7 +1558,7 @@ def integration(args, restore=False, resources=False, storage=False):
         report["phase"] = "cleanup"
         report["result"] = "passed"
     except Exception as exc:
-        report["error"] = storage_error(exc) if storage else redactor.clean(str(exc))
+        report["error"] = scenario_error(exc)
         cleanup_unknown = isinstance(exc, ProcessObservationError)
     finally:
         try:
@@ -1390,16 +1566,24 @@ def integration(args, restore=False, resources=False, storage=False):
         except Exception as exc:
             # Expiry must not bypass the separately bounded final cleanup.
             report["result"] = "failed"
-            report["error"] = storage_error(exc) if storage else redactor.clean(str(exc))
+            report["error"] = scenario_error(exc)
         try:
-            with m3_deadline(150, "M4 final cleanup" if storage else "M3 final cleanup") if resources or storage else nullcontext():
+            with m3_deadline(150, "M5 final cleanup" if crash else "M4 final cleanup" if storage else "M3 final cleanup") if resources or storage or crash else nullcontext():
                 clean = not cleanup_unknown
                 for item in daemons:
+                    if crash and item is intentional_crash:
+                        require(not item.observation_error and not item.live() and
+                                item.process.poll() == -9, "ownership")
+                        # The helper already verified retained exits and closed
+                        # observers. This exact owner alone has intentional -9.
+                        continue
                     if item.live(strict=False) or item.observation_error:
                         shutdown = item.stop()
                         if item is daemon:
                             report["final_shutdown"] = shutdown
                         clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
+                        if crash:
+                            clean = clean and shutdown["was_running"] is True and shutdown.get("signal") == "SIGTERM"
                         if storage and clean and not item.observation_error:
                             graceful_stops.add(id(item))
                     else:
@@ -1407,14 +1591,14 @@ def integration(args, restore=False, resources=False, storage=False):
                         item.finish_threads()
                         if item is daemon and report["result"] == "passed" and not (storage and id(item) in graceful_stops):
                             clean = False
-                    if storage:
+                    if storage or crash:
                         clean = clean and not item.observation_error and (item.process.poll() == 0)
-                        if id(item) not in graceful_stops:
+                        if storage and id(item) not in graceful_stops:
                             clean = False
                     if item.text() and report["result"] != "passed":
                         report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
                 require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
-                report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity, resources=resources, storage=storage))
+                report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity, resources=resources, storage=storage, crash=crash))
                 if cold_restore is not None:
                     report["cold_restore"].update(public_backup_summary(cold_restore.cleanup(processes_stopped=True)))
                     require(report["cold_restore"].get("private_removed") is True and
@@ -1424,26 +1608,39 @@ def integration(args, restore=False, resources=False, storage=False):
                     require(all(value == "passed" for value in functional_acceptance.values()), "acceptance coverage incomplete")
                     if resources:
                         report["acceptance"]["M3-04"] = "passed"
+                    if crash:
+                        require(report["acceptance"]["M5-03"] == "passed", "schema")
+                        report["acceptance"]["M5-04"] = "passed"
                     if storage:
                         report["acceptance"]["M4-04"] = "passed"
                     report["phase"] = "complete"
         except Exception as exc:
             report["result"] = "failed"
-            report["cleanup_error"] = storage_error(exc) if storage else redactor.clean(str(exc))
+            report["cleanup_error"] = scenario_error(exc)
         for sig, handler in old_handlers.items():
             signal.signal(sig, handler)
+    if crash:
+        # Include successful reads observed before a later comparison failed.
+        if isinstance(report.get("readback"), dict) and type(report["readback"].get("read_requests")) is int:
+            report["readback"]["read_requests"] = read_counter[0]
+        project_crash_observations()
     report["evidence_file_written"] = False
     if output_allowed:
         try:
             # Revalidate after cleanup. A refused path must never be used even
             # for diagnostics; failure still has the bounded stdout report.
-            with m3_deadline(10, "M4 evidence") if storage else nullcontext():
+            with m3_deadline(10, "M5 evidence" if crash else "M4 evidence") if storage or crash else nullcontext():
                 validate_artifact_paths(scope_hint, cache, output)
                 output.parent.mkdir(parents=True, exist_ok=True)
                 output.mkdir(mode=0o700)
                 report["evidence_file_written"] = True
                 project_observations()
                 project_storage_observations()
+                project_crash_observations()
+                if crash and report["result"] == "passed":
+                    redactor.check_report(report)
+                    report["acceptance"]["M5-05"] = "passed"
+                    require(all(value == "passed" for value in report["acceptance"].values()), "schema")
                 if resources and report["result"] == "passed":
                     # Scan the projected report before granting the report gate;
                     # a failed exclusive write revokes it below.
@@ -1461,7 +1658,9 @@ def integration(args, restore=False, resources=False, storage=False):
                 report["phase"] = "evidence"
             report["result"] = "failed"
             report["evidence_file_written"] = False
-            report["evidence_write_error"] = storage_error(exc) if storage else redactor.clean(str(exc))
+            report["evidence_write_error"] = scenario_error(exc)
+            if crash:
+                report["acceptance"]["M5-05"] = "not_run"
             if resources:
                 report["acceptance"]["M3-05"] = "not_run"
             if storage:
@@ -1489,6 +1688,7 @@ def integration(args, restore=False, resources=False, storage=False):
         except Exception:
             report["storage_partial"] = storage_tools.partial_extension({}, storage_tools.initial_workload())
     project_observations()
+    project_crash_observations()
     encoded = redactor.check_report(report)
     print(encoded, end="", flush=True)
     return 0 if report["result"] == "passed" else 1
@@ -1496,7 +1696,7 @@ def integration(args, restore=False, resources=False, storage=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("preflight", "integration", "integration-restore", "integration-resources", "integration-storage"))
+    parser.add_argument("command", choices=("preflight", "integration", "integration-restore", "integration-resources", "integration-storage", "integration-crash"))
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--cache", default=str(HERE / ".lab-cache"))
     parser.add_argument("--output", help="new directory for sanitized report.json; must not exist")
@@ -1510,7 +1710,7 @@ def main():
             print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
             return 1
     return integration(args, restore=args.command == "integration-restore", resources=args.command == "integration-resources",
-                       storage=args.command == "integration-storage")
+                       storage=args.command == "integration-storage", crash=args.command == "integration-crash")
 
 
 if __name__ == "__main__":

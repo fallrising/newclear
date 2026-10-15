@@ -230,8 +230,12 @@ def abrupt_shutdown(owner, *, deadline, read_identity):
             if owner.observation_error:
                 raise CrashError("ownership")
             check_deadline()
-            if not remaining and all(item["exit_observed"] for item in receipt["targets"]):
-                receipt["all_owned_exited"] = True
+            receipt["all_owned_exited"] = (not remaining and
+                                            all(item["exit_observed"] for item in receipt["targets"]))
+            # /proc may show the child nonlive after this iteration's poll
+            # returned None. Keep polling within the same deadline until Popen
+            # actually reaps the root; nonlive observations cannot supply -9.
+            if receipt["all_owned_exited"] and receipt["root_exit_code"] is not None:
                 break
             time.sleep(min(.01, max(0, cutoff-time.monotonic())))
         if receipt["root_exit_code"] != -signal.SIGKILL:

@@ -275,6 +275,33 @@ class CrashTests(unittest.TestCase):
         self.assertFalse(receipt["all_owned_exited"])
         self.assertEqual(caught.exception.reason,"deadline")
 
+    def test_nonlive_proc_after_first_pending_poll_waits_for_root_reap(self):
+        owner=FakeOwner()
+        owner.process.poll.side_effect=[None,-9]
+        receipt=self.run_crash(owner)
+        self.assertEqual(owner.process.poll.call_count,2)
+        self.assertEqual(receipt["status"],"verified")
+        self.assertEqual(receipt["root_exit_code"],-9)
+        self.assertTrue(receipt["all_owned_exited"])
+
+    def test_nonlive_proc_with_never_reaped_root_is_bounded_failure(self):
+        owner=FakeOwner()
+        owner.process.poll.side_effect=lambda:None
+        with self.assertRaises(crash.CrashError) as caught:
+            self.run_crash(owner,deadline=time.monotonic()+.03)
+        self.assertEqual(caught.exception.reason,"deadline")
+        self.assertGreater(owner.process.poll.call_count,1)
+        self.assertIsNone(caught.exception.receipt["root_exit_code"])
+        owner.finish_threads.assert_not_called()
+
+    def test_delayed_normal_root_reap_still_fails(self):
+        owner=FakeOwner()
+        owner.process.poll.side_effect=[None,0]
+        with self.assertRaises(crash.CrashError) as caught:self.run_crash(owner)
+        self.assertEqual(owner.process.poll.call_count,2)
+        self.assertEqual(caught.exception.reason,"identity")
+        self.assertEqual(caught.exception.receipt["root_exit_code"],0)
+
     def test_readback_exact_types_bounds_and_complete_controls(self):
         value=crash.initial_readback()
         with self.assertRaises(crash.CrashError): crash.project_readback(value, complete=True)

@@ -22,4 +22,4 @@ Demo 第一輪會先提交命令與 attempt intent，再呼叫 FakeBackend，記
 
 ## 下一道門檻
 
-M2 的每條原生 route 仍要有實際 entitlement、版本、精確 model/profile、工具／拒絕／停止／session 證據。Native、API、LIVE、SOAK 保持 NotRun；完整 artifact/review/publisher/context/backup 也需獨立實作與驗收。讀文件或跑 fake 不會建立帳號、登入、調用付費模型或部署服務。
+M2 的每條原生 route 仍要有實際 entitlement、版本、精確 model/profile、工具／拒絕／停止／session 證據。有界 native adapter 的 API／限制與逐 route 結果見 [M2 契約](m2.md)；API、LIVE、SOAK 保持 NotRun；完整 artifact/review/publisher/context/backup 也需獨立實作與驗收。讀文件或跑 fake 不會建立帳號、登入、調用付費模型或部署服務。

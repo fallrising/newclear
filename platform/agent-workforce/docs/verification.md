@@ -1,6 +1,6 @@
 # 驗收與證據分層
 
-- 狀態：M1 選定 FAKE 離線部分已實作／驗證；完整 native/API/live/soak 仍 Proposed/NotRun。
+- 狀態：M1 選定 FAKE 離線部分已實作／驗證；有界 M2 native 切片的結果見 [M2 契約](m2.md)；完整停止／resume gate 受阻，API/live/soak 仍 Proposed/NotRun。
 - 設計日期：2026-10-11。
 - 對應：[主 SDD](../SDD.md)、[第一場景](first-scenario.md)。
 
@@ -8,7 +8,7 @@
 
 每個驗收結果必須能回答：哪一版程式、哪個 route／帳號 entitlement、哪種環境、哪個輸入與候選成果、做了什麼、看到什麼，以及哪些部分仍未知。源碼中有 adapter、官方文件描述能力、CLI help 成功、假測試、真實呼叫、完整工作交付及長時間運作各是不同證據。
 
-歷史 DOC 層結果記於 §4.1。M1 選定 FAKE 離線部分的實作、測試／DB觀察與延期範圍見 [M1 契約](m1.md)；FAKE-06/09/11/14/15、完整FAKE-16與全部 NATIVE/API/LIVE/SOAK仍為 `NotRun`。文件 QA 或開發模型工具的使用不提升產品 runtime 層結果。既有相鄰產品的歷史測試只可標為 source/reference evidence，不直接繼承成新整合的通過證明。
+歷史 DOC 層結果記於 §4.1。M1 選定 FAKE 離線部分的實作、測試／DB觀察與延期範圍見 [M1 契約](m1.md)；FAKE-06/09/11/14/15、完整FAKE-16仍為 `NotRun`。M2 逐 route NATIVE 結果在 [M2 契約](m2.md) 另列，不能提升完整 M2、API、LIVE 或 SOAK。文件 QA 或開發模型工具的使用不提升產品 runtime 層結果。既有相鄰產品的歷史測試只可標為 source/reference evidence，不直接繼承成新整合的通過證明。
 
 | 狀態 | 意義 |
 | --- | --- |

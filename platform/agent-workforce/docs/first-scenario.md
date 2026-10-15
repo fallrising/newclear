@@ -168,3 +168,7 @@ SessionBinding 最少保存 worker、role、account、route/profile revision、h
 - [Kith v2 runtime](https://github.com/fallrising/newclear/blob/5b4dd565d4f269ce49e08a5381eb60943312d87f/products/kith/docs/v2/03-agent-runtime.md)：runtime、外部 client 邊界與 replay 規則。
 - [Kith runner adapters](https://github.com/fallrising/newclear/blob/5b4dd565d4f269ce49e08a5381eb60943312d87f/products/kith/runner/adapters.ts)：既有 Codex ephemeral／Claude no-session-persistence 與第一場景所需持久 SessionBinding 的差別。
 - [Kith W6](https://github.com/fallrising/newclear/blob/5b4dd565d4f269ce49e08a5381eb60943312d87f/products/kith/docs/v2/milestones/W6.md)：離線期間 mention 的 replay 不執行。Workforce 沒有在本次修改這些契約。
+
+## M2 實作邊界
+
+有界原生 ports 與逐 route qualification 見 [M2 契約](m2.md)。它們不等於本文件的完整 writer→reviewer→rework 工作流程；完整後代停止尚未證明時，保留 operation 與 reservations，不 resume 或重建工作。上述完整場景故障矩陣及 M3 LIVE 驗收仍為 NotRun。

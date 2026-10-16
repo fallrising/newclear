@@ -119,6 +119,7 @@ class RetryContractTests(unittest.TestCase):
 
     def test_schema_exposes_independent_entry_identity_and_nullable_unique_effect_key(self):
         db = sqlite3.connect(':memory:')
+        self.addCleanup(db.close)
         for sql in contract.SCHEMA_SQL: db.execute(sql)
         db.execute('INSERT INTO retry_jobs(id, case_name) VALUES (?, ?)', ('job-one', 'unguarded'))
         for identity in ('a', 'b'):

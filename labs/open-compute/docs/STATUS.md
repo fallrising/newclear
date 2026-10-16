@@ -1,6 +1,88 @@
 # Status and evidence
 
-Updated: 2026-10-16 (operator date; CI timestamps below use UTC).
+Updated: 2026-10-17 (operator date; CI timestamps below use UTC).
+
+## M6 result
+
+**Passed on the original open-compute v0.2.4 release.** A fresh non-root Linux
+runner executed three controlled callback-failure cases with one additional
+attempt. Independent entries recorded attempts 1/2 and the explicit policy,
+with a successful post-effect acknowledgement on each entry.
+
+| Case | Callback entries | D1 effect rows | completed | Workflow terminal |
+| --- | --- | ---: | ---: | --- |
+| Unguarded transient failure | 1,2; throw,return | 2 | 1 | complete |
+| Stable-key transient failure | 1,2; throw,return | 1 | 1 | complete |
+| Exhausted retries | 1,2; throw,throw | 2 | 0 | errored |
+
+Both successful outputs retained the original job/case and attempt 2. Exhaustion
+returned success=false, output=null and the exact generic public Workflow error.
+The sole step was `controlled-effect`, type `step`. Initial rows were empty of
+effects/entries and incomplete; repeated terminal and D1 readbacks matched.
+The cases charged 21 GET attempts against the shared 256 ceiling. This count
+excludes setup/deployment probes and is not a timing or throughput measure.
+The running daemon received SIGTERM and exited 0 without force; observed owned
+generations exited, observers drained and verified scope removal/exclusive
+sanitized report writing succeeded.
+
+The [M6 contract](SDD-M6.md) and original
+[sanitized report](evidence/2026-10-17-m6-ci.json) preserve this experiment.
+Report SHA256: `85cf9c2712afb2318a973bce30ac333c4db9440f21fb3e28cc489d7540a29440`.
+Historical M1–M5 contracts, fixture, release pin and reports remain unchanged.
+
+### M6 design and execution provenance
+
+| Item | Exact reference |
+| --- | --- |
+| Reviewed SDD committed before code | [`79180699`](https://github.com/fallrising/newclear/commit/791806999e6b218ebc3ab099bc323f36f4a3970a) |
+| Independently reviewed implementation | [`2301ae06`](https://github.com/fallrising/newclear/commit/2301ae066302a18860b9c77bad9d9abb928f41a4) |
+| Actual CI checkout | [`838203e5`](https://github.com/fallrising/newclear/commit/838203e59d6e044ca1a1a8172a464f181f27c45c) |
+| Tested complete Git tree | `e777995d08ece82a8de1f0bd579d8574fd59490e` |
+| Original runtime CI | [Run 38935855144](https://github.com/fallrising/newclear/actions/runs/38935855144), [M6 job 117091041565](https://github.com/fallrising/newclear/actions/runs/38935855144/job/117091041565) |
+| Harness run ID | `20261016T165647Z-146e5138` |
+| M6 runtime step window | 2026-10-16T16:56:46Z through 2026-10-16T16:57:11Z |
+| Environment | Linux x86_64, EUID 1001, Python 3.11.17; Ubuntu 24.04 runner |
+| New fixture SHA256 | `6802f38703ff91d28138b0eae2f80b31abe446dbbfb1fbe490a9043a40d8f1b9` |
+| Upstream identity | Original v0.2.4/source `73efa56a1b1ad51a4519b2253ffaa499cb29fb2d`; unchanged artifact/SHA256 in [the lock](../upstream.lock.json) |
+
+The checkout is GitHub's synthetic merge of main `6492e4f9` and candidate
+`2301ae06`. Its parents and complete tree were read back; the tree is identical
+to the candidate. Original emitted JSON and artifact contents match. Later
+documentation/final validation commits and reports do not become the original
+source of this observation. The report filename uses the operator date; actual
+UTC run timestamps are retained above and inside the report.
+
+### M6 verification and authoring limits
+
+Root's integrated suite and Python 3.11 CI each passed **213 tests, no skips**.
+All four CI jobs and steps passed, including original-runtime M1/M2/M3,
+cold-storage M4, checkpoint-crash M5 and controlled-retries M6. M6-01 through
+M6-05 passed. Contract/fixture/runner and CI/operator wiring received independent
+review. Actual original logs, six reports and tested-tree provenance were
+retained for independent evidence review.
+
+Red-Green regressions covered the post-effect premise, strict counts/types,
+readbacks, budgets, cleanup, write failures, an outer deadline expiring after
+case completion, signal interruption during process ownership transfer, an
+arbitrary failed-shutdown signal string and unsupported environment fallback.
+The latter two were reproduced independently before correction and re-review.
+Original failed test/review receipts remain retained. Local tests used Python 3.13.5;
+original-runtime/Python 3.11 evidence comes from fresh CI, not the persistent
+authoring home. Local `make` was unavailable, so its optional dry-run did not
+execute; CI actually executed both `make check` and `make integration-retry`.
+No provider/tool installation was needed.
+
+Follow the [quickstart](quickstart.md) and run
+`make -C labs/open-compute integration-retry` in a fresh disposable non-root
+account. The keyed effect is one synthetic local D1 insert. Entry logging, effect
+insertion, outcome acknowledgement and result settlement are separate operations.
+Markers show the reached post-effect checkpoint/intended outcome, not an
+independent exception trace or exclusion of acknowledgement-loss windows. Public
+attempt/config history is a placeholder and was not used as proof. Generic
+errors alone do not uniquely identify internal exhaustion. Finite stable reads
+do not exclude future execution. No external exactly-once, in-flight crash,
+power-loss, concurrency, soak, capacity, upgrade, isolation or production
+adoption conclusion follows. M4 endpoint changes still cannot yield per-D1 costs.
 
 ## M5 result
 

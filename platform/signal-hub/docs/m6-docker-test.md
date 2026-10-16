@@ -1,6 +1,6 @@
 # Bounded M6 Docker integration test
 
-This explicitly authorized test-environment continuation runs the production hub with generated release/inspection sources and a real Alertmanager container. Every event identifies itself as a synthetic Docker test. It does not satisfy the original four live M6 gates, seven-day production observation, phone receipt, independent-host outage notification, yesterday's real snapshot or OneFleet production admission.
+This explicitly authorized test-environment continuation runs the production hub with generated release/inspection sources and a real Alertmanager container. Every generated source event identifies itself as a synthetic Docker test; native freshness events retain their shape and are traceable to those synthetic sources. It does not satisfy the original four live M6 gates, seven-day production observation, phone receipt, independent-host outage notification, yesterday's real snapshot or OneFleet production admission.
 
 ## Design before execution
 

@@ -22,7 +22,7 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 
 2026-10-16 在明確授權的測試機器執行 hub、持久化 release／inspection fixtures、真實 Alertmanager 與獨立 HTTPS 收件器。Docker 使用普通網橋，收件器僅發佈於真實 tailnet 位址；全數非 root、cap-drop ALL、no-new-privileges、seccomp／AppArmor、唯讀 rootfs、資源限制及私有測試憑證經實際檢查。Bark 使用無對外路由的 internal 網路，只做健康及無效請求測試。
 
-實際投遞找到 Go resolver 將 IPv4 回傳為 mapped IPv6 的產品缺陷；新修正只在 production resolver 邊界正規化無 zone 的 IPv4，既有完整回答檢查、CIDR、mapped URL 拒絕、精確 allowlist、TLS 與 literal pinning 保持。實際 resolver 的 Red/Green 回歸與 delivery race 通過，修正版已成功送達並持久化六種事件。設計見 [Docker 測試設計](m6-docker-test.md)，逐項結果與保留失敗見 [Docker 範圍驗收紀錄](../.team/reports/M6-docker-acceptance.md)。
+實際投遞找到 Go resolver 將 IPv4 回傳為 mapped IPv6 的產品缺陷；新修正只在 production resolver 邊界正規化無 zone 的 IPv4，既有完整回答檢查、CIDR、mapped URL 拒絕、精確 allowlist、TLS 與 literal pinning 保持。實際 resolver 的 Red/Green 回歸與 delivery race 通過，修正版已成功送達並持久化六種事件。最終88筆投遞皆 succeeded，本輪測試容器已停止並保存。整合流程見 [PR #363](https://github.com/fallrising/newclear/pull/363)。設計見 [Docker 測試設計](m6-docker-test.md)，逐項結果與保留失敗見 [Docker 範圍驗收紀錄](../.team/reports/M6-docker-acceptance.md)。
 
 本輪是合成 Docker 整合；Bark 並非直接相容的 webhook 收件端，沒有新增 production Bark adapter、device 註冊、APNs 或手機成功宣稱。三來源七天真實觀測、手機收件、獨立主機停機通知、前一日真實快照及 OneFleet generic adapter 的 production admission 缺口均仍待完成，未進入完整 M6 review／done。
 

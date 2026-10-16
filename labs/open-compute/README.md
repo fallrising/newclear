@@ -130,3 +130,14 @@ receipts and original counter/nonce controls. Only actual execution linked from
 STATUS supports a pass. Sequential observed-generation termination does not
 establish atomic whole-tree crash, power loss, arbitrary in-flight replay,
 external exactly-once effects, unobserved descendant coverage or adoption.
+
+## Controlled Workflow retries (M6)
+
+The [M6 contract](docs/SDD-M6.md) defines three cases in a separate trusted
+fixture: a post-effect failure with unguarded D1 writes, the same failure with
+a stable operation key, and exhausted retries. Each uses one additional attempt.
+Follow the [quickstart](docs/quickstart.md), then run
+`make -C labs/open-compute integration-retry`. Actual results belong in
+[STATUS](docs/STATUS.md); a contract or offline test alone is not runtime evidence.
+The synthetic effect is a local D1 row. This does not test external exactly-once
+effects, process crashes between statements, concurrency or production adoption.

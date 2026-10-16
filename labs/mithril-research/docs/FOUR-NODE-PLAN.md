@@ -1,6 +1,6 @@
 # Mithril 四台測試機使用計劃
 
-2026-10-15 更新：以下保留 2026-09-27 的四機設計與當時授權／缺口記錄。已完成四機唯讀 metadata 盤點及第一段 P1a 本機工具，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 和 [VALIDATION](VALIDATION.md)。文中的「工具尚不存在」等敘述是歷史狀態；目前 strict planner／synthetic lifecycle／runtime lock／offline CI 已提供。完整 P1 的 SSH／Compose/auth／purge 及四機實測仍待完成，原有實機驗收門檻繼續有效。
+2026-10-15 更新：以下保留 2026-09-27 的四機設計與當時授權／缺口記錄。已完成四機唯讀 metadata 盤點及第一段 P1a 本機工具，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 和 [VALIDATION](VALIDATION.md)。文中的「工具尚不存在」等敘述是歷史狀態；目前 strict planner／synthetic lifecycle／runtime lock／offline CI 已提供。P1b 的 Compose/auth 產生、固定 SSH observe/down 與 purge preview 見 [P1-TOOLS](P1-TOOLS.md)。完整 P1 的 startup／cluster orchestration、purge apply 及四機實測仍待完成，原有實機驗收門檻繼續有效。
 
 版本：0.1；日期：2026-09-27；狀態：**文件設計完成，尚未部署或驗收**。
 

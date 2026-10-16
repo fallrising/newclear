@@ -1,6 +1,6 @@
 # 接續 Prompt：Mithril 四機實驗
 
-2026-10-15 接續狀態：P1a strict plan／synthetic lifecycle 已提供，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 與 [VALIDATION](VALIDATION.md)。完整 P1 仍缺 thin SSH executor／Compose/auth／purge；M1–M3 runtime 尚未驗收。接手先讀新增 P1 文件及 runtime.lock，不能把 local-fixture plan 或 demo 當作可執行實機批准。
+2026-10-15 接續狀態：P1a strict plan／synthetic lifecycle 已提供，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 與 [VALIDATION](VALIDATION.md)。P1b 接續提供 Compose/auth 產生、固定 SSH observe/down 與 purge preview，見 [P1-TOOLS](P1-TOOLS.md)；startup／cluster orchestration、purge apply 與 M1–M3 runtime 尚未驗收。接手先讀新增 P1 文件及 runtime.lock，不能把 local-fixture plan 或 demo 當作可執行實機批准。
 
 本 Prompt 是交接文件，不會因被閱讀就授權任何遠端操作。預設 mode 是 `plan-only`；Owner 明確選擇 `develop-only` 或批准精確實機變更計劃後，才可進入對應工作。文檔合併不是 runtime PASS。
 
@@ -28,6 +28,7 @@ docs/specs/monorepo-ci.md
 labs/mithril-research/AGENTS.md
 labs/mithril-research/README.md
 labs/mithril-research/upstream.lock.json
+labs/mithril-research/runtime.lock.json
 labs/mithril-research/docs/STATUS.md
 labs/mithril-research/docs/RESEARCH.md
 labs/mithril-research/docs/SDD.md
@@ -36,6 +37,10 @@ labs/mithril-research/docs/VALIDATION.md
 labs/mithril-research/docs/quickstart.md
 labs/mithril-research/docs/FOUR-NODE-PLAN.md
 labs/mithril-research/docs/EXECUTION_PROMPT.md
+labs/mithril-research/docs/P1-CONTRACT.md
+labs/mithril-research/docs/P1-LOCAL.md
+labs/mithril-research/docs/P1-TOOLS-CONTRACT.md
+labs/mithril-research/docs/P1-TOOLS.md
 ```
 
 [四機計劃](FOUR-NODE-PLAN.md) 是目前部署順序；[SDD](SDD.md) 保持需求／測例權威；[STATUS](STATUS.md) 是唯一任務狀態帳。資料衝突先指出並作最小文件修正，不默默改變研究 commit 或驗收口徑。
@@ -52,7 +57,7 @@ labs/mithril-research/docs/EXECUTION_PROMPT.md
 
 `plan-only`：只讀 repository／已授權盤點，整理實機差異、變更清單、風險、回復及批准需求；不安裝或啟動服務。
 
-`develop-only`：另經 Owner 指定後，續作 P1 尚缺工具。P1a 的 local-fixture core／contract tests／runtime lock／root CI 已存在；只可按其文件使用。後續 thin SSH／Compose/auth／purge 仍須有界開發，不以工具存在授權真實 VPS 寫入。
+`develop-only`：另經 Owner 指定後，續作 P1 尚缺工具。P1a 的 local-fixture core／contract tests／runtime lock／root CI 已存在；只可按其文件使用。P1b tools 的 CLI／證據邊界見 P1-TOOLS；後續 startup／cluster orchestration 與 purge apply 仍須有界開發，不以工具存在授權真實 VPS 寫入。
 
 `execute-approved`：必須已有核准的 H1–H4 身分、plan hash、ports、資源配額、保留清單、credentials 與回復邊界。只做批准的 P1–P3：固定 artifacts → 六實例及交叉副本 → 真實 backend health → Mithril → 小流量使用／SDK → down/up 與精確清理驗收。批准範圍內連續推進，不逐命令要求確認；身分漂移、共享服務異常或新風險才停止。
 

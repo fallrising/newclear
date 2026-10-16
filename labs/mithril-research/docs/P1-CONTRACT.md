@@ -1,8 +1,10 @@
 # P1 local operator contract
 
-Status: P1a bounded offline core after independent design review. Full P1 is
-partial: thin SSH executor, per-host Compose/auth runtime templates and separately
-approved purge remain deferred. P2/P3 VPS operations are not executed here.
+Status: P1a bounded offline core after independent design review. This document
+continues to govern labctl.py and local-fixture. The separate P1b
+[tooling contract](P1-TOOLS-CONTRACT.md) adds private Compose/auth generation,
+fixed SSH observation/down and purge preview. Startup/cluster orchestration,
+destructive purge application and P2/P3 VPS acceptance remain incomplete.
 Research source and C01-C13 remain governed by SDD and the four-node plan.
 
 ## Boundary

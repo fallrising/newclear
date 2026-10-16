@@ -1,6 +1,6 @@
 # 驗收與證據分層
 
-- 狀態：M1 選定 FAKE 離線部分已實作／驗證；有界 M2 native 切片的結果見 [M2 契約](m2.md)；完整停止／resume gate 受阻，API/live/soak 仍 Proposed/NotRun。
+- 狀態：M1 選定 FAKE 離線部分已實作／驗證；有界 M2 native 切片的結果見 [M2 契約](m2.md)；opt-in 本機停止 port 已有獨立測試及兩條原生 closure 證據；完整 route／resume gate 尚未通過，API/live/soak 仍 Proposed/NotRun。
 - 設計日期：2026-10-11。
 - 對應：[主 SDD](../SDD.md)、[第一場景](first-scenario.md)。
 

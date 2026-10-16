@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "template_revision": "p1b-v1",
+  "runtime_uid": 1000,
+  "runtime_gid": 1000,
+  "secret_revision": "synthetic-example-v1",
+  "mithril_image": "UNRESOLVED",
+  "mithril_image_provenance": "UNRESOLVED"
+}

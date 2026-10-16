@@ -1,5 +1,43 @@
 # Mithril 研究與計劃驗證記錄
 
+## P1b tools：2026-10-15–17（develop-only）
+
+這段交付 private four-host Compose/auth bundle、固定 SSH observe/stop/remove
+helper、帶持久 intent 的 down/reconcile 與 purge preview。沒有實際 SSH 呼叫、
+VPS 寫入、Redis/Mithril 啟動、網路變更、purge、release 或 image publication。
+`local-fixture`、`offline-bundle`、`mock-ssh` 分開記錄；實機 runtime 為 UNEXECUTED。
+固定 research commit 與兩份 locks 未變，完整 P1／MR-004 未完成。
+
+### Actual offline evidence
+
+- Native `gpt-6.1-sol` builders 與 `gpt-6-astra` 獨立設計／最終審查；模型 IDs 在規劃時按當前工具 catalog 與官方頁核對，無模型替換。Root 獨占 PLAN、整合、驗收與交付。完整 usage、quota 與費用未知，不推算數字。
+- [T-004](../.team/reports/T-004.md) 的 D1–D5 先固定 bundle/schema、inline Mithril secrets、literal helper、authoritative absence、durable uncertainty 與獨立批准邊界，之後才分派兩個隔離 writer。
+- [Bundle worker](../.team/reports/T-005.md)：實際 Red01/Red02 及 Green03，15 methods 通過。兩次真 CLI 產生 resolved synthetic 與 unresolved draft 私有配置；秘密及其 hashes 不出現在 summary／manifest。Credential injection、private output、link/traversal、semantic binding 與 nonrunnable H4 draft 皆有負向測試。
+- [Transport worker](../.team/reports/T-006.md)：初輪 Red01–Red06 保留；Green03 的 30 methods 通過，包括 real subprocess mock、bounded pipes、deadline/lost reply、identity/ownership drift、private state、fixed argv、SSH mapping hook/token refusal 與保留資料。Report validator 的格式失敗保留並修正；沒有將失敗覆寫為 PASS。
+- Root `t0310-root-baseline`：本輪起始 22 tests 通過。整合初版 `t0310-root-full01` 在 Python 3.13.5 通過 67 tests；`t0310-root-py311-01` 在既有固定 Python 3.11.17 image 以無網路、唯讀 source、非 root 及私有 disk-backed outputs 跑 `make check`（67 tests）與 `make demo`，均 exit 0。這些是修正獨立審查 finding 前的歷史 green，不能作最終驗收。
+- Root `t0310-compose-parse01`：對保存的 synthetic CLI 產物執行 `docker compose -f FILE config --quiet`，resolved H1–H4 及 draft H1–H3 共 7 份 exit 0；draft H4 的 services 為空。只解析配置，未啟動任何服務，也沒有驗證 Redis/Mithril ACL 效力。
+- [Independent T-007](../.team/reports/T-007.md) 初輪 67 tests 通過，但 `t0310-review-late-effect01` 的真實本機 subprocess 重現 R1：timeout 後目前狀態未變仍可有延遲效果，不能把 intent 判成 abandoned。R2 指出歷史 journal 接受 UNRESOLVED approval reference。兩項回交 Sol 先加 Red 再修正；原 probe 和初版 review 保留於 protected evidence。
+
+- R1/R2 rework 的實際 Red02 有 10 個 assertion failures；Green01 修正後 33 transport methods 通過。對 stop/running、remove/stopped 保留 uncertain，即使新 admission 也不發出第二次效果；拒絕 abandoned journal 與 UNRESOLVED 歷史 reference。詳見更新後 T-006。
+- Root 最終 `t0310-root-full02`：Python 3.13.5，完整 **70 tests**，exit 0。`t0310-root-py311-03`：固定 Python **3.11.17**，`make -C labs/mithril-research check`（70 tests）及 `make -C labs/mithril-research demo DEMO_OUTPUT=PRIVATE_OUTPUT` 均 exit 0。Demo 為 8 個 CLI subprocess／28 個 synthetic operations，兩輪 process instances 重建、marker 保留，最後 synthetic resources／uncertainty 皆為 0。中間 `t0310-root-py311-02` 的呼叫被中斷，沒有完成結果；未計為 PASS。
+- Root `t0310-root-preview-cli01`：實際 `ssh_executor.py purge-preview` CLI 對 synthetic private manifest／ownership 執行，exit 0；六個 data candidates、零 eligible paths、apply=false，stdout 無原始位置。私有 API preview digest 一致；獨立 approval assertion 仍回傳 authenticated_authority=false／無 eligibility 或 apply。沒有遠端呼叫。
+- Astra 最終 [T-007](../.team/reports/T-007.md) ACCEPT：獨立完整 70 tests、另寫的 delayed stop/remove subprocess probes，以及 12 個 malformed-journal action cases 全通過，R1/R2 已解決。Root `t0310-root-acceptance01` 通過 30-file scope/privacy／文件靜態檢查、四 task／四 report validators 與 `git diff --check`；locks、既有 fixture 和 P1a PLAN archive 未變。Reviewer audit-script 的中間失敗及修正亦保留於 report。
+
+全部新 build/test/check 均經 common workspace launcher，以唯一 task IDs 保存
+logs／artifacts／handoffs；公開只含去識別摘要。這輪未重跑 P1a 的 release build、
+121 upstream tests、Clippy／fmt；下段歷史結果不當作本輪執行。
+
+### Evidence limits
+
+Compose parser 與固定來源 config/ACL command-table 檢查只支持結構／來源相容性，
+不支持 listener、runtime ACL、image entrypoint 或容器 UID/GID 可讀性。Purge
+approval API 只核對獨立 digest 與 assertion shape，永遠回傳空 eligibility／無
+apply；不是 live filesystem/reference/process-use 或 semantic eligibility validator。
+尚缺 Mithril runtime-image provenance、完整 startup／cluster orchestration、有效
+host/network admission、實機兩輪 lifecycle 與另行批准的精確清理。MR 表保持
+4 DONE、1 BLOCKED_ENV、4 TODO。PR/CI/merge 與遠端回讀結果以 GitHub 及後續
+帳本報告為準，不由本 source snapshot 提前宣告。
+
 ## P1a local/native core：2026-10-15
 
 本輪限 develop-only 的第一個本機段落，source pin 不變。工具不呼叫 SSH／Docker，所有 fixture result 標成 local-fixture／remote_execution_supported=false；沒有四機 Redis/Mithril 啟動、故障、網路變更或清理。完整 P1 與 MR-004 仍未完成。
@@ -20,7 +58,7 @@ Independent T-001 design review 指出 scope、operation identity/recovery、sem
 
 ### Remaining gates
 
-Thin SSH executor、per-host Compose/auth／purge 尚未交付；完整 P0/P1、P2/P3、C01–C13、real backend health、runtime ACL、migration/failover/cache、fair benchmark 全部尚未 PASS。MR 表仍 4 DONE、1 BLOCKED_ENV、4 TODO／未完成 5。下方 2026-09-27 是原始歷史，不作本輪重跑。
+P1a 當時缺 thin SSH executor、per-host Compose/auth／purge；P1b 的進度見上段。完整 P0/P1、P2/P3、C01–C13、real backend health、runtime ACL、migration/failover/cache、fair benchmark 全部尚未 PASS。MR 表仍 4 DONE、1 BLOCKED_ENV、4 TODO／未完成 5。下方 2026-09-27 是原始歷史，不作本輪重跑。
 
 ## 四機使用計劃：MR-PLAN-20260927-01
 

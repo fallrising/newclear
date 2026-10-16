@@ -2,8 +2,9 @@
 
 This segment delivers an offline Python 3.11 standard-library core. It does not
 connect SSH, start Docker/Redis/Mithril, write a VPS or establish live readiness.
-Full P1 is partial: thin SSH execution, per-host Compose/auth packaging and the
-separately approved purge interface are still deferred. P2/P3 remain UNEXECUTED.
+The separate [P1b tools](P1-TOOLS.md) add private Compose/auth generation,
+fixed SSH observation/down and purge preview. Full P1 remains partial:
+startup/cluster orchestration, purge application and P2/P3 are UNEXECUTED.
 
 ## Artifact evidence
 
@@ -39,8 +40,8 @@ resources and occupied ports are checked; fresh live observations are deferred.
 
 Runtime-lock fields are exactly those in the checked-in lock. Hash/identity
 validation cannot authenticate arbitrary operator claims or grant deployment
-permission. Every result is labelled `lane=local-fixture` and
-`remote_execution_supported=false`.
+permission. Every labctl fixture result is labelled `lane=local-fixture` and
+`remote_execution_supported=false`; the separate transport has its own origin.
 
 ## Commands
 
@@ -87,8 +88,8 @@ preflight before any later live operation.
 
 ## Next gates
 
-Complete the remaining P1 executor/Compose/auth/purge tooling and review its exact
-action plan. Then, within separately approved P2/P3 scope, verify effective
+Review the separate P1b generated bundle and exact action plan; complete remaining
+startup/cluster orchestration and destructive cleanup tooling. Then, within separately approved P2/P3 scope, verify effective
 tailnet/host admission, actual binary/image provenance, all six backend nodes,
 proxy reads/writes, retained-data restart and exact cleanup. Any missing gate
 keeps MR-004 incomplete; P1a does not change the formal 4 DONE/5 unfinished count.

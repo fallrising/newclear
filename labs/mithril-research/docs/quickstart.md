@@ -4,7 +4,7 @@
 
 先用 [P1a 本機入口](P1-LOCAL.md) 執行 strict plan 與明示 synthetic lifecycle；`make check` 是 Python stdlib 離線驗證。再讀 [四機使用計劃](FOUR-NODE-PLAN.md) 與 [EXECUTION_PROMPT](EXECUTION_PROMPT.md)。四台已有私有 SSH 唯讀 metadata；有效網路政策、實機批准與完整 runtime 驗收仍待。
 
-**這裡還沒有一鍵四機啟動包。** P1a 提供 [runtime lock](../runtime.lock.json) 和 local-fixture CLI；Compose/auth、thin SSH executor、purge 與 live smoke 仍待。Fixture 不執行遠端命令，其結果不能變成 Redis/Mithril PASS。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
+**這裡還沒有一鍵四機啟動包。** P1a 提供 [runtime lock](../runtime.lock.json) 和 local-fixture CLI；[P1b tools](P1-TOOLS.md) 提供私有 Compose/auth 產生、固定 SSH observe/down/reconcile 與 purge preview。Startup／cluster orchestration、purge apply 與 live smoke 仍待。Fixture 不執行遠端命令，其結果不能變成 Redis/Mithril PASS。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
 
 ## 正式接手順序
 
@@ -44,7 +44,7 @@ sha256sum target/release/mithril
 
 P2 通過後才提供私有 Mithril endpoint、app user、密碼提示式連線指令與本 run key prefix。預期用 standalone redis-cli／SDK 完成 PING、帶 TTL 的 SET、GET、DEL，再用受控 direct backend 核對跨三個 shard 的真實資料；預期回覆見四機計劃 P3。
 
-不要用 Mithril PING／虛擬 CLUSTER 回覆代替六節點檢查，不把預期回覆寫成實測。正常 down 保留資料；同 run up 驗證重啟；purge 另核對精確物件與批准。此流程仍待實作與實機驗收。
+不要用 Mithril PING／虛擬 CLUSTER 回覆代替六節點檢查，不把預期回覆寫成實測。正常 down 保留資料；同 run up 驗證重啟；purge 另核對精確物件與批准。工具只提供部分介面；完整 lifecycle 仍待實機驗收。
 
 [U01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/installation.md
 [U04]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/rust-toolchain.toml

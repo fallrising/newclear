@@ -121,7 +121,8 @@ Only a bounded sanitized report may be retained as a short-lived artifact.
 
 `.github/workflows/mithril-research-ci.yml` is scoped to
 `labs/mithril-research/**` and itself. It runs `make check` with Python 3.11
-standard-library tests and `make demo` through the real CLI with synthetic data
+standard-library fixture, private bundle and mock SSH contract tests, and
+`make demo` through the real CLI with synthetic data
 in a new private runner-temporary directory. Permissions
 are `contents: read`, checkout does not persist credentials, and the job has a
 five-minute timeout. It does not build upstream, run Redis/Mithril, connect SSH,
